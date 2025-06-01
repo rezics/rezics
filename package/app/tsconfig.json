@@ -11,5 +11,6 @@
         "jsxImportSource": "react",
         "skipLibCheck": true
     },
-    "include": ["node_modules/vite/client.d.ts", "**/*"]
+    "include": ["node_modules/vite/client.d.ts", "**/*"],
+    "extends": ["@tsconfig/strictest/tsconfig.json"]
 }
