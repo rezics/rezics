@@ -1,5 +1,6 @@
-linkWorkspacePackages: true
-
-preferFrozenLockfile: true
 packages:
-    - "package/*"
+  - package/*
+linkWorkspacePackages: true
+onlyBuiltDependencies:
+  - '@tailwindcss/oxide'
+preferFrozenLockfile: true

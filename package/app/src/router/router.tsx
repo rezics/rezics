@@ -1,7 +1,7 @@
 import { Redirect, Route, Router, Switch } from "wouter";
-import { Home } from "./page/Home";
-import { Login } from "./page/Auth/Login";
-import { Register } from "./page/Auth/Register";
+import { Home } from "@/page/Home";
+import { Login } from "@/page/Auth/Login";
+import { Register } from "@/page/Auth/Register";
 
 export default (
     <Router>

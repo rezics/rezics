@@ -1,3 +1,18 @@
+## TECH_STACK
+- https://react.dev/
+- 组件库：https://mui.com/
+- 路由：https://github.com/molefrog/wouter
+- APP状态管理：https://github.com/pmndrs/zustand
+- 组件状态管理：https://github.com/pmndrs/valtio
+
+## Monorepo
+- https://rushjs.io/
+
+## DashBoard
+- https://refine.dev/
+
+
+
 # `create-preact`
 
 <h2 align="center">
