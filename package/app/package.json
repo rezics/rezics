@@ -1,32 +1,37 @@
 {
-    "name": "app",
-    "private": true,
-    "type": "module",
-    "scripts": {
-        "dev": "vite",
-        "build": "vite build",
-        "preview": "vite preview",
-        "cosmos": "cosmos",
-        "cosmos-export": "cosmos-export"
-    },
-    "dependencies": {
-        "@emotion/react": "^11.14.0",
-        "@emotion/styled": "^11.14.0",
-        "@fontsource/roboto": "^5.2.5",
-        "@mui/material": "^7.1.0",
-        "@tailwindcss/vite": "^4.1.8",
-        "@vitejs/plugin-react": "^4.5.0",
-        "react": "^18.3.1",
-        "react-dom": "^18.3.1",
-        "tailwindcss": "^4.1.8",
-        "wouter": "^3.7.1"
-    },
-    "devDependencies": {
-        "@types/react": "^18.3.1",
-        "@types/react-dom": "^18.3.1",
-        "react-cosmos": "^6.2.3",
-        "react-cosmos-plugin-vite": "^6.2.0",
-        "typescript": "^5.8.3",
-        "vite": "^6.0.4"
-    }
+  "name": "app",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "cosmos": "cosmos",
+    "cosmos-export": "cosmos-export"
+  },
+  "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
+    "@fontsource/roboto": "^5.2.5",
+    "@mui/material": "^7.1.0",
+    "@tailwindcss/vite": "^4.1.8",
+    "@vitejs/plugin-react": "^4.5.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "tailwindcss": "^4.1.8",
+    "wouter": "^3.7.1"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.1",
+    "@types/react-dom": "^18.3.1",
+    "react-cosmos": "^6.2.3",
+    "react-cosmos-plugin-vite": "^6.2.0",
+    "typescript": "^5.8.3",
+    "vite": "^6.0.4"
+  },
+  "msw": {
+    "workerDirectory": [
+      "public"
+    ]
+  }
 }

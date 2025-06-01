@@ -6,7 +6,11 @@
         "noEmit": true,
         "allowJs": true,
         "checkJs": true,
-
+        "baseUrl": ".",
+        "noImplicitAny": false,
+        "paths": {
+            "@/*": ["src/*"]
+        },
         "jsx": "react-jsx",
         "jsxImportSource": "react",
         "skipLibCheck": true
