@@ -1,0 +1,21 @@
+lockfileVersion: '9.0'
+
+settings:
+  autoInstallPeers: false
+  excludeLinksFromLockfile: false
+
+pnpmfileChecksum: sha256-XTeZQwJtKk4dimqf7175GhJCXrnq3Yh7+kwb86Bwcdo=
+
+importers:
+
+  .: {}
+
+  ../../packages/admin-panel: {}
+
+  ../../packages/api-server: {}
+
+  ../../packages/design-system: {}
+
+  ../../packages/shared-utils: {}
+
+  ../../packages/web-client: {}

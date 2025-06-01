@@ -26,7 +26,7 @@
    * Specify one of: "pnpmVersion", "npmVersion", or "yarnVersion".  See the Rush documentation
    * for details about these alternatives.
    */
-  "pnpmVersion": "8.15.8",
+  "pnpmVersion": "10.11.0",
 
   // "npmVersion": "6.14.15",
   // "yarnVersion": "1.9.4",
@@ -440,5 +440,25 @@
     //   "reviewCategory": "tools",
     //   "tags": [ "tools" ]
     // }
+    {
+      "packageName": "admin-panel",
+      "projectFolder": "packages/admin-panel"
+    },
+    {
+      "packageName": "api-server",
+      "projectFolder": "packages/api-server"
+    },
+    {
+      "packageName": "design-system",
+      "projectFolder": "packages/design-system"
+    },
+    {
+      "packageName": "shared-utils",
+      "projectFolder": "packages/shared-utils"
+    },
+    {
+      "packageName": "web-client",
+      "projectFolder": "packages/web-client"
+    }
   ]
 }
