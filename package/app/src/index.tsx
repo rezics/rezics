@@ -1,4 +1,4 @@
-import { render } from "preact";
+import { createRoot } from "react-dom/client";
 
 import preactLogo from "./assets/preact.svg";
 import "./style.css";
@@ -33,11 +33,12 @@ export function App() {
 
 function Resource(props) {
     return (
-        <a href={props.href} target="_blank" class="resource">
+        <a href={props.href} target="_blank" className="resource">
             <h2>{props.title}</h2>
             <p>{props.description}</p>
         </a>
     );
 }
 
-render(<App />, document.getElementById("app"));
+const root = createRoot(document.getElementById("app"));
+root.render(<App></App>);
