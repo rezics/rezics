@@ -8,6 +8,12 @@
     "type": "module",
     "devDependencies": {
         "@tsconfig/strictest": "^2.0.5",
-        "prettier": "^3.5.3"
+        "prettier": "^3.5.3",
+        "dotenv": "^16.5.0"
+    },
+    "dependencies": {
+        "appwrite": "^18.1.1",
+        "fp-ts": "^2.16.10",
+        "zod": "^3.25.46"
     }
 }
