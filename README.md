@@ -1,3 +1,1 @@
-# Library.Book
-
-A monorepo managed by Rush.
+# Library.Book Monorepo

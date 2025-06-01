@@ -1,0 +1,13 @@
+{
+    "name": "library-book",
+    "scripts": {
+        "format": "prettier -w package"
+    },
+    "license": "AGPL-3.0-only",
+    "packageManager": "pnpm@10.11.0",
+    "type": "module",
+    "devDependencies": {
+        "@tsconfig/strictest": "^2.0.5",
+        "prettier": "^3.5.3"
+    }
+}
