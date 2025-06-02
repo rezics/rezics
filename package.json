@@ -7,24 +7,13 @@
     "packageManager": "pnpm@10.11.0",
     "type": "module",
     "devDependencies": {
-        "@graphql-codegen/cli": "^5.0.6",
-        "@graphql-codegen/typescript": "^4.1.6",
-        "@graphql-codegen/typescript-msw": "^3.0.1",
-        "@graphql-codegen/typescript-operations": "^4.6.1",
-        "@graphql-tools/utils": "^10.8.6",
         "@tsconfig/strictest": "^2.0.5",
         "dotenv": "^16.5.0",
-        "msw": "^2.8.7",
         "prettier": "^3.5.3"
     },
     "dependencies": {
-        "@urql/vue": "^1.4.3",
         "appwrite": "^18.1.1",
         "fp-ts": "^2.16.10",
-        "graphql": "^16.11.0",
-        "graphql-tag": "^2.12.6",
-        "valtio": "^2.1.5",
-        "zod": "^3.25.46",
-        "zustand": "^5.0.5"
+        "zod": "^3.25.46"
     }
 }
