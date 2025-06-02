@@ -13,7 +13,7 @@ interface UIState {
   clearNotifications: () => void
 }
 
-export const useUIStore = create<UIState>((set) => ({
+export const uiStore = create<UIState>((set) => ({
   // 初始状态
   sidebarOpen: true,
   currentPage: 'home',

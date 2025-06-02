@@ -8,6 +8,8 @@
         "checkJs": true,
         "baseUrl": ".",
         "noImplicitAny": false,
+        "noUnusedLocals": false,
+        "noUnusedParameters": false,
         "paths": {
             "@/*": ["src/*"]
         },

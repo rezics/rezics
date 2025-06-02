@@ -10,7 +10,7 @@ interface AppState {
   setTheme: (theme: 'light' | 'dark') => void
 }
 
-export const useAppStore = create<AppState>((set) => ({
+export const appStore = create<AppState>((set) => ({
   // 初始状态
   isLoading: false,
   theme: 'light',
