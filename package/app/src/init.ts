@@ -1,13 +1,18 @@
 import { Client } from "appwrite";
 
-[process.env["ICS_ENDPOINT"], process.env["ICS_PROJECT"]].forEach((value) => {
-    if (value === undefined) {
-        throw new Error("At least one required value is missing");
-    }
-});
+if (process.env["NODE_ENV"] === "production") {
+    [process.env["ICS_ENDPOINT"], process.env["ICS_PROJECT"]].forEach((value) => {
+        if (value === undefined) {
+            throw new Error("At least one required value is missing");
+        }
+    });
+}
+
+const endpoint = process.env["ICS_ENDPOINT"] || "http://localhost/v1";
+const project = process.env["ICS_PROJECT"] || "default-project";
 
 const appwrite = new Client();
-appwrite.setEndpoint(process.env["ICS_ENDPOINT"]!);
-appwrite.setProject(process.env["ICS_PROJECT"]!);
+appwrite.setEndpoint(endpoint);
+appwrite.setProject(project);
 
 export { appwrite };
