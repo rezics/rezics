@@ -8,6 +8,11 @@ import ErrorIcon from '@mui/icons-material/Error';
 import PersonIcon from '@mui/icons-material/Person';
 import LoginIcon from '@mui/icons-material/Login';
 import HowToRegIcon from '@mui/icons-material/HowToReg';
+import BookIcon from '@mui/icons-material/Book';
+import LibraryBooksIcon from '@mui/icons-material/LibraryBooks';
+import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
+import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
+
 export interface NavigationItem {
   kind: 'header' | 'divider' | 'item';
   title?: string;
@@ -31,9 +36,29 @@ export const NAVIGATION: NavigationItem[] = [
   },
   {
     kind: 'item',
-    segment: '/orders',
-    title: 'Orders',
-    icon: <ShoppingCartIcon />,
+    segment: '/books',
+    title: 'Books',
+    icon: <BookIcon />,
+  },
+  {
+    kind: 'item',
+    segment: '/book',
+    title: 'Book',
+    icon: <LibraryBooksIcon />,
+    children: [
+      {
+        kind: 'item',
+        segment: '/book/1',
+        title: 'Book 1',
+        icon: <BookmarkBorderIcon />,
+      },
+      {
+        kind: 'item',
+        segment: '/booklist/1',
+        title: 'Book List 1',
+        icon: <FormatListBulletedIcon />,
+      },
+    ],
   },
   {
     kind: 'divider',

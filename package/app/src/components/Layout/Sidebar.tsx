@@ -5,7 +5,6 @@ import { useMediaQuery, styled, useTheme } from "@mui/material";
 import { layoutState, layoutActions } from "@/stores/layout";
 import { useSnapshot } from "valtio";
 import { ExpandLess, ExpandMore, ChevronLeft, ChevronRight } from "@mui/icons-material";
-import { theme } from "@/config/theme";
 
 interface SidebarProps {
     onClose: () => void;
@@ -13,20 +12,21 @@ interface SidebarProps {
     drawerWidth: any;
 }
 
-const DrawerHeader = styled("div")({
-    display: "flex",
-    alignItems: "center",
-    padding: theme.spacing(0, 1),
-    // necessary for content to be below app bar
-    ...theme.mixins.toolbar,
-    justifyContent: "flex-end",
-});
-
 export const Sidebar: React.FC<SidebarProps> = ({ onClose, handleDrawerToggle, drawerWidth }) => {
+    const theme = useTheme();
+
+    const DrawerHeader = styled("div")({
+        display: "flex",
+        alignItems: "center",
+        padding: theme.spacing(0, 1),
+        // necessary for content to be below app bar
+        ...theme.mixins.toolbar,
+        justifyContent: "flex-end",
+    });
+
     const [location, setLocation] = useLocation();
     const layoutStatesnap = useSnapshot(layoutState);
     const isMobile = useMediaQuery((theme) => theme.breakpoints.down("md"));
-    const theme = useTheme();
     const drawerWidthsnap = useSnapshot(drawerWidth);
 
     const handleItemClick = (segment: string | undefined, hasChildren: boolean) => {
@@ -53,9 +53,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ onClose, handleDrawerToggle, d
                 paper: {
                     style: {
                         width: layoutStatesnap.sidebarOpen ? drawerWidthsnap.data : 0,
-                        transition: 'all 0.3s ease-out',
-                    }
-                }
+                        transition: "all 0.3s ease-out",
+                    },
+                },
             }}
             className="transition-all duration-300 ease-out"
         >

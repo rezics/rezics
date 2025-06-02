@@ -11,6 +11,9 @@
 ## DashBoard
 - https://refine.dev/
 
+## GraphQL
+- https://github.com/urql-graphql/urql 
+- Appwrite SDK https://appwrite.io/docs/sdks
 
 
 # `create-preact`

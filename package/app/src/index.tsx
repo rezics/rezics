@@ -2,7 +2,7 @@ import { createRoot } from "react-dom/client";
 import { useState } from "react";
 import { ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
-import { getTheme } from "@/theme";
+import { getTheme } from "@/config/theme";
 import Router from "./routes/router";
 import "./index.css";
 
