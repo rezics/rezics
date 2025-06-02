@@ -1,3 +1,5 @@
+Get-ChildItem -Path . -Recurse -Include "node_modules", "package-lock.json", "pnpm-lock.yaml" | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
+
 ## TECH_STACK
 - https://react.dev/
 - 组件库：https://mui.com/

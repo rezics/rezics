@@ -8,6 +8,7 @@ import { MainLayout } from "@/layouts/MainLayout";
 // Book
 import { BookLib } from "@/pages/Book/BookLib";
 import { BookDetail } from "@/pages/Book/BookPage";
+import TestPage from "@/pages/Test/TestPage";
 
 // 从 App.tsx 传入的 props 类型
 interface AppRouterProps {
@@ -25,7 +26,8 @@ export default ({ mode, toggleTheme }: AppRouterProps) => (
                     <MainLayout mode={mode} toggleTheme={toggleTheme}>
                         <Route path="/" component={Home} />
                         <Route path="/books" component={BookLib} />
-                        <Route path="/book/:id"  component={BookDetail} />
+                        <Route path="/book/:id" component={BookDetail} />
+                        <Route path="/test" component={TestPage} />
                     </MainLayout>
                 </Switch>
             </Route>

@@ -109,8 +109,8 @@ export const NAVIGATION: NavigationItem[] = [
   },
   {
     kind: 'item',
-    segment: '/integrations',
-    title: 'Integrations',
+    segment: '/test',
+    title: 'Test',
     icon: <LayersIcon />,
   },
   {

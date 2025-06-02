@@ -6,25 +6,32 @@ import { getTheme } from "@/config/theme";
 import Router from "./routes/router";
 import "./index.css";
 
+import { client, UrqlProvider } from "@/plugins/providers/urql";
+import { setupMock } from "@/plugins/providers/mock";
+
 // 定义传递给 Router 的 props 类型
 interface RouterProps {
-  mode: 'light' | 'dark';
-  toggleTheme: () => void;
+    mode: "light" | "dark";
+    toggleTheme: () => void;
 }
 
 const App = () => {
-  const [mode, setMode] = useState<'light' | 'dark'>('light');
+    const [mode, setMode] = useState<"light" | "dark">("light");
 
-  const toggleTheme = () => {
-    setMode((prevMode) => (prevMode === 'light' ? 'dark' : 'light'));
-  };
+    const toggleTheme = () => {
+        setMode((prevMode) => (prevMode === "light" ? "dark" : "light"));
+    };
 
-  return (
-    <ThemeProvider theme={getTheme(mode)}>
-      <CssBaseline />
-      {(Router as (props: RouterProps) => React.ReactNode)({ mode, toggleTheme })}
-    </ThemeProvider>
-  );
+    setupMock();
+    
+    return (
+        <UrqlProvider value={client}>
+            <ThemeProvider theme={getTheme(mode)}>
+                <CssBaseline />
+                {(Router as (props: RouterProps) => React.ReactNode)({ mode, toggleTheme })}
+            </ThemeProvider>
+        </UrqlProvider>
+    );
 };
 
 const root = createRoot(document.getElementById("app")!);
