@@ -2,8 +2,7 @@ import React from "react";
 import { User } from "./User";
 import { layoutState } from "@/stores/layout";
 import { useSnapshot } from "valtio";
-import { theme } from "@/config/theme";
-
+import { useTheme } from '@mui/material/styles';
 interface HeaderProps {
     handleDrawerToggle: () => void;
     mode: "light" | "dark";
@@ -14,7 +13,7 @@ interface HeaderProps {
 export const Header: React.FC<HeaderProps> = ({ handleDrawerToggle, mode, onThemeToggle, drawerWidth }) => {
     const snap = useSnapshot(layoutState);
     const drawerWidthsnap = useSnapshot(drawerWidth);
-
+    const theme = useTheme();
     return (
         <AppBar
             position="fixed"
