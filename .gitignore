@@ -31,9 +31,6 @@ bower_components/
 # node-waf configuration
 .lock-wscript/
 
-# Compiled binary addons (https://nodejs.org/api/addons.html)
-build/Release/
-
 # Dependency directories
 node_modules/
 jspm_packages/
@@ -53,9 +50,6 @@ jspm_packages/
 # Output of 'npm pack'
 *.tgz
 
-# Yarn Integrity file
-.yarn-integrity
-
 # dotenv environment variables file
 .env
 .env.development.local
@@ -65,28 +59,6 @@ jspm_packages/
 
 # next.js build output
 .next/
-
-# Docusaurus cache and generated files
-.docusaurus/
-
-# Serverless directories
-.serverless/
-
-# FuseBox cache
-.fusebox/
-
-# DynamoDB Local files
-.dynamodb/
-
-# yarn v2
-.yarn/cache/
-.yarn/unplugged/
-.yarn/build-state.yml
-.yarn/install-state.gz
-.pnp.*
-
-# OS X temporary files
-.DS_Store
 
 # IntelliJ IDEA project files; if you want to commit IntelliJ settings, this recipe may be helpful:
 # https://github.com/github/gitignore/blob/main/Global/JetBrains.gitignore
@@ -104,18 +76,6 @@ common/temp/
 common/autoinstallers/*/.npmrc
 **/.rush/temp/
 *.lock
-
-# Common toolchain intermediate files
-temp/
-lib/
-lib-amd/
-lib-es6/
-lib-esnext/
-lib-commonjs/
-lib-shim/
-dist/
-dist-storybook/
-*.tsbuildinfo
 
 # Heft temporary files
 .cache/

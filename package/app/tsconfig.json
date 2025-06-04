@@ -6,16 +6,16 @@
         "noEmit": true,
         "allowJs": true,
         "checkJs": true,
-        "baseUrl": ".",
-        "noImplicitAny": false,
-        "noUnusedLocals": false,
-        "noUnusedParameters": false,
-        "paths": {
-            "@/*": ["src/*"]
-        },
+
         "jsx": "react-jsx",
         "jsxImportSource": "react",
-        "skipLibCheck": true
+        "skipLibCheck": true,
+
+        "paths": {
+            "@page/*": ["./src/page/*"],
+            "@component/*": ["./src/component/*"],
+            "@util/*": ["./src/util/*"]
+        }
     },
     "include": ["node_modules/vite/client.d.ts", "**/*"],
     "extends": ["@tsconfig/strictest/tsconfig.json"]
