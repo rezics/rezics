@@ -2,6 +2,7 @@ packages:
   - package/*
 linkWorkspacePackages: true
 onlyBuiltDependencies:
+  - '@supabase/supabase-js'
   - '@tailwindcss/oxide'
   - esbuild
   - msw
