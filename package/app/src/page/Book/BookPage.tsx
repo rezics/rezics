@@ -2,11 +2,11 @@ import React from "react";
 import { Box, Container, Grid, Typography, Paper, Divider, Avatar, Rating, Chip, Stack } from "@mui/material";
 import { proxy, useSnapshot } from "valtio";
 import { useParams } from "wouter";
-import { QuoteExcerpt } from "@/components/Book/QuoteExcerpt";
-import { BookTag } from "@/components/Book/BookTag";
-import { BookReviews } from "@/components/Book/BookReviews";
-import { ShortBookReviews } from "@/components/Book/ShortBookReviews";
-import { BookIncludeByBL } from "@/components/BookList/BookIncludeByBL";
+import { QuoteExcerpt } from "@component/Book/QuoteExcerpt";
+import { BookTag } from "@component/Book/BookTag";
+import { BookReviews } from "@component/Book/BookReviews";
+import { ShortBookReviews } from "@component/Book/ShortBookReviews";
+import { BookIncludeByBL } from "@component/BookList/BookIncludeByBL";
 
 interface Book {
     id: string;
@@ -53,13 +53,12 @@ export const BookDetail: React.FC = () => {
     const { id } = useParams<{ id: string }>();
     const [activeTab, setActiveTab] = React.useState(0);
 
-
     const snap = useSnapshot(state);
 
     const fetchBookDetail = async (id: string | undefined) => {
         if (!id) return;
-        console.log('fetchBookDetail', id);
-        
+        console.log("fetchBookDetail", id);
+
         try {
             state.loading = true;
             // 示例数据
@@ -73,20 +72,22 @@ export const BookDetail: React.FC = () => {
                 publishDate: "2024-11-10",
                 isbn: "978-7-123-45678-9",
                 tags: ["完本", "奇幻", "320万字"],
-                description: "1668年，我所在的城市被评为全国治安最好的地区。\n我对此做出了不可磨灭的贡献。\n因为我落网了。"
+                description:
+                    "1668年，我所在的城市被评为全国治安最好的地区。\n我对此做出了不可磨灭的贡献。\n因为我落网了。",
             };
 
             const authorData = {
                 name: "听日",
                 avatar: "https://styles.redditmedia.com/t5_26vvze/styles/profileIcon_pyesq04om2re1.jpeg",
-                description: "余华，1960年4月出生，1983年开始写作，主要作品有《兄弟》《活着》《许三观卖血记》《在细雨中呼喊》《第七天》等。作品已被翻译成40多种语言在美国、英国、澳大利亚、法国、德国、意大利、西班牙、葡萄牙、荷兰、瑞典、挪威、丹麦、芬兰、希腊、俄罗斯、保加利亚、匈牙利、捷克、斯洛伐克、塞尔维亚、斯洛文尼亚、波兰、罗马尼亚、土耳其、巴西、以色列、埃及、科威特、日本、韩国、越南、泰国、印度和印尼等40多个国家和地区出版。曾获意大利格林扎纳·卡佛文学奖（1998年）、法国文学和艺术骑士勋章（2004年）、法国国际信使外国小说奖（2008年）、意大利朱塞佩·阿切尔比国际文学奖（2014年）等。"
+                description:
+                    "余华，1960年4月出生，1983年开始写作，主要作品有《兄弟》《活着》《许三观卖血记》《在细雨中呼喊》《第七天》等。作品已被翻译成40多种语言在美国、英国、澳大利亚、法国、德国、意大利、西班牙、葡萄牙、荷兰、瑞典、挪威、丹麦、芬兰、希腊、俄罗斯、保加利亚、匈牙利、捷克、斯洛伐克、塞尔维亚、斯洛文尼亚、波兰、罗马尼亚、土耳其、巴西、以色列、埃及、科威特、日本、韩国、越南、泰国、印度和印尼等40多个国家和地区出版。曾获意大利格林扎纳·卡佛文学奖（1998年）、法国文学和艺术骑士勋章（2004年）、法国国际信使外国小说奖（2008年）、意大利朱塞佩·阿切尔比国际文学奖（2014年）等。",
             };
 
             // 使用原子更新
             state.book = { ...bookData };
             state.author = { ...authorData };
         } catch (error) {
-            state.error = error instanceof Error ? error.message : 'An error occurred';
+            state.error = error instanceof Error ? error.message : "An error occurred";
         } finally {
             state.loading = false;
         }

@@ -2,7 +2,6 @@ import React from "react";
 import { useLocation } from "wouter";
 import { NAVIGATION } from "./navigation";
 import { useMediaQuery, styled, useTheme } from "@mui/material";
-import { layoutState, layoutActions } from "@/stores/layout";
 import { useSnapshot } from "valtio";
 import { ExpandLess, ExpandMore, ChevronLeft, ChevronRight } from "@mui/icons-material";
 

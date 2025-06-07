@@ -1,23 +1,22 @@
 import React from "react";
 import { Box, Avatar, Typography, Button, Divider, useTheme, Rating } from "@mui/material";
 import { proxy, useSnapshot } from "valtio";
-import { useQuery } from "urql";
-import { ReactionBar } from "@component/Common/ReactionBar";
+import { gql, useQuery } from "urql";
 import { CollapsibleText } from "@component/Common/CollapsibleText";
 
-const GET_BOOK_REVIEWS = `
-  query GetBookReviews($bookId: ID!) {
-    bookReviews(bookId: $bookId) {
-      id
-      content
-      rating
-      createdAt
-      user {
-        name
-        avatar
-      }
+const GET_BOOK_REVIEWS = gql`
+    query GetBookReviews($bookId: ID!) {
+        bookReviews(bookId: $bookId) {
+            id
+            content
+            rating
+            createdAt
+            user {
+                name
+                avatar
+            }
+        }
     }
-  }
 `;
 
 interface BookReviewsProps {
