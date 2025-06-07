@@ -1,8 +1,7 @@
 import React from "react";
 import { User } from "./User";
-import { layoutState } from "@/stores/layout";
 import { useSnapshot } from "valtio";
-import { useTheme } from '@mui/material/styles';
+import { useTheme } from "@mui/material/styles";
 interface HeaderProps {
     handleDrawerToggle: () => void;
     mode: "light" | "dark";

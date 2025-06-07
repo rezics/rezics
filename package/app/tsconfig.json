@@ -12,6 +12,7 @@
         "skipLibCheck": true,
 
         "paths": {
+            "@/*": ["./src/*"],
             "@page/*": ["./src/page/*"],
             "@component/*": ["./src/component/*"],
             "@util/*": ["./src/util/*"]

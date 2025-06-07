@@ -13,7 +13,7 @@ import { ThemeProvider } from "@mui/material";
 
 export default (
     <Router>
-        <ThemeProvider theme={}>
+        <ThemeProvider theme={{}}>
             <MainLayout>
                 <Switch>
                     <Route path="/login" component={Login} />
