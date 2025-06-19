@@ -4,11 +4,26 @@ import { NAVIGATION } from "./navigation";
 import { useMediaQuery, styled, useTheme } from "@mui/material";
 import { useSnapshot } from "valtio";
 import { ExpandLess, ExpandMore, ChevronLeft, ChevronRight } from "@mui/icons-material";
+import {
+    Collapse,
+    Divider,
+    Drawer,
+    IconButton,
+    List,
+    ListItem,
+    ListItemButton,
+    ListItemIcon,
+    ListItemText,
+    Typography,
+} from "@mui/material";
+import { layoutActions, layoutState } from "@/global/layout";
 
 interface SidebarProps {
     onClose: () => void;
     handleDrawerToggle: () => void;
-    drawerWidth: any;
+    drawerWidth: {
+        data: number;
+    };
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ onClose, handleDrawerToggle, drawerWidth }) => {

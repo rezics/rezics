@@ -11,6 +11,9 @@ import { BookDetail } from "@/page/Book/BookPage";
 import TestPage from "@/page/Test/TestPage";
 import { ThemeProvider } from "@mui/material";
 
+// BookList
+import { BookListPage } from "@/page/BookList/BookListPage";
+
 export default (
     <Router>
         <ThemeProvider theme={{}}>
@@ -23,6 +26,7 @@ export default (
                             <Route path="/" component={Home} />
                             <Route path="/books" component={BookLib} />
                             <Route path="/book/:id" component={BookDetail} />
+                            <Route path="/booklist/:id" component={BookListPage} />
                             <Route path="/test" component={TestPage} />
                         </Switch>
                     </Route>

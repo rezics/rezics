@@ -1,5 +1,18 @@
 import React from "react";
-import { Box, Container, Grid, Typography, Paper, Divider, Avatar, Rating, Chip, Stack } from "@mui/material";
+import {
+    Box,
+    Container,
+    Grid,
+    Typography,
+    Paper,
+    Divider,
+    Avatar,
+    Rating,
+    Chip,
+    Stack,
+    Tabs,
+    Tab,
+} from "@mui/material";
 import { proxy, useSnapshot } from "valtio";
 import { useParams } from "wouter";
 import { QuoteExcerpt } from "@component/Book/QuoteExcerpt";
@@ -131,11 +144,11 @@ export const BookDetail: React.FC = () => {
                     <Container maxWidth="lg" className="py-6">
                         <Grid container spacing={3}>
                             {/* Cover Image */}
-                            <Grid size={{ xs: 12, md: 2 }}>
+                            <Grid size={{ xs: 12, md: 3, lg: 2 }} className="max-h-[300px] w-full">
                                 <img
                                     src={snap.book.cover}
                                     alt={snap.book.title}
-                                    className="w-full rounded-lg shadow-lg"
+                                    className="h-full rounded-lg shadow-lg mr-auto ml-auto"
                                 />
                             </Grid>
 

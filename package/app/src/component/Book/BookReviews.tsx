@@ -1,8 +1,9 @@
 import React from "react";
-import { Box, Avatar, Typography, Button, Divider, useTheme, Rating } from "@mui/material";
+import { Box, Avatar, Typography, Button, Divider, Rating } from "@mui/material";
 import { proxy, useSnapshot } from "valtio";
 import { gql, useQuery } from "urql";
 import { CollapsibleText } from "@component/Common/CollapsibleText";
+import { ReactionBar } from "@component/Common/ReactionBar";
 
 const GET_BOOK_REVIEWS = gql`
     query GetBookReviews($bookId: ID!) {
@@ -42,6 +43,7 @@ export const BookReviews: React.FC<BookReviewsProps> = ({ bookId }) => {
 
     return (
         <Box>
+            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
             {snap.reviews.map((review: any) => (
                 <Box key={review.id}>
                     <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
@@ -69,22 +71,10 @@ export const BookReviews: React.FC<BookReviewsProps> = ({ bookId }) => {
                         <CollapsibleText content={review.content} threshold={300} />
                     </Box>
 
-                    <Box
-                        sx={{
-                            display: "flex",
-                            justifyContent: "flex-end",
-                            mt: 2,
-                            width: {
-                                xs: "100%",
-                                sm: "75%",
-                                md: "50%",
-                                lg: "50%",
-                                xl: "33.33%",
-                            },
-                            mr: 2,
-                        }}
-                    >
-                        <ReactionBar />
+                    <Box className="w-full flex justify-end">
+                        <Box sx={{ width: { xs: "100%", sm: "75%", md: "50%", lg: "50%", xl: "33.33%" } }}>
+                            <ReactionBar />
+                        </Box>
                     </Box>
 
                     <Divider sx={{ my: 2 }} />
