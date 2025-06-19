@@ -4,7 +4,7 @@ export const mockUsers = [
     email: "test@example.com",
     password: "password123", // In real app, this would be hashed
     name: "Test User",
-    avatar: "https://avatar.iran.liara.run/public/boy"
+    avatar: "https://api.dicebear.com/9.x/pixel-art/svg?seed=John"
   }
 ];
 

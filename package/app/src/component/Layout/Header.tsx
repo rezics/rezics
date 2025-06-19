@@ -2,11 +2,17 @@ import React from "react";
 import { User } from "./User";
 import { useSnapshot } from "valtio";
 import { useTheme } from "@mui/material/styles";
+import { layoutState } from "@/global/layout";
+import { AppBar, IconButton, Toolbar, Typography } from "@mui/material";
+import { Menu, Brightness7, Brightness4 } from "@mui/icons-material";
+
 interface HeaderProps {
     handleDrawerToggle: () => void;
     mode: "light" | "dark";
     onThemeToggle: () => void;
-    drawerWidth: any;
+    drawerWidth: {
+        data: number;
+    };
 }
 
 export const Header: React.FC<HeaderProps> = ({ handleDrawerToggle, mode, onThemeToggle, drawerWidth }) => {

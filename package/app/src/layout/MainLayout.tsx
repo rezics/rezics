@@ -4,19 +4,33 @@ import { Sidebar } from "@component/Layout/Sidebar";
 import { Header } from "@component/Layout/Header";
 import { proxy, useSnapshot } from "valtio";
 import { Box } from "@mui/material";
+import { layoutActions, layoutState } from "@/global/layout";
+import { appStore } from "@/global/appStore";
+
 interface MainLayoutProps {
     children: ReactNode;
-    mode: "light" | "dark";
-    toggleTheme: () => void;
 }
 
 const drawerWidth = proxy({
     data: 240,
 });
 
-export const MainLayout: React.FC<MainLayoutProps> = ({ children, mode, toggleTheme }) => {
+export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
+    const isMobile = useMediaQuery("(max-width:960px)");
+    const { sidebarOpen } = useSnapshot(layoutState);
+    const { data: drawerWidthData } = useSnapshot(drawerWidth);
+
+    const handleDrawerToggle = () => {
+        layoutActions.toggleSidebar();
+    };
+
+    const mode = appStore((state) => state.theme);
+    function toggleTheme() {
+        appStore.setState({ theme: mode === "light" ? "dark" : "light" });
+    }
+
     return (
-        <Box sx={{ display: "flex", minHeight: "100vh" }}>
+        <div className="flex min-h-screen">
             <Header
                 handleDrawerToggle={handleDrawerToggle}
                 mode={mode}
@@ -30,15 +44,14 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children, mode, toggleTh
                 drawerWidth={drawerWidth}
             />
 
-            <Box
-                component="main"
+            <main
+                className="flex-grow pt-16 transition-all duration-300"
                 style={{
-                    width: `calc(100% - ${drawerWidth.data}px)`,
+                    width: `calc(100% - ${!isMobile && sidebarOpen ? drawerWidthData : 0}px)`,
                 }}
-                className="pt-16"
             >
                 {children}
-            </Box>
-        </Box>
+            </main>
+        </div>
     );
 };

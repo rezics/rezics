@@ -1,5 +1,6 @@
 import React from "react";
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button } from "@mui/material";
+import { useDialogStore } from "@/global/dialogStore";
 
 const DialogReply: React.FC = () => {
     const dialog = useDialogStore();
