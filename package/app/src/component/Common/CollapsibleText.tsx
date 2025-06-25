@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Box, Link, useTheme } from '@mui/material';
 import { proxy, useSnapshot } from "valtio";
 
@@ -7,13 +7,12 @@ interface CollapsibleTextProps {
     threshold?: number;
 }
 
-const state = proxy({ isExpanded: false });
-
 export const CollapsibleText: React.FC<CollapsibleTextProps> = ({
     content,
     threshold = 200
 }) => {
     const theme = useTheme();
+    const [state] = useState(() => proxy({ isExpanded: false }));
     const snap = useSnapshot(state);
 
     const truncatedContent = useMemo(() => {

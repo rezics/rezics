@@ -3,7 +3,7 @@ import { graphql, HttpResponse } from "msw";
 // import { GetBooksDocument, AddBookDocument } from '@/graphql/generated'; // 注意路径
 import { mockReviews, mockUsers as reviewUsers } from "./data/reviews";
 import { mockBookLists } from "./data/booklists";
-import { mockComment01 } from "./data/comment01";
+import { mockCommentTree01 } from "./data/comment01";
 import { mockABookList01 } from "./data/abooklist01";
 import { mockUsers, mockTokens } from "./data/auth";
 
@@ -69,7 +69,7 @@ export const handlers = [
         const { bookListId } = variables;
         return HttpResponse.json({
             data: {
-                comments: mockComment01,
+                comments: mockCommentTree01,
             },
         });
     }),

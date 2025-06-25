@@ -23,7 +23,7 @@ export const GET_COMMENTS = gql`
             id
             content
             createdAt
-            user {
+            author {
                 name
                 avatar
             }
@@ -32,7 +32,7 @@ export const GET_COMMENTS = gql`
                 id
                 content
                 createdAt
-                user {
+                author {
                     name
                     avatar
                 }
