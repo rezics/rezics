@@ -1,18 +1,16 @@
 import React from "react";
-import { Box, IconButton, useTheme } from "@mui/material";
+import { Box, IconButton } from "@mui/material";
 import { KeyboardArrowUp, KeyboardArrowDown, ChatBubbleOutline, StarBorder, Send } from "@mui/icons-material";
-import { proxy, useSnapshot } from "valtio";
 
 interface ReactionBarProps {
     onReply?: () => void;
     className?: string;
+    size?: 'small' | 'medium' | 'large';
+    fontSize?: string;
 }
 
-const state = proxy({ dialogVisible: false });
-
-export const ReactionBar: React.FC<ReactionBarProps> = ({ onReply, className }) => {
+export const ReactionBar: React.FC<ReactionBarProps> = ({ onReply, className, size = 'large', fontSize = '1.5rem' }) => {
     const handleReply = () => {
-        state.dialogVisible = true;
         onReply?.();
     };
 
@@ -29,25 +27,25 @@ export const ReactionBar: React.FC<ReactionBarProps> = ({ onReply, className }) 
             className={className}
         >
             <Box>
-                <IconButton size="large" sx={{ fontSize: "1.5rem" }}>
+                <IconButton size={size} sx={{ fontSize }}>
                     <KeyboardArrowUp fontSize="inherit" />
                 </IconButton>
-                <IconButton size="large" sx={{ fontSize: "1.5rem", ml: 1 }}>
+                <IconButton size={size} sx={{ fontSize, ml: 1 }}>
                     <KeyboardArrowDown fontSize="inherit" />
                 </IconButton>
             </Box>
             <Box>
-                <IconButton size="large" sx={{ fontSize: "1.5rem" }} onClick={handleReply}>
+                <IconButton size={size} sx={{ fontSize }} onClick={handleReply}>
                     <ChatBubbleOutline fontSize="inherit" />
                 </IconButton>
             </Box>
             <Box>
-                <IconButton size="large" sx={{ fontSize: "1.5rem" }}>
+                <IconButton size={size} sx={{ fontSize }}>
                     <StarBorder fontSize="inherit" />
                 </IconButton>
             </Box>
             <Box>
-                <IconButton size="large" sx={{ fontSize: "1.5rem" }}>
+                <IconButton size={size} sx={{ fontSize }}>
                     <Send fontSize="inherit" />
                 </IconButton>
             </Box>

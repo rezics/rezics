@@ -4,11 +4,10 @@ import { useQuery } from "urql";
 import { GET_BOOKLIST } from "@/graphql/bookList";
 import { CollapsibleText } from "@component/Common/CollapsibleText";
 import { AccentBar } from "@component/Common/AccentBar";
-import { ReplyComponents } from "@component/Form/ReplyComponents";
+// import { ReplyComponents } from "@component/Form/ReplyComponents";
+import { TreeReplyComponents } from "@component/Form/TreeReplyComponents";
 import { IconButton } from "@mui/material";
-import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
-import CommentIcon from "@mui/icons-material/Comment";
-import AddIcon from "@mui/icons-material/Add";
+import { ChatBubbleOutline, FavoriteBorder, Add, Comment } from "@mui/icons-material";
 
 export const BookListPage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
@@ -32,6 +31,10 @@ export const BookListPage: React.FC = () => {
         commentRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     };
 
+    const handleReply = () => {
+        console.log("reply");
+    };
+
     return (
         <div className="w-full max-w-4xl mt-[60px] mx-auto" data-testid="booklist-page">
             {/* Head */}
@@ -53,13 +56,13 @@ export const BookListPage: React.FC = () => {
                     )}
                     <div className="flex items-center gap-2">
                         <IconButton aria-label="Favorite" size="small">
-                            <FavoriteBorderIcon fontSize="small" />
+                            <FavoriteBorder fontSize="small" />
                         </IconButton>
                         <IconButton aria-label="Comments" size="small" onClick={handleGoToComments}>
-                            <CommentIcon fontSize="small" />
+                            <Comment fontSize="small" />
                         </IconButton>
                         <IconButton aria-label="Collection" size="small">
-                            <AddIcon fontSize="small" />
+                            <Add fontSize="small" />
                         </IconButton>
                     </div>
                 </div>
@@ -96,12 +99,21 @@ export const BookListPage: React.FC = () => {
             </div>
 
             {/* 评论区 */}
-            <div id="BLCOMMENT" ref={commentRef}>
-                <h2 className="text-xl font-semibold mt-6 mb-2 flex items-center">
-                    <AccentBar height={20} />
-                    <span className="align-middle ml-2">书单评论</span>
-                </h2>
-                <ReplyComponents bookListId={id} />
+            <div id="BLCOMMENT" ref={commentRef} className="mt-5">
+                <div className="flex items-center justify-between w-full">
+                    <div className="flex items-center gap-2">
+                        <AccentBar />
+                        <p className="text-2xl font-bold">评论</p>
+                    </div>
+
+                    <IconButton size="large" sx={{ fontSize: "1.5rem" }} onClick={handleReply}>
+                        <ChatBubbleOutline fontSize="inherit" />
+                    </IconButton>
+                </div>
+
+                <TreeReplyComponents bookListId={id} />
+                {/* 供评论区占位符 */}
+                <div className="mb-[200px]" />
             </div>
         </div>
     );
