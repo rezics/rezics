@@ -41,3 +41,20 @@ export const GET_COMMENTS = gql`
         }
     }
 `;
+
+// Get book lists list
+export const bookListsQuery = gql`
+    query GetBookLists {
+        bookLists {
+            id
+            title
+            description
+            books
+            creator {
+                name
+                avatar
+            }
+            likes
+        }
+    }
+`;
