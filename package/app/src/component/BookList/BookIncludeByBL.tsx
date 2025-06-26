@@ -2,25 +2,9 @@ import React from "react";
 import { Box, Grid, Typography, Avatar, IconButton, Card, CardContent, Stack } from "@mui/material";
 import { proxy, useSnapshot } from "valtio";
 import { Favorite } from "@mui/icons-material";
-import { gql, useQuery } from "urql";
-
+import { useQuery } from "urql";
+import { bookListsQuery } from "@/graphql/bookList";
 import { useLocation } from "wouter";
-
-const GET_BOOKLISTS = gql`
-    query GetBookLists {
-        bookLists {
-            id
-            title
-            description
-            books
-            creator {
-                name
-                avatar
-            }
-            likes
-        }
-    }
-`;
 
 interface BookList {
     id: string;
@@ -44,7 +28,7 @@ export const BookIncludeByBL: React.FC = () => {
     const snap = useSnapshot(state);
     const [, navigate] = useLocation();
     const [result] = useQuery({
-        query: GET_BOOKLISTS,
+        query: bookListsQuery,
     });
 
     React.useEffect(() => {

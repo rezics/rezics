@@ -6,9 +6,22 @@ import { mockBookLists } from "./data/booklists";
 import { mockCommentTree01 } from "./data/comment01";
 import { mockABookList01 } from "./data/abooklist01";
 import { mockUsers, mockTokens } from "./data/auth";
+import { bookInfo01, authorInfo01 } from "./data/bookinfo01";
+import { mockQuotes } from "./data/mockQuotes";
 
 export const handlers = [
-    // 🟢 Query: GetBooks
+    // ANCHOR BOOK
+    // ANCHOR 🟢 Query: BookInfoQuery
+    graphql.query("BookInfoQuery", ({ variables }) => {
+        return HttpResponse.json({
+            data: {
+                book: bookInfo01,
+                author: authorInfo01,
+            },
+        });
+    }),
+
+    // ANCHOR 🟢 Query: GetBooks
     graphql.query("GetBooksDocument", ({ variables }) => {
         return HttpResponse.json({
             data: {
@@ -20,7 +33,16 @@ export const handlers = [
         });
     }),
 
-    // 🟢 Query: GetBookReviews
+    // ANCHOR 🟢 Query: QuoteExcerptQuery
+    graphql.query("QuoteExcerptQuery", ({ variables }) => {
+        return HttpResponse.json({
+            data: {
+                quotes: mockQuotes,
+            },
+        });
+    }),
+
+    // ANCHOR 🟢 Query: GetBookReviews
     graphql.query("GetBookReviews", ({ variables }) => {
         const { bookId } = variables;
         const reviews = mockReviews
@@ -37,8 +59,9 @@ export const handlers = [
         });
     }),
 
-    // 🟢 Query: GetBookLists
-    graphql.query("GetBookLists", () => {
+    // ANCHOR BOOKLIST
+    // ANCHOR 🟢 Query: bookListsQuery
+    graphql.query("bookListsQuery", () => {
         return HttpResponse.json({
             data: {
                 bookLists: mockBookLists,
@@ -46,7 +69,7 @@ export const handlers = [
         });
     }),
 
-    // 🟢 Query: GetBookList
+    // ANCHOR 🟢 Query: GetBookList
     graphql.query("GetBookList", ({ variables }) => {
         const { id } = variables;
 
@@ -64,7 +87,7 @@ export const handlers = [
         });
     }),
 
-    // 🟢 Query: GetComments
+    // ANCHOR 🟢 Query: GetComments
     graphql.query("GetComments", ({ variables }) => {
         const { bookListId } = variables;
         return HttpResponse.json({
@@ -74,7 +97,7 @@ export const handlers = [
         });
     }),
 
-    // 🟢 Mutation: Login
+    // ANCHOR 🟢 Mutation: Login
     graphql.mutation("Login", ({ variables }) => {
         const { email, password } = variables;
         const user = mockUsers.find((u) => u.email === email && u.password === password);
@@ -96,7 +119,7 @@ export const handlers = [
         return HttpResponse.json({
             data: {
                 login: {
-                    token: mockTokens[email],
+                    token: mockTokens[email as keyof typeof mockTokens],
                     user: {
                         id: user.id,
                         name: user.name,
@@ -107,7 +130,7 @@ export const handlers = [
         });
     }),
 
-    // 🟢 Mutation: Register
+    // ANCHOR 🟢 Mutation: Register
     graphql.mutation("Register", ({ variables }) => {
         const { email, password } = variables;
 
@@ -134,12 +157,12 @@ export const handlers = [
         };
 
         mockUsers.push(newUser);
-        mockTokens[email] = `mock-jwt-token-${Date.now()}`;
+        mockTokens[email as keyof typeof mockTokens] = `mock-jwt-token-${Date.now()}`;
 
         return HttpResponse.json({
             data: {
                 register: {
-                    token: mockTokens[email],
+                    token: mockTokens[email as keyof typeof mockTokens],
                     user: {
                         id: newUser.id,
                         name: newUser.name,
@@ -150,7 +173,7 @@ export const handlers = [
         });
     }),
 
-    // 🟢 Mutation: ValidateEmail
+    // ANCHOR 🟢 Mutation: ValidateEmail
     graphql.mutation("ValidateEmail", ({ variables }) => {
         const { email } = variables;
         const errors: Array<{ field: string; message: string }> = [];
@@ -174,7 +197,7 @@ export const handlers = [
         });
     }),
 
-    // 🟢 Mutation: ValidatePassword
+    // ANCHOR 🟢 Mutation: ValidatePassword
     graphql.mutation("ValidatePassword", ({ variables }) => {
         const { password } = variables;
         const errors: Array<{ field: string; message: string }> = [];
@@ -198,7 +221,7 @@ export const handlers = [
         });
     }),
 
-    // 🟢 Mutation: AddBook
+    // ANCHOR 🟢 Mutation: AddBook
     graphql.mutation("AddBookDocument", async ({ variables }) => {
         const { title, author } = variables;
 
@@ -211,5 +234,13 @@ export const handlers = [
                 },
             },
         });
+    }),
+    // ANCHOR ⚠️ fallback handler - 捕捉未拦截的请求
+    graphql.operation((req) => {
+        console.warn(`[MSW] ⚠️ Unhandled GraphQL operation: ${req.operationName}`);
+        return HttpResponse.json(
+            { errors: [{ message: `No mock handler for operation: ${req.operationName}` }] },
+            { status: 400 }
+        );
     }),
 ];

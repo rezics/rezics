@@ -20,6 +20,11 @@ import { BookTag } from "@component/Book/BookTag";
 import { BookReviews } from "@component/Book/BookReviews";
 import { ShortBookReviews } from "@component/Book/ShortBookReviews";
 import { BookIncludeByBL } from "@component/BookList/BookIncludeByBL";
+import { AccentBar } from "@component/Common/AccentBar";
+
+import { BookInfoQuery } from "@/graphql/bookinfo";
+import { QuoteExcerptQuery } from "@/graphql/bookQuoteExcerpt";
+import { useQuery } from "urql";
 
 interface Book {
     id: string;
@@ -62,55 +67,58 @@ const state = proxy({
     error: null as string | null,
 });
 
+
+function QuoteExcerpts({ id }: { id: string }) {
+    // QuoteExcerptQuery
+    const [{ data, fetching, error }] = useQuery({
+        query: QuoteExcerptQuery,
+        variables: { bookId: id },
+    });
+    if (fetching) return <div>Loading...</div>;
+    if (error) return <div>Oh no... {error.message}</div>;
+    const quotes = data?.quotes;
+    
+    return (
+        <div>
+            {/* Quotes */}
+            <Box>
+                <Typography variant="h5" className="font-bold mb-4">
+                    <AccentBar />
+                    原文摘录
+                </Typography>
+                <Stack spacing={2}>
+                    {quotes.map((quote: any) => (
+                        <QuoteExcerpt key={quote.id} content={quote.content} />
+                    ))}
+                </Stack>
+            </Box>
+        </div>
+    );
+}
+
 export const BookDetail: React.FC = () => {
     const { id } = useParams<{ id: string }>();
     const [activeTab, setActiveTab] = React.useState(0);
 
     const snap = useSnapshot(state);
 
-    const fetchBookDetail = async (id: string | undefined) => {
-        if (!id) return;
-        console.log("fetchBookDetail", id);
+    // BookInfoQuery
+    console.log("fetchBookDetail", id);
 
-        try {
-            state.loading = true;
-            // 示例数据
-            const bookData = {
-                id,
-                title: "术师手册",
-                cover: "https://bookcover.yuewen.com/qdbimg/349573/1025990049/600.webp",
-                author: "听日",
-                rating: 8.6,
-                publisher: "未来出版社",
-                publishDate: "2024-11-10",
-                isbn: "978-7-123-45678-9",
-                tags: ["完本", "奇幻", "320万字"],
-                description:
-                    "1668年，我所在的城市被评为全国治安最好的地区。\n我对此做出了不可磨灭的贡献。\n因为我落网了。",
-            };
+    const [{ data, fetching, error }] = useQuery({
+        query: BookInfoQuery,
+        variables: { id },
+    });
 
-            const authorData = {
-                name: "听日",
-                avatar: "https://styles.redditmedia.com/t5_26vvze/styles/profileIcon_pyesq04om2re1.jpeg",
-                description:
-                    "余华，1960年4月出生，1983年开始写作，主要作品有《兄弟》《活着》《许三观卖血记》《在细雨中呼喊》《第七天》等。作品已被翻译成40多种语言在美国、英国、澳大利亚、法国、德国、意大利、西班牙、葡萄牙、荷兰、瑞典、挪威、丹麦、芬兰、希腊、俄罗斯、保加利亚、匈牙利、捷克、斯洛伐克、塞尔维亚、斯洛文尼亚、波兰、罗马尼亚、土耳其、巴西、以色列、埃及、科威特、日本、韩国、越南、泰国、印度和印尼等40多个国家和地区出版。曾获意大利格林扎纳·卡佛文学奖（1998年）、法国文学和艺术骑士勋章（2004年）、法国国际信使外国小说奖（2008年）、意大利朱塞佩·阿切尔比国际文学奖（2014年）等。",
-            };
+    if (fetching) return <div>Loading...</div>;
+    if (error) return <div>Oh no... {error.message}</div>;
 
-            // 使用原子更新
-            state.book = { ...bookData };
-            state.author = { ...authorData };
-        } catch (error) {
-            state.error = error instanceof Error ? error.message : "An error occurred";
-        } finally {
-            state.loading = false;
-        }
-    };
+    if (data?.book && data?.author) {
+        state.book = { ...data.book };
+        state.author = { ...data.author };
+    }
 
-    React.useEffect(() => {
-        fetchBookDetail(id);
-    }, [id]);
-
-    const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+    const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
         setActiveTab(newValue);
     };
 
@@ -215,6 +223,7 @@ export const BookDetail: React.FC = () => {
                                 {/* Description */}
                                 <Box>
                                     <Typography variant="h5" className="font-bold mb-4">
+                                        <AccentBar />
                                         简介
                                     </Typography>
                                     <Typography variant="body1" className="whitespace-pre-line">
@@ -226,27 +235,20 @@ export const BookDetail: React.FC = () => {
                                 {/* Tags */}
                                 <Box>
                                     <Typography variant="h5" className="font-bold mb-4">
+                                        <AccentBar />
                                         Tags
                                     </Typography>
                                     <BookTag />
                                 </Box>
                                 <Divider />
 
-                                {/* Quotes */}
-                                <Box>
-                                    <Typography variant="h5" className="font-bold mb-4">
-                                        原文摘录
-                                    </Typography>
-                                    <Stack spacing={2}>
-                                        <QuoteExcerpt content='作为一个词语，"活着"在我们的语言中充满了力量。它的力量不是来自于喊叫，也不是来自于进攻，而是忍受。去忍受生命赋予我们的责任，去忍受现实给予我们的幸福和苦难、无聊和平庸。' />
-                                        <QuoteExcerpt content='作为一个词语，"活着"在我们的语言中充满了力量。它的力量不是来自于喊叫，也不是来自于进攻，而是忍受。去忍受生命赋予我们的责任，去忍受现实给予我们的幸福和苦难、无聊和平庸。' />
-                                    </Stack>
-                                </Box>
+                                <QuoteExcerpts id={snap.book.id} />
                                 <Divider />
 
                                 {/* Short Reviews */}
                                 <Box>
                                     <Typography variant="h5" className="font-bold mb-4">
+                                        <AccentBar />
                                         短评
                                     </Typography>
                                     <ShortBookReviews bookId={snap.book.id} />
