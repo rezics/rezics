@@ -24,6 +24,7 @@ import { AccentBar } from "@component/Common/AccentBar";
 import { BookInfoQuery } from "@/graphql/bookinfo";
 import { QuoteExcerptQuery } from "@/graphql/bookQuoteExcerpt";
 import { useQuery } from "urql";
+import { ChapterList } from "@component/Book/ChapterList";
 
 interface Book {
     id: string;
@@ -190,14 +191,14 @@ export const BookDetail: React.FC = () => {
                         <Tabs value={activeTab} onChange={handleTabChange}>
                             <Tab label="基本信息" />
                             <Tab label="书评" />
-                            <Tab label="开发中" disabled />
+                            <Tab label="目录" />
                         </Tabs>
 
                         <TabPanel value={activeTab} index={0}>
                             <Stack spacing={4}>
                                 {/* Description */}
                                 <Box>
-                                    <Typography variant="h5" className="font-bold mb-4">
+                                    <Typography variant="h5" className="font-bold !mb-4">
                                         <AccentBar />
                                         简介
                                     </Typography>
@@ -209,20 +210,22 @@ export const BookDetail: React.FC = () => {
 
                                 {/* Tags */}
                                 <Box>
-                                    <Typography variant="h5" className="font-bold mb-4">
+                                    <Typography variant="h5" className="font-bold !mb-4">
                                         <AccentBar />
                                         Tags
                                     </Typography>
                                     <BookTag />
                                 </Box>
                                 <Divider />
+                                
+                                {/* 最新章节 */}
 
                                 <QuoteExcerptList id={data?.book.id || ""} />
                                 <Divider />
 
                                 {/* Short Reviews */}
                                 <Box>
-                                    <Typography variant="h5" className="font-bold mb-4">
+                                    <Typography variant="h5" className="font-bold !mb-4">
                                         <AccentBar />
                                         短评
                                     </Typography>
@@ -235,7 +238,8 @@ export const BookDetail: React.FC = () => {
                             <Stack spacing={4}>
                                 {/* Book Reviews */}
                                 <Box>
-                                    <Typography variant="h5" className="font-bold mb-4">
+                                    <Typography variant="h5" className="font-bold !mb-4">
+                                        <AccentBar />
                                         {data?.book.title}的书评
                                     </Typography>
                                     <BookReviews bookId={data?.book.id || ""} />
@@ -243,11 +247,19 @@ export const BookDetail: React.FC = () => {
 
                                 {/* Book Lists */}
                                 <Box>
-                                    <Typography variant="h5" className="font-bold mb-4">
+                                    <Typography variant="h5" className="font-bold !mb-4">
+                                        <AccentBar />
                                         包含 {data?.book.title} 的书单
                                     </Typography>
                                     <BookIncludeByBL />
                                 </Box>
+                            </Stack>
+                        </TabPanel>
+
+                        <TabPanel value={activeTab} index={2}>
+                            <Stack spacing={4}>
+                                {/* 章节列表 */}
+                                <ChapterList id={data?.book.id || "0"} />
                             </Stack>
                         </TabPanel>
                     </Grid>
@@ -260,11 +272,16 @@ export const BookDetail: React.FC = () => {
                                 <Typography variant="h6" className="font-bold mb-4">
                                     作者：{data?.book.author}
                                 </Typography>
-                                <Box className="flex gap-4 mb-4">
-                                    <Avatar src={data?.author.avatar || ""} className="w-20 h-20" />
-                                    <Typography variant="body2" className="text-gray-600">
+
+                                <Box className="mb-4">
+                                    <Avatar
+                                        src={data?.author.avatar || ""}
+                                        className="w-20 h-20 float-left mr-4 mb-2 rounded-full"
+                                    />
+                                    <Typography variant="body2" >
                                         {data?.author.description}
                                     </Typography>
+                                    <div className="clear-both" />
                                 </Box>
                             </Box>
                             <Divider className="my-4" />
