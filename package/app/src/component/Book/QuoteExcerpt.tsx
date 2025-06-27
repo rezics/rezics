@@ -18,8 +18,6 @@ interface QuoteExcerptProps {
     originalLink?: string;
 }
 
-const state = proxy({} as QuoteExcerptProps | any);
-
 export const QuoteExcerpt: React.FC<QuoteExcerptProps> = ({
     author = {
         name: "Amy Elsner",
@@ -34,6 +32,8 @@ export const QuoteExcerpt: React.FC<QuoteExcerptProps> = ({
     source = "引自第 5 页",
     originalLink = "#",
 }) => {
+
+    const state = proxy({} as QuoteExcerptProps | any);
     state.author = author;
     state.content = content;
     state.stats = stats;

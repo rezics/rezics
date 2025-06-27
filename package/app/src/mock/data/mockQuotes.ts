@@ -1,10 +1,32 @@
-export const mockQuotes = [
+export const mockQuotes: Quote[] = [
     {
         id: "1",
-        content: "作为一个词语，'活着'在我们的语言中充满了力量。它的力量不是来自于喊叫，也不是来自于进攻，而是忍受。去忍受生命赋予我们的责任，去忍受现实给予我们的幸福和苦难、无聊和平庸。",
+        content:
+            "作为一个词语，'活着'在我们的语言中充满了力量。它的力量不是来自于喊叫，也不是来自于进攻，而是忍受。去忍受生命赋予我们的责任，去忍受现实给予我们的幸福和苦难、无聊和平庸。",
+        createdAt: "2025-06-01T12:00:00Z",
+        author: {
+            name: "余华",
+            avatar: "https://example.com/avatar/yuhua.png",
+        },
     },
     {
         id: "2",
-        content: "薄宦各东西，往事随风雨。先自离歌不忍闻，又何况，春将暮。愁共落花多，人逐征鸿去。君向潇湘我向秦，后会知何处。",
+        content:
+            "薄宦各东西，往事随风雨。先自离歌不忍闻，又何况，春将暮。愁共落花多，人逐征鸿去。君向潇湘我向秦，后会知何处。",
+        createdAt: "2025-06-02T09:30:00Z",
+        author: {
+            name: "纳兰性德",
+            avatar: "https://example.com/avatar/nalan.png",
+        },
     },
 ];
+
+interface Quote {
+    id: string;
+    content: string;
+    createdAt: string;
+    author: {
+        name: string;
+        avatar: string;
+    };
+}
