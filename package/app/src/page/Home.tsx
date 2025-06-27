@@ -1,5 +1,6 @@
 import { BookCarousel } from "@component/Home/HomeCarousel";
 import { gql, useQuery } from "urql";
+import { MiniValtioTest } from "@component/Common/MiniValtioTest";
 
 export const Home = () => {
     // test urql timeout
@@ -24,6 +25,7 @@ export const Home = () => {
             </div>
             {/* End First Carousel */}
             {/* 干脆写个插件化定制板块的首页。 */}
+            <MiniValtioTest />
             <div>
                 { fetching ? <div>Loading...</div> : error ? <div>Error: {error.message}</div> : <div>
                     {data?.book && <div key={data?.book.id}>{data?.book.id}</div>}

@@ -1,14 +1,41 @@
-import { create } from 'zustand'
+import { create } from "zustand";
 
-interface DialogState {
-  dialogVisible: boolean
-  setDialogVisible: (visible: boolean) => void
+interface DialogEntry {
+    visible: boolean;
+    contentMain?: string;
 }
 
-const store = create<DialogState>((set) => ({
-  dialogVisible: false,
-  setDialogVisible: (visible) => set({ dialogVisible: visible }),
-}))
+interface DialogState {
+    dialogs: Record<string, DialogEntry>;
+    setDialogVisible: (key: string, visible: boolean) => void;
+    setDialogContent: (key: string, content: string) => void;
+    getDialogEntry: (key: string) => DialogEntry | undefined;
+}
 
-export const dialogStore = store
-export const useDialogStore = () => store.getState() 
+const useDialogStore = create<DialogState>((set, get) => ({
+    dialogs: {},
+
+    setDialogVisible: (key, visible) => {
+        const current = get().dialogs[key] ?? { visible: false, contentMain: "" };
+        set({
+            dialogs: {
+                ...get().dialogs,
+                [key]: { ...current, visible },
+            },
+        });
+    },
+
+    setDialogContent: (key, content) => {
+        const current = get().dialogs[key] ?? { visible: false, contentMain: "" };
+        set({
+            dialogs: {
+                ...get().dialogs,
+                [key]: { ...current, contentMain: content },
+            },
+        });
+    },
+
+    getDialogEntry: (key) => get().dialogs[key],
+}));
+
+export { useDialogStore };

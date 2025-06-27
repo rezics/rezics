@@ -6,6 +6,8 @@ import { GET_COMMENTS } from "@/graphql/bookList";
 import { Avatar, Box, Collapse, IconButton, Typography } from "@mui/material";
 import { Add, Remove } from "@mui/icons-material";
 import { ReactionBar } from "../Common/ReactionBar";
+import ReplyDrawer from "./ReplyDrawer";
+import { useDialogStore } from "@/global/dialogStore";
 
 // This is a temporary type definition based on the GraphQL schema.
 // It should be replaced with generated types.
@@ -26,9 +28,10 @@ type Comment = {
 interface CommentNodeProps {
     comment: Comment;
     level?: number;
+    openDrawer: (id: string) => void;
 }
 
-const CommentNode: React.FC<CommentNodeProps> = ({ comment, level = 0 }) => {
+const CommentNode: React.FC<CommentNodeProps> = ({ comment, level = 0, openDrawer }) => {
     // Expand first two levels by default
     const [isExpanded, setIsExpanded] = useState(level < 2);
 
@@ -42,6 +45,7 @@ const CommentNode: React.FC<CommentNodeProps> = ({ comment, level = 0 }) => {
 
     const handleReply = () => {
         console.log("Replying to comment:", comment.id);
+        openDrawer(comment.id);
         // This is where you would trigger a reply dialog or an inline reply form.
     };
 
@@ -85,7 +89,7 @@ const CommentNode: React.FC<CommentNodeProps> = ({ comment, level = 0 }) => {
             {comment.replies && comment.replies.length > 0 && (
                 <Collapse in={isExpanded} timeout="auto" unmountOnExit>
                     {comment.replies.map((reply) => (
-                        <CommentNode key={reply.id} comment={reply} level={level + 1} />
+                        <CommentNode key={reply.id} comment={reply} level={level + 1} openDrawer={openDrawer} />
                     ))}
                 </Collapse>
             )}
@@ -102,18 +106,41 @@ export const TreeReplyComponents: React.FC<ReplyComponentsProps> = ({ bookListId
         query: GET_COMMENTS,
         variables: { bookListId },
     });
+    
+    // currentReplyId
+    const setDialogVisible = useDialogStore((state) => state.setDialogVisible);
+    const [currentReplyId, setCurrentReplyId] = useState<string | null>(null);
 
     if (fetching) return <p>Loading...</p>;
     if (error) return <p>Oh no... {error.message}</p>;
 
     const topLevelComments = data?.comments || [];
 
+    const handleSubmit = (currentReplyId: string, content: string) => {
+        console.log("handleSubmit", currentReplyId, content);
+    };
+
+    
+    const openDrawer = (id: string) => {
+        setCurrentReplyId(id);
+        setDialogVisible(`reply-${id}`, true);
+    };
+
     return (
-        <Box p={2}>
-            {topLevelComments.map((comment: Comment) => (
-                <CommentNode key={comment.id} comment={comment} />
-            ))}
-        </Box>
+        <>
+            <Box p={2}>
+                {topLevelComments.map((comment: Comment) => (
+                    <CommentNode key={comment.id} comment={comment} openDrawer={openDrawer} />
+                ))}
+            </Box>
+            {/* 渲染 */}
+            {currentReplyId && (
+                <ReplyDrawer
+                    dialogId={`reply-${currentReplyId}`}
+                    onSubmit={(content) => handleSubmit(currentReplyId, content)}
+                />
+            )}
+        </>
     );
 };
 
