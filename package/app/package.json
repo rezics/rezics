@@ -47,6 +47,7 @@
         "@types/react-window": "^1.8.8",
         "eslint-plugin-react": "^7.37.5",
         "eslint-plugin-react-hooks": "^5.2.0",
+        "jsdom": "^26.1.0",
         "msw": "^2.8.7",
         "react-cosmos": "^6.2.3",
         "react-cosmos-plugin-vite": "^6.2.0",

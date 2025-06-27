@@ -1,7 +1,7 @@
 import { Route, Router, Switch } from "wouter";
 import { Home } from "@/page/Home";
 import { Login } from "@/page/Auth/Login";
-import { Register } from "@/page/Auth/Register";
+// import { Register } from "@/page/Auth/Register";
 import { NotFound } from "@/page/NotFound";
 import { MainLayout } from "@/layout/MainLayout";
 
@@ -20,7 +20,7 @@ export default (
             <MainLayout>
                 <Switch>
                     <Route path="/login" component={Login} />
-                    <Route path="/register" component={Register} />
+                    <Route path="/register" component={Login} />
                     <Route>
                         <Switch>
                             <Route path="/" component={Home} />

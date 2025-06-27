@@ -22,3 +22,18 @@ export const BookInfoQuery = gql`
         }
     }
 `;
+
+export const ChapterListQuery = gql`
+    query ChapterListQuery($id: ID!) {
+        chapters(id: $id) {
+            ID
+            ParentID
+            ChapterName
+            NoContent
+        }
+        chapterOrders(bookId: $id) {
+            parentId
+            childIds
+        }
+    }
+`;

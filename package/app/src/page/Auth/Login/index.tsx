@@ -47,7 +47,7 @@ export const Login: FC = () => {
                         <Alert severity="error">
                             {error}
                             <br />
-                            <Button type="button" slot="a" href="./resolve">
+                            <Button variant="text" type="button" slot="a" href="./resolve">
                                 Resolve
                             </Button>
                         </Alert>
@@ -58,7 +58,7 @@ export const Login: FC = () => {
             }
             actions={
                 <>
-                    <Button type="button" slot="a" href="./register">
+                    <Button variant="text" type="button" slot="a" href="./register">
                         Register
                     </Button>
                     <Button type="submit" variant="contained" loading={loading}>
