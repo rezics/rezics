@@ -40,6 +40,7 @@ const frontendConfig = {
     },
     rules: {
         "react/react-in-jsx-scope": "off",
+        "react-hooks/rules-of-hooks": "error"
     },
     settings: {
         react: {
