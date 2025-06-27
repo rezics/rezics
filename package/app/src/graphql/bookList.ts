@@ -44,7 +44,7 @@ export const GET_COMMENTS = gql`
 
 // Get book lists list
 export const bookListsQuery = gql`
-    query GetBookLists {
+    query bookListsQuery {
         bookLists {
             id
             title

@@ -4,7 +4,7 @@
         "format": "prettier -w package"
     },
     "license": "AGPL-3.0-only",
-    "packageManager": "pnpm@10.11.0",
+    "packageManager": "pnpm@10.12.4",
     "type": "module",
     "devDependencies": {
         "@tsconfig/strictest": "^2.0.5",
@@ -13,6 +13,7 @@
     },
     "dependencies": {
         "@supabase/supabase-js": "^2.49.9",
+        "@urql/exchange-auth": "^2.2.1",
         "fp-ts": "^2.16.10",
         "zod": "^3.25.46"
     }
