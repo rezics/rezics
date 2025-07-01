@@ -264,7 +264,7 @@ export const BookDetail: React.FC = () => {
                         </TabPanel>
                     </Grid>
 
-                    {/* Sidebar */}
+                    {/* ANCHOR Sidebar */}
                     <Grid size={{ xs: 12, lg: 3 }}>
                         <Paper className="p-3 mt-4">
                             {/* Author Info */}

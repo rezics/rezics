@@ -13,13 +13,7 @@ import LibraryBooksIcon from '@mui/icons-material/LibraryBooks';
 import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
 import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
 
-export interface NavigationItem {
-  kind: 'header' | 'divider' | 'item';
-  title?: string;
-  segment?: string;
-  icon?: React.ReactNode;
-  children?: NavigationItem[];
-}
+import { NavigationItem } from './navigation';
 
 // segment: router path
 
@@ -30,31 +24,31 @@ export const NAVIGATION: NavigationItem[] = [
   },
   {
     kind: 'item',
-    segment: '/',
+    segment: '~/',
     title: 'Home',
     icon: <DashboardIcon />,
   },
   {
     kind: 'item',
-    segment: '/books',
+    segment: '~/books',
     title: 'Books',
     icon: <BookIcon />,
   },
   {
     kind: 'item',
-    segment: '/book',
+    segment: '~/book',
     title: 'Book',
     icon: <LibraryBooksIcon />,
     children: [
       {
         kind: 'item',
-        segment: '/book/1',
+        segment: '~/book/1',
         title: 'Book 1',
         icon: <BookmarkBorderIcon />,
       },
       {
         kind: 'item',
-        segment: '/booklist/1',
+        segment: '~/booklist/1',
         title: 'Book List 1',
         icon: <FormatListBulletedIcon />,
       },
@@ -69,19 +63,19 @@ export const NAVIGATION: NavigationItem[] = [
   },
   {
     kind: 'item',
-    segment: '/auth',
+    segment: '~/auth',
     title: 'Auth',
     icon: <PersonIcon />,
     children: [
       {
         kind: 'item',
-        segment: '/login',
+        segment: '~/login',
         title: 'Login',
         icon: <LoginIcon />,
       },
       {
         kind: 'item',
-        segment: '/register',
+        segment: '~/register',
         title: 'Register',
         icon: <HowToRegIcon />,
       },
@@ -89,20 +83,20 @@ export const NAVIGATION: NavigationItem[] = [
   },
   {
     kind: 'item',
-    segment: '/reports',
-    title: 'Reports',
+    segment: '~/book/1/edit',
+    title: 'Book Edit',
     icon: <BarChartIcon />,
     children: [
       {
         kind: 'item',
-        title: 'Sales',
-        segment: '/sales',
+        title: 'Book Edit Main',
+        segment: '~/book/1/edit',
         icon: <DescriptionIcon />,
       },
       {
         kind: 'item',
-        title: 'Traffic',
-        segment: '/traffic',
+        title: 'Book Edit Chapter',
+        segment: '~/book/1/edit/1',
         icon: <DescriptionIcon />,
       },
     ],

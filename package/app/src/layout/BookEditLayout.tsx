@@ -1,14 +1,14 @@
 import React, { ReactNode } from "react";
 import { useMediaQuery } from "@mui/material";
 import { Sidebar } from "@component/Layout/Sidebar";
-import { Header } from "@/component/Layout/MainLayoutHeader";
+import { Header } from "@component/Layout/MainLayoutHeader";
 import { proxy, useSnapshot } from "valtio";
 // import { Box } from "@mui/material";
 import { layoutActions, layoutState } from "@/global/layout";
 import { appStore } from "@/global/appStore";
-import { NAVIGATION } from "@/component/Layout/MainNavigation";
+import { NAVIGATION } from "@/component/Layout/BookEditorNavigation";
 
-interface MainLayoutProps {
+interface BookEditLayoutProps {
     children: ReactNode;
 }
 
@@ -16,7 +16,7 @@ const drawerWidth = proxy({
     data: 240,
 });
 
-export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
+export const BookEditLayout: React.FC<BookEditLayoutProps> = ({ children }) => {
     const isMobile = useMediaQuery("(max-width:960px)");
     const { sidebarOpen } = useSnapshot(layoutState);
     const { data: drawerWidthData } = useSnapshot(drawerWidth);

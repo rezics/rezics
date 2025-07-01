@@ -6,10 +6,14 @@ import { NotFound } from "@/page/NotFound";
 import { MainLayout } from "@/layout/MainLayout";
 
 // Book
-import { BookLib } from "@/page/Book/BookLib";
+import { BookLib } from "@/page/Book/BookLibPage";
 import { BookDetail } from "@/page/Book/BookPage";
 import TestPage from "@/page/Test/TestPage";
 import { ThemeProvider } from "@mui/material";
+
+import { BookEditLayout } from "@/layout/BookEditLayout";
+import { BookEditMainPage } from "@/page/Book/BookEditMainPage";
+import { BookEditChapterPage } from "@/page/Book/BookEditChapterPage";
 
 // BookList
 import { BookListPage } from "@/page/BookList/BookListPage";
@@ -17,23 +21,35 @@ import { BookListPage } from "@/page/BookList/BookListPage";
 export default (
     <Router>
         <ThemeProvider theme={{}}>
-            <MainLayout>
-                <Switch>
-                    <Route path="/login" component={Login} />
-                    <Route path="/register" component={Login} />
-                    <Route>
+            <Switch>
+                {/* Auth */}
+                <Route path="/login" component={Login} />
+                <Route path="/register" component={Login} />
+
+                {/* Book Edit */}
+                <Route path="/book/:id/edit" nest>
+                    <BookEditLayout>
                         <Switch>
-                            <Route path="/" component={Home} />
+                            <Route path="/" component={BookEditMainPage}></Route>
+                            <Route path="/:chapterId" component={BookEditChapterPage}></Route>
+                        </Switch>
+                    </BookEditLayout>
+                </Route>
+
+                {/* Main */}
+                <Route>
+                    <MainLayout>
+                        <Switch>
                             <Route path="/books" component={BookLib} />
                             <Route path="/book/:id" component={BookDetail} />
                             <Route path="/booklist/:id" component={BookListPage} />
                             <Route path="/test" component={TestPage} />
+                            <Route path="/" component={Home} />
+                            <Route component={NotFound} />
                         </Switch>
-                    </Route>
-
-                    <NotFound />
-                </Switch>
-            </MainLayout>
+                    </MainLayout>
+                </Route>
+            </Switch>
         </ThemeProvider>
     </Router>
 );

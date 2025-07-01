@@ -1,6 +1,5 @@
 import React from "react";
 import { useLocation } from "wouter";
-import { NAVIGATION } from "./navigation";
 import { useMediaQuery, styled, useTheme } from "@mui/material";
 import { useSnapshot } from "valtio";
 import { ExpandLess, ExpandMore, ChevronLeft, ChevronRight } from "@mui/icons-material";
@@ -17,16 +16,18 @@ import {
     Typography,
 } from "@mui/material";
 import { layoutActions, layoutState } from "@/global/layout";
+import { NavigationItem } from "./navigation";
 
 interface SidebarProps {
     onClose: () => void;
     handleDrawerToggle: () => void;
+    NAVIGATION: NavigationItem[];
     drawerWidth: {
         data: number;
     };
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ onClose, handleDrawerToggle, drawerWidth }) => {
+export const Sidebar: React.FC<SidebarProps> = ({ onClose, handleDrawerToggle, drawerWidth, NAVIGATION }) => {
     const theme = useTheme();
 
     const DrawerHeader = styled("div")({
