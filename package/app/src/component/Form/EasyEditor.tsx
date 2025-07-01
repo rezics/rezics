@@ -1,6 +1,9 @@
 import React, { useEffect, useRef } from 'react';
 import EasyMDE from 'easymde';
 import 'easymde/dist/easymde.min.css';
+import MarkdownIt from 'markdown-it';
+
+import { preserveFormatPlugin } from './preserveFormatPlugin';
 
 interface EasyEditorProps {
   value: string;
@@ -15,11 +18,27 @@ const EasyEditor: React.FC<EasyEditorProps> = ({ value, onChange }) => {
 
   useEffect(() => {
     if (textareaRef.current) {
+
+      const md = new MarkdownIt({
+        html: true,
+        linkify: true,
+        breaks: true, // key: convert \n to <br>
+        typographer:  false,
+      });
+
+      md.use(preserveFormatPlugin);
+
       easyMDEInstance.current = new EasyMDE({
         element: textareaRef.current,
         initialValue: value || '',
         spellChecker: false,
         sideBySideFullscreen: false,
+        // preview
+        previewClass: ["editor-preview", "ics-md-preview"],
+        previewRender: (plainText) => {
+          console.log(plainText);
+          return md.render(plainText);
+        },
         toolbar: [
           { name: 'bold', action: EasyMDE.toggleBold, className: 'bx bx-bold', title: 'Bold' },
           { name: 'italic', action: EasyMDE.toggleItalic, className: 'bx bx-italic', title: 'Italic' },
