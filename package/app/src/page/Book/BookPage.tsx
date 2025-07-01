@@ -172,7 +172,7 @@ export const BookDetail: React.FC = () => {
                                                 key={tag}
                                                 label={tag}
                                                 size="small"
-                                                className="bg-white/10 text-white hover:bg-white/20"
+                                                className="*:bg-white/10 *:text-white *:hover:bg-white/20 *:p-1"
                                             />
                                         ))}
                                     </Stack>
