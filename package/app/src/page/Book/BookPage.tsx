@@ -13,6 +13,7 @@ import {
     Tabs,
     Tab,
 } from "@mui/material";
+import { TabContext, TabList, TabPanel } from "@mui/lab";
 import { useParams } from "wouter";
 import { QuoteExcerpt } from "@component/Book/QuoteExcerpt";
 import { BookTag } from "@component/Book/BookTag";
@@ -79,31 +80,9 @@ function QuoteExcerptList({ id }: { id: string }) {
     );
 }
 
-interface TabPanelProps {
-    children?: React.ReactNode;
-    index: number;
-    value: number;
-}
-
-function TabPanel(props: TabPanelProps) {
-    const { children, value, index, ...other } = props;
-
-    return (
-        <div
-            role="tabpanel"
-            hidden={value !== index}
-            id={`simple-tabpanel-${index}`}
-            aria-labelledby={`simple-tab-${index}`}
-            {...other}
-        >
-            {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
-        </div>
-    );
-}
-
 export const BookDetail: React.FC = () => {
     const { id } = useParams<{ id: string }>();
-    const [activeTab, setActiveTab] = React.useState(0);
+    const [activeTab, setActiveTab] = React.useState('0');
 
     // BookInfoQuery
     console.log("fetchBookDetail", id);
@@ -116,7 +95,7 @@ export const BookDetail: React.FC = () => {
     if (fetching) return <div>Loading...</div>;
     if (error) return <div>Oh no... {error.message}</div>;
 
-    const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
+    const handleTabChange = (_: React.SyntheticEvent, newValue: '0' | '1' | '2') => {
         setActiveTab(newValue);
     };
 
@@ -188,80 +167,82 @@ export const BookDetail: React.FC = () => {
                 <Grid container spacing={4}>
                     {/* Main Content */}
                     <Grid size={{ xs: 12, lg: 9 }}>
-                        <Tabs value={activeTab} onChange={handleTabChange}>
-                            <Tab label="基本信息" />
-                            <Tab label="书评" />
-                            <Tab label="目录" />
-                        </Tabs>
+                        <TabContext value={activeTab}>
+                            <TabList onChange={handleTabChange}>
+                                <Tab label="基本信息" value="0" />
+                                <Tab label="书评" value="1" />
+                                <Tab label="目录" value="2" />
+                            </TabList>
 
-                        <TabPanel value={activeTab} index={0}>
-                            <Stack spacing={4}>
-                                {/* Description */}
-                                <Box>
-                                    <Typography variant="h5" className="font-bold !mb-4">
-                                        <AccentBar />
-                                        简介
-                                    </Typography>
-                                    <Typography variant="body1" className="whitespace-pre-line">
-                                        {data?.book.description}
-                                    </Typography>
-                                </Box>
-                                <Divider />
+                            <TabPanel value="0">
+                                <Stack spacing={4}>
+                                    {/* Description */}
+                                    <Box>
+                                        <Typography variant="h5" className="font-bold !mb-4">
+                                            <AccentBar />
+                                            简介
+                                        </Typography>
+                                        <Typography variant="body1" className="whitespace-pre-line">
+                                            {data?.book.description}
+                                        </Typography>
+                                    </Box>
+                                    <Divider />
 
-                                {/* Tags */}
-                                <Box>
-                                    <Typography variant="h5" className="font-bold !mb-4">
-                                        <AccentBar />
-                                        Tags
-                                    </Typography>
-                                    <BookTag />
-                                </Box>
-                                <Divider />
-                                
-                                {/* 最新章节 */}
+                                    {/* Tags */}
+                                    <Box>
+                                        <Typography variant="h5" className="font-bold !mb-4">
+                                            <AccentBar />
+                                            Tags
+                                        </Typography>
+                                        <BookTag />
+                                    </Box>
+                                    <Divider />
 
-                                <QuoteExcerptList id={data?.book.id || ""} />
-                                <Divider />
+                                    {/* 最新章节 */}
 
-                                {/* Short Reviews */}
-                                <Box>
-                                    <Typography variant="h5" className="font-bold !mb-4">
-                                        <AccentBar />
-                                        短评
-                                    </Typography>
-                                    <ShortBookReviews bookId={data?.book.id || ""} />
-                                </Box>
-                            </Stack>
-                        </TabPanel>
+                                    <QuoteExcerptList id={data?.book.id || ""} />
+                                    <Divider />
 
-                        <TabPanel value={activeTab} index={1}>
-                            <Stack spacing={4}>
-                                {/* Book Reviews */}
-                                <Box>
-                                    <Typography variant="h5" className="font-bold !mb-4">
-                                        <AccentBar />
-                                        {data?.book.title}的书评
-                                    </Typography>
-                                    <BookReviews bookId={data?.book.id || ""} />
-                                </Box>
+                                    {/* Short Reviews */}
+                                    <Box>
+                                        <Typography variant="h5" className="font-bold !mb-4">
+                                            <AccentBar />
+                                            短评
+                                        </Typography>
+                                        <ShortBookReviews bookId={data?.book.id || ""} />
+                                    </Box>
+                                </Stack>
+                            </TabPanel>
 
-                                {/* Book Lists */}
-                                <Box>
-                                    <Typography variant="h5" className="font-bold !mb-4">
-                                        <AccentBar />
-                                        包含 {data?.book.title} 的书单
-                                    </Typography>
-                                    <BookIncludeByBL />
-                                </Box>
-                            </Stack>
-                        </TabPanel>
+                            <TabPanel value="1">
+                                <Stack spacing={4}>
+                                    {/* Book Reviews */}
+                                    <Box>
+                                        <Typography variant="h5" className="font-bold !mb-4">
+                                            <AccentBar />
+                                            {data?.book.title}的书评
+                                        </Typography>
+                                        <BookReviews bookId={data?.book.id || ""} />
+                                    </Box>
 
-                        <TabPanel value={activeTab} index={2}>
-                            <Stack spacing={4}>
-                                {/* 章节列表 */}
-                                <ChapterList id={data?.book.id || "0"} />
-                            </Stack>
-                        </TabPanel>
+                                    {/* Book Lists */}
+                                    <Box>
+                                        <Typography variant="h5" className="font-bold !mb-4">
+                                            <AccentBar />
+                                            包含 {data?.book.title} 的书单
+                                        </Typography>
+                                        <BookIncludeByBL />
+                                    </Box>
+                                </Stack>
+                            </TabPanel>
+
+                            <TabPanel value="2" keepMounted={true}>
+                                <Stack spacing={4}>
+                                    {/* 章节列表 */}
+                                    <ChapterList id={data?.book.id || "0"} />
+                                </Stack>
+                            </TabPanel>
+                        </TabContext>
                     </Grid>
 
                     {/* ANCHOR Sidebar */}
@@ -278,9 +259,7 @@ export const BookDetail: React.FC = () => {
                                         src={data?.author.avatar || ""}
                                         className="w-20 h-20 float-left mr-4 mb-2 rounded-full"
                                     />
-                                    <Typography variant="body2" >
-                                        {data?.author.description}
-                                    </Typography>
+                                    <Typography variant="body2">{data?.author.description}</Typography>
                                     <div className="clear-both" />
                                 </Box>
                             </Box>
