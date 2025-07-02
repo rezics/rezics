@@ -52,6 +52,12 @@ export const NAVIGATION: NavigationItem[] = [
         title: 'Book List 1',
         icon: <FormatListBulletedIcon />,
       },
+      {
+        kind: 'item',
+        segment: '~/book/1/read/a1b2c3d4e5f6g7h8i9j0',
+        title: 'Book Chapter 1',
+        icon: <BookIcon />,
+      }
     ],
   },
   {

@@ -5,6 +5,7 @@ import { bookListHandlers } from "./bookList";
 import { bookQuoteExcerptHandlers } from "./bookQuoteExcerpt";
 import { bookReviewsHandlers } from "./bookReviews";
 import { homepageHandlers } from "./homepage";
+import { chapterHandlers } from "./chapter";
 
 export const handlers = [
     ...authHandlers,
@@ -14,4 +15,5 @@ export const handlers = [
     ...bookQuoteExcerptHandlers,
     ...bookReviewsHandlers,
     ...homepageHandlers,
+    ...chapterHandlers,
 ] 
