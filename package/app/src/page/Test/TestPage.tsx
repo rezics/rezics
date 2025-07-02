@@ -1,29 +1,31 @@
-import { proxy, useSnapshot } from "valtio";
+import * as React from 'react';
+import Box from '@mui/material/Box';
+import { TabContext, TabList, TabPanel } from '@mui/lab';
+import Tab from '@mui/material/Tab';
 
-// This will re-render on `state.count` change but not on `state.text` change
-const state = proxy({ count: 0, text: "hello" });
+export default function PersistentTabs() {
+  const [value, setValue] = React.useState<'1' | '2'>('1');
 
-function Counter() {
-    
-    const snap = useSnapshot(state);
+  const handleChange = (_: React.SyntheticEvent, newValue: '1' | '2') => {
+    setValue(newValue);
+  };
 
-    function handleClick() {
-        ++state.count;
-        console.log('handleClick', state, snap);
-    }
-    return (
-        <div>
-            {snap.count}
-            <Button onClick={handleClick}>+1</Button>
-        </div>
-    );
+  return (
+    <TabContext value={value}> {/* ① 提供上下文 */}
+      <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+        <TabList onChange={handleChange} aria-label="lab API tabs example">
+          <Tab label="面板一" value="1" />
+          <Tab label="面板二" value="2" />
+        </TabList>
+      </Box>
+      {/* ② TabPanel 的 value 必须和 Tab 的 value 对应 */}
+      <TabPanel value="1" keepMounted>
+        {/* keepMounted 保持在 DOM，不会被卸载，内部状态持久化】 */}
+        这是第一个面板的内容
+      </TabPanel>
+      <TabPanel value="2" keepMounted>
+        这是第二个面板的内容
+      </TabPanel>
+    </TabContext>
+  );
 }
-
-export default function TestPage() {
-    return (
-        <div className="ml-10 mt-10">
-            <Counter />
-        </div>
-    );
-}
-

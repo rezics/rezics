@@ -4,32 +4,26 @@ import { ChapterListQuery } from "@/graphql/bookinfo";
 import { Button, Tooltip, Typography } from "@mui/material";
 import { AccentBar } from "../Common/AccentBar";
 
+import { buildTree, OrderMap, ID, FlatTree, NodeBase, TreeNodeWithChildren } from "@/util/treeAbstract";
+import { proxy, useSnapshot } from "valtio";
+
 // 扁平结构 + 顺序数组
 
-interface Chapter {
+// type ChapterMapType = Map<number, ChapterTreeNode>;
+
+type ChapterOrderType = OrderMap;
+
+interface ChapterTreeNode extends TreeNodeWithChildren {
     id: number;
-    ParentId: number;
-    ChapterName: string;
-    NoContent: boolean;
-}
-
-interface ChapterOrder {
     parentId: number;
-    childIds: number[];
+    title: string;
+    noContent: boolean;
+    children?: ChapterTreeNode[];
 }
 
-interface ChapterMap {
-    [id: number]: Chapter;
-}
-
+// component props
 interface ChapterListProps {
     id: string;
-}
-
-interface ChapterTreeNode {
-    id: number;
-    title: string;
-    children: ChapterTreeNode[];
 }
 
 export const ChapterList: React.FC<ChapterListProps> = ({ id }) => {
@@ -38,25 +32,16 @@ export const ChapterList: React.FC<ChapterListProps> = ({ id }) => {
         variables: { id },
     });
 
-    const chapters: Chapter[] = data?.chapters ?? [];
-    const orderList: ChapterOrder[] = data?.chapterOrders ?? [];
+    const chapters: ChapterTreeNode[] = data?.chapters ?? [];
+    const orderMap: ChapterOrderType = new Map(Object.entries(data?.chapterOrders ?? {}));
 
-    // console.log(chapters, orderList);
-
-    const { chapterMap, orderMap } = useMemo(() => {
-        const newChapterMap: ChapterMap = {};
-
-        // 直接映射章节（扁平）
-        chapters.forEach((ch: Chapter) => {
-            newChapterMap[ch.id] = ch;
-        });
-
-        return { chapterMap: newChapterMap, orderMap: orderList };
-    }, [chapters, orderList]);
-    // console.log("映射结果:", { chapterMap, orderMap });
+    // console.log(orderMap, typeof orderMap);
+    // const chapterTree: any = buildTree({nodes: chapters, orders: orderMap}, new Map([["isExpend", true]]));
+    // use individual state to store the expanded nodes
+    const chapterTree: any = useMemo(() => buildTree({ nodes: chapters, orders: orderMap }), [chapters, orderMap]);
 
     const [expandedNodes, setExpandedNodes] = useState<Set<number>>(new Set());
-    
+
     const toggleNode = (id: number) => {
         setExpandedNodes((prev) => {
             const newSet = new Set(prev);
@@ -71,9 +56,9 @@ export const ChapterList: React.FC<ChapterListProps> = ({ id }) => {
 
     const expandAll = () => {
         const allParentIds = new Set(
-            Object.keys(orderMap)
-                .filter((key) => key !== "null") // 注意是 "null"（字符串）
-                .map(Number),
+            Array.from(orderMap.keys())
+                .filter((key) => key !== "null") // 过滤掉字符串 "null"
+                .map((key) => Number(key)),
         );
         setExpandedNodes(allParentIds);
     };
@@ -84,7 +69,8 @@ export const ChapterList: React.FC<ChapterListProps> = ({ id }) => {
 
     const hasExpandedInit = useRef(false);
     useLayoutEffect(() => {
-        if (!hasExpandedInit.current && Object.keys(orderMap).length > 0) {
+        if (!hasExpandedInit.current && orderMap.size > 0) {
+            console.log("expandAllInit");
             expandAll();
             hasExpandedInit.current = true;
         }
@@ -92,30 +78,9 @@ export const ChapterList: React.FC<ChapterListProps> = ({ id }) => {
 
     if (fetching) return <div>Loading...</div>;
     if (error) return <div>Oh no... {error.message}</div>;
+    // const chapterTree: any = buildTree({nodes: chapters, orders: orderMap});
 
-    const buildChapterTree = (
-        orderMap: any,
-        chapterMap: Record<number, Chapter>,
-        rootId: number | string = "null",
-    ): Chapter[] => {
-        const childIds = rootId ? (orderMap[rootId] ? orderMap[rootId] : []) : [];
-
-        return childIds
-            .map((id: number) => {
-                const chapter = chapterMap[id];
-                if (!chapter) return null;
-
-                return {
-                    ...chapter,
-                    children: buildChapterTree(orderMap, chapterMap, id),
-                };
-            })
-            .filter((chapter: any) => chapter !== null);
-    };
-
-    const chapterTree: any = buildChapterTree(orderMap, chapterMap);
-
-    // console.log(chapterTree);
+    // console.log(chapterTree[0].children);
 
     // 渲染组件（递归）
     const ChapterTreeView = ({ nodes }: { nodes: ChapterTreeNode[] }) => (
@@ -134,9 +99,9 @@ export const ChapterList: React.FC<ChapterListProps> = ({ id }) => {
                         </Button>
                     </div>
 
-                    {expandedNodes.has(node.id) && node.children.length > 0 && (
+                    {expandedNodes.has(node.id) && node.children!.length > 0 && (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-1">
-                            {node.children.map((child: any) => {
+                            {node.children!.map((child: any) => {
                                 const name = child.title;
                                 const TruncatedLength = 15;
                                 const isTruncated = name.length > TruncatedLength;
