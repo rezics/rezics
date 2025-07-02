@@ -19,5 +19,5 @@
         }
     },
     "include": ["node_modules/vite/client.d.ts", "**/*"],
-    "extends": ["@tsconfig/strictest/tsconfig.json"]
+    "extends": "@tsconfig/strictest/tsconfig.json",
 }
