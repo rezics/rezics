@@ -11,9 +11,15 @@ import { BookDetail } from "@/page/Book/BookPage";
 import TestPage from "@/page/Test/TestPage";
 import { ThemeProvider } from "@mui/material";
 
+// Book Edit
 import { BookEditLayout } from "@/layout/BookEditLayout";
 import { BookEditMainPage } from "@/page/Book/BookEditMainPage";
 import { BookEditChapterPage } from "@/page/Book/BookEditChapterPage";
+
+// Book Read
+import { BookReadLayout } from "@/layout/BookReadLayout";
+import { BookReadChapterPage } from "@/page/Book/BookReadChapterPage";
+
 
 // BookList
 import { BookListPage } from "@/page/BookList/BookListPage";
@@ -25,6 +31,13 @@ export default (
                 {/* Auth */}
                 <Route path="/login" component={Login} />
                 <Route path="/register" component={Login} />
+
+                {/* Book Read */}
+                <Route path="/book/:id/read" nest>
+                    <BookReadLayout>
+                        <Route path="/:chapterId" component={BookReadChapterPage} />
+                    </BookReadLayout>
+                </Route>
 
                 {/* Book Edit */}
                 <Route path="/book/:id/edit" nest>

@@ -1,68 +1,151 @@
-import type MarkdownIt from 'markdown-it'
+import type MarkdownIt from "markdown-it";
+// import type { Token } from "markdown-it";
 
-// ------------------- 1. 處理空格的行內規則 -------------------
-function preserveSpaces(state: any, silent: boolean): boolean {
-  let pos = state.pos;
-  const max = state.posMax;
+// --- 插件选项接口 ---
+export interface PreserveFormatOptions {
+    /**
+     * 是否保留连续空格。
+     * @default true
+     */
+    preserveSpaces?: boolean;
 
-  while (pos < max && state.src.charCodeAt(pos) !== 0x0A) {
-    pos++;
-  }
+    /**
+     * 是否保留空行。
+     * @default true
+     */
+    preserveEmptyLines?: boolean;
 
-  if (pos === state.pos) return false;
-
-  if (!silent) {
-    let text = state.src.slice(state.pos, pos);
-    text = text.replace(/ {2,}/g, (match: string) => ' ' + '&nbsp;'.repeat(match.length - 1));
-
-    const token = state.push('text', '', 0);
-    token.content = text;
-  }
-
-  state.pos = pos;
-  return true;
+    /**
+     * 用于渲染空行的 HTML 字符串。
+     * @default '<p class="preserved-empty-line">&nbsp;</p>'
+     */
+    emptyLineRender?: string;
 }
 
-// ------------------- 2. 處理多個空行的區塊規則 -------------------
-function multipleEmptyLines(state: any, startLine: number, endLine: number, silent: boolean): boolean {
-  let nextLine = startLine;
+// 两个功能，第一个，将所有的空行转换成一个块标签，所有的空行。第二个，将所有的空格，转换成标准空格渲染出来而不是合并
+// ------------------- 1. 处理空行的块级规则 -------------------
+/**
+ * 处理空行的块级规则，它将 Markdown 源文本中的连续空行保留
+ *
+ * 工作原理:
+ * - 此插件通过一个 core rule 在块级解析前对源字符串进行预处理。
+ * - 它查找连续两个或以上的新行。
+ * - 两个新行（一个空行）是标准的段落分隔符，其行为被保留。
+ * - 每增加一个额外的新行，就被视为一个需要转换为 <br> 的空行。
+ * - 例如，三个新行（两个空行）= 一个段落分隔符 + 一个 <br>。
+ * - 转换时，它会插入 <br> 标签，并用空行包裹，以确保 markdown-it 将其视为独立的 HTML 块，
+ * 从而不破坏原始的段落分割逻辑。
+ *
+ * @param state markdown-it 的 state 实例
+ */
+function multipleEmptyLines(state: any) {
+    // console.log(state);
+    const src = state.src;
+    if (!src.includes("\n\n")) return;
 
-  // 不是空行則返回 false
-  if (!state.isEmpty(nextLine)) return false;
+    state.src = src.replace(/\n{2,}/g, (match: string) => {
+        // match 里全是 \n，长度就是换行数
+        const total = match.length;
+        // 保留一个 \n 让后续的段落分隔还能生效，多出来的每个就变成一个 <br>
+        const brCount = total - 1;
+        // ! 注意需要两个换行，这样才能正常分块
+        return "\n\n" + "&nbsp;\n".repeat(brCount);
+        // return "\n" + "<br>\n".repeat(brCount);
+    });
 
-  while (nextLine < endLine && state.isEmpty(nextLine)) {
-    nextLine++;
-  }
+    // console.log('after state', state);
 
-  const count = nextLine - startLine;
-
-  if (count < 2) return false; // 多於1行才插入
-
-  if (silent) return true;
-
-  const token = state.push('preserved_empty_lines', '', 0);
-  token.block = true;
-  token.meta = { count };
-
-  state.line = nextLine;
-  return true;
 }
 
-// ------------------- 3. 自訂渲染 -------------------
-function renderPreservedEmptyLines(tokens: any[], idx: number): string {
-  const count = tokens[idx]?.meta?.count ?? 1;
-  // 使用 <p></p> 更安全地占位段落
-  return '<p></p>'.repeat(count - 1);
+// ------------------- 2. 处理多空格的核心规则 -------------------
+function preserveSpacesCore(state: any) {
+    for (const blockToken of state.tokens) {
+        // 我们只关心 inline token，因为文本内容都在这里
+        if (blockToken.type === "inline" && blockToken.children) {
+            const newChildren: any[] = [];
+
+            for (const token of blockToken.children) {
+                // 在 inline token 的子节点中，我们只关心 text token
+                if (token.type === "text" && token.content.includes("  ")) {
+                    // 如果一个 text token 包含连续空格，我们将它分裂
+                    const parts = token.content.split(/( {2,})/g);
+
+                    parts.forEach((part: string) => {
+                        if (part.match(/ {2,}/)) {
+                            // 这部分是连续空格，创建一个 html_inline token 来渲染 &nbsp;
+                            const spaceToken = new state.Token("html_inline", "", 0);
+                            // 为了保留视觉上的间距并防止行首折叠，
+                            // '   ' -> '&nbsp; &nbsp;' 是一个不错的策略
+                            spaceToken.content = "&nbsp;".repeat(part.length);
+                            newChildren.push(spaceToken);
+                        } else if (part) {
+                            // 这部分是普通文本，创建一个新的 text token
+                            const textToken = new state.Token("text", "", 0);
+                            textToken.content = part;
+                            newChildren.push(textToken);
+                        }
+                    });
+                } else {
+                    // 如果 token 不是 text 或不含连续空格，直接保留
+                    newChildren.push(token);
+                }
+            }
+            // 用分裂后的新 token 数组替换旧的 children 数组
+            blockToken.children = newChildren;
+        }
+    }
 }
 
-// ------------------- 4. 組合插件 -------------------
-export function preserveFormatPlugin(md: MarkdownIt) {
-  // 保留多空格
-  md.inline.ruler.at('text', preserveSpaces);
+// ------------------- 3. 最终的插件函数 -------------------
+/**
+ * 一个 markdown-it 插件，定制化空行和空格的渲染
+ *
+ * 工作原理:
+ * - 拆分为两个核心组件，multipleEmptyLines and preserveSpacesCore 
+ * - multipleEmptyLines: 将空行替换成`\n\n&nbsp;\n`渲染, 从而保留空行
+ * - preserveSpacesCore: 将空格替换成`&nbsp;`渲染, 从而保留空格
+ * @param md markdown-it 实例
+ */
+export function preserveFormattingPlugin(md: MarkdownIt, options?: PreserveFormatOptions) {
+    const defaults: PreserveFormatOptions = {
+        preserveSpaces: true,
+        preserveEmptyLines: true,
+        emptyLineRender: '<p class="preserved-empty-line">&nbsp;</p>',
+    };
 
-  // 插入空段落處理器（在 paragraph 前）
-  md.block.ruler.before('paragraph', 'multiple_empty_lines', multipleEmptyLines);
+    const effectiveOptions = { ...defaults, ...options };
 
-  // 添加渲染規則
-  md.renderer.rules['preserved_empty_lines'] = renderPreservedEmptyLines;
+    // --- 注册空行处理规则 ---
+    // 在 block 解析之前，先把连续空行替换成 <br> token
+    md.core.ruler.before('normalize', "line_break_to_br", multipleEmptyLines);
+
+    // --- 注册空格处理规则 ---
+    if (effectiveOptions.preserveSpaces) {
+        // 注册核心规则。它会在所有 token 解析完毕后执行。
+        md.core.ruler.push("preserve_spaces_core", preserveSpacesCore);
+        // 注意：这个方法不需要 markdown-it 的 html 选项为 true 才能正确渲染 &nbsp;
+    }
 }
+
+// 列出所有 block 级别的 rule 名称
+// console.log('block rules:', md.block.ruler.getRules());
+
+// 列出所有 inline 级别的 rule 名称
+// console.log('inline rules:', md.inline.ruler.getRules());
+
+// block_rules: [
+//     'normalize',   'reference', 'blockquote',
+//     'code',        'fence',     'heading',
+//     'lheading',    'hr',        'list',
+//     'html_block',  'table',     'paragraph',
+//     'footnote_def'
+//   ]
+  
+// inline_rules: [
+//     'text',       'newline',     'escape',
+//     'backticks',  'del',         'ins',
+//     'mark',       'emphasis',    'link',
+//     'reflink',    'reference',   'autolink',
+//     'html_inline','entity',      'text_collapse'
+//   ]
+  
