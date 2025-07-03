@@ -38,7 +38,7 @@ export const NAVIGATION: NavigationItem[] = [
     {
         kind: "item",
         title: "Book Edit Chapter",
-        segment: "~/book/1/edit/2",
+        segment: "~/book/1/edit/323",
         icon: <DescriptionIcon />,
     },
     {

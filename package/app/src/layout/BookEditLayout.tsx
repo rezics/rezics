@@ -1,17 +1,15 @@
-import React, { ReactNode } from "react";
+import React, { ReactNode, useEffect, useState } from "react";
 import { useMediaQuery } from "@mui/material";
 import { Sidebar } from "@component/Layout/Sidebar";
 import { Header } from "@component/Layout/MainLayoutHeader";
-import { proxy, useSnapshot } from "valtio";
-// import { Box } from "@mui/material";
+
 import { useLayoutStore } from "@/global/layoutStore";
 import { appStore } from "@/global/appStore";
 import { NAVIGATION } from "@/component/Layout/BookEditorNavigation";
 
-import { Tree } from 'react-arborist';
 import { useQuery } from "urql";
 import { ChapterListQuery } from "@/graphql/bookinfo";
-import { useParams } from "wouter";
+import { useParams, useRoute } from "wouter";
 
 import { BookEditorSidebar } from "@/component/Layout/BookEditorSidebar";
 
@@ -20,7 +18,16 @@ interface BookEditLayoutProps {
 }
 
 export const BookEditLayout: React.FC<BookEditLayoutProps> = ({ children }) => {
+    // const [match, params] = useRoute("/:chapterId");
+    const [match, params] = useRoute("/book/:id/edit/:chapterId");
     const { id } = useParams();
+
+    const [selectedId, setSelectedId] = useState(match ? String(params.chapterId) : "");
+
+    useEffect(() => {
+        console.log("match, params", match, params);
+        setSelectedId(match ? String(params.chapterId) : "");
+    }, [match, params]);
 
     const [{ data, fetching, error }] = useQuery({
         query: ChapterListQuery,
@@ -52,8 +59,9 @@ export const BookEditLayout: React.FC<BookEditLayoutProps> = ({ children }) => {
                 onClose={() => isMobile && closeSidebar()}
                 handleDrawerToggle={handleDrawerToggle}
                 NAVIGATION={NAVIGATION}
+                noScrollBar={true}
             >
-                <BookEditorSidebar chaptersData={data} />
+                <BookEditorSidebar chaptersData={data} selectedId={selectedId} />
             </Sidebar>
 
             <main

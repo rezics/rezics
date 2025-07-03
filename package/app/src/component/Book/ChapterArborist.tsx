@@ -29,10 +29,12 @@ interface ChapterArboristProps {
     isDraggable: boolean;
     enableDoubleClickRename: boolean;
     tHeight: number;
+    searchTerm: string;
+    selectedId: string;
 }
 
 // you can't use chaptersData = {} to give a default value, because it will cause the Maximum update Warning
-export const ChapterArborist: React.FC<ChapterArboristProps> = ({ chapterTree, isDraggable, enableDoubleClickRename, tHeight }) => {
+export const ChapterArborist: React.FC<ChapterArboristProps> = ({ chapterTree, isDraggable, enableDoubleClickRename, tHeight, searchTerm, selectedId }) => {
     const treeRef: any = useRef(null);
 
     const [treeData, setTreeData] = useState<Chapter[]>([]);
@@ -104,6 +106,9 @@ export const ChapterArborist: React.FC<ChapterArboristProps> = ({ chapterTree, i
                 disableDrag={!isDraggable}
                 disableDrop={!isDraggable}
                 idAccessor="id"
+                searchTerm={searchTerm}
+                selection={selectedId ?? ''}
+                searchMatch={(node, t) => node.data.title.toLowerCase().includes(t.toLowerCase())}
                 childrenAccessor="children"
                 className="overflow-auto no-scrollbar"
             >

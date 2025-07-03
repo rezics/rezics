@@ -7,6 +7,7 @@ import { ChapterArborist } from "@/component/Book/ChapterArborist";
 
 import { useLayoutStore } from "@/global/layoutStore";
 import useMeasure from "react-use-measure";
+import { TextField } from "@mui/material";
 
 type Chapter = {
     id: string | number;
@@ -16,10 +17,11 @@ type Chapter = {
 
 interface BookEditorSidebarProps {
     chaptersData: any;
+    selectedId: string;
 }
 
 // you can't use chaptersData = {} to give a default value, because it will cause the Maximum update Warning
-export const BookEditorSidebar: React.FC<BookEditorSidebarProps> = ({ chaptersData }) => {
+export const BookEditorSidebar: React.FC<BookEditorSidebarProps> = ({ chaptersData, selectedId }) => {
     const { sidebarHeightBelow } = useLayoutStore();
     const chapters: ChapterTreeNode[] = chaptersData?.chapters ?? [];
     const orderMap: ChapterOrderType = new Map(Object.entries(chaptersData?.chapterOrders ?? {}));
@@ -28,38 +30,30 @@ export const BookEditorSidebar: React.FC<BookEditorSidebarProps> = ({ chaptersDa
         [chaptersData],
     );
 
-    const [isDraggable, setIsDraggable] = useState(false);
-    const [enableDoubleClickRename, setEnableDoubleClickRename] = useState(false);
+    const [searchTerm, setSearchTerm] = useState("");
+    const [selectIDTerm, setselectIDTerm] = useState("");
 
     const [height, setHeight] = useState(sidebarHeightBelow);
     useEffect(() => {
         setHeight(sidebarHeightBelow);
+        console.log(selectedId);
     }, [sidebarHeightBelow]);
 
     return (
         <div className="overflow-auto no-scrollbar">
-            {/* <div className="flex items-center mb-4 gap-6">
-                <label htmlFor="drag-switch" className="mr-2">
-                    Enable Drag to Reorder
-                </label>
-                <input
-                    id="drag-switch"
-                    type="checkbox"
-                    checked={isDraggable}
-                    onChange={(e) => setIsDraggable(e.target.checked)}
-                />
-
-                <FormControlLabel
-                    control={
-                        <Switch
-                            checked={enableDoubleClickRename}
-                            onChange={(e) => setEnableDoubleClickRename(e.target.checked)}
-                        />
-                    }
-                    label="双击重命名"
-                />
-            </div> */}
-            <ChapterArborist chapterTree={chapterTree} isDraggable={false} enableDoubleClickRename={false} tHeight={height} />
+            <div className="w-11/12 mx-auto">
+                <TextField id="standard-basic" label="searchTerm" variant="standard" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+                <TextField id="standard-basic" label="selectIDTerm" variant="standard" value={selectIDTerm} onChange={(e) => setselectIDTerm(e.target.value)} />
+            </div>
+            <ChapterArborist
+                chapterTree={chapterTree}
+                isDraggable={false}
+                enableDoubleClickRename={false}
+                tHeight={height}
+                searchTerm={searchTerm}
+                selectedId={String(selectedId)}
+                // selectedId={selectIDTerm}
+            />
         </div>
     );
 };
