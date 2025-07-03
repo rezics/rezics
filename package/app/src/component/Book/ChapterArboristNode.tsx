@@ -1,5 +1,6 @@
 import React from "react";
 import { NodeRendererProps } from "react-arborist";
+import { Link } from "wouter";
 
 // Type used inside the BookEditorSidebar tree
 export type Chapter = {
@@ -25,6 +26,7 @@ export const createChapterArboristNode = (
     treeRef: React.RefObject<any>,
     enableDoubleClickRename: boolean,
     isTreeDraggable: boolean,
+    baseLink: string,
 ) => {
     return function ChapterArboristNode({ node, style, dragHandle }: NodeRendererProps<Chapter>) {
         const isInternal = node.isInternal;
@@ -77,7 +79,9 @@ export const createChapterArboristNode = (
                             className="border px-1 text-sm w-full"
                         />
                     ) : (
-                        <span>{node.data.title}</span>
+                        <Link to={`${baseLink}/${node.id}`} className="text-gray-700 hover:text-blue-500 block cursor-default hover:cursor-pointer">
+                            <span>{node.data.title}</span>
+                        </Link>
                     )}
                 </span>
 

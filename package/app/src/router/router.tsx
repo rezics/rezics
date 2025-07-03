@@ -40,7 +40,7 @@ export default (
         <Route path="/register" component={Login} />
 
         {/* Book Read – keep the more specific path first */}
-        <Route path="/book/:id/read/:chapterId">
+        <Route path="/book/:bookId/read/:chapterId">
           {() => (
             <BookReadLayout>
               <BookReadChapterPage />
@@ -49,14 +49,14 @@ export default (
         </Route>
 
         {/* Book Edit (chapter first, then main) */}
-        <Route path="/book/:id/edit/:chapterId">
+        <Route path="/book/:bookId/edit/:chapterId">
           {() => (
             <BookEditLayout>
               <BookEditChapterPage />
             </BookEditLayout>
           )}
         </Route>
-        <Route path="/book/:id/edit">
+        <Route path="/book/:bookId/edit">
           {() => (
             <BookEditLayout>
               <BookEditMainPage />
@@ -70,14 +70,14 @@ export default (
             <BookLib />
           </MainLayout>
         </Route>
-        <Route path="/book/:id">
+        <Route path="/book/:bookId">
           {() => (
             <MainLayout>
               <BookDetail />
             </MainLayout>
           )}
         </Route>
-        <Route path="/booklist/:id">
+        <Route path="/booklist/:booklistId">
           {() => (
             <MainLayout>
               <BookListPage />
@@ -99,9 +99,7 @@ export default (
 
         {/* 404 fallback */}
         <Route>
-          <MainLayout>
             <NotFound />
-          </MainLayout>
         </Route>
       </Switch>
     </ThemeProvider>

@@ -31,10 +31,11 @@ interface ChapterArboristProps {
     tHeight: number;
     searchTerm: string;
     selectedId: string;
+    baseLink: string;
 }
 
 // you can't use chaptersData = {} to give a default value, because it will cause the Maximum update Warning
-export const ChapterArborist: React.FC<ChapterArboristProps> = ({ chapterTree, isDraggable, enableDoubleClickRename, tHeight, searchTerm, selectedId }) => {
+export const ChapterArborist: React.FC<ChapterArboristProps> = ({ chapterTree, isDraggable, enableDoubleClickRename, tHeight, searchTerm, selectedId, baseLink }) => {
     const treeRef: any = useRef(null);
 
     const [treeData, setTreeData] = useState<Chapter[]>([]);
@@ -87,8 +88,8 @@ export const ChapterArborist: React.FC<ChapterArboristProps> = ({ chapterTree, i
 
     // 创建带有 contextMenu 能力的 Node 渲染器
     const Node = useMemo(
-        () => createChapterArboristNode(setContextMenu, treeRef, enableDoubleClickRename, isDraggable),
-        [setContextMenu, enableDoubleClickRename, isDraggable],
+        () => createChapterArboristNode(setContextMenu, treeRef, enableDoubleClickRename, isDraggable, baseLink),
+        [setContextMenu, enableDoubleClickRename, isDraggable, baseLink],
     );
 
     return (
@@ -101,7 +102,8 @@ export const ChapterArborist: React.FC<ChapterArboristProps> = ({ chapterTree, i
                 onDelete={onDelete}
                 // width="100%"
                 height={tHeight}
-                indent={24}
+                // indent={24}
+                indent={0}
                 rowHeight={32}
                 disableDrag={!isDraggable}
                 disableDrop={!isDraggable}

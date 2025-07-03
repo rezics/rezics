@@ -4,7 +4,7 @@ import { TabContext, TabList, TabPanel } from "@mui/lab";
 import Tab from "@mui/material/Tab";
 
 import { BookEditorSidebar } from "@/component/Layout/BookEditorSidebar";
-import { ChapterListQuery } from "@/graphql/bookinfo";
+import { ChapterListQuery } from "@/graphql/bookInfo";
 import { useQuery } from "urql";
 
 export default function PersistentTabs() {

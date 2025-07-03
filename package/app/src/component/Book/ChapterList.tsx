@@ -1,11 +1,12 @@
 import { useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "urql";
-import { ChapterListQuery } from "@/graphql/bookinfo";
+import { ChapterListQuery } from "@/graphql/bookInfo";
 import { Button, Tooltip, Typography } from "@mui/material";
 import { AccentBar } from "../Common/AccentBar";
 
 import { buildTree, OrderMap, ID, FlatTree, NodeBase, TreeNodeWithChildren } from "@/util/treeAbstract";
 import { proxy, useSnapshot } from "valtio";
+import { useLocation, Link } from "wouter";
 
 // 扁平结构 + 顺序数组
 
@@ -27,6 +28,9 @@ interface ChapterListProps {
 }
 
 export const ChapterList: React.FC<ChapterListProps> = ({ id }) => {
+
+    const [location, navigate] = useLocation();
+
     const [{ data, fetching, error }] = useQuery({
         query: ChapterListQuery,
         variables: { id },
@@ -109,11 +113,11 @@ export const ChapterList: React.FC<ChapterListProps> = ({ id }) => {
 
                                 const content = (
                                     // use target="_blank" to open link in new tab
-                                    <a href="#" className="text-gray-700 hover:text-blue-500 block">
+                                    <Link to={`/book/${id}/read/${child.id}`} className="text-gray-700 hover:text-blue-500 block cursor-default hover:cursor-pointer">
                                         <p className="truncate p-2 rounded-md hover:bg-gray-100 transition-colors duration-200">
                                             {displayName}
                                         </p>
-                                    </a>
+                                    </Link>
                                 );
 
                                 return isTruncated ? (

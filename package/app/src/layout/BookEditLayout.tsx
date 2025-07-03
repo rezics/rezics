@@ -8,7 +8,7 @@ import { appStore } from "@/global/appStore";
 import { NAVIGATION } from "@/component/Layout/BookEditorNavigation";
 
 import { useQuery } from "urql";
-import { ChapterListQuery } from "@/graphql/bookinfo";
+import { ChapterListQuery } from "@/graphql/bookInfo";
 import { useParams, useRoute } from "wouter";
 
 import { BookEditorSidebar } from "@/component/Layout/BookEditorSidebar";
@@ -19,19 +19,27 @@ interface BookEditLayoutProps {
 
 export const BookEditLayout: React.FC<BookEditLayoutProps> = ({ children }) => {
     // const [match, params] = useRoute("/:chapterId");
-    const [match, params] = useRoute("/book/:id/edit/:chapterId");
-    const { id } = useParams();
-
+    const [match, params] = useRoute("/book/:bookId/edit/:chapterId");
+    const locationParams = useParams();
     const [selectedId, setSelectedId] = useState(match ? String(params.chapterId) : "");
+    const [baseUrl, setBaseUrl] = useState("");
+    let bookId = "";
+
+    useEffect(() => {
+        console.log("locationParams", locationParams);
+        bookId = locationParams[0] || "";
+        setBaseUrl(`/book/${bookId}/edit`);
+        console.log("bookId", bookId);
+        console.log("baseUrl", baseUrl);
+    }, [locationParams]);
 
     useEffect(() => {
         console.log("match, params", match, params);
         setSelectedId(match ? String(params.chapterId) : "");
     }, [match, params]);
-
     const [{ data, fetching, error }] = useQuery({
         query: ChapterListQuery,
-        variables: { id },
+        variables: { id: bookId },
     });
 
     const isMobile = useMediaQuery("(max-width:960px)");
@@ -61,7 +69,7 @@ export const BookEditLayout: React.FC<BookEditLayoutProps> = ({ children }) => {
                 NAVIGATION={NAVIGATION}
                 noScrollBar={true}
             >
-                <BookEditorSidebar chaptersData={data} selectedId={selectedId} />
+                <BookEditorSidebar chaptersData={data} selectedId={selectedId} baseLink={baseUrl}/>
             </Sidebar>
 
             <main

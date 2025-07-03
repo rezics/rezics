@@ -34,7 +34,7 @@ const EasyEditor: React.FC<EasyEditorProps> = ({ value, onChange }) => {
                 spellChecker: false,
                 sideBySideFullscreen: false,
                 // preview
-                previewClass: ["editor-preview", "ics-md-preview"],
+                previewClass: ["editor-preview", "ics-md-preview", "markdown-body"],
                 previewRender: (plainText) => {
                     console.log(plainText);
                     return md.render(plainText);

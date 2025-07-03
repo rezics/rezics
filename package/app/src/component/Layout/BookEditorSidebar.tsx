@@ -18,10 +18,11 @@ type Chapter = {
 interface BookEditorSidebarProps {
     chaptersData: any;
     selectedId: string;
+    baseLink: string;
 }
 
 // you can't use chaptersData = {} to give a default value, because it will cause the Maximum update Warning
-export const BookEditorSidebar: React.FC<BookEditorSidebarProps> = ({ chaptersData, selectedId }) => {
+export const BookEditorSidebar: React.FC<BookEditorSidebarProps> = ({ chaptersData, selectedId, baseLink }) => {
     const { sidebarHeightBelow } = useLayoutStore();
     const chapters: ChapterTreeNode[] = chaptersData?.chapters ?? [];
     const orderMap: ChapterOrderType = new Map(Object.entries(chaptersData?.chapterOrders ?? {}));
@@ -38,7 +39,7 @@ export const BookEditorSidebar: React.FC<BookEditorSidebarProps> = ({ chaptersDa
         setHeight(sidebarHeightBelow);
         console.log(selectedId);
     }, [sidebarHeightBelow]);
-
+    
     return (
         <div className="overflow-auto no-scrollbar">
             <div className="w-11/12 mx-auto">
@@ -53,6 +54,7 @@ export const BookEditorSidebar: React.FC<BookEditorSidebarProps> = ({ chaptersDa
                 searchTerm={searchTerm}
                 selectedId={String(selectedId)}
                 // selectedId={selectIDTerm}
+                baseLink={baseLink}
             />
         </div>
     );
