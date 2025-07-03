@@ -1,10 +1,29 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button, TextField } from "@mui/material";
 import EasyEditor from "@/component/Form/EasyEditor";
 
+import { useParams } from "wouter";
+import { useQuery } from "urql";
+import { ChapterContentQuery, ChapterContent } from "@/graphql/bookContent";
+
 export const BookEditChapterPage: React.FC = () => {
+
+    const { chapterId } = useParams();
+    const [{ data, fetching, error }] = useQuery<ChapterContent>({
+        query: ChapterContentQuery,
+        variables: { chapterId: chapterId },
+    });
+
     const [content, setContent] = useState("");
     const [title, setTitle] = useState("");
+    
+    useEffect(() => {
+        if (data) {
+            console.log(data);
+            setContent(data.content);
+            setTitle(data.chapterName);
+        }
+    }, [data]);
 
     const handleSubmit = () => {
         if (!content.trim()) {

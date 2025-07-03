@@ -13,6 +13,9 @@ import { client, UrqlProvider } from "./plugin/providers/urql";
 const container = document.getElementById("app") as HTMLElement;
 const root = createRoot(container);
 
+// import "github-markdown-css/github-markdown.css";
+import "github-markdown-css/github-markdown-light.css";
+
 function Root() {
     // const prefersDarkMode = useMediaQuery("(prefers-color-scheme: dark)");
     // const theme = useMemo(() => getTheme(prefersDarkMode ? "dark" : "light"), [prefersDarkMode]);

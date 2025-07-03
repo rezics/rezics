@@ -22,7 +22,7 @@ import { ShortBookReviews } from "@component/Book/ShortBookReviews";
 import { BookIncludeByBL } from "@component/BookList/BookIncludeByBL";
 import { AccentBar } from "@component/Common/AccentBar";
 
-import { BookInfoQuery } from "@/graphql/bookinfo";
+import { BookInfoQuery } from "@/graphql/bookInfo";
 import { QuoteExcerptQuery } from "@/graphql/bookQuoteExcerpt";
 import { useQuery } from "urql";
 import { ChapterList } from "@component/Book/ChapterList";
