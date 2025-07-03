@@ -44,14 +44,14 @@ export const NAVIGATION: NavigationItem[] = [
     {
         kind: "divider",
     },
-    {
-        kind: "header",
-        title: "Chapter Navigation",
-    },
-    {
-        kind: "item",
-        segment: "~/book/1/edit/1",
-        title: "Chapter 1",
-        icon: <DescriptionIcon />,
-    },
+    // {
+    //     kind: "header",
+    //     title: "Chapter Navigation",
+    // },
+    // {
+    //     kind: "item",
+    //     segment: "~/book/1/edit/1",
+    //     title: "Chapter 1",
+    //     icon: <DescriptionIcon />,
+    // },
 ];

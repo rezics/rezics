@@ -2,9 +2,8 @@ import React, { ReactNode } from "react";
 import { useMediaQuery } from "@mui/material";
 import { Sidebar } from "@component/Layout/Sidebar";
 import { Header } from "@/component/Layout/MainLayoutHeader";
-import { proxy, useSnapshot } from "valtio";
 // import { Box } from "@mui/material";
-import { layoutActions, layoutState } from "@/global/layout";
+import { useLayoutStore } from "@/global/layoutStore";
 import { appStore } from "@/global/appStore";
 import { NAVIGATION } from "@/component/Layout/MainNavigation";
 
@@ -12,17 +11,12 @@ interface MainLayoutProps {
     children: ReactNode;
 }
 
-const drawerWidth = proxy({
-    data: 240,
-});
-
 export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     const isMobile = useMediaQuery("(max-width:960px)");
-    const { sidebarOpen } = useSnapshot(layoutState);
-    const { data: drawerWidthData } = useSnapshot(drawerWidth);
+    const { sidebarOpen, drawerWidth, toggleSidebar, closeSidebar } = useLayoutStore();
 
     const handleDrawerToggle = () => {
-        layoutActions.toggleSidebar();
+        toggleSidebar();
     };
 
     const mode = appStore((state) => state.theme);
@@ -40,16 +34,15 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
             />
 
             <Sidebar
-                onClose={() => isMobile && layoutActions.closeSidebar()}
+                onClose={() => isMobile && closeSidebar()}
                 handleDrawerToggle={handleDrawerToggle}
-                drawerWidth={drawerWidth}
                 NAVIGATION={NAVIGATION}
             />
 
             <main
                 className="flex-grow pt-16 transition-all duration-300"
                 style={{
-                    width: `calc(100% - ${!isMobile && sidebarOpen ? drawerWidthData : 0}px)`,
+                    width: `calc(100% - ${!isMobile && sidebarOpen ? drawerWidth : 0}px)`,
                 }}
             >
                 {children}

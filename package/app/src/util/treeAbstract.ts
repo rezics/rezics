@@ -12,7 +12,8 @@
 /**
  * Abstract type for a node's identifier.
  */
-export type ID = string | number;
+// export type ID = string | number;
+export type ID = string;
 
 /**
  * Base interface for any node in a tree. Must have an `id`.
@@ -74,8 +75,9 @@ export function buildTree<T extends NodeBase>(
     const rootIds = orders.get(null) || orders.get("null") || [];
     const roots: Array<TreeNodeWithChildren<T>> = [];
     for (const rootId of rootIds) {
-        const rootNode = nodeMap.get(String(rootId));
+        let rootNode = nodeMap.get(String(rootId));
         if (rootNode) {
+            rootNode.id = String(rootNode.id);
             roots.push(rootNode);
         }
     }
@@ -94,6 +96,7 @@ export function buildTree<T extends NodeBase>(
             const childNode = nodeMap.get(String(childId));
             // console.log("childNode", childNode);
             if (childNode) {
+                childNode.id = String(childNode.id);
                 parentNode.children.push(childNode);
             }
         }
