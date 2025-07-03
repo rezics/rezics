@@ -1,4 +1,4 @@
-import React, { ReactNode, useMemo } from "react";
+import React, { ReactNode, useEffect, useMemo } from "react";
 import { useLocation } from "wouter";
 import { useMediaQuery, styled, useTheme } from "@mui/material";
 import { useSnapshot } from "valtio";
@@ -25,6 +25,7 @@ interface SidebarProps {
     onClose: () => void;
     handleDrawerToggle: () => void;
     NAVIGATION: NavigationItem[];
+    noScrollBar?: boolean;
     children?: ReactNode;
 }
 
@@ -33,6 +34,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     handleDrawerToggle,
     NAVIGATION,
     children = null,
+    noScrollBar = false,
 }) => {
     const { sidebarOpen, sidebarHeightBelow, toggleSidebar, setSidebarHeightBelow, toggleItem, openItems, drawerWidth } =
         useLayoutStore();
@@ -66,12 +68,25 @@ export const Sidebar: React.FC<SidebarProps> = ({
     const [refAbove, { height }] = useMeasure();
     const { height: windowHeight } = useWindowSize();
 
-    const heightBelow = useMemo(() => {
+    // Update the global store **after** render whenever height/windowHeight changes
+    useEffect(() => {
         setSidebarHeightBelow(windowHeight - height - 48);
-        console.log("layoutState.sidebarHeightBelow", sidebarHeightBelow);
-        console.log(sidebarOpen);
-        return `calc(100vh - ${height}px)`;
     }, [height, windowHeight]);
+
+    // Local value just for rendering
+    const heightBelow = `calc(100vh - ${height}px)`;
+
+    useEffect(() => {
+        if (!noScrollBar) return;
+        const wrapperId = "ics-sidebar-wrapper";
+        const wrapper = document.getElementById(wrapperId);
+        if (!wrapper) return;
+    
+        const firstDiv = wrapper.querySelector("div");
+        if (firstDiv) {
+            firstDiv.classList.add("no-scrollbar", "overflow-hidden");
+        }
+    }, [noScrollBar]);
 
     return (
         <Drawer
@@ -89,6 +104,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     },
                 },
             }}
+            id="ics-sidebar-wrapper"
             className="transition-all duration-300 ease-out"
         >
             <div ref={refAbove}>
