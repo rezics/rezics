@@ -1,5 +1,7 @@
 import { graphql, HttpResponse } from "msw";
 
+import { bookList01 } from "../data/bookList01";
+
 export const bookHandlers = [
     // ANCHOR 🟢 Query: GetBooks
     graphql.query("GetBooksDocument", ({ variables }) => {
@@ -24,6 +26,18 @@ export const bookHandlers = [
                     title,
                     author,
                 },
+            },
+        });
+    }),
+
+    // ANCHOR 🟢 Query: SearchBooks
+    graphql.query("SearchBooks", ({ variables }) => {
+        
+        console.log("SearchBooks", variables);
+
+        return HttpResponse.json({
+            data: {
+                searchBooks: bookList01,
             },
         });
     }),

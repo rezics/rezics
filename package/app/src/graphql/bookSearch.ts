@@ -7,7 +7,7 @@ export const SEARCH_BOOKS = gql`
             title
             author
             description
-            imageUrl
+            cover
         }
     }
 `
@@ -19,7 +19,7 @@ export const TOP_BOOKS = gql`
             title
             author
             description
-            imageUrl
+            cover
         }
     }
 `
