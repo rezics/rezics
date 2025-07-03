@@ -11,11 +11,11 @@ import { proxy, useSnapshot } from "valtio";
 
 // type ChapterMapType = Map<number, ChapterTreeNode>;
 
-type ChapterOrderType = OrderMap;
+export type ChapterOrderType = OrderMap;
 
-interface ChapterTreeNode extends TreeNodeWithChildren {
-    id: number;
-    parentId: number;
+export interface ChapterTreeNode extends TreeNodeWithChildren {
+    id: string;
+    parentId: string;
     title: string;
     noContent: boolean;
     children?: ChapterTreeNode[];
@@ -40,9 +40,9 @@ export const ChapterList: React.FC<ChapterListProps> = ({ id }) => {
     // use individual state to store the expanded nodes
     const chapterTree: any = useMemo(() => buildTree({ nodes: chapters, orders: orderMap }), [chapters, orderMap]);
 
-    const [expandedNodes, setExpandedNodes] = useState<Set<number>>(new Set());
+        const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set());
 
-    const toggleNode = (id: number) => {
+    const toggleNode = (id: string) => {
         setExpandedNodes((prev) => {
             const newSet = new Set(prev);
             if (newSet.has(id)) {
@@ -58,7 +58,7 @@ export const ChapterList: React.FC<ChapterListProps> = ({ id }) => {
         const allParentIds = new Set(
             Array.from(orderMap.keys())
                 .filter((key) => key !== "null") // 过滤掉字符串 "null"
-                .map((key) => Number(key)),
+                .map((key) => String(key)),
         );
         setExpandedNodes(allParentIds);
     };

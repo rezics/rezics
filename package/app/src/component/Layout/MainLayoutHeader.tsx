@@ -2,7 +2,7 @@ import React from "react";
 import { User } from "./User";
 import { useSnapshot } from "valtio";
 import { useTheme } from "@mui/material/styles";
-import { layoutState } from "@/global/layout";
+import { useLayoutStore } from "@/global/layoutStore";
 import { AppBar, IconButton, Toolbar, Typography } from "@mui/material";
 import { Menu, Brightness7, Brightness4 } from "@mui/icons-material";
 
@@ -10,22 +10,19 @@ interface HeaderProps {
     handleDrawerToggle: () => void;
     mode: "light" | "dark";
     onThemeToggle: () => void;
-    drawerWidth: {
-        data: number;
-    };
+    drawerWidth: number;
 }
 
 export const Header: React.FC<HeaderProps> = ({ handleDrawerToggle, mode, onThemeToggle, drawerWidth }) => {
-    const snap = useSnapshot(layoutState);
-    const drawerWidthsnap = useSnapshot(drawerWidth);
+    const { sidebarOpen } = useLayoutStore();
     const theme = useTheme();
     return (
         <AppBar
             position="fixed"
             sx={{
                 zIndex: (theme) => theme.zIndex.drawer + 1,
-                ml: snap.sidebarOpen ? drawerWidthsnap.data : 0,
-                width: snap.sidebarOpen ? `calc(100% - ${drawerWidthsnap.data}px)` : "100%",
+                ml: sidebarOpen ? drawerWidth : 0,
+                width: sidebarOpen ? `calc(100% - ${drawerWidth}px)` : "100%",
                 transition: theme.transitions.create(["margin", "width"], {
                     easing: theme.transitions.easing.easeOut,
                     duration: theme.transitions.duration.enteringScreen,
@@ -38,7 +35,7 @@ export const Header: React.FC<HeaderProps> = ({ handleDrawerToggle, mode, onThem
                     aria-label="open drawer"
                     onClick={handleDrawerToggle}
                     edge="start"
-                    sx={{ mr: 2, display: snap.sidebarOpen ? "none" : "flex" }}
+                    sx={{ mr: 2, display: sidebarOpen ? "none" : "flex" }}
                 >
                     <Menu />
                 </IconButton>
