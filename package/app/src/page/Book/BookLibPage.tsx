@@ -5,7 +5,7 @@ import { useQuery } from "urql";
 import { BookSearch } from "@component/Search/BookSearch";
 import { CardBookList } from "@component/Book/CardBookList";
 import { ListBookList } from "@component/Book/ListBookList";
-import { BookSearchFilter } from "@page/Book/BookSearchFilter";
+import { BookSearchFilter } from "@/component/Book/BookSearchFilter";
 import { SEARCH_BOOKS } from "@/graphql/bookSearch";
 import { SearchInfo } from "@util/searchParser";
 

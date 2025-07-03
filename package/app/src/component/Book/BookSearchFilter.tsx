@@ -24,7 +24,8 @@ export const BookSearchFilter = () => {
     const handleClick = (key: SortKey) => (e: React.MouseEvent) => {
         if (key === "recommend") {
             // 推荐票用下拉菜单
-            // setAnchorEl(e.currentTarget);
+            const el = e.currentTarget as HTMLElement;
+            setAnchorEl(el);
             return;
         }
         if (sortKey === key) {
@@ -38,6 +39,11 @@ export const BookSearchFilter = () => {
     const handleMenuSelect = (key: SortKey) => () => {
         setSortKey(key);
         setAsc(false);
+        setAnchorEl(null);
+    };
+
+    const handleSecondaryMenuSelect = (key: string) => () => {
+        console.log(key);
         setAnchorEl(null);
     };
 
@@ -74,8 +80,9 @@ export const BookSearchFilter = () => {
 
             {/* “推荐票” 下拉菜单 */}
             <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={() => setAnchorEl(null)}>
-                <MenuItem onClick={handleMenuSelect("recommend")}>推荐票</MenuItem>
-                <MenuItem onClick={handleMenuSelect("monthVotes")}>月票</MenuItem>
+                <MenuItem onClick={handleSecondaryMenuSelect("weekVotes")}>周推荐票</MenuItem>
+                <MenuItem onClick={handleSecondaryMenuSelect("monthVotes")}>月推荐票</MenuItem>
+                <MenuItem onClick={handleSecondaryMenuSelect("totalVotes")}>总推荐票</MenuItem>
             </Menu>
         </Stack>
     );
