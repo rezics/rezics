@@ -27,6 +27,8 @@ interface SidebarProps {
     NAVIGATION: NavigationItem[];
     noScrollBar?: boolean;
     children?: ReactNode;
+    onOverflowx?: boolean;
+    onOverflowy?: boolean;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -35,6 +37,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
     NAVIGATION,
     children = null,
     noScrollBar = false,
+    onOverflowx = false,
+    onOverflowy = false,
 }) => {
     const { sidebarOpen, sidebarHeightBelow, toggleSidebar, setSidebarHeightBelow, toggleItem, openItems, drawerWidth } =
         useLayoutStore();
@@ -77,16 +81,23 @@ export const Sidebar: React.FC<SidebarProps> = ({
     const heightBelow = `calc(100vh - ${height}px)`;
 
     useEffect(() => {
-        if (!noScrollBar) return;
         const wrapperId = "ics-sidebar-wrapper";
         const wrapper = document.getElementById(wrapperId);
         if (!wrapper) return;
     
         const firstDiv = wrapper.querySelector("div");
         if (firstDiv) {
-            firstDiv.classList.add("no-scrollbar", "overflow-hidden");
+            if (noScrollBar) {
+                firstDiv.classList.add("no-scrollbar");
+            }
+            if (onOverflowx) {
+                firstDiv.classList.add("!overflow-x-hidden");
+            }
+            if (onOverflowy) {
+                firstDiv.classList.add("!overflow-y-hidden");
+            }
         }
-    }, [noScrollBar]);
+    }, [noScrollBar, onOverflowx, onOverflowy]);
 
     return (
         <Drawer

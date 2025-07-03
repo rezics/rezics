@@ -103,6 +103,8 @@ export const BookDetail: React.FC = () => {
         <Box id="book-detail">
             {/* Book Overview */}
             <Box className="bg-cover bg-center relative" style={{ backgroundImage: `url(${data?.book.cover})` }}>
+                {/* Light Pic test is fine, the black blur is thick so the text is always able to read */}
+                {/* <Box className="bg-cover bg-center relative" style={{ backgroundImage: `url(https://static-cse.canva.cn/blob/239388/e1604019539295.jpg)` }}> */}
                 <Box className="bg-black/66 backdrop-blur-md shadow-lg">
                     <Container maxWidth="lg" className="py-6">
                         <Grid container spacing={3}>
