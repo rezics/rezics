@@ -2,11 +2,12 @@ import { useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "urql";
 import { ChapterListQuery } from "@/graphql/bookInfo";
 import { Button, Tooltip, Typography } from "@mui/material";
-import { AccentBar } from "../Common/AccentBar";
+import { AccentBar, AccentBarWithText } from "../Common/AccentBar";
 
 import { buildTree, OrderMap, ID, FlatTree, NodeBase, TreeNodeWithChildren } from "@/util/treeAbstract";
 import { proxy, useSnapshot } from "valtio";
 import { useLocation, Link } from "wouter";
+import { EditButtonFloatRight } from "@/component/Common/EditButtonFloatRight";
 
 // 扁平结构 + 顺序数组
 
@@ -28,7 +29,6 @@ interface ChapterListProps {
 }
 
 export const ChapterList: React.FC<ChapterListProps> = ({ id }) => {
-
     const [location, navigate] = useLocation();
 
     const [{ data, fetching, error }] = useQuery({
@@ -44,7 +44,7 @@ export const ChapterList: React.FC<ChapterListProps> = ({ id }) => {
     // use individual state to store the expanded nodes
     const chapterTree: any = useMemo(() => buildTree({ nodes: chapters, orders: orderMap }), [chapters, orderMap]);
 
-        const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set());
+    const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set());
 
     const toggleNode = (id: string) => {
         setExpandedNodes((prev) => {
@@ -113,7 +113,10 @@ export const ChapterList: React.FC<ChapterListProps> = ({ id }) => {
 
                                 const content = (
                                     // use target="_blank" to open link in new tab
-                                    <Link to={`/book/${id}/read/${child.id}`} className="text-gray-700 hover:text-blue-500 block cursor-default hover:cursor-pointer">
+                                    <Link
+                                        to={`/book/${id}/read/${child.id}`}
+                                        className="text-gray-700 hover:text-blue-500 block cursor-default hover:cursor-pointer"
+                                    >
                                         <p className="truncate p-2 rounded-md hover:bg-gray-100 transition-colors duration-200">
                                             {displayName}
                                         </p>
@@ -138,18 +141,17 @@ export const ChapterList: React.FC<ChapterListProps> = ({ id }) => {
     // Rander Component
     return (
         <div>
-            <div className="flex justify-between items-center">
-                <Typography variant="h5" className="font-bold !mb-4">
-                    <AccentBar />
-                    目录
-                </Typography>
+            <div className="flex justify-between items-center mb-4">
+                <AccentBarWithText text="目录" />
                 <div className="flex justify-end space-x-2 mb-4">
                     <Button variant="contained" onClick={expandAll} className="!mr-2">
                         Expand All
                     </Button>
-                    <Button variant="outlined" onClick={collapseAll}>
+                    <Button variant="outlined" onClick={collapseAll} className="!mr-2">
                         Collapse All
                     </Button>
+                    {/* This need to be a condition render, if someone maintain the book, only show the edit button to the maintainer */}
+                    <EditButtonFloatRight />
                 </div>
             </div>
             <ChapterTreeView nodes={chapterTree} />

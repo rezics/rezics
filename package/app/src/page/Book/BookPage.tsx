@@ -12,20 +12,24 @@ import {
     Stack,
     Tabs,
     Tab,
+    Button,
 } from "@mui/material";
+import { Edit, ArrowForwardIos } from "@mui/icons-material";
 import { TabContext, TabList, TabPanel } from "@mui/lab";
-import { useParams } from "wouter";
+import { useParams, Link } from "wouter";
 import { QuoteExcerpt } from "@component/Book/QuoteExcerpt";
 import { BookTag } from "@component/Book/BookTag";
 import { BookReviews } from "@component/Book/BookReviews";
 import { ShortBookReviews } from "@component/Book/ShortBookReviews";
 import { BookIncludeByBL } from "@component/BookList/BookIncludeByBL";
-import { AccentBar } from "@component/Common/AccentBar";
+import { AccentBar, AccentBarWithText } from "@component/Common/AccentBar";
 
 import { BookInfoQuery } from "@/graphql/bookInfo";
 import { QuoteExcerptQuery } from "@/graphql/bookQuoteExcerpt";
 import { useQuery } from "urql";
 import { ChapterList } from "@component/Book/ChapterList";
+import { ArrowForwardIcon } from "@component/Common/ArrowForwardIcon";
+import { EditButtonFloatRight } from "@component/Common/EditButtonFloatRight";
 
 interface Book {
     id: string;
@@ -54,7 +58,7 @@ interface BookInfo {
 }
 
 function QuoteExcerptList({ id }: { id: string }) {
-    // QuoteExcerptQuery
+    // ANCHOR QuoteExcerptQuery
     const [{ data, fetching, error }] = useQuery({
         query: QuoteExcerptQuery,
         variables: { bookId: id },
@@ -66,10 +70,11 @@ function QuoteExcerptList({ id }: { id: string }) {
         <div>
             {/* Quotes */}
             <Box>
-                <Typography variant="h5" className="font-bold mb-4">
-                    <AccentBar />
-                    原文摘录
-                </Typography>
+                <Link href={`/book/${id}/quotes`} className="flex mb-4">
+                    <ArrowForwardIcon size={16}>
+                        <AccentBarWithText text="原文摘录" />
+                    </ArrowForwardIcon>
+                </Link>
                 <Stack spacing={2}>
                     {(data?.quotes || []).map((quote: any) => (
                         <QuoteExcerpt key={quote.id} content={quote.content} />
@@ -82,7 +87,7 @@ function QuoteExcerptList({ id }: { id: string }) {
 
 export const BookDetail: React.FC = () => {
     const { id } = useParams<{ id: string }>();
-    const [activeTab, setActiveTab] = React.useState('0');
+    const [activeTab, setActiveTab] = React.useState("0");
 
     // BookInfoQuery
     console.log("fetchBookDetail", id);
@@ -95,7 +100,7 @@ export const BookDetail: React.FC = () => {
     if (fetching) return <div>Loading...</div>;
     if (error) return <div>Oh no... {error.message}</div>;
 
-    const handleTabChange = (_: React.SyntheticEvent, newValue: '0' | '1' | '2') => {
+    const handleTabChange = (_: React.SyntheticEvent, newValue: "0" | "1" | "2") => {
         setActiveTab(newValue);
     };
 
@@ -178,39 +183,40 @@ export const BookDetail: React.FC = () => {
 
                             <TabPanel value="0">
                                 <Stack spacing={4}>
-                                    {/* Description */}
+                                    {/* ANCHOR Description */}
                                     <Box>
-                                        <Typography variant="h5" className="font-bold !mb-4">
-                                            <AccentBar />
-                                            简介
-                                        </Typography>
+                                        <div className="flex mb-4">
+                                            <AccentBarWithText text="简介" />
+                                            <EditButtonFloatRight />
+                                        </div>
                                         <Typography variant="body1" className="whitespace-pre-line">
                                             {data?.book.description}
                                         </Typography>
                                     </Box>
                                     <Divider />
 
-                                    {/* Tags */}
+                                    {/* ANCHOR Tags */}
                                     <Box>
-                                        <Typography variant="h5" className="font-bold !mb-4">
-                                            <AccentBar />
-                                            Tags
-                                        </Typography>
+                                        <div className="flex mb-4">
+                                            <AccentBarWithText text="标签" />
+                                            <EditButtonFloatRight />
+                                        </div>
                                         <BookTag />
                                     </Box>
                                     <Divider />
 
-                                    {/* 最新章节 */}
+                                    {/* ANCHOR 最新章节 */}
 
                                     <QuoteExcerptList id={data?.book.id || ""} />
                                     <Divider />
 
-                                    {/* Short Reviews */}
+                                    {/* ANCHOR Short Reviews */}
                                     <Box>
-                                        <Typography variant="h5" className="font-bold !mb-4">
-                                            <AccentBar />
-                                            短评
-                                        </Typography>
+                                        <Link href={`/book/${data?.book.id}/reviews`} className="flex mb-4">
+                                            <ArrowForwardIcon size={16}>
+                                                <AccentBarWithText text="短评" />
+                                            </ArrowForwardIcon>
+                                        </Link>
                                         <ShortBookReviews bookId={data?.book.id || ""} />
                                     </Box>
                                 </Stack>
@@ -218,21 +224,23 @@ export const BookDetail: React.FC = () => {
 
                             <TabPanel value="1">
                                 <Stack spacing={4}>
-                                    {/* Book Reviews */}
+                                    {/* ANCHOR Book Reviews */}
                                     <Box>
-                                        <Typography variant="h5" className="font-bold !mb-4">
-                                            <AccentBar />
-                                            {data?.book.title}的书评
-                                        </Typography>
+                                        <Link href={`/book/${data?.book.id}/reviews`} className="flex mb-4">
+                                            <ArrowForwardIcon size={16}>
+                                                <AccentBarWithText text={`${data?.book.title}的书评`} />
+                                            </ArrowForwardIcon>
+                                        </Link>
                                         <BookReviews bookId={data?.book.id || ""} />
                                     </Box>
 
-                                    {/* Book Lists */}
+                                    {/* ANCHOR Book Lists */}
                                     <Box>
-                                        <Typography variant="h5" className="font-bold !mb-4">
-                                            <AccentBar />
-                                            包含 {data?.book.title} 的书单
-                                        </Typography>
+                                        <Link href={`/book/${data?.book.id}/lists`} className="flex mb-4">
+                                            <ArrowForwardIcon size={16}>
+                                                <AccentBarWithText text={`包含 ${data?.book.title} 的书单`} />
+                                            </ArrowForwardIcon>
+                                        </Link>
                                         <BookIncludeByBL />
                                     </Box>
                                 </Stack>
