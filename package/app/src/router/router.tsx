@@ -23,6 +23,11 @@ import { BookListPage } from "@/page/BookList/BookListPage";
 // Misc
 import TestPage from "@/page/Test/TestPage";
 import { MainLayout } from "@/layout/MainLayout";
+import { BookListEditPage } from "@/page/BookList/BookListEditPage";
+import { BookCollectionListPage } from "@/page/BookList/BookCollectionListPage";
+import { ShortReviewPage } from "@/page/Review/ShortReviewPage";
+import { LongReviewPage } from "@/page/Review/LongReviewPage";
+import { LongReviewEditPage } from "@/page/Review/LongReviewEditPage";
 
 /**
  * IMPORTANT – Flattened routing
@@ -64,7 +69,7 @@ export default (
           )}
         </Route>
 
-        {/* Main site area – all share MainLayout */}
+        {/* Book Info Routes */}
         <Route path="/books">
           <MainLayout>
             <BookLib />
@@ -77,6 +82,31 @@ export default (
             </MainLayout>
           )}
         </Route>
+
+        {/* Review Routes */}
+        <Route path="/review/short/book/:bookId">
+          {() => (
+            <MainLayout>
+              <ShortReviewPage />
+            </MainLayout>
+          )}
+        </Route>
+        <Route path="/review/long/book/:bookId">
+          {() => (
+            <MainLayout>
+              <LongReviewPage />
+            </MainLayout>
+          )}
+        </Route>
+        <Route path="/review/long/book/:bookId/edit">
+          {() => (
+            <MainLayout>
+              <LongReviewEditPage />
+            </MainLayout>
+          )}
+        </Route>
+
+        {/* BookList Routes */}
         <Route path="/booklist/:booklistId">
           {() => (
             <MainLayout>
@@ -84,6 +114,22 @@ export default (
             </MainLayout>
           )}
         </Route>
+        <Route path="/booklist/:booklistId/edit">
+          {() => (
+            <MainLayout>
+              <BookListEditPage />
+            </MainLayout>
+          )}
+        </Route>
+        <Route path="/booklist/book/:bookId">
+          {() => (
+            <MainLayout>
+              <BookCollectionListPage />
+            </MainLayout>
+          )}
+        </Route>
+
+        {/* Test */}
         <Route path="/test">
           <MainLayout>
             <TestPage />
