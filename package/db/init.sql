@@ -13,6 +13,7 @@ $$ LANGUAGE plpgsql;
 -- Create Users table
 CREATE TABLE users (
   id UUID PRIMARY KEY,
+  avatarUrl TEXT,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -85,7 +86,9 @@ CREATE TABLE books (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   title VARCHAR NOT NULL,
   description TEXT,
+  isbn VARCHAR UNIQUE NOT NULL,
   cover TEXT,
+  chapters jsonb,
   publish_at TIMESTAMP NOT NULL,
   status_id UUID NOT NULL,
   publisher_id UUID NOT NULL,
@@ -193,6 +196,7 @@ EXECUTE FUNCTION update_updated_at_column();
 CREATE TABLE comments (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   content TEXT NOT NULL,
+  likes INT DEFAULT 0,
   book_id UUID NOT NULL,
   author_id UUID NOT NULL,
   parent_id UUID,
