@@ -1,0 +1,9 @@
+{
+    "include": ["src/**/*"],
+    "compilerOptions": {
+        "target": "esnext" /* Set the JavaScript language version for emitted JavaScript and include compatible library declarations. */,
+        "module": "nodenext" /* Specify what module code is generated. */,
+        "moduleResolution": "nodenext" /* Specify how TypeScript looks up a file from a given module specifier. */
+    },
+    "extends": "../../tsconfig.json"
+}

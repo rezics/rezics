@@ -4,7 +4,7 @@ import { Layout } from "../lib/Layout";
 import { login } from "../lib/handler";
 import { string } from "zod";
 import { email } from "zod/v4";
-import { FC, useContext, useState } from "react";
+import { FC, useState } from "react";
 import Alert from "@mui/material/Alert";
 
 export const Login: FC = () => {
