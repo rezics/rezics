@@ -2,10 +2,10 @@ import { useState, useCallback } from "react";
 import { Typography, CircularProgress, Alert } from "@mui/material";
 import { useQuery } from "urql";
 
-import { BookSearch } from "@component/Search/BookSearch";
+import { BookSearch } from "@/component/BookLib/BookSearch";
 import { CardBookList } from "@component/Book/CardBookList";
 import { ListBookList } from "@component/Book/ListBookList";
-import { BookSearchFilter } from "@/component/Book/BookSearchFilter";
+import { BookSearchFilter } from "@/component/BookLib/BookSearchFilter";
 import { SEARCH_BOOKS } from "@/graphql/bookSearch";
 import { SearchInfo } from "@util/searchParser";
 

@@ -21,7 +21,7 @@ import { QuoteExcerpt } from "@component/Book/QuoteExcerpt";
 import { BookTag } from "@component/Book/BookTag";
 import { BookReviews } from "@component/Book/BookReviews";
 import { ShortBookReviews } from "@component/Book/ShortBookReviews";
-import { BookIncludeByBL } from "@component/BookList/BookIncludeByBL";
+import { BookIncludeByBL } from "@/component/ReadList/ReadlistByBookView";
 import { AccentBar, AccentBarWithText } from "@component/Common/AccentBar";
 
 import { BookInfoQuery } from "@/graphql/bookInfo";

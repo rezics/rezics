@@ -7,27 +7,27 @@ import { Login } from "@/page/Auth/Login";
 import { NotFound } from "@/page/NotFound";
 
 // Book – Read
-import { BookReadChapterPage } from "@/page/Book/BookReadChapterPage";
+import { BookReadChapterPage } from "@/page/Book/ChapterPage";
 import { BookReadLayout } from "@/layout/BookReadLayout";
 
 // Book – Edit
 import { BookEditLayout } from "@/layout/BookEditLayout";
-import { BookEditMainPage } from "@/page/Book/BookEditMainPage";
-import { BookEditChapterPage } from "@/page/Book/BookEditChapterPage";
+import { BookEditMainPage } from "@/page/BookEdit/InfoPage";
+import { BookEditChapterPage } from "@/page/BookEdit/ChapterPage";
 
 // Book list / Library pages
 import { BookLib } from "@/page/Book/BookLibPage";
 import { BookDetail } from "@/page/Book/BookPage";
-import { BookListPage } from "@/page/BookList/BookListPage";
+import { BookListPage } from "@/page/ReadList/ReadListPage";
 
 // Misc
 import TestPage from "@/page/Test/TestPage";
 import { MainLayout } from "@/layout/MainLayout";
-import { BookListEditPage } from "@/page/BookList/BookListEditPage";
-import { BookCollectionListPage } from "@/page/BookList/BookCollectionListPage";
+import { BookListEditPage } from "@/page/ReadList/ReadListEditPage";
+import { BookCollectionListPage } from "@/page/ReadList/ReadListsPage";
 import { ShortReviewPage } from "@/page/Review/ShortReviewPage";
-import { LongReviewPage } from "@/page/Review/LongReviewPage";
-import { LongReviewEditPage } from "@/page/Review/LongReviewEditPage";
+import { LongReviewPage } from "@/page/Review/ReviewPage";
+import { LongReviewEditPage } from "@/page/Review/ReviewEditPage";
 
 /**
  * IMPORTANT – Flattened routing
