@@ -32,17 +32,17 @@ interface BookReviewsState {
 }
 
 export const BookReviews: React.FC<BookReviewsProps> = ({ bookId }) => {
-    const state = useMemo(() => proxy({reviews: [], isReplyModalOpen: false} as BookReviewsState | any), []);
-    
+    const state = useMemo(() => proxy({ reviews: [], isReplyModalOpen: false } as BookReviewsState | any), []);
+
     const [result] = useQuery({
         query: GET_BOOK_REVIEWS,
         variables: { bookId },
         pause: !bookId,
     });
-    
+
     state.reviews = result.data?.bookReviews || [];
     const snap = useSnapshot(state);
-    
+
     React.useEffect(() => {
         if (result.data?.bookReviews) {
             state.reviews = result.data.bookReviews;
