@@ -1,5 +1,4 @@
 {
-    "name": "crawler",
     "type": "module",
     "license": "UNLICENSED",
     "devDependencies": {
