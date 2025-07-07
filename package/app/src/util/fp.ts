@@ -77,7 +77,7 @@ export const validation = {
     tryCatch: <T>(f: () => T): Either.Either<T, Error> =>
         Either.try({
             try: f,
-            catch: (error) => (error instanceof Error ? error : new Error(String(error)))
+            catch: (error) => (error instanceof Error ? error : new Error(String(error))),
         }),
 
     /**
@@ -115,7 +115,8 @@ export const stringUtils = {
     /**
      * Trim and convert to Option (None if empty)
      */
-    trimToOption: (str: string): Option.Option<string> => pipe(str.trim(), (s) => (s.length > 0 ? Option.some(s) : Option.none())),
+    trimToOption: (str: string): Option.Option<string> =>
+        pipe(str.trim(), (s) => (s.length > 0 ? Option.some(s) : Option.none())),
 
     /**
      * Check if string matches pattern
@@ -171,6 +172,5 @@ export const asyncUtils = {
     /**
      * Sequence array of async operations
      */
-    sequence: <T>(promises: ReadonlyArray<Promise<T>>): Promise<ReadonlyArray<T>> => 
-        Promise.all(Array.from(promises)),
+    sequence: <T>(promises: ReadonlyArray<Promise<T>>): Promise<ReadonlyArray<T>> => Promise.all(Array.from(promises)),
 };

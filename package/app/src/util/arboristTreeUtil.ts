@@ -33,10 +33,13 @@ const insertAt =
     };
 
 // 辅助函数：深拷贝节点（避免引用共享）
-const cloneNode = (node: TreeNode): TreeNode => ({
-    ...node,
-    children: node.children ? node.children.map(cloneNode) : undefined,
-});
+const cloneNode = (node: TreeNode): TreeNode => {
+    const { children, ...rest } = node;
+    if (children) {
+        return { ...rest, id: node.id, children: children.map(cloneNode) };
+    }
+    return { ...rest, id: node.id };
+};
 
 /**
  * 查找并移除指定 ID 的节点
@@ -124,21 +127,13 @@ export const findAndDelete = (tree: ReadonlyArray<TreeNode>, ids: ReadonlyArray<
 
     const processNode = (node: TreeNode): TreeNode => {
         if (node.children) {
-            const filteredChildren = pipe(
-                node.children,
-                A.filter(shouldKeep),
-                A.map(processNode)
-            );
+            const filteredChildren = pipe(node.children, A.filter(shouldKeep), A.map(processNode));
             return { ...node, children: filteredChildren };
         }
         return node;
     };
 
-    return pipe(
-        tree,
-        A.filter(shouldKeep),
-        A.map(processNode)
-    );
+    return pipe(tree, A.filter(shouldKeep), A.map(processNode));
 };
 
 /**
@@ -181,7 +176,8 @@ export const insertSiblingAfter = (
         return pipe(
             findNodeIndex(Array.from(nodes), targetId),
             O.match({
-                onNone: () => nodes.map((node) => (node.children ? { ...node, children: processNodes(node.children) } : node)),
+                onNone: () =>
+                    nodes.map((node) => (node.children ? { ...node, children: processNodes(node.children) } : node)),
                 onSome: (index) => {
                     processed = true;
                     return insertAt(index + 1, [newNode])(Array.from(nodes));
@@ -205,7 +201,8 @@ export const moveSiblingFirst = (tree: ReadonlyArray<TreeNode>, targetId: string
         return pipe(
             findNodeIndex(Array.from(nodes), targetId),
             O.match({
-                onNone: () => nodes.map((node) => (node.children ? { ...node, children: processNodes(node.children) } : node)),
+                onNone: () =>
+                    nodes.map((node) => (node.children ? { ...node, children: processNodes(node.children) } : node)),
                 onSome: (index) => {
                     processed = true;
                     const nodeArray = Array.from(nodes);
@@ -232,7 +229,8 @@ export const moveSiblingLast = (tree: ReadonlyArray<TreeNode>, targetId: string 
         return pipe(
             findNodeIndex(Array.from(nodes), targetId),
             O.match({
-                onNone: () => nodes.map((node) => (node.children ? { ...node, children: processNodes(node.children) } : node)),
+                onNone: () =>
+                    nodes.map((node) => (node.children ? { ...node, children: processNodes(node.children) } : node)),
                 onSome: (index) => {
                     processed = true;
                     const nodeArray = Array.from(nodes);

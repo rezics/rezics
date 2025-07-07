@@ -1,13 +1,14 @@
+export type Leaf = string | ((...args: any[]) => string);
 export type Locale = {
-    [key: string]: string | Locale;
+    [key: string]: Leaf | Locale;
 };
 
 const splitter = "->" as const;
 type Splitter = typeof splitter;
 
-type Leaves<T> = T extends object
+type Path<T> = T extends object
     ? {
-          [K in keyof T]: `${Exclude<K, symbol>}${Leaves<T[K]> extends never ? "" : `${Splitter}${Leaves<T[K]>}`}`;
+          [K in keyof T]: `${Exclude<K, symbol>}${Path<T[K]> extends never ? "" : `${Splitter}${Path<T[K]>}`}`;
       }[keyof T]
     : never;
 
@@ -15,25 +16,39 @@ const match = <T extends string[]>(source: string, targets: T): T[number] | null
     const [language] = source.split("-");
     return targets.find((target) => target === source) ?? targets.find((target) => target === language) ?? null;
 };
-const arrest = <T>(arrestion: boolean, message: string, value: T): T => {
-    if (arrestion) return value;
-    throw new Error(message);
-};
 
-export const make = <K extends string, T extends Record<string, T[K]>>(main: K, locale: T) => {
-    const locales = Object.keys(locale);
-    const matched = match(navigator.language, locales);
+export const make = <T extends Record<string, T[K]>, K extends keyof T extends string ? keyof T : never>(
+    main: K,
+    locale: T,
+) => {
+    type ID = keyof T extends string ? keyof T : never;
 
-    const get = (key: Leaves<T[K]>, id = matched): string => {
+    const locales = Object.keys(locale) as ID[];
+    let matched: ID = match(navigator.language, locales) || (main as ID);
+
+    const set = (id: ID) => {
+        matched = id;
+    };
+
+    const get = (key: Path<T[K]>, id = matched): Leaf => {
         const leaves = key.split(splitter) as string[];
 
-        return leaves.reduce<string | Locale>(
-            (acc, curr) => (acc as Locale)[curr] || arrest(id !== main, `Key not found: ${key}`, get(key, main)!),
-            locale[id!]!,
-        ) as string;
+        return leaves.reduce<Leaf | Locale>((acc, curr) => {
+            try {
+                return (acc as object)[curr as keyof typeof acc]!;
+            } catch (e) {
+                if (id !== main) {
+                    console.warn(`'${key}' can not be found in locale '${id}', falling back to main '${main}'.`);
+                    return get(key, main)!;
+                } else {
+                    throw new Error(`'${key}' can not be found in locale '${id}' and no fallback is available.`);
+                }
+            }
+        }, locale[id!]!) as Leaf;
     };
 
     return {
+        set,
         get,
     };
 };

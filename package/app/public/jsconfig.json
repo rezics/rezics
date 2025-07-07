@@ -1,0 +1,6 @@
+{
+    "include": ["./mockServiceWorker.js"],
+    "compilerOptions": {
+        "noCheck": true
+    }
+}
