@@ -6,9 +6,6 @@
             "default": "./src/*"
         }
     },
-    "dependencies": {
-        "zod": "^4.0.0"
-    },
     "devDependencies": {
         "typescript": "^5.8.3"
     }
