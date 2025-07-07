@@ -58,7 +58,7 @@ export const Register: FC = () => {
                     <TextField
                         name="confirm"
                         type="password"
-                        label={get("common->confirm")}
+                        label={get(`common->confirm`)}
                         variant="standard"
                     ></TextField>
                 </>

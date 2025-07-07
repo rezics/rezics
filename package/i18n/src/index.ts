@@ -12,6 +12,14 @@ type Path<T> = T extends object
       }[keyof T]
     : never;
 
+type FromPath<T, P extends string> = P extends `${infer K}${Splitter}${infer R}`
+    ? K extends keyof T
+        ? FromPath<T[K], R>
+        : never
+    : P extends keyof T
+      ? T[P]
+      : never;
+
 const match = <T extends string[]>(source: string, targets: T): T[number] | null => {
     const [language] = source.split("-");
     return targets.find((target) => target === source) ?? targets.find((target) => target === language) ?? null;
@@ -30,7 +38,7 @@ export const make = <T extends Record<string, T[K]>, K extends keyof T extends s
         matched = id;
     };
 
-    const get = (key: Path<T[K]>, id = matched): Leaf => {
+    const get = <P extends Path<T[K]>>(key: P, id = matched): FromPath<T[K], P> => {
         const leaves = key.split(splitter) as string[];
 
         return leaves.reduce<Leaf | Locale>((acc, curr) => {
@@ -44,7 +52,7 @@ export const make = <T extends Record<string, T[K]>, K extends keyof T extends s
                     throw new Error(`'${key}' can not be found in locale '${id}' and no fallback is available.`);
                 }
             }
-        }, locale[id!]!) as Leaf;
+        }, locale[id!]!) as any;
     };
 
     return {

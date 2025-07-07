@@ -3,7 +3,7 @@ import zhCN from "./zh-CN";
 export default {
     title: "ICS",
     motto: "継承 創造 伝播",
-    
+
     // Navigation & Menu
     navigation: {
         main_items: "メインアイテム",
@@ -24,7 +24,7 @@ export default {
         settings: "設定",
         logout: "ログアウト",
     },
-    
+
     // Authentication
     auth: {
         login: "ログイン",
@@ -40,7 +40,7 @@ export default {
             passwords_mismatch: "パスワードが一致しません。",
         },
     },
-    
+
     // Common UI Elements
     common: {
         email: "メール",
@@ -65,7 +65,7 @@ export default {
         close: "閉じる",
         open: "開く",
     },
-    
+
     // Pages
     pages: {
         not_found: "ページが見つかりません",
@@ -78,7 +78,7 @@ export default {
         book_collection_list_page: "本のコレクションリストページ",
         book_list_edit_page: "ブックリスト編集ページ",
     },
-    
+
     // Form & Editor
     editor: {
         bold: "太字",
@@ -94,20 +94,20 @@ export default {
         toggle_side_by_side: "並列表示を切り替え",
         markdown_guide: "Markdownガイド",
     },
-    
+
     // Placeholders & Labels
     placeholders: {
         search_books: "本を検索",
         chapter_title: "チャプタータイトルを入力",
     },
-    
+
     // Chapters & Books
     chapters: {
         new_chapter: "新しいチャプター",
         expand: "展開",
         collapse: "折りたたみ",
     },
-    
+
     // Accessibility Labels
     accessibility: {
         favorite: "お気に入り",
@@ -116,5 +116,9 @@ export default {
         search: "検索",
         close: "閉じる",
         open_drawer: "ドロワーを開く",
+    },
+
+    test: {
+        fn: (name: string) => `こんにちは、${name}！`,
     },
 } satisfies typeof zhCN;

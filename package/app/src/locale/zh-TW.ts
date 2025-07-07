@@ -3,7 +3,7 @@ import zhCN from "./zh-CN";
 export default {
     title: "ICS",
     motto: "繼承 創造 傳播",
-    
+
     // Navigation & Menu
     navigation: {
         main_items: "主要項目",
@@ -24,7 +24,7 @@ export default {
         settings: "設置",
         logout: "登出",
     },
-    
+
     // Authentication
     auth: {
         login: "登錄",
@@ -40,7 +40,7 @@ export default {
             passwords_mismatch: "密碼不匹配。",
         },
     },
-    
+
     // Common UI Elements
     common: {
         email: "郵箱",
@@ -65,7 +65,7 @@ export default {
         close: "關閉",
         open: "打開",
     },
-    
+
     // Pages
     pages: {
         not_found: "頁面未找到",
@@ -78,7 +78,7 @@ export default {
         book_collection_list_page: "書籍收藏列表頁面",
         book_list_edit_page: "書單編輯頁面",
     },
-    
+
     // Form & Editor
     editor: {
         bold: "粗體",
@@ -94,20 +94,20 @@ export default {
         toggle_side_by_side: "切換並排",
         markdown_guide: "Markdown指南",
     },
-    
+
     // Placeholders & Labels
     placeholders: {
         search_books: "搜索圖書",
         chapter_title: "請輸入章節標題",
     },
-    
+
     // Chapters & Books
     chapters: {
         new_chapter: "新章節",
         expand: "展開",
         collapse: "折疊",
     },
-    
+
     // Accessibility Labels
     accessibility: {
         favorite: "收藏",
@@ -116,5 +116,9 @@ export default {
         search: "搜索",
         close: "關閉",
         open_drawer: "打開側邊欄",
+    },
+
+    test: {
+        fn: (name: string) => `你好，${name}！`,
     },
 } satisfies typeof zhCN;

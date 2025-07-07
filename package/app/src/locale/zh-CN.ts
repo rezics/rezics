@@ -1,7 +1,7 @@
 export default {
     title: "ICS",
     motto: "继承 创造 传播",
-    
+
     // Navigation & Menu
     navigation: {
         main_items: "主要项目",
@@ -22,7 +22,7 @@ export default {
         settings: "设置",
         logout: "登出",
     },
-    
+
     // Authentication
     auth: {
         login: "登录",
@@ -38,7 +38,7 @@ export default {
             passwords_mismatch: "密码不匹配。",
         },
     },
-    
+
     // Common UI Elements
     common: {
         email: "邮箱",
@@ -63,7 +63,7 @@ export default {
         close: "关闭",
         open: "打开",
     },
-    
+
     // Pages
     pages: {
         not_found: "页面未找到",
@@ -76,7 +76,7 @@ export default {
         book_collection_list_page: "书籍收藏列表页面",
         book_list_edit_page: "书单编辑页面",
     },
-    
+
     // Form & Editor
     editor: {
         bold: "粗体",
@@ -92,20 +92,20 @@ export default {
         toggle_side_by_side: "切换并排",
         markdown_guide: "Markdown指南",
     },
-    
+
     // Placeholders & Labels
     placeholders: {
         search_books: "搜索图书",
         chapter_title: "请输入章节标题",
     },
-    
+
     // Chapters & Books
     chapters: {
         new_chapter: "新章节",
         expand: "展开",
         collapse: "折叠",
     },
-    
+
     // Accessibility Labels
     accessibility: {
         favorite: "收藏",
@@ -114,5 +114,9 @@ export default {
         search: "搜索",
         close: "关闭",
         open_drawer: "打开侧边栏",
+    },
+
+    test: {
+        fn: (name: string) => `你好，${name}！`,
     },
 };
