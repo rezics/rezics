@@ -54,7 +54,7 @@ const FullScreenModal: React.FC<FullScreenModalProps> = ({ open, onClose, title,
                             </Box>
 
                             {/* 关闭按钮 */}
-                            <IconButton edge="end" color="inherit" onClick={onClose} aria-label="close">
+                            <IconButton edge="end" color="inherit" onClick={onClose} aria-label={get("accessibility->close")}>
                                 <CloseIcon />
                             </IconButton>
                         </Toolbar>

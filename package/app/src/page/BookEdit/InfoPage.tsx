@@ -1,9 +1,11 @@
 import { ReactNode } from "react";
 
+import { get } from "@locale";
+
 export const BookEditMainPage: React.FC = () => {
     return (
         <div>
-            <h1>BookEditPage</h1>
+            <h1>{get("pages->book_edit_page")}</h1>
         </div>
     );
 };

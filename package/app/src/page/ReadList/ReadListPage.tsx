@@ -55,13 +55,13 @@ export const BookListPage: React.FC = () => {
                         </div>
                     )}
                     <div className="flex items-center gap-2">
-                        <IconButton aria-label="Favorite" size="small">
+                        <IconButton aria-label={get("accessibility->favorite")} size="small">
                             <FavoriteBorder fontSize="small" />
                         </IconButton>
-                        <IconButton aria-label="Comments" size="small" onClick={handleGoToComments}>
+                        <IconButton aria-label={get("accessibility->comments")} size="small" onClick={handleGoToComments}>
                             <Comment fontSize="small" />
                         </IconButton>
-                        <IconButton aria-label="Collection" size="small">
+                        <IconButton aria-label={get("accessibility->collection")} size="small">
                             <Add fontSize="small" />
                         </IconButton>
                     </div>
