@@ -3,6 +3,7 @@ import { Box, Typography, Chip, Stack } from "@mui/material";
 import { proxy, useSnapshot } from "valtio";
 import { AccentBarWithText } from "@component/Common/AccentBar";
 import { EditButtonFloatRight } from "@component/Common/EditButtonFloatRight";
+import { get } from "@locale";
 
 interface TagGroupObject {
     key: string;

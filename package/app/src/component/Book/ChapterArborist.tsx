@@ -6,6 +6,7 @@ import { Tree } from "react-arborist";
 import type { MoveHandler, RenameHandler, DeleteHandler } from "react-arborist";
 // 分离的 Node 渲染器工厂
 import { createChapterArboristNode } from "./ChapterArboristNode";
+import { get } from "@locale";
 
 import {
     findAndRemove,

@@ -4,6 +4,7 @@ import { useTheme } from "@mui/material/styles";
 import { useLayoutStore } from "@/global/layoutStore";
 import { AppBar, IconButton, Toolbar, Typography } from "@mui/material";
 import { Menu, Brightness7, Brightness4 } from "@mui/icons-material";
+import { get } from "@locale";
 
 interface HeaderProps {
     handleDrawerToggle: () => void;

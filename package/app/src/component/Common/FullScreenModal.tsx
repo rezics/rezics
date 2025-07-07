@@ -2,6 +2,7 @@ import React from "react";
 import { Modal, Box, AppBar, Toolbar, Typography, IconButton, Slide } from "@mui/material";
 // import { TransitionProps } from "@mui/material/transitions";
 import CloseIcon from "@mui/icons-material/Close";
+import { get } from "@locale";
 
 // 过渡动画 (从下方滑入)
 const Transition = React.forwardRef(function Transition(props: any, ref: any) {

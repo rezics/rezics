@@ -5,6 +5,7 @@ import EasyEditor from "@/component/Form/EasyEditor";
 import { useParams } from "wouter";
 import { useQuery } from "urql";
 import { ChapterContentQuery, ChapterContent } from "@/api/bookContent";
+import { get } from "@locale";
 
 export const BookEditChapterPage: React.FC = () => {
     const { chapterId } = useParams();
