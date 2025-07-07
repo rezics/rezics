@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import React from "react";
 
 export const BookEditMainPage: React.FC = () => {
     return (

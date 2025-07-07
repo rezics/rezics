@@ -8,7 +8,7 @@ import { ChapterContentQuery, ChapterContent } from "@/api/bookContent";
 
 export const BookEditChapterPage: React.FC = () => {
     const { chapterId } = useParams();
-    const [{ data, fetching, error }] = useQuery<ChapterContent>({
+    const [{ data }] = useQuery<ChapterContent>({
         query: ChapterContentQuery,
         variables: { chapterId: chapterId },
     });

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useRef } from "react";
 import { useParams } from "wouter";
 import { useQuery } from "urql";
 import { GET_BOOKLIST } from "@/api/readlist";
