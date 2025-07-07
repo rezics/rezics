@@ -1,14 +1,9 @@
 // https://github.com/brimdata/react-arborist
 
-import { ChapterTreeNode, ChapterOrderType } from "@/component/Book/ChapterList";
-import { buildTree } from "@/util/treeAbstract";
-import { useMemo, useState, useEffect, useCallback, CSSProperties, useRef } from "react";
+import { useMemo, useState, useEffect, useCallback, useRef } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { Tree } from "react-arborist";
 import type { MoveHandler, RenameHandler, DeleteHandler } from "react-arborist";
-// MUI
-import Switch from "@mui/material/Switch";
-import FormControlLabel from "@mui/material/FormControlLabel";
 // 分离的 Node 渲染器工厂
 import { createChapterArboristNode } from "./ChapterArboristNode";
 
@@ -77,24 +72,24 @@ export const ChapterArborist: React.FC<ChapterArboristProps> = ({
     const onMove: MoveHandler<Chapter> = useCallback(({ dragIds, parentId, index }) => {
         setTreeData((currentTree) => {
             const removed: Chapter[] = [];
-            const treeWithoutDragged = findAndRemove(currentTree, dragIds, removed);
-            return findAndInsert(treeWithoutDragged, parentId, index, removed);
+            const treeWithoutDragged = findAndRemove(currentTree, dragIds, removed as any) as Chapter[];
+            return findAndInsert(treeWithoutDragged, parentId, index, removed) as Chapter[];
         });
     }, []);
 
     const onRename: RenameHandler<Chapter> = useCallback(({ id, name }) => {
-        setTreeData((currentTree) => findAndEdit(currentTree, String(id), name));
+        setTreeData((currentTree) => findAndEdit(currentTree, String(id), name) as Chapter[]);
     }, []);
 
     const onDelete: DeleteHandler<Chapter> = useCallback(({ ids }) => {
-        setTreeData((currentTree) => findAndDelete(currentTree, ids));
+        setTreeData((currentTree) => findAndDelete(currentTree, ids) as Chapter[]);
     }, []);
 
     const handleCreate = useCallback((parentId: string | number) => {
         const newNode: Chapter = { id: uuidv4(), title: get("chapters->new_chapter") };
         setTreeData((currentTree) => {
             if (parentId) {
-                return findAndAddChild(currentTree, parentId, newNode);
+                return findAndAddChild(currentTree, parentId, newNode) as Chapter[];
             } else {
                 return [...currentTree, newNode];
             }
@@ -192,7 +187,7 @@ export const ChapterArborist: React.FC<ChapterArboristProps> = ({
                     <li
                         className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
                         onClick={() => {
-                            setTreeData((current) => moveSiblingFirst(current, contextMenu.node.id));
+                            setTreeData((current) => moveSiblingFirst(current, contextMenu.node.id) as Chapter[]);
                             setContextMenu(null);
                         }}
                     >
@@ -201,7 +196,7 @@ export const ChapterArborist: React.FC<ChapterArboristProps> = ({
                     <li
                         className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
                         onClick={() => {
-                            setTreeData((current) => moveSiblingLast(current, contextMenu.node.id));
+                            setTreeData((current) => moveSiblingLast(current, contextMenu.node.id) as Chapter[]);
                             setContextMenu(null);
                         }}
                     >

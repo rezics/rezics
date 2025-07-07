@@ -10,7 +10,7 @@ import { useQuery } from "urql";
 export default function PersistentTabs() {
     const [value, setValue] = React.useState<"1" | "2">("1");
 
-    const [{ data, fetching, error }] = useQuery({
+    const [{ data }] = useQuery({
         query: ChapterListQuery,
         variables: { id: "1" },
     });
@@ -32,7 +32,7 @@ export default function PersistentTabs() {
             {/* ② TabPanel 的 value 必须和 Tab 的 value 对应 */}
             <TabPanel value="1" keepMounted>
                 {/* keepMounted 保持在 DOM，不会被卸载，内部状态持久化】 */}
-                <BookEditorSidebar chaptersData={data} />
+                <BookEditorSidebar chaptersData={data} selectedId="" baseLink="/test" />
             </TabPanel>
             <TabPanel value="2" keepMounted>
                 这是第二个面板的内容

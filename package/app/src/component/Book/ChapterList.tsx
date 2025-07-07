@@ -1,11 +1,10 @@
 import { useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "urql";
 import { ChapterListQuery } from "@/api/book";
-import { Button, Tooltip, Typography } from "@mui/material";
-import { AccentBar, AccentBarWithText } from "../Common/AccentBar";
+import { Button, Tooltip } from "@mui/material";
+import { AccentBarWithText } from "../Common/AccentBar";
 
-import { buildTree, OrderMap, ID, FlatTree, NodeBase, TreeNodeWithChildren } from "@/util/treeAbstract";
-import { proxy, useSnapshot } from "valtio";
+import { buildTree, OrderMap, TreeNodeWithChildren } from "@/util/treeAbstract";
 import { useLocation, Link } from "wouter";
 import { EditButtonFloatRight } from "@/component/Common/EditButtonFloatRight";
 import { get } from "@locale";
@@ -30,7 +29,7 @@ interface ChapterListProps {
 }
 
 export const ChapterList: React.FC<ChapterListProps> = ({ id }) => {
-    const [location, navigate] = useLocation();
+    const [,] = useLocation();
 
     const [{ data, fetching, error }] = useQuery({
         query: ChapterListQuery,

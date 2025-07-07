@@ -172,5 +172,5 @@ export const asyncUtils = {
     /**
      * Sequence array of async operations
      */
-    sequence: <T>(promises: ReadonlyArray<Promise<T>>): Promise<ReadonlyArray<T>> => Promise.all(Array.from(promises)),
+    sequence: <T>(promises: ReadonlyArray<Promise<T>>): Promise<ReadonlyArray<T>> => Promise.all(promises),
 };

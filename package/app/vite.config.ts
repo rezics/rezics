@@ -3,7 +3,8 @@ import "dotenv/config";
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
-import { pipe } from "fp-ts/lib/function";
+// Using pipe from @/util/fp instead of fp-ts
+import { pipe } from "./src/util/fp";
 import { resolve } from "path";
 
 // https://vitejs.dev/config/

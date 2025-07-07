@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Button, Menu, MenuItem, Stack, Typography, useTheme } from "@mui/material";
+import { Button, Menu, MenuItem, Stack, Typography } from "@mui/material";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
@@ -16,7 +16,6 @@ const LABELS: Record<SortKey, string> = {
 };
 
 export const BookSearchFilter = () => {
-    const theme = useTheme();
     const [sortKey, setSortKey] = React.useState<SortKey>("relevance");
     const [asc, setAsc] = React.useState(false);
     const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
@@ -34,12 +33,6 @@ export const BookSearchFilter = () => {
             setSortKey(key);
             setAsc(false);
         }
-    };
-
-    const handleMenuSelect = (key: SortKey) => () => {
-        setSortKey(key);
-        setAsc(false);
-        setAnchorEl(null);
     };
 
     const handleSecondaryMenuSelect = (key: string) => () => {

@@ -1,12 +1,12 @@
 import { pipe } from "@/util/fp";
 import { A, O } from "@/util/fp";
-import { safeArray } from "@/util/fp";
 
 export interface BaseNode {
     id: string | number;
 }
 
 interface TreeNode extends BaseNode {
+    title: string; // Required title to match Chapter type
     children?: TreeNode[];
 }
 
@@ -207,7 +207,7 @@ export const moveSiblingFirst = (tree: ReadonlyArray<TreeNode>, targetId: string
                     processed = true;
                     const nodeArray = Array.from(nodes);
                     const targetNode = nodeArray[index]!;
-                    const otherNodes = A.filterWithIndex(nodeArray, (_, i) => i !== index);
+                    const otherNodes = nodeArray.filter((_, i) => i !== index);
                     return [targetNode, ...otherNodes];
                 },
             }),
@@ -235,7 +235,7 @@ export const moveSiblingLast = (tree: ReadonlyArray<TreeNode>, targetId: string 
                     processed = true;
                     const nodeArray = Array.from(nodes);
                     const targetNode = nodeArray[index]!;
-                    const otherNodes = A.filterWithIndex(nodeArray, (_, i) => i !== index);
+                    const otherNodes = nodeArray.filter((_, i) => i !== index);
                     return [...otherNodes, targetNode];
                 },
             }),

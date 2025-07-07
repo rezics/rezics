@@ -1,7 +1,6 @@
-import React, { ReactNode, useEffect, useMemo } from "react";
+import React, { ReactNode, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useMediaQuery, styled, useTheme } from "@mui/material";
-import { useSnapshot } from "valtio";
 import { ExpandLess, ExpandMore, ChevronLeft, ChevronRight } from "@mui/icons-material";
 import {
     Collapse,
@@ -42,8 +41,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
 }) => {
     const {
         sidebarOpen,
-        sidebarHeightBelow,
-        toggleSidebar,
         setSidebarHeightBelow,
         toggleItem,
         openItems,

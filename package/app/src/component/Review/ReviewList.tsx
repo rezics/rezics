@@ -2,11 +2,9 @@ import { BookReview } from "@/api/bookReviews";
 import { SingleReview } from "./SingleReview";
 
 import React, { useMemo } from "react";
-import { Box, Avatar, Typography, Button, Divider, Rating } from "@mui/material";
+import { Box } from "@mui/material";
 import { proxy, useSnapshot } from "valtio";
 import { gql, useQuery } from "urql";
-import { CollapsibleText } from "@component/Common/CollapsibleText";
-import { ReactionBar } from "@component/Common/ReactionBar";
 import FullScreenModal from "../Common/FullScreenModal";
 import TreeReplyComponents from "../Form/TreeReplyComponents";
 
