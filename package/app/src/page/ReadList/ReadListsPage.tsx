@@ -1,4 +1,4 @@
-import { BookIncludeByBL } from "@/component/ReadList/ReadlistByBookView";
+import { BookIncludeByBL } from "@/component/ReadList/ReadlistByBook";
 
 export function BookCollectionListPage() {
     return (

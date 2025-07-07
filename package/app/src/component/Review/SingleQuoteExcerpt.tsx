@@ -18,7 +18,7 @@ interface QuoteExcerptProps {
     originalLink?: string;
 }
 
-export const QuoteExcerpt: React.FC<QuoteExcerptProps> = ({
+export const SingleQuoteExcerpt: React.FC<QuoteExcerptProps> = ({
     author = {
         name: "Amy Elsner",
         avatar: "/vite.svg",

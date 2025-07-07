@@ -24,7 +24,8 @@ const state = proxy({
     error: null as string | null,
 });
 
-export const BookIncludeByBL: React.FC = () => {
+// * Complete list of book-related reading lists.
+export const ReadlistByBook: React.FC = () => {
     const snap = useSnapshot(state);
     const [, navigate] = useLocation();
     const [result] = useQuery({

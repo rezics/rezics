@@ -1,60 +1,12 @@
-import React, { useMemo } from "react";
-import { Box, Avatar, Typography, Button, Divider, Rating } from "@mui/material";
-import { proxy, useSnapshot } from "valtio";
-import { gql, useQuery } from "urql";
+import { Box, Avatar, Typography, Button, Rating, Divider } from "@mui/material";
 import { CollapsibleText } from "@component/Common/CollapsibleText";
 import { ReactionBar } from "@component/Common/ReactionBar";
-import FullScreenModal from "../Common/FullScreenModal";
-import TreeReplyComponents from "../Form/TreeReplyComponents";
+import { BookReview } from "@/graphql/bookReviews";
 
-const GET_BOOK_REVIEWS = gql`
-    query GetBookReviews($bookId: ID!) {
-        bookReviews(bookId: $bookId) {
-            id
-            content
-            rating
-            createdAt
-            user {
-                name
-                avatar
-            }
-        }
-    }
-`;
-
-interface BookReviewsProps {
-    bookId: string;
-}
-
-interface BookReviewsState {
-    reviews: any[];
-    isReplyModalOpen: boolean;
-}
-
-export const BookReviews: React.FC<BookReviewsProps> = ({ bookId }) => {
-    const state = useMemo(() => proxy({ reviews: [], isReplyModalOpen: false } as BookReviewsState | any), []);
-
-    const [result] = useQuery({
-        query: GET_BOOK_REVIEWS,
-        variables: { bookId },
-        pause: !bookId,
-    });
-
-    state.reviews = result.data?.bookReviews || [];
-    const snap = useSnapshot(state);
-
-    React.useEffect(() => {
-        if (result.data?.bookReviews) {
-            state.reviews = result.data.bookReviews;
-        }
-    }, [result.data]);
-
+export function SingleReview({ review, handleReply }: { review: BookReview, handleReply: (reviewId: string) => void }) {
     return (
-        <>
-            <Box>
-                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                {snap.reviews.map((review: any) => (
-                    <Box key={review.id}>
+        <div>
+            <Box key={review.id}>
                         <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
                             <Avatar src={review.user.avatar} sx={{ width: 40, height: 40, borderRadius: 1 }} />
                             <Box sx={{ ml: 2 }}>
@@ -84,7 +36,7 @@ export const BookReviews: React.FC<BookReviewsProps> = ({ bookId }) => {
                             <Box sx={{ width: { xs: "100%", sm: "75%", md: "50%", lg: "50%", xl: "33.33%" } }}>
                                 <ReactionBar
                                     onReply={() => {
-                                        state.isReplyModalOpen = true;
+                                        
                                     }}
                                 />
                             </Box>
@@ -92,20 +44,6 @@ export const BookReviews: React.FC<BookReviewsProps> = ({ bookId }) => {
 
                         <Divider sx={{ my: 2 }} />
                     </Box>
-                ))}
-            </Box>
-
-            <FullScreenModal
-                open={snap.isReplyModalOpen}
-                onClose={() => {
-                    state.isReplyModalOpen = false;
-                }}
-                title="回复"
-            >
-                <Box>
-                    <TreeReplyComponents bookListId={bookId} />
-                </Box>
-            </FullScreenModal>
-        </>
+        </div>
     );
-};
+}
