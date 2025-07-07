@@ -6,6 +6,7 @@ import { string } from "zod";
 import { email } from "zod/v4";
 import { FC, useState } from "react";
 import Alert from "@mui/material/Alert";
+import { get } from "@locale";
 
 export const Login: FC = () => {
     const [loading, setLoading] = useState(false);
@@ -13,7 +14,7 @@ export const Login: FC = () => {
 
     return (
         <Layout
-            title="Login"
+            title={get("auth->login")}
             onSubmit={async (event) => {
                 event.preventDefault();
                 setLoading(true);
@@ -36,33 +37,32 @@ export const Login: FC = () => {
             }}
             content={
                 <>
-                    {false ? (
-                        <Alert severity="warning">
-                            You have already login.
-                            <br />
-                            Re-login will overwrite the previous login information.
-                        </Alert>
-                    ) : undefined}
+                    {false ? <Alert severity="warning">{get("auth->already_login")}</Alert> : undefined}
                     {error ? (
                         <Alert severity="error">
                             {error}
                             <br />
                             <Button variant="text" type="button" slot="a" href="./resolve">
-                                Resolve
+                                {get("auth->resolve")}
                             </Button>
                         </Alert>
                     ) : undefined}
-                    <TextField name="email" type="email" label="Email" variant="standard"></TextField>
-                    <TextField name="password" type="password" label="Password" variant="standard"></TextField>
+                    <TextField name="email" type="email" label={get("common->email")} variant="standard"></TextField>
+                    <TextField
+                        name="password"
+                        type="password"
+                        label={get("common->password")}
+                        variant="standard"
+                    ></TextField>
                 </>
             }
             actions={
                 <>
                     <Button variant="text" type="button" slot="a" href="./register">
-                        Register
+                        {get("auth->register")}
                     </Button>
                     <Button type="submit" variant="contained" loading={loading}>
-                        Submit
+                        {get("auth->login")}
                     </Button>
                 </>
             }

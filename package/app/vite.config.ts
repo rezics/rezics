@@ -18,6 +18,7 @@ export default defineConfig({
             "@component": resolve(__dirname, "./src/component"),
             "@page": resolve(__dirname, "./src/page"),
             "@util": resolve(__dirname, "./src/util"),
+            "@locale": resolve(__dirname, "./src/locale/index.ts"),
         },
     },
     define: {

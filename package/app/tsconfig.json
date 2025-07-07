@@ -17,7 +17,8 @@
             "@/*": ["./src/*"],
             "@page/*": ["./src/page/*"],
             "@component/*": ["./src/component/*"],
-            "@util/*": ["./src/util/*"]
+            "@util/*": ["./src/util/*"],
+            "@locale": ["./src/locale/index.ts"]
         }
     },
     "include": ["node_modules/vite/client.d.ts", "**/*"],
