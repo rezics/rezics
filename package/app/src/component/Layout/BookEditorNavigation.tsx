@@ -19,24 +19,24 @@ import { NavigationItem } from "./navigation";
 export const NAVIGATION: NavigationItem[] = [
     {
         kind: "item",
-        title: "Back to Main",
+        title: get("navigation->back_to_main"),
         segment: "~/",
         icon: <DashboardIcon />,
     },
     {
         kind: "header",
-        title: "Book Editor Navigation",
+        title: get("navigation->book_editor_navigation"),
     },
 
     {
         kind: "item",
-        title: "Book Edit Main",
+        title: get("navigation->book_edit_main"),
         segment: "~/book/1/edit",
         icon: <DescriptionIcon />,
     },
     {
         kind: "item",
-        title: "Book Edit Chapter",
+        title: get("navigation->book_edit_chapter"),
         segment: "~/book/1/edit/323",
         icon: <DescriptionIcon />,
     },

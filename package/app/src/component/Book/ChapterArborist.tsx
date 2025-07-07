@@ -86,7 +86,7 @@ export const ChapterArborist: React.FC<ChapterArboristProps> = ({
     }, []);
 
     const handleCreate = useCallback((parentId: string | number) => {
-        const newNode: Chapter = { id: uuidv4(), title: "New Chapter" };
+        const newNode: Chapter = { id: uuidv4(), title: get("chapters->new_chapter") };
         setTreeData((currentTree) => {
             if (parentId) {
                 return findAndAddChild(currentTree, parentId, newNode) as Chapter[];
@@ -160,7 +160,7 @@ export const ChapterArborist: React.FC<ChapterArboristProps> = ({
                             setContextMenu(null);
                         }}
                     >
-                        {contextMenu.node?.isOpen ? "折叠" : "展开"}
+                        {contextMenu.node?.isOpen ? get("chapters->collapse") : get("chapters->expand")}
                     </li>
                     <li
                         className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
@@ -177,8 +177,8 @@ export const ChapterArborist: React.FC<ChapterArboristProps> = ({
                         className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
                         onClick={() => {
                             // 新建后续同级节点
-                            const newNode: Chapter = { id: uuidv4(), title: "New Chapter" };
-                            setTreeData((current) => insertSiblingAfter(current, contextMenu.node.id, newNode) as Chapter[]);
+                            const newNode: Chapter = { id: uuidv4(), title: get("chapters->new_chapter") };
+                            setTreeData((current) => insertSiblingAfter(current, contextMenu.node.id, newNode));
                             setContextMenu(null);
                         }}
                     >

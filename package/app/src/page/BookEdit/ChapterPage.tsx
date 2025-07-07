@@ -38,7 +38,7 @@ export const BookEditChapterPage: React.FC = () => {
         <div className="max-w-4xl mx-auto p-6">
             <div className="flex items-center justify-between mb-6">
                 <h1 className="text-2xl font-bold">编辑章节</h1>
-                <Button onClick={handleSubmit}>提交</Button>
+                <Button onClick={handleSubmit}>{get("common->submit")}</Button>
             </div>
 
             <div className="rounded-lg border border-gray-200 shadow-sm p-4 bg-white">
@@ -46,7 +46,7 @@ export const BookEditChapterPage: React.FC = () => {
                     <TextField
                         id="filled-textarea"
                         label="章节标题"
-                        placeholder="请输入章节标题"
+                        placeholder={get("placeholders->chapter_title")}
                         multiline
                         variant="filled"
                         className="w-full"

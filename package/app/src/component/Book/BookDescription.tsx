@@ -25,7 +25,7 @@ export function BookDescriptionEdit({}: {
 }) {
     return (
         <div>
-            <h1>Book Description Edit</h1>
+            <h1>{get("pages->book_description_edit")}</h1>
         </div>
     );
 }

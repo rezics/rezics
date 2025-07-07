@@ -77,7 +77,7 @@ export function BookTagEdit({}: {
 }) {
     return (
         <div>
-            <h1>Book Tag Edit</h1>
+            <h1>{get("pages->book_tag_edit")}</h1>
         </div>
     );
 }
