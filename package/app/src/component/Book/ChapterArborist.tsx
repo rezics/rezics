@@ -6,7 +6,7 @@ import { Tree } from "react-arborist";
 import type { MoveHandler, RenameHandler, DeleteHandler } from "react-arborist";
 // 分离的 Node 渲染器工厂
 import { createChapterArboristNode } from "./ChapterArboristNode";
-import { get } from "@locale";
+import { t } from "@component/Text";
 
 import {
     findAndRemove,
@@ -87,7 +87,7 @@ export const ChapterArborist: React.FC<ChapterArboristProps> = ({
     }, []);
 
     const handleCreate = useCallback((parentId: string | number) => {
-        const newNode: Chapter = { id: uuidv4(), title: get("chapters->new_chapter") };
+        const newNode: Chapter = { id: uuidv4(), title: t("chapters->new_chapter") };
         setTreeData((currentTree) => {
             if (parentId) {
                 return findAndAddChild(currentTree, parentId, newNode) as Chapter[];
@@ -161,7 +161,7 @@ export const ChapterArborist: React.FC<ChapterArboristProps> = ({
                             setContextMenu(null);
                         }}
                     >
-                        {contextMenu.node?.isOpen ? get("chapters->collapse") : get("chapters->expand")}
+                        {contextMenu.node?.isOpen ? t("chapters->collapse") : t("chapters->expand")}
                     </li>
                     <li
                         className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
@@ -178,7 +178,7 @@ export const ChapterArborist: React.FC<ChapterArboristProps> = ({
                         className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
                         onClick={() => {
                             // 新建后续同级节点
-                            const newNode: Chapter = { id: uuidv4(), title: get("chapters->new_chapter") };
+                            const newNode: Chapter = { id: uuidv4(), title: t("chapters->new_chapter") };
                             setTreeData((current) => insertSiblingAfter(current, contextMenu.node.id, newNode));
                             setContextMenu(null);
                         }}

@@ -1,7 +1,7 @@
 import React from "react";
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button } from "@mui/material";
 import { useDialogStore } from "@/global/dialogStore";
-import { get } from "@locale";
+import { t } from "@component/Text";
 
 const DialogReply: React.FC = () => {
     const dialog = useDialogStore();
@@ -12,12 +12,12 @@ const DialogReply: React.FC = () => {
 
     return (
         <Dialog open={true} onClose={handleClose}>
-            <DialogTitle>{get("common->reply")}</DialogTitle>
+            <DialogTitle>{t("common->reply")}</DialogTitle>
             <DialogContent>{/* Add your dialog content here */}</DialogContent>
             <DialogActions>
-                <Button onClick={handleClose}>{get("common->cancel")}</Button>
+                <Button onClick={handleClose}>{t("common->cancel")}</Button>
                 <Button onClick={handleClose} variant="contained" color="primary">
-                    {get("common->submit")}
+                    {t("common->submit")}
                 </Button>
             </DialogActions>
         </Dialog>

@@ -1,5 +1,5 @@
-import { get } from "@locale";
+import { t } from "@component/Text";
 
 export function ShortReviewPage() {
-    return <div>{get("pages->short_review_page")}</div>;
+    return <div>{t("pages->short_review_page")}</div>;
 }

@@ -8,7 +8,7 @@ import { AccentBar } from "@component/Common/AccentBar";
 import { TreeReplyComponents } from "@component/Form/TreeReplyComponents";
 import { IconButton } from "@mui/material";
 import { ChatBubbleOutline, FavoriteBorder, Add, Comment } from "@mui/icons-material";
-import { get } from "@locale";
+import { t } from "@component/Text";
 
 export const BookListPage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
@@ -56,13 +56,13 @@ export const BookListPage: React.FC = () => {
                         </div>
                     )}
                     <div className="flex items-center gap-2">
-                        <IconButton aria-label={get("accessibility->favorite")} size="small">
+                        <IconButton aria-label={t("accessibility->favorite")} size="small">
                             <FavoriteBorder fontSize="small" />
                         </IconButton>
-                        <IconButton aria-label={get("accessibility->comments")} size="small" onClick={handleGoToComments}>
+                        <IconButton aria-label={t("accessibility->comments")} size="small" onClick={handleGoToComments}>
                             <Comment fontSize="small" />
                         </IconButton>
-                        <IconButton aria-label={get("accessibility->collection")} size="small">
+                        <IconButton aria-label={t("accessibility->collection")} size="small">
                             <Add fontSize="small" />
                         </IconButton>
                     </div>

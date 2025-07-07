@@ -1,5 +1,5 @@
-import { get } from "@locale";
+import { t } from "@component/Text";
 
 export function LongReviewPage() {
-    return <div>{get("pages->long_review_page")}</div>;
+    return <div>{t("pages->long_review_page")}</div>;
 }

@@ -6,7 +6,7 @@ import { string } from "zod";
 import { email } from "zod/v4";
 import { FC, useState } from "react";
 import Alert from "@mui/material/Alert";
-import { get } from "@locale";
+import { t } from "@component/Text";
 
 export const Login: FC = () => {
     const [loading, setLoading] = useState(false);
@@ -14,7 +14,7 @@ export const Login: FC = () => {
 
     return (
         <Layout
-            title={get("auth->login")}
+            title={t("auth->login")}
             onSubmit={async (event) => {
                 event.preventDefault();
                 setLoading(true);
@@ -23,10 +23,10 @@ export const Login: FC = () => {
 
                 try {
                     const { error: e_email, data: _email } = email().safeParse(data.get("email"));
-                    if (e_email) throw new Error(get("auth->error->invalid_email"));
+                    if (e_email) throw new Error(t("auth->error->invalid_email"));
 
                     const { error: e_password, data: _password } = string().safeParse(data.get("password"));
-                    if (e_password) throw new Error(get("auth->error->invalid_password"));
+                    if (e_password) throw new Error(t("auth->error->invalid_password"));
 
                     await login(_email, _password);
                 } catch (e) {
@@ -37,21 +37,21 @@ export const Login: FC = () => {
             }}
             content={
                 <>
-                    {false ? <Alert severity="warning">{get("auth->already_login")}</Alert> : undefined}
+                    {false ? <Alert severity="warning">{t("auth->already_login")}</Alert> : undefined}
                     {error ? (
                         <Alert severity="error">
                             {error}
                             <br />
                             <Button variant="text" type="button" slot="a" href="./resolve">
-                                {get("auth->resolve")}
+                                {t("auth->resolve")}
                             </Button>
                         </Alert>
                     ) : undefined}
-                    <TextField name="email" type="email" label={get("common->email")} variant="standard"></TextField>
+                    <TextField name="email" type="email" label={t("common->email")} variant="standard"></TextField>
                     <TextField
                         name="password"
                         type="password"
-                        label={get("common->password")}
+                        label={t("common->password")}
                         variant="standard"
                     ></TextField>
                 </>
@@ -59,10 +59,10 @@ export const Login: FC = () => {
             actions={
                 <>
                     <Button variant="text" type="button" slot="a" href="./register">
-                        {get("auth->register")}
+                        {t("auth->register")}
                     </Button>
                     <Button type="submit" variant="contained" loading={loading}>
-                        {get("auth->login")}
+                        {t("auth->login")}
                     </Button>
                 </>
             }

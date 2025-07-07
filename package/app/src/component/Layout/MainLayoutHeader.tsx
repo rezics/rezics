@@ -4,7 +4,7 @@ import { useTheme } from "@mui/material/styles";
 import { useLayoutStore } from "@/global/layoutStore";
 import { AppBar, IconButton, Toolbar, Typography } from "@mui/material";
 import { Menu, Brightness7, Brightness4 } from "@mui/icons-material";
-import { get } from "@locale";
+import { t } from "@component/Text";
 
 interface HeaderProps {
     handleDrawerToggle: () => void;
@@ -32,7 +32,7 @@ export const Header: React.FC<HeaderProps> = ({ handleDrawerToggle, mode, onThem
             <Toolbar>
                 <IconButton
                     color="inherit"
-                    aria-label={get("accessibility->open_drawer")}
+                    aria-label={t("accessibility->open_drawer")}
                     onClick={handleDrawerToggle}
                     edge="start"
                     sx={{ mr: 2, display: sidebarOpen ? "none" : "flex" }}

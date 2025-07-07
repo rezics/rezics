@@ -13,31 +13,31 @@ import DescriptionIcon from "@mui/icons-material/Description";
 // import LibraryBooksIcon from "@mui/icons-material/LibraryBooks";
 
 import { NavigationItem } from "./navigation";
-import { get } from "@locale";
+import { t } from "@component/Text";
 
 // segment: router path
 
 export const NAVIGATION: NavigationItem[] = [
     {
         kind: "item",
-        title: get("navigation->back_to_main"),
+        title: t("navigation->back_to_main"),
         segment: "~/",
         icon: <DashboardIcon />,
     },
     {
         kind: "header",
-        title: get("navigation->book_editor_navigation"),
+        title: t("navigation->book_editor_navigation"),
     },
 
     {
         kind: "item",
-        title: get("navigation->book_edit_main"),
+        title: t("navigation->book_edit_main"),
         segment: "~/book/1/edit",
         icon: <DescriptionIcon />,
     },
     {
         kind: "item",
-        title: get("navigation->book_edit_chapter"),
+        title: t("navigation->book_edit_chapter"),
         segment: "~/book/1/edit/323",
         icon: <DescriptionIcon />,
     },
