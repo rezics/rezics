@@ -1,5 +1,4 @@
-import { useQuery } from "urql";
-import { Box, Link, Stack } from "@mui/material";
+import { Box, Stack } from "@mui/material";
 import { SingleQuoteExcerpt } from "@component/Review/SingleQuoteExcerpt";
 import { QuoteExcerpt } from "@/api/bookQuoteExcerpt";
 

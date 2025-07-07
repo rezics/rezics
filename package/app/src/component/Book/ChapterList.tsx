@@ -5,7 +5,6 @@ import { Button, Tooltip } from "@mui/material";
 import { AccentBarWithText } from "../Common/AccentBar";
 
 import { buildTree, OrderMap, TreeNodeWithChildren } from "@/util/treeAbstract";
-import { proxy, useSnapshot } from "valtio";
 import { useLocation, Link } from "wouter";
 import { EditButtonFloatRight } from "@/component/Common/EditButtonFloatRight";
 
