@@ -2,7 +2,7 @@ import { Typography } from "@mui/material";
 import { Box } from "@mui/material";
 import { AccentBarWithText } from "@component/Common/AccentBar";
 import { EditButtonFloatRight } from "@component/Common/EditButtonFloatRight";
-import { get } from "@locale";
+import { t } from "@component/Text";
 
 export function BookDescription({ description }: { description: string }) {
     return (
@@ -20,13 +20,10 @@ export function BookDescription({ description }: { description: string }) {
     );
 }
 
-export function BookDescriptionEdit({}: {
-    description: string;
-    updateDescription: (description: string) => void;
-}) {
+export function BookDescriptionEdit({}: { description: string; updateDescription: (description: string) => void }) {
     return (
         <div>
-            <h1>{get("pages->book_description_edit")}</h1>
+            <h1>{t("pages->book_description_edit")}</h1>
         </div>
     );
 }

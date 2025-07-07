@@ -6,7 +6,7 @@ import { string } from "zod";
 import { email } from "zod/v4";
 import { FC, useState } from "react";
 import Alert from "@mui/material/Alert";
-import { get } from "@locale";
+import { t } from "@component/Text";
 
 export const Register: FC = () => {
     const [loading, setLoading] = useState(false);
@@ -14,7 +14,7 @@ export const Register: FC = () => {
 
     return (
         <Layout
-            title={get("auth->register")}
+            title={t("auth->register")}
             onSubmit={async (event) => {
                 event.preventDefault();
                 setLoading(true);
@@ -24,18 +24,18 @@ export const Register: FC = () => {
 
                 try {
                     const { error: e_name, data: _name } = string().min(1).safeParse(data.get("name"));
-                    if (e_name) throw new Error(get("auth->error->invalid_username"));
+                    if (e_name) throw new Error(t("auth->error->invalid_username"));
 
                     const { error: e_email, data: _email } = email().safeParse(data.get("email"));
-                    if (e_email) throw new Error(get("auth->error->invalid_email"));
+                    if (e_email) throw new Error(t("auth->error->invalid_email"));
 
                     const { error: e_password, data: _password } = string().min(6).safeParse(data.get("password"));
-                    if (e_password) throw new Error(get("auth->error->invalid_password"));
+                    if (e_password) throw new Error(t("auth->error->invalid_password"));
 
                     const { error: e_confirm, data: _confirm } = string().safeParse(data.get("confirm"));
-                    if (e_confirm) throw new Error(get("auth->error->invalid_confirm"));
+                    if (e_confirm) throw new Error(t("auth->error->invalid_confirm"));
 
-                    if (_password !== _confirm) throw new Error(get("auth->error->passwords_mismatch"));
+                    if (_password !== _confirm) throw new Error(t("auth->error->passwords_mismatch"));
 
                     await register(_name, _email, _password);
                 } catch (e) {
@@ -47,18 +47,18 @@ export const Register: FC = () => {
             content={
                 <>
                     {error ? <Alert severity="error">{error}</Alert> : undefined}
-                    <TextField name="name" type="text" label={get("common->username")} variant="standard"></TextField>
-                    <TextField name="email" type="email" label={get("common->email")} variant="standard"></TextField>
+                    <TextField name="name" type="text" label={t("common->username")} variant="standard"></TextField>
+                    <TextField name="email" type="email" label={t("common->email")} variant="standard"></TextField>
                     <TextField
                         name="password"
                         type="password"
-                        label={get("common->password")}
+                        label={t("common->password")}
                         variant="standard"
                     ></TextField>
                     <TextField
                         name="confirm"
                         type="password"
-                        label={get(`common->confirm`)}
+                        label={t(`common->confirm`)}
                         variant="standard"
                     ></TextField>
                 </>
@@ -66,10 +66,10 @@ export const Register: FC = () => {
             actions={
                 <>
                     <Button variant="text" type="button" slot="a" href="./login">
-                        {get("auth->login")}
+                        {t("auth->login")}
                     </Button>
                     <Button type="submit" variant="contained" loading={loading}>
-                        {get("auth->register")}
+                        {t("auth->register")}
                     </Button>
                 </>
             }

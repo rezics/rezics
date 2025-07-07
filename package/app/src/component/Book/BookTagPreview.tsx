@@ -3,7 +3,7 @@ import { Box, Typography, Chip, Stack } from "@mui/material";
 import { proxy, useSnapshot } from "valtio";
 import { AccentBarWithText } from "@component/Common/AccentBar";
 import { EditButtonFloatRight } from "@component/Common/EditButtonFloatRight";
-import { get } from "@locale";
+import { t } from "@component/Text";
 
 interface TagGroupObject {
     key: string;
@@ -78,7 +78,7 @@ export function BookTagEdit({}: {
 }) {
     return (
         <div>
-            <h1>{get("pages->book_tag_edit")}</h1>
+            <h1>{t("pages->book_tag_edit")}</h1>
         </div>
     );
 }

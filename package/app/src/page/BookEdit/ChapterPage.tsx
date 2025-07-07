@@ -5,7 +5,7 @@ import EasyEditor from "@/component/Form/EasyEditor";
 import { useParams } from "wouter";
 import { useQuery } from "urql";
 import { ChapterContentQuery, ChapterContent } from "@/api/bookContent";
-import { get } from "@locale";
+import { t } from "@component/Text";
 
 export const BookEditChapterPage: React.FC = () => {
     const { chapterId } = useParams();
@@ -39,7 +39,7 @@ export const BookEditChapterPage: React.FC = () => {
         <div className="max-w-4xl mx-auto p-6">
             <div className="flex items-center justify-between mb-6">
                 <h1 className="text-2xl font-bold">编辑章节</h1>
-                <Button onClick={handleSubmit}>{get("common->submit")}</Button>
+                <Button onClick={handleSubmit}>{t("common->submit")}</Button>
             </div>
 
             <div className="rounded-lg border border-gray-200 shadow-sm p-4 bg-white">
@@ -47,7 +47,7 @@ export const BookEditChapterPage: React.FC = () => {
                     <TextField
                         id="filled-textarea"
                         label="章节标题"
-                        placeholder={get("placeholders->chapter_title")}
+                        placeholder={t("placeholders->chapter_title")}
                         multiline
                         variant="filled"
                         className="w-full"

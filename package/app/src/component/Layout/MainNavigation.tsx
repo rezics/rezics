@@ -12,31 +12,31 @@ import BookmarkBorderIcon from "@mui/icons-material/BookmarkBorder";
 import FormatListBulletedIcon from "@mui/icons-material/FormatListBulleted";
 
 import { NavigationItem } from "./navigation";
-import { get } from "@locale";
+import { t } from "@component/Text";
 
 // segment: router path
 
 export const NAVIGATION: NavigationItem[] = [
     {
         kind: "header",
-        title: get("navigation->main_items"),
+        title: t("navigation->main_items"),
     },
     {
         kind: "item",
         segment: "~/",
-        title: get("navigation->home"),
+        title: t("navigation->home"),
         icon: <DashboardIcon />,
     },
     {
         kind: "item",
         segment: "~/books",
-        title: get("navigation->books"),
+        title: t("navigation->books"),
         icon: <BookIcon />,
     },
     {
         kind: "item",
         segment: "~/book",
-        title: get("navigation->book"),
+        title: t("navigation->book"),
         icon: <LibraryBooksIcon />,
         children: [
             {
@@ -64,24 +64,24 @@ export const NAVIGATION: NavigationItem[] = [
     },
     {
         kind: "header",
-        title: get("navigation->analytics"),
+        title: t("navigation->analytics"),
     },
     {
         kind: "item",
         segment: "~/auth",
-        title: get("navigation->auth"),
+        title: t("navigation->auth"),
         icon: <PersonIcon />,
         children: [
             {
                 kind: "item",
                 segment: "~/login",
-                title: get("navigation->login"),
+                title: t("navigation->login"),
                 icon: <LoginIcon />,
             },
             {
                 kind: "item",
                 segment: "~/register",
-                title: get("navigation->register"),
+                title: t("navigation->register"),
                 icon: <HowToRegIcon />,
             },
         ],
@@ -89,18 +89,18 @@ export const NAVIGATION: NavigationItem[] = [
     {
         kind: "item",
         segment: "~/book/1/edit",
-        title: get("navigation->book_edit"),
+        title: t("navigation->book_edit"),
         icon: <BarChartIcon />,
         children: [
             {
                 kind: "item",
-                title: get("navigation->book_edit_main"),
+                title: t("navigation->book_edit_main"),
                 segment: "~/book/1/edit",
                 icon: <DescriptionIcon />,
             },
             {
                 kind: "item",
-                title: get("navigation->book_edit_chapter"),
+                title: t("navigation->book_edit_chapter"),
                 segment: "~/book/1/edit/1",
                 icon: <DescriptionIcon />,
             },
@@ -109,7 +109,7 @@ export const NAVIGATION: NavigationItem[] = [
     {
         kind: "item",
         segment: "/test",
-        title: get("navigation->test"),
+        title: t("navigation->test"),
         icon: <LayersIcon />,
     },
     {
