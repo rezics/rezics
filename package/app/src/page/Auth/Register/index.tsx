@@ -6,6 +6,7 @@ import { string } from "zod";
 import { email } from "zod/v4";
 import { FC, useState } from "react";
 import Alert from "@mui/material/Alert";
+import { get } from "@locale";
 
 export const Register: FC = () => {
     const [loading, setLoading] = useState(false);
@@ -13,7 +14,7 @@ export const Register: FC = () => {
 
     return (
         <Layout
-            title="Register"
+            title={get("auth->register")}
             onSubmit={async (event) => {
                 event.preventDefault();
                 setLoading(true);
@@ -46,19 +47,29 @@ export const Register: FC = () => {
             content={
                 <>
                     {error ? <Alert severity="error">{error}</Alert> : undefined}
-                    <TextField name="name" type="text" label="User Name" variant="standard"></TextField>
-                    <TextField name="email" type="email" label="Email" variant="standard"></TextField>
-                    <TextField name="password" type="password" label="Password" variant="standard"></TextField>
-                    <TextField name="confirm" type="password" label="Confirm Password" variant="standard"></TextField>
+                    <TextField name="name" type="text" label={get("common->username")} variant="standard"></TextField>
+                    <TextField name="email" type="email" label={get("common->email")} variant="standard"></TextField>
+                    <TextField
+                        name="password"
+                        type="password"
+                        label={get("common->password")}
+                        variant="standard"
+                    ></TextField>
+                    <TextField
+                        name="confirm"
+                        type="password"
+                        label={get("common->confirm")}
+                        variant="standard"
+                    ></TextField>
                 </>
             }
             actions={
                 <>
                     <Button variant="text" type="button" slot="a" href="./login">
-                        Login
+                        {get("auth->login")}
                     </Button>
                     <Button type="submit" variant="contained" loading={loading}>
-                        Submit
+                        {get("auth->register")}
                     </Button>
                 </>
             }

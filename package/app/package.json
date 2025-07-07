@@ -42,7 +42,8 @@
         "valtio": "^2.1.5",
         "wouter": "^3.7.1",
         "zod": "^3.25.46",
-        "zustand": "^5.0.5"
+        "zustand": "^5.0.5",
+        "i18n": "workspace:i18n"
     },
     "devDependencies": {
         "@graphql-codegen/cli": "^5.0.6",
