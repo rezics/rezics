@@ -1,5 +1,5 @@
 import React from "react";
-import { Drawer, TextField, Button, Stack } from "@mui/material";
+import { Drawer, Button } from "@mui/material";
 import { useDialogStore } from "@/global/dialogStore";
 
 import EasyEditor from "./EasyEditor";

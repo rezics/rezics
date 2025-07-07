@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Grid, Typography, Avatar, IconButton, Card, CardContent, Stack } from "@mui/material";
+import { Grid, Stack } from "@mui/material";
 import { proxy, useSnapshot } from "valtio";
 import { Favorite } from "@mui/icons-material";
 import { BookList } from "@/api/readlist";

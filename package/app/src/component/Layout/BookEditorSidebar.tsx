@@ -2,11 +2,10 @@
 
 import { ChapterTreeNode, ChapterOrderType } from "@/component/Book/ChapterList";
 import { buildTree } from "@/util/treeAbstract";
-import { useMemo, useState, useEffect, useCallback, CSSProperties, useRef } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { ChapterArborist } from "@/component/Book/ChapterArborist";
 
 import { useLayoutStore } from "@/global/layoutStore";
-import useMeasure from "react-use-measure";
 import { TextField } from "@mui/material";
 
 type Chapter = {
@@ -32,7 +31,6 @@ export const BookEditorSidebar: React.FC<BookEditorSidebarProps> = ({ chaptersDa
     );
 
     const [searchTerm, setSearchTerm] = useState("");
-    const [selectIDTerm, setselectIDTerm] = useState("");
 
     const [height, setHeight] = useState(sidebarHeightBelow);
     useEffect(() => {
