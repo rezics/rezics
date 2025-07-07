@@ -1,4 +1,4 @@
-import { gql } from 'graphql-tag'
+import { gql } from "graphql-tag";
 
 export interface BookReview {
     id: string;
@@ -13,17 +13,17 @@ export interface BookReview {
 }
 
 export const GET_BOOK_REVIEWS = gql`
-  query GetBookReviews($bookId: ID!) {
-    bookReviews(bookId: $bookId) {
-      id
-      content
-      rating
-      createdAt
-      user {
-        id
-        name
-        avatar
-      }
+    query GetBookReviews($bookId: ID!) {
+        bookReviews(bookId: $bookId) {
+            id
+            content
+            rating
+            createdAt
+            user {
+                id
+                name
+                avatar
+            }
+        }
     }
-  }
-` 
+`;

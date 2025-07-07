@@ -3,7 +3,7 @@ import { Favorite } from "@mui/icons-material";
 import { Card, CardContent, Typography, Grid, Box, Avatar, IconButton, Stack } from "@mui/material";
 
 interface SingleReadlistProps {
-    list: BookList
+    list: BookList;
     handleBookListClick: (id: string, e: React.MouseEvent) => void;
     handleLike: (id: string) => void;
 }

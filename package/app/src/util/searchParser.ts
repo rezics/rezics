@@ -32,4 +32,4 @@ export function parseSearchString(raw: string): SearchInfo {
         searchText: text,
         searchTags: tags,
     };
-} 
+}

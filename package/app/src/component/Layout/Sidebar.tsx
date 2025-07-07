@@ -40,8 +40,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
     onOverflowx = false,
     onOverflowy = false,
 }) => {
-    const { sidebarOpen, sidebarHeightBelow, toggleSidebar, setSidebarHeightBelow, toggleItem, openItems, drawerWidth } =
-        useLayoutStore();
+    const {
+        sidebarOpen,
+        sidebarHeightBelow,
+        toggleSidebar,
+        setSidebarHeightBelow,
+        toggleItem,
+        openItems,
+        drawerWidth,
+    } = useLayoutStore();
 
     const theme = useTheme();
 
@@ -84,7 +91,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         const wrapperId = "ics-sidebar-wrapper";
         const wrapper = document.getElementById(wrapperId);
         if (!wrapper) return;
-    
+
         const firstDiv = wrapper.querySelector("div");
         if (firstDiv) {
             if (noScrollBar) {

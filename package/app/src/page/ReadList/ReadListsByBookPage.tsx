@@ -8,13 +8,11 @@ export function ReadlistByBook() {
     const [result] = useQuery({
         query: bookListsQuery,
     });
-    
+
     React.useEffect(() => {
         if (result.data?.bookLists) {
             setBooklists(result.data.bookLists);
         }
     }, [result.data]);
-    return (
-        <ReadlistList booklists={booklists} />
-    )
+    return <ReadlistList booklists={booklists} />;
 }

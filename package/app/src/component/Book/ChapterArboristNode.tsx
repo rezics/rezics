@@ -53,7 +53,7 @@ export const createChapterArboristNode = (
             >
                 {/* Arrow toggle */}
                 {node.children && node.children.length > 0 && (
-                <span onClick={() => node.toggle()} className="w-4 flex justify-center items-center">
+                    <span onClick={() => node.toggle()} className="w-4 flex justify-center items-center">
                         {node.isOpen ? "▼" : "▶"}
                     </span>
                 )}
@@ -79,13 +79,15 @@ export const createChapterArboristNode = (
                             autoFocus
                             className="border px-1 text-sm w-full"
                         />
-                    ) : ( node.children && node.children.length > 0 ? 
-                        (
-                            <span>{node.data.title}</span>
-                        ):
-                        (<Link to={`${baseLink}/${node.id}`} className="text-gray-700 hover:text-blue-500 block cursor-default hover:cursor-pointer">
+                    ) : node.children && node.children.length > 0 ? (
+                        <span>{node.data.title}</span>
+                    ) : (
+                        <Link
+                            to={`${baseLink}/${node.id}`}
+                            className="text-gray-700 hover:text-blue-500 block cursor-default hover:cursor-pointer"
+                        >
                             <span className={`${node.isSelected ? "text-red-600" : ""}`}>{node.data.title}</span>
-                        </Link>)
+                        </Link>
                     )}
                 </span>
 
@@ -104,4 +106,4 @@ export const createChapterArboristNode = (
             </div>
         );
     };
-}; 
+};

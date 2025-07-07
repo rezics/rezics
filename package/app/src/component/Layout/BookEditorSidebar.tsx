@@ -39,12 +39,18 @@ export const BookEditorSidebar: React.FC<BookEditorSidebarProps> = ({ chaptersDa
         setHeight(sidebarHeightBelow);
         console.log(selectedId);
     }, [sidebarHeightBelow]);
-    
+
     return (
         // <div className="overflow-auto no-scrollbar">
         <div>
             <div className="w-11/12 mx-auto">
-                <TextField id="standard-basic" label="searchTerm" variant="standard" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+                <TextField
+                    id="standard-basic"
+                    label="searchTerm"
+                    variant="standard"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                />
                 {/* <TextField id="standard-basic" label="selectIDTerm" variant="standard" value={selectIDTerm} onChange={(e) => setselectIDTerm(e.target.value)} /> */}
             </div>
             <ChapterArborist

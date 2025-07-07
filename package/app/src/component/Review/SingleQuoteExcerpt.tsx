@@ -32,7 +32,6 @@ export const SingleQuoteExcerpt: React.FC<QuoteExcerptProps> = ({
     source = "引自第 5 页",
     originalLink = "#",
 }) => {
-
     const state = proxy({} as QuoteExcerptProps | any);
     state.author = author;
     state.content = content;

@@ -3,7 +3,7 @@ import { Box, Link, Stack } from "@mui/material";
 import { SingleQuoteExcerpt } from "@component/Review/SingleQuoteExcerpt";
 import { QuoteExcerpt } from "@/api/bookQuoteExcerpt";
 
-export function QuoteExcerptList({ data }: { data: QuoteExcerpt[]}) {
+export function QuoteExcerptList({ data }: { data: QuoteExcerpt[] }) {
     return (
         <div>
             {/* Quotes */}

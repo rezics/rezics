@@ -15,7 +15,7 @@ const state = proxy({
 // * Complete list of book-related reading lists.
 export function ReadlistList({ booklists }: { booklists: BookList[] }) {
     const [, navigate] = useLocation();
-    
+
     const handleLike = (id: string) => {
         console.log("Liked book ID:", id);
     };
@@ -37,4 +37,4 @@ export function ReadlistList({ booklists }: { booklists: BookList[] }) {
             ))}
         </Grid>
     );
-};
+}

@@ -4,7 +4,7 @@ import { AccentBarWithText } from "../Common/AccentBar";
 import { ReadlistByBook } from "@/page/ReadList/ReadListsByBookPage";
 
 // * ReadlistByBook may expose the data-fetching function. This component is only responsible for displaying a few entries as a preview.
-function ReadlistByBookPreview({ bookId, title }: { bookId: string, title: string }) {
+function ReadlistByBookPreview({ bookId, title }: { bookId: string; title: string }) {
     return (
         <Box>
             <Link href={`/book/${bookId}/lists`} className="flex mb-4">

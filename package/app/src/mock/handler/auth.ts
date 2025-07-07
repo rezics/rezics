@@ -125,4 +125,4 @@ export const authHandlers = [
             },
         });
     }),
-] 
+];

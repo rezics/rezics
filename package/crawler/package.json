@@ -12,7 +12,8 @@
     "dependencies": {
         "@intzaaa/logger": "^2.0.0",
         "dayjs": "^1.11.13",
-        "fp-ts": "^2.16.10",
+        "@effect/platform": "^0.63.35",
+        "effect": "^3.8.4",
         "mocha": "11.2.2",
         "playwright": "^1.52.0",
         "random-useragent": "^0.5.0",
