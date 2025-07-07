@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Avatar, Typography, Divider, IconButton, Stack } from "@mui/material";
+import { Box, Avatar, Typography, Divider, Stack } from "@mui/material";
 import { proxy, useSnapshot } from "valtio";
 import { Rating } from "@mui/material";
 import ThumbUpIcon from "@mui/icons-material/ThumbUp";

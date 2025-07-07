@@ -29,7 +29,7 @@ interface ChapterListProps {
 }
 
 export const ChapterList: React.FC<ChapterListProps> = ({ id }) => {
-    const [, navigate] = useLocation();
+    const [,] = useLocation();
 
     const [{ data, fetching, error }] = useQuery({
         query: ChapterListQuery,

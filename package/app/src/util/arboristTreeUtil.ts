@@ -6,7 +6,7 @@ export interface BaseNode {
 }
 
 interface TreeNode extends BaseNode {
-    title?: string; // Make title optional so it's compatible with Chapter
+    title: string; // Required title to match Chapter type
     children?: TreeNode[];
 }
 
