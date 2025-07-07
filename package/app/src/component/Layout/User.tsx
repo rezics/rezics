@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { IconButton, Avatar, Menu, MenuItem, Divider, ListItemIcon, ListItemText } from "@mui/material";
 import { Person as PersonIcon, Settings as SettingsIcon, Logout as LogoutIcon } from "@mui/icons-material";
+import { get } from "@locale";
 
 interface UserProps {
     onLogout?: () => void;
@@ -52,20 +53,20 @@ export const User: React.FC<UserProps> = ({ onLogout }) => {
                     <ListItemIcon>
                         <PersonIcon fontSize="small" />
                     </ListItemIcon>
-                    <ListItemText>Profile</ListItemText>
+                    <ListItemText>{get("navigation->profile")}</ListItemText>
                 </MenuItem>
                 <MenuItem onClick={handleMenuClose}>
                     <ListItemIcon>
                         <SettingsIcon fontSize="small" />
                     </ListItemIcon>
-                    <ListItemText>Settings</ListItemText>
+                    <ListItemText>{get("navigation->settings")}</ListItemText>
                 </MenuItem>
                 <Divider />
                 <MenuItem onClick={handleLogout}>
                     <ListItemIcon>
                         <LogoutIcon fontSize="small" />
                     </ListItemIcon>
-                    <ListItemText>Logout</ListItemText>
+                    <ListItemText>{get("navigation->logout")}</ListItemText>
                 </MenuItem>
             </Menu>
         </>
