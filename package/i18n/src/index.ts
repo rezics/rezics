@@ -16,6 +16,11 @@ const match = <T extends string[]>(source: string, targets: T): T[number] | null
     return targets.find((target) => target === source) ?? targets.find((target) => target === language) ?? null;
 };
 
+const arrest = <T>(arrestion: boolean, message: string, value: T): T => {
+    if (arrestion) return value;
+    throw new Error(message);
+};
+
 export const make = <K extends string, T extends Record<string, T[K]>>(main: K, locale: T) => {
     const locales = Object.keys(locale);
     const matched = match(navigator.language, locales);
@@ -24,7 +29,7 @@ export const make = <K extends string, T extends Record<string, T[K]>>(main: K, 
         const leaves = key.split(splitter) as string[];
 
         return leaves.reduce<string | Locale>(
-            (acc, curr) => (acc as Locale)[curr] || get(key, main)!,
+            (acc, curr) => (acc as Locale)[curr] || arrest(id !== main, `Key not found: ${key}`, get(key, main)!),
             locale[id!]!,
         ) as string;
     };
