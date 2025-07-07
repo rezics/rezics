@@ -1,6 +1,6 @@
 import { useParams } from "wouter";
 import { useQuery } from "urql";
-import { ChapterContentQuery, ChapterContent } from "@/graphql/bookContent";
+import { ChapterContentQuery, ChapterContent } from "@/api/bookContent";
 import { Typography } from "@mui/material";
 
 import MarkdownIt from "markdown-it";

@@ -7,65 +7,27 @@ import {
     Paper,
     Divider,
     Avatar,
-    Rating,
-    Chip,
     Stack,
-    Tabs,
     Tab,
-    Button,
 } from "@mui/material";
-import { Edit, ArrowForwardIos } from "@mui/icons-material";
 import { TabContext, TabList, TabPanel } from "@mui/lab";
 import { useParams, Link } from "wouter";
-import { BookTag, BookTagView } from "@/component/Book/BookTagPreview";
+import { BookTagView } from "@/component/Book/BookTagPreview";
 import { BookReviews } from "@/component/Book/BookReviewsPreview";
 import { ShortBookReviews } from "@/component/Book/ShortBookReviewsPreview";
-import { AccentBar, AccentBarWithText } from "@component/Common/AccentBar";
+import { AccentBarWithText } from "@component/Common/AccentBar";
 
-import { BookInfoQuery } from "@/graphql/bookInfo";
+import { BookInfoQuery } from "@/api/book";
 import { useQuery } from "urql";
+import { Book, BookInfo, Author } from "@/api/book";
+import { TagGroupObject } from "@/api/tag";
+
 import { ChapterList } from "@component/Book/ChapterList";
 import { ArrowForwardIcon } from "@component/Common/ArrowForwardIcon";
-import { EditButtonFloatRight } from "@component/Common/EditButtonFloatRight";
 import { BookHero } from "@component/Book/BookHero";
 import { BookDescription } from "@/component/Book/BookDescription";
 import { QuoteExcerptPreview } from "@/component/Book/QuoteExcerptPreview";
 import ReadlistByBookPreview from "@/component/Book/ReadlistByBookPreview";
-
-interface TagGroupObject {
-    key: string;
-    name: string;
-    tags: string[];
-}
-
-export interface Book {
-    id: string;
-    title: string;
-    cover: string;
-    author: string;
-    rating: number;
-    publisher: string;
-    publishDate: string;
-    isbn: string;
-    // tags: TagGroupObject[];
-    tags: string[];
-    description: string;
-}
-
-interface Author {
-    name: string;
-    avatar: string;
-    description: string;
-}
-
-interface BookInfo {
-    book: Book;
-    author: Author;
-    loading: boolean;
-    error: string | null;
-}
-
-
 
 export const BookDetail: React.FC = () => {
     const { id } = useParams<{ id: string }>();

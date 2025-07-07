@@ -4,9 +4,9 @@ import { useQuery } from "urql";
 
 import { BookSearch } from "@/component/BookLib/BookSearch";
 import { CardBookList } from "@component/Book/CardBookList";
-import { ListBookList } from "@component/Book/ListBookList";
+import { BookListView } from "@component/BookLib/BookListView";
 import { BookSearchFilter } from "@/component/BookLib/BookSearchFilter";
-import { SEARCH_BOOKS } from "@/graphql/bookSearch";
+import { SEARCH_BOOKS } from "@/api/bookSearch";
 import { SearchInfo } from "@util/searchParser";
 
 export interface Book {
@@ -71,7 +71,7 @@ export const BookLib = () => {
             </div>
             )}
 
-            <ListBookList books={books} />
+            <BookListView books={books} />
             {/* <CardBookList books={books} /> */}
             
         </div>

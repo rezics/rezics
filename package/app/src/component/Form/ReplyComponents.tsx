@@ -2,7 +2,7 @@
 
 import React, { useRef, useCallback } from "react";
 import { useQuery } from "urql";
-import { GET_COMMENTS } from "@/graphql/bookList";
+import { GET_COMMENTS } from "@/api/readlist";
 import { Avatar } from "@mui/material";
 // import { scrollToElementWithOffsetUniversal } from "@/util/domUtils";
 

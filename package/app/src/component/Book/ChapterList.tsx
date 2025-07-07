@@ -1,6 +1,6 @@
 import { useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "urql";
-import { ChapterListQuery } from "@/graphql/bookInfo";
+import { ChapterListQuery } from "@/api/book";
 import { Button, Tooltip, Typography } from "@mui/material";
 import { AccentBar, AccentBarWithText } from "../Common/AccentBar";
 

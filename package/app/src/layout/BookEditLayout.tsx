@@ -8,7 +8,7 @@ import { appStore } from "@/global/appStore";
 import { NAVIGATION } from "@/component/Layout/BookEditorNavigation";
 
 import { useQuery } from "urql";
-import { ChapterListQuery } from "@/graphql/bookInfo";
+import { ChapterListQuery } from "@/api/book";
 import { useParams, useRoute } from "wouter";
 
 import { BookEditorSidebar } from "@/component/Layout/BookEditorSidebar";

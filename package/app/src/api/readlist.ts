@@ -1,5 +1,17 @@
 import { gql } from "urql";
 
+export interface BookList {
+    id: string;
+    title: string;
+    description: string;
+    books: string[];
+    creator: {
+        name: string;
+        avatar: string;
+    };
+    likes: number;
+}
+
 export const GET_BOOKLIST = gql`
     query GetBookList($id: ID!) {
         bookList(id: $id) {

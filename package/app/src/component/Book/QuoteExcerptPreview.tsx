@@ -1,5 +1,5 @@
 import { useQuery } from "urql";
-import { QuoteExcerptQuery } from "@/graphql/bookQuoteExcerpt";
+import { QuoteExcerptQuery } from "@/api/bookQuoteExcerpt";
 import { AccentBarWithText } from "@component/Common/AccentBar";
 import { ArrowForwardIcon } from "@component/Common/ArrowForwardIcon";
 import { Link } from "@mui/material";

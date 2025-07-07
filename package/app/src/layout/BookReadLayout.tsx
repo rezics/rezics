@@ -11,7 +11,7 @@ import { BookEditorSidebar } from "@/component/Layout/BookEditorSidebar";
 import { Link, useParams, useRoute } from "wouter";
 
 import { useQuery } from "urql";
-import { ChapterListQuery } from "@/graphql/bookInfo";
+import { ChapterListQuery } from "@/api/book";
 
 interface BookReadLayout {
     children: ReactNode;

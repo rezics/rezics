@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useQuery } from "urql";
-import { GET_COMMENTS } from "@/graphql/bookList";
+import { GET_COMMENTS } from "@/api/readlist";
 import { Avatar, Box, Collapse, IconButton, Typography } from "@mui/material";
 import { Add, Remove } from "@mui/icons-material";
 import { ReactionBar } from "../Common/ReactionBar";
