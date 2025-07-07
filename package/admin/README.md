@@ -1,6 +1,6 @@
 # refine-antd-graphql-msw-template
 
-Refine template, with Ant Design, GraphQL, MSW, graphql-codegen 
+Refine template, with Ant Design, GraphQL, MSW, graphql-codegen
 
 <div align="center" style="margin: 30px;">
 <a href="https://refine.dev/">

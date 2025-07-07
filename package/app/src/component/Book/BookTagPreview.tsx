@@ -95,4 +95,4 @@ export const BookTagView: React.FC<BookTagProps> = ({ tagObjects }) => {
             <BookTag tagObjects={tagObjects} />
         </Box>
     );
-}
+};

@@ -81,7 +81,7 @@ export const BookReadLayout: React.FC<BookReadLayout> = ({ children }) => {
                             <Button variant="text">查看详情</Button>
                         </Link>
                     </div>
-                    <Divider/>
+                    <Divider />
                     <BookEditorSidebar chaptersData={data} selectedId={selectedId} baseLink={baseUrl} />
                 </div>
             </Sidebar>

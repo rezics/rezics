@@ -6,5 +6,5 @@ export function LongReviewEditPage() {
             <div>LongReviewEditPage</div>
             <EasyEditor value={""} onChange={() => {}} />
         </>
-    )
+    );
 }

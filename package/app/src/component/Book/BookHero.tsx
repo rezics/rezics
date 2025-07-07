@@ -67,5 +67,5 @@ export function BookHero({ data }: { data: Book }) {
                 </Box>
             </Box>
         </div>
-    )
+    );
 }

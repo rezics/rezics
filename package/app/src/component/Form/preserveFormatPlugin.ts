@@ -1,9 +1,9 @@
 import type MarkdownIt from "markdown-it";
-import { pipe } from '@/util/fp';
-import * as A from 'fp-ts/lib/Array';
-import * as O from 'fp-ts/lib/Option';
-import * as E from 'fp-ts/lib/Either';
-import { stringUtils } from '@/util/fp';
+import { pipe } from "@/util/fp";
+import * as A from "fp-ts/lib/Array";
+import * as O from "fp-ts/lib/Option";
+import * as E from "fp-ts/lib/Either";
+import { stringUtils } from "@/util/fp";
 
 // --- 插件选项接口 ---
 export interface PreserveFormatOptions {
@@ -49,20 +49,20 @@ const multipleEmptyLines = (state: any): void => {
             const brCount = total - 1;
             return "\n\n" + "&nbsp;\n".repeat(brCount);
         };
-        
+
         return src.replace(/\n{2,}/g, transformMatch);
     };
 
     const src = state.src;
     if (!src.includes("\n\n")) return;
-    
+
     state.src = processEmptyLines(src);
 };
 
 // ------------------- 2. 处理多空格的核心规则 -------------------
 /**
  * 处理多空格的核心规则，使用函数式编程方式重构
- * 
+ *
  * 设计原则：
  * - 纯函数：不修改输入，返回新的数据结构
  * - 不可变性：使用函数式转换而不是就地修改
@@ -78,8 +78,7 @@ interface Token {
 }
 
 // 检查是否为需要处理的文本token
-const isTextTokenWithSpaces = (token: Token): boolean => 
-    token.type === "text" && token.content.includes("  ");
+const isTextTokenWithSpaces = (token: Token): boolean => token.type === "text" && token.content.includes("  ");
 
 // 创建HTML内联token
 const createHtmlInlineToken = (content: string, TokenConstructor: any): Token => {
@@ -102,26 +101,23 @@ const processTextPart = (part: string, TokenConstructor: any): O.Option<Token> =
         const content = "&nbsp;".repeat(part.length);
         return O.some(createHtmlInlineToken(content, TokenConstructor));
     }
-    
+
     if (part.length > 0) {
         // 普通文本
         return O.some(createTextToken(part, TokenConstructor));
     }
-    
+
     return O.none;
 };
 
 // 分解含有连续空格的文本token
 const splitTextToken = (token: Token, TokenConstructor: any): Token[] => {
-    const parts = pipe(
-        token.content,
-        stringUtils.split(/( {2,})/g)
-    );
-    
+    const parts = pipe(token.content, stringUtils.split(/( {2,})/g));
+
     return pipe(
         parts,
-        A.map(part => processTextPart(part, TokenConstructor)),
-        A.compact  // 移除None值，只保留Some中的值
+        A.map((part) => processTextPart(part, TokenConstructor)),
+        A.compact, // 移除None值，只保留Some中的值
     );
 };
 
@@ -137,7 +133,7 @@ const processToken = (token: Token, TokenConstructor: any): Token[] => {
 const processInlineTokenChildren = (children: Token[], TokenConstructor: any): Token[] => {
     return pipe(
         children,
-        A.chain(token => processToken(token, TokenConstructor))
+        A.chain((token) => processToken(token, TokenConstructor)),
     );
 };
 
@@ -154,9 +150,9 @@ const processBlockToken = (blockToken: Token, TokenConstructor: any): Token => {
 const preserveSpacesCore = (state: any): void => {
     const processedTokens = pipe(
         state.tokens,
-        A.map(token => processBlockToken(token, state.Token))
+        A.map((token) => processBlockToken(token, state.Token)),
     );
-    
+
     state.tokens = processedTokens;
 };
 
@@ -165,16 +161,16 @@ const preserveSpacesCore = (state: any): void => {
  * 一个 markdown-it 插件，定制化空行和空格的渲染
  *
  * 工作原理:
- * - 拆分为两个核心组件，multipleEmptyLines and preserveSpacesCore 
+ * - 拆分为两个核心组件，multipleEmptyLines and preserveSpacesCore
  * - multipleEmptyLines: 将空行替换成`\n\n&nbsp;\n`渲染, 从而保留空行
  * - preserveSpacesCore: 将空格替换成`&nbsp;`渲染, 从而保留空格
- * 
+ *
  * 重构改进：
  * - 使用函数式编程方式，提高代码的正确性、效率和美观性
  * - 纯函数设计，无副作用，易于测试和理解
  * - 不可变数据结构，避免意外修改
  * - 组合性强，功能分解为小的、可重用的函数
- * 
+ *
  * @param md markdown-it 实例
  * @param options 插件选项
  */
@@ -190,7 +186,7 @@ export const preserveFormattingPlugin = (md: MarkdownIt, options?: PreserveForma
 
     // 注册空行处理规则
     if (effectiveOptions.preserveEmptyLines) {
-        md.core.ruler.before('normalize', "line_break_to_br", multipleEmptyLines);
+        md.core.ruler.before("normalize", "line_break_to_br", multipleEmptyLines);
     }
 
     // 注册空格处理规则
@@ -198,4 +194,3 @@ export const preserveFormattingPlugin = (md: MarkdownIt, options?: PreserveForma
         md.core.ruler.push("preserve_spaces_core", preserveSpacesCore);
     }
 };
-  

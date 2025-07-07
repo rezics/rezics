@@ -10,9 +10,7 @@ export type Strategy = (driver: Browser, url: URL) => Promise<Either<string, Boo
  * 验证URL域名是否匹配
  */
 const validateDomain = (url: URL, expectedDomain: string): Either<string, URL> =>
-    url.hostname === expectedDomain
-        ? right(url)
-        : left(`Domain must be ${expectedDomain}, got ${url.hostname}`);
+    url.hostname === expectedDomain ? right(url) : left(`Domain must be ${expectedDomain}, got ${url.hostname}`);
 
 /**
  * 清理URL参数
@@ -66,14 +64,13 @@ const cleanup = async (page: Page): Promise<void> => {
 /**
  * 将书籍数据与平台信息合并
  */
-const enrichBookData = (
-    platform: string,
-    url: URL
-) => (data: Omit<Book, "platform" | "link">): Book => ({
-    ...data,
-    platform,
-    link: url.toString(),
-});
+const enrichBookData =
+    (platform: string, url: URL) =>
+    (data: Omit<Book, "platform" | "link">): Book => ({
+        ...data,
+        platform,
+        link: url.toString(),
+    });
 
 /**
  * 捕获并转换错误
@@ -83,7 +80,7 @@ const catchToLeft = (error: unknown): Either<string, never> =>
 
 /**
  * 创建爬虫策略的高阶函数
- * 
+ *
  * 改进：
  * - 更好的错误处理和验证
  * - 资源管理更安全
@@ -112,14 +109,11 @@ export const create_strategy =
 
         try {
             const { page, responses } = await setupPage(driver);
-            
+
             try {
                 const result = await extractor(page, cleanUrl, responses);
-                
-                return pipe(
-                    result,
-                    E.map(enrichBookData(platform, cleanUrl))
-                );
+
+                return pipe(result, E.map(enrichBookData(platform, cleanUrl)));
             } finally {
                 await cleanup(page);
             }
@@ -130,7 +124,7 @@ export const create_strategy =
 
 /**
  * 创建发现器的高阶函数
- * 
+ *
  * 改进：
  * - 更好的错误处理
  * - 类型安全的参数传递
@@ -149,7 +143,7 @@ export const create_discover =
 
 /**
  * 创建测试函数
- * 
+ *
  * 改进：
  * - 更好的错误处理
  * - 格式化的JSON输出

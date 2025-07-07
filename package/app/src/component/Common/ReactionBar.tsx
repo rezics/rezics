@@ -5,11 +5,16 @@ import { KeyboardArrowUp, KeyboardArrowDown, ChatBubbleOutline, StarBorder, Send
 interface ReactionBarProps {
     onReply?: () => void;
     className?: string;
-    size?: 'small' | 'medium' | 'large';
+    size?: "small" | "medium" | "large";
     fontSize?: string;
 }
 
-export const ReactionBar: React.FC<ReactionBarProps> = ({ onReply, className, size = 'large', fontSize = '1.5rem' }) => {
+export const ReactionBar: React.FC<ReactionBarProps> = ({
+    onReply,
+    className,
+    size = "large",
+    fontSize = "1.5rem",
+}) => {
     const handleReply = () => {
         onReply?.();
     };

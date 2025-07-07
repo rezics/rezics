@@ -106,7 +106,7 @@ export const TreeReplyComponents: React.FC<ReplyComponentsProps> = ({ bookListId
         query: GET_COMMENTS,
         variables: { bookListId },
     });
-    
+
     // currentReplyId
     const setDialogVisible = useDialogStore((state) => state.setDialogVisible);
     const [currentReplyId, setCurrentReplyId] = useState<string | null>(null);
@@ -120,7 +120,6 @@ export const TreeReplyComponents: React.FC<ReplyComponentsProps> = ({ bookListId
         console.log("handleSubmit", currentReplyId, content);
     };
 
-    
     const openDrawer = (id: string) => {
         setCurrentReplyId(id);
         setDialogVisible(`reply-${id}`, true);

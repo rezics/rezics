@@ -19,11 +19,7 @@ export const CATEGORY_EDIT_MUTATION = gql`
 `;
 
 export const CATEGORIES_LIST_QUERY = gql`
-    query CategoriesList(
-        $paging: OffsetPaging!
-        $filter: CategoryFilter
-        $sorting: [CategorySort!]!
-    ) {
+    query CategoriesList($paging: OffsetPaging!, $filter: CategoryFilter, $sorting: [CategorySort!]!) {
         categories(paging: $paging, filter: $filter, sorting: $sorting) {
             nodes {
                 id

@@ -9,8 +9,8 @@ export const Home = () => {
                     id
                 }
             }
-        `
-    })
+        `,
+    });
     return (
         <div className="w-10/12 mx-auto">
             {/* First Carousel */}
@@ -23,9 +23,13 @@ export const Home = () => {
             {/* End First Carousel */}
             {/* 干脆写个插件化定制板块的首页。 */}
             <div>
-                { fetching ? <div>Loading...</div> : error ? <div>Error: {error.message}</div> : <div>
-                    {data?.book && <div key={data?.book.id}>{data?.book.id}</div>}
-                </div> }
+                {fetching ? (
+                    <div>Loading...</div>
+                ) : error ? (
+                    <div>Error: {error.message}</div>
+                ) : (
+                    <div>{data?.book && <div key={data?.book.id}>{data?.book.id}</div>}</div>
+                )}
             </div>
         </div>
     );

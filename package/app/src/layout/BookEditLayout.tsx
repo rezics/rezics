@@ -69,7 +69,7 @@ export const BookEditLayout: React.FC<BookEditLayoutProps> = ({ children }) => {
                 NAVIGATION={NAVIGATION}
                 noScrollBar={true}
             >
-                <BookEditorSidebar chaptersData={data} selectedId={selectedId} baseLink={baseUrl}/>
+                <BookEditorSidebar chaptersData={data} selectedId={selectedId} baseLink={baseUrl} />
             </Sidebar>
 
             <main

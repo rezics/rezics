@@ -14,12 +14,18 @@ export function BookDescription({ description }: { description: string }) {
                 <Typography variant="body1" className="whitespace-pre-line">
                     {description}
                 </Typography>
-            </Box>      
+            </Box>
         </div>
     );
 }
 
-export function BookDescriptionEdit({ description, updateDescription }: { description: string, updateDescription: (description: string) => void }) {
+export function BookDescriptionEdit({
+    description,
+    updateDescription,
+}: {
+    description: string;
+    updateDescription: (description: string) => void;
+}) {
     return (
         <div>
             <h1>Book Description Edit</h1>

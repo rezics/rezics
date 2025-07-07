@@ -1,4 +1,4 @@
-import { gql } from 'graphql-tag'
+import { gql } from "graphql-tag";
 
 export const SEARCH_BOOKS = gql`
     query SearchBooks($query: String!) {
@@ -10,7 +10,7 @@ export const SEARCH_BOOKS = gql`
             cover
         }
     }
-`
+`;
 
 export const TOP_BOOKS = gql`
     query TopBooks {
@@ -22,4 +22,4 @@ export const TOP_BOOKS = gql`
             cover
         }
     }
-`
+`;

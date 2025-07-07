@@ -7,7 +7,6 @@ import { useQuery } from "urql";
 import { ChapterContentQuery, ChapterContent } from "@/api/bookContent";
 
 export const BookEditChapterPage: React.FC = () => {
-
     const { chapterId } = useParams();
     const [{ data, fetching, error }] = useQuery<ChapterContent>({
         query: ChapterContentQuery,
@@ -16,7 +15,7 @@ export const BookEditChapterPage: React.FC = () => {
 
     const [content, setContent] = useState("");
     const [title, setTitle] = useState("");
-    
+
     useEffect(() => {
         if (data) {
             console.log(data);

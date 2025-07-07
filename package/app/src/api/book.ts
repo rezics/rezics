@@ -20,14 +20,12 @@ export interface Author {
     description: string;
 }
 
-
 export interface BookInfo {
     book: Book;
     author: Author;
     loading: boolean;
     error: string | null;
 }
-
 
 export const BookInfoQuery = gql`
     query BookInfoQuery($id: ID!) {

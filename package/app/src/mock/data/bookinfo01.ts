@@ -8,8 +8,7 @@ export const bookInfo01 = {
     publishDate: "2024-11-10",
     isbn: "978-7-123-45678-9",
     tags: ["完本", "奇幻", "320万字"],
-    description:
-        "1668年，我所在的城市被评为全国治安最好的地区。\n我对此做出了不可磨灭的贡献。\n因为我落网了。",
+    description: "1668年，我所在的城市被评为全国治安最好的地区。\n我对此做出了不可磨灭的贡献。\n因为我落网了。",
 };
 
 export const authorInfo01 = {

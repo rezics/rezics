@@ -59,7 +59,6 @@ export const BookReviews: React.FC<BookReviewsProps> = ({ bookId, title }) => {
                 </Link>
                 <ReviewList reviews={snap.reviews} />
             </Box>
-                
         </>
     );
 };
