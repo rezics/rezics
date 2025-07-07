@@ -11,13 +11,9 @@ type Leaves<T> = T extends object
       }[keyof T]
     : never;
 
-const match = <T extends string[]>(source: `${string}-${string}` | `${string}`, targets: T): T[number] | null => {
-    const [language, region] = source.split("-");
-    return (
-        targets.find((target) => target === `${language}-${region}`) ??
-        targets.find((target) => target === `${language}`) ??
-        null
-    );
+const match = <T extends string[]>(source: string, targets: T): T[number] | null => {
+    const [language] = source.split("-");
+    return targets.find((target) => target === source) ?? targets.find((target) => target === language) ?? null;
 };
 
 export const make = <K extends string, T extends Record<string, T[K]>>(main: K, locale: T) => {
