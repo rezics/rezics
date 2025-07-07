@@ -1,5 +1,34 @@
 import { gql } from "urql";
 
+export interface Book {
+    id: string;
+    title: string;
+    cover: string;
+    author: string;
+    rating: number;
+    publisher: string;
+    publishDate: string;
+    isbn: string;
+    // tags: TagGroupObject[];
+    tags: string[];
+    description: string;
+}
+
+export interface Author {
+    name: string;
+    avatar: string;
+    description: string;
+}
+
+
+export interface BookInfo {
+    book: Book;
+    author: Author;
+    loading: boolean;
+    error: string | null;
+}
+
+
 export const BookInfoQuery = gql`
     query BookInfoQuery($id: ID!) {
         book(id: $id) {

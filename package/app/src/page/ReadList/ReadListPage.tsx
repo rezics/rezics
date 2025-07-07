@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import { useParams } from "wouter";
 import { useQuery } from "urql";
-import { GET_BOOKLIST } from "@/graphql/bookList";
+import { GET_BOOKLIST } from "@/api/readlist";
 import { CollapsibleText } from "@component/Common/CollapsibleText";
 import { AccentBar } from "@component/Common/AccentBar";
 // import { ReplyComponents } from "@component/Form/ReplyComponents";

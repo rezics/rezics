@@ -1,7 +1,7 @@
 import { Box, Avatar, Typography, Button, Rating, Divider } from "@mui/material";
 import { CollapsibleText } from "@component/Common/CollapsibleText";
 import { ReactionBar } from "@component/Common/ReactionBar";
-import { BookReview } from "@/graphql/bookReviews";
+import { BookReview } from "@/api/bookReviews";
 
 export function SingleReview({ review, handleReply }: { review: BookReview, handleReply: (reviewId: string) => void }) {
     return (

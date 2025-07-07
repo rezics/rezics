@@ -1,4 +1,4 @@
-import { BookReview } from "@/graphql/bookReviews";
+import { BookReview } from "@/api/bookReviews";
 import { SingleReview } from "./SingleReview";
 
 import React, { useMemo } from "react";
