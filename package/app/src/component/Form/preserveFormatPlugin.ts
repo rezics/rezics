@@ -1,5 +1,4 @@
 import type MarkdownIt from "markdown-it";
-// import type { Token } from "markdown-it";
 
 // --- 插件选项接口 ---
 export interface PreserveFormatOptions {
@@ -39,7 +38,6 @@ export interface PreserveFormatOptions {
  * @param state markdown-it 的 state 实例
  */
 function multipleEmptyLines(state: any) {
-    // console.log(state);
     const src = state.src;
     if (!src.includes("\n\n")) return;
 
@@ -50,11 +48,7 @@ function multipleEmptyLines(state: any) {
         const brCount = total - 1;
         // ! 注意需要两个换行，这样才能正常分块
         return "\n\n" + "&nbsp;\n".repeat(brCount);
-        // return "\n" + "<br>\n".repeat(brCount);
     });
-
-    // console.log('after state', state);
-
 }
 
 // ------------------- 2. 处理多空格的核心规则 -------------------
@@ -123,29 +117,6 @@ export function preserveFormattingPlugin(md: MarkdownIt, options?: PreserveForma
     if (effectiveOptions.preserveSpaces) {
         // 注册核心规则。它会在所有 token 解析完毕后执行。
         md.core.ruler.push("preserve_spaces_core", preserveSpacesCore);
-        // 注意：这个方法不需要 markdown-it 的 html 选项为 true 才能正确渲染 &nbsp;
     }
 }
-
-// 列出所有 block 级别的 rule 名称
-// console.log('block rules:', md.block.ruler.getRules());
-
-// 列出所有 inline 级别的 rule 名称
-// console.log('inline rules:', md.inline.ruler.getRules());
-
-// block_rules: [
-//     'normalize',   'reference', 'blockquote',
-//     'code',        'fence',     'heading',
-//     'lheading',    'hr',        'list',
-//     'html_block',  'table',     'paragraph',
-//     'footnote_def'
-//   ]
-  
-// inline_rules: [
-//     'text',       'newline',     'escape',
-//     'backticks',  'del',         'ins',
-//     'mark',       'emphasis',    'link',
-//     'reflink',    'reference',   'autolink',
-//     'html_inline','entity',      'text_collapse'
-//   ]
   

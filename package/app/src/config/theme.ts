@@ -108,7 +108,6 @@ const getDesignTokens = (mode: "light" | "dark"): ThemeOptions => ({
                 },
             },
         },
-        // 你可以在这里继续为其他 MUI 组件添加覆盖……
     },
 
     typography: {
@@ -178,7 +177,7 @@ const getDesignTokens = (mode: "light" | "dark"): ThemeOptions => ({
         },
     },
 
-    // 剩余的常用全局配置项（可按需调整或删除不需要的部分）
+    // 剩余的常用全局配置项
     breakpoints: {
         values: {
             xs: 0,
@@ -194,13 +193,6 @@ const getDesignTokens = (mode: "light" | "dark"): ThemeOptions => ({
     shape: {
         borderRadius: 8, // 全局圆角
     },
-
-    // 使用 MUI 默认的 shadows，无需配置
-
-    // transitions、zIndex、mixins 等一般情况下保持默认，无需手动配置
-    // transitions: { create: (props) => { … } },
-    // zIndex: { appBar: 1100, drawer: 1200, modal: 1300, … },
-    // mixins: { toolbar: { minHeight: 56, … } },
 });
 
 /**
