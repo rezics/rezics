@@ -1,6 +1,6 @@
 import { Box, Chip, Rating, Container, Grid, Stack, Typography } from "@mui/material";
 
-import { Book } from "@/page/Book/BookPage";
+import { Book } from "@/api/book";
 
 export function BookHero({ data }: { data: Book }) {
     return (

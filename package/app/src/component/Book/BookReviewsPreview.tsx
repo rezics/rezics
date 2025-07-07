@@ -31,7 +31,7 @@ interface BookReviewsState {
     isReplyModalOpen: boolean;
 }
 
-export const BookReviews: React.FC<BookReviewsProps> = ({ bookId, title }) => {
+export const BookReviews: React.FC<BookReviewsProps> = ({ bookId }) => {
     const state = useMemo(() => proxy({ reviews: [], isReplyModalOpen: false } as BookReviewsState | any), []);
 
     const [result] = useQuery({

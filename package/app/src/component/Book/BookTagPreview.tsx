@@ -71,10 +71,7 @@ export const BookTag: React.FC<BookTagProps> = ({ tagObjects: propTagObjects }) 
     );
 };
 
-export function BookTagEdit({
-    tagObjects,
-    updateTagObjects,
-}: {
+export function BookTagEdit({}: {
     tagObjects: TagGroupObject[];
     updateTagObjects: (tagObjects: TagGroupObject[]) => void;
 }) {

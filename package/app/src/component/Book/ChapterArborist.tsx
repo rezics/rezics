@@ -1,14 +1,9 @@
 // https://github.com/brimdata/react-arborist
 
-import { ChapterTreeNode, ChapterOrderType } from "@/component/Book/ChapterList";
-import { buildTree } from "@/util/treeAbstract";
-import { useMemo, useState, useEffect, useCallback, CSSProperties, useRef } from "react";
+import { useMemo, useState, useEffect, useCallback, useRef } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { Tree } from "react-arborist";
 import type { MoveHandler, RenameHandler, DeleteHandler } from "react-arborist";
-// MUI
-import Switch from "@mui/material/Switch";
-import FormControlLabel from "@mui/material/FormControlLabel";
 // 分离的 Node 渲染器工厂
 import { createChapterArboristNode } from "./ChapterArboristNode";
 

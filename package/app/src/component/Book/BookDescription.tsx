@@ -19,10 +19,7 @@ export function BookDescription({ description }: { description: string }) {
     );
 }
 
-export function BookDescriptionEdit({
-    description,
-    updateDescription,
-}: {
+export function BookDescriptionEdit({}: {
     description: string;
     updateDescription: (description: string) => void;
 }) {
