@@ -24,18 +24,18 @@ export const Register: FC = () => {
 
                 try {
                     const { error: e_name, data: _name } = string().min(1).safeParse(data.get("name"));
-                    if (e_name) throw new Error("Invalid user name.");
+                    if (e_name) throw new Error(get("auth->error->invalid_username"));
 
                     const { error: e_email, data: _email } = email().safeParse(data.get("email"));
-                    if (e_email) throw new Error("Invalid email address.");
+                    if (e_email) throw new Error(get("auth->error->invalid_email"));
 
                     const { error: e_password, data: _password } = string().min(6).safeParse(data.get("password"));
-                    if (e_password) throw new Error("Password must be at least 6 characters long.");
+                    if (e_password) throw new Error(get("auth->error->invalid_password"));
 
                     const { error: e_confirm, data: _confirm } = string().safeParse(data.get("confirm"));
-                    if (e_confirm) throw new Error("Invalid password confirmation.");
+                    if (e_confirm) throw new Error(get("auth->error->invalid_confirm"));
 
-                    if (_password !== _confirm) throw new Error("Passwords do not match.");
+                    if (_password !== _confirm) throw new Error(get("auth->error->passwords_mismatch"));
 
                     await register(_name, _email, _password);
                 } catch (e) {

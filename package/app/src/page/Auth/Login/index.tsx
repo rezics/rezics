@@ -23,10 +23,10 @@ export const Login: FC = () => {
 
                 try {
                     const { error: e_email, data: _email } = email().safeParse(data.get("email"));
-                    if (e_email) throw new Error("Invalid email address.");
+                    if (e_email) throw new Error(get("auth->error->invalid_email"));
 
                     const { error: e_password, data: _password } = string().safeParse(data.get("password"));
-                    if (e_password) throw new Error("Invalid password.");
+                    if (e_password) throw new Error(get("auth->error->invalid_password"));
 
                     await login(_email, _password);
                 } catch (e) {
