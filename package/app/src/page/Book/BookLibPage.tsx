@@ -66,14 +66,13 @@ export const BookLib = () => {
             )}
 
             {books.length > 0 && (
-            <div className="mt-4 flex justify-end">
-                <BookSearchFilter />
-            </div>
+                <div className="mt-4 flex justify-end">
+                    <BookSearchFilter />
+                </div>
             )}
 
             <BookListView books={books} />
             {/* <CardBookList books={books} /> */}
-            
         </div>
     );
 };

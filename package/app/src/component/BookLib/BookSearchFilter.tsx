@@ -86,4 +86,4 @@ export const BookSearchFilter = () => {
             </Menu>
         </Stack>
     );
-}
+};

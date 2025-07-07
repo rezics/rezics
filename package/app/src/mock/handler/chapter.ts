@@ -8,18 +8,18 @@ export const chapterHandlers = [
     graphql.query("ChapterContentQuery", ({ variables }) => {
         let chapterContent = chapterContent01;
         // chapterContent.content = chapterContent01.content.repeat(100);
-        // chapterContent.content += "\n\n\n\n\n" 
+        // chapterContent.content += "\n\n\n\n\n"
         // chapterContent.content = chapterContent.content.repeat(10);
         const chapterId = Math.floor(Math.random() * 1800);
         const chapters = new Map(Object.entries(chapterList01.chapters));
-        if(chapters.has(chapterId.toString())) {
+        if (chapters.has(chapterId.toString())) {
             chapterContent.chapterName = chapters.get(chapterId.toString())!.title || "章节名称";
         } else {
             chapterContent.chapterName = "章节名称";
         }
 
         return HttpResponse.json({
-            data: chapterContent
+            data: chapterContent,
         });
     }),
 
@@ -37,4 +37,4 @@ export const chapterHandlers = [
     //         },
     //     });
     // }),
-] 
+];

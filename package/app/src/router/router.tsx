@@ -37,117 +37,117 @@ import { LongReviewEditPage } from "@/page/Review/ReviewEditPage";
  * an always-truthy Layout component first.
  */
 export default (
-  <Router>
-    <ThemeProvider theme={{}}>
-      <Switch>
-        {/* Auth */}
-        <Route path="/login" component={Login} />
-        <Route path="/register" component={Login} />
+    <Router>
+        <ThemeProvider theme={{}}>
+            <Switch>
+                {/* Auth */}
+                <Route path="/login" component={Login} />
+                <Route path="/register" component={Login} />
 
-        {/* Book Read – keep the more specific path first */}
-        <Route path="/book/:bookId/read/:chapterId">
-          {() => (
-            <BookReadLayout>
-              <BookReadChapterPage />
-            </BookReadLayout>
-          )}
-        </Route>
+                {/* Book Read – keep the more specific path first */}
+                <Route path="/book/:bookId/read/:chapterId">
+                    {() => (
+                        <BookReadLayout>
+                            <BookReadChapterPage />
+                        </BookReadLayout>
+                    )}
+                </Route>
 
-        {/* Book Edit (chapter first, then main) */}
-        <Route path="/book/:bookId/edit/:chapterId">
-          {() => (
-            <BookEditLayout>
-              <BookEditChapterPage />
-            </BookEditLayout>
-          )}
-        </Route>
-        <Route path="/book/:bookId/edit">
-          {() => (
-            <BookEditLayout>
-              <BookEditMainPage />
-            </BookEditLayout>
-          )}
-        </Route>
+                {/* Book Edit (chapter first, then main) */}
+                <Route path="/book/:bookId/edit/:chapterId">
+                    {() => (
+                        <BookEditLayout>
+                            <BookEditChapterPage />
+                        </BookEditLayout>
+                    )}
+                </Route>
+                <Route path="/book/:bookId/edit">
+                    {() => (
+                        <BookEditLayout>
+                            <BookEditMainPage />
+                        </BookEditLayout>
+                    )}
+                </Route>
 
-        {/* Book Info Routes */}
-        <Route path="/books">
-          <MainLayout>
-            <BookLib />
-          </MainLayout>
-        </Route>
-        <Route path="/book/:bookId">
-          {() => (
-            <MainLayout>
-              <BookDetail />
-            </MainLayout>
-          )}
-        </Route>
+                {/* Book Info Routes */}
+                <Route path="/books">
+                    <MainLayout>
+                        <BookLib />
+                    </MainLayout>
+                </Route>
+                <Route path="/book/:bookId">
+                    {() => (
+                        <MainLayout>
+                            <BookDetail />
+                        </MainLayout>
+                    )}
+                </Route>
 
-        {/* Review Routes */}
-        <Route path="/review/short/book/:bookId">
-          {() => (
-            <MainLayout>
-              <ShortReviewPage />
-            </MainLayout>
-          )}
-        </Route>
-        <Route path="/review/long/book/:bookId">
-          {() => (
-            <MainLayout>
-              <LongReviewPage />
-            </MainLayout>
-          )}
-        </Route>
-        <Route path="/review/long/book/:bookId/edit">
-          {() => (
-            <MainLayout>
-              <LongReviewEditPage />
-            </MainLayout>
-          )}
-        </Route>
+                {/* Review Routes */}
+                <Route path="/review/short/book/:bookId">
+                    {() => (
+                        <MainLayout>
+                            <ShortReviewPage />
+                        </MainLayout>
+                    )}
+                </Route>
+                <Route path="/review/long/book/:bookId">
+                    {() => (
+                        <MainLayout>
+                            <LongReviewPage />
+                        </MainLayout>
+                    )}
+                </Route>
+                <Route path="/review/long/book/:bookId/edit">
+                    {() => (
+                        <MainLayout>
+                            <LongReviewEditPage />
+                        </MainLayout>
+                    )}
+                </Route>
 
-        {/* BookList Routes */}
-        <Route path="/booklist/:booklistId">
-          {() => (
-            <MainLayout>
-              <BookListPage />
-            </MainLayout>
-          )}
-        </Route>
-        <Route path="/booklist/:booklistId/edit">
-          {() => (
-            <MainLayout>
-              <BookListEditPage />
-            </MainLayout>
-          )}
-        </Route>
-        <Route path="/booklist/book/:bookId">
-          {() => (
-            <MainLayout>
-              <BookCollectionListPage />
-            </MainLayout>
-          )}
-        </Route>
+                {/* BookList Routes */}
+                <Route path="/booklist/:booklistId">
+                    {() => (
+                        <MainLayout>
+                            <BookListPage />
+                        </MainLayout>
+                    )}
+                </Route>
+                <Route path="/booklist/:booklistId/edit">
+                    {() => (
+                        <MainLayout>
+                            <BookListEditPage />
+                        </MainLayout>
+                    )}
+                </Route>
+                <Route path="/booklist/book/:bookId">
+                    {() => (
+                        <MainLayout>
+                            <BookCollectionListPage />
+                        </MainLayout>
+                    )}
+                </Route>
 
-        {/* Test */}
-        <Route path="/test">
-          <MainLayout>
-            <TestPage />
-          </MainLayout>
-        </Route>
+                {/* Test */}
+                <Route path="/test">
+                    <MainLayout>
+                        <TestPage />
+                    </MainLayout>
+                </Route>
 
-        {/* Home */}
-        <Route path="/">
-          <MainLayout>
-            <Home />
-          </MainLayout>
-        </Route>
+                {/* Home */}
+                <Route path="/">
+                    <MainLayout>
+                        <Home />
+                    </MainLayout>
+                </Route>
 
-        {/* 404 fallback */}
-        <Route>
-            <NotFound />
-        </Route>
-      </Switch>
-    </ThemeProvider>
-  </Router>
+                {/* 404 fallback */}
+                <Route>
+                    <NotFound />
+                </Route>
+            </Switch>
+        </ThemeProvider>
+    </Router>
 );

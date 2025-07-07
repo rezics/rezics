@@ -33,7 +33,7 @@ const ReplyDrawer: React.FC<ReplyDrawerProps> = ({ dialogId, onSubmit }) => {
     }
 
     return (
-        <Drawer open={entry?.visible ?? false} onClose={handleClose} anchor="bottom" sx={{ zIndex: 2000 }} >
+        <Drawer open={entry?.visible ?? false} onClose={handleClose} anchor="bottom" sx={{ zIndex: 2000 }}>
             {/* 选择下方div的父元素，可以调整背景为透明 */}
             <div className="w-3/4 mx-auto flex gap-4 mt-4 min-h-[250px] h-[400px]">
                 {/* 左边编辑器，占大部分宽度 */}

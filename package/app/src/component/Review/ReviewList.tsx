@@ -21,8 +21,10 @@ interface BookReviewsState {
 }
 
 export function ReviewList({ reviews }: { reviews: BookReview[] }) {
-
-    const state = useMemo(() => proxy({ reviews: [], isReplyModalOpen: false, currentReplyId: null } as BookReviewsState | any), []);
+    const state = useMemo(
+        () => proxy({ reviews: [], isReplyModalOpen: false, currentReplyId: null } as BookReviewsState | any),
+        [],
+    );
 
     function handleReply(reviewId: string) {
         state.isReplyModalOpen = true;

@@ -1,6 +1,7 @@
 Get-ChildItem -Path . -Recurse -Include "node_modules", "package-lock.json", "pnpm-lock.yaml" | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
 
 ## TECH_STACK
+
 - https://react.dev/
 - 组件库：https://mui.com/
 - 路由：https://github.com/molefrog/wouter
@@ -8,15 +9,17 @@ Get-ChildItem -Path . -Recurse -Include "node_modules", "package-lock.json", "pn
 - 组件状态管理：https://github.com/pmndrs/valtio
 
 ## Monorepo
+
 - https://rushjs.io/
 
 ## DashBoard
+
 - https://refine.dev/
 
 ## GraphQL
-- https://github.com/urql-graphql/urql 
-- Appwrite SDK https://appwrite.io/docs/sdks
 
+- https://github.com/urql-graphql/urql
+- Appwrite SDK https://appwrite.io/docs/sdks
 
 # `create-preact`
 

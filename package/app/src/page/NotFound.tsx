@@ -19,9 +19,7 @@ export const NotFound = () => {
                 </CardContent>
                 <CardActions className="flex flex-row justify-between">
                     <Button onClick={() => history.back()}>Back</Button>
-                    <Button onClick={() => navigate("/")}>
-                        Home
-                    </Button>
+                    <Button onClick={() => navigate("/")}>Home</Button>
                 </CardActions>
             </Card>
         </div>

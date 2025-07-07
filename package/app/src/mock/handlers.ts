@@ -9,7 +9,7 @@ export const handlers = [
         console.warn(`[MSW] ⚠️ Unhandled GraphQL operation: ${req.operationName}`);
         return HttpResponse.json(
             { errors: [{ message: `No mock handler for operation: ${req.operationName}` }] },
-            { status: 400 }
+            { status: 400 },
         );
     }),
 ];

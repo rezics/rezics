@@ -1,60 +1,60 @@
 type User {
-  id: ID!
-  name: String!
-  avatar: String!
+    id: ID!
+    name: String!
+    avatar: String!
 }
 
 type Review {
-  id: ID!
-  content: String!
-  rating: Float!
-  createdAt: String!
-  user: User!
+    id: ID!
+    content: String!
+    rating: Float!
+    createdAt: String!
+    user: User!
 }
 
 type BookList {
-  id: ID!
-  title: String!
-  description: String!
-  books: [String!]!
-  creator: User!
-  likes: Int!
-  commentsNumber: Int!
+    id: ID!
+    title: String!
+    description: String!
+    books: [String!]!
+    creator: User!
+    likes: Int!
+    commentsNumber: Int!
 }
 
 type Comment {
-  id: ID!
-  content: String!
-  createdAt: String!
-  user: User!
-  likes: Int!
-  replies: [Comment!]
+    id: ID!
+    content: String!
+    createdAt: String!
+    user: User!
+    likes: Int!
+    replies: [Comment!]
 }
 
 type AuthPayload {
-  token: String!
-  user: User!
+    token: String!
+    user: User!
 }
 
 type ValidationError {
-  field: String!
-  message: String!
+    field: String!
+    message: String!
 }
 
 type Query {
-  bookReviews(bookId: ID!): [Review!]!
-  bookLists: [BookList!]!
-  bookList(id: ID!): BookList
-  comments(bookListId: ID!): [Comment!]!
-  me: User
+    bookReviews(bookId: ID!): [Review!]!
+    bookLists: [BookList!]!
+    bookList(id: ID!): BookList
+    comments(bookListId: ID!): [Comment!]!
+    me: User
 }
 
 type Mutation {
-  addReview(bookId: ID!, content: String!, rating: Float!): Review!
-  addComment(bookListId: ID!, content: String!): Comment!
-  addReply(commentId: ID!, content: String!): Comment!
-  login(email: String!, password: String!): AuthPayload!
-  register(email: String!, password: String!): AuthPayload!
-  validateEmail(email: String!): [ValidationError!]
-  validatePassword(password: String!): [ValidationError!]
-} 
+    addReview(bookId: ID!, content: String!, rating: Float!): Review!
+    addComment(bookListId: ID!, content: String!): Comment!
+    addReply(commentId: ID!, content: String!): Comment!
+    login(email: String!, password: String!): AuthPayload!
+    register(email: String!, password: String!): AuthPayload!
+    validateEmail(email: String!): [ValidationError!]
+    validatePassword(password: String!): [ValidationError!]
+}

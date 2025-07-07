@@ -16,4 +16,4 @@ export const handlers = [
     ...bookReviewsHandlers,
     ...homepageHandlers,
     ...chapterHandlers,
-] 
+];

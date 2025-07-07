@@ -12,7 +12,16 @@ import FormControlLabel from "@mui/material/FormControlLabel";
 // 分离的 Node 渲染器工厂
 import { createChapterArboristNode } from "./ChapterArboristNode";
 
-import { findAndRemove, findAndInsert, findAndEdit, findAndDelete, findAndAddChild, insertSiblingAfter, moveSiblingFirst, moveSiblingLast } from "@/util/arboristTreeUtil";
+import {
+    findAndRemove,
+    findAndInsert,
+    findAndEdit,
+    findAndDelete,
+    findAndAddChild,
+    insertSiblingAfter,
+    moveSiblingFirst,
+    moveSiblingLast,
+} from "@/util/arboristTreeUtil";
 
 type Chapter = {
     id: string | number;
@@ -21,8 +30,6 @@ type Chapter = {
 };
 
 /* Helper functions for immutable tree manipulation */
-
-
 
 interface ChapterArboristProps {
     chapterTree: any;
@@ -35,7 +42,15 @@ interface ChapterArboristProps {
 }
 
 // you can't use chaptersData = {} to give a default value, because it will cause the Maximum update Warning
-export const ChapterArborist: React.FC<ChapterArboristProps> = ({ chapterTree, isDraggable, enableDoubleClickRename, tHeight, searchTerm, selectedId, baseLink }) => {
+export const ChapterArborist: React.FC<ChapterArboristProps> = ({
+    chapterTree,
+    isDraggable,
+    enableDoubleClickRename,
+    tHeight,
+    searchTerm,
+    selectedId,
+    baseLink,
+}) => {
     const treeRef: any = useRef(null);
 
     const [treeData, setTreeData] = useState<Chapter[]>([]);
@@ -109,7 +124,7 @@ export const ChapterArborist: React.FC<ChapterArboristProps> = ({ chapterTree, i
                 disableDrop={!isDraggable}
                 idAccessor="id"
                 searchTerm={searchTerm}
-                selection={selectedId ?? ''}
+                selection={selectedId ?? ""}
                 searchMatch={(node, t) => node.data.title.toLowerCase().includes(t.toLowerCase())}
                 childrenAccessor="children"
                 className="overflow-auto no-scrollbar"
@@ -121,7 +136,7 @@ export const ChapterArborist: React.FC<ChapterArboristProps> = ({ chapterTree, i
                     className="fixed z-50 bg-white border rounded shadow"
                     style={{ top: contextMenu.y, left: contextMenu.x, minWidth: 120 }}
                     onClick={() => setContextMenu(null)}
-                    onContextMenu={e => e.preventDefault()}
+                    onContextMenu={(e) => e.preventDefault()}
                 >
                     <li
                         className="px-4 py-2 hover:bg-gray-100 cursor-pointer"

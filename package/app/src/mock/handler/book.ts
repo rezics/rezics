@@ -32,7 +32,6 @@ export const bookHandlers = [
 
     // ANCHOR 🟢 Query: SearchBooks
     graphql.query("SearchBooks", ({ variables }) => {
-        
         console.log("SearchBooks", variables);
 
         return HttpResponse.json({
@@ -41,4 +40,4 @@ export const bookHandlers = [
             },
         });
     }),
-] 
+];

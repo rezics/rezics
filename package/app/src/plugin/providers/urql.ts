@@ -1,10 +1,4 @@
-import {
-    createClient,
-    cacheExchange,
-    fetchExchange,
-    type Exchange,
-    Provider,
-} from "urql";
+import { createClient, cacheExchange, fetchExchange, type Exchange, Provider } from "urql";
 import { retryExchange } from "@urql/exchange-retry";
 import { devtoolsExchange } from "@urql/devtools";
 

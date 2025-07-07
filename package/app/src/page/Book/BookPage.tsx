@@ -1,15 +1,5 @@
 import React from "react";
-import {
-    Box,
-    Container,
-    Grid,
-    Typography,
-    Paper,
-    Divider,
-    Avatar,
-    Stack,
-    Tab,
-} from "@mui/material";
+import { Box, Container, Grid, Typography, Paper, Divider, Avatar, Stack, Tab } from "@mui/material";
 import { TabContext, TabList, TabPanel } from "@mui/lab";
 import { useParams, Link } from "wouter";
 import { BookTagView } from "@/component/Book/BookTagPreview";
@@ -99,7 +89,10 @@ export const BookDetail: React.FC = () => {
                                     <BookReviews bookId={data?.book.id || ""} title={data?.book.title || ""} />
 
                                     {/* ANCHOR Book Lists */}
-                                    <ReadlistByBookPreview bookId={data?.book.id || ""} title={data?.book.title || ""} />
+                                    <ReadlistByBookPreview
+                                        bookId={data?.book.id || ""}
+                                        title={data?.book.title || ""}
+                                    />
                                 </Stack>
                             </TabPanel>
 

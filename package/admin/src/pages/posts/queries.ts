@@ -31,11 +31,7 @@ export const POST_EDIT_MUTATION = gql`
 `;
 
 export const POSTS_LIST_QUERY = gql`
-    query BlogPostsList(
-        $paging: OffsetPaging!
-        $filter: BlogPostFilter
-        $sorting: [BlogPostSort!]!
-    ) {
+    query BlogPostsList($paging: OffsetPaging!, $filter: BlogPostFilter, $sorting: [BlogPostSort!]!) {
         blogPosts(paging: $paging, filter: $filter, sorting: $sorting) {
             nodes {
                 id
