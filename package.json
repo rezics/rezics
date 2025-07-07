@@ -7,14 +7,8 @@
     "packageManager": "pnpm@10.12.4",
     "type": "module",
     "devDependencies": {
-        "@tsconfig/strictest": "^2.0.5",
         "dotenv": "^16.5.0",
         "prettier": "^3.5.3"
     },
-    "dependencies": {
-        "@supabase/supabase-js": "^2.49.9",
-        "@urql/exchange-auth": "^2.2.1",
-        "fp-ts": "^2.16.10",
-        "zod": "^3.25.48"
-    }
+    "dependencies": {}
 }
