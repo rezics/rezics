@@ -7,15 +7,6 @@ import {
 } from "urql";
 import { retryExchange } from "@urql/exchange-retry";
 import { devtoolsExchange } from "@urql/devtools";
-import { authExchange } from "@urql/exchange-auth";
-
-// --- 1. 身份验证逻辑 ---
-const getAuthToken = (): string | null => {
-    if (typeof window === "undefined") {
-        return null;
-    }
-    return localStorage.getItem("authToken");
-};
 
 // --- 2. 配置 Exchanges (交换) ---
 const exchanges: Exchange[] = [
@@ -27,32 +18,6 @@ const exchanges: Exchange[] = [
         maxNumberAttempts: 3,
         retryIf: (err) => !!(err && err.networkError),
     }),
-    authExchange(async (utils) => {
-        const token = getAuthToken();
-
-        return {
-            addAuthToOperation(operation) {
-                if (token) {
-                    return utils.appendHeaders(operation, {
-                        Authorization: `Bearer ${token}`,
-                    });
-                }
-                return operation;
-            },
-            didAuthError(error) {
-                return error.graphQLErrors.some(
-                    (e) => e.extensions?.["code"] === "FORBIDDEN",
-                );
-            },
-            async refreshAuth() {
-                // TODO: Handle token refresh logic if your API supports it.
-                // For now, we'll just clear the token.
-                localStorage.removeItem("authToken");
-            },
-        };
-    }),
-    // we need to add timeoutExchange to handle the timeout of the request
-    // timeoutExchange, 
     fetchExchange,
 ];
 
