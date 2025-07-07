@@ -2,6 +2,7 @@ import { useState } from "react";
 import { TextField, IconButton, Stack, Chip } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import { parseSearchString, SearchInfo } from "@util/searchParser";
+import { get } from "@locale";
 
 interface BookSearchProps {
     onSearch: (info: SearchInfo) => void;
@@ -38,13 +39,13 @@ export const BookSearch: React.FC<BookSearchProps> = ({ onSearch }) => {
                 <TextField
                     fullWidth
                     size="small"
-                    label="Search books"
+                    label={get("placeholders->search_books")}
                     placeholder='Try: "[tag] author:John"'
                     value={value}
                     onChange={(e) => setValue(e.target.value)}
                     onKeyDown={handleKeyDown}
                 />
-                <IconButton color="primary" aria-label="search" onClick={handleSearch}>
+                <IconButton color="primary" aria-label={get("accessibility->search")} onClick={handleSearch}>
                     <SearchIcon />
                 </IconButton>
             </div>

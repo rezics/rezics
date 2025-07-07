@@ -1,3 +1,3 @@
 export function ShortReviewPage() {
-    return <div>ShortReviewPage</div>;
+    return <div>{get("pages->short_review_page")}</div>;
 }

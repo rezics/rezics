@@ -32,7 +32,7 @@ export const Header: React.FC<HeaderProps> = ({ handleDrawerToggle, mode, onThem
             <Toolbar>
                 <IconButton
                     color="inherit"
-                    aria-label="open drawer"
+                    aria-label={get("accessibility->open_drawer")}
                     onClick={handleDrawerToggle}
                     edge="start"
                     sx={{ mr: 2, display: sidebarOpen ? "none" : "flex" }}
