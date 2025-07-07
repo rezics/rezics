@@ -1,6 +1,5 @@
 import React from "react";
 import { User } from "./User";
-import { useSnapshot } from "valtio";
 import { useTheme } from "@mui/material/styles";
 import { useLayoutStore } from "@/global/layoutStore";
 import { AppBar, IconButton, Toolbar, Typography } from "@mui/material";

@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, styled, useTheme, Typography } from "@mui/material";
+import { Box, styled, Typography } from "@mui/material";
 import { ArrowForwardIos } from "@mui/icons-material";
 
 interface ArrowForwardIconProps {
@@ -19,8 +19,7 @@ const LinkWithIcon = styled(Box)(({ theme }) => ({
     },
 }));
 
-export const ArrowForwardIcon: React.FC<ArrowForwardIconProps> = ({ size = 24, color, children }) => {
-    const theme = useTheme();
+export const ArrowForwardIcon: React.FC<ArrowForwardIconProps> = ({ size = 24, children }) => {
 
     return (
         <LinkWithIcon>

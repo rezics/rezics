@@ -1,16 +1,8 @@
 import React from "react";
-import { Box, Grid, Typography, Avatar, IconButton, Card, CardContent, Stack } from "@mui/material";
-import { proxy, useSnapshot } from "valtio";
-import { Favorite } from "@mui/icons-material";
+import { Grid } from "@mui/material";
 import { BookList } from "@/api/readlist";
 import { useLocation } from "wouter";
 import { SingleReadlist } from "./SingleReadlist";
-
-const state = proxy({
-    booklists: [] as BookList[],
-    loading: false,
-    error: null as string | null,
-});
 
 // * Complete list of book-related reading lists.
 export function ReadlistList({ booklists }: { booklists: BookList[] }) {

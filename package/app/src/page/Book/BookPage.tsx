@@ -9,8 +9,7 @@ import { AccentBarWithText } from "@component/Common/AccentBar";
 
 import { BookInfoQuery } from "@/api/book";
 import { useQuery } from "urql";
-import { Book, BookInfo, Author } from "@/api/book";
-import { TagGroupObject } from "@/api/tag";
+import { Book, BookInfo } from "@/api/book";
 
 import { ChapterList } from "@component/Book/ChapterList";
 import { ArrowForwardIcon } from "@component/Common/ArrowForwardIcon";

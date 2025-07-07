@@ -37,7 +37,7 @@ const stateUtils = {
         (notifications: ReadonlyArray<string>): ReadonlyArray<string> =>
             pipe(
                 notifications,
-                A.filterWithIndex((_, i) => i !== index),
+                (arr) => arr.filter((_, i) => i !== index),
             ),
 
     /**

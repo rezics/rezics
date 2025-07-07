@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { TextField, IconButton, Stack, Chip } from "@mui/material";
+import { TextField, IconButton, Chip } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import { parseSearchString, SearchInfo } from "@util/searchParser";
 import { get } from "@locale";

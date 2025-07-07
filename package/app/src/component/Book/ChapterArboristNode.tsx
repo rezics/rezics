@@ -29,7 +29,6 @@ export const createChapterArboristNode = (
     baseLink: string,
 ) => {
     return function ChapterArboristNode({ node, style, dragHandle }: NodeRendererProps<Chapter>) {
-        const isInternal = node.isInternal;
 
         return (
             <div
