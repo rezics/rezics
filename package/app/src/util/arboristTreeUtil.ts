@@ -1,5 +1,6 @@
-import { pipe } from "@/util/fp";
-import { A, O } from "@/util/fp";
+import { pipe } from "effect/Function";
+import * as Array from "effect/Array";
+import * as Option from "effect/Option";
 
 export interface BaseNode {
     id: string | number;
@@ -21,14 +22,14 @@ const normalizeId = (id: string | number): string => String(id);
 const idsEqual = (id1: string | number, id2: string | number): boolean => normalizeId(id1) === normalizeId(id2);
 
 // 辅助函数：在数组中查找节点索引
-const findNodeIndex = (nodes: TreeNode[], targetId: string | number): O.Option<number> =>
-    A.findFirstIndex(nodes, (node) => idsEqual(node.id, targetId));
+const findNodeIndex = (nodes: TreeNode[], targetId: string | number): Option.Option<number> =>
+    Array.findFirstIndex(nodes, (node: TreeNode) => idsEqual(node.id, targetId));
 
 // 辅助函数：安全地在指定位置插入元素
 const insertAt =
     <T>(index: number, items: T[]) =>
     (array: T[]): T[] => {
-        const [before, after] = A.splitAt(array, index);
+        const [before, after] = Array.splitAt(array, index);
         return [...before, ...items, ...after];
     };
 
@@ -45,27 +46,29 @@ const cloneNode = (node: TreeNode): TreeNode => {
  * 查找并移除指定 ID 的节点
  */
 export const findAndRemove = (
+    // 返回一个元组 [新树, 被移除的节点]
     tree: ReadonlyArray<TreeNode>,
     ids: ReadonlyArray<string | number>,
-    removed: TreeNode[],
-): TreeNode[] => {
+): [TreeNode[], TreeNode[]] => {
     const idsSet = new Set(ids.map(normalizeId));
+    const removedNodes: TreeNode[] = [];
 
-    const processNode = (node: TreeNode): O.Option<TreeNode> => {
+    const processNode = (node: TreeNode): Option.Option<TreeNode> => {
         if (idsSet.has(normalizeId(node.id))) {
-            removed.push(cloneNode(node));
-            return O.none();
+            removedNodes.push(cloneNode(node));
+            return Option.none();
         }
 
         if (node.children) {
-            const newChildren = A.getSomes(node.children.map(processNode));
-            return O.some({ ...node, children: newChildren });
+            const newChildren = Array.getSomes(node.children.map(processNode));
+            return Option.some({ ...node, children: newChildren });
         }
 
-        return O.some(node);
+        return Option.some(node);
     };
 
-    return A.getSomes(Array.from(tree).map(processNode));
+    const newTree = Array.getSomes([...tree].map(processNode));
+    return [newTree, removedNodes];
 };
 
 /**
@@ -78,13 +81,13 @@ export const findAndInsert = (
     nodesToInsert: ReadonlyArray<TreeNode>,
 ): TreeNode[] => {
     if (parentId === null) {
-        return insertAt(index, Array.from(nodesToInsert))(Array.from(tree));
+        return insertAt(index, [...nodesToInsert])([...tree]);
     }
 
     const processNode = (node: TreeNode): TreeNode => {
         if (idsEqual(node.id, parentId!)) {
             const currentChildren = node.children ?? [];
-            const newChildren = insertAt(index, Array.from(nodesToInsert))(currentChildren);
+            const newChildren = insertAt(index, [...nodesToInsert])(currentChildren);
             return { ...node, children: newChildren };
         }
 
@@ -127,13 +130,13 @@ export const findAndDelete = (tree: ReadonlyArray<TreeNode>, ids: ReadonlyArray<
 
     const processNode = (node: TreeNode): TreeNode => {
         if (node.children) {
-            const filteredChildren = pipe(node.children, A.filter(shouldKeep), A.map(processNode));
+            const filteredChildren = pipe(node.children, Array.filter(shouldKeep), Array.map(processNode));
             return { ...node, children: filteredChildren };
         }
         return node;
     };
 
-    return pipe(tree, A.filter(shouldKeep), A.map(processNode));
+    return pipe(tree, Array.filter(shouldKeep), Array.map(processNode));
 };
 
 /**
@@ -171,16 +174,16 @@ export const insertSiblingAfter = (
     let processed = false;
 
     const processNodes = (nodes: ReadonlyArray<TreeNode>): TreeNode[] => {
-        if (processed) return Array.from(nodes);
+        if (processed) return [...nodes];
 
         return pipe(
-            findNodeIndex(Array.from(nodes), targetId),
-            O.match({
+            findNodeIndex([...nodes], targetId),
+            Option.match({
                 onNone: () =>
                     nodes.map((node) => (node.children ? { ...node, children: processNodes(node.children) } : node)),
-                onSome: (index) => {
+                onSome: (index: number) => {
                     processed = true;
-                    return insertAt(index + 1, [newNode])(Array.from(nodes));
+                    return insertAt(index + 1, [newNode])([...nodes]);
                 },
             }),
         );
@@ -196,18 +199,18 @@ export const moveSiblingFirst = (tree: ReadonlyArray<TreeNode>, targetId: string
     let processed = false;
 
     const processNodes = (nodes: ReadonlyArray<TreeNode>): TreeNode[] => {
-        if (processed) return Array.from(nodes);
+        if (processed) return [...nodes];
 
         return pipe(
-            findNodeIndex(Array.from(nodes), targetId),
-            O.match({
+            findNodeIndex([...nodes], targetId),
+            Option.match({
                 onNone: () =>
                     nodes.map((node) => (node.children ? { ...node, children: processNodes(node.children) } : node)),
-                onSome: (index) => {
+                onSome: (index: number) => {
                     processed = true;
-                    const nodeArray = Array.from(nodes);
+                    const nodeArray = [...nodes];
                     const targetNode = nodeArray[index]!;
-                    const otherNodes = nodeArray.filter((_, i) => i !== index);
+                    const otherNodes = nodeArray.filter((_: TreeNode, i: number) => i !== index);
                     return [targetNode, ...otherNodes];
                 },
             }),
@@ -224,18 +227,18 @@ export const moveSiblingLast = (tree: ReadonlyArray<TreeNode>, targetId: string 
     let processed = false;
 
     const processNodes = (nodes: ReadonlyArray<TreeNode>): TreeNode[] => {
-        if (processed) return Array.from(nodes);
+        if (processed) return [...nodes];
 
         return pipe(
-            findNodeIndex(Array.from(nodes), targetId),
-            O.match({
+            findNodeIndex([...nodes], targetId),
+            Option.match({
                 onNone: () =>
                     nodes.map((node) => (node.children ? { ...node, children: processNodes(node.children) } : node)),
-                onSome: (index) => {
+                onSome: (index: number) => {
                     processed = true;
-                    const nodeArray = Array.from(nodes);
+                    const nodeArray = [...nodes];
                     const targetNode = nodeArray[index]!;
-                    const otherNodes = nodeArray.filter((_, i) => i !== index);
+                    const otherNodes = nodeArray.filter((_: TreeNode, i: number) => i !== index);
                     return [...otherNodes, targetNode];
                 },
             }),

@@ -1,7 +1,6 @@
 import { create } from "zustand";
-import { pipe } from "@/util/fp";
-import { A } from "@/util/fp";
-import { objectUtils } from "@/util/fp";
+import { pipe } from "effect/Function";
+import * as Array from "effect/Array";
 
 interface UIState {
     // 状态
@@ -27,7 +26,7 @@ const stateUtils = {
     addNotification:
         (message: string) =>
         (notifications: ReadonlyArray<string>): ReadonlyArray<string> =>
-            pipe(notifications, A.append(message)),
+            pipe(notifications, Array.append(message)),
 
     /**
      * 安全地移除指定索引的通知
@@ -35,10 +34,7 @@ const stateUtils = {
     removeNotification:
         (index: number) =>
         (notifications: ReadonlyArray<string>): ReadonlyArray<string> =>
-            pipe(
-                notifications,
-                (arr) => arr.filter((_, i) => i !== index),
-            ),
+            pipe(notifications, (arr) => arr.filter((_, i) => i !== index)),
 
     /**
      * 清空通知数组
@@ -63,7 +59,7 @@ export const uiStore = create<UIState>((set) => ({
             sidebarOpen: stateUtils.toggle(state.sidebarOpen),
         })),
 
-    setCurrentPage: (page) => set(objectUtils.updateProp("currentPage", page)),
+    setCurrentPage: (page) => set((state) => ({ ...state, currentPage: page })),
 
     addNotification: (message) =>
         set((state) => ({
@@ -76,7 +72,7 @@ export const uiStore = create<UIState>((set) => ({
         })),
 
     clearNotifications: () =>
-        set((state) => ({
+        set(() => ({
             notifications: stateUtils.clearNotifications(),
         })),
 }));

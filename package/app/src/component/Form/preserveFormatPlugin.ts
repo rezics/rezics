@@ -1,7 +1,7 @@
 import type MarkdownIt from "markdown-it";
-import { pipe } from "@/util/fp";
-import { A, O } from "@/util/fp";
-import { stringUtils } from "@/util/fp";
+import { pipe } from "effect/Function";
+import * as Array from "effect/Array";
+import * as Option from "effect/Option";
 
 // --- 插件选项接口 ---
 export interface PreserveFormatOptions {
@@ -87,29 +87,32 @@ const createTextToken = (content: string, TokenConstructor: any): Token => {
 };
 
 // 处理单个文本部分
-const processTextPart = (part: string, TokenConstructor: any): O.Option<Token> => {
+const processTextPart = (part: string, TokenConstructor: any): Option.Option<Token> => {
     if (part.match(/ {2,}/)) {
         // 连续空格，转换为&nbsp;
         const content = "&nbsp;".repeat(part.length);
-        return O.some(createHtmlInlineToken(content, TokenConstructor));
+        return Option.some(createHtmlInlineToken(content, TokenConstructor));
     }
 
     if (part.length > 0) {
         // 普通文本
-        return O.some(createTextToken(part, TokenConstructor));
+        return Option.some(createTextToken(part, TokenConstructor));
     }
 
-    return O.none();
+    return Option.none();
 };
 
 // 分解含有连续空格的文本token
 const splitTextToken = (token: Token, TokenConstructor: any): Token[] => {
-    const parts = pipe(token.content, stringUtils.split(/( {2,})/g));
+    const parts = pipe(
+        token.content.split(/( {2,})/g),
+        Array.filter((s: string) => s.length > 0),
+    );
 
     return pipe(
         parts,
-        A.map((part) => processTextPart(part, TokenConstructor)),
-        A.getSomes, // 移除None值，只保留Some中的值
+        Array.map((part: string) => processTextPart(part, TokenConstructor)),
+        Array.getSomes, // 移除None值，只保留Some中的值
     );
 };
 
@@ -125,7 +128,7 @@ const processToken = (token: Token, TokenConstructor: any): Token[] => {
 const processInlineTokenChildren = (children: Token[], TokenConstructor: any): Token[] => {
     return pipe(
         children,
-        A.flatMap((token) => processToken(token, TokenConstructor)),
+        Array.flatMap((token: any) => processToken(token, TokenConstructor)),
     );
 };
 
@@ -142,7 +145,7 @@ const processBlockToken = (blockToken: Token, TokenConstructor: any): Token => {
 const preserveSpacesCore = (state: any): void => {
     const processedTokens = pipe(
         state.tokens,
-        A.map((token) => processBlockToken(token, state.Token)),
+        Array.map((token: any) => processBlockToken(token, state.Token)),
     );
 
     state.tokens = processedTokens;
