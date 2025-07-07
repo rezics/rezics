@@ -1,7 +1,5 @@
 import { pipe } from "@/util/fp";
-import * as A from "fp-ts/lib/Array";
-import * as O from "fp-ts/lib/Option";
-import * as E from "fp-ts/lib/Either";
+import { A, O } from "@/util/fp";
 import { safeArray } from "@/util/fp";
 
 export interface BaseNode {
@@ -13,13 +11,7 @@ interface TreeNode extends BaseNode {
 }
 
 /**
- * 函数式树操作工具
- *
- * 重构改进：
- * - 纯函数设计，无副作用
- * - 使用 fp-ts 进行安全的数组操作
- * - 更好的类型安全和错误处理
- * - 避免突变，始终返回新的数据结构
+ * 树操作工具
  */
 
 // 辅助函数：安全地将 id 转换为字符串进行比较
@@ -30,16 +22,15 @@ const idsEqual = (id1: string | number, id2: string | number): boolean => normal
 
 // 辅助函数：在数组中查找节点索引
 const findNodeIndex = (nodes: TreeNode[], targetId: string | number): O.Option<number> =>
-    pipe(
-        nodes,
-        A.findIndex((node) => idsEqual(node.id, targetId)),
-    );
+    A.findFirstIndex(nodes, (node) => idsEqual(node.id, targetId));
 
 // 辅助函数：安全地在指定位置插入元素
 const insertAt =
     <T>(index: number, items: T[]) =>
-    (array: T[]): T[] =>
-        pipe(array, A.splitAt(index), ([before, after]) => [...before, ...items, ...after]);
+    (array: T[]): T[] => {
+        const [before, after] = A.splitAt(array, index);
+        return [...before, ...items, ...after];
+    };
 
 // 辅助函数：深拷贝节点（避免引用共享）
 const cloneNode = (node: TreeNode): TreeNode => ({
@@ -60,18 +51,18 @@ export const findAndRemove = (
     const processNode = (node: TreeNode): O.Option<TreeNode> => {
         if (idsSet.has(normalizeId(node.id))) {
             removed.push(cloneNode(node));
-            return O.none;
+            return O.none();
         }
 
         if (node.children) {
-            const newChildren = pipe(node.children, A.filterMap(processNode));
+            const newChildren = A.getSomes(node.children.map(processNode));
             return O.some({ ...node, children: newChildren });
         }
 
         return O.some(node);
     };
 
-    return pipe(tree, A.filterMap(processNode));
+    return A.getSomes(Array.from(tree).map(processNode));
 };
 
 /**
@@ -133,13 +124,21 @@ export const findAndDelete = (tree: ReadonlyArray<TreeNode>, ids: ReadonlyArray<
 
     const processNode = (node: TreeNode): TreeNode => {
         if (node.children) {
-            const filteredChildren = pipe(node.children, A.filter(shouldKeep), A.map(processNode));
+            const filteredChildren = pipe(
+                node.children,
+                A.filter(shouldKeep),
+                A.map(processNode)
+            );
             return { ...node, children: filteredChildren };
         }
         return node;
     };
 
-    return pipe(tree, A.filter(shouldKeep), A.map(processNode));
+    return pipe(
+        tree,
+        A.filter(shouldKeep),
+        A.map(processNode)
+    );
 };
 
 /**
@@ -181,15 +180,13 @@ export const insertSiblingAfter = (
 
         return pipe(
             findNodeIndex(Array.from(nodes), targetId),
-            O.fold(
-                // 未找到节点，递归处理子节点
-                () => nodes.map((node) => (node.children ? { ...node, children: processNodes(node.children) } : node)),
-                // 找到节点，在其后插入新节点
-                (index) => {
+            O.match({
+                onNone: () => nodes.map((node) => (node.children ? { ...node, children: processNodes(node.children) } : node)),
+                onSome: (index) => {
                     processed = true;
                     return insertAt(index + 1, [newNode])(Array.from(nodes));
                 },
-            ),
+            }),
         );
     };
 
@@ -207,21 +204,16 @@ export const moveSiblingFirst = (tree: ReadonlyArray<TreeNode>, targetId: string
 
         return pipe(
             findNodeIndex(Array.from(nodes), targetId),
-            O.fold(
-                // 未找到节点，递归处理子节点
-                () => nodes.map((node) => (node.children ? { ...node, children: processNodes(node.children) } : node)),
-                // 找到节点，移动到最前
-                (index) => {
+            O.match({
+                onNone: () => nodes.map((node) => (node.children ? { ...node, children: processNodes(node.children) } : node)),
+                onSome: (index) => {
                     processed = true;
                     const nodeArray = Array.from(nodes);
                     const targetNode = nodeArray[index]!;
-                    const otherNodes = pipe(
-                        nodeArray,
-                        A.filterWithIndex((i, _) => i !== index),
-                    );
+                    const otherNodes = A.filterWithIndex(nodeArray, (_, i) => i !== index);
                     return [targetNode, ...otherNodes];
                 },
-            ),
+            }),
         );
     };
 
@@ -239,21 +231,16 @@ export const moveSiblingLast = (tree: ReadonlyArray<TreeNode>, targetId: string 
 
         return pipe(
             findNodeIndex(Array.from(nodes), targetId),
-            O.fold(
-                // 未找到节点，递归处理子节点
-                () => nodes.map((node) => (node.children ? { ...node, children: processNodes(node.children) } : node)),
-                // 找到节点，移动到最后
-                (index) => {
+            O.match({
+                onNone: () => nodes.map((node) => (node.children ? { ...node, children: processNodes(node.children) } : node)),
+                onSome: (index) => {
                     processed = true;
                     const nodeArray = Array.from(nodes);
                     const targetNode = nodeArray[index]!;
-                    const otherNodes = pipe(
-                        nodeArray,
-                        A.filterWithIndex((i, _) => i !== index),
-                    );
+                    const otherNodes = A.filterWithIndex(nodeArray, (_, i) => i !== index);
                     return [...otherNodes, targetNode];
                 },
-            ),
+            }),
         );
     };
 

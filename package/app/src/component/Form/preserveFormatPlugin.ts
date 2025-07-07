@@ -1,8 +1,6 @@
 import type MarkdownIt from "markdown-it";
 import { pipe } from "@/util/fp";
-import * as A from "fp-ts/lib/Array";
-import * as O from "fp-ts/lib/Option";
-import * as E from "fp-ts/lib/Either";
+import { A, O } from "@/util/fp";
 import { stringUtils } from "@/util/fp";
 
 // --- 插件选项接口 ---
@@ -61,13 +59,7 @@ const multipleEmptyLines = (state: any): void => {
 
 // ------------------- 2. 处理多空格的核心规则 -------------------
 /**
- * 处理多空格的核心规则，使用函数式编程方式重构
- *
- * 设计原则：
- * - 纯函数：不修改输入，返回新的数据结构
- * - 不可变性：使用函数式转换而不是就地修改
- * - 组合性：将复杂逻辑分解为小的、可组合的函数
- * - 类型安全：明确的类型定义和错误处理
+ * 处理多空格的核心规则
  */
 
 // 定义Token类型以提高类型安全性
@@ -107,7 +99,7 @@ const processTextPart = (part: string, TokenConstructor: any): O.Option<Token> =
         return O.some(createTextToken(part, TokenConstructor));
     }
 
-    return O.none;
+    return O.none();
 };
 
 // 分解含有连续空格的文本token
@@ -117,7 +109,7 @@ const splitTextToken = (token: Token, TokenConstructor: any): Token[] => {
     return pipe(
         parts,
         A.map((part) => processTextPart(part, TokenConstructor)),
-        A.compact, // 移除None值，只保留Some中的值
+        A.getSomes, // 移除None值，只保留Some中的值
     );
 };
 
@@ -133,7 +125,7 @@ const processToken = (token: Token, TokenConstructor: any): Token[] => {
 const processInlineTokenChildren = (children: Token[], TokenConstructor: any): Token[] => {
     return pipe(
         children,
-        A.chain((token) => processToken(token, TokenConstructor)),
+        A.flatMap((token) => processToken(token, TokenConstructor)),
     );
 };
 
@@ -164,12 +156,6 @@ const preserveSpacesCore = (state: any): void => {
  * - 拆分为两个核心组件，multipleEmptyLines and preserveSpacesCore
  * - multipleEmptyLines: 将空行替换成`\n\n&nbsp;\n`渲染, 从而保留空行
  * - preserveSpacesCore: 将空格替换成`&nbsp;`渲染, 从而保留空格
- *
- * 重构改进：
- * - 使用函数式编程方式，提高代码的正确性、效率和美观性
- * - 纯函数设计，无副作用，易于测试和理解
- * - 不可变数据结构，避免意外修改
- * - 组合性强，功能分解为小的、可重用的函数
  *
  * @param md markdown-it 实例
  * @param options 插件选项

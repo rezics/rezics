@@ -1,7 +1,6 @@
 import { create } from "zustand";
 import { pipe } from "@/util/fp";
-import * as A from "fp-ts/lib/Array";
-import * as O from "fp-ts/lib/Option";
+import { A } from "@/util/fp";
 import { objectUtils } from "@/util/fp";
 
 interface UIState {
@@ -19,12 +18,7 @@ interface UIState {
 }
 
 /**
- * 函数式状态管理工具
- *
- * 重构改进：
- * - 使用 ReadonlyArray 确保不可变性
- * - 提供更多实用的状态操作方法
- * - 使用 fp-ts 进行安全的数组操作
+ * 状态管理工具
  */
 const stateUtils = {
     /**
@@ -43,7 +37,7 @@ const stateUtils = {
         (notifications: ReadonlyArray<string>): ReadonlyArray<string> =>
             pipe(
                 notifications,
-                A.filterWithIndex((i, _) => i !== index),
+                A.filterWithIndex((_, i) => i !== index),
             ),
 
     /**
@@ -63,7 +57,7 @@ export const uiStore = create<UIState>((set) => ({
     currentPage: "home",
     notifications: [],
 
-    // Actions - 使用函数式方法
+    // Actions
     toggleSidebar: () =>
         set((state) => ({
             sidebarOpen: stateUtils.toggle(state.sidebarOpen),

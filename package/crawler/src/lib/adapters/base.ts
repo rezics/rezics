@@ -1,16 +1,15 @@
-import { Either, left, right } from "fp-ts/lib/Either.js";
-import * as E from "fp-ts/lib/Either.js";
+import { Either } from "effect";
+import { pipe } from "effect/Function";
 import { Browser, Page, Response } from "playwright";
 import { Book } from "../../schema.js";
-import { pipe } from "fp-ts/lib/function.js";
 
-export type Strategy = (driver: Browser, url: URL) => Promise<Either<string, Book>>;
+export type Strategy = (driver: Browser, url: URL) => Promise<Either.Either<Book, string>>;
 
 /**
  * 验证URL域名是否匹配
  */
-const validateDomain = (url: URL, expectedDomain: string): Either<string, URL> =>
-    url.hostname === expectedDomain ? right(url) : left(`Domain must be ${expectedDomain}, got ${url.hostname}`);
+const validateDomain = (url: URL, expectedDomain: string): Either.Either<URL, string> =>
+    url.hostname === expectedDomain ? Either.right(url) : Either.left(`Domain must be ${expectedDomain}, got ${url.hostname}`);
 
 /**
  * 清理URL参数
@@ -75,17 +74,11 @@ const enrichBookData =
 /**
  * 捕获并转换错误
  */
-const catchToLeft = (error: unknown): Either<string, never> =>
-    left(error instanceof Error ? error.message : String(error));
+const catchToLeft = (error: unknown): Either.Either<never, string> =>
+    Either.left(error instanceof Error ? error.message : String(error));
 
 /**
  * 创建爬虫策略的高阶函数
- *
- * 改进：
- * - 更好的错误处理和验证
- * - 资源管理更安全
- * - 函数式组合和管道
- * - 更清晰的错误消息
  */
 export const create_strategy =
     (
@@ -95,12 +88,12 @@ export const create_strategy =
             page: Page,
             url: URL,
             responses: Response[],
-        ) => Promise<Either<string, Omit<Book, "platform" | "link">>>,
+        ) => Promise<Either.Either<Omit<Book, "platform" | "link">, string>>,
     ): Strategy =>
     async (driver, url) => {
         // 验证域名
         const domainValidation = validateDomain(url, domain);
-        if (E.isLeft(domainValidation)) {
+        if (Either.isLeft(domainValidation)) {
             return domainValidation;
         }
 
@@ -113,7 +106,7 @@ export const create_strategy =
             try {
                 const result = await extractor(page, cleanUrl, responses);
 
-                return pipe(result, E.map(enrichBookData(platform, cleanUrl)));
+                return pipe(result, Either.map(enrichBookData(platform, cleanUrl)));
             } finally {
                 await cleanup(page);
             }
@@ -154,7 +147,7 @@ export const create_test = (strategy: Strategy, url: string) => async (): Promis
         const result = await strategy(driver, new URL(url));
         return JSON.stringify(result, null, 2);
     } catch (error) {
-        const errorResult = left(`Test failed: ${error instanceof Error ? error.message : String(error)}`);
+        const errorResult = Either.left(`Test failed: ${error instanceof Error ? error.message : String(error)}`);
         return JSON.stringify(errorResult, null, 2);
     }
 };

@@ -1,15 +1,11 @@
 /**
- * Simple functional tests for the fp-ts refactored code
- *
- * These tests verify that our refactored functions maintain
- * the same behavior while being more functional.
+ * Tests for functional programming utilities
  */
 
 import { describe, it, expect } from "@jest/globals";
-import { pipe } from "../util/fp";
-import * as A from "fp-ts/lib/Array";
-import * as O from "fp-ts/lib/Option";
-import { safeArray, stringUtils, objectUtils } from "../util/fp";
+import { pipe } from "../fp";
+import { A, O } from "../fp";
+import { safeArray, stringUtils, objectUtils } from "../fp";
 
 // Test data
 const testArray = [1, 2, 3, 4, 5];
@@ -19,23 +15,23 @@ describe("Functional Programming Utils", () => {
     describe("safeArray operations", () => {
         it("should safely get head of array", () => {
             expect(safeArray.head(testArray)).toEqual(O.some(1));
-            expect(safeArray.head(emptyArray)).toEqual(O.none);
+            expect(safeArray.head(emptyArray)).toEqual(O.none());
         });
 
         it("should safely get last of array", () => {
             expect(safeArray.last(testArray)).toEqual(O.some(5));
-            expect(safeArray.last(emptyArray)).toEqual(O.none);
+            expect(safeArray.last(emptyArray)).toEqual(O.none());
         });
 
         it("should safely lookup by index", () => {
             expect(safeArray.lookup(2)(testArray)).toEqual(O.some(3));
-            expect(safeArray.lookup(10)(testArray)).toEqual(O.none);
+            expect(safeArray.lookup(10)(testArray)).toEqual(O.none());
         });
 
         it("should find element with predicate", () => {
             const isEven = (n: number) => n % 2 === 0;
             expect(safeArray.find(isEven)(testArray)).toEqual(O.some(2));
-            expect(safeArray.find(isEven)([1, 3, 5])).toEqual(O.none);
+            expect(safeArray.find(isEven)([1, 3, 5])).toEqual(O.none());
         });
     });
 
@@ -47,8 +43,8 @@ describe("Functional Programming Utils", () => {
 
         it("should trim to option", () => {
             expect(stringUtils.trimToOption("  hello  ")).toEqual(O.some("hello"));
-            expect(stringUtils.trimToOption("   ")).toEqual(O.none);
-            expect(stringUtils.trimToOption("")).toEqual(O.none);
+            expect(stringUtils.trimToOption("   ")).toEqual(O.none());
+            expect(stringUtils.trimToOption("")).toEqual(O.none());
         });
 
         it("should check pattern matches", () => {
@@ -98,7 +94,7 @@ describe("Functional Programming Utils", () => {
                 safeArray.head,
             );
 
-            expect(result).toEqual(O.none);
+            expect(result).toEqual(O.none());
         });
     });
 });

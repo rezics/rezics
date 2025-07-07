@@ -1,8 +1,5 @@
 /**
- * Tests for the refactored tree utility functions
- *
- * These tests verify that our functional refactoring maintains
- * the same behavior as the original imperative code.
+ * Tests for tree utility functions
  */
 
 import { describe, it, expect } from "@jest/globals";
