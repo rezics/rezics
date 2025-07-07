@@ -3,7 +3,7 @@ import zhCN from "./zh-CN";
 export default {
     title: "ICS",
     motto: "Erben Schaffen Verbreiten",
-    
+
     // Navigation & Menu
     navigation: {
         main_items: "Hauptelemente",
@@ -24,14 +24,15 @@ export default {
         settings: "Einstellungen",
         logout: "Abmelden",
     },
-    
+
     // Authentication
     auth: {
         login: "Anmelden",
         logout: "Abmelden",
         register: "Registrieren",
         resolve: "Lösen",
-        already_login: "Sie sind bereits angemeldet. Eine erneute Anmeldung überschreibt die vorherigen Anmeldeinformationen.",
+        already_login:
+            "Sie sind bereits angemeldet. Eine erneute Anmeldung überschreibt die vorherigen Anmeldeinformationen.",
         error: {
             invalid_email: "Ungültige E-Mail-Adresse.",
             invalid_password: "Das Passwort muss mindestens 6 Zeichen lang sein.",
@@ -40,7 +41,7 @@ export default {
             passwords_mismatch: "Passwörter stimmen nicht überein.",
         },
     },
-    
+
     // Common UI Elements
     common: {
         email: "E-Mail",
@@ -65,7 +66,7 @@ export default {
         close: "Schließen",
         open: "Öffnen",
     },
-    
+
     // Pages
     pages: {
         not_found: "Seite nicht gefunden",
@@ -78,7 +79,7 @@ export default {
         book_collection_list_page: "Buchsammlungslistenseite",
         book_list_edit_page: "Buchliste bearbeiten",
     },
-    
+
     // Form & Editor
     editor: {
         bold: "Fett",
@@ -94,20 +95,20 @@ export default {
         toggle_side_by_side: "Nebeneinanderansicht umschalten",
         markdown_guide: "Markdown-Anleitung",
     },
-    
+
     // Placeholders & Labels
     placeholders: {
         search_books: "Bücher suchen",
         chapter_title: "Kapiteltitel eingeben",
     },
-    
+
     // Chapters & Books
     chapters: {
         new_chapter: "Neues Kapitel",
         expand: "Erweitern",
         collapse: "Einklappen",
     },
-    
+
     // Accessibility Labels
     accessibility: {
         favorite: "Favorit",
@@ -116,5 +117,9 @@ export default {
         search: "Suchen",
         close: "Schließen",
         open_drawer: "Schublade öffnen",
+    },
+
+    test: {
+        fn: (name: string) => `Hallo, ${name}!`,
     },
 } satisfies typeof zhCN;

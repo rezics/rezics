@@ -3,7 +3,7 @@ import zhCN from "./zh-CN";
 export default {
     title: "ICS",
     motto: "Inherited Create Spread",
-    
+
     // Navigation & Menu
     navigation: {
         main_items: "Main Items",
@@ -24,7 +24,7 @@ export default {
         settings: "Settings",
         logout: "Logout",
     },
-    
+
     // Authentication
     auth: {
         login: "Login",
@@ -40,7 +40,7 @@ export default {
             passwords_mismatch: "Passwords do not match.",
         },
     },
-    
+
     // Common UI Elements
     common: {
         email: "Email",
@@ -65,7 +65,7 @@ export default {
         close: "Close",
         open: "Open",
     },
-    
+
     // Pages
     pages: {
         not_found: "Page Not Found",
@@ -78,7 +78,7 @@ export default {
         book_collection_list_page: "Book Collection List Page",
         book_list_edit_page: "Book List Edit Page",
     },
-    
+
     // Form & Editor
     editor: {
         bold: "Bold",
@@ -94,20 +94,20 @@ export default {
         toggle_side_by_side: "Toggle Side by Side",
         markdown_guide: "Markdown Guide",
     },
-    
+
     // Placeholders & Labels
     placeholders: {
         search_books: "Search books",
         chapter_title: "Enter chapter title",
     },
-    
+
     // Chapters & Books
     chapters: {
         new_chapter: "New Chapter",
         expand: "Expand",
         collapse: "Collapse",
     },
-    
+
     // Accessibility Labels
     accessibility: {
         favorite: "Favorite",
@@ -116,5 +116,8 @@ export default {
         search: "Search",
         close: "Close",
         open_drawer: "Open drawer",
+    },
+    test: {
+        fn: (name: string) => `Hello, ${name}!`,
     },
 } satisfies typeof zhCN;
