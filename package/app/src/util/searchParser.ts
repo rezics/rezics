@@ -3,7 +3,15 @@ export interface SearchInfo {
     searchTags: string[];
 }
 
+/**
+ * [Some] -> Some
+ */
 const TAG_REGEX = /\[([^\]]+)\]/g;
+
+/**
+ * user:admin -> [user, admin]
+ * book:"Correct Code" -> [book, "Correct Code"]
+ */
 const FILTER_REGEX = /(\w+):("[^"]+"|\S+)/g;
 
 /**
