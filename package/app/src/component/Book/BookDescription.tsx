@@ -2,6 +2,7 @@ import { Typography } from "@mui/material";
 import { Box } from "@mui/material";
 import { AccentBarWithText } from "@component/Common/AccentBar";
 import { EditButtonFloatRight } from "@component/Common/EditButtonFloatRight";
+import { get } from "@locale";
 
 export function BookDescription({ description }: { description: string }) {
     return (

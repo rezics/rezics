@@ -8,6 +8,7 @@ import { AccentBar } from "@component/Common/AccentBar";
 import { TreeReplyComponents } from "@component/Form/TreeReplyComponents";
 import { IconButton } from "@mui/material";
 import { ChatBubbleOutline, FavoriteBorder, Add, Comment } from "@mui/icons-material";
+import { get } from "@locale";
 
 export const BookListPage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
