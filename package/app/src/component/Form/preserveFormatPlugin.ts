@@ -1,4 +1,9 @@
 import type MarkdownIt from "markdown-it";
+import { pipe } from '@/util/fp';
+import * as A from 'fp-ts/lib/Array';
+import * as O from 'fp-ts/lib/Option';
+import * as E from 'fp-ts/lib/Either';
+import { stringUtils } from '@/util/fp';
 
 // --- 插件选项接口 ---
 export interface PreserveFormatOptions {
@@ -37,58 +42,123 @@ export interface PreserveFormatOptions {
  *
  * @param state markdown-it 的 state 实例
  */
-function multipleEmptyLines(state: any) {
+const multipleEmptyLines = (state: any): void => {
+    const processEmptyLines = (src: string): string => {
+        const transformMatch = (match: string): string => {
+            const total = match.length;
+            const brCount = total - 1;
+            return "\n\n" + "&nbsp;\n".repeat(brCount);
+        };
+        
+        return src.replace(/\n{2,}/g, transformMatch);
+    };
+
     const src = state.src;
     if (!src.includes("\n\n")) return;
-
-    state.src = src.replace(/\n{2,}/g, (match: string) => {
-        // match 里全是 \n，长度就是换行数
-        const total = match.length;
-        // 保留一个 \n 让后续的段落分隔还能生效，多出来的每个就变成一个 <br>
-        const brCount = total - 1;
-        // ! 注意需要两个换行，这样才能正常分块
-        return "\n\n" + "&nbsp;\n".repeat(brCount);
-    });
-}
+    
+    state.src = processEmptyLines(src);
+};
 
 // ------------------- 2. 处理多空格的核心规则 -------------------
-function preserveSpacesCore(state: any) {
-    for (const blockToken of state.tokens) {
-        // 我们只关心 inline token，因为文本内容都在这里
-        if (blockToken.type === "inline" && blockToken.children) {
-            const newChildren: any[] = [];
+/**
+ * 处理多空格的核心规则，使用函数式编程方式重构
+ * 
+ * 设计原则：
+ * - 纯函数：不修改输入，返回新的数据结构
+ * - 不可变性：使用函数式转换而不是就地修改
+ * - 组合性：将复杂逻辑分解为小的、可组合的函数
+ * - 类型安全：明确的类型定义和错误处理
+ */
 
-            for (const token of blockToken.children) {
-                // 在 inline token 的子节点中，我们只关心 text token
-                if (token.type === "text" && token.content.includes("  ")) {
-                    // 如果一个 text token 包含连续空格，我们将它分裂
-                    const parts = token.content.split(/( {2,})/g);
-
-                    parts.forEach((part: string) => {
-                        if (part.match(/ {2,}/)) {
-                            // 这部分是连续空格，创建一个 html_inline token 来渲染 &nbsp;
-                            const spaceToken = new state.Token("html_inline", "", 0);
-                            // 为了保留视觉上的间距并防止行首折叠，
-                            // '   ' -> '&nbsp; &nbsp;' 是一个不错的策略
-                            spaceToken.content = "&nbsp;".repeat(part.length);
-                            newChildren.push(spaceToken);
-                        } else if (part) {
-                            // 这部分是普通文本，创建一个新的 text token
-                            const textToken = new state.Token("text", "", 0);
-                            textToken.content = part;
-                            newChildren.push(textToken);
-                        }
-                    });
-                } else {
-                    // 如果 token 不是 text 或不含连续空格，直接保留
-                    newChildren.push(token);
-                }
-            }
-            // 用分裂后的新 token 数组替换旧的 children 数组
-            blockToken.children = newChildren;
-        }
-    }
+// 定义Token类型以提高类型安全性
+interface Token {
+    type: string;
+    content: string;
+    children?: Token[];
 }
+
+// 检查是否为需要处理的文本token
+const isTextTokenWithSpaces = (token: Token): boolean => 
+    token.type === "text" && token.content.includes("  ");
+
+// 创建HTML内联token
+const createHtmlInlineToken = (content: string, TokenConstructor: any): Token => {
+    const token = new TokenConstructor("html_inline", "", 0);
+    token.content = content;
+    return token;
+};
+
+// 创建文本token
+const createTextToken = (content: string, TokenConstructor: any): Token => {
+    const token = new TokenConstructor("text", "", 0);
+    token.content = content;
+    return token;
+};
+
+// 处理单个文本部分
+const processTextPart = (part: string, TokenConstructor: any): O.Option<Token> => {
+    if (part.match(/ {2,}/)) {
+        // 连续空格，转换为&nbsp;
+        const content = "&nbsp;".repeat(part.length);
+        return O.some(createHtmlInlineToken(content, TokenConstructor));
+    }
+    
+    if (part.length > 0) {
+        // 普通文本
+        return O.some(createTextToken(part, TokenConstructor));
+    }
+    
+    return O.none;
+};
+
+// 分解含有连续空格的文本token
+const splitTextToken = (token: Token, TokenConstructor: any): Token[] => {
+    const parts = pipe(
+        token.content,
+        stringUtils.split(/( {2,})/g)
+    );
+    
+    return pipe(
+        parts,
+        A.map(part => processTextPart(part, TokenConstructor)),
+        A.compact  // 移除None值，只保留Some中的值
+    );
+};
+
+// 处理单个token
+const processToken = (token: Token, TokenConstructor: any): Token[] => {
+    if (isTextTokenWithSpaces(token)) {
+        return splitTextToken(token, TokenConstructor);
+    }
+    return [token];
+};
+
+// 处理inline token的所有子token
+const processInlineTokenChildren = (children: Token[], TokenConstructor: any): Token[] => {
+    return pipe(
+        children,
+        A.chain(token => processToken(token, TokenConstructor))
+    );
+};
+
+// 处理单个块级token
+const processBlockToken = (blockToken: Token, TokenConstructor: any): Token => {
+    if (blockToken.type === "inline" && blockToken.children) {
+        const newChildren = processInlineTokenChildren(blockToken.children, TokenConstructor);
+        return { ...blockToken, children: newChildren };
+    }
+    return blockToken;
+};
+
+// 主处理函数，处理所有tokens
+const preserveSpacesCore = (state: any): void => {
+    const processedTokens = pipe(
+        state.tokens,
+        A.map(token => processBlockToken(token, state.Token))
+    );
+    
+    state.tokens = processedTokens;
+};
 
 // ------------------- 3. 最终的插件函数 -------------------
 /**
@@ -98,10 +168,19 @@ function preserveSpacesCore(state: any) {
  * - 拆分为两个核心组件，multipleEmptyLines and preserveSpacesCore 
  * - multipleEmptyLines: 将空行替换成`\n\n&nbsp;\n`渲染, 从而保留空行
  * - preserveSpacesCore: 将空格替换成`&nbsp;`渲染, 从而保留空格
+ * 
+ * 重构改进：
+ * - 使用函数式编程方式，提高代码的正确性、效率和美观性
+ * - 纯函数设计，无副作用，易于测试和理解
+ * - 不可变数据结构，避免意外修改
+ * - 组合性强，功能分解为小的、可重用的函数
+ * 
  * @param md markdown-it 实例
+ * @param options 插件选项
  */
-export function preserveFormattingPlugin(md: MarkdownIt, options?: PreserveFormatOptions) {
-    const defaults: PreserveFormatOptions = {
+export const preserveFormattingPlugin = (md: MarkdownIt, options?: PreserveFormatOptions): void => {
+    // 默认选项，使用不可变方式合并
+    const defaults: Required<PreserveFormatOptions> = {
         preserveSpaces: true,
         preserveEmptyLines: true,
         emptyLineRender: '<p class="preserved-empty-line">&nbsp;</p>',
@@ -109,14 +188,14 @@ export function preserveFormattingPlugin(md: MarkdownIt, options?: PreserveForma
 
     const effectiveOptions = { ...defaults, ...options };
 
-    // --- 注册空行处理规则 ---
-    // 在 block 解析之前，先把连续空行替换成 <br> token
-    md.core.ruler.before('normalize', "line_break_to_br", multipleEmptyLines);
+    // 注册空行处理规则
+    if (effectiveOptions.preserveEmptyLines) {
+        md.core.ruler.before('normalize', "line_break_to_br", multipleEmptyLines);
+    }
 
-    // --- 注册空格处理规则 ---
+    // 注册空格处理规则
     if (effectiveOptions.preserveSpaces) {
-        // 注册核心规则。它会在所有 token 解析完毕后执行。
         md.core.ruler.push("preserve_spaces_core", preserveSpacesCore);
     }
-}
+};
   
