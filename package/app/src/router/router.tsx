@@ -25,8 +25,8 @@ import TestPage from "@/page/Test/TestPage";
 import { MainLayout } from "@/layout/MainLayout";
 import { BookListEditPage } from "@/page/ReadList/ReadListEditPage";
 import { BookCollectionListPage } from "@/page/ReadList/ReadListsPage";
-import { ShortReviewPage } from "@/page/Review/ShortReviewPage";
-import { LongReviewPage } from "@/page/Review/ReviewPage";
+import { ShortReviewPage } from "@/page/Review/ShortReviewByBookPage";
+import { ReviewByBookPage } from "@/page/Review/ReviewByBookPage";
 import { LongReviewEditPage } from "@/page/Review/ReviewEditPage";
 
 /**
@@ -94,7 +94,7 @@ export default (
                 <Route path="/review/long/book/:bookId">
                     {() => (
                         <MainLayout>
-                            <LongReviewPage />
+                            <ReviewByBookPage />
                         </MainLayout>
                     )}
                 </Route>
