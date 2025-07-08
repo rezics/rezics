@@ -6,5 +6,3 @@ const db = new Surreal({
 });
 
 db.connect("mem://");
-
-const result = await db.query("DEFINE TABLE TEST SCHEMAFULL");
