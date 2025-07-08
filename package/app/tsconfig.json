@@ -20,6 +20,6 @@
         }
     },
     "include": ["node_modules/vite/client.d.ts", "**/*"],
-    "exclude": ["public/mockServiceWorker.js"],
+    "exclude": ["./node_modules", "./dist", "./public/**/*"],
     "extends": "../../tsconfig.json"
 }
