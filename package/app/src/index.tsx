@@ -5,8 +5,9 @@ import Router from "./router/router";
 import { ThemeProvider, useMediaQuery } from "@mui/material";
 import { StyledEngineProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
-import { getTheme } from "./config/theme";
+import { getTheme, getDynamicTheme } from "./config/theme";
 import { appStore } from "./global/appStore";
+import { applyDynamicThemeToDOM, generateDynamicColors } from "./config/dynamicTheme";
 import { setupMock } from "./plugin/providers/mock";
 import { client, UrqlProvider } from "./plugin/providers/urql";
 
@@ -17,7 +18,18 @@ import "github-markdown-css/github-markdown-light.css";
 
 function Root() {
     const themeMode = appStore((state) => state.theme);
-    const theme = useMemo(() => getTheme(themeMode), [themeMode]);
+    const customColor = appStore((state) => state.customColor);
+    const useDynamicTheme = appStore((state) => state.useDynamicTheme);
+    
+    const theme = useMemo(() => {
+        if (useDynamicTheme && customColor) {
+            // 应用动态主题到 DOM
+            const dynamicColors = generateDynamicColors(customColor, themeMode === "dark");
+            applyDynamicThemeToDOM(dynamicColors, themeMode === "dark");
+            return getDynamicTheme(themeMode, customColor);
+        }
+        return getTheme(themeMode);
+    }, [themeMode, customColor, useDynamicTheme]);
 
     return (
         <StrictMode>
