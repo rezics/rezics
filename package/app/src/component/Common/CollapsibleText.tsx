@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { Box, Link, useTheme } from "@mui/material";
-import { proxy, useSnapshot } from "valtio";
+
 
 export namespace CollapsibleText {
     export type Show = {
@@ -53,13 +53,12 @@ export namespace CollapsibleText {
     };
 
     export const Container: React.FC<Container> = ({ content, threshold = 200 }) => {
-        const [state] = useState(() => proxy({ isExpanded: false }));
-        const snap = useSnapshot(state);
+        const [isExpanded, setIsExpanded] = useState(false);
 
         const toggle = () => {
-            state.isExpanded = !state.isExpanded;
+            setIsExpanded((prev) => !prev);
         };
 
-        return <Show content={content} threshold={threshold} isExpanded={snap.isExpanded} onToggle={toggle} />;
+        return <Show content={content} threshold={threshold} isExpanded={isExpanded} onToggle={toggle} />;
     };
 }
