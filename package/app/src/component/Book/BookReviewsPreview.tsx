@@ -1,5 +1,4 @@
-import React, { useMemo } from "react";
-import { proxy, useSnapshot } from "valtio";
+import React, { useEffect, useState } from "react";
 import { gql, useQuery } from "urql";
 import { ReviewList } from "../Review/ReviewList";
 import { ArrowForwardIcon } from "../Common/ArrowForwardIcon";
@@ -26,13 +25,8 @@ interface BookReviewsProps {
     title: string;
 }
 
-interface BookReviewsState {
-    reviews: any[];
-    isReplyModalOpen: boolean;
-}
-
 export const BookReviews: React.FC<BookReviewsProps> = ({ bookId }) => {
-    const state = useMemo(() => proxy({ reviews: [], isReplyModalOpen: false } as BookReviewsState | any), []);
+    const [reviews, setReviews] = useState<any[]>([]);
 
     const [result] = useQuery({
         query: GET_BOOK_REVIEWS,
@@ -40,12 +34,9 @@ export const BookReviews: React.FC<BookReviewsProps> = ({ bookId }) => {
         pause: !bookId,
     });
 
-    state.reviews = result.data?.bookReviews || [];
-    const snap = useSnapshot(state);
-
-    React.useEffect(() => {
+    useEffect(() => {
         if (result.data?.bookReviews) {
-            state.reviews = result.data.bookReviews;
+            setReviews(result.data.bookReviews);
         }
     }, [result.data]);
 
@@ -57,7 +48,7 @@ export const BookReviews: React.FC<BookReviewsProps> = ({ bookId }) => {
                         <AccentBarWithText.Show text={`${bookId}的书评`} />
                     </ArrowForwardIcon.Container>
                 </Link>
-                <ReviewList.Container reviews={snap.reviews} />
+                <ReviewList.Container reviews={reviews} />
             </Box>
         </>
     );

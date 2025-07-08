@@ -6,7 +6,7 @@ Get-ChildItem -Path . -Recurse -Include "node_modules", "package-lock.json", "pn
 - 组件库：https://mui.com/
 - 路由：https://github.com/molefrog/wouter
 - APP状态管理：https://github.com/pmndrs/zustand
-- 组件状态管理：https://github.com/pmndrs/valtio
+- 组件局部状态管理：React useState/useMemo/useReducer
 
 ## Monorepo
 

@@ -5,7 +5,6 @@ import { useQuery } from "urql";
 import { GET_COMMENTS } from "@/api/readlist";
 import { Box, Avatar, Typography, Button, Collapse, IconButton } from "@mui/material";
 import { Add, Remove } from "@mui/icons-material";
-import { proxy, useSnapshot } from "valtio";
 import { t } from "@component/Text";
 import { ReactionBar } from "../Common/ReactionBar";
 import { ReplyDrawer } from "./ReplyDrawer";
