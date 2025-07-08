@@ -32,7 +32,7 @@ export namespace BookPage {
                 <BookHero.Container data={data.book} />
 
                 {/* Main Content */}
-                <Container maxWidth="lg" className="mt-4 mb-8">
+                <Box maxWidth="lg" className="mt-4 mb-8">
                     <Grid container spacing={4}>
                         {/* Main Content */}
                         <Grid size={{ xs: 12, lg: 9 }}>
@@ -50,7 +50,8 @@ export namespace BookPage {
                                         <Divider />
 
                                         {/* ANCHOR Tags */}
-                                        <BookTagView.Container tagObjects={data?.book.tags || []} />
+                                        {/* <BookTagView.Container tagObjects={data?.book.tags || []} /> */}
+                                        <BookTagView.Container/>
                                         <Divider />
 
                                         {/* ANCHOR 最新章节 */}
@@ -129,7 +130,7 @@ export namespace BookPage {
                             </Paper>
                         </Grid>
                     </Grid>
-                </Container>
+                </Box>
             </Box>
         );
     };
