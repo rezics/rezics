@@ -1,6 +1,7 @@
 // 定义基础的设计 Token，可以根据需要扩展
-import { createTheme, ThemeOptions, responsiveFontSizes, Theme } from "@mui/material/styles";
+import { createTheme, ThemeOptions, responsiveFontSizes, Theme, PaletteOptions } from "@mui/material/styles";
 import { deepmerge } from "@mui/utils";
+import { generateDynamicColors, dynamicColorsToPalette, DynamicColorScheme } from "./dynamicTheme";
 
 /**
  * 根据 mode（'light' | 'dark'）返回对应的颜色、组件覆盖等设计 Token
@@ -194,6 +195,43 @@ const getDesignTokens = (mode: "light" | "dark"): ThemeOptions => ({
         borderRadius: 8, // 全局圆角
     },
 });
+
+/**
+ * 使用动态颜色生成主题
+ */
+export const getDynamicTheme = (mode: "light" | "dark", sourceColor?: string): Theme => {
+    if (!sourceColor) {
+        return createTheme(getDesignTokens(mode));
+    }
+
+    // 生成动态颜色方案
+    const dynamicColors = generateDynamicColors(sourceColor, mode === "dark");
+    const dynamicPalette = dynamicColorsToPalette(dynamicColors, mode);
+    
+    // 合并动态调色板和基础设计 token
+    const baseTokens = getDesignTokens(mode);
+    const enhancedTokens: ThemeOptions = {
+        ...baseTokens,
+        palette: {
+            ...baseTokens.palette,
+            ...dynamicPalette,
+        },
+        // 更新组件样式以使用动态颜色
+        components: {
+            ...baseTokens.components,
+            MuiAppBar: {
+                styleOverrides: {
+                    root: {
+                        backgroundColor: dynamicColors.primary,
+                        color: dynamicColors.onPrimary,
+                    },
+                },
+            },
+        },
+    };
+
+    return createTheme(enhancedTokens);
+};
 
 /**
  * getTheme 每次调用都 new 一个全新的 Theme
