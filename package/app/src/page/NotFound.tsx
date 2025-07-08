@@ -7,22 +7,45 @@ import { useLocation } from "wouter";
 import { Place } from "@mui/icons-material";
 import { t } from "@component/Text";
 
-export const NotFound = () => {
-    const [path, navigate] = useLocation();
-    return (
-        <div className="min-h-screen flex items-center justify-center">
-            <Card className="min-w-md max-w-lg">
-                <CardContent className="flex flex-col gap-4">
-                    <Typography variant="h4">{t("pages->not_found")}</Typography>
-                    <div>
-                        <Place></Place> {path}
-                    </div>
-                </CardContent>
-                <CardActions className="flex flex-row justify-between">
-                    <Button onClick={() => history.back()}>{t("common->back")}</Button>
-                    <Button onClick={() => navigate("/")}>{t("common->home")}</Button>
-                </CardActions>
-            </Card>
-        </div>
-    );
-};
+export namespace NotFound {
+    export type Show = {
+        path: string;
+        onBack: () => void;
+        onHome: () => void;
+    };
+
+    export const Show: React.FC<Show> = ({ path, onBack, onHome }) => {
+        return (
+            <div className="min-h-screen flex items-center justify-center">
+                <Card className="min-w-md max-w-lg">
+                    <CardContent className="flex flex-col gap-4">
+                        <Typography variant="h4">{t("pages->not_found")}</Typography>
+                        <div>
+                            <Place></Place> {path}
+                        </div>
+                    </CardContent>
+                    <CardActions className="flex flex-row justify-between">
+                        <Button onClick={onBack}>{t("common->back")}</Button>
+                        <Button onClick={onHome}>{t("common->home")}</Button>
+                    </CardActions>
+                </Card>
+            </div>
+        );
+    };
+
+    export type Container = {};
+
+    export const Container: React.FC<Container> = () => {
+        const [path, navigate] = useLocation();
+
+        const handleBack = () => {
+            history.back();
+        };
+
+        const handleHome = () => {
+            navigate("/");
+        };
+
+        return <Show path={path} onBack={handleBack} onHome={handleHome} />;
+    };
+}
