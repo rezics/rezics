@@ -2,7 +2,6 @@ import React, { ReactNode, useEffect, useState } from "react";
 import { Button, Divider, useMediaQuery } from "@mui/material";
 import { Sidebar } from "@component/Layout/Sidebar";
 import { Header } from "@component/Layout/MainLayoutHeader";
-import { proxy, useSnapshot } from "valtio";
 // import { Box } from "@mui/material";
 import { useLayoutStore } from "@/global/layoutStore";
 import { appStore } from "@/global/appStore";
@@ -17,9 +16,6 @@ interface BookReadLayout {
     children: ReactNode;
 }
 
-const drawerWidth = proxy({
-    data: 240,
-});
 
 export const BookReadLayout: React.FC<BookReadLayout> = ({ children }) => {
     const [match, params] = useRoute("/book/:bookId/read/:chapterId");

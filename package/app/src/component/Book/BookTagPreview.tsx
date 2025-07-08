@@ -1,6 +1,6 @@
 import React from "react";
 import { Box, Typography, Chip, Stack } from "@mui/material";
-import { proxy, useSnapshot } from "valtio";
+import { useMemo } from "react";
 import { AccentBarWithText } from "@component/Common/AccentBar";
 import { EditButtonFloatRight } from "@component/Common/EditButtonFloatRight";
 import { t } from "@component/Text";
@@ -59,26 +59,24 @@ export namespace BookTag {
     };
 
     export const Container: React.FC<Container> = ({ tagObjects: propTagObjects }) => {
-        const state = proxy({
-            tagObjects: [] as TagGroupObject[],
-        });
+        const tagObjects = useMemo(
+            () =>
+                propTagObjects || [
+                    {
+                        key: "tag1",
+                        name: "User",
+                        tags: ["奇幻", "冒险", "平行世界"],
+                    },
+                    {
+                        key: "tag2",
+                        name: "AI",
+                        tags: ["标签2-1", "标签2-2", "标签2-3"],
+                    },
+                ],
+            [propTagObjects],
+        );
 
-        state.tagObjects = propTagObjects || [
-            {
-                key: "tag1",
-                name: "User",
-                tags: ["奇幻", "冒险", "平行世界"],
-            },
-            {
-                key: "tag2",
-                name: "AI",
-                tags: ["标签2-1", "标签2-2", "标签2-3"],
-            },
-        ];
-
-        const snap = useSnapshot(state);
-
-        return <Show tagObjects={snap.tagObjects} />;
+        return <Show tagObjects={tagObjects} />;
     };
 }
 

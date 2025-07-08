@@ -1,9 +1,8 @@
 import { BookReview } from "@/api/bookReviews";
 import { SingleReview } from "./SingleReview";
 
-import React, { useMemo } from "react";
+import React, { useEffect, useReducer } from "react";
 import { Box } from "@mui/material";
-import { proxy, useSnapshot } from "valtio";
 import { gql, useQuery } from "urql";
 import FullScreenModal from "../Common/FullScreenModal";
 import TreeReplyComponents from "../Form/TreeReplyComponents";
@@ -46,35 +45,53 @@ export namespace ReviewList {
     };
 
     export const Container: React.FC<Container> = ({ reviews }) => {
-        const state = useMemo(
-            () => proxy({ reviews: [], isReplyModalOpen: false, currentReplyId: null } as BookReviewsState | any),
-            [],
-        );
+        type State = {
+            reviews: BookReview[];
+            isReplyModalOpen: boolean;
+            currentReplyId: string | null;
+        };
+
+        type Action =
+            | { type: "setReviews"; reviews: BookReview[] }
+            | { type: "openReply"; id: string }
+            | { type: "closeReply" };
+
+        const reducer = (state: State, action: Action): State => {
+            switch (action.type) {
+                case "setReviews":
+                    return { ...state, reviews: action.reviews };
+                case "openReply":
+                    return { ...state, isReplyModalOpen: true, currentReplyId: action.id };
+                case "closeReply":
+                    return { ...state, isReplyModalOpen: false, currentReplyId: null };
+                default:
+                    return state;
+            }
+        };
+
+        const [state, dispatch] = useReducer(reducer, {
+            reviews: [],
+            isReplyModalOpen: false,
+            currentReplyId: null,
+        });
+
+        useEffect(() => {
+            dispatch({ type: "setReviews", reviews: reviews || [] });
+        }, [reviews]);
 
         const handleReply = (reviewId: string) => {
-            state.isReplyModalOpen = true;
-            state.currentReplyId = reviewId;
+            dispatch({ type: "openReply", id: reviewId });
         };
 
         const handleCloseReplyModal = () => {
-            state.isReplyModalOpen = false;
-            state.currentReplyId = null;
+            dispatch({ type: "closeReply" });
         };
-
-        state.reviews = reviews || [];
-        const snap = useSnapshot(state);
-
-        React.useEffect(() => {
-            if (reviews) {
-                state.reviews = reviews;
-            }
-        }, [reviews]);
 
         return (
             <Show
-                reviews={snap.reviews}
-                isReplyModalOpen={snap.isReplyModalOpen}
-                currentReplyId={snap.currentReplyId}
+                reviews={state.reviews}
+                isReplyModalOpen={state.isReplyModalOpen}
+                currentReplyId={state.currentReplyId}
                 onReply={handleReply}
                 onCloseReplyModal={handleCloseReplyModal}
             />

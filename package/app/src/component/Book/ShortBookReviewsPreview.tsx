@@ -1,6 +1,5 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Box, Avatar, Typography, Divider, Stack } from "@mui/material";
-import { proxy, useSnapshot } from "valtio";
 import { Rating } from "@mui/material";
 import ThumbUpIcon from "@mui/icons-material/ThumbUp";
 import ThumbDownIcon from "@mui/icons-material/ThumbDown";
@@ -24,16 +23,12 @@ interface ShortBookReviewsProps {
     bookId: string;
 }
 
-const state = proxy({
-    reviews: [] as Review[],
-    loading: false,
-    error: null as string | null,
-});
-
 export const ShortBookReviews: React.FC<ShortBookReviewsProps> = ({ bookId }) => {
-    const snap = useSnapshot(state);
+    const [reviews, setReviews] = useState<Review[]>([]);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
-    React.useEffect(() => {
+    useEffect(() => {
         fetchReviews();
     }, [bookId]);
 
@@ -48,7 +43,7 @@ export const ShortBookReviews: React.FC<ShortBookReviewsProps> = ({ bookId }) =>
     const fetchReviews = () => {
         // TODO: fetch reviews from server
         // Mock reviews
-        state.reviews = [
+        setReviews([
             {
                 id: 1,
                 user: {
@@ -103,12 +98,12 @@ export const ShortBookReviews: React.FC<ShortBookReviewsProps> = ({ bookId }) =>
                 likes: 10,
                 dislikes: 2,
             },
-        ];
+        ]);
     };
 
     return (
         <Stack spacing={2}>
-            {snap.reviews.map((review) => (
+            {reviews.map((review) => (
                 <Box key={review.id}>
                     <Box sx={{ display: "flex", gap: 2 }}>
                         <Avatar src={review.user.avatar} sx={{ width: 32, height: 32 }} />
