@@ -16,7 +16,7 @@ import { t } from "@component/Text";
 
 // segment: router path
 
-export const NAVIGATION: NavigationItem[] = [
+export const NAVIGATION = (): NavigationItem[] => [
     {
         kind: "header",
         title: t("navigation->main_items"),

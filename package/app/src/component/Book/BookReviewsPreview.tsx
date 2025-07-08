@@ -53,11 +53,11 @@ export const BookReviews: React.FC<BookReviewsProps> = ({ bookId }) => {
         <>
             <Box>
                 <Link href={`/book/${bookId}/reviews`} className="flex mb-4">
-                    <ArrowForwardIcon size={16}>
-                        <AccentBarWithText text={`${bookId}的书评`} />
-                    </ArrowForwardIcon>
+                    <ArrowForwardIcon.Container size={16}>
+                        <AccentBarWithText.Show text={`${bookId}的书评`} />
+                    </ArrowForwardIcon.Container>
                 </Link>
-                <ReviewList reviews={snap.reviews} />
+                <ReviewList.Container reviews={snap.reviews} />
             </Box>
         </>
     );

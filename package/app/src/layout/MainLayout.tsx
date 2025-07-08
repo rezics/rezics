@@ -1,7 +1,7 @@
 import React, { ReactNode } from "react";
 import { useMediaQuery } from "@mui/material";
 import { Sidebar } from "@component/Layout/Sidebar";
-import { Header } from "@/component/Layout/MainLayoutHeader";
+import { Header } from "@component/Layout/MainLayoutHeader";
 // import { Box } from "@mui/material";
 import { useLayoutStore } from "@/global/layoutStore";
 import { appStore } from "@/global/appStore";
@@ -36,7 +36,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
             <Sidebar
                 onClose={() => isMobile && closeSidebar()}
                 handleDrawerToggle={handleDrawerToggle}
-                NAVIGATION={NAVIGATION}
+                NAVIGATION={NAVIGATION()}
             />
 
             <main

@@ -159,7 +159,7 @@ export const ShortBookReviews: React.FC<ShortBookReviewsProps> = ({ bookId }) =>
                                 </Box>
                             </Box>
                             <Typography component="div" variant="body2" color="text.secondary">
-                                <CollapsibleText content={review.content} threshold={50} />
+                                <CollapsibleText.Container content={review.content} threshold={50} />
                             </Typography>
                         </Box>
                     </Box>

@@ -86,7 +86,7 @@ export const BookListPage: React.FC = () => {
                                 <span className="text-lg text-yellow-500">{book.rating}</span>
                             </div>
                             <div>
-                                <CollapsibleText content={book.review} threshold={600} />
+                                <CollapsibleText.Container content={book.review} threshold={600} />
                             </div>
                         </div>
                     </div>
@@ -103,7 +103,7 @@ export const BookListPage: React.FC = () => {
             <div id="BLCOMMENT" ref={commentRef} className="mt-5">
                 <div className="flex items-center justify-between w-full">
                     <div className="flex items-center gap-2">
-                        <AccentBar />
+                        <AccentBar.Container />
                         <p className="text-2xl font-bold">评论</p>
                     </div>
 

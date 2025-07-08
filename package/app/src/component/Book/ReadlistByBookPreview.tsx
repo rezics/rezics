@@ -1,20 +1,18 @@
-import { Box, Link } from "@mui/material";
 import { ArrowForwardIcon } from "../Common/ArrowForwardIcon";
 import { AccentBarWithText } from "../Common/AccentBar";
-import { ReadlistByBook } from "@/page/ReadList/ReadListsByBookPage";
+import { Link } from "@mui/material";
 
-// * ReadlistByBook may expose the data-fetching function. This component is only responsible for displaying a few entries as a preview.
-function ReadlistByBookPreview({ bookId, title }: { bookId: string; title: string }) {
+export function ReadlistByBookPreview({ title, bookId }: { title: string; bookId?: string }) {
+    // TODO: 获取包含该书的书单数据
+
     return (
-        <Box>
+        <div>
             <Link href={`/book/${bookId}/lists`} className="flex mb-4">
-                <ArrowForwardIcon size={16}>
-                    <AccentBarWithText text={`包含 ${title} 的书单`} />
-                </ArrowForwardIcon>
+                <ArrowForwardIcon.Container size={16}>
+                    <AccentBarWithText.Container text={`包含 ${title} 的书单`} />
+                </ArrowForwardIcon.Container>
             </Link>
-            <ReadlistByBook />
-        </Box>
+            {/* 此处应该显示书单列表 */}
+        </div>
     );
 }
-
-export default ReadlistByBookPreview;

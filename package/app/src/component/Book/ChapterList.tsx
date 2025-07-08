@@ -142,7 +142,7 @@ export const ChapterList: React.FC<ChapterListProps> = ({ id }) => {
     return (
         <div>
             <div className="flex justify-between items-center mb-4">
-                <AccentBarWithText text="目录" />
+                <AccentBarWithText.Container text="目录" />
                 <div className="flex justify-end space-x-2 mb-4">
                     <Button variant="contained" onClick={expandAll} className="!mr-2">
                         Expand All
@@ -151,7 +151,7 @@ export const ChapterList: React.FC<ChapterListProps> = ({ id }) => {
                         Collapse All
                     </Button>
                     {/* This need to be a condition render, if someone maintain the book, only show the edit button to the maintainer */}
-                    <EditButtonFloatRight />
+                    <EditButtonFloatRight.Container />
                 </div>
             </div>
             <ChapterTreeView nodes={chapterTree} />

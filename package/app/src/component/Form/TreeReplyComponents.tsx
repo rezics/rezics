@@ -1,12 +1,14 @@
 // 暂时就先这样不处理，后面树化，或者使用VirtualList
 
-import React, { useState } from "react";
+import React, { useState, useCallback, useMemo } from "react";
 import { useQuery } from "urql";
 import { GET_COMMENTS } from "@/api/readlist";
-import { Avatar, Box, Collapse, IconButton, Typography } from "@mui/material";
+import { Box, Avatar, Typography, Button, Collapse, IconButton } from "@mui/material";
 import { Add, Remove } from "@mui/icons-material";
+import { proxy, useSnapshot } from "valtio";
+import { t } from "@component/Text";
 import { ReactionBar } from "../Common/ReactionBar";
-import ReplyDrawer from "./ReplyDrawer";
+import { ReplyDrawer } from "./ReplyDrawer";
 import { useDialogStore } from "@/global/dialogStore";
 
 // This is a temporary type definition based on the GraphQL schema.
@@ -75,7 +77,12 @@ const CommentNode: React.FC<CommentNodeProps> = ({ comment, level = 0, openDrawe
                     </Typography>
                     <Box className="w-full flex justify-end">
                         <Box sx={{ width: { xs: "75%", sm: "50%", md: "33%", lg: "30%", xl: "30%" } }}>
-                            <ReactionBar onReply={handleReply} className="mt-2" size="small" fontSize="1.3rem" />
+                            <ReactionBar.Container
+                                onReply={handleReply}
+                                className="mt-2"
+                                size="small"
+                                fontSize="1.3rem"
+                            />
                         </Box>
                     </Box>
                 </Box>

@@ -66,7 +66,7 @@ export const BookEditLayout: React.FC<BookEditLayoutProps> = ({ children }) => {
             <Sidebar
                 onClose={() => isMobile && closeSidebar()}
                 handleDrawerToggle={handleDrawerToggle}
-                NAVIGATION={NAVIGATION}
+                NAVIGATION={NAVIGATION()}
                 noScrollBar={true}
             >
                 <BookEditorSidebar chaptersData={data} selectedId={selectedId} baseLink={baseUrl} />
