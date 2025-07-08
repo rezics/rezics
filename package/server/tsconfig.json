@@ -1,0 +1,9 @@
+{
+    "include": ["src/**/*"],
+    "compilerOptions": {
+        "target": "esnext",
+        "module": "nodenext",
+        "moduleResolution": "nodenext"
+    },
+    "extends": "../../tsconfig.json"
+}
