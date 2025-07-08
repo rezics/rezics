@@ -41,8 +41,8 @@ export default (
         <ThemeProvider theme={{}}>
             <Switch>
                 {/* Auth */}
-                <Route path="/login" component={Login} />
-                <Route path="/register" component={Login} />
+                <Route path="/login" component={Login.Container} />
+                <Route path="/register" component={Login.Container} />
 
                 {/* Book Read – keep the more specific path first */}
                 <Route path="/book/:bookId/read/:chapterId">
@@ -139,13 +139,13 @@ export default (
                 {/* Home */}
                 <Route path="/">
                     <MainLayout>
-                        <Home />
+                        <Home.Container />
                     </MainLayout>
                 </Route>
 
                 {/* 404 fallback */}
                 <Route>
-                    <NotFound />
+                    <NotFound.Container />
                 </Route>
             </Switch>
         </ThemeProvider>

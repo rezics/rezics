@@ -16,7 +16,7 @@ import { ArrowForwardIcon } from "@component/Common/ArrowForwardIcon";
 import { BookHero } from "@component/Book/BookHero";
 import { BookDescription } from "@/component/Book/BookDescription";
 import { QuoteExcerptPreview } from "@/component/Book/QuoteExcerptPreview";
-import ReadlistByBookPreview from "@/component/Book/ReadlistByBookPreview";
+import { ReadlistByBookPreview } from "@/component/Book/ReadlistByBookPreview";
 
 export namespace BookPage {
     export type Show = {
