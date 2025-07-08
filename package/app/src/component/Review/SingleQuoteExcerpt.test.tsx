@@ -2,7 +2,7 @@ import { useFixtureInput } from "react-cosmos/client";
 import { SingleQuoteExcerpt } from "./SingleQuoteExcerpt";
 
 export default () => {
-    const [props] = useFixtureInput<Parameters<typeof SingleQuoteExcerpt>[0]>("Props", {
+    const [props] = useFixtureInput<SingleQuoteExcerpt.Show>("Props", {
         author: {
             name: "张三",
             avatar: "https://i.pravatar.cc/300?img=1",
@@ -22,12 +22,12 @@ export default () => {
         <div className="p-4 max-w-2xl">
             <h3 className="mb-4 text-lg font-semibold">单个摘录组件</h3>
             <div className="space-y-4">
-                <SingleQuoteExcerpt {...props} />
+                <SingleQuoteExcerpt.Show {...props} />
 
                 <div>
                     <h4 className="font-medium mb-2">不同类型的摘录</h4>
                     <div className="space-y-4">
-                        <SingleQuoteExcerpt
+                        <SingleQuoteExcerpt.Show
                             author={{
                                 name: "李四",
                                 avatar: "https://i.pravatar.cc/300?img=2",
@@ -42,7 +42,7 @@ export default () => {
                             originalLink="#"
                         />
 
-                        <SingleQuoteExcerpt
+                        <SingleQuoteExcerpt.Show
                             author={{
                                 name: "王五",
                                 avatar: "https://i.pravatar.cc/300?img=3",

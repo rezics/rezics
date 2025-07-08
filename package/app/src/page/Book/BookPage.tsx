@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { Box, Container, Grid, Typography, Paper, Divider, Avatar, Stack, Tab } from "@mui/material";
 import { TabContext, TabList, TabPanel } from "@mui/lab";
 import { useParams, Link } from "wouter";
@@ -40,7 +40,7 @@ export const BookDetail: React.FC = () => {
     return (
         <Box id="book-detail">
             {/* Book Overview */}
-            <BookHero data={data!.book} />
+            <BookHero.Container data={data!.book} />
 
             {/* Main Content */}
             <Container maxWidth="lg" className="mt-4 mb-8">
@@ -57,25 +57,25 @@ export const BookDetail: React.FC = () => {
                             <TabPanel value="0">
                                 <Stack spacing={4}>
                                     {/* ANCHOR Description */}
-                                    <BookDescription description={data?.book.description || ""} />
+                                    <BookDescription.Container description={data?.book.description || ""} />
                                     <Divider />
 
                                     {/* ANCHOR Tags */}
-                                    <BookTagView />
+                                    <BookTagView.Container tagObjects={data?.book.tags || []} />
                                     <Divider />
 
                                     {/* ANCHOR 最新章节 */}
 
                                     {/* ANCHOR Quote Excerpt Preview */}
-                                    <QuoteExcerptPreview id={data?.book.id || ""} />
+                                    <QuoteExcerptPreview.Container id={data?.book.id || ""} />
                                     <Divider />
 
                                     {/* ANCHOR Short Reviews */}
                                     <Box>
                                         <Link href={`/book/${data?.book.id}/reviews`} className="flex mb-4">
-                                            <ArrowForwardIcon size={16}>
-                                                <AccentBarWithText text="短评" />
-                                            </ArrowForwardIcon>
+                                            <ArrowForwardIcon.Container size={16}>
+                                                <AccentBarWithText.Container text="短评" />
+                                            </ArrowForwardIcon.Container>
                                         </Link>
                                         <ShortBookReviews bookId={data?.book.id || ""} />
                                     </Box>

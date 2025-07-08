@@ -4,26 +4,42 @@ import { AccentBarWithText } from "@component/Common/AccentBar";
 import { ArrowForwardIcon } from "@component/Common/ArrowForwardIcon";
 import { Link } from "@mui/material";
 import { QuoteExcerptList } from "../Review/QuoteExcerptList";
-interface QuoteExcerptPreviewProps {
-    id: string;
-}
+import { QuoteExcerpt } from "@/api/bookQuoteExcerpt";
 
-export function QuoteExcerptPreview({ id }: QuoteExcerptPreviewProps) {
-    // ANCHOR QuoteExcerptQuery
-    const [{ data, fetching, error }] = useQuery({
-        query: QuoteExcerptQuery,
-        variables: { bookId: id },
-    });
-    if (fetching) return <div>Loading...</div>;
-    if (error) return <div>Oh no... {error.message}</div>;
-    return (
-        <div>
-            <Link href={`/book/${id}/quotes`} className="flex mb-4">
-                <ArrowForwardIcon size={16}>
-                    <AccentBarWithText text="原文摘录" />
-                </ArrowForwardIcon>
-            </Link>
-            <QuoteExcerptList data={data?.quotes || []} />
-        </div>
-    );
+export namespace QuoteExcerptPreview {
+    export type Show = {
+        id: string;
+        data: QuoteExcerpt[];
+        isLoading: boolean;
+        error?: string;
+    };
+
+    export const Show: React.FC<Show> = ({ id, data, isLoading, error }) => {
+        if (isLoading) return <div>Loading...</div>;
+        if (error) return <div>Oh no... {error}</div>;
+
+        return (
+            <div>
+                <Link href={`/book/${id}/quotes`} className="flex mb-4">
+                    <ArrowForwardIcon.Show size={16}>
+                        <AccentBarWithText.Show text="原文摘录" />
+                    </ArrowForwardIcon.Show>
+                </Link>
+                <QuoteExcerptList.Container data={data || []} />
+            </div>
+        );
+    };
+
+    export type Container = {
+        id: string;
+    };
+
+    export const Container: React.FC<Container> = ({ id }) => {
+        const [{ data, fetching, error }] = useQuery({
+            query: QuoteExcerptQuery,
+            variables: { bookId: id },
+        });
+
+        return <Show id={id} data={data?.quotes || []} isLoading={fetching} error={error?.message} />;
+    };
 }

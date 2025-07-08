@@ -45,7 +45,7 @@ export const Header: React.FC<HeaderProps> = ({ handleDrawerToggle, mode, onThem
                 <IconButton color="inherit" onClick={onThemeToggle}>
                     {mode === "dark" ? <Brightness7 /> : <Brightness4 />}
                 </IconButton>
-                <User onLogout={() => console.log("Logout")} />
+                <User.Container onLogout={() => console.log("Logout")} />
             </Toolbar>
         </AppBar>
     );

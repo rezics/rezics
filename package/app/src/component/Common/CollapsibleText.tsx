@@ -2,50 +2,64 @@ import React, { useMemo, useState } from "react";
 import { Box, Link, useTheme } from "@mui/material";
 import { proxy, useSnapshot } from "valtio";
 
-interface CollapsibleTextProps {
-    content: string;
-    threshold?: number;
-}
-
-export const CollapsibleText: React.FC<CollapsibleTextProps> = ({ content, threshold = 200 }) => {
-    const theme = useTheme();
-    const [state] = useState(() => proxy({ isExpanded: false }));
-    const snap = useSnapshot(state);
-
-    const truncatedContent = useMemo(() => {
-        return content.length > threshold ? content.slice(0, threshold) : content;
-    }, [content, threshold]);
-
-    const toggle = () => {
-        state.isExpanded = !state.isExpanded;
+export namespace CollapsibleText {
+    export type Show = {
+        content: string;
+        threshold?: number;
+        isExpanded: boolean;
+        onToggle: () => void;
     };
 
-    return (
-        <Box sx={{ position: "relative" }}>
-            <Box>
-                {snap.isExpanded ? content : truncatedContent}
-                {content.length > threshold && (
-                    <>
-                        {!snap.isExpanded && "…"}{" "}
-                        <Link
-                            component="button"
-                            onClick={toggle}
-                            sx={{
-                                fontSize: "0.875rem",
-                                color: theme.palette.primary.main,
-                                textDecoration: "none",
-                                "&:hover": {
-                                    textDecoration: "underline",
-                                    cursor: "pointer",
-                                },
-                                transition: "color 0.2s",
-                            }}
-                        >
-                            {snap.isExpanded ? "收起" : "展開"}
-                        </Link>
-                    </>
-                )}
+    export const Show: React.FC<Show> = ({ content, threshold = 200, isExpanded, onToggle }) => {
+        const theme = useTheme();
+
+        const truncatedContent = useMemo(() => {
+            return content.length > threshold ? content.slice(0, threshold) : content;
+        }, [content, threshold]);
+
+        return (
+            <Box sx={{ position: "relative" }}>
+                <Box>
+                    {isExpanded ? content : truncatedContent}
+                    {content.length > threshold && (
+                        <>
+                            {!isExpanded && "…"}{" "}
+                            <Link
+                                component="button"
+                                onClick={onToggle}
+                                sx={{
+                                    fontSize: "0.875rem",
+                                    color: theme.palette.primary.main,
+                                    textDecoration: "none",
+                                    "&:hover": {
+                                        textDecoration: "underline",
+                                        cursor: "pointer",
+                                    },
+                                    transition: "color 0.2s",
+                                }}
+                            >
+                                {isExpanded ? "收起" : "展開"}
+                            </Link>
+                        </>
+                    )}
+                </Box>
             </Box>
-        </Box>
-    );
-};
+        );
+    };
+
+    export type Container = {
+        content: string;
+        threshold?: number;
+    };
+
+    export const Container: React.FC<Container> = ({ content, threshold = 200 }) => {
+        const [state] = useState(() => proxy({ isExpanded: false }));
+        const snap = useSnapshot(state);
+
+        const toggle = () => {
+            state.isExpanded = !state.isExpanded;
+        };
+
+        return <Show content={content} threshold={threshold} isExpanded={snap.isExpanded} onToggle={toggle} />;
+    };
+}
