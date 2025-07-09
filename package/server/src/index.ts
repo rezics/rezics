@@ -1,8 +1,17 @@
 import { Surreal } from "surrealdb";
-import { surrealdbNodeEngines } from "@surrealdb/node";
+import { surrealdbWasmEngines } from "@surrealdb/wasm";
+import * as CLI from "@effect/cli";
 
-const db = new Surreal({
-    engines: surrealdbNodeEngines(),
-});
+const main = async (argv: string[]) => {
+    const db = new Surreal({
+        engines: surrealdbWasmEngines(),
+    });
 
-db.connect("mem://");
+    await Promise.all([db.connect("mem://", { namespace: "root", database: "root" }), db.ready]);
+
+    const info = await db.version();
+
+    console.log(info);
+};
+
+main(process.argv.slice(2)).catch(console.error);

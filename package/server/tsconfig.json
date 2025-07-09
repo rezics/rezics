@@ -3,7 +3,8 @@
     "compilerOptions": {
         "target": "esnext",
         "module": "nodenext",
-        "moduleResolution": "nodenext"
+        "moduleResolution": "nodenext",
+        "lib": ["ESNext"]
     },
     "extends": "../../tsconfig.json"
 }
