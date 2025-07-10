@@ -9,7 +9,6 @@ import {
   SearchBookSchema 
 } from './types';
 
-// 书籍相关响应
 export const BookInfoResponseSchema = SuccessResponseSchema(BookInfoSchema);
 
 export const ChapterListResponseSchema = SuccessResponseSchema(z.object({
@@ -21,11 +20,9 @@ export const ChapterContentResponseSchema = SuccessResponseSchema(ChapterContent
 
 export const QuoteExcerptResponseSchema = SuccessResponseSchema(z.array(QuoteExcerptSchema));
 
-// 搜索相关响应
 export const SearchBooksResponseSchema = SuccessResponseSchema(z.array(SearchBookSchema));
 export const TopBooksResponseSchema = SuccessResponseSchema(z.array(SearchBookSchema));
 
-// 导出类型
 export type BookInfoResponse = z.infer<typeof BookInfoResponseSchema>;
 export type ChapterListResponse = z.infer<typeof ChapterListResponseSchema>;
 export type ChapterContentResponse = z.infer<typeof ChapterContentResponseSchema>;

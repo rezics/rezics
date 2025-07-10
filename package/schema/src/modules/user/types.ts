@@ -1,7 +1,6 @@
 import { z } from 'zod/v4';
 import { IDSchema, StringSchema } from '../../base';
 
-// 用户相关
 export const UserSchema = z.object({
   id: IDSchema,
   name: StringSchema,
@@ -14,7 +13,6 @@ export const AuthorSchema = z.object({
   description: StringSchema,
 });
 
-// 认证相关
 export const AuthPayloadSchema = z.object({
   token: StringSchema,
   user: UserSchema,
@@ -25,7 +23,6 @@ export const ValidationErrorSchema = z.object({
   message: StringSchema,
 });
 
-// 导出类型
 export type User = z.infer<typeof UserSchema>;
 export type Author = z.infer<typeof AuthorSchema>;
 export type AuthPayload = z.infer<typeof AuthPayloadSchema>;

@@ -2,7 +2,6 @@ import { z } from 'zod/v4';
 import { IDSchema, StringSchema, FloatSchema, DateStringSchema } from '../../base';
 import { UserSchema, AuthorSchema } from '../user';
 
-// 书籍相关
 export const BookSchema = z.object({
   id: IDSchema,
   title: StringSchema,
@@ -23,7 +22,6 @@ export const BookInfoSchema = z.object({
   error: StringSchema.nullable(),
 });
 
-// 章节相关
 export const ChapterSchema = z.object({
   id: IDSchema,
   parentId: IDSchema.optional(),
@@ -44,7 +42,6 @@ export const ChapterContentSchema = z.object({
   author: UserSchema,
 });
 
-// 引用摘录相关
 export const QuoteExcerptSchema = z.object({
   id: IDSchema,
   content: StringSchema,
@@ -52,7 +49,6 @@ export const QuoteExcerptSchema = z.object({
   author: UserSchema,
 });
 
-// 搜索相关
 export const SearchBookSchema = z.object({
   id: IDSchema,
   title: StringSchema,
@@ -61,7 +57,6 @@ export const SearchBookSchema = z.object({
   cover: StringSchema,
 });
 
-// 导出类型
 export type Book = z.infer<typeof BookSchema>;
 export type BookInfo = z.infer<typeof BookInfoSchema>;
 export type Chapter = z.infer<typeof ChapterSchema>;

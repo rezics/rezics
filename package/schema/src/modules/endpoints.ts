@@ -1,40 +1,36 @@
-// ==================== API 端点定义 ====================
+export const AUTH_ENDPOINTS = {
+  LOGIN: '/auth/login',
+  REGISTER: '/auth/register',
+  VALIDATE_EMAIL: '/auth/validate-email',
+  VALIDATE_PASSWORD: '/auth/validate-password',
+} as const;
 
-export const API_ENDPOINTS = {
-  // 认证
-  AUTH: {
-    LOGIN: '/api/auth/login',
-    REGISTER: '/api/auth/register',
-    VALIDATE_EMAIL: '/api/auth/validate-email',
-    VALIDATE_PASSWORD: '/api/auth/validate-password',
-  },
-  // 用户
-  USER: {
-    ME: '/api/user/me',
-  },
-  // 书籍
-  BOOK: {
-    INFO: '/api/book/:id',
-    CHAPTERS: '/api/book/:id/chapters',
-    CONTENT: '/api/chapter/:chapterId/content',
-    QUOTES: '/api/book/:bookId/quotes',
-  },
-  // 书单
-  BOOKLIST: {
-    GET: '/api/booklist/:id',
-    LIST: '/api/booklists',
-    COMMENTS: '/api/booklist/:bookListId/comments',
-    ADD_COMMENT: '/api/booklist/:bookListId/comments',
-    ADD_REPLY: '/api/comment/:commentId/replies',
-  },
-  // 书评
-  REVIEW: {
-    LIST: '/api/book/:bookId/reviews',
-    ADD: '/api/book/:bookId/reviews',
-  },
-  // 搜索
-  SEARCH: {
-    BOOKS: '/api/search/books',
-    TOP_BOOKS: '/api/search/top-books',
-  },
+export const USER_ENDPOINTS = {
+  ME: '/user/me',
+} as const;
+
+export const BOOK_ENDPOINTS = {
+  INFO: '/book/:id',
+  CHAPTER_LIST: '/book/:id/chapters',
+  CHAPTER_CONTENT: '/chapter/:chapterId',
+  QUOTE_EXCERPTS: '/book/:bookId/quote-excerpts',
+  SEARCH: '/books/search',
+  TOP_BOOKS: '/books/top',
+} as const;
+
+export const BOOKLIST_ENDPOINTS = {
+  LIST: '/booklist/:id',
+  LISTS: '/booklists',
+  COMMENTS: '/booklist/:bookListId/comments',
+  ADD_COMMENT: '/booklist/:bookListId/comments',
+  ADD_REPLY: '/comment/:commentId/replies',
+} as const;
+
+export const REVIEW_ENDPOINTS = {
+  BOOK_REVIEWS: '/book/:bookId/reviews',
+  ADD_REVIEW: '/book/:bookId/reviews',
+} as const;
+
+export const SEARCH_ENDPOINTS = {
+  BOOKS: '/search/books',
 } as const;
