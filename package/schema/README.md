@@ -10,37 +10,25 @@ src/
 ├── index.ts             # 主入口文件
 └── modules/             # 功能模块
     ├── index.ts         # 模块索引
-    ├── user.ts          # 用户相关类型
-    ├── book.ts          # 书籍相关类型
-    ├── booklist.ts      # 书单相关类型
-    ├── review.ts        # 书评相关类型
+    ├── user.ts          # 用户相关类型和 API
+    ├── book.ts          # 书籍相关类型和 API
+    ├── booklist.ts      # 书单相关类型和 API
+    ├── review.ts        # 书评相关类型和 API
     ├── tag.ts           # 标签相关类型
-    ├── auth.ts          # 认证相关 API
-    ├── book-api.ts      # 书籍相关 API
-    ├── booklist-api.ts  # 书单相关 API
-    ├── review-api.ts    # 书评相关 API
-    ├── search-api.ts    # 搜索相关 API
-    ├── user-api.ts      # 用户相关 API
+    ├── auth.ts          # 认证相关类型和 API
     └── endpoints.ts     # API 端点配置
 ```
 
 ## 模块说明
 
-### 基础模块
+### 功能模块
 - **base.ts**: 包含基础类型定义，如 ID、字符串、数字等通用类型
-- **user.ts**: 用户和作者相关的类型定义
-- **book.ts**: 书籍、章节、引用摘录等类型定义
-- **booklist.ts**: 书单和评论相关的类型定义
-- **review.ts**: 书评相关的类型定义
+- **user.ts**: 用户和作者相关的类型定义及 API
+- **book.ts**: 书籍、章节、引用摘录等类型定义及 API（包含搜索功能）
+- **booklist.ts**: 书单和评论相关的类型定义及 API
+- **review.ts**: 书评相关的类型定义及 API
 - **tag.ts**: 标签相关的类型定义
-
-### API 模块
-- **auth.ts**: 认证相关的请求和响应 schema
-- **book-api.ts**: 书籍相关的 API 请求和响应 schema
-- **booklist-api.ts**: 书单相关的 API 请求和响应 schema
-- **review-api.ts**: 书评相关的 API 请求和响应 schema
-- **search-api.ts**: 搜索相关的 API 请求和响应 schema
-- **user-api.ts**: 用户相关的 API 请求和响应 schema
+- **auth.ts**: 认证相关的类型定义及 API
 - **endpoints.ts**: API 端点配置
 
 ## 使用方式
@@ -55,6 +43,9 @@ import { BookListSchema } from 'schema/modules/booklist';
 
 // 导入 API 端点
 import { API_ENDPOINTS } from 'schema/modules/endpoints';
+
+// 导入 API 类型
+import { LoginRequest, BookInfoResponse } from 'schema';
 ```
 
 ## 特点

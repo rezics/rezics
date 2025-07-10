@@ -1,5 +1,5 @@
 import { z } from 'zod/v4';
-import { IDSchema, StringSchema } from './base';
+import { IDSchema, StringSchema, SuccessResponseSchema } from '../base';
 
 // 用户相关
 export const UserSchema = z.object({
@@ -30,3 +30,15 @@ export type User = z.infer<typeof UserSchema>;
 export type Author = z.infer<typeof AuthorSchema>;
 export type AuthPayload = z.infer<typeof AuthPayloadSchema>;
 export type ValidationError = z.infer<typeof ValidationErrorSchema>;
+
+// ==================== API 请求和响应 ====================
+
+// 用户相关请求
+export const GetMeRequestSchema = z.object({});
+
+// 用户相关响应
+export const MeResponseSchema = SuccessResponseSchema(UserSchema);
+
+// API 类型导出
+export type GetMeRequest = z.infer<typeof GetMeRequestSchema>;
+export type MeResponse = z.infer<typeof MeResponseSchema>;

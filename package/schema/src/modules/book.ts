@@ -1,5 +1,5 @@
 import { z } from 'zod/v4';
-import { IDSchema, StringSchema, FloatSchema, DateStringSchema } from '../base';
+import { IDSchema, StringSchema, FloatSchema, DateStringSchema, SuccessResponseSchema } from '../base';
 import { UserSchema, AuthorSchema } from './user';
 
 // 书籍相关
@@ -69,3 +69,61 @@ export type ChapterOrder = z.infer<typeof ChapterOrderSchema>;
 export type ChapterContent = z.infer<typeof ChapterContentSchema>;
 export type QuoteExcerpt = z.infer<typeof QuoteExcerptSchema>;
 export type SearchBook = z.infer<typeof SearchBookSchema>;
+
+// ==================== API 请求和响应 ====================
+
+// 书籍相关请求
+export const GetBookInfoRequestSchema = z.object({
+  id: z.string().min(1),
+});
+
+export const GetChapterListRequestSchema = z.object({
+  id: z.string().min(1),
+});
+
+export const GetChapterContentRequestSchema = z.object({
+  chapterId: z.string().min(1),
+});
+
+export const GetQuoteExcerptRequestSchema = z.object({
+  bookId: z.string().min(1),
+});
+
+// 书籍相关响应
+export const BookInfoResponseSchema = SuccessResponseSchema(BookInfoSchema);
+
+export const ChapterListResponseSchema = SuccessResponseSchema(z.object({
+  chapters: z.array(ChapterSchema),
+  chapterOrders: z.array(ChapterOrderSchema),
+}));
+
+export const ChapterContentResponseSchema = SuccessResponseSchema(ChapterContentSchema);
+
+export const QuoteExcerptResponseSchema = SuccessResponseSchema(z.array(QuoteExcerptSchema));
+
+// API 类型导出
+export type GetBookInfoRequest = z.infer<typeof GetBookInfoRequestSchema>;
+export type GetChapterListRequest = z.infer<typeof GetChapterListRequestSchema>;
+export type GetChapterContentRequest = z.infer<typeof GetChapterContentRequestSchema>;
+export type GetQuoteExcerptRequest = z.infer<typeof GetQuoteExcerptRequestSchema>;
+export type BookInfoResponse = z.infer<typeof BookInfoResponseSchema>;
+export type ChapterListResponse = z.infer<typeof ChapterListResponseSchema>;
+export type ChapterContentResponse = z.infer<typeof ChapterContentResponseSchema>;
+export type QuoteExcerptResponse = z.infer<typeof QuoteExcerptResponseSchema>;
+
+// 搜索相关请求
+export const SearchBooksRequestSchema = z.object({
+  query: z.string().min(1),
+});
+
+export const GetTopBooksRequestSchema = z.object({});
+
+// 搜索相关响应
+export const SearchBooksResponseSchema = SuccessResponseSchema(z.array(SearchBookSchema));
+export const TopBooksResponseSchema = SuccessResponseSchema(z.array(SearchBookSchema));
+
+// 搜索 API 类型导出
+export type SearchBooksRequest = z.infer<typeof SearchBooksRequestSchema>;
+export type GetTopBooksRequest = z.infer<typeof GetTopBooksRequestSchema>;
+export type SearchBooksResponse = z.infer<typeof SearchBooksResponseSchema>;
+export type TopBooksResponse = z.infer<typeof TopBooksResponseSchema>;
