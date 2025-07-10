@@ -318,6 +318,9 @@ importers:
 
   package/schema:
     dependencies:
+      graphql-tag:
+        specifier: ^2.12.6
+        version: 2.12.6(graphql@16.11.0)
       zod:
         specifier: ^3.25.46
         version: 3.25.48

@@ -1,4 +1,4 @@
-import { gql } from "urql";
+export { CHAPTER_CONTENT as ChapterContentQuery } from "schema";
 
 export interface ChapterContent {
     id: string;
@@ -10,17 +10,3 @@ export interface ChapterContent {
         avatar: string;
     };
 }
-
-export const ChapterContentQuery = gql`
-    query ChapterContentQuery($chapterId: ID!) {
-        chapter(id: $chapterId) {
-            id
-            content
-            createdAt
-            author {
-                name
-                avatar
-            }
-        }
-    }
-`;
