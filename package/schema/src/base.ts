@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from 'zod/v4';
 
 // 基础类型定义
 export const IDSchema = z.string().min(1);

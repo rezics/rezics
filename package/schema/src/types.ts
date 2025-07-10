@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from 'zod/v4';
 import { IDSchema, StringSchema, IntSchema, FloatSchema, DateStringSchema } from './base';
 
 // 用户相关
