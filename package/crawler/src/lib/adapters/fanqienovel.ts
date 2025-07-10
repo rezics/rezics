@@ -1,12 +1,12 @@
-import { right } from "fp-ts/lib/Either.js";
-import { create_strategy, create_test } from "./base.js";
+import { Either } from "effect";
+import { make_strategy, make_test } from "./base.js";
 import { Unit } from "../../schema.js";
 import { exec } from "../util.js";
 
 export const platform = "fanqienovel";
 export const domain = "fanqienovel.com";
 
-export const strategy = create_strategy(platform, domain, async (page, url, responses) => {
+export const strategy = make_strategy(platform, domain, async (page, url, responses) => {
     await page.goto(url.toString());
 
     const cover_src = (await page.locator(".book-cover-img.loaded").getAttribute("src"))!;
@@ -17,7 +17,7 @@ export const strategy = create_strategy(platform, domain, async (page, url, resp
             .map((child) => (child as HTMLElement).innerText!),
     );
 
-    return right({
+    return Either.right({
         id: {},
         cover: (await responses.find((response) => response.url() === cover_src)!.body()).toString("base64"),
         title: (await page.locator(".info-name").textContent())!,
@@ -51,7 +51,7 @@ export const strategy = create_strategy(platform, domain, async (page, url, resp
     });
 });
 
-export const test = create_test(strategy, "https://fanqienovel.com/page/7143038691944959011");
+export const test = make_test(strategy, "https://fanqienovel.com/page/7143038691944959011");
 
 process.env["TEST"] &&
     exec(async () => {

@@ -1,17 +1,17 @@
-import { right } from "fp-ts/lib/Either.js";
-import { create_discover, create_strategy, create_test } from "./base.js";
+import { Either } from "effect";
+import { make_discover, make_strategy, make_test } from "./base.js";
 import { exec, sleep } from "../util.js";
-import { Page } from "playwright";
+import type { Page } from "rebrowser-playwright";
 
 export const platform = "qidian";
 export const domain = "www.qidian.com";
 
-export const strategy = create_strategy(platform, domain, async (page, url, responses) => {
+export const strategy = make_strategy(platform, domain, async (page, url, responses) => {
     await page.goto(url.toString());
 
     const cover_src = (await page.locator("#bookImg").locator("img").first().getAttribute("src"))!;
 
-    return right({
+    return Either.right({
         id: {},
         cover: (await responses.find((response) => response.url().endsWith(cover_src))!.body()).toString("base64"),
         title: (await page.locator("#bookName").innerText())!,
@@ -40,7 +40,7 @@ export const strategy = create_strategy(platform, domain, async (page, url, resp
     });
 });
 
-export const discover = create_discover(async function* (page, keyword: string) {
+export const discover = make_discover(async function* (page, keyword: string) {
     try {
         await page.goto(`https://www.qidian.com/so/${keyword}.html`);
 
@@ -79,7 +79,7 @@ export const discover = create_discover(async function* (page, keyword: string) 
     }
 });
 
-export const test = create_test(strategy, "https://www.qidian.com/book/1032982789");
+export const test = make_test(strategy, "https://www.qidian.com/book/1032982789");
 
 process.env["TEST"] &&
     exec(async () => {
