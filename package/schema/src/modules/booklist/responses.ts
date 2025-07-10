@@ -1,13 +1,13 @@
 import { z } from 'zod/v4';
-import { PaginatedResponseSchema, SuccessResponseSchema } from '../../base';
-import { BookListSchema, CommentSchema } from './types';
+import { PaginatedResponse, SuccessResponse } from '../../base';
+import { BookList, Comment } from './types';
 
-export const BookListResponseSchema = SuccessResponseSchema(BookListSchema);
-export const BookListsResponseSchema = SuccessResponseSchema(PaginatedResponseSchema(BookListSchema));
-export const CommentsResponseSchema = SuccessResponseSchema(z.array(CommentSchema));
-export const CommentResponseSchema = SuccessResponseSchema(CommentSchema);
+export const BookListResponse = SuccessResponse(BookList);
+export const BookListsResponse = SuccessResponse(PaginatedResponse(BookList));
+export const CommentsResponse = SuccessResponse(z.array(Comment));
+export const CommentResponse = SuccessResponse(Comment);
 
-export type BookListResponse = z.infer<typeof BookListResponseSchema>;
-export type BookListsResponse = z.infer<typeof BookListsResponseSchema>;
-export type CommentsResponse = z.infer<typeof CommentsResponseSchema>;
-export type CommentResponse = z.infer<typeof CommentResponseSchema>;
+export type BookListResponse = z.infer<typeof BookListResponse>;
+export type BookListsResponse = z.infer<typeof BookListsResponse>;
+export type CommentsResponse = z.infer<typeof CommentsResponse>;
+export type CommentResponse = z.infer<typeof CommentResponse>;

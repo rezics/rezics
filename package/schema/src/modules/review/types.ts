@@ -1,13 +1,13 @@
 import { z } from 'zod/v4';
-import { IDSchema, StringSchema, FloatSchema, DateStringSchema } from '../../base';
-import { UserSchema } from '../user';
+import { ID, String, Float, DateString } from '../../base';
+import { User } from '../user';
 
-export const ReviewSchema = z.object({
-  id: IDSchema,
-  content: StringSchema,
-  rating: FloatSchema,
-  createdAt: DateStringSchema,
-  user: UserSchema,
+export const Review = z.object({
+  id: ID,
+  content: String,
+  rating: Float,
+  createdAt: DateString,
+  user: User,
 });
 
-export type Review = z.infer<typeof ReviewSchema>;
+export type Review = z.infer<typeof Review>;

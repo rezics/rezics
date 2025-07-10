@@ -1,30 +1,30 @@
 import { z } from 'zod/v4';
 
-export const GetBookInfoRequestSchema = z.object({
+export const GetBookInfoRequest = z.object({
   id: z.string().min(1),
 });
 
-export const GetChapterListRequestSchema = z.object({
+export const GetChapterListRequest = z.object({
   id: z.string().min(1),
 });
 
-export const GetChapterContentRequestSchema = z.object({
+export const GetChapterContentRequest = z.object({
   chapterId: z.string().min(1),
 });
 
-export const GetQuoteExcerptRequestSchema = z.object({
+export const GetQuoteExcerptRequest = z.object({
   bookId: z.string().min(1),
 });
 
-export const SearchBooksRequestSchema = z.object({
+export const SearchBooksRequest = z.object({
   query: z.string().min(1),
 });
 
-export const GetTopBooksRequestSchema = z.object({});
+export const GetTopBooksRequest = z.object({});
 
-export type GetBookInfoRequest = z.infer<typeof GetBookInfoRequestSchema>;
-export type GetChapterListRequest = z.infer<typeof GetChapterListRequestSchema>;
-export type GetChapterContentRequest = z.infer<typeof GetChapterContentRequestSchema>;
-export type GetQuoteExcerptRequest = z.infer<typeof GetQuoteExcerptRequestSchema>;
-export type SearchBooksRequest = z.infer<typeof SearchBooksRequestSchema>;
-export type GetTopBooksRequest = z.infer<typeof GetTopBooksRequestSchema>;
+export type GetBookInfoRequest = z.infer<typeof GetBookInfoRequest>;
+export type GetChapterListRequest = z.infer<typeof GetChapterListRequest>;
+export type GetChapterContentRequest = z.infer<typeof GetChapterContentRequest>;
+export type GetQuoteExcerptRequest = z.infer<typeof GetQuoteExcerptRequest>;
+export type SearchBooksRequest = z.infer<typeof SearchBooksRequest>;
+export type GetTopBooksRequest = z.infer<typeof GetTopBooksRequest>;

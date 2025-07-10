@@ -1,25 +1,25 @@
 import { z } from 'zod/v4';
-import { IDSchema, StringSchema, IntSchema } from '../../base';
-import { UserSchema } from '../user';
+import { ID, String, Int } from '../../base';
+import { User } from '../user';
 
-export const BookListSchema = z.object({
-  id: IDSchema,
-  title: StringSchema,
-  description: StringSchema,
-  books: z.array(StringSchema),
-  creator: UserSchema,
-  likes: IntSchema,
-  commentsNumber: IntSchema,
+export const BookList = z.object({
+  id: ID,
+  title: String,
+  description: String,
+  books: z.array(String),
+  creator: User,
+  likes: Int,
+  commentsNumber: Int,
 });
 
-export const CommentSchema: z.ZodType<any> = z.object({
-  id: IDSchema,
-  content: StringSchema,
+export const Comment: z.ZodType<any> = z.object({
+  id: ID,
+  content: String,
   createdAt: z.string().datetime(),
-  likes: IntSchema,
-  user: UserSchema,
-  replies: z.array(z.lazy(() => CommentSchema)).optional(),
+  likes: Int,
+  user: User,
+  replies: z.array(z.lazy(() => Comment)).optional(),
 });
 
-export type BookList = z.infer<typeof BookListSchema>;
-export type Comment = z.infer<typeof CommentSchema>;
+export type BookList = z.infer<typeof BookList>;
+export type Comment = z.infer<typeof Comment>;

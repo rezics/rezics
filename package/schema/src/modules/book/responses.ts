@@ -1,31 +1,31 @@
 import { z } from 'zod/v4';
-import { SuccessResponseSchema } from '../../base';
+import { SuccessResponse } from '../../base';
 import { 
-  BookInfoSchema, 
-  ChapterSchema, 
-  ChapterOrderSchema, 
-  ChapterContentSchema, 
-  QuoteExcerptSchema, 
-  SearchBookSchema 
+  BookInfo, 
+  Chapter, 
+  ChapterOrder, 
+  ChapterContent, 
+  QuoteExcerpt, 
+  SearchBook 
 } from './types';
 
-export const BookInfoResponseSchema = SuccessResponseSchema(BookInfoSchema);
+export const BookInfoResponse = SuccessResponse(BookInfo);
 
-export const ChapterListResponseSchema = SuccessResponseSchema(z.object({
-  chapters: z.array(ChapterSchema),
-  chapterOrders: z.array(ChapterOrderSchema),
+export const ChapterListResponse = SuccessResponse(z.object({
+  chapters: z.array(Chapter),
+  chapterOrders: z.array(ChapterOrder),
 }));
 
-export const ChapterContentResponseSchema = SuccessResponseSchema(ChapterContentSchema);
+export const ChapterContentResponse = SuccessResponse(ChapterContent);
 
-export const QuoteExcerptResponseSchema = SuccessResponseSchema(z.array(QuoteExcerptSchema));
+export const QuoteExcerptResponse = SuccessResponse(z.array(QuoteExcerpt));
 
-export const SearchBooksResponseSchema = SuccessResponseSchema(z.array(SearchBookSchema));
-export const TopBooksResponseSchema = SuccessResponseSchema(z.array(SearchBookSchema));
+export const SearchBooksResponse = SuccessResponse(z.array(SearchBook));
+export const TopBooksResponse = SuccessResponse(z.array(SearchBook));
 
-export type BookInfoResponse = z.infer<typeof BookInfoResponseSchema>;
-export type ChapterListResponse = z.infer<typeof ChapterListResponseSchema>;
-export type ChapterContentResponse = z.infer<typeof ChapterContentResponseSchema>;
-export type QuoteExcerptResponse = z.infer<typeof QuoteExcerptResponseSchema>;
-export type SearchBooksResponse = z.infer<typeof SearchBooksResponseSchema>;
-export type TopBooksResponse = z.infer<typeof TopBooksResponseSchema>;
+export type BookInfoResponse = z.infer<typeof BookInfoResponse>;
+export type ChapterListResponse = z.infer<typeof ChapterListResponse>;
+export type ChapterContentResponse = z.infer<typeof ChapterContentResponse>;
+export type QuoteExcerptResponse = z.infer<typeof QuoteExcerptResponse>;
+export type SearchBooksResponse = z.infer<typeof SearchBooksResponse>;
+export type TopBooksResponse = z.infer<typeof TopBooksResponse>;

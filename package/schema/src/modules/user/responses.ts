@@ -1,7 +1,7 @@
 import { z } from 'zod/v4';
-import { SuccessResponseSchema } from '../../base';
-import { UserSchema } from './types';
+import { SuccessResponse } from '../../base';
+import { User } from './types';
 
-export const MeResponseSchema = SuccessResponseSchema(UserSchema);
+export const MeResponse = SuccessResponse(User);
 
-export type MeResponse = z.infer<typeof MeResponseSchema>;
+export type MeResponse = z.infer<typeof MeResponse>;

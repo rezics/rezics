@@ -1,66 +1,66 @@
 import { z } from 'zod/v4';
-import { IDSchema, StringSchema, FloatSchema, DateStringSchema } from '../../base';
-import { UserSchema, AuthorSchema } from '../user';
+import { ID, String, Float, DateString } from '../../base';
+import { User, Author } from '../user';
 
-export const BookSchema = z.object({
-  id: IDSchema,
-  title: StringSchema,
-  cover: StringSchema,
-  author: StringSchema,
-  rating: FloatSchema,
-  publisher: StringSchema,
-  publishDate: StringSchema,
-  isbn: StringSchema,
-  tags: z.array(StringSchema),
-  description: StringSchema,
+export const Book = z.object({
+  id: ID,
+  title: String,
+  cover: String,
+  author: String,
+  rating: Float,
+  publisher: String,
+  publishDate: String,
+  isbn: String,
+  tags: z.array(String),
+  description: String,
 });
 
-export const BookInfoSchema = z.object({
-  book: BookSchema,
-  author: AuthorSchema,
+export const BookInfo = z.object({
+  book: Book,
+  author: Author,
   loading: z.boolean(),
-  error: StringSchema.nullable(),
+  error: String.nullable(),
 });
 
-export const ChapterSchema = z.object({
-  id: IDSchema,
-  parentId: IDSchema.optional(),
-  chapterName: StringSchema,
+export const Chapter = z.object({
+  id: ID,
+  parentId: ID.optional(),
+  chapterName: String,
   noContent: z.boolean(),
 });
 
-export const ChapterOrderSchema = z.object({
-  parentId: IDSchema,
-  childIds: z.array(IDSchema),
+export const ChapterOrder = z.object({
+  parentId: ID,
+  childIds: z.array(ID),
 });
 
-export const ChapterContentSchema = z.object({
-  id: IDSchema,
-  content: StringSchema,
-  createdAt: DateStringSchema,
-  chapterName: StringSchema,
-  author: UserSchema,
+export const ChapterContent = z.object({
+  id: ID,
+  content: String,
+  createdAt: DateString,
+  chapterName: String,
+  author: User,
 });
 
-export const QuoteExcerptSchema = z.object({
-  id: IDSchema,
-  content: StringSchema,
-  createdAt: DateStringSchema,
-  author: UserSchema,
+export const QuoteExcerpt = z.object({
+  id: ID,
+  content: String,
+  createdAt: DateString,
+  author: User,
 });
 
-export const SearchBookSchema = z.object({
-  id: IDSchema,
-  title: StringSchema,
-  author: StringSchema,
-  description: StringSchema,
-  cover: StringSchema,
+export const SearchBook = z.object({
+  id: ID,
+  title: String,
+  author: String,
+  description: String,
+  cover: String,
 });
 
-export type Book = z.infer<typeof BookSchema>;
-export type BookInfo = z.infer<typeof BookInfoSchema>;
-export type Chapter = z.infer<typeof ChapterSchema>;
-export type ChapterOrder = z.infer<typeof ChapterOrderSchema>;
-export type ChapterContent = z.infer<typeof ChapterContentSchema>;
-export type QuoteExcerpt = z.infer<typeof QuoteExcerptSchema>;
-export type SearchBook = z.infer<typeof SearchBookSchema>;
+export type Book = z.infer<typeof Book>;
+export type BookInfo = z.infer<typeof BookInfo>;
+export type Chapter = z.infer<typeof Chapter>;
+export type ChapterOrder = z.infer<typeof ChapterOrder>;
+export type ChapterContent = z.infer<typeof ChapterContent>;
+export type QuoteExcerpt = z.infer<typeof QuoteExcerpt>;
+export type SearchBook = z.infer<typeof SearchBook>;

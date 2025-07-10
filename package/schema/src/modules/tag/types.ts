@@ -1,10 +1,10 @@
 import { z } from 'zod/v4';
-import { StringSchema } from '../../base';
+import { String } from '../../base';
 
-export const TagGroupObjectSchema = z.object({
-  key: StringSchema,
-  name: StringSchema,
-  tags: z.array(StringSchema),
+export const TagGroupObject = z.object({
+  key: String,
+  name: String,
+  tags: z.array(String),
 });
 
-export type TagGroupObject = z.infer<typeof TagGroupObjectSchema>;
+export type TagGroupObject = z.infer<typeof TagGroupObject>;

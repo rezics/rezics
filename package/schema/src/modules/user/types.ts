@@ -1,29 +1,29 @@
 import { z } from 'zod/v4';
-import { IDSchema, StringSchema } from '../../base';
+import { ID, String } from '../../base';
 
-export const UserSchema = z.object({
-  id: IDSchema,
-  name: StringSchema,
-  avatar: StringSchema,
+export const User = z.object({
+  id: ID,
+  name: String,
+  avatar: String,
 });
 
-export const AuthorSchema = z.object({
-  name: StringSchema,
-  avatar: StringSchema,
-  description: StringSchema,
+export const Author = z.object({
+  name: String,
+  avatar: String,
+  description: String,
 });
 
-export const AuthPayloadSchema = z.object({
-  token: StringSchema,
-  user: UserSchema,
+export const AuthPayload = z.object({
+  token: String,
+  user: User,
 });
 
-export const ValidationErrorSchema = z.object({
-  field: StringSchema,
-  message: StringSchema,
+export const ValidationError = z.object({
+  field: String,
+  message: String,
 });
 
-export type User = z.infer<typeof UserSchema>;
-export type Author = z.infer<typeof AuthorSchema>;
-export type AuthPayload = z.infer<typeof AuthPayloadSchema>;
-export type ValidationError = z.infer<typeof ValidationErrorSchema>;
+export type User = z.infer<typeof User>;
+export type Author = z.infer<typeof Author>;
+export type AuthPayload = z.infer<typeof AuthPayload>;
+export type ValidationError = z.infer<typeof ValidationError>;
