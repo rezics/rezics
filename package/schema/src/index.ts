@@ -200,9 +200,7 @@ export type TopBooksResponse = z.infer<typeof TopBooksResponseSchema>;
 export type MeResponse = z.infer<typeof MeResponseSchema>;
 export type ErrorResponse = z.infer<typeof ErrorResponseSchema>;
 
-// ==================== GraphQL 查询导出 ====================
 
-export * from './queries';
 
 // ==================== API 端点定义 ====================
 

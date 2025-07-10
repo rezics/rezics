@@ -1,1 +1,0 @@
-export { LOGIN, REGISTER, VALIDATE_EMAIL, VALIDATE_PASSWORD } from "schema";

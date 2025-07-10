@@ -8,8 +8,7 @@ import CssBaseline from "@mui/material/CssBaseline";
 import { getTheme, getDynamicTheme } from "./config/theme";
 import { appStore } from "./global/appStore";
 import { applyDynamicThemeToDOM, generateDynamicColors } from "./config/dynamicTheme";
-import { setupMock } from "./plugin/providers/mock";
-import { client, UrqlProvider } from "./plugin/providers/urql";
+
 
 const container = document.getElementById("app") as HTMLElement;
 const root = createRoot(container);
@@ -36,13 +35,11 @@ function Root() {
             <StyledEngineProvider injectFirst>
                 <ThemeProvider theme={theme}>
                     <CssBaseline />
-                    <UrqlProvider value={client}>{Router}</UrqlProvider>
+                    {Router}
                 </ThemeProvider>
             </StyledEngineProvider>
         </StrictMode>
     );
 }
 
-setupMock().then(() => {
-    root.render(<Root />);
-});
+root.render(<Root />);

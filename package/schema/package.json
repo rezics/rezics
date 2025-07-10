@@ -7,8 +7,7 @@
         }
     },
     "dependencies": {
-        "zod": "^3.25.46",
-        "graphql-tag": "^2.12.6"
+        "zod": "^3.25.46"
     },
     "devDependencies": {
         "typescript": "^5.8.3"
