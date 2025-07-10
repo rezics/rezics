@@ -1,5 +1,5 @@
 import { z } from 'zod/v4';
-import { StringSchema } from '../base';
+import { StringSchema } from '../../base';
 
 // 标签相关
 export const TagGroupObjectSchema = z.object({
