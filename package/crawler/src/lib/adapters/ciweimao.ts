@@ -1,8 +1,8 @@
-import { right } from "fp-ts/lib/Either.js";
-import { create_discover, create_strategy, create_test } from "./base.js";
+import { Either } from "effect";
+import { make_discover, make_strategy, make_test } from "./base.js";
 import { exec, sleep } from "../util.js";
 import { chromium } from "../drivers/chromium.js";
-import { expect } from "playwright/test";
+import { expect } from "rebrowser-playwright/test";
 
 export const platform = "ciweimao";
 export const domain = "www.ciweimao.com";
@@ -10,7 +10,7 @@ export const domain = "www.ciweimao.com";
 /**
  * 创建书籍爬虫策略
  */
-export const strategy = create_strategy(platform, domain, async (page, url, responses) => {
+export const strategy = make_strategy(platform, domain, async (page, url, responses) => {
     let res = await page.goto(url.toString());
 
     while (res?.status() !== 200) {
@@ -25,7 +25,7 @@ export const strategy = create_strategy(platform, domain, async (page, url, resp
 
     const cover_src = (await page.locator(".cover").locator("img").first().getAttribute("src"))!;
 
-    return right({
+    return Either.right({
         id: {},
         cover: (await responses.find((response) => response.url() === cover_src)!.body()).toString("base64"),
         title: (await page
@@ -75,7 +75,7 @@ export const strategy = create_strategy(platform, domain, async (page, url, resp
     });
 });
 
-export const discover = create_discover(async function* (page): AsyncGenerator<URL> {
+export const discover = make_discover(async function* (page): AsyncGenerator<URL> {
     await page.goto(`https://${domain}/book_list`, { waitUntil: "domcontentloaded" });
 
     try {
@@ -104,7 +104,7 @@ export const discover = create_discover(async function* (page): AsyncGenerator<U
     }
 });
 
-export const test = create_test(strategy, "https://www.ciweimao.com/book/100409881");
+export const test = make_test(strategy, "https://www.ciweimao.com/book/100409881");
 
 process.env["TEST"] &&
     exec(async () => {
