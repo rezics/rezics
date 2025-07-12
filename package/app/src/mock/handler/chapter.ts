@@ -1,11 +1,11 @@
-import { graphql, HttpResponse } from "msw";
+import { http, HttpResponse } from "msw";
 
 import { chapterContent01 } from "../data/chapterContent01";
 import chapterList01 from "../data/chapterlist01.json";
 
 export const chapterHandlers = [
-    // ANCHOR 🟢 Query: GetChapterContent
-    graphql.query("ChapterContentQuery", ({ variables }) => {
+    // ANCHOR 🟢 REST: GET /chapters/:id/content
+    http.get("/chapters/:id/content", ({ params }) => {
         let chapterContent = chapterContent01;
         // chapterContent.content = chapterContent01.content.repeat(100);
         // chapterContent.content += "\n\n\n\n\n"
@@ -18,23 +18,6 @@ export const chapterHandlers = [
             chapterContent.chapterName = "章节名称";
         }
 
-        return HttpResponse.json({
-            data: chapterContent,
-        });
+        return HttpResponse.json(chapterContent);
     }),
-
-    // // ANCHOR 🟢 Mutation: AddBook
-    // graphql.mutation("AddBookDocument", async ({ variables }) => {
-    //     const { title, author } = variables;
-
-    //     return HttpResponse.json({
-    //         data: {
-    //             addBook: {
-    //                 id: String(Math.floor(Math.random() * 10000)),
-    //                 title,
-    //                 author,
-    //             },
-    //         },
-    //     });
-    // }),
 ];

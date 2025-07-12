@@ -1,43 +1,33 @@
-import { graphql, HttpResponse } from "msw";
+import { http, HttpResponse } from "msw";
 
 import { bookList01 } from "../data/bookList01";
 
 export const bookHandlers = [
-    // ANCHOR 🟢 Query: GetBooks
-    graphql.query("GetBooksDocument", ({ variables }) => {
+    // ANCHOR 🟢 REST: GET /books
+    http.get("/books", () => {
+        return HttpResponse.json([
+            { id: "1", title: "Mock Book 1", author: "Author A" },
+            { id: "2", title: "Mock Book 2", author: "Author B" },
+        ]);
+    }),
+
+    // ANCHOR 🟢 REST: POST /books
+    http.post("/books", async ({ request }) => {
+        const { title, author } = await request.json();
+
         return HttpResponse.json({
-            data: {
-                books: [
-                    { id: "1", title: "Mock Book 1", author: "Author A" },
-                    { id: "2", title: "Mock Book 2", author: "Author B" },
-                ],
-            },
+            id: String(Math.floor(Math.random() * 10000)),
+            title,
+            author,
         });
     }),
 
-    // ANCHOR 🟢 Mutation: AddBook
-    graphql.mutation("AddBookDocument", async ({ variables }) => {
-        const { title, author } = variables;
+    // ANCHOR 🟢 REST: GET /books/search
+    http.get("/books/search", ({ request }) => {
+        const url = new URL(request.url);
+        const query = url.searchParams.get('q');
+        console.log("SearchBooks", { query });
 
-        return HttpResponse.json({
-            data: {
-                addBook: {
-                    id: String(Math.floor(Math.random() * 10000)),
-                    title,
-                    author,
-                },
-            },
-        });
-    }),
-
-    // ANCHOR 🟢 Query: SearchBooks
-    graphql.query("SearchBooks", ({ variables }) => {
-        console.log("SearchBooks", variables);
-
-        return HttpResponse.json({
-            data: {
-                searchBooks: bookList01,
-            },
-        });
+        return HttpResponse.json(bookList01);
     }),
 ];

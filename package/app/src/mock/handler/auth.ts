@@ -1,54 +1,46 @@
-import { graphql, HttpResponse } from "msw";
+import { http, HttpResponse } from "msw";
 import { mockUsers, mockTokens } from "../data/auth";
 
 export const authHandlers = [
-    // ANCHOR 🟢 Mutation: Login
-    graphql.mutation("Login", ({ variables }) => {
-        const { email, password } = variables;
+    // ANCHOR 🟢 REST: POST /auth/login
+    http.post("/auth/login", async ({ request }) => {
+        const { email, password } = await request.json();
         const user = mockUsers.find((u) => u.email === email && u.password === password);
 
         if (!user) {
             return HttpResponse.json(
-                {
-                    errors: [
-                        {
-                            message: "Invalid email or password",
-                            path: ["login"],
-                        },
-                    ],
-                },
-                { status: 401 },
+                [
+                    {
+                        field: "email",
+                        message: "Invalid email or password",
+                    },
+                ],
+                { status: 400 },
             );
         }
 
         return HttpResponse.json({
-            data: {
-                login: {
-                    token: mockTokens[email as keyof typeof mockTokens],
-                    user: {
-                        id: user.id,
-                        name: user.name,
-                        avatar: user.avatar,
-                    },
-                },
+            token: mockTokens[email as keyof typeof mockTokens],
+            user: {
+                id: user.id,
+                name: user.name,
+                avatar: user.avatar,
             },
         });
     }),
 
-    // ANCHOR 🟢 Mutation: Register
-    graphql.mutation("Register", ({ variables }) => {
-        const { email, password } = variables;
+    // ANCHOR 🟢 REST: POST /auth/register
+    http.post("/auth/register", async ({ request }) => {
+        const { email, password } = await request.json();
 
         if (mockUsers.some((u) => u.email === email)) {
             return HttpResponse.json(
-                {
-                    errors: [
-                        {
-                            message: "Email already exists",
-                            path: ["register"],
-                        },
-                    ],
-                },
+                [
+                    {
+                        field: "email",
+                        message: "Email already exists",
+                    },
+                ],
                 { status: 400 },
             );
         }
@@ -65,22 +57,27 @@ export const authHandlers = [
         mockTokens[email as keyof typeof mockTokens] = `mock-jwt-token-${Date.now()}`;
 
         return HttpResponse.json({
-            data: {
-                register: {
-                    token: mockTokens[email as keyof typeof mockTokens],
-                    user: {
-                        id: newUser.id,
-                        name: newUser.name,
-                        avatar: newUser.avatar,
-                    },
-                },
+            token: mockTokens[email as keyof typeof mockTokens],
+            user: {
+                id: newUser.id,
+                name: newUser.name,
+                avatar: newUser.avatar,
             },
         });
     }),
 
-    // ANCHOR 🟢 Mutation: ValidateEmail
-    graphql.mutation("ValidateEmail", ({ variables }) => {
-        const { email } = variables;
+    // ANCHOR 🟢 REST: GET /auth/me
+    http.get("/auth/me", () => {
+        return HttpResponse.json({
+            id: "user1",
+            name: "John Doe",
+            avatar: "https://via.placeholder.com/150",
+        });
+    }),
+
+    // ANCHOR 🟢 REST: POST /validation/email
+    http.post("/validation/email", async ({ request }) => {
+        const { email } = await request.json();
         const errors: Array<{ field: string; message: string }> = [];
 
         if (!email) {
@@ -95,16 +92,12 @@ export const authHandlers = [
             });
         }
 
-        return HttpResponse.json({
-            data: {
-                validateEmail: errors,
-            },
-        });
+        return HttpResponse.json(errors);
     }),
 
-    // ANCHOR 🟢 Mutation: ValidatePassword
-    graphql.mutation("ValidatePassword", ({ variables }) => {
-        const { password } = variables;
+    // ANCHOR 🟢 REST: POST /validation/password
+    http.post("/validation/password", async ({ request }) => {
+        const { password } = await request.json();
         const errors: Array<{ field: string; message: string }> = [];
 
         if (!password) {
@@ -119,10 +112,6 @@ export const authHandlers = [
             });
         }
 
-        return HttpResponse.json({
-            data: {
-                validatePassword: errors,
-            },
-        });
+        return HttpResponse.json(errors);
     }),
 ];

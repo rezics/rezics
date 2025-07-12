@@ -1,44 +1,45 @@
-import { graphql, HttpResponse } from "msw";
+import { http, HttpResponse } from "msw";
 import { mockBookLists } from "../data/booklists";
 import { mockCommentTree01 } from "../data/comment01";
 import { mockABookList01 } from "../data/abooklist01";
 
 export const bookListHandlers = [
     // ANCHOR BOOKLIST
-    // ANCHOR 🟢 Query: bookListsQuery
-    graphql.query("bookListsQuery", () => {
-        return HttpResponse.json({
-            data: {
-                bookLists: mockBookLists,
-            },
-        });
+    // ANCHOR 🟢 REST: GET /booklists
+    http.get("/booklists", () => {
+        return HttpResponse.json(mockBookLists);
     }),
 
-    // ANCHOR 🟢 Query: GetBookList
-    graphql.query("GetBookList", ({ variables }) => {
-        const { id } = variables;
-
-        // // Since mockABookList01 is a single object, we just need to check if the id matches
-        // if (mockABookList01.id !== parseInt(id)) {
-        //   return HttpResponse.json({
-        //     data: {
-        //       bookList: null
-        //     }
-        //   });
-        // }
-
-        return HttpResponse.json({
-            data: { bookList: mockABookList01 },
-        });
+    // ANCHOR 🟢 REST: GET /booklists/:id
+    http.get("/booklists/:id", ({ params }) => {
+        const { id } = params;
+        
+        // Return the mock book list data
+        return HttpResponse.json(mockABookList01);
     }),
 
-    // ANCHOR 🟢 Query: GetComments
-    graphql.query("GetComments", ({ variables }) => {
-        const { bookListId } = variables;
+    // ANCHOR 🟢 REST: GET /booklists/:bookListId/comments
+    http.get("/booklists/:bookListId/comments", ({ params }) => {
+        const { bookListId } = params;
+        return HttpResponse.json(mockCommentTree01);
+    }),
+
+    // ANCHOR 🟢 REST: POST /booklists/:bookListId/comments
+    http.post("/booklists/:bookListId/comments", async ({ request, params }) => {
+        const { bookListId } = params;
+        const body = await request.json();
+        
+        // Return a mock new comment
         return HttpResponse.json({
-            data: {
-                comments: mockCommentTree01,
+            id: `comment_${Date.now()}`,
+            content: body.content,
+            createdAt: new Date().toISOString(),
+            user: {
+                id: "user1",
+                name: "John Doe",
+                avatar: "https://via.placeholder.com/150",
             },
+            likes: 0,
         });
     }),
 ];
