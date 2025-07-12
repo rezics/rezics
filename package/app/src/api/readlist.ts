@@ -1,4 +1,4 @@
-import { gql } from "urql";
+import { restClient } from "../plugin/providers/rest";
 
 export interface BookList {
     id: string;
@@ -10,63 +10,38 @@ export interface BookList {
         avatar: string;
     };
     likes: number;
+    commentsNumber: number;
 }
 
-export const GET_BOOKLIST = gql`
-    query GetBookList($id: ID!) {
-        bookList(id: $id) {
-            id
-            title
-            description
-            books
-            creator {
-                name
-                avatar
-            }
-            likes
-            commentsNumber
-        }
-    }
-`;
+export interface Comment {
+    id: string;
+    content: string;
+    createdAt: string;
+    user: {
+        name: string;
+        avatar: string;
+    };
+    likes: number;
+    replies?: Comment[];
+}
 
-export const GET_COMMENTS = gql`
-    query GetComments($bookListId: ID!) {
-        comments(bookListId: $bookListId) {
-            id
-            content
-            createdAt
-            author {
-                name
-                avatar
-            }
-            likes
-            replies {
-                id
-                content
-                createdAt
-                author {
-                    name
-                    avatar
-                }
-                likes
-            }
-        }
-    }
-`;
+// API functions
+export const getBookList = async (id: string): Promise<BookList> => {
+    return restClient.get<BookList>(`/booklists/${id}`);
+};
 
-// Get book lists list
-export const bookListsQuery = gql`
-    query bookListsQuery {
-        bookLists {
-            id
-            title
-            description
-            books
-            creator {
-                name
-                avatar
-            }
-            likes
-        }
-    }
-`;
+export const getComments = async (bookListId: string): Promise<Comment[]> => {
+    return restClient.get<Comment[]>(`/booklists/${bookListId}/comments`);
+};
+
+export const getBookLists = async (): Promise<BookList[]> => {
+    return restClient.get<BookList[]>("/booklists");
+};
+
+export const addComment = async (bookListId: string, content: string): Promise<Comment> => {
+    return restClient.post<Comment>(`/booklists/${bookListId}/comments`, { content });
+};
+
+export const addReply = async (commentId: string, content: string): Promise<Comment> => {
+    return restClient.post<Comment>(`/comments/${commentId}/replies`, { content });
+};

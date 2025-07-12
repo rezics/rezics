@@ -1,25 +1,18 @@
-import { gql } from "graphql-tag";
+import { restClient } from "../plugin/providers/rest";
 
-export const SEARCH_BOOKS = gql`
-    query SearchBooks($query: String!) {
-        searchBooks(query: $query) {
-            id
-            title
-            author
-            description
-            cover
-        }
-    }
-`;
+export interface SearchBook {
+    id: string;
+    title: string;
+    author: string;
+    description: string;
+    cover: string;
+}
 
-export const TOP_BOOKS = gql`
-    query TopBooks {
-        topBooks {
-            id
-            title
-            author
-            description
-            cover
-        }
-    }
-`;
+// API functions
+export const searchBooks = async (query: string): Promise<SearchBook[]> => {
+    return restClient.get<SearchBook[]>(`/books/search?q=${encodeURIComponent(query)}`);
+};
+
+export const getTopBooks = async (): Promise<SearchBook[]> => {
+    return restClient.get<SearchBook[]>("/books/top");
+};

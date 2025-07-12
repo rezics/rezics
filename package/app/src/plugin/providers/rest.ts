@@ -1,3 +1,5 @@
+import React from "react";
+
 // Simple HTTP client for REST API
 class RestClient {
     private baseUrl: string;

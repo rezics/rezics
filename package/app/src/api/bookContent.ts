@@ -1,4 +1,4 @@
-import { gql } from "urql";
+import { restClient } from "../plugin/providers/rest";
 
 export interface ChapterContent {
     id: string;
@@ -11,16 +11,7 @@ export interface ChapterContent {
     };
 }
 
-export const ChapterContentQuery = gql`
-    query ChapterContentQuery($chapterId: ID!) {
-        chapter(id: $chapterId) {
-            id
-            content
-            createdAt
-            author {
-                name
-                avatar
-            }
-        }
-    }
-`;
+// API functions
+export const getChapterContent = async (chapterId: string): Promise<ChapterContent> => {
+    return restClient.get<ChapterContent>(`/chapters/${chapterId}/content`);
+};

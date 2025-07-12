@@ -1,4 +1,4 @@
-import { gql } from "urql";
+import { restClient } from "../plugin/providers/rest";
 
 export interface QuoteExcerpt {
     id: string;
@@ -10,16 +10,8 @@ export interface QuoteExcerpt {
     };
 }
 
-export const QuoteExcerptQuery = gql`
-    query QuoteExcerptQuery($bookId: ID!) {
-        quotes(bookId: $bookId) {
-            id
-            content
-            createdAt
-            author {
-                name
-                avatar
-            }
-        }
-    }
-`;
+// API functions
+export const getQuotes = async (bookId?: string): Promise<QuoteExcerpt[]> => {
+    const endpoint = bookId ? `/books/${bookId}/quotes` : "/quotes";
+    return restClient.get<QuoteExcerpt[]>(endpoint);
+};

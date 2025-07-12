@@ -1,45 +1,37 @@
-import { gql } from "graphql-tag";
+import { restClient } from "../plugin/providers/rest";
 
-export const LOGIN = gql`
-    mutation Login($email: String!, $password: String!) {
-        login(email: $email, password: $password) {
-            token
-            user {
-                id
-                name
-                avatar
-            }
-        }
-    }
-`;
+// Types
+export interface AuthPayload {
+    token: string;
+    user: {
+        id: string;
+        name: string;
+        avatar: string;
+    };
+}
 
-export const REGISTER = gql`
-    mutation Register($email: String!, $password: String!) {
-        register(email: $email, password: $password) {
-            token
-            user {
-                id
-                name
-                avatar
-            }
-        }
-    }
-`;
+export interface ValidationError {
+    field: string;
+    message: string;
+}
 
-export const VALIDATE_EMAIL = gql`
-    mutation ValidateEmail($email: String!) {
-        validateEmail(email: $email) {
-            field
-            message
-        }
-    }
-`;
+// API functions
+export const login = async (email: string, password: string): Promise<AuthPayload> => {
+    return restClient.post<AuthPayload>("/auth/login", { email, password });
+};
 
-export const VALIDATE_PASSWORD = gql`
-    mutation ValidatePassword($password: String!) {
-        validatePassword(password: $password) {
-            field
-            message
-        }
-    }
-`;
+export const register = async (email: string, password: string): Promise<AuthPayload> => {
+    return restClient.post<AuthPayload>("/auth/register", { email, password });
+};
+
+export const validateEmail = async (email: string): Promise<ValidationError[]> => {
+    return restClient.post<ValidationError[]>("/validation/email", { email });
+};
+
+export const validatePassword = async (password: string): Promise<ValidationError[]> => {
+    return restClient.post<ValidationError[]>("/validation/password", { password });
+};
+
+export const getMe = async (): Promise<{ id: string; name: string; avatar: string }> => {
+    return restClient.get("/auth/me");
+};

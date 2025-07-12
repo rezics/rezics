@@ -1,15 +1,15 @@
 // src/mocks/handlers.ts
-import { graphql, HttpResponse } from "msw";
+import { http, HttpResponse } from "msw";
 import { handlers as apiHandlers } from "./handler";
 
 export const handlers = [
     ...apiHandlers,
     // ANCHOR ⚠️ fallback handler - 捕捉未拦截的请求
-    graphql.operation((req) => {
-        console.warn(`[MSW] ⚠️ Unhandled GraphQL operation: ${req.operationName}`);
+    http.all("*", (req) => {
+        console.warn(`[MSW] ⚠️ Unhandled REST request: ${req.request.method} ${req.request.url}`);
         return HttpResponse.json(
-            { errors: [{ message: `No mock handler for operation: ${req.operationName}` }] },
-            { status: 400 },
+            { message: `No mock handler for: ${req.request.method} ${req.request.url}` },
+            { status: 404 },
         );
     }),
 ];
