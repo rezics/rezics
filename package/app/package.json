@@ -20,15 +20,16 @@
         "@tailwindcss/vite": "^4.1.8",
         "@types/markdown-it": "^14.1.2",
         "@types/uuid": "^10.0.0",
-
+        "@urql/devtools": "^2.0.3",
+        "@urql/exchange-retry": "^1.3.1",
         "@vitejs/plugin-react": "^4.5.0",
         "easymde": "^2.20.0",
         "github-markdown-css": "^5.8.1",
-
+        "graphql": "^16.11.0",
+        "graphql-tag": "^2.12.6",
         "humanize-plus": "^1.8.2",
         "i18n": "workspace:i18n",
         "lorem-ipsum": "^2.0.8",
-        "schema": "workspace:schema",
         "markdown-it": "^14.1.0",
         "react": "^18.3.1",
         "react-arborist": "^3.4.3",
@@ -38,14 +39,18 @@
         "react-window": "^1.8.11",
         "swiper": "^11.2.8",
         "tailwindcss": "^4.1.8",
-
+        "urql": "^4.2.2",
         "uuid": "^11.1.0",
         "wouter": "^3.7.1",
         "zod": "^3.25.46",
         "zustand": "^5.0.5"
     },
     "devDependencies": {
-
+        "@graphql-codegen/cli": "^5.0.6",
+        "@graphql-codegen/typescript": "^4.1.6",
+        "@graphql-codegen/typescript-msw": "^3.0.1",
+        "@graphql-codegen/typescript-operations": "^4.6.1",
+        "@graphql-tools/utils": "^10.8.6",
         "@types/humanize-plus": "^1.8.2",
         "@types/react": "^18.3.1",
         "@types/react-dom": "^18.3.1",
@@ -53,7 +58,7 @@
         "eslint-plugin-react": "^7.37.5",
         "eslint-plugin-react-hooks": "^5.2.0",
         "jsdom": "^26.1.0",
-
+        "msw": "^2.8.7",
         "react-cosmos": "^6.2.3",
         "react-cosmos-plugin-vite": "^6.2.0",
         "tsx": "^4.19.4",
@@ -61,5 +66,10 @@
         "typescript-eslint": "^8.35.0",
         "unplugin-auto-import": "^19.3.0",
         "vite": "^6.0.4"
+    },
+    "msw": {
+        "workerDirectory": [
+            "public"
+        ]
     }
 }

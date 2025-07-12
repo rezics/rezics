@@ -3,7 +3,7 @@ import { Rating } from "@mui/material";
 import { CollapsibleText } from "@component/Common/CollapsibleText";
 import { Small } from "@component/User";
 import { Reactions } from "./lib/Reactions";
-
+import { gql } from "urql";
 
 export namespace Thread {
     export type Show = {
@@ -37,6 +37,12 @@ export namespace Thread {
     };
 
     export const Container: FC<Container> = ({ id }) => {
+        const query = gql`
+            query Thread(id: UUID!) {
+                
+            }
+        `;
+
         return <></>;
     };
 }
