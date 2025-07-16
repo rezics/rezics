@@ -1,5 +1,6 @@
 import { graphql, HttpResponse } from "msw";
 import { mockReviews, mockUsers as reviewUsers } from "../data/reviews";
+import { mockBookShortReviews } from "../data/reviews";
 
 export const bookReviewsHandlers = [
     // ANCHOR 🟢 Query: GetBookReviews
@@ -15,6 +16,22 @@ export const bookReviewsHandlers = [
         return HttpResponse.json({
             data: {
                 bookReviews: reviews,
+            },
+        });
+    }),
+    // ANCHOR 🟢 Query: GetBookShortReviews
+    graphql.query("GetBookShortReviews", ({ variables }) => {
+        const { bookId } = variables;
+        // const reviews = mockReviews
+        //     .filter((review) => review.bookId === bookId)
+        //     .map((review) => ({
+        //         ...review,
+        //         user: reviewUsers.find((user) => user.id === review.userId),
+        //     }));
+
+        return HttpResponse.json({
+            data: {
+                bookShortReviews: mockBookShortReviews,
             },
         });
     }),
