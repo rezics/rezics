@@ -1,5 +1,10 @@
 {
     "cSpell.words": ["booklist", "readlist", "urql", "wouter"],
     "i18n-ally.localesPaths": ["package/app/src/locale"],
-    "i18n-ally.enabledParsers": ["js", "ts", "json"],
+    "i18n-ally.enabledParsers": [
+        "js",
+        "ts",
+        "json"
+    ],
+    "i18n-ally.keystyle": "nested",
 }

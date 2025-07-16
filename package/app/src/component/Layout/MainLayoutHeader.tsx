@@ -6,6 +6,7 @@ import { AppBar, IconButton, Toolbar, Typography } from "@mui/material";
 import { Menu, Brightness7, Brightness4 } from "@mui/icons-material";
 import { ThemeQuickToggle } from "@/component/Theme/ThemeCustomizer";
 import { useTranslation } from "react-i18next";
+import { LangToggle } from "./LangToggle";
 
 interface HeaderProps {
     handleDrawerToggle: () => void;
@@ -45,6 +46,7 @@ export const Header: React.FC<HeaderProps> = ({ handleDrawerToggle, mode, onThem
                     REZICS
                 </Typography>
                 <ThemeQuickToggle />
+                <LangToggle />
                 <IconButton color="inherit" onClick={onThemeToggle}>
                     {mode === "dark" ? <Brightness7 /> : <Brightness4 />}
                 </IconButton>
