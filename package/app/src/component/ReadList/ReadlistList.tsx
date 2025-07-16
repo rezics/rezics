@@ -17,7 +17,7 @@ export function ReadlistList({ booklists }: { booklists: BookList[] }) {
         console.log("Original event object:", event);
         event.preventDefault();
         event.stopPropagation();
-        navigate(`/booklist/${id}`);
+        navigate(`/readlist/${id}`);
     };
 
     return (

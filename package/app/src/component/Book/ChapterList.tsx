@@ -7,7 +7,7 @@ import { AccentBarWithText } from "../Common/AccentBar";
 import { buildTree, OrderMap, TreeNodeWithChildren } from "@/util/treeAbstract";
 import { useLocation, Link } from "wouter";
 import { EditButtonFloatRight } from "@/component/Common/EditButtonFloatRight";
-import { t } from "@component/Text";
+//  ;
 
 // 扁平结构 + 顺序数组
 
@@ -99,7 +99,7 @@ export const ChapterList: React.FC<ChapterListProps> = ({ id }) => {
                             {node.title}
                         </div>
                         <Button variant="text" onClick={() => toggleNode(node.id)}>
-                            {expandedNodes.has(node.id) ? t("chapters->collapse") : t("chapters->expand")}
+                            {expandedNodes.has(node.id) ? "Collapse" : "Expand"}
                         </Button>
                     </div>
 

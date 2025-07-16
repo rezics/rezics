@@ -1,6 +1,6 @@
 import { ArrowForwardIcon } from "../Common/ArrowForwardIcon";
 import { AccentBarWithText } from "../Common/AccentBar";
-import { Link } from "@mui/material";
+import { Link } from "wouter";
 import { ReadlistList } from "@component/ReadList/ReadlistList";
 
 import { useQuery } from "urql";

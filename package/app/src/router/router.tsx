@@ -40,11 +40,11 @@ export default (
     <Router>
         <ThemeProvider theme={{}}>
             <Switch>
-                {/* Auth */}
+                {/* ANCHOR Auth */}
                 <Route path="/login" component={Login.Container} />
                 <Route path="/register" component={Login.Container} />
 
-                {/* Book Read – keep the more specific path first */}
+                {/* ANCHOR Book Read – keep the more specific path first */}
                 <Route path="/book/:bookId/read/:chapterId">
                     {() => (
                         <BookReadLayout>
@@ -53,7 +53,7 @@ export default (
                     )}
                 </Route>
 
-                {/* Book Edit (chapter first, then main) */}
+                {/* ANCHOR Book Edit (chapter first, then main) */}
                 <Route path="/book/:bookId/edit/:chapterId">
                     {() => (
                         <BookEditLayout>
@@ -69,7 +69,7 @@ export default (
                     )}
                 </Route>
 
-                {/* Book Info Routes */}
+                {/* ANCHOR Book Info Routes */}
                 <Route path="/books">
                     <MainLayout>
                         <BookLib />
@@ -83,7 +83,7 @@ export default (
                     )}
                 </Route>
 
-                {/* Review Routes */}
+                {/* ANCHOR Review Routes */}
                 <Route path="/review/short/book/:bookId">
                     {() => (
                         <MainLayout>
@@ -106,22 +106,24 @@ export default (
                     )}
                 </Route>
 
-                {/* BookList Routes */}
-                <Route path="/booklist/:booklistId">
+                {/* ANCHOR Quote Routes */}
+
+                {/* ANCHOR ReadList Routes */}
+                <Route path="/readlist/:readlistId">
                     {() => (
                         <MainLayout>
                             <BookListPage />
                         </MainLayout>
                     )}
                 </Route>
-                <Route path="/booklist/:booklistId/edit">
+                <Route path="/readlist/:readlistId/edit">
                     {() => (
                         <MainLayout>
                             <BookListEditPage />
                         </MainLayout>
                     )}
                 </Route>
-                <Route path="/booklist/book/:bookId">
+                <Route path="/readlist/book/:bookId">
                     {() => (
                         <MainLayout>
                             <BookCollectionListPage />
@@ -129,21 +131,21 @@ export default (
                     )}
                 </Route>
 
-                {/* Test */}
+                {/* ANCHOR Test */}
                 <Route path="/test">
                     <MainLayout>
                         <TestPage />
                     </MainLayout>
                 </Route>
 
-                {/* Home */}
+                {/* ANCHOR Home */}
                 <Route path="/">
                     <MainLayout>
                         <Home.Container />
                     </MainLayout>
                 </Route>
 
-                {/* 404 fallback */}
+                {/* ANCHOR404 fallback */}
                 <Route>
                     <NotFound.Container />
                 </Route>

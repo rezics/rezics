@@ -77,6 +77,17 @@ export default {
         book_list_edit_page: "书单编辑页面",
     },
 
+    // Book
+    book: {
+        description: "简介",
+        chapters: "章节",
+        tags: "标签",
+        reviews: "评论",
+        collections: "收藏夹",
+        edit: "编辑书籍",
+        add_to_collection: "添加到收藏夹",
+    },
+
     // Form & Editor
     editor: {
         bold: "粗体",

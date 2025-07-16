@@ -5,7 +5,7 @@ import { useQuery } from "urql";
 import { GET_COMMENTS } from "@/api/readlist";
 import { Box, Avatar, Typography, Button, Collapse, IconButton } from "@mui/material";
 import { Add, Remove } from "@mui/icons-material";
-import { t } from "@component/Text";
+//  ;
 import { ReactionBar } from "../Common/ReactionBar";
 import { ReplyDrawer } from "./ReplyDrawer";
 import { useDialogStore } from "@/global/dialogStore";
@@ -140,9 +140,9 @@ export const TreeReplyComponents: React.FC<ReplyComponentsProps> = ({ bookListId
             </Box>
             {/* 渲染 */}
             {currentReplyId && (
-                <ReplyDrawer
+                <ReplyDrawer.Container
                     dialogId={`reply-${currentReplyId}`}
-                    onSubmit={(content) => handleSubmit(currentReplyId, content)}
+                    onSubmit={(content: string) => handleSubmit(currentReplyId, content)}
                 />
             )}
         </>

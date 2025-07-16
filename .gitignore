@@ -1,3 +1,6 @@
+# Visual Studio Counter
+.VSCodeCounter/
+
 # Logs
 *.log
 npm-debug.log*

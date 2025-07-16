@@ -32,7 +32,7 @@ export namespace BookPage {
                 <BookHero.Container data={data.book} />
 
                 {/* Main Content */}
-                <Box maxWidth="lg" className="mt-4 mb-8">
+                <Box maxWidth="lg" className="mt-4 mb-8 mx-auto">
                     <Grid container spacing={4}>
                         {/* Main Content */}
                         <Grid size={{ xs: 12, lg: 9 }}>
@@ -43,7 +43,7 @@ export namespace BookPage {
                                     <Tab label="目录" value="2" />
                                 </TabList>
 
-                                <TabPanel value="0">
+                                <TabPanel value="0" keepMounted={true}>
                                     <Stack spacing={4}>
                                         {/* ANCHOR Description */}
                                         <BookDescription.Container description={data?.book.description || ""} />
@@ -62,7 +62,7 @@ export namespace BookPage {
 
                                         {/* ANCHOR Short Reviews */}
                                         <Box>
-                                            <Link href={`/book/${data?.book.id}/reviews`} className="flex mb-4">
+                                            <Link href={`/review/short/book/${data?.book.id}`} className="flex mb-4">
                                                 <ArrowForwardIcon.Container size={16}>
                                                     <AccentBarWithText.Container text="短评" />
                                                 </ArrowForwardIcon.Container>
@@ -72,7 +72,7 @@ export namespace BookPage {
                                     </Stack>
                                 </TabPanel>
 
-                                <TabPanel value="1">
+                                <TabPanel value="1" keepMounted={true}>
                                     <Stack spacing={4}>
                                         {/* ANCHOR Book Reviews */}
                                         <BookReviews bookId={data?.book.id || ""} title={data?.book.title || ""} />

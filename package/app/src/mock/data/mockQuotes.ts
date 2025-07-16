@@ -6,7 +6,7 @@ export const mockQuotes: Quote[] = [
         createdAt: "2025-06-01T12:00:00Z",
         author: {
             name: "余华",
-            avatar: "https://example.com/avatar/yuhua.png",
+            avatar: "https://api.dicebear.com/9.x/pixel-art/svg?seed=yuhua.png",
         },
     },
     {
@@ -16,7 +16,7 @@ export const mockQuotes: Quote[] = [
         createdAt: "2025-06-02T09:30:00Z",
         author: {
             name: "纳兰性德",
-            avatar: "https://example.com/avatar/nalan.png",
+            avatar: "https://api.dicebear.com/9.x/pixel-art/svg?seed=nalan.png",
         },
     },
 ];

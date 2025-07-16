@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { IconButton, Avatar, Menu, MenuItem, Divider, ListItemIcon, ListItemText } from "@mui/material";
 import { Person as PersonIcon, Settings as SettingsIcon, Logout as LogoutIcon } from "@mui/icons-material";
-import { t } from "@component/Text";
+//  ;
 
 export namespace User {
     export type Show = {
@@ -49,7 +49,7 @@ export namespace User {
                         <ListItemIcon>
                             <PersonIcon fontSize="small" />
                         </ListItemIcon>
-                        <ListItemText>{t("navigation->profile")}</ListItemText>
+                        <ListItemText>Profile</ListItemText>
                     </MenuItem>
                     <MenuItem
                         onClick={() => {
@@ -60,14 +60,14 @@ export namespace User {
                         <ListItemIcon>
                             <SettingsIcon fontSize="small" />
                         </ListItemIcon>
-                        <ListItemText>{t("navigation->settings")}</ListItemText>
+                        <ListItemText>Settings</ListItemText>
                     </MenuItem>
                     <Divider />
                     <MenuItem onClick={onLogout}>
                         <ListItemIcon>
                             <LogoutIcon fontSize="small" />
                         </ListItemIcon>
-                        <ListItemText>{t("navigation->logout")}</ListItemText>
+                        <ListItemText>Logout</ListItemText>
                     </MenuItem>
                 </Menu>
             </>

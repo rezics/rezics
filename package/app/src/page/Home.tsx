@@ -1,5 +1,6 @@
 import { BookCarousel } from "@component/Home/HomeCarousel";
 import { gql, useQuery } from "urql";
+import { useTranslation } from "react-i18next";
 
 export namespace Home {
     export type Show = {
@@ -9,6 +10,7 @@ export namespace Home {
     };
 
     export const Show: React.FC<Show> = ({ fetching, error, data }) => {
+        const { t } = useTranslation();
         return (
             <div className="w-10/12 mx-auto">
                 {/* First Carousel */}
@@ -20,6 +22,11 @@ export namespace Home {
                 </div>
                 {/* End First Carousel */}
                 {/* 干脆写个插件化定制板块的首页。 */}
+                <div>
+                    <p>{t("title")}</p>、
+                    <p>{t("accessibility.comments")}</p>
+                    <p>{t("auth.error.invalid_username")}</p>
+                </div>
                 <div>
                     {fetching ? (
                         <div>Loading...</div>

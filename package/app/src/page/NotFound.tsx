@@ -5,7 +5,6 @@ import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import { useLocation } from "wouter";
 import { Place } from "@mui/icons-material";
-import { t } from "@component/Text";
 
 export namespace NotFound {
     export type Show = {
@@ -19,14 +18,14 @@ export namespace NotFound {
             <div className="min-h-screen flex items-center justify-center">
                 <Card className="min-w-md max-w-lg">
                     <CardContent className="flex flex-col gap-4">
-                        <Typography variant="h4">{t("pages->not_found")}</Typography>
+                        <Typography variant="h4">Not Found</Typography>
                         <div>
                             <Place></Place> {path}
                         </div>
                     </CardContent>
                     <CardActions className="flex flex-row justify-between">
-                        <Button onClick={onBack}>{t("common->back")}</Button>
-                        <Button onClick={onHome}>{t("common->home")}</Button>
+                        <Button onClick={onBack}>Back</Button>
+                        <Button onClick={onHome}>Home</Button>
                     </CardActions>
                 </Card>
             </div>

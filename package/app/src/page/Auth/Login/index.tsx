@@ -6,7 +6,7 @@ import { string } from "zod";
 import { email } from "zod/v4";
 import { FC, useState } from "react";
 import Alert from "@mui/material/Alert";
-import { t } from "@component/Text";
+//  ;
 
 export namespace Login {
     export type Show = {

@@ -2,7 +2,7 @@ import { useQuery } from "urql";
 import { QuoteExcerptQuery } from "@/api/bookQuoteExcerpt";
 import { AccentBarWithText } from "@component/Common/AccentBar";
 import { ArrowForwardIcon } from "@component/Common/ArrowForwardIcon";
-import { Link } from "@mui/material";
+import { Link } from "wouter";
 import { QuoteExcerptList } from "../Review/QuoteExcerptList";
 import { QuoteExcerpt } from "@/api/bookQuoteExcerpt";
 
@@ -21,9 +21,9 @@ export namespace QuoteExcerptPreview {
         return (
             <div>
                 <Link href={`/book/${id}/quotes`} className="flex mb-4">
-                    <ArrowForwardIcon.Show size={16}>
-                        <AccentBarWithText.Show text="原文摘录" />
-                    </ArrowForwardIcon.Show>
+                    <ArrowForwardIcon.Container size={16}>
+                        <AccentBarWithText.Container text="原文摘录" />
+                    </ArrowForwardIcon.Container>
                 </Link>
                 <QuoteExcerptList.Container data={data || []} />
             </div>

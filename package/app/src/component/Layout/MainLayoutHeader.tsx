@@ -4,8 +4,8 @@ import { useTheme } from "@mui/material/styles";
 import { useLayoutStore } from "@/global/layoutStore";
 import { AppBar, IconButton, Toolbar, Typography } from "@mui/material";
 import { Menu, Brightness7, Brightness4 } from "@mui/icons-material";
-import { t } from "@component/Text";
 import { ThemeQuickToggle } from "@/component/Theme/ThemeCustomizer";
+import { useTranslation } from "react-i18next";
 
 interface HeaderProps {
     handleDrawerToggle: () => void;
@@ -17,6 +17,7 @@ interface HeaderProps {
 export const Header: React.FC<HeaderProps> = ({ handleDrawerToggle, mode, onThemeToggle, drawerWidth }) => {
     const { sidebarOpen } = useLayoutStore();
     const theme = useTheme();
+    const { t } = useTranslation();
     return (
         <AppBar
             position="fixed"
@@ -33,7 +34,7 @@ export const Header: React.FC<HeaderProps> = ({ handleDrawerToggle, mode, onThem
             <Toolbar>
                 <IconButton
                     color="inherit"
-                    aria-label={t("accessibility->open_drawer")}
+                    aria-label={t("accessibility.open_drawer")}
                     onClick={handleDrawerToggle}
                     edge="start"
                     sx={{ mr: 2, display: sidebarOpen ? "none" : "flex" }}

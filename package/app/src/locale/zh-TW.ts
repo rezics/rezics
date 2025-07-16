@@ -1,5 +1,3 @@
-import zhCN from "./zh-CN";
-
 export default {
     title: "ICS",
     motto: "繼承 創造 傳播",
@@ -117,8 +115,4 @@ export default {
         close: "關閉",
         open_drawer: "打開側邊欄",
     },
-
-    test: {
-        fn: (name: string) => `你好，${name}！`,
-    },
-} satisfies typeof zhCN;
+}
