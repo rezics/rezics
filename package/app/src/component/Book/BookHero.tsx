@@ -61,6 +61,9 @@ export namespace BookHero {
                                                     key={tag}
                                                     label={tag}
                                                     size="small"
+                                                    onClick={() => {
+                                                        console.log("tag clicked", tag);
+                                                    }}
                                                     className="*:bg-white/10 *:text-white *:hover:bg-white/20 *:p-1"
                                                 />
                                             ))}
