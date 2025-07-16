@@ -166,7 +166,8 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({ open, onClose 
                         </Typography>
                         <Grid container spacing={1}>
                             {Object.entries(PRESET_COLORS).map(([name, color]) => (
-                                <Grid item key={name}>
+                                // <Grid item key={name}>
+                                <Grid key={name}>
                                     <Tooltip title={`${name}: ${color}`}>
                                         <Paper
                                             elevation={selectedColor === color ? 4 : 1}

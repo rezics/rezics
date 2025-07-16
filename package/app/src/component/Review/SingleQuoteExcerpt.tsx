@@ -1,6 +1,7 @@
 import React from "react";
 import { Box, Avatar, Typography, Link, Paper } from "@mui/material";
 import FormatQuoteIcon from "@mui/icons-material/FormatQuote";
+import { useTranslation } from "react-i18next";
 
 export namespace SingleQuoteExcerpt {
     export type Show = {
@@ -19,6 +20,7 @@ export namespace SingleQuoteExcerpt {
     };
 
     export const Show: React.FC<Show> = ({ author, content, stats, source, originalLink }) => {
+        const { t } = useTranslation();
         return (
             <Paper
                 variant="outlined"
