@@ -2,8 +2,7 @@ import { Typography } from "@mui/material";
 import { Box } from "@mui/material";
 import { AccentBarWithText } from "@component/Common/AccentBar";
 import { EditButtonFloatRight } from "@component/Common/EditButtonFloatRight";
-import { t } from "@component/Text";
-
+import { useTranslation } from "react-i18next";
 export namespace BookDescription {
     export type Show = {
         description: string;
@@ -12,11 +11,12 @@ export namespace BookDescription {
     };
 
     export const Show: React.FC<Show> = ({ description, onEdit, showEditButton = true }) => {
+        let { t } = useTranslation();
         return (
             <div>
                 <Box>
                     <div className="flex mb-4">
-                        <AccentBarWithText.Show text="简介" />
+                        <AccentBarWithText.Show text={t("book.description")} />
                         {showEditButton && <EditButtonFloatRight.Show onClick={onEdit} />}
                     </div>
                     <Typography variant="body1" className="whitespace-pre-line">
@@ -49,7 +49,7 @@ export namespace BookDescriptionEdit {
     export const Show: React.FC<Show> = ({ description, onUpdate }) => {
         return (
             <div>
-                <h1>{t("pages->book_description_edit")}</h1>
+                <h1>简介</h1>
                 {/* Add editing UI here */}
             </div>
         );

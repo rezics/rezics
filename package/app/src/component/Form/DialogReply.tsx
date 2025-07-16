@@ -1,7 +1,7 @@
 import React from "react";
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button } from "@mui/material";
 import { useDialogStore } from "@/global/dialogStore";
-import { t } from "@component/Text";
+//  ;
 
 export namespace DialogReply {
     export type Show = {
@@ -13,12 +13,12 @@ export namespace DialogReply {
     export const Show: React.FC<Show> = ({ open, onClose, onSubmit }) => {
         return (
             <Dialog open={open} onClose={onClose}>
-                <DialogTitle>{t("common->reply")}</DialogTitle>
+                <DialogTitle>{/* Add your dialog content here */}</DialogTitle>
                 <DialogContent>{/* Add your dialog content here */}</DialogContent>
                 <DialogActions>
-                    <Button onClick={onClose}>{t("common->cancel")}</Button>
+                    <Button onClick={onClose}>{/* Add your dialog content here */}</Button>
                     <Button onClick={onSubmit || onClose} variant="contained" color="primary">
-                        {t("common->submit")}
+                        {/* Add your dialog content here */}
                     </Button>
                 </DialogActions>
             </Dialog>
@@ -33,7 +33,7 @@ export namespace DialogReply {
         const dialog = useDialogStore();
 
         const handleClose = () => {
-            dialog.setDialogVisible(false);
+            // dialog.setDialogVisible(false);
         };
 
         const handleSubmit = () => {

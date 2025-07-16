@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 import { gql, useQuery } from "urql";
 import { ReviewList } from "../Review/ReviewList";
 import { ArrowForwardIcon } from "../Common/ArrowForwardIcon";
-import { Box, Link } from "@mui/material";
+import { Box } from "@mui/material";
+import { Link } from "wouter";
 import { AccentBarWithText } from "../Common/AccentBar";
 
 const GET_BOOK_REVIEWS = gql`
@@ -25,7 +26,7 @@ interface BookReviewsProps {
     title: string;
 }
 
-export const BookReviews: React.FC<BookReviewsProps> = ({ bookId }) => {
+export const BookReviews: React.FC<BookReviewsProps> = ({ bookId, title }) => {
     const [reviews, setReviews] = useState<any[]>([]);
 
     const [result] = useQuery({
@@ -45,7 +46,7 @@ export const BookReviews: React.FC<BookReviewsProps> = ({ bookId }) => {
             <Box>
                 <Link href={`/book/${bookId}/reviews`} className="flex mb-4">
                     <ArrowForwardIcon.Container size={16}>
-                        <AccentBarWithText.Show text={`${bookId}的书评`} />
+                        <AccentBarWithText.Show text={`${title}的书评`} />
                     </ArrowForwardIcon.Container>
                 </Link>
                 <ReviewList.Container reviews={reviews} />

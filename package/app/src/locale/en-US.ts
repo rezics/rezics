@@ -1,5 +1,3 @@
-import zhCN from "./zh-CN";
-
 export default {
     title: "ICS",
     motto: "Inherited Create Spread",
@@ -39,6 +37,17 @@ export default {
             invalid_confirm: "Invalid password confirmation.",
             passwords_mismatch: "Passwords do not match.",
         },
+    },
+    
+    // Book
+    book: {
+        description: "Description",
+        chapters: "Chapters",
+        tags: "Tags",
+        reviews: "Reviews",
+        collections: "Collections",
+        edit: "Edit Book",
+        add_to_collection: "Add to Collection",
     },
 
     // Common UI Elements
@@ -117,7 +126,4 @@ export default {
         close: "Close",
         open_drawer: "Open drawer",
     },
-    test: {
-        fn: (name: string) => `Hello, ${name}!`,
-    },
-} satisfies typeof zhCN;
+}

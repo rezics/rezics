@@ -1,7 +1,6 @@
 import React from "react";
 import { Box, Avatar, Typography, Link, Paper } from "@mui/material";
 import FormatQuoteIcon from "@mui/icons-material/FormatQuote";
-import { t } from "../Text";
 
 export namespace SingleQuoteExcerpt {
     export type Show = {

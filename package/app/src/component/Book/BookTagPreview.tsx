@@ -1,9 +1,8 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Box, Typography, Chip, Stack } from "@mui/material";
 import { useMemo } from "react";
 import { AccentBarWithText } from "@component/Common/AccentBar";
-import { EditButtonFloatRight } from "@component/Common/EditButtonFloatRight";
-import { t } from "@component/Text";
+import { EditButtonFloatRight } from "@component/Common/EditButtonFloatRight"
 
 interface TagGroupObject {
     key: string;
@@ -17,6 +16,9 @@ export namespace BookTag {
     };
 
     export const Show: React.FC<Show> = ({ tagObjects }) => {
+        useEffect(() => {
+            console.log(tagObjects);
+        }, [tagObjects]);
         return (
             <Box>
                 {tagObjects.map((tagObject) => (
@@ -38,6 +40,9 @@ export namespace BookTag {
                                     key={tag}
                                     label={tag}
                                     size="small"
+                                    onClick={() => {
+                                        console.log(`Clicked tag: ${tag}`);
+                                    }}
                                     sx={{
                                         bgcolor: "grey.100",
                                         color: "primary.main",
@@ -59,22 +64,18 @@ export namespace BookTag {
     };
 
     export const Container: React.FC<Container> = ({ tagObjects: propTagObjects }) => {
-        const tagObjects = useMemo(
-            () =>
-                propTagObjects || [
-                    {
-                        key: "tag1",
-                        name: "User",
-                        tags: ["奇幻", "冒险", "平行世界"],
-                    },
-                    {
-                        key: "tag2",
-                        name: "AI",
-                        tags: ["标签2-1", "标签2-2", "标签2-3"],
-                    },
-                ],
-            [propTagObjects],
-        );
+        const tagObjects = [
+            {
+                key: "tag1",
+                name: "User",
+                tags: ["奇幻", "冒险", "平行世界"],
+            },
+            {
+                key: "tag2",
+                name: "AI",
+                tags: ["标签2-1", "标签2-2", "标签2-3"],
+            },
+        ];
 
         return <Show tagObjects={tagObjects} />;
     };
@@ -89,7 +90,18 @@ export namespace BookTagEdit {
     export const Show: React.FC<Show> = ({ tagObjects, onUpdate }) => {
         return (
             <div>
-                <h1>{t("pages->book_tag_edit")}</h1>
+                <h1>{/* t("pages->book_tag_edit") */}</h1>
+                {tagObjects.map((tagObject, index) => (
+                    <div key={index}>
+                        <h2>{tagObject.name}</h2>
+                        <ul>
+                            {tagObject.tags.map((tag, tagIndex) => (
+                                <li key={tagIndex}>{tag}</li>
+                            ))}
+                        </ul>
+                        <button onClick={() => onUpdate(tagObjects)}>Update</button>
+                    </div>
+                ))}
                 {/* Add editing UI here */}
             </div>
         );
@@ -119,7 +131,8 @@ export namespace BookTagView {
                     <AccentBarWithText.Show text="标签" />
                     {showEditButton && <EditButtonFloatRight.Show onClick={onEdit} />}
                 </div>
-                <BookTag.Show tagObjects={tagObjects} />
+                <BookTag.Container tagObjects={tagObjects} />
+                {/* <BookTag.Show tagObjects={tagObjects} /> */}
             </Box>
         );
     };

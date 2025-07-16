@@ -1,7 +1,5 @@
 import React from "react";
 
-import { t } from "@component/Text";
-
 export const BookEditMainPage: React.FC = () => {
     return (
         <div>

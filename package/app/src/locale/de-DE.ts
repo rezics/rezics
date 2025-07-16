@@ -1,5 +1,3 @@
-import zhCN from "./zh-CN";
-
 export default {
     title: "ICS",
     motto: "Erben Schaffen Verbreiten",
@@ -118,8 +116,4 @@ export default {
         close: "Schließen",
         open_drawer: "Schublade öffnen",
     },
-
-    test: {
-        fn: (name: string) => `Hallo, ${name}!`,
-    },
-} satisfies typeof zhCN;
+}

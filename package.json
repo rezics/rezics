@@ -11,6 +11,7 @@
         "prettier": "^3.5.3"
     },
     "dependencies": {
+        "react-i18next": "^15.6.0",
         "effect": "^3.16.12"
     }
 }

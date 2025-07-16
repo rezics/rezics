@@ -11,6 +11,10 @@ import { applyDynamicThemeToDOM, generateDynamicColors } from "./config/dynamicT
 import { setupMock } from "./plugin/providers/mock";
 import { client, UrqlProvider } from "./plugin/providers/urql";
 
+import {initI18n} from "./plugin/providers/i18n"
+
+initI18n();
+
 const container = document.getElementById("app") as HTMLElement;
 const root = createRoot(container);
 
