@@ -9,6 +9,7 @@ export const LangToggle: React.FC = () => {
 
     const changeLang = (lang: string) => {
         i18n.changeLanguage(lang);
+        localStorage.setItem("lang", lang);
         console.log("set lang to ", lang);
     };
 
