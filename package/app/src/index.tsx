@@ -1,4 +1,4 @@
-import { StrictMode, useMemo } from "react";
+import { StrictMode, useEffect, useMemo } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
 import Router from "./router/router";
@@ -11,7 +11,7 @@ import { applyDynamicThemeToDOM, generateDynamicColors } from "./config/dynamicT
 import { setupMock } from "./plugin/providers/mock";
 import { client, UrqlProvider } from "./plugin/providers/urql";
 
-import {initI18n} from "./plugin/providers/i18n"
+import { initI18n } from "./plugin/providers/i18n";
 
 initI18n();
 
@@ -24,7 +24,7 @@ function Root() {
     const themeMode = appStore((state) => state.theme);
     const customColor = appStore((state) => state.customColor);
     const useDynamicTheme = appStore((state) => state.useDynamicTheme);
-    
+
     const theme = useMemo(() => {
         if (useDynamicTheme && customColor) {
             // 应用动态主题到 DOM
@@ -34,6 +34,16 @@ function Root() {
         }
         return getTheme(themeMode);
     }, [themeMode, customColor, useDynamicTheme]);
+
+    useEffect(() => {
+        const root = document.documentElement;
+
+        if (themeMode === "dark") {
+            root.classList.add("dark");
+        } else {
+            root.classList.remove("dark");
+        }
+    }, [themeMode]);
 
     return (
         <StrictMode>
