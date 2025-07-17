@@ -12,6 +12,7 @@ import { setupMock } from "./plugin/providers/mock";
 import { client, UrqlProvider } from "./plugin/providers/urql";
 
 import { initI18n } from "./plugin/providers/i18n";
+import { PersistentSettingsLoader } from "./plugin/providers/PersistentSettingsLoader";
 
 initI18n();
 
@@ -50,6 +51,7 @@ function Root() {
             <StyledEngineProvider injectFirst>
                 <ThemeProvider theme={theme}>
                     <CssBaseline />
+                    <PersistentSettingsLoader />
                     <UrqlProvider value={client}>{Router}</UrqlProvider>
                 </ThemeProvider>
             </StyledEngineProvider>

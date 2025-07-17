@@ -91,14 +91,14 @@ export default (
                         </MainLayout>
                     )}
                 </Route>
-                <Route path="/review/long/book/:bookId">
+                <Route path="/review/book/:bookId">
                     {() => (
                         <MainLayout>
                             <ReviewByBookPage />
                         </MainLayout>
                     )}
                 </Route>
-                <Route path="/review/long/book/:bookId/edit">
+                <Route path="/review/book/:bookId/edit">
                     {() => (
                         <MainLayout>
                             <LongReviewEditPage />
