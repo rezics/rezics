@@ -21,7 +21,7 @@ export const mockReviews = [
         id: "1",
         bookId: "1",
         content:
-            "This book was absolutely amazing! The character development was incredible and the plot kept me engaged from start to finish. I would highly recommend it to anyone who enjoys this genre.",
+            "This book was absolutely amazing! The character development was incredible and the plot kept me engaged from start to finish. I would highly recommend it to anyone who enjoys this genre.This book was absolutely amazing! The character development was incredible and the plot kept me engaged from start to finish. I would highly recommend it to anyone who enjoys this genre.This book was absolutely amazing! The character development was incredible and the plot kept me engaged from start to finish. I would highly recommend it to anyone who enjoys this genre.This book was absolutely amazing! The character development was incredible and the plot kept me engaged from start to finish. I would highly recommend it to anyone who enjoys this genre.This book was absolutely amazing! The character development was incredible and the plot kept me engaged from start to finish. I would highly recommend it to anyone who enjoys this genre.This book was absolutely amazing! The character development was incredible and the plot kept me engaged from start to finish. I would highly recommend it to anyone who enjoys this genre.",
         rating: 4.5,
         createdAt: "2024-03-15T10:30:00Z",
         userId: "1",
@@ -84,7 +84,7 @@ export const mockBookShortReviews = [
             avatar: "https://styles.redditmedia.com/t5_26vvze/styles/profileIcon_pyesq04om2re1.jpeg",
         },
         title: "好书",
-        content: "这是一本好书",
+        content: "This book was absolutely amazing! The character development was incredible and the plot kept me engaged from start to finish. I would highly recommend it to anyone who enjoys this genre.This book was absolutely amazing! The character development was incredible and the plot kept me engaged from start to finish. I would highly recommend it to anyone who enjoys this genre.This book was absolutely amazing! The character development was incredible and the plot kept me engaged from start to finish. I would highly recommend it to anyone who enjoys this genre.This book was absolutely amazing! The character development was incredible and the plot kept me engaged from start to finish. I would highly recommend it to anyone who enjoys this genre.This book was absolutely amazing! The character development was incredible and the plot kept me engaged from start to finish. I would highly recommend it to anyone who enjoys this genre.This book was absolutely amazing! The character development was incredible and the plot kept me engaged from start to finish. I would highly recommend it to anyone who enjoys this genre.",
         rating: 3,
         createdAt: "2021-01-01",
         likes: 10,

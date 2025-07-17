@@ -1,7 +1,8 @@
-import { Box, Avatar, Typography, Button, Rating, Divider } from "@mui/material";
+import { Box, Avatar, Typography, Button, Rating, Divider, Tooltip, IconButton } from "@mui/material";
 import { CollapsibleText } from "@component/Common/CollapsibleText";
 import { ReactionBar } from "@component/Common/ReactionBar";
 import { BookReview } from "@/api/bookReviews";
+import { SentimentSatisfiedAlt, EmojiEvents } from "@mui/icons-material";
 
 export namespace SingleReview {
     export type Show = {
@@ -36,12 +37,7 @@ export namespace SingleReview {
                     </Box>
 
                     <Box sx={{ mt: 2 }}>
-                        <CollapsibleText.Show
-                            content={review.content}
-                            threshold={300}
-                            isExpanded={false}
-                            onToggle={() => {}}
-                        />
+                        <CollapsibleText.Container content={review.content} threshold={300} />
                     </Box>
 
                     <Box className="w-full flex justify-end">
@@ -49,7 +45,28 @@ export namespace SingleReview {
                             <ReactionBar.Show onReply={() => onReply(review.id)} />
                         </Box>
                     </Box>
-
+                    {/* Statistics and Awards */}
+                    <div className="flex w-full justify-end">
+                        <div className="text-sm flex gap-2 items-center">
+                            {/* TODO 小屏幕自动换行 */}
+                            <div>177 认同</div>
+                            <div>14 Comments</div>
+                            <div>190 funny</div>
+                            {/* Open a new line to show Awards */}
+                        </div>
+                        <div className="ml-4">
+                            <Tooltip title="Funny">
+                                <IconButton size="medium">
+                                    <SentimentSatisfiedAlt style={{ fontSize: "1rem" }} />
+                                </IconButton>
+                            </Tooltip>
+                            <Tooltip title="Award">
+                                <IconButton size="medium">
+                                    <EmojiEvents style={{ fontSize: "1rem" }} />
+                                </IconButton>
+                            </Tooltip>
+                        </div>
+                    </div>
                     <Divider sx={{ my: 2 }} />
                 </Box>
             </div>

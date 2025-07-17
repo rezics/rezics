@@ -6,6 +6,8 @@ import SentimentSatisfiedAltIcon from "@mui/icons-material/SentimentSatisfiedAlt
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
 import { BookReview } from "@/api/bookReviews";
+// import { CollapsibleText } from "../Common/CollapsibleText";
+import { CollapsibleByLineText } from "../Common/CollapsibleByLineText";
 
 export namespace SingleShortBookReview {
     export type Show = {
@@ -36,15 +38,13 @@ export namespace SingleShortBookReview {
                     <img
                         src={review.user.avatar}
                         alt={review.user.name}
-                        className="w-10 h-10 rounded-md object-cover"
+                        className="w-10 h-10 rounded-md object-cover mt-2"
                     />
 
                     <div className="flex-1 flex flex-col gap-2">
                         {/* Row 1: User Info and Rating */}
                         <div className="flex items-center gap-2">
-                            <span className="font-semibold text-sm text-gray-800 dark:text-gray-200">
-                                {review.user.name}
-                            </span>
+                            <span className="font-semibold text-sm">{review.user.name}</span>
                             <Tooltip title="阅读完整评测" placement="top-start">
                                 <div className="flex items-center gap-1 cursor-pointer bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 p-1 rounded-md">
                                     {isRecommended ? (
@@ -52,7 +52,7 @@ export namespace SingleShortBookReview {
                                     ) : (
                                         <ThumbDownIcon fontSize="small" className="text-gray-500" />
                                     )}
-                                    <span className="text-xs text-gray-600 dark:text-gray-400">
+                                    <span className="text-xs">
                                         {review.rating.toFixed(1)}/5.0 · {review.createdAt}
                                     </span>
                                 </div>
@@ -61,7 +61,11 @@ export namespace SingleShortBookReview {
 
                         {/* Row 2: Review Content */}
                         <div>
-                            <p className="text-sm !line-clamp-4 mt-1">{review.content}</p>
+                            {/* <p className="text-sm !line-clamp-4 mt-1">{review.content}</p> */}
+                            <CollapsibleByLineText.Container
+                                content={review.content}
+                                maxLines={4}
+                            />
                         </div>
 
                         {/* Row 3: Reactions */}
@@ -99,6 +103,7 @@ export namespace SingleShortBookReview {
                                     <span>{review.likes ?? 0} 人支持</span>
                                     <span>{review.funny ?? 0} 人觉得这篇评测很欢乐</span>
                                 </div>
+                                {/* TODO Add a new line to show Awards or don't show awards for short reviews */}
                             </div>
                             <Tooltip title="查看回复" placement="bottom">
                                 <div className="flex items-center gap-1 cursor-pointer hover:text-blue-500">

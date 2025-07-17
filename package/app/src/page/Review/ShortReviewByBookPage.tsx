@@ -5,7 +5,7 @@ import { ShortReviewList } from "@/component/Review/ShortReviewList";
 import { AccentBarWithText } from "@/component/Common/AccentBar";
 import EasyEditor from "@/component/Form/EasyEditor";
 import { useState } from "react";
-import { ScoreForm } from "@/component/Form/scoreForm";
+import { ScoreForm } from "@/component/Form/ScoreForm";
 import { Button } from "@mui/material";
 
 export function ShortReviewByBookPage() {
