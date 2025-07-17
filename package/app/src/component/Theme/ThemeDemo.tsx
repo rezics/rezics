@@ -64,7 +64,7 @@ export const ThemeDemo: React.FC = () => {
 
             <Grid container spacing={3}>
                 {/* 颜色系统演示 */}
-                <Grid item xs={12} md={6}>
+                <Grid sx={{ xs: 12, md: 6 }}>
                     <Card elevation={3}>
                         <CardContent>
                             <Typography variant="h5" gutterBottom color="primary">
@@ -150,7 +150,7 @@ export const ThemeDemo: React.FC = () => {
                 </Grid>
 
                 {/* 组件演示 */}
-                <Grid item xs={12} md={6}>
+                <Grid sx={{ xs: 12, md: 6 }}>
                     <Card elevation={3}>
                         <CardContent>
                             <Typography variant="h5" gutterBottom color="primary">
@@ -202,13 +202,13 @@ export const ThemeDemo: React.FC = () => {
                 </Grid>
 
                 {/* 卡片组合演示 */}
-                <Grid item xs={12}>
+                <Grid sx={{ xs: 12 }}>
                     <Typography variant="h5" gutterBottom color="primary" sx={{ mb: 3 }}>
                         卡片组合演示
                     </Typography>
                     <Grid container spacing={2}>
                         {Object.entries(PRESET_COLORS).slice(0, 8).map(([name, color]) => (
-                            <Grid item xs={12} sm={6} md={3} key={name}>
+                            <Grid sx={{ xs: 12, sm: 6, md: 3 }} key={name}>
                                 <Card 
                                     elevation={2}
                                     sx={{

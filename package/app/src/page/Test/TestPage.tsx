@@ -6,6 +6,7 @@ import Tab from "@mui/material/Tab";
 import { BookEditorSidebar } from "@/component/Layout/BookEditorSidebar";
 import { ChapterListQuery } from "@/api/book";
 import { useQuery } from "urql";
+import { ThemeDemo } from "@/component/Theme/ThemeDemo";
 
 export default function PersistentTabs() {
     const [value, setValue] = React.useState<"1" | "2">("1");
@@ -20,6 +21,8 @@ export default function PersistentTabs() {
     };
 
     return (
+        <div>
+        <ThemeDemo/>
         <TabContext value={value}>
             {" "}
             {/* ① 提供上下文 */}
@@ -38,5 +41,6 @@ export default function PersistentTabs() {
                 这是第二个面板的内容
             </TabPanel>
         </TabContext>
+        </div>
     );
 }

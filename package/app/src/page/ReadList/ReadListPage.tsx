@@ -8,9 +8,10 @@ import { AccentBar } from "@component/Common/AccentBar";
 import { TreeReplyComponents } from "@component/Form/TreeReplyComponents";
 import { IconButton } from "@mui/material";
 import { ChatBubbleOutline, FavoriteBorder, Add, Comment } from "@mui/icons-material";
-//  ;
+import { useTranslation } from "react-i18next";
 
 export const BookListPage: React.FC = () => {
+    const { t } = useTranslation();
     const { id } = useParams<{ id: string }>();
     const [{ data, fetching }] = useQuery({
         query: GET_BOOKLIST,
