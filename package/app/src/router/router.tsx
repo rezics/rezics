@@ -24,10 +24,11 @@ import { BookListPage } from "@/page/ReadList/ReadListPage";
 import TestPage from "@/page/Test/TestPage";
 import { MainLayout } from "@/layout/MainLayout";
 import { BookListEditPage } from "@/page/ReadList/ReadListEditPage";
-import { BookCollectionListPage } from "@/page/ReadList/ReadListsPage";
+import { ReadlistByBookPage } from "@/page/ReadList/ReadListsByBookPage";
 import { ShortReviewByBookPage } from "@/page/Review/ShortReviewByBookPage";
 import { ReviewByBookPage } from "@/page/Review/ReviewByBookPage";
 import { LongReviewEditPage } from "@/page/Review/ReviewEditPage";
+import { QuoteByBookPage } from "@/page/Review/QuoteByBookPage";
 
 /**
  * IMPORTANT – Flattened routing
@@ -107,6 +108,13 @@ export default (
                 </Route>
 
                 {/* ANCHOR Quote Routes */}
+                <Route path="/quote/book/:bookId">
+                    {() => (
+                        <MainLayout>
+                            <QuoteByBookPage />
+                        </MainLayout>
+                    )}
+                </Route>
 
                 {/* ANCHOR ReadList Routes */}
                 <Route path="/readlist/:readlistId">
@@ -126,7 +134,7 @@ export default (
                 <Route path="/readlist/book/:bookId">
                     {() => (
                         <MainLayout>
-                            <BookCollectionListPage />
+                            <ReadlistByBookPage />
                         </MainLayout>
                     )}
                 </Route>

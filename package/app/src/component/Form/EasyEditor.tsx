@@ -8,13 +8,16 @@ import { preserveFormattingPlugin } from "./preserveFormatPlugin";
 interface EasyEditorProps {
     value: string;
     onChange: (value: string) => void;
+    initialValue?: string;
 }
 
-const EasyEditor: React.FC<EasyEditorProps> = ({ value, onChange }) => {
+const EasyEditor: React.FC<EasyEditorProps> = ({ value, onChange, initialValue }) => {
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const easyMDEInstance = useRef<EasyMDE | null>(null);
     const onChangeRef = useRef(onChange);
     onChangeRef.current = onChange;
+
+    // console.log("initialValue", initialValue);
 
     useEffect(() => {
         if (textareaRef.current) {
@@ -116,6 +119,12 @@ const EasyEditor: React.FC<EasyEditorProps> = ({ value, onChange }) => {
             easyMDEInstance.current.value(value || "");
         }
     }, [value]);
+
+    useEffect(() => {
+        if (easyMDEInstance.current && initialValue) {
+            easyMDEInstance.current.value(initialValue);
+        }
+    }, [initialValue]);
 
     return (
         <div className="easymde-wrapper w-full h-full">
