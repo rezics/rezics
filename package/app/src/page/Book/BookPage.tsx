@@ -51,12 +51,17 @@ export namespace BookPage {
 
                                         {/* ANCHOR Tags */}
                                         {/* <BookTagView.Container tagObjects={data?.book.tags || []} /> */}
-                                        <BookTagView.Container/>
+                                        <BookTagView.Container />
                                         <Divider />
 
                                         {/* ANCHOR 最新章节 */}
 
                                         {/* ANCHOR Quote Excerpt Preview */}
+                                        <Link href={`/quote/book/${data?.book.id}`} className="flex mb-4">
+                                            <ArrowForwardIcon.Container size={16}>
+                                                <AccentBarWithText.Container text="原文摘录" />
+                                            </ArrowForwardIcon.Container>
+                                        </Link>
                                         <QuoteExcerptPreview.Container id={data?.book.id || ""} />
                                         <Divider />
 
