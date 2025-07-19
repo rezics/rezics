@@ -1,6 +1,6 @@
 import { initContract } from '@ts-rest/core';
 import { z } from 'zod';
-import { UserSchema, PaginationQuerySchema, PaginatedResponse } from '../../types';
+import { UserSchema, PaginationQuerySchema, PaginatedResponse } from './common';
 
 // ------------------------------------------------------------------
 // Readlist Type
