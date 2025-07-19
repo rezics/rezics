@@ -17,7 +17,15 @@ import { PersistentSettingsLoader } from "./plugin/providers/PersistentSettingsL
 initI18n();
 
 const container = document.getElementById("app") as HTMLElement;
-const root = createRoot(container);
+// 检查容器上是否已经附加了 root 实例
+// 我们使用一个自定义的 _reactRoot 属性来存储它
+if (!(container as any)._reactRoot) {
+    // 如果没有，就创建一个新的 root 并附加到容器上
+    (container as any)._reactRoot = createRoot(container);
+}
+
+// FIXME 但是我們仍然沒有找到爲什麽會有熱更新index的問題
+const root = (container as any)._reactRoot;
 
 import "github-markdown-css/github-markdown-light.css";
 
