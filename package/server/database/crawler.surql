@@ -1,6 +1,6 @@
 begin transaction;
 
-define database if not exists crawler;
+define database if not exists library;
 
 define table unit       schemafull type normal;
 define field title      on unit type string;
