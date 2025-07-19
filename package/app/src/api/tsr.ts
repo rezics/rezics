@@ -4,7 +4,7 @@ import { initTsrReactQuery } from "@ts-rest/react-query/v5";
 import { contract } from "../../../contract";
 import { getAccessToken, refreshToken } from "./auth";
 
-// 1. 创建并导出一个全局的 QueryClient
+// Global QueryClient
 export const queryClient = new QueryClient({
     defaultOptions: {
         queries: {
@@ -19,7 +19,7 @@ export const queryClient = new QueryClient({
     },
 });
 
-// 2. 定义一个自带自动刷新 Token 的 fetcher
+// Auth Fetch
 async function authFetch(input: RequestInfo, init?: RequestInit) {
     const token = await getAccessToken();
     const headers: Record<string, string> = {
@@ -44,7 +44,7 @@ async function authFetch(input: RequestInfo, init?: RequestInit) {
     return response;
 }
 
-// 3. 初始化 ts-rest/react-query 客户端
+// Tsr React Query Client
 export const tsr = initTsrReactQuery(contract, {
     baseUrl: process.env["NEXT_PUBLIC_API_BASE_URL"] || "http://localhost:35001",
     baseHeaders: {
@@ -60,7 +60,7 @@ export const tsr = initTsrReactQuery(contract, {
     queryClient,
 });
 
-// 4. 导出 Provider 组件，方便在应用中统一挂载
+// Tsr Provider
 export function TsrProvider({ children }: { children: React.ReactNode }) {
     return React.createElement(
         QueryClientProvider,
@@ -69,8 +69,7 @@ export function TsrProvider({ children }: { children: React.ReactNode }) {
     );
 }
 
-// 5. 便捷获取 ts-rest QueryClient (for invalidateQueries 等)
+// Tsr QueryClient
 export const useTsrQueryClient = () => tsr.useQueryClient();
 
-// 默认导出
 export default tsr;
