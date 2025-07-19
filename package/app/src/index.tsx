@@ -10,6 +10,7 @@ import { appStore } from "./global/appStore";
 import { applyDynamicThemeToDOM, generateDynamicColors } from "./config/dynamicTheme";
 import { setupMock } from "./plugin/providers/mock";
 import { client, UrqlProvider } from "./plugin/providers/urql";
+import { TsrProvider, queryClient } from "./api/tsr";
 
 import { initI18n } from "./plugin/providers/i18n";
 import { PersistentSettingsLoader } from "./plugin/providers/PersistentSettingsLoader";
@@ -26,6 +27,14 @@ if (!(container as any)._reactRoot) {
 
 // FIXME 但是我們仍然沒有找到爲什麽會有熱更新index的問題
 const root = (container as any)._reactRoot;
+
+// Open TanStack Query Devtools
+if (import.meta.env.MODE === "development") {
+    if (typeof window !== "undefined") {
+        // 啓用tanstack query devtools，自行下載瀏覽器擴展
+        (window as any).__TANSTACK_QUERY_CLIENT__ = queryClient;
+    }
+}
 
 import "github-markdown-css/github-markdown-light.css";
 
@@ -60,7 +69,9 @@ function Root() {
                 <ThemeProvider theme={theme}>
                     <CssBaseline />
                     <PersistentSettingsLoader />
-                    <UrqlProvider value={client}>{Router}</UrqlProvider>
+                    <TsrProvider>
+                        <UrqlProvider value={client}>{Router}</UrqlProvider>
+                    </TsrProvider>
                 </ThemeProvider>
             </StyledEngineProvider>
         </StrictMode>

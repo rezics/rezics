@@ -6,6 +6,7 @@ import { bookQuoteExcerptHandlers } from "./bookQuoteExcerpt";
 import { bookReviewsHandlers } from "./bookReviews";
 import { homepageHandlers } from "./homepage";
 import { chapterHandlers } from "./chapter";
+import { postHandlers } from "./post";
 
 export const handlers = [
     ...authHandlers,
@@ -16,4 +17,5 @@ export const handlers = [
     ...bookReviewsHandlers,
     ...homepageHandlers,
     ...chapterHandlers,
+    ...postHandlers,
 ];
