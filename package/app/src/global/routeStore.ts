@@ -4,11 +4,11 @@ import { create } from "zustand";
 /** 每个路由要保存的数据结构 */
 interface RouteData {
     scrollY?: number;
-    tab?: number;
+    tab?: string;
 }
 
 /** 整个 store 的状态和操作 */
-interface ScrollTabStore {
+interface RouteStore {
     /** 路由 key -> RouteData */
     routeMap: Record<string, RouteData>;
     /** 设置或合并某个路由的数据 */
@@ -19,7 +19,7 @@ interface ScrollTabStore {
     getRouteData: (routeKey: string) => RouteData | undefined;
 }
 
-export const useScrollTabStore = create<ScrollTabStore>((set, get) => ({
+export const routeStore = create<RouteStore>((set, get) => ({
     routeMap: {},
 
     setRouteData: (routeKey, data) =>

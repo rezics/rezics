@@ -1,7 +1,7 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 import { Box, Container, Grid, Typography, Paper, Divider, Avatar, Stack, Tab } from "@mui/material";
 import { TabContext, TabList, TabPanel } from "@mui/lab";
-import { useParams, Link } from "wouter";
+import { useParams, Link, useLocation } from "wouter";
 import { BookTagView } from "@/component/Book/BookTagPreview";
 import { BookReviews } from "@/component/Book/BookReviewsPreview";
 import { ShortBookReviews } from "@/component/Book/ShortBookReviewsPreview";
@@ -18,11 +18,18 @@ import { BookDescription } from "@/component/Book/BookDescription";
 import { QuoteExcerptPreview } from "@/component/Book/QuoteExcerptPreview";
 import { ReadlistByBookPreview } from "@/component/Book/ReadlistByBookPreview";
 
+import { routeStore } from "@/global/routeStore";
+import { startThrottledScroll } from "@/util/ScrollUtil";
+import { repeatTask } from "@/util/taskScheduler";
+import { fadeOverlay } from "@/util/pageAnimateUtil";
+
 export namespace BookPage {
+    type Tab = "0" | "1" | "2";
+
     export type Show = {
         data: BookInfo;
         activeTab: string;
-        onTabChange: (event: React.SyntheticEvent, newValue: "0" | "1" | "2") => void;
+        onTabChange: (event: React.SyntheticEvent | null, newValue: Tab) => void;
     };
 
     export const Show: React.FC<Show> = ({ data, activeTab, onTabChange }) => {
@@ -142,27 +149,74 @@ export namespace BookPage {
 
     export type Container = {};
 
-    export const Container: React.FC<Container> = () => {
+    const RawContainer: React.FC<Container> = () => {
         const { id } = useParams<{ id: string }>();
-        const [activeTab, setActiveTab] = React.useState("0");
+        const [location] = useLocation();
 
-        // BookInfoQuery
-        console.log("fetchBookDetail", id);
+        console.log("BookPageInit", id);
+
+        const getInitialTab = (): Tab => {
+            const routeData = routeStore.getState().getRouteData(String(location));
+            return (routeData?.tab as Tab) || "0";
+        };
+        const [activeTab, setActiveTab] = React.useState<Tab>(getInitialTab);
 
         const [{ data, fetching, error }] = useQuery<BookInfo>({
             query: BookInfoQuery,
             variables: { id },
         });
 
-        if (fetching) return <div>Loading...</div>;
-        if (error) return <div>Oh no... {error.message}</div>;
-
-        const handleTabChange = (_: React.SyntheticEvent, newValue: "0" | "1" | "2") => {
+        const tabRef = useRef<Tab>(getInitialTab());
+        const handleTabChange = (_: React.SyntheticEvent | null, newValue: Tab) => {
+            console.log("handleTabChange", newValue);
+            tabRef.current = newValue;
             setActiveTab(newValue);
         };
 
-        return <Show data={data!} activeTab={activeTab} onTabChange={handleTabChange} />;
+        let stopThrottledScroll: any = null;
+        useEffect(() => {
+            const timer = window.setTimeout(() => {
+            stopThrottledScroll = startThrottledScroll((y) => {
+                console.log("当前滚动位置：", y);
+                routeStore.getState().setRouteData(String(location), {
+                    scrollY: window.scrollY,
+                    tab: tabRef.current,
+                });
+            }, 200); // 150ms 节流
+            }, 500); // 500ms 后开始节流
+            return () => {
+                clearTimeout(timer);
+                stopThrottledScroll?.();
+
+                const prev = routeStore.getState().getRouteData(String(location)) || {};
+                routeStore.getState().setRouteData(String(location), {
+                    ...prev,
+                    tab: tabRef.current, // Override tab, scrollY keep unchanged
+                });
+                console.log("routeStoreData", routeStore.getState().getRouteData(String(location)));
+            };
+        }, [location]);
+
+        useEffect(() => {
+            const routeData = routeStore.getState().getRouteData(String(location));
+            if (routeData?.scrollY) {
+                console.log("scrollY to", routeData.scrollY);
+                repeatTask((scrollY = routeData.scrollY) => {
+                    window.scrollTo(0, scrollY || 0);
+                }, 50, 200);
+            }
+            fadeOverlay(250);
+        }, [location]);
+
+        return (
+            <div>
+                {fetching && <div>Loading...</div>}
+                {error && <div>Oh no... {error.message}</div>}
+                {data && <Show data={data} activeTab={activeTab} onTabChange={handleTabChange} />}
+            </div>
+        );
     };
+    export const Container = React.memo(RawContainer);
 }
 
 export const BookDetail = BookPage.Container;
