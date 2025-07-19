@@ -4,6 +4,9 @@
     "exports": {
         ".": {
             "import": "./src/index.ts"
+        },
+        "./module/*": {
+            "import": "./src/module/*.ts"
         }
     },
     "devDependencies": {

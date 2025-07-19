@@ -2,7 +2,7 @@ import { graphql, http, HttpResponse } from "msw";
 
 import { bookList01 } from "../data/bookList01";
 
-import { bookRouter } from "../../../../contract/book";
+import { bookRouter } from "contract/module/book";
 
 export const bookHandlers = [
     http.get(bookRouter.list.path, () => {
