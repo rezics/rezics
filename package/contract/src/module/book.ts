@@ -1,6 +1,6 @@
 import { initContract } from "@ts-rest/core";
 import { z } from "zod";
-import { PaginationQuerySchema, PaginatedResponse, UserSchema } from "./types";
+import { PaginationQuerySchema, PaginatedResponse, UserSchema } from "./common";
 
 // ------------------------------------------------------------------
 // Book & related Type
