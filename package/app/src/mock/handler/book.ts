@@ -1,8 +1,18 @@
-import { graphql, HttpResponse } from "msw";
+import { graphql, http, HttpResponse } from "msw";
 
 import { bookList01 } from "../data/bookList01";
 
+import { bookRouter } from "../../../../contract/book";
+
 export const bookHandlers = [
+    http.get(bookRouter.list.path, () => {
+        return HttpResponse.json({
+            data: {
+                books: bookList01,
+            },
+        });
+    }),
+    
     // ANCHOR 🟢 Query: GetBooks
     graphql.query("GetBooksDocument", ({ variables }) => {
         return HttpResponse.json({

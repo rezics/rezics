@@ -21,7 +21,7 @@
             "@locale": ["./src/locale/index.ts"]
         }
     },
-    "include": ["node_modules/vite/client.d.ts", "**/*", "./src/@type/i18next.d.ts"],
+    "include": ["node_modules/vite/client.d.ts", "**/*", "./src/@type/i18next.d.ts", "../contract"],
     "exclude": ["./node_modules", "./dist", "./public/**/*"],
     "extends": "../../tsconfig.json"
 }
