@@ -1,6 +1,6 @@
 import { initContract } from '@ts-rest/core';
 import { z } from 'zod';
-import { UserSchema } from '../../types';
+import { UserSchema } from './common';
 
 // ------------------------------------------------------------------
 // ANCHOR Review & Quote Type

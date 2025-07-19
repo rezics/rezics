@@ -1,6 +1,6 @@
 import { initContract } from "@ts-rest/core";
 import { z } from "zod";
-import { PaginationQuerySchema, PaginatedResponse } from "../../types";
+import { PaginationQuerySchema, PaginatedResponse } from "./common";
 
 // ------------------------------------------------------------------
 // Post & Category Type

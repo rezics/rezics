@@ -1,5 +1,5 @@
 import { http, HttpResponse } from "msw";
-import { postRouter } from "../../../../contract/post";
+import { postRouter } from "contract/module/post";
 
 const postList01 = [
     { id: "1", title: "Post 1", content: "Content 1" },
