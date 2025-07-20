@@ -1,6 +1,6 @@
 import { tsr } from "@/api/tsr";
 import { QuoteExcerptList } from "../Review/QuoteExcerptList";
-import { QuoteExcerpt } from "@/api/bookQuoteExcerpt";
+import { QuoteExcerpt } from "contract";
 
 export namespace QuoteExcerptPreview {
     export type Show = {
@@ -12,7 +12,7 @@ export namespace QuoteExcerptPreview {
 
     export const Show: React.FC<Show> = ({ data, isLoading, error }) => {
         if (isLoading) return <div>Loading...</div>;
-        if (error) return <div>Oh no... {error}</div>;
+        if (error && error !== "null") return <div>Oh no... {error}</div>;
 
         return (
             <div>
@@ -30,7 +30,7 @@ export namespace QuoteExcerptPreview {
             queryKey: ["quoteExcerpt", id],
             queryData: {
                 params: {
-                    id,
+                    bookId: id,
                 },
             },
         });
