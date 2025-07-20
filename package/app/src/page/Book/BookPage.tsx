@@ -153,7 +153,6 @@ export namespace BookPage {
 
         window.scrollTo({
             top: distance,
-            behavior: "smooth",
         });
 
         if (Math.abs(window.pageYOffset - before) > 10) {
