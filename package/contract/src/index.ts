@@ -1,22 +1,12 @@
-import { initContract } from "@ts-rest/core";
-import { authRouter } from "./module/auth";
-import { readlistRouter } from "./module/readList";
-import { bookRouter } from "./module/book";
-import { reviewRouter } from "./module/review";
-import { tagRouter } from "./module/tag";
-import { postRouter } from "./module/post";
-import { commentRouter } from "./module/comment";
-import { homePageRouter } from "./module/homePage";
-
-export * from "./module/auth";
-export * from "./module/book";
+export * from "./module/Auth";
+export * from "./module/Book";
 export * from "./module/common";
-export * from "./module/post";
-export * from "./module/readList";
-export * from "./module/review";
-export * from "./module/tag";
-export * from "./module/comment";
-export * from "./module/homePage";
+export * from "./module/Post";
+export * from "./module/ReadList";
+export * from "./module/Review";
+export * from "./module/Tag";
+export * from "./module/Comment";
+export * from "./module/HomePage";
 
 export * as ts_rest from "@ts-rest/core";
 export * as ts_fastify from "@ts-rest/fastify";
@@ -24,17 +14,4 @@ export * as ts_query from "@ts-rest/react-query/v5";
 
 export * as react_query from "@tanstack/react-query";
 
-const c = initContract();
-
-export const contract = c.router({
-  auth: authRouter,
-  books: bookRouter,
-  review: reviewRouter,
-  tag: tagRouter,
-  post: postRouter,
-  readlist: readlistRouter,
-  comment: commentRouter,
-  home: homePageRouter,
-});
-
-export type AppContract = typeof contract;  
+export * from "./full";
