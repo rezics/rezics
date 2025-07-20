@@ -16,8 +16,6 @@ import { ReadlistByBookPreview } from "@/component/Book/ReadlistByBookPreview";
 
 import { routeStore } from "@/global/routeStore";
 import { startThrottledScroll } from "@/util/ScrollUtil";
-import { repeatTask } from "@/util/taskScheduler";
-import { fadeOverlay } from "@/util/pageAnimateUtil";
 import { Book } from "contract";
 import tsr from "@/api/tsr";
 
@@ -27,7 +25,7 @@ export namespace BookPage {
     export type Show = {
         data: Book;
         activeTab: string;
-        onTabChange: (event: React.SyntheticEvent | null, newValue: Tab) => void;
+        onTabChange?: (event: React.SyntheticEvent | null, newValue: Tab) => void;
     };
 
     export const Show: React.FC<Show> = ({ data, activeTab, onTabChange }) => {
@@ -142,13 +140,29 @@ export namespace BookPage {
         );
     };
 
-    export type Container = {};
+    export type Container = {
+        bookId: string;
+    };
 
-    const RawContainer: React.FC<Container> = () => {
-        const { bookId } = useParams();
+    const scroll = async (distance: number, count = 0) => {
+        if (count > 1000) {
+            return;
+        }
+
+        const before = window.pageYOffset;
+
+        window.scrollTo({
+            top: distance,
+        });
+
+        if (Math.abs(window.pageYOffset - before) > 10) {
+            await new Promise((resolve) => setTimeout(resolve, 100));
+            return scroll(distance, count + 1);
+        }
+    };
+
+    export const Container: React.FC<Container> = ({ bookId }) => {
         const [location] = useLocation();
-
-        console.log("BookPageInit", bookId);
 
         const getInitialTab = (): Tab => {
             const routeData = routeStore.getState().getRouteData(String(location));
@@ -205,16 +219,9 @@ export namespace BookPage {
             // NOTE 這裏的邏輯還是有問題，雖然理論上只有回退的時候才會觸發滾動，但是我還是不確定會不會有bug
             const routeData = routeStore.getState().getRouteData(String(location));
             if (routeData?.scrollY) {
-                console.log("scrollY to", routeData.scrollY);
-                repeatTask(
-                    (scrollY = routeData.scrollY) => {
-                        window.scrollTo(0, scrollY || 0);
-                    },
-                    10,
-                    300,
-                );
+                console.log("scroll to", routeData.scrollY);
+                scroll(routeData.scrollY);
             }
-            fadeOverlay(300);
         }, [location]);
 
         if (isLoading) {
@@ -235,7 +242,6 @@ export namespace BookPage {
             </div>
         );
     };
-    export const Container = RawContainer;
 }
 
 export const BookDetail = BookPage.Container;
