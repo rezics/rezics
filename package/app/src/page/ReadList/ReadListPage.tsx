@@ -1,7 +1,5 @@
 import React, { useRef } from "react";
 import { useParams } from "wouter";
-import { useQuery } from "urql";
-import { GET_BOOKLIST } from "@/api/readlist";
 import { CollapsibleText } from "@component/Common/CollapsibleText";
 import { AccentBar } from "@component/Common/AccentBar";
 // import { ReplyComponents } from "@component/Form/ReplyComponents";
@@ -9,22 +7,27 @@ import { TreeReplyComponents } from "@component/Form/TreeReplyComponents";
 import { IconButton } from "@mui/material";
 import { ChatBubbleOutline, FavoriteBorder, Add, Comment } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
+import tsr from "@/api/tsr";
 
 export const BookListPage: React.FC = () => {
     const { t } = useTranslation();
     const { id } = useParams<{ id: string }>();
-    const [{ data, fetching }] = useQuery({
-        query: GET_BOOKLIST,
-        variables: { id },
+    const { data, isLoading, error } = tsr.readlists.get.useQuery({
+        queryKey: ["readlist", id],
+        queryData: {
+            params: {
+                readlistId: id || "",
+            },
+        },
     });
 
     const commentRef = useRef<HTMLDivElement>(null);
 
-    if (fetching) {
+    if (isLoading) {
         return <div className="text-center py-10">加载中...</div>;
     }
 
-    const bookList = data?.bookList;
+    const bookList = data?.body;
     if (!bookList) {
         return <div className="text-center py-10 text-red-500">未找到书单</div>;
     }
@@ -57,13 +60,13 @@ export const BookListPage: React.FC = () => {
                         </div>
                     )}
                     <div className="flex items-center gap-2">
-                        <IconButton aria-label={t("accessibility->favorite")} size="small">
+                        <IconButton aria-label={t("accessibility.favorite")} size="small">
                             <FavoriteBorder fontSize="small" />
                         </IconButton>
-                        <IconButton aria-label={t("accessibility->comments")} size="small" onClick={handleGoToComments}>
+                        <IconButton aria-label={t("accessibility.comments")} size="small" onClick={handleGoToComments}>
                             <Comment fontSize="small" />
                         </IconButton>
-                        <IconButton aria-label={t("accessibility->collection")} size="small">
+                        <IconButton aria-label={t("accessibility.collection")} size="small">
                             <Add fontSize="small" />
                         </IconButton>
                     </div>

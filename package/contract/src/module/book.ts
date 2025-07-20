@@ -6,11 +6,19 @@ import { PaginationQuerySchema, PaginatedResponse, UserSchema } from "./common";
 // Book & related Type
 // ------------------------------------------------------------------
 
+export const AuthorSchema = z.object({
+    id: z.string(),
+    name: z.string(),
+    avatar: z.url().optional(),
+    description: z.string().optional(),
+});
+export type Author = z.infer<typeof AuthorSchema>;
+
 export const BookSchema = z.object({
     id: z.string(),
     title: z.string(),
-    cover: z.string().url().optional(),
-    author: z.string(),
+    cover: z.url().optional(),
+    author: AuthorSchema,
     rating: z.number().optional(),
     publisher: z.string().optional(),
     publishDate: z.string().optional(),
@@ -21,12 +29,14 @@ export const BookSchema = z.object({
 export type Book = z.infer<typeof BookSchema>;
 
 export const ChapterSchema = z.object({
-    ID: z.string(),
-    ParentID: z.string().nullable(),
-    ChapterName: z.string(),
-    NoContent: z.boolean().optional(),
+    id: z.string(),
+    title: z.string(),
+    noContent: z.boolean().optional(),
 });
 export type Chapter = z.infer<typeof ChapterSchema>;
+
+export const ChapterOrderSchema = z.map(z.string(), z.array(z.string()));
+export type ChapterOrder = z.infer<typeof ChapterOrderSchema>;
 
 export const ChapterContentSchema = z.object({
     id: z.string(),
@@ -43,7 +53,7 @@ const c = initContract();
 export const bookRouter = c.router({
     get: {
         method: "GET",
-        path: "/books/:id",
+        path: "/books/:bookId",
         responses: { 200: BookSchema, 404: z.object({ message: z.string() }) },
     },
     update: {
@@ -72,12 +82,12 @@ export const bookRouter = c.router({
     chapters: c.router({
         list: {
             method: "GET",
-            path: "/books/:id/chapters",
-            responses: { 200: z.array(ChapterSchema) },
+            path: "/books/:bookId/chapters",
+            responses: { 200: z.object({ chapters: z.array(ChapterSchema), order: ChapterOrderSchema }) },
         },
         content: {
             method: "GET",
-            path: "/books/:id/chapters/:chapterId",
+            path: "/books/:bookId/chapters/:chapterId",
             responses: { 200: ChapterContentSchema },
         },
     }),

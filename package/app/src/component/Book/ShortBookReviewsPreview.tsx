@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { ShortReviewList } from "../Review/ShortReviewList";
-import { BookReview, GET_BOOK_SHORT_REVIEWS } from "@/api/bookReviews";
-import { useQuery } from "urql";
-
+import { tsr } from "@/api/tsr";
+import { BookReview } from "contract";
 
 type Review = BookReview & {
     likes?: number;
@@ -14,12 +13,16 @@ interface ShortBookReviewsProps {
 }
 
 export const ShortBookReviews: React.FC<ShortBookReviewsProps> = ({ bookId }) => {
-    const [result] = useQuery({
-        query: GET_BOOK_SHORT_REVIEWS,
-        variables: { bookId },
+    const { data, isLoading, error } = tsr.review.listShortReviews.useQuery({
+        queryKey: ["shortBookReviews", bookId],
+        queryData: {
+            params: {
+                bookId: bookId || "",
+            },
+        },
     });
 
-    const reviews = result.data?.bookShortReviews ?? [];
+    const reviews = data?.body ?? [];
 
     const handleLike = (reviewId: string) => {
         console.log("Like review:", reviewId);

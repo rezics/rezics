@@ -4,13 +4,13 @@ export const bookList01 = [
         title: "Mock Book 1",
         author: "Author A",
         description: "Mock Description 1",
-        cover: "https://bookcover.yuewen.com/qdbimg/349573/1025990049/600.webp",
+        cover: "https://m.media-amazon.com/images/I/81wGzzxqHSL._SY466_.jpg",
     },
     {
         id: "2",
         title: "Mock Book 2",
         author: "Author B",
         description: "Mock Description 2",
-        cover: "https://bookcover.yuewen.com/qdbimg/349573/1025990049/600.webp",
+        cover: "https://m.media-amazon.com/images/I/81wGzzxqHSL._SY466_.jpg",
     },
 ];

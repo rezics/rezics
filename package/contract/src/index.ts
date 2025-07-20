@@ -5,6 +5,8 @@ import { bookRouter } from "./module/book";
 import { reviewRouter } from "./module/review";
 import { tagRouter } from "./module/tag";
 import { postRouter } from "./module/post";
+import { commentRouter } from "./module/comment";
+import { homePageRouter } from "./module/homePage";
 
 export * from "./module/auth";
 export * from "./module/book";
@@ -13,6 +15,8 @@ export * from "./module/post";
 export * from "./module/readList";
 export * from "./module/review";
 export * from "./module/tag";
+export * from "./module/comment";
+export * from "./module/homePage";
 
 export * as ts_rest from "@ts-rest/core";
 export * as ts_fastify from "@ts-rest/fastify";
@@ -29,6 +33,8 @@ export const contract = c.router({
   tag: tagRouter,
   posts: postRouter,
   readlists: readlistRouter,
+  comments: commentRouter,
+  home: homePageRouter,
 });
 
 export type AppContract = typeof contract;  

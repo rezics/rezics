@@ -7,11 +7,10 @@ import { useLayoutStore } from "@/global/layoutStore";
 import { appStore } from "@/global/appStore";
 import { NAVIGATION } from "@/component/Layout/BookEditorNavigation";
 
-import { useQuery } from "urql";
-import { ChapterListQuery } from "@/api/book";
 import { useParams, useRoute } from "wouter";
 
 import { BookEditorSidebar } from "@/component/Layout/BookEditorSidebar";
+import tsr from "@/api/tsr";
 
 interface BookEditLayoutProps {
     children: ReactNode;
@@ -37,9 +36,13 @@ export const BookEditLayout: React.FC<BookEditLayoutProps> = ({ children }) => {
         console.log("match, params", match, params);
         setSelectedId(match ? String(params.chapterId) : "");
     }, [match, params]);
-    const [{ data, fetching, error }] = useQuery({
-        query: ChapterListQuery,
-        variables: { id: bookId },
+    const { data, isLoading, error } = tsr.books.chapters.list.useQuery({
+        queryKey: ["bookChapters", bookId],
+        queryData: {
+            params: {
+                bookId: bookId || "",
+            },
+        },
     });
 
     const isMobile = useMediaQuery("(max-width:960px)");
@@ -69,7 +72,16 @@ export const BookEditLayout: React.FC<BookEditLayoutProps> = ({ children }) => {
                 NAVIGATION={NAVIGATION()}
                 noScrollBar={true}
             >
-                <BookEditorSidebar chaptersData={data} selectedId={selectedId} baseLink={baseUrl} />
+                <BookEditorSidebar
+                    chaptersData={
+                        data?.body ?? {
+                            chapters: [],
+                            chapterOrder: new Map<string, string[]>(),
+                        }
+                    }
+                    selectedId={selectedId}
+                    baseLink={baseUrl}
+                />
             </Sidebar>
 
             <main

@@ -1,15 +1,19 @@
 import { useParams } from "wouter";
-import { useQuery } from "urql";
-import { ChapterContentQuery, ChapterContent } from "@/api/bookContent";
 
 import MarkdownIt from "markdown-it";
 import { preserveFormattingPlugin } from "@/component/Form/preserveFormatPlugin";
+import tsr from "@/api/tsr";
 
 export const BookReadChapterPage: React.FC = () => {
     const { chapterId } = useParams();
-    const [{ data, fetching, error }] = useQuery<ChapterContent>({
-        query: ChapterContentQuery,
-        variables: { chapterId: chapterId },
+    const { data, isLoading, error } = tsr.books.chapters.content.useQuery({
+        queryKey: ["bookChapter", chapterId],
+        queryData: {
+            params: {
+                bookId: "",
+                chapterId: chapterId || "",
+            },
+        },
     });
 
     const md = new MarkdownIt({
@@ -22,10 +26,10 @@ export const BookReadChapterPage: React.FC = () => {
 
     md.use(preserveFormattingPlugin);
 
-    const chapterHtml = md.render(data?.content || "");
+    const chapterHtml = md.render(data?.body.content || "");
 
-    if (fetching) return <div>Loading...</div>;
-    if (error) return <div>Oh no... {error.message}</div>;
+    if (isLoading) return <div>Loading...</div>;
+    if (error) return <div>Oh no... {String(error)}</div>;
     return (
         <div>
             <div className="w-11/12 mx-auto">

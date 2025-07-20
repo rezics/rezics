@@ -8,14 +8,10 @@ import { appStore } from "@/global/appStore";
 
 import { BookEditorSidebar } from "@/component/Layout/BookEditorSidebar";
 import { Link, useParams, useRoute } from "wouter";
-
-import { useQuery } from "urql";
-import { ChapterListQuery } from "@/api/book";
-
+import tsr from "@/api/tsr";
 interface BookReadLayout {
     children: ReactNode;
 }
-
 
 export const BookReadLayout: React.FC<BookReadLayout> = ({ children }) => {
     const [match, params] = useRoute("/book/:bookId/read/:chapterId");
@@ -39,9 +35,13 @@ export const BookReadLayout: React.FC<BookReadLayout> = ({ children }) => {
         setSelectedId(match ? String(params.chapterId) : "");
     }, [match, params]);
 
-    const [{ data, fetching, error }] = useQuery({
-        query: ChapterListQuery,
-        variables: { id: bookId },
+    const { data, isLoading, error } = tsr.books.chapters.list.useQuery({
+        queryKey: ["bookChapters", bookId],
+        queryData: {
+            params: {
+                bookId: bookId || "",
+            },
+        },
     });
 
     const handleDrawerToggle = () => {
@@ -78,7 +78,16 @@ export const BookReadLayout: React.FC<BookReadLayout> = ({ children }) => {
                         </Link>
                     </div>
                     <Divider />
-                    <BookEditorSidebar chaptersData={data} selectedId={selectedId} baseLink={baseUrl} />
+                    <BookEditorSidebar
+                        chaptersData={
+                            data?.body ?? {
+                                chapters: [],
+                                chapterOrder: new Map<string, string[]>(),
+                            }
+                        }
+                        selectedId={selectedId}
+                        baseLink={baseUrl}
+                    />
                 </div>
             </Sidebar>
 

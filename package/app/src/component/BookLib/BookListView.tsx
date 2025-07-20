@@ -1,6 +1,6 @@
 import { Card, CardContent, Typography } from "@mui/material";
 
-import { Book } from "@page/Book/BookLibPage";
+import { Book } from "contract";
 
 export namespace BookListView {
     export type Show = {

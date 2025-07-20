@@ -7,10 +7,6 @@ import { BookReviews } from "@/component/Book/BookReviewsPreview";
 import { ShortBookReviews } from "@/component/Book/ShortBookReviewsPreview";
 import { AccentBarWithText } from "@component/Common/AccentBar";
 
-import { BookInfoQuery } from "@/api/book";
-import { useQuery } from "urql";
-import { Book, BookInfo } from "@/api/book";
-
 import { ChapterList } from "@component/Book/ChapterList";
 import { ArrowForwardIcon } from "@component/Common/ArrowForwardIcon";
 import { BookHero } from "@component/Book/BookHero";
@@ -22,12 +18,14 @@ import { routeStore } from "@/global/routeStore";
 import { startThrottledScroll } from "@/util/ScrollUtil";
 import { repeatTask } from "@/util/taskScheduler";
 import { fadeOverlay } from "@/util/pageAnimateUtil";
+import { Book } from "contract";
+import tsr from "@/api/tsr";
 
 export namespace BookPage {
     type Tab = "0" | "1" | "2";
 
     export type Show = {
-        data: BookInfo;
+        data: Book;
         activeTab: string;
         onTabChange: (event: React.SyntheticEvent | null, newValue: Tab) => void;
     };
@@ -36,7 +34,7 @@ export namespace BookPage {
         return (
             <Box id="book-detail">
                 {/* Book Overview */}
-                <BookHero.Container data={data.book} />
+                <BookHero.Container data={data} />
 
                 {/* Main Content */}
                 <Box maxWidth="lg" className="mt-4 mb-8 mx-auto">
@@ -53,7 +51,7 @@ export namespace BookPage {
                                 <TabPanel value="0" keepMounted={true}>
                                     <Stack spacing={4}>
                                         {/* ANCHOR Description */}
-                                        <BookDescription.Container description={data?.book.description || ""} />
+                                        <BookDescription.Container description={data?.description || ""} />
                                         <Divider />
 
                                         {/* ANCHOR Tags */}
@@ -64,22 +62,22 @@ export namespace BookPage {
                                         {/* ANCHOR 最新章节 */}
 
                                         {/* ANCHOR Quote Excerpt Preview */}
-                                        <Link href={`/quote/book/${data?.book.id}`} className="flex mb-4">
+                                        <Link href={`/quote/book/${data?.id}`} className="flex mb-4">
                                             <ArrowForwardIcon.Container size={16}>
                                                 <AccentBarWithText.Container text="原文摘录" />
                                             </ArrowForwardIcon.Container>
                                         </Link>
-                                        <QuoteExcerptPreview.Container id={data?.book.id || ""} />
+                                        <QuoteExcerptPreview.Container id={data?.id || ""} />
                                         <Divider />
 
                                         {/* ANCHOR Short Reviews */}
                                         <Box>
-                                            <Link href={`/review/short/book/${data?.book.id}`} className="flex mb-4">
+                                            <Link href={`/review/short/book/${data?.id}`} className="flex mb-4">
                                                 <ArrowForwardIcon.Container size={16}>
                                                     <AccentBarWithText.Container text="短评" />
                                                 </ArrowForwardIcon.Container>
                                             </Link>
-                                            <ShortBookReviews bookId={data?.book.id || ""} />
+                                            <ShortBookReviews bookId={data?.id || ""} />
                                         </Box>
                                     </Stack>
                                 </TabPanel>
@@ -87,20 +85,17 @@ export namespace BookPage {
                                 <TabPanel value="1" keepMounted={true}>
                                     <Stack spacing={4}>
                                         {/* ANCHOR Book Reviews */}
-                                        <BookReviews bookId={data?.book.id || ""} title={data?.book.title || ""} />
+                                        <BookReviews bookId={data?.id || ""} title={data?.title || ""} />
 
                                         {/* ANCHOR Book Lists */}
-                                        <ReadlistByBookPreview
-                                            bookId={data?.book.id || ""}
-                                            title={data?.book.title || ""}
-                                        />
+                                        <ReadlistByBookPreview bookId={data?.id || ""} title={data?.title || ""} />
                                     </Stack>
                                 </TabPanel>
 
                                 <TabPanel value="2" keepMounted={true}>
                                     <Stack spacing={4}>
                                         {/* 章节列表 */}
-                                        <ChapterList id={data?.book.id || "0"} />
+                                        <ChapterList id={data?.id || "0"} />
                                     </Stack>
                                 </TabPanel>
                             </TabContext>
@@ -112,7 +107,7 @@ export namespace BookPage {
                                 {/* Author Info */}
                                 <Box>
                                     <Typography variant="h6" className="font-bold mb-4">
-                                        作者：{data?.book.author}
+                                        作者：{data?.author?.name}
                                     </Typography>
 
                                     <Box className="mb-4">
@@ -132,11 +127,11 @@ export namespace BookPage {
                                         书籍信息
                                     </Typography>
                                     <Stack spacing={1}>
-                                        <Typography variant="body2">书名：{data?.book.title}</Typography>
-                                        <Typography variant="body2">作者：{data?.book.author}</Typography>
-                                        <Typography variant="body2">出版社：{data?.book.publisher}</Typography>
-                                        <Typography variant="body2">出版日期：{data?.book.publishDate}</Typography>
-                                        <Typography variant="body2">ISBN：{data?.book.isbn}</Typography>
+                                        <Typography variant="body2">书名：{data?.title}</Typography>
+                                        <Typography variant="body2">作者：{data?.author?.name}</Typography>
+                                        <Typography variant="body2">出版社：{data?.publisher}</Typography>
+                                        <Typography variant="body2">出版日期：{data?.publishDate}</Typography>
+                                        <Typography variant="body2">ISBN：{data?.isbn}</Typography>
                                     </Stack>
                                 </Box>
                             </Paper>
@@ -150,10 +145,10 @@ export namespace BookPage {
     export type Container = {};
 
     const RawContainer: React.FC<Container> = () => {
-        const { id } = useParams<{ id: string }>();
+        const { bookId } = useParams();
         const [location] = useLocation();
 
-        console.log("BookPageInit", id);
+        console.log("BookPageInit", bookId);
 
         const getInitialTab = (): Tab => {
             const routeData = routeStore.getState().getRouteData(String(location));
@@ -161,10 +156,18 @@ export namespace BookPage {
         };
         const [activeTab, setActiveTab] = React.useState<Tab>(getInitialTab);
 
-        const [{ data, fetching, error }] = useQuery<BookInfo>({
-            query: BookInfoQuery,
-            variables: { id },
+        const { data, isLoading, error } = tsr.books.get.useQuery({
+            queryKey: ["book", bookId],
+            queryData: {
+                params: {
+                    bookId: bookId!,
+                },
+            },
         });
+
+        useEffect(() => {
+            console.log("book data", data);
+        }, [data]);
 
         const tabRef = useRef<Tab>(getInitialTab());
         const handleTabChange = (_: React.SyntheticEvent | null, newValue: Tab) => {
@@ -176,13 +179,14 @@ export namespace BookPage {
         let stopThrottledScroll: any = null;
         useEffect(() => {
             const timer = window.setTimeout(() => {
-            stopThrottledScroll = startThrottledScroll((y) => {
-                console.log("当前滚动位置：", y);
-                routeStore.getState().setRouteData(String(location), {
-                    scrollY: window.scrollY,
-                    tab: tabRef.current,
-                });
-            }, 200); // 150ms 节流
+                stopThrottledScroll = startThrottledScroll((y) => {
+                    console.log("当前滚动位置：", y);
+                    console.log("location", bookId);
+                    routeStore.getState().setRouteData(String(location), {
+                        scrollY: window.scrollY,
+                        tab: tabRef.current,
+                    });
+                }, 200); // 150ms 节流
             }, 500); // 500ms 后开始节流
             return () => {
                 clearTimeout(timer);
@@ -201,22 +205,36 @@ export namespace BookPage {
             const routeData = routeStore.getState().getRouteData(String(location));
             if (routeData?.scrollY) {
                 console.log("scrollY to", routeData.scrollY);
-                repeatTask((scrollY = routeData.scrollY) => {
-                    window.scrollTo(0, scrollY || 0);
-                }, 50, 200);
+                repeatTask(
+                    (scrollY = routeData.scrollY) => {
+                        window.scrollTo(0, scrollY || 0);
+                    },
+                    50,
+                    200,
+                );
             }
             fadeOverlay(250);
         }, [location]);
 
+        if (isLoading) {
+            return <div>Loading...</div>;
+        }
+
+        if (error) {
+            return <div>Oh no... {String(error)}</div>;
+        }
+
+        if (!data?.body.isbn) {
+            return null; // 或者 return <div>No data</div>;
+        }
+
         return (
             <div>
-                {fetching && <div>Loading...</div>}
-                {error && <div>Oh no... {error.message}</div>}
-                {data && <Show data={data} activeTab={activeTab} onTabChange={handleTabChange} />}
+                <Show data={data.body} activeTab={activeTab} onTabChange={handleTabChange} />
             </div>
         );
     };
-    export const Container = React.memo(RawContainer);
+    export const Container = RawContainer;
 }
 
 export const BookDetail = BookPage.Container;

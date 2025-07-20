@@ -5,7 +5,7 @@ import { UserSchema, PaginationQuerySchema, PaginatedResponse } from './common';
 // ------------------------------------------------------------------
 // Readlist Type
 // ------------------------------------------------------------------
-export const BookListSchema = z.object({
+export const ReadListSchema = z.object({
     id: z.string(),
     title: z.string(),
     description: z.string(),
@@ -14,26 +14,26 @@ export const BookListSchema = z.object({
     likes: z.number(),
     commentsNumber: z.number().optional(),
 });
-export type BookList = z.infer<typeof BookListSchema>;
+export type ReadList = z.infer<typeof ReadListSchema>;
 
 const c = initContract();
 
 export const readlistRouter = c.router({
     get: {
       method: 'GET',
-      path: '/book-lists/:id',
-      responses: { 200: BookListSchema },
+      path: '/readlists/:readlistId',
+      responses: { 200: ReadListSchema },
     },
     create: {
       method: 'POST',
-      path: '/book-lists',
-      body: BookListSchema.omit({ id: true, creator: true, commentsNumber: true }),
-      responses: { 201: BookListSchema },
+      path: '/readlists',
+      body: ReadListSchema.omit({ id: true, creator: true, commentsNumber: true }),
+      responses: { 201: ReadListSchema },
     },
-    list: {
+    listByBook: {
       method: 'GET',
-      path: '/book-lists',
+      path: '/readlists/book/:bookId',
       query: PaginationQuerySchema,
-      responses: { 200: PaginatedResponse(BookListSchema) },
+      responses: { 200: PaginatedResponse(ReadListSchema) },
     },
   });

@@ -1,14 +1,11 @@
-import { useLayoutEffect, useMemo, useRef, useState } from "react";
-import { useQuery } from "urql";
-import { ChapterListQuery } from "@/api/book";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Button, Tooltip } from "@mui/material";
 import { AccentBarWithText } from "../Common/AccentBar";
 
 import { buildTree, OrderMap, TreeNodeWithChildren } from "@/util/treeAbstract";
 import { useLocation, Link } from "wouter";
 import { EditButtonFloatRight } from "@/component/Common/EditButtonFloatRight";
-//  ;
-
+import { tsr } from "@/api/tsr";
 // 扁平结构 + 顺序数组
 
 // type ChapterMapType = Map<number, ChapterTreeNode>;
@@ -17,9 +14,8 @@ export type ChapterOrderType = OrderMap;
 
 export interface ChapterTreeNode extends TreeNodeWithChildren {
     id: string;
-    parentId: string;
     title: string;
-    noContent: boolean;
+    noContent?: boolean;
     children?: ChapterTreeNode[];
 }
 
@@ -31,18 +27,28 @@ interface ChapterListProps {
 export const ChapterList: React.FC<ChapterListProps> = ({ id }) => {
     const [,] = useLocation();
 
-    const [{ data, fetching, error }] = useQuery({
-        query: ChapterListQuery,
-        variables: { id },
+    const ChapterListQueryKey = ["chapters", id];
+
+    const { data, isLoading, error } = tsr.books.chapters.list.useQuery({
+        queryKey: ChapterListQueryKey,
+        queryData: {
+            params: {
+                bookId: id,
+            },
+        },
     });
 
-    const chapters: ChapterTreeNode[] = data?.chapters ?? [];
-    const orderMap: ChapterOrderType = new Map(Object.entries(data?.chapterOrders ?? {}));
+    const chapters: ChapterTreeNode[] = Object.values(data?.body?.chapters ?? []);
+    const orderMap: ChapterOrderType = new Map(Object.entries(data?.body?.order ?? []));
 
     // console.log(orderMap, typeof orderMap);
     // const chapterTree: any = buildTree({nodes: chapters, orders: orderMap}, new Map([["isExpend", true]]));
     // use individual state to store the expanded nodes
     const chapterTree: any = useMemo(() => buildTree({ nodes: chapters, orders: orderMap }), [chapters, orderMap]);
+
+    useEffect(() => {
+        console.log("chapterTree", chapterTree, chapters, orderMap);
+    }, [chapterTree]);
 
     const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set());
 
@@ -80,8 +86,11 @@ export const ChapterList: React.FC<ChapterListProps> = ({ id }) => {
         }
     }, [orderMap]);
 
-    if (fetching) return <div>Loading...</div>;
-    if (error) return <div>Oh no... {error.message}</div>;
+    if (isLoading) return <div>Loading...</div>;
+    if (error) return <div>Oh no... {String(error)}</div>;
+
+    console.log(data);
+
     // const chapterTree: any = buildTree({nodes: chapters, orders: orderMap});
 
     // console.log(chapterTree[0].children);

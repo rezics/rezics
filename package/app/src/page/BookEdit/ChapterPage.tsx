@@ -3,16 +3,20 @@ import { Button, TextField } from "@mui/material";
 import EasyEditor from "@/component/Form/EasyEditor";
 
 import { useParams } from "wouter";
-import { useQuery } from "urql";
-import { ChapterContentQuery, ChapterContent } from "@/api/bookContent";
 import { useTranslation } from "react-i18next";
+import tsr from "@/api/tsr";
 
 export const BookEditChapterPage: React.FC = () => {
     const { t } = useTranslation();
     const { chapterId } = useParams();
-    const [{ data }] = useQuery<ChapterContent>({
-        query: ChapterContentQuery,
-        variables: { chapterId: chapterId },
+    const { data, isLoading, error } = tsr.books.chapters.content.useQuery({
+        queryKey: ["bookChapter", chapterId],
+        queryData: {
+            params: {
+                bookId: "",
+                chapterId: chapterId || "",
+            },
+        },
     });
 
     const [content, setContent] = useState("");
@@ -21,8 +25,8 @@ export const BookEditChapterPage: React.FC = () => {
     useEffect(() => {
         if (data) {
             console.log(data);
-            setContent(data.content);
-            setTitle(data.chapterName);
+            setContent(data.body.content || "");
+            setTitle(data.body.chapterName || "");
         }
     }, [data]);
 

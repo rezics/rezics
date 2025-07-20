@@ -1,14 +1,13 @@
 // 暂时就先这样不处理，后面树化，或者使用VirtualList
 
 import React, { useState, useCallback, useMemo } from "react";
-import { useQuery } from "urql";
-import { GET_COMMENTS } from "@/api/readlist";
 import { Box, Avatar, Typography, Button, Collapse, IconButton } from "@mui/material";
 import { Add, Remove } from "@mui/icons-material";
 //  ;
 import { ReactionBar } from "../Common/ReactionBar";
 import { ReplyDrawer } from "./ReplyDrawer";
 import { useDialogStore } from "@/global/dialogStore";
+import tsr from "@/api/tsr";
 
 // This is a temporary type definition based on the GraphQL schema.
 // It should be replaced with generated types.
@@ -108,19 +107,24 @@ interface ReplyComponentsProps {
 }
 
 export const TreeReplyComponents: React.FC<ReplyComponentsProps> = ({ bookListId }) => {
-    const [{ data, fetching, error }] = useQuery({
-        query: GET_COMMENTS,
-        variables: { bookListId },
+    const commentId = bookListId; // TODO 暫時先用這個替代
+    const { data, isLoading, error } = tsr.comments.list.useQuery({
+        queryKey: ["comments",commentId],
+        queryData: {
+            params: {
+                commentId: commentId || "",
+            },
+        },
     });
 
     // currentReplyId
     const setDialogVisible = useDialogStore((state) => state.setDialogVisible);
     const [currentReplyId, setCurrentReplyId] = useState<string | null>(null);
 
-    if (fetching) return <p>Loading...</p>;
-    if (error) return <p>Oh no... {error.message}</p>;
+    if (isLoading) return <p>Loading...</p>;
+    if (error) return <p>Oh no... {String(error)}</p>;
 
-    const topLevelComments = data?.comments || [];
+    const topLevelComments = data?.body.items || [];
 
     const handleSubmit = (currentReplyId: string, content: string) => {
         console.log("handleSubmit", currentReplyId, content);

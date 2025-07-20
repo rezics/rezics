@@ -1,25 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { gql, useQuery } from "urql";
+
 import { ReviewList } from "../Review/ReviewList";
 import { ArrowForwardIcon } from "../Common/ArrowForwardIcon";
 import { Box } from "@mui/material";
 import { Link } from "wouter";
 import { AccentBarWithText } from "../Common/AccentBar";
-
-const GET_BOOK_REVIEWS = gql`
-    query GetBookReviews($bookId: ID!) {
-        bookReviews(bookId: $bookId) {
-            id
-            content
-            rating
-            createdAt
-            user {
-                name
-                avatar
-            }
-        }
-    }
-`;
+import tsr from "@/api/tsr";
 
 interface BookReviewsProps {
     bookId: string;
@@ -29,17 +15,20 @@ interface BookReviewsProps {
 export const BookReviews: React.FC<BookReviewsProps> = ({ bookId, title }) => {
     const [reviews, setReviews] = useState<any[]>([]);
 
-    const [result] = useQuery({
-        query: GET_BOOK_REVIEWS,
-        variables: { bookId },
-        pause: !bookId,
+    const { data, isLoading, error } = tsr.review.listReviews.useQuery({
+        queryKey: ["review", bookId],
+        queryData: {
+            params: {
+                bookId: bookId || "",
+            },
+        },
     });
 
     useEffect(() => {
-        if (result.data?.bookReviews) {
-            setReviews(result.data.bookReviews);
+        if (data?.body) {
+            setReviews(data.body);
         }
-    }, [result.data]);
+    }, [data]);
 
     return (
         <>

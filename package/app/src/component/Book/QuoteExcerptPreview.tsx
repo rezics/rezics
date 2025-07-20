@@ -1,5 +1,4 @@
-import { useQuery } from "urql";
-import { QuoteExcerptQuery } from "@/api/bookQuoteExcerpt";
+import { tsr } from "@/api/tsr";
 import { QuoteExcerptList } from "../Review/QuoteExcerptList";
 import { QuoteExcerpt } from "@/api/bookQuoteExcerpt";
 
@@ -27,11 +26,15 @@ export namespace QuoteExcerptPreview {
     };
 
     export const Container: React.FC<Container> = ({ id }) => {
-        const [{ data, fetching, error }] = useQuery({
-            query: QuoteExcerptQuery,
-            variables: { bookId: id },
+        const { data, isLoading, error } = tsr.review.listQuotes.useQuery({
+            queryKey: ["quoteExcerpt", id],
+            queryData: {
+                params: {
+                    id,
+                },
+            },
         });
 
-        return <Show data={data?.quotes || []} isLoading={fetching} error={error?.message} />;
+        return <Show data={data?.body || []} isLoading={isLoading} error={String(error)} />;
     };
 }
