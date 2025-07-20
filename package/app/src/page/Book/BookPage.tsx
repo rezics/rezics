@@ -47,7 +47,7 @@ export namespace BookPage {
                                     <Tab label="目录" value="2" />
                                 </TabList>
 
-                                <TabPanel value="0" keepMounted={true}>
+                                <TabPanel value="0">
                                     <Stack spacing={4}>
                                         {/* ANCHOR Description */}
                                         <BookDescription.Container description={data?.description || ""} />
@@ -81,7 +81,7 @@ export namespace BookPage {
                                     </Stack>
                                 </TabPanel>
 
-                                <TabPanel value="1" keepMounted={true}>
+                                <TabPanel value="1">
                                     <Stack spacing={4}>
                                         {/* ANCHOR Book Reviews */}
                                         <BookReviews bookId={data?.id || ""} title={data?.title || ""} />
@@ -91,7 +91,7 @@ export namespace BookPage {
                                     </Stack>
                                 </TabPanel>
 
-                                <TabPanel value="2" keepMounted={true}>
+                                <TabPanel value="2">
                                     <Stack spacing={4}>
                                         {/* 章节列表 */}
                                         <ChapterList id={data?.id || "0"} />
@@ -145,32 +145,26 @@ export namespace BookPage {
         bookId: string;
     };
 
-    const scroll = async (container: HTMLElement, distance: number, count = 0) => {
+    const scroll = async (distance: number, count = 0) => {
+        // After adjusting the page structure, the function worked much better.
         if (count > 1000) {
             return;
         }
 
-        const next = async (): Promise<void> => {
-            await new Promise((resolve) => setTimeout(resolve, 10));
-            return scroll(container, distance, count + 1);
-        };
+        const before = window.pageYOffset;
 
-        const before = container.scrollTop;
-        const height = container.scrollHeight;
-
-        if (distance > height) return next();
-
-        container.scrollTo({
+        window.scrollTo({
             top: distance,
-            behavior: "instant",
         });
 
-        if (Math.abs(container.scrollTop - before) > 10) return next();
+        if (Math.abs(window.pageYOffset - before) > 10) {
+            await new Promise((resolve) => setTimeout(resolve, 100));
+            return scroll(distance, count + 1);
+        }
     };
 
     export const Container: React.FC<Container> = ({ bookId }) => {
         const [location] = useLocation();
-        const show = useRef<HTMLElement>();
 
         const getInitialTab = (): Tab => {
             const routeData = routeStore.getState().getRouteData(String(location));
@@ -226,9 +220,9 @@ export namespace BookPage {
         useEffect(() => {
             // NOTE 這裏的邏輯還是有問題，雖然理論上只有回退的時候才會觸發滾動，但是我還是不確定會不會有bug
             const routeData = routeStore.getState().getRouteData(String(location));
-            if (routeData?.scrollY && show.current) {
+            if (routeData?.scrollY) {
                 console.log("scroll to", routeData.scrollY);
-                scroll(show.current.parentElement!, routeData.scrollY);
+                scroll(routeData.scrollY);
             }
         }, [location]);
 
@@ -244,7 +238,7 @@ export namespace BookPage {
             return null; // 或者 return <div>No data</div>;
         }
 
-        return <Show ref={show} data={data.body} activeTab={activeTab} onTabChange={handleTabChange} />;
+        return <Show data={data.body} activeTab={activeTab} onTabChange={handleTabChange} />;
     };
 }
 

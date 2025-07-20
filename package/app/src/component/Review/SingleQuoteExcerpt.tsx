@@ -60,7 +60,7 @@ export namespace SingleQuoteExcerpt {
                                     },
                                 }}
                             >
-                                (查看原文)
+                                (查看全文)
                             </Link>
                         </Typography>
 
@@ -76,10 +76,10 @@ export namespace SingleQuoteExcerpt {
                         >
                             <Box sx={{ display: "flex", gap: 1 }}>
                                 <Typography variant="caption">
-                                    {stats.replies} {t("common->reply")}
+                                    {stats.replies} {t("common.reply")}
                                 </Typography>
                                 <Typography variant="caption">
-                                    {stats.likes} {t("accessibility->favorite")}
+                                    {stats.likes} {t("accessibility.favorite")}
                                 </Typography>
                                 <Typography variant="caption">{stats.date}</Typography>
                             </Box>

@@ -40,7 +40,7 @@ export const BookEditLayout: React.FC<BookEditLayoutProps> = ({ children }) => {
         queryKey: ["bookChapters", bookId],
         queryData: {
             params: {
-                bookId: bookId || "",
+                bookId: bookId || "1",
             },
         },
     });

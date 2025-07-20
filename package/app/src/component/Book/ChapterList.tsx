@@ -3,7 +3,7 @@ import { Button, Tooltip } from "@mui/material";
 import { AccentBarWithText } from "../Common/AccentBar";
 
 import { buildTree, OrderMap, TreeNodeWithChildren } from "@/util/treeAbstract";
-import { useLocation, Link } from "wouter";
+import { Link } from "wouter";
 import { EditButtonFloatRight } from "@/component/Common/EditButtonFloatRight";
 import { tsr } from "@/api/tsr";
 // 扁平结构 + 顺序数组
@@ -25,8 +25,7 @@ interface ChapterListProps {
 }
 
 export const ChapterList: React.FC<ChapterListProps> = ({ id }) => {
-    const [,] = useLocation();
-
+    // TODO use Store to store the chapter expand state
     const ChapterListQueryKey = ["chapters", id];
 
     const { data, isLoading, error } = tsr.books.chapters.list.useQuery({

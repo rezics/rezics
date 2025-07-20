@@ -1,6 +1,6 @@
 import { Box, Stack } from "@mui/material";
 import { SingleQuoteExcerpt } from "@component/Review/SingleQuoteExcerpt";
-import { QuoteExcerpt } from "@/api/bookQuoteExcerpt";
+import { QuoteExcerpt } from "contract";
 
 export namespace QuoteExcerptList {
     export type Show = {
