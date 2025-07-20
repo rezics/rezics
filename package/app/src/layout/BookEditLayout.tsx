@@ -76,7 +76,7 @@ export const BookEditLayout: React.FC<BookEditLayoutProps> = ({ children }) => {
                     chaptersData={
                         data?.body ?? {
                             chapters: [],
-                            chapterOrder: new Map<string, string[]>(),
+                            order: new Map<string, string[]>(),
                         }
                     }
                     selectedId={selectedId}

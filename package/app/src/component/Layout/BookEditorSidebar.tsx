@@ -12,7 +12,7 @@ import { Chapter, ChapterOrder } from "contract";
 interface BookEditorSidebarProps {
     chaptersData: {
         chapters: Chapter[];
-        chapterOrder: ChapterOrder;
+        order: ChapterOrder;
     };
     selectedId: string;
     baseLink: string;
@@ -22,7 +22,11 @@ interface BookEditorSidebarProps {
 export const BookEditorSidebar: React.FC<BookEditorSidebarProps> = ({ chaptersData, selectedId, baseLink }) => {
     const { sidebarHeightBelow } = useLayoutStore();
     const chapters: ChapterTreeNode[] = chaptersData?.chapters ?? [];
-    const orderMap: ChapterOrderType = new Map(Object.entries(chaptersData?.chapterOrder ?? {}));
+    const orderMap: ChapterOrderType = new Map(Object.entries(chaptersData?.order ?? {}));
+
+    useEffect(() => {
+        console.log("chaptersData", chaptersData);
+    }, [chaptersData]);
     const chapterTree = useMemo(
         () => buildTree({ nodes: chapters, orders: orderMap }) as unknown as Chapter[],
         [chaptersData],
