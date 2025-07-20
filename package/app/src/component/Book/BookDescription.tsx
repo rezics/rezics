@@ -33,6 +33,7 @@ export namespace BookDescription {
                     description={description}
                     editOpen={editOpen ?? false}
                     setEditOpen={setEditOpen}
+                    mode="modal"
                 />
             </div>
         );
@@ -53,52 +54,76 @@ export namespace BookDescription {
 }
 
 export namespace BookDescriptionEdit {
-    export type Show = {
+    export type ShowProps = {
         description: string;
         onUpdate: (description: string) => void;
-        editOpen: boolean;
-        setEditOpen: any;
+        setEditOpen: (open: boolean) => void;
+        descriptionState: string;
+        setDescriptionState: React.Dispatch<React.SetStateAction<string>>;
     };
 
-    export const Show: React.FC<Show> = ({ description, onUpdate, editOpen, setEditOpen }) => {
+    export const Show: React.FC<ShowProps> = ({
+        onUpdate,
+        setEditOpen,
+        descriptionState,
+        setDescriptionState,
+    }) => {
         const handleUpdate = () => {
-            onUpdate(description);
+            onUpdate(descriptionState);
             setEditOpen(false);
         };
-        const [descriptionState, setDescriptionState] = useState(description);
-        useEffect(() => {
-            setDescriptionState(description);
-        }, [description]);
+
         return (
             <div>
-                <DialogContainer
-                    open={editOpen}
-                    onClose={() => {
-                        setEditOpen(false);
-                    }}
-                    title="编辑书籍描述"
-                >
-                    <EasyEditor value={descriptionState} onChange={setDescriptionState} />
-                    <div className="w-full">
-                        <div className="w-1/2 float-right">
-                            <Button onClick={handleUpdate} className="w-full">提交</Button>
-                        </div>
+                <EasyEditor value={descriptionState} onChange={setDescriptionState} />
+                <div className="w-full">
+                    <div className="w-1/2 float-right">
+                        <Button onClick={handleUpdate} className="w-full">
+                            提交
+                        </Button>
                     </div>
-                </DialogContainer>
+                </div>
             </div>
         );
     };
 
-    export type Container = {
+    export type ContainerProps = {
         description: string;
         editOpen: boolean;
-        setEditOpen: any;
+        // setEditOpen: (open: boolean) => void;
+        setEditOpen: any
+        mode?: "modal" | "inline"; // 'modal' wraps with Dialog, 'inline' renders directly
     };
 
-    export const Container: React.FC<Container> = ({ description, editOpen, setEditOpen }) => {
-        function onUpdate(description: string) {
-            console.log("update", description);
+    export const Container: React.FC<ContainerProps> = ({ description, editOpen, setEditOpen, mode = "inline" }) => {
+        const [descriptionState, setDescriptionState] = useState(description);
+
+        useEffect(() => {
+            setDescriptionState(description);
+        }, [description]);
+
+        const onUpdate = (newDesc: string) => {
+            console.log("update", newDesc);
+        };
+
+        const content = (
+            <Show
+                description={description}
+                onUpdate={onUpdate}
+                setEditOpen={setEditOpen}
+                descriptionState={descriptionState}
+                setDescriptionState={setDescriptionState}
+            />
+        );
+
+        if (mode === "modal") {
+            return (
+                <DialogContainer open={editOpen} onClose={() => setEditOpen(false)} title="编辑书籍描述">
+                    {content}
+                </DialogContainer>
+            );
         }
-        return <Show description={description} onUpdate={onUpdate} editOpen={editOpen} setEditOpen={setEditOpen} />;
+
+        return content;
     };
 }

@@ -1,11 +1,52 @@
+import { BookDescriptionEdit } from "@/component/Book/BookDescription";
 import React from "react";
 import { useTranslation } from "react-i18next";
+import { tsr } from "@/api/tsr";
+import { AccentBarWithText } from "@/component/Common/AccentBar";
+import Paper from "@mui/material/Paper";
 
-export const BookEditMainPage: React.FC = () => {
+interface BookEditMainPage {
+    bookId: string;
+}
+
+export const BookEditMainPage: React.FC<BookEditMainPage> = ({ bookId }) => {
     const { t } = useTranslation();
+    const { data, isLoading, error } = tsr.book.get.useQuery({
+        queryKey: ["book", bookId],
+        queryData: {
+            params: {
+                bookId: bookId!,
+            },
+        },
+    });
+    if (isLoading) return <div>Loading...</div>;
+    if (error) return <div>Error: {String(error)}</div>;
+    if (!data) return <div>No data</div>;
     return (
-        <div>
-            <h1>{t("pages.book_edit_page")}</h1>
+        <div className="mt-10 mx-auto w-11/12">
+            <div>
+                <div className="flex mb-4">
+                    <AccentBarWithText.Show text={t("book.description")} />
+                </div>
+                <BookDescriptionEdit.Container
+                    description={data.body.description ?? ""}
+                    editOpen={false}
+                    setEditOpen={() => {}}
+                />
+            </div>
+            <div>
+                <div className="flex mb-4">
+                    <AccentBarWithText.Show text="tags" />
+                </div>
+            </div>
+            <div>
+                <div className="flex mb-4">
+                    <AccentBarWithText.Show text="章節" />
+                </div>
+                <Paper>
+                    <div className="p-4 mt-2 mb-2">章節列表，可以編輯章節名稱，如果需要調換順序，請用側邊欄</div>
+                </Paper>
+            </div>
         </div>
     );
 };

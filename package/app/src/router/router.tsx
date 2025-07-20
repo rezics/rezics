@@ -17,7 +17,7 @@ import { BookEditChapterPage } from "@/page/BookEdit/ChapterPage";
 
 // Book list / Library pages
 import { BookLib } from "@/page/Book/BookLibPage";
-import { BookDetail } from "@/page/Book/BookPage";
+import { BookPage } from "@/page/Book/BookPage";
 import { ReadListPage } from "@/page/ReadList/ReadListPage";
 
 // Misc
@@ -65,9 +65,9 @@ export default (
                     )}
                 </Route>
                 <Route path="/book/:bookId/edit">
-                    {() => (
+                    {({ bookId }) => (
                         <BookEditLayout>
-                            <BookEditMainPage />
+                            <BookEditMainPage bookId={bookId} />
                         </BookEditLayout>
                     )}
                 </Route>
@@ -79,9 +79,9 @@ export default (
                     </MainLayout>
                 </Route>
                 <Route path="/book/:bookId">
-                    {() => (
+                    {({ bookId }) => (
                         <MainLayout>
-                            <BookDetail />
+                            <BookPage.Container bookId={bookId} />
                         </MainLayout>
                     )}
                 </Route>

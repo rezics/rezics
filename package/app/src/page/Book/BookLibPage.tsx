@@ -24,7 +24,7 @@ export const BookLib = () => {
         searchTags: [],
     });
 
-    const { data, isLoading, error } = tsr.books.search.useQuery({
+    const { data, isLoading, error } = tsr.book.search.useQuery({
         queryKey: ["books", currentQuery],
         queryData: {
             query: {

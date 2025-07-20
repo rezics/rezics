@@ -36,7 +36,7 @@ export const BookEditLayout: React.FC<BookEditLayoutProps> = ({ children }) => {
         console.log("match, params", match, params);
         setSelectedId(match ? String(params.chapterId) : "");
     }, [match, params]);
-    const { data, isLoading, error } = tsr.books.chapters.list.useQuery({
+    const { data, isLoading, error } = tsr.book.chapter.list.useQuery({
         queryKey: ["bookChapters", bookId],
         queryData: {
             params: {

@@ -12,7 +12,7 @@ const c = initContract();
 
 export const contract = c.router({
     auth: authRouter,
-    books: bookRouter,
+    book: bookRouter,
     review: reviewRouter,
     tag: tagRouter,
     post: postRouter,
