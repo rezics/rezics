@@ -1,5 +1,5 @@
 import { http, HttpResponse } from "msw";
-import { postRouter } from "contract/module/post";
+import { postRouter } from "contract";
 
 const categories = [
     { id: "1", title: "General" },

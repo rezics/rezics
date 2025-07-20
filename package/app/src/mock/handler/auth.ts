@@ -1,5 +1,5 @@
 import { http, HttpResponse } from "msw";
-import { authRouter } from "contract/module/auth";
+import { authRouter } from "contract";
 import { mockUsers, mockTokens } from "../data/auth";
 
 export const authHandlers = [

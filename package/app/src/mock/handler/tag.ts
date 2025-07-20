@@ -1,5 +1,5 @@
 import { http, HttpResponse } from "msw";
-import { tagRouter } from "contract/module/tag";
+import { tagRouter } from "contract";
 
 const mockTagGroups = [
     { key: "genre", name: "Genre", tags: ["Fantasy", "Sci-fi", "Romance"] },

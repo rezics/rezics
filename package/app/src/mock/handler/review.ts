@@ -1,5 +1,5 @@
 import { http, HttpResponse } from "msw";
-import { reviewRouter } from "contract/module/review";
+import { reviewRouter } from "contract";
 import { mockReviews, mockUsers, mockBookShortReviews } from "../data/reviews";
 import { mockQuotes } from "../data/mockQuotes";
 
