@@ -23,14 +23,15 @@ export namespace BookPage {
     type Tab = "0" | "1" | "2";
 
     export type Show = {
+        ref?: React.Ref<unknown> | undefined;
         data: Book;
         activeTab: string;
-        onTabChange?: (event: React.SyntheticEvent | null, newValue: Tab) => void;
+        onTabChange?: ((event: React.SyntheticEvent | null, newValue: Tab) => void) | undefined;
     };
 
-    export const Show: React.FC<Show> = ({ data, activeTab, onTabChange }) => {
+    export const Show: React.FC<Show> = ({ ref, data, activeTab, onTabChange }) => {
         return (
-            <Box id="book-detail">
+            <Box id="book-detail" ref={ref}>
                 {/* Book Overview */}
                 <BookHero.Container data={data} />
 
@@ -144,25 +145,32 @@ export namespace BookPage {
         bookId: string;
     };
 
-    const scroll = async (distance: number, count = 0) => {
+    const scroll = async (container: HTMLElement, distance: number, count = 0) => {
         if (count > 1000) {
             return;
         }
 
-        const before = window.pageYOffset;
+        const next = async (): Promise<void> => {
+            await new Promise((resolve) => setTimeout(resolve, 10));
+            return scroll(container, distance, count + 1);
+        };
 
-        window.scrollTo({
+        const before = container.scrollTop;
+        const height = container.scrollHeight;
+
+        if (distance > height) return next();
+
+        container.scrollTo({
             top: distance,
+            behavior: "instant",
         });
 
-        if (Math.abs(window.pageYOffset - before) > 10) {
-            await new Promise((resolve) => setTimeout(resolve, 100));
-            return scroll(distance, count + 1);
-        }
+        if (Math.abs(container.scrollTop - before) > 10) return next();
     };
 
     export const Container: React.FC<Container> = ({ bookId }) => {
         const [location] = useLocation();
+        const show = useRef<HTMLElement>();
 
         const getInitialTab = (): Tab => {
             const routeData = routeStore.getState().getRouteData(String(location));
@@ -218,9 +226,9 @@ export namespace BookPage {
         useEffect(() => {
             // NOTE 這裏的邏輯還是有問題，雖然理論上只有回退的時候才會觸發滾動，但是我還是不確定會不會有bug
             const routeData = routeStore.getState().getRouteData(String(location));
-            if (routeData?.scrollY) {
+            if (routeData?.scrollY && show.current) {
                 console.log("scroll to", routeData.scrollY);
-                scroll(routeData.scrollY);
+                scroll(show.current.parentElement!, routeData.scrollY);
             }
         }, [location]);
 
@@ -236,11 +244,7 @@ export namespace BookPage {
             return null; // 或者 return <div>No data</div>;
         }
 
-        return (
-            <div>
-                <Show data={data.body} activeTab={activeTab} onTabChange={handleTabChange} />
-            </div>
-        );
+        return <Show ref={show} data={data.body} activeTab={activeTab} onTabChange={handleTabChange} />;
     };
 }
 
