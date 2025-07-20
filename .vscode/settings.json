@@ -3,5 +3,6 @@
     "i18n-ally.localesPaths": ["package/app/src/locale"],
     "i18n-ally.enabledParsers": ["js", "ts", "json"],
     "i18n-ally.enabledFrameworks": ["react-i18next"],
-    "i18n-ally.keystyle": "nested"
+    "i18n-ally.keystyle": "nested",
+    "gel.project-dir": "./package/server/database"
 }
