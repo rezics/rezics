@@ -1,22 +1,10 @@
+// common.ts
 import { z } from "zod";
 import { PhoneNumberUtil, PhoneNumberFormat } from "google-libphonenumber";
 
-// ------------------------------------------------------------------
-// User
-// ------------------------------------------------------------------
+const phone_util = PhoneNumberUtil.getInstance();
 
-export const UserSchema = z.object({
-    id: z.string(),
-    name: z.string(),
-    // avatar: z.string().url().optional(),
-    avatar: z.string().url(),
-});
-export type User = z.infer<typeof UserSchema>;
-
-// ------------------------------------------------------------------
-// Pagination helper
-// ------------------------------------------------------------------
-
+// ---------------- Pagination ----------------
 export const PaginationQuerySchema = z.object({
     page: z.number().int().optional().default(1),
     limit: z.number().int().optional().default(20),
@@ -30,36 +18,42 @@ export const PaginatedResponse = <T extends z.ZodTypeAny>(item: T) =>
         total: z.number(),
     });
 
-const phone_util = PhoneNumberUtil.getInstance();
+// ---------------- Primitives ----------------
+export const id = z.string().uuid().describe("UUIDv4 ID");
 
-export const username = z.string().min(3).max(27).describe("username");
+export const username = z
+    .string()
+    .min(3)
+    .max(27)
+    .regex(/^[a-zA-Z0-9_]+$/, "Only alphanumeric and underscore")
+    .describe("username");
 
-export const email = z.email().max(100).describe("email");
+export const email = z.string().email().max(100).describe("email");
 
 export const phone = z
     .string()
     .min(4)
     .max(16)
-    .refine((value) => {
+    .refine((v) => {
         try {
-            phone_util.parse(value);
+            phone_util.parse(v);
             return true;
         } catch {
             return false;
         }
     }, "Invalid phone number")
-    .transform((value) => phone_util.format(phone_util.parse(value), PhoneNumberFormat.E164))
+    .transform((v) => phone_util.format(phone_util.parse(v), PhoneNumberFormat.E164))
     .describe("phone number");
 
 export const password = z.string().min(6).max(24).describe("password");
 
-export const id = z.uuidv4().describe("ID");
-
+// ---------------- Content Lengths ----------------
 export const content = {
     short: z.string().min(1).max(1000).describe("short content"),
-    medium: z.string().min(1).max(1000).describe("medium content"),
+    medium: z.string().min(1).max(5000).describe("medium content"),
     long: z.string().min(1).max(100000).describe("long content"),
 };
 
-export const updated_at = z.date().describe("updated at");
-export const created_at = z.date().describe("created at");
+// ---------------- Timestamps ----------------
+export const created_at = z.string().describe("ISO created timestamp");
+export const updated_at = z.string().describe("ISO updated timestamp");

@@ -1,6 +1,6 @@
 import { Card, CardContent, CardMedia, Typography } from "@mui/material";
 
-import { Book } from "@page/Book/BookLibPage";
+import { Book } from "contract";
 
 interface CardBookListProps {
     books: Book[];
@@ -25,7 +25,7 @@ export const CardBookList = ({ books }: CardBookListProps) => {
                                 {book.title}
                             </Typography>
                             <Typography variant="subtitle2" color="text.secondary" className="mb-2">
-                                {book.author}
+                                {book.author.name}
                             </Typography>
                             <Typography variant="body2" className="line-clamp-3">
                                 {book.description}

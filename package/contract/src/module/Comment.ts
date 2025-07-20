@@ -1,6 +1,7 @@
 import { initContract } from "@ts-rest/core";
 import { z } from "zod";
-import { PaginationQuerySchema, PaginatedResponse, UserSchema } from "./common";
+import { PaginationQuerySchema, PaginatedResponse } from "./common";
+import { UserSchema } from "./User";
 
 // ------------------------------------------------------------------
 // Comment Type
