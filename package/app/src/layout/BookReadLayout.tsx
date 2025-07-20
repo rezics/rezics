@@ -39,7 +39,7 @@ export const BookReadLayout: React.FC<BookReadLayout> = ({ children }) => {
         queryKey: ["bookChapters", bookId],
         queryData: {
             params: {
-                bookId: bookId || "",
+                bookId: bookId || "1",
             },
         },
     });
@@ -82,7 +82,7 @@ export const BookReadLayout: React.FC<BookReadLayout> = ({ children }) => {
                         chaptersData={
                             data?.body ?? {
                                 chapters: [],
-                                chapterOrder: new Map<string, string[]>(),
+                                order: new Map<string, string[]>(),
                             }
                         }
                         selectedId={selectedId}
