@@ -1,6 +1,6 @@
 import { Box, Chip, Rating, Container as MuiContainer, Grid, Stack, Typography } from "@mui/material";
 
-import { Book } from "@/api/book";
+import { Book } from "contract";
 
 export namespace BookHero {
     export type Show = {
@@ -46,7 +46,7 @@ export namespace BookHero {
                                             <Typography>
                                                 作者：
                                                 <Box component="span" className="font-medium">
-                                                    {data?.author}
+                                                    {data?.author?.name}
                                                 </Box>
                                             </Typography>
                                             <Typography>出版社：{data?.publisher}</Typography>
@@ -56,7 +56,7 @@ export namespace BookHero {
 
                                         {/* Tags */}
                                         <Stack direction="row" spacing={1}>
-                                            {data?.tags.map((tag: string) => (
+                                            {data?.tags?.map((tag: string) => (
                                                 <Chip
                                                     key={tag}
                                                     label={tag}

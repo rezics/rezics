@@ -1,16 +1,11 @@
-import { graphql, HttpResponse } from "msw";
+import { http, HttpResponse } from "msw";
+import { homePageRouter } from "contract";
 
-export const homepageHandlers = [
-    // ANCHOR 🟢 Query: HomeDelayQuery
-    graphql.query("HomeDelayQuery", async ({ variables }) => {
-        await new Promise((resolve) => setTimeout(resolve, 10000));
-        await new Promise((resolve) => setTimeout(resolve, 10000));
+export const homePageHandlers = [
+    http.get(homePageRouter.get.path, () => {
         return HttpResponse.json({
-            data: {
-                book: {
-                    id: "1",
-                },
-            },
+            id: "1",
+            content: "Mock Home Page",
         });
     }),
 ];

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { TextField, IconButton, Chip } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import { parseSearchString, SearchInfo } from "@util/searchParser";
-//  ;
+import { useTranslation } from "react-i18next";
 
 export namespace BookSearch {
     export type Show = {
@@ -13,6 +13,7 @@ export namespace BookSearch {
     };
 
     export const Show: React.FC<Show> = ({ value, onValueChange, onSearch, onAddTag }) => {
+        const { t} = useTranslation()
         const searchTags = {
             presetTags: ["fiction", "nonfiction", "mystery", "romance", "history", "science", "fantasy", "philosophy"],
             statusTags: ["10万字", "20万字", "50万字", "100万字", "200万字", "连载中", "已完结"],
@@ -31,13 +32,13 @@ export namespace BookSearch {
                     <TextField
                         fullWidth
                         size="small"
-                        label={t("placeholders->search_books")}
+                        label={t("placeholders.search_books")}
                         placeholder='Try: "[tag] author:John"'
                         value={value}
                         onChange={(e) => onValueChange(e.target.value)}
                         onKeyDown={handleKeyDown}
                     />
-                    <IconButton color="primary" aria-label={t("accessibility->search")} onClick={onSearch}>
+                    <IconButton color="primary" aria-label={t("accessibility.search")} onClick={onSearch}>
                         <SearchIcon />
                     </IconButton>
                 </div>

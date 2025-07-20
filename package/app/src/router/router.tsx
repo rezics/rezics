@@ -30,6 +30,7 @@ import { ReviewByBookPage } from "@/page/Review/ReviewByBookPage";
 import { LongReviewEditPage } from "@/page/Review/ReviewEditPage";
 import { QuoteByBookPage } from "@/page/Review/QuoteByBookPage";
 import { TestPage02 } from "@/page/Test/TestPage02";
+import { TestPage03 } from "@/page/Test/TestPage03";
 
 /**
  * IMPORTANT – Flattened routing
@@ -151,7 +152,11 @@ export default (
                         <TestPage02 />
                     </MainLayout>
                 </Route>
-
+                <Route path="/test03">
+                    <MainLayout>
+                        <TestPage03 />
+                    </MainLayout>
+                </Route>
                 {/* ANCHOR Home */}
                 <Route path="/">
                     <MainLayout>

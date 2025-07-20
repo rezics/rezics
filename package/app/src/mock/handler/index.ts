@@ -1,21 +1,17 @@
 import { authHandlers } from "./auth";
 import { bookHandlers } from "./book";
-import { bookInfoHandlers } from "./bookinfo";
-import { bookListHandlers } from "./bookList";
-import { bookQuoteExcerptHandlers } from "./bookQuoteExcerpt";
-import { bookReviewsHandlers } from "./bookReviews";
-import { homepageHandlers } from "./homepage";
-import { chapterHandlers } from "./chapter";
+import { reviewHandlers } from "./review";
+import { readlistHandlers } from "./readlist";
+import { tagHandlers } from "./tag";
 import { postHandlers } from "./post";
+import { homePageHandlers } from "./homePage";
 
 export const handlers = [
     ...authHandlers,
     ...bookHandlers,
-    ...bookInfoHandlers,
-    ...bookListHandlers,
-    ...bookQuoteExcerptHandlers,
-    ...bookReviewsHandlers,
-    ...homepageHandlers,
-    ...chapterHandlers,
+    ...reviewHandlers,
+    ...readlistHandlers,
+    ...tagHandlers,
     ...postHandlers,
-];
+    ...homePageHandlers,
+]; 

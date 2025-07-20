@@ -3,15 +3,8 @@ import { SingleReview } from "./SingleReview";
 
 import React, { useEffect, useReducer } from "react";
 import { Box } from "@mui/material";
-import { gql, useQuery } from "urql";
 import FullScreenModal from "../Common/FullScreenModal";
 import TreeReplyComponents from "../Form/TreeReplyComponents";
-
-interface BookReviewsState {
-    reviews: any[];
-    isReplyModalOpen: boolean;
-    currentReplyId: string | null;
-}
 
 export namespace ReviewList {
     export type Show = {

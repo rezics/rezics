@@ -1,22 +1,32 @@
 import { ReadlistList } from "@/component/ReadList/ReadlistList";
-import { useQuery } from "urql";
-import { bookListsQuery, BookList } from "@/api/readlist";
 import React, { useState } from "react";
 import { AccentBarWithText } from "@/component/Common/AccentBar";
 import { useTranslation } from "react-i18next";
+import tsr from "@/api/tsr";
+import { ReadList } from "contract"
 
 export function ReadlistByBookPage() {
     const { t } = useTranslation();
-    const [booklists, setBooklists] = useState<BookList[]>([]);
-    const [result] = useQuery({
-        query: bookListsQuery,
+    const bookId = "0";
+    const [booklists, setBooklists] = useState<ReadList[]>([]);
+    const { data, isLoading, error } = tsr.readlists.listByBook.useQuery({
+        queryKey: ["readlist", bookId],
+        queryData: {
+            params: {
+                bookId: bookId,
+            },
+            query: {
+                page: 1,
+                limit: 10,
+            },
+        },
     });
 
     React.useEffect(() => {
-        if (result.data?.bookLists) {
-            setBooklists(result.data.bookLists);
+        if (data?.body?.items) {
+            setBooklists(data.body.items);
         }
-    }, [result.data]);
+    }, [data]);
     return (
         <div className="w-11/12 mx-auto mt-10">
             <AccentBarWithText.Show text={`${t("pages.book_collection_list_page")}`} />

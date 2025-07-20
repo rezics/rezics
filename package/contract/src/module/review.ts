@@ -30,23 +30,23 @@ const c = initContract();
 export const reviewRouter = c.router({
   listReviews: {
     method: 'GET',
-    path: '/books/:id/reviews',
+    path: '/books/:bookId/reviews',
     responses: { 200: z.array(BookReviewSchema) },
   },
   listShortReviews: {
     method: 'GET',
-    path: '/books/:id/short-reviews',
+    path: '/books/:bookId/short-reviews',
     responses: { 200: z.array(BookReviewSchema) },
   },
   createReview: {
     method: 'POST',
-    path: '/books/:id/reviews',
+    path: '/books/:bookId/reviews',
     body: BookReviewSchema.omit({ id: true, createdAt: true, user: true }),
     responses: { 201: BookReviewSchema },
   },
   listQuotes: {
     method: 'GET',
-    path: '/books/:id/quotes',
+    path: '/books/:bookId/quotes',
     responses: { 200: z.array(QuoteExcerptSchema) },
   },
 });

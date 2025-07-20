@@ -1,21 +1,14 @@
 import { useState, useCallback } from "react";
 import { Typography, CircularProgress, Alert } from "@mui/material";
-import { useQuery } from "urql";
+
 
 import { BookSearch } from "@/component/BookLib/BookSearch";
-import { CardBookList } from "@component/Book/CardBookList";
+// import { CardBookList } from "@component/Book/CardBookList";
 import { BookListView } from "@component/BookLib/BookListView";
 import { BookSearchFilter } from "@/component/BookLib/BookSearchFilter";
-import { SEARCH_BOOKS } from "@/api/bookSearch";
 import { SearchInfo } from "@util/searchParser";
-
-export interface Book {
-    id: string;
-    title: string;
-    author: string;
-    description: string;
-    cover: string;
-}
+import { Book } from "contract";
+import tsr from "@/api/tsr";
 
 function buildQuery(info: SearchInfo): string {
     let q = info.searchText.trim();
@@ -31,35 +24,39 @@ export const BookLib = () => {
         searchTags: [],
     });
 
-    const [result] = useQuery({
-        query: SEARCH_BOOKS,
-        variables: { query: buildQuery(currentQuery) },
-        pause: !currentQuery.searchText && currentQuery.searchTags.length === 0,
+    const { data, isLoading, error } = tsr.books.search.useQuery({
+        queryKey: ["books", currentQuery],
+        queryData: {
+            query: {
+                query: buildQuery(currentQuery),
+                page: 1,
+                limit: 10,
+            },
+        },
     });
 
-    const books: Book[] = result.data?.searchBooks ?? [];
-
+    const books: Book[] = data?.body.items ?? [];
     const getBookList = useCallback((info: SearchInfo) => {
         setCurrentQuery(info);
     }, []);
 
     return (
         <div className="mx-auto max-w-7xl p-4">
-            <BookSearch onSearch={getBookList} />
+            <BookSearch.Container onSearch={getBookList} />
 
-            {result.fetching && (
+            {isLoading && (
                 <div className="flex justify-center py-8">
                     <CircularProgress />
                 </div>
             )}
 
-            {result.error && (
+            {error && (
                 <Alert severity="error" className="my-4">
-                    {result.error.message}
+                    {String(error)}
                 </Alert>
             )}
 
-            {!result.fetching && books.length === 0 && (
+            {!isLoading && books.length === 0 && (
                 <Typography variant="body1" className="mt-4 text-center">
                     No books found.
                 </Typography>
@@ -71,7 +68,7 @@ export const BookLib = () => {
                 </div>
             )}
 
-            <BookListView books={books} />
+            <BookListView.Container books={books} />
             {/* <CardBookList books={books} /> */}
         </div>
     );

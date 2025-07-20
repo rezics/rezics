@@ -9,19 +9,19 @@ import "swiper/css/pagination";
 const products = [
     {
         title: "Book 1",
-        cover: "https://bookcover.yuewen.com/qdbimg/349573/1027669580/600.webp",
+        cover: "https://m.media-amazon.com/images/I/81wGzzxqHSL._SY466_.jpg",
     },
     {
         title: "Book 2",
-        cover: "https://bookcover.yuewen.com/qdbimg/349573/1027669580/600.webp",
+        cover: "https://m.media-amazon.com/images/I/81wGzzxqHSL._SY466_.jpg",
     },
     {
         title: "Book 3",
-        cover: "https://bookcover.yuewen.com/qdbimg/349573/1027669580/600.webp",
+        cover: "https://m.media-amazon.com/images/I/81wGzzxqHSL._SY466_.jpg",
     },
     {
         title: "Book 4",
-        cover: "https://bookcover.yuewen.com/qdbimg/349573/1027669580/600.webp",
+        cover: "https://m.media-amazon.com/images/I/81wGzzxqHSL._SY466_.jpg",
     },
 ];
 

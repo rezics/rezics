@@ -1,9 +1,8 @@
 // 暂时就先这样不处理，后面树化，或者使用VirtualList
 
 import React, { useRef, useCallback } from "react";
-import { useQuery } from "urql";
-import { GET_COMMENTS } from "@/api/readlist";
 import { Avatar } from "@mui/material";
+import { tsr } from "@/api/tsr";
 // import { scrollToElementWithOffsetUniversal } from "@/util/domUtils";
 
 interface ReplyComponentsProps {
@@ -11,13 +10,18 @@ interface ReplyComponentsProps {
 }
 
 export const ReplyComponents: React.FC<ReplyComponentsProps> = ({ bookListId }) => {
-    const [{ data }] = useQuery({
-        query: GET_COMMENTS,
-        variables: { bookListId },
+    const commentId = bookListId; // TODO 暫時先用這個替代
+    const { data, isLoading, error } = tsr.comments.list.useQuery({
+        queryKey: ["comments", commentId],
+        queryData: {
+            params: {
+                commentId: commentId || "",
+            },
+        },
     });
 
     const commentRefs = useRef<Record<string, HTMLDivElement | null>>({});
-    const allComments = data?.comments || [];
+    const allComments = data?.body.items || [];
 
     // 滚动到指定评论
     const scrollToComment = useCallback((commentId: string) => {

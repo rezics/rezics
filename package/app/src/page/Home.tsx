@@ -1,11 +1,11 @@
 import { BookCarousel } from "@component/Home/HomeCarousel";
-import { gql, useQuery } from "urql";
 import { useTranslation } from "react-i18next";
+import { tsr } from "@/api/tsr";
 
 export namespace Home {
     export type Show = {
         fetching: boolean;
-        error?: Error;
+        error?: string;
         data?: any;
     };
 
@@ -30,10 +30,10 @@ export namespace Home {
                 <div>
                     {fetching ? (
                         <div>Loading...</div>
-                    ) : error ? (
-                        <div>Error: {error.message}</div>
+                    ) : error !== "null" ? (
+                        <div>Error: {error}</div>
                     ) : (
-                        <div>{data?.book && <div key={data?.book.id}>{data?.book.id}</div>}</div>
+                        <div>{data?.body && <div key={data?.body.id}>{data?.body.content}</div>}</div>
                     )}
                 </div>
             </div>
@@ -43,16 +43,10 @@ export namespace Home {
     export type Container = {};
 
     export const Container: React.FC<Container> = () => {
-        const [{ data, fetching, error }] = useQuery({
-            query: gql`
-                query HomeDelayQuery {
-                    books {
-                        id
-                    }
-                }
-            `,
+        const { data, isLoading, error } = tsr.home.get.useQuery({
+            queryKey: ["home"],
         });
 
-        return <Show fetching={fetching} error={error} data={data} />;
+        return <Show fetching={isLoading} error={String(error)} data={data} />;
     };
 }

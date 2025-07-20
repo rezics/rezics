@@ -7,15 +7,13 @@ import { ChapterArborist } from "@/component/Book/ChapterArborist";
 
 import { useLayoutStore } from "@/global/layoutStore";
 import { TextField } from "@mui/material";
-
-type Chapter = {
-    id: string | number;
-    title: string;
-    children?: Chapter[];
-};
+import { Chapter, ChapterOrder } from "contract";
 
 interface BookEditorSidebarProps {
-    chaptersData: any;
+    chaptersData: {
+        chapters: Chapter[];
+        chapterOrder: ChapterOrder;
+    };
     selectedId: string;
     baseLink: string;
 }
@@ -24,7 +22,7 @@ interface BookEditorSidebarProps {
 export const BookEditorSidebar: React.FC<BookEditorSidebarProps> = ({ chaptersData, selectedId, baseLink }) => {
     const { sidebarHeightBelow } = useLayoutStore();
     const chapters: ChapterTreeNode[] = chaptersData?.chapters ?? [];
-    const orderMap: ChapterOrderType = new Map(Object.entries(chaptersData?.chapterOrders ?? {}));
+    const orderMap: ChapterOrderType = new Map(Object.entries(chaptersData?.chapterOrder ?? {}));
     const chapterTree = useMemo(
         () => buildTree({ nodes: chapters, orders: orderMap }) as unknown as Chapter[],
         [chaptersData],

@@ -1,53 +1,81 @@
-import { graphql, http, HttpResponse } from "msw";
-
-import { bookList01 } from "../data/bookList01";
-
+import { http, HttpResponse } from "msw";
 import { bookRouter } from "contract/module/book";
+import { bookList01 } from "../data/bookList01";
+import { bookInfo01 } from "../data/bookinfo01";
+import chapterList01 from "../data/chapterlist01.json";
+
+const books = [...bookList01];
 
 export const bookHandlers = [
-    http.get(bookRouter.list.path, () => {
+    // List books with pagination
+    http.get(bookRouter.list.path, ({ request }) => {
+        const url = new URL(request.url);
+        const page = Number(url.searchParams.get("page") ?? 1);
+        const limit = Number(url.searchParams.get("limit") ?? 20);
+        const start = (page - 1) * limit;
+        const items = books.slice(start, start + limit);
         return HttpResponse.json({
-            data: {
-                books: bookList01,
-            },
-        });
-    }),
-    
-    // ANCHOR 🟢 Query: GetBooks
-    graphql.query("GetBooksDocument", ({ variables }) => {
-        return HttpResponse.json({
-            data: {
-                books: [
-                    { id: "1", title: "Mock Book 1", author: "Author A" },
-                    { id: "2", title: "Mock Book 2", author: "Author B" },
-                ],
-            },
+            items,
+            page,
+            totalPages: 1,
+            total: books.length,
         });
     }),
 
-    // ANCHOR 🟢 Mutation: AddBook
-    graphql.mutation("AddBookDocument", async ({ variables }) => {
-        const { title, author } = variables;
-
+    // Search books
+    http.get(bookRouter.search.path, ({ request }) => {
+        const url = new URL(request.url);
+        const query = (url.searchParams.get("query") ?? "").toLowerCase();
+        const filtered = books.filter((b) => b.title.toLowerCase().includes(query));
         return HttpResponse.json({
-            data: {
-                addBook: {
-                    id: String(Math.floor(Math.random() * 10000)),
-                    title,
-                    author,
-                },
-            },
+            items: filtered,
+            page: 1,
+            totalPages: 1,
+            total: filtered.length,
         });
     }),
 
-    // ANCHOR 🟢 Query: SearchBooks
-    graphql.query("SearchBooks", ({ variables }) => {
-        console.log("SearchBooks", variables);
+    // Top books
+    http.get(bookRouter.top.path, () => HttpResponse.json(books.slice(0, 5)) ),
 
+    // Get book detail
+    http.get(bookRouter.get.path, ({ params }) => {
+        // const book = books.find((b) => b.id === (params as any)["id"]) ?? (bookInfo01 as any);
+        // if (!book) return HttpResponse.json({ message: "Not found" }, { status: 404 });
+        const book = bookInfo01;
+        return HttpResponse.json(book);
+    }),
+
+    // Update book
+    http.put(bookRouter.update.path, async ({ params, request }) => {
+        const index = books.findIndex((b) => b.id === (params as any)["id"]);
+        if (index === -1) return HttpResponse.json({ message: "Not found" }, { status: 404 });
+        const patch: any = await request.json();
+        books[index] = { ...(books[index] as any), ...(patch as any) };
+        return HttpResponse.json(books[index]);
+    }),
+
+    // Chapters list
+    http.get(bookRouter.chapters.list.path, () => {
+        let data: any = {chapters:[], order: []}
+        data.order = chapterList01.order
+        data.chapters = Object.values(chapterList01.chapters);
+        // console.log("chapters", data);
+        return HttpResponse.json(data);
+    }),
+
+    // Chapter content
+    http.get(bookRouter.chapters.content.path, ({ params }) => {
         return HttpResponse.json({
-            data: {
-                searchBooks: bookList01,
+            id: (params as any)["chapterId"],
+            content: "Mock chapter content",
+            createdAt: new Date().toISOString(),
+            chapterName: `章节 ${(params as any)["chapterId"]}`,
+            author: {
+                id: "1",
+                name: "Mock Author",
+                avatar: "https://api.dicebear.com/9.x/pixel-art/svg?seed=author",
             },
         });
     }),
-];
+]; 
