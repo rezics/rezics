@@ -54,41 +54,41 @@ const c = initContract();
 export const bookRouter = c.router({
     get: {
         method: "GET",
-        path: "/books/:bookId",
+        path: "/book/:bookId",
         responses: { 200: BookSchema, 404: z.object({ message: z.string() }) },
     },
     update: {
         method: "PUT",
-        path: "/books/:id",
+        path: "/book/:id",
         body: BookSchema.partial().omit({ id: true }),
         responses: { 200: BookSchema, 404: z.object({ message: z.string() }) },
     },
     list: {
         method: "GET",
-        path: "/books",
+        path: "/book",
         query: PaginationQuerySchema.extend({ q: z.string().optional() }),
         responses: { 200: PaginatedResponse(BookSchema) },
     },
     search: {
         method: "GET",
-        path: "/books/search",
+        path: "/book/search",
         query: z.object({ query: z.string() }).merge(PaginationQuerySchema.partial()),
         responses: { 200: PaginatedResponse(BookSchema) },
     },
     top: {
         method: "GET",
-        path: "/books/top",
+        path: "/book/top",
         responses: { 200: z.array(BookSchema) },
     },
-    chapters: c.router({
+    chapter: c.router({
         list: {
             method: "GET",
-            path: "/books/:bookId/chapters",
+            path: "/book/:bookId/chapters",
             responses: { 200: z.object({ chapters: z.array(ChapterSchema), order: ChapterOrderSchema }) },
         },
         content: {
             method: "GET",
-            path: "/books/:bookId/chapters/:chapterId",
+            path: "/book/:bookId/chapter/:chapterId",
             responses: { 200: ChapterContentSchema },
         },
     }),

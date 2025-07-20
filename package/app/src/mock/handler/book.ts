@@ -57,7 +57,7 @@ export const bookHandlers = [
     }),
 
     // Chapters list
-    http.get(bookRouter.chapters.list.path, () => {
+    http.get(bookRouter.chapter.list.path, () => {
         let data: any = {chapters:[], order: []}
         data.order = chapterList01.order
         data.chapters = Object.values(chapterList01.chapters);
@@ -66,7 +66,7 @@ export const bookHandlers = [
     }),
 
     // Chapter content
-    http.get(bookRouter.chapters.content.path, ({ params }) => {
+    http.get(bookRouter.chapter.content.path, ({ params }) => {
         return HttpResponse.json(chapterContent01);
         // return HttpResponse.json({
         //     id: (params as any)["chapterId"],

@@ -28,7 +28,7 @@ export const ChapterList: React.FC<ChapterListProps> = ({ id }) => {
     // TODO use Store to store the chapter expand state
     const ChapterListQueryKey = ["chapters", id];
 
-    const { data, isLoading, error } = tsr.books.chapters.list.useQuery({
+    const { data, isLoading, error } = tsr.book.chapter.list.useQuery({
         queryKey: ChapterListQueryKey,
         queryData: {
             params: {

@@ -172,7 +172,7 @@ export namespace BookPage {
         };
         const [activeTab, setActiveTab] = React.useState<Tab>(getInitialTab);
 
-        const { data, isLoading, error } = tsr.books.get.useQuery({
+        const { data, isLoading, error } = tsr.book.get.useQuery({
             queryKey: ["book", bookId],
             queryData: {
                 params: {
@@ -241,5 +241,3 @@ export namespace BookPage {
         return <Show data={data.body} activeTab={activeTab} onTabChange={handleTabChange} />;
     };
 }
-
-export const BookDetail = BookPage.Container;

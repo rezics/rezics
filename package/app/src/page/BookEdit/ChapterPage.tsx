@@ -9,7 +9,7 @@ import tsr from "@/api/tsr";
 export const BookEditChapterPage: React.FC = () => {
     const { t } = useTranslation();
     const { chapterId } = useParams();
-    const { data, isLoading, error } = tsr.books.chapters.content.useQuery({
+    const { data, isLoading, error } = tsr.book.chapter.content.useQuery({
         queryKey: ["bookChapter", chapterId],
         queryData: {
             params: {
