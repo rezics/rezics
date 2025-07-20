@@ -1,6 +1,7 @@
 import { http, HttpResponse } from "msw";
 import { readlistRouter } from "contract/module/readList";
 import { mockBookLists } from "../data/booklists";
+import { mockABookList01 } from "../data/abooklist01"
 
 export const readlistHandlers = [
     // List readlists
@@ -20,8 +21,9 @@ export const readlistHandlers = [
 
     // Get single readlist
     http.get(readlistRouter.get.path, ({ params }) => {
-        const list = mockBookLists.find((l) => String(l.id) === (params as any)["id"]);
-        if (!list) return HttpResponse.json({ message: "Not found" }, { status: 404 });
+        // const list = mockBookLists.find((l) => String(l.id) === (params as any)["id"]);
+        // if (!list) return HttpResponse.json({ message: "Not found" }, { status: 404 });
+        const list = mockABookList01;
         return HttpResponse.json(list);
     }),
 

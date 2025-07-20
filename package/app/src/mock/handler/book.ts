@@ -3,6 +3,7 @@ import { bookRouter } from "contract/module/book";
 import { bookList01 } from "../data/bookList01";
 import { bookInfo01 } from "../data/bookinfo01";
 import chapterList01 from "../data/chapterlist01.json";
+import { chapterContent01 } from "../data/chapterContent01";
 
 const books = [...bookList01];
 
@@ -66,16 +67,17 @@ export const bookHandlers = [
 
     // Chapter content
     http.get(bookRouter.chapters.content.path, ({ params }) => {
-        return HttpResponse.json({
-            id: (params as any)["chapterId"],
-            content: "Mock chapter content",
-            createdAt: new Date().toISOString(),
-            chapterName: `章节 ${(params as any)["chapterId"]}`,
-            author: {
-                id: "1",
-                name: "Mock Author",
-                avatar: "https://api.dicebear.com/9.x/pixel-art/svg?seed=author",
-            },
-        });
+        return HttpResponse.json(chapterContent01);
+        // return HttpResponse.json({
+        //     id: (params as any)["chapterId"],
+        //     content: "Mock chapter content",
+        //     createdAt: new Date().toISOString(),
+        //     chapterName: `章节 ${(params as any)["chapterId"]}`,
+        //     author: {
+        //         id: "1",
+        //         name: "Mock Author",
+        //         avatar: "https://api.dicebear.com/9.x/pixel-art/svg?seed=author",
+        //     },
+        // });
     }),
 ]; 

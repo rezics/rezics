@@ -9,28 +9,19 @@ import { ChatBubbleOutline, FavoriteBorder, Add, Comment } from "@mui/icons-mate
 import { useTranslation } from "react-i18next";
 import tsr from "@/api/tsr";
 
-export const BookListPage: React.FC = () => {
+export const ReadListPage: React.FC = () => {
     const { t } = useTranslation();
-    const { id } = useParams<{ id: string }>();
-    const { data, isLoading, error } = tsr.readlists.get.useQuery({
-        queryKey: ["readlist", id],
+    const { readlistId } = useParams<{ readlistId: string }>();
+    const { data, isLoading, error } = tsr.readlist.get.useQuery({
+        queryKey: ["readlist", readlistId],
         queryData: {
             params: {
-                readlistId: id || "",
+                readlistId: readlistId || "",
             },
         },
     });
 
     const commentRef = useRef<HTMLDivElement>(null);
-
-    if (isLoading) {
-        return <div className="text-center py-10">加载中...</div>;
-    }
-
-    const bookList = data?.body;
-    if (!bookList) {
-        return <div className="text-center py-10 text-red-500">未找到书单</div>;
-    }
 
     const handleGoToComments = () => {
         commentRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -39,6 +30,15 @@ export const BookListPage: React.FC = () => {
     const handleReply = () => {
         console.log("reply");
     };
+
+    if (isLoading) {
+        return <div className="text-center py-10">加载中...</div>;
+    }
+
+    const bookList = data?.body;
+    if (!bookList?.id) {
+        return <div className="text-center py-10 text-red-500">未找到书单</div>;
+    }
 
     return (
         <div className="w-full max-w-4xl mt-[60px] mx-auto" data-testid="booklist-page">
@@ -116,7 +116,7 @@ export const BookListPage: React.FC = () => {
                     </IconButton>
                 </div>
 
-                <TreeReplyComponents bookListId={id} />
+                <TreeReplyComponents bookListId={readlistId || ""} />
                 {/* 供评论区占位符 */}
                 <div className="mb-[200px]" />
             </div>
@@ -124,4 +124,4 @@ export const BookListPage: React.FC = () => {
     );
 };
 
-export default BookListPage;
+export default ReadListPage;

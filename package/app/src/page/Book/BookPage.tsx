@@ -202,6 +202,7 @@ export namespace BookPage {
         }, [location]);
 
         useEffect(() => {
+            // NOTE 這裏的邏輯還是有問題，雖然理論上只有回退的時候才會觸發滾動，但是我還是不確定會不會有bug
             const routeData = routeStore.getState().getRouteData(String(location));
             if (routeData?.scrollY) {
                 console.log("scrollY to", routeData.scrollY);
@@ -209,11 +210,11 @@ export namespace BookPage {
                     (scrollY = routeData.scrollY) => {
                         window.scrollTo(0, scrollY || 0);
                     },
-                    50,
-                    200,
+                    10,
+                    300,
                 );
             }
-            fadeOverlay(250);
+            fadeOverlay(300);
         }, [location]);
 
         if (isLoading) {

@@ -1,6 +1,6 @@
 // 暂时就先这样不处理，后面树化，或者使用VirtualList
 
-import React, { useState, useCallback, useMemo } from "react";
+import React, { useState, useCallback, useMemo, useEffect } from "react";
 import { Box, Avatar, Typography, Button, Collapse, IconButton } from "@mui/material";
 import { Add, Remove } from "@mui/icons-material";
 //  ;
@@ -108,8 +108,8 @@ interface ReplyComponentsProps {
 
 export const TreeReplyComponents: React.FC<ReplyComponentsProps> = ({ bookListId }) => {
     const commentId = bookListId; // TODO 暫時先用這個替代
-    const { data, isLoading, error } = tsr.comments.list.useQuery({
-        queryKey: ["comments",commentId],
+    const { data, isLoading, error } = tsr.comment.list.useQuery({
+        queryKey: ["comments", commentId],
         queryData: {
             params: {
                 commentId: commentId || "",
@@ -120,11 +120,19 @@ export const TreeReplyComponents: React.FC<ReplyComponentsProps> = ({ bookListId
     // currentReplyId
     const setDialogVisible = useDialogStore((state) => state.setDialogVisible);
     const [currentReplyId, setCurrentReplyId] = useState<string | null>(null);
+    const [topLevelComments, setTopLevelComments] = useState<Comment[]>([]);
 
-    if (isLoading) return <p>Loading...</p>;
-    if (error) return <p>Oh no... {String(error)}</p>;
-
-    const topLevelComments = data?.body.items || [];
+    useEffect(() => {
+        // setTopLevelComments(data?.body.items || []);
+        // TODO Now we don't use the pagination, so we need to use the data?.body directly
+        if (Array.isArray(data?.body)) {
+            setTopLevelComments(data.body);
+        } else if (Array.isArray(data?.body?.items)) {
+            setTopLevelComments(data.body.items);
+        } else {
+            setTopLevelComments([]); // fallback to empty
+        }
+    }, [data]);
 
     const handleSubmit = (currentReplyId: string, content: string) => {
         console.log("handleSubmit", currentReplyId, content);
@@ -135,12 +143,19 @@ export const TreeReplyComponents: React.FC<ReplyComponentsProps> = ({ bookListId
         setDialogVisible(`reply-${id}`, true);
     };
 
+    if (isLoading) return <p>Loading...</p>;
+    if (error) return <p>Oh no... {String(error)}</p>;
+
     return (
         <>
             <Box p={2}>
-                {topLevelComments.map((comment: Comment) => (
-                    <CommentNode key={comment.id} comment={comment} openDrawer={openDrawer} />
-                ))}
+                {topLevelComments.length > 0 ? (
+                    topLevelComments.map((comment: Comment) => (
+                        <CommentNode key={comment.id} comment={comment} openDrawer={openDrawer} />
+                    ))
+                ) : (
+                    <p>No comments</p>
+                )}
             </Box>
             {/* 渲染 */}
             {currentReplyId && (

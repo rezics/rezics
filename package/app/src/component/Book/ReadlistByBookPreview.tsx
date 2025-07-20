@@ -7,7 +7,7 @@ import { tsr } from "@/api/tsr";
 export function ReadlistByBookPreview({ title, bookId }: { title: string; bookId?: string }) {
     // TODO: 获取包含该书的书单数据
 
-    const { data, isLoading, error } = tsr.readlists.listByBook.useQuery({
+    const { data, isLoading, error } = tsr.readlist.listByBook.useQuery({
         queryKey: ["readlistByBook", bookId],
         queryData: {
             params: {
