@@ -18,7 +18,7 @@ import { BookEditChapterPage } from "@/page/BookEdit/ChapterPage";
 // Book list / Library pages
 import { BookLib } from "@/page/Book/BookLibPage";
 import { BookDetail } from "@/page/Book/BookPage";
-import { BookListPage } from "@/page/ReadList/ReadListPage";
+import { ReadListPage } from "@/page/ReadList/ReadListPage";
 
 // Misc
 import TestPage from "@/page/Test/TestPage";
@@ -122,7 +122,7 @@ export default (
                 <Route path="/readlist/:readlistId">
                     {() => (
                         <MainLayout>
-                            <BookListPage />
+                            <ReadListPage />
                         </MainLayout>
                     )}
                 </Route>

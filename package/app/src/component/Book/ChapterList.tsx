@@ -46,9 +46,9 @@ export const ChapterList: React.FC<ChapterListProps> = ({ id }) => {
     // use individual state to store the expanded nodes
     const chapterTree: any = useMemo(() => buildTree({ nodes: chapters, orders: orderMap }), [chapters, orderMap]);
 
-    useEffect(() => {
-        console.log("chapterTree", chapterTree, chapters, orderMap);
-    }, [chapterTree]);
+    // useEffect(() => {
+    //     console.log("chapterTree", chapterTree, chapters, orderMap);
+    // }, [chapterTree]);
 
     const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set());
 

@@ -31,9 +31,9 @@ export const contract = c.router({
   books: bookRouter,
   review: reviewRouter,
   tag: tagRouter,
-  posts: postRouter,
-  readlists: readlistRouter,
-  comments: commentRouter,
+  post: postRouter,
+  readlist: readlistRouter,
+  comment: commentRouter,
   home: homePageRouter,
 });
 

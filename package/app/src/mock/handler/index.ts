@@ -5,6 +5,7 @@ import { readlistHandlers } from "./readlist";
 import { tagHandlers } from "./tag";
 import { postHandlers } from "./post";
 import { homePageHandlers } from "./homePage";
+import { commentHandlers } from "./comment";
 
 export const handlers = [
     ...authHandlers,
@@ -14,4 +15,5 @@ export const handlers = [
     ...tagHandlers,
     ...postHandlers,
     ...homePageHandlers,
+    ...commentHandlers,
 ]; 

@@ -32,7 +32,7 @@ const commentListResponse = PaginatedResponse(CommentSchema);
 export const commentRouter = c.router({
     list: {
         method: "GET",
-        path: "/comments/:commentId",
+        path: "/comment/list/:commentId",
         query: PaginationQuerySchema,
         responses: { 200: commentListResponse },
     },

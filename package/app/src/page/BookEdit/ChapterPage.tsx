@@ -13,7 +13,7 @@ export const BookEditChapterPage: React.FC = () => {
         queryKey: ["bookChapter", chapterId],
         queryData: {
             params: {
-                bookId: "",
+                bookId: "1",
                 chapterId: chapterId || "",
             },
         },

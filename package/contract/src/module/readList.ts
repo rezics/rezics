@@ -21,18 +21,18 @@ const c = initContract();
 export const readlistRouter = c.router({
     get: {
       method: 'GET',
-      path: '/readlists/:readlistId',
+      path: '/readlist/:readlistId',
       responses: { 200: ReadListSchema },
     },
     create: {
       method: 'POST',
-      path: '/readlists',
+      path: '/readlist',
       body: ReadListSchema.omit({ id: true, creator: true, commentsNumber: true }),
       responses: { 201: ReadListSchema },
     },
     listByBook: {
       method: 'GET',
-      path: '/readlists/book/:bookId',
+      path: '/readlist/book/:bookId',
       query: PaginationQuerySchema,
       responses: { 200: PaginatedResponse(ReadListSchema) },
     },
