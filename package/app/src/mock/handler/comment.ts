@@ -1,5 +1,5 @@
 import { http, HttpResponse } from "msw";
-import { commentRouter } from "contract/module/comment";
+import { commentRouter } from "contract";
 import { mockCommentTree01 } from "../data/comment01";
 
 export const commentHandlers = [

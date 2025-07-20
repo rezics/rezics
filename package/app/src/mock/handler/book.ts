@@ -1,5 +1,5 @@
 import { http, HttpResponse } from "msw";
-import { bookRouter } from "contract/module/book";
+import { bookRouter } from "contract";
 import { bookList01 } from "../data/bookList01";
 import { bookInfo01 } from "../data/bookinfo01";
 import chapterList01 from "../data/chapterlist01.json";

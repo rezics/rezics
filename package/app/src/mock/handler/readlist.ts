@@ -1,5 +1,5 @@
 import { http, HttpResponse } from "msw";
-import { readlistRouter } from "contract/module/readList";
+import { readlistRouter } from "contract";
 import { mockBookLists } from "../data/booklists";
 import { mockABookList01 } from "../data/abooklist01"
 
