@@ -6,9 +6,13 @@ import { useParams } from "wouter";
 import { useTranslation } from "react-i18next";
 import tsr from "@/api/tsr";
 
-export const BookEditChapterPage: React.FC = () => {
+interface BookEditChapterPageProps {
+    // bookId: string;
+    chapterId: string;
+}
+
+export const BookEditChapterPage: React.FC<BookEditChapterPageProps> = ({  chapterId }) => {
     const { t } = useTranslation();
-    const { chapterId } = useParams();
     const { data, isLoading, error } = tsr.book.chapter.content.useQuery({
         queryKey: ["bookChapter", chapterId],
         queryData: {

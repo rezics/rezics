@@ -9,7 +9,7 @@ export function ReadlistByBookPage() {
     const { t } = useTranslation();
     const bookId = "0";
     const [booklists, setBooklists] = useState<ReadList[]>([]);
-    const { data, isLoading, error } = tsr.readlists.listByBook.useQuery({
+    const { data, isLoading, error } = tsr.readlist.listByBook.useQuery({
         queryKey: ["readlist", bookId],
         queryData: {
             params: {

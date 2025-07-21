@@ -3,7 +3,6 @@ import React, { useEffect, useRef, useState } from "react";
 
 interface DraggableResizerProps {
     targetId: string;
-    // sidebarWidth: number;
     setSidebarWidth: any;
     onDragging: any;
     minWidth?: number;
@@ -13,7 +12,6 @@ interface DraggableResizerProps {
 
 export const DraggableResizer: React.FC<DraggableResizerProps> = ({
     targetId,
-    // sidebarWidth,
     setSidebarWidth,
     onDragging,
     minWidth = 180,
@@ -37,7 +35,7 @@ export const DraggableResizer: React.FC<DraggableResizerProps> = ({
             setSidebarWidth(newW);
             console.log("throttled width ➡", newW);
         }, throttleInterval);
-        console.log("！throttledRef.current", throttledRef.current);
+        // console.log("throttledRef.current", throttledRef.current);
         return () => {
             // 卸载时取消任何待执行的调用
             throttledRef.current!.cancel();
@@ -47,6 +45,10 @@ export const DraggableResizer: React.FC<DraggableResizerProps> = ({
     useEffect(() => {
         const resizer = resizerRef.current;
         const target = document.getElementById(targetId);
+        if (!target) {
+            console.warn(`Draggable Resizer: Element with ID ${targetId} not found!`);
+            return;
+        }
         if (!resizer || !target) return;
 
         // 保证容器相对定位
@@ -90,16 +92,41 @@ export const DraggableResizer: React.FC<DraggableResizerProps> = ({
         };
     }, [targetId, minWidth, maxWidth, isDragging, setSidebarWidth]);
 
+    const [topValue, setTopValue] = useState(0);
+
+    useEffect(() => {
+        const updatePosition = () => {
+            if (resizerRef.current) {
+                const elementHeight = resizerRef.current.offsetHeight;
+                const windowHeight = window.innerHeight;
+                const calculatedTop = (windowHeight - elementHeight) / 2;
+                setTopValue(calculatedTop);
+            }
+        };
+
+        // Run on mount and window resize
+        updatePosition();
+        window.addEventListener("resize", updatePosition);
+
+        // Cleanup event listener on unmount
+        return () => {
+            window.removeEventListener("resize", updatePosition);
+        };
+    }, []);
+
     return (
         <div
             ref={resizerRef}
             className="
-        absolute right-[-10px] top-1/2 -translate-y-1/2 
-        h-8 w-1 hover:w-2 hover:h-10 
-        bg-gray-300 hover:bg-gray-400 
-        rounded-l transition-all duration-200 
-        cursor-col-resize z-10
-      "
+            absolute right-[-10px] -translate-y-1/2
+            h-8 w-1 hover:w-2 hover:h-10
+            bg-gray-300 hover:bg-gray-400
+            rounded-l transition-all duration-200
+            cursor-col-resize z-1000
+          "
+            style={{
+                top: `${topValue}px`,
+            }}
         />
     );
 };
