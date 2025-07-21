@@ -4,5 +4,8 @@
     "i18n-ally.enabledParsers": ["js", "ts", "json"],
     "i18n-ally.enabledFrameworks": ["react-i18next"],
     "i18n-ally.keystyle": "nested",
-    "gel.project-dir": "./package/server/database"
+    "gel.project-dir": "./package/server/database",
+    "files.exclude": {
+        "package/server/database/dbschema/migrations": true
+    }
 }
