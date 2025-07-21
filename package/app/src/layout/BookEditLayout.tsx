@@ -93,7 +93,7 @@ export const BookEditLayout: React.FC<BookEditLayoutProps> = ({ children }) => {
                         baseLink={baseUrl}
                         drawerWidth={drawerWidth}
                         isDraggable={true}
-                        enableDoubleClickRename={true}
+                        enableDoubleClickRename={false}
                     />
                 </Sidebar>
                 <DraggableResizer

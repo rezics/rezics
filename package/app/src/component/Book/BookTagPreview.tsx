@@ -90,7 +90,7 @@ export namespace BookTagEdit {
     export const Show: React.FC<Show> = ({ tagObjects, onUpdate }) => {
         return (
             <div>
-                <h1>{/* t("pages->book_tag_edit") */}</h1>
+                <h1>{/* t("pages.book_tag_edit") */}</h1>
                 {tagObjects.map((tagObject, index) => (
                     <div key={index}>
                         <h2>{tagObject.name}</h2>

@@ -55,6 +55,7 @@ export const BookEditorSidebar: React.FC<BookEditorSidebarProps> = ({ chaptersDa
                     onChange={(e) => setSearchTerm(e.target.value)}
                 />
                 {/* <TextField id="standard-basic" label="selectIDTerm" variant="standard" value={selectIDTerm} onChange={(e) => setselectIDTerm(e.target.value)} /> */}
+                {/* TODO 添加一個開關以支持拖拽，防止不小心拖拽 */}
             </div>
             <ChapterArborist
                 chapterTree={chapterTree}
