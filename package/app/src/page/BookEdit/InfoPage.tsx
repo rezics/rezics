@@ -44,7 +44,7 @@ export const BookEditMainPage: React.FC<BookEditMainPage> = ({ bookId }) => {
                     <AccentBarWithText.Show text="章節" />
                 </div>
                 <Paper>
-                    <div className="p-4 mt-2 mb-2">章節列表，可以編輯章節名稱，如果需要調換順序，請用側邊欄</div>
+                    <div className="p-4 mt-2 mb-2">章節的編輯請從側邊欄，右擊支持新增，頂部按鈕開啓后支持拖拽，重命名請點擊進入具體章節</div>
                 </Paper>
             </div>
         </div>
