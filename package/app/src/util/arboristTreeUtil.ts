@@ -45,31 +45,26 @@ const cloneNode = (node: TreeNode): TreeNode => {
 /**
  * 查找并移除指定 ID 的节点
  */
-export const findAndRemove = (
-    // 返回一个元组 [新树, 被移除的节点]
-    tree: ReadonlyArray<TreeNode>,
-    ids: ReadonlyArray<string | number>,
-): [TreeNode[], TreeNode[]] => {
-    const idsSet = new Set(ids.map(normalizeId));
-    const removedNodes: TreeNode[] = [];
-
-    const processNode = (node: TreeNode): Option.Option<TreeNode> => {
-        if (idsSet.has(normalizeId(node.id))) {
-            removedNodes.push(cloneNode(node));
-            return Option.none();
+/**
+ * 在一棵 id/children 结构的树中，移除 ids 里的节点
+ * @param tree    原始树
+ * @param ids     要移除的节点 id 列表
+ * @param removed 传入一个空数组，函数会把所有被删的节点 push 到这里
+ * @returns       新树 (不含被移除节点)
+ */
+export function findAndRemove(tree: TreeNode[], ids: (string | number)[], removed: TreeNode[]): any[] {
+    return tree.filter((node) => {
+        const currentNodeId = String(node.id);
+        if (ids.includes(currentNodeId)) {
+            removed.push(JSON.parse(JSON.stringify(node)));
+            return false;
         }
-
         if (node.children) {
-            const newChildren = Array.getSomes(node.children.map(processNode));
-            return Option.some({ ...node, children: newChildren });
+            node.children = findAndRemove(node.children, ids, removed);
         }
-
-        return Option.some(node);
-    };
-
-    const newTree = Array.getSomes([...tree].map(processNode));
-    return [newTree, removedNodes];
-};
+        return true;
+    });
+}
 
 /**
  * 查找并在指定位置插入节点

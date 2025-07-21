@@ -34,6 +34,7 @@ interface ChapterArboristProps {
     searchTerm: string;
     selectedId: string;
     baseLink: string;
+    width?: number;
 }
 
 // you can't use chaptersData = {} to give a default value, because it will cause the Maximum update Warning
@@ -45,6 +46,7 @@ export const ChapterArborist: React.FC<ChapterArboristProps> = ({
     searchTerm,
     selectedId,
     baseLink,
+    width,
 }) => {
     const treeRef: any = useRef(null);
 
@@ -65,14 +67,14 @@ export const ChapterArborist: React.FC<ChapterArboristProps> = ({
 
     // commit side-effect simulation
     useEffect(() => {
-        console.log("假装提交", treeData);
+        console.log("Tree Data Changed, Submit", treeData);
         submitTreeData(treeData);
     }, [treeData]);
 
     const onMove: MoveHandler<Chapter> = useCallback(({ dragIds, parentId, index }) => {
         setTreeData((currentTree) => {
             const removed: Chapter[] = [];
-            const treeWithoutDragged = findAndRemove(currentTree, dragIds, removed as any) as Chapter[];
+            const treeWithoutDragged = findAndRemove(currentTree, dragIds, removed) as Chapter[];
             return findAndInsert(treeWithoutDragged, parentId, index, removed) as Chapter[];
         });
     }, []);
@@ -110,7 +112,7 @@ export const ChapterArborist: React.FC<ChapterArboristProps> = ({
                 onMove={onMove}
                 onRename={onRename}
                 onDelete={onDelete}
-                // width="100%"
+                width={width ?? undefined}
                 height={tHeight}
                 // indent={24}
                 indent={0}
