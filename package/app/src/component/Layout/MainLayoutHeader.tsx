@@ -7,15 +7,17 @@ import { Menu, Brightness7, Brightness4 } from "@mui/icons-material";
 import { ThemeQuickToggle } from "@/component/Theme/ThemeCustomizer";
 import { useTranslation } from "react-i18next";
 import { LangToggle } from "./LangToggle";
+// import clsx from 'clsx';
 
 interface HeaderProps {
     handleDrawerToggle: () => void;
     mode: "light" | "dark";
     onThemeToggle: () => void;
     drawerWidth: number;
+    isDragging?: boolean;
 }
 
-export const Header: React.FC<HeaderProps> = ({ handleDrawerToggle, mode, onThemeToggle, drawerWidth }) => {
+export const Header: React.FC<HeaderProps> = ({ handleDrawerToggle, mode, onThemeToggle, drawerWidth, isDragging=false }) => {
     const { sidebarOpen } = useLayoutStore();
     const theme = useTheme();
     const { t } = useTranslation();
@@ -31,6 +33,7 @@ export const Header: React.FC<HeaderProps> = ({ handleDrawerToggle, mode, onThem
                     duration: theme.transitions.duration.enteringScreen,
                 }),
             }}
+            className={isDragging ? 'rounded-tl-2xl rounded-bl-2xl' : ''}
         >
             <Toolbar>
                 <IconButton

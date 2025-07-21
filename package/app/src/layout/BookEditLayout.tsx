@@ -12,6 +12,8 @@ import { useParams, useRoute } from "wouter";
 import { BookEditorSidebar } from "@/component/Layout/BookEditorSidebar";
 import tsr from "@/api/tsr";
 
+import { DraggableResizer } from "@/component/Layout/DraggableResizer";
+
 interface BookEditLayoutProps {
     children: ReactNode;
 }
@@ -57,6 +59,12 @@ export const BookEditLayout: React.FC<BookEditLayoutProps> = ({ children }) => {
         appStore.setState({ theme: mode === "light" ? "dark" : "light" });
     }
 
+    function setDrawerWidth(width: number) {
+        useLayoutStore.setState({ drawerWidth: width });
+    }
+
+    const [isDragging, setIsDragging] = useState(false);
+
     return (
         <div className="flex min-h-screen">
             <Header
@@ -64,25 +72,36 @@ export const BookEditLayout: React.FC<BookEditLayoutProps> = ({ children }) => {
                 mode={mode}
                 onThemeToggle={toggleTheme}
                 drawerWidth={drawerWidth}
+                isDragging={isDragging}
             />
-
-            <Sidebar
-                onClose={() => isMobile && closeSidebar()}
-                handleDrawerToggle={handleDrawerToggle}
-                NAVIGATION={NAVIGATION()}
-                noScrollBar={true}
-            >
-                <BookEditorSidebar
-                    chaptersData={
-                        data?.body ?? {
-                            chapters: [],
-                            order: new Map<string, string[]>(),
+            <div id="book-edit-sidebar">
+                <Sidebar
+                    onClose={() => isMobile && closeSidebar()}
+                    handleDrawerToggle={handleDrawerToggle}
+                    NAVIGATION={NAVIGATION()}
+                    noScrollBar={true}
+                    isDragging={isDragging}
+                >
+                    <BookEditorSidebar
+                        chaptersData={
+                            data?.body ?? {
+                                chapters: [],
+                                order: new Map<string, string[]>(),
+                            }
                         }
-                    }
-                    selectedId={selectedId}
-                    baseLink={baseUrl}
+                        selectedId={selectedId}
+                        baseLink={baseUrl}
+                        drawerWidth={drawerWidth}
+                        isDraggable={true}
+                        enableDoubleClickRename={true}
+                    />
+                </Sidebar>
+                <DraggableResizer
+                    targetId="book-edit-sidebar"
+                    setSidebarWidth={setDrawerWidth}
+                    onDragging={setIsDragging}
                 />
-            </Sidebar>
+            </div>
 
             <main
                 className="flex-grow pt-16 transition-all duration-300"

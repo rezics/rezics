@@ -28,6 +28,7 @@ interface SidebarProps {
     children?: ReactNode;
     onOverflowx?: boolean;
     onOverflowy?: boolean;
+    isDragging?: boolean;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -38,14 +39,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
     noScrollBar = false,
     onOverflowx = false,
     onOverflowy = false,
+    isDragging = false,
 }) => {
-    const {
-        sidebarOpen,
-        setSidebarHeightBelow,
-        toggleItem,
-        openItems,
-        drawerWidth,
-    } = useLayoutStore();
+    const { sidebarOpen, setSidebarHeightBelow, toggleItem, openItems, drawerWidth } = useLayoutStore();
 
     const theme = useTheme();
 
@@ -122,68 +118,70 @@ export const Sidebar: React.FC<SidebarProps> = ({
             id="ics-sidebar-wrapper"
             className="transition-all duration-300 ease-out"
         >
-            <div ref={refAbove}>
-                <DrawerHeader>
-                    <IconButton onClick={handleDrawerToggle}>
-                        {theme.direction === "ltr" ? <ChevronLeft /> : <ChevronRight />}
-                    </IconButton>
-                </DrawerHeader>
-                <Divider />
-                <List>
-                    {NAVIGATION.map((item, index) => {
-                        if (item.kind === "header") {
+            {!isDragging && (
+                <div ref={refAbove}>
+                    <DrawerHeader>
+                        <IconButton onClick={handleDrawerToggle}>
+                            {theme.direction === "ltr" ? <ChevronLeft /> : <ChevronRight />}
+                        </IconButton>
+                    </DrawerHeader>
+                    <Divider />
+                    <List>
+                        {NAVIGATION.map((item, index) => {
+                            if (item.kind === "header") {
+                                return (
+                                    <ListItem key={index}>
+                                        <Typography variant="caption">{item.title}</Typography>
+                                    </ListItem>
+                                );
+                            }
+
+                            if (item.kind === "divider") {
+                                return <Divider key={index} />;
+                            }
+
+                            const isActive = location === `/${item.segment}`;
+                            const hasChildren = !!item.children && item.children.length > 0;
+                            const isOpen = item.segment ? !!openItems[item.segment] : false;
+
                             return (
-                                <ListItem key={index}>
-                                    <Typography variant="caption">{item.title}</Typography>
-                                </ListItem>
+                                <div key={item.segment || index.toString()}>
+                                    <ListItemButton
+                                        selected={isActive && !hasChildren}
+                                        onClick={() => handleItemClick(item.segment, hasChildren)}
+                                    >
+                                        <ListItemIcon>{item.icon}</ListItemIcon>
+                                        <ListItemText primary={item.title} />
+                                        {hasChildren && <span>{isOpen ? <ExpandLess /> : <ExpandMore />}</span>}
+                                    </ListItemButton>
+
+                                    {hasChildren && item.segment && (
+                                        <Collapse in={isOpen} timeout="auto" unmountOnExit>
+                                            <List component="div" disablePadding>
+                                                {item.children?.map((child) => {
+                                                    const isChildActive = location === `/${child.segment}`;
+                                                    return (
+                                                        <ListItemButton
+                                                            key={child.segment}
+                                                            selected={isChildActive}
+                                                            onClick={() => handleItemClick(child.segment, false)}
+                                                            sx={{ pl: 4 }}
+                                                        >
+                                                            <ListItemIcon>{child.icon}</ListItemIcon>
+                                                            <ListItemText primary={child.title} />
+                                                        </ListItemButton>
+                                                    );
+                                                })}
+                                            </List>
+                                        </Collapse>
+                                    )}
+                                </div>
                             );
-                        }
-
-                        if (item.kind === "divider") {
-                            return <Divider key={index} />;
-                        }
-
-                        const isActive = location === `/${item.segment}`;
-                        const hasChildren = !!item.children && item.children.length > 0;
-                        const isOpen = item.segment ? !!openItems[item.segment] : false;
-
-                        return (
-                            <div key={item.segment || index.toString()}>
-                                <ListItemButton
-                                    selected={isActive && !hasChildren}
-                                    onClick={() => handleItemClick(item.segment, hasChildren)}
-                                >
-                                    <ListItemIcon>{item.icon}</ListItemIcon>
-                                    <ListItemText primary={item.title} />
-                                    {hasChildren && <span>{isOpen ? <ExpandLess /> : <ExpandMore />}</span>}
-                                </ListItemButton>
-
-                                {hasChildren && item.segment && (
-                                    <Collapse in={isOpen} timeout="auto" unmountOnExit>
-                                        <List component="div" disablePadding>
-                                            {item.children?.map((child) => {
-                                                const isChildActive = location === `/${child.segment}`;
-                                                return (
-                                                    <ListItemButton
-                                                        key={child.segment}
-                                                        selected={isChildActive}
-                                                        onClick={() => handleItemClick(child.segment, false)}
-                                                        sx={{ pl: 4 }}
-                                                    >
-                                                        <ListItemIcon>{child.icon}</ListItemIcon>
-                                                        <ListItemText primary={child.title} />
-                                                    </ListItemButton>
-                                                );
-                                            })}
-                                        </List>
-                                    </Collapse>
-                                )}
-                            </div>
-                        );
-                    })}
-                </List>
-            </div>
-            <div style={{ height: heightBelow }}>{children}</div>
+                        })}
+                    </List>
+                </div>
+            )}
+            {!isDragging && <div style={{ height: heightBelow }}>{children}</div>}
         </Drawer>
     );
 };

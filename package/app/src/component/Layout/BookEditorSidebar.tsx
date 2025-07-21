@@ -16,10 +16,13 @@ interface BookEditorSidebarProps {
     };
     selectedId: string;
     baseLink: string;
+    drawerWidth: number;
+    isDraggable?: boolean;
+    enableDoubleClickRename?: boolean;
 }
 
 // you can't use chaptersData = {} to give a default value, because it will cause the Maximum update Warning
-export const BookEditorSidebar: React.FC<BookEditorSidebarProps> = ({ chaptersData, selectedId, baseLink }) => {
+export const BookEditorSidebar: React.FC<BookEditorSidebarProps> = ({ chaptersData, selectedId, baseLink, drawerWidth, isDraggable=false, enableDoubleClickRename=false }) => {
     const { sidebarHeightBelow } = useLayoutStore();
     const chapters: ChapterTreeNode[] = chaptersData?.chapters ?? [];
     const orderMap: ChapterOrderType = new Map(Object.entries(chaptersData?.order ?? {}));
@@ -55,13 +58,14 @@ export const BookEditorSidebar: React.FC<BookEditorSidebarProps> = ({ chaptersDa
             </div>
             <ChapterArborist
                 chapterTree={chapterTree}
-                isDraggable={false}
-                enableDoubleClickRename={false}
                 tHeight={height}
                 searchTerm={searchTerm}
                 selectedId={String(selectedId)}
+                width={drawerWidth}
                 // selectedId={String(selectIDTerm)}
                 baseLink={baseLink}
+                isDraggable={isDraggable}
+                enableDoubleClickRename={enableDoubleClickRename}
             />
         </div>
     );
