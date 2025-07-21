@@ -58,9 +58,9 @@ export default (
 
                 {/* ANCHOR Book Edit (chapter first, then main) */}
                 <Route path="/book/:bookId/edit/:chapterId">
-                    {() => (
+                    {({ chapterId }) => (
                         <BookEditLayout>
-                            <BookEditChapterPage />
+                            <BookEditChapterPage chapterId={chapterId} />
                         </BookEditLayout>
                     )}
                 </Route>
@@ -153,9 +153,9 @@ export default (
                     </MainLayout>
                 </Route>
                 <Route path="/test03">
-                    <MainLayout>
+                    <BookEditLayout>
                         <TestPage03 />
-                    </MainLayout>
+                    </BookEditLayout>
                 </Route>
                 {/* ANCHOR Home */}
                 <Route path="/">

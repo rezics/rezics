@@ -43,9 +43,11 @@ export const BookEditMainPage: React.FC<BookEditMainPage> = ({ bookId }) => {
                 <div className="flex mb-4">
                     <AccentBarWithText.Show text="章節" />
                 </div>
-                <Paper>
-                    <div className="p-4 mt-2 mb-2">章節的編輯請從側邊欄，右擊支持新增，頂部按鈕開啓后支持拖拽，重命名請點擊進入具體章節</div>
-                </Paper>
+                <blockquote className="p-4 my-4 border-s-4 border-gray-300 bg-gray-50 dark:border-gray-500 dark:bg-gray-800">
+                    <p className="leading-relaxed text-gray-600 dark:text-white">
+                        章節的編輯請從側邊欄，右擊支持新增，頂部按鈕開啓后支持拖拽，重命名請點擊進入具體章節
+                    </p>
+                </blockquote>
             </div>
         </div>
     );

@@ -6,7 +6,7 @@ import { useMemo, useState, useEffect } from "react";
 import { ChapterArborist } from "@/component/Book/ChapterArborist";
 
 import { useLayoutStore } from "@/global/layoutStore";
-import { TextField } from "@mui/material";
+import { Button, Divider, Switch, TextField } from "@mui/material";
 import { Chapter, ChapterOrder } from "contract";
 
 interface BookEditorSidebarProps {
@@ -22,7 +22,14 @@ interface BookEditorSidebarProps {
 }
 
 // you can't use chaptersData = {} to give a default value, because it will cause the Maximum update Warning
-export const BookEditorSidebar: React.FC<BookEditorSidebarProps> = ({ chaptersData, selectedId, baseLink, drawerWidth, isDraggable=false, enableDoubleClickRename=false }) => {
+export const BookEditorSidebar: React.FC<BookEditorSidebarProps> = ({
+    chaptersData,
+    selectedId,
+    baseLink,
+    drawerWidth,
+    isDraggable = false,
+    enableDoubleClickRename = false,
+}) => {
     const { sidebarHeightBelow } = useLayoutStore();
     const chapters: ChapterTreeNode[] = chaptersData?.chapters ?? [];
     const orderMap: ChapterOrderType = new Map(Object.entries(chaptersData?.order ?? {}));
@@ -43,20 +50,53 @@ export const BookEditorSidebar: React.FC<BookEditorSidebarProps> = ({ chaptersDa
         console.log(selectedId);
     }, [sidebarHeightBelow]);
 
+    const [enableDrag, setEnableDrag] = useState(false);
+
+    const dragInsurance = useMemo(() => {
+        return enableDrag && isDraggable;
+    }, [enableDrag, isDraggable]);
+
+    function updataChapter() {
+        console.log("Updata Chapter");
+    }
+
     return (
         // <div className="overflow-auto no-scrollbar">
         <div>
-            <div className="w-11/12 mx-auto">
-                <TextField
-                    id="standard-basic"
-                    label="searchTerm"
-                    variant="standard"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                />
-                {/* <TextField id="standard-basic" label="selectIDTerm" variant="standard" value={selectIDTerm} onChange={(e) => setselectIDTerm(e.target.value)} /> */}
-                {/* TODO 添加一個開關以支持拖拽，防止不小心拖拽 */}
+            <div className="mx-auto">
+                <div className="space-y-4 mb-6 w-full pl-6 pr-6">
+                    <TextField
+                        id="standard-basic"
+                        label="Search Term"
+                        variant="standard"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        placeholder="Enter search term"
+                        className="w-full"
+                    />
+
+                    {/* Optional Select ID Field */}
+                    {/* <TextField
+                        id="select-id-term"
+                        label="Select ID"
+                        variant="standard"
+                        value={selectIDTerm}
+                        onChange={(e) => setSelectIDTerm(e.target.value)}
+                        placeholder="Select an ID"
+                    /> */}
+
+                    <div className="flex items-center space-x-4 mt-3 w-full justify-between">
+                        <label className="text-gray-700 font-bold">Enable Drag</label>
+                        <Switch checked={enableDrag} onChange={(e) => setEnableDrag(e.target.checked)} />
+                    </div>
+                    <div className="w-full">
+                        <Button variant="contained" color="primary" className="w-full" onClick={updataChapter}>
+                            Updata Chapter
+                        </Button>
+                    </div>
+                </div>
             </div>
+            <Divider />
             <ChapterArborist
                 chapterTree={chapterTree}
                 tHeight={height}
@@ -65,7 +105,7 @@ export const BookEditorSidebar: React.FC<BookEditorSidebarProps> = ({ chaptersDa
                 width={drawerWidth}
                 // selectedId={String(selectIDTerm)}
                 baseLink={baseLink}
-                isDraggable={isDraggable}
+                isDraggable={dragInsurance}
                 enableDoubleClickRename={enableDoubleClickRename}
             />
         </div>
