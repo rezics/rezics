@@ -1,3 +1,52 @@
 module default {
+    type Book {
+        cover: str;
+        released_at: datetime;
+        last_update: datetime;
 
+        required grabbed_from: str;
+        required title: str;
+        required description: str;
+        required length: bigint;
+
+        required link author: Author;
+        multi link units: Unit {
+            constraint exclusive;
+        }
+        multi link platforms: Platform;
+        multi link tags: Tag;
+
+        created_at: datetime  {
+            rewrite insert using (datetime_current());
+        }
+        updated_at: datetime  {
+            rewrite insert, update using (datetime_of_statement())
+        }
+    }
+
+    type Unit {
+        required order: int32;
+        required title: str;
+        multi link children: Unit {
+            constraint exclusive;
+        }
+        link parent := .<children[is Unit];
+        link book :=  .<units[is Book];
+    }
+
+    type Tag {
+        required name: str;
+        multi link books := .<tags[is Book];
+    }
+
+    type Platform {
+        required name: str;
+        required domain: str;
+        multi link books := .<platforms[is Book];
+    }
+
+    type Author {
+        required name: str;
+        multi link books := .<author[is Book];
+    }
 }
