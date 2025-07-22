@@ -26,6 +26,10 @@ module default {
         }
     }
 
+    abstract type Tagable {
+        multi link tags: Tag;
+    }
+
     abstract type Nameable {
         required name: medium_str;
 
@@ -37,7 +41,7 @@ module default {
         multi link down: Person;
     }
 
-    type Book extending Nameable, Volatile, Evaluable {
+    type Book extending Nameable, Volatile, Evaluable, Tagable {
         cover: str;
         released_at: datetime;
         real_updated_at: datetime;
@@ -51,12 +55,11 @@ module default {
             constraint exclusive;
         }
         multi link platforms: Platform;
-        multi link tags: Tag;
 
         index on ((.length, .released_at, .real_updated_at));
     }
 
-    type Unit extending Nameable, Evaluable {
+    type Unit extending Nameable, Evaluable, Tagable {
         required order: int32;
         multi link children: Unit {
             constraint exclusive;
@@ -71,20 +74,20 @@ module default {
         multi link books := .<tags[is Book];
     }
 
-    type Platform extending Nameable, Evaluable {
+    type Platform extending Nameable, Evaluable, Tagable {
         required domain: short_str;
         multi link books := .<platforms[is Book];
 
         index on (.domain);
     }
 
-    type Author extending Nameable, Evaluable {
+    type Author extending Nameable, Evaluable, Tagable {
         description: long_str;
         single link user: Person;
         multi link books := .<author[is Book];
     }
 
-    abstract type Person extending Nameable, Volatile, Evaluable;
+    abstract type Person extending Nameable, Volatile, Evaluable, Tagable;
 
     type UserProfile extending Person {
         required email: email;
@@ -104,7 +107,7 @@ module default {
         }
     }
     
-    type Message extending Volatile {
+    type Message extending Volatile, Tagable {
         required link sender: Person;
         required link receiver: Person;
         required content: long_str;
@@ -112,10 +115,9 @@ module default {
         multi link replies: Message;
     }
 
-    type Thread extending Nameable, Volatile, Evaluable {
+    type Thread extending Nameable, Volatile, Evaluable, Tagable {
         required link author: Person;
         required content: long_str;
-
 
         multi link related: Nameable;
         multi link replies: Thread;
