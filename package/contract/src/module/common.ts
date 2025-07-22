@@ -26,7 +26,7 @@ export const PaginatedResponse = <T extends z.ZodTypeAny>(item: T) =>
     });
 
 // ---------------- Primitives ----------------
-export const id = z.uuidv4().describe("ID")
+export const id = z.uuidv4().describe("ID");
 
 export const username = z
     .string()
@@ -64,3 +64,14 @@ export const content = {
 // ---------------- Timestamps ----------------
 export const created_at = z.string().describe("ISO created timestamp");
 export const updated_at = z.string().describe("ISO updated timestamp");
+
+// ---------------- Thread ----------------
+export const ThreadSchema = z.object({
+    id: id,
+    title: z.string(),
+    status: z.string().optional(),
+    createdAt: created_at,
+    updatedAt: updated_at,
+});
+
+export type Thread = z.infer<typeof ThreadSchema>;

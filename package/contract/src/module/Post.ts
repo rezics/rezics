@@ -1,24 +1,12 @@
 import { initContract } from "@ts-rest/core";
 import { z } from "zod";
-import { PaginationQuerySchema, PaginatedResponse, id as idSchema } from "./common";
+import { PaginationQuerySchema, PaginatedResponse, id as idSchema, ThreadSchema } from "./common";
 
 // ------------------------------------------------------------------
 // Post & Category Type
 // ------------------------------------------------------------------
-export const PostCategorySchema = z.object({
-    id: idSchema,
-    title: z.string(),
-});
-export type PostCategory = z.infer<typeof PostCategorySchema>;
-
-export const PostSchema = z.object({
-    id: idSchema,
-    title: z.string(),
-    status: z.string().optional(),
+export const PostSchema = ThreadSchema.extend({
     content: z.string(),
-    category: PostCategorySchema,
-    createdAt: z.string().optional(),
-    updatedAt: z.string().optional(),
 });
 export type Post = z.infer<typeof PostSchema>;
 
@@ -47,12 +35,7 @@ export const postRouter = c.router({
         path: "/posts/:id",
         body: PostSchema.partial().omit({ id: true, createdAt: true, updatedAt: true }),
         responses: { 200: PostSchema },
-    },
-    categories: {
-        method: "GET",
-        path: "/categories",
-        responses: { 200: z.array(PostCategorySchema) },
-    },
+    }
 });
 
 export type PostRouter = typeof postRouter;

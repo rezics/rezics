@@ -1,7 +1,7 @@
 import { initContract } from "@ts-rest/core";
 import { z } from "zod";
 import { UserPreviewSchema } from "./User";
-import { id as idSchema } from "./common";
+import { id as idSchema, created_at } from "./common";
 
 // ------------------------------------------------------------------
 // Award Type & Schema
@@ -13,7 +13,7 @@ export const AwardSchema = z.object({
     // type: z.enum(["award1", "award2", "award3"]),
     type: z.string(), // 为了拓展性
     user: UserPreviewSchema,
-    createdAt: z.string(),
+    createdAt: created_at,
 });
 export type Award = z.infer<typeof AwardSchema>;
 
