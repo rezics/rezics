@@ -5,7 +5,7 @@ import ThumbDownIcon from "@mui/icons-material/ThumbDown";
 import SentimentSatisfiedAltIcon from "@mui/icons-material/SentimentSatisfiedAlt";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
-import { BookReview } from "@/api/bookReviews";
+import { BookReview } from "contract";
 // import { CollapsibleText } from "../Common/CollapsibleText";
 import { CollapsibleByLineText } from "../Common/CollapsibleByLineText";
 

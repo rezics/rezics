@@ -13,8 +13,8 @@ export namespace QuoteExcerptList {
                 {/* Quotes */}
                 <Box>
                     <Stack spacing={2}>
-                        {(data || []).map((quote: QuoteExcerpt) => (
-                            <SingleQuoteExcerpt.Show key={quote.id} author={quote.author} content={quote.content} stats={{replies: 0, likes: 0, date: quote.createdAt}} source={'quote.source'} originalLink={'quote.originalLink'} />
+                        {(Array.isArray(data) ? data : []).map((quote: QuoteExcerpt) => (
+                            <SingleQuoteExcerpt.Show key={quote.id} author={{name: quote.author.name, avatar: quote.author.avatar || ''}} content={quote.content} stats={{replies: 0, likes: 0, date: quote.createdAt}} source={'quote.source'} originalLink={'quote.originalLink'} />
                         ))}
                     </Stack>
                 </Box>

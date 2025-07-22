@@ -55,27 +55,27 @@ export namespace BookPage {
 
                                         {/* ANCHOR Tags */}
                                         {/* <BookTagView.Container tagObjects={data?.book.tags || []} /> */}
-                                        <BookTagView.Container />
+                                        <BookTagView.Container bookId={data?.id || "1"} />
                                         <Divider />
 
                                         {/* ANCHOR 最新章节 */}
 
                                         {/* ANCHOR Quote Excerpt Preview */}
-                                        <Link href={`/quote/book/${data?.id}`} className="flex mb-4">
-                                            <ArrowForwardIcon.Container size={16}>
+                                        <div>
+                                            <ArrowForwardIcon.Container size={16} to={`/quote/book/${data?.id}`}>
                                                 <AccentBarWithText.Container text="原文摘录" />
                                             </ArrowForwardIcon.Container>
-                                        </Link>
+                                        </div>
                                         <QuoteExcerptPreview.Container id={data?.id || ""} />
                                         <Divider />
 
                                         {/* ANCHOR Short Reviews */}
                                         <Box>
-                                            <Link href={`/review/short/book/${data?.id}`} className="flex mb-4">
-                                                <ArrowForwardIcon.Container size={16}>
+                                            <div>
+                                                <ArrowForwardIcon.Container size={16} to={`/review/short/book/${data?.id}`}>
                                                     <AccentBarWithText.Container text="短评" />
                                                 </ArrowForwardIcon.Container>
-                                            </Link>
+                                            </div>
                                             <ShortBookReviews bookId={data?.id || ""} />
                                         </Box>
                                     </Stack>

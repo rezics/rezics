@@ -5,9 +5,10 @@ import { z } from "zod";
 // Tag Type
 // ------------------------------------------------------------------
 export const TagGroupSchema = z.object({
-    key: z.string(),
-    name: z.string(),
-    tags: z.array(z.string()),
+    id: z.string(),
+    key: z.string().optional(), // key作为英文键
+    name: z.string(), // 怎样让 name 实现国际化？
+    tags: z.array(z.string()), // 标签本身也要注重国际化实现
 });
 export type TagGroup = z.infer<typeof TagGroupSchema>;
 
@@ -21,7 +22,7 @@ export const tagRouter = c.router({
     },
     get: {
         method: "GET",
-        path: "/tags/:key",
+        path: "/tags/:tagId",
         responses: { 200: TagGroupSchema },
     },
 });

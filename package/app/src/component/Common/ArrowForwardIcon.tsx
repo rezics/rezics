@@ -1,15 +1,26 @@
 import React from "react";
 import { Box, styled, Typography } from "@mui/material";
-import { ArrowForwardIos } from "@mui/icons-material";
+import ArrowForwardIosRoundedIcon from "@mui/icons-material/ArrowForwardIosRounded";
+import { Link } from "wouter";
 
 const LinkWithIcon = styled(Box)(({ theme }) => ({
-    display: "inline-flex", // 行内 flex，配合文字更自然
-    alignItems: "center", // 垂直居中
+    display: "inline-flex",
+    alignItems: "center",
     cursor: "pointer",
     color: theme.palette.text.primary,
-    // 仅在 hover 时给类名为 `.arrow-icon` 的子元素染色
+    transition: "color var(--default-transition-duration) var(--ease-out)",
+    "& .arrow-icon": {
+        fontWeight: 900,
+        marginLeft: "0.125rem",
+        lineHeight: "1",
+        fontSize: "24px !important", // 让 size 从 props 控制
+        color: "var(--color-on-base)",
+        transition:
+            "color var(--default-transition-duration) var(--ease-out), transform var(--default-transition-duration) var(--ease-out)",
+    },
     "&:hover .arrow-icon": {
         color: theme.palette.primary.main,
+        transform: "scale(1.1)",
     },
 }));
 
@@ -18,16 +29,19 @@ export namespace ArrowForwardIcon {
         size?: number;
         color?: string;
         children?: React.ReactNode;
+        to?: string;
     };
 
-    export const Show: React.FC<Show> = ({ size = 24, children }) => {
+    export const Show: React.FC<Show> = ({ children, to }) => {
         return (
-            <LinkWithIcon>
-                {/* 文本部分，用 Typography 能保证行高一致 */}
-                <Typography component="span">{children}</Typography>
-                {/* 图标部分，初始继承父级 text color */}
-                <ArrowForwardIos className="arrow-icon font-bold" sx={{ fontSize: size, ml: 0.5 }} />
-            </LinkWithIcon>
+            <Link to={to || "/"}>
+                <LinkWithIcon>
+                    {/* 文本部分，用 Typography 能保证行高一致 */}
+                    <Typography component="span">{children}</Typography>
+                    {/* 图标部分，初始继承父级 text color */}
+                    <ArrowForwardIosRoundedIcon className="arrow-icon transform" />
+                </LinkWithIcon>
+            </Link>
         );
     };
 
