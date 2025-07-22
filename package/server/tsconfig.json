@@ -2,8 +2,8 @@
     "include": ["src/**/*"],
     "compilerOptions": {
         "target": "esnext",
-        "module": "nodenext",
-        "moduleResolution": "nodenext",
+        "module": "esnext",
+        "moduleResolution": "bundler",
         "lib": ["ESNext"]
     },
     "extends": "../../tsconfig.json"

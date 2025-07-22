@@ -4,6 +4,7 @@
     "description": "",
     "main": "index.js",
     "scripts": {
+        "generate": "cd database && pnpx @gel/generate edgeql-js --target ts --output-dir ./ts",
         "ts": "node --import @swc-node/register/esm-register"
     },
     "keywords": [],
@@ -11,5 +12,8 @@
     "license": "ISC",
     "packageManager": "pnpm@10.8.1",
     "type": "module",
-    "dependencies": {}
+    "dependencies": {
+        "contract": "workspace:^",
+        "gel": "^2.1.1"
+    }
 }

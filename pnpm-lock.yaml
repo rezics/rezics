@@ -11,9 +11,6 @@ importers:
       effect:
         specifier: ^3.16.12
         version: 3.16.12
-      gel:
-        specifier: ^2.1.1
-        version: 2.1.1
       zod:
         specifier: ^4.0.5
         version: 4.0.5
@@ -277,7 +274,14 @@ importers:
         specifier: ^5.8.3
         version: 5.8.3
 
-  package/server: {}
+  package/server:
+    dependencies:
+      contract:
+        specifier: workspace:^
+        version: link:../contract
+      gel:
+        specifier: ^2.1.1
+        version: 2.1.1
 
 packages:
 
