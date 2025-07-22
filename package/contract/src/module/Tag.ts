@@ -1,6 +1,6 @@
 import { initContract } from "@ts-rest/core";
-import zod, { z } from "zod";
-import { id as idSchema, InternationalizedNameSchema, PaginationQuerySchema } from "./common";
+import { z } from "zod";
+import { id as idSchema, InternationalizedNameSchema, PaginationQuerySchema, ThreadSchema, created_at, updated_at } from "./common";
 import { BookSchema } from "./Book";
 import { UserSchema } from "./User";
 import { PostSchema } from "./Post";
@@ -15,8 +15,8 @@ export const TagSchema = z.object({
     key: z.string(),
     name: InternationalizedNameSchema,
     color: z.string(),
-    createdAt: z.date(),
-    updatedAt: z.date(),
+    createdAt: created_at,
+    updatedAt: updated_at,
 });
 export type Tag = z.infer<typeof TagSchema>;
 
@@ -27,8 +27,8 @@ export const TagGroupSchema = z.object({
     name: InternationalizedNameSchema,
     maintainer: idSchema, // Organization ID 实际上应该改成权限组
     tags: z.array(TagSchema),
-    createdAt: z.date(),
-    updatedAt: z.date(),
+    createdAt: created_at,
+    updatedAt: updated_at,
 });
 export type TagGroup = z.infer<typeof TagGroupSchema>;
 
@@ -38,8 +38,8 @@ export const TagBookLinkSchema = z.object({
     id: idSchema,
     tag: TagSchema,
     book: BookSchema,
-    createdAt: z.date(),
-    updatedAt: z.date(),
+    createdAt: created_at,
+    updatedAt: updated_at,
     createdBy: UserSchema,
 });
 export type TagBookLink = z.infer<typeof TagBookLinkSchema>;
@@ -47,9 +47,9 @@ export type TagBookLink = z.infer<typeof TagBookLinkSchema>;
 export const TagThreadLinkSchema = z.object({
     id: idSchema,
     tag: TagSchema,
-    thread: PostSchema, // 可能改为 Thread
-    createdAt: z.date(),
-    updatedAt: z.date(),
+    thread: ThreadSchema,
+    createdAt: created_at,
+    updatedAt: updated_at,
     createdBy: UserSchema,
 });
 export type TagThreadLink = z.infer<typeof TagThreadLinkSchema>;
@@ -58,8 +58,8 @@ export type TagThreadLink = z.infer<typeof TagThreadLinkSchema>;
 export const TagAuditingSchema = z.object({
     id: idSchema,
     tag: TagSchema,
-    createdAt: z.date(),
-    updatedAt: z.date(),
+    createdAt: created_at,
+    updatedAt: updated_at,
     createdBy: UserSchema,
     maintainer: idSchema, // Organization ID
 });
@@ -155,15 +155,17 @@ export const tagRouter = c.router({
         body: TagThreadLinkSchema.omit({ id: true, createdAt: true, updatedAt: true }),
         responses: { 200: TagThreadLinkSchema },
     },
-    listTagRelatedBook: {
+    TagRelatedBookList: {
         method: "GET",
-        path: "/tag/:tagId/book",
+        path: "/tag/:tagId/book/list",
+        query: PaginationQuerySchema,
         responses: { 200: z.array(BookSchema) },
     },
-    listTagRelatedThread: {
+    TagRelatedThreadList: {
         method: "GET",
-        path: "/tag/:tagId/thread",
-        responses: { 200: z.array(PostSchema) },
+        path: "/tag/:tagId/thread/list",
+        query: PaginationQuerySchema,
+        responses: { 200: z.array(ThreadSchema) },
     },
     // Book
     bookRelatedTag: {

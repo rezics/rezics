@@ -1,6 +1,6 @@
 import { initContract } from "@ts-rest/core";
 import { z } from "zod";
-import { PaginationQuerySchema, PaginatedResponse, id as idSchema} from "./common";
+import { PaginationQuerySchema, PaginatedResponse, id as idSchema, created_at } from "./common";
 import { UserSchema } from "./User";
 import { TagSchema } from "./Tag";
 
@@ -44,7 +44,7 @@ export type ChapterOrder = z.infer<typeof ChapterOrderSchema>;
 export const ChapterContentSchema = z.object({
     id: idSchema,
     content: z.string(),
-    createdAt: z.string(),
+    createdAt: created_at,
     chapterName: z.string(),
     author: UserSchema,
 });
@@ -67,7 +67,7 @@ export const bookRouter = c.router({
     },
     list: {
         method: "GET",
-        path: "/book",
+        path: "/book/list",
         query: PaginationQuerySchema.extend({ q: z.string().optional() }),
         responses: { 200: PaginatedResponse(BookSchema) },
     },

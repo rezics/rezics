@@ -1,6 +1,6 @@
 import { initContract } from "@ts-rest/core";
 import { z } from "zod";
-import { PaginationQuerySchema, PaginatedResponse, id as idSchema } from "./common";
+import { PaginationQuerySchema, PaginatedResponse, id as idSchema, created_at } from "./common";
 import { UserSchema } from "./User";
 
 // ------------------------------------------------------------------
@@ -19,7 +19,7 @@ export const CommentSchema: z.ZodSchema<Comment> = z.lazy(() =>
     z.object({
         id: idSchema,
         content: z.string(),
-        createdAt: z.string(),
+        createdAt: created_at,
         author: UserSchema,
         likes: z.number(),
         replies: z.array(CommentSchema),
