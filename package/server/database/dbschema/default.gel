@@ -2,12 +2,15 @@ module default {
     scalar type short_str extending str {
         constraint max_len_value(100);
     }
+
     scalar type medium_str extending str {
         constraint max_len_value(1000);
     }
+
     scalar type long_str extending str {
         constraint max_len_value(10000);
     }
+
     scalar type email extending str {
         constraint min_len_value(4);
         constraint max_len_value(1000);
@@ -23,13 +26,18 @@ module default {
         }
     }
 
-    type Book extending Logger {
+    abstract type Entity {
+        required name: medium_str;
+
+        index on (.name);
+    }
+
+    type Book extending Entity, Logger {
         cover: str;
         released_at: datetime;
-        last_update: datetime;
+        real_updated_at: datetime;
 
         required grabbed_from: str;
-        required title: medium_str;
         required description: long_str;
         required length: bigint;
 
@@ -39,47 +47,52 @@ module default {
         }
         multi link platforms: Platform;
         multi link tags: Tag;
+
+        index on ((.length, .released_at, .real_updated_at));
     }
 
-    type Unit {
+    type Unit extending Entity {
         required order: int32;
-        required title: medium_str;
         multi link children: Unit {
             constraint exclusive;
         }
         link parent := .<children[is Unit];
         link book :=  .<units[is Book];
+
+        index on (.order);
     }
 
-    type Tag {
-        required name: short_str;
+    type Tag extending Entity {
         multi link books := .<tags[is Book];
     }
 
-    type Platform {
-        required name: medium_str;
+    type Platform extending Entity {
         required domain: medium_str;
         multi link books := .<platforms[is Book];
+
+        index on (.name);
+        index on (.domain);
     }
 
-    type Author {
-        required name: short_str;
+    type Author extending Entity {
         required description: medium_str;
-        single link user: UserEntity;
+        single link user: Entity;
         multi link books := .<author[is Book];
+
+        index on (.name);
     }
 
-    abstract type UserEntity {
-        required name: short_str;
-    }
+    abstract type Person extending Entity;
 
-    type UserProfile extending UserEntity, Logger {
+    type UserProfile extending Person, Logger {
         required email: email;
         description: long_str;
         multi link friends: UserProfile;
+
+        index on (.email);
     }
 
-    type UserGroup extending UserEntity, Logger {
+    type UserGroup extending Person, Logger {
         multi link members: UserProfile {
             power: int32 {
                 default := 99;
@@ -90,16 +103,20 @@ module default {
     }
     
     type Message extending Logger {
-        required link sender: UserEntity;
-        required link receiver: UserEntity;
+        required link sender: Person;
+        required link receiver: Person;
         required content: long_str;
+
+        multi link replies: Message;
     }
 
-    type Thread extending Logger {
-        required link author: UserEntity;
+    type Thread extending Entity, Logger {
+        required link author: Person;
         required content: long_str;
+        multi link up: Person;
+        multi link down: Person;
 
-        multi link related: Tag | Book;
+        multi link related: Entity;
         multi link replies: Thread;
     }
 }
