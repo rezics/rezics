@@ -57,7 +57,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
     const [location, setLocation] = useLocation();
     const isMobile = useMediaQuery((theme) => theme.breakpoints.down("md"));
 
-    const handleItemClick = (segment: string | undefined, hasChildren: boolean) => {
+    const handleItemClick = (event: any, segment: string | undefined, hasChildren: boolean) => {
+        console.log("handleItemClick", event);
         if (!segment) return;
         if (hasChildren) {
             toggleItem(segment);
@@ -148,7 +149,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
                                 <div key={item.segment || index.toString()}>
                                     <ListItemButton
                                         selected={isActive && !hasChildren}
-                                        onClick={() => handleItemClick(item.segment, hasChildren)}
+                                        onClick={(event) => handleItemClick(event, item.segment, hasChildren)}
+                                        onAuxClick={(event) => handleItemClick(event, item.segment, hasChildren)}
                                     >
                                         <ListItemIcon>{item.icon}</ListItemIcon>
                                         <ListItemText primary={item.title} />
@@ -158,13 +160,18 @@ export const Sidebar: React.FC<SidebarProps> = ({
                                     {hasChildren && item.segment && (
                                         <Collapse in={isOpen} timeout="auto" unmountOnExit>
                                             <List component="div" disablePadding>
-                                                {item.children?.map((child) => {
+                                                {item.children?.map((child: any) => {
                                                     const isChildActive = location === `/${child.segment}`;
                                                     return (
                                                         <ListItemButton
                                                             key={child.segment}
                                                             selected={isChildActive}
-                                                            onClick={() => handleItemClick(child.segment, false)}
+                                                            onClick={(event) =>
+                                                                handleItemClick(event, child.segment, false)
+                                                            }
+                                                            onAuxClick={(event) =>
+                                                                handleItemClick(event, child.segment, false)
+                                                            }
                                                             sx={{ pl: 4 }}
                                                         >
                                                             <ListItemIcon>{child.icon}</ListItemIcon>

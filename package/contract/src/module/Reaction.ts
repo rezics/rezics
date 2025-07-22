@@ -1,14 +1,15 @@
 import { initContract } from "@ts-rest/core";
 import { z } from "zod";
 import { UserSchema } from "./User";
+import { id as idSchema } from "./common";
 
 // ------------------------------------------------------------------
 // Reaction Type & Schema
 // ------------------------------------------------------------------
 export const ReactionSchema = z.object({
-    id: z.string(),
+    id: idSchema,
     objectType: z.string(), // e.g. "Comment", "Post", ...
-    objectId: z.string(), // UUID
+    objectId: idSchema,
     type: z.enum(["like", "dislike", "funny"]),
     user: UserSchema,
     createdAt: z.string(),
@@ -40,7 +41,7 @@ export const reactionRouter = c.router({
         method: "POST",
         path: "/objects/:objectType/:objectId/reaction",
         body: ReactionSchema.omit({ id: true, createdAt: true, user: true }).extend({
-            userId: z.string(), // pass current user id
+            userId: idSchema, // pass current user id
         }),
         responses: { 201: ReactionSchema },
     },

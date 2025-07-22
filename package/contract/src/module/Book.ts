@@ -1,6 +1,6 @@
 import { initContract } from "@ts-rest/core";
 import { z } from "zod";
-import { PaginationQuerySchema, PaginatedResponse } from "./common";
+import { PaginationQuerySchema, PaginatedResponse, id as idSchema} from "./common";
 import { UserSchema } from "./User";
 
 // ------------------------------------------------------------------
@@ -8,7 +8,7 @@ import { UserSchema } from "./User";
 // ------------------------------------------------------------------
 
 export const AuthorSchema = z.object({
-    id: z.string(),
+    id: idSchema,
     name: z.string(),
     avatar: z.url().optional(),
     description: z.string().optional(),
@@ -16,7 +16,7 @@ export const AuthorSchema = z.object({
 export type Author = z.infer<typeof AuthorSchema>;
 
 export const BookSchema = z.object({
-    id: z.string(),
+    id: idSchema,
     title: z.string(),
     cover: z.url().optional(),
     author: AuthorSchema,
@@ -30,7 +30,7 @@ export const BookSchema = z.object({
 export type Book = z.infer<typeof BookSchema>;
 
 export const ChapterSchema = z.object({
-    id: z.string(),
+    id: idSchema,
     title: z.string(),
     noContent: z.boolean().optional(),
 });
@@ -40,7 +40,7 @@ export const ChapterOrderSchema = z.map(z.string(), z.array(z.string()));
 export type ChapterOrder = z.infer<typeof ChapterOrderSchema>;
 
 export const ChapterContentSchema = z.object({
-    id: z.string(),
+    id: idSchema,
     content: z.string(),
     createdAt: z.string(),
     chapterName: z.string(),

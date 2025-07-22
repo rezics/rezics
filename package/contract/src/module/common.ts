@@ -19,7 +19,7 @@ export const PaginatedResponse = <T extends z.ZodTypeAny>(item: T) =>
     });
 
 // ---------------- Primitives ----------------
-export const id = z.string().uuid().describe("UUIDv4 ID");
+export const id = z.uuidv4().describe("ID")
 
 export const username = z
     .string()
