@@ -2,6 +2,7 @@ import { initContract } from "@ts-rest/core";
 import { z } from "zod";
 import { PaginationQuerySchema, PaginatedResponse, id as idSchema} from "./common";
 import { UserSchema } from "./User";
+import { TagSchema } from "./Tag";
 
 // ------------------------------------------------------------------
 // Book & related Type
@@ -24,7 +25,8 @@ export const BookSchema = z.object({
     publisher: z.string().optional(),
     publishDate: z.string().optional(),
     isbn: z.string().optional(),
-    tags: z.array(z.string()).optional(),
+    // tags: TagGroupSchema, // association ICSBookTag group
+    tags: z.array(TagSchema), // * 应当注意，查询的时候只查询 ICSBookTag group，或者不查询 tags
     description: z.string().optional(),
 });
 export type Book = z.infer<typeof BookSchema>;

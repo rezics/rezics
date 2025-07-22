@@ -4,6 +4,11 @@ import { PhoneNumberUtil, PhoneNumberFormat } from "google-libphonenumber";
 
 const phone_util = PhoneNumberUtil.getInstance();
 
+// ---------------- Internationalization ----------------
+export const countryList = ["CN", "US", "JP", "KR", "TW", "HK", "MO", "SG", "MY", "PH"];
+export const InternationalizedNameSchema = z.map(z.enum(countryList), z.string());
+export type InternationalizedName = z.infer<typeof InternationalizedNameSchema>;
+
 // ---------------- Pagination ----------------
 export const PaginationQuerySchema = z.object({
     page: z.number().int().optional().default(1),
