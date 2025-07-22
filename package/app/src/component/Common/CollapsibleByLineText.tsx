@@ -4,13 +4,14 @@ import { useTranslation } from "react-i18next";
 
 export namespace CollapsibleByLineText {
     export type ShowProps = {
-        content: string;
+        content?: string;
+        children?: React.ReactNode;
         maxLines?: number; // 行数阈值，默认 4
         isExpanded: boolean;
         onToggle: () => void;
     };
 
-    export const Show: React.FC<ShowProps> = ({ content, maxLines = 4, isExpanded, onToggle }) => {
+    export const Show: React.FC<ShowProps> = ({ content, children, maxLines = 4, isExpanded, onToggle }) => {
         const { t } = useTranslation();
         const theme = useTheme();
         const containerRef = useRef<HTMLDivElement>(null);
@@ -26,8 +27,16 @@ export namespace CollapsibleByLineText {
 
         return (
             <div className="relative text-base leading-snug">
-                <div ref={containerRef} className={!isExpanded ? `!line-clamp-${maxLines} overflow-hidden` : ""}>
-                    {content}
+                <div
+                    ref={containerRef}
+                    style={{
+                        WebkitLineClamp: isExpanded ? undefined : maxLines, // 动态控制行数
+                        display: "-webkit-box", // 需要这两个来启用多行文本裁剪
+                        WebkitBoxOrient: "vertical",
+                        overflow: "hidden",
+                    }}
+                >
+                    {content ? content : children}
                     {isExpanded && (
                         <button onClick={onToggle} className="ml-1 text-sm font-medium text-blue-600 hover:underline">
                             收起
@@ -59,14 +68,17 @@ export namespace CollapsibleByLineText {
     };
 
     export type ContainerProps = {
-        content: string;
+        content?: string;
+        children?: React.ReactNode;
         maxLines?: number;
     };
 
-    export const Container: React.FC<ContainerProps> = ({ content, maxLines = 4 }) => {
+    export const Container: React.FC<ContainerProps> = ({ content, children, maxLines = 4 }) => {
         const [isExpanded, setIsExpanded] = useState(false);
         const toggle = () => setIsExpanded((v) => !v);
 
-        return <Show content={content} maxLines={maxLines} isExpanded={isExpanded} onToggle={toggle} />;
+        return (
+            <Show content={content} children={children} maxLines={maxLines} isExpanded={isExpanded} onToggle={toggle} />
+        );
     };
 }

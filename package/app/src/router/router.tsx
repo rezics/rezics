@@ -31,6 +31,7 @@ import { LongReviewEditPage } from "@/page/Review/ReviewEditPage";
 import { QuoteByBookPage } from "@/page/Review/QuoteByBookPage";
 import { TestPage02 } from "@/page/Test/TestPage02";
 import { TestPage03 } from "@/page/Test/TestPage03";
+import { TagByBookPage } from "@/page/Tag/TagByBookPage";
 
 /**
  * IMPORTANT – Flattened routing
@@ -137,6 +138,15 @@ export default (
                     {() => (
                         <MainLayout>
                             <ReadlistByBookPage />
+                        </MainLayout>
+                    )}
+                </Route>
+
+                {/* ANCHOR Tag Routes */}
+                <Route path="/tag/book/:bookId">
+                    {({ bookId }) => (
+                        <MainLayout>
+                            <TagByBookPage bookId={bookId} />
                         </MainLayout>
                     )}
                 </Route>
