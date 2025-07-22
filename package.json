@@ -8,7 +8,8 @@
     "type": "module",
     "devDependencies": {
         "dotenv": "^16.5.0",
-        "prettier": "^3.5.3"
+        "prettier": "^3.5.3",
+        "@swc-node/register": "^1.10.10"
     },
     "dependencies": {
         "effect": "^3.16.12",
