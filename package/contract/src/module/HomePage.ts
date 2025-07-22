@@ -1,11 +1,12 @@
 import { initContract } from "@ts-rest/core";
 import { z } from "zod";
+import { id as idSchema } from "./common";
 
 // ------------------------------------------------------------------
 // HomePage Type
 // ------------------------------------------------------------------
 export const HomePageSchema = z.object({
-    id: z.string(),
+    id: idSchema,
     content: z.string(),
 });
 export type HomePage = z.infer<typeof HomePageSchema>;

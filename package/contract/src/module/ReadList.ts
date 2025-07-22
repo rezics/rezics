@@ -1,13 +1,13 @@
 import { initContract } from '@ts-rest/core';
 import { z } from 'zod';
-import { PaginationQuerySchema, PaginatedResponse } from './common';
+import { PaginationQuerySchema, PaginatedResponse, id as idSchema } from './common';
 import { UserSchema } from './User';
 
 // ------------------------------------------------------------------
 // Readlist Type
 // ------------------------------------------------------------------
 export const ReadListSchema = z.object({
-    id: z.string(),
+    id: idSchema,
     title: z.string(),
     description: z.string(),
     books: z.array(z.string()),

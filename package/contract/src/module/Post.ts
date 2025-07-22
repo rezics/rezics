@@ -1,18 +1,18 @@
 import { initContract } from "@ts-rest/core";
 import { z } from "zod";
-import { PaginationQuerySchema, PaginatedResponse } from "./common";
+import { PaginationQuerySchema, PaginatedResponse, id as idSchema } from "./common";
 
 // ------------------------------------------------------------------
 // Post & Category Type
 // ------------------------------------------------------------------
 export const PostCategorySchema = z.object({
-    id: z.string(),
+    id: idSchema,
     title: z.string(),
 });
 export type PostCategory = z.infer<typeof PostCategorySchema>;
 
 export const PostSchema = z.object({
-    id: z.string(),
+    id: idSchema,
     title: z.string(),
     status: z.string().optional(),
     content: z.string(),

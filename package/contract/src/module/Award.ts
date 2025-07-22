@@ -1,14 +1,15 @@
 import { initContract } from "@ts-rest/core";
 import { z } from "zod";
 import { UserPreviewSchema } from "./User";
+import { id as idSchema } from "./common";
 
 // ------------------------------------------------------------------
 // Award Type & Schema
 // ------------------------------------------------------------------
 export const AwardSchema = z.object({
-    id: z.string(),
+    id: idSchema,
     objectType: z.string(), // e.g. "Comment", "Post", ...
-    objectId: z.string(), // UUID
+    objectId: idSchema,
     type: z.enum(["award1", "award2", "award3"]),
     user: UserPreviewSchema,
     createdAt: z.string(),
@@ -40,7 +41,7 @@ export const awardRouter = c.router({
         method: "POST",
         path: "/objects/:objectType/:objectId/award",
         body: AwardSchema.omit({ id: true, createdAt: true, user: true }).extend({
-            userId: z.string(), // pass current user id
+            userId: idSchema, // pass current user id
         }),
         responses: { 201: AwardSchema },
     },
