@@ -5,12 +5,27 @@ import { id as idSchema } from "./common";
 // ------------------------------------------------------------------
 // Tag Type
 // ------------------------------------------------------------------
+export const TagSchema = z.object({
+    id: idSchema,
+    groupId: idSchema,
+    key: z.string().optional(),
+    name: z.string(),
+    color: z.string(),
+    createdAt: z.date(),
+    updatedAt: z.date(),
+});
+
 export const TagGroupSchema = z.object({
     id: idSchema,
+    type: z.enum(["community", "book"]).default("community"),
     key: z.string().optional(), // key作为英文键
     name: z.string(), // 怎样让 name 实现国际化？
-    tags: z.array(z.string()), // 标签本身也要注重国际化实现
+    // owner: 权限管理
+    tags: z.array(TagSchema),
 });
+
+// 其中 key 和 name 是为了国际化而设计的
+
 export type TagGroup = z.infer<typeof TagGroupSchema>;
 
 const c = initContract();
