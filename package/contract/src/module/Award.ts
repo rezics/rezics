@@ -10,7 +10,8 @@ export const AwardSchema = z.object({
     id: idSchema,
     objectType: z.string(), // e.g. "Comment", "Post", ...
     objectId: idSchema,
-    type: z.enum(["award1", "award2", "award3"]),
+    // type: z.enum(["award1", "award2", "award3"]),
+    type: z.string(), // 为了拓展性
     user: UserPreviewSchema,
     createdAt: z.string(),
 });

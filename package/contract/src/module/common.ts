@@ -8,6 +8,8 @@ const phone_util = PhoneNumberUtil.getInstance();
 export const PaginationQuerySchema = z.object({
     page: z.number().int().optional().default(1),
     limit: z.number().int().optional().default(20),
+    type: z.enum(["time", "name", "popular", "agree"]).optional().default("time"),
+    order: z.enum(["asc", "desc"]).optional().default("desc"),
 });
 
 export const PaginatedResponse = <T extends z.ZodTypeAny>(item: T) =>
