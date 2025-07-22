@@ -11,15 +11,10 @@ module default {
         constraint max_len_value(10000);
     }
 
-    scalar type email extending str {
-        constraint min_len_value(4);
-        constraint max_len_value(1000);
-        constraint regexp(r'\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b');
-    }
-
     abstract type Volatile {
         required created_at: datetime {
             rewrite insert using (datetime_of_statement());
+            readonly := true;
         }
         required updated_at: datetime {
             rewrite insert, update using (datetime_of_statement())
@@ -90,7 +85,7 @@ module default {
     abstract type Person extending Nameable, Volatile, Evaluable, Tagable;
 
     type UserProfile extending Person {
-        required email: email;
+        required email: short_str;
         description: long_str;
         multi link friends: UserProfile;
 
