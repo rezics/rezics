@@ -1,3 +1,6 @@
+using extension auth;
+using extension ai;
+
 module default {
     scalar type short_str extending str {
         constraint max_len_value(100);
@@ -11,7 +14,7 @@ module default {
         constraint max_len_value(10000);
     }
 
-    abstract type Volatile {
+    abstract type Auditable {
         required created_at: datetime {
             rewrite insert using (datetime_of_statement());
             readonly := true;
@@ -22,7 +25,7 @@ module default {
     }
 
     abstract type Tagable {
-        multi link tags: Tag;
+        multi link tags: Nameable;
     }
 
     abstract type Nameable {
@@ -34,15 +37,16 @@ module default {
     abstract type Evaluable {
         multi link up: Person;
         multi link down: Person;
+        multi link favorites: Person;
     }
 
-    type Book extending Nameable, Volatile, Evaluable, Tagable {
+    type Book extending Nameable, Auditable, Evaluable, Tagable {
         cover: str;
         released_at: datetime;
         real_updated_at: datetime;
 
         required grabbed_from: str;
-        required description: long_str;
+        description: long_str;
         required length: bigint;
 
         required multi link author: Author;
@@ -65,8 +69,8 @@ module default {
         index on (.order);
     }
 
-    type Tag extending Nameable {
-        multi link books := .<tags[is Book];
+    type CustomTag extending Nameable {
+        required single link owner: Person;
     }
 
     type Platform extending Nameable, Evaluable, Tagable {
@@ -82,18 +86,25 @@ module default {
         multi link books := .<author[is Book];
     }
 
-    abstract type Person extending Nameable, Volatile, Evaluable, Tagable;
+    abstract type Person extending Nameable, Auditable, Evaluable, Tagable {
+        owned_favorites := .<favorites[is Evaluable];
+        owned_tags := .<owner[is Nameable];
+    }
 
-    type UserProfile extending Person {
+    type User extending Person {
         required email: short_str;
         description: long_str;
-        multi link friends: UserProfile;
+        multi link friends: User;
+
+        required identity: ext::auth::Identity {
+            constraint exclusive;
+        };
 
         index on (.email);
     }
 
-    type UserGroup extending Person {
-        multi link members: UserProfile {
+    type Organization extending Person {
+        multi link members: Person {
             power: int32 {
                 default := 99;
                 constraint min_value(0);
@@ -101,20 +112,11 @@ module default {
             }
         }
     }
-    
-    type Message extending Volatile, Tagable {
-        required link sender: Person;
-        required link receiver: Person;
-        required content: long_str;
 
-        multi link replies: Message;
-    }
-
-    type Thread extending Nameable, Volatile, Evaluable, Tagable {
+    type Thread extending Nameable, Auditable, Evaluable, Tagable {
         required link author: Person;
         required content: long_str;
 
-        multi link related: Nameable;
         multi link replies: Thread;
     }
 }
