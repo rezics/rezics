@@ -7,13 +7,12 @@
     "packageManager": "pnpm@10.12.4",
     "type": "module",
     "devDependencies": {
+        "@swc-node/register": "^1.10.10",
         "dotenv": "^16.5.0",
-        "prettier": "^3.5.3",
-        "@swc-node/register": "^1.10.10"
+        "prettier": "^3.5.3"
     },
     "dependencies": {
         "effect": "^3.16.12",
-        "gel": "^2.1.1",
         "zod": "^4.0.5"
     }
 }
