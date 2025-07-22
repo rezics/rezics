@@ -17,7 +17,7 @@ module default {
         constraint regexp(r'\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b');
     }
 
-    abstract type Logger {
+    abstract type Volatile {
         required created_at: datetime {
             rewrite insert using (datetime_of_statement());
         }
@@ -26,13 +26,18 @@ module default {
         }
     }
 
-    abstract type Entity {
+    abstract type Nameable {
         required name: medium_str;
 
         index on (.name);
     }
 
-    type Book extending Entity, Logger {
+    abstract type Evaluable {
+        multi link up: Person;
+        multi link down: Person;
+    }
+
+    type Book extending Nameable, Volatile, Evaluable {
         cover: str;
         released_at: datetime;
         real_updated_at: datetime;
@@ -51,7 +56,7 @@ module default {
         index on ((.length, .released_at, .real_updated_at));
     }
 
-    type Unit extending Entity {
+    type Unit extending Nameable, Evaluable {
         required order: int32;
         multi link children: Unit {
             constraint exclusive;
@@ -62,29 +67,26 @@ module default {
         index on (.order);
     }
 
-    type Tag extending Entity {
+    type Tag extending Nameable {
         multi link books := .<tags[is Book];
     }
 
-    type Platform extending Entity {
-        required domain: medium_str;
+    type Platform extending Nameable, Evaluable {
+        required domain: short_str;
         multi link books := .<platforms[is Book];
 
-        index on (.name);
         index on (.domain);
     }
 
-    type Author extending Entity {
-        required description: medium_str;
-        single link user: Entity;
+    type Author extending Nameable, Evaluable {
+        description: long_str;
+        single link user: Person;
         multi link books := .<author[is Book];
-
-        index on (.name);
     }
 
-    abstract type Person extending Entity;
+    abstract type Person extending Nameable, Volatile, Evaluable;
 
-    type UserProfile extending Person, Logger {
+    type UserProfile extending Person {
         required email: email;
         description: long_str;
         multi link friends: UserProfile;
@@ -92,7 +94,7 @@ module default {
         index on (.email);
     }
 
-    type UserGroup extending Person, Logger {
+    type UserGroup extending Person {
         multi link members: UserProfile {
             power: int32 {
                 default := 99;
@@ -102,7 +104,7 @@ module default {
         }
     }
     
-    type Message extending Logger {
+    type Message extending Volatile {
         required link sender: Person;
         required link receiver: Person;
         required content: long_str;
@@ -110,13 +112,12 @@ module default {
         multi link replies: Message;
     }
 
-    type Thread extending Entity, Logger {
+    type Thread extending Nameable, Volatile, Evaluable {
         required link author: Person;
         required content: long_str;
-        multi link up: Person;
-        multi link down: Person;
 
-        multi link related: Entity;
+
+        multi link related: Nameable;
         multi link replies: Thread;
     }
 }

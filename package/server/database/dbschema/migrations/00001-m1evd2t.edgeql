@@ -1,4 +1,4 @@
-CREATE MIGRATION m1m7nsztdcghqafz6af3wqxomefgrjxe3kbb4lvh7gelbpmotjlqxq
+CREATE MIGRATION m1evd2th4gj2wi6wn5kvjdkun4uvgbhxz7wu5u7zm2v2wchmcsk75a
     ONTO initial
 {
   CREATE EXTENSION pgvector VERSION '0.7';
@@ -20,16 +20,15 @@ CREATE MIGRATION m1m7nsztdcghqafz6af3wqxomefgrjxe3kbb4lvh7gelbpmotjlqxq
       CREATE CONSTRAINT std::max_len_value(100);
   };
   CREATE FUTURE simple_scoping;
-  CREATE ABSTRACT TYPE default::Entity {
+  CREATE ABSTRACT TYPE default::Nameable {
       CREATE REQUIRED PROPERTY name: default::medium_str;
       CREATE INDEX ON (.name);
   };
-  CREATE TYPE default::Author EXTENDING default::Entity {
-      ALTER INDEX ON (.name) SET OWNED;
-      CREATE SINGLE LINK user: default::Entity;
-      CREATE REQUIRED PROPERTY description: default::medium_str;
+  CREATE ABSTRACT TYPE default::Evaluable;
+  CREATE TYPE default::Author EXTENDING default::Nameable, default::Evaluable {
+      CREATE PROPERTY description: default::long_str;
   };
-  CREATE ABSTRACT TYPE default::Logger {
+  CREATE ABSTRACT TYPE default::Volatile {
       CREATE REQUIRED PROPERTY created_at: std::datetime {
           CREATE REWRITE
               INSERT 
@@ -44,7 +43,7 @@ CREATE MIGRATION m1m7nsztdcghqafz6af3wqxomefgrjxe3kbb4lvh7gelbpmotjlqxq
               USING (std::datetime_of_statement());
       };
   };
-  CREATE TYPE default::Book EXTENDING default::Entity, default::Logger {
+  CREATE TYPE default::Book EXTENDING default::Nameable, default::Volatile, default::Evaluable {
       CREATE REQUIRED MULTI LINK author: default::Author;
       CREATE REQUIRED PROPERTY length: std::bigint;
       CREATE PROPERTY real_updated_at: std::datetime;
@@ -57,9 +56,16 @@ CREATE MIGRATION m1m7nsztdcghqafz6af3wqxomefgrjxe3kbb4lvh7gelbpmotjlqxq
   ALTER TYPE default::Author {
       CREATE MULTI LINK books := (.<author[IS default::Book]);
   };
-  CREATE TYPE default::Platform EXTENDING default::Entity {
-      ALTER INDEX ON (.name) SET OWNED;
-      CREATE REQUIRED PROPERTY domain: default::medium_str;
+  CREATE ABSTRACT TYPE default::Person EXTENDING default::Nameable, default::Volatile, default::Evaluable;
+  ALTER TYPE default::Evaluable {
+      CREATE MULTI LINK down: default::Person;
+      CREATE MULTI LINK up: default::Person;
+  };
+  ALTER TYPE default::Author {
+      CREATE SINGLE LINK user: default::Person;
+  };
+  CREATE TYPE default::Platform EXTENDING default::Nameable, default::Evaluable {
+      CREATE REQUIRED PROPERTY domain: default::short_str;
       CREATE INDEX ON (.domain);
   };
   ALTER TYPE default::Book {
@@ -68,14 +74,14 @@ CREATE MIGRATION m1m7nsztdcghqafz6af3wqxomefgrjxe3kbb4lvh7gelbpmotjlqxq
   ALTER TYPE default::Platform {
       CREATE MULTI LINK books := (.<platforms[IS default::Book]);
   };
-  CREATE TYPE default::Tag EXTENDING default::Entity;
+  CREATE TYPE default::Tag EXTENDING default::Nameable;
   ALTER TYPE default::Book {
       CREATE MULTI LINK tags: default::Tag;
   };
   ALTER TYPE default::Tag {
       CREATE MULTI LINK books := (.<tags[IS default::Book]);
   };
-  CREATE TYPE default::Unit EXTENDING default::Entity {
+  CREATE TYPE default::Unit EXTENDING default::Nameable, default::Evaluable {
       CREATE REQUIRED PROPERTY order: std::int32;
       CREATE INDEX ON (.order);
       CREATE MULTI LINK children: default::Unit {
@@ -91,22 +97,13 @@ CREATE MIGRATION m1m7nsztdcghqafz6af3wqxomefgrjxe3kbb4lvh7gelbpmotjlqxq
   ALTER TYPE default::Unit {
       CREATE LINK book := (.<units[IS default::Book]);
   };
-  CREATE ABSTRACT TYPE default::Person EXTENDING default::Entity;
-  CREATE TYPE default::Thread EXTENDING default::Entity, default::Logger {
-      CREATE MULTI LINK related: default::Entity;
-      CREATE REQUIRED LINK author: default::Person;
-      CREATE MULTI LINK down: default::Person;
-      CREATE MULTI LINK up: default::Person;
-      CREATE MULTI LINK replies: default::Thread;
-      CREATE REQUIRED PROPERTY content: default::long_str;
-  };
-  CREATE TYPE default::UserProfile EXTENDING default::Person, default::Logger {
+  CREATE TYPE default::UserProfile EXTENDING default::Person {
       CREATE REQUIRED PROPERTY email: default::email;
       CREATE INDEX ON (.email);
       CREATE MULTI LINK friends: default::UserProfile;
       CREATE PROPERTY description: default::long_str;
   };
-  CREATE TYPE default::UserGroup EXTENDING default::Person, default::Logger {
+  CREATE TYPE default::UserGroup EXTENDING default::Person {
       CREATE MULTI LINK members: default::UserProfile {
           CREATE PROPERTY power: std::int32 {
               SET default := 99;
@@ -115,7 +112,13 @@ CREATE MIGRATION m1m7nsztdcghqafz6af3wqxomefgrjxe3kbb4lvh7gelbpmotjlqxq
           };
       };
   };
-  CREATE TYPE default::Message EXTENDING default::Logger {
+  CREATE TYPE default::Thread EXTENDING default::Nameable, default::Volatile, default::Evaluable {
+      CREATE MULTI LINK related: default::Nameable;
+      CREATE REQUIRED LINK author: default::Person;
+      CREATE MULTI LINK replies: default::Thread;
+      CREATE REQUIRED PROPERTY content: default::long_str;
+  };
+  CREATE TYPE default::Message EXTENDING default::Volatile {
       CREATE REQUIRED LINK receiver: default::Person;
       CREATE MULTI LINK replies: default::Message;
       CREATE REQUIRED LINK sender: default::Person;

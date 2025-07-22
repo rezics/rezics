@@ -1,5 +1,5 @@
 {
-    "cSpell.words": ["booklist", "libphonenumber", "readlist", "urql", "wouter", "libphonenumber"],
+    "cSpell.words": ["booklist", "Evaluable", "libphonenumber", "readlist", "urql", "wouter"],
     "i18n-ally.localesPaths": ["package/app/src/locale"],
     "i18n-ally.enabledParsers": ["js", "ts", "json"],
     "i18n-ally.enabledFrameworks": ["react-i18next"],
