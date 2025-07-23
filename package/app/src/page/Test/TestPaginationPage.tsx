@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { z } from "zod"; // 假设从外部导入
-import { Box, Typography, Grid, Card, CardContent, ThemeProvider, createTheme } from "@mui/material";
+import { Box, Typography, Grid, Card, CardContent, ThemeProvider, createTheme, Divider } from "@mui/material";
 import { UniversalPaginator } from "@/component/Common/Pagination";
+import { contract } from "contract";
+import { BookSearchFilter } from "@/component/BookLib/BookSearchFilter";
 
 // 1. Zod Schemas (假设从 './schemas' 等文件导入)
 // =============================================
@@ -72,7 +74,7 @@ const PostCard: React.FC<PostCardProps> = ({ post }) => (
 
 // 5. 示例 App (父组件，负责状态管理和数据获取)
 // =============================================
-const theme = createTheme({ palette: { mode: "light" } });
+// const theme = createTheme({ palette: { mode: "light" } });
 
 // TODO 目前外部数据更新之后，分页会有错误，错误的回到第一页
 export default function TestPaginationPage() {
@@ -101,7 +103,10 @@ export default function TestPaginationPage() {
                     order: currentSort.order,
                 };
                 const response = (await fetchPostsAPI(query)) as { items: Post[]; total: number };
-                setAllFetchedItems((prev) => (page === 1 ? response.items : [...prev, ...response.items]));
+                // setAllFetchedItems((prev) => (page === 1 ? response.items : [...prev, ...response.items]));
+                setAllFetchedItems((prev) =>
+                    (page === 1 ? response.items : [...prev, ...response.items]).slice(0, 100),
+                ); // 最多100个/根据page来算
                 setTotalItems(response.total);
                 setCurrentExternalPage(page);
             } catch (error) {
@@ -137,34 +142,59 @@ export default function TestPaginationPage() {
         fetchDataBlock(requestedExternalPage, sortConfig);
     };
 
+    useEffect(() => {
+        console.log(contract);
+    }, []);
+
     return (
-        <ThemeProvider theme={theme}>
-            <Box sx={{ bgcolor: "#f4f6f8", p: { xs: 2, md: 4 }, minHeight: "100vh" }}>
-                <Typography variant="h4" component="h1" gutterBottom sx={{ textAlign: "center", mb: 4 }}>
-                    通用分页控制器演示
-                </Typography>
-                <UniversalPaginator<Post>
-                    data={allFetchedItems}
-                    totalExternalItems={totalItems}
-                    itemsPerPage={12}
-                    externalItemsPerPage={EXTERNAL_PAGE_SIZE}
-                    sortType={sortConfig.type}
-                    sortOrder={sortConfig.order}
-                    onSortChange={handleSortChange}
-                    onNeedMoreData={handleNeedMoreData}
-                    isLoading={isLoading && allFetchedItems.length === 0}
-                >
-                    {(currentPageItems: Post[]) => (
-                        <Grid container spacing={2}>
-                            {currentPageItems.map((post) => (
-                                <Grid sx={{ xs: 12, sm: 6, md: 4, lg: 3 }} key={post.id}>
-                                    <PostCard post={post} />
-                                </Grid>
-                            ))}
-                        </Grid>
-                    )}
-                </UniversalPaginator>
-            </Box>
-        </ThemeProvider>
+        <Box sx={{ bgcolor: "#f4f6f8", p: { xs: 2, md: 4 }, minHeight: "100vh" }}>
+            <Typography variant="h4" component="h1" gutterBottom sx={{ textAlign: "center", mb: 4 }}>
+                通用分页控制器演示
+            </Typography>
+            <UniversalPaginator<Post>
+                data={allFetchedItems}
+                totalExternalItems={totalItems}
+                itemsPerPage={30}
+                externalItemsPerPage={EXTERNAL_PAGE_SIZE}
+                sortType={sortConfig.type}
+                sortOrder={sortConfig.order}
+                onSortChange={handleSortChange}
+                requestData={handleNeedMoreData}
+                isLoading={isLoading && allFetchedItems.length === 0}
+                sortControl={<BookSearchFilter />}
+            >
+                {(currentPageItems: Post[]) => (
+                    <Grid container spacing={2}>
+                        {currentPageItems.map((post) => (
+                            <Grid sx={{ xs: 12, sm: 6, md: 4, lg: 3 }} key={post.id}>
+                                <PostCard post={post} />
+                            </Grid>
+                        ))}
+                    </Grid>
+                )}
+            </UniversalPaginator>
+            <Divider className="!my-6" />
+            <UniversalPaginator<Post>
+                data={allFetchedItems}
+                totalExternalItems={totalItems}
+                itemsPerPage={30}
+                externalItemsPerPage={EXTERNAL_PAGE_SIZE}
+                sortType={sortConfig.type}
+                sortOrder={sortConfig.order}
+                onSortChange={handleSortChange}
+                requestData={handleNeedMoreData}
+                isLoading={isLoading && allFetchedItems.length === 0}
+            >
+                {(currentPageItems: Post[]) => (
+                    <Grid container spacing={2}>
+                        {currentPageItems.map((post) => (
+                            <Grid sx={{ xs: 12, sm: 6, md: 4, lg: 3 }} key={post.id}>
+                                <PostCard post={post} />
+                            </Grid>
+                        ))}
+                    </Grid>
+                )}
+            </UniversalPaginator>
+        </Box>
     );
 }
