@@ -101,6 +101,7 @@ interface UniversalPaginatorProps<T> {
     isLoading?: boolean;
 }
 // TODO 分页数量计算似乎是错误的
+// 错误的原因是请求之后，数据是从第一页开始渲染，这个逻辑是不对的。所以判断哪一页需要请求也是需要修改的
 export const UniversalPaginator = <T,>({
     data,
     totalExternalItems,
@@ -133,8 +134,10 @@ export const UniversalPaginator = <T,>({
     const handlePageChange = useCallback(
         (_: React.ChangeEvent<unknown>, newPage: number) => {
             const requiredItemsCount = newPage * itemsPerPage;
+            console.log("pageChange", requiredItemsCount, data.length, totalExternalItems);
             if (requiredItemsCount > data.length && data.length < totalExternalItems) {
                 const requiredExternalPage = Math.ceil(requiredItemsCount / externalItemsPerPage);
+                console.log("requiredExternalPage", requiredExternalPage);
                 onNeedMoreData(requiredExternalPage);
             }
             setCurrentPage(newPage);
