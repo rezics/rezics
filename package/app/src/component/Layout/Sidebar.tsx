@@ -1,5 +1,5 @@
 import React, { ReactNode, useEffect } from "react";
-import { useLocation } from "wouter";
+import { Link, useLocation } from "wouter";
 import { useMediaQuery, styled, useTheme } from "@mui/material";
 import { ExpandLess, ExpandMore, ChevronLeft, ChevronRight } from "@mui/icons-material";
 import {
@@ -13,6 +13,7 @@ import {
     ListItemIcon,
     ListItemText,
     Typography,
+    Button,
 } from "@mui/material";
 import { useLayoutStore } from "@/global/layoutStore";
 import { NavigationItem } from "./navigation";
@@ -58,12 +59,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
     const isMobile = useMediaQuery((theme) => theme.breakpoints.down("md"));
 
     const handleItemClick = (event: any, segment: string | undefined, hasChildren: boolean) => {
-        console.log("handleItemClick", event);
+        // console.log("handleItemClick", event);
         if (!segment) return;
         if (hasChildren) {
             toggleItem(segment);
         } else {
-            setLocation(`${segment}`);
+            // setLocation(`${segment}`);
             if (isMobile) {
                 onClose();
             }
@@ -148,9 +149,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
                             return (
                                 <div key={item.segment || index.toString()}>
                                     <ListItemButton
+                                        component={Link}
+                                        href={hasChildren ? "" : `${item.segment}`}
                                         selected={isActive && !hasChildren}
-                                        onClick={(event) => handleItemClick(event, item.segment, hasChildren)}
-                                        onAuxClick={(event) => handleItemClick(event, item.segment, hasChildren)}
+                                        onClick={(event: any) => handleItemClick(event, item.segment, hasChildren)}
                                     >
                                         <ListItemIcon>{item.icon}</ListItemIcon>
                                         <ListItemText primary={item.title} />
@@ -165,11 +167,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
                                                     return (
                                                         <ListItemButton
                                                             key={child.segment}
+                                                            component={Link}
+                                                            href={`${child.segment}`}
                                                             selected={isChildActive}
                                                             onClick={(event) =>
-                                                                handleItemClick(event, child.segment, false)
-                                                            }
-                                                            onAuxClick={(event) =>
                                                                 handleItemClick(event, child.segment, false)
                                                             }
                                                             sx={{ pl: 4 }}

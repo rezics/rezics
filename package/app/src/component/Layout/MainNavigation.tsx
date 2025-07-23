@@ -22,37 +22,37 @@ export const NAVIGATION = (): NavigationItem[] => [
     },
     {
         kind: "item",
-        segment: "~/",
+        segment: "/",
         title: "Home",
         icon: <DashboardIcon />,
     },
     {
         kind: "item",
-        segment: "~/books",
+        segment: "/books",
         title: "Books",
         icon: <BookIcon />,
     },
     {
         kind: "item",
-        segment: "~/book",
+        segment: "/book",
         title: "Book",
         icon: <LibraryBooksIcon />,
         children: [
             {
                 kind: "item",
-                segment: "~/book/1",
+                segment: "/book/1",
                 title: "Book 1",
                 icon: <BookmarkBorderIcon />,
             },
             {
                 kind: "item",
-                segment: "~/readlist/1",
+                segment: "/readlist/1",
                 title: "Read List 1",
                 icon: <FormatListBulletedIcon />,
             },
             {
                 kind: "item",
-                segment: "~/book/1/read/a1b2c3d4e5f6g7h8i9j0",
+                segment: "/book/1/read/a1b2c3d4e5f6g7h8i9j0",
                 title: "Book Chapter 1",
                 icon: <BookIcon />,
             },
@@ -67,19 +67,19 @@ export const NAVIGATION = (): NavigationItem[] => [
     },
     {
         kind: "item",
-        segment: "~/auth",
+        segment: "/auth",
         title: "Auth",
         icon: <PersonIcon />,
         children: [
             {
                 kind: "item",
-                segment: "~/login",
+                segment: "/login",
                 title: "Login",
                 icon: <LoginIcon />,
             },
             {
                 kind: "item",
-                segment: "~/register",
+                segment: "/register",
                 title: "Register",
                 icon: <HowToRegIcon />,
             },
@@ -87,20 +87,20 @@ export const NAVIGATION = (): NavigationItem[] => [
     },
     {
         kind: "item",
-        segment: "~/book/1/edit",
+        segment: "/book/1/edit",
         title: "Book Edit",
         icon: <BarChartIcon />,
         children: [
             {
                 kind: "item",
                 title: "Book Edit Main",
-                segment: "~/book/1/edit",
+                segment: "/book/1/edit",
                 icon: <DescriptionIcon />,
             },
             {
                 kind: "item",
                 title: "Book Edit Chapter",
-                segment: "~/book/1/edit/1",
+                segment: "/book/1/edit/1",
                 icon: <DescriptionIcon />,
             },
         ],
