@@ -71,5 +71,5 @@ export const postHandlers = [
     }),
 
     // Categories
-    http.get(postRouter.categories.path, () => HttpResponse.json(categories)),
+    // http.get(postRouter.categories.path, () => HttpResponse.json(categories)),
 ]; 

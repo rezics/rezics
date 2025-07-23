@@ -3,7 +3,6 @@ import { z } from "zod";
 import { id as idSchema, InternationalizedNameSchema, PaginationQuerySchema, ThreadSchema, created_at, updated_at } from "./common";
 import { BookSchema } from "./Book";
 import { UserSchema } from "./User";
-import { PostSchema } from "./Post";
 
 // ------------------------------------------------------------------
 // Tag Type
@@ -36,8 +35,8 @@ export type TagGroup = z.infer<typeof TagGroupSchema>;
 // ensure cascading deletion
 export const TagBookLinkSchema = z.object({
     id: idSchema,
-    tag: TagSchema,
-    book: BookSchema,
+    tag: z.lazy(() => TagSchema),
+    book: z.lazy(() => BookSchema),
     createdAt: created_at,
     updatedAt: updated_at,
     createdBy: UserSchema,
@@ -46,8 +45,8 @@ export type TagBookLink = z.infer<typeof TagBookLinkSchema>;
 
 export const TagThreadLinkSchema = z.object({
     id: idSchema,
-    tag: TagSchema,
-    thread: ThreadSchema,
+    tag: z.lazy(() => TagSchema),
+    thread: z.lazy(() => ThreadSchema),
     createdAt: created_at,
     updatedAt: updated_at,
     createdBy: UserSchema,
@@ -57,7 +56,7 @@ export type TagThreadLink = z.infer<typeof TagThreadLinkSchema>;
 // auditing schema
 export const TagAuditingSchema = z.object({
     id: idSchema,
-    tag: TagSchema,
+    tag: z.lazy(() => TagSchema),
     createdAt: created_at,
     updatedAt: updated_at,
     createdBy: UserSchema,
@@ -159,7 +158,7 @@ export const tagRouter = c.router({
         method: "GET",
         path: "/tag/:tagId/book/list",
         query: PaginationQuerySchema,
-        responses: { 200: z.array(BookSchema) },
+        responses: { 200: z.array(z.lazy(() => BookSchema)) },
     },
     TagRelatedThreadList: {
         method: "GET",
