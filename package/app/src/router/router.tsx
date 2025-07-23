@@ -32,6 +32,7 @@ import { QuoteByBookPage } from "@/page/Review/QuoteByBookPage";
 import { TestPage02 } from "@/page/Test/TestPage02";
 import { TestPage03 } from "@/page/Test/TestPage03";
 import { TagByBookPage } from "@/page/Tag/TagByBookPage";
+import TestPaginationPage from "@/page/Test/TestPaginationPage";
 
 /**
  * IMPORTANT – Flattened routing
@@ -166,6 +167,11 @@ export default (
                     <BookEditLayout>
                         <TestPage03 />
                     </BookEditLayout>
+                </Route>
+                <Route path="/test04">
+                    <MainLayout>
+                        <TestPaginationPage />
+                    </MainLayout>
                 </Route>
                 {/* ANCHOR Home */}
                 <Route path="/">
