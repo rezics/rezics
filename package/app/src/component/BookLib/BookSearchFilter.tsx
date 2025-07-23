@@ -41,7 +41,7 @@ export const BookSearchFilter = () => {
     };
 
     return (
-        <Stack direction="row" spacing={2} alignItems="center">
+        <Stack direction="row" spacing={2} alignItems="center" className="book-search-filter mb-6">
             {(Object.keys(LABELS) as SortKey[]).map((key) => {
                 const active = key === sortKey;
                 return (

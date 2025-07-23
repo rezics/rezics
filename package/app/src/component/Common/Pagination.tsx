@@ -12,7 +12,7 @@ import {
     LinearProgress,
     Pagination,
 } from "@mui/material";
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { ArrowDownward, ArrowUpward } from "@mui/icons-material";
 
 interface SortControlsProps {
@@ -20,6 +20,20 @@ interface SortControlsProps {
     sortOrder: "asc" | "desc";
     onSortChange: (newSort: { type?: string; order?: "asc" | "desc" }) => void;
 }
+/**
+ * SortControls
+ * @param {SortControlsProps} props
+ * example:
+ * ```ts
+ *   const [sortConfig, setSortConfig] = useState<{
+ *       type: "time" | "name" | "popular" | "agree";
+ *       order: "asc" | "desc";
+ *   }>({
+ *       type: "popular",
+ *       order: "desc",
+ *   });
+ *   ```
+ */
 const SortControls: React.FC<SortControlsProps> = ({ sortType, sortOrder, onSortChange }) => {
     const sortOptions = [
         { value: "time", label: "按时间" },
@@ -88,16 +102,14 @@ const PaginationBar: React.FC<PaginationBarProps> = ({ page, totalPages, onPageC
     );
 };
 
-interface UniversalPaginatorProps<T> {
+interface UniversalPaginatorProps<T> extends SortControlsProps {
     data: T[];
     totalExternalItems: number;
     itemsPerPage?: number;
     externalItemsPerPage?: number;
-    sortType: string;
-    sortOrder: "asc" | "desc";
-    onSortChange: (newSort: { type?: string; order?: "asc" | "desc" }) => void;
-    onNeedMoreData: (externalPage: number) => void;
+    requestData: (externalPage: number) => void;
     children: (currentPageItems: T[]) => React.ReactNode;
+    sortControl?: React.ReactElement<SortControlsProps>;
     isLoading?: boolean;
 }
 // TODO 分页数量计算似乎是错误的
@@ -110,16 +122,33 @@ export const UniversalPaginator = <T,>({
     sortType,
     sortOrder,
     onSortChange,
-    onNeedMoreData,
+    requestData,
     children,
+    sortControl,
     isLoading = false,
 }: UniversalPaginatorProps<T>) => {
     const [currentPage, setCurrentPage] = useState<number>(1);
+    const internalPagesPerExternalPage = useMemo(
+        () => Math.ceil(externalItemsPerPage / itemsPerPage),
+        [externalItemsPerPage, itemsPerPage],
+    );
+    const externalPage = useMemo(
+        () => Math.ceil(currentPage / internalPagesPerExternalPage),
+        [currentPage, internalPagesPerExternalPage],
+    );
+    const rangeStartPage = useMemo(
+        () => (externalPage - 1) * internalPagesPerExternalPage + 1,
+        [externalPage, internalPagesPerExternalPage],
+    );
+    const globalStartIndex = useMemo(
+        () => (currentPage - rangeStartPage) * itemsPerPage + (externalPage - 1) * externalItemsPerPage,
+        [currentPage, rangeStartPage, itemsPerPage, externalPage, externalItemsPerPage],
+    );
 
-    // 这么写的话会导致刷新后回到第一页
-    // useEffect(() => {
-    //     setCurrentPage(1);
-    // }, [sortType, sortOrder, data]);
+    useEffect(() => {
+        requestData(externalPage);
+        console.log("requestData", externalPage);
+    }, [externalPage]);
 
     const totalPages = useMemo(
         () => Math.max(1, Math.ceil(totalExternalItems / itemsPerPage)),
@@ -127,27 +156,47 @@ export const UniversalPaginator = <T,>({
     );
 
     const currentPageItems = useMemo(() => {
-        const startIndex = (currentPage - 1) * itemsPerPage;
-        return data.slice(startIndex, startIndex + itemsPerPage);
-    }, [data, currentPage, itemsPerPage]);
+        const startIndex = (currentPage - rangeStartPage) * itemsPerPage;
+        console.log(
+            "currentPageItems",
+            "currentPage",
+            currentPage,
+            "globalStartIndex",
+            globalStartIndex,
+            "externalPage",
+            externalPage,
+            "data.length",
+            data.length,
+        );
+        console.log(
+            "rangeStartPage",
+            rangeStartPage,
+            "startIndex",
+            startIndex,
+            "endIndex",
+            startIndex + itemsPerPage - 1,
+        );
+        return data.slice(startIndex, startIndex + itemsPerPage); // no minus 1, because slice is not inclusive
+    }, [data, currentPage, itemsPerPage, externalItemsPerPage]);
 
     const handlePageChange = useCallback(
         (_: React.ChangeEvent<unknown>, newPage: number) => {
-            const requiredItemsCount = newPage * itemsPerPage;
-            console.log("pageChange", requiredItemsCount, data.length, totalExternalItems);
-            if (requiredItemsCount > data.length && data.length < totalExternalItems) {
-                const requiredExternalPage = Math.ceil(requiredItemsCount / externalItemsPerPage);
-                console.log("requiredExternalPage", requiredExternalPage);
-                onNeedMoreData(requiredExternalPage);
-            }
+            console.log(
+                "pageChange",
+                newPage,
+                rangeStartPage,
+                globalStartIndex,
+                internalPagesPerExternalPage,
+                externalPage,
+            );
             setCurrentPage(newPage);
         },
-        [data, totalExternalItems, itemsPerPage, externalItemsPerPage, onNeedMoreData],
+        [data, totalExternalItems, itemsPerPage, externalItemsPerPage, requestData],
     );
 
     return (
         <Box>
-            <SortControls sortType={sortType} sortOrder={sortOrder} onSortChange={onSortChange} />
+            {sortControl || <SortControls sortType={sortType} sortOrder={sortOrder} onSortChange={onSortChange} />}
             <Box sx={{ minHeight: 300, position: "relative" }}>
                 {isLoading && <LinearProgress sx={{ position: "absolute", top: 0, left: 0, width: "100%" }} />}
                 {children(currentPageItems)}
