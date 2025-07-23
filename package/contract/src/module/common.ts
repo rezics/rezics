@@ -28,6 +28,13 @@ export const PaginatedResponse = <T extends z.ZodTypeAny>(item: T) =>
 // ---------------- Primitives ----------------
 export const id = z.uuidv4().describe("ID");
 
+export const icsid = z
+    .string()
+    .regex(/^BK-[a-zA-Z0-9]{24}$/, {
+        message: "ICSID must start with 'BK' followed by 24 alphanumeric characters.",
+    })
+    .describe("ICSID");
+
 export const username = z
     .string()
     .min(3)

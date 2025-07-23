@@ -1,6 +1,6 @@
 import { initContract } from "@ts-rest/core";
 import { z } from "zod";
-import { PaginationQuerySchema, PaginatedResponse, id as idSchema, created_at } from "./common";
+import { PaginationQuerySchema, PaginatedResponse, id as idSchema, created_at, icsid } from "./common";
 import { UserSchema } from "./User";
 import { TagSchema } from "./Tag";
 
@@ -19,6 +19,7 @@ export type Author = z.infer<typeof AuthorSchema>;
 export const BookSchema = z.object({
     id: idSchema,
     title: z.string(),
+    icsid: icsid,
     cover: z.url().optional(),
     author: AuthorSchema,
     rating: z.number().optional(),
