@@ -5,7 +5,9 @@
     "main": "index.js",
     "scripts": {
         "generate": "cd database && pnpx @gel/generate edgeql-js --target ts --output-dir ./ts",
-        "ts": "node --import @swc-node/register/esm-register"
+        "ts": "node --import @swc-node/register/esm-register",
+        "start": "tsx src/index.ts",
+        "init:gel": "cd database && gel project init"
     },
     "keywords": [],
     "author": "",
@@ -14,6 +16,7 @@
     "type": "module",
     "dependencies": {
         "contract": "workspace:^",
+        "fastify": "^5.4.0",
         "gel": "^2.1.1"
     }
 }
