@@ -11,12 +11,12 @@ import Homepage from "./HomePage";
 export { Auth, Book, Review, Tag, Post, ReadList, Comment, Homepage };
 
 export default c.router({
-    auth: Auth,
-    book: Book,
-    review: Review,
-    tag: Tag,
-    post: Post,
-    readlist: ReadList,
-    comment: Comment,
-    home: Homepage,
+    Auth,
+    Book,
+    Review,
+    Tag,
+    Post,
+    ReadList,
+    Comment,
+    Homepage,
 });

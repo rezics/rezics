@@ -1,51 +1,39 @@
 // common.ts
-import { z } from "zod";
+import { z, ZodObject } from "zod";
 import { PhoneNumberUtil, PhoneNumberFormat } from "google-libphonenumber";
 
 const phone_util = PhoneNumberUtil.getInstance();
 
-// ---------------- Internationalization ----------------
-export const countryList = [
-    "CN",
-    "US",
-    "JP",
-    "KR",
-    "TW",
-    "HK",
-    "MO",
-    "SG",
-    "MY",
-    "PH",
-];
-export const InternationalizedNameSchema = z.map(
-    z.enum(countryList),
-    z.string(),
-);
-export type InternationalizedName = z.infer<typeof InternationalizedNameSchema>;
+export const id = z.uuidv4().describe("ID");
 
-// ---------------- Pagination ----------------
-export const PaginationQuerySchema = z.object({
-    page: z.number().int().optional().default(1),
-    limit: z.number().int().optional().default(20),
-    type: z
-        .enum(["time", "name", "popular", "agree"])
-        .optional()
-        .default("time"),
-    order: z.enum(["asc", "desc"]).optional().default("desc"),
-});
+export const shortString = z.string().max(100);
+export const longString = z.string().max(10000);
 
-export const PaginatedResponse = <T extends z.ZodTypeAny>(item: T) =>
-    z.object({
+export const Pagination = <TRead extends ZodObject, TItem extends ZodObject>(
+    read: TRead,
+    item: TItem,
+) => {
+    const Read = z.object({
+        ...read.shape,
+        page: z.int(),
+        limit: z.int(),
+        type: z.string(),
+        order: z.enum(["asc", "desc"]),
+    });
+
+    const View = z.object({
         items: z.array(item),
         page: z.number(),
         totalItems: z.number(),
-        // itemNumberPerPage: z.number().default(100),
     });
 
-// ---------------- Primitives ----------------
-export const id = z.uuidv4().describe("ID");
+    return {
+        Read,
+        View,
+    };
+};
 
-export const icsid = z
+export const icsId = z
     .string()
     .regex(/^BK-[a-zA-Z0-9]{24}$/, {
         message:
@@ -60,9 +48,9 @@ export const username = z
     .regex(/^[a-zA-Z0-9_]+$/, "Only alphanumeric and underscore")
     .describe("username");
 
-export const email = z.string().email().max(100).describe("email");
+export const email = z.email().describe("email");
 
-export const phone = z
+export const phoneNumber = z
     .string()
     .min(4)
     .max(16)
@@ -79,26 +67,23 @@ export const phone = z
     )
     .describe("phone number");
 
-export const password = z.string().min(6).max(24).describe("password");
+export const password = z.string().min(8).max(27).describe("password");
 
-// ---------------- Content Lengths ----------------
-export const content = {
-    short: z.string().min(1).max(1000).describe("short content"),
-    medium: z.string().min(1).max(5000).describe("medium content"),
-    long: z.string().min(1).max(100000).describe("long content"),
-};
-
-// ---------------- Timestamps ----------------
-export const created_at = z.string().describe("ISO created timestamp");
-export const updated_at = z.string().describe("ISO updated timestamp");
-
-// ---------------- Thread ----------------
-export const ThreadSchema = z.object({
-    id: id,
-    title: z.string(),
-    status: z.string().optional(),
-    createdAt: created_at,
-    updatedAt: updated_at,
+export const Auditable = z.object({
+    created_at: z.date(),
+    updated_at: z.date(),
 });
 
-export type Thread = z.infer<typeof ThreadSchema>;
+export const Nameable = z.object({
+    name: shortString,
+});
+
+export const Tagable = z.object({
+    tags: z.array(z.string()),
+});
+
+export const Evaluable = z.object({
+    up: z.array(id),
+    down: z.array(id),
+    favorites: z.array(id),
+});

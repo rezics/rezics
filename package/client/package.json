@@ -1,5 +1,5 @@
 {
-    "name": "app",
+    "name": "client",
     "private": true,
     "type": "module",
     "scripts": {
@@ -48,8 +48,7 @@
         "urql": "^4.2.2",
         "uuid": "^11.1.0",
         "wouter": "^3.7.1",
-        "zustand": "^5.0.5",
-        "contract": "workspace:^"
+        "zustand": "^5.0.5"
     },
     "devDependencies": {
         "@graphql-codegen/cli": "^5.0.6",

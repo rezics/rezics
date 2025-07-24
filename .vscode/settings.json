@@ -3,19 +3,21 @@
         "booklist",
         "edgeql",
         "Evaluable",
+        "icsid",
         "libphonenumber",
         "pnpx",
         "readlist",
         "Tagable",
         "urql",
+        "uuidv",
         "wouter"
     ],
     "i18n-ally.localesPaths": ["package/app/src/locale"],
     "i18n-ally.enabledParsers": ["js", "ts", "json"],
     "i18n-ally.enabledFrameworks": ["react-i18next"],
     "i18n-ally.keystyle": "nested",
-    "gel.project-dir": "./package/server/database",
+    "gel.project-dir": "package/database",
     "files.exclude": {
-        "package/server/database/dbschema/migrations": true
+        "package/database/dbschema/migrations": true
     }
 }
