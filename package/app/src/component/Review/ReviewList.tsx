@@ -1,4 +1,4 @@
-import { BookReview } from "@/api/bookReviews";
+import { BookReview } from "contract";
 import { SingleReview } from "./SingleReview";
 
 import React, { useEffect, useReducer } from "react";

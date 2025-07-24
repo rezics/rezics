@@ -33,6 +33,8 @@ import { TestPage02 } from "@/page/Test/TestPage02";
 import { TestPage03 } from "@/page/Test/TestPage03";
 import { TagByBookPage } from "@/page/Tag/TagByBookPage";
 import TestPaginationPage from "@/page/Test/TestPaginationPage";
+import { NewBookPage } from "@/page/BookEdit/NewBookPage";
+import { UserPage } from "@/page/User/UserPage";
 
 /**
  * IMPORTANT – Flattened routing
@@ -59,6 +61,11 @@ export default (
                 </Route>
 
                 {/* ANCHOR Book Edit (chapter first, then main) */}
+                <Route path="/book/new">
+                    <MainLayout>
+                        <NewBookPage />
+                    </MainLayout>
+                </Route>
                 <Route path="/book/:bookId/edit/:chapterId">
                     {({ chapterId }) => (
                         <BookEditLayout>
@@ -148,6 +155,15 @@ export default (
                     {({ bookId }) => (
                         <MainLayout>
                             <TagByBookPage bookId={bookId} />
+                        </MainLayout>
+                    )}
+                </Route>
+
+                {/* AHCHOR User Routes */}
+                <Route path="/user/:userId">
+                    {({ userId }) => (
+                        <MainLayout>
+                            <UserPage userId={userId} />
                         </MainLayout>
                     )}
                 </Route>
