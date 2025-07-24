@@ -294,11 +294,7 @@ importers:
 
   package/database: {}
 
-  package/server:
-    dependencies:
-      gel:
-        specifier: ^2.1.1
-        version: 2.1.1
+  package/server: {}
 
 packages:
 

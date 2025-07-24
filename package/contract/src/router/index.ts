@@ -14,11 +14,11 @@ export { Auth, Book, Review, Tag, Post, ReadList, Comment, Homepage, Chapter };
 export default c.router({
     Auth,
     Book,
-    Review,
+    // Review,
     Tag,
-    Post,
-    ReadList,
-    Comment,
-    Homepage,
+    // Post,
+    // ReadList,
+    // Comment,
+    // Homepage,
     Chapter,
 });
