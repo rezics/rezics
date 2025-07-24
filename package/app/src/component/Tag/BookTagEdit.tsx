@@ -1,8 +1,15 @@
 import React, { useState, useEffect } from "react";
 import DialogContainer from "@component/Common/DialogContainer"; // Ensure this path is correct
-import { TagGroup } from "contract";
+import { TagGroup } from "contract/schema";
 import Autocomplete from "@mui/material/Autocomplete";
-import { Button, Chip, IconButton, TextField, MenuItem, Alert } from "@mui/material";
+import {
+    Button,
+    Chip,
+    IconButton,
+    TextField,
+    MenuItem,
+    Alert,
+} from "@mui/material";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import Menu from "@mui/material/Menu";
 
@@ -21,7 +28,9 @@ export function TagEditAutocomplete() {
         <Autocomplete
             disablePortal
             options={OrganizationList}
-            renderInput={(params) => <TextField {...params} label="Organization" />}
+            renderInput={(params) => (
+                <TextField {...params} label="Organization" />
+            )}
             className="w-full"
         />
     );
@@ -96,21 +105,33 @@ function EditSingleTag({ label, onUpdate, setOnTagEdit }: EditSingleTagProps) {
     return (
         <div className="mt-6">
             <div className="flex justify-between">
-                <Button variant="outlined" color="primary" onClick={() => setOnTagEdit(false)}>
+                <Button
+                    variant="outlined"
+                    color="primary"
+                    onClick={() => setOnTagEdit(false)}
+                >
                     Back
                 </Button>
                 <div className="w-full !ml-4 items-center py-1 font-bold">
                     {label}
                 </div>
-                <Button variant="contained" color="primary" onClick={() => setOnTagEdit(false)}>
+                <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={() => setOnTagEdit(false)}
+                >
                     Update
                 </Button>
             </div>
             <div className="mt-4">
-                <TextField label="name" value={label} onChange={(e) => onUpdate(e.target.value)} />
+                <TextField
+                    label="name"
+                    value={label}
+                    onChange={(e) => onUpdate(e.target.value)}
+                />
             </div>
         </div>
-    )
+    );
 }
 
 export namespace BookTagEdit {
@@ -134,13 +155,19 @@ export namespace BookTagEdit {
         return (
             <div>
                 <Alert severity="info" className="mb-4">
-                    单机Tag以编辑, 你只会搜索到你订阅的组织，如果想要编辑某个组织的标签，请去[这里]管理组织订阅
+                    单机Tag以编辑,
+                    你只会搜索到你订阅的组织，如果想要编辑某个组织的标签，请去[这里]管理组织订阅
                 </Alert>
                 <div className="flex justify-between">
                     <div className="w-full">
                         <TagEditAutocomplete />
                     </div>
-                    <Button variant="contained" color="primary" onClick={handleUpdate} className="w-1/4 !ml-4">
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={handleUpdate}
+                        className="w-1/4 !ml-4"
+                    >
                         Update
                     </Button>
                 </div>
@@ -149,11 +176,20 @@ export namespace BookTagEdit {
                  * 编辑特定 TagGroup 的 Tags
                  */}
                 {onTagEdit ? (
-                    <EditSingleTag label={'tag 1'} onUpdate={() => {}} setOnTagEdit={setOnTagEdit} />
+                    <EditSingleTag
+                        label={"tag 1"}
+                        onUpdate={() => {}}
+                        setOnTagEdit={setOnTagEdit}
+                    />
                 ) : (
                     <div className="flex flex-wrap gap-2 mt-6">
                         {tagGroupObject.tags.map((tag) => (
-                            <TagEditChip key={tag} label={tag} onEdit={handleTagEdit} onDelete={() => {}} />
+                            <TagEditChip
+                                key={tag}
+                                label={tag}
+                                onEdit={handleTagEdit}
+                                onDelete={() => {}}
+                            />
                         ))}
                     </div>
                 )}
@@ -195,14 +231,24 @@ export namespace BookTagEdit {
 
         const content = (
             <Show
-                tagGroupObject={editedTagGroupObject || { id: "1", name: "Tag Group 1", tags: [] }}
+                tagGroupObject={
+                    editedTagGroupObject || {
+                        id: "1",
+                        name: "Tag Group 1",
+                        tags: [],
+                    }
+                }
                 onUpdate={handleTagUpdate}
             />
         );
 
         if (mode === "modal") {
             return (
-                <DialogContainer open={editOpen} onClose={() => setEditOpen(false)} title="Edit Book Tags">
+                <DialogContainer
+                    open={editOpen}
+                    onClose={() => setEditOpen(false)}
+                    title="Edit Book Tags"
+                >
                     <div className="min-h-[500px]">{content}</div>
                 </DialogContainer>
             );

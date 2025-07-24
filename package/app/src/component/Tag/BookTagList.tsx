@@ -1,5 +1,5 @@
 import { Box } from "@mui/material";
-import { TagGroup } from "contract";
+import { TagGroup } from "contract/schema";
 import { useEffect } from "react";
 import { SingleBookTag } from "./SingleBookTag";
 

@@ -1,8 +1,8 @@
 import { http, HttpResponse } from "msw";
-import { homePageRouter } from "contract";
+import { Homepage } from "contract";
 
 export const homePageHandlers = [
-    http.get(homePageRouter.get.path, () => {
+    http.get(Homepage.get.path, () => {
         return HttpResponse.json({
             id: "1",
             content: "Mock Home Page",

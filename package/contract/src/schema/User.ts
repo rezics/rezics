@@ -2,9 +2,6 @@
 import { z } from "zod";
 import { phone, email, username, password, id as idSchema } from "./common";
 
-// ------------------------------------------------------------------
-// User Profile
-// ------------------------------------------------------------------
 export const UserSchema = z.object({
     id: idSchema,
     username, // 用户名
@@ -24,9 +21,6 @@ export const UserPreviewSchema = z.object({
 });
 export type UserPreview = z.infer<typeof UserPreviewSchema>;
 
-// ------------------------------------------------------------------
-// Auth Payloads
-// ------------------------------------------------------------------
 export const SignupBodySchema = z.object({
     username,
     email,

@@ -1,13 +1,16 @@
 // https://github.com/brimdata/react-arborist
 
-import { ChapterTreeNode, ChapterOrderType } from "@/component/Book/ChapterList";
+import {
+    ChapterTreeNode,
+    ChapterOrderType,
+} from "@/component/Book/ChapterList";
 import { buildTree } from "@/util/treeAbstract";
 import { useMemo, useState, useEffect } from "react";
 import { ChapterArborist } from "@/component/Book/ChapterArborist";
 
 import { useLayoutStore } from "@/global/layoutStore";
 import { Button, Divider, Switch, TextField } from "@mui/material";
-import { Chapter, ChapterOrder } from "contract";
+import { Chapter, ChapterOrder } from "contract/schema";
 
 interface BookEditorSidebarProps {
     chaptersData: {
@@ -32,13 +35,19 @@ export const BookEditorSidebar: React.FC<BookEditorSidebarProps> = ({
 }) => {
     const { sidebarHeightBelow } = useLayoutStore();
     const chapters: ChapterTreeNode[] = chaptersData?.chapters ?? [];
-    const orderMap: ChapterOrderType = new Map(Object.entries(chaptersData?.order ?? {}));
+    const orderMap: ChapterOrderType = new Map(
+        Object.entries(chaptersData?.order ?? {}),
+    );
 
     useEffect(() => {
         console.log("chaptersData", chaptersData);
     }, [chaptersData]);
     const chapterTree = useMemo(
-        () => buildTree({ nodes: chapters, orders: orderMap }) as unknown as Chapter[],
+        () =>
+            buildTree({
+                nodes: chapters,
+                orders: orderMap,
+            }) as unknown as Chapter[],
         [chaptersData],
     );
 
@@ -86,11 +95,21 @@ export const BookEditorSidebar: React.FC<BookEditorSidebarProps> = ({
                     /> */}
 
                     <div className="flex items-center space-x-4 mt-3 w-full justify-between">
-                        <label className="text-gray-700 font-bold">Enable Drag</label>
-                        <Switch checked={enableDrag} onChange={(e) => setEnableDrag(e.target.checked)} />
+                        <label className="text-gray-700 font-bold">
+                            Enable Drag
+                        </label>
+                        <Switch
+                            checked={enableDrag}
+                            onChange={(e) => setEnableDrag(e.target.checked)}
+                        />
                     </div>
                     <div className="w-full">
-                        <Button variant="contained" color="primary" className="w-full" onClick={updataChapter}>
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            className="w-full"
+                            onClick={updataChapter}
+                        >
                             Updata Chapter
                         </Button>
                     </div>

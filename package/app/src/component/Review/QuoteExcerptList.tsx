@@ -1,6 +1,6 @@
 import { Box, Stack } from "@mui/material";
 import { SingleQuoteExcerpt } from "@component/Review/SingleQuoteExcerpt";
-import { QuoteExcerpt } from "contract";
+import { QuoteExcerpt } from "contract/schema";
 
 export namespace QuoteExcerptList {
     export type Show = {
@@ -13,9 +13,25 @@ export namespace QuoteExcerptList {
                 {/* Quotes */}
                 <Box>
                     <Stack spacing={2}>
-                        {(Array.isArray(data) ? data : []).map((quote: QuoteExcerpt) => (
-                            <SingleQuoteExcerpt.Show key={quote.id} author={{name: quote.author.name, avatar: quote.author.avatar || ''}} content={quote.content} stats={{replies: 0, likes: 0, date: quote.createdAt}} source={'quote.source'} originalLink={'quote.originalLink'} />
-                        ))}
+                        {(Array.isArray(data) ? data : []).map(
+                            (quote: QuoteExcerpt) => (
+                                <SingleQuoteExcerpt.Show
+                                    key={quote.id}
+                                    author={{
+                                        name: quote.author.name,
+                                        avatar: quote.author.avatar || "",
+                                    }}
+                                    content={quote.content}
+                                    stats={{
+                                        replies: 0,
+                                        likes: 0,
+                                        date: quote.createdAt,
+                                    }}
+                                    source={"quote.source"}
+                                    originalLink={"quote.originalLink"}
+                                />
+                            ),
+                        )}
                     </Stack>
                 </Box>
             </div>

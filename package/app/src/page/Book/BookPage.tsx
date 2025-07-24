@@ -1,5 +1,15 @@
 import React, { useEffect, useMemo, useRef } from "react";
-import { Box, Container, Grid, Typography, Paper, Divider, Avatar, Stack, Tab } from "@mui/material";
+import {
+    Box,
+    Container,
+    Grid,
+    Typography,
+    Paper,
+    Divider,
+    Avatar,
+    Stack,
+    Tab,
+} from "@mui/material";
 import { TabContext, TabList, TabPanel } from "@mui/lab";
 import { useParams, Link, useLocation } from "wouter";
 import { BookTagView } from "@/component/Book/BookTagPreview";
@@ -27,10 +37,17 @@ export namespace BookPage {
         ref?: React.Ref<unknown> | undefined;
         data: Book;
         activeTab: string;
-        onTabChange?: ((event: React.SyntheticEvent | null, newValue: Tab) => void) | undefined;
+        onTabChange?:
+            | ((event: React.SyntheticEvent | null, newValue: Tab) => void)
+            | undefined;
     };
 
-    export const Show: React.FC<Show> = ({ ref, data, activeTab, onTabChange }) => {
+    export const Show: React.FC<Show> = ({
+        ref,
+        data,
+        activeTab,
+        onTabChange,
+    }) => {
         return (
             <Box id="book-detail" ref={ref}>
                 {/* Book Overview */}
@@ -51,37 +68,55 @@ export namespace BookPage {
                                 <TabPanel value="0">
                                     <Stack spacing={4}>
                                         {/* ANCHOR Description */}
-                                        <BookDescription.Container description={data?.description || ""} />
+                                        <BookDescription.Container
+                                            description={
+                                                data?.description || ""
+                                            }
+                                        />
                                         <Divider />
 
                                         {/* ANCHOR Tags */}
                                         {/* <BookTagView.Container tagObjects={data?.book.tags || []} /> */}
-                                        <BookTagView.Container bookId={data?.id || "1"} />
+                                        <BookTagView.Container
+                                            bookId={data?.id || "1"}
+                                        />
                                         <Divider />
 
                                         {/* ANCHOR Author Info */}
-                                        <AuthorInfo.Container author={data?.author || {}} />
+                                        <AuthorInfo.Container
+                                            author={data?.author || {}}
+                                        />
                                         <Divider />
 
                                         {/* ANCHOR 最新章节 */}
 
                                         {/* ANCHOR Quote Excerpt Preview */}
                                         <div>
-                                            <ArrowForwardIcon.Container size={16} to={`/quote/book/${data?.id}`}>
+                                            <ArrowForwardIcon.Container
+                                                size={16}
+                                                to={`/quote/book/${data?.id}`}
+                                            >
                                                 <AccentBarWithText.Container text="原文摘录" />
                                             </ArrowForwardIcon.Container>
                                         </div>
-                                        <QuoteExcerptPreview.Container id={data?.id || ""} />
+                                        <QuoteExcerptPreview.Container
+                                            id={data?.id || ""}
+                                        />
                                         <Divider />
 
                                         {/* ANCHOR Short Reviews */}
                                         <Box>
                                             <div>
-                                                <ArrowForwardIcon.Container size={16} to={`/review/short/book/${data?.id}`}>
+                                                <ArrowForwardIcon.Container
+                                                    size={16}
+                                                    to={`/review/short/book/${data?.id}`}
+                                                >
                                                     <AccentBarWithText.Container text="短评" />
                                                 </ArrowForwardIcon.Container>
                                             </div>
-                                            <ShortBookReviews bookId={data?.id || ""} />
+                                            <ShortBookReviews
+                                                bookId={data?.id || ""}
+                                            />
                                         </Box>
                                     </Stack>
                                 </TabPanel>
@@ -89,10 +124,16 @@ export namespace BookPage {
                                 <TabPanel value="1">
                                     <Stack spacing={4}>
                                         {/* ANCHOR Book Reviews */}
-                                        <BookReviews bookId={data?.id || ""} title={data?.title || ""} />
+                                        <BookReviews
+                                            bookId={data?.id || ""}
+                                            title={data?.title || ""}
+                                        />
 
                                         {/* ANCHOR Book Lists */}
-                                        <ReadlistByBookPreview bookId={data?.id || ""} title={data?.title || ""} />
+                                        <ReadlistByBookPreview
+                                            bookId={data?.id || ""}
+                                            title={data?.title || ""}
+                                        />
                                     </Stack>
                                 </TabPanel>
 
@@ -112,15 +153,28 @@ export namespace BookPage {
 
                                 {/* Book Info */}
                                 <Box>
-                                    <Typography variant="h6" className="font-bold mb-4">
+                                    <Typography
+                                        variant="h6"
+                                        className="font-bold mb-4"
+                                    >
                                         书籍信息
                                     </Typography>
                                     <Stack spacing={1}>
-                                        <Typography variant="body2">书名：{data?.title}</Typography>
-                                        <Typography variant="body2">作者：{data?.author?.name}</Typography>
-                                        <Typography variant="body2">出版社：{data?.publisher}</Typography>
-                                        <Typography variant="body2">出版日期：{data?.publishDate}</Typography>
-                                        <Typography variant="body2">ISBN：{data?.isbn}</Typography>
+                                        <Typography variant="body2">
+                                            书名：{data?.title}
+                                        </Typography>
+                                        <Typography variant="body2">
+                                            作者：{data?.author?.name}
+                                        </Typography>
+                                        <Typography variant="body2">
+                                            出版社：{data?.publisher}
+                                        </Typography>
+                                        <Typography variant="body2">
+                                            出版日期：{data?.publishDate}
+                                        </Typography>
+                                        <Typography variant="body2">
+                                            ISBN：{data?.isbn}
+                                        </Typography>
                                     </Stack>
                                 </Box>
                             </Paper>
@@ -157,7 +211,9 @@ export namespace BookPage {
         const [location] = useLocation();
 
         const getInitialTab = (): Tab => {
-            const routeData = routeStore.getState().getRouteData(String(location));
+            const routeData = routeStore
+                .getState()
+                .getRouteData(String(location));
             return (routeData?.tab as Tab) || "0";
         };
         const [activeTab, setActiveTab] = React.useState<Tab>(getInitialTab);
@@ -176,7 +232,10 @@ export namespace BookPage {
         }, [data]);
 
         const tabRef = useRef<Tab>(getInitialTab());
-        const handleTabChange = (_: React.SyntheticEvent | null, newValue: Tab) => {
+        const handleTabChange = (
+            _: React.SyntheticEvent | null,
+            newValue: Tab,
+        ) => {
             console.log("handleTabChange", newValue);
             tabRef.current = newValue;
             setActiveTab(newValue);
@@ -198,18 +257,24 @@ export namespace BookPage {
                 clearTimeout(timer);
                 stopThrottledScroll?.();
 
-                const prev = routeStore.getState().getRouteData(String(location)) || {};
+                const prev =
+                    routeStore.getState().getRouteData(String(location)) || {};
                 routeStore.getState().setRouteData(String(location), {
                     ...prev,
                     tab: tabRef.current, // Override tab, scrollY keep unchanged
                 });
-                console.log("routeStoreData", routeStore.getState().getRouteData(String(location)));
+                console.log(
+                    "routeStoreData",
+                    routeStore.getState().getRouteData(String(location)),
+                );
             };
         }, [location]);
 
         useEffect(() => {
             // NOTE 這裏的邏輯還是有問題，雖然理論上只有回退的時候才會觸發滾動，但是我還是不確定會不會有bug
-            const routeData = routeStore.getState().getRouteData(String(location));
+            const routeData = routeStore
+                .getState()
+                .getRouteData(String(location));
             if (routeData?.scrollY) {
                 console.log("scroll to", routeData.scrollY);
                 scroll(routeData.scrollY);
@@ -228,6 +293,12 @@ export namespace BookPage {
             return null; // 或者 return <div>No data</div>;
         }
 
-        return <Show data={data.body} activeTab={activeTab} onTabChange={handleTabChange} />;
+        return (
+            <Show
+                data={data.body}
+                activeTab={activeTab}
+                onTabChange={handleTabChange}
+            />
+        );
     };
 }

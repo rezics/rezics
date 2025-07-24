@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { ShortReviewList } from "../Review/ShortReviewList";
 import { tsr } from "@/api/tsr";
-import { BookReview } from "contract";
+import { BookReview } from "contract/schema";
 
 type Review = BookReview & {
     likes?: number;
@@ -12,7 +12,9 @@ interface ShortBookReviewsProps {
     bookId: string;
 }
 
-export const ShortBookReviews: React.FC<ShortBookReviewsProps> = ({ bookId }) => {
+export const ShortBookReviews: React.FC<ShortBookReviewsProps> = ({
+    bookId,
+}) => {
     const { data, isLoading, error } = tsr.review.listShortReviews.useQuery({
         queryKey: ["shortBookReviews", bookId],
         queryData: {
@@ -32,5 +34,11 @@ export const ShortBookReviews: React.FC<ShortBookReviewsProps> = ({ bookId }) =>
         console.log("Dislike review:", reviewId);
     };
 
-    return <ShortReviewList.Show reviews={reviews} onLike={handleLike} onDislike={handleDislike} />;
+    return (
+        <ShortReviewList.Show
+            reviews={reviews}
+            onLike={handleLike}
+            onDislike={handleDislike}
+        />
+    );
 };

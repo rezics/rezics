@@ -1,8 +1,17 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { z } from "zod"; // 假设从外部导入
-import { Box, Typography, Grid, Card, CardContent, ThemeProvider, createTheme, Divider } from "@mui/material";
+import {
+    Box,
+    Typography,
+    Grid,
+    Card,
+    CardContent,
+    ThemeProvider,
+    createTheme,
+    Divider,
+} from "@mui/material";
 import { UniversalPaginator } from "@/component/Common/Pagination";
-import { contract } from "contract";
+import contract from "contract";
 import { BookSearchFilter } from "@/component/BookLib/BookSearchFilter";
 
 // 1. Zod Schemas (假设从 './schemas' 等文件导入)
@@ -10,7 +19,10 @@ import { BookSearchFilter } from "@/component/BookLib/BookSearchFilter";
 export const PaginationQuerySchema = z.object({
     page: z.number().int().optional().default(1),
     limit: z.number().int().optional().default(100), // 外部API一次获取100条
-    type: z.enum(["time", "name", "popular", "agree"]).optional().default("time"),
+    type: z
+        .enum(["time", "name", "popular", "agree"])
+        .optional()
+        .default("time"),
     order: z.enum(["asc", "desc"]).optional().default("desc"),
 });
 const PostSchema = z.object({
@@ -36,7 +48,8 @@ const allPosts: Post[] = Array.from({ length: 555 }, (_, i) => ({
 const fetchPostsAPI = (query: PaginationQuery) => {
     return new Promise((resolve) => {
         setTimeout(() => {
-            const { page, limit, type, order } = PaginationQuerySchema.parse(query);
+            const { page, limit, type, order } =
+                PaginationQuerySchema.parse(query);
             const sorted = [...allPosts].sort((a, b) => {
                 let comp = 0;
                 if (type === "name") comp = a.name.localeCompare(b.name);
@@ -93,7 +106,13 @@ export default function TestPaginationPage() {
     const EXTERNAL_PAGE_SIZE = 100;
 
     const fetchDataBlock = useCallback(
-        async (page: number, currentSort: { type: "time" | "name" | "popular" | "agree"; order: "asc" | "desc" }) => {
+        async (
+            page: number,
+            currentSort: {
+                type: "time" | "name" | "popular" | "agree";
+                order: "asc" | "desc";
+            },
+        ) => {
             setIsLoading(true);
             try {
                 const query: PaginationQuery = {
@@ -102,10 +121,16 @@ export default function TestPaginationPage() {
                     type: currentSort.type,
                     order: currentSort.order,
                 };
-                const response = (await fetchPostsAPI(query)) as { items: Post[]; total: number };
+                const response = (await fetchPostsAPI(query)) as {
+                    items: Post[];
+                    total: number;
+                };
                 // setAllFetchedItems((prev) => (page === 1 ? response.items : [...prev, ...response.items]));
                 setAllFetchedItems((prev) =>
-                    (page === 1 ? response.items : [...prev, ...response.items]).slice(0, 100),
+                    (page === 1
+                        ? response.items
+                        : [...prev, ...response.items]
+                    ).slice(0, 100),
                 ); // 最多100个/根据page来算
                 setTotalItems(response.total);
                 setCurrentExternalPage(page);
@@ -122,10 +147,14 @@ export default function TestPaginationPage() {
         fetchDataBlock(1, sortConfig);
     }, [sortConfig, fetchDataBlock]);
 
-    const handleSortChange = (newSort: { type?: string; order?: "asc" | "desc" }) => {
+    const handleSortChange = (newSort: {
+        type?: string;
+        order?: "asc" | "desc";
+    }) => {
         setSortConfig((prev) => ({
             type:
-                newSort.type && ["time", "name", "popular", "agree"].includes(newSort.type)
+                newSort.type &&
+                ["time", "name", "popular", "agree"].includes(newSort.type)
                     ? (newSort.type as "time" | "name" | "popular" | "agree")
                     : prev.type,
             order: newSort.order ?? prev.order,
@@ -149,8 +178,15 @@ export default function TestPaginationPage() {
     const [currentPage, setCurrentPage] = useState(1);
 
     return (
-        <Box sx={{ bgcolor: "#f4f6f8", p: { xs: 2, md: 4 }, minHeight: "100vh" }}>
-            <Typography variant="h4" component="h1" gutterBottom sx={{ textAlign: "center", mb: 4 }}>
+        <Box
+            sx={{ bgcolor: "#f4f6f8", p: { xs: 2, md: 4 }, minHeight: "100vh" }}
+        >
+            <Typography
+                variant="h4"
+                component="h1"
+                gutterBottom
+                sx={{ textAlign: "center", mb: 4 }}
+            >
                 通用分页控制器演示
             </Typography>
             <UniversalPaginator<Post>
@@ -163,14 +199,23 @@ export default function TestPaginationPage() {
                 onSortChange={handleSortChange}
                 requestData={handleNeedMoreData}
                 isLoading={isLoading && allFetchedItems.length === 0}
-                sortControl={<BookSearchFilter sortType={sortConfig.type} sortOrder={sortConfig.order} onSortChange={handleSortChange} />}
+                sortControl={
+                    <BookSearchFilter
+                        sortType={sortConfig.type}
+                        sortOrder={sortConfig.order}
+                        onSortChange={handleSortChange}
+                    />
+                }
                 currentPage={currentPage}
                 setCurrentPage={setCurrentPage}
             >
                 {(currentPageItems: Post[]) => (
                     <Grid container spacing={2}>
                         {currentPageItems.map((post) => (
-                            <Grid sx={{ xs: 12, sm: 6, md: 4, lg: 3 }} key={post.id}>
+                            <Grid
+                                sx={{ xs: 12, sm: 6, md: 4, lg: 3 }}
+                                key={post.id}
+                            >
                                 <PostCard post={post} />
                             </Grid>
                         ))}
@@ -194,7 +239,10 @@ export default function TestPaginationPage() {
                 {(currentPageItems: Post[]) => (
                     <Grid container spacing={2}>
                         {currentPageItems.map((post) => (
-                            <Grid sx={{ xs: 12, sm: 6, md: 4, lg: 3 }} key={post.id}>
+                            <Grid
+                                sx={{ xs: 12, sm: 6, md: 4, lg: 3 }}
+                                key={post.id}
+                            >
                                 <PostCard post={post} />
                             </Grid>
                         ))}

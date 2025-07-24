@@ -1,6 +1,5 @@
-import { initContract } from "@ts-rest/core";
 import { z } from "zod";
-import { PaginationQuerySchema, PaginatedResponse, id as idSchema, created_at } from "./common";
+import { id as idSchema, created_at } from "./common";
 import { UserSchema } from "./User";
 
 // ------------------------------------------------------------------
@@ -25,16 +24,3 @@ export const CommentSchema: z.ZodSchema<Comment> = z.lazy(() =>
         replies: z.array(CommentSchema),
     }),
 );
-
-// ANCHOR CommentRouter
-const c = initContract();
-
-const commentListResponse = PaginatedResponse(CommentSchema);
-export const commentRouter = c.router({
-    list: {
-        method: "GET",
-        path: "/comment/list/:commentId",
-        query: PaginationQuerySchema,
-        responses: { 200: commentListResponse },
-    },
-});

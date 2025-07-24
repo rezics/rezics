@@ -1,6 +1,6 @@
 import { Card, CardContent, Typography } from "@mui/material";
 
-import { Book } from "contract";
+import { Book } from "contract/schema";
 
 export namespace BookListView {
     export type Show = {
@@ -11,7 +11,10 @@ export namespace BookListView {
         return (
             <div className="mt-4 grid grid-cols-1">
                 {books.map((book) => (
-                    <Card key={book.id} className="mt-4 h-[200px] flex flex-row items-stretch gap-4 w-full">
+                    <Card
+                        key={book.id}
+                        className="mt-4 h-[200px] flex flex-row items-stretch gap-4 w-full"
+                    >
                         {book.cover && (
                             <img
                                 src={book.cover}
@@ -25,10 +28,17 @@ export namespace BookListView {
                                 <Typography variant="h6" className="mb-1">
                                     {book.title}
                                 </Typography>
-                                <Typography variant="subtitle2" color="text.secondary" className="mb-2">
+                                <Typography
+                                    variant="subtitle2"
+                                    color="text.secondary"
+                                    className="mb-2"
+                                >
                                     {book.author.name}
                                 </Typography>
-                                <Typography variant="body2" className="line-clamp-3">
+                                <Typography
+                                    variant="body2"
+                                    className="line-clamp-3"
+                                >
                                     {book.description}
                                 </Typography>
                             </div>

@@ -1,77 +1,19 @@
-import { initContract } from "@ts-rest/core";
+import c from "./c";
 import { z } from "zod";
-import { id as idSchema, InternationalizedNameSchema, PaginationQuerySchema, ThreadSchema, created_at, updated_at } from "./common";
-import { BookSchema } from "./Book";
-import { UserSchema } from "./User";
-
-// ------------------------------------------------------------------
-// Tag Type
-// -----------------------------------------------------------------
-
-export const TagSchema = z.object({
-    id: idSchema,
-    groupId: idSchema, // 维护groupId就够了，权限组必须由后端查询
-    key: z.string(),
-    name: InternationalizedNameSchema,
-    color: z.string(),
-    createdAt: created_at,
-    updatedAt: updated_at,
-});
-export type Tag = z.infer<typeof TagSchema>;
-
-export const TagGroupSchema = z.object({
-    id: idSchema,
-    type: z.enum(["community", "book"]).default("community"),
-    key: z.string(), // key is a required English key, for the sake of humanity.
-    name: InternationalizedNameSchema,
-    maintainer: idSchema, // Organization ID 实际上应该改成权限组
-    tags: z.array(TagSchema),
-    createdAt: created_at,
-    updatedAt: updated_at,
-});
-export type TagGroup = z.infer<typeof TagGroupSchema>;
-
-// Link Schema, Tracking creation information for evaluation purposes
-// ensure cascading deletion
-export const TagBookLinkSchema = z.object({
-    id: idSchema,
-    tag: z.lazy(() => TagSchema),
-    book: z.lazy(() => BookSchema),
-    createdAt: created_at,
-    updatedAt: updated_at,
-    createdBy: UserSchema,
-});
-export type TagBookLink = z.infer<typeof TagBookLinkSchema>;
-
-export const TagThreadLinkSchema = z.object({
-    id: idSchema,
-    tag: z.lazy(() => TagSchema),
-    thread: z.lazy(() => ThreadSchema),
-    createdAt: created_at,
-    updatedAt: updated_at,
-    createdBy: UserSchema,
-});
-export type TagThreadLink = z.infer<typeof TagThreadLinkSchema>;
-
-// auditing schema
-export const TagAuditingSchema = z.object({
-    id: idSchema,
-    tag: z.lazy(() => TagSchema),
-    createdAt: created_at,
-    updatedAt: updated_at,
-    createdBy: UserSchema,
-    maintainer: idSchema, // Organization ID
-});
-
-// TODO 完善 auditing 逻辑
-
-const c = initContract();
+import { PaginationQuerySchema, ThreadSchema, id as idSchema } from "./common";
+import {
+    TagSchema,
+    TagGroupSchema,
+    TagBookLinkSchema,
+    TagThreadLinkSchema,
+} from "../schema/Tag";
+import { BookSchema } from "../schema/Book";
 
 const bookSpecificTagGroupListTagQuery = z.object({
     tagGroupId: z.array(idSchema),
 });
 
-export const tagRouter = c.router({
+export default c.router({
     // single tag and tag group
     list: {
         method: "GET",
@@ -93,7 +35,11 @@ export const tagRouter = c.router({
     createTagGroup: {
         method: "POST",
         path: "/taggroup",
-        body: TagGroupSchema.omit({ id: true, createdAt: true, updatedAt: true }),
+        body: TagGroupSchema.omit({
+            id: true,
+            createdAt: true,
+            updatedAt: true,
+        }),
         responses: { 200: TagGroupSchema },
     },
     updateTag: {
@@ -105,7 +51,11 @@ export const tagRouter = c.router({
     updateTagGroup: {
         method: "PUT",
         path: "/taggroup/:tagGroupId",
-        body: TagGroupSchema.omit({ id: true, createdAt: true, updatedAt: true }),
+        body: TagGroupSchema.omit({
+            id: true,
+            createdAt: true,
+            updatedAt: true,
+        }),
         responses: { 200: TagGroupSchema },
     },
     // Delete need to ensure cascading deletion
@@ -123,13 +73,21 @@ export const tagRouter = c.router({
     createTagRelatedBook: {
         method: "POST",
         path: "/tag/:tagId/book/:bookId",
-        body: TagBookLinkSchema.omit({ id: true, createdAt: true, updatedAt: true }),
+        body: TagBookLinkSchema.omit({
+            id: true,
+            createdAt: true,
+            updatedAt: true,
+        }),
         responses: { 200: TagBookLinkSchema },
     },
     createTagRelatedThread: {
         method: "POST",
         path: "/tag/:tagId/thread/:threadId",
-        body: TagThreadLinkSchema.omit({ id: true, createdAt: true, updatedAt: true }),
+        body: TagThreadLinkSchema.omit({
+            id: true,
+            createdAt: true,
+            updatedAt: true,
+        }),
         responses: { 200: TagThreadLinkSchema },
     },
     deleteTagRelatedBook: {
@@ -145,13 +103,21 @@ export const tagRouter = c.router({
     updateTagRelatedBook: {
         method: "PUT",
         path: "/tag/:tagId/book/:bookId",
-        body: TagBookLinkSchema.omit({ id: true, createdAt: true, updatedAt: true }),
+        body: TagBookLinkSchema.omit({
+            id: true,
+            createdAt: true,
+            updatedAt: true,
+        }),
         responses: { 200: TagBookLinkSchema },
     },
     updateTagRelatedThread: {
         method: "PUT",
         path: "/tag/:tagId/thread/:threadId",
-        body: TagThreadLinkSchema.omit({ id: true, createdAt: true, updatedAt: true }),
+        body: TagThreadLinkSchema.omit({
+            id: true,
+            createdAt: true,
+            updatedAt: true,
+        }),
         responses: { 200: TagThreadLinkSchema },
     },
     TagRelatedBookList: {
@@ -190,5 +156,3 @@ export const tagRouter = c.router({
         responses: { 200: z.array(TagSchema) },
     },
 });
-
-export type TagRouter = typeof tagRouter;

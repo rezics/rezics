@@ -1,5 +1,5 @@
 import { http, HttpResponse } from "msw";
-import { postRouter } from "contract";
+import { Post } from "contract";
 
 const categories = [
     { id: "1", title: "General" },
@@ -27,7 +27,7 @@ let posts = [
 
 export const postHandlers = [
     // List posts
-    http.get(postRouter.list.path, ({ request }) => {
+    http.get(Post.list.path, ({ request }) => {
         const url = new URL(request.url);
         const page = Number(url.searchParams.get("page") ?? 1);
         const limit = Number(url.searchParams.get("limit") ?? 20);
@@ -42,14 +42,15 @@ export const postHandlers = [
     }),
 
     // Get post
-    http.get(postRouter.get.path, ({ params }) => {
+    http.get(Post.get.path, ({ params }) => {
         const post = posts.find((p) => p.id === (params as any)["id"]);
-        if (!post) return HttpResponse.json({ message: "Not found" }, { status: 404 });
+        if (!post)
+            return HttpResponse.json({ message: "Not found" }, { status: 404 });
         return HttpResponse.json(post);
     }),
 
     // Create post
-    http.post(postRouter.create.path, async ({ request }) => {
+    http.post(Post.create.path, async ({ request }) => {
         const body = await request.json();
         const newPost = {
             id: String(posts.length + 1),
@@ -62,14 +63,19 @@ export const postHandlers = [
     }),
 
     // Update post
-    http.put(postRouter.update.path, async ({ params, request }) => {
+    http.put(Post.update.path, async ({ params, request }) => {
         const index = posts.findIndex((p) => p.id === (params as any)["id"]);
-        if (index === -1) return HttpResponse.json({ message: "Not found" }, { status: 404 });
+        if (index === -1)
+            return HttpResponse.json({ message: "Not found" }, { status: 404 });
         const patch = await request.json();
-        posts[index] = { ...(posts[index] as any), ...(patch as any), updatedAt: new Date().toISOString() };
+        posts[index] = {
+            ...(posts[index] as any),
+            ...(patch as any),
+            updatedAt: new Date().toISOString(),
+        };
         return HttpResponse.json(posts[index]);
     }),
 
     // Categories
-    // http.get(postRouter.categories.path, () => HttpResponse.json(categories)),
-]; 
+    // http.get(Post.categories.path, () => HttpResponse.json(categories)),
+];

@@ -1,11 +1,11 @@
 import { http, HttpResponse } from "msw";
-import { readlistRouter } from "contract";
+import { ReadList } from "contract";
 import { mockBookLists } from "../data/booklists";
-import { mockABookList01 } from "../data/abooklist01"
+import { mockABookList01 } from "../data/abooklist01";
 
 export const readlistHandlers = [
     // List readlists
-    http.get(readlistRouter.listByBook.path, ({ request }) => {
+    http.get(ReadList.listByBook.path, ({ request }) => {
         const url = new URL(request.url);
         const page = Number(url.searchParams.get("page") ?? 1);
         const limit = Number(url.searchParams.get("limit") ?? 20);
@@ -20,7 +20,7 @@ export const readlistHandlers = [
     }),
 
     // Get single readlist
-    http.get(readlistRouter.get.path, ({ params }) => {
+    http.get(ReadList.get.path, ({ params }) => {
         // const list = mockBookLists.find((l) => String(l.id) === (params as any)["id"]);
         // if (!list) return HttpResponse.json({ message: "Not found" }, { status: 404 });
         const list = mockABookList01;
@@ -28,7 +28,7 @@ export const readlistHandlers = [
     }),
 
     // Create readlist
-    http.post(readlistRouter.create.path, async ({ request }) => {
+    http.post(ReadList.create.path, async ({ request }) => {
         const body = await request.json();
         const newList = {
             id: String(mockBookLists.length + 1),
@@ -42,4 +42,4 @@ export const readlistHandlers = [
         mockBookLists.push(newList);
         return HttpResponse.json(newList, { status: 201 });
     }),
-]; 
+];
