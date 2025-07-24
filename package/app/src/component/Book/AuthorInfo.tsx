@@ -26,7 +26,7 @@ export namespace AuthorInfo {
                         <AccentBarWithText.Show text={t("book.authorInfo") + " " + author?.name} />
                         {showEditButton && <EditButtonFloatRight.Show onClick={onEdit} />}
                     </div>
-                    <Typography variant="body1" className="whitespace-pre-line">
+                    <div className="whitespace-pre-line">
                         <Box>
                             <Box className="mb-4 mt-2 flex">
                                 {/* 左侧图片区域 */}
@@ -47,7 +47,7 @@ export namespace AuthorInfo {
                                 </Typography>
                             </Box>
                         </Box>
-                    </Typography>
+                    </div>
                 </Box>
                 <AuthorInfoEdit.Container
                     author={author}

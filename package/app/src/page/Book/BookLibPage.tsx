@@ -46,32 +46,25 @@ export namespace BookLib {
     }) => {
         const [currentPage, setCurrentPage] = useState(1);
 
-        if (isLoading) {
-            return (
-                <div className="flex justify-center py-8">
-                    <CircularProgress />
-                </div>
-            );
-        }
-        if (error) {
-            return (
-                <Alert severity="error" className="my-4">
-                    {String(error)}
-                </Alert>
-            );
-        }
-        if (books.length === 0) {
-            return (
-                <Typography variant="body1" className="mt-4 text-center">
-                    No books found.
-                </Typography>
-            );
-        }
-
         return (
             <div className="mx-auto max-w-7xl p-4">
                 <BookSearch.Container onSearch={getBookList} />
                 <div className="mt-4" />
+                {/* {isLoading && (
+                    <div className="flex justify-center py-8">
+                        <CircularProgress />
+                    </div>
+                )} */}
+                {error && (
+                    <Alert severity="error" className="my-4">
+                        {String(error)}
+                    </Alert>
+                )}
+                {books.length === 0 && !isLoading && (
+                    <Typography variant="body1" className="mt-4 text-center">
+                        No books found.
+                    </Typography>
+                )}
                 <UniversalPaginator<Book>
                     data={books}
                     totalExternalItems={totalItems}

@@ -29,11 +29,10 @@ export function ReadlistByBookPreview({ title, bookId }: { title: string; bookId
 
     return (
         <div>
-            <Link href={`/readlist/book/${bookId}`} className="flex mb-4">
-                <ArrowForwardIcon.Container size={16}>
-                    <AccentBarWithText.Container text={`包含 ${title} 的书单`} />
-                </ArrowForwardIcon.Container>
-            </Link>
+            <ArrowForwardIcon.Container size={16} to={`/readlist/book/${bookId}`}>
+                <AccentBarWithText.Container text={`包含 ${title} 的书单`} />
+            </ArrowForwardIcon.Container>
+            <div className="mb-4" />
             <ReadlistList booklists={data?.body?.items || []} />
             {/* 此处应该显示书单列表 */}
         </div>
