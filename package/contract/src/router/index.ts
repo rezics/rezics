@@ -19,6 +19,6 @@ export default c.router({
     // Post,
     // ReadList,
     // Comment,
-    // Homepage,
+    Homepage,
     Chapter,
 });
