@@ -4,16 +4,11 @@
     "description": "",
     "main": "index.js",
     "scripts": {
-        "generate": "cd database && pnpx @gel/generate edgeql-js --target ts --output-dir ./ts",
-        "start": "tsx src/index.ts",
-        "init:gel": "cd database && gel project init"
+        "start": "tsx src/index.ts"
     },
     "keywords": [],
     "author": "",
     "license": "ISC",
     "packageManager": "pnpm@10.8.1",
-    "type": "module",
-    "dependencies": {
-        "gel": "^2.1.1"
-    }
+    "type": "module"
 }
