@@ -4,10 +4,13 @@ import { id, Nameable, Auditable, shortString, Tagable } from "./common";
 
 export namespace Tag {
     const Mutable = {
+        id,
         ...Nameable.shape,
         ...Tagable.shape,
+        ...Auditable.shape,
         color: shortString,
         owner: z.array(id),
+        type: z.enum(["book", "thread"]),
     };
 
     export const Create = z.object({
@@ -31,8 +34,8 @@ export namespace Tag {
 //     id: id,
 //     tag: z.lazy(() => TagSchema),
 //     book: z.lazy(() => z.any()), // 使用any来避免循环依赖，在router中会正确使用BookSchema
-//     createdAt: createdAt,
-//     updatedAt: updatedAt,
+//     created_at:created_atat,
+//     updated_at: updated_at,
 //     createdBy: UserSchema,
 // });
 // export type TagBookLink = z.infer<typeof TagBookLinkSchema>;
@@ -41,8 +44,8 @@ export namespace Tag {
 //     id: id,
 //     tag: z.lazy(() => TagSchema),
 //     thread: z.lazy(() => ThreadSchema),
-//     createdAt: createdAt,
-//     updatedAt: updatedAt,
+//     created_at:created_atat,
+//     updated_at: updated_at,
 //     createdBy: UserSchema,
 // });
 // export type TagThreadLink = z.infer<typeof TagThreadLinkSchema>;
@@ -51,8 +54,8 @@ export namespace Tag {
 // export const TagAuditingSchema = z.object({
 //     id: id,
 //     tag: z.lazy(() => TagSchema),
-//     createdAt: createdAt,
-//     updatedAt: updatedAt,
+//     created_at:created_atat,
+//     updated_at: updated_at,
 //     createdBy: UserSchema,
 //     maintainer: id, // Organization ID
 // });

@@ -12,16 +12,16 @@ let posts = [
         title: "Post 1",
         content: "Content 1",
         category: categories[0],
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
     },
     {
         id: "2",
         title: "Post 2",
         content: "Content 2",
         category: categories[1],
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
     },
 ];
 
@@ -55,8 +55,8 @@ export const postHandlers = [
         const newPost = {
             id: String(posts.length + 1),
             ...(body as any),
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
         } as any;
         posts.push(newPost);
         return HttpResponse.json(newPost, { status: 201 });
@@ -71,7 +71,7 @@ export const postHandlers = [
         posts[index] = {
             ...(posts[index] as any),
             ...(patch as any),
-            updatedAt: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
         };
         return HttpResponse.json(posts[index]);
     }),

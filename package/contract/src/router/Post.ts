@@ -1,34 +1,34 @@
 import c from "./c";
 import { z } from "zod";
 import { PaginationQuerySchema, PaginatedResponse } from "./common";
-import { PostSchema } from "../schema/Post";
+import { Post } from "../schema/Post";
 
 export default c.router({
     list: {
         method: "GET",
         path: "/posts",
         query: PaginationQuerySchema,
-        responses: { 200: PaginatedResponse(PostSchema) },
+        responses: { 200: PaginatedResponse(Post) },
     },
     get: {
         method: "GET",
         path: "/posts/:id",
-        responses: { 200: PostSchema, 404: z.object({ message: z.string() }) },
+        responses: { 200: Post, 404: z.object({ message: z.string() }) },
     },
     create: {
         method: "POST",
         path: "/posts",
-        body: PostSchema.omit({ id: true, createdAt: true, updatedAt: true }),
-        responses: { 201: PostSchema },
+        body: Post.omit({ id: true, created_at: true, updated_at: true }),
+        responses: { 201: Post },
     },
     update: {
         method: "PUT",
         path: "/posts/:id",
-        body: PostSchema.partial().omit({
+        body: Post.partial().omit({
             id: true,
-            createdAt: true,
-            updatedAt: true,
+            created_at: true,
+            updated_at: true,
         }),
-        responses: { 200: PostSchema },
+        responses: { 200: Post },
     },
 });

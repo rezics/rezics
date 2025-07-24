@@ -43,8 +43,9 @@ export const PaginatedResponse = <T extends z.ZodTypeAny>(item: T) =>
     });
 
 // ---------------- Primitives ----------------
-export const id = z.uuidv4().describe("ID");
+export const id = z.uuidv7().describe("ID");
 
+// use https://github.com/ai/nanoid, 9 time, 12 random, 3 check
 export const icsid = z
     .string()
     .regex(/^BK-[a-zA-Z0-9]{24}$/, {
@@ -97,8 +98,8 @@ export const ThreadSchema = z.object({
     id: id,
     title: z.string(),
     status: z.string().optional(),
-    createdAt: created_at,
-    updatedAt: updated_at,
+    created_at: created_at,
+    updated_at: updated_at,
 });
 
 export type Thread = z.infer<typeof ThreadSchema>;

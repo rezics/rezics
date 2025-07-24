@@ -11,7 +11,7 @@ export const ReactionSchema = z.object({
     objectId: idSchema,
     type: z.enum(["like", "dislike", "funny"]),
     user: UserSchema,
-    createdAt: z.string(),
+    created_at: z.string(),
 });
 export type Reaction = z.infer<typeof ReactionSchema>;
 

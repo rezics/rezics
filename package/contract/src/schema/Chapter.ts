@@ -11,6 +11,7 @@ export namespace Chapter {
 
     export const Read = z.object({
         book: id,
+        chapter: id,
     });
 
     export const View = z.object({

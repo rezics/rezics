@@ -16,11 +16,6 @@ Get-ChildItem -Path . -Recurse -Include "node_modules", "package-lock.json", "pn
 
 - https://refine.dev/
 
-## GraphQL
-
-- https://github.com/urql-graphql/urql
-- Appwrite SDK https://appwrite.io/docs/sdks
-
 # `create-preact`
 
 <h2 align="center">
@@ -36,3 +31,6 @@ Get-ChildItem -Path . -Recurse -Include "node_modules", "package-lock.json", "pn
 - `pnpm build` - Builds for production, emitting to `dist/`
 
 - `pnpm preview` - Starts a server at http://localhost:4173/ to test production build locally
+
+- `pnpm dlx tsx check-ts-errors.ts` - log all error find in the project
+

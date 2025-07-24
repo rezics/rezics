@@ -57,7 +57,7 @@ export const ReplyComponents: React.FC<ReplyComponentsProps> = ({ bookListId }) 
                         <div className="flex items-center gap-2">
                             <span className="font-semibold text-red-800">{comment.author}</span>
                             <span className="text-xs text-gray-500">#{comment.id}</span>
-                            <span className="text-xs text-gray-500">{comment.createdAt}</span>
+                            <span className="text-xs text-gray-500">{comment.created_at}</span>
                         </div>
                         {comment.parent_id && (
                             <div className="text-xs text-blue-500 mt-1">

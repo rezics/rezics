@@ -1,7 +1,7 @@
 import { Box, Avatar, Typography, Button, Rating, Divider, Tooltip, IconButton } from "@mui/material";
 import { CollapsibleText } from "@component/Common/CollapsibleText";
 import { ReactionBar } from "@component/Common/ReactionBar";
-import { BookReview } from "@/api/bookReviews";
+import { BookReview } from "contract/schema";
 import { SentimentSatisfiedAlt, EmojiEvents } from "@mui/icons-material";
 
 export namespace SingleReview {
@@ -22,7 +22,7 @@ export namespace SingleReview {
                                 {review.user.name}
                             </Typography>
                             <Typography variant="body2" color="text.secondary">
-                                {review.createdAt}
+                                {review.created_at}
                             </Typography>
                         </Box>
                         <Button variant="outlined" size="small" sx={{ ml: 2, py: 0.5 }} onClick={onFollow}>

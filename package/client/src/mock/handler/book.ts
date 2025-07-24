@@ -1,5 +1,6 @@
 import { http, HttpResponse } from "msw";
 import { Book } from "contract";
+import {Chapter} from "contract"
 import { bookList01 } from "../data/bookList01";
 import { bookInfo01 } from "../data/bookinfo01";
 import chapterList01 from "../data/chapterlist01.json";
@@ -31,7 +32,7 @@ export const bookHandlers = [
     }),
 
     // Top books
-    http.get(Book.top.path, () => HttpResponse.json(books.slice(0, 5))),
+    // http.get(Book.top.path, () => HttpResponse.json(books.slice(0, 5))),
 
     // Get book detail
     http.get(Book.get.path, ({ params }) => {
@@ -52,7 +53,7 @@ export const bookHandlers = [
     }),
 
     // Chapters list
-    http.get(Book.chapter.list.path, () => {
+    http.get(Chapter.list.path, () => {
         let data: any = { chapters: [], order: [] };
         data.order = chapterList01.order;
         data.chapters = Object.values(chapterList01.chapters);
@@ -61,12 +62,12 @@ export const bookHandlers = [
     }),
 
     // Chapter content
-    http.get(Book.chapter.content.path, ({ params }) => {
+    http.get(Chapter.get.path, ({ params }) => {
         return HttpResponse.json(chapterContent01);
         // return HttpResponse.json({
         //     id: (params as any)["chapterId"],
         //     content: "Mock chapter content",
-        //     createdAt: new Date().toISOString(),
+        //     created_at: new Date().toISOString(),
         //     chapterName: `章节 ${(params as any)["chapterId"]}`,
         //     author: {
         //         id: "1",

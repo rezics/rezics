@@ -16,7 +16,7 @@ export default c.router({
     createReview: {
         method: "POST",
         path: "/books/:bookId/reviews",
-        body: BookReviewSchema.omit({ id: true, createdAt: true, user: true }),
+        body: BookReviewSchema.omit({ id: true, created_at: true, user: true }),
         responses: { 201: BookReviewSchema },
     },
     listQuotes: {

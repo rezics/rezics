@@ -3,13 +3,9 @@ import { useTranslation } from "react-i18next";
 import { tsr } from "@/api/tsr";
 
 export namespace Home {
-    export type Show = {
-        fetching: boolean;
-        error?: string;
-        data?: any;
-    };
+    export type Show = {};
 
-    export const Show: React.FC<Show> = ({ fetching, error, data }) => {
+    export const Show: React.FC<Show> = () => {
         const { t } = useTranslation();
         return (
             <div className="w-10/12 mx-auto">
@@ -18,23 +14,15 @@ export namespace Home {
                     <div className="text-purple w-2/3 p-4 flex-none">
                         <BookCarousel autoplayIntervalNum={3000} />
                     </div>
-                    <div className="w-1/3 bg-green-200 p-4 flex-1">右侧公告板</div>
+                    <div className="w-1/3 bg-green-200 p-4 flex-1">
+                        右侧公告板
+                    </div>
                 </div>
                 {/* End First Carousel */}
                 {/* 干脆写个插件化定制板块的首页。 */}
                 <div>
-                    <p>{t("title")}</p>、
-                    <p>{t("accessibility.comments")}</p>
+                    <p>{t("title")}</p>、<p>{t("accessibility.comments")}</p>
                     <p>{t("auth.error.invalid_username")}</p>
-                </div>
-                <div>
-                    {fetching ? (
-                        <div>Loading...</div>
-                    ) : error !== "null" ? (
-                        <div>Error: {error}</div>
-                    ) : (
-                        <div>{data?.body && <div key={data?.body.id}>{data?.body.content}</div>}</div>
-                    )}
                 </div>
             </div>
         );
@@ -43,10 +31,6 @@ export namespace Home {
     export type Container = {};
 
     export const Container: React.FC<Container> = () => {
-        const { data, isLoading, error } = tsr.home.get.useQuery({
-            queryKey: ["home"],
-        });
-
-        return <Show fetching={isLoading} error={String(error)} data={data} />;
+        return <Show />;
     };
 }

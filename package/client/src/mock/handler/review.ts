@@ -17,7 +17,7 @@ export const reviewHandlers = [
                     title: `Review ${r.id}`,
                     content: r.content,
                     rating: r.rating,
-                    createdAt: r.createdAt,
+                    created_at: rcreated_atat,
                     user: user
                         ? { id: user.id, name: user.name, avatar: user.avatar }
                         : { id: "0", name: "Unknown", avatar: "" },
@@ -40,7 +40,7 @@ export const reviewHandlers = [
             bookId: (params as any)["id"],
             content: (body as any).content ?? "",
             rating: (body as any).rating ?? 0,
-            createdAt: new Date().toISOString(),
+            created_at: new Date().toISOString(),
             userId: "1",
         } as any;
         mockReviews.push(newReview);
@@ -50,7 +50,7 @@ export const reviewHandlers = [
                 title: (body as any).title ?? "",
                 content: newReview.content,
                 rating: newReview.rating,
-                createdAt: newReview.createdAt,
+                created_at: newReviewcreated_atat,
                 user: { id: "1", name: "John Doe", avatar: "" },
             },
             { status: 201 },

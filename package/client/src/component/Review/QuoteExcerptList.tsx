@@ -25,7 +25,7 @@ export namespace QuoteExcerptList {
                                     stats={{
                                         replies: 0,
                                         likes: 0,
-                                        date: quote.createdAt,
+                                        date: quote.created_at,
                                     }}
                                     source={"quote.source"}
                                     originalLink={"quote.originalLink"}
