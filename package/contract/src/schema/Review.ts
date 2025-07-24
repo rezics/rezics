@@ -9,7 +9,7 @@ import { id as idSchema } from "./common";
 export const QuoteExcerptSchema = z.object({
     id: idSchema,
     content: z.string(),
-    createdAt: z.string(),
+    created_at: z.string(),
     author: UserSchema,
 });
 export type QuoteExcerpt = z.infer<typeof QuoteExcerptSchema>;
@@ -19,7 +19,7 @@ export const BookReviewSchema = z.object({
     title: z.string(),
     content: z.string(),
     rating: z.number(),
-    createdAt: z.string(),
+    created_at: z.string(),
     user: UserSchema,
 });
 export type BookReview = z.infer<typeof BookReviewSchema>;

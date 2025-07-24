@@ -1,6 +1,6 @@
 export const chapterContent01 = {
     id: "r23a7abx5827",
-    createdAt: "2021-01-01",
+    created_at: "2021-01-01",
     chapterName: "章节名称",
     author: {
         name: "John Doe",

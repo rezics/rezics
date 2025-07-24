@@ -19,7 +19,7 @@ type Author = {
 type Comment = {
     id: string;
     content: string;
-    createdAt: string;
+    created_at: string;
     author: Author;
     likes: number;
     replies?: Comment[];
@@ -67,7 +67,7 @@ const CommentNode: React.FC<CommentNodeProps> = ({ comment, level = 0, openDrawe
                             {comment.author.name}
                         </Typography>
                         <Typography variant="caption" color="text.secondary">
-                            {new Date(comment.createdAt).toLocaleString()}
+                            {new Date(comment.created_at).toLocaleString()}
                         </Typography>
                     </Box>
                     <Typography variant="body2" mt={1}>

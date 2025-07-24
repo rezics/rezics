@@ -4,6 +4,7 @@ import { PublishInfoSchema } from "./PublishInfo";
 
 export namespace Book {
     const Mutable = {
+        id,
         ...Nameable.shape,
         ...Tagable.shape,
         cover: z.url().nullable(),

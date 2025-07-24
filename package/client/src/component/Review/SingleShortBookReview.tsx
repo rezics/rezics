@@ -62,7 +62,7 @@ export namespace SingleShortBookReview {
                                     )}
                                     <span className="text-xs">
                                         {review.rating.toFixed(1)}/5.0 ·{" "}
-                                        {review.createdAt}
+                                        {review.created_at}
                                     </span>
                                 </div>
                             </Tooltip>

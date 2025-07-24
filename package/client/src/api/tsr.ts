@@ -1,7 +1,7 @@
 import React from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { initTsrReactQuery } from "@ts-rest/react-query/v5";
-import { contract } from "contract";
+import contract from "contract";
 import { getAccessToken, refreshToken } from "./auth";
 
 // Global QueryClient

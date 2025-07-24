@@ -15,8 +15,8 @@ export const UserSchema = z.object({
     phone: phoneNumber.optional(), // 手机号可选
     name: z.string().min(1).max(50).describe("Full name"),
     avatar: z.url().optional(),
-    createdAt: z.string().describe("ISO timestamp"),
-    updatedAt: z.string().describe("ISO timestamp"),
+    created_at: z.string().describe("ISO timestamp"),
+    updated_at: z.string().describe("ISO timestamp"),
 });
 export type User = z.infer<typeof UserSchema>;
 

@@ -14,7 +14,7 @@ export default c.router({
         path: "/objects/:objectType/:objectId/reaction",
         body: ReactionSchema.omit({
             id: true,
-            createdAt: true,
+            created_at: true,
             user: true,
         }).extend({
             userId: idSchema, // pass current user id

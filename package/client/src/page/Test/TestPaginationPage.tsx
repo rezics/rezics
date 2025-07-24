@@ -28,7 +28,7 @@ export const PaginationQuerySchema = z.object({
 const PostSchema = z.object({
     id: z.string(),
     name: z.string(),
-    createdAt: z.date(),
+    created_at: z.date(),
     popularity: z.number(),
     agrees: z.number(),
 });
@@ -40,7 +40,7 @@ type Post = z.infer<typeof PostSchema>;
 const allPosts: Post[] = Array.from({ length: 555 }, (_, i) => ({
     id: `post_${i + 1}`,
     name: `帖子标题 ${i + 1}`,
-    createdAt: new Date(Date.now() - Math.random() * 1000 * 3600 * 24 * 30),
+    created_at: new Date(Date.now() - Math.random() * 1000 * 3600 * 24 * 30),
     popularity: Math.floor(Math.random() * 1000),
     agrees: Math.floor(Math.random() * 500),
 }));
@@ -55,7 +55,7 @@ const fetchPostsAPI = (query: PaginationQuery) => {
                 if (type === "name") comp = a.name.localeCompare(b.name);
                 else if (type === "popular") comp = a.popularity - b.popularity;
                 else if (type === "agree") comp = a.agrees - b.agrees;
-                else comp = a.createdAt.getTime() - b.createdAt.getTime();
+                else comp = a.created_at.getTime() - bcreated_atat.getTime();
                 return order === "asc" ? comp : -comp;
             });
             const total = sorted.length;

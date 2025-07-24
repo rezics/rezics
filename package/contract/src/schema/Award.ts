@@ -1,27 +1,27 @@
-// import { z } from "zod";
-// import { UserPreviewSchema } from "./User";
-// import { id as idSchema, createdAt } from "./common";
+import { z } from "zod";
+import { UserPreviewSchema } from "./User";
+import { id, Auditable } from "./common";
 
-// // ------------------------------------------------------------------
-// // Award Type & Schema
-// // ------------------------------------------------------------------
-// export const AwardSchema = z.object({
-//     id: idSchema,
-//     objectType: z.string(), // e.g. "Comment", "Post", ...
-//     objectId: idSchema,
-//     // type: z.enum(["award1", "award2", "award3"]),
-//     type: z.string(), // 为了拓展性
-//     user: UserPreviewSchema,
-//     createdAt: createdAt,
-// });
-// export type Award = z.infer<typeof AwardSchema>;
+// ------------------------------------------------------------------
+// Award Type & Schema
+// ------------------------------------------------------------------
+export const AwardSchema = z.object({
+    id,
+    ...Auditable.shape,
+    objectType: z.string(), // e.g. "Comment", "Post", ...
+    objectId: id,
+    // type: z.enum(["award1", "award2", "award3"]),
+    type: z.string(), // 为了拓展性
+    user: UserPreviewSchema,
+});
+export type Award = z.infer<typeof AwardSchema>;
 
-// // ------------------------------------------------------------------
-// // Award Stats Schema
-// // ------------------------------------------------------------------
-// export const AwardStatsItemSchema = z.object({
-//     type: AwardSchema.shape.type,
-//     count: z.number(),
-// });
-// export const AwardStatsSchema = z.array(AwardStatsItemSchema);
-// export type AwardStats = z.infer<typeof AwardStatsSchema>;
+// ------------------------------------------------------------------
+// Award Stats Schema
+// ------------------------------------------------------------------
+export const AwardStatsItemSchema = z.object({
+    type: AwardSchema.shape.type,
+    count: z.number(),
+});
+export const AwardStatsSchema = z.array(AwardStatsItemSchema);
+export type AwardStats = z.infer<typeof AwardStatsSchema>;
