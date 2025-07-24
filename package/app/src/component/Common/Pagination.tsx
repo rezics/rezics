@@ -15,14 +15,7 @@ import {
 import { useState, useMemo, useCallback, useEffect } from "react";
 import { ArrowDownward, ArrowUpward } from "@mui/icons-material";
 
-interface SortControlsProps {
-    sortType: string;
-    sortOrder: "asc" | "desc";
-    onSortChange: (newSort: { type?: string; order?: "asc" | "desc" }) => void;
-}
 /**
- * SortControls
- * @param {SortControlsProps} props
  * example:
  * ```ts
  *   const [sortConfig, setSortConfig] = useState<{
@@ -33,6 +26,15 @@ interface SortControlsProps {
  *       order: "desc",
  *   });
  *   ```
+ */
+export interface SortControlsProps {
+    sortType: string;
+    sortOrder: "asc" | "desc";
+    onSortChange: (newSort: { type?: string; order?: "asc" | "desc" }) => void;
+}
+/**
+ * SortControls
+ * @param {SortControlsProps} props
  */
 const SortControls: React.FC<SortControlsProps> = ({ sortType, sortOrder, onSortChange }) => {
     const sortOptions = [
@@ -112,8 +114,6 @@ interface UniversalPaginatorProps<T> extends SortControlsProps {
     sortControl?: React.ReactElement<SortControlsProps>;
     isLoading?: boolean;
 }
-// TODO 分页数量计算似乎是错误的
-// 错误的原因是请求之后，数据是从第一页开始渲染，这个逻辑是不对的。所以判断哪一页需要请求也是需要修改的
 export const UniversalPaginator = <T,>({
     data,
     totalExternalItems,

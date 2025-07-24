@@ -32,6 +32,12 @@ export namespace QuoteExcerptPreview {
                 params: {
                     bookId: id,
                 },
+                query: {
+                    page: 1,
+                    limit: 2,
+                    type: "popular",
+                    order: "desc",
+                }
             },
         });
 

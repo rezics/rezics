@@ -11,6 +11,7 @@ import { ChapterList } from "@component/Book/ChapterList";
 import { ArrowForwardIcon } from "@component/Common/ArrowForwardIcon";
 import { BookHero } from "@component/Book/BookHero";
 import { BookDescription } from "@/component/Book/BookDescription";
+import { AuthorInfo } from "@/component/Book/AuthorInfo";
 import { QuoteExcerptPreview } from "@/component/Book/QuoteExcerptPreview";
 import { ReadlistByBookPreview } from "@/component/Book/ReadlistByBookPreview";
 
@@ -58,6 +59,10 @@ export namespace BookPage {
                                         <BookTagView.Container bookId={data?.id || "1"} />
                                         <Divider />
 
+                                        {/* ANCHOR Author Info */}
+                                        <AuthorInfo.Container author={data?.author || {}} />
+                                        <Divider />
+
                                         {/* ANCHOR 最新章节 */}
 
                                         {/* ANCHOR Quote Excerpt Preview */}
@@ -103,21 +108,6 @@ export namespace BookPage {
                         {/* ANCHOR Sidebar */}
                         <Grid size={{ xs: 12, lg: 3 }}>
                             <Paper className="p-3 mt-4">
-                                {/* Author Info */}
-                                <Box>
-                                    <Typography variant="h6" className="font-bold mb-4">
-                                        作者：{data?.author?.name}
-                                    </Typography>
-
-                                    <Box className="mb-4">
-                                        <Avatar
-                                            src={data?.author.avatar || ""}
-                                            className="w-20 h-20 float-left mr-4 mb-2 rounded-full"
-                                        />
-                                        <Typography variant="body2">{data?.author.description}</Typography>
-                                        <div className="clear-both" />
-                                    </Box>
-                                </Box>
                                 <Divider className="my-4" />
 
                                 {/* Book Info */}

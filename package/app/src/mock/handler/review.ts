@@ -2,6 +2,7 @@ import { http, HttpResponse } from "msw";
 import { reviewRouter } from "contract";
 import { mockReviews, mockUsers, mockBookShortReviews } from "../data/reviews";
 import { mockQuotes } from "../data/mockQuotes";
+import { generateRandomItemsFrom } from "./common";
 
 export const reviewHandlers = [
     // List full reviews
@@ -55,5 +56,18 @@ export const reviewHandlers = [
     }),
 
     // Quotes
-    http.get(reviewRouter.listQuotes.path, () => HttpResponse.json(mockQuotes)),
-]; 
+    http.get(reviewRouter.listQuotes.path, ({ request, params, cookies }) => {
+        // console.log(request, params, cookies);
+        const url = new URL(request.url);
+        const searchParams = url.searchParams;
+        const query = {
+            bookId: params["bookId"],
+            page: searchParams.get("page"),
+            limit: searchParams.get("limit"),
+            type: searchParams.get("type"),
+            order: searchParams.get("order"),
+        };
+        console.log(query);
+        return HttpResponse.json(generateRandomItemsFrom(mockQuotes, Number(query.limit) || 5));
+    }),
+];

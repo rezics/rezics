@@ -161,7 +161,7 @@ export default function TestPaginationPage() {
                 onSortChange={handleSortChange}
                 requestData={handleNeedMoreData}
                 isLoading={isLoading && allFetchedItems.length === 0}
-                sortControl={<BookSearchFilter />}
+                sortControl={<BookSearchFilter sortType={sortConfig.type} sortOrder={sortConfig.order} onSortChange={handleSortChange} />}
             >
                 {(currentPageItems: Post[]) => (
                     <Grid container spacing={2}>

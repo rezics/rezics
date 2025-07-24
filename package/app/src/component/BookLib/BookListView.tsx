@@ -26,7 +26,7 @@ export namespace BookListView {
                                     {book.title}
                                 </Typography>
                                 <Typography variant="subtitle2" color="text.secondary" className="mb-2">
-                                    {book.author}
+                                    {book.author.name}
                                 </Typography>
                                 <Typography variant="body2" className="line-clamp-3">
                                     {book.description}
