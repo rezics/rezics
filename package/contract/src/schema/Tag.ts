@@ -1,69 +1,59 @@
 import { z } from "zod";
-import {
-    id as idSchema,
-    InternationalizedNameSchema,
-    ThreadSchema,
-    created_at,
-    updated_at,
-} from "./common";
-import { UserSchema } from "./User";
+import { id, Nameable, Auditable, shortString, Tagable } from "./common";
+// import { UserSchema } from "./User";
 
-// ------------------------------------------------------------------
-// Tag Type
-// -----------------------------------------------------------------
+export namespace Tag {
+    const Mutable = {
+        ...Nameable.shape,
+        ...Tagable.shape,
+        color: shortString,
+        owner: z.array(id),
+    };
 
-export const TagSchema = z.object({
-    id: idSchema,
-    groupId: idSchema, // 维护groupId就够了，权限组必须由后端查询
-    key: z.string(),
-    name: InternationalizedNameSchema,
-    color: z.string(),
-    createdAt: created_at,
-    updatedAt: updated_at,
-});
-export type Tag = z.infer<typeof TagSchema>;
+    export const Create = z.object({
+        ...Mutable,
+    });
 
-export const TagGroupSchema = z.object({
-    id: idSchema,
-    type: z.enum(["community", "book"]).default("community"),
-    key: z.string(), // key is a required English key, for the sake of humanity.
-    name: InternationalizedNameSchema,
-    maintainer: idSchema, // Organization ID 实际上应该改成权限组
-    tags: z.array(TagSchema),
-    createdAt: created_at,
-    updatedAt: updated_at,
-});
-export type TagGroup = z.infer<typeof TagGroupSchema>;
+    export const Read = z.object({
+        id,
+    });
 
-// Link Schema, Tracking creation information for evaluation purposes
-// ensure cascading deletion
-export const TagBookLinkSchema = z.object({
-    id: idSchema,
-    tag: z.lazy(() => TagSchema),
-    book: z.lazy(() => z.any()), // 使用any来避免循环依赖，在router中会正确使用BookSchema
-    createdAt: created_at,
-    updatedAt: updated_at,
-    createdBy: UserSchema,
-});
-export type TagBookLink = z.infer<typeof TagBookLinkSchema>;
+    export const View = z.object({
+        ...Auditable.shape,
+        ...Mutable,
+        id,
+    });
+}
 
-export const TagThreadLinkSchema = z.object({
-    id: idSchema,
-    tag: z.lazy(() => TagSchema),
-    thread: z.lazy(() => ThreadSchema),
-    createdAt: created_at,
-    updatedAt: updated_at,
-    createdBy: UserSchema,
-});
-export type TagThreadLink = z.infer<typeof TagThreadLinkSchema>;
+// // Link Schema, Tracking creation information for evaluation purposes
+// // ensure cascading deletion
+// export const TagBookLinkSchema = z.object({
+//     id: id,
+//     tag: z.lazy(() => TagSchema),
+//     book: z.lazy(() => z.any()), // 使用any来避免循环依赖，在router中会正确使用BookSchema
+//     createdAt: createdAt,
+//     updatedAt: updatedAt,
+//     createdBy: UserSchema,
+// });
+// export type TagBookLink = z.infer<typeof TagBookLinkSchema>;
 
-// auditing schema
-export const TagAuditingSchema = z.object({
-    id: idSchema,
-    tag: z.lazy(() => TagSchema),
-    createdAt: created_at,
-    updatedAt: updated_at,
-    createdBy: UserSchema,
-    maintainer: idSchema, // Organization ID
-});
-export type TagAuditing = z.infer<typeof TagAuditingSchema>;
+// export const TagThreadLinkSchema = z.object({
+//     id: id,
+//     tag: z.lazy(() => TagSchema),
+//     thread: z.lazy(() => ThreadSchema),
+//     createdAt: createdAt,
+//     updatedAt: updatedAt,
+//     createdBy: UserSchema,
+// });
+// export type TagThreadLink = z.infer<typeof TagThreadLinkSchema>;
+
+// // auditing schema
+// export const TagAuditingSchema = z.object({
+//     id: id,
+//     tag: z.lazy(() => TagSchema),
+//     createdAt: createdAt,
+//     updatedAt: updatedAt,
+//     createdBy: UserSchema,
+//     maintainer: id, // Organization ID
+// });
+// export type TagAuditing = z.infer<typeof TagAuditingSchema>;

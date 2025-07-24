@@ -53,7 +53,10 @@ module default {
         multi link units: Unit {
             constraint exclusive;
         }
-        multi link platforms: Platform;
+        multi link publishers: Publisher {
+            required date: datetime;
+            required isbn: short_str;
+        }
 
         index on ((.length, .released_at, .real_updated_at));
     }
@@ -73,9 +76,9 @@ module default {
         required single link owner: Person;
     }
 
-    type Platform extending Nameable, Evaluable, Tagable {
+    type Publisher extending Nameable, Evaluable, Tagable {
         required domain: short_str;
-        multi link books := .<platforms[is Book];
+        multi link books := .<publishers[is Book];
 
         index on (.domain);
     }

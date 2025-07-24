@@ -1,12 +1,18 @@
 // user.ts
 import { z } from "zod";
-import { phone, email, username, password, id as idSchema } from "./common";
+import {
+    phoneNumber,
+    email,
+    username,
+    password,
+    id as idSchema,
+} from "./common";
 
 export const UserSchema = z.object({
     id: idSchema,
     username, // 用户名
     email, // 邮箱
-    phone: phone.optional(), // 手机号可选
+    phone: phoneNumber.optional(), // 手机号可选
     name: z.string().min(1).max(50).describe("Full name"),
     avatar: z.url().optional(),
     createdAt: z.string().describe("ISO timestamp"),
@@ -25,7 +31,7 @@ export const SignupBodySchema = z.object({
     username,
     email,
     password,
-    phone: phone.optional(),
+    phone: phoneNumber.optional(),
 });
 export type SignupBody = z.infer<typeof SignupBodySchema>;
 

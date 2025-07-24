@@ -1,0 +1,16 @@
+{
+    "name": "database",
+    "version": "0.0.1",
+    "type": "module",
+    "packageManager": "pnpm@10.13.1",
+    "scripts": {
+        "generate:ts": "pnpx @gel/generate edgeql-js --target ts --output-dir ./generated",
+        "generate:interface": "pnpx @gel/generate interfaces --file ./generated/interface.ts",
+        "generate": "pnpm run generate:ts && pnpm run generate:interface"
+    },
+    "exports": {
+        ".": {
+            "default": "./index.ts"
+        }
+    }
+}

@@ -15,8 +15,6 @@
     "packageManager": "pnpm@10.8.1",
     "type": "module",
     "dependencies": {
-        "contract": "workspace:^",
-        "fastify": "^5.4.0",
         "gel": "^2.1.1"
     }
 }

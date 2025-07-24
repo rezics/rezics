@@ -1,50 +1,41 @@
 import { z } from "zod";
-import { id as idSchema, created_at, icsid } from "./common";
-import { UserSchema } from "./User";
+import { id, icsId, Nameable, Auditable, Evaluable, Tagable } from "./common";
+import { PublishInfoSchema } from "./PublishInfo";
 
-// ------------------------------------------------------------------
-// Book & related Type
-// ------------------------------------------------------------------
+export namespace Book {
+    const Mutable = {
+        ...Nameable.shape,
+        ...Tagable.shape,
+        cover: z.url().nullable(),
+        author: z.array(id),
+        rating: z.number().nullable(),
+        length: z.int().nullable(),
+        publishInfo: z.array(PublishInfoSchema),
+        tags: z.array(id),
+        description: z.string().nullable(),
+    };
 
-export const AuthorSchema = z.object({
-    id: idSchema,
-    name: z.string(),
-    avatar: z.url().optional(),
-    description: z.string().optional(),
-});
-export type Author = z.infer<typeof AuthorSchema>;
+    export const Create = z.object({
+        ...Mutable,
+    });
 
-export const BookSchema = z.object({
-    id: idSchema,
-    title: z.string(),
-    icsid: icsid,
-    cover: z.url().optional(),
-    author: AuthorSchema,
-    rating: z.number().optional(),
-    publisher: z.string().optional(),
-    publishDate: z.string().optional(),
-    isbn: z.string().optional(),
-    // tags: TagGroupSchema, // association ICSBookTag group
-    tags: z.array(z.any()), // 使用any避免循环依赖，实际使用时会在router中正确关联TagSchema
-    description: z.string().optional(),
-});
-export type Book = z.infer<typeof BookSchema>;
+    export const Read = z
+        .object({
+            ...Nameable.shape,
+            ...Tagable.shape,
+            id,
+            icsId,
+            publisher: z.array(id),
+            author: z.array(id),
+            rating: z.number(),
+            length: z.int(),
+        })
+        .partial();
 
-export const ChapterSchema = z.object({
-    id: idSchema,
-    title: z.string(),
-    noContent: z.boolean().optional(),
-});
-export type Chapter = z.infer<typeof ChapterSchema>;
-
-export const ChapterOrderSchema = z.map(z.string(), z.array(z.string()));
-export type ChapterOrder = z.infer<typeof ChapterOrderSchema>;
-
-export const ChapterContentSchema = z.object({
-    id: idSchema,
-    content: z.string(),
-    createdAt: created_at,
-    chapterName: z.string(),
-    author: UserSchema,
-});
-export type ChapterContent = z.infer<typeof ChapterContentSchema>;
+    export const View = z.object({
+        ...Evaluable.shape,
+        ...Auditable.shape,
+        id,
+        icsId,
+    });
+}
