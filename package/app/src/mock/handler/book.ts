@@ -4,40 +4,34 @@ import { bookList01 } from "../data/bookList01";
 import { bookInfo01 } from "../data/bookinfo01";
 import chapterList01 from "../data/chapterlist01.json";
 import { chapterContent01 } from "../data/chapterContent01";
+import { generateRandomItemsFrom } from "./common";
 
 const books = [...bookList01];
 
 export const bookHandlers = [
-    // List books with pagination
+    // List and Search books
     http.get(bookRouter.list.path, ({ request }) => {
         const url = new URL(request.url);
-        const page = Number(url.searchParams.get("page") ?? 1);
-        const limit = Number(url.searchParams.get("limit") ?? 20);
-        const start = (page - 1) * limit;
-        const items = books.slice(start, start + limit);
-        return HttpResponse.json({
-            items,
-            page,
-            totalPages: 1,
-            total: books.length,
-        });
-    }),
-
-    // Search books
-    http.get(bookRouter.search.path, ({ request }) => {
-        const url = new URL(request.url);
-        const query = (url.searchParams.get("query") ?? "").toLowerCase();
-        const filtered = books.filter((b) => b.title.toLowerCase().includes(query));
-        return HttpResponse.json({
-            items: filtered,
-            page: 1,
-            totalPages: 1,
-            total: filtered.length,
-        });
+        const searchParams = url.searchParams;
+        const query = {
+            page: searchParams.get("page"),
+            limit: searchParams.get("limit"),
+            type: searchParams.get("type"),
+            order: searchParams.get("order"),
+            tag: searchParams.get("tag"),
+            sort: searchParams.get("sort"),
+        };
+        console.log("mock book list query", query);
+        const responseJson = {
+            items: generateRandomItemsFrom(books, Number(query.limit) || 5),
+            page: query.page,
+            totalItems: 10000,
+        }
+        return HttpResponse.json(responseJson);
     }),
 
     // Top books
-    http.get(bookRouter.top.path, () => HttpResponse.json(books.slice(0, 5)) ),
+    http.get(bookRouter.top.path, () => HttpResponse.json(books.slice(0, 5))),
 
     // Get book detail
     http.get(bookRouter.get.path, ({ params }) => {
@@ -58,8 +52,8 @@ export const bookHandlers = [
 
     // Chapters list
     http.get(bookRouter.chapter.list.path, () => {
-        let data: any = {chapters:[], order: []}
-        data.order = chapterList01.order
+        let data: any = { chapters: [], order: [] };
+        data.order = chapterList01.order;
         data.chapters = Object.values(chapterList01.chapters);
         // console.log("chapters", data);
         return HttpResponse.json(data);
@@ -80,4 +74,4 @@ export const bookHandlers = [
         //     },
         // });
     }),
-]; 
+];

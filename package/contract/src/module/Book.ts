@@ -69,13 +69,7 @@ export const bookRouter = c.router({
     list: {
         method: "GET",
         path: "/book/list",
-        query: PaginationQuerySchema.extend({ q: z.string().optional() }),
-        responses: { 200: PaginatedResponse(BookSchema) },
-    },
-    search: {
-        method: "GET",
-        path: "/book/search",
-        query: z.object({ query: z.string() }).merge(PaginationQuerySchema.partial()),
+        query: PaginationQuerySchema.extend({ tag: z.string().optional(), sort: z.string().optional() }),
         responses: { 200: PaginatedResponse(BookSchema) },
     },
     top: {

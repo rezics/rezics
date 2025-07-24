@@ -43,6 +43,7 @@ export default {
     book: {
         description: "Description",
         chapters: "Chapters",
+        authorInfo: "Author Info",
         tags: "Tags",
         reviews: "Reviews",
         collections: "Collections",

@@ -21,8 +21,8 @@ export const PaginatedResponse = <T extends z.ZodTypeAny>(item: T) =>
     z.object({
         items: z.array(item),
         page: z.number(),
-        totalPages: z.number(),
-        total: z.number(),
+        totalItems: z.number(),
+        // itemNumberPerPage: z.number().default(100),
     });
 
 // ---------------- Primitives ----------------

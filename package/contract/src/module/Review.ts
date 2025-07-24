@@ -1,7 +1,7 @@
 import { initContract } from '@ts-rest/core';
 import { z } from 'zod';
 import { UserSchema } from './User';
-import { id as idSchema } from './common';
+import { id as idSchema, PaginationQuerySchema } from './common';
 
 // ------------------------------------------------------------------
 // ANCHOR Review & Quote Type
@@ -31,23 +31,24 @@ const c = initContract();
 export const reviewRouter = c.router({
   listReviews: {
     method: 'GET',
-    path: '/books/:bookId/reviews',
+    path: '/review/book/:bookId/',
     responses: { 200: z.array(BookReviewSchema) },
   },
   listShortReviews: {
     method: 'GET',
-    path: '/books/:bookId/short-reviews',
+    path: '/review/short/book/:bookId/',
     responses: { 200: z.array(BookReviewSchema) },
   },
   createReview: {
     method: 'POST',
-    path: '/books/:bookId/reviews',
+    path: '/review/books/:bookId/reviews',
     body: BookReviewSchema.omit({ id: true, createdAt: true, user: true }),
     responses: { 201: BookReviewSchema },
   },
   listQuotes: {
     method: 'GET',
-    path: '/books/:bookId/quotes',
+    path: '/quote/book/:bookId/',
+    query: PaginationQuerySchema,
     responses: { 200: z.array(QuoteExcerptSchema) },
   },
 });
