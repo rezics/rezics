@@ -146,6 +146,8 @@ export default function TestPaginationPage() {
         console.log(contract);
     }, []);
 
+    const [currentPage, setCurrentPage] = useState(1);
+
     return (
         <Box sx={{ bgcolor: "#f4f6f8", p: { xs: 2, md: 4 }, minHeight: "100vh" }}>
             <Typography variant="h4" component="h1" gutterBottom sx={{ textAlign: "center", mb: 4 }}>
@@ -162,6 +164,8 @@ export default function TestPaginationPage() {
                 requestData={handleNeedMoreData}
                 isLoading={isLoading && allFetchedItems.length === 0}
                 sortControl={<BookSearchFilter sortType={sortConfig.type} sortOrder={sortConfig.order} onSortChange={handleSortChange} />}
+                currentPage={currentPage}
+                setCurrentPage={setCurrentPage}
             >
                 {(currentPageItems: Post[]) => (
                     <Grid container spacing={2}>
@@ -184,6 +188,8 @@ export default function TestPaginationPage() {
                 onSortChange={handleSortChange}
                 requestData={handleNeedMoreData}
                 isLoading={isLoading && allFetchedItems.length === 0}
+                currentPage={currentPage}
+                setCurrentPage={setCurrentPage}
             >
                 {(currentPageItems: Post[]) => (
                     <Grid container spacing={2}>

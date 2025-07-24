@@ -113,6 +113,8 @@ interface UniversalPaginatorProps<T> extends SortControlsProps {
     children: (currentPageItems: T[]) => React.ReactNode;
     sortControl?: React.ReactElement<SortControlsProps>;
     isLoading?: boolean;
+    currentPage: number;
+    setCurrentPage: (page: number) => void;
 }
 export const UniversalPaginator = <T,>({
     data,
@@ -126,8 +128,10 @@ export const UniversalPaginator = <T,>({
     children,
     sortControl,
     isLoading = false,
+    currentPage = 1,
+    setCurrentPage,
 }: UniversalPaginatorProps<T>) => {
-    const [currentPage, setCurrentPage] = useState<number>(1);
+    // const [currentPage, setCurrentPage] = useState<number>(1);
     const internalPagesPerExternalPage = useMemo(
         () => Math.ceil(externalItemsPerPage / itemsPerPage),
         [externalItemsPerPage, itemsPerPage],
