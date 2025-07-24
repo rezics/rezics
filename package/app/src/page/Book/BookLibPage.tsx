@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useMemo } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { Typography, CircularProgress, Alert } from "@mui/material";
 
 import { BookSearch } from "@/component/BookLib/BookSearch";
@@ -18,98 +18,143 @@ function buildQuery(info: SearchInfo): string {
     return q;
 }
 
-export const BookLib = () => {
-    const EXTERNAL_PAGE_SIZE = 100;
-    const [currentQuery, setCurrentQuery] = useState<SearchInfo>({
-        searchText: "",
-        searchTags: [],
-    });
-    const [page, setPage] = useState(1);
-
-    const { data, isLoading, error } = tsr.book.list.useQuery({
-        queryKey: ["books", currentQuery, page],
-        queryData: {
-            query: {
-                tag: buildQuery(currentQuery),
-                sort: "recommend",
-                page,
-                limit: EXTERNAL_PAGE_SIZE,
-            },
-        },
-    });
-
-    function handleNeedMoreData(page: number) {
-        setPage(page);
-    }
-
-    const books: Book[] = useMemo(() => data?.body?.items ?? [], [data]);
-    const getBookList = useCallback((info: SearchInfo) => {
-        setCurrentQuery(info);
-    }, []);
-
-    const handleSortChange = (newSort: { type?: string; order?: "asc" | "desc" }) => {
-        console.log("handleSortChange, newSort", newSort);
-        setSortConfig((prev) => ({
-            type: newSort.type as BookLibSortKey,
-            order: newSort.order ?? prev.order,
-        }));
+export namespace BookLib {
+    type ShowProps = {
+        books: Book[];
+        totalItems: number;
+        isLoading: boolean;
+        error: any;
+        getBookList: (info: SearchInfo) => void;
+        sortConfig: {
+            type: BookLibSortKey;
+            order: "asc" | "desc";
+        };
+        handleNeedMoreData: any;
+        handleSortChange: any;
+        EXTERNAL_PAGE_SIZE: number;
     };
+    export const Show: React.FC<ShowProps> = ({
+        books,
+        totalItems,
+        isLoading,
+        error,
+        getBookList,
+        sortConfig,
+        handleNeedMoreData,
+        handleSortChange,
+        EXTERNAL_PAGE_SIZE,
+    }) => {
+        const [currentPage, setCurrentPage] = useState(1);
 
-    const [sortConfig, setSortConfig] = useState<{
-        type: BookLibSortKey;
-        order: "asc" | "desc";
-    }>({
-        type: "time",
-        order: "desc",
-    });
+        if (isLoading) {
+            return (
+                <div className="flex justify-center py-8">
+                    <CircularProgress />
+                </div>
+            );
+        }
+        if (error) {
+            return (
+                <Alert severity="error" className="my-4">
+                    {String(error)}
+                </Alert>
+            );
+        }
+        if (books.length === 0) {
+            return (
+                <Typography variant="body1" className="mt-4 text-center">
+                    No books found.
+                </Typography>
+            );
+        }
 
-    if (isLoading) {
         return (
-            <div className="flex justify-center py-8">
-                <CircularProgress />
+            <div className="mx-auto max-w-7xl p-4">
+                <BookSearch.Container onSearch={getBookList} />
+                <div className="mt-4" />
+                <UniversalPaginator<Book>
+                    data={books}
+                    totalExternalItems={totalItems}
+                    itemsPerPage={10}
+                    externalItemsPerPage={EXTERNAL_PAGE_SIZE}
+                    sortType={sortConfig.type}
+                    sortOrder={sortConfig.order}
+                    onSortChange={handleSortChange}
+                    requestData={handleNeedMoreData}
+                    isLoading={isLoading && books.length === 0}
+                    sortControl={
+                        <BookSearchFilter
+                            sortType={sortConfig.type}
+                            sortOrder={sortConfig.order}
+                            onSortChange={handleSortChange}
+                        />
+                    }
+                    currentPage={currentPage}
+                    setCurrentPage={setCurrentPage}
+                >
+                    {(currentPageItems: Book[]) => <BookListView.Container books={currentPageItems} />}
+                </UniversalPaginator>
+                {/* <CardBookList books={books} /> */}
             </div>
         );
-    }
-    if (error) {
-        return (
-            <Alert severity="error" className="my-4">
-                {String(error)}
-            </Alert>
-        );
-    }
-    if (books.length === 0) {
-        return (
-            <Typography variant="body1" className="mt-4 text-center">
-                No books found.
-            </Typography>
-        );
-    }
+    };
+    export const Container: React.FC = () => {
+        const EXTERNAL_PAGE_SIZE = 100;
+        const [searchPage, setSearchPage] = useState(1);
+        const [currentQuery, setCurrentQuery] = useState<SearchInfo>({
+            searchText: "",
+            searchTags: [],
+        });
 
-    return (
-        <div className="mx-auto max-w-7xl p-4">
-            <BookSearch.Container onSearch={getBookList} />
-            <div className="mt-4"/>
-            <UniversalPaginator<Book>
-                data={books}
-                totalExternalItems={data?.body?.totalItems ?? 0}
-                itemsPerPage={10}
-                externalItemsPerPage={EXTERNAL_PAGE_SIZE}
-                sortType={sortConfig.type}
-                sortOrder={sortConfig.order}
-                onSortChange={handleSortChange}
-                requestData={handleNeedMoreData}
-                isLoading={isLoading && books.length === 0}
-                sortControl={
-                    <BookSearchFilter
-                        sortType={sortConfig.type}
-                        sortOrder={sortConfig.order}
-                        onSortChange={handleSortChange}
-                    />
-                }
-            >
-                {(currentPageItems: Book[]) => <BookListView.Container books={currentPageItems} />}
-            </UniversalPaginator>
-            {/* <CardBookList books={books} /> */}
-        </div>
-    );
-};
+        const { data, isLoading, error } = tsr.book.list.useQuery({
+            queryKey: ["books", currentQuery, searchPage],
+            queryData: {
+                query: {
+                    tag: buildQuery(currentQuery),
+                    sort: "recommend",
+                    page: searchPage,
+                    limit: EXTERNAL_PAGE_SIZE,
+                },
+            },
+        });
+
+        function handleNeedMoreData(page: number) {
+            setSearchPage(page);
+        }
+
+        const books: Book[] = useMemo(() => data?.body?.items ?? [], [data]);
+        const totalItems: number = data?.body?.totalItems ?? 0;
+        const getBookList = useCallback((info: SearchInfo) => {
+            setCurrentQuery(info);
+        }, []);
+
+        const handleSortChange = (newSort: { type?: string; order?: "asc" | "desc" }) => {
+            console.log("handleSortChange, newSort", newSort);
+            setSortConfig((prev) => ({
+                type: newSort.type as BookLibSortKey,
+                order: newSort.order ?? prev.order,
+            }));
+        };
+
+        const [sortConfig, setSortConfig] = useState<{
+            type: BookLibSortKey;
+            order: "asc" | "desc";
+        }>({
+            type: "time",
+            order: "desc",
+        });
+        return (
+            <Show
+                books={books}
+                totalItems={totalItems}
+                isLoading={isLoading}
+                error={error}
+                getBookList={getBookList}
+                sortConfig={sortConfig}
+                handleNeedMoreData={handleNeedMoreData}
+                handleSortChange={handleSortChange}
+                EXTERNAL_PAGE_SIZE={EXTERNAL_PAGE_SIZE}
+            />
+        );
+    };
+}

@@ -77,7 +77,7 @@ export default (
                 {/* ANCHOR Book Info Routes */}
                 <Route path="/books">
                     <MainLayout>
-                        <BookLib />
+                        <BookLib.Container />
                     </MainLayout>
                 </Route>
                 <Route path="/book/:bookId">
