@@ -5,7 +5,7 @@ import ThumbDownIcon from "@mui/icons-material/ThumbDown";
 import SentimentSatisfiedAltIcon from "@mui/icons-material/SentimentSatisfiedAlt";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
-import { BookReview } from "contract";
+import { BookReview } from "contract/schema";
 // import { CollapsibleText } from "../Common/CollapsibleText";
 import { CollapsibleByLineText } from "../Common/CollapsibleByLineText";
 
@@ -44,16 +44,25 @@ export namespace SingleShortBookReview {
                     <div className="flex-1 flex flex-col gap-2">
                         {/* Row 1: User Info and Rating */}
                         <div className="flex items-center gap-2">
-                            <span className="font-semibold text-sm">{review.user.name}</span>
+                            <span className="font-semibold text-sm">
+                                {review.user.name}
+                            </span>
                             <Tooltip title="阅读完整评测" placement="top-start">
                                 <div className="flex items-center gap-1 cursor-pointer bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 p-1 rounded-md">
                                     {isRecommended ? (
-                                        <ThumbUpIcon fontSize="small" className="text-blue-500" />
+                                        <ThumbUpIcon
+                                            fontSize="small"
+                                            className="text-blue-500"
+                                        />
                                     ) : (
-                                        <ThumbDownIcon fontSize="small" className="text-gray-500" />
+                                        <ThumbDownIcon
+                                            fontSize="small"
+                                            className="text-gray-500"
+                                        />
                                     )}
                                     <span className="text-xs">
-                                        {review.rating.toFixed(1)}/5.0 · {review.createdAt}
+                                        {review.rating.toFixed(1)}/5.0 ·{" "}
+                                        {review.createdAt}
                                     </span>
                                 </div>
                             </Tooltip>
@@ -77,7 +86,9 @@ export namespace SingleShortBookReview {
                                             onClick={handleLike}
                                             className="p-1.5 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700"
                                         >
-                                            <ThumbUpIcon style={{ fontSize: "1rem" }} />
+                                            <ThumbUpIcon
+                                                style={{ fontSize: "1rem" }}
+                                            />
                                         </button>
                                     </Tooltip>
                                     <Tooltip title="无帮助" placement="bottom">
@@ -85,30 +96,42 @@ export namespace SingleShortBookReview {
                                             onClick={handleDislike}
                                             className="p-1.5 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700"
                                         >
-                                            <ThumbDownIcon style={{ fontSize: "1rem" }} />
+                                            <ThumbDownIcon
+                                                style={{ fontSize: "1rem" }}
+                                            />
                                         </button>
                                     </Tooltip>
                                     <Tooltip title="欢乐" placement="bottom">
                                         <button className="p-1.5 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700">
-                                            <SentimentSatisfiedAltIcon style={{ fontSize: "1rem" }} />
+                                            <SentimentSatisfiedAltIcon
+                                                style={{ fontSize: "1rem" }}
+                                            />
                                         </button>
                                     </Tooltip>
                                     <Tooltip title="颁奖" placement="bottom">
                                         <button className="p-1.5 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700">
-                                            <EmojiEventsIcon style={{ fontSize: "1rem" }} />
+                                            <EmojiEventsIcon
+                                                style={{ fontSize: "1rem" }}
+                                            />
                                         </button>
                                     </Tooltip>
                                 </div>
                                 <div className="ml-4 text-xs flex items-center gap-2">
                                     <span>{review.likes ?? 0} 人支持</span>
-                                    <span>{review.funny ?? 0} 人觉得这篇评测很欢乐</span>
+                                    <span>
+                                        {review.funny ?? 0} 人觉得这篇评测很欢乐
+                                    </span>
                                 </div>
                                 {/* TODO Add a new line to show Awards or don't show awards for short reviews */}
                             </div>
                             <Tooltip title="查看回复" placement="bottom">
                                 <div className="flex items-center gap-1 cursor-pointer hover:text-blue-500">
-                                    <ChatBubbleOutlineIcon style={{ fontSize: "1rem" }} />
-                                    <span className="text-xs">{review.replies ?? 0} </span>
+                                    <ChatBubbleOutlineIcon
+                                        style={{ fontSize: "1rem" }}
+                                    />
+                                    <span className="text-xs">
+                                        {review.replies ?? 0}{" "}
+                                    </span>
                                 </div>
                             </Tooltip>
                         </div>

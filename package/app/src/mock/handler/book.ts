@@ -1,5 +1,5 @@
 import { http, HttpResponse } from "msw";
-import { bookRouter } from "contract";
+import { Book } from "contract";
 import { bookList01 } from "../data/bookList01";
 import { bookInfo01 } from "../data/bookinfo01";
 import chapterList01 from "../data/chapterlist01.json";
@@ -10,7 +10,7 @@ const books = [...bookList01];
 
 export const bookHandlers = [
     // List and Search books
-    http.get(bookRouter.list.path, ({ request }) => {
+    http.get(Book.list.path, ({ request }) => {
         const url = new URL(request.url);
         const searchParams = url.searchParams;
         const query = {
@@ -26,15 +26,15 @@ export const bookHandlers = [
             items: generateRandomItemsFrom(books, Number(query.limit) || 5),
             page: query.page,
             totalItems: 10000,
-        }
+        };
         return HttpResponse.json(responseJson);
     }),
 
     // Top books
-    http.get(bookRouter.top.path, () => HttpResponse.json(books.slice(0, 5))),
+    http.get(Book.top.path, () => HttpResponse.json(books.slice(0, 5))),
 
     // Get book detail
-    http.get(bookRouter.get.path, ({ params }) => {
+    http.get(Book.get.path, ({ params }) => {
         // const book = books.find((b) => b.id === (params as any)["id"]) ?? (bookInfo01 as any);
         // if (!book) return HttpResponse.json({ message: "Not found" }, { status: 404 });
         const book = bookInfo01;
@@ -42,16 +42,17 @@ export const bookHandlers = [
     }),
 
     // Update book
-    http.put(bookRouter.update.path, async ({ params, request }) => {
+    http.put(Book.update.path, async ({ params, request }) => {
         const index = books.findIndex((b) => b.id === (params as any)["id"]);
-        if (index === -1) return HttpResponse.json({ message: "Not found" }, { status: 404 });
+        if (index === -1)
+            return HttpResponse.json({ message: "Not found" }, { status: 404 });
         const patch: any = await request.json();
         books[index] = { ...(books[index] as any), ...(patch as any) };
         return HttpResponse.json(books[index]);
     }),
 
     // Chapters list
-    http.get(bookRouter.chapter.list.path, () => {
+    http.get(Book.chapter.list.path, () => {
         let data: any = { chapters: [], order: [] };
         data.order = chapterList01.order;
         data.chapters = Object.values(chapterList01.chapters);
@@ -60,7 +61,7 @@ export const bookHandlers = [
     }),
 
     // Chapter content
-    http.get(bookRouter.chapter.content.path, ({ params }) => {
+    http.get(Book.chapter.content.path, ({ params }) => {
         return HttpResponse.json(chapterContent01);
         // return HttpResponse.json({
         //     id: (params as any)["chapterId"],

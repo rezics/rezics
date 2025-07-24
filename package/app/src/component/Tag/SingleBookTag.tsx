@@ -1,6 +1,6 @@
 import { Box, Typography, Chip, Stack } from "@mui/material";
 import { CollapsibleByLineText } from "@component/Common/CollapsibleByLineText";
-import { TagGroup } from "contract";
+import { TagGroup } from "contract/schema";
 
 interface CustomChipProps {
     tag: string;

@@ -3,10 +3,10 @@
     "version": "0.0.1",
     "exports": {
         ".": {
-            "import": "./src/index.ts"
+            "import": "./src/router/index.ts"
         },
-        "./module/*": {
-            "import": "./src/module/*.ts"
+        "./schema": {
+            "import": "./src/schema/index.ts"
         }
     },
     "devDependencies": {
@@ -14,10 +14,6 @@
         "typescript": "^5.8.3"
     },
     "dependencies": {
-        "@tanstack/react-query": "^5.83.0",
-        "@ts-rest/core": "3.53.0-rc.1",
-        "@ts-rest/fastify": "3.53.0-rc.1",
-        "@ts-rest/react-query": "3.53.0-rc.1",
         "google-libphonenumber": "^3.2.42"
     }
 }

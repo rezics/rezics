@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { AccentBarWithText } from "@/component/Common/AccentBar";
 import { ReviewEdit } from "@/component/Review/ReviewEdit";
 import tsr from "@/api/tsr";
-import { BookReview } from "contract";
+import { BookReview } from "contract/schema";
 
 export function ReviewByBookPage() {
     const params = useParams();

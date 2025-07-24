@@ -1,4 +1,3 @@
-import { initContract } from "@ts-rest/core";
 import { z } from "zod";
 import { id as idSchema } from "./common";
 
@@ -10,13 +9,3 @@ export const HomePageSchema = z.object({
     content: z.string(),
 });
 export type HomePage = z.infer<typeof HomePageSchema>;
-
-// ANCHOR HomePageRouter
-const c = initContract();
-export const homePageRouter = c.router({
-    get: {
-        method: "GET",
-        path: "/home",
-        responses: { 200: HomePageSchema },
-    },
-});

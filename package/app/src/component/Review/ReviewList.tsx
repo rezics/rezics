@@ -1,4 +1,4 @@
-import { BookReview } from "contract";
+import { BookReview } from "contract/schema";
 import { SingleReview } from "./SingleReview";
 
 import React, { useEffect, useReducer } from "react";
@@ -15,18 +15,34 @@ export namespace ReviewList {
         onCloseReplyModal: () => void;
     };
 
-    export const Show: React.FC<Show> = ({ reviews, isReplyModalOpen, currentReplyId, onReply, onCloseReplyModal }) => {
+    export const Show: React.FC<Show> = ({
+        reviews,
+        isReplyModalOpen,
+        currentReplyId,
+        onReply,
+        onCloseReplyModal,
+    }) => {
         return (
             <>
                 <Box>
                     {reviews.map((review: BookReview) => (
-                        <SingleReview.Show key={review.id} review={review} onReply={onReply} />
+                        <SingleReview.Show
+                            key={review.id}
+                            review={review}
+                            onReply={onReply}
+                        />
                     ))}
                 </Box>
 
-                <FullScreenModal open={isReplyModalOpen} onClose={onCloseReplyModal} title="回复">
+                <FullScreenModal
+                    open={isReplyModalOpen}
+                    onClose={onCloseReplyModal}
+                    title="回复"
+                >
                     <Box>
-                        <TreeReplyComponents bookListId={currentReplyId || ""} />
+                        <TreeReplyComponents
+                            bookListId={currentReplyId || ""}
+                        />
                     </Box>
                 </FullScreenModal>
             </>
@@ -54,9 +70,17 @@ export namespace ReviewList {
                 case "setReviews":
                     return { ...state, reviews: action.reviews };
                 case "openReply":
-                    return { ...state, isReplyModalOpen: true, currentReplyId: action.id };
+                    return {
+                        ...state,
+                        isReplyModalOpen: true,
+                        currentReplyId: action.id,
+                    };
                 case "closeReply":
-                    return { ...state, isReplyModalOpen: false, currentReplyId: null };
+                    return {
+                        ...state,
+                        isReplyModalOpen: false,
+                        currentReplyId: null,
+                    };
                 default:
                     return state;
             }

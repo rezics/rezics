@@ -1,12 +1,12 @@
 import { http, HttpResponse } from "msw";
-import { reviewRouter } from "contract";
+import { Review } from "contract";
 import { mockReviews, mockUsers, mockBookShortReviews } from "../data/reviews";
 import { mockQuotes } from "../data/mockQuotes";
 import { generateRandomItemsFrom } from "./common";
 
 export const reviewHandlers = [
     // List full reviews
-    http.get(reviewRouter.listReviews.path, ({ params }) => {
+    http.get(Review.listReviews.path, ({ params }) => {
         const reviews = mockReviews
             // .filter((r) => r.bookId === (params as any)["id"])
             .filter(() => 1)
@@ -27,10 +27,12 @@ export const reviewHandlers = [
     }),
 
     // List short reviews
-    http.get(reviewRouter.listShortReviews.path, () => HttpResponse.json(mockBookShortReviews)),
+    http.get(Review.listShortReviews.path, () =>
+        HttpResponse.json(mockBookShortReviews),
+    ),
 
     // Create review
-    http.post(reviewRouter.createReview.path, async ({ request, params }) => {
+    http.post(Review.createReview.path, async ({ request, params }) => {
         const body = await request.json();
         const newReviewId = String(mockReviews.length + 1);
         const newReview = {
@@ -56,7 +58,7 @@ export const reviewHandlers = [
     }),
 
     // Quotes
-    http.get(reviewRouter.listQuotes.path, ({ request, params, cookies }) => {
+    http.get(Review.listQuotes.path, ({ request, params, cookies }) => {
         // console.log(request, params, cookies);
         const url = new URL(request.url);
         const searchParams = url.searchParams;
@@ -68,6 +70,8 @@ export const reviewHandlers = [
             order: searchParams.get("order"),
         };
         console.log(query);
-        return HttpResponse.json(generateRandomItemsFrom(mockQuotes, Number(query.limit) || 5));
+        return HttpResponse.json(
+            generateRandomItemsFrom(mockQuotes, Number(query.limit) || 5),
+        );
     }),
 ];

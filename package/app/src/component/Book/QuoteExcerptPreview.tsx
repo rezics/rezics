@@ -1,6 +1,6 @@
 import { tsr } from "@/api/tsr";
 import { QuoteExcerptList } from "../Review/QuoteExcerptList";
-import { QuoteExcerpt } from "contract";
+import { QuoteExcerpt } from "contract/schema";
 
 export namespace QuoteExcerptPreview {
     export type Show = {
@@ -37,10 +37,16 @@ export namespace QuoteExcerptPreview {
                     limit: 2,
                     type: "popular",
                     order: "desc",
-                }
+                },
             },
         });
 
-        return <Show data={data?.body || []} isLoading={isLoading} error={String(error)} />;
+        return (
+            <Show
+                data={data?.body || []}
+                isLoading={isLoading}
+                error={String(error)}
+            />
+        );
     };
 }

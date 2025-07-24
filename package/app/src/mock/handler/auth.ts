@@ -1,19 +1,24 @@
 import { http, HttpResponse } from "msw";
-import { authRouter } from "contract";
+import { Auth } from "contract";
 import { mockUsers, mockTokens } from "../data/auth";
 
 export const authHandlers = [
     // Login
-    http.post(authRouter.login.path, async ({ request }) => {
+    http.post(Auth.login.path, async ({ request }) => {
         const { email, password } = (await request.json()) as {
             email: string;
             password: string;
         };
 
-        const user = mockUsers.find((u) => u.email === email && u.password === password);
+        const user = mockUsers.find(
+            (u) => u.email === email && u.password === password,
+        );
 
         if (!user) {
-            return HttpResponse.json({ message: "Invalid email or password" }, { status: 401 });
+            return HttpResponse.json(
+                { message: "Invalid email or password" },
+                { status: 401 },
+            );
         }
 
         const tokenKey = email as keyof typeof mockTokens;
@@ -31,14 +36,17 @@ export const authHandlers = [
     }),
 
     // Register
-    http.post(authRouter.register.path, async ({ request }) => {
+    http.post(Auth.register.path, async ({ request }) => {
         const { email, password } = (await request.json()) as {
             email: string;
             password: string;
         };
 
         if (mockUsers.some((u) => u.email === email)) {
-            return HttpResponse.json({ message: "Email already exists" }, { status: 400 });
+            return HttpResponse.json(
+                { message: "Email already exists" },
+                { status: 400 },
+            );
         }
 
         const newUser = {
@@ -63,12 +71,17 @@ export const authHandlers = [
     }),
 
     // Refresh token
-    http.post(authRouter.refresh.path, async ({ request }) => {
-        const { refreshToken } = (await request.json()) as { refreshToken?: string };
+    http.post(Auth.refresh.path, async ({ request }) => {
+        const { refreshToken } = (await request.json()) as {
+            refreshToken?: string;
+        };
         if (!refreshToken) {
-            return HttpResponse.json({ message: "Invalid refresh token" }, { status: 401 });
+            return HttpResponse.json(
+                { message: "Invalid refresh token" },
+                { status: 401 },
+            );
         }
         const newAccessToken = `mock-jwt-token-${Date.now()}`;
         return HttpResponse.json({ accessToken: newAccessToken, refreshToken });
     }),
-]; 
+];
