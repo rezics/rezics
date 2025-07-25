@@ -1,6 +1,9 @@
 packages:
   - package/*
 
+ignoredBuiltDependencies:
+  - bcrypt
+
 linkWorkspacePackages: true
 
 onlyBuiltDependencies:
