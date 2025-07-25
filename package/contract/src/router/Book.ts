@@ -1,6 +1,6 @@
 import c from "./c";
 import { z } from "zod";
-import { PaginationQuerySchema, PaginatedResponse } from "./common";
+import { Pagination } from "../schema/common";
 import { Book } from "../schema/Book";
 
 export default c.router({
@@ -18,7 +18,7 @@ export default c.router({
     list: {
         method: "GET",
         path: "/book/list",
-        query: PaginationQuerySchema.extend({ q: z.string().optional() }),
-        responses: { 200: PaginatedResponse(Book.View) },
+        query: Pagination(Book.Read, Book.View).Read,
+        responses: { 200: Pagination(Book.Read, Book.View).View },
     },
 });

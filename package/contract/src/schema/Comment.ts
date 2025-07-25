@@ -1,25 +1,49 @@
 import { z } from "zod";
-import { id, Auditable } from "./common";
-import { UserSchema } from "./User";
+import { id, Auditable, Evaluable } from "./common";
+import { User } from "./User";
 
-// ------------------------------------------------------------------
-// Comment Type
-// ------------------------------------------------------------------
-export type Comment = z.infer<typeof Auditable> & {
-    id: string;
-    content: string;
-    author: z.infer<typeof UserSchema>;
-    likes: number;
-    replies: Comment[]; // 遞歸
-};
-
-export const CommentSchema: z.ZodSchema<Comment> = z.lazy(() =>
-    z.object({
-        id,
-        ...Auditable.shape,
+export namespace Comment {
+    const Mutable = {
         content: z.string(),
-        author: UserSchema,
-        likes: z.number(),
-        replies: z.array(CommentSchema),
-    }),
-);
+        authorId: id,
+        parentId: id.nullable(),
+    };
+
+    export const Create = z.object({
+        ...Mutable,
+    });
+
+    export const Read = z
+        .object({
+            id,
+
+            authorId: id,
+            parentId: id.nullable(),
+        })
+        .partial();
+
+    export const Update = z
+        .object({
+            ...Create.shape,
+        })
+        .partial();
+
+    export const Delete = z
+        .object({
+            id,
+        })
+        .partial();
+
+    export const ViewInner: z.ZodType<any> = z.lazy(() =>
+        z.object({
+            id,
+            content: z.string(),
+            author: User.Preview,
+            replies: z.array(ViewInner),
+            ...Evaluable.shape,
+            ...Auditable.shape,
+        }),
+    );
+
+    export const View = ViewInner;
+}

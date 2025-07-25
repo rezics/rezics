@@ -1,11 +1,39 @@
 import { z } from "zod";
-import { id as idSchema } from "./common";
+import { id,  Auditable } from "./common";
 
-// ------------------------------------------------------------------
-// HomePage Type
-// ------------------------------------------------------------------
-export const HomePageSchema = z.object({
-    id: idSchema,
-    content: z.string(),
-});
-export type HomePage = z.infer<typeof HomePageSchema>;
+export namespace HomePage {
+    const Mutable = {
+        content: z.string(),
+    };
+
+    export const Create = z.object({
+        ...Mutable,
+    });
+
+    export const Read = z
+        .object({
+            id,
+            
+        })
+        .partial();
+
+    export const Update = z
+        .object({
+            ...Create.shape,
+        })
+        .partial();
+
+    export const Delete = z
+        .object({
+            id,
+            
+        })
+        .partial();
+
+    export const View = z.object({
+        id,
+        
+        ...Mutable,
+        ...Auditable.shape,
+    });
+}

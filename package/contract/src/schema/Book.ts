@@ -1,17 +1,16 @@
 import { z } from "zod";
 import { id, icsId, Nameable, Auditable, Evaluable, Tagable } from "./common";
-import { PublishInfoSchema } from "./PublishInfo";
+import { PublishInfo } from "./PublishInfo";
 
 export namespace Book {
     const Mutable = {
-        id,
         ...Nameable.shape,
         ...Tagable.shape,
         cover: z.url().nullable(),
         author: z.array(id),
         rating: z.number().nullable(),
         length: z.int().nullable(),
-        publishInfo: z.array(PublishInfoSchema),
+        publishInfo: z.array(PublishInfo.View),
         tags: z.array(id),
         description: z.string().nullable(),
     };
@@ -33,7 +32,21 @@ export namespace Book {
         })
         .partial();
 
+    export const Update = z
+        .object({
+            ...Create.shape,
+        })
+        .partial();
+
+    export const Delete = z
+        .object({
+            id,
+            icsId,
+        })
+        .partial();
+
     export const View = z.object({
+        ...Mutable,
         ...Evaluable.shape,
         ...Auditable.shape,
         id,

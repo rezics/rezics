@@ -9,3 +9,7 @@ export * from "./ReadList";
 export * from "./HomePage";
 export * from "./Award";
 export * from "./Reaction";
+export * from "./Author";
+export * from "./Chapter";
+export * from "./Permission";
+export * from "./PublishInfo";

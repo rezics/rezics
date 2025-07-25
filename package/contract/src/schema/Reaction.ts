@@ -1,26 +1,59 @@
 import { z } from "zod";
-import { UserSchema } from "./User";
-import { id as idSchema } from "./common";
+import { User } from "./User";
+import { id, icsId, Auditable } from "./common";
 
-// ------------------------------------------------------------------
-// Reaction Type & Schema
-// ------------------------------------------------------------------
-export const ReactionSchema = z.object({
-    id: idSchema,
-    objectType: z.string(), // e.g. "Comment", "Post", ...
-    objectId: idSchema,
-    type: z.enum(["like", "dislike", "funny"]),
-    user: UserSchema,
-    created_at: z.string(),
-});
-export type Reaction = z.infer<typeof ReactionSchema>;
+export namespace Reaction {
+    const Mutable = {
+        objectType: z.string(), // e.g. "Comment", "Post", ...
+        objectId: id,
+        type: z.enum(["like", "dislike", "funny"]),
+        userId: id,
+    };
 
-// ------------------------------------------------------------------
-// Reaction Stats Schema
-// ------------------------------------------------------------------
-export const ReactionStatsItemSchema = z.object({
-    type: ReactionSchema.shape.type,
-    count: z.number(),
-});
-export const ReactionStatsSchema = z.array(ReactionStatsItemSchema);
-export type ReactionStats = z.infer<typeof ReactionStatsSchema>;
+    export const Create = z.object({
+        ...Mutable,
+    });
+
+    export const Read = z
+        .object({
+            id,
+            icsId,
+            objectType: z.string(),
+            objectId: id,
+            type: z.enum(["like", "dislike", "funny"]),
+            userId: id,
+        })
+        .partial();
+
+    export const Update = z
+        .object({
+            ...Create.shape,
+        })
+        .partial();
+
+    export const Delete = z
+        .object({
+            id,
+            icsId,
+        })
+        .partial();
+
+    export const View = z.object({
+        id,
+        icsId,
+        objectType: z.string(),
+        objectId: id,
+        type: z.enum(["like", "dislike", "funny"]),
+        user: User.Preview,
+        ...Auditable.shape,
+    });
+}
+
+export namespace ReactionStats {
+    export const Item = z.object({
+        type: Reaction.Create.shape.type,
+        count: z.number(),
+    });
+
+    export const View = z.array(Item);
+}
