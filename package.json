@@ -1,30 +1,32 @@
 {
-    "name": "library-book",
-    "scripts": {
-        "format": "prettier -w package"
-    },
-    "license": "AGPL-3.0-only",
-    "packageManager": "pnpm@10.12.4",
-    "type": "module",
-    "devDependencies": {
-        "dotenv": "^16.5.0",
-        "prettier": "^3.5.3",
-        "typescript": "^5.8.3"
-    },
-    "dependencies": {
-        "@tanstack/react-query": "^5.83.0",
-        "@ts-rest/core": "3.53.0-rc.1",
-        "@ts-rest/fastify": "3.53.0-rc.1",
-        "@ts-rest/open-api": "3.53.0-rc.1",
-        "@ts-rest/react-query": "3.53.0-rc.1",
-        "client": "workspace:^",
-        "contract": "workspace:^",
-        "database": "workspace:^",
-        "effect": "^3.16.12",
-        "fastify": "^4.29.1",
-        "gel": "^2.1.1",
-        "server": "workspace:^",
-        "tsx": "^4.19.4",
-        "zod": "^4.0.5"
-    }
+  "name": "library-book",
+  "scripts": {
+    "format": "prettier -w package",
+    "prepare": "husky"
+  },
+  "license": "AGPL-3.0-only",
+  "packageManager": "pnpm@10.12.4",
+  "type": "module",
+  "devDependencies": {
+    "dotenv": "^16.5.0",
+    "husky": "^9.1.7",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "@tanstack/react-query": "^5.83.0",
+    "@ts-rest/core": "3.53.0-rc.1",
+    "@ts-rest/fastify": "3.53.0-rc.1",
+    "@ts-rest/open-api": "3.53.0-rc.1",
+    "@ts-rest/react-query": "3.53.0-rc.1",
+    "client": "workspace:^",
+    "contract": "workspace:^",
+    "database": "workspace:^",
+    "effect": "^3.16.12",
+    "fastify": "^4.29.1",
+    "gel": "^2.1.1",
+    "server": "workspace:^",
+    "tsx": "^4.19.4",
+    "zod": "^4.0.5"
+  }
 }
