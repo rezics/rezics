@@ -1,8 +1,5 @@
 import s from "./s";
 import c from "contract";
+import d from "database";
 
-export default s.router(c.Auth, {
-    login: async ({ headers, body }) => {
-        return {};
-    },
-});
+export default s.router(c.Auth, {});
