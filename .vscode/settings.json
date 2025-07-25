@@ -9,6 +9,7 @@
         "readlist",
         "Tagable",
         "urql",
+        "uuid",
         "uuidv",
         "wouter"
     ],
