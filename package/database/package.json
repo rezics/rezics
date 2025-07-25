@@ -4,11 +4,11 @@
     "type": "module",
     "packageManager": "pnpm@10.13.1",
     "scripts": {
-        "generate": "pnpx @gel/generate queries"
+        "generate": "pnpx @gel/generate edgeql-js --output-dir ./generated --target mts"
     },
     "exports": {
         ".": {
-            "default": "./index.ts"
+            "default": "./generated/index.mts"
         }
     }
 }

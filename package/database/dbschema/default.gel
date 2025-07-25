@@ -70,7 +70,7 @@ module default {
     type Publisher extending Nameable, Evaluable, Relatable {
         required domain: short_str;
         multi link books: Book {
-            required date: datetime;
+            date: datetime;
             isbn: short_str;
         };
 

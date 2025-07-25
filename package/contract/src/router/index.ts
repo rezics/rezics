@@ -14,21 +14,16 @@ import { HomePageRouter } from "./HomePage";
 import { PermissionRouter } from "./Permission";
 import { PublishInfoRouter } from "./PublishInfo";
 
-export { 
-    UserRouter, 
-    AuthorRouter, 
-    BookRouter, 
-    ChapterRouter, 
-    ReviewRouter, 
-    TagRouter, 
-    CommentRouter, 
-    PostRouter, 
-    ReadListRouter, 
-    ReactionRouter, 
-    AwardRouter, 
-    HomePageRouter,
-    PermissionRouter,
-    PublishInfoRouter
+export const Router = {
+    Auth,
+    Book,
+    Review,
+    Tag,
+    Post,
+    ReadList,
+    Comment,
+    Homepage,
+    Chapter,
 };
 
 export default c.router({
