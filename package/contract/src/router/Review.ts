@@ -143,3 +143,5 @@ export const ReviewRouter = c.router({
         },
     },
 });
+
+export default ReviewRouter;

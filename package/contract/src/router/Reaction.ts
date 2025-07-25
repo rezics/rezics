@@ -176,3 +176,5 @@ export const ReactionRouter = c.router({
         },
     },
 });
+
+export default ReactionRouter

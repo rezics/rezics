@@ -162,3 +162,5 @@ export const AwardRouter = c.router({
         },
     },
 });
+
+export default AwardRouter

@@ -231,3 +231,5 @@ export const TagRouter = c.router({
         },
     },
 });
+
+export default TagRouter;

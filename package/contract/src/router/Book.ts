@@ -182,3 +182,5 @@ export const BookRouter = c.router({
         },
     },
 });
+
+export default BookRouter

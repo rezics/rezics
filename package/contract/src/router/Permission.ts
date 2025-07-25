@@ -159,3 +159,5 @@ export const PermissionRouter = c.router({
         },
     },
 });
+
+export default PermissionRouter;
