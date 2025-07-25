@@ -1,24 +1,45 @@
-import { id, Nameable, Evaluable, Tagable } from "./common";
+import { id,  Nameable, Evaluable, Tagable, Auditable } from "./common";
 import { z } from "zod";
 
 export namespace Chapter {
-    export const Create = z.object({
+    const Mutable = {
         ...Nameable.shape,
-        ...Evaluable.shape,
         ...Tagable.shape,
-        book: id,
+        bookId: id,
+        content: z.string(),
+    };
+
+    export const Create = z.object({
+        ...Mutable,
     });
 
-    export const Read = z.object({
-        book: id,
-        chapter: id,
-    });
+    export const Read = z
+        .object({
+            id,
+            
+            bookId: id,
+        })
+        .partial();
+
+    export const Update = z
+        .object({
+            ...Create.shape,
+        })
+        .partial();
+
+    export const Delete = z
+        .object({
+            id,
+            
+        })
+        .partial();
 
     export const View = z.object({
-        ...Nameable.shape,
+        ...Mutable,
         ...Evaluable.shape,
-        ...Tagable.shape,
+        ...Auditable.shape,
         id,
+        
     });
 }
 

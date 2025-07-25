@@ -5,43 +5,75 @@ import {
     email,
     username,
     password,
-    id as idSchema,
+    id,
+    Auditable,
+    Nameable,
 } from "./common";
 
-export const UserSchema = z.object({
-    id: idSchema,
-    username, // 用户名
-    email, // 邮箱
-    phone: phoneNumber.optional(), // 手机号可选
-    name: z.string().min(1).max(50).describe("Full name"),
-    avatar: z.url().optional(),
-    created_at: z.string().describe("ISO timestamp"),
-    updated_at: z.string().describe("ISO timestamp"),
-});
-export type User = z.infer<typeof UserSchema>;
-
-export const UserPreviewSchema = z.object({
-    id: idSchema,
-    username,
-    avatar: z.url().optional(),
-});
-export type UserPreview = z.infer<typeof UserPreviewSchema>;
-
-export const SignupBodySchema = z.object({
-    username,
-    email,
-    password,
-    phone: phoneNumber.optional(),
-});
-export type SignupBody = z.infer<typeof SignupBodySchema>;
-
-export const LoginBodySchema = z
-    .object({
-        username: z.string().optional(),
-        email: z.string().optional(),
+export namespace User {
+    const Mutable = {
+        username,
+        email,
+        phone: phoneNumber.nullable(),
+        ...Nameable.shape,
+        avatar: z.url().nullable(),
         password,
-    })
-    .refine((data) => data.username || data.email, {
-        message: "Must provide username or email",
+    };
+
+    export const Create = z.object({
+        ...Mutable,
     });
-export type LoginBody = z.infer<typeof LoginBodySchema>;
+
+    export const Read = z
+        .object({
+            id,
+            username,
+            ...Nameable.shape,
+        })
+        .partial();
+
+    export const Update = z
+        .object({
+            ...Mutable,
+        })
+        .partial();
+
+    export const Delete = z
+        .object({
+            id,
+        })
+        .partial();
+
+    export const View = z.object({
+        id,
+        username,
+        email,
+        phone: phoneNumber.nullable(),
+        ...Nameable.shape,
+        avatar: z.url().nullable(),
+        ...Auditable.shape,
+    });
+
+    export const Preview = z.object({
+        id,
+        username,
+        avatar: z.url().nullable(),
+    });
+
+    export const Signup = z.object({
+        username,
+        email,
+        password,
+        phone: phoneNumber.nullable(),
+    });
+
+    export const Login = z
+        .object({
+            username: z.string().optional(),
+            email: z.string().optional(),
+            password,
+        })
+        .refine((data) => data.username || data.email, {
+            message: "Must provide username or email",
+        });
+}

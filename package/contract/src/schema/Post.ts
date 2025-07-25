@@ -1,14 +1,44 @@
 import { z } from "zod";
-import { id, Auditable } from "./common";
+import { id,  Auditable, Evaluable, Nameable, Tagable } from "./common";
 
-// ------------------------------------------------------------------
-// Post & Category Type
-// ------------------------------------------------------------------
-// export const PostSchema = ThreadSchema.extend({
-export const Post = z.object({
-    id,
-    ...Auditable.shape,
-    content: z.string(),
-});
+export namespace Post {
+    const Mutable = {
+        ...Nameable.shape,
+        ...Tagable.shape,
+        content: z.string(),
+        authorId: id,
+    };
 
-export type Post = z.infer<typeof Post>;
+    export const Create = z.object({
+        ...Mutable,
+    });
+
+    export const Read = z
+        .object({
+            id,
+            
+            authorId: id,
+        })
+        .partial();
+
+    export const Update = z
+        .object({
+            ...Create.shape,
+        })
+        .partial();
+
+    export const Delete = z
+        .object({
+            id,
+            
+        })
+        .partial();
+
+    export const View = z.object({
+        id,
+        
+        ...Mutable,
+        ...Evaluable.shape,
+        ...Auditable.shape,
+    });
+}

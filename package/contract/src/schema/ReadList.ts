@@ -1,17 +1,49 @@
 import { z } from "zod";
-import { id as idSchema } from "./common";
-import { UserSchema } from "./User";
+import { id, icsId, Auditable, Evaluable, Nameable } from "./common";
+import { User } from "./User";
+import { Book } from "./Book";
 
-// ------------------------------------------------------------------
-// Readlist Type
-// ------------------------------------------------------------------
-export const ReadListSchema = z.object({
-    id: idSchema,
-    title: z.string(),
-    description: z.string(),
-    books: z.array(z.string()),
-    creator: UserSchema,
-    likes: z.number(),
-    commentsNumber: z.number().optional(),
-});
-export type ReadList = z.infer<typeof ReadListSchema>;
+export namespace ReadList {
+    const Mutable = {
+        ...Nameable.shape,
+        description: z.string().nullable(),
+        books: z.array(id),
+        creatorId: id,
+    };
+
+    export const Create = z.object({
+        ...Mutable,
+    });
+
+    export const Read = z
+        .object({
+            id,
+            icsId,
+            creatorId: id,
+        })
+        .partial();
+
+    export const Update = z
+        .object({
+            ...Create.shape,
+        })
+        .partial();
+
+    export const Delete = z
+        .object({
+            id,
+            icsId,
+        })
+        .partial();
+
+    export const View = z.object({
+        id,
+        icsId,
+        ...Nameable.shape,
+        description: z.string().nullable(),
+        books: z.array(Book.View),
+        creator: User.Preview,
+        ...Evaluable.shape,
+        ...Auditable.shape,
+    });
+}

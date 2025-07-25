@@ -4,7 +4,7 @@ import { PhoneNumberUtil, PhoneNumberFormat } from "google-libphonenumber";
 
 const phone_util = PhoneNumberUtil.getInstance();
 
-export const id = z.uuidv4().describe("ID");
+export const id = z.uuidv7().describe("ID");
 
 export const shortString = z.string().max(100);
 export const longString = z.string().max(10000);
@@ -33,6 +33,7 @@ export const Pagination = <TRead extends ZodObject, TItem extends ZodObject>(
     };
 };
 
+// use https://github.com/ai/nanoid, 9 time, 12 random, 3 check
 export const icsId = z
     .string()
     .regex(/^BK-[a-zA-Z0-9]{24}$/, {
@@ -79,7 +80,7 @@ export const Nameable = z.object({
 });
 
 export const Tagable = z.object({
-    tags: z.array(z.string()),
+    tags: z.array(id),
 });
 
 export const Evaluable = z.object({
