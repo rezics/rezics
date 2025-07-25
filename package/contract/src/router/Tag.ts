@@ -36,7 +36,7 @@ export const TagRouter = c.router({
             204: c.response<null>(),
         },
     },
-    
+
     // Extended tag-specific endpoints
     list: {
         method: "GET",
@@ -55,7 +55,7 @@ export const TagRouter = c.router({
             }),
         },
     },
-    
+
     // Tag groups management
     createTagGroup: {
         method: "POST",
@@ -82,7 +82,7 @@ export const TagRouter = c.router({
             }),
         },
     },
-    
+
     // Sub-tags based on book and tag (as requested)
     getSubTagsForBookAndTag: {
         method: "GET",
@@ -91,7 +91,7 @@ export const TagRouter = c.router({
             200: z.array(Tag.View),
         },
     },
-    
+
     // Tag-added event recording (as requested)
     recordTagAddedEvent: {
         method: "POST",
@@ -111,7 +111,7 @@ export const TagRouter = c.router({
             }),
         },
     },
-    
+
     // Book-tag relationships
     getBookTags: {
         method: "GET",
@@ -137,7 +137,7 @@ export const TagRouter = c.router({
             200: z.array(Tag.View),
         },
     },
-    
+
     // Thread-tag relationships
     getThreadTags: {
         method: "GET",
@@ -146,7 +146,7 @@ export const TagRouter = c.router({
             200: z.array(Tag.View),
         },
     },
-    
+
     // Tag relationship management
     addTagToBook: {
         method: "POST",
@@ -192,7 +192,7 @@ export const TagRouter = c.router({
             }),
         },
     },
-    
+
     // Tag analytics and statistics
     getTagStats: {
         method: "GET",
@@ -202,11 +202,15 @@ export const TagRouter = c.router({
                 usageCount: z.number(),
                 bookCount: z.number(),
                 threadCount: z.number(),
-                popularBooks: z.array(z.object({
-                    id: z.string(),
-                    name: z.string(),
-                    cover: z.string().nullable(),
-                })).max(5),
+                popularBooks: z
+                    .array(
+                        z.object({
+                            id: z.string(),
+                            name: z.string(),
+                            cover: z.string().nullable(),
+                        }),
+                    )
+                    .max(5),
             }),
         },
     },
@@ -218,10 +222,12 @@ export const TagRouter = c.router({
             limit: z.number().optional(),
         }),
         responses: {
-            200: z.array(z.object({
-                tag: Tag.View,
-                usageCount: z.number(),
-            })),
+            200: z.array(
+                z.object({
+                    tag: Tag.View,
+                    usageCount: z.number(),
+                }),
+            ),
         },
     },
 });

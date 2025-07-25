@@ -4,11 +4,10 @@ import d from "database";
 
 export default s.router(c.Tag, {
     create: async ({ body }) => {
-        d.insert(d.CustomTag, {
+        d.insert(d.Tag, {
             name: body.name,
-            owner: d.select(d.User.i),
+            owner: body.owner,
         });
-
         return {
             200: {},
         };
