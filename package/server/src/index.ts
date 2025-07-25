@@ -1,9 +1,13 @@
-import { initServer } from "@ts-rest/fastify";
 import c from "contract";
 import Fastify from "fastify";
 import s from "./router/s";
-import d from "database";
 import { Config } from "./config";
+
+import Auth from "./router/Auth";
+import Book from "./router/Book";
+import Chapter from "./router/Chapter";
+import Homepage from "./router/Homepage";
+import Tag from "./router/Tag";
 
 const main = async () => {
     const { host, port } = Config.parse(process.env);
@@ -11,6 +15,10 @@ const main = async () => {
 
     const r = s.router(c, {
         Auth,
+        Book,
+        Chapter,
+        Homepage,
+        Tag,
     });
 
     f.register(s.plugin(r));
