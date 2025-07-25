@@ -6,10 +6,6 @@ module default {
         constraint max_len_value(100);
     }
 
-    scalar type medium_str extending str {
-        constraint max_len_value(1000);
-    }
-
     scalar type long_str extending str {
         constraint max_len_value(10000);
     }
@@ -17,19 +13,21 @@ module default {
     abstract type Auditable {
         required created_at: datetime {
             rewrite insert using (datetime_of_statement());
+            default := datetime_of_statement();
             readonly := true;
         }
         required updated_at: datetime {
-            rewrite insert, update using (datetime_of_statement())
+            rewrite insert, update using (datetime_of_statement());
+            default := datetime_of_statement();
         }
     }
 
-    abstract type Tagable {
-        multi link tags: Nameable;
+    abstract type Relatable {
+        multi link related_to: Nameable;
     }
 
     abstract type Nameable {
-        required name: medium_str;
+        required name: short_str;
 
         index on (.name);
     }
@@ -40,63 +38,59 @@ module default {
         multi link favorites: Person;
     }
 
-    type Book extending Nameable, Auditable, Evaluable, Tagable {
+    type Book extending Nameable, Auditable, Evaluable, Relatable {
         cover: str;
         released_at: datetime;
-        real_updated_at: datetime;
 
         required grabbed_from: str;
         description: long_str;
-        required length: bigint;
+        required length: int64;
 
         required multi link author: Author;
-        multi link units: Unit {
-            constraint exclusive;
-        }
-        multi link publishers: Publisher {
-            required date: datetime;
-            required isbn: short_str;
-        }
+        multi link chapters := .<book[is Chapter];
+        multi link publishers := .<books[is Publisher];
 
-        index on ((.length, .released_at, .real_updated_at));
+        index on ((.length, .released_at));
     }
 
-    type Unit extending Nameable, Evaluable, Tagable {
-        required order: int32;
-        multi link children: Unit {
-            constraint exclusive;
-        }
-        link parent := .<children[is Unit];
-        link book :=  .<units[is Book];
-
-        index on (.order);
+    type Chapter extending Nameable, Evaluable, Relatable {
+        required order: float64;
+        required single link book: Book;
+        single link parent: Chapter;
+        multi link children := .<parent[is Chapter];
     }
 
-    type CustomTag extending Nameable {
-        required single link owner: Person;
+    type Tag extending Nameable, Relatable {
+        required multi link owner: Person;
+        required type: short_str;
+
+        index on (.type);
     }
 
-    type Publisher extending Nameable, Evaluable, Tagable {
+    type Publisher extending Nameable, Evaluable, Relatable {
         required domain: short_str;
-        multi link books := .<publishers[is Book];
+        multi link books: Book {
+            required date: datetime;
+            isbn: short_str;
+        };
 
         index on (.domain);
     }
 
-    type Author extending Nameable, Evaluable, Tagable {
+    type Author extending Nameable, Evaluable, Relatable {
         description: long_str;
         single link user: Person;
         multi link books := .<author[is Book];
     }
 
-    abstract type Person extending Nameable, Auditable, Evaluable, Tagable {
+    abstract type Person extending Nameable, Auditable, Evaluable, Relatable {
         owned_favorites := .<favorites[is Evaluable];
-        owned_tags := .<owner[is Nameable];
+        owned_tags := .<owner[is Tag];
     }
 
     type User extending Person {
-        required email: short_str;
         description: long_str;
+        required email: short_str;
         multi link friends: User;
 
         required identity: ext::auth::Identity {
@@ -116,7 +110,7 @@ module default {
         }
     }
 
-    type Thread extending Nameable, Auditable, Evaluable, Tagable {
+    type Thread extending Nameable, Auditable, Evaluable, Relatable {
         required link author: Person;
         required content: long_str;
 
