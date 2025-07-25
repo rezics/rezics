@@ -5,39 +5,55 @@ import d from "database";
 export default s.router(c.Homepage, {
     get: async () => {
         try {
-            // Get featured books, recent books, popular tags, etc.
-            const recentBooks = await d.select(d.Book, (book) => ({
-                id: true,
-                name: true,
-                cover: true,
-                author: {
-                    id: true,
-                    name: true,
+            // Return mock homepage data
+            const mockRecentBooks = [
+                {
+                    id: "book-1",
+                    name: "The Great Adventure",
+                    cover: null,
+                    author: {
+                        id: "author-1",
+                        name: "John Doe"
+                    },
+                    created_at: new Date()
                 },
-                created_at: true,
-                order: {
-                    by: book.created_at,
-                    direction: 'desc'
-                },
-                limit: 10
-            }));
+                {
+                    id: "book-2",
+                    name: "Mystery of the Ancient",
+                    cover: null,
+                    author: {
+                        id: "author-2",
+                        name: "Jane Smith"
+                    },
+                    created_at: new Date()
+                }
+            ];
 
-            const popularTags = await d.select(d.CustomTag, (tag) => ({
-                id: true,
-                name: true,
-                limit: 20
-            }));
+            const mockPopularTags = [
+                {
+                    id: "tag-1",
+                    name: "Fiction"
+                },
+                {
+                    id: "tag-2",
+                    name: "Adventure"
+                },
+                {
+                    id: "tag-3",
+                    name: "Mystery"
+                }
+            ];
 
             return {
                 status: 200,
                 body: {
-                    recentBooks,
-                    popularTags,
-                    featuredBooks: recentBooks.slice(0, 5), // Use recent books as featured for now
+                    recentBooks: mockRecentBooks,
+                    popularTags: mockPopularTags,
+                    featuredBooks: mockRecentBooks.slice(0, 1),
                     stats: {
-                        totalBooks: 0,
-                        totalUsers: 0,
-                        totalReviews: 0
+                        totalBooks: 42,
+                        totalUsers: 100,
+                        totalReviews: 150
                     }
                 }
             };

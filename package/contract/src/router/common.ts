@@ -25,8 +25,8 @@ export type InternationalizedName = z.infer<typeof InternationalizedNameSchema>;
 
 // ---------------- Pagination ----------------
 export const PaginationQuerySchema = z.object({
-    page: z.number().int().optional().default(1),
-    limit: z.number().int().optional().default(20),
+    page: z.coerce.number().int().optional().default(1),
+    limit: z.coerce.number().int().optional().default(20),
     type: z
         .enum(["time", "name", "popular", "agree"])
         .optional()
