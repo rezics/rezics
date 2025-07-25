@@ -1,28 +1,25 @@
 import { initServer } from "@ts-rest/fastify";
 import c from "contract";
-import fastify from "fastify";
+import d from "database";
+import Fastify from "fastify";
+import { Config } from "./config";
 
-const server = initServer();
-const router = server.router(c.Homepage, {
-	get: async () => {
-		const homePageData = {
-			id: crypto.randomUUID(),
-			content: "Hello, world!"
-		};
+const main = async () => {
+    const { host, port } = Config.parse(process.env);
+    const f = Fastify({ logger: true });
+    const s = initServer();
 
-		return {
-			status: 200,
-			body: homePageData,
-		};
-	}
+    const r = s.router(c, {});
+
+    f.register(s.plugin(r));
+
+    f.listen({
+        host,
+        port,
+    });
+};
+
+main().catch((err) => {
+    console.error(err);
+    process.exit(1);
 });
-
-const app = fastify({ logger: true });
-app.register(server.plugin(router));
-
-const host = process.env['WEBSERVER_HOST'] || '0.0.0.0';
-const port = process.env['WEBSERVER_PORT'] ? parseInt(process.env['WEBSERVER_PORT']) : 3000;
-
-console.log(`Starting server on ${host}:${port}`);
-
-await app.listen({ host, port });
