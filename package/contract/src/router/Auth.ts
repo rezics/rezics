@@ -1,6 +1,6 @@
 import c from "./c";
 import { z } from "zod";
-import { UserSchema } from "../schema/User";
+import { User } from "../schema/User";
 
 export default c.router({
     login: {
@@ -8,7 +8,7 @@ export default c.router({
         path: "/auth/login",
         body: z.object({ email: z.email(), password: z.string() }),
         responses: {
-            200: z.object({ token: z.string(), user: UserSchema }),
+            200: z.object({ token: z.string(), user: User.View }),
             401: z.object({ message: z.string() }),
         },
     },
@@ -17,7 +17,7 @@ export default c.router({
         path: "/auth/register",
         body: z.object({ email: z.email(), password: z.string() }),
         responses: {
-            200: z.object({ token: z.string(), user: UserSchema }),
+            200: z.object({ token: z.string(), user: User.View }),
         },
     },
     refresh: {

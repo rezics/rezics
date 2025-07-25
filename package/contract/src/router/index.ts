@@ -1,24 +1,49 @@
 import c from "./c";
-import Auth from "./Auth";
-import ReadList from "./ReadList";
-import Book from "./Book";
-import Review from "./Review";
-import Tag from "./Tag";
-import Post from "./Post";
-import Comment from "./Comment";
-import Homepage from "./HomePage";
-import Chapter from "./Chapter";
+import { UserRouter } from "./User";
+import { AuthorRouter } from "./Author";
+import { BookRouter } from "./Book";
+import { ChapterRouter } from "./Chapter";
+import { ReviewRouter } from "./Review";
+import { TagRouter } from "./Tag";
+import { CommentRouter } from "./Comment";
+import { PostRouter } from "./Post";
+import { ReadListRouter } from "./ReadList";
+import { ReactionRouter } from "./Reaction";
+import { AwardRouter } from "./Award";
+import { HomePageRouter } from "./HomePage";
+import { PermissionRouter } from "./Permission";
+import { PublishInfoRouter } from "./PublishInfo";
 
-export { Auth, Book, Review, Tag, Post, ReadList, Comment, Homepage, Chapter };
+export { 
+    UserRouter, 
+    AuthorRouter, 
+    BookRouter, 
+    ChapterRouter, 
+    ReviewRouter, 
+    TagRouter, 
+    CommentRouter, 
+    PostRouter, 
+    ReadListRouter, 
+    ReactionRouter, 
+    AwardRouter, 
+    HomePageRouter,
+    PermissionRouter,
+    PublishInfoRouter
+};
 
 export default c.router({
-    Auth,
-    Book,
-    // Review,
-    Tag,
-    // Post,
-    // ReadList,
-    // Comment,
-    Homepage,
-    Chapter,
+    users: UserRouter,
+    authors: AuthorRouter,
+    books: BookRouter,
+    chapters: ChapterRouter,
+    reviews: ReviewRouter,
+    tags: TagRouter,
+    comments: CommentRouter,
+    posts: PostRouter,
+    readlists: ReadListRouter,
+    reactions: ReactionRouter,
+    awards: AwardRouter,
+    homepage: HomePageRouter,
+    permissions: PermissionRouter,
+    publishinfo: PublishInfoRouter,
 });
