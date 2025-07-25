@@ -139,3 +139,5 @@ export const CommentRouter = c.router({
         },
     },
 });
+
+export default CommentRouter;

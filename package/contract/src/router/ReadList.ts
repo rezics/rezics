@@ -149,3 +149,5 @@ export const ReadListRouter = c.router({
         },
     },
 });
+
+export default ReadListRouter;

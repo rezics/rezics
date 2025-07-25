@@ -107,3 +107,5 @@ export const AuthorRouter = c.router({
         },
     },
 });
+
+export default AuthorRouter

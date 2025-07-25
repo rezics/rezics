@@ -184,3 +184,5 @@ export const HomePageRouter = c.router({
         },
     },
 });
+
+export default HomePageRouter;

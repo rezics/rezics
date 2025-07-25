@@ -107,3 +107,5 @@ export const ChapterRouter = c.router({
         },
     },
 });
+
+export default ChapterRouter;

@@ -1,44 +1,48 @@
 import c from "./c";
-import { UserRouter } from "./User";
-import { AuthorRouter } from "./Author";
-import { BookRouter } from "./Book";
-import { ChapterRouter } from "./Chapter";
-import { ReviewRouter } from "./Review";
-import { TagRouter } from "./Tag";
-import { CommentRouter } from "./Comment";
-import { PostRouter } from "./Post";
-import { ReadListRouter } from "./ReadList";
-import { ReactionRouter } from "./Reaction";
-import { AwardRouter } from "./Award";
-import { HomePageRouter } from "./HomePage";
-import { PermissionRouter } from "./Permission";
-import { PublishInfoRouter } from "./PublishInfo";
+import User from "./User";
+import Author from "./Author";
+import Book from "./Book";
+import Chapter from "./Chapter";
+import Review from "./Review";
+import Tag from "./Tag";
+import Comment from "./Comment";
+import Post from "./Post";
+import ReadList from "./ReadList";
+import Reaction from "./Reaction";
+import Award from "./Award";
+import HomePage from "./HomePage";
+import Permission from "./Permission";
+import PublishInfo from "./PublishInfo";
 
 export const Router = {
-    Auth,
+    Author,
     Book,
     Review,
     Tag,
     Post,
     ReadList,
     Comment,
-    Homepage,
     Chapter,
+    Reaction,
+    Award,
+    HomePage,
+    Permission,
+    PublishInfo,
 };
 
 export default c.router({
-    users: UserRouter,
-    authors: AuthorRouter,
-    books: BookRouter,
-    chapters: ChapterRouter,
-    reviews: ReviewRouter,
-    tags: TagRouter,
-    comments: CommentRouter,
-    posts: PostRouter,
-    readlists: ReadListRouter,
-    reactions: ReactionRouter,
-    awards: AwardRouter,
-    homepage: HomePageRouter,
-    permissions: PermissionRouter,
-    publishinfo: PublishInfoRouter,
+    users: User,
+    authors: Author,
+    books: Book,
+    chapters: Chapter,
+    reviews: Review,
+    tags: Tag,
+    comments: Comment,
+    posts: Post,
+    readlists: ReadList,
+    reactions: Reaction,
+    awards: Award,
+    homepage: HomePage,
+    permissions: Permission,
+    publishInfo: PublishInfo,
 });

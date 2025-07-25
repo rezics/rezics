@@ -191,3 +191,5 @@ export const PublishInfoRouter = c.router({
         },
     },
 });
+
+export default PublishInfoRouter;

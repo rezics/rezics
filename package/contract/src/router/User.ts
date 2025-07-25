@@ -125,3 +125,5 @@ export const UserRouter = c.router({
         },
     },
 });
+
+export default UserRouter;
