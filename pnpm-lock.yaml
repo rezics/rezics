@@ -17,6 +17,9 @@ importers:
       '@ts-rest/fastify':
         specifier: 3.53.0-rc.1
         version: 3.53.0-rc.1(@ts-rest/core@3.53.0-rc.1(@types/node@24.1.0))(fastify@4.29.1)
+      '@ts-rest/open-api':
+        specifier: 3.53.0-rc.1
+        version: 3.53.0-rc.1(@ts-rest/core@3.53.0-rc.1(@types/node@24.1.0))(zod@4.0.5)
       '@ts-rest/react-query':
         specifier: 3.53.0-rc.1
         version: 3.53.0-rc.1(@tanstack/react-query@5.83.0(react@18.3.1))(@ts-rest/core@3.53.0-rc.1(@types/node@24.1.0))(react@18.3.1)
@@ -309,6 +312,12 @@ packages:
   '@ampproject/remapping@2.3.0':
     resolution: {integrity: sha512-30iZtAPgz+LTIYoeivqYo853f02jBYSd5uGnGpkFV0M3xOt9aN73erkgYAmZU43x4VfqcnLxW9Kpg3R5LC4YYw==}
     engines: {node: '>=6.0.0'}
+
+  '@anatine/zod-openapi@1.14.2':
+    resolution: {integrity: sha512-q0qHfnuNYVKu0Swrnnvfj9971AEyW7c8v9jCOZGCl5ZbyGMNG4RPyJkRcMi/JC8CRfdOe0IDfNm1nNsi2avprg==}
+    peerDependencies:
+      openapi3-ts: ^2.0.0 || ^3.0.0
+      zod: ^3.20.0
 
   '@ardatan/relay-compiler@12.0.0':
     resolution: {integrity: sha512-9anThAaj1dQr6IGmzBMcfzOQKTa5artjuPmw8NYK/fiGEMjADbSguBY2FMDykt+QhilR3wc9VA/3yVju7JHg7Q==}
@@ -1758,6 +1767,12 @@ packages:
     peerDependencies:
       '@ts-rest/core': 3.53.0-rc.1
       fastify: ^4.0.0
+
+  '@ts-rest/open-api@3.53.0-rc.1':
+    resolution: {integrity: sha512-JqmmdwFP2AHlyK9T4dwgsFL3QGNRppV9JIBh0G9mbJE7m7Kj403VsxJZ5X128E3XqwH7JIgJ4wsyGRX4Zbtqvw==}
+    peerDependencies:
+      '@ts-rest/core': 3.53.0-rc.1
+      zod: ^3.22.3
 
   '@ts-rest/react-query@3.53.0-rc.1':
     resolution: {integrity: sha512-wqn29MGKFhQWQsQatVH/vsBA/+faXKTXlgsR7hwbwpwABUcebuuj7JwZttxZoGWQqjNJJH+rsOQ6BQDhhyfuoQ==}
@@ -3875,6 +3890,9 @@ packages:
     resolution: {integrity: sha512-mnkeQ1qP5Ue2wd+aivTD3NHd/lZ96Lu0jgf0pwktLPtx6cTZiH7tyeGRRHs0zX0rbrahXPnXlUnbeXyaBBuIaw==}
     engines: {node: '>=18'}
 
+  openapi3-ts@2.0.2:
+    resolution: {integrity: sha512-TxhYBMoqx9frXyOgnRHufjQfPXomTIHYKhSKJ6jHfj13kS8OEIhvmE8CTuQyKtjjWttAjX5DPxM1vmalEpo8Qw==}
+
   optionator@0.9.4:
     resolution: {integrity: sha512-6IpQ7mKUxRcZNLIObR0hz7lxsapSSIYNZJwXPGeF0mTVqGKFIXj1DQcMoT22S3ROcLyY/rz0PWaWZ9ayWmad9g==}
     engines: {node: '>= 0.8.0'}
@@ -4764,6 +4782,10 @@ packages:
     peerDependencies:
       typescript: '>=4.8.4'
 
+  ts-deepmerge@6.2.1:
+    resolution: {integrity: sha512-8CYSLazCyj0DJDpPIxOFzJG46r93uh6EynYjuey+bxcLltBeqZL7DMfaE5ZPzZNFlav7wx+2TDa/mBl8gkTYzw==}
+    engines: {node: '>=14.13.1'}
+
   ts-easing@0.2.0:
     resolution: {integrity: sha512-Z86EW+fFFh/IFB1fqQ3/+7Zpf9t2ebOAxNI/V6Wo7r5gqiqtxmgTlQ1qbqQcjLKYeSHPTsEmvlJUDg/EuL0uHQ==}
 
@@ -5228,6 +5250,12 @@ snapshots:
     dependencies:
       '@jridgewell/gen-mapping': 0.3.8
       '@jridgewell/trace-mapping': 0.3.25
+
+  '@anatine/zod-openapi@1.14.2(openapi3-ts@2.0.2)(zod@4.0.5)':
+    dependencies:
+      openapi3-ts: 2.0.2
+      ts-deepmerge: 6.2.1
+      zod: 4.0.5
 
   '@ardatan/relay-compiler@12.0.0(graphql@16.11.0)':
     dependencies:
@@ -6848,6 +6876,13 @@ snapshots:
     dependencies:
       '@ts-rest/core': 3.53.0-rc.1(@types/node@24.1.0)
       fastify: 4.29.1
+
+  '@ts-rest/open-api@3.53.0-rc.1(@ts-rest/core@3.53.0-rc.1(@types/node@24.1.0))(zod@4.0.5)':
+    dependencies:
+      '@anatine/zod-openapi': 1.14.2(openapi3-ts@2.0.2)(zod@4.0.5)
+      '@ts-rest/core': 3.53.0-rc.1(@types/node@24.1.0)
+      openapi3-ts: 2.0.2
+      zod: 4.0.5
 
   '@ts-rest/react-query@3.53.0-rc.1(@tanstack/react-query@5.83.0(react@18.3.1))(@ts-rest/core@3.53.0-rc.1(@types/node@24.1.0))(react@18.3.1)':
     dependencies:
@@ -9245,6 +9280,10 @@ snapshots:
       is-inside-container: 1.0.0
       is-wsl: 3.1.0
 
+  openapi3-ts@2.0.2:
+    dependencies:
+      yaml: 1.10.2
+
   optionator@0.9.4:
     dependencies:
       deep-is: 0.1.4
@@ -10234,6 +10273,8 @@ snapshots:
   ts-api-utils@2.1.0(typescript@5.8.3):
     dependencies:
       typescript: 5.8.3
+
+  ts-deepmerge@6.2.1: {}
 
   ts-easing@0.2.0: {}
 

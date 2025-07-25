@@ -15,6 +15,7 @@
         "@tanstack/react-query": "^5.83.0",
         "@ts-rest/core": "3.53.0-rc.1",
         "@ts-rest/fastify": "3.53.0-rc.1",
+        "@ts-rest/open-api": "3.53.0-rc.1",
         "@ts-rest/react-query": "3.53.0-rc.1",
         "client": "workspace:^",
         "contract": "workspace:^",

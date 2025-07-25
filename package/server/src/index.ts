@@ -1,15 +1,17 @@
 import { initServer } from "@ts-rest/fastify";
 import c from "contract";
-import d from "database";
 import Fastify from "fastify";
+import s from "./router/s";
+import d from "database";
 import { Config } from "./config";
 
 const main = async () => {
     const { host, port } = Config.parse(process.env);
     const f = Fastify({ logger: true });
-    const s = initServer();
 
-    const r = s.router(c, {});
+    const r = s.router(c, {
+        Auth,
+    });
 
     f.register(s.plugin(r));
 
