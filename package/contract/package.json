@@ -3,10 +3,10 @@
     "version": "0.0.1",
     "exports": {
         ".": {
-            "import": "./src/router/index.ts"
+            "import": "./src/index.ts"
         },
-        "./schema": {
-            "import": "./src/schema/index.ts"
+        "./*": {
+            "import": "./src/*.ts"
         }
     },
     "devDependencies": {

@@ -2,7 +2,7 @@ import c from "./c";
 import { z } from "zod";
 import { Comment } from "../schema/Comment";
 
-export const CommentRouter = c.router({
+export default c.router({
     // Standard CRUD operations
     create: {
         method: "POST",
@@ -36,7 +36,7 @@ export const CommentRouter = c.router({
             204: c.response<null>(),
         },
     },
-    
+
     // Extended comment-specific endpoints
     listByParent: {
         method: "GET",
@@ -139,5 +139,3 @@ export const CommentRouter = c.router({
         },
     },
 });
-
-export default CommentRouter;

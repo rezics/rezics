@@ -2,7 +2,7 @@ import c from "./c";
 import { z } from "zod";
 import { User } from "../schema/User";
 
-export const UserRouter = c.router({
+export default c.router({
     // Standard CRUD operations
     create: {
         method: "POST",
@@ -36,7 +36,7 @@ export const UserRouter = c.router({
             204: c.response<null>(),
         },
     },
-    
+
     // Extended user-specific endpoints
     signup: {
         method: "POST",
@@ -83,23 +83,27 @@ export const UserRouter = c.router({
         method: "GET",
         path: "/users/:id/books",
         responses: {
-            200: z.array(z.object({
-                id: z.string(),
-                name: z.string(),
-                cover: z.string().nullable(),
-            })),
+            200: z.array(
+                z.object({
+                    id: z.string(),
+                    name: z.string(),
+                    cover: z.string().nullable(),
+                }),
+            ),
         },
     },
     getUserReadLists: {
         method: "GET",
         path: "/users/:id/readlists",
         responses: {
-            200: z.array(z.object({
-                id: z.string(),
-                name: z.string(),
-                description: z.string().nullable(),
-                bookCount: z.number(),
-            })),
+            200: z.array(
+                z.object({
+                    id: z.string(),
+                    name: z.string(),
+                    description: z.string().nullable(),
+                    bookCount: z.number(),
+                }),
+            ),
         },
     },
     getUserReviews: {
@@ -111,19 +115,19 @@ export const UserRouter = c.router({
         }),
         responses: {
             200: z.object({
-                reviews: z.array(z.object({
-                    id: z.string(),
-                    title: z.string(),
-                    content: z.string(),
-                    rating: z.number(),
-                    bookId: z.string(),
-                    bookName: z.string(),
-                    created_at: z.date(),
-                })),
+                reviews: z.array(
+                    z.object({
+                        id: z.string(),
+                        title: z.string(),
+                        content: z.string(),
+                        rating: z.number(),
+                        bookId: z.string(),
+                        bookName: z.string(),
+                        created_at: z.date(),
+                    }),
+                ),
                 total: z.number(),
             }),
         },
     },
 });
-
-export default UserRouter;

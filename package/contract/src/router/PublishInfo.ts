@@ -2,7 +2,7 @@ import c from "./c";
 import { z } from "zod";
 import { PublishInfo } from "../schema/PublishInfo";
 
-export const PublishInfoRouter = c.router({
+export default c.router({
     // Standard CRUD operations
     create: {
         method: "POST",
@@ -36,7 +36,7 @@ export const PublishInfoRouter = c.router({
             204: c.response<null>(),
         },
     },
-    
+
     // Extended publish info-specific endpoints
     list: {
         method: "GET",
@@ -84,11 +84,13 @@ export const PublishInfoRouter = c.router({
         responses: {
             200: z.object({
                 publishInfo: PublishInfo.View,
-                book: z.object({
-                    id: z.string(),
-                    name: z.string(),
-                    authors: z.array(z.string()),
-                }).optional(),
+                book: z
+                    .object({
+                        id: z.string(),
+                        name: z.string(),
+                        authors: z.array(z.string()),
+                    })
+                    .optional(),
             }),
         },
     },
@@ -117,12 +119,14 @@ export const PublishInfoRouter = c.router({
                     name: z.string(),
                 }),
                 publications: z.array(PublishInfo.View),
-                timeline: z.array(z.object({
-                    date: z.date(),
-                    publisher: z.string(),
-                    edition: z.string().optional(),
-                    isbn: z.string().optional(),
-                })),
+                timeline: z.array(
+                    z.object({
+                        date: z.date(),
+                        publisher: z.string(),
+                        edition: z.string().optional(),
+                        isbn: z.string().optional(),
+                    }),
+                ),
                 firstPublished: z.date().optional(),
                 latestPublished: z.date().optional(),
             }),
@@ -141,15 +145,21 @@ export const PublishInfoRouter = c.router({
                 totalPublications: z.number(),
                 uniqueBooks: z.number(),
                 uniquePublishers: z.number(),
-                publicationsByPeriod: z.array(z.object({
-                    period: z.string(),
-                    count: z.number(),
-                })),
-                topPublishers: z.array(z.object({
-                    publisherId: z.string(),
-                    publisherName: z.string(),
-                    publicationCount: z.number(),
-                })).max(10),
+                publicationsByPeriod: z.array(
+                    z.object({
+                        period: z.string(),
+                        count: z.number(),
+                    }),
+                ),
+                topPublishers: z
+                    .array(
+                        z.object({
+                            publisherId: z.string(),
+                            publisherName: z.string(),
+                            publicationCount: z.number(),
+                        }),
+                    )
+                    .max(10),
             }),
         },
     },
@@ -161,16 +171,20 @@ export const PublishInfoRouter = c.router({
         }),
         responses: {
             200: z.object({
-                duplicates: z.array(z.object({
-                    isbn: z.string(),
-                    publications: z.array(z.object({
-                        id: z.string(),
-                        bookName: z.string(),
-                        publisherName: z.string(),
-                        publishDate: z.date(),
-                    })),
-                    count: z.number(),
-                })),
+                duplicates: z.array(
+                    z.object({
+                        isbn: z.string(),
+                        publications: z.array(
+                            z.object({
+                                id: z.string(),
+                                bookName: z.string(),
+                                publisherName: z.string(),
+                                publishDate: z.date(),
+                            }),
+                        ),
+                        count: z.number(),
+                    }),
+                ),
                 total: z.number(),
             }),
         },
@@ -191,5 +205,3 @@ export const PublishInfoRouter = c.router({
         },
     },
 });
-
-export default PublishInfoRouter;

@@ -2,7 +2,7 @@ import c from "./c";
 import { z } from "zod";
 import { Author } from "../schema/Author";
 
-export const AuthorRouter = c.router({
+export default c.router({
     // Standard CRUD operations
     create: {
         method: "POST",
@@ -35,7 +35,7 @@ export const AuthorRouter = c.router({
             204: c.response<null>(),
         },
     },
-    
+
     // Extended author-specific endpoints
     list: {
         method: "GET",
@@ -61,16 +61,20 @@ export const AuthorRouter = c.router({
         }),
         responses: {
             200: z.object({
-                books: z.array(z.object({
-                    id: z.string(),
-                    name: z.string(),
-                    cover: z.string().nullable(),
-                    rating: z.number().nullable(),
-                    publishInfo: z.array(z.object({
-                        publishedAt: z.date(),
-                        publisher: z.string(),
-                    })),
-                })),
+                books: z.array(
+                    z.object({
+                        id: z.string(),
+                        name: z.string(),
+                        cover: z.string().nullable(),
+                        rating: z.number().nullable(),
+                        publishInfo: z.array(
+                            z.object({
+                                publishedAt: z.date(),
+                                publisher: z.string(),
+                            }),
+                        ),
+                    }),
+                ),
                 total: z.number(),
             }),
         },
@@ -83,10 +87,12 @@ export const AuthorRouter = c.router({
                 totalBooks: z.number(),
                 averageRating: z.number().nullable(),
                 totalReviews: z.number(),
-                genres: z.array(z.object({
-                    name: z.string(),
-                    count: z.number(),
-                })),
+                genres: z.array(
+                    z.object({
+                        name: z.string(),
+                        count: z.number(),
+                    }),
+                ),
             }),
         },
     },
@@ -98,14 +104,14 @@ export const AuthorRouter = c.router({
             limit: z.number().optional(),
         }),
         responses: {
-            200: z.array(z.object({
-                id: z.string(),
-                name: z.string(),
-                avatar: z.string().nullable(),
-                bookCount: z.number(),
-            })),
+            200: z.array(
+                z.object({
+                    id: z.string(),
+                    name: z.string(),
+                    avatar: z.string().nullable(),
+                    bookCount: z.number(),
+                }),
+            ),
         },
     },
 });
-
-export default AuthorRouter

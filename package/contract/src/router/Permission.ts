@@ -2,7 +2,7 @@ import c from "./c";
 import { z } from "zod";
 import { Permission } from "../schema/Permission";
 
-export const PermissionRouter = c.router({
+export default c.router({
     // Standard CRUD operations
     create: {
         method: "POST",
@@ -36,7 +36,7 @@ export const PermissionRouter = c.router({
             204: c.response<null>(),
         },
     },
-    
+
     // Extended permission-specific endpoints
     getUserPermissions: {
         method: "GET",
@@ -78,11 +78,13 @@ export const PermissionRouter = c.router({
             hasRoot: z.boolean().optional(),
         }),
         responses: {
-            200: z.array(z.object({
-                userId: z.string(),
-                userName: z.string(),
-                permissions: Permission.View,
-            })),
+            200: z.array(
+                z.object({
+                    userId: z.string(),
+                    userName: z.string(),
+                    permissions: Permission.View,
+                }),
+            ),
         },
     },
     grantPermission: {
@@ -120,36 +122,44 @@ export const PermissionRouter = c.router({
         method: "GET",
         path: "/permissions/:id/history",
         responses: {
-            200: z.array(z.object({
-                action: z.enum(["granted", "revoked", "updated"]),
-                resource: z.string(),
-                oldValue: z.string().optional(),
-                newValue: z.string().optional(),
-                changedBy: z.string(),
-                timestamp: z.date(),
-            })),
+            200: z.array(
+                z.object({
+                    action: z.enum(["granted", "revoked", "updated"]),
+                    resource: z.string(),
+                    oldValue: z.string().optional(),
+                    newValue: z.string().optional(),
+                    changedBy: z.string(),
+                    timestamp: z.date(),
+                }),
+            ),
         },
     },
     bulkUpdatePermissions: {
         method: "POST",
         path: "/permissions/bulk-update",
         body: z.object({
-            updates: z.array(z.object({
-                userId: z.string(),
-                permissions: Permission.Update,
-            })),
+            updates: z.array(
+                z.object({
+                    userId: z.string(),
+                    permissions: Permission.Update,
+                }),
+            ),
             updatedBy: z.string(),
         }),
         responses: {
             200: z.object({
-                successful: z.array(z.object({
-                    userId: z.string(),
-                    permissions: Permission.View,
-                })),
-                failed: z.array(z.object({
-                    userId: z.string(),
-                    error: z.string(),
-                })),
+                successful: z.array(
+                    z.object({
+                        userId: z.string(),
+                        permissions: Permission.View,
+                    }),
+                ),
+                failed: z.array(
+                    z.object({
+                        userId: z.string(),
+                        error: z.string(),
+                    }),
+                ),
                 summary: z.object({
                     total: z.number(),
                     successful: z.number(),
@@ -159,5 +169,3 @@ export const PermissionRouter = c.router({
         },
     },
 });
-
-export default PermissionRouter;

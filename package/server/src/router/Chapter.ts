@@ -1,5 +1,4 @@
-import s from "./s";
-import c from "contract";
-import d from "database";
+import Chapter from "contract/router/Chapter";
+import { setup } from "./setup";
 
-export default s.router(c.Chapter, {});
+export default setup(({ gel, tsr }) => tsr.router(Chapter, {}));

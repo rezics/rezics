@@ -1,5 +1,5 @@
-using extension auth;
-using extension ai;
+using extension graphql;
+using extension edgeql_http;
 
 module default {
     scalar type short_str extending str {
@@ -23,7 +23,8 @@ module default {
     }
 
     abstract type Relatable {
-        multi link related_to: Nameable;
+        multi link related_to: Relatable;
+        related_by := .<related_to[is Relatable];
     }
 
     abstract type Nameable {
@@ -40,17 +41,16 @@ module default {
 
     type Book extending Nameable, Auditable, Evaluable, Relatable {
         cover: str;
-        released_at: datetime;
+        description: long_str;
 
         required grabbed_from: str;
-        description: long_str;
         required length: int64;
 
-        required multi link author: Author;
+        multi link author := .<books[is Author];
         multi link chapters := .<book[is Chapter];
         multi link publishers := .<books[is Publisher];
 
-        index on ((.length, .released_at));
+        index on (.length);
     }
 
     type Chapter extending Nameable, Evaluable, Relatable {
@@ -60,7 +60,7 @@ module default {
         multi link children := .<parent[is Chapter];
     }
 
-    type Tag extending Nameable, Relatable {
+    type Tag extending Nameable, Auditable, Relatable {
         required multi link owner: Person;
         required type: short_str;
 
@@ -80,7 +80,7 @@ module default {
     type Author extending Nameable, Evaluable, Relatable {
         description: long_str;
         single link user: Person;
-        multi link books := .<author[is Book];
+        multi link books: Book;
     }
 
     abstract type Person extending Nameable, Auditable, Evaluable, Relatable {
@@ -92,10 +92,6 @@ module default {
         description: long_str;
         required email: short_str;
         multi link friends: User;
-
-        required identity: ext::auth::Identity {
-            constraint exclusive;
-        };
 
         index on (.email);
     }

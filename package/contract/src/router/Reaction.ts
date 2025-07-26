@@ -2,7 +2,7 @@ import c from "./c";
 import { z } from "zod";
 import { Reaction, ReactionStats } from "../schema/Reaction";
 
-export const ReactionRouter = c.router({
+export default c.router({
     // Standard CRUD operations
     create: {
         method: "POST",
@@ -36,7 +36,7 @@ export const ReactionRouter = c.router({
             204: c.response<null>(),
         },
     },
-    
+
     // Extended reaction-specific endpoints
     listByObject: {
         method: "GET",
@@ -87,10 +87,12 @@ export const ReactionRouter = c.router({
             200: z.object({
                 stats: ReactionStats.View,
                 total: z.number(),
-                userReaction: z.object({
-                    type: z.enum(["like", "dislike", "funny"]),
-                    created_at: z.date(),
-                }).nullable(),
+                userReaction: z
+                    .object({
+                        type: z.enum(["like", "dislike", "funny"]),
+                        created_at: z.date(),
+                    })
+                    .nullable(),
             }),
         },
     },
@@ -110,10 +112,12 @@ export const ReactionRouter = c.router({
                 summary: z.object({
                     totalReactions: z.number(),
                     byType: ReactionStats.View,
-                    byObjectType: z.array(z.object({
-                        objectType: z.string(),
-                        count: z.number(),
-                    })),
+                    byObjectType: z.array(
+                        z.object({
+                            objectType: z.string(),
+                            count: z.number(),
+                        }),
+                    ),
                 }),
             }),
         },
@@ -141,17 +145,21 @@ export const ReactionRouter = c.router({
         query: z.object({
             objectType: z.string(),
             reactionType: z.enum(["like", "dislike", "funny"]).optional(),
-            timeframe: z.enum(["hour", "day", "week", "month", "all"]).optional(),
+            timeframe: z
+                .enum(["hour", "day", "week", "month", "all"])
+                .optional(),
             limit: z.number().optional(),
         }),
         responses: {
-            200: z.array(z.object({
-                objectId: z.string(),
-                objectType: z.string(),
-                totalReactions: z.number(),
-                reactionStats: ReactionStats.View,
-                recentActivity: z.number(),
-            })),
+            200: z.array(
+                z.object({
+                    objectId: z.string(),
+                    objectType: z.string(),
+                    totalReactions: z.number(),
+                    reactionStats: ReactionStats.View,
+                    recentActivity: z.number(),
+                }),
+            ),
         },
     },
     bulkCreateReactions: {
@@ -163,10 +171,12 @@ export const ReactionRouter = c.router({
         responses: {
             201: z.object({
                 created: z.array(Reaction.View),
-                failed: z.array(z.object({
-                    index: z.number(),
-                    error: z.string(),
-                })),
+                failed: z.array(
+                    z.object({
+                        index: z.number(),
+                        error: z.string(),
+                    }),
+                ),
                 summary: z.object({
                     total: z.number(),
                     successful: z.number(),
@@ -176,5 +186,3 @@ export const ReactionRouter = c.router({
         },
     },
 });
-
-export default ReactionRouter
