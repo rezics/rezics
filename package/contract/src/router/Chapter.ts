@@ -2,7 +2,7 @@ import { z } from "zod";
 import c from "./c";
 import { Chapter } from "../schema/Chapter";
 
-export const ChapterRouter = c.router({
+export default c.router({
     // Standard CRUD operations
     create: {
         method: "POST",
@@ -35,7 +35,7 @@ export const ChapterRouter = c.router({
             204: c.response<null>(),
         },
     },
-    
+
     // Extended chapter-specific endpoints
     listByBook: {
         method: "GET",
@@ -83,13 +83,15 @@ export const ChapterRouter = c.router({
         }),
         responses: {
             200: z.object({
-                quotes: z.array(z.object({
-                    id: z.string(),
-                    content: z.string(),
-                    userId: z.string(),
-                    userName: z.string(),
-                    created_at: z.date(),
-                })),
+                quotes: z.array(
+                    z.object({
+                        id: z.string(),
+                        content: z.string(),
+                        userId: z.string(),
+                        userName: z.string(),
+                        created_at: z.date(),
+                    }),
+                ),
                 total: z.number(),
             }),
         },
@@ -107,5 +109,3 @@ export const ChapterRouter = c.router({
         },
     },
 });
-
-export default ChapterRouter;

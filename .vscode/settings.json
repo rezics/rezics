@@ -20,5 +20,6 @@
     "gel.project-dir": "package/database",
     "files.exclude": {
         "package/database/dbschema/migrations": true
-    }
+    },
+    "typescript.tsdk": "node_modules/typescript/lib"
 }

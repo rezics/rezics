@@ -1,6 +1,4 @@
 [hooks]
-"schema.change.after" = "pnpx @gel/generate edgeql-js && pnpx @gel/generate queries"
-
 
 [instance]
 server-version = "6.9"

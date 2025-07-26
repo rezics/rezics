@@ -40,7 +40,7 @@ const CommentNode: React.FC<CommentNodeProps> = ({ comment, level = 0, openDrawe
             setIsExpanded(!isExpanded);
         }
         // TODO: Implement asynchronous loading of comments if they are not already fetched.
-        // This would require a new GraphQL query like `getReplies(commentId: ID!)`.
+        // This would require a new GraphQL query like getReplies(commentId: ID!).
     };
 
     const handleReply = () => {

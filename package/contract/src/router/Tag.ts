@@ -2,7 +2,7 @@ import c from "./c";
 import { z } from "zod";
 import { Tag } from "../schema/Tag";
 
-export const TagRouter = c.router({
+export default c.router({
     // Standard CRUD operations
     create: {
         method: "POST",
@@ -231,5 +231,3 @@ export const TagRouter = c.router({
         },
     },
 });
-
-export default TagRouter;

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { id,  Auditable } from "./common";
+import { id, Auditable } from "./common";
 
 export namespace HomePage {
     const Mutable = {
@@ -13,7 +13,6 @@ export namespace HomePage {
     export const Read = z
         .object({
             id,
-            
         })
         .partial();
 
@@ -26,13 +25,12 @@ export namespace HomePage {
     export const Delete = z
         .object({
             id,
-            
         })
         .partial();
 
     export const View = z.object({
         id,
-        
+
         ...Mutable,
         ...Auditable.shape,
     });

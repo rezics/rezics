@@ -26,7 +26,6 @@
         "@vitejs/plugin-react": "^4.5.0",
         "easymde": "^2.20.0",
         "github-markdown-css": "^5.8.1",
-        "graphql": "^16.11.0",
         "graphql-tag": "^2.12.6",
         "humanize-plus": "^1.8.2",
         "i18n": "^0.15.1",

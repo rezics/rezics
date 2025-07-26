@@ -79,9 +79,14 @@ export const Nameable = z.object({
     name: shortString,
 });
 
-export const Tagable = z.object({
-    tags: z.array(id),
-});
+export namespace Relatable {
+    export const To = z.object({
+        related_to: z.array(id),
+    });
+    export const By = z.object({
+        related_by: z.array(id),
+    });
+}
 
 export const Evaluable = z.object({
     up: z.array(id),

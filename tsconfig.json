@@ -1,5 +1,6 @@
 {
     "compilerOptions": {
+        "incremental": true,
         "esModuleInterop": true,
         "noEmit": true,
         "strict": true /* Enable all strict type-checking options. */,

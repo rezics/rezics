@@ -1,13 +1,12 @@
 import { z } from "zod";
-import { id, icsId, Nameable, Auditable, shortString, Tagable } from "./common";
+import { id, Nameable, Auditable, shortString, Relatable } from "./common";
 
 export namespace Tag {
     const Mutable = {
         ...Nameable.shape,
-        ...Tagable.shape,
-        color: shortString,
+        ...Relatable.To.shape,
         owner: z.array(id),
-        type: z.enum(["book", "thread"]),
+        type: shortString,
     };
 
     export const Create = z.object({
@@ -16,7 +15,7 @@ export namespace Tag {
 
     export const Read = z
         .object({
-            id
+            id,
         })
         .partial();
 
@@ -29,14 +28,13 @@ export namespace Tag {
     export const Delete = z
         .object({
             id,
-            icsId,
         })
         .partial();
 
     export const View = z.object({
         id,
-        icsId,
         ...Mutable,
+        ...Relatable.By.shape,
         ...Auditable.shape,
     });
 }

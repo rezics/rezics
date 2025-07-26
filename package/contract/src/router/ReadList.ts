@@ -2,7 +2,7 @@ import c from "./c";
 import { z } from "zod";
 import { ReadList } from "../schema/ReadList";
 
-export const ReadListRouter = c.router({
+export default c.router({
     // Standard CRUD operations
     create: {
         method: "POST",
@@ -36,7 +36,7 @@ export const ReadListRouter = c.router({
             204: c.response<null>(),
         },
     },
-    
+
     // Extended readlist-specific endpoints
     list: {
         method: "GET",
@@ -102,17 +102,21 @@ export const ReadListRouter = c.router({
         }),
         responses: {
             200: z.object({
-                books: z.array(z.object({
-                    id: z.string(),
-                    name: z.string(),
-                    cover: z.string().nullable(),
-                    authors: z.array(z.object({
+                books: z.array(
+                    z.object({
                         id: z.string(),
                         name: z.string(),
-                    })),
-                    rating: z.number().nullable(),
-                    addedAt: z.date(),
-                })),
+                        cover: z.string().nullable(),
+                        authors: z.array(
+                            z.object({
+                                id: z.string(),
+                                name: z.string(),
+                            }),
+                        ),
+                        rating: z.number().nullable(),
+                        addedAt: z.date(),
+                    }),
+                ),
                 total: z.number(),
             }),
         },
@@ -126,13 +130,15 @@ export const ReadListRouter = c.router({
         }),
         responses: {
             200: z.object({
-                readlists: z.array(z.object({
-                    id: z.string(),
-                    name: z.string(),
-                    description: z.string().nullable(),
-                    creatorName: z.string(),
-                    bookCount: z.number(),
-                })),
+                readlists: z.array(
+                    z.object({
+                        id: z.string(),
+                        name: z.string(),
+                        description: z.string().nullable(),
+                        creatorName: z.string(),
+                        bookCount: z.number(),
+                    }),
+                ),
                 total: z.number(),
             }),
         },
@@ -149,5 +155,3 @@ export const ReadListRouter = c.router({
         },
     },
 });
-
-export default ReadListRouter;

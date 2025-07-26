@@ -2,7 +2,7 @@ import c from "./c";
 import { z } from "zod";
 import { Review, Quote } from "../schema/Review";
 
-export const ReviewRouter = c.router({
+export default c.router({
     // Standard CRUD operations for reviews
     create: {
         method: "POST",
@@ -36,7 +36,7 @@ export const ReviewRouter = c.router({
             204: c.response<null>(),
         },
     },
-    
+
     // Extended review-specific endpoints
     listByBook: {
         method: "GET",
@@ -143,5 +143,3 @@ export const ReviewRouter = c.router({
         },
     },
 });
-
-export default ReviewRouter;

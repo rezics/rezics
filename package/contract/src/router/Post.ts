@@ -2,7 +2,7 @@ import c from "./c";
 import { z } from "zod";
 import { Post } from "../schema/Post";
 
-export const PostRouter = c.router({
+export default c.router({
     // Standard CRUD operations
     create: {
         method: "POST",
@@ -36,7 +36,7 @@ export const PostRouter = c.router({
             204: c.response<null>(),
         },
     },
-    
+
     // Extended post-specific endpoints
     list: {
         method: "GET",
@@ -47,7 +47,9 @@ export const PostRouter = c.router({
             search: z.string().optional(),
             authorId: z.string().optional(),
             tagId: z.string().optional(),
-            sortBy: z.enum(["created_at", "updated_at", "rating", "name"]).optional(),
+            sortBy: z
+                .enum(["created_at", "updated_at", "rating", "name"])
+                .optional(),
             order: z.enum(["asc", "desc"]).optional(),
         }),
         responses: {
@@ -76,12 +78,14 @@ export const PostRouter = c.router({
         method: "GET",
         path: "/posts/:id/tags",
         responses: {
-            200: z.array(z.object({
-                id: z.string(),
-                name: z.string(),
-                color: z.string(),
-                type: z.enum(["book", "thread"]),
-            })),
+            200: z.array(
+                z.object({
+                    id: z.string(),
+                    name: z.string(),
+                    color: z.string(),
+                    type: z.enum(["book", "thread"]),
+                }),
+            ),
         },
     },
     addTagToPost: {
@@ -120,14 +124,16 @@ export const PostRouter = c.router({
         }),
         responses: {
             200: z.object({
-                comments: z.array(z.object({
-                    id: z.string(),
-                    content: z.string(),
-                    authorId: z.string(),
-                    authorName: z.string(),
-                    created_at: z.date(),
-                    replyCount: z.number(),
-                })),
+                comments: z.array(
+                    z.object({
+                        id: z.string(),
+                        content: z.string(),
+                        authorId: z.string(),
+                        authorName: z.string(),
+                        created_at: z.date(),
+                        replyCount: z.number(),
+                    }),
+                ),
                 total: z.number(),
             }),
         },
@@ -170,13 +176,13 @@ export const PostRouter = c.router({
             tagId: z.string().optional(),
         }),
         responses: {
-            200: z.array(z.object({
-                post: Post.View,
-                trendScore: z.number(),
-                changeRate: z.number(),
-            })),
+            200: z.array(
+                z.object({
+                    post: Post.View,
+                    trendScore: z.number(),
+                    changeRate: z.number(),
+                }),
+            ),
         },
     },
 });
-
-export default PostRouter;
