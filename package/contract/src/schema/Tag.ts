@@ -1,5 +1,6 @@
-import { z } from "zod";
+import z from "zod";
 import { id, Nameable, Auditable, shortString, Relatable } from "./common";
+import { Select } from "../util/select";
 
 export namespace Tag {
     const Mutable = {
@@ -12,12 +13,6 @@ export namespace Tag {
     export const Create = z.object({
         ...Mutable,
     });
-
-    export const Read = z
-        .object({
-            id,
-        })
-        .partial();
 
     export const Update = z
         .object({
@@ -36,5 +31,10 @@ export namespace Tag {
         ...Mutable,
         ...Relatable.By.shape,
         ...Auditable.shape,
+    });
+
+    export const Read = z.object({
+        id,
+        select: Select(View),
     });
 }

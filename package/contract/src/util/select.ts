@@ -1,9 +1,10 @@
 import z, { ZodObject, ZodType } from "zod";
 import { objectMap } from "./objectMap";
 
-type Select<T> = T extends object
-    ? Partial<{ [K in keyof T]: Select<T[K]> }>
-    : boolean;
+type Select<T> =
+    T extends Exclude<T extends object ? T : never, Date | Array<any>>
+        ? Partial<{ [K in keyof T]: Select<T[K]> }>
+        : boolean;
 export const Select = <TSchema extends ZodType>(
     schema: TSchema,
 ): ZodType<Select<z.infer<TSchema>>> => {
