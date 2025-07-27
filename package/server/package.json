@@ -10,5 +10,9 @@
     "author": "",
     "license": "ISC",
     "packageManager": "pnpm@10.8.1",
-    "type": "module"
+    "type": "module",
+    "devDependencies": {
+        "bcrypt": "^6.0.0",
+        "uuid": "^11.1.0"
+    }
 }
