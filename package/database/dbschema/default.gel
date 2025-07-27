@@ -34,9 +34,9 @@ module default {
     }
 
     abstract type Evaluable {
-        multi link up: Person;
-        multi link down: Person;
-        multi link favorites: Person;
+        multi link up := .<owned_up[is Person];
+        multi link down := .<owned_down[is Person];
+        multi link favorites := .<owned_favorites[is Person];
     }
 
     type Book extending Nameable, Auditable, Evaluable, Relatable {
@@ -46,7 +46,7 @@ module default {
         required grabbed_from: str;
         required length: int64;
 
-        multi link author := .<books[is Author];
+        multi link authors := .<books[is Author];
         multi link chapters := .<book[is Chapter];
         multi link publishers := .<books[is Publisher];
 
@@ -61,7 +61,7 @@ module default {
     }
 
     type Tag extending Nameable, Auditable, Relatable {
-        required multi link owner: Person;
+        multi link owners := .<owned_tags[is Person];
         required type: short_str;
 
         index on (.type);
@@ -84,8 +84,10 @@ module default {
     }
 
     abstract type Person extending Nameable, Auditable, Evaluable, Relatable {
-        owned_favorites := .<favorites[is Evaluable];
-        owned_tags := .<owner[is Tag];
+        multi link owned_up: Evaluable;
+        multi link owned_down: Evaluable;
+        multi link owned_favorites: Evaluable;
+        multi link owned_tags: Tag;
     }
 
     type User extending Person {

@@ -5,6 +5,7 @@
         "Evaluable",
         "icsid",
         "libphonenumber",
+        "pgcrypto",
         "pnpx",
         "readlist",
         "Tagable",
