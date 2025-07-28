@@ -1,43 +1,77 @@
-import z, { ZodObject, ZodType } from "zod";
-import { objectMap } from "./objectMap";
+export type ArraySelect<TBaseItem> = [
+    {
+        select: Select<TBaseItem>;
+        offset: number;
+        length: number;
+    },
+];
 
-type Select<T> =
-    T extends Exclude<T extends object ? T : never, Date | Array<any>>
-        ? Partial<{ [K in keyof T]: Select<T[K]> }>
+export type Select<TBase> =
+    TBase extends Exclude<TBase extends object ? TBase : never, Date>
+        ? TBase extends Array<infer I>
+            ? ArraySelect<I>
+            : Partial<{ [K in keyof TBase]: Select<TBase[K]> }>
         : boolean;
-export const Select = <TSchema extends ZodType>(
-    schema: TSchema,
-): ZodType<Select<z.infer<TSchema>>> => {
-    if (schema instanceof ZodObject) {
-        return z.object(
-            objectMap(schema.partial().shape, (value) => Select(value)),
-        ) as any;
-    } else {
-        return z.boolean() as any;
-    }
+
+export type ArrayResult<
+    TBaseItem,
+    TSelect extends ArraySelect<TBaseItem>,
+> = Result<TBaseItem, TSelect[0]["select"]>[];
+
+export type Result<TBase, TSelect extends Select<TBase>> = TSelect extends true
+    ? TBase
+    : TBase extends Array<infer TBaseItem>
+      ? TSelect extends ArraySelect<TBaseItem>
+          ? ArrayResult<TBaseItem, TSelect>
+          : never
+      : TSelect extends object
+        ? {
+              [K in keyof TSelect]: K extends keyof TBase
+                  ? TSelect[K] extends Select<TBase[K]>
+                      ? Result<TBase[K], TSelect[K]>
+                      : never
+                  : never;
+          }
+        : never;
+
+export type DeepPartial<T> = {
+    [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P];
 };
 
-type Result<T, S extends Select<T>> = T extends object
-    ? {
-          [K in keyof S]: K extends keyof T
-              ? Result<T[K], S[K] extends Select<T[K]> ? S[K] : never>
-              : never;
-      }
-    : T;
-export const Result = <
-    TSchema extends ZodType,
-    TSelect extends Select<z.infer<TSchema>>,
->(
-    schema: TSchema,
-    select: ZodType<TSelect>,
-): ZodType<Result<z.infer<TSchema>, TSelect>> => {
-    if (select instanceof ZodObject && schema instanceof ZodObject) {
-        return z.object(
-            objectMap(select.shape, (value, key) =>
-                Result(schema.shape[key], value),
-            ),
-        ) as any;
-    } else {
-        return schema as any;
-    }
-};
+/*
+
+{
+    type Book = {
+        title: string;
+        author: Author[];
+    };
+
+    type Author = {
+        name: string;
+        age: number;
+    };
+
+    const select = {
+        title: true,
+        author: [
+            {
+                select: {
+                    name: true,
+                },
+                offset: 0,
+                length: 100,
+            },
+        ],
+    } satisfies Select<Book>;
+
+    const result: Result<Book, typeof select> = {
+        title: "Hello, World!",
+        author: [
+            {
+                name: "Nice",
+            },
+        ],
+    };
+}
+
+*/

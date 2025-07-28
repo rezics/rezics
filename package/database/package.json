@@ -4,11 +4,14 @@
     "type": "module",
     "packageManager": "pnpm@10.13.1",
     "scripts": {
-        "generate": "pnpx @gel/generate queries --target ts --file ./index"
+        "generate": "pnpx @gel/generate queries --target ts --file ./query && pnpx @gel/generate interfaces --file ./interface.ts && pnpm ts-to-zod ./interface.ts ./zod.ts"
     },
     "exports": {
         ".": {
             "default": "./index.ts"
+        },
+        "./*": {
+            "default": "./*"
         }
     }
 }
