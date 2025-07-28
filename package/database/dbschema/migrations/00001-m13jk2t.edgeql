@@ -1,10 +1,8 @@
-CREATE MIGRATION m1fighmfqa6warkedtk6tn3viqwp2kdsxhapi42y3qbu6ojjzh5qeq
+CREATE MIGRATION m13jk2tbdrn75lhkfkwzqtz33l3p234tbiicub6qaoaurruekmgega
     ONTO initial
 {
-  CREATE EXTENSION pgvector VERSION '0.7';
-  CREATE EXTENSION pgcrypto VERSION '1.3';
-  CREATE EXTENSION auth VERSION '1.0';
-  CREATE EXTENSION ai VERSION '1.0';
+  CREATE EXTENSION edgeql_http VERSION '1.0';
+  CREATE EXTENSION graphql VERSION '1.0';
   CREATE SCALAR TYPE default::long_str EXTENDING std::str {
       CREATE CONSTRAINT std::max_len_value(10000);
   };
@@ -46,7 +44,11 @@ CREATE MIGRATION m1fighmfqa6warkedtk6tn3viqwp2kdsxhapi42y3qbu6ojjzh5qeq
       CREATE PROPERTY description: default::long_str;
       CREATE REQUIRED PROPERTY grabbed_from: std::str;
   };
-  CREATE ABSTRACT TYPE default::Person EXTENDING default::Nameable, default::Auditable, default::Evaluable, default::Relatable;
+  CREATE ABSTRACT TYPE default::Person EXTENDING default::Nameable, default::Auditable, default::Evaluable, default::Relatable {
+      CREATE MULTI LINK owned_down: default::Evaluable;
+      CREATE MULTI LINK owned_favorites: default::Evaluable;
+      CREATE MULTI LINK owned_up: default::Evaluable;
+  };
   CREATE TYPE default::Organization EXTENDING default::Person {
       CREATE MULTI LINK members: default::Person {
           CREATE PROPERTY power: std::int32 {
@@ -57,29 +59,19 @@ CREATE MIGRATION m1fighmfqa6warkedtk6tn3viqwp2kdsxhapi42y3qbu6ojjzh5qeq
       };
   };
   ALTER TYPE default::Evaluable {
-      CREATE MULTI LINK down: default::Person;
-      CREATE MULTI LINK favorites: default::Person;
-      CREATE MULTI LINK up: default::Person;
-  };
-  ALTER TYPE default::Person {
-      CREATE LINK owned_favorites := (.<favorites[IS default::Evaluable]);
-  };
-  CREATE TYPE default::Tag EXTENDING default::Nameable, default::Auditable, default::Relatable {
-      CREATE REQUIRED MULTI LINK owner: default::Person;
-      CREATE REQUIRED PROPERTY type: default::short_str;
-      CREATE INDEX ON (.type);
-  };
-  ALTER TYPE default::Person {
-      CREATE LINK owned_tags := (.<owner[IS default::Tag]);
+      CREATE MULTI LINK down := (.<owned_down[IS default::Person]);
+      CREATE MULTI LINK favorites := (.<owned_favorites[IS default::Person]);
+      CREATE MULTI LINK up := (.<owned_up[IS default::Person]);
   };
   CREATE TYPE default::User EXTENDING default::Person {
       CREATE REQUIRED PROPERTY email: default::short_str;
       CREATE INDEX ON (.email);
       CREATE MULTI LINK friends: default::User;
-      CREATE REQUIRED LINK identity: ext::auth::Identity {
-          CREATE CONSTRAINT std::exclusive;
-      };
       CREATE PROPERTY description: default::long_str;
+  };
+  CREATE TYPE default::Tag EXTENDING default::Nameable, default::Auditable, default::Relatable {
+      CREATE REQUIRED PROPERTY type: default::short_str;
+      CREATE INDEX ON (.type);
   };
   CREATE TYPE default::Thread EXTENDING default::Nameable, default::Auditable, default::Evaluable, default::Relatable {
       CREATE REQUIRED LINK author: default::Person;
@@ -92,7 +84,7 @@ CREATE MIGRATION m1fighmfqa6warkedtk6tn3viqwp2kdsxhapi42y3qbu6ojjzh5qeq
       CREATE PROPERTY description: default::long_str;
   };
   ALTER TYPE default::Book {
-      CREATE MULTI LINK author := (.<books[IS default::Author]);
+      CREATE MULTI LINK authors := (.<books[IS default::Author]);
   };
   CREATE TYPE default::Chapter EXTENDING default::Nameable, default::Evaluable, default::Relatable {
       CREATE REQUIRED SINGLE LINK book: default::Book;
@@ -113,5 +105,11 @@ CREATE MIGRATION m1fighmfqa6warkedtk6tn3viqwp2kdsxhapi42y3qbu6ojjzh5qeq
   };
   ALTER TYPE default::Book {
       CREATE MULTI LINK publishers := (.<books[IS default::Publisher]);
+  };
+  ALTER TYPE default::Person {
+      CREATE MULTI LINK owned_tags: default::Tag;
+  };
+  ALTER TYPE default::Tag {
+      CREATE MULTI LINK owners := (.<owned_tags[IS default::Person]);
   };
 };
