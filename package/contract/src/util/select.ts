@@ -1,8 +1,10 @@
 export type ArraySelect<TBaseItem> = [
-    {
-        select: Select<TBaseItem>;
+    select: Select<TBaseItem>,
+    option?: {
         offset: number;
-        length: number;
+        length?: number;
+        order?: "<" | ">";
+        by?: keyof TBaseItem;
     },
 ];
 
@@ -16,7 +18,7 @@ export type Select<TBase> =
 export type ArrayResult<
     TBaseItem,
     TSelect extends ArraySelect<TBaseItem>,
-> = Result<TBaseItem, TSelect[0]["select"]>[];
+> = Result<TBaseItem, TSelect[0]>[];
 
 export type Result<TBase, TSelect extends Select<TBase>> = TSelect extends true
     ? TBase
@@ -37,41 +39,3 @@ export type Result<TBase, TSelect extends Select<TBase>> = TSelect extends true
 export type DeepPartial<T> = {
     [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P];
 };
-
-/*
-
-{
-    type Book = {
-        title: string;
-        author: Author[];
-    };
-
-    type Author = {
-        name: string;
-        age: number;
-    };
-
-    const select = {
-        title: true,
-        author: [
-            {
-                select: {
-                    name: true,
-                },
-                offset: 0,
-                length: 100,
-            },
-        ],
-    } satisfies Select<Book>;
-
-    const result: Result<Book, typeof select> = {
-        title: "Hello, World!",
-        author: [
-            {
-                name: "Nice",
-            },
-        ],
-    };
-}
-
-*/
