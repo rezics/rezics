@@ -3,6 +3,7 @@
         "incremental": true,
         "esModuleInterop": true,
         "noEmit": true,
+        "noErrorTruncation": true,
         "strict": true /* Enable all strict type-checking options. */,
         "noImplicitAny": true /* Enable error reporting for expressions and declarations with an implied 'any' type. */,
         "strictNullChecks": true /* When type checking, take into account 'null' and 'undefined'. */,

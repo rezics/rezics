@@ -36,7 +36,7 @@ export const BookRouter = c.router({
             204: c.response<null>(),
         },
     },
-    
+
     // Extended book-specific endpoints
     list: {
         method: "GET",
@@ -61,12 +61,14 @@ export const BookRouter = c.router({
         method: "GET",
         path: "/books/:id/chapters",
         responses: {
-            200: z.array(z.object({
-                id: z.string(),
-                name: z.string(),
-                bookId: z.string(),
-                created_at: z.date(),
-            })),
+            200: z.array(
+                z.object({
+                    id: z.string(),
+                    name: z.string(),
+                    bookId: z.string(),
+                    created_at: z.date(),
+                }),
+            ),
         },
     },
     getBookReviews: {
@@ -79,15 +81,17 @@ export const BookRouter = c.router({
         }),
         responses: {
             200: z.object({
-                reviews: z.array(z.object({
-                    id: z.string(),
-                    title: z.string(),
-                    content: z.string(),
-                    rating: z.number(),
-                    userId: z.string(),
-                    userName: z.string(),
-                    created_at: z.date(),
-                })),
+                reviews: z.array(
+                    z.object({
+                        id: z.string(),
+                        title: z.string(),
+                        content: z.string(),
+                        rating: z.number(),
+                        userId: z.string(),
+                        userName: z.string(),
+                        created_at: z.date(),
+                    }),
+                ),
                 total: z.number(),
                 averageRating: z.number(),
             }),
@@ -97,12 +101,14 @@ export const BookRouter = c.router({
         method: "GET",
         path: "/books/:id/tags",
         responses: {
-            200: z.array(z.object({
-                id: z.string(),
-                name: z.string(),
-                color: z.string(),
-                type: z.enum(["book", "thread"]),
-            })),
+            200: z.array(
+                z.object({
+                    id: z.string(),
+                    name: z.string(),
+                    color: z.string(),
+                    type: z.enum(["book", "thread"]),
+                }),
+            ),
         },
     },
     addBookTag: {
@@ -153,16 +159,20 @@ export const BookRouter = c.router({
             includeTags: z.boolean().optional(),
         }),
         responses: {
-            200: z.array(z.object({
-                id: z.string(),
-                name: z.string(),
-                cover: z.string().nullable(),
-                authors: z.array(z.object({
+            200: z.array(
+                z.object({
                     id: z.string(),
                     name: z.string(),
-                })),
-                rating: z.number().nullable(),
-            })),
+                    cover: z.string().nullable(),
+                    authors: z.array(
+                        z.object({
+                            id: z.string(),
+                            name: z.string(),
+                        }),
+                    ),
+                    rating: z.number().nullable(),
+                }),
+            ),
         },
     },
     getRecommendations: {
@@ -172,15 +182,17 @@ export const BookRouter = c.router({
             limit: z.number().optional(),
         }),
         responses: {
-            200: z.array(z.object({
-                id: z.string(),
-                name: z.string(),
-                cover: z.string().nullable(),
-                rating: z.number().nullable(),
-                similarity: z.number(),
-            })),
+            200: z.array(
+                z.object({
+                    id: z.string(),
+                    name: z.string(),
+                    cover: z.string().nullable(),
+                    rating: z.number().nullable(),
+                    similarity: z.number(),
+                }),
+            ),
         },
     },
 });
 
-export default BookRouter
+export default BookRouter;

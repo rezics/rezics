@@ -79,7 +79,8 @@ module default {
 
     type Author extending Nameable, Evaluable, Relatable {
         description: long_str;
-        single link user: Person;
+
+        link user := .<authors[is User];
         multi link books: Book;
     }
 
@@ -92,8 +93,13 @@ module default {
 
     type User extending Person {
         description: long_str;
+    
         required email: short_str;
+
         multi link friends: User;
+        multi link authors: Author {
+            constraint exclusive;
+        };
 
         index on (.email);
     }

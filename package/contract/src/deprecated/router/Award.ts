@@ -35,7 +35,7 @@ export const AwardRouter = c.router({
             204: c.response<null>(),
         },
     },
-    
+
     // Extended award-specific endpoints
     listByObject: {
         method: "GET",
@@ -131,17 +131,23 @@ export const AwardRouter = c.router({
             objectType: z.string().optional(),
             objectId: z.string().optional(),
             userId: z.string().optional(),
-            timeframe: z.enum(["day", "week", "month", "year", "all"]).optional(),
+            timeframe: z
+                .enum(["day", "week", "month", "year", "all"])
+                .optional(),
         }),
         responses: {
             200: z.object({
                 totalAwards: z.number(),
                 byType: AwardStats.View,
-                topRecipients: z.array(z.object({
-                    userId: z.string(),
-                    userName: z.string(),
-                    count: z.number(),
-                })).max(10),
+                topRecipients: z
+                    .array(
+                        z.object({
+                            userId: z.string(),
+                            userName: z.string(),
+                            count: z.number(),
+                        }),
+                    )
+                    .max(10),
                 recentActivity: z.array(Award.View).max(20),
             }),
         },
@@ -154,13 +160,15 @@ export const AwardRouter = c.router({
             limit: z.number().optional(),
         }),
         responses: {
-            200: z.array(z.object({
-                type: z.string(),
-                count: z.number(),
-                description: z.string().optional(),
-            })),
+            200: z.array(
+                z.object({
+                    type: z.string(),
+                    count: z.number(),
+                    description: z.string().optional(),
+                }),
+            ),
         },
     },
 });
 
-export default AwardRouter
+export default AwardRouter;

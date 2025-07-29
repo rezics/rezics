@@ -1,6 +1,5 @@
 import z from "zod";
 import { id, Nameable, Auditable, shortString, Relatable } from "./common";
-import { Select } from "../util/select";
 
 export namespace Tag {
     const Mutable = {
