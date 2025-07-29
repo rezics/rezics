@@ -1,5 +1,6 @@
 using extension graphql;
 using extension edgeql_http;
+using extension pgcrypto;
 
 module default {
     scalar type short_str extending str {
@@ -102,6 +103,13 @@ module default {
         };
 
         index on (.email);
+    }
+
+    type Identification extending Auditable {
+        required password_hash: str;
+        required single link user: User;
+
+        index on (.user);
     }
 
     type Organization extending Person {
