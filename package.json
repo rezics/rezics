@@ -7,18 +7,12 @@
     "packageManager": "pnpm@10.12.4",
     "type": "module",
     "devDependencies": {
-        "@graphql-codegen/cli": "^5.0.7",
-        "@parcel/watcher": "^2.5.1",
         "dotenv": "^16.5.0",
         "prettier": "^3.5.3",
         "typescript": "^5.8.3"
     },
     "dependencies": {
         "@tanstack/react-query": "^5.83.0",
-        "@ts-rest/core": "3.53.0-rc.1",
-        "@ts-rest/fastify": "3.53.0-rc.1",
-        "@ts-rest/open-api": "3.53.0-rc.1",
-        "@ts-rest/react-query": "3.53.0-rc.1",
         "client": "workspace:^",
         "contract": "workspace:^",
         "database": "workspace:^",
@@ -30,6 +24,7 @@
         "graphql-modules": "^3.0.0",
         "server": "workspace:^",
         "tsx": "^4.19.4",
+        "xstate": "^5.20.1",
         "zod": "^4.0.5"
     }
 }

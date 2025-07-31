@@ -1,6 +1,7 @@
 {
     "name": "contract",
     "version": "0.0.1",
+    "type": "module",
     "exports": {
         ".": {
             "import": "./src/index.ts"
@@ -14,6 +15,7 @@
         "typescript": "^5.8.3"
     },
     "dependencies": {
+        "@selext/core": "^1.0.0",
         "google-libphonenumber": "^3.2.42"
     }
 }

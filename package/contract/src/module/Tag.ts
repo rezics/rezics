@@ -1,12 +1,16 @@
-import { CURD, Shallow } from "./common";
+import { Tag, Auditable } from "database/interface";
+import { Result } from "@selext/core";
+import { CRUDContract } from "./util";
 
-import { Auditable, Tag as DTag, Relatable } from "database/interface";
-
-export type Tag = CURD<
-    "/tag",
-    DTag,
-    Omit<Shallow<DTag>, "id" | keyof Auditable | keyof Relatable>,
-    Partial<Omit<DTag, "id" | keyof Auditable | "related_by">>,
-    Extract<DTag, { id: string }>,
-    Extract<DTag, { id: string }>
+export type TagContract = CRUDContract<
+    Tag,
+    "tag",
+    Result<Tag, { name: true; type: true; owners: [{ id: true }] }>,
+    never,
+    Result<Tag, { id: true }>,
+    never,
+    Omit<Tag, "id" | keyof Auditable | "related_by">,
+    never,
+    Result<Tag, { id: true }>,
+    never
 >;

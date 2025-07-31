@@ -11,18 +11,6 @@ importers:
       '@tanstack/react-query':
         specifier: ^5.83.0
         version: 5.83.0(react@18.3.1)
-      '@ts-rest/core':
-        specifier: 3.53.0-rc.1
-        version: 3.53.0-rc.1(@types/node@24.1.0)
-      '@ts-rest/fastify':
-        specifier: 3.53.0-rc.1
-        version: 3.53.0-rc.1(@ts-rest/core@3.53.0-rc.1(@types/node@24.1.0))(fastify@4.29.1)
-      '@ts-rest/open-api':
-        specifier: 3.53.0-rc.1
-        version: 3.53.0-rc.1(@ts-rest/core@3.53.0-rc.1(@types/node@24.1.0))(zod@4.0.5)
-      '@ts-rest/react-query':
-        specifier: 3.53.0-rc.1
-        version: 3.53.0-rc.1(@tanstack/react-query@5.83.0(react@18.3.1))(@ts-rest/core@3.53.0-rc.1(@types/node@24.1.0))(react@18.3.1)
       client:
         specifier: workspace:^
         version: link:package/client
@@ -56,16 +44,13 @@ importers:
       tsx:
         specifier: ^4.19.4
         version: 4.19.4
+      xstate:
+        specifier: ^5.20.1
+        version: 5.20.1
       zod:
         specifier: ^4.0.5
         version: 4.0.5
     devDependencies:
-      '@graphql-codegen/cli':
-        specifier: ^5.0.7
-        version: 5.0.7(@parcel/watcher@2.5.1)(@types/node@24.1.0)(graphql@16.11.0)(typescript@5.8.3)
-      '@parcel/watcher':
-        specifier: ^2.5.1
-        version: 2.5.1
       dotenv:
         specifier: ^16.5.0
         version: 16.5.0
@@ -250,6 +235,9 @@ importers:
 
   package/contract:
     dependencies:
+      '@selext/core':
+        specifier: ^1.0.0
+        version: 1.0.0
       google-libphonenumber:
         specifier: ^3.2.42
         version: 3.2.42
@@ -314,12 +302,6 @@ packages:
   '@ampproject/remapping@2.3.0':
     resolution: {integrity: sha512-30iZtAPgz+LTIYoeivqYo853f02jBYSd5uGnGpkFV0M3xOt9aN73erkgYAmZU43x4VfqcnLxW9Kpg3R5LC4YYw==}
     engines: {node: '>=6.0.0'}
-
-  '@anatine/zod-openapi@1.14.2':
-    resolution: {integrity: sha512-q0qHfnuNYVKu0Swrnnvfj9971AEyW7c8v9jCOZGCl5ZbyGMNG4RPyJkRcMi/JC8CRfdOe0IDfNm1nNsi2avprg==}
-    peerDependencies:
-      openapi3-ts: ^2.0.0 || ^3.0.0
-      zod: ^3.20.0
 
   '@ardatan/relay-compiler@12.0.0':
     resolution: {integrity: sha512-9anThAaj1dQr6IGmzBMcfzOQKTa5artjuPmw8NYK/fiGEMjADbSguBY2FMDykt+QhilR3wc9VA/3yVju7JHg7Q==}
@@ -1631,6 +1613,9 @@ packages:
     cpu: [x64]
     os: [win32]
 
+  '@selext/core@1.0.0':
+    resolution: {integrity: sha512-oSB6HsdVKAROMyc9wXzmmbcVSdMRzn7Xf6dEeY0VX3odNaNrSp5KNatH5DzXM3+NesMDf//jvkVFfpAhWfnzCQ==}
+
   '@skidding/launch-editor@2.2.3':
     resolution: {integrity: sha512-0SuGEsWdulnbryUJ6humogFuuDMWMb4VJyhOc3FGVkibxVdECYDDkGx8VjS/NePZSegNONDIVhCEVZLTv4ycTQ==}
 
@@ -1826,18 +1811,6 @@ packages:
     peerDependenciesMeta:
       '@types/node':
         optional: true
-
-  '@ts-rest/fastify@3.53.0-rc.1':
-    resolution: {integrity: sha512-zEsEFit/w2fp0UN6wVKUEJ2PXmHEAioFl8MD6xIRW/apE7OEnO6jEG3scM/qcVJDDxuxi3DtzDXBrvohGkm9WQ==}
-    peerDependencies:
-      '@ts-rest/core': 3.53.0-rc.1
-      fastify: ^4.0.0
-
-  '@ts-rest/open-api@3.53.0-rc.1':
-    resolution: {integrity: sha512-JqmmdwFP2AHlyK9T4dwgsFL3QGNRppV9JIBh0G9mbJE7m7Kj403VsxJZ5X128E3XqwH7JIgJ4wsyGRX4Zbtqvw==}
-    peerDependencies:
-      '@ts-rest/core': 3.53.0-rc.1
-      zod: ^3.22.3
 
   '@ts-rest/react-query@3.53.0-rc.1':
     resolution: {integrity: sha512-wqn29MGKFhQWQsQatVH/vsBA/+faXKTXlgsR7hwbwpwABUcebuuj7JwZttxZoGWQqjNJJH+rsOQ6BQDhhyfuoQ==}
@@ -3962,9 +3935,6 @@ packages:
     resolution: {integrity: sha512-mnkeQ1qP5Ue2wd+aivTD3NHd/lZ96Lu0jgf0pwktLPtx6cTZiH7tyeGRRHs0zX0rbrahXPnXlUnbeXyaBBuIaw==}
     engines: {node: '>=18'}
 
-  openapi3-ts@2.0.2:
-    resolution: {integrity: sha512-TxhYBMoqx9frXyOgnRHufjQfPXomTIHYKhSKJ6jHfj13kS8OEIhvmE8CTuQyKtjjWttAjX5DPxM1vmalEpo8Qw==}
-
   optionator@0.9.4:
     resolution: {integrity: sha512-6IpQ7mKUxRcZNLIObR0hz7lxsapSSIYNZJwXPGeF0mTVqGKFIXj1DQcMoT22S3ROcLyY/rz0PWaWZ9ayWmad9g==}
     engines: {node: '>= 0.8.0'}
@@ -4857,10 +4827,6 @@ packages:
     peerDependencies:
       typescript: '>=4.8.4'
 
-  ts-deepmerge@6.2.1:
-    resolution: {integrity: sha512-8CYSLazCyj0DJDpPIxOFzJG46r93uh6EynYjuey+bxcLltBeqZL7DMfaE5ZPzZNFlav7wx+2TDa/mBl8gkTYzw==}
-    engines: {node: '>=14.13.1'}
-
   ts-easing@0.2.0:
     resolution: {integrity: sha512-Z86EW+fFFh/IFB1fqQ3/+7Zpf9t2ebOAxNI/V6Wo7r5gqiqtxmgTlQ1qbqQcjLKYeSHPTsEmvlJUDg/EuL0uHQ==}
 
@@ -5228,6 +5194,9 @@ packages:
   xmlchars@2.2.0:
     resolution: {integrity: sha512-JZnDKK8B0RCDw84FNdDAIpZK+JuJw+s7Lz8nksI7SIuU3UXJJslUthsi+uWBUYOwPFwW7W7PRLRfUKpxjtjFCw==}
 
+  xstate@5.20.1:
+    resolution: {integrity: sha512-i9ZpNnm/XhCOMUxae1suT8PjYNTStZWbhmuKt4xeTPaYG5TS0Fz0i+Ka5yxoNPpaHW3VW6JIowrwFgSTZONxig==}
+
   y18n@4.0.3:
     resolution: {integrity: sha512-JKhqTOwSrqNA1NY5lSztJ1GrBiUodLMmIZuLiDaMRJ+itFd+ABVE8XBjOvIWL+rSqNDC74LCSFmlb/U4UZ4hJQ==}
 
@@ -5312,12 +5281,6 @@ snapshots:
     dependencies:
       '@jridgewell/gen-mapping': 0.3.8
       '@jridgewell/trace-mapping': 0.3.25
-
-  '@anatine/zod-openapi@1.14.2(openapi3-ts@2.0.2)(zod@4.0.5)':
-    dependencies:
-      openapi3-ts: 2.0.2
-      ts-deepmerge: 6.2.1
-      zod: 4.0.5
 
   '@ardatan/relay-compiler@12.0.0(graphql@16.11.0)':
     dependencies:
@@ -6766,6 +6729,7 @@ snapshots:
       '@parcel/watcher-win32-arm64': 2.5.1
       '@parcel/watcher-win32-ia32': 2.5.1
       '@parcel/watcher-win32-x64': 2.5.1
+    optional: true
 
   '@petamoriken/float16@3.9.2': {}
 
@@ -6843,6 +6807,8 @@ snapshots:
 
   '@rollup/rollup-win32-x64-msvc@4.41.1':
     optional: true
+
+  '@selext/core@1.0.0': {}
 
   '@skidding/launch-editor@2.2.3':
     dependencies:
@@ -6995,18 +6961,6 @@ snapshots:
   '@ts-rest/core@3.53.0-rc.1(@types/node@24.1.0)':
     optionalDependencies:
       '@types/node': 24.1.0
-
-  '@ts-rest/fastify@3.53.0-rc.1(@ts-rest/core@3.53.0-rc.1(@types/node@24.1.0))(fastify@4.29.1)':
-    dependencies:
-      '@ts-rest/core': 3.53.0-rc.1(@types/node@24.1.0)
-      fastify: 4.29.1
-
-  '@ts-rest/open-api@3.53.0-rc.1(@ts-rest/core@3.53.0-rc.1(@types/node@24.1.0))(zod@4.0.5)':
-    dependencies:
-      '@anatine/zod-openapi': 1.14.2(openapi3-ts@2.0.2)(zod@4.0.5)
-      '@ts-rest/core': 3.53.0-rc.1(@types/node@24.1.0)
-      openapi3-ts: 2.0.2
-      zod: 4.0.5
 
   '@ts-rest/react-query@3.53.0-rc.1(@tanstack/react-query@5.83.0(react@18.3.1))(@ts-rest/core@3.53.0-rc.1(@types/node@24.1.0))(react@18.3.1)':
     dependencies:
@@ -7840,7 +7794,8 @@ snapshots:
 
   detect-indent@6.1.0: {}
 
-  detect-libc@1.0.3: {}
+  detect-libc@1.0.3:
+    optional: true
 
   detect-libc@2.0.4: {}
 
@@ -9318,7 +9273,8 @@ snapshots:
       lower-case: 2.0.2
       tslib: 2.8.1
 
-  node-addon-api@7.1.1: {}
+  node-addon-api@7.1.1:
+    optional: true
 
   node-addon-api@8.5.0: {}
 
@@ -9406,10 +9362,6 @@ snapshots:
       define-lazy-prop: 3.0.0
       is-inside-container: 1.0.0
       is-wsl: 3.1.0
-
-  openapi3-ts@2.0.2:
-    dependencies:
-      yaml: 1.10.2
 
   optionator@0.9.4:
     dependencies:
@@ -10403,8 +10355,6 @@ snapshots:
     dependencies:
       typescript: 5.8.3
 
-  ts-deepmerge@6.2.1: {}
-
   ts-easing@0.2.0: {}
 
   ts-interface-checker@0.1.13: {}
@@ -10764,6 +10714,8 @@ snapshots:
   xml-name-validator@5.0.0: {}
 
   xmlchars@2.2.0: {}
+
+  xstate@5.20.1: {}
 
   y18n@4.0.3: {}
 

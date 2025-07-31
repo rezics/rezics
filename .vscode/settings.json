@@ -9,6 +9,7 @@
         "pnpx",
         "readlist",
         "Tagable",
+        "TCRUD",
         "urql",
         "uuid",
         "uuidv",
