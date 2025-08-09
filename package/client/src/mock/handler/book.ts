@@ -1,6 +1,6 @@
 import { http, HttpResponse } from "msw";
 import { Book } from "contract";
-import {Chapter} from "contract"
+import { Chapter } from "contract";
 import { bookList01 } from "../data/bookList01";
 import { bookInfo01 } from "../data/bookinfo01";
 import chapterList01 from "../data/chapterlist01.json";
@@ -45,8 +45,9 @@ export const bookHandlers = [
     // Update book
     http.put(Book.update.path, async ({ params, request }) => {
         const index = books.findIndex((b) => b.id === (params as any)["id"]);
-        if (index === -1)
+        if (index === -1) {
             return HttpResponse.json({ message: "Not found" }, { status: 404 });
+        }
         const patch: any = await request.json();
         books[index] = { ...(books[index] as any), ...(patch as any) };
         return HttpResponse.json(books[index]);

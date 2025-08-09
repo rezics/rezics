@@ -11,7 +11,9 @@ interface BookEditChapterPageProps {
     chapterId: string;
 }
 
-export const BookEditChapterPage: React.FC<BookEditChapterPageProps> = ({  chapterId }) => {
+export const BookEditChapterPage: React.FC<BookEditChapterPageProps> = (
+    { chapterId },
+) => {
     const { t } = useTranslation();
     const { data, isLoading, error } = tsr.book.chapter.content.useQuery({
         queryKey: ["bookChapter", chapterId],

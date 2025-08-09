@@ -64,7 +64,10 @@ export function buildTree<T extends NodeBase>(
     for (const node of nodes) {
         // extend fields
         if (extendFields.size > 0) {
-            nodeMap.set(String(node.id), { ...node, ...Object.fromEntries(extendFields) });
+            nodeMap.set(String(node.id), {
+                ...node,
+                ...Object.fromEntries(extendFields),
+            });
         } else {
             nodeMap.set(String(node.id), { ...node });
         }
@@ -125,7 +128,9 @@ export function flattenTree<T extends NodeBase>(
         // Filter temporary fields
         if (filterFields.length > 0) {
             const filteredRest = Object.fromEntries(
-                Object.entries(rest).filter(([key]) => !filterFields.includes(key)),
+                Object.entries(rest).filter(([key]) =>
+                    !filterFields.includes(key)
+                ),
             ) as T;
             nodes.push(filteredRest as T);
         } else {
@@ -215,7 +220,9 @@ export function updateNode<T extends NodeBase>(
     nodeId: T["id"],
     updates: Partial<Omit<T, "id">>,
 ): FlatTree<T> {
-    const newNodes = tree.nodes.map((node) => (node.id === nodeId ? { ...node, ...updates } : node));
+    const newNodes = tree.nodes.map((
+        node,
+    ) => (node.id === nodeId ? { ...node, ...updates } : node));
     return { ...tree, nodes: newNodes };
 }
 
@@ -265,7 +272,10 @@ export function moveNode<T extends NodeBase>(
  * @param nodeIds The IDs of the nodes to delete.
  * @returns A new `FlatTree` instance with the nodes removed.
  */
-export function deleteNodes<T extends NodeBase>(tree: FlatTree<T>, nodeIds: T["id"][]): FlatTree<T> {
+export function deleteNodes<T extends NodeBase>(
+    tree: FlatTree<T>,
+    nodeIds: T["id"][],
+): FlatTree<T> {
     const idsToDelete = collectDescendants(nodeIds, tree.orders);
 
     const newNodes = tree.nodes.filter((node) => !idsToDelete.has(node.id));
@@ -273,7 +283,9 @@ export function deleteNodes<T extends NodeBase>(tree: FlatTree<T>, nodeIds: T["i
     const newOrders: OrderMap = new Map();
     for (const [parentId, children] of tree.orders.entries()) {
         if (idsToDelete.has(parentId as T["id"])) continue;
-        const newChildren = children.filter((childId) => !idsToDelete.has(childId));
+        const newChildren = children.filter((childId) =>
+            !idsToDelete.has(childId)
+        );
         if (newChildren.length > 0) {
             newOrders.set(parentId, newChildren);
         }

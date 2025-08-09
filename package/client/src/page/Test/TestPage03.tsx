@@ -10,7 +10,12 @@ export function TestPage03() {
         <div className="w-4/6 mx-auto mt-20">
             <div className="text-2xl font-bold mb-10">TestPage03</div>
             {/* <ChapterList id="1" /> */}
-            <BookTagEdit.Container tagObjects={[]} updateTagObjects={() => {}} editOpen={false} setEditOpen={() => {}} />
+            <BookTagEdit.Container
+                tagObjects={[]}
+                updateTagObjects={() => {}}
+                editOpen={false}
+                setEditOpen={() => {}}
+            />
         </div>
     );
 }

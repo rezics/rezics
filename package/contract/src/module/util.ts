@@ -1,12 +1,10 @@
-import { Term, FailureResponse } from "@selext/core";
+import { FailureResponse, Term } from "@selext/core";
 
-export type DateIsString<T> = T extends object
-    ? {
-          [TKey in keyof T]: DateIsString<T[TKey]>;
-      }
-    : T extends Date
-      ? string
-      : T;
+export type DateIsString<T> = T extends object ? {
+        [TKey in keyof T]: DateIsString<T[TKey]>;
+    }
+    : T extends Date ? string
+    : T;
 
 export const objectMap = <T extends object, R>(
     obj: T,
@@ -22,13 +20,6 @@ export const objectMap = <T extends object, R>(
     ) as any;
 };
 
-export type TanStackQueryTerm<TTerm extends Term<any, any, any, any>> =
-    (input: {
-        operation: Parameters<TTerm>[0];
-        parameter: Parameters<TTerm>[1];
-        select: Parameters<TTerm>[2];
-    }) => ReturnType<TTerm>;
-
 export type CRUDContract<
     TBase,
     TBaseOperation extends string,
@@ -40,25 +31,26 @@ export type CRUDContract<
     TUpdateFailureResponse extends FailureResponse<any> = never,
     TDeleteParameter extends object = object,
     TDeleteFailureResponse extends FailureResponse<any> = never,
-> = Term<
-    TBase,
-    `${TBaseOperation}.create`,
-    TCreateParameter,
-    TCreateFailureResponse
-> &
-    Term<
+> =
+    & Term<
+        TBase,
+        `${TBaseOperation}.create`,
+        TCreateParameter,
+        TCreateFailureResponse
+    >
+    & Term<
         TBase,
         `${TBaseOperation}.read`,
         TReadParameter,
         TReadFailureResponse
-    > &
-    Term<
+    >
+    & Term<
         TBase,
         `${TBaseOperation}.update`,
         TUpdateParameter,
         TUpdateFailureResponse
-    > &
-    Term<
+    >
+    & Term<
         TBase,
         `${TBaseOperation}.delete`,
         TDeleteParameter,

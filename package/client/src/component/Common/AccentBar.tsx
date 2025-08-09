@@ -44,7 +44,10 @@ export namespace AccentBarWithText {
 
         return (
             <Typography variant="h5" className="font-bold flex items-center">
-                <AccentBar.Show height={height} color={color || theme.palette.primary.main} />
+                <AccentBar.Show
+                    height={height}
+                    color={color || theme.palette.primary.main}
+                />
                 <span>{text}</span>
             </Typography>
         );

@@ -2,12 +2,15 @@ import { useFixtureInput } from "react-cosmos/client";
 import ReplyDrawer from "./ReplyDrawer";
 
 export default () => {
-    const [props] = useFixtureInput<Parameters<typeof ReplyDrawer>[0]>("Props", {
-        dialogId: "reply-test-123",
-        onSubmit: (content: string) => {
-            alert(`Submitted content: ${content}`);
+    const [props] = useFixtureInput<Parameters<typeof ReplyDrawer>[0]>(
+        "Props",
+        {
+            dialogId: "reply-test-123",
+            onSubmit: (content: string) => {
+                alert(`Submitted content: ${content}`);
+            },
         },
-    });
+    );
 
     return (
         <div className="p-4">
@@ -15,13 +18,16 @@ export default () => {
 
             <div className="mb-4 p-4 bg-gray-50 rounded-lg">
                 <p className="text-sm text-gray-600">
-                    注意：此组件依赖于 useDialogStore 全局状态管理，在 Cosmos 中可能无法正常显示。 ReplyDrawer
+                    注意：此组件依赖于 useDialogStore 全局状态管理，在 Cosmos
+                    中可能无法正常显示。 ReplyDrawer
                     是一个底部抽屉式的回复组件，包含富文本编辑器。
                 </p>
             </div>
 
             <div className="border border-gray-200 rounded-lg p-4">
-                <p className="mb-2">在实际应用中，ReplyDrawer 会从屏幕底部弹出，包含：</p>
+                <p className="mb-2">
+                    在实际应用中，ReplyDrawer 会从屏幕底部弹出，包含：
+                </p>
                 <ul className="list-disc list-inside space-y-1 text-sm">
                     <li>EasyEditor 富文本编辑器</li>
                     <li>提交按钮</li>
@@ -57,16 +63,22 @@ export default () => {
 
             {/* 模拟的 ReplyDrawer 外观 */}
             <div className="mt-6 p-4 border-2 border-dashed border-gray-300 rounded-lg">
-                <p className="text-sm font-medium mb-2">模拟的 ReplyDrawer 外观：</p>
+                <p className="text-sm font-medium mb-2">
+                    模拟的 ReplyDrawer 外观：
+                </p>
                 <div className="bg-white rounded-lg shadow-lg p-4 max-w-3xl mx-auto">
                     <div className="flex gap-4">
                         <div className="flex-1 border border-gray-200 rounded min-h-[200px] p-3">
-                            <p className="text-gray-500 text-sm">EasyEditor 富文本编辑器区域</p>
+                            <p className="text-gray-500 text-sm">
+                                EasyEditor 富文本编辑器区域
+                            </p>
                         </div>
                         <div className="flex flex-col justify-end">
                             <button
                                 className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-                                onClick={() => props.onSubmit && props.onSubmit("示例内容")}
+                                onClick={() =>
+                                    props.onSubmit &&
+                                    props.onSubmit("示例内容")}
                             >
                                 提交
                             </button>

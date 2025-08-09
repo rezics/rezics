@@ -3,7 +3,7 @@ import { User } from "./User";
 import { useTheme } from "@mui/material/styles";
 import { useLayoutStore } from "@/global/layoutStore";
 import { AppBar, IconButton, Toolbar, Typography } from "@mui/material";
-import { Menu, Brightness7, Brightness4 } from "@mui/icons-material";
+import { Brightness4, Brightness7, Menu } from "@mui/icons-material";
 import { ThemeQuickToggle } from "@/component/Theme/ThemeCustomizer";
 import { useTranslation } from "react-i18next";
 import { LangToggle } from "./LangToggle";
@@ -17,7 +17,15 @@ interface HeaderProps {
     isDragging?: boolean;
 }
 
-export const Header: React.FC<HeaderProps> = ({ handleDrawerToggle, mode, onThemeToggle, drawerWidth, isDragging=false }) => {
+export const Header: React.FC<HeaderProps> = (
+    {
+        handleDrawerToggle,
+        mode,
+        onThemeToggle,
+        drawerWidth,
+        isDragging = false,
+    },
+) => {
     const { sidebarOpen } = useLayoutStore();
     const theme = useTheme();
     const { t } = useTranslation();
@@ -33,7 +41,7 @@ export const Header: React.FC<HeaderProps> = ({ handleDrawerToggle, mode, onThem
                     duration: theme.transitions.duration.enteringScreen,
                 }),
             }}
-            className={isDragging ? 'rounded-tl-2xl rounded-bl-2xl' : ''}
+            className={isDragging ? "rounded-tl-2xl rounded-bl-2xl" : ""}
         >
             <Toolbar>
                 <IconButton
@@ -45,7 +53,12 @@ export const Header: React.FC<HeaderProps> = ({ handleDrawerToggle, mode, onThem
                 >
                     <Menu />
                 </IconButton>
-                <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
+                <Typography
+                    variant="h6"
+                    noWrap
+                    component="div"
+                    sx={{ flexGrow: 1 }}
+                >
                     REZICS
                 </Typography>
                 <ThemeQuickToggle />

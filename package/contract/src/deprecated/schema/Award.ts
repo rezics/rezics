@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { id,  Auditable } from "./common";
+import { Auditable, id } from "./common";
 import { User } from "./User";
 
 export namespace Award {
@@ -18,7 +18,7 @@ export namespace Award {
     export const Read = z
         .object({
             id,
-            
+
             objectType: z.string(),
             objectId: id,
             type: z.string(),
@@ -35,13 +35,12 @@ export namespace Award {
     export const Delete = z
         .object({
             id,
-            
         })
         .partial();
 
     export const View = z.object({
         id,
-        
+
         objectType: z.string(),
         objectId: id,
         type: z.string(),

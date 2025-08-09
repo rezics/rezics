@@ -1,4 +1,4 @@
-import { Tag, Auditable } from "database/interface";
+import { Interface } from "database";
 import { Result } from "@selext/core";
 import { CRUDContract } from "./util";
 

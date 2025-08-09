@@ -1,10 +1,13 @@
-import { useState, useCallback, useMemo } from "react";
-import { Typography, CircularProgress, Alert } from "@mui/material";
+import { useCallback, useMemo, useState } from "react";
+import { Alert, CircularProgress, Typography } from "@mui/material";
 
 import { BookSearch } from "@/component/BookLib/BookSearch";
 // import { CardBookList } from "@component/Book/CardBookList";
 import { BookListView } from "@component/BookLib/BookListView";
-import { BookSearchFilter, BookLibSortKey } from "@/component/BookLib/BookSearchFilter";
+import {
+    BookLibSortKey,
+    BookSearchFilter,
+} from "@/component/BookLib/BookSearchFilter";
 import { SearchInfo } from "@util/searchParser";
 import { Book } from "contract";
 import tsr from "@/api/tsr";
@@ -13,7 +16,8 @@ import { UniversalPaginator } from "@/component/Common/Pagination";
 function buildQuery(info: SearchInfo): string {
     let q = info.searchText.trim();
     if (info.searchTags.length) {
-        q = `${q} ${info.searchTags.map((t: string) => `[${t}]`).join(" ")}`.trim();
+        q = `${q} ${info.searchTags.map((t: string) => `[${t}]`).join(" ")}`
+            .trim();
     }
     return q;
 }
@@ -50,11 +54,13 @@ export namespace BookLib {
             <div className="mx-auto max-w-7xl p-4">
                 <BookSearch.Container onSearch={getBookList} />
                 <div className="mt-4" />
-                {/* {isLoading && (
+                {
+                    /* {isLoading && (
                     <div className="flex justify-center py-8">
                         <CircularProgress />
                     </div>
-                )} */}
+                )} */
+                }
                 {error && (
                     <Alert severity="error" className="my-4">
                         {String(error)}
@@ -85,7 +91,9 @@ export namespace BookLib {
                     currentPage={currentPage}
                     setCurrentPage={setCurrentPage}
                 >
-                    {(currentPageItems: Book[]) => <BookListView.Container books={currentPageItems} />}
+                    {(currentPageItems: Book[]) => (
+                        <BookListView.Container books={currentPageItems} />
+                    )}
                 </UniversalPaginator>
                 {/* <CardBookList books={books} /> */}
             </div>
@@ -121,7 +129,9 @@ export namespace BookLib {
             setCurrentQuery(info);
         }, []);
 
-        const handleSortChange = (newSort: { type?: string; order?: "asc" | "desc" }) => {
+        const handleSortChange = (
+            newSort: { type?: string; order?: "asc" | "desc" },
+        ) => {
             console.log("handleSortChange, newSort", newSort);
             setSortConfig((prev) => ({
                 type: newSort.type as BookLibSortKey,

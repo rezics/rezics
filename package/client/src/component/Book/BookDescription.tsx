@@ -16,14 +16,18 @@ export namespace BookDescription {
         setEditOpen?: (open: boolean) => void;
     };
 
-    export const Show: React.FC<Show> = ({ description, onEdit, showEditButton = true, editOpen, setEditOpen }) => {
+    export const Show: React.FC<Show> = (
+        { description, onEdit, showEditButton = true, editOpen, setEditOpen },
+    ) => {
         let { t } = useTranslation();
         return (
             <div>
                 <Box>
                     <div className="flex mb-4">
                         <AccentBarWithText.Show text={t("book.description")} />
-                        {showEditButton && <EditButtonFloatRight.Show onClick={onEdit} />}
+                        {showEditButton && (
+                            <EditButtonFloatRight.Show onClick={onEdit} />
+                        )}
                     </div>
                     <Typography variant="body1" className="whitespace-pre-line">
                         {description}
@@ -49,7 +53,14 @@ export namespace BookDescription {
             setEditOpen(true);
         };
 
-        return <Show description={description} onEdit={handleEdit} editOpen={editOpen} setEditOpen={setEditOpen} />;
+        return (
+            <Show
+                description={description}
+                onEdit={handleEdit}
+                editOpen={editOpen}
+                setEditOpen={setEditOpen}
+            />
+        );
     };
 }
 
@@ -75,7 +86,10 @@ export namespace BookDescriptionEdit {
 
         return (
             <div>
-                <EasyEditor value={descriptionState} onChange={setDescriptionState} />
+                <EasyEditor
+                    value={descriptionState}
+                    onChange={setDescriptionState}
+                />
                 <div className="w-full">
                     <div className="w-1/2 float-right">
                         <Button onClick={handleUpdate} className="w-full">
@@ -91,11 +105,13 @@ export namespace BookDescriptionEdit {
         description: string;
         editOpen: boolean;
         // setEditOpen: (open: boolean) => void;
-        setEditOpen: any
+        setEditOpen: any;
         mode?: "modal" | "inline"; // 'modal' wraps with Dialog, 'inline' renders directly
     };
 
-    export const Container: React.FC<ContainerProps> = ({ description, editOpen, setEditOpen, mode = "inline" }) => {
+    export const Container: React.FC<ContainerProps> = (
+        { description, editOpen, setEditOpen, mode = "inline" },
+    ) => {
         const [descriptionState, setDescriptionState] = useState(description);
 
         useEffect(() => {
@@ -118,7 +134,11 @@ export namespace BookDescriptionEdit {
 
         if (mode === "modal") {
             return (
-                <DialogContainer open={editOpen} onClose={() => setEditOpen(false)} title="编辑书籍描述">
+                <DialogContainer
+                    open={editOpen}
+                    onClose={() => setEditOpen(false)}
+                    title="编辑书籍描述"
+                >
                     {content}
                 </DialogContainer>
             );

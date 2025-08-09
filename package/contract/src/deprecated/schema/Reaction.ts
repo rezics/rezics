@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { User } from "./User";
-import { id, icsId, Auditable } from "./common";
+import { Auditable, icsId, id } from "./common";
 
 export namespace Reaction {
     const Mutable = {

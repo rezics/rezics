@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { TextField, IconButton, Chip } from "@mui/material";
+import { Chip, IconButton, TextField } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import { parseSearchString, SearchInfo } from "@util/searchParser";
 import { useTranslation } from "react-i18next";
@@ -12,14 +12,35 @@ export namespace BookSearch {
         onAddTag: (tag: string) => void;
     };
 
-    export const Show: React.FC<Show> = ({ value, onValueChange, onSearch, onAddTag }) => {
-        const { t} = useTranslation()
+    export const Show: React.FC<Show> = (
+        { value, onValueChange, onSearch, onAddTag },
+    ) => {
+        const { t } = useTranslation();
         const searchTags = {
-            presetTags: ["fiction", "nonfiction", "mystery", "romance", "history", "science", "fantasy", "philosophy"],
-            statusTags: ["10万字", "20万字", "50万字", "100万字", "200万字", "连载中", "已完结"],
+            presetTags: [
+                "fiction",
+                "nonfiction",
+                "mystery",
+                "romance",
+                "history",
+                "science",
+                "fantasy",
+                "philosophy",
+            ],
+            statusTags: [
+                "10万字",
+                "20万字",
+                "50万字",
+                "100万字",
+                "200万字",
+                "连载中",
+                "已完结",
+            ],
         };
 
-        const handleKeyDown: React.KeyboardEventHandler<HTMLInputElement> = (e) => {
+        const handleKeyDown: React.KeyboardEventHandler<HTMLInputElement> = (
+            e,
+        ) => {
             if (e.key === "Enter") {
                 e.preventDefault();
                 onSearch();
@@ -38,7 +59,11 @@ export namespace BookSearch {
                         onChange={(e) => onValueChange(e.target.value)}
                         onKeyDown={handleKeyDown}
                     />
-                    <IconButton color="primary" aria-label={t("accessibility.search")} onClick={onSearch}>
+                    <IconButton
+                        color="primary"
+                        aria-label={t("accessibility.search")}
+                        onClick={onSearch}
+                    >
                         <SearchIcon />
                     </IconButton>
                 </div>
@@ -80,7 +105,9 @@ export namespace BookSearch {
         };
 
         const handleAddTag = (tag: string) => {
-            const withTag = value.includes(`[${tag}]`) ? value : `${value} [${tag}] `;
+            const withTag = value.includes(`[${tag}]`)
+                ? value
+                : `${value} [${tag}] `;
             setValue(withTag.trim());
         };
 

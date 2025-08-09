@@ -2,9 +2,12 @@ import { useFixtureInput } from "react-cosmos/client";
 import { BookCarousel } from "./HomeCarousel";
 
 export default () => {
-    const [props] = useFixtureInput<Parameters<typeof BookCarousel>[0]>("Props", {
-        autoplayIntervalNum: 3000,
-    });
+    const [props] = useFixtureInput<Parameters<typeof BookCarousel>[0]>(
+        "Props",
+        {
+            autoplayIntervalNum: 3000,
+        },
+    );
 
     return (
         <div className="p-4">
@@ -12,7 +15,8 @@ export default () => {
 
             <div className="mb-4 p-4 bg-gray-50 rounded-lg">
                 <p className="text-sm text-gray-600">
-                    BookCarousel 是一个基于 Swiper 的轮播组件，用于在首页展示推荐书籍。
+                    BookCarousel 是一个基于 Swiper
+                    的轮播组件，用于在首页展示推荐书籍。
                     支持自动播放、分页指示器和循环播放功能。
                 </p>
             </div>
@@ -22,7 +26,8 @@ export default () => {
                     <p className="text-sm font-medium">当前设置：</p>
                     <ul className="mt-2 text-sm space-y-1">
                         <li>
-                            <strong>自动播放间隔：</strong> {props.autoplayIntervalNum}ms
+                            <strong>自动播放间隔：</strong>{" "}
+                            {props.autoplayIntervalNum}ms
                         </li>
                         <li>
                             <strong>循环播放：</strong> 启用
@@ -43,12 +48,16 @@ export default () => {
                     <h4 className="font-medium mb-2">不同播放速度的示例</h4>
                     <div className="space-y-4">
                         <div className="border rounded p-4">
-                            <p className="text-sm font-medium mb-2">快速播放 (1秒间隔):</p>
+                            <p className="text-sm font-medium mb-2">
+                                快速播放 (1秒间隔):
+                            </p>
                             <BookCarousel autoplayIntervalNum={1000} />
                         </div>
 
                         <div className="border rounded p-4">
-                            <p className="text-sm font-medium mb-2">慢速播放 (5秒间隔):</p>
+                            <p className="text-sm font-medium mb-2">
+                                慢速播放 (5秒间隔):
+                            </p>
                             <BookCarousel autoplayIntervalNum={5000} />
                         </div>
                     </div>

@@ -29,10 +29,12 @@ export default {
         logout: "ログアウト",
         register: "登録",
         resolve: "解決",
-        already_login: "既にログインしています。再ログインすると、以前のログイン情報が上書きされます。",
+        already_login:
+            "既にログインしています。再ログインすると、以前のログイン情報が上書きされます。",
         error: {
             invalid_email: "無効なメールアドレスです。",
-            invalid_password: "パスワードは少なくとも6文字である必要があります。",
+            invalid_password:
+                "パスワードは少なくとも6文字である必要があります。",
             invalid_username: "無効なユーザー名です。",
             invalid_confirm: "無効なパスワード確認です。",
             passwords_mismatch: "パスワードが一致しません。",
@@ -115,4 +117,4 @@ export default {
         close: "閉じる",
         open_drawer: "ドロワーを開く",
     },
-}
+};

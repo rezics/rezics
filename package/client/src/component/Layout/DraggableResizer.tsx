@@ -46,7 +46,9 @@ export const DraggableResizer: React.FC<DraggableResizerProps> = ({
         const resizer = resizerRef.current;
         const target = document.getElementById(targetId);
         if (!target) {
-            console.warn(`Draggable Resizer: Element with ID ${targetId} not found!`);
+            console.warn(
+                `Draggable Resizer: Element with ID ${targetId} not found!`,
+            );
             return;
         }
         if (!resizer || !target) return;

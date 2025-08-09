@@ -1,14 +1,14 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import DialogContainer from "@component/Common/DialogContainer"; // Ensure this path is correct
 import { TagGroup } from "contract/schema";
 import Autocomplete from "@mui/material/Autocomplete";
 import {
+    Alert,
     Button,
     Chip,
     IconButton,
-    TextField,
     MenuItem,
-    Alert,
+    TextField,
 } from "@mui/material";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import Menu from "@mui/material/Menu";
@@ -171,28 +171,32 @@ export namespace BookTagEdit {
                         Update
                     </Button>
                 </div>
-                {/* TODO
+                {
+                    /* TODO
                  * 根据 Organization and Item(BookId) 获取 TagGroup
                  * 编辑特定 TagGroup 的 Tags
-                 */}
-                {onTagEdit ? (
-                    <EditSingleTag
-                        label={"tag 1"}
-                        onUpdate={() => {}}
-                        setOnTagEdit={setOnTagEdit}
-                    />
-                ) : (
-                    <div className="flex flex-wrap gap-2 mt-6">
-                        {tagGroupObject.tags.map((tag) => (
-                            <TagEditChip
-                                key={tag}
-                                label={tag}
-                                onEdit={handleTagEdit}
-                                onDelete={() => {}}
-                            />
-                        ))}
-                    </div>
-                )}
+                 */
+                }
+                {onTagEdit
+                    ? (
+                        <EditSingleTag
+                            label={"tag 1"}
+                            onUpdate={() => {}}
+                            setOnTagEdit={setOnTagEdit}
+                        />
+                    )
+                    : (
+                        <div className="flex flex-wrap gap-2 mt-6">
+                            {tagGroupObject.tags.map((tag) => (
+                                <TagEditChip
+                                    key={tag}
+                                    label={tag}
+                                    onEdit={handleTagEdit}
+                                    onDelete={() => {}}
+                                />
+                            ))}
+                        </div>
+                    )}
             </div>
         );
     };
@@ -231,13 +235,11 @@ export namespace BookTagEdit {
 
         const content = (
             <Show
-                tagGroupObject={
-                    editedTagGroupObject || {
-                        id: "1",
-                        name: "Tag Group 1",
-                        tags: [],
-                    }
-                }
+                tagGroupObject={editedTagGroupObject || {
+                    id: "1",
+                    name: "Tag Group 1",
+                    tags: [],
+                }}
                 onUpdate={handleTagUpdate}
             />
         );

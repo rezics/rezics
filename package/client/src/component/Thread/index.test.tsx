@@ -24,7 +24,12 @@ export default () => {
     };
 
     return (
-        <Thread.Show user={user} rating={5} create_at={new Date()} reactions={reactions}>
+        <Thread.Show
+            user={user}
+            rating={5}
+            create_at={new Date()}
+            reactions={reactions}
+        >
             {loremIpsum({ count: 12 })}
         </Thread.Show>
     );

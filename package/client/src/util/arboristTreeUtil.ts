@@ -19,19 +19,24 @@ interface TreeNode extends BaseNode {
 const normalizeId = (id: string | number): string => String(id);
 
 // 辅助函数：检查两个 id 是否相等
-const idsEqual = (id1: string | number, id2: string | number): boolean => normalizeId(id1) === normalizeId(id2);
+const idsEqual = (id1: string | number, id2: string | number): boolean =>
+    normalizeId(id1) === normalizeId(id2);
 
 // 辅助函数：在数组中查找节点索引
-const findNodeIndex = (nodes: TreeNode[], targetId: string | number): Option.Option<number> =>
-    Array.findFirstIndex(nodes, (node: TreeNode) => idsEqual(node.id, targetId));
+const findNodeIndex = (
+    nodes: TreeNode[],
+    targetId: string | number,
+): Option.Option<number> =>
+    Array.findFirstIndex(
+        nodes,
+        (node: TreeNode) => idsEqual(node.id, targetId),
+    );
 
 // 辅助函数：安全地在指定位置插入元素
-const insertAt =
-    <T>(index: number, items: T[]) =>
-    (array: T[]): T[] => {
-        const [before, after] = Array.splitAt(array, index);
-        return [...before, ...items, ...after];
-    };
+const insertAt = <T>(index: number, items: T[]) => (array: T[]): T[] => {
+    const [before, after] = Array.splitAt(array, index);
+    return [...before, ...items, ...after];
+};
 
 // 辅助函数：深拷贝节点（避免引用共享）
 const cloneNode = (node: TreeNode): TreeNode => {
@@ -52,7 +57,11 @@ const cloneNode = (node: TreeNode): TreeNode => {
  * @param removed 传入一个空数组，函数会把所有被删的节点 push 到这里
  * @returns       新树 (不含被移除节点)
  */
-export function findAndRemove(tree: TreeNode[], ids: (string | number)[], removed: TreeNode[]): any[] {
+export function findAndRemove(
+    tree: TreeNode[],
+    ids: (string | number)[],
+    removed: TreeNode[],
+): any[] {
     return tree.filter((node) => {
         const currentNodeId = String(node.id);
         if (ids.includes(currentNodeId)) {
@@ -82,7 +91,9 @@ export const findAndInsert = (
     const processNode = (node: TreeNode): TreeNode => {
         if (idsEqual(node.id, parentId!)) {
             const currentChildren = node.children ?? [];
-            const newChildren = insertAt(index, [...nodesToInsert])(currentChildren);
+            const newChildren = insertAt(index, [...nodesToInsert])(
+                currentChildren,
+            );
             return { ...node, children: newChildren };
         }
 
@@ -99,7 +110,11 @@ export const findAndInsert = (
 /**
  * 查找并编辑节点标题
  */
-export const findAndEdit = (tree: ReadonlyArray<TreeNode>, id: string | number, newName: string): TreeNode[] => {
+export const findAndEdit = (
+    tree: ReadonlyArray<TreeNode>,
+    id: string | number,
+    newName: string,
+): TreeNode[] => {
     const processNode = (node: TreeNode): TreeNode => {
         if (idsEqual(node.id, id)) {
             return { ...node, title: newName } as TreeNode;
@@ -118,14 +133,22 @@ export const findAndEdit = (tree: ReadonlyArray<TreeNode>, id: string | number, 
 /**
  * 查找并删除指定 ID 的节点
  */
-export const findAndDelete = (tree: ReadonlyArray<TreeNode>, ids: ReadonlyArray<string | number>): TreeNode[] => {
+export const findAndDelete = (
+    tree: ReadonlyArray<TreeNode>,
+    ids: ReadonlyArray<string | number>,
+): TreeNode[] => {
     const idsSet = new Set(ids.map(normalizeId));
 
-    const shouldKeep = (node: TreeNode): boolean => !idsSet.has(normalizeId(node.id));
+    const shouldKeep = (node: TreeNode): boolean =>
+        !idsSet.has(normalizeId(node.id));
 
     const processNode = (node: TreeNode): TreeNode => {
         if (node.children) {
-            const filteredChildren = pipe(node.children, Array.filter(shouldKeep), Array.map(processNode));
+            const filteredChildren = pipe(
+                node.children,
+                Array.filter(shouldKeep),
+                Array.map(processNode),
+            );
             return { ...node, children: filteredChildren };
         }
         return node;
@@ -144,7 +167,9 @@ export const findAndAddChild = (
 ): TreeNode[] => {
     const processNode = (node: TreeNode): TreeNode => {
         if (idsEqual(node.id, parentId)) {
-            const children = node.children ? [...node.children, newNode] : [newNode];
+            const children = node.children
+                ? [...node.children, newNode]
+                : [newNode];
             return { ...node, children };
         }
 
@@ -175,7 +200,12 @@ export const insertSiblingAfter = (
             findNodeIndex([...nodes], targetId),
             Option.match({
                 onNone: () =>
-                    nodes.map((node) => (node.children ? { ...node, children: processNodes(node.children) } : node)),
+                    nodes.map((
+                        node,
+                    ) => (node.children
+                        ? { ...node, children: processNodes(node.children) }
+                        : node)
+                    ),
                 onSome: (index: number) => {
                     processed = true;
                     return insertAt(index + 1, [newNode])([...nodes]);
@@ -190,7 +220,10 @@ export const insertSiblingAfter = (
 /**
  * 将节点移动到同级最前
  */
-export const moveSiblingFirst = (tree: ReadonlyArray<TreeNode>, targetId: string | number): TreeNode[] => {
+export const moveSiblingFirst = (
+    tree: ReadonlyArray<TreeNode>,
+    targetId: string | number,
+): TreeNode[] => {
     let processed = false;
 
     const processNodes = (nodes: ReadonlyArray<TreeNode>): TreeNode[] => {
@@ -200,12 +233,20 @@ export const moveSiblingFirst = (tree: ReadonlyArray<TreeNode>, targetId: string
             findNodeIndex([...nodes], targetId),
             Option.match({
                 onNone: () =>
-                    nodes.map((node) => (node.children ? { ...node, children: processNodes(node.children) } : node)),
+                    nodes.map((
+                        node,
+                    ) => (node.children
+                        ? { ...node, children: processNodes(node.children) }
+                        : node)
+                    ),
                 onSome: (index: number) => {
                     processed = true;
                     const nodeArray = [...nodes];
                     const targetNode = nodeArray[index]!;
-                    const otherNodes = nodeArray.filter((_: TreeNode, i: number) => i !== index);
+                    const otherNodes = nodeArray.filter((
+                        _: TreeNode,
+                        i: number,
+                    ) => i !== index);
                     return [targetNode, ...otherNodes];
                 },
             }),
@@ -218,7 +259,10 @@ export const moveSiblingFirst = (tree: ReadonlyArray<TreeNode>, targetId: string
 /**
  * 将节点移动到同级最后
  */
-export const moveSiblingLast = (tree: ReadonlyArray<TreeNode>, targetId: string | number): TreeNode[] => {
+export const moveSiblingLast = (
+    tree: ReadonlyArray<TreeNode>,
+    targetId: string | number,
+): TreeNode[] => {
     let processed = false;
 
     const processNodes = (nodes: ReadonlyArray<TreeNode>): TreeNode[] => {
@@ -228,12 +272,20 @@ export const moveSiblingLast = (tree: ReadonlyArray<TreeNode>, targetId: string 
             findNodeIndex([...nodes], targetId),
             Option.match({
                 onNone: () =>
-                    nodes.map((node) => (node.children ? { ...node, children: processNodes(node.children) } : node)),
+                    nodes.map((
+                        node,
+                    ) => (node.children
+                        ? { ...node, children: processNodes(node.children) }
+                        : node)
+                    ),
                 onSome: (index: number) => {
                     processed = true;
                     const nodeArray = [...nodes];
                     const targetNode = nodeArray[index]!;
-                    const otherNodes = nodeArray.filter((_: TreeNode, i: number) => i !== index);
+                    const otherNodes = nodeArray.filter((
+                        _: TreeNode,
+                        i: number,
+                    ) => i !== index);
                     return [...otherNodes, targetNode];
                 },
             }),

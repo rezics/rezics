@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { id, Auditable } from "./common";
+import { Auditable, id } from "./common";
 
 export namespace HomePage {
     const Mutable = {

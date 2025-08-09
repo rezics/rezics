@@ -1,4 +1,4 @@
-import { id,  Nameable, Evaluable, Tagable, Auditable } from "./common";
+import { Auditable, Evaluable, id, Nameable, Tagable } from "./common";
 import { z } from "zod";
 
 export namespace Chapter {
@@ -16,7 +16,7 @@ export namespace Chapter {
     export const Read = z
         .object({
             id,
-            
+
             bookId: id,
         })
         .partial();
@@ -30,7 +30,6 @@ export namespace Chapter {
     export const Delete = z
         .object({
             id,
-            
         })
         .partial();
 
@@ -39,7 +38,6 @@ export namespace Chapter {
         ...Evaluable.shape,
         ...Auditable.shape,
         id,
-        
     });
 }
 

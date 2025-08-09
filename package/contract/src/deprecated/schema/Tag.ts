@@ -1,5 +1,5 @@
 import z from "zod";
-import { id, Nameable, Auditable, shortString, Relatable } from "./common";
+import { Auditable, id, Nameable, Relatable, shortString } from "./common";
 
 export namespace Tag {
     const Mutable = {

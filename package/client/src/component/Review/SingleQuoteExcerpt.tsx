@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Avatar, Typography, Link, Paper } from "@mui/material";
+import { Avatar, Box, Link, Paper, Typography } from "@mui/material";
 import FormatQuoteIcon from "@mui/icons-material/FormatQuote";
 import { useTranslation } from "react-i18next";
 
@@ -19,7 +19,9 @@ export namespace SingleQuoteExcerpt {
         originalLink: string;
     };
 
-    export const Show: React.FC<Show> = ({ author, content, stats, source, originalLink }) => {
+    export const Show: React.FC<Show> = (
+        { author, content, stats, source, originalLink },
+    ) => {
         const { t } = useTranslation();
         return (
             <Paper
@@ -32,7 +34,10 @@ export namespace SingleQuoteExcerpt {
                 }}
             >
                 <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-                    <Avatar src={author.avatar} sx={{ width: 20, height: 20, mr: 1 }} />
+                    <Avatar
+                        src={author.avatar}
+                        sx={{ width: 20, height: 20, mr: 1 }}
+                    />
                     <Typography variant="subtitle2" fontWeight="bold">
                         {author.name}
                     </Typography>
@@ -48,7 +53,11 @@ export namespace SingleQuoteExcerpt {
                         }}
                     />
                     <Box sx={{ flex: 1 }}>
-                        <Typography variant="body2" color="text.primary" sx={{ lineHeight: 1.6 }}>
+                        <Typography
+                            variant="body2"
+                            color="text.primary"
+                            sx={{ lineHeight: 1.6 }}
+                        >
                             {content}
                             <Link
                                 href={originalLink}
@@ -81,7 +90,9 @@ export namespace SingleQuoteExcerpt {
                                 <Typography variant="caption">
                                     {stats.likes} {t("accessibility.favorite")}
                                 </Typography>
-                                <Typography variant="caption">{stats.date}</Typography>
+                                <Typography variant="caption">
+                                    {stats.date}
+                                </Typography>
                             </Box>
                             <Typography variant="caption" color="text.disabled">
                                 —— {source}

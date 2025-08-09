@@ -1,6 +1,6 @@
 // common.ts
 import { z, ZodObject } from "zod";
-import { PhoneNumberUtil, PhoneNumberFormat } from "google-libphonenumber";
+import { PhoneNumberFormat, PhoneNumberUtil } from "google-libphonenumber";
 
 const phone_util = PhoneNumberUtil.getInstance();
 
@@ -64,7 +64,7 @@ export const phoneNumber = z
         }
     }, "Invalid phone number")
     .transform((v) =>
-        phone_util.format(phone_util.parse(v), PhoneNumberFormat.E164),
+        phone_util.format(phone_util.parse(v), PhoneNumberFormat.E164)
     )
     .describe("phone number");
 

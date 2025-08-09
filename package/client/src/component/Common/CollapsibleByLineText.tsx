@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useTheme } from "@mui/material/styles";
 import { useTranslation } from "react-i18next";
 
@@ -11,7 +11,9 @@ export namespace CollapsibleByLineText {
         onToggle: () => void;
     };
 
-    export const Show: React.FC<ShowProps> = ({ content, children, maxLines = 4, isExpanded, onToggle }) => {
+    export const Show: React.FC<ShowProps> = (
+        { content, children, maxLines = 4, isExpanded, onToggle },
+    ) => {
         const { t } = useTranslation();
         const theme = useTheme();
         const containerRef = useRef<HTMLDivElement>(null);
@@ -38,7 +40,10 @@ export namespace CollapsibleByLineText {
                 >
                     {content ? content : children}
                     {isExpanded && (
-                        <button onClick={onToggle} className="ml-1 text-sm font-medium text-blue-600 hover:underline">
+                        <button
+                            onClick={onToggle}
+                            className="ml-1 text-sm font-medium text-blue-600 hover:underline"
+                        >
                             收起
                         </button>
                     )}
@@ -53,10 +58,14 @@ export namespace CollapsibleByLineText {
                             style={{
                                 width: "8rem",
                                 height: "100%",
-                                background: `linear-gradient(to left, ${theme.palette.background.default} 40%, transparent 100%)`,
+                                background:
+                                    `linear-gradient(to left, ${theme.palette.background.default} 40%, transparent 100%)`,
                             }}
                         >
-                            <button onClick={onToggle} className="text-sm font-medium text-blue-600 hover:underline">
+                            <button
+                                onClick={onToggle}
+                                className="text-sm font-medium text-blue-600 hover:underline"
+                            >
                                 {/* 展开 */}
                                 {t("common.expand")}
                             </button>
@@ -73,12 +82,20 @@ export namespace CollapsibleByLineText {
         maxLines?: number;
     };
 
-    export const Container: React.FC<ContainerProps> = ({ content, children, maxLines = 4 }) => {
+    export const Container: React.FC<ContainerProps> = (
+        { content, children, maxLines = 4 },
+    ) => {
         const [isExpanded, setIsExpanded] = useState(false);
         const toggle = () => setIsExpanded((v) => !v);
 
         return (
-            <Show content={content} children={children} maxLines={maxLines} isExpanded={isExpanded} onToggle={toggle} />
+            <Show
+                content={content}
+                children={children}
+                maxLines={maxLines}
+                isExpanded={isExpanded}
+                onToggle={toggle}
+            />
         );
     };
 }

@@ -1,13 +1,13 @@
 // user.ts
 import { z } from "zod";
 import {
-    phoneNumber,
-    email,
-    username,
-    password,
-    id,
     Auditable,
+    email,
+    id,
     Nameable,
+    password,
+    phoneNumber,
+    username,
 } from "./common";
 
 export namespace User {

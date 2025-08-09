@@ -2,7 +2,9 @@ import { useFixtureInput } from "react-cosmos/client";
 import ReadlistByBookPreview from "./ReadlistByBookPreview";
 
 export default () => {
-    const [props] = useFixtureInput<Parameters<typeof ReadlistByBookPreview>[0]>("Props", {
+    const [props] = useFixtureInput<
+        Parameters<typeof ReadlistByBookPreview>[0]
+    >("Props", {
         bookId: "book-123",
         title: "《哈利·波特与魔法石》",
     });
@@ -14,7 +16,10 @@ export default () => {
                 <ReadlistByBookPreview {...props} />
             </div>
             <div className="mt-4 text-sm text-gray-600">
-                <p>注意：此组件依赖 ReadlistByBook 页面组件，可能需要路由和数据支持。</p>
+                <p>
+                    注意：此组件依赖 ReadlistByBook
+                    页面组件，可能需要路由和数据支持。
+                </p>
             </div>
         </div>
     );

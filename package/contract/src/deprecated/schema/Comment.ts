@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { id, Auditable, Evaluable } from "./common";
+import { Auditable, Evaluable, id } from "./common";
 import { User } from "./User";
 
 export namespace Comment {
@@ -42,7 +42,7 @@ export namespace Comment {
             replies: z.array(ViewInner),
             ...Evaluable.shape,
             ...Auditable.shape,
-        }),
+        })
     );
 
     export const View = ViewInner;

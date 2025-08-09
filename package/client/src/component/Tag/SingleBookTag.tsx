@@ -1,4 +1,4 @@
-import { Box, Typography, Chip, Stack } from "@mui/material";
+import { Box, Chip, Stack, Typography } from "@mui/material";
 import { CollapsibleByLineText } from "@component/Common/CollapsibleByLineText";
 import { TagGroup } from "contract/schema";
 

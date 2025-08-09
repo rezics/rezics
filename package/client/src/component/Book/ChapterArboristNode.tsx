@@ -28,12 +28,15 @@ export const createChapterArboristNode = (
     isTreeDraggable: boolean,
     baseLink: string,
 ) => {
-    return function ChapterArboristNode({ node, style, dragHandle }: NodeRendererProps<Chapter>) {
-
+    return function ChapterArboristNode(
+        { node, style, dragHandle }: NodeRendererProps<Chapter>,
+    ) {
         return (
             <div
                 style={style}
-                ref={!node.isEditing && isTreeDraggable ? dragHandle : undefined}
+                ref={!node.isEditing && isTreeDraggable
+                    ? dragHandle
+                    : undefined}
                 className={`flex items-center gap-1 px-1 cursor-pointer select-none ${
                     node.state.isSelected ? "text-blue-600" : ""
                 }`}
@@ -52,46 +55,65 @@ export const createChapterArboristNode = (
             >
                 {/* Arrow toggle */}
                 {node.children && node.children.length > 0 && (
-                    <span onClick={() => node.toggle()} className="w-4 flex justify-center items-center">
+                    <span
+                        onClick={() => node.toggle()}
+                        className="w-4 flex justify-center items-center"
+                    >
                         {node.isOpen ? "▼" : "▶"}
                     </span>
                 )}
 
                 {/* Icon */}
-                {/* <span className="w-4 flex justify-center items-center">
+                {
+                    /* <span className="w-4 flex justify-center items-center">
                     {node.isLeaf ? "📄" : "📁"}
-                </span> */}
+                </span> */
+                }
 
                 {/* Title or editing input */}
                 {/* <span className="flex-1 whitespace-nowrap"> */}
                 <span className="whitespace-nowrap">
-                    {node.isEditing ? (
-                        <input
-                            type="text"
-                            defaultValue={node.data.title}
-                            onFocus={(e) => e.currentTarget.select()}
-                            onBlur={() => node.reset()}
-                            onKeyDown={(e) => {
-                                if (e.key === "Escape") node.reset();
-                                if (e.key === "Enter") node.submit((e.target as HTMLInputElement).value);
-                            }}
-                            autoFocus
-                            className="border px-1 text-sm w-full"
-                        />
-                    ) : node.children && node.children.length > 0 ? (
-                        <span>{node.data.title}</span>
-                    ) : (
-                        <Link
-                            to={`${baseLink}/${node.id}`}
-                            className="text-gray-700 hover:text-blue-500 block cursor-default hover:cursor-pointer"
-                        >
-                            <span className={`${node.isSelected ? "text-red-600" : ""}`}>{node.data.title}</span>
-                        </Link>
-                    )}
+                    {node.isEditing
+                        ? (
+                            <input
+                                type="text"
+                                defaultValue={node.data.title}
+                                onFocus={(e) => e.currentTarget.select()}
+                                onBlur={() => node.reset()}
+                                onKeyDown={(e) => {
+                                    if (e.key === "Escape") node.reset();
+                                    if (e.key === "Enter") {
+                                        node.submit(
+                                            (e.target as HTMLInputElement)
+                                                .value,
+                                        );
+                                    }
+                                }}
+                                autoFocus
+                                className="border px-1 text-sm w-full"
+                            />
+                        )
+                        : node.children && node.children.length > 0
+                        ? <span>{node.data.title}</span>
+                        : (
+                            <Link
+                                to={`${baseLink}/${node.id}`}
+                                className="text-gray-700 hover:text-blue-500 block cursor-default hover:cursor-pointer"
+                            >
+                                <span
+                                    className={`${
+                                        node.isSelected ? "text-red-600" : ""
+                                    }`}
+                                >
+                                    {node.data.title}
+                                </span>
+                            </Link>
+                        )}
                 </span>
 
                 {/* Optional quick actions (edit icon) */}
-                {/* {!node.isEditing && (
+                {
+                    /* {!node.isEditing && (
                     <button
                         className="ml-1 text-xs opacity-50 hover:opacity-100"
                         onClick={(e) => {
@@ -101,7 +123,8 @@ export const createChapterArboristNode = (
                     >
                         ✏️
                     </button>
-                )} */}
+                )} */
+                }
             </div>
         );
     };

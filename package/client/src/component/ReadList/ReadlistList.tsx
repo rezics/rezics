@@ -24,7 +24,11 @@ export function ReadlistList({ booklists }: { booklists: BookList[] }) {
         <Grid container spacing={2}>
             {booklists.map((list: any) => (
                 <Grid size={{ xs: 12, lg: 6, xl: 4 }} key={list.id}>
-                    <SingleReadlist list={list} handleBookListClick={handleBookListClick} handleLike={handleLike} />
+                    <SingleReadlist
+                        list={list}
+                        handleBookListClick={handleBookListClick}
+                        handleLike={handleLike}
+                    />
                 </Grid>
             ))}
         </Grid>

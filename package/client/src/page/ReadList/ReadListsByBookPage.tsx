@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { AccentBarWithText } from "@/component/Common/AccentBar";
 import { useTranslation } from "react-i18next";
 import tsr from "@/api/tsr";
-import { ReadList } from "contract"
+import { ReadList } from "contract";
 
 export function ReadlistByBookPage() {
     const { t } = useTranslation();
@@ -29,7 +29,9 @@ export function ReadlistByBookPage() {
     }, [data]);
     return (
         <div className="w-11/12 mx-auto mt-10">
-            <AccentBarWithText.Show text={`${t("pages.book_collection_list_page")}`} />
+            <AccentBarWithText.Show
+                text={`${t("pages.book_collection_list_page")}`}
+            />
             <div className="mt-4">
                 <ReadlistList booklists={booklists} />
             </div>

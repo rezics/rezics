@@ -1,6 +1,6 @@
 // 暂时就先这样不处理，后面树化，或者使用VirtualList
 
-import React, { useRef, useCallback } from "react";
+import React, { useCallback, useRef } from "react";
 import { Avatar } from "@mui/material";
 import { tsr } from "@/api/tsr";
 // import { scrollToElementWithOffsetUniversal } from "@/util/domUtils";
@@ -9,7 +9,9 @@ interface ReplyComponentsProps {
     bookListId: string;
 }
 
-export const ReplyComponents: React.FC<ReplyComponentsProps> = ({ bookListId }) => {
+export const ReplyComponents: React.FC<ReplyComponentsProps> = (
+    { bookListId },
+) => {
     const commentId = bookListId; // TODO 暫時先用這個替代
     const { data, isLoading, error } = tsr.comments.list.useQuery({
         queryKey: ["comments", commentId],
@@ -55,9 +57,15 @@ export const ReplyComponents: React.FC<ReplyComponentsProps> = ({ bookListId }) 
                     <Avatar src={comment.avatar} className="w-8 h-8" />
                     <div className="flex-1">
                         <div className="flex items-center gap-2">
-                            <span className="font-semibold text-red-800">{comment.author}</span>
-                            <span className="text-xs text-gray-500">#{comment.id}</span>
-                            <span className="text-xs text-gray-500">{comment.created_at}</span>
+                            <span className="font-semibold text-red-800">
+                                {comment.author}
+                            </span>
+                            <span className="text-xs text-gray-500">
+                                #{comment.id}
+                            </span>
+                            <span className="text-xs text-gray-500">
+                                {comment.created_at}
+                            </span>
                         </div>
                         {comment.parent_id && (
                             <div className="text-xs text-blue-500 mt-1">
@@ -70,7 +78,8 @@ export const ReplyComponents: React.FC<ReplyComponentsProps> = ({ bookListId }) 
                                         scrollToComment(comment.parent_id);
                                     }}
                                 >
-                                    #{comment.parent_id} {getParentPreview(comment.parent_id)}
+                                    #{comment.parent_id}{" "}
+                                    {getParentPreview(comment.parent_id)}
                                 </a>
                             </div>
                         )}

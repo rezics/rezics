@@ -1,7 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { Box, Link, useTheme } from "@mui/material";
 
-
 export namespace CollapsibleText {
     export type Show = {
         content: string;
@@ -10,11 +9,15 @@ export namespace CollapsibleText {
         onToggle: () => void;
     };
 
-    export const Show: React.FC<Show> = ({ content, threshold = 200, isExpanded, onToggle }) => {
+    export const Show: React.FC<Show> = (
+        { content, threshold = 200, isExpanded, onToggle },
+    ) => {
         const theme = useTheme();
 
         const truncatedContent = useMemo(() => {
-            return content.length > threshold ? content.slice(0, threshold) : content;
+            return content.length > threshold
+                ? content.slice(0, threshold)
+                : content;
         }, [content, threshold]);
 
         return (
@@ -52,13 +55,22 @@ export namespace CollapsibleText {
         threshold?: number;
     };
 
-    export const Container: React.FC<Container> = ({ content, threshold = 200 }) => {
+    export const Container: React.FC<Container> = (
+        { content, threshold = 200 },
+    ) => {
         const [isExpanded, setIsExpanded] = useState(false);
 
         const toggle = () => {
             setIsExpanded((prev) => !prev);
         };
 
-        return <Show content={content} threshold={threshold} isExpanded={isExpanded} onToggle={toggle} />;
+        return (
+            <Show
+                content={content}
+                threshold={threshold}
+                isExpanded={isExpanded}
+                onToggle={toggle}
+            />
+        );
     };
 }

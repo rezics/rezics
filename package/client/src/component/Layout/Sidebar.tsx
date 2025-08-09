@@ -1,8 +1,14 @@
 import React, { ReactNode, useEffect } from "react";
 import { Link, useLocation } from "wouter";
-import { useMediaQuery, styled, useTheme } from "@mui/material";
-import { ExpandLess, ExpandMore, ChevronLeft, ChevronRight } from "@mui/icons-material";
+import { styled, useMediaQuery, useTheme } from "@mui/material";
 import {
+    ChevronLeft,
+    ChevronRight,
+    ExpandLess,
+    ExpandMore,
+} from "@mui/icons-material";
+import {
+    Button,
     Collapse,
     Divider,
     Drawer,
@@ -13,7 +19,6 @@ import {
     ListItemIcon,
     ListItemText,
     Typography,
-    Button,
 } from "@mui/material";
 import { useLayoutStore } from "@/global/layoutStore";
 import { NavigationItem } from "./navigation";
@@ -42,7 +47,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
     onOverflowy = false,
     isDragging = false,
 }) => {
-    const { sidebarOpen, setSidebarHeightBelow, toggleItem, openItems, drawerWidth } = useLayoutStore();
+    const {
+        sidebarOpen,
+        setSidebarHeightBelow,
+        toggleItem,
+        openItems,
+        drawerWidth,
+    } = useLayoutStore();
 
     const theme = useTheme();
 
@@ -58,7 +69,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
     const [location, setLocation] = useLocation();
     const isMobile = useMediaQuery((theme) => theme.breakpoints.down("md"));
 
-    const handleItemClick = (event: any, segment: string | undefined, hasChildren: boolean) => {
+    const handleItemClick = (
+        event: any,
+        segment: string | undefined,
+        hasChildren: boolean,
+    ) => {
         // console.log("handleItemClick", event);
         if (!segment) return;
         if (hasChildren) {
@@ -124,7 +139,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 <div ref={refAbove}>
                     <DrawerHeader>
                         <IconButton onClick={handleDrawerToggle}>
-                            {theme.direction === "ltr" ? <ChevronLeft /> : <ChevronRight />}
+                            {theme.direction === "ltr"
+                                ? <ChevronLeft />
+                                : <ChevronRight />}
                         </IconButton>
                     </DrawerHeader>
                     <Divider />
@@ -133,7 +150,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
                             if (item.kind === "header") {
                                 return (
                                     <ListItem key={index}>
-                                        <Typography variant="caption">{item.title}</Typography>
+                                        <Typography variant="caption">
+                                            {item.title}
+                                        </Typography>
                                     </ListItem>
                                 );
                             }
@@ -143,43 +162,81 @@ export const Sidebar: React.FC<SidebarProps> = ({
                             }
 
                             const isActive = location === `/${item.segment}`;
-                            const hasChildren = !!item.children && item.children.length > 0;
-                            const isOpen = item.segment ? !!openItems[item.segment] : false;
+                            const hasChildren = !!item.children &&
+                                item.children.length > 0;
+                            const isOpen = item.segment
+                                ? !!openItems[item.segment]
+                                : false;
 
                             return (
                                 <div key={item.segment || index.toString()}>
                                     <ListItemButton
                                         component={Link}
-                                        href={hasChildren ? "" : `${item.segment}`}
+                                        href={hasChildren
+                                            ? ""
+                                            : `${item.segment}`}
                                         selected={isActive && !hasChildren}
-                                        onClick={(event: any) => handleItemClick(event, item.segment, hasChildren)}
+                                        onClick={(event: any) =>
+                                            handleItemClick(
+                                                event,
+                                                item.segment,
+                                                hasChildren,
+                                            )}
                                     >
                                         <ListItemIcon>{item.icon}</ListItemIcon>
                                         <ListItemText primary={item.title} />
-                                        {hasChildren && <span>{isOpen ? <ExpandLess /> : <ExpandMore />}</span>}
+                                        {hasChildren && (
+                                            <span>
+                                                {isOpen
+                                                    ? <ExpandLess />
+                                                    : <ExpandMore />}
+                                            </span>
+                                        )}
                                     </ListItemButton>
 
                                     {hasChildren && item.segment && (
-                                        <Collapse in={isOpen} timeout="auto" unmountOnExit>
-                                            <List component="div" disablePadding>
-                                                {item.children?.map((child: any) => {
-                                                    const isChildActive = location === `/${child.segment}`;
-                                                    return (
-                                                        <ListItemButton
-                                                            key={child.segment}
-                                                            component={Link}
-                                                            href={`${child.segment}`}
-                                                            selected={isChildActive}
-                                                            onClick={(event) =>
-                                                                handleItemClick(event, child.segment, false)
-                                                            }
-                                                            sx={{ pl: 4 }}
-                                                        >
-                                                            <ListItemIcon>{child.icon}</ListItemIcon>
-                                                            <ListItemText primary={child.title} />
-                                                        </ListItemButton>
-                                                    );
-                                                })}
+                                        <Collapse
+                                            in={isOpen}
+                                            timeout="auto"
+                                            unmountOnExit
+                                        >
+                                            <List
+                                                component="div"
+                                                disablePadding
+                                            >
+                                                {item.children?.map(
+                                                    (child: any) => {
+                                                        const isChildActive =
+                                                            location ===
+                                                                `/${child.segment}`;
+                                                        return (
+                                                            <ListItemButton
+                                                                key={child
+                                                                    .segment}
+                                                                component={Link}
+                                                                href={`${child.segment}`}
+                                                                selected={isChildActive}
+                                                                onClick={(
+                                                                    event,
+                                                                ) => handleItemClick(
+                                                                    event,
+                                                                    child
+                                                                        .segment,
+                                                                    false,
+                                                                )}
+                                                                sx={{ pl: 4 }}
+                                                            >
+                                                                <ListItemIcon>
+                                                                    {child.icon}
+                                                                </ListItemIcon>
+                                                                <ListItemText
+                                                                    primary={child
+                                                                        .title}
+                                                                />
+                                                            </ListItemButton>
+                                                        );
+                                                    },
+                                                )}
                                             </List>
                                         </Collapse>
                                     )}
@@ -189,7 +246,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     </List>
                 </div>
             )}
-            {!isDragging && <div style={{ height: heightBelow }}>{children}</div>}
+            {!isDragging && (
+                <div style={{ height: heightBelow }}>{children}</div>
+            )}
         </Drawer>
     );
 };

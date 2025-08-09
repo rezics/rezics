@@ -24,19 +24,37 @@ export const Register: FC = () => {
                 const data = new FormData(event.currentTarget);
 
                 try {
-                    const { error: e_name, data: _name } = string().min(1).safeParse(data.get("name"));
-                    if (e_name) throw new Error(t("auth.error.invalid_username"));
+                    const { error: e_name, data: _name } = string().min(1)
+                        .safeParse(data.get("name"));
+                    if (e_name) {
+                        throw new Error(t("auth.error.invalid_username"));
+                    }
 
-                    const { error: e_email, data: _email } = email().safeParse(data.get("email"));
+                    const { error: e_email, data: _email } = email().safeParse(
+                        data.get("email"),
+                    );
                     if (e_email) throw new Error(t("auth.error.invalid_email"));
 
-                    const { error: e_password, data: _password } = string().min(6).safeParse(data.get("password"));
-                    if (e_password) throw new Error(t("auth.error.invalid_password"));
+                    const { error: e_password, data: _password } = string().min(
+                        6,
+                    ).safeParse(data.get("password"));
+                    if (e_password) {
+                        throw new Error(
+                            t("auth.error.invalid_password"),
+                        );
+                    }
 
-                    const { error: e_confirm, data: _confirm } = string().safeParse(data.get("confirm"));
-                    if (e_confirm) throw new Error(t("auth.error.invalid_confirm"));
+                    const { error: e_confirm, data: _confirm } = string()
+                        .safeParse(data.get("confirm"));
+                    if (e_confirm) {
+                        throw new Error(t("auth.error.invalid_confirm"));
+                    }
 
-                    if (_password !== _confirm) throw new Error(t("auth.error.passwords_mismatch"));
+                    if (_password !== _confirm) {
+                        throw new Error(
+                            t("auth.error.passwords_mismatch"),
+                        );
+                    }
 
                     await register(_name, _email, _password);
                 } catch (e) {
@@ -47,26 +65,47 @@ export const Register: FC = () => {
             }}
             content={
                 <>
-                    {error ? <Alert severity="error">{error}</Alert> : undefined}
-                    <TextField name="name" type="text" label={t("common.username")} variant="standard"></TextField>
-                    <TextField name="email" type="email" label={t("common.email")} variant="standard"></TextField>
+                    {error
+                        ? <Alert severity="error">{error}</Alert>
+                        : undefined}
+                    <TextField
+                        name="name"
+                        type="text"
+                        label={t("common.username")}
+                        variant="standard"
+                    >
+                    </TextField>
+                    <TextField
+                        name="email"
+                        type="email"
+                        label={t("common.email")}
+                        variant="standard"
+                    >
+                    </TextField>
                     <TextField
                         name="password"
                         type="password"
                         label={t("common.password")}
                         variant="standard"
-                    ></TextField>
+                    >
+                    </TextField>
                     <TextField
                         name="confirm"
                         type="password"
                         label={t(`common.confirm`)}
                         variant="standard"
-                    ></TextField>
+                    >
+                    </TextField>
                 </>
             }
             actions={
                 <>
-                    <Button variant="text" type="button" slot="a" href="./login">
+                    <Button
+                        variant="text"
+                        type="button"
+                        slot="a"
+                        href="./login"
+                    >
                         {t("auth.login")}
                     </Button>
                     <Button type="submit" variant="contained" loading={loading}>
@@ -74,6 +113,7 @@ export const Register: FC = () => {
                     </Button>
                 </>
             }
-        ></Layout>
+        >
+        </Layout>
     );
 };

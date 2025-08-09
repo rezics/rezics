@@ -1,9 +1,0 @@
-{
-    "include": ["**/*"],
-    "compilerOptions": {
-        "target": "esnext",
-        "module": "esnext",
-        "moduleResolution": "bundler"
-    },
-    "extends": "../../tsconfig.json"
-}

@@ -33,7 +33,10 @@ export const BookReadChapterPage: React.FC = () => {
     return (
         <div>
             <div className="w-11/12 mx-auto">
-                <div id="markdown-chapter-content" className="markdown-body p-4">
+                <div
+                    id="markdown-chapter-content"
+                    className="markdown-body p-4"
+                >
                     <div dangerouslySetInnerHTML={{ __html: chapterHtml }} />
                 </div>
             </div>

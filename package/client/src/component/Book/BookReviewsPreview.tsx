@@ -32,7 +32,10 @@ export const BookReviews: React.FC<BookReviewsProps> = ({ bookId, title }) => {
     return (
         <>
             <Box>
-                <ArrowForwardIcon.Container size={16} to={`/review/book/${bookId}/`}>
+                <ArrowForwardIcon.Container
+                    size={16}
+                    to={`/review/book/${bookId}/`}
+                >
                     <AccentBarWithText.Show text={`${title}的书评`} />
                 </ArrowForwardIcon.Container>
                 <ReviewList.Container reviews={reviews} />

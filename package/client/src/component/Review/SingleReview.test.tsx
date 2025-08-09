@@ -2,7 +2,9 @@ import { SingleReview } from "./SingleReview";
 import { useFixtureInput } from "react-cosmos/client";
 
 export default function SingleReviewTest() {
-    const [reviewProps] = useFixtureInput<Parameters<typeof SingleReview.Container>[0]>("Review Props", {
+    const [reviewProps] = useFixtureInput<
+        Parameters<typeof SingleReview.Container>[0]
+    >("Review Props", {
         review: {
             id: "review-1",
             user: {
@@ -13,7 +15,7 @@ export default function SingleReviewTest() {
             content:
                 "这本书很不错，值得推荐。情节紧凑，人物形象鲜明。作者的文笔很好，读起来很流畅。特别是对于主角的心理描写，非常细腻。",
             rating: 4.5,
-            created_at "2024-01-15",
+            created_at: "2024-01-15",
             likes: 23,
             dislikes: 2,
         },

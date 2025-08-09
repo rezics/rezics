@@ -1,18 +1,18 @@
 import {
-    Paper,
-    Grid,
-    FormControl,
-    InputLabel,
-    Select,
-    MenuItem,
-    ToggleButtonGroup,
-    ToggleButton,
     Box,
-    Typography,
+    FormControl,
+    Grid,
+    InputLabel,
     LinearProgress,
+    MenuItem,
     Pagination,
+    Paper,
+    Select,
+    ToggleButton,
+    ToggleButtonGroup,
+    Typography,
 } from "@mui/material";
-import { useState, useMemo, useCallback, useEffect } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { ArrowDownward, ArrowUpward } from "@mui/icons-material";
 
 /**
@@ -36,7 +36,9 @@ export interface SortControlsProps {
  * SortControls
  * @param {SortControlsProps} props
  */
-const SortControls: React.FC<SortControlsProps> = ({ sortType, sortOrder, onSortChange }) => {
+const SortControls: React.FC<SortControlsProps> = (
+    { sortType, sortOrder, onSortChange },
+) => {
     const sortOptions = [
         { value: "time", label: "按时间" },
         { value: "name", label: "按名称" },
@@ -52,7 +54,10 @@ const SortControls: React.FC<SortControlsProps> = ({ sortType, sortOrder, onSort
                         <Select
                             value={sortType}
                             label="排序方式"
-                            onChange={(e) => onSortChange({ type: e.target.value as string })}
+                            onChange={(e) =>
+                                onSortChange({
+                                    type: e.target.value as string,
+                                })}
                         >
                             {sortOptions.map((opt) => (
                                 <MenuItem key={opt.value} value={opt.value}>
@@ -66,7 +71,8 @@ const SortControls: React.FC<SortControlsProps> = ({ sortType, sortOrder, onSort
                     <ToggleButtonGroup
                         value={sortOrder}
                         exclusive
-                        onChange={(_, v: "asc" | "desc" | null) => v && onSortChange({ order: v })}
+                        onChange={(_, v: "asc" | "desc" | null) =>
+                            v && onSortChange({ order: v })}
                     >
                         <ToggleButton value="desc">
                             <ArrowDownward />
@@ -88,7 +94,9 @@ interface PaginationBarProps {
     totalPages: number;
     onPageChange: (event: React.ChangeEvent<unknown>, page: number) => void;
 }
-const PaginationBar: React.FC<PaginationBarProps> = ({ page, totalPages, onPageChange }) => {
+const PaginationBar: React.FC<PaginationBarProps> = (
+    { page, totalPages, onPageChange },
+) => {
     if (totalPages <= 1) return null;
     return (
         <Box sx={{ display: "flex", justifyContent: "center", p: 2, mt: 2 }}>
@@ -145,8 +153,16 @@ export const UniversalPaginator = <T,>({
         [externalPage, internalPagesPerExternalPage],
     );
     const globalStartIndex = useMemo(
-        () => (currentPage - rangeStartPage) * itemsPerPage + (externalPage - 1) * externalItemsPerPage,
-        [currentPage, rangeStartPage, itemsPerPage, externalPage, externalItemsPerPage],
+        () =>
+            (currentPage - rangeStartPage) * itemsPerPage +
+            (externalPage - 1) * externalItemsPerPage,
+        [
+            currentPage,
+            rangeStartPage,
+            itemsPerPage,
+            externalPage,
+            externalItemsPerPage,
+        ],
     );
 
     useEffect(() => {
@@ -195,20 +211,47 @@ export const UniversalPaginator = <T,>({
             );
             setCurrentPage(newPage);
         },
-        [data, totalExternalItems, itemsPerPage, externalItemsPerPage, requestData],
+        [
+            data,
+            totalExternalItems,
+            itemsPerPage,
+            externalItemsPerPage,
+            requestData,
+        ],
     );
 
     return (
         <Box>
-            {sortControl || <SortControls sortType={sortType} sortOrder={sortOrder} onSortChange={onSortChange} />}
+            {sortControl || (
+                <SortControls
+                    sortType={sortType}
+                    sortOrder={sortOrder}
+                    onSortChange={onSortChange}
+                />
+            )}
             <Box sx={{ minHeight: 300, position: "relative" }}>
-                {isLoading && <LinearProgress sx={{ position: "absolute", top: 0, left: 0, width: "100%" }} />}
+                {isLoading && (
+                    <LinearProgress
+                        sx={{
+                            position: "absolute",
+                            top: 0,
+                            left: 0,
+                            width: "100%",
+                        }}
+                    />
+                )}
                 {children(currentPageItems)}
                 {!isLoading && currentPageItems.length === 0 && (
-                    <Typography sx={{ textAlign: "center", p: 5 }}>没有内容。</Typography>
+                    <Typography sx={{ textAlign: "center", p: 5 }}>
+                        没有内容。
+                    </Typography>
                 )}
             </Box>
-            <PaginationBar page={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
+            <PaginationBar
+                page={currentPage}
+                totalPages={totalPages}
+                onPageChange={handlePageChange}
+            />
         </Box>
     );
 };

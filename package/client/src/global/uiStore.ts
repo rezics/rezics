@@ -63,12 +63,16 @@ export const uiStore = create<UIState>((set) => ({
 
     addNotification: (message) =>
         set((state) => ({
-            notifications: stateUtils.addNotification(message)(state.notifications),
+            notifications: stateUtils.addNotification(message)(
+                state.notifications,
+            ),
         })),
 
     removeNotification: (index) =>
         set((state) => ({
-            notifications: stateUtils.removeNotification(index)(state.notifications),
+            notifications: stateUtils.removeNotification(index)(
+                state.notifications,
+            ),
         })),
 
     clearNotifications: () =>

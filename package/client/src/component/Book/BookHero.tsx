@@ -1,9 +1,9 @@
 import {
     Box,
     Chip,
-    Rating,
     Container as MuiContainer,
     Grid,
+    Rating,
     Stack,
     Typography,
 } from "@mui/material";
@@ -52,9 +52,8 @@ export namespace BookHero {
                                             </Typography>
                                             <Box className="flex items-center gap-2">
                                                 <Rating
-                                                    value={
-                                                        (data?.rating || 0) / 2
-                                                    }
+                                                    value={(data?.rating || 0) /
+                                                        2}
                                                     precision={0.5}
                                                     readOnly
                                                 />

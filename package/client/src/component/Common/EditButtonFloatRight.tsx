@@ -10,7 +10,12 @@ export namespace EditButtonFloatRight {
     export const Show: React.FC<Show> = ({ onClick, text = "编辑" }) => {
         return (
             <div className="flex-1 justify-end">
-                <Button variant="text" startIcon={<Edit />} className="float-right" onClick={onClick}>
+                <Button
+                    variant="text"
+                    startIcon={<Edit />}
+                    className="float-right"
+                    onClick={onClick}
+                >
                     {text}
                 </Button>
             </div>

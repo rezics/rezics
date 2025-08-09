@@ -1,45 +1,49 @@
 import React, { useState } from "react";
 import {
     Box,
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    DialogActions,
     Button,
-    Switch,
-    FormControlLabel,
-    Typography,
-    Grid,
-    Paper,
-    IconButton,
-    Tooltip,
-    TextField,
     Chip,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    FormControlLabel,
+    Grid,
+    IconButton,
+    Paper,
     Stack,
+    Switch,
+    TextField,
+    Tooltip,
+    Typography,
     useTheme,
 } from "@mui/material";
 import {
-    Palette as PaletteIcon,
     Close as CloseIcon,
-    Refresh as RefreshIcon,
+    Palette as PaletteIcon,
     Photo as PhotoIcon,
+    Refresh as RefreshIcon,
 } from "@mui/icons-material";
 import { appStore } from "@/global/appStore";
-import { PRESET_COLORS, extractColorFromImage } from "@/config/dynamicTheme";
+import { extractColorFromImage, PRESET_COLORS } from "@/config/dynamicTheme";
 
 interface ThemeCustomizerProps {
     open: boolean;
     onClose: () => void;
 }
 
-export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({ open, onClose }) => {
+export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = (
+    { open, onClose },
+) => {
     const theme = useTheme();
     const customColor = appStore((state) => state.customColor);
     const useDynamicTheme = appStore((state) => state.useDynamicTheme);
     const setCustomColor = appStore((state) => state.setCustomColor);
     const setUseDynamicTheme = appStore((state) => state.setUseDynamicTheme);
 
-    const [selectedColor, setSelectedColor] = useState(customColor || "#f4606c");
+    const [selectedColor, setSelectedColor] = useState(
+        customColor || "#f4606c",
+    );
     const [customHex, setCustomHex] = useState("");
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [isExtracting, setIsExtracting] = useState(false);
@@ -49,10 +53,12 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({ open, onClose 
         setCustomColor(color);
     };
 
-    const handleCustomHexChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleCustomHexChange = (
+        event: React.ChangeEvent<HTMLInputElement>,
+    ) => {
         const value = event.target.value;
         setCustomHex(value);
-        
+
         // 验证十六进制颜色格式
         if (/^#[0-9A-F]{6}$/i.test(value)) {
             setSelectedColor(value);
@@ -60,11 +66,15 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({ open, onClose 
         }
     };
 
-    const handleDynamicThemeToggle = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleDynamicThemeToggle = (
+        event: React.ChangeEvent<HTMLInputElement>,
+    ) => {
         setUseDynamicTheme(event.target.checked);
     };
 
-    const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleImageUpload = async (
+        event: React.ChangeEvent<HTMLInputElement>,
+    ) => {
         const file = event.target.files?.[0];
         if (!file) return;
 
@@ -99,7 +109,11 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({ open, onClose 
     return (
         <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
             <DialogTitle>
-                <Box display="flex" alignItems="center" justifyContent="space-between">
+                <Box
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="space-between"
+                >
                     <Box display="flex" alignItems="center" gap={1}>
                         <PaletteIcon />
                         <Typography variant="h6">主题自定义</Typography>
@@ -124,8 +138,13 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({ open, onClose 
                             }
                             label={
                                 <Box>
-                                    <Typography variant="body1">启用动态主题</Typography>
-                                    <Typography variant="body2" color="text.secondary">
+                                    <Typography variant="body1">
+                                        启用动态主题
+                                    </Typography>
+                                    <Typography
+                                        variant="body2"
+                                        color="text.secondary"
+                                    >
                                         基于选择的颜色自动生成协调的配色方案
                                     </Typography>
                                 </Box>
@@ -145,15 +164,21 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({ open, onClose 
                                     height: 48,
                                     borderRadius: 2,
                                     backgroundColor: selectedColor,
-                                    border: `2px solid ${theme.palette.divider}`,
+                                    border:
+                                        `2px solid ${theme.palette.divider}`,
                                 }}
                             />
                             <Box>
                                 <Typography variant="body1" fontWeight="medium">
                                     {selectedColor.toUpperCase()}
                                 </Typography>
-                                <Typography variant="body2" color="text.secondary">
-                                    {useDynamicTheme ? "动态主题已启用" : "静态主题"}
+                                <Typography
+                                    variant="body2"
+                                    color="text.secondary"
+                                >
+                                    {useDynamicTheme
+                                        ? "动态主题已启用"
+                                        : "静态主题"}
                                 </Typography>
                             </Box>
                         </Box>
@@ -165,19 +190,23 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({ open, onClose 
                             预设颜色
                         </Typography>
                         <Grid container spacing={1}>
-                            {Object.entries(PRESET_COLORS).map(([name, color]) => (
+                            {Object.entries(PRESET_COLORS).map((
+                                [name, color],
+                            ) => (
                                 // <Grid item key={name}>
                                 <Grid key={name}>
                                     <Tooltip title={`${name}: ${color}`}>
                                         <Paper
-                                            elevation={selectedColor === color ? 4 : 1}
+                                            elevation={selectedColor === color
+                                                ? 4
+                                                : 1}
                                             sx={{
                                                 width: 40,
                                                 height: 40,
                                                 backgroundColor: color,
                                                 cursor: "pointer",
-                                                border: selectedColor === color 
-                                                    ? `3px solid ${theme.palette.primary.main}` 
+                                                border: selectedColor === color
+                                                    ? `3px solid ${theme.palette.primary.main}`
                                                     : `1px solid ${theme.palette.divider}`,
                                                 borderRadius: 1,
                                                 transition: "all 0.2s ease",
@@ -186,7 +215,8 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({ open, onClose 
                                                     elevation: 3,
                                                 },
                                             }}
-                                            onClick={() => handleColorSelect(color)}
+                                            onClick={() =>
+                                                handleColorSelect(color)}
                                         />
                                     </Tooltip>
                                 </Grid>
@@ -208,18 +238,22 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({ open, onClose 
                             onChange={handleCustomHexChange}
                             helperText="输入格式: #RRGGBB"
                             InputProps={{
-                                startAdornment: customHex && /^#[0-9A-F]{6}$/i.test(customHex) ? (
-                                    <Box
-                                        sx={{
-                                            width: 20,
-                                            height: 20,
-                                            borderRadius: "50%",
-                                            backgroundColor: customHex,
-                                            border: `1px solid ${theme.palette.divider}`,
-                                            mr: 1,
-                                        }}
-                                    />
-                                ) : null,
+                                startAdornment: customHex &&
+                                        /^#[0-9A-F]{6}$/i.test(customHex)
+                                    ? (
+                                        <Box
+                                            sx={{
+                                                width: 20,
+                                                height: 20,
+                                                borderRadius: "50%",
+                                                backgroundColor: customHex,
+                                                border:
+                                                    `1px solid ${theme.palette.divider}`,
+                                                mr: 1,
+                                            }}
+                                        />
+                                    )
+                                    : null,
                             }}
                         />
                     </Box>
@@ -252,7 +286,11 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({ open, onClose 
                                 />
                             )}
                         </Box>
-                        <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                        <Typography
+                            variant="body2"
+                            color="text.secondary"
+                            sx={{ mt: 1 }}
+                        >
                             上传图片自动提取主色调作为主题颜色
                         </Typography>
                     </Box>

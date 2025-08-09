@@ -27,7 +27,8 @@ export default function PersistentTabs() {
         <div>
             <div>
                 <p className="text-blue-600 dark:text-gray-400">
-                    用 div tailwind css 重写，并重新布局，Avatar 依然放在左边，但是改为方形，右侧内则分为三个DIV
+                    用 div tailwind css 重写，并重新布局，Avatar
+                    依然放在左边，但是改为方形，右侧内则分为三个DIV
                 </p>
             </div>
             <ThemeDemo />
@@ -35,7 +36,10 @@ export default function PersistentTabs() {
                 {" "}
                 {/* ① 提供上下文 */}
                 <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-                    <TabList onChange={handleChange} aria-label="lab API tabs example">
+                    <TabList
+                        onChange={handleChange}
+                        aria-label="lab API tabs example"
+                    >
                         <Tab label="面板一" value="1" />
                         <Tab label="面板二" value="2" />
                     </TabList>
@@ -43,7 +47,12 @@ export default function PersistentTabs() {
                 {/* ② TabPanel 的 value 必须和 Tab 的 value 对应 */}
                 <TabPanel value="1" keepMounted>
                     {/* keepMounted 保持在 DOM，不会被卸载，内部状态持久化】 */}
-                    <BookEditorSidebar chaptersData={data?.body ?? { chapters: [], order: new Map() }} selectedId="" baseLink="/test" />
+                    <BookEditorSidebar
+                        chaptersData={data?.body ??
+                            { chapters: [], order: new Map() }}
+                        selectedId=""
+                        baseLink="/test"
+                    />
                 </TabPanel>
                 <TabPanel value="2" keepMounted>
                     这是第二个面板的内容

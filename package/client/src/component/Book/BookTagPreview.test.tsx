@@ -2,7 +2,9 @@ import { BookTagView } from "./BookTagPreview";
 import { useFixtureInput } from "react-cosmos/client";
 
 export default function BookTagViewTest() {
-    const [props] = useFixtureInput<Parameters<typeof BookTagView.Container>[0]>("Props", {
+    const [props] = useFixtureInput<
+        Parameters<typeof BookTagView.Container>[0]
+    >("Props", {
         tagObjects: [
             {
                 key: "user-tags",

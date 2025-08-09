@@ -5,7 +5,12 @@ import { AccentBar } from "@component/Common/AccentBar";
 // import { ReplyComponents } from "@component/Form/ReplyComponents";
 import { TreeReplyComponents } from "@component/Form/TreeReplyComponents";
 import { IconButton } from "@mui/material";
-import { ChatBubbleOutline, FavoriteBorder, Add, Comment } from "@mui/icons-material";
+import {
+    Add,
+    ChatBubbleOutline,
+    Comment,
+    FavoriteBorder,
+} from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
 import tsr from "@/api/tsr";
 
@@ -24,7 +29,10 @@ export const ReadListPage: React.FC = () => {
     const commentRef = useRef<HTMLDivElement>(null);
 
     const handleGoToComments = () => {
-        commentRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+        commentRef.current?.scrollIntoView({
+            behavior: "smooth",
+            block: "start",
+        });
     };
 
     const handleReply = () => {
@@ -41,7 +49,10 @@ export const ReadListPage: React.FC = () => {
     }
 
     return (
-        <div className="w-full max-w-4xl mt-[60px] mx-auto" data-testid="booklist-page">
+        <div
+            className="w-full max-w-4xl mt-[60px] mx-auto"
+            data-testid="booklist-page"
+        >
             {/* Head */}
             <div className="space-y-4">
                 <div>
@@ -56,17 +67,29 @@ export const ReadListPage: React.FC = () => {
                                 alt="creator avatar"
                                 className="w-10 h-10 rounded-full shadow"
                             />
-                            <p className="text-sm text-gray-700">{bookList.creator.name}</p>
+                            <p className="text-sm text-gray-700">
+                                {bookList.creator.name}
+                            </p>
                         </div>
                     )}
                     <div className="flex items-center gap-2">
-                        <IconButton aria-label={t("accessibility.favorite")} size="small">
+                        <IconButton
+                            aria-label={t("accessibility.favorite")}
+                            size="small"
+                        >
                             <FavoriteBorder fontSize="small" />
                         </IconButton>
-                        <IconButton aria-label={t("accessibility.comments")} size="small" onClick={handleGoToComments}>
+                        <IconButton
+                            aria-label={t("accessibility.comments")}
+                            size="small"
+                            onClick={handleGoToComments}
+                        >
                             <Comment fontSize="small" />
                         </IconButton>
-                        <IconButton aria-label={t("accessibility.collection")} size="small">
+                        <IconButton
+                            aria-label={t("accessibility.collection")}
+                            size="small"
+                        >
                             <Add fontSize="small" />
                         </IconButton>
                     </div>
@@ -85,12 +108,19 @@ export const ReadListPage: React.FC = () => {
                         />
                         <div>
                             <div className="flex items-center gap-2">
-                                <h3 className="text-xl font-semibold">{book.title}</h3>
+                                <h3 className="text-xl font-semibold">
+                                    {book.title}
+                                </h3>
                                 {/* 评分展示 */}
-                                <span className="text-lg text-yellow-500">{book.rating}</span>
+                                <span className="text-lg text-yellow-500">
+                                    {book.rating}
+                                </span>
                             </div>
                             <div>
-                                <CollapsibleText.Container content={book.review} threshold={600} />
+                                <CollapsibleText.Container
+                                    content={book.review}
+                                    threshold={600}
+                                />
                             </div>
                         </div>
                     </div>
@@ -99,8 +129,10 @@ export const ReadListPage: React.FC = () => {
 
             {/* Likes & Comments */}
             <div className="text-sm mt-5 text-gray-700">
-                <span>{bookList.likes}</span> <span className="ml-1">likes</span>
-                <span className="ml-4">{bookList.commentsNumber}</span> <span className="ml-1">comments</span>
+                <span>{bookList.likes}</span>{" "}
+                <span className="ml-1">likes</span>
+                <span className="ml-4">{bookList.commentsNumber}</span>{" "}
+                <span className="ml-1">comments</span>
             </div>
 
             {/* 评论区 */}
@@ -111,7 +143,11 @@ export const ReadListPage: React.FC = () => {
                         <p className="text-2xl font-bold">评论</p>
                     </div>
 
-                    <IconButton size="large" sx={{ fontSize: "1.5rem" }} onClick={handleReply}>
+                    <IconButton
+                        size="large"
+                        sx={{ fontSize: "1.5rem" }}
+                        onClick={handleReply}
+                    >
                         <ChatBubbleOutline fontSize="inherit" />
                     </IconButton>
                 </div>

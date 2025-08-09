@@ -1,7 +1,14 @@
 // 暂时就先这样不处理，后面树化，或者使用VirtualList
 
-import React, { useState, useCallback, useMemo, useEffect } from "react";
-import { Box, Avatar, Typography, Button, Collapse, IconButton } from "@mui/material";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import {
+    Avatar,
+    Box,
+    Button,
+    Collapse,
+    IconButton,
+    Typography,
+} from "@mui/material";
 import { Add, Remove } from "@mui/icons-material";
 //  ;
 import { ReactionBar } from "../Common/ReactionBar";
@@ -31,7 +38,9 @@ interface CommentNodeProps {
     openDrawer: (id: string) => void;
 }
 
-const CommentNode: React.FC<CommentNodeProps> = ({ comment, level = 0, openDrawer }) => {
+const CommentNode: React.FC<CommentNodeProps> = (
+    { comment, level = 0, openDrawer },
+) => {
     // Expand first two levels by default
     const [isExpanded, setIsExpanded] = useState(level < 2);
 
@@ -60,10 +69,18 @@ const CommentNode: React.FC<CommentNodeProps> = ({ comment, level = 0, openDrawe
             }}
         >
             <Box display="flex" gap={2} alignItems="flex-start">
-                <Avatar src={comment.author.avatar} sx={{ width: 32, height: 32 }} />
+                <Avatar
+                    src={comment.author.avatar}
+                    sx={{ width: 32, height: 32 }}
+                />
                 <Box flex={1}>
                     <Box display="flex" alignItems="center" gap={1}>
-                        <Typography variant="subtitle2" component="span" color="text.primary" fontWeight="bold">
+                        <Typography
+                            variant="subtitle2"
+                            component="span"
+                            color="text.primary"
+                            fontWeight="bold"
+                        >
                             {comment.author.name}
                         </Typography>
                         <Typography variant="caption" color="text.secondary">
@@ -74,7 +91,17 @@ const CommentNode: React.FC<CommentNodeProps> = ({ comment, level = 0, openDrawe
                         {comment.content}
                     </Typography>
                     <Box className="w-full flex justify-end">
-                        <Box sx={{ width: { xs: "75%", sm: "50%", md: "33%", lg: "30%", xl: "30%" } }}>
+                        <Box
+                            sx={{
+                                width: {
+                                    xs: "75%",
+                                    sm: "50%",
+                                    md: "33%",
+                                    lg: "30%",
+                                    xl: "30%",
+                                },
+                            }}
+                        >
                             <ReactionBar.Container
                                 onReply={handleReply}
                                 className="mt-2"
@@ -94,7 +121,12 @@ const CommentNode: React.FC<CommentNodeProps> = ({ comment, level = 0, openDrawe
             {comment.replies && comment.replies.length > 0 && (
                 <Collapse in={isExpanded} timeout="auto" unmountOnExit>
                     {comment.replies.map((reply) => (
-                        <CommentNode key={reply.id} comment={reply} level={level + 1} openDrawer={openDrawer} />
+                        <CommentNode
+                            key={reply.id}
+                            comment={reply}
+                            level={level + 1}
+                            openDrawer={openDrawer}
+                        />
                     ))}
                 </Collapse>
             )}
@@ -106,7 +138,9 @@ interface ReplyComponentsProps {
     bookListId: string;
 }
 
-export const TreeReplyComponents: React.FC<ReplyComponentsProps> = ({ bookListId }) => {
+export const TreeReplyComponents: React.FC<ReplyComponentsProps> = (
+    { bookListId },
+) => {
     const commentId = bookListId; // TODO 暫時先用這個替代
     const { data, isLoading, error } = tsr.comment.list.useQuery({
         queryKey: ["comments", commentId],
@@ -149,19 +183,24 @@ export const TreeReplyComponents: React.FC<ReplyComponentsProps> = ({ bookListId
     return (
         <>
             <Box p={2}>
-                {topLevelComments.length > 0 ? (
-                    topLevelComments.map((comment: Comment) => (
-                        <CommentNode key={comment.id} comment={comment} openDrawer={openDrawer} />
-                    ))
-                ) : (
-                    <p>No comments</p>
-                )}
+                {topLevelComments.length > 0
+                    ? (
+                        topLevelComments.map((comment: Comment) => (
+                            <CommentNode
+                                key={comment.id}
+                                comment={comment}
+                                openDrawer={openDrawer}
+                            />
+                        ))
+                    )
+                    : <p>No comments</p>}
             </Box>
             {/* 渲染 */}
             {currentReplyId && (
                 <ReplyDrawer.Container
                     dialogId={`reply-${currentReplyId}`}
-                    onSubmit={(content: string) => handleSubmit(currentReplyId, content)}
+                    onSubmit={(content: string) =>
+                        handleSubmit(currentReplyId, content)}
                 />
             )}
         </>

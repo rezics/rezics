@@ -29,7 +29,8 @@ export default {
         logout: "Logout",
         register: "Register",
         resolve: "Resolve",
-        already_login: "You have already logged in. Re-login will overwrite the previous login information.",
+        already_login:
+            "You have already logged in. Re-login will overwrite the previous login information.",
         error: {
             invalid_email: "Invalid email address.",
             invalid_password: "Password must be at least 6 characters long.",
@@ -38,7 +39,7 @@ export default {
             passwords_mismatch: "Passwords do not match.",
         },
     },
-    
+
     // Book
     book: {
         description: "Description",
@@ -127,4 +128,4 @@ export default {
         close: "Close",
         open_drawer: "Open drawer",
     },
-}
+};

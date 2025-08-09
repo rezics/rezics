@@ -115,4 +115,4 @@ export default {
         close: "關閉",
         open_drawer: "打開側邊欄",
     },
-}
+};

@@ -3,7 +3,9 @@ import { useFixtureInput } from "react-cosmos/client";
 
 export default {
     Default: () => {
-        const [props] = useFixtureInput<Parameters<typeof EditButtonFloatRight.Container>[0]>("Props", {
+        const [props] = useFixtureInput<
+            Parameters<typeof EditButtonFloatRight.Container>[0]
+        >("Props", {
             onClick: () => console.log("Edit clicked"),
             text: "编辑",
         });
@@ -16,7 +18,9 @@ export default {
     },
 
     CustomText: () => {
-        const [props] = useFixtureInput<Parameters<typeof EditButtonFloatRight.Container>[0]>("Props", {
+        const [props] = useFixtureInput<
+            Parameters<typeof EditButtonFloatRight.Container>[0]
+        >("Props", {
             onClick: () => console.log("Modify clicked"),
             text: "修改",
         });

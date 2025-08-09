@@ -59,27 +59,3 @@ jspm_packages/
 .env.test.local
 .env.production.local
 .env.local
-
-# next.js build output
-.next/
-
-# IntelliJ IDEA project files; if you want to commit IntelliJ settings, this recipe may be helpful:
-# https://github.com/github/gitignore/blob/main/Global/JetBrains.gitignore
-.idea/
-*.iml
-
-# Visual Studio Code
-# .vscode/
-# !.vscode/tasks.json
-# !.vscode/launch.json
-
-# Rush temporary files
-common/deploy/
-common/temp/
-common/autoinstallers/*/.npmrc
-**/.rush/temp/
-*.lock
-
-# Heft temporary files
-.cache/
-.heft/

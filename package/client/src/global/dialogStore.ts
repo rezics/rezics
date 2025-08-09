@@ -16,7 +16,8 @@ const useDialogStore = create<DialogState>((set, get) => ({
     dialogs: {},
 
     setDialogVisible: (key, visible) => {
-        const current = get().dialogs[key] ?? { visible: false, contentMain: "" };
+        const current = get().dialogs[key] ??
+            { visible: false, contentMain: "" };
         set({
             dialogs: {
                 ...get().dialogs,
@@ -26,7 +27,8 @@ const useDialogStore = create<DialogState>((set, get) => ({
     },
 
     setDialogContent: (key, content) => {
-        const current = get().dialogs[key] ?? { visible: false, contentMain: "" };
+        const current = get().dialogs[key] ??
+            { visible: false, contentMain: "" };
         set({
             dialogs: {
                 ...get().dialogs,

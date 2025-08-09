@@ -44,14 +44,28 @@ const DialogContainer: React.FC<DialogContainerProps> = ({
             scroll="paper"
             // MUI Dialog 默认支持 Esc 关闭
         >
-            <AppBar position="relative" elevation={1} sx={{ position: fullScreen ? "fixed" : "static" }}>
+            <AppBar
+                position="relative"
+                elevation={1}
+                sx={{ position: fullScreen ? "fixed" : "static" }}
+            >
                 <Toolbar variant="dense">
                     {title && (
-                        <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+                        <Typography
+                            variant="h6"
+                            component="div"
+                            sx={{ flexGrow: 1 }}
+                        >
                             {title}
                         </Typography>
                     )}
-                    <IconButton edge="end" color="inherit" onClick={onClose} aria-label="close" size="large">
+                    <IconButton
+                        edge="end"
+                        color="inherit"
+                        onClick={onClose}
+                        aria-label="close"
+                        size="large"
+                    >
                         <CloseIcon />
                     </IconButton>
                 </Toolbar>

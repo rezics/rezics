@@ -11,7 +11,9 @@ interface EasyEditorProps {
     initialValue?: string;
 }
 
-const EasyEditor: React.FC<EasyEditorProps> = ({ value, onChange, initialValue }) => {
+const EasyEditor: React.FC<EasyEditorProps> = (
+    { value, onChange, initialValue },
+) => {
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const easyMDEInstance = useRef<EasyMDE | null>(null);
     const onChangeRef = useRef(onChange);
@@ -37,14 +39,28 @@ const EasyEditor: React.FC<EasyEditorProps> = ({ value, onChange, initialValue }
                 spellChecker: false,
                 sideBySideFullscreen: false,
                 // preview
-                previewClass: ["editor-preview", "ics-md-preview", "markdown-body"],
+                previewClass: [
+                    "editor-preview",
+                    "ics-md-preview",
+                    "markdown-body",
+                ],
                 previewRender: (plainText) => {
                     console.log(plainText);
                     return md.render(plainText);
                 },
                 toolbar: [
-                    { name: "bold", action: EasyMDE.toggleBold, className: "bx bx-bold", title: "Bold" },
-                    { name: "italic", action: EasyMDE.toggleItalic, className: "bx bx-italic", title: "Italic" },
+                    {
+                        name: "bold",
+                        action: EasyMDE.toggleBold,
+                        className: "bx bx-bold",
+                        title: "Bold",
+                    },
+                    {
+                        name: "italic",
+                        action: EasyMDE.toggleItalic,
+                        className: "bx bx-italic",
+                        title: "Italic",
+                    },
                     {
                         name: "heading",
                         action: EasyMDE.toggleHeadingSmaller,
@@ -71,9 +87,24 @@ const EasyEditor: React.FC<EasyEditorProps> = ({ value, onChange, initialValue }
                         title: "Numbered List",
                     },
                     "|",
-                    { name: "link", action: EasyMDE.drawLink, className: "bx bx-link", title: "Create Link" },
-                    { name: "image", action: EasyMDE.drawImage, className: "bx bx-image", title: "Insert Image" },
-                    { name: "table", action: EasyMDE.drawTable, className: "bx bx-table", title: "Insert Table" },
+                    {
+                        name: "link",
+                        action: EasyMDE.drawLink,
+                        className: "bx bx-link",
+                        title: "Create Link",
+                    },
+                    {
+                        name: "image",
+                        action: EasyMDE.drawImage,
+                        className: "bx bx-image",
+                        title: "Insert Image",
+                    },
+                    {
+                        name: "table",
+                        action: EasyMDE.drawTable,
+                        className: "bx bx-table",
+                        title: "Insert Table",
+                    },
                     "|",
                     {
                         name: "preview",
@@ -90,7 +121,10 @@ const EasyEditor: React.FC<EasyEditorProps> = ({ value, onChange, initialValue }
                     {
                         name: "guide",
                         action: () => {
-                            window.open("https://www.markdownguide.org/basic-syntax/", "_blank");
+                            window.open(
+                                "https://www.markdownguide.org/basic-syntax/",
+                                "_blank",
+                            );
                         },
                         className: "bx bx-help-circle no-disable",
                         title: "Markdown Guide",
@@ -115,7 +149,9 @@ const EasyEditor: React.FC<EasyEditorProps> = ({ value, onChange, initialValue }
     }, []);
 
     useEffect(() => {
-        if (easyMDEInstance.current && easyMDEInstance.current.value() !== value) {
+        if (
+            easyMDEInstance.current && easyMDEInstance.current.value() !== value
+        ) {
             easyMDEInstance.current.value(value || "");
         }
     }, [value]);

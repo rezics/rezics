@@ -17,9 +17,12 @@ export const BookReadLayout: React.FC<BookReadLayout> = ({ children }) => {
     const [match, params] = useRoute("/book/:bookId/read/:chapterId");
     const locationParams = useParams();
     const isMobile = useMediaQuery("(max-width:960px)");
-    const { sidebarOpen, drawerWidth, toggleSidebar, closeSidebar } = useLayoutStore();
+    const { sidebarOpen, drawerWidth, toggleSidebar, closeSidebar } =
+        useLayoutStore();
     const [baseUrl, setBaseUrl] = useState("");
-    const [selectedId, setSelectedId] = useState(match ? String(params.chapterId) : "");
+    const [selectedId, setSelectedId] = useState(
+        match ? String(params.chapterId) : "",
+    );
     let bookId = "";
 
     useEffect(() => {
@@ -73,18 +76,19 @@ export const BookReadLayout: React.FC<BookReadLayout> = ({ children }) => {
                 <div>
                     <div className="flex items-center justify-between mb-2 bg-gray-50 text-sm text-gray-800">
                         <div className="font-medium">目录</div>
-                        <Link to={`/book/${locationParams[0]}/`} className="text-blue-600 hover:underline">
+                        <Link
+                            to={`/book/${locationParams[0]}/`}
+                            className="text-blue-600 hover:underline"
+                        >
                             <Button variant="text">查看详情</Button>
                         </Link>
                     </div>
                     <Divider />
                     <BookEditorSidebar
-                        chaptersData={
-                            data?.body ?? {
-                                chapters: [],
-                                order: new Map<string, string[]>(),
-                            }
-                        }
+                        chaptersData={data?.body ?? {
+                            chapters: [],
+                            order: new Map<string, string[]>(),
+                        }}
                         selectedId={selectedId}
                         baseLink={baseUrl}
                     />
@@ -94,7 +98,9 @@ export const BookReadLayout: React.FC<BookReadLayout> = ({ children }) => {
             <main
                 className="flex-grow pt-16 transition-all duration-300"
                 style={{
-                    width: `calc(100% - ${!isMobile && sidebarOpen ? drawerWidth : 0}px)`,
+                    width: `calc(100% - ${
+                        !isMobile && sidebarOpen ? drawerWidth : 0
+                    }px)`,
                 }}
             >
                 {children}

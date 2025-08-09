@@ -1,11 +1,11 @@
 // https://github.com/brimdata/react-arborist
 
 import {
-    ChapterTreeNode,
     ChapterOrderType,
+    ChapterTreeNode,
 } from "@/component/Book/ChapterList";
 import { buildTree } from "@/util/treeAbstract";
-import { useMemo, useState, useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ChapterArborist } from "@/component/Book/ChapterArborist";
 
 import { useLayoutStore } from "@/global/layoutStore";
@@ -85,14 +85,16 @@ export const BookEditorSidebar: React.FC<BookEditorSidebarProps> = ({
                     />
 
                     {/* Optional Select ID Field */}
-                    {/* <TextField
+                    {
+                        /* <TextField
                         id="select-id-term"
                         label="Select ID"
                         variant="standard"
                         value={selectIDTerm}
                         onChange={(e) => setSelectIDTerm(e.target.value)}
                         placeholder="Select an ID"
-                    /> */}
+                    /> */
+                    }
 
                     <div className="flex items-center space-x-4 mt-3 w-full justify-between">
                         <label className="text-gray-700 font-bold">

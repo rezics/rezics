@@ -10,10 +10,12 @@ export namespace ScoreForm {
         precision?: number;
     };
 
-    export const Edit: React.FC<Edit> = ({ defaultValue, onScoreChange, onChangeActive, max, precision }) => {
-        let initScore
+    export const Edit: React.FC<Edit> = (
+        { defaultValue, onScoreChange, onChangeActive, max, precision },
+    ) => {
+        let initScore;
         useEffect(() => {
-            initScore = defaultValue ?? 0
+            initScore = defaultValue ?? 0;
         });
         return (
             <div>
@@ -24,7 +26,8 @@ export namespace ScoreForm {
                     precision={precision ?? 0.5}
                     max={max ?? 10}
                     onChange={(event, value) => onScoreChange?.(value ?? 0)}
-                    onChangeActive={(event, value) => onChangeActive?.(value ?? 0)}
+                    onChangeActive={(event, value) =>
+                        onChangeActive?.(value ?? 0)}
                     className="inline-block align-middle items-center"
                 />
             </div>

@@ -1,0 +1,22 @@
+{
+    "name": "database",
+    "version": "0.0.1",
+    "fmt": {
+        "exclude": [
+            "./generated/**/*"
+        ]
+    },
+    "lint": {
+        "exclude": [
+            "./generated/**/*"
+        ]
+    },
+    "tasks": {
+        "generate:query": "deno run -A @gel/generate queries --target ts --file ./generated/query",
+        "generate:interface": "deno run -A @gel/generate interfaces --file ./generated/interface.ts",
+        "generate": "deno task generate:query && deno task generate:interface"
+    },
+    "exports": {
+        ".": "./mod.ts"
+    }
+}

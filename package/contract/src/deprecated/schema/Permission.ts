@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { id,  Auditable } from "./common";
+import { Auditable, id } from "./common";
 
 export namespace Permission {
     const Access = z.enum(["none", "read-only", "read-write"]);
@@ -18,7 +18,6 @@ export namespace Permission {
     export const Read = z
         .object({
             id,
-            
         })
         .partial();
 
@@ -31,13 +30,12 @@ export namespace Permission {
     export const Delete = z
         .object({
             id,
-            
         })
         .partial();
 
     export const View = z.object({
         id,
-        
+
         ...Mutable,
         ...Auditable.shape,
     });

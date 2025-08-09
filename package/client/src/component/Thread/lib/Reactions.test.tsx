@@ -3,7 +3,10 @@ import { Reactions } from "./Reactions";
 
 export default () => {
     const [up, setUp] = useFixtureInput<Reactions["state"]["up"]>("Up", null);
-    const [star, setStar] = useFixtureInput<Reactions["state"]["star"]>("star", false);
+    const [star, setStar] = useFixtureInput<Reactions["state"]["star"]>(
+        "star",
+        false,
+    );
 
     return (
         <Reactions
@@ -16,6 +19,7 @@ export default () => {
                 onDown: () => setUp(up === false ? null : false),
                 onStar: () => setStar(!star),
             }}
-        ></Reactions>
+        >
+        </Reactions>
     );
 };

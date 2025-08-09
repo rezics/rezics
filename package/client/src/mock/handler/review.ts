@@ -1,6 +1,6 @@
 import { http, HttpResponse } from "msw";
 import { Review } from "contract";
-import { mockReviews, mockUsers, mockBookShortReviews } from "../data/reviews";
+import { mockBookShortReviews, mockReviews, mockUsers } from "../data/reviews";
 import { mockQuotes } from "../data/mockQuotes";
 import { generateRandomItemsFrom } from "./common";
 
@@ -27,8 +27,9 @@ export const reviewHandlers = [
     }),
 
     // List short reviews
-    http.get(Review.listShortReviews.path, () =>
-        HttpResponse.json(mockBookShortReviews),
+    http.get(
+        Review.listShortReviews.path,
+        () => HttpResponse.json(mockBookShortReviews),
     ),
 
     // Create review

@@ -16,7 +16,9 @@ export namespace ShortReviewList {
         spacing?: number | string;
     };
 
-    export const Show: React.FC<Show> = ({ reviews, onLike, onDislike, spacing = 2 }) => {
+    export const Show: React.FC<Show> = (
+        { reviews, onLike, onDislike, spacing = 2 },
+    ) => {
         // TODO Support useState
         // const [loading, setLoading] = useState(false);
         // const [error, setError] = useState<string | null>(null);

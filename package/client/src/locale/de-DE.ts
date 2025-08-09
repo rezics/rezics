@@ -33,7 +33,8 @@ export default {
             "Sie sind bereits angemeldet. Eine erneute Anmeldung überschreibt die vorherigen Anmeldeinformationen.",
         error: {
             invalid_email: "Ungültige E-Mail-Adresse.",
-            invalid_password: "Das Passwort muss mindestens 6 Zeichen lang sein.",
+            invalid_password:
+                "Das Passwort muss mindestens 6 Zeichen lang sein.",
             invalid_username: "Ungültiger Benutzername.",
             invalid_confirm: "Ungültige Passwort-Bestätigung.",
             passwords_mismatch: "Passwörter stimmen nicht überein.",
@@ -116,4 +117,4 @@ export default {
         close: "Schließen",
         open_drawer: "Schublade öffnen",
     },
-}
+};

@@ -1,8 +1,17 @@
-import { Box, Avatar, Typography, Button, Rating, Divider, Tooltip, IconButton } from "@mui/material";
+import {
+    Avatar,
+    Box,
+    Button,
+    Divider,
+    IconButton,
+    Rating,
+    Tooltip,
+    Typography,
+} from "@mui/material";
 import { CollapsibleText } from "@component/Common/CollapsibleText";
 import { ReactionBar } from "@component/Common/ReactionBar";
 import { BookReview } from "contract/schema";
-import { SentimentSatisfiedAlt, EmojiEvents } from "@mui/icons-material";
+import { EmojiEvents, SentimentSatisfiedAlt } from "@mui/icons-material";
 
 export namespace SingleReview {
     export type Show = {
@@ -16,7 +25,10 @@ export namespace SingleReview {
             <div>
                 <Box key={review.id}>
                     <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-                        <Avatar src={review.user.avatar} sx={{ width: 40, height: 40, borderRadius: 1 }} />
+                        <Avatar
+                            src={review.user.avatar}
+                            sx={{ width: 40, height: 40, borderRadius: 1 }}
+                        />
                         <Box sx={{ ml: 2 }}>
                             <Typography variant="subtitle1" fontWeight="bold">
                                 {review.user.name}
@@ -25,11 +37,19 @@ export namespace SingleReview {
                                 {review.created_at}
                             </Typography>
                         </Box>
-                        <Button variant="outlined" size="small" sx={{ ml: 2, py: 0.5 }} onClick={onFollow}>
+                        <Button
+                            variant="outlined"
+                            size="small"
+                            sx={{ ml: 2, py: 0.5 }}
+                            onClick={onFollow}
+                        >
                             Follow
                         </Button>
                         <Box sx={{ ml: "auto", textAlign: "right" }}>
-                            <Rating defaultValue={review.rating} precision={0.5} />
+                            <Rating
+                                defaultValue={review.rating}
+                                precision={0.5}
+                            />
                             <Typography variant="body2" color="text.secondary">
                                 {990} reviews {1232} followers
                             </Typography>
@@ -37,12 +57,27 @@ export namespace SingleReview {
                     </Box>
 
                     <Box sx={{ mt: 2 }}>
-                        <CollapsibleText.Container content={review.content} threshold={300} />
+                        <CollapsibleText.Container
+                            content={review.content}
+                            threshold={300}
+                        />
                     </Box>
 
                     <Box className="w-full flex justify-end">
-                        <Box sx={{ width: { xs: "100%", sm: "75%", md: "50%", lg: "50%", xl: "33.33%" } }}>
-                            <ReactionBar.Show onReply={() => onReply(review.id)} />
+                        <Box
+                            sx={{
+                                width: {
+                                    xs: "100%",
+                                    sm: "75%",
+                                    md: "50%",
+                                    lg: "50%",
+                                    xl: "33.33%",
+                                },
+                            }}
+                        >
+                            <ReactionBar.Show
+                                onReply={() => onReply(review.id)}
+                            />
                         </Box>
                     </Box>
                     {/* Statistics and Awards */}
@@ -57,7 +92,9 @@ export namespace SingleReview {
                         <div className="ml-4">
                             <Tooltip title="Funny">
                                 <IconButton size="medium">
-                                    <SentimentSatisfiedAlt style={{ fontSize: "1rem" }} />
+                                    <SentimentSatisfiedAlt
+                                        style={{ fontSize: "1rem" }}
+                                    />
                                 </IconButton>
                             </Tooltip>
                             <Tooltip title="Award">
@@ -83,6 +120,12 @@ export namespace SingleReview {
             console.log("Follow clicked for user:", review.user.name);
         };
 
-        return <Show review={review} onReply={handleReply} onFollow={handleFollow} />;
+        return (
+            <Show
+                review={review}
+                onReply={handleReply}
+                onFollow={handleFollow}
+            />
+        );
     };
 }

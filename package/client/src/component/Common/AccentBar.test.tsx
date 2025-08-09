@@ -3,7 +3,9 @@ import { useFixtureInput } from "react-cosmos/client";
 
 export default {
     AccentBar: () => {
-        const [props] = useFixtureInput<Parameters<typeof AccentBar.Container>[0]>("AccentBar Props", {
+        const [props] = useFixtureInput<
+            Parameters<typeof AccentBar.Container>[0]
+        >("AccentBar Props", {
             height: 24,
             color: "#1976d2",
         });
@@ -16,7 +18,9 @@ export default {
     },
 
     AccentBarWithText: () => {
-        const [props] = useFixtureInput<Parameters<typeof AccentBarWithText.Container>[0]>("AccentBarWithText Props", {
+        const [props] = useFixtureInput<
+            Parameters<typeof AccentBarWithText.Container>[0]
+        >("AccentBarWithText Props", {
             height: 24,
             color: "#1976d2",
             text: "标题文本",

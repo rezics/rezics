@@ -44,8 +44,9 @@ export const postHandlers = [
     // Get post
     http.get(Post.get.path, ({ params }) => {
         const post = posts.find((p) => p.id === (params as any)["id"]);
-        if (!post)
+        if (!post) {
             return HttpResponse.json({ message: "Not found" }, { status: 404 });
+        }
         return HttpResponse.json(post);
     }),
 
@@ -65,8 +66,9 @@ export const postHandlers = [
     // Update post
     http.put(Post.update.path, async ({ params, request }) => {
         const index = posts.findIndex((p) => p.id === (params as any)["id"]);
-        if (index === -1)
+        if (index === -1) {
             return HttpResponse.json({ message: "Not found" }, { status: 404 });
+        }
         const patch = await request.json();
         posts[index] = {
             ...(posts[index] as any),
@@ -75,7 +77,6 @@ export const postHandlers = [
         };
         return HttpResponse.json(posts[index]);
     }),
-
     // Categories
     // http.get(Post.categories.path, () => HttpResponse.json(categories)),
 ];

@@ -22,7 +22,9 @@ export const BookEditLayout: React.FC<BookEditLayoutProps> = ({ children }) => {
     // const [match, params] = useRoute("/:chapterId");
     const [match, params] = useRoute("/book/:bookId/edit/:chapterId");
     const locationParams = useParams();
-    const [selectedId, setSelectedId] = useState(match ? String(params.chapterId) : "");
+    const [selectedId, setSelectedId] = useState(
+        match ? String(params.chapterId) : "",
+    );
     const [baseUrl, setBaseUrl] = useState("");
     let bookId = "";
 
@@ -48,7 +50,8 @@ export const BookEditLayout: React.FC<BookEditLayoutProps> = ({ children }) => {
     });
 
     const isMobile = useMediaQuery("(max-width:960px)");
-    const { sidebarOpen, drawerWidth, toggleSidebar, closeSidebar } = useLayoutStore();
+    const { sidebarOpen, drawerWidth, toggleSidebar, closeSidebar } =
+        useLayoutStore();
 
     const handleDrawerToggle = () => {
         toggleSidebar();
@@ -83,12 +86,10 @@ export const BookEditLayout: React.FC<BookEditLayoutProps> = ({ children }) => {
                     isDragging={isDragging}
                 >
                     <BookEditorSidebar
-                        chaptersData={
-                            data?.body ?? {
-                                chapters: [],
-                                order: new Map<string, string[]>(),
-                            }
-                        }
+                        chaptersData={data?.body ?? {
+                            chapters: [],
+                            order: new Map<string, string[]>(),
+                        }}
                         selectedId={selectedId}
                         baseLink={baseUrl}
                         drawerWidth={drawerWidth}
@@ -106,7 +107,9 @@ export const BookEditLayout: React.FC<BookEditLayoutProps> = ({ children }) => {
             <main
                 className="flex-grow pt-16 transition-all duration-300"
                 style={{
-                    width: `calc(100% - ${!isMobile && sidebarOpen ? drawerWidth : 0}px)`,
+                    width: `calc(100% - ${
+                        !isMobile && sidebarOpen ? drawerWidth : 0
+                    }px)`,
                 }}
             >
                 {children}

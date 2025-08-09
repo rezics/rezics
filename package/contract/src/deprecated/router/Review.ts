@@ -1,6 +1,6 @@
 import c from "./c";
 import { z } from "zod";
-import { Review, Quote } from "../schema/Review";
+import { Quote, Review } from "../schema/Review";
 
 export default c.router({
     // Standard CRUD operations for reviews

@@ -13,8 +13,9 @@ export const tagHandlers = [
         const group = mockTagGroups.find(
             (g) => g.key === (params as any)["key"],
         );
-        if (!group)
+        if (!group) {
             return HttpResponse.json({ message: "Not found" }, { status: 404 });
+        }
         return HttpResponse.json(group);
     }),
 ];

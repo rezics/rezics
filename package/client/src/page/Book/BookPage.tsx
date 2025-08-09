@@ -1,17 +1,17 @@
 import React, { useEffect, useMemo, useRef } from "react";
 import {
+    Avatar,
     Box,
     Container,
-    Grid,
-    Typography,
-    Paper,
     Divider,
-    Avatar,
+    Grid,
+    Paper,
     Stack,
     Tab,
+    Typography,
 } from "@mui/material";
 import { TabContext, TabList, TabPanel } from "@mui/lab";
-import { useParams, Link, useLocation } from "wouter";
+import { Link, useLocation, useParams } from "wouter";
 import { BookTagView } from "@/component/Book/BookTagPreview";
 import { BookReviews } from "@/component/Book/BookReviewsPreview";
 import { ShortBookReviews } from "@/component/Book/ShortBookReviewsPreview";
@@ -69,9 +69,8 @@ export namespace BookPage {
                                     <Stack spacing={4}>
                                         {/* ANCHOR Description */}
                                         <BookDescription.Container
-                                            description={
-                                                data?.description || ""
-                                            }
+                                            description={data?.description ||
+                                                ""}
                                         />
                                         <Divider />
 

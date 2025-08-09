@@ -3,7 +3,8 @@ import { BookDescription } from "./BookDescription";
 
 export default () => {
     const [props] = useFixtureInput<BookDescription.Show>("Props", {
-        description: `《哈利·波特与魔法石》是英国作家J.K.罗琳创作的长篇小说，《哈利·波特》系列小说的第一部。
+        description:
+            `《哈利·波特与魔法石》是英国作家J.K.罗琳创作的长篇小说，《哈利·波特》系列小说的第一部。
 
 该作的主人公是哈利·波特，一个巫师，他在霍格沃茨魔法学校的六年学习生活中的冒险故事。该故事的主线是哈利与伏地魔的对抗，伏地魔是一个邪恶的魔法师，他杀死了哈利的父母。
 

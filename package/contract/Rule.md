@@ -1,1 +1,0 @@
-- 对外公开 RESTful 接口偏好 GET+URL，内部或付费 API 偏好 POST+Body。

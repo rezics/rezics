@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { id, icsId, Nameable, Auditable, Evaluable, Tagable } from "./common";
+import { Auditable, Evaluable, icsId, id, Nameable, Tagable } from "./common";
 import { PublishInfo } from "./PublishInfo";
 
 export namespace Book {

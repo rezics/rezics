@@ -8,7 +8,11 @@ type Task = () => void;
  * @param duration  （可选）任务总时长，单位毫秒；若不传则无限循环
  * @returns         一个停止任务的函数
  */
-export function repeatTask(task: Task, interval: number, duration?: number): () => void {
+export function repeatTask(
+    task: Task,
+    interval: number,
+    duration?: number,
+): () => void {
     // 1. 先启动一个 interval
     const timerId = window.setInterval(task, interval);
 

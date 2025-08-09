@@ -13,7 +13,8 @@ interface MainLayoutProps {
 
 export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     const isMobile = useMediaQuery("(max-width:960px)");
-    const { sidebarOpen, drawerWidth, toggleSidebar, closeSidebar } = useLayoutStore();
+    const { sidebarOpen, drawerWidth, toggleSidebar, closeSidebar } =
+        useLayoutStore();
 
     const handleDrawerToggle = () => {
         toggleSidebar();
@@ -42,7 +43,9 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
             <main
                 className="flex-grow pt-16 transition-all duration-300"
                 style={{
-                    width: `calc(100% - ${!isMobile && sidebarOpen ? drawerWidth : 0}px)`,
+                    width: `calc(100% - ${
+                        !isMobile && sidebarOpen ? drawerWidth : 0
+                    }px)`,
                 }}
             >
                 {children}

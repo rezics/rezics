@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { id, Nameable, Auditable } from "./common";
+import { Auditable, id, Nameable } from "./common";
 
 export namespace Author {
     const Mutable = {

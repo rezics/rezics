@@ -35,7 +35,9 @@ export function BookListEditPage() {
                     Add
                 </Button>
             </div>
-            <div>{/* TODO 列出添加的所有书评Card，并支持排序，删除，以及快捷编辑具体书评 */}</div>
+            <div>
+                {/* TODO 列出添加的所有书评Card，并支持排序，删除，以及快捷编辑具体书评 */}
+            </div>
         </div>
     );
 }

@@ -1,12 +1,12 @@
 import { ButtonGroup, IconButton } from "@mui/material";
 import {
     Reply,
-    ThumbUpAlt,
-    ThumbDownAlt,
-    ThumbUpOffAlt,
-    ThumbDownOffAlt,
     Star,
     StarOutline,
+    ThumbDownAlt,
+    ThumbDownOffAlt,
+    ThumbUpAlt,
+    ThumbUpOffAlt,
 } from "@mui/icons-material";
 
 export namespace Reactions {
@@ -23,11 +23,19 @@ export namespace Reactions {
         }>;
     };
 
-    export const Show: React.FC<Show> = ({ state: { up, star }, event: { onUp, onDown, onStar, onReply } }) => (
+    export const Show: React.FC<Show> = (
+        { state: { up, star }, event: { onUp, onDown, onStar, onReply } },
+    ) => (
         <ButtonGroup>
-            <IconButton onClick={onUp}>{up === true ? <ThumbUpAlt /> : <ThumbUpOffAlt />}</IconButton>
-            <IconButton onClick={onDown}>{up === false ? <ThumbDownAlt /> : <ThumbDownOffAlt />}</IconButton>
-            <IconButton onClick={onStar}>{star ? <Star /> : <StarOutline />}</IconButton>
+            <IconButton onClick={onUp}>
+                {up === true ? <ThumbUpAlt /> : <ThumbUpOffAlt />}
+            </IconButton>
+            <IconButton onClick={onDown}>
+                {up === false ? <ThumbDownAlt /> : <ThumbDownOffAlt />}
+            </IconButton>
+            <IconButton onClick={onStar}>
+                {star ? <Star /> : <StarOutline />}
+            </IconButton>
             <IconButton onClick={onReply}>
                 <Reply />
             </IconButton>

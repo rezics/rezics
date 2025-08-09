@@ -1,6 +1,18 @@
 import React, { useState } from "react";
-import { IconButton, Avatar, Menu, MenuItem, Divider, ListItemIcon, ListItemText } from "@mui/material";
-import { Person as PersonIcon, Settings as SettingsIcon, Logout as LogoutIcon } from "@mui/icons-material";
+import {
+    Avatar,
+    Divider,
+    IconButton,
+    ListItemIcon,
+    ListItemText,
+    Menu,
+    MenuItem,
+} from "@mui/material";
+import {
+    Logout as LogoutIcon,
+    Person as PersonIcon,
+    Settings as SettingsIcon,
+} from "@mui/icons-material";
 //  ;
 
 export namespace User {
@@ -13,7 +25,9 @@ export namespace User {
         onSettings?: () => void;
     };
 
-    export const Show: React.FC<Show> = ({ anchorEl, onMenuOpen, onMenuClose, onLogout, onProfile, onSettings }) => {
+    export const Show: React.FC<Show> = (
+        { anchorEl, onMenuOpen, onMenuClose, onLogout, onProfile, onSettings },
+    ) => {
         return (
             <>
                 <IconButton

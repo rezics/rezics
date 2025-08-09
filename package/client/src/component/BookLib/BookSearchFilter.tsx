@@ -5,7 +5,13 @@ import { ArrowDownward, ArrowUpward } from "@mui/icons-material";
 import { SortControlsProps } from "@component/Common/Pagination";
 import { useTheme } from "@mui/material/styles";
 
-export type BookLibSortKey = "relevance" | "time" | "favorites" | "wordCount" | "monthVotes" | "recommend";
+export type BookLibSortKey =
+    | "relevance"
+    | "time"
+    | "favorites"
+    | "wordCount"
+    | "monthVotes"
+    | "recommend";
 
 const LABELS: Partial<Record<BookLibSortKey, string>> = {
     relevance: "搜索相关性",
@@ -17,7 +23,9 @@ const LABELS: Partial<Record<BookLibSortKey, string>> = {
 
 interface BookSearchFilterProps extends SortControlsProps {}
 
-export const BookSearchFilter: React.FC<BookSearchFilterProps> = ({ sortType, sortOrder, onSortChange }) => {
+export const BookSearchFilter: React.FC<BookSearchFilterProps> = (
+    { sortType, sortOrder, onSortChange },
+) => {
     const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
     const theme = useTheme();
 
@@ -37,7 +45,12 @@ export const BookSearchFilter: React.FC<BookSearchFilterProps> = ({ sortType, so
 
     return (
         <div className="flex justify-between">
-            <Stack direction="row" spacing={2} alignItems="center" className="book-search-filter mb-6">
+            <Stack
+                direction="row"
+                spacing={2}
+                alignItems="center"
+                className="book-search-filter mb-6"
+            >
                 {(Object.keys(LABELS) as BookLibSortKey[]).map((key) => {
                     const active = key === sortType;
                     return (
@@ -45,23 +58,40 @@ export const BookSearchFilter: React.FC<BookSearchFilterProps> = ({ sortType, so
                             key={key}
                             onClick={() => onSortChange({ type: key })}
                             sx={{
-                                backgroundColor: active ? theme.palette.secondary.main : "",
+                                backgroundColor: active
+                                    ? theme.palette.secondary.main
+                                    : "",
                             }}
                             // variant={active ? "outlined" : "contained" }
                         >
-                            <Typography variant="body2">{LABELS[key]}</Typography>
+                            <Typography variant="body2">
+                                {LABELS[key]}
+                            </Typography>
                         </Button>
                     );
                 })}
-                <Button onClick={handleClick("recommend")} endIcon={<ArrowDropDownIcon fontSize="small" />}>
+                <Button
+                    onClick={handleClick("recommend")}
+                    endIcon={<ArrowDropDownIcon fontSize="small" />}
+                >
                     <Typography variant="body2">推荐</Typography>
                 </Button>
 
                 {/* “推荐票” 下拉菜单 */}
-                <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={() => setAnchorEl(null)}>
-                    <MenuItem onClick={handleSecondaryMenuSelect("weekVotes")}>周推荐票</MenuItem>
-                    <MenuItem onClick={handleSecondaryMenuSelect("monthVotes")}>月推荐票</MenuItem>
-                    <MenuItem onClick={handleSecondaryMenuSelect("totalVotes")}>总推荐票</MenuItem>
+                <Menu
+                    anchorEl={anchorEl}
+                    open={Boolean(anchorEl)}
+                    onClose={() => setAnchorEl(null)}
+                >
+                    <MenuItem onClick={handleSecondaryMenuSelect("weekVotes")}>
+                        周推荐票
+                    </MenuItem>
+                    <MenuItem onClick={handleSecondaryMenuSelect("monthVotes")}>
+                        月推荐票
+                    </MenuItem>
+                    <MenuItem onClick={handleSecondaryMenuSelect("totalVotes")}>
+                        总推荐票
+                    </MenuItem>
                 </Menu>
             </Stack>
             <div>
@@ -70,7 +100,9 @@ export const BookSearchFilter: React.FC<BookSearchFilterProps> = ({ sortType, so
                     onClick={() => onSortChange({ order: "desc" })}
                     size="small"
                     sx={{
-                        backgroundColor: sortOrder === "desc" ? theme.palette.secondary.main : "",
+                        backgroundColor: sortOrder === "desc"
+                            ? theme.palette.secondary.main
+                            : "",
                         textTransform: "none",
                     }}
                 >
@@ -83,7 +115,9 @@ export const BookSearchFilter: React.FC<BookSearchFilterProps> = ({ sortType, so
                     className="!ml-2"
                     size="small"
                     sx={{
-                        backgroundColor: sortOrder === "asc" ? theme.palette.secondary.main : "",
+                        backgroundColor: sortOrder === "asc"
+                            ? theme.palette.secondary.main
+                            : "",
                         textTransform: "none",
                     }}
                 >

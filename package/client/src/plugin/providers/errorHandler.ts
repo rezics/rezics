@@ -5,7 +5,9 @@ function setupGlobalErrorHandlers() {
         const hasRefreshed = sessionStorage.getItem(REFRESH_FLAG_KEY);
 
         if (hasRefreshed) {
-            console.warn("Detected repeated error after refresh. Skipping reload.");
+            console.warn(
+                "Detected repeated error after refresh. Skipping reload.",
+            );
             sessionStorage.removeItem(REFRESH_FLAG_KEY);
             return;
         }

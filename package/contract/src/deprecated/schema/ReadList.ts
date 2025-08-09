@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { id, icsId, Auditable, Evaluable, Nameable } from "./common";
+import { Auditable, Evaluable, icsId, id, Nameable } from "./common";
 import { User } from "./User";
 import { Book } from "./Book";
 

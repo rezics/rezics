@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { User } from "./User";
-import { id, icsId, Auditable, Evaluable, Nameable } from "./common";
+import { Auditable, Evaluable, icsId, id, Nameable } from "./common";
 
 export namespace Review {
     const Mutable = {

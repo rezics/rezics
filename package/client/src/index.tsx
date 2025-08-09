@@ -5,11 +5,14 @@ import Router from "./router/router";
 import { ThemeProvider, useMediaQuery } from "@mui/material";
 import { StyledEngineProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
-import { getTheme, getDynamicTheme } from "./config/theme";
+import { getDynamicTheme, getTheme } from "./config/theme";
 import { appStore } from "./global/appStore";
-import { applyDynamicThemeToDOM, generateDynamicColors } from "./config/dynamicTheme";
+import {
+    applyDynamicThemeToDOM,
+    generateDynamicColors,
+} from "./config/dynamicTheme";
 import { setupMock } from "./plugin/providers/mock";
-import { TsrProvider, queryClient } from "./api/tsr";
+import { queryClient, TsrProvider } from "./api/tsr";
 
 import { initI18n } from "./plugin/providers/i18n";
 import { PersistentSettingsLoader } from "./plugin/providers/PersistentSettingsLoader";
@@ -45,7 +48,10 @@ function Root() {
     const theme = useMemo(() => {
         if (useDynamicTheme && customColor) {
             // 应用动态主题到 DOM
-            const dynamicColors = generateDynamicColors(customColor, themeMode === "dark");
+            const dynamicColors = generateDynamicColors(
+                customColor,
+                themeMode === "dark",
+            );
             applyDynamicThemeToDOM(dynamicColors, themeMode === "dark");
             return getDynamicTheme(themeMode, customColor);
         }

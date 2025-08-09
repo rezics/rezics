@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { id, icsId, Auditable } from "./common";
+import { Auditable, icsId, id } from "./common";
 
 export namespace PublishInfo {
     const Mutable = {

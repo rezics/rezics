@@ -43,7 +43,8 @@ export const mockCommentTree01 = [
                 created_at: "2025-05-05 12:48:24",
                 author: {
                     name: "Grace",
-                    avatar: "https://api.dicebear.com/9.x/pixel-art/svg?seed=John157",
+                    avatar:
+                        "https://api.dicebear.com/9.x/pixel-art/svg?seed=John157",
                 },
                 likes: 5,
                 replies: [],
@@ -140,7 +141,8 @@ export const mockCommentTree01 = [
                 created_at: "2025-04-18 13:01:24",
                 author: {
                     name: "Paul",
-                    avatar: "https://api.dicebear.com/9.x/pixel-art/svg?seed=John587",
+                    avatar:
+                        "https://api.dicebear.com/9.x/pixel-art/svg?seed=John587",
                 },
                 likes: 1,
                 replies: [],
@@ -177,7 +179,8 @@ export const mockCommentTree01 = [
                 created_at: "2025-05-04 07:47:24",
                 author: {
                     name: "Frank",
-                    avatar: "https://api.dicebear.com/9.x/pixel-art/svg?seed=John120",
+                    avatar:
+                        "https://api.dicebear.com/9.x/pixel-art/svg?seed=John120",
                 },
                 likes: 2,
                 replies: [],
@@ -189,7 +192,8 @@ export const mockCommentTree01 = [
                 created_at: "2025-04-27 05:48:24",
                 author: {
                     name: "Nina",
-                    avatar: "https://api.dicebear.com/9.x/pixel-art/svg?seed=John637",
+                    avatar:
+                        "https://api.dicebear.com/9.x/pixel-art/svg?seed=John637",
                 },
                 likes: 0,
                 replies: [],
@@ -214,7 +218,8 @@ export const mockCommentTree01 = [
                 created_at: "2025-05-16 20:05:24",
                 author: {
                     name: "David",
-                    avatar: "https://api.dicebear.com/9.x/pixel-art/svg?seed=John224",
+                    avatar:
+                        "https://api.dicebear.com/9.x/pixel-art/svg?seed=John224",
                 },
                 likes: 16,
                 replies: [],
@@ -239,7 +244,8 @@ export const mockCommentTree01 = [
                 created_at: "2025-04-21 11:39:24",
                 author: {
                     name: "Jack",
-                    avatar: "https://api.dicebear.com/9.x/pixel-art/svg?seed=John194",
+                    avatar:
+                        "https://api.dicebear.com/9.x/pixel-art/svg?seed=John194",
                 },
                 likes: 6,
                 replies: [],
@@ -276,7 +282,8 @@ export const mockCommentTree01 = [
                 created_at: "2025-05-03 22:53:24",
                 author: {
                     name: "Bob",
-                    avatar: "https://api.dicebear.com/9.x/pixel-art/svg?seed=John189",
+                    avatar:
+                        "https://api.dicebear.com/9.x/pixel-art/svg?seed=John189",
                 },
                 likes: 1,
                 replies: [],
@@ -337,7 +344,8 @@ export const mockCommentTree01 = [
                 created_at: "2025-04-30 11:43:24",
                 author: {
                     name: "Hannah",
-                    avatar: "https://api.dicebear.com/9.x/pixel-art/svg?seed=John634",
+                    avatar:
+                        "https://api.dicebear.com/9.x/pixel-art/svg?seed=John634",
                 },
                 likes: 1,
                 replies: [],
@@ -349,7 +357,8 @@ export const mockCommentTree01 = [
                 created_at: "2025-04-24 11:55:24",
                 author: {
                     name: "Paul",
-                    avatar: "https://api.dicebear.com/9.x/pixel-art/svg?seed=John500",
+                    avatar:
+                        "https://api.dicebear.com/9.x/pixel-art/svg?seed=John500",
                 },
                 likes: 15,
                 replies: [],
@@ -434,7 +443,8 @@ export const mockCommentTree01 = [
                 created_at: "2025-04-27 12:16:24",
                 author: {
                     name: "Quincy",
-                    avatar: "https://api.dicebear.com/9.x/pixel-art/svg?seed=John324",
+                    avatar:
+                        "https://api.dicebear.com/9.x/pixel-art/svg?seed=John324",
                 },
                 likes: 9,
                 replies: [],
@@ -567,7 +577,8 @@ export const mockCommentTree01 = [
                 created_at: "2025-04-23 10:10:24",
                 author: {
                     name: "Paul",
-                    avatar: "https://api.dicebear.com/9.x/pixel-art/svg?seed=John615",
+                    avatar:
+                        "https://api.dicebear.com/9.x/pixel-art/svg?seed=John615",
                 },
                 likes: 0,
                 replies: [],
@@ -592,7 +603,8 @@ export const mockCommentTree01 = [
                 created_at: "2025-05-10 07:32:24",
                 author: {
                     name: "Grace",
-                    avatar: "https://api.dicebear.com/9.x/pixel-art/svg?seed=John86",
+                    avatar:
+                        "https://api.dicebear.com/9.x/pixel-art/svg?seed=John86",
                 },
                 likes: 1,
                 replies: [],
@@ -629,7 +641,8 @@ export const mockCommentTree01 = [
                 created_at: "2025-04-23 17:41:24",
                 author: {
                     name: "Charlie",
-                    avatar: "https://api.dicebear.com/9.x/pixel-art/svg?seed=John984",
+                    avatar:
+                        "https://api.dicebear.com/9.x/pixel-art/svg?seed=John984",
                 },
                 likes: 19,
                 replies: [],
@@ -666,7 +679,8 @@ export const mockCommentTree01 = [
                 created_at: "2025-04-27 18:14:24",
                 author: {
                     name: "Sam",
-                    avatar: "https://api.dicebear.com/9.x/pixel-art/svg?seed=John986",
+                    avatar:
+                        "https://api.dicebear.com/9.x/pixel-art/svg?seed=John986",
                 },
                 likes: 19,
                 replies: [],
@@ -678,7 +692,8 @@ export const mockCommentTree01 = [
                 created_at: "2025-05-04 15:21:24",
                 author: {
                     name: "Leo",
-                    avatar: "https://api.dicebear.com/9.x/pixel-art/svg?seed=John663",
+                    avatar:
+                        "https://api.dicebear.com/9.x/pixel-art/svg?seed=John663",
                 },
                 likes: 9,
                 replies: [],
@@ -703,7 +718,8 @@ export const mockCommentTree01 = [
                 created_at: "2025-05-08 22:09:24",
                 author: {
                     name: "Nina",
-                    avatar: "https://api.dicebear.com/9.x/pixel-art/svg?seed=John123",
+                    avatar:
+                        "https://api.dicebear.com/9.x/pixel-art/svg?seed=John123",
                 },
                 likes: 10,
                 replies: [],
@@ -715,7 +731,8 @@ export const mockCommentTree01 = [
                 created_at: "2025-05-16 06:11:24",
                 author: {
                     name: "Oscar",
-                    avatar: "https://api.dicebear.com/9.x/pixel-art/svg?seed=John201",
+                    avatar:
+                        "https://api.dicebear.com/9.x/pixel-art/svg?seed=John201",
                 },
                 likes: 9,
                 replies: [
@@ -726,7 +743,8 @@ export const mockCommentTree01 = [
                         created_at: "2025-04-17 16:15:24",
                         author: {
                             name: "Leo",
-                            avatar: "https://api.dicebear.com/9.x/pixel-art/svg?seed=John55",
+                            avatar:
+                                "https://api.dicebear.com/9.x/pixel-art/svg?seed=John55",
                         },
                         likes: 3,
                         replies: [],

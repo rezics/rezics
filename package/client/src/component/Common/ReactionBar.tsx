@@ -1,6 +1,12 @@
 import React from "react";
 import { Box, IconButton } from "@mui/material";
-import { KeyboardArrowUp, KeyboardArrowDown, ChatBubbleOutline, StarBorder, Send } from "@mui/icons-material";
+import {
+    ChatBubbleOutline,
+    KeyboardArrowDown,
+    KeyboardArrowUp,
+    Send,
+    StarBorder,
+} from "@mui/icons-material";
 
 export namespace ReactionBar {
     export type Show = {
@@ -10,7 +16,9 @@ export namespace ReactionBar {
         fontSize?: string;
     };
 
-    export const Show: React.FC<Show> = ({ onReply, className, size = "large", fontSize = "1.5rem" }) => {
+    export const Show: React.FC<Show> = (
+        { onReply, className, size = "large", fontSize = "1.5rem" },
+    ) => {
         const handleReply = () => {
             onReply?.();
         };
@@ -36,7 +44,11 @@ export namespace ReactionBar {
                     </IconButton>
                 </Box>
                 <Box>
-                    <IconButton size={size} sx={{ fontSize }} onClick={handleReply}>
+                    <IconButton
+                        size={size}
+                        sx={{ fontSize }}
+                        onClick={handleReply}
+                    >
                         <ChatBubbleOutline fontSize="inherit" />
                     </IconButton>
                 </Box>

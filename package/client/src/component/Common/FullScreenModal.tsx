@@ -1,5 +1,13 @@
 import React from "react";
-import { Modal, Box, AppBar, Toolbar, Typography, IconButton, Slide } from "@mui/material";
+import {
+    AppBar,
+    Box,
+    IconButton,
+    Modal,
+    Slide,
+    Toolbar,
+    Typography,
+} from "@mui/material";
 // import { TransitionProps } from "@mui/material/transitions";
 import CloseIcon from "@mui/icons-material/Close";
 //  ;
@@ -24,7 +32,9 @@ interface FullScreenModalProps {
  * @param {React.ReactNode} [props.title] - 顶栏插槽，可以传入字符串或 JSX 元素
  * @param {React.ReactNode} [props.children] - 内容区域的默认插槽
  */
-const FullScreenModal: React.FC<FullScreenModalProps> = ({ open, onClose, title, children }) => {
+const FullScreenModal: React.FC<FullScreenModalProps> = (
+    { open, onClose, title, children },
+) => {
     return (
         <Modal open={open} onClose={onClose} closeAfterTransition>
             <Transition in={open}>
@@ -41,21 +51,31 @@ const FullScreenModal: React.FC<FullScreenModalProps> = ({ open, onClose, title,
                     <AppBar position="static" sx={{ flexShrink: 0 }}>
                         <Toolbar>
                             <Box sx={{ flexGrow: 1 }}>
-                                {/* 这里是 title 插槽的关键逻辑：
+                                {
+                                    /* 这里是 title 插槽的关键逻辑：
                   - 如果 title 是字符串, 用 Typography 组件包裹来应用默认样式
                   - 如果 title 是一个 React 元素 (JSX), 则直接渲染
-                */}
-                                {typeof title === "string" ? (
-                                    <Typography variant="h6" component="div">
-                                        {title}
-                                    </Typography>
-                                ) : (
-                                    title
-                                )}
+                */
+                                }
+                                {typeof title === "string"
+                                    ? (
+                                        <Typography
+                                            variant="h6"
+                                            component="div"
+                                        >
+                                            {title}
+                                        </Typography>
+                                    )
+                                    : title}
                             </Box>
 
                             {/* 关闭按钮 */}
-                            <IconButton edge="end" color="inherit" onClick={onClose} aria-label="Close">
+                            <IconButton
+                                edge="end"
+                                color="inherit"
+                                onClick={onClose}
+                                aria-label="Close"
+                            >
                                 <CloseIcon />
                             </IconButton>
                         </Toolbar>

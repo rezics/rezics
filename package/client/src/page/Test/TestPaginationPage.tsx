@@ -1,14 +1,14 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { z } from "zod"; // 假设从外部导入
 import {
     Box,
-    Typography,
-    Grid,
     Card,
     CardContent,
-    ThemeProvider,
     createTheme,
     Divider,
+    Grid,
+    ThemeProvider,
+    Typography,
 } from "@mui/material";
 import { UniversalPaginator } from "@/component/Common/Pagination";
 import contract from "contract";
@@ -48,8 +48,9 @@ const allPosts: Post[] = Array.from({ length: 555 }, (_, i) => ({
 const fetchPostsAPI = (query: PaginationQuery) => {
     return new Promise((resolve) => {
         setTimeout(() => {
-            const { page, limit, type, order } =
-                PaginationQuerySchema.parse(query);
+            const { page, limit, type, order } = PaginationQuerySchema.parse(
+                query,
+            );
             const sorted = [...allPosts].sort((a, b) => {
                 let comp = 0;
                 if (type === "name") comp = a.name.localeCompare(b.name);
@@ -127,10 +128,8 @@ export default function TestPaginationPage() {
                 };
                 // setAllFetchedItems((prev) => (page === 1 ? response.items : [...prev, ...response.items]));
                 setAllFetchedItems((prev) =>
-                    (page === 1
-                        ? response.items
-                        : [...prev, ...response.items]
-                    ).slice(0, 100),
+                    (page === 1 ? response.items : [...prev, ...response.items])
+                        .slice(0, 100)
                 ); // 最多100个/根据page来算
                 setTotalItems(response.total);
                 setCurrentExternalPage(page);
@@ -152,11 +151,10 @@ export default function TestPaginationPage() {
         order?: "asc" | "desc";
     }) => {
         setSortConfig((prev) => ({
-            type:
-                newSort.type &&
-                ["time", "name", "popular", "agree"].includes(newSort.type)
-                    ? (newSort.type as "time" | "name" | "popular" | "agree")
-                    : prev.type,
+            type: newSort.type &&
+                    ["time", "name", "popular", "agree"].includes(newSort.type)
+                ? (newSort.type as "time" | "name" | "popular" | "agree")
+                : prev.type,
             order: newSort.order ?? prev.order,
         }));
         setAllFetchedItems([]);

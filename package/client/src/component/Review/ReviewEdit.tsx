@@ -18,8 +18,15 @@ export function ReviewEdit() {
             <div className="flex w-full justify-between">
                 <div className="flex gap-2 items-center">
                     <span className="text-lg font-bold">Your Rating</span>
-                    <ScoreForm.Edit onScoreChange={setScore} onChangeActive={setActiveScore} max={10} precision={1} />
-                    <div className="text-lg font-bold">{activeScore != -1 ? activeScore : score}</div>
+                    <ScoreForm.Edit
+                        onScoreChange={setScore}
+                        onChangeActive={setActiveScore}
+                        max={10}
+                        precision={1}
+                    />
+                    <div className="text-lg font-bold">
+                        {activeScore != -1 ? activeScore : score}
+                    </div>
                 </div>
                 <Button variant="contained" color="primary" onClick={onSubmit}>
                     Submit ALL

@@ -49,17 +49,19 @@ export namespace SingleShortBookReview {
                             </span>
                             <Tooltip title="阅读完整评测" placement="top-start">
                                 <div className="flex items-center gap-1 cursor-pointer bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 p-1 rounded-md">
-                                    {isRecommended ? (
-                                        <ThumbUpIcon
-                                            fontSize="small"
-                                            className="text-blue-500"
-                                        />
-                                    ) : (
-                                        <ThumbDownIcon
-                                            fontSize="small"
-                                            className="text-gray-500"
-                                        />
-                                    )}
+                                    {isRecommended
+                                        ? (
+                                            <ThumbUpIcon
+                                                fontSize="small"
+                                                className="text-blue-500"
+                                            />
+                                        )
+                                        : (
+                                            <ThumbDownIcon
+                                                fontSize="small"
+                                                className="text-gray-500"
+                                            />
+                                        )}
                                     <span className="text-xs">
                                         {review.rating.toFixed(1)}/5.0 ·{" "}
                                         {review.created_at}
@@ -130,7 +132,8 @@ export namespace SingleShortBookReview {
                                         style={{ fontSize: "1rem" }}
                                     />
                                     <span className="text-xs">
-                                        {review.replies ?? 0}{" "}
+                                        {review.replies ?? 0}
+                                        {" "}
                                     </span>
                                 </div>
                             </Tooltip>

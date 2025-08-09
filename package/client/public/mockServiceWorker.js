@@ -142,7 +142,9 @@ async function handleRequest(event, requestId) {
                         status: responseClone.status,
                         statusText: responseClone.statusText,
                         body: responseClone.body,
-                        headers: Object.fromEntries(responseClone.headers.entries()),
+                        headers: Object.fromEntries(
+                            responseClone.headers.entries(),
+                        ),
                     },
                 },
                 [responseClone.body],
@@ -202,7 +204,9 @@ async function getResponse(event, client, requestId) {
         const acceptHeader = headers.get("accept");
         if (acceptHeader) {
             const values = acceptHeader.split(",").map((value) => value.trim());
-            const filteredValues = values.filter((value) => value !== "msw/passthrough");
+            const filteredValues = values.filter((value) =>
+                value !== "msw/passthrough"
+            );
 
             if (filteredValues.length > 0) {
                 headers.set("accept", filteredValues.join(", "));
@@ -278,7 +282,10 @@ function sendToClient(client, message, transferrables = []) {
             resolve(event.data);
         };
 
-        client.postMessage(message, [channel.port2].concat(transferrables.filter(Boolean)));
+        client.postMessage(
+            message,
+            [channel.port2].concat(transferrables.filter(Boolean)),
+        );
     });
 }
 

@@ -70,10 +70,14 @@ interface Token {
 }
 
 // 检查是否为需要处理的文本token
-const isTextTokenWithSpaces = (token: Token): boolean => token.type === "text" && token.content.includes("  ");
+const isTextTokenWithSpaces = (token: Token): boolean =>
+    token.type === "text" && token.content.includes("  ");
 
 // 创建HTML内联token
-const createHtmlInlineToken = (content: string, TokenConstructor: any): Token => {
+const createHtmlInlineToken = (
+    content: string,
+    TokenConstructor: any,
+): Token => {
     const token = new TokenConstructor("html_inline", "", 0);
     token.content = content;
     return token;
@@ -87,7 +91,10 @@ const createTextToken = (content: string, TokenConstructor: any): Token => {
 };
 
 // 处理单个文本部分
-const processTextPart = (part: string, TokenConstructor: any): Option.Option<Token> => {
+const processTextPart = (
+    part: string,
+    TokenConstructor: any,
+): Option.Option<Token> => {
     if (part.match(/ {2,}/)) {
         // 连续空格，转换为&nbsp;
         const content = "&nbsp;".repeat(part.length);
@@ -125,7 +132,10 @@ const processToken = (token: Token, TokenConstructor: any): Token[] => {
 };
 
 // 处理inline token的所有子token
-const processInlineTokenChildren = (children: Token[], TokenConstructor: any): Token[] => {
+const processInlineTokenChildren = (
+    children: Token[],
+    TokenConstructor: any,
+): Token[] => {
     return pipe(
         children,
         Array.flatMap((token: any) => processToken(token, TokenConstructor)),
@@ -135,7 +145,10 @@ const processInlineTokenChildren = (children: Token[], TokenConstructor: any): T
 // 处理单个块级token
 const processBlockToken = (blockToken: Token, TokenConstructor: any): Token => {
     if (blockToken.type === "inline" && blockToken.children) {
-        const newChildren = processInlineTokenChildren(blockToken.children, TokenConstructor);
+        const newChildren = processInlineTokenChildren(
+            blockToken.children,
+            TokenConstructor,
+        );
         return { ...blockToken, children: newChildren };
     }
     return blockToken;
@@ -163,7 +176,10 @@ const preserveSpacesCore = (state: any): void => {
  * @param md markdown-it 实例
  * @param options 插件选项
  */
-export const preserveFormattingPlugin = (md: MarkdownIt, options?: PreserveFormatOptions): void => {
+export const preserveFormattingPlugin = (
+    md: MarkdownIt,
+    options?: PreserveFormatOptions,
+): void => {
     // 默认选项，使用不可变方式合并
     const defaults: Required<PreserveFormatOptions> = {
         preserveSpaces: true,
@@ -175,7 +191,11 @@ export const preserveFormattingPlugin = (md: MarkdownIt, options?: PreserveForma
 
     // 注册空行处理规则
     if (effectiveOptions.preserveEmptyLines) {
-        md.core.ruler.before("normalize", "line_break_to_br", multipleEmptyLines);
+        md.core.ruler.before(
+            "normalize",
+            "line_break_to_br",
+            multipleEmptyLines,
+        );
     }
 
     // 注册空格处理规则

@@ -46,7 +46,8 @@ async function authFetch(input: RequestInfo, init?: RequestInit) {
 
 // Tsr React Query Client
 export const tsr = initTsrReactQuery(contract, {
-    baseUrl: process.env["NEXT_PUBLIC_API_BASE_URL"] || "http://localhost:35001",
+    baseUrl: process.env["NEXT_PUBLIC_API_BASE_URL"] ||
+        "http://localhost:35001",
     baseHeaders: {
         // 动态读取 Token
         Authorization: () => {

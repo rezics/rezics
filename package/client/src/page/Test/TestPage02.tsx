@@ -24,12 +24,11 @@ export function TestPage02() {
     if (isLoading) return <div>Loading...</div>;
     if (error) {
         // ts-rest error 可能为 Error 或 { body }
-        const msg =
-            error instanceof Error
-                ? error.message
-                : error && typeof error === "object" && "body" in error
-                  ? JSON.stringify(error.body)
-                  : String(error);
+        const msg = error instanceof Error
+            ? error.message
+            : error && typeof error === "object" && "body" in error
+            ? JSON.stringify(error.body)
+            : String(error);
         return <div>Error: {msg}</div>;
     }
 
@@ -45,8 +44,16 @@ export function TestPage02() {
             </ul>
 
             <h2>Update Post</h2>
-            <input placeholder="Post ID" value={updateId} onChange={(e) => setUpdateId(e.target.value)} />
-            <input placeholder="New Title" value={newTitle} onChange={(e) => setNewTitle(e.target.value)} />
+            <input
+                placeholder="Post ID"
+                value={updateId}
+                onChange={(e) => setUpdateId(e.target.value)}
+            />
+            <input
+                placeholder="New Title"
+                value={newTitle}
+                onChange={(e) => setNewTitle(e.target.value)}
+            />
             <button
                 onClick={() => {
                     updateMutation.mutate({
@@ -60,14 +67,13 @@ export function TestPage02() {
             {updateMutation.isPending && <div>Updating...</div>}
             {updateMutation.error && (
                 <div>
-                    Error:{" "}
-                    {updateMutation.error instanceof Error
+                    Error: {updateMutation.error instanceof Error
                         ? updateMutation.error.message
                         : updateMutation.error &&
-                            typeof updateMutation.error === "object" &&
-                            "body" in updateMutation.error
-                          ? JSON.stringify(updateMutation.error.body)
-                          : String(updateMutation.error)}
+                                typeof updateMutation.error === "object" &&
+                                "body" in updateMutation.error
+                        ? JSON.stringify(updateMutation.error.body)
+                        : String(updateMutation.error)}
                 </div>
             )}
             {updateMutation.data && <div>Update Success!</div>}

@@ -21,7 +21,8 @@ export const useLayoutStore = create<LayoutState>((set: any) => ({
     openItems: {},
 
     // actions
-    toggleSidebar: () => set((state: any) => ({ sidebarOpen: !state.sidebarOpen })),
+    toggleSidebar: () =>
+        set((state: any) => ({ sidebarOpen: !state.sidebarOpen })),
 
     closeSidebar: () => set({ sidebarOpen: false }),
 

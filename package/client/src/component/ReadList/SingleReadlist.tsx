@@ -1,6 +1,15 @@
 import { BookList } from "@/api/readlist";
 import { Favorite } from "@mui/icons-material";
-import { Card, CardContent, Typography, Grid, Box, Avatar, IconButton, Stack } from "@mui/material";
+import {
+    Avatar,
+    Box,
+    Card,
+    CardContent,
+    Grid,
+    IconButton,
+    Stack,
+    Typography,
+} from "@mui/material";
 
 interface SingleReadlistProps {
     list: BookList;
@@ -8,7 +17,9 @@ interface SingleReadlistProps {
     handleLike: (id: string) => void;
 }
 
-export function SingleReadlist({ list, handleBookListClick, handleLike }: SingleReadlistProps) {
+export function SingleReadlist(
+    { list, handleBookListClick, handleLike }: SingleReadlistProps,
+) {
     return (
         <Card
             sx={{
@@ -23,7 +34,9 @@ export function SingleReadlist({ list, handleBookListClick, handleLike }: Single
             }}
             onClick={(e) => handleBookListClick(list.id, e)}
         >
-            <CardContent sx={{ flex: 1, display: "flex", flexDirection: "column" }}>
+            <CardContent
+                sx={{ flex: 1, display: "flex", flexDirection: "column" }}
+            >
                 <Typography variant="h6" fontWeight="bold" gutterBottom>
                     {list.title}
                 </Typography>
@@ -71,7 +84,10 @@ export function SingleReadlist({ list, handleBookListClick, handleLike }: Single
                     }}
                 >
                     <Stack direction="row" spacing={1} alignItems="center">
-                        <Avatar src={list.creator.avatar} sx={{ width: 24, height: 24 }} />
+                        <Avatar
+                            src={list.creator.avatar}
+                            sx={{ width: 24, height: 24 }}
+                        />
                         <Typography variant="body2" color="text.secondary">
                             {list.creator.name}
                         </Typography>

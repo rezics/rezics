@@ -1,4 +1,4 @@
-interface UserPageProps {   
+interface UserPageProps {
     userId: string;
 }
 
@@ -8,5 +8,5 @@ export function UserPage({ userId }: UserPageProps) {
             <h1>User Page</h1>
             {userId}
         </div>
-    )
+    );
 }

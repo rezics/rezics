@@ -1,37 +1,31 @@
+import useSWR from "swr";
+
 import { TagContract } from "./Tag";
+import { createContract, Term } from "@selext/core";
 
 export type Contract = TagContract;
 
-import { useQuery, useMutation } from "@tanstack/react-query";
+export const contract: Contract = createContract({}) as any;
 
-export const Query: Contract = async (...input) => {
-    const { data } = useQuery({
-        queryKey: input,
-        queryFn: async () => {
-            const response = await fetch("/api", {
-                method: "POST",
-                body: JSON.stringify(input),
-            });
+type InferOverloadReturnType<TFunc, TArgs extends any[]> = TFunc extends (
+    ...args: TArgs
+) => infer TReturn ? TReturn
+    : never;
 
-            return response.json();
-        },
-    });
+export const query = <TTerm extends Term<any, any, any, any>>(
+    contract: TTerm,
+) => (async (input) => {
+    const swr = useSWR(input, contract);
+}) as Awaited<TTerm>;
 
-    return data;
-};
+const res = await query(contract)({
+    operation: "tag.delete",
+    parameter: { id: "123" },
+    select: { id: true, name: true },
+});
 
-export const Mutation: Contract = async (...input) => {
-    const { data } = useMutation({
-        mutationKey: input,
-        mutationFn: async () => {
-            const response = await fetch("/api", {
-                method: "POST",
-                body: JSON.stringify(input),
-            });
-
-            return response.json();
-        },
-    });
-
-    return data;
-};
+const _res = await contract({
+    operation: "tag.delete",
+    parameter: { id: "123" },
+    select: { id: true, name: true },
+});

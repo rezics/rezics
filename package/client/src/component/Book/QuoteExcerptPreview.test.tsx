@@ -13,7 +13,10 @@ export default () => {
                 <QuoteExcerptPreview.Container {...props} />
             </div>
             <div className="mt-4 text-sm text-gray-600">
-                <p>注意：此组件需要 GraphQL 查询支持，在 Cosmos 中可能显示加载状态或错误信息。</p>
+                <p>
+                    注意：此组件需要 GraphQL 查询支持，在 Cosmos
+                    中可能显示加载状态或错误信息。
+                </p>
             </div>
         </div>
     );
