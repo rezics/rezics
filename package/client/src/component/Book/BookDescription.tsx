@@ -1,11 +1,11 @@
 import { Button, Typography } from "@mui/material";
 import { Box } from "@mui/material";
-import { AccentBarWithText } from "@component/Common/AccentBar";
-import { EditButtonFloatRight } from "@component/Common/EditButtonFloatRight";
+import { AccentBarWithText } from "@component/Common/AccentBar.tsx";
+import { EditButtonFloatRight } from "@component/Common/EditButtonFloatRight.tsx";
 import { useTranslation } from "react-i18next";
 import { useEffect, useState } from "react";
-import DialogContainer from "../Common/DialogContainer";
-import EasyEditor from "@component/Form/EasyEditor";
+import DialogContainer from "../Common/DialogContainer.tsx";
+import EasyEditor from "@component/Form/EasyEditor.tsx";
 
 export namespace BookDescription {
     export type Show = {
@@ -29,7 +29,10 @@ export namespace BookDescription {
                             <EditButtonFloatRight.Show onClick={onEdit} />
                         )}
                     </div>
-                    <Typography variant="body1" className="whitespace-pre-line">
+                    <Typography
+                        variant="body1"
+                        className="whitespace-pre-line"
+                    >
                         {description}
                     </Typography>
                 </Box>
@@ -73,12 +76,9 @@ export namespace BookDescriptionEdit {
         setDescriptionState: React.Dispatch<React.SetStateAction<string>>;
     };
 
-    export const Show: React.FC<ShowProps> = ({
-        onUpdate,
-        setEditOpen,
-        descriptionState,
-        setDescriptionState,
-    }) => {
+    export const Show: React.FC<ShowProps> = (
+        { onUpdate, setEditOpen, descriptionState, setDescriptionState },
+    ) => {
         const handleUpdate = () => {
             onUpdate(descriptionState);
             setEditOpen(false);
@@ -92,7 +92,10 @@ export namespace BookDescriptionEdit {
                 />
                 <div className="w-full">
                     <div className="w-1/2 float-right">
-                        <Button onClick={handleUpdate} className="w-full">
+                        <Button
+                            onClick={handleUpdate}
+                            className="w-full"
+                        >
                             提交
                         </Button>
                     </div>

@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
-import DialogContainer from "@component/Common/DialogContainer"; // Ensure this path is correct
-import { TagGroup } from "contract/schema";
+import DialogContainer from "@component/Common/DialogContainer.tsx"; // Ensure this path is correct
 import Autocomplete from "@mui/material/Autocomplete";
 import {
     Alert,

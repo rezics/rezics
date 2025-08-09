@@ -8,6 +8,7 @@
         "cosmos-export": "cosmos-export"
     },
     "imports": {
+        "@component/": "./src/component/",
         "@emotion/react": "npm:@emotion/react@11.14.0",
         "@emotion/styled": "npm:@emotion/styled@11.14.1",
         "@fontsource/roboto": "npm:@fontsource/roboto@5.2.6",

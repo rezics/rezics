@@ -1,12 +1,12 @@
 import { Avatar, Box, Typography } from "@mui/material";
 import { Author } from "contract/schema";
 import { useTranslation } from "react-i18next";
-import { AccentBarWithText } from "@component/Common/AccentBar";
-import { EditButtonFloatRight } from "@component/Common/EditButtonFloatRight";
+import { AccentBarWithText } from "@component/Common/AccentBar.tsx";
+import { EditButtonFloatRight } from "@component/Common/EditButtonFloatRight.tsx";
 import { useEffect, useState } from "react";
-import EasyEditor from "@component/Form/EasyEditor";
+import EasyEditor from "@component/Form/EasyEditor.tsx";
 import { Button } from "@mui/material";
-import DialogContainer from "../Common/DialogContainer";
+import DialogContainer from "../Common/DialogContainer.tsx";
 
 export namespace AuthorInfo {
     export type Show = {
@@ -17,13 +17,9 @@ export namespace AuthorInfo {
         setEditOpen?: (open: boolean) => void;
     };
 
-    export const Show: React.FC<Show> = ({
-        author,
-        onEdit,
-        showEditButton = true,
-        editOpen,
-        setEditOpen,
-    }) => {
+    export const Show: React.FC<Show> = (
+        { author, onEdit, showEditButton = true, editOpen, setEditOpen },
+    ) => {
         let { t } = useTranslation();
         return (
             <div>
@@ -99,12 +95,9 @@ export namespace AuthorInfoEdit {
         setDescriptionState: any;
     };
 
-    export const Show: React.FC<ShowProps> = ({
-        onUpdate,
-        setEditOpen,
-        descriptionState,
-        setDescriptionState,
-    }) => {
+    export const Show: React.FC<ShowProps> = (
+        { onUpdate, setEditOpen, descriptionState, setDescriptionState },
+    ) => {
         const handleUpdate = () => {
             onUpdate(descriptionState);
             setEditOpen(false);
@@ -118,7 +111,10 @@ export namespace AuthorInfoEdit {
                 />
                 <div className="w-full">
                     <div className="w-1/2 float-right">
-                        <Button onClick={handleUpdate} className="w-full">
+                        <Button
+                            onClick={handleUpdate}
+                            className="w-full"
+                        >
                             提交
                         </Button>
                     </div>
@@ -135,12 +131,9 @@ export namespace AuthorInfoEdit {
         mode?: "modal" | "inline"; // 'modal' wraps with Dialog, 'inline' renders directly
     };
 
-    export const Container: React.FC<ContainerProps> = ({
-        author,
-        editOpen,
-        setEditOpen,
-        mode = "inline",
-    }) => {
+    export const Container: React.FC<ContainerProps> = (
+        { author, editOpen, setEditOpen, mode = "inline" },
+    ) => {
         const [descriptionState, setDescriptionState] = useState(
             author.description,
         );

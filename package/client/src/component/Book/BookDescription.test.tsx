@@ -1,5 +1,5 @@
 import { useFixtureInput } from "react-cosmos/client";
-import { BookDescription } from "./BookDescription";
+import { BookDescription } from "./BookDescription.tsx";
 
 export default () => {
     const [props] = useFixtureInput<BookDescription.Show>("Props", {

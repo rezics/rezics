@@ -2,8 +2,7 @@
     "name": "contract",
     "version": "0.0.1",
     "exports": {
-        ".": "./src/index.ts",
-        "./*": "./src/*.ts"
+        ".": "./mod.ts"
     },
     "imports": {
         "@types/google-libphonenumber": "npm:@types/google-libphonenumber@^7.4.30",
