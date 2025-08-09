@@ -49,16 +49,19 @@ module default {
 
         multi link authors := .<books[is Author];
         multi link chapters := .<book[is Chapter];
+        link chapter_order := .<book[is ChapterOrder];
         multi link publishers := .<books[is Publisher];
 
         index on (.length);
     }
 
     type Chapter extending Nameable, Evaluable, Relatable {
-        required order: float64;
         required single link book: Book;
-        single link parent: Chapter;
-        multi link children := .<parent[is Chapter];
+    }
+
+    type ChapterOrder {
+        required content: str;
+        required single link book: Book;
     }
 
     type Tag extending Nameable, Auditable, Relatable {
@@ -105,8 +108,8 @@ module default {
         index on (.email);
     }
 
-    type Identification extending Auditable {
-        required password_hash: str;
+    type Identity extending Auditable {
+        required password: str;
         required single link user: User;
 
         index on (.user);

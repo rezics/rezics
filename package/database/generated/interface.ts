@@ -214,8 +214,8 @@ export namespace $default {
   }
   export interface Author extends Nameable, Evaluable, Relatable {
     "description"?: string | null;
+    "user"?: User | null;
     "books": Book[];
-    "user"?: Person | null;
   }
   export interface Book extends Nameable, Auditable, Evaluable, Relatable {
     "length": number;
@@ -223,14 +223,20 @@ export namespace $default {
     "description"?: string | null;
     "grabbed_from": string;
     "authors": Author[];
+    "chapter_order": ChapterOrder[];
     "chapters": Chapter[];
     "publishers": Publisher[];
   }
   export interface Chapter extends Nameable, Evaluable, Relatable {
-    "order": number;
     "book": Book;
-    "parent"?: Chapter | null;
-    "children": Chapter[];
+  }
+  export interface ChapterOrder extends std.$Object {
+    "content": string;
+    "book": Book;
+  }
+  export interface Identity extends Auditable {
+    "password": string;
+    "user": User;
   }
   export interface Person extends Nameable, Auditable, Evaluable, Relatable {
     "owned_down": Evaluable[];
@@ -257,6 +263,7 @@ export namespace $default {
   export interface User extends Person {
     "email": string;
     "description"?: string | null;
+    "authors": Author[];
     "friends": User[];
   }
 }
@@ -267,6 +274,8 @@ export type Relatable = $default.Relatable;
 export type Author = $default.Author;
 export type Book = $default.Book;
 export type Chapter = $default.Chapter;
+export type ChapterOrder = $default.ChapterOrder;
+export type Identity = $default.Identity;
 export type Person = $default.Person;
 export type Organization = $default.Organization;
 export type Publisher = $default.Publisher;
@@ -555,6 +564,8 @@ export interface types {
     "Author": $default.Author;
     "Book": $default.Book;
     "Chapter": $default.Chapter;
+    "ChapterOrder": $default.ChapterOrder;
+    "Identity": $default.Identity;
     "Person": $default.Person;
     "Organization": $default.Organization;
     "Publisher": $default.Publisher;

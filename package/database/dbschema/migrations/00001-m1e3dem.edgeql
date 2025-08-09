@@ -1,6 +1,7 @@
-CREATE MIGRATION m13jk2tbdrn75lhkfkwzqtz33l3p234tbiicub6qaoaurruekmgega
+CREATE MIGRATION m1e3demima2xaw6kxamgwvogvalb2wtunjvmehqgmlux62tpbjfgpq
     ONTO initial
 {
+  CREATE EXTENSION pgcrypto VERSION '1.3';
   CREATE EXTENSION edgeql_http VERSION '1.0';
   CREATE EXTENSION graphql VERSION '1.0';
   CREATE SCALAR TYPE default::long_str EXTENDING std::str {
@@ -44,6 +45,9 @@ CREATE MIGRATION m13jk2tbdrn75lhkfkwzqtz33l3p234tbiicub6qaoaurruekmgega
       CREATE PROPERTY description: default::long_str;
       CREATE REQUIRED PROPERTY grabbed_from: std::str;
   };
+  CREATE TYPE default::Identity EXTENDING default::Auditable {
+      CREATE REQUIRED PROPERTY password: std::str;
+  };
   CREATE ABSTRACT TYPE default::Person EXTENDING default::Nameable, default::Auditable, default::Evaluable, default::Relatable {
       CREATE MULTI LINK owned_down: default::Evaluable;
       CREATE MULTI LINK owned_favorites: default::Evaluable;
@@ -80,17 +84,28 @@ CREATE MIGRATION m13jk2tbdrn75lhkfkwzqtz33l3p234tbiicub6qaoaurruekmgega
   };
   CREATE TYPE default::Author EXTENDING default::Nameable, default::Evaluable, default::Relatable {
       CREATE MULTI LINK books: default::Book;
-      CREATE SINGLE LINK user: default::Person;
       CREATE PROPERTY description: default::long_str;
   };
   ALTER TYPE default::Book {
       CREATE MULTI LINK authors := (.<books[IS default::Author]);
   };
+  ALTER TYPE default::User {
+      CREATE MULTI LINK authors: default::Author {
+          CREATE CONSTRAINT std::exclusive;
+      };
+  };
+  ALTER TYPE default::Author {
+      CREATE LINK user := (.<authors[IS default::User]);
+  };
+  CREATE TYPE default::ChapterOrder {
+      CREATE REQUIRED SINGLE LINK book: default::Book;
+      CREATE REQUIRED PROPERTY content: std::str;
+  };
+  ALTER TYPE default::Book {
+      CREATE LINK chapter_order := (.<book[IS default::ChapterOrder]);
+  };
   CREATE TYPE default::Chapter EXTENDING default::Nameable, default::Evaluable, default::Relatable {
       CREATE REQUIRED SINGLE LINK book: default::Book;
-      CREATE SINGLE LINK parent: default::Chapter;
-      CREATE MULTI LINK children := (.<parent[IS default::Chapter]);
-      CREATE REQUIRED PROPERTY order: std::float64;
   };
   ALTER TYPE default::Book {
       CREATE MULTI LINK chapters := (.<book[IS default::Chapter]);
@@ -105,6 +120,10 @@ CREATE MIGRATION m13jk2tbdrn75lhkfkwzqtz33l3p234tbiicub6qaoaurruekmgega
   };
   ALTER TYPE default::Book {
       CREATE MULTI LINK publishers := (.<books[IS default::Publisher]);
+  };
+  ALTER TYPE default::Identity {
+      CREATE REQUIRED SINGLE LINK user: default::User;
+      CREATE INDEX ON (.user);
   };
   ALTER TYPE default::Person {
       CREATE MULTI LINK owned_tags: default::Tag;
