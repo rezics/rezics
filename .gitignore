@@ -1,6 +1,9 @@
 # Visual Studio Counter
 .VSCodeCounter/
 
+# Vite
+.vite/
+
 # Logs
 *.log
 npm-debug.log*

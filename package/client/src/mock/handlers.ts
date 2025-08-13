@@ -1,9 +1,9 @@
 // src/mocks/handlers.ts
 import { http, HttpResponse } from "msw";
-import { handlers as apiHandlers } from "./handler";
+import { apiHandler } from "./handler/index.ts";
 
 export const handlers = [
-    ...apiHandlers,
+    apiHandler,
     // fallback handler - 捕捉未拦截的请求
     http.all("*", ({ request }) => {
         console.warn(

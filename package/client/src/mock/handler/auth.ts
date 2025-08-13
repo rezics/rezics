@@ -1,6 +1,6 @@
 import { http, HttpResponse } from "msw";
-import { Auth } from "contract";
-import { mockTokens, mockUsers } from "../data/auth";
+// import { Auth } from "contract";
+import { mockTokens, mockUsers } from "../data/auth.ts";
 
 export const authHandlers = [
     // Login

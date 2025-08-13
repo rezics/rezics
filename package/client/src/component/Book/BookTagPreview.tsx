@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import { Box } from "@mui/material";
-import { AccentBarWithText } from "@component/Common/AccentBar";
-import { EditButtonFloatRight } from "@component/Common/EditButtonFloatRight";
-import { ArrowForwardIcon } from "../Common/ArrowForwardIcon";
+import { AccentBarWithText } from "@component/Common/AccentBar.tsx";
+import { EditButtonFloatRight } from "@component/Common/EditButtonFloatRight.tsx";
+import { ArrowForwardIcon } from "../Common/ArrowForwardIcon.tsx";
 import { TagGroup } from "contract/schema";
 
-import { BookTagList } from "@component/Tag/BookTagList";
-import { BookTagEdit } from "../Tag/BookTagEdit";
+import { BookTagList } from "@component/Tag/BookTagList.tsx";
+import { BookTagEdit } from "../Tag/BookTagEdit.tsx";
 
 export namespace BookTagView {
     export type Show = {

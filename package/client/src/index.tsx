@@ -1,21 +1,21 @@
 import { StrictMode, useEffect, useMemo } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
-import Router from "./router/router";
+import Router from "./router/router.tsx";
 import { ThemeProvider, useMediaQuery } from "@mui/material";
 import { StyledEngineProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
-import { getDynamicTheme, getTheme } from "./config/theme";
-import { appStore } from "./global/appStore";
+import { getDynamicTheme, getTheme } from "./config/theme.ts";
+import { appStore } from "./global/appStore.ts";
 import {
     applyDynamicThemeToDOM,
     generateDynamicColors,
-} from "./config/dynamicTheme";
-import { setupMock } from "./plugin/providers/mock";
-import { queryClient, TsrProvider } from "./api/tsr";
+} from "./config/dynamicTheme.ts";
+import { setupMock } from "./plugin/providers/mock.ts";
+// import { queryClient, TsrProvider } from "./api/tsr.ts";
 
-import { initI18n } from "./plugin/providers/i18n";
-import { PersistentSettingsLoader } from "./plugin/providers/PersistentSettingsLoader";
+import { initI18n } from "./plugin/providers/i18n.ts";
+import { PersistentSettingsLoader } from "./plugin/providers/PersistentSettingsLoader.tsx";
 
 initI18n();
 
@@ -31,12 +31,12 @@ if (!(container as any)._reactRoot) {
 const root = (container as any)._reactRoot;
 
 // Open TanStack Query Devtools
-if (import.meta.env.MODE === "development") {
-    if (typeof window !== "undefined") {
-        // 啓用tanstack query devtools，自行下載瀏覽器擴展
-        (window as any).__TANSTACK_QUERY_CLIENT__ = queryClient;
-    }
-}
+// if (import.meta.env.MODE === "development") {
+//     if (typeof window !== "undefined") {
+//         // 啓用tanstack query devtools，自行下載瀏覽器擴展
+//         (window as any).__TANSTACK_QUERY_CLIENT__ = queryClient;
+//     }
+// }
 
 import "github-markdown-css/github-markdown-light.css";
 
@@ -74,9 +74,9 @@ function Root() {
                 <ThemeProvider theme={theme}>
                     <CssBaseline />
                     <PersistentSettingsLoader />
-                    <TsrProvider>
-                        {Router}
-                    </TsrProvider>
+                    {/* <TsrProvider> */}
+                    {Router}
+                    {/* </TsrProvider> */}
                 </ThemeProvider>
             </StyledEngineProvider>
         </StrictMode>
@@ -86,3 +86,5 @@ function Root() {
 setupMock().then(() => {
     root.render(<Root />);
 });
+
+// root.render(<Root />);

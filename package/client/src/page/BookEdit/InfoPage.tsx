@@ -1,7 +1,7 @@
 import { BookDescriptionEdit } from "@/component/Book/BookDescription";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { tsr } from "@/api/tsr";
+import { tsr } from "@/api/tsr.ts";
 import { AccentBarWithText } from "@/component/Common/AccentBar";
 import Paper from "@mui/material/Paper";
 

@@ -1,11 +1,11 @@
 import { http, HttpResponse } from "msw";
 import { Book } from "contract";
 import { Chapter } from "contract";
-import { bookList01 } from "../data/bookList01";
-import { bookInfo01 } from "../data/bookinfo01";
-import chapterList01 from "../data/chapterlist01.json";
-import { chapterContent01 } from "../data/chapterContent01";
-import { generateRandomItemsFrom } from "./common";
+import { bookList01 } from "../data/bookList01.ts";
+import { bookInfo01 } from "../data/bookinfo01.ts";
+import chapterList01 from "../data/chapterlist01.json" with { type: "json" };
+import { chapterContent01 } from "../data/chapterContent01.ts";
+import { generateRandomItemsFrom } from "./common.ts";
 
 const books = [...bookList01];
 

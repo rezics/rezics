@@ -1,5 +1,6 @@
 import useSWR from "swr";
 import { Tag } from "contract";
+import { apiPost } from "@/api/swr.ts";
 
 const createTagInput = {
     operation: "tag.create",
@@ -10,25 +11,24 @@ const createTagInput = {
     },
 } satisfies Tag.Input.Create;
 
-// Silence unused data for now
-const { data: _data } = useSWR<
-    Tag.Output.Create<typeof createTagInput.select>,
-    Error,
-    typeof createTagInput
->(
-    createTagInput,
-    async (key) => {
-        const _res = await fetch("/api", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                Accept: "application/json",
-            },
-            body: JSON.stringify(key),
-        });
-        if (!_res.ok) {
-            throw new Error(`Request failed: ${_res.status}`);
-        }
-        return (await _res.json()) as any;
-    },
-);
+export function UseTag() {
+    // Silence unused data for now
+    const { data: _data } = useSWR<
+        Tag.Output.Create<typeof createTagInput.select>,
+        Error,
+        typeof createTagInput
+    >(
+        createTagInput,
+        async (key) => {
+            const res = await apiPost(key);
+            console.log("res", res);
+            return res;
+        },
+    );
+    return (
+        <div>
+            <h1>Tag</h1>
+            {JSON.stringify(_data)}
+        </div>
+    );
+}

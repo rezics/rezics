@@ -2,39 +2,39 @@ import { Route, Router, Switch } from "wouter";
 import { ThemeProvider } from "@mui/material";
 
 // Pages
-import { Home } from "@/page/Home";
-import { Login } from "@/page/Auth/Login";
-import { NotFound } from "@/page/NotFound";
+import { Home } from "@/page/Home.tsx";
+// import { Login } from "@/page/Auth/Login.tsx";
+import { NotFound } from "@/page/NotFound.tsx";
 
 // Book – Read
-import { BookReadChapterPage } from "@/page/Book/ChapterPage";
-import { BookReadLayout } from "@/layout/BookReadLayout";
+import { BookReadChapterPage } from "@/page/Book/ChapterPage.tsx";
+import { BookReadLayout } from "@/layout/BookReadLayout.tsx";
 
 // Book – Edit
-import { BookEditLayout } from "@/layout/BookEditLayout";
-import { BookEditMainPage } from "@/page/BookEdit/InfoPage";
-import { BookEditChapterPage } from "@/page/BookEdit/ChapterPage";
+import { BookEditLayout } from "@/layout/BookEditLayout.tsx";
+import { BookEditMainPage } from "@/page/BookEdit/InfoPage.tsx";
+import { BookEditChapterPage } from "@/page/BookEdit/ChapterPage.tsx";
 
 // Book list / Library pages
-import { BookLib } from "@/page/Book/BookLibPage";
-import { BookPage } from "@/page/Book/BookPage";
-import { ReadListPage } from "@/page/ReadList/ReadListPage";
+import { BookLib } from "@/page/Book/BookLibPage.tsx";
+import { BookPage } from "@/page/Book/BookPage.tsx";
+import { ReadListPage } from "@/page/ReadList/ReadListPage.tsx";
 
 // Misc
-import TestPage from "@/page/Test/TestPage";
-import { MainLayout } from "@/layout/MainLayout";
-import { BookListEditPage } from "@/page/ReadList/ReadListEditPage";
-import { ReadlistByBookPage } from "@/page/ReadList/ReadListsByBookPage";
-import { ShortReviewByBookPage } from "@/page/Review/ShortReviewByBookPage";
-import { ReviewByBookPage } from "@/page/Review/ReviewByBookPage";
-import { LongReviewEditPage } from "@/page/Review/ReviewEditPage";
-import { QuoteByBookPage } from "@/page/Review/QuoteByBookPage";
-import { TestPage02 } from "@/page/Test/TestPage02";
-import { TestPage03 } from "@/page/Test/TestPage03";
-import { TagByBookPage } from "@/page/Tag/TagByBookPage";
-import TestPaginationPage from "@/page/Test/TestPaginationPage";
-import { NewBookPage } from "@/page/BookEdit/NewBookPage";
-import { UserPage } from "@/page/User/UserPage";
+import TestPage from "@/page/Test/TestPage.tsx";
+import { MainLayout } from "@/layout/MainLayout.tsx";
+import { BookListEditPage } from "@/page/ReadList/ReadListEditPage.tsx";
+import { ReadlistByBookPage } from "@/page/ReadList/ReadListsByBookPage.tsx";
+import { ShortReviewByBookPage } from "@/page/Review/ShortReviewByBookPage.tsx";
+import { ReviewByBookPage } from "@/page/Review/ReviewByBookPage.tsx";
+import { LongReviewEditPage } from "@/page/Review/ReviewEditPage.tsx";
+import { QuoteByBookPage } from "@/page/Review/QuoteByBookPage.tsx";
+import { TestPage02 } from "@/page/Test/TestPage02.tsx";
+import { TestPage03 } from "@/page/Test/TestPage03.tsx";
+import { TagByBookPage } from "@/page/Tag/TagByBookPage.tsx";
+// import TestPaginationPage from "@/page/Test/TestPaginationPage.tsx";
+import { NewBookPage } from "@/page/BookEdit/NewBookPage.tsx";
+import { UserPage } from "@/page/User/UserPage.tsx";
 
 /**
  * IMPORTANT – Flattened routing
@@ -48,8 +48,10 @@ export default (
         <ThemeProvider theme={{}}>
             <Switch>
                 {/* ANCHOR Auth */}
-                <Route path="/login" component={Login.Container} />
-                <Route path="/register" component={Login.Container} />
+                {
+                    /* <Route path="/login" component={Login.Container} />
+                <Route path="/register" component={Login.Container} /> */
+                }
 
                 {/* ANCHOR Book Read – keep the more specific path first */}
                 <Route path="/book/:bookId/read/:chapterId">
@@ -180,15 +182,19 @@ export default (
                     </MainLayout>
                 </Route>
                 <Route path="/test03">
-                    <BookEditLayout>
-                        <TestPage03 />
-                    </BookEditLayout>
+                    <TestPage03 />
+                    {
+                        /* <BookEditLayout>
+                    </BookEditLayout> */
+                    }
                 </Route>
-                <Route path="/test04">
+                {
+                    /* <Route path="/test04">
                     <MainLayout>
                         <TestPaginationPage />
                     </MainLayout>
-                </Route>
+                </Route> */
+                }
                 {/* ANCHOR Home */}
                 <Route path="/">
                     <MainLayout>
