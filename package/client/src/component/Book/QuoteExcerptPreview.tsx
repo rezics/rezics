@@ -1,6 +1,14 @@
-import { tsr } from "@/api/tsr";
-import { QuoteExcerptList } from "../Review/QuoteExcerptList";
-import { QuoteExcerpt } from "contract/schema";
+import { apiPost } from "@/api/swr.ts";
+import { QuoteExcerptList } from "../Review/QuoteExcerptList.tsx";
+import useSWR from "swr";
+
+interface QuoteExcerpt {
+    id: string;
+    content: string;
+    author: string;
+    createdAt: string;
+    updatedAt: string;
+}
 
 export namespace QuoteExcerptPreview {
     export type Show = {
@@ -26,24 +34,25 @@ export namespace QuoteExcerptPreview {
     };
 
     export const Container: React.FC<Container> = ({ id }) => {
-        const { data, isLoading, error } = tsr.review.listQuotes.useQuery({
-            queryKey: ["quoteExcerpt", id],
-            queryData: {
-                params: {
-                    bookId: id,
-                },
-                query: {
-                    page: 1,
-                    limit: 2,
-                    type: "popular",
-                    order: "desc",
-                },
-            },
-        });
 
+        const createBookInput = {
+            operation: "review.listQuotes",
+            parameter: { bookId: id },
+            select: {
+                id: true,
+                content: true,
+                author: true,
+                createdAt: true,
+                updatedAt: true,
+            },
+        }
+
+        const { data, isLoading, error } = useSWR(createBookInput, apiPost);
+
+        if (!data?.success) return <div>No data</div>;
         return (
             <Show
-                data={data?.body || []}
+                data={data?.success || []}
                 isLoading={isLoading}
                 error={String(error)}
             />

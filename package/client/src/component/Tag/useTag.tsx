@@ -19,11 +19,7 @@ export function UseTag() {
         typeof createTagInput
     >(
         createTagInput,
-        async (key) => {
-            const res = await apiPost(key);
-            console.log("res", res);
-            return res;
-        },
+        apiPost,
     );
     return (
         <div>

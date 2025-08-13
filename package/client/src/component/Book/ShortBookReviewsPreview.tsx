@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { ShortReviewList } from "../Review/ShortReviewList";
-import { tsr } from "@/api/tsr";
-import { BookReview } from "contract/schema";
+import { ShortReviewList } from "../Review/ShortReviewList.tsx";
+import { apiPost } from "@/api/swr.ts";
+import useSWR from "swr";
 
-type Review = BookReview & {
+type Review = {
     likes?: number;
     dislikes?: number;
 };
@@ -15,16 +15,16 @@ interface ShortBookReviewsProps {
 export const ShortBookReviews: React.FC<ShortBookReviewsProps> = ({
     bookId,
 }) => {
-    const { data, isLoading, error } = tsr.review.listShortReviews.useQuery({
-        queryKey: ["shortBookReviews", bookId],
-        queryData: {
-            params: {
-                bookId: bookId || "",
-            },
+    const createBookInput = {
+        operation: "review.short.list",
+        parameter: { bookId: bookId },
+        select: {
+            id: true,
         },
-    });
+    }
+    const { data, isLoading, error } = useSWR(createBookInput, apiPost);
 
-    const reviews = data?.body ?? [];
+    const reviews = data || [];
 
     const handleLike = (reviewId: string) => {
         console.log("Like review:", reviewId);

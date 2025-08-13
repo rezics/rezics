@@ -1,29 +1,67 @@
-import { http, HttpResponse } from "msw";
-// import { Tag } from "contract";
+import { HttpResponse } from "msw";
 
-let Tag: any = {}
+// Simple in-memory store for tags to make read/update/delete meaningful in mocks
+const tagStore = new Map<string, any>();
 
-const mockTagGroups = [
-    { key: "genre", name: "Genre", tags: ["Fantasy", "Sci-fi", "Romance"] },
-    { key: "status", name: "Status", tags: ["Ongoing", "Completed"] },
-];
-
-// export const tagHandlers = [
-//     http.get(Tag.list.path, () => HttpResponse.json(mockTagGroups)),
-
-//     http.get(Tag.get.path, ({ params }) => {
-//         const group = mockTagGroups.find(
-//             (g) => g.key === (params as any)["key"],
-//         );
-//         if (!group) {
-//             return HttpResponse.json({ message: "Not found" }, { status: 404 });
-//         }
-//         return HttpResponse.json(group);
-//     }),
-// ];
+function genId() {
+  return Math.random().toString(36).slice(2, 10);
+}
 
 export function tagCreateHandler(body: any) {
-    console.log("tagCreateHandler", body);
-    // return HttpResponse.json({ id: "111", name: "test" }, { status: 200 });
-    return { id: "111", name: "test" }
+  const id = genId();
+  const now = new Date().toISOString();
+  const created = {
+    id,
+    name: body?.parameter?.name ?? "New Tag",
+    type: body?.parameter?.type ?? "general",
+    owners: body?.parameter?.owners ?? [],
+    created_at: now,
+    updated_at: now,
+  };
+  tagStore.set(id, created);
+  return HttpResponse.json({ id: created.id, name: created.name }, { status: 200 });
+}
+
+export function tagReadHandler(body: any) {
+  const id = body?.parameter?.id;
+  const found = id ? tagStore.get(id) : undefined;
+  if (!found) {
+    const result = { id, name: "" };
+    return HttpResponse.json({ ...result }, { status: 200 });
+  }
+  const result = { id: found.id, name: found.name };
+  return HttpResponse.json({ ...result }, { status: 200 });
+}
+
+export function tagUpdateHandler(body: any) {
+  const id = body?.parameter?.id;
+  const prev = id ? tagStore.get(id) : undefined;
+  if (!prev) {
+    // Upsert-like behavior for mocks
+    const now = new Date().toISOString();
+    const created = {
+      id: id ?? genId(),
+      name: body?.parameter?.name ?? "",
+      type: body?.parameter?.type ?? "general",
+      owners: body?.parameter?.owners ?? [],
+      created_at: now,
+      updated_at: now,
+    };
+    tagStore.set(created.id, created);
+    return HttpResponse.json({ id: created.id, name: created.name }, { status: 200 });
+  }
+  const updated = {
+    ...prev,
+    ...body?.parameter,
+    updated_at: new Date().toISOString(),
+  };
+  tagStore.set(updated.id, updated);
+  return HttpResponse.json({ id: updated.id, name: updated.name }, { status: 200 });
+}
+
+export function tagDeleteHandler(body: any) {
+  const id = body?.parameter?.id;
+  if (id) tagStore.delete(id);
+  // Return minimal selected fields
+  return HttpResponse.json({ id }, { status: 200 });
 }

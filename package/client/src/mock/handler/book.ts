@@ -1,6 +1,4 @@
-import { http, HttpResponse } from "msw";
-import { Book } from "contract";
-import { Chapter } from "contract";
+import { HttpResponse } from "msw";
 import { bookList01 } from "../data/bookList01.ts";
 import { bookInfo01 } from "../data/bookinfo01.ts";
 import chapterList01 from "../data/chapterlist01.json" with { type: "json" };
@@ -9,72 +7,86 @@ import { generateRandomItemsFrom } from "./common.ts";
 
 const books = [...bookList01];
 
-export const bookHandlers = [
-    // List and Search books
-    http.get(Book.list.path, ({ request }) => {
-        const url = new URL(request.url);
-        const searchParams = url.searchParams;
-        const query = {
-            page: searchParams.get("page"),
-            limit: searchParams.get("limit"),
-            type: searchParams.get("type"),
-            order: searchParams.get("order"),
-            tag: searchParams.get("tag"),
-            sort: searchParams.get("sort"),
+// ===== Operation-based handlers =====
+
+const bookStore = new Map<string, any>();
+
+function genId() {
+    return Math.random().toString(36).slice(2, 10);
+}
+
+export function bookCreateHandler(body: any) {
+    const id = genId();
+    const now = new Date().toISOString();
+    const created = {
+        id,
+        title: body?.parameter?.title ?? "Untitled Book",
+        authors: body?.parameter?.authors ?? [],
+        created_at: now,
+        updated_at: now,
+    };
+    bookStore.set(id, created);
+    return HttpResponse.json({ id: created.id, title: created.title }, { status: 200 });
+}
+
+export function bookReadHandler(body: any) {
+    const id = body?.parameter?.id;
+    const found = id ? bookStore.get(id) : undefined;
+    const payload = found ?? bookInfo01;
+    // Return minimal common fields for flexibility
+    // const result = {
+    //     id: payload.id ?? id ?? genId(),
+    //     title: payload.title ?? payload.name ?? "",
+    // };
+    const result = payload
+    return HttpResponse.json({ ...result }, { status: 200 });
+}
+
+export function bookUpdateHandler(body: any) {
+    const id = body?.parameter?.id;
+    const prev = id ? bookStore.get(id) : undefined;
+    if (!prev) {
+        const now = new Date().toISOString();
+        const created = {
+            id: id ?? genId(),
+            title: body?.parameter?.title ?? "",
+            authors: body?.parameter?.authors ?? [],
+            created_at: now,
+            updated_at: now,
         };
-        console.log("mock book list query", query);
-        const responseJson = {
-            items: generateRandomItemsFrom(books, Number(query.limit) || 5),
-            page: query.page,
-            totalItems: 10000,
-        };
-        return HttpResponse.json(responseJson);
-    }),
+        bookStore.set(created.id, created);
+        return HttpResponse.json({ id: created.id, title: created.title }, { status: 200 });
+    }
+    const updated = {
+        ...prev,
+        ...body?.parameter,
+        updated_at: new Date().toISOString(),
+    };
+    bookStore.set(updated.id, updated);
+    return HttpResponse.json({ id: updated.id, title: updated.title }, { status: 200 });
+}
 
-    // Top books
-    // http.get(Book.top.path, () => HttpResponse.json(books.slice(0, 5))),
+export function bookDeleteHandler(body: any) {
+    const id = body?.parameter?.id;
+    if (id) bookStore.delete(id);
+    return HttpResponse.json({ success: { id } }, { status: 200 });
+}
 
-    // Get book detail
-    http.get(Book.get.path, ({ params }) => {
-        // const book = books.find((b) => b.id === (params as any)["id"]) ?? (bookInfo01 as any);
-        // if (!book) return HttpResponse.json({ message: "Not found" }, { status: 404 });
-        const book = bookInfo01;
-        return HttpResponse.json(book);
-    }),
+export function bookListHandler(body: any) {
+    const page = body?.parameter?.page ?? 1;
+    const limit = body?.parameter?.limit ?? 5;
+    const items = generateRandomItemsFrom(books, Number(limit) || 5);
+    return HttpResponse.json({ items, page, totalItems: 10000 }, { status: 200 });
+}
 
-    // Update book
-    http.put(Book.update.path, async ({ params, request }) => {
-        const index = books.findIndex((b) => b.id === (params as any)["id"]);
-        if (index === -1) {
-            return HttpResponse.json({ message: "Not found" }, { status: 404 });
-        }
-        const patch: any = await request.json();
-        books[index] = { ...(books[index] as any), ...(patch as any) };
-        return HttpResponse.json(books[index]);
-    }),
+// Chapter ops – keep here for backward compatibility with previous file structure
+export function chapterListHandler(_body: any) {
+    const data: any = { chapters: [], order: [] };
+    data.order = (chapterList01 as any).order;
+    data.chapters = Object.values((chapterList01 as any).chapters);
+    return HttpResponse.json({ ...data }, { status: 200 });
+}
 
-    // Chapters list
-    http.get(Chapter.list.path, () => {
-        let data: any = { chapters: [], order: [] };
-        data.order = chapterList01.order;
-        data.chapters = Object.values(chapterList01.chapters);
-        // console.log("chapters", data);
-        return HttpResponse.json(data);
-    }),
-
-    // Chapter content
-    http.get(Chapter.get.path, ({ params }) => {
-        return HttpResponse.json(chapterContent01);
-        // return HttpResponse.json({
-        //     id: (params as any)["chapterId"],
-        //     content: "Mock chapter content",
-        //     created_at: new Date().toISOString(),
-        //     chapterName: `章节 ${(params as any)["chapterId"]}`,
-        //     author: {
-        //         id: "1",
-        //         name: "Mock Author",
-        //         avatar: "https://api.dicebear.com/9.x/pixel-art/svg?seed=author",
-        //     },
-        // });
-    }),
-];
+export function chapterReadHandler(_body: any) {
+    return HttpResponse.json({ ...chapterContent01 }, { status: 200 });
+}

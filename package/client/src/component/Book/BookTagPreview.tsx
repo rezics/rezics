@@ -3,14 +3,13 @@ import { Box } from "@mui/material";
 import { AccentBarWithText } from "@component/Common/AccentBar.tsx";
 import { EditButtonFloatRight } from "@component/Common/EditButtonFloatRight.tsx";
 import { ArrowForwardIcon } from "../Common/ArrowForwardIcon.tsx";
-import { TagGroup } from "contract/schema";
 
 import { BookTagList } from "@component/Tag/BookTagList.tsx";
 import { BookTagEdit } from "../Tag/BookTagEdit.tsx";
 
 export namespace BookTagView {
     export type Show = {
-        tagObjects: TagGroup[];
+        tagObjects: any[];
         onEdit?: () => void;
         showEditButton?: boolean;
         bookId: string;
@@ -53,7 +52,7 @@ export namespace BookTagView {
     };
 
     export type Container = {
-        tagObjects?: TagGroup[] | undefined;
+        tagObjects?: any[] | undefined;
         bookId: string;
     };
 

@@ -7,9 +7,26 @@
 // import { homePageHandlers } from "./homePage.ts";
 // import { commentHandlers } from "./comment.ts";
 
-import { tagCreateHandler } from "./tag.ts";
+import { tagCreateHandler, tagReadHandler, tagUpdateHandler, tagDeleteHandler } from "./tag.ts";
+import {
+  bookCreateHandler,
+  bookReadHandler,
+  bookUpdateHandler,
+  bookDeleteHandler,
+  bookListHandler,
+  chapterListHandler,
+  chapterReadHandler,
+} from "./book.ts";
+import {
+  commentCreateHandler,
+  commentReadHandler,
+  commentUpdateHandler,
+  commentDeleteHandler,
+  commentListByTargetHandler,
+} from "./comment.ts";
 
 import { http, HttpResponse } from "msw";
+import { reviewShortListHandler, reviewCreateHandler, reviewListQuotesHandler } from "./review.ts";
 
 // 定义 operation -> handler 的映射
 const operationMap: Record<
@@ -17,8 +34,30 @@ const operationMap: Record<
   (body: any, req: any, ctx: any) => Promise<any> | any
 > = {
   "tag.create": tagCreateHandler,
-  //   "tag.delete": tagDeleteHandler,
-  //   "post.publish": postPublishHandler,
+  "tag.read": tagReadHandler,
+  "tag.update": tagUpdateHandler,
+  "tag.delete": tagDeleteHandler,
+  // Book
+  "book.create": bookCreateHandler,
+  "book.read": bookReadHandler,
+  "book.update": bookUpdateHandler,
+  "book.delete": bookDeleteHandler,
+  "book.list": bookListHandler,
+  // Chapter
+  "chapter.list": chapterListHandler,
+  "chapter.read": chapterReadHandler,
+  // Comment
+  "comment.create": commentCreateHandler,
+  "comment.read": commentReadHandler,
+  "comment.update": commentUpdateHandler,
+  "comment.delete": commentDeleteHandler,
+  // custom op for listing comments under an entity
+  "comment.listByTarget": commentListByTargetHandler,
+  //"post.publish": postPublishHandler,
+  // Review
+  "review.short.list": reviewShortListHandler,
+  "review.create": reviewCreateHandler,
+  "review.listQuotes": reviewListQuotesHandler,
 };
 
 export const apiHandler = http.all("/api", async ({ request, params, cookies }) => {
@@ -26,7 +65,7 @@ export const apiHandler = http.all("/api", async ({ request, params, cookies }) 
     console.log("apiHandler", request, params, cookies);
     const body: any = await request.json();
 
-    console.log("body", body);
+    // console.log("body", body);
     const operation = body.operation;
 
     if (!operation || typeof operation !== "string") {
@@ -43,7 +82,8 @@ export const apiHandler = http.all("/api", async ({ request, params, cookies }) 
 
     const result = handler(body, request, cookies);
 
-    return HttpResponse.json(result, { status: 200 });
+    // return HttpResponse.json(result, { status: 200 });
+    return result;
   } catch (err) {
     return HttpResponse.json(
       { error: "Internal mock server error", detail: String(err) },

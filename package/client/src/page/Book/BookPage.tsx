@@ -12,30 +12,31 @@ import {
 } from "@mui/material";
 import { TabContext, TabList, TabPanel } from "@mui/lab";
 import { Link, useLocation, useParams } from "wouter";
-import { BookTagView } from "@/component/Book/BookTagPreview";
-import { BookReviews } from "@/component/Book/BookReviewsPreview";
-import { ShortBookReviews } from "@/component/Book/ShortBookReviewsPreview";
-import { AccentBarWithText } from "@component/Common/AccentBar";
+import { BookTagView } from "@/component/Book/BookTagPreview.tsx";
+import { BookReviews } from "@/component/Book/BookReviewsPreview.tsx";
+import { ShortBookReviews } from "@/component/Book/ShortBookReviewsPreview.tsx";
+import { AccentBarWithText } from "@component/Common/AccentBar.tsx";
 
-import { ChapterList } from "@component/Book/ChapterList";
-import { ArrowForwardIcon } from "@component/Common/ArrowForwardIcon";
-import { BookHero } from "@component/Book/BookHero";
-import { BookDescription } from "@/component/Book/BookDescription";
-import { AuthorInfo } from "@/component/Book/AuthorInfo";
-import { QuoteExcerptPreview } from "@/component/Book/QuoteExcerptPreview";
-import { ReadlistByBookPreview } from "@/component/Book/ReadlistByBookPreview";
+import { ChapterList } from "@component/Book/ChapterList.tsx";
+import { ArrowForwardIcon } from "@component/Common/ArrowForwardIcon.tsx";
+import { BookHero } from "@component/Book/BookHero.tsx";
+import { BookDescription } from "@/component/Book/BookDescription.tsx";
+import { AuthorInfo } from "@/component/Book/AuthorInfo.tsx";
+import { QuoteExcerptPreview } from "@/component/Book/QuoteExcerptPreview.tsx";
+import { ReadlistByBookPreview } from "@/component/Book/ReadlistByBookPreview.tsx";
 
-import { routeStore } from "@/global/routeStore";
-import { startThrottledScroll } from "@/util/ScrollUtil";
+import { routeStore } from "@/global/routeStore.ts";
+import { startThrottledScroll } from "@/util/ScrollUtil.ts";
 import { Book } from "contract";
-import tsr from "@/api/tsr";
+import useSWR from "swr";
+import { apiPost } from "@/api/swr.ts";
 
 export namespace BookPage {
     type Tab = "0" | "1" | "2";
 
     export type Show = {
         ref?: React.Ref<unknown> | undefined;
-        data: Book;
+        data: any;
         activeTab: string;
         onTabChange?:
             | ((event: React.SyntheticEvent | null, newValue: Tab) => void)
@@ -194,13 +195,13 @@ export namespace BookPage {
             return;
         }
 
-        const before = window.pageYOffset;
+        const before = globalThis.pageYOffset;
 
-        window.scrollTo({
+        globalThis.scrollTo({
             top: distance,
         });
 
-        if (Math.abs(window.pageYOffset - before) > 10) {
+        if (Math.abs(globalThis.pageYOffset - before) > 10) {
             await new Promise((resolve) => setTimeout(resolve, 100));
             return scroll(distance, count + 1);
         }
@@ -217,14 +218,15 @@ export namespace BookPage {
         };
         const [activeTab, setActiveTab] = React.useState<Tab>(getInitialTab);
 
-        const { data, isLoading, error } = tsr.book.get.useQuery({
-            queryKey: ["book", bookId],
-            queryData: {
-                params: {
-                    bookId: bookId!,
-                },
+        const createBookInput = {
+            operation: "book.read",
+            parameter: { id: bookId },
+            select: {
+                id: true,
             },
-        });
+        } satisfies Book.Input.Read;
+
+        const { data, isLoading, error } = useSWR(createBookInput, apiPost);
 
         useEffect(() => {
             console.log("book data", data);
@@ -242,12 +244,13 @@ export namespace BookPage {
 
         let stopThrottledScroll: any = null;
         useEffect(() => {
-            const timer = window.setTimeout(() => {
+            const timer = globalThis.setTimeout(() => {
                 stopThrottledScroll = startThrottledScroll((y) => {
                     console.log("当前滚动位置：", y);
                     console.log("location", bookId);
                     routeStore.getState().setRouteData(String(location), {
-                        scrollY: window.scrollY,
+                        scrollY: globalThis.pageYOffset,
+                        // scrollY: window.scrollY,
                         tab: tabRef.current,
                     });
                 }, 200); // 150ms 节流
@@ -288,13 +291,16 @@ export namespace BookPage {
             return <div>Oh no... {String(error)}</div>;
         }
 
-        if (!data?.body.isbn) {
+        if (!data?.id) {
             return null; // 或者 return <div>No data</div>;
         }
+        // if (!data?.body.isbn) {
+        //     return null; // 或者 return <div>No data</div>;
+        // }
 
         return (
             <Show
-                data={data.body}
+                data={data}
                 activeTab={activeTab}
                 onTabChange={handleTabChange}
             />

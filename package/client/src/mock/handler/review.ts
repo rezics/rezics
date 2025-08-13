@@ -1,78 +1,47 @@
-import { http, HttpResponse } from "msw";
-import { Review } from "contract";
-import { mockBookShortReviews, mockReviews, mockUsers } from "../data/reviews";
-import { mockQuotes } from "../data/mockQuotes";
-import { generateRandomItemsFrom } from "./common";
+import { HttpResponse } from "msw";
+import { mockBookShortReviews, mockReviews, mockUsers } from "../data/reviews.ts";
+import { mockQuotes } from "../data/mockQuotes.ts";
+import { generateRandomItemsFrom } from "./common.ts";  
 
-export const reviewHandlers = [
-    // List full reviews
-    http.get(Review.listReviews.path, ({ params }) => {
-        const reviews = mockReviews
-            // .filter((r) => r.bookId === (params as any)["id"])
-            .filter(() => 1)
-            .map((r) => {
-                const user = mockUsers.find((u) => u.id === r.userId);
-                return {
-                    id: r.id,
-                    title: `Review ${r.id}`,
-                    content: r.content,
-                    rating: r.rating,
-                    created_at: rcreated_atat,
-                    user: user
-                        ? { id: user.id, name: user.name, avatar: user.avatar }
-                        : { id: "0", name: "Unknown", avatar: "" },
-                };
-            });
-        return HttpResponse.json(reviews);
-    }),
+function genId() {
+    return Math.random().toString(36).slice(2, 10);
+}
 
-    // List short reviews
-    http.get(
-        Review.listShortReviews.path,
-        () => HttpResponse.json(mockBookShortReviews),
-    ),
+// operation: "review.short.list"
+export function reviewShortListHandler(body: any) {
+    const limit = body?.parameter?.limit;
+    const list = Array.isArray(mockBookShortReviews)
+        ? (limit ? mockBookShortReviews.slice(0, limit) : mockBookShortReviews)
+        : [];
+    return HttpResponse.json(list, { status: 200 });
+}
 
-    // Create review
-    http.post(Review.createReview.path, async ({ request, params }) => {
-        const body = await request.json();
-        const newReviewId = String(mockReviews.length + 1);
-        const newReview = {
-            id: newReviewId,
-            bookId: (params as any)["id"],
-            content: (body as any).content ?? "",
-            rating: (body as any).rating ?? 0,
-            created_at: new Date().toISOString(),
-            userId: "1",
-        } as any;
-        mockReviews.push(newReview);
-        return HttpResponse.json(
-            {
-                id: newReview.id,
-                title: (body as any).title ?? "",
-                content: newReview.content,
-                rating: newReview.rating,
-                created_at: newReviewcreated_atat,
-                user: { id: "1", name: "John Doe", avatar: "" },
-            },
-            { status: 201 },
-        );
-    }),
+// operation: "review.create"
+export function reviewCreateHandler(body: any) {
+    const id = genId();
+    const user = mockUsers[0] ?? { id: "1", name: "John Doe", avatar: "" };
+    const created = {
+        id,
+        title: body?.parameter?.title ?? "",
+        content: body?.parameter?.content ?? "",
+        rating: body?.parameter?.rating ?? 0,
+        created_at: new Date().toISOString(),
+        user,
+    } as any;
+    mockReviews.push({
+        id,
+        bookId: body?.parameter?.bookId ?? "1",
+        content: created.content,
+        rating: created.rating,
+        created_at: created.created_at,
+        userId: user.id,
+    } as any);
+    return HttpResponse.json({ ...created }, { status: 201 });
+}
 
-    // Quotes
-    http.get(Review.listQuotes.path, ({ request, params, cookies }) => {
-        // console.log(request, params, cookies);
-        const url = new URL(request.url);
-        const searchParams = url.searchParams;
-        const query = {
-            bookId: params["bookId"],
-            page: searchParams.get("page"),
-            limit: searchParams.get("limit"),
-            type: searchParams.get("type"),
-            order: searchParams.get("order"),
-        };
-        console.log(query);
-        return HttpResponse.json(
-            generateRandomItemsFrom(mockQuotes, Number(query.limit) || 5),
-        );
-    }),
-];
+// operation: "review.listQuotes"
+export function reviewListQuotesHandler(body: any) {
+    const limit = Number(body?.parameter?.limit) || 5;
+    const items = generateRandomItemsFrom(mockQuotes, limit);
+    return HttpResponse.json(items, { status: 200 });
+}
