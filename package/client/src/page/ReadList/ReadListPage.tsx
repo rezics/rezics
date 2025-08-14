@@ -1,9 +1,9 @@
 import React, { useRef } from "react";
 import { useParams } from "wouter";
-import { CollapsibleText } from "@component/Common/CollapsibleText";
-import { AccentBar } from "@component/Common/AccentBar";
+import { CollapsibleText } from "@component/Common/CollapsibleText.tsx";
+import { AccentBar } from "@component/Common/AccentBar.tsx";
 // import { ReplyComponents } from "@component/Form/ReplyComponents";
-import { TreeReplyComponents } from "@component/Form/TreeReplyComponents";
+import { TreeReplyComponents } from "@component/Form/TreeReplyComponents.tsx";
 import { IconButton } from "@mui/material";
 import {
     Add,
@@ -12,23 +12,24 @@ import {
     FavoriteBorder,
 } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
-import tsr from "@/api/tsr";
+import { apiPost } from "@/api/swr.ts";
+import useSWR from "swr";
 
 export const ReadListPage: React.FC = () => {
     const { t } = useTranslation();
     const { readlistId } = useParams<{ readlistId: string }>();
-    const { data, isLoading, error } = tsr.readlist.get.useQuery({
-        queryKey: ["readlist", readlistId],
-        queryData: {
-            params: {
-                readlistId: readlistId || "",
-            },
+    const createReadlistReadInput = {
+        operation: "readlist.read",
+        parameter: {
+            readlistId: readlistId || "",
         },
-    });
+    }
+    const { data, isLoading, error } = useSWR(createReadlistReadInput, apiPost);
 
     const commentRef = useRef<HTMLDivElement>(null);
 
     const handleGoToComments = () => {
+        // @ts-ignore: scrollIntoView is not defined in the type declaration
         commentRef.current?.scrollIntoView({
             behavior: "smooth",
             block: "start",
@@ -43,7 +44,7 @@ export const ReadListPage: React.FC = () => {
         return <div className="text-center py-10">加载中...</div>;
     }
 
-    const bookList = data?.body;
+    const bookList = data;
     if (!bookList?.id) {
         return <div className="text-center py-10 text-red-500">未找到书单</div>;
     }

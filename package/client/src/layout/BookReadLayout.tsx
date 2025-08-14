@@ -1,14 +1,15 @@
 import React, { ReactNode, useEffect, useState } from "react";
 import { Button, Divider, useMediaQuery } from "@mui/material";
-import { Sidebar } from "@component/Layout/Sidebar";
-import { Header } from "@component/Layout/MainLayoutHeader";
+import { Sidebar } from "@component/Layout/Sidebar.tsx";
+import { Header } from "@component/Layout/MainLayoutHeader.tsx";
 // import { Box } from "@mui/material";
-import { useLayoutStore } from "@/global/layoutStore";
-import { appStore } from "@/global/appStore";
+import { useLayoutStore } from "@/global/layoutStore.ts";
+import { appStore } from "@/global/appStore.ts";
 
-import { BookEditorSidebar } from "@/component/Layout/BookEditorSidebar";
+import { BookEditorSidebar } from "@/component/Layout/BookEditorSidebar.tsx";
 import { Link, useParams, useRoute } from "wouter";
-import tsr from "@/api/tsr";
+import { apiPost } from "@/api/swr.ts";
+import useSWR from "swr";
 interface BookReadLayout {
     children: ReactNode;
 }
@@ -38,20 +39,19 @@ export const BookReadLayout: React.FC<BookReadLayout> = ({ children }) => {
         setSelectedId(match ? String(params.chapterId) : "");
     }, [match, params]);
 
-    const { data, isLoading, error } = tsr.book.chapter.list.useQuery({
-        queryKey: ["bookChapters", bookId],
-        queryData: {
-            params: {
-                bookId: bookId || "1",
-            },
+    const createBookChaptersInput = {
+        operation: "chapter.list",
+        parameter: {
+            bookId: bookId || "1",
         },
-    });
+    };
+    const { data, isLoading, error } = useSWR(createBookChaptersInput, apiPost);
 
     const handleDrawerToggle = () => {
         toggleSidebar();
     };
 
-    const mode = appStore((state) => state.theme);
+    const mode = appStore((state: any) => state.theme);
     function toggleTheme() {
         appStore.setState({ theme: mode === "light" ? "dark" : "light" });
     }
@@ -85,12 +85,13 @@ export const BookReadLayout: React.FC<BookReadLayout> = ({ children }) => {
                     </div>
                     <Divider />
                     <BookEditorSidebar
-                        chaptersData={data?.body ?? {
+                        chaptersData={data ?? {
                             chapters: [],
                             order: new Map<string, string[]>(),
                         }}
                         selectedId={selectedId}
                         baseLink={baseUrl}
+                        drawerWidth={drawerWidth}
                     />
                 </div>
             </Sidebar>

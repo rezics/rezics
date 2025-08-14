@@ -1,18 +1,19 @@
 import React, { ReactNode, useEffect, useState } from "react";
 import { useMediaQuery } from "@mui/material";
-import { Sidebar } from "@component/Layout/Sidebar";
-import { Header } from "@component/Layout/MainLayoutHeader";
+import { Sidebar } from "@component/Layout/Sidebar.tsx";
+import { Header } from "@component/Layout/MainLayoutHeader.tsx";
 
-import { useLayoutStore } from "@/global/layoutStore";
-import { appStore } from "@/global/appStore";
-import { NAVIGATION } from "@/component/Layout/BookEditorNavigation";
+    import { useLayoutStore } from "@/global/layoutStore.ts";
+import { appStore } from "@/global/appStore.ts";
+import { NAVIGATION } from "@/component/Layout/BookEditorNavigation.tsx";
 
 import { useParams, useRoute } from "wouter";
 
-import { BookEditorSidebar } from "@/component/Layout/BookEditorSidebar";
-import tsr from "@/api/tsr";
+import { BookEditorSidebar } from "@/component/Layout/BookEditorSidebar.tsx";
+import { apiPost } from "@/api/swr.ts";
+import useSWR from "swr";
 
-import { DraggableResizer } from "@/component/Layout/DraggableResizer";
+import { DraggableResizer } from "@/component/Layout/DraggableResizer.tsx";
 
 interface BookEditLayoutProps {
     children: ReactNode;
@@ -40,14 +41,13 @@ export const BookEditLayout: React.FC<BookEditLayoutProps> = ({ children }) => {
         console.log("match, params", match, params);
         setSelectedId(match ? String(params.chapterId) : "");
     }, [match, params]);
-    const { data, isLoading, error } = tsr.book.chapter.list.useQuery({
-        queryKey: ["bookChapters", bookId],
-        queryData: {
-            params: {
-                bookId: bookId || "1",
-            },
+    const createBookChaptersInput = {
+        operation: "chapter.list",
+        parameter: {
+            bookId: bookId || "1",
         },
-    });
+    };
+    const { data, isLoading, error } = useSWR(createBookChaptersInput, apiPost);
 
     const isMobile = useMediaQuery("(max-width:960px)");
     const { sidebarOpen, drawerWidth, toggleSidebar, closeSidebar } =
@@ -57,7 +57,7 @@ export const BookEditLayout: React.FC<BookEditLayoutProps> = ({ children }) => {
         toggleSidebar();
     };
 
-    const mode = appStore((state) => state.theme);
+    const mode = appStore((state: any) => state.theme);
     function toggleTheme() {
         appStore.setState({ theme: mode === "light" ? "dark" : "light" });
     }
@@ -86,7 +86,7 @@ export const BookEditLayout: React.FC<BookEditLayoutProps> = ({ children }) => {
                     isDragging={isDragging}
                 >
                     <BookEditorSidebar
-                        chaptersData={data?.body ?? {
+                        chaptersData={data ?? {
                             chapters: [],
                             order: new Map<string, string[]>(),
                         }}

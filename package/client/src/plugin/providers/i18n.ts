@@ -1,11 +1,11 @@
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
 
-import enUS from "@/locale/en-US";
-import zhCN from "@/locale/zh-CN";
-import deDE from "@/locale/de-DE";
-import jaJP from "@/locale/ja-JP";
-import zhTW from "@/locale/zh-TW";
+import enUS from "@/locale/en-US.ts";
+import zhCN from "@/locale/zh-CN.ts";
+import deDE from "@/locale/de-DE.ts";
+import jaJP from "@/locale/ja-JP.ts";
+import zhTW from "@/locale/zh-TW.ts";
 
 export function initI18n() {
     i18n.use(initReactI18next) // passes i18n down to react-i18next

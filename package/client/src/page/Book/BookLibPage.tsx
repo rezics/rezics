@@ -1,17 +1,18 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Alert, CircularProgress, Typography } from "@mui/material";
 
-import { BookSearch } from "@/component/BookLib/BookSearch";
+import { BookSearch } from "@/component/BookLib/BookSearch.tsx";
 // import { CardBookList } from "@component/Book/CardBookList";
-import { BookListView } from "@component/BookLib/BookListView";
+import { BookListView } from "@component/BookLib/BookListView.tsx";
 import {
     BookLibSortKey,
     BookSearchFilter,
-} from "@/component/BookLib/BookSearchFilter";
-import { SearchInfo } from "@util/searchParser";
+} from "@/component/BookLib/BookSearchFilter.tsx";
+import { SearchInfo } from "@/util/searchParser.ts";
 import { Book } from "contract";
-import tsr from "@/api/tsr";
-import { UniversalPaginator } from "@/component/Common/Pagination";
+import { apiPost } from "@/api/swr.ts";
+import useSWR from "swr";
+import { UniversalPaginator } from "@/component/Common/Pagination.tsx";
 
 function buildQuery(info: SearchInfo): string {
     let q = info.searchText.trim();
@@ -22,6 +23,7 @@ function buildQuery(info: SearchInfo): string {
     return q;
 }
 
+type Book = any;
 export namespace BookLib {
     type ShowProps = {
         books: Book[];
@@ -107,9 +109,9 @@ export namespace BookLib {
             searchTags: [],
         });
 
-        const { data, isLoading, error } = tsr.book.list.useQuery({
-            queryKey: ["books", currentQuery, searchPage],
-            queryData: {
+        const createBookListInput = {
+            operation: "book.list",
+            parameter: {
                 query: {
                     tag: buildQuery(currentQuery),
                     sort: "recommend",
@@ -117,14 +119,19 @@ export namespace BookLib {
                     limit: EXTERNAL_PAGE_SIZE,
                 },
             },
-        });
+        };
+        const { data, isLoading, error } = useSWR(createBookListInput, apiPost);
 
         function handleNeedMoreData(page: number) {
             setSearchPage(page);
         }
 
-        const books: Book[] = useMemo(() => data?.body?.items ?? [], [data]);
-        const totalItems: number = data?.body?.totalItems ?? 0;
+        useEffect(() => {
+            console.log("data", data);
+        }, [data]);
+
+        const books: Book[] = useMemo(() => data?.items ?? [], [data]);
+        const totalItems: number = data?.totalItems ?? 0;
         const getBookList = useCallback((info: SearchInfo) => {
             setCurrentQuery(info);
         }, []);

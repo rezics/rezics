@@ -1,9 +1,10 @@
-import { BookDescriptionEdit } from "@/component/Book/BookDescription";
+import { BookDescriptionEdit } from "@/component/Book/BookDescription.tsx";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { tsr } from "@/api/tsr.ts";
-import { AccentBarWithText } from "@/component/Common/AccentBar";
-import Paper from "@mui/material/Paper";
+import { apiPost } from "@/api/swr.ts";
+import useSWR from "swr";
+import { AccentBarWithText } from "@/component/Common/AccentBar.tsx";
+// import Paper from "@mui/material/Paper";
 
 interface BookEditMainPage {
     bookId: string;
@@ -11,14 +12,13 @@ interface BookEditMainPage {
 
 export const BookEditMainPage: React.FC<BookEditMainPage> = ({ bookId }) => {
     const { t } = useTranslation();
-    const { data, isLoading, error } = tsr.book.get.useQuery({
-        queryKey: ["book", bookId],
-        queryData: {
-            params: {
-                bookId: bookId!,
-            },
+    const createBookInfoInput = {
+        operation: "book.read",
+        parameter: {
+            bookId: bookId || "",
         },
-    });
+    };
+    const { data, isLoading, error } = useSWR(createBookInfoInput, apiPost);
     if (isLoading) return <div>Loading...</div>;
     if (error) return <div>Error: {String(error)}</div>;
     if (!data) return <div>No data</div>;
@@ -29,7 +29,7 @@ export const BookEditMainPage: React.FC<BookEditMainPage> = ({ bookId }) => {
                     <AccentBarWithText.Show text={t("book.description")} />
                 </div>
                 <BookDescriptionEdit.Container
-                    description={data.body.description ?? ""}
+                    description={data?.description ?? ""}
                     editOpen={false}
                     setEditOpen={() => {}}
                 />

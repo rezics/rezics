@@ -139,7 +139,7 @@ export namespace BookPage {
 
                                 <TabPanel value="2">
                                     <Stack spacing={4}>
-                                        {/* 章节列表 */}
+                                        {/* ANCHOR Chapter List */}
                                         <ChapterList id={data?.id || "0"} />
                                     </Stack>
                                 </TabPanel>
@@ -294,7 +294,7 @@ export namespace BookPage {
         if (!data?.id) {
             return null; // 或者 return <div>No data</div>;
         }
-        // if (!data?.body.isbn) {
+        // if (!data.isbn) {
         //     return null; // 或者 return <div>No data</div>;
         // }
 

@@ -124,6 +124,13 @@ interface UniversalPaginatorProps<T> extends SortControlsProps {
     currentPage: number;
     setCurrentPage: (page: number) => void;
 }
+
+/**
+ * UniversalPaginator
+ * @param {UniversalPaginatorProps<T>} props
+ * @returns {React.ReactNode}
+ * @todo Add an option to keep the page scrolled to the bottom to prevent it from jumping to the top when new data loads.
+ */
 export const UniversalPaginator = <T,>({
     data,
     totalExternalItems,

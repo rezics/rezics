@@ -31,8 +31,8 @@ export const BookEditChapterPage: React.FC<BookEditChapterPageProps> = (
     useEffect(() => {
         if (data) {
             console.log(data);
-            setContent(data.body.content || "");
-            setTitle(data.body.chapterName || "");
+            setContent(.content || "");
+            setTitle(.chapterName || "");
         }
     }, [data]);
 

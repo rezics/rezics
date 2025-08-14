@@ -1,6 +1,15 @@
 import { Box, Stack } from "@mui/material";
-import { SingleQuoteExcerpt } from "@component/Review/SingleQuoteExcerpt";
-import { QuoteExcerpt } from "contract/schema";
+import { SingleQuoteExcerpt } from "@component/Review/SingleQuoteExcerpt.tsx";
+
+type QuoteExcerpt = {
+    id: string;
+    content: string;
+    author: {
+        name: string;
+        avatar: string;
+    };
+    created_at: string;
+} | any;
 
 export namespace QuoteExcerptList {
     export type Show = {

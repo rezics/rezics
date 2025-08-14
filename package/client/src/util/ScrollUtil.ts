@@ -15,6 +15,7 @@ export function startThrottledScroll(
 ): () => void {
     // 1. 用 lodash 的 throttle 包装回调
     const throttled = throttle(() => {
+        // @ts-ignore: window.scrollY is not defined in the type declaration
         handle(window.scrollY);
     }, interval);
 

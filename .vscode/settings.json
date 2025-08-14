@@ -16,7 +16,7 @@
     "uuidv",
     "wouter"
   ],
-  "i18n-ally.localesPaths": ["package/app/src/locale"],
+  "i18n-ally.localesPaths": ["package/client/src/locale"],
   "i18n-ally.enabledParsers": ["js", "ts", "json"],
   "i18n-ally.enabledFrameworks": ["react-i18next"],
   "i18n-ally.keystyle": "nested",

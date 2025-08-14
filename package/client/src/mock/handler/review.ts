@@ -16,6 +16,21 @@ export function reviewShortListHandler(body: any) {
     return HttpResponse.json(list, { status: 200 });
 }
 
+// operation: "review.list"
+export function reviewListHandler(body: any) {
+    const limit = body?.parameter?.limit;
+    const bookId = body?.parameter?.bookId;
+    const source = Array.isArray(mockReviews) ? mockReviews : [];
+    const filtered = bookId ? source.filter((r: any) => r.bookId === bookId) : source;
+    const joined = filtered.map((r: any) => ({
+        ...r,
+        user: mockUsers.find((u) => u.id === r.userId) ?? { id: String(r.userId ?? ""), name: "Unknown", avatar: "" },
+    }));
+    const list = limit ? joined.slice(0, limit) : joined;
+    const result = generateRandomItemsFrom(list, 4);
+    return HttpResponse.json(result, { status: 200 });
+}
+
 // operation: "review.create"
 export function reviewCreateHandler(body: any) {
     const id = genId();

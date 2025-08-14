@@ -1,26 +1,23 @@
-import { ArrowForwardIcon } from "../Common/ArrowForwardIcon";
-import { AccentBarWithText } from "../Common/AccentBar";
-import { Link } from "wouter";
-import { ReadlistList } from "@component/ReadList/ReadlistList";
-import { tsr } from "@/api/tsr";
+import { ArrowForwardIcon } from "../Common/ArrowForwardIcon.tsx";
+import { AccentBarWithText } from "../Common/AccentBar.tsx";
+import { Link as _Link } from "wouter";
+import { ReadlistList } from "@component/ReadList/ReadlistList.tsx";
+import { apiPost } from "@/api/swr.ts";
+import useSWR from "swr";
 
 export function ReadlistByBookPreview(
     { title, bookId }: { title: string; bookId?: string },
 ) {
     // TODO: 获取包含该书的书单数据
 
-    const { data, isLoading, error } = tsr.readlist.listByBook.useQuery({
-        queryKey: ["readlistByBook", bookId],
-        queryData: {
-            params: {
-                bookId: bookId || "",
-            },
-            query: {
-                page: 1,
-                limit: 10,
-            },
+    const createReadlistListInput = {
+        operation: "readlist.list",
+        parameter: {
+            bookId: bookId || "",
         },
-    });
+    }
+    const { data, isLoading, error } = useSWR(createReadlistListInput, apiPost);
+
 
     if (isLoading) {
         return <div>Loading...</div>;
@@ -38,7 +35,7 @@ export function ReadlistByBookPreview(
                 <AccentBarWithText.Container text={`包含 ${title} 的书单`} />
             </ArrowForwardIcon.Container>
             <div className="mb-4" />
-            <ReadlistList booklists={data?.body?.items || []} />
+            <ReadlistList booklists={data?.items || []} />
             {/* 此处应该显示书单列表 */}
         </div>
     );

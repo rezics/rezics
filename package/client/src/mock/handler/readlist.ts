@@ -1,45 +1,39 @@
-import { http, HttpResponse } from "msw";
-import { ReadList } from "contract";
-import { mockBookLists } from "../data/booklists";
-import { mockABookList01 } from "../data/abooklist01";
+import { HttpResponse } from "msw";
+import { mockBookLists } from "../data/booklists.ts";
+import { mockABookList01 } from "../data/abooklist01.ts";
 
-export const readlistHandlers = [
-    // List readlists
-    http.get(ReadList.listByBook.path, ({ request }) => {
-        const url = new URL(request.url);
-        const page = Number(url.searchParams.get("page") ?? 1);
-        const limit = Number(url.searchParams.get("limit") ?? 20);
-        const start = (page - 1) * limit;
-        const items = mockBookLists.slice(start, start + limit);
-        return HttpResponse.json({
-            items,
-            page,
-            totalPages: 1,
-            total: mockBookLists.length,
-        });
-    }),
+// operation: "readlist.list"
+export function readlistListHandler(body: any) {
+    const page = Number(body?.parameter?.page ?? 1);
+    const limit = Number(body?.parameter?.limit ?? 20);
+    const start = (page - 1) * limit;
+    const items = mockBookLists.slice(start, start + limit);
+    return HttpResponse.json({
+        items,
+        page,
+        totalPages: 1,
+        total: mockBookLists.length,
+    }, { status: 200 });
+}
 
-    // Get single readlist
-    http.get(ReadList.get.path, ({ params }) => {
-        // const list = mockBookLists.find((l) => String(l.id) === (params as any)["id"]);
-        // if (!list) return HttpResponse.json({ message: "Not found" }, { status: 404 });
-        const list = mockABookList01;
-        return HttpResponse.json(list);
-    }),
+// operation: "readlist.read"
+export function readlistReadHandler(_body: any) {
+    const list = mockABookList01;
+    return HttpResponse.json({ ...list }, { status: 200 });
+}
 
-    // Create readlist
-    http.post(ReadList.create.path, async ({ request }) => {
-        const body = await request.json();
-        const newList = {
-            id: String(mockBookLists.length + 1),
-            ...(body as any),
-            creator: {
-                name: "Mock User",
-                avatar: "https://api.dicebear.com/9.x/pixel-art/svg?seed=user",
-            },
-            likes: 0,
-        } as any;
-        mockBookLists.push(newList);
-        return HttpResponse.json(newList, { status: 201 });
-    }),
-];
+// operation: "readlist.create"
+export function readlistCreateHandler(body: any) {
+    const payload = body?.parameter ?? {};
+    const newList = {
+        id: String(mockBookLists.length + 1),
+        ...(payload as any),
+        creator: {
+            name: "Mock User",
+            avatar: "https://api.dicebear.com/9.x/pixel-art/svg?seed=user",
+        },
+        likes: 0,
+    } as any;
+    mockBookLists.push(newList);
+    return HttpResponse.json(newList, { status: 201 });
+}

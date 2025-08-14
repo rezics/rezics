@@ -1,30 +1,28 @@
-import { ReadlistList } from "@/component/ReadList/ReadlistList";
+    import { ReadlistList } from "@/component/ReadList/ReadlistList.tsx";
 import React, { useState } from "react";
-import { AccentBarWithText } from "@/component/Common/AccentBar";
+import { AccentBarWithText } from "@/component/Common/AccentBar.tsx";
 import { useTranslation } from "react-i18next";
-import tsr from "@/api/tsr";
-import { ReadList } from "contract";
+import { apiPost } from "@/api/swr.ts";
+import useSWR from "swr";
+// import { ReadList } from "contract";
+
+type ReadList = any;
 
 export function ReadlistByBookPage() {
     const { t } = useTranslation();
     const bookId = "0";
     const [booklists, setBooklists] = useState<ReadList[]>([]);
-    const { data, isLoading, error } = tsr.readlist.listByBook.useQuery({
-        queryKey: ["readlist", bookId],
-        queryData: {
-            params: {
-                bookId: bookId,
-            },
-            query: {
-                page: 1,
-                limit: 10,
-            },
+    const createReadlistListByBookInput = {
+        operation: "readlist.listByBook",
+        parameter: {
+            bookId: bookId,
         },
-    });
+    };
+    const { data, isLoading, error } = useSWR(createReadlistListByBookInput, apiPost);
 
     React.useEffect(() => {
-        if (data?.body?.items) {
-            setBooklists(data.body.items);
+        if (data?.items) {
+            setBooklists(data.items);
         }
     }, [data]);
     return (

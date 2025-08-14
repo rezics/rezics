@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
 
-import { ReviewList } from "../Review/ReviewList";
-import { ArrowForwardIcon } from "../Common/ArrowForwardIcon";
+import { ReviewList } from "../Review/ReviewList.tsx";
+import { ArrowForwardIcon } from "../Common/ArrowForwardIcon.tsx";
 import { Box } from "@mui/material";
-import { AccentBarWithText } from "../Common/AccentBar";
-import tsr from "@/api/tsr";
+import { AccentBarWithText } from "../Common/AccentBar.tsx";
+import { apiPost } from "@/api/swr.ts";
+import useSWR from "swr";
 
 interface BookReviewsProps {
     bookId: string;
@@ -14,18 +15,17 @@ interface BookReviewsProps {
 export const BookReviews: React.FC<BookReviewsProps> = ({ bookId, title }) => {
     const [reviews, setReviews] = useState<any[]>([]);
 
-    const { data, isLoading, error } = tsr.review.listReviews.useQuery({
-        queryKey: ["review", bookId],
-        queryData: {
-            params: {
-                bookId: bookId || "",
-            },
+    const createBookReviewsInput = {
+        operation: "review.list",
+        parameter: {
+            bookId: bookId || "",
         },
-    });
+    }
+    const { data, isLoading, error } = useSWR(createBookReviewsInput, apiPost);
 
     useEffect(() => {
-        if (data?.body) {
-            setReviews(data.body);
+        if (data) {
+            setReviews(data);
         }
     }, [data]);
 

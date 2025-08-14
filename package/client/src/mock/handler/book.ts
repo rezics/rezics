@@ -1,8 +1,6 @@
 import { HttpResponse } from "msw";
 import { bookList01 } from "../data/bookList01.ts";
 import { bookInfo01 } from "../data/bookinfo01.ts";
-import chapterList01 from "../data/chapterlist01.json" with { type: "json" };
-import { chapterContent01 } from "../data/chapterContent01.ts";
 import { generateRandomItemsFrom } from "./common.ts";
 
 const books = [...bookList01];
@@ -73,20 +71,8 @@ export function bookDeleteHandler(body: any) {
 }
 
 export function bookListHandler(body: any) {
-    const page = body?.parameter?.page ?? 1;
-    const limit = body?.parameter?.limit ?? 5;
+    const page = body?.parameter?.query?.page ?? 1;
+    const limit = body?.parameter?.query?.limit ?? 5;
     const items = generateRandomItemsFrom(books, Number(limit) || 5);
     return HttpResponse.json({ items, page, totalItems: 10000 }, { status: 200 });
-}
-
-// Chapter ops – keep here for backward compatibility with previous file structure
-export function chapterListHandler(_body: any) {
-    const data: any = { chapters: [], order: [] };
-    data.order = (chapterList01 as any).order;
-    data.chapters = Object.values((chapterList01 as any).chapters);
-    return HttpResponse.json({ ...data }, { status: 200 });
-}
-
-export function chapterReadHandler(_body: any) {
-    return HttpResponse.json({ ...chapterContent01 }, { status: 200 });
 }

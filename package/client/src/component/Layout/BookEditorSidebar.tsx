@@ -3,15 +3,23 @@
 import {
     ChapterOrderType,
     ChapterTreeNode,
-} from "@/component/Book/ChapterList";
-import { buildTree } from "@/util/treeAbstract";
+} from "@/component/Book/ChapterList.tsx";
+import { buildTree } from "@/util/treeAbstract.ts";
 import { useEffect, useMemo, useState } from "react";
-import { ChapterArborist } from "@/component/Book/ChapterArborist";
+import { ChapterArborist } from "@/component/Book/ChapterArborist.tsx";
 
-import { useLayoutStore } from "@/global/layoutStore";
+import { useLayoutStore } from "@/global/layoutStore.ts";
 import { Button, Divider, Switch, TextField } from "@mui/material";
-import { Chapter, ChapterOrder } from "contract/schema";
 
+
+interface Chapter {
+    id: string;
+    title: string;
+}
+
+interface ChapterOrder {
+    [key: string]: string;
+}
 interface BookEditorSidebarProps {
     chaptersData: {
         chapters: Chapter[];
@@ -79,7 +87,7 @@ export const BookEditorSidebar: React.FC<BookEditorSidebarProps> = ({
                         label="Search Term"
                         variant="standard"
                         value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
+                        onChange={(e: any) => setSearchTerm(e.target.value)}
                         placeholder="Enter search term"
                         className="w-full"
                     />
@@ -102,7 +110,7 @@ export const BookEditorSidebar: React.FC<BookEditorSidebarProps> = ({
                         </label>
                         <Switch
                             checked={enableDrag}
-                            onChange={(e) => setEnableDrag(e.target.checked)}
+                            onChange={(e: any) => setEnableDrag(e.target.checked)}
                         />
                     </div>
                     <div className="w-full">

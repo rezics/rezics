@@ -1,6 +1,7 @@
 import { apiPost } from "@/api/swr.ts";
 import { QuoteExcerptList } from "../Review/QuoteExcerptList.tsx";
 import useSWR from "swr";
+import { isEmptyValue } from "@/util/dataCheck.ts";
 
 interface QuoteExcerpt {
     id: string;
@@ -20,7 +21,7 @@ export namespace QuoteExcerptPreview {
 
     export const Show: React.FC<Show> = ({ data, isLoading, error }) => {
         if (isLoading) return <div>Loading...</div>;
-        if (error && error !== "null") return <div>Oh no... {error}</div>;
+        if (error && !isEmptyValue(error)) return <div>Oh no... {error}</div>;
 
         return (
             <div>
@@ -36,7 +37,7 @@ export namespace QuoteExcerptPreview {
     export const Container: React.FC<Container> = ({ id }) => {
 
         const createBookInput = {
-            operation: "review.listQuotes",
+            operation: "review.quote.list",
             parameter: { bookId: id },
             select: {
                 id: true,
@@ -49,10 +50,10 @@ export namespace QuoteExcerptPreview {
 
         const { data, isLoading, error } = useSWR(createBookInput, apiPost);
 
-        if (!data?.success) return <div>No data</div>;
+        const quote = data || [];
         return (
             <Show
-                data={data?.success || []}
+                data={quote}
                 isLoading={isLoading}
                 error={String(error)}
             />

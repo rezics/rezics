@@ -11,10 +11,11 @@ import {
 } from "@mui/material";
 import { Add, Remove } from "@mui/icons-material";
 //  ;
-import { ReactionBar } from "../Common/ReactionBar";
-import { ReplyDrawer } from "./ReplyDrawer";
-import { useDialogStore } from "@/global/dialogStore";
-import tsr from "@/api/tsr";
+import { ReactionBar } from "../Common/ReactionBar.tsx";
+import { ReplyDrawer } from "./ReplyDrawer.tsx";
+import { useDialogStore } from "@/global/dialogStore.ts";
+import { apiPost } from "@/api/swr.ts";
+import useSWR from "swr";
 
 // This is a temporary type definition based on the GraphQL schema.
 // It should be replaced with generated types.
@@ -142,14 +143,13 @@ export const TreeReplyComponents: React.FC<ReplyComponentsProps> = (
     { bookListId },
 ) => {
     const commentId = bookListId; // TODO 暫時先用這個替代
-    const { data, isLoading, error } = tsr.comment.list.useQuery({
-        queryKey: ["comments", commentId],
-        queryData: {
-            params: {
-                commentId: commentId || "",
-            },
+    const createCommentListInput = {
+        operation: "comment.list",
+        parameter: {
+            commentId: commentId || "",
         },
-    });
+    };
+    const { data, isLoading, error } = useSWR(createCommentListInput, apiPost);
 
     // currentReplyId
     const setDialogVisible = useDialogStore((state) => state.setDialogVisible);
@@ -157,14 +157,15 @@ export const TreeReplyComponents: React.FC<ReplyComponentsProps> = (
     const [topLevelComments, setTopLevelComments] = useState<Comment[]>([]);
 
     useEffect(() => {
-        // setTopLevelComments(data?.body.items || []);
-        // TODO Now we don't use the pagination, so we need to use the data?.body directly
-        if (Array.isArray(data?.body)) {
-            setTopLevelComments(data.body);
-        } else if (Array.isArray(data?.body?.items)) {
-            setTopLevelComments(data.body.items);
-        } else {
-            setTopLevelComments([]); // fallback to empty
+        // TODO Now we don't use the pagination, so we need to use the data directly
+        try {
+            if (data) {
+                const arr: any = Object.values(data);
+                setTopLevelComments(arr);
+                console.log("topLevelComments", topLevelComments, "data", data);
+            }
+        } catch (_error) {
+            console.error("Error setting top level comments");
         }
     }, [data]);
 

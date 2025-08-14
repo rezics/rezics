@@ -23,7 +23,7 @@ export const ReplyComponents: React.FC<ReplyComponentsProps> = (
     });
 
     const commentRefs = useRef<Record<string, HTMLDivElement | null>>({});
-    const allComments = data?.body.items || [];
+    const allComments = data.items || [];
 
     // 滚动到指定评论
     const scrollToComment = useCallback((commentId: string) => {

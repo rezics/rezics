@@ -1,20 +1,20 @@
 import { useParams } from "wouter";
 
 import MarkdownIt from "markdown-it";
-import { preserveFormattingPlugin } from "@/component/Form/preserveFormatPlugin";
-import tsr from "@/api/tsr";
+import { preserveFormattingPlugin } from "@/component/Form/preserveFormatPlugin.ts";
+import { apiPost } from "@/api/swr.ts";
+import useSWR from "swr";
 
 export const BookReadChapterPage: React.FC = () => {
     const { chapterId } = useParams();
-    const { data, isLoading, error } = tsr.book.chapter.content.useQuery({
-        queryKey: ["bookChapter", chapterId],
-        queryData: {
-            params: {
-                bookId: "1",
-                chapterId: chapterId || "",
-            },
+    const createBookChapterContentInput = {
+        operation: "chapter.read",
+        parameter: {
+            bookId: "1",
+            chapterId: chapterId || "",
         },
-    });
+    };
+    const { data, isLoading, error } = useSWR(createBookChapterContentInput, apiPost);
 
     const md = new MarkdownIt({
         html: false,
@@ -26,7 +26,7 @@ export const BookReadChapterPage: React.FC = () => {
 
     md.use(preserveFormattingPlugin);
 
-    const chapterHtml = md.render(data?.body.content || "");
+    const chapterHtml = md.render(data?.content || "");
 
     if (isLoading) return <div>Loading...</div>;
     if (error) return <div>Oh no... {String(error)}</div>;

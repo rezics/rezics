@@ -36,7 +36,7 @@ export function TestPage02() {
         <div>
             <h2>Post List</h2>
             <ul>
-                {data?.body?.items?.map((post: any) => (
+                {data?.items?.map((post: any) => (
                     <li key={post.id}>
                         {post.title} (id: {post.id})
                     </li>

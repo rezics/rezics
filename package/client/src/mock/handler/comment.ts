@@ -1,7 +1,8 @@
 import { HttpResponse } from "msw";
+import { mockCommentTree01 } from "../data/comment01.ts";
 
 // Minimal tree data placeholder
-const mockCommentTree01 = {
+const miniMockCommentTree01 = {
     id: "root",
     content: "Root comment",
     author: { id: "1", name: "User 1" },
@@ -16,7 +17,7 @@ const mockCommentTree01 = {
 };
 
 // In-memory store
-const commentStore = new Map<string, any>([[mockCommentTree01.id, mockCommentTree01]]);
+const commentStore = new Map<string, any>([[miniMockCommentTree01.id, miniMockCommentTree01]]);
 
 function genId() {
     return Math.random().toString(36).slice(2, 10);
@@ -35,8 +36,8 @@ export function commentCreateHandler(body: any) {
 }
 
 export function commentReadHandler(body: any) {
-    const id = body?.parameter?.id ?? mockCommentTree01.id;
-    const found = commentStore.get(id) ?? mockCommentTree01;
+    const id = body?.parameter?.id ?? miniMockCommentTree01.id;
+    const found = commentStore.get(id) ?? miniMockCommentTree01;
     const result = { id: found.id, content: found.content };
     return HttpResponse.json({ ...result }, { status: 200 });
 }

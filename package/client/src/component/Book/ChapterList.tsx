@@ -1,16 +1,17 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Button, Tooltip } from "@mui/material";
-import { AccentBarWithText } from "../Common/AccentBar";
+import { AccentBarWithText } from "../Common/AccentBar.tsx";
 
-import { buildTree, OrderMap, TreeNodeWithChildren } from "@/util/treeAbstract";
+import { buildTree, OrderMap, TreeNodeWithChildren } from "@/util/treeAbstract.ts";
 import { Link } from "wouter";
-import { EditButtonFloatRight } from "@/component/Common/EditButtonFloatRight";
-import { tsr } from "@/api/tsr";
+import { EditButtonFloatRight } from "@/component/Common/EditButtonFloatRight.tsx";
+import { apiPost } from "@/api/swr.ts";
+import useSWR from "swr";
 // 扁平结构 + 顺序数组
 
 // type ChapterMapType = Map<number, ChapterTreeNode>;
 
-export type ChapterOrderType = OrderMap;
+export type ChapterOrderType = any;
 
 export interface ChapterTreeNode extends TreeNodeWithChildren {
     id: string;
@@ -26,22 +27,22 @@ interface ChapterListProps {
 
 export const ChapterList: React.FC<ChapterListProps> = ({ id }) => {
     // TODO use Store to store the chapter expand state
-    const ChapterListQueryKey = ["chapters", id];
-
-    const { data, isLoading, error } = tsr.Book.chapter.list.useQuery({
-        queryKey: ChapterListQueryKey,
-        queryData: {
-            params: {
-                bookId: id,
-            },
+    const createChapterListInput = {
+        operation: "chapter.list",
+        parameter: { bookId: id },
+        select: {
+            id: true,
+            title: true,
         },
-    });
+    }
+
+    const { data, isLoading, error } = useSWR(createChapterListInput, apiPost);
 
     const chapters: ChapterTreeNode[] = Object.values(
-        data?.body?.chapters ?? [],
+        data?.chapters ?? [],
     );
     const orderMap: ChapterOrderType = new Map(
-        Object.entries(data?.body?.order ?? []),
+        Object.entries(data?.order ?? []),
     );
 
     // console.log(orderMap, typeof orderMap);

@@ -2,7 +2,7 @@ import React from "react";
 import { Button, Menu, MenuItem, Stack, Typography } from "@mui/material";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import { ArrowDownward, ArrowUpward } from "@mui/icons-material";
-import { SortControlsProps } from "@component/Common/Pagination";
+import { SortControlsProps } from "@/component/Common/Pagination.tsx";
 import { useTheme } from "@mui/material/styles";
 
 export type BookLibSortKey =

@@ -14,9 +14,8 @@ import {
   bookUpdateHandler,
   bookDeleteHandler,
   bookListHandler,
-  chapterListHandler,
-  chapterReadHandler,
 } from "./book.ts";
+import { chapterListHandler, chapterReadHandler } from "./chapter.ts";
 import {
   commentCreateHandler,
   commentReadHandler,
@@ -24,9 +23,11 @@ import {
   commentDeleteHandler,
   commentListByTargetHandler,
 } from "./comment.ts";
+import { test01Handler } from "./test.ts";
 
 import { http, HttpResponse } from "msw";
-import { reviewShortListHandler, reviewCreateHandler, reviewListQuotesHandler } from "./review.ts";
+import { reviewShortListHandler, reviewListHandler, reviewCreateHandler, reviewListQuotesHandler } from "./review.ts";
+import { readlistListHandler, readlistReadHandler, readlistCreateHandler } from "./readlist.ts";
 
 // 定义 operation -> handler 的映射
 const operationMap: Record<
@@ -52,20 +53,28 @@ const operationMap: Record<
   "comment.update": commentUpdateHandler,
   "comment.delete": commentDeleteHandler,
   // custom op for listing comments under an entity
-  "comment.listByTarget": commentListByTargetHandler,
+  "comment.list": commentListByTargetHandler,
   //"post.publish": postPublishHandler,
   // Review
-  "review.short.list": reviewShortListHandler,
   "review.create": reviewCreateHandler,
-  "review.listQuotes": reviewListQuotesHandler,
+  "review.list": reviewListHandler,
+  "review.short.list": reviewShortListHandler,
+  "review.quote.list": reviewListQuotesHandler,
+  // Readlist
+  "readlist.list": readlistListHandler,
+  "readlist.read": readlistReadHandler,
+  "readlist.create": readlistCreateHandler,
+  // Test
+  "test.01": test01Handler,
 };
 
-export const apiHandler = http.all("/api", async ({ request, params, cookies }) => {
+// @ts-ignore: unused parameter
+export const apiHandler = http.all("/api", async ({ request, params: _params, cookies }) => {
   try {
-    console.log("apiHandler", request, params, cookies);
+    // console.log("apiHandler", request, params, cookies);
     const body: any = await request.json();
 
-    // console.log("body", body);
+    console.log("REQ", body);
     const operation = body.operation;
 
     if (!operation || typeof operation !== "string") {

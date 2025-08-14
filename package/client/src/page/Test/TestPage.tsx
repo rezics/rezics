@@ -3,25 +3,34 @@ import Box from "@mui/material/Box";
 import { TabContext, TabList, TabPanel } from "@mui/lab";
 import Tab from "@mui/material/Tab";
 
-import { BookEditorSidebar } from "@/component/Layout/BookEditorSidebar";
-import { ThemeDemo } from "@/component/Theme/ThemeDemo";
-import tsr from "@/api/tsr";
+import { BookEditorSidebar } from "@/component/Layout/BookEditorSidebar.tsx";
+import { ThemeDemo } from "@/component/Theme/ThemeDemo.tsx";
+import { apiPost } from "@/api/swr.ts";
+import useSWR from "swr";
 
 export default function PersistentTabs() {
     const [value, setValue] = React.useState<"1" | "2">("1");
 
-    const { data, isLoading, error } = tsr.book.chapter.list.useQuery({
-        queryKey: ["bookChapter", "0"],
-        queryData: {
-            params: {
-                bookId: "0",
-            },
+    const createChapterListInput = {
+        operation: "chapter.list",
+        parameter: { bookId: "0" },
+        select: {
+            id: true,
+            title: true,
         },
-    });
+    }
+    
+    const { data, isLoading, error } = useSWR(createChapterListInput, apiPost);
 
     const handleChange = (_: React.SyntheticEvent, newValue: "1" | "2") => {
         setValue(newValue);
     };
+
+    const createTestInput = {
+        operation: "test.01",
+        parameter: { bookId: "0" },
+    }
+    const { data: testData, isLoading: testLoading, error: testError } = useSWR(createTestInput, apiPost);
 
     return (
         <div>
@@ -48,14 +57,19 @@ export default function PersistentTabs() {
                 <TabPanel value="1" keepMounted>
                     {/* keepMounted 保持在 DOM，不会被卸载，内部状态持久化】 */}
                     <BookEditorSidebar
-                        chaptersData={data?.body ??
+                        chaptersData={data ??
                             { chapters: [], order: new Map() }}
                         selectedId=""
                         baseLink="/test"
+                        drawerWidth={300}
                     />
                 </TabPanel>
                 <TabPanel value="2" keepMounted>
-                    这是第二个面板的内容
+                    <div>SWR Test</div>
+                    <div>{String(testData)}</div>
+                    <div>{String(testLoading)}</div>
+                    <div>{String(testError)}</div>
+                    <div className="mt-100"></div>
                 </TabPanel>
             </TabContext>
         </div>

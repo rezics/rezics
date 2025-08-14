@@ -1,12 +1,15 @@
 import { useParams } from "wouter";
 
-import { ReviewList } from "@/component/Review/ReviewList";
+import { ReviewList } from "@/component/Review/ReviewList.tsx";
 import { useTranslation } from "react-i18next";
 import { useEffect, useState } from "react";
-import { AccentBarWithText } from "@/component/Common/AccentBar";
-import { ReviewEdit } from "@/component/Review/ReviewEdit";
-import tsr from "@/api/tsr";
-import { BookReview } from "contract/schema";
+import { AccentBarWithText } from "@/component/Common/AccentBar.tsx";
+import { ReviewEdit } from "@/component/Review/ReviewEdit.tsx";
+import { apiPost } from "@/api/swr.ts";
+import useSWR from "swr";
+// import { BookReview } from "contract/schema";
+
+type BookReview = any;
 
 export function ReviewByBookPage() {
     const params = useParams();
@@ -15,18 +18,17 @@ export function ReviewByBookPage() {
 
     const [reviews, setReviews] = useState<BookReview[]>([]);
 
-    const { data, isLoading, error } = tsr.review.listReviews.useQuery({
-        queryKey: ["review", bookId],
-        queryData: {
-            params: {
-                bookId: bookId || "",
-            },
+    const createReviewListInput = {
+        operation: "review.listReviews",
+        parameter: {
+            bookId: bookId || "",
         },
-    });
+    };
+    const { data, isLoading, error } = useSWR(createReviewListInput, apiPost);
 
     useEffect(() => {
-        if (data?.body) {
-            setReviews(data.body);
+        if (data?.reviews) {
+            setReviews(data.reviews);
         }
     }, [data]);
 
