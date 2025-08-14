@@ -35,25 +35,21 @@ export namespace Chapter {
     export namespace Output {
         export type Create<TSelect extends Select<Interface.Chapter>> = Output<
             Interface.Chapter,
-            never,
             TSelect
         >;
 
         export type Read<TSelect extends Select<Interface.Chapter>> = Output<
             Interface.Chapter,
-            never,
             TSelect
         >;
 
         export type Update<TSelect extends Select<Interface.Chapter>> = Output<
             Interface.Chapter,
-            never,
             TSelect
         >;
 
         export type Delete<TSelect extends Select<Interface.Chapter>> = Output<
             Interface.Chapter,
-            never,
             TSelect
         >;
     }

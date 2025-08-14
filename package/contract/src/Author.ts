@@ -32,25 +32,21 @@ export namespace Author {
     export namespace Output {
         export type Create<TSelect extends Select<Interface.Author>> = Output<
             Interface.Author,
-            never,
             TSelect
         >;
 
         export type Read<TSelect extends Select<Interface.Author>> = Output<
             Interface.Author,
-            never,
             TSelect
         >;
 
         export type Update<TSelect extends Select<Interface.Author>> = Output<
             Interface.Author,
-            never,
             TSelect
         >;
 
         export type Delete<TSelect extends Select<Interface.Author>> = Output<
             Interface.Author,
-            never,
             TSelect
         >;
     }

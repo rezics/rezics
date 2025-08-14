@@ -1,4 +1,7 @@
 {
+    "compilerOptions": {
+        "lib": ["dom", "esnext", "deno.ns"]
+    },
     "imports": {
         "@types/node": "npm:@types/node@^22.15.21",
         "prettier": "npm:prettier@^3.5.3",

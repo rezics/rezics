@@ -32,25 +32,21 @@ export namespace Tag {
     export namespace Output {
         export type Create<TSelect extends Select<Interface.Tag>> = Output<
             Interface.Tag,
-            never,
             TSelect
         >;
 
         export type Read<TSelect extends Select<Interface.Tag>> = Output<
             Interface.Tag,
-            never,
             TSelect
         >;
 
         export type Update<TSelect extends Select<Interface.Tag>> = Output<
             Interface.Tag,
-            never,
             TSelect
         >;
 
         export type Delete<TSelect extends Select<Interface.Tag>> = Output<
             Interface.Tag,
-            never,
             TSelect
         >;
     }

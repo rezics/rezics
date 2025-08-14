@@ -32,25 +32,21 @@ export namespace User {
     export namespace Output {
         export type Create<TSelect extends Select<Interface.User>> = Output<
             Interface.User,
-            never,
             TSelect
         >;
 
         export type Read<TSelect extends Select<Interface.User>> = Output<
             Interface.User,
-            never,
             TSelect
         >;
 
         export type Update<TSelect extends Select<Interface.User>> = Output<
             Interface.User,
-            never,
             TSelect
         >;
 
         export type Delete<TSelect extends Select<Interface.User>> = Output<
             Interface.User,
-            never,
             TSelect
         >;
     }
