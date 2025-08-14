@@ -114,13 +114,13 @@ export type Input<
 /**
  * Typed operation response union.
  * Success returns the selected result shape; otherwise returns a failure payload.
- * @template TInput Input descriptor
+ * @template TBase Result base type before selection
+ * @template TSelect Selection to apply to TBase
  */
 export type Output<
     TBase,
-    TOtherResponse extends Response<string, any> = never,
     TSelect extends Select<TBase> = Select<TBase>,
-> = SuccessResponse<Result<TBase, TSelect>> | TOtherResponse;
+> = Result<TBase, TSelect>;
 
 /**
  * Picks only non-object (shallow) properties of T.
