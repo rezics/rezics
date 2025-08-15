@@ -1,35 +1,39 @@
 {
-    "nodeModulesDir": "auto",
-    "workspace": [
-        "./package/client",
-        "./package/contract",
-        "./package/database",
-        "./package/server",
-        "./package/crawler"
-    ],
-    "compilerOptions": {
-        "jsx": "react-jsx",
-        "jsxImportSource": "react",
-        "strict": true,
-        "noUnusedParameters": true
-    },
-    "fmt": {
-        "indentWidth": 4
-    },
-    "lint": {
-        "rules": {
-            "exclude": [
-                "no-explicit-any",
-                "no-namespace"
-            ]
-        }
-    },
-    "imports": {
-        "@gel/generate": "npm:@gel/generate@^0.6.4",
-        "@std/assert": "jsr:@std/assert@^1.0.14",
-        "effect": "npm:effect@^3.17.7",
-        "gel": "npm:gel@^2.1.1",
-        "swr": "npm:swr@^2.3.5",
-        "zod": "npm:zod@^4.0.16"
-    }
+	"unstable": [
+		"fmt-component",
+		"fmt-sql"
+	],
+	"nodeModulesDir": "auto",
+	"workspace": [
+		"./package/client",
+		"./package/contract",
+		"./package/database",
+		"./package/server",
+		"./package/crawler"
+	],
+	"compilerOptions": {
+		"jsx": "react-jsx",
+		"jsxImportSource": "react",
+		"strict": true,
+		"noUnusedParameters": true
+	},
+	"fmt": {
+		"indentWidth": 4,
+		"useTabs": true
+	},
+	"lint": {
+		"rules": {
+			"exclude": [
+				"no-explicit-any",
+				"no-namespace"
+			]
+		}
+	},
+	"imports": {
+		"@std/assert": "jsr:@std/assert@^1.0.14",
+		"effect": "npm:effect@^3.17.7",
+		"gel": "npm:gel@^2.1.1",
+		"swr": "npm:swr@^2.3.6",
+		"zod": "npm:zod@^4.0.17"
+	}
 }

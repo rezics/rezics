@@ -7,44 +7,44 @@ import { useLocation } from "wouter";
 import { Place } from "@mui/icons-material";
 
 export namespace NotFound {
-    export type Show = {
-        path: string;
-        onBack: () => void;
-        onHome: () => void;
-    };
+	export type Show = {
+		path: string;
+		onBack: () => void;
+		onHome: () => void;
+	};
 
-    export const Show: React.FC<Show> = ({ path, onBack, onHome }) => {
-        return (
-            <div className="min-h-screen flex items-center justify-center">
-                <Card className="min-w-md max-w-lg">
-                    <CardContent className="flex flex-col gap-4">
-                        <Typography variant="h4">Not Found</Typography>
-                        <div>
-                            <Place></Place> {path}
-                        </div>
-                    </CardContent>
-                    <CardActions className="flex flex-row justify-between">
-                        <Button onClick={onBack}>Back</Button>
-                        <Button onClick={onHome}>Home</Button>
-                    </CardActions>
-                </Card>
-            </div>
-        );
-    };
+	export const Show: React.FC<Show> = ({ path, onBack, onHome }) => {
+		return (
+			<div className="min-h-screen flex items-center justify-center">
+				<Card className="min-w-md max-w-lg">
+					<CardContent className="flex flex-col gap-4">
+						<Typography variant="h4">Not Found</Typography>
+						<div>
+							<Place></Place> {path}
+						</div>
+					</CardContent>
+					<CardActions className="flex flex-row justify-between">
+						<Button onClick={onBack}>Back</Button>
+						<Button onClick={onHome}>Home</Button>
+					</CardActions>
+				</Card>
+			</div>
+		);
+	};
 
-    export type Container = {};
+	export type Container = {};
 
-    export const Container: React.FC<Container> = () => {
-        const [path, navigate] = useLocation();
+	export const Container: React.FC<Container> = () => {
+		const [path, navigate] = useLocation();
 
-        const handleBack = () => {
-            history.back();
-        };
+		const handleBack = () => {
+			history.back();
+		};
 
-        const handleHome = () => {
-            navigate("/");
-        };
+		const handleHome = () => {
+			navigate("/");
+		};
 
-        return <Show path={path} onBack={handleBack} onHome={handleHome} />;
-    };
+		return <Show path={path} onBack={handleBack} onHome={handleHome} />;
+	};
 }

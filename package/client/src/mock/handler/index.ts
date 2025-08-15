@@ -7,96 +7,115 @@
 // import { homePageHandlers } from "./homePage.ts";
 // import { commentHandlers } from "./comment.ts";
 
-import { tagCreateHandler, tagReadHandler, tagUpdateHandler, tagDeleteHandler } from "./tag.ts";
 import {
-  bookCreateHandler,
-  bookReadHandler,
-  bookUpdateHandler,
-  bookDeleteHandler,
-  bookListHandler,
+	tagCreateHandler,
+	tagDeleteHandler,
+	tagReadHandler,
+	tagUpdateHandler,
+} from "./tag.ts";
+import {
+	bookCreateHandler,
+	bookDeleteHandler,
+	bookListHandler,
+	bookReadHandler,
+	bookUpdateHandler,
 } from "./book.ts";
 import { chapterListHandler, chapterReadHandler } from "./chapter.ts";
 import {
-  commentCreateHandler,
-  commentReadHandler,
-  commentUpdateHandler,
-  commentDeleteHandler,
-  commentListByTargetHandler,
+	commentCreateHandler,
+	commentDeleteHandler,
+	commentListByTargetHandler,
+	commentReadHandler,
+	commentUpdateHandler,
 } from "./comment.ts";
 import { test01Handler } from "./test.ts";
 
 import { http, HttpResponse } from "msw";
-import { reviewShortListHandler, reviewListHandler, reviewCreateHandler, reviewListQuotesHandler } from "./review.ts";
-import { readlistListHandler, readlistReadHandler, readlistCreateHandler } from "./readlist.ts";
+import {
+	reviewCreateHandler,
+	reviewListHandler,
+	reviewListQuotesHandler,
+	reviewShortListHandler,
+} from "./review.ts";
+import {
+	readlistCreateHandler,
+	readlistListHandler,
+	readlistReadHandler,
+} from "./readlist.ts";
 
 // 定义 operation -> handler 的映射
 const operationMap: Record<
-  string,
-  (body: any, req: any, ctx: any) => Promise<any> | any
+	string,
+	(body: any, req: any, ctx: any) => Promise<any> | any
 > = {
-  "tag.create": tagCreateHandler,
-  "tag.read": tagReadHandler,
-  "tag.update": tagUpdateHandler,
-  "tag.delete": tagDeleteHandler,
-  // Book
-  "book.create": bookCreateHandler,
-  "book.read": bookReadHandler,
-  "book.update": bookUpdateHandler,
-  "book.delete": bookDeleteHandler,
-  "book.list": bookListHandler,
-  // Chapter
-  "chapter.list": chapterListHandler,
-  "chapter.read": chapterReadHandler,
-  // Comment
-  "comment.create": commentCreateHandler,
-  "comment.read": commentReadHandler,
-  "comment.update": commentUpdateHandler,
-  "comment.delete": commentDeleteHandler,
-  // custom op for listing comments under an entity
-  "comment.list": commentListByTargetHandler,
-  //"post.publish": postPublishHandler,
-  // Review
-  "review.create": reviewCreateHandler,
-  "review.list": reviewListHandler,
-  "review.short.list": reviewShortListHandler,
-  "review.quote.list": reviewListQuotesHandler,
-  // Readlist
-  "readlist.list": readlistListHandler,
-  "readlist.read": readlistReadHandler,
-  "readlist.create": readlistCreateHandler,
-  // Test
-  "test.01": test01Handler,
+	"tag.create": tagCreateHandler,
+	"tag.read": tagReadHandler,
+	"tag.update": tagUpdateHandler,
+	"tag.delete": tagDeleteHandler,
+	// Book
+	"book.create": bookCreateHandler,
+	"book.read": bookReadHandler,
+	"book.update": bookUpdateHandler,
+	"book.delete": bookDeleteHandler,
+	"book.list": bookListHandler,
+	// Chapter
+	"chapter.list": chapterListHandler,
+	"chapter.read": chapterReadHandler,
+	// Comment
+	"comment.create": commentCreateHandler,
+	"comment.read": commentReadHandler,
+	"comment.update": commentUpdateHandler,
+	"comment.delete": commentDeleteHandler,
+	// custom op for listing comments under an entity
+	"comment.list": commentListByTargetHandler,
+	//"post.publish": postPublishHandler,
+	// Review
+	"review.create": reviewCreateHandler,
+	"review.list": reviewListHandler,
+	"review.short.list": reviewShortListHandler,
+	"review.quote.list": reviewListQuotesHandler,
+	// Readlist
+	"readlist.list": readlistListHandler,
+	"readlist.read": readlistReadHandler,
+	"readlist.create": readlistCreateHandler,
+	// Test
+	"test.01": test01Handler,
 };
 
 // @ts-ignore: unused parameter
-export const apiHandler = http.all("/api", async ({ request, params: _params, cookies }) => {
-  try {
-    // console.log("apiHandler", request, params, cookies);
-    const body: any = await request.json();
+export const apiHandler = http.all(
+	"/api",
+	async ({ request, params: _params, cookies }) => {
+		try {
+			// console.log("apiHandler", request, params, cookies);
+			const body: any = await request.json();
 
-    console.log("REQ", body);
-    const operation = body.operation;
+			console.log("REQ", body);
+			const operation = body.operation;
 
-    if (!operation || typeof operation !== "string") {
-      return HttpResponse.json({ error: "Missing operation" }, { status: 400 });
-    }
+			if (!operation || typeof operation !== "string") {
+				return HttpResponse.json({ error: "Missing operation" }, {
+					status: 400,
+				});
+			}
 
-    const handler = operationMap[operation];
-    if (!handler) {
-      return HttpResponse.json(
-        { error: `No handler for operation "${operation}"` },
-        { status: 404 }
-      );
-    }
+			const handler = operationMap[operation];
+			if (!handler) {
+				return HttpResponse.json(
+					{ error: `No handler for operation "${operation}"` },
+					{ status: 404 },
+				);
+			}
 
-    const result = handler(body, request, cookies);
+			const result = handler(body, request, cookies);
 
-    // return HttpResponse.json(result, { status: 200 });
-    return result;
-  } catch (err) {
-    return HttpResponse.json(
-      { error: "Internal mock server error", detail: String(err) },
-      { status: 500 }
-    );
-  }
-});
+			// return HttpResponse.json(result, { status: 200 });
+			return result;
+		} catch (err) {
+			return HttpResponse.json(
+				{ error: "Internal mock server error", detail: String(err) },
+				{ status: 500 },
+			);
+		}
+	},
+);

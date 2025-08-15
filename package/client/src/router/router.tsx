@@ -44,169 +44,169 @@ import { UserPage } from "@/page/User/UserPage.tsx";
  * an always-truthy Layout component first.
  */
 export default (
-    <Router>
-        <ThemeProvider theme={{}}>
-            <Switch>
-                {/* ANCHOR Auth */}
-                {
-                    /* <Route path="/login" component={Login.Container} />
+	<Router>
+		<ThemeProvider theme={{}}>
+			<Switch>
+				{/* ANCHOR Auth */}
+				{
+					/* <Route path="/login" component={Login.Container} />
                 <Route path="/register" component={Login.Container} /> */
-                }
+				}
 
-                {/* ANCHOR Book Read – keep the more specific path first */}
-                <Route path="/book/:bookId/read/:chapterId">
-                    {() => (
-                        <BookReadLayout>
-                            <BookReadChapterPage />
-                        </BookReadLayout>
-                    )}
-                </Route>
+				{/* ANCHOR Book Read – keep the more specific path first */}
+				<Route path="/book/:bookId/read/:chapterId">
+					{() => (
+						<BookReadLayout>
+							<BookReadChapterPage />
+						</BookReadLayout>
+					)}
+				</Route>
 
-                {/* ANCHOR Book Edit (chapter first, then main) */}
-                <Route path="/book/new">
-                    <MainLayout>
-                        <NewBookPage />
-                    </MainLayout>
-                </Route>
-                <Route path="/book/:bookId/edit/:chapterId">
-                    {({ chapterId }) => (
-                        <BookEditLayout>
-                            <BookEditChapterPage chapterId={chapterId} />
-                        </BookEditLayout>
-                    )}
-                </Route>
-                <Route path="/book/:bookId/edit">
-                    {({ bookId }) => (
-                        <BookEditLayout>
-                            <BookEditMainPage bookId={bookId} />
-                        </BookEditLayout>
-                    )}
-                </Route>
+				{/* ANCHOR Book Edit (chapter first, then main) */}
+				<Route path="/book/new">
+					<MainLayout>
+						<NewBookPage />
+					</MainLayout>
+				</Route>
+				<Route path="/book/:bookId/edit/:chapterId">
+					{({ chapterId }) => (
+						<BookEditLayout>
+							<BookEditChapterPage chapterId={chapterId} />
+						</BookEditLayout>
+					)}
+				</Route>
+				<Route path="/book/:bookId/edit">
+					{({ bookId }) => (
+						<BookEditLayout>
+							<BookEditMainPage bookId={bookId} />
+						</BookEditLayout>
+					)}
+				</Route>
 
-                {/* ANCHOR Book Info Routes */}
-                <Route path="/books">
-                    <MainLayout>
-                        <BookLib.Container />
-                    </MainLayout>
-                </Route>
-                <Route path="/book/:bookId">
-                    {({ bookId }) => (
-                        <MainLayout>
-                            <BookPage.Container bookId={bookId} />
-                        </MainLayout>
-                    )}
-                </Route>
+				{/* ANCHOR Book Info Routes */}
+				<Route path="/books">
+					<MainLayout>
+						<BookLib.Container />
+					</MainLayout>
+				</Route>
+				<Route path="/book/:bookId">
+					{({ bookId }) => (
+						<MainLayout>
+							<BookPage.Container bookId={bookId} />
+						</MainLayout>
+					)}
+				</Route>
 
-                {/* ANCHOR Review Routes */}
-                <Route path="/review/short/book/:bookId">
-                    {() => (
-                        <MainLayout>
-                            <ShortReviewByBookPage />
-                        </MainLayout>
-                    )}
-                </Route>
-                <Route path="/review/book/:bookId">
-                    {() => (
-                        <MainLayout>
-                            <ReviewByBookPage />
-                        </MainLayout>
-                    )}
-                </Route>
-                <Route path="/review/book/:bookId/edit">
-                    {() => (
-                        <MainLayout>
-                            <LongReviewEditPage />
-                        </MainLayout>
-                    )}
-                </Route>
+				{/* ANCHOR Review Routes */}
+				<Route path="/review/short/book/:bookId">
+					{() => (
+						<MainLayout>
+							<ShortReviewByBookPage />
+						</MainLayout>
+					)}
+				</Route>
+				<Route path="/review/book/:bookId">
+					{() => (
+						<MainLayout>
+							<ReviewByBookPage />
+						</MainLayout>
+					)}
+				</Route>
+				<Route path="/review/book/:bookId/edit">
+					{() => (
+						<MainLayout>
+							<LongReviewEditPage />
+						</MainLayout>
+					)}
+				</Route>
 
-                {/* ANCHOR Quote Routes */}
-                <Route path="/quote/book/:bookId">
-                    {() => (
-                        <MainLayout>
-                            <QuoteByBookPage />
-                        </MainLayout>
-                    )}
-                </Route>
+				{/* ANCHOR Quote Routes */}
+				<Route path="/quote/book/:bookId">
+					{() => (
+						<MainLayout>
+							<QuoteByBookPage />
+						</MainLayout>
+					)}
+				</Route>
 
-                {/* ANCHOR ReadList Routes */}
-                <Route path="/readlist/:readlistId">
-                    {() => (
-                        <MainLayout>
-                            <ReadListPage />
-                        </MainLayout>
-                    )}
-                </Route>
-                <Route path="/readlist/:readlistId/edit">
-                    {() => (
-                        <MainLayout>
-                            <BookListEditPage />
-                        </MainLayout>
-                    )}
-                </Route>
-                <Route path="/readlist/book/:bookId">
-                    {() => (
-                        <MainLayout>
-                            <ReadlistByBookPage />
-                        </MainLayout>
-                    )}
-                </Route>
+				{/* ANCHOR ReadList Routes */}
+				<Route path="/readlist/:readlistId">
+					{() => (
+						<MainLayout>
+							<ReadListPage />
+						</MainLayout>
+					)}
+				</Route>
+				<Route path="/readlist/:readlistId/edit">
+					{() => (
+						<MainLayout>
+							<BookListEditPage />
+						</MainLayout>
+					)}
+				</Route>
+				<Route path="/readlist/book/:bookId">
+					{() => (
+						<MainLayout>
+							<ReadlistByBookPage />
+						</MainLayout>
+					)}
+				</Route>
 
-                {/* ANCHOR Tag Routes */}
-                <Route path="/tag/book/:bookId">
-                    {({ bookId }) => (
-                        <MainLayout>
-                            <TagByBookPage bookId={bookId} />
-                        </MainLayout>
-                    )}
-                </Route>
+				{/* ANCHOR Tag Routes */}
+				<Route path="/tag/book/:bookId">
+					{({ bookId }) => (
+						<MainLayout>
+							<TagByBookPage bookId={bookId} />
+						</MainLayout>
+					)}
+				</Route>
 
-                {/* AHCHOR User Routes */}
-                <Route path="/user/:userId">
-                    {({ userId }) => (
-                        <MainLayout>
-                            <UserPage userId={userId} />
-                        </MainLayout>
-                    )}
-                </Route>
+				{/* AHCHOR User Routes */}
+				<Route path="/user/:userId">
+					{({ userId }) => (
+						<MainLayout>
+							<UserPage userId={userId} />
+						</MainLayout>
+					)}
+				</Route>
 
-                {/* ANCHOR Test */}
-                <Route path="/test">
-                    <MainLayout>
-                        <TestPage />
-                    </MainLayout>
-                </Route>
-                <Route path="/test02">
-                    <MainLayout>
-                        <TestPage02 />
-                    </MainLayout>
-                </Route>
-                <Route path="/test03">
-                    <TestPage03 />
-                    {
-                        /* <BookEditLayout>
+				{/* ANCHOR Test */}
+				<Route path="/test">
+					<MainLayout>
+						<TestPage />
+					</MainLayout>
+				</Route>
+				<Route path="/test02">
+					<MainLayout>
+						<TestPage02 />
+					</MainLayout>
+				</Route>
+				<Route path="/test03">
+					<TestPage03 />
+					{
+						/* <BookEditLayout>
                     </BookEditLayout> */
-                    }
-                </Route>
-                {
-                    /* <Route path="/test04">
+					}
+				</Route>
+				{
+					/* <Route path="/test04">
                     <MainLayout>
                         <TestPaginationPage />
                     </MainLayout>
                 </Route> */
-                }
-                {/* ANCHOR Home */}
-                <Route path="/">
-                    <MainLayout>
-                        <Home.Container />
-                    </MainLayout>
-                </Route>
+				}
+				{/* ANCHOR Home */}
+				<Route path="/">
+					<MainLayout>
+						<Home.Container />
+					</MainLayout>
+				</Route>
 
-                {/* ANCHOR404 fallback */}
-                <Route>
-                    <NotFound.Container />
-                </Route>
-            </Switch>
-        </ThemeProvider>
-    </Router>
+				{/* ANCHOR404 fallback */}
+				<Route>
+					<NotFound.Container />
+				</Route>
+			</Switch>
+		</ThemeProvider>
+	</Router>
 );

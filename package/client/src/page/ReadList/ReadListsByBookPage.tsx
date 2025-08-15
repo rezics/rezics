@@ -1,4 +1,4 @@
-    import { ReadlistList } from "@/component/ReadList/ReadlistList.tsx";
+import { ReadlistList } from "@/component/ReadList/ReadlistList.tsx";
 import React, { useState } from "react";
 import { AccentBarWithText } from "@/component/Common/AccentBar.tsx";
 import { useTranslation } from "react-i18next";
@@ -9,30 +9,33 @@ import useSWR from "swr";
 type ReadList = any;
 
 export function ReadlistByBookPage() {
-    const { t } = useTranslation();
-    const bookId = "0";
-    const [booklists, setBooklists] = useState<ReadList[]>([]);
-    const createReadlistListByBookInput = {
-        operation: "readlist.listByBook",
-        parameter: {
-            bookId: bookId,
-        },
-    };
-    const { data, isLoading, error } = useSWR(createReadlistListByBookInput, apiPost);
+	const { t } = useTranslation();
+	const bookId = "0";
+	const [booklists, setBooklists] = useState<ReadList[]>([]);
+	const createReadlistListByBookInput = {
+		operation: "readlist.listByBook",
+		parameter: {
+			bookId: bookId,
+		},
+	};
+	const { data, isLoading, error } = useSWR(
+		createReadlistListByBookInput,
+		apiPost,
+	);
 
-    React.useEffect(() => {
-        if (data?.items) {
-            setBooklists(data.items);
-        }
-    }, [data]);
-    return (
-        <div className="w-11/12 mx-auto mt-10">
-            <AccentBarWithText.Show
-                text={`${t("pages.book_collection_list_page")}`}
-            />
-            <div className="mt-4">
-                <ReadlistList booklists={booklists} />
-            </div>
-        </div>
-    );
+	React.useEffect(() => {
+		if (data?.items) {
+			setBooklists(data.items);
+		}
+	}, [data]);
+	return (
+		<div className="w-11/12 mx-auto mt-10">
+			<AccentBarWithText.Show
+				text={`${t("pages.book_collection_list_page")}`}
+			/>
+			<div className="mt-4">
+				<ReadlistList booklists={booklists} />
+			</div>
+		</div>
+	);
 }
