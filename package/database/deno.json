@@ -2,16 +2,17 @@
 	"name": "database",
 	"version": "0.0.1",
 	"exclude": [
-		"./generated"
+		"./generated/"
 	],
 	"fmt": {
 		"exclude": [
-			"./generated/**/*"
+			"./generated/"
 		]
 	},
 	"lint": {
 		"exclude": [
-			"./generated/**/*"
+			"./generated/",
+			"./mod.ts"
 		]
 	},
 	"tasks": {
