@@ -1,5 +1,5 @@
 import { useFixtureInput } from "react-cosmos/client";
-import { CardBookList } from "./CardBookList";
+import { CardBookList } from "./CardBookList.tsx";
 
 export default () => {
 	const [props] = useFixtureInput<Parameters<typeof CardBookList>[0]>(

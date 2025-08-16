@@ -6,6 +6,9 @@ import { useTranslation } from "react-i18next";
 import { useEffect, useState } from "react";
 import DialogContainer from "../Common/DialogContainer.tsx";
 import EasyEditor from "@component/Form/EasyEditor.tsx";
+import { Book } from "contract";
+import { useApiPost } from "@/api/swr.ts";
+import { useBookPageStore } from "@/global/page/bookPageStore.ts";
 
 export namespace BookDescription {
 	export type Show = {
@@ -14,10 +17,18 @@ export namespace BookDescription {
 		showEditButton?: boolean;
 		editOpen?: boolean;
 		setEditOpen?: (open: boolean) => void;
+		bookId: string;
 	};
 
 	export const Show: React.FC<Show> = (
-		{ description, onEdit, showEditButton = true, editOpen, setEditOpen },
+		{
+			description,
+			onEdit,
+			showEditButton = true,
+			editOpen,
+			setEditOpen,
+			bookId,
+		},
 	) => {
 		let { t } = useTranslation();
 		return (
@@ -40,6 +51,7 @@ export namespace BookDescription {
 					description={description}
 					editOpen={editOpen ?? false}
 					setEditOpen={setEditOpen}
+					bookId={bookId}
 					mode="modal"
 				/>
 			</div>
@@ -48,9 +60,10 @@ export namespace BookDescription {
 
 	export type Container = {
 		description: string;
+		bookId: string;
 	};
 
-	export const Container: React.FC<Container> = ({ description }) => {
+	export const Container: React.FC<Container> = ({ description, bookId }) => {
 		const [editOpen, setEditOpen] = useState(false);
 		const handleEdit = () => {
 			setEditOpen(true);
@@ -62,6 +75,7 @@ export namespace BookDescription {
 				onEdit={handleEdit}
 				editOpen={editOpen}
 				setEditOpen={setEditOpen}
+				bookId={bookId}
 			/>
 		);
 	};
@@ -110,10 +124,11 @@ export namespace BookDescriptionEdit {
 		// setEditOpen: (open: boolean) => void;
 		setEditOpen: any;
 		mode?: "modal" | "inline"; // 'modal' wraps with Dialog, 'inline' renders directly
+		bookId: string;
 	};
 
 	export const Container: React.FC<ContainerProps> = (
-		{ description, editOpen, setEditOpen, mode = "inline" },
+		{ description, editOpen, setEditOpen, mode = "inline", bookId },
 	) => {
 		const [descriptionState, setDescriptionState] = useState(description);
 
@@ -121,8 +136,32 @@ export namespace BookDescriptionEdit {
 			setDescriptionState(description);
 		}, [description]);
 
-		const onUpdate = (newDesc: string) => {
-			console.log("update", newDesc);
+		const onUpdate = async (newDesc: string) => {
+			const updateBookInput = {
+				operation: "book.update",
+				parameter: { id: bookId, description: newDesc },
+				select: {
+					id: true,
+					description: true,
+				},
+			} satisfies Book.Input.Update;
+			// const result: Book.Output.Read<{ id: true; description: true }> =
+			// 	await apiPost(updateBookInput);
+
+			const result = await useApiPost(updateBookInput);
+
+			if (result === "error") {
+				console.error("update book description error", result);
+				return;
+			}
+			// const data: Book.Output.Read<typeof updateBookInput.select> = result;
+			const data = descriptionState;
+			useBookPageStore.getState().updateBook(bookId, {
+				description: data ?? description,
+			});
+			setTimeout(() => {
+				console.log("update Store", useBookPageStore.getState().books[bookId])
+			}, 1000);
 		};
 
 		const content = (

@@ -1,13 +1,11 @@
 import { SWRConfiguration } from "swr";
 
+import { apiPost } from "@/api/swr.ts";
+
 export const swrOptions: SWRConfiguration = {
   // ---------------- 基础 ----------------
   // fetcher：默认数据抓取器，生产环境建议做错误检查，避免 500/404 被当作成功结果
-  fetcher: (url: string) =>
-    fetch(url).then((res) => {
-      if (!res.ok) throw new Error(`Request failed: ${res.status}`);
-      return res.json();
-    }),
+  fetcher: apiPost,
 
   // ---------------- Revalidate 策略 ----------------
   // * 需要注意，SWR的插件显示的是缓存的读取时间，不是最新请求时间
@@ -20,9 +18,9 @@ export const swrOptions: SWRConfiguration = {
   // 网络断开后恢复连接时自动刷新数据
   revalidateOnReconnect: true,
   // 相同 key 的请求在 3 秒内去重，避免重复请求
-  dedupingInterval: 3000,
+  dedupingInterval: 10000,
   // 页面频繁切换焦点时，5 秒内只会 revalidate 一次
-  focusThrottleInterval: 5000,
+  focusThrottleInterval: 15000,
 
   // ---------------- 刷新与轮询 ----------------
   // 默认不开启轮询；如果有实时数据需求，可以在单独 hook 配置

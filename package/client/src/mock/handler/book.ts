@@ -32,13 +32,14 @@ export function bookCreateHandler(body: any) {
 export function bookReadHandler(body: any) {
 	const id = body?.parameter?.id;
 	const found = id ? bookStore.get(id) : undefined;
-	const payload = found ?? bookInfo01;
+	// @ts-ignore no use payload
+	const _payload = found ?? bookInfo01;
 	// Return minimal common fields for flexibility
 	// const result = {
 	//     id: payload.id ?? id ?? genId(),
 	//     title: payload.title ?? payload.name ?? "",
 	// };
-	const result = payload;
+	const result = bookInfo01;
 	return HttpResponse.json({ ...result }, { status: 200 });
 }
 

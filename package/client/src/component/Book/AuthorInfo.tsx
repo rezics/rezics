@@ -1,5 +1,4 @@
 import { Avatar, Box, Typography } from "@mui/material";
-import { Author } from "contract/schema";
 import { useTranslation } from "react-i18next";
 import { AccentBarWithText } from "@component/Common/AccentBar.tsx";
 import { EditButtonFloatRight } from "@component/Common/EditButtonFloatRight.tsx";
@@ -7,6 +6,12 @@ import { useEffect, useState } from "react";
 import EasyEditor from "@component/Form/EasyEditor.tsx";
 import { Button } from "@mui/material";
 import DialogContainer from "../Common/DialogContainer.tsx";
+
+interface Author {
+	name: string;
+	avatar: string | null;
+	description: string;
+}
 
 export namespace AuthorInfo {
 	export type Show = {

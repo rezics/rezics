@@ -1,8 +1,6 @@
-import React, { useEffect, useMemo, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import {
-	Avatar,
 	Box,
-	Container,
 	Divider,
 	Grid,
 	Paper,
@@ -11,7 +9,7 @@ import {
 	Typography,
 } from "@mui/material";
 import { TabContext, TabList, TabPanel } from "@mui/lab";
-import { Link, useLocation, useParams } from "wouter";
+import { useLocation } from "wouter";
 import { BookTagView } from "@/component/Book/BookTagPreview.tsx";
 import { BookReviews } from "@/component/Book/BookReviewsPreview.tsx";
 import { ShortBookReviews } from "@/component/Book/ShortBookReviewsPreview.tsx";
@@ -29,7 +27,7 @@ import { routeStore } from "@/global/routeStore.ts";
 import { startThrottledScroll } from "@/util/ScrollUtil.ts";
 import { Book } from "contract";
 import useSWR from "swr";
-import { apiPost } from "@/api/swr.ts";
+import { useBookPageStore } from "@/global/page/bookPageStore.ts";
 
 export namespace BookPage {
 	type Tab = "0" | "1" | "2";
@@ -72,6 +70,7 @@ export namespace BookPage {
 										<BookDescription.Container
 											description={data?.description ||
 												""}
+											bookId={data?.id || ""}
 										/>
 										<Divider />
 
@@ -218,20 +217,29 @@ export namespace BookPage {
 		};
 		const [activeTab, setActiveTab] = React.useState<Tab>(getInitialTab);
 
-        // ANCHOR Data Fetching
-        const createBookInput = {
-            operation: "book.read",
-            parameter: { id: bookId },
-            select: {
-                id: true,
-            },
-        } satisfies Book.Input.Read;
-		
-		const { data, isLoading, error } = useSWR(createBookInput, apiPost);
+		// ANCHOR Data Fetching
+		const book = useBookPageStore((s) => s.books[bookId]);
+		const createBookInput = {
+			operation: "book.read",
+			parameter: { id: bookId },
+			select: {
+				id: true,
+				name: true,
+				authors: [{ id: true, name: true }],
+				cover: true,
+				description: true,
+				length: true,
+			},
+		} satisfies Book.Input.Read;
 
+		const { data, isLoading, error } = useSWR<
+			Book.Output.Read<typeof createBookInput.select>,
+			Error,
+			typeof createBookInput
+		>(createBookInput);
 
 		useEffect(() => {
-			console.log("book data", data);
+			useBookPageStore.getState().updateBook(bookId, { ...data });
 		}, [data]);
 
 		const tabRef = useRef<Tab>(getInitialTab());
@@ -244,22 +252,22 @@ export namespace BookPage {
 			setActiveTab(newValue);
 		};
 
-        let stopThrottledScroll: any = null;
-        useEffect(() => {
-            const timer = globalThis.setTimeout(() => {
-                stopThrottledScroll = startThrottledScroll((_y) => {
-                    // console.log("当前滚动位置：", y);
-                    // console.log("location", bookId);
-                    routeStore.getState().setRouteData(String(location), {
-                        scrollY: globalThis.pageYOffset,
-                        // scrollY: window.scrollY,
-                        tab: tabRef.current,
-                    });
-                }, 200); // 150ms 节流
-            }, 500); // 500ms 后开始节流
-            return () => {
-                clearTimeout(timer);
-                stopThrottledScroll?.();
+		let stopThrottledScroll: any = null;
+		useEffect(() => {
+			const timer = globalThis.setTimeout(() => {
+				stopThrottledScroll = startThrottledScroll((_y) => {
+					// console.log("当前滚动位置：", y);
+					// console.log("location", bookId);
+					routeStore.getState().setRouteData(String(location), {
+						scrollY: globalThis.pageYOffset,
+						// scrollY: window.scrollY,
+						tab: tabRef.current,
+					});
+				}, 200); // 150ms 节流
+			}, 500); // 500ms 后开始节流
+			return () => {
+				clearTimeout(timer);
+				stopThrottledScroll?.();
 
 				const prev =
 					routeStore.getState().getRouteData(String(location)) || {};
@@ -293,7 +301,7 @@ export namespace BookPage {
 			return <div>Oh no... {String(error)}</div>;
 		}
 
-		if (!data?.id) {
+		if (!book?.id) {
 			return null; // 或者 return <div>No data</div>;
 		}
 		// if (!data.isbn) {
@@ -302,7 +310,7 @@ export namespace BookPage {
 
 		return (
 			<Show
-				data={data}
+				data={book}
 				activeTab={activeTab}
 				onTabChange={handleTabChange}
 			/>

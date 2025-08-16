@@ -54,6 +54,7 @@
 		"react-cosmos": "npm:react-cosmos@7.0.0",
 		"react-cosmos-plugin-vite": "npm:react-cosmos-plugin-vite@7.0.0",
 		"typescript": "npm:typescript@5.9.2",
-		"vite": "npm:vite@7.1.2"
+		"vite": "npm:vite@7.1.2",
+		"@redux-devtools/extension": "npm:@redux-devtools/extension@3.3.0"
 	}
 }
