@@ -8,7 +8,7 @@ import { buildTree } from "@/util/treeAbstract.ts";
 import { useEffect, useMemo, useState } from "react";
 import { ChapterArborist } from "@/component/Book/ChapterArborist.tsx";
 
-import { useLayoutStore } from "@/global/layoutStore.ts";
+import { useLayoutStore } from "@/global/Layout/layoutStore.ts";
 import { Button, Divider, Switch, TextField } from "@mui/material";
 
 interface Chapter {

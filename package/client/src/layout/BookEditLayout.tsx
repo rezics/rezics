@@ -3,7 +3,7 @@ import { useMediaQuery } from "@mui/material";
 import { Sidebar } from "@component/Layout/Sidebar.tsx";
 import { Header } from "@component/Layout/MainLayoutHeader.tsx";
 
-import { useLayoutStore } from "@/global/layoutStore.ts";
+import { useLayoutStore } from "@/global/Layout/layoutStore.ts";
 import { appStore } from "@/global/appStore.ts";
 import { NAVIGATION } from "@/component/Layout/BookEditorNavigation.tsx";
 

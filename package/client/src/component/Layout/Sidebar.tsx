@@ -20,8 +20,8 @@ import {
 	ListItemText,
 	Typography,
 } from "@mui/material";
-import { useLayoutStore } from "@/global/layoutStore";
-import { NavigationItem } from "./navigation";
+import { useLayoutStore } from "@/global/Layout/layoutStore.ts";
+import { NavigationItem } from "@/component/Layout/navigation.d.ts";
 
 import useMeasure from "react-use-measure";
 import { useWindowSize } from "react-use";
@@ -70,6 +70,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 	const isMobile = useMediaQuery((theme) => theme.breakpoints.down("md"));
 
 	const handleItemClick = (
+		// @ts-expect-error - event is not used
 		event: any,
 		segment: string | undefined,
 		hasChildren: boolean,

@@ -1,12 +1,12 @@
 import React from "react";
-import { User } from "./User";
+import { User } from "@/component/Layout/User.tsx";
 import { useTheme } from "@mui/material/styles";
-import { useLayoutStore } from "@/global/layoutStore";
+import { useLayoutStore } from "@/global/Layout/layoutStore.ts";
 import { AppBar, IconButton, Toolbar, Typography } from "@mui/material";
 import { Brightness4, Brightness7, Menu } from "@mui/icons-material";
-import { ThemeQuickToggle } from "@/component/Theme/ThemeCustomizer";
+import { ThemeQuickToggle } from "@/component/Theme/ThemeCustomizer.tsx";
 import { useTranslation } from "react-i18next";
-import { LangToggle } from "./LangToggle";
+import { LangToggle } from "@/component/Layout/LangToggle.tsx";
 // import clsx from 'clsx';
 
 interface HeaderProps {

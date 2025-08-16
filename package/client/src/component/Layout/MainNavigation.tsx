@@ -11,7 +11,7 @@ import LibraryBooksIcon from "@mui/icons-material/LibraryBooks";
 import BookmarkBorderIcon from "@mui/icons-material/BookmarkBorder";
 import FormatListBulletedIcon from "@mui/icons-material/FormatListBulleted";
 
-import { NavigationItem } from "./navigation";
+import { NavigationItem } from "./navigation.d.ts";
 
 // segment: router path
 

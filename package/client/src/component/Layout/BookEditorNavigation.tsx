@@ -12,7 +12,7 @@ import DashboardIcon from "@mui/icons-material/Dashboard";
 import DescriptionIcon from "@mui/icons-material/Description";
 // import LibraryBooksIcon from "@mui/icons-material/LibraryBooks";
 
-import { NavigationItem } from "./navigation";
+import { NavigationItem } from "./navigation.d.ts";
 
 // segment: router path
 

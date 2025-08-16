@@ -3,7 +3,7 @@ import { Button, Divider, useMediaQuery } from "@mui/material";
 import { Sidebar } from "@component/Layout/Sidebar.tsx";
 import { Header } from "@component/Layout/MainLayoutHeader.tsx";
 // import { Box } from "@mui/material";
-import { useLayoutStore } from "@/global/layoutStore.ts";
+import { useLayoutStore } from "@/global/Layout/layoutStore.ts";
 import { appStore } from "@/global/appStore.ts";
 
 import { BookEditorSidebar } from "@/component/Layout/BookEditorSidebar.tsx";
