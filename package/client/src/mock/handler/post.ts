@@ -1,5 +1,5 @@
 import { http, HttpResponse } from "msw";
-import { Post } from "contract";
+// import { Post } from "@/contract/post.ts";
 
 const categories = [
 	{ id: "1", title: "General" },

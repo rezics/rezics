@@ -11,15 +11,18 @@ import {
 	applyDynamicThemeToDOM,
 	generateDynamicColors,
 } from "./config/dynamicTheme.ts";
+import { SWRConfig } from "swr";
+import { swrOptions } from "./plugin/providers/swr.ts";
 import { setupMock } from "./plugin/providers/mock.ts";
 
-
+// ANCHOR I18n
 import { initI18n } from "./plugin/providers/i18n.ts";
-import { PersistentSettingsLoader } from "./plugin/providers/PersistentSettingsLoader.tsx";
-
 initI18n();
 
-// @ts-ignore we have getElementById in the browser
+// ANCHOR PersistentSettings
+import { PersistentSettingsLoader } from "./plugin/providers/PersistentSettingsLoader.tsx";
+
+// ANCHOR APP root
 const container = document.getElementById("app") as HTMLElement;
 // 检查容器上是否已经附加了 root 实例
 // 我们使用一个自定义的 _reactRoot 属性来存储它
@@ -30,14 +33,6 @@ if (!(container as any)._reactRoot) {
 
 // FIXME 但是我們仍然沒有找到爲什麽會有熱更新index的問題
 const root = (container as any)._reactRoot;
-
-// Open TanStack Query Devtools
-// if (import.meta.env.MODE === "development") {
-//     if (typeof window !== "undefined") {
-//         // 啓用tanstack query devtools，自行下載瀏覽器擴展
-//         (window as any).__TANSTACK_QUERY_CLIENT__ = queryClient;
-//     }
-// }
 
 import "github-markdown-css/github-markdown-light.css";
 
@@ -76,9 +71,9 @@ function Root() {
 				<ThemeProvider theme={theme}>
 					<CssBaseline />
 					<PersistentSettingsLoader />
-					{/* <TsrProvider> */}
-					{Router}
-					{/* </TsrProvider> */}
+					<SWRConfig value={swrOptions}>
+						{Router}
+					</SWRConfig>
 				</ThemeProvider>
 			</StyledEngineProvider>
 		</StrictMode>
