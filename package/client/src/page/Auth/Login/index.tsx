@@ -1,7 +1,7 @@
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
-import { Layout } from "../lib/Layout";
-import { login } from "../lib/handler";
+import { Layout } from "../lib/Layout.tsx";
+import { login } from "../lib/handler.ts";
 import { string } from "zod";
 import { email } from "zod/v4";
 import { FC, useState } from "react";
@@ -99,7 +99,10 @@ export namespace Login {
 			event.preventDefault();
 			setLoading(true);
 
-			const data = new FormData(event.currentTarget);
+			// const data = new FormData(event.currentTarget);
+			const data = new FormData();
+			data.append("email", "test@test.com");
+			data.append("password", "123456");
 
 			try {
 				const { error: e_email, data: _email } = email().safeParse(

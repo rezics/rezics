@@ -1,7 +1,7 @@
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
-import { Layout } from "../lib/Layout";
-import { register } from "../lib/handler";
+import { Layout } from "../lib/Layout.tsx";
+import { register } from "../lib/handler.ts";
 import { string } from "zod";
 import { email } from "zod/v4";
 import { FC, useState } from "react";
@@ -21,7 +21,12 @@ export const Register: FC = () => {
 				setLoading(true);
 				setError(undefined);
 
-				const data = new FormData(event.currentTarget);
+				// const data = new FormData(event.currentTarget);
+				const data = new FormData();
+				data.append("name", "test");
+				data.append("email", "test@test.com");
+				data.append("password", "123456");
+				data.append("confirm", "123456");
 
 				try {
 					const { error: e_name, data: _name } = string().min(1)
