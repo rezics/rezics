@@ -219,6 +219,7 @@ export namespace BookPage {
 		const [activeTab, setActiveTab] = React.useState<Tab>(getInitialTab);
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 		const createBookInput = {
 			operation: "book.read",
 			parameter: { id: bookId },
@@ -229,6 +230,8 @@ export namespace BookPage {
 
 		const { data, isLoading, error } = useSWR(createBookInput, apiPost);
 =======
+=======
+>>>>>>> Stashed changes
         // ANCHOR Data Fetching
         const createBookInput = {
             operation: "book.read",
@@ -243,6 +246,9 @@ export namespace BookPage {
             Error,
             typeof createBookInput
         >(createBookInput, apiPost);
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 
 		useEffect(() => {
