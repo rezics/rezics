@@ -4,7 +4,7 @@ import { apiPost } from "@/api/swr.ts";
 
 const createTagInput = {
 	operation: "tag.create",
-	parameter: { name: "New Tag", owners: [{ id: "owner-id" }] },
+	parameter: { name: "New Tag", owners: [{ id: "owner-id" }], type: "book" },
 	select: {
 		id: true,
 		name: true,

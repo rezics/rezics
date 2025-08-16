@@ -218,20 +218,6 @@ export namespace BookPage {
 		};
 		const [activeTab, setActiveTab] = React.useState<Tab>(getInitialTab);
 
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-		const createBookInput = {
-			operation: "book.read",
-			parameter: { id: bookId },
-			select: {
-				id: true,
-			},
-		} satisfies Book.Input.Read;
-
-		const { data, isLoading, error } = useSWR(createBookInput, apiPost);
-=======
-=======
->>>>>>> Stashed changes
         // ANCHOR Data Fetching
         const createBookInput = {
             operation: "book.read",
@@ -240,16 +226,9 @@ export namespace BookPage {
                 id: true,
             },
         } satisfies Book.Input.Read;
+		
+		const { data, isLoading, error } = useSWR(createBookInput, apiPost);
 
-        const { data, isLoading, error } = useSWR<
-            Book.Output.Read<typeof createBookInput.select>,
-            Error,
-            typeof createBookInput
-        >(createBookInput, apiPost);
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
 
 		useEffect(() => {
 			console.log("book data", data);
@@ -265,24 +244,6 @@ export namespace BookPage {
 			setActiveTab(newValue);
 		};
 
-<<<<<<< Updated upstream
-		let stopThrottledScroll: any = null;
-		useEffect(() => {
-			const timer = globalThis.setTimeout(() => {
-				stopThrottledScroll = startThrottledScroll((y) => {
-					console.log("当前滚动位置：", y);
-					console.log("location", bookId);
-					routeStore.getState().setRouteData(String(location), {
-						scrollY: globalThis.pageYOffset,
-						// scrollY: window.scrollY,
-						tab: tabRef.current,
-					});
-				}, 200); // 150ms 节流
-			}, 500); // 500ms 后开始节流
-			return () => {
-				clearTimeout(timer);
-				stopThrottledScroll?.();
-=======
         let stopThrottledScroll: any = null;
         useEffect(() => {
             const timer = globalThis.setTimeout(() => {
@@ -299,7 +260,6 @@ export namespace BookPage {
             return () => {
                 clearTimeout(timer);
                 stopThrottledScroll?.();
->>>>>>> Stashed changes
 
 				const prev =
 					routeStore.getState().getRouteData(String(location)) || {};

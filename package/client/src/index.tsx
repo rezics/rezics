@@ -59,14 +59,9 @@ function Root() {
 		return getTheme(themeMode);
 	}, [themeMode, customColor, useDynamicTheme]);
 
-<<<<<<< Updated upstream
-	useEffect(() => {
-		const root = document.documentElement;
-=======
     useEffect(() => {
         // @ts-ignore we have document in the browser
         const root = document.documentElement;
->>>>>>> Stashed changes
 
 		if (themeMode === "dark") {
 			root.classList.add("dark");
@@ -75,7 +70,6 @@ function Root() {
 		}
 	}, [themeMode]);
 
-<<<<<<< Updated upstream
 	return (
 		<StrictMode>
 			<StyledEngineProvider injectFirst>
@@ -89,19 +83,6 @@ function Root() {
 			</StyledEngineProvider>
 		</StrictMode>
 	);
-=======
-    return (
-        <StrictMode>
-            <StyledEngineProvider injectFirst>
-                <ThemeProvider theme={theme}>
-                    <CssBaseline />
-                    <PersistentSettingsLoader />
-                    {Router}
-                </ThemeProvider>
-            </StyledEngineProvider>
-        </StrictMode>
-    );
->>>>>>> Stashed changes
 }
 
 setupMock().then(() => {
