@@ -12,13 +12,14 @@ import {
 	generateDynamicColors,
 } from "./config/dynamicTheme.ts";
 import { setupMock } from "./plugin/providers/mock.ts";
-// import { queryClient, TsrProvider } from "./api/tsr.ts";
+
 
 import { initI18n } from "./plugin/providers/i18n.ts";
 import { PersistentSettingsLoader } from "./plugin/providers/PersistentSettingsLoader.tsx";
 
 initI18n();
 
+// @ts-ignore we have getElementById in the browser
 const container = document.getElementById("app") as HTMLElement;
 // 检查容器上是否已经附加了 root 实例
 // 我们使用一个自定义的 _reactRoot 属性来存储它
@@ -58,8 +59,14 @@ function Root() {
 		return getTheme(themeMode);
 	}, [themeMode, customColor, useDynamicTheme]);
 
+<<<<<<< Updated upstream
 	useEffect(() => {
 		const root = document.documentElement;
+=======
+    useEffect(() => {
+        // @ts-ignore we have document in the browser
+        const root = document.documentElement;
+>>>>>>> Stashed changes
 
 		if (themeMode === "dark") {
 			root.classList.add("dark");
@@ -68,6 +75,7 @@ function Root() {
 		}
 	}, [themeMode]);
 
+<<<<<<< Updated upstream
 	return (
 		<StrictMode>
 			<StyledEngineProvider injectFirst>
@@ -81,6 +89,19 @@ function Root() {
 			</StyledEngineProvider>
 		</StrictMode>
 	);
+=======
+    return (
+        <StrictMode>
+            <StyledEngineProvider injectFirst>
+                <ThemeProvider theme={theme}>
+                    <CssBaseline />
+                    <PersistentSettingsLoader />
+                    {Router}
+                </ThemeProvider>
+            </StyledEngineProvider>
+        </StrictMode>
+    );
+>>>>>>> Stashed changes
 }
 
 setupMock().then(() => {

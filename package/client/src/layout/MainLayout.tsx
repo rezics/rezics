@@ -1,11 +1,11 @@
 import React, { ReactNode } from "react";
 import { useMediaQuery } from "@mui/material";
-import { Sidebar } from "@component/Layout/Sidebar";
-import { Header } from "@component/Layout/MainLayoutHeader";
+import { Sidebar } from "@/component/Layout/Sidebar.tsx";
+import { Header } from "@/component/Layout/MainLayoutHeader.tsx";
 // import { Box } from "@mui/material";
-import { useLayoutStore } from "@/global/layoutStore";
-import { appStore } from "@/global/appStore";
-import { NAVIGATION } from "@/component/Layout/MainNavigation";
+import { useLayoutStore } from "@/global/layoutStore.ts";
+import { appStore } from "@/global/appStore.ts";
+import { NAVIGATION } from "@/component/Layout/MainNavigation.tsx";
 
 interface MainLayoutProps {
 	children: ReactNode;

@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import { Button, TextField } from "@mui/material";
-import EasyEditor from "@/component/Form/EasyEditor";
+import EasyEditor from "@/component/Form/EasyEditor.tsx";
 
 import { useParams } from "wouter";
 import { useTranslation } from "react-i18next";
-import tsr from "@/api/tsr";
+import { apiPost } from "@/api/swr.ts";
+import useSWR from "swr";
 
 interface BookEditChapterPageProps {
     // bookId: string;
@@ -15,15 +16,17 @@ export const BookEditChapterPage: React.FC<BookEditChapterPageProps> = (
     { chapterId },
 ) => {
     const { t } = useTranslation();
-    const { data, isLoading, error } = tsr.book.chapter.content.useQuery({
-        queryKey: ["bookChapter", chapterId],
-        queryData: {
-            params: {
-                bookId: "1",
-                chapterId: chapterId || "",
-            },
+    const createBookChapterContentInput = {
+        operation: "chapter.read",
+        parameter: {
+            bookId: "1",
+            chapterId: chapterId || "",
         },
-    });
+    };
+    const { data, isLoading, error } = useSWR(
+        createBookChapterContentInput,
+        apiPost,
+    );
 
     const [content, setContent] = useState("");
     const [title, setTitle] = useState("");
@@ -31,8 +34,8 @@ export const BookEditChapterPage: React.FC<BookEditChapterPageProps> = (
     useEffect(() => {
         if (data) {
             console.log(data);
-            setContent(.content || "");
-            setTitle(.chapterName || "");
+            setContent(data.content || "");
+            setTitle(data.chapterName || "");
         }
     }, [data]);
 
@@ -63,7 +66,7 @@ export const BookEditChapterPage: React.FC<BookEditChapterPageProps> = (
                         variant="filled"
                         className="w-full"
                         value={title}
-                        onChange={(e) => setTitle(e.target.value)}
+                        onChange={(e: any) => setTitle(e.target.value)}
                     />
                 </div>
                 <EasyEditor value={content} onChange={setContent} />
