@@ -159,9 +159,9 @@ export namespace BookDescriptionEdit {
 			useBookPageStore.getState().updateBook(bookId, {
 				description: data ?? description,
 			});
-			setTimeout(() => {
-				console.log("update Store", useBookPageStore.getState().books[bookId])
-			}, 1000);
+			// setTimeout(() => {
+			// 	console.log("update Store", useBookPageStore.getState().books[bookId])
+			// }, 1000);
 		};
 
 		const content = (

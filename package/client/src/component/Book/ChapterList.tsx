@@ -20,7 +20,6 @@ export type ChapterOrderType = any;
 export interface ChapterTreeNode extends TreeNodeWithChildren {
 	id: string;
 	title: string;
-	noContent?: boolean;
 	children?: ChapterTreeNode[];
 }
 

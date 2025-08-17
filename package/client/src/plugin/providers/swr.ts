@@ -18,9 +18,11 @@ export const swrOptions: SWRConfiguration = {
   // 网络断开后恢复连接时自动刷新数据
   revalidateOnReconnect: true,
   // 相同 key 的请求在 3 秒内去重，避免重复请求
-  dedupingInterval: 10000,
+  dedupingInterval: 1000,
+  // dedupingInterval: 10000,
   // 页面频繁切换焦点时，5 秒内只会 revalidate 一次
-  focusThrottleInterval: 15000,
+  focusThrottleInterval: 1000,
+  // focusThrottleInterval: 15000,
 
   // ---------------- 刷新与轮询 ----------------
   // 默认不开启轮询；如果有实时数据需求，可以在单独 hook 配置

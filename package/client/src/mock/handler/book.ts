@@ -1,7 +1,7 @@
 import { HttpResponse } from "msw";
 import { bookList01 } from "../data/bookList01.ts";
 import { bookInfo01 } from "../data/bookinfo01.ts";
-import { generateRandomItemsFrom } from "./common.ts";
+import { generateRandomItemsFrom, secureRandomString } from "./common.ts";
 
 const books = [...bookList01];
 
@@ -31,15 +31,18 @@ export function bookCreateHandler(body: any) {
 
 export function bookReadHandler(body: any) {
 	const id = body?.parameter?.id;
-	const found = id ? bookStore.get(id) : undefined;
+	// const found = id ? bookStore.get(id) : undefined;
 	// @ts-ignore no use payload
-	const _payload = found ?? bookInfo01;
+	// let _payload = found ?? bookInfo01;
+	let payload = bookInfo01;
+	payload.title = secureRandomString(10);
+
 	// Return minimal common fields for flexibility
 	// const result = {
 	//     id: payload.id ?? id ?? genId(),
 	//     title: payload.title ?? payload.name ?? "",
 	// };
-	const result = bookInfo01;
+	const result = payload;
 	return HttpResponse.json({ ...result }, { status: 200 });
 }
 

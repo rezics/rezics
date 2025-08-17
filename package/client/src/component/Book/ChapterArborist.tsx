@@ -5,7 +5,7 @@ import { v4 as uuidv4 } from "uuid";
 import { Tree } from "react-arborist";
 import type { DeleteHandler, MoveHandler, RenameHandler } from "react-arborist";
 // 分离的 Node 渲染器工厂
-import { createChapterArboristNode } from "./ChapterArboristNode";
+import { createChapterArboristNode } from "./ChapterArboristNode.tsx";
 
 import {
 	findAndAddChild,
@@ -16,7 +16,7 @@ import {
 	insertSiblingAfter,
 	moveSiblingFirst,
 	moveSiblingLast,
-} from "@/util/arboristTreeUtil";
+} from "@/util/arboristTreeUtil.ts";
 
 type Chapter = {
 	id: string | number;

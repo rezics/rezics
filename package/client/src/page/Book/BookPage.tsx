@@ -240,7 +240,7 @@ export namespace BookPage {
 
 		useEffect(() => {
 			useBookPageStore.getState().updateBook(bookId, { ...data });
-		}, [data]);
+		}, [data, isLoading]);
 
 		const tabRef = useRef<Tab>(getInitialTab());
 		const handleTabChange = (
