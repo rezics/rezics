@@ -9,13 +9,15 @@
 		"./package/contract",
 		"./package/database",
 		"./package/server",
-		"./package/crawler"
+		"./package/crawler",
+		"./package/util"
 	],
 	"compilerOptions": {
 		"jsx": "react-jsx",
 		"jsxImportSource": "react",
 		"strict": true,
-		"noUnusedParameters": true
+		"noUnusedParameters": true,
+		"noErrorTruncation": true
 	},
 	"fmt": {
 		"indentWidth": 4,
