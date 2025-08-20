@@ -37,45 +37,45 @@ export const platform = "example";
 export const domain = "www.example.com";
 
 export const strategy = make_strategy(
-	platform,
-	domain,
-	async (page, url, responses) => {
-		await page.goto(url.toString());
+    platform,
+    domain,
+    async (page, url, responses) => {
+        await page.goto(url.toString());
 
-		// extract fields using locators
-		const coverSrc = await page.locator("img.cover").getAttribute("src");
-		const cover =
-			(await responses.find((r) => r.url().endsWith(coverSrc!))!.body())
-				.toString("base64");
+        // extract fields using locators
+        const coverSrc = await page.locator("img.cover").getAttribute("src");
+        const cover =
+            (await responses.find((r) => r.url().endsWith(coverSrc!))!.body())
+                .toString("base64");
 
-		return Either.right({
-			id: {},
-			cover,
-			title: await page.locator(".title").innerText(),
-			authors: [await page.locator(".author").innerText()],
-			tags: await page.locator(".tags a").allInnerTexts(),
-			description: await page.locator(".desc").innerText(),
-			units: [{ title: "Volume 1", children: [{ title: "Chapter 1" }] }],
-			completed: false,
-			length: 0,
-			last_update: new Date().toISOString(),
-			release: null,
-			rating: null,
-		});
-	},
+        return Either.right({
+            id: {},
+            cover,
+            title: await page.locator(".title").innerText(),
+            authors: [await page.locator(".author").innerText()],
+            tags: await page.locator(".tags a").allInnerTexts(),
+            description: await page.locator(".desc").innerText(),
+            units: [{ title: "Volume 1", children: [{ title: "Chapter 1" }] }],
+            completed: false,
+            length: 0,
+            last_update: new Date().toISOString(),
+            release: null,
+            rating: null,
+        });
+    },
 );
 
-export const discover = make_discover(async function* (page, keyword: string) {
-	await page.goto(
-		`https://${domain}/search?q=${encodeURIComponent(keyword)}`,
-	);
-	for (
-		const href of await page.locator(".result a").allAttributeValues("href")
-	) {
-		try {
-			yield new URL(href!);
-		} catch {}
-	}
+export const discover = make_discover(async function*(page, keyword: string) {
+    await page.goto(
+        `https://${domain}/search?q=${encodeURIComponent(keyword)}`,
+    );
+    for (
+        const href of await page.locator(".result a").allAttributeValues("href")
+    ) {
+        try {
+            yield new URL(href!);
+        } catch {}
+    }
 });
 
 export const test = make_test(strategy, `https://${domain}/book/123`);

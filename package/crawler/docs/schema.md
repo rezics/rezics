@@ -7,8 +7,8 @@ the default export of the module.
 
 ```ts
 type Unit = {
-	title: string;
-	children?: Unit[];
+    title: string;
+    children?: Unit[];
 };
 ```
 
@@ -16,20 +16,20 @@ type Unit = {
 
 ```ts
 type Book = {
-	id: { isbn?: string; icsid?: string };
-	cover: base64; // bytes as base64 string
-	title: string;
-	authors: string[]; // non-empty names
-	units: Unit[]; // hierarchical TOC
-	platform: string; // adapter/platform name
-	link: string; // canonical URL
-	tags: string[];
-	description: string;
-	release: string | null; // ISO datetime
-	completed: boolean;
-	length: number; // site-specific normalization
-	last_update: string; // ISO datetime
-	rating: number | null; // 0..1
+    id: { isbn?: string; icsid?: string };
+    cover: base64; // bytes as base64 string
+    title: string;
+    authors: string[]; // non-empty names
+    units: Unit[]; // hierarchical TOC
+    platform: string; // adapter/platform name
+    link: string; // canonical URL
+    tags: string[];
+    description: string;
+    release: string | null; // ISO datetime
+    completed: boolean;
+    length: number; // site-specific normalization
+    last_update: string; // ISO datetime
+    rating: number | null; // 0..1
 };
 ```
 

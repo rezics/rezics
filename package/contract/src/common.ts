@@ -7,13 +7,13 @@
  * @template TBaseItem Item type of the source array
  */
 export type ArraySelect<TBaseItem> = [
-	select: Select<TBaseItem>,
-	option?: {
-		/** 0-based start index */
-		offset: number;
-		/** Number of items to include (to end if omitted) */
-		length?: number;
-	},
+    select: Select<TBaseItem>,
+    option?: {
+        /** 0-based start index */
+        offset: number;
+        /** Number of items to include (to end if omitted) */
+        length?: number;
+    },
 ];
 
 /** Select all fields at current depth (shallow) */
@@ -30,17 +30,17 @@ export type SelectDeepAll = "**";
  * @template TBase Base type to select from
  */
 export type Select<TBase> = (TBase extends Date ? string : TBase) extends object
-	// Is Object
-	? TBase extends Array<infer TBaseItem>
-		// Is Array
-		? ArraySelect<TBaseItem>
-		// Is Object, But Not Array
-	:
-		| Partial<{ [TKey in keyof TBase]: Select<TBase[TKey]> }>
-		| SelectAll
-		| SelectDeepAll
-	// Is Scalar
-	: true;
+    // Is Object
+    ? TBase extends Array<infer TBaseItem>
+        // Is Array
+        ? ArraySelect<TBaseItem>
+        // Is Object, But Not Array
+    :
+        | Partial<{ [TKey in keyof TBase]: Select<TBase[TKey]> }>
+        | SelectAll
+        | SelectDeepAll
+    // Is Scalar
+    : true;
 
 /**
  * Result type for array selections: an array of selected item results.
@@ -48,8 +48,8 @@ export type Select<TBase> = (TBase extends Date ? string : TBase) extends object
  * @template TSelect Array selection applied to items
  */
 export type ArrayResult<
-	TBaseItem,
-	TSelect extends ArraySelect<TBaseItem>,
+    TBaseItem,
+    TSelect extends ArraySelect<TBaseItem>,
 > = Result<TBaseItem, TSelect[0]>[];
 
 /**
@@ -64,36 +64,35 @@ export type ArrayResult<
  * @template TSelect Selection to apply
  */
 export type Result<TBase, TSelect extends Select<TBase>> = TBase extends object
-	// Is Object
-	? TBase extends Array<infer TBaseItem>
-		// Is Array -> ArrayResult
-		? ArrayResult<
-			TBaseItem,
-			TSelect extends ArraySelect<TBaseItem> ? TSelect : never
-		>
-		// Is Object, But Not Array
-	: TSelect extends SelectAll
-		// Select All (Shallow)
-		? Shallow<TBase>
-	: TSelect extends SelectDeepAll
-		// Select Deep All
-		? TBase
-	: {
-		[
-			K in keyof TSelect as K extends keyof TBase
-				? TSelect[K] extends Select<TBase[K]> ? K
-				: never
-				: never
-		]: K extends keyof TBase
-			// K Is In TBase
-			? TSelect[K] extends Select<TBase[K]>
-				// TSelect[K] Is Select
-				? Result<TBase[K], TSelect[K]>
-			: never
-			: never;
-	}
-	// Is Scalar
-	: TBase;
+    // Is Object
+    ? TBase extends Array<infer TBaseItem>
+        // Is Array -> ArrayResult
+        ? ArrayResult<
+            TBaseItem,
+            TSelect extends ArraySelect<TBaseItem> ? TSelect : never
+        >
+        // Is Object, But Not Array
+    : TSelect extends SelectAll
+        // Select All (Shallow)
+        ? Shallow<TBase>
+    : TSelect extends SelectDeepAll
+        // Select Deep All
+        ? TBase
+    : {
+        [
+            K in keyof TSelect as K extends keyof TBase ? TSelect[K] extends Select<TBase[K]> ? K
+                : never
+                : never
+        ]: K extends keyof TBase
+            // K Is In TBase
+            ? TSelect[K] extends Select<TBase[K]>
+                // TSelect[K] Is Select
+                ? Result<TBase[K], TSelect[K]>
+            : never
+            : never;
+    }
+    // Is Scalar
+    : TBase;
 
 /**
  * Typed operation request envelope.
@@ -105,10 +104,10 @@ export type Result<TBase, TSelect extends Select<TBase>> = TBase extends object
  * @template TFailureResponse Failure response type(s) (propagated to Output)
  */
 export type Input<
-	TBase,
-	TOperation extends string,
-	TParameter extends object,
-	TSelect extends Select<TBase> = Select<TBase>,
+    TBase,
+    TOperation extends string,
+    TParameter extends object,
+    TSelect extends Select<TBase> = Select<TBase>,
 > = { operation: TOperation; parameter: TParameter; select: TSelect };
 
 /**
@@ -118,27 +117,27 @@ export type Input<
  * @template TSelect Selection to apply to TBase
  */
 export type Output<
-	TBase,
-	TSelect extends Select<TBase> = Select<TBase>,
+    TBase,
+    TSelect extends Select<TBase> = Select<TBase>,
 > = Result<TBase, TSelect>;
 
 /**
  * Picks only non-object (shallow) properties of T.
  */
 export type Shallow<T> = T extends object ? {
-		[K in keyof T as T[K] extends object ? never : K]: T[K];
-	}
-	: T;
+        [K in keyof T as T[K] extends object ? never : K]: T[K];
+    }
+    : T;
 
 /**
  * Deep version of Partial. Recursively makes all properties optional.
  */
 export type DeepPartial<T> = T extends object ? Partial<
-		{
-			[K in keyof T]: DeepPartial<T[K]>;
-		}
-	>
-	: T;
+        {
+            [K in keyof T]: DeepPartial<T[K]>;
+        }
+    >
+    : T;
 
 /**
  * Discriminated response shape.
@@ -146,7 +145,7 @@ export type DeepPartial<T> = T extends object ? Partial<
  * @template TResult Payload type
  */
 export type Response<TType extends string, TResult> = {
-	[K in TType]: TResult;
+    [K in TType]: TResult;
 };
 
 /** Successful response wrapper */
@@ -160,6 +159,6 @@ export type Exact<T, U> = T extends U ? (U extends T ? T : never) : never;
 
 /** Convert a union type to an intersection type. */
 export type UnionToIntersection<U> = (
-	U extends any ? (k: U) => void : never
+    U extends any ? (k: U) => void : never
 ) extends (k: infer I) => void ? I
-	: never;
+    : never;

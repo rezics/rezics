@@ -5608,6 +5608,7 @@
       "jsr:@std/assert@^1.0.14",
       "npm:effect@^3.17.7",
       "npm:gel@^2.1.1",
+      "npm:prettier@^3.6.2",
       "npm:swr@^2.3.6",
       "npm:zod@^4.0.17"
     ],

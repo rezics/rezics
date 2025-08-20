@@ -181,15 +181,15 @@ TEST=1 node --loader tsx ./src/lib/adapters/ciweimao.ts
 Programmatic usage example:
 
 ```ts
-import { chromium } from "./src/lib/drivers/chromium.js";
 import { strategy as qidian } from "./src/lib/adapters/qidian.js";
+import { chromium } from "./src/lib/drivers/chromium.js";
 
 const run = async () => {
-	const result = await qidian(
-		chromium,
-		new URL("https://www.qidian.com/book/1032982789"),
-	);
-	console.log(result);
+    const result = await qidian(
+        chromium,
+        new URL("https://www.qidian.com/book/1032982789"),
+    );
+    console.log(result);
 };
 run();
 ```
@@ -197,8 +197,8 @@ run();
 Write to SurrealDB after crawling:
 
 ```ts
-import { write } from "./src/write.js";
 import type { Book } from "./src/schema.js";
+import { write } from "./src/write.js";
 
 // assuming `book` is a validated Book object
 await write(book as Book);

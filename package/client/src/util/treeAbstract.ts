@@ -19,7 +19,7 @@ export type ID = string;
  * Base interface for any node in a tree. Must have an `id`.
  */
 export interface NodeBase<IDType = ID> {
-	id: IDType;
+    id: IDType;
 }
 
 /**
@@ -34,17 +34,17 @@ export type OrderMap<IDType = ID> = Map<IDType | null, IDType[]>;
  * It's generic and can work with any node type that extends `NodeBase`.
  */
 export interface FlatTree<T extends NodeBase> {
-	/** An array containing all nodes in the tree. */
-	nodes: T[];
-	/** A map that defines the parent-child relationships and order of nodes. */
-	orders: OrderMap;
+    /** An array containing all nodes in the tree. */
+    nodes: T[];
+    /** A map that defines the parent-child relationships and order of nodes. */
+    orders: OrderMap;
 }
 
 /**
  * The nested representation of a tree node, with children directly attached.
  */
 export type TreeNodeWithChildren<T = NodeBase> = T & {
-	children?: Array<TreeNodeWithChildren<T>>;
+    children?: Array<TreeNodeWithChildren<T>>;
 };
 
 // --- Tree Transformation Functions ---
@@ -55,58 +55,58 @@ export type TreeNodeWithChildren<T = NodeBase> = T & {
  * @returns An array of root nodes, each with its descendants nested within.
  */
 export function buildTree<T extends NodeBase>(
-	flat: FlatTree<T>,
-	extendFields: Map<any, any> = new Map(),
+    flat: FlatTree<T>,
+    extendFields: Map<any, any> = new Map(),
 ): Array<TreeNodeWithChildren<T>> {
-	const { nodes, orders } = flat;
-	const nodeMap = new Map<T["id"], TreeNodeWithChildren<T>>();
-	// console.log("extendFields", extendFields);
-	for (const node of nodes) {
-		// extend fields
-		if (extendFields.size > 0) {
-			nodeMap.set(String(node.id), {
-				...node,
-				...Object.fromEntries(extendFields),
-			});
-		} else {
-			nodeMap.set(String(node.id), { ...node });
-		}
-	}
-	// console.log("nodeMap", nodeMap);
+    const { nodes, orders } = flat;
+    const nodeMap = new Map<T["id"], TreeNodeWithChildren<T>>();
+    // console.log("extendFields", extendFields);
+    for (const node of nodes) {
+        // extend fields
+        if (extendFields.size > 0) {
+            nodeMap.set(String(node.id), {
+                ...node,
+                ...Object.fromEntries(extendFields),
+            });
+        } else {
+            nodeMap.set(String(node.id), { ...node });
+        }
+    }
+    // console.log("nodeMap", nodeMap);
 
-	// Build roots
-	const rootIds = orders.get(null) || orders.get("null") || [];
-	const roots: Array<TreeNodeWithChildren<T>> = [];
-	for (const rootId of rootIds) {
-		let rootNode = nodeMap.get(String(rootId));
-		if (rootNode) {
-			rootNode.id = String(rootNode.id);
-			roots.push(rootNode);
-		}
-	}
+    // Build roots
+    const rootIds = orders.get(null) || orders.get("null") || [];
+    const roots: Array<TreeNodeWithChildren<T>> = [];
+    for (const rootId of rootIds) {
+        let rootNode = nodeMap.get(String(rootId));
+        if (rootNode) {
+            rootNode.id = String(rootNode.id);
+            roots.push(rootNode);
+        }
+    }
 
-	// Build tree
-	// console.log("orders", orders, orders.entries());
-	for (const [parentId, childIds] of orders.entries()) {
-		if (parentId === null) continue;
-		const stringParentId = String(parentId);
-		const parentNode = nodeMap.get(stringParentId);
-		// console.log("parentNode", parentNode);
-		if (!parentNode) continue;
+    // Build tree
+    // console.log("orders", orders, orders.entries());
+    for (const [parentId, childIds] of orders.entries()) {
+        if (parentId === null) continue;
+        const stringParentId = String(parentId);
+        const parentNode = nodeMap.get(stringParentId);
+        // console.log("parentNode", parentNode);
+        if (!parentNode) continue;
 
-		parentNode.children = [];
-		for (const childId of childIds) {
-			const childNode = nodeMap.get(String(childId));
-			// console.log("childNode", childNode);
-			if (childNode) {
-				childNode.id = String(childNode.id);
-				parentNode.children.push(childNode);
-			}
-		}
-	}
-	// console.log("roots", roots);
+        parentNode.children = [];
+        for (const childId of childIds) {
+            const childNode = nodeMap.get(String(childId));
+            // console.log("childNode", childNode);
+            if (childNode) {
+                childNode.id = String(childNode.id);
+                parentNode.children.push(childNode);
+            }
+        }
+    }
+    // console.log("roots", roots);
 
-	return roots;
+    return roots;
 }
 
 /**
@@ -115,45 +115,43 @@ export function buildTree<T extends NodeBase>(
  * @returns The `FlatTree` representation.
  */
 export function flattenTree<T extends NodeBase>(
-	forest: Array<TreeNodeWithChildren<T>>,
-	filterFields: string[] = [],
+    forest: Array<TreeNodeWithChildren<T>>,
+    filterFields: string[] = [],
 ): FlatTree<T> {
-	const nodes: T[] = [];
-	const orders: OrderMap = new Map();
+    const nodes: T[] = [];
+    const orders: OrderMap = new Map();
 
-	function dfs(node: TreeNodeWithChildren<T>, parentId: T["id"] | null) {
-		// eslint-disable-next-line @typescript-eslint/no-unused-vars
-		const { children, ...rest } = node;
+    function dfs(node: TreeNodeWithChildren<T>, parentId: T["id"] | null) {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { children, ...rest } = node;
 
-		// Filter temporary fields
-		if (filterFields.length > 0) {
-			const filteredRest = Object.fromEntries(
-				Object.entries(rest).filter(([key]) =>
-					!filterFields.includes(key)
-				),
-			) as T;
-			nodes.push(filteredRest as T);
-		} else {
-			nodes.push(rest as T);
-		}
+        // Filter temporary fields
+        if (filterFields.length > 0) {
+            const filteredRest = Object.fromEntries(
+                Object.entries(rest).filter(([key]) => !filterFields.includes(key)),
+            ) as T;
+            nodes.push(filteredRest as T);
+        } else {
+            nodes.push(rest as T);
+        }
 
-		const siblings = orders.get(parentId) || [];
-		siblings.push(node.id);
-		orders.set(parentId, siblings);
+        const siblings = orders.get(parentId) || [];
+        siblings.push(node.id);
+        orders.set(parentId, siblings);
 
-		if (children) {
-			// orders.set(node.id, children.map(c => c.id));
-			for (const child of children) {
-				dfs(child, node.id);
-			}
-		}
-	}
+        if (children) {
+            // orders.set(node.id, children.map(c => c.id));
+            for (const child of children) {
+                dfs(child, node.id);
+            }
+        }
+    }
 
-	for (const root of forest) {
-		dfs(root, null);
-	}
+    for (const root of forest) {
+        dfs(root, null);
+    }
 
-	return { nodes, orders };
+    return { nodes, orders };
 }
 
 // --- Tree Manipulation Functions (Immutable) ---
@@ -166,21 +164,21 @@ export function flattenTree<T extends NodeBase>(
  * @returns A Set containing the initial IDs and all of their descendants.
  */
 function collectDescendants(idsToCollect: ID[], orders: OrderMap): Set<ID> {
-	const collected = new Set(idsToCollect);
-	const queue = [...idsToCollect];
+    const collected = new Set(idsToCollect);
+    const queue = [...idsToCollect];
 
-	while (queue.length > 0) {
-		const currentId = queue.shift()!;
-		const children = orders.get(currentId) || [];
-		for (const childId of children) {
-			if (!collected.has(childId)) {
-				collected.add(childId);
-				queue.push(childId);
-			}
-		}
-	}
+    while (queue.length > 0) {
+        const currentId = queue.shift()!;
+        const children = orders.get(currentId) || [];
+        for (const childId of children) {
+            if (!collected.has(childId)) {
+                collected.add(childId);
+                queue.push(childId);
+            }
+        }
+    }
 
-	return collected;
+    return collected;
 }
 
 /**
@@ -192,20 +190,20 @@ function collectDescendants(idsToCollect: ID[], orders: OrderMap): Set<ID> {
  * @returns A new `FlatTree` instance with the node added.
  */
 export function createNode<T extends NodeBase>(
-	tree: FlatTree<T>,
-	newNode: T,
-	parentId: T["id"] | null,
-	index?: number,
+    tree: FlatTree<T>,
+    newNode: T,
+    parentId: T["id"] | null,
+    index?: number,
 ): FlatTree<T> {
-	const newNodes = [...tree.nodes, newNode];
-	const newOrders: OrderMap = new Map(tree.orders);
-	const siblings = [...(newOrders.get(parentId) || [])];
+    const newNodes = [...tree.nodes, newNode];
+    const newOrders: OrderMap = new Map(tree.orders);
+    const siblings = [...(newOrders.get(parentId) || [])];
 
-	const insertionIndex = index === undefined ? siblings.length : index;
-	siblings.splice(insertionIndex, 0, newNode.id);
-	newOrders.set(parentId, siblings);
+    const insertionIndex = index === undefined ? siblings.length : index;
+    siblings.splice(insertionIndex, 0, newNode.id);
+    newOrders.set(parentId, siblings);
 
-	return { nodes: newNodes, orders: newOrders };
+    return { nodes: newNodes, orders: newOrders };
 }
 
 /**
@@ -216,14 +214,14 @@ export function createNode<T extends NodeBase>(
  * @returns A new `FlatTree` instance with the node updated.
  */
 export function updateNode<T extends NodeBase>(
-	tree: FlatTree<T>,
-	nodeId: T["id"],
-	updates: Partial<Omit<T, "id">>,
+    tree: FlatTree<T>,
+    nodeId: T["id"],
+    updates: Partial<Omit<T, "id">>,
 ): FlatTree<T> {
-	const newNodes = tree.nodes.map((
-		node,
-	) => (node.id === nodeId ? { ...node, ...updates } : node));
-	return { ...tree, nodes: newNodes };
+    const newNodes = tree.nodes.map((
+        node,
+    ) => (node.id === nodeId ? { ...node, ...updates } : node));
+    return { ...tree, nodes: newNodes };
 }
 
 /**
@@ -235,35 +233,35 @@ export function updateNode<T extends NodeBase>(
  * @returns A new `FlatTree` instance with the node moved.
  */
 export function moveNode<T extends NodeBase>(
-	tree: FlatTree<T>,
-	nodeId: T["id"],
-	newParentId: T["id"] | null,
-	newIndex: number,
+    tree: FlatTree<T>,
+    nodeId: T["id"],
+    newParentId: T["id"] | null,
+    newIndex: number,
 ): FlatTree<T> {
-	const newOrders: OrderMap = new Map();
-	let oldParentId: T["id"] | null = null;
+    const newOrders: OrderMap = new Map();
+    let oldParentId: T["id"] | null = null;
 
-	// Find old parent and create new order map without the moving node
-	for (const [pId, children] of tree.orders.entries()) {
-		const newChildren = children.filter((cId) => {
-			if (cId === nodeId) {
-				oldParentId = pId;
-				return false;
-			}
-			return true;
-		});
-		if (newChildren.length > 0) {
-			newOrders.set(pId, newChildren);
-		}
-	}
+    // Find old parent and create new order map without the moving node
+    for (const [pId, children] of tree.orders.entries()) {
+        const newChildren = children.filter((cId) => {
+            if (cId === nodeId) {
+                oldParentId = pId;
+                return false;
+            }
+            return true;
+        });
+        if (newChildren.length > 0) {
+            newOrders.set(pId, newChildren);
+        }
+    }
 
-	// Add to new parent
-	// Handle case where node is moved within the same parent
-	const targetSiblings = [...(newOrders.get(newParentId) || [])];
-	targetSiblings.splice(newIndex, 0, nodeId);
-	newOrders.set(newParentId, targetSiblings);
+    // Add to new parent
+    // Handle case where node is moved within the same parent
+    const targetSiblings = [...(newOrders.get(newParentId) || [])];
+    targetSiblings.splice(newIndex, 0, nodeId);
+    newOrders.set(newParentId, targetSiblings);
 
-	return { ...tree, orders: newOrders };
+    return { ...tree, orders: newOrders };
 }
 
 /**
@@ -273,23 +271,21 @@ export function moveNode<T extends NodeBase>(
  * @returns A new `FlatTree` instance with the nodes removed.
  */
 export function deleteNodes<T extends NodeBase>(
-	tree: FlatTree<T>,
-	nodeIds: T["id"][],
+    tree: FlatTree<T>,
+    nodeIds: T["id"][],
 ): FlatTree<T> {
-	const idsToDelete = collectDescendants(nodeIds, tree.orders);
+    const idsToDelete = collectDescendants(nodeIds, tree.orders);
 
-	const newNodes = tree.nodes.filter((node) => !idsToDelete.has(node.id));
+    const newNodes = tree.nodes.filter((node) => !idsToDelete.has(node.id));
 
-	const newOrders: OrderMap = new Map();
-	for (const [parentId, children] of tree.orders.entries()) {
-		if (idsToDelete.has(parentId as T["id"])) continue;
-		const newChildren = children.filter((childId) =>
-			!idsToDelete.has(childId)
-		);
-		if (newChildren.length > 0) {
-			newOrders.set(parentId, newChildren);
-		}
-	}
+    const newOrders: OrderMap = new Map();
+    for (const [parentId, children] of tree.orders.entries()) {
+        if (idsToDelete.has(parentId as T["id"])) continue;
+        const newChildren = children.filter((childId) => !idsToDelete.has(childId));
+        if (newChildren.length > 0) {
+            newOrders.set(parentId, newChildren);
+        }
+    }
 
-	return { nodes: newNodes, orders: newOrders };
+    return { nodes: newNodes, orders: newOrders };
 }

@@ -10,21 +10,21 @@ type ScrollHandler = (scrollY: number) => void;
  * @returns        停止监听的函数，调用它会移除监听并取消节流
  */
 export function startThrottledScroll(
-	handle: ScrollHandler,
-	interval: number = 200,
+    handle: ScrollHandler,
+    interval: number = 200,
 ): () => void {
-	// 1. 用 lodash 的 throttle 包装回调
-	const throttled = throttle(() => {
-		// @ts-ignore: window.scrollY is not defined in the type declaration
-		handle(window.scrollY);
-	}, interval);
+    // 1. 用 lodash 的 throttle 包装回调
+    const throttled = throttle(() => {
+        // @ts-ignore: window.scrollY is not defined in the type declaration
+        handle(window.scrollY);
+    }, interval);
 
-	// 2. 注册滚动事件
-	window.addEventListener("scroll", throttled, { passive: true });
+    // 2. 注册滚动事件
+    window.addEventListener("scroll", throttled, { passive: true });
 
-	// 3. 返回一个停止监听的函数
-	return () => {
-		window.removeEventListener("scroll", throttled);
-		throttled.cancel(); // 取消任何待执行的节流调用
-	};
+    // 3. 返回一个停止监听的函数
+    return () => {
+        window.removeEventListener("scroll", throttled);
+        throttled.cancel(); // 取消任何待执行的节流调用
+    };
 }

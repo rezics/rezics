@@ -11,12 +11,12 @@ Drivers wrap `rebrowser-playwright` browser launchers. Use them to create a
 - Typical usage:
 
 ```ts
-import { chromium } from "../lib/drivers/chromium.js";
 import { strategy as qidian } from "../lib/adapters/qidian.js";
+import { chromium } from "../lib/drivers/chromium.js";
 
 const res = await qidian(
-	chromium,
-	new URL("https://www.qidian.com/book/1032982789"),
+    chromium,
+    new URL("https://www.qidian.com/book/1032982789"),
 );
 ```
 

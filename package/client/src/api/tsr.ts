@@ -1,7 +1,7 @@
 export function tsr() {
-	return {};
+    return {};
 }
 
 export default function Tsr() {
-	return {};
+    return {};
 }

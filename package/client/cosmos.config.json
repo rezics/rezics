@@ -1,6 +1,6 @@
 {
-	"$schema": "http://json.schemastore.org/cosmos-config",
-	"plugins": ["react-cosmos-plugin-vite"],
-	"fixtureFileSuffix": "test",
-	"globalImports": ["./src/index.css"]
+    "$schema": "http://json.schemastore.org/cosmos-config",
+    "plugins": ["react-cosmos-plugin-vite"],
+    "fixtureFileSuffix": "test",
+    "globalImports": ["./src/index.css"]
 }
