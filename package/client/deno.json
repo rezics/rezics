@@ -8,11 +8,7 @@
         "cosmos-export": "cosmos-export"
     },
     "lint": {
-        "rules": {
-            "exclude": [
-                "no-unused-vars"
-            ]
-        }
+        "exclude": ["**/*"]
     },
     "imports": {
         "@/": "./src/",
@@ -56,6 +52,8 @@
         "@types/react-window": "npm:@types/react-window@1.8.8",
         "eslint-plugin-react": "npm:eslint-plugin-react@7.37.5",
         "eslint-plugin-react-hooks": "npm:eslint-plugin-react-hooks@5.2.0",
+        "eslint-plugin-jsx-a11y": "npm:eslint-plugin-jsx-a11y@^6.10.2",
+        "eslint-plugin-react-refresh": "npm:eslint-plugin-react-refresh@^0.4.20",
         "jsdom": "npm:jsdom@26.1.0",
         "msw": "npm:msw@2.10.5",
         "react-cosmos": "npm:react-cosmos@7.0.0",

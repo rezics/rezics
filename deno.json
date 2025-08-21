@@ -37,7 +37,6 @@
         "@typescript-eslint/eslint-plugin": "npm:@typescript-eslint/eslint-plugin@^8.40.0",
         "@typescript-eslint/parser": "npm:@typescript-eslint/parser@^8.40.0",
         "effect": "npm:effect@^3.17.7",
-        "eslint-plugin-react-refresh": "npm:eslint-plugin-react-refresh@^0.4.20",
         "gel": "npm:gel@^2.1.1",
         "prettier": "npm:prettier@^3.6.2",
         "swr": "npm:swr@^2.3.6",
