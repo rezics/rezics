@@ -7,6 +7,13 @@
         "cosmos": "cosmos",
         "cosmos-export": "cosmos-export"
     },
+    "lint": {
+        "rules": {
+            "exclude": [
+                "no-unused-vars"
+            ]
+        }
+    },
     "imports": {
         "@/": "./src/",
         "@component/": "./src/component/",

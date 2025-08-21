@@ -1,46 +1,47 @@
 {
-  "cSpell.words": [
-    "booklist",
-    "deno",
-    "denoland",
-    "edgeql",
-    "Evaluable",
-    "icsid",
-    "libphonenumber",
-    "pgcrypto",
-    "pnpx",
-    "readlist",
-    "rebrowser",
-    "Tagable",
-    "TCRUD",
-    "urql",
-    "uuid",
-    "uuidv",
-    "wouter"
-  ],
-  "i18n-ally.localesPaths": ["package/client/src/locale"],
-  "i18n-ally.enabledParsers": ["js", "ts", "json"],
-  "i18n-ally.enabledFrameworks": ["react-i18next"],
-  "i18n-ally.keystyle": "nested",
-  "gel.project-dir": "package/database",
-  "files.exclude": {
-    "package/database/dbschema/migrations": true
-  },
-  "typescript.tsdk": "node_modules/typescript/lib",
-  "deno.enable": true,
-  "deno.importMap": "import_map.json",
-  "deno.unstable": ["kv"],
-  "deno.suggest.imports.hosts": {
-    "https://deno.land": true,
-    "https://esm.sh": true,
-    "npm:": true
-  },
-  "editor.formatOnSave": true,
-  "editor.defaultFormatter": "dprint.dprint",
-  "[javascript]": {
-    "editor.defaultFormatter": "dprint.dprint"
-},
-"[json]": {
-    "editor.defaultFormatter": "dprint.dprint"
-}
+    "cSpell.words": [
+        "booklist",
+        "deno",
+        "denoland",
+        "easymde",
+        "edgeql",
+        "Evaluable",
+        "icsid",
+        "libphonenumber",
+        "pgcrypto",
+        "pnpx",
+        "readlist",
+        "rebrowser",
+        "Tagable",
+        "TCRUD",
+        "urql",
+        "uuid",
+        "uuidv",
+        "wouter"
+    ],
+    "i18n-ally.localesPaths": ["package/client/src/locale"],
+    "i18n-ally.enabledParsers": ["js", "ts", "json"],
+    "i18n-ally.enabledFrameworks": ["react-i18next"],
+    "i18n-ally.keystyle": "nested",
+    "gel.project-dir": "package/database",
+    "files.exclude": {
+        "package/database/dbschema/migrations": true
+    },
+    "typescript.tsdk": "node_modules/typescript/lib",
+    "deno.enable": true,
+    "deno.importMap": "import_map.json",
+    "deno.unstable": ["kv"],
+    "deno.suggest.imports.hosts": {
+        "https://deno.land": true,
+        "https://esm.sh": true,
+        "npm:": true
+    },
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "dprint.dprint",
+    "[javascript]": {
+        "editor.defaultFormatter": "dprint.dprint"
+    },
+    "[json]": {
+        "editor.defaultFormatter": "dprint.dprint"
+    }
 }
