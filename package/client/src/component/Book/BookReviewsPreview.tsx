@@ -4,7 +4,7 @@ import { apiPost } from "@/api/swr.ts";
 import { Box } from "@mui/material";
 import useSWR from "swr";
 import { AccentBarWithText } from "../Common/AccentBar.tsx";
-import { ArrowForwardIcon } from "../Common/ArrowForwardIcon.tsx";
+import { ArrowForwardIconContainer } from "../Common/ArrowForwardIcon.tsx";
 import { ReviewList } from "../Review/ReviewList.tsx";
 
 interface BookReviewsProps {
@@ -32,12 +32,12 @@ export const BookReviews: React.FC<BookReviewsProps> = ({ bookId, title }) => {
     return (
         <>
             <Box>
-                <ArrowForwardIcon.Container
+                <ArrowForwardIconContainer
                     size={16}
                     to={`/review/book/${bookId}/`}
                 >
                     <AccentBarWithText.Show text={`${title}的书评`} />
-                </ArrowForwardIcon.Container>
+                </ArrowForwardIconContainer>
                 <ReviewList.Container reviews={reviews} />
             </Box>
         </>

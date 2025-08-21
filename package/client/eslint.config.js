@@ -6,6 +6,7 @@ import jsxA11y from "eslint-plugin-jsx-a11y";
 import react from "eslint-plugin-react";
 import reactHooks from "eslint-plugin-react-hooks";
 import reactRefresh from "eslint-plugin-react-refresh";
+import globals from "globals";
 
 // 通用忽略（Flat Config 要用 ignores 字段）
 export default [
@@ -18,13 +19,14 @@ export default [
             "**/.next/**",
             "**/coverage/**",
             "**/*.min.*",
+            "**/*.lock",
         ],
     },
 
-    // 1) JS 基础
+    // JS 基础
     js.configs.recommended,
 
-    // 2) TypeScript（基础，不做类型流分析，性能更好）
+    // TypeScript（基础，不做类型流分析，性能更好）
     {
         files: ["**/*.{ts,tsx}"],
         languageOptions: {
@@ -44,7 +46,7 @@ export default [
 
             // --- 务实微调（常见诉求） ---
             // 允许临时 any（给警告，不让 CI 挂）
-            "@typescript-eslint/no-explicit-any": "warn",
+            "@typescript-eslint/no-explicit-any": "off",
 
             // 用 TS 版本的未使用变量检测，并允许下划线占位
             "no-unused-vars": "off", // 关闭 JS 版
@@ -64,14 +66,15 @@ export default [
         },
     },
 
-    // 3) React 基础 + Hooks + a11y + Fast Refresh
+    // React 基础 + Hooks + a11y + Fast Refresh
+    reactRefresh.configs.vite,
+
     {
         files: ["**/*.{jsx,tsx}"],
         plugins: {
             react,
             "react-hooks": reactHooks,
             "jsx-a11y": jsxA11y,
-            "react-refresh": reactRefresh,
         },
         languageOptions: {
             parser: tsParser, // 统一用一个 parser 处理 TSX/JSX
@@ -95,12 +98,24 @@ export default [
             // 无障碍（产品向项目强烈建议）
             ...jsxA11y.configs.recommended.rules,
 
-            // Fast Refresh 友好：组件文件不要导出非组件绑定
-            "react-refresh/only-export-components": "error",
+            // eslint-plugin-react config
+            "react/react-in-jsx-scope": "off",
+            "react/jsx-uses-react": "off",
 
             // 少量语义化微调（可按团队口味增删）
             "react/self-closing-comp": "warn",
             "react/jsx-no-useless-fragment": ["warn", { allowExpressions: true }],
+        },
+    },
+
+    // 浏览器环境
+    {
+        files: ["**/*.{js,ts,jsx,tsx}"],
+        languageOptions: {
+            globals: {
+                ...globals.browser, // 浏览器全局
+                ...globals.es2021, // ES2021 全局（可选）
+            },
         },
     },
 ];

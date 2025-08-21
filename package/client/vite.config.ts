@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import { resolve } from "node:path";

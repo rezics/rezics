@@ -24,29 +24,27 @@ const LinkWithIcon = styled(Box)(({ theme }) => ({
     },
 }));
 
-export namespace ArrowForwardIcon {
-    export type Show = {
-        size?: number;
-        color?: string;
-        children?: React.ReactNode;
-        to?: string;
-    };
+export type Show = {
+    size?: number;
+    color?: string;
+    children?: React.ReactNode;
+    to?: string;
+};
 
-    export const Show: React.FC<Show> = ({ children, to }) => {
-        return (
-            <Link to={to || "/"}>
-                <LinkWithIcon>
-                    {/* 文本部分，用 Typography 能保证行高一致 */}
-                    <Typography component="span">{children}</Typography>
-                    {/* 图标部分，初始继承父级 text color */}
-                    <ArrowForwardIosRoundedIcon className="arrow-icon transform" />
-                </LinkWithIcon>
-            </Link>
-        );
-    };
+export const ArrowForwardIconShow: React.FC<Show> = ({ children, to }) => {
+    return (
+        <Link to={to || "/"}>
+            <LinkWithIcon>
+                {/* 文本部分，用 Typography 能保证行高一致 */}
+                <Typography component="span">{children}</Typography>
+                {/* 图标部分，初始继承父级 text color */}
+                <ArrowForwardIosRoundedIcon className="arrow-icon transform" />
+            </LinkWithIcon>
+        </Link>
+    );
+};
 
-    export type Container = Show;
-    export const Container: React.FC<Container> = (props) => {
-        return <Show {...props} />;
-    };
-}
+export type Container = Show;
+export const ArrowForwardIconContainer: React.FC<Container> = (props) => {
+    return <ArrowForwardIconShow {...props} />;
+};

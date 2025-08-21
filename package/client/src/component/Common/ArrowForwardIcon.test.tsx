@@ -4,7 +4,7 @@ import { ArrowForwardIcon } from "./ArrowForwardIcon";
 export default {
     Default: () => {
         const [props] = useFixtureInput<
-            Parameters<typeof ArrowForwardIcon.Container>[0]
+            Parameters<typeof ArrowForwardIconContainer>[0]
         >("Props", {
             size: 24,
             children: "点击查看更多",
@@ -12,7 +12,7 @@ export default {
 
         return (
             <div className="p-4">
-                <ArrowForwardIcon.Container {...props} />
+                <ArrowForwardIconContainer {...props} />
             </div>
         );
     },
@@ -20,19 +20,19 @@ export default {
     Sizes: () => (
         <div className="p-4 space-y-4">
             <div>
-                <ArrowForwardIcon.Container size={16}>
+                <ArrowForwardIconContainer size={16}>
                     小尺寸
-                </ArrowForwardIcon.Container>
+                </ArrowForwardIconContainer>
             </div>
             <div>
-                <ArrowForwardIcon.Container size={24}>
+                <ArrowForwardIconContainer size={24}>
                     中等尺寸
-                </ArrowForwardIcon.Container>
+                </ArrowForwardIconContainer>
             </div>
             <div>
-                <ArrowForwardIcon.Container size={32}>
+                <ArrowForwardIconContainer size={32}>
                     大尺寸
-                </ArrowForwardIcon.Container>
+                </ArrowForwardIconContainer>
             </div>
         </div>
     ),
@@ -40,19 +40,19 @@ export default {
     Examples: () => (
         <div className="p-4 space-y-4">
             <div>
-                <ArrowForwardIcon.Container>
+                <ArrowForwardIconContainer>
                     查看详情
-                </ArrowForwardIcon.Container>
+                </ArrowForwardIconContainer>
             </div>
             <div>
-                <ArrowForwardIcon.Container>
+                <ArrowForwardIconContainer>
                     继续阅读
-                </ArrowForwardIcon.Container>
+                </ArrowForwardIconContainer>
             </div>
             <div>
-                <ArrowForwardIcon.Container>
+                <ArrowForwardIconContainer>
                     了解更多
-                </ArrowForwardIcon.Container>
+                </ArrowForwardIconContainer>
             </div>
         </div>
     ),

@@ -1,6 +1,6 @@
 import { Button, Tooltip } from "@mui/material";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { AccentBarWithText } from "../Common/AccentBar.tsx";
+import { AccentBarWithTextContainer } from "../Common/AccentBar.tsx";
 
 import { apiPost } from "@/api/swr.ts";
 import { EditButtonFloatRight } from "@/component/Common/EditButtonFloatRight.tsx";
@@ -168,7 +168,7 @@ export const ChapterList: React.FC<ChapterListProps> = ({ id }) => {
     return (
         <div>
             <div className="flex justify-between items-center mb-4">
-                <AccentBarWithText.Container text="目录" />
+                <AccentBarWithTextContainer text="目录" />
                 <div className="flex justify-end space-x-2 mb-4">
                     <Button
                         variant="contained"

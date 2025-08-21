@@ -2,7 +2,7 @@ import { AccentBarWithText } from "@component/Common/AccentBar.tsx";
 import { EditButtonFloatRight } from "@component/Common/EditButtonFloatRight.tsx";
 import { Box } from "@mui/material";
 import React, { useState } from "react";
-import { ArrowForwardIcon } from "../Common/ArrowForwardIcon.tsx";
+import { ArrowForwardIconContainer } from "../Common/ArrowForwardIcon.tsx";
 
 import { BookTagList } from "@component/Tag/BookTagList.tsx";
 import { BookTagEdit } from "../Tag/BookTagEdit.tsx";
@@ -28,12 +28,12 @@ export namespace BookTagView {
         return (
             <Box>
                 <div className="flex mb-4">
-                    <ArrowForwardIcon.Container
+                    <ArrowForwardIconContainer
                         size={16}
                         to={`/tag/book/${bookId}`}
                     >
                         <AccentBarWithText.Show text="标签" />
-                    </ArrowForwardIcon.Container>
+                    </ArrowForwardIconContainer>
                     {showEditButton && <EditButtonFloatRight.Show onClick={onEdit} />}
                 </div>
                 <BookTagList.Container tagGroups={tagObjects} />

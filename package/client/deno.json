@@ -26,6 +26,7 @@
         "@vitejs/plugin-react": "npm:@vitejs/plugin-react@5.0.0",
         "easymde": "npm:easymde@2.20.0",
         "github-markdown-css": "npm:github-markdown-css@5.8.1",
+        "globals": "npm:globals@^16.3.0",
         "graphql-tag": "npm:graphql-tag@2.12.6",
         "humanize-plus": "npm:humanize-plus@1.8.2",
         "i18n": "npm:i18n@0.15.1",

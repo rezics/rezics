@@ -17,7 +17,7 @@ import { BookEditMainPage } from "@/page/BookEdit/InfoPage.tsx";
 
 // Book list / Library pages
 import { BookLib } from "@/page/Book/BookLibPage.tsx";
-import { BookPage } from "@/page/Book/BookPage.tsx";
+import { BookPageContainer } from "@/page/Book/BookPage.tsx";
 import { ReadListPage } from "@/page/ReadList/ReadListPage.tsx";
 
 // Misc
@@ -92,7 +92,7 @@ export default (
                 <Route path="/book/:bookId">
                     {({ bookId }) => (
                         <MainLayout>
-                            <BookPage.Container bookId={bookId} />
+                            <BookPageContainer bookId={bookId} />
                         </MainLayout>
                     )}
                 </Route>

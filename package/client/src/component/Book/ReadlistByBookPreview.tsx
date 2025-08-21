@@ -2,8 +2,8 @@ import { apiPost } from "@/api/swr.ts";
 import { ReadlistList } from "@component/ReadList/ReadlistList.tsx";
 import useSWR from "swr";
 import { Link as _Link } from "wouter";
-import { AccentBarWithText } from "../Common/AccentBar.tsx";
-import { ArrowForwardIcon } from "../Common/ArrowForwardIcon.tsx";
+import { AccentBarWithTextContainer } from "../Common/AccentBar.tsx";
+import { ArrowForwardIconContainer } from "../Common/ArrowForwardIcon.tsx";
 
 export function ReadlistByBookPreview(
     { title, bookId }: { title: string; bookId?: string },
@@ -27,12 +27,12 @@ export function ReadlistByBookPreview(
 
     return (
         <div>
-            <ArrowForwardIcon.Container
+            <ArrowForwardIconContainer
                 size={16}
                 to={`/readlist/book/${bookId}`}
             >
-                <AccentBarWithText.Container text={`包含 ${title} 的书单`} />
-            </ArrowForwardIcon.Container>
+                <AccentBarWithTextContainer text={`包含 ${title} 的书单`} />
+            </ArrowForwardIconContainer>
             <div className="mb-4" />
             <ReadlistList booklists={data?.items || []} />
             {/* 此处应该显示书单列表 */}
