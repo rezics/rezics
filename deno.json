@@ -21,7 +21,7 @@
     },
     "fmt": {
         "indentWidth": 4,
-        "useTabs": true
+        "useTabs": false
     },
     "lint": {
         "rules": {

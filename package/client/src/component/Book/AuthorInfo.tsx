@@ -13,6 +13,26 @@ interface Author {
     description: string | null | undefined;
 }
 
+const FollowButton: React.FC<{ author: Author }> = ({ author }) => {
+    const [following, setFollowing] = useState(false);
+
+    const handleFollow = () => {
+        setFollowing(!following);
+    };
+
+    return (
+        <div className="mt-2 mx-auto flex justify-center">
+            <Button
+                variant="contained"
+                color={following ? "secondary" : "primary"}
+                onClick={handleFollow}
+            >
+                {following ? "Unfollow" : "Follow"} {author.name}
+            </Button>
+        </div>
+    );
+};
+
 export namespace AuthorInfo {
     export type Show = {
         author: Author;
@@ -33,18 +53,20 @@ export namespace AuthorInfo {
                         <AccentBarWithText.Show
                             text={t("book.authorInfo") + " " + author?.name}
                         />
+                        {/* <FollowButton author={author} /> */}
                         {showEditButton && <EditButtonFloatRight.Show onClick={onEdit} />}
                     </div>
                     <div className="whitespace-pre-line">
                         <Box>
                             <Box className="mb-4 mt-2 flex">
                                 {/* 左侧图片区域 */}
-                                <div className="w-1/4 flex justify-center items-center">
+                                <div className="w-1/5 flex-row justify-center">
                                     <img
                                         src={author.avatar || ""}
                                         className="max-w-full max-h-full object-contain"
                                         alt="avatar"
                                     />
+                                    <FollowButton author={author} />
                                 </div>
 
                                 {/* 分割线 */}

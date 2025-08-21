@@ -38,7 +38,7 @@ export const BookEditorSidebar: React.FC<BookEditorSidebarProps> = ({
     enableDoubleClickRename = false,
 }) => {
     /**
-     * TODO
+     * TODO 美化；点击卷的文字也应当触发折叠/展开；最起码阅读界面如此
      * @param param0
      * @returns
      */
