@@ -1,7 +1,7 @@
-import js from "npm:@eslint/js";
-import tsPlugin from "npm:@typescript-eslint/eslint-plugin";
-import tsParser from "npm:@typescript-eslint/parser";
-import reactRefresh from "npm:eslint-plugin-react-refresh";
+import js from "@eslint/js";
+import tsPlugin from "@typescript-eslint/eslint-plugin";
+import tsParser from "@typescript-eslint/parser";
+import reactRefresh from "eslint-plugin-react-refresh";
 
 export default [
     // JS 基础规则
