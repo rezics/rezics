@@ -1,5 +1,5 @@
 // AuthorInfo.tsx  —— ES Module 版本（无 namespace）
-import { AccentBarWithText } from "@component/Common/AccentBar.tsx";
+import { AccentBarWithTextShow } from "@component/Common/AccentBar.tsx";
 import { EditButtonFloatRight } from "@component/Common/EditButtonFloatRight.tsx";
 import EasyEditor from "@component/Form/EasyEditor.tsx";
 import { Box, Button, Typography } from "@mui/material";
@@ -20,11 +20,12 @@ const FollowButton: React.FC<{ author: Author }> = ({ author }) => {
     const handleFollow = () => setFollowing((v) => !v);
 
     return (
-        <div className="mt-2 mx-auto flex justify-center">
+        <div className="w-full mt-2">
             <Button
                 variant="contained"
                 color={following ? "secondary" : "primary"}
                 onClick={handleFollow}
+                className="w-full"
             >
                 {following ? "Unfollow" : "Follow"} {author.name}
             </Button>
@@ -52,16 +53,16 @@ const AuthorInfoShow: React.FC<AuthorInfoShowProps> = ({
 
     return (
         <div>
-            <Box>
+            <div>
                 <div className="flex mb-4">
-                    <AccentBarWithText.Show text={t("book.authorInfo") + " " + author?.name} />
+                    <AccentBarWithTextShow text={t("book.authorInfo") + " " + author?.name} />
                     {/* <FollowButton author={author} /> */}
                     {showEditButton && <EditButtonFloatRight.Show onClick={onEdit} />}
                 </div>
 
                 <div className="whitespace-pre-line">
-                    <Box>
-                        <Box className="mb-4 mt-2 flex">
+                    <div>
+                        <div className="mb-4 mt-2 flex">
                             {/* 左侧图片区域 */}
                             <div className="w-1/5 flex-row justify-center">
                                 <img
@@ -79,12 +80,12 @@ const AuthorInfoShow: React.FC<AuthorInfoShowProps> = ({
                             <Typography className="flex-1 !text-md">
                                 {author.description}
                             </Typography>
-                        </Box>
-                    </Box>
+                        </div>
+                    </div>
                 </div>
-            </Box>
+            </div>
 
-            <AuthorInfoEdit.Container
+            <AuthorInfoEditContainer
                 author={author}
                 editOpen={editOpen ?? false}
                 setEditOpen={setEditOpen!}
@@ -196,15 +197,4 @@ const AuthorInfoEditContainer: React.FC<AuthorInfoEditContainerProps> = ({
     return content;
 };
 
-export const AuthorInfo = {
-    Show: AuthorInfoShow,
-    Container: AuthorInfoContainer,
-} as const;
-
-export const AuthorInfoEdit = {
-    Show: AuthorInfoEditShow,
-    Container: AuthorInfoEditContainer,
-} as const;
-
-// 也可以选择分别命名导出：
-// export { AuthorInfoShow, AuthorInfoContainer, AuthorInfoEditShow, AuthorInfoEditContainer };
+export { AuthorInfoContainer, AuthorInfoEditContainer, AuthorInfoEditShow, AuthorInfoShow };

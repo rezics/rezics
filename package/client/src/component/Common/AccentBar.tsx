@@ -36,7 +36,7 @@ export type AccentBarWithTextShowProps = {
     text: string;
 };
 
-export const Show: React.FC<AccentBarWithTextShowProps> = ({ height = 24, color, text }) => {
+export const AccentBarWithTextShow: React.FC<AccentBarWithTextShowProps> = ({ height = 24, color, text }) => {
     const theme = useTheme();
 
     return (
@@ -52,5 +52,5 @@ export const Show: React.FC<AccentBarWithTextShowProps> = ({ height = 24, color,
 
 export type AccentBarWithTextContainerProps = AccentBarWithTextShowProps;
 export const AccentBarWithTextContainer: React.FC<AccentBarWithTextContainerProps> = (props) => {
-    return <Show {...props} />;
+    return <AccentBarWithTextShow {...props} />;
 };

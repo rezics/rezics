@@ -1,7 +1,7 @@
 import { useParams } from "wouter";
 
 import { apiPost } from "@/api/swr.ts";
-import { AccentBarWithText } from "@/component/Common/AccentBar.tsx";
+import { AccentBarWithTextShow } from "@/component/Common/AccentBar.tsx";
 import { ReviewEdit } from "@/component/Review/ReviewEdit.tsx";
 import { ReviewList } from "@/component/Review/ReviewList.tsx";
 import { useEffect, useState } from "react";
@@ -34,7 +34,7 @@ export function ReviewByBookPage() {
 
     return (
         <div className="w-11/12 mx-auto mt-10">
-            <AccentBarWithText.Show text={`${t("pages.review_page")}`} />
+            <AccentBarWithTextShow text={`${t("pages.review_page")}`} />
             <div className="mt-4">
                 <ReviewEdit />
 

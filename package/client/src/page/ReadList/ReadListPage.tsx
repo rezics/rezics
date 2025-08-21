@@ -1,4 +1,4 @@
-import { AccentBar } from "@component/Common/AccentBar.tsx";
+import { AccentBarContainer } from "@component/Common/AccentBar.tsx";
 import { CollapsibleText } from "@component/Common/CollapsibleText.tsx";
 import React, { useRef } from "react";
 import { useParams } from "wouter";
@@ -133,7 +133,7 @@ export const ReadListPage: React.FC = () => {
             <div id="BLCOMMENT" ref={commentRef} className="mt-5">
                 <div className="flex items-center justify-between w-full">
                     <div className="flex items-center gap-2">
-                        <AccentBar.Container />
+                        <AccentBarContainer />
                         <p className="text-2xl font-bold">评论</p>
                     </div>
 

@@ -1,5 +1,5 @@
 import { apiPost } from "@/api/swr.ts";
-import { AccentBarWithText } from "@/component/Common/AccentBar.tsx";
+import { AccentBarWithTextShow } from "@/component/Common/AccentBar.tsx";
 import { ReadlistList } from "@/component/ReadList/ReadlistList.tsx";
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -30,7 +30,7 @@ export function ReadlistByBookPage() {
     }, [data]);
     return (
         <div className="w-11/12 mx-auto mt-10">
-            <AccentBarWithText.Show
+            <AccentBarWithTextShow
                 text={`${t("pages.book_collection_list_page")}`}
             />
             <div className="mt-4">

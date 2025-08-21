@@ -19,7 +19,7 @@ export async function apiPost<T>(key: T) {
  * - 成功时返回对象 (T)
  * - 出错时返回字符串 "error"
  */
-export async function useApiPost<T>(key: T): Promise<any | "error"> {
+export async function safeApiPost<T>(key: T): Promise<any | "error"> {
     try {
         return await apiPost<T>(key);
     } catch (err) {

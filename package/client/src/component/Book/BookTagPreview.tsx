@@ -1,4 +1,4 @@
-import { AccentBarWithText } from "@component/Common/AccentBar.tsx";
+import { AccentBarWithTextShow } from "@component/Common/AccentBar.tsx";
 import { EditButtonFloatRight } from "@component/Common/EditButtonFloatRight.tsx";
 import { Box } from "@mui/material";
 import React, { useState } from "react";
@@ -32,7 +32,7 @@ export namespace BookTagView {
                         size={16}
                         to={`/tag/book/${bookId}`}
                     >
-                        <AccentBarWithText.Show text="标签" />
+                        <AccentBarWithTextShow text="标签" />
                     </ArrowForwardIconContainer>
                     {showEditButton && <EditButtonFloatRight.Show onClick={onEdit} />}
                 </div>

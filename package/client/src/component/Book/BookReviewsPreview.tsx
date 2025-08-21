@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { apiPost } from "@/api/swr.ts";
 import { Box } from "@mui/material";
 import useSWR from "swr";
-import { AccentBarWithText } from "../Common/AccentBar.tsx";
+import { AccentBarWithTextShow } from "../Common/AccentBar.tsx";
 import { ArrowForwardIconContainer } from "../Common/ArrowForwardIcon.tsx";
 import { ReviewList } from "../Review/ReviewList.tsx";
 
@@ -36,7 +36,7 @@ export const BookReviews: React.FC<BookReviewsProps> = ({ bookId, title }) => {
                     size={16}
                     to={`/review/book/${bookId}/`}
                 >
-                    <AccentBarWithText.Show text={`${title}的书评`} />
+                    <AccentBarWithTextShow text={`${title}的书评`} />
                 </ArrowForwardIconContainer>
                 <ReviewList.Container reviews={reviews} />
             </Box>

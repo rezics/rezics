@@ -7,8 +7,8 @@ import { Box, Divider, Grid, Paper, Stack, Tab, Typography } from "@mui/material
 import React, { useEffect, useRef } from "react";
 import { useLocation } from "wouter";
 
-import { AuthorInfo } from "@/component/Book/AuthorInfo.tsx";
-import { BookDescription } from "@/component/Book/BookDescription.tsx";
+import { AuthorInfoContainer } from "@/component/Book/AuthorInfo.tsx";
+import { BookDescriptionContainer } from "@/component/Book/BookDescription.tsx";
 import { QuoteExcerptPreview } from "@/component/Book/QuoteExcerptPreview.tsx";
 import { ReadlistByBookPreview } from "@/component/Book/ReadlistByBookPreview.tsx";
 import { ArrowForwardIconContainer } from "@/component/Common/ArrowForwardIcon.tsx";
@@ -75,7 +75,7 @@ export const BookPageShow: React.FC<ShowProps> = ({
                             <TabPanel value="0">
                                 <Stack spacing={4}>
                                     {/* ANCHOR Description */}
-                                    <BookDescription.Container
+                                    <BookDescriptionContainer
                                         description={data?.description || ""}
                                         bookId={data?.id || ""}
                                     />
@@ -89,7 +89,7 @@ export const BookPageShow: React.FC<ShowProps> = ({
                                     <Divider />
 
                                     {/* ANCHOR Author Info */}
-                                    <AuthorInfo.Container
+                                    <AuthorInfoContainer
                                         author={data?.authors[0] || {
                                             name: "",
                                             description: "",
@@ -271,7 +271,7 @@ export const BookPageContainer: React.FC<ContainerProps> = ({ bookId }) => {
         }, 500); // 500ms 后开始节流
         return () => {
             clearTimeout(timer);
-            stopThrottledScroll?.();
+            stopThrottledScroll.current?.();
 
             const prev = routeStore.getState().getRouteData(String(location)) || {};
             routeStore.getState().setRouteData(String(location), {

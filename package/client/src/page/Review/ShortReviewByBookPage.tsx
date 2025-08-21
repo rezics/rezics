@@ -1,5 +1,5 @@
 import { apiPost } from "@/api/swr.ts";
-import { AccentBarWithText } from "@/component/Common/AccentBar.tsx";
+import { AccentBarWithTextShow } from "@/component/Common/AccentBar.tsx";
 import { ReviewEdit } from "@/component/Review/ReviewEdit.tsx";
 import { ShortReviewList } from "@/component/Review/ShortReviewList.tsx";
 import useSWR from "swr";
@@ -20,7 +20,7 @@ export function ShortReviewByBookPage() {
 
     return (
         <div className="w-10/12 mx-auto mt-10">
-            <AccentBarWithText.Show text="短评" />
+            <AccentBarWithTextShow text="短评" />
             <div className="mt-4">
                 <ReviewEdit />
                 <ShortReviewList.Show reviews={data ?? []} />

@@ -1,5 +1,5 @@
 import { apiPost } from "@/api/swr.ts";
-import { AccentBarWithText } from "@/component/Common/AccentBar.tsx";
+import { AccentBarWithTextShow } from "@/component/Common/AccentBar.tsx";
 import useSWR from "swr";
 
 interface TagByBookPageProps {
@@ -17,7 +17,7 @@ export function TagByBookPage({ bookId }: TagByBookPageProps) {
 
     return (
         <div className="w-11/12 mx-auto mt-10">
-            <AccentBarWithText.Show text={`${data.title} 的标签`} />
+            <AccentBarWithTextShow text={`${data.title} 的标签`} />
         </div>
     );
 }
