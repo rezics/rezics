@@ -1,12 +1,15 @@
-import { Button, Tooltip } from "@mui/material";
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { AccentBarWithTextContainer } from "../Common/AccentBar.tsx";
-
 import { apiPost } from "@/api/swr.ts";
 import { EditButtonFloatRight } from "@/component/Common/EditButtonFloatRight.tsx";
-import { buildTree, OrderMap, TreeNodeWithChildren } from "@/util/treeAbstract.ts";
+import { useChapterListStore } from "@/global/page/chapterListStore.ts";
+import { buildTree } from "@/util/treeAbstract.ts";
+import type { TreeNodeWithChildren } from "@/util/treeAbstract.ts";
+import { Button, Tooltip } from "@mui/material";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React from "react";
 import useSWR from "swr";
 import { Link } from "wouter";
+import { AccentBarWithTextContainer } from "../Common/AccentBar.tsx";
+
 // 扁平结构 + 顺序数组
 
 // type ChapterMapType = Map<number, ChapterTreeNode>;
@@ -22,41 +25,35 @@ export interface ChapterTreeNode extends TreeNodeWithChildren {
 // component props
 interface ChapterListProps {
     id: string;
+    data: any;
 }
 
-export const ChapterList: React.FC<ChapterListProps> = ({ id }) => {
-    // TODO use Store to store the chapter expand state
-    const createChapterListInput = {
-        operation: "chapter.list",
-        parameter: { bookId: id },
-        select: {
-            id: true,
-            title: true,
-        },
-    };
+export const ChapterList: React.FC<ChapterListProps> = ({ id, data }) => {
+    const chapterList = useChapterListStore((s) => s.chapterList[id]);
 
-    const { data, isLoading, error } = useSWR(createChapterListInput, apiPost);
+    const saveExpanded = useCallback((set: Set<string>) => {
+        const arr = [...set];
+        useChapterListStore.getState().updateChapterList(id, { expandedNodes: JSON.stringify(arr) });
+    }, [id]);
 
     const chapters: ChapterTreeNode[] = Object.values(
         data?.chapters ?? [],
     );
-    const orderMap: ChapterOrderType = new Map(
-        Object.entries(data?.order ?? []),
-    );
+    type ChapterOrderType = Map<string, string[]>;
 
-    // console.log(orderMap, typeof orderMap);
-    // const chapterTree: any = buildTree({nodes: chapters, orders: orderMap}, new Map([["isExpend", true]]));
-    // use individual state to store the expanded nodes
+    const orderMap: ChapterOrderType = useMemo(() => {
+        const raw = (data?.order ?? {}) as Record<string, string[]>;
+        return new Map(Object.entries(raw));
+    }, [data?.order]);
+
     const chapterTree: any = useMemo(
         () => buildTree({ nodes: chapters, orders: orderMap }),
         [chapters, orderMap],
     );
 
-    // useEffect(() => {
-    //     console.log("chapterTree", chapterTree, chapters, orderMap);
-    // }, [chapterTree]);
-
-    const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set());
+    const [expandedNodes, setExpandedNodes] = useState<Set<string>>(
+        chapterList?.expandedNodes ? new Set(JSON.parse(chapterList.expandedNodes)) : new Set(),
+    );
 
     const toggleNode = (id: string) => {
         setExpandedNodes((prev) => {
@@ -66,53 +63,50 @@ export const ChapterList: React.FC<ChapterListProps> = ({ id }) => {
             } else {
                 newSet.add(id);
             }
+            saveExpanded(newSet);
             return newSet;
         });
     };
 
-    const expandAll = () => {
+    const expandAll = useCallback(() => {
+        console.log("expandAll", orderMap);
         const allParentIds = new Set(
             Array.from(orderMap.keys())
-                .filter((key) => key !== "null") // 过滤掉字符串 "null"
+                .filter((key) => key !== "null")
                 .map((key) => String(key)),
         );
         setExpandedNodes(allParentIds);
-    };
+        saveExpanded(allParentIds);
+    }, [orderMap, setExpandedNodes, saveExpanded]);
 
-    const collapseAll = () => {
+    const collapseAll = useCallback(() => {
         setExpandedNodes(new Set());
-    };
+        saveExpanded(new Set());
+    }, [saveExpanded]);
 
-    const hasExpandedInit = useRef(false);
-    useLayoutEffect(() => {
-        if (!hasExpandedInit.current && orderMap.size > 0) {
-            console.log("expandAllInit");
+    useEffect(() => {
+        console.log("ChapterList mounted");
+        if (!chapterList) {
+            console.log("chapterList is empty, expandAll");
             expandAll();
-            hasExpandedInit.current = true;
         }
-    }, [orderMap]);
+        return () => {
+            console.log("ChapterList unmounted");
+        };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
-    if (isLoading) return <div>Loading...</div>;
-    if (error) return <div>Oh no... {String(error)}</div>;
-
-    console.log(data);
-
-    // const chapterTree: any = buildTree({nodes: chapters, orders: orderMap});
-
-    // console.log(chapterTree[0].children);
-
-    // 渲染组件（递归）
     const ChapterTreeView = ({ nodes }: { nodes: ChapterTreeNode[] }) => (
         <div className="space-y-4">
             {nodes.map((node) => (
                 <div key={node.id}>
                     <div className="flex justify-between items-center">
-                        <div
+                        <button
                             className="text-xl font-semibold text-gray-800 mb-2 cursor-pointer"
                             onClick={() => toggleNode(node.id)}
                         >
                             {node.title}
-                        </div>
+                        </button>
                         <Button
                             variant="text"
                             onClick={() => toggleNode(node.id)}
@@ -191,4 +185,33 @@ export const ChapterList: React.FC<ChapterListProps> = ({ id }) => {
             <ChapterTreeView nodes={chapterTree} />
         </div>
     );
+};
+
+interface ChapterListContainerProps {
+    id: string;
+}
+
+/**
+ * ChapterListContainer
+ * Show Chapter List in flat way
+ * TODO support user setting initial function
+ * @param param0
+ * @returns
+ */
+export const ChapterListContainer: React.FC<ChapterListContainerProps> = ({ id }) => {
+    const createChapterListInput = {
+        operation: "chapter.list",
+        parameter: { bookId: id },
+        select: {
+            id: true,
+            title: true,
+        },
+    };
+
+    const { data, isLoading, error } = useSWR<any, any>(createChapterListInput, apiPost);
+
+    if (isLoading) return <div>Loading...</div>;
+    if (error) return <div>Oh no... {String(error)}</div>;
+
+    return <ChapterList id={id} data={data} />;
 };

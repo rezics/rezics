@@ -13,7 +13,7 @@ import { QuoteExcerptPreview } from "@/component/Book/QuoteExcerptPreview.tsx";
 import { ReadlistByBookPreview } from "@/component/Book/ReadlistByBookPreview.tsx";
 import { ArrowForwardIconContainer } from "@/component/Common/ArrowForwardIcon.tsx";
 import { BookHeroContainer } from "@component/Book/BookHero.tsx";
-import { ChapterList } from "@component/Book/ChapterList.tsx";
+import { ChapterListContainer } from "@component/Book/ChapterList.tsx";
 
 import { useBookPageStore } from "@/global/page/bookPageStore.ts";
 import { routeStore } from "@/global/routeStore.ts";
@@ -152,7 +152,7 @@ export const BookPageShow: React.FC<ShowProps> = ({
                             <TabPanel value="2">
                                 <Stack spacing={4}>
                                     {/* ANCHOR Chapter List */}
-                                    <ChapterList id={data?.id || "0"} />
+                                    <ChapterListContainer id={data?.id || "0"} />
                                 </Stack>
                             </TabPanel>
                         </TabContext>
