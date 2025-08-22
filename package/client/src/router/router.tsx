@@ -2,8 +2,9 @@ import { ThemeProvider } from "@mui/material";
 import { Route, Router, Switch } from "wouter";
 
 // Pages
+import { LoginPage } from "@/page/Auth/LoginPage.tsx";
+import { RegisterPage } from "@/page/Auth/RegisterPage.tsx";
 import { Home } from "@/page/Home.tsx";
-// import { Login } from "@/page/Auth/Login.tsx";
 import { NotFound } from "@/page/NotFound.tsx";
 
 // Book – Read
@@ -48,10 +49,12 @@ export default (
         <ThemeProvider theme={{}}>
             <Switch>
                 {/* ANCHOR Auth */}
-                {
-                    /* <Route path="/login" component={Login.Container} />
-                <Route path="/register" component={Login.Container} /> */
-                }
+                <Route path="/login">
+                    <LoginPage />
+                </Route>
+                <Route path="/register">
+                    <RegisterPage />
+                </Route>
 
                 {/* ANCHOR Book Read – keep the more specific path first */}
                 <Route path="/book/:bookId/read/:chapterId">

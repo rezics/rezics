@@ -1,12 +1,13 @@
 import { SWRConfiguration } from "swr";
 
 import { apiPost } from "@/api/swr.ts";
+import { withBearer } from "@/api/swrBearer.ts";
 
 export const swrOptions: SWRConfiguration = {
     // ---------------- 基础 ----------------
     // fetcher：默认数据抓取器，生产环境建议做错误检查，避免 500/404 被当作成功结果
     fetcher: apiPost,
-
+    use: [withBearer],
     // ---------------- Revalidate 策略 ----------------
     // * 需要注意，SWR的插件显示的是缓存的读取时间，不是最新请求时间
     // 有缓存也会触发后台更新，保证数据新鲜

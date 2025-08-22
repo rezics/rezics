@@ -1,6 +1,7 @@
-import { Book } from "contract";
-import { OptionalOrUndef } from "./common.ts";
+import type { Book } from "contract";
+import type { OptionalOrUndef } from "./common.ts";
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const createBookInput = {
     operation: "book.read",
     parameter: { id: "undefined" },

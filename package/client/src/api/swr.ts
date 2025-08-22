@@ -1,17 +1,58 @@
-export async function apiPost<T>(key: T) {
-    const _res = await fetch("/api", {
-        // https://example.com/api
-        method: "POST",
+let accessToken: string | null = null;
+
+const stored = localStorage.getItem("accessToken");
+if (stored) {
+    accessToken = stored;
+}
+
+export const tokenStore = {
+    get: () => accessToken,
+
+    set: (t: string | null) => {
+        accessToken = t;
+        if (t) {
+            localStorage.setItem("accessToken", t);
+        } else {
+            localStorage.removeItem("accessToken");
+        }
+    },
+};
+type RequestInit = {
+    method?: string;
+    headers?: Record<string, string> | Headers;
+    body?: string | FormData | null;
+    [key: string]: any;
+};
+
+export async function fetchJSONWithBearer<T>(url: string, init?: RequestInit): Promise<T> {
+    const res = await fetch(url, {
+        ...init,
         headers: {
+            "Accept": "application/json",
             "Content-Type": "application/json",
-            Accept: "application/json",
+            ...(tokenStore.get() ? { "Authorization": `Bearer ${tokenStore.get()}` } : {}),
+            ...(init?.headers || {}),
         },
+    });
+    if (!res.ok) {
+        const err: any = new Error("HTTP error");
+        err.status = res.status;
+        try {
+            err.data = await res.json();
+        } catch {
+            // empty
+        }
+        throw err;
+    }
+    return res.json() as Promise<T>;
+}
+
+export async function apiPost<T>(key: T) {
+    const url = "/api";
+    return await fetchJSONWithBearer(url, {
+        method: "POST",
         body: JSON.stringify(key),
     });
-    if (!_res.ok) {
-        throw new Error(`Request failed: ${_res.status}`);
-    }
-    return (await _res.json()) as any;
 }
 
 /**
