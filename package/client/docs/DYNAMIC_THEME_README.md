@@ -58,8 +58,8 @@ src/
 
 ```typescript
 function generateDynamicColors(
-    sourceColor: string,
-    isDark: boolean,
+	sourceColor: string,
+	isDark: boolean,
 ): DynamicColorScheme;
 ```
 
@@ -76,8 +76,8 @@ function generateDynamicColors(
 
 ```typescript
 function dynamicColorsToPalette(
-    colors: DynamicColorScheme,
-    mode: "light" | "dark",
+	colors: DynamicColorScheme,
+	mode: "light" | "dark",
 ): PaletteOptions;
 ```
 
@@ -140,31 +140,31 @@ const theme = getDynamicTheme("light", "#FF5722");
 
 ```typescript
 export const PRESET_COLORS = {
-    red: "#f44336",
-    pink: "#e91e63",
-    purple: "#9c27b0",
-    deepPurple: "#673ab7",
-    indigo: "#3f51b5",
-    blue: "#2196f3",
-    lightBlue: "#03a9f4",
-    cyan: "#00bcd4",
-    teal: "#009688",
-    green: "#4caf50",
-    lightGreen: "#8bc34a",
-    lime: "#cddc39",
-    yellow: "#ffeb3b",
-    amber: "#ffc107",
-    orange: "#ff9800",
-    deepOrange: "#ff5722",
-    brown: "#795548",
-    grey: "#9e9e9e",
-    blueGrey: "#607d8b",
-    // 自定义颜色
-    coral: "#f4606c",
-    mint: "#00d4aa",
-    lavender: "#b19cd9",
-    peach: "#ffab91",
-    sage: "#a5d6a7",
+	red: "#f44336",
+	pink: "#e91e63",
+	purple: "#9c27b0",
+	deepPurple: "#673ab7",
+	indigo: "#3f51b5",
+	blue: "#2196f3",
+	lightBlue: "#03a9f4",
+	cyan: "#00bcd4",
+	teal: "#009688",
+	green: "#4caf50",
+	lightGreen: "#8bc34a",
+	lime: "#cddc39",
+	yellow: "#ffeb3b",
+	amber: "#ffc107",
+	orange: "#ff9800",
+	deepOrange: "#ff5722",
+	brown: "#795548",
+	grey: "#9e9e9e",
+	blueGrey: "#607d8b",
+	// 自定义颜色
+	coral: "#f4606c",
+	mint: "#00d4aa",
+	lavender: "#b19cd9",
+	peach: "#ffab91",
+	sage: "#a5d6a7",
 };
 ```
 
@@ -201,21 +201,21 @@ pnpm add @material/material-color-utilities
 
 ```typescript
 import {
-    applyDynamicThemeToDOM,
-    generateDynamicColors,
+	applyDynamicThemeToDOM,
+	generateDynamicColors,
 } from "./config/dynamicTheme";
 import { getDynamicTheme } from "./config/theme";
 
 const theme = useMemo(() => {
-    if (useDynamicTheme && customColor) {
-        const dynamicColors = generateDynamicColors(
-            customColor,
-            themeMode === "dark",
-        );
-        applyDynamicThemeToDOM(dynamicColors, themeMode === "dark");
-        return getDynamicTheme(themeMode, customColor);
-    }
-    return getTheme(themeMode);
+	if (useDynamicTheme && customColor) {
+		const dynamicColors = generateDynamicColors(
+			customColor,
+			themeMode === "dark",
+		);
+		applyDynamicThemeToDOM(dynamicColors, themeMode === "dark");
+		return getDynamicTheme(themeMode, customColor);
+	}
+	return getTheme(themeMode);
 }, [themeMode, customColor, useDynamicTheme]);
 ```
 
@@ -264,8 +264,8 @@ import { ThemeQuickToggle } from "@/component/Theme/ThemeCustomizer";
 ```typescript
 // 在 dynamicTheme.ts 中扩展 PRESET_COLORS
 export const PRESET_COLORS = {
-    ...existingColors,
-    myCustomColor: "#your-color-here",
+	...existingColors,
+	myCustomColor: "#your-color-here",
 };
 ```
 
@@ -274,12 +274,12 @@ export const PRESET_COLORS = {
 ```typescript
 // 修改 dynamicColorsToPalette 函数来自定义颜色映射
 export function dynamicColorsToPalette(
-    colors: DynamicColorScheme,
-    mode: "light" | "dark",
+	colors: DynamicColorScheme,
+	mode: "light" | "dark",
 ): PaletteOptions {
-    return {
-        // 自定义你的颜色映射逻辑
-    };
+	return {
+		// 自定义你的颜色映射逻辑
+	};
 }
 ```
 
@@ -315,9 +315,9 @@ console.log("Generated colors:", colors);
 
 ```css
 :root {
-    --md-sys-color-primary: #ff5722;
-    --md-sys-color-on-primary: #ffffff;
-    /* ... 更多颜色变量 */
+	--md-sys-color-primary: #ff5722;
+	--md-sys-color-on-primary: #ffffff;
+	/* ... 更多颜色变量 */
 }
 ```
 

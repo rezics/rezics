@@ -2,5 +2,5 @@
 
 export * as gel from "gel";
 export { spec } from "./__spec__.ts";
-export * as castMaps from "./castMaps.ts";
 export * as syntax from "./syntax.ts";
+export * as castMaps from "./castMaps.ts";

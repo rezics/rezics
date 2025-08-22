@@ -14,7 +14,7 @@ const container = document.getElementById("app") as HTMLElement;
 const root = createRoot(container);
 
 setupMock().then(() => {
-    root.render(<App />);
+	root.render(<App />);
 });
 
 // 如果要在某些环境防止重复创建，也可以：

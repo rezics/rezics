@@ -17,40 +17,40 @@ import { NavigationItem } from "./navigation.d.ts";
 // segment: router path
 
 export const NAVIGATION = (): NavigationItem[] => [
-    {
-        kind: "item",
-        title: "Back to Main",
-        segment: "~/",
-        icon: <DashboardIcon />,
-    },
-    {
-        kind: "header",
-        title: "Book Editor Navigation",
-    },
+	{
+		kind: "item",
+		title: "Back to Main",
+		segment: "~/",
+		icon: <DashboardIcon />,
+	},
+	{
+		kind: "header",
+		title: "Book Editor Navigation",
+	},
 
-    {
-        kind: "item",
-        title: "Book Edit Main",
-        segment: "~/book/1/edit",
-        icon: <DescriptionIcon />,
-    },
-    {
-        kind: "item",
-        title: "Book Edit Chapter",
-        segment: "~/book/1/edit/323",
-        icon: <DescriptionIcon />,
-    },
-    {
-        kind: "divider",
-    },
-    // {
-    //     kind: "header",
-    //     title: "Chapter Navigation",
-    // },
-    // {
-    //     kind: "item",
-    //     segment: "~/book/1/edit/1",
-    //     title: "Chapter 1",
-    //     icon: <DescriptionIcon />,
-    // },
+	{
+		kind: "item",
+		title: "Book Edit Main",
+		segment: "~/book/1/edit",
+		icon: <DescriptionIcon />,
+	},
+	{
+		kind: "item",
+		title: "Book Edit Chapter",
+		segment: "~/book/1/edit/323",
+		icon: <DescriptionIcon />,
+	},
+	{
+		kind: "divider",
+	},
+	// {
+	//     kind: "header",
+	//     title: "Chapter Navigation",
+	// },
+	// {
+	//     kind: "item",
+	//     segment: "~/book/1/edit/1",
+	//     title: "Chapter 1",
+	//     icon: <DescriptionIcon />,
+	// },
 ];

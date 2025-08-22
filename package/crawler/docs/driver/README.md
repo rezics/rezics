@@ -15,8 +15,8 @@ import { strategy as qidian } from "../lib/adapters/qidian.js";
 import { chromium } from "../lib/drivers/chromium.js";
 
 const res = await qidian(
-    chromium,
-    new URL("https://www.qidian.com/book/1032982789"),
+	chromium,
+	new URL("https://www.qidian.com/book/1032982789"),
 );
 ```
 

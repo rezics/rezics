@@ -1,4 +1,4 @@
 {
-    "name": "util",
-    "exports": "./mod.ts"
+	"name": "util",
+	"exports": "./mod.ts"
 }

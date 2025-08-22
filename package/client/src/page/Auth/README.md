@@ -1,10 +1,12 @@
 # Auth Components
 
-该模块包含认证相关的组件，从 namespace 模式重构为组件化模式，提供更好的复用性和可维护性。
+该模块包含认证相关的组件，从 namespace
+模式重构为组件化模式，提供更好的复用性和可维护性。
 
 ## 组件说明
 
 ### LoginShow
+
 登录表单展示组件，可以在页面布局中使用，也可以在 Modal 中展示。
 
 ```tsx
@@ -30,6 +32,7 @@ import { LoginShow } from './LoginPage.tsx';
 ```
 
 ### RegisterShow
+
 注册表单展示组件，同样支持页面和Modal两种使用方式。
 
 ```tsx
@@ -54,6 +57,7 @@ import { RegisterShow } from './RegisterPage.tsx';
 ```
 
 ### LoginPage / RegisterPage
+
 完整的页面容器组件，包含状态管理和表单处理逻辑。
 
 ```tsx
@@ -65,34 +69,37 @@ import { LoginPage, RegisterPage } from './index.ts';
 ```
 
 ### AuthModal
+
 认证模态框组件，可以在登录和注册之间切换。
 
 ```tsx
-import { AuthModal } from './AuthModal.tsx';
+import { AuthModal } from "./AuthModal.tsx";
 
 <AuthModal
-  open={isOpen}
-  onClose={() => setIsOpen(false)}
-  initialMode="login"
-/>
+	open={isOpen}
+	onClose={() => setIsOpen(false)}
+	initialMode="login"
+/>;
 ```
 
 ### useAuthModal Hook
+
 管理认证模态框状态的 Hook。
 
 ```tsx
-import { useAuthModal } from './useAuthModal.tsx';
+import { useAuthModal } from "./useAuthModal.tsx";
 
 function MyComponent() {
-  const { isOpen, openLogin, openRegister, close, AuthModal } = useAuthModal();
+	const { isOpen, openLogin, openRegister, close, AuthModal } =
+		useAuthModal();
 
-  return (
-    <div>
-      <Button onClick={openLogin}>Login</Button>
-      <Button onClick={openRegister}>Register</Button>
-      <AuthModal />
-    </div>
-  );
+	return (
+		<div>
+			<Button onClick={openLogin}>Login</Button>
+			<Button onClick={openRegister}>Register</Button>
+			<AuthModal />
+		</div>
+	);
 }
 ```
 

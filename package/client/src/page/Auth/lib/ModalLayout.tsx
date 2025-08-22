@@ -5,20 +5,20 @@ import CardContent from "@mui/material/CardContent";
 import { FC } from "react";
 
 export const ModalLayout: FC<{
-    title: string;
-    onSubmit: React.FormEventHandler<HTMLFormElement>;
-    content: React.ReactNode;
-    actions: React.ReactNode;
+	title: string;
+	onSubmit: React.FormEventHandler<HTMLFormElement>;
+	content: React.ReactNode;
+	actions: React.ReactNode;
 }> = ({ title, onSubmit, content, actions }) => (
-    <form onSubmit={onSubmit}>
-        <Card className="min-w-96 max-w-md">
-            <CardContent className="flex flex-col gap-4">
-                <Typography variant="h4">{title}</Typography>
-                {content}
-            </CardContent>
-            <CardActions className="flex flex-row justify-between">
-                {actions}
-            </CardActions>
-        </Card>
-    </form>
+	<form onSubmit={onSubmit}>
+		<Card className="min-w-96 max-w-md">
+			<CardContent className="flex flex-col gap-4">
+				<Typography variant="h4">{title}</Typography>
+				{content}
+			</CardContent>
+			<CardActions className="flex flex-row justify-between">
+				{actions}
+			</CardActions>
+		</Card>
+	</form>
 );

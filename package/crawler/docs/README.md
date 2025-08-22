@@ -185,11 +185,11 @@ import { strategy as qidian } from "./src/lib/adapters/qidian.js";
 import { chromium } from "./src/lib/drivers/chromium.js";
 
 const run = async () => {
-    const result = await qidian(
-        chromium,
-        new URL("https://www.qidian.com/book/1032982789"),
-    );
-    console.log(result);
+	const result = await qidian(
+		chromium,
+		new URL("https://www.qidian.com/book/1032982789"),
+	);
+	console.log(result);
 };
 run();
 ```

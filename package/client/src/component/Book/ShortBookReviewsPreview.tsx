@@ -4,41 +4,41 @@ import useSWR from "swr";
 import { ShortReviewList } from "../Review/ShortReviewList.tsx";
 
 type Review = {
-    likes?: number;
-    dislikes?: number;
+	likes?: number;
+	dislikes?: number;
 };
 
 interface ShortBookReviewsProps {
-    bookId: string;
+	bookId: string;
 }
 
 export const ShortBookReviews: React.FC<ShortBookReviewsProps> = ({
-    bookId,
+	bookId,
 }) => {
-    const createBookInput = {
-        operation: "review.short.list",
-        parameter: { bookId: bookId },
-        select: {
-            id: true,
-        },
-    };
-    const { data, isLoading, error } = useSWR(createBookInput, apiPost);
+	const createBookInput = {
+		operation: "review.short.list",
+		parameter: { bookId: bookId },
+		select: {
+			id: true,
+		},
+	};
+	const { data, isLoading, error } = useSWR(createBookInput, apiPost);
 
-    const reviews = data || [];
+	const reviews = data || [];
 
-    const handleLike = (reviewId: string) => {
-        console.log("Like review:", reviewId);
-    };
+	const handleLike = (reviewId: string) => {
+		console.log("Like review:", reviewId);
+	};
 
-    const handleDislike = (reviewId: string) => {
-        console.log("Dislike review:", reviewId);
-    };
+	const handleDislike = (reviewId: string) => {
+		console.log("Dislike review:", reviewId);
+	};
 
-    return (
-        <ShortReviewList.Show
-            reviews={reviews}
-            onLike={handleLike}
-            onDislike={handleDislike}
-        />
-    );
+	return (
+		<ShortReviewList.Show
+			reviews={reviews}
+			onLike={handleLike}
+			onDislike={handleDislike}
+		/>
+	);
 };

@@ -5,9 +5,9 @@ import { devtools } from "zustand/middleware";
  * 书籍元信息
  */
 export interface BookMeta {
-    description?: string | null;
-    title?: string | null;
-    [key: string]: any;
+	description?: string | null;
+	title?: string | null;
+	[key: string]: any;
 }
 
 /**
@@ -15,22 +15,22 @@ export interface BookMeta {
  * - 支持多本书，key 为 bookId (string)
  */
 interface BookPageState {
-    /** 所有书籍元信息，按 bookId 存储 */
-    books: Record<string, BookMeta>;
+	/** 所有书籍元信息，按 bookId 存储 */
+	books: Record<string, BookMeta>;
 
-    /**
-     * 设置书籍元信息（覆盖式）
-     * @param bookId - 书籍唯一 ID
-     * @param meta - 书籍元信息
-     */
-    setBook: (bookId: string, meta: BookMeta) => void;
+	/**
+	 * 设置书籍元信息（覆盖式）
+	 * @param bookId - 书籍唯一 ID
+	 * @param meta - 书籍元信息
+	 */
+	setBook: (bookId: string, meta: BookMeta) => void;
 
-    /**
-     * 更新书籍某一字段（部分更新）
-     * @param bookId - 书籍唯一 ID
-     * @param patch - 要更新的字段
-     */
-    updateBook: (bookId: string, patch: Partial<BookMeta>) => void;
+	/**
+	 * 更新书籍某一字段（部分更新）
+	 * @param bookId - 书籍唯一 ID
+	 * @param patch - 要更新的字段
+	 */
+	updateBook: (bookId: string, patch: Partial<BookMeta>) => void;
 }
 
 /**
@@ -42,26 +42,27 @@ interface BookPageState {
  * useBookPageStore.getState().updateBook(bookId, {description: "这是新的简介！",})
  */
 export const useBookPageStore = create<BookPageState>()(
-    devtools((set) => ({
-        books: {},
+	devtools((set) => ({
+		books: {},
 
-        setBook: (bookId, meta) =>
-            set((state) => ({
-                books: {
-                    ...state.books,
-                    [bookId]: meta,
-                },
-            })),
+		setBook: (bookId, meta) =>
+			set((state) => ({
+				books: {
+					...state.books,
+					[bookId]: meta,
+				},
+			})),
 
-        updateBook: (bookId, patch) =>
-            set((state) => {
-                const prev = state.books[bookId] ?? { title: "", description: "" };
-                return {
-                    books: {
-                        ...state.books,
-                        [bookId]: { ...prev, ...patch },
-                    },
-                };
-            }),
-    })),
+		updateBook: (bookId, patch) =>
+			set((state) => {
+				const prev = state.books[bookId] ??
+					{ title: "", description: "" };
+				return {
+					books: {
+						...state.books,
+						[bookId]: { ...prev, ...patch },
+					},
+				};
+			}),
+	})),
 );

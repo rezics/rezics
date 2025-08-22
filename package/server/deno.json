@@ -1,10 +1,10 @@
 {
-    "name": "@ics/library-server",
-    "version": "0.0.1",
-    "exports": {
-        ".": "./mod.ts"
-    },
-    "imports": {
-        "hono": "npm:hono@^4.9.1"
-    }
+	"name": "@ics/library-server",
+	"version": "0.0.1",
+	"exports": {
+		".": "./mod.ts"
+	},
+	"imports": {
+		"hono": "npm:hono@^4.9.1"
+	}
 }

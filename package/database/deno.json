@@ -1,5 +1,4 @@
 {
-==== BASE ====
 	"name": "database",
 	"version": "0.0.1",
 	"exclude": [
@@ -29,5 +28,4 @@
 		"drizzle-kit": "npm:drizzle-kit@^0.31.4",
 		"drizzle-orm": "npm:drizzle-orm@^0.44.4"
 	}
-==== BASE ====
 }
