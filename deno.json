@@ -19,7 +19,6 @@
 		"jsxImportSourceTypes": "@types/react",
 		"strict": true,
 		"noUnusedParameters": true,
-		"exactOptionalPropertyTypes": true,
 		"noErrorTruncation": true
 	},
 	"fmt": {
