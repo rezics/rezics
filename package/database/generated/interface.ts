@@ -8,7 +8,12 @@ export namespace std {
     export interface $Object extends BaseObject {}
     export type Endian = "Little" | "Big";
     export interface FreeObject {}
-    export type JsonEmpty = "ReturnEmpty" | "ReturnTarget" | "Error" | "UseNull" | "DeleteKey";
+    export type JsonEmpty =
+        | "ReturnEmpty"
+        | "ReturnTarget"
+        | "Error"
+        | "UseNull"
+        | "DeleteKey";
     export namespace enc {
         export type Base64Alphabet = "standard" | "urlsafe";
     }
@@ -143,9 +148,20 @@ export namespace std {
     }
     export namespace net {
         export type RequestFailureKind = "NetworkError" | "Timeout";
-        export type RequestState = "Pending" | "InProgress" | "Completed" | "Failed";
+        export type RequestState =
+            | "Pending"
+            | "InProgress"
+            | "Completed"
+            | "Failed";
         export namespace http {
-            export type Method = "GET" | "POST" | "PUT" | "DELETE" | "HEAD" | "OPTIONS" | "PATCH";
+            export type Method =
+                | "GET"
+                | "POST"
+                | "PUT"
+                | "DELETE"
+                | "HEAD"
+                | "OPTIONS"
+                | "PATCH";
             export interface Response extends std.BaseObject {
                 "created_at": Date;
                 "status"?: number | null;
@@ -157,7 +173,10 @@ export namespace std {
                 "state": std.net.RequestState;
                 "created_at": Date;
                 "updated_at": Date;
-                "failure"?: { kind: std.net.RequestFailureKind; message: string } | null;
+                "failure"?: {
+                    kind: std.net.RequestFailureKind;
+                    message: string;
+                } | null;
                 "url": string;
                 "method": Method;
                 "headers"?: { name: string; value: string }[] | null;
@@ -218,7 +237,13 @@ export namespace cfg {
     export interface DatabaseConfig extends AbstractConfig {}
     export interface BranchConfig extends DatabaseConfig {}
     export interface Config extends AbstractConfig {}
-    export type ConnectionTransport = "TCP" | "TCP_PG" | "HTTP" | "SIMPLE_HTTP" | "HTTP_METRICS" | "HTTP_HEALTH";
+    export type ConnectionTransport =
+        | "TCP"
+        | "TCP_PG"
+        | "HTTP"
+        | "SIMPLE_HTTP"
+        | "HTTP_METRICS"
+        | "HTTP_HEALTH";
     export interface EmailProviderConfig extends ConfigObject {
         "name": string;
     }
@@ -232,7 +257,11 @@ export namespace cfg {
     export interface Password extends AuthMethod {
         "transports": ConnectionTransport[];
     }
-    export type QueryCacheMode = "InMemory" | "RegInline" | "PgFunc" | "Default";
+    export type QueryCacheMode =
+        | "InMemory"
+        | "RegInline"
+        | "PgFunc"
+        | "Default";
     export type QueryStatsOption = "None" | "All";
     export interface SCRAM extends AuthMethod {
         "transports": ConnectionTransport[];
@@ -248,7 +277,11 @@ export namespace cfg {
         "timeout_per_email": gel.Duration;
         "timeout_per_attempt": gel.Duration;
     }
-    export type SMTPSecurity = "PlainText" | "TLS" | "STARTTLS" | "STARTTLSOrPlainText";
+    export type SMTPSecurity =
+        | "PlainText"
+        | "TLS"
+        | "STARTTLS"
+        | "STARTTLSOrPlainText";
     export type StoreMigrationSDL = "AlwaysStore" | "NeverStore";
     export interface Trust extends AuthMethod {}
     export interface mTLS extends AuthMethod {
@@ -263,14 +296,34 @@ export namespace sys {
         "last_migration"?: string | null;
     }
     export interface Database extends Branch {}
-    export interface ExtensionPackage extends SystemObject, schema.AnnotationSubject {
+    export interface ExtensionPackage
+        extends SystemObject, schema.AnnotationSubject {
         "script": string;
-        "version": { major: number; minor: number; stage: VersionStage; stage_no: number; local: string[] };
+        "version": {
+            major: number;
+            minor: number;
+            stage: VersionStage;
+            stage_no: number;
+            local: string[];
+        };
     }
-    export interface ExtensionPackageMigration extends SystemObject, schema.AnnotationSubject {
+    export interface ExtensionPackageMigration
+        extends SystemObject, schema.AnnotationSubject {
         "script": string;
-        "from_version": { major: number; minor: number; stage: VersionStage; stage_no: number; local: string[] };
-        "to_version": { major: number; minor: number; stage: VersionStage; stage_no: number; local: string[] };
+        "from_version": {
+            major: number;
+            minor: number;
+            stage: VersionStage;
+            stage_no: number;
+            local: string[];
+        };
+        "to_version": {
+            major: number;
+            minor: number;
+            stage: VersionStage;
+            stage_no: number;
+            local: string[];
+        };
     }
     export type OutputFormat = "BINARY" | "JSON" | "JSON_ELEMENTS" | "NONE";
     export interface QueryStats extends ExternalObject {
@@ -305,7 +358,11 @@ export namespace sys {
         "branch"?: Branch | null;
     }
     export type QueryType = "EdgeQL" | "SQL";
-    export interface Role extends SystemObject, schema.InheritingObject, schema.AnnotationSubject {
+    export interface Role
+        extends
+            SystemObject,
+            schema.InheritingObject,
+            schema.AnnotationSubject {
         "name": string;
         "superuser": boolean;
         "is_superuser": boolean;
@@ -322,7 +379,10 @@ export namespace $default {
         "created_at": Date;
         "updated_at": Date;
     }
-    export interface Nameable extends std.$Object {
+    export interface Base extends std.$Object {
+        "_id": string;
+    }
+    export interface Nameable extends Base {
         "name": string;
     }
     export interface Evaluable extends std.$Object {
@@ -336,8 +396,8 @@ export namespace $default {
     }
     export interface Author extends Nameable, Evaluable, Relatable {
         "description"?: string | null;
-        "user"?: User | null;
         "books": Book[];
+        "user"?: User | null;
     }
     export interface Book extends Nameable, Auditable, Evaluable, Relatable {
         "length": number;
@@ -353,7 +413,7 @@ export namespace $default {
         "book": Book;
     }
     export interface ChapterOrder extends std.$Object {
-        "content": string;
+        "content": unknown;
         "book": Book;
     }
     export interface Identity extends Auditable {
@@ -370,7 +430,6 @@ export namespace $default {
         "members": Person[];
     }
     export interface Publisher extends Nameable, Evaluable, Relatable {
-        "domain": string;
         "books": Book[];
     }
     export interface Tag extends Nameable, Auditable, Relatable {
@@ -390,6 +449,7 @@ export namespace $default {
     }
 }
 export type Auditable = $default.Auditable;
+export type Base = $default.Base;
 export type Nameable = $default.Nameable;
 export type Evaluable = $default.Evaluable;
 export type Relatable = $default.Relatable;
@@ -405,7 +465,12 @@ export type Tag = $default.Tag;
 export type Thread = $default.Thread;
 export type User = $default.User;
 export namespace schema {
-    export type AccessKind = "Select" | "UpdateRead" | "UpdateWrite" | "Delete" | "Insert";
+    export type AccessKind =
+        | "Select"
+        | "UpdateRead"
+        | "UpdateWrite"
+        | "Delete"
+        | "Insert";
     export interface $Object extends std.BaseObject {
         "name": string;
         "internal": boolean;
@@ -469,7 +534,8 @@ export namespace schema {
         "from_type"?: Type | null;
         "to_type"?: Type | null;
     }
-    export interface ConsistencySubject extends InheritingObject, AnnotationSubject {
+    export interface ConsistencySubject
+        extends InheritingObject, AnnotationSubject {
         "constraints": Constraint[];
     }
     export interface Constraint extends CallableObject, InheritingObject {
@@ -545,7 +611,13 @@ export namespace schema {
         "element_type": Type;
     }
     export interface MultiRangeExprAlias extends MultiRange {}
-    export interface ObjectType extends Source, ConsistencySubject, InheritingObject, Type, AnnotationSubject {
+    export interface ObjectType
+        extends
+            Source,
+            ConsistencySubject,
+            InheritingObject,
+            Type,
+            AnnotationSubject {
         "compound_type": boolean;
         "is_compound_type": boolean;
         "union_of": ObjectType[];
@@ -568,7 +640,10 @@ export namespace schema {
         "default"?: string | null;
         "type": Type;
     }
-    export type ParameterKind = "VariadicParam" | "NamedOnlyParam" | "PositionalParam";
+    export type ParameterKind =
+        | "VariadicParam"
+        | "NamedOnlyParam"
+        | "PositionalParam";
     export interface Property extends Pointer {}
     export interface PseudoType extends InheritingObject, Type {}
     export interface Range extends CollectionType {
@@ -581,13 +656,21 @@ export namespace schema {
         "subject": Pointer;
     }
     export type RewriteKind = "Update" | "Insert";
-    export interface ScalarType extends PrimitiveType, ConsistencySubject, AnnotationSubject {
+    export interface ScalarType
+        extends PrimitiveType, ConsistencySubject, AnnotationSubject {
         "default"?: string | null;
         "enum_values"?: string[] | null;
         "arg_values"?: string[] | null;
     }
-    export type SourceDeleteAction = "DeleteTarget" | "Allow" | "DeleteTargetIfOrphan";
-    export type TargetDeleteAction = "Restrict" | "DeleteSource" | "Allow" | "DeferredRestrict";
+    export type SourceDeleteAction =
+        | "DeleteTarget"
+        | "Allow"
+        | "DeleteTargetIfOrphan";
+    export type TargetDeleteAction =
+        | "Restrict"
+        | "DeleteSource"
+        | "Allow"
+        | "DeferredRestrict";
     export interface Trigger extends InheritingObject, AnnotationSubject {
         "timing": TriggerTiming;
         "kinds": TriggerKind[];
@@ -680,6 +763,7 @@ export interface types {
     };
     "default": {
         "Auditable": $default.Auditable;
+        "Base": $default.Base;
         "Nameable": $default.Nameable;
         "Evaluable": $default.Evaluable;
         "Relatable": $default.Relatable;

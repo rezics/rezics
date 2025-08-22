@@ -13,12 +13,12 @@ export function flat<
     h: THierarchicalTree,
 ): FlatTree {
     return Object.fromEntries(
-        h.flatMap(function(node): [string, string[]][] {
+        h.flatMap(function (node): [string, string[]][] {
             return [
                 [
                     node.self,
-                    node.children?.flatMap((child) => child.self)
-                        ?? [],
+                    node.children?.flatMap((child) => child.self) ??
+                        [],
                 ],
                 ...Object.entries(flat(node.children ?? [])),
             ];
@@ -26,7 +26,7 @@ export function flat<
     ) as FlatTree;
 }
 
-// {A: [B, C], B: [D]} -> [[A, [[B, [D]], C]]] -> [{self: A, children: [{self: B, children: [{self: D}]}, {self: C}]}]
+// {A: [B, C], B: [D]} -> [[A, [[B, [D]], [C]]]] -> [{self: A, children: [{self: B, children: [{self: D}]}, {self: C}]}]
 export function hierarchical<
     TFlatTree extends FlatTree,
 >(
@@ -38,7 +38,7 @@ export function hierarchical<
 
     type AuxTree = [string, AuxTree][];
     function buildAuxTree(keys: string[]): AuxTree {
-        return keys.map(function(key) {
+        return keys.map(function (key) {
             refCounts[key]++;
             return [key, f[key] ? buildAuxTree(structuredClone(f[key])) : []];
         });
@@ -49,7 +49,7 @@ export function hierarchical<
     );
 
     function convertToHierarchical(auxTree: AuxTree): HierarchicalTree {
-        return auxTree.map(function([key, children]) {
+        return auxTree.map(function ([key, children]) {
             return {
                 self: key,
                 ...(children.length > 0 && {

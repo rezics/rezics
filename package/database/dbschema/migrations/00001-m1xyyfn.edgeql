@@ -1,4 +1,4 @@
-CREATE MIGRATION m1e3demima2xaw6kxamgwvogvalb2wtunjvmehqgmlux62tpbjfgpq
+CREATE MIGRATION m1xyyfndnuylkgldoyvjkkv7nfwiw7w3ewh5jzdudr7cq4jsntjdxq
     ONTO initial
 {
   CREATE EXTENSION pgcrypto VERSION '1.3';
@@ -29,7 +29,14 @@ CREATE MIGRATION m1e3demima2xaw6kxamgwvogvalb2wtunjvmehqgmlux62tpbjfgpq
               USING (std::datetime_of_statement());
       };
   };
-  CREATE ABSTRACT TYPE default::Nameable {
+  CREATE ABSTRACT TYPE default::Base {
+      CREATE REQUIRED PROPERTY _id: std::uuid {
+          SET readonly := true;
+          CREATE CONSTRAINT std::exclusive;
+      };
+      CREATE INDEX ON (._id);
+  };
+  CREATE ABSTRACT TYPE default::Nameable EXTENDING default::Base {
       CREATE REQUIRED PROPERTY name: default::short_str;
       CREATE INDEX ON (.name);
   };
@@ -97,28 +104,22 @@ CREATE MIGRATION m1e3demima2xaw6kxamgwvogvalb2wtunjvmehqgmlux62tpbjfgpq
   ALTER TYPE default::Author {
       CREATE LINK user := (.<authors[IS default::User]);
   };
-  CREATE TYPE default::ChapterOrder {
-      CREATE REQUIRED SINGLE LINK book: default::Book;
-      CREATE REQUIRED PROPERTY content: std::str;
-  };
-  ALTER TYPE default::Book {
-      CREATE LINK chapter_order := (.<book[IS default::ChapterOrder]);
-  };
   CREATE TYPE default::Chapter EXTENDING default::Nameable, default::Evaluable, default::Relatable {
       CREATE REQUIRED SINGLE LINK book: default::Book;
-  };
-  ALTER TYPE default::Book {
-      CREATE MULTI LINK chapters := (.<book[IS default::Chapter]);
   };
   CREATE TYPE default::Publisher EXTENDING default::Nameable, default::Evaluable, default::Relatable {
       CREATE MULTI LINK books: default::Book {
           CREATE PROPERTY date: std::datetime;
           CREATE PROPERTY isbn: default::short_str;
       };
-      CREATE REQUIRED PROPERTY domain: default::short_str;
-      CREATE INDEX ON (.domain);
+  };
+  CREATE TYPE default::ChapterOrder {
+      CREATE REQUIRED SINGLE LINK book: default::Book;
+      CREATE REQUIRED PROPERTY content: std::json;
   };
   ALTER TYPE default::Book {
+      CREATE LINK chapter_order := (.<book[IS default::ChapterOrder]);
+      CREATE MULTI LINK chapters := (.<book[IS default::Chapter]);
       CREATE MULTI LINK publishers := (.<books[IS default::Publisher]);
   };
   ALTER TYPE default::Identity {

@@ -1365,446 +1365,124 @@ export type $MultiRangeExprAliasλShape = $.typeutil.flatten<$MultiRangeλShape 
 type $MultiRangeExprAlias = $.ObjectType<"schema::MultiRangeExprAlias", $MultiRangeExprAliasλShape, null, [
     ...$MultiRange["__exclusives__"],
 ], "schema::MultiRangeExprAlias">;
-const $MultiRangeExprAlias = $.makeType<$MultiRangeExprAlias>(
-    _.spec,
-    "a92ef6fd-611e-5b00-8115-cc0ebb5f0be5",
-    _.syntax.literal,
-);
+==== BASE ====
+const $MultiRangeExprAlias = $.makeType<$MultiRangeExprAlias>(_.spec, "a92ef6fd-611e-5b00-8115-cc0ebb5f0be5", _.syntax.literal);
 
-const MultiRangeExprAlias: $.$expr_PathNode<$.TypeSet<$MultiRangeExprAlias, $.Cardinality.Many>, null> = _.syntax
-    .$PathNode($.$toSet($MultiRangeExprAlias, $.Cardinality.Many), null);
+const MultiRangeExprAlias: $.$expr_PathNode<$.TypeSet<$MultiRangeExprAlias, $.Cardinality.Many>, null> = _.syntax.$PathNode($.$toSet($MultiRangeExprAlias, $.Cardinality.Many), null);
 
-export type $ObjectTypeλShape = $.typeutil.flatten<
-    & $SourceλShape
-    & Omit<$ConsistencySubjectλShape, "<subject">
-    & $InheritingObjectλShape
-    & Omit<$TypeλShape, "<target">
-    & $AnnotationSubjectλShape
-    & {
-        "compound_type": $.PropertyDesc<_std.$bool, $.Cardinality.One, false, true, false, false>;
-        "is_compound_type": $.PropertyDesc<_std.$bool, $.Cardinality.One, false, true, false, false>;
-        "union_of": $.LinkDesc<$ObjectType, $.Cardinality.Many, {}, false, false, false, false>;
-        "intersection_of": $.LinkDesc<$ObjectType, $.Cardinality.Many, {}, false, false, false, false>;
-        "links": $.LinkDesc<$Link, $.Cardinality.Many, {}, false, true, false, false>;
-        "properties": $.LinkDesc<$Property, $.Cardinality.Many, {}, false, true, false, false>;
-        "access_policies": $.LinkDesc<
-            $AccessPolicy,
-            $.Cardinality.Many,
-            {
-                "@owned": $.PropertyDesc<_std.$bool, $.Cardinality.AtMostOne>;
-                "@is_owned": $.PropertyDesc<_std.$bool, $.Cardinality.AtMostOne>;
-            },
-            true,
-            false,
-            false,
-            false
-        >;
-        "triggers": $.LinkDesc<
-            $Trigger,
-            $.Cardinality.Many,
-            {
-                "@owned": $.PropertyDesc<_std.$bool, $.Cardinality.AtMostOne>;
-                "@is_owned": $.PropertyDesc<_std.$bool, $.Cardinality.AtMostOne>;
-            },
-            true,
-            false,
-            false,
-            false
-        >;
-        "<__type__[is std::BaseObject]": $.LinkDesc<$.ObjectType, $.Cardinality.Many, {}, false, false, false, false>;
-        "<__type__[is schema::TupleElement]": $.LinkDesc<
-            $TupleElement,
-            $.Cardinality.Many,
-            {},
-            false,
-            false,
-            false,
-            false
-        >;
-        "<__type__[is schema::Object]": $.LinkDesc<
-            $Object_32faaa35947553cf88fce68ecf1be4d9,
-            $.Cardinality.Many,
-            {},
-            false,
-            false,
-            false,
-            false
-        >;
-        "<__type__[is schema::VolatilitySubject]": $.LinkDesc<
-            $VolatilitySubject,
-            $.Cardinality.Many,
-            {},
-            false,
-            false,
-            false,
-            false
-        >;
-        "<__type__[is schema::SubclassableObject]": $.LinkDesc<
-            $SubclassableObject,
-            $.Cardinality.Many,
-            {},
-            false,
-            false,
-            false,
-            false
-        >;
-        "<__type__[is schema::InheritingObject]": $.LinkDesc<
-            $InheritingObject,
-            $.Cardinality.Many,
-            {},
-            false,
-            false,
-            false,
-            false
-        >;
-        "<__type__[is schema::Delta]": $.LinkDesc<$Delta, $.Cardinality.Many, {}, false, false, false, false>;
-        "<__type__[is schema::AnnotationSubject]": $.LinkDesc<
-            $AnnotationSubject,
-            $.Cardinality.Many,
-            {},
-            false,
-            false,
-            false,
-            false
-        >;
-        "<__type__[is std::Object]": $.LinkDesc<
-            _std.$Object_8ce8c71ee4fa5f73840c22d7eaa58588,
-            $.Cardinality.Many,
-            {},
-            false,
-            false,
-            false,
-            false
-        >;
-        "<union_of[is schema::ObjectType]": $.LinkDesc<$ObjectType, $.Cardinality.Many, {}, false, false, false, false>;
-        "<intersection_of[is schema::ObjectType]": $.LinkDesc<
-            $ObjectType,
-            $.Cardinality.Many,
-            {},
-            false,
-            false,
-            false,
-            false
-        >;
-        "<subject[is schema::AccessPolicy]": $.LinkDesc<
-            $AccessPolicy,
-            $.Cardinality.Many,
-            {},
-            false,
-            false,
-            false,
-            false
-        >;
-        "<subject[is schema::Trigger]": $.LinkDesc<$Trigger, $.Cardinality.Many, {}, false, false, false, false>;
-        "<__type__[is schema::FutureBehavior]": $.LinkDesc<
-            $FutureBehavior,
-            $.Cardinality.Many,
-            {},
-            false,
-            false,
-            false,
-            false
-        >;
-        "<__type__[is sys::SystemObject]": $.LinkDesc<
-            _sys.$SystemObject,
-            $.Cardinality.Many,
-            {},
-            false,
-            false,
-            false,
-            false
-        >;
-        "<__type__[is sys::ExternalObject]": $.LinkDesc<
-            _sys.$ExternalObject,
-            $.Cardinality.Many,
-            {},
-            false,
-            false,
-            false,
-            false
-        >;
-        "<__type__[is sys::Branch]": $.LinkDesc<_sys.$Branch, $.Cardinality.Many, {}, false, false, false, false>;
-        "<__type__[is sys::Database]": $.LinkDesc<_sys.$Database, $.Cardinality.Many, {}, false, false, false, false>;
-        "<__type__[is sys::ExtensionPackage]": $.LinkDesc<
-            _sys.$ExtensionPackage,
-            $.Cardinality.Many,
-            {},
-            false,
-            false,
-            false,
-            false
-        >;
-        "<__type__[is sys::ExtensionPackageMigration]": $.LinkDesc<
-            _sys.$ExtensionPackageMigration,
-            $.Cardinality.Many,
-            {},
-            false,
-            false,
-            false,
-            false
-        >;
-        "<__type__[is sys::Role]": $.LinkDesc<_sys.$Role, $.Cardinality.Many, {}, false, false, false, false>;
-        "<__type__[is sys::QueryStats]": $.LinkDesc<
-            _sys.$QueryStats,
-            $.Cardinality.Many,
-            {},
-            false,
-            false,
-            false,
-            false
-        >;
-        "<__type__[is cfg::ConfigObject]": $.LinkDesc<
-            _cfg.$ConfigObject,
-            $.Cardinality.Many,
-            {},
-            false,
-            false,
-            false,
-            false
-        >;
-        "<__type__[is cfg::AuthMethod]": $.LinkDesc<
-            _cfg.$AuthMethod,
-            $.Cardinality.Many,
-            {},
-            false,
-            false,
-            false,
-            false
-        >;
-        "<__type__[is cfg::Trust]": $.LinkDesc<_cfg.$Trust, $.Cardinality.Many, {}, false, false, false, false>;
-        "<__type__[is cfg::SCRAM]": $.LinkDesc<_cfg.$SCRAM, $.Cardinality.Many, {}, false, false, false, false>;
-        "<__type__[is cfg::JWT]": $.LinkDesc<_cfg.$JWT, $.Cardinality.Many, {}, false, false, false, false>;
-        "<__type__[is cfg::Password]": $.LinkDesc<_cfg.$Password, $.Cardinality.Many, {}, false, false, false, false>;
-        "<__type__[is cfg::mTLS]": $.LinkDesc<_cfg.$mTLS, $.Cardinality.Many, {}, false, false, false, false>;
-        "<__type__[is cfg::Auth]": $.LinkDesc<_cfg.$Auth, $.Cardinality.Many, {}, false, false, false, false>;
-        "<__type__[is cfg::EmailProviderConfig]": $.LinkDesc<
-            _cfg.$EmailProviderConfig,
-            $.Cardinality.Many,
-            {},
-            false,
-            false,
-            false,
-            false
-        >;
-        "<__type__[is cfg::SMTPProviderConfig]": $.LinkDesc<
-            _cfg.$SMTPProviderConfig,
-            $.Cardinality.Many,
-            {},
-            false,
-            false,
-            false,
-            false
-        >;
-        "<__type__[is cfg::AbstractConfig]": $.LinkDesc<
-            _cfg.$AbstractConfig,
-            $.Cardinality.Many,
-            {},
-            false,
-            false,
-            false,
-            false
-        >;
-        "<__type__[is cfg::ExtensionConfig]": $.LinkDesc<
-            _cfg.$ExtensionConfig,
-            $.Cardinality.Many,
-            {},
-            false,
-            false,
-            false,
-            false
-        >;
-        "<__type__[is cfg::Config]": $.LinkDesc<_cfg.$Config, $.Cardinality.Many, {}, false, false, false, false>;
-        "<__type__[is cfg::InstanceConfig]": $.LinkDesc<
-            _cfg.$InstanceConfig,
-            $.Cardinality.Many,
-            {},
-            false,
-            false,
-            false,
-            false
-        >;
-        "<__type__[is schema::Annotation]": $.LinkDesc<$Annotation, $.Cardinality.Many, {}, false, false, false, false>;
-        "<__type__[is cfg::DatabaseConfig]": $.LinkDesc<
-            _cfg.$DatabaseConfig,
-            $.Cardinality.Many,
-            {},
-            false,
-            false,
-            false,
-            false
-        >;
-        "<__type__[is cfg::BranchConfig]": $.LinkDesc<
-            _cfg.$BranchConfig,
-            $.Cardinality.Many,
-            {},
-            false,
-            false,
-            false,
-            false
-        >;
-        "<__type__[is std::net::http::Response]": $.LinkDesc<
-            _stdnethttp.$Response,
-            $.Cardinality.Many,
-            {},
-            false,
-            false,
-            false,
-            false
-        >;
-        "<__type__[is std::net::http::ScheduledRequest]": $.LinkDesc<
-            _stdnethttp.$ScheduledRequest,
-            $.Cardinality.Many,
-            {},
-            false,
-            false,
-            false,
-            false
-        >;
-        "<__type__[is schema::Type]": $.LinkDesc<$Type, $.Cardinality.Many, {}, false, false, false, false>;
-        "<__type__[is schema::PrimitiveType]": $.LinkDesc<
-            $PrimitiveType,
-            $.Cardinality.Many,
-            {},
-            false,
-            false,
-            false,
-            false
-        >;
-        "<__type__[is schema::CollectionType]": $.LinkDesc<
-            $CollectionType,
-            $.Cardinality.Many,
-            {},
-            false,
-            false,
-            false,
-            false
-        >;
-        "<__type__[is schema::Array]": $.LinkDesc<$Array, $.Cardinality.Many, {}, false, false, false, false>;
-        "<__type__[is schema::ArrayExprAlias]": $.LinkDesc<
-            $ArrayExprAlias,
-            $.Cardinality.Many,
-            {},
-            false,
-            false,
-            false,
-            false
-        >;
-        "<__type__[is schema::Tuple]": $.LinkDesc<$Tuple, $.Cardinality.Many, {}, false, false, false, false>;
-        "<__type__[is schema::TupleExprAlias]": $.LinkDesc<
-            $TupleExprAlias,
-            $.Cardinality.Many,
-            {},
-            false,
-            false,
-            false,
-            false
-        >;
-        "<__type__[is schema::Range]": $.LinkDesc<$Range, $.Cardinality.Many, {}, false, false, false, false>;
-        "<__type__[is schema::RangeExprAlias]": $.LinkDesc<
-            $RangeExprAlias,
-            $.Cardinality.Many,
-            {},
-            false,
-            false,
-            false,
-            false
-        >;
-        "<__type__[is schema::MultiRange]": $.LinkDesc<$MultiRange, $.Cardinality.Many, {}, false, false, false, false>;
-        "<__type__[is schema::MultiRangeExprAlias]": $.LinkDesc<
-            $MultiRangeExprAlias,
-            $.Cardinality.Many,
-            {},
-            false,
-            false,
-            false,
-            false
-        >;
-        "<__type__[is schema::Alias]": $.LinkDesc<$Alias, $.Cardinality.Many, {}, false, false, false, false>;
-        "<__type__[is schema::Global]": $.LinkDesc<$Global, $.Cardinality.Many, {}, false, false, false, false>;
-        "<__type__[is schema::Parameter]": $.LinkDesc<$Parameter, $.Cardinality.Many, {}, false, false, false, false>;
-        "<__type__[is schema::CallableObject]": $.LinkDesc<
-            $CallableObject,
-            $.Cardinality.Many,
-            {},
-            false,
-            false,
-            false,
-            false
-        >;
-        "<__type__[is schema::Function]": $.LinkDesc<$Function, $.Cardinality.Many, {}, false, false, false, false>;
-        "<__type__[is schema::Operator]": $.LinkDesc<$Operator, $.Cardinality.Many, {}, false, false, false, false>;
-        "<__type__[is schema::Cast]": $.LinkDesc<$Cast, $.Cardinality.Many, {}, false, false, false, false>;
-        "<__type__[is schema::Migration]": $.LinkDesc<$Migration, $.Cardinality.Many, {}, false, false, false, false>;
-        "<__type__[is schema::Module]": $.LinkDesc<$Module, $.Cardinality.Many, {}, false, false, false, false>;
-        "<__type__[is schema::PseudoType]": $.LinkDesc<$PseudoType, $.Cardinality.Many, {}, false, false, false, false>;
-        "<__type__[is schema::Constraint]": $.LinkDesc<$Constraint, $.Cardinality.Many, {}, false, false, false, false>;
-        "<__type__[is schema::ConsistencySubject]": $.LinkDesc<
-            $ConsistencySubject,
-            $.Cardinality.Many,
-            {},
-            false,
-            false,
-            false,
-            false
-        >;
-        "<__type__[is schema::Rewrite]": $.LinkDesc<$Rewrite, $.Cardinality.Many, {}, false, false, false, false>;
-        "<__type__[is schema::Pointer]": $.LinkDesc<$Pointer, $.Cardinality.Many, {}, false, false, false, false>;
-        "<__type__[is schema::Property]": $.LinkDesc<$Property, $.Cardinality.Many, {}, false, false, false, false>;
-        "<__type__[is schema::ScalarType]": $.LinkDesc<$ScalarType, $.Cardinality.Many, {}, false, false, false, false>;
-        "<__type__[is schema::Index]": $.LinkDesc<$Index, $.Cardinality.Many, {}, false, false, false, false>;
-        "<__type__[is schema::Source]": $.LinkDesc<$Source, $.Cardinality.Many, {}, false, false, false, false>;
-        "<__type__[is schema::Link]": $.LinkDesc<$Link, $.Cardinality.Many, {}, false, false, false, false>;
-        "<target[is schema::Link]": $.LinkDesc<$Link, $.Cardinality.Many, {}, false, false, false, false>;
-        "<__type__[is schema::AccessPolicy]": $.LinkDesc<
-            $AccessPolicy,
-            $.Cardinality.Many,
-            {},
-            false,
-            false,
-            false,
-            false
-        >;
-        "<__type__[is schema::Trigger]": $.LinkDesc<$Trigger, $.Cardinality.Many, {}, false, false, false, false>;
-        "<__type__[is schema::ObjectType]": $.LinkDesc<$ObjectType, $.Cardinality.Many, {}, false, false, false, false>;
-        "<__type__[is schema::Extension]": $.LinkDesc<$Extension, $.Cardinality.Many, {}, false, false, false, false>;
-        "<__type__[is Auditable]": $.LinkDesc<_$default.$Auditable, $.Cardinality.Many, {}, false, false, false, false>;
-        "<__type__[is Nameable]": $.LinkDesc<_$default.$Nameable, $.Cardinality.Many, {}, false, false, false, false>;
-        "<__type__[is Evaluable]": $.LinkDesc<_$default.$Evaluable, $.Cardinality.Many, {}, false, false, false, false>;
-        "<__type__[is Relatable]": $.LinkDesc<_$default.$Relatable, $.Cardinality.Many, {}, false, false, false, false>;
-        "<__type__[is Book]": $.LinkDesc<_$default.$Book, $.Cardinality.Many, {}, false, false, false, false>;
-        "<__type__[is Identity]": $.LinkDesc<_$default.$Identity, $.Cardinality.Many, {}, false, false, false, false>;
-        "<__type__[is Person]": $.LinkDesc<_$default.$Person, $.Cardinality.Many, {}, false, false, false, false>;
-        "<__type__[is Organization]": $.LinkDesc<
-            _$default.$Organization,
-            $.Cardinality.Many,
-            {},
-            false,
-            false,
-            false,
-            false
-        >;
-        "<__type__[is User]": $.LinkDesc<_$default.$User, $.Cardinality.Many, {}, false, false, false, false>;
-        "<__type__[is Tag]": $.LinkDesc<_$default.$Tag, $.Cardinality.Many, {}, false, false, false, false>;
-        "<__type__[is Thread]": $.LinkDesc<_$default.$Thread, $.Cardinality.Many, {}, false, false, false, false>;
-        "<__type__[is Author]": $.LinkDesc<_$default.$Author, $.Cardinality.Many, {}, false, false, false, false>;
-        "<__type__[is ChapterOrder]": $.LinkDesc<
-            _$default.$ChapterOrder,
-            $.Cardinality.Many,
-            {},
-            false,
-            false,
-            false,
-            false
-        >;
-        "<__type__[is Chapter]": $.LinkDesc<_$default.$Chapter, $.Cardinality.Many, {}, false, false, false, false>;
-        "<__type__[is Publisher]": $.LinkDesc<_$default.$Publisher, $.Cardinality.Many, {}, false, false, false, false>;
-        "<__type__": $.LinkDesc<$.ObjectType, $.Cardinality.Many, {}, false, false, false, false>;
-        "<intersection_of": $.LinkDesc<$.ObjectType, $.Cardinality.Many, {}, false, false, false, false>;
-        "<subject": $.LinkDesc<$.ObjectType, $.Cardinality.Many, {}, false, false, false, false>;
-        "<target": $.LinkDesc<$.ObjectType, $.Cardinality.Many, {}, false, false, false, false>;
-        "<union_of": $.LinkDesc<$.ObjectType, $.Cardinality.Many, {}, false, false, false, false>;
-    }
->;
+export type $ObjectTypeλShape = $.typeutil.flatten<$SourceλShape & Omit<$ConsistencySubjectλShape, "<subject"> & $InheritingObjectλShape & Omit<$TypeλShape, "<target"> & $AnnotationSubjectλShape & {
+  "compound_type": $.PropertyDesc<_std.$bool, $.Cardinality.One, false, true, false, false>;
+  "is_compound_type": $.PropertyDesc<_std.$bool, $.Cardinality.One, false, true, false, false>;
+  "union_of": $.LinkDesc<$ObjectType, $.Cardinality.Many, {}, false, false,  false, false>;
+  "intersection_of": $.LinkDesc<$ObjectType, $.Cardinality.Many, {}, false, false,  false, false>;
+  "links": $.LinkDesc<$Link, $.Cardinality.Many, {}, false, true,  false, false>;
+  "properties": $.LinkDesc<$Property, $.Cardinality.Many, {}, false, true,  false, false>;
+  "access_policies": $.LinkDesc<$AccessPolicy, $.Cardinality.Many, {
+    "@owned": $.PropertyDesc<_std.$bool, $.Cardinality.AtMostOne>;
+    "@is_owned": $.PropertyDesc<_std.$bool, $.Cardinality.AtMostOne>;
+  }, true, false, false, false>;
+  "triggers": $.LinkDesc<$Trigger, $.Cardinality.Many, {
+    "@owned": $.PropertyDesc<_std.$bool, $.Cardinality.AtMostOne>;
+    "@is_owned": $.PropertyDesc<_std.$bool, $.Cardinality.AtMostOne>;
+  }, true, false, false, false>;
+  "<__type__[is std::BaseObject]": $.LinkDesc<$.ObjectType, $.Cardinality.Many, {}, false, false,  false, false>;
+  "<__type__[is schema::TupleElement]": $.LinkDesc<$TupleElement, $.Cardinality.Many, {}, false, false,  false, false>;
+  "<__type__[is schema::Object]": $.LinkDesc<$Object_32faaa35947553cf88fce68ecf1be4d9, $.Cardinality.Many, {}, false, false,  false, false>;
+  "<__type__[is schema::VolatilitySubject]": $.LinkDesc<$VolatilitySubject, $.Cardinality.Many, {}, false, false,  false, false>;
+  "<__type__[is schema::SubclassableObject]": $.LinkDesc<$SubclassableObject, $.Cardinality.Many, {}, false, false,  false, false>;
+  "<__type__[is schema::InheritingObject]": $.LinkDesc<$InheritingObject, $.Cardinality.Many, {}, false, false,  false, false>;
+  "<__type__[is schema::Delta]": $.LinkDesc<$Delta, $.Cardinality.Many, {}, false, false,  false, false>;
+  "<__type__[is schema::AnnotationSubject]": $.LinkDesc<$AnnotationSubject, $.Cardinality.Many, {}, false, false,  false, false>;
+  "<__type__[is std::Object]": $.LinkDesc<_std.$Object_8ce8c71ee4fa5f73840c22d7eaa58588, $.Cardinality.Many, {}, false, false,  false, false>;
+  "<union_of[is schema::ObjectType]": $.LinkDesc<$ObjectType, $.Cardinality.Many, {}, false, false,  false, false>;
+  "<intersection_of[is schema::ObjectType]": $.LinkDesc<$ObjectType, $.Cardinality.Many, {}, false, false,  false, false>;
+  "<subject[is schema::AccessPolicy]": $.LinkDesc<$AccessPolicy, $.Cardinality.Many, {}, false, false,  false, false>;
+  "<subject[is schema::Trigger]": $.LinkDesc<$Trigger, $.Cardinality.Many, {}, false, false,  false, false>;
+  "<__type__[is schema::FutureBehavior]": $.LinkDesc<$FutureBehavior, $.Cardinality.Many, {}, false, false,  false, false>;
+  "<__type__[is sys::SystemObject]": $.LinkDesc<_sys.$SystemObject, $.Cardinality.Many, {}, false, false,  false, false>;
+  "<__type__[is sys::ExternalObject]": $.LinkDesc<_sys.$ExternalObject, $.Cardinality.Many, {}, false, false,  false, false>;
+  "<__type__[is sys::Branch]": $.LinkDesc<_sys.$Branch, $.Cardinality.Many, {}, false, false,  false, false>;
+  "<__type__[is sys::Database]": $.LinkDesc<_sys.$Database, $.Cardinality.Many, {}, false, false,  false, false>;
+  "<__type__[is sys::ExtensionPackage]": $.LinkDesc<_sys.$ExtensionPackage, $.Cardinality.Many, {}, false, false,  false, false>;
+  "<__type__[is sys::ExtensionPackageMigration]": $.LinkDesc<_sys.$ExtensionPackageMigration, $.Cardinality.Many, {}, false, false,  false, false>;
+  "<__type__[is sys::Role]": $.LinkDesc<_sys.$Role, $.Cardinality.Many, {}, false, false,  false, false>;
+  "<__type__[is sys::QueryStats]": $.LinkDesc<_sys.$QueryStats, $.Cardinality.Many, {}, false, false,  false, false>;
+  "<__type__[is cfg::ConfigObject]": $.LinkDesc<_cfg.$ConfigObject, $.Cardinality.Many, {}, false, false,  false, false>;
+  "<__type__[is cfg::AuthMethod]": $.LinkDesc<_cfg.$AuthMethod, $.Cardinality.Many, {}, false, false,  false, false>;
+  "<__type__[is cfg::Trust]": $.LinkDesc<_cfg.$Trust, $.Cardinality.Many, {}, false, false,  false, false>;
+  "<__type__[is cfg::SCRAM]": $.LinkDesc<_cfg.$SCRAM, $.Cardinality.Many, {}, false, false,  false, false>;
+  "<__type__[is cfg::JWT]": $.LinkDesc<_cfg.$JWT, $.Cardinality.Many, {}, false, false,  false, false>;
+  "<__type__[is cfg::Password]": $.LinkDesc<_cfg.$Password, $.Cardinality.Many, {}, false, false,  false, false>;
+  "<__type__[is cfg::mTLS]": $.LinkDesc<_cfg.$mTLS, $.Cardinality.Many, {}, false, false,  false, false>;
+  "<__type__[is cfg::Auth]": $.LinkDesc<_cfg.$Auth, $.Cardinality.Many, {}, false, false,  false, false>;
+  "<__type__[is cfg::EmailProviderConfig]": $.LinkDesc<_cfg.$EmailProviderConfig, $.Cardinality.Many, {}, false, false,  false, false>;
+  "<__type__[is cfg::SMTPProviderConfig]": $.LinkDesc<_cfg.$SMTPProviderConfig, $.Cardinality.Many, {}, false, false,  false, false>;
+  "<__type__[is cfg::AbstractConfig]": $.LinkDesc<_cfg.$AbstractConfig, $.Cardinality.Many, {}, false, false,  false, false>;
+  "<__type__[is cfg::ExtensionConfig]": $.LinkDesc<_cfg.$ExtensionConfig, $.Cardinality.Many, {}, false, false,  false, false>;
+  "<__type__[is cfg::Config]": $.LinkDesc<_cfg.$Config, $.Cardinality.Many, {}, false, false,  false, false>;
+  "<__type__[is cfg::InstanceConfig]": $.LinkDesc<_cfg.$InstanceConfig, $.Cardinality.Many, {}, false, false,  false, false>;
+  "<__type__[is schema::Annotation]": $.LinkDesc<$Annotation, $.Cardinality.Many, {}, false, false,  false, false>;
+  "<__type__[is cfg::DatabaseConfig]": $.LinkDesc<_cfg.$DatabaseConfig, $.Cardinality.Many, {}, false, false,  false, false>;
+  "<__type__[is cfg::BranchConfig]": $.LinkDesc<_cfg.$BranchConfig, $.Cardinality.Many, {}, false, false,  false, false>;
+  "<__type__[is std::net::http::Response]": $.LinkDesc<_stdnethttp.$Response, $.Cardinality.Many, {}, false, false,  false, false>;
+  "<__type__[is std::net::http::ScheduledRequest]": $.LinkDesc<_stdnethttp.$ScheduledRequest, $.Cardinality.Many, {}, false, false,  false, false>;
+  "<__type__[is schema::Type]": $.LinkDesc<$Type, $.Cardinality.Many, {}, false, false,  false, false>;
+  "<__type__[is schema::PrimitiveType]": $.LinkDesc<$PrimitiveType, $.Cardinality.Many, {}, false, false,  false, false>;
+  "<__type__[is schema::CollectionType]": $.LinkDesc<$CollectionType, $.Cardinality.Many, {}, false, false,  false, false>;
+  "<__type__[is schema::Array]": $.LinkDesc<$Array, $.Cardinality.Many, {}, false, false,  false, false>;
+  "<__type__[is schema::ArrayExprAlias]": $.LinkDesc<$ArrayExprAlias, $.Cardinality.Many, {}, false, false,  false, false>;
+  "<__type__[is schema::Tuple]": $.LinkDesc<$Tuple, $.Cardinality.Many, {}, false, false,  false, false>;
+  "<__type__[is schema::TupleExprAlias]": $.LinkDesc<$TupleExprAlias, $.Cardinality.Many, {}, false, false,  false, false>;
+  "<__type__[is schema::Range]": $.LinkDesc<$Range, $.Cardinality.Many, {}, false, false,  false, false>;
+  "<__type__[is schema::RangeExprAlias]": $.LinkDesc<$RangeExprAlias, $.Cardinality.Many, {}, false, false,  false, false>;
+  "<__type__[is schema::MultiRange]": $.LinkDesc<$MultiRange, $.Cardinality.Many, {}, false, false,  false, false>;
+  "<__type__[is schema::MultiRangeExprAlias]": $.LinkDesc<$MultiRangeExprAlias, $.Cardinality.Many, {}, false, false,  false, false>;
+  "<__type__[is schema::Alias]": $.LinkDesc<$Alias, $.Cardinality.Many, {}, false, false,  false, false>;
+  "<__type__[is schema::Global]": $.LinkDesc<$Global, $.Cardinality.Many, {}, false, false,  false, false>;
+  "<__type__[is schema::Parameter]": $.LinkDesc<$Parameter, $.Cardinality.Many, {}, false, false,  false, false>;
+  "<__type__[is schema::CallableObject]": $.LinkDesc<$CallableObject, $.Cardinality.Many, {}, false, false,  false, false>;
+  "<__type__[is schema::Function]": $.LinkDesc<$Function, $.Cardinality.Many, {}, false, false,  false, false>;
+  "<__type__[is schema::Operator]": $.LinkDesc<$Operator, $.Cardinality.Many, {}, false, false,  false, false>;
+  "<__type__[is schema::Cast]": $.LinkDesc<$Cast, $.Cardinality.Many, {}, false, false,  false, false>;
+  "<__type__[is schema::Migration]": $.LinkDesc<$Migration, $.Cardinality.Many, {}, false, false,  false, false>;
+  "<__type__[is schema::Module]": $.LinkDesc<$Module, $.Cardinality.Many, {}, false, false,  false, false>;
+  "<__type__[is schema::PseudoType]": $.LinkDesc<$PseudoType, $.Cardinality.Many, {}, false, false,  false, false>;
+  "<__type__[is schema::Constraint]": $.LinkDesc<$Constraint, $.Cardinality.Many, {}, false, false,  false, false>;
+  "<__type__[is schema::ConsistencySubject]": $.LinkDesc<$ConsistencySubject, $.Cardinality.Many, {}, false, false,  false, false>;
+  "<__type__[is schema::Rewrite]": $.LinkDesc<$Rewrite, $.Cardinality.Many, {}, false, false,  false, false>;
+  "<__type__[is schema::Pointer]": $.LinkDesc<$Pointer, $.Cardinality.Many, {}, false, false,  false, false>;
+  "<__type__[is schema::Property]": $.LinkDesc<$Property, $.Cardinality.Many, {}, false, false,  false, false>;
+  "<__type__[is schema::ScalarType]": $.LinkDesc<$ScalarType, $.Cardinality.Many, {}, false, false,  false, false>;
+  "<__type__[is schema::Index]": $.LinkDesc<$Index, $.Cardinality.Many, {}, false, false,  false, false>;
+  "<__type__[is schema::Source]": $.LinkDesc<$Source, $.Cardinality.Many, {}, false, false,  false, false>;
+  "<__type__[is schema::Link]": $.LinkDesc<$Link, $.Cardinality.Many, {}, false, false,  false, false>;
+  "<target[is schema::Link]": $.LinkDesc<$Link, $.Cardinality.Many, {}, false, false,  false, false>;
+  "<__type__[is schema::AccessPolicy]": $.LinkDesc<$AccessPolicy, $.Cardinality.Many, {}, false, false,  false, false>;
+  "<__type__[is schema::Trigger]": $.LinkDesc<$Trigger, $.Cardinality.Many, {}, false, false,  false, false>;
+  "<__type__[is schema::ObjectType]": $.LinkDesc<$ObjectType, $.Cardinality.Many, {}, false, false,  false, false>;
+  "<__type__[is schema::Extension]": $.LinkDesc<$Extension, $.Cardinality.Many, {}, false, false,  false, false>;
+  "<__type__[is Auditable]": $.LinkDesc<_$default.$Auditable, $.Cardinality.Many, {}, false, false,  false, false>;
+  "<__type__[is Nameable]": $.LinkDesc<_$default.$Nameable, $.Cardinality.Many, {}, false, false,  false, false>;
+  "<__type__[is Evaluable]": $.LinkDesc<_$default.$Evaluable, $.Cardinality.Many, {}, false, false,  false, false>;
+  "<__type__[is Relatable]": $.LinkDesc<_$default.$Relatable, $.Cardinality.Many, {}, false, false,  false, false>;
+  "<__type__[is Book]": $.LinkDesc<_$default.$Book, $.Cardinality.Many, {}, false, false,  false, false>;
+  "<__type__[is Identity]": $.LinkDesc<_$default.$Identity, $.Cardinality.Many, {}, false, false,  false, false>;
+  "<__type__[is Person]": $.LinkDesc<_$default.$Person, $.Cardinality.Many, {}, false, false,  false, false>;
+  "<__type__[is Organization]": $.LinkDesc<_$default.$Organization, $.Cardinality.Many, {}, false, false,  false, false>;
+  "<__type__[is User]": $.LinkDesc<_$default.$User, $.Cardinality.Many, {}, false, false,  false, false>;
+  "<__type__[is Tag]": $.LinkDesc<_$default.$Tag, $.Cardinality.Many, {}, false, false,  false, false>;
+  "<__type__[is Thread]": $.LinkDesc<_$default.$Thread, $.Cardinality.Many, {}, false, false,  false, false>;
+  "<__type__[is Author]": $.LinkDesc<_$default.$Author, $.Cardinality.Many, {}, false, false,  false, false>;
+  "<__type__[is ChapterOrder]": $.LinkDesc<_$default.$ChapterOrder, $.Cardinality.Many, {}, false, false,  false, false>;
+  "<__type__[is Chapter]": $.LinkDesc<_$default.$Chapter, $.Cardinality.Many, {}, false, false,  false, false>;
+  "<__type__[is Publisher]": $.LinkDesc<_$default.$Publisher, $.Cardinality.Many, {}, false, false,  false, false>;
+  "<__type__": $.LinkDesc<$.ObjectType, $.Cardinality.Many, {}, false, false,  false, false>;
+  "<intersection_of": $.LinkDesc<$.ObjectType, $.Cardinality.Many, {}, false, false,  false, false>;
+  "<subject": $.LinkDesc<$.ObjectType, $.Cardinality.Many, {}, false, false,  false, false>;
+  "<target": $.LinkDesc<$.ObjectType, $.Cardinality.Many, {}, false, false,  false, false>;
+  "<union_of": $.LinkDesc<$.ObjectType, $.Cardinality.Many, {}, false, false,  false, false>;
+}>;
+==== BASE ====
 type $ObjectType = $.ObjectType<"schema::ObjectType", $ObjectTypeλShape, null, [
     ...$Source["__exclusives__"],
     ...$ConsistencySubject["__exclusives__"],
