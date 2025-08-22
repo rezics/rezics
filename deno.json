@@ -1,46 +1,47 @@
 {
-	"unstable": [
-		"fmt-component",
-		"fmt-sql"
-	],
-	"lock": false,
-	"nodeModulesDir": "auto",
-	"workspace": [
-		"./package/client",
-		"./package/contract",
-		"./package/database",
-		"./package/server",
-		"./package/crawler",
-		"./package/util"
-	],
-	"compilerOptions": {
-		"jsx": "react-jsx",
-		"jsxImportSource": "react",
-		"jsxImportSourceTypes": "@types/react",
-		"strict": true,
-		"noUnusedParameters": true,
-		"noErrorTruncation": true
-	},
-	"fmt": {
-		"indentWidth": 4,
-		"useTabs": true
-	},
-	"lint": {
-		"rules": {
-			"exclude": [
-				"no-explicit-any",
-				"no-namespace"
-			]
-		}
-	},
-	"imports": {
-		"@effect/cli": "npm:@effect/cli@^0.69.0",
-		"@effect/platform-node": "npm:@effect/platform-node@^0.96.0",
-		"@std/assert": "jsr:@std/assert@^1.0.14",
-		"effect": "npm:effect@^3.17.7",
-		"gel": "npm:gel@^2.1.1",
-		"swr": "npm:swr@^2.3.6",
-		"uuid": "npm:uuid@^11.1.0",
-		"zod": "npm:zod@^4.0.17"
-	}
+    "unstable": ["fmt-component", "fmt-sql"],
+    "lock": false,
+    "nodeModulesDir": "auto",
+    "workspace": [
+        "./package/client",
+        "./package/contract",
+        "./package/database",
+        "./package/server",
+        "./package/crawler",
+        "./package/util"
+    ],
+    "deno.disablePaths": [
+        "package/client",
+        "**/node_modules/**",
+        "**/.vite/**",
+        "**/dist/**"
+    ],
+    "deno.suggest.imports.enabled": false,
+    "compilerOptions": {
+        "jsx": "react-jsx",
+        "jsxImportSource": "react",
+        "jsxImportSourceTypes": "@types/react",
+        "strict": true,
+        "noUnusedParameters": true,
+        "noErrorTruncation": true
+    },
+    "fmt": {
+        "indentWidth": 4,
+        "useTabs": true
+    },
+    "lint": {
+        "rules": {
+            "exclude": ["no-explicit-any", "no-namespace"]
+        }
+    },
+    "imports": {
+        "@effect/cli": "npm:@effect/cli@^0.69.0",
+        "@effect/platform-node": "npm:@effect/platform-node@^0.96.0",
+        "@std/assert": "jsr:@std/assert@^1.0.14",
+        "effect": "npm:effect@^3.17.7",
+        "gel": "npm:gel@^2.1.1",
+        "swr": "npm:swr@^2.3.6",
+        "uuid": "npm:uuid@^11.1.0",
+        "zod": "npm:zod@^4.0.17"
+    }
 }
