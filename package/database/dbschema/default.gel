@@ -11,6 +11,15 @@ module default {
         constraint max_len_value(10000);
     }
 
+    abstract type Base {
+        required _id: uuid {
+            readonly := true;
+            constraint exclusive;
+        }
+
+        index on (._id)
+    }
+
     abstract type Auditable {
         required created_at: datetime {
             rewrite insert using (datetime_of_statement());
@@ -28,7 +37,7 @@ module default {
         related_by := .<related_to[is Relatable];
     }
 
-    abstract type Nameable {
+    abstract type Nameable extending Base {
         required name: short_str;
 
         index on (.name);
@@ -41,6 +50,8 @@ module default {
     }
 
     type Book extending Nameable, Auditable, Evaluable, Relatable {
+        isbn: short_str;
+
         cover: str;
         description: long_str;
 
@@ -60,7 +71,7 @@ module default {
     }
 
     type ChapterOrder {
-        required content: str;
+        required content: json;
         required single link book: Book;
     }
 
@@ -72,13 +83,10 @@ module default {
     }
 
     type Publisher extending Nameable, Evaluable, Relatable {
-        required domain: short_str;
         multi link books: Book {
             date: datetime;
             isbn: short_str;
         };
-
-        index on (.domain);
     }
 
     type Author extending Nameable, Evaluable, Relatable {
@@ -98,6 +106,7 @@ module default {
     type User extending Person {
         description: long_str;
     
+        avatar: str;
         required email: short_str;
 
         multi link friends: User;

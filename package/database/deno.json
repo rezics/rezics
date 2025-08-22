@@ -1,31 +1,33 @@
 {
-    "name": "database",
-    "version": "0.0.1",
-    "exclude": [
-        "./generated/"
-    ],
-    "fmt": {
-        "exclude": [
-            "./generated/"
-        ]
-    },
-    "lint": {
-        "exclude": [
-            "./generated/",
-            "./mod.ts"
-        ]
-    },
-    "tasks": {
-        "generate:query": "deno run -A npm:@gel/generate queries --no-update-ignore-file --target ts --file ./generated/query",
-        "generate:interface": "deno run -A npm:@gel/generate interfaces --no-update-ignore-file --file ./generated/interface.ts",
-        "generate:edgeql-js": "deno run -A npm:@gel/generate edgeql-js --no-update-ignore-file --force-overwrite --target deno --out ./generated/edgeql-js",
-        "generate": "deno task generate:query && deno task generate:interface && deno task generate:edgeql-js"
-    },
-    "exports": {
-        ".": "./mod.ts"
-    },
-    "imports": {
-        "drizzle-kit": "npm:drizzle-kit@^0.31.4",
-        "drizzle-orm": "npm:drizzle-orm@^0.44.4"
-    }
+==== BASE ====
+	"name": "database",
+	"version": "0.0.1",
+	"exclude": [
+		"./generated/"
+	],
+	"fmt": {
+		"exclude": [
+			"./generated/"
+		]
+	},
+	"lint": {
+		"exclude": [
+			"./generated/",
+			"./mod.ts"
+		]
+	},
+	"tasks": {
+		"generate:query": "deno run -A npm:@gel/generate queries --no-update-ignore-file --target ts --file ./generated/query",
+		"generate:interface": "deno run -A npm:@gel/generate interfaces --no-update-ignore-file --file ./generated/interface.ts",
+		"generate:edgeql-js": "deno run -A npm:@gel/generate edgeql-js --no-update-ignore-file --force-overwrite --target deno --out ./generated/edgeql-js",
+		"generate": "deno task generate:query && deno task generate:interface && deno task generate:edgeql-js"
+	},
+	"exports": {
+		".": "./mod.ts"
+	},
+	"imports": {
+		"drizzle-kit": "npm:drizzle-kit@^0.31.4",
+		"drizzle-orm": "npm:drizzle-orm@^0.44.4"
+	}
+==== BASE ====
 }

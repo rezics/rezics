@@ -1,13 +1,14 @@
 {
-    "compilerOptions": {
-        "lib": ["dom", "esnext", "deno.ns"]
-    },
-    "imports": {
-        "@types/node": "npm:@types/node@^24.2.1",
-        "prettier": "npm:prettier@^3.6.2",
-        "@intzaaa/logger": "npm:@intzaaa/logger@^2.0.0",
-        "dayjs": "npm:dayjs@^1.11.13",
-        "mocha": "npm:mocha@11.7.1",
-        "rebrowser-playwright": "npm:rebrowser-playwright@^1.52.0"
-    }
+	"version": "0.0.1",
+	"compilerOptions": {
+		"lib": ["dom", "esnext", "deno.ns"]
+	},
+	"imports": {
+		"@types/node": "npm:@types/node@^24.2.1",
+		"prettier": "npm:prettier@^3.6.2",
+		"@intzaaa/logger": "npm:@intzaaa/logger@^2.0.0",
+		"dayjs": "npm:dayjs@^1.11.13",
+		"mocha": "npm:mocha@11.7.1",
+		"rebrowser-playwright": "npm:rebrowser-playwright@^1.52.0"
+	}
 }
