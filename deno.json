@@ -16,6 +16,7 @@
 	"compilerOptions": {
 		"jsx": "react-jsx",
 		"jsxImportSource": "react",
+		"jsxImportSourceTypes": "@types/react",
 		"strict": true,
 		"noUnusedParameters": true,
 		"exactOptionalPropertyTypes": true,
