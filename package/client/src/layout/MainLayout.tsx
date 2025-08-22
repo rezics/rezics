@@ -1,7 +1,8 @@
 import { Header } from "@/component/Layout/MainLayoutHeader.tsx";
 import { Sidebar } from "@/component/Layout/Sidebar.tsx";
 import { useMediaQuery } from "@mui/material";
-import React, { ReactNode } from "react";
+import React from "react";
+import type { ReactNode } from "react";
 // import { Box } from "@mui/material";
 import { NAVIGATION } from "@/component/Layout/MainNavigation.tsx";
 import { appStore } from "@/global/appStore.ts";

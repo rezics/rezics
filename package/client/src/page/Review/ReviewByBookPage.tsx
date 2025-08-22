@@ -19,7 +19,7 @@ export function ReviewByBookPage() {
     const [reviews, setReviews] = useState<BookReview[]>([]);
 
     const createReviewListInput = {
-        operation: "review.listReviews",
+        operation: "review.list",
         parameter: {
             bookId: bookId || "",
         },
@@ -27,8 +27,8 @@ export function ReviewByBookPage() {
     const { data, isLoading, error } = useSWR(createReviewListInput, apiPost);
 
     useEffect(() => {
-        if (data?.reviews) {
-            setReviews(data.reviews);
+        if (data) {
+            setReviews(data as any);
         }
     }, [data]);
 

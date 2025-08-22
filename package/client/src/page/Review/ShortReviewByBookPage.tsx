@@ -8,7 +8,7 @@ import { useParams } from "wouter";
 export function ShortReviewByBookPage() {
     const { bookId } = useParams();
     const createShortReviewListInput = {
-        operation: "review.listShortReviews",
+        operation: "review.short.list",
         parameter: {
             bookId: bookId || "",
         },
@@ -23,7 +23,7 @@ export function ShortReviewByBookPage() {
             <AccentBarWithTextShow text="短评" />
             <div className="mt-4">
                 <ReviewEdit />
-                <ShortReviewList.Show reviews={data ?? []} />
+                <ShortReviewList.Show reviews={data ?? [] as any} />
             </div>
         </div>
     );

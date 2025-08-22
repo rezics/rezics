@@ -10,6 +10,7 @@ declare global {
     var cancelAnimationFrame: (id: number) => void;
     var innerHeight: number;
     var document: any;
+    var history: any;
 }
 
 export {};

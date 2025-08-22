@@ -5,7 +5,7 @@ import { Route, Router, Switch } from "wouter";
 import { LoginPage } from "@/page/Auth/LoginPage.tsx";
 import { RegisterPage } from "@/page/Auth/RegisterPage.tsx";
 import { Home } from "@/page/Home.tsx";
-import { NotFound } from "@/page/NotFound.tsx";
+import { NotFoundContainer } from "@/page/NotFound.tsx";
 
 // Book – Read
 import { BookReadLayout } from "@/layout/BookReadLayout.tsx";
@@ -164,7 +164,7 @@ export default (
                     )}
                 </Route>
 
-                {/* AHCHOR User Routes */}
+                {/* ANCHOR User Routes */}
                 <Route path="/user/:userId">
                     {({ userId }) => (
                         <MainLayout>
@@ -207,7 +207,7 @@ export default (
 
                 {/* ANCHOR404 fallback */}
                 <Route>
-                    <NotFound.Container />
+                    <NotFoundContainer />
                 </Route>
             </Switch>
         </ThemeProvider>

@@ -1,5 +1,5 @@
 import { LangToggle } from "@/component/Layout/LangToggle.tsx";
-import { User } from "@/component/Layout/User.tsx";
+import { UserContainer } from "@/component/Layout/User.tsx";
 import { ThemeQuickToggle } from "@/component/Theme/ThemeCustomizer.tsx";
 import { useLayoutStore } from "@/global/Layout/layoutStore.ts";
 import { Brightness4, Brightness7, Menu } from "@mui/icons-material";
@@ -66,7 +66,7 @@ export const Header: React.FC<HeaderProps> = (
                 <IconButton color="inherit" onClick={onThemeToggle}>
                     {mode === "dark" ? <Brightness7 /> : <Brightness4 />}
                 </IconButton>
-                <User.Container onLogout={() => console.log("Logout")} />
+                <UserContainer onLogout={() => console.log("Logout")} />
             </Toolbar>
         </AppBar>
     );

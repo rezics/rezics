@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { createJSONStorage, persist } from "zustand/middleware";
 
 interface User {
     id: string;
@@ -17,7 +18,7 @@ interface UserState {
     logout: () => void;
 }
 
-export const useUserStore = create<UserState>((set) => ({
+export const useUserStore = create<UserState>()(persist((set) => ({
     // 初始状态
     user: null,
     isAuthenticated: false,
@@ -34,4 +35,7 @@ export const useUserStore = create<UserState>((set) => ({
             user: null,
             isAuthenticated: false,
         }),
+}), {
+    name: "user-store",
+    storage: createJSONStorage(() => localStorage),
 }));

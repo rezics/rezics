@@ -10,11 +10,11 @@ import { apiPost } from "@/api/swr.ts";
 import { BookEditorSidebar } from "@/component/Layout/BookEditorSidebar.tsx";
 import useSWR from "swr";
 import { Link, useParams, useRoute } from "wouter";
-interface BookReadLayout {
+interface BookReadLayoutProps {
     children: ReactNode;
 }
 
-export const BookReadLayout: React.FC<BookReadLayout> = ({ children }) => {
+export const BookReadLayout: React.FC<BookReadLayoutProps> = ({ children }) => {
     const [match, params] = useRoute("/book/:bookId/read/:chapterId");
     const locationParams = useParams();
     const isMobile = useMediaQuery("(max-width:960px)");
@@ -84,7 +84,7 @@ export const BookReadLayout: React.FC<BookReadLayout> = ({ children }) => {
                     </div>
                     <Divider />
                     <BookEditorSidebar
-                        chaptersData={data ?? {
+                        chaptersData={data as any ?? {
                             chapters: [],
                             order: new Map<string, string[]>(),
                         }}

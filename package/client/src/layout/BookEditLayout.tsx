@@ -85,7 +85,7 @@ export const BookEditLayout: React.FC<BookEditLayoutProps> = ({ children }) => {
                     isDragging={isDragging}
                 >
                     <BookEditorSidebar
-                        chaptersData={data ?? {
+                        chaptersData={data as any ?? {
                             chapters: [],
                             order: new Map<string, string[]>(),
                         }}

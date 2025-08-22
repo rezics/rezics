@@ -11,7 +11,7 @@ import LibraryBooksIcon from "@mui/icons-material/LibraryBooks";
 import LoginIcon from "@mui/icons-material/Login";
 import PersonIcon from "@mui/icons-material/Person";
 
-import { NavigationItem } from "./navigation.d.ts";
+import type { NavigationItem } from "./navigation.d.ts";
 
 // segment: router path
 
@@ -110,6 +110,26 @@ export const NAVIGATION = (): NavigationItem[] => [
         segment: "/test",
         title: "Test",
         icon: <LayersIcon />,
+        children: [
+            {
+                kind: "item",
+                segment: "/test",
+                title: "Test 01",
+                icon: <LayersIcon />,
+            },
+            {
+                kind: "item",
+                segment: "/test02",
+                title: "Test 02",
+                icon: <LayersIcon />,
+            },
+            {
+                kind: "item",
+                segment: "/test03",
+                title: "Test 03",
+                icon: <LayersIcon />,
+            },
+        ],
     },
     {
         kind: "item",

@@ -59,8 +59,7 @@ export default function PersistentTabs() {
                 <TabPanel value="1" keepMounted>
                     {/* keepMounted 保持在 DOM，不会被卸载，内部状态持久化】 */}
                     <BookEditorSidebar
-                        chaptersData={data
-                            ?? { chapters: [], order: new Map() }}
+                        chaptersData={data as any ?? { chapters: [], order: new Map() as any }}
                         selectedId=""
                         baseLink="/test"
                         drawerWidth={300}
@@ -71,7 +70,7 @@ export default function PersistentTabs() {
                     <div>{String(testData)}</div>
                     <div>{String(testLoading)}</div>
                     <div>{String(testError)}</div>
-                    <div className="mt-100"></div>
+                    <div className="mt-100" />
                 </TabPanel>
             </TabContext>
         </div>

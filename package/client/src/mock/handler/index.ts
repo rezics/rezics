@@ -62,7 +62,6 @@ const operationMap: Record<
     "test.01": test01Handler,
 };
 
-// @ts-ignore: unused parameter
 export const apiHandler = http.all(
     "/api",
     async ({ request, params: _params, cookies }) => {

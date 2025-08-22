@@ -4,47 +4,46 @@ import Card from "@mui/material/Card";
 import CardActions from "@mui/material/CardActions";
 import CardContent from "@mui/material/CardContent";
 import Typography from "@mui/material/Typography";
+import React from "react";
 import { useLocation } from "wouter";
 
-export namespace NotFound {
-    export type Show = {
-        path: string;
-        onBack: () => void;
-        onHome: () => void;
+export type NotFoundShowProps = {
+    path: string;
+    onBack: () => void;
+    onHome: () => void;
+};
+
+export const NotFoundShow: React.FC<NotFoundShowProps> = ({ path, onBack, onHome }) => {
+    return (
+        <div className="min-h-screen flex items-center justify-center">
+            <Card className="min-w-md max-w-lg">
+                <CardContent className="flex flex-col gap-4">
+                    <Typography variant="h4">Not Found</Typography>
+                    <div>
+                        <Place></Place> {path}
+                    </div>
+                </CardContent>
+                <CardActions className="flex flex-row justify-between">
+                    <Button onClick={onBack}>Back</Button>
+                    <Button onClick={onHome}>Home</Button>
+                </CardActions>
+            </Card>
+        </div>
+    );
+};
+
+export type NotFoundContainerProps = object;
+
+export const NotFoundContainer: React.FC<NotFoundContainerProps> = () => {
+    const [path, navigate] = useLocation();
+
+    const handleBack = () => {
+        window.history.back();
     };
 
-    export const Show: React.FC<Show> = ({ path, onBack, onHome }) => {
-        return (
-            <div className="min-h-screen flex items-center justify-center">
-                <Card className="min-w-md max-w-lg">
-                    <CardContent className="flex flex-col gap-4">
-                        <Typography variant="h4">Not Found</Typography>
-                        <div>
-                            <Place></Place> {path}
-                        </div>
-                    </CardContent>
-                    <CardActions className="flex flex-row justify-between">
-                        <Button onClick={onBack}>Back</Button>
-                        <Button onClick={onHome}>Home</Button>
-                    </CardActions>
-                </Card>
-            </div>
-        );
+    const handleHome = () => {
+        navigate("/");
     };
 
-    export type Container = {};
-
-    export const Container: React.FC<Container> = () => {
-        const [path, navigate] = useLocation();
-
-        const handleBack = () => {
-            history.back();
-        };
-
-        const handleHome = () => {
-            navigate("/");
-        };
-
-        return <Show path={path} onBack={handleBack} onHome={handleHome} />;
-    };
-}
+    return <NotFoundShow path={path} onBack={handleBack} onHome={handleHome} />;
+};
