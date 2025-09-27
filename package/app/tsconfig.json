@@ -7,8 +7,7 @@
       "@page/*": ["src/page/*"],
       "@util/*": ["src/util/*"],
       "@locale": ["src/locale/index.ts"],
-      "contract": ["./contract/mod.ts"],
-      "contract/*": ["./contract/src/*"]
+      
     },
     /* 输出 */
     "target": "ES2022",

@@ -1,5 +1,6 @@
 import { queryOptions } from "@tanstack/react-query";
 import { type ApiError, http } from "./react-query/http.ts";
+import { type ChapterListDTO, type ChapterDetailDTO, type CreateChapterInput, type UpdateChapterInput } from "contract";
 
 // Chapter special structure:
 // - Backend (mock) returns: { order: number[][] | number[], chapters: Array<{id,title,noContent}> }
@@ -12,16 +13,7 @@ export type ChapterNode = {
   children: ChapterNode[];
 };
 
-export type ChapterListDTO = {
-  order: number[] | number[][];
-  chapters: { id: number; title: string; noContent: boolean }[];
-};
-
-export type ChapterDetailDTO = {
-  id: number;
-  title: string;
-  content?: string;
-};
+// DTOs moved to contract
 
 export const chapterKeys = {
   all: () => ["chapter"] as const,
@@ -76,8 +68,7 @@ export function buildChapterTree(dto: ChapterListDTO): ChapterNode[] {
 }
 
 // CRUD
-export type CreateChapterInput = { bookId: string; title: string; content?: string; parentId?: number | null };
-export type UpdateChapterInput = Partial<Omit<CreateChapterInput, "bookId">>;
+// Inputs moved to contract
 
 export const chapterApi = {
   list: (bookId: string) => http<ChapterListDTO>(`/books/${bookId}/chapters`),

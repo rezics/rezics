@@ -1,20 +1,9 @@
 import { queryOptions } from "@tanstack/react-query";
 import { type ApiError, http } from "./react-query/http.ts";
-import { type OffsetPaginated, type OffsetPaginationParams } from "./types";
+import { type OffsetPaginated, type OffsetPaginationParams, type BookDTO, type CreateBookInput, type UpdateBookInput } from "contract";
 
 // === DTOs (server contracts) ===
-export type BookDTO = {
-  id: string;
-  title: string;
-  authors?: { id: string; name: string; avatar?: string; description?: string }[];
-  coverUrl?: string;
-  isbn?: string;
-  description?: string;
-  extra?: {
-    publishers?: { id: string; name: string }[];
-    publishDate?: string;
-  };
-};
+// BookDTO comes from contract
 
 // === Views (UI consumption) ===
 export type BookListItem = Pick<BookDTO, "id" | "title"> & {
@@ -35,16 +24,7 @@ export const bookKeys = {
 };
 
 // === HTTP helpers (CRUD) ===
-export type CreateBookInput = {
-  title: string;
-  authorIds?: string[];
-  coverUrl?: string;
-  isbn?: string;
-  chaptersIndex?: string | null;
-  extra?: Record<string, unknown> | null;
-};
-
-export type UpdateBookInput = Partial<CreateBookInput>;
+// CreateBookInput / UpdateBookInput from contract
 
 const buildPageQuery = (params?: OffsetPaginationParams) => {
   const q = new URLSearchParams();

@@ -1,16 +1,8 @@
 import { queryOptions } from "@tanstack/react-query";
 import { type ApiError, http } from "./react-query/http.ts";
-import { type OffsetPaginated, type OffsetPaginationParams } from "./types";
+import { type OffsetPaginated, type OffsetPaginationParams, type CommentDTO } from "contract";
 
-export type CommentDTO = {
-  id: string;
-  rootPostId: string;
-  parentCommentId?: string | null;
-  depth: number;
-  content?: string | null;
-  created_at?: string;
-  user?: { id: string; name: string; avatar?: string };
-};
+// CommentDTO from contract
 
 export type CommentTreeNode = CommentDTO & { children: CommentTreeNode[] };
 

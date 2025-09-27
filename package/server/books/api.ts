@@ -1,47 +1,12 @@
 import {api, Query} from 'encore.dev/api';
+import type { BookListResponse, BookResponse, CreateBookInput, UpdateBookInput, PublicUser } from 'contract';
 import {prisma} from '../database-main/client';
 import type {Book, User, Post} from '../database-main/types/prisma';
 import type {Prisma} from '../database-main/prisma/generated/client';
 import {PostStatus, PostType} from '../database-main/types/prisma';
 
-interface BookCreateRequest {
-  userId: string; // Post.userId
-  title: string;
-  authorIds?: string[];
-  coverUrl?: string;
-  isbn?: string;
-  chaptersIndex?: string;
-  extra?: unknown;
-}
-
-interface BookUpdateRequest {
-  title?: string;
-  authorIds?: string[];
-  coverUrl?: string;
-  isbn?: string;
-  chaptersIndex?: string;
-  extra?: unknown;
-}
-
-type PublicUser = Pick<User, 'id' | 'slug' | 'name' | 'avatar'>;
-
-interface BookResponse {
-  postId: string;
-  title: string;
-  authors: PublicUser[];
-  coverUrl?: string;
-  isbn?: string;
-  chaptersIndex?: string;
-  extra?: unknown;
-  userId: string;
-  user?: PublicUser;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-interface BookListResponse {
-  books: BookResponse[];
-}
+type BookCreateRequest = Required<Pick<CreateBookInput, 'userId' | 'title'>> & Omit<CreateBookInput, 'title' | 'userId'>;
+type BookUpdateRequest = UpdateBookInput;
 
 interface BookListParams {
   q?: Query<string>; // search in title/isbn

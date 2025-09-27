@@ -6,7 +6,6 @@
   "license": "MPL-2.0",
   "type": "module",
   "scripts": {
-    "postinstall": "pnpx prisma generate",
     "test": "vitest",
     "seed": "tsx prisma/seed.ts",
     "seed:small": "SEED_USERS=5 SEED_TAGS=10 SEED_BOOKS=5 SEED_OTHER_POSTS=10 SEED_COMMENTS=20 tsx prisma/seed.ts",
@@ -30,6 +29,7 @@
     "vitest": "^1.5.0"
   },
   "dependencies": {
+    "contract": "workspace:*",
     "@prisma/adapter-pg": "^6.16.2",
     "@prisma/client": "6.16.2",
     "dotenv": "^17.2.2",
