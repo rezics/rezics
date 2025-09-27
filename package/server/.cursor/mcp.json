@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "encore-mcp": {
+      "command": "encore",
+      "args": ["mcp", "run", "--app=bvt78"]
+    },
+    "Prisma-Local": {
+      "command": "pnpx",
+      "args": ["prisma", "mcp"]
+    }
+  }
+}

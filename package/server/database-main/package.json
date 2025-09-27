@@ -1,0 +1,10 @@
+{
+  "name": "database-main",
+  "private": true,
+  "scripts": {
+    "seed": "tsx prisma/seed.ts",
+    "migrate:dev": "prisma migrate dev --schema=./prisma/schema.prisma",
+    "studio": "pnpx prisma studio",
+    "generate": "pnpx prisma generate"
+  }
+}

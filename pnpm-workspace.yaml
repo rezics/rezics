@@ -1,0 +1,20 @@
+packages:
+  - 'package/*'
+  - 'package/*/*'
+  - 'package/*/*/*'
+
+catalog:
+  # ensure single versions across workspace when desired; opt-in as needed
+  # example:
+  # react: 19.1.1
+
+onlyBuiltDependencies:
+  - '@parcel/watcher'
+  - '@tailwindcss/oxide'
+  - esbuild
+  - msgpackr-extract
+  - msw
+  - '@prisma/client'
+  - '@prisma/engines'
+  - prisma
+

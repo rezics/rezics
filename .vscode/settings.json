@@ -1,38 +1,35 @@
 {
-	"cSpell.words": [
-		"backpressure",
-		"booklist",
-		"deno",
-		"denoland",
-		"edgeql",
-		"Evaluable",
-		"icsid",
-		"libphonenumber",
-		"pgcrypto",
-		"pnpx",
-		"qidian",
-		"readlist",
-		"rebrowser",
-		"Tagable",
-		"TCRUD",
-		"urql",
-		"uuid",
-		"uuidv",
-		"wouter"
-	],
-	"i18n-ally.localesPaths": ["package/client/src/locale"],
-	"i18n-ally.enabledParsers": ["js", "ts", "json"],
-	"i18n-ally.enabledFrameworks": ["react-i18next"],
-	"i18n-ally.keystyle": "nested",
-	"gel.project-dir": "package/database",
-	"files.exclude": {
-		"package/database/dbschema/migrations": true
-	},
-	"deno.enable": true,
-	"deno.suggest.imports.hosts": {
-		"https://deno.land": true,
-		"https://esm.sh": true,
-		"npm:": true
-	},
-	"editor.defaultFormatter": "denoland.vscode-deno"
+  "cSpell.words": [
+    "backpressure",
+    "booklist",
+    "deno",
+    "denoland",
+    "edgeql",
+    "Evaluable",
+    "icsid",
+    "libphonenumber",
+    "pgcrypto",
+    "pnpx",
+    "qidian",
+    "readlist",
+    "rebrowser",
+    "Tagable",
+    "TCRUD",
+    "urql",
+    "uuid",
+    "uuidv",
+    "wouter"
+  ],
+  "i18n-ally.localesPaths": ["package/client/src/locale"],
+  "i18n-ally.enabledParsers": ["js", "ts", "json"],
+  "i18n-ally.enabledFrameworks": ["react-i18next"],
+  "i18n-ally.keystyle": "nested",
+  "gel.project-dir": "package/database",
+  "files.exclude": {
+    "package/database/dbschema/migrations": true
+  },
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  }
 }

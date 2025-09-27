@@ -1,4 +1,0 @@
-{
-	"name": "util",
-	"exports": "./mod.ts"
-}

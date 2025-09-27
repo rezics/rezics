@@ -1,0 +1,254 @@
+// This is your Prisma schema file.
+// Docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/**
+ * =========================
+ * Enums
+ * =========================
+ */
+
+enum PostType {
+  BOOK
+  COMMENT
+  NOTE
+  REVIEW
+  QUOTE
+  READLIST
+  IMAGE
+  VIDEO
+  CHAPTER
+}
+
+enum PostStatus {
+  DRAFT
+  ACTIVE
+  DELETED
+  FROZEN
+}
+
+enum UserType {
+  USER
+  AUTHOR
+}
+
+/**
+ * =========================
+ * Core: User
+ * =========================
+ * TODO 增加子组织
+ */
+model User {
+  id           String @id @default(uuid()) @db.Uuid
+  email        String @unique
+  slug         String @unique
+  passwordHash String
+
+  type UserType @default(USER)
+
+  name     String
+  avatar   String?
+  bio      String?
+  joinDate DateTime?
+
+  // Relations
+  posts       Post[]
+  books       Book[]
+  domainPosts Post[] @relation("PostDomains")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([name])
+  @@index([email])
+}
+
+/**
+ * =========================
+ * Core: Post (统一内容入口)
+ * - 仅固定最小公约字段；弹性入 metadata(JSON)
+ * - 其它类型（REVIEW/QUOTE/READLIST…）都在这里
+ * =========================
+ */
+model Post {
+  id      String @id @default(uuid()) @db.Uuid
+  userId  String @db.Uuid
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  domains User[] @relation("PostDomains")
+
+  type   PostType
+  status PostStatus @default(ACTIVE)
+
+  title    String?
+  content  String?
+  metadata Json    @default("{}")
+
+  // 可选：指向任意 Post 的“弱引用”
+  // 可被用于 Chapter，Review，Quote，Note，ReadList，Image，Video
+  targetPostId String? @db.Uuid
+  targetPost   Post?   @relation("PostTargets", fields: [targetPostId], references: [id])
+  targetedBy   Post[]  @relation("PostTargets")
+
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Book relation
+  book Book? @relation("BookForPost") // 1:1 子表
+
+  // Tag relation
+  tag  Tag?  @relation("TagForPost")
+  tags Tag[] @relation("PostTags")
+
+  stats     PostStats?
+  reactions PostReactions?
+
+  // === CommentIndex 的 3 条反向关系 ===
+  // 1) 这条评论本体对应的 Post（1:1）
+  commentIndex CommentIndex? @relation("CommentIndexForPost")
+
+  // 2) 作为“根对象”的 Post（1:N）
+  commentRoots CommentIndex[] @relation("RootPost")
+
+  // 3) 作为“父评论”的 Post（1:N）
+  childCommentIndexes CommentIndex[] @relation("ParentComment")
+
+  @@index([type, status, createdAt])
+  @@index([userId, createdAt])
+  @@index([targetPostId])
+}
+
+/**
+ * =========================
+ * 专用子表：Book（1:1 绑定 Post）
+ * 仅 Book 拥有专表；章节树、额外域等放 JSON
+ * =========================
+ * authors 就是纯字符串，关联用户的话单独做
+ */
+model Book {
+  // 与 Post 1:1 绑定；采用 Post.id 作为主键
+  postId String @id @db.Uuid
+  post   Post   @relation("BookForPost", fields: [postId], references: [id], onDelete: Cascade)
+
+  title         String
+  authors       User[] // User[]，作者列表，所有作者都会被注册为用户
+  coverUrl      String?
+  isbn          String?
+  chaptersIndex String? // 章节树状信息, 章节信息类似Review,统一使用
+  extra         Json? // 领域扩展（出版社、出版年、装帧…）
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([title])
+  @@index([isbn])
+}
+
+/**
+ * =========================
+ * 评论树“关系索引表”
+ * - 每条评论本体是 Post(type='COMMENT')
+ * - 该表存 root/parent/depth，加速树查询
+ * =========================
+ */
+model CommentIndex {
+  // 这条“评论 Post”的 id（与 Post 1:1）
+  postId String @id @db.Uuid
+  post   Post   @relation("CommentIndexForPost", fields: [postId], references: [id], onDelete: Cascade)
+
+  // 根对象
+  rootPostId String @db.Uuid
+  rootPost   Post   @relation("RootPost", fields: [rootPostId], references: [id], onDelete: Cascade)
+
+  // 父级评论（同为 Post）
+  parentCommentId String? @db.Uuid
+  parentComment   Post?   @relation("ParentComment", fields: [parentCommentId], references: [id], onDelete: SetNull)
+
+  depth Int
+  // 删掉多余/重复的 @@index([rootPostId])，避免重复索引
+
+  @@index([rootPostId, depth])
+  @@index([parentCommentId])
+}
+
+/**
+ * =========================
+ * 统计与互动
+ * - PostStats：评论数等冗余计数（列表/详情快取）
+ * - PostReactions：赞/踩/爱心计数聚合
+ * =========================
+ */
+
+model PostStats {
+  postId String @id @db.Uuid
+  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  commentCount Int @default(0)
+  viewCount    Int @default(0)
+
+  updatedAt DateTime @updatedAt
+}
+
+model PostReactions {
+  postId String @id @db.Uuid
+  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  likeCount    Int @default(0)
+  dislikeCount Int @default(0)
+  loveCount    Int @default(0)
+
+  updatedAt DateTime @updatedAt
+}
+
+model Rating {
+  postId     String   @db.Uuid
+  userId     String   @db.Uuid
+  totalScore Int      @default(0)
+  totalCount Int      @default(0)
+  updatedAt  DateTime @updatedAt
+
+  @@id([postId, userId]) // 联合主键
+}
+
+/**
+ * =========================
+ * 标签：作用于任意 Post（含 Book）
+ * =========================
+ * TODO 迁移到PostId
+ */
+model Tag {
+  postId String  @id @default(uuid()) @db.Uuid
+  post   Post    @relation("TagForPost", fields: [postId], references: [id], onDelete: Cascade)
+  name   String
+  type   String? // e.g. general / genre / author / system
+
+  posts Post[] @relation("PostTags")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([postId, name, type])
+  @@index([type])
+}
+
+/**
+ * =========================
+ * 说明与迁移提示（非运行字段）
+ * - JSONB/GiN 索引：Prisma schema 不直接声明 GiN，
+ * 请在迁移中加 raw SQL，如：
+ * CREATE INDEX idx_posts_metadata_gin ON "Post" USING GIN(("metadata"));
+ * - 若要 ltree/物化路径，可在迁移里启用扩展并增列，或保留目前索引表实现。
+ * - 典型 metadata 结构（示例）：
+ * REVIEW:   { "rating": 4.5, "title": "短评标题" }
+ * QUOTE:    { "text": "...", "fromChapter": 12 }
+ * READLIST: { "coverUrl": "...", "books": ["<bookPostId1>", "<bookPostId2>"] }
+ */
