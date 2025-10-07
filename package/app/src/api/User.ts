@@ -1,17 +1,14 @@
 import { queryOptions } from "@tanstack/react-query";
-import { type ApiError, http } from "./react-query/http.ts";
-import { type OffsetPaginated, type OffsetPaginationParams } from "./types";
+import { http } from "./react-query/http.ts";
+import { 
+  type OffsetPaginated, 
+  type OffsetPaginationParams,
+  type UserDTO,
+  type CreateUserInput,
+  type UpdateUserInput
+} from "contract";
 
-export type UserDTO = {
-  id: string;
-  email?: string;
-  slug?: string;
-  name: string;
-  avatar?: string;
-  bio?: string;
-  joinDate?: string;
-};
-
+// === Query Keys ===
 export const userKeys = {
   all: () => ["user"] as const,
   me: () => [...userKeys.all(), "me"] as const,
@@ -19,16 +16,7 @@ export const userKeys = {
   detail: (id: string) => [...userKeys.all(), "detail", id] as const,
 };
 
-export type CreateUserInput = {
-  email: string;
-  password: string;
-  name: string;
-  avatar?: string;
-  bio?: string;
-};
-
-export type UpdateUserInput = Partial<Omit<CreateUserInput, "password">> & { password?: string };
-
+// === Helper ===
 const buildPageQuery = (params?: OffsetPaginationParams) => {
   const q = new URLSearchParams();
   if (params?.offset != null) q.set("offset", String(params.offset));
@@ -37,29 +25,36 @@ const buildPageQuery = (params?: OffsetPaginationParams) => {
   return s ? `?${s}` : "";
 };
 
+// === API ===
 export const userApi = {
-  list: (params?: OffsetPaginationParams) => http<OffsetPaginated<UserDTO>>(`/users${buildPageQuery(params)}`),
-  get: (id: string) => http<UserDTO>(`/users/${id}`),
-  me: () => http<UserDTO>(`/users/me`),
-  create: (input: CreateUserInput) => http<UserDTO>(`/users`, { method: "POST", body: JSON.stringify(input) }),
+  list: (params?: OffsetPaginationParams) => 
+    http<OffsetPaginated<UserDTO>>(`/users${buildPageQuery(params)}`),
+  get: (id: string) => 
+    http<UserDTO>(`/users/${id}`),
+  me: () => 
+    http<UserDTO>(`/users/me`),
+  create: (input: CreateUserInput) => 
+    http<UserDTO>(`/users`, { method: "POST", body: JSON.stringify(input) }),
   update: (id: string, input: UpdateUserInput) =>
     http<UserDTO>(`/users/${id}`, { method: "PATCH", body: JSON.stringify(input) }),
-  remove: (id: string) => http<void>(`/users/${id}`, { method: "DELETE" }),
+  remove: (id: string) => 
+    http<void>(`/users/${id}`, { method: "DELETE" }),
 };
 
+// === Queries ===
 export const userQueries = {
   me: () =>
-    queryOptions<UserDTO, ApiError, UserDTO, ReturnType<typeof userKeys.me>>({
+    queryOptions({
       queryKey: userKeys.me(),
       queryFn: () => userApi.me(),
     }),
   list: (offset?: number, limit?: number) =>
-    queryOptions<OffsetPaginated<UserDTO>, ApiError, OffsetPaginated<UserDTO>, ReturnType<typeof userKeys.list>>({
+    queryOptions({
       queryKey: userKeys.list(offset, limit),
       queryFn: () => userApi.list({ offset, limit }),
     }),
   byId: (id: string) =>
-    queryOptions<UserDTO, ApiError, UserDTO, ReturnType<typeof userKeys.detail>>({
+    queryOptions({
       queryKey: userKeys.detail(id),
       queryFn: () => userApi.get(id),
     }),
