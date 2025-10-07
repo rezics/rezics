@@ -20,8 +20,8 @@ import { routeStore } from "@/global/routeStore.ts";
 import { scroll, startThrottledScroll } from "@/util/ScrollUtil.ts";
 import { useScrollRestore } from "@/util/useScrollRestore.ts";
 
-import type { BookDetail } from "@/api/Book.ts";
-import { bookQueries } from "@/api/Book.ts";
+import type { BookDetail } from "@/api/book/Book";
+import { bookQueries } from "@/api/book/Book";
 import { useQuery } from "@tanstack/react-query";
 
 type TabValue = "0" | "1" | "2";

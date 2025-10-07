@@ -8,12 +8,11 @@ export type PublicUser = {
 };
 
 export type BookDTO = {
-  id: string;
+  postId: string;
   title: string;
   authors?: PublicUser[];
   coverUrl?: string;
   isbn?: string;
-  description?: string;
   chaptersIndex?: string;
   extra?: Record<string, unknown> | null;
   userId?: string;
@@ -23,7 +22,7 @@ export type BookDTO = {
 };
 
 export type CreateBookInput = {
-  userId?: string;
+  userId: string;
   title: string;
   authorIds?: string[];
   coverUrl?: string;
@@ -32,4 +31,30 @@ export type CreateBookInput = {
   extra?: Record<string, unknown> | null;
 };
 
-export type UpdateBookInput = Partial<CreateBookInput>;
+export type UpdateBookInput = {
+  title?: string;
+  authorIds?: string[];
+  coverUrl?: string;
+  isbn?: string;
+  chaptersIndex?: string | null;
+  extra?: Record<string, unknown> | null;
+};
+
+export type BookListResponse = {
+  books: BookDTO[];
+  total?: number;
+};
+
+export type BookResponse = BookDTO;
+
+export type BookSearchParams = {
+  q?: string;
+  tag?: string;
+  tags?: string;
+  authorId?: string;
+  authorIds?: string;
+  userId?: string;
+  isbn?: string;
+  page?: number;
+  limit?: number;
+};
