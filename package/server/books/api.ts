@@ -1,9 +1,8 @@
 import {api, Query} from 'encore.dev/api';
 import type { BookListResponse, BookResponse, CreateBookInput, UpdateBookInput, PublicUser } from 'contract';
 import {prisma} from '../database-main/client';
-import type {Book, User, Post} from '../database-main/types/prisma';
-import type {Prisma} from '../database-main/prisma/generated/client';
-import {PostStatus, PostType} from '../database-main/types/prisma';
+import type {Book, User, Post, Prisma} from '../database-main/client';
+import {PostStatus, PostType} from '../database-main/client';
 
 type BookCreateRequest = Required<Pick<CreateBookInput, 'userId' | 'title'>> & Omit<CreateBookInput, 'title' | 'userId'>;
 type BookUpdateRequest = UpdateBookInput;
