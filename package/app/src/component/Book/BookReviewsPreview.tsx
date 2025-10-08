@@ -4,7 +4,7 @@ import { AccentBarWithTextShow } from "../Common/AccentBar.tsx";
 import { ArrowForwardIconContainer } from "../Common/ArrowForwardIcon.tsx";
 import { ReviewList } from "../Review/ReviewList.tsx";
 
-import { reviewQueries } from "@/api/Review.ts";
+import { reviewQueries } from "@/api/review.ts";
 import { useQuery } from "@tanstack/react-query";
 interface BookReviewsProps {
   bookId: string;

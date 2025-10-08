@@ -24,10 +24,10 @@ export type {
 } from './Book.types';
 
 // Query Keys
-export {bookKeys} from './book/Book.keys';
+export {bookKeys} from './book/book.keys';
 
 // API Client
-export {bookApi} from './book/Book.api';
+export {bookApi} from './book/book.api';
 
 // Query Configurations
 export {
@@ -39,7 +39,7 @@ export {
   booksByAuthorQuery,
   bookByIsbnQuery,
   bookInfiniteListQuery,
-} from './book/Book.queries';
+} from './book/book.queries';
 
 // Mutation Hooks
 export {
@@ -47,4 +47,4 @@ export {
   useCreateBookMutation,
   useUpdateBookMutation,
   useDeleteBookMutation,
-} from './book/Book.mutations';
+} from './book/book.mutations';

@@ -3,8 +3,8 @@
  */
 
 import {useMutation, useQueryClient, type UseMutationOptions} from '@tanstack/react-query';
-import {bookApi} from './Book.api';
-import {bookKeys} from './Book.keys';
+import {bookApi} from './book.api';
+import {bookKeys} from './book.keys';
 import type {CreateBookInput, UpdateBookInput, BookResponse} from 'contract';
 
 /**

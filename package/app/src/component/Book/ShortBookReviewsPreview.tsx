@@ -1,4 +1,4 @@
-import { reviewQueries } from "@/api/Review.ts";
+import { reviewQueries } from "@/api/review.ts";
 import { useQuery } from "@tanstack/react-query";
 import React, { useEffect, useState } from "react";
 import { ShortReviewListShow } from "../Review/ShortReviewList.tsx";

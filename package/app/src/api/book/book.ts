@@ -21,13 +21,13 @@ export type {
   BookFilters,
   BookSortOption,
   BookView,
-} from './Book.types';
+} from './book.types';
 
 // Query Keys
-export {bookKeys} from './Book.keys';
+export {bookKeys} from './book.keys';
 
 // API Client
-export {bookApi} from './Book.api';
+export {bookApi} from './book.api';
 
 // Query Configurations
 export {
@@ -39,7 +39,7 @@ export {
   booksByAuthorQuery,
   bookByIsbnQuery,
   bookInfiniteListQuery,
-} from './Book.queries';
+} from './book.queries';
 
 // Mutation Hooks
 export {
@@ -47,4 +47,4 @@ export {
   useCreateBookMutation,
   useUpdateBookMutation,
   useDeleteBookMutation,
-} from './Book.mutations';
+} from './book.mutations';

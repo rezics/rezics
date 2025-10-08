@@ -7,7 +7,7 @@ import React, { useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams } from "wouter";
 
-import { readlistQueries } from "@/api/readlist.ts";
+import { readlistQueries } from "@/api/readlist";
 import { useQuery } from "@tanstack/react-query";
 
 export const ReadListPage: React.FC = () => {

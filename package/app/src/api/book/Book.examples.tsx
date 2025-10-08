@@ -13,7 +13,7 @@ import {
   useDeleteBookMutation,
   type CreateBookInput,
   type UpdateBookInput,
-} from '../Book';
+} from '../book';
 
 /**
  * Example 1: Basic book list
@@ -339,4 +339,4 @@ function BookCard({book}: {book: any}) {
 // React import (for examples)
 import * as React from 'react';
 import {useQueryClient} from '@tanstack/react-query';
-import {bookKeys} from './Book.keys';
+import {bookKeys} from './book.keys';

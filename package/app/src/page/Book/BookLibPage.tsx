@@ -11,7 +11,7 @@ import { BookListViewContainer } from "@component/BookLib/BookListView.tsx";
 
 import React from "react";
 
-import { bookQueries } from "@/api/book/Book";
+import { bookQueries } from "@/api/book/book";
 import { useQuery } from "@tanstack/react-query";
 
 function buildQuery(info: SearchInfo): string {

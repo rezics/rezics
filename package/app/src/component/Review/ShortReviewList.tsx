@@ -1,4 +1,4 @@
-import type { ReviewDTO } from "@/api/Review.ts";
+import type { ReviewDTO } from "@/api/review";
 import { Stack } from "@mui/material";
 import React from "react";
 import { SingleShortBookReview } from "./SingleShortBookReview";

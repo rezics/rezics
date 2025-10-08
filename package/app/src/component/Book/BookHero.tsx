@@ -1,7 +1,7 @@
 import { Box, Chip, Container as MuiContainer, Grid, Rating, Stack, Typography } from "@mui/material";
 import React from "react";
 
-import type { BookDetail } from "@/api/book/Book";
+import type { BookDetail } from "@/api/book/book";
 
 export const BookHeroShow: React.FC<{ bookInfo: BookDetail; tags: string[]; rating: number }> = (
   { bookInfo, tags, rating },

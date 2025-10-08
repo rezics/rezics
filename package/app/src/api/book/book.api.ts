@@ -9,7 +9,7 @@ import type {
   BookListResponse,
   BookResponse,
 } from 'contract';
-import type {BookFilters} from './Book.types';
+import type {BookFilters} from './book.types';
 
 /**
  * Build query string from filters

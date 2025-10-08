@@ -3,7 +3,7 @@
  * Following TanStack Query best practices for key management
  */
 
-import type {BookFilters} from './Book.types';
+import type {BookFilters} from './book.types';
 
 export const bookKeys = {
   /**

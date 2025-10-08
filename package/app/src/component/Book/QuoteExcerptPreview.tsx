@@ -2,7 +2,7 @@ import { isEmptyValue } from "@/util/dataCheck.ts";
 import React from "react";
 import { QuoteExcerptList } from "../Review/QuoteExcerptList.tsx";
 
-import { reviewApi, reviewQueries } from "@/api/Review.ts";
+import { reviewApi, reviewQueries } from "@/api/review.ts";
 import { useQuery } from "@tanstack/react-query";
 
 interface QuoteExcerpt {
