@@ -1,4 +1,5 @@
 {
+  // "typescript.experimental.useTsgo": true,
   "cSpell.words": [
     "backpressure",
     "booklist",

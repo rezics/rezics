@@ -1,9 +1,12 @@
-import { UseTag } from "@/component/Tag/useTag.tsx";
+import {UseTag} from '@/component/Tag/useTag.tsx';
+
+import {BookExamples} from '@/api/book/Book.examples.tsx';
 
 export function TestPage03() {
   return (
     <div>
-      <UseTag />
+      {/* <UseTag /> */}
+      <BookExamples />
     </div>
   );
 }

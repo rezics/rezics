@@ -20,15 +20,14 @@ import { routeStore } from "@/global/routeStore.ts";
 import { scroll, startThrottledScroll } from "@/util/ScrollUtil.ts";
 import { useScrollRestore } from "@/util/useScrollRestore.ts";
 
-import type { BookDetail } from "@/api/book/book";
 import { bookQueries } from "@/api/book/book";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 
 type TabValue = "0" | "1" | "2";
 
 type ShowProps = {
   ref?: React.Ref<unknown>;
-  bookInfo: BookDetail;
+  bookInfo: any; // TODO import book type from contract
   tags: string[];
   rating: number;
   activeTab: string;
@@ -208,7 +207,8 @@ export const BookPageContainer: React.FC<ContainerProps> = ({ bookId }) => {
 
   // ANCHOR Data Fetching
   const book: any = useBookPageStore((s) => s.books[bookId]);
-  const { data, isLoading, error } = useQuery(bookQueries.byId(bookId));
+  // const { data, isLoading, error } = useQuery(bookQueries.byId(bookId));
+  const {data, isLoading, error} = useSuspenseQuery(bookQueries.detail(bookId));
   const rating = 8.5, tags = ["完本", "奇幻", "320万字"];
 
   useEffect(() => {
@@ -221,10 +221,6 @@ export const BookPageContainer: React.FC<ContainerProps> = ({ bookId }) => {
 
   if (error) {
     return <div>Oh no... {String(error)}</div>;
-  }
-
-  if (!book?.id) {
-    return null; // 或者 return <div>No data</div>;
   }
 
   return (

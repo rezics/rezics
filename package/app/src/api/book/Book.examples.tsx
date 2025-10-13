@@ -1,11 +1,15 @@
 /**
  * Frontend Book API Usage Examples
- * 
+ *
  * This file demonstrates how to use the refactored Book API
  * in React components using TanStack Query.
  */
 
-import {useQuery, useSuspenseQuery, useInfiniteQuery} from '@tanstack/react-query';
+import {
+  useQuery,
+  useSuspenseQuery,
+  useInfiniteQuery,
+} from '@tanstack/react-query';
 import {
   bookQueries,
   useCreateBookMutation,
@@ -16,7 +20,7 @@ import {
 } from '../book';
 
 /**
- * Example 1: Basic book list
+ * ANCHOR Example 1: Basic book list
  */
 export function BookListExample() {
   const {data, isLoading, error} = useQuery(bookQueries.list());
@@ -38,15 +42,15 @@ export function BookListExample() {
 }
 
 /**
- * Example 2: Filtered book list
+ * ANCHOR Example 2: Filtered book list
  */
 export function FilteredBookListExample() {
   const {data} = useQuery(
     bookQueries.list({
       page: 1,
       limit: 20,
-      tags: 'fiction,scifi',
-      q: 'space',
+      // tags: 'fiction,scifi',
+      q: 'Vorago',
     }),
   );
 
@@ -60,7 +64,7 @@ export function FilteredBookListExample() {
 }
 
 /**
- * Example 3: Single book detail with Suspense
+ * ANCHOR Example 3: Single book detail with Suspense
  */
 export function BookDetailExample({postId}: {postId: string}) {
   const {data: book} = useSuspenseQuery(bookQueries.detail(postId));
@@ -82,7 +86,7 @@ export function BookDetailExample({postId}: {postId: string}) {
 }
 
 /**
- * Example 4: Search books
+ * ANCHOR Example 4: Search books
  */
 export function BookSearchExample() {
   const [searchQuery, setSearchQuery] = React.useState('');
@@ -108,7 +112,7 @@ export function BookSearchExample() {
 }
 
 /**
- * Example 5: Create a book
+ * ANCHOR Example 5: Create a book
  */
 export function CreateBookExample() {
   const createBook = useCreateBookMutation({
@@ -149,7 +153,7 @@ export function CreateBookExample() {
 }
 
 /**
- * Example 6: Update a book
+ * ANCHOR Example 6: Update a book
  */
 export function UpdateBookExample({postId}: {postId: string}) {
   const {data: book} = useQuery(bookQueries.detail(postId));
@@ -175,7 +179,7 @@ export function UpdateBookExample({postId}: {postId: string}) {
 }
 
 /**
- * Example 7: Delete a book
+ * ANCHOR Example 7: Delete a book
  */
 export function DeleteBookExample({postId}: {postId: string}) {
   const deleteBook = useDeleteBookMutation({
@@ -199,16 +203,11 @@ export function DeleteBookExample({postId}: {postId: string}) {
 }
 
 /**
- * Example 8: Infinite scroll
+ * ANCHOR Example 8: Infinite scroll
  */
 export function InfiniteBookListExample() {
-  const {
-    data,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-    isLoading,
-  } = useInfiniteQuery(bookQueries.infiniteList({limit: 20}));
+  const {data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading} =
+    useInfiniteQuery(bookQueries.infiniteList({limit: 20}));
 
   if (isLoading) return <div>Loading...</div>;
 
@@ -232,13 +231,14 @@ export function InfiniteBookListExample() {
 }
 
 /**
- * Example 9: Books by user
+ * ANCHOR Example 9: Books by user
  */
 export function UserBooksExample({userId}: {userId: string}) {
   const {data} = useQuery(bookQueries.byUser(userId));
 
   return (
     <div>
+      {/* eslint-disable-next-line react/no-unescaped-entities */}
       <h2>User's Books</h2>
       {data?.books.map(book => (
         <div key={book.postId}>{book.title}</div>
@@ -248,7 +248,7 @@ export function UserBooksExample({userId}: {userId: string}) {
 }
 
 /**
- * Example 10: Books by author
+ * ANCHOR Example 10: Books by author
  */
 export function AuthorBooksExample({authorId}: {authorId: string}) {
   const {data} = useQuery(bookQueries.byAuthor(authorId));
@@ -264,7 +264,7 @@ export function AuthorBooksExample({authorId}: {authorId: string}) {
 }
 
 /**
- * Example 11: ISBN lookup
+ * ANCHOR Example 11: ISBN lookup
  */
 export function IsbnLookupExample() {
   const [isbn, setIsbn] = React.useState('');
@@ -289,7 +289,7 @@ export function IsbnLookupExample() {
 }
 
 /**
- * Example 12: Optimistic update
+ * ANCHOR Example 12: Optimistic update
  */
 export function OptimisticUpdateExample({postId}: {postId: string}) {
   const queryClient = useQueryClient();
@@ -310,7 +310,7 @@ export function OptimisticUpdateExample({postId}: {postId: string}) {
 
       return {previousBook};
     },
-    onError: (err, variables, context) => {
+    onError: (err, variables, context: any) => {
       // Rollback on error
       if (context?.previousBook) {
         queryClient.setQueryData(
@@ -340,3 +340,33 @@ function BookCard({book}: {book: any}) {
 import * as React from 'react';
 import {useQueryClient} from '@tanstack/react-query';
 import {bookKeys} from './book.keys';
+import {Divider, Chip} from '@mui/material';
+
+function ExampleChipDivider() {
+  return (
+    <Divider>
+      <Chip label="Chip" size="small" />
+    </Divider>
+  );
+}
+
+/** Main component to showcase all examples
+ * ANCHOR All Examples
+ */
+export function BookExamples() {
+  return (
+    <div>
+      <h1>Book API Examples</h1>
+      <BookListExample />
+      <ExampleChipDivider />
+      <FilteredBookListExample />
+      <ExampleChipDivider />
+      <BookDetailExample postId="8e3c577b-64cf-41a3-82bb-c3371f41378c" />
+      <ExampleChipDivider />
+      <BookSearchExample />
+      <ExampleChipDivider />
+      <CreateBookExample />
+      <div className='mt-100'/>
+    </div>
+  );
+}

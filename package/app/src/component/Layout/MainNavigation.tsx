@@ -40,7 +40,7 @@ export const NAVIGATION = (): NavigationItem[] => [
     children: [
       {
         kind: "item",
-        segment: "/book/1",
+        segment: "/book/8e3c577b-64cf-41a3-82bb-c3371f41378c",
         title: "Book 1",
         icon: <BookmarkBorderIcon />,
       },
