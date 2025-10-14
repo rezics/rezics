@@ -30,5 +30,6 @@ export function mapBookToDTO(book: BookWithRelations): BookDTO {
     user: sanitizeUser(book.post.user),
     createdAt: book.createdAt,
     updatedAt: book.updatedAt,
+    description: book.description || undefined,
   };
 }

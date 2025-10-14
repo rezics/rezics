@@ -8,6 +8,8 @@ import {
 
 import {faker} from '@faker-js/faker';
 
+import {getRandomBookCover} from './seed/data.js';
+
 // ------------------------------
 // Configuration
 // ------------------------------
@@ -283,10 +285,11 @@ async function seedBooks(
           connect: pickN(users, randomInt(1, 3)).map(u => ({id: u.id})),
         },
         coverUrl: randomBoolean(0.8)
-          ? faker.image.url({width: 300, height: 420})
+          ? getRandomBookCover()
           : null,
         isbn: randomBoolean(0.8) ? faker.commerce.isbn() : null,
         chaptersIndex: generateChapters(),
+        description: generateParagraph(1, 2),
         extra: generateBookExtra(),
       },
     });
@@ -402,7 +405,7 @@ async function seedComments(
         type: PostType.COMMENT,
         status: PostStatus.ACTIVE,
         title: null,
-        content: generateParagraph(1, 2),
+        content: generateParagraph(2, 5),
         metadata: {},
         targetPostId: null,
         publishedAt: faker.date.past({years: 1}),

@@ -140,6 +140,7 @@ model Book {
 
   title         String
   authors       User[] // User[]，作者列表，所有作者都会被注册为用户
+  description   String?
   coverUrl      String?
   isbn          String?
   chaptersIndex String? // 章节树状信息, 章节信息类似Review,统一使用

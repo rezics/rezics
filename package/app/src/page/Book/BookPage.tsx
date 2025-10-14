@@ -45,6 +45,7 @@ export const BookPageShow: React.FC<ShowProps> = ({
   activeTab,
   onTabChange,
 }) => {
+  console.log("BookPageShow render", bookInfo);
   return (
     <Box id="book-detail" ref={ref}>
       {/* Book Overview */}
@@ -78,7 +79,7 @@ export const BookPageShow: React.FC<ShowProps> = ({
                     /* ANCHOR Author Info */
                   }
                   <AuthorInfoContainer
-                    author={bookInfo?.authors[0] || {
+                    author={bookInfo?.authors?.[0] || {
                       name: "",
                       description: "",
                     }}
@@ -158,7 +159,7 @@ export const BookPageShow: React.FC<ShowProps> = ({
                     作者：{bookInfo?.authors?.[0]?.name ?? ""}
                   </Typography>
                   <Typography variant="body2">
-                    出版社：{bookInfo?.extra?.publishers?.[0]?.name ?? ""}
+                    出版社：{bookInfo?.extra?.publisher ?? ""}
                   </Typography>
                   <Typography variant="body2">
                     出版日期：
@@ -208,7 +209,7 @@ export const BookPageContainer: React.FC<ContainerProps> = ({ bookId }) => {
   // ANCHOR Data Fetching
   const book: any = useBookPageStore((s) => s.books[bookId]);
   // const { data, isLoading, error } = useQuery(bookQueries.byId(bookId));
-  const {data, isLoading, error} = useSuspenseQuery(bookQueries.detail(bookId));
+  const {data, isLoading, error} = useQuery(bookQueries.detail(bookId));
   const rating = 8.5, tags = ["完本", "奇幻", "320万字"];
 
   useEffect(() => {

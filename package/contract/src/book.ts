@@ -17,6 +17,7 @@ export type BookDTO = {
   extra?: Record<string, unknown> | null;
   userId?: string;
   user?: PublicUser;
+  description?: string;
   createdAt?: string | Date;
   updatedAt?: string | Date;
 };

@@ -68,7 +68,7 @@ export const BookHeroShow: React.FC<{ bookInfo: BookDetail; tags: string[]; rati
                     </Typography>
                     <Typography>
                       出版社：
-                      {bookInfo?.extra?.publishers?.[0]?.name}
+                      {bookInfo?.extra?.publisher}
                     </Typography>
                     <Typography>
                       出版日期：{bookInfo?.extra?.publishDate ?? ""}
