@@ -97,6 +97,7 @@ export const update = api(
       isbn: req.isbn,
       chaptersIndex: req.chaptersIndex,
       extra: req.extra,
+      description: req.description,
     };
 
     const book = await bookService.update(postId, bookReq);

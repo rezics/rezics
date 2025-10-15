@@ -28,6 +28,7 @@ export type BookUpdateRequest = {
   isbn?: string;
   chaptersIndex?: string | null;
   extra?: Record<string, unknown> | null;
+  description?: string;
 };
 
 /**

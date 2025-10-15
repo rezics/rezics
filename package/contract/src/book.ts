@@ -43,6 +43,7 @@ export type UpdateBookInput = {
   isbn?: string;
   chaptersIndex?: string | null;
   extra?: Record<string, unknown> | null;
+  description?: string;
 };
 
 export type BookListResponse = {

@@ -1,8 +1,8 @@
-import { AccentBarWithTextShow } from "@component/Common/AccentBar.tsx";
-import { EditButtonFloatRight } from "@component/Common/EditButtonFloatRight.tsx";
-import { Box, Button, Typography } from "@mui/material";
-import React from "react";
-import { useTranslation } from "react-i18next";
+import {AccentBarWithTextShow} from '@component/Common/AccentBar.tsx';
+import {EditButtonFloatRight} from '@component/Common/EditButtonFloatRight.tsx';
+import {Box, Button, Typography} from '@mui/material';
+import React from 'react';
+import {useTranslation} from 'react-i18next';
 
 export type BookDescriptionShowProps = {
   description: string;
@@ -20,18 +20,18 @@ export const BookDescriptionShow: React.FC<BookDescriptionShowProps> = ({
   setEditOpen,
   bookId,
 }) => {
-  let { t } = useTranslation();
+  let {t} = useTranslation();
   return (
     <div>
       <Box>
         <div className="flex mb-4">
-          <AccentBarWithTextShow text={t("book.description")} />{" "}
+          <AccentBarWithTextShow text={t('book.description')} />{' '}
           {showEditButton && <EditButtonFloatRight.Show onClick={onEdit} />}
-        </div>{" "}
+        </div>{' '}
         <Typography variant="body1" className="whitespace-pre-line">
           {description}
         </Typography>
-      </Box>{" "}
+      </Box>{' '}
       <BookDescriptionEditContainer
         description={description}
         editOpen={editOpen ?? false}
@@ -48,7 +48,7 @@ export type BookDescriptionContainerProps = {
 };
 export const BookDescriptionContainer: React.FC<
   BookDescriptionContainerProps
-> = ({ description, bookId }) => {
+> = ({description, bookId}) => {
   const [editOpen, setEditOpen] = useState(false);
   const handleEdit = () => {
     setEditOpen(true);
@@ -64,7 +64,7 @@ export const BookDescriptionContainer: React.FC<
   );
 };
 
-import EasyEditor from "@component/Form/EasyEditor.tsx";
+import EasyEditor from '@component/Form/EasyEditor.tsx';
 export type BookDescriptionEditShowProps = {
   description: string;
   onUpdate: (description: string) => void;
@@ -75,7 +75,7 @@ export type BookDescriptionEditShowProps = {
 
 export const BookDescriptionEditShow: React.FC<
   BookDescriptionEditShowProps
-> = ({ onUpdate, setEditOpen, descriptionState, setDescriptionState }) => {
+> = ({onUpdate, setEditOpen, descriptionState, setDescriptionState}) => {
   const handleUpdate = () => {
     onUpdate(descriptionState);
     setEditOpen(false);
@@ -83,10 +83,7 @@ export const BookDescriptionEditShow: React.FC<
 
   return (
     <div>
-      <EasyEditor
-        value={descriptionState}
-        onChange={setDescriptionState}
-      />
+      <EasyEditor value={descriptionState} onChange={setDescriptionState} />
       <div className="w-full">
         <div className="w-1/2 float-right">
           <Button onClick={handleUpdate} className="w-full">
@@ -98,44 +95,38 @@ export const BookDescriptionEditShow: React.FC<
   );
 };
 
-import { safeRpcPost } from "@/api/swr-query/rq.ts";
-import { useBookPageStore } from "@/global/page/bookPageStore.ts";
-import type { Book } from "contract";
-import { useEffect, useState } from "react";
-import DialogContainer from "../Common/DialogContainer.tsx";
+import {useBookPageStore} from '@/global/page/bookPageStore.ts';
+import {useEffect, useState} from 'react';
+import DialogContainer from '../Common/DialogContainer.tsx';
+
+import type {UpdateBookInput} from 'contract';
+import {useUpdateBookMutation} from '@/api/book/book.mutations';
 
 export type BookDescriptionEditContainerProps = {
   description: string;
   editOpen: boolean;
   setEditOpen: (open: boolean) => void;
-  mode?: "modal" | "inline";
+  mode?: 'modal' | 'inline';
   bookId: string;
 };
 
 export const BookDescriptionEditContainer: React.FC<
   BookDescriptionEditContainerProps
-> = ({ description, editOpen, setEditOpen, mode = "inline", bookId }) => {
+> = ({description, editOpen, setEditOpen, mode = 'inline', bookId}) => {
   const [descriptionState, setDescriptionState] = useState(description);
 
   useEffect(() => {
     setDescriptionState(description);
   }, [description]);
 
-  const onUpdate = async (newDesc: string) => {
-    const updateBookInput = {
-      operation: "book.update",
-      parameter: { id: bookId, description: newDesc },
-      select: {
-        id: true,
-        description: true,
-      },
-    } satisfies Book.Input.Update;
+  const updateBook = useUpdateBookMutation();
 
-    const result = await safeRpcPost(updateBookInput);
-    if (result === "error") {
-      console.error("update book description error", result);
-      return;
-    }
+  const onUpdate = async (newDesc: string) => {
+    const updates: UpdateBookInput = {
+      description: newDesc,
+    };
+
+    updateBook.mutate({postId: bookId, input: updates});
 
     useBookPageStore.getState().updateBook(bookId, {
       description: newDesc,
@@ -152,7 +143,7 @@ export const BookDescriptionEditContainer: React.FC<
     />
   );
 
-  if (mode === "modal") {
+  if (mode === 'modal') {
     return (
       <DialogContainer
         open={editOpen}

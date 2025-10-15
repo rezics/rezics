@@ -47,7 +47,7 @@ export function BookListExample() {
 export function FilteredBookListExample() {
   const {data} = useQuery(
     bookQueries.list({
-      page: 1,
+      start: 1,
       limit: 20,
       // tags: 'fiction,scifi',
       q: 'Vorago',
@@ -366,7 +366,7 @@ export function BookExamples() {
       <BookSearchExample />
       <ExampleChipDivider />
       <CreateBookExample />
-      <div className='mt-100'/>
+      <div className="mt-100" />
     </div>
   );
 }

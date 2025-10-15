@@ -168,7 +168,15 @@ export class BookService {
   ): Promise<BookWithRelations> {
     validateUpdateBook(req);
 
-    const {title, authorIds, coverUrl, isbn, chaptersIndex, extra} = req;
+    const {
+      title,
+      authorIds,
+      coverUrl,
+      isbn,
+      chaptersIndex,
+      extra,
+      description,
+    } = req;
 
     const book = await prisma.book.update({
       where: {postId},
@@ -180,6 +188,7 @@ export class BookService {
         coverUrl: coverUrl || undefined,
         isbn: isbn || undefined,
         chaptersIndex: chaptersIndex || undefined,
+        description: description || undefined,
         extra: (extra ?? undefined) as Prisma.InputJsonValue | undefined,
         post: {
           update: {
