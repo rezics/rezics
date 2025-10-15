@@ -9,6 +9,7 @@
     "Evaluable",
     "icsid",
     "libphonenumber",
+    "ltree",
     "pgcrypto",
     "pnpx",
     "qidian",
@@ -26,12 +27,18 @@
   "i18n-ally.enabledParsers": ["js", "ts", "json"],
   "i18n-ally.enabledFrameworks": ["react-i18next"],
   "i18n-ally.keystyle": "nested",
-  "gel.project-dir": "package/database",
   "files.exclude": {
     "package/database/dbschema/migrations": true
   },
   "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSave": true,
   "[json]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[prisma]": {
+    "editor.defaultFormatter": "Prisma.prisma-insider"
   }
 }

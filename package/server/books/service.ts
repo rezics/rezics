@@ -129,7 +129,8 @@ export class BookService {
   async create(req: BookCreateRequest): Promise<BookWithRelations> {
     validateCreateBook(req);
 
-    const {userId, title, authorIds, coverUrl, isbn, chaptersIndex, extra} = req;
+    const {userId, title, authorIds, coverUrl, isbn, chaptersIndex, extra} =
+      req;
 
     const book = await prisma.book.create({
       data: {

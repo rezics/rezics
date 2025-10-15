@@ -1,33 +1,37 @@
-import { BookReviews } from "@/component/Book/BookReviewsPreview.tsx";
-import { BookTagView } from "@/component/Book/BookTagPreview.tsx";
-import { ShortBookReviews } from "@/component/Book/ShortBookReviewsPreview.tsx";
-import { AccentBarWithTextContainer } from "@component/Common/AccentBar.tsx";
-import { TabContext, TabList, TabPanel } from "@mui/lab";
-import { Box, Divider, Grid, Paper, Stack, Tab, Typography } from "@mui/material";
-import React, { useEffect, useRef } from "react";
-import { useLocation } from "wouter";
+import {BookReviews} from '@/component/Book/BookReviewsPreview.tsx';
+import {BookTagView} from '@/component/Book/BookTagPreview.tsx';
+import {ShortBookReviews} from '@/component/Book/ShortBookReviewsPreview.tsx';
+import {AccentBarWithTextContainer} from '@component/Common/AccentBar.tsx';
+import {TabContext, TabList, TabPanel} from '@mui/lab';
+import {Box, Divider, Grid, Paper, Stack, Tab, Typography} from '@mui/material';
+import React, {useEffect, useRef} from 'react';
+import {useLocation} from 'wouter';
 
-import { AuthorInfoContainer } from "@/component/Book/AuthorInfo.tsx";
-import { BookDescriptionContainer } from "@/component/Book/BookDescription.tsx";
-import { QuoteExcerptPreviewContainer } from "@/component/Book/QuoteExcerptPreview.tsx";
-import { ReadlistByBookPreview } from "@/component/Book/ReadlistByBookPreview.tsx";
-import { ArrowForwardIconContainer } from "@/component/Common/ArrowForwardIcon.tsx";
-import { BookHeroContainer } from "@component/Book/BookHero.tsx";
-import { ChapterListContainer } from "@component/Book/ChapterList.tsx";
+import {AuthorInfoContainer} from '@/component/Book/AuthorInfo.tsx';
+import {BookDescriptionContainer} from '@/component/Book/BookDescription.tsx';
+import {QuoteExcerptPreviewContainer} from '@/component/Book/QuoteExcerptPreview.tsx';
+import {ReadlistByBookPreview} from '@/component/Book/ReadlistByBookPreview.tsx';
+import {ArrowForwardIconContainer} from '@/component/Common/ArrowForwardIcon.tsx';
+import {BookHeroContainer} from '@component/Book/BookHero.tsx';
+import {ChapterListContainer} from '@component/Book/ChapterList.tsx';
 
-import { useBookPageStore } from "@/global/page/bookPageStore.ts";
-import { routeStore } from "@/global/routeStore.ts";
-import { scroll, startThrottledScroll } from "@/util/ScrollUtil.ts";
-import { useScrollRestore } from "@/util/useScrollRestore.ts";
+import {useBookPageStore} from '@/global/page/bookPageStore.ts';
+import {routeStore} from '@/global/routeStore.ts';
+import {scroll, startThrottledScroll} from '@/util/ScrollUtil.ts';
+import {useScrollRestore} from '@/util/useScrollRestore.ts';
 
-import { bookQueries } from "@/api/book/book";
-import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
+import {bookQueries} from '@/api/book/book';
+import {useQuery, useSuspenseQuery} from '@tanstack/react-query';
 
-type TabValue = "0" | "1" | "2";
+import type {BookDTO} from 'contract';
+
+type Book = BookDTO;
+
+type TabValue = '0' | '1' | '2';
 
 type ShowProps = {
   ref?: React.Ref<unknown>;
-  bookInfo: any; // TODO import book type from contract
+  bookInfo: Book;
   tags: string[];
   rating: number;
   activeTab: string;
@@ -45,7 +49,7 @@ export const BookPageShow: React.FC<ShowProps> = ({
   activeTab,
   onTabChange,
 }) => {
-  console.log("BookPageShow render", bookInfo);
+  console.log('BookPageShow render', bookInfo);
   return (
     <Box id="book-detail" ref={ref}>
       {/* Book Overview */}
@@ -55,7 +59,7 @@ export const BookPageShow: React.FC<ShowProps> = ({
       <Box maxWidth="lg" className="mt-4 mb-8 mx-auto">
         <Grid container spacing={4}>
           {/* Main Content */}
-          <Grid size={{ xs: 12, lg: 9 }}>
+          <Grid size={{xs: 12, lg: 9}}>
             <TabContext value={activeTab}>
               <TabList onChange={onTabChange}>
                 <Tab label="基本信息" value="0" />
@@ -66,23 +70,23 @@ export const BookPageShow: React.FC<ShowProps> = ({
                 <Stack spacing={4}>
                   {/* ANCHOR Description */}
                   <BookDescriptionContainer
-                    description={bookInfo?.description || ""}
-                    bookId={bookInfo?.id || ""}
+                    description={bookInfo?.description || ''}
+                    bookId={bookInfo?.postId || ''}
                   />
                   <Divider />
 
                   {/* ANCHOR Tags */}
-                  <BookTagView.Container bookId={bookInfo?.id || ""} />
+                  <BookTagView.Container bookId={bookInfo?.postId || ''} />
                   <Divider />
 
-                  {
-                    /* ANCHOR Author Info */
-                  }
+                  {/* ANCHOR Author Info */}
                   <AuthorInfoContainer
-                    author={bookInfo?.authors?.[0] || {
-                      name: "",
-                      description: "",
-                    }}
+                    author={
+                      bookInfo?.authors?.[0] || {
+                        name: '',
+                        description: '',
+                      }
+                    }
                   />
                   <Divider />
 
@@ -92,12 +96,12 @@ export const BookPageShow: React.FC<ShowProps> = ({
                   <div>
                     <ArrowForwardIconContainer
                       size={16}
-                      to={`/quote/book/${bookInfo?.id}`}
+                      to={`/quote/book/${bookInfo?.postId}`}
                     >
                       <AccentBarWithTextContainer text="原文摘录" />
                     </ArrowForwardIconContainer>
                   </div>
-                  <QuoteExcerptPreviewContainer id={bookInfo?.id || ""} />
+                  <QuoteExcerptPreviewContainer id={bookInfo?.postId || ''} />
                   <Divider />
 
                   {/* ANCHOR Short Reviews */}
@@ -105,12 +109,12 @@ export const BookPageShow: React.FC<ShowProps> = ({
                     <div>
                       <ArrowForwardIconContainer
                         size={16}
-                        to={`/review/short/book/${bookInfo?.id}`}
+                        to={`/review/short/book/${bookInfo?.postId}`}
                       >
                         <AccentBarWithTextContainer text="短评" />
                       </ArrowForwardIconContainer>
                     </div>
-                    <ShortBookReviews bookId={bookInfo?.id || ""} />
+                    <ShortBookReviews bookId={bookInfo?.postId || ''} />
                   </Box>
                 </Stack>
               </TabPanel>
@@ -122,14 +126,14 @@ export const BookPageShow: React.FC<ShowProps> = ({
 
                   {/* ANCHOR Book Reviews */}
                   <BookReviews
-                    bookId={bookInfo?.id || ""}
-                    title={bookInfo?.title || ""}
+                    bookId={bookInfo?.postId || ''}
+                    title={bookInfo?.title || ''}
                   />
 
                   {/* ANCHOR Book Lists */}
                   <ReadlistByBookPreview
-                    bookId={bookInfo?.id || ""}
-                    title={bookInfo?.title || ""}
+                    bookId={bookInfo?.postId || ''}
+                    title={bookInfo?.title || ''}
                   />
                 </Stack>
               </TabPanel>
@@ -137,14 +141,14 @@ export const BookPageShow: React.FC<ShowProps> = ({
               <TabPanel value="2">
                 <Stack spacing={4}>
                   {/* ANCHOR Chapter List */}
-                  <ChapterListContainer id={bookInfo?.id || "0"} />
+                  <ChapterListContainer id={bookInfo?.postId || '0'} />
                 </Stack>
               </TabPanel>
             </TabContext>
           </Grid>
 
           {/* ANCHOR Sidebar */}
-          <Grid size={{ xs: 12, lg: 3 }}>
+          <Grid size={{xs: 12, lg: 3}}>
             <Paper className="p-3 mt-4">
               <Divider className="my-4" />
 
@@ -154,20 +158,22 @@ export const BookPageShow: React.FC<ShowProps> = ({
                   书籍信息
                 </Typography>
                 <Stack spacing={1}>
-                  <Typography variant="body2">书名：{bookInfo?.title}</Typography>
                   <Typography variant="body2">
-                    作者：{bookInfo?.authors?.[0]?.name ?? ""}
+                    书名：{bookInfo?.title}
                   </Typography>
                   <Typography variant="body2">
-                    出版社：{bookInfo?.extra?.publisher ?? ""}
+                    作者：{bookInfo?.authors?.[0]?.name ?? ''}
+                  </Typography>
+                  <Typography variant="body2">
+                    出版社：{bookInfo?.extra?.publisher ?? ''}
                   </Typography>
                   <Typography variant="body2">
                     出版日期：
-                    {bookInfo?.extra?.publishDate ?? ""}
+                    {bookInfo?.extra?.publishDate ?? ''}
                     {/* TODO: i18n later */}
                   </Typography>
                   <Typography variant="body2">
-                    ISBN：{bookInfo?.isbn ?? " "}
+                    ISBN：{bookInfo?.isbn ?? ' '}
                     {/* TODO: i18n later */}
                   </Typography>
                 </Stack>
@@ -184,12 +190,12 @@ export type ContainerProps = {
   bookId: string;
 };
 
-export const BookPageContainer: React.FC<ContainerProps> = ({ bookId }) => {
+export const BookPageContainer: React.FC<ContainerProps> = ({bookId}) => {
   const [location] = useLocation();
 
   const getInitialTab = (): TabValue => {
     const routeData = routeStore.getState().getRouteData(String(location));
-    return (routeData?.tab as TabValue) || "0";
+    return (routeData?.tab as TabValue) || '0';
   };
   const [activeTab, setActiveTab] = React.useState<TabValue>(getInitialTab);
 
@@ -201,19 +207,20 @@ export const BookPageContainer: React.FC<ContainerProps> = ({ bookId }) => {
     _: React.SyntheticEvent | null,
     newValue: TabValue,
   ) => {
-    console.log("handleTabChange", newValue);
+    console.log('handleTabChange', newValue);
     tabRef.current = newValue;
     setActiveTab(newValue);
   };
 
   // ANCHOR Data Fetching
-  const book: any = useBookPageStore((s) => s.books[bookId]);
+  const book: any = useBookPageStore(s => s.books[bookId]);
   // const { data, isLoading, error } = useQuery(bookQueries.byId(bookId));
   const {data, isLoading, error} = useQuery(bookQueries.detail(bookId));
-  const rating = 8.5, tags = ["完本", "奇幻", "320万字"];
+  const rating = 8.5,
+    tags = ['完本', '奇幻', '320万字'];
 
   useEffect(() => {
-    useBookPageStore.getState().updateBook(bookId, { ...data });
+    useBookPageStore.getState().updateBook(bookId, {...data});
   }, [data, isLoading, bookId]);
 
   if (isLoading) {

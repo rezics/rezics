@@ -7,6 +7,10 @@ export type PublicUser = {
   description?: string;
 };
 
+/**
+ * The Book type returned by the API
+ * Data Transfer Object (DTO)
+ */
 export type BookDTO = {
   postId: string;
   title: string;
@@ -14,7 +18,7 @@ export type BookDTO = {
   coverUrl?: string;
   isbn?: string;
   chaptersIndex?: string;
-  extra?: Record<string, unknown> | null;
+  extra?: Record<string, unknown> | null | any;
   userId?: string;
   user?: PublicUser;
   description?: string;
@@ -56,6 +60,6 @@ export type BookSearchParams = {
   authorIds?: string;
   userId?: string;
   isbn?: string;
-  page?: number;
+  start?: number;
   limit?: number;
 };

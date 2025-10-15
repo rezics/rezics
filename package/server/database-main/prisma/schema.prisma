@@ -1,12 +1,12 @@
 generator client {
-  provider = "prisma-client"
-  output   = "./generated"
+  provider     = "prisma-client"
+  output       = "./generated"
   moduleFormat = "esm"
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("PRISMA_DATABASE_URL")
+  provider          = "postgresql"
+  url               = env("PRISMA_DATABASE_URL")
   shadowDatabaseUrl = env("PRISMA_SHADOW_DATABASE_URL")
 }
 

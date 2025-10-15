@@ -12,6 +12,13 @@ encore db reset main
 pnpx prisma migrate reset
 ```
 
+## Encore
+
+```sh
+# FTL connection failure
+encore daemon restart
+```
+
 ## Bun 缓存清理
 
 ```powershell

@@ -1,5 +1,10 @@
 import {api, Query} from 'encore.dev/api';
-import type {BookListResponse, BookResponse, CreateBookInput, UpdateBookInput} from 'contract';
+import type {
+  BookListResponse,
+  BookResponse,
+  CreateBookInput,
+  UpdateBookInput,
+} from 'contract';
 import {bookService} from './service';
 import {mapBookToDTO} from './mapper';
 import type {BookCreateRequest, BookUpdateRequest} from './types';
