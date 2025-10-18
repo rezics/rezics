@@ -1,18 +1,18 @@
 /**
  * Book Service Usage Examples
- * 
+ *
  * This file demonstrates how to use the refactored Book service
  * in different scenarios.
  */
 
 import {bookService} from './service';
-import type {BookCreateRequest, BookUpdateRequest} from './types';
+import type {CreateBookInput, UpdateBookInput} from 'contract';
 
 /**
  * Example 1: Create a new book
  */
 export async function exampleCreateBook() {
-  const newBook: BookCreateRequest = {
+  const newBook: CreateBookInput = {
     userId: 'user-123',
     title: 'The Great Gatsby',
     authorIds: ['author-456'],
@@ -47,7 +47,9 @@ export async function exampleListBooks() {
 
   console.log(`Found ${total} books`);
   books.forEach(book => {
-    console.log(`- ${book.title} by ${book.authors.map(a => a.name).join(', ')}`);
+    console.log(
+      `- ${book.title} by ${book.authors.map(a => a.name).join(', ')}`,
+    );
   });
 
   return {books, total};
@@ -70,7 +72,7 @@ export async function exampleGetBook(postId: string) {
  * Example 4: Update a book
  */
 export async function exampleUpdateBook(postId: string) {
-  const updates: BookUpdateRequest = {
+  const updates: UpdateBookInput = {
     title: 'The Great Gatsby (Updated Edition)',
     coverUrl: 'https://example.com/new-cover.jpg',
     extra: {
@@ -160,7 +162,9 @@ export async function examplePagination() {
     });
 
     allBooks.push(...books);
-    console.log(`Loaded page ${currentPage}, total items: ${allBooks.length}/${total}`);
+    console.log(
+      `Loaded page ${currentPage}, total items: ${allBooks.length}/${total}`,
+    );
 
     if (allBooks.length >= total) {
       break;

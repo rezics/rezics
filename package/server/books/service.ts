@@ -1,14 +1,12 @@
 import {prisma} from '../database-main/client';
 import {PostStatus, PostType} from '../database-main/client';
 import type {Prisma} from '../database-main/client';
-import type {
-  BookCreateRequest,
-  BookUpdateRequest,
-  BookFilterOptions,
-  BookWithRelations,
-} from './types';
+import type {BookFilterOptions, BookWithRelations} from './types';
 import {bookInclude} from './types';
 import {validateCreateBook, validateUpdateBook} from './validation';
+import type {UpdateBookInput, CreateBookInput} from 'contract';
+
+import {getBookApproxCount} from './sql';
 
 /**
  * Book Service - Business logic layer
@@ -85,6 +83,8 @@ export class BookService {
 
     const where = this.buildWhereClause(options);
 
+    // TODO use Postgres Approximate counting
+    const timeStart = Date.now();
     const [books, total] = await Promise.all([
       prisma.book.findMany({
         where,
@@ -93,8 +93,11 @@ export class BookService {
         take: limitNum,
         include: bookInclude,
       }),
-      prisma.book.count({where}),
+      getBookApproxCount(),
     ]);
+    const timeEnd = Date.now();
+
+    console.log(`time: ${timeEnd - timeStart}ms, ${timeStart}, ${timeEnd}`);
 
     return {books: books as BookWithRelations[], total};
   }
@@ -126,7 +129,7 @@ export class BookService {
   /**
    * Create new book
    */
-  async create(req: BookCreateRequest): Promise<BookWithRelations> {
+  async create(req: CreateBookInput): Promise<BookWithRelations> {
     validateCreateBook(req);
 
     const {userId, title, authorIds, coverUrl, isbn, chaptersIndex, extra} =
@@ -164,7 +167,7 @@ export class BookService {
    */
   async update(
     postId: string,
-    req: BookUpdateRequest,
+    req: UpdateBookInput,
   ): Promise<BookWithRelations> {
     validateUpdateBook(req);
 

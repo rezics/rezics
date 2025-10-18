@@ -33,7 +33,7 @@
     "@prisma/adapter-pg": "^6.16.2",
     "@prisma/client": "6.16.2",
     "dotenv": "^17.2.2",
-    "encore.dev": "^1.50.0",
+    "encore.dev": "^1.50.6",
     "eslint": "^9.36.0",
     "globals": "^16.4.0"
   },

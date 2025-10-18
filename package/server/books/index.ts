@@ -1,6 +1,6 @@
 /**
  * Books Service - Main exports
- * 
+ *
  * This service manages book entities with full CRUD operations,
  * search, filtering, and relationship management.
  */
@@ -12,13 +12,12 @@ export * from './api';
 export {bookService, BookService} from './service';
 
 // Types for internal use
-export type {
-  BookWithRelations,
-  BookCreateRequest,
-  BookUpdateRequest,
-  BookFilterOptions,
-} from './types';
+export type {BookWithRelations, BookFilterOptions} from './types';
 
 // Utilities
 export {sanitizeUser, mapBookToDTO} from './mapper';
-export {validateCreateBook, validateUpdateBook, ValidationError} from './validation';
+export {
+  validateCreateBook,
+  validateUpdateBook,
+  ValidationError,
+} from './validation';

@@ -9,29 +9,6 @@ export type BookWithRelations = Book & {
 };
 
 /**
- * Request types for API endpoints
- */
-export type BookCreateRequest = {
-  userId: string;
-  title: string;
-  authorIds?: string[];
-  coverUrl?: string;
-  isbn?: string;
-  chaptersIndex?: string | null;
-  extra?: Record<string, unknown> | null;
-};
-
-export type BookUpdateRequest = {
-  title?: string;
-  authorIds?: string[];
-  coverUrl?: string;
-  isbn?: string;
-  chaptersIndex?: string | null;
-  extra?: Record<string, unknown> | null;
-  description?: string;
-};
-
-/**
  * Query filter types
  */
 export type BookFilterOptions = {
@@ -45,16 +22,6 @@ export type BookFilterOptions = {
   page?: number;
   limit?: number;
 };
-
-/**
- * Type guards
- */
-export function isValidBookCreateRequest(
-  req: unknown,
-): req is BookCreateRequest {
-  const r = req as BookCreateRequest;
-  return typeof r === 'object' && r !== null && !!r.userId && !!r.title;
-}
 
 /**
  * Prisma include for book relations

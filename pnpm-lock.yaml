@@ -222,8 +222,8 @@ importers:
         specifier: ^17.2.2
         version: 17.2.2
       encore.dev:
-        specifier: ^1.50.0
-        version: 1.50.0
+        specifier: ^1.50.6
+        version: 1.50.6
       eslint:
         specifier: ^9.36.0
         version: 9.36.0(jiti@2.6.0)
@@ -2356,8 +2356,8 @@ packages:
     resolution: {integrity: sha512-Q0n9HRi4m6JuGIV1eFlmvJB7ZEVxu93IrMyiMsGC0lrMJMWzRgx6WGquyfQgZVb31vhGgXnfmPNNXmxnOkRBrg==}
     engines: {node: '>= 0.8'}
 
-  encore.dev@1.50.0:
-    resolution: {integrity: sha512-ruPe2xEWOt6LXn5bGK7HArPyjcjgIyKenoXE6dVoOGMnzFfykiZ8/5r2Rc9dn01WhrvgSn2sfDIhooKdxZ+dkA==}
+  encore.dev@1.50.6:
+    resolution: {integrity: sha512-pTsG3L9wfJJxmBOSZnLDtAL3ezdZn9tOcrJOq1de+VFYE1C2oCM/iHjv3vjXhM8ELml2zdvjnUlL47Et2kZKaw==}
     engines: {node: '>=18.0.0'}
 
   enhanced-resolve@5.18.3:
@@ -6224,7 +6224,7 @@ snapshots:
 
   '@types/uuid@10.0.0': {}
 
-  '@typescript-eslint/eslint-plugin@5.62.0(@typescript-eslint/parser@5.62.0(eslint@8.57.1)(typescript@5.9.2))(eslint@8.57.1)(typescript@5.9.2)':
+  '@typescript-eslint/eslint-plugin@5.62.0(@typescript-eslint/parser@5.62.0(eslint@9.36.0(jiti@2.6.0))(typescript@5.9.2))(eslint@8.57.1)(typescript@5.9.2)':
     dependencies:
       '@eslint-community/regexpp': 4.12.1
       '@typescript-eslint/parser': 5.62.0(eslint@8.57.1)(typescript@5.9.2)
@@ -7000,7 +7000,7 @@ snapshots:
 
   encodeurl@2.0.0: {}
 
-  encore.dev@1.50.0: {}
+  encore.dev@1.50.6: {}
 
   enhanced-resolve@5.18.3:
     dependencies:
@@ -7771,7 +7771,7 @@ snapshots:
 
   gts@6.0.2(typescript@5.9.2):
     dependencies:
-      '@typescript-eslint/eslint-plugin': 5.62.0(@typescript-eslint/parser@5.62.0(eslint@8.57.1)(typescript@5.9.2))(eslint@8.57.1)(typescript@5.9.2)
+      '@typescript-eslint/eslint-plugin': 5.62.0(@typescript-eslint/parser@5.62.0(eslint@9.36.0(jiti@2.6.0))(typescript@5.9.2))(eslint@8.57.1)(typescript@5.9.2)
       '@typescript-eslint/parser': 5.62.0(eslint@8.57.1)(typescript@5.9.2)
       chalk: 4.1.2
       eslint: 8.57.1

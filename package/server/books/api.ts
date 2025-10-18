@@ -7,7 +7,6 @@ import type {
 } from 'contract';
 import {bookService} from './service';
 import {mapBookToDTO} from './mapper';
-import type {BookCreateRequest, BookUpdateRequest} from './types';
 
 /**
  * Query parameters for book list endpoint
@@ -66,7 +65,7 @@ export const get = api(
 export const create = api(
   {expose: true, method: 'POST', path: '/books'},
   async (req: CreateBookInput): Promise<BookResponse> => {
-    const bookReq: BookCreateRequest = {
+    const bookReq: CreateBookInput = {
       userId: req.userId,
       title: req.title,
       authorIds: req.authorIds,
@@ -74,6 +73,7 @@ export const create = api(
       isbn: req.isbn,
       chaptersIndex: req.chaptersIndex,
       extra: req.extra,
+      description: req.description,
     };
 
     const book = await bookService.create(bookReq);
@@ -90,7 +90,7 @@ export const update = api(
     postId,
     ...req
   }: {postId: string} & UpdateBookInput): Promise<BookResponse> => {
-    const bookReq: BookUpdateRequest = {
+    const bookReq: UpdateBookInput = {
       title: req.title,
       authorIds: req.authorIds,
       coverUrl: req.coverUrl,
