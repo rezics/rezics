@@ -1,4 +1,13 @@
 {
+  "vitest.commandLine": "encore test"
+  
+  // Optional: If needed, set ENCORE_RUNTIME_LIB (platform-specific).
+  // "vitest.nodeEnv": {
+  //   "ENCORE_RUNTIME_LIB": "<path-to-encore-runtime.node>"
+  // }
+}
+
+{
   // "typescript.experimental.useTsgo": true,
   "cSpell.words": [
     "backpressure",
