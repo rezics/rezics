@@ -8,7 +8,7 @@ import type {
   UpdateBookInput,
   BookListResponse,
   BookResponse,
-} from 'contract';
+} from '@package/contract';
 import type {BookFilters} from './book.types';
 
 /**

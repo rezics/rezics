@@ -1,5 +1,10 @@
-import {Elysia} from 'elysia';
-import { bookListQuerySchema, bookParamsSchema, createBookSchema, updateBookSchema } from '@package/contract';
+import {Elysia, t} from 'elysia';
+import {
+  bookListQuerySchema,
+  bookParamsSchema,
+  createBookSchema,
+  updateBookSchema,
+} from '@package/contract';
 import type {
   BookListQuery,
   BookListResponse,
@@ -10,25 +15,27 @@ import type {
 import {bookService} from './book.service';
 import {mapBookToDTO} from './mapper';
 
-
-
 /**
  * Book Controller - Elysia.js routes
  * Get all books with filters and pagination
  * GET /books?q=search&tag=fiction&page=1&limit=20
  */
 export const bookApi = new Elysia({prefix: '/books'})
-  .get('/', async ({query}): Promise<BookListResponse> => { 
-    const {books, total} = await bookService.list(query);
-    return {books: books.map(mapBookToDTO), total};
-  }, {
-    query: bookListQuerySchema,
-    detail: {
-      summary: 'Get all books',
-      description: 'Get all books with filters and pagination',
-      tags: ['Books'],
+  .get(
+    '/',
+    async ({query}): Promise<BookListResponse> => {
+      const {books, total} = await bookService.list(query);
+      return {books: books.map(mapBookToDTO), total};
     },
-  })
+    {
+      query: bookListQuerySchema,
+      detail: {
+        summary: 'Get all books',
+        description: 'Get all books with filters and pagination',
+        tags: ['Books'],
+      },
+    },
+  )
 
   /**
    * Get book by postId

@@ -13,8 +13,7 @@
     }
   },
   "dependencies": {
-    "@sinclair/typebox": "0.33.9",
-    "elysia": "^1.4.12",
-    "typebox": "^1.0.38"
+    "@sinclair/typebox": "^0.34.41",
+    "elysia": "^1.4.12"
   }
 }

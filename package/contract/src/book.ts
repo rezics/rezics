@@ -1,6 +1,4 @@
-import { t } from "elysia";
-
-import type { Static } from "typebox"
+import { t } from "elysia"; 
 
 // =================================================================
 // 1. Core Data Transfer Objects (DTOs)
@@ -50,7 +48,7 @@ export const bookDTOSchema = t.Object({
   updatedAt: t.Optional(t.Union([t.String(), t.Date()])),
 });
 
-export type BookDTO = Static<typeof bookDTOSchema>;
+export type BookDTO = typeof bookDTOSchema['static'];
 
 // =================================================================
 // 2. API Endpoint Schemas & Types
@@ -73,7 +71,7 @@ export const bookListQuerySchema = t.Object({
   limit: t.Optional(t.Numeric()), // default 20
 });
 
-export type BookListQuery = Static<typeof bookListQuerySchema>;
+export type BookListQuery = typeof bookListQuerySchema['static'];
 
 /**
  * [Response] /books 的响应体 Schema
@@ -84,7 +82,7 @@ export const bookListResponseSchema = t.Object({
   total: t.Optional(t.Number()), // 响应体中使用 t.Number()
 });
 
-export type BookListResponse = Static<typeof bookListResponseSchema>;
+export type BookListResponse = typeof bookListResponseSchema['static'];
 
 // --- Book Detail (GET /books/:postId) ---
 
@@ -95,7 +93,7 @@ export const bookParamsSchema = t.Object({
   postId: t.String(),
 });
 
-export type BookParams = Static<typeof bookParamsSchema>;
+export type BookParams = typeof bookParamsSchema['static'];
 
 /**
  * [Response] /books/:postId 的响应体 Schema
@@ -103,7 +101,7 @@ export type BookParams = Static<typeof bookParamsSchema>;
  */
 export const bookResponseSchema = bookDTOSchema; // 直接复用 DTO
 
-export type BookResponse = Static<typeof bookResponseSchema>; // 等同于 BookDTO
+export type BookResponse = typeof bookResponseSchema['static']; // 等同于 BookDTO
 
 // --- Create Book (POST /books) ---
 
@@ -123,7 +121,7 @@ export const createBookSchema = t.Object({
 });
 
 // 从 Schema 派生类型，替换原有的 CreateBookInput
-export type CreateBookInput = Static<typeof createBookSchema>;
+export type CreateBookInput = typeof createBookSchema['static'];
 
 // --- Update Book (PUT /books/:postId) ---
 
@@ -142,7 +140,7 @@ export const updateBookSchema = t.Object({
 });
 
 // 从 Schema 派生类型，替换原有的 UpdateBookInput
-export type UpdateBookInput = Static<typeof updateBookSchema>;
+export type UpdateBookInput = typeof updateBookSchema['static'];
 
 // =================================================================
 // 3. Internal Service/Repository Types
@@ -165,4 +163,4 @@ export const bookSearchParamsSchema = t.Object({
   limit: t.Optional(t.Number()),
 });
 
-export type BookSearchParams = Static<typeof bookSearchParamsSchema>;
+export type BookSearchParams = typeof bookSearchParamsSchema['static'];

@@ -7,7 +7,7 @@
       "@page/*": ["src/page/*"],
       "@util/*": ["src/util/*"],
       "@locale": ["src/locale/index.ts"],
-      
+      "@package/*": ["../*"],
     },
     /* 输出 */
     "target": "ES2022",
@@ -17,7 +17,7 @@
     "declaration": true, // 生成 .d.ts 类型声明
     "emitDeclarationOnly": true, // 既编译 JS 又生成类型声明
     "outDir": "dist", // 输出目录
-    "rootDir": "src", // 源码目录
+    "rootDir": "../", // 源码目录
     "moduleResolution": "node", // 兼容 node 模块解析
     "esModuleInterop": true, // 兼容 commonjs 的导入（比如 require 的库）
     "skipLibCheck": true, // 跳过第三方库的声明检查，加快编译

@@ -21,9 +21,7 @@ export default defineConfig(({ mode }) => {
         "@page": resolve(__dirname, "./src/page"),
         "@util": resolve(__dirname, "./src/util"),
         "@locale": resolve(__dirname, "./src/locale/index.ts"),
-        // Local workspace aliases so the client can run without pnpm workspaces
-        contract: resolve(__dirname, "../contract/src/index.ts"),
-        "contract/": resolve(__dirname, "../contract/src"),
+        "@package": resolve(__dirname, "../"),
       },
     },
     define: {

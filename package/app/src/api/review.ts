@@ -8,7 +8,7 @@ import {
   type QuoteDTO,
   type CreateReviewInput,
   type UpdateReviewInput
-} from "contract";
+} from "@package/contract";
 
 // === Query Keys ===
 export const reviewKeys = {
