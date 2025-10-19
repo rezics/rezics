@@ -7,7 +7,7 @@ import type {BookWithRelations} from './types';
  */
 export function sanitizeUser(u: User): PublicUser {
   return {
-    id: u.id,
+    id: u.unitId,
     slug: u.slug,
     name: u.name,
     avatar: u.avatar ?? (null as any),
@@ -19,15 +19,15 @@ export function sanitizeUser(u: User): PublicUser {
  */
 export function mapBookToDTO(book: BookWithRelations): BookDTO {
   return {
-    postId: book.postId,
+    unitId: book.unitId,
     title: book.title,
     authors: book.authors.map(sanitizeUser),
     coverUrl: book.coverUrl || undefined,
     isbn: book.isbn || undefined,
     chaptersIndex: book.chaptersIndex || undefined,
     extra: (book.extra as Record<string, unknown>) || undefined,
-    userId: book.post.userId,
-    user: sanitizeUser(book.post.user),
+    userId: book.unit.userId,
+    user: sanitizeUser(book.unit.user),
     createdAt: book.createdAt,
     updatedAt: book.updatedAt,
     description: book.description || undefined,

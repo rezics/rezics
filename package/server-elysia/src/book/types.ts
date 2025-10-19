@@ -1,10 +1,10 @@
-import type {Book, User, Post, Prisma} from '@/prisma/client';
+import type {Book, User, Unit, Prisma} from '@/prisma/client';
 
 /**
  * Internal book type with relations
  */
 export type BookWithRelations = Book & {
-  post: Post & {user: User};
+  unit: Unit & {user: User};
   authors: User[];
 };
 
@@ -27,6 +27,6 @@ export type BookFilterOptions = {
  * Prisma include for book relations
  */
 export const bookInclude = {
-  post: {include: {user: true}},
+  unit: {include: {user: true}},
   authors: true,
 } satisfies Prisma.BookInclude;

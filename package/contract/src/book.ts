@@ -1,4 +1,4 @@
-import { t } from "elysia"; 
+import {t} from 'elysia';
 
 // =================================================================
 // 1. Core Data Transfer Objects (DTOs)
@@ -6,11 +6,10 @@ import { t } from "elysia";
 
 const User = t.Object({
   id: t.String(),
-  name: t.String()
-})
+  name: t.String(),
+});
 
-type User = typeof User['static']
-
+type User = (typeof User)['static'];
 
 /**
  * 用户的公开信息 Schema
@@ -24,20 +23,20 @@ export const publicUserSchema = t.Object({
   description: t.Optional(t.String()),
 });
 
-export type PublicUser = typeof publicUserSchema['static']
+export type PublicUser = (typeof publicUserSchema)['static'];
 
 /**
  * API 返回的 Book DTO Schema
  * (原 BookDTO type)
  */
 export const bookDTOSchema = t.Object({
-  postId: t.String(),
+  unitId: t.String(),
   title: t.String(),
   authors: t.Optional(t.Array(publicUserSchema)),
   coverUrl: t.Optional(t.String()),
   isbn: t.Optional(t.String()),
   // 保持与 Input 一致，允许 null
-  chaptersIndex: t.Optional(t.Nullable(t.String())), 
+  chaptersIndex: t.Optional(t.Nullable(t.String())),
   // 保持与 Input 一致
   extra: t.Optional(t.Nullable(t.Record(t.String(), t.Any()))),
   userId: t.Optional(t.String()),
@@ -48,7 +47,7 @@ export const bookDTOSchema = t.Object({
   updatedAt: t.Optional(t.Union([t.String(), t.Date()])),
 });
 
-export type BookDTO = typeof bookDTOSchema['static'];
+export type BookDTO = (typeof bookDTOSchema)['static'];
 
 // =================================================================
 // 2. API Endpoint Schemas & Types
@@ -71,7 +70,7 @@ export const bookListQuerySchema = t.Object({
   limit: t.Optional(t.Numeric()), // default 20
 });
 
-export type BookListQuery = typeof bookListQuerySchema['static'];
+export type BookListQuery = (typeof bookListQuerySchema)['static'];
 
 /**
  * [Response] /books 的响应体 Schema
@@ -82,18 +81,18 @@ export const bookListResponseSchema = t.Object({
   total: t.Optional(t.Number()), // 响应体中使用 t.Number()
 });
 
-export type BookListResponse = typeof bookListResponseSchema['static'];
+export type BookListResponse = (typeof bookListResponseSchema)['static'];
 
-// --- Book Detail (GET /books/:postId) ---
+// --- Book Detail (GET /books/:unitId) ---
 
 /**
  * [Params] /books/:postId 的路径参数 Schema
  */
 export const bookParamsSchema = t.Object({
-  postId: t.String(),
+  unitId: t.String(),
 });
 
-export type BookParams = typeof bookParamsSchema['static'];
+export type BookParams = (typeof bookParamsSchema)['static'];
 
 /**
  * [Response] /books/:postId 的响应体 Schema
@@ -101,7 +100,7 @@ export type BookParams = typeof bookParamsSchema['static'];
  */
 export const bookResponseSchema = bookDTOSchema; // 直接复用 DTO
 
-export type BookResponse = typeof bookResponseSchema['static']; // 等同于 BookDTO
+export type BookResponse = (typeof bookResponseSchema)['static']; // 等同于 BookDTO
 
 // --- Create Book (POST /books) ---
 
@@ -121,7 +120,7 @@ export const createBookSchema = t.Object({
 });
 
 // 从 Schema 派生类型，替换原有的 CreateBookInput
-export type CreateBookInput = typeof createBookSchema['static'];
+export type CreateBookInput = (typeof createBookSchema)['static'];
 
 // --- Update Book (PUT /books/:postId) ---
 
@@ -140,7 +139,7 @@ export const updateBookSchema = t.Object({
 });
 
 // 从 Schema 派生类型，替换原有的 UpdateBookInput
-export type UpdateBookInput = typeof updateBookSchema['static'];
+export type UpdateBookInput = (typeof updateBookSchema)['static'];
 
 // =================================================================
 // 3. Internal Service/Repository Types
@@ -163,4 +162,4 @@ export const bookSearchParamsSchema = t.Object({
   limit: t.Optional(t.Number()),
 });
 
-export type BookSearchParams = typeof bookSearchParamsSchema['static'];
+export type BookSearchParams = (typeof bookSearchParamsSchema)['static'];

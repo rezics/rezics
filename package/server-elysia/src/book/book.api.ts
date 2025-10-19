@@ -38,20 +38,20 @@ export const bookApi = new Elysia({prefix: '/books'})
   )
 
   /**
-   * Get book by postId
-   * GET /books/:postId
+   * Get book by unitId
+   * GET /books/:unitId
    */
   .get(
-    '/:postId',
+    '/:unitId',
     async ({params}): Promise<BookResponse> => {
-      const book = await bookService.getByPostId(params.postId);
+      const book = await bookService.getByUnitId(params.unitId);
       return mapBookToDTO(book);
     },
     {
       params: bookParamsSchema,
       detail: {
         summary: 'Get book',
-        description: 'Get a single book by post ID',
+        description: 'Get a single book by unit ID',
         tags: ['Books'],
       },
     },
@@ -90,10 +90,10 @@ export const bookApi = new Elysia({prefix: '/books'})
 
   /**
    * Update book
-   * PUT /books/:postId
+   * PUT /books/:unitId
    */
   .put(
-    '/:postId',
+    '/:unitId',
     async ({params, body}): Promise<BookResponse> => {
       const bookReq: UpdateBookInput = {
         title: body.title,
@@ -105,7 +105,7 @@ export const bookApi = new Elysia({prefix: '/books'})
         description: body.description,
       };
 
-      const book = await bookService.update(params.postId, bookReq);
+      const book = await bookService.update(params.unitId, bookReq);
       return mapBookToDTO(book);
     },
     {
@@ -113,7 +113,7 @@ export const bookApi = new Elysia({prefix: '/books'})
       body: updateBookSchema,
       detail: {
         summary: 'Update book',
-        description: 'Update an existing book by post ID',
+        description: 'Update an existing book by unit ID',
         tags: ['Books'],
       },
     },
@@ -121,19 +121,19 @@ export const bookApi = new Elysia({prefix: '/books'})
 
   /**
    * Delete book
-   * DELETE /books/:postId
+   * DELETE /books/:unitId
    */
   .delete(
-    '/:postId',
+    '/:unitId',
     async ({params}): Promise<{message: string}> => {
-      await bookService.delete(params.postId);
+      await bookService.delete(params.unitId);
       return {message: 'Book and related post deleted successfully'};
     },
     {
       params: bookParamsSchema,
       detail: {
         summary: 'Delete book',
-        description: 'Delete a book and its related post by post ID',
+        description: 'Delete a book and its related unit by unit ID',
         tags: ['Books'],
       },
     },

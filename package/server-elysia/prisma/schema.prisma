@@ -137,7 +137,7 @@ model Unit {
 model Book {
   // 与 Unit 1:1 绑定；采用 Unit.id 作为主键
   unitId String @id @db.Uuid
-  Unit   Unit   @relation("BookIndexForUnit", fields: [unitId], references: [id], onDelete: Cascade)
+  unit   Unit   @relation("BookIndexForUnit", fields: [unitId], references: [id], onDelete: Cascade)
 
   title         String
   authors       User[] // User[]，作者列表，所有作者都会被注册为用户
@@ -164,7 +164,7 @@ model Book {
 model CommentIndex {
   // 这条“评论 Unit”的 id（与 Unit 1:1）
   unitId String @id @db.Uuid
-  Unit   Unit   @relation("CommentIndexForUnit", fields: [unitId], references: [id], onDelete: Cascade)
+  unit   Unit   @relation("CommentIndexForUnit", fields: [unitId], references: [id], onDelete: Cascade)
 
   // 根对象
   rootUnitId String @db.Uuid
@@ -191,7 +191,7 @@ model CommentIndex {
 
 model UnitStats {
   unitId String @id @db.Uuid
-  Unit   Unit   @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  unit   Unit   @relation(fields: [unitId], references: [id], onDelete: Cascade)
 
   commentCount Int @default(0)
   viewCount    Int @default(0)
@@ -201,7 +201,7 @@ model UnitStats {
 
 model UnitReactions {
   unitId String @id @db.Uuid
-  Unit   Unit   @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  unit   Unit   @relation(fields: [unitId], references: [id], onDelete: Cascade)
 
   likeCount    Int @default(0)
   dislikeCount Int @default(0)
@@ -228,11 +228,11 @@ model Rating {
  */
 model Tag {
   unitId String  @id @default(dbgenerated("uuidv7()")) @db.Uuid
-  Unit   Unit    @relation("TagIndexForUnit", fields: [unitId], references: [id], onDelete: Cascade)
+  unit   Unit    @relation("TagIndexForUnit", fields: [unitId], references: [id], onDelete: Cascade)
   name   String
   type   String? // e.g. general / genre / author / system
 
-  Units Unit[] @relation("UnitTags")
+  units Unit[] @relation("UnitTags")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

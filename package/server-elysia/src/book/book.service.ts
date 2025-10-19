@@ -1,5 +1,5 @@
 import {prisma} from '@/prisma/client';
-import {PostStatus, PostType} from '@/prisma/client';
+import {UnitStatus, UnitType} from '@/prisma/client';
 import type {Prisma} from '@/prisma/client';
 import type {BookFilterOptions, BookWithRelations} from './types';
 import {bookInclude} from './types';
@@ -24,7 +24,7 @@ export class BookService {
         OR: [
           {title: {contains: options.q, mode: 'insensitive'}},
           {isbn: {contains: options.q, mode: 'insensitive'}},
-          {post: {title: {contains: options.q, mode: 'insensitive'}}},
+          {unit: {title: {contains: options.q, mode: 'insensitive'}}},
         ],
       });
     }
@@ -36,7 +36,7 @@ export class BookService {
 
     // Filter by user ID
     if (options.userId && options.userId.trim()) {
-      andWhere.push({post: {userId: options.userId}});
+      andWhere.push({unit: {userId: options.userId}});
     }
 
     // Filter by author IDs
@@ -47,7 +47,7 @@ export class BookService {
     if (authorList.length > 0) {
       andWhere.push({
         authors: {
-          some: {id: {in: authorList}},
+          some: {unitId: {in: authorList}},
         },
       });
     }
@@ -59,7 +59,7 @@ export class BookService {
       .filter(Boolean);
     if (tagList.length > 0) {
       andWhere.push({
-        post: {
+        unit: {
           tags: {
             some: {name: {in: tagList}},
           },
@@ -101,9 +101,10 @@ export class BookService {
   /**
    * Get book by postId
    */
-  async getByPostId(postId: string): Promise<BookWithRelations> {
+  async getByUnitId(unitId: string): Promise<BookWithRelations> {
+    const unit = await prisma.unit.findUniqueOrThrow({where: {id: unitId}});
     const book = await prisma.book.findUniqueOrThrow({
-      where: {postId},
+      where: {unitId: unit.id},
       include: bookInclude,
     });
 
@@ -133,11 +134,11 @@ export class BookService {
 
     const book = await prisma.book.create({
       data: {
-        post: {
+        unit: {
           create: {
             userId,
-            type: PostType.BOOK,
-            status: PostStatus.ACTIVE,
+            type: UnitType.BOOK,
+            status: UnitStatus.ACTIVE,
             title,
             metadata: (extra ?? {}) as Prisma.InputJsonValue,
           },
@@ -145,7 +146,7 @@ export class BookService {
         title,
         authors:
           authorIds && authorIds.length > 0
-            ? {connect: authorIds.map((id: string) => ({id}))}
+            ? {connect: authorIds.map((unitId: string) => ({unitId}))}
             : undefined,
         coverUrl: coverUrl || undefined,
         isbn: isbn || undefined,
@@ -162,7 +163,7 @@ export class BookService {
    * Update book
    */
   async update(
-    postId: string,
+    unitId: string,
     req: UpdateBookInput,
   ): Promise<BookWithRelations> {
     validateUpdateBook(req);
@@ -178,18 +179,18 @@ export class BookService {
     } = req;
 
     const book = await prisma.book.update({
-      where: {postId},
+      where: {unitId},
       data: {
         title: title || undefined,
         authors: Array.isArray(authorIds)
-          ? {set: authorIds.map(id => ({id}))}
+          ? {set: authorIds.map(unitId => ({unitId}))}
           : undefined,
         coverUrl: coverUrl || undefined,
         isbn: isbn || undefined,
         chaptersIndex: chaptersIndex || undefined,
         description: description || undefined,
         extra: (extra ?? undefined) as Prisma.InputJsonValue | undefined,
-        post: {
+        unit: {
           update: {
             title: title || undefined,
             metadata: (extra ?? undefined) as Prisma.InputJsonValue | undefined,
@@ -203,17 +204,17 @@ export class BookService {
   }
 
   /**
-   * Delete book by postId
+   * Delete book by unitId
    */
-  async delete(postId: string): Promise<void> {
-    await prisma.post.delete({where: {id: postId}});
+  async delete(unitId: string): Promise<void> {
+    await prisma.unit.delete({where: {id: unitId}});
   }
 
   /**
-   * Check if book exists by postId
+   * Check if book exists by unitId
    */
-  async exists(postId: string): Promise<boolean> {
-    const count = await prisma.book.count({where: {postId}});
+  async exists(unitId: string): Promise<boolean> {
+    const count = await prisma.book.count({where: {unitId}});
     return count > 0;
   }
 
@@ -222,7 +223,7 @@ export class BookService {
    */
   async getByUserId(userId: string): Promise<BookWithRelations[]> {
     const books = await prisma.book.findMany({
-      where: {post: {userId}},
+      where: {authors: {some: {unitId: userId}}},
       orderBy: {createdAt: 'desc'},
       include: bookInclude,
     });
@@ -237,7 +238,7 @@ export class BookService {
     const books = await prisma.book.findMany({
       where: {
         authors: {
-          some: {id: authorId},
+          some: {unitId: authorId},
         },
       },
       orderBy: {createdAt: 'desc'},
