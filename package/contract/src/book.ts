@@ -1,8 +1,18 @@
-import { t, type Static } from "elysia";
+import { t } from "elysia";
+
+import type { Static } from "typebox"
 
 // =================================================================
 // 1. Core Data Transfer Objects (DTOs)
 // =================================================================
+
+const User = t.Object({
+  id: t.String(),
+  name: t.String()
+})
+
+type User = typeof User['static']
+
 
 /**
  * 用户的公开信息 Schema
@@ -16,7 +26,7 @@ export const publicUserSchema = t.Object({
   description: t.Optional(t.String()),
 });
 
-export type PublicUser = Static<typeof publicUserSchema>;
+export type PublicUser = typeof publicUserSchema['static']
 
 /**
  * API 返回的 Book DTO Schema

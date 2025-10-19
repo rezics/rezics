@@ -2,7 +2,7 @@ import {Elysia} from 'elysia';
 import {swagger} from '@elysiajs/swagger';
 import {cors} from '@elysiajs/cors';
 import {bearer} from '@elysiajs/bearer';
-import {bookApi} from './book/book.api';
+import {bookApi} from './book';
 
 import 'dotenv/config'
 
