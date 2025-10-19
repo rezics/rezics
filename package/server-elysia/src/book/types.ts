@@ -1,3 +1,5 @@
+// Type only used in server, otherwise use contract
+
 import type {Book, User, Unit, Prisma} from '@/prisma/client';
 
 /**

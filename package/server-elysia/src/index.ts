@@ -1,9 +1,7 @@
 import {Elysia} from 'elysia';
-import {jwt} from '@elysiajs/jwt';
 import {swagger} from '@elysiajs/swagger';
-import {cors} from '@elysiajs/cors';
-import {bearer} from '@elysiajs/bearer';
 import {bookApi} from './book';
+import {userApi} from './user';
 
 import 'dotenv/config';
 
@@ -26,16 +24,9 @@ const app = new Elysia()
       });
     });
   })
-  .use(
-    jwt({
-      name: 'jwt',
-      secret: process.env.JWT_SECRET!,
-    }),
-  )
   .use(swagger())
-  .use(cors())
-  .use(bearer())
   .use(bookApi)
+  .use(userApi)
   .get('/', () => 'Hello Elysia')
   .get('/health', () => ({status: 'ok'}))
   .listen(3000);
@@ -44,5 +35,3 @@ console.log(
   `🦊 Elysia is running at http://${app.server?.hostname}:${app.server?.port}`,
   `\n🔗 Swagger UI: http://${app.server?.hostname}:${app.server?.port}/swagger`,
 );
-
-export type App = typeof app;

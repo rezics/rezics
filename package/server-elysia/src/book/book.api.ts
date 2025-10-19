@@ -15,12 +15,13 @@ import type {
 import {bookService} from './book.service';
 import {mapBookToDTO} from './mapper';
 
+import {coreInstance} from '../core';
 /**
  * Book Controller - Elysia.js routes
  * Get all books with filters and pagination
  * GET /books?q=search&tag=fiction&page=1&limit=20
  */
-export const bookApi = new Elysia({prefix: '/books'})
+export const bookApi = coreInstance('/books')
   .get(
     '/',
     async ({query}): Promise<BookListResponse> => {

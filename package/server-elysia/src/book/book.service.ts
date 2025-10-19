@@ -3,7 +3,6 @@ import {UnitStatus, UnitType} from '@/prisma/client';
 import type {Prisma} from '@/prisma/client';
 import type {BookFilterOptions, BookWithRelations} from './types';
 import {bookInclude} from './types';
-import {validateCreateBook, validateUpdateBook} from './validation.ts';
 import type {UpdateBookInput, CreateBookInput} from '@package/contract';
 
 import {getBookApproxCount} from './sql';
@@ -127,8 +126,6 @@ export class BookService {
    * Create new book
    */
   async create(req: CreateBookInput): Promise<BookWithRelations> {
-    validateCreateBook(req);
-
     const {userId, title, authorIds, coverUrl, isbn, chaptersIndex, extra} =
       req;
 
@@ -166,8 +163,6 @@ export class BookService {
     unitId: string,
     req: UpdateBookInput,
   ): Promise<BookWithRelations> {
-    validateUpdateBook(req);
-
     const {
       title,
       authorIds,

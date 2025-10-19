@@ -6,7 +6,7 @@
  */
 
 // API endpoints (automatically registered by Encore)
-export { bookApi } from './book.api';
+export {bookApi} from './book.api';
 
 // Service layer for internal use
 export {bookService, BookService} from './book.service';
@@ -16,8 +16,3 @@ export type {BookWithRelations, BookFilterOptions} from './types';
 
 // Utilities
 export {sanitizeUser, mapBookToDTO} from './mapper';
-export {
-  validateCreateBook,
-  validateUpdateBook,
-  ValidationError,
-} from './validation';
