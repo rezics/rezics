@@ -5,8 +5,8 @@ generator client {
 }
 
 datasource db {
-  provider          = "postgresql"
-  url               = env("PRISMA_DATABASE_URL")
+  provider = "postgres"
+  url      = env("PRISMA_DATABASE_URL")
 }
 
 /**
@@ -15,7 +15,7 @@ datasource db {
  * =========================
  */
 
-enum PostType {
+enum UnitType {
   BOOK
   COMMENT
   NOTE
@@ -27,7 +27,7 @@ enum PostType {
   CHAPTER
 }
 
-enum PostStatus {
+enum UnitStatus {
   DRAFT
   ACTIVE
   DELETED
@@ -44,9 +44,10 @@ enum UserType {
  * Core: User
  * =========================
  * TODO 增加子组织
+ * also use unitId
  */
 model User {
-  id           String @id @default(uuid()) @db.Uuid
+  unitId       String @id @default(dbgenerated("uuidv7()")) @db.Uuid
   email        String @unique
   slug         String @unique
   passwordHash String
@@ -59,9 +60,9 @@ model User {
   joinDate DateTime?
 
   // Relations
-  posts       Post[]
+  Units       Unit[] @relation("UnitForUser")
   books       Book[]
-  domainPosts Post[] @relation("PostDomains")
+  domainUnits Unit[] @relation("UnitDomains")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -72,70 +73,71 @@ model User {
 
 /**
  * =========================
- * Core: Post (统一内容入口)
+ * Core: Unit (统一内容入口)
  * - 仅固定最小公约字段；弹性入 metadata(JSON)
  * - 其它类型（REVIEW/QUOTE/READLIST…）都在这里
  * =========================
  */
-model Post {
-  id      String @id @default(uuid()) @db.Uuid
+model Unit {
+  // basic info
+  id      String @id @default(dbgenerated("uuidv7()")) @db.Uuid
   userId  String @db.Uuid
-  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  domains User[] @relation("PostDomains")
+  user    User   @relation("UnitForUser", fields: [userId], references: [unitId], onDelete: Cascade)
+  domains User[] @relation("UnitDomains")
 
-  type   PostType
-  status PostStatus @default(ACTIVE)
+  type   UnitType
+  status UnitStatus @default(ACTIVE)
 
   title    String?
   content  String?
   metadata Json    @default("{}")
 
-  // 可选：指向任意 Post 的“弱引用”
+  // 可选：指向任意 Unit 的“弱引用”
   // 可被用于 Chapter，Review，Quote，Note，ReadList，Image，Video
-  targetPostId String? @db.Uuid
-  targetPost   Post?   @relation("PostTargets", fields: [targetPostId], references: [id])
-  targetedBy   Post[]  @relation("PostTargets")
+  targetUnitId String? @db.Uuid
+  targetUnit   Unit?   @relation("UnitTargets", fields: [targetUnitId], references: [id])
+  targetedBy   Unit[]  @relation("UnitTargets")
 
   publishedAt DateTime?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
   // Book relation
-  book Book? @relation("BookForPost") // 1:1 子表
+  book Book? @relation("BookIndexForUnit")
 
   // Tag relation
-  tag  Tag?  @relation("TagForPost")
-  tags Tag[] @relation("PostTags")
+  tag  Tag?  @relation("TagIndexForUnit")
+  tags Tag[] @relation("UnitTags")
 
-  stats     PostStats?
-  reactions PostReactions?
+  stats     UnitStats?
+  reactions UnitReactions?
 
   // === CommentIndex 的 3 条反向关系 ===
-  // 1) 这条评论本体对应的 Post（1:1）
-  commentIndex CommentIndex? @relation("CommentIndexForPost")
+  // 1) 这条评论本体对应的 Unit（1:1）
+  commentIndex CommentIndex? @relation("CommentIndexForUnit")
 
-  // 2) 作为“根对象”的 Post（1:N）
-  commentRoots CommentIndex[] @relation("RootPost")
+  // 2) 作为“根对象”的 Unit（1:N）
+  commentRoots CommentIndex[] @relation("RootUnit")
 
-  // 3) 作为“父评论”的 Post（1:N）
+  // 3) 作为“父评论”的 Unit（1:N）
   childCommentIndexes CommentIndex[] @relation("ParentComment")
 
   @@index([type, status, createdAt])
   @@index([userId, createdAt])
-  @@index([targetPostId])
+  @@index([targetUnitId])
 }
 
 /**
  * =========================
- * 专用子表：Book（1:1 绑定 Post）
+ * 专用子表：Book（1:1 绑定 Unit）
  * 仅 Book 拥有专表；章节树、额外域等放 JSON
  * =========================
  * authors 就是纯字符串，关联用户的话单独做
  */
 model Book {
-  // 与 Post 1:1 绑定；采用 Post.id 作为主键
-  postId String @id @db.Uuid
-  post   Post   @relation("BookForPost", fields: [postId], references: [id], onDelete: Cascade)
+  // 与 Unit 1:1 绑定；采用 Unit.id 作为主键
+  unitId String @id @db.Uuid
+  Unit   Unit   @relation("BookIndexForUnit", fields: [unitId], references: [id], onDelete: Cascade)
 
   title         String
   authors       User[] // User[]，作者列表，所有作者都会被注册为用户
@@ -155,41 +157,41 @@ model Book {
 /**
  * =========================
  * 评论树“关系索引表”
- * - 每条评论本体是 Post(type='COMMENT')
+ * - 每条评论本体是 Unit(type='COMMENT')
  * - 该表存 root/parent/depth，加速树查询
  * =========================
  */
 model CommentIndex {
-  // 这条“评论 Post”的 id（与 Post 1:1）
-  postId String @id @db.Uuid
-  post   Post   @relation("CommentIndexForPost", fields: [postId], references: [id], onDelete: Cascade)
+  // 这条“评论 Unit”的 id（与 Unit 1:1）
+  unitId String @id @db.Uuid
+  Unit   Unit   @relation("CommentIndexForUnit", fields: [unitId], references: [id], onDelete: Cascade)
 
   // 根对象
-  rootPostId String @db.Uuid
-  rootPost   Post   @relation("RootPost", fields: [rootPostId], references: [id], onDelete: Cascade)
+  rootUnitId String @db.Uuid
+  rootUnit   Unit   @relation("RootUnit", fields: [rootUnitId], references: [id], onDelete: Cascade)
 
-  // 父级评论（同为 Post）
+  // 父级评论（同为 Unit）
   parentCommentId String? @db.Uuid
-  parentComment   Post?   @relation("ParentComment", fields: [parentCommentId], references: [id], onDelete: SetNull)
+  parentComment   Unit?   @relation("ParentComment", fields: [parentCommentId], references: [id], onDelete: SetNull)
 
   depth Int
-  // 删掉多余/重复的 @@index([rootPostId])，避免重复索引
+  // 删掉多余/重复的 @@index([rootUnitId])，避免重复索引
 
-  @@index([rootPostId, depth])
+  @@index([rootUnitId, depth])
   @@index([parentCommentId])
 }
 
 /**
  * =========================
  * 统计与互动
- * - PostStats：评论数等冗余计数（列表/详情快取）
- * - PostReactions：赞/踩/爱心计数聚合
+ * - UnitStats：评论数等冗余计数（列表/详情快取）
+ * - UnitReactions：赞/踩/爱心计数聚合
  * =========================
  */
 
-model PostStats {
-  postId String @id @db.Uuid
-  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+model UnitStats {
+  unitId String @id @db.Uuid
+  Unit   Unit   @relation(fields: [unitId], references: [id], onDelete: Cascade)
 
   commentCount Int @default(0)
   viewCount    Int @default(0)
@@ -197,9 +199,9 @@ model PostStats {
   updatedAt DateTime @updatedAt
 }
 
-model PostReactions {
-  postId String @id @db.Uuid
-  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+model UnitReactions {
+  unitId String @id @db.Uuid
+  Unit   Unit   @relation(fields: [unitId], references: [id], onDelete: Cascade)
 
   likeCount    Int @default(0)
   dislikeCount Int @default(0)
@@ -209,33 +211,33 @@ model PostReactions {
 }
 
 model Rating {
-  postId     String   @db.Uuid
+  unitId     String   @db.Uuid
   userId     String   @db.Uuid
   totalScore Int      @default(0)
   totalCount Int      @default(0)
   updatedAt  DateTime @updatedAt
 
-  @@id([postId, userId]) // 联合主键
+  @@id([unitId, userId]) // 联合主键
 }
 
 /**
  * =========================
- * 标签：作用于任意 Post（含 Book）
+ * 标签：作用于任意 Unit（含 Book）
  * =========================
- * TODO 迁移到PostId
+ * TODO 迁移到unitId
  */
 model Tag {
-  postId String  @id @default(uuid()) @db.Uuid
-  post   Post    @relation("TagForPost", fields: [postId], references: [id], onDelete: Cascade)
+  unitId String  @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  Unit   Unit    @relation("TagIndexForUnit", fields: [unitId], references: [id], onDelete: Cascade)
   name   String
   type   String? // e.g. general / genre / author / system
 
-  posts Post[] @relation("PostTags")
+  Units Unit[] @relation("UnitTags")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@unique([postId, name, type])
+  @@unique([unitId, name, type])
   @@index([type])
 }
 
@@ -244,10 +246,10 @@ model Tag {
  * 说明与迁移提示（非运行字段）
  * - JSONB/GiN 索引：Prisma schema 不直接声明 GiN，
  * 请在迁移中加 raw SQL，如：
- * CREATE INDEX idx_posts_metadata_gin ON "Post" USING GIN(("metadata"));
+ * CREATE INDEX idx_Units_metadata_gin ON "Unit" USING GIN(("metadata"));
  * - 若要 ltree/物化路径，可在迁移里启用扩展并增列，或保留目前索引表实现。
  * - 典型 metadata 结构（示例）：
  * REVIEW:   { "rating": 4.5, "title": "短评标题" }
  * QUOTE:    { "text": "...", "fromChapter": 12 }
- * READLIST: { "coverUrl": "...", "books": ["<bookPostId1>", "<bookPostId2>"] }
+ * READLIST: { "coverUrl": "...", "books": ["<bookunitId1>", "<bookunitId2>"] }
  */

@@ -1,4 +1,5 @@
 import {Elysia} from 'elysia';
+import {jwt} from '@elysiajs/jwt';
 import {swagger} from '@elysiajs/swagger';
 import {cors} from '@elysiajs/cors';
 import {bearer} from '@elysiajs/bearer';
@@ -25,6 +26,12 @@ const app = new Elysia()
       });
     });
   })
+  .use(
+    jwt({
+      name: 'jwt',
+      secret: process.env.JWT_SECRET!,
+    }),
+  )
   .use(swagger())
   .use(cors())
   .use(bearer())
@@ -35,6 +42,7 @@ const app = new Elysia()
 
 console.log(
   `🦊 Elysia is running at http://${app.server?.hostname}:${app.server?.port}`,
+  `\n🔗 Swagger UI: http://${app.server?.hostname}:${app.server?.port}/swagger`,
 );
 
 export type App = typeof app;

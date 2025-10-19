@@ -1,0 +1,57 @@
+import {faker} from '@faker-js/faker';
+import type {PrismaClient} from '../generated/client.js';
+import {UnitType, UnitStatus} from '../generated/client.js';
+import type {CreatedUser} from './types.js';
+
+/**
+ * Tag types available in the system
+ */
+const TAG_TYPES = ['general', 'genre', 'author', 'system'] as const;
+
+/**
+ * Seed tags into database
+ * @param prisma - Prisma client instance
+ * @param total - Number of tags to create
+ * @param users - Array of created users
+ * @returns Array of tag unit IDs
+ */
+export async function seedTags(
+  prisma: PrismaClient,
+  total: number,
+  users: CreatedUser[],
+): Promise<string[]> {
+  console.log(`🏷️ Seeding ${total} tags...`);
+  const tagUnitIds: string[] = [];
+
+  for (let i = 0; i < total; i++) {
+    const user = faker.helpers.arrayElement(users);
+    const name = `${faker.word.adjective()} ${faker.word.noun()}`;
+    const type = faker.helpers.arrayElement(TAG_TYPES);
+
+    // Create a unit for the tag
+    const unit = await prisma.unit.create({
+      data: {
+        userId: user.unitId,
+        type: UnitType.NOTE,
+        status: UnitStatus.ACTIVE,
+        title: `Tag: ${name}`,
+        content: `This is a ${type} tag`,
+        metadata: {},
+        publishedAt: faker.date.past({years: 1}),
+      },
+    });
+
+    // Create the tag
+    await prisma.tag.create({
+      data: {
+        unitId: unit.id,
+        name,
+        type,
+      },
+    });
+
+    tagUnitIds.push(unit.id);
+  }
+
+  return tagUnitIds;
+}
