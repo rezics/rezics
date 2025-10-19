@@ -13,11 +13,11 @@ const app = new Elysia()
   .trace(async ({onHandle, context}) => {
     // 监听 handle 阶段
     onHandle(({begin, onStop}) => {
-      const {path, params, request} = context;
+      const {route, params, request} = context;
 
       onStop(({end}) => {
         console.log(
-          `[${request.method}] ${path} took ${end - begin}ms`,
+          `[${request.method}] ${route} took ${end - begin}ms`,
           'params:',
           params,
         );

@@ -14,8 +14,10 @@ import type {
 } from '@package/contract';
 import {bookService} from './book.service';
 import {mapBookToDTO} from './mapper';
-
+import {unitService} from '@/src/unit/unit.service';
 import {coreInstance} from '../core';
+import {verifyAuth} from '@/src/utils/authUtils';
+
 /**
  * Book Controller - Elysia.js routes
  * Get all books with filters and pagination
@@ -64,9 +66,10 @@ export const bookApi = coreInstance('/books')
    */
   .post(
     '/',
-    async ({body}): Promise<BookResponse> => {
+    async ({body, headers, jwt, set}): Promise<BookResponse> => {
+      const payload = await verifyAuth(headers.authorization, jwt, set);
       const bookReq: CreateBookInput = {
-        userId: body.userId,
+        userId: payload.userId,
         title: body.title,
         authorIds: body.authorIds,
         coverUrl: body.coverUrl,
@@ -92,21 +95,24 @@ export const bookApi = coreInstance('/books')
   /**
    * Update book
    * PUT /books/:unitId
+   * NOTE Please provide only the keys that require updating. Otherwise, even if the string is empty, it will trigger a field update.
    */
   .put(
     '/:unitId',
-    async ({params, body}): Promise<BookResponse> => {
-      const bookReq: UpdateBookInput = {
-        title: body.title,
-        authorIds: body.authorIds,
-        coverUrl: body.coverUrl,
-        isbn: body.isbn,
-        chaptersIndex: body.chaptersIndex,
-        extra: body.extra,
-        description: body.description,
-      };
-
-      const book = await bookService.update(params.unitId, bookReq);
+    async ({params, body, headers, jwt, set}): Promise<BookResponse> => {
+      const payload = await verifyAuth(headers.authorization, jwt, set);
+      const targetBookUnit = await unitService.getByUnitId(params.unitId);
+      if (!targetBookUnit) {
+        set.status = 404;
+        throw new Error(`Book not found: ${params.unitId}`);
+      }
+      if (targetBookUnit.userId !== payload.userId) {
+        set.status = 403;
+        throw new Error(
+          'Forbidden: you do not have permission to update this book',
+        );
+      }
+      const book = await bookService.update(params.unitId, body);
       return mapBookToDTO(book);
     },
     {
@@ -126,7 +132,21 @@ export const bookApi = coreInstance('/books')
    */
   .delete(
     '/:unitId',
-    async ({params}): Promise<{message: string}> => {
+    async ({params, headers, jwt, set}): Promise<{message: string}> => {
+      const payload = await verifyAuth(headers.authorization, jwt, set);
+      const targetBookUnit = await unitService.getByUnitId(params.unitId);
+      if (!targetBookUnit) {
+        set.status = 404;
+        throw new Error(`Book not found: ${params.unitId}`);
+      }
+
+      if (targetBookUnit.userId !== payload.userId) {
+        set.status = 403;
+        throw new Error(
+          'Forbidden: you do not have permission to delete this book',
+        );
+      }
+
       await bookService.delete(params.unitId);
       return {message: 'Book and related post deleted successfully'};
     },
