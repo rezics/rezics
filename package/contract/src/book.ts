@@ -1,15 +1,6 @@
 import {t} from 'elysia';
 
-// =================================================================
-// 1. Core Data Transfer Objects (DTOs)
-// =================================================================
-
-const User = t.Object({
-  id: t.String(),
-  name: t.String(),
-});
-
-type User = (typeof User)['static'];
+// ANCHOR Core Data Transfer Objects (DTOs)
 
 /**
  * 用户的公开信息 Schema
@@ -49,9 +40,7 @@ export const bookDTOSchema = t.Object({
 
 export type BookDTO = (typeof bookDTOSchema)['static'];
 
-// =================================================================
-// 2. API Endpoint Schemas & Types
-// =================================================================
+// ANCHOR API Endpoint Schemas & Types
 
 // --- Book List (GET /books) ---
 
@@ -141,9 +130,7 @@ export const updateBookSchema = t.Object({
 // 从 Schema 派生类型，替换原有的 UpdateBookInput
 export type UpdateBookInput = (typeof updateBookSchema)['static'];
 
-// =================================================================
-// 3. Internal Service/Repository Types
-// =================================================================
+// ANCHOR Internal Service/Repository Types
 
 /**
  * 内部服务层使用的搜索参数 Schema
@@ -163,3 +150,7 @@ export const bookSearchParamsSchema = t.Object({
 });
 
 export type BookSearchParams = (typeof bookSearchParamsSchema)['static'];
+
+// ANCHOR Extra Types
+
+export type Publisher = {};

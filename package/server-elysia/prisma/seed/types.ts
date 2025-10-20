@@ -21,6 +21,8 @@ export interface CreatedUnit {
  */
 export interface SeedCounts {
   users: number;
+  pressUsers: number;
+  producerUsers: number;
   tags: number;
   books: number;
   otherPosts: number;

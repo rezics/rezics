@@ -28,6 +28,8 @@ export async function seedBooks(
   prisma: PrismaClient,
   total: number,
   users: CreatedUser[],
+  pressUsers: CreatedUser[],
+  producerUsers: CreatedUser[],
   tagUnitIds: string[],
 ): Promise<CreatedUnit[]> {
   console.log(`📚 Seeding ${total} books...`);
@@ -58,8 +60,18 @@ export async function seedBooks(
       data: {
         unitId: unit.id,
         title,
-        authors: {
+        author: {
           connect: pickN(users, randomInt(1, 3)).map(u => ({unitId: u.unitId})),
+        },
+        press: {
+          connect: pickN(pressUsers, randomInt(1, 3)).map(u => ({
+            unitId: u.unitId,
+          })),
+        },
+        producer: {
+          connect: pickN(producerUsers, randomInt(1, 3)).map(u => ({
+            unitId: u.unitId,
+          })),
         },
         coverUrl: randomBoolean(0.8) ? getRandomBookCover() : null,
         isbn: randomBoolean(0.8) ? faker.commerce.isbn() : null,

@@ -37,6 +37,8 @@ enum UnitStatus {
 enum UserType {
   USER
   AUTHOR
+  PRESS
+  PRODUCER
 }
 
 /**
@@ -60,9 +62,11 @@ model User {
   joinDate DateTime?
 
   // Relations
-  Units       Unit[] @relation("UnitForUser")
-  books       Book[]
-  domainUnits Unit[] @relation("UnitDomains")
+  Units        Unit[] @relation("UnitForUser")
+  authorBook   Book[] @relation("BookAuthor")
+  pressBook    Book[] @relation("BookPress")
+  producerBook Book[] @relation("BookProducer")
+  domainUnits  Unit[] @relation("UnitDomains")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -140,7 +144,9 @@ model Book {
   unit   Unit   @relation("BookIndexForUnit", fields: [unitId], references: [id], onDelete: Cascade)
 
   title         String
-  authors       User[] // User[]，作者列表，所有作者都会被注册为用户
+  author        User[]  @relation("BookAuthor") // User[]，作者列表，所有作者都会被注册为用户
+  press         User[]  @relation("BookPress")
+  producer      User[]  @relation("BookProducer")
   description   String?
   coverUrl      String?
   isbn          String?

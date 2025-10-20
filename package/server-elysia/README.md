@@ -24,7 +24,6 @@ bunx prisma migrate dev --name init
 bunx prisma generate
 bun run prisma:seed
 # 大型迁移
-encore db reset main
 bunx prisma migrate reset
 ```
 

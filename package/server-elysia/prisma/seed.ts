@@ -2,7 +2,7 @@ import 'dotenv/config';
 import {PrismaClient} from './generated/client';
 import {DEFAULT_COUNTS} from './seed/config';
 import {resetDatabase} from './seed/database';
-import {seedUsers} from './seed/users';
+import {seedPressUsers, seedProducerUsers, seedUsers} from './seed/users';
 import {seedTags} from './seed/tags';
 import {seedBooks} from './seed/books';
 import {seedOtherUnits} from './seed/units';
@@ -35,6 +35,15 @@ async function main() {
     const users = await seedUsers(prisma, DEFAULT_COUNTS.users);
     console.log(`✅ Created ${users.length} users`);
 
+    const pressUsers = await seedPressUsers(prisma, DEFAULT_COUNTS.pressUsers);
+    console.log(`✅ Created ${pressUsers.length} press users`);
+
+    const producerUsers = await seedProducerUsers(
+      prisma,
+      DEFAULT_COUNTS.producerUsers,
+    );
+    console.log(`✅ Created ${producerUsers.length} producer users`);
+
     // Seed tags
     const tagUnitIds = await seedTags(prisma, DEFAULT_COUNTS.tags, users);
     console.log(`✅ Created ${tagUnitIds.length} tags`);
@@ -44,6 +53,8 @@ async function main() {
       prisma,
       DEFAULT_COUNTS.books,
       users,
+      pressUsers,
+      producerUsers,
       tagUnitIds,
     );
     const bookIds = books.map(b => b.id);

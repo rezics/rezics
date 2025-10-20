@@ -45,7 +45,7 @@ export class BookService {
       .filter(Boolean);
     if (authorList.length > 0) {
       andWhere.push({
-        authors: {
+        author: {
           some: {unitId: {in: authorList}},
         },
       });
@@ -141,7 +141,7 @@ export class BookService {
           },
         },
         title,
-        authors:
+        author:
           authorIds && authorIds.length > 0
             ? {connect: authorIds.map((unitId: string) => ({unitId}))}
             : undefined,
@@ -177,7 +177,7 @@ export class BookService {
       where: {unitId},
       data: {
         title: title || undefined,
-        authors: Array.isArray(authorIds)
+        author: Array.isArray(authorIds)
           ? {set: authorIds.map(unitId => ({unitId}))}
           : undefined,
         coverUrl: coverUrl || undefined,
@@ -218,7 +218,7 @@ export class BookService {
    */
   async getByUserId(userId: string): Promise<BookWithRelations[]> {
     const books = await prisma.book.findMany({
-      where: {authors: {some: {unitId: userId}}},
+      where: {author: {some: {unitId: userId}}},
       orderBy: {createdAt: 'desc'},
       include: bookInclude,
     });
@@ -232,7 +232,7 @@ export class BookService {
   async getByAuthorId(authorId: string): Promise<BookWithRelations[]> {
     const books = await prisma.book.findMany({
       where: {
-        authors: {
+        author: {
           some: {unitId: authorId},
         },
       },
