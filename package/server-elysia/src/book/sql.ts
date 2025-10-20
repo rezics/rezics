@@ -7,7 +7,7 @@ import {prisma} from '@/prisma/client';
  */
 export async function getBookApproxCount() {
   const query: any = async () => {
-    await prisma.$queryRaw<[{int8: bigint}]>`
+    return await prisma.$queryRaw<[{int8: bigint}]>`
     SELECT (reltuples / relpages * (pg_relation_size(oid) / 8192))::bigint
     FROM pg_class
     WHERE oid = '"Book"'::regclass;

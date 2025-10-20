@@ -51,6 +51,23 @@ export class BookService {
       });
     }
 
+    // Filter by press IDs
+    const pressList = (options.pressIds ?? options.pressId ?? '')
+      .split(',')
+      .map(s => s.trim())
+      .filter(Boolean);
+    if (pressList.length > 0) {
+      andWhere.push({press: {some: {unitId: {in: pressList}}}});
+    }
+
+    // Filter by producer IDs
+    const producerList = (options.producerIds ?? options.producerId ?? '')
+      .split(',')
+      .map(s => s.trim())
+      .filter(Boolean);
+    if (producerList.length > 0) {
+      andWhere.push({producer: {some: {unitId: {in: producerList}}}});
+    }
     // Filter by tags
     const tagList = (options.tags ?? options.tag ?? '')
       .split(',')

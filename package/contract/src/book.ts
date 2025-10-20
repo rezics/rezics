@@ -23,7 +23,9 @@ export type PublicUser = (typeof publicUserSchema)['static'];
 export const bookDTOSchema = t.Object({
   unitId: t.String(),
   title: t.String(),
-  authors: t.Optional(t.Array(publicUserSchema)),
+  author: t.Optional(t.Array(publicUserSchema)),
+  press: t.Optional(t.Array(publicUserSchema)),
+  producer: t.Optional(t.Array(publicUserSchema)),
   coverUrl: t.Optional(t.String()),
   isbn: t.Optional(t.String()),
   // 保持与 Input 一致，允许 null

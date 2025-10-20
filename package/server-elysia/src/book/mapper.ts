@@ -21,7 +21,9 @@ export function mapBookToDTO(book: BookWithRelations): BookDTO {
   return {
     unitId: book.unitId,
     title: book.title,
-    authors: book.authors.map(sanitizeUser),
+    author: book.author.map(sanitizeUser),
+    press: book.press.map(sanitizeUser),
+    producer: book.producer.map(sanitizeUser),
     coverUrl: book.coverUrl || undefined,
     isbn: book.isbn || undefined,
     chaptersIndex: book.chaptersIndex || undefined,

@@ -7,7 +7,9 @@ import type {Book, User, Unit, Prisma} from '@/prisma/client';
  */
 export type BookWithRelations = Book & {
   unit: Unit & {user: User};
-  authors: User[];
+  author: User[];
+  press: User[];
+  producer: User[];
 };
 
 /**
@@ -19,6 +21,10 @@ export type BookFilterOptions = {
   tags?: string;
   authorId?: string;
   authorIds?: string;
+  pressId?: string;
+  pressIds?: string;
+  producerId?: string;
+  producerIds?: string;
   userId?: string;
   isbn?: string;
   page?: number;
@@ -30,5 +36,7 @@ export type BookFilterOptions = {
  */
 export const bookInclude = {
   unit: {include: {user: true}},
-  authors: true,
+  author: true,
+  press: true,
+  producer: true,
 } satisfies Prisma.BookInclude;
