@@ -14,10 +14,17 @@ export function sanitizeUser(u: User): PublicUser {
   };
 }
 
+export function sanitizeUserWithBio(u: User): PublicUser {
+  return {
+    ...sanitizeUser(u),
+    bio: u.bio ?? undefined,
+  };
+}
+
 /**
  * Map internal Book model to BookDTO
  */
-export function mapBookToDTO(book: BookWithRelations): BookDTO {
+export function mapBaseBookToDTO(book: BookWithRelations): BookDTO {
   return {
     unitId: book.unitId,
     title: book.title,
@@ -26,12 +33,20 @@ export function mapBookToDTO(book: BookWithRelations): BookDTO {
     producer: book.producer.map(sanitizeUser),
     coverUrl: book.coverUrl || undefined,
     isbn: book.isbn || undefined,
-    chaptersIndex: book.chaptersIndex || undefined,
-    extra: (book.extra as Record<string, unknown>) || undefined,
     userId: book.unit.userId,
     user: sanitizeUser(book.unit.user),
+    tags: book.unit.tags?.map(tag => tag.name) || [],
     createdAt: book.createdAt,
     updatedAt: book.updatedAt,
     description: book.description || undefined,
+  };
+}
+
+export function mapBookToDTO(book: BookWithRelations): BookDTO {
+  return {
+    ...mapBaseBookToDTO(book),
+    chaptersIndex: book.chaptersIndex || undefined,
+    author: book.author.map(sanitizeUserWithBio),
+    extra: (book.extra as Record<string, unknown>) || undefined,
   };
 }

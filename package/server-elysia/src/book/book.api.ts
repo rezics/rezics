@@ -13,7 +13,7 @@ import type {
   UpdateBookInput,
 } from '@package/contract';
 import {bookService} from './book.service';
-import {mapBookToDTO} from './mapper';
+import {mapBaseBookToDTO, mapBookToDTO} from './mapper';
 import {unitService} from '@/src/unit/unit.service';
 import {coreInstance} from '../core';
 import {verifyAuth} from '@/src/utils/authUtils';
@@ -28,7 +28,7 @@ export const bookApi = coreInstance('/books')
     '/',
     async ({query}): Promise<BookListResponse> => {
       const {books, total} = await bookService.list(query);
-      return {books: books.map(mapBookToDTO), total};
+      return {books: books.map(mapBaseBookToDTO), total};
     },
     {
       query: bookListQuerySchema,

@@ -23,7 +23,7 @@ import {useScrollRestore} from '@/util/useScrollRestore.ts';
 import {bookQueries} from '@/api/book/book';
 import {useQuery, useSuspenseQuery} from '@tanstack/react-query';
 
-import type {BookDTO} from 'contract';
+import type {BookDTO} from '@package/contract';
 
 type Book = BookDTO;
 
@@ -32,7 +32,6 @@ type TabValue = '0' | '1' | '2';
 type ShowProps = {
   ref?: React.Ref<unknown>;
   bookInfo: Book;
-  tags: string[];
   rating: number;
   activeTab: string;
   onTabChange?: (
@@ -44,7 +43,6 @@ type ShowProps = {
 export const BookPageShow: React.FC<ShowProps> = ({
   ref,
   bookInfo,
-  tags,
   rating,
   activeTab,
   onTabChange,
@@ -53,7 +51,7 @@ export const BookPageShow: React.FC<ShowProps> = ({
   return (
     <Box id="book-detail" ref={ref}>
       {/* Book Overview */}
-      <BookHeroContainer bookInfo={bookInfo} tags={tags} rating={rating} />
+      <BookHeroContainer bookInfo={bookInfo} rating={rating} />
 
       {/* Main Content */}
       <Box maxWidth="lg" className="mt-4 mb-8 mx-auto">
@@ -71,20 +69,21 @@ export const BookPageShow: React.FC<ShowProps> = ({
                   {/* ANCHOR Description */}
                   <BookDescriptionContainer
                     description={bookInfo?.description || ''}
-                    bookId={bookInfo?.postId || ''}
+                    bookId={bookInfo?.unitId || ''}
                   />
                   <Divider />
 
                   {/* ANCHOR Tags */}
-                  <BookTagView.Container bookId={bookInfo?.postId || ''} />
+                  <BookTagView.Container bookId={bookInfo?.unitId || ''} />
                   <Divider />
 
                   {/* ANCHOR Author Info */}
                   <AuthorInfoContainer
                     author={
-                      bookInfo?.authors?.[0] || {
+                      bookInfo?.author?.[0] || {
+                        id: '',
                         name: '',
-                        description: '',
+                        bio: '',
                       }
                     }
                   />
@@ -96,12 +95,12 @@ export const BookPageShow: React.FC<ShowProps> = ({
                   <div>
                     <ArrowForwardIconContainer
                       size={16}
-                      to={`/quote/book/${bookInfo?.postId}`}
+                      to={`/quote/book/${bookInfo?.unitId}`}
                     >
                       <AccentBarWithTextContainer text="原文摘录" />
                     </ArrowForwardIconContainer>
                   </div>
-                  <QuoteExcerptPreviewContainer id={bookInfo?.postId || ''} />
+                  <QuoteExcerptPreviewContainer id={bookInfo?.unitId || ''} />
                   <Divider />
 
                   {/* ANCHOR Short Reviews */}
@@ -109,12 +108,12 @@ export const BookPageShow: React.FC<ShowProps> = ({
                     <div>
                       <ArrowForwardIconContainer
                         size={16}
-                        to={`/review/short/book/${bookInfo?.postId}`}
+                        to={`/review/short/book/${bookInfo?.unitId}`}
                       >
                         <AccentBarWithTextContainer text="短评" />
                       </ArrowForwardIconContainer>
                     </div>
-                    <ShortBookReviews bookId={bookInfo?.postId || ''} />
+                    <ShortBookReviews bookId={bookInfo?.unitId || ''} />
                   </Box>
                 </Stack>
               </TabPanel>
@@ -126,13 +125,13 @@ export const BookPageShow: React.FC<ShowProps> = ({
 
                   {/* ANCHOR Book Reviews */}
                   <BookReviews
-                    bookId={bookInfo?.postId || ''}
+                    bookId={bookInfo?.unitId || ''}
                     title={bookInfo?.title || ''}
                   />
 
                   {/* ANCHOR Book Lists */}
                   <ReadlistByBookPreview
-                    bookId={bookInfo?.postId || ''}
+                    bookId={bookInfo?.unitId || ''}
                     title={bookInfo?.title || ''}
                   />
                 </Stack>
@@ -141,7 +140,7 @@ export const BookPageShow: React.FC<ShowProps> = ({
               <TabPanel value="2">
                 <Stack spacing={4}>
                   {/* ANCHOR Chapter List */}
-                  <ChapterListContainer id={bookInfo?.postId || '0'} />
+                  <ChapterListContainer id={bookInfo?.unitId || '0'} />
                 </Stack>
               </TabPanel>
             </TabContext>
@@ -162,19 +161,17 @@ export const BookPageShow: React.FC<ShowProps> = ({
                     书名：{bookInfo?.title}
                   </Typography>
                   <Typography variant="body2">
-                    作者：{bookInfo?.authors?.[0]?.name ?? ''}
+                    作者：{bookInfo?.author?.[0]?.name ?? ''}
                   </Typography>
                   <Typography variant="body2">
-                    出版社：{bookInfo?.extra?.publisher ?? ''}
+                    出版社：{bookInfo?.press?.[0]?.name ?? ''}
                   </Typography>
                   <Typography variant="body2">
-                    出版日期：
-                    {bookInfo?.extra?.publishDate ?? ''}
-                    {/* TODO: i18n later */}
+                    出品方：
+                    {bookInfo?.producer?.[0]?.name ?? ''}
                   </Typography>
                   <Typography variant="body2">
                     ISBN：{bookInfo?.isbn ?? ' '}
-                    {/* TODO: i18n later */}
                   </Typography>
                 </Stack>
               </Box>
@@ -216,8 +213,7 @@ export const BookPageContainer: React.FC<ContainerProps> = ({bookId}) => {
   const book: any = useBookPageStore(s => s.books[bookId]);
   // const { data, isLoading, error } = useQuery(bookQueries.byId(bookId));
   const {data, isLoading, error} = useQuery(bookQueries.detail(bookId));
-  const rating = 8.5,
-    tags = ['完本', '奇幻', '320万字'];
+  const rating = 8.5;
 
   useEffect(() => {
     useBookPageStore.getState().updateBook(bookId, {...data});
@@ -234,7 +230,6 @@ export const BookPageContainer: React.FC<ContainerProps> = ({bookId}) => {
   return (
     <BookPageShow
       bookInfo={book}
-      tags={tags}
       rating={rating}
       activeTab={activeTab}
       onTabChange={handleTabChange}

@@ -1,33 +1,30 @@
 // AuthorInfo.tsx  —— ES Module 版本（无 namespace）
-import { AccentBarWithTextShow } from "@component/Common/AccentBar.tsx";
-import { EditButtonFloatRight } from "@component/Common/EditButtonFloatRight.tsx";
-import EasyEditor from "@component/Form/EasyEditor.tsx";
-import { Box, Button, Typography } from "@mui/material";
-import React, { useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
-import DialogContainer from "../Common/DialogContainer.tsx";
+import {AccentBarWithTextShow} from '@component/Common/AccentBar.tsx';
+import {EditButtonFloatRight} from '@component/Common/EditButtonFloatRight.tsx';
+import EasyEditor from '@component/Form/EasyEditor.tsx';
+import {Box, Button, Typography} from '@mui/material';
+import React, {useEffect, useState} from 'react';
+import {useTranslation} from 'react-i18next';
+import DialogContainer from '../Common/DialogContainer.tsx';
+import type {PublicUser} from '@package/contract';
 
 // --------- Types ---------
-export interface Author {
-  name: string;
-  avatar?: string | null;
-  description?: string | null;
-}
+export type Author = PublicUser;
 
 // --------- Small parts ---------
-const FollowButton: React.FC<{ author: Author }> = ({ author }) => {
+const FollowButton: React.FC<{author: Author}> = ({author}) => {
   const [following, setFollowing] = useState(false);
-  const handleFollow = () => setFollowing((v) => !v);
+  const handleFollow = () => setFollowing(v => !v);
 
   return (
     <div className="w-full mt-2">
       <Button
         variant="contained"
-        color={following ? "secondary" : "primary"}
+        color={following ? 'secondary' : 'primary'}
         onClick={handleFollow}
         className="w-full"
       >
-        {following ? "Unfollow" : "Follow"} {author.name}
+        {following ? 'Unfollow' : 'Follow'} {author.name}
       </Button>
     </div>
   );
@@ -49,14 +46,14 @@ const AuthorInfoShow: React.FC<AuthorInfoShowProps> = ({
   editOpen,
   setEditOpen,
 }) => {
-  const { t } = useTranslation();
+  const {t} = useTranslation();
 
   return (
     <div>
       <div>
         <div className="flex mb-4">
           <AccentBarWithTextShow
-            text={t("book.authorInfo") + " " + author?.name}
+            text={t('book.authorInfo') + ' ' + author?.name}
           />
           {/* <FollowButton author={author} /> */}
           {showEditButton && <EditButtonFloatRight.Show onClick={onEdit} />}
@@ -68,7 +65,7 @@ const AuthorInfoShow: React.FC<AuthorInfoShowProps> = ({
               {/* 左侧图片区域 */}
               <div className="w-1/5 flex-row justify-center">
                 <img
-                  src={author.avatar || ""}
+                  src={author.avatar || ''}
                   className="max-w-full max-h-full object-contain"
                   alt="avatar"
                 />
@@ -79,9 +76,7 @@ const AuthorInfoShow: React.FC<AuthorInfoShowProps> = ({
               <div className="h-auto border-l border-gray-300 mx-4" />
 
               {/* 右侧文本区域 */}
-              <Typography className="flex-1 !text-md">
-                {author.description}
-              </Typography>
+              <Typography className="flex-1 !text-md">{author.bio}</Typography>
             </div>
           </div>
         </div>
@@ -102,9 +97,7 @@ export type AuthorInfoContainerProps = {
   author: Author;
 };
 
-const AuthorInfoContainer: React.FC<AuthorInfoContainerProps> = ({
-  author,
-}) => {
+const AuthorInfoContainer: React.FC<AuthorInfoContainerProps> = ({author}) => {
   const [editOpen, setEditOpen] = useState(false);
   const handleEdit = () => setEditOpen(true);
 
@@ -140,10 +133,7 @@ const AuthorInfoEditShow: React.FC<AuthorInfoEditShowProps> = ({
 
   return (
     <div>
-      <EasyEditor
-        value={descriptionState}
-        onChange={setDescriptionState}
-      />
+      <EasyEditor value={descriptionState} onChange={setDescriptionState} />
       <div className="w-full">
         <div className="w-1/2 float-right">
           <Button onClick={handleUpdate} className="w-full">
@@ -160,25 +150,23 @@ export type AuthorInfoEditContainerProps = {
   author: Author;
   editOpen: boolean;
   setEditOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  mode?: "modal" | "inline";
+  mode?: 'modal' | 'inline';
 };
 
 const AuthorInfoEditContainer: React.FC<AuthorInfoEditContainerProps> = ({
   author,
   editOpen,
   setEditOpen,
-  mode = "inline",
+  mode = 'inline',
 }) => {
-  const [descriptionState, setDescriptionState] = useState(
-    author.description,
-  );
+  const [descriptionState, setDescriptionState] = useState(author.bio);
 
   useEffect(() => {
-    setDescriptionState(author.description);
-  }, [author.description]);
+    setDescriptionState(author.bio);
+  }, [author.bio]);
 
   const onUpdate = (newDesc: string) => {
-    console.log("update", newDesc);
+    console.log('update', newDesc);
     // TODO: 调 API 更新作者信息
   };
 
@@ -192,7 +180,7 @@ const AuthorInfoEditContainer: React.FC<AuthorInfoEditContainerProps> = ({
     />
   );
 
-  if (mode === "modal") {
+  if (mode === 'modal') {
     return (
       <DialogContainer
         open={editOpen}
@@ -206,4 +194,9 @@ const AuthorInfoEditContainer: React.FC<AuthorInfoEditContainerProps> = ({
   return content;
 };
 
-export { AuthorInfoContainer, AuthorInfoEditContainer, AuthorInfoEditShow, AuthorInfoShow };
+export {
+  AuthorInfoContainer,
+  AuthorInfoEditContainer,
+  AuthorInfoEditShow,
+  AuthorInfoShow,
+};

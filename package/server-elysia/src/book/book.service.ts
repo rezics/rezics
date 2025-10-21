@@ -1,9 +1,13 @@
 import {prisma} from '@/prisma/client';
 import {UnitStatus, UnitType} from '@/prisma/client';
 import type {Prisma} from '@/prisma/client';
-import type {BookFilterOptions, BookWithRelations} from './types';
+import type {BookWithRelations} from './types';
 import {bookInclude} from './types';
-import type {UpdateBookInput, CreateBookInput} from '@package/contract';
+import type {
+  BookListQuery,
+  UpdateBookInput,
+  CreateBookInput,
+} from '@package/contract';
 
 import {getBookApproxCount} from './sql';
 
@@ -14,7 +18,7 @@ export class BookService {
   /**
    * Build where clause for book queries
    */
-  private buildWhereClause(options: BookFilterOptions): Prisma.BookWhereInput {
+  private buildWhereClause(options: BookListQuery): Prisma.BookWhereInput {
     const andWhere: Prisma.BookWhereInput[] = [];
 
     // Search in title, isbn, or post title
@@ -89,22 +93,25 @@ export class BookService {
   /**
    * List books with filters and pagination
    */
-  async list(options: BookFilterOptions = {}): Promise<{
+  async list(options: BookListQuery = {}): Promise<{
     books: BookWithRelations[];
     total: number;
   }> {
-    const pageNum = Math.max(Number(options.page ?? 1), 1);
+    const cursor = options.cursor;
+    const hasCursor = cursor?.unitId && cursor?.createdAt;
     const limitNum = Math.max(1, Math.min(Number(options.limit ?? 20), 100));
-    const skip = (pageNum - 1) * limitNum;
 
     const where = this.buildWhereClause(options);
-
+    console.log('cursor', cursor);
     // TODO use Postgres Approximate counting
     const [books, total] = await Promise.all([
       prisma.book.findMany({
         where,
         orderBy: {createdAt: 'desc'},
-        skip,
+        cursor: hasCursor
+          ? {unitId: cursor.unitId, createdAt: cursor.createdAt}
+          : undefined,
+        skip: hasCursor ? 1 : 0,
         take: limitNum,
         include: bookInclude,
       }),

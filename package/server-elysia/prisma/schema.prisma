@@ -20,6 +20,7 @@ enum UnitType {
   COMMENT
   NOTE
   REVIEW
+  TAG
   QUOTE
   READLIST
   IMAGE

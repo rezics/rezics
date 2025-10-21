@@ -6,7 +6,8 @@ import type {CreatedUser} from './types.js';
 /**
  * Tag types available in the system
  */
-const TAG_TYPES = ['general', 'genre', 'author', 'system'] as const;
+// const TAG_TYPES = ['general', 'genre', 'author', 'system'] as const;
+const TAG_TYPES = ['book'] as const;
 
 /**
  * Seed tags into database
@@ -32,7 +33,7 @@ export async function seedTags(
     const unit = await prisma.unit.create({
       data: {
         userId: user.unitId,
-        type: UnitType.NOTE,
+        type: UnitType.TAG,
         status: UnitStatus.ACTIVE,
         title: `Tag: ${name}`,
         content: `This is a ${type} tag`,

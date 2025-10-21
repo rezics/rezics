@@ -13,7 +13,7 @@ import React from 'react';
 
 import {bookQueries} from '@/api/book/book';
 import {useQuery} from '@tanstack/react-query';
-import type {BookDTO} from 'contract';
+import type {BookDTO} from '@package/contract';
 
 function buildQuery(info: SearchInfo): string {
   let q = info.searchText.trim();
@@ -115,16 +115,25 @@ export const BookLibContainer: React.FC = () => {
     searchText: '',
     searchTags: [],
   });
+  const [cursor, setCursor] = useState<
+    {unitId: string; createdAt: string} | undefined
+  >(undefined);
 
   const {data, isLoading, error} = useQuery(
     bookQueries.list({
-      start: (searchPage - 1) * EXTERNAL_PAGE_SIZE,
+      cursor: {...cursor},
       limit: EXTERNAL_PAGE_SIZE,
     }),
   );
 
   function handleNeedMoreData(page: number) {
-    setSearchPage(page);
+    const lastBook = data?.books[data.books.length - 1];
+    if (lastBook?.unitId && lastBook?.createdAt) {
+      setCursor({
+        unitId: lastBook.unitId,
+        createdAt: String(lastBook.createdAt),
+      });
+    }
   }
 
   useEffect(() => {

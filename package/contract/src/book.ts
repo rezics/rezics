@@ -11,7 +11,7 @@ export const publicUserSchema = t.Object({
   slug: t.Optional(t.String()),
   name: t.String(),
   avatar: t.Optional(t.Nullable(t.String())),
-  description: t.Optional(t.String()),
+  bio: t.Optional(t.String()),
 });
 
 export type PublicUser = (typeof publicUserSchema)['static'];
@@ -34,6 +34,7 @@ export const bookDTOSchema = t.Object({
   extra: t.Optional(t.Nullable(t.Record(t.String(), t.Any()))),
   userId: t.Optional(t.String()),
   user: t.Optional(publicUserSchema),
+  tags: t.Optional(t.Array(t.String())),
   description: t.Optional(t.String()),
   // t.Union 用于匹配 'string | Date'
   createdAt: t.Optional(t.Union([t.String(), t.Date()])),
@@ -55,10 +56,19 @@ export const bookListQuerySchema = t.Object({
   tags: t.Optional(t.String()), // comma-separated list
   authorId: t.Optional(t.String()),
   authorIds: t.Optional(t.String()), // comma-separated list
+  pressId: t.Optional(t.String()),
+  pressIds: t.Optional(t.String()),
+  producerId: t.Optional(t.String()),
+  producerIds: t.Optional(t.String()),
   userId: t.Optional(t.String()),
   isbn: t.Optional(t.String()),
-  page: t.Optional(t.Numeric()), // 1-based
-  limit: t.Optional(t.Numeric()), // default 20
+  cursor: t.Optional(
+    t.Object({
+      unitId: t.Optional(t.String()),
+      createdAt: t.Optional(t.String()),
+    }),
+  ),
+  limit: t.Optional(t.Number()), // default 20
 });
 
 export type BookListQuery = (typeof bookListQuerySchema)['static'];

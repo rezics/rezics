@@ -99,7 +99,7 @@ import {useBookPageStore} from '@/global/page/bookPageStore.ts';
 import {useEffect, useState} from 'react';
 import DialogContainer from '../Common/DialogContainer.tsx';
 
-import type {UpdateBookInput} from 'contract';
+import type {UpdateBookInput} from '@package/contract';
 import {useUpdateBookMutation} from '@/api/book/book.mutations';
 
 export type BookDescriptionEditContainerProps = {

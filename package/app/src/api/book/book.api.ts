@@ -10,24 +10,7 @@ import type {
   BookResponse,
 } from '@package/contract';
 import type {BookFilters} from './book.types';
-
-/**
- * Build query string from filters
- */
-function buildQueryString(filters?: BookFilters): string {
-  if (!filters) return '';
-
-  const params = new URLSearchParams();
-
-  Object.entries(filters).forEach(([key, value]) => {
-    if (value !== undefined && value !== null && value !== '') {
-      params.set(key, String(value));
-    }
-  });
-
-  const queryString = params.toString();
-  return queryString ? `?${queryString}` : '';
-}
+import {buildQueryString} from '../utils/buildQuery';
 
 /**
  * Base API URL - should be configured via environment

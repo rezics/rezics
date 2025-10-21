@@ -2,7 +2,7 @@ import {Card, CardContent, Typography} from '@mui/material';
 
 import {Link} from 'wouter';
 
-import type {BookDTO} from 'contract';
+import type {BookDTO} from '@package/contract';
 
 // import { Book } from "contract/schema";
 type Book = BookDTO;
@@ -15,8 +15,8 @@ export const BookListViewShow = ({books}: BookListViewShowProps) => {
   return (
     <div className="mt-4 grid grid-cols-1">
       {books.map(book => (
-        <div key={book.postId}>
-          <Link to={`/book/${book.postId}`}>
+        <div key={book.unitId}>
+          <Link to={`/book/${book.unitId}`}>
             <Card className="mt-4 h-[200px] flex flex-row items-stretch gap-4 w-full">
               {book.coverUrl && (
                 <img
@@ -36,7 +36,7 @@ export const BookListViewShow = ({books}: BookListViewShowProps) => {
                     color="text.secondary"
                     className="mb-2"
                   >
-                    {book.authors?.[0]?.name || ''}
+                    {book.author?.[0]?.name || ''}
                   </Typography>
                   <Typography variant="body2" className="line-clamp-3">
                     {book.description}
