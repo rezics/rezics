@@ -1,21 +1,14 @@
+import {userApi} from '@/api/user/user.api';
+import {setToken, removeToken} from '@/api/react-query/http';
+import type {CreateUserInput} from '@package/contract';
+
 export const login = async (email: string, password: string) => {
   try {
-    const response = await fetch("/api/auth/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ email, password }),
-    });
-
-    if (!response.ok) {
-      throw new Error("Login failed");
-    }
-
-    const data = await response.json();
-    return data;
+    const {user, token} = await userApi.login({email, password});
+    setToken(token);
+    return {user, token};
   } catch (error) {
-    console.error("Error during login:", error);
+    console.error('Error during login:', error);
     throw error;
   }
 };
@@ -24,24 +17,29 @@ export const register = async (
   name: string,
   email: string,
   password: string,
+  avatar?: string,
+  bio?: string,
 ) => {
   try {
-    const response = await fetch("/api/auth/register", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ name, email, password }),
-    });
-
-    if (!response.ok) {
-      throw new Error("Registration failed");
-    }
-
-    const data = await response.json();
-    return data;
+    const input: CreateUserInput = {
+      email,
+      password,
+      name,
+      avatar,
+      bio,
+    };
+    const {user, token} = await userApi.register(input);
+    setToken(token);
+    return {user, token};
   } catch (error) {
-    console.error("Error during registration:", error);
+    console.error('Error during registration:', error);
     throw error;
+  }
+};
+
+export const logout = () => {
+  removeToken();
+  if (typeof window !== 'undefined') {
+    window.location.href = '/login';
   }
 };

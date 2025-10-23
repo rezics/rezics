@@ -1,24 +1,30 @@
-import { queryOptions } from "@tanstack/react-query";
-import { http } from "./react-query/http.ts";
-import { 
-  type OffsetPaginated, 
-  type OffsetPaginationParams, 
+import {queryOptions} from '@tanstack/react-query';
+import {apiFetch} from './react-query/http.ts';
+import {
+  type OffsetPaginated,
+  type OffsetPaginationParams,
   type CommentDTO,
   type CreateCommentInput,
-  type UpdateCommentInput
-} from "contract";
+  type UpdateCommentInput,
+} from '@package/contract';
 
 // === Query Keys ===
 export const commentKeys = {
-  all: () => ["comment"] as const,
-  byRoot: (rootPostId: string) => [...commentKeys.all(), "root", { rootPostId }] as const,
+  all: () => ['comment'] as const,
+  byRoot: (rootPostId: string) =>
+    [...commentKeys.all(), 'root', {rootPostId}] as const,
   byDepth: (
     rootPostId: string,
     depth: number,
     offset?: number,
     limit?: number,
-  ) => [...commentKeys.all(), "depth", { rootPostId, depth, offset, limit }] as const,
-  detail: (id: string) => [...commentKeys.all(), "detail", id] as const,
+  ) =>
+    [
+      ...commentKeys.all(),
+      'depth',
+      {rootPostId, depth, offset, limit},
+    ] as const,
+  detail: (id: string) => [...commentKeys.all(), 'detail', id] as const,
 };
 
 // === Helper ===
@@ -29,34 +35,38 @@ const buildQuery = (params?: Record<string, unknown>) => {
     q.set(k, String(v));
   });
   const s = q.toString();
-  return s ? `?${s}` : "";
+  return s ? `?${s}` : '';
 };
 
 // === API ===
 export const commentApi = {
-  listByRoot: (rootPostId: string) => 
-    http<CommentDTO[]>(`/comments${buildQuery({ rootPostId })}`),
+  listByRoot: (rootPostId: string) =>
+    apiFetch<CommentDTO[]>(`/comments${buildQuery({rootPostId})}`),
 
   listByDepth: (
     rootPostId: string,
     depth: number,
-    opts?: OffsetPaginationParams & { limit?: number },
+    opts?: OffsetPaginationParams & {limit?: number},
   ) =>
-    http<OffsetPaginated<CommentDTO>>(
-      `/comments/by-depth${buildQuery({ rootPostId, depth, ...(opts ?? {}) })}`,
+    apiFetch<OffsetPaginated<CommentDTO>>(
+      `/comments/by-depth${buildQuery({rootPostId, depth, ...(opts ?? {})})}`,
     ),
 
-  get: (id: string) => 
-    http<CommentDTO>(`/comments/${id}`),
-    
+  get: (id: string) => apiFetch<CommentDTO>(`/comments/${id}`),
+
   create: (input: CreateCommentInput) =>
-    http<CommentDTO>(`/comments`, { method: "POST", body: JSON.stringify(input) }),
-    
+    apiFetch<CommentDTO>(`/comments`, {
+      method: 'POST',
+      body: JSON.stringify(input),
+    }),
+
   update: (id: string, input: UpdateCommentInput) =>
-    http<CommentDTO>(`/comments/${id}`, { method: "PATCH", body: JSON.stringify(input) }),
-    
-  remove: (id: string) => 
-    http<void>(`/comments/${id}`, { method: "DELETE" }),
+    apiFetch<CommentDTO>(`/comments/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(input),
+    }),
+
+  remove: (id: string) => apiFetch<void>(`/comments/${id}`, {method: 'DELETE'}),
 };
 
 // === Queries ===
@@ -67,10 +77,15 @@ export const commentQueries = {
       queryFn: () => commentApi.listByRoot(rootPostId),
     }),
 
-  byDepth: (rootPostId: string, depth: number, offset?: number, limit?: number) =>
+  byDepth: (
+    rootPostId: string,
+    depth: number,
+    offset?: number,
+    limit?: number,
+  ) =>
     queryOptions({
       queryKey: commentKeys.byDepth(rootPostId, depth, offset, limit),
-      queryFn: () => commentApi.listByDepth(rootPostId, depth, { offset, limit }),
+      queryFn: () => commentApi.listByDepth(rootPostId, depth, {offset, limit}),
     }),
 
   byId: (id: string) =>

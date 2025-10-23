@@ -9,7 +9,11 @@ import {
 } from '@tanstack/react-query';
 import {bookApi} from './book.api';
 import {bookKeys} from './book.keys';
-import type {CreateBookInput, UpdateBookInput, BookResponse} from 'contract';
+import type {
+  CreateBookInput,
+  UpdateBookInput,
+  BookResponse,
+} from '@package/contract';
 
 /**
  * Mutation for creating a book
@@ -29,7 +33,7 @@ export function useCreateBookMutation(
       queryClient.invalidateQueries({queryKey: bookKeys.lists()});
 
       // Optionally pre-populate the cache with the new book
-      queryClient.setQueryData(bookKeys.detail(data.postId), data);
+      queryClient.setQueryData(bookKeys.detail(data.unitId), data);
 
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },

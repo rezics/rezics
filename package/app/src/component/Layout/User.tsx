@@ -1,8 +1,20 @@
-import { useUserStore } from "@/global/userStore.ts";
-import { Logout as LogoutIcon, Person as PersonIcon, Settings as SettingsIcon } from "@mui/icons-material";
-import { Avatar, Divider, IconButton, ListItemIcon, ListItemText, Menu, MenuItem } from "@mui/material";
-import React, { useState } from "react";
-import { Link } from "wouter";
+import {useUserStore} from '@/global/userStore.ts';
+import {
+  Logout as LogoutIcon,
+  Person as PersonIcon,
+  Settings as SettingsIcon,
+} from '@mui/icons-material';
+import {
+  Avatar,
+  Divider,
+  IconButton,
+  ListItemIcon,
+  ListItemText,
+  Menu,
+  MenuItem,
+} from '@mui/material';
+import React, {useState} from 'react';
+import {Link} from 'wouter';
 
 export type UserShowProps = {
   anchorEl: HTMLElement | null;
@@ -21,17 +33,17 @@ export const UserShow: React.FC<UserShowProps> = ({
   onProfile,
   onSettings,
 }) => {
-  const user = useUserStore((state) => state.user);
+  const user = useUserStore(state => state.user);
   return (
     <>
       <IconButton
         onClick={onMenuOpen}
         size="small"
-        sx={{ ml: 2 }}
+        sx={{ml: 2}}
         aria-controls="menu-appbar"
         aria-haspopup="true"
       >
-        <Avatar sx={{ width: 32, height: 32 }}>
+        <Avatar sx={{width: 32, height: 32}}>
           <img src={user?.avatar} alt="avatar" />
         </Avatar>
       </IconButton>
@@ -39,13 +51,13 @@ export const UserShow: React.FC<UserShowProps> = ({
         id="menu-appbar"
         anchorEl={anchorEl}
         anchorOrigin={{
-          vertical: "bottom",
-          horizontal: "right",
+          vertical: 'bottom',
+          horizontal: 'right',
         }}
         keepMounted
         transformOrigin={{
-          vertical: "top",
-          horizontal: "right",
+          vertical: 'top',
+          horizontal: 'right',
         }}
         open={Boolean(anchorEl)}
         onClose={onMenuClose}
@@ -60,7 +72,7 @@ export const UserShow: React.FC<UserShowProps> = ({
             <PersonIcon fontSize="small" />
           </ListItemIcon>
           <ListItemText>
-            <Link to={`/user/${user?.id}`}>Profile</Link>
+            <Link to={`/user/me`}>Profile</Link>
           </ListItemText>
         </MenuItem>
         <MenuItem
@@ -92,7 +104,7 @@ export type UserContainerProps = {
   onLogout?: () => void;
 };
 
-export const UserContainer: React.FC<UserContainerProps> = ({ onLogout }) => {
+export const UserContainer: React.FC<UserContainerProps> = ({onLogout}) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
@@ -109,11 +121,11 @@ export const UserContainer: React.FC<UserContainerProps> = ({ onLogout }) => {
   };
 
   const handleProfile = () => {
-    console.log("Profile clicked");
+    console.log('Profile clicked');
   };
 
   const handleSettings = () => {
-    console.log("Settings clicked");
+    console.log('Settings clicked');
   };
 
   return (

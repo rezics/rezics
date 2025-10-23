@@ -12,37 +12,7 @@ import type {
 import type {BookFilters} from './book.types';
 import {buildQueryString} from '../utils/buildQuery';
 
-/**
- * Base API URL - should be configured via environment
- */
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
-
-/**
- * Generic fetch wrapper with error handling
- */
-async function apiFetch<T>(
-  endpoint: string,
-  options?: globalThis.RequestInit,
-): Promise<T> {
-  const url = `${API_BASE_URL}${endpoint}`;
-
-  const response = await fetch(url, {
-    ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...options?.headers,
-    },
-  });
-
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({
-      message: `HTTP error! status: ${response.status}`,
-    }));
-    throw new Error(error.message || 'API request failed');
-  }
-
-  return response.json();
-}
+import {apiFetch} from '../react-query/http';
 
 /**
  * Book API methods

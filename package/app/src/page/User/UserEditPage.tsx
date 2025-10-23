@@ -1,0 +1,206 @@
+import {
+  Alert,
+  Avatar,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  CircularProgress,
+  TextField,
+  Typography,
+} from '@mui/material';
+import SaveIcon from '@mui/icons-material/Save';
+import CancelIcon from '@mui/icons-material/Cancel';
+import {useEffect, useState} from 'react';
+import type {FC} from 'react';
+import type React from 'react';
+import {useTranslation} from 'react-i18next';
+import type {UserDTO, UpdateUserInput} from '@package/contract';
+import {useQuery} from '@tanstack/react-query';
+import {userQueries} from '@/api/user/user.queries';
+import {UserLoading} from './UserState';
+import {userApi} from '@/api/user/user.api';
+
+export interface UserEditPageProps {
+  onCancel?: () => void;
+  onSuccess?: (user: UserDTO) => void;
+}
+
+/**
+ * UserEditPage - 用户资料编辑页面
+ * 允许用户编辑自己的个人信息
+ */
+export const UserEditPage: FC<UserEditPageProps> = ({onCancel, onSuccess}) => {
+  const {t} = useTranslation();
+  const [user, setUser] = useState<UserDTO | null>(null);
+  const {data, isLoading} = useQuery(userQueries.me());
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string>();
+  const [success, setSuccess] = useState(false);
+
+  const [formData, setFormData] = useState<UpdateUserInput>({
+    name: '',
+    avatar: '',
+    bio: '',
+    password: '',
+  });
+
+  useEffect(() => {
+    if (data) {
+      setUser(data);
+      setFormData({
+        name: data.name,
+        avatar: data.avatar || '',
+        bio: data.bio || '',
+        password: '',
+      });
+    }
+  }, [data]);
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setSaving(true);
+    setError(undefined);
+    setSuccess(false);
+
+    try {
+      const updateData: UpdateUserInput = {
+        name: formData.name,
+        avatar: formData.avatar || undefined,
+        bio: formData.bio || undefined,
+      };
+
+      // Only include password if it's not empty
+      if (formData.password && formData.password.trim() !== '') {
+        updateData.password = formData.password;
+      }
+
+      const updatedUser = await userApi.updateMe(updateData);
+      setUser(updatedUser);
+      setSuccess(true);
+
+      if (onSuccess) {
+        onSuccess(updatedUser);
+      }
+
+      // Clear password field after successful update
+      setFormData(prev => ({...prev, password: ''}));
+    } catch (err) {
+      setError((err as Error).message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleChange = (field: keyof UpdateUserInput, value: string) => {
+    setFormData(prev => ({...prev, [field]: value}));
+  };
+
+  if (isLoading) {
+    return <UserLoading />;
+  }
+
+  if (!user) {
+    return (
+      <Box className="flex items-center justify-center h-64">
+        <Typography color="error">Failed to load user data</Typography>
+      </Box>
+    );
+  }
+
+  return (
+    <Box className="w-11/12 max-w-2xl mx-auto mt-10">
+      <Card className="shadow-lg rounded-2xl">
+        <CardHeader
+          avatar={
+            <Avatar src={formData.avatar} sx={{width: 80, height: 80}}>
+              {formData.name?.charAt(0).toUpperCase()}
+            </Avatar>
+          }
+          title={
+            <Typography variant="h4" className="font-semibold">
+              {t('common.edit')} Profile
+            </Typography>
+          }
+        />
+        <CardContent>
+          <form onSubmit={handleSubmit}>
+            {error && (
+              <Alert severity="error" className="mb-4">
+                {error}
+              </Alert>
+            )}
+            {success && (
+              <Alert severity="success" className="mb-4">
+                Profile updated successfully!
+              </Alert>
+            )}
+
+            <Box className="space-y-4">
+              <TextField
+                fullWidth
+                label={t('common.username')}
+                value={formData.name}
+                onChange={e => handleChange('name', e.target.value)}
+                required
+                variant="outlined"
+              />
+
+              <TextField
+                fullWidth
+                label="Avatar URL"
+                value={formData.avatar}
+                onChange={e => handleChange('avatar', e.target.value)}
+                variant="outlined"
+                helperText="Enter a URL for your profile picture"
+              />
+
+              <TextField
+                fullWidth
+                label="Bio"
+                value={formData.bio}
+                onChange={e => handleChange('bio', e.target.value)}
+                variant="outlined"
+                multiline
+                rows={4}
+                helperText="Tell us about yourself"
+              />
+
+              <TextField
+                fullWidth
+                type="password"
+                label="New Password (optional)"
+                value={formData.password}
+                onChange={e => handleChange('password', e.target.value)}
+                variant="outlined"
+                helperText="Leave empty to keep current password"
+              />
+
+              <Box className="flex gap-2 justify-end mt-6">
+                {onCancel && (
+                  <Button
+                    variant="outlined"
+                    startIcon={<CancelIcon />}
+                    onClick={onCancel}
+                    disabled={saving}
+                  >
+                    {t('common.cancel')}
+                  </Button>
+                )}
+                <Button
+                  type="submit"
+                  variant="contained"
+                  startIcon={<SaveIcon />}
+                  disabled={saving}
+                >
+                  {saving ? <CircularProgress size={24} /> : t('common.save')}
+                </Button>
+              </Box>
+            </Box>
+          </form>
+        </CardContent>
+      </Card>
+    </Box>
+  );
+};

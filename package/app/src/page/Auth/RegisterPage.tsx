@@ -1,13 +1,13 @@
-import Alert from "@mui/material/Alert";
-import Button from "@mui/material/Button";
-import TextField from "@mui/material/TextField";
-import { type FC, useState } from "react";
-import type React from "react";
-import { useTranslation } from "react-i18next";
-import { string, z } from "zod";
-import { register } from "./lib/handler.ts";
-import { Layout } from "./lib/Layout.tsx";
-import { ModalLayout } from "./lib/ModalLayout.tsx";
+import Alert from '@mui/material/Alert';
+import Button from '@mui/material/Button';
+import TextField from '@mui/material/TextField';
+import {type FC, useState} from 'react';
+import type React from 'react';
+import {useTranslation} from 'react-i18next';
+import {string, z} from 'zod';
+import {register} from './lib/handler.ts';
+import {Layout} from './lib/Layout.tsx';
+import {ModalLayout} from './lib/ModalLayout.tsx';
 
 export interface RegisterShowProps {
   loading: boolean;
@@ -30,7 +30,7 @@ export const RegisterShow: FC<RegisterShowProps> = ({
   onLoginClick,
   isModal = false,
 }) => {
-  const { t } = useTranslation();
+  const {t} = useTranslation();
 
   const content = (
     <>
@@ -38,28 +38,28 @@ export const RegisterShow: FC<RegisterShowProps> = ({
       <TextField
         name="name"
         type="text"
-        label={t("common.username")}
+        label={t('common.username')}
         variant="standard"
         required
       />
       <TextField
         name="email"
         type="email"
-        label={t("common.email")}
+        label={t('common.email')}
         variant="standard"
         required
       />
       <TextField
         name="password"
         type="password"
-        label={t("common.password")}
+        label={t('common.password')}
         variant="standard"
         required
       />
       <TextField
         name="confirm"
         type="password"
-        label={t("common.confirm")}
+        label={t('common.confirm')}
         variant="standard"
         required
       />
@@ -69,10 +69,10 @@ export const RegisterShow: FC<RegisterShowProps> = ({
   const actions = !hideActions && (
     <>
       <Button variant="text" type="button" onClick={onLoginClick}>
-        {t("auth.login")}
+        {t('auth.login')}
       </Button>
       <Button type="submit" variant="contained" disabled={loading}>
-        {loading ? "Loading..." : t("auth.register")}
+        {loading ? 'Loading...' : t('auth.register')}
       </Button>
     </>
   );
@@ -81,7 +81,7 @@ export const RegisterShow: FC<RegisterShowProps> = ({
 
   return (
     <LayoutComponent
-      title={t("auth.register")}
+      title={t('auth.register')}
       onSubmit={onSubmit}
       content={content}
       actions={actions}
@@ -99,7 +99,7 @@ export interface RegisterPageProps {}
 export const RegisterPage: FC<RegisterPageProps> = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>();
-  const { t } = useTranslation();
+  const {t} = useTranslation();
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -107,47 +107,46 @@ export const RegisterPage: FC<RegisterPageProps> = () => {
     setError(undefined);
 
     const form = event.currentTarget as HTMLFormElement;
-    const data = new FormData();
-    // TODO: Remove hardcoded values
-    // data.append("name", "test");
-    // data.append("email", "test@test.com");
-    // data.append("password", "123456");
-    // data.append("confirm", "123456");
+    const data = new FormData(form);
 
     try {
-      const { error: e_name, data: _name } = string()
+      const {error: e_name, data: _name} = string()
         .min(1)
-        .safeParse(data.get("name"));
+        .safeParse(data.get('name'));
       if (e_name) {
-        throw new Error(t("auth.error.invalid_username"));
+        throw new Error(t('auth.error.invalid_username'));
       }
 
-      const { error: e_email, data: _email } = z
+      const {error: e_email, data: _email} = z
         .string()
         .email()
-        .safeParse(data.get("email"));
-      if (e_email) throw new Error(t("auth.error.invalid_email"));
+        .safeParse(data.get('email'));
+      if (e_email) throw new Error(t('auth.error.invalid_email'));
 
-      const { error: e_password, data: _password } = string()
+      const {error: e_password, data: _password} = string()
         .min(6)
-        .safeParse(data.get("password"));
+        .safeParse(data.get('password'));
       if (e_password) {
-        throw new Error(t("auth.error.invalid_password"));
+        throw new Error(t('auth.error.invalid_password'));
       }
 
-      const { error: e_confirm, data: _confirm } = string().safeParse(
-        data.get("confirm"),
+      const {error: e_confirm, data: _confirm} = string().safeParse(
+        data.get('confirm'),
       );
       if (e_confirm) {
-        throw new Error(t("auth.error.invalid_confirm"));
+        throw new Error(t('auth.error.invalid_confirm'));
       }
 
       if (_password !== _confirm) {
-        throw new Error(t("auth.error.passwords_mismatch"));
+        throw new Error(t('auth.error.passwords_mismatch'));
       }
 
       await register(_name, _email, _password);
-      // TODO: Handle successful registration (redirect, show success message, etc.)
+
+      // Redirect to home page after successful registration
+      if (typeof window !== 'undefined') {
+        window.location.href = '/';
+      }
     } catch (e) {
       setError((e as Error).message);
     } finally {
@@ -157,7 +156,7 @@ export const RegisterPage: FC<RegisterPageProps> = () => {
 
   const handleLoginClick = () => {
     // TODO: Navigate to login page
-    window.location.href = "/login";
+    window.location.href = '/login';
   };
 
   return (

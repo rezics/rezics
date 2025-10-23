@@ -1,93 +1,52 @@
-import { Avatar, Button, Card, CardContent, CardHeader, CircularProgress, Typography } from "@mui/material";
-import { useEffect, useState } from "react";
+import {useState} from 'react';
+import type {FC} from 'react';
+import {UserProfilePage} from './UserProfilePage';
+import {UserEditPage} from './UserEditPage';
+import type {UserDTO} from '@package/contract';
 
-import useRpcQuery from "@/api/swr-query/tsrTypeBuild";
-
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  avatarUrl: string;
-  bio: string;
-  joinDate: string;
+export interface UserPageProps {
+  unitId?: string;
+  isCurrentUser?: boolean;
 }
 
-interface UserPageProps {
-  userId: string;
-}
+/**
+ * UserPage - 用户页面容器
+ * 根据状态显示用户资料或编辑表单
+ */
+export const UserPage: FC<UserPageProps> = ({
+  unitId,
+  isCurrentUser = false,
+}) => {
+  const [isEditing, setIsEditing] = useState(false);
 
-export function UserPage({ userId }: UserPageProps) {
-  const createUserInput = {
-    operation: "user.read",
-    parameter: { id: userId },
-    select: {
-      id: true,
-      name: true,
-      avatar: true,
-      bio: true,
-      joinDate: true,
-    },
+  const handleEditClick = () => {
+    setIsEditing(true);
   };
-  const { data, error, isLoading } = useRpcQuery<any>(createUserInput);
 
-  if (isLoading) {
+  const handleCancelEdit = () => {
+    setIsEditing(false);
+  };
+
+  const handleEditSuccess = (_user: UserDTO) => {
+    setIsEditing(false);
+    // Optionally refresh the profile or show success message
+  };
+
+  // If in edit mode and is current user, show edit form
+  if (isEditing && isCurrentUser) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <CircularProgress />
-      </div>
+      <UserEditPage onCancel={handleCancelEdit} onSuccess={handleEditSuccess} />
     );
   }
 
-  if (error) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <Typography color="error">{error?.message}</Typography>
-      </div>
-    );
-  }
-
+  // Otherwise show profile
   return (
-    <div className="w-11/12 mx-auto mt-10">
-      <Card className="shadow-lg rounded-2xl">
-        <CardHeader
-          avatar={
-            <Avatar
-              src={data?.avatar}
-              sx={{ width: 64, height: 64 }}
-            />
-          }
-          title={
-            <Typography variant="h5" className="font-semibold">
-              {data?.name}
-            </Typography>
-          }
-          subheader={
-            <Typography variant="body2" color="textSecondary">
-              Joined on {data?.joinDate}
-            </Typography>
-          }
-          action={<Button variant="contained">Follow</Button>}
-        />
-        <CardContent>
-          <Typography variant="subtitle1" className="mb-2">
-            Email
-          </Typography>
-          <Typography
-            variant="body2"
-            color="textSecondary"
-            className="mb-4"
-          >
-            {data?.email}
-          </Typography>
-
-          <Typography variant="subtitle1" className="mb-2">
-            Bio
-          </Typography>
-          <Typography variant="body1" className="text-gray-700">
-            {data?.bio}
-          </Typography>
-        </CardContent>
-      </Card>
-    </div>
+    <UserProfilePage
+      unitId={unitId || ''}
+      isCurrentUser={isCurrentUser}
+      onEditClick={handleEditClick}
+    />
   );
-}
+};
+
+export default UserPage;

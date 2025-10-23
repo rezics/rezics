@@ -1,15 +1,16 @@
-import { Typography } from "@mui/material";
-import Card from "@mui/material/Card";
-import CardActions from "@mui/material/CardActions";
-import CardContent from "@mui/material/CardContent";
-import { FC } from "react";
+import {Typography} from '@mui/material';
+import Card from '@mui/material/Card';
+import CardActions from '@mui/material/CardActions';
+import CardContent from '@mui/material/CardContent';
+import type {FC} from 'react';
+import type React from 'react';
 
 export const Layout: FC<{
   title: string;
   onSubmit: React.FormEventHandler<HTMLFormElement>;
   content: React.ReactNode;
   actions: React.ReactNode;
-}> = ({ title, onSubmit, content, actions }) => (
+}> = ({title, onSubmit, content, actions}) => (
   <form
     onSubmit={onSubmit}
     className="w-full h-dvh flex flex-col items-center justify-center"

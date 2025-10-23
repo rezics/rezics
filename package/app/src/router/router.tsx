@@ -1,42 +1,42 @@
-import { ThemeProvider } from "@mui/material";
-import { Route, Router, Switch } from "wouter";
+import {ThemeProvider} from '@mui/material';
+import {Route, Router, Switch} from 'wouter';
 
 // Pages
-import { LoginPage } from "@/page/Auth/LoginPage.tsx";
-import { RegisterPage } from "@/page/Auth/RegisterPage.tsx";
-import { Home } from "@/page/Home.tsx";
-import { NotFoundContainer } from "@/page/NotFound.tsx";
+import {LoginPage} from '@/page/Auth/LoginPage.tsx';
+import {RegisterPage} from '@/page/Auth/RegisterPage.tsx';
+import {Home} from '@/page/Home.tsx';
+import {NotFoundContainer} from '@/page/NotFound.tsx';
 
 // Book – Read
-import { BookReadLayout } from "@/layout/BookReadLayout.tsx";
-import { BookReadChapterPage } from "@/page/Book/ChapterPage.tsx";
+import {BookReadLayout} from '@/layout/BookReadLayout.tsx';
+import {BookReadChapterPage} from '@/page/Book/ChapterPage.tsx';
 
 // Book – Edit
-import { BookEditLayout } from "@/layout/BookEditLayout.tsx";
-import { BookEditChapterPage } from "@/page/BookEdit/ChapterPage.tsx";
-import { BookEditMainPage } from "@/page/BookEdit/InfoPage.tsx";
+import {BookEditLayout} from '@/layout/BookEditLayout.tsx';
+import {BookEditChapterPage} from '@/page/BookEdit/ChapterPage.tsx';
+import {BookEditMainPage} from '@/page/BookEdit/InfoPage.tsx';
 
 // Book list / Library pages
-import { BookLibContainer } from "@/page/Book/BookLibPage.tsx";
-import { BookPageContainer } from "@/page/Book/BookPage.tsx";
-import { ReadListPage } from "@/page/ReadList/ReadListPage.tsx";
+import {BookLibContainer} from '@/page/Book/BookLibPage.tsx';
+import {BookPageContainer} from '@/page/Book/BookPage.tsx';
+import {ReadListPage} from '@/page/ReadList/ReadListPage.tsx';
 
 // Misc
-import { MainLayout } from "@/layout/MainLayout.tsx";
-import { BookListEditPage } from "@/page/ReadList/ReadListEditPage.tsx";
-import { ReadlistByBookPage } from "@/page/ReadList/ReadListsByBookPage.tsx";
-import { QuoteByBookPage } from "@/page/Review/QuoteByBookPage.tsx";
-import { ReviewByBookPage } from "@/page/Review/ReviewByBookPage.tsx";
-import { LongReviewEditPage } from "@/page/Review/ReviewEditPage.tsx";
-import { ShortReviewByBookPage } from "@/page/Review/ShortReviewByBookPage.tsx";
-import { TagByBookPage } from "@/page/Tag/TagByBookPage.tsx";
-import TestPage from "@/page/Test/TestPage.tsx";
-import { TestPage02 } from "@/page/Test/TestPage02.tsx";
-import { TestPage03 } from "@/page/Test/TestPage03.tsx";
+import {MainLayout} from '@/layout/MainLayout.tsx';
+import {BookListEditPage} from '@/page/ReadList/ReadListEditPage.tsx';
+import {ReadlistByBookPage} from '@/page/ReadList/ReadListsByBookPage.tsx';
+import {QuoteByBookPage} from '@/page/Review/QuoteByBookPage.tsx';
+import {ReviewByBookPage} from '@/page/Review/ReviewByBookPage.tsx';
+import {LongReviewEditPage} from '@/page/Review/ReviewEditPage.tsx';
+import {ShortReviewByBookPage} from '@/page/Review/ShortReviewByBookPage.tsx';
+import {TagByBookPage} from '@/page/Tag/TagByBookPage.tsx';
+import TestPage from '@/page/Test/TestPage.tsx';
+import {TestPage02} from '@/page/Test/TestPage02.tsx';
+import {TestPage03} from '@/page/Test/TestPage03.tsx';
 // import TestPaginationPage from "@/page/Test/TestPaginationPage.tsx";
-import { NewBookPage } from "@/page/BookEdit/NewBookPage.tsx";
-import { MainConfigPage } from "@/page/Config/MainConfigPage";
-import { UserPage } from "@/page/User/UserPage.tsx";
+import {NewBookPage} from '@/page/BookEdit/NewBookPage.tsx';
+import {MainConfigPage} from '@/page/Config/MainConfigPage';
+import {UserPage} from '@/page/User/UserPage.tsx';
 
 // TODO 删除 ThemeProvider
 
@@ -75,14 +75,14 @@ export default (
           </MainLayout>
         </Route>
         <Route path="/book/:bookId/edit/:chapterId">
-          {({ chapterId }) => (
+          {({chapterId}) => (
             <BookEditLayout>
               <BookEditChapterPage chapterId={chapterId} />
             </BookEditLayout>
           )}
         </Route>
         <Route path="/book/:bookId/edit">
-          {({ bookId }) => (
+          {({bookId}) => (
             <BookEditLayout>
               <BookEditMainPage bookId={bookId} />
             </BookEditLayout>
@@ -96,7 +96,7 @@ export default (
           </MainLayout>
         </Route>
         <Route path="/book/:bookId">
-          {({ bookId }) => (
+          {({bookId}) => (
             <MainLayout>
               <BookPageContainer bookId={bookId} />
             </MainLayout>
@@ -160,7 +160,7 @@ export default (
 
         {/* ANCHOR Tag Routes */}
         <Route path="/tag/book/:bookId">
-          {({ bookId }) => (
+          {({bookId}) => (
             <MainLayout>
               <TagByBookPage bookId={bookId} />
             </MainLayout>
@@ -168,12 +168,18 @@ export default (
         </Route>
 
         {/* ANCHOR User Routes */}
-        <Route path="/user/:userId">
-          {({ userId }) => (
+        <Route path="/user/:unitId">
+          {({unitId}) => (
             <MainLayout>
-              <UserPage userId={userId} />
+              <UserPage unitId={unitId} />
             </MainLayout>
           )}
+        </Route>
+
+        <Route path="/user/me">
+          <MainLayout>
+            <UserPage isCurrentUser={true} />
+          </MainLayout>
         </Route>
 
         {/* ANCHOR Config Routes */}
@@ -196,18 +202,14 @@ export default (
         </Route>
         <Route path="/test03">
           <TestPage03 />
-          {
-            /* <BookEditLayout>
-                    </BookEditLayout> */
-          }
+          {/* <BookEditLayout>
+                    </BookEditLayout> */}
         </Route>
-        {
-          /* <Route path="/test04">
+        {/* <Route path="/test04">
                     <MainLayout>
                         <TestPaginationPage />
                     </MainLayout>
-                </Route> */
-        }
+                </Route> */}
         {/* ANCHOR Home */}
         <Route path="/">
           <MainLayout>

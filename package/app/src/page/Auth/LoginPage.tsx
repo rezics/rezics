@@ -1,13 +1,13 @@
-import Alert from "@mui/material/Alert";
-import Button from "@mui/material/Button";
-import TextField from "@mui/material/TextField";
-import { type FC, useState } from "react";
-import type React from "react";
-import { useTranslation } from "react-i18next";
-import { string, z } from "zod";
-import { login } from "./lib/handler.ts";
-import { Layout } from "./lib/Layout.tsx";
-import { ModalLayout } from "./lib/ModalLayout.tsx";
+import Alert from '@mui/material/Alert';
+import Button from '@mui/material/Button';
+import TextField from '@mui/material/TextField';
+import {type FC, useState} from 'react';
+import type React from 'react';
+import {useTranslation} from 'react-i18next';
+import {string, z} from 'zod';
+import {login} from './lib/handler.ts';
+import {Layout} from './lib/Layout.tsx';
+import {ModalLayout} from './lib/ModalLayout.tsx';
 
 export interface LoginShowProps {
   loading: boolean;
@@ -32,11 +32,13 @@ export const LoginShow: FC<LoginShowProps> = ({
   onRegisterClick,
   isModal = false,
 }) => {
-  const { t } = useTranslation();
+  const {t} = useTranslation();
 
   const content = (
     <>
-      {showAlreadyLoggedIn && <Alert severity="warning">{t("auth.already_login")}</Alert>}
+      {showAlreadyLoggedIn && (
+        <Alert severity="warning">{t('auth.already_login')}</Alert>
+      )}
       {error && (
         <Alert severity="error">
           {error}
@@ -48,21 +50,21 @@ export const LoginShow: FC<LoginShowProps> = ({
               /* TODO: handle resolve */
             }}
           >
-            {t("auth.resolve")}
+            {t('auth.resolve')}
           </Button>
         </Alert>
       )}
       <TextField
         name="email"
         type="email"
-        label={t("common.email")}
+        label={t('common.email')}
         variant="standard"
         required
       />
       <TextField
         name="password"
         type="password"
-        label={t("common.password")}
+        label={t('common.password')}
         variant="standard"
         required
       />
@@ -72,10 +74,10 @@ export const LoginShow: FC<LoginShowProps> = ({
   const actions = !hideActions && (
     <>
       <Button variant="text" type="button" onClick={onRegisterClick}>
-        {t("auth.register")}
+        {t('auth.register')}
       </Button>
       <Button type="submit" variant="contained" disabled={loading}>
-        {loading ? "Loading..." : t("auth.login")}
+        {loading ? 'Loading...' : t('auth.login')}
       </Button>
     </>
   );
@@ -84,7 +86,7 @@ export const LoginShow: FC<LoginShowProps> = ({
 
   return (
     <LayoutComponent
-      title={t("auth.login")}
+      title={t('auth.login')}
       onSubmit={onSubmit}
       content={content}
       actions={actions}
@@ -102,7 +104,7 @@ export interface LoginPageProps {}
 export const LoginPage: FC<LoginPageProps> = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>();
-  const { t } = useTranslation();
+  const {t} = useTranslation();
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -110,28 +112,28 @@ export const LoginPage: FC<LoginPageProps> = () => {
     setError(undefined);
 
     const form = event.currentTarget as HTMLFormElement;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const data = new FormData();
-    // TODO: Remove hardcoded values
-    // data.append("email", "test@test.com");
-    // data.append("password", "123456");
+    const data = new FormData(form);
 
     try {
-      const { error: e_email, data: _email } = z
+      const {error: e_email, data: _email} = z
         .string()
         .email()
-        .safeParse(data.get("email"));
-      if (e_email) throw new Error(t("auth.error.invalid_email"));
+        .safeParse(data.get('email'));
+      if (e_email) throw new Error(t('auth.error.invalid_email'));
 
-      const { error: e_password, data: _password } = string()
+      const {error: e_password, data: _password} = string()
         .min(1)
-        .safeParse(data.get("password"));
+        .safeParse(data.get('password'));
       if (e_password) {
-        throw new Error(t("auth.error.invalid_password"));
+        throw new Error(t('auth.error.invalid_password'));
       }
 
       await login(_email, _password);
-      // TODO: Handle successful login (redirect, etc.)
+
+      // Redirect to home page after successful login
+      if (typeof window !== 'undefined') {
+        window.location.href = '/';
+      }
     } catch (e) {
       setError((e as Error).message);
     } finally {
@@ -141,7 +143,7 @@ export const LoginPage: FC<LoginPageProps> = () => {
 
   const handleRegisterClick = () => {
     // TODO: Navigate to register page
-    window.location.href = "/register";
+    window.location.href = '/register';
   };
 
   return (
