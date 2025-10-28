@@ -141,18 +141,19 @@ model Unit {
  */
 model Book {
   // 与 Unit 1:1 绑定；采用 Unit.id 作为主键
-  unitId String @id @db.Uuid
+  unitId String @id @default(dbgenerated("uuidv7()")) @db.Uuid
   unit   Unit   @relation("BookIndexForUnit", fields: [unitId], references: [id], onDelete: Cascade)
 
-  title         String
-  author        User[]  @relation("BookAuthor") // User[]，作者列表，所有作者都会被注册为用户
-  press         User[]  @relation("BookPress")
-  producer      User[]  @relation("BookProducer")
-  description   String?
-  coverUrl      String?
-  isbn          String?
-  chaptersIndex String? // 章节树状信息, 章节信息类似Review,统一使用
-  extra         Json? // 领域扩展（出版社、出版年、装帧…）
+  title        String
+  author       User[]     @relation("BookAuthor") // User[]，作者列表，所有作者都会被注册为用户
+  press        User[]     @relation("BookPress")
+  producer     User[]     @relation("BookProducer")
+  description  String?
+  coverUrl     String?
+  isbn         String?
+  // chaptersIndex String? // 章节树状信息, 章节信息类似Review,统一使用
+  chapterIndex BookIndex?
+  extra        Json? // 领域扩展（出版社、出版年、装帧…）
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -160,6 +161,16 @@ model Book {
   @@index([title])
   @@index([isbn])
 }
+
+model BookIndex {
+  bookUnitId String   @id @db.Uuid
+  book       Book     @relation(fields: [bookUnitId], references: [unitId], onDelete: Cascade)
+  index      Json // 目录 JSON
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+// TODO 检查下列 unitId 是否需要, 只有真正绑定 Unit 的才需要 unitId
 
 /**
  * =========================
@@ -170,7 +181,7 @@ model Book {
  */
 model CommentIndex {
   // 这条“评论 Unit”的 id（与 Unit 1:1）
-  unitId String @id @db.Uuid
+  unitId String @id @default(dbgenerated("uuidv7()")) @db.Uuid
   unit   Unit   @relation("CommentIndexForUnit", fields: [unitId], references: [id], onDelete: Cascade)
 
   // 根对象

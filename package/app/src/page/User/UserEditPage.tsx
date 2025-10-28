@@ -146,7 +146,7 @@ export const UserEditPage: FC<UserEditPageProps> = ({onCancel, onSuccess}) => {
                 required
                 variant="outlined"
               />
-
+              <div className="h-2" />
               <TextField
                 fullWidth
                 label="Avatar URL"
@@ -155,7 +155,7 @@ export const UserEditPage: FC<UserEditPageProps> = ({onCancel, onSuccess}) => {
                 variant="outlined"
                 helperText="Enter a URL for your profile picture"
               />
-
+              <div className="h-2" />
               <TextField
                 fullWidth
                 label="Bio"
@@ -166,7 +166,7 @@ export const UserEditPage: FC<UserEditPageProps> = ({onCancel, onSuccess}) => {
                 rows={4}
                 helperText="Tell us about yourself"
               />
-
+              <div className="h-2" />
               <TextField
                 fullWidth
                 type="password"
@@ -176,7 +176,7 @@ export const UserEditPage: FC<UserEditPageProps> = ({onCancel, onSuccess}) => {
                 variant="outlined"
                 helperText="Leave empty to keep current password"
               />
-
+              <div className="h-2" />
               <Box className="flex gap-2 justify-end mt-6">
                 {onCancel && (
                   <Button

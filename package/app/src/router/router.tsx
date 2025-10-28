@@ -167,6 +167,14 @@ export default (
           )}
         </Route>
 
+        <Route path="/user/me/*">
+          {params => (
+            <MainLayout>
+              <UserPage key="me" isCurrentUser={params ? true : true} />
+            </MainLayout>
+          )}
+        </Route>
+
         {/* ANCHOR User Routes */}
         <Route path="/user/:unitId">
           {({unitId}) => (
@@ -174,12 +182,6 @@ export default (
               <UserPage unitId={unitId} />
             </MainLayout>
           )}
-        </Route>
-
-        <Route path="/user/me">
-          <MainLayout>
-            <UserPage isCurrentUser={true} />
-          </MainLayout>
         </Route>
 
         {/* ANCHOR Config Routes */}

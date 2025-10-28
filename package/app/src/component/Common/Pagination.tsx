@@ -1,4 +1,4 @@
-import { ArrowDownward, ArrowUpward } from "@mui/icons-material";
+import {ArrowDownward, ArrowUpward} from '@mui/icons-material';
 import {
   Box,
   FormControl,
@@ -12,10 +12,10 @@ import {
   ToggleButton,
   ToggleButtonGroup,
   Typography,
-} from "@mui/material";
-import { useCallback, useEffect, useMemo, useState } from "react";
+} from '@mui/material';
+import {useCallback, useEffect, useMemo, useState} from 'react';
 
-import React from "react";
+import React from 'react';
 
 /**
  * example:
@@ -31,8 +31,8 @@ import React from "react";
  */
 export interface SortControlsProps {
   sortType: string;
-  sortOrder: "asc" | "desc";
-  onSortChange: (newSort: { type?: string; order?: "asc" | "desc" }) => void;
+  sortOrder: 'asc' | 'desc';
+  onSortChange: (newSort: {type?: string; order?: 'asc' | 'desc'}) => void;
 }
 /**
  * SortControls
@@ -44,26 +44,27 @@ const SortControls: React.FC<SortControlsProps> = ({
   onSortChange,
 }) => {
   const sortOptions = [
-    { value: "time", label: "按时间" },
-    { value: "name", label: "按名称" },
-    { value: "popular", label: "按热度" },
-    { value: "agree", label: "按赞同数" },
+    {value: 'time', label: '按时间'},
+    {value: 'name', label: '按名称'},
+    {value: 'popular', label: '按热度'},
+    {value: 'agree', label: '按赞同数'},
   ];
   return (
-    <Paper elevation={1} sx={{ p: 2, mb: 2, borderRadius: 2 }}>
+    <Paper elevation={1} sx={{p: 2, mb: 2, borderRadius: 2}}>
       <Grid container spacing={2} alignItems="center">
-        <Grid sx={{ xs: 12, sm: "auto" }}>
-          <FormControl sx={{ minWidth: 150 }}>
+        <Grid sx={{xs: 12, sm: 'auto'}}>
+          <FormControl sx={{minWidth: 150}}>
             <InputLabel>排序方式</InputLabel>
             <Select
               value={sortType}
               label="排序方式"
-              onChange={(e) =>
+              onChange={e =>
                 onSortChange({
                   type: e.target.value as string,
-                })}
+                })
+              }
             >
-              {sortOptions.map((opt) => (
+              {sortOptions.map(opt => (
                 <MenuItem key={opt.value} value={opt.value}>
                   {opt.label}
                 </MenuItem>
@@ -71,11 +72,13 @@ const SortControls: React.FC<SortControlsProps> = ({
             </Select>
           </FormControl>
         </Grid>
-        <Grid sx={{ xs: 12, sm: "auto" }}>
+        <Grid sx={{xs: 12, sm: 'auto'}}>
           <ToggleButtonGroup
             value={sortOrder}
             exclusive
-            onChange={(_, v: "asc" | "desc" | null) => v && onSortChange({ order: v })}
+            onChange={(_, v: 'asc' | 'desc' | null) =>
+              v && onSortChange({order: v})
+            }
           >
             <ToggleButton value="desc">
               <ArrowDownward />
@@ -104,7 +107,7 @@ const PaginationBar: React.FC<PaginationBarProps> = ({
 }) => {
   if (totalPages <= 1) return null;
   return (
-    <Box sx={{ display: "flex", justifyContent: "center", p: 2, mt: 2 }}>
+    <Box sx={{display: 'flex', justifyContent: 'center', p: 2, mt: 2}}>
       <Pagination
         count={totalPages}
         page={page}
@@ -122,6 +125,11 @@ interface UniversalPaginatorProps<T> extends SortControlsProps {
   totalExternalItems: number;
   itemsPerPage?: number;
   externalItemsPerPage?: number;
+  /**
+   *
+   * @param externalPage - the page number need to query
+   * @returns
+   */
   requestData: (externalPage: number) => void;
   children: (currentPageItems: T[]) => React.ReactNode;
   sortControl?: React.ReactElement<SortControlsProps>;
@@ -166,8 +174,8 @@ export const UniversalPaginator = <T,>({
   );
   const globalStartIndex = useMemo(
     () =>
-      (currentPage - rangeStartPage) * itemsPerPage
-      + (externalPage - 1) * externalItemsPerPage,
+      (currentPage - rangeStartPage) * itemsPerPage +
+      (externalPage - 1) * externalItemsPerPage,
     [
       currentPage,
       rangeStartPage,
@@ -179,7 +187,7 @@ export const UniversalPaginator = <T,>({
 
   useEffect(() => {
     requestData(externalPage);
-    console.log("requestData", externalPage);
+    console.log('requestData', externalPage);
   }, [externalPage]);
 
   const totalPages = useMemo(
@@ -190,22 +198,22 @@ export const UniversalPaginator = <T,>({
   const currentPageItems = useMemo(() => {
     const startIndex = (currentPage - rangeStartPage) * itemsPerPage;
     console.log(
-      "currentPageItems",
-      "currentPage",
+      'currentPageItems',
+      'currentPage',
       currentPage,
-      "globalStartIndex",
+      'globalStartIndex',
       globalStartIndex,
-      "externalPage",
+      'externalPage',
       externalPage,
-      "data.length",
+      'data.length',
       data.length,
     );
     console.log(
-      "rangeStartPage",
+      'rangeStartPage',
       rangeStartPage,
-      "startIndex",
+      'startIndex',
       startIndex,
-      "endIndex",
+      'endIndex',
       startIndex + itemsPerPage - 1,
     );
     return data.slice(startIndex, startIndex + itemsPerPage); // no minus 1, because slice is not inclusive
@@ -214,7 +222,7 @@ export const UniversalPaginator = <T,>({
   const handlePageChange = useCallback(
     (_: React.ChangeEvent<unknown>, newPage: number) => {
       console.log(
-        "pageChange",
+        'pageChange',
         newPage,
         rangeStartPage,
         globalStartIndex,
@@ -223,13 +231,7 @@ export const UniversalPaginator = <T,>({
       );
       setCurrentPage(newPage);
     },
-    [
-      data,
-      totalExternalItems,
-      itemsPerPage,
-      externalItemsPerPage,
-      requestData,
-    ],
+    [data, totalExternalItems, itemsPerPage, externalItemsPerPage, requestData],
   );
 
   return (
@@ -241,22 +243,20 @@ export const UniversalPaginator = <T,>({
           onSortChange={onSortChange}
         />
       )}
-      <Box sx={{ minHeight: 300, position: "relative" }}>
+      <Box sx={{minHeight: 300, position: 'relative'}}>
         {isLoading && (
           <LinearProgress
             sx={{
-              position: "absolute",
+              position: 'absolute',
               top: 0,
               left: 0,
-              width: "100%",
+              width: '100%',
             }}
           />
         )}
         {children(currentPageItems)}
         {!isLoading && currentPageItems.length === 0 && (
-          <Typography sx={{ textAlign: "center", p: 5 }}>
-            没有内容。
-          </Typography>
+          <Typography sx={{textAlign: 'center', p: 5}}>没有内容。</Typography>
         )}
       </Box>
       <PaginationBar

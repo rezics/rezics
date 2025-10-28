@@ -62,6 +62,13 @@ export const bookListQuerySchema = t.Object({
   producerIds: t.Optional(t.String()),
   userId: t.Optional(t.String()),
   isbn: t.Optional(t.String()),
+  sort: t.Optional(
+    t.Object({
+      type: t.Optional(t.String()), // sort by createdAt or updatedAt
+      order: t.Optional(t.String()), // asc or desc
+    }),
+  ),
+  start: t.Optional(t.Number()), // (page - 1) * limit
   cursor: t.Optional(
     t.Object({
       unitId: t.Optional(t.String()),
@@ -141,27 +148,6 @@ export const updateBookSchema = t.Object({
 
 // 从 Schema 派生类型，替换原有的 UpdateBookInput
 export type UpdateBookInput = (typeof updateBookSchema)['static'];
-
-// ANCHOR Internal Service/Repository Types
-
-/**
- * 内部服务层使用的搜索参数 Schema
- * (原 BookSearchParams type)
- * 注意：page 转换为了 start，t.Numeric 转换为了 t.Number
- */
-export const bookSearchParamsSchema = t.Object({
-  q: t.Optional(t.String()),
-  tag: t.Optional(t.String()),
-  tags: t.Optional(t.String()),
-  authorId: t.Optional(t.String()),
-  authorIds: t.Optional(t.String()),
-  userId: t.Optional(t.String()),
-  isbn: t.Optional(t.String()),
-  start: t.Optional(t.Number()), // (page - 1) * limit
-  limit: t.Optional(t.Number()),
-});
-
-export type BookSearchParams = (typeof bookSearchParamsSchema)['static'];
 
 // ANCHOR Extra Types
 

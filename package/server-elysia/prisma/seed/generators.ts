@@ -22,19 +22,22 @@ export function generateBookExtra(): Prisma.InputJsonValue {
   };
 }
 
+import chapterList01 from '../../../app/src/mock/data/chapterlist01.json' with { type: 'json' };
+
 /**
  * Generate chapters index as JSON string
  * @returns JSON string of chapter array
  */
-export function generateChapters(): string {
-  const chapterCount = randomInt(5, 20);
-  return JSON.stringify(
-    Array.from({length: chapterCount}, (_, i) => ({
-      index: i + 1,
-      title: generateTitle(2, 4),
-      pages: randomInt(5, 30),
-    })),
-  );
+export function generateChapters(): Prisma.InputJsonValue {
+  // const chapterCount = randomInt(5, 20);
+  // return JSON.stringify(
+  //   Array.from({length: chapterCount}, (_, i) => ({
+  //     index: i + 1,
+  //     title: generateTitle(2, 4),
+  //     pages: randomInt(5, 30),
+  //   })),
+  // );
+  return chapterList01;
 }
 
 /**

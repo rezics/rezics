@@ -110,30 +110,21 @@ export const BookLibShow: React.FC<BookLibShowProps> = ({
 
 export const BookLibContainer: React.FC = () => {
   const EXTERNAL_PAGE_SIZE = 100;
-  const [searchPage, setSearchPage] = useState(1);
   const [currentQuery, setCurrentQuery] = useState<SearchInfo>({
     searchText: '',
     searchTags: [],
   });
-  const [cursor, setCursor] = useState<
-    {unitId: string; createdAt: string} | undefined
-  >(undefined);
+  const [start, setStart] = useState<number>(0);
 
   const {data, isLoading, error} = useQuery(
     bookQueries.list({
-      cursor: {...cursor},
+      start,
       limit: EXTERNAL_PAGE_SIZE,
     }),
   );
 
   function handleNeedMoreData(page: number) {
-    const lastBook = data?.books[data.books.length - 1];
-    if (lastBook?.unitId && lastBook?.createdAt) {
-      setCursor({
-        unitId: lastBook.unitId,
-        createdAt: String(lastBook.createdAt),
-      });
-    }
+    setStart((page - 1) * EXTERNAL_PAGE_SIZE);
   }
 
   useEffect(() => {

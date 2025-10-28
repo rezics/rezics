@@ -33,6 +33,8 @@ export const UserProfilePage: FC<UserProfilePageProps> = ({
 }) => {
   const {t} = useTranslation();
 
+  console.log('isCurrentUser', isCurrentUser);
+
   const meQuery = useQuery({...userQueries.me(), enabled: isCurrentUser});
   const detailQuery = useQuery({
     ...userQueries.detail(unitId),
@@ -94,7 +96,7 @@ export const UserProfilePage: FC<UserProfilePageProps> = ({
             </Box>
           }
           action={
-            isCurrentUser && (
+            isCurrentUser ? (
               <Button
                 variant="contained"
                 startIcon={<EditIcon />}
@@ -102,7 +104,7 @@ export const UserProfilePage: FC<UserProfilePageProps> = ({
               >
                 {t('common.edit')}
               </Button>
-            )
+            ) : null
           }
         />
         <CardContent>
@@ -116,7 +118,6 @@ export const UserProfilePage: FC<UserProfilePageProps> = ({
               </Typography>
             </Box>
           )}
-
           {user.bio && (
             <Box className="mb-4">
               <Typography variant="subtitle1" className="font-semibold mb-2">
@@ -127,7 +128,6 @@ export const UserProfilePage: FC<UserProfilePageProps> = ({
               </Typography>
             </Box>
           )}
-
           {!user.bio && (
             <Typography
               variant="body2"

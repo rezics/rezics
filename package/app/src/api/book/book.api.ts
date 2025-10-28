@@ -33,6 +33,13 @@ export const bookApi = {
   },
 
   /**
+   * Get chapterIndex by bookUnitId
+   */
+  getChapterIndex: async (bookUnitId: string): Promise<any> => {
+    return apiFetch<any>(`/books/${bookUnitId}/chapterIndex`);
+  },
+
+  /**
    * Search books by query and filters
    */
   search: async (

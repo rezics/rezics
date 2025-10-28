@@ -19,6 +19,8 @@ export const UserPage: FC<UserPageProps> = ({
 }) => {
   const [isEditing, setIsEditing] = useState(false);
 
+  console.log(isCurrentUser, 'isCurrentUser');
+
   const handleEditClick = () => {
     setIsEditing(true);
   };

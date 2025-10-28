@@ -61,6 +61,28 @@ export const bookApi = coreInstance('/books')
   )
 
   /**
+   * Get chapterIndex by bookUnitId
+   * GET /books/:unitId/chapterIndex
+   */
+  .get(
+    '/:unitId/chapterIndex',
+    async ({params}): Promise<any> => {
+      const chapterIndex = await bookService.getChapterIndexByBookUnitId(
+        params.unitId,
+      );
+      return chapterIndex;
+    },
+    {
+      params: bookParamsSchema,
+      detail: {
+        summary: 'Get chapterIndex',
+        description: 'Get chapterIndex by bookUnitId',
+        tags: ['Books'],
+      },
+    },
+  )
+
+  /**
    * Create new book
    * POST /books
    */

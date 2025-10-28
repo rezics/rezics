@@ -75,7 +75,9 @@ export async function seedBooks(
         },
         coverUrl: randomBoolean(0.8) ? getRandomBookCover() : null,
         isbn: randomBoolean(0.8) ? faker.commerce.isbn() : null,
-        chaptersIndex: generateChapters(),
+        chapterIndex: {
+          create: {index: generateChapters()},
+        },
         description: generateParagraph(1, 2),
         extra: generateBookExtra(),
       },

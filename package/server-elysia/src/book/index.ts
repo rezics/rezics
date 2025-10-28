@@ -12,7 +12,7 @@ export {bookApi} from './book.api';
 export {bookService, BookService} from './book.service';
 
 // Types for internal use
-export type {BookWithRelations, BookFilterOptions} from './types';
+export type {BookWithRelations} from './types';
 
 // Utilities
 export {sanitizeUser, mapBookToDTO} from './mapper';

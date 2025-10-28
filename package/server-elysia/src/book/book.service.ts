@@ -100,7 +100,13 @@ export class BookService {
     const cursor = options.cursor;
     const hasCursor = cursor?.unitId && cursor?.createdAt;
     const limitNum = Math.max(1, Math.min(Number(options.limit ?? 20), 100));
-
+    const calculateSkip = () => {
+      if (hasCursor) {
+        return 1;
+      }
+      return options.start ?? 0;
+    };
+    const skipNum = calculateSkip();
     const where = this.buildWhereClause(options);
     console.log('cursor', cursor);
     // TODO use Postgres Approximate counting
@@ -108,10 +114,10 @@ export class BookService {
       prisma.book.findMany({
         where,
         orderBy: {createdAt: 'desc'},
+        skip: skipNum,
         cursor: hasCursor
           ? {unitId: cursor.unitId, createdAt: cursor.createdAt}
           : undefined,
-        skip: hasCursor ? 1 : 0,
         take: limitNum,
         include: bookInclude,
       }),
@@ -132,6 +138,16 @@ export class BookService {
     });
 
     return book as BookWithRelations;
+  }
+
+  /**
+   * Get chapterIndex by bookUnitId
+   */
+  async getChapterIndexByBookUnitId(bookUnitId: string): Promise<any> {
+    const chapterIndex = await prisma.bookIndex.findUniqueOrThrow({
+      where: {bookUnitId},
+    });
+    return chapterIndex;
   }
 
   /**
@@ -171,7 +187,9 @@ export class BookService {
             : undefined,
         coverUrl: coverUrl || undefined,
         isbn: isbn || undefined,
-        chaptersIndex: chaptersIndex || undefined,
+        chapterIndex: {
+          create: {index: chaptersIndex || ({} as Prisma.InputJsonValue)},
+        },
         extra: (extra ?? null) as Prisma.InputJsonValue,
       },
       include: bookInclude,
@@ -206,7 +224,9 @@ export class BookService {
           : undefined,
         coverUrl: coverUrl || undefined,
         isbn: isbn || undefined,
-        chaptersIndex: chaptersIndex || undefined,
+        chapterIndex: {
+          update: {index: chaptersIndex || undefined},
+        },
         description: description || undefined,
         extra: (extra ?? undefined) as Prisma.InputJsonValue | undefined,
         unit: {

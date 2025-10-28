@@ -91,6 +91,16 @@ export const bookInfiniteListQuery = (filters?: Omit<BookFilters, 'page'>) =>
   });
 
 /**
+ * Query options for getting chapterIndex by bookUnitId
+ */
+export const bookChapterIndexQuery = (bookUnitId: string) =>
+  queryOptions({
+    queryKey: bookKeys.chapterIndex(bookUnitId),
+    queryFn: () => bookApi.getChapterIndex(bookUnitId),
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+
+/**
  * Combined query options export
  */
 export const bookQueries = {
@@ -101,4 +111,5 @@ export const bookQueries = {
   byAuthor: booksByAuthorQuery,
   byIsbn: bookByIsbnQuery,
   infiniteList: bookInfiniteListQuery,
+  chapterIndex: bookChapterIndexQuery,
 };
