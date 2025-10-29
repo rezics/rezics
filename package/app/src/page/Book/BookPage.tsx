@@ -8,12 +8,12 @@ import React, {useEffect, useRef} from 'react';
 import {useLocation} from 'wouter';
 
 import {AuthorInfoContainer} from '@/component/Book/AuthorInfo.tsx';
-import {BookDescriptionContainer} from '@/component/Book/BookDescription.tsx';
+import {BookDescription} from '@/component/Book/BookDescription';
 import {QuoteExcerptPreviewContainer} from '@/component/Book/QuoteExcerptPreview.tsx';
 import {ReadlistByBookPreview} from '@/component/Book/ReadlistByBookPreview.tsx';
 import {ArrowForwardIconContainer} from '@/component/Common/ArrowForwardIcon.tsx';
 import {BookHeroContainer} from '@component/Book/BookHero.tsx';
-import {ChapterListContainer} from '@component/Book/ChapterList.tsx';
+import {ChapterListContainer} from '@/component/Book/Chapter/ChapterList';
 
 import {useBookPageStore} from '@/global/page/bookPageStore.ts';
 import {routeStore} from '@/global/routeStore.ts';
@@ -67,7 +67,7 @@ export const BookPageShow: React.FC<ShowProps> = ({
               <TabPanel value="0">
                 <Stack spacing={4}>
                   {/* ANCHOR Description */}
-                  <BookDescriptionContainer
+                  <BookDescription.Container
                     description={bookInfo?.description || ''}
                     bookId={bookInfo?.unitId || ''}
                   />

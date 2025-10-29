@@ -1,11 +1,19 @@
+/* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
+/* eslint-disable jsx-a11y/click-events-have-key-events */
+/* eslint-disable jsx-a11y/no-static-element-interactions */
+/* eslint-disable jsx-a11y/interactive-supports-focus */
+/* eslint-disable jsx-a11y/no-noninteractive-tabindex */
+
 // https://github.com/brimdata/react-arborist
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Tree } from "react-arborist";
-import type { DeleteHandler, MoveHandler, RenameHandler } from "react-arborist";
-import { v4 as uuidv4 } from "uuid";
+import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import {Tree} from 'react-arborist';
+import type {DeleteHandler, MoveHandler, RenameHandler} from 'react-arborist';
+import {v4 as uuidv4} from 'uuid';
 // 分离的 Node 渲染器工厂
-import { createChapterArboristNode } from "./ChapterArboristNode.tsx";
+import {createChapterArboristNode} from './ChapterArboristNode.tsx';
+
+import React from 'react';
 
 import {
   findAndAddChild,
@@ -16,7 +24,7 @@ import {
   insertSiblingAfter,
   moveSiblingFirst,
   moveSiblingLast,
-} from "@/util/arboristTreeUtil.ts";
+} from '@/util/arboristTreeUtil.ts';
 
 type Chapter = {
   id: string | number;
@@ -51,31 +59,29 @@ export const ChapterArborist: React.FC<ChapterArboristProps> = ({
   const treeRef: any = useRef(null);
 
   const [treeData, setTreeData] = useState<Chapter[]>([]);
-  const [contextMenu, setContextMenu] = useState<
-    {
-      x: number;
-      y: number;
-      node: any;
-    } | null
-  >(null);
+  const [contextMenu, setContextMenu] = useState<{
+    x: number;
+    y: number;
+    node: any;
+  } | null>(null);
 
   useEffect(() => {
     setTreeData(chapterTree);
   }, [chapterTree]);
 
   function submitTreeData(data: any) {
-    console.log("submitTreeData", data);
+    console.log('submitTreeData', data);
   }
 
   // commit side-effect simulation
   useEffect(() => {
-    console.log("Tree Data Changed, Submit", treeData);
+    console.log('Tree Data Changed, Submit', treeData);
     submitTreeData(treeData);
   }, [treeData]);
 
   const onMove: MoveHandler<Chapter> = useCallback(
-    ({ dragIds, parentId, index }) => {
-      setTreeData((currentTree) => {
+    ({dragIds, parentId, index}) => {
+      setTreeData(currentTree => {
         const removed: Chapter[] = [];
         const treeWithoutDragged = findAndRemove(
           currentTree,
@@ -93,27 +99,21 @@ export const ChapterArborist: React.FC<ChapterArboristProps> = ({
     [],
   );
 
-  const onRename: RenameHandler<Chapter> = useCallback(({ id, name }) => {
+  const onRename: RenameHandler<Chapter> = useCallback(({id, name}) => {
     setTreeData(
-      (currentTree) => findAndEdit(currentTree, String(id), name) as Chapter[],
+      currentTree => findAndEdit(currentTree, String(id), name) as Chapter[],
     );
   }, []);
 
-  const onDelete: DeleteHandler<Chapter> = useCallback(({ ids }) => {
-    setTreeData(
-      (currentTree) => findAndDelete(currentTree, ids) as Chapter[],
-    );
+  const onDelete: DeleteHandler<Chapter> = useCallback(({ids}) => {
+    setTreeData(currentTree => findAndDelete(currentTree, ids) as Chapter[]);
   }, []);
 
   const handleCreate = useCallback((parentId: string | number) => {
-    const newNode: Chapter = { id: uuidv4(), title: "New Chapter" };
-    setTreeData((currentTree) => {
+    const newNode: Chapter = {id: uuidv4(), title: 'New Chapter'};
+    setTreeData(currentTree => {
       if (parentId) {
-        return findAndAddChild(
-          currentTree,
-          parentId,
-          newNode,
-        ) as Chapter[];
+        return findAndAddChild(currentTree, parentId, newNode) as Chapter[];
       } else {
         return [...currentTree, newNode];
       }
@@ -150,8 +150,10 @@ export const ChapterArborist: React.FC<ChapterArboristProps> = ({
         disableDrop={!isDraggable}
         idAccessor="id"
         searchTerm={searchTerm}
-        selection={selectedId ?? ""}
-        searchMatch={(node, t) => node.data.title.toLowerCase().includes(t.toLowerCase())}
+        selection={selectedId ?? ''}
+        searchMatch={(node, t) =>
+          node.data.title.toLowerCase().includes(t.toLowerCase())
+        }
         childrenAccessor="children"
         className="overflow-auto no-scrollbar"
       >
@@ -166,7 +168,7 @@ export const ChapterArborist: React.FC<ChapterArboristProps> = ({
             minWidth: 120,
           }}
           onClick={() => setContextMenu(null)}
-          onContextMenu={(e) => e.preventDefault()}
+          onContextMenu={e => e.preventDefault()}
         >
           <li
             className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
@@ -195,7 +197,7 @@ export const ChapterArborist: React.FC<ChapterArboristProps> = ({
               setContextMenu(null);
             }}
           >
-            {contextMenu.node?.isOpen ? "Collapse" : "Expand"}
+            {contextMenu.node?.isOpen ? 'Collapse' : 'Expand'}
           </li>
           <li
             className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
@@ -214,14 +216,10 @@ export const ChapterArborist: React.FC<ChapterArboristProps> = ({
               // 新建后续同级节点
               const newNode: Chapter = {
                 id: uuidv4(),
-                title: "New Chapter",
+                title: 'New Chapter',
               };
-              setTreeData((current) =>
-                insertSiblingAfter(
-                  current,
-                  contextMenu.node.id,
-                  newNode,
-                )
+              setTreeData(current =>
+                insertSiblingAfter(current, contextMenu.node.id, newNode),
               );
               setContextMenu(null);
             }}
@@ -232,11 +230,8 @@ export const ChapterArborist: React.FC<ChapterArboristProps> = ({
             className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
             onClick={() => {
               setTreeData(
-                (current) =>
-                  moveSiblingFirst(
-                    current,
-                    contextMenu.node.id,
-                  ) as Chapter[],
+                current =>
+                  moveSiblingFirst(current, contextMenu.node.id) as Chapter[],
               );
               setContextMenu(null);
             }}
@@ -247,11 +242,8 @@ export const ChapterArborist: React.FC<ChapterArboristProps> = ({
             className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
             onClick={() => {
               setTreeData(
-                (current) =>
-                  moveSiblingLast(
-                    current,
-                    contextMenu.node.id,
-                  ) as Chapter[],
+                current =>
+                  moveSiblingLast(current, contextMenu.node.id) as Chapter[],
               );
               setContextMenu(null);
             }}

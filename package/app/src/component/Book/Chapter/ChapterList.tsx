@@ -8,7 +8,7 @@ import React from 'react';
 import {useQuery} from '@tanstack/react-query';
 import {bookQueries} from '@/api/book/book.queries.ts';
 import {Link} from 'wouter';
-import {AccentBarWithTextContainer} from '../Common/AccentBar.tsx';
+import {AccentBarWithTextContainer} from '../../Common/AccentBar.tsx';
 
 // 扁平结构 + 顺序数组
 
@@ -23,7 +23,7 @@ export interface ChapterTreeNode extends TreeNodeWithChildren {
 }
 
 // component props
-interface ChapterListProps {
+export interface ChapterListProps {
   id: string;
   data: any;
 }
@@ -41,18 +41,22 @@ export const ChapterList: React.FC<ChapterListProps> = ({id, data}) => {
     [id],
   );
 
-  const chapters: ChapterTreeNode[] = Object.values(data?.chapters ?? []);
-  type ChapterOrderType = Map<string, string[]>;
-
-  const orderMap: ChapterOrderType = useMemo(() => {
-    const raw = (data?.order ?? {}) as Record<string, string[]>;
-    return new Map(Object.entries(raw));
-  }, [data?.order]);
+  let orders = useMemo(() => {
+    const rawOrders = JSON.parse(JSON.stringify(data?.order ?? {}));
+    console.log('rawOrders', rawOrders);
+    return rawOrders instanceof Map
+      ? rawOrders
+      : new Map(Object.entries(rawOrders ?? {}));
+  }, [data]);
 
   const chapterTree: any = useMemo(
-    () => buildTree({nodes: chapters, orders: orderMap}),
-    [chapters, orderMap],
+    () => buildTree({nodes: data?.chapters ?? [], orders: data?.order ?? {}}),
+    [data],
   );
+
+  useEffect(() => {
+    console.log('chapterTree', chapterTree);
+  }, [chapterTree]);
 
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(
     chapterList?.expandedNodes
@@ -74,15 +78,15 @@ export const ChapterList: React.FC<ChapterListProps> = ({id, data}) => {
   };
 
   const expandAll = useCallback(() => {
-    console.log('expandAll', orderMap);
+    console.log('expandAll', orders);
     const allParentIds = new Set(
-      Array.from(orderMap.keys())
+      Array.from(orders.keys() ?? [])
         .filter(key => key !== 'null')
         .map(key => String(key)),
     );
     setExpandedNodes(allParentIds);
     saveExpanded(allParentIds);
-  }, [orderMap, setExpandedNodes, saveExpanded]);
+  }, [orders, setExpandedNodes, saveExpanded]);
 
   const collapseAll = useCallback(() => {
     setExpandedNodes(new Set());

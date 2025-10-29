@@ -58,9 +58,19 @@ export function buildTree<T extends NodeBase>(
   flat: FlatTree<T>,
   extendFields: Map<any, any> = new Map(),
 ): Array<TreeNodeWithChildren<T>> {
-  const { nodes, orders } = flat;
-  const nodeMap = new Map<T["id"], TreeNodeWithChildren<T>>();
-  // console.log("extendFields", extendFields);
+  const safeFlat = JSON.parse(JSON.stringify(flat));
+  const rawNodes = safeFlat.nodes;
+  const rawOrders = safeFlat.orders;
+
+  const nodes = Array.isArray(rawNodes)
+    ? rawNodes
+    : Object.values(rawNodes ?? {});
+  const orders =
+    rawOrders instanceof Map
+      ? rawOrders
+      : new Map(Object.entries(rawOrders ?? {}));
+
+  const nodeMap = new Map<T['id'], TreeNodeWithChildren<T>>();
   for (const node of nodes) {
     // extend fields
     if (extendFields.size > 0) {
@@ -69,13 +79,16 @@ export function buildTree<T extends NodeBase>(
         ...Object.fromEntries(extendFields),
       });
     } else {
-      nodeMap.set(String(node.id), { ...node });
+      nodeMap.set(String(node.id), {...node});
     }
   }
-  // console.log("nodeMap", nodeMap);
+  // console.log('nodeMap', nodeMap);
 
   // Build roots
-  const rootIds = orders.get(null) || orders.get("null") || [];
+  let rootIds = orders.get(null) || orders.get('null') || [];
+  if (rootIds.length === 0) {
+    rootIds = Array.from(orders.keys());
+  }
   const roots: Array<TreeNodeWithChildren<T>> = [];
   for (const rootId of rootIds) {
     let rootNode = nodeMap.get(String(rootId));
@@ -84,9 +97,10 @@ export function buildTree<T extends NodeBase>(
       roots.push(rootNode);
     }
   }
+  // console.log('orders', orders, orders.entries());
+  // console.log('roots', roots);
 
   // Build tree
-  // console.log("orders", orders, orders.entries());
   for (const [parentId, childIds] of orders.entries()) {
     if (parentId === null) continue;
     const stringParentId = String(parentId);
@@ -104,7 +118,7 @@ export function buildTree<T extends NodeBase>(
       }
     }
   }
-  // console.log("roots", roots);
+  console.log('roots', roots);
 
   return roots;
 }
@@ -121,16 +135,14 @@ export function flattenTree<T extends NodeBase>(
   const nodes: T[] = [];
   const orders: OrderMap = new Map();
 
-  function dfs(node: TreeNodeWithChildren<T>, parentId: T["id"] | null) {
+  function dfs(node: TreeNodeWithChildren<T>, parentId: T['id'] | null) {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { children, ...rest } = node;
+    const {children, ...rest} = node;
 
     // Filter temporary fields
     if (filterFields.length > 0) {
       const filteredRest = Object.fromEntries(
-        Object.entries(rest).filter(
-          ([key]) => !filterFields.includes(key),
-        ),
+        Object.entries(rest).filter(([key]) => !filterFields.includes(key)),
       ) as T;
       nodes.push(filteredRest as T);
     } else {
@@ -153,7 +165,7 @@ export function flattenTree<T extends NodeBase>(
     dfs(root, null);
   }
 
-  return { nodes, orders };
+  return {nodes, orders};
 }
 
 // --- Tree Manipulation Functions (Immutable) ---
@@ -194,7 +206,7 @@ function collectDescendants(idsToCollect: ID[], orders: OrderMap): Set<ID> {
 export function createNode<T extends NodeBase>(
   tree: FlatTree<T>,
   newNode: T,
-  parentId: T["id"] | null,
+  parentId: T['id'] | null,
   index?: number,
 ): FlatTree<T> {
   const newNodes = [...tree.nodes, newNode];
@@ -205,7 +217,7 @@ export function createNode<T extends NodeBase>(
   siblings.splice(insertionIndex, 0, newNode.id);
   newOrders.set(parentId, siblings);
 
-  return { nodes: newNodes, orders: newOrders };
+  return {nodes: newNodes, orders: newOrders};
 }
 
 /**
@@ -217,11 +229,13 @@ export function createNode<T extends NodeBase>(
  */
 export function updateNode<T extends NodeBase>(
   tree: FlatTree<T>,
-  nodeId: T["id"],
-  updates: Partial<Omit<T, "id">>,
+  nodeId: T['id'],
+  updates: Partial<Omit<T, 'id'>>,
 ): FlatTree<T> {
-  const newNodes = tree.nodes.map((node) => node.id === nodeId ? { ...node, ...updates } : node);
-  return { ...tree, nodes: newNodes };
+  const newNodes = tree.nodes.map(node =>
+    node.id === nodeId ? {...node, ...updates} : node,
+  );
+  return {...tree, nodes: newNodes};
 }
 
 /**
@@ -234,16 +248,16 @@ export function updateNode<T extends NodeBase>(
  */
 export function moveNode<T extends NodeBase>(
   tree: FlatTree<T>,
-  nodeId: T["id"],
-  newParentId: T["id"] | null,
+  nodeId: T['id'],
+  newParentId: T['id'] | null,
   newIndex: number,
 ): FlatTree<T> {
   const newOrders: OrderMap = new Map();
-  let oldParentId: T["id"] | null = null;
+  let oldParentId: T['id'] | null = null;
 
   // Find old parent and create new order map without the moving node
   for (const [pId, children] of tree.orders.entries()) {
-    const newChildren = children.filter((cId) => {
+    const newChildren = children.filter(cId => {
       if (cId === nodeId) {
         oldParentId = pId;
         return false;
@@ -261,7 +275,7 @@ export function moveNode<T extends NodeBase>(
   targetSiblings.splice(newIndex, 0, nodeId);
   newOrders.set(newParentId, targetSiblings);
 
-  return { ...tree, orders: newOrders };
+  return {...tree, orders: newOrders};
 }
 
 /**
@@ -272,22 +286,20 @@ export function moveNode<T extends NodeBase>(
  */
 export function deleteNodes<T extends NodeBase>(
   tree: FlatTree<T>,
-  nodeIds: T["id"][],
+  nodeIds: T['id'][],
 ): FlatTree<T> {
   const idsToDelete = collectDescendants(nodeIds, tree.orders);
 
-  const newNodes = tree.nodes.filter((node) => !idsToDelete.has(node.id));
+  const newNodes = tree.nodes.filter(node => !idsToDelete.has(node.id));
 
   const newOrders: OrderMap = new Map();
   for (const [parentId, children] of tree.orders.entries()) {
-    if (idsToDelete.has(parentId as T["id"])) continue;
-    const newChildren = children.filter(
-      (childId) => !idsToDelete.has(childId),
-    );
+    if (idsToDelete.has(parentId as T['id'])) continue;
+    const newChildren = children.filter(childId => !idsToDelete.has(childId));
     if (newChildren.length > 0) {
       newOrders.set(parentId, newChildren);
     }
   }
 
-  return { nodes: newNodes, orders: newOrders };
+  return {nodes: newNodes, orders: newOrders};
 }

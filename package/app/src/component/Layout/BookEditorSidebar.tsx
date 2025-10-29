@@ -1,12 +1,15 @@
 // https://github.com/brimdata/react-arborist
 
-import { ChapterArborist } from "@/component/Book/ChapterArborist.tsx";
-import { ChapterOrderType, ChapterTreeNode } from "@/component/Book/ChapterList.tsx";
-import { buildTree } from "@/util/treeAbstract.ts";
-import { useEffect, useMemo, useState } from "react";
+import {ChapterArborist} from '@/component/Book/Chapter/ChapterArborist';
+import {
+  ChapterOrderType,
+  ChapterTreeNode,
+} from '@/component/Book/Chapter/ChapterList';
+import {buildTree} from '@/util/treeAbstract.ts';
+import {useEffect, useMemo, useState} from 'react';
 
-import { useLayoutStore } from "@/global/Layout/layoutStore.ts";
-import { Button, Divider, Switch, TextField } from "@mui/material";
+import {useLayoutStore} from '@/global/Layout/layoutStore.ts';
+import {Button, Divider, Switch, TextField} from '@mui/material';
 
 interface Chapter {
   id: string;
@@ -42,14 +45,14 @@ export const BookEditorSidebar: React.FC<BookEditorSidebarProps> = ({
    * @param param0
    * @returns
    */
-  const { sidebarHeightBelow } = useLayoutStore();
+  const {sidebarHeightBelow} = useLayoutStore();
   const chapters: ChapterTreeNode[] = chaptersData?.chapters ?? [];
   const orderMap: ChapterOrderType = new Map(
     Object.entries(chaptersData?.order ?? {}),
   );
 
   useEffect(() => {
-    console.log("chaptersData", chaptersData);
+    console.log('chaptersData', chaptersData);
   }, [chaptersData]);
   const chapterTree = useMemo(
     () =>
@@ -60,7 +63,7 @@ export const BookEditorSidebar: React.FC<BookEditorSidebarProps> = ({
     [chaptersData],
   );
 
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState('');
 
   const [height, setHeight] = useState(sidebarHeightBelow);
   useEffect(() => {
@@ -75,7 +78,7 @@ export const BookEditorSidebar: React.FC<BookEditorSidebarProps> = ({
   }, [enableDrag, isDraggable]);
 
   function updataChapter() {
-    console.log("Updata Chapter");
+    console.log('Updata Chapter');
   }
 
   return (
@@ -94,21 +97,17 @@ export const BookEditorSidebar: React.FC<BookEditorSidebarProps> = ({
           />
 
           {/* Optional Select ID Field */}
-          {
-            /* <TextField
+          {/* <TextField
                         id="select-id-term"
                         label="Select ID"
                         variant="standard"
                         value={selectIDTerm}
                         onChange={(e) => setSelectIDTerm(e.target.value)}
                         placeholder="Select an ID"
-                    /> */
-          }
+                    /> */}
 
           <div className="flex items-center space-x-4 mt-3 w-full justify-between">
-            <label className="text-gray-700 font-bold">
-              Enable Drag
-            </label>
+            <label className="text-gray-700 font-bold">Enable Drag</label>
             <Switch
               checked={enableDrag}
               onChange={(e: any) => setEnableDrag(e.target.checked)}
