@@ -1,5 +1,5 @@
-import { NewBook } from "@/component/Book/NewBook";
+// import { NewBook } from "@/component/Book/NewBook";
 
-export function NewBookPage() {
-  return <NewBook.Container />;
-}
+// export function NewBookPage() {
+//   return <NewBook.Container />;
+// }

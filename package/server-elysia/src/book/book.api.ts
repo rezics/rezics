@@ -148,6 +148,28 @@ export const bookApi = coreInstance('/books')
     },
   )
 
+  .put(
+    '/:unitId/chapterIndex',
+    async ({params, body, headers, jwt, set}): Promise<any> => {
+      const payload = await verifyAuth(headers.authorization, jwt, set);
+      const chapterIndex = await bookService.updateChapterIndex(
+        params.unitId,
+        body.chaptersIndex,
+      );
+      return chapterIndex;
+    },
+    {
+      params: bookParamsSchema,
+      body: t.Object({
+        chaptersIndex: t.String(),
+      }),
+      detail: {
+        summary: 'Update book chapter index',
+        description: 'Update the chapter index of a book by unit ID',
+        tags: ['Books'],
+      },
+    },
+  )
   /**
    * Delete book
    * DELETE /books/:unitId

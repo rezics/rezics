@@ -1,43 +1,40 @@
-import { Card, CardContent, CardMedia, Typography } from "@mui/material";
+import {Card, CardContent, CardMedia, Typography} from '@mui/material';
 
-import { Book } from "contract/schema";
+import type {BookDTO} from '@package/contract';
 
 interface CardBookListProps {
-  books: Book[];
+  books: BookDTO[];
 }
 
-export const CardBookList = ({ books }: CardBookListProps) => {
+export const CardBookList = ({books}: CardBookListProps) => {
   return (
     <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-      {books.map((book) => (
+      {books.map(book => (
         <Card
-          key={book.id}
+          key={book.unitId}
           className="h-full flex flex-row items-stretch gap-4 w-full"
         >
-          {book.cover && (
+          {book.coverUrl && (
             <CardMedia
               component="img"
-              image={book.cover}
-              alt={book.name}
-              style={{ width: "36%", objectFit: "cover" }}
+              image={book.coverUrl}
+              alt={book.title}
+              style={{width: '36%', objectFit: 'cover'}}
             />
           )}
           <CardContent className="flex-1 flex flex-col justify-between min-w-0">
             <div>
               <Typography variant="h6" className="mb-1">
-                {book.name}
+                {book.title}
               </Typography>
               <Typography
                 variant="subtitle2"
                 color="text.secondary"
                 className="mb-2"
               >
-                {book.author.name}
+                {book.author?.[0]?.name || ''}
               </Typography>
-              <Typography
-                variant="body2"
-                className="line-clamp-3"
-              >
+              <Typography variant="body2" className="line-clamp-3">
                 {book.description}
               </Typography>
             </div>

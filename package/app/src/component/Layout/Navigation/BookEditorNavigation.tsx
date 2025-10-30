@@ -1,4 +1,4 @@
-import DashboardIcon from "@mui/icons-material/Dashboard";
+import DashboardIcon from '@mui/icons-material/Dashboard';
 // import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 // import BarChartIcon from "@mui/icons-material/BarChart";
 // import LayersIcon from "@mui/icons-material/Layers";
@@ -9,39 +9,39 @@ import DashboardIcon from "@mui/icons-material/Dashboard";
 // import BookIcon from "@mui/icons-material/Book";
 // import FormatListBulletedIcon from "@mui/icons-material/FormatListBulleted";
 // import BookmarkBorderIcon from "@mui/icons-material/BookmarkBorder";
-import DescriptionIcon from "@mui/icons-material/Description";
+import DescriptionIcon from '@mui/icons-material/Description';
 // import LibraryBooksIcon from "@mui/icons-material/LibraryBooks";
 
-import { NavigationItem } from "./navigation.d.ts";
+import type {NavigationItem} from './navigation.d.ts';
 
 // segment: router path
 
 export const NAVIGATION = (): NavigationItem[] => [
   {
-    kind: "item",
-    title: "Back to Main",
-    segment: "~/",
+    kind: 'item',
+    title: 'Back to Main',
+    segment: '~/',
     icon: <DashboardIcon />,
   },
   {
-    kind: "header",
-    title: "Book Editor Navigation",
+    kind: 'header',
+    title: 'Book Editor Navigation',
   },
 
   {
-    kind: "item",
-    title: "Book Edit Main",
-    segment: "~/book/1/edit",
+    kind: 'item',
+    title: 'Book Edit Main',
+    segment: '~/book/1/edit',
     icon: <DescriptionIcon />,
   },
   {
-    kind: "item",
-    title: "Book Edit Chapter",
-    segment: "~/book/1/edit/323",
+    kind: 'item',
+    title: 'Book Edit Chapter',
+    segment: '~/book/1/edit/323',
     icon: <DescriptionIcon />,
   },
   {
-    kind: "divider",
+    kind: 'divider',
   },
   // {
   //     kind: "header",

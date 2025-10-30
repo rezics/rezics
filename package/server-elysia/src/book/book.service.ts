@@ -242,6 +242,17 @@ export class BookService {
     return book as BookWithRelations;
   }
 
+  async updateChapterIndex(
+    unitId: string,
+    chaptersIndex: Prisma.InputJsonValue,
+  ): Promise<Prisma.InputJsonValue> {
+    const chapterIndex = await prisma.bookIndex.update({
+      where: {bookUnitId: unitId},
+      data: {index: chaptersIndex || undefined},
+    });
+    return chapterIndex;
+  }
+
   /**
    * Delete book by unitId
    */

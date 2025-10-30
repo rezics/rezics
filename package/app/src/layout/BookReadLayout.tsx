@@ -1,49 +1,50 @@
-import { Header } from "@component/Layout/MainLayoutHeader.tsx";
-import { Sidebar } from "@component/Layout/Sidebar.tsx";
-import { Button, Divider, useMediaQuery } from "@mui/material";
-import React, { ReactNode, useEffect, useState } from "react";
+import {Header} from '@/component/Layout/Header/MainLayoutHeader';
+import {Sidebar} from '@/component/Layout/Sidebar/Sidebar';
+import {Button, Divider, useMediaQuery} from '@mui/material';
+import React, {ReactNode, useEffect, useState} from 'react';
 // import { Box } from "@mui/material";
-import { appStore } from "@/global/appStore.ts";
-import { useLayoutStore } from "@/global/Layout/layoutStore.ts";
+import {appStore} from '@/global/appStore.ts';
+import {useLayoutStore} from '@/global/Layout/layoutStore.ts';
 
-import useRpcQuery from "@/api/swr-query/tsrTypeBuild";
-import { BookEditorSidebar } from "@/component/Layout/BookEditorSidebar.tsx";
-import { Link, useParams, useRoute } from "wouter";
+import useRpcQuery from '@/api/swr-query/tsrTypeBuild';
+import {BookEditorSidebar} from '@/component/Layout/Sidebar/BookEditorSidebar';
+import {Link, useParams, useRoute} from 'wouter';
 interface BookReadLayoutProps {
   children: ReactNode;
 }
 
-export const BookReadLayout: React.FC<BookReadLayoutProps> = ({ children }) => {
-  const [match, params] = useRoute("/book/:bookId/read/:chapterId");
+export const BookReadLayout: React.FC<BookReadLayoutProps> = ({children}) => {
+  const [match, params] = useRoute('/book/:bookId/read/:chapterId');
   const locationParams = useParams();
-  const isMobile = useMediaQuery("(max-width:960px)");
-  const { sidebarOpen, drawerWidth, toggleSidebar, closeSidebar } = useLayoutStore();
-  const [baseUrl, setBaseUrl] = useState("");
+  const isMobile = useMediaQuery('(max-width:960px)');
+  const {sidebarOpen, drawerWidth, toggleSidebar, closeSidebar} =
+    useLayoutStore();
+  const [baseUrl, setBaseUrl] = useState('');
   const [selectedId, setSelectedId] = useState(
-    match ? String(params.chapterId) : "",
+    match ? String(params.chapterId) : '',
   );
-  let bookId = "";
+  let bookId = '';
 
   useEffect(() => {
-    console.log("locationParams", locationParams);
-    bookId = locationParams[0] || "";
+    console.log('locationParams', locationParams);
+    bookId = locationParams[0] || '';
     setBaseUrl(`/book/${bookId}/read`);
-    console.log("bookId", bookId);
-    console.log("baseUrl", baseUrl);
+    console.log('bookId', bookId);
+    console.log('baseUrl', baseUrl);
   }, [locationParams]);
 
   useEffect(() => {
-    console.log("match, params", match, params);
-    setSelectedId(match ? String(params.chapterId) : "");
+    console.log('match, params', match, params);
+    setSelectedId(match ? String(params.chapterId) : '');
   }, [match, params]);
 
   const createBookChaptersInput = {
-    operation: "chapter.list",
+    operation: 'chapter.list',
     parameter: {
-      bookId: bookId || "1",
+      bookId: bookId || '1',
     },
   };
-  const { data, isLoading, error } = useRpcQuery<any>(createBookChaptersInput);
+  const {data, isLoading, error} = useRpcQuery<any>(createBookChaptersInput);
 
   const handleDrawerToggle = () => {
     toggleSidebar();
@@ -51,7 +52,7 @@ export const BookReadLayout: React.FC<BookReadLayoutProps> = ({ children }) => {
 
   const mode = appStore((state: any) => state.theme);
   function toggleTheme() {
-    appStore.setState({ theme: mode === "light" ? "dark" : "light" });
+    appStore.setState({theme: mode === 'light' ? 'dark' : 'light'});
   }
 
   return (
@@ -83,10 +84,12 @@ export const BookReadLayout: React.FC<BookReadLayoutProps> = ({ children }) => {
           </div>
           <Divider />
           <BookEditorSidebar
-            chaptersData={(data as any) ?? {
-              chapters: [],
-              order: new Map<string, string[]>(),
-            }}
+            chaptersData={
+              (data as any) ?? {
+                chapters: [],
+                order: new Map<string, string[]>(),
+              }
+            }
             selectedId={selectedId}
             baseLink={baseUrl}
             drawerWidth={drawerWidth}

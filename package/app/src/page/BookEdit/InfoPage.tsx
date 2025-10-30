@@ -1,6 +1,8 @@
-import useRpcQuery from '@/api/swr-query/tsrTypeBuild';
+import {useQuery} from '@tanstack/react-query';
+import {bookQueries} from '@/api/book';
 import {BookDescription} from '@/component/Book/BookDescription';
 import {AccentBarWithTextShow} from '@/component/Common/AccentBar.tsx';
+import {BookTitleEditor} from '@/component/Book/BookTitle';
 import React from 'react';
 import {useTranslation} from 'react-i18next';
 // import Paper from "@mui/material/Paper";
@@ -11,18 +13,21 @@ interface BookEditMainPageProps {
 
 export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({bookId}) => {
   const {t} = useTranslation();
-  const createBookInfoInput = {
-    operation: 'book.read',
-    parameter: {
-      bookId: bookId || '',
-    },
-  };
-  const {data, isLoading, error} = useRpcQuery<any>(createBookInfoInput);
+  const {data, isLoading, error} = useQuery(bookQueries.detail(bookId));
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error: {String(error)}</div>;
   if (!data) return <div>No data</div>;
   return (
     <div className="mt-10 mx-auto w-11/12">
+      <div>
+        <div className="text-2xl font-bold mb-4">书籍编辑</div>
+      </div>
+      <div>
+        <AccentBarWithTextShow text="title" />
+        <div className="mb-8">
+          <BookTitleEditor title={data?.title ?? ''} />
+        </div>
+      </div>
       <div>
         <div className="flex mb-4">
           <AccentBarWithTextShow text={t('book.description')} />

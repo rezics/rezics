@@ -34,7 +34,7 @@ import TestPage from '@/page/Test/TestPage.tsx';
 import {TestPage02} from '@/page/Test/TestPage02.tsx';
 import {TestPage03} from '@/page/Test/TestPage03.tsx';
 // import TestPaginationPage from "@/page/Test/TestPaginationPage.tsx";
-import {NewBookPage} from '@/page/BookEdit/NewBookPage.tsx';
+// import {NewBookPage} from '@/page/BookEdit/NewBookPage.tsx';
 import {MainConfigPage} from '@/page/Config/MainConfigPage';
 import {UserPage} from '@/page/User/UserPage.tsx';
 
@@ -69,21 +69,21 @@ export default (
         </Route>
 
         {/* ANCHOR Book Edit (chapter first, then main) */}
-        <Route path="/book/new">
+        {/* <Route path="/book/new">
           <MainLayout>
             <NewBookPage />
           </MainLayout>
-        </Route>
+        </Route> */}
         <Route path="/book/:bookId/edit/:chapterId">
-          {({chapterId}) => (
-            <BookEditLayout>
+          {({bookId, chapterId}) => (
+            <BookEditLayout bookId={bookId} chapterId={chapterId}>
               <BookEditChapterPage chapterId={chapterId} />
             </BookEditLayout>
           )}
         </Route>
         <Route path="/book/:bookId/edit">
           {({bookId}) => (
-            <BookEditLayout>
+            <BookEditLayout bookId={bookId}>
               <BookEditMainPage bookId={bookId} />
             </BookEditLayout>
           )}
