@@ -16,11 +16,11 @@ export function envInt(name: string, fallback: number): number {
  * Default seed counts from environment or fallback values
  */
 export const DEFAULT_COUNTS: SeedCounts = {
-  users: envInt('SEED_USERS', 200),
-  pressUsers: envInt('SEED_PRESS_USERS', 20),
-  producerUsers: envInt('SEED_PRODUCER_USERS', 20),
-  tags: envInt('SEED_TAGS', 4000),
-  books: envInt('SEED_BOOKS', 50),
-  otherPosts: envInt('SEED_OTHER_POSTS', 150),
-  comments: envInt('SEED_COMMENTS', 600),
+  users: envInt('SEED_USERS', 2000),
+  pressUsers: envInt('SEED_PRESS_USERS', 200),
+  producerUsers: envInt('SEED_PRODUCER_USERS', 200),
+  tags: envInt('SEED_TAGS', 40000),
+  books: envInt('SEED_BOOKS', 500),
+  otherPosts: envInt('SEED_OTHER_POSTS', 1500),
+  comments: envInt('SEED_COMMENTS', 6000),
 };

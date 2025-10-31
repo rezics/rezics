@@ -15,7 +15,6 @@ const UNIT_TYPES: UnitType[] = [
   UnitTypeEnum.READLIST,
   UnitTypeEnum.IMAGE,
   UnitTypeEnum.VIDEO,
-  UnitTypeEnum.CHAPTER,
 ];
 
 /**

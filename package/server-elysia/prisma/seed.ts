@@ -1,10 +1,11 @@
 import 'dotenv/config';
 import {PrismaClient} from './generated/client';
+import type {Prisma} from './generated/client';
 import {DEFAULT_COUNTS} from './seed/config';
 import {resetDatabase} from './seed/database';
 import {seedPressUsers, seedProducerUsers, seedUsers} from './seed/users';
 import {seedTags} from './seed/tags';
-import {seedBooks} from './seed/books';
+import {seedBooks, updateChapterIndex, seedChaptersForBook} from './seed/books';
 import {seedOtherUnits} from './seed/units';
 import {seedComments, updateStatsWithCommentCounts} from './seed/comments';
 
@@ -70,7 +71,15 @@ async function main() {
     );
     console.log(`✅ Created ${others.length} other units`);
 
-    // update chapter index
+    // Generate chapters per book and update chapter index JSON
+    for (const bookId of bookIds) {
+      const chapterTree = await seedChaptersForBook(prisma, bookId);
+      await updateChapterIndex(
+        prisma,
+        bookId,
+        chapterTree as unknown as Prisma.InputJsonValue,
+      );
+    }
 
     // Seed comments
     const allRootUnitIds: string[] = [...bookIds, ...others.map(o => o.id)];

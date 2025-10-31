@@ -7,7 +7,7 @@ import {randomUUID} from 'crypto';
 
 function generateSlug(name: string) {
   let slug = name.replace(/\s+/g, '_');
-  const uuid = randomUUID().split('-')[0];
+  const uuid = randomUUID();
   slug += `_${uuid}`;
   return slug;
 }
@@ -59,7 +59,7 @@ export async function seedPressUsers(
     const slug = generateSlug(username);
     const created = await prisma.user.create({
       data: {
-        email: faker.internet.email({firstName: username}),
+        email: `${randomUUID()}_${faker.internet.email({firstName: username})}`,
         passwordHash: faker.internet.password({length: 32}),
         slug,
         name: username,

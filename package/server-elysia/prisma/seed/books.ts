@@ -1,5 +1,5 @@
 import {faker} from '@faker-js/faker';
-import type {PrismaClient} from '../generated/client.js';
+import type {PrismaClient, Prisma} from '../generated/client.js';
 import {UnitType, UnitStatus} from '../generated/client.js';
 import type {CreatedUser, CreatedUnit} from './types.js';
 import {
@@ -9,12 +9,20 @@ import {
   generateTitle,
   generateParagraph,
 } from './utils.js';
-import {
-  buildUnitTitleByType,
-  generateBookExtra,
-  generateChapters,
-} from './generators.js';
+import {buildUnitTitleByType, generateBookExtra} from './generators.js';
 import {getRandomBookCover} from './data.js';
+
+// Chapter tree structure to store into BookIndex.index
+interface ChapterIndexChapter {
+  id: string;
+  title: string;
+  noContent: boolean;
+}
+
+export interface ChapterTreeIndex {
+  chapters: Record<string, ChapterIndexChapter>;
+  order: Record<string, string[]>; // parentId -> children ids
+}
 
 /**
  * Seed books into database
@@ -76,7 +84,8 @@ export async function seedBooks(
         coverUrl: randomBoolean(0.8) ? getRandomBookCover() : null,
         isbn: randomBoolean(0.8) ? faker.commerce.isbn() : null,
         chapterIndex: {
-          create: {index: ''},
+          // Create placeholder JSON; will be updated after we actually create chapter units per book
+          create: {index: {} as Prisma.InputJsonValue},
         },
         description: generateParagraph(1, 2),
         extra: generateBookExtra(),
@@ -102,10 +111,94 @@ export async function seedBooks(
 export async function updateChapterIndex(
   prisma: PrismaClient,
   bookId: string,
-  chapterIndex: string,
+  chapterIndex: Prisma.InputJsonValue,
 ): Promise<void> {
   await prisma.bookIndex.update({
     where: {bookUnitId: bookId},
     data: {index: chapterIndex},
   });
+}
+
+/**
+ * Create chapter Units for a book and build a ChapterTreeIndex JSON referencing those Unit IDs.
+ * The structure matches app's generateChapterTree: { chapters: Record<id, {id,title,noContent}>, order: Record<parentId, childIds[]> }.
+ */
+export async function seedChaptersForBook(
+  prisma: PrismaClient,
+  bookUnitId: string,
+  opts?: {topLevelCount?: number; minChildren?: number; maxChildren?: number},
+): Promise<ChapterTreeIndex> {
+  const topLevelCount =
+    opts?.topLevelCount ?? faker.number.int({min: 1, max: 4});
+  const minChildren = opts?.minChildren ?? 20;
+  const maxChildren = opts?.maxChildren ?? 100;
+
+  const chapters: Record<string, ChapterIndexChapter> = {};
+  const order: Record<string, string[]> = {};
+
+  // Resolve the book's author userId once
+  const bookUnit = await prisma.unit.findUnique({
+    where: {id: bookUnitId},
+    select: {userId: true},
+  });
+  const bookUserId =
+    bookUnit?.userId ??
+    (await prisma.unit.findFirst({
+      where: {id: bookUnitId},
+      select: {userId: true},
+    }))!.userId;
+
+  // Create top-level chapter groups (noContent=true)
+  for (let t = 0; t < topLevelCount; t++) {
+    const parentTitle = generateTitle(2, 4);
+    const parent = await prisma.unit.create({
+      data: {
+        userId: bookUserId,
+        type: UnitType.CHAPTER,
+        status: UnitStatus.ACTIVE,
+        title: parentTitle,
+        content: null,
+        metadata: {},
+        targetUnitId: bookUnitId, // reference the book
+      },
+      select: {id: true},
+    });
+
+    chapters[parent.id] = {
+      id: parent.id,
+      title: parentTitle,
+      noContent: true,
+    };
+
+    // For deterministic title, we can reuse the created Unit's title, but since we generated above, keep as is
+    // Generate children under this parent
+    const childCount = faker.number.int({min: minChildren, max: maxChildren});
+    const childIds: string[] = [];
+    for (let i = 0; i < childCount; i++) {
+      const noContent = faker.datatype.boolean({probability: 0.2});
+      const childTitle = faker.lorem.words({min: 3, max: 6});
+      const child = await prisma.unit.create({
+        data: {
+          userId: bookUserId,
+          type: UnitType.CHAPTER,
+          status: UnitStatus.ACTIVE,
+          title: childTitle,
+          content: noContent ? null : generateParagraph(1, 3),
+          metadata: {},
+          targetUnitId: bookUnitId,
+        },
+        select: {id: true /* title not needed here */},
+      });
+
+      chapters[child.id] = {
+        id: child.id,
+        title: childTitle,
+        noContent,
+      };
+      childIds.push(child.id);
+    }
+    order[parent.id] = childIds;
+  }
+
+  return {chapters, order};
 }

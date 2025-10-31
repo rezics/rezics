@@ -10,7 +10,6 @@ import {faker} from '@faker-js/faker';
  */
 export interface Chapter {
   id: string;
-  parentId: string | null;
   title: string;
   noContent: boolean;
 }
@@ -47,7 +46,6 @@ export function generateChapterTree(
   for (const parentId of topLevelIds) {
     chapters[parentId] = {
       id: parentId,
-      parentId: null,
       title: faker.lorem.words({min: 2, max: 4}),
       noContent: true,
     };
@@ -60,7 +58,6 @@ export function generateChapterTree(
       const childId = faker.string.uuid();
       chapters[childId] = {
         id: childId,
-        parentId,
         title: faker.lorem.words({min: 3, max: 6}),
         noContent: faker.datatype.boolean({probability: 0.2}),
       };
