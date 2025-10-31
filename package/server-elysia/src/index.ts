@@ -1,6 +1,8 @@
 import {Elysia} from 'elysia';
 import {swagger} from '@elysiajs/swagger';
 import {bookApi} from './book';
+import {readlistApi} from './readlist';
+import {reviewApi} from './review';
 import {userApi} from './user';
 import {tagApi} from './tag';
 
@@ -27,6 +29,8 @@ const app = new Elysia()
   })
   .use(swagger())
   .use(bookApi)
+  .use(readlistApi)
+  .use(reviewApi)
   .use(userApi)
   .use(tagApi)
   .get('/', () => 'Hello Elysia')

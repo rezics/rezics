@@ -45,7 +45,7 @@ export function mapBaseBookToDTO(book: BookWithRelations): BookDTO {
 export function mapBookToDTO(book: BookWithRelations): BookDTO {
   return {
     ...mapBaseBookToDTO(book),
-    chaptersIndex: book.chaptersIndex || undefined,
+    // chaptersIndex: book.chaptersIndex || undefined,
     author: book.author.map(sanitizeUserWithBio),
     extra: (book.extra as Record<string, unknown>) || undefined,
   };

@@ -1,7 +1,7 @@
-import type { ReviewDTO } from "@/api/review";
-import { Stack } from "@mui/material";
-import React from "react";
-import { SingleShortBookReview } from "./SingleShortBookReview";
+import type {ReviewDTO} from '@package/contract';
+import {Stack} from '@mui/material';
+import React from 'react';
+import {SingleShortBookReview} from './SingleShortBookReview';
 
 export type ShortReviewListShowProps = {
   reviews: Array<
@@ -27,7 +27,7 @@ export const ShortReviewListShow: React.FC<ShortReviewListShowProps> = ({
 
   return (
     <Stack spacing={spacing}>
-      {reviews.map((review) => (
+      {reviews.map(review => (
         <SingleShortBookReview.Show
           key={review.id}
           review={review}

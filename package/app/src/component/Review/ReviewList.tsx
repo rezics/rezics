@@ -1,117 +1,111 @@
-import { BookReview } from "contract/schema";
-import { SingleReview } from "./SingleReview";
+import {type ReviewDTO} from '@package/contract';
+import {SingleReviewShow} from './SingleReview';
 
-import { Box } from "@mui/material";
-import React, { useEffect, useReducer } from "react";
-import FullScreenModal from "../Common/FullScreenModal";
-import TreeReplyComponents from "../Form/TreeReplyComponents";
+import {Box} from '@mui/material';
+import React, {useEffect, useReducer} from 'react';
+import FullScreenModal from '../Common/FullScreenModal';
+import TreeReplyComponents from '../Form/TreeReplyComponents';
 
-export namespace ReviewList {
-  export type Show = {
-    reviews: BookReview[];
+export type ReviewListShowProps = {
+  reviews: ReviewDTO[];
+  isReplyModalOpen: boolean;
+  currentReplyId: string | null;
+  onReply: (reviewId: string) => void;
+  onCloseReplyModal: () => void;
+};
+
+export const ReviewListShow: React.FC<ReviewListShowProps> = ({
+  reviews,
+  isReplyModalOpen,
+  currentReplyId,
+  onReply,
+  onCloseReplyModal,
+}) => {
+  return (
+    <>
+      <Box>
+        {reviews.map((review: ReviewDTO) => (
+          <SingleReviewShow key={review.id} review={review} onReply={onReply} />
+        ))}
+      </Box>
+
+      <FullScreenModal
+        open={isReplyModalOpen}
+        onClose={onCloseReplyModal}
+        title="回复"
+      >
+        <Box>
+          <TreeReplyComponents bookListId={currentReplyId || ''} />
+        </Box>
+      </FullScreenModal>
+    </>
+  );
+};
+
+export type ReviewListContainerProps = {
+  reviews: ReviewDTO[];
+};
+
+export const ReviewListContainer: React.FC<ReviewListContainerProps> = ({
+  reviews,
+}) => {
+  type State = {
+    reviews: ReviewDTO[];
     isReplyModalOpen: boolean;
     currentReplyId: string | null;
-    onReply: (reviewId: string) => void;
-    onCloseReplyModal: () => void;
   };
 
-  export const Show: React.FC<Show> = ({
-    reviews,
-    isReplyModalOpen,
-    currentReplyId,
-    onReply,
-    onCloseReplyModal,
-  }) => {
-    return (
-      <>
-        <Box>
-          {reviews.map((review: BookReview) => (
-            <SingleReview.Show
-              key={review.id}
-              review={review}
-              onReply={onReply}
-            />
-          ))}
-        </Box>
+  type Action =
+    | {type: 'setReviews'; reviews: ReviewDTO[]}
+    | {type: 'openReply'; id: string}
+    | {type: 'closeReply'};
 
-        <FullScreenModal
-          open={isReplyModalOpen}
-          onClose={onCloseReplyModal}
-          title="回复"
-        >
-          <Box>
-            <TreeReplyComponents
-              bookListId={currentReplyId || ""}
-            />
-          </Box>
-        </FullScreenModal>
-      </>
-    );
+  const reducer = (state: State, action: Action): State => {
+    switch (action.type) {
+      case 'setReviews':
+        return {...state, reviews: action.reviews};
+      case 'openReply':
+        return {
+          ...state,
+          isReplyModalOpen: true,
+          currentReplyId: action.id,
+        };
+      case 'closeReply':
+        return {
+          ...state,
+          isReplyModalOpen: false,
+          currentReplyId: null,
+        };
+      default:
+        return state;
+    }
   };
 
-  export type Container = {
-    reviews: BookReview[];
+  const [state, dispatch] = useReducer(reducer, {
+    reviews: [],
+    isReplyModalOpen: false,
+    currentReplyId: null,
+  });
+
+  useEffect(() => {
+    dispatch({type: 'setReviews', reviews: reviews || []});
+  }, [reviews]);
+
+  const handleReply = (reviewId: string) => {
+    dispatch({type: 'openReply', id: reviewId});
   };
 
-  export const Container: React.FC<Container> = ({ reviews }) => {
-    type State = {
-      reviews: BookReview[];
-      isReplyModalOpen: boolean;
-      currentReplyId: string | null;
-    };
-
-    type Action =
-      | { type: "setReviews"; reviews: BookReview[] }
-      | { type: "openReply"; id: string }
-      | { type: "closeReply" };
-
-    const reducer = (state: State, action: Action): State => {
-      switch (action.type) {
-        case "setReviews":
-          return { ...state, reviews: action.reviews };
-        case "openReply":
-          return {
-            ...state,
-            isReplyModalOpen: true,
-            currentReplyId: action.id,
-          };
-        case "closeReply":
-          return {
-            ...state,
-            isReplyModalOpen: false,
-            currentReplyId: null,
-          };
-        default:
-          return state;
-      }
-    };
-
-    const [state, dispatch] = useReducer(reducer, {
-      reviews: [],
-      isReplyModalOpen: false,
-      currentReplyId: null,
-    });
-
-    useEffect(() => {
-      dispatch({ type: "setReviews", reviews: reviews || [] });
-    }, [reviews]);
-
-    const handleReply = (reviewId: string) => {
-      dispatch({ type: "openReply", id: reviewId });
-    };
-
-    const handleCloseReplyModal = () => {
-      dispatch({ type: "closeReply" });
-    };
-
-    return (
-      <Show
-        reviews={state.reviews}
-        isReplyModalOpen={state.isReplyModalOpen}
-        currentReplyId={state.currentReplyId}
-        onReply={handleReply}
-        onCloseReplyModal={handleCloseReplyModal}
-      />
-    );
+  const handleCloseReplyModal = () => {
+    dispatch({type: 'closeReply'});
   };
-}
+
+  return (
+    <ReviewListShow
+      reviews={state.reviews}
+      isReplyModalOpen={state.isReplyModalOpen}
+      currentReplyId={state.currentReplyId}
+      onReply={handleReply}
+      onCloseReplyModal={handleCloseReplyModal}
+    />
+  );
+};
