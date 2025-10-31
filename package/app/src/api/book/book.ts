@@ -1,7 +1,7 @@
 /**
  * Book API - Main entry point
  * Provides a unified interface for all book-related operations
- * 
+ *
  * File organization:
  * - Book.types.ts: TypeScript types and interfaces
  * - Book.keys.ts: React Query key factory
@@ -16,7 +16,6 @@ export type {
   BookDTO,
   CreateBookInput,
   UpdateBookInput,
-  BookSearchParams,
   BookFormData,
   BookFilters,
   BookSortOption,

@@ -1,9 +1,11 @@
-import type {BookFilters} from '../book/book.types';
-
 /**
- * Build query string from filters
+ * Build query string from filters (generic)
+ * Accepts any plain object where values can be primitives, arrays, or objects.
  */
-export function buildQueryString(filters?: BookFilters): string {
+export function buildQueryString(
+  // Use a broad type to keep this utility reusable across API domains
+  filters?: Record<string, unknown>,
+): string {
   if (!filters) return '';
 
   const params = new URLSearchParams();
