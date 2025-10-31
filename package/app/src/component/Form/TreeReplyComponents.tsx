@@ -1,13 +1,20 @@
 // 暂时就先这样不处理，后面树化，或者使用VirtualList
 
-import { Add, Remove } from "@mui/icons-material";
-import { Avatar, Box, Button, Collapse, IconButton, Typography } from "@mui/material";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import {Add, Remove} from '@mui/icons-material';
+import {
+  Avatar,
+  Box,
+  Button,
+  Collapse,
+  IconButton,
+  Typography,
+} from '@mui/material';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
 //  ;
-import useRpcQuery from "@/api/swr-query/tsrTypeBuild.ts";
-import { useDialogStore } from "@/global/dialogStore.ts";
-import { ReactionBar } from "../Common/ReactionBar.tsx";
-import { ReplyDrawer } from "./ReplyDrawer.tsx";
+
+import {useDialogStore} from '@/global/dialogStore.ts';
+import {ReactionBar} from '../Common/ReactionBar.tsx';
+import {ReplyDrawer} from './ReplyDrawer.tsx';
 
 // This is a temporary type definition based on the GraphQL schema.
 // It should be replaced with generated types.
@@ -48,7 +55,7 @@ const CommentNode: React.FC<CommentNodeProps> = ({
   };
 
   const handleReply = () => {
-    console.log("Replying to comment:", comment.id);
+    console.log('Replying to comment:', comment.id);
     openDrawer(comment.id);
     // This is where you would trigger a reply dialog or an inline reply form.
   };
@@ -58,16 +65,13 @@ const CommentNode: React.FC<CommentNodeProps> = ({
       mt={2}
       pl={level > 0 ? 4 : 0}
       sx={{
-        borderLeft: level > 0 ? `2px solid #eee` : "none",
-        marginLeft: level > 0 ? "16px" : "0",
-        paddingLeft: level > 0 ? "16px" : "0",
+        borderLeft: level > 0 ? `2px solid #eee` : 'none',
+        marginLeft: level > 0 ? '16px' : '0',
+        paddingLeft: level > 0 ? '16px' : '0',
       }}
     >
       <Box display="flex" gap={2} alignItems="flex-start">
-        <Avatar
-          src={comment.author.avatar}
-          sx={{ width: 32, height: 32 }}
-        />
+        <Avatar src={comment.author.avatar} sx={{width: 32, height: 32}} />
         <Box flex={1}>
           <Box display="flex" alignItems="center" gap={1}>
             <Typography
@@ -89,11 +93,11 @@ const CommentNode: React.FC<CommentNodeProps> = ({
             <Box
               sx={{
                 width: {
-                  xs: "75%",
-                  sm: "50%",
-                  md: "33%",
-                  lg: "30%",
-                  xl: "30%",
+                  xs: '75%',
+                  sm: '50%',
+                  md: '33%',
+                  lg: '30%',
+                  xl: '30%',
                 },
               }}
             >
@@ -115,7 +119,7 @@ const CommentNode: React.FC<CommentNodeProps> = ({
 
       {comment.replies && comment.replies.length > 0 && (
         <Collapse in={isExpanded} timeout="auto" unmountOnExit>
-          {comment.replies.map((reply) => (
+          {comment.replies.map(reply => (
             <CommentNode
               key={reply.id}
               comment={reply}
@@ -138,15 +142,20 @@ export const TreeReplyComponents: React.FC<ReplyComponentsProps> = ({
 }) => {
   const commentId = bookListId; // TODO 暫時先用這個替代
   const createCommentListInput = {
-    operation: "comment.list",
+    operation: 'comment.list',
     parameter: {
-      commentId: commentId || "",
+      commentId: commentId || '',
     },
   };
-  const { data, isLoading, error } = useRpcQuery<Record<string, Comment>>(createCommentListInput);
+  // const {data, isLoading, error} = useRpcQuery<Record<string, Comment>>(
+  //   createCommentListInput,
+  // );
+  const data = {};
+  const isLoading = false;
+  const error: any = null;
 
   // currentReplyId
-  const setDialogVisible = useDialogStore((state) => state.setDialogVisible);
+  const setDialogVisible = useDialogStore(state => state.setDialogVisible);
   const [currentReplyId, setCurrentReplyId] = useState<string | null>(null);
   const [topLevelComments, setTopLevelComments] = useState<Comment[]>([]);
 
@@ -156,15 +165,15 @@ export const TreeReplyComponents: React.FC<ReplyComponentsProps> = ({
       if (data) {
         const arr: any = Object.values(data);
         setTopLevelComments(arr);
-        console.log("topLevelComments", topLevelComments, "data", data);
+        console.log('topLevelComments', topLevelComments, 'data', data);
       }
     } catch (_error) {
-      console.error("Error setting top level comments");
+      console.error('Error setting top level comments');
     }
   }, [data]);
 
   const handleSubmit = (currentReplyId: string, content: string) => {
-    console.log("handleSubmit", currentReplyId, content);
+    console.log('handleSubmit', currentReplyId, content);
   };
 
   const openDrawer = (id: string) => {
@@ -178,17 +187,17 @@ export const TreeReplyComponents: React.FC<ReplyComponentsProps> = ({
   return (
     <>
       <Box p={2}>
-        {topLevelComments.length > 0
-          ? (
-            topLevelComments.map((comment: Comment) => (
-              <CommentNode
-                key={comment.id}
-                comment={comment}
-                openDrawer={openDrawer}
-              />
-            ))
-          )
-          : <p>No comments</p>}
+        {topLevelComments.length > 0 ? (
+          topLevelComments.map((comment: Comment) => (
+            <CommentNode
+              key={comment.id}
+              comment={comment}
+              openDrawer={openDrawer}
+            />
+          ))
+        ) : (
+          <p>No comments</p>
+        )}
       </Box>
       {/* 渲染 */}
       {currentReplyId && (

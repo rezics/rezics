@@ -1,71 +1,143 @@
-import EasyEditor from "@/component/Form/EasyEditor.tsx";
-import { Button, TextField } from "@mui/material";
-import { useEffect, useState } from "react";
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
+import {Button, CircularProgress, TextField} from '@mui/material';
+import {useTranslation} from 'react-i18next';
 
-import useRpcQuery from "@/api/swr-query/tsrTypeBuild";
-import { useTranslation } from "react-i18next";
-import { useParams } from "wouter";
+import EasyEditor from '@/component/Form/EasyEditor.tsx';
+import {useQuery} from '@tanstack/react-query';
+import {
+  chapterDetailQuery,
+  useUpdateChapterMutation,
+} from '@/api/chapter/chapter';
 
 interface BookEditChapterPageProps {
-  // bookId: string;
-  chapterId: string;
+  chapterId: string; // unitId of chapter
 }
 
 export const BookEditChapterPage: React.FC<BookEditChapterPageProps> = ({
   chapterId,
 }) => {
-  const { t } = useTranslation();
-  const createBookChapterContentInput = {
-    operation: "chapter.read",
-    parameter: {
-      bookId: "1",
-      chapterId: chapterId || "",
-    },
-  };
-  const { data, isLoading, error } = useRpcQuery<any>(createBookChapterContentInput);
+  const {t} = useTranslation();
 
-  const [content, setContent] = useState("");
-  const [title, setTitle] = useState("");
+  // Load chapter detail
+  const {
+    data,
+    isPending: isLoading,
+    isError,
+    error,
+  } = useQuery(chapterDetailQuery(chapterId));
 
+  const [title, setTitle] = useState('');
+  const [content, setContent] = useState('');
+
+  // Initialize form state from fetched data
   useEffect(() => {
     if (data) {
-      console.log(data);
-      setContent(data.content || "");
-      setTitle(data.chapterName || "");
+      setTitle((data as any).title || '');
+      setContent((data as any).content || '');
     }
   }, [data]);
 
-  const handleSubmit = () => {
-    if (!content.trim()) {
-      alert("内容不能为空！");
-      return;
-    }
+  const updateMutation = useUpdateChapterMutation();
 
-    // TODO: 替换为 API 提交逻辑
-    console.log("提交的内容：", content, "标题：", title);
-  };
+  const isDirty = useMemo(() => {
+    if (!data) return false;
+    const initialTitle = (data as any).title || '';
+    const initialContent = (data as any).content || '';
+    return initialTitle !== title || initialContent !== content;
+  }, [data, title, content]);
+
+  const isInvalid = useMemo(() => {
+    return !title.trim() || !content.trim();
+  }, [title, content]);
+
+  const handleSubmit = useCallback(async () => {
+    if (isInvalid) return;
+    await updateMutation.mutateAsync({
+      unitId: chapterId,
+      input: {
+        // Fields based on contract shape
+        chapterName: title,
+        content,
+      } as any,
+    });
+  }, [isInvalid, updateMutation, chapterId, title, content]);
+
+  // Ctrl/Cmd+S to save
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      const isSaveHotkey =
+        (e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's';
+      if (isSaveHotkey) {
+        e.preventDefault();
+        if (!isInvalid && isDirty && !updateMutation.isPending) {
+          handleSubmit();
+        }
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [isInvalid, isDirty, updateMutation.isPending, handleSubmit]);
+
+  if (isLoading) {
+    return (
+      <div className="w-full flex items-center justify-center p-10">
+        <CircularProgress size={24} />
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="max-w-xl mx-auto p-6 text-red-600">
+        {(error as Error)?.message || 'Failed to load chapter'}
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-4xl mx-auto p-6">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">编辑章节</h1>
-        <Button onClick={handleSubmit}>{t("common.submit")}</Button>
+        <h1 className="text-2xl font-bold">
+          {t('chapter.edit_title', '编辑章节')}
+        </h1>
+        <Button
+          variant="contained"
+          onClick={handleSubmit}
+          disabled={isInvalid || !isDirty || updateMutation.isPending}
+        >
+          {updateMutation.isPending ? (
+            <span className="flex items-center gap-2">
+              <CircularProgress size={16} /> {t('common.saving', '保存中...')}
+            </span>
+          ) : (
+            t('common.submit')
+          )}
+        </Button>
       </div>
 
       <div className="rounded-lg border border-gray-200 shadow-sm p-4 bg-white">
         <div className="mb-4">
           <TextField
-            id="filled-textarea"
-            label="章节标题"
-            placeholder={t("placeholders.chapter_title")}
+            id="chapter-title"
+            label={t('chapter.title', '章节标题')}
+            placeholder={t('placeholders.chapter_title')}
             multiline
             variant="filled"
             className="w-full"
             value={title}
-            onChange={(e: any) => setTitle(e.target.value)}
+            onChange={e => setTitle(e.target.value)}
+            error={!title.trim()}
+            helperText={!title.trim() ? t('validation.required', '必填') : ' '}
           />
         </div>
-        <EasyEditor value={content} onChange={setContent} />
+        <div className="min-h-[400px]">
+          <EasyEditor value={content} onChange={setContent} />
+          {!content.trim() && (
+            <div className="text-sm text-red-600 mt-2">
+              {t('validation.required', '必填')}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

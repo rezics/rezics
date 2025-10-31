@@ -15,6 +15,7 @@ interface ChapterListEditorProps {
   enableDoubleClickRename?: boolean;
   bookId: string;
   chapterId?: string;
+  isEdit?: boolean;
 }
 
 export const ChapterListEditor: React.FC<ChapterListEditorProps> = ({
@@ -23,6 +24,7 @@ export const ChapterListEditor: React.FC<ChapterListEditorProps> = ({
   drawerWidth,
   isDraggable = false,
   enableDoubleClickRename = false,
+  isEdit = true,
 }) => {
   // Data fetching
   const {data, isLoading, error} = useQuery(bookQueries.chapterIndex(bookId));
@@ -62,7 +64,10 @@ export const ChapterListEditor: React.FC<ChapterListEditorProps> = ({
   return (
     <div>
       <div className="mx-auto">
-        <div className="space-y-4 mb-6 w-full pl-6 pr-6">
+        <div
+          className="space-y-4 mb-6 w-full pl-6 pr-6"
+          style={isEdit ? {display: 'block'} : {display: 'none'}}
+        >
           <TextField
             id="standard-basic"
             label="Search Term"

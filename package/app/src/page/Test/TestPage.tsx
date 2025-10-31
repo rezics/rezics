@@ -3,7 +3,6 @@ import Box from '@mui/material/Box';
 import Tab from '@mui/material/Tab';
 import * as React from 'react';
 
-import useRpcQuery from '@/api/swr-query/tsrTypeBuild';
 import {ThemeDemo} from '@/component/Theme/ThemeDemo.tsx';
 
 import {TagEditor} from '@/component/Tag/BookTagsExample.tsx';
@@ -14,16 +13,6 @@ export default function PersistentTabs() {
   const handleChange = (_: React.SyntheticEvent, newValue: '1' | '2') => {
     setValue(newValue);
   };
-
-  const createTestInput = {
-    operation: 'test.01',
-    parameter: {bookId: '0'},
-  };
-  const {
-    data: testData,
-    isLoading: testLoading,
-    error: testError,
-  } = useRpcQuery<any>(createTestInput);
 
   return (
     <div>
@@ -51,13 +40,7 @@ export default function PersistentTabs() {
             domainId="0"
           />
         </TabPanel>
-        <TabPanel value="2" keepMounted>
-          <div>SWR Test</div>
-          <div>{String(testData)}</div>
-          <div>{String(testLoading)}</div>
-          <div>{String(testError)}</div>
-          <div className="mt-100" />
-        </TabPanel>
+        <TabPanel value="2" keepMounted></TabPanel>
       </TabContext>
     </div>
   );

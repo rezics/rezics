@@ -84,6 +84,7 @@ export const BookReadLayout: React.FC<BookReadLayoutProps> = ({
             drawerWidth={drawerWidth}
             isDraggable={true}
             enableDoubleClickRename={false}
+            isEdit={false}
           />
         </div>
       </Sidebar>

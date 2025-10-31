@@ -1,6 +1,5 @@
 import {useQueries, useQuery} from '@tanstack/react-query';
 import {Link} from 'wouter';
-import useRpcQuery from '@/api/swr-query/tsrTypeBuild';
 import {AccentBarWithTextShow} from '@/component/Common/AccentBar.tsx';
 import {tagApi, tagQueries} from '@/api/tag';
 import type {TagDetailDTO} from '@package/contract';
@@ -17,13 +16,6 @@ export function TagByBookPage({
   domainId,
   full = false,
 }: TagByBookPageProps) {
-  // Book title for header (existing RPC kept for compatibility)
-  const bookInfoInput = {
-    operation: 'book.read',
-    parameter: {bookId: bookId || ''},
-  };
-  const {data: bookData} = useRpcQuery<any>(bookInfoInput);
-
   // List tags attached to this book (object)
   const pageSize = full ? 100 : 30;
   const {
@@ -53,7 +45,7 @@ export function TagByBookPage({
 
   return (
     <div className="w-11/12 mx-auto mt-10">
-      <AccentBarWithTextShow text={`${bookData?.title ?? ''} 的标签`} />
+      <AccentBarWithTextShow text={`标签`} />
 
       {isLoading && <div>加载中…</div>}
       {error && <div>加载失败</div>}
