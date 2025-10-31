@@ -1,13 +1,12 @@
 import {Alert, CircularProgress, Typography} from '@mui/material';
 import {useCallback, useEffect, useMemo, useState} from 'react';
 
-import {BookSearch} from '@/component/BookLib/BookSearch.tsx';
+import {BookSearchContainer} from '@/component/BookLib/BookSearch/BookSearch';
 // import { CardBookList } from "@component/Book/CardBookList";
-import {BookSearchFilter} from '@/component/BookLib/BookSearchFilter.tsx';
-import type {BookLibSortKey} from '@/component/BookLib/BookSearchFilter.tsx';
+import type {BookLibSortKey} from '@/component/Search/SearchFilter';
 import {UniversalPaginator} from '@/component/Common/Pagination.tsx';
 import type {SearchInfo} from '@/util/searchParser.ts';
-import {BookListViewContainer} from '@component/BookLib/BookListView.tsx';
+import {BookListViewContainer} from '@/component/BookLib/BookList/BookListView';
 
 import React from 'react';
 
@@ -56,7 +55,7 @@ export const BookLibShow: React.FC<BookLibShowProps> = ({
   if (error) {
     return (
       <div className="mx-auto max-w-7xl p-4">
-        <BookSearch.Container onSearch={getBookList} />
+        <BookSearchContainer onSearch={() => {}} />
         <Alert severity="error" className="my-4">
           {String(error)}
         </Alert>
@@ -64,21 +63,8 @@ export const BookLibShow: React.FC<BookLibShowProps> = ({
     );
   }
 
-  if (books.length === 0 && !isLoading) {
-    return (
-      <div className="mx-auto max-w-7xl p-4">
-        <BookSearch.Container onSearch={getBookList} />
-        <Typography variant="body1" className="mt-4 text-center">
-          No books found.
-        </Typography>
-      </div>
-    );
-  }
-
   return (
     <div className="mx-auto max-w-7xl p-4">
-      <BookSearch.Container onSearch={getBookList} />
-      <div className="mt-4" />
       <UniversalPaginator<Book>
         data={books}
         totalExternalItems={totalItems}
@@ -90,10 +76,10 @@ export const BookLibShow: React.FC<BookLibShowProps> = ({
         requestData={handleNeedMoreData}
         isLoading={isLoading && books.length === 0}
         sortControl={
-          <BookSearchFilter
-            sortType={sortConfig.type}
-            sortOrder={sortConfig.order}
-            onSortChange={handleSortChange}
+          <BookSearchContainer
+            onSearch={(info, q) => {
+              console.log('onSearch', info, q);
+            }}
           />
         }
         currentPage={currentPage}

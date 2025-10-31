@@ -4,7 +4,6 @@ import Tab from '@mui/material/Tab';
 import * as React from 'react';
 
 import useRpcQuery from '@/api/swr-query/tsrTypeBuild';
-import {BookEditorSidebar} from '@/component/Layout/Sidebar/BookEditorSidebar';
 import {ThemeDemo} from '@/component/Theme/ThemeDemo.tsx';
 
 export default function PersistentTabs() {
@@ -56,17 +55,6 @@ export default function PersistentTabs() {
         {/* ② TabPanel 的 value 必须和 Tab 的 value 对应 */}
         <TabPanel value="1" keepMounted>
           {/* keepMounted 保持在 DOM，不会被卸载，内部状态持久化】 */}
-          <BookEditorSidebar
-            chaptersData={
-              (data as any) ?? {
-                chapters: [],
-                order: new Map() as any,
-              }
-            }
-            selectedId=""
-            baseLink="/test"
-            drawerWidth={300}
-          />
         </TabPanel>
         <TabPanel value="2" keepMounted>
           <div>SWR Test</div>

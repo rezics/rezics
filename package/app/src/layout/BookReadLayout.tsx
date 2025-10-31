@@ -7,7 +7,7 @@ import {appStore} from '@/global/appStore.ts';
 import {useLayoutStore} from '@/global/Layout/layoutStore.ts';
 
 import useRpcQuery from '@/api/swr-query/tsrTypeBuild';
-import {BookEditorSidebar} from '@/component/Layout/Sidebar/BookEditorSidebar';
+import {ChapterListEditor} from '@/component/Book/Chapter/ChapterListEditor';
 import {Link, useParams, useRoute} from 'wouter';
 interface BookReadLayoutProps {
   children: ReactNode;
@@ -83,15 +83,9 @@ export const BookReadLayout: React.FC<BookReadLayoutProps> = ({children}) => {
             </Link>
           </div>
           <Divider />
-          <BookEditorSidebar
-            chaptersData={
-              (data as any) ?? {
-                chapters: [],
-                order: new Map<string, string[]>(),
-              }
-            }
-            selectedId={selectedId}
-            baseLink={baseUrl}
+          <ChapterListEditor
+            bookId={bookId}
+            chapterId={selectedId}
             drawerWidth={drawerWidth}
           />
         </div>
