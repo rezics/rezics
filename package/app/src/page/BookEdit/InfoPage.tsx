@@ -1,5 +1,5 @@
 import {useQuery} from '@tanstack/react-query';
-import {bookQueries} from '@/api/book';
+import {bookQueries} from '@/api/book/book';
 import {BookDescription} from '@/component/Book/BookDescription';
 import {AccentBarWithTextShow} from '@/component/Common/AccentBar.tsx';
 import {BookMetadataEditor} from '@/component/Book/Metadata/BookMetadataEditor';

@@ -6,14 +6,20 @@ import React, {ReactNode, useEffect, useState} from 'react';
 import {appStore} from '@/global/appStore.ts';
 import {useLayoutStore} from '@/global/Layout/layoutStore.ts';
 
-import useRpcQuery from '@/api/swr-query/tsrTypeBuild';
+import {DraggableResizer} from '@/component/Layout/DraggableResizer.tsx';
 import {ChapterListEditor} from '@/component/Book/Chapter/ChapterListEditor';
 import {Link, useParams, useRoute} from 'wouter';
 interface BookReadLayoutProps {
   children: ReactNode;
+  bookId: string;
+  chapterId: string;
 }
 
-export const BookReadLayout: React.FC<BookReadLayoutProps> = ({children}) => {
+export const BookReadLayout: React.FC<BookReadLayoutProps> = ({
+  children,
+  bookId,
+  chapterId,
+}) => {
   const [match, params] = useRoute('/book/:bookId/read/:chapterId');
   const locationParams = useParams();
   const isMobile = useMediaQuery('(max-width:960px)');
@@ -23,32 +29,21 @@ export const BookReadLayout: React.FC<BookReadLayoutProps> = ({children}) => {
   const [selectedId, setSelectedId] = useState(
     match ? String(params.chapterId) : '',
   );
-  let bookId = '';
-
-  useEffect(() => {
-    console.log('locationParams', locationParams);
-    bookId = locationParams[0] || '';
-    setBaseUrl(`/book/${bookId}/read`);
-    console.log('bookId', bookId);
-    console.log('baseUrl', baseUrl);
-  }, [locationParams]);
 
   useEffect(() => {
     console.log('match, params', match, params);
     setSelectedId(match ? String(params.chapterId) : '');
   }, [match, params]);
 
-  const createBookChaptersInput = {
-    operation: 'chapter.list',
-    parameter: {
-      bookId: bookId || '1',
-    },
-  };
-  const {data, isLoading, error} = useRpcQuery<any>(createBookChaptersInput);
-
   const handleDrawerToggle = () => {
     toggleSidebar();
   };
+
+  function setDrawerWidth(width: number) {
+    useLayoutStore.setState({drawerWidth: width});
+  }
+
+  const [isDragging, setIsDragging] = useState(false);
 
   const mode = appStore((state: any) => state.theme);
   function toggleTheme() {
@@ -84,12 +79,20 @@ export const BookReadLayout: React.FC<BookReadLayoutProps> = ({children}) => {
           </div>
           <Divider />
           <ChapterListEditor
-            bookId={bookId}
-            chapterId={selectedId}
+            bookId={bookId || ''}
+            chapterId={chapterId || ''}
             drawerWidth={drawerWidth}
+            isDraggable={true}
+            enableDoubleClickRename={false}
           />
         </div>
       </Sidebar>
+
+      <DraggableResizer
+        targetId="book-edit-sidebar"
+        setSidebarWidth={setDrawerWidth}
+        onDragging={setIsDragging}
+      />
 
       <main
         className="flex-grow pt-16 transition-all duration-300"

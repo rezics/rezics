@@ -1,6 +1,7 @@
 import {Elysia} from 'elysia';
 import {swagger} from '@elysiajs/swagger';
 import {bookApi} from './book';
+import {chapterApi} from './chapter';
 import {readlistApi} from './readlist';
 import {reviewApi} from './review';
 import {userApi} from './user';
@@ -29,6 +30,7 @@ const app = new Elysia()
   })
   .use(swagger())
   .use(bookApi)
+  .use(chapterApi)
   .use(readlistApi)
   .use(reviewApi)
   .use(userApi)

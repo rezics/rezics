@@ -1,49 +1,33 @@
-import { useParams } from "wouter";
+import {useQuery} from '@tanstack/react-query';
+import {useParams} from 'wouter';
 
-import useRpcQuery from "@/api/swr-query/tsrTypeBuild";
-import { AccentBarWithTextShow } from "@/component/Common/AccentBar.tsx";
-import { ReviewEdit } from "@/component/Review/ReviewEdit.tsx";
-import { ReviewList } from "@/component/Review/ReviewList.tsx";
-import { useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
-// import { BookReview } from "contract/schema";
-
-type BookReview = any;
+import {reviewQueries} from '@/api/review/review';
+import {AccentBarWithTextShow} from '@/component/Common/AccentBar.tsx';
+import {ReviewEdit} from '@/component/Review/ReviewEdit.tsx';
+import {ReviewListContainer} from '@/component/Review/ReviewList.tsx';
+import {useTranslation} from 'react-i18next';
 
 export function ReviewByBookPage() {
-  const params = useParams();
-  const bookId = params[0];
-  const { t } = useTranslation();
+  const {bookId} = useParams();
+  const {t} = useTranslation();
 
-  const [reviews, setReviews] = useState<BookReview[]>([]);
+  const {data, isLoading, error} = useQuery(reviewQueries.byBook(bookId || ''));
 
-  const createReviewListInput = {
-    operation: "review.list",
-    parameter: {
-      bookId: bookId || "",
-    },
-  };
-  const { data, isLoading, error } = useRpcQuery<any[]>(createReviewListInput);
-
-  useEffect(() => {
-    if (data) {
-      setReviews(data as any);
-    }
-  }, [data]);
+  const reviews = data?.reviews ?? [];
 
   return (
     <div className="w-11/12 mx-auto mt-10">
-      <AccentBarWithTextShow text={`${t("pages.review_page")}`} />
+      <AccentBarWithTextShow text={`${t('pages.review_page')}`} />
       <div className="mt-4">
         <ReviewEdit />
 
-        <ReviewList.Show
-          reviews={reviews}
-          isReplyModalOpen={false}
-          currentReplyId={null}
-          onReply={() => {}}
-          onCloseReplyModal={() => {}}
-        />
+        {isLoading ? (
+          <div>Loading...</div>
+        ) : error instanceof Error ? (
+          <div>Error: {error.message}</div>
+        ) : (
+          <ReviewListContainer reviews={reviews} />
+        )}
       </div>
     </div>
   );

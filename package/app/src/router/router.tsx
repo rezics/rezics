@@ -61,9 +61,9 @@ export default (
 
         {/* ANCHOR Book Read – keep the more specific path first */}
         <Route path="/book/:bookId/read/:chapterId">
-          {() => (
-            <BookReadLayout>
-              <BookReadChapterPage />
+          {({bookId, chapterId}) => (
+            <BookReadLayout bookId={bookId} chapterId={chapterId}>
+              <BookReadChapterPage chapterId={chapterId} />
             </BookReadLayout>
           )}
         </Route>

@@ -1,18 +1,23 @@
-import { AccentBarContainer } from "@component/Common/AccentBar.tsx";
-import { CollapsibleText } from "@component/Common/CollapsibleText.tsx";
-import { TreeReplyComponents } from "@component/Form/TreeReplyComponents.tsx";
-import { Add, ChatBubbleOutline, Comment, FavoriteBorder } from "@mui/icons-material";
-import { IconButton } from "@mui/material";
-import React, { useRef } from "react";
-import { useTranslation } from "react-i18next";
-import { useParams } from "wouter";
+import {AccentBarContainer} from '@component/Common/AccentBar.tsx';
+// import {CollapsibleText} from '@component/Common/CollapsibleText.tsx';
+import {TreeReplyComponents} from '@component/Form/TreeReplyComponents.tsx';
+import {
+  Add,
+  ChatBubbleOutline,
+  Comment,
+  FavoriteBorder,
+} from '@mui/icons-material';
+import {IconButton} from '@mui/material';
+import React, {useRef} from 'react';
+import {useTranslation} from 'react-i18next';
+import {useParams} from 'wouter';
 
-import { readlistQueries } from "@/api/readlist";
-import { useQuery } from "@tanstack/react-query";
+import {readlistQueries} from '@/api/readlist/readlist';
+import {useQuery} from '@tanstack/react-query';
 
 export const ReadListPage: React.FC = () => {
-  const { t } = useTranslation();
-  const { readlistId } = useParams<{ readlistId: string }>();
+  const {t} = useTranslation();
+  const {readlistId} = useParams<{readlistId: string}>();
 
   const commentRef = useRef<HTMLDivElement>(null);
 
@@ -20,16 +25,20 @@ export const ReadListPage: React.FC = () => {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore: scrollIntoView is not defined in the type declaration
     commentRef.current?.scrollIntoView({
-      behavior: "smooth",
-      block: "start",
+      behavior: 'smooth',
+      block: 'start',
     });
   };
 
   const handleReply = () => {
-    console.log("reply");
+    console.log('reply');
   };
 
-  const { data: bookList, isLoading, error } = useQuery(readlistQueries.byId(readlistId));
+  const {
+    data: bookList,
+    isLoading,
+    error,
+  } = useQuery(readlistQueries.detail(readlistId || ''));
 
   if (isLoading) {
     return <div className="text-center py-10">加载中...</div>;
@@ -48,39 +57,32 @@ export const ReadListPage: React.FC = () => {
       <div className="space-y-4">
         <div>
           <h2 className="text-2xl font-bold">{bookList.title}</h2>
-          <p className="text-gray-600">{bookList.description}</p>
+          {/* 新 API 暂无 description 字段 */}
+          {/* <p className="text-gray-600">{(bookList as any).description}</p> */}
         </div>
         <div className="flex justify-between items-center">
           {bookList.creator && (
             <div className="flex items-center gap-3">
               <img
-                src={bookList.creator.avatar}
+                src={bookList.creator.avatar || ''}
                 alt="creator avatar"
                 className="w-10 h-10 rounded-full shadow"
               />
-              <p className="text-sm text-gray-700">
-                {bookList.creator.name}
-              </p>
+              <p className="text-sm text-gray-700">{bookList.creator.name}</p>
             </div>
           )}
           <div className="flex items-center gap-2">
-            <IconButton
-              aria-label={t("accessibility.favorite")}
-              size="small"
-            >
+            <IconButton aria-label={t('accessibility.favorite')} size="small">
               <FavoriteBorder fontSize="small" />
             </IconButton>
             <IconButton
-              aria-label={t("accessibility.comments")}
+              aria-label={t('accessibility.comments')}
               size="small"
               onClick={handleGoToComments}
             >
               <Comment fontSize="small" />
             </IconButton>
-            <IconButton
-              aria-label={t("accessibility.collection")}
-              size="small"
-            >
+            <IconButton aria-label={t('accessibility.collection')} size="small">
               <Add fontSize="small" />
             </IconButton>
           </div>
@@ -88,40 +90,13 @@ export const ReadListPage: React.FC = () => {
       </div>
 
       {/* Book List */}
-      <div className="grid grid-cols-1 gap-4 mt-6">
-        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-        {bookList.books.map((book: any, idx: number) => (
-          <div key={idx} className="flex items-start space-x-4">
-            <img
-              src={book.cover}
-              alt="book cover"
-              className="w-24 h-32 object-cover rounded-md shadow-md"
-            />
-            <div>
-              <div className="flex items-center gap-2">
-                <h3 className="text-xl font-semibold">
-                  {book.name}
-                </h3>
-                {/* 评分展示 */}
-                <span className="text-lg text-yellow-500">
-                  {book.rating}
-                </span>
-              </div>
-              <div>
-                <CollapsibleText.Container
-                  content={book.review}
-                  threshold={600}
-                />
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
+      {/* 新 API 暂不直接返回 books 列表，这里占位或从 metadata.items 进一步查询渲染 */}
+      {/* <div className="grid grid-cols-1 gap-4 mt-6"> ... </div> */}
 
       {/* Likes & Comments */}
       <div className="text-sm mt-5 text-gray-700">
-        <span>{bookList.likes}</span> <span className="ml-1">likes</span>
-        <span className="ml-4">{bookList.commentsNumber}</span> <span className="ml-1">comments</span>
+        <span>{bookList.likes ?? 0}</span> <span className="ml-1">likes</span>
+        {/* 新 API 暂无 commentsNumber */}
       </div>
 
       {/* 评论区 */}
@@ -134,14 +109,14 @@ export const ReadListPage: React.FC = () => {
 
           <IconButton
             size="large"
-            sx={{ fontSize: "1.5rem" }}
+            sx={{fontSize: '1.5rem'}}
             onClick={handleReply}
           >
             <ChatBubbleOutline fontSize="inherit" />
           </IconButton>
         </div>
 
-        <TreeReplyComponents bookListId={readlistId || ""} />
+        <TreeReplyComponents bookListId={readlistId || ''} />
         {/* 供评论区占位符 */}
         <div className="mb-[200px]" />
       </div>
