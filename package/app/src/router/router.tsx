@@ -4,7 +4,7 @@ import {Route, Router, Switch} from 'wouter';
 // Pages
 import {LoginPage} from '@/page/Auth/LoginPage.tsx';
 import {RegisterPage} from '@/page/Auth/RegisterPage.tsx';
-import {Home} from '@/page/Home.tsx';
+import {HomeContainer} from '@/page/Home.tsx';
 import {NotFoundContainer} from '@/page/NotFound.tsx';
 
 // Book – Read
@@ -229,7 +229,7 @@ export default (
         {/* ANCHOR Home */}
         <Route path="/">
           <MainLayout>
-            <Home.Container />
+            <HomeContainer />
           </MainLayout>
         </Route>
 

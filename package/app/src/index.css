@@ -1,11 +1,4 @@
-@import "tailwindcss";
-
-/* support toggling dark mode manually, disable media query */
-@custom-variant dark (&:where(.dark, .dark *));
-
-* {
-  overflow: visible;
-}
+@import 'tailwindcss';
 
 .no-scrollbar {
   /* IE and Edge */

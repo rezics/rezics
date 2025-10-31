@@ -12,37 +12,30 @@ import type {BookDTO} from '@package/contract';
 
 type Book = BookDTO;
 
-export type HomeNewReleasesProps = {
+export type HomeEditorPicksProps = {
   title?: string;
   limit?: number;
 };
 
 /**
- * HomeNewReleases
- * - Fetches latest books (createdAt desc) using the standard list query with q left empty
- * - Displays a responsive grid of book cards
+ * HomeEditorPicks
+ * For now, shows a curated-style grid from the same list API.
  */
-export const HomeNewReleases: React.FC<HomeNewReleasesProps> = ({
-  title = '新书推荐',
-  limit = 12,
+export const HomeEditorPicks: React.FC<HomeEditorPicksProps> = ({
+  title = '编辑精选',
+  limit = 8,
 }) => {
   const {data, isLoading, error} = useQuery(
-    bookQueries.list({
-      start: 0,
-      limit,
-      q: '',
-      sort: {type: 'createdAt', order: 'desc'},
-    }),
+    bookQueries.list({start: 0, limit, q: ''}),
   );
-
   const books: Book[] = useMemo(() => data?.books ?? [], [data]);
 
   if (error) {
     return (
       <div className="w-full">
-        <div className="flex items-center justify-between mb-3">
-          <Typography variant="h6">{title}</Typography>
-        </div>
+        <Typography variant="h6" className="mb-3">
+          {title}
+        </Typography>
         <Alert severity="error">{String(error)}</Alert>
       </div>
     );
@@ -54,15 +47,14 @@ export const HomeNewReleases: React.FC<HomeNewReleasesProps> = ({
         <Typography variant="h6">{title}</Typography>
         {isLoading && <CircularProgress size={20} />}
       </div>
-      <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+      <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 md:grid-cols-4">
         {books.map(book => (
           <Card key={book.unitId} className="overflow-hidden">
             {book.coverUrl && (
               <img
                 src={book.coverUrl}
                 alt={book.title}
-                className="w-full h-44 object-cover"
-                loading="lazy"
+                className="w-full h-40 object-cover"
               />
             )}
             <CardContent className="!pt-3">
@@ -88,4 +80,4 @@ export const HomeNewReleases: React.FC<HomeNewReleasesProps> = ({
   );
 };
 
-export default HomeNewReleases;
+export default HomeEditorPicks;
