@@ -248,7 +248,8 @@ model Tag {
   unitId String  @id @default(dbgenerated("uuidv7()")) @db.Uuid
   unit   Unit    @relation("TagIndexForUnit", fields: [unitId], references: [id], onDelete: Cascade)
   name   String
-  type   String? // e.g. general / genre / author / system
+  i18n   Json?
+  type   String? // e.g. general / book / author / system
 
   units Unit[] @relation("UnitTags")
 

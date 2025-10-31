@@ -14,14 +14,6 @@ import {bookQueries} from '@/api/book/book';
 import {useQuery} from '@tanstack/react-query';
 import type {BookDTO} from '@package/contract';
 
-function buildQuery(info: SearchInfo): string {
-  let q = info.searchText.trim();
-  if (info.searchTags.length) {
-    q = `${q} ${info.searchTags.map((t: string) => `[${t}]`).join(' ')}`.trim();
-  }
-  return q;
-}
-
 type Book = BookDTO;
 
 type BookLibShowProps = {
@@ -29,7 +21,6 @@ type BookLibShowProps = {
   totalItems: number;
   isLoading: boolean;
   error: any;
-  getBookList: (info: SearchInfo) => void;
   sortConfig: {
     type: BookLibSortKey;
     order: 'asc' | 'desc';
@@ -37,6 +28,7 @@ type BookLibShowProps = {
   handleNeedMoreData: any;
   handleSortChange: any;
   EXTERNAL_PAGE_SIZE: number;
+  setCurrentQuery: any;
 };
 
 export const BookLibShow: React.FC<BookLibShowProps> = ({
@@ -44,11 +36,11 @@ export const BookLibShow: React.FC<BookLibShowProps> = ({
   totalItems,
   isLoading,
   error,
-  getBookList,
   sortConfig,
   handleNeedMoreData,
   handleSortChange,
   EXTERNAL_PAGE_SIZE,
+  setCurrentQuery,
 }) => {
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -78,6 +70,10 @@ export const BookLibShow: React.FC<BookLibShowProps> = ({
         sortControl={
           <BookSearchContainer
             onSearch={(info, q) => {
+              setCurrentQuery({
+                searchText: q,
+                searchTags: info.tags,
+              });
               console.log('onSearch', info, q);
             }}
           />
@@ -106,6 +102,7 @@ export const BookLibContainer: React.FC = () => {
     bookQueries.list({
       start,
       limit: EXTERNAL_PAGE_SIZE,
+      q: currentQuery.searchText,
     }),
   );
 
@@ -119,9 +116,6 @@ export const BookLibContainer: React.FC = () => {
 
   const books: Book[] = useMemo(() => data?.books ?? [], [data]);
   const totalItems: number = data?.total ?? 0;
-  const getBookList = useCallback((info: SearchInfo) => {
-    setCurrentQuery(info);
-  }, []);
 
   const handleSortChange = (newSort: {
     type?: string;
@@ -147,7 +141,7 @@ export const BookLibContainer: React.FC = () => {
       totalItems={totalItems}
       isLoading={isLoading}
       error={error}
-      getBookList={getBookList}
+      setCurrentQuery={setCurrentQuery}
       sortConfig={sortConfig}
       handleNeedMoreData={handleNeedMoreData}
       handleSortChange={handleSortChange}

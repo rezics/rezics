@@ -29,7 +29,7 @@ import {QuoteByBookPage} from '@/page/Review/QuoteByBookPage.tsx';
 import {ReviewByBookPage} from '@/page/Review/ReviewByBookPage.tsx';
 import {LongReviewEditPage} from '@/page/Review/ReviewEditPage.tsx';
 import {ShortReviewByBookPage} from '@/page/Review/ShortReviewByBookPage.tsx';
-import {TagByBookPage} from '@/page/Tag/TagByBookPage.tsx';
+import {TagByBookPage, TagByBookFullPage} from '@/page/Tag/TagByUnitPage';
 import TestPage from '@/page/Test/TestPage.tsx';
 import {TestPage02} from '@/page/Test/TestPage02.tsx';
 import {TestPage03} from '@/page/Test/TestPage03.tsx';
@@ -163,6 +163,20 @@ export default (
           {({bookId}) => (
             <MainLayout>
               <TagByBookPage bookId={bookId} />
+            </MainLayout>
+          )}
+        </Route>
+        <Route path="/tag/book/:bookId/tags">
+          {({bookId}) => (
+            <MainLayout>
+              <TagByBookFullPage bookId={bookId} />
+            </MainLayout>
+          )}
+        </Route>
+        <Route path="/tag/book/:bookId/tags/:domainId">
+          {({bookId, domainId}) => (
+            <MainLayout>
+              <TagByBookFullPage bookId={bookId} domainId={domainId} />
             </MainLayout>
           )}
         </Route>

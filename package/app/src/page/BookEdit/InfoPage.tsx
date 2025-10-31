@@ -2,7 +2,7 @@ import {useQuery} from '@tanstack/react-query';
 import {bookQueries} from '@/api/book';
 import {BookDescription} from '@/component/Book/BookDescription';
 import {AccentBarWithTextShow} from '@/component/Common/AccentBar.tsx';
-import {BookTitleEditor} from '@/component/Book/BookTitle';
+import {BookMetadataEditor} from '@/component/Book/Metadata/BookMetadataEditor';
 import React from 'react';
 import {useTranslation} from 'react-i18next';
 // import Paper from "@mui/material/Paper";
@@ -23,9 +23,16 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({bookId}) => {
         <div className="text-2xl font-bold mb-4">书籍编辑</div>
       </div>
       <div>
-        <AccentBarWithTextShow text="title" />
+        <div className="flex mb-4">
+          <AccentBarWithTextShow text="MetaData" />
+        </div>
         <div className="mb-8">
-          <BookTitleEditor title={data?.title ?? ''} />
+          <BookMetadataEditor
+            value={data as any}
+            onChange={value => {
+              console.log('onChange', value);
+            }}
+          />
         </div>
       </div>
       <div>

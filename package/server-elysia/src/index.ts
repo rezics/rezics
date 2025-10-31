@@ -2,6 +2,7 @@ import {Elysia} from 'elysia';
 import {swagger} from '@elysiajs/swagger';
 import {bookApi} from './book';
 import {userApi} from './user';
+import {tagApi} from './tag';
 
 import 'dotenv/config';
 
@@ -27,6 +28,7 @@ const app = new Elysia()
   .use(swagger())
   .use(bookApi)
   .use(userApi)
+  .use(tagApi)
   .get('/', () => 'Hello Elysia')
   .get('/health', () => ({status: 'ok'}))
   .listen(3000);
