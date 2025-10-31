@@ -5,6 +5,7 @@ import {chapterApi} from './chapter';
 import {readlistApi} from './readlist';
 import {reviewApi} from './review';
 import {userApi} from './user';
+import {unitApi} from './unit';
 import {tagApi} from './tag';
 
 import 'dotenv/config';
@@ -34,6 +35,7 @@ const app = new Elysia()
   .use(readlistApi)
   .use(reviewApi)
   .use(userApi)
+  .use(unitApi)
   .use(tagApi)
   .get('/', () => 'Hello Elysia')
   .get('/health', () => ({status: 'ok'}))

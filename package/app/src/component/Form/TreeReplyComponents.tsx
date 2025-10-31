@@ -1,39 +1,33 @@
 // 暂时就先这样不处理，后面树化，或者使用VirtualList
 
 import {Add, Remove} from '@mui/icons-material';
-import {
-  Avatar,
-  Box,
-  Button,
-  Collapse,
-  IconButton,
-  Typography,
-} from '@mui/material';
-import React, {useCallback, useEffect, useMemo, useState} from 'react';
+import {Avatar, Box, Collapse, IconButton, Typography} from '@mui/material';
+import React, {useEffect, useMemo, useState} from 'react';
+import {useQuery} from '@tanstack/react-query';
 //  ;
 
 import {useDialogStore} from '@/global/dialogStore.ts';
 import {ReactionBar} from '../Common/ReactionBar.tsx';
 import {ReplyDrawer} from './ReplyDrawer.tsx';
 
+import {unitCommentTreeQuery} from '@/api/unit/unit.queries';
+import type {CommentTreeNode} from '@package/contract';
 // This is a temporary type definition based on the GraphQL schema.
-// It should be replaced with generated types.
-type Author = {
+// Local UI type adapted from CommentTreeNode
+type UiAuthor = {
   name: string;
-  avatar: string;
+  avatar?: string | null;
 };
 
-type Comment = {
+type UiComment = {
   id: string;
-  content: string;
-  created_at: string;
-  author: Author;
-  likes: number;
-  replies?: Comment[];
+  content?: string | null;
+  created_at?: string;
+  author?: UiAuthor;
+  replies?: UiComment[];
 };
-
 interface CommentNodeProps {
-  comment: Comment;
+  comment: UiComment;
   level?: number;
   openDrawer: (id: string) => void;
 }
@@ -71,7 +65,10 @@ const CommentNode: React.FC<CommentNodeProps> = ({
       }}
     >
       <Box display="flex" gap={2} alignItems="flex-start">
-        <Avatar src={comment.author.avatar} sx={{width: 32, height: 32}} />
+        <Avatar
+          src={comment.author?.avatar ?? undefined}
+          sx={{width: 32, height: 32}}
+        />
         <Box flex={1}>
           <Box display="flex" alignItems="center" gap={1}>
             <Typography
@@ -80,10 +77,12 @@ const CommentNode: React.FC<CommentNodeProps> = ({
               color="text.primary"
               fontWeight="bold"
             >
-              {comment.author.name}
+              {comment.author?.name ?? 'Unknown'}
             </Typography>
             <Typography variant="caption" color="text.secondary">
-              {new Date(comment.created_at).toLocaleString()}
+              {comment.created_at
+                ? new Date(comment.created_at).toLocaleString()
+                : ''}
             </Typography>
           </Box>
           <Typography variant="body2" mt={1}>
@@ -140,37 +139,99 @@ interface ReplyComponentsProps {
 export const TreeReplyComponents: React.FC<ReplyComponentsProps> = ({
   bookListId,
 }) => {
-  const commentId = bookListId; // TODO 暫時先用這個替代
-  const createCommentListInput = {
-    operation: 'comment.list',
-    parameter: {
-      commentId: commentId || '',
-    },
-  };
-  // const {data, isLoading, error} = useRpcQuery<Record<string, Comment>>(
-  //   createCommentListInput,
-  // );
-  const data = {};
-  const isLoading = false;
-  const error: any = null;
+  // Assume bookListId represents the root unit id for comments
+  const unitId = bookListId;
+
+  // Fetch a flat slice of the comment tree for the unit
+  const {data, isLoading, error} = useQuery(
+    unitCommentTreeQuery(unitId, {
+      // Fetch up to depth 3 for an initial view; adjust as needed
+      maxDepth: 3,
+      order: 'asc',
+      start: 0,
+      limit: 200,
+    }),
+  );
 
   // currentReplyId
   const setDialogVisible = useDialogStore(state => state.setDialogVisible);
   const [currentReplyId, setCurrentReplyId] = useState<string | null>(null);
-  const [topLevelComments, setTopLevelComments] = useState<Comment[]>([]);
+  const [topLevelComments, setTopLevelComments] = useState<UiComment[]>([]);
+
+  const buildTree = useMemo(() => {
+    return (items: CommentTreeNode[] | undefined): UiComment[] => {
+      if (!items || items.length === 0) return [];
+
+      // Map of id -> UiComment
+      const map = new Map<string, UiComment>();
+      // Group by parentId
+      const childrenMap = new Map<string | null | undefined, UiComment[]>();
+
+      for (const n of items) {
+        const ui: UiComment = {
+          id: n.id,
+          content: n.content ?? null,
+          created_at: n.createdAt
+            ? typeof n.createdAt === 'string'
+              ? n.createdAt
+              : new Date(n.createdAt as any).toISOString()
+            : undefined,
+          author: n.user
+            ? {name: n.user.name, avatar: n.user.avatar ?? undefined}
+            : undefined,
+          replies: [],
+        };
+        map.set(n.id, ui);
+        const key = (n as any).parentCommentId ?? null;
+        const list = childrenMap.get(key) ?? [];
+        list.push(ui);
+        childrenMap.set(key, list);
+      }
+
+      // Link children to parents
+      for (const n of items) {
+        const parentId = (n as any).parentCommentId ?? null;
+        if (parentId && map.has(parentId)) {
+          const parent = map.get(parentId)!;
+          const childList = childrenMap.get(parentId) ?? [];
+          // Ensure parent's replies uses grouped list
+          parent.replies = childList;
+        }
+      }
+
+      // Roots are those with no parent or missing parent in this slice
+      const roots: UiComment[] = [];
+      const rootCandidates =
+        childrenMap.get(null) ?? childrenMap.get(undefined) ?? [];
+      for (const r of rootCandidates) {
+        roots.push(r);
+      }
+
+      // Some nodes may reference a parent not included in the slice; treat them as roots
+      if (roots.length === 0) {
+        // Fallback: choose items with missing parent
+        for (const n of items) {
+          const parentId = (n as any).parentCommentId ?? null;
+          if (!parentId || !map.has(parentId)) {
+            const ui = map.get(n.id)!;
+            if (!roots.includes(ui)) roots.push(ui);
+          }
+        }
+      }
+
+      return roots;
+    };
+  }, []);
 
   useEffect(() => {
-    // TODO Now we don't use the pagination, so we need to use the data directly
     try {
-      if (data) {
-        const arr: any = Object.values(data);
-        setTopLevelComments(arr);
-        console.log('topLevelComments', topLevelComments, 'data', data);
-      }
+      const items = data?.items;
+      const tree = buildTree(items as any);
+      setTopLevelComments(tree);
     } catch (_error) {
-      console.error('Error setting top level comments');
+      console.error('Error building comment tree');
     }
-  }, [data]);
+  }, [data, buildTree]);
 
   const handleSubmit = (currentReplyId: string, content: string) => {
     console.log('handleSubmit', currentReplyId, content);
@@ -188,7 +249,7 @@ export const TreeReplyComponents: React.FC<ReplyComponentsProps> = ({
     <>
       <Box p={2}>
         {topLevelComments.length > 0 ? (
-          topLevelComments.map((comment: Comment) => (
+          topLevelComments.map((comment: UiComment) => (
             <CommentNode
               key={comment.id}
               comment={comment}

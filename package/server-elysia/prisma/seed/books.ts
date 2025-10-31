@@ -76,7 +76,7 @@ export async function seedBooks(
         coverUrl: randomBoolean(0.8) ? getRandomBookCover() : null,
         isbn: randomBoolean(0.8) ? faker.commerce.isbn() : null,
         chapterIndex: {
-          create: {index: generateChapters()},
+          create: {index: ''},
         },
         description: generateParagraph(1, 2),
         extra: generateBookExtra(),
@@ -97,4 +97,15 @@ export async function seedBooks(
   }
 
   return created;
+}
+
+export async function updateChapterIndex(
+  prisma: PrismaClient,
+  bookId: string,
+  chapterIndex: string,
+): Promise<void> {
+  await prisma.bookIndex.update({
+    where: {bookUnitId: bookId},
+    data: {index: chapterIndex},
+  });
 }

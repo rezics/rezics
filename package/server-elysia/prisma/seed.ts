@@ -70,6 +70,8 @@ async function main() {
     );
     console.log(`✅ Created ${others.length} other units`);
 
+    // update chapter index
+
     // Seed comments
     const allRootUnitIds: string[] = [...bookIds, ...others.map(o => o.id)];
     const {perRootCount} = await seedComments(
