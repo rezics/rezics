@@ -1,12 +1,11 @@
-// @ts-nocheck temporary disable type check
-import { extractColorFromImage, PRESET_COLORS } from "@/config/dynamicTheme";
-import { appStore } from "@/global/appStore";
+import {extractColorFromImage, PRESET_COLORS} from '@/config/dynamicTheme';
+import {appStore} from '@/global/appStore';
 import {
   Close as CloseIcon,
   Palette as PaletteIcon,
   Photo as PhotoIcon,
   Refresh as RefreshIcon,
-} from "@mui/icons-material";
+} from '@mui/icons-material';
 import {
   Box,
   Button,
@@ -25,8 +24,8 @@ import {
   Tooltip,
   Typography,
   useTheme,
-} from "@mui/material";
-import React, { useState } from "react";
+} from '@mui/material';
+import React, {useState} from 'react';
 
 interface ThemeCustomizerProps {
   open: boolean;
@@ -41,14 +40,10 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({
   const customColor = appStore((state: any) => state.customColor);
   const useDynamicTheme = appStore((state: any) => state.useDynamicTheme);
   const setCustomColor = appStore((state: any) => state.setCustomColor);
-  const setUseDynamicTheme = appStore(
-    (state: any) => state.setUseDynamicTheme,
-  );
+  const setUseDynamicTheme = appStore((state: any) => state.setUseDynamicTheme);
 
-  const [selectedColor, setSelectedColor] = useState(
-    customColor || "#f4606c",
-  );
-  const [customHex, setCustomHex] = useState("");
+  const [selectedColor, setSelectedColor] = useState(customColor || '#f4606c');
+  const [customHex, setCustomHex] = useState('');
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [isExtracting, setIsExtracting] = useState(false);
 
@@ -92,16 +87,16 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({
       setCustomColor(extractedColor);
       URL.revokeObjectURL(imageUrl);
     } catch (error) {
-      console.error("颜色提取失败:", error);
+      console.error('颜色提取失败:', error);
     } finally {
       setIsExtracting(false);
     }
   };
 
   const handleReset = () => {
-    setSelectedColor("#f4606c");
-    setCustomColor("#f4606c");
-    setCustomHex("");
+    setSelectedColor('#f4606c');
+    setCustomColor('#f4606c');
+    setCustomHex('');
     setUseDynamicTheme(false);
     setImageFile(null);
   };
@@ -113,11 +108,7 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <DialogTitle>
-        <Box
-          display="flex"
-          alignItems="center"
-          justifyContent="space-between"
-        >
+        <Box display="flex" alignItems="center" justifyContent="space-between">
           <Box display="flex" alignItems="center" gap={1}>
             <PaletteIcon />
             <Typography variant="h6">主题自定义</Typography>
@@ -142,13 +133,8 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({
               }
               label={
                 <Box>
-                  <Typography variant="body1">
-                    启用动态主题
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    color="text.secondary"
-                  >
+                  <Typography variant="body1">启用动态主题</Typography>
+                  <Typography variant="body2" color="text.secondary">
                     基于选择的颜色自动生成协调的配色方案
                   </Typography>
                 </Box>
@@ -175,13 +161,8 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({
                 <Typography variant="body1" fontWeight="medium">
                   {selectedColor.toUpperCase()}
                 </Typography>
-                <Typography
-                  variant="body2"
-                  color="text.secondary"
-                >
-                  {useDynamicTheme
-                    ? "动态主题已启用"
-                    : "静态主题"}
+                <Typography variant="body2" color="text.secondary">
+                  {useDynamicTheme ? '动态主题已启用' : '静态主题'}
                 </Typography>
               </Box>
             </Box>
@@ -193,36 +174,33 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({
               预设颜色
             </Typography>
             <Grid container spacing={1}>
-              {Object.entries(PRESET_COLORS).map(
-                ([name, color]) => (
-                  // <Grid item key={name}>
-                  <Grid key={name}>
-                    <Tooltip title={`${name}: ${color}`}>
-                      <Paper
-                        elevation={selectedColor === color
-                          ? 4
-                          : 1}
-                        sx={{
-                          width: 40,
-                          height: 40,
-                          backgroundColor: color,
-                          cursor: "pointer",
-                          border: selectedColor === color
+              {Object.entries(PRESET_COLORS).map(([name, color]) => (
+                // <Grid item key={name}>
+                <Grid key={name}>
+                  <Tooltip title={`${name}: ${color}`}>
+                    <Paper
+                      elevation={selectedColor === color ? 4 : 1}
+                      sx={{
+                        width: 40,
+                        height: 40,
+                        backgroundColor: color,
+                        cursor: 'pointer',
+                        border:
+                          selectedColor === color
                             ? `3px solid ${theme.palette.primary.main}`
                             : `1px solid ${theme.palette.divider}`,
-                          borderRadius: 1,
-                          transition: "all 0.2s ease",
-                          "&:hover": {
-                            transform: "scale(1.1)",
-                            elevation: 3,
-                          },
-                        }}
-                        onClick={() => handleColorSelect(color)}
-                      />
-                    </Tooltip>
-                  </Grid>
-                ),
-              )}
+                        borderRadius: 1,
+                        transition: 'all 0.2s ease',
+                        '&:hover': {
+                          transform: 'scale(1.1)',
+                          elevation: 3,
+                        },
+                      }}
+                      onClick={() => handleColorSelect(color)}
+                    />
+                  </Tooltip>
+                </Grid>
+              ))}
             </Grid>
           </Box>
 
@@ -240,21 +218,19 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({
               onChange={handleCustomHexChange}
               helperText="输入格式: #RRGGBB"
               InputProps={{
-                startAdornment: customHex
-                    && /^#[0-9A-F]{6}$/i.test(customHex)
-                  ? (
+                startAdornment:
+                  customHex && /^#[0-9A-F]{6}$/i.test(customHex) ? (
                     <Box
                       sx={{
                         width: 20,
                         height: 20,
-                        borderRadius: "50%",
+                        borderRadius: '50%',
                         backgroundColor: customHex,
                         border: `1px solid ${theme.palette.divider}`,
                         mr: 1,
                       }}
                     />
-                  )
-                  : null,
+                  ) : null,
               }}
             />
           </Box>
@@ -271,7 +247,7 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({
                 startIcon={<PhotoIcon />}
                 disabled={isExtracting}
               >
-                {isExtracting ? "提取中..." : "选择图片"}
+                {isExtracting ? '提取中...' : '选择图片'}
                 <input
                   type="file"
                   hidden
@@ -287,11 +263,7 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({
                 />
               )}
             </Box>
-            <Typography
-              variant="body2"
-              color="text.secondary"
-              sx={{ mt: 1 }}
-            >
+            <Typography variant="body2" color="text.secondary" sx={{mt: 1}}>
               上传图片自动提取主色调作为主题颜色
             </Typography>
           </Box>
@@ -314,15 +286,12 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({
 // 快速主题切换按钮组件
 export const ThemeQuickToggle: React.FC = () => {
   const [open, setOpen] = useState(false);
-  const useDynamicTheme = appStore((state) => state.useDynamicTheme);
+  const useDynamicTheme = appStore(state => state.useDynamicTheme);
 
   return (
     <>
       <Tooltip title="主题自定义">
-        <IconButton
-          onClick={() => setOpen(true)}
-          className="!text-white"
-        >
+        <IconButton onClick={() => setOpen(true)} className="!text-white">
           <PaletteIcon />
         </IconButton>
       </Tooltip>

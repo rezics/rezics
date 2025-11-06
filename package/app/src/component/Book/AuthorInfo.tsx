@@ -153,6 +153,11 @@ export type AuthorInfoEditContainerProps = {
   mode?: 'modal' | 'inline';
 };
 
+/**
+ * TODO 右侧文字应当支持折叠，并且，应当扩展字段，包含作家自己的简介和平台简介，规避文字量太少造成的丑陋问题。
+ * @param param0
+ * @returns
+ */
 const AuthorInfoEditContainer: React.FC<AuthorInfoEditContainerProps> = ({
   author,
   editOpen,

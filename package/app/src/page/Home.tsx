@@ -13,6 +13,7 @@ import {HomePromotionStrip} from '@component/Home/HomePromotionStrip';
 import {HomeTrendingReviews} from '@component/Home/HomeTrendingReviews';
 import {HomeTrendingWiki} from '@component/Home/HomeTrendingWiki';
 import {HomeAuthorSpotlight} from '@component/Home/HomeAuthorSpotlight';
+import {NoticeBoard} from '@component/Home/NoticeBoard';
 import {useTranslation} from 'react-i18next';
 import React from 'react';
 
@@ -27,7 +28,7 @@ export const HomeShow: React.FC<HomeShowProps> = () => {
         <div className="text-purple w-2/3 p-4 flex-none">
           <BookCarousel autoplayIntervalNum={3000} />
         </div>
-        <div className="w-1/3 bg-green-200 p-4 flex-1">右侧公告板</div>
+        <NoticeBoard />
       </div>
       {/* End First Carousel */}
       {/* Promotion strip */}
@@ -81,10 +82,6 @@ export const HomeShow: React.FC<HomeShowProps> = () => {
         <HomeNewsletterSignup />
       </div>
       {/* 干脆写个插件化定制板块的首页。 */}
-      <div>
-        <p>{t('title')}</p>、<p>{t('accessibility.comments')}</p>
-        <p>{t('auth.error.invalid_username')}</p>
-      </div>
     </div>
   );
 };
