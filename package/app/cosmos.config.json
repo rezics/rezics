@@ -2,5 +2,6 @@
   "$schema": "http://json.schemastore.org/cosmos-config",
   "plugins": ["react-cosmos-plugin-vite"],
   "fixtureFileSuffix": "test",
-  "globalImports": ["./src/index.css"]
+  "globalImports": ["./src/index.css"],
+  "port": 5173
 }

@@ -30,7 +30,7 @@ export class TagService {
     }
 
     if (options.domainId) {
-      and.push({unit: {domains: {some: {unitId: options.domainId}}}});
+      and.push({unit: {domains: {some: {id: options.domainId}}}});
     }
 
     return and.length ? {AND: and} : {};
@@ -77,7 +77,7 @@ export class TagService {
       where: {
         name,
         type: type ?? undefined,
-        unit: {domains: {some: {unitId: domainId}}},
+        unit: {domains: {some: {id: domainId}}},
       },
       include: tagInclude,
     });
@@ -97,7 +97,7 @@ export class TagService {
             title: name,
             // domains: connect
             ...(Array.isArray(domains) && domains.length
-              ? {domains: {connect: domains.map(id => ({unitId: id}))}}
+              ? {domains: {connect: domains.map(id => ({id}))}}
               : {}),
           },
         },
@@ -123,7 +123,7 @@ export class TagService {
           update: {
             title: name ?? undefined,
             ...(Array.isArray(domains)
-              ? {domains: {set: domains.map(id => ({unitId: id}))}}
+              ? {domains: {set: domains.map(id => ({id}))}}
               : {}),
           },
         },

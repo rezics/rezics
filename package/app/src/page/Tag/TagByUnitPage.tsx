@@ -1,9 +1,9 @@
 import {useQueries, useQuery} from '@tanstack/react-query';
 import {Link} from 'wouter';
 import {AccentBarWithTextShow} from '@/component/Common/AccentBar.tsx';
-import {tagApi, tagQueries} from '@/api/tag';
+import {tagApi, tagQueries} from '@/api/tag/tag';
 import type {TagDetailDTO} from '@package/contract';
-import {TagList} from '@/component/Tag/TagList';
+import {TagWrapper} from '@/component/Tag/TagWrapper';
 
 interface TagByBookPageProps {
   bookId: string;
@@ -52,13 +52,7 @@ export function TagByBookPage({
 
       {!isLoading && !error && (
         <div className="mt-4">
-          <TagList
-            tags={details}
-            onDomainClick={d => {
-              // navigate to domain-specific page
-              window.location.href = `/tag/book/${bookId}/tags/${d}`;
-            }}
-          />
+          <TagWrapper filters={{objectId: bookId}} mode="grouped" />
         </div>
       )}
 

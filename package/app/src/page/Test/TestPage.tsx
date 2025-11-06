@@ -5,7 +5,7 @@ import * as React from 'react';
 
 import {ThemeDemo} from '@/component/Theme/ThemeDemo.tsx';
 
-import {TagEditor} from '@/component/Tag/BookTagsExample.tsx';
+import {TagListEdit} from '@/component/Tag/Edit/TagListEdit.tsx';
 
 export default function PersistentTabs() {
   const [value, setValue] = React.useState<'1' | '2'>('1');
@@ -35,10 +35,7 @@ export default function PersistentTabs() {
         {/* ② TabPanel 的 value 必须和 Tab 的 value 对应 */}
         <TabPanel value="1" keepMounted>
           {/* keepMounted 保持在 DOM，不会被卸载，内部状态持久化】 */}
-          <TagEditor
-            bookUnitId="019a2c19-d5ae-770e-8f30-f547c284436a"
-            domainId="0"
-          />
+          <TagListEdit objectUnitId="019a2c19-d5ae-770e-8f30-f547c284436a" />
         </TabPanel>
         <TabPanel value="2" keepMounted></TabPanel>
       </TabContext>

@@ -1,5 +1,5 @@
 import {BookReviews} from '@/component/Book/BookReviewsPreview.tsx';
-import {BookTagViewContainer} from '@/component/Book/BookTagPreview.tsx';
+import {TagWrapper} from '@/component/Tag/TagWrapper.tsx';
 import {ShortBookReviews} from '@/component/Book/ShortBookReviewsPreview.tsx';
 import {AccentBarWithTextContainer} from '@component/Common/AccentBar.tsx';
 import {TabContext, TabList, TabPanel} from '@mui/lab';
@@ -74,7 +74,18 @@ export const BookPageShow: React.FC<ShowProps> = ({
                   <Divider />
 
                   {/* ANCHOR Tags */}
-                  <BookTagViewContainer bookId={bookInfo?.unitId || ''} />
+                  <div>
+                    <ArrowForwardIconContainer
+                      size={16}
+                      to={`/tag/book/${bookInfo?.unitId}/tags`}
+                    >
+                      <AccentBarWithTextContainer text="Tags" />
+                    </ArrowForwardIconContainer>
+                  </div>
+                  <TagWrapper
+                    filters={{objectId: bookInfo?.unitId || ''}}
+                    mode="grouped"
+                  />
                   <Divider />
 
                   {/* ANCHOR Author Info */}

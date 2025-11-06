@@ -3,7 +3,7 @@
 import type {Prisma, Tag, Unit, User} from '@/prisma/client';
 
 export type TagWithRelations = Tag & {
-  unit: Unit & {user: User; domains: User[]};
+  unit: Unit & {user: User; domains: Unit[]};
 };
 
 export const tagInclude = {

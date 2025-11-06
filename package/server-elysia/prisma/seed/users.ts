@@ -31,7 +31,7 @@ export async function seedUsers(
     const slug = generateSlug(username);
     const created = await prisma.user.create({
       data: {
-        email: faker.internet.email({firstName: username}),
+        email: `${slug}@example.com`,
         passwordHash: faker.internet.password({length: 32}),
         slug,
         name: username,
@@ -59,7 +59,7 @@ export async function seedPressUsers(
     const slug = generateSlug(username);
     const created = await prisma.user.create({
       data: {
-        email: `${randomUUID()}_${faker.internet.email({firstName: username})}`,
+        email: `${slug}@example.com`,
         passwordHash: faker.internet.password({length: 32}),
         slug,
         name: username,
@@ -87,7 +87,7 @@ export async function seedProducerUsers(
     const slug = generateSlug(username);
     const created = await prisma.user.create({
       data: {
-        email: faker.internet.email({firstName: username}),
+        email: `${slug}@example.com`,
         passwordHash: faker.internet.password({length: 32}),
         slug,
         name: username,

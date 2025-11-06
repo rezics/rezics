@@ -1,67 +1,65 @@
-import {Box, Chip, Stack, Typography} from '@mui/material';
-import type {TagDetailDTO} from '@package/contract';
+import React, {useState, useCallback} from 'react';
+import {Chip, Typography} from '@mui/material';
+import type {TagDetailDTO} from '@/api/tag/tag';
+import {TagDetailCard} from './TagCards';
 
-export type DomainGroupedTags = Record<string, TagDetailDTO[]>; // key = domainId ("__no_domain__" when none)
-
-const NO_DOMAIN = '__no_domain__';
-
-function groupByDomain(tags: TagDetailDTO[]): DomainGroupedTags {
-  const groups: DomainGroupedTags = {};
-  for (const tag of tags) {
-    const domains =
-      tag.domains && tag.domains.length ? tag.domains : [NO_DOMAIN];
-    for (const d of domains) {
-      if (!groups[d]) groups[d] = [];
-      groups[d].push(tag);
-    }
-  }
-  return groups;
-}
-
-export type TagListProps = {
+/**
+ * TagList – 展示标签列表（纯展示，不负责数据拉取）
+ * 点击某个标签在下方展示 TagDetailCard，按住 Ctrl 点击直接跳转新窗口。
+ */
+export const TagList: React.FC<{
   tags: TagDetailDTO[];
-  onTagClick?: (tag: TagDetailDTO) => void;
-  onDomainClick?: (domainId: string) => void;
-  domainLabelMap?: Record<string, string>; // optional pretty names for domain ids
-};
+  className?: string;
+  autoSelectFirst?: boolean;
+}> = ({tags, className, autoSelectFirst}) => {
+  const [activeId, setActiveId] = useState<string | null>(
+    autoSelectFirst && tags.length > 0 ? tags[0].id : null,
+  );
+  const activeTag = tags.find(t => t.id === activeId) || null;
 
-export const TagList = ({
-  tags,
-  onTagClick,
-  onDomainClick,
-  domainLabelMap,
-}: TagListProps) => {
-  const grouped = groupByDomain(tags);
-  const domainIds = Object.keys(grouped);
+  const handleClick = useCallback(
+    (e: React.MouseEvent, tag: TagDetailDTO) => {
+      if (e.ctrlKey) {
+        window.open(`/tags/${tag.id}`, '_blank');
+        return;
+      }
+      setActiveId(tag.id === activeId ? null : tag.id);
+    },
+    [activeId],
+  );
+
+  if (tags.length === 0) {
+    return (
+      <div className={className}>
+        <Typography variant="body2" color="text.secondary">
+          暂无标签
+        </Typography>
+      </div>
+    );
+  }
 
   return (
-    <Stack spacing={3}>
-      {domainIds.map(domainId => (
-        <Box key={domainId}>
-          <Stack direction="row" alignItems="center" spacing={1} sx={{mb: 1}}>
-            <Typography
-              variant="subtitle1"
-              fontWeight={600}
-              sx={{cursor: onDomainClick ? 'pointer' : 'default'}}
-              onClick={() => onDomainClick && onDomainClick(domainId)}
-            >
-              {domainId === NO_DOMAIN
-                ? 'Other'
-                : domainLabelMap?.[domainId] ?? domainId}
-            </Typography>
-          </Stack>
-          <Stack direction="row" useFlexGap flexWrap="wrap" gap={1}>
-            {grouped[domainId].map(tag => (
-              <Chip
-                key={tag.id}
-                label={`#${tag.name}`}
-                size="small"
-                onClick={onTagClick ? () => onTagClick(tag) : undefined}
-              />
-            ))}
-          </Stack>
-        </Box>
-      ))}
-    </Stack>
+    <div className={className}>
+      <div className="flex flex-wrap gap-2">
+        {tags.map(tag => (
+          <div key={tag.id} className="flex items-center">
+            <Chip
+              label={tag.name}
+              size="small"
+              clickable
+              color={tag.id === activeId ? 'primary' : 'default'}
+              onClick={e => handleClick(e, tag)}
+            />
+          </div>
+        ))}
+      </div>
+      {activeTag && (
+        <div className="mt-4">
+          <TagDetailCard tag={activeTag} />
+        </div>
+      )}
+    </div>
   );
 };
+
+export default TagList;

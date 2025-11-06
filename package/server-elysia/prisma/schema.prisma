@@ -20,6 +20,7 @@ enum UnitType {
   COMMENT
   NOTE
   REVIEW
+  DOMAIN
   TAG
   QUOTE
   READLIST
@@ -67,7 +68,6 @@ model User {
   authorBook   Book[] @relation("BookAuthor")
   pressBook    Book[] @relation("BookPress")
   producerBook Book[] @relation("BookProducer")
-  domainUnits  Unit[] @relation("UnitDomains")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -85,10 +85,11 @@ model User {
  */
 model Unit {
   // basic info
-  id      String @id @default(dbgenerated("uuidv7()")) @db.Uuid
-  userId  String @db.Uuid
-  user    User   @relation("UnitForUser", fields: [userId], references: [unitId], onDelete: Cascade)
-  domains User[] @relation("UnitDomains")
+  id             String @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  userId         String @db.Uuid
+  user           User   @relation("UnitForUser", fields: [userId], references: [unitId], onDelete: Cascade)
+  domains        Unit[] @relation("UnitDomains")
+  domainIncludes Unit[] @relation("UnitDomains")
 
   type   UnitType
   status UnitStatus @default(ACTIVE)

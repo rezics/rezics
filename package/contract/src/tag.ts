@@ -3,6 +3,8 @@ export type TagDTO = {
   id: string; // equals Tag.unitId
   name: string;
   type?: string | null;
+  domains: any;
+  content?: string | null;
 };
 
 export type TagDetailDTO = TagDTO & {
