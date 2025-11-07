@@ -33,7 +33,7 @@ export const userApi = coreInstance('/users')
       const userReq: CreateUserInput = {
         email: body.email,
         password: body.password,
-        name: body.name,
+        slug: body.slug,
         avatar: body.avatar,
         bio: body.bio,
       };
@@ -44,7 +44,8 @@ export const userApi = coreInstance('/users')
       const token = await jwt.sign({
         userId: user.unitId,
         email: user.email,
-        name: user.name,
+        slug: user.slug,
+        permission: JSON.parse(JSON.stringify({roles: ['USER']})),
       } as JWTPayload);
 
       return {user: mapUserToDTO(user), token};
@@ -76,7 +77,8 @@ export const userApi = coreInstance('/users')
       const token = await jwt.sign({
         userId: user.unitId,
         email: user.email,
-        name: user.name,
+        slug: user.slug,
+        permission: user.permission,
       } as JWTPayload);
 
       return {user: mapUserToDTO(user), token};

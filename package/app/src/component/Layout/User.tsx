@@ -107,6 +107,8 @@ export const UserShow: React.FC<UserShowProps> = ({
         onClose={onMenuClose}
       >
         <MenuItem
+          component={Link}
+          to={`/user/me`}
           onClick={() => {
             onMenuClose();
             onProfile?.();
@@ -115,11 +117,11 @@ export const UserShow: React.FC<UserShowProps> = ({
           <ListItemIcon>
             <PersonIcon fontSize="small" />
           </ListItemIcon>
-          <ListItemText>
-            <Link to={`/user/me`}>Profile</Link>
-          </ListItemText>
+          <ListItemText>Profile</ListItemText>
         </MenuItem>
         <MenuItem
+          component={Link}
+          to={`/user/me/edit`}
           onClick={() => {
             onMenuClose();
             onSettings?.();
@@ -128,9 +130,7 @@ export const UserShow: React.FC<UserShowProps> = ({
           <ListItemIcon>
             <SettingsIcon fontSize="small" />
           </ListItemIcon>
-          <ListItemText>
-            <Link to="/config">Settings</Link>
-          </ListItemText>
+          <ListItemText>Settings</ListItemText>
         </MenuItem>
         <Divider />
         <MenuItem onClick={onLogout}>

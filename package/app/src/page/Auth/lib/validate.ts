@@ -36,12 +36,12 @@ export function validatePassword(password: string) {
   if (!/[0-9]/.test(password)) {
     return {valid: false, error: 'Password must contain at least one number.'};
   }
-  if (!/[^A-Za-z0-9]/.test(password)) {
-    return {
-      valid: false,
-      error: 'Password must contain at least one special character.',
-    };
-  }
+  // if (!/[^A-Za-z0-9]/.test(password)) {
+  //   return {
+  //     valid: false,
+  //     error: 'Password must contain at least one special character.',
+  //   };
+  // }
   return {valid: true, error: null};
 }
 
@@ -66,10 +66,14 @@ export function validateSlug(slug: string) {
   if (!slug) {
     return {valid: false, error: 'Slug is required.'};
   }
-  if (!/^[a-z0-9-]+$/.test(slug)) {
+  if (slug.length < 5) {
+    return {valid: false, error: 'Slug must be at least 5 characters long.'};
+  }
+  if (!/^[a-zA-Z0-9-_]+$/.test(slug)) {
     return {
       valid: false,
-      error: 'Slug can only contain lowercase letters, numbers, and hyphens.',
+      error:
+        'Slug can only contain lowercase letters, uppercase letters, numbers, and hyphens.',
     };
   }
   if (slug.startsWith('-') || slug.endsWith('-')) {

@@ -2,12 +2,11 @@ import Alert from '@mui/material/Alert';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import {type FC, useState} from 'react';
-import type React from 'react';
 import {useTranslation} from 'react-i18next';
 import {login} from './lib/handler.ts';
 import {Layout} from './lib/Layout.tsx';
 import {ModalLayout} from './lib/ModalLayout.tsx';
-import {Card, CardContent, Dialog, DialogContent} from '@mui/material';
+import {Dialog, DialogContent} from '@mui/material';
 
 import {validateEmail, validatePassword} from './lib/validate.ts';
 import {useUserStore} from '@/global/userStore.ts';
@@ -141,11 +140,11 @@ export const LoginPage: FC<LoginPageProps> = ({isModal = false, onClose}) => {
 
     try {
       console.log('try to login');
-      const email = data?.email;
       let validateData: {valid: boolean; error: string | null} = {
         valid: false,
         error: null,
       };
+      const email = data?.email;
       validateData = validateEmail(email);
       if (!validateData.valid) throw new Error(validateData.error ?? '');
 

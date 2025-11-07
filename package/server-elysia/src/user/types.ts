@@ -2,6 +2,8 @@
 
 import type {User, Unit, Prisma} from '@/prisma/client';
 
+import {t} from 'elysia';
+
 /**
  * Internal user type with relations
  */
@@ -34,8 +36,16 @@ export const userInclude = {
 /**
  * JWT Payload type
  */
-export type JWTPayload = {
-  userId: string;
-  email: string;
-  name: string;
-};
+export const jwtPayloadSchema = t.Object({
+  userId: t.String(),
+  email: t.String(),
+  slug: t.String(),
+  permission: t.Object(
+    {
+      roles: t.Array(t.String()),
+    },
+    {additionalProperties: true},
+  ),
+});
+
+export type JWTPayload = (typeof jwtPayloadSchema)['static'];

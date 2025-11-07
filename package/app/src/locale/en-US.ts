@@ -31,6 +31,10 @@ export default {
     resolve: 'Resolve',
     already_login:
       'You have already logged in. Re-login will overwrite the previous login information.',
+    help: {
+      slug: 'Username is globally unique.',
+      slug_require: 'Only allow a-z, 0-9, A-Z, -, _',
+    },
     error: {
       email_required: 'Email is required.',
       invalid_email: 'Invalid email address.',
@@ -59,6 +63,7 @@ export default {
     password: 'Password',
     confirm: 'Confirm Password',
     username: 'Username',
+    nickname: 'Nickname',
     back: 'Back',
     home: 'Home',
     cancel: 'Cancel',

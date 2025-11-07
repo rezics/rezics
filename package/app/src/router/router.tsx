@@ -26,6 +26,9 @@ import {TagByBookPage, TagByBookFullPage} from '@/page/Tag/TagByUnitPage';
 import {TagDomainPage} from '@/page/Tag/TagDomain';
 import {TagUnitPage} from '@/page/Tag/TagUnitPage';
 
+// User pages
+import {UserEditPage} from '@/page/User/UserEditPage.tsx';
+
 // Misc
 import {MainLayout} from '@/layout/MainLayout.tsx';
 import {BookListEditPage} from '@/page/ReadList/ReadListEditPage.tsx';
@@ -206,28 +209,23 @@ export default (
           )}
         </Route>
 
-        <Route path="/user/me/*">
-          {params => (
-            <MainLayout>
-              <UserPage key="me" isCurrentUser={params ? true : true} />
-            </MainLayout>
-          )}
-        </Route>
-
         {/* ANCHOR User Routes */}
+        <Route path="/user/me/edit">
+          <MainLayout>
+            <UserEditPage />
+          </MainLayout>
+        </Route>
+        <Route path="/user/me">
+          <MainLayout>
+            <UserPage isCurrentUser={true} />
+          </MainLayout>
+        </Route>
         <Route path="/user/:unitId">
           {({unitId}) => (
             <MainLayout>
               <UserPage unitId={unitId} />
             </MainLayout>
           )}
-        </Route>
-
-        {/* ANCHOR Config Routes */}
-        <Route path="/config">
-          <MainLayout>
-            <MainConfigPage />
-          </MainLayout>
         </Route>
 
         {/* ANCHOR Test */}

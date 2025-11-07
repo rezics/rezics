@@ -117,7 +117,7 @@ export class UserService {
    * Create new user
    */
   async create(req: CreateUserInput): Promise<UserWithRelations> {
-    const {email, password, name, avatar, bio} = req;
+    const {email, password, slug, avatar, bio} = req;
 
     // Check if email already exists
     const existing = await this.getByEmail(email);
@@ -125,15 +125,12 @@ export class UserService {
       throw new Error('Email already exists');
     }
 
-    // Generate slug from name
-    const slug = name.toLowerCase().replace(/\s+/g, '-');
-
     const user = await prisma.user.create({
       data: {
         email,
         slug,
         passwordHash: password,
-        name,
+        name: slug,
         avatar: avatar || undefined,
         bio: bio || undefined,
         type: UserType.USER,

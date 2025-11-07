@@ -64,7 +64,7 @@ model User {
   description String? // Descriptive wiki for authors/publishers
   joinDate    DateTime?
 
-  permissions Json?
+  permission Json?
 
   // Relations
   Units        Unit[] @relation("UnitForUser")

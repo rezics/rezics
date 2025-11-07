@@ -2,12 +2,11 @@ import Alert from '@mui/material/Alert';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import {type FC, useState} from 'react';
-import type React from 'react';
 import {useTranslation} from 'react-i18next';
 import {register} from './lib/handler.ts';
 import {Layout} from './lib/Layout.tsx';
 import {ModalLayout} from './lib/ModalLayout.tsx';
-import {validateEmail, validateName, validatePassword} from './lib/validate.ts';
+import {validateEmail, validateSlug, validatePassword} from './lib/validate.ts';
 import {Dialog, DialogContent} from '@mui/material';
 import {useUserStore} from '@/global/userStore.ts';
 
@@ -18,11 +17,10 @@ export interface RegisterShowProps {
   hideActions?: boolean;
   onLoginClick?: () => void;
   isModal?: boolean;
-  onClose?: () => void;
 }
 
 interface RegisterData {
-  name: string;
+  slug: string;
   email: string;
   password: string;
   confirm: string;
@@ -39,11 +37,10 @@ export const RegisterShow: FC<RegisterShowProps> = ({
   hideActions = false,
   onLoginClick,
   isModal = false,
-  onClose,
 }) => {
   const {t} = useTranslation();
   const [data, setData] = useState<RegisterData>({
-    name: '',
+    slug: '',
     email: '',
     password: '',
     confirm: '',
@@ -53,17 +50,6 @@ export const RegisterShow: FC<RegisterShowProps> = ({
     <>
       {error && <Alert severity="error">{error}</Alert>}
       <TextField
-        name="name"
-        type="text"
-        label={t('common.username')}
-        variant="standard"
-        required
-        value={data?.name}
-        onChange={(event: any) => {
-          setData({...data, name: event.target.value});
-        }}
-      />
-      <TextField
         name="email"
         type="email"
         label={t('common.email')}
@@ -72,6 +58,19 @@ export const RegisterShow: FC<RegisterShowProps> = ({
         value={data?.email}
         onChange={(event: any) => {
           setData({...data, email: event.target.value});
+        }}
+      />
+      <TextField
+        name="slug"
+        type="text"
+        label={t('common.username')}
+        variant="standard"
+        placeholder={t('auth.help.slug')}
+        helperText={t('auth.help.slug_require')}
+        required
+        value={data?.slug}
+        onChange={(event: any) => {
+          setData({...data, slug: event.target.value});
         }}
       />
       <TextField
@@ -85,6 +84,17 @@ export const RegisterShow: FC<RegisterShowProps> = ({
           setData({...data, password: event.target.value});
         }}
       />
+      {/* <TextField
+        name="name"
+        type="text"
+        label={t('common.nickname')}
+        variant="standard"
+        required
+        value={data?.name}
+        onChange={(event: any) => {
+          setData({...data, name: event.target.value});
+        }}
+      /> */}
       <TextField
         name="confirm"
         type="password"
@@ -145,33 +155,34 @@ export const RegisterPage: FC<RegisterPageProps> = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>();
   let hasError = false;
-  const {t} = useTranslation();
   const {setUser} = useUserStore();
 
   const handleSubmit = async (data: RegisterData) => {
     setLoading(true);
     setError(undefined);
     try {
-      const name = data?.name;
-      if (!validateName(name))
-        throw new Error(t('auth.error.invalid_username'));
+      let validateData: {valid: boolean; error: string | null} = {
+        valid: false,
+        error: null,
+      };
+      const slug = data?.slug;
+      validateData = validateSlug(slug);
+      if (!validateData.valid) throw new Error(validateData.error ?? '');
 
       const email = data?.email;
-      if (!validateEmail(email)) throw new Error(t('auth.error.invalid_email'));
+      validateData = validateEmail(email);
+      if (!validateData.valid) throw new Error(validateData.error ?? '');
 
       const password = data?.password;
-      if (!validatePassword(password))
-        throw new Error(t('auth.error.invalid_password'));
+      validateData = validatePassword(password);
+      if (!validateData.valid) throw new Error(validateData.error ?? '');
 
       const confirm = data?.confirm;
-      if (!validatePassword(confirm))
-        throw new Error(t('auth.error.invalid_confirm'));
+      validateData = validatePassword(confirm);
+      if (!validateData.valid) throw new Error(validateData.error ?? '');
+      if (password !== confirm) throw new Error('Passwords do not match.');
 
-      if (password !== confirm) {
-        throw new Error(t('auth.error.passwords_mismatch'));
-      }
-
-      const result = await register(name, email, password);
+      const result = await register(slug, email, password);
       setUser(result?.user);
     } catch (e) {
       setError((e as Error).message);
@@ -196,7 +207,6 @@ export const RegisterPage: FC<RegisterPageProps> = ({
       onSubmit={handleSubmit}
       onLoginClick={handleLoginClick}
       isModal={isModal}
-      onClose={onClose}
     />
   );
 };

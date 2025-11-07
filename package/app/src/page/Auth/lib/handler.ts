@@ -12,7 +12,7 @@ export const login = async (email: string, password: string) => {
 };
 
 export const register = async (
-  name: string,
+  slug: string,
   email: string,
   password: string,
   avatar?: string,
@@ -22,7 +22,7 @@ export const register = async (
     const input: CreateUserInput = {
       email,
       password,
-      name,
+      slug,
       avatar,
       bio,
     };

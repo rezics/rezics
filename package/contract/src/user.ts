@@ -12,12 +12,13 @@ export type UserDTO = {
 export type CreateUserInput = {
   email: string;
   password: string;
-  name: string;
+  slug: string;
   avatar?: string;
   bio?: string;
 };
 
 export type UpdateUserInput = Partial<Omit<CreateUserInput, 'password'>> & {
+  name?: string;
   password?: string;
 };
 
@@ -43,7 +44,10 @@ export type UserParams = (typeof userParamsSchema)['static'];
 export const createUserSchema = t.Object({
   email: t.String({format: 'email'}),
   password: t.String({minLength: 6}),
-  name: t.String({minLength: 1}),
+  slug: t.String({
+    minLength: 5,
+    pattern: '^[a-zA-Z0-9](?:[a-zA-Z0-9-_]*[a-zA-Z0-9])?$',
+  }),
   avatar: t.Optional(t.String()),
   bio: t.Optional(t.String()),
 });

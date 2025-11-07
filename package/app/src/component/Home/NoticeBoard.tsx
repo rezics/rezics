@@ -1,7 +1,6 @@
 import React from 'react';
 import {useTheme} from '@mui/material/styles';
 import {
-  Paper,
   Stack,
   Typography,
   Chip,
@@ -10,7 +9,6 @@ import {
   List,
   ListItemButton,
   Skeleton,
-  Button,
 } from '@mui/material';
 import NotificationsRoundedIcon from '@mui/icons-material/NotificationsRounded';
 
