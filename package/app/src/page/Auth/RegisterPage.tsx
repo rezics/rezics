@@ -4,18 +4,28 @@ import TextField from '@mui/material/TextField';
 import {type FC, useState} from 'react';
 import type React from 'react';
 import {useTranslation} from 'react-i18next';
-import {string, z} from 'zod';
 import {register} from './lib/handler.ts';
 import {Layout} from './lib/Layout.tsx';
 import {ModalLayout} from './lib/ModalLayout.tsx';
+import {validateEmail, validateName, validatePassword} from './lib/validate.ts';
+import {Dialog, DialogContent} from '@mui/material';
+import {useUserStore} from '@/global/userStore.ts';
 
 export interface RegisterShowProps {
   loading: boolean;
   error?: string;
-  onSubmit: (event: React.FormEvent<HTMLFormElement>) => void;
+  onSubmit: (data: RegisterData) => void;
   hideActions?: boolean;
   onLoginClick?: () => void;
   isModal?: boolean;
+  onClose?: () => void;
+}
+
+interface RegisterData {
+  name: string;
+  email: string;
+  password: string;
+  confirm: string;
 }
 
 /**
@@ -29,8 +39,15 @@ export const RegisterShow: FC<RegisterShowProps> = ({
   hideActions = false,
   onLoginClick,
   isModal = false,
+  onClose,
 }) => {
   const {t} = useTranslation();
+  const [data, setData] = useState<RegisterData>({
+    name: '',
+    email: '',
+    password: '',
+    confirm: '',
+  });
 
   const content = (
     <>
@@ -41,6 +58,10 @@ export const RegisterShow: FC<RegisterShowProps> = ({
         label={t('common.username')}
         variant="standard"
         required
+        value={data?.name}
+        onChange={(event: any) => {
+          setData({...data, name: event.target.value});
+        }}
       />
       <TextField
         name="email"
@@ -48,6 +69,10 @@ export const RegisterShow: FC<RegisterShowProps> = ({
         label={t('common.email')}
         variant="standard"
         required
+        value={data?.email}
+        onChange={(event: any) => {
+          setData({...data, email: event.target.value});
+        }}
       />
       <TextField
         name="password"
@@ -55,6 +80,10 @@ export const RegisterShow: FC<RegisterShowProps> = ({
         label={t('common.password')}
         variant="standard"
         required
+        value={data?.password}
+        onChange={(event: any) => {
+          setData({...data, password: event.target.value});
+        }}
       />
       <TextField
         name="confirm"
@@ -62,6 +91,10 @@ export const RegisterShow: FC<RegisterShowProps> = ({
         label={t('common.confirm')}
         variant="standard"
         required
+        value={data?.confirm}
+        onChange={(event: any) => {
+          setData({...data, confirm: event.target.value});
+        }}
       />
     </>
   );
@@ -71,7 +104,14 @@ export const RegisterShow: FC<RegisterShowProps> = ({
       <Button variant="text" type="button" onClick={onLoginClick}>
         {t('auth.login')}
       </Button>
-      <Button type="submit" variant="contained" disabled={loading}>
+      <Button
+        type="button"
+        variant="contained"
+        disabled={loading}
+        onClick={() => {
+          onSubmit(data);
+        }}
+      >
         {loading ? 'Loading...' : t('auth.register')}
       </Button>
     </>
@@ -82,7 +122,6 @@ export const RegisterShow: FC<RegisterShowProps> = ({
   return (
     <LayoutComponent
       title={t('auth.register')}
-      onSubmit={onSubmit}
       content={content}
       actions={actions}
     />
@@ -90,67 +129,58 @@ export const RegisterShow: FC<RegisterShowProps> = ({
 };
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-export interface RegisterPageProps {}
+export interface RegisterPageProps {
+  isModal?: boolean;
+  onClose?: () => void;
+}
 
 /**
  * RegisterPage - 完整的注册页面容器
  * 包含状态管理和表单处理逻辑
  */
-export const RegisterPage: FC<RegisterPageProps> = () => {
+export const RegisterPage: FC<RegisterPageProps> = ({
+  isModal = false,
+  onClose,
+}) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>();
+  let hasError = false;
   const {t} = useTranslation();
+  const {setUser} = useUserStore();
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const handleSubmit = async (data: RegisterData) => {
     setLoading(true);
     setError(undefined);
-
-    const form = event.currentTarget as HTMLFormElement;
-    const data = new FormData(form);
-
     try {
-      const {error: e_name, data: _name} = string()
-        .min(1)
-        .safeParse(data.get('name'));
-      if (e_name) {
+      const name = data?.name;
+      if (!validateName(name))
         throw new Error(t('auth.error.invalid_username'));
-      }
 
-      const {error: e_email, data: _email} = z
-        .string()
-        .email()
-        .safeParse(data.get('email'));
-      if (e_email) throw new Error(t('auth.error.invalid_email'));
+      const email = data?.email;
+      if (!validateEmail(email)) throw new Error(t('auth.error.invalid_email'));
 
-      const {error: e_password, data: _password} = string()
-        .min(6)
-        .safeParse(data.get('password'));
-      if (e_password) {
+      const password = data?.password;
+      if (!validatePassword(password))
         throw new Error(t('auth.error.invalid_password'));
-      }
 
-      const {error: e_confirm, data: _confirm} = string().safeParse(
-        data.get('confirm'),
-      );
-      if (e_confirm) {
+      const confirm = data?.confirm;
+      if (!validatePassword(confirm))
         throw new Error(t('auth.error.invalid_confirm'));
-      }
 
-      if (_password !== _confirm) {
+      if (password !== confirm) {
         throw new Error(t('auth.error.passwords_mismatch'));
       }
 
-      await register(_name, _email, _password);
-
-      // Redirect to home page after successful registration
-      if (typeof window !== 'undefined') {
-        window.location.href = '/';
-      }
+      const result = await register(name, email, password);
+      setUser(result?.user);
     } catch (e) {
       setError((e as Error).message);
+      hasError = true;
     } finally {
       setLoading(false);
+    }
+    if (!hasError) {
+      onClose?.();
     }
   };
 
@@ -165,6 +195,24 @@ export const RegisterPage: FC<RegisterPageProps> = () => {
       error={error}
       onSubmit={handleSubmit}
       onLoginClick={handleLoginClick}
+      isModal={isModal}
+      onClose={onClose}
     />
   );
 };
+
+export function RegisterModal({
+  open,
+  onClose,
+}: {
+  open: boolean;
+  onClose: () => void;
+}) {
+  return (
+    <Dialog open={open} onClose={onClose}>
+      <DialogContent className="!p-0">
+        <RegisterPage isModal={true} onClose={onClose} />
+      </DialogContent>
+    </Dialog>
+  );
+}

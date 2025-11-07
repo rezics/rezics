@@ -1,0 +1,82 @@
+import i18n from 'i18next';
+const t = i18n.t;
+export function validateEmail(email: string) {
+  if (!email) {
+    return {valid: false, error: t('auth.error.email_required')};
+  }
+  const pattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!pattern.test(email)) {
+    return {valid: false, error: 'Invalid email format.'};
+  }
+  return {valid: true, error: null};
+}
+
+export function validatePassword(password: string) {
+  if (!password) {
+    return {valid: false, error: 'Password is required.'};
+  }
+  if (password.length < 8) {
+    return {
+      valid: false,
+      error: 'Password must be at least 8 characters long.',
+    };
+  }
+  if (!/[A-Z]/.test(password)) {
+    return {
+      valid: false,
+      error: 'Password must contain at least one uppercase letter.',
+    };
+  }
+  if (!/[a-z]/.test(password)) {
+    return {
+      valid: false,
+      error: 'Password must contain at least one lowercase letter.',
+    };
+  }
+  if (!/[0-9]/.test(password)) {
+    return {valid: false, error: 'Password must contain at least one number.'};
+  }
+  if (!/[^A-Za-z0-9]/.test(password)) {
+    return {
+      valid: false,
+      error: 'Password must contain at least one special character.',
+    };
+  }
+  return {valid: true, error: null};
+}
+
+export function validateName(name: string) {
+  if (!name) {
+    return {valid: false, error: 'Name is required.'};
+  }
+  if (name.length < 5) {
+    return {valid: false, error: 'Name must be at least 5 characters long.'};
+  }
+  // if (!/^[A-Za-z0-9_\-\s]+$/.test(name)) {
+  //   return {
+  //     valid: false,
+  //     error:
+  //       'Name can only contain letters, numbers, spaces, underscores, or hyphens.',
+  //   };
+  // }
+  return {valid: true, error: null};
+}
+
+export function validateSlug(slug: string) {
+  if (!slug) {
+    return {valid: false, error: 'Slug is required.'};
+  }
+  if (!/^[a-z0-9-]+$/.test(slug)) {
+    return {
+      valid: false,
+      error: 'Slug can only contain lowercase letters, numbers, and hyphens.',
+    };
+  }
+  if (slug.startsWith('-') || slug.endsWith('-')) {
+    return {valid: false, error: 'Slug cannot start or end with a hyphen.'};
+  }
+  if (slug.includes('--')) {
+    return {valid: false, error: 'Slug cannot contain consecutive hyphens.'};
+  }
+  return {valid: true, error: null};
+}

@@ -26,6 +26,23 @@ export async function seedUsers(
   const nextUsername = createUsernameGenerator();
   const users: CreatedUser[] = [];
 
+  await prisma.user.create({
+    data: {
+      email: 'admin@example.com',
+      passwordHash: faker.internet.password({length: 32}),
+      slug: 'admin',
+      name: 'Admin',
+      avatar: faker.image.avatar(),
+      bio: generateParagraph(1, 2),
+      description: generateParagraph(5, 10),
+      joinDate: faker.date.past({years: 4}),
+      permissions: {
+        roles: ['ADMIN'],
+      },
+    },
+    select: {unitId: true, name: true},
+  });
+
   for (let i = 0; i < total; i++) {
     const username = nextUsername();
     const slug = generateSlug(username);
@@ -37,6 +54,7 @@ export async function seedUsers(
         name: username,
         avatar: faker.image.avatar(),
         bio: generateParagraph(1, 2),
+        description: generateParagraph(5, 10),
         joinDate: faker.date.past({years: 4}),
       },
       select: {unitId: true, name: true},

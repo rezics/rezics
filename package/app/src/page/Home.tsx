@@ -1,4 +1,3 @@
-import {BookCarousel} from '@component/Home/HomeCarousel';
 import {HomeNewReleases} from '@component/Home/HomeNewReleases';
 import {HomeRankingSection} from '@component/Home/HomeRankingSection';
 import {HomeTagExplore} from '@component/Home/HomeTagExplore';
@@ -13,7 +12,7 @@ import {HomePromotionStrip} from '@component/Home/HomePromotionStrip';
 import {HomeTrendingReviews} from '@component/Home/HomeTrendingReviews';
 import {HomeTrendingWiki} from '@component/Home/HomeTrendingWiki';
 import {HomeAuthorSpotlight} from '@component/Home/HomeAuthorSpotlight';
-import {NoticeBoard} from '@component/Home/NoticeBoard';
+import {ResponsiveCarouselNotice} from '@component/Home/ResponsiveCarouselNotice';
 import {useTranslation} from 'react-i18next';
 import React from 'react';
 
@@ -24,11 +23,8 @@ export const HomeShow: React.FC<HomeShowProps> = () => {
   return (
     <div className="w-10/12 mx-auto">
       {/* First Carousel */}
-      <div className="q-pa-md flex space-x-4">
-        <div className="text-purple w-2/3 p-4 flex-none">
-          <BookCarousel autoplayIntervalNum={3000} />
-        </div>
-        <NoticeBoard />
+      <div className="mt-6">
+        <ResponsiveCarouselNotice />
       </div>
       {/* End First Carousel */}
       {/* Promotion strip */}

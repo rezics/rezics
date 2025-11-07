@@ -7,11 +7,10 @@ import type React from 'react';
 
 export const ModalLayout: FC<{
   title: string;
-  onSubmit: React.FormEventHandler<HTMLFormElement>;
   content: React.ReactNode;
   actions: React.ReactNode;
-}> = ({title, onSubmit, content, actions}) => (
-  <form onSubmit={onSubmit}>
+}> = ({title, content, actions}) => (
+  <form>
     <Card className="min-w-96 max-w-md">
       <CardContent className="flex flex-col gap-4">
         <Typography variant="h4">{title}</Typography>

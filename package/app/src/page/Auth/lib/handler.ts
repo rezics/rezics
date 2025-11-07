@@ -1,16 +1,14 @@
-import {userApi} from '@/api/user/user.api';
+import {userApi} from '@/api/user/user';
 import {setToken, removeToken} from '@/api/react-query/http';
 import type {CreateUserInput} from '@package/contract';
 
 export const login = async (email: string, password: string) => {
-  try {
-    const {user, token} = await userApi.login({email, password});
-    setToken(token);
-    return {user, token};
-  } catch (error) {
-    console.error('Error during login:', error);
-    throw error;
+  const {user, token} = await userApi.login({email, password});
+  setToken(token);
+  if (!user || !token) {
+    throw new Error('Login failed');
   }
+  return {user, token};
 };
 
 export const register = async (
@@ -39,7 +37,7 @@ export const register = async (
 
 export const logout = () => {
   removeToken();
-  if (typeof window !== 'undefined') {
-    window.location.href = '/login';
-  }
+  if (typeof window === 'undefined') return;
+  localStorage.removeItem('user-store');
+  window.location.href = '/login';
 };

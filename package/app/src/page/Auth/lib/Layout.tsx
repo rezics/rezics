@@ -7,14 +7,10 @@ import type React from 'react';
 
 export const Layout: FC<{
   title: string;
-  onSubmit: React.FormEventHandler<HTMLFormElement>;
   content: React.ReactNode;
   actions: React.ReactNode;
-}> = ({title, onSubmit, content, actions}) => (
-  <form
-    onSubmit={onSubmit}
-    className="w-full h-dvh flex flex-col items-center justify-center"
-  >
+}> = ({title, content, actions}) => (
+  <div className="w-full h-dvh flex flex-col items-center justify-center">
     <Card className="min-w-md">
       <CardContent className="flex flex-col gap-4">
         <Typography variant="h4">{title}</Typography>
@@ -24,5 +20,5 @@ export const Layout: FC<{
         {actions}
       </CardActions>
     </Card>
-  </form>
+  </div>
 );

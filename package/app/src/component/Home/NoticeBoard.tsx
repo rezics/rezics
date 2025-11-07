@@ -133,10 +133,10 @@ export const NoticeBoard: React.FC<NoticeBoardProps> = ({initialNotices}) => {
   }, [initialNotices]);
 
   return (
-    <div className="flex-1 p-2 w-1/3">
+    <div>
       <div className="border-radius-2 overflow-hidden">
         {/* Header */}
-        <div className="p-2 flex items-center justify-between dark:bg-neutral-900">
+        <div className="p-2 flex items-center justify-between">
           <Stack direction="row" spacing={1.5} alignItems="center">
             <div
               className="w-8 h-8 inline-flex items-center justify-center rounded-[10px] shadow-sm"

@@ -58,10 +58,13 @@ model User {
 
   type UserType @default(USER)
 
-  name     String
-  avatar   String?
-  bio      String?
-  joinDate DateTime?
+  name        String
+  avatar      String?
+  bio         String?
+  description String? // Descriptive wiki for authors/publishers
+  joinDate    DateTime?
+
+  permissions Json?
 
   // Relations
   Units        Unit[] @relation("UnitForUser")

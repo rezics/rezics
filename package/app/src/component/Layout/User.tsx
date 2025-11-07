@@ -6,6 +6,7 @@ import {
 } from '@mui/icons-material';
 import {
   Avatar,
+  Button,
   Divider,
   IconButton,
   ListItemIcon,
@@ -15,6 +16,49 @@ import {
 } from '@mui/material';
 import React, {useState} from 'react';
 import {Link} from 'wouter';
+
+import {LoginModal} from '@/page/Auth/LoginPage';
+import {RegisterModal} from '@/page/Auth/RegisterPage';
+import {logout} from '@/page/Auth/lib/handler';
+
+const LoginPrompt = () => {
+  const [loginModalOpen, setLoginModalOpen] = useState(false);
+  const [registerModalOpen, setRegisterModalOpen] = useState(false);
+  return (
+    <div>
+      <Button
+        variant="text"
+        className="!text-white"
+        onClick={() => {
+          setLoginModalOpen(true);
+        }}
+      >
+        Login
+      </Button>
+      <Button
+        variant="outlined"
+        className="!text-white !border-white"
+        onClick={() => {
+          setRegisterModalOpen(true);
+        }}
+      >
+        Register
+      </Button>
+      <LoginModal
+        open={loginModalOpen}
+        onClose={() => {
+          setLoginModalOpen(false);
+        }}
+      />
+      <RegisterModal
+        open={registerModalOpen}
+        onClose={() => {
+          setRegisterModalOpen(false);
+        }}
+      />
+    </div>
+  );
+};
 
 export type UserShowProps = {
   anchorEl: HTMLElement | null;
@@ -105,6 +149,7 @@ export type UserContainerProps = {
 };
 
 export const UserContainer: React.FC<UserContainerProps> = ({onLogout}) => {
+  const user = useUserStore(state => state.user);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
@@ -118,6 +163,7 @@ export const UserContainer: React.FC<UserContainerProps> = ({onLogout}) => {
   const handleLogout = () => {
     handleMenuClose();
     onLogout?.();
+    logout();
   };
 
   const handleProfile = () => {
@@ -127,6 +173,10 @@ export const UserContainer: React.FC<UserContainerProps> = ({onLogout}) => {
   const handleSettings = () => {
     console.log('Settings clicked');
   };
+
+  if (!user) {
+    return <LoginPrompt />;
+  }
 
   return (
     <UserShow

@@ -4,15 +4,23 @@ import TextField from '@mui/material/TextField';
 import {type FC, useState} from 'react';
 import type React from 'react';
 import {useTranslation} from 'react-i18next';
-import {string, z} from 'zod';
 import {login} from './lib/handler.ts';
 import {Layout} from './lib/Layout.tsx';
 import {ModalLayout} from './lib/ModalLayout.tsx';
+import {Card, CardContent, Dialog, DialogContent} from '@mui/material';
+
+import {validateEmail, validatePassword} from './lib/validate.ts';
+import {useUserStore} from '@/global/userStore.ts';
+
+interface LoginData {
+  email: string;
+  password: string;
+}
 
 export interface LoginShowProps {
   loading: boolean;
   error?: string;
-  onSubmit: (event: React.FormEvent<HTMLFormElement>) => void;
+  onSubmit: (data: LoginData) => void;
   showAlreadyLoggedIn?: boolean;
   hideActions?: boolean;
   onRegisterClick?: () => void;
@@ -33,6 +41,10 @@ export const LoginShow: FC<LoginShowProps> = ({
   isModal = false,
 }) => {
   const {t} = useTranslation();
+  const [data, setData] = useState<LoginData>({
+    email: '',
+    password: '',
+  });
 
   const content = (
     <>
@@ -42,16 +54,15 @@ export const LoginShow: FC<LoginShowProps> = ({
       {error && (
         <Alert severity="error">
           {error}
-          <br />
-          <Button
+          {/* TODO: handle resolve */}
+          {/* <Button
             variant="text"
             type="button"
             onClick={() => {
-              /* TODO: handle resolve */
             }}
           >
             {t('auth.resolve')}
-          </Button>
+          </Button> */}
         </Alert>
       )}
       <TextField
@@ -60,6 +71,10 @@ export const LoginShow: FC<LoginShowProps> = ({
         label={t('common.email')}
         variant="standard"
         required
+        value={data?.email}
+        onChange={(event: any) => {
+          setData({...data, email: event.target.value});
+        }}
       />
       <TextField
         name="password"
@@ -67,6 +82,10 @@ export const LoginShow: FC<LoginShowProps> = ({
         label={t('common.password')}
         variant="standard"
         required
+        value={data?.password}
+        onChange={(event: any) => {
+          setData({...data, password: event.target.value});
+        }}
       />
     </>
   );
@@ -76,7 +95,14 @@ export const LoginShow: FC<LoginShowProps> = ({
       <Button variant="text" type="button" onClick={onRegisterClick}>
         {t('auth.register')}
       </Button>
-      <Button type="submit" variant="contained" disabled={loading}>
+      <Button
+        type="button"
+        variant="contained"
+        disabled={loading}
+        onClick={() => {
+          onSubmit(data);
+        }}
+      >
         {loading ? 'Loading...' : t('auth.login')}
       </Button>
     </>
@@ -87,57 +113,56 @@ export const LoginShow: FC<LoginShowProps> = ({
   return (
     <LayoutComponent
       title={t('auth.login')}
-      onSubmit={onSubmit}
       content={content}
       actions={actions}
     />
   );
 };
 
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
-export interface LoginPageProps {}
+export interface LoginPageProps {
+  isModal?: boolean;
+  onClose?: () => void;
+}
 
 /**
  * LoginPage - 完整的登录页面容器
  * 包含状态管理和表单处理逻辑
  */
-export const LoginPage: FC<LoginPageProps> = () => {
+export const LoginPage: FC<LoginPageProps> = ({isModal = false, onClose}) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>();
+  let hasError = false;
+  const {setUser} = useUserStore();
   const {t} = useTranslation();
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const handleSubmit = async (data: LoginData) => {
     setLoading(true);
     setError(undefined);
 
-    const form = event.currentTarget as HTMLFormElement;
-    const data = new FormData(form);
-
     try {
-      const {error: e_email, data: _email} = z
-        .string()
-        .email()
-        .safeParse(data.get('email'));
-      if (e_email) throw new Error(t('auth.error.invalid_email'));
+      console.log('try to login');
+      const email = data?.email;
+      let validateData: {valid: boolean; error: string | null} = {
+        valid: false,
+        error: null,
+      };
+      validateData = validateEmail(email);
+      if (!validateData.valid) throw new Error(validateData.error ?? '');
 
-      const {error: e_password, data: _password} = string()
-        .min(1)
-        .safeParse(data.get('password'));
-      if (e_password) {
-        throw new Error(t('auth.error.invalid_password'));
-      }
+      const password = data?.password;
+      validateData = validatePassword(password);
+      if (!validateData.valid) throw new Error(validateData.error ?? '');
 
-      await login(_email, _password);
-
-      // Redirect to home page after successful login
-      if (typeof window !== 'undefined') {
-        window.location.href = '/';
-      }
-    } catch (e) {
+      const result = await login(email, password);
+      setUser(result?.user);
+    } catch (e: any) {
+      hasError = true;
       setError((e as Error).message);
     } finally {
       setLoading(false);
+    }
+    if (!hasError) {
+      onClose?.();
     }
   };
 
@@ -152,6 +177,23 @@ export const LoginPage: FC<LoginPageProps> = () => {
       error={error}
       onSubmit={handleSubmit}
       onRegisterClick={handleRegisterClick}
+      isModal={isModal}
     />
   );
 };
+
+export function LoginModal({
+  open,
+  onClose,
+}: {
+  open: boolean;
+  onClose: () => void;
+}) {
+  return (
+    <Dialog open={open} onClose={onClose}>
+      <DialogContent className="!p-0">
+        <LoginPage isModal={true} onClose={onClose} />
+      </DialogContent>
+    </Dialog>
+  );
+}
