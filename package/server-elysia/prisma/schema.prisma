@@ -264,6 +264,13 @@ model Tag {
   @@index([type])
 }
 
+model EchoKV {
+  key       String   @id
+  value     Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 /**
  * =========================
  * 说明与迁移提示（非运行字段）

@@ -39,5 +39,4 @@ export const logout = () => {
   removeToken();
   if (typeof window === 'undefined') return;
   localStorage.removeItem('user-store');
-  window.location.href = '/login';
 };

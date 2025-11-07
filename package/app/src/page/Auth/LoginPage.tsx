@@ -10,6 +10,7 @@ import {Dialog, DialogContent} from '@mui/material';
 
 import {validateEmail, validatePassword} from './lib/validate.ts';
 import {useUserStore} from '@/global/userStore.ts';
+import {useLocation} from 'wouter';
 
 interface LoginData {
   email: string;
@@ -132,8 +133,7 @@ export const LoginPage: FC<LoginPageProps> = ({isModal = false, onClose}) => {
   const [error, setError] = useState<string>();
   let hasError = false;
   const {setUser} = useUserStore();
-  const {t} = useTranslation();
-
+  const [_location, navigate] = useLocation();
   const handleSubmit = async (data: LoginData) => {
     setLoading(true);
     setError(undefined);
@@ -167,7 +167,7 @@ export const LoginPage: FC<LoginPageProps> = ({isModal = false, onClose}) => {
 
   const handleRegisterClick = () => {
     // TODO: Navigate to register page
-    window.location.href = '/register';
+    navigate('/register');
   };
 
   return (

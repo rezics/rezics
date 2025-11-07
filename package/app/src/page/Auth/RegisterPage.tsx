@@ -9,6 +9,7 @@ import {ModalLayout} from './lib/ModalLayout.tsx';
 import {validateEmail, validateSlug, validatePassword} from './lib/validate.ts';
 import {Dialog, DialogContent} from '@mui/material';
 import {useUserStore} from '@/global/userStore.ts';
+import {useLocation} from 'wouter';
 
 export interface RegisterShowProps {
   loading: boolean;
@@ -138,7 +139,6 @@ export const RegisterShow: FC<RegisterShowProps> = ({
   );
 };
 
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface RegisterPageProps {
   isModal?: boolean;
   onClose?: () => void;
@@ -156,7 +156,7 @@ export const RegisterPage: FC<RegisterPageProps> = ({
   const [error, setError] = useState<string>();
   let hasError = false;
   const {setUser} = useUserStore();
-
+  const [_location, navigate] = useLocation();
   const handleSubmit = async (data: RegisterData) => {
     setLoading(true);
     setError(undefined);
@@ -197,7 +197,7 @@ export const RegisterPage: FC<RegisterPageProps> = ({
 
   const handleLoginClick = () => {
     // TODO: Navigate to login page
-    window.location.href = '/login';
+    navigate('/login');
   };
 
   return (

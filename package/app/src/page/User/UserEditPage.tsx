@@ -140,7 +140,7 @@ export const UserEditPage: FC<UserEditPageProps> = ({onCancel, onSuccess}) => {
             <Box className="space-y-4">
               <TextField
                 fullWidth
-                label={t('common.username')}
+                label={t('common.nickname')}
                 value={formData.name}
                 onChange={e => handleChange('name', e.target.value)}
                 required

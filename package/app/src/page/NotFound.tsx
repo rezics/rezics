@@ -1,11 +1,11 @@
-import { Place } from "@mui/icons-material";
-import Button from "@mui/material/Button";
-import Card from "@mui/material/Card";
-import CardActions from "@mui/material/CardActions";
-import CardContent from "@mui/material/CardContent";
-import Typography from "@mui/material/Typography";
-import React from "react";
-import { useLocation } from "wouter";
+import {Place} from '@mui/icons-material';
+import Button from '@mui/material/Button';
+import Card from '@mui/material/Card';
+import CardActions from '@mui/material/CardActions';
+import CardContent from '@mui/material/CardContent';
+import Typography from '@mui/material/Typography';
+import React from 'react';
+import {useLocation} from 'wouter';
 
 export type NotFoundShowProps = {
   path: string;
@@ -24,7 +24,7 @@ export const NotFoundShow: React.FC<NotFoundShowProps> = ({
         <CardContent className="flex flex-col gap-4">
           <Typography variant="h4">Not Found</Typography>
           <div>
-            <Place></Place> {path}
+            <Place /> {path}
           </div>
         </CardContent>
         <CardActions className="flex flex-row justify-between">
@@ -46,7 +46,7 @@ export const NotFoundContainer: React.FC<NotFoundContainerProps> = () => {
   };
 
   const handleHome = () => {
-    navigate("/");
+    navigate('/');
   };
 
   return <NotFoundShow path={path} onBack={handleBack} onHome={handleHome} />;

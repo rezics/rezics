@@ -42,8 +42,8 @@ import {TestPage02} from '@/page/Test/TestPage02.tsx';
 import {TestPage03} from '@/page/Test/TestPage03.tsx';
 // import TestPaginationPage from "@/page/Test/TestPaginationPage.tsx";
 // import {NewBookPage} from '@/page/BookEdit/NewBookPage.tsx';
-import {MainConfigPage} from '@/page/Config/MainConfigPage';
 import {UserPage} from '@/page/User/UserPage.tsx';
+import {NoticePage} from '@/page/Misc/Notice.tsx';
 
 // TODO 删除 ThemeProvider
 
@@ -60,10 +60,14 @@ export default (
       <Switch>
         {/* ANCHOR Auth */}
         <Route path="/login">
-          <LoginPage />
+          <MainLayout>
+            <LoginPage />
+          </MainLayout>
         </Route>
         <Route path="/register">
-          <RegisterPage />
+          <MainLayout>
+            <RegisterPage />
+          </MainLayout>
         </Route>
 
         {/* ANCHOR Book Read – keep the more specific path first */}
@@ -228,6 +232,13 @@ export default (
           )}
         </Route>
 
+        {/* ANCHOR Misc */}
+        <Route path="/misc/notice">
+          <MainLayout>
+            <NoticePage />
+          </MainLayout>
+        </Route>
+
         {/* ANCHOR Test */}
         <Route path="/test">
           <MainLayout>
@@ -244,11 +255,7 @@ export default (
           {/* <BookEditLayout>
                     </BookEditLayout> */}
         </Route>
-        {/* <Route path="/test04">
-                    <MainLayout>
-                        <TestPaginationPage />
-                    </MainLayout>
-                </Route> */}
+
         {/* ANCHOR Home */}
         <Route path="/">
           <MainLayout>

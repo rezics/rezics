@@ -7,6 +7,7 @@ import {reviewApi} from './review';
 import {userApi} from './user';
 import {unitApi} from './unit';
 import {tagApi} from './tag';
+import {echoKvApi} from './echokv';
 
 import 'dotenv/config';
 
@@ -37,6 +38,7 @@ const app = new Elysia()
   .use(userApi)
   .use(unitApi)
   .use(tagApi)
+  .use(echoKvApi)
   .get('/', () => 'Hello Elysia')
   .get('/health', () => ({status: 'ok'}))
   .listen(3000);

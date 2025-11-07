@@ -16,6 +16,7 @@ import {
 } from '@mui/material';
 import React, {useState} from 'react';
 import {Link} from 'wouter';
+import {useLocation} from 'wouter';
 
 import {LoginModal} from '@/page/Auth/LoginPage';
 import {RegisterModal} from '@/page/Auth/RegisterPage';
@@ -149,6 +150,7 @@ export type UserContainerProps = {
 };
 
 export const UserContainer: React.FC<UserContainerProps> = ({onLogout}) => {
+  const [location, navigate] = useLocation();
   const user = useUserStore(state => state.user);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
@@ -164,6 +166,7 @@ export const UserContainer: React.FC<UserContainerProps> = ({onLogout}) => {
     handleMenuClose();
     onLogout?.();
     logout();
+    navigate('/login');
   };
 
   const handleProfile = () => {
