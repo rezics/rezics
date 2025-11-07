@@ -134,7 +134,7 @@ export const NoticeBoard: React.FC<NoticeBoardProps> = ({initialNotices}) => {
 
   return (
     <div className="flex-1 p-2 w-1/3">
-      <Paper elevation={0} sx={{borderRadius: 2, overflow: 'hidden'}}>
+      <div className="border-radius-2 overflow-hidden">
         {/* Header */}
         <div className="p-2 flex items-center justify-between dark:bg-neutral-900">
           <Stack direction="row" spacing={1.5} alignItems="center">
@@ -190,7 +190,7 @@ export const NoticeBoard: React.FC<NoticeBoardProps> = ({initialNotices}) => {
               dense
               disablePadding
               sx={{
-                maxHeight: 288,
+                maxHeight: '100%',
                 overflow: 'auto',
                 pr: 0.5,
                 '& .MuiListItemButton-root': {
@@ -297,8 +297,8 @@ export const NoticeBoard: React.FC<NoticeBoardProps> = ({initialNotices}) => {
         </div>
 
         {/* Footer */}
-        <div className="px-2 pb-2 pt-1">
-          {/* <Button
+        {/* <div className="px-2 pb-2 pt-1">
+          <Button
             fullWidth
             href="/subscribe"
             variant="contained"
@@ -306,9 +306,9 @@ export const NoticeBoard: React.FC<NoticeBoardProps> = ({initialNotices}) => {
             size="small"
           >
             订阅最新公告
-          </Button> */}
-        </div>
-      </Paper>
+          </Button>
+        </div> */}
+      </div>
     </div>
   );
 };

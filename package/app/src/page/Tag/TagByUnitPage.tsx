@@ -1,5 +1,5 @@
 import {useQueries, useQuery} from '@tanstack/react-query';
-import {Link} from 'wouter';
+import {RouterLink} from '@/component/Common/RouterLink';
 import {AccentBarWithTextShow} from '@/component/Common/AccentBar.tsx';
 import {tagApi, tagQueries} from '@/api/tag/tag';
 import type {TagDetailDTO} from '@package/contract';
@@ -58,11 +58,11 @@ export function TagByBookPage({
 
       {showSeeAll && (
         <div className="mt-4">
-          <Link href={`/tag/book/${bookId}/tags`}>
+          <RouterLink href={`/tag/book/${bookId}/tags`}>
             <span className="text-primary-600 hover:underline">
               查看全部标签（{total}）
             </span>
-          </Link>
+          </RouterLink>
         </div>
       )}
     </div>

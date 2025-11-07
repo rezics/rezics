@@ -21,6 +21,11 @@ import {BookLibContainer} from '@/page/Book/BookLibPage.tsx';
 import {BookPageContainer} from '@/page/Book/BookPage.tsx';
 import {ReadListPage} from '@/page/ReadList/ReadListPage.tsx';
 
+// Tag pages
+import {TagByBookPage, TagByBookFullPage} from '@/page/Tag/TagByUnitPage';
+import {TagDomainPage} from '@/page/Tag/TagDomain';
+import {TagUnitPage} from '@/page/Tag/TagUnitPage';
+
 // Misc
 import {MainLayout} from '@/layout/MainLayout.tsx';
 import {BookListEditPage} from '@/page/ReadList/ReadListEditPage.tsx';
@@ -29,7 +34,6 @@ import {QuoteByBookPage} from '@/page/Review/QuoteByBookPage.tsx';
 import {ReviewByBookPage} from '@/page/Review/ReviewByBookPage.tsx';
 import {LongReviewEditPage} from '@/page/Review/ReviewEditPage.tsx';
 import {ShortReviewByBookPage} from '@/page/Review/ShortReviewByBookPage.tsx';
-import {TagByBookPage, TagByBookFullPage} from '@/page/Tag/TagByUnitPage';
 import TestPage from '@/page/Test/TestPage.tsx';
 import {TestPage02} from '@/page/Test/TestPage02.tsx';
 import {TestPage03} from '@/page/Test/TestPage03.tsx';
@@ -159,6 +163,27 @@ export default (
         </Route>
 
         {/* ANCHOR Tag Routes */}
+        <Route path="/tag/domain/:unitId">
+          {({unitId}) => (
+            <MainLayout>
+              <TagDomainPage unitId={unitId} />
+            </MainLayout>
+          )}
+        </Route>
+        <Route path="/tag/domain/:unitId/title/:title">
+          {({unitId, title}) => (
+            <MainLayout>
+              <TagDomainPage unitId={unitId} title={title} />
+            </MainLayout>
+          )}
+        </Route>
+        <Route path="/tag/:unitId">
+          {({unitId}) => (
+            <MainLayout>
+              <TagUnitPage unitId={unitId} />
+            </MainLayout>
+          )}
+        </Route>
         <Route path="/tag/book/:bookId">
           {({bookId}) => (
             <MainLayout>

@@ -4,6 +4,8 @@ import {tagQueries} from '@/api/tag/tag';
 import type {TagFilters, TagDTO, TagDetailDTO} from '@/api/tag/tag';
 import TagList from './TagList';
 
+import {RouterLink} from '@/component/Common/RouterLink';
+
 type Mode = 'flat' | 'grouped';
 
 export type TagWrapperProps = {
@@ -122,12 +124,14 @@ export const TagWrapper: React.FC<TagWrapperProps> = ({
                   未分组
                 </span>
               ) : (
-                <a
-                  href={`/units/${domId}`}
+                <RouterLink
+                  href={`/tag/domain/${domId}/title/${
+                    domainTitleMap.get(domId as string) ?? String(domId)
+                  }`}
                   className="text-sm font-semibold text-blue-600 hover:underline"
                 >
                   {domainTitleMap.get(domId as string) ?? String(domId)}
-                </a>
+                </RouterLink>
               )}
             </div>
             <TagList tags={items as unknown as TagDetailDTO[]} />
