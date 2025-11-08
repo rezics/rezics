@@ -1,4 +1,4 @@
-import React, {useMemo, useState} from 'react';
+import React, {useEffect, useMemo, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import {Search} from '@/component/Search';
 import type {SearchInfo} from '@/component/Search/searchParser';
@@ -18,10 +18,12 @@ export type BookSortType =
 
 export type BookSearchContainerProps = {
   onSearch: (options: BookQueryOptions) => void;
+  defaultValue?: SearchInfo;
 };
 
 export const BookSearchContainer: React.FC<BookSearchContainerProps> = ({
   onSearch,
+  defaultValue,
 }) => {
   const {t} = useTranslation();
   const [sort, setSort] = useState<{
@@ -79,6 +81,7 @@ export const BookSearchContainer: React.FC<BookSearchContainerProps> = ({
           onSearch={handleSearch}
           placeholder={t('placeholders.search_books')}
           tagGroups={tagGroups}
+          defaultValue={defaultValue}
         />
       </div>
       <div className="mt-4">

@@ -1,7 +1,7 @@
 import SearchIcon from '@mui/icons-material/Search';
 import {Chip, IconButton, TextField} from '@mui/material';
 import {type SearchInfo} from '@/component/Search/searchParser';
-import React, {useMemo, useState} from 'react';
+import React, {useEffect, useMemo, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 
 export type SearchInputShowProps = {
@@ -142,6 +142,10 @@ export const SearchInputContainer: React.FC<SearchInputContainerProps> = ({
   tagGroups,
 }) => {
   const [value, setValue] = useState(defaultValue);
+
+  useEffect(() => {
+    setValue(defaultValue);
+  }, [defaultValue]);
 
   const handleSearch = () => {
     onSearch(value);
