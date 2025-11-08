@@ -1,12 +1,12 @@
 import SearchIcon from '@mui/icons-material/Search';
 import {Chip, IconButton, TextField} from '@mui/material';
-import {parseSearchString, type SearchInfo} from '@util/searchParser';
+import {type SearchInfo} from '@/component/Search/searchParser';
 import React, {useMemo, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 
 export type SearchInputShowProps = {
-  value: string;
-  onValueChange: (value: string) => void;
+  value: SearchInfo;
+  onValueChange: (value: SearchInfo) => void;
   onSearch: () => void;
   onAddTag?: (tag: string) => void;
   placeholder?: string; // already translated text
@@ -53,9 +53,9 @@ export const SearchInputShow: React.FC<SearchInputShowProps> = ({
           fullWidth
           size="small"
           label={placeholder ?? t('placeholders.search_books')}
-          placeholder='Try: "[tag] author:John"'
-          value={value}
-          onChange={e => onValueChange(e.target.value)}
+          placeholder="Title, ISBN, Author, Publisher, Producer"
+          value={value.keyword ?? ''}
+          onChange={e => onValueChange({...value, keyword: e.target.value})}
           onKeyDown={handleKeyDown}
         />
         <IconButton
@@ -66,6 +66,41 @@ export const SearchInputShow: React.FC<SearchInputShowProps> = ({
           <SearchIcon />
         </IconButton>
       </div>
+      <div className="flex items-center gap-2 mt-4">
+        <TextField
+          fullWidth
+          size="small"
+          label={'Tags'}
+          placeholder="Click tags below or enter tags separated by commas"
+          value={value.tags ? value.tags.join(', ') : ''}
+          onChange={e =>
+            onValueChange({...value, tags: e.target.value.split(', ')})
+          }
+          onKeyDown={handleKeyDown}
+        />
+        <TextField
+          fullWidth
+          size="small"
+          label={'Word Count'}
+          placeholder='Min to Max: "10000-20000"' // TODO: translate
+          value={value.wordCount ?? ''}
+          onChange={e =>
+            onValueChange({...value, wordCount: parseInt(e.target.value)})
+          }
+          onKeyDown={handleKeyDown}
+        />
+      </div>
+      {/* <div className="flex items-center gap-2 mt-4">
+        <TextField
+          fullWidth
+          size="small"
+          label={'User'}
+          placeholder='User or Publisher: "John"'
+          value={value.user ?? ''}
+          onChange={e => onValueChange({...value, user: e.target.value})}
+          onKeyDown={handleKeyDown}
+        />
+      </div> */}
 
       {groups && Object.keys(groups).length > 0 && (
         <div className="mt-4">
@@ -94,28 +129,26 @@ export const SearchInputShow: React.FC<SearchInputShowProps> = ({
 };
 
 export type SearchInputContainerProps = {
-  onSearch: (info: SearchInfo, raw: string) => void;
-  defaultValue?: string;
+  onSearch: (info: SearchInfo) => void;
+  defaultValue?: SearchInfo;
   placeholder?: string;
   tagGroups?: Record<string, string[]>;
 };
 
 export const SearchInputContainer: React.FC<SearchInputContainerProps> = ({
   onSearch,
-  defaultValue = '',
+  defaultValue = {keyword: '', tags: []},
   placeholder,
   tagGroups,
 }) => {
   const [value, setValue] = useState(defaultValue);
 
   const handleSearch = () => {
-    const info = parseSearchString(value);
-    onSearch(info, value);
+    onSearch(value);
   };
 
   const handleAddTag = (tag: string) => {
-    const withTag = value.includes(`[${tag}]`) ? value : `${value} [${tag}] `;
-    setValue(withTag.trim());
+    setValue({...value, tags: [...(value.tags ?? []), tag]});
   };
 
   return (

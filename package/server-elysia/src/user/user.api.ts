@@ -42,7 +42,7 @@ export const userApi = coreInstance('/users')
 
       // Generate JWT token
       const token = await jwt.sign({
-        userId: user.unitId,
+        unitId: user.unitId,
         email: user.email,
         slug: user.slug,
         permission: JSON.parse(JSON.stringify({roles: ['USER']})),
@@ -75,7 +75,7 @@ export const userApi = coreInstance('/users')
 
       // Generate JWT token
       const token = await jwt.sign({
-        userId: user.unitId,
+        unitId: user.unitId,
         email: user.email,
         slug: user.slug,
         permission: user.permission,
@@ -101,7 +101,7 @@ export const userApi = coreInstance('/users')
     '/me',
     async ({headers, jwt, set}): Promise<UserDTO> => {
       const payload = await verifyAuth(headers.authorization, jwt, set);
-      const user = await userService.getByUnitId(payload.userId);
+      const user = await userService.getByUnitId(payload.unitId);
       return mapUserToDTO(user);
     },
     {
@@ -189,7 +189,7 @@ export const userApi = coreInstance('/users')
         password: body.password,
       };
 
-      const user = await userService.update(payload.userId, userReq);
+      const user = await userService.update(payload.unitId, userReq);
       return mapUserToDTO(user);
     },
     {
@@ -213,7 +213,12 @@ export const userApi = coreInstance('/users')
       const payload = await verifyAuth(headers.authorization, jwt, set);
 
       // Only allow users to update their own profile
-      if (payload.userId !== params.unitId) {
+      const hasPermission = () => {
+        if (payload.unitId === params.unitId) return true;
+        if (payload?.permission?.roles?.includes('ADMIN')) return true;
+        return false;
+      };
+      if (!hasPermission()) {
         set.status = 403;
         throw new Error('Forbidden: Cannot update other users');
       }
@@ -222,6 +227,7 @@ export const userApi = coreInstance('/users')
         name: body.name,
         avatar: body.avatar,
         bio: body.bio,
+        description: body.description,
         password: body.password,
       };
 
@@ -247,7 +253,7 @@ export const userApi = coreInstance('/users')
     '/me',
     async ({headers, jwt, set}): Promise<{message: string}> => {
       const payload = await verifyAuth(headers.authorization, jwt, set);
-      await userService.delete(payload.userId);
+      await userService.delete(payload.unitId);
       return {message: 'User deleted successfully'};
     },
     {
@@ -270,7 +276,7 @@ export const userApi = coreInstance('/users')
       const payload = await verifyAuth(headers.authorization, jwt, set);
 
       // Only allow users to delete their own profile
-      if (payload.userId !== params.unitId) {
+      if (payload.unitId !== params.unitId) {
         set.status = 403;
         throw new Error('Forbidden: Cannot delete other users');
       }

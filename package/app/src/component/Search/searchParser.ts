@@ -1,6 +1,8 @@
 export interface SearchInfo {
-  searchText: string;
-  searchTags: string[];
+  keyword?: string;
+  tags?: string[];
+  wordCount?: number;
+  user?: string;
 }
 
 /**
@@ -30,14 +32,14 @@ export function parseSearchString(raw: string): SearchInfo {
     if (tag) {
       tags.push(tag);
     }
-    text = text.replace(match[0], "");
+    text = text.replace(match[0], '');
   }
 
   // Remove key:value filters for now
-  text = text.replace(FILTER_REGEX, "").trim();
+  text = text.replace(FILTER_REGEX, '').trim();
 
   return {
-    searchText: text,
-    searchTags: tags,
+    keyword: text,
+    tags: tags,
   };
 }

@@ -45,7 +45,6 @@ export const UserProfilePage: FC<UserProfilePageProps> = ({
   const queryError = (meQuery.error ?? detailQuery.error) as Error | null;
   const user = (isCurrentUser ? meQuery.data : detailQuery.data) as
     | UserDTO
-    | Omit<UserDTO, 'email'>
     | undefined;
 
   if (isLoading) {
@@ -108,7 +107,17 @@ export const UserProfilePage: FC<UserProfilePageProps> = ({
           }
         />
         <CardContent>
-          {'email' in user && user.email && (
+          {user.unitId && (
+            <Box className="mb-4">
+              <Typography variant="subtitle1" className="font-semibold mb-2">
+                Unit ID
+              </Typography>
+              <Typography variant="body2" color="textSecondary">
+                {user.unitId}
+              </Typography>
+            </Box>
+          )}
+          {user.email && (
             <Box className="mb-4">
               <Typography variant="subtitle1" className="font-semibold mb-2">
                 {t('common.email')}

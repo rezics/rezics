@@ -6,19 +6,13 @@ import {getToken} from '@/api/react-query/http';
 import {userApi} from '@/api/user/user.api';
 import type {UserDTO} from '@package/contract';
 
-interface User {
-  id: string;
-  name: string;
-  email?: string;
-  avatar?: string;
-  role?: string;
-}
+type PartialUserDTO = Partial<UserDTO> & Record<string, unknown>;
 
 interface UserState {
-  user: User | null;
+  user: PartialUserDTO | null;
   isAuthenticated: boolean;
 
-  setUser: (user: User | null) => void;
+  setUser: (user: PartialUserDTO | null) => void;
   logout: () => void;
   init: () => Promise<void>;
 }
@@ -60,7 +54,7 @@ export const useUserStore = create<UserState>()(
           const raw = localStorage.getItem('user-store');
           if (raw) {
             const parsed = JSON.parse(raw) as {
-              state?: {user?: User; isAuthenticated?: boolean};
+              state?: {user?: PartialUserDTO; isAuthenticated?: boolean};
             };
             const snapshotUser = parsed?.state?.user ?? null;
             const snapshotAuth = !!parsed?.state?.isAuthenticated;
@@ -80,15 +74,15 @@ export const useUserStore = create<UserState>()(
         try {
           const qc: QueryClient | undefined = (window as any)
             ?.__TANSTACK_QUERY_CLIENT__;
-          let dto: UserDTO;
+          let dto: PartialUserDTO;
           if (qc) {
             dto = await qc.ensureQueryData(userQueries.me());
           } else {
             dto = await userApi.me();
           }
 
-          const mapped: User = {
-            id: dto.id,
+          const mapped: PartialUserDTO = {
+            unitId: dto.unitId,
             name: dto.name,
             email: dto.email,
             avatar: dto.avatar,

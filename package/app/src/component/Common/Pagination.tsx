@@ -1,19 +1,28 @@
 import {ArrowDownward, ArrowUpward} from '@mui/icons-material';
 import {
   Box,
+  Button,
   FormControl,
   Grid,
   InputLabel,
   LinearProgress,
   MenuItem,
   Pagination,
+  PaginationItem,
   Paper,
   Select,
   ToggleButton,
   ToggleButtonGroup,
   Typography,
 } from '@mui/material';
-import {useCallback, useEffect, useMemo, useState} from 'react';
+import {
+  useImperativeHandle,
+  forwardRef,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 
 import React from 'react';
 
@@ -97,26 +106,41 @@ const SortControls: React.FC<SortControlsProps> = ({
 
 interface PaginationBarProps {
   page: number;
+  dataLength: number;
   totalPages: number;
   onPageChange: (event: React.ChangeEvent<unknown>, page: number) => void;
 }
 const PaginationBar: React.FC<PaginationBarProps> = ({
   page,
+  dataLength,
   totalPages,
   onPageChange,
 }) => {
   if (totalPages <= 1) return null;
   return (
-    <Box sx={{display: 'flex', justifyContent: 'center', p: 2, mt: 2}}>
-      <Pagination
-        count={totalPages}
-        page={page}
-        onChange={onPageChange}
-        color="primary"
-        showFirstButton
-        showLastButton
-      />
-    </Box>
+    <div>
+      <Box sx={{display: 'flex', justifyContent: 'center', p: 2, mt: 2}}>
+        <Pagination
+          // count={totalPages}
+          count={dataLength}
+          page={page}
+          onChange={onPageChange}
+          color="primary"
+          showFirstButton
+          showLastButton
+        />
+        {/* <Button
+          variant="text"
+          style={{bottom: '3px'}}
+          onClick={() => onPageChange(null as any, page + 1)}
+        >
+          Next
+        </Button> */}
+      </Box>
+      <div className="text-sm text-gray-500 text-center">
+        Tips: 数据页数并不代表总数据量，请点击最后一页来尝试加载更多数据
+      </div>
+    </div>
   );
 };
 
@@ -131,6 +155,7 @@ interface UniversalPaginatorProps<T> extends SortControlsProps {
    * @returns
    */
   requestData: (externalPage: number) => void;
+  preRequestData?: (externalPage: number) => Promise<boolean>;
   children: (currentPageItems: T[]) => React.ReactNode;
   sortControl?: React.ReactElement<SortControlsProps>;
   isLoading?: boolean;
@@ -138,28 +163,36 @@ interface UniversalPaginatorProps<T> extends SortControlsProps {
   setCurrentPage: (page: number) => void;
 }
 
+export type UniversalPaginatorHandle = {
+  resetPaginationPageNumber: () => void;
+};
+
 /**
  * UniversalPaginator
  * @param {UniversalPaginatorProps<T>} props
  * @returns {React.ReactNode}
  * @todo Add an option to keep the page scrolled to the bottom to prevent it from jumping to the top when new data loads.
  */
-export const UniversalPaginator = <T,>({
-  data,
-  totalExternalItems,
-  itemsPerPage = 30,
-  externalItemsPerPage = 100,
-  sortType,
-  sortOrder,
-  onSortChange,
-  requestData,
-  children,
-  sortControl,
-  isLoading = false,
-  currentPage = 1,
-  setCurrentPage,
-}: UniversalPaginatorProps<T>) => {
-  // const [currentPage, setCurrentPage] = useState<number>(1);
+export const UniversalPaginatorInner = <T,>(
+  {
+    data,
+    totalExternalItems,
+    itemsPerPage = 30,
+    externalItemsPerPage = 100,
+    sortType,
+    sortOrder,
+    onSortChange,
+    requestData,
+    preRequestData,
+    children,
+    sortControl,
+    isLoading = false,
+    currentPage = 1,
+    setCurrentPage,
+  }: UniversalPaginatorProps<T>,
+  ref: React.Ref<UniversalPaginatorHandle>,
+) => {
+  const [paginationPageNumber, setPaginationPageNumber] = useState<number>(1);
   const internalPagesPerExternalPage = useMemo(
     () => Math.ceil(externalItemsPerPage / itemsPerPage),
     [externalItemsPerPage, itemsPerPage],
@@ -185,8 +218,29 @@ export const UniversalPaginator = <T,>({
     ],
   );
 
+  useImperativeHandle(ref, () => ({
+    resetPaginationPageNumber() {
+      const nextPaginationPageNumber =
+        externalPage * Math.ceil(externalItemsPerPage / itemsPerPage);
+      const dataMaxPageNumber = Math.ceil(data.length / itemsPerPage);
+      setPaginationPageNumber(
+        Math.min(dataMaxPageNumber, nextPaginationPageNumber),
+      );
+      console.log(
+        'resetPaginationPageNumber',
+        dataMaxPageNumber,
+        nextPaginationPageNumber,
+      );
+    },
+  }));
+
   useEffect(() => {
     requestData(externalPage);
+    const nextPaginationPageNumber =
+      externalPage * Math.ceil(externalItemsPerPage / itemsPerPage);
+    setPaginationPageNumber(
+      Math.max(paginationPageNumber, nextPaginationPageNumber),
+    );
     console.log('requestData', externalPage);
   }, [externalPage]);
 
@@ -230,6 +284,22 @@ export const UniversalPaginator = <T,>({
         externalPage,
       );
       setCurrentPage(newPage);
+      const isTheLastPage = () => {
+        return newPage >= paginationPageNumber;
+      };
+      if (isTheLastPage()) {
+        const externalPage = Math.ceil(newPage / internalPagesPerExternalPage);
+        preRequestData?.(externalPage + 1).then(result => {
+          if (result) {
+            const nextPaginationPageNumber =
+              (externalPage + 1) *
+              Math.ceil(externalItemsPerPage / itemsPerPage);
+            setPaginationPageNumber(
+              Math.max(paginationPageNumber, nextPaginationPageNumber),
+            );
+          }
+        });
+      }
     },
     [data, totalExternalItems, itemsPerPage, externalItemsPerPage, requestData],
   );
@@ -261,9 +331,15 @@ export const UniversalPaginator = <T,>({
       </Box>
       <PaginationBar
         page={currentPage}
+        dataLength={paginationPageNumber}
         totalPages={totalPages}
         onPageChange={handlePageChange}
       />
     </Box>
   );
 };
+
+export const UniversalPaginator = forwardRef(UniversalPaginatorInner) as <T>(
+  props: UniversalPaginatorProps<T> &
+    React.RefAttributes<UniversalPaginatorHandle>,
+) => React.ReactElement | null;

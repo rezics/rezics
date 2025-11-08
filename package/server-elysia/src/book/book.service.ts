@@ -27,7 +27,14 @@ export class BookService {
         OR: [
           {title: {contains: options.q, mode: 'insensitive'}},
           {isbn: {contains: options.q, mode: 'insensitive'}},
-          {unit: {title: {contains: options.q, mode: 'insensitive'}}},
+          // {unit: {title: {contains: options.q, mode: 'insensitive'}}},
+          {author: {some: {name: {contains: options.q, mode: 'insensitive'}}}},
+          {press: {some: {name: {contains: options.q, mode: 'insensitive'}}}},
+          {
+            producer: {
+              some: {name: {contains: options.q, mode: 'insensitive'}},
+            },
+          },
         ],
       });
     }
@@ -121,10 +128,11 @@ export class BookService {
         take: limitNum,
         include: bookInclude,
       }),
+      // prisma.book.count({where}),
       getBookApproxCount(),
     ]);
 
-    return {books: books as BookWithRelations[], total};
+    return {books: books as BookWithRelations[], total: total};
   }
 
   /**

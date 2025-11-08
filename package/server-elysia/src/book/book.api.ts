@@ -91,7 +91,7 @@ export const bookApi = coreInstance('/books')
     async ({body, headers, jwt, set}): Promise<BookResponse> => {
       const payload = await verifyAuth(headers.authorization, jwt, set);
       const bookReq: CreateBookInput = {
-        userId: payload.userId,
+        userId: payload.unitId,
         title: body.title,
         authorIds: body.authorIds,
         coverUrl: body.coverUrl,
@@ -128,7 +128,7 @@ export const bookApi = coreInstance('/books')
         set.status = 404;
         throw new Error(`Book not found: ${params.unitId}`);
       }
-      if (targetBookUnit.userId !== payload.userId) {
+      if (targetBookUnit.userId !== payload.unitId) {
         set.status = 403;
         throw new Error(
           'Forbidden: you do not have permission to update this book',
@@ -184,7 +184,7 @@ export const bookApi = coreInstance('/books')
         throw new Error(`Book not found: ${params.unitId}`);
       }
 
-      if (targetBookUnit.userId !== payload.userId) {
+      if (targetBookUnit.userId !== payload.unitId) {
         set.status = 403;
         throw new Error(
           'Forbidden: you do not have permission to delete this book',

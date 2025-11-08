@@ -1,7 +1,7 @@
 import React, {useMemo, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import {Search} from '@/component/Search';
-import type {SearchInfo} from '@util/searchParser';
+import type {SearchInfo} from '@/component/Search/searchParser';
 import type {BookQueryOptions} from '@package/contract/src/search';
 import {bookQueryOptionsSchema} from '@package/contract/src/search';
 import {toBookQueryString} from '@package/contract/src/search';
@@ -17,7 +17,7 @@ export type BookSortType =
   | 'custom';
 
 export type BookSearchContainerProps = {
-  onSearch: (options: BookQueryOptions, q: string) => void;
+  onSearch: (options: BookQueryOptions) => void;
 };
 
 export const BookSearchContainer: React.FC<BookSearchContainerProps> = ({
@@ -54,10 +54,12 @@ export const BookSearchContainer: React.FC<BookSearchContainerProps> = ({
     [],
   );
 
-  const handleSearch = (info: SearchInfo, _raw: string) => {
+  const handleSearch = (info: SearchInfo) => {
     const options: BookQueryOptions = {
-      keyword: info.searchText || undefined,
-      tags: info.searchTags.length ? info.searchTags : undefined,
+      keyword: info.keyword ?? undefined,
+      tags: info.tags?.length ? info.tags : undefined,
+      user: info.user ?? undefined,
+      wordCount: info.wordCount ?? undefined,
       sort:
         sort.type || sort.order
           ? {type: sort.type as any, order: sort.order}
@@ -66,8 +68,8 @@ export const BookSearchContainer: React.FC<BookSearchContainerProps> = ({
 
     // schema referenced (validation optional at runtime)
     void bookQueryOptionsSchema;
-    const q = toBookQueryString(options);
-    onSearch(options, q);
+    // const q = toBookQueryString(options);
+    onSearch(options);
   };
 
   return (

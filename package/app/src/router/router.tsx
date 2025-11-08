@@ -231,6 +231,13 @@ export default (
             </MainLayout>
           )}
         </Route>
+        <Route path="/user/:unitId/edit">
+          {({unitId}) => (
+            <MainLayout>
+              <UserEditPage unitId={unitId} />
+            </MainLayout>
+          )}
+        </Route>
 
         {/* ANCHOR Misc */}
         <Route path="/misc/notice">

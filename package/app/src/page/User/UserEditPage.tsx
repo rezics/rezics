@@ -25,19 +25,34 @@ import {userApi} from '@/api/user/user.api';
 export interface UserEditPageProps {
   onCancel?: () => void;
   onSuccess?: (user: UserDTO) => void;
+  unitId?: string;
 }
 
 /**
  * UserEditPage - 用户资料编辑页面
  * 允许用户编辑自己的个人信息
  */
-export const UserEditPage: FC<UserEditPageProps> = ({onCancel, onSuccess}) => {
+export const UserEditPage: FC<UserEditPageProps> = ({
+  onCancel,
+  onSuccess,
+  unitId,
+}) => {
   const {t} = useTranslation();
   const [user, setUser] = useState<UserDTO | null>(null);
-  const {data, isLoading} = useQuery(userQueries.me());
+  const meQuery = useQuery({...userQueries.me(), enabled: !unitId});
+  const detailQuery = useQuery({
+    ...userQueries.detail(unitId ?? ''),
+    enabled: !!unitId,
+  });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string>();
   const [success, setSuccess] = useState(false);
+
+  const isLoading = meQuery.isLoading || detailQuery.isLoading;
+  const queryError = (meQuery.error ?? detailQuery.error) as Error | null;
+  const data = (!unitId ? meQuery.data : detailQuery.data) as
+    | UserDTO
+    | undefined;
 
   const [formData, setFormData] = useState<UpdateUserInput>({
     name: '',
@@ -75,8 +90,12 @@ export const UserEditPage: FC<UserEditPageProps> = ({onCancel, onSuccess}) => {
       if (formData.password && formData.password.trim() !== '') {
         updateData.password = formData.password;
       }
-
-      const updatedUser = await userApi.updateMe(updateData);
+      let updatedUser: UserDTO;
+      if (!unitId) {
+        updatedUser = await userApi.updateMe(updateData);
+      } else {
+        updatedUser = await userApi.update(unitId, updateData);
+      }
       setUser(updatedUser);
       setSuccess(true);
 
@@ -161,6 +180,17 @@ export const UserEditPage: FC<UserEditPageProps> = ({onCancel, onSuccess}) => {
                 label="Bio"
                 value={formData.bio}
                 onChange={e => handleChange('bio', e.target.value)}
+                variant="outlined"
+                multiline
+                rows={4}
+                helperText="Tell us about yourself"
+              />
+              <div className="h-2" />
+              <TextField
+                fullWidth
+                label="Description"
+                value={formData.description}
+                onChange={e => handleChange('description', e.target.value)}
                 variant="outlined"
                 multiline
                 rows={4}

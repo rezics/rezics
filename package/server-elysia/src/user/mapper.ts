@@ -7,12 +7,14 @@ import type {UserWithRelations} from './types';
  */
 export function mapUserToDTO(user: User | UserWithRelations): UserDTO {
   return {
-    id: user.unitId,
+    unitId: user.unitId,
     email: user.email,
     slug: user.slug,
+    type: user.type,
     name: user.name,
     avatar: user.avatar || undefined,
     bio: user.bio || undefined,
+    description: user.description || undefined,
     joinDate: user.joinDate?.toISOString(),
   };
 }
@@ -24,7 +26,7 @@ export function mapUserToPublicProfile(
   user: User | UserWithRelations,
 ): Omit<UserDTO, 'email'> {
   return {
-    id: user.unitId,
+    unitId: user.unitId,
     slug: user.slug,
     name: user.name,
     avatar: user.avatar || undefined,

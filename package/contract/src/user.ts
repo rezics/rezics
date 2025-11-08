@@ -1,11 +1,13 @@
 // User contracts
 export type UserDTO = {
-  id: string;
+  unitId: string;
   email?: string;
   slug?: string;
+  type?: string;
   name: string;
   avatar?: string;
   bio?: string;
+  description?: string;
   joinDate?: string;
 };
 
@@ -15,6 +17,7 @@ export type CreateUserInput = {
   slug: string;
   avatar?: string;
   bio?: string;
+  description?: string;
 };
 
 export type UpdateUserInput = Partial<Omit<CreateUserInput, 'password'>> & {
@@ -58,6 +61,7 @@ export const updateUserSchema = t.Object({
   name: t.Optional(t.String({minLength: 1})),
   avatar: t.Optional(t.String()),
   bio: t.Optional(t.String()),
+  description: t.Optional(t.String()),
   password: t.Optional(t.String({minLength: 6})),
 });
 
