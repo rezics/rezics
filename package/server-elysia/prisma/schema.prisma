@@ -152,6 +152,7 @@ model Book {
   author       User[]     @relation("BookAuthor") // User[]，作者列表，所有作者都会被注册为用户
   press        User[]     @relation("BookPress")
   producer     User[]     @relation("BookProducer")
+  tags         String[]   @default([])
   description  String?
   coverUrl     String?
   isbn         String?

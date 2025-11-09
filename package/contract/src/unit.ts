@@ -6,7 +6,7 @@ import {t} from 'elysia';
  * Public user information used in many DTOs
  */
 export const publicUserSchema = t.Object({
-  id: t.String(),
+  unitId: t.String(),
   slug: t.Optional(t.String()),
   name: t.String(),
   avatar: t.Optional(t.Nullable(t.String())),

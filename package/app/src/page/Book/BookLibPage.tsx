@@ -1,5 +1,4 @@
 import {Alert, CircularProgress, Typography} from '@mui/material';
-import {useSearchParams} from 'wouter';
 import {
   useCallback,
   useEffect,
@@ -63,6 +62,10 @@ export const BookLibShow = (
   const [currentPage, setCurrentPage] = useState(1);
   const universalPaginatorRef = useRef<UniversalPaginatorHandle>(null);
 
+  useEffect(() => {
+    console.log('currentQuery', currentQuery);
+  }, [currentQuery]);
+
   useImperativeHandle(ref, () => ({
     resetPaginationPageNumber() {
       universalPaginatorRef.current?.resetPaginationPageNumber();
@@ -103,10 +106,7 @@ export const BookLibShow = (
               });
               console.log('onSearch', info);
             }}
-            defaultValue={{
-              keyword: currentQuery.keyword ?? '',
-              tags: currentQuery.tags ?? [],
-            }}
+            defaultValue={currentQuery}
           />
         }
         currentPage={currentPage}
@@ -125,22 +125,12 @@ export const BookLibShowRef = forwardRef(BookLibShow);
 
 export const BookLibContainer: React.FC = () => {
   const ref = useRef<UniversalPaginatorHandle>(null);
-  const [searchParams] = useSearchParams();
   const EXTERNAL_PAGE_SIZE = 100;
   const [currentQuery, setCurrentQuery] = useState<SearchInfo>({
     keyword: '',
     tags: [],
   });
   const [start, setStart] = useState<number>(0);
-
-  useEffect(() => {
-    const keyword = searchParams.get('keyword');
-    const tags = searchParams.get('tags')?.split(',') ?? [];
-    setCurrentQuery({
-      keyword: keyword ?? '',
-      tags: tags,
-    });
-  }, [searchParams]);
 
   const {data, isLoading, error} = useQuery(
     bookQueries.list({

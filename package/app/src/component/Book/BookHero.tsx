@@ -9,6 +9,9 @@ import {
 } from '@mui/material';
 import React from 'react';
 import {Link} from 'wouter';
+import {useUserStore} from '@/global/userStore';
+import {useLocation} from 'wouter';
+import {EditButtonFloatRight} from '@component/Common/EditButtonFloatRight.tsx';
 
 import type {BookDTO} from '@package/contract';
 
@@ -19,6 +22,8 @@ export const BookHeroShow: React.FC<{
   rating: number;
 }> = ({bookInfo, rating}) => {
   const tags = bookInfo?.tags ?? [];
+  const user: any = useUserStore(state => state.user);
+  const [_location, navigate] = useLocation();
   return (
     <div>
       <Box
@@ -50,16 +55,30 @@ export const BookHeroShow: React.FC<{
                     <Typography variant="h4" className="font-bold text-white">
                       {bookInfo?.title}
                     </Typography>
-                    {/* <Box className="flex items-center gap-2">
-                      <Rating
-                        value={(rating || 0) / 2}
-                        precision={0.5}
-                        readOnly
-                      />
-                      <Typography variant="h6" className="text-amber-500">
-                        {rating} / 10
-                      </Typography>
-                    </Box> */}
+                    <div className="flex items-center gap-2">
+                      <div className="flex flex-col items-start gap-2">
+                        <div className="flex items-center gap-2">
+                          <Rating
+                            // value={(rating || 0) / 2}
+                            value={8}
+                            precision={0.5}
+                            readOnly
+                          />
+                          <Typography variant="h6" className="text-amber-500">
+                            {rating} / 10
+                          </Typography>
+                        </div>
+                        <div className="self-end">
+                          {user?.permission?.role?.includes('ADMIN') && (
+                            <EditButtonFloatRight.Show
+                              onClick={() => {
+                                navigate(`/book/${bookInfo?.unitId}/edit`);
+                              }}
+                            />
+                          )}
+                        </div>
+                      </div>
+                    </div>
                   </Box>
 
                   {/* Author & Publisher Info */}

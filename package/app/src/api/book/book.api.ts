@@ -26,10 +26,10 @@ export const bookApi = {
   },
 
   /**
-   * Get single book by postId
+   * Get single book by unitId
    */
-  get: async (postId: string): Promise<BookResponse> => {
-    return apiFetch<BookResponse>(`/books/${postId}`);
+  get: async (unitId: string): Promise<BookResponse> => {
+    return apiFetch<BookResponse>(`/books/${unitId}`);
   },
 
   /**

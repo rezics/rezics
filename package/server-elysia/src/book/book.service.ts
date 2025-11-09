@@ -136,12 +136,12 @@ export class BookService {
   }
 
   /**
-   * Get book by postId
+   * Get book by unitId
    */
   async getByUnitId(unitId: string): Promise<BookWithRelations> {
-    const unit = await prisma.unit.findUniqueOrThrow({where: {id: unitId}});
+    // const unit = await prisma.unit.findUniqueOrThrow({where: {id: unitId}});
     const book = await prisma.book.findUniqueOrThrow({
-      where: {unitId: unit.id},
+      where: {unitId: unitId},
       include: bookInclude,
     });
 
@@ -216,6 +216,8 @@ export class BookService {
     const {
       title,
       authorIds,
+      pressIds,
+      producerIds,
       coverUrl,
       isbn,
       chaptersIndex,
@@ -229,6 +231,12 @@ export class BookService {
         title: title || undefined,
         author: Array.isArray(authorIds)
           ? {set: authorIds.map(unitId => ({unitId}))}
+          : undefined,
+        press: Array.isArray(pressIds)
+          ? {set: pressIds.map(unitId => ({unitId}))}
+          : undefined,
+        producer: Array.isArray(producerIds)
+          ? {set: producerIds.map(unitId => ({unitId}))}
           : undefined,
         coverUrl: coverUrl || undefined,
         isbn: isbn || undefined,

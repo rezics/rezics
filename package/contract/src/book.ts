@@ -7,7 +7,7 @@ import {t} from 'elysia';
  * (原 PublicUser type)
  */
 export const publicUserSchema = t.Object({
-  id: t.String(),
+  unitId: t.String(),
   slug: t.Optional(t.String()),
   name: t.String(),
   avatar: t.Optional(t.Nullable(t.String())),
@@ -139,6 +139,8 @@ export type CreateBookInput = (typeof createBookSchema)['static'];
 export const updateBookSchema = t.Object({
   title: t.Optional(t.String()),
   authorIds: t.Optional(t.Array(t.String())),
+  pressIds: t.Optional(t.Array(t.String())),
+  producerIds: t.Optional(t.Array(t.String())),
   coverUrl: t.Optional(t.String()),
   isbn: t.Optional(t.String()),
   chaptersIndex: t.Optional(t.Nullable(t.String())),

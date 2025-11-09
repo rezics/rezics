@@ -15,6 +15,7 @@ export function mapUserToDTO(user: User | UserWithRelations): UserDTO {
     avatar: user.avatar || undefined,
     bio: user.bio || undefined,
     description: user.description || undefined,
+    permission: user.permission || undefined,
     joinDate: user.joinDate?.toISOString(),
   };
 }

@@ -17,6 +17,7 @@ import {mapBaseBookToDTO, mapBookToDTO} from './mapper';
 import {unitService} from '@/src/unit/unit.service';
 import {coreInstance} from '../core';
 import {verifyAuth} from '@/src/utils/authUtils';
+import {hasPermissionToUpdateBook} from '@package/contract';
 
 /**
  * Book Controller - Elysia.js routes
@@ -128,7 +129,14 @@ export const bookApi = coreInstance('/books')
         set.status = 404;
         throw new Error(`Book not found: ${params.unitId}`);
       }
-      if (targetBookUnit.userId !== payload.unitId) {
+      console.log('payload', payload);
+      if (
+        !hasPermissionToUpdateBook(
+          payload as any,
+          undefined,
+          targetBookUnit as any,
+        )
+      ) {
         set.status = 403;
         throw new Error(
           'Forbidden: you do not have permission to update this book',

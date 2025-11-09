@@ -9,6 +9,7 @@ export type UserDTO = {
   bio?: string;
   description?: string;
   joinDate?: string;
+  permission?: any;
 };
 
 export type CreateUserInput = {

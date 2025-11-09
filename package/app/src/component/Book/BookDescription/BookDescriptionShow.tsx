@@ -21,7 +21,7 @@ export const BookDescriptionShow: React.FC<BookDescriptionShowProps> = ({
       <Box>
         <div className="flex mb-4">
           <AccentBarWithTextShow text={t('book.description')} />{' '}
-          {showEditButton && <EditButtonFloatRight.Show onClick={onEdit} />}
+          {/* {showEditButton && <EditButtonFloatRight.Show onClick={onEdit} />} */}
         </div>{' '}
         <Typography variant="body1" className="whitespace-pre-line">
           {description}

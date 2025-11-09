@@ -1,4 +1,5 @@
 // Re-export all contracts
+export * from './permission';
 export * from './pagination';
 export * from './book';
 export * from './chapter';

@@ -7,7 +7,7 @@ import type {BookWithRelations} from './types';
  */
 export function sanitizeUser(u: User): PublicUser {
   return {
-    id: u.unitId,
+    unitId: u.unitId,
     slug: u.slug,
     name: u.name,
     avatar: u.avatar ?? (null as any),

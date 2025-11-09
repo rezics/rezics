@@ -3,6 +3,7 @@ import {Chip, IconButton, TextField} from '@mui/material';
 import {type SearchInfo} from '@/component/Search/searchParser';
 import React, {useEffect, useMemo, useState} from 'react';
 import {useTranslation} from 'react-i18next';
+import {useSearchParams, useLocation} from 'wouter';
 
 export type SearchInputShowProps = {
   value: SearchInfo;
@@ -145,11 +146,22 @@ export const SearchInputContainer: React.FC<SearchInputContainerProps> = ({
   placeholder,
   tagGroups,
 }) => {
+  const [searchParams] = useSearchParams();
+  const [location, _navigate] = useLocation();
   const [value, setValue] = useState(defaultValue);
 
   useEffect(() => {
-    setValue(defaultValue);
-  }, [defaultValue]);
+    if (location === '/books') {
+      const keyword = searchParams.get('keyword');
+      const tags = searchParams.get('tags')?.split(',') ?? [];
+      const currentSearch = {
+        keyword: keyword ?? '',
+        tags: tags,
+      };
+      setValue(currentSearch);
+      onSearch(currentSearch);
+    }
+  }, [searchParams, location]);
 
   const handleSearch = () => {
     onSearch({
