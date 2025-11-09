@@ -116,6 +116,16 @@ const PaginationBar: React.FC<PaginationBarProps> = ({
   totalPages,
   onPageChange,
 }) => {
+  useEffect(() => {
+    console.log(
+      'PaginationBar',
+      JSON.stringify({
+        page: page,
+        dataLength: dataLength,
+        totalPages: totalPages,
+      }),
+    );
+  }, [page, dataLength, totalPages]);
   if (totalPages <= 1) return null;
   return (
     <div>
@@ -155,7 +165,7 @@ interface UniversalPaginatorProps<T> extends SortControlsProps {
    * @returns
    */
   requestData: (externalPage: number) => void;
-  preRequestData?: (externalPage: number) => Promise<boolean>;
+  preRequestData?: (externalPage: number) => Promise<number>;
   children: (currentPageItems: T[]) => React.ReactNode;
   sortControl?: React.ReactElement<SortControlsProps>;
   isLoading?: boolean;
@@ -192,7 +202,12 @@ export const UniversalPaginatorInner = <T,>(
   }: UniversalPaginatorProps<T>,
   ref: React.Ref<UniversalPaginatorHandle>,
 ) => {
-  const [paginationPageNumber, setPaginationPageNumber] = useState<number>(1);
+  const [paginationPageNumber, setPaginationPageNumber] = useState<number>(
+    externalItemsPerPage / itemsPerPage,
+  );
+  useEffect(() => {
+    console.log('paginationPageNumber', paginationPageNumber);
+  }, [paginationPageNumber]);
   const internalPagesPerExternalPage = useMemo(
     () => Math.ceil(externalItemsPerPage / itemsPerPage),
     [externalItemsPerPage, itemsPerPage],
@@ -219,30 +234,31 @@ export const UniversalPaginatorInner = <T,>(
   );
 
   useImperativeHandle(ref, () => ({
-    resetPaginationPageNumber() {
-      const nextPaginationPageNumber =
-        externalPage * Math.ceil(externalItemsPerPage / itemsPerPage);
-      const dataMaxPageNumber = Math.ceil(data.length / itemsPerPage);
-      setPaginationPageNumber(
-        Math.min(dataMaxPageNumber, nextPaginationPageNumber),
-      );
-      console.log(
-        'resetPaginationPageNumber',
-        dataMaxPageNumber,
-        nextPaginationPageNumber,
-      );
+    async resetPaginationPageNumber() {
+      console.log('resetPaginationPageNumber');
+      const result = await preRequestData?.(1);
+      if (result) {
+        const nextPaginationPageNumber =
+          externalPage * Math.ceil(externalItemsPerPage / itemsPerPage);
+        const dataMaxPageNumber = Math.ceil(result / itemsPerPage);
+        setPaginationPageNumber(
+          Math.min(dataMaxPageNumber, nextPaginationPageNumber),
+        );
+        console.log(
+          'resetPaginationPageNumber',
+          JSON.stringify({
+            result: result,
+            externalPage: externalPage,
+            externalItemsPerPage: externalItemsPerPage,
+            itemsPerPage: itemsPerPage,
+            dataMaxPageNumber: dataMaxPageNumber,
+            nextPaginationPageNumber: nextPaginationPageNumber,
+          }),
+        );
+        handlePageChange(null as any, 1);
+      }
     },
   }));
-
-  useEffect(() => {
-    requestData(externalPage);
-    const nextPaginationPageNumber =
-      externalPage * Math.ceil(externalItemsPerPage / itemsPerPage);
-    setPaginationPageNumber(
-      Math.max(paginationPageNumber, nextPaginationPageNumber),
-    );
-    console.log('requestData', externalPage);
-  }, [externalPage]);
 
   const totalPages = useMemo(
     () => Math.max(1, Math.ceil(totalExternalItems / itemsPerPage)),
@@ -273,36 +289,39 @@ export const UniversalPaginatorInner = <T,>(
     return data.slice(startIndex, startIndex + itemsPerPage); // no minus 1, because slice is not inclusive
   }, [data, currentPage, itemsPerPage, externalItemsPerPage]);
 
-  const handlePageChange = useCallback(
-    (_: React.ChangeEvent<unknown>, newPage: number) => {
-      console.log(
-        'pageChange',
-        newPage,
-        rangeStartPage,
-        globalStartIndex,
-        internalPagesPerExternalPage,
-        externalPage,
-      );
-      setCurrentPage(newPage);
-      const isTheLastPage = () => {
-        return newPage >= paginationPageNumber;
-      };
-      if (isTheLastPage()) {
-        const externalPage = Math.ceil(newPage / internalPagesPerExternalPage);
-        preRequestData?.(externalPage + 1).then(result => {
-          if (result) {
-            const nextPaginationPageNumber =
-              (externalPage + 1) *
-              Math.ceil(externalItemsPerPage / itemsPerPage);
-            setPaginationPageNumber(
-              Math.max(paginationPageNumber, nextPaginationPageNumber),
-            );
-          }
-        });
-      }
-    },
-    [data, totalExternalItems, itemsPerPage, externalItemsPerPage, requestData],
-  );
+  const handlePageChange = (_: React.ChangeEvent<unknown>, newPage: number) => {
+    console.log(
+      'pageChange',
+      JSON.stringify({
+        newPage: newPage,
+        paginationPageNumber: paginationPageNumber,
+        rangeStartPage: rangeStartPage,
+        globalStartIndex: globalStartIndex,
+        internalPagesPerExternalPage: internalPagesPerExternalPage,
+        externalPage: externalPage,
+      }),
+    );
+    requestData(Math.ceil(newPage / internalPagesPerExternalPage));
+    setCurrentPage(newPage);
+    const isTheLastPage = () => {
+      return newPage >= paginationPageNumber;
+    };
+    if (isTheLastPage()) {
+      const externalPage = Math.ceil(newPage / internalPagesPerExternalPage);
+      console.log('handlePageChange');
+      preRequestData?.(externalPage + 1).then(result => {
+        console.log('preRequestData', result);
+        if (result) {
+          const nextPaginationPageNumber =
+            externalPage * Math.ceil(externalItemsPerPage / itemsPerPage) +
+            Math.ceil(result / itemsPerPage);
+          setPaginationPageNumber(
+            Math.max(paginationPageNumber, nextPaginationPageNumber),
+          );
+        }
+      });
+    }
+  };
 
   return (
     <Box>

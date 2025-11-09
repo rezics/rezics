@@ -131,9 +131,10 @@ export interface LoginPageProps {
 export const LoginPage: FC<LoginPageProps> = ({isModal = false, onClose}) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>();
+
   let hasError = false;
   const {setUser} = useUserStore();
-  const [_location, navigate] = useLocation();
+  const [location, navigate] = useLocation();
   const handleSubmit = async (data: LoginData) => {
     setLoading(true);
     setError(undefined);
@@ -162,6 +163,9 @@ export const LoginPage: FC<LoginPageProps> = ({isModal = false, onClose}) => {
     }
     if (!hasError) {
       onClose?.();
+      if (location === '/login') {
+        navigate('/');
+      }
     }
   };
 

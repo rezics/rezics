@@ -151,6 +151,7 @@ export type UserContainerProps = {
 
 export const UserContainer: React.FC<UserContainerProps> = ({onLogout}) => {
   const [location, navigate] = useLocation();
+  const {setUser} = useUserStore();
   const user = useUserStore(state => state.user);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
@@ -166,6 +167,7 @@ export const UserContainer: React.FC<UserContainerProps> = ({onLogout}) => {
     handleMenuClose();
     onLogout?.();
     logout();
+    setUser(null);
     navigate('/login');
   };
 

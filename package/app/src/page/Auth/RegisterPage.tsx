@@ -156,7 +156,7 @@ export const RegisterPage: FC<RegisterPageProps> = ({
   const [error, setError] = useState<string>();
   let hasError = false;
   const {setUser} = useUserStore();
-  const [_location, navigate] = useLocation();
+  const [location, navigate] = useLocation();
   const handleSubmit = async (data: RegisterData) => {
     setLoading(true);
     setError(undefined);
@@ -192,6 +192,9 @@ export const RegisterPage: FC<RegisterPageProps> = ({
     }
     if (!hasError) {
       onClose?.();
+      if (location === '/register') {
+        navigate('/');
+      }
     }
   };
 

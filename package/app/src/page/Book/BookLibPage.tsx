@@ -101,7 +101,6 @@ export const BookLibShow = (
                 keyword: info.keyword ?? '',
                 tags: info.tags ?? [],
               });
-              setCurrentPage(1);
               console.log('onSearch', info);
             }}
             defaultValue={{
@@ -125,8 +124,8 @@ export const BookLibShow = (
 export const BookLibShowRef = forwardRef(BookLibShow);
 
 export const BookLibContainer: React.FC = () => {
-  const [searchParams] = useSearchParams();
   const ref = useRef<UniversalPaginatorHandle>(null);
+  const [searchParams] = useSearchParams();
   const EXTERNAL_PAGE_SIZE = 100;
   const [currentQuery, setCurrentQuery] = useState<SearchInfo>({
     keyword: '',
@@ -167,13 +166,17 @@ export const BookLibContainer: React.FC = () => {
       }),
     );
     console.log('handlePreRequestData', data, page);
-    return data?.books?.length > 0;
+    return data?.books?.length;
   }
 
   useEffect(() => {
     console.log('data', data);
-    ref.current?.resetPaginationPageNumber();
   }, [data]);
+
+  useEffect(() => {
+    ref.current?.resetPaginationPageNumber();
+    console.log('currentQuery', currentQuery);
+  }, [currentQuery]);
 
   const books: Book[] = useMemo(() => data?.books ?? [], [data]);
   const totalItems: number = data?.total ?? 0;

@@ -8,6 +8,7 @@ import {
   Typography,
 } from '@mui/material';
 import React from 'react';
+import {Link} from 'wouter';
 
 import type {BookDTO} from '@package/contract';
 
@@ -84,6 +85,8 @@ export const BookHeroShow: React.FC<{
                   <Stack direction="row" spacing={1}>
                     {tags?.map((tag: string) => (
                       <Chip
+                        component={Link}
+                        href={`/books?tags=${tag}`}
                         key={tag}
                         label={tag}
                         size="small"

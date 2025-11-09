@@ -72,7 +72,11 @@ export const SearchInputShow: React.FC<SearchInputShowProps> = ({
           size="small"
           label={'Tags'}
           placeholder="Click tags below or enter tags separated by commas"
-          value={value.tags ? value.tags.join(', ') : ''}
+          value={
+            value.tags
+              ? value.tags.filter(tag => tag.trim() !== '').join(', ')
+              : ''
+          }
           onChange={e =>
             onValueChange({...value, tags: e.target.value.split(', ')})
           }
@@ -148,7 +152,10 @@ export const SearchInputContainer: React.FC<SearchInputContainerProps> = ({
   }, [defaultValue]);
 
   const handleSearch = () => {
-    onSearch(value);
+    onSearch({
+      ...value,
+      tags: value.tags?.filter(tag => tag.trim() !== '') ?? [],
+    });
   };
 
   const handleAddTag = (tag: string) => {

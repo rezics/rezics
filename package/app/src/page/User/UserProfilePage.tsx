@@ -15,6 +15,7 @@ import type {UserDTO} from '@package/contract';
 import {useQuery} from '@tanstack/react-query';
 import {userQueries} from '@/api/user/user.queries';
 import {UserError, UserLoading} from './UserState';
+import {useUserStore} from '@/global/userStore';
 
 export interface UserProfilePageProps {
   unitId: string;
@@ -31,11 +32,15 @@ export const UserProfilePage: FC<UserProfilePageProps> = ({
   isCurrentUser = false,
   onEditClick,
 }) => {
+  const currentUser = useUserStore(state => state.user);
   const {t} = useTranslation();
 
   console.log('isCurrentUser', isCurrentUser);
 
-  const meQuery = useQuery({...userQueries.me(), enabled: isCurrentUser});
+  const meQuery = useQuery({
+    ...userQueries.me(currentUser?.unitId ?? ''),
+    enabled: isCurrentUser,
+  });
   const detailQuery = useQuery({
     ...userQueries.detail(unitId),
     enabled: !isCurrentUser && !!unitId,
