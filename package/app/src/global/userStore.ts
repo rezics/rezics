@@ -6,7 +6,7 @@ import {getToken} from '@/api/react-query/http';
 import {userApi} from '@/api/user/user.api';
 import type {UserDTO} from '@package/contract';
 
-type PartialUserDTO = Partial<UserDTO> & Record<string, unknown>;
+export type PartialUserDTO = Partial<UserDTO> & Record<string, unknown>;
 
 interface UserState {
   user: PartialUserDTO | null;

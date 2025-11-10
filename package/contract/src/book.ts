@@ -117,9 +117,11 @@ export type BookResponse = (typeof bookResponseSchema)['static']; // 等同于 B
  * (原 createBookSchema)
  */
 export const createBookSchema = t.Object({
-  userId: t.String(),
+  userId: t.Optional(t.String()),
   title: t.String(),
   authorIds: t.Optional(t.Array(t.String())),
+  pressIds: t.Optional(t.Array(t.String())),
+  producerIds: t.Optional(t.Array(t.String())),
   coverUrl: t.Optional(t.String()),
   isbn: t.Optional(t.String()),
   chaptersIndex: t.Optional(t.Nullable(t.String())),

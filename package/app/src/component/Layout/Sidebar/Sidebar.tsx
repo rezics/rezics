@@ -92,8 +92,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   // Update the global store **after** render whenever height/windowHeight changes
   useEffect(() => {
-    setSidebarHeightBelow(windowHeight - height - 48);
-  }, [height, windowHeight]);
+    setSidebarHeightBelow(windowHeight - height - 200);
+  }, [height, windowHeight, setSidebarHeightBelow]);
 
   // Local value just for rendering
   const heightBelow = `calc(100vh - ${height}px)`;
@@ -134,7 +134,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         },
       }}
       id="ics-sidebar-wrapper"
-      className="transition-all duration-300 ease-out"
+      className="transition-all duration-300 ease-out [&>*]:overflow-x-clip [&>*]:min-w-0 [&>*]:touch-pan-y"
     >
       {!isDragging && (
         <div ref={refAbove}>

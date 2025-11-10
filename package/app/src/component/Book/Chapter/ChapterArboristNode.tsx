@@ -1,12 +1,14 @@
-/* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
-/* eslint-disable jsx-a11y/click-events-have-key-events */
-/* eslint-disable jsx-a11y/no-static-element-interactions */
-/* eslint-disable jsx-a11y/interactive-supports-focus */
-/* eslint-disable jsx-a11y/no-noninteractive-tabindex */
-
 import React from 'react';
 import type {NodeRendererProps} from 'react-arborist';
+import {RouterLink} from '@/component/Common/RouterLink';
 import {Link} from 'wouter';
+import {useTheme, alpha} from '@mui/material/styles';
+import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
+import FolderOutlinedIcon from '@mui/icons-material/FolderOutlined';
+import FolderOpenOutlinedIcon from '@mui/icons-material/FolderOpenOutlined';
+import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
 
 // Type used inside the BookEditorSidebar tree
 export type Chapter = {
@@ -33,19 +35,28 @@ export const createChapterArboristNode = (
   enableDoubleClickRename: boolean,
   isTreeDraggable: boolean,
   baseLink: string,
+  isEditable: boolean = false,
 ) => {
   return function ChapterArboristNode({
     node,
     style,
     dragHandle,
   }: NodeRendererProps<Chapter>) {
+    const theme = useTheme();
+    const hasChildren = !!(node.children && node.children.length > 0);
+    const isSelected = node.state.isSelected;
+    const selectedBg = alpha(theme.palette.primary.main, 0.08);
+    const selectedColor = theme.palette.primary.main;
+
     return (
       <div
-        style={style}
+        style={{
+          ...style,
+          backgroundColor: isSelected ? selectedBg : 'transparent',
+          color: isSelected ? selectedColor : undefined,
+        }}
         ref={!node.isEditing && isTreeDraggable ? dragHandle : undefined}
-        className={`flex items-center gap-1 px-1 cursor-pointer select-none ${
-          node.state.isSelected ? 'text-blue-600' : ''
-        }`}
+        className={`flex items-center gap-2 px-2 py-1 cursor-pointer select-none rounded-sm transition-colors hover:bg-slate-100 dark:hover:bg-slate-800`}
         onDoubleClick={() => {
           if (enableDoubleClickRename) {
             node.edit();
@@ -60,23 +71,38 @@ export const createChapterArboristNode = (
         }}
       >
         {/* Arrow toggle */}
-        {node.children && node.children.length > 0 && (
-          <span
+        {hasChildren ? (
+          <button
+            type="button"
             onClick={() => node.toggle()}
-            className="w-4 flex justify-center items-center"
+            className="w-5 h-5 flex justify-center items-center text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+            aria-label={node.isOpen ? 'Collapse' : 'Expand'}
           >
-            {node.isOpen ? '▼' : '▶'}
-          </span>
+            {node.isOpen ? (
+              <KeyboardArrowDownIcon fontSize="small" />
+            ) : (
+              <KeyboardArrowRightIcon fontSize="small" />
+            )}
+          </button>
+        ) : (
+          <span className="w-5 h-5" />
         )}
 
-        {/* Icon */}
-        {/* <span className="w-4 flex justify-center items-center">
-                    {node.isLeaf ? "📄" : "📁"}
-                </span> */}
+        {/* Node icon */}
+        {/* <span className="w-5 h-5 flex justify-center items-center text-slate-500 dark:text-slate-400">
+          {hasChildren ? (
+            node.isOpen ? (
+              <FolderOpenOutlinedIcon fontSize="small" />
+            ) : (
+              <FolderOutlinedIcon fontSize="small" />
+            )
+          ) : (
+            <DescriptionOutlinedIcon fontSize="small" />
+          )}
+        </span> */}
 
         {/* Title or editing input */}
-        {/* <span className="flex-1 whitespace-nowrap"> */}
-        <span className="whitespace-nowrap">
+        <div className="min-w-0 flex-1">
           {node.isEditing ? (
             <input
               type="text"
@@ -89,35 +115,29 @@ export const createChapterArboristNode = (
                   node.submit((e.target as HTMLInputElement).value);
                 }
               }}
-              autoFocus
-              className="border px-1 text-sm w-full"
+              className="w-full px-2 py-1 text-sm rounded border border-slate-300 dark:border-slate-600 bg-transparent focus:outline-none"
+              style={{
+                boxShadow: `0 0 0 2px ${alpha(
+                  theme.palette.primary.main,
+                  0.25,
+                )}`,
+              }}
             />
-          ) : node.children && node.children.length > 0 ? (
-            <span>{node.data.title}</span>
+          ) : hasChildren ? (
+            <span className="truncate">{node.data.title}</span>
           ) : (
-            <Link
-              to={`${baseLink}/${node.id}`}
-              className="text-gray-700 hover:text-blue-500 block cursor-default hover:cursor-pointer"
-            >
-              <span className={`${node.isSelected ? 'text-red-600' : ''}`}>
-                {node.data.title}
-              </span>
+            <Link href={isEditable ? '#' : `${baseLink}/${node.id}`}>
+              <span className="block truncate">{node.data.title}</span>
             </Link>
           )}
-        </span>
+        </div>
 
-        {/* Optional quick actions (edit icon) */}
-        {/* {!node.isEditing && (
-                    <button
-                        className="ml-1 text-xs opacity-50 hover:opacity-100"
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            node.edit();
-                        }}
-                    >
-                        ✏️
-                    </button>
-                )} */}
+        {/* Visual drag indicator when draggable (drag handle remains row-wide for usability) */}
+        {!node.isEditing && isTreeDraggable && (
+          <span className="ml-1 w-5 h-5 flex items-center justify-center text-slate-400 hover:text-slate-600">
+            <DragIndicatorIcon fontSize="small" />
+          </span>
+        )}
       </div>
     );
   };

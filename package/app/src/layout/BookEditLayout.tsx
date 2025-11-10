@@ -1,13 +1,13 @@
 import {Header} from '@/component/Layout/Header/MainLayoutHeader';
 import {Sidebar} from '@/component/Layout/Sidebar/Sidebar';
 import {useMediaQuery} from '@mui/material';
-import React, {type ReactNode, useState} from 'react';
+import React, {type ReactNode, useEffect, useState} from 'react';
 
 import {NAVIGATION} from '@/component/Layout/Navigation/BookEditorNavigation';
 import {appStore} from '@/global/appStore.ts';
 import {useLayoutStore} from '@/global/Layout/layoutStore.ts';
 
-import {ChapterListEditor} from '@/component/Book/Chapter/ChapterListEditor';
+import {LinearChapterList} from '@/component/Book/Chapter/LinearChapterList';
 
 import {DraggableResizer} from '@/component/Layout/DraggableResizer.tsx';
 
@@ -41,6 +41,14 @@ export const BookEditLayout: React.FC<BookEditLayoutProps> = ({
 
   const [isDragging, setIsDragging] = useState(false);
 
+  // UI state
+  const {sidebarHeightBelow} = useLayoutStore();
+  const [height, setHeight] = useState(sidebarHeightBelow);
+
+  useEffect(() => {
+    setHeight(sidebarHeightBelow);
+  }, [sidebarHeightBelow]);
+
   return (
     <div className="flex min-h-screen">
       <Header
@@ -54,14 +62,15 @@ export const BookEditLayout: React.FC<BookEditLayoutProps> = ({
         <Sidebar
           onClose={() => isMobile && closeSidebar()}
           handleDrawerToggle={handleDrawerToggle}
-          NAVIGATION={NAVIGATION()}
+          NAVIGATION={NAVIGATION(bookId || '')}
           noScrollBar={true}
           isDragging={isDragging}
         >
-          <ChapterListEditor
+          <LinearChapterList
             bookId={bookId || ''}
             chapterId={chapterId || ''}
-            drawerWidth={drawerWidth}
+            width={drawerWidth}
+            height={height}
             isDraggable={true}
             enableDoubleClickRename={false}
           />

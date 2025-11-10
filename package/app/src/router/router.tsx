@@ -15,6 +15,8 @@ import {BookReadChapterPage} from '@/page/Book/ChapterPage.tsx';
 import {BookEditLayout} from '@/layout/BookEditLayout.tsx';
 import {BookEditChapterPage} from '@/page/BookEdit/ChapterPage.tsx';
 import {BookEditMainPage} from '@/page/BookEdit/InfoPage.tsx';
+import {NewBookPage} from '@/page/BookEdit/NewBookPage.tsx';
+import {BookEditChapterListPage} from '@/page/BookEdit/ChapterListPage.tsx';
 
 // Book list / Library pages
 import {BookLibContainer} from '@/page/Book/BookLibPage.tsx';
@@ -80,12 +82,19 @@ export default (
         </Route>
 
         {/* ANCHOR Book Edit (chapter first, then main) */}
-        {/* <Route path="/book/new">
+        <Route path="/book/new">
           <MainLayout>
             <NewBookPage />
           </MainLayout>
-        </Route> */}
-        <Route path="/book/:bookId/edit/:chapterId">
+        </Route>
+        <Route path="/book/:bookId/edit/chapter/">
+          {({bookId}) => (
+            <BookEditLayout bookId={bookId}>
+              <BookEditChapterListPage bookId={bookId} />
+            </BookEditLayout>
+          )}
+        </Route>
+        <Route path="/book/:bookId/edit/chapter/:chapterId">
           {({bookId, chapterId}) => (
             <BookEditLayout bookId={bookId} chapterId={chapterId}>
               <BookEditChapterPage chapterId={chapterId} />

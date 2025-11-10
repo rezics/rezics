@@ -1,19 +1,21 @@
-/* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
-/* eslint-disable jsx-a11y/click-events-have-key-events */
-/* eslint-disable jsx-a11y/no-static-element-interactions */
-/* eslint-disable jsx-a11y/interactive-supports-focus */
-/* eslint-disable jsx-a11y/no-noninteractive-tabindex */
-
 // https://github.com/brimdata/react-arborist
 
-import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import {Tree} from 'react-arborist';
 import type {DeleteHandler, MoveHandler, RenameHandler} from 'react-arborist';
 import {v4 as uuidv4} from 'uuid';
 // 分离的 Node 渲染器工厂
 import {createChapterArboristNode} from './ChapterArboristNode.tsx';
 
-import React from 'react';
+import {ChapterArboristContextMenu} from './ChapterArboristContextMenu.tsx';
 
 import {
   findAndAddChild,
@@ -21,9 +23,6 @@ import {
   findAndEdit,
   findAndInsert,
   findAndRemove,
-  insertSiblingAfter,
-  moveSiblingFirst,
-  moveSiblingLast,
 } from '@/util/arboristTreeUtil.ts';
 
 type Chapter = {
@@ -32,226 +31,182 @@ type Chapter = {
   children?: Chapter[];
 };
 
-/* Helper functions for immutable tree manipulation */
+export interface ChapterArboristRefHandle {
+  expandAll: () => void;
+  collapseAll: () => void;
+}
 
 interface ChapterArboristProps {
   chapterTree: any;
-  isDraggable: boolean;
-  enableDoubleClickRename: boolean;
   tHeight: number;
   searchTerm: string;
   selectedId: string;
   baseLink: string;
   width?: number;
+  isEditable?: boolean;
+  isDraggable?: boolean;
+  enableDoubleClickRename?: boolean;
 }
 
 // you can't use chaptersData = {} to give a default value, because it will cause the Maximum update Warning
-export const ChapterArborist: React.FC<ChapterArboristProps> = ({
-  chapterTree,
-  isDraggable,
-  enableDoubleClickRename,
-  tHeight,
-  searchTerm,
-  selectedId,
-  baseLink,
-  width,
-}) => {
-  const treeRef: any = useRef(null);
-
-  const [treeData, setTreeData] = useState<Chapter[]>([]);
-  const [contextMenu, setContextMenu] = useState<{
-    x: number;
-    y: number;
-    node: any;
-  } | null>(null);
-
-  useEffect(() => {
-    setTreeData(chapterTree);
-  }, [chapterTree]);
-
-  function submitTreeData(data: any) {
-    console.log('submitTreeData', data);
-  }
-
-  // commit side-effect simulation
-  useEffect(() => {
-    console.log('Tree Data Changed, Submit', treeData);
-    submitTreeData(treeData);
-  }, [treeData]);
-
-  const onMove: MoveHandler<Chapter> = useCallback(
-    ({dragIds, parentId, index}) => {
-      setTreeData(currentTree => {
-        const removed: Chapter[] = [];
-        const treeWithoutDragged = findAndRemove(
-          currentTree,
-          dragIds,
-          removed,
-        ) as Chapter[];
-        return findAndInsert(
-          treeWithoutDragged,
-          parentId,
-          index,
-          removed,
-        ) as Chapter[];
-      });
+export const ChapterArborist = forwardRef<
+  ChapterArboristRefHandle,
+  ChapterArboristProps
+>(
+  (
+    {
+      chapterTree,
+      tHeight,
+      searchTerm,
+      selectedId,
+      baseLink,
+      width,
+      isEditable = false,
+      isDraggable = false,
+      enableDoubleClickRename = false,
     },
-    [],
-  );
+    ref,
+  ) => {
+    const treeRef: any = useRef(null);
 
-  const onRename: RenameHandler<Chapter> = useCallback(({id, name}) => {
-    setTreeData(
-      currentTree => findAndEdit(currentTree, String(id), name) as Chapter[],
+    const [treeData, setTreeData] = useState<Chapter[]>([]);
+    const [contextMenu, setContextMenu] = useState<{
+      x: number;
+      y: number;
+      node: any;
+    } | null>(null);
+
+    useImperativeHandle(ref, () => ({
+      expandAll() {
+        treeRef.current?.openAll();
+      },
+      collapseAll() {
+        treeRef.current?.closeAll();
+      },
+    }));
+
+    useEffect(() => {
+      setTreeData(chapterTree);
+    }, [chapterTree]);
+
+    function submitTreeData(data: any) {
+      console.log('submitTreeData', data);
+    }
+
+    // commit side-effect simulation
+    useEffect(() => {
+      console.log('Tree Data Changed, Submit', treeData);
+      submitTreeData(treeData);
+    }, [treeData]);
+
+    const onMove: MoveHandler<Chapter> = useCallback(
+      ({dragIds, parentId, index}) => {
+        setTreeData(currentTree => {
+          const removed: Chapter[] = [];
+          const treeWithoutDragged = findAndRemove(
+            currentTree,
+            dragIds,
+            removed,
+          ) as Chapter[];
+          return findAndInsert(
+            treeWithoutDragged,
+            parentId,
+            index,
+            removed,
+          ) as Chapter[];
+        });
+      },
+      [],
     );
-  }, []);
 
-  const onDelete: DeleteHandler<Chapter> = useCallback(({ids}) => {
-    setTreeData(currentTree => findAndDelete(currentTree, ids) as Chapter[]);
-  }, []);
+    const onRename: RenameHandler<Chapter> = useCallback(({id, name}) => {
+      setTreeData(
+        currentTree => findAndEdit(currentTree, String(id), name) as Chapter[],
+      );
+    }, []);
 
-  const handleCreate = useCallback((parentId: string | number) => {
-    const newNode: Chapter = {id: uuidv4(), title: 'New Chapter'};
-    setTreeData(currentTree => {
-      if (parentId) {
-        return findAndAddChild(currentTree, parentId, newNode) as Chapter[];
-      } else {
-        return [...currentTree, newNode];
-      }
-    });
-  }, []);
+    const onDelete: DeleteHandler<Chapter> = useCallback(({ids}) => {
+      setTreeData(currentTree => findAndDelete(currentTree, ids) as Chapter[]);
+    }, []);
 
-  // 创建带有 contextMenu 能力的 Node 渲染器
-  const Node = useMemo(
-    () =>
-      createChapterArboristNode(
+    const handleCreate = useCallback((parentId: string | number) => {
+      const newNode: Chapter = {id: uuidv4(), title: 'New Chapter'};
+      setTreeData(currentTree => {
+        if (parentId) {
+          return findAndAddChild(currentTree, parentId, newNode) as Chapter[];
+        } else {
+          return [...currentTree, newNode];
+        }
+      });
+    }, []);
+
+    // 创建带有 contextMenu 能力的 Node 渲染器
+    const Node = useMemo(
+      () =>
+        createChapterArboristNode(
+          setContextMenu,
+          treeRef,
+          isEditable && enableDoubleClickRename,
+          isEditable && isDraggable,
+          baseLink,
+          isEditable,
+        ),
+      [
         setContextMenu,
-        treeRef,
+        isEditable,
         enableDoubleClickRename,
         isDraggable,
         baseLink,
-      ),
-    [setContextMenu, enableDoubleClickRename, isDraggable, baseLink],
-  );
+      ],
+    );
 
-  return (
-    <div className="p-4" onClick={() => setContextMenu(null)}>
-      <Tree<Chapter>
-        ref={treeRef}
-        data={treeData}
-        onMove={onMove}
-        onRename={onRename}
-        onDelete={onDelete}
-        width={width ?? undefined}
-        height={tHeight}
-        // indent={24}
-        indent={0}
-        rowHeight={32}
-        disableDrag={!isDraggable}
-        disableDrop={!isDraggable}
-        idAccessor="id"
-        searchTerm={searchTerm}
-        selection={selectedId ?? ''}
-        searchMatch={(node, t) =>
-          node.data.title.toLowerCase().includes(t.toLowerCase())
-        }
-        childrenAccessor="children"
-        className="overflow-auto no-scrollbar"
+    const effectiveDrag = isEditable && isDraggable;
+
+    return (
+      <div
+        className="p-2"
+        role="presentation"
+        onClick={() => setContextMenu(null)}
+        onKeyDown={(e: any) => {
+          if (e.key === 'Escape') setContextMenu(null);
+        }}
       >
-        {Node}
-      </Tree>
-      {contextMenu && (
-        <ul
-          className="fixed z-50 bg-white border rounded shadow"
-          style={{
-            top: contextMenu.y,
-            left: contextMenu.x,
-            minWidth: 120,
-          }}
-          onClick={() => setContextMenu(null)}
-          onContextMenu={e => e.preventDefault()}
+        <Tree<Chapter>
+          ref={treeRef}
+          data={treeData}
+          onMove={onMove}
+          onRename={onRename}
+          onDelete={onDelete}
+          width={width ?? undefined}
+          height={tHeight}
+          // indent={24}
+          indent={0}
+          rowHeight={32}
+          disableDrag={!effectiveDrag}
+          disableDrop={!effectiveDrag}
+          idAccessor="id"
+          searchTerm={searchTerm}
+          selection={selectedId ?? ''}
+          searchMatch={(node, t) =>
+            node.data.title.toLowerCase().includes(t.toLowerCase())
+          }
+          childrenAccessor="children"
+          className="overflow-auto"
         >
-          <li
-            className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-            onClick={() => {
-              contextMenu.node?.edit();
-              setContextMenu(null);
-            }}
-          >
-            重命名
-          </li>
-          <li
-            className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-            onClick={() => {
-              treeRef.current?.delete(contextMenu.node.id);
-              setContextMenu(null);
-            }}
-          >
-            删除
-          </li>
-          <li
-            className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-            onClick={() => {
-              if (contextMenu.node.isInternal) {
-                contextMenu.node.toggle();
-              }
-              setContextMenu(null);
-            }}
-          >
-            {contextMenu.node?.isOpen ? 'Collapse' : 'Expand'}
-          </li>
-          <li
-            className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-            onClick={() => {
-              // 新建子节点 (第一个/仅有)
-              const parentId = contextMenu.node.id;
-              handleCreate(parentId);
-              setContextMenu(null);
-            }}
-          >
-            新建子节点
-          </li>
-          <li
-            className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-            onClick={() => {
-              // 新建后续同级节点
-              const newNode: Chapter = {
-                id: uuidv4(),
-                title: 'New Chapter',
-              };
-              setTreeData(current =>
-                insertSiblingAfter(current, contextMenu.node.id, newNode),
-              );
-              setContextMenu(null);
-            }}
-          >
-            新建同级节点
-          </li>
-          <li
-            className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-            onClick={() => {
-              setTreeData(
-                current =>
-                  moveSiblingFirst(current, contextMenu.node.id) as Chapter[],
-              );
-              setContextMenu(null);
-            }}
-          >
-            移到同级最前
-          </li>
-          <li
-            className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-            onClick={() => {
-              setTreeData(
-                current =>
-                  moveSiblingLast(current, contextMenu.node.id) as Chapter[],
-              );
-              setContextMenu(null);
-            }}
-          >
-            移到同级最后
-          </li>
-        </ul>
-      )}
-    </div>
-  );
-};
+          {Node}
+        </Tree>
+        {isEditable && contextMenu && (
+          <ChapterArboristContextMenu
+            contextMenu={contextMenu}
+            setContextMenu={setContextMenu}
+            treeRef={treeRef}
+            setTreeData={setTreeData}
+            handleCreate={handleCreate}
+          />
+        )}
+      </div>
+    );
+  },
+);
+
+ChapterArborist.displayName = 'ChapterArborist';

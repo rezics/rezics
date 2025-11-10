@@ -7,7 +7,7 @@ import {appStore} from '@/global/appStore.ts';
 import {useLayoutStore} from '@/global/Layout/layoutStore.ts';
 
 import {DraggableResizer} from '@/component/Layout/DraggableResizer.tsx';
-import {ChapterListEditor} from '@/component/Book/Chapter/ChapterListEditor';
+import {LinearChapterList} from '@/component/Book/Chapter/LinearChapterList';
 import {Link, useParams, useRoute} from 'wouter';
 interface BookReadLayoutProps {
   children: ReactNode;
@@ -78,7 +78,7 @@ export const BookReadLayout: React.FC<BookReadLayoutProps> = ({
             </Link>
           </div>
           <Divider />
-          <ChapterListEditor
+          <LinearChapterList
             bookId={bookId || ''}
             chapterId={chapterId || ''}
             drawerWidth={drawerWidth}

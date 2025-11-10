@@ -1,16 +1,25 @@
 // User contracts
-export type UserDTO = {
-  unitId: string;
-  email?: string;
-  slug?: string;
-  type?: string;
-  name: string;
-  avatar?: string;
-  bio?: string;
-  description?: string;
-  joinDate?: string;
-  permission?: any;
-};
+
+export const userDTOSchema = t.Object({
+  unitId: t.String(),
+  email: t.Optional(t.String()),
+  slug: t.Optional(t.String()),
+  type: t.Optional(t.String()),
+  name: t.String(),
+  avatar: t.Optional(t.String()),
+  bio: t.Optional(t.String()),
+  description: t.Optional(t.String()),
+  joinDate: t.Optional(t.String()),
+  permission: t.Optional(
+    t.Object(
+      {
+        role: t.Array(t.String()),
+      },
+      {additionalProperties: true},
+    ),
+  ),
+});
+export type UserDTO = (typeof userDTOSchema)['static'];
 
 export type CreateUserInput = {
   email: string;

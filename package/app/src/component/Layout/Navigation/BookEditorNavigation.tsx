@@ -16,7 +16,7 @@ import type {NavigationItem} from './navigation.d.ts';
 
 // segment: router path
 
-export const NAVIGATION = (): NavigationItem[] => [
+export const NAVIGATION = (bookId: string): NavigationItem[] => [
   {
     kind: 'item',
     title: 'Back to Main',
@@ -31,13 +31,13 @@ export const NAVIGATION = (): NavigationItem[] => [
   {
     kind: 'item',
     title: 'Book Edit Main',
-    segment: '~/book/1/edit',
+    segment: `~/book/${bookId}/edit`,
     icon: <DescriptionIcon />,
   },
   {
     kind: 'item',
     title: 'Book Edit Chapter',
-    segment: '~/book/1/edit/323',
+    segment: `~/book/${bookId}/edit/chapter/`,
     icon: <DescriptionIcon />,
   },
   {

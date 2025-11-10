@@ -45,14 +45,101 @@ const updateBookDialog = (
   );
 };
 
+interface BookEditInfoShowProps {
+  bookId?: string;
+  handleSubmit: () => void;
+  setMetadataState: React.Dispatch<React.SetStateAction<BookMetadataValue>>;
+  metadataState: BookMetadataValue;
+  updateBookErrorOpen: boolean;
+  setUpdateBookErrorOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  updateBookErrorText: any | null;
+  setUpdateBookErrorText: React.Dispatch<React.SetStateAction<any | null>>;
+}
+
+export const BookEditInfoShow: React.FC<BookEditInfoShowProps> = ({
+  bookId,
+  handleSubmit,
+  setMetadataState,
+  metadataState,
+  updateBookErrorOpen,
+  setUpdateBookErrorOpen,
+  updateBookErrorText,
+}) => {
+  const {t} = useTranslation();
+  const [location, navigate] = useLocation();
+  return (
+    <div className="mt-10 mx-auto w-11/12">
+      <div className="flex justify-between items-center">
+        <div className="text-2xl font-bold mb-4">书籍编辑</div>
+        <div className="flex items-center gap-2">
+          {bookId ? (
+            <Button
+              variant="outlined"
+              color="primary"
+              onClick={() => {
+                navigate(`/book/${bookId}/`);
+              }}
+            >
+              返回
+            </Button>
+          ) : null}
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => {
+              handleSubmit();
+            }}
+          >
+            提交
+          </Button>
+        </div>
+      </div>
+      <div>
+        <div className="flex mb-4">
+          <AccentBarWithTextShow text="MetaData" />
+        </div>
+        <div className="mb-8">
+          <BookMetadataEditor
+            value={metadataState}
+            onChange={value => {
+              setMetadataState(prev => ({...prev, ...value}));
+            }}
+          />
+        </div>
+      </div>
+      <div>
+        <div className="flex mb-4">
+          <AccentBarWithTextShow text={t('book.description')} />
+        </div>
+        <EasyEditor
+          value={metadataState?.description ?? ''}
+          onChange={value => {
+            setMetadataState(prev => ({...prev, description: value}));
+          }}
+        />
+      </div>
+      <div>
+        <div className="flex mb-4">
+          <AccentBarWithTextShow text="tags" />
+        </div>
+      </div>
+      {updateBookDialog(
+        updateBookErrorOpen,
+        () => {
+          setUpdateBookErrorOpen(false);
+        },
+        updateBookErrorText,
+      )}
+    </div>
+  );
+};
+
 interface BookEditMainPageProps {
   bookId: string;
 }
 
 export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({bookId}) => {
-  const {t} = useTranslation();
   const {data, isLoading, error} = useQuery(bookQueries.detail(bookId));
-  const [_location, navigate] = useLocation();
   const [metadataState, setMetadataState] = React.useState<BookMetadataValue>(
     {},
   );
@@ -105,76 +192,15 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({bookId}) => {
   if (error) return <div>Error: {String(error)}</div>;
   if (!data) return <div>No data</div>;
   return (
-    <div className="mt-10 mx-auto w-11/12">
-      <div className="flex justify-between items-center">
-        <div className="text-2xl font-bold mb-4">书籍编辑</div>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outlined"
-            color="primary"
-            onClick={() => {
-              navigate(`/book/${bookId}/`);
-            }}
-          >
-            返回
-          </Button>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={() => {
-              handleSubmit();
-            }}
-          >
-            提交
-          </Button>
-        </div>
-      </div>
-      <div>
-        <div className="flex mb-4">
-          <AccentBarWithTextShow text="MetaData" />
-        </div>
-        <div className="mb-8">
-          <BookMetadataEditor
-            value={metadataState}
-            onChange={value => {
-              setMetadataState(prev => ({...prev, ...value}));
-            }}
-          />
-        </div>
-      </div>
-      <div>
-        <div className="flex mb-4">
-          <AccentBarWithTextShow text={t('book.description')} />
-        </div>
-        <EasyEditor
-          value={metadataState?.description ?? ''}
-          onChange={value => {
-            setMetadataState(prev => ({...prev, description: value}));
-          }}
-        />
-      </div>
-      <div>
-        <div className="flex mb-4">
-          <AccentBarWithTextShow text="tags" />
-        </div>
-      </div>
-      <div>
-        <div className="flex mb-4">
-          <AccentBarWithTextShow text="章節" />
-        </div>
-        <blockquote className="p-4 my-4 border-s-4 border-gray-300 bg-gray-50 dark:border-gray-500 dark:bg-gray-800">
-          <p className="leading-relaxed text-gray-600 dark:text-white">
-            章節的編輯請從側邊欄，右擊支持新增，頂部按鈕開啓后支持拖拽，重命名請點擊進入具體章節
-          </p>
-        </blockquote>
-      </div>
-      {updateBookDialog(
-        updateBookErrorOpen,
-        () => {
-          setUpdateBookErrorOpen(false);
-        },
-        updateBookErrorText,
-      )}
-    </div>
+    <BookEditInfoShow
+      bookId={bookId}
+      handleSubmit={handleSubmit}
+      setMetadataState={setMetadataState}
+      metadataState={metadataState}
+      updateBookErrorOpen={updateBookErrorOpen}
+      setUpdateBookErrorOpen={setUpdateBookErrorOpen}
+      updateBookErrorText={updateBookErrorText}
+      setUpdateBookErrorText={setUpdateBookErrorText}
+    />
   );
 };

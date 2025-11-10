@@ -13,6 +13,11 @@ interface BookEditChapterPageProps {
   chapterId: string; // unitId of chapter
 }
 
+/**
+ * TODO 正常来说，所有的章节分卷管理都需要在这里解决，新增章节的时候选择分卷，或者删除章节。
+ * @param param0
+ * @returns
+ */
 export const BookEditChapterPage: React.FC<BookEditChapterPageProps> = ({
   chapterId,
 }) => {
