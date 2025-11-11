@@ -22,6 +22,7 @@ import {BookEditChapterListPage} from '@/page/BookEdit/ChapterListPage.tsx';
 import {BookLibContainer} from '@/page/Book/BookLibPage.tsx';
 import {BookPageContainer} from '@/page/Book/BookPage.tsx';
 import {ReadListPage} from '@/page/ReadList/ReadListPage.tsx';
+import {ReadListsPage} from '@/page/ReadList/ReadListsPage.tsx';
 
 // Tag pages
 import {TagByBookPage, TagByBookFullPage} from '@/page/Tag/TagByUnitPage';
@@ -156,6 +157,11 @@ export default (
         </Route>
 
         {/* ANCHOR ReadList Routes */}
+        <Route path="/readlist">
+          <MainLayout>
+            <ReadListsPage />
+          </MainLayout>
+        </Route>
         <Route path="/readlist/:readlistId">
           {() => (
             <MainLayout>

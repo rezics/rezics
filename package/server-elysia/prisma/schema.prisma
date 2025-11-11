@@ -44,9 +44,7 @@ enum UserType {
 }
 
 /**
- * =========================
- * Core: User
- * =========================
+ * ANCHOR User
  * TODO 增加子组织
  * also use unitId
  */
@@ -80,11 +78,9 @@ model User {
 }
 
 /**
- * =========================
- * Core: Unit (统一内容入口)
+ * ANCHOR Unit (统一内容入口)
  * - 仅固定最小公约字段；弹性入 metadata(JSON)
  * - 其它类型（REVIEW/QUOTE/READLIST…）都在这里
- * =========================
  */
 model Unit {
   // basic info
@@ -103,6 +99,7 @@ model Unit {
 
   // 可选：指向任意 Unit 的“弱引用”
   // 可被用于 Chapter，Review，Quote，Note，ReadList，Image，Video
+  // TODO Check if targetUnitId is needed
   targetUnitId String? @db.Uuid
   targetUnit   Unit?   @relation("UnitTargets", fields: [targetUnitId], references: [id])
   targetedBy   Unit[]  @relation("UnitTargets")
@@ -113,6 +110,9 @@ model Unit {
 
   // Book relation
   book Book? @relation("BookIndexForUnit")
+
+  // ReadList relation
+  readList ReadList? @relation("ReadListIndexForUnit")
 
   // Tag relation
   tag  Tag?  @relation("TagIndexForUnit")
@@ -137,10 +137,8 @@ model Unit {
 }
 
 /**
- * =========================
- * 专用子表：Book（1:1 绑定 Unit）
+ * ANCHOR Book（1:1 绑定 Unit）
  * 仅 Book 拥有专表；章节树、额外域等放 JSON
- * =========================
  * authors 就是纯字符串，关联用户的话单独做
  */
 model Book {
@@ -160,8 +158,9 @@ model Book {
   chapterIndex BookIndex?
   extra        Json? // 领域扩展（出版社、出版年、装帧…）
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  readList  ReadList[] @relation("ReadListForBook")
 
   @@index([title])
   @@index([isbn])
@@ -175,14 +174,23 @@ model BookIndex {
   updatedAt  DateTime @updatedAt
 }
 
+/**
+ * ANCHOR ReadList: 阅读列表
+ */
+model ReadList {
+  unitId    String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  unit      Unit     @relation("ReadListIndexForUnit", fields: [unitId], references: [id], onDelete: Cascade)
+  book      Book[]   @relation("ReadListForBook")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 // TODO 检查下列 unitId 是否需要, 只有真正绑定 Unit 的才需要 unitId
 
 /**
- * =========================
- * 评论树“关系索引表”
+ * ANCHOR CommentIndex: 评论树“关系索引表”
  * - 每条评论本体是 Unit(type='COMMENT')
  * - 该表存 root/parent/depth，加速树查询
- * =========================
  */
 model CommentIndex {
   // 这条“评论 Unit”的 id（与 Unit 1:1）
@@ -205,13 +213,10 @@ model CommentIndex {
 }
 
 /**
- * =========================
- * 统计与互动
- * - UnitStats：评论数等冗余计数（列表/详情快取）
- * - UnitReactions：赞/踩/爱心计数聚合
- * =========================
+ * ANCHOR UnitStats: 统计与互动
+ * - 评论数等冗余计数（列表/详情快取）
+ * - 赞/踩/爱心计数聚合
  */
-
 model UnitStats {
   unitId String @id @db.Uuid
   unit   Unit   @relation(fields: [unitId], references: [id], onDelete: Cascade)
@@ -244,9 +249,7 @@ model Rating {
 }
 
 /**
- * =========================
- * 标签：作用于任意 Unit（含 Book）
- * =========================
+ * ANCHOR Tag: 作用于任意 Unit（含 Book）
  * TODO 迁移到unitId
  */
 model Tag {
@@ -265,6 +268,9 @@ model Tag {
   @@index([type])
 }
 
+/**
+ * ANCHOR EchoKV: 临时存储
+ */
 model EchoKV {
   key       String   @id
   value     Json
@@ -273,7 +279,6 @@ model EchoKV {
 }
 
 /**
- * =========================
  * 说明与迁移提示（非运行字段）
  * - JSONB/GiN 索引：Prisma schema 不直接声明 GiN，
  * 请在迁移中加 raw SQL，如：

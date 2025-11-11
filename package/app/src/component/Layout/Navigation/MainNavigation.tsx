@@ -32,31 +32,18 @@ export const NAVIGATION = (): NavigationItem[] => [
     title: 'Books',
     icon: <BookIcon />,
   },
+
   {
     kind: 'item',
-    segment: '/book',
-    title: 'Book',
-    icon: <LibraryBooksIcon />,
-    children: [
-      {
-        kind: 'item',
-        segment: '/book/8e3c577b-64cf-41a3-82bb-c3371f41378c',
-        title: 'Book 1',
-        icon: <BookmarkBorderIcon />,
-      },
-      {
-        kind: 'item',
-        segment: '/readlist/1',
-        title: 'Read List 1',
-        icon: <FormatListBulletedIcon />,
-      },
-      {
-        kind: 'item',
-        segment: '/book/1/read/a1b2c3d4e5f6g7h8i9j0',
-        title: 'Book Chapter 1',
-        icon: <BookIcon />,
-      },
-    ],
+    segment: '/readlist/',
+    title: 'Read Lists',
+    icon: <FormatListBulletedIcon />,
+  },
+  {
+    kind: 'item',
+    segment: '/book/1/read/a1b2c3d4e5f6g7h8i9j0',
+    title: 'Book Chapter 1',
+    icon: <BookIcon />,
   },
   {
     kind: 'divider',

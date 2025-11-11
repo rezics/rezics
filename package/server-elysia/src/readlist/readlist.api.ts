@@ -66,7 +66,7 @@ export const readlistApi = coreInstance('/readlists')
     async ({body, headers, jwt, set}): Promise<ReadlistResponse> => {
       const payload = await verifyAuth(headers.authorization, jwt, set);
       const req: CreateReadlistInput = {
-        userId: payload.userId,
+        userId: payload.unitId,
         title: body.title,
         coverUrl: body.coverUrl,
         items: body.items,
@@ -97,7 +97,7 @@ export const readlistApi = coreInstance('/readlists')
         set.status = 404;
         throw new Error(`Readlist not found: ${params.unitId}`);
       }
-      if (target.userId !== payload.userId) {
+      if (target.userId !== payload.unitId) {
         set.status = 403;
         throw new Error(
           'Forbidden: you do not have permission to update this readlist',
@@ -129,7 +129,7 @@ export const readlistApi = coreInstance('/readlists')
         set.status = 404;
         throw new Error(`Readlist not found: ${params.unitId}`);
       }
-      if (target.userId !== payload.userId) {
+      if (target.userId !== payload.unitId) {
         set.status = 403;
         throw new Error(
           'Forbidden: you do not have permission to delete this readlist',
