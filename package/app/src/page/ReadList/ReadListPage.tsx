@@ -14,6 +14,23 @@ import {useParams} from 'wouter';
 
 import {readlistQueries} from '@/api/readlist/readlist';
 import {useQuery} from '@tanstack/react-query';
+import {BookListViewItem} from '@/component/BookLib/BookList/BookListView.tsx';
+
+const SingleBookReview = ({
+  review,
+}: {
+  review: {title?: string; content?: string};
+}) => {
+  if (!review.title || !review.content) {
+    return null;
+  }
+  return (
+    <div>
+      <p className="text-md text-gray-700">{review.title}</p>
+      <p className="text-sm text-gray-700">{review.content}</p>
+    </div>
+  );
+};
 
 export const ReadListPage: React.FC = () => {
   const {t} = useTranslation();
@@ -46,6 +63,12 @@ export const ReadListPage: React.FC = () => {
 
   if (!bookList?.id) {
     return <div className="text-center py-10 text-red-500">未找到书单</div>;
+  }
+
+  function getReviewForBook(book: {unitId: string}) {
+    const bookListReviewLength = bookList?.reviews?.length ?? 0;
+    const randomIndex = Math.floor(Math.random() * bookListReviewLength);
+    return bookList?.reviews[randomIndex];
   }
 
   return (
@@ -98,6 +121,18 @@ export const ReadListPage: React.FC = () => {
         <span>{bookList.likes ?? 0}</span> <span className="ml-1">likes</span>
         {/* 新 API 暂无 commentsNumber */}
       </div>
+
+      {bookList.books?.length > 0 &&
+        bookList.books.map(book => (
+          <div key={book.unitId}>
+            <BookListViewItem book={book} />
+            <div className="mt-4">
+              <SingleBookReview
+                review={getReviewForBook(book) ?? {title: '', content: ''}}
+              />
+            </div>
+          </div>
+        ))}
 
       {/* 评论区 */}
       <div id="BLCOMMENT" ref={commentRef} className="mt-5">

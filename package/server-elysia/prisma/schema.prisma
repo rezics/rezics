@@ -112,7 +112,8 @@ model Unit {
   book Book? @relation("BookIndexForUnit")
 
   // ReadList relation
-  readList ReadList? @relation("ReadListIndexForUnit")
+  readList          ReadList?  @relation("ReadListIndexForUnit")
+  reviewForReadList ReadList[] @relation("ReviewForReadList")
 
   // Tag relation
   tag  Tag?  @relation("TagIndexForUnit")
@@ -180,6 +181,7 @@ model BookIndex {
 model ReadList {
   unitId    String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
   unit      Unit     @relation("ReadListIndexForUnit", fields: [unitId], references: [id], onDelete: Cascade)
+  review    Unit[]   @relation("ReviewForReadList")
   book      Book[]   @relation("ReadListForBook")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

@@ -6,14 +6,8 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import {
-  Alert,
-  Card,
-  CardContent,
-  CardMedia,
-  Stack,
-  Typography,
-} from '@mui/material';
+import {Alert} from '@mui/material';
+import Masonry from '@mui/lab/Masonry';
 import {
   UniversalPaginator,
   type UniversalPaginatorHandle,
@@ -26,53 +20,22 @@ import type {ReadlistDTO} from '@package/contract';
 
 type Readlist = ReadlistDTO;
 
+import {SingleReadlist} from '@/component/ReadList/SingleReadlist';
+
 // Simple list view for Readlists
 const ReadlistListView: React.FC<{readlists: Readlist[]}> = ({readlists}) => {
   return (
-    <Stack direction="row" flexWrap="wrap" gap={2}>
+    <div>
       {readlists.map(item => (
-        <Card
-          key={item.id}
-          variant="outlined"
-          sx={{
-            flexGrow: 1,
-            flexBasis: {
-              xs: '100%',
-              sm: '48%',
-              md: '31%',
-              lg: '23%',
-            },
-            maxWidth: {xs: '100%', sm: '48%', md: '31%', lg: '23%'},
-          }}
-        >
-          {item.coverUrl ? (
-            <CardMedia
-              component="img"
-              height="160"
-              image={item.coverUrl}
-              alt={item.title}
-            />
-          ) : null}
-          <CardContent>
-            <Stack spacing={0.5}>
-              <Typography variant="subtitle1" noWrap>
-                {item.title}
-              </Typography>
-              {item.creator?.name && (
-                <Typography variant="body2" color="text.secondary">
-                  {item.creator.name}
-                </Typography>
-              )}
-              {typeof item.likes === 'number' && (
-                <Typography variant="caption" color="text.secondary">
-                  ❤ {item.likes}
-                </Typography>
-              )}
-            </Stack>
-          </CardContent>
-        </Card>
+        <div key={item.id}>
+          <SingleReadlist
+            data={item}
+            handleBookListClick={() => {}}
+            handleLike={() => {}}
+          />
+        </div>
       ))}
-    </Stack>
+    </div>
   );
 };
 

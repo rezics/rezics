@@ -12,7 +12,6 @@ const UNIT_TYPES: UnitType[] = [
   UnitTypeEnum.NOTE,
   UnitTypeEnum.REVIEW,
   UnitTypeEnum.QUOTE,
-  UnitTypeEnum.READLIST,
   UnitTypeEnum.IMAGE,
   UnitTypeEnum.VIDEO,
 ];

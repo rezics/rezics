@@ -69,7 +69,7 @@ export class UnitService {
       .filter(Boolean);
     if (domainList.length > 0) {
       andWhere.push({
-        domains: {some: {unitId: {in: domainList}}},
+        domains: {some: {id: {in: domainList}}},
       });
     }
 
@@ -243,7 +243,7 @@ export class UnitService {
       createdAt: ci.unit?.createdAt,
       user: ci.unit?.user
         ? {
-            id: ci.unit.user.unitId,
+            unitId: ci.unit.user.unitId,
             slug: ci.unit.user.slug ?? undefined,
             name: ci.unit.user.name,
             avatar: ci.unit.user.avatar ?? (null as any),

@@ -27,4 +27,5 @@ export interface SeedCounts {
   books: number;
   otherPosts: number;
   comments: number;
+  readLists: number;
 }

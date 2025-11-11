@@ -23,4 +23,5 @@ export const DEFAULT_COUNTS: SeedCounts = {
   books: envInt('SEED_BOOKS', 500),
   otherPosts: envInt('SEED_OTHER_POSTS', 1500),
   comments: envInt('SEED_COMMENTS', 6000),
+  readLists: envInt('SEED_READ_LISTS', 1000),
 };

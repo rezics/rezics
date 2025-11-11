@@ -8,6 +8,7 @@ import {seedTags} from './seed/tags';
 import {seedBooks, updateChapterIndex, seedChaptersForBook} from './seed/books';
 import {seedOtherUnits} from './seed/units';
 import {seedComments, updateStatsWithCommentCounts} from './seed/comments';
+import {seedReadLists} from './seed/readlist';
 
 // ------------------------------
 // Prisma Client
@@ -69,7 +70,18 @@ async function main() {
       bookIds,
       tagUnitIds,
     );
+    const reviewUnitIds = others.map(o => o.id);
     console.log(`✅ Created ${others.length} other units`);
+
+    // Seed read lists
+    const readLists = await seedReadLists(
+      prisma,
+      DEFAULT_COUNTS.readLists,
+      users,
+      bookIds,
+      reviewUnitIds,
+    );
+    console.log(`✅ Created ${readLists.length} read lists`);
 
     // Generate chapters per book and update chapter index JSON
     for (const bookId of bookIds) {
@@ -104,6 +116,7 @@ async function main() {
       tags: tagUnitIds.length,
       books: books.length,
       otherUnits: others.length,
+      readLists: readLists.length,
       comments: totalComments,
     };
 

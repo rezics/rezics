@@ -7,12 +7,14 @@ import {publicUserSchema} from './unit';
  * Readlist metadata structure stored under Unit.metadata
  * - items: review-unit to book-unit linkage
  */
+// Raw metadata saved on Unit.metadata (kept for storage/back-compat)
+// Note: Either bookUnitId or reviewUnitId can be present, or both.
 export const readlistMetadataSchema = t.Object({
   coverUrl: t.Optional(t.String()),
   items: t.Array(
     t.Object({
-      reviewUnitId: t.String(),
-      bookUnitId: t.String(),
+      bookUnitId: t.Optional(t.String()),
+      reviewUnitId: t.Optional(t.String()),
     }),
   ),
 });
@@ -24,13 +26,43 @@ export type ReadlistMetadata = (typeof readlistMetadataSchema)['static'];
  * - Keeps top-level coverUrl/creator/likes for convenience & back-compat
  * - Also exposes metadata for richer clients
  */
+// Brief user for embedded ownership on book items
+export const userBriefSchema = t.Object({
+  unitId: t.String(),
+  name: t.String(),
+});
+
+export const readlistBookBriefSchema = t.Object({
+  unitId: t.String(),
+  title: t.String(),
+  coverUrl: t.Optional(t.String()),
+  author: t.Optional(
+    t.Array(
+      t.Object({
+        unitId: t.String(),
+        name: t.String(),
+        avatar: t.Optional(t.String()),
+      }),
+    ),
+  ),
+});
+
+export const readlistReviewBriefSchema = t.Object({
+  unitId: t.String(),
+  title: t.Optional(t.String()),
+  content: t.Optional(t.String()),
+});
+
+// Readlist DTO now returns books[] and reviews[] directly (no items wrapper)
 export const readlistDTOSchema = t.Object({
   id: t.String(),
   title: t.String(),
+  content: t.Optional(t.String()),
   coverUrl: t.Optional(t.String()),
   creator: t.Optional(publicUserSchema),
   likes: t.Optional(t.Number()),
-  metadata: t.Optional(readlistMetadataSchema),
+  books: t.Array(readlistBookBriefSchema),
+  reviews: t.Array(readlistReviewBriefSchema),
 });
 
 export type ReadlistDTO = (typeof readlistDTOSchema)['static'];
@@ -102,8 +134,8 @@ export const createReadlistSchema = t.Object({
   items: t.Optional(
     t.Array(
       t.Object({
-        reviewUnitId: t.String(),
-        bookUnitId: t.String(),
+        bookUnitId: t.Optional(t.String()),
+        reviewUnitId: t.Optional(t.String()),
       }),
     ),
   ),

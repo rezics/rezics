@@ -3,7 +3,7 @@ import {coreInstance} from '../core';
 import {verifyAuth} from '@/src/utils/authUtils';
 import {unitService} from '@/src/unit/unit.service';
 import {readlistService} from './readlist.service';
-import {mapReadlistToDTO, mapBaseReadlistToDTO} from './mapper';
+// mapper now used inside service; no direct mapping required here
 import {
   readlistListQuerySchema,
   readlistParamsSchema,
@@ -27,7 +27,7 @@ export const readlistApi = coreInstance('/readlists')
     '/',
     async ({query}): Promise<ReadlistListResponse> => {
       const {readlists, total} = await readlistService.list(query as any);
-      return {readlists: readlists.map(mapBaseReadlistToDTO), total};
+      return {readlists, total};
     },
     {
       query: readlistListQuerySchema,
@@ -46,7 +46,7 @@ export const readlistApi = coreInstance('/readlists')
     '/:unitId',
     async ({params}): Promise<ReadlistResponse> => {
       const rl = await readlistService.getByUnitId(params.unitId);
-      return mapReadlistToDTO(rl);
+      return rl;
     },
     {
       params: readlistParamsSchema,
@@ -73,7 +73,7 @@ export const readlistApi = coreInstance('/readlists')
         bookIds: body.bookIds,
       };
       const rl = await readlistService.create(req);
-      return mapReadlistToDTO(rl);
+      return rl;
     },
     {
       body: createReadlistSchema,
@@ -104,7 +104,7 @@ export const readlistApi = coreInstance('/readlists')
         );
       }
       const rl = await readlistService.update(params.unitId, body);
-      return mapReadlistToDTO(rl);
+      return rl;
     },
     {
       params: readlistParamsSchema,

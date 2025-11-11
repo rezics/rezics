@@ -1,29 +1,59 @@
-import type {User} from '@/prisma/client';
 import type {PublicUser, ReadlistDTO} from '@package/contract';
-import type {ReadlistWithRelations} from './types';
+import type {ReadlistSelected, ReadlistListSelected} from './types';
 
-export function sanitizeUser(u: User): PublicUser {
+export function sanitizeUser(u: {
+  unitId: string;
+  slug?: string;
+  name: string;
+  avatar?: string | null;
+}): PublicUser {
   return {
-    id: u.unitId,
+    unitId: u.unitId,
     slug: u.slug,
     name: u.name,
     avatar: u.avatar ?? (null as any),
   };
 }
 
-export function mapBaseReadlistToDTO(u: ReadlistWithRelations): ReadlistDTO {
-  const metadata = (u.metadata as any) ?? {};
+// Simple mappers for readlist service shapes
+export function mapReadlistListRowToDTO(
+  row: ReadlistListSelected,
+): ReadlistDTO {
+  const meta = (row.unit?.metadata as any) ?? {};
+  const coverUrl = meta?.coverUrl ?? undefined;
   return {
-    id: u.id,
-    title: u.title ?? '',
-    coverUrl: metadata?.coverUrl ?? undefined,
-    creator: u.user ? sanitizeUser(u.user) : undefined,
-    likes: u.reactions?.likeCount ?? 0,
-    metadata: metadata,
+    id: row.unitId,
+    title: row.unit?.title ?? '',
+    coverUrl,
+    content: row.unit?.content ?? undefined,
+    creator: row.unit?.user ? sanitizeUser(row.unit.user) : undefined,
+    likes: row.unit?.reactions?.likeCount ?? 0,
+    books: [],
+    reviews: [],
   };
 }
 
-export function mapReadlistToDTO(u: ReadlistWithRelations): ReadlistDTO {
-  // For now, same as base mapping; left for future expansion
-  return mapBaseReadlistToDTO(u);
+export function mapReadlistRowToDTO(row: ReadlistSelected): ReadlistDTO {
+  const meta = (row.unit?.metadata as any) ?? {};
+  const coverUrl = meta?.coverUrl ?? undefined;
+  return {
+    id: row.unitId,
+    title: row.unit?.title ?? '',
+    content: row.unit?.content ?? undefined,
+    coverUrl,
+    creator: row.unit?.user ? sanitizeUser(row.unit.user) : undefined,
+    likes: row.unit?.reactions?.likeCount ?? 0,
+    books: (row.book ?? []).map(b => ({
+      unitId: b.unitId,
+      title: b.title,
+      description: b.description ?? undefined,
+      coverUrl: b.coverUrl ?? undefined,
+      author: b.author,
+    })),
+    reviews: (row.review ?? []).map(r => ({
+      unitId: r.id,
+      title: r.title ?? undefined,
+      content: r.content ?? undefined,
+    })),
+  } as ReadlistDTO;
 }

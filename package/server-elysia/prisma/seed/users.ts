@@ -36,8 +36,8 @@ export async function seedUsers(
       bio: generateParagraph(1, 2),
       description: generateParagraph(5, 10),
       joinDate: faker.date.past({years: 4}),
-      permissions: {
-        roles: ['ADMIN'],
+      permission: {
+        role: ['ADMIN'],
       },
     },
     select: {unitId: true, name: true},
