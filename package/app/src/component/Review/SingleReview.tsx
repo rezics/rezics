@@ -1,5 +1,5 @@
 import {CollapsibleText} from '@component/Common/CollapsibleText';
-import {ReactionBar} from '@component/Common/ReactionBar';
+import {ReactionBarShow} from '@component/Common/ReactionBar';
 import {EmojiEvents, SentimentSatisfiedAlt} from '@mui/icons-material';
 import {
   Avatar,
@@ -37,8 +37,9 @@ export const SingleReviewShow: React.FC<SingleReviewShowProps> = ({
             <Typography variant="subtitle1" fontWeight="bold">
               {review.user?.name}
             </Typography>
+
             <Typography variant="body2" color="text.secondary">
-              {review.created_at}
+              {990} reviews {1232} followers
             </Typography>
           </Box>
           <Button
@@ -50,9 +51,9 @@ export const SingleReviewShow: React.FC<SingleReviewShowProps> = ({
             Follow
           </Button>
           <Box sx={{ml: 'auto', textAlign: 'right'}}>
-            <Rating defaultValue={review.rating} precision={0.5} />
+            <Rating defaultValue={review.rating} precision={0.5} readOnly />
             <Typography variant="body2" color="text.secondary">
-              {990} reviews {1232} followers
+              {review.created_at}
             </Typography>
           </Box>
         </Box>
@@ -73,7 +74,7 @@ export const SingleReviewShow: React.FC<SingleReviewShowProps> = ({
               },
             }}
           >
-            <ReactionBar.Show onReply={() => onReply(review.id)} />
+            <ReactionBarShow onReply={() => onReply(review.id)} />
           </Box>
         </Box>
         {/* Statistics and Awards */}

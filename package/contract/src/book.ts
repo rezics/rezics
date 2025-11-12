@@ -12,6 +12,7 @@ export const publicUserSchema = t.Object({
   name: t.String(),
   avatar: t.Optional(t.Nullable(t.String())),
   bio: t.Optional(t.String()),
+  description: t.Optional(t.String()),
 });
 
 export type PublicUser = (typeof publicUserSchema)['static'];

@@ -51,6 +51,7 @@ export const readlistReviewBriefSchema = t.Object({
   unitId: t.String(),
   title: t.Optional(t.String()),
   content: t.Optional(t.String()),
+  targetUnitId: t.Optional(t.String()),
 });
 
 // Readlist DTO now returns books[] and reviews[] directly (no items wrapper)

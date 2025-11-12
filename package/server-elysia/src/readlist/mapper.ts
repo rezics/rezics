@@ -53,6 +53,7 @@ export function mapReadlistRowToDTO(row: ReadlistSelected): ReadlistDTO {
     reviews: (row.review ?? []).map(r => ({
       unitId: r.id,
       title: r.title ?? undefined,
+      targetUnitId: r.targetUnitId,
       content: r.content ?? undefined,
     })),
   } as ReadlistDTO;

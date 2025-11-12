@@ -9,6 +9,8 @@ import {
   randomFloat,
 } from './utils.js';
 
+import {seedComments} from './comments.js';
+
 /**
  * Seed ReadList units and their Book connections
  * - Creates a Unit with type READLIST per list
@@ -78,7 +80,7 @@ export async function seedReadLists(
       ),
     );
 
-    await prisma.readList.create({
+    const currentReadlist = await prisma.readList.create({
       data: {
         unitId: unit.id,
         book: {
@@ -90,6 +92,8 @@ export async function seedReadLists(
         },
       },
     });
+
+    await createCommentTreeForReadlist(prisma, currentReadlist.unitId, users);
 
     await prisma.unitStats.create({data: {unitId: unit.id}});
     await prisma.unitReactions.create({
@@ -107,6 +111,16 @@ export async function seedReadLists(
   return created;
 }
 
+async function createCommentTreeForReadlist(
+  prisma: PrismaClient,
+  readlistUnitId: string,
+  users: CreatedUser[],
+): Promise<string> {
+  const {perRootCount} = await seedComments(prisma, randomInt(20, 200), users, [
+    readlistUnitId,
+  ]);
+  return '';
+}
 /**
  * Create a Review Unit for a given Book (by book's Unit ID)
  * and return the created review Unit's ID.
@@ -133,7 +147,7 @@ async function createReviewUnit(
       type: UnitTypeEnum.REVIEW,
       status: randomBoolean(0.9) ? UnitStatus.ACTIVE : UnitStatus.DRAFT,
       title: reviewTitle,
-      content: randomBoolean(0.8) ? generateParagraph(1, 4) : null,
+      content: generateParagraph(40, 400),
       metadata: {rating},
       targetUnitId: bookUnitId,
       publishedAt: faker.date.past({years: 2}),

@@ -7,7 +7,7 @@ import {useQuery} from '@tanstack/react-query';
 //  ;
 
 import {useDialogStore} from '@/global/dialogStore.ts';
-import {ReactionBar} from '../Common/ReactionBar.tsx';
+import {ReactionBarContainer} from '../Common/ReactionBar.tsx';
 import {ReplyDrawer} from './ReplyDrawer.tsx';
 
 import {unitCommentTreeQuery} from '@/api/unit/unit.queries';
@@ -100,7 +100,7 @@ const CommentNode: React.FC<CommentNodeProps> = ({
                 },
               }}
             >
-              <ReactionBar.Container
+              <ReactionBarContainer
                 onReply={handleReply}
                 className="mt-2"
                 size="small"

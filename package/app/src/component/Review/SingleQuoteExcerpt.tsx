@@ -1,7 +1,18 @@
 import FormatQuoteIcon from '@mui/icons-material/FormatQuote';
-import {Avatar, Box, Link, Paper, Typography} from '@mui/material';
+import {
+  Avatar,
+  Link,
+  Paper,
+  Typography,
+  Tooltip,
+  IconButton,
+} from '@mui/material';
+import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import React from 'react';
 import {useTranslation} from 'react-i18next';
+
+import {CollapsibleByLineTextContainer} from '../Common/CollapsibleByLineText';
+import {RouterLink} from '../Common/RouterLink';
 
 export type SingleQuoteExcerptShowProps = {
   author: {
@@ -31,19 +42,33 @@ export const SingleQuoteExcerptShow: React.FC<SingleQuoteExcerptShowProps> = ({
       variant="outlined"
       sx={{
         p: 2,
+        position: 'relative',
         '& .MuiPaper-root': {
           borderColor: 'divider',
         },
       }}
     >
-      <Box sx={{display: 'flex', alignItems: 'center', mb: 2}}>
+      <Tooltip title="打开全文">
+        <IconButton
+          component={RouterLink}
+          href={originalLink}
+          size="small"
+          sx={{position: 'absolute', top: 8, right: 8}}
+          aria-label="打开全文"
+          title="打开全文"
+        >
+          <OpenInNewIcon fontSize="small" />
+        </IconButton>
+      </Tooltip>
+
+      <div className="flex items-center mb-2">
         <Avatar src={author.avatar} sx={{width: 20, height: 20, mr: 1}} />
         <Typography variant="subtitle2" fontWeight="bold">
           {author.name}
         </Typography>
-      </Box>
+      </div>
 
-      <Box sx={{display: 'flex', alignItems: 'flex-start'}}>
+      <div className="flex items-start">
         <FormatQuoteIcon
           sx={{
             fontSize: 30,
@@ -52,52 +77,33 @@ export const SingleQuoteExcerptShow: React.FC<SingleQuoteExcerptShowProps> = ({
             mt: 0.5,
           }}
         />
-        <Box sx={{flex: 1}}>
+        <div className="flex-1">
           <Typography
             variant="body2"
             color="text.primary"
             sx={{lineHeight: 1.6}}
           >
-            {content}
-            <Link
-              href={originalLink}
-              sx={{
-                ml: 0.5,
-                color: 'primary.main',
-                '&:hover': {
-                  textDecoration: 'underline',
-                },
-              }}
-            >
-              (查看全文)
-            </Link>
+            <CollapsibleByLineTextContainer content={content} />
           </Typography>
 
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              mt: 1.5,
-              color: 'text.secondary',
-              fontSize: '0.75rem',
-            }}
-          >
-            <Box sx={{display: 'flex', gap: 1}}>
-              <Typography variant="caption">
+          <div className="flex items-center justify-between mt-3">
+            <div className="flex gap-1">
+              <Typography variant="caption" color="text.secondary">
                 {stats.replies} {t('common.reply')}
               </Typography>
-              <Typography variant="caption">
+              <Typography variant="caption" color="text.secondary">
                 {stats.likes} {t('accessibility.favorite')}
               </Typography>
-              <Typography variant="caption">{stats.date}</Typography>
-            </Box>
+              <Typography variant="caption" color="text.secondary">
+                {stats.date}
+              </Typography>
+            </div>
             <Typography variant="caption" color="text.disabled">
               —— {source}
             </Typography>
-          </Box>
-        </Box>
-      </Box>
+          </div>
+        </div>
+      </div>
     </Paper>
   );
 };

@@ -19,9 +19,9 @@ export const DEFAULT_COUNTS: SeedCounts = {
   users: envInt('SEED_USERS', 2000),
   pressUsers: envInt('SEED_PRESS_USERS', 200),
   producerUsers: envInt('SEED_PRODUCER_USERS', 200),
-  tags: envInt('SEED_TAGS', 40000),
+  tags: envInt('SEED_TAGS', 4000),
   books: envInt('SEED_BOOKS', 500),
   otherPosts: envInt('SEED_OTHER_POSTS', 1500),
-  comments: envInt('SEED_COMMENTS', 6000),
+  comments: envInt('SEED_COMMENTS', 600),
   readLists: envInt('SEED_READ_LISTS', 1000),
 };

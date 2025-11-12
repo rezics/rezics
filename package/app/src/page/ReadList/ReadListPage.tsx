@@ -14,23 +14,9 @@ import {useParams} from 'wouter';
 
 import {readlistQueries} from '@/api/readlist/readlist';
 import {useQuery} from '@tanstack/react-query';
-import {BookListViewItem} from '@/component/BookLib/BookList/BookListView.tsx';
+import {BookReviewGroup} from '@/component/ReadList/Review.tsx';
 
-const SingleBookReview = ({
-  review,
-}: {
-  review: {title?: string; content?: string};
-}) => {
-  if (!review.title || !review.content) {
-    return null;
-  }
-  return (
-    <div>
-      <p className="text-md text-gray-700">{review.title}</p>
-      <p className="text-sm text-gray-700">{review.content}</p>
-    </div>
-  );
-};
+// Collapsible single review component moved to component/ReadList/Review.tsx
 
 export const ReadListPage: React.FC = () => {
   const {t} = useTranslation();
@@ -54,7 +40,7 @@ export const ReadListPage: React.FC = () => {
   const {
     data: bookList,
     isLoading,
-    error,
+    error: _error,
   } = useQuery(readlistQueries.detail(readlistId || ''));
 
   if (isLoading) {
@@ -66,9 +52,10 @@ export const ReadListPage: React.FC = () => {
   }
 
   function getReviewForBook(book: {unitId: string}) {
-    const bookListReviewLength = bookList?.reviews?.length ?? 0;
-    const randomIndex = Math.floor(Math.random() * bookListReviewLength);
-    return bookList?.reviews[randomIndex];
+    // 暂时使用fake 逻辑
+    return bookList?.reviews?.find(
+      review => review.targetUnitId === book.unitId,
+    );
   }
 
   return (
@@ -124,18 +111,16 @@ export const ReadListPage: React.FC = () => {
 
       {bookList.books?.length > 0 &&
         bookList.books.map(book => (
-          <div key={book.unitId}>
-            <BookListViewItem book={book} />
-            <div className="mt-4">
-              <SingleBookReview
-                review={getReviewForBook(book) ?? {title: '', content: ''}}
-              />
-            </div>
-          </div>
+          <BookReviewGroup
+            key={book.unitId}
+            book={book}
+            review={getReviewForBook(book) ?? {title: '', content: ''}}
+            className="mt-4"
+          />
         ))}
 
       {/* 评论区 */}
-      <div id="BLCOMMENT" ref={commentRef} className="mt-5">
+      <div ref={commentRef} className="mt-5">
         <div className="flex items-center justify-between w-full">
           <div className="flex items-center gap-2">
             <AccentBarContainer />

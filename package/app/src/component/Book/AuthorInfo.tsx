@@ -76,7 +76,13 @@ const AuthorInfoShow: React.FC<AuthorInfoShowProps> = ({
               <div className="h-auto border-l border-gray-300 mx-4" />
 
               {/* 右侧文本区域 */}
-              <Typography className="flex-1 !text-md">{author.bio}</Typography>
+              <div className="flex-1 !text-md">
+                <Typography className="">Bio:{author.bio}</Typography>
+                <br />
+                <Typography className="">
+                  Description:{author.description}
+                </Typography>
+              </div>
             </div>
           </div>
         </div>

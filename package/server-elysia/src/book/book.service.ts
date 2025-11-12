@@ -181,7 +181,7 @@ export class BookService {
       data: {
         unit: {
           create: {
-            userId,
+            userId: userId || '',
             type: UnitType.BOOK,
             status: UnitStatus.ACTIVE,
             title,

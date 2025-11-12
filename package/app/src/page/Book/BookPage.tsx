@@ -92,9 +92,10 @@ export const BookPageShow: React.FC<ShowProps> = ({
                   <AuthorInfoContainer
                     author={
                       bookInfo?.author?.[0] || {
-                        id: '',
+                        unitId: '',
                         name: '',
                         bio: '',
+                        description: '',
                       }
                     }
                   />

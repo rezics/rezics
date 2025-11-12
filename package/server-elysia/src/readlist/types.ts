@@ -60,6 +60,7 @@ export const readlistSelect = {
       id: true,
       title: true,
       content: true,
+      targetUnitId: true,
     },
   },
 } satisfies Prisma.ReadListSelect;

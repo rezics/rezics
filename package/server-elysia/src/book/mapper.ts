@@ -18,6 +18,7 @@ export function sanitizeUserWithBio(u: User): PublicUser {
   return {
     ...sanitizeUser(u),
     bio: u.bio ?? undefined,
+    description: u.description ?? undefined,
   };
 }
 
