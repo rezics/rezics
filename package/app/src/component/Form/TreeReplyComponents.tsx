@@ -8,10 +8,12 @@ import {useQuery} from '@tanstack/react-query';
 
 import {useDialogStore} from '@/global/dialogStore.ts';
 import {ReactionBarContainer} from '../Common/ReactionBar.tsx';
-import {ReplyDrawer} from './ReplyDrawer.tsx';
+import {ReplyDrawerContainer} from './ReplyDrawer.tsx';
 
-import {unitCommentTreeQuery} from '@/api/unit/unit.queries';
+import {commentQueries} from '@/api/comment/comment.queries.ts';
 import type {CommentTreeNode} from '@package/contract';
+import {useCreateCommentMutation} from '@/api/comment/comment.mutations';
+
 // This is a temporary type definition based on the GraphQL schema.
 // Local UI type adapted from CommentTreeNode
 type UiAuthor = {
@@ -133,18 +135,15 @@ const CommentNode: React.FC<CommentNodeProps> = ({
 };
 
 interface ReplyComponentsProps {
-  bookListId: string;
+  unitId: string;
 }
 
 export const TreeReplyComponents: React.FC<ReplyComponentsProps> = ({
-  bookListId,
+  unitId,
 }) => {
-  // Assume bookListId represents the root unit id for comments
-  const unitId = bookListId;
-
   // Fetch a flat slice of the comment tree for the unit
   const {data, isLoading, error} = useQuery(
-    unitCommentTreeQuery(unitId, {
+    commentQueries.unitCommentTree(unitId, {
       // Fetch up to depth 3 for an initial view; adjust as needed
       maxDepth: 3,
       order: 'asc',
@@ -233,15 +232,20 @@ export const TreeReplyComponents: React.FC<ReplyComponentsProps> = ({
     }
   }, [data, buildTree]);
 
-  const handleSubmit = (currentReplyId: string, content: string) => {
-    console.log('handleSubmit', currentReplyId, content);
-  };
-
   const openDrawer = (id: string) => {
     setCurrentReplyId(id);
     setDialogVisible(`reply-${id}`, true);
   };
 
+  const createCommentMutation = useCreateCommentMutation();
+
+  const handleSubmit = (content: string) => {
+    createCommentMutation.mutate({
+      rootPostId: unitId,
+      parentCommentId: currentReplyId || '',
+      content,
+    });
+  };
   if (isLoading) return <p>Loading...</p>;
   if (error) return <p>Oh no... {error.message}</p>;
 
@@ -262,9 +266,9 @@ export const TreeReplyComponents: React.FC<ReplyComponentsProps> = ({
       </Box>
       {/* 渲染 */}
       {currentReplyId && (
-        <ReplyDrawer.Container
+        <ReplyDrawerContainer
           dialogId={`reply-${currentReplyId}`}
-          onSubmit={(content: string) => handleSubmit(currentReplyId, content)}
+          onSubmit={(content: string) => handleSubmit(content)}
         />
       )}
     </>

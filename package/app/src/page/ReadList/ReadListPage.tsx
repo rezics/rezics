@@ -8,14 +8,16 @@ import {
   FavoriteBorder,
 } from '@mui/icons-material';
 import {IconButton} from '@mui/material';
-import React, {useRef} from 'react';
+import React, {useRef, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import {useParams} from 'wouter';
 
 import {readlistQueries} from '@/api/readlist/readlist';
 import {useQuery} from '@tanstack/react-query';
 import {BookReviewGroup} from '@/component/ReadList/Review.tsx';
-
+import {ReplyDrawerContainer} from '@/component/Form/ReplyDrawer.tsx';
+import {useDialogStore} from '@/global/dialogStore';
+import {useCreateCommentMutation} from '@/api/comment/comment.mutations';
 // Collapsible single review component moved to component/ReadList/Review.tsx
 
 export const ReadListPage: React.FC = () => {
@@ -23,6 +25,8 @@ export const ReadListPage: React.FC = () => {
   const {readlistId} = useParams<{readlistId: string}>();
 
   const commentRef = useRef<HTMLDivElement>(null);
+  const [currentReplyId, setCurrentReplyId] = useState<string | null>(null);
+  const setDialogVisible = useDialogStore(state => state.setDialogVisible);
 
   const handleGoToComments = () => {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -34,7 +38,18 @@ export const ReadListPage: React.FC = () => {
   };
 
   const handleReply = () => {
-    console.log('reply');
+    console.log('reply', readlistId);
+    setCurrentReplyId(readlistId);
+    setDialogVisible(`reply-${readlistId}`, true);
+  };
+
+  const createCommentMutation = useCreateCommentMutation();
+
+  const handleSubmit = (content: string) => {
+    createCommentMutation.mutate({
+      rootPostId: readlistId || '',
+      content,
+    });
   };
 
   const {
@@ -136,10 +151,16 @@ export const ReadListPage: React.FC = () => {
           </IconButton>
         </div>
 
-        <TreeReplyComponents bookListId={readlistId || ''} />
+        <TreeReplyComponents unitId={readlistId || ''} />
         {/* 供评论区占位符 */}
         <div className="mb-[200px]" />
       </div>
+      {currentReplyId && (
+        <ReplyDrawerContainer
+          dialogId={`reply-${currentReplyId}`}
+          onSubmit={(content: string) => handleSubmit(content)}
+        />
+      )}
     </div>
   );
 };

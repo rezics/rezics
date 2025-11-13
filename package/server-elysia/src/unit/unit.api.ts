@@ -79,7 +79,7 @@ export const unitApi = coreInstance('/units')
       // Enforce creating for current user
       const createReq: CreateUnitInput = {
         ...body,
-        userId: payload.userId,
+        userId: payload.unitId,
       };
       const unit = await unitService.create(createReq);
       return mapUnitToDTO(unit);
@@ -108,7 +108,7 @@ export const unitApi = coreInstance('/units')
         set.status = 404;
         throw new Error(`Unit not found: ${params.unitId}`);
       }
-      if (target.userId !== payload.userId) {
+      if (target.userId !== payload.unitId) {
         set.status = 403;
         throw new Error('Forbidden: you do not own this unit');
       }
@@ -143,7 +143,7 @@ export const unitApi = coreInstance('/units')
         set.status = 404;
         throw new Error(`Unit not found: ${params.unitId}`);
       }
-      if (target.userId !== payload.userId) {
+      if (target.userId !== payload.unitId) {
         set.status = 403;
         throw new Error('Forbidden: you do not own this unit');
       }
@@ -156,40 +156,6 @@ export const unitApi = coreInstance('/units')
         summary: 'Delete unit',
         description: 'Delete a Unit by id (cascades to related indexes)',
         tags: ['Units'],
-      },
-    },
-  )
-
-  /**
-   * Comment Tree (flat slice) under a root Unit
-   * GET /units/:unitId/comment-tree
-   * Query parameters:
-   * - parentId: if provided, returns only direct children of this comment
-   * - maxDepth: when parentId is omitted, returns comments up to this depth from the root (0-based)
-   * - start/limit: pagination controls
-   * - order: asc|desc by createdAt
-   */
-  .get(
-    '/:unitId/comment-tree',
-    async ({params, query}): Promise<CommentTreeResponse> => {
-      const items = await unitService.getCommentTreeFlat(params.unitId, {
-        parentId: (query as any).parentId,
-        maxDepth: (query as any).maxDepth,
-        start: (query as any).start,
-        limit: (query as any).limit,
-        order: ((query as any).order as 'asc' | 'desc') ?? 'asc',
-      });
-      return {rootUnitId: params.unitId, items};
-    },
-    {
-      params: unitParamsSchema,
-      query: commentTreeQuerySchema,
-      response: commentTreeResponseSchema,
-      detail: {
-        summary: 'Get comment tree slice',
-        description:
-          'Returns a flat slice of comments under the root unit using CommentIndex to optimize tree retrieval.',
-        tags: ['Units', 'Comments'],
       },
     },
   );

@@ -8,6 +8,7 @@ export * from './readlist';
 export * from './review';
 export * from './tag';
 export * from './user';
+export * from './reaction';
 export {
   publicUserSchema as sharedPublicUserSchema,
   type PublicUser as SharedPublicUser,

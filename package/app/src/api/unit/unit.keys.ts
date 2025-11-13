@@ -2,7 +2,7 @@
  * React Query keys for Unit queries
  */
 
-import type {UnitFilters, CommentTreeQuery} from './unit.types';
+import type {UnitFilters} from './unit.types';
 
 export const unitKeys = {
   /**
@@ -21,13 +21,6 @@ export const unitKeys = {
    */
   details: () => [...unitKeys.all(), 'detail'] as const,
   detail: (unitId: string) => [...unitKeys.details(), unitId] as const,
-
-  /**
-   * Keys for comment tree queries
-   */
-  commentTrees: () => [...unitKeys.all(), 'commentTree'] as const,
-  commentTree: (unitId: string, params?: CommentTreeQuery) =>
-    [...unitKeys.commentTrees(), unitId, params] as const,
 
   /**
    * Keys for user-specific queries (convenience)

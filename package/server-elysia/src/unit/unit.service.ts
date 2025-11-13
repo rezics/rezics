@@ -5,7 +5,6 @@ import type {
   UnitListQuery,
   CreateUnitInput,
   UpdateUnitInput,
-  CommentTreeNode,
 } from '@package/contract';
 import {unitInclude} from './types';
 import type {UnitWithRelations} from './types';
@@ -194,63 +193,6 @@ export class UnitService {
   /** Delete a Unit by id (cascades) */
   async delete(unitId: string): Promise<void> {
     await prisma.unit.delete({where: {id: unitId}});
-  }
-
-  /**
-   * Get a flat slice of comment tree under a root unit, optionally limited by parent (direct children)
-   * - If parentId is provided, returns only direct children of that parent
-   * - If parentId is omitted, returns all comments up to maxDepth from the root
-   * - Results include public user info via Unit relation
-   */
-  async getCommentTreeFlat(
-    rootUnitId: string,
-    options: {
-      parentId?: string;
-      maxDepth?: number;
-      start?: number;
-      limit?: number;
-      order?: 'asc' | 'desc';
-    } = {},
-  ): Promise<CommentTreeNode[]> {
-    const limitNum = Math.max(1, Math.min(Number(options.limit ?? 50), 200));
-    const skipNum = options.start ?? 0;
-    const order = options.order ?? 'asc';
-
-    const where: Prisma.CommentIndexWhereInput = {rootUnitId};
-
-    if (options.parentId) {
-      // Only direct children of the given parent
-      where.parentCommentId = options.parentId;
-    } else if (typeof options.maxDepth === 'number') {
-      // Depth from root (0 = direct reply to root object)
-      where.depth = {lte: options.maxDepth};
-    }
-
-    const items = await prisma.commentIndex.findMany({
-      where,
-      orderBy: [{unit: {createdAt: order}}],
-      skip: skipNum,
-      take: limitNum,
-      include: {unit: {include: {user: true}}},
-    });
-
-    return items.map(ci => ({
-      id: ci.unitId,
-      rootUnitId: ci.rootUnitId,
-      parentCommentId: ci.parentCommentId ?? undefined,
-      depth: ci.depth,
-      content: ci.unit?.content ?? undefined,
-      createdAt: ci.unit?.createdAt,
-      user: ci.unit?.user
-        ? {
-            unitId: ci.unit.user.unitId,
-            slug: ci.unit.user.slug ?? undefined,
-            name: ci.unit.user.name,
-            avatar: ci.unit.user.avatar ?? (null as any),
-            bio: ci.unit.user.bio ?? undefined,
-          }
-        : undefined,
-    }));
   }
 }
 

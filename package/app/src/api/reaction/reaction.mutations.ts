@@ -1,0 +1,125 @@
+/**
+ * React Query mutations for Reaction operations
+ */
+
+import {
+  useMutation,
+  useQueryClient,
+  type UseMutationOptions,
+} from '@tanstack/react-query';
+import {reactionApi} from './reaction.api';
+import {reactionKeys} from './reaction.keys';
+import type {
+  ReactionDTO,
+  ReactionCreateInput,
+  ReactionUpdateInput,
+  ReactionDeleteQuery,
+} from './reaction.types.ts';
+
+/**
+ * Mutation for creating a reaction
+ */
+export function useCreateReactionMutation(
+  options?: Omit<
+    UseMutationOptions<ReactionDTO, Error, ReactionCreateInput>,
+    'mutationFn'
+  >,
+): ReturnType<typeof useMutation<ReactionDTO, Error, ReactionCreateInput>> {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (input: ReactionCreateInput) => reactionApi.create(input),
+    onSuccess: (data, variables, onMutateResult, context) => {
+      // Invalidate summary and my reactions for the target
+      queryClient.invalidateQueries({
+        queryKey: reactionKeys.summary(
+          variables.targetType,
+          variables.targetId,
+        ),
+      });
+      queryClient.invalidateQueries({
+        queryKey: reactionKeys.my(variables.targetType, variables.targetId),
+      });
+      // Also refresh lists if used
+      queryClient.invalidateQueries({queryKey: reactionKeys.lists()});
+
+      options?.onSuccess?.(data, variables, onMutateResult, context);
+    },
+    ...options,
+  });
+}
+
+/**
+ * Mutation for updating a reaction
+ */
+export function useUpdateReactionMutation(
+  options?: Omit<
+    UseMutationOptions<ReactionDTO, Error, ReactionUpdateInput>,
+    'mutationFn'
+  >,
+): ReturnType<typeof useMutation<ReactionDTO, Error, ReactionUpdateInput>> {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (input: ReactionUpdateInput) => reactionApi.update(input),
+    onSuccess: (data, variables, onMutateResult, context) => {
+      // Invalidate affected caches for target
+      queryClient.invalidateQueries({
+        queryKey: reactionKeys.summary(
+          variables.targetType,
+          variables.targetId,
+        ),
+      });
+      queryClient.invalidateQueries({
+        queryKey: reactionKeys.my(variables.targetType, variables.targetId),
+      });
+      queryClient.invalidateQueries({queryKey: reactionKeys.lists()});
+
+      options?.onSuccess?.(data, variables, onMutateResult, context);
+    },
+    ...options,
+  });
+}
+
+/**
+ * Mutation for deleting a reaction
+ */
+export function useDeleteReactionMutation(
+  options?: Omit<
+    UseMutationOptions<{deleted: boolean}, Error, ReactionDeleteQuery>,
+    'mutationFn'
+  >,
+): ReturnType<
+  typeof useMutation<{deleted: boolean}, Error, ReactionDeleteQuery>
+> {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (query: ReactionDeleteQuery) => reactionApi.remove(query),
+    onSuccess: (data, variables, onMutateResult, context) => {
+      // Invalidate affected caches for target
+      queryClient.invalidateQueries({
+        queryKey: reactionKeys.summary(
+          variables.targetType,
+          variables.targetId,
+        ),
+      });
+      queryClient.invalidateQueries({
+        queryKey: reactionKeys.my(variables.targetType, variables.targetId),
+      });
+      queryClient.invalidateQueries({queryKey: reactionKeys.lists()});
+
+      options?.onSuccess?.(data, variables, onMutateResult, context);
+    },
+    ...options,
+  });
+}
+
+/**
+ * Combined mutations export
+ */
+export const reactionMutations = {
+  useCreate: useCreateReactionMutation,
+  useUpdate: useUpdateReactionMutation,
+  useDelete: useDeleteReactionMutation,
+};

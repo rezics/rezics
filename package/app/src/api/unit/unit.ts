@@ -42,7 +42,6 @@ export {
   unitSearchQuery,
   unitsByUserQuery,
   unitInfiniteListQuery,
-  unitCommentTreeQuery,
 } from './unit.queries';
 
 // Mutation Hooks

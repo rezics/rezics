@@ -12,8 +12,6 @@ export const readlistListSelect = {
       updatedAt: true,
       publishedAt: true,
       user: {select: {unitId: true, slug: true, name: true, avatar: true}},
-      reactions: {select: {likeCount: true}},
-      stats: {select: {commentCount: true, viewCount: true}},
     },
   },
 };
@@ -40,8 +38,6 @@ export const readlistSelect = {
       updatedAt: true,
       publishedAt: true,
       user: {select: {unitId: true, slug: true, name: true, avatar: true}},
-      reactions: {select: {likeCount: true}},
-      stats: {select: {commentCount: true, viewCount: true}},
     },
   },
   // Books in the readlist

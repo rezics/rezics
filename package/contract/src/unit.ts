@@ -134,33 +134,3 @@ export const updateUnitSchema = t.Object({
 });
 
 export type UpdateUnitInput = (typeof updateUnitSchema)['static'];
-
-// ANCHOR Comment tree query/response
-export const commentTreeNodeSchema = t.Object({
-  id: t.String(),
-  rootUnitId: t.String(),
-  parentCommentId: t.Optional(t.Nullable(t.String())),
-  depth: t.Number(),
-  content: t.Optional(t.Nullable(t.String())),
-  createdAt: t.Optional(t.Union([t.String(), t.Date()])),
-  user: t.Optional(publicUserSchema),
-});
-
-export type CommentTreeNode = (typeof commentTreeNodeSchema)['static'];
-
-export const commentTreeQuerySchema = t.Object({
-  parentId: t.Optional(t.String()),
-  maxDepth: t.Optional(t.Number()),
-  start: t.Optional(t.Number()),
-  limit: t.Optional(t.Number()),
-  order: t.Optional(t.String()), // asc | desc
-});
-
-export type CommentTreeQuery = (typeof commentTreeQuerySchema)['static'];
-
-export const commentTreeResponseSchema = t.Object({
-  rootUnitId: t.String(),
-  items: t.Array(commentTreeNodeSchema),
-});
-
-export type CommentTreeResponse = (typeof commentTreeResponseSchema)['static'];

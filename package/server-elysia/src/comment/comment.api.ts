@@ -3,37 +3,55 @@ import {coreInstance} from '../core';
 import {verifyAuth} from '@/src/utils/authUtils';
 import {commentService} from './comment.service.ts';
 import {mapCommentToDTO} from './mapper.ts';
-import type {
-  CreateCommentInput,
-  UpdateCommentInput,
-  CommentTreeResponse,
-  CommentTreeQuery,
+import type {CreateCommentInput} from '@package/contract';
+
+import {
+  commentListQuerySchema,
+  createCommentSchema,
+  unitParamsSchema,
+  updateCommentSchema,
+  commentTreeResponseSchema,
+  commentTreeQuerySchema,
+  type CommentTreeResponse,
 } from '@package/contract';
-
-// Query schema for listing comments under a root
-export const commentListQuerySchema = t.Object({
-  rootUnitId: t.String(), // The Unit id this comment tree belongs to
-  parentId: t.Optional(t.String()), // Optional parent comment id to list direct children
-  maxDepth: t.Optional(t.Number()), // Limit depth when parentId not provided
-  start: t.Optional(t.Number()),
-  limit: t.Optional(t.Number()),
-  order: t.Optional(t.String()), // asc | desc
-});
-
-export const createCommentSchema = t.Object({
-  rootPostId: t.String(), // matches contract naming; maps to CommentIndex.rootUnitId
-  parentCommentId: t.Optional(t.Nullable(t.String())),
-  content: t.String(),
-});
-
-export const updateCommentSchema = t.Object({
-  content: t.String(),
-});
 
 /**
  * Comment Controller - Elysia.js routes (mirrors bookApi style)
  */
 export const commentApi = coreInstance('/comments')
+  /**
+   * Comment Tree (flat slice) under a root Unit
+   * GET /units/:unitId/comment-tree
+   * Query parameters:
+   * - parentId: if provided, returns only direct children of this comment
+   * - maxDepth: when parentId is omitted, returns comments up to this depth from the root (0-based)
+   * - start/limit: pagination controls
+   * - order: asc|desc by createdAt
+   */
+  .get(
+    '/comment-tree/:unitId',
+    async ({params, query}): Promise<CommentTreeResponse> => {
+      const items = await commentService.getCommentTreeFlat(params.unitId, {
+        parentId: (query as any).parentId,
+        maxDepth: (query as any).maxDepth,
+        start: (query as any).start,
+        limit: (query as any).limit,
+        order: ((query as any).order as 'asc' | 'desc') ?? 'asc',
+      });
+      return {rootUnitId: params.unitId, items};
+    },
+    {
+      params: unitParamsSchema,
+      query: commentTreeQuerySchema,
+      response: commentTreeResponseSchema,
+      detail: {
+        summary: 'Get comment tree slice',
+        description:
+          'Returns a flat slice of comments under the root unit using CommentIndex to optimize tree retrieval.',
+        tags: ['Units', 'Comments'],
+      },
+    },
+  )
   /**
    * List comments under a root Unit or a parent comment (flat slice)
    * GET /comments?rootUnitId=...&parentId=...&limit=20

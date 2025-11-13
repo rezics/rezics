@@ -6,7 +6,6 @@ import {queryOptions, infiniteQueryOptions} from '@tanstack/react-query';
 import {unitApi} from './unit.api';
 import {unitKeys} from './unit.keys';
 import type {UnitFilters} from './unit.types';
-import type {CommentTreeQuery} from '@package/contract';
 
 /**
  * Query options for listing units
@@ -70,19 +69,6 @@ export const unitInfiniteListQuery = (filters?: Omit<UnitFilters, 'page'>) =>
   });
 
 /**
- * Query options for getting a comment tree slice under a unit
- */
-export const unitCommentTreeQuery = (
-  unitId: string,
-  params?: CommentTreeQuery,
-) =>
-  queryOptions({
-    queryKey: unitKeys.commentTree(unitId, params),
-    queryFn: () => unitApi.getCommentTree(unitId, params),
-    staleTime: 1000 * 60 * 2, // 2 minutes - comments change frequently
-  });
-
-/**
  * Combined query options export
  */
 export const unitQueries = {
@@ -91,5 +77,4 @@ export const unitQueries = {
   search: unitSearchQuery,
   byUser: unitsByUserQuery,
   infiniteList: unitInfiniteListQuery,
-  commentTree: unitCommentTreeQuery,
 };

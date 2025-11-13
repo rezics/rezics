@@ -53,23 +53,11 @@ export class ReadlistService {
     const order = (options.sort?.order ?? 'desc') as 'asc' | 'desc';
     const type = options.sort?.type ?? 'createdAt';
     if (type === 'likeCount')
-      return [
-        {unit: {reactions: {likeCount: order}}},
-        {unit: {createdAt: 'desc'}},
-        {unitId: 'desc'},
-      ];
+      return [{unit: {createdAt: 'desc'}}, {unitId: 'desc'}];
     if (type === 'commentCount')
-      return [
-        {unit: {stats: {commentCount: order}}},
-        {unit: {createdAt: 'desc'}},
-        {unitId: 'desc'},
-      ];
+      return [{unit: {createdAt: 'desc'}}, {unitId: 'desc'}];
     if (type === 'viewCount')
-      return [
-        {unit: {stats: {viewCount: order}}},
-        {unit: {createdAt: 'desc'}},
-        {unitId: 'desc'},
-      ];
+      return [{unit: {createdAt: 'desc'}}, {unitId: 'desc'}];
     if (type === 'updatedAt')
       return [{unit: {updatedAt: order}}, {unitId: 'desc'}];
     if (type === 'publishedAt')

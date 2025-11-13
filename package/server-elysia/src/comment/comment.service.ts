@@ -1,12 +1,73 @@
 import {prisma} from '@/prisma/client';
 import type {Prisma} from '@/prisma/client';
 import {UnitType, UnitStatus} from '@/prisma/client';
-import type {CreateCommentInput, UpdateCommentInput} from '@package/contract';
+import type {
+  CreateCommentInput,
+  UpdateCommentInput,
+  CommentTreeNode,
+} from '@package/contract';
 import {commentInclude} from './types';
 import type {CommentWithRelations} from './types';
 import {getCommentApproxCount} from './sql';
 
 export class CommentService {
+  /**
+   * Get a flat slice of comment tree under a root unit, optionally limited by parent (direct children)
+   * - If parentId is provided, returns only direct children of that parent
+   * - If parentId is omitted, returns all comments up to maxDepth from the root
+   * - Results include public user info via Unit relation
+   */
+  async getCommentTreeFlat(
+    rootUnitId: string,
+    options: {
+      parentId?: string;
+      maxDepth?: number;
+      start?: number;
+      limit?: number;
+      order?: 'asc' | 'desc';
+    } = {},
+  ): Promise<CommentTreeNode[]> {
+    const limitNum = Math.max(1, Math.min(Number(options.limit ?? 50), 200));
+    const skipNum = options.start ?? 0;
+    const order = options.order ?? 'asc';
+
+    const where: Prisma.CommentIndexWhereInput = {rootUnitId};
+
+    if (options.parentId) {
+      // Only direct children of the given parent
+      where.parentCommentId = options.parentId;
+    } else if (typeof options.maxDepth === 'number') {
+      // Depth from root (0 = direct reply to root object)
+      where.depth = {lte: options.maxDepth};
+    }
+
+    const items = await prisma.commentIndex.findMany({
+      where,
+      orderBy: [{unit: {createdAt: order}}],
+      skip: skipNum,
+      take: limitNum,
+      include: {unit: {include: {user: true}}},
+    });
+
+    return items.map(ci => ({
+      id: ci.unitId,
+      rootUnitId: ci.rootUnitId,
+      parentCommentId: ci.parentCommentId ?? undefined,
+      depth: ci.depth,
+      content: ci.unit?.content ?? undefined,
+      createdAt: ci.unit?.createdAt,
+      user: ci.unit?.user
+        ? {
+            unitId: ci.unit.user.unitId,
+            slug: ci.unit.user.slug ?? undefined,
+            name: ci.unit.user.name,
+            avatar: ci.unit.user.avatar ?? (null as any),
+            bio: ci.unit.user.bio ?? undefined,
+          }
+        : undefined,
+    }));
+  }
+
   /** List comments under a root unit, optionally restricted to a parent (direct children) */
   async list(
     rootUnitId: string,

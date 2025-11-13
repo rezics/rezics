@@ -8,8 +8,6 @@ import type {
   UpdateUnitInput,
   UnitListResponse,
   UnitResponse,
-  CommentTreeQuery,
-  CommentTreeResponse,
 } from '@package/contract';
 import type {UnitFilters} from './unit.types';
 import {buildQueryString} from '../utils/buildQuery';
@@ -87,17 +85,5 @@ export const unitApi = {
     return apiFetch<{message: string}>(`/units/${unitId}`, {
       method: 'DELETE',
     });
-  },
-
-  /**
-   * Get comment tree slice for a unit
-   */
-  getCommentTree: async (
-    unitId: string,
-    params?: CommentTreeQuery,
-  ): Promise<CommentTreeResponse> => {
-    return apiFetch<CommentTreeResponse>(
-      `/units/${unitId}/comment-tree${buildQueryString(params)}`,
-    );
   },
 };
