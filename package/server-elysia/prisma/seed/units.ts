@@ -4,6 +4,10 @@ import {UnitType as UnitTypeEnum, UnitStatus} from '../generated/client.js';
 import type {CreatedUser, CreatedUnit} from './types.js';
 import {randomInt, randomBoolean, pickN, generateParagraph} from './utils.js';
 import {buildUnitTitleByType, buildMetadataByType} from './generators.js';
+import {
+  upsertReactionSummariesForUnit,
+  upsertViewCountForUnit,
+} from './unitStats.js';
 
 /**
  * Unit types to generate (excluding BOOK and COMMENT)
@@ -70,16 +74,11 @@ export async function seedOtherUnits(
       select: {id: true, type: true},
     });
 
-    await prisma.unitStats.create({
-      data: {unitId: unit.id, viewCount: randomInt(0, 10_000)},
-    });
-    await prisma.unitReactions.create({
-      data: {
-        unitId: unit.id,
-        likeCount: randomInt(0, 300),
-        dislikeCount: randomInt(0, 60),
-        loveCount: randomInt(0, 220),
-      },
+    await upsertViewCountForUnit(prisma, unit.id, randomInt(0, 10_000));
+    await upsertReactionSummariesForUnit(prisma, unit.id, {
+      like: randomInt(0, 300),
+      dislike: randomInt(0, 60),
+      love: randomInt(0, 220),
     });
 
     created.push(unit);

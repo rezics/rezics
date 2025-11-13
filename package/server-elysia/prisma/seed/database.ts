@@ -9,8 +9,9 @@ export async function resetDatabase(prisma: PrismaClient): Promise<void> {
   console.log('🗑️  Resetting database...');
   // Order matters due to FKs
   await prisma.commentIndex.deleteMany();
-  await prisma.unitReactions.deleteMany();
-  await prisma.unitStats.deleteMany();
+  await prisma.reaction.deleteMany();
+  await prisma.reactionSummary.deleteMany();
+  await prisma.rating.deleteMany();
   await prisma.book.deleteMany();
   await prisma.tag.deleteMany();
   await prisma.unit.deleteMany();

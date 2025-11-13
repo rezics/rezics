@@ -10,6 +10,10 @@ import {
 } from './utils.js';
 
 import {seedComments} from './comments.js';
+import {
+  upsertReactionSummariesForUnit,
+  upsertViewCountForUnit,
+} from './unitStats.js';
 
 /**
  * Seed ReadList units and their Book connections
@@ -95,14 +99,11 @@ export async function seedReadLists(
 
     await createCommentTreeForReadlist(prisma, currentReadlist.unitId, users);
 
-    await prisma.unitStats.create({data: {unitId: unit.id}});
-    await prisma.unitReactions.create({
-      data: {
-        unitId: unit.id,
-        likeCount: randomInt(0, 200),
-        dislikeCount: randomInt(0, 40),
-        loveCount: randomInt(0, 160),
-      },
+    await upsertViewCountForUnit(prisma, unit.id);
+    await upsertReactionSummariesForUnit(prisma, unit.id, {
+      like: randomInt(0, 200),
+      dislike: randomInt(0, 40),
+      love: randomInt(0, 160),
     });
 
     created.push(unit);
@@ -155,14 +156,11 @@ async function createReviewUnit(
     select: {id: true},
   });
 
-  await prisma.unitStats.create({data: {unitId: review.id}});
-  await prisma.unitReactions.create({
-    data: {
-      unitId: review.id,
-      likeCount: randomInt(0, 120),
-      dislikeCount: randomInt(0, 30),
-      loveCount: randomInt(0, 100),
-    },
+  await upsertViewCountForUnit(prisma, review.id);
+  await upsertReactionSummariesForUnit(prisma, review.id, {
+    like: randomInt(0, 120),
+    dislike: randomInt(0, 30),
+    love: randomInt(0, 100),
   });
 
   return review.id;

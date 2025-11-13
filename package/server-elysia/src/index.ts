@@ -8,6 +8,8 @@ import {userApi} from './user';
 import {unitApi} from './unit';
 import {tagApi} from './tag';
 import {echoKvApi} from './echokv';
+import {commentApi} from './comment';
+import {reactionApi} from './reaction';
 
 import 'dotenv/config';
 
@@ -38,6 +40,8 @@ const app = new Elysia()
   .use(userApi)
   .use(unitApi)
   .use(tagApi)
+  .use(commentApi)
+  .use(reactionApi)
   .use(echoKvApi)
   .get('/', () => 'Hello Elysia')
   .get('/health', () => ({status: 'ok'}))

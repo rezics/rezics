@@ -3,6 +3,7 @@ import type {PrismaClient} from '../generated/client.js';
 import {UnitType, UnitStatus} from '../generated/client.js';
 import type {CreatedUser} from './types.js';
 import {randomInt, randomBoolean, generateParagraph} from './utils.js';
+import {upsertCommentCountForUnit} from './unitStats.js';
 
 /**
  * Result of seeding comments
@@ -80,15 +81,9 @@ export async function updateStatsWithCommentCounts(
   perRootCount: Map<string, number>,
 ): Promise<void> {
   console.log('📊 Updating unit stats with comment counts...');
-  const updates: Promise<unknown>[] = [];
+  const updates: Promise<void>[] = [];
   perRootCount.forEach((count, unitId) => {
-    updates.push(
-      prisma.unitStats.upsert({
-        where: {unitId},
-        create: {unitId, commentCount: count},
-        update: {commentCount: count},
-      }),
-    );
+    updates.push(upsertCommentCountForUnit(prisma, unitId, count));
   });
   await Promise.all(updates);
 }

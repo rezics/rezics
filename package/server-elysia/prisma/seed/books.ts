@@ -11,6 +11,10 @@ import {
 } from './utils.js';
 import {buildUnitTitleByType, generateBookExtra} from './generators.js';
 import {getRandomBookCover} from './data.js';
+import {
+  upsertReactionSummariesForUnit,
+  upsertViewCountForUnit,
+} from './unitStats.js';
 
 // Chapter tree structure to store into BookIndex.index
 interface ChapterIndexChapter {
@@ -92,14 +96,11 @@ export async function seedBooks(
       },
     });
 
-    await prisma.unitStats.create({data: {unitId: unit.id}});
-    await prisma.unitReactions.create({
-      data: {
-        unitId: unit.id,
-        likeCount: randomInt(0, 250),
-        dislikeCount: randomInt(0, 50),
-        loveCount: randomInt(0, 180),
-      },
+    await upsertViewCountForUnit(prisma, unit.id);
+    await upsertReactionSummariesForUnit(prisma, unit.id, {
+      like: randomInt(0, 250),
+      dislike: randomInt(0, 50),
+      love: randomInt(0, 180),
     });
 
     created.push(unit);

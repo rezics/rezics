@@ -65,10 +65,11 @@ model User {
   permission Json?
 
   // Relations
-  Units        Unit[] @relation("UnitForUser")
-  authorBook   Book[] @relation("BookAuthor")
-  pressBook    Book[] @relation("BookPress")
-  producerBook Book[] @relation("BookProducer")
+  Units        Unit[]     @relation("UnitForUser")
+  authorBook   Book[]     @relation("BookAuthor")
+  pressBook    Book[]     @relation("BookPress")
+  producerBook Book[]     @relation("BookProducer")
+  reactions    Reaction[] @relation("UserReactions")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -118,9 +119,6 @@ model Unit {
   // Tag relation
   tag  Tag?  @relation("TagIndexForUnit")
   tags Tag[] @relation("UnitTags")
-
-  stats     UnitStats?
-  reactions UnitReactions?
 
   // === CommentIndex 的 3 条反向关系 ===
   // 1) 这条评论本体对应的 Unit（1:1）
@@ -219,35 +217,39 @@ model CommentIndex {
  * - 评论数等冗余计数（列表/详情快取）
  * - 赞/踩/爱心计数聚合
  */
-model UnitStats {
-  unitId String @id @db.Uuid
-  unit   Unit   @relation(fields: [unitId], references: [id], onDelete: Cascade)
+model Reaction {
+  id     String @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  user   User   @relation("UserReactions", fields: [userId], references: [unitId])
+  userId String @db.Uuid
 
-  commentCount Int @default(0)
-  viewCount    Int @default(0)
+  targetType String
+  targetId   String @db.Uuid // bookId / chapterId / commentId
 
-  updatedAt DateTime @updatedAt
+  reaction String // like, bookmark, laugh, etc.
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, targetType, targetId, reaction])
+  @@index([targetType, targetId])
 }
 
-model UnitReactions {
-  unitId String @id @db.Uuid
-  unit   Unit   @relation(fields: [unitId], references: [id], onDelete: Cascade)
+model ReactionSummary {
+  targetType String
+  targetId   String @db.Uuid
+  reaction   String
+  count      Int    @default(0)
 
-  likeCount    Int @default(0)
-  dislikeCount Int @default(0)
-  loveCount    Int @default(0)
-
-  updatedAt DateTime @updatedAt
+  @@id([targetType, targetId, reaction])
 }
 
 model Rating {
   unitId     String   @db.Uuid
-  userId     String   @db.Uuid
+  domain     String   @db.Uuid // UnitId
   totalScore Int      @default(0)
   totalCount Int      @default(0)
   updatedAt  DateTime @updatedAt
 
-  @@id([unitId, userId]) // 联合主键
+  @@id([unitId, domain]) // 联合主键
 }
 
 /**

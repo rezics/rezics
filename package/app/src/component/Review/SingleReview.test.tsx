@@ -8,7 +8,7 @@ export default function SingleReviewTest() {
     review: {
       id: 'review-1',
       user: {
-        id: 'user-1',
+        unitId: 'user-1',
         name: '张三',
         avatar: 'https://via.placeholder.com/40',
       },
