@@ -61,6 +61,7 @@ export const ReplyDrawerContainer: React.FC<ReplyDrawerContainerProps> = ({
   const handleSubmit = () => {
     if (onSubmit && entry?.contentMain !== undefined) {
       onSubmit(entry.contentMain);
+      handleClose();
     }
   };
 

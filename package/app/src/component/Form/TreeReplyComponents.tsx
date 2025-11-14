@@ -7,31 +7,45 @@ import {useQuery} from '@tanstack/react-query';
 //  ;
 
 import {useDialogStore} from '@/global/dialogStore.ts';
-import {ReactionBarContainer} from '../Common/ReactionBar.tsx';
+import {
+  ReactionAdminBar,
+  ReactionBarContainer,
+} from '../Common/ReactionBar.tsx';
 import {ReplyDrawerContainer} from './ReplyDrawer.tsx';
 
 import {commentQueries} from '@/api/comment/comment.queries.ts';
 import type {CommentTreeNode} from '@package/contract';
 import {useCreateCommentMutation} from '@/api/comment/comment.mutations';
 
+import {useUserStore} from '@/global/userStore';
+
 // This is a temporary type definition based on the GraphQL schema.
 // Local UI type adapted from CommentTreeNode
-type UiAuthor = {
+type UiUser = {
+  unitId: string;
   name: string;
   avatar?: string | null;
+  [key: string]: any;
 };
 
 type UiComment = {
   id: string;
   content?: string | null;
   created_at?: string;
-  author?: UiAuthor;
+  user?: UiUser;
   replies?: UiComment[];
 };
 interface CommentNodeProps {
   comment: UiComment;
   level?: number;
   openDrawer: (id: string) => void;
+}
+
+function havePermission(comment: any, user: any) {
+  return (
+    comment.user?.unitId === user.unitId ||
+    user.permission?.role?.includes('ADMIN')
+  );
 }
 
 const CommentNode: React.FC<CommentNodeProps> = ({
@@ -41,7 +55,7 @@ const CommentNode: React.FC<CommentNodeProps> = ({
 }) => {
   // Expand first two levels by default
   const [isExpanded, setIsExpanded] = useState(level < 2);
-
+  const user = useUserStore(state => state.user);
   const handleToggleExpand = () => {
     if (comment.replies && comment.replies.length > 0) {
       setIsExpanded(!isExpanded);
@@ -68,7 +82,7 @@ const CommentNode: React.FC<CommentNodeProps> = ({
     >
       <Box display="flex" gap={2} alignItems="flex-start">
         <Avatar
-          src={comment.author?.avatar ?? undefined}
+          src={comment.user?.avatar ?? undefined}
           sx={{width: 32, height: 32}}
         />
         <Box flex={1}>
@@ -79,7 +93,7 @@ const CommentNode: React.FC<CommentNodeProps> = ({
               color="text.primary"
               fontWeight="bold"
             >
-              {comment.author?.name ?? 'Unknown'}
+              {comment.user?.name ?? 'Unknown'}
             </Typography>
             <Typography variant="caption" color="text.secondary">
               {comment.created_at
@@ -90,7 +104,14 @@ const CommentNode: React.FC<CommentNodeProps> = ({
           <Typography variant="body2" mt={1}>
             {comment.content}
           </Typography>
-          <Box className="w-full flex justify-end">
+          <Box className="w-full flex justify-end mt-2">
+            <ReactionAdminBar
+              className={`${havePermission(comment, user) ? '' : 'hidden'}`}
+              size="small"
+              fontSize="1.3rem"
+              onEdit={() => {}}
+              onDelete={() => {}}
+            />
             <Box
               sx={{
                 width: {
@@ -104,7 +125,6 @@ const CommentNode: React.FC<CommentNodeProps> = ({
             >
               <ReactionBarContainer
                 onReply={handleReply}
-                className="mt-2"
                 size="small"
                 fontSize="1.3rem"
               />
@@ -145,7 +165,7 @@ export const TreeReplyComponents: React.FC<ReplyComponentsProps> = ({
   const {data, isLoading, error} = useQuery(
     commentQueries.unitCommentTree(unitId, {
       // Fetch up to depth 3 for an initial view; adjust as needed
-      maxDepth: 3,
+      maxDepth: 100,
       order: 'asc',
       start: 0,
       limit: 200,
@@ -175,9 +195,7 @@ export const TreeReplyComponents: React.FC<ReplyComponentsProps> = ({
               ? n.createdAt
               : new Date(n.createdAt as any).toISOString()
             : undefined,
-          author: n.user
-            ? {name: n.user.name, avatar: n.user.avatar ?? undefined}
-            : undefined,
+          user: n.user ? n.user : undefined,
           replies: [],
         };
         map.set(n.id, ui);
@@ -234,7 +252,7 @@ export const TreeReplyComponents: React.FC<ReplyComponentsProps> = ({
 
   const openDrawer = (id: string) => {
     setCurrentReplyId(id);
-    setDialogVisible(`reply-${id}`, true);
+    setDialogVisible(id, true);
   };
 
   const createCommentMutation = useCreateCommentMutation();
@@ -267,7 +285,7 @@ export const TreeReplyComponents: React.FC<ReplyComponentsProps> = ({
       {/* 渲染 */}
       {currentReplyId && (
         <ReplyDrawerContainer
-          dialogId={`reply-${currentReplyId}`}
+          dialogId={currentReplyId}
           onSubmit={(content: string) => handleSubmit(content)}
         />
       )}

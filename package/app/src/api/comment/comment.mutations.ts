@@ -31,6 +31,7 @@ export function useCreateCommentMutation(
     onSuccess: (data, variables, onMutateResult, context) => {
       // Invalidate lists under the root post/tree
       queryClient.invalidateQueries({queryKey: commentKeys.lists()});
+      queryClient.invalidateQueries({queryKey: commentKeys.commentTrees()});
 
       // Optionally seed detail cache (assumes data.id is unitId)
       if (data.id) {

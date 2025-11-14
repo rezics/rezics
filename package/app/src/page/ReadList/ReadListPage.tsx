@@ -40,7 +40,7 @@ export const ReadListPage: React.FC = () => {
   const handleReply = () => {
     console.log('reply', readlistId);
     setCurrentReplyId(readlistId);
-    setDialogVisible(`reply-${readlistId}`, true);
+    setDialogVisible(readlistId, true);
   };
 
   const createCommentMutation = useCreateCommentMutation();
@@ -157,7 +157,7 @@ export const ReadListPage: React.FC = () => {
       </div>
       {currentReplyId && (
         <ReplyDrawerContainer
-          dialogId={`reply-${currentReplyId}`}
+          dialogId={currentReplyId}
           onSubmit={(content: string) => handleSubmit(content)}
         />
       )}

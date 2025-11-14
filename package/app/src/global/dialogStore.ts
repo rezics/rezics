@@ -1,4 +1,6 @@
-import { create } from "zustand";
+import {create} from 'zustand';
+import {devtools, subscribeWithSelector} from 'zustand/middleware';
+import {immer} from 'zustand/middleware/immer';
 
 interface DialogEntry {
   visible: boolean;
@@ -12,36 +14,43 @@ interface DialogState {
   getDialogEntry: (key: string) => DialogEntry | undefined;
 }
 
-const useDialogStore = create<DialogState>((set, get) => ({
-  dialogs: {},
+// Helper：保证每次访问一个 key 都有结构
+const ensureEntry = (state: DialogState, key: string): DialogEntry => {
+  if (!state.dialogs[key]) {
+    state.dialogs[key] = {visible: false, contentMain: ''};
+  }
+  return state.dialogs[key];
+};
 
-  setDialogVisible: (key, visible) => {
-    const current = get().dialogs[key] ?? {
-      visible: false,
-      contentMain: "",
-    };
-    set({
-      dialogs: {
-        ...get().dialogs,
-        [key]: { ...current, visible },
-      },
-    });
-  },
+export const useDialogStore = create<DialogState>()(
+  devtools(
+    subscribeWithSelector(
+      immer((set, get) => ({
+        dialogs: {},
 
-  setDialogContent: (key, content) => {
-    const current = get().dialogs[key] ?? {
-      visible: false,
-      contentMain: "",
-    };
-    set({
-      dialogs: {
-        ...get().dialogs,
-        [key]: { ...current, contentMain: content },
-      },
-    });
-  },
+        setDialogVisible: (key, visible) =>
+          set(
+            state => {
+              const entry = ensureEntry(state, key);
+              entry.visible = visible;
+            },
+            false,
+            `dialog/setVisible/${key}`,
+          ),
 
-  getDialogEntry: (key) => get().dialogs[key],
-}));
+        setDialogContent: (key, content) =>
+          set(
+            state => {
+              const entry = ensureEntry(state, key);
+              entry.contentMain = content;
+            },
+            false,
+            `dialog/setContent/${key}`,
+          ),
 
-export { useDialogStore };
+        getDialogEntry: key => get().dialogs[key],
+      })),
+    ),
+    {name: 'DialogStore'},
+  ),
+);
