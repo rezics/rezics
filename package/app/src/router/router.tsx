@@ -18,9 +18,11 @@ import {BookEditMainPage} from '@/page/BookEdit/InfoPage.tsx';
 import {NewBookPage} from '@/page/BookEdit/NewBookPage.tsx';
 import {BookEditChapterListPage} from '@/page/BookEdit/ChapterListPage.tsx';
 
-// Book list / Library pages
+// Library pages
 import {BookLibContainer} from '@/page/Book/BookLibPage.tsx';
 import {BookPageContainer} from '@/page/Book/BookPage.tsx';
+
+// ReadList pages
 import {ReadListPage} from '@/page/ReadList/ReadListPage.tsx';
 import {ReadListsPage} from '@/page/ReadList/ReadListsPage.tsx';
 
@@ -34,7 +36,8 @@ import {UserEditPage} from '@/page/User/UserEditPage.tsx';
 
 // Misc
 import {MainLayout} from '@/layout/MainLayout.tsx';
-import {BookListEditPage} from '@/page/ReadList/ReadListEditPage.tsx';
+import {ReadListEditPage} from '@/page/ReadList/ReadListEditPage.tsx';
+import {NewReadListPage} from '@/page/ReadList/NewReadListPage.tsx';
 import {ReadlistByBookPage} from '@/page/ReadList/ReadListsByBookPage.tsx';
 import {QuoteByBookPage} from '@/page/Review/QuoteByBookPage.tsx';
 import {ReviewByBookPage} from '@/page/Review/ReviewByBookPage.tsx';
@@ -157,6 +160,11 @@ export default (
         </Route>
 
         {/* ANCHOR ReadList Routes */}
+        <Route path="/readlist/new">
+          <MainLayout>
+            <NewReadListPage />
+          </MainLayout>
+        </Route>
         <Route path="/readlist">
           <MainLayout>
             <ReadListsPage />
@@ -170,9 +178,9 @@ export default (
           )}
         </Route>
         <Route path="/readlist/:readlistId/edit">
-          {() => (
+          {({readlistId}) => (
             <MainLayout>
-              <BookListEditPage />
+              <ReadListEditPage readlistId={readlistId ?? ''} />
             </MainLayout>
           )}
         </Route>

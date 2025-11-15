@@ -2,7 +2,7 @@
 import {AccentBarWithTextShow} from '@component/Common/AccentBar.tsx';
 import {EditButtonFloatRight} from '@component/Common/EditButtonFloatRight.tsx';
 import EasyEditor from '@component/Form/EasyEditor.tsx';
-import {Box, Button, Typography} from '@mui/material';
+import {Button, Typography} from '@mui/material';
 import React, {useEffect, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import DialogContainer from '../Common/DialogContainer.tsx';
@@ -24,7 +24,7 @@ const FollowButton: React.FC<{author: Author}> = ({author}) => {
         onClick={handleFollow}
         className="w-full"
       >
-        {following ? 'Unfollow' : 'Follow'} {author.name}
+        {following ? 'Unfollow' : 'Follow'}
       </Button>
     </div>
   );

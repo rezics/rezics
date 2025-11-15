@@ -5,12 +5,13 @@ import {
   Add,
   ChatBubbleOutline,
   Comment,
+  Edit,
   FavoriteBorder,
 } from '@mui/icons-material';
-import {IconButton} from '@mui/material';
+import {IconButton, Tooltip} from '@mui/material';
 import React, {useRef, useState} from 'react';
 import {useTranslation} from 'react-i18next';
-import {useParams} from 'wouter';
+import {useLocation, useParams} from 'wouter';
 
 import {readlistQueries} from '@/api/readlist/readlist';
 import {useQuery} from '@tanstack/react-query';
@@ -23,7 +24,7 @@ import {useCreateCommentMutation} from '@/api/comment/comment.mutations';
 export const ReadListPage: React.FC = () => {
   const {t} = useTranslation();
   const {readlistId} = useParams<{readlistId: string}>();
-
+  const [, navigate] = useLocation();
   const commentRef = useRef<HTMLDivElement>(null);
   const [currentReplyId, setCurrentReplyId] = useState<string | null>(null);
   const setDialogVisible = useDialogStore(state => state.setDialogVisible);
@@ -81,7 +82,24 @@ export const ReadListPage: React.FC = () => {
       {/* Head */}
       <div className="space-y-4">
         <div>
-          <h2 className="text-2xl font-bold">{bookList.title}</h2>
+          <div className="flex items-center">
+            <h2 className="text-2xl font-bold">{bookList.title}</h2>
+
+            <div className="ml-auto">
+              <Tooltip title={t('common.edit')} placement="top">
+                <IconButton
+                  aria-label={t('common.edit')}
+                  size="small"
+                  onClick={() => {
+                    navigate(`/readlist/${readlistId}/edit`);
+                  }}
+                >
+                  <Edit fontSize="small" />
+                </IconButton>
+              </Tooltip>
+            </div>
+          </div>
+
           {/* 新 API 暂无 description 字段 */}
           {/* <p className="text-gray-600">{(bookList as any).description}</p> */}
         </div>
@@ -114,6 +132,10 @@ export const ReadListPage: React.FC = () => {
         </div>
       </div>
 
+      <div>
+        {bookList.content && <div className="mt-4">{bookList.content}</div>}
+      </div>
+
       {/* Book List */}
       {/* 新 API 暂不直接返回 books 列表，这里占位或从 metadata.items 进一步查询渲染 */}
       {/* <div className="grid grid-cols-1 gap-4 mt-6"> ... </div> */}
@@ -129,7 +151,9 @@ export const ReadListPage: React.FC = () => {
           <BookReviewGroup
             key={book.unitId}
             book={book}
-            review={getReviewForBook(book) ?? {title: '', content: ''}}
+            review={
+              getReviewForBook(book) ?? {unitId: '', title: '', content: ''}
+            }
             className="mt-4"
           />
         ))}

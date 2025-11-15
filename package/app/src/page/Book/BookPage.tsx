@@ -21,7 +21,7 @@ import {scroll, startThrottledScroll} from '@/util/ScrollUtil.ts';
 import {useScrollRestore} from '@/util/useScrollRestore.ts';
 
 import {bookQueries} from '@/api/book/book';
-import {useQuery, useSuspenseQuery} from '@tanstack/react-query';
+import {useQuery} from '@tanstack/react-query';
 
 import type {BookDTO} from '@package/contract';
 

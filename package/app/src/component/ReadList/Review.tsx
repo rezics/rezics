@@ -2,8 +2,10 @@ import React from 'react';
 import {IconButton, Paper, Tooltip} from '@mui/material';
 import {ExpandMore, ExpandLess, ChatBubbleOutline} from '@mui/icons-material';
 import {BookListViewItem} from '@/component/BookLib/BookList/BookListView.tsx';
+import {navigate} from 'wouter/use-browser-location';
 
 export type ReviewData = {
+  unitId: string;
   title?: string;
   content?: string;
 };
@@ -69,9 +71,17 @@ export const CollapsibleReview: React.FC<CollapsibleReviewProps> = ({
       aria-label="Book review"
     >
       <div className="flex items-start gap-3">
-        <div className="mt-0.5 shrink-0 text-gray-500">
-          <ChatBubbleOutline fontSize="small" />
-        </div>
+        <Tooltip title="打开书评页面">
+          <IconButton
+            aria-label="review"
+            onClick={() => {
+              navigate(`/review/${review?.unitId}`);
+            }}
+          >
+            <ChatBubbleOutline fontSize="small" />
+          </IconButton>
+        </Tooltip>
+
         <div className="min-w-0 flex-1">
           {review?.title && (
             <p className="text-sm font-semibold text-gray-800 leading-6 truncate">
