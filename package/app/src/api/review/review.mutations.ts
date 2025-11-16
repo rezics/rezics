@@ -29,6 +29,9 @@ export function useCreateReviewMutation(
   return useMutation({
     mutationFn: (input: CreateReviewInput) => reviewApi.create(input),
     onSuccess: (data, variables, onMutateResult, context) => {
+      // TODO 遍历所有 Query key, 支持高级查询的Query失效
+      // const allQueries = queryClient.getQueryCache().getAll();
+
       // Invalidate and refetch review lists
       queryClient.invalidateQueries({queryKey: reviewKeys.lists()});
 

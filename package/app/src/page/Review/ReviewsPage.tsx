@@ -12,7 +12,10 @@ import type {ReviewDTO} from '@package/contract';
 import {Search} from '@/component/Search';
 
 type Review = ReviewDTO;
-export const ReviewListPage: React.FC = () => {
+interface ReviewsPageProps {
+  bookUnitId?: string;
+}
+export const ReviewsPage: React.FC<ReviewsPageProps> = ({bookUnitId}) => {
   const ref = useRef<UniversalPaginatorHandle>(null);
   const queryClient = useQueryClient();
 
@@ -25,6 +28,7 @@ export const ReviewListPage: React.FC = () => {
 
   const reviewListQueryOpts = useQuery(
     reviewQueries.list({
+      bookId: bookUnitId,
       start: startReview,
       limit: EXTERNAL_PAGE_SIZE,
       q: keyword || undefined,
@@ -33,6 +37,7 @@ export const ReviewListPage: React.FC = () => {
 
   const remarkListQueryOpts = useQuery(
     remarkQueries.list({
+      bookId: bookUnitId,
       start: startRemark,
       limit: EXTERNAL_PAGE_SIZE,
       q: keyword || undefined,
@@ -55,6 +60,7 @@ export const ReviewListPage: React.FC = () => {
     const common = {
       limit: EXTERNAL_PAGE_SIZE,
       q: keyword || undefined,
+      bookId: bookUnitId,
     };
 
     const query =
@@ -83,7 +89,7 @@ export const ReviewListPage: React.FC = () => {
     () => activeData?.reviews ?? [],
     [activeData],
   );
-  const totalItems: number = activeData?.total ?? 0;
+  const totalItems: number = activeData?.total ?? 10000;
 
   return (
     <div className="mx-auto max-w-7xl p-4 mt-4">
@@ -131,4 +137,4 @@ export const ReviewListPage: React.FC = () => {
   );
 };
 
-export default ReviewListPage;
+export default ReviewsPage;

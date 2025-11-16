@@ -19,8 +19,10 @@ import {NewBookPage} from '@/page/BookEdit/NewBookPage.tsx';
 import {BookEditChapterListPage} from '@/page/BookEdit/ChapterListPage.tsx';
 
 // Review pages
-import {ReviewListPage} from '@/page/Review/ReviewListPage.tsx';
+import {ReviewsPage} from '@/page/Review/ReviewsPage';
 import {ReviewPage} from '@/page/Review/ReviewPage.tsx';
+import {ReviewNewPage} from '@/page/Review/ReviewNewPage.tsx';
+import {ReviewEditPageContainer} from '@/page/Review/ReviewEditPage.tsx';
 
 // Library pages
 import {BookLibContainer} from '@/page/Book/BookLibPage.tsx';
@@ -45,7 +47,6 @@ import {NewReadListPage} from '@/page/ReadList/NewReadListPage.tsx';
 import {ReadlistByBookPage} from '@/page/ReadList/ReadListsByBookPage.tsx';
 import {QuoteByBookPage} from '@/page/Review/QuoteByBookPage.tsx';
 import {ReviewByBookPage} from '@/page/Review/ReviewByBookPage.tsx';
-import {ReviewEditPage} from '@/page/Review/ReviewEditPage.tsx';
 import {ShortReviewByBookPage} from '@/page/Review/ShortReviewByBookPage.tsx';
 import TestPage from '@/page/Test/TestPage.tsx';
 import {TestPage02} from '@/page/Test/TestPage02.tsx';
@@ -135,7 +136,21 @@ export default (
         <Route path="/review/">
           {() => (
             <MainLayout>
-              <ReviewListPage />
+              <ReviewsPage />
+            </MainLayout>
+          )}
+        </Route>
+        <Route path="/review/new/:bookUnitId">
+          {({bookUnitId}) => (
+            <MainLayout>
+              <ReviewNewPage bookUnitId={bookUnitId} />
+            </MainLayout>
+          )}
+        </Route>
+        <Route path="/review/:reviewId/edit">
+          {({reviewId}) => (
+            <MainLayout>
+              <ReviewEditPageContainer reviewId={reviewId} />
             </MainLayout>
           )}
         </Route>
@@ -143,13 +158,6 @@ export default (
           {({reviewId}) => (
             <MainLayout>
               <ReviewPage reviewId={reviewId} />
-            </MainLayout>
-          )}
-        </Route>
-        <Route path="/review/:reviewId/edit">
-          {({reviewId}) => (
-            <MainLayout>
-              <ReviewEditPage reviewId={reviewId} />
             </MainLayout>
           )}
         </Route>

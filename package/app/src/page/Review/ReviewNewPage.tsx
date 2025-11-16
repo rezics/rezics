@@ -1,0 +1,69 @@
+import {type ReviewResponse} from '@package/contract/src/review';
+import {ReviewEditPage} from './ReviewEditPage';
+import {useState} from 'react';
+import {TextField} from '@mui/material';
+import {CooldownButton} from '@/component/Common/CooldownButton';
+
+import {useCreateReviewMutation} from '@/api/review/review.mutations';
+import {useAlertStore} from '@/global/windowAlertStore';
+import {useUserStore} from '@/global/userStore';
+
+export function ReviewNewPage({bookUnitId}: {bookUnitId: string}) {
+  const [reviewData, setReviewData] = useState<ReviewResponse>(
+    {} as ReviewResponse,
+  );
+  const {show} = useAlertStore();
+  const {user} = useUserStore();
+  const {mutate, isPending} = useCreateReviewMutation({
+    onSuccess: data => {
+      show('Review created successfully');
+      console.log('create review success', data);
+    },
+    onError: error => {
+      show(`Create review failed: ${error}`);
+      console.error('create review failed', error);
+    },
+  });
+
+  function handleSave() {
+    console.log(reviewData);
+    const userId = user?.unitId as string;
+    if (!userId) {
+      show('Please login first');
+      return;
+    }
+    mutate({
+      bookId: bookUnitId,
+      title: reviewData.title || '',
+      content: reviewData.content || '',
+      rating: reviewData.rating || 0,
+      userId: userId,
+    });
+  }
+  return (
+    <div>
+      <div className="max-w-4xl mx-auto mt-4">
+        <h1 className="text-xl font-semibold">New Review</h1>
+        <TextField
+          label="Book Unit ID"
+          variant="filled"
+          className="w-full !mt-4"
+          value={bookUnitId}
+          disabled
+        />
+        <ReviewEditPage data={reviewData} setData={setReviewData} />
+        <div className="flex justify-end gap-2">
+          <CooldownButton
+            cooldownMs={10000}
+            type="button"
+            className="btn btn-primary"
+            onClick={handleSave}
+            disabled={isPending}
+          >
+            {isPending ? 'Submitting...' : 'Submit'}
+          </CooldownButton>
+        </div>
+      </div>
+    </div>
+  );
+}
