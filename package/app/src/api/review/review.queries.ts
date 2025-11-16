@@ -92,3 +92,18 @@ export const reviewQueries = {
   byBook: reviewsByBookQuery,
   infiniteList: reviewInfiniteListQuery,
 };
+
+/**
+ * Short review (UnitType.REMARK) query options
+ */
+
+export const remarkListQuery = (filters?: ReviewFilters) =>
+  queryOptions({
+    queryKey: reviewKeys.list({...filters, kind: 'remark'} as any),
+    queryFn: () => reviewApi.remark.list(filters),
+    staleTime: 1000 * 60 * 5,
+  });
+
+export const remarkQueries = {
+  list: remarkListQuery,
+};

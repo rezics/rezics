@@ -12,6 +12,8 @@ import type {ReviewFilters} from './review.types';
 import {buildQueryString} from '../utils/buildQuery';
 import {apiFetch} from '../react-query/http';
 
+const shortBasePath = '/reviews/short';
+
 export const reviewApi = {
   /**
    * List reviews with optional filters
@@ -93,5 +95,16 @@ export const reviewApi = {
     return apiFetch<{message: string}>(`/reviews/${id}`, {
       method: 'DELETE',
     });
+  },
+
+  remark: {
+    /**
+     * List short reviews (UnitType.REMARK)
+     */
+    list: async (filters?: ReviewFilters): Promise<ReviewListResponse> => {
+      return apiFetch<ReviewListResponse>(
+        `${shortBasePath}${buildQueryString(filters)}`,
+      );
+    },
   },
 };

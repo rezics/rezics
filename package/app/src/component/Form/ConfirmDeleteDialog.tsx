@@ -18,7 +18,7 @@ export const ConfirmDeleteDialog: React.FC<{
       onClose={onClose}
       slotProps={{
         paper: {
-          className: 'min-w-[20rem]', // 如果你想用 Tailwind
+          className: 'min-w-[20rem]',
         },
       }}
     >

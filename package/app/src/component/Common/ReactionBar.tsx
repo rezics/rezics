@@ -2,15 +2,15 @@ import {
   ChatBubbleOutline,
   KeyboardArrowDown,
   KeyboardArrowUp,
-  Send,
   StarBorder,
   OpenInNew,
   DeleteOutlined,
   EditOutlined,
 } from '@mui/icons-material';
-import {Box, IconButton, Tooltip} from '@mui/material';
-import React from 'react';
-import {RouterLink} from './RouterLink';
+import {IconButton} from '@mui/material';
+import React, {useState} from 'react';
+import {ReactionBarToolBox} from './reactionBarToolBox';
+import {useAlertStore} from '@/global/windowAlertStore';
 
 export type ReactionAdminBarProps = {
   className?: string;
@@ -50,6 +50,7 @@ export type ReactionBarShowProps = {
   className?: string;
   size?: 'small' | 'medium' | 'large';
   fontSize?: string;
+  itemUrl?: string;
 };
 
 export const ReactionBarShow: React.FC<ReactionBarShowProps> = ({
@@ -57,10 +58,14 @@ export const ReactionBarShow: React.FC<ReactionBarShowProps> = ({
   className,
   size = 'large',
   fontSize = '1.5rem',
+  itemUrl,
 }) => {
   const handleReply = () => {
     onReply?.();
   };
+
+  const [isToolBoxOpen, setIsToolBoxOpen] = useState(false);
+  const {show: showAlert} = useAlertStore();
 
   return (
     <div
@@ -88,11 +93,24 @@ export const ReactionBarShow: React.FC<ReactionBarShowProps> = ({
       </div>
 
       <div>
-        <IconButton component={RouterLink} href="#" size={size} sx={{fontSize}}>
-          {/* TODO 添加一个模态框，专门处理这个元素，将分享和打开全文集成在模态框里面，打开模态框的同时就复制链接 */}
+        <IconButton
+          size={size}
+          sx={{fontSize}}
+          onClick={() => {
+            showAlert('链接已经复制到剪贴板');
+            setIsToolBoxOpen(true);
+          }}
+        >
           <OpenInNew fontSize="inherit" />
         </IconButton>
       </div>
+      <ReactionBarToolBox
+        open={isToolBoxOpen}
+        onClose={() => {
+          setIsToolBoxOpen(false);
+        }}
+        itemUrl={itemUrl}
+      />
     </div>
   );
 };

@@ -71,6 +71,7 @@ export const unitListQuerySchema = t.Object({
   userIds: t.Optional(t.String()),
   domainIds: t.Optional(t.String()), // filter by domain owners
   targetUnitId: t.Optional(t.String()),
+  targetUnitIds: t.Optional(t.String()),
   hasTarget: t.Optional(t.String()), // 'true' | 'false'
   createdAtFrom: t.Optional(t.String()),
   createdAtTo: t.Optional(t.String()),

@@ -25,7 +25,11 @@ export const ReviewListShow: React.FC<ReviewListShowProps> = ({
     <>
       <Box>
         {reviews.map((review: ReviewDTO) => (
-          <SingleReviewShow key={review.id} review={review} onReply={onReply} />
+          <SingleReviewShow
+            key={review.unitId}
+            review={review}
+            onReply={onReply}
+          />
         ))}
       </Box>
 
@@ -35,7 +39,7 @@ export const ReviewListShow: React.FC<ReviewListShowProps> = ({
         title="回复"
       >
         <Box>
-          <TreeReplyComponents bookListId={currentReplyId || ''} />
+          <TreeReplyComponents unitId={currentReplyId || ''} />
         </Box>
       </FullScreenModal>
     </>

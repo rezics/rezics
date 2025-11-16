@@ -27,7 +27,7 @@ export const SingleReviewShow: React.FC<SingleReviewShowProps> = ({
 }) => {
   return (
     <div>
-      <Box key={review.id}>
+      <Box key={review.unitId}>
         <Box sx={{display: 'flex', alignItems: 'center', mb: 2}}>
           <Avatar
             src={review.user?.avatar ?? ''}
@@ -74,7 +74,10 @@ export const SingleReviewShow: React.FC<SingleReviewShowProps> = ({
               },
             }}
           >
-            <ReactionBarShow onReply={() => onReply(review.id)} />
+            <ReactionBarShow
+              onReply={() => onReply(review.unitId)}
+              itemUrl={`/review/${review.unitId}`}
+            />
           </Box>
         </Box>
         {/* Statistics and Awards */}

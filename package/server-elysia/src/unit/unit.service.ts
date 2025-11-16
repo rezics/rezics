@@ -8,112 +8,147 @@ import type {
 } from '@package/contract';
 import {unitInclude} from './types';
 import type {UnitWithRelations} from './types';
-import {getUnitApproxCount} from './sql';
+
+type MaybeInclude = Prisma.UnitInclude | undefined;
+type ResolvedInclude<TInclude extends MaybeInclude> =
+  TInclude extends Prisma.UnitInclude ? TInclude : typeof unitInclude;
+type UnitResult<TInclude extends MaybeInclude> = Prisma.UnitGetPayload<{
+  include: ResolvedInclude<TInclude>;
+}>;
+
+/**
+ * Compose a Prisma where clause for Unit list queries.
+ */
+export function buildUnitWhereClause(
+  options: UnitListQuery,
+): Prisma.UnitWhereInput {
+  const andWhere: Prisma.UnitWhereInput[] = [];
+
+  // Text search: title/content
+  if (options.q && options.q.trim()) {
+    andWhere.push({
+      OR: [
+        {title: {contains: options.q, mode: 'insensitive'}},
+        {content: {contains: options.q, mode: 'insensitive'}},
+      ],
+    });
+  }
+
+  // Filter by type(s)
+  const typeList = (options.types ?? options.type ?? '')
+    .split(',')
+    .map(s => s.trim())
+    .filter(Boolean);
+  if (typeList.length > 0) andWhere.push({type: {in: typeList as UnitType[]}});
+
+  // Exclude types
+  const excludeTypeList = (options.excludeTypes ?? '')
+    .split(',')
+    .map(s => s.trim())
+    .filter(Boolean);
+  if (excludeTypeList.length > 0)
+    andWhere.push({NOT: {type: {in: excludeTypeList as UnitType[]}}});
+
+  // Filter by status(es)
+  const statusList = (options.statuses ?? options.status ?? '')
+    .split(',')
+    .map(s => s.trim())
+    .filter(Boolean);
+  if (statusList.length > 0)
+    andWhere.push({status: {in: statusList as UnitStatus[]}});
+
+  // Filter by userId(s)
+  const userList = (options.userIds ?? options.userId ?? '')
+    .split(',')
+    .map(s => s.trim())
+    .filter(Boolean);
+  if (userList.length > 0) andWhere.push({userId: {in: userList}});
+
+  // Filter by domain owner(s)
+  const domainList = (options.domainIds ?? '')
+    .split(',')
+    .map(s => s.trim())
+    .filter(Boolean);
+  if (domainList.length > 0) {
+    andWhere.push({
+      domains: {some: {id: {in: domainList}}},
+    });
+  }
+
+  // Target filters
+  const targetList = (options.targetUnitIds ?? '')
+    .split(',')
+    .map(s => s.trim())
+    .filter(Boolean);
+  const singleTarget = options.targetUnitId?.trim();
+  const combinedTargets = [...targetList, singleTarget].filter(
+    Boolean,
+  ) as string[];
+  if (combinedTargets.length === 1)
+    andWhere.push({targetUnitId: combinedTargets[0]});
+  if (combinedTargets.length > 1)
+    andWhere.push({targetUnitId: {in: Array.from(new Set(combinedTargets))}});
+  if (options.hasTarget === 'true') andWhere.push({NOT: {targetUnitId: null}});
+  if (options.hasTarget === 'false') andWhere.push({targetUnitId: null});
+
+  // Tags
+  const tagList = (options.tags ?? options.tag ?? '')
+    .split(',')
+    .map(s => s.trim())
+    .filter(Boolean);
+  if (tagList.length > 0) {
+    andWhere.push({tags: {some: {name: {in: tagList}}}});
+  }
+
+  // Date ranges
+  if (options.createdAtFrom) {
+    andWhere.push({createdAt: {gte: new Date(options.createdAtFrom)}});
+  }
+  if (options.createdAtTo) {
+    andWhere.push({createdAt: {lte: new Date(options.createdAtTo)}});
+  }
+  if (options.publishedAtFrom) {
+    andWhere.push({publishedAt: {gte: new Date(options.publishedAtFrom)}});
+  }
+  if (options.publishedAtTo) {
+    andWhere.push({publishedAt: {lte: new Date(options.publishedAtTo)}});
+  }
+
+  return andWhere.length > 0 ? {AND: andWhere} : {};
+}
+
+/**
+ * Merge multiple where inputs with AND semantics.
+ */
+export function mergeUnitWhereInputs(
+  ...clauses: (Prisma.UnitWhereInput | undefined)[]
+): Prisma.UnitWhereInput {
+  const valid = clauses.filter(Boolean) as Prisma.UnitWhereInput[];
+  if (valid.length === 0) return {};
+  if (valid.length === 1) return valid[0]!;
+  return {AND: valid};
+}
 
 /**
  * Unit Service - Business logic for generic Unit entities and comment trees
  */
 export class UnitService {
   /**
-   * Build Prisma where clause for Unit list queries
-   */
-  private buildWhereClause(options: UnitListQuery): Prisma.UnitWhereInput {
-    const andWhere: Prisma.UnitWhereInput[] = [];
-
-    // Text search: title/content
-    if (options.q && options.q.trim()) {
-      andWhere.push({
-        OR: [
-          {title: {contains: options.q, mode: 'insensitive'}},
-          {content: {contains: options.q, mode: 'insensitive'}},
-        ],
-      });
-    }
-
-    // Filter by type(s)
-    const typeList = (options.types ?? options.type ?? '')
-      .split(',')
-      .map(s => s.trim())
-      .filter(Boolean);
-    if (typeList.length > 0)
-      andWhere.push({type: {in: typeList as UnitType[]}});
-
-    // Exclude types
-    const excludeTypeList = (options.excludeTypes ?? '')
-      .split(',')
-      .map(s => s.trim())
-      .filter(Boolean);
-    if (excludeTypeList.length > 0)
-      andWhere.push({NOT: {type: {in: excludeTypeList as UnitType[]}}});
-
-    // Filter by status(es)
-    const statusList = (options.statuses ?? options.status ?? '')
-      .split(',')
-      .map(s => s.trim())
-      .filter(Boolean);
-    if (statusList.length > 0)
-      andWhere.push({status: {in: statusList as UnitStatus[]}});
-
-    // Filter by userId(s)
-    const userList = (options.userIds ?? options.userId ?? '')
-      .split(',')
-      .map(s => s.trim())
-      .filter(Boolean);
-    if (userList.length > 0) andWhere.push({userId: {in: userList}});
-
-    // Filter by domain owner(s)
-    const domainList = (options.domainIds ?? '')
-      .split(',')
-      .map(s => s.trim())
-      .filter(Boolean);
-    if (domainList.length > 0) {
-      andWhere.push({
-        domains: {some: {id: {in: domainList}}},
-      });
-    }
-
-    // Target filters
-    if (options.targetUnitId && options.targetUnitId.trim()) {
-      andWhere.push({targetUnitId: options.targetUnitId});
-    }
-    if (options.hasTarget === 'true')
-      andWhere.push({NOT: {targetUnitId: null}});
-    if (options.hasTarget === 'false') andWhere.push({targetUnitId: null});
-
-    // Tags
-    const tagList = (options.tags ?? options.tag ?? '')
-      .split(',')
-      .map(s => s.trim())
-      .filter(Boolean);
-    if (tagList.length > 0) {
-      andWhere.push({tags: {some: {name: {in: tagList}}}});
-    }
-
-    // Date ranges
-    if (options.createdAtFrom) {
-      andWhere.push({createdAt: {gte: new Date(options.createdAtFrom)}});
-    }
-    if (options.createdAtTo) {
-      andWhere.push({createdAt: {lte: new Date(options.createdAtTo)}});
-    }
-    if (options.publishedAtFrom) {
-      andWhere.push({publishedAt: {gte: new Date(options.publishedAtFrom)}});
-    }
-    if (options.publishedAtTo) {
-      andWhere.push({publishedAt: {lte: new Date(options.publishedAtTo)}});
-    }
-
-    return andWhere.length > 0 ? {AND: andWhere} : {};
-  }
-
-  /**
    * List Units with pagination and rich filters
    */
-  async list(options: UnitListQuery = {}) {
+  async list<TInclude extends MaybeInclude = undefined>(
+    options: UnitListQuery = {},
+    opts?: {
+      include?: TInclude;
+      where?: Prisma.UnitWhereInput;
+    },
+  ): Promise<{units: UnitResult<TInclude>[]; total: number}> {
     const limitNum = Math.max(1, Math.min(Number(options.limit ?? 20), 100));
     const skipNum = options.cursor?.unitId ? 1 : options.start ?? 0;
 
-    const where = this.buildWhereClause(options);
+    const include = (opts?.include ?? unitInclude) as ResolvedInclude<TInclude>;
+    const baseWhere = buildUnitWhereClause(options);
+    const where = mergeUnitWhereInputs(baseWhere, opts?.where);
 
     const sortField = options.sort?.field ?? 'createdAt';
     const sortOrder = (
@@ -129,21 +164,28 @@ export class UnitService {
           ? {id: options.cursor.unitId}
           : undefined,
         take: limitNum,
-        include: unitInclude,
+        include: include as Prisma.UnitInclude,
       }),
-      getUnitApproxCount(),
+      prisma.unit.count({where}),
     ]);
 
-    return {units: units as UnitWithRelations[], total};
+    return {
+      units: units as UnitResult<TInclude>[],
+      total,
+    };
   }
 
   /** Get a unit by id with relations */
-  async getByUnitId(unitId: string): Promise<UnitWithRelations> {
+  async getByUnitId<TInclude extends MaybeInclude = undefined>(
+    unitId: string,
+    opts?: {include?: TInclude},
+  ): Promise<UnitResult<TInclude>> {
+    const include = (opts?.include ?? unitInclude) as ResolvedInclude<TInclude>;
     const unit = await prisma.unit.findUniqueOrThrow({
       where: {id: unitId},
-      include: unitInclude,
+      include: include as Prisma.UnitInclude,
     });
-    return unit as UnitWithRelations;
+    return unit as UnitResult<TInclude>;
   }
 
   /** Create a Unit */
@@ -191,8 +233,11 @@ export class UnitService {
   }
 
   /** Delete a Unit by id (cascades) */
-  async delete(unitId: string): Promise<void> {
-    await prisma.unit.delete({where: {id: unitId}});
+  async delete(
+    unitId: string,
+    db: Prisma.TransactionClient | typeof prisma = prisma,
+  ): Promise<void> {
+    await db.unit.delete({where: {id: unitId}});
   }
 }
 

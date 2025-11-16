@@ -33,7 +33,7 @@ export function useCreateReviewMutation(
       queryClient.invalidateQueries({queryKey: reviewKeys.lists()});
 
       // Pre-populate the cache with the new review
-      queryClient.setQueryData(reviewKeys.detail(data.id), data);
+      queryClient.setQueryData(reviewKeys.detail(data.unitId), data);
 
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },

@@ -42,7 +42,7 @@ export const jwtPayloadSchema = t.Object({
   slug: t.String(),
   permission: t.Object(
     {
-      roles: t.Array(t.String()),
+      role: t.Array(t.String()),
     },
     {additionalProperties: true},
   ),

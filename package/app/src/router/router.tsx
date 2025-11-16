@@ -18,6 +18,10 @@ import {BookEditMainPage} from '@/page/BookEdit/InfoPage.tsx';
 import {NewBookPage} from '@/page/BookEdit/NewBookPage.tsx';
 import {BookEditChapterListPage} from '@/page/BookEdit/ChapterListPage.tsx';
 
+// Review pages
+import {ReviewListPage} from '@/page/Review/ReviewListPage.tsx';
+import {ReviewPage} from '@/page/Review/ReviewPage.tsx';
+
 // Library pages
 import {BookLibContainer} from '@/page/Book/BookLibPage.tsx';
 import {BookPageContainer} from '@/page/Book/BookPage.tsx';
@@ -41,7 +45,7 @@ import {NewReadListPage} from '@/page/ReadList/NewReadListPage.tsx';
 import {ReadlistByBookPage} from '@/page/ReadList/ReadListsByBookPage.tsx';
 import {QuoteByBookPage} from '@/page/Review/QuoteByBookPage.tsx';
 import {ReviewByBookPage} from '@/page/Review/ReviewByBookPage.tsx';
-import {LongReviewEditPage} from '@/page/Review/ReviewEditPage.tsx';
+import {ReviewEditPage} from '@/page/Review/ReviewEditPage.tsx';
 import {ShortReviewByBookPage} from '@/page/Review/ShortReviewByBookPage.tsx';
 import TestPage from '@/page/Test/TestPage.tsx';
 import {TestPage02} from '@/page/Test/TestPage02.tsx';
@@ -128,6 +132,27 @@ export default (
         </Route>
 
         {/* ANCHOR Review Routes */}
+        <Route path="/review/">
+          {() => (
+            <MainLayout>
+              <ReviewListPage />
+            </MainLayout>
+          )}
+        </Route>
+        <Route path="/review/:reviewId">
+          {({reviewId}) => (
+            <MainLayout>
+              <ReviewPage reviewId={reviewId} />
+            </MainLayout>
+          )}
+        </Route>
+        <Route path="/review/:reviewId/edit">
+          {({reviewId}) => (
+            <MainLayout>
+              <ReviewEditPage reviewId={reviewId} />
+            </MainLayout>
+          )}
+        </Route>
         <Route path="/review/short/book/:bookId">
           {() => (
             <MainLayout>
@@ -139,13 +164,6 @@ export default (
           {() => (
             <MainLayout>
               <ReviewByBookPage />
-            </MainLayout>
-          )}
-        </Route>
-        <Route path="/review/book/:bookId/edit">
-          {() => (
-            <MainLayout>
-              <LongReviewEditPage />
             </MainLayout>
           )}
         </Route>

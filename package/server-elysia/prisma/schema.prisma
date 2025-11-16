@@ -19,6 +19,7 @@ enum UnitType {
   BOOK
   COMMENT
   NOTE
+  REMARK // 区分用户书评和鉴赏家书评（REVIEW）
   REVIEW
   DOMAIN
   TAG

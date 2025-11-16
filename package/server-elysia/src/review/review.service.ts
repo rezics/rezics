@@ -1,160 +1,237 @@
-import {prisma} from '@/prisma/client';
-import {UnitStatus, UnitType} from '@/prisma/client';
+import {prisma, UnitStatus, UnitType} from '@/prisma/client';
 import type {Prisma} from '@/prisma/client';
-import type {ReviewWithRelations} from './types';
-import {reviewInclude} from './types';
+import {unitService} from '@/src/unit/unit.service';
 import type {
   CreateReviewInput,
   UpdateReviewInput,
   ReviewListQuery,
 } from '@package/contract';
-import {getReviewApproxCount} from './sql.ts';
+import type {ReviewWithRelations} from './types';
+import {reviewInclude} from './types';
+import {
+  buildRatingWhereClause,
+  extractRatingFromMetadata,
+  mapReviewQueryToUnitQuery,
+  normalizeRatingValue,
+  buildMetadataWithRating,
+} from './mapper';
+
+type UnitTypeOption = {unitType?: UnitType};
 
 export class ReviewService {
-  private buildWhereClause(options: ReviewListQuery): Prisma.UnitWhereInput {
-    const andWhere: Prisma.UnitWhereInput[] = [];
-    // Type constraint
-    andWhere.push({type: UnitType.REVIEW});
-
-    // Search by q in title/content
-    if (options.q && options.q.trim()) {
-      andWhere.push({
-        OR: [
-          {title: {contains: options.q, mode: 'insensitive'}},
-          {content: {contains: options.q, mode: 'insensitive'}},
-        ],
-      });
-    }
-
-    // Filter by userId (author of review)
-    if (options.userId && options.userId.trim()) {
-      andWhere.push({userId: options.userId});
-    }
-
-    // Filter by target book unitId(s)
-    const bookList = (options.bookIds ?? options.bookId ?? '')
-      .split(',')
-      .map(s => s.trim())
-      .filter(Boolean);
-    if (bookList.length > 0) {
-      andWhere.push({targetUnitId: {in: bookList}});
-    }
-
-    // Filter by tags
-    const tagList = (options.tags ?? options.tag ?? '')
-      .split(',')
-      .map(s => s.trim())
-      .filter(Boolean);
-    if (tagList.length > 0) {
-      andWhere.push({
-        tags: {
-          some: {name: {in: tagList}},
-        },
-      });
-    }
-
-    // Filter by rating range (stored in metadata.rating)
-    if (typeof options.ratingMin === 'number') {
-      andWhere.push({
-        metadata: {path: ['rating'], gte: options.ratingMin} as any,
-      });
-    }
-    if (typeof options.ratingMax === 'number') {
-      andWhere.push({
-        metadata: {path: ['rating'], lte: options.ratingMax} as any,
-      });
-    }
-
-    return andWhere.length > 0 ? {AND: andWhere} : {};
-  }
-
-  async list(options: ReviewListQuery = {}): Promise<{
+  /**
+   * 列表查询 Review。
+   *
+   * - 会自动根据 `ReviewListQuery` 组装底层 Unit 查询
+   * - 可通过 cfg.unitType 复用到其它 UnitType 的 Review 语义
+   */
+  async list(
+    options: ReviewListQuery = {},
+    cfg?: UnitTypeOption,
+  ): Promise<{
     reviews: ReviewWithRelations[];
     total: number;
   }> {
-    const cursor = options.cursor;
-    const hasCursor = !!(cursor?.id && cursor?.createdAt);
-    const limitNum = Math.max(1, Math.min(Number(options.limit ?? 20), 100));
-    const calculateSkip = () => {
-      if (hasCursor) return 1;
-      return options.start ?? 0;
-    };
-    const skipNum = calculateSkip();
-    const where = this.buildWhereClause(options);
+    const unitType = this.resolveUnitType(cfg?.unitType);
+    const unitQuery = mapReviewQueryToUnitQuery(options, unitType);
+    const ratingWhere = buildRatingWhereClause(options);
 
-    // Sorting
-    const sortType = options.sort?.type ?? 'createdAt';
-    const sortOrder = (options.sort?.order as 'asc' | 'desc') ?? 'desc';
-    const orderBy: Prisma.UnitOrderByWithRelationInput =
-      sortType === 'updatedAt'
-        ? {updatedAt: sortOrder}
-        : {createdAt: sortOrder};
+    const {units, total} = await unitService.list(unitQuery, {
+      include: reviewInclude,
+      where: ratingWhere,
+    });
 
-    const [units, total] = await Promise.all([
-      prisma.unit.findMany({
-        where,
-        orderBy,
-        skip: skipNum,
-        cursor: hasCursor
-          ? ({id: cursor!.id, createdAt: cursor!.createdAt} as any)
-          : undefined,
-        take: limitNum,
+    return {reviews: units as ReviewWithRelations[], total};
+  }
+
+  /**
+   * 根据 id 获取单个 Review。
+   *
+   * - 同时校验 Unit 的 type 是否为期望的 Review 类型
+   */
+  async getById(
+    id: string,
+    cfg?: UnitTypeOption,
+  ): Promise<ReviewWithRelations> {
+    const unitType = this.resolveUnitType(cfg?.unitType);
+    const unit = await unitService.getByUnitId(id, {include: reviewInclude});
+    if (unit.type !== unitType)
+      throw new Error(`Unit ${id} is not a ${unitType} review.`);
+    return unit as ReviewWithRelations;
+  }
+
+  /**
+   * 创建 Review。
+   *
+   * - 会写入 Unit、附带 metadata.rating
+   * - 若提供 rating，则同时更新对应图书的聚合评分
+   */
+  async create(
+    req: CreateReviewInput,
+    cfg?: UnitTypeOption,
+  ): Promise<ReviewWithRelations> {
+    const unitType = this.resolveUnitType(cfg?.unitType);
+    const normalizedRating = normalizeRatingValue(req.rating);
+
+    const review = await prisma.$transaction(async tx => {
+      const unit = await tx.unit.create({
+        data: {
+          userId: req.userId,
+          type: unitType,
+          status: UnitStatus.ACTIVE,
+          title: req.title ?? undefined,
+          content: req.content,
+          targetUnitId: req.bookId,
+          metadata:
+            normalizedRating !== undefined
+              ? (buildMetadataWithRating(
+                  normalizedRating,
+                ) as Prisma.InputJsonValue)
+              : undefined,
+        },
         include: reviewInclude,
-      }),
-      getReviewApproxCount(),
-    ]);
+      });
 
-    return {reviews: units as unknown as ReviewWithRelations[], total};
-  }
+      if (normalizedRating !== undefined && req.bookId) {
+        await this.applyRatingDelta(tx, req.bookId, normalizedRating, 1);
+      }
 
-  async getById(id: string): Promise<ReviewWithRelations> {
-    const unit = await prisma.unit.findUniqueOrThrow({
-      where: {id},
-      include: reviewInclude,
+      return unit as ReviewWithRelations;
     });
-    return unit as unknown as ReviewWithRelations;
-  }
 
-  async create(req: CreateReviewInput): Promise<ReviewWithRelations> {
-    const {userId, bookId, content, title, rating} = req;
-    const unit = await prisma.unit.create({
-      data: {
-        userId,
-        type: UnitType.REVIEW,
-        status: UnitStatus.ACTIVE,
-        title: title || undefined,
-        content,
-        targetUnitId: bookId,
-        metadata: {
-          rating: typeof rating === 'number' ? rating : undefined,
-        } as unknown as Prisma.InputJsonValue,
-      },
-      include: reviewInclude,
-    });
-    return unit as unknown as ReviewWithRelations;
+    return review;
   }
 
   async update(
     id: string,
     req: UpdateReviewInput,
+    cfg?: UnitTypeOption,
   ): Promise<ReviewWithRelations> {
-    const {content, title, rating} = req;
-    const unit = await prisma.unit.update({
-      where: {id},
-      data: {
-        content: content ?? undefined,
-        title: title ?? undefined,
-        metadata: (rating !== undefined
-          ? ({rating} as unknown as Prisma.InputJsonValue)
-          : (undefined as unknown)) as any,
-      },
-      include: reviewInclude,
+    const unitType = this.resolveUnitType(cfg?.unitType);
+    const ratingProvided = Object.prototype.hasOwnProperty.call(req, 'rating');
+    const normalizedRating =
+      ratingProvided && typeof req.rating === 'number'
+        ? normalizeRatingValue(req.rating)
+        : undefined;
+
+    const review = await prisma.$transaction(async tx => {
+      const existing = await tx.unit.findUniqueOrThrow({
+        where: {id},
+        select: {metadata: true, targetUnitId: true, type: true},
+      });
+      if (existing.type !== unitType)
+        throw new Error(`Unit ${id} is not a ${unitType} review.`);
+
+      const currentRating = extractRatingFromMetadata(existing.metadata);
+      const metadataUpdate =
+        ratingProvided && normalizedRating !== undefined
+          ? (buildMetadataWithRating(
+              normalizedRating,
+              existing.metadata,
+            ) as Prisma.InputJsonValue)
+          : undefined;
+
+      const updated = await tx.unit.update({
+        where: {id},
+        data: {
+          content: req.content ?? undefined,
+          title: req.title ?? undefined,
+          metadata: metadataUpdate,
+        },
+        include: reviewInclude,
+      });
+
+      if (
+        ratingProvided &&
+        normalizedRating !== undefined &&
+        existing.targetUnitId
+      ) {
+        const deltaScore = normalizedRating - (currentRating ?? 0);
+        const deltaCount = currentRating === undefined ? 1 : 0;
+        if (deltaScore !== 0 || deltaCount !== 0) {
+          await this.applyRatingDelta(
+            tx,
+            existing.targetUnitId,
+            deltaScore,
+            deltaCount,
+          );
+        }
+      }
+
+      return updated as ReviewWithRelations;
     });
-    return unit as unknown as ReviewWithRelations;
+
+    return review;
   }
 
-  async delete(id: string): Promise<void> {
-    await prisma.unit.delete({where: {id}});
+  async delete(id: string, cfg?: UnitTypeOption): Promise<void> {
+    const unitType = this.resolveUnitType(cfg?.unitType);
+    await prisma.$transaction(async tx => {
+      const existing = await tx.unit.findUniqueOrThrow({
+        where: {id},
+        select: {metadata: true, targetUnitId: true, type: true},
+      });
+      if (existing.type !== unitType)
+        throw new Error(`Unit ${id} is not a ${unitType} review.`);
+
+      const currentRating = extractRatingFromMetadata(existing.metadata);
+      await unitService.delete(id, tx);
+
+      if (currentRating !== undefined && existing.targetUnitId) {
+        await this.applyRatingDelta(
+          tx,
+          existing.targetUnitId,
+          -currentRating,
+          -1,
+        );
+      }
+    });
+  }
+
+  private resolveUnitType(unitType?: UnitType): UnitType {
+    return unitType ?? UnitType.REVIEW;
+  }
+
+  private async applyRatingDelta(
+    tx: Prisma.TransactionClient,
+    bookUnitId: string,
+    deltaScore: number,
+    deltaCount: number,
+  ): Promise<void> {
+    if (!bookUnitId || (deltaScore === 0 && deltaCount === 0)) return;
+    const key = {unitId: bookUnitId, domain: bookUnitId};
+    const existing = await tx.rating.findUnique({
+      where: {unitId_domain: key},
+    });
+
+    if (!existing) {
+      if (deltaCount <= 0) return;
+      await tx.rating.create({
+        data: {
+          unitId: bookUnitId,
+          domain: bookUnitId,
+          totalScore: deltaScore,
+          totalCount: deltaCount,
+        },
+      });
+      return;
+    }
+
+    const nextScore = existing.totalScore + deltaScore;
+    const nextCount = existing.totalCount + deltaCount;
+
+    if (nextCount <= 0) {
+      await tx.rating.delete({where: {unitId_domain: key}});
+      return;
+    }
+
+    await tx.rating.update({
+      where: {unitId_domain: key},
+      data: {
+        totalScore: nextScore,
+        totalCount: nextCount,
+      },
+    });
   }
 }
 

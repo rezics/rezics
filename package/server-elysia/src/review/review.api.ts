@@ -1,6 +1,6 @@
-import {Elysia, t} from 'elysia';
 import {coreInstance} from '../core';
 import {verifyAuth} from '@/src/utils/authUtils';
+import {UnitType} from '@/prisma/client';
 import {
   createReviewSchema,
   updateReviewSchema,
@@ -13,6 +13,7 @@ import {
 import {reviewService} from './review.service';
 import {mapReviewToDTO} from './mapper';
 import {unitService} from '@/src/unit/unit.service';
+import type {JWTPayload} from '../user';
 
 export const reviewApi = coreInstance('/reviews')
   /**
@@ -62,7 +63,9 @@ export const reviewApi = coreInstance('/reviews')
         ...body,
         userId: payload.unitId,
       } as CreateReviewInput;
-      const review = await reviewService.create(req);
+      const review = await reviewService.create(req, {
+        unitType: UnitType.REVIEW,
+      });
       return mapReviewToDTO(review);
     },
     {
@@ -79,18 +82,30 @@ export const reviewApi = coreInstance('/reviews')
    */
   .put(
     '/:id',
-    async ({params, body, headers, jwt, set}): Promise<ReviewResponse> => {
+    async ({
+      params,
+      body,
+      headers,
+      jwt,
+      set,
+    }: {
+      params: {id: string};
+      body: import('@package/contract').UpdateReviewInput;
+      headers: {authorization?: string};
+      jwt: any;
+      set: any;
+    }): Promise<ReviewResponse> => {
       const payload = await verifyAuth(headers.authorization, jwt, set);
-      const target = await unitService.getByUnitId(params.id);
-      if (!target) {
-        set.status = 404;
-        throw new Error(`Review not found: ${params.id}`);
-      }
-      if (target.userId !== payload.unitId) {
-        set.status = 403;
-        throw new Error('Forbidden: you do not have permission to update');
-      }
-      const review = await reviewService.update(params.id, body);
+      await ensureReviewOwnership(
+        params.id,
+        UnitType.REVIEW,
+        payload.unitId,
+        set,
+        payload,
+      );
+      const review = await reviewService.update(params.id, body, {
+        unitType: UnitType.REVIEW,
+      });
       return mapReviewToDTO(review);
     },
     {
@@ -108,18 +123,25 @@ export const reviewApi = coreInstance('/reviews')
    */
   .delete(
     '/:id',
-    async ({params, headers, jwt, set}): Promise<{message: string}> => {
+    async ({
+      params,
+      headers,
+      jwt,
+      set,
+    }: {
+      params: {id: string};
+      headers: {authorization?: string};
+      jwt: any;
+      set: any;
+    }): Promise<{message: string}> => {
       const payload = await verifyAuth(headers.authorization, jwt, set);
-      const target = await unitService.getByUnitId(params.id);
-      if (!target) {
-        set.status = 404;
-        throw new Error(`Review not found: ${params.id}`);
-      }
-      if (target.userId !== payload.unitId) {
-        set.status = 403;
-        throw new Error('Forbidden: you do not have permission to delete');
-      }
-      await reviewService.delete(params.id);
+      await ensureReviewOwnership(
+        params.id,
+        UnitType.REVIEW,
+        payload.unitId,
+        set,
+      );
+      await reviewService.delete(params.id, {unitType: UnitType.REVIEW});
       return {message: 'Review deleted successfully'};
     },
     {
@@ -130,4 +152,70 @@ export const reviewApi = coreInstance('/reviews')
         tags: ['Reviews'],
       },
     },
+  )
+  /**
+   * List short reviews (UnitType.REMARK)
+   */
+  .get(
+    '/short',
+    async ({query}): Promise<ReviewListResponse> => {
+      const {reviews, total} = await reviewService.list(query, {
+        unitType: UnitType.REMARK,
+      });
+      return {reviews: reviews.map(mapReviewToDTO), total};
+    },
+    {
+      query: reviewListQuerySchema,
+      detail: {
+        summary: 'Get all short reviews',
+        description: 'List short-form reviews (UnitType.REMARK)',
+        tags: ['Short Reviews'],
+      },
+    },
+  )
+  /**
+   * Get single short review
+   */
+  .get(
+    '/remark/:id',
+    async ({params}): Promise<ReviewResponse> => {
+      const review = await reviewService.getById(params.id, {
+        unitType: UnitType.REMARK,
+      });
+      return mapReviewToDTO(review);
+    },
+    {
+      params: reviewParamsSchema,
+      detail: {
+        summary: 'Get short review',
+        description: 'Get a single short review by id',
+        tags: ['Short Reviews'],
+      },
+    },
   );
+
+async function ensureReviewOwnership(
+  reviewId: string,
+  expectedType: UnitType,
+  ownerId: string,
+  set: {status?: number | string},
+  payload?: JWTPayload,
+): Promise<void> {
+  if (payload?.permission?.role?.includes('ADMIN')) {
+    return;
+  }
+  const target = await unitService.getByUnitId(reviewId).catch(() => {
+    set.status = 404;
+    throw new Error(`Review not found: ${reviewId}`);
+  });
+
+  if (!target || target.type !== expectedType) {
+    set.status = 404;
+    throw new Error(`Review not found: ${reviewId}`);
+  }
+
+  if (target.userId !== ownerId) {
+    set.status = 403;
+    throw new Error('Forbidden: you do not have permission');
+  }
+}

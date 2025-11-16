@@ -67,13 +67,6 @@ export const ReadListPage: React.FC = () => {
     return <div className="text-center py-10 text-red-500">未找到书单</div>;
   }
 
-  function getReviewForBook(book: {unitId: string}) {
-    // 暂时使用fake 逻辑
-    return bookList?.reviews?.find(
-      review => review.targetUnitId === book.unitId,
-    );
-  }
-
   return (
     <div
       className="w-full max-w-4xl mt-[60px] mx-auto"
