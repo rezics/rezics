@@ -54,5 +54,6 @@ export function mapReadlistRowToDTO(row: ReadlistSelected): ReadlistDTO {
       targetUnitId: r.targetUnitId,
       content: r.content ?? undefined,
     })),
+    order: row.order ?? [],
   } as ReadlistDTO;
 }

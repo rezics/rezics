@@ -7,7 +7,7 @@ import type {ReviewWithRelations} from './types';
  */
 export function sanitizeUser(u: User): PublicUser {
   return {
-    id: u.unitId,
+    unitId: u.unitId,
     slug: u.slug,
     name: u.name,
     avatar: u.avatar ?? (null as any),
@@ -19,7 +19,7 @@ export function mapReviewToDTO(unit: ReviewWithRelations): ReviewDTO {
   const rating =
     typeof meta.rating === 'number' ? (meta.rating as number) : undefined;
   return {
-    id: unit.id,
+    unitId: unit.id,
     bookId: unit.targetUnitId ?? '',
     title: unit.title ?? undefined,
     content: unit.content ?? '',

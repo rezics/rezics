@@ -28,6 +28,7 @@ export type ReadlistListSelected = Prisma.ReadListGetPayload<{
 // Minimal, purpose-built select for ReadList queries
 export const readlistSelect = {
   unitId: true,
+  order: true,
   unit: {
     select: {
       id: true,

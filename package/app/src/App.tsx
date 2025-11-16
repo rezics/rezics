@@ -15,6 +15,7 @@ import {ReactQueryProvider} from './plugin/providers/react-query.tsx';
 import Router from './router/router.tsx';
 
 import {ErrorBoundary} from 'react-error-boundary';
+import {WindowAlert} from './component/Common/WindowAlert.tsx';
 
 export default function App() {
   const themeMode = appStore(s => s.theme);
@@ -48,6 +49,7 @@ export default function App() {
           <ThemeProvider theme={theme}>
             <CssBaseline />
             <PersistentSettingsLoader />
+            <WindowAlert />
             <ReactQueryProvider>{Router}</ReactQueryProvider>
           </ThemeProvider>
         </StyledEngineProvider>

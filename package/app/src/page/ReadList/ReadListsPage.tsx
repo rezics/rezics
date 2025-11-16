@@ -7,7 +7,6 @@ import React, {
   useState,
 } from 'react';
 import {Alert} from '@mui/material';
-import Masonry from '@mui/lab/Masonry';
 import {
   UniversalPaginator,
   type UniversalPaginatorHandle,

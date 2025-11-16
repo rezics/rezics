@@ -181,6 +181,7 @@ model ReadList {
   unit      Unit     @relation("ReadListIndexForUnit", fields: [unitId], references: [id], onDelete: Cascade)
   review    Unit[]   @relation("ReviewForReadList")
   book      Book[]   @relation("ReadListForBook")
+  order     String[] @default([]) // review unitId list
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

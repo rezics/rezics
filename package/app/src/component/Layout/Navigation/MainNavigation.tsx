@@ -90,6 +90,12 @@ export const NAVIGATION = (): NavigationItem[] => [
         segment: '/book/1/edit/1',
         icon: <DescriptionIcon />,
       },
+      {
+        kind: 'item',
+        title: 'Read List New',
+        segment: '/readlist/new',
+        icon: <FormatListBulletedIcon />,
+      },
     ],
   },
   {

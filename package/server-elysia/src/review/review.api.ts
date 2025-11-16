@@ -60,7 +60,7 @@ export const reviewApi = coreInstance('/reviews')
       const payload = await verifyAuth(headers.authorization, jwt, set);
       const req: CreateReviewInput = {
         ...body,
-        userId: payload.userId,
+        userId: payload.unitId,
       } as CreateReviewInput;
       const review = await reviewService.create(req);
       return mapReviewToDTO(review);
@@ -86,7 +86,7 @@ export const reviewApi = coreInstance('/reviews')
         set.status = 404;
         throw new Error(`Review not found: ${params.id}`);
       }
-      if (target.userId !== payload.userId) {
+      if (target.userId !== payload.unitId) {
         set.status = 403;
         throw new Error('Forbidden: you do not have permission to update');
       }
@@ -115,7 +115,7 @@ export const reviewApi = coreInstance('/reviews')
         set.status = 404;
         throw new Error(`Review not found: ${params.id}`);
       }
-      if (target.userId !== payload.userId) {
+      if (target.userId !== payload.unitId) {
         set.status = 403;
         throw new Error('Forbidden: you do not have permission to delete');
       }

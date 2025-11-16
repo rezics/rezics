@@ -64,6 +64,7 @@ export const readlistDTOSchema = t.Object({
   likes: t.Optional(t.Number()),
   books: t.Array(readlistBookBriefSchema),
   reviews: t.Array(readlistReviewBriefSchema),
+  order: t.Optional(t.Array(t.String())),
 });
 
 export type ReadlistDTO = (typeof readlistDTOSchema)['static'];
@@ -129,19 +130,13 @@ export type ReadlistResponse = (typeof readlistResponseSchema)['static'];
  * - bookIds is deprecated (kept for back-compat, optional)
  */
 export const createReadlistSchema = t.Object({
-  userId: t.String(),
-  title: t.String(),
+  unitId: t.Optional(t.String()),
+  book: t.Array(t.String()),
+  review: t.Array(t.String()),
+  order: t.Array(t.String()),
+  title: t.Optional(t.String()),
+  content: t.Optional(t.String()),
   coverUrl: t.Optional(t.String()),
-  items: t.Optional(
-    t.Array(
-      t.Object({
-        bookUnitId: t.Optional(t.String()),
-        reviewUnitId: t.Optional(t.String()),
-      }),
-    ),
-  ),
-  // Deprecated: prefer `items`
-  bookIds: t.Optional(t.Array(t.String())),
 });
 
 export type CreateReadlistInput = (typeof createReadlistSchema)['static'];

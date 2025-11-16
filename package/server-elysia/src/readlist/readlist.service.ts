@@ -99,8 +99,8 @@ export class ReadlistService {
     return mapReadlistRowToDTO(row);
   }
 
-  async create(req: CreateReadlistInput): Promise<ReadlistDTO> {
-    const {userId, title, coverUrl, items, bookIds} = req;
+  async create(req: CreateReadlistInput, userId: string): Promise<ReadlistDTO> {
+    const {book, review, order, title, content, coverUrl} = req;
 
     // Create Unit first (1:1 with ReadList)
     const unit = await prisma.unit.create({
@@ -112,29 +112,12 @@ export class ReadlistService {
         metadata: {coverUrl: coverUrl || undefined} as Prisma.InputJsonValue,
       },
     });
-
-    // Collect relations from inputs
-    const connectBookIds = new Set<string>();
-    const connectReviewIds = new Set<string>();
-    if (Array.isArray(items)) {
-      for (const it of items) {
-        if (it.bookUnitId) connectBookIds.add(it.bookUnitId);
-        if (it.reviewUnitId) connectReviewIds.add(it.reviewUnitId);
-      }
-    }
-    if (Array.isArray(bookIds)) {
-      for (const bid of bookIds) connectBookIds.add(bid);
-    }
-
     const row = await prisma.readList.create({
       data: {
         unitId: unit.id,
-        book: connectBookIds.size
-          ? {connect: Array.from(connectBookIds).map(id => ({unitId: id}))}
-          : undefined,
-        review: connectReviewIds.size
-          ? {connect: Array.from(connectReviewIds).map(id => ({id}))}
-          : undefined,
+        book: {connect: book!.map(unitId => ({unitId}))},
+        review: {connect: review!.map(id => ({id}))},
+        order,
       },
       select: readlistSelect,
     });
@@ -143,48 +126,23 @@ export class ReadlistService {
   }
 
   async update(unitId: string, req: UpdateReadlistInput): Promise<ReadlistDTO> {
-    // Prepare metadata update
-    const unit = await prisma.unit.findUniqueOrThrow({where: {id: unitId}});
-    const meta = ((unit.metadata ?? {}) as any) || {};
-    if (typeof req.coverUrl !== 'undefined')
-      meta.coverUrl = req.coverUrl || undefined;
-
-    // Derive relation sets if provided
-    const booksSet = new Set<string>();
-    const reviewsSet = new Set<string>();
-    if (Array.isArray(req.items)) {
-      for (const it of req.items) {
-        if (it.bookUnitId) booksSet.add(it.bookUnitId);
-        if (it.reviewUnitId) reviewsSet.add(it.reviewUnitId);
-      }
-    }
-    if (Array.isArray(req.bookIds)) {
-      for (const id of req.bookIds) booksSet.add(id);
-    }
-
-    const data: Prisma.ReadListUpdateInput = {
-      unit: {
-        update: {
-          title: req.title || undefined,
-          metadata: meta as Prisma.InputJsonValue,
-        },
-      },
-    };
-
-    if (booksSet.size > 0) {
-      (data as any).book = {
-        set: Array.from(booksSet).map(id => ({unitId: id})),
-      } satisfies Prisma.BookUpdateManyWithoutReadListNestedInput;
-    }
-    if (reviewsSet.size > 0) {
-      (data as any).review = {
-        set: Array.from(reviewsSet).map(id => ({id})),
-      } satisfies Prisma.UnitUpdateManyWithoutReviewForReadListNestedInput;
-    }
-
+    const {book, review, order, title, content, coverUrl} = req;
     const row = await prisma.readList.update({
       where: {unitId},
-      data,
+      data: {
+        unit: {
+          update: {
+            title: title || undefined,
+            content: content || undefined,
+            metadata: {
+              coverUrl: coverUrl || undefined,
+            } as Prisma.InputJsonValue,
+          },
+        },
+        book: {connect: book!.map(unitId => ({unitId}))},
+        review: {connect: review!.map(id => ({id}))},
+        order,
+      },
       select: readlistSelect,
     });
     return mapReadlistRowToDTO(row);

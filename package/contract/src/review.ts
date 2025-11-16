@@ -9,7 +9,7 @@ import {publicUserSchema} from './unit';
  * - bookId maps to Unit.targetUnitId (the Book's unitId)
  */
 export const reviewDTOSchema = t.Object({
-  id: t.String(),
+  unitId: t.String(),
   bookId: t.String(),
   title: t.Optional(t.String()),
   content: t.String(),

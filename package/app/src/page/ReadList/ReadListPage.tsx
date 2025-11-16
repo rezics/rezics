@@ -146,17 +146,19 @@ export const ReadListPage: React.FC = () => {
         {/* 新 API 暂无 commentsNumber */}
       </div>
 
-      {bookList.books?.length > 0 &&
-        bookList.books.map(book => (
-          <BookReviewGroup
-            key={book.unitId}
-            book={book}
-            review={
-              getReviewForBook(book) ?? {unitId: '', title: '', content: ''}
-            }
-            className="mt-4"
-          />
-        ))}
+      {bookList?.order?.length === 0 && (
+        <div className="text-sm text-gray-500">暂无书评</div>
+      )}
+      {bookList?.order?.map(unitId => {
+        const reviewData = bookList?.reviews.find(r => r.unitId === unitId);
+        const bookData = bookList?.books.find(
+          b => b.unitId === reviewData?.targetUnitId,
+        );
+        if (!bookData || !reviewData) return null;
+        return (
+          <BookReviewGroup key={unitId} review={reviewData} book={bookData} />
+        );
+      })}
 
       {/* 评论区 */}
       <div ref={commentRef} className="mt-5">

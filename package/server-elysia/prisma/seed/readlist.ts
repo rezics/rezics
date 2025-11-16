@@ -94,6 +94,7 @@ export async function seedReadLists(
           // Connect by Unit.id for review relations
           connect: createdReviewIds.map(id => ({id})),
         },
+        order: createdReviewIds,
       },
     });
 

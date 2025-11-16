@@ -66,13 +66,13 @@ export const readlistApi = coreInstance('/readlists')
     async ({body, headers, jwt, set}): Promise<ReadlistResponse> => {
       const payload = await verifyAuth(headers.authorization, jwt, set);
       const req: CreateReadlistInput = {
-        userId: payload.unitId,
         title: body.title,
         coverUrl: body.coverUrl,
-        items: body.items,
-        bookIds: body.bookIds,
+        book: body.book,
+        review: body.review,
+        order: body.order,
       };
-      const rl = await readlistService.create(req);
+      const rl = await readlistService.create(req, payload.unitId);
       return rl;
     },
     {
@@ -97,12 +97,15 @@ export const readlistApi = coreInstance('/readlists')
         set.status = 404;
         throw new Error(`Readlist not found: ${params.unitId}`);
       }
-      if (target.userId !== payload.unitId) {
-        set.status = 403;
-        throw new Error(
-          'Forbidden: you do not have permission to update this readlist',
-        );
-      }
+      // if (
+      //   target.userId !== payload.unitId &&
+      //   !payload?.permission?.roles?.includes('ADMIN')
+      // ) {
+      //   set.status = 403;
+      //   throw new Error(
+      //     'Forbidden: you do not have permission to update this readlist',
+      //   );
+      // }
       const rl = await readlistService.update(params.unitId, body);
       return rl;
     },

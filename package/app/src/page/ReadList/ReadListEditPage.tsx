@@ -9,15 +9,19 @@ import {
   Tooltip,
 } from '@mui/material';
 import {ArrowDownward, ArrowUpward, Delete} from '@mui/icons-material';
-import {useParams} from 'wouter';
-import {useQuery} from '@tanstack/react-query';
+import {useQuery, useQueryClient} from '@tanstack/react-query';
 
-import {readlistQueries} from '@/api/readlist/readlist';
+import {
+  readlistQueries,
+  useDeleteReadlistMutation,
+  useUpdateReadlistMutation,
+} from '@/api/readlist/readlist';
 import {reviewQueries} from '@/api/review/review';
-import {bookQueries} from '@/api/book/book';
 import {BookReviewGroup} from '@/component/ReadList/Review.tsx';
-
-type ReviewId = string;
+import {bookQueries} from '@/api/book/book';
+import {useLocation} from 'wouter';
+import {ConfirmDeleteDialog} from '@/component/Form/ConfirmDeleteDialog';
+import {useAlertStore} from '@/global/windowAlertStore';
 
 function extractReviewId(input: string): string | null {
   if (!input) return null;
@@ -76,7 +80,14 @@ const ReviewSearchBox: React.FC<{
           variant="standard"
           value={keyword}
           onChange={e => setKeyword(e.target.value)}
+          onKeyDown={e => {
+            if (e.key === 'Enter') {
+              const k = keyword.trim();
+              if (k) setQ(k);
+            }
+          }}
         />
+
         <Button
           variant="outlined"
           onClick={() => setQ(keyword.trim())}
@@ -91,20 +102,20 @@ const ReviewSearchBox: React.FC<{
         {!isLoading &&
           reviews?.slice(0, 5).map((rv: any) => (
             <Paper
-              key={rv.id}
+              key={rv.unitId}
               variant="outlined"
               className="p-2 flex items-center justify-between"
             >
               <div className="min-w-0">
                 <div className="text-sm font-medium truncate">
                   {rv.title || '(无标题)'}{' '}
-                  <span className="text-gray-500">#{rv.id}</span>
+                  <span className="text-gray-500">#{rv.unitId}</span>
                 </div>
                 <div className="text-xs text-gray-600 line-clamp-1">
                   {rv.content}
                 </div>
               </div>
-              <Button size="small" onClick={() => onAdd(rv.id)}>
+              <Button size="small" onClick={() => onAdd(rv.unitId)}>
                 添加
               </Button>
             </Paper>
@@ -159,38 +170,56 @@ const ReviewItemRow: React.FC<{
 };
 
 export const ReadListEditor: React.FC<{
-  data: any;
-  initialReviewIds?: string[];
   header?: React.ReactNode;
-}> = ({data, initialReviewIds = [], header}) => {
-  const [reviewIds, setReviewIds] = useState<ReviewId[]>(initialReviewIds);
+  readlistData: any;
+  setReadlistData: (data: any) => void;
+}> = ({header, readlistData, setReadlistData}) => {
   useEffect(() => {
-    setReviewIds(initialReviewIds);
-  }, [initialReviewIds]);
+    console.log('readlistData update', readlistData);
+  }, [readlistData]);
 
-  const addReviewId = (id: string) => {
-    setReviewIds(prev => (prev.includes(id) ? prev : [...prev, id]));
+  function updateReviewIds(ids: string[]) {
+    setReadlistData(prev => ({...prev, order: ids}));
+  }
+
+  const queryClient = useQueryClient();
+
+  const addReviewId = async (id: string) => {
+    // 触发 review 查询
+    const review = await queryClient.fetchQuery(reviewQueries.detail(id));
+    const reviewWithTargetUnitId = {
+      ...review,
+      targetUnitId: review.bookId,
+    };
+
+    // 触发 book 查询
+    const book = await queryClient.fetchQuery(
+      bookQueries.detail(review?.bookId),
+    );
+
+    setReadlistData(prev => ({
+      ...prev,
+      books: [...prev.books, book],
+      reviews: [...prev.reviews, reviewWithTargetUnitId],
+      order: [...(prev.order ?? []), id],
+    }));
   };
   const removeReviewId = (id: string) => {
-    setReviewIds(prev => prev.filter(x => x !== id));
+    updateReviewIds(readlistData.order?.filter(x => x !== id) ?? []);
   };
   const moveUp = (id: string) => {
-    setReviewIds(prev => {
-      const idx = prev.indexOf(id);
-      if (idx <= 0) return prev;
-      const next = prev.slice();
-      [next[idx - 1], next[idx]] = [next[idx], next[idx - 1]];
-      return next;
-    });
+    const idx = readlistData.order?.indexOf(id);
+    if (idx <= 0) return;
+    const next = readlistData.order?.slice();
+    [next[idx - 1], next[idx]] = [next[idx], next[idx - 1]];
+    updateReviewIds(next);
   };
   const moveDown = (id: string) => {
-    setReviewIds(prev => {
-      const idx = prev.indexOf(id);
-      if (idx < 0 || idx >= prev.length - 1) return prev;
-      const next = prev.slice();
-      [next[idx], next[idx + 1]] = [next[idx + 1], next[idx]];
-      return next;
-    });
+    const idx = readlistData.order?.indexOf(id);
+    if (idx < 0 || idx >= readlistData.order?.length - 1) return;
+    const next = readlistData.order?.slice();
+    [next[idx], next[idx + 1]] = [next[idx + 1], next[idx]];
+    updateReviewIds(next);
   };
 
   return (
@@ -204,16 +233,29 @@ export const ReadListEditor: React.FC<{
             label="书单名称"
             className="w-full"
             variant="standard"
-            value={data.title}
-            onChange={e => console.log(e.target.value)}
+            value={readlistData?.title}
+            onChange={e =>
+              setReadlistData(prev => ({...prev, title: e.target.value}))
+            }
           />
           <div className="mt-2" />
           <TextField
             label="书单简介"
             variant="standard"
             className="w-full"
-            value={data.content}
-            onChange={e => console.log(e.target.value)}
+            value={readlistData?.content}
+            onChange={e =>
+              setReadlistData(prev => ({...prev, content: e.target.value}))
+            }
+          />
+          <TextField
+            label="书单封面"
+            variant="standard"
+            className="w-full"
+            value={readlistData?.coverUrl}
+            onChange={e =>
+              setReadlistData(prev => ({...prev, coverUrl: e.target.value}))
+            }
           />
         </Paper>
         <Paper variant="outlined" className="p-4 space-y-4">
@@ -227,20 +269,21 @@ export const ReadListEditor: React.FC<{
             当前书评（支持排序与删除）
           </div>
           <Stack spacing={3}>
-            {reviewIds.length === 0 && (
+            {readlistData?.order?.length === 0 && (
               <div className="text-sm text-gray-500">暂无书评</div>
             )}
-            {reviewIds.map(id => {
-              console.log(id);
-              const reviewData = data.reviews.find(r => r.unitId === id);
-              const bookData = data.books.find(
+            {readlistData?.order?.map(unitId => {
+              const reviewData = readlistData?.reviews.find(
+                r => r.unitId === unitId,
+              );
+              const bookData = readlistData?.books.find(
                 b => b.unitId === reviewData?.targetUnitId,
               );
               if (!bookData || !reviewData) return null;
               return (
                 <ReviewItemRow
-                  key={id}
-                  reviewId={id}
+                  key={unitId}
+                  reviewId={unitId}
                   bookData={bookData}
                   reviewData={reviewData}
                   onRemove={removeReviewId}
@@ -257,20 +300,92 @@ export const ReadListEditor: React.FC<{
 };
 
 export function ReadListEditPage({readlistId}: {readlistId: string}) {
+  const [, navigate] = useLocation();
   const {data, isLoading} = useQuery(readlistQueries.detail(readlistId || ''));
-  const [initialIds, setInitialIds] = useState<string[]>([]);
+  type ReadlistData = typeof data;
 
+  const updateReadlistMutation = useUpdateReadlistMutation();
+
+  const [readlistData, setReadlistData] = useState<any>(data);
   useEffect(() => {
-    const reviews = (data?.reviews ?? []) as Array<any>;
-    setInitialIds(reviews.map(r => r?.unitId).filter(Boolean));
+    if (data) {
+      setReadlistData(data);
+    }
   }, [data]);
+
+  function handleSubmit(data: ReadlistData) {
+    // 将 books 转换成 Prisma connect 格式
+    const bookConnect = (data?.books ?? []).filter(Boolean).map(b => b.unitId);
+
+    // 将 reviews 转换成 Prisma connect 格式
+    const reviewConnect = (data?.reviews ?? [])
+      .filter(Boolean)
+      .map(r => r.unitId);
+
+    console.log('bookConnect', bookConnect);
+    console.log('reviewConnect', reviewConnect);
+
+    // 排序字段：直接传字符串数组
+    const order = data?.order ?? [];
+
+    updateReadlistMutation.mutate(
+      {
+        unitId: readlistId,
+        input: {
+          title: data?.title ?? undefined,
+          content: data?.content ?? undefined,
+          coverUrl: data?.coverUrl ?? undefined,
+
+          // Prisma connect 必须传数组
+          book: bookConnect.length > 0 ? bookConnect : undefined,
+          review: reviewConnect.length > 0 ? reviewConnect : undefined,
+          order: order.length > 0 ? order : undefined,
+        },
+      },
+      {
+        onSuccess: () => {
+          useAlertStore.getState().show('书单更新成功');
+        },
+        onError: error => {
+          useAlertStore.getState().show(String(error));
+        },
+      },
+    );
+  }
+
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const deleteReadlistMutation = useDeleteReadlistMutation();
+  const handleDelete = () => {
+    deleteReadlistMutation.mutate(readlistId, {
+      onSuccess: () => {
+        console.log('书单删除成功');
+        navigate(`/readlist`);
+      },
+      onError: error => {
+        console.error('书单删除失败', error);
+      },
+    });
+    setDeleteDialogOpen(false);
+  };
 
   const header = (
     <div className="mb-4">
       <div className="flex items-center">
         <div className="text-2xl font-bold">编辑书单</div>
         <div className="ml-auto">
-          <Button variant="contained" color="primary">
+          <Button
+            variant="outlined"
+            color="primary"
+            className="!mr-2"
+            onClick={() => navigate(`/readlist/${readlistId}`)}
+          >
+            返回
+          </Button>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => handleSubmit(readlistData)}
+          >
             提交
           </Button>
         </div>
@@ -280,11 +395,28 @@ export function ReadListEditPage({readlistId}: {readlistId: string}) {
   );
 
   return (
-    <ReadListEditor
-      initialReviewIds={initialIds}
-      header={header}
-      data={data ?? {books: [], reviews: []}}
-    />
+    <div>
+      <ReadListEditor
+        header={header}
+        readlistData={readlistData}
+        setReadlistData={setReadlistData}
+      />
+      <div className="mt-4 max-w-4xl mx-auto mb-8">
+        <Button
+          className="w-full"
+          variant="contained"
+          color="primary"
+          onClick={() => setDeleteDialogOpen(true)}
+        >
+          删除
+        </Button>
+        <ConfirmDeleteDialog
+          open={deleteDialogOpen}
+          onClose={() => setDeleteDialogOpen(false)}
+          onSubmit={handleDelete}
+        />
+      </div>
+    </div>
   );
 }
 
