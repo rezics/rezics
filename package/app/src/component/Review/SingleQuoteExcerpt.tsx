@@ -55,7 +55,6 @@ export const SingleQuoteExcerptShow: React.FC<SingleQuoteExcerptShowProps> = ({
           size="small"
           sx={{position: 'absolute', top: 8, right: 8}}
           aria-label="打开全文"
-          title="打开全文"
         >
           <OpenInNewIcon fontSize="small" />
         </IconButton>
@@ -79,6 +78,7 @@ export const SingleQuoteExcerptShow: React.FC<SingleQuoteExcerptShowProps> = ({
         />
         <div className="flex-1">
           <Typography
+            component="div"
             variant="body2"
             color="text.primary"
             sx={{lineHeight: 1.6}}

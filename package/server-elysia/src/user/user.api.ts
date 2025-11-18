@@ -215,7 +215,7 @@ export const userApi = coreInstance('/users')
       // Only allow users to update their own profile
       const hasPermission = () => {
         if (payload.unitId === params.unitId) return true;
-        if (payload?.permission?.roles?.includes('ADMIN')) return true;
+        if (payload?.permission?.role?.includes('ADMIN')) return true;
         return false;
       };
       if (!hasPermission()) {

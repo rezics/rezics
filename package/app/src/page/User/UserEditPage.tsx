@@ -39,26 +39,20 @@ export const UserEditPage: FC<UserEditPageProps> = ({
 }) => {
   const {t} = useTranslation();
   const [user, setUser] = useState<UserDTO | null>(null);
-  const meQuery = useQuery({...userQueries.me(), enabled: !unitId});
-  const detailQuery = useQuery({
-    ...userQueries.detail(unitId ?? ''),
-    enabled: !!unitId,
-  });
+  const {
+    data,
+    isLoading,
+    error: queryError,
+  } = useQuery(userQueries.detail(unitId ?? ''));
+  const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string>();
-  const [success, setSuccess] = useState(false);
-
-  const isLoading = meQuery.isLoading || detailQuery.isLoading;
-  const queryError = (meQuery.error ?? detailQuery.error) as Error | null;
-  const data = (!unitId ? meQuery.data : detailQuery.data) as
-    | UserDTO
-    | undefined;
 
   const [formData, setFormData] = useState<UpdateUserInput>({
     name: '',
     avatar: '',
     bio: '',
     password: '',
+    description: '',
   });
 
   useEffect(() => {
@@ -69,15 +63,17 @@ export const UserEditPage: FC<UserEditPageProps> = ({
         avatar: data.avatar || '',
         bio: data.bio || '',
         password: '',
+        description: data.description || '',
       });
     }
-  }, [data]);
+    if (queryError) {
+      setError(JSON.stringify(queryError));
+    }
+  }, [data, queryError]);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setSaving(true);
-    setError(undefined);
-    setSuccess(false);
 
     try {
       const updateData: UpdateUserInput = {
@@ -97,7 +93,6 @@ export const UserEditPage: FC<UserEditPageProps> = ({
         updatedUser = await userApi.update(unitId, updateData);
       }
       setUser(updatedUser);
-      setSuccess(true);
 
       if (onSuccess) {
         onSuccess(updatedUser);
@@ -106,7 +101,7 @@ export const UserEditPage: FC<UserEditPageProps> = ({
       // Clear password field after successful update
       setFormData(prev => ({...prev, password: ''}));
     } catch (err) {
-      setError((err as Error).message);
+      setError(JSON.stringify(err));
     } finally {
       setSaving(false);
     }
@@ -150,12 +145,6 @@ export const UserEditPage: FC<UserEditPageProps> = ({
                 {error}
               </Alert>
             )}
-            {success && (
-              <Alert severity="success" className="mb-4">
-                Profile updated successfully!
-              </Alert>
-            )}
-
             <Box className="space-y-4">
               <TextField
                 fullWidth

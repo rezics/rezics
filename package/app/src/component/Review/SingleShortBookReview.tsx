@@ -24,11 +24,11 @@ export const SingleShortBookReviewShow: React.FC<
   SingleShortBookReviewShowProps
 > = ({review, onLike, onDislike}) => {
   const handleLike = () => {
-    onLike?.(review.id);
+    onLike?.(review.unitId);
   };
 
   const handleDislike = () => {
-    onDislike?.(review.id);
+    onDislike?.(review.unitId);
   };
 
   const isRecommended = review.rating && review.rating >= 4;

@@ -120,9 +120,9 @@ export const BookPageShow: React.FC<ShowProps> = ({
                     <div>
                       <ArrowForwardIconContainer
                         size={16}
-                        to={`/review/short/book/${bookInfo?.unitId}`}
+                        to={`/review/book/${bookInfo?.unitId}?tab=remark`}
                       >
-                        <AccentBarWithTextContainer text="短评" />
+                        <AccentBarWithTextContainer text="Remark" />
                       </ArrowForwardIconContainer>
                     </div>
                     <ShortBookReviews bookId={bookInfo?.unitId || ''} />

@@ -83,10 +83,14 @@ export function buildMetadataByType(
         rating: Math.round(randomFloat(1, 5) * 10) / 10,
         title: generateTitle(2, 5),
       };
+    case UnitTypeEnum.REMARK:
+      return {
+        rating: Math.round(randomFloat(1, 5) * 10) / 10,
+        title: generateTitle(2, 5),
+      };
     case UnitTypeEnum.QUOTE:
       return {
-        text: faker.lorem.sentence(),
-        fromChapter: randomInt(1, 30),
+        source: faker.lorem.sentence(),
       };
     case UnitTypeEnum.READLIST: {
       const count = randomInt(3, Math.min(10, context.bookIds.length));

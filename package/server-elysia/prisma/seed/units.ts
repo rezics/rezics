@@ -15,6 +15,7 @@ import {
 const UNIT_TYPES: UnitType[] = [
   UnitTypeEnum.NOTE,
   UnitTypeEnum.REVIEW,
+  UnitTypeEnum.REMARK,
   UnitTypeEnum.QUOTE,
   UnitTypeEnum.IMAGE,
   UnitTypeEnum.VIDEO,
@@ -51,6 +52,7 @@ export async function seedOtherUnits(
     if (
       (type === UnitTypeEnum.REVIEW ||
         type === UnitTypeEnum.QUOTE ||
+        type === UnitTypeEnum.REMARK ||
         type === UnitTypeEnum.CHAPTER) &&
       bookUnitIds.length > 0
     ) {
@@ -73,6 +75,29 @@ export async function seedOtherUnits(
       },
       select: {id: true, type: true},
     });
+
+    if (type === UnitTypeEnum.REMARK || type === UnitTypeEnum.REVIEW) {
+      const rating = (metadata as {rating: number}).rating;
+      const bookUnitId = targetUnitId ?? '';
+      await prisma.rating.upsert({
+        where: {unitId_domain: {unitId: bookUnitId, domain: bookUnitId}},
+        update: {
+          domain: bookUnitId,
+          totalScore: {
+            increment: rating,
+          },
+          totalCount: {
+            increment: 1,
+          },
+        },
+        create: {
+          unitId: bookUnitId,
+          domain: bookUnitId,
+          totalScore: rating,
+          totalCount: 1,
+        },
+      });
+    }
 
     await upsertViewCountForUnit(prisma, unit.id, randomInt(0, 10_000));
     await upsertReactionSummariesForUnit(prisma, unit.id, {

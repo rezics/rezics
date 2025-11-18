@@ -1,24 +1,10 @@
-import {
-  SingleQuoteExcerptShow,
-  SingleQuoteExcerptShowProps,
-} from '@component/Review/SingleQuoteExcerpt.tsx';
+import {SingleQuoteExcerptShow} from '@component/Review/SingleQuoteExcerpt.tsx';
+import type {UnitDTO, UnitListResponse} from '@package/contract';
 import {Box, Stack} from '@mui/material';
 import React from 'react';
 
-type QuoteExcerpt =
-  | {
-      id: string;
-      content: string;
-      author: {
-        name: string;
-        avatar: string;
-      };
-      created_at: string;
-    }
-  | any;
-
 export type QuoteExcerptListShowProps = {
-  data: QuoteExcerpt[];
+  data: UnitListResponse;
 };
 
 export const QuoteExcerptListShow: React.FC<QuoteExcerptListShowProps> = ({
@@ -29,23 +15,25 @@ export const QuoteExcerptListShow: React.FC<QuoteExcerptListShowProps> = ({
       {/* Quotes */}
       <Box>
         <Stack spacing={2}>
-          {(Array.isArray(data) ? data : []).map((quote: QuoteExcerpt) => (
-            <SingleQuoteExcerptShow
-              key={quote.id}
-              author={{
-                name: quote.author.name,
-                avatar: quote.author.avatar || '',
-              }}
-              content={quote.content}
-              stats={{
-                replies: 0,
-                likes: 0,
-                date: quote.created_at,
-              }}
-              source={'quote.source'}
-              originalLink={'quote.originalLink'}
-            />
-          ))}
+          {(Array.isArray(data.units) ? data.units : []).map(
+            (quote: UnitDTO) => (
+              <SingleQuoteExcerptShow
+                key={quote.id}
+                author={{
+                  name: quote.user?.name || '',
+                  avatar: quote.user?.avatar || '',
+                }}
+                content={quote.content || ''}
+                stats={{
+                  replies: 0,
+                  likes: 0,
+                  date: quote.createdAt?.toString() || '',
+                }}
+                source={quote.metadata?.source || ''}
+                originalLink={`/quote/${quote.id}`}
+              />
+            ),
+          )}
         </Stack>
       </Box>
     </div>
@@ -53,7 +41,7 @@ export const QuoteExcerptListShow: React.FC<QuoteExcerptListShowProps> = ({
 };
 
 export type QuoteExcerptListContainerProps = {
-  data: QuoteExcerpt[];
+  data: UnitListResponse;
 };
 
 export const QuoteExcerptListContainer: React.FC<

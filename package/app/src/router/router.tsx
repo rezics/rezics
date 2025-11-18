@@ -23,6 +23,8 @@ import {ReviewsPage} from '@/page/Review/ReviewsPage';
 import {ReviewPage} from '@/page/Review/ReviewPage.tsx';
 import {ReviewNewPage} from '@/page/Review/ReviewNewPage.tsx';
 import {ReviewEditPageContainer} from '@/page/Review/ReviewEditPage.tsx';
+import {QuoteByBookPage} from '@/page/Review/QuoteByBookPage.tsx';
+import {QuotePage} from '@/page/Review/QuotePage.tsx';
 
 // Library pages
 import {BookLibContainer} from '@/page/Book/BookLibPage.tsx';
@@ -31,6 +33,9 @@ import {BookPageContainer} from '@/page/Book/BookPage.tsx';
 // ReadList pages
 import {ReadListPage} from '@/page/ReadList/ReadListPage.tsx';
 import {ReadListsPage} from '@/page/ReadList/ReadListsPage.tsx';
+
+// Unit pages
+import {UnitsPage} from '@/page/Unit/UnitsPage.tsx';
 
 // Tag pages
 import {TagByBookPage, TagByBookFullPage} from '@/page/Tag/TagByUnitPage';
@@ -45,7 +50,6 @@ import {MainLayout} from '@/layout/MainLayout.tsx';
 import {ReadListEditPage} from '@/page/ReadList/ReadListEditPage.tsx';
 import {NewReadListPage} from '@/page/ReadList/NewReadListPage.tsx';
 import {ReadlistByBookPage} from '@/page/ReadList/ReadListsByBookPage.tsx';
-import {QuoteByBookPage} from '@/page/Review/QuoteByBookPage.tsx';
 import {ReviewByBookPage} from '@/page/Review/ReviewByBookPage.tsx';
 import {ShortReviewByBookPage} from '@/page/Review/ShortReviewByBookPage.tsx';
 import TestPage from '@/page/Test/TestPage.tsx';
@@ -184,6 +188,13 @@ export default (
             </MainLayout>
           )}
         </Route>
+        <Route path="/quote/:unitId">
+          {({unitId}) => (
+            <MainLayout>
+              <QuotePage unitId={unitId} />
+            </MainLayout>
+          )}
+        </Route>
 
         {/* ANCHOR ReadList Routes */}
         <Route path="/readlist/new">
@@ -216,6 +227,13 @@ export default (
               <ReadlistByBookPage />
             </MainLayout>
           )}
+        </Route>
+
+        {/* ANCHOR Unit Routes */}
+        <Route path="/unit">
+          <MainLayout>
+            <UnitsPage />
+          </MainLayout>
         </Route>
 
         {/* ANCHOR Tag Routes */}

@@ -1,5 +1,6 @@
 // AuthorInfo.tsx  —— ES Module 版本（无 namespace）
-import {AccentBarWithTextShow} from '@component/Common/AccentBar.tsx';
+import {AccentBarWithTextContainer} from '@component/Common/AccentBar.tsx';
+import {ArrowForwardIconContainer} from '@component/Common/ArrowForwardIcon.tsx';
 import {EditButtonFloatRight} from '@component/Common/EditButtonFloatRight.tsx';
 import EasyEditor from '@component/Form/EasyEditor.tsx';
 import {Button, Typography} from '@mui/material';
@@ -52,11 +53,9 @@ const AuthorInfoShow: React.FC<AuthorInfoShowProps> = ({
     <div>
       <div>
         <div className="flex mb-4">
-          <AccentBarWithTextShow
-            text={t('book.authorInfo') + ' ' + author?.name}
-          />
-          {/* <FollowButton author={author} /> */}
-          {showEditButton && <EditButtonFloatRight.Show onClick={onEdit} />}
+          <ArrowForwardIconContainer size={16} to={`/user/${author?.unitId}`}>
+            <AccentBarWithTextContainer text={`Author: ${author?.name}`} />
+          </ArrowForwardIconContainer>
         </div>
 
         <div className="whitespace-pre-line">

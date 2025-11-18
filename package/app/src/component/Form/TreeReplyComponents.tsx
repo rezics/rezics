@@ -15,10 +15,16 @@ import {ReplyDrawerContainer} from './ReplyDrawer.tsx';
 
 import {commentQueries} from '@/api/comment/comment.queries.ts';
 import type {CommentTreeNode} from '@package/contract';
-import {useCreateCommentMutation} from '@/api/comment/comment.mutations';
+import {
+  useCreateCommentMutation,
+  useDeleteCommentMutation,
+  useUpdateCommentMutation,
+} from '@/api/comment/comment.mutations';
 
 import {useUserStore} from '@/global/userStore';
+import {buildTree} from './treeReplyUtil';
 
+import {useAlertStore} from '@/global/windowAlertStore';
 // This is a temporary type definition based on the GraphQL schema.
 // Local UI type adapted from CommentTreeNode
 type UiUser = {
@@ -28,7 +34,7 @@ type UiUser = {
   [key: string]: any;
 };
 
-type UiComment = {
+export type UiComment = {
   id: string;
   content?: string | null;
   created_at?: string;
@@ -38,7 +44,8 @@ type UiComment = {
 interface CommentNodeProps {
   comment: UiComment;
   level?: number;
-  openDrawer: (id: string) => void;
+  openDrawer: (id: string, content?: string) => void;
+  setCurrentEditCommentId: (id: string) => void;
 }
 
 function havePermission(comment: any, user: any) {
@@ -52,6 +59,7 @@ const CommentNode: React.FC<CommentNodeProps> = ({
   comment,
   level = 0,
   openDrawer,
+  setCurrentEditCommentId,
 }) => {
   // Expand first two levels by default
   const [isExpanded, setIsExpanded] = useState(level < 2);
@@ -64,10 +72,35 @@ const CommentNode: React.FC<CommentNodeProps> = ({
     // This would require a new GraphQL query like getReplies(commentId: ID!).
   };
 
+  const showAlert = useAlertStore(state => state.show);
+
   const handleReply = () => {
     console.log('Replying to comment:', comment.id);
     openDrawer(comment.id);
     // This is where you would trigger a reply dialog or an inline reply form.
+  };
+
+  const deleteCommentMutation = useDeleteCommentMutation({
+    onSuccess: () => {
+      showAlert('Comment deleted successfully');
+    },
+    onError: () => {
+      showAlert('Failed to delete comment');
+    },
+  });
+
+  const handleDelete = () => {
+    deleteCommentMutation.mutate(comment.id);
+  };
+
+  const setDialogContent = useDialogStore(state => state.setDialogContent);
+
+  const handleUpdate = () => {
+    console.log('handleUpdate', comment.id);
+    const key = `update_${comment.id}`;
+    setDialogContent(key, comment.content ?? '');
+    setCurrentEditCommentId(comment.id);
+    openDrawer(key);
   };
 
   return (
@@ -109,8 +142,8 @@ const CommentNode: React.FC<CommentNodeProps> = ({
               className={`${havePermission(comment, user) ? '' : 'hidden'}`}
               size="small"
               fontSize="1.3rem"
-              onEdit={() => {}}
-              onDelete={() => {}}
+              onEdit={handleUpdate}
+              onDelete={handleDelete}
             />
             <Box
               sx={{
@@ -146,6 +179,7 @@ const CommentNode: React.FC<CommentNodeProps> = ({
               comment={reply}
               level={level + 1}
               openDrawer={openDrawer}
+              setCurrentEditCommentId={setCurrentEditCommentId}
             />
           ))}
         </Collapse>
@@ -158,10 +192,9 @@ interface ReplyComponentsProps {
   unitId: string;
 }
 
-export const TreeReplyComponents: React.FC<ReplyComponentsProps> = ({
-  unitId,
-}) => {
+export function TreeReplyComponents({unitId}: ReplyComponentsProps) {
   // Fetch a flat slice of the comment tree for the unit
+  const showAlert = useAlertStore(state => state.show);
   const {data, isLoading, error} = useQuery(
     commentQueries.unitCommentTree(unitId, {
       // Fetch up to depth 3 for an initial view; adjust as needed
@@ -174,71 +207,12 @@ export const TreeReplyComponents: React.FC<ReplyComponentsProps> = ({
 
   // currentReplyId
   const setDialogVisible = useDialogStore(state => state.setDialogVisible);
+  const setDialogContent = useDialogStore(state => state.setDialogContent);
   const [currentReplyId, setCurrentReplyId] = useState<string | null>(null);
+  const [currentEditCommentId, setCurrentEditCommentId] = useState<
+    string | null
+  >(null);
   const [topLevelComments, setTopLevelComments] = useState<UiComment[]>([]);
-
-  const buildTree = useMemo(() => {
-    return (items: CommentTreeNode[] | undefined): UiComment[] => {
-      if (!items || items.length === 0) return [];
-
-      // Map of id -> UiComment
-      const map = new Map<string, UiComment>();
-      // Group by parentId
-      const childrenMap = new Map<string | null | undefined, UiComment[]>();
-
-      for (const n of items) {
-        const ui: UiComment = {
-          id: n.id,
-          content: n.content ?? null,
-          created_at: n.createdAt
-            ? typeof n.createdAt === 'string'
-              ? n.createdAt
-              : new Date(n.createdAt as any).toISOString()
-            : undefined,
-          user: n.user ? n.user : undefined,
-          replies: [],
-        };
-        map.set(n.id, ui);
-        const key = (n as any).parentCommentId ?? null;
-        const list = childrenMap.get(key) ?? [];
-        list.push(ui);
-        childrenMap.set(key, list);
-      }
-
-      // Link children to parents
-      for (const n of items) {
-        const parentId = (n as any).parentCommentId ?? null;
-        if (parentId && map.has(parentId)) {
-          const parent = map.get(parentId)!;
-          const childList = childrenMap.get(parentId) ?? [];
-          // Ensure parent's replies uses grouped list
-          parent.replies = childList;
-        }
-      }
-
-      // Roots are those with no parent or missing parent in this slice
-      const roots: UiComment[] = [];
-      const rootCandidates =
-        childrenMap.get(null) ?? childrenMap.get(undefined) ?? [];
-      for (const r of rootCandidates) {
-        roots.push(r);
-      }
-
-      // Some nodes may reference a parent not included in the slice; treat them as roots
-      if (roots.length === 0) {
-        // Fallback: choose items with missing parent
-        for (const n of items) {
-          const parentId = (n as any).parentCommentId ?? null;
-          if (!parentId || !map.has(parentId)) {
-            const ui = map.get(n.id)!;
-            if (!roots.includes(ui)) roots.push(ui);
-          }
-        }
-      }
-
-      return roots;
-    };
-  }, []);
 
   useEffect(() => {
     try {
@@ -248,21 +222,48 @@ export const TreeReplyComponents: React.FC<ReplyComponentsProps> = ({
     } catch (_error) {
       console.error('Error building comment tree');
     }
-  }, [data, buildTree]);
+  }, [data]);
 
   const openDrawer = (id: string) => {
     setCurrentReplyId(id);
     setDialogVisible(id, true);
   };
 
-  const createCommentMutation = useCreateCommentMutation();
+  const createCommentMutation = useCreateCommentMutation({
+    onSuccess: () => {
+      showAlert('Comment created successfully');
+    },
+    onError: () => {
+      showAlert('Failed to create comment');
+    },
+  });
+
+  const updateCommentMutation = useUpdateCommentMutation({
+    onSuccess: () => {
+      showAlert('Comment updated successfully');
+      setCurrentEditCommentId(null);
+    },
+    onError: () => {
+      showAlert('Failed to update comment');
+      setCurrentEditCommentId(null);
+    },
+  });
 
   const handleSubmit = (content: string) => {
-    createCommentMutation.mutate({
-      rootPostId: unitId,
-      parentCommentId: currentReplyId || '',
-      content,
-    });
+    if (currentReplyId && currentReplyId.startsWith('update_')) {
+      updateCommentMutation.mutate({
+        unitId: currentReplyId.replace('update_', ''),
+        input: {
+          content,
+        },
+      });
+    } else {
+      createCommentMutation.mutate({
+        rootPostId: unitId,
+        parentCommentId: currentReplyId || '',
+        content,
+      });
+    }
   };
   if (isLoading) return <p>Loading...</p>;
   if (error) return <p>Oh no... {error.message}</p>;
@@ -276,6 +277,7 @@ export const TreeReplyComponents: React.FC<ReplyComponentsProps> = ({
               key={comment.id}
               comment={comment}
               openDrawer={openDrawer}
+              setCurrentEditCommentId={setCurrentEditCommentId}
             />
           ))
         ) : (
@@ -291,6 +293,6 @@ export const TreeReplyComponents: React.FC<ReplyComponentsProps> = ({
       )}
     </>
   );
-};
+}
 
 export default TreeReplyComponents;

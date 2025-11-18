@@ -10,6 +10,7 @@ import {ReviewListContainer} from '@/component/Review/ReviewList';
 import {reviewQueries, remarkQueries} from '@/api/review/review.queries';
 import type {ReviewDTO} from '@package/contract';
 import {Search} from '@/component/Search';
+import {useSearchParams} from 'wouter';
 
 type Review = ReviewDTO;
 interface ReviewsPageProps {
@@ -25,6 +26,16 @@ export const ReviewsPage: React.FC<ReviewsPageProps> = ({bookUnitId}) => {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [tab, setTab] = useState<'review' | 'remark'>('review');
   const [keyword, setKeyword] = useState<string>('');
+  const [searchParams, _setSearchParams] = useSearchParams();
+
+  useEffect(() => {
+    const tabParam = searchParams.get('tab');
+    if (tabParam) {
+      if (tabParam === 'review' || tabParam === 'remark') {
+        setTab(tabParam as 'review' | 'remark');
+      }
+    }
+  }, [searchParams]);
 
   const reviewListQueryOpts = useQuery(
     reviewQueries.list({

@@ -3,6 +3,7 @@ import type {FC} from 'react';
 import {UserProfilePage} from './UserProfilePage';
 import {UserEditPage} from './UserEditPage';
 import type {UserDTO} from '@package/contract';
+import {useUserStore} from '@/global/userStore';
 
 export interface UserPageProps {
   unitId?: string;
@@ -18,7 +19,7 @@ export const UserPage: FC<UserPageProps> = ({
   isCurrentUser = false,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
-
+  const currentUser = useUserStore(state => state.user);
   console.log(isCurrentUser, 'isCurrentUser');
 
   const handleEditClick = () => {
@@ -35,9 +36,16 @@ export const UserPage: FC<UserPageProps> = ({
   };
 
   // If in edit mode and is current user, show edit form
-  if (isEditing && isCurrentUser) {
+  if (
+    isEditing &&
+    (isCurrentUser || currentUser?.permission?.role?.includes('ADMIN'))
+  ) {
     return (
-      <UserEditPage onCancel={handleCancelEdit} onSuccess={handleEditSuccess} />
+      <UserEditPage
+        onCancel={handleCancelEdit}
+        onSuccess={handleEditSuccess}
+        unitId={unitId}
+      />
     );
   }
 

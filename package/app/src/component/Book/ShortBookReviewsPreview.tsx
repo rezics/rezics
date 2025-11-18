@@ -1,13 +1,7 @@
 import {reviewQueries} from '@/api/review/review';
 import {useQuery} from '@tanstack/react-query';
-import React, {useEffect, useState} from 'react';
+import React from 'react';
 import {ShortReviewListShow} from '../Review/ShortReviewList.tsx';
-
-type Review = {
-  likes?: number;
-  dislikes?: number;
-};
-
 interface ShortBookReviewsProps {
   bookId: string;
 }
@@ -18,8 +12,6 @@ export const ShortBookReviews: React.FC<ShortBookReviewsProps> = ({bookId}) => {
   const {data, isLoading, error} = useQuery(
     reviewQueries.byBook(bookId, {limit: 4}),
   );
-
-  const reviews: any = data?.reviews || [];
 
   const handleLike = (reviewId: string) => {
     console.log('Like review:', reviewId);
@@ -38,7 +30,7 @@ export const ShortBookReviews: React.FC<ShortBookReviewsProps> = ({bookId}) => {
 
   return (
     <ShortReviewListShow
-      reviews={reviews}
+      data={data ?? {reviews: [], total: 0}}
       onLike={handleLike}
       onDislike={handleDislike}
     />

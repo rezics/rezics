@@ -100,7 +100,8 @@ export const UserProfilePage: FC<UserProfilePageProps> = ({
             </Box>
           }
           action={
-            isCurrentUser ? (
+            isCurrentUser ||
+            currentUser?.permission?.role?.includes('ADMIN') ? (
               <Button
                 variant="contained"
                 startIcon={<EditIcon />}
