@@ -28,6 +28,7 @@ export function useCreateUnitMutation(
 
   return useMutation({
     mutationFn: (input: CreateUnitInput) => unitApi.create(input),
+    ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
       // Invalidate and refetch unit lists
       queryClient.invalidateQueries({queryKey: unitKeys.lists()});
@@ -39,7 +40,6 @@ export function useCreateUnitMutation(
 
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
-    ...options,
   });
 }
 
@@ -60,6 +60,7 @@ export function useUpdateUnitMutation(
 
   return useMutation({
     mutationFn: ({unitId, input}) => unitApi.update(unitId, input),
+    ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
       // Update the cache for this specific unit
       queryClient.setQueryData(unitKeys.detail(variables.unitId), data);
@@ -69,7 +70,6 @@ export function useUpdateUnitMutation(
 
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
-    ...options,
   });
 }
 
@@ -86,6 +86,7 @@ export function useDeleteUnitMutation(
 
   return useMutation({
     mutationFn: (unitId: string) => unitApi.remove(unitId),
+    ...options,
     onSuccess: (data, unitId, onMutateResult, context) => {
       // Remove from cache
       queryClient.removeQueries({queryKey: unitKeys.detail(unitId)});
@@ -95,7 +96,6 @@ export function useDeleteUnitMutation(
 
       options?.onSuccess?.(data, unitId, onMutateResult, context);
     },
-    ...options,
   });
 }
 

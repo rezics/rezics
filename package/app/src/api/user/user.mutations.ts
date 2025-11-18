@@ -20,13 +20,13 @@ export function useRegisterMutation(
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (input: CreateUserInput) => userApi.register(input),
+    ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
       // Seed current user
       qc.setQueryData(userKeys.detail('me'), data.user);
       qc.invalidateQueries({queryKey: userKeys.lists()});
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
-    ...options,
   });
 }
 
@@ -44,11 +44,11 @@ export function useLoginMutation(
   return useMutation({
     mutationFn: (input: {email: string; password: string}) =>
       userApi.login(input),
+    ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
       qc.setQueryData(userKeys.detail('me'), data.user);
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
-    ...options,
   });
 }
 
@@ -61,12 +61,12 @@ export function useUpdateMeMutation(
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (input: UpdateUserInput) => userApi.updateMe(input),
+    ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
       qc.setQueryData(userKeys.detail('me'), data);
       qc.invalidateQueries({queryKey: userKeys.lists()});
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
-    ...options,
   });
 }
 
@@ -79,12 +79,12 @@ export function useDeleteMeMutation(
   const qc = useQueryClient();
   return useMutation({
     mutationFn: () => userApi.deleteMe(),
+    ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
       qc.removeQueries({queryKey: userKeys.detail('me')});
       qc.invalidateQueries({queryKey: userKeys.lists()});
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
-    ...options,
   });
 }
 

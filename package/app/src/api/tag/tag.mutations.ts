@@ -14,6 +14,7 @@ export function useCreateTagMutation(
 
   return useMutation({
     mutationFn: (input: CreateTagInput) => tagApi.create(input),
+    ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
       queryClient.invalidateQueries({queryKey: tagKeys.lists()});
       // contract TagDetailDTO uses `id` field
@@ -21,7 +22,6 @@ export function useCreateTagMutation(
       queryClient.setQueryData(tagKeys.detail((data as any).id), data);
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
-    ...options,
   });
 }
 
@@ -36,12 +36,12 @@ export function useUpdateTagMutation(
   return useMutation({
     mutationFn: ({unitId, input}: {unitId: string; input: UpdateTagInput}) =>
       tagApi.update(unitId, input),
+    ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
       queryClient.setQueryData(tagKeys.detail(variables.unitId), data);
       queryClient.invalidateQueries({queryKey: tagKeys.lists()});
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
-    ...options,
   });
 }
 
@@ -55,12 +55,12 @@ export function useDeleteTagMutation(
 
   return useMutation({
     mutationFn: (unitId: string) => tagApi.remove(unitId),
+    ...options,
     onSuccess: (data, unitId, onMutateResult, context) => {
       queryClient.removeQueries({queryKey: tagKeys.detail(unitId)});
       queryClient.invalidateQueries({queryKey: tagKeys.lists()});
       options?.onSuccess?.(data, unitId, onMutateResult, context);
     },
-    ...options,
   });
 }
 
@@ -78,6 +78,7 @@ export function useAttachTagMutation(
 
   return useMutation({
     mutationFn: ({unitId, targetUnitId}) => tagApi.attach(unitId, targetUnitId),
+    ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
       queryClient.invalidateQueries({queryKey: tagKeys.lists()});
       queryClient.invalidateQueries({
@@ -85,7 +86,6 @@ export function useAttachTagMutation(
       });
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
-    ...options,
   });
 }
 
@@ -103,6 +103,7 @@ export function useDetachTagMutation(
 
   return useMutation({
     mutationFn: ({unitId, targetUnitId}) => tagApi.detach(unitId, targetUnitId),
+    ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
       queryClient.invalidateQueries({queryKey: tagKeys.lists()});
       queryClient.invalidateQueries({
@@ -110,7 +111,6 @@ export function useDetachTagMutation(
       });
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
-    ...options,
   });
 }
 

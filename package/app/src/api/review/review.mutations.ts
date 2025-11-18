@@ -28,6 +28,7 @@ export function useCreateReviewMutation(
 
   return useMutation({
     mutationFn: (input: CreateReviewInput) => reviewApi.create(input),
+    ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
       // TODO 遍历所有 Query key, 支持高级查询的Query失效
       // const allQueries = queryClient.getQueryCache().getAll();
@@ -40,7 +41,6 @@ export function useCreateReviewMutation(
 
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
-    ...options,
   });
 }
 
@@ -61,6 +61,7 @@ export function useUpdateReviewMutation(
 
   return useMutation({
     mutationFn: ({id, input}) => reviewApi.update(id, input),
+    ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
       // Update the cache for this specific review
       queryClient.setQueryData(reviewKeys.detail(variables.id), data);
@@ -70,7 +71,6 @@ export function useUpdateReviewMutation(
 
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
-    ...options,
   });
 }
 
@@ -87,6 +87,7 @@ export function useDeleteReviewMutation(
 
   return useMutation({
     mutationFn: (id: string) => reviewApi.remove(id),
+    ...options,
     onSuccess: (data, id, onMutateResult, context) => {
       // Remove from cache
       queryClient.removeQueries({queryKey: reviewKeys.detail(id)});
@@ -96,7 +97,6 @@ export function useDeleteReviewMutation(
 
       options?.onSuccess?.(data, id, onMutateResult, context);
     },
-    ...options,
   });
 }
 

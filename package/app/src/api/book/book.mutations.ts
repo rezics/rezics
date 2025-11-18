@@ -28,6 +28,7 @@ export function useCreateBookMutation(
 
   return useMutation({
     mutationFn: (input: CreateBookInput) => bookApi.create(input),
+    ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
       // Invalidate and refetch book lists
       queryClient.invalidateQueries({queryKey: bookKeys.lists()});
@@ -37,7 +38,6 @@ export function useCreateBookMutation(
 
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
-    ...options,
   });
 }
 
@@ -58,6 +58,7 @@ export function useUpdateBookMutation(
 
   return useMutation({
     mutationFn: ({postId, input}) => bookApi.update(postId, input),
+    ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
       // Update the cache for this specific book
       queryClient.setQueryData(bookKeys.detail(variables.postId), data);
@@ -67,7 +68,6 @@ export function useUpdateBookMutation(
 
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
-    ...options,
   });
 }
 
@@ -84,6 +84,7 @@ export function useDeleteBookMutation(
 
   return useMutation({
     mutationFn: (postId: string) => bookApi.remove(postId),
+    ...options,
     onSuccess: (data, postId, onMutateResult, context) => {
       // Remove from cache
       queryClient.removeQueries({queryKey: bookKeys.detail(postId)});
@@ -93,7 +94,6 @@ export function useDeleteBookMutation(
 
       options?.onSuccess?.(data, postId, onMutateResult, context);
     },
-    ...options,
   });
 }
 

@@ -29,6 +29,7 @@ export function useCreateReactionMutation(
 
   return useMutation({
     mutationFn: (input: ReactionCreateInput) => reactionApi.create(input),
+    ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
       // Invalidate summary and my reactions for the target
       queryClient.invalidateQueries({
@@ -45,7 +46,6 @@ export function useCreateReactionMutation(
 
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
-    ...options,
   });
 }
 
@@ -62,6 +62,7 @@ export function useUpdateReactionMutation(
 
   return useMutation({
     mutationFn: (input: ReactionUpdateInput) => reactionApi.update(input),
+    ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
       // Invalidate affected caches for target
       queryClient.invalidateQueries({
@@ -77,7 +78,6 @@ export function useUpdateReactionMutation(
 
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
-    ...options,
   });
 }
 
@@ -96,6 +96,7 @@ export function useDeleteReactionMutation(
 
   return useMutation({
     mutationFn: (query: ReactionDeleteQuery) => reactionApi.remove(query),
+    ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
       // Invalidate affected caches for target
       queryClient.invalidateQueries({
@@ -111,7 +112,6 @@ export function useDeleteReactionMutation(
 
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
-    ...options,
   });
 }
 

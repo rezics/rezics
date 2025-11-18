@@ -28,6 +28,7 @@ export function useCreateReadlistMutation(
 
   return useMutation({
     mutationFn: (input: CreateReadlistInput) => readlistApi.create(input),
+    ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
       // Invalidate and refetch readlist lists
       queryClient.invalidateQueries({queryKey: readlistKeys.lists()});
@@ -37,7 +38,6 @@ export function useCreateReadlistMutation(
 
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
-    ...options,
   });
 }
 
@@ -58,6 +58,7 @@ export function useUpdateReadlistMutation(
 
   return useMutation({
     mutationFn: ({unitId, input}) => readlistApi.update(unitId, input),
+    ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
       // Update the cache for this specific readlist
       queryClient.setQueryData(readlistKeys.detail(variables.unitId), data);
@@ -67,7 +68,6 @@ export function useUpdateReadlistMutation(
 
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
-    ...options,
   });
 }
 
@@ -84,6 +84,7 @@ export function useDeleteReadlistMutation(
 
   return useMutation({
     mutationFn: (unitId: string) => readlistApi.remove(unitId),
+    ...options,
     onSuccess: (data, unitId, onMutateResult, context) => {
       // Remove from cache
       queryClient.removeQueries({queryKey: readlistKeys.detail(unitId)});
@@ -93,7 +94,6 @@ export function useDeleteReadlistMutation(
 
       options?.onSuccess?.(data, unitId, onMutateResult, context);
     },
-    ...options,
   });
 }
 

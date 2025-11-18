@@ -28,6 +28,7 @@ export function useCreateChapterMutation(
 
   return useMutation({
     mutationFn: (input: CreateChapterInput) => chapterApi.create(input),
+    ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
       // Invalidate and refetch chapter lists
       queryClient.invalidateQueries({queryKey: chapterKeys.lists()});
@@ -37,7 +38,6 @@ export function useCreateChapterMutation(
 
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
-    ...options,
   });
 }
 
@@ -58,6 +58,7 @@ export function useUpdateChapterMutation(
 
   return useMutation({
     mutationFn: ({unitId, input}) => chapterApi.update(unitId, input),
+    ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
       // Update the cache for this specific chapter
       queryClient.setQueryData(chapterKeys.detail(variables.unitId), data);
@@ -67,7 +68,6 @@ export function useUpdateChapterMutation(
 
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
-    ...options,
   });
 }
 
@@ -84,6 +84,7 @@ export function useDeleteChapterMutation(
 
   return useMutation({
     mutationFn: (unitId: string) => chapterApi.remove(unitId),
+    ...options,
     onSuccess: (data, unitId, onMutateResult, context) => {
       // Remove from cache
       queryClient.removeQueries({queryKey: chapterKeys.detail(unitId)});
@@ -93,7 +94,6 @@ export function useDeleteChapterMutation(
 
       options?.onSuccess?.(data, unitId, onMutateResult, context);
     },
-    ...options,
   });
 }
 

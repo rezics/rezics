@@ -28,6 +28,7 @@ export function useCreateCommentMutation(
 
   return useMutation({
     mutationFn: (input: CreateCommentInput) => commentApi.create(input),
+    ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
       // Invalidate lists under the root post/tree
       queryClient.invalidateQueries({queryKey: commentKeys.lists()});
@@ -40,7 +41,6 @@ export function useCreateCommentMutation(
 
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
-    ...options,
   });
 }
 
@@ -61,12 +61,14 @@ export function useUpdateCommentMutation(
 
   return useMutation({
     mutationFn: ({unitId, input}) => commentApi.update(unitId, input),
+    ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
-      queryClient.setQueryData(commentKeys.detail(variables.unitId), data);
       queryClient.invalidateQueries({queryKey: commentKeys.lists()});
+      queryClient.invalidateQueries({queryKey: commentKeys.commentTrees()});
+
+      queryClient.setQueryData(commentKeys.detail(variables.unitId), data);
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
-    ...options,
   });
 }
 
@@ -83,14 +85,15 @@ export function useDeleteCommentMutation(
 
   return useMutation({
     mutationFn: (unitId: string) => commentApi.remove(unitId),
+    ...options,
     onSuccess: (data, unitId, onMutateResult, context) => {
       // Remove detail cache
       queryClient.removeQueries({queryKey: commentKeys.detail(unitId)});
       // Invalidate lists for freshness
       queryClient.invalidateQueries({queryKey: commentKeys.lists()});
+      queryClient.invalidateQueries({queryKey: commentKeys.commentTrees()});
       options?.onSuccess?.(data, unitId, onMutateResult, context);
     },
-    ...options,
   });
 }
 
