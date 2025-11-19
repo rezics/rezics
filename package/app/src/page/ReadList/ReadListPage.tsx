@@ -1,6 +1,6 @@
 import {AccentBarContainer} from '@component/Common/AccentBar.tsx';
 // import {CollapsibleText} from '@component/Common/CollapsibleText.tsx';
-import {TreeReplyComponents} from '@component/Form/TreeReplyComponents.tsx';
+import {TreeReplyComponents} from '@/component/Form/Comment/TreeReplyComponents';
 import {
   Add,
   ChatBubbleOutline,
@@ -9,17 +9,14 @@ import {
   FavoriteBorder,
 } from '@mui/icons-material';
 import {IconButton, Tooltip} from '@mui/material';
-import React, {useRef, useState} from 'react';
+import React, {useRef} from 'react';
 import {useTranslation} from 'react-i18next';
 import {useLocation, useParams} from 'wouter';
 
 import {readlistQueries} from '@/api/readlist/readlist';
 import {useQuery} from '@tanstack/react-query';
 import {BookReviewGroup} from '@/component/ReadList/Review.tsx';
-import {ReplyDrawerContainer} from '@/component/Form/ReplyDrawer.tsx';
-import {useDialogStore} from '@/global/dialogStore';
-import {useCreateCommentMutation} from '@/api/comment/comment.mutations';
-import {useAlertStore} from '@/global/windowAlertStore';
+import {SingleCommentElementWrapper} from '@/component/Form/Comment/SingleCommentElementWrapper';
 // Collapsible single review component moved to component/ReadList/Review.tsx
 
 export const ReadListPage: React.FC = () => {
@@ -27,37 +24,12 @@ export const ReadListPage: React.FC = () => {
   const {readlistId} = useParams<{readlistId: string}>();
   const [, navigate] = useLocation();
   const commentRef = useRef<HTMLDivElement>(null);
-  const [currentReplyId, setCurrentReplyId] = useState<string | null>(null);
-  const setDialogVisible = useDialogStore(state => state.setDialogVisible);
-  const showAlert = useAlertStore(state => state.show);
   const handleGoToComments = () => {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore: scrollIntoView is not defined in the type declaration
     commentRef.current?.scrollIntoView({
       behavior: 'smooth',
       block: 'start',
-    });
-  };
-
-  const handleReply = () => {
-    console.log('reply', readlistId);
-    setCurrentReplyId(readlistId);
-    setDialogVisible(readlistId, true);
-  };
-
-  const createCommentMutation = useCreateCommentMutation({
-    onSuccess: () => {
-      showAlert('Comment created successfully');
-    },
-    onError: () => {
-      showAlert('Failed to create comment');
-    },
-  });
-
-  const handleSubmit = (content: string) => {
-    createCommentMutation.mutate({
-      rootPostId: readlistId || '',
-      content,
     });
   };
 
@@ -169,25 +141,17 @@ export const ReadListPage: React.FC = () => {
             <p className="text-2xl font-bold">评论</p>
           </div>
 
-          <IconButton
-            size="large"
-            sx={{fontSize: '1.5rem'}}
-            onClick={handleReply}
-          >
-            <ChatBubbleOutline fontSize="inherit" />
-          </IconButton>
+          <SingleCommentElementWrapper replyUnitId={readlistId || ''}>
+            <IconButton size="large" sx={{fontSize: '1.5rem'}}>
+              <ChatBubbleOutline fontSize="inherit" />
+            </IconButton>
+          </SingleCommentElementWrapper>
         </div>
 
         <TreeReplyComponents unitId={readlistId || ''} />
         {/* 供评论区占位符 */}
         <div className="mb-[200px]" />
       </div>
-      {currentReplyId && (
-        <ReplyDrawerContainer
-          dialogId={currentReplyId}
-          onSubmit={(content: string) => handleSubmit(content)}
-        />
-      )}
     </div>
   );
 };

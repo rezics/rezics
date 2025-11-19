@@ -4,7 +4,7 @@ import {SingleReviewShow} from './SingleReview';
 import {Box, Button} from '@mui/material';
 import React, {useEffect, useReducer} from 'react';
 import FullScreenModal from '../Common/FullScreenModal';
-import TreeReplyComponents from '../Form/TreeReplyComponents';
+import TreeReplyComponents from '../Form/Comment/TreeReplyComponents';
 
 export type ReviewListShowProps = {
   reviews: ReviewDTO[];

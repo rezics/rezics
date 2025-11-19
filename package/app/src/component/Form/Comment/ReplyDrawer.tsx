@@ -2,7 +2,7 @@ import {useDialogStore} from '@/global/dialogStore';
 import {Button, Drawer} from '@mui/material';
 import React from 'react';
 
-import EasyEditor from './EasyEditor';
+import EasyEditor from '../EasyEditor';
 
 export type ReplyDrawerShowProps = {
   open: boolean;

@@ -10,7 +10,7 @@ import {bookQueries} from '@/api/book/book';
 import {BookListViewItem} from '@/component/BookLib/BookList/BookListView';
 import FullScreenModal from '@/component/Common/FullScreenModal';
 import {useState} from 'react';
-import TreeReplyComponents from '@/component/Form/TreeReplyComponents';
+import TreeReplyComponents from '@/component/Form/Comment/TreeReplyComponents';
 
 export function ReviewPage({reviewId}: {reviewId: string}) {
   const {t} = useTranslation();

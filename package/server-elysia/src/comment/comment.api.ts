@@ -13,6 +13,7 @@ import {
   commentTreeResponseSchema,
   commentTreeQuerySchema,
   type CommentTreeResponse,
+  hasPermissionToComment,
 } from '@package/contract';
 
 /**
@@ -138,7 +139,7 @@ export const commentApi = coreInstance('/comments')
     async ({params, body, headers, jwt, set}) => {
       const payload = await verifyAuth(headers.authorization, jwt, set);
       const target = await commentService.getByUnitId(params.unitId);
-      if (target.unit.userId !== payload.unitId) {
+      if (!hasPermissionToComment(payload as any, target.unit as any)) {
         set.status = 403;
         throw new Error('Forbidden: you do not own this comment');
       }
@@ -165,7 +166,7 @@ export const commentApi = coreInstance('/comments')
     async ({params, headers, jwt, set}) => {
       const payload = await verifyAuth(headers.authorization, jwt, set);
       const target = await commentService.getByUnitId(params.unitId);
-      if (target.unit.userId !== payload.unitId) {
+      if (!hasPermissionToComment(payload as any, target.unit as any)) {
         set.status = 403;
         throw new Error('Forbidden: you do not own this comment');
       }

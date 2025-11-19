@@ -1,4 +1,4 @@
-import type {UiComment} from './Comment/TreeReplyComponents';
+import type {UiComment} from './TreeReplyComponents';
 import type {CommentTreeNode} from '@package/contract';
 
 export function buildTree(items: CommentTreeNode[] | undefined): UiComment[] {

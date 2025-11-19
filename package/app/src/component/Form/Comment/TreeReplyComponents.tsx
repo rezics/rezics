@@ -10,7 +10,7 @@ import {useDialogStore} from '@/global/dialogStore.ts';
 import {
   ReactionAdminBar,
   ReactionBarContainer,
-} from '../Common/ReactionBar.tsx';
+} from '../../Common/ReactionBar.tsx';
 import {ReplyDrawerContainer} from './ReplyDrawer.tsx';
 
 import {commentQueries} from '@/api/comment/comment.queries.ts';
@@ -22,7 +22,7 @@ import {
 } from '@/api/comment/comment.mutations';
 
 import {useUserStore} from '@/global/userStore';
-import {buildTree} from './treeReplyUtil';
+import {buildTree} from '../treeReplyUtil.ts';
 
 import {useAlertStore} from '@/global/windowAlertStore';
 // This is a temporary type definition based on the GraphQL schema.
