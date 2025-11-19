@@ -17,6 +17,7 @@
     "Evaluable",
     "icsid",
     "libphonenumber",
+    "linkify",
     "ltree",
     "pgcrypto",
     "pnpx",

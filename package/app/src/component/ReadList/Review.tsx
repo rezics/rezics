@@ -3,6 +3,7 @@ import {IconButton, Paper, Tooltip} from '@mui/material';
 import {ExpandMore, ExpandLess, ChatBubbleOutline} from '@mui/icons-material';
 import {BookListViewItem} from '@/component/BookLib/BookList/BookListView.tsx';
 import {navigate} from 'wouter/use-browser-location';
+import {MarkdownContent} from '../Common/MarkdownContent';
 
 export type ReviewData = {
   unitId: string;
@@ -15,6 +16,9 @@ type CollapsibleReviewProps = {
   defaultExpanded?: boolean;
   maxCollapsedLines?: number;
   className?: string;
+  contentClassName?: string;
+  header?: React.ReactNode;
+  footer?: React.ReactNode;
 };
 
 /**
@@ -28,6 +32,9 @@ export const CollapsibleReview: React.FC<CollapsibleReviewProps> = ({
   defaultExpanded = false,
   maxCollapsedLines = 4,
   className = '',
+  contentClassName = 'text-[13px] sm:text-sm text-gray-700 leading-6',
+  header,
+  footer,
 }) => {
   const [expanded, setExpanded] = React.useState<boolean>(defaultExpanded);
   const contentId = React.useId();
@@ -70,6 +77,7 @@ export const CollapsibleReview: React.FC<CollapsibleReviewProps> = ({
       role="region"
       aria-label="Book review"
     >
+      {header}
       <div className="flex items-start gap-3">
         <Tooltip title="打开书评页面">
           <IconButton
@@ -95,9 +103,7 @@ export const CollapsibleReview: React.FC<CollapsibleReviewProps> = ({
               <div
                 ref={contentRef}
                 id={contentId}
-                className={
-                  'text-[13px] sm:text-sm text-gray-700 leading-6 overflow-hidden'
-                }
+                className={`overflow-hidden ${contentClassName}`}
                 style={
                   expanded
                     ? {display: 'block'}
@@ -110,7 +116,7 @@ export const CollapsibleReview: React.FC<CollapsibleReviewProps> = ({
                       }
                 }
               >
-                {review.content}
+                <MarkdownContent content={review?.content} />
               </div>
 
               {/* subtle gradient when collapsed and overflowing */}
@@ -140,6 +146,7 @@ export const CollapsibleReview: React.FC<CollapsibleReviewProps> = ({
           )}
         </div>
       </div>
+      {footer}
     </Paper>
   );
 };

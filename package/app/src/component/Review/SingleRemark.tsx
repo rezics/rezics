@@ -114,7 +114,7 @@ export const SingleRemarkShow: React.FC<SingleRemarkShowProps> = ({
               </div>
               {/* TODO Add a new line to show Awards or don't show awards for short reviews */}
             </div>
-            <Tooltip title="查看回复" placement="bottom">
+            <Tooltip title="回复数">
               <div className="flex items-center gap-1 cursor-pointer hover:text-blue-500">
                 <ChatBubbleOutlineIcon style={{fontSize: '1rem'}} />
                 <span className="text-xs">{review.replies ?? 0} </span>

@@ -1,5 +1,4 @@
 import {AccentBarContainer} from '@component/Common/AccentBar.tsx';
-// import {CollapsibleText} from '@component/Common/CollapsibleText.tsx';
 import {TreeReplyComponents} from '@/component/Form/Comment/TreeReplyComponents';
 import {
   Add,
@@ -17,7 +16,6 @@ import {readlistQueries} from '@/api/readlist/readlist';
 import {useQuery} from '@tanstack/react-query';
 import {BookReviewGroup} from '@/component/ReadList/Review.tsx';
 import {SingleCommentElementWrapper} from '@/component/Form/Comment/SingleCommentElementWrapper';
-// Collapsible single review component moved to component/ReadList/Review.tsx
 
 export const ReadListPage: React.FC = () => {
   const {t} = useTranslation();

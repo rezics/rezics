@@ -3,8 +3,6 @@ import {SingleReviewShow} from './SingleReview';
 
 import {Box, Button} from '@mui/material';
 import React, {useEffect, useReducer} from 'react';
-import FullScreenModal from '../Common/FullScreenModal';
-import TreeReplyComponents from '../Form/Comment/TreeReplyComponents';
 
 export type ReviewListShowProps = {
   reviews: ReviewDTO[];
@@ -16,33 +14,18 @@ export type ReviewListShowProps = {
 
 export const ReviewListShow: React.FC<ReviewListShowProps> = ({
   reviews,
-  isReplyModalOpen,
-  currentReplyId,
   onReply,
-  onCloseReplyModal,
 }) => {
   return (
-    <>
-      <Box>
-        {reviews.map((review: ReviewDTO) => (
-          <SingleReviewShow
-            key={review.unitId}
-            review={review}
-            onReply={onReply}
-          />
-        ))}
-      </Box>
-
-      <FullScreenModal
-        open={isReplyModalOpen}
-        onClose={onCloseReplyModal}
-        title="回复"
-      >
-        <Box>
-          <TreeReplyComponents unitId={currentReplyId || ''} />
-        </Box>
-      </FullScreenModal>
-    </>
+    <Box>
+      {reviews.map((review: ReviewDTO) => (
+        <SingleReviewShow
+          key={review.unitId}
+          review={review}
+          onReply={onReply}
+        />
+      ))}
+    </Box>
   );
 };
 

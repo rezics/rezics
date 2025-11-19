@@ -7,9 +7,11 @@ import {useDialogStore} from '@/global/dialogStore';
 export function SingleCommentElementWrapper({
   replyUnitId,
   children,
+  className,
 }: {
   replyUnitId: string;
   children: React.ReactNode;
+  className?: string;
 }) {
   const setDialogVisible = useDialogStore(state => state.setDialogVisible);
   const [isReplyModalOpen, setIsReplyModalOpen] = useState(false);
@@ -35,7 +37,7 @@ export function SingleCommentElementWrapper({
     });
   };
   return (
-    <div>
+    <div className={className}>
       {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events */}
       <div role="button" tabIndex={0} onClick={handleReply}>
         {children}

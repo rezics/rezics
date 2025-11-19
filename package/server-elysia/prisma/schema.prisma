@@ -233,6 +233,7 @@ model Reaction {
 
   @@unique([userId, targetType, targetId, reaction])
   @@index([targetType, targetId])
+  @@index([targetType, userId])
 }
 
 model ReactionSummary {

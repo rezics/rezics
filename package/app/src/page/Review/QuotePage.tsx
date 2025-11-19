@@ -17,6 +17,7 @@ import {useQuery} from '@tanstack/react-query';
 import {unitQueries} from '@/api/unit/unit.queries';
 import FormatQuoteIcon from '@mui/icons-material/FormatQuote';
 import {SingleCommentElementWrapper} from '@/component/Form/Comment/SingleCommentElementWrapper';
+import {MarkdownContent} from '@/component/Common/MarkdownContent';
 // Collapsible single review component moved to component/ReadList/Review.tsx
 
 interface QuotePageProps {
@@ -124,7 +125,9 @@ export const QuotePage: React.FC<QuotePageProps> = ({unitId}) => {
             mt: 0.5,
           }}
         />
-        <div className="flex-1 mt-2">{Quote.content && Quote.content}</div>
+        <div className="flex-1 mt-2">
+          {Quote.content && <MarkdownContent content={Quote.content} />}
+        </div>
       </div>
 
       {/* Book List */}

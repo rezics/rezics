@@ -1,6 +1,7 @@
 import {useTheme} from '@mui/material/styles';
 import React, {useEffect, useRef, useState} from 'react';
 import {useTranslation} from 'react-i18next';
+import {MarkdownContent} from './MarkdownContent';
 
 export type CollapsibleByLineTextShowProps = {
   content?: string;
@@ -37,7 +38,7 @@ export const CollapsibleByLineTextShow: React.FC<
           overflow: 'hidden',
         }}
       >
-        {content ? content : children}
+        {content ? <MarkdownContent content={content} /> : children}
         {isExpanded && (
           <button
             onClick={onToggle}

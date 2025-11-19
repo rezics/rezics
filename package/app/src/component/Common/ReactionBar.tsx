@@ -1,12 +1,12 @@
 import {
   ChatBubbleOutline,
-  KeyboardArrowDown,
-  KeyboardArrowUp,
   StarBorder,
   OpenInNew,
   DeleteOutlined,
   EditOutlined,
 } from '@mui/icons-material';
+import ThumbDownAltOutlinedIcon from '@mui/icons-material/ThumbDownAltOutlined';
+import ThumbUpAltOutlinedIcon from '@mui/icons-material/ThumbUpAltOutlined';
 import {IconButton} from '@mui/material';
 import React, {useState} from 'react';
 import {ReactionBarToolBox} from './reactionBarToolBox';
@@ -51,6 +51,7 @@ export type ReactionBarShowProps = {
   size?: 'small' | 'medium' | 'large';
   fontSize?: string;
   itemUrl?: string;
+  hideReply?: boolean;
 };
 
 export const ReactionBarShow: React.FC<ReactionBarShowProps> = ({
@@ -59,6 +60,7 @@ export const ReactionBarShow: React.FC<ReactionBarShowProps> = ({
   size = 'large',
   fontSize = '1.5rem',
   itemUrl,
+  hideReply = false,
 }) => {
   const handleReply = () => {
     onReply?.();
@@ -73,18 +75,22 @@ export const ReactionBarShow: React.FC<ReactionBarShowProps> = ({
     >
       <div>
         <IconButton size={size} sx={{fontSize}}>
-          <KeyboardArrowUp fontSize="inherit" />
+          <ThumbUpAltOutlinedIcon fontSize="inherit" />
         </IconButton>
-        <IconButton size={size} sx={{fontSize, ml: 1}}>
-          <KeyboardArrowDown fontSize="inherit" />
+      </div>
+      <div>
+        <IconButton size={size} sx={{fontSize}}>
+          <ThumbDownAltOutlinedIcon fontSize="inherit" />
         </IconButton>
       </div>
 
-      <div>
-        <IconButton size={size} sx={{fontSize}} onClick={handleReply}>
-          <ChatBubbleOutline fontSize="inherit" />
-        </IconButton>
-      </div>
+      {!hideReply && (
+        <div>
+          <IconButton size={size} sx={{fontSize}} onClick={handleReply}>
+            <ChatBubbleOutline fontSize="inherit" />
+          </IconButton>
+        </div>
+      )}
 
       <div>
         <IconButton size={size} sx={{fontSize}}>
