@@ -45,7 +45,6 @@ interface CommentNodeProps {
   comment: UiComment;
   level?: number;
   openDrawer: (id: string, content?: string) => void;
-  setCurrentEditCommentId: (id: string) => void;
 }
 
 function havePermission(comment: any, user: any) {
@@ -59,7 +58,6 @@ const CommentNode: React.FC<CommentNodeProps> = ({
   comment,
   level = 0,
   openDrawer,
-  setCurrentEditCommentId,
 }) => {
   // Expand first two levels by default
   const [isExpanded, setIsExpanded] = useState(level < 2);
@@ -99,7 +97,6 @@ const CommentNode: React.FC<CommentNodeProps> = ({
     console.log('handleUpdate', comment.id);
     const key = `update_${comment.id}`;
     setDialogContent(key, comment.content ?? '');
-    setCurrentEditCommentId(comment.id);
     openDrawer(key);
   };
 
@@ -179,7 +176,6 @@ const CommentNode: React.FC<CommentNodeProps> = ({
               comment={reply}
               level={level + 1}
               openDrawer={openDrawer}
-              setCurrentEditCommentId={setCurrentEditCommentId}
             />
           ))}
         </Collapse>
@@ -207,11 +203,7 @@ export function TreeReplyComponents({unitId}: ReplyComponentsProps) {
 
   // currentReplyId
   const setDialogVisible = useDialogStore(state => state.setDialogVisible);
-  const setDialogContent = useDialogStore(state => state.setDialogContent);
   const [currentReplyId, setCurrentReplyId] = useState<string | null>(null);
-  const [currentEditCommentId, setCurrentEditCommentId] = useState<
-    string | null
-  >(null);
   const [topLevelComments, setTopLevelComments] = useState<UiComment[]>([]);
 
   useEffect(() => {
@@ -241,11 +233,9 @@ export function TreeReplyComponents({unitId}: ReplyComponentsProps) {
   const updateCommentMutation = useUpdateCommentMutation({
     onSuccess: () => {
       showAlert('Comment updated successfully');
-      setCurrentEditCommentId(null);
     },
     onError: () => {
       showAlert('Failed to update comment');
-      setCurrentEditCommentId(null);
     },
   });
 
@@ -277,7 +267,6 @@ export function TreeReplyComponents({unitId}: ReplyComponentsProps) {
               key={comment.id}
               comment={comment}
               openDrawer={openDrawer}
-              setCurrentEditCommentId={setCurrentEditCommentId}
             />
           ))
         ) : (

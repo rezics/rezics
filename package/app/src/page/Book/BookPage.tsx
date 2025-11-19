@@ -1,10 +1,10 @@
 import {BookReviews} from '@/component/Book/BookReviewsPreview.tsx';
 import {TagWrapper} from '@/component/Tag/TagWrapper.tsx';
-import {ShortBookReviews} from '@/component/Book/ShortBookReviewsPreview.tsx';
+import {RemarkPreview} from '@/component/Book/RemarkPreview';
 import {AccentBarWithTextContainer} from '@component/Common/AccentBar.tsx';
 import {TabContext, TabList, TabPanel} from '@mui/lab';
 import {Box, Divider, Grid, Paper, Stack, Tab, Typography} from '@mui/material';
-import React, {useEffect, useRef} from 'react';
+import React, {useEffect, useMemo, useRef} from 'react';
 import {useLocation} from 'wouter';
 
 import {AuthorInfoContainer} from '@/component/Book/AuthorInfo.tsx';
@@ -115,7 +115,7 @@ export const BookPageShow: React.FC<ShowProps> = ({
                   <QuoteExcerptPreviewContainer id={bookInfo?.unitId || ''} />
                   <Divider />
 
-                  {/* ANCHOR Short Reviews */}
+                  {/* ANCHOR Remark */}
                   <Box>
                     <div>
                       <ArrowForwardIconContainer
@@ -125,7 +125,7 @@ export const BookPageShow: React.FC<ShowProps> = ({
                         <AccentBarWithTextContainer text="Remark" />
                       </ArrowForwardIconContainer>
                     </div>
-                    <ShortBookReviews bookId={bookInfo?.unitId || ''} />
+                    <RemarkPreview bookId={bookInfo?.unitId || ''} />
                   </Box>
                 </Stack>
               </TabPanel>
@@ -225,7 +225,11 @@ export const BookPageContainer: React.FC<ContainerProps> = ({bookId}) => {
   const book: any = useBookPageStore(s => s.books[bookId]);
   // const { data, isLoading, error } = useQuery(bookQueries.byId(bookId));
   const {data, isLoading, error} = useQuery(bookQueries.detail(bookId));
-  const rating = 8.5;
+  const {data: rating} = useQuery(bookQueries.rating(bookId));
+  const ratingValue = useMemo(() => {
+    const average = (rating?.totalScore || 0) / (rating?.totalCount || 1) || 0;
+    return Number(average.toFixed(1));
+  }, [rating]);
 
   useEffect(() => {
     useBookPageStore.getState().updateBook(bookId, {...data});
@@ -242,7 +246,7 @@ export const BookPageContainer: React.FC<ContainerProps> = ({bookId}) => {
   return (
     <BookPageShow
       bookInfo={book}
-      rating={rating}
+      rating={ratingValue || 0}
       activeTab={activeTab}
       onTabChange={handleTabChange}
     />

@@ -22,6 +22,8 @@ export const bookKeys = {
    */
   details: () => [...bookKeys.all(), 'detail'] as const,
   detail: (postId: string) => [...bookKeys.details(), postId] as const,
+  rating: (bookUnitId: string) =>
+    [...bookKeys.all(), 'rating', bookUnitId] as const,
   chapterIndex: (bookUnitId: string) =>
     [...bookKeys.all(), 'chapterIndex', bookUnitId] as const,
 

@@ -9,6 +9,8 @@ import {
   type ReviewListResponse,
   type ReviewResponse,
   type CreateReviewInput,
+  reviewQuerySchema,
+  type reviewQuerySchemaType,
 } from '@package/contract';
 import {reviewService} from './review.service';
 import {mapReviewToDTO} from './mapper';
@@ -39,12 +41,15 @@ export const reviewApi = coreInstance('/reviews')
    */
   .get(
     '/:id',
-    async ({params}): Promise<ReviewResponse> => {
-      const review = await reviewService.getById(params.id);
+    async ({params, query}): Promise<ReviewResponse> => {
+      const review = await reviewService.getById(params.id, {
+        unitType: query.unitType as UnitType,
+      });
       return mapReviewToDTO(review);
     },
     {
       params: reviewParamsSchema,
+      query: reviewQuerySchema,
       detail: {
         summary: 'Get review',
         description: 'Get a single review by id',
@@ -85,31 +90,35 @@ export const reviewApi = coreInstance('/reviews')
     async ({
       params,
       body,
+      query,
       headers,
       jwt,
       set,
     }: {
       params: {id: string};
       body: import('@package/contract').UpdateReviewInput;
+      query: reviewQuerySchemaType;
       headers: {authorization?: string};
       jwt: any;
       set: any;
     }): Promise<ReviewResponse> => {
       const payload = await verifyAuth(headers.authorization, jwt, set);
+      const unitType = query.unitType ?? UnitType.REVIEW;
       await ensureReviewOwnership(
         params.id,
-        UnitType.REVIEW,
+        unitType as UnitType,
         payload.unitId,
         set,
         payload,
       );
       const review = await reviewService.update(params.id, body, {
-        unitType: UnitType.REVIEW,
+        unitType: unitType as UnitType,
       });
       return mapReviewToDTO(review);
     },
     {
       params: reviewParamsSchema,
+      query: reviewQuerySchema,
       body: updateReviewSchema,
       detail: {
         summary: 'Update review',
@@ -128,24 +137,28 @@ export const reviewApi = coreInstance('/reviews')
       headers,
       jwt,
       set,
+      query,
     }: {
       params: {id: string};
       headers: {authorization?: string};
       jwt: any;
       set: any;
+      query: reviewQuerySchemaType;
     }): Promise<{message: string}> => {
       const payload = await verifyAuth(headers.authorization, jwt, set);
+      const unitType = query.unitType ?? UnitType.REVIEW;
       await ensureReviewOwnership(
         params.id,
-        UnitType.REVIEW,
+        unitType as UnitType,
         payload.unitId,
         set,
       );
-      await reviewService.delete(params.id, {unitType: UnitType.REVIEW});
+      await reviewService.delete(params.id, {unitType: unitType as UnitType});
       return {message: 'Review deleted successfully'};
     },
     {
       params: reviewParamsSchema,
+      query: reviewQuerySchema,
       detail: {
         summary: 'Delete review',
         description: 'Delete a review by id',

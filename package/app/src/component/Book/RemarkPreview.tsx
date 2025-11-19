@@ -1,4 +1,4 @@
-import {reviewQueries} from '@/api/review/review';
+import {remarkQueries} from '@/api/review/review';
 import {useQuery} from '@tanstack/react-query';
 import React from 'react';
 import {ShortReviewListShow} from '../Review/ShortReviewList.tsx';
@@ -8,9 +8,9 @@ interface ShortBookReviewsProps {
 
 // 短评就是Post评论
 
-export const ShortBookReviews: React.FC<ShortBookReviewsProps> = ({bookId}) => {
+export const RemarkPreview: React.FC<ShortBookReviewsProps> = ({bookId}) => {
   const {data, isLoading, error} = useQuery(
-    reviewQueries.byBook(bookId, {limit: 4}),
+    remarkQueries.list({bookId, limit: 4}),
   );
 
   const handleLike = (reviewId: string) => {

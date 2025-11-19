@@ -14,6 +14,14 @@ import {buildQueryString} from '../utils/buildQuery';
 
 import {apiFetch} from '../react-query/http';
 
+type Rating = {
+  unitId: string;
+  updatedAt: Date;
+  domain: string;
+  totalScore: number;
+  totalCount: number;
+};
+
 /**
  * Book API methods
  */
@@ -30,6 +38,13 @@ export const bookApi = {
    */
   get: async (unitId: string): Promise<BookResponse> => {
     return apiFetch<BookResponse>(`/books/${unitId}`);
+  },
+
+  /**
+   * Get rating by book unitId
+   */
+  getRating: async (bookUnitId: string): Promise<Rating> => {
+    return apiFetch<Rating>(`/books/${bookUnitId}/rating`);
   },
 
   /**

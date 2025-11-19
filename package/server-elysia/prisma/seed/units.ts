@@ -10,21 +10,20 @@ import {
 } from './unitStats.js';
 
 /**
- * Unit types to generate (excluding BOOK and COMMENT)
+ * Per-book unit types to generate
  */
-const UNIT_TYPES: UnitType[] = [
-  UnitTypeEnum.NOTE,
+const PER_BOOK_TYPES: UnitType[] = [
+  UnitTypeEnum.QUOTE,
   UnitTypeEnum.REVIEW,
   UnitTypeEnum.REMARK,
-  UnitTypeEnum.QUOTE,
-  UnitTypeEnum.IMAGE,
-  UnitTypeEnum.VIDEO,
 ];
 
 /**
- * Seed other units (non-book, non-comment units)
+ * Seed units:
+ * 1) For each book in bookUnitIds, generate 10-100 of each: QUOTE, REVIEW, REMARK
+ * 2) Then generate `total` CHAPTER units across random books
  * @param prisma - Prisma client instance
- * @param total - Number of units to create
+ * @param total - Number of CHAPTER units to create
  * @param users - Array of created users
  * @param bookUnitIds - Array of book unit IDs
  * @param tagUnitIds - Array of tag unit IDs
@@ -37,27 +36,91 @@ export async function seedOtherUnits(
   bookUnitIds: string[],
   tagUnitIds: string[],
 ): Promise<CreatedUnit[]> {
-  console.log(`📝 Seeding ${total} other units...`);
+  console.log(
+    `📝 Seeding per-book QUOTE/REVIEW/REMARK and ${total} CHAPTER units...`,
+  );
   const created: CreatedUnit[] = [];
 
+  if (bookUnitIds.length === 0) {
+    console.warn(
+      '⚠️ No bookUnitIds provided; skipping unit seeding tied to books.',
+    );
+    return created;
+  }
+
+  // 1) For each book, generate 10-100 of each: QUOTE, REVIEW, REMARK
+  for (const bookUnitId of bookUnitIds) {
+    for (const type of PER_BOOK_TYPES) {
+      const countForType = randomInt(10, 100);
+      for (let i = 0; i < countForType; i++) {
+        const author = faker.helpers.arrayElement(users);
+        const title = buildUnitTitleByType(type);
+        const metadata = buildMetadataByType(type, {bookIds: [bookUnitId]});
+        const publishedAt = randomBoolean(0.8)
+          ? faker.date.past({years: 2})
+          : null;
+
+        const unit = await prisma.unit.create({
+          data: {
+            userId: author.unitId,
+            type,
+            status: randomBoolean(0.9) ? UnitStatus.ACTIVE : UnitStatus.DRAFT,
+            title,
+            content: randomBoolean(0.8) ? generateParagraph(1, 4) : null,
+            metadata,
+            targetUnitId: bookUnitId,
+            publishedAt,
+            tags: {
+              connect: pickN(tagUnitIds, randomInt(0, 4)).map(unitId => ({
+                unitId,
+              })),
+            },
+          },
+          select: {id: true, type: true},
+        });
+
+        if (type === UnitTypeEnum.REMARK || type === UnitTypeEnum.REVIEW) {
+          const rating = (metadata as {rating: number}).rating;
+          await prisma.rating.upsert({
+            where: {unitId_domain: {unitId: bookUnitId, domain: bookUnitId}},
+            update: {
+              domain: bookUnitId,
+              totalScore: {
+                increment: rating,
+              },
+              totalCount: {
+                increment: 1,
+              },
+            },
+            create: {
+              unitId: bookUnitId,
+              domain: bookUnitId,
+              totalScore: rating,
+              totalCount: 1,
+            },
+          });
+        }
+
+        await upsertViewCountForUnit(prisma, unit.id, randomInt(0, 10_000));
+        await upsertReactionSummariesForUnit(prisma, unit.id, {
+          like: randomInt(0, 300),
+          dislike: randomInt(0, 60),
+          love: randomInt(0, 220),
+        });
+
+        created.push(unit);
+      }
+    }
+  }
+
+  // 2) Generate `total` CHAPTER units across random books
   for (let i = 0; i < total; i++) {
     const author = faker.helpers.arrayElement(users);
-    const type = faker.helpers.arrayElement(UNIT_TYPES);
+    const bookUnitId = faker.helpers.arrayElement(bookUnitIds);
+    const type = UnitTypeEnum.CHAPTER;
     const title = buildUnitTitleByType(type);
-    const metadata = buildMetadataByType(type, {bookIds: bookUnitIds});
+    const metadata = buildMetadataByType(type, {bookIds: [bookUnitId]});
     const publishedAt = randomBoolean(0.8) ? faker.date.past({years: 2}) : null;
-
-    // Set target unit for reviews, quotes, and chapters
-    let targetUnitId: string | null = null;
-    if (
-      (type === UnitTypeEnum.REVIEW ||
-        type === UnitTypeEnum.QUOTE ||
-        type === UnitTypeEnum.REMARK ||
-        type === UnitTypeEnum.CHAPTER) &&
-      bookUnitIds.length > 0
-    ) {
-      targetUnitId = faker.helpers.arrayElement(bookUnitIds);
-    }
 
     const unit = await prisma.unit.create({
       data: {
@@ -67,7 +130,7 @@ export async function seedOtherUnits(
         title,
         content: randomBoolean(0.8) ? generateParagraph(1, 4) : null,
         metadata,
-        targetUnitId: targetUnitId ?? undefined,
+        targetUnitId: bookUnitId,
         publishedAt,
         tags: {
           connect: pickN(tagUnitIds, randomInt(0, 4)).map(unitId => ({unitId})),
@@ -75,29 +138,6 @@ export async function seedOtherUnits(
       },
       select: {id: true, type: true},
     });
-
-    if (type === UnitTypeEnum.REMARK || type === UnitTypeEnum.REVIEW) {
-      const rating = (metadata as {rating: number}).rating;
-      const bookUnitId = targetUnitId ?? '';
-      await prisma.rating.upsert({
-        where: {unitId_domain: {unitId: bookUnitId, domain: bookUnitId}},
-        update: {
-          domain: bookUnitId,
-          totalScore: {
-            increment: rating,
-          },
-          totalCount: {
-            increment: 1,
-          },
-        },
-        create: {
-          unitId: bookUnitId,
-          domain: bookUnitId,
-          totalScore: rating,
-          totalCount: 1,
-        },
-      });
-    }
 
     await upsertViewCountForUnit(prisma, unit.id, randomInt(0, 10_000));
     await upsertReactionSummariesForUnit(prisma, unit.id, {

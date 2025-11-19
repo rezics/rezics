@@ -4,12 +4,13 @@ import SentimentSatisfiedAltIcon from '@mui/icons-material/SentimentSatisfiedAlt
 import ThumbDownIcon from '@mui/icons-material/ThumbDown';
 import ThumbUpIcon from '@mui/icons-material/ThumbUp';
 import {Tooltip} from '@mui/material';
+import {Link} from 'wouter';
 import type {ReviewDTO} from '@package/contract';
 import React from 'react';
 // import { CollapsibleText } from "../Common/CollapsibleText";
 import {CollapsibleByLineTextContainer} from '../Common/CollapsibleByLineText';
 
-export type SingleShortBookReviewShowProps = {
+export type SingleRemarkShowProps = {
   review: ReviewDTO & {
     likes?: number;
     dislikes?: number;
@@ -20,9 +21,11 @@ export type SingleShortBookReviewShowProps = {
   onDislike?: (reviewId: string) => void;
 };
 
-export const SingleShortBookReviewShow: React.FC<
-  SingleShortBookReviewShowProps
-> = ({review, onLike, onDislike}) => {
+export const SingleRemarkShow: React.FC<SingleRemarkShowProps> = ({
+  review,
+  onLike,
+  onDislike,
+}) => {
   const handleLike = () => {
     onLike?.(review.unitId);
   };
@@ -50,14 +53,17 @@ export const SingleShortBookReviewShow: React.FC<
             </span>
             <Tooltip title="阅读完整评测" placement="top-start">
               <div className="flex items-center gap-1 cursor-pointer bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 p-1 rounded-md">
-                {isRecommended ? (
-                  <ThumbUpIcon fontSize="small" className="text-blue-500" />
-                ) : (
-                  <ThumbDownIcon fontSize="small" className="text-gray-500" />
-                )}
-                <span className="text-xs">
-                  {review.rating?.toFixed(1) || '0.0'}/5.0 · {review.created_at}
-                </span>
+                <Link href={`/remark/${review.unitId}`}>
+                  {isRecommended ? (
+                    <ThumbUpIcon fontSize="small" className="text-blue-500" />
+                  ) : (
+                    <ThumbDownIcon fontSize="small" className="text-gray-500" />
+                  )}
+                  <span className="text-xs">
+                    {review.rating?.toFixed(1) || '0.0'}/5.0 ·{' '}
+                    {review.created_at}
+                  </span>
+                </Link>
               </div>
             </Tooltip>
           </div>

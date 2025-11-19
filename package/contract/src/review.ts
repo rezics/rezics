@@ -20,6 +20,14 @@ export const reviewDTOSchema = t.Object({
 
 export type ReviewDTO = (typeof reviewDTOSchema)['static'];
 
+export const reviewQuerySchema = t.Object({
+  unitType: t.Optional(t.String()), // REVIEW | REMARK
+});
+
+export type reviewQuerySchemaType = (typeof reviewQuerySchema)['static'];
+
+export type ReviewQuery = (typeof reviewQuerySchema)['static'];
+
 /**
  * Create Review Input
  * - userId & bookId are required
@@ -62,6 +70,7 @@ export type QuoteDTO = (typeof quoteDTOSchema)['static'];
 // ANCHOR Review list/query contracts
 
 export const reviewListQuerySchema = t.Object({
+  unitType: t.Optional(t.String()), // REVIEW | REMARK
   q: t.Optional(t.String()), // search in title/content
   userId: t.Optional(t.String()),
   bookId: t.Optional(t.String()),

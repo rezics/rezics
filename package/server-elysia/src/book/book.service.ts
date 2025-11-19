@@ -1,6 +1,6 @@
 import {prisma} from '@/prisma/client';
 import {UnitStatus, UnitType} from '@/prisma/client';
-import type {Prisma} from '@/prisma/client';
+import type {Prisma, Rating} from '@/prisma/client';
 import type {BookWithRelations} from './types';
 import {bookInclude} from './types';
 import type {
@@ -146,6 +146,16 @@ export class BookService {
     });
 
     return book as BookWithRelations;
+  }
+
+  /**
+   * Get rating by book unitId
+   */
+  async getRatingByBookUnitId(unitId: string): Promise<Rating> {
+    const rating = await prisma.rating.findUniqueOrThrow({
+      where: {unitId_domain: {unitId: unitId, domain: unitId}},
+    });
+    return rating;
   }
 
   /**

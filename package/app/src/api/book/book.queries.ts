@@ -101,12 +101,23 @@ export const bookChapterIndexQuery = (bookUnitId: string) =>
   });
 
 /**
+ * Query options for getting rating by book unitId
+ */
+export const bookRatingQuery = (bookUnitId: string) =>
+  queryOptions({
+    queryKey: bookKeys.rating(bookUnitId),
+    queryFn: () => bookApi.getRating(bookUnitId),
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+
+/**
  * Combined query options export
  */
 export const bookQueries = {
   list: bookListQuery,
   detail: bookDetailQuery,
   search: bookSearchQuery,
+  rating: bookRatingQuery,
   byUser: booksByUserQuery,
   byAuthor: booksByAuthorQuery,
   byIsbn: bookByIsbnQuery,

@@ -62,7 +62,7 @@ export async function seedBooks(
         metadata: {},
         publishedAt,
         tags: {
-          connect: pickN(tagUnitIds, randomInt(0, 3)).map(unitId => ({unitId})),
+          connect: pickN(tagUnitIds, randomInt(1, 5)).map(unitId => ({unitId})),
         },
       },
       select: {id: true, type: true},

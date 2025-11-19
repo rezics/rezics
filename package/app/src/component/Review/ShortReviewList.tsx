@@ -1,6 +1,6 @@
 import {Stack} from '@mui/material';
 import React from 'react';
-import {SingleShortBookReviewShow} from './SingleShortBookReview';
+import {SingleRemarkShow} from './SingleRemark';
 import type {ReviewListResponse} from '@package/contract';
 
 export type ShortReviewListShowProps = {
@@ -23,7 +23,7 @@ export const ShortReviewListShow: React.FC<ShortReviewListShowProps> = ({
   return (
     <Stack spacing={spacing}>
       {(Array.isArray(data.reviews) ? data.reviews : []).map(review => (
-        <SingleShortBookReviewShow
+        <SingleRemarkShow
           key={review.unitId}
           review={review}
           onLike={onLike}

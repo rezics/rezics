@@ -55,8 +55,6 @@ export class ReviewService {
   ): Promise<ReviewWithRelations> {
     const unitType = this.resolveUnitType(cfg?.unitType);
     const unit = await unitService.getByUnitId(id, {include: reviewInclude});
-    if (unit.type !== unitType)
-      throw new Error(`Unit ${id} is not a ${unitType} review.`);
     return unit as ReviewWithRelations;
   }
 
@@ -107,7 +105,6 @@ export class ReviewService {
     req: UpdateReviewInput,
     cfg?: UnitTypeOption,
   ): Promise<ReviewWithRelations> {
-    const unitType = this.resolveUnitType(cfg?.unitType);
     const ratingProvided = Object.prototype.hasOwnProperty.call(req, 'rating');
     const normalizedRating =
       ratingProvided && typeof req.rating === 'number'
@@ -119,8 +116,6 @@ export class ReviewService {
         where: {id},
         select: {metadata: true, targetUnitId: true, type: true},
       });
-      if (existing.type !== unitType)
-        throw new Error(`Unit ${id} is not a ${unitType} review.`);
 
       const currentRating = extractRatingFromMetadata(existing.metadata);
       const metadataUpdate =
@@ -171,8 +166,6 @@ export class ReviewService {
         where: {id},
         select: {metadata: true, targetUnitId: true, type: true},
       });
-      if (existing.type !== unitType)
-        throw new Error(`Unit ${id} is not a ${unitType} review.`);
 
       const currentRating = extractRatingFromMetadata(existing.metadata);
       await unitService.delete(id, tx);

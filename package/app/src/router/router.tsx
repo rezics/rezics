@@ -165,6 +165,13 @@ export default (
             </MainLayout>
           )}
         </Route>
+        <Route path="/remark/:reviewId">
+          {({reviewId}) => (
+            <MainLayout>
+              <ReviewPage reviewId={reviewId} />
+            </MainLayout>
+          )}
+        </Route>
         <Route path="/review/short/book/:bookId">
           {() => (
             <MainLayout>

@@ -60,7 +60,7 @@ export const BookHeroShow: React.FC<{
                         <div className="flex items-center gap-2">
                           <Rating
                             // value={(rating || 0) / 2}
-                            value={8}
+                            value={rating}
                             precision={0.5}
                             readOnly
                           />

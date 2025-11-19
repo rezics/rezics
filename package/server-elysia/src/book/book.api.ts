@@ -18,6 +18,7 @@ import {unitService} from '@/src/unit/unit.service';
 import {coreInstance} from '../core';
 import {verifyAuth} from '@/src/utils/authUtils';
 import {hasPermissionToUpdateBook} from '@package/contract';
+import type {Rating} from '@/prisma/client';
 
 /**
  * Book Controller - Elysia.js routes
@@ -57,6 +58,20 @@ export const bookApi = coreInstance('/books')
         summary: 'Get book',
         description: 'Get a single book by unit ID',
         tags: ['Books'],
+      },
+    },
+  )
+
+  .get(
+    '/:unitId/rating',
+    async ({params}): Promise<Rating> => {
+      const rating = await bookService.getRatingByBookUnitId(params.unitId);
+      return rating;
+    },
+    {
+      params: bookParamsSchema,
+      detail: {
+        summary: 'Get rating',
       },
     },
   )
