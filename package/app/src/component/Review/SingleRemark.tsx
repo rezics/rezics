@@ -3,20 +3,60 @@ import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import SentimentSatisfiedAltIcon from '@mui/icons-material/SentimentSatisfiedAlt';
 import ThumbDownIcon from '@mui/icons-material/ThumbDown';
 import ThumbUpIcon from '@mui/icons-material/ThumbUp';
-import {Tooltip} from '@mui/material';
+import {Box, Tooltip, Typography} from '@mui/material';
 import {Link} from 'wouter';
 import type {ReviewDTO} from '@package/contract';
-import React from 'react';
+import React, {useState, useEffect} from 'react';
 // import { CollapsibleText } from "../Common/CollapsibleText";
 import {CollapsibleByLineTextContainer} from '../Common/CollapsibleByLineText';
 
+export function MetaInfoBadge({
+  review,
+  isRecommended,
+}: {
+  review: ReviewDTO;
+  isRecommended: boolean;
+}) {
+  return (
+    <Tooltip title="阅读完整评测" placement="top-start">
+      <Box
+        component={Link}
+        href={`/remark/${review.unitId}`}
+        className="flex items-center gap-1"
+        sx={{
+          textDecoration: 'none',
+          color: 'inherit',
+          p: 0.5,
+          borderRadius: 1,
+          transition: 'background-color 0.2s ease',
+          '&:hover': {
+            backgroundColor: 'action.hover',
+          },
+        }}
+      >
+        {isRecommended ? (
+          <ThumbUpIcon fontSize="small" color="primary" />
+        ) : (
+          <ThumbDownIcon fontSize="small" color="disabled" />
+        )}
+
+        <Typography variant="caption">
+          {review.rating?.toFixed(1) ?? '0.0'}/5.0 · {review.created_at}
+        </Typography>
+      </Box>
+    </Tooltip>
+  );
+}
+
+type ReactionSummaryDTO = {
+  likes?: number;
+  dislikes?: number;
+  funny?: number;
+  replies?: number;
+};
+
 export type SingleRemarkShowProps = {
-  review: ReviewDTO & {
-    likes?: number;
-    dislikes?: number;
-    funny?: number;
-    replies?: number;
-  };
+  review: ReviewDTO;
   onLike?: (reviewId: string) => void;
   onDislike?: (reviewId: string) => void;
 };
@@ -34,7 +74,28 @@ export const SingleRemarkShow: React.FC<SingleRemarkShowProps> = ({
     onDislike?.(review.unitId);
   };
 
-  const isRecommended = review.rating && review.rating >= 4;
+  const isRecommended = review.rating && review.rating >= 3 ? true : false;
+
+  const [reactionSummaries, setReactionSummaries] =
+    useState<ReactionSummaryDTO>({});
+
+  useEffect(() => {
+    const reactionSummariesArray = review.reactionSummaries ?? [];
+    const likes =
+      reactionSummariesArray.find(reaction => reaction.reaction === 'like')
+        ?.count ?? 0;
+    const dislikes =
+      reactionSummariesArray.find(reaction => reaction.reaction === 'dislike')
+        ?.count ?? 0;
+    const funny =
+      reactionSummariesArray.find(reaction => reaction.reaction === 'love')
+        ?.count ?? 0;
+    const replies =
+      reactionSummariesArray.find(reaction => reaction.reaction === 'reply')
+        ?.count ?? 0;
+    setReactionSummaries({likes, dislikes, funny, replies});
+    console.log(review.reactionSummaries);
+  }, [review]);
 
   return (
     <div className="py-4 border-b border-gray-200 dark:border-gray-700">
@@ -51,21 +112,7 @@ export const SingleRemarkShow: React.FC<SingleRemarkShowProps> = ({
             <span className="font-semibold text-sm">
               {review.user?.name || ''}
             </span>
-            <Tooltip title="阅读完整评测" placement="top-start">
-              <div className="flex items-center gap-1 cursor-pointer bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 p-1 rounded-md">
-                <Link href={`/remark/${review.unitId}`}>
-                  {isRecommended ? (
-                    <ThumbUpIcon fontSize="small" className="text-blue-500" />
-                  ) : (
-                    <ThumbDownIcon fontSize="small" className="text-gray-500" />
-                  )}
-                  <span className="text-xs">
-                    {review.rating?.toFixed(1) || '0.0'}/5.0 ·{' '}
-                    {review.created_at}
-                  </span>
-                </Link>
-              </div>
-            </Tooltip>
+            <MetaInfoBadge review={review} isRecommended={isRecommended} />
           </div>
 
           {/* Row 2: Review Content */}
@@ -109,15 +156,19 @@ export const SingleRemarkShow: React.FC<SingleRemarkShowProps> = ({
                 </Tooltip>
               </div>
               <div className="ml-4 text-xs flex items-center gap-2">
-                <span>{review.likes ?? 0} 人支持</span>
-                <span>{review.funny ?? 0} 人觉得这篇评测很欢乐</span>
+                <span>{reactionSummaries?.likes ?? 0} 人支持</span>
+                <span>
+                  {reactionSummaries?.funny ?? 0} 人觉得这篇评测很欢乐
+                </span>
               </div>
               {/* TODO Add a new line to show Awards or don't show awards for short reviews */}
             </div>
             <Tooltip title="回复数">
               <div className="flex items-center gap-1 cursor-pointer hover:text-blue-500">
                 <ChatBubbleOutlineIcon style={{fontSize: '1rem'}} />
-                <span className="text-xs">{review.replies ?? 0} </span>
+                <span className="text-xs">
+                  {reactionSummaries?.replies ?? 0}{' '}
+                </span>
               </div>
             </Tooltip>
           </div>

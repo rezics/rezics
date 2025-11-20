@@ -3,7 +3,8 @@ import {t} from 'elysia';
 // ANCHOR Shared schemas based on Prisma `Unit` and public user view
 
 /**
- * Public user information used in many DTOs
+ * 用户的公开信息 Schema
+ * (原 PublicUser type)
  */
 export const publicUserSchema = t.Object({
   unitId: t.String(),
@@ -11,6 +12,7 @@ export const publicUserSchema = t.Object({
   name: t.String(),
   avatar: t.Optional(t.Nullable(t.String())),
   bio: t.Optional(t.String()),
+  description: t.Optional(t.String()),
 });
 
 export type PublicUser = (typeof publicUserSchema)['static'];

@@ -9,7 +9,6 @@ import type {ReactionListQuery} from '@package/contract';
 export class ReactionService {
   private whereFromQuery(query: ReactionListQuery): Prisma.ReactionWhereInput {
     const and: Prisma.ReactionWhereInput[] = [];
-    if (query.targetType) and.push({targetType: query.targetType});
     if (query.targetId) and.push({targetId: query.targetId});
     if (query.reaction) and.push({reaction: query.reaction});
     if (query.userId) and.push({userId: query.userId});
@@ -35,12 +34,9 @@ export class ReactionService {
     return {reactions: rows, total};
   }
 
-  async getSummary(
-    targetType: string,
-    targetId: string,
-  ): Promise<Record<string, number>> {
+  async getSummary(targetId: string): Promise<Record<string, number>> {
     const rows = await prisma.reactionSummary.findMany({
-      where: {targetType, targetId},
+      where: {targetId},
     });
     const result: Record<string, number> = {};
     for (const r of rows) result[r.reaction] = r.count;

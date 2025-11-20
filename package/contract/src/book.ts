@@ -1,21 +1,7 @@
 import {t} from 'elysia';
+import {publicUserSchema} from './unit';
 
 // ANCHOR Core Data Transfer Objects (DTOs)
-
-/**
- * 用户的公开信息 Schema
- * (原 PublicUser type)
- */
-export const publicUserSchema = t.Object({
-  unitId: t.String(),
-  slug: t.Optional(t.String()),
-  name: t.String(),
-  avatar: t.Optional(t.Nullable(t.String())),
-  bio: t.Optional(t.String()),
-  description: t.Optional(t.String()),
-});
-
-export type PublicUser = (typeof publicUserSchema)['static'];
 
 /**
  * API 返回的 Book DTO Schema
@@ -37,6 +23,7 @@ export const bookDTOSchema = t.Object({
   user: t.Optional(publicUserSchema),
   tags: t.Optional(t.Array(t.String())),
   description: t.Optional(t.String()),
+  reactionSummaries: t.Optional(t.Any()),
   // t.Union 用于匹配 'string | Date'
   createdAt: t.Optional(t.Union([t.String(), t.Date()])),
   updatedAt: t.Optional(t.Union([t.String(), t.Date()])),

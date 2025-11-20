@@ -17,6 +17,11 @@ import {useQuery} from '@tanstack/react-query';
 import {BookReviewGroup} from '@/component/ReadList/Review.tsx';
 import {SingleCommentElementWrapper} from '@/component/Form/Comment/SingleCommentElementWrapper';
 
+import {
+  MiniActionBar,
+  MiniAdminActionBar,
+} from '@/component/Common/MiniActionBar';
+
 export const ReadListPage: React.FC = () => {
   const {t} = useTranslation();
   const {readlistId} = useParams<{readlistId: string}>();
@@ -57,17 +62,10 @@ export const ReadListPage: React.FC = () => {
             <h2 className="text-2xl font-bold">{bookList.title}</h2>
 
             <div className="ml-auto">
-              <Tooltip title={t('common.edit')} placement="top">
-                <IconButton
-                  aria-label={t('common.edit')}
-                  size="small"
-                  onClick={() => {
-                    navigate(`/readlist/${readlistId}/edit`);
-                  }}
-                >
-                  <Edit fontSize="small" />
-                </IconButton>
-              </Tooltip>
+              <MiniAdminActionBar
+                editionURL={`/readlist/${readlistId}/edit`}
+                userUnitId={bookList.creator?.unitId}
+              />
             </div>
           </div>
 
@@ -86,19 +84,7 @@ export const ReadListPage: React.FC = () => {
             </div>
           )}
           <div className="flex items-center gap-2">
-            <IconButton aria-label={t('accessibility.favorite')} size="small">
-              <FavoriteBorder fontSize="small" />
-            </IconButton>
-            <IconButton
-              aria-label={t('accessibility.comments')}
-              size="small"
-              onClick={handleGoToComments}
-            >
-              <Comment fontSize="small" />
-            </IconButton>
-            <IconButton aria-label={t('accessibility.collection')} size="small">
-              <Add fontSize="small" />
-            </IconButton>
+            <MiniActionBar handleOnCommentClick={handleGoToComments} />
           </div>
         </div>
       </div>

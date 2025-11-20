@@ -16,7 +16,7 @@
 
     "paths": {
       "@/*": ["./*"],
-      "@package/*": ["../*/src"]
+      "@package/*": ["../*"]
     },
 
     // Best practices

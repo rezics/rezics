@@ -150,6 +150,23 @@ export class CommentService {
       },
       include: commentInclude,
     });
+
+    await prisma.reactionSummary.upsert({
+      where: {
+        targetType_targetId_reaction: {
+          targetType: 'COMMENT',
+          targetId: rootPostId,
+          reaction: 'reply',
+        },
+      },
+      update: {count: {increment: 1}},
+      create: {
+        targetType: 'COMMENT',
+        targetId: created.unitId,
+        reaction: 'reply',
+        count: 1,
+      },
+    });
     return created as CommentWithRelations;
   }
 

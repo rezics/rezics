@@ -10,7 +10,6 @@ import type {ReactionListQuery} from '@package/contract';
 export type ReactionDTO = {
   id: string;
   userId: string;
-  targetType: string;
   targetId: string;
   reaction: string;
   createdAt: string;
@@ -28,7 +27,6 @@ export type ReactionListResponse = {
  * Payload for creating a reaction
  */
 export type ReactionCreateInput = {
-  targetType: string;
   targetId: string;
   reaction: string;
 };
@@ -37,7 +35,6 @@ export type ReactionCreateInput = {
  * Payload for updating a reaction from one type to another
  */
 export type ReactionUpdateInput = {
-  targetType: string;
   targetId: string;
   oldReaction: string;
   newReaction: string;
@@ -47,7 +44,6 @@ export type ReactionUpdateInput = {
  * Query for deleting a reaction (matches server query fields)
  */
 export type ReactionDeleteQuery = {
-  targetType: string;
   targetId: string;
   reaction: string;
 };
@@ -56,7 +52,6 @@ export type ReactionDeleteQuery = {
  * Response for summary counts per reaction for a target
  */
 export type ReactionSummaryResponse = {
-  targetType: string;
   targetId: string;
   summary: Record<string, number>;
 };
@@ -66,7 +61,6 @@ export type ReactionSummaryResponse = {
  */
 export type ReactionMyResponse = {
   userId: string;
-  targetType: string;
   targetId: string;
   reactions: string[];
 };

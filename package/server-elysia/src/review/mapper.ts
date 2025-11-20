@@ -162,6 +162,7 @@ export function mapReviewToDTO(unit: ReviewWithRelations): ReviewDTO {
     title: unit.title ?? undefined,
     content: unit.content ?? '',
     rating,
+    reactionSummaries: unit.reactionSummaries,
     created_at: unit.createdAt?.toISOString?.() ?? (unit.createdAt as any),
     user: unit.user ? sanitizeUser(unit.user) : undefined,
   };

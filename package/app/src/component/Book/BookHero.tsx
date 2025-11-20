@@ -10,12 +10,32 @@ import {
 import React from 'react';
 import {Link} from 'wouter';
 import {useUserStore} from '@/global/userStore';
-import {useLocation} from 'wouter';
-import {EditButtonFloatRight} from '@component/Common/EditButtonFloatRight.tsx';
 
 import type {BookDTO} from '@package/contract';
+import {MiniActionBar, MiniAdminActionBar} from '../Common/MiniActionBar';
 
 type Book = BookDTO;
+
+export const BookHeroReactionBar: React.FC<{
+  bookInfo: any;
+  className?: string;
+}> = ({bookInfo, className}) => {
+  const color = 'text-white';
+  return (
+    <div className={className}>
+      <MiniAdminActionBar
+        editionURL={`/book/${bookInfo?.unitId}/edit`}
+        textColor={color}
+        userUnitId={bookInfo?.user?.unitId}
+      />
+      <MiniActionBar
+        hideReply={true}
+        className={className ?? ''}
+        textColor={color}
+      />
+    </div>
+  );
+};
 
 export const BookHeroShow: React.FC<{
   bookInfo: Book;
@@ -23,7 +43,6 @@ export const BookHeroShow: React.FC<{
 }> = ({bookInfo, rating}) => {
   const tags = bookInfo?.tags ?? [];
   const user: any = useUserStore(state => state.user);
-  const [_location, navigate] = useLocation();
   return (
     <div>
       <Box
@@ -48,75 +67,76 @@ export const BookHeroShow: React.FC<{
               </Grid>
 
               {/* Book Info */}
-              <Grid size={{xs: 12, md: 9}}>
+              <Grid size={{xs: 12, md: 6}}>
                 <Stack spacing={2}>
                   {/* Title and Rating */}
                   <Box className="flex justify-between items-center">
-                    <Typography variant="h4" className="font-bold text-white">
-                      {bookInfo?.title}
-                    </Typography>
-                    <div className="flex items-center gap-2">
-                      <div className="flex flex-col items-start gap-2">
-                        <div className="flex items-center gap-2">
-                          <Rating
-                            // value={(rating || 0) / 2}
-                            value={rating}
-                            precision={0.5}
-                            readOnly
+                    <div className="flex-1 min-w-0">
+                      <Typography
+                        variant="h4"
+                        className="font-bold text-white break-words" // optional: break-words
+                      >
+                        {bookInfo?.title}
+                      </Typography>
+
+                      {/* Author & Publisher Info */}
+                      <Stack spacing={1} className="text-white">
+                        <Typography>
+                          作者：
+                          <Box component="span" className="font-medium">
+                            {bookInfo?.author?.[0]?.name}
+                          </Box>
+                        </Typography>
+                        <Typography>
+                          出版社：
+                          {bookInfo?.press?.[0]?.name}
+                        </Typography>
+                        <Typography>
+                          出品方：
+                          {bookInfo?.producer?.[0]?.name}
+                        </Typography>
+                        <Typography>ISBN：{bookInfo?.isbn ?? ''}</Typography>
+                      </Stack>
+
+                      {/* Tags */}
+                      <Box className="flex flex-wrap gap-2">
+                        {tags?.map(tag => (
+                          <Chip
+                            key={tag}
+                            component={Link}
+                            href={`/books?tags=${tag}`}
+                            label={tag}
+                            size="small"
+                            className="*:bg-white/10 *:text-white *:hover:bg-white/20 *:px-2 *:py-1"
                           />
-                          <Typography variant="h6" className="text-amber-500">
-                            {rating} / 10
-                          </Typography>
-                        </div>
-                        <div className="self-end">
-                          {user?.permission?.role?.includes('ADMIN') && (
-                            <EditButtonFloatRight.Show
-                              onClick={() => {
-                                navigate(`/book/${bookInfo?.unitId}/edit`);
-                              }}
-                            />
-                          )}
-                        </div>
-                      </div>
+                        ))}
+                      </Box>
                     </div>
                   </Box>
-
-                  {/* Author & Publisher Info */}
-                  <Stack spacing={1} className="text-white">
-                    <Typography>
-                      作者：
-                      <Box component="span" className="font-medium">
-                        {bookInfo?.author?.[0]?.name}
-                      </Box>
-                    </Typography>
-                    <Typography>
-                      出版社：
-                      {bookInfo?.press?.[0]?.name}
-                    </Typography>
-                    <Typography>
-                      出品方：
-                      {bookInfo?.producer?.[0]?.name}
-                    </Typography>
-                    <Typography>ISBN：{bookInfo?.isbn ?? ''}</Typography>
-                  </Stack>
-
-                  {/* Tags */}
-                  <Stack direction="row" spacing={1}>
-                    {tags?.map((tag: string) => (
-                      <Chip
-                        component={Link}
-                        href={`/books?tags=${tag}`}
-                        key={tag}
-                        label={tag}
-                        size="small"
-                        onClick={() => {
-                          console.log('tag clicked', tag);
-                        }}
-                        className="*:bg-white/10 *:text-white *:hover:bg-white/20 *:p-1"
-                      />
-                    ))}
-                  </Stack>
                 </Stack>
+              </Grid>
+
+              {/* Reaction Bar */}
+              <Grid size={{xs: 12, md: 3}}>
+                <div className="flex items-center gap-2 justify-end">
+                  <div className="flex flex-col items-start gap-2">
+                    <div className="flex items-center gap-2">
+                      <Rating
+                        // value={(rating || 0) / 2}
+                        value={rating}
+                        precision={0.5}
+                        readOnly
+                      />
+                      <Typography variant="h6" className="text-amber-500">
+                        {rating} / 10
+                      </Typography>
+                    </div>
+                    <BookHeroReactionBar
+                      bookInfo={bookInfo}
+                      className="self-end"
+                    />
+                  </div>
+                </div>
               </Grid>
             </Grid>
           </MuiContainer>

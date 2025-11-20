@@ -98,6 +98,7 @@ model Unit {
   title    String?
   content  String?
   metadata Json    @default("{}")
+  nsfw     Boolean @default(false)
 
   // 可选：指向任意 Unit 的“弱引用”
   // 可被用于 Chapter，Review，Quote，Note，ReadList，Image，Video
@@ -130,6 +131,9 @@ model Unit {
 
   // 3) 作为“父评论”的 Unit（1:N）
   childCommentIndexes CommentIndex[] @relation("ParentComment")
+
+  reactions         Reaction[]        @relation("UnitReactions")
+  reactionSummaries ReactionSummary[] @relation("UnitReactionSummaries")
 
   @@index([type, status, createdAt])
   @@index([userId, createdAt])
@@ -221,28 +225,28 @@ model CommentIndex {
  */
 model Reaction {
   id     String @id @default(dbgenerated("uuidv7()")) @db.Uuid
-  user   User   @relation("UserReactions", fields: [userId], references: [unitId])
+  user   User   @relation("UserReactions", fields: [userId], references: [unitId], onDelete: Cascade)
   userId String @db.Uuid
 
-  targetType String
   targetId   String @db.Uuid // bookId / chapterId / commentId
+  targetUnit Unit   @relation("UnitReactions", fields: [targetId], references: [id], onDelete: Cascade)
 
   reaction String // like, bookmark, laugh, etc.
 
   createdAt DateTime @default(now())
 
-  @@unique([userId, targetType, targetId, reaction])
-  @@index([targetType, targetId])
-  @@index([targetType, userId])
+  @@unique([userId, targetId, reaction])
+  @@index([targetId])
+  @@index([userId, reaction])
 }
 
 model ReactionSummary {
-  targetType String
   targetId   String @db.Uuid
+  targetUnit Unit   @relation("UnitReactionSummaries", fields: [targetId], references: [id], onDelete: Cascade)
   reaction   String
   count      Int    @default(0)
 
-  @@id([targetType, targetId, reaction])
+  @@id([targetId, reaction])
 }
 
 model Rating {

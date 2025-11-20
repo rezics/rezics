@@ -37,6 +37,7 @@ export function mapBaseBookToDTO(book: BookWithRelations): BookDTO {
     userId: book.unit.userId,
     user: sanitizeUser(book.unit.user),
     tags: book.unit.tags?.map(tag => tag.name) || [],
+    reactionSummaries: book.unit.reactionSummaries,
     createdAt: book.createdAt,
     updatedAt: book.updatedAt,
     description: book.description || undefined,

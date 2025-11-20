@@ -16,6 +16,7 @@ export const reviewDTOSchema = t.Object({
   rating: t.Optional(t.Number()),
   created_at: t.Optional(t.String()),
   user: t.Optional(publicUserSchema),
+  reactionSummaries: t.Optional(t.Any()),
 });
 
 export type ReviewDTO = (typeof reviewDTOSchema)['static'];

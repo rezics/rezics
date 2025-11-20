@@ -19,7 +19,10 @@ import FormatQuoteIcon from '@mui/icons-material/FormatQuote';
 import {SingleCommentElementWrapper} from '@/component/Form/Comment/SingleCommentElementWrapper';
 import {MarkdownContent} from '@/component/Common/MarkdownContent';
 // Collapsible single review component moved to component/ReadList/Review.tsx
-
+import {
+  MiniActionBar,
+  MiniAdminActionBar,
+} from '@/component/Common/MiniActionBar';
 interface QuotePageProps {
   unitId: string;
 }
@@ -70,17 +73,10 @@ export const QuotePage: React.FC<QuotePageProps> = ({unitId}) => {
             <h2 className="text-2xl font-bold">{Quote.title}</h2>
 
             <div className="ml-auto">
-              <Tooltip title={t('common.edit')} placement="top">
-                <IconButton
-                  aria-label={t('common.edit')}
-                  size="small"
-                  onClick={() => {
-                    navigate(`/unit/${unitId}/edit`);
-                  }}
-                >
-                  <Edit fontSize="small" />
-                </IconButton>
-              </Tooltip>
+              <MiniAdminActionBar
+                editionURL={`/unit/${unitId}/edit`}
+                userUnitId={Quote.user?.unitId}
+              />
             </div>
           </div>
 
@@ -99,19 +95,7 @@ export const QuotePage: React.FC<QuotePageProps> = ({unitId}) => {
             </div>
           )}
           <div className="flex items-center gap-2">
-            <IconButton aria-label={t('accessibility.favorite')} size="small">
-              <FavoriteBorder fontSize="small" />
-            </IconButton>
-            <IconButton
-              aria-label={t('accessibility.comments')}
-              size="small"
-              onClick={handleGoToComments}
-            >
-              <Comment fontSize="small" />
-            </IconButton>
-            <IconButton aria-label={t('accessibility.collection')} size="small">
-              <Add fontSize="small" />
-            </IconButton>
+            <MiniActionBar handleOnCommentClick={handleGoToComments} />
           </div>
         </div>
       </div>

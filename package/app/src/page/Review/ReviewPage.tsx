@@ -27,6 +27,11 @@ import {AccentBarContainer} from '@/component/Common/AccentBar';
 import {SingleCommentElementWrapper} from '@/component/Form/Comment/SingleCommentElementWrapper';
 import {useUserStore} from '@/global/userStore';
 
+import {
+  MiniActionBar,
+  MiniAdminActionBar,
+} from '@/component/Common/MiniActionBar';
+
 export function ReviewPage({reviewId}: {reviewId: string}) {
   const {t} = useTranslation();
   const {user} = useUserStore();
@@ -128,39 +133,12 @@ export function ReviewPage({reviewId}: {reviewId: string}) {
             </div>
           </div>
           <div className="text-right">
-            <div className="flex items-center gap-2">
-              <IconButton aria-label={t('accessibility.favorite')} size="small">
-                <FavoriteBorder fontSize="small" />
-              </IconButton>
-              <IconButton
-                aria-label={t('accessibility.comments')}
-                size="small"
-                onClick={handleGoToComments}
-              >
-                <Comment fontSize="small" />
-              </IconButton>
-              <IconButton
-                aria-label={t('accessibility.collection')}
-                size="small"
-              >
-                <Add fontSize="small" />
-              </IconButton>
-            </div>
-            <div>
-              {(user?.name === review.user?.name ||
-                user?.permission?.role.includes('ADMIN')) && (
-                <Tooltip title={t('common.edit')} placement="top">
-                  <IconButton
-                    aria-label={t('common.edit')}
-                    size="small"
-                    onClick={() => {
-                      navigate(`/review/${review.unitId}/edit`);
-                    }}
-                  >
-                    <Edit fontSize="small" />
-                  </IconButton>
-                </Tooltip>
-              )}
+            <div className="flex items-center">
+              <MiniAdminActionBar
+                editionURL={`/review/${review.unitId}/edit`}
+                userUnitId={review.user?.unitId}
+              />
+              <MiniActionBar handleOnCommentClick={handleGoToComments} />
             </div>
           </div>
         </div>

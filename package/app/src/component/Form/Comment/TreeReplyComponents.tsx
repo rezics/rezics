@@ -49,8 +49,8 @@ interface CommentNodeProps {
 
 function havePermission(comment: any, user: any) {
   return (
-    comment.user?.unitId === user.unitId ||
-    user.permission?.role?.includes('ADMIN')
+    comment.user?.unitId === user?.unitId ||
+    user?.permission?.role?.includes('ADMIN')
   );
 }
 
