@@ -260,6 +260,18 @@ model Reaction {
   @@index([userId, reaction])
 }
 
+model Bookmark {
+  userId    String   @db.Uuid
+  targetId  String   @db.Uuid // use userId targetId userId to query all user tags
+  tags      String[] @default([])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, targetId])
+  @@index([userId])
+  @@index([targetId])
+}
+
 model ReactionSummary {
   targetId   String @db.Uuid
   targetUnit Unit   @relation("UnitReactionSummaries", fields: [targetId], references: [id], onDelete: Cascade)

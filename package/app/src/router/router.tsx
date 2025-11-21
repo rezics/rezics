@@ -44,6 +44,7 @@ import {TagUnitPage} from '@/page/Tag/TagUnitPage';
 
 // User pages
 import {UserEditPage} from '@/page/User/UserEditPage.tsx';
+import {BookmarkPage} from '@/page/User/BookmarkPage.tsx';
 
 // Misc
 import {MainLayout} from '@/layout/MainLayout.tsx';
@@ -296,6 +297,11 @@ export default (
         <Route path="/user/me">
           <MainLayout>
             <UserPage isCurrentUser={true} />
+          </MainLayout>
+        </Route>
+        <Route path="/user/me/bookmarks">
+          <MainLayout>
+            <BookmarkPage />
           </MainLayout>
         </Route>
         <Route path="/user/:unitId">

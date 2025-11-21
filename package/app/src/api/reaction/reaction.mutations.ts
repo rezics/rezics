@@ -14,6 +14,8 @@ import type {
   ReactionCreateInput,
   ReactionUpdateInput,
   ReactionDeleteQuery,
+  BookmarkTagsUpdateInput,
+  BookmarkTagsResponse,
 } from './reaction.types.ts';
 
 /**
@@ -107,10 +109,46 @@ export function useDeleteReactionMutation(
 }
 
 /**
+ * Mutation for setting bookmark tags on a target for current user
+ */
+export function useSetBookmarkTagsMutation(
+  options?: Omit<
+    UseMutationOptions<BookmarkTagsResponse, Error, BookmarkTagsUpdateInput>,
+    'mutationFn'
+  >,
+): ReturnType<
+  typeof useMutation<BookmarkTagsResponse, Error, BookmarkTagsUpdateInput>
+> {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (input: BookmarkTagsUpdateInput) =>
+      reactionApi.setBookmarkTags(input),
+    ...options,
+    onSuccess: (data, variables, onMutateResult, context) => {
+      // Keep bookmark tag query in sync
+      queryClient.invalidateQueries({
+        queryKey: reactionKeys.bookmarkTags(variables.targetId),
+      });
+      // Bookmark 也是一种 reaction，必要时也可以刷新 my/summary
+      queryClient.invalidateQueries({
+        queryKey: reactionKeys.my(variables.targetId),
+      });
+      queryClient.invalidateQueries({
+        queryKey: reactionKeys.summary(variables.targetId),
+      });
+
+      options?.onSuccess?.(data, variables, onMutateResult, context);
+    },
+  });
+}
+
+/**
  * Combined mutations export
  */
 export const reactionMutations = {
   useCreate: useCreateReactionMutation,
   useUpdate: useUpdateReactionMutation,
   useDelete: useDeleteReactionMutation,
+  useSetBookmarkTags: useSetBookmarkTagsMutation,
 };

@@ -49,10 +49,7 @@ export class ReactionService {
    * - Single targetId: returns string[] (reactions for that target)
    * - Multiple targetIds: returns Record<targetId, string[]>
    */
-  async getUserReactions(
-    userId: string,
-    targetId: string,
-  ): Promise<string[]>;
+  async getUserReactions(userId: string, targetId: string): Promise<string[]>;
   async getUserReactions(
     userId: string,
     targetIds: string[],
@@ -82,7 +79,7 @@ export class ReactionService {
         result[id] = [];
       }
       for (const row of rows) {
-        result[row.targetId].push(row.reaction);
+        result[row.targetId]?.push(row.reaction);
       }
       return result;
     }
@@ -121,6 +118,23 @@ export class ReactionService {
         create: {targetId, reaction, count: 1},
         update: {count: {increment: 1}},
       });
+
+      // If this is a bookmark reaction, ensure a Bookmark row exists (without tags for now).
+      if (reaction === 'bookmark') {
+        await tx.bookmark.upsert({
+          where: {
+            userId_targetId: {
+              userId,
+              targetId,
+            },
+          },
+          create: {
+            userId,
+            targetId,
+          },
+          update: {},
+        });
+      }
 
       return created;
     });
@@ -163,6 +177,16 @@ export class ReactionService {
           data: {count: {decrement: 1}},
         })
         .catch(() => Promise.resolve());
+
+      // If we removed a bookmark reaction, also remove the Bookmark row (tags no longer apply).
+      if (reaction === 'bookmark') {
+        await tx.bookmark.deleteMany({
+          where: {
+            userId,
+            targetId,
+          },
+        });
+      }
 
       return {deleted: true};
     });
@@ -221,6 +245,15 @@ export class ReactionService {
             data: {count: {decrement: 1}},
           })
           .catch(() => Promise.resolve());
+        // If old reaction was bookmark, drop bookmark row.
+        if (oldReaction === 'bookmark') {
+          await tx.bookmark.deleteMany({
+            where: {
+              userId,
+              targetId,
+            },
+          });
+        }
       }
 
       // Ensure new exists; only increment summary if this is newly created
@@ -251,6 +284,22 @@ export class ReactionService {
           create: {targetId, reaction: newReaction, count: 1},
           update: {count: {increment: 1}},
         });
+        // If new reaction is bookmark, ensure a Bookmark row exists.
+        if (newReaction === 'bookmark') {
+          await tx.bookmark.upsert({
+            where: {
+              userId_targetId: {
+                userId,
+                targetId,
+              },
+            },
+            create: {
+              userId,
+              targetId,
+            },
+            update: {},
+          });
+        }
       }
 
       return {reaction: result, changed: true};

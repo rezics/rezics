@@ -64,7 +64,7 @@ const AuthorInfoShow: React.FC<AuthorInfoShowProps> = ({
               {/* 左侧图片区域 */}
               <div className="w-1/5 flex-row justify-center">
                 <img
-                  src={author.avatar || ''}
+                  src={author.avatar || undefined}
                   className="max-w-full max-h-full object-contain"
                   alt="avatar"
                 />

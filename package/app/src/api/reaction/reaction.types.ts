@@ -73,4 +73,23 @@ export type ReactionMyResponse = {
   reactionsByTarget: Record<string, string[]>;
 };
 
+/**
+ * Bookmark tags tied to a bookmark reaction.
+ * Returned by /reactions/bookmarks/:targetId
+ */
+export type BookmarkTagsResponse = {
+  userId: string;
+  targetId: string;
+  tags: string[];
+};
+
+/**
+ * Input for setting bookmark tags on a target.
+ * The targetId is carried separately (path param) in API, but we bundle it here for convenience.
+ */
+export type BookmarkTagsUpdateInput = {
+  targetId: string;
+  tags: string[];
+};
+
 export type {ReactionListQuery};

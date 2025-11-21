@@ -35,6 +35,7 @@ export const BookHeroReactionBar: React.FC<{
         hideReply={true}
         className={className ?? ''}
         textColor={color}
+        unitId={bookInfo?.unitId}
       />
     </div>
   );
@@ -50,7 +51,7 @@ export const BookHeroShow: React.FC<{
     <div>
       <Box
         className="bg-cover bg-center relative"
-        style={{backgroundImage: `url(${bookInfo?.coverUrl})`}}
+        style={{backgroundImage: `url(${bookInfo?.coverUrl ?? undefined})`}}
       >
         {/* Light Pic test is fine, the black blur is thick so the text is always able to read */}
         {/* <Box className="bg-cover bg-center relative" style={{ backgroundImage: `url(https://static-cse.canva.cn/blob/239388/e1604019539295.jpg)` }}> */}
@@ -63,7 +64,7 @@ export const BookHeroShow: React.FC<{
                 className="max-h-[300px] w-full"
               >
                 <img
-                  src={bookInfo?.coverUrl ?? ''}
+                  src={bookInfo?.coverUrl ?? undefined}
                   alt={bookInfo?.title}
                   className="h-full rounded-lg shadow-lg mr-auto ml-auto"
                 />

@@ -13,10 +13,7 @@ export const ReviewHeader: React.FC<{
   return (
     <div className="flex flex-wrap items-center mb-2 gap-2">
       {/* Avatar */}
-      <Avatar
-        src={review.user?.avatar ?? ''}
-        sx={{width: 40, height: 40, borderRadius: 1}}
-      />
+      <Avatar src={review.user?.avatar ?? ''} variant="rounded" />
 
       {/* User Info */}
       <div className="ml-2">
@@ -78,6 +75,7 @@ const ReviewFooter: React.FC<{
       {/* Right: ReactionBar */}
       <div className="flex justify-end">
         <ReactionBar
+          unitId={review.unitId}
           onReply={() => onReply(review.unitId)}
           itemUrl={`/review/${review.unitId}`}
           hideReply={true}

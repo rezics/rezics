@@ -1,7 +1,7 @@
 import {AccentBarContainer} from '@component/Common/AccentBar.tsx';
 import {TreeReplyComponents} from '@/component/Form/Comment/TreeReplyComponents';
 import {ChatBubbleOutline} from '@mui/icons-material';
-import {IconButton} from '@mui/material';
+import {Avatar, IconButton} from '@mui/material';
 import React, {useRef} from 'react';
 import {useTranslation} from 'react-i18next';
 import {useLocation, useParams} from 'wouter';
@@ -67,16 +67,20 @@ export const ReadListPage: React.FC = () => {
         <div className="flex justify-between items-center">
           {bookList.creator && (
             <div className="flex items-center gap-3">
-              <img
+              <Avatar
                 src={bookList.creator.avatar || ''}
-                alt="creator avatar"
-                className="w-10 h-10 rounded-full shadow"
+                alt={bookList.creator.name || 'Avatar'}
+                variant="rounded"
+                className="shadow"
               />
               <p className="text-sm text-gray-700">{bookList.creator.name}</p>
             </div>
           )}
           <div className="flex items-center gap-2">
-            <MiniActionBar handleOnCommentClick={handleGoToComments} />
+            <MiniActionBar
+              handleOnCommentClick={handleGoToComments}
+              unitId={readlistId || ''}
+            />
           </div>
         </div>
       </div>

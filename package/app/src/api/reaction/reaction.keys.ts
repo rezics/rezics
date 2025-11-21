@@ -23,4 +23,9 @@ export const reactionKeys = {
   mine: () => [...reactionKeys.all(), 'my'] as const,
   my: (targetId: string) =>
     [...reactionKeys.mine(), {targetId}] as const,
+
+  /** Keys for bookmark tags of current user on a target */
+  bookmarkTagsRoot: () => [...reactionKeys.all(), 'bookmarkTags'] as const,
+  bookmarkTags: (targetId: string) =>
+    [...reactionKeys.bookmarkTagsRoot(), {targetId}] as const,
 } as const;

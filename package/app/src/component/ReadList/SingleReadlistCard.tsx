@@ -12,6 +12,8 @@ import {
 } from '@mui/material';
 import React from 'react';
 import {useLocation} from 'wouter';
+import {MiniActionBar} from '@/component/Common/Reaction/MiniActionBar';
+
 interface SingleReadlistProps {
   data: ReadlistResponse;
   handleBookListClick: (id: string, e: React.MouseEvent) => void;
@@ -69,7 +71,16 @@ export function SingleReadlist({
               </Grid>
             ))}
           </div> */}
-          <img src={data.coverUrl} alt={data.title} />
+          <div
+            className="relative w-full overflow-hidden rounded-md"
+            style={{aspectRatio: '16 / 9'}}
+          >
+            <img
+              src={data.coverUrl}
+              alt={data.title}
+              className="w-full h-full object-cover"
+            />
+          </div>
         </Grid>
 
         <Box
@@ -94,15 +105,15 @@ export function SingleReadlist({
           </Stack>
 
           <Stack direction="row" spacing={1} alignItems="center">
-            <IconButton
-              size="small"
+            {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
+            <div
               onClick={e => {
                 e.stopPropagation();
                 handleLike(data.id);
               }}
             >
-              <Favorite fontSize="small" />
-            </IconButton>
+              <MiniActionBar unitId={data.id} hideReply={true} />
+            </div>
             <Typography variant="body2" color="text.secondary">
               {data.likes}
             </Typography>

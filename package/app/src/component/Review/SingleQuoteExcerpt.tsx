@@ -61,7 +61,11 @@ export const SingleQuoteExcerptShow: React.FC<SingleQuoteExcerptShowProps> = ({
       </Tooltip>
 
       <div className="flex items-center mb-2">
-        <Avatar src={author.avatar} sx={{width: 20, height: 20, mr: 1}} />
+        <Avatar
+          src={author.avatar}
+          sx={{width: 20, height: 20, mr: 1}}
+          variant="rounded"
+        />
         <Typography variant="subtitle2" fontWeight="bold">
           {author.name}
         </Typography>

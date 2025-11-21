@@ -25,6 +25,7 @@ import {useUserStore} from '@/global/userStore';
 import {buildTree} from '../treeReplyUtil.ts';
 
 import {useAlertStore} from '@/global/windowAlertStore';
+import {reactionApi} from '@/api/reaction/reaction';
 // This is a temporary type definition based on the GraphQL schema.
 // Local UI type adapted from CommentTreeNode
 type UiUser = {
@@ -45,6 +46,7 @@ interface CommentNodeProps {
   comment: UiComment;
   level?: number;
   openDrawer: (id: string, content?: string) => void;
+  userReactionsByTarget?: Record<string, string[]>;
 }
 
 function havePermission(comment: any, user: any) {
@@ -58,6 +60,7 @@ const CommentNode: React.FC<CommentNodeProps> = ({
   comment,
   level = 0,
   openDrawer,
+  userReactionsByTarget,
 }) => {
   // Expand first two levels by default
   const [isExpanded, setIsExpanded] = useState(level < 2);
@@ -99,6 +102,9 @@ const CommentNode: React.FC<CommentNodeProps> = ({
     setDialogContent(key, comment.content ?? '');
     openDrawer(key);
   };
+
+  const currentUserReactions =
+    userReactionsByTarget?.[comment.id] ?? ([] as string[]);
 
   return (
     <Box
@@ -145,20 +151,20 @@ const CommentNode: React.FC<CommentNodeProps> = ({
             <Box
               sx={{
                 width: {
-                  xs: '30%',
-                  sm: '30%',
-                  md: '23%',
-                  lg: '20%',
-                  xl: '15%',
+                  xs: '75%',
+                  sm: '50%',
+                  md: '35%',
+                  lg: '30%',
+                  xl: '25%',
                 },
               }}
             >
               <ReactionBar
                 onReply={handleReply}
+                unitId={comment.id}
                 size="small"
                 fontSize="1.3rem"
-                hideLike={true}
-                hideDislike={true}
+                currentUserReactions={currentUserReactions}
               />
             </Box>
           </Box>
@@ -178,6 +184,7 @@ const CommentNode: React.FC<CommentNodeProps> = ({
               comment={reply}
               level={level + 1}
               openDrawer={openDrawer}
+              userReactionsByTarget={userReactionsByTarget}
             />
           ))}
         </Collapse>
@@ -193,6 +200,7 @@ interface ReplyComponentsProps {
 export function TreeReplyComponents({unitId}: ReplyComponentsProps) {
   // Fetch a flat slice of the comment tree for the unit
   const showAlert = useAlertStore(state => state.show);
+  const user = useUserStore(state => state.user);
   const {data, isLoading, error} = useQuery(
     commentQueries.unitCommentTree(unitId, {
       // Fetch up to depth 3 for an initial view; adjust as needed
@@ -208,15 +216,33 @@ export function TreeReplyComponents({unitId}: ReplyComponentsProps) {
   const [currentReplyId, setCurrentReplyId] = useState<string | null>(null);
   const [topLevelComments, setTopLevelComments] = useState<UiComment[]>([]);
 
+  const commentItems = useMemo(
+    () => (data?.items as CommentTreeNode[] | undefined) ?? [],
+    [data],
+  );
+
+  const targetIds = useMemo(
+    () => commentItems.map(item => item.id).filter(Boolean),
+    [commentItems],
+  );
+
+  const {data: myReactions} = useQuery({
+    queryKey: ['reactions', 'my', {targetIds}],
+    queryFn: () => reactionApi.my({targetIds}),
+    enabled: !!user && targetIds.length > 0,
+    staleTime: 1000 * 60, // 1 minute
+  });
+
+  const userReactionsByTarget = myReactions?.reactionsByTarget ?? {};
+
   useEffect(() => {
     try {
-      const items = data?.items;
-      const tree = buildTree(items as any);
+      const tree = buildTree(commentItems as any);
       setTopLevelComments(tree);
     } catch (_error) {
       console.error('Error building comment tree');
     }
-  }, [data]);
+  }, [commentItems]);
 
   const openDrawer = (id: string) => {
     setCurrentReplyId(id);
@@ -269,6 +295,7 @@ export function TreeReplyComponents({unitId}: ReplyComponentsProps) {
               key={comment.id}
               comment={comment}
               openDrawer={openDrawer}
+              userReactionsByTarget={userReactionsByTarget}
             />
           ))
         ) : (

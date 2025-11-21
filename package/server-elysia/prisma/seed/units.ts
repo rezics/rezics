@@ -51,7 +51,9 @@ export async function seedOtherUnits(
 
   // 1) For each book, generate 10-100 of each: QUOTE, REVIEW, REMARK
   for (const bookUnitId of bookUnitIds) {
+    console.log(`Seeding units for book ${bookUnitId}`);
     for (const type of PER_BOOK_TYPES) {
+      console.log(`Seeding units for type ${type}`);
       const countForType = randomInt(10, 100);
       for (let i = 0; i < countForType; i++) {
         const author = faker.helpers.arrayElement(users);
@@ -118,6 +120,7 @@ export async function seedOtherUnits(
   }
 
   // 2) Generate `total` CHAPTER units across random books
+  console.log(`Seeding chapter units for ${total} books`);
   for (let i = 0; i < total; i++) {
     const author = faker.helpers.arrayElement(users);
     const bookUnitId = faker.helpers.arrayElement(bookUnitIds);

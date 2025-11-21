@@ -80,16 +80,17 @@ export const CollapsibleReview: React.FC<CollapsibleReviewProps> = ({
     >
       {header}
       <div className="flex items-start gap-3">
-        {/* <Tooltip title="打开书评页面">
-          <IconButton
-            aria-label="review"
-            onClick={() => {
-              navigate(`/review/${review?.unitId}`);
-            }}
-          >
-            <ChatBubbleOutline fontSize="small" />
-          </IconButton>
-        </Tooltip> */}
+        {/* md 以上才显示 */}
+        <div className="hidden md:block">
+          <Tooltip title="打开书评页面">
+            <IconButton
+              aria-label="review"
+              onClick={() => navigate(`/review/${review?.unitId}`)}
+            >
+              <ChatBubbleOutline fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        </div>
 
         <div className="min-w-0 flex-1">
           {review?.title && (
