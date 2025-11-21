@@ -8,6 +8,8 @@ export type ReactionSummaryDTO = {
 export function parseReactionSummaries(
   reactionSummariesArray: any[],
 ): ReactionSummaryDTO {
+  if (!reactionSummariesArray)
+    return {likes: 0, dislikes: 0, bookmark: 0, comment: 0};
   const likes =
     reactionSummariesArray.find(reaction => reaction.reaction === 'like')
       ?.count ?? 0;

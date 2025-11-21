@@ -1,18 +1,17 @@
 import type {ReadlistResponse} from '@package/contract';
-import {Favorite} from '@mui/icons-material';
 import {
   Avatar,
   Box,
   Card,
   CardContent,
   Grid,
-  IconButton,
   Stack,
   Typography,
 } from '@mui/material';
 import React from 'react';
 import {useLocation} from 'wouter';
 import {MiniActionBar} from '@/component/Common/Reaction/MiniActionBar';
+import {useTranslation} from 'react-i18next';
 
 interface SingleReadlistProps {
   data: ReadlistResponse;
@@ -31,6 +30,7 @@ export function SingleReadlist({
   handleLike,
 }: SingleReadlistProps) {
   const [, navigate] = useLocation();
+  const {t} = useTranslation();
   return (
     <Card
       sx={{
@@ -104,19 +104,25 @@ export function SingleReadlist({
             </Typography>
           </Stack>
 
-          <Stack direction="row" spacing={1} alignItems="center">
+          <Stack spacing={1} alignItems="center">
             {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
             <div
               onClick={e => {
                 e.stopPropagation();
                 handleLike(data.id);
               }}
+              className="flex items-center"
             >
-              <MiniActionBar unitId={data.id} hideReply={true} />
+              <Typography color="text.secondary">
+                {data.reactionSummaries.find(r => r.reaction === 'like')
+                  ?.count ?? 0}
+              </Typography>
+              <MiniActionBar
+                unitId={data.id}
+                hideReply={true}
+                reactionSummaries={data.reactionSummaries}
+              />
             </div>
-            <Typography variant="body2" color="text.secondary">
-              {data.likes}
-            </Typography>
           </Stack>
         </Box>
       </CardContent>

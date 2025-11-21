@@ -1,13 +1,6 @@
 import {useQuery} from '@tanstack/react-query';
-import {
-  Avatar,
-  Box,
-  IconButton,
-  Rating,
-  Tooltip,
-  Typography,
-} from '@mui/material';
-import {Link, useLocation} from 'wouter';
+import {Avatar, Box, IconButton, Rating, Typography} from '@mui/material';
+import {Link} from 'wouter';
 import {useTranslation} from 'react-i18next';
 
 import {reviewQueries} from '@/api/review/review';
@@ -16,26 +9,19 @@ import {bookQueries} from '@/api/book/book';
 import {BookListViewItem} from '@/component/BookLib/BookList/BookListView';
 import {useRef} from 'react';
 import TreeReplyComponents from '@/component/Form/Comment/TreeReplyComponents';
-import {
-  FavoriteBorder,
-  Comment,
-  Add,
-  ChatBubbleOutline,
-  Edit,
-} from '@mui/icons-material';
+import {ChatBubbleOutline} from '@mui/icons-material';
 import {AccentBarContainer} from '@/component/Common/AccentBar';
 import {SingleCommentElementWrapper} from '@/component/Form/Comment/SingleCommentElementWrapper';
-import {useUserStore} from '@/global/userStore';
 
 import {
   MiniActionBar,
   MiniAdminActionBar,
 } from '@/component/Common/Reaction/MiniActionBar';
+import {ReactionStatistics} from '@/component/Common/Reaction/ReactionStatistics';
+import {parseReactionSummaries} from '@/util/reactionSummariesParser';
 
 export function ReviewPage({reviewId}: {reviewId: string}) {
   const {t} = useTranslation();
-  const {user} = useUserStore();
-  const [, navigate] = useLocation();
   const {
     data: review,
     isLoading,
@@ -133,7 +119,7 @@ export function ReviewPage({reviewId}: {reviewId: string}) {
             </div>
           </div>
           <div className="text-right">
-            <div className="flex items-center">
+            <div className="flex justify-end">
               <MiniAdminActionBar
                 editionURL={`/review/${review.unitId}/edit`}
                 userUnitId={review.user?.unitId}
@@ -147,6 +133,12 @@ export function ReviewPage({reviewId}: {reviewId: string}) {
         <Box sx={{mt: 3}}>
           <MarkdownContent content={review.content || ''} />
         </Box>
+
+        <div className="mt-2">
+          <ReactionStatistics
+            reactionSummaries={parseReactionSummaries(review.reactionSummaries)}
+          />
+        </div>
 
         {/* ANCHOR Comments */}
         <div ref={commentRef} className="mt-5">

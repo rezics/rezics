@@ -57,6 +57,7 @@ interface MiniActionBarProps {
   textColor?: string;
   unitId?: string;
   handleOnCommentClick?: () => void;
+  reactionSummaries?: any[];
 }
 
 export function MiniActionBar({

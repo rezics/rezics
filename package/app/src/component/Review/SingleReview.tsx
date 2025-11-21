@@ -5,6 +5,7 @@ import {type ReviewDTO} from '@package/contract';
 import React from 'react';
 import {CollapsibleReview} from '@/component/ReadList/Review';
 import {parseReactionSummaries} from '@/util/reactionSummariesParser';
+import {ReactionStatistics} from '../Common/Reaction/ReactionStatistics';
 
 export const ReviewHeader: React.FC<{
   review: ReviewDTO;
@@ -65,11 +66,8 @@ const ReviewFooter: React.FC<{
   return (
     <div className="w-full flex flex-wrap justify-between items-center gap-2">
       {/* Left: Reaction stats */}
-      <div className="flex flex-wrap gap-2 text-sm items-center flex-shrink-0 ml-2">
-        <div>{reactionSummaries?.likes ?? 0} 认同</div>
-        <div>{reactionSummaries?.dislikes ?? 0} 不认同</div>
-        <div>{reactionSummaries?.bookmark ?? 0} 收藏</div>
-        <div>{reactionSummaries?.comment ?? 0} 评论</div>
+      <div className="ml-2">
+        <ReactionStatistics reactionSummaries={reactionSummaries} />
       </div>
 
       {/* Right: ReactionBar */}

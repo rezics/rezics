@@ -42,19 +42,7 @@ export type BaseUnit = (typeof baseUnitSchema)['static'];
 export const unitDTOSchema = t.Object({
   ...baseUnitSchema.properties,
   tags: t.Optional(t.Array(t.String())),
-  stats: t.Optional(
-    t.Object({
-      commentCount: t.Number(),
-      viewCount: t.Number(),
-    }),
-  ),
-  reactions: t.Optional(
-    t.Object({
-      likeCount: t.Number(),
-      dislikeCount: t.Number(),
-      loveCount: t.Number(),
-    }),
-  ),
+  reactionSummaries: t.Optional(t.Any()),
 });
 
 export type UnitDTO = (typeof unitDTOSchema)['static'];

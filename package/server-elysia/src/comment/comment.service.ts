@@ -155,13 +155,13 @@ export class CommentService {
       where: {
         targetId_reaction: {
           targetId: rootPostId,
-          reaction: 'reply',
+          reaction: 'comment',
         },
       },
       update: {count: {increment: 1}},
       create: {
         targetId: rootPostId,
-        reaction: 'reply',
+        reaction: 'comment',
         count: 1,
       },
     });

@@ -61,7 +61,7 @@ export const readlistDTOSchema = t.Object({
   content: t.Optional(t.String()),
   coverUrl: t.Optional(t.String()),
   creator: t.Optional(publicUserSchema),
-  likes: t.Optional(t.Number()),
+  reactionSummaries: t.Optional(t.Any()),
   books: t.Array(readlistBookBriefSchema),
   reviews: t.Array(readlistReviewBriefSchema),
   order: t.Optional(t.Array(t.String())),

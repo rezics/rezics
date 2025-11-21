@@ -15,6 +15,8 @@ import {
   MiniActionBar,
   MiniAdminActionBar,
 } from '@/component/Common/Reaction/MiniActionBar';
+import {parseReactionSummaries} from '@/util/reactionSummariesParser';
+import {ReactionStatistics} from '@/component/Common/Reaction/ReactionStatistics';
 
 export const ReadListPage: React.FC = () => {
   const {readlistId} = useParams<{readlistId: string}>();
@@ -95,8 +97,9 @@ export const ReadListPage: React.FC = () => {
 
       {/* Likes & Comments */}
       <div className="text-sm mt-5 text-gray-700">
-        <span>{bookList.likes ?? 0}</span> <span className="ml-1">likes</span>
-        {/* 新 API 暂无 commentsNumber */}
+        <ReactionStatistics
+          reactionSummaries={parseReactionSummaries(bookList.reactionSummaries)}
+        />
       </div>
 
       {bookList?.order?.length === 0 && (

@@ -38,15 +38,6 @@ export function mapUnitToDTO(unit: UnitWithRelations): UnitDTO {
     createdAt: unit.createdAt,
     updatedAt: unit.updatedAt,
     tags: unit.tags?.map(t => t.name) ?? [],
-    stats: unit.stats
-      ? {commentCount: unit.stats.commentCount, viewCount: unit.stats.viewCount}
-      : undefined,
-    reactions: unit.reactions
-      ? {
-          likeCount: unit.reactions.likeCount,
-          dislikeCount: unit.reactions.dislikeCount,
-          loveCount: unit.reactions.loveCount,
-        }
-      : undefined,
+    reactionSummaries: unit.reactionSummaries,
   } as UnitDTO;
 }

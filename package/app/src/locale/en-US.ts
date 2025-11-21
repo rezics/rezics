@@ -127,6 +127,7 @@ export default {
 
   // Accessibility Labels
   accessibility: {
+    hot: 'Hot',
     favorite: 'Favorite',
     comments: 'Comments',
     collection: 'Collection',

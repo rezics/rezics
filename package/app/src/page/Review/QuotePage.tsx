@@ -23,6 +23,8 @@ import {
   MiniActionBar,
   MiniAdminActionBar,
 } from '@/component/Common/Reaction/MiniActionBar';
+import {parseReactionSummaries} from '@/util/reactionSummariesParser';
+import {ReactionStatistics} from '@/component/Common/Reaction/ReactionStatistics';
 interface QuotePageProps {
   unitId: string;
 }
@@ -122,12 +124,9 @@ export const QuotePage: React.FC<QuotePageProps> = ({unitId}) => {
 
       <div className="flex items-center justify-between mt-3">
         <div className="flex gap-1">
-          <Typography variant="caption" color="text.secondary">
-            {stats?.replies} {t('common.reply')}
-          </Typography>
-          <Typography variant="caption" color="text.secondary">
-            {stats?.likes} {t('accessibility.favorite')}
-          </Typography>
+          <ReactionStatistics
+            reactionSummaries={parseReactionSummaries(Quote.reactionSummaries)}
+          />
           <Typography variant="caption" color="text.secondary">
             {stats?.date}
           </Typography>

@@ -1,6 +1,6 @@
 // Type only used in server, otherwise use contract
 
-import type {Unit, User, Prisma, Tag} from '@/prisma/client';
+import type {Unit, User, Prisma, Tag, ReactionSummary} from '@/prisma/client';
 
 /**
  * Internal Unit type with relations
@@ -8,6 +8,7 @@ import type {Unit, User, Prisma, Tag} from '@/prisma/client';
 export type UnitWithRelations = Unit & {
   user: User;
   tags: Tag[];
+  reactionSummaries: ReactionSummary[];
 };
 
 /**
@@ -16,4 +17,5 @@ export type UnitWithRelations = Unit & {
 export const unitInclude = {
   user: true,
   tags: true,
+  reactionSummaries: true,
 } satisfies Prisma.UnitInclude;
