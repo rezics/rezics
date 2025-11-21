@@ -1,5 +1,6 @@
 import type {PublicUser, ReadlistDTO} from '@package/contract';
 import type {ReadlistSelected, ReadlistListSelected} from './types';
+import {mapReviewToDTO} from '../review/mapper';
 
 export function sanitizeUser(u: {
   unitId: string;
@@ -48,12 +49,11 @@ export function mapReadlistRowToDTO(row: ReadlistSelected): ReadlistDTO {
       coverUrl: b.coverUrl ?? undefined,
       author: b.author,
     })),
-    reviews: (row.review ?? []).map(r => ({
-      unitId: r.id,
-      title: r.title ?? undefined,
-      targetUnitId: r.targetUnitId,
-      content: r.content ?? undefined,
-    })),
+    reviews: (row.review ?? []).map(r => {
+      let result: any = mapReviewToDTO(r as any);
+      result.targetUnitId = r.targetUnitId;
+      return result;
+    }),
     order: row.order ?? [],
   } as ReadlistDTO;
 }

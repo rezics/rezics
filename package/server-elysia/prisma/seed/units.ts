@@ -6,7 +6,8 @@ import {randomInt, randomBoolean, pickN, generateParagraph} from './utils.js';
 import {buildUnitTitleByType, buildMetadataByType} from './generators.js';
 import {
   upsertReactionSummariesForUnit,
-  upsertViewCountForUnit,
+  upsertBookmarkCountForUnit,
+  upsertCommentCountForUnit,
 } from './unitStats.js';
 
 /**
@@ -101,12 +102,15 @@ export async function seedOtherUnits(
           });
         }
 
-        await upsertViewCountForUnit(prisma, unit.id, randomInt(0, 10_000));
         await upsertReactionSummariesForUnit(prisma, unit.id, {
           like: randomInt(0, 300),
           dislike: randomInt(0, 60),
           love: randomInt(0, 220),
         });
+
+        await upsertBookmarkCountForUnit(prisma, unit.id, randomInt(0, 100));
+
+        await upsertCommentCountForUnit(prisma, unit.id, randomInt(0, 100));
 
         created.push(unit);
       }
@@ -139,7 +143,6 @@ export async function seedOtherUnits(
       select: {id: true, type: true},
     });
 
-    await upsertViewCountForUnit(prisma, unit.id, randomInt(0, 10_000));
     await upsertReactionSummariesForUnit(prisma, unit.id, {
       like: randomInt(0, 300),
       dislike: randomInt(0, 60),

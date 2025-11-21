@@ -33,13 +33,10 @@ export function useCreateReactionMutation(
     onSuccess: (data, variables, onMutateResult, context) => {
       // Invalidate summary and my reactions for the target
       queryClient.invalidateQueries({
-        queryKey: reactionKeys.summary(
-          variables.targetType,
-          variables.targetId,
-        ),
+        queryKey: reactionKeys.summary(variables.targetId),
       });
       queryClient.invalidateQueries({
-        queryKey: reactionKeys.my(variables.targetType, variables.targetId),
+        queryKey: reactionKeys.my(variables.targetId),
       });
       // Also refresh lists if used
       queryClient.invalidateQueries({queryKey: reactionKeys.lists()});
@@ -66,13 +63,10 @@ export function useUpdateReactionMutation(
     onSuccess: (data, variables, onMutateResult, context) => {
       // Invalidate affected caches for target
       queryClient.invalidateQueries({
-        queryKey: reactionKeys.summary(
-          variables.targetType,
-          variables.targetId,
-        ),
+        queryKey: reactionKeys.summary(variables.targetId),
       });
       queryClient.invalidateQueries({
-        queryKey: reactionKeys.my(variables.targetType, variables.targetId),
+        queryKey: reactionKeys.my(variables.targetId),
       });
       queryClient.invalidateQueries({queryKey: reactionKeys.lists()});
 
@@ -100,13 +94,10 @@ export function useDeleteReactionMutation(
     onSuccess: (data, variables, onMutateResult, context) => {
       // Invalidate affected caches for target
       queryClient.invalidateQueries({
-        queryKey: reactionKeys.summary(
-          variables.targetType,
-          variables.targetId,
-        ),
+        queryKey: reactionKeys.summary(variables.targetId),
       });
       queryClient.invalidateQueries({
-        queryKey: reactionKeys.my(variables.targetType, variables.targetId),
+        queryKey: reactionKeys.my(variables.targetId),
       });
       queryClient.invalidateQueries({queryKey: reactionKeys.lists()});
 

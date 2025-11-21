@@ -65,6 +65,12 @@ model User {
 
   permission Json?
 
+  followersCount  Int @default(0) // 粉丝数
+  followingsCount Int @default(0) // 关注数
+
+  followers  Follow[] @relation("UserFollowers")
+  followings Follow[] @relation("UserFollowings")
+
   // Relations
   Units        Unit[]     @relation("UnitForUser")
   authorBook   Book[]     @relation("BookAuthor")
@@ -77,6 +83,19 @@ model User {
 
   @@index([name])
   @@index([email])
+}
+
+model Follow {
+  id         String @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  follower   User   @relation("UserFollowings", fields: [followerId], references: [unitId])
+  followerId String @db.Uuid
+
+  following   User   @relation("UserFollowers", fields: [followingId], references: [unitId])
+  followingId String @db.Uuid
+
+  createdAt DateTime @default(now())
+
+  @@unique([followerId, followingId])
 }
 
 /**
@@ -237,6 +256,7 @@ model Reaction {
 
   @@unique([userId, targetId, reaction])
   @@index([targetId])
+  @@index([targetId, reaction])
   @@index([userId, reaction])
 }
 

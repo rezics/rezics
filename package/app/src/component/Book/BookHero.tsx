@@ -12,7 +12,10 @@ import {Link} from 'wouter';
 import {useUserStore} from '@/global/userStore';
 
 import type {BookDTO} from '@package/contract';
-import {MiniActionBar, MiniAdminActionBar} from '../Common/MiniActionBar';
+import {
+  MiniActionBar,
+  MiniAdminActionBar,
+} from '../Common/Reaction/MiniActionBar';
 
 type Book = BookDTO;
 

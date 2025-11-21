@@ -1,13 +1,7 @@
 import {AccentBarContainer} from '@component/Common/AccentBar.tsx';
 import {TreeReplyComponents} from '@/component/Form/Comment/TreeReplyComponents';
-import {
-  Add,
-  ChatBubbleOutline,
-  Comment,
-  Edit,
-  FavoriteBorder,
-} from '@mui/icons-material';
-import {IconButton, Tooltip} from '@mui/material';
+import {ChatBubbleOutline} from '@mui/icons-material';
+import {IconButton} from '@mui/material';
 import React, {useRef} from 'react';
 import {useTranslation} from 'react-i18next';
 import {useLocation, useParams} from 'wouter';
@@ -20,12 +14,10 @@ import {SingleCommentElementWrapper} from '@/component/Form/Comment/SingleCommen
 import {
   MiniActionBar,
   MiniAdminActionBar,
-} from '@/component/Common/MiniActionBar';
+} from '@/component/Common/Reaction/MiniActionBar';
 
 export const ReadListPage: React.FC = () => {
-  const {t} = useTranslation();
   const {readlistId} = useParams<{readlistId: string}>();
-  const [, navigate] = useLocation();
   const commentRef = useRef<HTMLDivElement>(null);
   const handleGoToComments = () => {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment

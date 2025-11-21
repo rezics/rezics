@@ -22,7 +22,7 @@ import {MarkdownContent} from '@/component/Common/MarkdownContent';
 import {
   MiniActionBar,
   MiniAdminActionBar,
-} from '@/component/Common/MiniActionBar';
+} from '@/component/Common/Reaction/MiniActionBar';
 interface QuotePageProps {
   unitId: string;
 }

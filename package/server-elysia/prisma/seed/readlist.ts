@@ -12,7 +12,7 @@ import {
 import {seedComments} from './comments.js';
 import {
   upsertReactionSummariesForUnit,
-  upsertViewCountForUnit,
+  upsertBookmarkCountForUnit,
 } from './unitStats.js';
 
 /**
@@ -100,7 +100,7 @@ export async function seedReadLists(
 
     await createCommentTreeForReadlist(prisma, currentReadlist.unitId, users);
 
-    await upsertViewCountForUnit(prisma, unit.id);
+    await upsertBookmarkCountForUnit(prisma, unit.id, randomInt(0, 100));
     await upsertReactionSummariesForUnit(prisma, unit.id, {
       like: randomInt(0, 200),
       dislike: randomInt(0, 40),
@@ -157,7 +157,7 @@ async function createReviewUnit(
     select: {id: true},
   });
 
-  await upsertViewCountForUnit(prisma, review.id);
+  await upsertBookmarkCountForUnit(prisma, review.id, randomInt(0, 100));
   await upsertReactionSummariesForUnit(prisma, review.id, {
     like: randomInt(0, 120),
     dislike: randomInt(0, 30),

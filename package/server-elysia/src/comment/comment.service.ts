@@ -153,16 +153,14 @@ export class CommentService {
 
     await prisma.reactionSummary.upsert({
       where: {
-        targetType_targetId_reaction: {
-          targetType: 'COMMENT',
+        targetId_reaction: {
           targetId: rootPostId,
           reaction: 'reply',
         },
       },
       update: {count: {increment: 1}},
       create: {
-        targetType: 'COMMENT',
-        targetId: created.unitId,
+        targetId: rootPostId,
         reaction: 'reply',
         count: 1,
       },

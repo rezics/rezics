@@ -30,7 +30,7 @@ import {useUserStore} from '@/global/userStore';
 import {
   MiniActionBar,
   MiniAdminActionBar,
-} from '@/component/Common/MiniActionBar';
+} from '@/component/Common/Reaction/MiniActionBar';
 
 export function ReviewPage({reviewId}: {reviewId: string}) {
   const {t} = useTranslation();

@@ -58,6 +58,10 @@ export const readlistSelect = {
       title: true,
       content: true,
       targetUnitId: true,
+      createdAt: true,
+      metadata: true,
+      user: {select: {unitId: true, slug: true, name: true, avatar: true}},
+      reactionSummaries: true,
     },
   },
 } satisfies Prisma.ReadListSelect;

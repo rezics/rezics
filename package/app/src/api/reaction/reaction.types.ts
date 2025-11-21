@@ -61,8 +61,16 @@ export type ReactionSummaryResponse = {
  */
 export type ReactionMyResponse = {
   userId: string;
-  targetId: string;
-  reactions: string[];
+  /**
+   * All targetIds included in this query.
+   * For single-target queries, this will be an array of length 1.
+   */
+  targetIds: string[];
+  /**
+   * Aggregated reactions keyed by targetId.
+   * Each entry is the list of reaction types for that target.
+   */
+  reactionsByTarget: Record<string, string[]>;
 };
 
 export type {ReactionListQuery};

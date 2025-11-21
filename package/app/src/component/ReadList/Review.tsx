@@ -4,6 +4,7 @@ import {ExpandMore, ExpandLess, ChatBubbleOutline} from '@mui/icons-material';
 import {BookListViewItem} from '@/component/BookLib/BookList/BookListView.tsx';
 import {navigate} from 'wouter/use-browser-location';
 import {MarkdownContent} from '../Common/MarkdownContent';
+import {ReviewHeader} from '@/component/Review/SingleReview';
 
 export type ReviewData = {
   unitId: string;
@@ -79,7 +80,7 @@ export const CollapsibleReview: React.FC<CollapsibleReviewProps> = ({
     >
       {header}
       <div className="flex items-start gap-3">
-        <Tooltip title="打开书评页面">
+        {/* <Tooltip title="打开书评页面">
           <IconButton
             aria-label="review"
             onClick={() => {
@@ -88,7 +89,7 @@ export const CollapsibleReview: React.FC<CollapsibleReviewProps> = ({
           >
             <ChatBubbleOutline fontSize="small" />
           </IconButton>
-        </Tooltip>
+        </Tooltip> */}
 
         <div className="min-w-0 flex-1">
           {review?.title && (
@@ -153,6 +154,25 @@ export const CollapsibleReview: React.FC<CollapsibleReviewProps> = ({
 
 export default CollapsibleReview;
 
+function CollapsibleReviewContainer({
+  review,
+  defaultExpanded = false,
+  maxCollapsedLines = 4,
+  className = '',
+  contentClassName = 'text-[13px] sm:text-sm text-gray-700 leading-6',
+}: CollapsibleReviewProps) {
+  return (
+    <div className={`w-full ${className}`}>
+      <CollapsibleReview
+        review={review}
+        header={<ReviewHeader review={review as any} />}
+        defaultExpanded={defaultExpanded}
+        maxCollapsedLines={maxCollapsedLines}
+        contentClassName={contentClassName}
+      />
+    </div>
+  );
+}
 // Book + Review grouped presentation for ReadList pages
 export const BookReviewGroup: React.FC<{
   book: any;
@@ -163,7 +183,7 @@ export const BookReviewGroup: React.FC<{
     <div className={`w-full ${className}`}>
       <BookListViewItem book={book} />
       <div className="mt-3">
-        <CollapsibleReview review={review} />
+        <CollapsibleReviewContainer review={review} />
       </div>
     </div>
   );

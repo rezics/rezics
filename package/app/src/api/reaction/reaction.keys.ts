@@ -16,11 +16,11 @@ export const reactionKeys = {
 
   /** Keys for summary queries (per target) */
   summaries: () => [...reactionKeys.all(), 'summary'] as const,
-  summary: (targetType: string, targetId: string) =>
-    [...reactionKeys.summaries(), {targetType, targetId}] as const,
+  summary: (targetId: string) =>
+    [...reactionKeys.summaries(), {targetId}] as const,
 
   /** Keys for current user's reactions on a target */
   mine: () => [...reactionKeys.all(), 'my'] as const,
-  my: (targetType: string, targetId: string) =>
-    [...reactionKeys.mine(), {targetType, targetId}] as const,
+  my: (targetId: string) =>
+    [...reactionKeys.mine(), {targetId}] as const,
 } as const;

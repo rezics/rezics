@@ -8,6 +8,7 @@ import {
   updateSchema,
   deleteQuerySchema,
   summaryQuerySchema,
+  myQuerySchema,
 } from '@package/contract';
 
 export const reactionApi = coreInstance('/reactions')
@@ -32,9 +33,9 @@ export const reactionApi = coreInstance('/reactions')
   .get(
     '/summary',
     async ({query}) => {
-      const {targetType, targetId} = query;
-      const summary = await reactionService.getSummary(targetType, targetId);
-      return {targetType, targetId, summary};
+      const {targetId} = query;
+      const summary = await reactionService.getSummary(targetId);
+      return {targetId, summary};
     },
     {
       query: summaryQuerySchema,
@@ -51,22 +52,55 @@ export const reactionApi = coreInstance('/reactions')
     '/my',
     async ({query, headers, jwt, set}) => {
       const payload = await verifyAuth(headers.authorization, jwt, set);
-      const {targetType, targetId} = query as {
-        targetType: string;
-        targetId: string;
+      const {targetId, targetIds} = query as {
+        targetId?: string;
+        /**
+         * JSON stringified array of targetIds, e.g. '["id1","id2"]'
+         */
+        targetIds?: string;
       };
-      const reactions = await reactionService.getUserReactions(
+
+      let effectiveTargetIds: string[] = [];
+      if (targetIds) {
+        try {
+          const parsed = JSON.parse(targetIds);
+          if (Array.isArray(parsed)) {
+            effectiveTargetIds = parsed.map(String);
+          }
+        } catch {
+          // Fallback: ignore malformed targetIds, will rely on targetId instead
+        }
+      }
+
+      if (!effectiveTargetIds.length && targetId) {
+        effectiveTargetIds = [targetId];
+      }
+
+      if (!effectiveTargetIds.length) {
+        return {
+          userId: payload.unitId,
+          targetIds: [],
+          reactionsByTarget: {},
+        };
+      }
+
+      const reactionsByTarget = await reactionService.getUserReactions(
         payload.unitId,
-        targetType,
-        targetId,
+        effectiveTargetIds,
       );
-      return {userId: payload.unitId, targetType, targetId, reactions};
+
+      return {
+        userId: payload.unitId,
+        targetIds: effectiveTargetIds,
+        reactionsByTarget,
+      };
     },
     {
-      query: summaryQuerySchema,
+      query: myQuerySchema,
       detail: {
-        summary: 'Get my reactions',
-        description: "Get current user's reactions for a target",
+        summary: 'Get my reactions (single or multiple targets)',
+        description:
+          "Get current user's reactions for one or many targets, aggregated by targetId",
         tags: ['Reactions'],
       },
     },
@@ -79,7 +113,6 @@ export const reactionApi = coreInstance('/reactions')
       const payload = await verifyAuth(headers.authorization, jwt, set);
       const created = await reactionService.create({
         userId: payload.unitId,
-        targetType: body.targetType,
         targetId: body.targetId,
         reaction: body.reaction,
       });
@@ -102,7 +135,6 @@ export const reactionApi = coreInstance('/reactions')
       const payload = await verifyAuth(headers.authorization, jwt, set);
       const {reaction} = await reactionService.update(
         payload.unitId,
-        body.targetType,
         body.targetId,
         body.oldReaction,
         body.newReaction,
@@ -126,7 +158,6 @@ export const reactionApi = coreInstance('/reactions')
       const payload = await verifyAuth(headers.authorization, jwt, set);
       const {deleted} = await reactionService.remove({
         userId: payload.unitId,
-        targetType: query.targetType as string,
         targetId: query.targetId as string,
         reaction: query.reaction as string,
       });

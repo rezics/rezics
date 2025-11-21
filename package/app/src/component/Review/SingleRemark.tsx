@@ -1,6 +1,4 @@
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
-import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
-import SentimentSatisfiedAltIcon from '@mui/icons-material/SentimentSatisfiedAlt';
 import ThumbDownIcon from '@mui/icons-material/ThumbDown';
 import ThumbUpIcon from '@mui/icons-material/ThumbUp';
 import {Box, Tooltip, Typography} from '@mui/material';
@@ -9,6 +7,12 @@ import type {ReviewDTO} from '@package/contract';
 import React, {useState, useEffect} from 'react';
 // import { CollapsibleText } from "../Common/CollapsibleText";
 import {CollapsibleByLineTextContainer} from '../Common/CollapsibleByLineText';
+import {
+  parseReactionSummaries,
+  type ReactionSummaryDTO,
+} from '@/util/reactionSummariesParser';
+
+import {ReactionBar} from '@/component/Common/Reaction/ReactionBar';
 
 export function MetaInfoBadge({
   review,
@@ -48,13 +52,6 @@ export function MetaInfoBadge({
   );
 }
 
-type ReactionSummaryDTO = {
-  likes?: number;
-  dislikes?: number;
-  funny?: number;
-  replies?: number;
-};
-
 export type SingleRemarkShowProps = {
   review: ReviewDTO;
   onLike?: (reviewId: string) => void;
@@ -81,19 +78,7 @@ export const SingleRemarkShow: React.FC<SingleRemarkShowProps> = ({
 
   useEffect(() => {
     const reactionSummariesArray = review.reactionSummaries ?? [];
-    const likes =
-      reactionSummariesArray.find(reaction => reaction.reaction === 'like')
-        ?.count ?? 0;
-    const dislikes =
-      reactionSummariesArray.find(reaction => reaction.reaction === 'dislike')
-        ?.count ?? 0;
-    const funny =
-      reactionSummariesArray.find(reaction => reaction.reaction === 'love')
-        ?.count ?? 0;
-    const replies =
-      reactionSummariesArray.find(reaction => reaction.reaction === 'reply')
-        ?.count ?? 0;
-    setReactionSummaries({likes, dislikes, funny, replies});
+    setReactionSummaries(parseReactionSummaries(reactionSummariesArray));
     console.log(review.reactionSummaries);
   }, [review]);
 
@@ -128,23 +113,15 @@ export const SingleRemarkShow: React.FC<SingleRemarkShowProps> = ({
           <div className="flex justify-between items-center text-gray-600 dark:text-gray-400">
             <div className="flex items-center">
               <div className="flex items-center space-x-1">
-                <Tooltip title="有帮助" placement="bottom">
-                  <button
-                    onClick={handleLike}
-                    className="p-1.5 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700"
-                  >
-                    <ThumbUpIcon style={{fontSize: '1rem'}} />
-                  </button>
-                </Tooltip>
-                <Tooltip title="无帮助" placement="bottom">
-                  <button
-                    onClick={handleDislike}
-                    className="p-1.5 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700"
-                  >
-                    <ThumbDownIcon style={{fontSize: '1rem'}} />
-                  </button>
-                </Tooltip>
-                <Tooltip title="欢乐" placement="bottom">
+                {/* ANCHOR Remove Reaction Bar for Performance Issue */}
+                {/* <ReactionBar
+                  size="small"
+                  fontSize="1.1rem"
+                  hideBookmark={true}
+                  hideShare={true}
+                  hideReply={true}
+                /> */}
+                {/* <Tooltip title="欢乐" placement="bottom">
                   <button className="p-1.5 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700">
                     <SentimentSatisfiedAltIcon style={{fontSize: '1rem'}} />
                   </button>
@@ -153,13 +130,11 @@ export const SingleRemarkShow: React.FC<SingleRemarkShowProps> = ({
                   <button className="p-1.5 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700">
                     <EmojiEventsIcon style={{fontSize: '1rem'}} />
                   </button>
-                </Tooltip>
+                </Tooltip> */}
               </div>
-              <div className="ml-4 text-xs flex items-center gap-2">
+              <div className="text-xs flex items-center gap-2">
                 <span>{reactionSummaries?.likes ?? 0} 人支持</span>
-                <span>
-                  {reactionSummaries?.funny ?? 0} 人觉得这篇评测很欢乐
-                </span>
+                <span>{reactionSummaries?.bookmark ?? 0} 人收藏</span>
               </div>
               {/* TODO Add a new line to show Awards or don't show awards for short reviews */}
             </div>
@@ -167,7 +142,7 @@ export const SingleRemarkShow: React.FC<SingleRemarkShowProps> = ({
               <div className="flex items-center gap-1 cursor-pointer hover:text-blue-500">
                 <ChatBubbleOutlineIcon style={{fontSize: '1rem'}} />
                 <span className="text-xs">
-                  {reactionSummaries?.replies ?? 0}{' '}
+                  {reactionSummaries?.comment ?? 0}{' '}
                 </span>
               </div>
             </Tooltip>

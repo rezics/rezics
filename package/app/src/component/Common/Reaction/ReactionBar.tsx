@@ -4,13 +4,20 @@ import {
   OpenInNew,
   DeleteOutlined,
   EditOutlined,
+  SentimentSatisfiedAlt,
+  EmojiEvents,
 } from '@mui/icons-material';
 import ThumbDownAltOutlinedIcon from '@mui/icons-material/ThumbDownAltOutlined';
 import ThumbUpAltOutlinedIcon from '@mui/icons-material/ThumbUpAltOutlined';
-import {IconButton} from '@mui/material';
+import {IconButton, Tooltip} from '@mui/material';
 import React, {useState} from 'react';
 import {ReactionBarToolBox} from './reactionBarToolBox';
 import {useAlertStore} from '@/global/windowAlertStore';
+
+import {
+  useCreateReactionMutation,
+  useDeleteReactionMutation,
+} from '@/api/reaction/reaction.mutations';
 
 export type ReactionAdminBarProps = {
   className?: string;
@@ -45,22 +52,32 @@ export function ReactionAdminBar({
   );
 }
 
-export type ReactionBarShowProps = {
+export type ReactionBarProps = {
   onReply?: () => void;
+  unitId?: string;
   className?: string;
   size?: 'small' | 'medium' | 'large';
   fontSize?: string;
   itemUrl?: string;
+  hideLike?: boolean;
+  hideDislike?: boolean;
   hideReply?: boolean;
+  hideBookmark?: boolean;
+  hideShare?: boolean;
 };
 
-export const ReactionBarShow: React.FC<ReactionBarShowProps> = ({
+export const ReactionBar: React.FC<ReactionBarProps> = ({
   onReply,
+  unitId,
   className,
   size = 'large',
   fontSize = '1.5rem',
   itemUrl,
+  hideLike = false,
+  hideDislike = false,
   hideReply = false,
+  hideBookmark = false,
+  hideShare = false,
 }) => {
   const handleReply = () => {
     onReply?.();
@@ -73,16 +90,20 @@ export const ReactionBarShow: React.FC<ReactionBarShowProps> = ({
     <div
       className={`flex justify-between items-center w-full max-w-sm mx-auto ${className}`}
     >
-      <div>
-        <IconButton size={size} sx={{fontSize}}>
-          <ThumbUpAltOutlinedIcon fontSize="inherit" />
-        </IconButton>
-      </div>
-      <div>
-        <IconButton size={size} sx={{fontSize}}>
-          <ThumbDownAltOutlinedIcon fontSize="inherit" />
-        </IconButton>
-      </div>
+      {!hideLike && (
+        <div>
+          <IconButton size={size} sx={{fontSize}}>
+            <ThumbUpAltOutlinedIcon fontSize="inherit" />
+          </IconButton>
+        </div>
+      )}
+      {!hideDislike && (
+        <div>
+          <IconButton size={size} sx={{fontSize}}>
+            <ThumbDownAltOutlinedIcon fontSize="inherit" />
+          </IconButton>
+        </div>
+      )}
 
       {!hideReply && (
         <div>
@@ -92,24 +113,28 @@ export const ReactionBarShow: React.FC<ReactionBarShowProps> = ({
         </div>
       )}
 
-      <div>
-        <IconButton size={size} sx={{fontSize}}>
-          <StarBorder fontSize="inherit" />
-        </IconButton>
-      </div>
+      {!hideBookmark && (
+        <div>
+          <IconButton size={size} sx={{fontSize}}>
+            <StarBorder fontSize="inherit" />
+          </IconButton>
+        </div>
+      )}
 
-      <div>
-        <IconButton
-          size={size}
-          sx={{fontSize}}
-          onClick={() => {
-            showAlert('链接已经复制到剪贴板');
-            setIsToolBoxOpen(true);
-          }}
-        >
-          <OpenInNew fontSize="inherit" />
-        </IconButton>
-      </div>
+      {!hideShare && (
+        <div>
+          <IconButton
+            size={size}
+            sx={{fontSize}}
+            onClick={() => {
+              showAlert('链接已经复制到剪贴板');
+              setIsToolBoxOpen(true);
+            }}
+          >
+            <OpenInNew fontSize="inherit" />
+          </IconButton>
+        </div>
+      )}
       <ReactionBarToolBox
         open={isToolBoxOpen}
         onClose={() => {
@@ -121,9 +146,19 @@ export const ReactionBarShow: React.FC<ReactionBarShowProps> = ({
   );
 };
 
-export type ReactionBarContainerProps = ReactionBarShowProps;
-export const ReactionBarContainer: React.FC<
-  ReactionBarContainerProps
-> = props => {
-  return <ReactionBarShow {...props} />;
-};
+export function AwardReactionBar() {
+  return (
+    <div>
+      <Tooltip title="Funny">
+        <IconButton size="medium">
+          <SentimentSatisfiedAlt style={{fontSize: '1rem'}} />
+        </IconButton>
+      </Tooltip>
+      <Tooltip title="Award">
+        <IconButton size="medium">
+          <EmojiEvents style={{fontSize: '1rem'}} />
+        </IconButton>
+      </Tooltip>
+    </div>
+  );
+}

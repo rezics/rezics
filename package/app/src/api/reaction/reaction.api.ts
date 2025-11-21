@@ -35,33 +35,33 @@ export const reactionApi = {
   /**
    * Get summary counts by reaction for a target
    *
-   * @param {string} targetType - Target entity type (e.g., 'BOOK', 'COMMENT')
    * @param {string} targetId - Target entity id (UUID)
    * @returns {Promise<ReactionSummaryResponse>} Aggregated counts per reaction
    */
-  summary: async (
-    targetType: string,
-    targetId: string,
-  ): Promise<ReactionSummaryResponse> => {
+  summary: async (targetId: string): Promise<ReactionSummaryResponse> => {
     return apiFetch<ReactionSummaryResponse>(
-      `/reactions/summary${buildQueryString({targetType, targetId})}`,
+      `/reactions/summary${buildQueryString({targetId})}`,
     );
   },
 
   /**
-   * Get current user's reactions for a target
+   * Get current user's reactions for one or many targets
    * Requires a valid Authorization header to be present via apiFetch setup
    *
-   * @param {string} targetType - Target entity type
-   * @param {string} targetId - Target entity id (UUID)
-   * @returns {Promise<ReactionMyResponse>} Current user's reactions on the target
+   * - Single-target usage:
+   *    reactionApi.my({ targetId })
+   * - Multi-target usage:
+   *    reactionApi.my({ targetIds: [...] })
+   *
+   * @param params - Either { targetId } or { targetIds }
+   * @returns {Promise<ReactionMyResponse>} Aggregated reactions keyed by targetId
    */
-  my: async (
-    targetType: string,
-    targetId: string,
-  ): Promise<ReactionMyResponse> => {
+  my: async (params: {
+    targetId?: string;
+    targetIds?: string[];
+  }): Promise<ReactionMyResponse> => {
     return apiFetch<ReactionMyResponse>(
-      `/reactions/my${buildQueryString({targetType, targetId})}`,
+      `/reactions/my${buildQueryString(params)}`,
     );
   },
 

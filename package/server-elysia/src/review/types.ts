@@ -19,5 +19,5 @@ export const reviewInclude = {
   user: true,
   tags: true,
   reactionSummaries: true,
-  targetUnit: {include: {book: true}},
+  targetUnit: {include: {book: true, reactionSummaries: true}},
 } satisfies Prisma.UnitInclude;

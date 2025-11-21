@@ -9,8 +9,8 @@ import {useQuery} from '@tanstack/react-query';
 import {useDialogStore} from '@/global/dialogStore.ts';
 import {
   ReactionAdminBar,
-  ReactionBarContainer,
-} from '../../Common/ReactionBar.tsx';
+  ReactionBar,
+} from '../../Common/Reaction/ReactionBar.tsx';
 import {ReplyDrawerContainer} from './ReplyDrawer.tsx';
 
 import {commentQueries} from '@/api/comment/comment.queries.ts';
@@ -145,18 +145,20 @@ const CommentNode: React.FC<CommentNodeProps> = ({
             <Box
               sx={{
                 width: {
-                  xs: '75%',
-                  sm: '50%',
-                  md: '33%',
-                  lg: '30%',
-                  xl: '30%',
+                  xs: '30%',
+                  sm: '30%',
+                  md: '23%',
+                  lg: '20%',
+                  xl: '15%',
                 },
               }}
             >
-              <ReactionBarContainer
+              <ReactionBar
                 onReply={handleReply}
                 size="small"
                 fontSize="1.3rem"
+                hideLike={true}
+                hideDislike={true}
               />
             </Box>
           </Box>

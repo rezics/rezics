@@ -13,7 +13,7 @@ import {buildUnitTitleByType, generateBookExtra} from './generators.js';
 import {getRandomBookCover} from './data.js';
 import {
   upsertReactionSummariesForUnit,
-  upsertViewCountForUnit,
+  upsertBookmarkCountForUnit,
 } from './unitStats.js';
 
 // Chapter tree structure to store into BookIndex.index
@@ -96,7 +96,7 @@ export async function seedBooks(
       },
     });
 
-    await upsertViewCountForUnit(prisma, unit.id);
+    await upsertBookmarkCountForUnit(prisma, unit.id, randomInt(0, 100));
     await upsertReactionSummariesForUnit(prisma, unit.id, {
       like: randomInt(0, 250),
       dislike: randomInt(0, 50),

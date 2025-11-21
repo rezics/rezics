@@ -43,13 +43,53 @@ export class ReactionService {
     return result;
   }
 
+  /**
+   * Get current user's reactions.
+   *
+   * - Single targetId: returns string[] (reactions for that target)
+   * - Multiple targetIds: returns Record<targetId, string[]>
+   */
   async getUserReactions(
     userId: string,
-    targetType: string,
     targetId: string,
-  ): Promise<string[]> {
+  ): Promise<string[]>;
+  async getUserReactions(
+    userId: string,
+    targetIds: string[],
+  ): Promise<Record<string, string[]>>;
+  async getUserReactions(
+    userId: string,
+    target: string | string[],
+  ): Promise<string[] | Record<string, string[]>> {
+    // Multi-target aggregated mode
+    if (Array.isArray(target)) {
+      if (!target.length) return {};
+
+      const rows = await prisma.reaction.findMany({
+        where: {
+          userId,
+          targetId: {in: target},
+        },
+        select: {
+          targetId: true,
+          reaction: true,
+        },
+      });
+
+      const result: Record<string, string[]> = {};
+      // Ensure all requested ids exist in the map
+      for (const id of target) {
+        result[id] = [];
+      }
+      for (const row of rows) {
+        result[row.targetId].push(row.reaction);
+      }
+      return result;
+    }
+
+    // Single-target mode (backward compatible)
     const rows = await prisma.reaction.findMany({
-      where: {userId, targetType, targetId},
+      where: {userId, targetId: target},
       select: {reaction: true},
     });
     return rows.map(r => r.reaction);
@@ -57,15 +97,14 @@ export class ReactionService {
 
   /** Create a reaction (idempotent). Increments summary only if newly created. */
   async create(
-    params: Pick<Reaction, 'userId' | 'targetType' | 'targetId' | 'reaction'>,
+    params: Pick<Reaction, 'userId' | 'targetId' | 'reaction'>,
   ): Promise<Reaction> {
-    const {userId, targetType, targetId, reaction} = params;
+    const {userId, targetId, reaction} = params;
     return await prisma.$transaction(async tx => {
       const existing = await tx.reaction.findUnique({
         where: {
-          userId_targetType_targetId_reaction: {
+          userId_targetId_reaction: {
             userId,
-            targetType,
             targetId,
             reaction,
           },
@@ -74,12 +113,12 @@ export class ReactionService {
       if (existing) return existing;
 
       const created = await tx.reaction.create({
-        data: {userId, targetType, targetId, reaction},
+        data: {userId, targetId, reaction},
       });
 
       await tx.reactionSummary.upsert({
-        where: {targetType_targetId_reaction: {targetType, targetId, reaction}},
-        create: {targetType, targetId, reaction, count: 1},
+        where: {targetId_reaction: {targetId, reaction}},
+        create: {targetId, reaction, count: 1},
         update: {count: {increment: 1}},
       });
 
@@ -89,15 +128,14 @@ export class ReactionService {
 
   /** Delete a reaction for a user (idempotent). Decrements summary if deleted. */
   async remove(
-    params: Pick<Reaction, 'userId' | 'targetType' | 'targetId' | 'reaction'>,
+    params: Pick<Reaction, 'userId' | 'targetId' | 'reaction'>,
   ): Promise<{deleted: boolean}> {
-    const {userId, targetType, targetId, reaction} = params;
+    const {userId, targetId, reaction} = params;
     return await prisma.$transaction(async tx => {
       const existing = await tx.reaction.findUnique({
         where: {
-          userId_targetType_targetId_reaction: {
+          userId_targetId_reaction: {
             userId,
-            targetType,
             targetId,
             reaction,
           },
@@ -108,9 +146,8 @@ export class ReactionService {
 
       await tx.reaction.delete({
         where: {
-          userId_targetType_targetId_reaction: {
+          userId_targetId_reaction: {
             userId,
-            targetType,
             targetId,
             reaction,
           },
@@ -121,7 +158,7 @@ export class ReactionService {
       await tx.reactionSummary
         .update({
           where: {
-            targetType_targetId_reaction: {targetType, targetId, reaction},
+            targetId_reaction: {targetId, reaction},
           },
           data: {count: {decrement: 1}},
         })
@@ -134,7 +171,6 @@ export class ReactionService {
   /** Update reaction type (old -> next). Handles summaries accordingly. */
   async update(
     userId: string,
-    targetType: string,
     targetId: string,
     oldReaction: string,
     newReaction: string,
@@ -142,9 +178,8 @@ export class ReactionService {
     if (oldReaction === newReaction) {
       const existing = await prisma.reaction.findUnique({
         where: {
-          userId_targetType_targetId_reaction: {
+          userId_targetId_reaction: {
             userId,
-            targetType,
             targetId,
             reaction: newReaction,
           },
@@ -157,9 +192,8 @@ export class ReactionService {
       // Remove old if exists
       const old = await tx.reaction.findUnique({
         where: {
-          userId_targetType_targetId_reaction: {
+          userId_targetId_reaction: {
             userId,
-            targetType,
             targetId,
             reaction: oldReaction,
           },
@@ -169,9 +203,8 @@ export class ReactionService {
       if (old) {
         await tx.reaction.delete({
           where: {
-            userId_targetType_targetId_reaction: {
+            userId_targetId_reaction: {
               userId,
-              targetType,
               targetId,
               reaction: oldReaction,
             },
@@ -180,8 +213,7 @@ export class ReactionService {
         await tx.reactionSummary
           .update({
             where: {
-              targetType_targetId_reaction: {
-                targetType,
+              targetId_reaction: {
                 targetId,
                 reaction: oldReaction,
               },
@@ -194,9 +226,8 @@ export class ReactionService {
       // Ensure new exists; only increment summary if this is newly created
       const newExists = await tx.reaction.findUnique({
         where: {
-          userId_targetType_targetId_reaction: {
+          userId_targetId_reaction: {
             userId,
-            targetType,
             targetId,
             reaction: newReaction,
           },
@@ -208,17 +239,16 @@ export class ReactionService {
         result = newExists;
       } else {
         result = await tx.reaction.create({
-          data: {userId, targetType, targetId, reaction: newReaction},
+          data: {userId, targetId, reaction: newReaction},
         });
         await tx.reactionSummary.upsert({
           where: {
-            targetType_targetId_reaction: {
-              targetType,
+            targetId_reaction: {
               targetId,
               reaction: newReaction,
             },
           },
-          create: {targetType, targetId, reaction: newReaction, count: 1},
+          create: {targetId, reaction: newReaction, count: 1},
           update: {count: {increment: 1}},
         });
       }

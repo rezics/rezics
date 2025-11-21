@@ -13,16 +13,14 @@ export async function upsertReactionSummary(
     targetId: string;
     reaction: string;
     count: number;
-    targetType?: string;
   },
 ): Promise<void> {
   const {targetId, reaction, count} = params;
-  const targetType = params.targetType ?? 'Unit';
   await prisma.reactionSummary.upsert({
     where: {
-      targetType_targetId_reaction: {targetType, targetId, reaction},
+      targetId_reaction: {targetId, reaction},
     },
-    create: {targetType, targetId, reaction, count},
+    create: {targetId, reaction, count},
     update: {count},
   });
 }
@@ -35,9 +33,7 @@ export async function upsertReactionSummariesForUnit(
   prisma: PrismaClient,
   unitId: string,
   counts?: ReactionCounts,
-  options?: {targetType?: string},
 ): Promise<void> {
-  const targetType = options?.targetType ?? 'Unit';
   const merged: Record<string, number> = {
     like: counts?.like ?? randomInt(0, 300),
     dislike: counts?.dislike ?? randomInt(0, 60),
@@ -49,26 +45,20 @@ export async function upsertReactionSummariesForUnit(
       targetId: unitId,
       reaction,
       count,
-      targetType,
     }),
   );
   await Promise.all(tasks);
 }
 
-/**
- * Upsert view count via ReactionSummary('view').
- */
-export async function upsertViewCountForUnit(
+export async function upsertBookmarkCountForUnit(
   prisma: PrismaClient,
   unitId: string,
-  viewCount?: number,
-  options?: {targetType?: string},
+  bookmarkCount: number,
 ): Promise<void> {
   await upsertReactionSummary(prisma, {
     targetId: unitId,
-    reaction: 'view',
-    count: viewCount ?? faker.number.int({min: 0, max: 10_000}),
-    targetType: options?.targetType ?? 'Unit',
+    reaction: 'bookmark',
+    count: bookmarkCount,
   });
 }
 
@@ -79,13 +69,11 @@ export async function upsertCommentCountForUnit(
   prisma: PrismaClient,
   unitId: string,
   commentCount: number,
-  options?: {targetType?: string},
 ): Promise<void> {
   await upsertReactionSummary(prisma, {
     targetId: unitId,
     reaction: 'comment',
     count: commentCount,
-    targetType: options?.targetType ?? 'Unit',
   });
 }
 
@@ -117,8 +105,8 @@ export async function upsertRatingAggregate(
 export async function seedStatsBundleForUnit(
   prisma: PrismaClient,
   unitId: string,
-  options?: {targetType?: string},
 ): Promise<void> {
-  await upsertViewCountForUnit(prisma, unitId, undefined, options);
-  await upsertReactionSummariesForUnit(prisma, unitId, undefined, options);
+  // Note: view counts are managed in dedicated seed modules (books/units/readlist).
+  // This helper focuses on reaction summaries only.
+  await upsertReactionSummariesForUnit(prisma, unitId);
 }

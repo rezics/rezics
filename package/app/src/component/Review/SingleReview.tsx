@@ -1,54 +1,60 @@
-import {CollapsibleText} from '@component/Common/CollapsibleText';
-import {ReactionBarShow} from '@component/Common/ReactionBar';
-import {EmojiEvents, SentimentSatisfiedAlt} from '@mui/icons-material';
-import {
-  Avatar,
-  Box,
-  Button,
-  Divider,
-  IconButton,
-  Rating,
-  Tooltip,
-  Typography,
-} from '@mui/material';
+import {ReactionBar} from '@/component/Common/Reaction/ReactionBar';
+import {Avatar, Box, Button, Rating, Tooltip, Typography} from '@mui/material';
+import {Link} from 'wouter';
 import {type ReviewDTO} from '@package/contract';
 import React from 'react';
 import {CollapsibleReview} from '@/component/ReadList/Review';
+import {parseReactionSummaries} from '@/util/reactionSummariesParser';
 
-const ReviewHeader: React.FC<{review: ReviewDTO; onFollow?: () => void}> = ({
-  review,
-  onFollow,
-}) => {
+export const ReviewHeader: React.FC<{
+  review: ReviewDTO;
+  onFollow?: () => void;
+}> = ({review, onFollow}) => {
   return (
-    <Box sx={{display: 'flex', alignItems: 'center', mb: 2}}>
+    <div className="flex flex-wrap items-center mb-2 gap-2">
+      {/* Avatar */}
       <Avatar
         src={review.user?.avatar ?? ''}
         sx={{width: 40, height: 40, borderRadius: 1}}
       />
-      <Box sx={{ml: 2}}>
+
+      {/* User Info */}
+      <div className="ml-2">
         <Typography variant="subtitle1" fontWeight="bold">
           {review.user?.name}
         </Typography>
 
         <Typography variant="body2" color="text.secondary">
-          {990} reviews {1232} followers
+          {/* {990} reviews · {1232} followers */}
+          {1232} followers
         </Typography>
-      </Box>
+      </div>
+
+      {/* Follow Button */}
       <Button
         variant="outlined"
         size="small"
-        sx={{ml: 2, py: 0.5}}
+        sx={{py: 0.5}}
+        className="!ml-2"
         onClick={onFollow}
       >
         Follow
       </Button>
-      <Box sx={{ml: 'auto', textAlign: 'right'}}>
-        <Rating defaultValue={review.rating} precision={0.5} readOnly />
-        <Typography variant="body2" color="text.secondary">
-          {review.created_at}
-        </Typography>
-      </Box>
-    </Box>
+
+      {/* Rating + Time (push to right, but wrap under on small screens) */}
+      <div className="ml-auto text-right min-w-[120px]">
+        <Tooltip title={`打开书评页面`} placement="top-end">
+          <Link href={`/review/${review.unitId}`}>
+            <div>
+              <Rating defaultValue={review.rating} precision={0.5} readOnly />
+              <Typography variant="body2" color="text.secondary">
+                {review.created_at}
+              </Typography>
+            </div>
+          </Link>
+        </Tooltip>
+      </div>
+    </div>
   );
 };
 
@@ -56,48 +62,28 @@ const ReviewFooter: React.FC<{
   review: ReviewDTO;
   onReply: (reviewId: string) => void;
 }> = ({review, onReply}) => {
+  const reactionSummaries = parseReactionSummaries(
+    review.reactionSummaries ?? [],
+  );
   return (
-    <div>
-      <Box className="w-full flex justify-end">
-        <Box
-          sx={{
-            width: {
-              xs: '100%',
-              sm: '75%',
-              md: '50%',
-              lg: '50%',
-              xl: '33.33%',
-            },
-          }}
-        >
-          <ReactionBarShow
-            onReply={() => onReply(review.unitId)}
-            itemUrl={`/review/${review.unitId}`}
-            hideReply={true}
-          />
-        </Box>
-      </Box>
-      {/* Statistics and Awards */}
-      <div className="flex w-full justify-end">
-        <div className="text-sm flex gap-2 items-center">
-          {/* TODO 小屏幕自动换行 */}
-          <div>177 认同</div>
-          <div>14 Comments</div>
-          <div>190 funny</div>
-          {/* Open a new line to show Awards */}
-        </div>
-        <div className="ml-4">
-          <Tooltip title="Funny">
-            <IconButton size="medium">
-              <SentimentSatisfiedAlt style={{fontSize: '1rem'}} />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title="Award">
-            <IconButton size="medium">
-              <EmojiEvents style={{fontSize: '1rem'}} />
-            </IconButton>
-          </Tooltip>
-        </div>
+    <div className="w-full flex flex-wrap justify-between items-center gap-2">
+      {/* Left: Reaction stats */}
+      <div className="flex flex-wrap gap-2 text-sm items-center flex-shrink-0 ml-2">
+        <div>{reactionSummaries?.likes ?? 0} 认同</div>
+        <div>{reactionSummaries?.dislikes ?? 0} 不认同</div>
+        <div>{reactionSummaries?.bookmark ?? 0} 收藏</div>
+        <div>{reactionSummaries?.comment ?? 0} 评论</div>
+      </div>
+
+      {/* Right: ReactionBar */}
+      <div className="flex justify-end">
+        <ReactionBar
+          onReply={() => onReply(review.unitId)}
+          itemUrl={`/review/${review.unitId}`}
+          hideReply={true}
+          hideLike={true}
+          hideDislike={true}
+        />
       </div>
     </div>
   );
