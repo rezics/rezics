@@ -175,6 +175,7 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({bookId}) => {
       producerIds: metadataState.producer?.map(producer => producer.unitId),
       isbn: metadataState.isbn,
       coverUrl: metadataState.coverUrl,
+      nsfw: metadataState.nsfw,
     };
     updateBookMutation.mutateAsync({
       postId: bookId,

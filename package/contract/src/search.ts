@@ -18,6 +18,7 @@ export const bookQueryOptionsSchema = t.Object({
   authorIds: t.Optional(t.Array(t.String())),
   pressIds: t.Optional(t.Array(t.String())),
   producerIds: t.Optional(t.Array(t.String())),
+  nsfw: t.Optional(t.Boolean()),
   sort: t.Optional(
     t.Object({
       type: t.Optional(bookSortTypeSchema),

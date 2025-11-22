@@ -15,6 +15,7 @@ export const bookDTOSchema = t.Object({
   producer: t.Optional(t.Array(publicUserSchema)),
   coverUrl: t.Optional(t.String()),
   isbn: t.Optional(t.String()),
+  nsfw: t.Optional(t.Boolean()),
   // 保持与 Input 一致，允许 null
   chaptersIndex: t.Optional(t.Nullable(t.String())),
   // 保持与 Input 一致
@@ -40,6 +41,8 @@ export type BookDTO = (typeof bookDTOSchema)['static'];
  */
 export const bookListQuerySchema = t.Object({
   q: t.Optional(t.String()), // search in title/isbn
+  // 是否搜索 NSFW 内容；不传或为 false 时，只返回非 NSFW 内容
+  nsfw: t.Optional(t.Boolean()),
   tag: t.Optional(t.String()), // single tag
   tags: t.Optional(t.String()), // comma-separated list
   authorId: t.Optional(t.String()),
@@ -110,6 +113,7 @@ export const createBookSchema = t.Object({
   authorIds: t.Optional(t.Array(t.String())),
   pressIds: t.Optional(t.Array(t.String())),
   producerIds: t.Optional(t.Array(t.String())),
+  nsfw: t.Optional(t.Boolean()),
   coverUrl: t.Optional(t.String()),
   isbn: t.Optional(t.String()),
   chaptersIndex: t.Optional(t.Nullable(t.String())),
@@ -131,6 +135,7 @@ export const updateBookSchema = t.Object({
   authorIds: t.Optional(t.Array(t.String())),
   pressIds: t.Optional(t.Array(t.String())),
   producerIds: t.Optional(t.Array(t.String())),
+  nsfw: t.Optional(t.Boolean()),
   coverUrl: t.Optional(t.String()),
   isbn: t.Optional(t.String()),
   chaptersIndex: t.Optional(t.Nullable(t.String())),

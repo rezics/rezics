@@ -103,6 +103,7 @@ export const BookLibShow = (
               setCurrentQuery({
                 keyword: info.keyword ?? '',
                 tags: info.tags ?? [],
+                nsfw: info.nsfw ?? false,
               });
               console.log('onSearch', info);
             }}
@@ -129,6 +130,7 @@ export const BookLibContainer: React.FC = () => {
   const [currentQuery, setCurrentQuery] = useState<SearchInfo>({
     keyword: '',
     tags: [],
+    nsfw: false,
   });
   const [start, setStart] = useState<number>(0);
 
@@ -138,6 +140,7 @@ export const BookLibContainer: React.FC = () => {
       limit: EXTERNAL_PAGE_SIZE,
       q: currentQuery.keyword ?? '',
       tags: currentQuery.tags?.join(',') ?? '',
+      ...(currentQuery.nsfw ? {nsfw: true} : {}),
     }),
   );
 
@@ -153,6 +156,7 @@ export const BookLibContainer: React.FC = () => {
         limit: EXTERNAL_PAGE_SIZE,
         q: currentQuery.keyword ?? '',
         tags: currentQuery.tags?.join(',') ?? '',
+        ...(currentQuery.nsfw ? {nsfw: true} : {}),
       }),
     );
     console.log('handlePreRequestData', data, page);

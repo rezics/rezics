@@ -6,11 +6,9 @@ import {
   updateBookSchema,
 } from '@package/contract';
 import type {
-  BookListQuery,
   BookListResponse,
   BookResponse,
   CreateBookInput,
-  UpdateBookInput,
 } from '@package/contract';
 import {bookService} from './book.service';
 import {mapBaseBookToDTO, mapBookToDTO} from './mapper';
@@ -110,6 +108,7 @@ export const bookApi = coreInstance('/books')
         userId: payload.unitId,
         title: body.title,
         authorIds: body.authorIds,
+        nsfw: body.nsfw,
         coverUrl: body.coverUrl,
         isbn: body.isbn,
         chaptersIndex: body.chaptersIndex,

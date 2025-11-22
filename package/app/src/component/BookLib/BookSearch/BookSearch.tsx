@@ -62,6 +62,7 @@ export const BookSearchContainer: React.FC<BookSearchContainerProps> = ({
       tags: info.tags?.length ? info.tags : undefined,
       user: info.user ?? undefined,
       wordCount: info.wordCount ?? undefined,
+      nsfw: info.nsfw ?? false,
       sort:
         sort.type || sort.order
           ? {type: sort.type as any, order: sort.order}

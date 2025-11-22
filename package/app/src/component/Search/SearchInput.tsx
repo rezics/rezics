@@ -1,9 +1,16 @@
 import SearchIcon from '@mui/icons-material/Search';
-import {Chip, IconButton, TextField} from '@mui/material';
+import {
+  Chip,
+  FormControlLabel,
+  IconButton,
+  TextField,
+  Checkbox,
+} from '@mui/material';
 import {type SearchInfo} from '@/component/Search/searchParser';
 import React, {useEffect, useMemo, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import {useSearchParams, useLocation} from 'wouter';
+import {NSFWInfo} from '@/component/Book/Metadata/BookMetadataEditor';
 
 export type SearchInputShowProps = {
   value: SearchInfo;
@@ -93,6 +100,15 @@ export const SearchInputShow: React.FC<SearchInputShowProps> = ({
             onValueChange({...value, wordCount: parseInt(e.target.value)})
           }
           onKeyDown={handleKeyDown}
+        />
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={!!value.nsfw}
+              onChange={e => onValueChange({...value, nsfw: e.target.checked})}
+            />
+          }
+          label={<NSFWInfo />}
         />
       </div>
       {/* <div className="flex items-center gap-2 mt-4">

@@ -21,6 +21,14 @@ export class BookService {
   private buildWhereClause(options: BookListQuery): Prisma.BookWhereInput {
     const andWhere: Prisma.BookWhereInput[] = [];
 
+    // NSFW filter - by default, only return non-NSFW content
+    // If options.nsfw === true, only return NSFW content
+    if (options.nsfw === true) {
+      andWhere.push({unit: {nsfw: true}});
+    } else {
+      andWhere.push({unit: {nsfw: false}});
+    }
+
     // Search in title, isbn, or post title
     if (options.q && options.q.trim()) {
       andWhere.push({
@@ -94,7 +102,7 @@ export class BookService {
       });
     }
 
-    return andWhere.length > 0 ? {AND: andWhere} : {};
+    return {AND: andWhere};
   }
 
   /**
@@ -184,8 +192,16 @@ export class BookService {
    * Create new book
    */
   async create(req: CreateBookInput): Promise<BookWithRelations> {
-    const {userId, title, authorIds, coverUrl, isbn, chaptersIndex, extra} =
-      req;
+    const {
+      userId,
+      title,
+      authorIds,
+      coverUrl,
+      isbn,
+      chaptersIndex,
+      extra,
+      nsfw,
+    } = req;
 
     const book = await prisma.book.create({
       data: {
@@ -195,6 +211,7 @@ export class BookService {
             type: UnitType.BOOK,
             status: UnitStatus.ACTIVE,
             title,
+            nsfw: nsfw || false,
             metadata: (extra ?? {}) as Prisma.InputJsonValue,
           },
         },
@@ -233,6 +250,7 @@ export class BookService {
       chaptersIndex,
       extra,
       description,
+      nsfw,
     } = req;
 
     const book = await prisma.book.update({
@@ -259,6 +277,7 @@ export class BookService {
           update: {
             title: title || undefined,
             metadata: (extra ?? undefined) as Prisma.InputJsonValue | undefined,
+            nsfw: nsfw || false,
           },
         },
       },

@@ -123,36 +123,35 @@ const UsersMultiSelect: React.FC<{
     </div>
   );
 };
+export function NSFWInfo() {
+  return (
+    <div className="flex items-center gap-1">
+      <span>NSFW</span>
 
+      <Tooltip
+        title="当书籍名称或封面包含裸露、色情等敏感内容时，请勾选此选项"
+        placement="right"
+        slotProps={{
+          tooltip: {
+            sx: {
+              fontSize: '0.85rem',
+              padding: '6px 10px',
+              maxWidth: 300,
+              lineHeight: 1.4,
+            },
+          },
+        }}
+      >
+        <InfoOutlined fontSize="small" color="action" />
+      </Tooltip>
+    </div>
+  );
+}
 export const BookMetadataEditor: React.FC<BookMetadataEditorProps> = ({
   value,
   onChange,
   disabled,
 }) => {
-  function NSFWInfo() {
-    return (
-      <div className="flex items-center gap-1">
-        <span>NSFW</span>
-
-        <Tooltip
-          title="当书籍名称或封面包含裸露、色情等敏感内容时，请勾选此选项"
-          placement="right"
-          slotProps={{
-            tooltip: {
-              sx: {
-                fontSize: '0.85rem',
-                padding: '6px 10px',
-                maxWidth: 300,
-                lineHeight: 1.4,
-              },
-            },
-          }}
-        >
-          <InfoOutlined fontSize="small" color="action" />
-        </Tooltip>
-      </div>
-    );
-  }
   return (
     <div className="flex flex-col gap-6">
       <div>
@@ -222,10 +221,18 @@ export const BookMetadataEditor: React.FC<BookMetadataEditorProps> = ({
         </div>
         <div>
           <FormControlLabel
-            control={<Checkbox />}
+            control={
+              <Checkbox
+                checked={value?.nsfw ?? false}
+                onChange={e =>
+                  onChange?.({
+                    nsfw: e.target.checked,
+                  })
+                }
+                disabled={disabled}
+              />
+            }
             label={<NSFWInfo />}
-            // checked={value?.nsfw ?? false}
-            // onChange={e => onChange?.({nsfw: e.target.checked})}
             disabled={disabled}
           />
         </div>

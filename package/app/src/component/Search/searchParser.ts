@@ -3,6 +3,7 @@ export interface SearchInfo {
   tags?: string[];
   wordCount?: number;
   user?: string;
+  nsfw?: boolean;
 }
 
 /**
