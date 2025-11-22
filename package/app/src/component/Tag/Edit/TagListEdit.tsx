@@ -4,10 +4,17 @@ import {
   Button,
   ToggleButtonGroup,
   ToggleButton,
+  TextField,
+  Chip,
 } from '@mui/material';
 import {useQuery} from '@tanstack/react-query';
-import {tagByObjectQuery, useDetachTagMutation} from '@/api/tag/tag';
-import type {TagDetailDTO} from '@/api/tag/tag';
+import {
+  tagByObjectQuery,
+  useDetachTagMutation,
+  useAttachTagMutation,
+  tagApi,
+} from '@/api/tag/tag';
+import type {TagDetailDTO, TagDTO} from '@/api/tag/tag';
 import {SingleTagChip} from '../TagList';
 import NewTag from './NewTag';
 import TagEdit from './TagEdit';
@@ -34,9 +41,16 @@ export const TagListEdit: React.FC<TagListEditProps> = ({
   const [view, setView] = useState<'list' | 'grouped'>('list');
   const [showCreate, setShowCreate] = useState(false);
   const [editingTag, setEditingTag] = useState<TagDetailDTO | null>(null);
+  const [search, setSearch] = useState('');
+  const [domainList, setDomainList] = useState<any[]>([]);
 
   const detachMutation = useDetachTagMutation({
     onSuccess: () => refetch(),
+  });
+  const attachMutation = useAttachTagMutation({
+    onSuccess: () => {
+      refetch();
+    },
   });
   // 新建逻辑放在子组件 TagEdit 中通过回调刷新
 
@@ -59,12 +73,42 @@ export const TagListEdit: React.FC<TagListEditProps> = ({
       for (const d of rawDomains) {
         const id = d && (d.id ?? d.unitId) ? String(d.id ?? d.unitId) : null;
         if (!id) continue;
+        setDomainList(prev => [...prev, {id, title: d.title}]);
         m.set(id, [...(m.get(id) ?? []), tag]);
       }
     }
 
     return m;
   }, [list, view]);
+
+  const searchTerm = search.trim();
+  const {
+    data: searchData,
+    isLoading: isSearching,
+    error: searchError,
+  } = useQuery<{
+    tags: TagDTO[];
+    total: number;
+  }>({
+    queryKey: ['tags', 'search', searchTerm],
+    enabled: searchTerm.length > 0,
+    queryFn: () => tagApi.list({q: searchTerm, limit: 20}),
+  });
+
+  const searchResults: TagDTO[] = useMemo(
+    () =>
+      (searchData?.tags ?? []).filter(
+        t => !list.some(attached => attached.id === t.id),
+      ),
+    [searchData, list],
+  );
+
+  const handleAttach = async (tagId: string) => {
+    await attachMutation.mutateAsync({
+      unitId: tagId,
+      targetUnitId: objectUnitId,
+    });
+  };
 
   const onDetach = async (tag: TagDetailDTO) => {
     await detachMutation.mutateAsync({
@@ -111,7 +155,9 @@ export const TagListEdit: React.FC<TagListEditProps> = ({
         {[...grouped.entries()].map(([dom, items]) => (
           <div key={dom} className="space-y-2">
             <div className="text-sm font-semibold text-gray-700">
-              {dom === 'NO_DOMAIN' ? '未分组' : dom}
+              {dom === 'NO_DOMAIN'
+                ? '未分组'
+                : domainList.find(d => d.id === dom)?.title ?? dom}
             </div>
             <div className="space-y-1">
               {items.map(t => (
@@ -211,6 +257,51 @@ export const TagListEdit: React.FC<TagListEditProps> = ({
 
       {!isLoading && !error && view === 'list' && renderListView()}
       {!isLoading && !error && view === 'grouped' && renderGroupedView()}
+
+      {/* 搜索并添加已有标签 */}
+      <div className="mt-6 pt-4 border-t">
+        <div className="text-sm font-semibold text-gray-700 mb-2">
+          搜索并添加标签
+        </div>
+        <div className="flex items-center gap-2 mb-3">
+          <TextField
+            size="small"
+            fullWidth
+            placeholder="输入标签名搜索…"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+          />
+          {isSearching && <CircularProgress size={18} />}
+        </div>
+        {searchError && (
+          <div className="text-xs text-red-600 mb-2">
+            搜索失败：{String((searchError as any)?.message ?? searchError)}
+          </div>
+        )}
+        {searchTerm && !isSearching && searchResults.length === 0 && (
+          <div className="text-xs text-gray-500">未找到匹配的标签</div>
+        )}
+        {searchResults.length > 0 && (
+          <div className="space-y-1">
+            {searchResults.map(t => (
+              <div
+                key={t.id}
+                className="flex items-center justify-between gap-2"
+              >
+                <Chip label={t.name} size="small" />
+                <Button
+                  size="small"
+                  variant="outlined"
+                  onClick={() => handleAttach(t.id)}
+                  disabled={attachMutation.isPending}
+                >
+                  添加
+                </Button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 };

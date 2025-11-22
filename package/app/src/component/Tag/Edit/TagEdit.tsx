@@ -19,6 +19,7 @@ export const TagEdit: React.FC<TagEditProps> = ({tag, onSaved, className}) => {
   const isUpdate = !!tag;
   const [name, setName] = useState(tag?.name ?? '');
   const [type, setType] = useState<string | null>(tag?.type ?? null);
+  const [domains, setDomains] = useState<UnitDTO[]>();
   const [domainIds, setDomainIds] = useState<string[]>(() => {
     if (!tag?.domains) return [];
     // 兼容后端返回的两种形态：
@@ -83,8 +84,13 @@ export const TagEdit: React.FC<TagEditProps> = ({tag, onSaved, className}) => {
   };
 
   const selectedDomainOptions = useMemo(() => {
-    return domainIds.map(id => ({id, title: id}));
-  }, [domainIds]);
+    return (
+      domains?.map(d => ({
+        id: d.id,
+        title: d.title,
+      })) ?? []
+    );
+  }, [domains]);
 
   return (
     <form onSubmit={onSubmit} className={className}>
@@ -134,6 +140,11 @@ export const TagEdit: React.FC<TagEditProps> = ({tag, onSaved, className}) => {
             value={selectedDomainOptions as any}
             onChange={(_, values) => {
               setDomainIds(values.map(v => (v as any).id));
+              setDomains(
+                values.map(v => {
+                  return {id: v.id, title: v.title} as any;
+                }),
+              );
             }}
             renderInput={params => {
               const {InputProps, ...rest} = params;
