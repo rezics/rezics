@@ -19,7 +19,19 @@ export const TagEdit: React.FC<TagEditProps> = ({tag, onSaved, className}) => {
   const isUpdate = !!tag;
   const [name, setName] = useState(tag?.name ?? '');
   const [type, setType] = useState<string | null>(tag?.type ?? null);
-  const [domainIds, setDomainIds] = useState<string[]>(tag?.domains ?? []);
+  const [domainIds, setDomainIds] = useState<string[]>(() => {
+    if (!tag?.domains) return [];
+    // 兼容后端返回的两种形态：
+    // - string[]: 直接是域的 unitId
+    // - object[]: 域对象，包含 { id | unitId, ... }
+    return (tag.domains as any[])
+      .map(d =>
+        typeof d === 'string'
+          ? d
+          : String((d as any).id ?? (d as any).unitId ?? ''),
+      )
+      .filter(Boolean);
+  });
 
   // domain 搜索
   const [q, setQ] = useState('');
@@ -97,7 +109,9 @@ export const TagEdit: React.FC<TagEditProps> = ({tag, onSaved, className}) => {
           <TextField
             id="tag-type"
             size="small"
-            value={type ?? ''}
+            // value={type ?? ''}
+            value={'book'}
+            disabled
             onChange={e => setType(e.target.value || null)}
             placeholder="可选，如：TOPIC / GENRE"
           />
@@ -111,32 +125,39 @@ export const TagEdit: React.FC<TagEditProps> = ({tag, onSaved, className}) => {
             multiple
             options={options}
             loading={searching}
-            getOptionLabel={o => (o as any).title ?? (o as any).id}
+            getOptionLabel={o => {
+              const anyO = o as any;
+              const label = anyO.title ?? anyO.name ?? anyO.id;
+              return typeof label === 'string' ? label : String(label ?? '');
+            }}
             filterOptions={x => x} // 保留远程结果
             value={selectedDomainOptions as any}
             onChange={(_, values) => {
               setDomainIds(values.map(v => (v as any).id));
             }}
-            renderInput={params => (
-              <TextField
-                {...params}
-                id="tag-domains"
-                size="small"
-                placeholder="搜索域（DOMAIN）"
-                onChange={e => setQ(e.target.value)}
-                InputProps={{
-                  ...params.InputProps,
-                  endAdornment: (
-                    <>
-                      {searching ? (
-                        <CircularProgress color="inherit" size={16} />
-                      ) : null}
-                      {params.InputProps.endAdornment}
-                    </>
-                  ),
-                }}
-              />
-            )}
+            renderInput={params => {
+              const {InputProps, ...rest} = params;
+              return (
+                <TextField
+                  {...rest}
+                  id="tag-domains"
+                  size="small"
+                  placeholder="搜索域（DOMAIN）"
+                  onChange={e => setQ(e.target.value)}
+                  InputProps={{
+                    ...InputProps,
+                    endAdornment: (
+                      <>
+                        {searching ? (
+                          <CircularProgress color="inherit" size={16} />
+                        ) : null}
+                        {InputProps.endAdornment}
+                      </>
+                    ),
+                  }}
+                />
+              );
+            }}
           />
           <div className="text-xs text-gray-500">
             按名称搜索 Unit（类型为 DOMAIN）进行绑定

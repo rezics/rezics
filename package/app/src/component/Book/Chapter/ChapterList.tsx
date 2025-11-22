@@ -1,9 +1,8 @@
-import {EditButtonFloatRight} from '@/component/Common/EditButtonFloatRight.tsx';
 import {useChapterListStore} from '@/global/page/chapterListStore.ts';
 import {buildTree} from '@/util/treeAbstract.ts';
 import type {TreeNodeWithChildren} from '@/util/treeAbstract.ts';
 import {Button, Tooltip} from '@mui/material';
-import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import {useCallback, useEffect, useMemo, useState} from 'react';
 import React from 'react';
 import {useQuery} from '@tanstack/react-query';
 import {bookQueries} from '@/api/book/book.queries.ts';
@@ -158,7 +157,6 @@ export const ChapterList: React.FC<ChapterListProps> = ({id, data}) => {
     </div>
   );
 
-  // Rander Component
   return (
     <div>
       <div className="flex justify-between items-center mb-4">
@@ -171,7 +169,7 @@ export const ChapterList: React.FC<ChapterListProps> = ({id, data}) => {
             Collapse All
           </Button>
           {/* This need to be a condition render, if someone maintain the book, only show the edit button to the maintainer */}
-          <EditButtonFloatRight.Container />
+          {/* <EditButtonFloatRight.Container /> */}
         </div>
       </div>
       <ChapterTreeView nodes={chapterTree} />

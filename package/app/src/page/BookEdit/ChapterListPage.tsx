@@ -3,6 +3,7 @@ import React, {useState, useEffect, useRef} from 'react';
 import {LinearChapterList} from '@/component/Book/Chapter/LinearChapterList';
 import {ChapterArboristHeightSlider} from '@/component/Book/Chapter/ChapterArboristHeightSlider';
 import {AccentBarWithTextShow} from '@/component/Common/AccentBar';
+import {Alert} from '@mui/material';
 
 interface BookEditChapterListPageProps {
   bookId: string;
@@ -40,12 +41,10 @@ export const BookEditChapterListPage: React.FC<
         <div className="flex mb-4">
           <AccentBarWithTextShow text="章節编辑" />
         </div>
-        <blockquote className="p-4 my-4 border-s-4 border-gray-300 bg-gray-50 dark:border-gray-500 dark:bg-gray-800">
-          <p className="leading-relaxed text-gray-600 dark:text-white">
-            右擊支持新增，頂部按鈕開啓后支持拖拽，重命名請开启Double-click
-            Rename
-          </p>
-        </blockquote>
+        <Alert severity="error">功能正在开发中，尚不可使用</Alert>
+        <Alert severity="info" className="my-4">
+          右擊支持新增，頂部按鈕開啓后支持拖拽，重命名請开启Double-click Rename
+        </Alert>
       </div>
       <ChapterArboristHeightSlider
         height={chapterArboristHeight}

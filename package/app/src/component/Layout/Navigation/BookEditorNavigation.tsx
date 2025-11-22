@@ -36,6 +36,12 @@ export const NAVIGATION = (bookId: string): NavigationItem[] => [
   },
   {
     kind: 'item',
+    title: 'Book Edit Tag',
+    segment: `~/book/${bookId}/edit/tag`,
+    icon: <DescriptionIcon />,
+  },
+  {
+    kind: 'item',
     title: 'Book Edit Chapter',
     segment: `~/book/${bookId}/edit/chapter/`,
     icon: <DescriptionIcon />,
