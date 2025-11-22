@@ -1,16 +1,17 @@
 import {ReactionBar} from '@/component/Common/Reaction/ReactionBar';
-import {Avatar, Box, Button, Rating, Tooltip, Typography} from '@mui/material';
+import {Avatar, Box, Rating, Tooltip, Typography} from '@mui/material';
 import {Link} from 'wouter';
 import {type ReviewDTO} from '@package/contract';
 import React from 'react';
 import {CollapsibleReview} from '@/component/ReadList/Review';
 import {parseReactionSummaries} from '@/util/reactionSummariesParser';
+import {FollowButton} from '@/component/Common/Reaction/FollowButton';
 import {ReactionStatistics} from '../Common/Reaction/ReactionStatistics';
 
 export const ReviewHeader: React.FC<{
   review: ReviewDTO;
-  onFollow?: () => void;
-}> = ({review, onFollow}) => {
+}> = ({review}) => {
+  const followersCount = review.user?.followersCount ?? 0;
   return (
     <div className="flex flex-wrap items-center mb-2 gap-2">
       {/* Avatar */}
@@ -23,21 +24,20 @@ export const ReviewHeader: React.FC<{
         </Typography>
 
         <Typography variant="body2" color="text.secondary">
-          {/* {990} reviews · {1232} followers */}
-          {1232} followers
+          {followersCount} followers
         </Typography>
       </div>
 
       {/* Follow Button */}
-      <Button
-        variant="outlined"
-        size="small"
-        sx={{py: 0.5}}
-        className="!ml-2"
-        onClick={onFollow}
-      >
-        Follow
-      </Button>
+      {review.user && (
+        <div className="!ml-2">
+          <FollowButton
+            userId={review.user.unitId}
+            initialFollowersCount={review.user.followersCount}
+            size="small"
+          />
+        </div>
+      )}
 
       {/* Rating + Time (push to right, but wrap under on small screens) */}
       <div className="ml-auto text-right min-w-[120px]">
@@ -88,13 +88,11 @@ const ReviewFooter: React.FC<{
 export type SingleReviewShowProps = {
   review: ReviewDTO;
   onReply: (reviewId: string) => void;
-  onFollow?: () => void;
 };
 
 export const SingleReviewShow: React.FC<SingleReviewShowProps> = ({
   review,
   onReply,
-  onFollow,
 }) => {
   return (
     <div>
@@ -103,7 +101,7 @@ export const SingleReviewShow: React.FC<SingleReviewShowProps> = ({
           <CollapsibleReview
             review={review}
             contentClassName="leading-6"
-            header={<ReviewHeader review={review} onFollow={onFollow} />}
+            header={<ReviewHeader review={review} />}
             footer={<ReviewFooter review={review} onReply={onReply} />}
           />
         </Box>
@@ -121,15 +119,5 @@ export const SingleReviewContainer: React.FC<SingleReviewContainerProps> = ({
   review,
   handleReply,
 }) => {
-  const handleFollow = () => {
-    console.log('Follow clicked for user:', review.user?.name ?? '');
-  };
-
-  return (
-    <SingleReviewShow
-      review={review}
-      onReply={handleReply}
-      onFollow={handleFollow}
-    />
-  );
+  return <SingleReviewShow review={review} onReply={handleReply} />;
 };

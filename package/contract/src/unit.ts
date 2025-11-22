@@ -13,6 +13,9 @@ export const publicUserSchema = t.Object({
   avatar: t.Optional(t.Nullable(t.String())),
   bio: t.Optional(t.String()),
   description: t.Optional(t.String()),
+  // Follow statistics (public, non-sensitive)
+  followersCount: t.Optional(t.Number()),
+  followingsCount: t.Optional(t.Number()),
 });
 
 export type PublicUser = (typeof publicUserSchema)['static'];

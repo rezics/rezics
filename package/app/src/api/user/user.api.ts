@@ -72,4 +72,36 @@ export const userApi = {
   delete: async (unitId: string): Promise<{message: string}> => {
     return apiFetch(`/users/${unitId}`, {method: 'DELETE'});
   },
+
+  follow: async (targetId: string): Promise<{message: string}> => {
+    return apiFetch(`/users/follow/${targetId}`, {method: 'POST'});
+  },
+
+  unfollow: async (targetId: string): Promise<{message: string}> => {
+    return apiFetch(`/users/follow/${targetId}`, {method: 'DELETE'});
+  },
+
+  getFollowStatus: async (
+    targetIds: string[],
+  ): Promise<Record<string, boolean>> => {
+    const qs = new URLSearchParams();
+    targetIds.forEach(id => qs.append('targetIds', id));
+    return apiFetch(`/users/follow/status?${qs.toString()}`);
+  },
+
+  getFollowers: async (
+    unitId: string,
+    query?: {page?: number; limit?: number},
+  ): Promise<{users: Omit<UserDTO, 'email'>[]; total: number}> => {
+    const qs = query ? `?${new URLSearchParams(query as any).toString()}` : '';
+    return apiFetch(`/users/${unitId}/followers${qs}`);
+  },
+
+  getFollowings: async (
+    unitId: string,
+    query?: {page?: number; limit?: number},
+  ): Promise<{users: Omit<UserDTO, 'email'>[]; total: number}> => {
+    const qs = query ? `?${new URLSearchParams(query as any).toString()}` : '';
+    return apiFetch(`/users/${unitId}/followings${qs}`);
+  },
 };

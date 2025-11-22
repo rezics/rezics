@@ -8,28 +8,10 @@ import React, {useEffect, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import DialogContainer from '../Common/DialogContainer.tsx';
 import type {PublicUser} from '@package/contract';
+import {FollowButton} from '../Common/Reaction/FollowButton.tsx';
 
 // --------- Types ---------
 export type Author = PublicUser;
-
-// --------- Small parts ---------
-const FollowButton: React.FC<{author: Author}> = ({author}) => {
-  const [following, setFollowing] = useState(false);
-  const handleFollow = () => setFollowing(v => !v);
-
-  return (
-    <div className="w-full mt-2">
-      <Button
-        variant="contained"
-        color={following ? 'secondary' : 'primary'}
-        onClick={handleFollow}
-        className="w-full"
-      >
-        {following ? 'Unfollow' : 'Follow'}
-      </Button>
-    </div>
-  );
-};
 
 // --------- AuthorInfo.Show ---------
 export type AuthorInfoShowProps = {
@@ -68,7 +50,14 @@ const AuthorInfoShow: React.FC<AuthorInfoShowProps> = ({
                   className="max-w-full max-h-full object-contain"
                   alt="avatar"
                 />
-                <FollowButton author={author} />
+                <div className="mt-2 w-full">
+                  <FollowButton
+                    userId={author.unitId}
+                    initialFollowersCount={author.followersCount}
+                    showFollowersText={true}
+                    fullWidth
+                  />
+                </div>
               </div>
 
               {/* 分割线 */}

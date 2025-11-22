@@ -19,6 +19,10 @@ export function sanitizeUser(u: User): PublicUser {
     slug: u.slug,
     name: u.name,
     avatar: u.avatar ?? (null as any),
+    bio: u.bio ?? undefined,
+    description: u.description ?? undefined,
+    followersCount: u.followersCount,
+    followingsCount: u.followingsCount,
   };
 }
 

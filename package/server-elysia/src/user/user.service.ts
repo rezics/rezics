@@ -217,6 +217,168 @@ export class UserService {
 
     return user;
   }
+
+  /**
+   * Follow a user
+   */
+  async follow(followerId: string, followingId: string): Promise<void> {
+    if (followerId === followingId) {
+      throw new Error('Cannot follow yourself');
+    }
+
+    await prisma.$transaction(async tx => {
+      const existing = await tx.follow.findUnique({
+        where: {
+          followerId_followingId: {
+            followerId,
+            followingId,
+          },
+        },
+      });
+
+      if (existing) return;
+
+      await tx.follow.create({
+        data: {
+          followerId,
+          followingId,
+        },
+      });
+
+      await tx.user.update({
+        where: {unitId: followerId},
+        data: {followingsCount: {increment: 1}},
+      });
+
+      await tx.user.update({
+        where: {unitId: followingId},
+        data: {followersCount: {increment: 1}},
+      });
+    });
+  }
+
+  /**
+   * Unfollow a user
+   */
+  async unfollow(followerId: string, followingId: string): Promise<void> {
+    await prisma.$transaction(async tx => {
+      const existing = await tx.follow.findUnique({
+        where: {
+          followerId_followingId: {
+            followerId,
+            followingId,
+          },
+        },
+      });
+
+      if (!existing) return;
+
+      await tx.follow.delete({
+        where: {
+          followerId_followingId: {
+            followerId,
+            followingId,
+          },
+        },
+      });
+
+      await tx.user.update({
+        where: {unitId: followerId},
+        data: {followingsCount: {decrement: 1}},
+      });
+
+      await tx.user.update({
+        where: {unitId: followingId},
+        data: {followersCount: {decrement: 1}},
+      });
+    });
+  }
+
+  /**
+   * Get follow status for multiple targets
+   */
+  async getFollowStatus(
+    followerId: string,
+    targetIds: string[],
+  ): Promise<Record<string, boolean>> {
+    if (!targetIds.length) return {};
+
+    const follows = await prisma.follow.findMany({
+      where: {
+        followerId,
+        followingId: {in: targetIds},
+      },
+      select: {
+        followingId: true,
+      },
+    });
+
+    const result: Record<string, boolean> = {};
+    targetIds.forEach(id => {
+      result[id] = false;
+    });
+    follows.forEach(f => {
+      result[f.followingId] = true;
+    });
+
+    return result;
+  }
+
+  /**
+   * List followers
+   */
+  async getFollowers(
+    userId: string,
+    options: {page?: number; limit?: number} = {},
+  ): Promise<{users: UserWithRelations[]; total: number}> {
+    const pageNum = Math.max(Number(options.page ?? 1), 1);
+    const limitNum = Math.max(1, Math.min(Number(options.limit ?? 20), 100));
+    const skip = (pageNum - 1) * limitNum;
+
+    const [follows, total] = await Promise.all([
+      prisma.follow.findMany({
+        where: {followingId: userId},
+        include: {follower: {include: userInclude}},
+        orderBy: {createdAt: 'desc'},
+        skip,
+        take: limitNum,
+      }),
+      prisma.follow.count({where: {followingId: userId}}),
+    ]);
+
+    return {
+      users: follows.map(f => f.follower as UserWithRelations),
+      total,
+    };
+  }
+
+  /**
+   * List followings
+   */
+  async getFollowings(
+    userId: string,
+    options: {page?: number; limit?: number} = {},
+  ): Promise<{users: UserWithRelations[]; total: number}> {
+    const pageNum = Math.max(Number(options.page ?? 1), 1);
+    const limitNum = Math.max(1, Math.min(Number(options.limit ?? 20), 100));
+    const skip = (pageNum - 1) * limitNum;
+
+    const [follows, total] = await Promise.all([
+      prisma.follow.findMany({
+        where: {followerId: userId},
+        include: {following: {include: userInclude}},
+        orderBy: {createdAt: 'desc'},
+        skip,
+        take: limitNum,
+      }),
+      prisma.follow.count({where: {followerId: userId}}),
+    ]);
+
+    return {
+      users: follows.map(f => f.following as UserWithRelations),
+      total,
+    };
+  }
 }
 
 // Export singleton instance

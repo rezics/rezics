@@ -17,6 +17,7 @@ import {
   loginSchema,
 } from '@package/contract';
 
+import {t} from 'elysia';
 import {coreInstance} from '../core';
 
 /**
@@ -149,6 +150,136 @@ export const userApi = coreInstance('/users')
         summary: 'Get all users',
         description: 'Get all users with filters and pagination',
         tags: ['Users'],
+      },
+    },
+  )
+
+  /**
+   * Follow a user
+   * POST /users/follow/:targetId
+   */
+  .post(
+    '/follow/:targetId',
+    async ({headers, jwt, params, set}) => {
+      const payload = await verifyAuth(headers.authorization, jwt, set);
+      await userService.follow(payload.unitId, params.targetId);
+      return {message: 'Followed successfully'};
+    },
+    {
+      params: t.Object({
+        targetId: t.String(),
+      }),
+      detail: {
+        summary: 'Follow user',
+        description: 'Follow a user',
+        tags: ['Users', 'Follow'],
+      },
+    },
+  )
+
+  /**
+   * Unfollow a user
+   * DELETE /users/follow/:targetId
+   */
+  .delete(
+    '/follow/:targetId',
+    async ({headers, jwt, params, set}) => {
+      const payload = await verifyAuth(headers.authorization, jwt, set);
+      await userService.unfollow(payload.unitId, params.targetId);
+      return {message: 'Unfollowed successfully'};
+    },
+    {
+      params: t.Object({
+        targetId: t.String(),
+      }),
+      detail: {
+        summary: 'Unfollow user',
+        description: 'Unfollow a user',
+        tags: ['Users', 'Follow'],
+      },
+    },
+  )
+
+  /**
+   * Get follow status for current user
+   * GET /users/follow/status?targetIds=...
+   */
+  .get(
+    '/follow/status',
+    async ({headers, jwt, query, set}) => {
+      const payload = await verifyAuth(headers.authorization, jwt, set);
+      const {targetIds} = query;
+
+      let ids: string[] = [];
+      if (targetIds) {
+        ids = Array.isArray(targetIds) ? targetIds : [targetIds];
+      }
+
+      const status = await userService.getFollowStatus(payload.unitId, ids);
+      return status;
+    },
+    {
+      query: t.Object({
+        targetIds: t.Optional(t.Union([t.String(), t.Array(t.String())])),
+      }),
+      detail: {
+        summary: 'Get follow status',
+        description: 'Check if current user follows specified targets',
+        tags: ['Users', 'Follow'],
+      },
+    },
+  )
+
+  /**
+   * Get followers of a user
+   * GET /users/:unitId/followers
+   */
+  .get(
+    '/:unitId/followers',
+    async ({params, query}) => {
+      const {users, total} = await userService.getFollowers(
+        params.unitId,
+        query,
+      );
+      return {users: users.map(mapUserToPublicProfile), total};
+    },
+    {
+      params: userParamsSchema,
+      query: t.Object({
+        page: t.Optional(t.Numeric()),
+        limit: t.Optional(t.Numeric()),
+      }),
+      detail: {
+        summary: 'Get followers',
+        description: 'Get followers of a user',
+        tags: ['Users', 'Follow'],
+      },
+    },
+  )
+
+  /**
+   * Get followings of a user
+   * GET /users/:unitId/followings
+   */
+  .get(
+    '/:unitId/followings',
+    async ({params, query}) => {
+      const {users, total} = await userService.getFollowings(
+        params.unitId,
+        query,
+      );
+      return {users: users.map(mapUserToPublicProfile), total};
+    },
+    {
+      params: userParamsSchema,
+      query: t.Object({
+        page: t.Optional(t.Numeric()),
+        limit: t.Optional(t.Numeric()),
+      }),
+      detail: {
+        summary: 'Get followings',
+        description: 'Get followings of a user',
+        tags: ['Users', 'Follow'],
       },
     },
   )

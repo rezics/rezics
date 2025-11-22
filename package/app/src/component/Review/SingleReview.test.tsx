@@ -11,6 +11,7 @@ export default function SingleReviewTest() {
         unitId: 'user-1',
         name: '张三',
         avatar: 'https://via.placeholder.com/40',
+        followersCount: 1232,
       },
       content:
         '这本书很不错，值得推荐。情节紧凑，人物形象鲜明。作者的文笔很好，读起来很流畅。特别是对于主角的心理描写，非常细腻。',

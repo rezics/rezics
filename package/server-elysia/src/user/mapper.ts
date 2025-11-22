@@ -15,6 +15,8 @@ export function mapUserToDTO(user: User | UserWithRelations): UserDTO {
     avatar: user.avatar || undefined,
     bio: user.bio || undefined,
     description: user.description || undefined,
+    followersCount: user.followersCount,
+    followingsCount: user.followingsCount,
     permission: user.permission as {role: string[]} | undefined,
     joinDate: user.joinDate?.toISOString(),
   };
@@ -33,6 +35,8 @@ export function mapUserToPublicProfile(
     avatar: user.avatar || undefined,
     bio: user.bio || undefined,
     description: user.description || undefined,
+    followersCount: user.followersCount,
+    followingsCount: user.followingsCount,
     joinDate: user.joinDate?.toISOString(),
   };
 }

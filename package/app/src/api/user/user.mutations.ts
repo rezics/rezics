@@ -88,9 +88,77 @@ export function useDeleteMeMutation(
   });
 }
 
+export function useFollowMutation(
+  options?: Omit<
+    UseMutationOptions<{message: string}, Error, string>,
+    'mutationFn'
+  >,
+) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (targetId: string) => userApi.follow(targetId),
+    ...options,
+    onSuccess: (data, targetId, onMutateResult, context) => {
+      qc.invalidateQueries({queryKey: userKeys.detail(targetId)});
+      qc.invalidateQueries({queryKey: userKeys.detail('me')});
+      // Invalidate specific follow status
+      qc.invalidateQueries({
+        predicate: query => {
+          const key = query.queryKey;
+          return (
+            key[0] === 'users' &&
+            key[1] === 'detail' &&
+            key[2] === 'me' &&
+            key[3] === 'follow-status' &&
+            Array.isArray(key[4]) &&
+            key[4].includes(targetId)
+          );
+        },
+      });
+      qc.invalidateQueries({queryKey: userKeys.followers(targetId)});
+      options?.onSuccess?.(data, targetId, onMutateResult, context);
+    },
+  });
+}
+
+export function useUnfollowMutation(
+  options?: Omit<
+    UseMutationOptions<{message: string}, Error, string>,
+    'mutationFn'
+  >,
+) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (targetId: string) => userApi.unfollow(targetId),
+    ...options,
+    onSuccess: (data, targetId, onMutateResult, context) => {
+      qc.invalidateQueries({queryKey: userKeys.detail(targetId)});
+      qc.invalidateQueries({queryKey: userKeys.detail('me')});
+      // Invalidate specific follow status
+      qc.invalidateQueries({
+        predicate: query => {
+          const key = query.queryKey;
+          return (
+            key[0] === 'users' &&
+            key[1] === 'detail' &&
+            key[2] === 'me' &&
+            key[3] === 'follow-status' &&
+            Array.isArray(key[4]) &&
+            key[4].includes(targetId)
+          );
+        },
+      });
+      qc.invalidateQueries({queryKey: userKeys.followers(targetId)});
+      options?.onSuccess?.(data, targetId, onMutateResult, context);
+    },
+  });
+}
+
 export const userMutations = {
   useRegister: useRegisterMutation,
   useLogin: useLoginMutation,
   useUpdateMe: useUpdateMeMutation,
   useDeleteMe: useDeleteMeMutation,
+  useFollow: useFollowMutation,
+  useUnfollow: useUnfollowMutation,
 };

@@ -31,9 +31,39 @@ export const userDetailQuery = (unitId: string) =>
     staleTime: 1000 * 60 * 10,
   });
 
+export const userFollowersQuery = (
+  unitId: string,
+  query?: {page?: number; limit?: number},
+) =>
+  queryOptions({
+    queryKey: userKeys.followers(unitId, query),
+    queryFn: () => userApi.getFollowers(unitId, query),
+    enabled: !!unitId,
+  });
+
+export const userFollowingsQuery = (
+  unitId: string,
+  query?: {page?: number; limit?: number},
+) =>
+  queryOptions({
+    queryKey: userKeys.followings(unitId, query),
+    queryFn: () => userApi.getFollowings(unitId, query),
+    enabled: !!unitId,
+  });
+
+export const userFollowStatusQuery = (targetIds: string[]) =>
+  queryOptions({
+    queryKey: userKeys.followStatus(targetIds),
+    queryFn: () => userApi.getFollowStatus(targetIds),
+    enabled: targetIds.length > 0,
+  });
+
 export const userQueries = {
   me: userMeQuery,
   jwtPayload: userJwtPayloadQuery,
   list: userListQuery,
   detail: userDetailQuery,
+  followers: userFollowersQuery,
+  followings: userFollowingsQuery,
+  followStatus: userFollowStatusQuery,
 };

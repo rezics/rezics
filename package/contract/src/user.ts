@@ -9,6 +9,9 @@ export const userDTOSchema = t.Object({
   avatar: t.Optional(t.String()),
   bio: t.Optional(t.String()),
   description: t.Optional(t.String()),
+  // Follow statistics
+  followersCount: t.Optional(t.Number()),
+  followingsCount: t.Optional(t.Number()),
   joinDate: t.Optional(t.String()),
   permission: t.Optional(
     t.Object(

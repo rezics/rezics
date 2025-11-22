@@ -12,4 +12,10 @@ export const userKeys = {
   searches: () => [...userKeys.all(), 'search'] as const,
   search: (q: string, filters?: Record<string, unknown>) =>
     [...userKeys.searches(), {q, ...filters}] as const,
+  followers: (unitId: string, query?: Record<string, unknown>) =>
+    [...userKeys.detail(unitId), 'followers', query] as const,
+  followings: (unitId: string, query?: Record<string, unknown>) =>
+    [...userKeys.detail(unitId), 'followings', query] as const,
+  followStatus: (targetIds: string[]) =>
+    [...userKeys.detail('me'), 'follow-status', targetIds] as const,
 } as const;
