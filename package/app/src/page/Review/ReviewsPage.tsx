@@ -9,7 +9,6 @@ import {
 import {ReviewListContainer} from '@/component/Review/ReviewList';
 import {reviewQueries, remarkQueries} from '@/api/review/review.queries';
 import type {ReviewDTO} from '@package/contract';
-import {Search} from '@/component/Search';
 import {useSearchParams} from 'wouter';
 import {SimpleSearchInput} from '@/component/Search/SimpleSearchInput';
 

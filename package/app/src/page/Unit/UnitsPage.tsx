@@ -9,7 +9,6 @@ import {
 } from '@/component/Common/Pagination.tsx';
 import {unitQueries} from '@/api/unit/unit.queries';
 import type {UnitDTO} from '@package/contract';
-import {Search} from '@/component/Search';
 import {SimpleSearchInput} from '@/component/Search/SimpleSearchInput';
 
 type Unit = UnitDTO;

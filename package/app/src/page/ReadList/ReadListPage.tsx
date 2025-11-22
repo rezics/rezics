@@ -3,8 +3,7 @@ import {TreeReplyComponents} from '@/component/Form/Comment/TreeReplyComponents'
 import {ChatBubbleOutline} from '@mui/icons-material';
 import {Avatar, IconButton} from '@mui/material';
 import React, {useRef} from 'react';
-import {useTranslation} from 'react-i18next';
-import {useLocation, useParams} from 'wouter';
+import {useParams} from 'wouter';
 
 import {readlistQueries} from '@/api/readlist/readlist';
 import {useQuery} from '@tanstack/react-query';

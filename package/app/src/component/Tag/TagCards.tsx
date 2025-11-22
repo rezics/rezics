@@ -61,7 +61,7 @@ export const TagCard: React.FC<{
 export const TagDetailCard: React.FC<{
   tag: TagDetailDTO;
   onNavigate?: (tag: TagDetailDTO) => void;
-}> = ({tag, onNavigate}) => {
+}> = ({tag}) => {
   return (
     <Card elevation={0} className="border border-gray-200 rounded-md">
       <CardContent className="space-y-2">
