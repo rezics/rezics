@@ -11,6 +11,7 @@ import {reviewQueries, remarkQueries} from '@/api/review/review.queries';
 import type {ReviewDTO} from '@package/contract';
 import {Search} from '@/component/Search';
 import {useSearchParams} from 'wouter';
+import {SimpleSearchInput} from '@/component/Search/SimpleSearchInput';
 
 type Review = ReviewDTO;
 interface ReviewsPageProps {
@@ -120,12 +121,13 @@ export const ReviewsPage: React.FC<ReviewsPageProps> = ({bookUnitId}) => {
         setCurrentPage={setCurrentPage}
         sortControl={
           <div>
-            <Search.Container
+            <SimpleSearchInput
               onSearch={info => {
-                setKeyword(info.keyword ?? '');
+                setKeyword(info ?? '');
+                console.log('onSearch', info);
               }}
-              defaultValue={{keyword, tags: []}}
-              placeholder="Search reviews"
+              defaultValue={{keyword: keyword ?? ''}}
+              placeholder="Search readlists"
             />
             <Box sx={{borderBottom: 1, borderColor: 'divider', mt: 2, mb: 2}}>
               <Tabs

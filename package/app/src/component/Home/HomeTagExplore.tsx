@@ -59,7 +59,7 @@ export const HomeTagExplore: React.FC<HomeTagExploreProps> = ({
       </div>
       <div className="flex flex-wrap gap-2">
         {tags.map(tag => (
-          <Link key={tag} href={`/books`}>
+          <Link key={tag} href={`/book`}>
             <Chip label={tag} clickable variant="outlined" />
           </Link>
         ))}

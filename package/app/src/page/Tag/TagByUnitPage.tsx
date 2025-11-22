@@ -58,7 +58,7 @@ export function TagByBookPage({
 
       {showSeeAll && (
         <div className="mt-4">
-          <RouterLink href={`/tag/book/${bookId}/tags`}>
+          <RouterLink href={`/tag/book/${bookId}/tag`}>
             <span className="text-primary-600 hover:underline">
               查看全部标签（{total}）
             </span>

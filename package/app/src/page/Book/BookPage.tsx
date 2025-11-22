@@ -77,7 +77,7 @@ export const BookPageShow: React.FC<ShowProps> = ({
                   <div>
                     <ArrowForwardIconContainer
                       size={16}
-                      to={`/tag/book/${bookInfo?.unitId}/tags`}
+                      to={`/tag/book/${bookInfo?.unitId}/tag`}
                     >
                       <AccentBarWithTextContainer text="Tags" />
                     </ArrowForwardIconContainer>

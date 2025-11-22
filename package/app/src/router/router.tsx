@@ -126,7 +126,7 @@ export default (
         </Route>
 
         {/* ANCHOR Book Info Routes */}
-        <Route path="/books">
+        <Route path="/book">
           <MainLayout>
             <BookLibContainer />
           </MainLayout>
@@ -275,14 +275,14 @@ export default (
             </MainLayout>
           )}
         </Route>
-        <Route path="/tag/book/:bookId/tags">
+        <Route path="/tag/book/:bookId/tag">
           {({bookId}) => (
             <MainLayout>
               <TagByBookFullPage bookId={bookId} />
             </MainLayout>
           )}
         </Route>
-        <Route path="/tag/book/:bookId/tags/:domainId">
+        <Route path="/tag/book/:bookId/tag/:domainId">
           {({bookId, domainId}) => (
             <MainLayout>
               <TagByBookFullPage bookId={bookId} domainId={domainId} />

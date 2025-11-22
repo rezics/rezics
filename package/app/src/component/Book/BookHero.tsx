@@ -108,7 +108,7 @@ export const BookHeroShow: React.FC<{
                           <Chip
                             key={tag}
                             component={Link}
-                            href={`/books?tags=${tag}`}
+                            href={`/book?tags=${tag}`}
                             label={tag}
                             size="small"
                             className="*:bg-white/10 *:text-white *:hover:bg-white/20 *:px-2 *:py-1"

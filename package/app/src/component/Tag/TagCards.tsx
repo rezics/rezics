@@ -93,7 +93,7 @@ export const TagDetailCard: React.FC<{
             查看详情 →
           </RouterLink>
           <RouterLink
-            href={`/books?tags=${tag.name}`}
+            href={`/book?tags=${tag.name}`}
             className="text-sm text-blue-600 hover:underline !ml-8"
           >
             搜索标签 →

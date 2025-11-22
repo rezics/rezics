@@ -11,7 +11,7 @@ import {
   UniversalPaginator,
   type UniversalPaginatorHandle,
 } from '@/component/Common/Pagination.tsx';
-import {Search} from '@/component/Search';
+import {SimpleSearchInput} from '@/component/Search/SimpleSearchInput';
 import type {SearchInfo} from '@/component/Search/searchParser';
 import {useQuery, useQueryClient} from '@tanstack/react-query';
 import {readlistQueries} from '@/api/readlist/readlist.queries';
@@ -89,7 +89,11 @@ const ReadlistsShow = (
   if (error) {
     return (
       <div className="mx-auto max-w-7xl p-4">
-        <Search.Container onSearch={() => {}} placeholder="Search readlists" />
+        <SimpleSearchInput
+          onSearch={() => {}}
+          defaultValue={{keyword: ''}}
+          placeholder="Search readlists"
+        />
         <Alert severity="error" className="my-4">
           {String(error)}
         </Alert>
@@ -112,15 +116,15 @@ const ReadlistsShow = (
         preRequestData={handlePreRequestData}
         isLoading={isLoading && readlists.length === 0}
         sortControl={
-          <Search.Container
+          <SimpleSearchInput
             onSearch={info => {
               setCurrentQuery({
-                keyword: info.keyword ?? '',
-                tags: info.tags ?? [],
+                keyword: info ?? '',
+                tags: [],
               });
               console.log('onSearch', info);
             }}
-            defaultValue={currentQuery}
+            defaultValue={{keyword: currentQuery.keyword ?? ''}}
             placeholder="Search readlists"
           />
         }

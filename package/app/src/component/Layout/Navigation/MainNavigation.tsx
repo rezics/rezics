@@ -28,7 +28,7 @@ export const NAVIGATION = (): NavigationItem[] => [
   },
   {
     kind: 'item',
-    segment: '/books',
+    segment: '/book',
     title: 'Books',
     icon: <BookIcon />,
   },

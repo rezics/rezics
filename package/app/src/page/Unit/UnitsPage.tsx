@@ -10,6 +10,7 @@ import {
 import {unitQueries} from '@/api/unit/unit.queries';
 import type {UnitDTO} from '@package/contract';
 import {Search} from '@/component/Search';
+import {SimpleSearchInput} from '@/component/Search/SimpleSearchInput';
 
 type Unit = UnitDTO;
 
@@ -174,11 +175,11 @@ export const UnitsPage: React.FC<UnitsPageProps> = ({
         setCurrentPage={setCurrentPage}
         sortControl={
           <div>
-            <Search.Container
+            <SimpleSearchInput
               onSearch={info => {
-                setKeyword(info.keyword ?? '');
+                setKeyword(info ?? '');
               }}
-              defaultValue={{keyword, tags: []}}
+              defaultValue={{keyword: keyword ?? ''}}
               placeholder="Search units"
             />
             {!isSingle && (

@@ -6,11 +6,11 @@ export type HomeSearchBarProps = object;
 
 /**
  * HomeSearchBar
- * Wraps the BookSearchContainer; on submit, navigate to /books.
+ * Wraps the BookSearchContainer; on submit, navigate to /book.
  */
 export const HomeSearchBar: React.FC<HomeSearchBarProps> = () => {
   const [, navigate] = useLocation();
-  return <BookSearchContainer onSearch={() => navigate('/books')} />;
+  return <BookSearchContainer onSearch={() => navigate('/book')} />;
 };
 
 export default HomeSearchBar;

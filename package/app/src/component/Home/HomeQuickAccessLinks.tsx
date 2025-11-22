@@ -29,7 +29,7 @@ export const HomeQuickAccessLinks: React.FC<HomeQuickAccessLinksProps> = ({
       </div>
       <div className="flex flex-wrap gap-2">
         {items.map(name => (
-          <Link key={name} href="/books">
+          <Link key={name} href="/book">
             <Chip label={name} variant="filled" clickable />
           </Link>
         ))}

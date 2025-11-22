@@ -151,7 +151,7 @@ export const SearchInputContainer: React.FC<SearchInputContainerProps> = ({
   const [value, setValue] = useState(defaultValue);
 
   useEffect(() => {
-    if (location === '/books') {
+    if (location === '/book') {
       const keyword = searchParams.get('keyword');
       const tags = searchParams.get('tags')?.split(',') ?? [];
       const currentSearch = {
