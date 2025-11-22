@@ -5,6 +5,7 @@ import {
   tagParamsSchema,
   updateTagSchema,
   attachTagSchema,
+  hasPermissionToTag,
 } from '@package/contract';
 import type {
   CreateTagInput,
@@ -17,6 +18,7 @@ import {coreInstance} from '../core';
 import {tagService} from './tag.service';
 import {mapTagDetailToDTO, mapTagToDTO} from './mapper';
 import {verifyAuth} from '@/src/utils/authUtils';
+import {unitService} from '../unit/unit.service';
 
 export const tagApi = coreInstance('/tags')
   // List tags (optionally scoped by domain)
@@ -81,8 +83,14 @@ export const tagApi = coreInstance('/tags')
     '/',
     async ({body, headers, jwt, set}): Promise<TagDetailDTO> => {
       const payload = await verifyAuth(headers.authorization, jwt, set);
+      if (!payload.unitId) {
+        set.status = 403;
+        throw new Error(
+          'Forbidden: you do not have a unit, please login first',
+        );
+      }
       const created = await tagService.create(
-        payload.userId,
+        payload.unitId,
         body as CreateTagInput,
       );
       return mapTagDetailToDTO(created);
@@ -99,7 +107,7 @@ export const tagApi = coreInstance('/tags')
     async ({params, body, headers, jwt, set}): Promise<TagDetailDTO> => {
       const payload = await verifyAuth(headers.authorization, jwt, set);
       const existing = await tagService.getByUnitId(params.unitId);
-      if (existing.unit.userId !== payload.userId) {
+      if (!hasPermissionToTag(payload as any, existing.unit as any)) {
         set.status = 403;
         throw new Error('Forbidden: you do not own this tag');
       }
@@ -122,7 +130,7 @@ export const tagApi = coreInstance('/tags')
     async ({params, headers, jwt, set}): Promise<{message: string}> => {
       const payload = await verifyAuth(headers.authorization, jwt, set);
       const existing = await tagService.getByUnitId(params.unitId);
-      if (existing.unit.userId !== payload.userId) {
+      if (!hasPermissionToTag(payload as any, existing.unit as any)) {
         set.status = 403;
         throw new Error('Forbidden: you do not own this tag');
       }
@@ -141,11 +149,16 @@ export const tagApi = coreInstance('/tags')
     async ({params, body, headers, jwt, set}): Promise<{message: string}> => {
       const payload = await verifyAuth(headers.authorization, jwt, set);
       const existing = await tagService.getByUnitId(params.unitId);
-      if (existing.unit.userId !== payload.userId) {
+      const target = await unitService.getByUnitId(body.targetUnitId);
+      if (
+        !existing ||
+        !target ||
+        !hasPermissionToTag(payload as any, target as any)
+      ) {
         set.status = 403;
         throw new Error('Forbidden: you do not own this tag');
       }
-      await tagService.attachToUnit(params.unitId, (body as any).targetUnitId);
+      await tagService.attachToUnit(params.unitId, body.targetUnitId);
       return {message: 'Tag attached successfully'};
     },
     {
@@ -161,7 +174,7 @@ export const tagApi = coreInstance('/tags')
     async ({params, body, headers, jwt, set}): Promise<{message: string}> => {
       const payload = await verifyAuth(headers.authorization, jwt, set);
       const existing = await tagService.getByUnitId(params.unitId);
-      if (existing.unit.userId !== payload.userId) {
+      if (!hasPermissionToTag(payload as any, existing.unit as any)) {
         set.status = 403;
         throw new Error('Forbidden: you do not own this tag');
       }

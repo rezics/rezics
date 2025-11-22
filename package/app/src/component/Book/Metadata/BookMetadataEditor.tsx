@@ -1,11 +1,16 @@
 import React from 'react';
 
-import Autocomplete from '@mui/material/Autocomplete';
-import Avatar from '@mui/material/Avatar';
-import Chip from '@mui/material/Chip';
-import CircularProgress from '@mui/material/CircularProgress';
-import TextField from '@mui/material/TextField';
-
+import {
+  Autocomplete,
+  CircularProgress,
+  TextField,
+  Checkbox,
+  Avatar,
+  Chip,
+  FormControlLabel,
+  Tooltip,
+} from '@mui/material';
+import {InfoOutlined} from '@mui/icons-material';
 import type {BookDTO, UserDTO} from '@package/contract';
 import {userApi} from '@/api/user/user.api';
 
@@ -124,6 +129,30 @@ export const BookMetadataEditor: React.FC<BookMetadataEditorProps> = ({
   onChange,
   disabled,
 }) => {
+  function NSFWInfo() {
+    return (
+      <div className="flex items-center gap-1">
+        <span>NSFW</span>
+
+        <Tooltip
+          title="当书籍名称或封面包含裸露、色情等敏感内容时，请勾选此选项"
+          placement="right"
+          slotProps={{
+            tooltip: {
+              sx: {
+                fontSize: '0.85rem',
+                padding: '6px 10px',
+                maxWidth: 300,
+                lineHeight: 1.4,
+              },
+            },
+          }}
+        >
+          <InfoOutlined fontSize="small" color="action" />
+        </Tooltip>
+      </div>
+    );
+  }
   return (
     <div className="flex flex-col gap-6">
       <div>
@@ -188,6 +217,15 @@ export const BookMetadataEditor: React.FC<BookMetadataEditorProps> = ({
             value={(value?.producer as any) ?? []}
             onChange={v => onChange?.({producer: v as any})}
             placeholder="搜索出品方..."
+            disabled={disabled}
+          />
+        </div>
+        <div>
+          <FormControlLabel
+            control={<Checkbox />}
+            label={<NSFWInfo />}
+            // checked={value?.nsfw ?? false}
+            // onChange={e => onChange?.({nsfw: e.target.checked})}
             disabled={disabled}
           />
         </div>

@@ -1,7 +1,6 @@
 import {useQuery} from '@tanstack/react-query';
-import {BookDTO} from '@package/contract';
+import {type BookDTO} from '@package/contract';
 import {bookQueries} from '@/api/book/book';
-import {BookDescription} from '@/component/Book/BookDescription';
 import {AccentBarWithTextShow} from '@/component/Common/AccentBar.tsx';
 import {BookMetadataEditor} from '@/component/Book/Metadata/BookMetadataEditor';
 import React from 'react';
@@ -18,7 +17,7 @@ import {
 import {useLocation} from 'wouter';
 import EasyEditor from '@component/Form/EasyEditor.tsx';
 import {useUpdateBookMutation} from '@/api/book/book';
-import {UpdateBookInput} from '@package/contract';
+import {type UpdateBookInput} from '@package/contract';
 import {useEffect} from 'react';
 // import Paper from "@mui/material/Paper";
 
@@ -66,7 +65,7 @@ export const BookEditInfoShow: React.FC<BookEditInfoShowProps> = ({
   updateBookErrorText,
 }) => {
   const {t} = useTranslation();
-  const [location, navigate] = useLocation();
+  const [_location, navigate] = useLocation();
   return (
     <div className="mt-10 mx-auto w-11/12">
       <div className="flex justify-between items-center">
@@ -117,11 +116,6 @@ export const BookEditInfoShow: React.FC<BookEditInfoShowProps> = ({
             setMetadataState(prev => ({...prev, description: value}));
           }}
         />
-      </div>
-      <div>
-        <div className="flex mb-4">
-          <AccentBarWithTextShow text="tags" />
-        </div>
       </div>
       {updateBookDialog(
         updateBookErrorOpen,

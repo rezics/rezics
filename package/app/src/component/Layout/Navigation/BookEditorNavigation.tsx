@@ -19,8 +19,8 @@ import type {NavigationItem} from './navigation.d.ts';
 export const NAVIGATION = (bookId: string): NavigationItem[] => [
   {
     kind: 'item',
-    title: 'Back to Main',
-    segment: '~/',
+    title: 'Back to Book',
+    segment: `~/book/${bookId}`,
     icon: <DashboardIcon />,
   },
   {
