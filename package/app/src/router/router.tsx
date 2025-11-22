@@ -45,6 +45,7 @@ import {TagUnitPage} from '@/page/Tag/TagUnitPage';
 // User pages
 import {UserEditPage} from '@/page/User/UserEditPage.tsx';
 import {BookmarkPage} from '@/page/User/BookmarkPage.tsx';
+import {FollowInfoPage} from '@/page/User/FollowInfoPage.tsx';
 
 // Misc
 import {MainLayout} from '@/layout/MainLayout.tsx';
@@ -60,6 +61,7 @@ import {TestPage03} from '@/page/Test/TestPage03.tsx';
 // import {NewBookPage} from '@/page/BookEdit/NewBookPage.tsx';
 import {UserPage} from '@/page/User/UserPage.tsx';
 import {NoticePage} from '@/page/Misc/Notice.tsx';
+import {ReactionInfoPage} from '@/page/User/ReactionInfoPage.tsx';
 
 // TODO 删除 ThemeProvider
 
@@ -302,6 +304,16 @@ export default (
         <Route path="/user/me/bookmark">
           <MainLayout>
             <BookmarkPage />
+          </MainLayout>
+        </Route>
+        <Route path="/user/me/reaction">
+          <MainLayout>
+            <ReactionInfoPage isCurrentUser={true} />
+          </MainLayout>
+        </Route>
+        <Route path="/user/me/follow">
+          <MainLayout>
+            <FollowInfoPage isCurrentUser={true} />
           </MainLayout>
         </Route>
         <Route path="/user/:unitId">

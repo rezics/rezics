@@ -8,6 +8,7 @@ import {
   Box,
   Chip,
 } from '@mui/material';
+import {Link} from 'wouter';
 import EditIcon from '@mui/icons-material/Edit';
 import type {FC} from 'react';
 import {useTranslation} from 'react-i18next';
@@ -152,6 +153,29 @@ export const UserProfilePage: FC<UserProfilePageProps> = ({
               No bio available
             </Typography>
           )}
+        </CardContent>
+      </Card>
+
+      <Card className="shadow-lg rounded-2xl mt-4">
+        <CardContent>
+          <Typography variant="h6" className="font-semibold inline-block">
+            导航：
+          </Typography>
+          <Link href={`/user/me/bookmark`}>
+            <Button variant="text" color="primary">
+              书签
+            </Button>
+          </Link>
+          <Link href={`/user/me/follow`}>
+            <Button variant="text" color="primary">
+              关注
+            </Button>
+          </Link>
+          <Link href={`/user/me/reaction`}>
+            <Button variant="text" color="primary">
+              反应
+            </Button>
+          </Link>
         </CardContent>
       </Card>
     </Box>

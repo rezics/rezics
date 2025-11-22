@@ -1,6 +1,6 @@
 import React, {useEffect, useMemo, useState} from 'react';
 import {useQuery, useQueryClient} from '@tanstack/react-query';
-import {Select, MenuItem, Chip, Typography, Box} from '@mui/material';
+import {Select, MenuItem, Chip, Typography, Box, Button} from '@mui/material';
 import type {UnitDTO} from '@package/contract';
 
 import {reactionApi, reactionQueries} from '@/api/reaction/reaction';
@@ -14,6 +14,7 @@ import {
 
 import {UserBookmarkTagsCard} from './UserBookmarkTagsCard';
 import {BookmarkItemCard} from '@/component/User/Bookmark/BookmarkItemCard';
+import {useLocation} from 'wouter';
 
 export type BookmarkEntry = {
   unit: UnitDTO;
@@ -42,6 +43,7 @@ const UNIT_TYPE_OPTIONS = [
 ] as const;
 
 export const BookmarkPage: React.FC = () => {
+  const [_location, navigate] = useLocation();
   const user = useUserStore(state => state.user);
   const userId = user?.unitId;
   const {show: showAlert} = useAlertStore();
@@ -361,6 +363,13 @@ export const BookmarkPage: React.FC = () => {
               </MenuItem>
             ))}
           </Select>
+          <Button
+            variant="text"
+            color="primary"
+            onClick={() => navigate('/user/me')}
+          >
+            返回
+          </Button>
         </div>
       </div>
 
