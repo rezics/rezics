@@ -62,14 +62,15 @@ export const reviewApi = coreInstance('/reviews')
    */
   .post(
     '/',
-    async ({body, headers, jwt, set}): Promise<ReviewResponse> => {
+    async ({body, headers, jwt, set, query}): Promise<ReviewResponse> => {
       const payload = await verifyAuth(headers.authorization, jwt, set);
+      const unitType = query.unitType ?? UnitType.REVIEW;
       const req: CreateReviewInput = {
         ...body,
         userId: payload.unitId,
       } as CreateReviewInput;
       const review = await reviewService.create(req, {
-        unitType: UnitType.REVIEW,
+        unitType: unitType as UnitType,
       });
       return mapReviewToDTO(review);
     },
@@ -111,9 +112,7 @@ export const reviewApi = coreInstance('/reviews')
         set,
         payload,
       );
-      const review = await reviewService.update(params.id, body, {
-        unitType: unitType as UnitType,
-      });
+      const review = await reviewService.update(params.id, body);
       return mapReviewToDTO(review);
     },
     {
@@ -153,7 +152,7 @@ export const reviewApi = coreInstance('/reviews')
         payload.unitId,
         set,
       );
-      await reviewService.delete(params.id, {unitType: unitType as UnitType});
+      await reviewService.delete(params.id);
       return {message: 'Review deleted successfully'};
     },
     {
@@ -222,10 +221,10 @@ async function ensureReviewOwnership(
     throw new Error(`Review not found: ${reviewId}`);
   });
 
-  if (!target || target.type !== expectedType) {
-    set.status = 404;
-    throw new Error(`Review not found: ${reviewId}`);
-  }
+  // if (!target || target.type !== expectedType) {
+  //   set.status = 404;
+  //   throw new Error(`Review not found: ${reviewId}`);
+  // }
 
   if (target.userId !== ownerId) {
     set.status = 403;

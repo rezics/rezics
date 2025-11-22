@@ -1,24 +1,14 @@
 import {AccentBarContainer} from '@component/Common/AccentBar.tsx';
-// import {CollapsibleText} from '@component/Common/CollapsibleText.tsx';
 import {TreeReplyComponents} from '@/component/Form/Comment/TreeReplyComponents';
-import {
-  Add,
-  ChatBubbleOutline,
-  Comment,
-  Edit,
-  FavoriteBorder,
-} from '@mui/icons-material';
-import {IconButton, Tooltip, Typography} from '@mui/material';
+import {ChatBubbleOutline} from '@mui/icons-material';
+import {IconButton, Typography} from '@mui/material';
 import React, {useRef} from 'react';
-import {useTranslation} from 'react-i18next';
-import {useLocation} from 'wouter';
 
 import {useQuery} from '@tanstack/react-query';
 import {unitQueries} from '@/api/unit/unit.queries';
 import FormatQuoteIcon from '@mui/icons-material/FormatQuote';
 import {SingleCommentElementWrapper} from '@/component/Form/Comment/SingleCommentElementWrapper';
 import {MarkdownContent} from '@/component/Common/MarkdownContent';
-// Collapsible single review component moved to component/ReadList/Review.tsx
 import {
   MiniActionBar,
   MiniAdminActionBar,
@@ -30,8 +20,6 @@ interface QuotePageProps {
 }
 
 export const QuotePage: React.FC<QuotePageProps> = ({unitId}) => {
-  const {t} = useTranslation();
-  const [, navigate] = useLocation();
   const commentRef = useRef<HTMLDivElement>(null);
   const handleGoToComments = () => {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -97,7 +85,10 @@ export const QuotePage: React.FC<QuotePageProps> = ({unitId}) => {
             </div>
           )}
           <div className="flex items-center gap-2">
-            <MiniActionBar handleOnCommentClick={handleGoToComments} />
+            <MiniActionBar
+              handleOnCommentClick={handleGoToComments}
+              unitId={unitId || ''}
+            />
           </div>
         </div>
       </div>

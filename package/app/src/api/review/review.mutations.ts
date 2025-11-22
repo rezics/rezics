@@ -23,11 +23,12 @@ export function useCreateReviewMutation(
     UseMutationOptions<ReviewResponse, Error, CreateReviewInput>,
     'mutationFn'
   >,
+  unitType?: string,
 ) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (input: CreateReviewInput) => reviewApi.create(input),
+    mutationFn: (input: CreateReviewInput) => reviewApi.create(input, unitType),
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
       // TODO 遍历所有 Query key, 支持高级查询的Query失效

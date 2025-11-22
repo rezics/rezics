@@ -173,7 +173,7 @@ export const UnitsPage: React.FC<UnitsPageProps> = ({
         currentPage={currentPage}
         setCurrentPage={setCurrentPage}
         sortControl={
-          <div>
+          <div className="mb-4">
             <SimpleSearchInput
               onSearch={info => {
                 setKeyword(info ?? '');

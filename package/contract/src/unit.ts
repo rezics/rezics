@@ -2,6 +2,21 @@ import {t} from 'elysia';
 
 // ANCHOR Shared schemas based on Prisma `Unit` and public user view
 
+export const UnitType = {
+  BOOK: 'BOOK',
+  COMMENT: 'COMMENT',
+  NOTE: 'NOTE',
+  REMARK: 'REMARK',
+  REVIEW: 'REVIEW',
+  DOMAIN: 'DOMAIN',
+  TAG: 'TAG',
+  QUOTE: 'QUOTE',
+  READLIST: 'READLIST',
+  IMAGE: 'IMAGE',
+  VIDEO: 'VIDEO',
+  CHAPTER: 'CHAPTER',
+} as const;
+
 /**
  * 用户的公开信息 Schema
  * (原 PublicUser type)

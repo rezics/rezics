@@ -92,12 +92,12 @@ export const SingleQuoteExcerptShow: React.FC<SingleQuoteExcerptShowProps> = ({
 
           <div className="flex items-center justify-between mt-3">
             <div className="flex gap-1">
-              <Typography variant="caption" color="text.secondary">
+              {/* <Typography variant="caption" color="text.secondary">
                 {stats.replies} {t('common.reply')}
               </Typography>
               <Typography variant="caption" color="text.secondary">
                 {stats.likes} {t('accessibility.favorite')}
-              </Typography>
+              </Typography> */}
               <Typography variant="caption" color="text.secondary">
                 {stats.date}
               </Typography>

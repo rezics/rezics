@@ -68,8 +68,12 @@ export const reviewApi = {
   /**
    * Create new review
    */
-  create: async (input: CreateReviewInput): Promise<ReviewResponse> => {
-    return apiFetch<ReviewResponse>('/reviews', {
+  create: async (
+    input: CreateReviewInput,
+    unitType?: string,
+  ): Promise<ReviewResponse> => {
+    const suffix = unitType ? `?unitType=${unitType}` : '';
+    return apiFetch<ReviewResponse>(`/reviews${suffix}`, {
       method: 'POST',
       body: JSON.stringify(input),
     });
@@ -81,13 +85,14 @@ export const reviewApi = {
   update: async (
     id: string,
     input: UpdateReviewInput,
+    unitType?: string,
   ): Promise<ReviewResponse> => {
-    return apiFetch<ReviewResponse>(`/reviews/${id}`, {
+    const suffix = unitType ? `?unitType=${unitType}` : '';
+    return apiFetch<ReviewResponse>(`/reviews/${id}${suffix}`, {
       method: 'PUT',
       body: JSON.stringify(input),
     });
   },
-
   /**
    * Delete review
    */

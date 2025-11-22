@@ -7,23 +7,30 @@ import {CooldownButton} from '@/component/Common/CooldownButton';
 import {useCreateReviewMutation} from '@/api/review/review.mutations';
 import {useAlertStore} from '@/global/windowAlertStore';
 import {useUserStore} from '@/global/userStore';
-
+import {useSearchParams} from 'wouter';
+import {UnitType} from '@package/contract/src/unit';
 export function ReviewNewPage({bookUnitId}: {bookUnitId: string}) {
+  const [searchParams, _setSearchParams] = useSearchParams();
   const [reviewData, setReviewData] = useState<ReviewResponse>(
     {} as ReviewResponse,
   );
   const {show} = useAlertStore();
   const {user} = useUserStore();
-  const {mutate, isPending} = useCreateReviewMutation({
-    onSuccess: data => {
-      show('Review created successfully');
-      console.log('create review success', data);
+  const unitType =
+    searchParams.get('tab') === 'remark' ? UnitType.REMARK : UnitType.REVIEW;
+  const {mutate, isPending} = useCreateReviewMutation(
+    {
+      onSuccess: data => {
+        show('Review created successfully');
+        console.log('create review success', data);
+      },
+      onError: error => {
+        show(`Create review failed: ${error}`);
+        console.error('create review failed', error);
+      },
     },
-    onError: error => {
-      show(`Create review failed: ${error}`);
-      console.error('create review failed', error);
-    },
-  });
+    unitType,
+  );
 
   function handleSave() {
     console.log(reviewData);
@@ -43,7 +50,7 @@ export function ReviewNewPage({bookUnitId}: {bookUnitId: string}) {
   return (
     <div>
       <div className="max-w-4xl mx-auto mt-4">
-        <h1 className="text-xl font-semibold">New Review</h1>
+        <h1 className="text-xl font-semibold">New {unitType}</h1>
         <TextField
           label="Book Unit ID"
           variant="filled"

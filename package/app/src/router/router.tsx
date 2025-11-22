@@ -53,7 +53,7 @@ import {ReadListEditPage} from '@/page/ReadList/ReadListEditPage.tsx';
 import {NewReadListPage} from '@/page/ReadList/NewReadListPage.tsx';
 import {ReadlistByBookPage} from '@/page/ReadList/ReadListsByBookPage.tsx';
 import {ReviewByBookPage} from '@/page/Review/ReviewByBookPage.tsx';
-import {ShortReviewByBookPage} from '@/page/Review/ShortReviewByBookPage.tsx';
+// import {ShortReviewByBookPage} from '@/page/Review/ShortReviewByBookPage.tsx';
 import TestPage from '@/page/Test/TestPage.tsx';
 import {TestPage02} from '@/page/Test/TestPage02.tsx';
 import {TestPage03} from '@/page/Test/TestPage03.tsx';
@@ -175,13 +175,13 @@ export default (
             </MainLayout>
           )}
         </Route>
-        <Route path="/review/short/book/:bookId">
+        {/* <Route path="/review/short/book/:bookId">
           {() => (
             <MainLayout>
               <ShortReviewByBookPage />
             </MainLayout>
           )}
-        </Route>
+        </Route> */}
         <Route path="/review/book/:bookId">
           {() => (
             <MainLayout>
