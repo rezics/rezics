@@ -299,7 +299,7 @@ export default (
             <UserPage isCurrentUser={true} />
           </MainLayout>
         </Route>
-        <Route path="/user/me/bookmarks">
+        <Route path="/user/me/bookmark">
           <MainLayout>
             <BookmarkPage />
           </MainLayout>

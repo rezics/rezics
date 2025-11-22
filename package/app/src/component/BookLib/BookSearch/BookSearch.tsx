@@ -85,7 +85,7 @@ export const BookSearchContainer: React.FC<BookSearchContainerProps> = ({
         />
       </div>
       <div className="mt-4">
-        <Search.Filter
+        {/* <Search.Filter
           sortType={sort.type ?? 'relevance'}
           sortOrder={sort.order ?? 'desc'}
           onSortChange={s =>
@@ -95,7 +95,7 @@ export const BookSearchContainer: React.FC<BookSearchContainerProps> = ({
               ...(s.order ? {order: s.order} : {}),
             }))
           }
-        />
+        /> */}
       </div>
     </div>
   );

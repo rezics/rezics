@@ -33,7 +33,8 @@ export function SingleReadlist({
   className = '',
 }: SingleReadlistProps) {
   const id = data.id;
-  const likeCount = data.likes ?? 0;
+  const likeCount =
+    data.reactionSummaries?.find(r => r.reaction === 'like')?.count ?? 0;
   const authorName = data.creator?.name ?? data.creator?.slug ?? '—';
   const cover = data.coverUrl;
 

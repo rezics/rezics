@@ -34,6 +34,7 @@ export const UserPage: FC<UserPageProps> = ({
     setIsEditing(false);
     // Optionally refresh the profile or show success message
   };
+  const userId = unitId || currentUser?.unitId;
 
   // If in edit mode and is current user, show edit form
   if (
@@ -44,7 +45,7 @@ export const UserPage: FC<UserPageProps> = ({
       <UserEditPage
         onCancel={handleCancelEdit}
         onSuccess={handleEditSuccess}
-        unitId={unitId}
+        unitId={userId}
       />
     );
   }
@@ -52,7 +53,7 @@ export const UserPage: FC<UserPageProps> = ({
   // Otherwise show profile
   return (
     <UserProfilePage
-      unitId={unitId || ''}
+      unitId={userId || ''}
       isCurrentUser={isCurrentUser}
       onEditClick={handleEditClick}
     />
