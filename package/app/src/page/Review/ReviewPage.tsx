@@ -1,5 +1,12 @@
 import {useQuery} from '@tanstack/react-query';
-import {Avatar, Box, IconButton, Rating, Typography} from '@mui/material';
+import {
+  Avatar,
+  Box,
+  IconButton,
+  Rating,
+  Tooltip,
+  Typography,
+} from '@mui/material';
 import {Link} from 'wouter';
 import {useTranslation} from 'react-i18next';
 
@@ -107,16 +114,23 @@ export function ReviewPage({reviewId}: {reviewId: string}) {
             sx={{width: 56, height: 56, borderRadius: 1}}
           />
           <div className="flex-1">
-            <div className="flex items-center justify-between">
-              <div>
-                <Typography variant="h6" className="font-bold">
-                  {review.user?.name}
-                </Typography>
-                <div className="text-sm text-gray-500 mt-1">
-                  <span>{review.created_at}</span>
+            <Tooltip title={'打开用户界面'} placement="top-start">
+              <Link
+                href={`/user/${review.user?.unitId}`}
+                className="flex items-center"
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Typography variant="h6" className="font-bold">
+                      {review.user?.name}
+                    </Typography>
+                    <div className="text-sm text-gray-500 mt-1">
+                      <span>{review.created_at}</span>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
+              </Link>
+            </Tooltip>
           </div>
           <div className="text-right">
             <div className="flex justify-end">

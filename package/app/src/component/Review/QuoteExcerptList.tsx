@@ -20,6 +20,7 @@ export const QuoteExcerptListShow: React.FC<QuoteExcerptListShowProps> = ({
               <SingleQuoteExcerptShow
                 key={quote.id}
                 author={{
+                  unitId: quote.user?.unitId || '',
                   name: quote.user?.name || '',
                   avatar: quote.user?.avatar || '',
                 }}

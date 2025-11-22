@@ -5,7 +5,6 @@ import {type ReviewDTO} from '@package/contract';
 import React from 'react';
 import {CollapsibleReview} from '@/component/ReadList/Review';
 import {parseReactionSummaries} from '@/util/reactionSummariesParser';
-import {FollowButton} from '@/component/Common/Reaction/FollowButton';
 import {ReactionStatistics} from '../Common/Reaction/ReactionStatistics';
 
 export const ReviewHeader: React.FC<{
@@ -14,30 +13,28 @@ export const ReviewHeader: React.FC<{
   const followersCount = review.user?.followersCount ?? 0;
   return (
     <div className="flex flex-wrap items-center mb-2 gap-2">
-      {/* Avatar */}
-      <Avatar src={review.user?.avatar ?? ''} variant="rounded" />
+      <Tooltip title={'打开用户界面'} placement="top-start">
+        <Link
+          href={`/user/${review.user?.unitId}`}
+          className="flex items-center"
+        >
+          {/* Avatar */}
+          <Avatar src={review.user?.avatar ?? ''} variant="rounded" />
 
-      {/* User Info */}
-      <div className="ml-2">
-        <Typography variant="subtitle1" fontWeight="bold">
-          {review.user?.name}
-        </Typography>
+          {/* User Info */}
+          <div className="ml-2">
+            <Typography variant="subtitle1" fontWeight="bold">
+              {review.user?.name}
+            </Typography>
 
-        <Typography variant="body2" color="text.secondary">
-          {followersCount} followers
-        </Typography>
-      </div>
+            <Typography variant="body2" color="text.secondary">
+              {followersCount} followers
+            </Typography>
+          </div>
+        </Link>
+      </Tooltip>
 
-      {/* Follow Button */}
-      {review.user && (
-        <div className="!ml-2">
-          <FollowButton
-            userId={review.user.unitId}
-            initialFollowersCount={review.user.followersCount}
-            size="small"
-          />
-        </div>
-      )}
+      {/* Follow Button removed because performance issue */}
 
       {/* Rating + Time (push to right, but wrap under on small screens) */}
       <div className="ml-auto text-right min-w-[120px]">

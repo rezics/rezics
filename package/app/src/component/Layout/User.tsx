@@ -88,7 +88,7 @@ export const UserShow: React.FC<UserShowProps> = ({
         aria-controls="menu-appbar"
         aria-haspopup="true"
       >
-        <Avatar sx={{width: 32, height: 32}}>
+        <Avatar sx={{width: 32, height: 32}} variant="rounded">
           <img src={user?.avatar} alt="avatar" />
         </Avatar>
       </IconButton>
@@ -150,7 +150,7 @@ export type UserContainerProps = {
 };
 
 export const UserContainer: React.FC<UserContainerProps> = ({onLogout}) => {
-  const [location, navigate] = useLocation();
+  const [_location, navigate] = useLocation();
   const {setUser} = useUserStore();
   const user = useUserStore(state => state.user);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);

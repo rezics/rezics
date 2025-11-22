@@ -1,9 +1,9 @@
 import {AccentBarContainer} from '@component/Common/AccentBar.tsx';
 import {TreeReplyComponents} from '@/component/Form/Comment/TreeReplyComponents';
 import {ChatBubbleOutline} from '@mui/icons-material';
-import {Avatar, IconButton} from '@mui/material';
+import {Avatar, IconButton, Tooltip} from '@mui/material';
 import React, {useRef} from 'react';
-import {useParams} from 'wouter';
+import {Link, useParams} from 'wouter';
 
 import {readlistQueries} from '@/api/readlist/readlist';
 import {useQuery} from '@tanstack/react-query';
@@ -65,17 +65,27 @@ export const ReadListPage: React.FC = () => {
           {/* 新 API 暂无 description 字段 */}
           {/* <p className="text-gray-600">{(bookList as any).description}</p> */}
         </div>
+
         <div className="flex justify-between items-center">
           {bookList.creator && (
-            <div className="flex items-center gap-3">
-              <Avatar
-                src={bookList.creator.avatar || ''}
-                alt={bookList.creator.name || 'Avatar'}
-                variant="rounded"
-                className="shadow"
-              />
-              <p className="text-sm text-gray-700">{bookList.creator.name}</p>
-            </div>
+            <Tooltip title={'打开用户界面'} placement="top-start">
+              <Link
+                href={`/user/${bookList.creator?.unitId}`}
+                className="flex items-center"
+              >
+                <div className="flex items-center gap-3">
+                  <Avatar
+                    src={bookList.creator.avatar || ''}
+                    alt={bookList.creator.name || 'Avatar'}
+                    variant="rounded"
+                    className="shadow"
+                  />
+                  <p className="text-sm text-gray-700">
+                    {bookList.creator.name}
+                  </p>
+                </div>
+              </Link>
+            </Tooltip>
           )}
           <div className="flex items-center gap-2">
             <MiniActionBar

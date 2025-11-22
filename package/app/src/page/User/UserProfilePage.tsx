@@ -17,6 +17,7 @@ import {useQuery} from '@tanstack/react-query';
 import {userQueries} from '@/api/user/user.queries';
 import {UserError, UserLoading} from './UserState';
 import {useUserStore} from '@/global/userStore';
+import FollowButton from '@/component/Common/Reaction/FollowButton';
 
 export interface UserProfilePageProps {
   unitId: string;
@@ -101,16 +102,25 @@ export const UserProfilePage: FC<UserProfilePageProps> = ({
             </Box>
           }
           action={
-            isCurrentUser ||
-            currentUser?.permission?.role?.includes('ADMIN') ? (
-              <Button
-                variant="contained"
-                startIcon={<EditIcon />}
-                onClick={onEditClick}
-              >
-                {t('common.edit')}
-              </Button>
-            ) : null
+            <div>
+              {!isCurrentUser && user.unitId !== currentUser?.unitId && (
+                <FollowButton
+                  userId={user.unitId}
+                  size="medium"
+                  className="!mr-2"
+                />
+              )}
+              {isCurrentUser ||
+              currentUser?.permission?.role?.includes('ADMIN') ? (
+                <Button
+                  variant="contained"
+                  startIcon={<EditIcon />}
+                  onClick={onEditClick}
+                >
+                  {t('common.edit')}
+                </Button>
+              ) : null}
+            </div>
           }
         />
         <CardContent>
@@ -155,29 +165,30 @@ export const UserProfilePage: FC<UserProfilePageProps> = ({
           )}
         </CardContent>
       </Card>
-
-      <Card className="shadow-lg rounded-2xl mt-4">
-        <CardContent>
-          <Typography variant="h6" className="font-semibold inline-block">
-            导航：
-          </Typography>
-          <Link href={`/user/me/bookmark`}>
-            <Button variant="text" color="primary">
-              书签
-            </Button>
-          </Link>
-          <Link href={`/user/me/follow`}>
-            <Button variant="text" color="primary">
-              关注
-            </Button>
-          </Link>
-          <Link href={`/user/me/reaction`}>
-            <Button variant="text" color="primary">
-              反应
-            </Button>
-          </Link>
-        </CardContent>
-      </Card>
+      {(isCurrentUser || user.unitId == currentUser?.unitId) && (
+        <Card className="shadow-lg rounded-2xl mt-4">
+          <CardContent>
+            <Typography variant="h6" className="font-semibold inline-block">
+              导航：
+            </Typography>
+            <Link href={`/user/me/bookmark`}>
+              <Button variant="text" color="primary">
+                书签
+              </Button>
+            </Link>
+            <Link href={`/user/me/follow`}>
+              <Button variant="text" color="primary">
+                关注
+              </Button>
+            </Link>
+            <Link href={`/user/me/reaction`}>
+              <Button variant="text" color="primary">
+                反应
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+      )}
     </Box>
   );
 };

@@ -1,12 +1,6 @@
 import FormatQuoteIcon from '@mui/icons-material/FormatQuote';
-import {
-  Avatar,
-  Link,
-  Paper,
-  Typography,
-  Tooltip,
-  IconButton,
-} from '@mui/material';
+import {Avatar, Paper, Typography, Tooltip, IconButton} from '@mui/material';
+import {Link} from 'wouter';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import React from 'react';
 import {useTranslation} from 'react-i18next';
@@ -16,6 +10,7 @@ import {RouterLink} from '../Common/RouterLink';
 
 export type SingleQuoteExcerptShowProps = {
   author: {
+    unitId: string;
     name: string;
     avatar: string;
   };
@@ -61,14 +56,18 @@ export const SingleQuoteExcerptShow: React.FC<SingleQuoteExcerptShowProps> = ({
       </Tooltip>
 
       <div className="flex items-center mb-2">
-        <Avatar
-          src={author.avatar}
-          sx={{width: 20, height: 20, mr: 1}}
-          variant="rounded"
-        />
-        <Typography variant="subtitle2" fontWeight="bold">
-          {author.name}
-        </Typography>
+        <Tooltip title={'打开用户界面'} placement="top-start">
+          <Link href={`/user/${author.unitId}`} className="flex items-center">
+            <Avatar
+              src={author.avatar}
+              sx={{width: 20, height: 20, mr: 1}}
+              variant="rounded"
+            />
+            <Typography variant="subtitle2" fontWeight="bold">
+              {author.name}
+            </Typography>
+          </Link>
+        </Tooltip>
       </div>
 
       <div className="flex items-start">
