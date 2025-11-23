@@ -33,8 +33,9 @@ export const bookQueryOptionsSchema = t.Object({
       createdAt: t.Optional(t.String()),
     }),
   ),
-  filter: t.Optional(t.Record(t.String(), t.Any())),
-  experimental: t.Optional(t.Record(t.String(), t.Any())),
+  // use any will lead to errors
+  // filter: t.Optional(t.Record(t.String(), t.Any())),
+  // experimental: t.Optional(t.Record(t.String(), t.Any())),
 });
 
 export type BookQueryOptions = (typeof bookQueryOptionsSchema)['static'];
