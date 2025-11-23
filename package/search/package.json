@@ -1,0 +1,16 @@
+{
+  "name": "search",
+  "module": "src/index.ts",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "meilisearch": "cd ./bin && ./meilisearch --config-file-path='./config.toml'"
+  },
+  "devDependencies": {},
+  "peerDependencies": {},
+  "dependencies": {
+    "@types/node": "^24.10.1",
+    "dotenv": "^17.2.3",
+    "meilisearch": "^0.54.0"
+  }
+}

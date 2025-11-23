@@ -23,6 +23,8 @@ Library.Book.Backend
 bunx prisma migrate dev --name init
 bunx prisma generate
 bun run prisma:seed
+bun run db:migrate
+bunx prisma migrate deploy
 # 大型迁移
 bunx prisma migrate reset
 ```

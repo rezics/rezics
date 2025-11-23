@@ -28,7 +28,8 @@ export const bookApi = coreInstance('/books')
     '/',
     async ({query}): Promise<BookListResponse> => {
       const {books, total} = await bookService.list(query);
-      return {books: books.map(mapBaseBookToDTO), total};
+      // return {books: books.map(mapBaseBookToDTO), total};
+      return {books: books as any, total};
     },
     {
       query: bookListQuerySchema,

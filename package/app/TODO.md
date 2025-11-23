@@ -6,10 +6,9 @@
 - 剧透警告
 - 後續支持 Route 動畫定制
 - 章節名稱修改綁定
-- 實現提交提示
-- [ ] 将 Mock list 数据扩展到 千条量级
 - [ ] 侧边栏支持插件，可以获取比如书库内书籍状态
 - [ ] 字数不是 tag，只是伪装成 tag,是支持填写区间以查询的
+- [ ] https://github.com/meilisearch/meilisearch-react
 
 ## Complete
 

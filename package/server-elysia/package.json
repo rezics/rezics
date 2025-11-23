@@ -9,7 +9,8 @@
     "prisma:generate": "bunx prisma generate",
     "prisma:migrate": "bunx prisma migrate dev",
     "prisma:studio": "bunx prisma studio",
-    "prisma:seed": "bun run prisma/seed.ts"
+    "prisma:seed": "bun run prisma/seed.ts",
+    "db:migrate": "bun run prisma/db/index.ts"
   },
   "devDependencies": {
     "@types/bun": "^1.3.0",
