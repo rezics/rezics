@@ -3,6 +3,7 @@ export * from './permission';
 export * from './pagination';
 export * from './book';
 export * from './chapter';
+export * from './search';
 export * from './comment';
 export * from './readlist';
 export * from './review';

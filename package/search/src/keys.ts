@@ -1,7 +1,17 @@
 // meili.keys.ts
+// Small helpers around Meilisearch key management.
+
 import {meili} from './client';
 
-export async function getSearchKey() {
+/**
+ * Create a Meilisearch key that is allowed to perform only `search` actions
+ * on the `books` index.
+ *
+ * This is the recommended key type to hand out to frontend clients.
+ *
+ * @returns The newly created key string.
+ */
+export async function getSearchKey(): Promise<string> {
   const resp = await meili.createKey({
     actions: ['search'], // 只允许搜索
     indexes: ['books'], // 允许的索引
@@ -11,6 +21,12 @@ export async function getSearchKey() {
   return resp.key;
 }
 
+/**
+ * Create a short-lived Meilisearch admin key with full permissions.
+ *
+ * The key is valid for 30 days and should only be used in secure
+ * server-side contexts.
+ */
 export async function getAdminKey() {
   return meili.createKey({
     actions: ['*'],
@@ -19,10 +35,17 @@ export async function getAdminKey() {
   });
 }
 
+/**
+ * List all existing Meilisearch API keys.
+ */
 export async function listKeys() {
   return meili.getKeys();
 }
 
+/**
+ * Delete a Meilisearch API key by its UID.
+ */
 export async function deleteKey(keyUid: string) {
   return meili.deleteKey(keyUid);
 }
+

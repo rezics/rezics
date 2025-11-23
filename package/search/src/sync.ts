@@ -1,8 +1,9 @@
-// meili.sync.ts
 import {PrismaClient} from '@package/server-elysia/prisma/generated/client';
 import {addOrUpdateBooks} from './documents';
 
 const prisma = new PrismaClient();
+
+// TODO 引入 cursor 进行 千万级批量操作
 
 export async function syncAllBooks() {
   const books = await prisma.book.findMany({
@@ -25,6 +26,9 @@ export async function syncAllBooks() {
     tags: b.unit.tags.map(t => t.name),
     authors: b.author.map(a => a.name),
     nsfw: b.unit.nsfw,
+    authorIds: b.author.map(a => a.unitId),
+    pressIds: b.press.map(p => p.unitId),
+    producerIds: b.producer.map(p => p.unitId),
     createdAt: b.createdAt,
     updatedAt: b.updatedAt,
   }));

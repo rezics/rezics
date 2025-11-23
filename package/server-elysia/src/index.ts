@@ -5,6 +5,7 @@ import {chapterApi} from './chapter';
 import {readlistApi} from './readlist';
 import {reviewApi} from './review';
 import {userApi} from './user';
+import {meiliApi} from './meili';
 import {unitApi} from './unit';
 import {tagApi} from './tag';
 import {echoKvApi} from './echokv';
@@ -38,6 +39,7 @@ const app = new Elysia()
   .use(readlistApi)
   .use(reviewApi)
   .use(userApi)
+  .use(meiliApi)
   .use(unitApi)
   .use(tagApi)
   .use(commentApi)

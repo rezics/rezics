@@ -1,6 +1,6 @@
 import {prisma} from '@/prisma/client';
-import {UnitStatus, UnitType, Prisma} from '@/prisma/client';
-import type {Rating} from '@/prisma/client';
+import {UnitStatus, UnitType} from '@/prisma/client';
+import type {Prisma, Rating} from '@/prisma/client';
 import type {BookWithRelations} from './types';
 import {bookInclude} from './types';
 import type {
@@ -30,23 +30,23 @@ export class BookService {
     }
 
     // Search in title, isbn, or post title
-    // if (options.q && options.q.trim()) {
-    //   andWhere.push({
-    //     OR: [
-    //       {title: {contains: options.q, mode: 'insensitive'}},
-    //       {author: {some: {name: {contains: options.q, mode: 'insensitive'}}}},
-    //       {press: {some: {name: {contains: options.q, mode: 'insensitive'}}}},
-    //       {
-    //         producer: {
-    //           some: {name: {contains: options.q, mode: 'insensitive'}},
-    //         },
-    //       },
-    //       // 性能优化
-    //       // {isbn: {contains: options.q, mode: 'insensitive'}},
-    //       // {unit: {title: {contains: options.q, mode: 'insensitive'}}},
-    //     ],
-    //   });
-    // }
+    if (options.q && options.q.trim()) {
+      andWhere.push({
+        OR: [
+          {title: {contains: options.q, mode: 'insensitive'}},
+          {isbn: {contains: options.q, mode: 'insensitive'}},
+          // {unit: {title: {contains: options.q, mode: 'insensitive'}}},
+          {author: {some: {name: {contains: options.q, mode: 'insensitive'}}}},
+          {press: {some: {name: {contains: options.q, mode: 'insensitive'}}}},
+          {
+            producer: {
+              some: {name: {contains: options.q, mode: 'insensitive'}},
+            },
+          },
+        ],
+      });
+    }
+
     // Filter by ISBN
     if (options.isbn && options.isbn.trim()) {
       andWhere.push({isbn: {contains: options.isbn, mode: 'insensitive'}});
@@ -122,50 +122,20 @@ export class BookService {
       return options.start ?? 0;
     };
     const skipNum = calculateSkip();
-    let where = this.buildWhereClause(options);
+    const where = this.buildWhereClause(options);
     console.log('cursor', cursor);
-    // const autoPrismaQuery = prisma.book.findMany({
-    //   where,
-    //   orderBy: {createdAt: 'desc'},
-    //   skip: skipNum,
-    //   cursor: hasCursor
-    //     ? {unitId: cursor.unitId, createdAt: cursor.createdAt}
-    //     : undefined,
-    //   take: limitNum,
-    //   include: bookInclude,
-    // });
     // TODO use Postgres Approximate counting
-    const whereClauses: Prisma.Sql[] = [];
-    // searchVector 条件
-    if (options.q) {
-      whereClauses.push(
-        Prisma.sql`"Book"."searchVector" @@ plainto_tsquery('simple', ${options.q})`,
-      );
-    }
-
-    // 没条件就 TRUE
-    const whereSql =
-      whereClauses.length > 0
-        ? Prisma.sql`${Prisma.join(whereClauses, 'AND')}`
-        : (Prisma.sql`TRUE` as Prisma.Sql);
-    const sql = Prisma.sql`
-      SELECT
-      "Book"."unitId",
-      "Book"."title",
-      "Book"."isbn",
-      "Book"."createdAt",
-      "Book"."updatedAt",
-      "Book"."description",
-      "Book"."coverUrl",
-      "Book"."extra"
-      FROM "Book"
-      WHERE ${whereSql}
-      ORDER BY "Book"."createdAt" DESC
-      LIMIT ${options.limit ?? 50}
-      OFFSET ${skipNum}
-      `;
     const [books, total] = await Promise.all([
-      await prisma.$queryRaw(sql),
+      prisma.book.findMany({
+        where,
+        orderBy: {createdAt: 'desc'},
+        skip: skipNum,
+        cursor: hasCursor
+          ? {unitId: cursor.unitId, createdAt: cursor.createdAt}
+          : undefined,
+        take: limitNum,
+        include: bookInclude,
+      }),
       // prisma.book.count({where}),
       getBookApproxCount(),
     ]);
