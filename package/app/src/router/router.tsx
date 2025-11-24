@@ -28,7 +28,7 @@ import {QuoteByBookPage} from '@/page/Review/QuoteByBookPage.tsx';
 import {QuotePage} from '@/page/Review/QuotePage.tsx';
 
 // Library pages
-import {BookLibContainer} from '@/page/Book/BookLibPage_02';
+import {BookLibContainer} from '@/page/Book/BookLibPage';
 // import {BookLibContainer} from '@/page/Book/BookLibPage';
 import {BookPageContainer} from '@/page/Book/BookPage.tsx';
 
