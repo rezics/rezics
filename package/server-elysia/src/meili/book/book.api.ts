@@ -1,9 +1,8 @@
 import type {BookQueryOptions} from '@package/contract';
 import {toBookQueryString} from '@package/contract';
-import type {SearchResponse} from 'meilisearch';
-import {bookIndex} from '../meili_index';
+import {bookIndex} from '@package/search/src/meili_index';
 import type {BookSearchDocument, BookSearchResult} from './interface';
-
+import type {SearchResponse} from '@package/search/src/index';
 /**
  * Low-level search API that accepts a fully-constructed Meilisearch query string.
  *
@@ -22,6 +21,7 @@ export async function searchBooksRaw(
   const page = options?.page ?? 1;
   const hitsPerPage = options?.limit ?? 20;
 
+  console.log('searchBooksRaw', q, options);
   return bookIndex.search<BookSearchDocument>(q, {
     page,
     hitsPerPage,
@@ -43,7 +43,8 @@ export async function searchBooksRaw(
 export async function searchBooks(
   opts: BookQueryOptions,
 ): Promise<BookSearchResult> {
-  const q = toBookQueryString(opts);
+  // const q = toBookQueryString(opts);
+  const q = opts.keyword ?? '';
 
   const filter: string[] = [];
 
@@ -96,12 +97,15 @@ export async function searchBooks(
   const start = opts.start ?? 0;
   const page = Math.floor(start / limit) + 1;
 
-  const resp = await searchBooksRaw(q, {
-    page,
-    limit,
-    filter: filter.length > 0 ? filter : undefined,
-    sort: sort.length > 0 ? sort : undefined,
-  });
+  const resp = await searchBooksRaw(
+    q,
+    //   {
+    //   page,
+    //   limit,
+    //   filter: filter.length > 0 ? filter : undefined,
+    //   sort: sort.length > 0 ? sort : undefined,
+    // }
+  );
 
   return {
     hits: resp.hits as BookSearchDocument[],

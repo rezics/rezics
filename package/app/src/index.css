@@ -1,5 +1,7 @@
 @import 'tailwindcss';
 
+@import 'instantsearch.css/themes/algolia-min.css';
+
 .no-scrollbar {
   /* IE and Edge */
   -ms-overflow-style: none;

@@ -8,7 +8,7 @@ import {addOrUpdateBooks, deleteAllBooks, deleteBooks} from './documents';
 import {getSearchKey, getAdminKey, listKeys, deleteKey} from './keys';
 import {syncAllBooks} from './sync';
 
-export * from './book';
+export * from './type';
 
 /**
  * Initialize the `books` index in Meilisearch with the correct settings

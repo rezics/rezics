@@ -1,10 +1,7 @@
 import type {BookQueryOptions} from '@package/contract';
-import type {
-  BookSearchDocument,
-  BookSearchResult,
-} from '@package/search/src/index';
+import type {BookSearchDocument, BookSearchResult} from './book/interface';
+import {searchBooks} from './book/book.api';
 import {
-  searchBooks,
   syncAllBooks,
   initBookIndex,
   getSearchKey,

@@ -4,3 +4,5 @@
 
 
 cd /mnt/d/ICS/Library.Book/Library.Book/package/search/
+
+bun run meilisearch
