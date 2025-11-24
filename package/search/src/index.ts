@@ -3,10 +3,17 @@
 // hiding low-level details and wiring with the rest of the application.
 
 import {meili} from './client';
-import {initBookIndex} from './meili_index';
-import {addOrUpdateBooks, deleteAllBooks, deleteBooks} from './documents';
+import {initBookIndex, initUnitIndex} from './meili_index';
+import {
+  addOrUpdateBooks,
+  addOrUpdateUnits,
+  deleteAllBooks,
+  deleteAllUnits,
+  deleteBooks,
+  deleteUnits,
+} from './documents';
 import {getSearchKey, getAdminKey, listKeys, deleteKey} from './keys';
-import {syncAllBooks} from './sync';
+import {syncAllBooks, syncAllUnits, syncAllUnitsOld} from './sync';
 
 export * from './type';
 
@@ -19,6 +26,13 @@ export * from './type';
 export {initBookIndex};
 
 /**
+ * Initialize the `units` index in Meilisearch with the correct settings.
+ *
+ * Safe to call multiple times; Meilisearch will update the settings as needed.
+ */
+export {initUnitIndex};
+
+/**
  * Perform a full synchronization of all books from the primary database
  * into the Meilisearch `books` index.
  *
@@ -27,12 +41,36 @@ export {initBookIndex};
 export {syncAllBooks};
 
 /**
+ * Perform a full synchronization of all units from the primary database
+ * into the Meilisearch `units` index.
+ *
+ * This is usually run as an admin/maintenance operation, not per request.
+ */
+export {syncAllUnits};
+
+/**
+ * Perform a full synchronization of all units from the primary database
+ * into the Meilisearch `units` index.
+ *
+ * This is usually run as an admin/maintenance operation, not per request.
+ */
+export {syncAllUnitsOld};
+
+/**
  * Upsert an array of book documents into Meilisearch.
  *
  * Prefer {@link syncAllBooks} for bulk sync from the DB; use this for
  * fine-grained updates when a single book changes.
  */
 export {addOrUpdateBooks, deleteBooks, deleteAllBooks};
+
+/**
+ * Upsert an array of unit documents into Meilisearch.
+ *
+ * Prefer {@link syncAllUnits} for bulk sync from the DB; use this for
+ * fine-grained updates when a single unit changes.
+ */
+export {addOrUpdateUnits, deleteUnits, deleteAllUnits};
 
 /**
  * Meilisearch API client instance used internally by this package.

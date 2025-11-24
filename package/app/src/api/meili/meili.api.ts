@@ -1,48 +1,19 @@
 /**
- * Meilisearch Book API client
+ * Meilisearch Book & Unit API client
  *
- * Frontend wrapper around the backend `/meili/books/search` endpoint.
+ * Frontend wrapper around the backend Meili search endpoints.
  */
 
-import type {BookListResponse} from '@package/contract';
+import type {
+  BookListResponse,
+  UnitListResponse,
+  ReviewDTO,
+  ReviewListResponse,
+} from '@package/contract';
 import {buildQueryString} from '../utils/buildQuery';
 import {apiFetch} from '../react-query/http';
 import type {BookFilters} from '../book/book.types';
-
-/**
- * Shape of a single book document returned by Meilisearch.
- *
- * This mirrors (a subset of) the server-side `BookSearchDocument` type.
- * Kept local here to avoid pulling the Node-only `@package/search` package
- * into the browser bundle.
- */
-export type MeiliBookHit = {
-  id: string;
-  title: string;
-  description: string | null;
-  tags: string[];
-  authors: string[];
-  nsfw: boolean;
-  createdAt: string;
-  updatedAt: string;
-  authorIds?: string[];
-  pressIds?: string[];
-  producerIds?: string[];
-};
-
-/**
- * Normalized Meilisearch book search result.
- *
- * This mirrors the backend `BookSearchResult` shape.
- */
-export type MeiliBookSearchResult = {
-  hits: MeiliBookHit[];
-  page: number;
-  totalPages: number;
-  totalHits: number;
-  processingTimeMs: number;
-  query: string;
-};
+import type {UnitFilters} from '../unit/unit.types';
 
 export const meiliBookApi = {
   /**
@@ -56,3 +27,51 @@ export const meiliBookApi = {
     );
   },
 };
+
+export const meiliUnitApi = {
+  unitSearch: async (filters?: UnitFilters): Promise<UnitListResponse> => {
+    return apiFetch<UnitListResponse>(
+      `/meili/units/search${buildQueryString(filters)}`,
+    );
+  },
+};
+
+/**
+ * Map a single Unit (from Meili unit index) into a ReviewDTO.
+ *
+ * - unit.id / unit.unitId -> ReviewDTO.unitId
+ * - unit.targetUnitId     -> ReviewDTO.bookId
+ * - unit.title/content    -> ReviewDTO.title/content
+ * - unit.metadata.rating  -> ReviewDTO.rating
+ * - unit.createdAt        -> ReviewDTO.created_at
+ * - unit.user             -> ReviewDTO.user
+ * - unit.reactionSummaries-> ReviewDTO.reactionSummaries
+ */
+export function mapUnitToReviewDTO(unit: any): ReviewDTO {
+  return {
+    unitId: unit.unitId ?? unit.id,
+    bookId: unit.targetUnitId,
+    title: unit.title,
+    content: unit.content ?? '',
+    rating: unit.metadata?.rating,
+    created_at: unit.createdAt,
+    user: unit.user,
+    reactionSummaries: unit.reactionSummaries,
+  };
+}
+
+/**
+ * Convert a Meili /meili/units/search response into a ReviewListResponse
+ * compatible with the existing review API.
+ */
+export function mapUnitListToReviewListResponse(
+  unitResp: UnitListResponse,
+): ReviewListResponse {
+  const reviews: ReviewDTO[] =
+    (unitResp.units as any[] | undefined)?.map(mapUnitToReviewDTO) ?? [];
+
+  return {
+    reviews,
+    total: unitResp.total,
+  };
+}

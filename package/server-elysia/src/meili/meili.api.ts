@@ -1,8 +1,14 @@
 import {t} from 'elysia';
 import {coreInstance} from '../core';
-import {bookQueryOptionsSchema, type BookQueryOptions} from '@package/contract';
+import {
+  bookQueryOptionsSchema,
+  type BookQueryOptions,
+  unitListQuerySchema,
+  type UnitListQuery,
+} from '@package/contract';
 import {meiliService} from './meili.service';
 import {verifyAuth} from '@/src/utils/authUtils';
+import {deleteAllUnits} from '@package/search/src/documents';
 
 /**
  * Meili API - Elysia routes for search and key management.
@@ -52,6 +58,28 @@ export const meiliApi = coreInstance('/meili')
   )
 
   /**
+   * Search units using Meilisearch.
+   *
+   * GET /meili/units/search
+   */
+  .get(
+    '/units/search',
+    async ({query}) => {
+      const options = query as UnitListQuery;
+      return meiliService.searchUnits(options);
+    },
+    {
+      query: unitListQuerySchema,
+      detail: {
+        summary: 'Search units (Meilisearch)',
+        description:
+          'Full-text search over generic units using Meilisearch, driven by contract-based UnitListQuery.',
+        tags: ['Meili', 'Units', 'Search'],
+      },
+    },
+  )
+
+  /**
    * Initialize the `books` index (idempotent).
    *
    * POST /meili/books/init
@@ -71,6 +99,25 @@ export const meiliApi = coreInstance('/meili')
   )
 
   /**
+   * Initialize the `units` index (idempotent).
+   *
+   * POST /meili/units/init
+   */
+  .post(
+    '/units/init',
+    async () => {
+      await meiliService.initUnitsIndex();
+      return {message: 'units index initialized'};
+    },
+    {
+      detail: {
+        summary: 'Init units index',
+        tags: ['Meili', 'Admin'],
+      },
+    },
+  )
+
+  /**
    * Trigger a full sync of all books into Meilisearch.
    *
    * POST /meili/books/sync
@@ -84,6 +131,54 @@ export const meiliApi = coreInstance('/meili')
     {
       detail: {
         summary: 'Sync all books to Meilisearch',
+        tags: ['Meili', 'Admin'],
+      },
+    },
+  )
+
+  /**
+   * Trigger a full sync of all units into Meilisearch.
+   *
+   * POST /meili/units/sync
+   */
+  .post(
+    '/units/sync',
+    async () => {
+      const task = await meiliService.syncAllUnits();
+      return {task};
+    },
+    {
+      detail: {
+        summary: 'Sync all units to Meilisearch',
+        tags: ['Meili', 'Admin'],
+      },
+    },
+  )
+
+  .post(
+    '/units/syncAllUnits',
+    async () => {
+      const task = await meiliService.syncAllUnitsOld();
+      return {task};
+      return {message: 'all units synced'};
+    },
+    {
+      detail: {
+        summary: 'Sync all units to Meilisearch (old)',
+        tags: ['Meili', 'Admin'],
+      },
+    },
+  )
+
+  .get(
+    '/units/deleteAllUnits',
+    async () => {
+      await deleteAllUnits();
+      return {message: 'all units deleted'};
+    },
+    {
+      detail: {
+        summary: 'Delete all units from Meilisearch',
         tags: ['Meili', 'Admin'],
       },
     },

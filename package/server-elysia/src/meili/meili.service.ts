@@ -1,6 +1,8 @@
-import type {BookQueryOptions} from '@package/contract';
+import type {BookQueryOptions, UnitListQuery} from '@package/contract';
 import type {BookSearchDocument, BookSearchResult} from './book/interface';
+import type {UnitSearchDocument, UnitSearchResult} from './unit/interface';
 import {searchBooks} from './book/book.api';
+import {searchUnits} from './unit/unit.api';
 import {
   syncAllBooks,
   initBookIndex,
@@ -8,6 +10,9 @@ import {
   getAdminKey,
   listKeys,
   deleteKey,
+  initUnitIndex,
+  syncAllUnits,
+  syncAllUnitsOld,
 } from '@package/search/src/index';
 
 /**
@@ -26,10 +31,24 @@ export class MeiliService {
   }
 
   /**
+   * Search units using the contract-based UnitListQuery.
+   */
+  async searchUnits(options: UnitListQuery): Promise<UnitSearchResult> {
+    return searchUnits(options);
+  }
+
+  /**
    * Initialize Meilisearch `books` index settings.
    */
   async initBooksIndex(): Promise<void> {
     await initBookIndex();
+  }
+
+  /**
+   * Initialize Meilisearch `units` index settings.
+   */
+  async initUnitsIndex(): Promise<void> {
+    await initUnitIndex();
   }
 
   /**
@@ -40,12 +59,36 @@ export class MeiliService {
   }
 
   /**
+   * Trigger a full re-sync of all units into Meilisearch.
+   */
+  async syncAllUnits(): Promise<unknown> {
+    return syncAllUnits();
+  }
+
+  /**
+   * Trigger a full re-sync of all units into Meilisearch.
+   */
+  async syncAllUnitsOld(): Promise<unknown> {
+    return syncAllUnitsOld();
+  }
+
+  /**
    * Convenience wrapper to expose the BookSearchDocument type
    * from the service layer, if needed by callers.
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   // This is here purely for type re-exporting via `typeof`.
   get _BookSearchDocumentType(): BookSearchDocument | undefined {
+    return undefined;
+  }
+
+  /**
+   * Convenience wrapper to expose the UnitSearchDocument type
+   * from the service layer, if needed by callers.
+   */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  // This is here purely for type re-exporting via `typeof`.
+  get _UnitSearchDocumentType(): UnitSearchDocument | undefined {
     return undefined;
   }
 

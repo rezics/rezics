@@ -20,7 +20,8 @@ import {NewBookPage} from '@/page/BookEdit/NewBookPage.tsx';
 import {BookEditChapterListPage} from '@/page/BookEdit/ChapterListPage.tsx';
 
 // Review pages
-import {ReviewsPage} from '@/page/Review/ReviewsPage';
+// import {ReviewsPage} from '@/page/Review/ReviewsPage';
+import {ReviewsPage} from '@/page/Review/ReviewsPage_2';
 import {ReviewPage} from '@/page/Review/ReviewPage.tsx';
 import {ReviewNewPage} from '@/page/Review/ReviewNewPage.tsx';
 import {ReviewEditPageContainer} from '@/page/Review/ReviewEditPage.tsx';
