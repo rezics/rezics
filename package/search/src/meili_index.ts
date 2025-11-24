@@ -12,10 +12,18 @@ export const bookIndex = meili.index('books');
  */
 export async function initBookIndex() {
   await bookIndex.updateSettings({
-    searchableAttributes: ['title', 'description', 'tags', 'authors'],
+    searchableAttributes: [
+      'title',
+      'description',
+      'tagSearch',
+      'authors',
+      'presses',
+      'isbn',
+      'producers',
+    ],
     filterableAttributes: [
       'nsfw',
-      'tags',
+      'tagSearch',
       'authorIds',
       'pressIds',
       'producerIds',

@@ -4,9 +4,10 @@
  * Frontend wrapper around the backend `/meili/books/search` endpoint.
  */
 
-import type {BookQueryOptions} from '@package/contract';
+import type {BookListResponse} from '@package/contract';
 import {buildQueryString} from '../utils/buildQuery';
 import {apiFetch} from '../react-query/http';
+import type {BookFilters} from '../book/book.types';
 
 /**
  * Shape of a single book document returned by Meilisearch.
@@ -49,9 +50,9 @@ export const meiliBookApi = {
    *
    * The backend expects a `BookQueryOptions` object encoded in the query string.
    */
-  search: async (options: BookQueryOptions): Promise<MeiliBookSearchResult> => {
-    return apiFetch<MeiliBookSearchResult>(
-      `/meili/books/search${buildQueryString(options as any)}`,
+  bookSearch: async (filters?: BookFilters): Promise<BookListResponse> => {
+    return apiFetch<BookListResponse>(
+      `/meili/books/search${buildQueryString(filters)}`,
     );
   },
 };

@@ -12,19 +12,19 @@ import type {SearchResponse} from '@package/search/src/index';
 export async function searchBooksRaw(
   q: string,
   options?: {
-    page?: number;
+    offset?: number;
     limit?: number;
     filter?: string | string[];
     sort?: string[];
   },
 ): Promise<SearchResponse<BookSearchDocument>> {
-  const page = options?.page ?? 1;
-  const hitsPerPage = options?.limit ?? 20;
+  const offset = options?.offset ?? 1;
+  const limit = options?.limit ?? 20;
 
   console.log('searchBooksRaw', q, options);
   return bookIndex.search<BookSearchDocument>(q, {
-    page,
-    hitsPerPage,
+    offset,
+    limit,
     filter: options?.filter,
     sort: options?.sort,
   });
@@ -57,7 +57,7 @@ export async function searchBooks(
 
   if (opts.tags?.length) {
     filter.push(
-      `tags IN [${opts.tags
+      `tagSearch IN [${opts.tags
         .map(t => `"${t.replace(/"/g, '\\"')}"`)
         .join(', ')}]`,
     );
@@ -93,25 +93,20 @@ export async function searchBooks(
     sort.push(`${opts.sort.type}:${order}`);
   }
 
-  const limit = Math.max(1, Math.min(opts.limit ?? 20, 100));
-  const start = opts.start ?? 0;
-  const page = Math.floor(start / limit) + 1;
+  const limit = opts.limit ?? 100;
+  const offset = opts.start ?? 0;
 
-  const resp = await searchBooksRaw(
-    q,
-    //   {
-    //   page,
-    //   limit,
-    //   filter: filter.length > 0 ? filter : undefined,
-    //   sort: sort.length > 0 ? sort : undefined,
-    // }
-  );
+  const resp = await searchBooksRaw(q, {
+    offset,
+    limit,
+    filter: filter.length > 0 ? filter : undefined,
+    sort: sort.length > 0 ? sort : undefined,
+  });
 
   return {
-    hits: resp.hits as BookSearchDocument[],
-    page: resp.page ?? page,
-    totalPages: resp.totalPages ?? 1,
-    totalHits: resp.totalHits ?? resp.estimatedTotalHits ?? resp.hits.length,
+    books: resp.hits as BookSearchDocument[],
+    // others: resp,
+    total: resp.totalHits ?? resp.estimatedTotalHits ?? resp.hits.length,
     processingTimeMs: resp.processingTimeMs,
     query: resp.query ?? q,
   };

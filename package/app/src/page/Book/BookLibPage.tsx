@@ -1,27 +1,28 @@
-import {Alert} from '@mui/material';
-import {useEffect, useImperativeHandle, useMemo, useState} from 'react';
-
+import {Alert, CircularProgress, Typography} from '@mui/material';
 import {
-  BookSearchContainer,
-  type BookSortType,
-} from '@/component/BookLib/BookSearch/BookSearch';
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useState,
+} from 'react';
+
+import {BookSearchContainer} from '@/component/BookLib/BookSearch/BookSearch';
 // import { CardBookList } from "@component/Book/CardBookList";
 import type {BookLibSortKey} from '@/component/Search/SearchFilter';
 import {
   UniversalPaginator,
   type UniversalPaginatorHandle,
 } from '@/component/Common/Pagination.tsx';
+import type {SearchInfo} from '@/component/Search/searchParser';
 import {BookListViewContainer} from '@/component/BookLib/BookList/BookListView';
 
 import React, {forwardRef, useRef} from 'react';
 
+import {bookQueries} from '@/api/book/book';
 import {useQueryClient, useQuery} from '@tanstack/react-query';
 
-import {meiliBookSearchQuery} from '@/api/meili/meili.queries';
-import type {MeiliBookHit} from '@/api/meili/meili.api';
-
 import type {BookDTO} from '@package/contract';
-import type {BookQueryOptions} from '@package/contract';
 
 type Book = BookDTO;
 
@@ -38,10 +39,8 @@ type BookLibShowProps = {
   handlePreRequestData: any;
   handleSortChange: any;
   EXTERNAL_PAGE_SIZE: number;
-  setSearchOptions: (
-    updater: (prev: BookQueryOptions) => BookQueryOptions,
-  ) => void;
-  searchOptions: BookQueryOptions;
+  setCurrentQuery: any;
+  currentQuery: SearchInfo;
 };
 
 export const BookLibShow = (
@@ -55,8 +54,8 @@ export const BookLibShow = (
     handlePreRequestData,
     handleSortChange,
     EXTERNAL_PAGE_SIZE,
-    setSearchOptions,
-    searchOptions,
+    setCurrentQuery,
+    currentQuery,
   }: BookLibShowProps,
   ref: React.Ref<UniversalPaginatorHandle>,
 ) => {
@@ -64,8 +63,8 @@ export const BookLibShow = (
   const universalPaginatorRef = useRef<UniversalPaginatorHandle>(null);
 
   useEffect(() => {
-    console.log('searchOptions', searchOptions);
-  }, [searchOptions]);
+    console.log('currentQuery', currentQuery);
+  }, [currentQuery]);
 
   useImperativeHandle(ref, () => ({
     resetPaginationPageNumber() {
@@ -100,12 +99,15 @@ export const BookLibShow = (
         isLoading={isLoading && books.length === 0}
         sortControl={
           <BookSearchContainer
-            onSearch={options => {
-              setSearchOptions(() => ({
-                ...options,
-              }));
-              console.log('onSearch', options);
+            onSearch={info => {
+              setCurrentQuery({
+                keyword: info.keyword ?? '',
+                tags: info.tags ?? [],
+                nsfw: info.nsfw ?? false,
+              });
+              console.log('onSearch', info);
             }}
+            defaultValue={currentQuery}
           />
         }
         currentPage={currentPage}
@@ -125,56 +127,21 @@ export const BookLibShowRef = forwardRef(BookLibShow);
 export const BookLibContainer: React.FC = () => {
   const ref = useRef<UniversalPaginatorHandle>(null);
   const EXTERNAL_PAGE_SIZE = 100;
-  const [searchOptions, setSearchOptionsState] = useState<BookQueryOptions>({
+  const [currentQuery, setCurrentQuery] = useState<SearchInfo>({
+    keyword: '',
+    tags: [],
     nsfw: false,
   });
   const [start, setStart] = useState<number>(0);
 
-  const [sortConfig, setSortConfig] = useState<{
-    type: BookLibSortKey;
-    order: 'asc' | 'desc';
-  }>({
-    type: 'time',
-    order: 'desc',
-  });
-
-  const mapSortKeyToBookSortType = (key: BookLibSortKey): BookSortType => {
-    switch (key) {
-      case 'time':
-        return 'createdAt';
-      case 'favorites':
-        return 'favorites';
-      case 'wordCount':
-        return 'wordCount';
-      case 'monthVotes':
-        return 'monthlyVotes';
-      case 'recommend':
-        return 'recommendation';
-      case 'relevance':
-      default:
-        return 'relevance';
-    }
-  };
-
-  const optionsWithPagingAndSort: BookQueryOptions = useMemo(() => {
-    const base: BookQueryOptions = {
-      ...searchOptions,
+  const {data, isLoading, error} = useQuery(
+    bookQueries.list({
       start,
       limit: EXTERNAL_PAGE_SIZE,
-    };
-
-    const mappedType = mapSortKeyToBookSortType(sortConfig.type);
-    const order = sortConfig.order;
-
-    if (mappedType && mappedType !== 'relevance') {
-      base.sort = {type: mappedType as any, order};
-    }
-
-    return base;
-  }, [searchOptions, start, EXTERNAL_PAGE_SIZE, sortConfig]);
-
-  const {data, isLoading, error} = useQuery(
-    meiliBookSearchQuery(optionsWithPagingAndSort),
+      q: currentQuery.keyword ?? '',
+      tags: currentQuery.tags?.join(',') ?? '',
+      ...(currentQuery.nsfw ? {nsfw: true} : {}),
+    }),
   );
 
   function handleNeedMoreData(page: number) {
@@ -184,13 +151,16 @@ export const BookLibContainer: React.FC = () => {
   const queryClient = useQueryClient();
   async function handlePreRequestData(page: number) {
     const data = await queryClient.fetchQuery(
-      meiliBookSearchQuery({
-        ...optionsWithPagingAndSort,
+      bookQueries.list({
         start: (page - 1) * EXTERNAL_PAGE_SIZE,
+        limit: EXTERNAL_PAGE_SIZE,
+        q: currentQuery.keyword ?? '',
+        tags: currentQuery.tags?.join(',') ?? '',
+        ...(currentQuery.nsfw ? {nsfw: true} : {}),
       }),
     );
     console.log('handlePreRequestData', data, page);
-    return data?.hits?.length;
+    return data?.books?.length;
   }
 
   useEffect(() => {
@@ -199,43 +169,11 @@ export const BookLibContainer: React.FC = () => {
 
   useEffect(() => {
     ref.current?.resetPaginationPageNumber();
-    console.log('searchOptions', searchOptions);
-  }, [searchOptions]);
+    console.log('currentQuery', currentQuery);
+  }, [currentQuery]);
 
-  const books: Book[] = useMemo(() => {
-    if (!data?.hits) return [];
-    // Map Meilisearch hits into a minimal BookDTO shape used by the list view
-    return (data.hits as MeiliBookHit[]).map(hit => {
-      const partial: Partial<BookDTO> = {
-        unitId: hit.id,
-        title: hit.title,
-        description: hit.description ?? undefined,
-        tags: hit.tags,
-        nsfw: hit.nsfw,
-        createdAt: hit.createdAt,
-        updatedAt: hit.updatedAt,
-      };
-
-      if (hit.authors?.length) {
-        partial.author = [
-          {
-            unitId: '',
-            slug: undefined,
-            name: hit.authors[0],
-            avatar: undefined,
-            bio: undefined,
-            description: undefined,
-            followersCount: undefined,
-            followingsCount: undefined,
-          },
-        ] as any;
-      }
-
-      return partial as Book;
-    });
-  }, [data]);
-
-  const totalItems: number = data?.totalHits ?? 0;
+  const books: Book[] = useMemo(() => data?.books ?? [], [data]);
+  const totalItems: number = data?.total ?? 0;
 
   const handleSortChange = (newSort: {
     type?: string;
@@ -248,12 +186,13 @@ export const BookLibContainer: React.FC = () => {
     }));
   };
 
-  const setSearchOptions = (
-    updater: (prev: BookQueryOptions) => BookQueryOptions,
-  ) => {
-    setSearchOptionsState(prev => updater(prev));
-  };
-
+  const [sortConfig, setSortConfig] = useState<{
+    type: BookLibSortKey;
+    order: 'asc' | 'desc';
+  }>({
+    type: 'time',
+    order: 'desc',
+  });
   return (
     <BookLibShowRef
       ref={ref}
@@ -261,8 +200,8 @@ export const BookLibContainer: React.FC = () => {
       totalItems={totalItems}
       isLoading={isLoading}
       error={error}
-      searchOptions={optionsWithPagingAndSort}
-      setSearchOptions={setSearchOptions}
+      currentQuery={currentQuery}
+      setCurrentQuery={setCurrentQuery}
       sortConfig={sortConfig}
       handleNeedMoreData={handleNeedMoreData}
       handlePreRequestData={handlePreRequestData}

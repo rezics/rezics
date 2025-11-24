@@ -1,11 +1,5 @@
-import {Alert, CircularProgress, Typography} from '@mui/material';
-import {
-  useCallback,
-  useEffect,
-  useImperativeHandle,
-  useMemo,
-  useState,
-} from 'react';
+import {Alert} from '@mui/material';
+import {useEffect, useImperativeHandle, useMemo, useState} from 'react';
 
 import {BookSearchContainer} from '@/component/BookLib/BookSearch/BookSearch';
 // import { CardBookList } from "@component/Book/CardBookList";
@@ -19,7 +13,7 @@ import {BookListViewContainer} from '@/component/BookLib/BookList/BookListView';
 
 import React, {forwardRef, useRef} from 'react';
 
-import {bookQueries} from '@/api/book/book';
+import {meiliQueries} from '@/api/meili/meili.queries';
 import {useQueryClient, useQuery} from '@tanstack/react-query';
 
 import type {BookDTO} from '@package/contract';
@@ -135,7 +129,7 @@ export const BookLibContainer: React.FC = () => {
   const [start, setStart] = useState<number>(0);
 
   const {data, isLoading, error} = useQuery(
-    bookQueries.list({
+    meiliQueries.booksSearch({
       start,
       limit: EXTERNAL_PAGE_SIZE,
       q: currentQuery.keyword ?? '',
@@ -151,7 +145,7 @@ export const BookLibContainer: React.FC = () => {
   const queryClient = useQueryClient();
   async function handlePreRequestData(page: number) {
     const data = await queryClient.fetchQuery(
-      bookQueries.list({
+      meiliQueries.booksSearch({
         start: (page - 1) * EXTERNAL_PAGE_SIZE,
         limit: EXTERNAL_PAGE_SIZE,
         q: currentQuery.keyword ?? '',
