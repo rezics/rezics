@@ -21,7 +21,7 @@ import {BookEditChapterListPage} from '@/page/BookEdit/ChapterListPage.tsx';
 
 // Review pages
 // import {ReviewsPage} from '@/page/Review/ReviewsPage';
-import {ReviewsPage} from '@/page/Review/ReviewsPage_2';
+import {ReviewsPage} from '@/page/Review/ReviewsPage';
 import {ReviewPage} from '@/page/Review/ReviewPage.tsx';
 import {ReviewNewPage} from '@/page/Review/ReviewNewPage.tsx';
 import {ReviewEditPageContainer} from '@/page/Review/ReviewEditPage.tsx';

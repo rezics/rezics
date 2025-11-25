@@ -7,10 +7,13 @@ import {
   type UniversalPaginatorHandle,
 } from '@/component/Common/Pagination.tsx';
 import {ReviewListContainer} from '@/component/Review/ReviewList';
-import {reviewQueries, remarkQueries} from '@/api/review/review.queries';
 import type {ReviewDTO} from '@package/contract';
 import {useSearchParams} from 'wouter';
 import {SimpleSearchInput} from '@/component/Search/SimpleSearchInput';
+import {
+  meiliUnitApi,
+  mapUnitListToReviewListResponse,
+} from '@/api/meili/meili.api';
 
 type Review = ReviewDTO;
 interface ReviewsPageProps {
@@ -36,23 +39,33 @@ export const ReviewsPage: React.FC<ReviewsPageProps> = ({bookUnitId}) => {
       }
     }
   }, [searchParams]);
-
-  const reviewListQueryOpts = useQuery(
-    reviewQueries.list({
-      bookId: bookUnitId,
-      start: startReview,
+  const buildMeiliUnitQuery = (kind: 'review' | 'remark', start: number) => {
+    const type = kind === 'review' ? 'REVIEW' : 'REMARK';
+    const filters = {
+      type,
+      targetUnitId: bookUnitId,
+      start,
       limit: EXTERNAL_PAGE_SIZE,
       q: keyword || undefined,
-    }),
+    };
+
+    return {
+      queryKey: ['meili-units', kind, bookUnitId, start, keyword],
+      queryFn: async () => {
+        const unitResp = await meiliUnitApi.unitSearch(filters);
+        return mapUnitListToReviewListResponse(unitResp);
+      },
+      enabled: !!bookUnitId,
+      staleTime: 1000 * 60 * 5,
+    } as const;
+  };
+
+  const reviewListQueryOpts = useQuery(
+    buildMeiliUnitQuery('review', startReview),
   );
 
   const remarkListQueryOpts = useQuery(
-    remarkQueries.list({
-      bookId: bookUnitId,
-      start: startRemark,
-      limit: EXTERNAL_PAGE_SIZE,
-      q: keyword || undefined,
-    }),
+    buildMeiliUnitQuery('remark', startRemark),
   );
 
   const {data: reviewData, isLoading: isLoadingReview} = reviewListQueryOpts;
@@ -68,24 +81,16 @@ export const ReviewsPage: React.FC<ReviewsPageProps> = ({bookUnitId}) => {
   }
 
   async function handlePreRequestData(page: number) {
-    const common = {
-      limit: EXTERNAL_PAGE_SIZE,
-      q: keyword || undefined,
-      bookId: bookUnitId,
-    };
-
-    const query =
-      tab === 'review'
-        ? reviewQueries.list({
-            ...common,
-            start: (page - 1) * EXTERNAL_PAGE_SIZE,
-          })
-        : remarkQueries.list({
-            ...common,
-            start: (page - 1) * EXTERNAL_PAGE_SIZE,
-          });
-
-    const nextData = await queryClient.fetchQuery(query);
+    const isReview = tab === 'review';
+    const start = (page - 1) * EXTERNAL_PAGE_SIZE;
+    const {queryKey, queryFn} = buildMeiliUnitQuery(
+      isReview ? 'review' : 'remark',
+      start,
+    );
+    const nextData = await queryClient.fetchQuery({
+      queryKey,
+      queryFn,
+    });
     return nextData?.reviews?.length ?? 0;
   }
 
