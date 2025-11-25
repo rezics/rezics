@@ -48,6 +48,7 @@ export async function initUnitIndex() {
   await unitIndex.updateSettings({
     searchableAttributes: ['title', 'content', 'tags'],
     filterableAttributes: [
+      'targetUnitId',
       'type',
       'status',
       'userId',

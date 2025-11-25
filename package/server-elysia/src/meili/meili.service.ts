@@ -12,7 +12,6 @@ import {
   deleteKey,
   initUnitIndex,
   syncAllUnits,
-  syncAllUnitsOld,
 } from '@package/search/src/index';
 
 /**
@@ -63,13 +62,6 @@ export class MeiliService {
    */
   async syncAllUnits(): Promise<unknown> {
     return syncAllUnits();
-  }
-
-  /**
-   * Trigger a full re-sync of all units into Meilisearch.
-   */
-  async syncAllUnitsOld(): Promise<unknown> {
-    return syncAllUnitsOld();
   }
 
   /**

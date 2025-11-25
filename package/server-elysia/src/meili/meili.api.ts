@@ -155,21 +155,6 @@ export const meiliApi = coreInstance('/meili')
     },
   )
 
-  .post(
-    '/units/syncAllUnits',
-    async () => {
-      const task = await meiliService.syncAllUnitsOld();
-      return {task};
-      return {message: 'all units synced'};
-    },
-    {
-      detail: {
-        summary: 'Sync all units to Meilisearch (old)',
-        tags: ['Meili', 'Admin'],
-      },
-    },
-  )
-
   .get(
     '/units/deleteAllUnits',
     async () => {

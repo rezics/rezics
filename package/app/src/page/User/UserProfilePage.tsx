@@ -149,9 +149,7 @@ export const UserProfilePage: FC<UserProfilePageProps> = ({
               <Typography variant="subtitle1" className="font-semibold mb-2">
                 Bio
               </Typography>
-              <Typography variant="body1" className="text-gray-700">
-                {user.bio}
-              </Typography>
+              <Typography variant="body1">{user.bio}</Typography>
             </Box>
           )}
           {!user.bio && (

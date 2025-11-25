@@ -60,7 +60,8 @@ export async function syncAllUnits() {
   const BATCH_SIZE = 5000;
 
   // Step 1: 清空索引（你自己现有的函数）
-  // const deleteResult = await deleteAllUnits();
+  const deleteResult = await deleteAllUnits();
+  console.log('sync all units, deleteResult', deleteResult);
 
   let cursor: string | undefined = undefined;
   let total = 0;
@@ -95,8 +96,8 @@ export async function syncAllUnits() {
       status: u.status ?? '',
       userId: u.userId ?? '',
       domainIds: u.domains ? u.domains.map((d: any) => d.id) : [],
-      // targetUnitId: u.targetUnitId,
-      // hasTarget: u.targetUnitId !== null,
+      targetUnitId: u.targetUnitId,
+      hasTarget: u.targetUnitId !== null,
       nsfw: u.nsfw,
       createdAt: u.createdAt,
       updatedAt: u.updatedAt,
@@ -120,48 +121,4 @@ export async function syncAllUnits() {
     message: 'sync all units success',
     totalSynced: total,
   };
-}
-
-// ANCHOR: Units sync
-export async function syncAllUnitsOld() {
-  const units = await prisma.unit.findMany({
-    take: 1000,
-    include: {
-      user: true,
-      tags: true,
-      reactionSummaries: true,
-      domains: {
-        select: {id: true},
-      },
-    },
-  });
-
-  const formatted = units.map(u => ({
-    id: u.id,
-    // search fields
-    title: u.title,
-    content: u.content,
-    tags: u.tags.map(t => t.name),
-    type: u.type,
-    status: u.status,
-    userId: u.userId,
-    domainIds: u.domains.map(d => d.id),
-    targetUnitId: u.targetUnitId,
-    hasTarget: u.targetUnitId !== null,
-    nsfw: u.nsfw,
-    createdAt: u.createdAt,
-    updatedAt: u.updatedAt,
-    publishedAt: u.publishedAt,
-    // result fields
-    unitId: u.id,
-    user: u.user,
-    metadata: u.metadata,
-    tagObjects: u.tags,
-    reactionSummaries: u.reactionSummaries,
-  }));
-
-  const deleteResult = await deleteAllUnits();
-  const addResult = await addOrUpdateUnits(formatted);
-  const result = {deleteResult, addResult};
-  return {message: 'sync all units success', result};
 }
