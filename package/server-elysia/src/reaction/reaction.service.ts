@@ -42,12 +42,10 @@ export class ReactionService {
    *   getSummary([id1, id2]) -> Record<targetId, Record<reaction, count>>
    */
   async getSummary(targetId: string): Promise<Record<string, number>>;
-  async getSummary(
-    targetIds: string[],
-  ): Promise<Record<string, Record<string, number>>>;
+  async getSummary(targetIds: string[]): Promise<ReactionSummary[]>;
   async getSummary(
     target: string | string[],
-  ): Promise<Record<string, number> | Record<string, Record<string, number>>> {
+  ): Promise<ReactionSummary[] | Record<string, number>> {
     // Multi-target aggregated mode
     if (Array.isArray(target)) {
       if (!target.length) return {};
@@ -61,18 +59,7 @@ export class ReactionService {
       for (const id of target) {
         byTarget[id] = {};
       }
-      for (const row of rows) {
-        if (!byTarget[row.targetId]) {
-          byTarget[row.targetId] = {};
-        }
-        if (
-          byTarget[row.targetId] &&
-          byTarget[row.targetId]!.hasOwnProperty(row.reaction)
-        ) {
-          byTarget[row.targetId]![row.reaction] = row.count;
-        }
-      }
-      return byTarget;
+      return rows;
     }
 
     // Single-target mode (backward compatible)

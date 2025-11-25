@@ -19,6 +19,7 @@ import {
   mapUnitListToReadlistListResponse,
 } from '@/api/meili/meili.api';
 import type {ReadlistDTO} from '@package/contract';
+import {reactionApi} from '@/api/reaction/reaction.api';
 
 type Readlist = ReadlistDTO;
 
@@ -205,7 +206,56 @@ export function ReadListsPage() {
     console.log('currentQuery', currentQuery);
   }, [currentQuery]);
 
-  const readlists: Readlist[] = useMemo(() => data?.readlists ?? [], [data]);
+  const baseReadlists: Readlist[] = useMemo(
+    () => data?.readlists ?? [],
+    [data],
+  );
+
+  const currentTargetIds = useMemo(
+    () => baseReadlists.map(r => r.id).filter(Boolean),
+    [baseReadlists],
+  );
+
+  const {data: reactionSummaryBatch} = useQuery({
+    queryKey: ['reaction-summary-batch', 'readlists', currentTargetIds],
+    queryFn: () => reactionApi.summaryBatch(currentTargetIds as string[]),
+    enabled: currentTargetIds.length > 0,
+    staleTime: 1000 * 60 * 2,
+  });
+
+  const [readlists, setReadlists] = useState<Readlist[]>([]);
+
+  useEffect(() => {
+    if (!baseReadlists || baseReadlists.length === 0) {
+      setReadlists([]);
+      return;
+    }
+
+    if (!reactionSummaryBatch) {
+      setReadlists(baseReadlists);
+      return;
+    }
+
+    const merged = baseReadlists.map(item => {
+      const summaryMap = reactionSummaryBatch.summaries[item.id];
+      if (!summaryMap) return item;
+
+      const reactionSummaries = Object.entries(summaryMap).map(
+        ([reaction, count]) => ({
+          reaction,
+          count,
+        }),
+      );
+
+      return {
+        ...item,
+        reactionSummaries,
+      };
+    });
+
+    setReadlists(merged);
+  }, [baseReadlists, reactionSummaryBatch]);
+
   const totalItems: number = data?.total ?? 0;
 
   const [sortConfig, setSortConfig] = useState<{

@@ -14,6 +14,7 @@ import {
   meiliUnitApi,
   mapUnitListToReviewListResponse,
 } from '@/api/meili/meili.api';
+import {reactionApi} from '@/api/reaction/reaction.api';
 
 type Review = ReviewDTO;
 interface ReviewsPageProps {
@@ -101,10 +102,59 @@ export const ReviewsPage: React.FC<ReviewsPageProps> = ({bookUnitId}) => {
 
   const activeData = tab === 'review' ? reviewData : remarkData;
   const isLoading = tab === 'review' ? isLoadingReview : isLoadingRemark;
-  const reviews: Review[] = useMemo(
+  const baseReviews: Review[] = useMemo(
     () => activeData?.reviews ?? [],
     [activeData],
   );
+
+  // Collect current visible review unitIds for reaction summary batch query
+  const currentTargetIds = useMemo(
+    () => baseReviews.map(r => r.unitId).filter(Boolean),
+    [baseReviews],
+  );
+
+  const {data: reactionSummaryBatch} = useQuery({
+    queryKey: ['reaction-summary-batch', tab, bookUnitId, currentTargetIds],
+    queryFn: () => reactionApi.summaryBatch(currentTargetIds as string[]),
+    enabled: currentTargetIds.length > 0,
+    staleTime: 1000 * 60 * 2,
+  });
+
+  const [reviews, setReviews] = useState<Review[]>([]);
+
+  // Merge Meili review list data with accurate reaction summaries
+  useEffect(() => {
+    if (!baseReviews || baseReviews.length === 0) {
+      setReviews([]);
+      return;
+    }
+
+    if (!reactionSummaryBatch) {
+      // Fallback: just use Meili data if batch summary not loaded yet
+      setReviews(baseReviews);
+      return;
+    }
+
+    const merged = baseReviews.map(review => {
+      const summaryMap = reactionSummaryBatch.summaries[review.unitId];
+      if (!summaryMap) return review;
+
+      const reactionSummaries = Object.entries(summaryMap).map(
+        ([reaction, count]) => ({
+          reaction,
+          count,
+        }),
+      );
+
+      return {
+        ...review,
+        reactionSummaries,
+      };
+    });
+
+    setReviews(merged);
+  }, [baseReviews, reactionSummaryBatch]);
+
   const totalItems: number = activeData?.total ?? 10000;
 
   return (

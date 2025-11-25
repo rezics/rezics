@@ -4,6 +4,12 @@
 
 import type {ReactionListQuery} from '@package/contract';
 
+export type ReactionSummary = {
+  targetId: string;
+  reaction: string;
+  count: number;
+};
+
 /**
  * Data Transfer Object for a single reaction row
  */

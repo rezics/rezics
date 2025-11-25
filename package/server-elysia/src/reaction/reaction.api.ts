@@ -2,7 +2,7 @@ import {t} from 'elysia';
 import {coreInstance} from '../core';
 import {verifyAuth} from '@/src/utils/authUtils';
 import {reactionService} from './reaction.service';
-import {prisma} from '@/prisma/client';
+import {prisma, type ReactionSummary} from '@/prisma/client';
 
 import {
   listQuerySchema,
@@ -73,7 +73,7 @@ export const reactionApi = coreInstance('/reactions')
         summaries,
       } as {
         targetIds: string[];
-        summaries: Record<string, Record<string, number>>;
+        summaries: ReactionSummary[];
       };
     },
     {

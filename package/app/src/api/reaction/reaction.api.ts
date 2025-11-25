@@ -17,7 +17,25 @@ import type {
   ReactionMyResponse,
   BookmarkTagsResponse,
   BookmarkTagsUpdateInput,
+  ReactionSummary,
 } from './reaction.types.ts';
+
+function transformReactionSummaryResponse(response: {
+  targetIds: string[];
+  summaries: ReactionSummary[];
+}): ReactionMultiSummaryResponse {
+  const summaries: Record<string, Record<string, number>> = {};
+  response.summaries.forEach(summary => {
+    if (!summaries[summary.targetId]) {
+      summaries[summary.targetId] = {};
+    }
+    summaries[summary.targetId][summary.reaction] = summary.count;
+  });
+  return {
+    targetIds: response.targetIds,
+    summaries,
+  };
+}
 
 /**
  * Reaction API methods
@@ -59,9 +77,11 @@ export const reactionApi = {
     const qs = new URLSearchParams();
     targetIds.forEach(id => qs.append('targetIds', id));
     const queryString = qs.toString();
-    return apiFetch<ReactionMultiSummaryResponse>(
-      `/reactions/summary${queryString ? `?${queryString}` : ''}`,
-    );
+    const response = await apiFetch<{
+      targetIds: string[];
+      summaries: ReactionSummary[];
+    }>(`/reactions/summary${queryString ? `?${queryString}` : ''}`);
+    return transformReactionSummaryResponse(response);
   },
 
   /**
