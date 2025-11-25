@@ -230,6 +230,48 @@ export const userApi = coreInstance('/users')
     },
   )
 
+  .get(
+    '/follow/summary',
+    async ({headers, jwt, query, set}) => {
+      await verifyAuth(headers.authorization, jwt, set);
+      const {targetIds} = query;
+
+      let ids: string[] = [];
+      if (targetIds) {
+        ids = Array.isArray(targetIds) ? targetIds : [targetIds];
+      }
+
+      if (!ids.length) {
+        return {
+          targetIds: [],
+          followers: {},
+        } as {
+          targetIds: string[];
+          followers: Record<string, number>;
+        };
+      }
+
+      const followers = await userService.getFollowSummary(ids);
+      return {
+        targetIds: ids,
+        followers,
+      } as {
+        targetIds: string[];
+        followers: Record<string, number>;
+      };
+    },
+    {
+      query: t.Object({
+        targetIds: t.Optional(t.Union([t.String(), t.Array(t.String())])),
+      }),
+      detail: {
+        summary: 'Get follow summary',
+        description: 'Get follower counts for one or many target users',
+        tags: ['Users', 'Follow'],
+      },
+    },
+  )
+
   /**
    * Get followers of a user
    * GET /users/:unitId/followers

@@ -33,10 +33,51 @@ export class ReactionService {
     ]);
     return {reactions: rows, total};
   }
+  /**
+   * Get aggregated reaction counts.
+   *
+   * - Single-target mode (backward compatible):
+   *   getSummary(targetId) -> Record<reaction, count>
+   * - Multi-target mode:
+   *   getSummary([id1, id2]) -> Record<targetId, Record<reaction, count>>
+   */
+  async getSummary(targetId: string): Promise<Record<string, number>>;
+  async getSummary(
+    targetIds: string[],
+  ): Promise<Record<string, Record<string, number>>>;
+  async getSummary(
+    target: string | string[],
+  ): Promise<Record<string, number> | Record<string, Record<string, number>>> {
+    // Multi-target aggregated mode
+    if (Array.isArray(target)) {
+      if (!target.length) return {};
 
-  async getSummary(targetId: string): Promise<Record<string, number>> {
+      const rows = await prisma.reactionSummary.findMany({
+        where: {targetId: {in: target}},
+      });
+
+      const byTarget: Record<string, Record<string, number>> = {};
+      // Ensure all requested ids exist in the result map
+      for (const id of target) {
+        byTarget[id] = {};
+      }
+      for (const row of rows) {
+        if (!byTarget[row.targetId]) {
+          byTarget[row.targetId] = {};
+        }
+        if (
+          byTarget[row.targetId] &&
+          byTarget[row.targetId]!.hasOwnProperty(row.reaction)
+        ) {
+          byTarget[row.targetId]![row.reaction] = row.count;
+        }
+      }
+      return byTarget;
+    }
+
+    // Single-target mode (backward compatible)
     const rows = await prisma.reactionSummary.findMany({
-      where: {targetId},
+      where: {targetId: target},
     });
     const result: Record<string, number> = {};
     for (const r of rows) result[r.reaction] = r.count;

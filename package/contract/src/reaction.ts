@@ -25,7 +25,18 @@ export const deleteQuerySchema = t.Object({
 });
 
 export const summaryQuerySchema = t.Object({
-  targetId: t.String(),
+  /**
+   * Backward-compatible single-target query param.
+   */
+  targetId: t.Optional(t.String()),
+  /**
+   * New multi-target query param.
+   *
+   * Usage examples:
+   * - /reactions/summary?targetIds=foo
+   * - /reactions/summary?targetIds=foo&targetIds=bar
+   */
+  targetIds: t.Optional(t.Union([t.String(), t.Array(t.String())])),
 });
 
 /**

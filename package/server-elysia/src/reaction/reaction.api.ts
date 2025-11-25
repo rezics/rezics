@@ -31,19 +31,57 @@ export const reactionApi = coreInstance('/reactions')
     },
   )
 
-  // Get summary counts for a target
+  // Get summary counts for one or many targets
   .get(
     '/summary',
     async ({query}) => {
-      const {targetId} = query;
-      const summary = await reactionService.getSummary(targetId);
-      return {targetId, summary};
+      const {targetId, targetIds} = query as {
+        targetId?: string;
+        targetIds?: string | string[];
+      };
+
+      // Normalize to array of ids
+      let ids: string[] = [];
+      if (targetIds) {
+        ids = Array.isArray(targetIds) ? targetIds : [targetIds];
+      }
+      if (!ids.length && targetId) {
+        ids = [targetId];
+      }
+
+      // No ids provided – return empty structure
+      if (!ids.length) {
+        return {
+          targetIds: [],
+          summaries: {},
+        } as {
+          targetIds: string[];
+          summaries: Record<string, Record<string, number>>;
+        };
+      }
+
+      // Backward-compatible single-target response when only `targetId` is used
+      if (!targetIds && targetId && ids.length === 1) {
+        const summary = await reactionService.getSummary(targetId);
+        return {targetId, summary};
+      }
+
+      // Multi-target summary response
+      const summaries = await reactionService.getSummary(ids);
+      return {
+        targetIds: ids,
+        summaries,
+      } as {
+        targetIds: string[];
+        summaries: Record<string, Record<string, number>>;
+      };
     },
     {
       query: summaryQuerySchema,
       detail: {
         summary: 'Get reaction summary',
-        description: 'Get aggregated counts per reaction for a target',
+        description:
+          'Get aggregated counts per reaction for one or many targets',
         tags: ['Reactions'],
       },
     },

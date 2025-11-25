@@ -325,6 +325,37 @@ export class UserService {
   }
 
   /**
+   * Get follower counts summary for multiple targets.
+   *
+   * Returns a map: { [targetId]: followersCount }
+   * Missing users default to 0.
+   */
+  async getFollowSummary(targetIds: string[]): Promise<Record<string, number>> {
+    if (!targetIds.length) return {};
+
+    const users = await prisma.user.findMany({
+      where: {
+        unitId: {in: targetIds},
+      },
+      select: {
+        unitId: true,
+        followersCount: true,
+      },
+    });
+
+    const result: Record<string, number> = {};
+    // Initialize all requested ids to 0 for deterministic keys
+    targetIds.forEach(id => {
+      result[id] = 0;
+    });
+    users.forEach(user => {
+      result[user.unitId] = user.followersCount ?? 0;
+    });
+
+    return result;
+  }
+
+  /**
    * List followers
    */
   async getFollowers(
