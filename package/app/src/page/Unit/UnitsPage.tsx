@@ -92,7 +92,7 @@ interface UnitsPageProps {
 export const UnitsPage: React.FC<UnitsPageProps> = ({
   mode = 'tab',
   type,
-  types = ['REVIEW', 'REMARK', 'QUOTE', 'BOOK'],
+  types = ['UNIT', 'REVIEW', 'REMARK', 'QUOTE', 'BOOK'],
   userId,
   targetUnitId,
   children = defaultChildren,
@@ -146,7 +146,7 @@ export const UnitsPage: React.FC<UnitsPageProps> = ({
   }
 
   const {queryKey, queryFn} = buildMeiliUnitQuery(
-    tab as keyof typeof UnitType,
+    tab === 'UNIT' ? undefined : (tab as keyof typeof UnitType),
     startMap[tab] ?? 0,
     targetUnitId ?? '',
     keyword,

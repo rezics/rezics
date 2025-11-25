@@ -1,10 +1,9 @@
-import React, {useEffect, useMemo, useState} from 'react';
+import React, {useMemo, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import {Search} from '@/component/Search';
 import type {SearchInfo} from '@/component/Search/searchParser';
 import type {BookQueryOptions} from '@package/contract/src/search';
 import {bookQueryOptionsSchema} from '@package/contract/src/search';
-import {toBookQueryString} from '@package/contract/src/search';
 
 export type BookSortType =
   | 'relevance'
@@ -26,35 +25,38 @@ export const BookSearchContainer: React.FC<BookSearchContainerProps> = ({
   defaultValue,
 }) => {
   const {t} = useTranslation();
-  const [sort, setSort] = useState<{
+  const [sort, _setSort] = useState<{
     type?: BookSortType;
     order?: 'asc' | 'desc';
   }>({order: 'desc'});
 
-  const tagGroups = useMemo(
-    () => ({
-      presetTags: [
-        'fiction',
-        'nonfiction',
-        'mystery',
-        'romance',
-        'history',
-        'science',
-        'fantasy',
-        'philosophy',
-      ],
-      statusTags: [
-        '10万字',
-        '20万字',
-        '50万字',
-        '100万字',
-        '200万字',
-        '连载中',
-        '已完结',
-      ],
-    }),
-    [],
-  );
+  // TODO 实际上应该由 echokv 提供data
+  // const tagGroups = useMemo(
+  //   () => ({
+  //     presetTags: [
+  //       'fiction',
+  //       'nonfiction',
+  //       'mystery',
+  //       'romance',
+  //       'history',
+  //       'science',
+  //       'fantasy',
+  //       'philosophy',
+  //     ],
+  //     statusTags: [
+  //       '10万字',
+  //       '20万字',
+  //       '50万字',
+  //       '100万字',
+  //       '200万字',
+  //       '连载中',
+  //       '已完结',
+  //     ],
+  //   }),
+  //   [],
+  // );
+
+  const tagGroups = useMemo(() => ({}), []);
 
   const handleSearch = (info: SearchInfo) => {
     const options: BookQueryOptions = {

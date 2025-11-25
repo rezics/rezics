@@ -7,6 +7,7 @@ import {meiliBookApi} from './meili.api';
 import {type BookFilters} from '../book/book.types';
 import {meiliUnitApi} from './meili.api';
 import type {UnitListResponse, UnitType} from '@package/contract/src/unit';
+import {hashFn} from '../utils/hash';
 
 export const meiliBookSearchQuery = (filters?: BookFilters) =>
   queryOptions({
@@ -21,7 +22,7 @@ export const meiliQueries = {
 };
 
 export const buildMeiliUnitQuery = (
-  kind: keyof typeof UnitType,
+  kind: undefined | keyof typeof UnitType,
   start: number,
   targetUnitId: string,
   keyword: string,
@@ -38,7 +39,14 @@ export const buildMeiliUnitQuery = (
   };
 
   return {
-    queryKey: ['meili-units', kind, targetUnitId, start, keyword],
+    queryKey: [
+      'meili-units',
+      kind,
+      targetUnitId,
+      start,
+      keyword,
+      hashFn(mapFn),
+    ],
     queryFn: async () => {
       const unitResp = await meiliUnitApi.unitSearch(filters);
       return mapFn(unitResp);

@@ -80,6 +80,7 @@ export const SearchInputShow: React.FC<SearchInputShowProps> = ({
           size="small"
           label={'Tags'}
           placeholder="Click tags below or enter tags separated by commas"
+          className="max-w-xl"
           value={
             value.tags
               ? value.tags.filter(tag => tag.trim() !== '').join(', ')
@@ -90,7 +91,8 @@ export const SearchInputShow: React.FC<SearchInputShowProps> = ({
           }
           onKeyDown={handleKeyDown}
         />
-        <TextField
+        {/* TODO: add word count search support */}
+        {/* <TextField
           fullWidth
           size="small"
           label={'Word Count'}
@@ -100,16 +102,20 @@ export const SearchInputShow: React.FC<SearchInputShowProps> = ({
             onValueChange({...value, wordCount: parseInt(e.target.value)})
           }
           onKeyDown={handleKeyDown}
-        />
-        <FormControlLabel
-          control={
-            <Checkbox
-              checked={!!value.nsfw}
-              onChange={e => onValueChange({...value, nsfw: e.target.checked})}
-            />
-          }
-          label={<NSFWInfo />}
-        />
+        /> */}
+        <div className="ml-auto">
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={!!value.nsfw}
+                onChange={e =>
+                  onValueChange({...value, nsfw: e.target.checked})
+                }
+              />
+            }
+            label={<NSFWInfo />}
+          />
+        </div>
       </div>
       {/* <div className="flex items-center gap-2 mt-4">
         <TextField
@@ -177,6 +183,7 @@ export const SearchInputContainer: React.FC<SearchInputContainerProps> = ({
       setValue(currentSearch);
       onSearch(currentSearch);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams, location]);
 
   const handleSearch = () => {
