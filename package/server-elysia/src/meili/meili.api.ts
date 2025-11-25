@@ -40,14 +40,14 @@ export const meiliApi = coreInstance('/meili')
    *
    * GET /meili/books/search
    */
-  .get(
+  .post(
     '/books/search',
-    async ({query}) => {
-      const options = query as BookQueryOptions;
+    async ({body}) => {
+      const options = body as BookQueryOptions;
       return meiliService.searchBooks(options);
     },
     {
-      query: bookQueryOptionsSchema,
+      body: bookQueryOptionsSchema,
       detail: {
         summary: 'Search books (Meilisearch)',
         description:

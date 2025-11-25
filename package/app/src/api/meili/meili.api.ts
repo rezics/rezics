@@ -25,9 +25,10 @@ export const meiliBookApi = {
    * The backend expects a `BookQueryOptions` object encoded in the query string.
    */
   bookSearch: async (filters?: BookFilters): Promise<BookListResponse> => {
-    return apiFetch<BookListResponse>(
-      `/meili/books/search${buildQueryString(filters)}`,
-    );
+    return apiFetch<BookListResponse>(`/meili/books/search`, {
+      method: 'POST',
+      body: JSON.stringify(filters),
+    });
   },
 };
 

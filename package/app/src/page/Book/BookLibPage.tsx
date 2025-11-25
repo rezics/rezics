@@ -131,8 +131,8 @@ export const BookLibContainer: React.FC = () => {
     meiliQueries.booksSearch({
       start,
       limit: EXTERNAL_PAGE_SIZE,
-      q: currentQuery.keyword ?? '',
-      tags: currentQuery.tags?.join(',') ?? '',
+      keyword: currentQuery.keyword ?? '',
+      tags: currentQuery.tags ?? [],
       ...(currentQuery.nsfw ? {nsfw: true} : {}),
     }),
   );
@@ -147,8 +147,8 @@ export const BookLibContainer: React.FC = () => {
       meiliQueries.booksSearch({
         start: (page - 1) * EXTERNAL_PAGE_SIZE,
         limit: EXTERNAL_PAGE_SIZE,
-        q: currentQuery.keyword ?? '',
-        tags: currentQuery.tags?.join(',') ?? '',
+        keyword: currentQuery.keyword ?? '',
+        tags: currentQuery.tags ?? [],
         ...(currentQuery.nsfw ? {nsfw: true} : {}),
       }),
     );

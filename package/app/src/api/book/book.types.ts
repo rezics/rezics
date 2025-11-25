@@ -7,6 +7,7 @@ import type {
   CreateBookInput,
   UpdateBookInput,
   BookListQuery,
+  BookQueryOptions,
 } from '@package/contract';
 
 // Re-export contract types
@@ -17,7 +18,7 @@ export type {BookDTO, CreateBookInput, UpdateBookInput, BookListQuery};
  */
 export type BookFormData = Omit<CreateBookInput, 'userId'>;
 
-export type BookFilters = Partial<BookListQuery>;
+export type BookFilters = Partial<BookQueryOptions>;
 
 export type BookSortOption = 'title' | 'createdAt' | 'updatedAt';
 
