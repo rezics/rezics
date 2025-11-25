@@ -7,6 +7,10 @@ import {RegisterPage} from '@/page/Auth/RegisterPage.tsx';
 import {HomeContainer} from '@/page/Home.tsx';
 import {NotFoundContainer} from '@/page/NotFound.tsx';
 
+// Book
+import {BookLibContainer} from '@/page/Book/BookLibPage';
+import {BookPageContainer} from '@/page/Book/BookPage.tsx';
+
 // Book – Read
 import {BookReadLayout} from '@/layout/BookReadLayout.tsx';
 import {BookReadChapterPage} from '@/page/Book/ChapterPage.tsx';
@@ -20,7 +24,6 @@ import {NewBookPage} from '@/page/BookEdit/NewBookPage.tsx';
 import {BookEditChapterListPage} from '@/page/BookEdit/ChapterListPage.tsx';
 
 // Review pages
-// import {ReviewsPage} from '@/page/Review/ReviewsPage';
 import {ReviewsPage} from '@/page/Review/ReviewsPage';
 import {ReviewPage} from '@/page/Review/ReviewPage.tsx';
 import {ReviewNewPage} from '@/page/Review/ReviewNewPage.tsx';
@@ -28,17 +31,13 @@ import {ReviewEditPageContainer} from '@/page/Review/ReviewEditPage.tsx';
 import {QuoteByBookPage} from '@/page/Review/QuoteByBookPage.tsx';
 import {QuotePage} from '@/page/Review/QuotePage.tsx';
 
-// Library pages
-import {BookLibContainer} from '@/page/Book/BookLibPage';
-// import {BookLibContainer} from '@/page/Book/BookLibPage';
-import {BookPageContainer} from '@/page/Book/BookPage.tsx';
-
 // ReadList pages
 import {ReadListPage} from '@/page/ReadList/ReadListPage.tsx';
 import {ReadListsPage} from '@/page/ReadList/ReadListsPage';
 
 // Unit pages
 import {UnitsPage} from '@/page/Unit/UnitsPage.tsx';
+import {UnitPage} from '@/page/Unit/UnitPage.tsx';
 
 // Tag pages
 import {TagByBookPage, TagByBookFullPage} from '@/page/Tag/TagByUnitPage';
@@ -56,12 +55,9 @@ import {ReadListEditPage} from '@/page/ReadList/ReadListEditPage.tsx';
 import {NewReadListPage} from '@/page/ReadList/NewReadListPage.tsx';
 import {ReadlistByBookPage} from '@/page/ReadList/ReadListsByBookPage.tsx';
 import {ReviewByBookPage} from '@/page/Review/ReviewByBookPage.tsx';
-// import {ShortReviewByBookPage} from '@/page/Review/ShortReviewByBookPage.tsx';
 import TestPage from '@/page/Test/TestPage.tsx';
 import {TestPage02} from '@/page/Test/TestPage02.tsx';
 import {TestPage03} from '@/page/Test/TestPage03.tsx';
-// import TestPaginationPage from "@/page/Test/TestPaginationPage.tsx";
-// import {NewBookPage} from '@/page/BookEdit/NewBookPage.tsx';
 import {UserPage} from '@/page/User/UserPage.tsx';
 import {NoticePage} from '@/page/Misc/Notice.tsx';
 import {ReactionInfoPage} from '@/page/User/ReactionInfoPage.tsx';
@@ -91,7 +87,21 @@ export default (
           </MainLayout>
         </Route>
 
-        {/* ANCHOR Book Read – keep the more specific path first */}
+        {/* ANCHOR Book */}
+        <Route path="/book">
+          <MainLayout>
+            <BookLibContainer />
+          </MainLayout>
+        </Route>
+        <Route path="/book/:bookId">
+          {({bookId}) => (
+            <MainLayout>
+              <BookPageContainer bookId={bookId} />
+            </MainLayout>
+          )}
+        </Route>
+
+        {/* ANCHOR Book Read*/}
         <Route path="/book/:bookId/read/:chapterId">
           {({bookId, chapterId}) => (
             <BookReadLayout bookId={bookId} chapterId={chapterId}>
@@ -105,6 +115,13 @@ export default (
           <MainLayout>
             <NewBookPage />
           </MainLayout>
+        </Route>
+        <Route path="/book/:bookId/edit">
+          {({bookId}) => (
+            <BookEditLayout bookId={bookId}>
+              <BookEditMainPage bookId={bookId} />
+            </BookEditLayout>
+          )}
         </Route>
         <Route path="/book/:bookId/edit/chapter/">
           {({bookId}) => (
@@ -125,27 +142,6 @@ export default (
             <BookEditLayout bookId={bookId}>
               <BookEditTagPage bookId={bookId} />
             </BookEditLayout>
-          )}
-        </Route>
-        <Route path="/book/:bookId/edit">
-          {({bookId}) => (
-            <BookEditLayout bookId={bookId}>
-              <BookEditMainPage bookId={bookId} />
-            </BookEditLayout>
-          )}
-        </Route>
-
-        {/* ANCHOR Book Info Routes */}
-        <Route path="/book">
-          <MainLayout>
-            <BookLibContainer />
-          </MainLayout>
-        </Route>
-        <Route path="/book/:bookId">
-          {({bookId}) => (
-            <MainLayout>
-              <BookPageContainer bookId={bookId} />
-            </MainLayout>
           )}
         </Route>
 
@@ -254,6 +250,13 @@ export default (
           <MainLayout>
             <UnitsPage />
           </MainLayout>
+        </Route>
+        <Route path="/unit/:unitId">
+          {({unitId}) => (
+            <MainLayout>
+              <UnitPage unitId={unitId} />
+            </MainLayout>
+          )}
         </Route>
 
         {/* ANCHOR Tag Routes */}

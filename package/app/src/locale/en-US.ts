@@ -45,6 +45,17 @@ export default {
     },
   },
 
+  // ANCHOR User
+  user: {
+    open_profile: 'Open Profile',
+  },
+
+  // ANCHOR Unit
+  unit: {
+    no_content: 'No content',
+    no_metadata: 'No metadata',
+  },
+
   // Book
   book: {
     description: 'Description',
@@ -59,6 +70,8 @@ export default {
 
   // Common UI Elements
   common: {
+    created_at: 'Created at',
+    updated_at: 'Updated at',
     email: 'Email',
     password: 'Password',
     confirm: 'Confirm Password',
@@ -81,10 +94,12 @@ export default {
     reply: 'Reply',
     close: 'Close',
     open: 'Open',
+    no_data: 'No data',
   },
 
   // Pages
   pages: {
+    unit_page: 'Unit Page',
     not_found: 'Page Not Found',
     book_tag_edit: 'Book Tag Edit',
     book_description_edit: 'Book Description Edit',
