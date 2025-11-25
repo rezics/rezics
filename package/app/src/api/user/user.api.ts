@@ -10,6 +10,11 @@ import type {
 } from '@package/contract';
 import {apiFetch} from '../react-query/http';
 
+type FollowSummaryResponse = {
+  targetIds: string[];
+  followers: Record<string, number>;
+};
+
 export const userApi = {
   register: async (
     input: CreateUserInput,
@@ -87,6 +92,16 @@ export const userApi = {
     const qs = new URLSearchParams();
     targetIds.forEach(id => qs.append('targetIds', id));
     return apiFetch(`/users/follow/status?${qs.toString()}`);
+  },
+
+  getFollowSummary: async (
+    targetIds: string[],
+  ): Promise<FollowSummaryResponse> => {
+    const qs = new URLSearchParams();
+    targetIds.forEach(id => qs.append('targetIds', id));
+    return apiFetch<FollowSummaryResponse>(
+      `/users/follow/summary?${qs.toString()}`,
+    );
   },
 
   getFollowers: async (

@@ -9,6 +9,7 @@ import {apiFetch} from '../react-query/http';
 import type {
   ReactionDTO,
   ReactionListResponse,
+  ReactionMultiSummaryResponse,
   ReactionCreateInput,
   ReactionUpdateInput,
   ReactionDeleteQuery,
@@ -43,6 +44,23 @@ export const reactionApi = {
   summary: async (targetId: string): Promise<ReactionSummaryResponse> => {
     return apiFetch<ReactionSummaryResponse>(
       `/reactions/summary${buildQueryString({targetId})}`,
+    );
+  },
+
+  /**
+   * Get summary counts by reaction for many targets
+   *
+   * @param {string[]} targetIds - Array of target entity ids (UUID)
+   * @returns {Promise<ReactionMultiSummaryResponse>} Aggregated counts per reaction, keyed by targetId
+   */
+  summaryBatch: async (
+    targetIds: string[],
+  ): Promise<ReactionMultiSummaryResponse> => {
+    const qs = new URLSearchParams();
+    targetIds.forEach(id => qs.append('targetIds', id));
+    const queryString = qs.toString();
+    return apiFetch<ReactionMultiSummaryResponse>(
+      `/reactions/summary${queryString ? `?${queryString}` : ''}`,
     );
   },
 

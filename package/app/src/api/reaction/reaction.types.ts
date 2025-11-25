@@ -57,6 +57,14 @@ export type ReactionSummaryResponse = {
 };
 
 /**
+ * Response for summary counts per reaction for many targets
+ */
+export type ReactionMultiSummaryResponse = {
+  targetIds: string[];
+  summaries: Record<string, Record<string, number>>;
+};
+
+/**
  * Response for current user's reactions on a target
  */
 export type ReactionMyResponse = {
