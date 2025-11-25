@@ -3,7 +3,7 @@ import {useQuery} from '@tanstack/react-query';
 import {reactionQueries} from '@/api/reaction/reaction';
 import {useAlertStore} from '@/global/windowAlertStore';
 import {useSetBookmarkTagsMutation} from '@/api/reaction/reaction.mutations';
-import {Typography, TextField, Chip, Button} from '@mui/material';
+import {Typography, TextField, Chip, Button, Paper} from '@mui/material';
 
 type UserBookmarkTagsCardProps = {
   userId: string;
@@ -62,15 +62,22 @@ export const UserBookmarkTagsCard: React.FC<UserBookmarkTagsCardProps> = ({
   };
 
   return (
-    <div className="flex items-start justify-between border rounded-md px-3 py-2 bg-white shadow-sm mb-3">
+    <Paper
+      elevation={2}
+      className="flex items-start justify-between rounded-md px-3 py-2 bg-white mb-3"
+    >
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-1">
-          <span className="inline-block text-[11px] px-2 py-[2px] rounded-full bg-blue-50 text-blue-600">
-            TAG-LIB
-          </span>
-          <span className="text-[11px] text-gray-400">
+          <Chip
+            label="TAG-LIB"
+            size="small"
+            color="primary"
+            variant="outlined"
+            className="text-[11px]"
+          />
+          <Typography variant="caption" color="textSecondary">
             用户 {userId} 的标签库
-          </span>
+          </Typography>
         </div>
         <Typography variant="subtitle1" className="font-semibold truncate mb-1">
           标签管理
@@ -84,13 +91,21 @@ export const UserBookmarkTagsCard: React.FC<UserBookmarkTagsCardProps> = ({
         </Typography>
 
         <div className="mt-2 flex flex-wrap gap-1 items-center">
-          <span className="text-xs text-gray-500 mr-1">可用标签:</span>
+          <Typography variant="caption" className="text-gray-500 mr-1">
+            可用标签:
+          </Typography>
           {isLoading ? (
-            <span className="text-xs text-gray-400">加载中…</span>
+            <Typography variant="caption" color="textSecondary">
+              加载中…
+            </Typography>
           ) : isError ? (
-            <span className="text-xs text-red-500">加载失败</span>
+            <Typography variant="caption" color="error">
+              加载失败
+            </Typography>
           ) : localTags.length === 0 ? (
-            <span className="text-xs text-gray-400">暂无标签</span>
+            <Typography variant="caption" color="textSecondary">
+              暂无标签
+            </Typography>
           ) : (
             localTags.map(tag => (
               <Chip
@@ -126,6 +141,6 @@ export const UserBookmarkTagsCard: React.FC<UserBookmarkTagsCardProps> = ({
           </Button>
         </div>
       </div>
-    </div>
+    </Paper>
   );
 };

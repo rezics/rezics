@@ -42,6 +42,10 @@ const UNIT_TYPE_OPTIONS = [
   'CHAPTER',
 ] as const;
 
+/**
+ * BookmarkPage
+ * @returns
+ */
 export const BookmarkPage: React.FC = () => {
   const [_location, navigate] = useLocation();
   const user = useUserStore(state => state.user);
