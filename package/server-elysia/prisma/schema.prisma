@@ -279,6 +279,7 @@ model ReactionSummary {
   count      Int    @default(0)
 
   @@id([targetId, reaction])
+  @@index([targetId])
 }
 
 model Rating {

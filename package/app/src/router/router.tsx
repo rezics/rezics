@@ -35,7 +35,7 @@ import {BookPageContainer} from '@/page/Book/BookPage.tsx';
 
 // ReadList pages
 import {ReadListPage} from '@/page/ReadList/ReadListPage.tsx';
-import {ReadListsPage} from '@/page/ReadList/ReadListsPage.tsx';
+import {ReadListsPage} from '@/page/ReadList/ReadListsPage';
 
 // Unit pages
 import {UnitsPage} from '@/page/Unit/UnitsPage.tsx';

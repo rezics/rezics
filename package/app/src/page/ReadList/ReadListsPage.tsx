@@ -14,7 +14,10 @@ import {
 import {SimpleSearchInput} from '@/component/Search/SimpleSearchInput';
 import type {SearchInfo} from '@/component/Search/searchParser';
 import {useQuery, useQueryClient} from '@tanstack/react-query';
-import {readlistQueries} from '@/api/readlist/readlist.queries';
+import {
+  meiliUnitApi,
+  mapUnitListToReadlistListResponse,
+} from '@/api/meili/meili.api';
 import type {ReadlistDTO} from '@package/contract';
 
 type Readlist = ReadlistDTO;
@@ -107,7 +110,7 @@ const ReadlistsShow = (
         ref={universalPaginatorRef}
         data={readlists}
         totalExternalItems={totalItems}
-        itemsPerPage={12}
+        itemsPerPage={10}
         externalItemsPerPage={EXTERNAL_PAGE_SIZE}
         sortType={sortConfig.type}
         sortOrder={sortConfig.order}
@@ -154,14 +157,31 @@ export function ReadListsPage() {
   });
   const [start, setStart] = useState<number>(0);
 
-  const {data, isLoading, error} = useQuery(
-    readlistQueries.list({
-      start,
+  const buildMeiliReadlistQuery = (startOffset: number) => {
+    const filters = {
+      type: 'READLIST',
+      start: startOffset,
       limit: EXTERNAL_PAGE_SIZE,
-      q: currentQuery.keyword ?? '',
-      tags: currentQuery.tags?.join(',') ?? '',
-    }),
-  );
+      q: currentQuery.keyword || undefined,
+      tags: currentQuery.tags?.join(',') || undefined,
+    } as const;
+
+    return {
+      queryKey: [
+        'meili-readlists',
+        startOffset,
+        currentQuery.keyword,
+        currentQuery.tags?.join(','),
+      ],
+      queryFn: async () => {
+        const unitResp = await meiliUnitApi.unitSearch(filters);
+        return mapUnitListToReadlistListResponse(unitResp);
+      },
+      staleTime: 1000 * 60 * 5,
+    } as const;
+  };
+
+  const {data, isLoading, error} = useQuery(buildMeiliReadlistQuery(start));
 
   function handleNeedMoreData(page: number) {
     setStart((page - 1) * EXTERNAL_PAGE_SIZE);
@@ -169,14 +189,9 @@ export function ReadListsPage() {
 
   const queryClient = useQueryClient();
   async function handlePreRequestData(page: number) {
-    const data = await queryClient.fetchQuery(
-      readlistQueries.list({
-        start: (page - 1) * EXTERNAL_PAGE_SIZE,
-        limit: EXTERNAL_PAGE_SIZE,
-        q: currentQuery.keyword ?? '',
-        tags: currentQuery.tags?.join(',') ?? '',
-      }),
-    );
+    const startOffset = (page - 1) * EXTERNAL_PAGE_SIZE;
+    const {queryKey, queryFn} = buildMeiliReadlistQuery(startOffset);
+    const data = await queryClient.fetchQuery({queryKey, queryFn});
     console.log('handlePreRequestData', data, page);
     return data?.readlists?.length ?? 0;
   }
