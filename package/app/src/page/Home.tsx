@@ -13,13 +13,11 @@ import {HomeTrendingReviews} from '@component/Home/HomeTrendingReviews';
 import {HomeTrendingWiki} from '@component/Home/HomeTrendingWiki';
 import {HomeAuthorSpotlight} from '@component/Home/HomeAuthorSpotlight';
 import {ResponsiveCarouselNotice} from '@component/Home/ResponsiveCarouselNotice';
-import {useTranslation} from 'react-i18next';
 import React from 'react';
 
 export type HomeShowProps = object;
 
 export const HomeShow: React.FC<HomeShowProps> = () => {
-  const {t} = useTranslation();
   return (
     <div className="w-10/12 mx-auto">
       {/* First Carousel */}
@@ -32,14 +30,15 @@ export const HomeShow: React.FC<HomeShowProps> = () => {
         <HomePromotionStrip />
       </div>
       {/* Search and quick links */}
-      <div className="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-        <div className="lg:col-span-2">
+      <div className="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+        <div className="lg:col-span-1">
           <HomeSearchBar />
         </div>
-        <div>
+        <div className="lg:col-span-1">
           <HomeQuickAccessLinks />
         </div>
       </div>
+
       {/* New Releases Section */}
       <div className="mt-8">
         <HomeNewReleases />

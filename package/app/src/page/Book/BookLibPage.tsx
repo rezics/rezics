@@ -2,7 +2,6 @@ import {Alert} from '@mui/material';
 import {useEffect, useImperativeHandle, useMemo, useState} from 'react';
 
 import {BookSearchContainer} from '@/component/BookLib/BookSearch/BookSearch';
-// import { CardBookList } from "@component/Book/CardBookList";
 import type {BookLibSortKey} from '@/component/Search/SearchFilter';
 import {
   UniversalPaginator,
