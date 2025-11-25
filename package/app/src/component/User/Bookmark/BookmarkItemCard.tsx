@@ -15,22 +15,7 @@ import {
 import {Delete} from '@mui/icons-material';
 import {type BookmarkEntry} from '@/page/User/BookmarkPage';
 import {Link} from 'wouter';
-import type {UnitDTO} from '@package/contract';
-
-function buildUnitUrl(unit: UnitDTO): string {
-  switch (unit.type) {
-    case 'BOOK':
-      return `/book/${unit.id}`;
-    case 'REVIEW':
-      return `/review/${unit.id}`;
-    case 'QUOTE':
-      return `/quote/${unit.id}`;
-    case 'READLIST':
-      return `/readlist/${unit.id}`;
-    default:
-      return `/unit/${unit.id}`;
-  }
-}
+import {buildUnitUrl} from '@/util/buildUrlUtil';
 
 type BookmarkItemCardProps = {
   entry: BookmarkEntry;

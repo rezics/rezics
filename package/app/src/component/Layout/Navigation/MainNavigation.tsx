@@ -34,14 +34,20 @@ export const NAVIGATION = (): NavigationItem[] => [
   {
     kind: 'item',
     segment: '/readlist/',
-    title: 'Read Lists',
+    title: 'Read List',
     icon: <FormatListBulletedIcon />,
   },
   {
     kind: 'item',
     segment: '/review/',
-    title: 'Review Lists',
+    title: 'Review List',
     icon: <BookIcon />,
+  },
+  {
+    kind: 'item',
+    segment: '/unit/',
+    title: 'Unit List',
+    icon: <DescriptionIcon />,
   },
   {
     kind: 'divider',

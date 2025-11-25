@@ -147,8 +147,19 @@ export async function searchUnits(
     sort: sort.length > 0 ? sort : undefined,
   });
 
+  function clipContent(resp: any) {
+    return resp.hits.map((hit: UnitSearchDocument) => {
+      return {
+        ...hit,
+        content: hit.content?.slice(0, 500) + '...',
+      };
+    });
+  }
+
+  const unitsResult = clipContent(resp);
+
   return {
-    units: resp.hits as UnitSearchDocument[],
+    units: unitsResult,
     total: resp.totalHits ?? resp.estimatedTotalHits ?? resp.hits.length,
     processingTimeMs: resp.processingTimeMs,
     query: resp.query ?? q,

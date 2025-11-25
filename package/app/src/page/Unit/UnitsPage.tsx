@@ -1,15 +1,17 @@
 import React, {useEffect, useMemo, useRef, useState} from 'react';
-import {Tabs, Tab, Box} from '@mui/material';
+import {Tabs, Tab, Box, Tooltip, Chip, Paper, Typography} from '@mui/material';
 import {useQuery, useQueryClient} from '@tanstack/react-query';
-import {useSearchParams} from 'wouter';
+import {Link, useSearchParams} from 'wouter';
 
 import {
   UniversalPaginator,
   type UniversalPaginatorHandle,
 } from '@/component/Common/Pagination.tsx';
 import {unitQueries} from '@/api/unit/unit.queries';
-import type {UnitDTO} from '@package/contract';
+import type {UnitDTO, UnitType} from '@package/contract';
 import {SimpleSearchInput} from '@/component/Search/SimpleSearchInput';
+import {buildUnitUrl} from '@/util/buildUrlUtil';
+import {buildMeiliUnitQuery} from '@/api/meili/meili.queries';
 
 type Unit = UnitDTO;
 
@@ -19,20 +21,42 @@ function defaultChildren(units: Unit[]) {
   return (
     <div className="space-y-3">
       {units.map(item => (
-        <div key={item.id} className="p-3 border rounded">
-          <div className="text-sm text-gray-500">
-            {item.user?.name || 'Unknown'} ·{' '}
-            {(item.createdAt || '')?.toString()}
-          </div>
-          {item.title && <div className="font-medium mt-1">{item.title}</div>}
-          {item.content && (
-            <div className="text-gray-700 mt-1">
-              {item.content.length > 160
-                ? `${item.content.slice(0, 160)}…`
-                : item.content}
+        <Paper
+          key={item.id}
+          elevation={2}
+          className="flex items-start justify-between rounded-md px-3 py-2"
+        >
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-1">
+              <Tooltip title="打开内容页面" placement="top">
+                <Link to={buildUnitUrl(item)}>
+                  <Chip
+                    label={item.type || 'UNKNOWN'}
+                    size="small"
+                    variant="outlined"
+                    onClick={() => {}}
+                    className="text-[11px]"
+                  />
+                </Link>
+              </Tooltip>
+              <Typography
+                variant="subtitle1"
+                className="font-semibold truncate mb-1"
+              >
+                {item.title || '(未命名内容)'}
+              </Typography>
             </div>
-          )}
-        </div>
+            {item.content && (
+              <Typography
+                variant="body2"
+                color="textSecondary"
+                className="line-clamp-4"
+              >
+                {item.content}
+              </Typography>
+            )}
+          </div>
+        </Paper>
       ))}
     </div>
   );
@@ -68,7 +92,7 @@ interface UnitsPageProps {
 export const UnitsPage: React.FC<UnitsPageProps> = ({
   mode = 'tab',
   type,
-  types = ['REVIEW', 'REMARK', 'QUOTE'],
+  types = ['REVIEW', 'REMARK', 'QUOTE', 'BOOK'],
   userId,
   targetUnitId,
   children = defaultChildren,
@@ -117,16 +141,23 @@ export const UnitsPage: React.FC<UnitsPageProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const {data: activeData, isLoading} = useQuery(
-    unitQueries.list({
-      type: tab,
-      userId,
-      targetUnitId,
-      q: keyword || undefined,
-      start: startMap[tab] ?? 0,
-      limit: EXTERNAL_PAGE_SIZE,
-    }),
+  function mapUnitResponse(unitResp) {
+    return unitResp;
+  }
+
+  const {queryKey, queryFn} = buildMeiliUnitQuery(
+    tab as keyof typeof UnitType,
+    startMap[tab] ?? 0,
+    targetUnitId ?? '',
+    keyword,
+    EXTERNAL_PAGE_SIZE,
+    mapUnitResponse,
   );
+
+  const {data: activeData, isLoading} = useQuery({
+    queryKey,
+    queryFn,
+  });
 
   function handleNeedMoreData(page: number) {
     const externalStart = (page - 1) * EXTERNAL_PAGE_SIZE;
