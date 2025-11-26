@@ -50,6 +50,12 @@ export const NAVIGATION = (): NavigationItem[] => [
     icon: <DescriptionIcon />,
   },
   {
+    kind: 'item',
+    segment: '/misc/echokv',
+    title: 'EchoKV',
+    icon: <DescriptionIcon />,
+  },
+  {
     kind: 'divider',
   },
   {

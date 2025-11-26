@@ -25,10 +25,12 @@ export const HomeShow: React.FC<HomeShowProps> = () => {
         <ResponsiveCarouselNotice />
       </div>
       {/* End First Carousel */}
+
       {/* Promotion strip */}
-      <div className="mt-6">
+      {/* <div className="mt-6">
         <HomePromotionStrip />
-      </div>
+      </div> */}
+
       {/* Search and quick links */}
       <div className="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
         <div className="lg:col-span-1">
@@ -39,20 +41,22 @@ export const HomeShow: React.FC<HomeShowProps> = () => {
         </div>
       </div>
 
-      {/* New Releases Section */}
-      <div className="mt-8">
-        <HomeNewReleases />
-      </div>
       {/* End New Releases Section */}
       {/* Ranking + Tags */}
-      <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2">
+      {/* <HomeTagExplore /> */}
+      {/* <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-6 h-[550px]">
+        <div className="lg:col-span-2 overflow-hidden">
           <HomeEditorPicks />
         </div>
-        <div className="space-y-6">
+
+        <div className="space-y-6 overflow-y-auto">
           <HomeRankingSection />
-          <HomeTagExplore />
         </div>
+      </div> */}
+
+      {/* Book list */}
+      <div className="mt-8">
+        <HomeNewReleases />
       </div>
       {/* Read list */}
       <div className="mt-8">

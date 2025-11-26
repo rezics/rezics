@@ -1,4 +1,4 @@
-const noticeboard = [
+export const noticeboard = [
   {
     id: '1',
     title: '站点升级维护通知',

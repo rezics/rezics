@@ -14,6 +14,7 @@ import {RouterLink} from '../Common/RouterLink';
 import NotificationsRoundedIcon from '@mui/icons-material/NotificationsRounded';
 import {echoKvGetQuery} from '@/api/echokv/echokv';
 import {useQuery} from '@tanstack/react-query';
+import {useAlertStore} from '@/global/windowAlertStore';
 
 type Notice = {
   id: string;
@@ -66,12 +67,21 @@ export type NoticeBoardProps = {
 
 export const NoticeBoard: React.FC<NoticeBoardProps> = ({initialNotices}) => {
   const theme = useTheme();
-  const [notices, setNotices] = useState<any[]>([]);
+  const {show: showAlert} = useAlertStore();
+  const [notices, setNotices] = useState<Notice[]>([]);
   const {data, isLoading, error} = useQuery(echoKvGetQuery('home_notice'));
 
   useEffect(() => {
-    setNotices((data?.value as any[]) ?? []);
-  }, [data]);
+    try {
+      setNotices((JSON.parse(String(data?.value)) as Notice[]) ?? []);
+    } catch (error) {
+      showAlert(`公告板数据解析失败: ${error}`);
+    }
+  }, [data, showAlert]);
+
+  if (error) {
+    showAlert(`公告板数据加载失败: ${error}`);
+  }
 
   return (
     <div>
@@ -139,7 +149,7 @@ export const NoticeBoard: React.FC<NoticeBoardProps> = ({initialNotices}) => {
                 },
               }}
             >
-              {notices.slice(0, 6).map(item => (
+              {notices?.map(item => (
                 <div key={item.id} className="mb-1">
                   <ListItemButton
                     component="a"

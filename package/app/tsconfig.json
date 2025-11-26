@@ -7,7 +7,7 @@
       "@page/*": ["src/page/*"],
       "@util/*": ["src/util/*"],
       "@locale": ["src/locale/index.ts"],
-      "@package/*": ["../*"],
+      "@package/*": ["../*"]
     },
     /* 输出 */
     "target": "ES2022",

@@ -27,6 +27,7 @@ bun run db:migrate
 bunx prisma migrate deploy
 # 大型迁移
 bunx prisma migrate reset
+bun run prisma:seed:echokv
 ```
 
 ## Encore

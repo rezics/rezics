@@ -61,6 +61,7 @@ import {TestPage03} from '@/page/Test/TestPage03.tsx';
 import {UserPage} from '@/page/User/UserPage.tsx';
 import {NoticePage} from '@/page/Misc/Notice.tsx';
 import {ReactionInfoPage} from '@/page/User/ReactionInfoPage.tsx';
+import EchokvEditPage from '@/page/Misc/EchokvEdit.tsx';
 
 // TODO 删除 ThemeProvider
 
@@ -348,6 +349,11 @@ export default (
         <Route path="/misc/notice">
           <MainLayout>
             <NoticePage />
+          </MainLayout>
+        </Route>
+        <Route path="/misc/echokv">
+          <MainLayout>
+            <EchokvEditPage />
           </MainLayout>
         </Route>
 

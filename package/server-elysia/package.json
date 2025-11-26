@@ -10,6 +10,7 @@
     "prisma:migrate": "bunx prisma migrate dev",
     "prisma:studio": "bunx prisma studio",
     "prisma:seed": "bun run prisma/seed.ts",
+    "prisma:seed:echokv": "bun run prisma/seed/echokv.ts",
     "db:migrate": "bun run prisma/db/index.ts"
   },
   "devDependencies": {
