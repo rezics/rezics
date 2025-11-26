@@ -83,7 +83,7 @@ export const SingleRemarkShow: React.FC<SingleRemarkShowProps> = ({
   }, [review]);
 
   return (
-    <div className="py-4 border-b border-gray-200 dark:border-gray-700">
+    <div className="py-4 border-b border-gray-200">
       <div className="flex gap-3">
         <img
           src={review.user?.avatar || ''}

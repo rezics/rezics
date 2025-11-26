@@ -4,8 +4,10 @@ import {AccentBarWithTextShow} from '../Common/AccentBar.tsx';
 import {ArrowForwardIconContainer} from '../Common/ArrowForwardIcon.tsx';
 import {ReviewListContainer} from '../Review/ReviewList.tsx';
 
-import {reviewQueries} from '@/api/review/review';
 import {useQuery} from '@tanstack/react-query';
+import {buildMeiliUnitQuery} from '@/api/meili/meili.queries';
+import {mapUnitListToReviewListResponse} from '@/api/meili/meili.api';
+import {UnitType} from '@package/contract/src/unit';
 interface BookReviewsProps {
   bookId: string;
   title: string;
@@ -14,8 +16,18 @@ interface BookReviewsProps {
 export const BookReviews: React.FC<BookReviewsProps> = ({bookId, title}) => {
   const [reviews, setReviews] = useState<any[]>([]);
 
-  const {data, isLoading, error} = useQuery(
-    reviewQueries.byBook(bookId, {limit: 4}),
+  const {data} = useQuery(
+    buildMeiliUnitQuery(
+      UnitType.REVIEW,
+      0,
+      bookId,
+      '',
+      4,
+      mapUnitListToReviewListResponse,
+      {
+        enabled: !!bookId,
+      },
+    ),
   );
 
   useEffect(() => {

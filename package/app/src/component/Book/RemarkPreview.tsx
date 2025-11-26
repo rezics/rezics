@@ -1,7 +1,9 @@
-import {remarkQueries} from '@/api/review/review';
 import {useQuery} from '@tanstack/react-query';
 import React from 'react';
 import {ShortReviewListShow} from '../Review/ShortReviewList.tsx';
+import {buildMeiliUnitQuery} from '@/api/meili/meili.queries';
+import {mapUnitListToReviewListResponse} from '@/api/meili/meili.api';
+import {UnitType} from '@package/contract/src/unit';
 interface ShortBookReviewsProps {
   bookId: string;
 }
@@ -10,7 +12,17 @@ interface ShortBookReviewsProps {
 
 export const RemarkPreview: React.FC<ShortBookReviewsProps> = ({bookId}) => {
   const {data, isLoading, error} = useQuery(
-    remarkQueries.list({bookId, limit: 4}),
+    buildMeiliUnitQuery(
+      UnitType.REMARK,
+      0,
+      bookId,
+      '',
+      4,
+      mapUnitListToReviewListResponse,
+      {
+        enabled: !!bookId,
+      },
+    ),
   );
 
   const handleLike = (reviewId: string) => {

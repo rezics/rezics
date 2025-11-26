@@ -30,6 +30,7 @@ import {ReviewNewPage} from '@/page/Review/ReviewNewPage.tsx';
 import {ReviewEditPageContainer} from '@/page/Review/ReviewEditPage.tsx';
 import {QuoteByBookPage} from '@/page/Review/QuoteByBookPage.tsx';
 import {QuotePage} from '@/page/Review/QuotePage.tsx';
+import {QuoteEditPageContainer} from '@/page/Review/QuoteEditPage.tsx';
 
 // ReadList pages
 import {ReadListPage} from '@/page/ReadList/ReadListPage.tsx';
@@ -209,6 +210,13 @@ export default (
           {({unitId}) => (
             <MainLayout>
               <QuotePage unitId={unitId} />
+            </MainLayout>
+          )}
+        </Route>
+        <Route path="/quote/:unitId/edit">
+          {({unitId}) => (
+            <MainLayout>
+              <QuoteEditPageContainer unitId={unitId} />
             </MainLayout>
           )}
         </Route>

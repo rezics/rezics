@@ -64,7 +64,7 @@ export const QuotePage: React.FC<QuotePageProps> = ({unitId}) => {
 
             <div className="ml-auto">
               <MiniAdminActionBar
-                editionURL={`/unit/${unitId}/edit`}
+                editionURL={`/quote/${unitId}/edit`}
                 userUnitId={Quote.user?.unitId}
               />
             </div>

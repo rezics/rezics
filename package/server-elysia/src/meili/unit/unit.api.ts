@@ -151,7 +151,10 @@ export async function searchUnits(
     return resp.hits.map((hit: UnitSearchDocument) => {
       return {
         ...hit,
-        content: hit.content?.slice(0, 500) + '...',
+        content:
+          (hit.content?.length ?? 0) > 500
+            ? hit.content?.slice(0, 500) + '...'
+            : hit.content,
       };
     });
   }

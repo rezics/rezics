@@ -3,8 +3,10 @@ import {Link as _Link} from 'wouter';
 import {AccentBarWithTextContainer} from '../Common/AccentBar.tsx';
 import {ArrowForwardIconContainer} from '../Common/ArrowForwardIcon.tsx';
 
-import {readlistQueries} from '@/api/readlist/readlist';
 import {useQuery} from '@tanstack/react-query';
+import {buildMeiliUnitQuery} from '@/api/meili/meili.queries';
+import {mapUnitListToReadlistListResponse} from '@/api/meili/meili.api';
+import {UnitType} from '@package/contract/src/unit';
 
 export function ReadlistByBookPreview({
   title,
@@ -13,9 +15,20 @@ export function ReadlistByBookPreview({
   title: string;
   bookId?: string;
 }) {
-  // 获取包含该书的书单数据
+  const targetUnitId = bookId || '';
+
   const {data, isLoading, error} = useQuery(
-    readlistQueries.list({hasBookUnitId: bookId || '', limit: 4}),
+    buildMeiliUnitQuery(
+      UnitType.READLIST,
+      0,
+      targetUnitId,
+      '',
+      4,
+      mapUnitListToReadlistListResponse,
+      {
+        enabled: !!targetUnitId,
+      },
+    ),
   );
 
   if (isLoading) {
@@ -30,7 +43,6 @@ export function ReadlistByBookPreview({
       </ArrowForwardIconContainer>
       <div className="mb-4" />
       <ReadlistList booklists={data?.readlists || []} />
-      {/* 此处应该显示书单列表 */}
     </div>
   );
 }

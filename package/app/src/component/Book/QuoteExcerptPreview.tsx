@@ -2,8 +2,9 @@ import {isEmptyValue} from '@/util/dataCheck.ts';
 import React from 'react';
 import {QuoteExcerptListContainer} from '../Review/QuoteExcerptList.tsx';
 
-import {unitQueries} from '@/api/unit/unit';
 import {useQuery} from '@tanstack/react-query';
+import {buildMeiliUnitQuery} from '@/api/meili/meili.queries';
+import {UnitType} from '@package/contract/src/unit';
 
 export type QuoteExcerptPreviewContainerProps = {
   id: string;
@@ -12,9 +13,18 @@ export type QuoteExcerptPreviewContainerProps = {
 export const QuoteExcerptPreviewContainer: React.FC<
   QuoteExcerptPreviewContainerProps
 > = ({id}) => {
-  // 使用最新的 Review API：按书籍获取评测，限制数量为 3
   const {data, isLoading, error} = useQuery(
-    unitQueries.list({limit: 3, type: 'QUOTE', targetUnitId: id}),
+    buildMeiliUnitQuery(
+      UnitType.QUOTE,
+      0,
+      id,
+      '',
+      3,
+      unitResp => unitResp,
+      {
+        enabled: !!id,
+      },
+    ),
   );
 
   if (isLoading) return <div>Loading...</div>;
