@@ -1,6 +1,5 @@
 import {HomeSearchBar} from '@component/Home/HomeSearchBar';
 import {HomeQuickAccessLinks} from '@component/Home/HomeQuickAccessLinks';
-import {HomeAuthorSpotlight} from '@component/Home/HomeAuthorSpotlight';
 import {ResponsiveCarouselNotice} from '@component/Home/ResponsiveCarouselNotice';
 import {HomeMeiliDiscoverySection} from '@component/Home/HomeMeiliDiscoverySection';
 import React from 'react';

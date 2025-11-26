@@ -68,6 +68,11 @@ export default {
     add_to_collection: 'Add to Collection',
   },
 
+  // Comment
+  comment: {
+    login_to_view: 'Please login to view comments',
+  },
+
   // Common UI Elements
   common: {
     created_at: 'Created at',

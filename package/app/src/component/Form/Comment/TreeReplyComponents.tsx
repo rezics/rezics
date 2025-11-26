@@ -26,6 +26,7 @@ import {buildTree} from '../treeReplyUtil.ts';
 
 import {useAlertStore} from '@/global/windowAlertStore';
 import {reactionApi} from '@/api/reaction/reaction';
+import {useTranslation} from 'react-i18next';
 // This is a temporary type definition based on the GraphQL schema.
 // Local UI type adapted from CommentTreeNode
 type UiUser = {
@@ -201,116 +202,123 @@ export function TreeReplyComponents({unitId}: ReplyComponentsProps) {
   // Fetch a flat slice of the comment tree for the unit
   const showAlert = useAlertStore(state => state.show);
   const user = useUserStore(state => state.user);
-  const {data, isLoading, error} = useQuery(
-    commentQueries.unitCommentTree(unitId, {
-      // Fetch up to depth 3 for an initial view; adjust as needed
-      maxDepth: 100,
-      order: 'asc',
-      start: 0,
-      limit: 200,
-    }),
-  );
+  const {t} = useTranslation();
 
-  // currentReplyId
-  const setDialogVisible = useDialogStore(state => state.setDialogVisible);
-  const [currentReplyId, setCurrentReplyId] = useState<string | null>(null);
-  const [topLevelComments, setTopLevelComments] = useState<UiComment[]>([]);
+  function Core({unitId}: {unitId: string}) {
+    const {data, isLoading, error} = useQuery(
+      commentQueries.unitCommentTree(unitId, {
+        // Fetch up to depth 3 for an initial view; adjust as needed
+        maxDepth: 100,
+        order: 'asc',
+        start: 0,
+        limit: 200,
+      }),
+    );
 
-  const commentItems = useMemo(
-    () => (data?.items as CommentTreeNode[] | undefined) ?? [],
-    [data],
-  );
+    // currentReplyId
+    const setDialogVisible = useDialogStore(state => state.setDialogVisible);
+    const [currentReplyId, setCurrentReplyId] = useState<string | null>(null);
+    const [topLevelComments, setTopLevelComments] = useState<UiComment[]>([]);
 
-  const targetIds = useMemo(
-    () => commentItems.map(item => item.id).filter(Boolean),
-    [commentItems],
-  );
+    const commentItems = useMemo(
+      () => (data?.items as CommentTreeNode[] | undefined) ?? [],
+      [data],
+    );
 
-  const {data: myReactions} = useQuery({
-    queryKey: ['reactions', 'my', {targetIds}],
-    queryFn: () => reactionApi.my({targetIds}),
-    enabled: !!user && targetIds.length > 0,
-    staleTime: 1000 * 60, // 1 minute
-  });
+    const targetIds = useMemo(
+      () => commentItems.map(item => item.id).filter(Boolean),
+      [commentItems],
+    );
 
-  const userReactionsByTarget = myReactions?.reactionsByTarget ?? {};
+    const {data: myReactions} = useQuery({
+      queryKey: ['reactions', 'my', {targetIds}],
+      queryFn: () => reactionApi.my({targetIds}),
+      enabled: !!user && targetIds.length > 0,
+      staleTime: 1000 * 60, // 1 minute
+    });
 
-  useEffect(() => {
-    try {
-      const tree = buildTree(commentItems as any);
-      setTopLevelComments(tree);
-    } catch (_error) {
-      console.error('Error building comment tree');
-    }
-  }, [commentItems]);
+    const userReactionsByTarget = myReactions?.reactionsByTarget ?? {};
 
-  const openDrawer = (id: string) => {
-    setCurrentReplyId(id);
-    setDialogVisible(id, true);
-  };
+    useEffect(() => {
+      try {
+        const tree = buildTree(commentItems as any);
+        setTopLevelComments(tree);
+      } catch (_error) {
+        console.error('Error building comment tree');
+      }
+    }, [commentItems]);
 
-  const createCommentMutation = useCreateCommentMutation({
-    onSuccess: () => {
-      showAlert('Comment created successfully');
-    },
-    onError: () => {
-      showAlert('Failed to create comment');
-    },
-  });
+    const openDrawer = (id: string) => {
+      setCurrentReplyId(id);
+      setDialogVisible(id, true);
+    };
 
-  const updateCommentMutation = useUpdateCommentMutation({
-    onSuccess: () => {
-      showAlert('Comment updated successfully');
-    },
-    onError: () => {
-      showAlert('Failed to update comment');
-    },
-  });
+    const createCommentMutation = useCreateCommentMutation({
+      onSuccess: () => {
+        showAlert('Comment created successfully');
+      },
+      onError: () => {
+        showAlert('Failed to create comment');
+      },
+    });
 
-  const handleSubmit = (content: string) => {
-    if (currentReplyId && currentReplyId.startsWith('update_')) {
-      updateCommentMutation.mutate({
-        unitId: currentReplyId.replace('update_', ''),
-        input: {
+    const updateCommentMutation = useUpdateCommentMutation({
+      onSuccess: () => {
+        showAlert('Comment updated successfully');
+      },
+      onError: () => {
+        showAlert('Failed to update comment');
+      },
+    });
+
+    const handleSubmit = (content: string) => {
+      if (currentReplyId && currentReplyId.startsWith('update_')) {
+        updateCommentMutation.mutate({
+          unitId: currentReplyId.replace('update_', ''),
+          input: {
+            content,
+          },
+        });
+      } else {
+        createCommentMutation.mutate({
+          rootPostId: unitId,
+          parentCommentId: currentReplyId || '',
           content,
-        },
-      });
-    } else {
-      createCommentMutation.mutate({
-        rootPostId: unitId,
-        parentCommentId: currentReplyId || '',
-        content,
-      });
-    }
-  };
-  if (isLoading) return <p>Loading...</p>;
-  if (error) return <p>Oh no... {error.message}</p>;
+        });
+      }
+    };
+    if (isLoading) return <p>Loading...</p>;
+    if (error) return <p>Oh no... {error.message}</p>;
 
-  return (
-    <>
-      <Box p={2}>
-        {topLevelComments.length > 0 ? (
-          topLevelComments.map((comment: UiComment) => (
-            <CommentNode
-              key={comment.id}
-              comment={comment}
-              openDrawer={openDrawer}
-              userReactionsByTarget={userReactionsByTarget}
-            />
-          ))
-        ) : (
-          <p>No comments</p>
+    return (
+      <>
+        <Box p={2}>
+          {topLevelComments.length > 0 ? (
+            topLevelComments.map((comment: UiComment) => (
+              <CommentNode
+                key={comment.id}
+                comment={comment}
+                openDrawer={openDrawer}
+                userReactionsByTarget={userReactionsByTarget}
+              />
+            ))
+          ) : (
+            <p>No comments</p>
+          )}
+        </Box>
+        {/* 渲染 */}
+        {currentReplyId && (
+          <ReplyDrawerContainer
+            dialogId={currentReplyId}
+            onSubmit={(content: string) => handleSubmit(content)}
+          />
         )}
-      </Box>
-      {/* 渲染 */}
-      {currentReplyId && (
-        <ReplyDrawerContainer
-          dialogId={currentReplyId}
-          onSubmit={(content: string) => handleSubmit(content)}
-        />
-      )}
-    </>
-  );
+      </>
+    );
+  }
+
+  if (!user) return <div>{t('comment.login_to_view')}</div>;
+  return <Core unitId={unitId} />;
 }
 
 export default TreeReplyComponents;

@@ -10,6 +10,7 @@
 - [ ] 字数不是 tag，只是伪装成 tag,是支持填写区间以查询的
 - [ ] https://github.com/meilisearch/meilisearch-react
 - [ ] 引入 react-instantsearch
+- [ ] Clone NanoJSON 优化代码
 
 ## Complete
 

@@ -80,7 +80,8 @@ export async function apiFetch<T>(
     removeToken();
     // Optionally redirect to login
     if (typeof window !== 'undefined') {
-      window.location.href = '/login';
+      // TODO 完善权限机制后加回来
+      // window.location.href = '/login';
     }
     throw new Error('Unauthorized - Please login again');
   }
