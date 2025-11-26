@@ -1,2 +1,2 @@
 export * from './unit.api';
-export * from './interface';
+export * from '@package/contract/src/meili/unit';

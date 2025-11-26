@@ -9,6 +9,7 @@ import type {
 import {commentInclude} from './types';
 import type {CommentWithRelations} from './types';
 import {getCommentApproxCount} from './sql';
+import {syncUnitToMeili, deleteUnitFromMeili} from '@/src/meili/unit/sync';
 
 export class CommentService {
   /**
@@ -151,6 +152,8 @@ export class CommentService {
       include: commentInclude,
     });
 
+    await syncUnitToMeili(created.unitId);
+
     await prisma.reactionSummary.upsert({
       where: {
         targetId_reaction: {
@@ -180,12 +183,14 @@ export class CommentService {
       },
       include: commentInclude,
     });
+    await syncUnitToMeili(updated.unitId);
     return updated as CommentWithRelations;
   }
 
   /** Delete comment */
   async delete(unitId: string): Promise<void> {
     await prisma.unit.delete({where: {id: unitId}}); // cascades CommentIndex
+    await deleteUnitFromMeili(unitId);
   }
 
   async exists(unitId: string): Promise<boolean> {

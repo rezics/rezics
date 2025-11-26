@@ -1,2 +1,2 @@
 export * from './book.api';
-export * from './interface';
+export * from '@package/contract/src/meili/book';

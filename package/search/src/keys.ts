@@ -14,7 +14,7 @@ import {meili} from './client';
 export async function getSearchKey(): Promise<string> {
   const resp = await meili.createKey({
     actions: ['search'], // 只允许搜索
-    indexes: ['books'], // 允许的索引
+    indexes: ['books', 'units'], // 允许的索引
     expiresAt: null,
   });
 
@@ -48,4 +48,3 @@ export async function listKeys() {
 export async function deleteKey(keyUid: string) {
   return meili.deleteKey(keyUid);
 }
-

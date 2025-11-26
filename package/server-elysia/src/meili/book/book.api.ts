@@ -1,7 +1,7 @@
 import type {BookQueryOptions} from '@package/contract';
 import {toBookQueryString} from '@package/contract';
 import {bookIndex} from '@package/search/src/meili_index';
-import type {BookSearchDocument, BookSearchResult} from './interface';
+import type {BookSearchDocument, BookSearchResult} from './index';
 import type {SearchResponse} from '@package/search/src/index';
 /**
  * Low-level search API that accepts a fully-constructed Meilisearch query string.

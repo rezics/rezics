@@ -1,12 +1,7 @@
 import {prisma} from '@/prisma/client';
 import {UnitStatus, UnitType} from '@/prisma/client';
 import type {Prisma} from '@/prisma/client';
-import {
-  readlistSelect,
-  type ReadlistSelected,
-  readlistListSelect,
-  type ReadlistListSelect,
-} from './types';
+import {readlistSelect, readlistListSelect} from './types';
 import type {
   ReadlistListQuery,
   CreateReadlistInput,
@@ -14,6 +9,7 @@ import type {
 } from '@package/contract';
 import type {ReadlistDTO} from '@package/contract';
 import {mapReadlistListRowToDTO, mapReadlistRowToDTO} from './mapper';
+import {syncUnitToMeili, deleteUnitFromMeili} from '@/src/meili/unit/sync';
 
 export class ReadlistService {
   private buildWhere(options: ReadlistListQuery): Prisma.ReadListWhereInput {
@@ -122,6 +118,8 @@ export class ReadlistService {
       select: readlistSelect,
     });
 
+    await syncUnitToMeili(unit.id);
+
     return mapReadlistRowToDTO(row);
   }
 
@@ -145,11 +143,13 @@ export class ReadlistService {
       },
       select: readlistSelect,
     });
+    await syncUnitToMeili(unitId);
     return mapReadlistRowToDTO(row);
   }
 
   async delete(unitId: string): Promise<void> {
     await prisma.unit.delete({where: {id: unitId}});
+    await deleteUnitFromMeili(unitId);
   }
 }
 

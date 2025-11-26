@@ -5,16 +5,25 @@
  */
 export interface BookSearchDocument {
   id: string;
+  // search fields
   title: string;
   description: string | null;
-  tags: string[];
+  tagSearch: string[];
   authors: string[];
+  presses: string[];
+  producers: string[];
   nsfw: boolean;
-  createdAt: string;
-  updatedAt: string;
-  authorIds?: string[];
-  pressIds?: string[];
-  producerIds?: string[];
+  authorIds: string[];
+  pressIds: string[];
+  producerIds: string[];
+  createdAt: string | Date;
+  updatedAt: string | Date;
+  // result fields
+  unitId: string;
+  author: any;
+  press: any;
+  producer: any;
+  tags: any[];
 }
 
 /**

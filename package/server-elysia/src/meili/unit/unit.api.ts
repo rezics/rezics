@@ -1,6 +1,6 @@
 import type {UnitListQuery} from '@package/contract';
 import {unitIndex} from '@package/search/src/meili_index';
-import type {UnitSearchDocument, UnitSearchResult} from './interface';
+import type {UnitSearchDocument, UnitSearchResult} from './index';
 import type {SearchResponse} from '@package/search/src/index';
 
 /**

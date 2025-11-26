@@ -19,8 +19,8 @@ export interface UnitSearchDocument {
   targetUnitId?: string | null;
   hasTarget?: boolean;
   nsfw?: boolean;
-  createdAt?: string;
-  updatedAt?: string;
+  createdAt?: string | Date;
+  updatedAt?: string | Date;
   publishedAt?: string | null;
 
   // result fields (denormalized from Unit relations/metadata)

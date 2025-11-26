@@ -1,6 +1,6 @@
 import type {BookQueryOptions, UnitListQuery} from '@package/contract';
-import type {BookSearchDocument, BookSearchResult} from './book/interface';
-import type {UnitSearchDocument, UnitSearchResult} from './unit/interface';
+import type {BookSearchResult} from './book';
+import type {UnitSearchResult} from './unit';
 import {searchBooks} from './book/book.api';
 import {searchUnits} from './unit/unit.api';
 import {
@@ -62,26 +62,6 @@ export class MeiliService {
    */
   async syncAllUnits(): Promise<unknown> {
     return syncAllUnits();
-  }
-
-  /**
-   * Convenience wrapper to expose the BookSearchDocument type
-   * from the service layer, if needed by callers.
-   */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  // This is here purely for type re-exporting via `typeof`.
-  get _BookSearchDocumentType(): BookSearchDocument | undefined {
-    return undefined;
-  }
-
-  /**
-   * Convenience wrapper to expose the UnitSearchDocument type
-   * from the service layer, if needed by callers.
-   */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  // This is here purely for type re-exporting via `typeof`.
-  get _UnitSearchDocumentType(): UnitSearchDocument | undefined {
-    return undefined;
   }
 
   /**

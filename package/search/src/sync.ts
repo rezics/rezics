@@ -5,6 +5,10 @@ import {
   deleteAllBooks,
   deleteAllUnits,
 } from './documents';
+import type {
+  BookSearchDocument,
+  UnitSearchDocument,
+} from '@package/contract/src/meili';
 
 const prisma = new PrismaClient();
 
@@ -25,7 +29,7 @@ export async function syncAllBooks() {
     },
   });
 
-  const formatted = books.map(b => ({
+  const formatted: BookSearchDocument[] = books.map(b => ({
     id: b.unitId,
     // search fields
     title: b.title,
@@ -86,7 +90,7 @@ export async function syncAllUnits() {
     if (units.length === 0) break;
 
     // Format batch
-    const formatted = units.map((u: any) => ({
+    const formatted: UnitSearchDocument[] = units.map((u: any) => ({
       id: u.id,
       // search fields
       title: u.title ?? '',
