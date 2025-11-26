@@ -183,7 +183,7 @@ export class CommentService {
       },
       include: commentInclude,
     });
-    await syncUnitToMeili(updated.unitId);
+    await syncUnitToMeili(unitId);
     return updated as CommentWithRelations;
   }
 

@@ -15,6 +15,7 @@ import {
   normalizeRatingValue,
   buildMetadataWithRating,
 } from './mapper';
+import {syncUnitToMeili, deleteUnitFromMeili} from '@/src/meili/unit/sync';
 
 type UnitTypeOption = {unitType?: UnitType};
 
@@ -97,6 +98,8 @@ export class ReviewService {
       return unit as ReviewWithRelations;
     });
 
+    await syncUnitToMeili(review.id);
+
     return review;
   }
 
@@ -156,6 +159,8 @@ export class ReviewService {
       return updated as ReviewWithRelations;
     });
 
+    await syncUnitToMeili(id);
+
     return review;
   }
 
@@ -179,6 +184,7 @@ export class ReviewService {
         );
       }
     });
+    await deleteUnitFromMeili(id);
   }
 
   private resolveUnitType(unitType?: UnitType): UnitType {

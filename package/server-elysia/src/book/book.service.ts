@@ -8,7 +8,7 @@ import type {
   UpdateBookInput,
   CreateBookInput,
 } from '@package/contract';
-
+import {syncBookToMeili, deleteBookFromMeili} from '@/src/meili/book/sync';
 import {getBookApproxCount} from './sql';
 
 /**
@@ -230,6 +230,8 @@ export class BookService {
       include: bookInclude,
     });
 
+    await syncBookToMeili(book.unitId);
+
     return book as BookWithRelations;
   }
 
@@ -284,6 +286,8 @@ export class BookService {
       include: bookInclude,
     });
 
+    await syncBookToMeili(unitId);
+
     return book as BookWithRelations;
   }
 
@@ -303,6 +307,7 @@ export class BookService {
    */
   async delete(unitId: string): Promise<void> {
     await prisma.unit.delete({where: {id: unitId}});
+    await deleteBookFromMeili(unitId);
   }
 
   /**

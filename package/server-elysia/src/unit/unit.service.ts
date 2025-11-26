@@ -8,6 +8,7 @@ import type {
 } from '@package/contract';
 import {unitInclude} from './types';
 import type {UnitWithRelations} from './types';
+import {syncUnitToMeili, deleteUnitFromMeili} from '@/src/meili/unit/sync';
 
 type MaybeInclude = Prisma.UnitInclude | undefined;
 type ResolvedInclude<TInclude extends MaybeInclude> =
@@ -205,6 +206,7 @@ export class UnitService {
       },
       include: unitInclude,
     });
+    await syncUnitToMeili(unit.id);
     return unit as UnitWithRelations;
   }
 
@@ -229,6 +231,7 @@ export class UnitService {
       },
       include: unitInclude,
     });
+    await syncUnitToMeili(unitId);
     return unit as UnitWithRelations;
   }
 
@@ -238,6 +241,7 @@ export class UnitService {
     db: Prisma.TransactionClient | typeof prisma = prisma,
   ): Promise<void> {
     await db.unit.delete({where: {id: unitId}});
+    await deleteUnitFromMeili(unitId);
   }
 }
 
