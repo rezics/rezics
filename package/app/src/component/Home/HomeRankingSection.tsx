@@ -32,7 +32,6 @@ export const HomeRankingSection: React.FC<HomeRankingSectionProps> = ({
     bookQueries.list({
       start: 0,
       limit,
-      q: '',
       sort: {type: 'updatedAt', order: 'desc'},
     }),
   );

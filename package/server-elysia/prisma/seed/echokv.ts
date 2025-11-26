@@ -1,21 +1,42 @@
 // 添加 main tag group 以及 公告板
 import {PrismaClient} from '../generated/client';
 
-import {noticeboard} from './data/home/noticeboard';
+import {generateNoticeboardData} from './data/home/noticeboard';
+import {products} from './data/home/homeCarousel';
 
 export const seedEchoKV = async (prisma: PrismaClient) => {
-  await prisma.echoKV.create({
-    data: {
+  await prisma.echoKV.upsert({
+    where: {key: 'home_notice'},
+    create: {
       key: 'home_notice',
-      value: JSON.stringify(noticeboard),
+      value: JSON.stringify(generateNoticeboardData(100)),
+    },
+    update: {
+      value: JSON.stringify(generateNoticeboardData(100)),
     },
   });
-  await prisma.echoKV.create({
-    data: {
+  await prisma.echoKV.upsert({
+    where: {key: 'book_search_tag_group_quick'},
+    create: {
       key: 'book_search_tag_group_quick',
       value: JSON.stringify({
         presetTags: ['fiction', 'nonfiction', 'mystery', 'romance'],
       }),
+    },
+    update: {
+      value: JSON.stringify({
+        presetTags: ['fiction', 'nonfiction', 'mystery', 'romance'],
+      }),
+    },
+  });
+  await prisma.echoKV.upsert({
+    where: {key: 'home_carousel'},
+    create: {
+      key: 'home_carousel',
+      value: JSON.stringify(products),
+    },
+    update: {
+      value: JSON.stringify(products),
     },
   });
 };

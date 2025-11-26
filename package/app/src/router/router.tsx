@@ -88,20 +88,6 @@ export default (
           </MainLayout>
         </Route>
 
-        {/* ANCHOR Book */}
-        <Route path="/book">
-          <MainLayout>
-            <BookLibContainer />
-          </MainLayout>
-        </Route>
-        <Route path="/book/:bookId">
-          {({bookId}) => (
-            <MainLayout>
-              <BookPageContainer bookId={bookId} />
-            </MainLayout>
-          )}
-        </Route>
-
         {/* ANCHOR Book Read*/}
         <Route path="/book/:bookId/read/:chapterId">
           {({bookId, chapterId}) => (
@@ -143,6 +129,20 @@ export default (
             <BookEditLayout bookId={bookId}>
               <BookEditTagPage bookId={bookId} />
             </BookEditLayout>
+          )}
+        </Route>
+
+        {/* ANCHOR Book */}
+        <Route path="/book">
+          <MainLayout>
+            <BookLibContainer />
+          </MainLayout>
+        </Route>
+        <Route path="/book/:bookId">
+          {({bookId}) => (
+            <MainLayout>
+              <BookPageContainer bookId={bookId} />
+            </MainLayout>
           )}
         </Route>
 

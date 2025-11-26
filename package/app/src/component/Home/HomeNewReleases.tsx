@@ -30,7 +30,6 @@ export const HomeNewReleases: React.FC<HomeNewReleasesProps> = ({
     bookQueries.list({
       start: 0,
       limit,
-      q: '',
       sort: {type: 'createdAt', order: 'desc'},
     }),
   );

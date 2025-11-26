@@ -36,7 +36,7 @@ export const noticeboard = [
 
 console.log(JSON.stringify(noticeboard, null, 2));
 
-function generateNoticeboardData(number: number) {
+export function generateNoticeboardData(number: number) {
   const data = [];
   for (let i = 0; i < number; i++) {
     data.push({

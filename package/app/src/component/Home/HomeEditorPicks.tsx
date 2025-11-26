@@ -26,7 +26,7 @@ export const HomeEditorPicks: React.FC<HomeEditorPicksProps> = ({
   limit = 8,
 }) => {
   const {data, isLoading, error} = useQuery(
-    bookQueries.list({start: 0, limit, q: ''}),
+    bookQueries.list({start: 0, limit}),
   );
   const books: Book[] = useMemo(() => data?.books ?? [], [data]);
 

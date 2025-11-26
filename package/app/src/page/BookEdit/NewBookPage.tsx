@@ -40,7 +40,7 @@ export function NewBookPage() {
     createBookMutation.mutate({
       title: metadataState.title ?? '',
       description: metadataState.description ?? '',
-       nsfw: metadataState.nsfw ?? false,
+      nsfw: metadataState.nsfw ?? false,
       authorIds: metadataState.author?.map(author => author.unitId) ?? [],
       pressIds: metadataState.press?.map(press => press.unitId) ?? [],
       producerIds:

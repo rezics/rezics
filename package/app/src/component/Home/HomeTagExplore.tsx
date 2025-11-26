@@ -23,7 +23,7 @@ export const HomeTagExplore: React.FC<HomeTagExploreProps> = ({
   maxTags = 18,
 }) => {
   const {data, isLoading, error} = useQuery(
-    bookQueries.list({start: 0, limit, q: ''}),
+    bookQueries.list({start: 0, limit}),
   );
 
   const tags = useMemo(() => {
