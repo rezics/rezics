@@ -1,27 +1,21 @@
-import React from 'react';
+import React, {useMemo} from 'react';
 import {Chip} from '@mui/material';
 import {Link} from 'wouter';
-
-const presets = [
-  '文学',
-  '经济',
-  '漫画',
-  '历史',
-  '科幻',
-  '哲学',
-  '传记',
-  '技术',
-];
+import {echoKvGetQuery} from '@/api/echokv/echokv';
+import {useQuery} from '@tanstack/react-query';
+import {parseEchoKVResponse} from '@/api/echokv/util';
 
 export type HomeQuickAccessLinksProps = {
   title?: string;
-  items?: string[];
+  key?: string;
 };
 
 export const HomeQuickAccessLinks: React.FC<HomeQuickAccessLinksProps> = ({
   title = '快速入口',
-  items = presets,
+  key = 'book_search_tag_group_quick',
 }) => {
+  const {data} = useQuery(echoKvGetQuery(key));
+  const items = useMemo(() => parseEchoKVResponse<string[]>(data), [data]);
   return (
     <div className="w-full">
       <div className="flex items-center justify-between mb-3">

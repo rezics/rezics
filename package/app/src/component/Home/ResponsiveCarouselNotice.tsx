@@ -48,7 +48,7 @@ export function ResponsiveCarouselNotice() {
       {/* 右侧：NoticeBoard */}
       <div
         ref={noticeRef}
-        className={`p-4 ${isWide ? 'w-1/3' : 'w-full'} overflow-auto`}
+        className={`${isWide ? 'w-1/3' : 'w-full'} overflow-auto max-h-[32rem]`}
       >
         <NoticeBoard />
       </div>

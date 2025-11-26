@@ -10,6 +10,14 @@ export const seedEchoKV = async (prisma: PrismaClient) => {
       value: JSON.stringify(noticeboard),
     },
   });
+  await prisma.echoKV.create({
+    data: {
+      key: 'book_search_tag_group_quick',
+      value: JSON.stringify({
+        presetTags: ['fiction', 'nonfiction', 'mystery', 'romance'],
+      }),
+    },
+  });
 };
 
 const prisma = new PrismaClient();

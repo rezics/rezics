@@ -22,7 +22,7 @@ export const HomeAuthorSpotlight: React.FC<HomeAuthorSpotlightProps> = ({
   maxAuthors = 12,
 }) => {
   const {data, isLoading, error} = useQuery(
-    bookQueries.list({start: 0, limit, q: ''}),
+    bookQueries.list({start: 0, limit}),
   );
 
   const authors = useMemo(() => {

@@ -15,6 +15,8 @@ import NotificationsRoundedIcon from '@mui/icons-material/NotificationsRounded';
 import {echoKvGetQuery} from '@/api/echokv/echokv';
 import {useQuery} from '@tanstack/react-query';
 import {useAlertStore} from '@/global/windowAlertStore';
+import {parseEchoKVResponse} from '@/api/echokv/util';
+import type {Theme} from '@mui/material/styles';
 
 type Notice = {
   id: string;
@@ -61,35 +63,163 @@ function TagBadge({tag}: {tag?: Notice['tag']}) {
   );
 }
 
-export type NoticeBoardProps = {
-  initialNotices?: Notice[];
-};
+function NoticeBoardHeader({
+  theme,
+  className,
+}: {
+  theme: Theme;
+  className?: string;
+}) {
+  return (
+    <div
+      className={className}
+      style={{
+        backgroundColor: theme.palette.background.default,
+      }}
+    >
+      <div className="p-2 flex items-center justify-between">
+        <Stack direction="row" spacing={1.5} alignItems="center">
+          <div
+            className="w-8 h-8 inline-flex items-center justify-center rounded-[10px] shadow-sm"
+            style={{
+              backgroundColor: theme.palette.primary.main,
+              color: theme.palette.primary.contrastText,
+            }}
+          >
+            <NotificationsRoundedIcon className="w-5 h-5" />
+          </div>
+          <div>
+            <Typography variant="caption" color="text.secondary">
+              Notice
+            </Typography>
+            <Typography variant="subtitle1" fontWeight={600}>
+              公告板
+            </Typography>
+          </div>
+        </Stack>
+        <RouterLink
+          href="/misc/notice"
+          underline="hover"
+          color="primary"
+          variant="body2"
+        >
+          查看全部
+        </RouterLink>
+      </div>
 
-export const NoticeBoard: React.FC<NoticeBoardProps> = ({initialNotices}) => {
+      <Divider />
+    </div>
+  );
+}
+
+function NoticeBoardItem({item, theme}: {item: Notice; theme: Theme}) {
+  return (
+    <div key={item.id} className="mb-1">
+      <ListItemButton
+        component="a"
+        href={item.link ?? '#'}
+        sx={{
+          border: `1px solid ${theme.palette.divider}`,
+          bgcolor: theme.palette.background.paper,
+          transition: theme.transitions.create(
+            ['background-color', 'border-color'],
+            {
+              duration: theme.transitions.duration.shortest,
+            },
+          ),
+          '&:hover': {
+            borderColor: theme.palette.primary.light,
+            bgcolor:
+              theme.palette.mode === 'light'
+                ? theme.palette.primary[50] ?? 'rgba(25,118,210,0.06)'
+                : 'rgba(25,118,210,0.12)',
+          },
+        }}
+      >
+        <Stack
+          direction="row"
+          spacing={1.5}
+          alignItems="flex-start"
+          sx={{width: '100%'}}
+        >
+          <Chip
+            label={item.pin ? '置顶' : '新'}
+            color={item.pin ? 'warning' : 'default'}
+            size="small"
+            variant={item.pin ? 'filled' : 'outlined'}
+            sx={{mt: 0.25}}
+          />
+          <div className="min-w-0 flex-1">
+            <Stack direction="row" spacing={1} alignItems="center">
+              <Typography
+                variant="body2"
+                fontWeight={600}
+                noWrap
+                sx={{
+                  color: 'text.primary',
+                  flexShrink: 1,
+                  minWidth: 0,
+                }}
+              >
+                {item.title}
+              </Typography>
+              <TagBadge tag={item.tag} />
+            </Stack>
+            {item.content && (
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{
+                  mt: 0.5,
+                  display: '-webkit-box',
+                  WebkitLineClamp: 2,
+                  WebkitBoxOrient: 'vertical',
+                  overflow: 'hidden',
+                }}
+              >
+                {item.content}
+              </Typography>
+            )}
+            <Typography
+              variant="caption"
+              color="text.disabled"
+              sx={{mt: 0.5, display: 'block'}}
+            >
+              {formatRelative(item.date)}
+            </Typography>
+          </div>
+          <Typography
+            variant="body2"
+            color="text.disabled"
+            sx={{
+              ml: 0.5,
+              opacity: 0,
+              transition: theme.transitions.create('opacity', {
+                duration: theme.transitions.duration.shortest,
+              }),
+              '.MuiListItemButton-root:hover &': {opacity: 1},
+            }}
+            className={item.link ? 'visible' : 'invisible'}
+          >
+            →
+          </Typography>
+        </Stack>
+      </ListItemButton>
+    </div>
+  );
+}
+
+export const NoticeBoard: React.FC = () => {
   const theme = useTheme();
   const {show: showAlert} = useAlertStore();
   const [notices, setNotices] = useState<Notice[]>([]);
   const {data, isLoading, error} = useQuery(echoKvGetQuery('home_notice'));
 
   useEffect(() => {
-    if (typeof data?.value === 'string') {
-      try {
-        setNotices((JSON.parse(String(data?.value)) as Notice[]) ?? []);
-      } catch (error) {
-        showAlert(`公告板数据解析失败: ${error}`);
-      }
-    }
-    if (typeof data?.value === 'object') {
-      try {
-        setNotices(data?.value as Notice[]);
-      } catch (error) {
-        showAlert(`公告板数据解析失败: ${error}`);
-      }
-    } else {
-      if (!data?.value && data?.value !== undefined) {
-        showAlert(`公告板数据格式错误: ${typeof data?.value}`);
-      }
-      setNotices([]);
+    try {
+      setNotices(parseEchoKVResponse<Notice[]>(data));
+    } catch (error) {
+      showAlert(`公告板数据解析失败: ${error}`);
     }
   }, [data, showAlert]);
 
@@ -98,172 +228,52 @@ export const NoticeBoard: React.FC<NoticeBoardProps> = ({initialNotices}) => {
   }
 
   return (
-    <div>
-      <div className="border-radius-2 overflow-hidden">
-        {/* Header */}
-        <div className="p-2 flex items-center justify-between">
-          <Stack direction="row" spacing={1.5} alignItems="center">
-            <div
-              className="w-8 h-8 inline-flex items-center justify-center rounded-[10px] shadow-sm"
-              style={{
-                backgroundColor: theme.palette.primary.main,
-                color: theme.palette.primary.contrastText,
-              }}
-            >
-              <NotificationsRoundedIcon className="w-5 h-5" />
-            </div>
-            <div>
-              <Typography variant="caption" color="text.secondary">
-                Notice
-              </Typography>
-              <Typography variant="subtitle1" fontWeight={600}>
-                公告板
-              </Typography>
-            </div>
+    <div className="w-full h-full flex flex-col">
+      {/* Header */}
+      <NoticeBoardHeader
+        theme={theme}
+        className="sticky top-0 z-10 rounded-lg"
+      />
+
+      {/* Content */}
+      <div className="flex-1 overflow-y-auto space-y-3 mt-3 p-2">
+        {isLoading && (
+          <Stack spacing={1.2}>
+            <Skeleton variant="rounded" height={18} />
+            <Skeleton variant="rounded" height={18} />
+            <Skeleton variant="rounded" height={18} />
+            <Skeleton variant="rounded" height={18} />
           </Stack>
-          <RouterLink
-            href="/misc/notice"
-            underline="hover"
-            color="primary"
-            variant="body2"
+        )}
+
+        {!isLoading && (!notices || notices.length === 0) && (
+          <Typography variant="body2" color="text.secondary">
+            暂无公告
+          </Typography>
+        )}
+
+        {!isLoading && notices && notices.length > 0 && (
+          <List
+            dense
+            disablePadding
+            sx={{
+              maxHeight: '100%',
+              overflow: 'auto',
+              pr: 0.5,
+              '& .MuiListItemButton-root': {
+                borderRadius: 1.5,
+              },
+            }}
           >
-            查看全部
-          </RouterLink>
-        </div>
+            {notices?.map(item => (
+              <NoticeBoardItem key={item.id} item={item} theme={theme} />
+            ))}
+          </List>
+        )}
+      </div>
 
-        <Divider />
-
-        {/* Content */}
-        <div className="p-2">
-          {isLoading && (
-            <Stack spacing={1.2}>
-              <Skeleton variant="rounded" height={18} />
-              <Skeleton variant="rounded" height={18} />
-              <Skeleton variant="rounded" height={18} />
-              <Skeleton variant="rounded" height={18} />
-            </Stack>
-          )}
-
-          {!isLoading && (!notices || notices.length === 0) && (
-            <Typography variant="body2" color="text.secondary">
-              暂无公告
-            </Typography>
-          )}
-
-          {!isLoading && notices && notices.length > 0 && (
-            <List
-              dense
-              disablePadding
-              sx={{
-                maxHeight: '100%',
-                overflow: 'auto',
-                pr: 0.5,
-                '& .MuiListItemButton-root': {
-                  borderRadius: 1.5,
-                },
-              }}
-            >
-              {notices?.map(item => (
-                <div key={item.id} className="mb-1">
-                  <ListItemButton
-                    component="a"
-                    href={item.link ?? '#'}
-                    sx={{
-                      border: `1px solid ${theme.palette.divider}`,
-                      bgcolor: theme.palette.background.paper,
-                      transition: theme.transitions.create(
-                        ['background-color', 'border-color'],
-                        {
-                          duration: theme.transitions.duration.shortest,
-                        },
-                      ),
-                      '&:hover': {
-                        borderColor: theme.palette.primary.light,
-                        bgcolor:
-                          theme.palette.mode === 'light'
-                            ? theme.palette.primary[50] ??
-                              'rgba(25,118,210,0.06)'
-                            : 'rgba(25,118,210,0.12)',
-                      },
-                    }}
-                  >
-                    <Stack
-                      direction="row"
-                      spacing={1.5}
-                      alignItems="flex-start"
-                      sx={{width: '100%'}}
-                    >
-                      <Chip
-                        label={item.pin ? '置顶' : '新'}
-                        color={item.pin ? 'warning' : 'default'}
-                        size="small"
-                        variant={item.pin ? 'filled' : 'outlined'}
-                        sx={{mt: 0.25}}
-                      />
-                      <div className="min-w-0 flex-1">
-                        <Stack direction="row" spacing={1} alignItems="center">
-                          <Typography
-                            variant="body2"
-                            fontWeight={600}
-                            noWrap
-                            sx={{
-                              color: 'text.primary',
-                              flexShrink: 1,
-                              minWidth: 0,
-                            }}
-                          >
-                            {item.title}
-                          </Typography>
-                          <TagBadge tag={item.tag} />
-                        </Stack>
-                        {item.content && (
-                          <Typography
-                            variant="body2"
-                            color="text.secondary"
-                            sx={{
-                              mt: 0.5,
-                              display: '-webkit-box',
-                              WebkitLineClamp: 2,
-                              WebkitBoxOrient: 'vertical',
-                              overflow: 'hidden',
-                            }}
-                          >
-                            {item.content}
-                          </Typography>
-                        )}
-                        <Typography
-                          variant="caption"
-                          color="text.disabled"
-                          sx={{mt: 0.5, display: 'block'}}
-                        >
-                          {formatRelative(item.date)}
-                        </Typography>
-                      </div>
-                      <Typography
-                        variant="body2"
-                        color="text.disabled"
-                        sx={{
-                          ml: 0.5,
-                          opacity: 0,
-                          transition: theme.transitions.create('opacity', {
-                            duration: theme.transitions.duration.shortest,
-                          }),
-                          '.MuiListItemButton-root:hover &': {opacity: 1},
-                        }}
-                        className={item.link ? 'visible' : 'invisible'}
-                      >
-                        →
-                      </Typography>
-                    </Stack>
-                  </ListItemButton>
-                </div>
-              ))}
-            </List>
-          )}
-        </div>
-
-        {/* Footer */}
-        {/* <div className="px-2 pb-2 pt-1">
+      {/* Footer */}
+      {/* <div className="px-2 pb-2 pt-1">
           <Button
             fullWidth
             href="/subscribe"
@@ -274,7 +284,6 @@ export const NoticeBoard: React.FC<NoticeBoardProps> = ({initialNotices}) => {
             订阅最新公告
           </Button>
         </div> */}
-      </div>
     </div>
   );
 };
