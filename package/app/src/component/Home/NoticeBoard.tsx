@@ -72,10 +72,24 @@ export const NoticeBoard: React.FC<NoticeBoardProps> = ({initialNotices}) => {
   const {data, isLoading, error} = useQuery(echoKvGetQuery('home_notice'));
 
   useEffect(() => {
-    try {
-      setNotices((JSON.parse(String(data?.value)) as Notice[]) ?? []);
-    } catch (error) {
-      showAlert(`公告板数据解析失败: ${error}`);
+    if (typeof data?.value === 'string') {
+      try {
+        setNotices((JSON.parse(String(data?.value)) as Notice[]) ?? []);
+      } catch (error) {
+        showAlert(`公告板数据解析失败: ${error}`);
+      }
+    }
+    if (typeof data?.value === 'object') {
+      try {
+        setNotices(data?.value as Notice[]);
+      } catch (error) {
+        showAlert(`公告板数据解析失败: ${error}`);
+      }
+    } else {
+      if (!data?.value && data?.value !== undefined) {
+        showAlert(`公告板数据格式错误: ${typeof data?.value}`);
+      }
+      setNotices([]);
     }
   }, [data, showAlert]);
 

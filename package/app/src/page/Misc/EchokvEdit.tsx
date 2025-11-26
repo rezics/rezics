@@ -11,21 +11,21 @@ import {
 } from '@mui/material';
 import {echoKvApi} from '@/api/echokv/echokv';
 import {useAlertStore} from '@/global/windowAlertStore';
-import {JSONEditor, type JSONEditorConfig} from '@pardnchiu/nanojson';
+import {JSONEditor} from '@pardnchiu/nanojson/dist/NanoJSON.esm.js';
 
 type JSONEditorInstance = JSONEditor;
 
 export const EchokvEditPage: React.FC = () => {
   const {show: showAlert} = useAlertStore();
 
-  const [currentKey, setCurrentKey] = useState('home_notice');
+  const [currentKey, setCurrentKey] = useState('key_name');
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const editorRef = useRef<JSONEditorInstance | null>(null);
 
   // 初始化一次，不依赖 React 的 DOM 变动
   useEffect(() => {
-    const config: JSONEditorConfig = {
+    const config = {
       id: 'nanojson-editor',
       title: 'JSON 编辑器',
       description: '编辑 EchoKV JSON 值',
@@ -58,12 +58,12 @@ export const EchokvEditPage: React.FC = () => {
       let parsed;
       if (typeof raw === 'string') {
         try {
-          parsed = JSON.parse(raw);
+          parsed = {value: JSON.parse(raw)};
         } catch {
           parsed = {value: raw};
         }
       } else {
-        parsed = raw ?? {};
+        parsed = {value: raw ?? {}};
       }
 
       await editorRef.current.import(parsed); // 自动渲染
@@ -75,6 +75,11 @@ export const EchokvEditPage: React.FC = () => {
     }
   };
 
+  const handleClear = () => {
+    if (!editorRef.current) return;
+    editorRef.current.reset();
+  };
+
   // 保存
   const handleSave = async () => {
     if (!editorRef.current) return;
@@ -83,11 +88,13 @@ export const EchokvEditPage: React.FC = () => {
     setSaving(true);
     try {
       const jsonText = editorRef.current.json; // ★ 一次性获取最终 JSON 字符串
-      JSON.parse(jsonText); // 校验
+      const dataObject = JSON.parse(jsonText);
+      const value = dataObject.value;
+      console.log(value, editorRef.current);
 
-      // await echoKvApi.set(currentKey.trim(), jsonText);
+      const result = await echoKvApi.set(currentKey.trim(), value);
 
-      showAlert('已保存');
+      showAlert(`已保存: ${JSON.stringify(result)}`);
     } catch (err) {
       showAlert(`当前 JSON 非法：${String(err)}`);
     } finally {
@@ -133,6 +140,14 @@ export const EchokvEditPage: React.FC = () => {
               >
                 {saving ? '保存中…' : '保存'}
               </Button>
+              <Button
+                variant="outlined"
+                size="small"
+                onClick={handleClear}
+                disabled={loading}
+              >
+                清空
+              </Button>
             </Stack>
           </Stack>
         </Box>
@@ -142,6 +157,13 @@ export const EchokvEditPage: React.FC = () => {
         {/* 只提供一个静态 div，不让 React 控制内部 DOM */}
         <Box sx={{p: 2}}>
           <div id="nanojson-editor" className="min-h-[500px]" />
+          <style>
+            {`
+              #nanojson-editor option {
+                color: var(--color-rose-400) !important;
+              }
+            `}
+          </style>
         </Box>
       </Paper>
     </Box>
