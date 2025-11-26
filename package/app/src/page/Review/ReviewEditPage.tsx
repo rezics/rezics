@@ -3,11 +3,15 @@ import {useQuery} from '@tanstack/react-query';
 import EasyEditor from '@/component/Form/EasyEditor';
 import {Button, Rating} from '@mui/material';
 import {reviewQueries} from '@/api/review/review.queries';
-import {useUpdateReviewMutation} from '@/api/review/review.mutations';
+import {
+  useUpdateReviewMutation,
+  useDeleteReviewMutation,
+} from '@/api/review/review.mutations';
 import type {ReviewResponse, UpdateReviewInput} from '@package/contract';
 import {TextField} from '@mui/material';
 import {useAlertStore} from '@/global/windowAlertStore';
-
+import {DeleteButton} from '@/component/Form/DeleteWrapper';
+import {useLocation} from 'wouter';
 interface ReviewEditPageProps {
   data: ReviewResponse;
   setData: (data: ReviewResponse) => void;
@@ -76,7 +80,7 @@ export function ReviewEditPage({data, setData}: ReviewEditPageProps) {
 
 export function ReviewEditPageContainer({reviewId}: {reviewId: string}) {
   const {data, isLoading, isError} = useQuery(reviewQueries.detail(reviewId));
-
+  const [_location, navigate] = useLocation();
   const [reviewData, setReviewData] = useState<ReviewResponse>(
     {} as ReviewResponse,
   );
@@ -97,6 +101,15 @@ export function ReviewEditPageContainer({reviewId}: {reviewId: string}) {
     },
   });
 
+  const {mutate: deleteReviewMutation, isPending: _isDeleting} =
+    useDeleteReviewMutation({
+      onSuccess: () => {
+        show('Review deleted successfully');
+      },
+      onError: error => {
+        show(String(error));
+      },
+    });
   function handleSave() {
     const input: UpdateReviewInput = {
       title: reviewData.title || undefined,
@@ -105,6 +118,18 @@ export function ReviewEditPageContainer({reviewId}: {reviewId: string}) {
     };
 
     mutate({id: reviewId, input});
+  }
+
+  function handleDelete() {
+    deleteReviewMutation(reviewId, {
+      onSuccess: () => {
+        show('Review deleted successfully');
+        navigate(`/review/book/${reviewData.bookId}`);
+      },
+      onError: error => {
+        show(`Review delete failed: ${error}`);
+      },
+    });
   }
 
   if (isLoading) {
@@ -122,6 +147,7 @@ export function ReviewEditPageContainer({reviewId}: {reviewId: string}) {
         <ReviewEditPage data={reviewData} setData={setReviewData} />
 
         <div className="flex justify-end gap-2">
+          <DeleteButton onDelete={handleDelete} />
           <Button
             type="button"
             className="btn btn-primary"

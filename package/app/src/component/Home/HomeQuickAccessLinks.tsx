@@ -15,14 +15,17 @@ export const HomeQuickAccessLinks: React.FC<HomeQuickAccessLinksProps> = ({
   key = 'book_search_tag_group_quick',
 }) => {
   const {data} = useQuery(echoKvGetQuery(key));
-  const items = useMemo(() => parseEchoKVResponse<string[]>(data), [data]);
+  const items = useMemo(
+    () => parseEchoKVResponse<any>(data)?.presetTags ?? [],
+    [data],
+  );
   return (
     <div className="w-full">
       <div className="flex items-center justify-between mb-3">
         <span className="font-semibold">{title}</span>
       </div>
       <div className="flex flex-wrap gap-2">
-        {items.map(name => (
+        {(Array.isArray(items) ? items : []).map(name => (
           <Link key={name} href={`/book?tags=${name}`}>
             <Chip label={name} variant="filled" clickable />
           </Link>

@@ -3,7 +3,11 @@
  */
 
 import {queryOptions} from '@tanstack/react-query';
-import {meiliBookApi, meiliUnitApi} from './meili.api';
+import {
+  mapUnitListToReadlistListResponse,
+  meiliBookApi,
+  meiliUnitApi,
+} from './meili.api';
 import {type BookFilters} from '../book/book.types';
 import type {UnitListResponse, UnitType} from '@package/contract/src/unit';
 import {hashFn} from '../utils/hash';
@@ -54,6 +58,30 @@ export const buildMeiliUnitQuery = (
       return mapFn(unitResp);
     },
     enabled: options?.enabled ?? true,
+    staleTime: 1000 * 60 * 5,
+  } as const;
+};
+
+export const buildMeiliReadlistQuery = (
+  startOffset: number,
+  EXTERNAL_PAGE_SIZE: number,
+  keyword: string,
+  tags: string[],
+) => {
+  const filters = {
+    type: 'READLIST',
+    start: startOffset,
+    limit: EXTERNAL_PAGE_SIZE,
+    q: keyword || undefined,
+    tags: tags?.join(',') || undefined,
+  } as const;
+
+  return {
+    queryKey: ['meili-readlists', startOffset, keyword, tags?.join(',')],
+    queryFn: async () => {
+      const unitResp = await meiliUnitApi.unitSearch(filters);
+      return mapUnitListToReadlistListResponse(unitResp);
+    },
     staleTime: 1000 * 60 * 5,
   } as const;
 };

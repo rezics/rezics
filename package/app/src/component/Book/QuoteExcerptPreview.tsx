@@ -3,7 +3,6 @@ import React from 'react';
 import {QuoteExcerptListContainer} from '../Review/QuoteExcerptList.tsx';
 
 import {unitQueries} from '@/api/unit/unit';
-import {UnitListResponse} from '@package/contract';
 import {useQuery} from '@tanstack/react-query';
 
 export type QuoteExcerptPreviewContainerProps = {

@@ -14,10 +14,7 @@ import {
 import {SimpleSearchInput} from '@/component/Search/SimpleSearchInput';
 import type {SearchInfo} from '@/component/Search/searchParser';
 import {useQuery, useQueryClient} from '@tanstack/react-query';
-import {
-  meiliUnitApi,
-  mapUnitListToReadlistListResponse,
-} from '@/api/meili/meili.api';
+import {buildMeiliReadlistQuery} from '@/api/meili/meili.queries';
 import type {ReadlistDTO} from '@package/contract';
 import {reactionApi} from '@/api/reaction/reaction.api';
 
@@ -158,31 +155,14 @@ export function ReadListsPage() {
   });
   const [start, setStart] = useState<number>(0);
 
-  const buildMeiliReadlistQuery = (startOffset: number) => {
-    const filters = {
-      type: 'READLIST',
-      start: startOffset,
-      limit: EXTERNAL_PAGE_SIZE,
-      q: currentQuery.keyword || undefined,
-      tags: currentQuery.tags?.join(',') || undefined,
-    } as const;
-
-    return {
-      queryKey: [
-        'meili-readlists',
-        startOffset,
-        currentQuery.keyword,
-        currentQuery.tags?.join(','),
-      ],
-      queryFn: async () => {
-        const unitResp = await meiliUnitApi.unitSearch(filters);
-        return mapUnitListToReadlistListResponse(unitResp);
-      },
-      staleTime: 1000 * 60 * 5,
-    } as const;
-  };
-
-  const {data, isLoading, error} = useQuery(buildMeiliReadlistQuery(start));
+  const {data, isLoading, error} = useQuery(
+    buildMeiliReadlistQuery(
+      start,
+      EXTERNAL_PAGE_SIZE,
+      currentQuery.keyword ?? '',
+      currentQuery.tags ?? [],
+    ),
+  );
 
   function handleNeedMoreData(page: number) {
     setStart((page - 1) * EXTERNAL_PAGE_SIZE);
@@ -191,7 +171,12 @@ export function ReadListsPage() {
   const queryClient = useQueryClient();
   async function handlePreRequestData(page: number) {
     const startOffset = (page - 1) * EXTERNAL_PAGE_SIZE;
-    const {queryKey, queryFn} = buildMeiliReadlistQuery(startOffset);
+    const {queryKey, queryFn} = buildMeiliReadlistQuery(
+      startOffset,
+      EXTERNAL_PAGE_SIZE,
+      currentQuery.keyword ?? '',
+      currentQuery.tags ?? [],
+    );
     const data = await queryClient.fetchQuery({queryKey, queryFn});
     console.log('handlePreRequestData', data, page);
     return data?.readlists?.length ?? 0;

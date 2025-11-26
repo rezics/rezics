@@ -38,7 +38,7 @@ export const BookCarousel: React.FC<BookCarouselProps> = ({
       slidesPerView={1}
       className="min-h-[200px]"
     >
-      {products.map((product, index) => (
+      {products?.map((product, index) => (
         <SwiperSlide key={index}>
           <Grid container spacing={2} alignItems="center" sx={{px: 2}}>
             <Grid size={{xs: 12, sm: 3}}>
