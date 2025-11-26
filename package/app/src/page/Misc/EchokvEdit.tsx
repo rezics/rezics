@@ -4,11 +4,17 @@ import {
   Box,
   Button,
   Divider,
+  InputAdornment,
+  List,
+  ListItemButton,
+  ListItemText,
   Paper,
   Stack,
   TextField,
   Typography,
 } from '@mui/material';
+import {useQuery} from '@tanstack/react-query';
+import SearchIcon from '@mui/icons-material/Search';
 import {echoKvApi} from '@/api/echokv/echokv';
 import {useAlertStore} from '@/global/windowAlertStore';
 import {JSONEditor} from '@pardnchiu/nanojson/dist/NanoJSON.esm.js';
@@ -19,9 +25,16 @@ export const EchokvEditPage: React.FC = () => {
   const {show: showAlert} = useAlertStore();
 
   const [currentKey, setCurrentKey] = useState('key_name');
+  const [searchKey, setSearchKey] = useState('');
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const editorRef = useRef<JSONEditorInstance | null>(null);
+
+  const {data: keyList, isLoading: keyListLoading} = useQuery({
+    queryKey: ['echokv-keys', searchKey],
+    queryFn: () => echoKvApi.listKeys(searchKey),
+    staleTime: 1000 * 60,
+  });
 
   // 初始化一次，不依赖 React 的 DOM 变动
   useEffect(() => {
@@ -107,6 +120,70 @@ export const EchokvEditPage: React.FC = () => {
       <Typography variant="h4" gutterBottom>
         EchoKV JSON 编辑器
       </Typography>
+
+      <Paper sx={{mt: 2, borderRadius: 2, p: 2}}>
+        <Typography variant="h6" gutterBottom>
+          Key 列表
+        </Typography>
+        <Stack spacing={1.5}>
+          <TextField
+            size="small"
+            label="搜索 Key"
+            value={searchKey}
+            onChange={e => setSearchKey(e.target.value)}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon fontSize="small" />
+                </InputAdornment>
+              ),
+            }}
+          />
+          <Box
+            sx={{
+              maxHeight: 260,
+              overflow: 'auto',
+              borderRadius: 1,
+              border: theme => `1px solid ${theme.palette.divider}`,
+            }}
+          >
+            {keyListLoading && (
+              <Box sx={{p: 1.5}}>
+                <Typography variant="body2" color="text.secondary">
+                  加载中…
+                </Typography>
+              </Box>
+            )}
+            {!keyListLoading &&
+              (!keyList?.keys || keyList.keys.length === 0) && (
+                <Box sx={{p: 1.5}}>
+                  <Typography variant="body2" color="text.secondary">
+                    暂无数据
+                  </Typography>
+                </Box>
+              )}
+            {!keyListLoading && keyList?.keys && keyList.keys.length > 0 && (
+              <List dense disablePadding>
+                {keyList.keys.map(key => (
+                  <ListItemButton
+                    key={key}
+                    selected={currentKey === key}
+                    onClick={() => setCurrentKey(key)}
+                  >
+                    <ListItemText
+                      primary={key}
+                      primaryTypographyProps={{
+                        noWrap: true,
+                        title: key,
+                      }}
+                    />
+                  </ListItemButton>
+                ))}
+              </List>
+            )}
+          </Box>
+        </Stack>
+      </Paper>
 
       <Paper sx={{mt: 3, borderRadius: 2, overflow: 'hidden'}}>
         <Box sx={{px: 2, py: 1.5}}>

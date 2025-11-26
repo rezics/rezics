@@ -28,6 +28,33 @@ export class EchoKvService {
     });
     return record.value as JsonValue;
   }
+
+  /**
+   * List all keys, optionally filtered by a search string.
+   * Newest records come first.
+   */
+  async listKeys(search?: string): Promise<string[]> {
+    const records = await prisma.echoKV.findMany({
+      ...(search
+        ? {
+            where: {
+              key: {
+                contains: search,
+                mode: 'insensitive',
+              },
+            },
+          }
+        : {}),
+      select: {
+        key: true,
+      },
+      orderBy: {
+        updatedAt: 'desc',
+      },
+    });
+
+    return records.map(r => r.key);
+  }
 }
 
 export const echoKvService = new EchoKvService();

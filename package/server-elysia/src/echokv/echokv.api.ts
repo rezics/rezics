@@ -1,9 +1,32 @@
 import {t} from 'elysia';
 import {coreInstance} from '../core';
-import type {EchoKVResponse, EchoKVUpsertRequest} from './types';
+import type {
+  EchoKVKeyListResponse,
+  EchoKVResponse,
+  EchoKVUpsertRequest,
+} from './types';
 import {echoKvService} from './echokv.service';
 
 export const echoKvApi = coreInstance('/echokv')
+  // List all keys (with optional search)
+  .get(
+    '/',
+    async ({query}): Promise<EchoKVKeyListResponse> => {
+      const keys = await echoKvService.listKeys(query.search);
+      return {keys};
+    },
+    {
+      query: t.Object({
+        search: t.Optional(t.String()),
+      }),
+      detail: {
+        summary: 'List keys',
+        description: 'List all keys with an optional search string.',
+        tags: ['EchoKV'],
+      },
+    },
+  )
+
   // Get value by key
   .get(
     '/:key',

@@ -13,3 +13,10 @@ export type EchoKVUpsertRequest = {
    */
   value: JsonValue;
 };
+
+export type EchoKVKeyListResponse = {
+  /**
+   * All keys that match the optional search condition.
+   */
+  keys: string[];
+};
