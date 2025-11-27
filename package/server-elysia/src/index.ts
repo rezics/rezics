@@ -44,7 +44,6 @@ const app = new Elysia()
       });
     });
   })
-  .use(swagger())
   .use(bookApi)
   .use(chapterApi)
   .use(readlistApi)
@@ -57,8 +56,13 @@ const app = new Elysia()
   .use(reactionApi)
   .use(echoKvApi)
   .get('/', () => 'Hello Elysia')
-  .get('/health', () => ({status: 'ok'}))
-  .listen(process.env.PORT ?? 3000);
+  .get('/health', () => ({status: 'ok'}));
+
+if (process.env.NODE_ENV === 'development') {
+  app.use(swagger());
+}
+
+app.listen(process.env.PORT ?? 3000);
 
 console.log(
   `🦊 Elysia is running at http://${app.server?.hostname}:${app.server?.port}`,

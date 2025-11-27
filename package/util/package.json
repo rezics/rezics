@@ -1,5 +1,9 @@
 {
   "type": "module",
+  "scripts": {
+    "install-services": "bun run install-services/install-services.ts",
+    "deploy": "bun run deploy-script/deploy-script.ts"
+  },
   "devDependencies": {
     "@types/node": "^24.10.1"
   }
