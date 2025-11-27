@@ -11,6 +11,7 @@
 - [ ] https://github.com/meilisearch/meilisearch-react
 - [ ] 引入 react-instantsearch
 - [ ] Clone NanoJSON 优化代码
+- fix : NODE_ENV=production is not supported in the .env file. Only NODE_ENV=development is supported to create a development build of your project. If you need to set process.env.NODE_ENV, you can set it in the Vite config instead.
 
 ## Complete
 

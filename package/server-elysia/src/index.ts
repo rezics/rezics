@@ -13,14 +13,15 @@ import {commentApi} from './comment';
 import {reactionApi} from './reaction';
 import {cors} from '@elysiajs/cors';
 
+import {getProdState} from './utils/getProdState';
+
 import 'dotenv/config';
 
-if (process.env.NODE_ENV === 'development') {
+const {isProd, isDev} = getProdState();
+
+if (isDev) {
   await import('./utils/logger-hook');
 }
-
-const isProd = process.env.NODE_ENV === 'production';
-
 const app = new Elysia()
   .use(
     cors({
@@ -58,7 +59,7 @@ const app = new Elysia()
   .get('/', () => 'Hello Elysia')
   .get('/health', () => ({status: 'ok'}));
 
-if (process.env.NODE_ENV === 'development') {
+if (isDev) {
   app.use(swagger());
 }
 
