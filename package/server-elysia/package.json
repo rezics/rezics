@@ -5,7 +5,9 @@
   "private": true,
   "scripts": {
     "dev": "bun run --watch --no-cache src/index.ts",
-    "build": "tsc",
+    "dev:cluster": "bun run --watch --no-cache src/cluster.ts",
+    "build": "bun build \t--compile \t--minify-whitespace \t--minify-syntax \t--target bun \t--outfile server \tsrc/index.ts",
+    "build:linux": "bun build \t--compile \t--minify-whitespace \t--minify-syntax \t--target bun-linux-x64 \t--outfile server \tsrc/cluster.ts",
     "prisma:generate": "bunx prisma generate",
     "prisma:migrate": "bunx prisma migrate dev",
     "prisma:studio": "bunx prisma studio",

@@ -28,6 +28,23 @@ bunx prisma migrate deploy
 # 大型迁移
 bunx prisma migrate reset
 bun run prisma:seed:echokv
+
+# Linux 
+npx prisma generate
+```
+
+```sh
+# Ubuntu 示例
+sudo apt update
+sudo apt install postgresql postgresql-contrib
+sudo service postgresql start
+
+```
+
+
+```sh
+sudo systemctl restart rezbooklib.service
+journalctl -u rezbooklib.service -n 50 --no-pager
 ```
 
 ## Encore

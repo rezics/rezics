@@ -11,6 +11,7 @@ import {tagApi} from './tag';
 import {echoKvApi} from './echokv';
 import {commentApi} from './comment';
 import {reactionApi} from './reaction';
+import {cors} from '@elysiajs/cors';
 
 import 'dotenv/config';
 
@@ -18,7 +19,17 @@ if (process.env.NODE_ENV === 'development') {
   await import('./utils/logger-hook');
 }
 
+const isProd = process.env.NODE_ENV === 'production';
+
 const app = new Elysia()
+  .use(
+    cors({
+      origin: isProd ? ['https://book.rezics.com', 'https://rezics.com'] : true,
+      methods: ['GET', 'POST', 'OPTIONS'],
+      allowedHeaders: ['*'],
+      credentials: true,
+    }),
+  )
   .trace(async ({onHandle, context}) => {
     // 监听 handle 阶段
     onHandle(({begin, onStop}) => {
@@ -47,7 +58,7 @@ const app = new Elysia()
   .use(echoKvApi)
   .get('/', () => 'Hello Elysia')
   .get('/health', () => ({status: 'ok'}))
-  .listen(3000);
+  .listen(process.env.PORT ?? 3000);
 
 console.log(
   `🦊 Elysia is running at http://${app.server?.hostname}:${app.server?.port}`,

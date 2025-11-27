@@ -9,6 +9,7 @@ import {seedBooks, updateChapterIndex, seedChaptersForBook} from './seed/books';
 import {seedOtherUnits} from './seed/units';
 import {seedComments, updateStatsWithCommentCounts} from './seed/comments';
 import {seedReadLists} from './seed/readlist';
+import {seedEchoKV} from './seed/echokv';
 
 // ------------------------------
 // Prisma Client
@@ -109,6 +110,9 @@ async function main() {
 
     // Update stats with comment counts
     await updateStatsWithCommentCounts(prisma, perRootCount);
+
+    // Seed echo KV
+    await seedEchoKV(prisma);
 
     // Print summary
     const summary = {

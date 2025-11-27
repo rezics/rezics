@@ -223,9 +223,10 @@ export const NoticeBoard: React.FC = () => {
     }
   }, [data, showAlert]);
 
-  if (error) {
-    showAlert(`公告板数据加载失败: ${error}`);
-  }
+  useEffect(() => {
+    // 这里有问题，每次都会触发
+    // showAlert(`公告板数据加载失败: ${error}`);
+  }, [error, showAlert]);
 
   return (
     <div className="w-full h-full flex flex-col">
