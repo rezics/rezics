@@ -24,6 +24,7 @@ import {coreInstance} from '../core';
  * User Controller - Elysia.js routes with JWT authentication
  */
 export const userApi = coreInstance('/users')
+  // ANCHOR User Core
   /**
    * Register new user (public)
    * POST /users/register
@@ -153,6 +154,55 @@ export const userApi = coreInstance('/users')
       },
     },
   )
+
+  // ANCHOR Verification Code Logic
+  /**
+   * Send verification code
+   * POST /users/send-verification-code
+   */
+  .post(
+    '/send-verification-code',
+    async ({body}) => {
+      const email = body.email;
+      await userService.sendVerificationCode(email);
+      return {message: 'Verification code sent successfully'};
+    },
+    {
+      body: t.Object({
+        email: t.String(),
+      }),
+      detail: {
+        summary: 'Send verification code',
+        description: 'Send verification code to user',
+        tags: ['Users', 'Verification Code'],
+      },
+    },
+  )
+
+  /**
+   * Verify verification code
+   * POST /users/verify-verification-code
+   */
+  .post(
+    '/verify-verification-code',
+    async ({headers, jwt, body, set}) => {
+      const payload = await verifyAuth(headers.authorization, jwt, set);
+      const email = payload.email;
+      await userService.verifyVerificationCode(email, body.code);
+    },
+    {
+      body: t.Object({
+        code: t.String(),
+      }),
+      detail: {
+        summary: 'Verify verification code',
+        description: 'Verify verification code',
+        tags: ['Users', 'Verification Code'],
+      },
+    },
+  )
+
+  // ANCHOR Follow Logic
 
   /**
    * Follow a user

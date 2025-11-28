@@ -8,8 +8,13 @@ import type {UserFilterOptions, UserWithRelations} from './types';
 import {userInclude} from './types';
 import type {CreateUserInput, UpdateUserInput} from '@package/contract';
 import {isPasswordValid} from './utils';
+import {Resend} from 'resend';
+
+import {allowEmailDomains} from './allowEmailDomains';
 
 const SALT_ROUNDS = 10;
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 /**
  * User Service - Business logic layer
@@ -125,6 +130,12 @@ export class UserService {
       throw new Error('Email already exists');
     }
 
+    if (
+      !allowEmailDomains.includes(email.split('@')[1] ?? 'invalid-email-domain')
+    ) {
+      throw new Error('Invalid email domain');
+    }
+
     const user = await prisma.user.create({
       data: {
         email,
@@ -216,6 +227,67 @@ export class UserService {
     }
 
     return user;
+  }
+
+  // ANCHOR Verification Code Logic
+  /**
+   * Send verification code
+   */
+  async sendVerificationCode(
+    email: string,
+    userId?: string,
+  ): Promise<{status: 'success' | 'error'; data: any}> {
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiresAt = new Date(Date.now() + 1000 * 60 * 30); // 30 minutes
+    const theUserId = userId ?? '019aca29-e86c-79ba-a29e-cd6b1c653c55'; // we don't need user id for verification code
+    const {data, error} = await resend.emails.send({
+      from: 'Acme <onboarding@resend.dev>',
+      to: [email],
+      subject: 'REZICS - Verification Code',
+      html: `<strong>Your verification code is: ${code}. It will expire in 30 minutes.</strong>`,
+    });
+
+    if (error) {
+      return {status: 'error', data: error};
+    }
+
+    await prisma.verificationCode.create({
+      data: {email, userId: theUserId, code, expiresAt},
+    });
+
+    return {status: 'success', data: data};
+  }
+
+  /**
+   * Verify verification code
+   */
+  async verifyVerificationCode(
+    email: string,
+    code: string,
+  ): Promise<{status: 'success' | 'error'; message?: string}> {
+    const verificationCode = await prisma.verificationCode.findUnique({
+      where: {email, code},
+    });
+    if (!verificationCode) {
+      return {status: 'error', message: 'Verification code not found'};
+    }
+    if (verificationCode.expiresAt < new Date()) {
+      return {status: 'error', message: 'Verification code expired'};
+    }
+    if (verificationCode.usedAt) {
+      return {status: 'error', message: 'Verification code already used'};
+    }
+    await prisma.verificationCode.update({
+      where: {id: verificationCode.id},
+      data: {usedAt: new Date()},
+    });
+    return {status: 'success'};
+  }
+  /**
+   * Resend verification code
+   */
+  async resendVerificationCode(email: string, userId: string): Promise<void> {
+    await this.sendVerificationCode(email, userId);
   }
 
   /**

@@ -86,6 +86,18 @@ model User {
   @@index([email])
 }
 
+model VerificationCode {
+  id        String    @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  userId    String    @db.Uuid
+  email     String    @unique
+  code      String
+  expiresAt DateTime
+  usedAt    DateTime? // 提供接口，暂时还不支持
+  createdAt DateTime  @default(now())
+
+  @@index([email])
+}
+
 model Follow {
   id         String @id @default(dbgenerated("uuidv7()")) @db.Uuid
   follower   User   @relation("UserFollowings", fields: [followerId], references: [unitId])
