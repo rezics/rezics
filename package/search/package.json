@@ -4,7 +4,8 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "meilisearch": "cd ./bin && ./meilisearch --config-file-path='./config.toml'"
+    "meilisearch": "cd ./bin && ./meilisearch --config-file-path='./config.toml'",
+    "meilisearch:wsl": "cd ./bin && ./meilisearch --http-addr 0.0.0.0:7700 --config-file-path='./config.toml'"
   },
   "devDependencies": {},
   "peerDependencies": {},

@@ -3,7 +3,7 @@ import {Sidebar} from '@/component/Layout/Sidebar/Sidebar';
 import {useMediaQuery} from '@mui/material';
 import React from 'react';
 import type {ReactNode} from 'react';
-// import { Box } from "@mui/material";
+import {Helmet} from 'react-helmet-async';
 import {NAVIGATION} from '@/component/Layout/Navigation/MainNavigation';
 import {appStore} from '@/global/appStore.ts';
 import {useLayoutStore} from '@/global/Layout/layoutStore.ts';
@@ -28,6 +28,9 @@ export const MainLayout: React.FC<MainLayoutProps> = ({children}) => {
 
   return (
     <div className="flex min-h-screen">
+      <Helmet>
+        <title>REZICS | 书库</title>
+      </Helmet>
       <Header
         handleDrawerToggle={handleDrawerToggle}
         mode={mode}

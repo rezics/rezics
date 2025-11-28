@@ -16,6 +16,7 @@ import Router from './router/router.tsx';
 
 import {ErrorBoundary} from 'react-error-boundary';
 import {WindowAlert} from './component/Common/WindowAlert.tsx';
+import {HelmetProvider} from 'react-helmet-async';
 
 export default function App() {
   const themeMode = appStore(s => s.theme);
@@ -45,14 +46,16 @@ export default function App() {
   return (
     <ErrorBoundary fallback={<div>Something went wrong</div>}>
       <StrictMode>
-        <StyledEngineProvider injectFirst>
-          <ThemeProvider theme={theme}>
-            <CssBaseline />
-            <PersistentSettingsLoader />
-            <WindowAlert />
-            <ReactQueryProvider>{Router}</ReactQueryProvider>
-          </ThemeProvider>
-        </StyledEngineProvider>
+        <HelmetProvider>
+          <StyledEngineProvider injectFirst>
+            <ThemeProvider theme={theme}>
+              <CssBaseline />
+              <PersistentSettingsLoader />
+              <WindowAlert />
+              <ReactQueryProvider>{Router}</ReactQueryProvider>
+            </ThemeProvider>
+          </StyledEngineProvider>
+        </HelmetProvider>
       </StrictMode>
     </ErrorBoundary>
   );

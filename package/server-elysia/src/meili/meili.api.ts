@@ -9,6 +9,7 @@ import {
 import {meiliService} from './meili.service';
 import {verifyAuth} from '@/src/utils/authUtils';
 import {deleteAllUnits} from '@package/search/src/documents';
+import {checkMeiliHealth} from '@package/search/src/client';
 
 /**
  * Meili API - Elysia routes for search and key management.
@@ -23,7 +24,6 @@ export const meiliApi = coreInstance('/meili')
     '/health',
     async () => {
       // Lazy import to avoid creating the client eagerly if not needed.
-      const {checkMeiliHealth} = await import('@package/search/src/client');
       const ok = await checkMeiliHealth();
       return {status: ok ? 'available' : 'unavailable'};
     },
