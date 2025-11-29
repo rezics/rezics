@@ -1,5 +1,7 @@
 import React, {useEffect} from 'react';
-import {useMemo, useState} from 'react';
+import {useState} from 'react';
+import {buildMeiliUnitQuery} from '@/api/meili/meili.queries';
+import {UnitType} from '@package/contract/src/unit';
 import {
   Button,
   IconButton,
@@ -22,6 +24,7 @@ import {bookQueries} from '@/api/book/book';
 import {useLocation} from 'wouter';
 import {ConfirmDeleteDialog} from '@/component/Form/ConfirmDeleteDialog';
 import {useAlertStore} from '@/global/windowAlertStore';
+import {mapUnitListToReviewListResponse} from '@/api/meili/meili.api';
 
 function extractReviewId(input: string): string | null {
   if (!input) return null;
@@ -68,7 +71,16 @@ const ReviewSearchBox: React.FC<{
 }> = ({onAdd}) => {
   const [keyword, setKeyword] = useState('');
   const [q, setQ] = useState('');
-  const {data, isLoading} = useQuery(reviewQueries.search(q));
+  const {data, isLoading} = useQuery(
+    buildMeiliUnitQuery(
+      UnitType.REVIEW,
+      0,
+      '',
+      q,
+      5,
+      mapUnitListToReviewListResponse,
+    ),
+  );
   const reviews = data?.reviews ?? [];
 
   return (

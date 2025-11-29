@@ -6,6 +6,7 @@ import {useQuery} from '@tanstack/react-query';
 import {echoKvGetQuery} from '@/api/echokv/echokv';
 import {parseEchoKVResponse} from '@/api/echokv/util';
 import {useAlertStore} from '@/global/windowAlertStore';
+import {Link} from 'wouter';
 
 import 'swiper/css';
 import 'swiper/css/pagination';
@@ -40,22 +41,24 @@ export const BookCarousel: React.FC<BookCarouselProps> = ({
     >
       {products?.map((product, index) => (
         <SwiperSlide key={index}>
-          <Grid container spacing={2} alignItems="center" sx={{px: 2}}>
-            <Grid size={{xs: 12, sm: 3}}>
-              <Box
-                component="img"
-                src={product.cover}
-                alt={product.title}
-                sx={{width: '100%', borderRadius: 1}}
-              />
+          <Link to={product?.link ?? ''}>
+            <Grid container spacing={2} alignItems="center" sx={{px: 2}}>
+              <Grid size={{xs: 12, sm: 3}}>
+                <Box
+                  component="img"
+                  src={product.cover}
+                  alt={product.title}
+                  sx={{width: '100%', borderRadius: 1}}
+                />
+              </Grid>
+              <Grid size={{xs: 12, sm: 9}}>
+                <Typography variant="h6" fontWeight="bold" gutterBottom>
+                  {product.title}
+                </Typography>
+                <Typography variant="body2">{product.lorem}</Typography>
+              </Grid>
             </Grid>
-            <Grid size={{xs: 12, sm: 9}}>
-              <Typography variant="h6" fontWeight="bold" gutterBottom>
-                {product.title}
-              </Typography>
-              <Typography variant="body2">{product.lorem}</Typography>
-            </Grid>
-          </Grid>
+          </Link>
         </SwiperSlide>
       ))}
     </Swiper>

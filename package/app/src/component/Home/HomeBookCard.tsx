@@ -53,7 +53,7 @@ const BookCard = ({
         <CardContent className="flex flex-col flex-1 w-full gap-1 p-1">
           {/* 标题：限制显示2行，超出省略 */}
           <div
-            className="font-bold leading-tight text-gray-900 line-clamp-2 min-h-[2.5em]"
+            className="font-bold leading-tight line-clamp-2 min-h-[2.5em]"
             title={book.title}
           >
             {book.title}
