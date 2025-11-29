@@ -1,8 +1,14 @@
-import type {BookQueryOptions, UnitListQuery} from '@package/contract';
+import type {
+  BookQueryOptions,
+  UnitListQuery,
+  ReadlistListQuery,
+} from '@package/contract';
 import type {BookSearchResult} from './book';
 import type {UnitSearchResult} from './unit';
+import type {ReadlistSearchResult} from './readlist';
 import {searchBooks} from './book/book.api';
 import {searchUnits} from './unit/unit.api';
+import {searchReadlists} from './readlist/readlist.api';
 import {
   syncAllBooks,
   initBookIndex,
@@ -12,6 +18,8 @@ import {
   deleteKey,
   initUnitIndex,
   syncAllUnits,
+  initReadlistIndex,
+  syncAllReadlists,
 } from '@package/search/src/index';
 
 /**
@@ -37,6 +45,15 @@ export class MeiliService {
   }
 
   /**
+   * Search readlists using the contract-based ReadlistListQuery.
+   */
+  async searchReadlists(
+    options: ReadlistListQuery,
+  ): Promise<ReadlistSearchResult> {
+    return searchReadlists(options);
+  }
+
+  /**
    * Initialize Meilisearch `books` index settings.
    */
   async initBooksIndex(): Promise<void> {
@@ -51,6 +68,13 @@ export class MeiliService {
   }
 
   /**
+   * Initialize Meilisearch `readlists` index settings.
+   */
+  async initReadlistsIndex(): Promise<void> {
+    await initReadlistIndex();
+  }
+
+  /**
    * Trigger a full re-sync of all books into Meilisearch.
    */
   async syncAllBooks(): Promise<unknown> {
@@ -62,6 +86,13 @@ export class MeiliService {
    */
   async syncAllUnits(): Promise<unknown> {
     return syncAllUnits();
+  }
+
+  /**
+   * Trigger a full re-sync of all readlists into Meilisearch.
+   */
+  async syncAllReadlists(): Promise<unknown> {
+    return syncAllReadlists();
   }
 
   /**

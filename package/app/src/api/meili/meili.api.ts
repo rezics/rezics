@@ -7,12 +7,14 @@
 import type {
   BookListResponse,
   ReadlistDTO,
+  ReadlistListQuery,
   ReadlistListResponse,
   ReadlistMetadata,
   UnitListResponse,
   ReviewDTO,
   ReviewListResponse,
 } from '@package/contract';
+import type {ReadlistSearchResult} from '@package/contract/src/meili/readlist';
 import {buildQueryString} from '../utils/buildQuery';
 import {apiFetch} from '../react-query/http';
 import type {BookFilters} from '../book/book.types';
@@ -26,6 +28,22 @@ export const meiliBookApi = {
    */
   bookSearch: async (filters?: BookFilters): Promise<BookListResponse> => {
     return apiFetch<BookListResponse>(`/meili/books/search`, {
+      method: 'POST',
+      body: JSON.stringify(filters),
+    });
+  },
+};
+
+export const meiliReadlistApi = {
+  /**
+   * Search readlists via backend Meilisearch controller.
+   *
+   * The backend expects a `ReadlistListQuery` object encoded in the request body.
+   */
+  readlistSearch: async (
+    filters?: ReadlistListQuery,
+  ): Promise<ReadlistSearchResult> => {
+    return apiFetch<ReadlistSearchResult>(`/meili/readlists/search`, {
       method: 'POST',
       body: JSON.stringify(filters),
     });
@@ -134,6 +152,23 @@ export function mapUnitToReadlistDTO(unit: any): ReadlistDTO {
     books,
     reviews,
     order,
+  };
+}
+
+/**
+ * Convert a Meili `/meili/readlists/search` response into a
+ * `ReadlistListResponse` compatible with the existing `/readlists` API.
+ */
+export function mapReadlistSearchResultToReadlistListResponse(
+  searchResult: ReadlistSearchResult,
+): ReadlistListResponse {
+  const readlists: ReadlistDTO[] =
+    (searchResult.readlists as any[] | undefined)?.map(mapUnitToReadlistDTO) ??
+    [];
+
+  return {
+    readlists,
+    total: searchResult.total,
   };
 }
 

@@ -1,5 +1,5 @@
 // meili.documents.ts
-import {bookIndex, unitIndex} from './meili_index';
+import {bookIndex, unitIndex, readlistIndex} from './meili_index';
 
 // ANCHOR: Books
 export async function addOrUpdateBooks(books: any[]) {
@@ -25,4 +25,17 @@ export async function deleteUnits(ids: string[]) {
 
 export async function deleteAllUnits() {
   return unitIndex.deleteAllDocuments();
+}
+
+// ANCHOR: Readlists
+export async function addOrUpdateReadlists(readlists: any[]) {
+  return readlistIndex.addDocuments(readlists);
+}
+
+export async function deleteReadlists(ids: string[]) {
+  return readlistIndex.deleteDocuments(ids);
+}
+
+export async function deleteAllReadlists() {
+  return readlistIndex.deleteAllDocuments();
 }

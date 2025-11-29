@@ -11,9 +11,14 @@ import {UnitType} from '@package/contract/src/unit';
 interface BookReviewsProps {
   bookId: string;
   title: string;
+  reviewNumber?: number;
 }
 
-export const BookReviews: React.FC<BookReviewsProps> = ({bookId, title}) => {
+export const BookReviews: React.FC<BookReviewsProps> = ({
+  bookId,
+  title,
+  reviewNumber = 4,
+}) => {
   const [reviews, setReviews] = useState<any[]>([]);
 
   const {data} = useQuery(
@@ -22,7 +27,7 @@ export const BookReviews: React.FC<BookReviewsProps> = ({bookId, title}) => {
       0,
       bookId,
       '',
-      4,
+      reviewNumber,
       mapUnitListToReviewListResponse,
       {
         enabled: !!bookId,
@@ -41,7 +46,7 @@ export const BookReviews: React.FC<BookReviewsProps> = ({bookId, title}) => {
       <ArrowForwardIconContainer size={16} to={`/review/book/${bookId}/`}>
         <AccentBarWithTextShow text={`${title}的书评`} />
       </ArrowForwardIconContainer>
-      <ReviewListContainer reviews={reviews} />
+      <ReviewListContainer reviews={reviews?.slice(0, reviewNumber)} />
     </div>
   );
 };

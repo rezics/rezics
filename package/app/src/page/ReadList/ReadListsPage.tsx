@@ -146,7 +146,7 @@ const ReadlistsShowRef = forwardRef(ReadlistsShow);
  * 后续API调整，Service调整的问题，是否要切换到 unit 查询，还是继续用独立服务。
  * @returns ReadListsPage
  */
-export function ReadListsPage() {
+export function ReadListsPage({bookUnitId}: {bookUnitId?: string}) {
   const ref = useRef<UniversalPaginatorHandle>(null);
   const EXTERNAL_PAGE_SIZE = 100;
   const [currentQuery, setCurrentQuery] = useState<SearchInfo>({
@@ -161,6 +161,7 @@ export function ReadListsPage() {
       EXTERNAL_PAGE_SIZE,
       currentQuery.keyword ?? '',
       currentQuery.tags ?? [],
+      {bookId: bookUnitId ?? undefined},
     ),
   );
 

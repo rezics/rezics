@@ -3,16 +3,19 @@
 // hiding low-level details and wiring with the rest of the application.
 
 export {meili} from './client';
-export {initBookIndex, initUnitIndex} from './meili_index';
+export {initBookIndex, initUnitIndex, initReadlistIndex} from './meili_index';
 export {
   addOrUpdateBooks,
   addOrUpdateUnits,
+  addOrUpdateReadlists,
   deleteAllBooks,
   deleteAllUnits,
+  deleteAllReadlists,
   deleteBooks,
   deleteUnits,
+  deleteReadlists,
 } from './documents';
 export {getSearchKey, getAdminKey, listKeys, deleteKey} from './keys';
-export {syncAllBooks, syncAllUnits} from './sync';
+export {syncAllBooks, syncAllUnits, syncAllReadlists} from './sync';
 
 export * from './type';

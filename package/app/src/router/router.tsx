@@ -247,9 +247,9 @@ export default (
           )}
         </Route>
         <Route path="/readlist/book/:bookId">
-          {() => (
+          {({bookId}) => (
             <MainLayout>
-              <ReadlistByBookPage />
+              <ReadlistByBookPage bookId={bookId} />
             </MainLayout>
           )}
         </Route>

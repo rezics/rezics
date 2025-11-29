@@ -8,18 +8,19 @@ import {UnitType} from '@package/contract/src/unit';
 
 export type QuoteExcerptPreviewContainerProps = {
   id: string;
+  quoteNumber?: number;
 };
 
 export const QuoteExcerptPreviewContainer: React.FC<
   QuoteExcerptPreviewContainerProps
-> = ({id}) => {
+> = ({id, quoteNumber = 3}) => {
   const {data, isLoading, error} = useQuery(
     buildMeiliUnitQuery(
       UnitType.QUOTE,
       0,
       id,
       '',
-      3,
+      quoteNumber,
       unitResp => unitResp,
       {
         enabled: !!id,
@@ -33,7 +34,12 @@ export const QuoteExcerptPreviewContainer: React.FC<
 
   return (
     <div>
-      <QuoteExcerptListContainer data={data || {units: [], total: 0}} />
+      <QuoteExcerptListContainer
+        data={{
+          units: data?.units?.slice(0, quoteNumber) || [],
+          total: data?.total,
+        }}
+      />
     </div>
   );
 };

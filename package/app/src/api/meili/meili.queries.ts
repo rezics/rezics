@@ -4,8 +4,9 @@
 
 import {queryOptions} from '@tanstack/react-query';
 import {
-  mapUnitListToReadlistListResponse,
+  mapReadlistSearchResultToReadlistListResponse,
   meiliBookApi,
+  meiliReadlistApi,
   meiliUnitApi,
 } from './meili.api';
 import {type BookFilters} from '../book/book.types';
@@ -50,6 +51,7 @@ export const buildMeiliUnitQuery = (
       kind,
       targetUnitId ?? null,
       start,
+      limit,
       keyword,
       hashFn(mapFn),
     ],
@@ -62,25 +64,52 @@ export const buildMeiliUnitQuery = (
   } as const;
 };
 
+type ReadlistExtraFilterOptions = {
+  /** Filter readlists created by a specific user. */
+  userId?: string;
+  /**
+   * Filter readlists that contain the given book unit.
+   * Maps to backend `hasBookUnitId`.
+   */
+  bookId?: string;
+  /**
+   * Filter readlists that contain the given review unit.
+   * Maps to backend `hasReviewUnitId`.
+   */
+  reviewId?: string;
+};
+
 export const buildMeiliReadlistQuery = (
   startOffset: number,
   EXTERNAL_PAGE_SIZE: number,
   keyword: string,
   tags: string[],
+  options?: ReadlistExtraFilterOptions,
 ) => {
   const filters = {
-    type: 'READLIST',
     start: startOffset,
     limit: EXTERNAL_PAGE_SIZE,
     q: keyword || undefined,
     tags: tags?.join(',') || undefined,
+    ...(options?.userId ? {userId: options.userId} : {}),
+    ...(options?.bookId ? {hasBookUnitId: options.bookId} : {}),
+    ...(options?.reviewId ? {hasReviewUnitId: options.reviewId} : {}),
   } as const;
 
   return {
-    queryKey: ['meili-readlists', startOffset, keyword, tags?.join(',')],
+    queryKey: [
+      'meili-readlists',
+      startOffset,
+      EXTERNAL_PAGE_SIZE,
+      keyword,
+      tags?.join(','),
+      options?.userId ?? null,
+      options?.bookId ?? null,
+      options?.reviewId ?? null,
+    ],
     queryFn: async () => {
-      const unitResp = await meiliUnitApi.unitSearch(filters);
-      return mapUnitListToReadlistListResponse(unitResp);
+      const searchResult = await meiliReadlistApi.readlistSearch(filters);
+      return mapReadlistSearchResultToReadlistListResponse(searchResult);
     },
     staleTime: 1000 * 60 * 5,
   } as const;

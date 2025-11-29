@@ -4,31 +4,19 @@ import {AccentBarWithTextContainer} from '../Common/AccentBar.tsx';
 import {ArrowForwardIconContainer} from '../Common/ArrowForwardIcon.tsx';
 
 import {useQuery} from '@tanstack/react-query';
-import {buildMeiliUnitQuery} from '@/api/meili/meili.queries';
-import {mapUnitListToReadlistListResponse} from '@/api/meili/meili.api';
-import {UnitType} from '@package/contract/src/unit';
+import {buildMeiliReadlistQuery} from '@/api/meili/meili.queries';
 
 export function ReadlistByBookPreview({
   title,
   bookId,
+  readlistNumber = 6,
 }: {
   title: string;
   bookId?: string;
+  readlistNumber?: number;
 }) {
-  const targetUnitId = bookId || '';
-
   const {data, isLoading, error} = useQuery(
-    buildMeiliUnitQuery(
-      UnitType.READLIST,
-      0,
-      targetUnitId,
-      '',
-      4,
-      mapUnitListToReadlistListResponse,
-      {
-        enabled: !!targetUnitId,
-      },
-    ),
+    buildMeiliReadlistQuery(0, readlistNumber, '', [], {bookId}),
   );
 
   if (isLoading) {
@@ -42,7 +30,9 @@ export function ReadlistByBookPreview({
         <AccentBarWithTextContainer text={`包含 ${title} 的书单`} />
       </ArrowForwardIconContainer>
       <div className="mb-4" />
-      <ReadlistList booklists={data?.readlists || []} />
+      <ReadlistList
+        booklists={data?.readlists?.slice(0, readlistNumber) || []}
+      />
     </div>
   );
 }

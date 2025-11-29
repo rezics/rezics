@@ -7,13 +7,14 @@ import {
   Typography,
   Box,
   Chip,
+  Tooltip,
 } from '@mui/material';
 import {Link} from 'wouter';
 import EditIcon from '@mui/icons-material/Edit';
 import type {FC} from 'react';
 import {useTranslation} from 'react-i18next';
 import type {UserDTO} from '@package/contract';
-import {useQuery} from '@tanstack/react-query';
+import {useQuery, useQueryClient} from '@tanstack/react-query';
 import {userQueries} from '@/api/user/user.queries';
 import {UserError, UserLoading} from './UserState';
 import {useUserStore} from '@/global/userStore';
@@ -35,6 +36,7 @@ export const UserProfilePage: FC<UserProfilePageProps> = ({
   onEditClick,
 }) => {
   const currentUser = useUserStore(state => state.user);
+  const {setUser} = useUserStore();
   const {t} = useTranslation();
 
   console.log('isCurrentUser', isCurrentUser);
@@ -47,6 +49,18 @@ export const UserProfilePage: FC<UserProfilePageProps> = ({
     ...userQueries.detail(unitId),
     enabled: !isCurrentUser && !!unitId,
   });
+  const queryClient = useQueryClient();
+  async function refreshUser() {
+    const data = await queryClient.fetchQuery(
+      userQueries.me(currentUser?.unitId ?? ''),
+    );
+    setUser({
+      unitId: data?.unitId,
+      name: data?.name,
+      email: data?.email,
+      avatar: data?.avatar,
+    });
+  }
 
   const isLoading = meQuery.isLoading || detailQuery.isLoading;
   const queryError = (meQuery.error ?? detailQuery.error) as Error | null;
@@ -110,6 +124,17 @@ export const UserProfilePage: FC<UserProfilePageProps> = ({
                   className="!mr-2"
                 />
               )}
+              {isCurrentUser || user.unitId !== currentUser?.unitId ? (
+                <Tooltip title="需要刷新页面再点击刷新" placement="bottom">
+                  <Button
+                    variant="contained"
+                    onClick={refreshUser}
+                    className="!mr-2"
+                  >
+                    刷新
+                  </Button>
+                </Tooltip>
+              ) : null}
               {isCurrentUser ||
               currentUser?.permission?.role?.includes('ADMIN') ? (
                 <Button

@@ -60,3 +60,32 @@ export async function initUnitIndex() {
   });
   unitIndex.addDocuments([], {primaryKey: 'id'});
 }
+
+// ANCHOR: Readlists index
+export const readlistIndex = meili.index('readlists');
+
+/**
+ * Initialize or update the Meilisearch `readlists` index settings.
+ *
+ * - `searchableAttributes`: fields used for full-text search
+ * - `filterableAttributes`: fields usable in filter expressions
+ * - `sortableAttributes`: fields usable in sort expressions
+ */
+export async function initReadlistIndex() {
+  await readlistIndex.updateSettings({
+    searchableAttributes: ['title', 'content', 'tags'],
+    filterableAttributes: [
+      'targetUnitId',
+      'bookIds',
+      'reviewIds',
+      'type',
+      'status',
+      'userId',
+      'domainIds',
+      'nsfw',
+      'tags',
+    ],
+    sortableAttributes: ['createdAt', 'updatedAt'],
+  });
+  readlistIndex.addDocuments([], {primaryKey: 'id'});
+}

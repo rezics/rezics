@@ -5,6 +5,8 @@ import {
   type BookQueryOptions,
   unitListQuerySchema,
   type UnitListQuery,
+  readlistListQuerySchema,
+  type ReadlistListQuery,
 } from '@package/contract';
 import {meiliService} from './meili.service';
 import {verifyAuth} from '@/src/utils/authUtils';
@@ -58,6 +60,28 @@ export const meiliApi = coreInstance('/meili')
   )
 
   /**
+   * Search readlists using Meilisearch.
+   *
+   * POST /meili/readlists/search
+   */
+  .post(
+    '/readlists/search',
+    async ({body}) => {
+      const options = body as ReadlistListQuery;
+      return meiliService.searchReadlists(options);
+    },
+    {
+      body: readlistListQuerySchema,
+      detail: {
+        summary: 'Search readlists (Meilisearch)',
+        description:
+          'Full-text search over readlists using Meilisearch, driven by contract-based ReadlistListQuery.',
+        tags: ['Meili', 'Readlists', 'Search'],
+      },
+    },
+  )
+
+  /**
    * Search units using Meilisearch.
    *
    * GET /meili/units/search
@@ -99,6 +123,25 @@ export const meiliApi = coreInstance('/meili')
   )
 
   /**
+   * Initialize the `readlists` index (idempotent).
+   *
+   * POST /meili/readlists/init
+   */
+  .post(
+    '/readlists/init',
+    async () => {
+      await meiliService.initReadlistsIndex();
+      return {message: 'readlists index initialized'};
+    },
+    {
+      detail: {
+        summary: 'Init readlists index',
+        tags: ['Meili', 'Admin'],
+      },
+    },
+  )
+
+  /**
    * Initialize the `units` index (idempotent).
    *
    * POST /meili/units/init
@@ -131,6 +174,25 @@ export const meiliApi = coreInstance('/meili')
     {
       detail: {
         summary: 'Sync all books to Meilisearch',
+        tags: ['Meili', 'Admin'],
+      },
+    },
+  )
+
+  /**
+   * Trigger a full sync of all readlists into Meilisearch.
+   *
+   * POST /meili/readlists/sync
+   */
+  .post(
+    '/readlists/sync',
+    async () => {
+      const task = await meiliService.syncAllReadlists();
+      return {task};
+    },
+    {
+      detail: {
+        summary: 'Sync all readlists to Meilisearch',
         tags: ['Meili', 'Admin'],
       },
     },

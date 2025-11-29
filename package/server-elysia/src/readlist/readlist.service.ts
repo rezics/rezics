@@ -10,6 +10,10 @@ import type {
 import type {ReadlistDTO} from '@package/contract';
 import {mapReadlistListRowToDTO, mapReadlistRowToDTO} from './mapper';
 import {syncUnitToMeili, deleteUnitFromMeili} from '@/src/meili/unit/sync';
+import {
+  deleteReadlistFromMeili,
+  syncReadlistToMeili,
+} from '../meili/readlist/sync';
 
 export class ReadlistService {
   private buildWhere(options: ReadlistListQuery): Prisma.ReadListWhereInput {
@@ -119,6 +123,7 @@ export class ReadlistService {
     });
 
     await syncUnitToMeili(unit.id);
+    await syncReadlistToMeili(unit.id);
 
     return mapReadlistRowToDTO(row);
   }
@@ -144,12 +149,14 @@ export class ReadlistService {
       select: readlistSelect,
     });
     await syncUnitToMeili(unitId);
+    await syncReadlistToMeili(unitId);
     return mapReadlistRowToDTO(row);
   }
 
   async delete(unitId: string): Promise<void> {
     await prisma.unit.delete({where: {id: unitId}});
     await deleteUnitFromMeili(unitId);
+    await deleteReadlistFromMeili(unitId);
   }
 }
 

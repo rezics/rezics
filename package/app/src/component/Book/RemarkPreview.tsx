@@ -42,7 +42,7 @@ export const RemarkPreview: React.FC<ShortBookReviewsProps> = ({bookId}) => {
 
   return (
     <ShortReviewListShow
-      data={data ?? {reviews: [], total: 0}}
+      data={{reviews: data?.reviews?.slice(0, 4) || [], total: data?.total}}
       onLike={handleLike}
       onDislike={handleDislike}
     />
