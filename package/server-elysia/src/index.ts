@@ -23,14 +23,8 @@ if (isDev) {
   await import('./utils/logger-hook');
 }
 const app = new Elysia()
-  .use(
-    cors({
-      origin: isProd ? ['https://book.rezics.com', 'https://rezics.com'] : true,
-      methods: ['GET', 'POST', 'OPTIONS'],
-      allowedHeaders: ['*'],
-      credentials: true,
-    }),
-  )
+  // CORS The policy may need to be updated
+  .use(cors())
   .onError(({code, error, set}) => {
     set.status ||= 500;
     const message =

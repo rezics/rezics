@@ -77,13 +77,25 @@ export async function apiFetch<T>(
 
   // Handle 401 Unauthorized - token might be expired
   if (response.status === 401) {
-    removeToken();
-    // Optionally redirect to login
-    if (typeof window !== 'undefined') {
-      // TODO 完善权限机制后加回来
-      // window.location.href = '/login';
+    const responseJson = await response.json();
+    if (!responseJson?.message?.includes('Invalid token')) {
+      throw new Error(responseJson?.message);
     }
-    throw new Error('Unauthorized - Please login again');
+    removeToken();
+    const refreshTokenResponse = await fetch(
+      `${API_BASE_URL}/users/refresh-token`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      },
+    );
+    const json = await refreshTokenResponse.json();
+    if (!json?.token) {
+      throw new Error('Unauthorized - Please login again');
+    }
+    setToken(json.token);
   }
 
   if (!response.ok) {

@@ -5,7 +5,10 @@ import type {
 } from '@package/contract';
 import {userService} from './user.service';
 import {mapUserToDTO, mapUserToPublicProfile} from './mapper';
-import type {JWTPayload} from './types';
+import type {JWTPayload, RefreshTokenPayload} from './types';
+import {sessionService} from './session.service';
+
+import {v7 as uuidv7} from 'uuid';
 
 import {verifyAuth} from '@/src/utils/authUtils';
 
@@ -36,7 +39,12 @@ export const userApi = coreInstance('/users')
    */
   .post(
     '/register',
-    async ({body, jwt}): Promise<{user: UserDTO; token: string}> => {
+    async ({
+      body,
+      jwt,
+      refreshToken,
+      setCookie,
+    }): Promise<{user: UserDTO; token: string}> => {
       const userReq: CreateUserInput = {
         email: body.email,
         password: body.password,
@@ -54,6 +62,28 @@ export const userApi = coreInstance('/users')
         slug: user.slug,
         permission: JSON.parse(JSON.stringify({roles: ['USER']})),
       } as JWTPayload);
+
+      const sessionId = uuidv7();
+      const refreshTokenSign = await refreshToken.sign({
+        sessionId: sessionId,
+        unitId: user.unitId,
+        type: 'refreshToken',
+      } as RefreshTokenPayload);
+
+      // 为新注册用户创建基于数据库的 refresh 会话记录
+      await sessionService.createSession({
+        sessionId: sessionId,
+        userId: user.unitId,
+        refreshToken: refreshTokenSign,
+      });
+
+      setCookie('refresh_token', refreshTokenSign, {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'lax',
+        path: '/users/refresh-token',
+        maxAge: 60 * 60 * 24 * 30,
+      });
 
       return {user: mapUserToDTO(user), token};
     },
@@ -73,7 +103,12 @@ export const userApi = coreInstance('/users')
    */
   .post(
     '/login',
-    async ({body, jwt}): Promise<{user: UserDTO; token: string}> => {
+    async ({
+      body,
+      jwt,
+      refreshToken,
+      setCookie,
+    }): Promise<{user: UserDTO; token: string}> => {
       const user = await userService.authenticate(body.email, body.password);
 
       if (!user) {
@@ -88,6 +123,28 @@ export const userApi = coreInstance('/users')
         permission: user.permission,
       } as JWTPayload);
 
+      const sessionId = uuidv7();
+      const refreshTokenSign = await refreshToken.sign({
+        sessionId: sessionId,
+        unitId: user.unitId,
+        type: 'refreshToken',
+      } as RefreshTokenPayload);
+
+      // 登录成功后，为用户创建 / 追加新的 refresh 会话记录
+      await sessionService.createSession({
+        sessionId: sessionId,
+        userId: user.unitId,
+        refreshToken: refreshTokenSign,
+      });
+
+      setCookie('refresh_token', refreshTokenSign, {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'lax',
+        path: '/users/refresh-token',
+        maxAge: 60 * 60 * 24 * 30,
+      });
+
       return {user: mapUserToDTO(user), token};
     },
     {
@@ -95,6 +152,81 @@ export const userApi = coreInstance('/users')
       detail: {
         summary: 'Login user',
         description: 'Authenticate user and get JWT token',
+        tags: ['Users'],
+      },
+    },
+  )
+
+  /**
+   * Refresh token
+   * POST /users/refresh-token
+   */
+  .post(
+    '/refresh-token',
+    async ({
+      headers,
+      jwt,
+      refreshToken,
+      set,
+      setCookie,
+    }): Promise<{token: string}> => {
+      const payload = await verifyAuth<RefreshTokenPayload>(
+        headers.refreshToken,
+        refreshToken,
+        set,
+      );
+
+      // 基于数据库会话进行二次校验（哈希比对 / 过期 / 撤销等）
+      const validation = await sessionService.validateAndMarkUsed({
+        sessionId: payload.sessionId,
+        refreshToken: headers.refreshToken ?? '',
+      });
+
+      if (!validation.valid) {
+        set.status = 401;
+        throw new Error(
+          `Unauthorized: Refresh session invalid (${validation.reason})`,
+        );
+      }
+
+      // 优先使用会话中的 userId，确保与数据库一致
+      const userId = validation.session.userId ?? payload.unitId;
+      const user = await userService.getByUnitId(userId);
+      const token = await jwt.sign({
+        unitId: user.unitId,
+        email: user.email,
+        slug: user.slug,
+        permission: user.permission,
+      } as JWTPayload);
+
+      const newSessionId = uuidv7();
+      const newRefreshTokenSign = await refreshToken.sign({
+        sessionId: newSessionId,
+        unitId: user.unitId,
+        type: 'refreshToken',
+      } as RefreshTokenPayload);
+      await sessionService.createSession({
+        sessionId: newSessionId,
+        userId: user.unitId,
+        refreshToken: newRefreshTokenSign,
+      });
+
+      setCookie('refresh_token', newRefreshTokenSign, {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'lax',
+        path: '/users/refresh-token',
+        maxAge: 60 * 60 * 24 * 30,
+      });
+
+      return {
+        token: token,
+      };
+    },
+    {
+      detail: {
+        summary: 'Refresh token',
+        description: 'Refresh JWT token',
         tags: ['Users'],
       },
     },
@@ -126,7 +258,11 @@ export const userApi = coreInstance('/users')
   .get(
     '/me/jwt-payload',
     async ({headers, jwt, set}): Promise<JWTPayload> => {
-      const payload = await verifyAuth(headers.authorization, jwt, set);
+      const payload = await verifyAuth<JWTPayload>(
+        headers.authorization,
+        jwt,
+        set,
+      );
       return payload;
     },
     {
@@ -191,7 +327,11 @@ export const userApi = coreInstance('/users')
   .post(
     '/verify-verification-code',
     async ({headers, jwt, body, set}) => {
-      const payload = await verifyAuth(headers.authorization, jwt, set);
+      const payload = await verifyAuth<JWTPayload>(
+        headers.authorization,
+        jwt,
+        set,
+      );
       const email = payload.email;
       await userService.verifyVerificationCode(email, body.code);
     },

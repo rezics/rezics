@@ -49,3 +49,9 @@ export const jwtPayloadSchema = t.Object({
 });
 
 export type JWTPayload = (typeof jwtPayloadSchema)['static'];
+
+export type RefreshTokenPayload = {
+  sessionId: string;
+  unitId: string;
+  type: 'refreshToken';
+};

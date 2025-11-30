@@ -2,6 +2,7 @@ import {Elysia} from 'elysia';
 import {jwt} from '@elysiajs/jwt';
 import {cors} from '@elysiajs/cors';
 import {bearer} from '@elysiajs/bearer';
+import {cookie} from '@elysiajs/cookie';
 
 export function coreInstance(prefix: string) {
   return new Elysia({prefix: prefix})
@@ -9,8 +10,17 @@ export function coreInstance(prefix: string) {
       jwt({
         name: 'jwt',
         secret: process.env.JWT_SECRET!,
+        exp: '15m',
       }),
     )
+    .use(
+      jwt({
+        name: 'refreshToken',
+        secret: process.env.REFRESH_TOKEN_SECRET!,
+        exp: '30d',
+      }),
+    )
+    .use(cookie())
     .use(bearer());
 }
 
