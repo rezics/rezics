@@ -1,4 +1,3 @@
-import {t} from 'elysia';
 import {coreInstance} from '../core';
 import {verifyAuth} from '@/src/utils/authUtils';
 import {
@@ -9,14 +8,18 @@ import {
   type ChapterListResponse,
   type ChapterResponse,
   type CreateChapterInput,
-  type UpdateChapterInput,
 } from '@package/contract';
-import {chapterService} from './chapter.service.ts';
+import {chapterService} from './chapter.service';
 import {
   mapUnitToChapterDetailDTO,
   mapUnitToChapterListItemDTO,
 } from './mapper.ts';
 import {unitService} from '@/src/unit/unit.service';
+
+import {
+  hasPermissionToUpdateChapter,
+  hasPermissionToDeleteChapter,
+} from '@package/contract';
 
 export const chapterApi = coreInstance('/chapters')
   // List chapters
@@ -63,7 +66,7 @@ export const chapterApi = coreInstance('/chapters')
     async ({body, headers, jwt, set}): Promise<ChapterResponse> => {
       const payload = await verifyAuth(headers.authorization, jwt, set);
       const req: CreateChapterInput = {
-        userId: payload.userId,
+        userId: payload.unitId,
         title: body.title,
         content: body.content,
         targetUnitId: body.targetUnitId,
@@ -93,7 +96,7 @@ export const chapterApi = coreInstance('/chapters')
         set.status = 404;
         throw new Error(`Chapter not found: ${params.unitId}`);
       }
-      if (target.userId !== payload.userId) {
+      if (!hasPermissionToUpdateChapter(payload as any, target as any)) {
         set.status = 403;
         throw new Error('Forbidden: you do not have permission to update');
       }
@@ -121,7 +124,7 @@ export const chapterApi = coreInstance('/chapters')
         set.status = 404;
         throw new Error(`Chapter not found: ${params.unitId}`);
       }
-      if (target.userId !== payload.userId) {
+      if (!hasPermissionToDeleteChapter(payload as any, target as any)) {
         set.status = 403;
         throw new Error('Forbidden: you do not have permission to delete');
       }

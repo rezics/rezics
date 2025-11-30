@@ -17,6 +17,11 @@ import {
   loginSchema,
 } from '@package/contract';
 
+import {
+  hasPermissionToUpdateUser,
+  BasicAdminPermission,
+} from '@package/contract';
+
 import {t} from 'elysia';
 import {coreInstance} from '../core';
 
@@ -436,12 +441,7 @@ export const userApi = coreInstance('/users')
       const payload = await verifyAuth(headers.authorization, jwt, set);
 
       // Only allow users to update their own profile
-      const hasPermission = () => {
-        if (payload.unitId === params.unitId) return true;
-        if (payload?.permission?.role?.includes('ADMIN')) return true;
-        return false;
-      };
-      if (!hasPermission()) {
+      if (!hasPermissionToUpdateUser(payload as any, params.unitId)) {
         set.status = 403;
         throw new Error('Forbidden: Cannot update other users');
       }
@@ -476,6 +476,11 @@ export const userApi = coreInstance('/users')
     '/me',
     async ({headers, jwt, set}): Promise<{message: string}> => {
       const payload = await verifyAuth(headers.authorization, jwt, set);
+      // TODO Temporarily allow admin to delete any user
+      if (!BasicAdminPermission(payload as any)) {
+        set.status = 403;
+        throw new Error('Forbidden: Cannot delete current user');
+      }
       await userService.delete(payload.unitId);
       return {message: 'User deleted successfully'};
     },
@@ -498,8 +503,8 @@ export const userApi = coreInstance('/users')
     async ({headers, jwt, params, set}): Promise<{message: string}> => {
       const payload = await verifyAuth(headers.authorization, jwt, set);
 
-      // Only allow users to delete their own profile
-      if (payload.unitId !== params.unitId) {
+      // TODO Temporarily allow admin to delete any user
+      if (!BasicAdminPermission(payload as any)) {
         set.status = 403;
         throw new Error('Forbidden: Cannot delete other users');
       }

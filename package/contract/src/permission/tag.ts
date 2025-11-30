@@ -1,11 +1,25 @@
 import type {UserDTO, UnitDTO} from '../index';
+import {BasicAdminPermission, isBlocked} from './core';
 
-export function hasPermissionToTag(user: UserDTO, unit?: UnitDTO): boolean {
-  if (user.permission?.role?.includes('ADMIN')) {
+export function hasPermissionToUpdateTag(
+  user: UserDTO,
+  unit?: UnitDTO,
+): boolean {
+  if (isBlocked(user)) {
+    return false;
+  }
+  if (BasicAdminPermission(user)) {
     return true;
   }
-  if (user.unitId === unit?.user?.unitId) {
+  if (user.unitId == unit?.user?.unitId) {
     return true;
   }
-  return false;
+  return true;
+}
+
+export function hasPermissionToDeleteTag(
+  user: UserDTO,
+  unit?: UnitDTO,
+): boolean {
+  return hasPermissionToUpdateTag(user, unit);
 }

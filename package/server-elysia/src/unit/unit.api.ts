@@ -1,4 +1,3 @@
-import {Elysia, t} from 'elysia';
 import {coreInstance} from '../core';
 import {
   unitListQuerySchema,
@@ -7,14 +6,13 @@ import {
   unitListResponseSchema,
   createUnitSchema,
   updateUnitSchema,
-  commentTreeQuerySchema,
-  commentTreeResponseSchema,
   type UnitListQuery,
   type UnitListResponse,
   type UnitResponse,
   type CreateUnitInput,
   type UpdateUnitInput,
-  type CommentTreeResponse,
+  hasPermissionToUpdateUnit,
+  hasPermissionToDeleteUnit,
 } from '@package/contract';
 import {unitService} from './unit.service';
 import {mapUnitToDTO} from './mapper';
@@ -104,11 +102,7 @@ export const unitApi = coreInstance('/units')
     async ({params, body, headers, jwt, set}): Promise<UnitResponse> => {
       const payload = await verifyAuth(headers.authorization, jwt, set);
       const target = await unitService.getByUnitId(params.unitId);
-      if (!target) {
-        set.status = 404;
-        throw new Error(`Unit not found: ${params.unitId}`);
-      }
-      if (target.userId !== payload.unitId) {
+      if (!hasPermissionToUpdateUnit(payload as any, target as any)) {
         set.status = 403;
         throw new Error('Forbidden: you do not own this unit');
       }
@@ -139,11 +133,7 @@ export const unitApi = coreInstance('/units')
     async ({params, headers, jwt, set}): Promise<{message: string}> => {
       const payload = await verifyAuth(headers.authorization, jwt, set);
       const target = await unitService.getByUnitId(params.unitId);
-      if (!target) {
-        set.status = 404;
-        throw new Error(`Unit not found: ${params.unitId}`);
-      }
-      if (target.userId !== payload.unitId) {
+      if (!hasPermissionToDeleteUnit(payload as any, target as any)) {
         set.status = 403;
         throw new Error('Forbidden: you do not own this unit');
       }

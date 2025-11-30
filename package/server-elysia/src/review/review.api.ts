@@ -11,6 +11,8 @@ import {
   type CreateReviewInput,
   reviewQuerySchema,
   type reviewQuerySchemaType,
+  hasPermissionToDeleteReview,
+  hasPermissionToUpdateReview,
 } from '@package/contract';
 import {reviewService} from './review.service';
 import {mapReviewToDTO} from './mapper';
@@ -91,7 +93,6 @@ export const reviewApi = coreInstance('/reviews')
     async ({
       params,
       body,
-      query,
       headers,
       jwt,
       set,
@@ -104,20 +105,18 @@ export const reviewApi = coreInstance('/reviews')
       set: any;
     }): Promise<ReviewResponse> => {
       const payload = await verifyAuth(headers.authorization, jwt, set);
-      const unitType = query.unitType ?? UnitType.REVIEW;
-      await ensureReviewOwnership(
-        params.id,
-        unitType as UnitType,
-        payload.unitId,
-        set,
-        payload,
-      );
+      const target = await reviewService.getById(params.id);
+      if (!hasPermissionToUpdateReview(payload as any, target as any)) {
+        set.status = 403;
+        throw new Error(
+          'Forbidden: you do not have permission to update this review',
+        );
+      }
       const review = await reviewService.update(params.id, body);
       return mapReviewToDTO(review);
     },
     {
       params: reviewParamsSchema,
-      query: reviewQuerySchema,
       body: updateReviewSchema,
       detail: {
         summary: 'Update review',
@@ -136,7 +135,6 @@ export const reviewApi = coreInstance('/reviews')
       headers,
       jwt,
       set,
-      query,
     }: {
       params: {id: string};
       headers: {authorization?: string};
@@ -145,19 +143,18 @@ export const reviewApi = coreInstance('/reviews')
       query: reviewQuerySchemaType;
     }): Promise<{message: string}> => {
       const payload = await verifyAuth(headers.authorization, jwt, set);
-      const unitType = query.unitType ?? UnitType.REVIEW;
-      await ensureReviewOwnership(
-        params.id,
-        unitType as UnitType,
-        payload.unitId,
-        set,
-      );
+      const target = await reviewService.getById(params.id);
+      if (!hasPermissionToDeleteReview(payload as any, target as any)) {
+        set.status = 403;
+        throw new Error(
+          'Forbidden: you do not have permission to delete this review',
+        );
+      }
       await reviewService.delete(params.id);
       return {message: 'Review deleted successfully'};
     },
     {
       params: reviewParamsSchema,
-      query: reviewQuerySchema,
       detail: {
         summary: 'Delete review',
         description: 'Delete a review by id',
@@ -205,29 +202,3 @@ export const reviewApi = coreInstance('/reviews')
       },
     },
   );
-
-async function ensureReviewOwnership(
-  reviewId: string,
-  expectedType: UnitType,
-  ownerId: string,
-  set: {status?: number | string},
-  payload?: JWTPayload,
-): Promise<void> {
-  if (payload?.permission?.role?.includes('ADMIN')) {
-    return;
-  }
-  const target = await unitService.getByUnitId(reviewId).catch(() => {
-    set.status = 404;
-    throw new Error(`Review not found: ${reviewId}`);
-  });
-
-  // if (!target || target.type !== expectedType) {
-  //   set.status = 404;
-  //   throw new Error(`Review not found: ${reviewId}`);
-  // }
-
-  if (target.userId !== ownerId) {
-    set.status = 403;
-    throw new Error('Forbidden: you do not have permission');
-  }
-}

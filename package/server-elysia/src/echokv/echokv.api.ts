@@ -6,6 +6,8 @@ import type {
   EchoKVUpsertRequest,
 } from './types';
 import {echoKvService} from './echokv.service';
+import {verifyAuth} from '../utils/authUtils';
+import {BasicAdminPermission} from '@package/contract';
 
 export const echoKvApi = coreInstance('/echokv')
   // List all keys (with optional search)
@@ -49,7 +51,12 @@ export const echoKvApi = coreInstance('/echokv')
   // Upsert value by key
   .put(
     '/:key',
-    async ({params, body}): Promise<EchoKVResponse> => {
+    async ({params, body, headers, jwt, set}): Promise<EchoKVResponse> => {
+      const payload = await verifyAuth(headers.authorization, jwt, set);
+      if (!BasicAdminPermission(payload as any)) {
+        set.status = 403;
+        throw new Error('Forbidden: You are not authorized to update EchoKV');
+      }
       const value = await echoKvService.set(
         params.key,
         body.value as EchoKVUpsertRequest['value'],

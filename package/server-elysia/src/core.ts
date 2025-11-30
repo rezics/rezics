@@ -11,7 +11,6 @@ export function coreInstance(prefix: string) {
         secret: process.env.JWT_SECRET!,
       }),
     )
-    .use(cors())
     .use(bearer());
 }
 

@@ -1,4 +1,4 @@
-import {Elysia, t} from 'elysia';
+import {t} from 'elysia';
 import {
   bookListQuerySchema,
   bookParamsSchema,
@@ -11,7 +11,7 @@ import type {
   CreateBookInput,
 } from '@package/contract';
 import {bookService} from './book.service';
-import {mapBaseBookToDTO, mapBookToDTO} from './mapper';
+import {mapBookToDTO} from './mapper';
 import {unitService} from '@/src/unit/unit.service';
 import {coreInstance} from '../core';
 import {verifyAuth} from '@/src/utils/authUtils';

@@ -31,6 +31,17 @@ const app = new Elysia()
       credentials: true,
     }),
   )
+  .onError(({code, error, set}) => {
+    set.status ||= 500;
+    const message =
+      error instanceof Error ? error.message : 'Internal Server Error';
+
+    return {
+      status: set.status,
+      code,
+      message,
+    };
+  })
   .trace(async ({onHandle, context}) => {
     // 监听 handle 阶段
     onHandle(({begin, onStop}) => {

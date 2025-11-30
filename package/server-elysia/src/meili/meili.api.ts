@@ -12,6 +12,7 @@ import {meiliService} from './meili.service';
 import {verifyAuth} from '@/src/utils/authUtils';
 import {deleteAllUnits} from '@package/search/src/documents';
 import {checkMeiliHealth} from '@package/search/src/client';
+import {isRoot} from '@package/contract';
 
 /**
  * Meili API - Elysia routes for search and key management.
@@ -110,7 +111,14 @@ export const meiliApi = coreInstance('/meili')
    */
   .post(
     '/books/init',
-    async () => {
+    async ({headers, jwt, set}) => {
+      const payload = await verifyAuth(headers.authorization, jwt, set);
+      if (!isRoot(payload as any)) {
+        set.status = 403;
+        throw new Error(
+          'Forbidden: You are not authorized to init books index',
+        );
+      }
       await meiliService.initBooksIndex();
       return {message: 'books index initialized'};
     },
@@ -129,7 +137,14 @@ export const meiliApi = coreInstance('/meili')
    */
   .post(
     '/readlists/init',
-    async () => {
+    async ({headers, jwt, set}) => {
+      const payload = await verifyAuth(headers.authorization, jwt, set);
+      if (!isRoot(payload as any)) {
+        set.status = 403;
+        throw new Error(
+          'Forbidden: You are not authorized to init readlists index',
+        );
+      }
       await meiliService.initReadlistsIndex();
       return {message: 'readlists index initialized'};
     },
@@ -148,7 +163,14 @@ export const meiliApi = coreInstance('/meili')
    */
   .post(
     '/units/init',
-    async () => {
+    async ({headers, jwt, set}) => {
+      const payload = await verifyAuth(headers.authorization, jwt, set);
+      if (!isRoot(payload as any)) {
+        set.status = 403;
+        throw new Error(
+          'Forbidden: You are not authorized to init units index',
+        );
+      }
       await meiliService.initUnitsIndex();
       return {message: 'units index initialized'};
     },
@@ -167,7 +189,12 @@ export const meiliApi = coreInstance('/meili')
    */
   .post(
     '/books/sync',
-    async () => {
+    async ({headers, jwt, set}) => {
+      const payload = await verifyAuth(headers.authorization, jwt, set);
+      if (!isRoot(payload as any)) {
+        set.status = 403;
+        throw new Error('Forbidden: You are not authorized to sync all books');
+      }
       const task = await meiliService.syncAllBooks();
       return {task};
     },
@@ -186,7 +213,14 @@ export const meiliApi = coreInstance('/meili')
    */
   .post(
     '/readlists/sync',
-    async () => {
+    async ({headers, jwt, set}) => {
+      const payload = await verifyAuth(headers.authorization, jwt, set);
+      if (!isRoot(payload as any)) {
+        set.status = 403;
+        throw new Error(
+          'Forbidden: You are not authorized to sync all readlists',
+        );
+      }
       const task = await meiliService.syncAllReadlists();
       return {task};
     },
@@ -205,7 +239,12 @@ export const meiliApi = coreInstance('/meili')
    */
   .post(
     '/units/sync',
-    async () => {
+    async ({headers, jwt, set}) => {
+      const payload = await verifyAuth(headers.authorization, jwt, set);
+      if (!isRoot(payload as any)) {
+        set.status = 403;
+        throw new Error('Forbidden: You are not authorized to sync all units');
+      }
       const task = await meiliService.syncAllUnits();
       return {task};
     },
@@ -219,7 +258,14 @@ export const meiliApi = coreInstance('/meili')
 
   .get(
     '/units/deleteAllUnits',
-    async () => {
+    async ({headers, jwt, set}) => {
+      const payload = await verifyAuth(headers.authorization, jwt, set);
+      if (!isRoot(payload as any)) {
+        set.status = 403;
+        throw new Error(
+          'Forbidden: You are not authorized to delete all units',
+        );
+      }
       await deleteAllUnits();
       return {message: 'all units deleted'};
     },
@@ -240,7 +286,13 @@ export const meiliApi = coreInstance('/meili')
     '/keys/search',
     // Require authentication before issuing a search key.
     async ({headers, jwt, set}) => {
-      await verifyAuth(headers.authorization, jwt, set);
+      const payload = await verifyAuth(headers.authorization, jwt, set);
+      if (!isRoot(payload as any)) {
+        set.status = 403;
+        throw new Error(
+          'Forbidden: You are not authorized to create search key',
+        );
+      }
       const key = await meiliService.createSearchKey();
       return {key};
     },
@@ -260,7 +312,13 @@ export const meiliApi = coreInstance('/meili')
   .post(
     '/keys/admin',
     async ({headers, jwt, set}) => {
-      await verifyAuth(headers.authorization, jwt, set);
+      const payload = await verifyAuth(headers.authorization, jwt, set);
+      if (!isRoot(payload as any)) {
+        set.status = 403;
+        throw new Error(
+          'Forbidden: You are not authorized to create admin key',
+        );
+      }
       const key = await meiliService.createAdminKey();
       return key;
     },
@@ -280,7 +338,11 @@ export const meiliApi = coreInstance('/meili')
   .get(
     '/keys',
     async ({headers, jwt, set}) => {
-      await verifyAuth(headers.authorization, jwt, set);
+      const payload = await verifyAuth(headers.authorization, jwt, set);
+      if (!isRoot(payload as any)) {
+        set.status = 403;
+        throw new Error('Forbidden: You are not authorized to list keys');
+      }
       return meiliService.listKeys();
     },
     {
@@ -299,7 +361,11 @@ export const meiliApi = coreInstance('/meili')
   .delete(
     '/keys/:uid',
     async ({params, headers, jwt, set}) => {
-      await verifyAuth(headers.authorization, jwt, set);
+      const payload = await verifyAuth(headers.authorization, jwt, set);
+      if (!isRoot(payload as any)) {
+        set.status = 403;
+        throw new Error('Forbidden: You are not authorized to delete key');
+      }
       await meiliService.deleteKey(params.uid);
       return {message: 'key deleted'};
     },

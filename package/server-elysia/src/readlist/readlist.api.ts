@@ -9,6 +9,8 @@ import {
   readlistParamsSchema,
   createReadlistSchema,
   updateReadlistSchema,
+  hasPermissionToUpdateReadlist,
+  hasPermissionToDeleteReadlist,
 } from '@package/contract';
 import type {
   ReadlistListQuery,
@@ -93,6 +95,12 @@ export const readlistApi = coreInstance('/readlists')
     async ({params, body, headers, jwt, set}): Promise<ReadlistResponse> => {
       const payload = await verifyAuth(headers.authorization, jwt, set);
       const target = await unitService.getByUnitId(params.unitId);
+      if (!hasPermissionToUpdateReadlist(payload as any, target as any)) {
+        set.status = 403;
+        throw new Error(
+          'Forbidden: you do not have permission to update this readlist',
+        );
+      }
       if (!target) {
         set.status = 404;
         throw new Error(`Readlist not found: ${params.unitId}`);
@@ -128,11 +136,7 @@ export const readlistApi = coreInstance('/readlists')
     async ({params, headers, jwt, set}): Promise<{message: string}> => {
       const payload = await verifyAuth(headers.authorization, jwt, set);
       const target = await unitService.getByUnitId(params.unitId);
-      if (!target) {
-        set.status = 404;
-        throw new Error(`Readlist not found: ${params.unitId}`);
-      }
-      if (target.userId !== payload.unitId) {
+      if (!hasPermissionToDeleteReadlist(payload as any, target as any)) {
         set.status = 403;
         throw new Error(
           'Forbidden: you do not have permission to delete this readlist',
