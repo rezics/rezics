@@ -25,6 +25,7 @@ export function ReviewEditPage({data, setData}: ReviewEditPageProps) {
     if (!Number.isNaN(num)) {
       setData({...data, rating: num});
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ratingInput]);
 
   return (

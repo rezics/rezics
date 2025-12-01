@@ -116,6 +116,12 @@ export const NAVIGATION = (): NavigationItem[] => [
   },
   {
     kind: 'item',
+    segment: '/meili',
+    title: 'Meili',
+    icon: <DescriptionIcon />,
+  },
+  {
+    kind: 'item',
     segment: '/test',
     title: 'Test',
     icon: <LayersIcon />,

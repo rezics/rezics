@@ -7,7 +7,6 @@ import {
   UniversalPaginator,
   type UniversalPaginatorHandle,
 } from '@/component/Common/Pagination.tsx';
-import {unitQueries} from '@/api/unit/unit.queries';
 import type {UnitDTO, UnitType} from '@package/contract';
 import {SimpleSearchInput} from '@/component/Search/SimpleSearchInput';
 import {buildUnitUrl} from '@/util/buildUrlUtil';
@@ -166,16 +165,16 @@ export const UnitsPage: React.FC<UnitsPageProps> = ({
   }
 
   async function handlePreRequestData(page: number) {
-    const t = tab;
-    const query = unitQueries.list({
-      type: t,
-      userId,
-      targetUnitId,
-      q: keyword || undefined,
-      start: (page - 1) * EXTERNAL_PAGE_SIZE,
-      limit: EXTERNAL_PAGE_SIZE,
-    });
-    const nextData = await queryClient.fetchQuery(query);
+    const start = (page - 1) * EXTERNAL_PAGE_SIZE;
+    const {queryKey, queryFn} = buildMeiliUnitQuery(
+      tab === 'UNIT' ? undefined : (tab as keyof typeof UnitType),
+      start,
+      targetUnitId ?? '',
+      keyword,
+      EXTERNAL_PAGE_SIZE,
+      mapUnitResponse,
+    );
+    const nextData = await queryClient.fetchQuery({queryKey, queryFn});
     return nextData?.units?.length ?? 0;
   }
 

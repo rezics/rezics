@@ -27,6 +27,7 @@ import {
 
 import {t} from 'elysia';
 import {coreInstance} from '../core';
+import {setCookie} from '../utils/cookie';
 
 /**
  * User Controller - Elysia.js routes with JWT authentication
@@ -43,7 +44,7 @@ export const userApi = coreInstance('/users')
       body,
       jwt,
       refreshToken,
-      setCookie,
+      cookie: {refresh_token},
     }): Promise<{user: UserDTO; token: string}> => {
       const userReq: CreateUserInput = {
         email: body.email,
@@ -77,7 +78,8 @@ export const userApi = coreInstance('/users')
         refreshToken: refreshTokenSign,
       });
 
-      setCookie('refresh_token', refreshTokenSign, {
+      setCookie(refresh_token!, {
+        value: refreshTokenSign,
         httpOnly: true,
         secure: true,
         sameSite: 'lax',
@@ -107,7 +109,7 @@ export const userApi = coreInstance('/users')
       body,
       jwt,
       refreshToken,
-      setCookie,
+      cookie: {refresh_token},
     }): Promise<{user: UserDTO; token: string}> => {
       const user = await userService.authenticate(body.email, body.password);
 
@@ -137,7 +139,8 @@ export const userApi = coreInstance('/users')
         refreshToken: refreshTokenSign,
       });
 
-      setCookie('refresh_token', refreshTokenSign, {
+      setCookie(refresh_token!, {
+        value: refreshTokenSign,
         httpOnly: true,
         secure: true,
         sameSite: 'lax',
@@ -168,13 +171,16 @@ export const userApi = coreInstance('/users')
       jwt,
       refreshToken,
       set,
-      setCookie,
+      cookie: {refresh_token},
     }): Promise<{token: string}> => {
+      const refreshTokenCookieValue = refresh_token?.value as string;
       const payload = await verifyAuth<RefreshTokenPayload>(
-        headers.refreshToken,
+        refreshTokenCookieValue,
         refreshToken,
         set,
       );
+
+      console.log('generate new token', payload);
 
       // 基于数据库会话进行二次校验（哈希比对 / 过期 / 撤销等）
       const validation = await sessionService.validateAndMarkUsed({
@@ -211,7 +217,8 @@ export const userApi = coreInstance('/users')
         refreshToken: newRefreshTokenSign,
       });
 
-      setCookie('refresh_token', newRefreshTokenSign, {
+      setCookie(refresh_token!, {
+        value: newRefreshTokenSign,
         httpOnly: true,
         secure: true,
         sameSite: 'lax',

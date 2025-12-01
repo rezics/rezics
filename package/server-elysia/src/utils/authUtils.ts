@@ -15,6 +15,11 @@ export async function verifyAuth<T extends CommonPayload>(
     throw new Error('Unauthorized: No authorization header provided');
   }
 
+  if (typeof authorization != 'string') {
+    set.status = 401;
+    throw new Error('Unauthorized: Invalid authorization header');
+  }
+
   // Extract token from "Bearer <token>" format
   const token = authorization.startsWith('Bearer ')
     ? authorization.slice(7)

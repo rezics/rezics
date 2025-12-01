@@ -52,6 +52,7 @@ import {FollowInfoPage} from '@/page/User/FollowInfoPage.tsx';
 
 // Misc
 import {MainLayout} from '@/layout/MainLayout.tsx';
+import {MeiliPage} from '@/page/Meili/MeiliPage.tsx';
 import {ReadListEditPage} from '@/page/ReadList/ReadListEditPage.tsx';
 import {NewReadListPage} from '@/page/ReadList/NewReadListPage.tsx';
 import {ReadlistByBookPage} from '@/page/ReadList/ReadListsByBookPage.tsx';
@@ -77,6 +78,11 @@ export default (
   <Router>
     <ThemeProvider theme={{}}>
       <Switch>
+        <Route path="/meili">
+          <MainLayout>
+            <MeiliPage />
+          </MainLayout>
+        </Route>
         {/* ANCHOR Auth */}
         <Route path="/login">
           <MainLayout>

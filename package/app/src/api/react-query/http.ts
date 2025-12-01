@@ -43,6 +43,25 @@ export const isAuthenticated = (): boolean => {
   return !!getToken();
 };
 
+function buildHeaders(
+  options?: globalThis.RequestInit,
+): Record<string, string> {
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  };
+  const token = getToken();
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+  if (options?.headers) {
+    const existingHeaders = new Headers(options.headers);
+    existingHeaders.forEach((value, key) => {
+      headers[key] = value;
+    });
+  }
+  return headers;
+}
+
 /**
  * Generic fetch wrapper with error handling and JWT support
  */
@@ -51,41 +70,30 @@ export async function apiFetch<T>(
   options?: globalThis.RequestInit,
 ): Promise<T> {
   const url = `${API_BASE_URL}${endpoint}`;
-  const token = getToken();
-
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-  };
-
-  // Merge existing headers
-  if (options?.headers) {
-    const existingHeaders = new Headers(options.headers);
-    existingHeaders.forEach((value, key) => {
-      headers[key] = value;
-    });
-  }
-
-  // Add JWT token to Authorization header if available
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
-  }
-
-  const response = await fetch(url, {
+  const headers = buildHeaders(options);
+  let response = await fetch(url, {
     ...options,
-    headers,
+    credentials: 'include',
+    headers: headers,
   });
 
+  const responseJson = await response.json();
   // Handle 401 Unauthorized - token might be expired
   if (response.status === 401) {
-    const responseJson = await response.json();
-    if (!responseJson?.message?.includes('Invalid token')) {
-      throw new Error(responseJson?.message);
+    if (responseJson?.message?.includes('No authorization')) {
+      throw new Error(
+        JSON.stringify({
+          status: response?.status,
+          message: responseJson?.message,
+        }),
+      );
     }
-    removeToken();
+    console.log('Auto refresh token');
     const refreshTokenResponse = await fetch(
       `${API_BASE_URL}/users/refresh-token`,
       {
         method: 'POST',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -96,15 +104,23 @@ export async function apiFetch<T>(
       throw new Error('Unauthorized - Please login again');
     }
     setToken(json.token);
+    console.log(`Auto retry ${url}`);
+    const newHeaders = buildHeaders(options);
+    response = await fetch(url, {
+      ...options,
+      credentials: 'include',
+      headers: newHeaders,
+    });
   }
 
   if (!response.ok) {
-    const errorText = await response.text();
-    const error = await response.json().catch(() => ({
-      message: `HTTP error! ${response.status} ${errorText}`,
-    }));
-    throw new Error(error.message || 'API request failed');
+    throw new Error(
+      JSON.stringify({
+        status: response?.status,
+        message: responseJson?.message,
+      }),
+    );
   }
 
-  return response.json();
+  return responseJson;
 }
