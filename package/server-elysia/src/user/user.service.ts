@@ -8,13 +8,22 @@ import type {UserFilterOptions, UserWithRelations} from './types';
 import {userInclude} from './types';
 import type {CreateUserInput, UpdateUserInput} from '@package/contract';
 import {isPasswordValid} from './utils';
-import {Resend} from 'resend';
+import nodemailer from 'nodemailer';
 
-import {allowEmailDomains} from './allowEmailDomains';
+const transporter = nodemailer.createTransport({
+  host: process.env.SMTP_HOST,
+  port: 587,
+  secure: false,
+  auth: {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASSWORD,
+  },
+  pool: true,
+  maxConnections: 3,
+  maxMessages: 50,
+});
 
 const SALT_ROUNDS = 10;
-
-const resend = new Resend(process.env.RESEND_API_KEY);
 
 /**
  * User Service - Business logic layer
@@ -130,12 +139,6 @@ export class UserService {
       throw new Error('Email already exists');
     }
 
-    if (
-      !allowEmailDomains.includes(email.split('@')[1] ?? 'invalid-email-domain')
-    ) {
-      throw new Error('Invalid email domain');
-    }
-
     const user = await prisma.user.create({
       data: {
         email,
@@ -237,25 +240,40 @@ export class UserService {
     email: string,
     userId?: string,
   ): Promise<{status: 'success' | 'error'; data: any}> {
+    const nowTime = new Date();
+    const isEmailExist = await prisma.verificationCode.findUnique({
+      where: {email},
+    });
+    const minResendTime = 1000 * 30; // 30 seconds
+    if (isEmailExist) {
+      const elapsed = nowTime.getTime() - isEmailExist.createdAt.getTime();
+      if (elapsed < minResendTime) {
+        return {
+          status: 'error',
+          data: `You can only resend the code after ${
+            minResendTime / 1000
+          } seconds`,
+        };
+      }
+    }
     const code = Math.floor(100000 + Math.random() * 900000).toString();
-    const expiresAt = new Date(Date.now() + 1000 * 60 * 30); // 30 minutes
+    const expiresAt = new Date(nowTime.getTime() + 1000 * 60 * 30); // 30 minutes
     const theUserId = userId ?? '019aca29-e86c-79ba-a29e-cd6b1c653c55'; // we don't need user id for verification code
-    const {data, error} = await resend.emails.send({
-      from: 'Acme <onboarding@resend.dev>',
-      to: [email],
+    transporter.sendMail({
+      from: `${process.env.SMTP_USER_NAME} <${process.env.SMTP_USER}>`,
+      to: email,
       subject: 'REZICS - Verification Code',
+      text: `Your verification code is: ${code}. It will expire in 30 minutes.`,
       html: `<strong>Your verification code is: ${code}. It will expire in 30 minutes.</strong>`,
     });
 
-    if (error) {
-      return {status: 'error', data: error};
-    }
-
-    await prisma.verificationCode.create({
-      data: {email, userId: theUserId, code, expiresAt},
+    await prisma.verificationCode.upsert({
+      where: {email},
+      update: {code, expiresAt, createdAt: nowTime},
+      create: {email, userId: theUserId, code, expiresAt},
     });
 
-    return {status: 'success', data: data};
+    return {status: 'success', data: 'Verification code sent successfully'};
   }
 
   /**

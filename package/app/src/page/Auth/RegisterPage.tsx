@@ -10,6 +10,7 @@ import {validateEmail, validateSlug, validatePassword} from './lib/validate.ts';
 import {Dialog, DialogContent} from '@mui/material';
 import {useUserStore} from '@/global/userStore.ts';
 import {useLocation} from 'wouter';
+import {Turnstile} from '@/component/Form/Turnstile.tsx';
 
 export interface RegisterShowProps {
   loading: boolean;
@@ -50,6 +51,11 @@ export const RegisterShow: FC<RegisterShowProps> = ({
   const content = (
     <>
       {error && <Alert severity="error">{error}</Alert>}
+      <Turnstile
+        onVerify={token => {
+          console.log(token);
+        }}
+      />
       <TextField
         name="email"
         type="email"

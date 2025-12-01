@@ -7,7 +7,7 @@ interface AlertState {
   close: () => void;
 }
 
-export const useAlertStore = create<AlertState>((set, get) => ({
+export const useAlertStore = create<AlertState>((set, _get) => ({
   open: false,
   message: '',
 

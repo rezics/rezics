@@ -29,6 +29,8 @@ import {t} from 'elysia';
 import {coreInstance} from '../core';
 import {setCookie} from '../utils/cookie';
 
+import {allowEmailDomains} from './allowEmailDomains';
+
 /**
  * User Controller - Elysia.js routes with JWT authentication
  */
@@ -310,10 +312,22 @@ export const userApi = coreInstance('/users')
    */
   .post(
     '/send-verification-code',
-    async ({body}) => {
+    async ({body, set}) => {
       const email = body.email;
-      await userService.sendVerificationCode(email);
-      return {message: 'Verification code sent successfully'};
+      if (
+        !allowEmailDomains.includes(
+          email.split('@')[1] ?? 'invalid-email-domain',
+        )
+      ) {
+        set.status = 400;
+        throw new Error('Invalid email domain');
+      }
+      const result = await userService.sendVerificationCode(email);
+      if (result.status === 'error') {
+        set.status = 400;
+        throw new Error(result.data);
+      }
+      return {data: {status: 'success', info: result.data}};
     },
     {
       body: t.Object({
