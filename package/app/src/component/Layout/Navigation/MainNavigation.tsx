@@ -13,143 +13,154 @@ import type {NavigationItem} from './navigation.d.ts';
 
 // segment: router path
 
-export const NAVIGATION = (): NavigationItem[] => [
-  {
-    kind: 'header',
-    title: 'Main Items',
-  },
-  {
-    kind: 'item',
-    segment: '/',
-    title: 'Home',
-    icon: <DashboardIcon />,
-  },
-  {
-    kind: 'item',
-    segment: '/book',
-    title: 'Books',
-    icon: <BookIcon />,
-  },
+export const NAVIGATION = (isAdmin = false): NavigationItem[] => {
+  const common: NavigationItem[] = [
+    {
+      kind: 'header',
+      title: 'Main',
+    },
+    {
+      kind: 'item',
+      segment: '/',
+      title: 'Home',
+      icon: <DashboardIcon />,
+    },
+    {
+      kind: 'item',
+      segment: '/book',
+      title: 'Books',
+      icon: <BookIcon />,
+    },
+    {
+      kind: 'item',
+      segment: '/readlist',
+      title: 'Read Lists',
+      icon: <FormatListBulletedIcon />,
+    },
+    {
+      kind: 'item',
+      segment: '/review',
+      title: 'Reviews',
+      icon: <BookIcon />,
+    },
+    {
+      kind: 'item',
+      segment: '/unit',
+      title: 'Units',
+      icon: <DescriptionIcon />,
+    },
 
-  {
-    kind: 'item',
-    segment: '/readlist/',
-    title: 'Read List',
-    icon: <FormatListBulletedIcon />,
-  },
-  {
-    kind: 'item',
-    segment: '/review/',
-    title: 'Review List',
-    icon: <BookIcon />,
-  },
-  {
-    kind: 'item',
-    segment: '/unit/',
-    title: 'Unit List',
-    icon: <DescriptionIcon />,
-  },
-  {
-    kind: 'item',
-    segment: '/misc/echokv',
-    title: 'EchoKV',
-    icon: <DescriptionIcon />,
-  },
-  {
-    kind: 'divider',
-  },
-  {
-    kind: 'header',
-    title: 'Analytics',
-  },
-  {
-    kind: 'item',
-    segment: '/auth',
-    title: 'Auth',
-    icon: <PersonIcon />,
-    children: [
-      {
-        kind: 'item',
-        segment: '/login',
-        title: 'Login',
-        icon: <LoginIcon />,
-      },
-      {
-        kind: 'item',
-        segment: '/register',
-        title: 'Register',
-        icon: <HowToRegIcon />,
-      },
-    ],
-  },
-  {
-    kind: 'item',
-    segment: '/book/1/edit',
-    title: 'Book Edit',
-    icon: <BarChartIcon />,
-    children: [
-      {
-        kind: 'item',
-        title: 'Add New Book',
-        segment: '/book/new',
-        icon: <DescriptionIcon />,
-      },
-      {
-        kind: 'item',
-        title: 'Book Edit Chapter',
-        segment: '/book/1/edit/1',
-        icon: <DescriptionIcon />,
-      },
-      {
-        kind: 'item',
-        title: 'Read List New',
-        segment: '/readlist/new',
-        icon: <FormatListBulletedIcon />,
-      },
-      {
-        kind: 'item',
-        title: 'Review New',
-        segment: '/review/new',
-        icon: <BookIcon />,
-      },
-    ],
-  },
-  {
-    kind: 'item',
-    segment: '/meili',
-    title: 'Meili',
-    icon: <DescriptionIcon />,
-  },
-  {
-    kind: 'item',
-    segment: '/test',
-    title: 'Test',
-    icon: <LayersIcon />,
-    children: [
-      {
-        kind: 'item',
-        segment: '/test',
-        title: 'Test 01',
-        icon: <LayersIcon />,
-      },
-      {
-        kind: 'item',
-        segment: '/test02',
-        title: 'Test 02',
-        icon: <LayersIcon />,
-      },
-      {
-        kind: 'item',
-        segment: '/test03',
-        title: 'Test 03',
-        icon: <LayersIcon />,
-      },
-    ],
-  },
-  {
-    kind: 'item',
-    segment: '/test/404',
-    title: '404',
-    icon: <ErrorIcon />,
-  },
-];
+    {kind: 'divider'},
+
+    {
+      kind: 'header',
+      title: 'Management',
+    },
+    {
+      kind: 'item',
+      segment: '/book/new',
+      title: 'New Book',
+      icon: <DescriptionIcon />,
+    },
+    {
+      kind: 'item',
+      title: 'New Read List',
+      segment: '/readlist/new',
+      icon: <FormatListBulletedIcon />,
+    },
+  ];
+
+  const admin: NavigationItem[] = !isAdmin
+    ? []
+    : [
+        {kind: 'divider'},
+
+        {
+          kind: 'item',
+          segment: '/misc/echokv',
+          title: 'EchoKV',
+          icon: <DescriptionIcon />,
+        },
+
+        {kind: 'divider'},
+
+        {
+          kind: 'header',
+          title: 'Auth',
+        },
+        {
+          kind: 'item',
+          segment: '/auth',
+          title: 'User',
+          icon: <PersonIcon />,
+          children: [
+            {
+              kind: 'item',
+              segment: '/login',
+              title: 'Login',
+              icon: <LoginIcon />,
+            },
+            {
+              kind: 'item',
+              segment: '/register',
+              title: 'Register',
+              icon: <HowToRegIcon />,
+            },
+          ],
+        },
+
+        {kind: 'divider'},
+
+        {
+          kind: 'header',
+          title: 'System / Analytics',
+        },
+        {
+          kind: 'item',
+          segment: '/meili',
+          title: 'Meili Search',
+          icon: <DescriptionIcon />,
+        },
+
+        {kind: 'divider'},
+
+        {
+          kind: 'header',
+          title: 'Developer Tools',
+        },
+        {
+          kind: 'item',
+          segment: '/test',
+          title: 'Test Suite',
+          icon: <LayersIcon />,
+          children: [
+            {
+              kind: 'item',
+              segment: '/test',
+              title: 'Test 01',
+              icon: <LayersIcon />,
+            },
+            {
+              kind: 'item',
+              segment: '/test02',
+              title: 'Test 02',
+              icon: <LayersIcon />,
+            },
+            {
+              kind: 'item',
+              segment: '/test03',
+              title: 'Test 03',
+              icon: <LayersIcon />,
+            },
+          ],
+        },
+        {
+          kind: 'item',
+          segment: '/test/404',
+          title: '404 Page',
+          icon: <ErrorIcon />,
+        },
+      ];
+
+  return [...common, ...admin];
+};
