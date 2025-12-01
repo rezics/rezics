@@ -28,6 +28,7 @@ export async function initBookIndex() {
       'authorIds',
       'pressIds',
       'producerIds',
+      'textLength',
     ],
     sortableAttributes: ['createdAt', 'updatedAt'],
   });

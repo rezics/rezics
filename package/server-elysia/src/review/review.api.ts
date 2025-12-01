@@ -13,6 +13,7 @@ import {
   type reviewQuerySchemaType,
   hasPermissionToDeleteReview,
   hasPermissionToUpdateReview,
+  BasicAdminPermission,
 } from '@package/contract';
 import {reviewService} from './review.service';
 import {mapReviewToDTO} from './mapper';
@@ -25,7 +26,14 @@ export const reviewApi = coreInstance('/reviews')
    */
   .get(
     '/',
-    async ({query}): Promise<ReviewListResponse> => {
+    async ({query, headers, jwt, set}): Promise<ReviewListResponse> => {
+      const payload = await verifyAuth(headers.authorization, jwt, set);
+      if (!BasicAdminPermission(payload as any)) {
+        set.status = 403;
+        throw new Error(
+          'Forbidden: you do not have permission to get all reviews',
+        );
+      }
       const {reviews, total} = await reviewService.list(query);
       return {reviews: reviews.map(mapReviewToDTO), total};
     },

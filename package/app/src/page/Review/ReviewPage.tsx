@@ -138,7 +138,10 @@ export function ReviewPage({reviewId}: {reviewId: string}) {
                 editionURL={`/review/${review.unitId}/edit`}
                 userUnitId={review.user?.unitId}
               />
-              <MiniActionBar handleOnCommentClick={handleGoToComments} />
+              <MiniActionBar
+                handleOnCommentClick={handleGoToComments}
+                unitId={review.unitId}
+              />
             </div>
           </div>
         </div>

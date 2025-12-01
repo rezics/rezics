@@ -13,6 +13,7 @@ import {
   type UpdateUnitInput,
   hasPermissionToUpdateUnit,
   hasPermissionToDeleteUnit,
+  BasicAdminPermission,
 } from '@package/contract';
 import {unitService} from './unit.service';
 import {mapUnitToDTO} from './mapper';
@@ -29,7 +30,14 @@ export const unitApi = coreInstance('/units')
    */
   .get(
     '/',
-    async ({query}): Promise<UnitListResponse> => {
+    async ({query, headers, jwt, set}): Promise<UnitListResponse> => {
+      const payload = await verifyAuth(headers.authorization, jwt, set);
+      if (!BasicAdminPermission(payload as any)) {
+        set.status = 403;
+        throw new Error(
+          'Forbidden: you do not have permission to get all books',
+        );
+      }
       const {units, total} = await unitService.list(query as UnitListQuery);
       return {units: units.map(mapUnitToDTO), total};
     },

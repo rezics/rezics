@@ -12,6 +12,7 @@ export interface BookSearchDocument {
   authors: string[];
   presses: string[];
   producers: string[];
+  textLength: number;
   nsfw: boolean;
   authorIds: string[];
   pressIds: string[];

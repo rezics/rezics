@@ -19,13 +19,21 @@ import {unitService} from '@/src/unit/unit.service';
 import {
   hasPermissionToUpdateChapter,
   hasPermissionToDeleteChapter,
+  BasicAdminPermission,
 } from '@package/contract';
 
 export const chapterApi = coreInstance('/chapters')
   // List chapters
   .get(
     '/',
-    async ({query}): Promise<ChapterListResponse> => {
+    async ({query, headers, jwt, set}): Promise<ChapterListResponse> => {
+      const payload = await verifyAuth(headers.authorization, jwt, set);
+      if (!BasicAdminPermission(payload as any)) {
+        set.status = 403;
+        throw new Error(
+          'Forbidden: you do not have permission to get all books',
+        );
+      }
       const {items, total} = await chapterService.list(query);
       return {
         items: items.map(mapUnitToChapterListItemDTO),

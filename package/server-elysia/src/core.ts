@@ -9,7 +9,7 @@ export function coreInstance(prefix: string) {
       jwt({
         name: 'jwt',
         secret: process.env.JWT_SECRET!,
-        exp: '15s',
+        exp: '30min',
       }),
     )
     .use(

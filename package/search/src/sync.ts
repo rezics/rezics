@@ -67,6 +67,7 @@ export async function syncAllBooks() {
         authorIds: b.author?.map((a: any) => a.unitId) ?? [],
         pressIds: b.press?.map((p: any) => p.unitId) ?? [],
         producerIds: b.producer?.map((p: any) => p.unitId) ?? [],
+        textLength: b.textLength ?? 0,
         createdAt: b.createdAt,
         updatedAt: b.updatedAt,
         // result fields

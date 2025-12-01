@@ -15,7 +15,10 @@ import {mapBookToDTO} from './mapper';
 import {unitService} from '@/src/unit/unit.service';
 import {coreInstance} from '../core';
 import {verifyAuth} from '@/src/utils/authUtils';
-import {hasPermissionToUpdateBook} from '@package/contract';
+import {
+  hasPermissionToUpdateBook,
+  BasicAdminPermission,
+} from '@package/contract';
 import type {Rating} from '@/prisma/client';
 
 /**
@@ -26,7 +29,14 @@ import type {Rating} from '@/prisma/client';
 export const bookApi = coreInstance('/books')
   .get(
     '/',
-    async ({query}): Promise<BookListResponse> => {
+    async ({query, headers, jwt, set}): Promise<BookListResponse> => {
+      const payload = await verifyAuth(headers.authorization, jwt, set);
+      if (!BasicAdminPermission(payload as any)) {
+        set.status = 403;
+        throw new Error(
+          'Forbidden: you do not have permission to get all books',
+        );
+      }
       const {books, total} = await bookService.list(query);
       // return {books: books.map(mapBaseBookToDTO), total};
       return {books: books as any, total};

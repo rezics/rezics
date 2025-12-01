@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Book" ADD COLUMN     "textLength" INTEGER NOT NULL DEFAULT 0;
