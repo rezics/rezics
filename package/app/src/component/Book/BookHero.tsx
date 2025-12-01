@@ -99,11 +99,14 @@ export const BookHeroShow: React.FC<{
                           出品方：
                           {bookInfo?.producer?.[0]?.name}
                         </Typography>
+                        <Typography>
+                          字数：{bookInfo?.textLength ?? 0}
+                        </Typography>
                         <Typography>ISBN：{bookInfo?.isbn ?? ''}</Typography>
                       </Stack>
 
                       {/* Tags */}
-                      <Box className="flex flex-wrap gap-2">
+                      <Box className="flex flex-wrap gap-2 mt-2">
                         {tags?.map(tag => (
                           <Chip
                             key={tag}

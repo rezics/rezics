@@ -183,6 +183,9 @@ export const BookPageShow: React.FC<ShowProps> = ({
                     {bookInfo?.producer?.[0]?.name ?? ''}
                   </Typography>
                   <Typography variant="body2">
+                    字数：{bookInfo?.textLength ?? 0}
+                  </Typography>
+                  <Typography variant="body2">
                     ISBN：{bookInfo?.isbn ?? ' '}
                   </Typography>
                 </Stack>

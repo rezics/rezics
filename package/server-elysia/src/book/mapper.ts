@@ -34,6 +34,7 @@ export function mapBaseBookToDTO(book: BookWithRelations): BookDTO {
     producer: book.producer.map(sanitizeUser),
     coverUrl: book.coverUrl || undefined,
     isbn: book.isbn || undefined,
+    textLength: book.textLength.toString() || '0',
     nsfw: book.unit.nsfw || undefined,
     userId: book.unit.userId,
     user: sanitizeUser(book.unit.user),

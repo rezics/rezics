@@ -173,6 +173,7 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({bookId}) => {
       authorIds: metadataState.author?.map(author => author.unitId),
       pressIds: metadataState.press?.map(press => press.unitId),
       producerIds: metadataState.producer?.map(producer => producer.unitId),
+      textLength: metadataState.textLength,
       isbn: metadataState.isbn,
       coverUrl: metadataState.coverUrl,
       nsfw: metadataState.nsfw,

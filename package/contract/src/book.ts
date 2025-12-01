@@ -15,6 +15,7 @@ export const bookDTOSchema = t.Object({
   producer: t.Optional(t.Array(publicUserSchema)),
   coverUrl: t.Optional(t.String()),
   isbn: t.Optional(t.String()),
+  textLength: t.Optional(t.String()),
   nsfw: t.Optional(t.Boolean()),
   // 保持与 Input 一致，允许 null
   chaptersIndex: t.Optional(t.Nullable(t.String())),
@@ -116,6 +117,7 @@ export const createBookSchema = t.Object({
   nsfw: t.Optional(t.Boolean()),
   coverUrl: t.Optional(t.String()),
   isbn: t.Optional(t.String()),
+  textLength: t.Optional(t.String()),
   chaptersIndex: t.Optional(t.Nullable(t.String())),
   extra: t.Optional(t.Nullable(t.Record(t.String(), t.Any()))),
   description: t.Optional(t.String()),
@@ -138,6 +140,7 @@ export const updateBookSchema = t.Object({
   nsfw: t.Optional(t.Boolean()),
   coverUrl: t.Optional(t.String()),
   isbn: t.Optional(t.String()),
+  textLength: t.Optional(t.String()),
   chaptersIndex: t.Optional(t.Nullable(t.String())),
   extra: t.Optional(t.Nullable(t.Record(t.String(), t.Any()))),
   description: t.Optional(t.String()),

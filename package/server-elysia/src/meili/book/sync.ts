@@ -33,7 +33,7 @@ export async function syncBookToMeili(unitId: string): Promise<void> {
     authorIds: book.author?.map((a: User) => a.unitId) ?? [],
     pressIds: book.press?.map((p: User) => p.unitId) ?? [],
     producerIds: book.producer?.map((p: User) => p.unitId) ?? [],
-    textLength: book.textLength ?? 0,
+    textLength: Number(book.textLength) ?? 0,
     createdAt: book.createdAt,
     updatedAt: book.updatedAt,
     // result fields

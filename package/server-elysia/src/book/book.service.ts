@@ -198,6 +198,7 @@ export class BookService {
       authorIds,
       coverUrl,
       isbn,
+      textLength,
       chaptersIndex,
       extra,
       nsfw,
@@ -221,6 +222,7 @@ export class BookService {
             ? {connect: authorIds.map((unitId: string) => ({unitId}))}
             : undefined,
         coverUrl: coverUrl || undefined,
+        textLength: parseInt(textLength || '0') || 0,
         isbn: isbn || undefined,
         chapterIndex: {
           create: {index: chaptersIndex || ({} as Prisma.InputJsonValue)},
@@ -249,6 +251,7 @@ export class BookService {
       producerIds,
       coverUrl,
       isbn,
+      textLength,
       chaptersIndex,
       extra,
       description,
@@ -270,6 +273,7 @@ export class BookService {
           : undefined,
         coverUrl: coverUrl || undefined,
         isbn: isbn || undefined,
+        textLength: Number(textLength || '0') || 0,
         chapterIndex: {
           update: {index: chaptersIndex || undefined},
         },

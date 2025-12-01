@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Book" ALTER COLUMN "textLength" SET DATA TYPE BIGINT;

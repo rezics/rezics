@@ -63,7 +63,7 @@ export const BookSearchContainer: React.FC<BookSearchContainerProps> = ({
       keyword: info.keyword ?? undefined,
       tags: info.tags?.length ? info.tags : undefined,
       user: info.user ?? undefined,
-      wordCount: info.wordCount ?? undefined,
+      textLength: info.textLength ?? undefined,
       nsfw: info.nsfw ?? false,
       sort:
         sort.type || sort.order
@@ -71,8 +71,6 @@ export const BookSearchContainer: React.FC<BookSearchContainerProps> = ({
           : undefined,
     } as BookQueryOptions;
 
-    // schema referenced (validation optional at runtime)
-    void bookQueryOptionsSchema;
     // const q = toBookQueryString(options);
     onSearch(options);
   };

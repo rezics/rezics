@@ -1,7 +1,7 @@
 export interface SearchInfo {
   keyword?: string;
   tags?: string[];
-  wordCount?: number;
+  textLength?: string;
   user?: string;
   nsfw?: boolean;
 }

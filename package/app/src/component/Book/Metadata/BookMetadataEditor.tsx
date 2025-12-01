@@ -219,7 +219,16 @@ export const BookMetadataEditor: React.FC<BookMetadataEditorProps> = ({
             disabled={disabled}
           />
         </div>
-        <div>
+        <div className="flex items-center gap-2">
+          <TextField
+            fullWidth
+            label="Text Length"
+            value={value?.textLength ?? ''}
+            onChange={v => onChange?.({textLength: v.target.value})}
+            disabled={disabled}
+            variant="outlined"
+            size="small"
+          />
           <FormControlLabel
             control={
               <Checkbox

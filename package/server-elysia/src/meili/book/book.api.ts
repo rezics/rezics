@@ -30,6 +30,18 @@ export async function searchBooksRaw(
   });
 }
 
+function buildTextLengthFilter(input: number | {min?: number; max?: number}) {
+  if (typeof input === 'number') {
+    return `textLength = ${input}`;
+  }
+
+  const clauses = [];
+  if (input.min != null) clauses.push(`textLength >= ${input.min}`);
+  if (input.max != null) clauses.push(`textLength <= ${input.max}`);
+
+  return clauses.length ? clauses.join(' AND ') : undefined;
+}
+
 /**
  * Higher-level search API for books.
  *
@@ -61,6 +73,20 @@ export async function searchBooks(
         .map(t => `"${t.replace(/"/g, '\\"')}"`)
         .join(', ')}]`,
     );
+  }
+
+  if (opts.textLength) {
+    const tmp: any[] = opts.textLength.split('-').map(Number);
+    let min = 0,
+      max = 0;
+    if (tmp.length === 2) {
+      min = tmp[0];
+      max = tmp[1];
+    }
+    const tmpFilter = buildTextLengthFilter({min, max});
+    if (tmpFilter) {
+      filter.push(tmpFilter);
+    }
   }
 
   if (opts.authorIds?.length) {

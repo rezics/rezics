@@ -154,7 +154,6 @@ export const bookApi = coreInstance('/books')
         set.status = 404;
         throw new Error(`Book not found: ${params.unitId}`);
       }
-      console.log('payload', payload);
       if (
         !hasPermissionToUpdateBook(
           payload as any,
@@ -168,6 +167,7 @@ export const bookApi = coreInstance('/books')
         );
       }
       const book = await bookService.update(params.unitId, body);
+      console.log('book updated');
       return mapBookToDTO(book);
     },
     {

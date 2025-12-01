@@ -91,18 +91,15 @@ export const SearchInputShow: React.FC<SearchInputShowProps> = ({
           }
           onKeyDown={handleKeyDown}
         />
-        {/* TODO: add word count search support */}
-        {/* <TextField
+        <TextField
           fullWidth
           size="small"
           label={'Word Count'}
-          placeholder='Min to Max: "10000-20000"' // TODO: translate
-          value={value.wordCount ?? ''}
-          onChange={e =>
-            onValueChange({...value, wordCount: parseInt(e.target.value)})
-          }
+          placeholder='Min to Max: "10000-20000"'
+          value={value.textLength ?? ''}
+          onChange={e => onValueChange({...value, textLength: e.target.value})}
           onKeyDown={handleKeyDown}
-        /> */}
+        />
         <div className="ml-auto">
           <FormControlLabel
             control={
