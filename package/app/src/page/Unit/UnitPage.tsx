@@ -1,11 +1,11 @@
 import {useQuery} from '@tanstack/react-query';
-import {Avatar, Chip, Tooltip, Typography} from '@mui/material';
-import {Link} from 'wouter';
+import {Avatar, Chip, Paper, Tooltip, Typography} from '@mui/material';
 import {useTranslation} from 'react-i18next';
 
 import {unitDetailQuery} from '@/api/unit/unit';
 import {AccentBarContainer} from '@/component/Common/AccentBar';
 import {MarkdownContent} from '@/component/Common/MarkdownContent';
+import {RouterLink} from '@/component/Common/RouterLink';
 
 type UnitPageProps = {
   unitId: string;
@@ -116,12 +116,12 @@ export function UnitPage({unitId}: UnitPageProps) {
               />
               <div className="flex flex-col">
                 <Tooltip title={t('user.open_profile')}>
-                  <Link
+                  <RouterLink
                     href={`/user/${unit.user.unitId}`}
-                    className="text-sm font-medium text-sky-600 hover:underline"
+                    className="text-sm font-medium"
                   >
                     {unit.user.name}
-                  </Link>
+                  </RouterLink>
                 </Tooltip>
                 <Typography variant="caption" color="text.secondary">
                   {unit.user.slug}
@@ -130,7 +130,7 @@ export function UnitPage({unitId}: UnitPageProps) {
             </div>
           )}
 
-          <div className="text-xs text-gray-500 space-y-0.5 sm:text-right">
+          <div className="text-xs space-y-0.5 sm:text-right">
             {unit.createdAt && (
               <div>
                 {t('common.created_at')}: {String(unit.createdAt)}
@@ -147,7 +147,7 @@ export function UnitPage({unitId}: UnitPageProps) {
 
       {/* ANCHOR Content */}
       <div className="mt-8">
-        <div className="rounded-xl border border-gray-200/80 dark:border-gray-700/80 bg-white/70 dark:bg-slate-900/70 shadow-sm p-5">
+        <Paper className="p-5">
           {unit.content ? (
             <MarkdownContent content={unit.content} />
           ) : (
@@ -155,7 +155,7 @@ export function UnitPage({unitId}: UnitPageProps) {
               {t('unit.no_content')}
             </Typography>
           )}
-        </div>
+        </Paper>
       </div>
 
       {/* ANCHOR Metadata */}
@@ -174,14 +174,8 @@ export function UnitPage({unitId}: UnitPageProps) {
         ) : (
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             {metadataEntries.map(([key, value]) => (
-              <div
-                key={key}
-                className="rounded-lg border border-gray-200/80 dark:border-gray-700/80 bg-white/60 dark:bg-slate-900/60 shadow-sm p-4"
-              >
-                <Typography
-                  variant="subtitle2"
-                  className="font-semibold text-gray-700 dark:text-gray-100"
-                >
+              <Paper key={key} className="p-4">
+                <Typography variant="subtitle2" className="font-semibold">
                   {key}
                 </Typography>
                 <Typography
@@ -191,7 +185,7 @@ export function UnitPage({unitId}: UnitPageProps) {
                 >
                   {formatMetadataValue(value)}
                 </Typography>
-              </div>
+              </Paper>
             ))}
           </div>
         )}

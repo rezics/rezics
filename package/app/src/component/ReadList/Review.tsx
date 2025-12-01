@@ -94,7 +94,7 @@ export const CollapsibleReview: React.FC<CollapsibleReviewProps> = ({
 
         <div className="min-w-0 flex-1">
           {review?.title && (
-            <p className="text-sm font-semibold text-gray-800 leading-6 truncate">
+            <p className="text-sm font-semibold leading-6 truncate">
               {review.title}
             </p>
           )}
@@ -123,7 +123,7 @@ export const CollapsibleReview: React.FC<CollapsibleReviewProps> = ({
 
               {/* subtle gradient when collapsed and overflowing */}
               {!expanded && isOverflowing && (
-                <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-white/90 to-transparent" />
+                <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-8  to-transparent" />
               )}
 
               {(isOverflowing || expanded) && (

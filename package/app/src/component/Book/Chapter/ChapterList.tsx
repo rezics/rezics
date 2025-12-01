@@ -110,7 +110,7 @@ export const ChapterList: React.FC<ChapterListProps> = ({id, data}) => {
         <div key={node.id}>
           <div className="flex justify-between items-center">
             <button
-              className="text-xl font-semibold text-gray-800 mb-2 cursor-pointer"
+              className="text-xl font-semibold mb-2 cursor-pointer"
               onClick={() => toggleNode(node.id)}
             >
               {node.title}
@@ -134,9 +134,9 @@ export const ChapterList: React.FC<ChapterListProps> = ({id, data}) => {
                   // use target="_blank" to open link in new tab
                   <Link
                     to={`/book/${id}/read/${child.id}`}
-                    className="text-gray-700 hover:text-blue-500 block cursor-default hover:cursor-pointer"
+                    className="hover:text-[var(--mui-palette-primary-main)] block cursor-default hover:cursor-pointer"
                   >
-                    <p className="truncate p-2 rounded-md hover:bg-gray-100 transition-colors duration-200">
+                    <p className="truncate p-2 rounded-md transition-colors duration-200">
                       {displayName}
                     </p>
                   </Link>

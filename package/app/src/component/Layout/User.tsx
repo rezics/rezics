@@ -21,6 +21,8 @@ import {useLocation} from 'wouter';
 import {LoginModal} from '@/page/Auth/LoginPage';
 import {RegisterModal} from '@/page/Auth/RegisterPage';
 import {logout} from '@/page/Auth/lib/handler';
+import {userQueries} from '@/api/user/user.queries';
+import {useQuery} from '@tanstack/react-query';
 
 const LoginPrompt = () => {
   const [loginModalOpen, setLoginModalOpen] = useState(false);
@@ -78,7 +80,8 @@ export const UserShow: React.FC<UserShowProps> = ({
   onProfile,
   onSettings,
 }) => {
-  const user = useUserStore(state => state.user);
+  const userStore = useUserStore(state => state.user);
+  const {data: user} = useQuery(userQueries.me(userStore?.unitId ?? ''));
   return (
     <>
       <IconButton
@@ -88,8 +91,12 @@ export const UserShow: React.FC<UserShowProps> = ({
         aria-controls="menu-appbar"
         aria-haspopup="true"
       >
-        <Avatar sx={{width: 32, height: 32}} variant="rounded">
-          <img src={user?.avatar} alt="avatar" />
+        <Avatar
+          sx={{width: 32, height: 32}}
+          variant="rounded"
+          src={user?.avatar}
+        >
+          {user?.name?.charAt(0).toUpperCase()}
         </Avatar>
       </IconButton>
       <Menu

@@ -115,7 +115,7 @@ export const createChapterArboristNode = (
                   node.submit((e.target as HTMLInputElement).value);
                 }
               }}
-              className="w-full px-2 py-1 text-sm rounded border border-slate-300 dark:border-slate-600 bg-transparent focus:outline-none"
+              className="w-full px-2 py-1 text-sm rounded border bg-transparent focus:outline-none"
               style={{
                 boxShadow: `0 0 0 2px ${alpha(
                   theme.palette.primary.main,

@@ -81,7 +81,7 @@ export const QuotePage: React.FC<QuotePageProps> = ({unitId}) => {
                 alt="creator avatar"
                 className="w-10 h-10 rounded-full shadow"
               />
-              <p className="text-sm text-gray-700">{Quote.user.name}</p>
+              <p className="text-sm">{Quote.user.name}</p>
             </div>
           )}
           <div className="flex items-center gap-2">

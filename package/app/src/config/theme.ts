@@ -220,7 +220,7 @@ export const getDynamicTheme = (
   sourceColor?: string,
 ): Theme => {
   if (!sourceColor) {
-    return createTheme(getDesignTokens(mode), {cssVariables: true});
+    return createTheme({...getDesignTokens(mode), cssVariables: true});
   }
 
   // 生成动态颜色方案
@@ -249,7 +249,7 @@ export const getDynamicTheme = (
     },
   };
 
-  return createTheme(enhancedTokens, {cssVariables: true});
+  return createTheme({...enhancedTokens, cssVariables: true});
 };
 
 /**
@@ -259,5 +259,8 @@ export const getTheme = (
   mode: 'light' | 'dark',
   customColor?: string,
 ): Theme => {
-  return createTheme(getDesignTokens(mode, customColor), {cssVariables: true});
+  return createTheme({
+    ...getDesignTokens(mode, customColor),
+    cssVariables: true,
+  });
 };
