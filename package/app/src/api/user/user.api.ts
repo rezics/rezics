@@ -25,6 +25,20 @@ export const userApi = {
     });
   },
 
+  /**
+   * Send verification code to user email.
+   * Optionally includes a Turnstile token for bot protection.
+   */
+  sendVerificationCode: async (input: {
+    email: string;
+    turnstileToken?: string;
+  }): Promise<{data: {status: string; info: string}}> => {
+    return apiFetch(`/users/send-verification-code`, {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
+  },
+
   login: async (input: {
     email: string;
     password: string;

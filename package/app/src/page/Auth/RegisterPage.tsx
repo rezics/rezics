@@ -2,6 +2,7 @@ import Alert from '@mui/material/Alert';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import {type FC, useState} from 'react';
+import type React from 'react';
 import {useTranslation} from 'react-i18next';
 import {register} from './lib/handler.ts';
 import {Layout} from './lib/Layout.tsx';
@@ -11,14 +12,18 @@ import {Dialog, DialogContent} from '@mui/material';
 import {useUserStore} from '@/global/userStore.ts';
 import {useLocation} from 'wouter';
 import {Turnstile} from '@/component/Form/Turnstile.tsx';
+import {userApi} from '@/api/user/user';
 
 export interface RegisterShowProps {
   loading: boolean;
   error?: string;
+  cardHeader?: React.ReactNode;
   onSubmit: (data: RegisterData) => void;
   hideActions?: boolean;
   onLoginClick?: () => void;
   isModal?: boolean;
+  onSendVerificationCodeClick?: (email: string) => void;
+  sendingCode?: boolean;
 }
 
 interface RegisterData {
@@ -26,6 +31,7 @@ interface RegisterData {
   email: string;
   password: string;
   confirm: string;
+  verificationCode?: string;
 }
 
 /**
@@ -36,9 +42,12 @@ export const RegisterShow: FC<RegisterShowProps> = ({
   loading,
   error,
   onSubmit,
+  cardHeader,
   hideActions = false,
   onLoginClick,
   isModal = false,
+  onSendVerificationCodeClick,
+  sendingCode,
 }) => {
   const {t} = useTranslation();
   const [data, setData] = useState<RegisterData>({
@@ -50,12 +59,8 @@ export const RegisterShow: FC<RegisterShowProps> = ({
 
   const content = (
     <>
+      {cardHeader}
       {error && <Alert severity="error">{error}</Alert>}
-      <Turnstile
-        onVerify={token => {
-          console.log(token);
-        }}
-      />
       <TextField
         name="email"
         type="email"
@@ -85,6 +90,7 @@ export const RegisterShow: FC<RegisterShowProps> = ({
         type="password"
         label={t('common.password')}
         variant="standard"
+        helperText={t('auth.help.password_require')}
         required
         value={data?.password}
         onChange={(event: any) => {
@@ -113,6 +119,31 @@ export const RegisterShow: FC<RegisterShowProps> = ({
           setData({...data, confirm: event.target.value});
         }}
       />
+      <div className="flex">
+        <TextField
+          name="verificationCode"
+          type="text"
+          label="Verification Code"
+          variant="standard"
+          value={data?.verificationCode ?? ''}
+          onChange={(event: any) => {
+            setData({...data, verificationCode: event.target.value});
+          }}
+        />
+
+        <div className="flex flex-1 justify-end">
+          <Button
+            type="button"
+            variant="outlined"
+            className=""
+            onClick={() => {
+              onSendVerificationCodeClick?.(data.email);
+            }}
+          >
+            {sendingCode ? 'Sending...' : 'Get code'}
+          </Button>
+        </div>
+      </div>
     </>
   );
 
@@ -160,6 +191,11 @@ export const RegisterPage: FC<RegisterPageProps> = ({
 }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>();
+  const [showTurnstile, setShowTurnstile] = useState(false);
+  const [emailForVerificationCode, setEmailForVerificationCode] = useState<
+    string | null
+  >(null);
+  const [sendingCode, setSendingCode] = useState(false);
   let hasError = false;
   const {setUser} = useUserStore();
   const [location, navigate] = useLocation();
@@ -188,7 +224,10 @@ export const RegisterPage: FC<RegisterPageProps> = ({
       if (!validateData.valid) throw new Error(validateData.error ?? '');
       if (password !== confirm) throw new Error('Passwords do not match.');
 
-      const result = await register(slug, email, password);
+      const verificationCode = data?.verificationCode;
+      if (!verificationCode) throw new Error('Verification code is required.');
+
+      const result = await register(slug, email, password, verificationCode);
       setUser(result?.user);
     } catch (e) {
       setError((e as Error).message);
@@ -204,18 +243,59 @@ export const RegisterPage: FC<RegisterPageProps> = ({
     }
   };
 
+  const handleRequestVerificationCode = (email: string) => {
+    const validateData = validateEmail(email);
+    if (!validateData.valid) {
+      setError(validateData.error ?? 'Invalid email address');
+      return;
+    }
+    setEmailForVerificationCode(email);
+    setShowTurnstile(true);
+  };
+
+  const handleTurnstileVerify = async (token: string) => {
+    if (!emailForVerificationCode) return;
+    try {
+      setSendingCode(true);
+      await userApi.sendVerificationCode({
+        email: emailForVerificationCode,
+        turnstileToken: token,
+      });
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setSendingCode(false);
+      setShowTurnstile(false);
+    }
+  };
+
   const handleLoginClick = () => {
     // TODO: Navigate to login page
     navigate('/login');
   };
 
+  const cardHeader = (
+    <>
+      {showTurnstile && (
+        <div
+          style={{marginTop: '16px', display: 'flex', justifyContent: 'center'}}
+        >
+          <Turnstile onVerify={handleTurnstileVerify} />
+        </div>
+      )}
+    </>
+  );
+
   return (
     <RegisterShow
       loading={loading}
       error={error}
+      cardHeader={cardHeader}
       onSubmit={handleSubmit}
       onLoginClick={handleLoginClick}
       isModal={isModal}
+      onSendVerificationCodeClick={handleRequestVerificationCode}
+      sendingCode={sendingCode}
     />
   );
 };

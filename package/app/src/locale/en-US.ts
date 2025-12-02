@@ -34,6 +34,7 @@ export default {
     help: {
       slug: 'Username is globally unique.',
       slug_require: 'Only allow a-z, 0-9, A-Z, -, _',
+      password_require: 'Password must be at least 8 characters long.',
     },
     error: {
       email_required: 'Email is required.',

@@ -30,6 +30,7 @@ import {coreInstance} from '../core';
 import {setCookie} from '../utils/cookie';
 
 import {allowEmailDomains} from './allowEmailDomains';
+import {verifyTurnstileToken} from '../utils/turnstileUtils';
 
 /**
  * User Controller - Elysia.js routes with JWT authentication
@@ -47,7 +48,24 @@ export const userApi = coreInstance('/users')
       jwt,
       refreshToken,
       cookie: {refresh_token},
+      set,
     }): Promise<{user: UserDTO; token: string}> => {
+      const verificationCode = body.verificationCode;
+      if (verificationCode) {
+        const result = await userService.verifyVerificationCode(
+          body.email,
+          verificationCode,
+        );
+        console.log('verifyVerificationCode result', result);
+        if (result.status === 'error') {
+          set.status = 400;
+          throw new Error('Invalid verification code');
+        }
+      } else {
+        set.status = 400;
+        throw new Error('Verification code is required');
+      }
+
       const userReq: CreateUserInput = {
         email: body.email,
         password: body.password,
@@ -314,6 +332,15 @@ export const userApi = coreInstance('/users')
     '/send-verification-code',
     async ({body, set}) => {
       const email = body.email;
+      const turnstileToken = body.turnstileToken;
+      if (turnstileToken) {
+        const result = await verifyTurnstileToken(turnstileToken);
+        if (!result.success) {
+          set.status = 400;
+          throw new Error('Bot detected');
+        }
+      }
+
       if (
         !allowEmailDomains.includes(
           email.split('@')[1] ?? 'invalid-email-domain',
@@ -332,6 +359,7 @@ export const userApi = coreInstance('/users')
     {
       body: t.Object({
         email: t.String(),
+        turnstileToken: t.Optional(t.String()),
       }),
       detail: {
         summary: 'Send verification code',

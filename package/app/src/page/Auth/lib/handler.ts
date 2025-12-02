@@ -15,12 +15,14 @@ export const register = async (
   slug: string,
   email: string,
   password: string,
+  verificationCode?: string,
   avatar?: string,
   bio?: string,
 ) => {
   try {
     const input: CreateUserInput = {
       email,
+      verificationCode,
       password,
       slug,
       avatar,

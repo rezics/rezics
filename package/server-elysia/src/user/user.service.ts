@@ -269,8 +269,8 @@ export class UserService {
 
     await prisma.verificationCode.upsert({
       where: {email},
-      update: {code, expiresAt, createdAt: nowTime},
-      create: {email, userId: theUserId, code, expiresAt},
+      update: {code, expiresAt, createdAt: nowTime, usedAt: null},
+      create: {email, userId: theUserId, code, expiresAt, usedAt: null},
     });
 
     return {status: 'success', data: 'Verification code sent successfully'};

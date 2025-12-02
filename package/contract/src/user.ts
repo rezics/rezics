@@ -31,6 +31,7 @@ export type CreateUserInput = {
   avatar?: string;
   bio?: string;
   description?: string;
+  verificationCode?: string;
 };
 
 export type UpdateUserInput = Partial<Omit<CreateUserInput, 'password'>> & {
@@ -66,6 +67,7 @@ export const createUserSchema = t.Object({
   }),
   avatar: t.Optional(t.String()),
   bio: t.Optional(t.String()),
+  verificationCode: t.Optional(t.String()),
 });
 
 export type CreateUser = (typeof createUserSchema)['static'];
