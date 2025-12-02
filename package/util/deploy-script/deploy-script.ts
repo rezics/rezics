@@ -110,6 +110,7 @@ async function deploy() {
   //
   console.log('\n===== Build backend server-elysia =====');
   await run('bun install', SERVER_DIR);
+  await run('bun run prisma:deploy', SERVER_DIR);
   await runIn(SERVER_DIR, 'bun run build:linux');
 
   console.log(`\n>>> Deploy server → ${SERVER_TARGET}`);
