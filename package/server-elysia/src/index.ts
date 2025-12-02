@@ -22,9 +22,29 @@ const {isProd, isDev} = getProdState();
 if (isDev) {
   await import('./utils/logger-hook');
 }
+
+const devOrigins = ['http://localhost:35001'];
+
+const prodOrigins = ['https://book.rezics.com', 'https://rezics.com'];
+
+const allowedOrigins = isDev ? devOrigins : prodOrigins;
+
 const app = new Elysia()
   // CORS The policy may need to be updated
-  .use(cors())
+  .use(
+    cors({
+      origin: allowedOrigins,
+      credentials: true,
+      methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+      allowedHeaders: [
+        'Content-Type',
+        'Authorization',
+        'Accept',
+        'X-Requested-With',
+      ],
+      exposeHeaders: ['Content-Type', 'Authorization'],
+    }),
+  )
   .onError(({code, error, set}) => {
     set.status ||= 500;
     const message =
