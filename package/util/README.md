@@ -3,3 +3,7 @@
 cd /www/wwwroot/Library.Book/Library.Book/package/util/
 bun run deploy
 ```
+
+```
+systemctl restart rezbooklib.service
+```

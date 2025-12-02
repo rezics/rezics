@@ -71,10 +71,10 @@ async function runIn(dir: string, cmd: string) {
 
 async function deploy() {
   console.log('==============================');
-  console.log('🚀 开始部署 Library.Book');
+  console.log('Start deploying Library.Book');
   console.log('==============================\n');
 
-  console.log('目录', {
+  console.log('Directories', {
     ROOT: ROOT,
     SCRIPT_DIR: SCRIPT_DIR,
     GIT_ROOT: GIT_ROOT,
@@ -87,33 +87,33 @@ async function deploy() {
   //
   // 1. Git 同步（强制拉取）
   //
-  console.log('\n===== 1. 获取最新 Git =====');
+  console.log('\n===== Get latest Git =====');
   await run('git fetch --all', GIT_ROOT);
   await run('git reset --hard origin/dev', GIT_ROOT);
 
   //
   // 2. 构建前端 App
   //
-  console.log('\n===== 2. 构建前端 app =====');
+  console.log('\n===== Build frontend app =====');
   await run('bun install', APP_DIR);
   await runIn(APP_DIR, 'bun run build');
 
-  console.log(`\n>>> 清空目录: ${FRONTEND_TARGET}`);
+  console.log(`\n>>> Clear directory: ${FRONTEND_TARGET}`);
   await clearDir(FRONTEND_TARGET);
 
-  console.log('>>> 拷贝 dist → 部署目录');
+  console.log('>>> Copy dist → deployment directory');
   const distPath = path.join(APP_DIR, 'dist');
   await cp(distPath, FRONTEND_TARGET, {recursive: true});
 
   //
   // 3. 构建 Elysia 后端
   //
-  console.log('\n===== 3. 构建后端 server-elysia =====');
+  console.log('\n===== Build backend server-elysia =====');
   await run('bun install', SERVER_DIR);
   await runIn(SERVER_DIR, 'bun run build:linux');
 
-  console.log(`\n>>> 部署 server → ${SERVER_TARGET}`);
-  console.log('暂停服务');
+  console.log(`\n>>> Deploy server → ${SERVER_TARGET}`);
+  console.log('Stopping service');
   await run('sudo systemctl stop rezbooklib.service', SERVER_DIR);
   const outputServer = path.join(SERVER_DIR, 'server'); // build:linux 后生成的文件
 
@@ -124,12 +124,12 @@ async function deploy() {
   await run('sudo systemctl start rezbooklib.service', SERVER_DIR);
 
   console.log('\n==============================');
-  console.log('🎉 部署完毕：前端 + 后端已全部更新');
+  console.log('Deployment complete: frontend + backend updated');
   console.log('==============================\n');
 }
 
 deploy().catch(err => {
-  console.error('\n❌ 部署失败:');
+  console.error('\nDeployment failed:');
   console.error(err);
   process.exit(1);
 });
