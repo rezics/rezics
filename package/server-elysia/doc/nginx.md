@@ -1,4 +1,8 @@
-    
+
+## CORS 配置
+
+> Nginx 的 CORS 配置不应当随便启用，应当采用插件配置
+
 if ($request_method = OPTIONS)  添加 allow-Origin，可以让请求传给 elysia
 
 
