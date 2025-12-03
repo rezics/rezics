@@ -3,7 +3,7 @@ import {AccentBarWithTextShow} from '@/component/Common/AccentBar';
 import TagListEdit from '@/component/Tag/Edit/TagListEdit';
 import {Alert} from '@mui/material';
 
-interface BookEditTagPageProps {
+export interface BookEditTagPageProps {
   bookId: string;
 }
 

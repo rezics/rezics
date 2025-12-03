@@ -61,7 +61,7 @@ function defaultChildren(units: Unit[]) {
   );
 }
 
-interface UnitsPageProps {
+export interface UnitsPageProps {
   /**
    * Mode of the page:
    * - 'tab': show tabs to switch between multiple unit types

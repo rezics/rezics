@@ -9,7 +9,7 @@ import {appStore} from '@/global/appStore.ts';
 import {useLayoutStore} from '@/global/Layout/layoutStore.ts';
 import {useUserStore} from '@/global/userStore';
 
-interface MainLayoutProps {
+export interface MainLayoutProps {
   children: ReactNode;
 }
 

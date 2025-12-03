@@ -5,7 +5,7 @@ import {ChapterArboristHeightSlider} from '@/component/Book/Chapter/ChapterArbor
 import {AccentBarWithTextShow} from '@/component/Common/AccentBar';
 import {Alert} from '@mui/material';
 
-interface BookEditChapterListPageProps {
+export interface BookEditChapterListPageProps {
   bookId: string;
 }
 

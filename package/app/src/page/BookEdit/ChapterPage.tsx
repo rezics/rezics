@@ -9,7 +9,7 @@ import {
   useUpdateChapterMutation,
 } from '@/api/chapter/chapter';
 
-interface BookEditChapterPageProps {
+export interface BookEditChapterPageProps {
   chapterId: string; // unitId of chapter
 }
 

@@ -16,7 +16,7 @@ import {UnitType} from '@package/contract/src/unit';
 import {mapUnitListToReviewListResponse} from '@/api/meili/meili.api';
 
 type Review = ReviewDTO;
-interface ReviewsPageProps {
+export interface ReviewsPageProps {
   bookUnitId?: string;
 }
 export const ReviewsPage: React.FC<ReviewsPageProps> = ({bookUnitId}) => {

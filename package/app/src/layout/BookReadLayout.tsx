@@ -1,7 +1,7 @@
 import {Header} from '@/component/Layout/Header/MainLayoutHeader';
 import {Sidebar} from '@/component/Layout/Sidebar/Sidebar';
 import {Button, Divider, useMediaQuery} from '@mui/material';
-import React, {ReactNode, useEffect, useState} from 'react';
+import React, {type ReactNode, useEffect, useState} from 'react';
 // import { Box } from "@mui/material";
 import {appStore} from '@/global/appStore.ts';
 import {useLayoutStore} from '@/global/Layout/layoutStore.ts';
@@ -9,7 +9,7 @@ import {useLayoutStore} from '@/global/Layout/layoutStore.ts';
 import {DraggableResizer} from '@/component/Layout/DraggableResizer.tsx';
 import {LinearChapterList} from '@/component/Book/Chapter/LinearChapterList';
 import {Link, useParams, useRoute} from 'wouter';
-interface BookReadLayoutProps {
+export interface BookReadLayoutProps {
   children: ReactNode;
   bookId: string;
   chapterId: string;
@@ -81,7 +81,6 @@ export const BookReadLayout: React.FC<BookReadLayoutProps> = ({
           <LinearChapterList
             bookId={bookId || ''}
             chapterId={chapterId || ''}
-            drawerWidth={drawerWidth}
             isDraggable={true}
             enableDoubleClickRename={false}
             isEdit={false}

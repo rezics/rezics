@@ -11,7 +11,7 @@ import {LinearChapterList} from '@/component/Book/Chapter/LinearChapterList';
 
 import {DraggableResizer} from '@/component/Layout/DraggableResizer.tsx';
 
-interface BookEditLayoutProps {
+export interface BookEditLayoutProps {
   bookId?: string;
   chapterId?: string;
   children: ReactNode;

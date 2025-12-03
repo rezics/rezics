@@ -1,69 +1,221 @@
 import {ThemeProvider} from '@mui/material';
 import {Route, Router, Switch} from 'wouter';
+import {lazy} from 'react';
 
-// Pages
-import {LoginPage} from '@/page/Auth/LoginPage.tsx';
-import {RegisterPage} from '@/page/Auth/RegisterPage.tsx';
-import {HomeContainer} from '@/page/Home.tsx';
-import {NotFoundContainer} from '@/page/NotFound.tsx';
+// ========== Pages ==========
+export const LoginPage = lazy(() =>
+  import('@/page/Auth/LoginPage').then(m => ({default: m.LoginPage})),
+);
 
-// Book
-import {BookLibContainer} from '@/page/Book/BookLibPage';
-import {BookPageContainer} from '@/page/Book/BookPage.tsx';
+export const RegisterPage = lazy(() =>
+  import('@/page/Auth/RegisterPage').then(m => ({default: m.RegisterPage})),
+);
 
-// Book – Read
-import {BookReadLayout} from '@/layout/BookReadLayout.tsx';
-import {BookReadChapterPage} from '@/page/Book/ChapterPage.tsx';
+export const HomeContainer = lazy(() =>
+  import('@/page/Home').then(m => ({default: m.HomeContainer})),
+);
 
-// Book – Edit
-import {BookEditLayout} from '@/layout/BookEditLayout.tsx';
-import {BookEditChapterPage} from '@/page/BookEdit/ChapterPage.tsx';
-import {BookEditTagPage} from '@/page/BookEdit/TagPage.tsx';
-import {BookEditMainPage} from '@/page/BookEdit/InfoPage.tsx';
-import {NewBookPage} from '@/page/BookEdit/NewBookPage.tsx';
-import {BookEditChapterListPage} from '@/page/BookEdit/ChapterListPage.tsx';
+export const NotFoundContainer = lazy(() =>
+  import('@/page/NotFound').then(m => ({default: m.NotFoundContainer})),
+);
 
-// Review pages
-import {ReviewsPage} from '@/page/Review/ReviewsPage';
-import {ReviewPage} from '@/page/Review/ReviewPage.tsx';
-import {ReviewNewPage} from '@/page/Review/ReviewNewPage.tsx';
-import {ReviewEditPageContainer} from '@/page/Review/ReviewEditPage.tsx';
-import {QuoteByBookPage} from '@/page/Review/QuoteByBookPage.tsx';
-import {QuotePage} from '@/page/Review/QuotePage.tsx';
-import {QuoteEditPageContainer} from '@/page/Review/QuoteEditPage.tsx';
+// ========== Book ==========
+export const BookLibContainer = lazy(() =>
+  import('@/page/Book/BookLibPage').then(m => ({default: m.BookLibContainer})),
+);
 
-// ReadList pages
-import {ReadListPage} from '@/page/ReadList/ReadListPage.tsx';
-import {ReadListsPage} from '@/page/ReadList/ReadListsPage';
+export const BookPageContainer = lazy(() =>
+  import('@/page/Book/BookPage').then(m => ({default: m.BookPageContainer})),
+);
 
-// Unit pages
-import {UnitsPage} from '@/page/Unit/UnitsPage.tsx';
-import {UnitPage} from '@/page/Unit/UnitPage.tsx';
+// ========== Book – Read ==========
+export const BookReadLayout = lazy(() =>
+  import('@/layout/BookReadLayout').then(m => ({default: m.BookReadLayout})),
+);
 
-// Tag pages
-import {TagByBookPage, TagByBookFullPage} from '@/page/Tag/TagByUnitPage';
-import {TagDomainPage} from '@/page/Tag/TagDomain';
-import {TagUnitPage} from '@/page/Tag/TagUnitPage';
+export const BookReadChapterPage = lazy(() =>
+  import('@/page/Book/ChapterPage').then(m => ({
+    default: m.BookReadChapterPage,
+  })),
+);
 
-// User pages
-import {UserEditPage} from '@/page/User/UserEditPage.tsx';
-import {BookmarkPage} from '@/page/User/BookmarkPage.tsx';
-import {FollowInfoPage} from '@/page/User/FollowInfoPage.tsx';
+// ========== Book – Edit ==========
+export const BookEditLayout = lazy(() =>
+  import('@/layout/BookEditLayout').then(m => ({default: m.BookEditLayout})),
+);
 
-// Misc
-import {MainLayout} from '@/layout/MainLayout.tsx';
-import {MeiliPage} from '@/page/Meili/MeiliPage.tsx';
-import {ReadListEditPage} from '@/page/ReadList/ReadListEditPage.tsx';
-import {NewReadListPage} from '@/page/ReadList/NewReadListPage.tsx';
-import {ReadlistByBookPage} from '@/page/ReadList/ReadListsByBookPage.tsx';
-import {ReviewByBookPage} from '@/page/Review/ReviewByBookPage.tsx';
-import TestPage from '@/page/Test/TestPage.tsx';
-import {TestPage02} from '@/page/Test/TestPage02.tsx';
-import {TestPage03} from '@/page/Test/TestPage03.tsx';
-import {UserPage} from '@/page/User/UserPage.tsx';
-import {NoticePage} from '@/page/Misc/Notice.tsx';
-import {ReactionInfoPage} from '@/page/User/ReactionInfoPage.tsx';
-import EchokvEditPage from '@/page/Misc/EchokvEdit.tsx';
+export const BookEditChapterPage = lazy(() =>
+  import('@/page/BookEdit/ChapterPage').then(m => ({
+    default: m.BookEditChapterPage,
+  })),
+);
+
+export const BookEditTagPage = lazy(() =>
+  import('@/page/BookEdit/TagPage').then(m => ({default: m.BookEditTagPage})),
+);
+
+export const BookEditMainPage = lazy(() =>
+  import('@/page/BookEdit/InfoPage').then(m => ({default: m.BookEditMainPage})),
+);
+
+export const NewBookPage = lazy(() =>
+  import('@/page/BookEdit/NewBookPage').then(m => ({default: m.NewBookPage})),
+);
+
+export const BookEditChapterListPage = lazy(() =>
+  import('@/page/BookEdit/ChapterListPage').then(m => ({
+    default: m.BookEditChapterListPage,
+  })),
+);
+
+// ========== Review Pages ==========
+export const ReviewsPage = lazy(() =>
+  import('@/page/Review/ReviewsPage').then(m => ({default: m.ReviewsPage})),
+);
+
+export const ReviewPage = lazy(() =>
+  import('@/page/Review/ReviewPage').then(m => ({default: m.ReviewPage})),
+);
+
+export const ReviewNewPage = lazy(() =>
+  import('@/page/Review/ReviewNewPage').then(m => ({default: m.ReviewNewPage})),
+);
+
+export const ReviewEditPageContainer = lazy(() =>
+  import('@/page/Review/ReviewEditPage').then(m => ({
+    default: m.ReviewEditPageContainer,
+  })),
+);
+
+export const QuoteByBookPage = lazy(() =>
+  import('@/page/Review/QuoteByBookPage').then(m => ({
+    default: m.QuoteByBookPage,
+  })),
+);
+
+export const QuotePage = lazy(() =>
+  import('@/page/Review/QuotePage').then(m => ({default: m.QuotePage})),
+);
+
+export const QuoteEditPageContainer = lazy(() =>
+  import('@/page/Review/QuoteEditPage').then(m => ({
+    default: m.QuoteEditPageContainer,
+  })),
+);
+
+// ========== ReadList Pages ==========
+export const ReadListPage = lazy(() =>
+  import('@/page/ReadList/ReadListPage').then(m => ({default: m.ReadListPage})),
+);
+
+export const ReadListsPage = lazy(() =>
+  import('@/page/ReadList/ReadListsPage').then(m => ({
+    default: m.ReadListsPage,
+  })),
+);
+
+// ========== Unit Pages ==========
+export const UnitsPage = lazy(() =>
+  import('@/page/Unit/UnitsPage').then(m => ({default: m.UnitsPage})),
+);
+
+export const UnitPage = lazy(() =>
+  import('@/page/Unit/UnitPage').then(m => ({default: m.UnitPage})),
+);
+
+// ========== Tag Pages ==========
+export const TagByBookPage = lazy(() =>
+  import('@/page/Tag/TagByUnitPage').then(m => ({default: m.TagByBookPage})),
+);
+
+export const TagByBookFullPage = lazy(() =>
+  import('@/page/Tag/TagByUnitPage').then(m => ({
+    default: m.TagByBookFullPage,
+  })),
+);
+
+export const TagDomainPage = lazy(() =>
+  import('@/page/Tag/TagDomain').then(m => ({default: m.TagDomainPage})),
+);
+
+export const TagUnitPage = lazy(() =>
+  import('@/page/Tag/TagUnitPage').then(m => ({default: m.TagUnitPage})),
+);
+
+// ========== User Pages ==========
+export const UserEditPage = lazy(() =>
+  import('@/page/User/UserEditPage').then(m => ({default: m.UserEditPage})),
+);
+
+export const BookmarkPage = lazy(() =>
+  import('@/page/User/BookmarkPage').then(m => ({default: m.BookmarkPage})),
+);
+
+export const FollowInfoPage = lazy(() =>
+  import('@/page/User/FollowInfoPage').then(m => ({default: m.FollowInfoPage})),
+);
+
+export const UserPage = lazy(() =>
+  import('@/page/User/UserPage').then(m => ({default: m.UserPage})),
+);
+
+export const ReactionInfoPage = lazy(() =>
+  import('@/page/User/ReactionInfoPage').then(m => ({
+    default: m.ReactionInfoPage,
+  })),
+);
+
+// ========== Misc ==========
+export const MainLayout = lazy(() =>
+  import('@/layout/MainLayout').then(m => ({default: m.MainLayout})),
+);
+
+export const MeiliPage = lazy(() =>
+  import('@/page/Meili/MeiliPage').then(m => ({default: m.MeiliPage})),
+);
+
+export const ReadListEditPage = lazy(() =>
+  import('@/page/ReadList/ReadListEditPage').then(m => ({
+    default: m.ReadListEditPage,
+  })),
+);
+
+export const NewReadListPage = lazy(() =>
+  import('@/page/ReadList/NewReadListPage').then(m => ({
+    default: m.NewReadListPage,
+  })),
+);
+
+export const ReadlistByBookPage = lazy(() =>
+  import('@/page/ReadList/ReadListsByBookPage').then(m => ({
+    default: m.ReadlistByBookPage,
+  })),
+);
+
+export const ReviewByBookPage = lazy(() =>
+  import('@/page/Review/ReviewByBookPage').then(m => ({
+    default: m.ReviewByBookPage,
+  })),
+);
+
+// Test
+export const TestPage = lazy(() => import('@/page/Test/TestPage'));
+
+export const TestPage02 = lazy(() =>
+  import('@/page/Test/TestPage02').then(m => ({default: m.TestPage02})),
+);
+
+export const TestPage03 = lazy(() =>
+  import('@/page/Test/TestPage03').then(m => ({default: m.TestPage03})),
+);
+
+// Echokv
+export const EchokvEditPage = lazy(() => import('@/page/Misc/EchokvEdit'));
+
+// Notice
+export const NoticePage = lazy(() =>
+  import('@/page/Misc/Notice').then(m => ({default: m.NoticePage})),
+);
 
 // TODO 删除 ThemeProvider
 

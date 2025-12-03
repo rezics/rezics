@@ -44,7 +44,7 @@ const updateBookDialog = (
   );
 };
 
-interface BookEditInfoShowProps {
+export interface BookEditInfoShowProps {
   bookId?: string;
   handleSubmit: () => void;
   setMetadataState: React.Dispatch<React.SetStateAction<BookMetadataValue>>;
@@ -128,7 +128,7 @@ export const BookEditInfoShow: React.FC<BookEditInfoShowProps> = ({
   );
 };
 
-interface BookEditMainPageProps {
+export interface BookEditMainPageProps {
   bookId: string;
 }
 

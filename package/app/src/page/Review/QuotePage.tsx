@@ -15,7 +15,7 @@ import {
 } from '@/component/Common/Reaction/MiniActionBar';
 import {parseReactionSummaries} from '@/util/reactionSummariesParser';
 import {ReactionStatistics} from '@/component/Common/Reaction/ReactionStatistics';
-interface QuotePageProps {
+export interface QuotePageProps {
   unitId: string;
 }
 
