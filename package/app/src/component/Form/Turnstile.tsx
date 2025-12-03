@@ -37,6 +37,7 @@ export function Turnstile({
       script.async = true;
       script.defer = true;
       script.id = scriptId;
+      script.crossOrigin = 'anonymous';
       document.body.appendChild(script);
     }
 
