@@ -27,12 +27,6 @@ interface ServiceConfig {
 
 const SERVICES: ServiceConfig[] = [
   {
-    name: 'meilisearch.service',
-    src: './meilisearch.service',
-    enable: true,
-    start: true,
-  },
-  {
     name: 'rezbooklib.service',
     src: './rezbooklib.service',
     enable: true,

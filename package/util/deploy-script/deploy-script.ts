@@ -47,7 +47,7 @@ const APP_DIR = path.join(ROOT, 'app');
 const SERVER_DIR = path.join(ROOT, 'server-elysia');
 
 // 部署输出目录
-const FRONTEND_TARGET = '/www/wwwroot/book.rezics.com/';
+const FRONTEND_TARGET = '/opt/1panel/www/sites/book.rezics.com/index';
 const SERVER_TARGET = '/www/wwwroot/Library.Book/server/';
 
 // 执行命令（打印实时 stdout/stderr）
