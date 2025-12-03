@@ -6,6 +6,6 @@ bun run deploy
 
 ```
 systemctl restart rezbooklib.service
-journalctl -u rezbooklib.service -n 100
+journalctl -u rezbooklib.service -n 100 # 这个好像是报错日志命令，不要用
 journalctl -u rezbooklib.service -f
 ```

@@ -41,6 +41,8 @@ export const seedEchoKV = async (prisma: PrismaClient) => {
   });
 };
 
-const prisma = new PrismaClient();
-
-seedEchoKV(prisma);
+if (require.main === module) {
+  // Only run when executed directly from CLI
+  const prisma = new PrismaClient();
+  seedEchoKV(prisma).finally(() => prisma.$disconnect());
+}

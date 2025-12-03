@@ -1,5 +1,3 @@
-import {writeFile} from 'fs/promises';
-
 export const noticeboard = [
   {
     id: '1',
@@ -34,8 +32,6 @@ export const noticeboard = [
   },
 ];
 
-console.log(JSON.stringify(noticeboard, null, 2));
-
 export function generateNoticeboardData(number: number) {
   const data = [];
   for (let i = 0; i < number; i++) {
@@ -46,8 +42,3 @@ export function generateNoticeboardData(number: number) {
   }
   return data;
 }
-
-writeFile(
-  'noticeboard.json',
-  JSON.stringify(generateNoticeboardData(100), null, 2),
-);
