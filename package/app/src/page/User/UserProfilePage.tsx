@@ -51,15 +51,17 @@ export const UserProfilePage: FC<UserProfilePageProps> = ({
   });
   const queryClient = useQueryClient();
   async function refreshUser() {
-    const data = await queryClient.fetchQuery(
-      userQueries.me(currentUser?.unitId ?? ''),
-    );
-    setUser({
-      unitId: data?.unitId,
-      name: data?.name,
-      email: data?.email,
-      avatar: data?.avatar,
-    });
+    window.location.reload();
+    // const data = await queryClient.fetchQuery(
+    //   userQueries.me(currentUser?.unitId ?? ''),
+    // );
+    // setUser({
+    //   unitId: data?.unitId,
+    //   name: data?.name,
+    //   email: data?.email,
+    //   avatar: data?.avatar,
+    //   permission: data?.permission,
+    // });
   }
 
   const isLoading = meQuery.isLoading || detailQuery.isLoading;

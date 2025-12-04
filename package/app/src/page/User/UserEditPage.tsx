@@ -45,7 +45,7 @@ export const UserEditPage: FC<UserEditPageProps> = ({
     isLoading,
     error: queryError,
   } = useQuery(userQueries.detail(unitId ?? ''));
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | any | null>(null);
   const [saving, setSaving] = useState(false);
 
   const [formData, setFormData] = useState<UpdateUserInput>({
@@ -68,7 +68,7 @@ export const UserEditPage: FC<UserEditPageProps> = ({
       });
     }
     if (queryError) {
-      setError(JSON.stringify(queryError));
+      setError(queryError);
     }
   }, [data, queryError]);
 
@@ -102,7 +102,7 @@ export const UserEditPage: FC<UserEditPageProps> = ({
       // Clear password field after successful update
       setFormData(prev => ({...prev, password: ''}));
     } catch (err) {
-      setError(JSON.stringify(err));
+      setError(err);
     } finally {
       setSaving(false);
     }
@@ -143,7 +143,7 @@ export const UserEditPage: FC<UserEditPageProps> = ({
           <form onSubmit={handleSubmit}>
             {error && (
               <Alert severity="error" className="mb-4">
-                {error}
+                {JSON.stringify(error.message)}
               </Alert>
             )}
             <Box className="space-y-4">
