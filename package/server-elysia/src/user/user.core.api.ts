@@ -294,11 +294,15 @@ export const coreRoute = (api: ReturnType<typeof coreInstance>) => {
         async ({headers, jwt, body, set}): Promise<UserDTO> => {
           const payload = await verifyAuth(headers.authorization, jwt, set);
 
+          let passwordHash: string | undefined = undefined;
+          if (body.password) {
+            passwordHash = await hashPassword(body.password);
+          }
           const userReq: UpdateUserInput = {
             name: body.name,
             avatar: body.avatar,
             bio: body.bio,
-            password: body.password,
+            password: passwordHash,
           };
 
           const user = await userService.update(payload.unitId, userReq);

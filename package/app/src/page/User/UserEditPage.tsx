@@ -21,6 +21,7 @@ import {useQuery} from '@tanstack/react-query';
 import {userQueries} from '@/api/user/user.queries';
 import {UserLoading} from './UserState';
 import {userApi} from '@/api/user/user.api';
+import {PasswordField} from '@/component/Form/PasswordField';
 
 export interface UserEditPageProps {
   onCancel?: () => void;
@@ -186,12 +187,11 @@ export const UserEditPage: FC<UserEditPageProps> = ({
                 helperText="Tell us about yourself"
               />
               <div className="h-2" />
-              <TextField
-                fullWidth
-                type="password"
+              <PasswordField
+                className="w-full"
                 label="New Password (optional)"
-                value={formData.password}
-                onChange={e => handleChange('password', e.target.value)}
+                value={formData.password || ''}
+                setValue={value => handleChange('password', value)}
                 variant="outlined"
                 helperText="Leave empty to keep current password"
               />

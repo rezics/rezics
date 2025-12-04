@@ -12,6 +12,8 @@ interface PasswordFieldProps {
   variant?: 'standard' | 'outlined' | 'filled';
   onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
   setValue: (value: string) => void;
+  helperText?: string;
+  className?: string;
 }
 
 export const PasswordField: FC<PasswordFieldProps> = ({
@@ -20,6 +22,8 @@ export const PasswordField: FC<PasswordFieldProps> = ({
   value,
   setValue,
   variant = 'standard',
+  helperText = 'At least 8 characters',
+  className,
 }) => {
   const {t} = useTranslation();
   const [showPassword, setShowPassword] = useState(false);
@@ -38,9 +42,11 @@ export const PasswordField: FC<PasswordFieldProps> = ({
 
   return (
     <TextField
+      className={className}
       name={name ?? 'password'}
       type={showPassword ? 'text' : 'password'}
       label={label ?? t('common.password')}
+      helperText={helperText}
       variant={variant}
       required
       value={value}
