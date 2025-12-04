@@ -11,6 +11,7 @@ import {tagApi} from './tag';
 import {echoKvApi} from './echokv';
 import {commentApi} from './comment';
 import {reactionApi} from './reaction';
+import {tokenApi} from './token';
 import {cors} from '@elysiajs/cors';
 
 import {getProdState} from './utils/getProdState';
@@ -80,6 +81,7 @@ const app = new Elysia()
   .use(tagApi)
   .use(commentApi)
   .use(reactionApi)
+  .use(tokenApi)
   .use(echoKvApi)
   .get('/', () => 'Hello Elysia')
   .get('/health', () => ({status: 'ok'}));

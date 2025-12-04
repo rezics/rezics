@@ -1,5 +1,4 @@
 import {PrismaClient} from './generated/client';
-import {PrismaPg} from '@prisma/adapter-pg';
 import {Pool} from 'pg';
 
 // Get database URL from environment variable
@@ -25,7 +24,7 @@ const enableQueryEventLogging =
 
 // Initialize Prisma Client with PostgreSQL adapter
 export const prisma = new PrismaClient({
-  adapter: new PrismaPg(pool),
+  // adapter: new PrismaPg(pool), // NOTE Don't use this adapter, it's very slow!
   log: enableQueryEventLogging
     ? [{emit: 'event', level: 'query'} as const]
     : [],

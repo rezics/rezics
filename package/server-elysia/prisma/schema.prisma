@@ -78,12 +78,37 @@ model User {
   pressBook    Book[]     @relation("BookPress")
   producerBook Book[]     @relation("BookProducer")
   reactions    Reaction[] @relation("UserReactions")
+  apiTokens    ApiToken[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([name])
   @@index([email])
+}
+
+model ApiToken {
+  id String @id @default(dbgenerated("uuidv7()")) @db.Uuid
+
+  userId String @db.Uuid
+  user   User   @relation(fields: [userId], references: [unitId])
+
+  name      String
+  tokenHash String @unique
+  scopes    Json   @default("{}") // example: {main:['admin']}
+
+  createdAt  DateTime  @default(now())
+  expiresAt  DateTime? // Optional, default no expiration
+  lastUsedAt DateTime?
+  lastIP     String?
+  userAgent  String?
+
+  revoked   Boolean   @default(false)
+  revokedAt DateTime?
+
+  @@index([userId])
+  @@index([tokenHash])
+  @@index([expiresAt])
 }
 
 model AuthSession {
