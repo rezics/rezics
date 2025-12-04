@@ -1,5 +1,5 @@
 import {coreInstance} from '../core';
-import {verifyAuth} from '@/src/utils/authUtils';
+import {verifyAuth} from '@/src/user/utils.ts';
 import {
   chapterListQuerySchema,
   chapterParamsSchema,

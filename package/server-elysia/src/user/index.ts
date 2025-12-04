@@ -16,3 +16,5 @@ export type {UserWithRelations, UserFilterOptions, JWTPayload} from './types';
 
 // Utilities
 export {mapUserToDTO, mapUserToPublicProfile} from './mapper';
+
+export * from './utils';

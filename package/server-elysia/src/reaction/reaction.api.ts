@@ -1,6 +1,6 @@
 import {t} from 'elysia';
 import {coreInstance} from '../core';
-import {verifyAuth} from '@/src/utils/authUtils';
+import {verifyAuth} from '@/src/user/utils';
 import {reactionService} from './reaction.service';
 import {prisma, type ReactionSummary} from '@/prisma/client';
 

@@ -16,7 +16,7 @@ import type {
 import {coreInstance} from '../core';
 import {tagService} from './tag.service';
 import {mapTagDetailToDTO, mapTagToDTO} from './mapper';
-import {verifyAuth} from '@/src/utils/authUtils';
+import {verifyAuth} from '@/src/user/utils';
 import {unitService} from '../unit/unit.service';
 import {
   hasPermissionToUpdateTag,

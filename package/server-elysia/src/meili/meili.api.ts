@@ -9,7 +9,7 @@ import {
   type ReadlistListQuery,
 } from '@package/contract';
 import {meiliService} from './meili.service';
-import {verifyAuth} from '@/src/utils/authUtils';
+import {verifyAuth} from '@/src/user/utils';
 import {deleteAllUnits} from '@package/search/src/documents';
 import {checkMeiliHealth} from '@package/search/src/client';
 import {isRoot} from '@package/contract';

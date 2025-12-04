@@ -10,7 +10,7 @@ import {sessionService} from './session.service';
 
 import {v7 as uuidv7} from 'uuid';
 
-import {verifyAuth} from '@/src/utils/authUtils';
+import {hashPassword, verifyAuth} from './utils';
 
 import {
   userListQuerySchema,
@@ -65,10 +65,10 @@ export const userApi = coreInstance('/users')
         set.status = 400;
         throw new Error('Verification code is required');
       }
-
+      const passwordHash = await hashPassword(body.password);
       const userReq: CreateUserInput = {
         email: body.email,
-        password: body.password,
+        password: passwordHash,
         slug: body.slug,
         avatar: body.avatar,
         bio: body.bio,
@@ -259,6 +259,51 @@ export const userApi = coreInstance('/users')
     },
   )
 
+  .post(
+    '/change-password',
+    async ({headers, jwt, body, set}): Promise<{message: string}> => {
+      return {message: 'Backend not implemented'};
+      const payload = await verifyAuth(headers.authorization, jwt, set);
+      const password = body.password;
+      const newPassword = body.newPassword;
+      // await userService.changePassword(payload.unitId, password, newPassword);
+      return {message: 'Password changed successfully'};
+    },
+    {
+      body: t.Object({
+        password: t.String(),
+        newPassword: t.String(),
+      }),
+      detail: {
+        summary: 'Change password',
+        description: 'Change password for current user',
+        tags: ['Users'],
+      },
+    },
+  )
+
+  .post(
+    'reset-password',
+    async ({body, set}): Promise<{message: string}> => {
+      const email = body.email;
+      const verificationCode = body.verificationCode;
+      const newPassword = body.newPassword;
+      await userService.resetPassword(email, verificationCode, newPassword);
+      return {message: 'Password reset successfully'};
+    },
+    {
+      body: t.Object({
+        email: t.String(),
+        verificationCode: t.String(),
+        newPassword: t.String(),
+      }),
+      detail: {
+        summary: 'Reset password',
+        description: 'Reset password for user',
+        tags: ['Users'],
+      },
+    },
+  )
   /**
    * Get current user profile (requires JWT)
    * GET /users/me

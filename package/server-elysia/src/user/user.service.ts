@@ -7,7 +7,7 @@ import type {Prisma} from '@/prisma/client';
 import type {UserFilterOptions, UserWithRelations} from './types';
 import {userInclude} from './types';
 import type {CreateUserInput, UpdateUserInput} from '@package/contract';
-import {isPasswordValid} from './utils';
+import {hashPassword, verifyPassword} from './utils';
 import nodemailer from 'nodemailer';
 
 const transporter = nodemailer.createTransport({
@@ -209,7 +209,7 @@ export class UserService {
       return false;
     }
 
-    return isPasswordValid(password, user.passwordHash);
+    return verifyPassword(password, user.passwordHash);
   }
 
   /**
@@ -224,12 +224,30 @@ export class UserService {
       return null;
     }
 
-    const isValid = isPasswordValid(password, user.passwordHash);
+    const isValid = await verifyPassword(password, user.passwordHash);
     if (!isValid) {
       return null;
     }
 
     return user;
+  }
+
+  async resetPassword(
+    email: string,
+    verificationCode: string,
+    newPassword: string,
+  ): Promise<void> {
+    const verificationCodeRecord = await prisma.verificationCode.findUnique({
+      where: {email, code: verificationCode},
+    });
+    if (!verificationCodeRecord) {
+      throw new Error('Verification code not found');
+    }
+    const passwordHash = await hashPassword(newPassword);
+    await prisma.user.update({
+      where: {email},
+      data: {passwordHash},
+    });
   }
 
   // ANCHOR Verification Code Logic

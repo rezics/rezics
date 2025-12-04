@@ -14,7 +14,7 @@ import {bookService} from './book.service';
 import {mapBookToDTO} from './mapper';
 import {unitService} from '@/src/unit/unit.service';
 import {coreInstance} from '../core';
-import {verifyAuth} from '@/src/utils/authUtils';
+import {verifyAuth} from '@/src/user/utils';
 import {
   hasPermissionToUpdateBook,
   BasicAdminPermission,

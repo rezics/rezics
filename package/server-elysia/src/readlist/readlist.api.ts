@@ -1,6 +1,6 @@
 import {Elysia, t} from 'elysia';
 import {coreInstance} from '../core';
-import {verifyAuth} from '@/src/utils/authUtils';
+import {verifyAuth} from '@/src/user/utils';
 import {unitService} from '@/src/unit/unit.service';
 import {readlistService} from './readlist.service';
 // mapper now used inside service; no direct mapping required here

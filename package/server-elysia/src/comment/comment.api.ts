@@ -1,6 +1,6 @@
 import {t, Elysia} from 'elysia';
 import {coreInstance} from '../core';
-import {verifyAuth} from '@/src/utils/authUtils';
+import {verifyAuth} from '@/src/user/utils.ts';
 import {commentService} from './comment.service.ts';
 import {mapCommentToDTO} from './mapper.ts';
 import type {CreateCommentInput} from '@package/contract';

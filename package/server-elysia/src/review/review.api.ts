@@ -1,5 +1,5 @@
 import {coreInstance} from '../core';
-import {verifyAuth} from '@/src/utils/authUtils';
+import {verifyAuth} from '@/src/user/utils';
 import {UnitType} from '@/prisma/client';
 import {
   createReviewSchema,
