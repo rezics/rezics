@@ -1,4 +1,5 @@
 import type {JWTPayload, RefreshTokenPayload} from '@/src/user/types';
+import bcrypt from 'bcrypt';
 
 type CommonPayload = JWTPayload | RefreshTokenPayload;
 
@@ -32,4 +33,11 @@ export async function verifyAuth<T extends CommonPayload>(
   }
 
   return payload;
+}
+
+/**
+ *
+ */
+export async function hashpassword(password: string): Promise<string> {
+  return await bcrypt.hash(password, 11);
 }

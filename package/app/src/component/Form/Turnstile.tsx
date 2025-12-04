@@ -1,4 +1,4 @@
-import {useEffect, useRef} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {useAlertStore} from '@/global/windowAlertStore';
 
 declare global {
@@ -11,21 +11,32 @@ declare global {
   }
 }
 
+function defaultLoadingComponent() {
+  return <div>Loading verification widget...</div>;
+}
+
 interface TurnstileProps {
   siteKeyProps?: string;
   onVerify: (token: string) => void;
   options?: Record<string, any>;
+  loadingComponent?: React.ReactNode;
 }
 
 export function Turnstile({
   siteKeyProps,
   onVerify,
   options = {},
+  loadingComponent = defaultLoadingComponent(),
 }: TurnstileProps) {
   const siteKey = siteKeyProps ?? import.meta.env.VITE_TURNSTILE_SITE_KEY;
   const {show: showAlert} = useAlertStore();
   const containerRef = useRef<HTMLDivElement>(null);
   const widgetIdRef = useRef<string | null>(null);
+  const [isVerifiedShow, setIsVerifiedShow] = useState(false);
+
+  function handleVerify(token: string) {
+    onVerify(token);
+  }
 
   useEffect(() => {
     // 1. 动态加载 Turnstile 脚本
@@ -46,9 +57,10 @@ export function Turnstile({
       if (window.turnstile && containerRef.current && !widgetIdRef.current) {
         widgetIdRef.current = window.turnstile.render(containerRef.current, {
           sitekey: siteKey,
-          callback: (token: string) => onVerify(token),
+          callback: handleVerify,
           ...options,
         });
+        setIsVerifiedShow(true);
       }
     }, 100);
 
@@ -66,5 +78,10 @@ export function Turnstile({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  return <div ref={containerRef} />;
+  return (
+    <div>
+      <div ref={containerRef} />
+      <div>{!isVerifiedShow && loadingComponent}</div>
+    </div>
+  );
 }

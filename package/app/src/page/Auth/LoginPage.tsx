@@ -11,6 +11,7 @@ import {Dialog, DialogContent} from '@mui/material';
 import {validateEmail, validatePassword} from './lib/validate.ts';
 import {useUserStore} from '@/global/userStore.ts';
 import {useLocation} from 'wouter';
+import {PasswordField} from '@/component/Form/PasswordField';
 
 interface LoginData {
   email: string;
@@ -76,15 +77,10 @@ export const LoginShow: FC<LoginShowProps> = ({
           setData({...data, email: event.target.value});
         }}
       />
-      <TextField
-        name="password"
-        type="password"
-        label={t('common.password')}
-        variant="standard"
-        required
+      <PasswordField
         value={data?.password}
-        onChange={(event: any) => {
-          setData({...data, password: event.target.value});
+        setValue={(value: string) => {
+          setData({...data, password: value});
         }}
       />
     </>

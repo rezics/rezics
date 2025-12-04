@@ -13,6 +13,7 @@ import {useUserStore} from '@/global/userStore.ts';
 import {useLocation} from 'wouter';
 import {Turnstile} from '@/component/Form/Turnstile.tsx';
 import {userApi} from '@/api/user/user';
+import {PasswordField} from '@/component/Form/PasswordField';
 
 export interface RegisterShowProps {
   loading: boolean;
@@ -85,16 +86,10 @@ export const RegisterShow: FC<RegisterShowProps> = ({
           setData({...data, slug: event.target.value});
         }}
       />
-      <TextField
-        name="password"
-        type="password"
-        label={t('common.password')}
-        variant="standard"
-        helperText={t('auth.help.password_require')}
-        required
+      <PasswordField
         value={data?.password}
-        onChange={(event: any) => {
-          setData({...data, password: event.target.value});
+        setValue={(value: string) => {
+          setData({...data, password: value});
         }}
       />
       {/* <TextField
@@ -108,15 +103,10 @@ export const RegisterShow: FC<RegisterShowProps> = ({
           setData({...data, name: event.target.value});
         }}
       /> */}
-      <TextField
-        name="confirm"
-        type="password"
-        label={t('common.confirm')}
-        variant="standard"
-        required
+      <PasswordField
         value={data?.confirm}
-        onChange={(event: any) => {
-          setData({...data, confirm: event.target.value});
+        setValue={(value: string) => {
+          setData({...data, confirm: value});
         }}
       />
       <div className="flex">

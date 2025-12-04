@@ -1,0 +1,68 @@
+import TextField from '@mui/material/TextField';
+import {useTranslation} from 'react-i18next';
+import React, {useState, type FC} from 'react';
+import IconButton from '@mui/material/IconButton';
+import InputAdornment from '@mui/material/InputAdornment';
+import {Visibility, VisibilityOff} from '@mui/icons-material';
+
+interface PasswordFieldProps {
+  name?: string;
+  label?: string;
+  value: string;
+  variant?: 'standard' | 'outlined' | 'filled';
+  onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  setValue: (value: string) => void;
+}
+
+export const PasswordField: FC<PasswordFieldProps> = ({
+  name,
+  label,
+  value,
+  setValue,
+  variant = 'standard',
+}) => {
+  const {t} = useTranslation();
+  const [showPassword, setShowPassword] = useState(false);
+
+  const handleMouseDownPassword = (
+    event: React.MouseEvent<HTMLButtonElement>,
+  ) => {
+    event.preventDefault();
+  };
+
+  const handleMouseUpPassword = (
+    event: React.MouseEvent<HTMLButtonElement>,
+  ) => {
+    event.preventDefault();
+  };
+
+  return (
+    <TextField
+      name={name ?? 'password'}
+      type={showPassword ? 'text' : 'password'}
+      label={label ?? t('common.password')}
+      variant={variant}
+      required
+      value={value}
+      onChange={(event: any) => {
+        setValue(event.target.value);
+      }}
+      InputProps={{
+        endAdornment: (
+          <InputAdornment position="end">
+            <IconButton
+              aria-label={
+                showPassword ? 'hide the password' : 'display the password'
+              }
+              onClick={() => setShowPassword(!showPassword)}
+              onMouseDown={handleMouseDownPassword}
+              onMouseUp={handleMouseUpPassword}
+            >
+              {showPassword ? <VisibilityOff /> : <Visibility />}
+            </IconButton>
+          </InputAdornment>
+        ),
+      }}
+    />
+  );
+};
