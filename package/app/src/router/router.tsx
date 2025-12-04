@@ -11,6 +11,12 @@ export const RegisterPage = lazy(() =>
   import('@/page/Auth/RegisterPage').then(m => ({default: m.RegisterPage})),
 );
 
+export const ResetPasswordPage = lazy(() =>
+  import('@/page/Auth/ResetPasswordPage').then(m => ({
+    default: m.ResetPasswordPage,
+  })),
+);
+
 export const HomeContainer = lazy(() =>
   import('@/page/Home').then(m => ({default: m.HomeContainer})),
 );
@@ -244,6 +250,11 @@ export default (
         <Route path="/register">
           <MainLayout>
             <RegisterPage />
+          </MainLayout>
+        </Route>
+        <Route path="/reset-password">
+          <MainLayout>
+            <ResetPasswordPage />
           </MainLayout>
         </Route>
 

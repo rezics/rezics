@@ -16,6 +16,20 @@ type FollowSummaryResponse = {
 };
 
 export const userApi = {
+  /**
+   * Reset password with verification code.
+   */
+  resetPassword: async (input: {
+    email: string;
+    verificationCode: string;
+    newPassword: string;
+  }): Promise<{message: string}> => {
+    return apiFetch(`/users/reset-password`, {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
+  },
+
   register: async (
     input: CreateUserInput,
   ): Promise<{user: UserDTO; token: string}> => {

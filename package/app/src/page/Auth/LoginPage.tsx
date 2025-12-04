@@ -1,137 +1,52 @@
 import Alert from '@mui/material/Alert';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
+import {Dialog, DialogContent} from '@mui/material';
 import {type FC, useState} from 'react';
 import {useTranslation} from 'react-i18next';
+import {useLocation} from 'wouter';
+
+import {PasswordField} from '@/component/Form/PasswordField';
+import {RouterLink} from '@/component/Common/RouterLink.tsx';
+import {useUserStore} from '@/global/userStore.ts';
 import {login} from './lib/handler.ts';
 import {Layout} from './lib/Layout.tsx';
 import {ModalLayout} from './lib/ModalLayout.tsx';
-import {Dialog, DialogContent} from '@mui/material';
-
-import {validateEmail, validatePassword} from './lib/validate.ts';
-import {useUserStore} from '@/global/userStore.ts';
-import {useLocation} from 'wouter';
-import {PasswordField} from '@/component/Form/PasswordField';
+import {validateEmail} from './lib/validate.ts';
 
 interface LoginData {
   email: string;
   password: string;
 }
 
-export interface LoginShowProps {
-  loading: boolean;
-  error?: string;
-  onSubmit: (data: LoginData) => void;
-  showAlreadyLoggedIn?: boolean;
-  hideActions?: boolean;
-  onRegisterClick?: () => void;
-  isModal?: boolean;
-}
-
-/**
- * LoginShow - 登录表单展示组件
- * 可以在页面布局中使用，也可以在 Modal 中展示
- */
-export const LoginShow: FC<LoginShowProps> = ({
-  loading,
-  error,
-  onSubmit,
-  showAlreadyLoggedIn = false,
-  hideActions = false,
-  onRegisterClick,
-  isModal = false,
-}) => {
-  const {t} = useTranslation();
-  const [data, setData] = useState<LoginData>({
-    email: '',
-    password: '',
-  });
-
-  const content = (
-    <>
-      {showAlreadyLoggedIn && (
-        <Alert severity="warning">{t('auth.already_login')}</Alert>
-      )}
-      {error && (
-        <Alert severity="error">
-          {error}
-          {/* TODO: handle resolve */}
-          {/* <Button
-            variant="text"
-            type="button"
-            onClick={() => {
-            }}
-          >
-            {t('auth.resolve')}
-          </Button> */}
-        </Alert>
-      )}
-      <TextField
-        name="email"
-        type="email"
-        label={t('common.email')}
-        variant="standard"
-        required
-        value={data?.email}
-        onChange={(event: any) => {
-          setData({...data, email: event.target.value});
-        }}
-      />
-      <PasswordField
-        value={data?.password}
-        setValue={(value: string) => {
-          setData({...data, password: value});
-        }}
-      />
-    </>
-  );
-
-  const actions = !hideActions && (
-    <>
-      <Button variant="text" type="button" onClick={onRegisterClick}>
-        {t('auth.register')}
-      </Button>
-      <Button
-        type="button"
-        variant="contained"
-        disabled={loading}
-        onClick={() => {
-          onSubmit(data);
-        }}
-      >
-        {loading ? 'Loading...' : t('auth.login')}
-      </Button>
-    </>
-  );
-
-  const LayoutComponent = isModal ? ModalLayout : Layout;
-
-  return (
-    <LayoutComponent
-      title={t('auth.login')}
-      content={content}
-      actions={actions}
-    />
-  );
-};
-
 export interface LoginPageProps {
   isModal?: boolean;
   onClose?: () => void;
+  /** 当在 AuthModal 中使用时，点击“注册”按钮切换到注册视图 */
+  onRegisterClick?: () => void;
 }
 
 /**
  * LoginPage - 完整的登录页面容器
- * 包含状态管理和表单处理逻辑
+ * 合并了原来的 Show/Page 结构
  */
-export const LoginPage: FC<LoginPageProps> = ({isModal = false, onClose}) => {
+export const LoginPage: FC<LoginPageProps> = ({
+  isModal = false,
+  onClose,
+  onRegisterClick,
+}) => {
+  const {t} = useTranslation();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>();
-
-  let hasError = false;
+  const [data, setData] = useState<LoginData>({
+    email: '',
+    password: '',
+  });
   const {setUser} = useUserStore();
   const [location, navigate] = useLocation();
-  const handleSubmit = async (data: LoginData) => {
+
+  const handleSubmit = async () => {
+    let hasError = false;
     setLoading(true);
     setError(undefined);
 
@@ -146,7 +61,6 @@ export const LoginPage: FC<LoginPageProps> = ({isModal = false, onClose}) => {
       if (!validateData.valid) throw new Error(validateData.error ?? '');
 
       const password = data?.password;
-
       const result = await login(email, password);
       setUser(result?.user);
     } catch (e: any) {
@@ -164,17 +78,63 @@ export const LoginPage: FC<LoginPageProps> = ({isModal = false, onClose}) => {
   };
 
   const handleRegisterClick = () => {
-    // TODO: Navigate to register page
-    navigate('/register');
+    if (onRegisterClick) {
+      onRegisterClick();
+    } else {
+      // TODO: Navigate to register page
+      navigate('/register');
+    }
   };
 
+  const LayoutComponent = isModal ? ModalLayout : Layout;
+
+  const content = (
+    <>
+      {error && <Alert severity="error">{error}</Alert>}
+      <TextField
+        name="email"
+        type="email"
+        label={t('common.email')}
+        variant="standard"
+        required
+        value={data?.email}
+        onChange={(event: any) => {
+          setData({...data, email: event.target.value});
+        }}
+      />
+      <PasswordField
+        value={data?.password}
+        setValue={(value: string) => {
+          setData({...data, password: value});
+        }}
+      />
+      <div>
+        <RouterLink href="/reset-password">Forget password?</RouterLink>
+      </div>
+    </>
+  );
+
+  const actions = (
+    <>
+      <Button variant="text" type="button" onClick={handleRegisterClick}>
+        {t('auth.register')}
+      </Button>
+      <Button
+        type="button"
+        variant="contained"
+        disabled={loading}
+        onClick={handleSubmit}
+      >
+        {loading ? 'Loading...' : t('auth.login')}
+      </Button>
+    </>
+  );
+
   return (
-    <LoginShow
-      loading={loading}
-      error={error}
-      onSubmit={handleSubmit}
-      onRegisterClick={handleRegisterClick}
-      isModal={isModal}
+    <LayoutComponent
+      title={t('auth.login')}
+      content={content}
+      actions={actions}
     />
   );
 };

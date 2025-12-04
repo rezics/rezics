@@ -4,55 +4,49 @@ import TextField from '@mui/material/TextField';
 import {Dialog, DialogContent} from '@mui/material';
 import {type FC, useRef, useState} from 'react';
 import {useTranslation} from 'react-i18next';
-import {register} from './lib/handler.ts';
-import {Layout} from './lib/Layout.tsx';
-import {ModalLayout} from './lib/ModalLayout.tsx';
-import {validateEmail, validateSlug, validatePassword} from './lib/validate.ts';
-import {useUserStore} from '@/global/userStore.ts';
 import {useLocation} from 'wouter';
+
 import {Turnstile} from '@/component/Form/Turnstile.tsx';
 import {PasswordField} from '@/component/Form/PasswordField';
+import {Layout} from './lib/Layout.tsx';
+import {ModalLayout} from './lib/ModalLayout.tsx';
+import {validateEmail, validatePassword} from './lib/validate.ts';
+import {userApi} from '@/api/user/user';
 import {
   GetVerificationCode,
   type GetVerificationCodeHandle,
 } from './GetVerificationCode.tsx';
 
-interface RegisterData {
-  slug: string;
+interface ResetPasswordData {
   email: string;
   password: string;
   confirm: string;
   verificationCode?: string;
 }
 
-export interface RegisterPageProps {
+export interface ResetPasswordPageProps {
   isModal?: boolean;
   onClose?: () => void;
-  /** 当在 AuthModal 中使用时，点击“登录”按钮切换回登录视图 */
-  onLoginClick?: () => void;
 }
 
 /**
- * RegisterPage - 完整的注册页面容器
+ * ResetPasswordPage - 完整的重置密码页面容器
  * 合并了原来的 Show/Page 结构，并复用 GetVerificationCode 组件
  */
-export const RegisterPage: FC<RegisterPageProps> = ({
+export const ResetPasswordPage: FC<ResetPasswordPageProps> = ({
   isModal = false,
   onClose,
-  onLoginClick,
 }) => {
   const {t} = useTranslation();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>();
   const [showTurnstile, setShowTurnstile] = useState(false);
-  const [data, setData] = useState<RegisterData>({
-    slug: '',
+  const [data, setData] = useState<ResetPasswordData>({
     email: '',
     password: '',
     confirm: '',
   });
   const verificationRef = useRef<GetVerificationCodeHandle | null>(null);
-  const {setUser} = useUserStore();
   const [location, navigate] = useLocation();
 
   const handleSubmit = async () => {
@@ -64,9 +58,6 @@ export const RegisterPage: FC<RegisterPageProps> = ({
         valid: false,
         error: null,
       };
-      const slug = data?.slug;
-      validateData = validateSlug(slug);
-      if (!validateData.valid) throw new Error(validateData.error ?? '');
 
       const email = data?.email;
       validateData = validateEmail(email);
@@ -79,23 +70,31 @@ export const RegisterPage: FC<RegisterPageProps> = ({
       const confirm = data?.confirm;
       validateData = validatePassword(confirm);
       if (!validateData.valid) throw new Error(validateData.error ?? '');
-      if (password !== confirm) throw new Error('Passwords do not match.');
+      if (password !== confirm) {
+        throw new Error('Passwords do not match.');
+      }
 
       const verificationCode = data?.verificationCode;
-      if (!verificationCode) throw new Error('Verification code is required.');
+      if (!verificationCode) {
+        throw new Error('Verification code is required.');
+      }
 
-      const result = await register(slug, email, password, verificationCode);
-      setUser(result?.user);
+      await userApi.resetPassword({
+        email,
+        verificationCode,
+        newPassword: password,
+      });
     } catch (e) {
       setError((e as Error).message);
       hasError = true;
     } finally {
       setLoading(false);
     }
+
     if (!hasError) {
       onClose?.();
-      if (location === '/register') {
-        navigate('/');
+      if (location === '/reset-password') {
+        navigate('/login');
       }
     }
   };
@@ -105,12 +104,8 @@ export const RegisterPage: FC<RegisterPageProps> = ({
     await verificationRef.current.handleTurnstileVerify(token);
   };
 
-  const handleLoginClickInternal = () => {
-    if (onLoginClick) {
-      onLoginClick();
-    } else {
-      navigate('/login');
-    }
+  const handleLoginClick = () => {
+    navigate('/login');
   };
 
   const LayoutComponent = isModal ? ModalLayout : Layout;
@@ -134,19 +129,6 @@ export const RegisterPage: FC<RegisterPageProps> = ({
         value={data?.email}
         onChange={(event: any) => {
           setData({...data, email: event.target.value});
-        }}
-      />
-      <TextField
-        name="slug"
-        type="text"
-        label={t('common.username')}
-        variant="standard"
-        placeholder={t('auth.help.slug')}
-        helperText={t('auth.help.slug_require')}
-        required
-        value={data?.slug}
-        onChange={(event: any) => {
-          setData({...data, slug: event.target.value});
         }}
       />
       <PasswordField
@@ -173,7 +155,7 @@ export const RegisterPage: FC<RegisterPageProps> = ({
 
   const actions = (
     <>
-      <Button variant="text" type="button" onClick={handleLoginClickInternal}>
+      <Button variant="text" type="button" onClick={handleLoginClick}>
         {t('auth.login')}
       </Button>
       <Button
@@ -182,21 +164,21 @@ export const RegisterPage: FC<RegisterPageProps> = ({
         disabled={loading}
         onClick={handleSubmit}
       >
-        {loading ? 'Loading...' : t('auth.register')}
+        {loading ? 'Loading...' : 'Reset Password'}
       </Button>
     </>
   );
 
   return (
     <LayoutComponent
-      title={t('auth.register')}
+      title="Reset Password"
       content={content}
       actions={actions}
     />
   );
 };
 
-export function RegisterModal({
+export function ResetPasswordModal({
   open,
   onClose,
 }: {
@@ -206,7 +188,7 @@ export function RegisterModal({
   return (
     <Dialog open={open} onClose={onClose}>
       <DialogContent className="!p-0">
-        <RegisterPage isModal={true} onClose={onClose} />
+        <ResetPasswordPage isModal={true} onClose={onClose} />
       </DialogContent>
     </Dialog>
   );
