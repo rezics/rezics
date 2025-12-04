@@ -194,6 +194,7 @@ export const UserEditPage: FC<UserEditPageProps> = ({
                 setValue={value => handleChange('password', value)}
                 variant="outlined"
                 helperText="Leave empty to keep current password"
+                required={false}
               />
               <div className="h-2" />
               <Box className="flex gap-2 justify-end mt-6">

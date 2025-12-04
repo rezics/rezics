@@ -334,12 +334,17 @@ export const coreRoute = (api: ReturnType<typeof coreInstance>) => {
             throw new Error('Forbidden: Cannot update other users');
           }
 
+          let passwordHash: string | undefined = undefined;
+          if (body.password) {
+            passwordHash = await hashPassword(body.password);
+          }
+
           const userReq: UpdateUserInput = {
             name: body.name,
             avatar: body.avatar,
             bio: body.bio,
             description: body.description,
-            password: body.password,
+            password: passwordHash,
           };
 
           const user = await userService.update(params.unitId, userReq);

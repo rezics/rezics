@@ -13,6 +13,7 @@ interface PasswordFieldProps {
   onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
   setValue: (value: string) => void;
   helperText?: string;
+  required?: boolean;
   className?: string;
 }
 
@@ -24,6 +25,7 @@ export const PasswordField: FC<PasswordFieldProps> = ({
   variant = 'standard',
   helperText = 'At least 8 characters',
   className,
+  required = true,
 }) => {
   const {t} = useTranslation();
   const [showPassword, setShowPassword] = useState(false);
@@ -48,7 +50,7 @@ export const PasswordField: FC<PasswordFieldProps> = ({
       label={label ?? t('common.password')}
       helperText={helperText}
       variant={variant}
-      required
+      required={required}
       value={value}
       onChange={(event: any) => {
         setValue(event.target.value);
