@@ -29,6 +29,7 @@ bunx prisma generate
 bun run prisma:seed
 bun run db:migrate
 bunx prisma migrate deploy
+bun run ./prisma/seed/utils/passwordReset.ts
 # 大型迁移
 bunx prisma migrate reset
 bun run prisma:seed:echokv

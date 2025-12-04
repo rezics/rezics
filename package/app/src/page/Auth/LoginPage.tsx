@@ -146,8 +146,6 @@ export const LoginPage: FC<LoginPageProps> = ({isModal = false, onClose}) => {
       if (!validateData.valid) throw new Error(validateData.error ?? '');
 
       const password = data?.password;
-      validateData = validatePassword(password);
-      if (!validateData.valid) throw new Error(validateData.error ?? '');
 
       const result = await login(email, password);
       setUser(result?.user);
