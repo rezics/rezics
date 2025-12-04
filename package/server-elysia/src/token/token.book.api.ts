@@ -1,6 +1,5 @@
 import {t} from 'elysia';
 import {coreInstance} from '../core';
-import {verifyAuth} from '@/src/user/utils';
 import {tokenService} from './token.service';
 import {
   bookParamsSchema,
@@ -10,6 +9,11 @@ import {
 } from '@package/contract';
 import {bookService} from '../book/book.service';
 import {unitService} from '../unit/unit.service';
+import {
+  hasPermissionToCreateBook,
+  hasPermissionToReadBook,
+  hasPermissionToUpdateBook,
+} from './permission';
 
 export const bookRoute = (api: ReturnType<typeof coreInstance>) => {
   return (
@@ -27,27 +31,18 @@ export const bookRoute = (api: ReturnType<typeof coreInstance>) => {
             null;
           const userAgent = request.headers.get('user-agent') ?? null;
 
-          const {userId, scopes} = await tokenService.authenticateFromHeader(
+          const {scopes} = await tokenService.authenticateFromHeader(
             headers.authorization,
             {status: set.status as number | undefined},
             {ip, userAgent},
           );
 
-          if (
-            !tokenService.hasAdminScope(scopes) &&
-            !tokenService.hasScope(scopes, 'book', 'read')
-          ) {
+          if (!hasPermissionToReadBook(scopes)) {
             set.status = 403;
             throw new Error('Forbidden: token does not have book:read scope');
           }
 
           const book = await bookService.getByUnitId(params.unitId);
-
-          // Only allow access to books owned by this token's user
-          if (book.unit.userId !== userId) {
-            set.status = 403;
-            throw new Error('Forbidden: token does not own this book');
-          }
 
           // Reuse existing DTO mapper through the book service index
           const {mapBookToDTO} = await import('../book/mapper');
@@ -91,10 +86,7 @@ export const bookRoute = (api: ReturnType<typeof coreInstance>) => {
             {ip, userAgent},
           );
 
-          if (
-            !tokenService.hasAdminScope(scopes) &&
-            !tokenService.hasScope(scopes, 'book', 'write')
-          ) {
+          if (!hasPermissionToCreateBook(scopes)) {
             set.status = 403;
             throw new Error('Forbidden: token does not have book:write scope');
           }
@@ -138,24 +130,15 @@ export const bookRoute = (api: ReturnType<typeof coreInstance>) => {
             null;
           const userAgent = request.headers.get('user-agent') ?? null;
 
-          const {userId, scopes} = await tokenService.authenticateFromHeader(
+          const {scopes} = await tokenService.authenticateFromHeader(
             headers.authorization,
             {status: set.status as number | undefined},
             {ip, userAgent},
           );
 
-          if (
-            !tokenService.hasAdminScope(scopes) &&
-            !tokenService.hasScope(scopes, 'book', 'write')
-          ) {
+          if (!(await hasPermissionToUpdateBook(scopes))) {
             set.status = 403;
             throw new Error('Forbidden: token does not have book:write scope');
-          }
-
-          const unit = await unitService.getByUnitId(params.unitId);
-          if (!unit || unit.userId !== userId) {
-            set.status = 403;
-            throw new Error('Forbidden: token does not own this book');
           }
 
           const updated = await bookService.update(params.unitId, body as any);

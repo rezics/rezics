@@ -4,35 +4,34 @@ import {
   Box,
   Typography,
   Button,
-  Table,
-  TableHead,
-  TableRow,
-  TableCell,
-  TableBody,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  IconButton,
-  Tooltip,
   CircularProgress,
   Alert,
   Stack,
 } from '@mui/material';
-import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import {useQuery} from '@tanstack/react-query';
 import {tokenQueries} from '@/api/token/token.queries';
 import {
   useCreateTokenMutation,
   useRevokeTokenMutation,
+  useUpdateTokenMutation,
 } from '@/api/token/token.mutations';
-import type {ApiTokenDTO, CreateApiTokenInput} from '@package/contract';
+import type {
+  ApiTokenDTO,
+  CreateApiTokenInput,
+  UpdateApiTokenInput,
+} from '@package/contract';
+import {
+  TokenTable,
+  CreateTokenDialog,
+  EditTokenDialog,
+  TokenSecretDialog,
+} from './component';
 
 /**
  * TokenPage - 管理当前用户的 API tokens
  * - 列表展示
  * - 新建 token（仅返回一次的原始 token）
+ * - 编辑 token（更新权限等）
  * - 撤销 token
  */
 export const TokenPage: FC = () => {
@@ -46,36 +45,53 @@ export const TokenPage: FC = () => {
 
   const createMutation = useCreateTokenMutation();
   const revokeMutation = useRevokeTokenMutation();
+  const updateMutation = useUpdateTokenMutation();
 
   const [creating, setCreating] = useState(false);
+  const [updating, setUpdating] = useState(false);
   const [revokingIds, setRevokingIds] = useState<Record<string, boolean>>({});
 
   // Create dialog state
   const [openCreate, setOpenCreate] = useState(false);
-  const [name, setName] = useState('');
-  const [expiresAt, setExpiresAt] = useState<string>('');
   const [createdSecret, setCreatedSecret] = useState<string | null>(null);
   const [creatingError, setCreatingError] = useState<string | null>(null);
 
-  const handleCreate = async () => {
-    setCreatingError(null);
-    const input: CreateApiTokenInput = {
-      name: name || 'New Token',
-      ...(expiresAt ? {expiresAt} : {}),
-    };
+  // Edit dialog state
+  const [openEdit, setOpenEdit] = useState(false);
+  const [editingToken, setEditingToken] = useState<ApiTokenDTO | null>(null);
+  const [updatingError, setUpdatingError] = useState<string | null>(null);
 
+  const handleCreate = async (input: CreateApiTokenInput) => {
+    setCreatingError(null);
     try {
       setCreating(true);
       const res = await createMutation.mutateAsync(input);
-      // res: {token, tokenInfo}
       setCreatedSecret(res.token);
       setOpenCreate(false);
-      setName('');
-      setExpiresAt('');
     } catch (err) {
       setCreatingError((err as Error)?.message ?? 'Create failed');
     } finally {
       setCreating(false);
+    }
+  };
+
+  const handleEdit = (token: ApiTokenDTO) => {
+    setEditingToken(token);
+    setUpdatingError(null);
+    setOpenEdit(true);
+  };
+
+  const handleUpdate = async (id: string, input: UpdateApiTokenInput) => {
+    setUpdatingError(null);
+    try {
+      setUpdating(true);
+      await updateMutation.mutateAsync({id, input});
+      setOpenEdit(false);
+      setEditingToken(null);
+    } catch (err) {
+      setUpdatingError((err as Error)?.message ?? 'Update failed');
+    } finally {
+      setUpdating(false);
     }
   };
 
@@ -85,19 +101,9 @@ export const TokenPage: FC = () => {
       setRevokingIds(s => ({...s, [id]: true}));
       await revokeMutation.mutateAsync(id);
     } catch (err) {
-      // simple alert for errors
       alert((err as Error)?.message ?? 'Revoke failed');
     } finally {
       setRevokingIds(s => ({...s, [id]: false}));
-    }
-  };
-
-  const copyToClipboard = async (text: string | null) => {
-    if (!text) return;
-    try {
-      await navigator.clipboard.writeText(text);
-    } catch (_) {
-      // ignore
     }
   };
 
@@ -137,123 +143,42 @@ export const TokenPage: FC = () => {
       )}
 
       {!isLoading && !error && tokens.length > 0 && (
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>Name</TableCell>
-              <TableCell>Created</TableCell>
-              <TableCell>Expires</TableCell>
-              <TableCell>Revoked</TableCell>
-              <TableCell align="right">Actions</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {tokens.map(t => (
-              <TableRow key={t.id} hover>
-                <TableCell>{t.name}</TableCell>
-                <TableCell>
-                  {t.createdAt ? new Date(t.createdAt).toLocaleString() : '-'}
-                </TableCell>
-                <TableCell>
-                  {t.expiresAt
-                    ? new Date(t.expiresAt).toLocaleString()
-                    : 'Never'}
-                </TableCell>
-                <TableCell>{t.revoked ? 'Yes' : 'No'}</TableCell>
-                <TableCell align="right">
-                  <Stack direction="row" spacing={1} justifyContent="flex-end">
-                    <Tooltip title="Revoke">
-                      <Button
-                        size="small"
-                        color="error"
-                        onClick={() => handleRevoke(t.id)}
-                        disabled={(t.revoked ?? false) || !!revokingIds[t.id]}
-                      >
-                        Revoke
-                      </Button>
-                    </Tooltip>
-                  </Stack>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+        <TokenTable
+          tokens={tokens}
+          revokingIds={revokingIds}
+          onRevoke={handleRevoke}
+          onEdit={handleEdit}
+        />
       )}
 
       {/* Create dialog */}
-      <Dialog
+      <CreateTokenDialog
         open={openCreate}
         onClose={() => setOpenCreate(false)}
-        fullWidth
-        maxWidth="sm"
-      >
-        <DialogTitle>Create API Token</DialogTitle>
-        <DialogContent>
-          <Box className="space-y-4 mt-2">
-            <TextField
-              fullWidth
-              label="Token name"
-              value={name}
-              onChange={e => setName(e.target.value)}
-            />
-            <div className="my-6" />
-            <TextField
-              fullWidth
-              type="datetime-local"
-              label="Expires At (optional)"
-              InputLabelProps={{shrink: true}}
-              value={expiresAt}
-              onChange={e => setExpiresAt(e.target.value)}
-            />
-            {creatingError && <Alert severity="error">{creatingError}</Alert>}
-          </Box>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenCreate(false)}>Cancel</Button>
-          <Button
-            onClick={handleCreate}
-            variant="contained"
-            color="primary"
-            disabled={creating}
-          >
-            {creating ? 'Creating…' : 'Create'}
-          </Button>
-        </DialogActions>
-      </Dialog>
+        onCreate={handleCreate}
+        creating={creating}
+        error={creatingError}
+      />
+
+      {/* Edit dialog */}
+      <EditTokenDialog
+        open={openEdit}
+        token={editingToken}
+        onClose={() => {
+          setOpenEdit(false);
+          setEditingToken(null);
+        }}
+        onUpdate={handleUpdate}
+        updating={updating}
+        error={updatingError}
+      />
 
       {/* Created secret dialog (shown once) */}
-      <Dialog
+      <TokenSecretDialog
         open={!!createdSecret}
+        secret={createdSecret}
         onClose={() => setCreatedSecret(null)}
-        fullWidth
-        maxWidth="sm"
-      >
-        <DialogTitle>Token Created — Copy & Store</DialogTitle>
-        <DialogContent>
-          <Box className="mt-2">
-            <Alert severity="warning">
-              This token value is only shown once. Be sure to copy and store it
-              securely.
-            </Alert>
-
-            <Box className="mt-4 flex items-center justify-between">
-              <Typography
-                variant="body1"
-                component="pre"
-                style={{whiteSpace: 'pre-wrap', wordBreak: 'break-all'}}
-              >
-                {createdSecret}
-              </Typography>
-              <IconButton onClick={() => copyToClipboard(createdSecret)}>
-                <ContentCopyIcon />
-              </IconButton>
-            </Box>
-          </Box>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setCreatedSecret(null)}>Close</Button>
-        </DialogActions>
-      </Dialog>
+      />
     </Box>
   );
 };
