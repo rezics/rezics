@@ -184,24 +184,25 @@ export class TokenService {
     }
 
     // Update usage metadata in the background (non-blocking best-effort).
-    void prisma.apiToken
-      .update({
-        where: {id: record.id},
-        data: {
-          lastUsedAt: new Date(),
-          lastIP: opts?.ip ?? undefined,
-          userAgent: opts?.userAgent ?? undefined,
-        },
-      })
-      .catch(() => {});
+    // We may need this later, but now disabled for performance reasons.
+    // void prisma.apiToken
+    //   .update({
+    //     where: {id: record.id},
+    //     data: {
+    //       lastUsedAt: new Date(),
+    //       lastIP: opts?.ip ?? undefined,
+    //       userAgent: opts?.userAgent ?? undefined,
+    //     },
+    //   })
+    //   .catch(() => {});
+    // const tokenDto = mapApiTokenToDTO(record as ApiTokenWithScopes);
 
     const scopes =
       (record.scopes as ApiTokenScopes | null) ?? ({} as ApiTokenScopes);
-    const tokenDto = mapApiTokenToDTO(record as ApiTokenWithScopes);
 
     return {
       userId: record.userId,
-      token: tokenDto,
+      token: null as any,
       scopes,
     };
   }
@@ -221,6 +222,10 @@ export class TokenService {
     const domainPerms = scopes[domain];
     if (!Array.isArray(domainPerms)) return false;
     return domainPerms.includes(permission) || domainPerms.includes('*');
+  }
+
+  hasAdminScope(scopes: ApiTokenScopes | null | undefined): boolean {
+    return scopes?.main?.includes('admin') ?? false;
   }
 }
 

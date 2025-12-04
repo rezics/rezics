@@ -81,7 +81,12 @@ export const NAVIGATION = (isAdmin = false): NavigationItem[] => {
           title: 'EchoKV',
           icon: <DescriptionIcon />,
         },
-
+        {
+          kind: 'item',
+          segment: '/token',
+          title: 'Token',
+          icon: <DescriptionIcon />,
+        },
         {kind: 'divider'},
 
         {

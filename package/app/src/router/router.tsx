@@ -25,6 +25,11 @@ export const NotFoundContainer = lazy(() =>
   import('@/page/NotFound').then(m => ({default: m.NotFoundContainer})),
 );
 
+// ========== Token ==========
+export const TokenPage = lazy(() =>
+  import('@/page/Token/TokenPage').then(m => ({default: m.TokenPage})),
+);
+
 // ========== Book ==========
 export const BookLibContainer = lazy(() =>
   import('@/page/Book/BookLibPage').then(m => ({default: m.BookLibContainer})),
@@ -255,6 +260,13 @@ export default (
         <Route path="/reset-password">
           <MainLayout>
             <ResetPasswordPage />
+          </MainLayout>
+        </Route>
+
+        {/* ANCHOR Token Routes */}
+        <Route path="/token">
+          <MainLayout>
+            <TokenPage />
           </MainLayout>
         </Route>
 
