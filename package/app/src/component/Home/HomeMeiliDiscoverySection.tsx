@@ -187,7 +187,7 @@ const BooksSection: React.FC<BooksSectionProps> = ({limit = 12}) => {
   return (
     <div className="w-full h-full flex flex-col">
       <SectionHeader
-        title="为你推荐"
+        title="推荐"
         subtitle="基于 Meilisearch 的实时推荐书单"
         isLoading={isLoading}
       />

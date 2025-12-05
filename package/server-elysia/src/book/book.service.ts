@@ -139,6 +139,9 @@ export class BookService {
       // prisma.book.count({where}),
       getBookApproxCount(),
     ]);
+    books.forEach(book => {
+      book.textLength = String(book.textLength) as any;
+    });
 
     return {books: books as BookWithRelations[], total: total};
   }

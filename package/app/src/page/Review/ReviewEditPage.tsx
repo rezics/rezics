@@ -1,7 +1,7 @@
 import {useState, useEffect} from 'react';
 import {useQuery} from '@tanstack/react-query';
 import EasyEditor from '@/component/Form/EasyEditor';
-import {Button, Rating} from '@mui/material';
+import {Button} from '@mui/material';
 import {reviewQueries} from '@/api/review/review.queries';
 import {
   useUpdateReviewMutation,
@@ -12,22 +12,14 @@ import {TextField} from '@mui/material';
 import {useAlertStore} from '@/global/windowAlertStore';
 import {DeleteButton} from '@/component/Form/DeleteWrapper';
 import {useLocation} from 'wouter';
+import {RatingWithInput} from '@/component/Form/Rating';
+
 interface ReviewEditPageProps {
   data: ReviewResponse;
   setData: (data: ReviewResponse) => void;
 }
 
 export function ReviewEditPage({data, setData}: ReviewEditPageProps) {
-  const [ratingInput, setRatingInput] = useState('');
-
-  useEffect(() => {
-    const num = Number(ratingInput);
-    if (!Number.isNaN(num)) {
-      setData({...data, rating: num});
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ratingInput]);
-
   return (
     <div className="flex flex-col gap-4 mt-2">
       <div className="flex flex-col gap-2">
@@ -42,31 +34,13 @@ export function ReviewEditPage({data, setData}: ReviewEditPageProps) {
 
       <div className="flex items-center gap-3">
         <span className="text-sm font-medium">Rating</span>
-        <Rating
-          name="score-rating-10"
-          size="large"
+        <RatingWithInput
           value={data.rating || 0}
-          precision={0.5}
+          onChange={value => setData({...data, rating: value ?? 0})}
           max={10}
-          onChange={(_event, value) => setRatingInput(String(value ?? 0))}
-        />
-        <TextField
-          variant="standard"
-          value={ratingInput}
-          onChange={e => {
-            const val = e.target.value;
-
-            // 允许：空、整数、小数但最多一位，例如 "7", "7.", "7.3"
-            if (/^\d{0,2}(\.\d?)?$/.test(val)) {
-              setRatingInput(val);
-            }
-          }}
-          onBlur={() => {
-            // 失焦时自动修正，例如 "7." -> "7"
-            if (ratingInput.endsWith('.')) {
-              setRatingInput(ratingInput.slice(0, -1));
-            }
-          }}
+          precision={0.5}
+          size="large"
+          name="score-rating-10"
         />
       </div>
       <div className="flex-1 min-h-[300px]">
@@ -112,6 +86,13 @@ export function ReviewEditPageContainer({reviewId}: {reviewId: string}) {
       },
     });
   function handleSave() {
+    if (reviewData.rating) {
+      if (reviewData.rating > 10 || reviewData.rating < 0) {
+        show('Rating must be between 0 and 10');
+        return;
+      }
+    }
+
     const input: UpdateReviewInput = {
       title: reviewData.title || undefined,
       content: reviewData.content || '',

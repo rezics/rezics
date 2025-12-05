@@ -1,19 +1,45 @@
-import {TextField} from '@mui/material';
+import {Button, TextField} from '@mui/material';
 import EasyEditor from '@/component/Form/EasyEditor';
 import type {UnitFormData} from '@/api/unit/unit.types';
 import {useEffect, useMemo, useState} from 'react';
 import {useQuery} from '@tanstack/react-query';
 import {unitQueries} from '@/api/unit/unit.queries';
+import {useUpdateUnitMutation} from '@/api/unit/unit.mutations';
+import {useAlertStore} from '@/global/windowAlertStore';
 interface QuoteEditPageProps {
+  unitId: string;
   data: UnitFormData;
   setData: (data: UnitFormData) => void;
 }
 
-export function QuoteEditPage({data, setData}: QuoteEditPageProps) {
+export function QuoteEditPage({unitId, data, setData}: QuoteEditPageProps) {
+  const {show} = useAlertStore();
   const source = useMemo(
     () => (data.metadata as any)?.source || '',
     [data.metadata],
   );
+
+  const {mutate, isPending} = useUpdateUnitMutation({
+    onSuccess: data => {
+      show('Quote updated successfully');
+      console.log('update quote success', data);
+    },
+    onError: error => {
+      show(`Update quote failed: ${error}`);
+      console.error('update quote failed', error);
+    },
+  });
+
+  function handleSave() {
+    mutate({
+      unitId: unitId,
+      input: {
+        title: data.title,
+        content: data.content,
+        // status: data.status || '', // not support now
+      },
+    });
+  }
 
   return (
     <div className="flex flex-col gap-4 mt-2">
@@ -48,6 +74,9 @@ export function QuoteEditPage({data, setData}: QuoteEditPageProps) {
           onChange={value => setData({...data, content: value})}
         />
       </div>
+      <Button variant="contained" color="primary" onClick={handleSave}>
+        Save
+      </Button>
     </div>
   );
 }
@@ -82,7 +111,7 @@ export function QuoteEditPageContainer({unitId}: {unitId: string}) {
 
   return (
     <div className="max-w-4xl mx-auto mt-4">
-      <QuoteEditPage data={quoteData} setData={setQuoteData} />;
+      <QuoteEditPage unitId={unitId} data={quoteData} setData={setQuoteData} />;
     </div>
   );
 }

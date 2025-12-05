@@ -68,7 +68,7 @@ export function buildMetadataWithRating(
  */
 export function normalizeRatingValue(value?: number): number | undefined {
   if (typeof value !== 'number' || Number.isNaN(value)) return undefined;
-  return Math.round(value);
+  return value;
 }
 
 /**
