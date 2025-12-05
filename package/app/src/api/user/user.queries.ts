@@ -2,9 +2,9 @@ import {queryOptions} from '@tanstack/react-query';
 import {userApi} from './user.api';
 import {userKeys} from './user.keys';
 
-export const userMeQuery = (unitId: string) =>
+export const userMeQuery = () =>
   queryOptions({
-    queryKey: userKeys.detail(unitId),
+    queryKey: userKeys.meDetail(),
     queryFn: () => userApi.me(),
     staleTime: 1000 * 60 * 5,
   });

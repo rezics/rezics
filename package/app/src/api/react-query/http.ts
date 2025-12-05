@@ -77,7 +77,8 @@ export async function apiFetch<T>(
     headers: headers,
   });
 
-  const responseJson = await response.json();
+  let responseJson = await response.json();
+
   // Handle 401 Unauthorized - token might be expired
   if (response.status === 401) {
     if (responseJson?.message?.includes('No authorization')) {
@@ -111,6 +112,7 @@ export async function apiFetch<T>(
       credentials: 'include',
       headers: newHeaders,
     });
+    responseJson = await response.json();
   }
 
   if (!response.ok) {

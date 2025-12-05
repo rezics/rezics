@@ -11,10 +11,10 @@ import {
 } from '@mui/material';
 import {Link} from 'wouter';
 import EditIcon from '@mui/icons-material/Edit';
-import type {FC} from 'react';
+import {useEffect, type FC} from 'react';
 import {useTranslation} from 'react-i18next';
 import type {UserDTO} from '@package/contract';
-import {useQuery, useQueryClient} from '@tanstack/react-query';
+import {useQuery} from '@tanstack/react-query';
 import {userQueries} from '@/api/user/user.queries';
 import {UserError, UserLoading} from './UserState';
 import {useUserStore} from '@/global/userStore';
@@ -31,7 +31,7 @@ export interface UserProfilePageProps {
  * 显示用户的详细信息，包括头像、名字、简介等
  */
 export const UserProfilePage: FC<UserProfilePageProps> = ({
-  unitId,
+  unitId = '',
   isCurrentUser = false,
   onEditClick,
 }) => {
@@ -42,14 +42,23 @@ export const UserProfilePage: FC<UserProfilePageProps> = ({
   console.log('isCurrentUser', isCurrentUser);
 
   const meQuery = useQuery({
-    ...userQueries.me(currentUser?.unitId ?? ''),
+    ...userQueries.me(),
     enabled: isCurrentUser,
   });
   const detailQuery = useQuery({
     ...userQueries.detail(unitId),
-    enabled: !isCurrentUser && !!unitId,
+    enabled: !isCurrentUser && unitId !== '',
   });
-  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    if (meQuery.data) {
+      setUser(meQuery.data);
+    }
+    if (detailQuery.data) {
+      setUser(detailQuery.data);
+    }
+  }, [meQuery.data, setUser, detailQuery.data]);
+
   async function refreshUser() {
     window.location.reload();
     // const data = await queryClient.fetchQuery(

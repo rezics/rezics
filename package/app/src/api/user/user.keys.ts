@@ -9,6 +9,7 @@ export const userKeys = {
     [...userKeys.lists(), filters] as const,
   details: () => [...userKeys.all(), 'detail'] as const,
   detail: (unitId: string) => [...userKeys.details(), unitId] as const,
+  meDetail: () => [...userKeys.all(), 'me', 'detail'] as const,
   searches: () => [...userKeys.all(), 'search'] as const,
   search: (q: string, filters?: Record<string, unknown>) =>
     [...userKeys.searches(), {q, ...filters}] as const,
