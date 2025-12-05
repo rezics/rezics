@@ -155,6 +155,7 @@ const PaginationBar: React.FC<PaginationBarProps> = ({
 };
 
 interface UniversalPaginatorProps<T> extends SortControlsProps {
+  ref: React.Ref<UniversalPaginatorHandle>;
   data: T[];
   totalExternalItems: number;
   itemsPerPage?: number;
@@ -183,25 +184,23 @@ export type UniversalPaginatorHandle = {
  * @returns {React.ReactNode}
  * @todo Add an option to keep the page scrolled to the bottom to prevent it from jumping to the top when new data loads.
  */
-export const UniversalPaginatorInner = <T,>(
-  {
-    data,
-    totalExternalItems,
-    itemsPerPage = 30,
-    externalItemsPerPage = 100,
-    sortType,
-    sortOrder,
-    onSortChange,
-    requestData,
-    preRequestData,
-    children,
-    sortControl,
-    isLoading = false,
-    currentPage = 1,
-    setCurrentPage,
-  }: UniversalPaginatorProps<T>,
-  ref: React.Ref<UniversalPaginatorHandle>,
-) => {
+export const UniversalPaginator = <T,>({
+  ref,
+  data,
+  totalExternalItems,
+  itemsPerPage = 30,
+  externalItemsPerPage = 100,
+  sortType,
+  sortOrder,
+  onSortChange,
+  requestData,
+  preRequestData,
+  children,
+  sortControl,
+  isLoading = false,
+  currentPage = 1,
+  setCurrentPage,
+}: UniversalPaginatorProps<T>) => {
   const [paginationPageNumber, setPaginationPageNumber] = useState<number>(
     externalItemsPerPage / itemsPerPage,
   );
@@ -357,8 +356,3 @@ export const UniversalPaginatorInner = <T,>(
     </Box>
   );
 };
-
-export const UniversalPaginator = forwardRef(UniversalPaginatorInner) as <T>(
-  props: UniversalPaginatorProps<T> &
-    React.RefAttributes<UniversalPaginatorHandle>,
-) => React.ReactElement | null;

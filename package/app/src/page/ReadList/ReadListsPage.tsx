@@ -1,11 +1,4 @@
-import React, {
-  forwardRef,
-  useEffect,
-  useImperativeHandle,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import React, {useEffect, useMemo, useRef, useState} from 'react';
 import {Alert} from '@mui/material';
 import {
   UniversalPaginator,
@@ -39,121 +32,36 @@ const ReadlistListView: React.FC<{readlists: Readlist[]}> = ({readlists}) => {
   );
 };
 
-type SortKey = 'time' | 'name' | 'popular' | 'agree';
-
-type ReadlistsShowProps = {
-  readlists: Readlist[];
-  totalItems: number;
-  isLoading: boolean;
-  error: any;
-  sortConfig: {
-    type: SortKey;
-    order: 'asc' | 'desc';
-  };
-  handleNeedMoreData: (page: number) => void;
-  handlePreRequestData: (page: number) => Promise<number>;
-  handleSortChange: (newSort: {type?: string; order?: 'asc' | 'desc'}) => void;
-  EXTERNAL_PAGE_SIZE: number;
-  setCurrentQuery: React.Dispatch<React.SetStateAction<SearchInfo>>;
-  currentQuery: SearchInfo;
-};
-
-const ReadlistsShow = (
-  {
-    readlists,
-    totalItems,
-    isLoading,
-    error,
-    sortConfig,
-    handleNeedMoreData,
-    handlePreRequestData,
-    handleSortChange,
-    EXTERNAL_PAGE_SIZE,
-    setCurrentQuery,
-    currentQuery,
-  }: ReadlistsShowProps,
-  ref: React.Ref<UniversalPaginatorHandle>,
-) => {
-  const [currentPage, setCurrentPage] = useState(1);
-  const universalPaginatorRef = useRef<UniversalPaginatorHandle>(null);
-
-  useEffect(() => {
-    console.log('currentQuery', currentQuery);
-  }, [currentQuery]);
-
-  useImperativeHandle(ref, () => ({
-    resetPaginationPageNumber() {
-      universalPaginatorRef.current?.resetPaginationPageNumber();
-    },
-  }));
-
-  if (error) {
-    return (
-      <div className="mx-auto max-w-7xl p-4">
-        <SimpleSearchInput
-          onSearch={() => {}}
-          defaultValue={{keyword: ''}}
-          placeholder="Search readlists"
-        />
-        <Alert severity="error" className="my-4">
-          {String(error)}
-        </Alert>
-      </div>
-    );
-  }
-
+function ErrorView({error}: {error: Error}) {
   return (
     <div className="mx-auto max-w-7xl p-4">
-      <UniversalPaginator<Readlist>
-        ref={universalPaginatorRef}
-        data={readlists}
-        totalExternalItems={totalItems}
-        itemsPerPage={10}
-        externalItemsPerPage={EXTERNAL_PAGE_SIZE}
-        sortType={sortConfig.type}
-        sortOrder={sortConfig.order}
-        onSortChange={handleSortChange}
-        requestData={handleNeedMoreData}
-        preRequestData={handlePreRequestData}
-        isLoading={isLoading && readlists.length === 0}
-        sortControl={
-          <SimpleSearchInput
-            onSearch={info => {
-              setCurrentQuery({
-                keyword: info ?? '',
-                tags: [],
-              });
-              console.log('onSearch', info);
-            }}
-            defaultValue={{keyword: currentQuery.keyword ?? ''}}
-            placeholder="Search readlists"
-          />
-        }
-        currentPage={currentPage}
-        setCurrentPage={setCurrentPage}
-      >
-        {(currentPageItems: Readlist[]) => (
-          <ReadlistListView readlists={currentPageItems} />
-        )}
-      </UniversalPaginator>
+      <SimpleSearchInput
+        onSearch={() => {}}
+        defaultValue={{keyword: ''}}
+        placeholder="Search readlists"
+      />
+      <Alert severity="error" className="my-4">
+        {String(error)}
+      </Alert>
     </div>
   );
-};
+}
 
-const ReadlistsShowRef = forwardRef(ReadlistsShow);
+type SortKey = 'time' | 'name' | 'popular' | 'agree';
 
 /**
  * 后续API调整，Service调整的问题，是否要切换到 unit 查询，还是继续用独立服务。
  * @returns ReadListsPage
  */
 export function ReadListsPage({bookUnitId}: {bookUnitId?: string}) {
-  const ref = useRef<UniversalPaginatorHandle>(null);
+  const universalPaginatorRef = useRef<UniversalPaginatorHandle>(null);
   const EXTERNAL_PAGE_SIZE = 100;
   const [currentQuery, setCurrentQuery] = useState<SearchInfo>({
     keyword: '',
     tags: [],
   });
   const [start, setStart] = useState<number>(0);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const {data, isLoading, error} = useQuery(
     buildMeiliReadlistQuery(
@@ -177,6 +85,7 @@ export function ReadListsPage({bookUnitId}: {bookUnitId?: string}) {
       EXTERNAL_PAGE_SIZE,
       currentQuery.keyword ?? '',
       currentQuery.tags ?? [],
+      {bookId: bookUnitId ?? undefined},
     );
     const data = await queryClient.fetchQuery({queryKey, queryFn});
     console.log('handlePreRequestData', data, page);
@@ -188,7 +97,7 @@ export function ReadListsPage({bookUnitId}: {bookUnitId?: string}) {
   }, [data]);
 
   useEffect(() => {
-    ref.current?.resetPaginationPageNumber();
+    universalPaginatorRef.current?.resetPaginationPageNumber();
     console.log('currentQuery', currentQuery);
   }, [currentQuery]);
 
@@ -263,20 +172,44 @@ export function ReadListsPage({bookUnitId}: {bookUnitId?: string}) {
     }));
   };
 
+  if (error) {
+    return <ErrorView error={error} />;
+  }
+
   return (
-    <ReadlistsShowRef
-      ref={ref}
-      readlists={readlists}
-      totalItems={totalItems}
-      isLoading={isLoading}
-      error={error}
-      currentQuery={currentQuery}
-      setCurrentQuery={setCurrentQuery}
-      sortConfig={sortConfig}
-      handleNeedMoreData={handleNeedMoreData}
-      handlePreRequestData={handlePreRequestData}
-      handleSortChange={handleSortChange}
-      EXTERNAL_PAGE_SIZE={EXTERNAL_PAGE_SIZE}
-    />
+    <div className="mx-auto max-w-7xl p-4">
+      <UniversalPaginator<Readlist>
+        ref={universalPaginatorRef}
+        data={readlists}
+        totalExternalItems={totalItems}
+        itemsPerPage={10}
+        externalItemsPerPage={EXTERNAL_PAGE_SIZE}
+        sortType={sortConfig.type}
+        sortOrder={sortConfig.order}
+        onSortChange={handleSortChange}
+        requestData={handleNeedMoreData}
+        preRequestData={handlePreRequestData}
+        isLoading={isLoading && readlists.length === 0}
+        sortControl={
+          <SimpleSearchInput
+            onSearch={info => {
+              setCurrentQuery({
+                keyword: info ?? '',
+                tags: [],
+              });
+              console.log('onSearch', info);
+            }}
+            defaultValue={{keyword: currentQuery.keyword ?? ''}}
+            placeholder="Search readlists"
+          />
+        }
+        currentPage={currentPage}
+        setCurrentPage={setCurrentPage}
+      >
+        {(currentPageItems: Readlist[]) => (
+          <ReadlistListView readlists={currentPageItems} />
+        )}
+      </UniversalPaginator>
+    </div>
   );
 }
