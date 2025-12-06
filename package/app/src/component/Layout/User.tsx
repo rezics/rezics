@@ -80,8 +80,7 @@ export const UserShow: React.FC<UserShowProps> = ({
   onProfile,
   onSettings,
 }) => {
-  const userStore = useUserStore(state => state.user);
-  const {data: user} = useQuery(userQueries.me(userStore?.unitId ?? ''));
+  const {data: user} = useQuery(userQueries.me());
   return (
     <>
       <IconButton
@@ -173,9 +172,9 @@ export const UserContainer: React.FC<UserContainerProps> = ({onLogout}) => {
   const handleLogout = () => {
     handleMenuClose();
     onLogout?.();
-    logout();
     setUser(null);
     navigate('/login');
+    logout();
   };
 
   const handleProfile = () => {

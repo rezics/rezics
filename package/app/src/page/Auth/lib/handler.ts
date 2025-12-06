@@ -37,8 +37,11 @@ export const register = async (
   }
 };
 
-export const logout = () => {
+export const logout = (disableReload = false) => {
   removeToken();
   if (typeof window === 'undefined') return;
   localStorage.removeItem('user-store');
+  if (!disableReload) {
+    setTimeout(() => location.reload(), 500);
+  }
 };
