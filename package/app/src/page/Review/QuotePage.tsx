@@ -15,6 +15,7 @@ import {
 } from '@/component/Common/Reaction/MiniActionBar';
 import {parseReactionSummaries} from '@/util/reactionSummariesParser';
 import {ReactionStatistics} from '@/component/Common/Reaction/ReactionStatistics';
+import {LazyLoadImage} from '@/component/Common/LazyLoadImage';
 export interface QuotePageProps {
   unitId: string;
 }
@@ -76,7 +77,7 @@ export const QuotePage: React.FC<QuotePageProps> = ({unitId}) => {
         <div className="flex justify-between items-center">
           {Quote.user && (
             <div className="flex items-center gap-3">
-              <img
+              <LazyLoadImage
                 src={Quote.user.avatar || ''}
                 alt="creator avatar"
                 className="w-10 h-10 rounded-full shadow"

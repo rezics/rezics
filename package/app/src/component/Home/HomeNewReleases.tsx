@@ -9,6 +9,7 @@ import {
 } from '@mui/material';
 import {bookQueries} from '@/api/book/book';
 import type {BookDTO} from '@package/contract';
+import {LazyLoadImage} from '../Common/LazyLoadImage';
 
 type Book = BookDTO;
 
@@ -57,11 +58,10 @@ export const HomeNewReleases: React.FC<HomeNewReleasesProps> = ({
         {books.map(book => (
           <Card key={book.unitId} className="overflow-hidden">
             {book.coverUrl && (
-              <img
+              <LazyLoadImage
                 src={book.coverUrl}
                 alt={book.title}
                 className="w-full h-44 object-cover"
-                loading="lazy"
               />
             )}
             <CardContent className="!pt-3">

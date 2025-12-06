@@ -16,6 +16,7 @@ import {
   MiniActionBar,
   MiniAdminActionBar,
 } from '../Common/Reaction/MiniActionBar';
+import {LazyLoadImage} from '../Common/LazyLoadImage';
 
 type Book = BookDTO;
 
@@ -63,8 +64,8 @@ export const BookHeroShow: React.FC<{
                 size={{xs: 12, md: 3, lg: 2}}
                 className="max-h-[300px] w-full"
               >
-                <img
-                  src={bookInfo?.coverUrl ?? undefined}
+                <LazyLoadImage
+                  src={bookInfo?.coverUrl ?? ''}
                   alt={bookInfo?.title}
                   className="h-full rounded-lg shadow-lg mr-auto ml-auto"
                 />

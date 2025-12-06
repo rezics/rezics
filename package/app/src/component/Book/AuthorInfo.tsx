@@ -9,6 +9,7 @@ import {useTranslation} from 'react-i18next';
 import DialogContainer from '../Common/DialogContainer.tsx';
 import type {PublicUser} from '@package/contract';
 import {FollowButton} from '../Common/Reaction/FollowButton.tsx';
+import {LazyLoadImage} from '@/component/Common/LazyLoadImage';
 
 // --------- Types ---------
 export type Author = PublicUser;
@@ -45,8 +46,8 @@ const AuthorInfoShow: React.FC<AuthorInfoShowProps> = ({
             <div className="mb-4 mt-2 flex">
               {/* 左侧图片区域 */}
               <div className="w-1/5 flex-row justify-center">
-                <img
-                  src={author.avatar || undefined}
+                <LazyLoadImage
+                  src={author.avatar || ''}
                   className="max-w-full max-h-full object-contain"
                   alt="avatar"
                 />

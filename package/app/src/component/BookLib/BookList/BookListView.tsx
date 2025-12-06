@@ -1,8 +1,9 @@
-import {Card, CardContent, Typography} from '@mui/material';
+import {Card, CardContent, CardMedia, Typography} from '@mui/material';
 
 import {Link} from 'wouter';
 
 import type {BookDTO} from '@package/contract';
+import {LazyLoadImage} from '@/component/Common/LazyLoadImage';
 
 // import { Book } from "contract/schema";
 type Book = BookDTO;
@@ -17,12 +18,14 @@ export const BookListViewItem = ({book}: {book: Book}) => {
       <Link to={`/book/${book.unitId}`}>
         <Card className="mt-4 h-[200px] flex flex-row items-stretch gap-4 w-full">
           {book.coverUrl && (
-            <img
-              src={book.coverUrl}
-              alt={book.title}
-              // style={{ width: "36%", objectFit: "cover" }}
-              className="!h-full object-cover"
-            />
+            <CardMedia className="aspect-[2/3]">
+              <LazyLoadImage
+                src={book.coverUrl}
+                alt={book.title}
+                // style={{width: '36%', objectFit: 'cover'}}
+                className="!h-full object-cover w-full"
+              />
+            </CardMedia>
           )}
           <CardContent className="flex-1 flex flex-col justify-between min-w-0">
             <div>

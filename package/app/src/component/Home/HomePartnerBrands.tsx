@@ -1,4 +1,5 @@
 import React from 'react';
+import {LazyLoadImage} from '../Common/LazyLoadImage';
 
 const defaultBrands = [
   'https://dummyimage.com/100x40/cccccc/000&text=Brand+A',
@@ -24,7 +25,7 @@ export const HomePartnerBrands: React.FC<HomePartnerBrandsProps> = ({
       </div>
       <div className="flex flex-wrap gap-6 items-center">
         {logos.map((src, i) => (
-          <img
+          <LazyLoadImage
             key={i}
             src={src}
             alt={`brand-${i}`}

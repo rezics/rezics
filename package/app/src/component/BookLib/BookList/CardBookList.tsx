@@ -1,3 +1,4 @@
+import {LazyLoadImage} from '@/component/Common/LazyLoadImage';
 import {Card, CardContent, CardMedia, Typography} from '@mui/material';
 
 import type {BookDTO} from '@package/contract';
@@ -15,12 +16,13 @@ export const CardBookList = ({books}: CardBookListProps) => {
           className="h-full flex flex-row items-stretch gap-4 w-full"
         >
           {book.coverUrl && (
-            <CardMedia
-              component="img"
-              image={book.coverUrl}
-              alt={book.title}
-              style={{width: '36%', objectFit: 'cover'}}
-            />
+            <CardMedia style={{width: '36%', objectFit: 'cover'}}>
+              <LazyLoadImage
+                src={book.coverUrl}
+                alt={book.title}
+                className="w-full h-full object-cover"
+              />
+            </CardMedia>
           )}
           <CardContent className="flex-1 flex flex-col justify-between min-w-0">
             <div>

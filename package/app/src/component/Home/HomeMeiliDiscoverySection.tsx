@@ -27,6 +27,7 @@ import {buildMeiliUnitQuery} from '@/api/meili/meili.queries';
 import {UnitType} from '@package/contract/src/unit';
 import {Link} from 'wouter';
 import BookCard from './HomeBookCard';
+import {LazyLoadImage} from '../Common/LazyLoadImage';
 
 type Book = BookDTO;
 type Readlist = ReadlistDTO;
@@ -234,11 +235,10 @@ const ReadlistsSection: React.FC<ReadlistsSectionProps> = ({limit = 6}) => {
               <CardContent className="flex gap-3">
                 {list.coverUrl && (
                   <div className="shrink-0">
-                    <img
+                    <LazyLoadImage
                       src={list.coverUrl}
                       alt={list.title}
                       className="w-16 h-20 object-cover rounded"
-                      loading="lazy"
                     />
                   </div>
                 )}

@@ -9,6 +9,7 @@ import {
 } from '@mui/material';
 import {bookQueries} from '@/api/book/book';
 import type {BookDTO} from '@package/contract';
+import {LazyLoadImage} from '../Common/LazyLoadImage';
 
 type Book = BookDTO;
 
@@ -54,7 +55,7 @@ export const HomeReadList: React.FC<HomeReadListProps> = ({
             className="min-w-[160px] max-w-[160px] overflow-hidden"
           >
             {book.coverUrl && (
-              <img
+              <LazyLoadImage
                 src={book.coverUrl}
                 alt={book.title}
                 className="w-full h-48 object-cover"

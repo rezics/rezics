@@ -51,6 +51,7 @@
     "react-i18next": "15.6.1",
     "react-instantsearch": "^7.20.0",
     "react-json-view-lite": "^2.5.0",
+    "react-lazy-load-image-component": "^1.6.3",
     "react-use": "17.6.0",
     "react-use-measure": "2.1.7",
     "react-window": "1.8.11",

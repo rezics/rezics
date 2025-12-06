@@ -13,6 +13,7 @@ import {
 } from '@/util/reactionSummariesParser';
 
 import {ReactionBar} from '@/component/Common/Reaction/ReactionBar';
+import {LazyLoadImage} from '../Common/LazyLoadImage';
 
 export function MetaInfoBadge({
   review,
@@ -85,7 +86,7 @@ export const SingleRemarkShow: React.FC<SingleRemarkShowProps> = ({
   return (
     <div className="py-4 border-b border-gray-200">
       <div className="flex gap-3">
-        <img
+        <LazyLoadImage
           src={review.user?.avatar || ''}
           alt={review.user?.name || ''}
           className="w-10 h-10 rounded-md object-cover mt-2"

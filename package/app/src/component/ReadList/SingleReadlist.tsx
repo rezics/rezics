@@ -11,6 +11,7 @@ import {
 import ThumbUpAltOutlinedIcon from '@mui/icons-material/ThumbUpAltOutlined';
 import BookmarkAddOutlinedIcon from '@mui/icons-material/BookmarkAddOutlined';
 import {Link} from 'wouter';
+import {LazyLoadImage} from '../Common/LazyLoadImage';
 
 interface SingleReadlistProps {
   data: ReadlistResponse;
@@ -47,12 +48,13 @@ export function SingleReadlist({
       className={`mt-4 h-[200px] flex flex-row items-stretch gap-4 w-full ${className}`}
     >
       {/* Cover */}
-      <CardMedia
-        component="img"
-        image={cover || '/placeholder-cover.png'}
-        alt={data.title}
-        style={{width: '36%', objectFit: 'cover'}}
-      />
+      <CardMedia style={{width: '36%', objectFit: 'cover'}}>
+        <LazyLoadImage
+          src={cover ?? ''}
+          alt={data.title}
+          className="w-full h-full object-cover"
+        />
+      </CardMedia>
       {/* Right content */}
       <Box className="flex flex-1 flex-col justify-between min-w-0">
         <Box className="flex flex-col gap-1 min-w-0">

@@ -12,6 +12,7 @@ import React from 'react';
 import {useLocation} from 'wouter';
 import {MiniActionBar} from '@/component/Common/Reaction/MiniActionBar';
 import {useTranslation} from 'react-i18next';
+import {LazyLoadImage} from '../Common/LazyLoadImage';
 
 interface SingleReadlistProps {
   data: ReadlistResponse;
@@ -75,8 +76,8 @@ export function SingleReadlist({
             className="relative w-full overflow-hidden rounded-md"
             style={{aspectRatio: '16 / 9'}}
           >
-            <img
-              src={data.coverUrl}
+            <LazyLoadImage
+              src={data.coverUrl ?? ''}
               alt={data.title}
               className="w-full h-full object-cover"
             />

@@ -7,6 +7,7 @@ import {
   Box,
 } from '@mui/material';
 import type {BookDTO} from '@package/contract';
+import {LazyLoadImage} from '../Common/LazyLoadImage';
 // 辅助组件或直接在父组件中使用
 const BookCard = ({
   book,
@@ -33,10 +34,9 @@ const BookCard = ({
         {/* 封面图区域 */}
         {book.coverUrl ? (
           <Box className="relative w-full h-42 aspect-[3/4] overflow-hidden bg-gray-100">
-            <img
+            <LazyLoadImage
               src={book.coverUrl}
               alt={book.title}
-              loading="lazy"
               className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-110"
             />
             {/* 可选：添加一个渐变遮罩在底部，让文字在图片衔接处更柔和（视设计风格而定） */}
