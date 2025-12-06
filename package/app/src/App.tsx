@@ -52,9 +52,13 @@ export default function App() {
             <ThemeProvider theme={theme}>
               <CssBaseline />
               <PersistentSettingsLoader />
-              <WindowAlert />
-              <ReactQueryProvider>{Router}</ReactQueryProvider>
-              <HelpFab />
+              <ReactQueryProvider>
+                <>
+                  {Router}
+                  <WindowAlert />
+                  <HelpFab />
+                </>
+              </ReactQueryProvider>
             </ThemeProvider>
           </StyledEngineProvider>
         </HelmetProvider>

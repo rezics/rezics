@@ -5,6 +5,7 @@ export * from './book';
 export * from './chapter';
 export * from './search';
 export * from './comment';
+export * from './feedback';
 export * from './readlist';
 export * from './review';
 export * from './tag';

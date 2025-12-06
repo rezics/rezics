@@ -8,6 +8,7 @@ import {NAVIGATION} from '@/component/Layout/Navigation/MainNavigation';
 import {appStore} from '@/global/appStore.ts';
 import {useLayoutStore} from '@/global/Layout/layoutStore.ts';
 import {useUserStore} from '@/global/userStore';
+import {MainLayoutFooter} from '@/component/Layout/Footer/MainLayoutFooter.tsx';
 
 export interface MainLayoutProps {
   children: ReactNode;
@@ -41,9 +42,11 @@ export const MainLayout: React.FC<MainLayoutProps> = ({children}) => {
         mode={mode}
         onThemeToggle={toggleTheme}
         drawerWidth={drawerWidth}
+        layoutType="type-b"
       />
 
       <Sidebar
+        layoutType="type-b"
         onClose={() => isMobile && closeSidebar()}
         handleDrawerToggle={handleDrawerToggle}
         NAVIGATION={NAVIGATION(isAdmin)}
@@ -56,6 +59,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({children}) => {
         }}
       >
         {children}
+        <MainLayoutFooter />
       </main>
     </div>
   );

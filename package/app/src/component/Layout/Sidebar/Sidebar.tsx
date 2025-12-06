@@ -35,6 +35,7 @@ interface SidebarProps {
   onOverflowx?: boolean;
   onOverflowy?: boolean;
   isDragging?: boolean;
+  layoutType?: 'type-a' | 'type-b';
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -46,6 +47,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onOverflowx = false,
   onOverflowy = false,
   isDragging = false,
+  layoutType = 'type-a',
 }) => {
   const {
     sidebarOpen,
@@ -143,7 +145,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               {theme.direction === 'ltr' ? <ChevronLeft /> : <ChevronRight />}
             </IconButton>
           </DrawerHeader>
-          <Divider />
+          {layoutType === 'type-a' && <Divider />}
           <List>
             {NAVIGATION.map((item, index) => {
               if (item.kind === 'header') {

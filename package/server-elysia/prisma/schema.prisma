@@ -385,13 +385,29 @@ model EchoKV {
 /**
  * Feedback
  */
+
+enum FeedbackType {
+  REPORT
+  BUG
+  FEATURE
+  OTHER
+}
+
 model Feedback {
-  id        String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
-  userId    String   @db.Uuid
-  unitId    String   @db.Uuid
-  content   String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id         String       @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  userId     String       @db.Uuid
+  unitId     String?      @db.Uuid
+  content    String
+  type       FeedbackType @default(REPORT)
+  resolved   Boolean      @default(false)
+  resolvedAt DateTime?
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+
+  @@index([userId])
+  @@index([unitId])
+  @@index([type])
+  @@index([resolved])
 }
 
 /**

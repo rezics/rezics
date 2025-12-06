@@ -1,0 +1,18 @@
+import type {Feedback} from '@/prisma/client';
+import type {FeedbackDTO} from '@package/contract';
+
+export function mapFeedbackToDTO(model: Feedback): FeedbackDTO {
+  return {
+    id: model.id,
+    userId: model.userId,
+    unitId: model.unitId,
+    content: model.content,
+    type: model.type as any,
+    resolved: model.resolved,
+    resolvedAt: model.resolvedAt
+      ? model.resolvedAt.toISOString?.() ?? (model.resolvedAt as any)
+      : null,
+    createdAt: model.createdAt.toISOString?.() ?? (model.createdAt as any),
+    updatedAt: model.updatedAt.toISOString?.() ?? (model.updatedAt as any),
+  };
+}

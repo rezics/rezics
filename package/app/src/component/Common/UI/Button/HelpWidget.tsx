@@ -8,6 +8,7 @@ import {
 } from '@mui/icons-material';
 import AddIcon from '@mui/icons-material/Add';
 import ReportProblemIcon from '@mui/icons-material/ReportProblem';
+import FeedbackDialog from '@/component/Feedback/FeedbackDialog';
 
 export interface HelpFabAction {
   id: string;
@@ -79,6 +80,8 @@ export const HelpFab: React.FC<HelpFabProps> = ({
 }) => {
   const [open, setOpen] = React.useState(false);
 
+  const [feedbackDialogOpen, setFeedbackDialogOpen] = React.useState(false);
+
   const list = actions ?? defaultHelpActions;
   if (!list.length) return null;
 
@@ -88,6 +91,9 @@ export const HelpFab: React.FC<HelpFabProps> = ({
 
   const handleActionClick = (item: HelpFabAction) => {
     item.onClick?.();
+    if (item.id == 'feedback') {
+      setFeedbackDialogOpen(true);
+    }
     setOpen(false);
   };
 
@@ -170,6 +176,10 @@ export const HelpFab: React.FC<HelpFabProps> = ({
           {open ? <CloseIcon /> : icon ?? <AddIcon />}
         </Fab>
       </Zoom>
+      <FeedbackDialog
+        open={feedbackDialogOpen}
+        onClose={() => setFeedbackDialogOpen(false)}
+      />
     </Box>
   );
 };
