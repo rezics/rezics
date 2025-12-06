@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import DialogContainer from '../../Common/DialogContainer.tsx';
+import DialogContainer from '../../Common/Overlay/DialogContainer.tsx';
 import {useBookPageStore} from '@/global/page/bookPageStore.ts';
 import {useUpdateBookMutation} from '@/api/book/book.mutations';
 import type {UpdateBookInput} from '@package/contract';

@@ -2,7 +2,7 @@ import React, {useState, useEffect, useRef} from 'react';
 
 import {LinearChapterList} from '@/component/Book/Chapter/LinearChapterList';
 import {ChapterArboristHeightSlider} from '@/component/Book/Chapter/ChapterArboristHeightSlider';
-import {AccentBarWithTextShow} from '@/component/Common/AccentBar';
+import {AccentBarWithTextShow} from '@/component/Common/Navigation/AccentBar';
 import {Alert} from '@mui/material';
 
 export interface BookEditChapterListPageProps {

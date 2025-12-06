@@ -1,4 +1,4 @@
-import {AccentBarContainer} from '@component/Common/AccentBar.tsx';
+import {AccentBarContainer} from '@/component/Common/Navigation/AccentBar';
 import {TreeReplyComponents} from '@/component/Form/Comment/TreeReplyComponents';
 import {ChatBubbleOutline} from '@mui/icons-material';
 import {Avatar, IconButton, Tooltip} from '@mui/material';

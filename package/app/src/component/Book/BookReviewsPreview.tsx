@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 
-import {AccentBarWithTextShow} from '../Common/AccentBar.tsx';
-import {ArrowForwardIconContainer} from '../Common/ArrowForwardIcon.tsx';
+import {AccentBarWithTextShow} from '../Common/Navigation/AccentBar.tsx';
+import {ArrowForwardIconContainer} from '../Common/Navigation/ArrowForwardIcon.tsx';
 import {ReviewListContainer} from '../Review/ReviewList.tsx';
 
 import {useQuery} from '@tanstack/react-query';

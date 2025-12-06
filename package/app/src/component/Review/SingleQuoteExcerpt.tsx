@@ -5,8 +5,8 @@ import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import React from 'react';
 import {useTranslation} from 'react-i18next';
 
-import {CollapsibleByLineTextContainer} from '../Common/CollapsibleByLineText';
-import {RouterLink} from '../Common/RouterLink';
+import {CollapsibleByLineTextContainer} from '../Common/UI/Text/CollapsibleByLineText';
+import {RouterLink} from '../Common/Navigation/RouterLink';
 
 export type SingleQuoteExcerptShowProps = {
   author: {

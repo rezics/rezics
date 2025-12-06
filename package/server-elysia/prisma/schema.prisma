@@ -383,6 +383,18 @@ model EchoKV {
 }
 
 /**
+ * Feedback
+ */
+model Feedback {
+  id        String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  userId    String   @db.Uuid
+  unitId    String   @db.Uuid
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+/**
  * 说明与迁移提示（非运行字段）
  * - JSONB/GiN 索引：Prisma schema 不直接声明 GiN，
  * 请在迁移中加 raw SQL，如：

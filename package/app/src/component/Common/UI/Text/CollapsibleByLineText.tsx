@@ -1,7 +1,7 @@
 import {useTheme} from '@mui/material/styles';
 import React, {useEffect, useRef, useState} from 'react';
 import {useTranslation} from 'react-i18next';
-import {MarkdownContent} from './MarkdownContent';
+import {MarkdownContent} from '../../MarkdownContent';
 
 export type CollapsibleByLineTextShowProps = {
   content?: string;

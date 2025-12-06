@@ -1,5 +1,5 @@
-import {AccentBarWithTextContainer} from '@/component/Common/AccentBar.tsx';
-import {ArrowForwardIconContainer} from '@/component/Common/ArrowForwardIcon.tsx';
+import {AccentBarWithTextContainer} from '@/component/Common/Navigation/AccentBar';
+import {ArrowForwardIconContainer} from '@/component/Common/Navigation/ArrowForwardIcon';
 import {useParams} from 'wouter';
 import {QuoteNewPage} from './QuoteNewPage';
 import UnitsPage from '../Unit/UnitsPage';

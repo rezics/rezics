@@ -1,7 +1,7 @@
 import {useLocation, useParams} from 'wouter';
 
 import {ReviewsPage} from '@/page/Review/ReviewsPage';
-import {AccentBarWithTextShow} from '@/component/Common/AccentBar.tsx';
+import {AccentBarWithTextShow} from '@/component/Common/Navigation/AccentBar';
 import {ReviewNewPage} from '@/page/Review/ReviewNewPage';
 import {useTranslation} from 'react-i18next';
 import {Button, Divider} from '@mui/material';

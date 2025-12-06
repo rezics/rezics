@@ -1,7 +1,7 @@
 import React from 'react';
 import {Card, CardContent, Typography, Chip} from '@mui/material';
 import type {TagDetailDTO} from '@/api/tag/tag';
-import {RouterLink} from '../Common/RouterLink';
+import {RouterLink} from '../Common/Navigation/RouterLink';
 
 /**
  * Generic card showing a tag's primary information

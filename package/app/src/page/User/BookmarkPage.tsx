@@ -10,7 +10,7 @@ import {useAlertStore} from '@/global/windowAlertStore';
 import {
   UniversalPaginator,
   type UniversalPaginatorHandle,
-} from '@/component/Common/Pagination.tsx';
+} from '@/component/Common/Navigation/Pagination';
 
 import {UserBookmarkTagsCard} from './UserBookmarkTagsCard';
 import {BookmarkItemCard} from '@/component/User/Bookmark/BookmarkItemCard';

@@ -1,7 +1,7 @@
 import {useQuery} from '@tanstack/react-query';
 import {CreateBookInput, type BookDTO} from '@package/contract';
 import {bookQueries} from '@/api/book/book';
-import {AccentBarWithTextShow} from '@/component/Common/AccentBar.tsx';
+import {AccentBarWithTextShow} from '@/component/Common/Navigation/AccentBar';
 import {BookMetadataEditor} from '@/component/Book/Metadata/BookMetadataEditor';
 import React from 'react';
 import {useTranslation} from 'react-i18next';

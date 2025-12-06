@@ -1,4 +1,4 @@
-import {AccentBarWithTextShow} from '@/component/Common/AccentBar.tsx';
+import {AccentBarWithTextShow} from '@/component/Common/Navigation/AccentBar.tsx';
 import {ReadListsPage} from './ReadListsPage.tsx';
 import {useTranslation} from 'react-i18next';
 

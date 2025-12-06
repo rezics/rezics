@@ -6,7 +6,7 @@ import {Link, useSearchParams} from 'wouter';
 import {
   UniversalPaginator,
   type UniversalPaginatorHandle,
-} from '@/component/Common/Pagination.tsx';
+} from '@/component/Common/Navigation/Pagination';
 import type {UnitDTO, UnitType} from '@package/contract';
 import {SimpleSearchInput} from '@/component/Search/SimpleSearchInput';
 import {buildUnitUrl} from '@/util/buildUrlUtil';

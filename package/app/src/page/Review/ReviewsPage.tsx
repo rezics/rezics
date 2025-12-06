@@ -5,7 +5,7 @@ import {useQuery, useQueryClient} from '@tanstack/react-query';
 import {
   UniversalPaginator,
   type UniversalPaginatorHandle,
-} from '@/component/Common/Pagination.tsx';
+} from '@/component/Common/Navigation/Pagination';
 import {ReviewListContainer} from '@/component/Review/ReviewList';
 import type {ReviewDTO} from '@package/contract';
 import {useSearchParams} from 'wouter';

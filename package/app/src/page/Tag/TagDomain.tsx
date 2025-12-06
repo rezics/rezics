@@ -1,6 +1,6 @@
 import {useQuery} from '@tanstack/react-query';
 import {tagQueries} from '@/api/tag/tag';
-import {AccentBarWithTextShow} from '@/component/Common/AccentBar';
+import {AccentBarWithTextShow} from '@/component/Common/Navigation/AccentBar';
 import {TagWrapper} from '@/component/Tag/TagWrapper';
 
 export function TagDomainPage({

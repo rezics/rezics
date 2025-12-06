@@ -4,7 +4,7 @@ import {tagQueries} from '@/api/tag/tag';
 import type {TagFilters, TagDTO, TagDetailDTO} from '@/api/tag/tag';
 import TagList from './TagList';
 
-import {RouterLink} from '@/component/Common/RouterLink';
+import {RouterLink} from '@/component/Common/Navigation/RouterLink';
 
 type Mode = 'flat' | 'grouped';
 

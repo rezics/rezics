@@ -2,7 +2,7 @@ import {type ReviewResponse} from '@package/contract/src/review';
 import {ReviewEditPage} from './ReviewEditPage';
 import {useState} from 'react';
 import {TextField} from '@mui/material';
-import {CooldownButton} from '@/component/Common/CooldownButton';
+import {CooldownButton} from '@/component/Common/UI/Button/CooldownButton';
 
 import {useCreateReviewMutation} from '@/api/review/review.mutations';
 import {useAlertStore} from '@/global/windowAlertStore';

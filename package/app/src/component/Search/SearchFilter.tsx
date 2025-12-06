@@ -1,4 +1,4 @@
-import {SortControlsProps} from '@/component/Common/Pagination.tsx';
+import {SortControlsProps} from '@/component/Common/Navigation/Pagination';
 import {ArrowDownward, ArrowUpward} from '@mui/icons-material';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import {Button, Menu, MenuItem, Stack, Typography} from '@mui/material';

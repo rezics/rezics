@@ -19,7 +19,7 @@ import {useUserStore} from '@/global/userStore';
 import {
   UniversalPaginator,
   type UniversalPaginatorHandle,
-} from '@/component/Common/Pagination.tsx';
+} from '@/component/Common/Navigation/Pagination';
 import {useLocation} from 'wouter';
 
 type SimpleUser = Omit<UserDTO, 'email'>;

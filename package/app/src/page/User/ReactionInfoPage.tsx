@@ -17,7 +17,7 @@ import type {ReactionDTO} from '@/api/reaction/reaction.types';
 import {
   UniversalPaginator,
   type UniversalPaginatorHandle,
-} from '@/component/Common/Pagination.tsx';
+} from '@/component/Common/Navigation/Pagination';
 import {useLocation} from 'wouter';
 
 type ReactionInfoPageProps = {

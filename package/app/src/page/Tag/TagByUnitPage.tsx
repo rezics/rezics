@@ -1,6 +1,6 @@
 import {useQueries, useQuery} from '@tanstack/react-query';
-import {RouterLink} from '@/component/Common/RouterLink';
-import {AccentBarWithTextShow} from '@/component/Common/AccentBar.tsx';
+import {RouterLink} from '@/component/Common/Navigation/RouterLink';
+import {AccentBarWithTextShow} from '@/component/Common/Navigation/AccentBar';
 import {tagApi, tagQueries} from '@/api/tag/tag';
 import type {TagDetailDTO} from '@package/contract';
 import {TagWrapper} from '@/component/Tag/TagWrapper';

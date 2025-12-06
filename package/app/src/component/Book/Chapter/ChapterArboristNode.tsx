@@ -1,6 +1,6 @@
 import React from 'react';
 import type {NodeRendererProps} from 'react-arborist';
-import {RouterLink} from '@/component/Common/RouterLink';
+import {RouterLink} from '@/component/Common/Navigation/RouterLink';
 import {Link} from 'wouter';
 import {useTheme, alpha} from '@mui/material/styles';
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';

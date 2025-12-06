@@ -15,7 +15,8 @@ import {ReactQueryProvider} from './plugin/providers/react-query.tsx';
 import Router from './router/router.tsx';
 
 import {ErrorBoundary} from 'react-error-boundary';
-import {WindowAlert} from './component/Common/WindowAlert.tsx';
+import {WindowAlert} from './component/Common/Overlay/WindowAlert.tsx';
+import {HelpFab} from './component/Common/UI/Button/HelpWidget.tsx';
 import {HelmetProvider} from 'react-helmet-async';
 
 export default function App() {
@@ -53,6 +54,7 @@ export default function App() {
               <PersistentSettingsLoader />
               <WindowAlert />
               <ReactQueryProvider>{Router}</ReactQueryProvider>
+              <HelpFab />
             </ThemeProvider>
           </StyledEngineProvider>
         </HelmetProvider>

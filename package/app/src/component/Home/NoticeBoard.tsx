@@ -10,7 +10,7 @@ import {
   ListItemButton,
   Skeleton,
 } from '@mui/material';
-import {RouterLink} from '../Common/RouterLink';
+import {RouterLink} from '../Common/Navigation/RouterLink';
 import NotificationsRoundedIcon from '@mui/icons-material/NotificationsRounded';
 import {echoKvGetQuery} from '@/api/echokv/echokv';
 import {useQuery} from '@tanstack/react-query';

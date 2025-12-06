@@ -7,7 +7,7 @@ import {useTranslation} from 'react-i18next';
 import {useLocation} from 'wouter';
 
 import {PasswordField} from '@/component/Form/PasswordField';
-import {RouterLink} from '@/component/Common/RouterLink.tsx';
+import {RouterLink} from '@/component/Common/Navigation/RouterLink.tsx';
 import {useUserStore} from '@/global/userStore.ts';
 import {login} from './lib/handler.ts';
 import {Layout} from './lib/Layout.tsx';

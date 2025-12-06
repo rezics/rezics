@@ -1,6 +1,6 @@
 import React, {useState, useImperativeHandle} from 'react';
 import TextField from '@mui/material/TextField';
-import {CooldownButton} from '@/component/Common/CooldownButton.tsx';
+import {CooldownButton} from '@/component/Common/UI/Button/CooldownButton';
 import {validateEmail} from './lib/validate';
 import {userApi} from '@/api/user/user';
 import {useAlertStore} from '@/global/windowAlertStore';

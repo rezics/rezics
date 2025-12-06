@@ -1,7 +1,7 @@
 import {BookReviews} from '@/component/Book/BookReviewsPreview.tsx';
 import {TagWrapper} from '@/component/Tag/TagWrapper.tsx';
 import {RemarkPreview} from '@/component/Book/RemarkPreview';
-import {AccentBarWithTextContainer} from '@component/Common/AccentBar.tsx';
+import {AccentBarWithTextContainer} from '@/component/Common/Navigation/AccentBar';
 import {TabContext, TabList, TabPanel} from '@mui/lab';
 import {Box, Divider, Grid, Paper, Stack, Tab, Typography} from '@mui/material';
 import React, {useEffect, useMemo, useRef} from 'react';
@@ -11,7 +11,7 @@ import {AuthorInfoContainer} from '@/component/Book/AuthorInfo.tsx';
 import {BookDescription} from '@/component/Book/BookDescription';
 import {QuoteExcerptPreviewContainer} from '@/component/Book/QuoteExcerptPreview.tsx';
 import {ReadlistByBookPreview} from '@/component/Book/ReadlistByBookPreview.tsx';
-import {ArrowForwardIconContainer} from '@/component/Common/ArrowForwardIcon.tsx';
+import {ArrowForwardIconContainer} from '@/component/Common/Navigation/ArrowForwardIcon';
 import {BookHeroContainer} from '@component/Book/BookHero.tsx';
 import {ChapterListContainer} from '@/component/Book/Chapter/ChapterList';
 

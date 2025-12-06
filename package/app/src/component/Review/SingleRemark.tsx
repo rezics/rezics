@@ -5,14 +5,12 @@ import {Box, Tooltip, Typography} from '@mui/material';
 import {Link} from 'wouter';
 import type {ReviewDTO} from '@package/contract';
 import React, {useState, useEffect} from 'react';
-// import { CollapsibleText } from "../Common/CollapsibleText";
-import {CollapsibleByLineTextContainer} from '../Common/CollapsibleByLineText';
+import {CollapsibleByLineTextContainer} from '../Common/UI/Text/CollapsibleByLineText';
 import {
   parseReactionSummaries,
   type ReactionSummaryDTO,
 } from '@/util/reactionSummariesParser';
 
-import {ReactionBar} from '@/component/Common/Reaction/ReactionBar';
 import {LazyLoadImage} from '../Common/LazyLoadImage';
 
 export function MetaInfoBadge({
@@ -46,7 +44,7 @@ export function MetaInfoBadge({
         )}
 
         <Typography variant="caption">
-          {review.rating?.toFixed(1) ?? '0.0'}/5.0 · {review.created_at}
+          {review.rating?.toFixed(1) ?? '0.0'}/10 · {review.created_at}
         </Typography>
       </Box>
     </Tooltip>

@@ -6,7 +6,7 @@ import type {BookLibSortKey} from '@/component/Search/SearchFilter';
 import {
   UniversalPaginator,
   type UniversalPaginatorHandle,
-} from '@/component/Common/Pagination.tsx';
+} from '@/component/Common/Navigation/Pagination';
 import type {SearchInfo} from '@/component/Search/searchParser';
 import {BookListViewContainer} from '@/component/BookLib/BookList/BookListView';
 

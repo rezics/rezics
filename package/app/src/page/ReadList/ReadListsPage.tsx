@@ -3,7 +3,7 @@ import {Alert} from '@mui/material';
 import {
   UniversalPaginator,
   type UniversalPaginatorHandle,
-} from '@/component/Common/Pagination.tsx';
+} from '@/component/Common/Navigation/Pagination';
 import {SimpleSearchInput} from '@/component/Search/SimpleSearchInput';
 import type {SearchInfo} from '@/component/Search/searchParser';
 import {useQuery, useQueryClient} from '@tanstack/react-query';

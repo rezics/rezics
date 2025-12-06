@@ -1,4 +1,5 @@
-import { TextField } from "@mui/material";
+import React from 'react';
+import {TextField} from '@mui/material';
 
 export function RoseTextField({
   type,
@@ -31,10 +32,10 @@ export function RoseTextField({
       InputProps={InputProps}
       slotProps={{
         inputLabel: {
-          className: "peer-focus:text-rose-500",
+          className: 'peer-focus:text-rose-500',
         },
         input: {
-          className: "focus:border-rose-500 hover:border-rose-400",
+          className: 'focus:border-rose-500 hover:border-rose-400',
         },
       }}
     />

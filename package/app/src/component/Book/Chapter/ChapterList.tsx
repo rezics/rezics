@@ -7,7 +7,7 @@ import React from 'react';
 import {useQuery} from '@tanstack/react-query';
 import {bookQueries} from '@/api/book/book.queries.ts';
 import {Link} from 'wouter';
-import {AccentBarWithTextContainer} from '../../Common/AccentBar.tsx';
+import {AccentBarWithTextContainer} from '../../Common/Navigation/AccentBar.tsx';
 
 // 扁平结构 + 顺序数组
 

@@ -1,12 +1,11 @@
 // AuthorInfo.tsx  —— ES Module 版本（无 namespace）
-import {AccentBarWithTextContainer} from '@component/Common/AccentBar.tsx';
-import {ArrowForwardIconContainer} from '@component/Common/ArrowForwardIcon.tsx';
-import {EditButtonFloatRight} from '@component/Common/EditButtonFloatRight.tsx';
+import {AccentBarWithTextContainer} from '@/component/Common/Navigation/AccentBar.tsx';
+import {ArrowForwardIconContainer} from '@/component/Common/Navigation/ArrowForwardIcon.tsx';
 import EasyEditor from '@component/Form/EasyEditor.tsx';
 import {Button, Typography} from '@mui/material';
 import React, {useEffect, useState} from 'react';
 import {useTranslation} from 'react-i18next';
-import DialogContainer from '../Common/DialogContainer.tsx';
+import DialogContainer from '../Common/Overlay/DialogContainer.tsx';
 import type {PublicUser} from '@package/contract';
 import {FollowButton} from '../Common/Reaction/FollowButton.tsx';
 import {LazyLoadImage} from '@/component/Common/LazyLoadImage';
