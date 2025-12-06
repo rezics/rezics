@@ -21,6 +21,7 @@ export async function initBookIndex() {
       'presses',
       'isbn',
       'producers',
+      'extra',
     ],
     filterableAttributes: [
       'nsfw',

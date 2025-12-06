@@ -1,5 +1,5 @@
 import {useQuery} from '@tanstack/react-query';
-import {type BookDTO} from '@package/contract';
+import {CreateBookInput, type BookDTO} from '@package/contract';
 import {bookQueries} from '@/api/book/book';
 import {AccentBarWithTextShow} from '@/component/Common/AccentBar.tsx';
 import {BookMetadataEditor} from '@/component/Book/Metadata/BookMetadataEditor';
@@ -16,11 +16,15 @@ import {
 } from '@mui/material';
 import {useLocation} from 'wouter';
 import EasyEditor from '@component/Form/EasyEditor.tsx';
-import {useUpdateBookMutation} from '@/api/book/book';
+import {useCreateBookMutation, useUpdateBookMutation} from '@/api/book/book';
 import {type UpdateBookInput} from '@package/contract';
 import {useEffect} from 'react';
 import {BookExtraEditor} from '@/component/Book/Metadata/BookExtraEditor';
 // import Paper from "@mui/material/Paper";
+
+function validatePublishURL(publishURL: string[]) {
+  return publishURL.every(url => url.startsWith('https://'));
+}
 
 type BookMetadataValue = Partial<BookDTO>;
 
@@ -57,13 +61,20 @@ export interface BookEditInfoShowProps {
 }
 
 export interface BookEditMainPageProps {
-  bookId: string;
+  bookId?: string;
+  newBook: boolean;
 }
 
-export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({bookId}) => {
+export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
+  bookId,
+  newBook,
+}) => {
   const {t} = useTranslation();
   const [_location, navigate] = useLocation();
-  const {data, isLoading, error} = useQuery(bookQueries.detail(bookId));
+  const {data, isLoading, error} = useQuery({
+    ...bookQueries.detail(bookId ?? ''),
+    enabled: !newBook,
+  });
   const [metadataState, setMetadataState] = React.useState<BookMetadataValue>(
     {},
   );
@@ -74,6 +85,27 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({bookId}) => {
   useEffect(() => {
     setMetadataState(data ?? {});
   }, [data]);
+
+  const createBookMutation = useCreateBookMutation({
+    onSuccess: data => {
+      console.log('create book success', data);
+      setUpdateBookErrorText({
+        title: '创建书籍成功',
+        message:
+          '创建书籍成功，书籍详情页可能需要等待几分钟/手动刷新才能看到最新内容。',
+      });
+      setUpdateBookErrorOpen(true);
+    },
+    onError: error => {
+      console.error('create book failed', error);
+      setUpdateBookErrorText({
+        title: '创建书籍失败',
+        message: String(error || 'Unknown error'),
+        error: true,
+      });
+      setUpdateBookErrorOpen(true);
+    },
+  });
 
   const updateBookMutation = useUpdateBookMutation({
     onSuccess: data => {
@@ -107,16 +139,38 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({bookId}) => {
       isbn: metadataState.isbn,
       coverUrl: metadataState.coverUrl,
       nsfw: metadataState.nsfw,
+      extra: metadataState.extra,
     };
-    updateBookMutation.mutateAsync({
-      postId: bookId,
-      input: updateBookData,
-    });
+    const createBookData: CreateBookInput = {
+      ...updateBookData,
+      title: metadataState.title ?? '',
+    };
+    if (bookId) {
+      updateBookMutation.mutateAsync({
+        postId: bookId,
+        input: updateBookData,
+      });
+    } else {
+      const publishURL = metadataState.extra?.publishURL;
+      if (publishURL && validatePublishURL(publishURL)) {
+        createBookMutation.mutateAsync({
+          ...createBookData,
+        });
+      } else {
+        setUpdateBookErrorText({
+          title: '创建书籍失败',
+          message:
+            '请至少添加一个正确的，书籍发布的链接，譬如起点对应书籍的链接，以https://开头。',
+          error: true,
+        });
+        setUpdateBookErrorOpen(true);
+      }
+    }
   }
 
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error: {String(error)}</div>;
-  if (!data) return <div>No data</div>;
+  if (!data && !newBook) return <div>No data</div>;
   return (
     <div className="mt-10 mx-auto w-11/12">
       <div className="flex justify-between items-center">
@@ -179,7 +233,7 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({bookId}) => {
           <BookExtraEditor
             value={metadataState.extra}
             onChange={value => {
-              console.log('value', value);
+              setMetadataState(prev => ({...prev, extra: value}));
             }}
           />
         </div>

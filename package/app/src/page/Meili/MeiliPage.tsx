@@ -24,9 +24,6 @@ type MessageState = {
 
 /**
  * Meili 管理页面
- *
- * - 使用 MUI 按钮 / Card / Typography
- * - 布局容器全部使用 div + Tailwind，不使用 MUI Box
  */
 export function MeiliPage() {
   const [message, setMessage] = useState<MessageState>(null);
