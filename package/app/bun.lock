@@ -42,6 +42,7 @@
         "react-helmet-async": "^2.0.5",
         "react-i18next": "15.6.1",
         "react-instantsearch": "^7.20.0",
+        "react-json-view-lite": "^2.5.0",
         "react-use": "17.6.0",
         "react-use-measure": "2.1.7",
         "react-window": "1.8.11",
@@ -1408,6 +1409,8 @@
     "react-instantsearch-core": ["react-instantsearch-core@7.20.0", "", { "dependencies": { "@babel/runtime": "^7.27.6", "ai": "^5.0.18", "algoliasearch-helper": "3.26.1", "instantsearch.js": "4.84.0", "use-sync-external-store": "^1.0.0", "zod": "^3.25.76 || ^4", "zod-to-json-schema": "3.24.6" }, "peerDependencies": { "algoliasearch": ">= 3.1 < 6", "react": ">= 16.8.0 < 20" } }, "sha512-awTPtAEozGWNVcZ969fMBO1S61QPDT13NdIlDjtoeg6GF4ZN9TXH+B/kjK5OxN0WzdbWxrE1nPGNfH9lHS7ZMg=="],
 
     "react-is": ["react-is@19.2.0", "", {}, "sha512-x3Ax3kNSMIIkyVYhWPyO09bu0uttcAIoecO/um/rKGQ4EltYWVYtyiGkS/3xMynrbVQdS69Jhlv8FXUEZehlzA=="],
+
+    "react-json-view-lite": ["react-json-view-lite@2.5.0", "", { "peerDependencies": { "react": "^18.0.0 || ^19.0.0" } }, "sha512-tk7o7QG9oYyELWHL8xiMQ8x4WzjCzbWNyig3uexmkLb54r8jO0yH3WCWx8UZS0c49eSA4QUmG5caiRJ8fAn58g=="],
 
     "react-refresh": ["react-refresh@0.17.0", "", {}, "sha512-z6F7K9bV85EfseRCp2bzrpyQ0Gkw1uLoCel9XBVWPg/TjRj94SkJzUTGfOa4bs7iJvBWtQG0Wq7wnI0syw3EBQ=="],
 
