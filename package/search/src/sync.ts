@@ -59,6 +59,8 @@ export async function syncAllBooks() {
         // search fields
         title: b.title,
         description: b.description ?? null,
+        coverUrl: b.coverUrl ?? null,
+        isbn: b.isbn ?? null,
         tagSearch,
         authors: b.author?.map((a: any) => a.name) ?? [],
         presses: b.press?.map((p: any) => p.name) ?? [],
@@ -70,6 +72,8 @@ export async function syncAllBooks() {
         textLength: Number(b.textLength) ?? 0,
         createdAt: b.createdAt,
         updatedAt: b.updatedAt,
+        extra: b.extra ?? null,
+        metadata: b.unit?.metadata ?? null,
         // result fields
         unitId: b.unitId,
         author: b.author,
@@ -78,16 +82,7 @@ export async function syncAllBooks() {
         tags: b.unit?.tags ?? [],
       };
 
-      // 保持兼容：如果下游索引里有 coverUrl / isbn 字段，则一并写入
-      return {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore - allow extra fields for Meili payload
-        coverUrl: b.coverUrl,
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore - allow extra fields for Meili payload
-        isbn: b.isbn,
-        ...base,
-      } as BookSearchDocument;
+      return base;
     });
 
     const addResult = await addOrUpdateBooks(formatted);

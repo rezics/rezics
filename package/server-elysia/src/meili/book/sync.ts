@@ -25,6 +25,8 @@ export async function syncBookToMeili(unitId: string): Promise<void> {
     // search fields
     title: book.title,
     description: book.description ?? null,
+    coverUrl: book.coverUrl ?? null,
+    isbn: book.isbn ?? null,
     tagSearch,
     authors: book.author?.map((a: User) => a.name) ?? [],
     presses: book.press?.map((p: User) => p.name) ?? [],
@@ -36,6 +38,8 @@ export async function syncBookToMeili(unitId: string): Promise<void> {
     textLength: Number(book.textLength) ?? 0,
     createdAt: book.createdAt,
     updatedAt: book.updatedAt,
+    extra: book.extra ?? null,
+    metadata: book.unit?.metadata ?? null,
     // result fields
     unitId: book.unitId,
     author: book.author,

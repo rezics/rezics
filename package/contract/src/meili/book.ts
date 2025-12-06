@@ -8,6 +8,8 @@ export interface BookSearchDocument {
   // search fields
   title: string;
   description: string | null;
+  coverUrl: string | null;
+  isbn: string | null;
   tagSearch: string[];
   authors: string[];
   presses: string[];
@@ -19,6 +21,8 @@ export interface BookSearchDocument {
   producerIds: string[];
   createdAt: string | Date;
   updatedAt: string | Date;
+  extra: any;
+  metadata: any;
   // result fields
   unitId: string;
   author: any;
