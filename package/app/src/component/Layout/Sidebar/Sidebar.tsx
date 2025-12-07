@@ -1,4 +1,4 @@
-import {NavigationItem} from '@/component/Layout/Navigation/navigation';
+import {type NavigationItem} from '@/component/Layout/Navigation/navigation';
 import {useLayoutStore} from '@/global/Layout/layoutStore.ts';
 import {
   ChevronLeft,
@@ -8,7 +8,6 @@ import {
 } from '@mui/icons-material';
 import {styled, useMediaQuery, useTheme} from '@mui/material';
 import {
-  Button,
   Collapse,
   Divider,
   Drawer,
@@ -20,11 +19,58 @@ import {
   ListItemText,
   Typography,
 } from '@mui/material';
-import React, {ReactNode, useEffect} from 'react';
+import React, {type ReactNode, useEffect} from 'react';
 import {Link, useLocation} from 'wouter';
 
 import {useWindowSize} from 'react-use';
 import useMeasure from 'react-use-measure';
+
+function customWrapperOverflow(
+  noScrollBar: boolean,
+  onOverflowx: boolean,
+  onOverflowy: boolean,
+) {
+  const wrapperId = 'ics-sidebar-wrapper';
+  const wrapper = document.getElementById(wrapperId);
+  if (!wrapper) return;
+
+  const firstDiv = wrapper.querySelector('div');
+  if (firstDiv) {
+    if (noScrollBar) {
+      firstDiv.classList.add('no-scrollbar');
+    }
+    if (onOverflowx) {
+      firstDiv.classList.add('!overflow-x-hidden');
+    }
+    if (onOverflowy) {
+      firstDiv.classList.add('!overflow-y-hidden');
+    }
+  }
+}
+
+export function DrawerHeader({
+  handleDrawerToggle,
+}: {
+  handleDrawerToggle: () => void;
+}) {
+  const theme = useTheme();
+
+  return (
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        padding: theme.spacing(0, 1),
+        ...theme.mixins.toolbar, // ensures space below AppBar
+        justifyContent: 'flex-end',
+      }}
+    >
+      <IconButton onClick={handleDrawerToggle}>
+        {theme.direction === 'ltr' ? <ChevronLeft /> : <ChevronRight />}
+      </IconButton>
+    </div>
+  );
+}
 
 interface SidebarProps {
   onClose: () => void;
@@ -47,7 +93,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onOverflowx = false,
   onOverflowy = false,
   isDragging = false,
-  layoutType = 'type-a',
+  layoutType = 'type-b',
 }) => {
   const {
     sidebarOpen,
@@ -57,18 +103,20 @@ export const Sidebar: React.FC<SidebarProps> = ({
     drawerWidth,
   } = useLayoutStore();
 
-  const theme = useTheme();
+  const [refAbove, {height}] = useMeasure();
+  const {height: windowHeight} = useWindowSize();
 
-  const DrawerHeader = styled('div')({
-    display: 'flex',
-    alignItems: 'center',
-    padding: theme.spacing(0, 1),
-    // necessary for content to be below app bar
-    ...theme.mixins.toolbar,
-    justifyContent: 'flex-end',
-  });
+  useEffect(() => {
+    setSidebarHeightBelow(windowHeight - height - 200);
+  }, [height, windowHeight, setSidebarHeightBelow]);
 
-  const [location, setLocation] = useLocation();
+  const heightBelow = `calc(100vh - ${height}px)`;
+
+  useEffect(() => {
+    customWrapperOverflow(noScrollBar, onOverflowx, onOverflowy);
+  }, [noScrollBar, onOverflowx, onOverflowy]);
+
+  const [location, _setLocation] = useLocation();
   const isMobile = useMediaQuery(theme => theme.breakpoints.down('md'));
 
   const handleItemClick = (
@@ -89,63 +137,31 @@ export const Sidebar: React.FC<SidebarProps> = ({
     }
   };
 
-  const [refAbove, {height}] = useMeasure();
-  const {height: windowHeight} = useWindowSize();
-
-  // Update the global store **after** render whenever height/windowHeight changes
-  useEffect(() => {
-    setSidebarHeightBelow(windowHeight - height - 200);
-  }, [height, windowHeight, setSidebarHeightBelow]);
-
-  // Local value just for rendering
-  const heightBelow = `calc(100vh - ${height}px)`;
-
-  useEffect(() => {
-    const wrapperId = 'ics-sidebar-wrapper';
-    const wrapper = document.getElementById(wrapperId);
-    if (!wrapper) return;
-
-    const firstDiv = wrapper.querySelector('div');
-    if (firstDiv) {
-      if (noScrollBar) {
-        firstDiv.classList.add('no-scrollbar');
-      }
-      if (onOverflowx) {
-        firstDiv.classList.add('!overflow-x-hidden');
-      }
-      if (onOverflowy) {
-        firstDiv.classList.add('!overflow-y-hidden');
-      }
-    }
-  }, [noScrollBar, onOverflowx, onOverflowy]);
-
   return (
     <Drawer
       variant={isMobile ? 'temporary' : 'persistent'}
       open={sidebarOpen}
       onClose={onClose}
-      style={{
-        width: sidebarOpen ? drawerWidth : 0,
-      }}
       slotProps={{
         paper: {
-          style: {
-            width: sidebarOpen ? drawerWidth : 0,
-            transition: 'all 0.3s ease-out',
-          },
+          style: !isMobile
+            ? {width: drawerWidth, transition: 'width 0.3s ease-out'}
+            : {width: drawerWidth}, // mobile 不动 width，不动 transition
         },
       }}
-      id="ics-sidebar-wrapper"
-      className="transition-all duration-300 ease-out [&>*]:overflow-x-clip [&>*]:min-w-0 [&>*]:touch-pan-y"
+      sx={{
+        ...(isMobile && {
+          '& .MuiDrawer-paper': {
+            transition: 'transform 225ms cubic-bezier(0, 0, 0.2, 1)',
+          },
+        }),
+      }}
     >
       {!isDragging && (
         <div ref={refAbove}>
-          <DrawerHeader>
-            <IconButton onClick={handleDrawerToggle}>
-              {theme.direction === 'ltr' ? <ChevronLeft /> : <ChevronRight />}
-            </IconButton>
-          </DrawerHeader>
+          <DrawerHeader handleDrawerToggle={handleDrawerToggle} />
           {layoutType === 'type-a' && <Divider />}
+          {layoutType === 'type-b' && <div className="mt-2" />}
           <List>
             {NAVIGATION.map((item, index) => {
               if (item.kind === 'header') {

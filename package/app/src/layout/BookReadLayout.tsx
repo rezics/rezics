@@ -3,12 +3,11 @@ import {Sidebar} from '@/component/Layout/Sidebar/Sidebar';
 import {Button, Divider, useMediaQuery} from '@mui/material';
 import React, {type ReactNode, useEffect, useState} from 'react';
 // import { Box } from "@mui/material";
-import {appStore} from '@/global/appStore.ts';
-import {useLayoutStore} from '@/global/Layout/layoutStore.ts';
 
 import {DraggableResizer} from '@/component/Layout/DraggableResizer.tsx';
 import {LinearChapterList} from '@/component/Book/Chapter/LinearChapterList';
 import {Link, useParams, useRoute} from 'wouter';
+import {useResponsiveSidebar} from './useResponsiveSidebar';
 export interface BookReadLayoutProps {
   children: ReactNode;
   bookId: string;
@@ -22,9 +21,6 @@ export const BookReadLayout: React.FC<BookReadLayoutProps> = ({
 }) => {
   const [match, params] = useRoute('/book/:bookId/read/:chapterId');
   const locationParams = useParams();
-  const isMobile = useMediaQuery('(max-width:960px)');
-  const {sidebarOpen, drawerWidth, toggleSidebar, closeSidebar} =
-    useLayoutStore();
   const [baseUrl, setBaseUrl] = useState('');
   const [selectedId, setSelectedId] = useState(
     match ? String(params.chapterId) : '',
@@ -35,28 +31,27 @@ export const BookReadLayout: React.FC<BookReadLayoutProps> = ({
     setSelectedId(match ? String(params.chapterId) : '');
   }, [match, params]);
 
-  const handleDrawerToggle = () => {
-    toggleSidebar();
-  };
-
-  function setDrawerWidth(width: number) {
-    useLayoutStore.setState({drawerWidth: width});
-  }
-
-  const [isDragging, setIsDragging] = useState(false);
-
-  const mode = appStore((state: any) => state.theme);
-  function toggleTheme() {
-    appStore.setState({theme: mode === 'light' ? 'dark' : 'light'});
-  }
+  const {
+    sidebarOpen,
+    handleDrawerToggle,
+    themeMode,
+    toggleTheme,
+    drawerWidth,
+    isMobile,
+    closeSidebar,
+    setDrawerWidth,
+    setIsDragging,
+    isSidebarTransitioning,
+  } = useResponsiveSidebar();
 
   return (
     <div className="flex min-h-screen">
       <Header
         handleDrawerToggle={handleDrawerToggle}
-        mode={mode}
+        mode={themeMode}
         onThemeToggle={toggleTheme}
         drawerWidth={drawerWidth}
+        disableDrawerToggle={isSidebarTransitioning}
       />
 
       <Sidebar

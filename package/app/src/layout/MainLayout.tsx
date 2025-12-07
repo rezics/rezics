@@ -1,40 +1,28 @@
 import {Header} from '@/component/Layout/Header/MainLayoutHeader';
 import {Sidebar} from '@/component/Layout/Sidebar/Sidebar';
-import {useMediaQuery} from '@mui/material';
-import React, {useState} from 'react';
 import type {ReactNode} from 'react';
 import {Helmet} from 'react-helmet-async';
 import {NAVIGATION} from '@/component/Layout/Navigation/MainNavigation';
-import {appStore} from '@/global/appStore.ts';
-import {useLayoutStore} from '@/global/Layout/layoutStore.ts';
-import {useUserStore} from '@/global/userStore';
 import {MainLayoutFooter} from '@/component/Layout/Footer/MainLayoutFooter.tsx';
+import {useResponsiveSidebar} from './useResponsiveSidebar';
+import React from 'react';
 
 export interface MainLayoutProps {
   children: ReactNode;
 }
 
 export const MainLayout: React.FC<MainLayoutProps> = ({children}) => {
-  const isMobile = useMediaQuery('(max-width:960px)');
-  const {sidebarOpen, drawerWidth, toggleSidebar, closeSidebar} =
-    useLayoutStore();
-  const [isSidebarTransitioning, setIsSidebarTransitioning] = useState(false);
-  const handleDrawerToggle = () => {
-    setIsSidebarTransitioning(true);
-    toggleSidebar();
-    window.setTimeout(() => {
-      setIsSidebarTransitioning(false);
-    }, 300);
-  };
-
-  const mode = appStore(state => state.theme);
-  function toggleTheme() {
-    appStore.setState({theme: mode === 'light' ? 'dark' : 'light'});
-  }
-
-  const isAdmin = useUserStore(state =>
-    state.user?.permission?.role?.includes('ADMIN'),
-  );
+  const {
+    isMobile,
+    sidebarOpen,
+    drawerWidth,
+    handleDrawerToggle,
+    closeSidebar,
+    isSidebarTransitioning,
+    themeMode,
+    toggleTheme,
+    isAdmin,
+  } = useResponsiveSidebar();
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -45,17 +33,15 @@ export const MainLayout: React.FC<MainLayoutProps> = ({children}) => {
       {/* Header stays at the top */}
       <Header
         handleDrawerToggle={handleDrawerToggle}
-        mode={mode}
+        mode={themeMode}
         onThemeToggle={toggleTheme}
         drawerWidth={drawerWidth}
-        layoutType="type-b"
         disableDrawerToggle={isSidebarTransitioning}
       />
 
       {/* Middle horizontal layout: Sidebar + Page Content */}
       <div className="flex flex-1">
         <Sidebar
-          layoutType="type-b"
           onClose={() => isMobile && closeSidebar()}
           handleDrawerToggle={handleDrawerToggle}
           NAVIGATION={NAVIGATION(isAdmin)}

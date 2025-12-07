@@ -25,7 +25,7 @@ export const Header: React.FC<HeaderProps> = ({
   onThemeToggle,
   drawerWidth,
   isDragging = false,
-  layoutType = 'type-a',
+  layoutType = 'type-b',
   disableDrawerToggle = false,
 }) => {
   const {sidebarOpen} = useLayoutStore();

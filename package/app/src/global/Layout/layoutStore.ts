@@ -1,5 +1,5 @@
 // src/stores/useLayoutStore.ts
-import { create } from "zustand";
+import {create} from 'zustand';
 
 interface LayoutState {
   sidebarOpen: boolean;
@@ -21,11 +21,15 @@ export const useLayoutStore = create<LayoutState>((set: any) => ({
   openItems: {},
 
   // actions
-  toggleSidebar: () => set((state: any) => ({ sidebarOpen: !state.sidebarOpen })),
+  toggleSidebar: () =>
+    set((state: any) => ({
+      sidebarOpen: !state.sidebarOpen,
+      drawerWidth: state.drawerWidth === 240 ? 0 : 240,
+    })),
 
-  closeSidebar: () => set({ sidebarOpen: false }),
+  closeSidebar: () => set({sidebarOpen: false, drawerWidth: 0}),
 
-  setSidebarHeightBelow: (h: number) => set({ sidebarHeightBelow: h }),
+  setSidebarHeightBelow: (h: number) => set({sidebarHeightBelow: h}),
 
   toggleItem: (segment: string) =>
     set((state: any) => ({
