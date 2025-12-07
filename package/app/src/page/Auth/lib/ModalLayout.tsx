@@ -11,14 +11,12 @@ export const ModalLayout: FC<{
   actions: React.ReactNode;
 }> = ({title, content, actions}) => (
   <form>
-    <Card className="min-w-96 max-w-md">
+    <Card className="min-w-full sm:min-w-[384px] lg:min-w-[480px]">
       <CardContent className="flex flex-col gap-4">
         <Typography variant="h4">{title}</Typography>
         {content}
       </CardContent>
-      <CardActions className="flex flex-row justify-between">
-        {actions}
-      </CardActions>
+      <CardActions className="flex flex-row justify-end">{actions}</CardActions>
     </Card>
   </form>
 );

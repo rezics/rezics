@@ -13,6 +13,7 @@ import {login} from './lib/handler.ts';
 import {Layout} from './lib/Layout.tsx';
 import {ModalLayout} from './lib/ModalLayout.tsx';
 import {validateEmail} from './lib/validate.ts';
+import {TextButton} from '@/component/Common/UI/Button/TextButton.tsx';
 
 interface LoginData {
   email: string;
@@ -81,8 +82,9 @@ export const LoginPage: FC<LoginPageProps> = ({
     if (onRegisterClick) {
       onRegisterClick();
     } else {
-      // TODO: Navigate to register page
       navigate('/register');
+      console.log('handleRegisterClick');
+      onClose?.();
     }
   };
 
@@ -110,16 +112,21 @@ export const LoginPage: FC<LoginPageProps> = ({
       />
       <div>
         <RouterLink href="/reset-password">Forget password?</RouterLink>
+        <br />
+        <TextButton onClick={handleRegisterClick}>
+          Don&apos;t have an account? Register
+        </TextButton>
       </div>
     </>
   );
 
   const actions = (
     <>
-      <Button variant="text" type="button" onClick={handleRegisterClick}>
+      {/* <Button variant="text" type="button" onClick={handleRegisterClick}>
         {t('auth.register')}
-      </Button>
+      </Button> */}
       <Button
+        className="justify-end"
         type="button"
         variant="contained"
         disabled={loading}

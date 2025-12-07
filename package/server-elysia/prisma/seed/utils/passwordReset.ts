@@ -14,7 +14,7 @@ export async function resetAllUserPasswords(
 ): Promise<void> {
   const passwordHash = await hashPassword(plainPassword);
 
-  console.log('🔐 Resetting all user passwords...');
+  console.log('Resetting all user passwords...');
 
   const result = await prisma.user.updateMany({
     data: {
@@ -23,7 +23,7 @@ export async function resetAllUserPasswords(
   });
 
   console.log(
-    `✅ Password reset complete. Updated ${result.count} user(s) to the new password.`,
+    `Password reset complete. Updated ${result.count} user(s) to the new password.`,
   );
 }
 
@@ -47,7 +47,7 @@ async function main() {
 
 main()
   .catch(err => {
-    console.error('❌ Failed to reset user passwords:', err);
+    console.error('Failed to reset user passwords:', err);
     process.exitCode = 1;
   })
   .finally(async () => {

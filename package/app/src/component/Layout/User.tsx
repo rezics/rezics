@@ -23,41 +23,51 @@ import {RegisterModal} from '@/page/Auth/RegisterPage';
 import {logout} from '@/page/Auth/lib/handler';
 import {userQueries} from '@/api/user/user.queries';
 import {useQuery} from '@tanstack/react-query';
+import {useIsMobile} from '@/util/MediaQueryUtil';
 
 const LoginPrompt = () => {
   const [loginModalOpen, setLoginModalOpen] = useState(false);
   const [registerModalOpen, setRegisterModalOpen] = useState(false);
-  return (
-    <div>
+
+  const isMobile = useIsMobile();
+
+  if (isMobile) {
+    return (
       <Button
         variant="text"
         className="!text-white"
-        onClick={() => {
-          setLoginModalOpen(true);
-        }}
+        component={Link}
+        to="/login"
+      >
+        Login
+      </Button>
+    );
+  }
+
+  return (
+    <div className="flex gap-2">
+      <Button
+        variant="text"
+        className="!text-white"
+        onClick={() => setLoginModalOpen(true)}
       >
         Login
       </Button>
       <Button
         variant="outlined"
         className="!text-white !border-white"
-        onClick={() => {
-          setRegisterModalOpen(true);
-        }}
+        onClick={() => setRegisterModalOpen(true)}
       >
         Register
       </Button>
+
       <LoginModal
         open={loginModalOpen}
-        onClose={() => {
-          setLoginModalOpen(false);
-        }}
+        onClose={() => setLoginModalOpen(false)}
       />
       <RegisterModal
         open={registerModalOpen}
-        onClose={() => {
-          setRegisterModalOpen(false);
-        }}
+        onClose={() => setRegisterModalOpen(false)}
       />
     </div>
   );

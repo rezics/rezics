@@ -33,10 +33,12 @@ export const MainLayout: React.FC<MainLayoutProps> = ({children}) => {
   );
 
   return (
-    <div className="flex min-h-screen">
+    <div className="min-h-screen flex flex-col">
       <Helmet>
         <title>REZICS | 书库</title>
       </Helmet>
+
+      {/* Header stays at the top */}
       <Header
         handleDrawerToggle={handleDrawerToggle}
         mode={mode}
@@ -45,22 +47,28 @@ export const MainLayout: React.FC<MainLayoutProps> = ({children}) => {
         layoutType="type-b"
       />
 
-      <Sidebar
-        layoutType="type-b"
-        onClose={() => isMobile && closeSidebar()}
-        handleDrawerToggle={handleDrawerToggle}
-        NAVIGATION={NAVIGATION(isAdmin)}
-      />
+      {/* Middle horizontal layout: Sidebar + Page Content */}
+      <div className="flex flex-1">
+        <Sidebar
+          layoutType="type-b"
+          onClose={() => isMobile && closeSidebar()}
+          handleDrawerToggle={handleDrawerToggle}
+          NAVIGATION={NAVIGATION(isAdmin)}
+        />
 
-      <main
-        className="flex-grow pt-[56px] sm:pt-[64px] transition-all duration-300"
-        style={{
-          width: `calc(100% - ${!isMobile && sidebarOpen ? drawerWidth : 0}px)`,
-        }}
-      >
-        {children}
-        <MainLayoutFooter />
-      </main>
+        <main
+          className="flex flex-col flex-1 pt-[56px] sm:pt-[64px] transition-all duration-300"
+          style={{
+            width: `calc(100% - ${
+              !isMobile && sidebarOpen ? drawerWidth : 0
+            }px)`,
+          }}
+        >
+          <div className="flex-1 mb-4">{children}</div>
+          {/* Footer always at bottom (scrolls naturally when content tall) */}
+          <MainLayoutFooter />
+        </main>
+      </div>
     </div>
   );
 };

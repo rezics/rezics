@@ -59,30 +59,30 @@ export function GetVerificationCode({
     },
   }));
   return (
-    <div className="flex">
+    <div className="flex items-center gap-0">
       <TextField
         name="verificationCode"
         type="text"
         label="Verification Code"
         variant="standard"
         value={data?.verificationCode ?? ''}
-        onChange={(event: any) => {
+        onChange={event => {
           setData({...data, verificationCode: event.target.value});
         }}
+        margin="none"
+        className="flex-grow"
       />
 
-      <div className="flex flex-1 justify-end">
-        <CooldownButton
-          cooldownMs={30000} // 30 seconds
-          type="button"
-          variant="outlined"
-          onClick={() => {
-            handleRequestVerificationCode(data.email);
-          }}
-        >
-          {sendingCode ? 'Sending...' : 'Get code'}
-        </CooldownButton>
-      </div>
+      <CooldownButton
+        cooldownMs={30000}
+        type="button"
+        variant="outlined"
+        onClick={() => handleRequestVerificationCode(data.email)}
+        size="small"
+        className="!ml-2 h-10 px-3"
+      >
+        {sendingCode ? 'Sending...' : 'Get code'}
+      </CooldownButton>
     </div>
   );
 }

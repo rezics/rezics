@@ -16,6 +16,7 @@ import {
   GetVerificationCode,
   type GetVerificationCodeHandle,
 } from './GetVerificationCode.tsx';
+import {TextButton} from '@/component/Common/UI/Button/TextButton.tsx';
 
 interface ResetPasswordData {
   email: string;
@@ -150,14 +151,17 @@ export const ResetPasswordPage: FC<ResetPasswordPageProps> = ({
         setError={setError}
         ref={verificationRef}
       />
+      <div>
+        <TextButton onClick={handleLoginClick}>Back to Login</TextButton>
+      </div>
     </>
   );
 
   const actions = (
     <>
-      <Button variant="text" type="button" onClick={handleLoginClick}>
+      {/* <Button variant="text" type="button" onClick={handleLoginClick}>
         {t('auth.login')}
-      </Button>
+      </Button> */}
       <Button
         type="button"
         variant="contained"

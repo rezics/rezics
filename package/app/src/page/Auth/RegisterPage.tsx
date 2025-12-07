@@ -16,6 +16,7 @@ import {
   GetVerificationCode,
   type GetVerificationCodeHandle,
 } from './GetVerificationCode.tsx';
+import {TextButton} from '@/component/Common/UI/Button/TextButton.tsx';
 
 interface RegisterData {
   slug: string;
@@ -110,6 +111,7 @@ export const RegisterPage: FC<RegisterPageProps> = ({
       onLoginClick();
     } else {
       navigate('/login');
+      onClose?.();
     }
   };
 
@@ -168,14 +170,19 @@ export const RegisterPage: FC<RegisterPageProps> = ({
         setError={setError}
         ref={verificationRef}
       />
+      <div>
+        <TextButton onClick={handleLoginClickInternal}>
+          Have an account? Login
+        </TextButton>
+      </div>
     </>
   );
 
   const actions = (
     <>
-      <Button variant="text" type="button" onClick={handleLoginClickInternal}>
+      {/* <Button variant="text" type="button" onClick={handleLoginClickInternal}>
         {t('auth.login')}
-      </Button>
+      </Button> */}
       <Button
         type="button"
         variant="contained"
