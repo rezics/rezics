@@ -76,7 +76,7 @@ export const useUserStore = create<UserState>()(
             ?.__TANSTACK_QUERY_CLIENT__;
           let dto: PartialUserDTO;
           if (qc) {
-            dto = await qc.ensureQueryData(userQueries.me(''));
+            dto = await qc.ensureQueryData(userQueries.me());
           } else {
             dto = await userApi.me();
           }

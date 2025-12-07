@@ -1,10 +1,13 @@
-import throttle from "lodash/throttle";
-import React, { useEffect, useRef, useState } from "react";
+import throttle from 'lodash/throttle';
+import React, {useEffect, useRef, useState} from 'react';
 
 interface DraggableResizerProps {
+  /** Id of the sidebar wrapper element whose width will be controlled. */
   targetId: string;
-  setSidebarWidth: any;
-  onDragging: any;
+  /** Setter called with the new sidebar width while dragging. */
+  setSidebarWidth: (width: number) => void;
+  /** Callback to notify whether the user is currently dragging. */
+  onDragging: (dragging: boolean) => void;
   minWidth?: number;
   maxWidth?: number;
   throttleInterval?: number;
@@ -33,7 +36,7 @@ export const DraggableResizer: React.FC<DraggableResizerProps> = ({
     // 创建一个新的节流函数
     throttledRef.current = throttle((newW: number) => {
       setSidebarWidth(newW);
-      console.log("throttled width ➡", newW);
+      console.log('throttled width ➡', newW);
     }, throttleInterval);
     // console.log("throttledRef.current", throttledRef.current);
     return () => {
@@ -46,17 +49,14 @@ export const DraggableResizer: React.FC<DraggableResizerProps> = ({
     const resizer: any = resizerRef.current;
     const target = document.getElementById(targetId);
     if (!target) {
-      console.warn(
-        `Draggable Resizer: Element with ID ${targetId} not found!`,
-      );
+      console.warn(`Draggable Resizer: Element with ID ${targetId} not found!`);
       return;
     }
     if (!resizer || !target) return;
 
     // 保证容器相对定位
-    // @ts-expect-error - getComputedStyle is defined by the browser
-    if (getComputedStyle(target).position === "static") {
-      target.style.position = "relative";
+    if (getComputedStyle(target).position === 'static') {
+      target.style.position = 'relative';
     }
 
     const onPointerDown = (e: PointerEvent | any) => {
@@ -64,7 +64,7 @@ export const DraggableResizer: React.FC<DraggableResizerProps> = ({
       // 捕获后续所有指针事件
       (resizer as any).setPointerCapture(e.pointerId);
       setIsDragging(true);
-      document.body.style.userSelect = "none";
+      document.body.style.userSelect = 'none';
     };
 
     const onPointerMove = (e: PointerEvent | any) => {
@@ -77,21 +77,23 @@ export const DraggableResizer: React.FC<DraggableResizerProps> = ({
 
     const onPointerUp = (e: PointerEvent | any) => {
       setIsDragging(false);
-      document.body.style.userSelect = "";
+      document.body.style.userSelect = '';
       try {
         (resizer as any).releasePointerCapture(e.pointerId);
-      } catch {}
+      } catch (error) {
+        console.error(error);
+      }
     };
 
-    resizer.addEventListener("pointerdown", onPointerDown);
-    globalThis.addEventListener("pointermove", onPointerMove);
-    globalThis.addEventListener("pointerup", onPointerUp);
+    resizer.addEventListener('pointerdown', onPointerDown);
+    globalThis.addEventListener('pointermove', onPointerMove);
+    globalThis.addEventListener('pointerup', onPointerUp);
 
     return () => {
-      resizer.removeEventListener("pointerdown", onPointerDown);
-      globalThis.removeEventListener("pointermove", onPointerMove);
-      globalThis.removeEventListener("pointerup", onPointerUp);
-      document.body.style.userSelect = "";
+      resizer.removeEventListener('pointerdown', onPointerDown);
+      globalThis.removeEventListener('pointermove', onPointerMove);
+      globalThis.removeEventListener('pointerup', onPointerUp);
+      document.body.style.userSelect = '';
     };
   }, [targetId, minWidth, maxWidth, isDragging, setSidebarWidth]);
 
@@ -109,11 +111,11 @@ export const DraggableResizer: React.FC<DraggableResizerProps> = ({
 
     // Run on mount and window resize
     updatePosition();
-    globalThis.addEventListener("resize", updatePosition);
+    globalThis.addEventListener('resize', updatePosition);
 
     // Cleanup event listener on unmount
     return () => {
-      globalThis.removeEventListener("resize", updatePosition);
+      globalThis.removeEventListener('resize', updatePosition);
     };
   }, []);
 

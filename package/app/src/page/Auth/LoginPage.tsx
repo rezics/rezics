@@ -111,11 +111,10 @@ export const LoginPage: FC<LoginPageProps> = ({
         }}
       />
       <div>
-        <RouterLink href="/reset-password">Forget password?</RouterLink>
+        New to ReZICS?&nbsp;
+        <TextButton onClick={handleRegisterClick}>Create an account</TextButton>
         <br />
-        <TextButton onClick={handleRegisterClick}>
-          Don&apos;t have an account? Register
-        </TextButton>
+        <RouterLink href="/reset-password">Forget password?</RouterLink>
       </div>
     </>
   );

@@ -171,9 +171,8 @@ export const RegisterPage: FC<RegisterPageProps> = ({
         ref={verificationRef}
       />
       <div>
-        <TextButton onClick={handleLoginClickInternal}>
-          Have an account? Login
-        </TextButton>
+        Already have an account?&nbsp;
+        <TextButton onClick={handleLoginClickInternal}>Sign in →</TextButton>
       </div>
     </>
   );
