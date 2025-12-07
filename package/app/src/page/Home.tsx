@@ -10,9 +10,7 @@ export const HomeShow: React.FC<HomeShowProps> = () => {
   return (
     <div className="w-10/12 mx-auto mb-10">
       {/* First Carousel */}
-      <div className="mt-6">
-        <ResponsiveCarouselNotice />
-      </div>
+      <div className="mt-6">{/* <ResponsiveCarouselNotice /> */}</div>
       {/* End First Carousel */}
 
       {/* Promotion strip */}

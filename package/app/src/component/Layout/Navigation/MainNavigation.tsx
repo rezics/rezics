@@ -9,7 +9,7 @@ import LayersIcon from '@mui/icons-material/Layers';
 import LoginIcon from '@mui/icons-material/Login';
 import PersonIcon from '@mui/icons-material/Person';
 
-import type {NavigationItem} from './navigation.d.ts';
+import type {NavigationItem} from './navigation';
 
 // segment: router path
 

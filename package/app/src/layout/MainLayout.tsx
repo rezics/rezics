@@ -14,8 +14,8 @@ export interface MainLayoutProps {
 export const MainLayout: React.FC<MainLayoutProps> = ({children}) => {
   const {
     isMobile,
-    sidebarOpen,
     drawerWidth,
+    sidebarOpen,
     handleDrawerToggle,
     closeSidebar,
     isSidebarTransitioning,
@@ -39,22 +39,15 @@ export const MainLayout: React.FC<MainLayoutProps> = ({children}) => {
         disableDrawerToggle={isSidebarTransitioning}
       />
 
-      {/* Middle horizontal layout: Sidebar + Page Content */}
       <div className="flex flex-1">
+        {/* Middle horizontal layout: Sidebar + Page Content */}
         <Sidebar
           onClose={() => isMobile && closeSidebar()}
           handleDrawerToggle={handleDrawerToggle}
           NAVIGATION={NAVIGATION(isAdmin)}
         />
 
-        <main
-          className="flex flex-col flex-1 pt-[56px] sm:pt-[64px] transition-all duration-300"
-          style={{
-            width: `calc(100% - ${
-              !isMobile && sidebarOpen ? drawerWidth : 0
-            }px)`,
-          }}
-        >
+        <main className="pt-[56px] sm:pt-[64px] transition-all duration-300 h-screen">
           <div className="flex-1 mb-4">{children}</div>
           {/* Footer always at bottom (scrolls naturally when content tall) */}
           <MainLayoutFooter />

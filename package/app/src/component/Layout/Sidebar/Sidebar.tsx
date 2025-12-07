@@ -6,7 +6,7 @@ import {
   ExpandLess,
   ExpandMore,
 } from '@mui/icons-material';
-import {styled, useMediaQuery, useTheme} from '@mui/material';
+import {useMediaQuery, useTheme} from '@mui/material';
 import {
   Collapse,
   Divider,
@@ -139,7 +139,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   return (
     <Drawer
-      variant={isMobile ? 'temporary' : 'persistent'}
+      variant={isMobile ? 'temporary' : 'permanent'}
       open={sidebarOpen}
       onClose={onClose}
       slotProps={{

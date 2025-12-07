@@ -4,7 +4,7 @@ import {Button, Divider, useMediaQuery} from '@mui/material';
 import React, {type ReactNode, useEffect, useState} from 'react';
 // import { Box } from "@mui/material";
 
-import {DraggableResizer} from '@/component/Layout/DraggableResizer.tsx';
+import {DraggableResizer} from '@/component/Layout/DraggableResizer';
 import {LinearChapterList} from '@/component/Book/Chapter/LinearChapterList';
 import {Link, useParams, useRoute} from 'wouter';
 import {useResponsiveSidebar} from './useResponsiveSidebar';

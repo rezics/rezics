@@ -3,12 +3,12 @@ import DialogContainer from '../../Common/Overlay/DialogContainer.tsx';
 import {useBookPageStore} from '@/global/page/bookPageStore.ts';
 import {useUpdateBookMutation} from '@/api/book/book.mutations';
 import type {UpdateBookInput} from '@package/contract';
-import {BookDescriptionEditShow} from './BookDescriptionEditShow';
+import {BookDescriptionEditShow} from './BookDescriptionEditShow.tsx';
 import type {
   BookDescriptionEditContainerProps,
   BookDescriptionEditorInlineProps,
   BookDescriptionEditorModalProps,
-} from './types';
+} from './types.ts';
 
 /**
  * Container for editing a book description.

@@ -54,6 +54,7 @@
     "USERPROFILE",
     "uuid",
     "uuidv",
+    "vaul",
     "wouter",
     "wwwroot"
   ],
@@ -78,5 +79,8 @@
   "prisma.pinToPrisma6": true,
   "[powershell]": {
     "editor.defaultFormatter": "ms-vscode.powershell"
+  },
+  "material-icon-theme.folders.associations": {
+    "component": "components"
   }
 }

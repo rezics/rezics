@@ -13,7 +13,6 @@ export interface ResponsiveSidebarState {
   drawerWidth: number;
   isDragging: boolean;
   handleDrawerToggle: () => void;
-  setSidebarOpen: (open: boolean) => void;
   closeSidebar: () => void;
   setDrawerWidth: (width: number) => void;
   setIsDragging: React.Dispatch<React.SetStateAction<boolean>>;
@@ -28,6 +27,7 @@ export const useResponsiveSidebar = (): ResponsiveSidebarState => {
   const isMobile = useMediaQuery('(max-width:960px)');
   const sidebarOpen = useLayoutStore(state => state.sidebarOpen);
   const drawerWidth = useLayoutStore(state => state.drawerWidth);
+  const {toggleSidebar, closeSidebar} = useLayoutStore();
   const [isDragging, setIsDragging] = useState(false);
   const [isSidebarTransitioning, setIsSidebarTransitioning] = useState(false);
 
@@ -41,21 +41,16 @@ export const useResponsiveSidebar = (): ResponsiveSidebarState => {
   );
 
   useEffect(() => {
-    setSidebarOpen(!isMobile);
+    closeSidebar();
   }, [isMobile]);
 
   function setDrawerWidth(width: number) {
     useLayoutStore.setState({drawerWidth: width});
   }
-  function setSidebarOpen(open: boolean = true) {
-    useLayoutStore.setState({sidebarOpen: open});
-  }
-  function closeSidebar() {
-    useLayoutStore.setState({sidebarOpen: false});
-  }
   const handleDrawerToggle = () => {
+    console.log('handleDrawerToggle', sidebarOpen);
     setIsSidebarTransitioning(true);
-    setSidebarOpen(!sidebarOpen);
+    toggleSidebar();
     window.setTimeout(() => {
       setIsSidebarTransitioning(false);
     }, 300);
@@ -67,7 +62,6 @@ export const useResponsiveSidebar = (): ResponsiveSidebarState => {
     drawerWidth,
     isDragging,
     handleDrawerToggle,
-    setSidebarOpen,
     closeSidebar,
     setDrawerWidth,
     setIsDragging,

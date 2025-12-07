@@ -426,12 +426,9 @@ const LockedPanel: React.FC<{
 }> = ({children, className}) => {
   return (
     <Paper
-      className={`${className} p-4`}
+      className={`${className} p-4 lg:h-[42rem]`}
       sx={{
         height: '32rem',
-        '@media (min-width: 1024px)': {
-          height: '42rem',
-        },
       }}
     >
       {children}
