@@ -16,6 +16,7 @@ interface HeaderProps {
   drawerWidth: number;
   isDragging?: boolean;
   layoutType?: 'type-a' | 'type-b';
+  disableDrawerToggle?: boolean;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -25,10 +26,16 @@ export const Header: React.FC<HeaderProps> = ({
   drawerWidth,
   isDragging = false,
   layoutType = 'type-a',
+  disableDrawerToggle = false,
 }) => {
   const {sidebarOpen} = useLayoutStore();
   const theme = useTheme();
   const {t} = useTranslation();
+
+  function handleDrawerToggleInner() {
+    if (disableDrawerToggle) return;
+    handleDrawerToggle();
+  }
   return (
     <AppBar
       position="fixed"
@@ -52,7 +59,7 @@ export const Header: React.FC<HeaderProps> = ({
         <IconButton
           color="inherit"
           aria-label={t('accessibility.open_drawer')}
-          onClick={handleDrawerToggle}
+          onClick={handleDrawerToggleInner}
           edge="start"
           sx={{
             mr: 2,

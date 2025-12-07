@@ -1,7 +1,7 @@
 import {Header} from '@/component/Layout/Header/MainLayoutHeader';
 import {Sidebar} from '@/component/Layout/Sidebar/Sidebar';
 import {useMediaQuery} from '@mui/material';
-import React from 'react';
+import React, {useState} from 'react';
 import type {ReactNode} from 'react';
 import {Helmet} from 'react-helmet-async';
 import {NAVIGATION} from '@/component/Layout/Navigation/MainNavigation';
@@ -18,9 +18,13 @@ export const MainLayout: React.FC<MainLayoutProps> = ({children}) => {
   const isMobile = useMediaQuery('(max-width:960px)');
   const {sidebarOpen, drawerWidth, toggleSidebar, closeSidebar} =
     useLayoutStore();
-
+  const [isSidebarTransitioning, setIsSidebarTransitioning] = useState(false);
   const handleDrawerToggle = () => {
+    setIsSidebarTransitioning(true);
     toggleSidebar();
+    window.setTimeout(() => {
+      setIsSidebarTransitioning(false);
+    }, 300);
   };
 
   const mode = appStore(state => state.theme);
@@ -45,6 +49,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({children}) => {
         onThemeToggle={toggleTheme}
         drawerWidth={drawerWidth}
         layoutType="type-b"
+        disableDrawerToggle={isSidebarTransitioning}
       />
 
       {/* Middle horizontal layout: Sidebar + Page Content */}
