@@ -3,7 +3,7 @@ import {Box, Button, Typography, Stack} from '@mui/material';
 import FeedbackDrawer from '@/component/Feedback/FeedbackDrawer';
 import FeedbackList from '@/component/Feedback/FeedbackList';
 
-const FeedbackPage: React.FC = () => {
+export const FeedbackPage: React.FC = () => {
   const [open, setOpen] = React.useState(false);
 
   return (
@@ -21,5 +21,3 @@ const FeedbackPage: React.FC = () => {
     </Box>
   );
 };
-
-export default FeedbackPage;

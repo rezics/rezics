@@ -75,11 +75,11 @@ export const Header: React.FC<HeaderProps> = ({
         <Typography variant="h6" noWrap component="div" sx={{flexGrow: 1}}>
           REZICS
         </Typography>
-        <ThemeQuickToggle />
+        {/* <ThemeQuickToggle /> */}
         <LangToggle />
-        <IconButton color="inherit" onClick={onThemeToggle}>
+        {/* <IconButton color="inherit" onClick={onThemeToggle}>
           {mode === 'dark' ? <Brightness7 /> : <Brightness4 />}
-        </IconButton>
+        </IconButton> */}
         <UserContainer onLogout={() => console.log('Logout')} />
       </Toolbar>
     </AppBar>

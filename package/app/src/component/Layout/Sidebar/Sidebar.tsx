@@ -6,7 +6,7 @@ import {
   ExpandLess,
   ExpandMore,
 } from '@mui/icons-material';
-import {useMediaQuery, useTheme} from '@mui/material';
+import {Box, useMediaQuery, useTheme} from '@mui/material';
 import {
   Collapse,
   Divider,
@@ -57,11 +57,11 @@ export function DrawerHeader({
   const theme = useTheme();
 
   return (
-    <div
-      style={{
+    <Box
+      sx={{
         display: 'flex',
         alignItems: 'center',
-        padding: theme.spacing(0, 1),
+        px: 1,
         ...theme.mixins.toolbar, // ensures space below AppBar
         justifyContent: 'flex-end',
       }}
@@ -69,7 +69,7 @@ export function DrawerHeader({
       <IconButton onClick={handleDrawerToggle}>
         {theme.direction === 'ltr' ? <ChevronLeft /> : <ChevronRight />}
       </IconButton>
-    </div>
+    </Box>
   );
 }
 

@@ -128,6 +128,20 @@ export const NAVIGATION = (isAdmin = false): NavigationItem[] => {
         },
 
         {kind: 'divider'},
+        {
+          kind: 'item',
+          segment: '/feedback',
+          title: 'Feedback',
+          icon: <DescriptionIcon />,
+        },
+        {
+          kind: 'item',
+          segment: '/feedback/admin',
+          title: 'Feedback Admin',
+          icon: <DescriptionIcon />,
+        },
+
+        {kind: 'divider'},
 
         {
           kind: 'header',

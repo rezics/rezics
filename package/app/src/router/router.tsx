@@ -176,6 +176,18 @@ export const ReactionInfoPage = lazy(() =>
   })),
 );
 
+// ========== Feedback ==========
+
+export const FeedbackPage = lazy(() =>
+  import('@/page/Feedback/FeedbackPage').then(m => ({default: m.FeedbackPage})),
+);
+
+export const FeedbackAdminPage = lazy(() =>
+  import('@/page/Feedback/Admin/FeedbackAdminPage').then(m => ({
+    default: m.FeedbackAdminPage,
+  })),
+);
+
 // ========== Misc ==========
 export const MainLayout = lazy(() =>
   import('@/layout/MainLayout').then(m => ({default: m.MainLayout})),
@@ -267,6 +279,19 @@ export default (
         <Route path="/token">
           <MainLayout>
             <TokenPage />
+          </MainLayout>
+        </Route>
+
+        {/* ANCHOR Feedback Routes */}
+        <Route path="/feedback">
+          <MainLayout>
+            <FeedbackPage />
+          </MainLayout>
+        </Route>
+
+        <Route path="/feedback/admin">
+          <MainLayout>
+            <FeedbackAdminPage />
           </MainLayout>
         </Route>
 

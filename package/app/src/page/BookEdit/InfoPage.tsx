@@ -62,12 +62,12 @@ export interface BookEditInfoShowProps {
 
 export interface BookEditMainPageProps {
   bookId?: string;
-  newBook: boolean;
+  newBook?: boolean;
 }
 
 export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
   bookId,
-  newBook,
+  newBook = false,
 }) => {
   const {t} = useTranslation();
   const [_location, navigate] = useLocation();

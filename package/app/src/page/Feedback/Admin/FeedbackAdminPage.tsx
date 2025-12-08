@@ -12,7 +12,7 @@ import FeedbackDrawer from '@/component/Feedback/FeedbackDrawer';
 import {useQuery} from '@tanstack/react-query';
 import {feedbackListQuery} from '@/api/feedback/feedback.queries';
 
-const FeedbackAdminPage: React.FC = () => {
+export const FeedbackAdminPage: React.FC = () => {
   const [open, setOpen] = React.useState(false);
   const [type, setType] = React.useState<'all' | 'mine' | 'user'>('all');
   const [userId, setUserId] = React.useState<string>('');
@@ -58,5 +58,3 @@ const FeedbackAdminPage: React.FC = () => {
     </Box>
   );
 };
-
-export default FeedbackAdminPage;

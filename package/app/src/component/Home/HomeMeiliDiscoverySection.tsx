@@ -35,7 +35,7 @@ type Review = ReviewDTO;
 type Quote = QuoteDTO;
 
 const SECTION_CARD_CLASS =
-  'overflow-hidden border border-solid border-gray-100 shadow-sm bg-white';
+  'overflow-hidden border border-solid border-gray-100 shadow-sm';
 
 type SimpleQueryState<T> = {
   items: T[];

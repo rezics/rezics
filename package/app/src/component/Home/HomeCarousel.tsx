@@ -1,4 +1,4 @@
-import {Box, Grid, Typography, useMediaQuery} from '@mui/material';
+import {Grid, Typography, useMediaQuery} from '@mui/material';
 import React, {useEffect, useRef, useState} from 'react';
 import {useQuery} from '@tanstack/react-query';
 import {echoKvGetQuery} from '@/api/echokv/echokv';
