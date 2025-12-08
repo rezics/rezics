@@ -57,7 +57,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           )}
         >
           {/* 这里放置一个相对容器，方便放置关闭按钮 */}
-          <div className="relative h-full flex flex-col overflow-hidden">
+          <div className="relative h-full flex flex-col overflow-hidden bg-light dark:bg-dark">
             {/* 仅在 Fixed 模式下，通常需要一个显式的关闭按钮 */}
             <button
               onClick={onClose}
@@ -88,7 +88,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       />
       <div
         className={cn(
-          `fixed inset-y-0 left-0 overflow-hidden border-r transition-[${width}] duration-300 ease-in-out`,
+          `fixed inset-y-0 left-0 overflow-hidden transition-[${width}] duration-300 ease-in-out`,
           isOpen ? width : 'w-0',
           className,
         )}
