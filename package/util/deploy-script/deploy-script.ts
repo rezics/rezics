@@ -95,7 +95,7 @@ async function deploy() {
   // 2. 构建前端 App
   //
   console.log('\n===== Build frontend app =====');
-  await run('bun install', APP_DIR);
+  await run('bun install', GIT_ROOT);
   await runIn(APP_DIR, 'bun run build');
 
   console.log(`\n>>> Clear directory: ${FRONTEND_TARGET}`);
