@@ -7,6 +7,9 @@ import {
   type UnitListQuery,
   readlistListQuerySchema,
   type ReadlistListQuery,
+  feedbackListQuerySchema,
+  type FeedbackListQuery,
+  BasicAdminPermission,
 } from '@package/contract';
 import {meiliService} from './meili.service';
 import {verifyAuth} from '@/src/user/utils';
@@ -78,6 +81,37 @@ export const meiliApi = coreInstance('/meili')
         description:
           'Full-text search over readlists using Meilisearch, driven by contract-based ReadlistListQuery.',
         tags: ['Meili', 'Readlists', 'Search'],
+      },
+    },
+  )
+
+  /**
+   * Search feedbacks using Meilisearch.
+   *
+   * POST /meili/feedbacks/search
+   */
+  .post(
+    '/feedbacks/search',
+    async ({body, headers, jwt, set}) => {
+      const payload = await verifyAuth(headers.authorization, jwt, set);
+      const isAdmin = BasicAdminPermission(payload as any);
+
+      const options = {...(body as FeedbackListQuery)};
+
+      // 非管理员只能查看自己的反馈，即使传入 userId 也会被覆盖。
+      if (!isAdmin) {
+        options.userId = (payload as any).unitId;
+      }
+
+      return meiliService.searchFeedbacks(options);
+    },
+    {
+      body: feedbackListQuerySchema,
+      detail: {
+        summary: 'Search feedbacks (Meilisearch)',
+        description:
+          'Search feedbacks using Meilisearch with filters, respecting admin and non-admin permissions.',
+        tags: ['Meili', 'Feedback', 'Search'],
       },
     },
   )
@@ -157,6 +191,32 @@ export const meiliApi = coreInstance('/meili')
   )
 
   /**
+   * Initialize the `feedbacks` index (idempotent).
+   *
+   * POST /meili/feedbacks/init
+   */
+  .post(
+    '/feedbacks/init',
+    async ({headers, jwt, set}) => {
+      const payload = await verifyAuth(headers.authorization, jwt, set);
+      if (!isRoot(payload as any)) {
+        set.status = 403;
+        throw new Error(
+          'Forbidden: You are not authorized to init feedbacks index',
+        );
+      }
+      await meiliService.initFeedbacksIndex();
+      return {message: 'feedbacks index initialized'};
+    },
+    {
+      detail: {
+        summary: 'Init feedbacks index',
+        tags: ['Meili', 'Admin'],
+      },
+    },
+  )
+
+  /**
    * Initialize the `units` index (idempotent).
    *
    * POST /meili/units/init
@@ -227,6 +287,32 @@ export const meiliApi = coreInstance('/meili')
     {
       detail: {
         summary: 'Sync all readlists to Meilisearch',
+        tags: ['Meili', 'Admin'],
+      },
+    },
+  )
+
+  /**
+   * Trigger a full sync of all feedbacks into Meilisearch.
+   *
+   * POST /meili/feedbacks/sync
+   */
+  .post(
+    '/feedbacks/sync',
+    async ({headers, jwt, set}) => {
+      const payload = await verifyAuth(headers.authorization, jwt, set);
+      if (!isRoot(payload as any)) {
+        set.status = 403;
+        throw new Error(
+          'Forbidden: You are not authorized to sync all feedbacks',
+        );
+      }
+      const task = await meiliService.syncAllFeedbacks();
+      return {task};
+    },
+    {
+      detail: {
+        summary: 'Sync all feedbacks to Meilisearch',
         tags: ['Meili', 'Admin'],
       },
     },

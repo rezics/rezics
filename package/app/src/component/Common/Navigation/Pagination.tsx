@@ -168,6 +168,7 @@ interface UniversalPaginatorProps<T> extends SortControlsProps {
   requestData: (externalPage: number) => void;
   preRequestData?: (externalPage: number) => Promise<number>;
   children: (currentPageItems: T[]) => React.ReactNode;
+  disableSortControl?: boolean;
   sortControl?: React.ReactElement<SortControlsProps>;
   isLoading?: boolean;
   currentPage: number;
@@ -196,6 +197,7 @@ export const UniversalPaginator = <T,>({
   requestData,
   preRequestData,
   children,
+  disableSortControl = false,
   sortControl,
   isLoading = false,
   currentPage = 1,
@@ -324,13 +326,15 @@ export const UniversalPaginator = <T,>({
 
   return (
     <Box>
-      {sortControl || (
-        <SortControls
-          sortType={sortType}
-          sortOrder={sortOrder}
-          onSortChange={onSortChange}
-        />
-      )}
+      {!disableSortControl &&
+        (sortControl || (
+          <SortControls
+            sortType={sortType}
+            sortOrder={sortOrder}
+            onSortChange={onSortChange}
+          />
+        ))}
+
       <Box sx={{minHeight: 300, position: 'relative'}}>
         {isLoading && (
           <LinearProgress

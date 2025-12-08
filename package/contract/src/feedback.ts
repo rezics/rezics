@@ -20,6 +20,7 @@ export type FeedbackDTO = {
   id: string;
   userId: string;
   unitId?: string | null;
+  url?: string | null;
   content: string;
   type: FeedbackType;
   resolved: boolean;
@@ -46,6 +47,7 @@ export const feedbackDTOSchema = t.Object({
  * - userId is taken from JWT on server side
  */
 export type CreateFeedbackInput = {
+  url?: string | null;
   unitId?: string | null;
   content: string;
   type?: FeedbackType;
@@ -53,6 +55,7 @@ export type CreateFeedbackInput = {
 
 export const createFeedbackSchema = t.Object({
   unitId: t.Optional(t.Nullable(t.String())),
+  url: t.Optional(t.Nullable(t.String())),
   content: t.String(),
   type: t.Optional(feedbackTypeSchema),
 });
@@ -61,6 +64,7 @@ export const createFeedbackSchema = t.Object({
  * List / filter feedbacks (admin or per-user)
  */
 export type FeedbackListQuery = OffsetPaginationParams & {
+  q?: string;
   userId?: string;
   unitId?: string;
   type?: FeedbackType;
@@ -72,6 +76,7 @@ export type FeedbackListQuery = OffsetPaginationParams & {
 export const feedbackListQuerySchema = t.Object({
   offset: t.Optional(t.Number()),
   limit: t.Optional(t.Number()),
+  q: t.Optional(t.String()),
   userId: t.Optional(t.String()),
   unitId: t.Optional(t.String()),
   type: t.Optional(feedbackTypeSchema),

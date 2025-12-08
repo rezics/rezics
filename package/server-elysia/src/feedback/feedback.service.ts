@@ -6,20 +6,23 @@ import type {
   FeedbackListResponse,
 } from '@package/contract';
 import {mapFeedbackToDTO} from './mapper';
+import {syncFeedbackToMeili} from '@/src/meili/feedback/sync';
 
 export class FeedbackService {
   async create(
     input: CreateFeedbackInput & {userId: string},
   ): Promise<ReturnType<typeof mapFeedbackToDTO>> {
-    const {userId, unitId, content, type} = input;
+    const {userId, unitId, url, content, type} = input;
     const created = await prisma.feedback.create({
       data: {
         userId,
         unitId: unitId ?? null,
+        url: url ?? null,
         content,
         type: type ?? 'REPORT',
       },
     });
+    await syncFeedbackToMeili(created.id);
     return mapFeedbackToDTO(created);
   }
 
@@ -101,6 +104,7 @@ export class FeedbackService {
       where: {id},
       data,
     });
+    await syncFeedbackToMeili(id);
     return mapFeedbackToDTO(updated);
   }
 }

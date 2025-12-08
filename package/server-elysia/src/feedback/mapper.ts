@@ -6,6 +6,7 @@ export function mapFeedbackToDTO(model: Feedback): FeedbackDTO {
     id: model.id,
     userId: model.userId,
     unitId: model.unitId,
+    url: model.url,
     content: model.content,
     type: model.type as any,
     resolved: model.resolved,

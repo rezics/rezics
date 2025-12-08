@@ -9,6 +9,8 @@ import {
 } from '@mui/material';
 import {useCreateFeedbackMutation} from '@/api/feedback/feedback.mutations';
 import type {CreateFeedbackInput} from '@/api/feedback/feedback.types';
+import {useLocation} from 'wouter';
+import {useEffect} from 'react';
 
 type FeedbackFormProps = {
   defaultValues?: Partial<CreateFeedbackInput>;
@@ -26,10 +28,16 @@ const FeedbackForm: React.FC<FeedbackFormProps> = ({
   defaultValues,
   onSubmitted,
 }) => {
+  const [location] = useLocation();
   const [form, setForm] = useState<CreateFeedbackInput>({
+    url: '',
     content: defaultValues?.content ?? '',
     type: defaultValues?.type ?? 'BUG',
   });
+
+  useEffect(() => {
+    setForm(prev => ({...prev, url: location}));
+  }, [location]);
 
   const [errors, setErrors] = useState({
     content: false,

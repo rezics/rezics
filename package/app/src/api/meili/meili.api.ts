@@ -8,8 +8,12 @@ import type {
   BookListResponse,
   ReadlistListQuery,
   UnitListResponse,
+  FeedbackListQuery,
 } from '@package/contract';
-import type {ReadlistSearchResult} from '@package/contract';
+import type {
+  ReadlistSearchResult,
+  FeedbackSearchResult,
+} from '@package/contract';
 import {buildQueryString} from '../utils/buildQuery';
 import {apiFetch} from '../react-query/http';
 import type {BookFilters} from '../book/book.types';
@@ -52,5 +56,21 @@ export const meiliUnitApi = {
     return apiFetch<UnitListResponse>(
       `/meili/units/search${buildQueryString(filters)}`,
     );
+  },
+};
+
+export const meiliFeedbackApi = {
+  /**
+   * Search feedbacks via backend Meilisearch controller.
+   *
+   * The backend expects a `FeedbackListQuery` object encoded in the request body.
+   */
+  feedbackSearch: async (
+    filters?: FeedbackListQuery,
+  ): Promise<FeedbackSearchResult> => {
+    return apiFetch<FeedbackSearchResult>(`/meili/feedbacks/search`, {
+      method: 'POST',
+      body: JSON.stringify(filters),
+    });
   },
 };

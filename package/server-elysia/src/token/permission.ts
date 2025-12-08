@@ -28,3 +28,21 @@ export async function hasPermissionToUpdateBook(
   }
   return false;
 }
+
+export function hasPermissionToReadUser(scopes: ApiTokenScopes): boolean {
+  if (tokenService.hasAdminScope(scopes)) return true;
+  if (tokenService.hasScope(scopes, 'user', 'read')) return true;
+  return false;
+}
+
+export function hasPermissionToCreateUser(scopes: ApiTokenScopes): boolean {
+  if (tokenService.hasAdminScope(scopes)) return true;
+  if (tokenService.hasScope(scopes, 'user', 'write')) return true;
+  return false;
+}
+
+export function hasPermissionToUpdateUser(scopes: ApiTokenScopes): boolean {
+  if (tokenService.hasAdminScope(scopes)) return true;
+  if (tokenService.hasScope(scopes, 'user', 'write')) return true;
+  return false;
+}

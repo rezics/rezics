@@ -93,6 +93,26 @@ export function MeiliPage() {
     onError: err => setMessage({type: 'error', text: err.message}),
   });
 
+  const initFeedbacksMutation = meiliAdminMutations.useInitFeedbacksIndex({
+    onSuccess: res => {
+      setMessage({
+        type: 'success',
+        text: res.message || 'Feedbacks 索引初始化完成',
+      });
+    },
+    onError: err => setMessage({type: 'error', text: err.message}),
+  });
+
+  const syncFeedbacksMutation = meiliAdminMutations.useSyncFeedbacks({
+    onSuccess: () => {
+      setMessage({
+        type: 'success',
+        text: '开始同步全部 Feedbacks 到 Meili',
+      });
+    },
+    onError: err => setMessage({type: 'error', text: err.message}),
+  });
+
   const deleteAllUnitsMutation = meiliAdminMutations.useDeleteAllUnits({
     onSuccess: res => {
       setMessage({
@@ -231,6 +251,16 @@ export function MeiliPage() {
                     ? '初始化中…'
                     : '初始化 Units 索引'}
                 </Button>
+                <Button
+                  variant="contained"
+                  size="small"
+                  onClick={() => initFeedbacksMutation.mutate()}
+                  disabled={initFeedbacksMutation.isPending}
+                >
+                  {initFeedbacksMutation.isPending
+                    ? '初始化中…'
+                    : '初始化 Feedbacks 索引'}
+                </Button>
               </div>
               <Typography variant="caption" color="text.secondary">
                 这些操作需要 Root 权限，且会访问后端 JWT
@@ -272,6 +302,16 @@ export function MeiliPage() {
                   disabled={syncUnitsMutation.isPending}
                 >
                   {syncUnitsMutation.isPending ? '同步中…' : '同步全部 Units'}
+                </Button>
+                <Button
+                  variant="outlined"
+                  size="small"
+                  onClick={() => syncFeedbacksMutation.mutate()}
+                  disabled={syncFeedbacksMutation.isPending}
+                >
+                  {syncFeedbacksMutation.isPending
+                    ? '同步中…'
+                    : '同步全部 Feedbacks'}
                 </Button>
               </div>
               <Typography variant="caption" color="text.secondary">

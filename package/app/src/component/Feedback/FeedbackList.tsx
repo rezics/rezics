@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {
   Box,
   List,
@@ -15,20 +15,22 @@ import {
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
 import DoneIcon from '@mui/icons-material/Done';
-import {useQuery} from '@tanstack/react-query';
-import {
-  feedbackListQuery,
-  myFeedbackListQuery,
-  feedbacksByUserQuery,
-} from '@/api/feedback/feedback.queries';
+import {useQuery, useQueryClient} from '@tanstack/react-query';
+import {buildMeiliFeedbackQuery} from '@/api/meili/meili.queries';
 import {useSetFeedbackResolvedMutation} from '@/api/feedback/feedback.mutations';
 import type {FeedbackDTO} from '@/api/feedback/feedback.types';
+import {
+  UniversalPaginator,
+  type UniversalPaginatorHandle,
+} from '@/component/Common/Navigation/Pagination';
 
 import {Popover, PopoverContent, PopoverTrigger} from '@/component/ui/popover';
+import {Link} from 'wouter';
 
 type FeedbackListProps = {
   queryType: 'mine' | 'all' | 'user';
   userId?: string;
+  search?: string;
 };
 
 const typeColor: Record<
@@ -47,10 +49,34 @@ const typeColor: Record<
   OTHER: 'default',
 };
 
-const FeedbackList: React.FC<FeedbackListProps> = ({queryType, userId}) => {
-  const listResult = useQuery(feedbackListQuery());
-  const myResult = useQuery(myFeedbackListQuery());
-  const byUserResult = useQuery(feedbacksByUserQuery(userId ?? '', undefined));
+const EXTERNAL_PAGE_SIZE = 50;
+
+const FeedbackList: React.FC<FeedbackListProps> = ({
+  queryType,
+  userId,
+  search,
+}) => {
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [startAll, setStartAll] = useState<number>(0);
+  const [startMine, setStartMine] = useState<number>(0);
+  const [startUser, setStartUser] = useState<number>(0);
+
+  const queryClient = useQueryClient();
+  const paginatorRef = useRef<UniversalPaginatorHandle | null>(null);
+
+  const listResult = useQuery(
+    buildMeiliFeedbackQuery(startAll, EXTERNAL_PAGE_SIZE, search ?? ''),
+  );
+
+  const myResult = useQuery(
+    buildMeiliFeedbackQuery(startMine, EXTERNAL_PAGE_SIZE, search ?? '', {}),
+  );
+
+  const byUserResult = useQuery(
+    buildMeiliFeedbackQuery(startUser, EXTERNAL_PAGE_SIZE, search ?? '', {
+      userId: userId ?? undefined,
+    }),
+  );
 
   const resolveMutation = useSetFeedbackResolvedMutation();
 
@@ -59,145 +85,219 @@ const FeedbackList: React.FC<FeedbackListProps> = ({queryType, userId}) => {
     // resolveMutation.mutate({id, resolved: true});
   };
 
-  const currentData =
+  const activeResult =
     queryType === 'mine'
-      ? myResult.data
+      ? myResult
       : queryType === 'user'
-      ? byUserResult.data
-      : listResult.data;
+      ? byUserResult
+      : listResult;
 
-  const isLoading =
-    listResult.isLoading || myResult.isLoading || byUserResult.isLoading;
+  const currentData = activeResult.data;
+  const isLoading = activeResult.isLoading;
+  const isError = activeResult.isError;
 
-  const isError =
-    listResult.isError || myResult.isError || byUserResult.isError;
+  useEffect(() => {
+    setCurrentPage(1);
+    if (queryType === 'all') {
+      setStartAll(0);
+    } else if (queryType === 'mine') {
+      setStartMine(0);
+    } else if (queryType === 'user') {
+      setStartUser(0);
+    }
+
+    paginatorRef.current?.resetPaginationPageNumber?.();
+  }, [queryType, userId, search]);
+
+  const handleNeedMoreData = (externalPage: number) => {
+    const offset = (externalPage - 1) * EXTERNAL_PAGE_SIZE;
+    if (queryType === 'mine') {
+      setStartMine(offset);
+    } else if (queryType === 'user') {
+      setStartUser(offset);
+    } else {
+      setStartAll(offset);
+    }
+  };
+
+  const handlePreRequestData = async (externalPage: number) => {
+    const offset = (externalPage - 1) * EXTERNAL_PAGE_SIZE;
+    const limit = EXTERNAL_PAGE_SIZE;
+
+    if (queryType === 'mine') {
+      const {queryKey, queryFn} = buildMeiliFeedbackQuery(
+        offset,
+        limit,
+        search ?? '',
+        {},
+      );
+      const next = await queryClient.fetchQuery({queryKey, queryFn});
+      return next?.items?.length ?? 0;
+    }
+
+    if (queryType === 'user') {
+      if (!userId) return 0;
+      const {queryKey, queryFn} = buildMeiliFeedbackQuery(
+        offset,
+        limit,
+        search ?? '',
+        {
+          userId,
+        },
+      );
+      const next = await queryClient.fetchQuery({queryKey, queryFn});
+      return next?.items?.length ?? 0;
+    }
+
+    const {queryKey, queryFn} = buildMeiliFeedbackQuery(
+      offset,
+      limit,
+      search ?? '',
+    );
+    const next = await queryClient.fetchQuery({queryKey, queryFn});
+    return next?.items?.length ?? 0;
+  };
 
   return (
     <Box className="">
-      {isLoading && (
-        <Typography
-          variant="body2"
-          color="text.secondary"
-          className="px-2 py-1"
-        >
-          正在加载反馈...
-        </Typography>
-      )}
-
       {isError && (
         <Typography variant="body2" color="error" className="px-2 py-1">
           加载反馈失败，请稍后重试。
         </Typography>
       )}
 
-      <List>
-        {currentData?.items?.map((item: FeedbackDTO) => (
-          <ListItem key={item.id} disableGutters className="mb-3">
-            <Paper
-              variant="outlined"
-              className="w-full px-3 py-2 border-gray-200"
-              elevation={0}
-            >
-              <Stack
-                direction="row"
-                spacing={1}
-                className="items-center justify-between mb-1"
-              >
-                <Stack direction="row" spacing={1} className="items-center">
-                  <Chip
-                    size="small"
-                    label={item.type}
-                    color={typeColor[item.type]}
-                  />
-                  <Typography variant="subtitle2" className="font-medium">
-                    反馈 #{item.id}
-                  </Typography>
-                  {item.unitId && (
-                    <Chip
-                      size="small"
-                      variant="outlined"
-                      label={`单元 ${item.unitId}`}
-                    />
-                  )}
-                  {item.resolved ? (
-                    <Chip
-                      size="small"
-                      color="success"
-                      label="已解决"
-                      icon={<DoneIcon />}
-                    />
-                  ) : (
-                    <Chip
-                      size="small"
-                      color="warning"
-                      label="待处理"
-                      icon={<HourglassEmptyIcon />}
-                    />
-                  )}
-                </Stack>
-
-                {!item.resolved && (
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Tooltip title="标记为已解决">
-                        <IconButton
+      <UniversalPaginator<FeedbackDTO>
+        ref={paginatorRef}
+        data={currentData?.items ?? []}
+        totalExternalItems={currentData?.totalItems ?? 0}
+        itemsPerPage={10}
+        externalItemsPerPage={EXTERNAL_PAGE_SIZE}
+        sortType={undefined as any}
+        sortOrder={undefined as any}
+        onSortChange={() => {}}
+        requestData={handleNeedMoreData}
+        preRequestData={handlePreRequestData}
+        isLoading={isLoading && (currentData?.items?.length ?? 0) === 0}
+        currentPage={currentPage}
+        setCurrentPage={setCurrentPage}
+        disableSortControl={true}
+      >
+        {(currentPageItems: FeedbackDTO[]) => (
+          <List>
+            {currentPageItems.map((item: FeedbackDTO) => (
+              <ListItem key={item.id} disableGutters className="mb-3">
+                <Paper
+                  variant="outlined"
+                  className="w-full px-3 py-2 border-gray-200"
+                  elevation={0}
+                >
+                  <Stack
+                    direction="row"
+                    spacing={1}
+                    className="items-center justify-between mb-1"
+                  >
+                    <Stack direction="row" spacing={1} className="items-center">
+                      <Chip
+                        size="small"
+                        label={item.type}
+                        color={typeColor[item.type]}
+                      />
+                      <Typography variant="subtitle2" className="font-medium">
+                        反馈 #{item.id}
+                      </Typography>
+                      {item.unitId && (
+                        <Chip
                           size="small"
-                          disabled={resolveMutation.isPending}
-                        >
-                          <CheckCircleOutlineIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                    </PopoverTrigger>
-                    <PopoverContent>
-                      <div className="flex flex-col gap-4 p-4">
-                        <div className="text-base font-medium text-gray-800">
-                          确定将此项目标记为已解决？
-                        </div>
+                          variant="outlined"
+                          label={`单元 ${item.unitId}`}
+                        />
+                      )}
+                      {item.resolved ? (
+                        <Chip
+                          size="small"
+                          color="success"
+                          label="已解决"
+                          icon={<DoneIcon />}
+                        />
+                      ) : (
+                        <Chip
+                          size="small"
+                          color="warning"
+                          label="待处理"
+                          icon={<HourglassEmptyIcon />}
+                        />
+                      )}
+                    </Stack>
 
-                        <Button
-                          variant="contained"
-                          color="primary"
-                          onClick={() => handleResolve(item.id)}
-                        >
-                          确定
-                        </Button>
-                      </div>
-                    </PopoverContent>
-                  </Popover>
-                )}
-              </Stack>
+                    {!item.resolved && (
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Tooltip title="标记为已解决">
+                            <IconButton
+                              size="small"
+                              disabled={resolveMutation.isPending}
+                            >
+                              <CheckCircleOutlineIcon fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                        </PopoverTrigger>
+                        <PopoverContent>
+                          <div className="flex flex-col gap-4 p-4">
+                            <div className="text-base font-medium text-gray-800">
+                              确定将此项目标记为已解决？
+                            </div>
 
-              <Stack
-                direction="row"
-                spacing={2}
-                className="text-xs text-gray-500 mb-1 flex-wrap"
-              >
-                <Typography variant="caption">用户ID：{item.userId}</Typography>
-                <Typography variant="caption">
-                  创建时间：{new Date(item.createdAt).toLocaleString()}
-                </Typography>
-                <Typography variant="caption">
-                  更新时间：{new Date(item.updatedAt).toLocaleString()}
-                </Typography>
-                {item.resolvedAt && (
-                  <Typography variant="caption">
-                    解决时间：{new Date(item.resolvedAt).toLocaleString()}
+                            <Button
+                              variant="contained"
+                              color="primary"
+                              onClick={() => handleResolve(item.id)}
+                            >
+                              确定
+                            </Button>
+                          </div>
+                        </PopoverContent>
+                      </Popover>
+                    )}
+                  </Stack>
+
+                  <Stack
+                    direction="row"
+                    spacing={2}
+                    className="text-xs text-gray-500 mb-1 flex-wrap"
+                  >
+                    <Typography variant="caption">
+                      用户ID：{item.userId}
+                    </Typography>
+                    <Typography variant="caption">
+                      创建时间：{new Date(item.createdAt).toLocaleString()}
+                    </Typography>
+                    <Typography variant="caption">
+                      更新时间：{new Date(item.updatedAt).toLocaleString()}
+                    </Typography>
+                    {item.resolvedAt && (
+                      <Typography variant="caption">
+                        解决时间：{new Date(item.resolvedAt).toLocaleString()}
+                      </Typography>
+                    )}
+                  </Stack>
+
+                  <Divider className="my-1" />
+
+                  <div>
+                    <Link href={item.url ?? ''}>{item.url}</Link>
+                  </div>
+                  <Typography
+                    variant="body2"
+                    className="text-gray-700 whitespace-pre-line"
+                  >
+                    {item.content}
                   </Typography>
-                )}
-              </Stack>
-
-              <Divider className="my-1" />
-
-              <Typography
-                variant="body2"
-                className="text-gray-700 whitespace-pre-line"
-              >
-                {item.content}
-              </Typography>
-            </Paper>
-          </ListItem>
-        ))}
-      </List>
+                </Paper>
+              </ListItem>
+            ))}
+          </List>
+        )}
+      </UniversalPaginator>
     </Box>
   );
 };

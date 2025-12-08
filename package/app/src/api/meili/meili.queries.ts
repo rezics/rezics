@@ -8,9 +8,14 @@ import {
   meiliBookApi,
   meiliReadlistApi,
   meiliUnitApi,
+  meiliFeedbackApi,
 } from './meili.api';
 import {type BookFilters} from '../book/book.types';
-import type {UnitListResponse, UnitType} from '@package/contract';
+import type {
+  UnitListResponse,
+  UnitType,
+  FeedbackListResponse,
+} from '@package/contract';
 import {hashFn} from '../utils/hash';
 
 export const meiliBookSearchQuery = (filters?: BookFilters) =>
@@ -60,6 +65,44 @@ export const buildMeiliUnitQuery = (
       return mapFn(unitResp);
     },
     enabled: options?.enabled ?? true,
+    staleTime: 1000 * 60 * 5,
+  } as const;
+};
+
+type FeedbackExtraFilterOptions = {
+  /** Filter feedbacks created by a specific user. */
+  userId?: string;
+};
+
+export const buildMeiliFeedbackQuery = (
+  offset: number,
+  limit: number,
+  keyword: string,
+  options?: FeedbackExtraFilterOptions,
+) => {
+  const filters = {
+    offset,
+    limit,
+    q: keyword || undefined,
+    ...(options?.userId ? {userId: options.userId} : {}),
+  } as const;
+
+  return {
+    queryKey: [
+      'meili-feedbacks',
+      offset,
+      limit,
+      keyword,
+      options?.userId ?? null,
+    ],
+    queryFn: async (): Promise<FeedbackListResponse> => {
+      const searchResult = await meiliFeedbackApi.feedbackSearch(filters);
+      return {
+        items: searchResult.feedbacks as any[],
+        offset,
+        totalItems: searchResult.total,
+      };
+    },
     staleTime: 1000 * 60 * 5,
   } as const;
 };

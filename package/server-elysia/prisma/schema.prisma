@@ -397,6 +397,7 @@ model Feedback {
   id         String       @id @default(dbgenerated("uuidv7()")) @db.Uuid
   userId     String       @db.Uuid
   unitId     String?      @db.Uuid
+  url        String?
   content    String
   type       FeedbackType @default(REPORT)
   resolved   Boolean      @default(false)

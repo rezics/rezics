@@ -18,6 +18,7 @@ import {unitService} from '../unit/unit.service';
 import {BasicAdminPermission} from '@package/contract';
 
 import {bookRoute} from './token.book.api';
+import {userRoute} from './token.user.api';
 
 /**
  * Token API - routes under /token
@@ -28,6 +29,7 @@ import {bookRoute} from './token.book.api';
  */
 export const tokenApi = coreInstance('/token')
   .use(bookRoute)
+  .use(userRoute)
   /**
    * List tokens for current user
    * GET /token/tokens

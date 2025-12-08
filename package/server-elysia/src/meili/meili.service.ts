@@ -2,13 +2,16 @@ import type {
   BookQueryOptions,
   UnitListQuery,
   ReadlistListQuery,
+  FeedbackListQuery,
 } from '@package/contract';
 import type {BookSearchResult} from './book';
 import type {UnitSearchResult} from './unit';
 import type {ReadlistSearchResult} from './readlist';
+import type {FeedbackSearchResult} from './feedback';
 import {searchBooks} from './book/book.api';
 import {searchUnits} from './unit/unit.api';
 import {searchReadlists} from './readlist/readlist.api';
+import {searchFeedbacks} from './feedback/feedback.api';
 import {
   syncAllBooks,
   initBookIndex,
@@ -20,6 +23,8 @@ import {
   syncAllUnits,
   initReadlistIndex,
   syncAllReadlists,
+  initFeedbackIndex,
+  syncAllFeedbacks,
 } from '@package/search/src/index';
 
 /**
@@ -54,6 +59,15 @@ export class MeiliService {
   }
 
   /**
+   * Search feedbacks using the contract-based FeedbackListQuery.
+   */
+  async searchFeedbacks(
+    options: FeedbackListQuery,
+  ): Promise<FeedbackSearchResult> {
+    return searchFeedbacks(options);
+  }
+
+  /**
    * Initialize Meilisearch `books` index settings.
    */
   async initBooksIndex(): Promise<void> {
@@ -75,6 +89,13 @@ export class MeiliService {
   }
 
   /**
+   * Initialize Meilisearch `feedbacks` index settings.
+   */
+  async initFeedbacksIndex(): Promise<void> {
+    await initFeedbackIndex();
+  }
+
+  /**
    * Trigger a full re-sync of all books into Meilisearch.
    */
   async syncAllBooks(): Promise<unknown> {
@@ -93,6 +114,13 @@ export class MeiliService {
    */
   async syncAllReadlists(): Promise<unknown> {
     return syncAllReadlists();
+  }
+
+  /**
+   * Trigger a full re-sync of all feedbacks into Meilisearch.
+   */
+  async syncAllFeedbacks(): Promise<unknown> {
+    return syncAllFeedbacks();
   }
 
   /**

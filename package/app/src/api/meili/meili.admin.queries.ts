@@ -77,6 +77,11 @@ export const meiliAdminApi = {
       method: 'POST',
     });
   },
+  initFeedbacksIndex: async (): Promise<MeiliApiMessageResponse> => {
+    return apiFetch<MeiliApiMessageResponse>('/meili/feedbacks/init', {
+      method: 'POST',
+    });
+  },
 
   // 全量同步
   syncAllBooks: async (): Promise<MeiliTaskResponse> => {
@@ -91,6 +96,11 @@ export const meiliAdminApi = {
   },
   syncAllUnits: async (): Promise<MeiliTaskResponse> => {
     return apiFetch<MeiliTaskResponse>('/meili/units/sync', {
+      method: 'POST',
+    });
+  },
+  syncAllFeedbacks: async (): Promise<MeiliTaskResponse> => {
+    return apiFetch<MeiliTaskResponse>('/meili/feedbacks/sync', {
       method: 'POST',
     });
   },
@@ -180,6 +190,18 @@ export function useMeiliInitUnitsIndexMutation(
   });
 }
 
+export function useMeiliInitFeedbacksIndexMutation(
+  options?: Omit<
+    UseMutationOptions<MeiliApiMessageResponse, Error, void>,
+    'mutationFn'
+  >,
+) {
+  return useMutation({
+    mutationFn: () => meiliAdminApi.initFeedbacksIndex(),
+    ...options,
+  });
+}
+
 export function useMeiliSyncBooksMutation(
   options?: Omit<
     UseMutationOptions<MeiliTaskResponse, Error, void>,
@@ -212,6 +234,18 @@ export function useMeiliSyncUnitsMutation(
 ) {
   return useMutation({
     mutationFn: () => meiliAdminApi.syncAllUnits(),
+    ...options,
+  });
+}
+
+export function useMeiliSyncFeedbacksMutation(
+  options?: Omit<
+    UseMutationOptions<MeiliTaskResponse, Error, void>,
+    'mutationFn'
+  >,
+) {
+  return useMutation({
+    mutationFn: () => meiliAdminApi.syncAllFeedbacks(),
     ...options,
   });
 }
@@ -272,9 +306,11 @@ export const meiliAdminMutations = {
   useInitBooksIndex: useMeiliInitBooksIndexMutation,
   useInitReadlistsIndex: useMeiliInitReadlistsIndexMutation,
   useInitUnitsIndex: useMeiliInitUnitsIndexMutation,
+  useInitFeedbacksIndex: useMeiliInitFeedbacksIndexMutation,
   useSyncBooks: useMeiliSyncBooksMutation,
   useSyncReadlists: useMeiliSyncReadlistsMutation,
   useSyncUnits: useMeiliSyncUnitsMutation,
+  useSyncFeedbacks: useMeiliSyncFeedbacksMutation,
   useDeleteAllUnits: useMeiliDeleteAllUnitsMutation,
   useCreateSearchKey: useMeiliCreateSearchKeyMutation,
   useCreateAdminKey: useMeiliCreateAdminKeyMutation,

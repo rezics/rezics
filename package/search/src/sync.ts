@@ -3,11 +3,17 @@ import {
   addOrUpdateBooks,
   addOrUpdateUnits,
   addOrUpdateReadlists,
+  addOrUpdateFeedbacks,
   deleteAllBooks,
   deleteAllUnits,
   deleteAllReadlists,
+  deleteAllFeedbacks,
 } from './documents';
-import type {BookSearchDocument, UnitSearchDocument} from '@package/contract';
+import type {
+  BookSearchDocument,
+  UnitSearchDocument,
+  FeedbackSearchDocument,
+} from '@package/contract';
 
 const prisma = new PrismaClient();
 
@@ -253,6 +259,59 @@ export async function syncAllReadlists() {
 
   return {
     message: 'sync all readlists success',
+    totalSynced: total,
+  };
+}
+
+// ANCHOR: Feedbacks sync with batching (cursor-based)
+export async function syncAllFeedbacks() {
+  const BATCH_SIZE = 5000;
+
+  // Step 1: 清空索引
+  const deleteResult = await deleteAllFeedbacks();
+  console.log('sync all feedbacks, deleteResult', deleteResult);
+
+  let cursor: string | undefined = undefined;
+  let total = 0;
+
+  while (true) {
+    console.log('sync all feedbacks, cursor', cursor, 'total', total);
+
+    const feedbacks: any[] = await prisma.feedback.findMany({
+      take: BATCH_SIZE,
+      skip: cursor ? 1 : 0,
+      cursor: cursor ? {id: cursor} : undefined,
+      orderBy: {id: 'asc'},
+    });
+
+    if (feedbacks.length === 0) break;
+
+    const formatted: FeedbackSearchDocument[] = feedbacks.map(f => {
+      const doc: FeedbackSearchDocument = {
+        id: f.id,
+        userId: f.userId,
+        unitId: f.unitId,
+        url: f.url,
+        content: f.content,
+        type: f.type,
+        resolved: f.resolved,
+        resolvedAt: f.resolvedAt,
+        createdAt: f.createdAt,
+        updatedAt: f.updatedAt,
+      };
+
+      return doc;
+    });
+
+    const addResult = await addOrUpdateFeedbacks(formatted);
+    console.log('sync all feedbacks, addResult', addResult);
+
+    total += formatted.length;
+    cursor = feedbacks[feedbacks.length - 1]!.id;
+  }
+
+  return {
+    message: 'sync all feedbacks success',
     totalSynced: total,
   };
 }
