@@ -149,6 +149,12 @@ export const NAVIGATION = (isAdmin = false): NavigationItem[] => {
         },
         {
           kind: 'item',
+          segment: '/theme-switch',
+          title: 'Theme Switch',
+          icon: <DescriptionIcon />,
+        },
+        {
+          kind: 'item',
           segment: '/test',
           title: 'Test Suite',
           icon: <LayersIcon />,

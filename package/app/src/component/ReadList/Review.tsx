@@ -74,7 +74,7 @@ export const CollapsibleReview: React.FC<CollapsibleReviewProps> = ({
   return (
     <Paper
       variant="outlined"
-      className={`p-3 sm:p-4 rounded-lg border-gray-200/80 bg-white/70 backdrop-blur ${className}`}
+      className={`p-3 sm:p-4 rounded-lg backdrop-blur ${className}`}
       role="region"
       aria-label="Book review"
     >

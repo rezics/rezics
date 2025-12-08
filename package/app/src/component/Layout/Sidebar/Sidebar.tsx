@@ -172,9 +172,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   }
                 >
                   <ListItemIcon>{item.icon}</ListItemIcon>
-                  <ListItemText primary={item.title} />
+                  <ListItemText
+                    className="dark:text-light text-dark"
+                    primary={item.title}
+                  />
                   {hasChildren && (
-                    <span>{isOpen ? <ExpandLess /> : <ExpandMore />}</span>
+                    <span className="dark:text-light text-dark">
+                      {isOpen ? <ExpandLess /> : <ExpandMore />}
+                    </span>
                   )}
                 </ListItemButton>
 
@@ -195,7 +200,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
                             sx={{pl: 4}}
                           >
                             <ListItemIcon>{child.icon}</ListItemIcon>
-                            <ListItemText primary={child.title} />
+                            <ListItemText
+                              className="dark:text-light text-dark"
+                              primary={child.title}
+                            />
                           </ListItemButton>
                         );
                       })}

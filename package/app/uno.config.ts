@@ -3,7 +3,7 @@ import {defineConfig, presetIcons, presetAttributify} from 'unocss';
 import transformerDirectives from '@unocss/transformer-directives';
 import presetWind4 from '@unocss/preset-wind4';
 import presetAnimations from 'unocss-preset-animations';
-import {presetShadcn} from 'unocss-preset-shadcn';
+import {builtinColors, presetShadcn} from 'unocss-preset-shadcn';
 
 export default defineConfig({
   content: {
@@ -34,17 +34,7 @@ export default defineConfig({
 
   presets: [
     presetAnimations(),
-    presetShadcn(
-      {
-        color: 'red',
-        // With default setting for SolidUI, you need to set the darkSelector option.
-        darkSelector: '[data-kb-theme="dark"]',
-      },
-      {
-        // If you are using other ui.
-        // componentLibrary: 'reka',
-      },
-    ),
+    presetShadcn(builtinColors.map(c => ({color: c}))),
     presetWind4({
       preflights: {
         reset: true,

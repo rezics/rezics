@@ -50,7 +50,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         {/* 侧边栏面板 - 处理滑入滑出 */}
         <aside
           className={cn(
-            'fixed top-0 left-0 z-50 h-full bg-white shadow-xl transition-transform duration-300 ease-in-out dark:bg-slate-900',
+            'fixed top-0 left-0 z-50 h-full shadow-xl transition-transform duration-300 ease-in-out',
             width,
             isOpen ? 'translate-x-0' : '-translate-x-full',
             className,
@@ -61,7 +61,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             {/* 仅在 Fixed 模式下，通常需要一个显式的关闭按钮 */}
             <button
               onClick={onClose}
-              className="absolute top-4 right-4 p-1 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+              className="absolute top-4 right-4 p-1 rounded-md transition-colors"
               aria-label="Close sidebar"
             >
               <X size={20} className="text-slate-500" />
@@ -88,7 +88,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       />
       <div
         className={cn(
-          `fixed inset-y-0 left-0 overflow-hidden border-r border-slate-200 bg-white dark:bg-slate-900 dark:border-slate-800 transition-[${width}] duration-300 ease-in-out`,
+          `fixed inset-y-0 left-0 overflow-hidden border-r transition-[${width}] duration-300 ease-in-out`,
           isOpen ? width : 'w-0',
           className,
         )}

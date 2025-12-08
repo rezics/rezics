@@ -48,7 +48,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({children}) => {
           NAVIGATION={NAVIGATION(isAdmin)}
         />
         <main className="flex flex-col flex-1 pt-[56px] sm:pt-[64px] transition-all duration-300 h-screen w-full">
-          <div className="flex-1 mb-4">{children}</div>
+          <div className="flex-1 pb-4 dark:bg-dark bg-light">{children}</div>
           {/* Footer always at bottom (scrolls naturally when content tall) */}
           <MainLayoutFooter />
         </main>

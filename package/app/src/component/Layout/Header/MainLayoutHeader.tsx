@@ -77,9 +77,9 @@ export const Header: React.FC<HeaderProps> = ({
         </Typography>
         {/* <ThemeQuickToggle /> */}
         <LangToggle />
-        {/* <IconButton color="inherit" onClick={onThemeToggle}>
+        <IconButton color="inherit" onClick={onThemeToggle}>
           {mode === 'dark' ? <Brightness7 /> : <Brightness4 />}
-        </IconButton> */}
+        </IconButton>
         <UserContainer onLogout={() => console.log('Logout')} />
       </Toolbar>
     </AppBar>

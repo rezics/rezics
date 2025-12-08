@@ -3,6 +3,13 @@ import {Route, Router, Switch} from 'wouter';
 import {lazy} from 'react';
 
 // ========== Pages ==========
+
+export const ThemeSwitchPage = lazy(() =>
+  import('@/component/ui/theme-switch').then(m => ({
+    default: m.ThemeSwitch,
+  })),
+);
+
 export const LoginPage = lazy(() =>
   import('@/page/Auth/LoginPage').then(m => ({default: m.LoginPage})),
 );
@@ -253,6 +260,11 @@ export default (
   <Router>
     <ThemeProvider theme={{}}>
       <Switch>
+        <Route path="/theme-switch">
+          <MainLayout>
+            <ThemeSwitchPage />
+          </MainLayout>
+        </Route>
         <Route path="/meili">
           <MainLayout>
             <MeiliPage />
