@@ -12,7 +12,6 @@
     "format:check": "prettier --check ."
   },
   "dependencies": {
-    "@package/contract": "workspace:*",
     "@effect/cli": "^0.69.0",
     "@effect/platform-node": "^0.96.0",
     "@emotion/react": "11.14.0",
@@ -24,11 +23,11 @@
     "@mui/icons-material": "7.3.1",
     "@mui/lab": "7.0.0-beta.16",
     "@mui/material": "7.3.1",
+    "@package/contract": "workspace:*",
     "@pardnchiu/nanojson": "^1.1.3",
     "@radix-ui/react-dialog": "^1.1.15",
     "@radix-ui/react-slot": "^1.2.4",
     "@redux-devtools/extension": "3.3.0",
-    "@tailwindcss/vite": "4.1.11",
     "@tanstack/query-broadcast-client-experimental": "^5.89.0",
     "@tanstack/query-sync-storage-persister": "^5.89.0",
     "@tanstack/react-query": "^5.89.0",
@@ -64,8 +63,6 @@
     "react-window": "1.8.11",
     "swr": "^2.3.6",
     "tailwind-merge": "^3.4.0",
-    "tailwindcss": "4.1.11",
-    "tailwindcss-animate": "^1.0.7",
     "uuid": "^11.1.0",
     "vaul": "^1.1.2",
     "wouter": "3.7.1",
@@ -82,6 +79,8 @@
     "@types/uuid": "10.0.0",
     "@typescript-eslint/eslint-plugin": "^8.44.0",
     "@typescript-eslint/parser": "^8.44.0",
+    "@unocss/preset-wind4": "^66.5.10",
+    "@unocss/transformer-directives": "^66.5.10",
     "@vitejs/plugin-react": "5.0.0",
     "eslint": "^9.35.0",
     "eslint-plugin-jsx-a11y": "^6.10.2",
@@ -93,6 +92,7 @@
     "react-cosmos": "7.0.0",
     "react-cosmos-plugin-vite": "7.0.0",
     "typescript": "5.9.2",
+    "unocss": "^66.5.10",
     "vite": "7.1.2"
   },
   "msw": {

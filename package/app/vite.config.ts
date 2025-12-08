@@ -1,6 +1,6 @@
 /* eslint-disable no-undef */
-import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
+import UnoCSS from 'unocss/vite';
 import {resolve} from 'node:path';
 import process from 'node:process';
 import {defineConfig, loadEnv} from 'vite';
@@ -10,7 +10,7 @@ export default defineConfig(({mode}) => {
   const env = loadEnv(mode, process.cwd(), 'ICS');
 
   return {
-    plugins: [tailwindcss(), react()],
+    plugins: [UnoCSS(), react()],
     server: {
       port: 35001,
     },

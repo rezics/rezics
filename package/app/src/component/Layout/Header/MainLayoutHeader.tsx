@@ -8,7 +8,6 @@ import {useTheme} from '@mui/material/styles';
 import React from 'react';
 import {useTranslation} from 'react-i18next';
 import {cn} from '@/lib/utils';
-// import clsx from 'clsx';
 
 interface HeaderProps {
   handleDrawerToggle: () => void;

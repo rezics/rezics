@@ -3,6 +3,7 @@
   "cSpell.words": [
     "appbar",
     "Argb",
+    "Attributify",
     "backpressure",
     "booklist",
     "bunx",
@@ -37,6 +38,7 @@
     "PGUSER",
     "plpgsql",
     "pnpx",
+    "preflights",
     "qidian",
     "readlist",
     "Readlists",
@@ -50,6 +52,7 @@
     "Tagable",
     "TCRUD",
     "tsvector",
+    "unocss",
     "urql",
     "USERPROFILE",
     "uuid",
@@ -58,6 +61,7 @@
     "wouter",
     "wwwroot"
   ],
+  "css.lint.unknownAtRules": "ignore",
   "i18n-ally.localesPaths": ["package/app/src/locale"],
   "i18n-ally.enabledParsers": ["js", "ts", "json"],
   "i18n-ally.enabledFrameworks": ["react-i18next"],

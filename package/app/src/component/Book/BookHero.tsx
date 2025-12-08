@@ -1,15 +1,6 @@
-import {
-  Box,
-  Chip,
-  Container as MuiContainer,
-  Grid,
-  Rating,
-  Stack,
-  Typography,
-} from '@mui/material';
+import {Rating} from '@mui/material';
 import React from 'react';
 import {Link} from 'wouter';
-import {useUserStore} from '@/global/userStore';
 
 import type {BookDTO} from '@package/contract';
 import {
@@ -47,109 +38,67 @@ export const BookHeroShow: React.FC<{
   rating: number;
 }> = ({bookInfo, rating}) => {
   const tags = bookInfo?.tags ?? [];
-  const user: any = useUserStore(state => state.user);
   return (
-    <div>
-      <Box
-        className="bg-cover bg-center relative"
-        style={{backgroundImage: `url(${bookInfo?.coverUrl ?? undefined})`}}
-      >
-        {/* Light Pic test is fine, the black blur is thick so the text is always able to read */}
-        {/* <Box className="bg-cover bg-center relative" style={{ backgroundImage: `url(https://static-cse.canva.cn/blob/239388/e1604019539295.jpg)` }}> */}
-        <Box className="bg-black/66 backdrop-blur-md shadow-lg">
-          <MuiContainer maxWidth="lg" className="py-6">
-            <Grid container spacing={3}>
-              {/* Cover Image */}
-              <Grid
-                size={{xs: 12, md: 3, lg: 2}}
-                className="max-h-[300px] w-full"
-              >
-                <LazyLoadImage
-                  src={bookInfo?.coverUrl ?? ''}
-                  alt={bookInfo?.title}
-                  className="h-full rounded-lg shadow-lg mr-auto ml-auto"
-                />
-              </Grid>
+    <div
+      className="bg-cover bg-center relative"
+      style={{
+        backgroundImage: `url(${bookInfo?.coverUrl || ''})`,
+      }}
+    >
+      <div className="bg-black/60 backdrop-blur-md shadow-lg w-full">
+        <div className="container mx-auto max-w-[1250px] py-6 grid grid-cols-12 gap-6 px-4">
+          {/* Cover Image */}
+          <div className="col-span-4 md:col-span-3 lg:col-span-2 flex justify-center">
+            <LazyLoadImage
+              src={bookInfo?.coverUrl || ''}
+              alt={bookInfo?.title}
+              className="max-h-[300px] rounded-lg"
+            />
+          </div>
 
-              {/* Book Info */}
-              <Grid size={{xs: 12, md: 6}}>
-                <Stack spacing={2}>
-                  {/* Title and Rating */}
-                  <Box className="flex justify-between items-center">
-                    <div className="flex-1 min-w-0">
-                      <Typography
-                        variant="h4"
-                        className="font-bold text-white break-words" // optional: break-words
-                      >
-                        {bookInfo?.title}
-                      </Typography>
+          {/* Book Info */}
+          <div className="col-span-8 md:col-span-6 text-white flex flex-col gap-3">
+            <h1 className="text-2xl font-bold break-words">
+              {bookInfo?.title}
+            </h1>
 
-                      {/* Author & Publisher Info */}
-                      <Stack spacing={1} className="text-white">
-                        <Typography>
-                          作者：
-                          <Box component="span" className="font-medium">
-                            {bookInfo?.author?.[0]?.name}
-                          </Box>
-                        </Typography>
-                        <Typography>
-                          出版社：
-                          {bookInfo?.press?.[0]?.name}
-                        </Typography>
-                        <Typography>
-                          出品方：
-                          {bookInfo?.producer?.[0]?.name}
-                        </Typography>
-                        <Typography>
-                          字数：{bookInfo?.textLength ?? 0}
-                        </Typography>
-                        <Typography>ISBN：{bookInfo?.isbn ?? ''}</Typography>
-                      </Stack>
+            <div className="space-y-1">
+              <p>
+                作者：
+                <span className="font-medium">
+                  {bookInfo?.author?.[0]?.name}
+                </span>
+              </p>
+              <p>出版社：{bookInfo?.press?.[0]?.name}</p>
+              <p>出品方：{bookInfo?.producer?.[0]?.name}</p>
+              <p>字数：{bookInfo?.textLength ?? 0}</p>
+              <p>ISBN：{bookInfo?.isbn}</p>
+            </div>
 
-                      {/* Tags */}
-                      <Box className="flex flex-wrap gap-2 mt-2">
-                        {tags?.map(tag => (
-                          <Chip
-                            key={tag}
-                            component={Link}
-                            href={`/book?tags=${tag}`}
-                            label={tag}
-                            size="small"
-                            className="*:bg-white/10 *:text-white *:hover:bg-white/20 *:px-2 *:py-1"
-                          />
-                        ))}
-                      </Box>
-                    </div>
-                  </Box>
-                </Stack>
-              </Grid>
+            {/* Tags */}
+            <div className="flex flex-wrap gap-2 mt-1">
+              {tags?.map(tag => (
+                <Link key={tag} href={`/book?tags=${tag}`}>
+                  <span className="px-2 py-1 rounded bg-white/10 text-white hover:bg-white/20 transition">
+                    {tag}
+                  </span>
+                </Link>
+              ))}
+            </div>
+          </div>
 
-              {/* Reaction Bar */}
-              <Grid size={{xs: 12, md: 3}}>
-                <div className="flex items-center gap-2 justify-end">
-                  <div className="flex flex-col items-start gap-2">
-                    <div className="flex items-center gap-2">
-                      <Rating
-                        // value={(rating || 0) / 2}
-                        value={rating}
-                        precision={0.5}
-                        readOnly
-                      />
-                      <Typography variant="h6" className="text-amber-500">
-                        {rating} / 10
-                      </Typography>
-                    </div>
-                    <BookHeroReactionBar
-                      bookInfo={bookInfo}
-                      className="self-end"
-                    />
-                  </div>
-                </div>
-              </Grid>
-            </Grid>
-          </MuiContainer>
-        </Box>
-      </Box>
+          {/* Rating + Reaction */}
+          <div className="col-span-12 md:col-span-3 lg:col-span-4">
+            <div className="flex flex-col items-end gap-2">
+              <div className="flex items-center gap-2">
+                <Rating value={rating} precision={0.5} readOnly size="large" />
+                <span className="text-2xl text-amber-500">{rating} / 10</span>
+              </div>
+              <BookHeroReactionBar bookInfo={bookInfo} />
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

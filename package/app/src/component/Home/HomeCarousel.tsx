@@ -1,10 +1,11 @@
-import {Box, Grid, Typography} from '@mui/material';
+import {Box, Grid, Typography, useMediaQuery} from '@mui/material';
 import React, {useEffect, useRef, useState} from 'react';
 import {useQuery} from '@tanstack/react-query';
 import {echoKvGetQuery} from '@/api/echokv/echokv';
 import {parseEchoKVResponse} from '@/api/echokv/util';
 import {useAlertStore} from '@/global/windowAlertStore';
 import {Link} from 'wouter';
+import {LazyLoadImage} from '@/component/Common/LazyLoadImage';
 
 import {
   Carousel,
@@ -54,6 +55,19 @@ export const BookCarousel: React.FC<BookCarouselProps> = ({
     return () => clearInterval(id);
   }, [autoplayIntervalNum]);
 
+  const smallThanXS = useMediaQuery('(max-width: 600px)');
+
+  const CarouselContentInner = ({product}: {product: any}) => {
+    return (
+      <>
+        <Typography variant="h6" fontWeight="bold" gutterBottom>
+          {product.title}
+        </Typography>
+        <Typography variant="body2">{product.lorem}</Typography>
+      </>
+    );
+  };
+
   return (
     <Carousel
       opts={{loop: true}}
@@ -65,19 +79,41 @@ export const BookCarousel: React.FC<BookCarouselProps> = ({
           <CarouselItem key={index}>
             <Link to={product?.link ?? ''}>
               <Grid container spacing={2} alignItems="center" sx={{px: 2}}>
-                <Grid size={{xs: 12, sm: 3}}>
-                  <Box
-                    component="img"
-                    src={product.cover}
-                    alt={product.title}
-                    sx={{width: '100%', borderRadius: 1}}
+                <Grid size={{xs: 0, sm: 3}}>
+                  <LazyLoadImage
+                    src={product.cover ?? ''}
+                    alt={product.title ?? ''}
+                    className="w-full h-full object-cover rounded-lg"
                   />
                 </Grid>
-                <Grid size={{xs: 12, sm: 9}}>
-                  <Typography variant="h6" fontWeight="bold" gutterBottom>
-                    {product.title}
-                  </Typography>
-                  <Typography variant="body2">{product.lorem}</Typography>
+                <Grid size={{xs: 10, sm: 9}}>
+                  {smallThanXS ? (
+                    <div
+                      className="relative w-full h-[250px] sm:h-[280px] rounded-lg overflow-hidden flex items-end"
+                      style={{
+                        backgroundImage: `url(${product.cover ?? ''})`,
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                        backgroundRepeat: 'no-repeat',
+                      }}
+                    >
+                      {/* 暗幕遮罩，向上渐变 → 更读得清 */}
+
+                      {/* 内容层 */}
+                      <div className="relative z-10 w-full space-y-1 text-white p-3 sm:p-6 ">
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent backdrop-blur-sm mb-0" />
+                        <Typography
+                          variant="caption"
+                          className="line-clamp-3 opacity-90"
+                        >
+                          <div className="font-bold">{product.title}</div>
+                          {product.lorem}
+                        </Typography>
+                      </div>
+                    </div>
+                  ) : (
+                    <CarouselContentInner product={product} />
+                  )}
                 </Grid>
               </Grid>
             </Link>

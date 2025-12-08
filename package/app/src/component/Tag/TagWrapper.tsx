@@ -128,7 +128,7 @@ export const TagWrapper: React.FC<TagWrapperProps> = ({
                   href={`/tag/domain/${domId}/title/${
                     domainTitleMap.get(domId as string) ?? String(domId)
                   }`}
-                  className="text-sm font-semibold text-blue-600 hover:underline"
+                  className="text-sm font-semibold"
                 >
                   {domainTitleMap.get(domId as string) ?? String(domId)}
                 </RouterLink>
