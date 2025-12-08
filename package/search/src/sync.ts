@@ -4,15 +4,18 @@ import {
   addOrUpdateUnits,
   addOrUpdateReadlists,
   addOrUpdateFeedbacks,
+  addOrUpdateUsers,
   deleteAllBooks,
   deleteAllUnits,
   deleteAllReadlists,
   deleteAllFeedbacks,
+  deleteAllUsers,
 } from './documents';
 import type {
   BookSearchDocument,
   UnitSearchDocument,
   FeedbackSearchDocument,
+  UserSearchDocument,
 } from '@package/contract';
 
 const prisma = new PrismaClient();
@@ -312,6 +315,57 @@ export async function syncAllFeedbacks() {
 
   return {
     message: 'sync all feedbacks success',
+    totalSynced: total,
+  };
+}
+
+// ANCHOR: Users sync with batching (cursor-based)
+export async function syncAllUsers() {
+  const BATCH_SIZE = 5000;
+
+  const deleteResult = await deleteAllUsers();
+  console.log('sync all users, deleteResult', deleteResult);
+
+  let cursor: string | undefined = undefined;
+  let total = 0;
+
+  while (true) {
+    console.log('sync all users, cursor', cursor, 'total', total);
+
+    const users: any[] = await prisma.user.findMany({
+      take: BATCH_SIZE,
+      skip: cursor ? 1 : 0,
+      cursor: cursor ? {unitId: cursor} : undefined,
+      orderBy: {unitId: 'asc'},
+    });
+
+    if (users.length === 0) break;
+
+    const formatted: UserSearchDocument[] = users.map(u => ({
+      id: u.unitId,
+      unitId: u.unitId,
+      name: u.name,
+      email: u.email,
+      slug: u.slug,
+      type: u.type,
+      avatar: u.avatar,
+      bio: u.bio,
+      description: u.description,
+      followersCount: u.followersCount,
+      followingsCount: u.followingsCount,
+      joinDate: u.joinDate,
+      permission: (u.permission ?? null) as any,
+    }));
+
+    const addResult = await addOrUpdateUsers(formatted);
+    console.log('sync all users, addResult', addResult);
+
+    total += formatted.length;
+    cursor = users[users.length - 1]!.unitId;
+  }
+
+  return {
+    message: 'sync all users success',
     totalSynced: total,
   };
 }

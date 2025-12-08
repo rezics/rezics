@@ -2,6 +2,7 @@ import type {
   CreateUserInput,
   UpdateUserInput,
   UserDTO,
+  UserListQuery,
 } from '@package/contract';
 import {userService} from './user.service';
 import {mapUserToDTO, mapUserToPublicProfile} from './mapper';
@@ -28,6 +29,8 @@ import {
 import {t} from 'elysia';
 import {coreInstance} from '../core';
 import {setCookie} from '../utils/cookie';
+import {meiliService} from '@/src/meili/meili.service';
+import {mapUserSearchDocToPublicProfile} from '@/src/meili/mapper';
 
 export const coreRoute = (api: ReturnType<typeof coreInstance>) => {
   return (
@@ -273,8 +276,11 @@ export const coreRoute = (api: ReturnType<typeof coreInstance>) => {
         async ({
           query,
         }): Promise<{users: Omit<UserDTO, 'email'>[]; total: number}> => {
-          const {users, total} = await userService.list(query);
-          return {users: users.map(mapUserToPublicProfile), total};
+          const result = await meiliService.searchUsers(query as UserListQuery);
+          return {
+            users: result.users.map(mapUserSearchDocToPublicProfile),
+            total: result.total,
+          };
         },
         {
           query: userListQuerySchema,

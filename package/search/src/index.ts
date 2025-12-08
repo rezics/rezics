@@ -8,20 +8,24 @@ export {
   initUnitIndex,
   initReadlistIndex,
   initFeedbackIndex,
+  initUserIndex,
 } from './meili_index';
 export {
   addOrUpdateBooks,
   addOrUpdateUnits,
   addOrUpdateReadlists,
   addOrUpdateFeedbacks,
+  addOrUpdateUsers,
   deleteAllBooks,
   deleteAllUnits,
   deleteAllReadlists,
   deleteAllFeedbacks,
+  deleteAllUsers,
   deleteBooks,
   deleteUnits,
   deleteReadlists,
   deleteFeedbacks,
+  deleteUsers,
 } from './documents';
 export {getSearchKey, getAdminKey, listKeys, deleteKey} from './keys';
 export {
@@ -29,6 +33,7 @@ export {
   syncAllUnits,
   syncAllReadlists,
   syncAllFeedbacks,
+  syncAllUsers,
 } from './sync';
 
 export * from './type';

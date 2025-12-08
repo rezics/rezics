@@ -3,15 +3,20 @@ import type {
   UnitListQuery,
   ReadlistListQuery,
   FeedbackListQuery,
+  UserListQuery,
 } from '@package/contract';
-import type {BookSearchResult} from './book';
-import type {UnitSearchResult} from './unit';
-import type {ReadlistSearchResult} from './readlist';
-import type {FeedbackSearchResult} from './feedback';
+import type {BookSearchResult} from '@package/contract';
+import type {
+  UnitSearchResult,
+  ReadlistSearchResult,
+  FeedbackSearchResult,
+  UserSearchResult,
+} from '@package/contract';
 import {searchBooks} from './book/book.api';
 import {searchUnits} from './unit/unit.api';
 import {searchReadlists} from './readlist/readlist.api';
 import {searchFeedbacks} from './feedback/feedback.api';
+import {searchUsers} from './user/user.api';
 import {
   syncAllBooks,
   initBookIndex,
@@ -25,6 +30,8 @@ import {
   syncAllReadlists,
   initFeedbackIndex,
   syncAllFeedbacks,
+  initUserIndex,
+  syncAllUsers,
 } from '@package/search/src/index';
 
 /**
@@ -68,6 +75,13 @@ export class MeiliService {
   }
 
   /**
+   * Search users using the contract-based UserListQuery.
+   */
+  async searchUsers(options: UserListQuery): Promise<UserSearchResult> {
+    return searchUsers(options);
+  }
+
+  /**
    * Initialize Meilisearch `books` index settings.
    */
   async initBooksIndex(): Promise<void> {
@@ -96,6 +110,13 @@ export class MeiliService {
   }
 
   /**
+   * Initialize Meilisearch `users` index settings.
+   */
+  async initUsersIndex(): Promise<void> {
+    await initUserIndex();
+  }
+
+  /**
    * Trigger a full re-sync of all books into Meilisearch.
    */
   async syncAllBooks(): Promise<unknown> {
@@ -121,6 +142,13 @@ export class MeiliService {
    */
   async syncAllFeedbacks(): Promise<unknown> {
     return syncAllFeedbacks();
+  }
+
+  /**
+   * Trigger a full re-sync of all users into Meilisearch.
+   */
+  async syncAllUsers(): Promise<unknown> {
+    return syncAllUsers();
   }
 
   /**

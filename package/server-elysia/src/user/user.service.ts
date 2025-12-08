@@ -9,6 +9,7 @@ import {userInclude} from './types';
 import type {CreateUserInput, UpdateUserInput} from '@package/contract';
 import {hashPassword, verifyPassword} from './utils';
 import nodemailer from 'nodemailer';
+import {syncUserToMeili, deleteUserFromMeili} from '@/src/meili/user/sync';
 
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
@@ -153,6 +154,8 @@ export class UserService {
       include: userInclude,
     });
 
+    await syncUserToMeili(user.unitId);
+
     return user as UserWithRelations;
   }
 
@@ -182,6 +185,8 @@ export class UserService {
       include: userInclude,
     });
 
+    await syncUserToMeili(unitId);
+
     return user as UserWithRelations;
   }
 
@@ -190,6 +195,7 @@ export class UserService {
    */
   async delete(unitId: string): Promise<void> {
     await prisma.user.delete({where: {unitId}});
+    await deleteUserFromMeili(unitId);
   }
 
   /**

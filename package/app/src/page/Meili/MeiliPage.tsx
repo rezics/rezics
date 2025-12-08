@@ -72,6 +72,16 @@ export function MeiliPage() {
     onError: err => setMessage({type: 'error', text: err.message}),
   });
 
+  const initUsersMutation = meiliAdminMutations.useInitUsersIndex({
+    onSuccess: res => {
+      setMessage({
+        type: 'success',
+        text: res.message || 'Users 索引初始化完成',
+      });
+    },
+    onError: err => setMessage({type: 'error', text: err.message}),
+  });
+
   const syncBooksMutation = meiliAdminMutations.useSyncBooks({
     onSuccess: () => {
       setMessage({type: 'success', text: '开始同步全部 Books 到 Meili'});
@@ -109,6 +119,12 @@ export function MeiliPage() {
         type: 'success',
         text: '开始同步全部 Feedbacks 到 Meili',
       });
+    },
+    onError: err => setMessage({type: 'error', text: err.message}),
+  });
+  const syncUsersMutation = meiliAdminMutations.useSyncUsers({
+    onSuccess: () => {
+      setMessage({type: 'success', text: '开始同步全部 Users 到 Meili'});
     },
     onError: err => setMessage({type: 'error', text: err.message}),
   });
@@ -261,6 +277,16 @@ export function MeiliPage() {
                     ? '初始化中…'
                     : '初始化 Feedbacks 索引'}
                 </Button>
+                <Button
+                  variant="contained"
+                  size="small"
+                  onClick={() => initUsersMutation.mutate()}
+                  disabled={initUsersMutation.isPending}
+                >
+                  {initUsersMutation.isPending
+                    ? '初始化中…'
+                    : '初始化 Users 索引'}
+                </Button>
               </div>
               <Typography variant="caption" color="text.secondary">
                 这些操作需要 Root 权限，且会访问后端 JWT
@@ -312,6 +338,14 @@ export function MeiliPage() {
                   {syncFeedbacksMutation.isPending
                     ? '同步中…'
                     : '同步全部 Feedbacks'}
+                </Button>
+                <Button
+                  variant="outlined"
+                  size="small"
+                  onClick={() => syncUsersMutation.mutate()}
+                  disabled={syncUsersMutation.isPending}
+                >
+                  {syncUsersMutation.isPending ? '同步中…' : '同步全部 Users'}
                 </Button>
               </div>
               <Typography variant="caption" color="text.secondary">

@@ -7,6 +7,7 @@ import {
   userListQuerySchema,
   createUserSchema,
   type UserDTO,
+  type UserListQuery,
 } from '@package/contract';
 import {userService} from '../user/user.service';
 import {
@@ -14,6 +15,8 @@ import {
   hasPermissionToUpdateUser,
   hasPermissionToCreateUser,
 } from './permission';
+import {meiliService} from '../meili/meili.service';
+import {mapUserSearchDocToDTO} from '../meili/mapper';
 
 export const userRoute = (api: ReturnType<typeof coreInstance>) => {
   return (
@@ -42,12 +45,11 @@ export const userRoute = (api: ReturnType<typeof coreInstance>) => {
             throw new Error('Forbidden: token does not have user:read scope');
           }
 
-          const {users, total} = await userService.list(query);
-          const {mapUserToDTO} = await import('../user/mapper');
+          const result = await meiliService.searchUsers(query as UserListQuery);
 
           return {
-            users: users.map(mapUserToDTO),
-            total,
+            users: result.users.map(mapUserSearchDocToDTO),
+            total: result.total,
           };
         },
         {

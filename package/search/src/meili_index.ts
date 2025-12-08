@@ -117,3 +117,22 @@ export async function initFeedbackIndex() {
   });
   feedbackIndex.addDocuments([], {primaryKey: 'id'});
 }
+
+// ANCHOR: Users index
+export const userIndex = meili.index('users');
+
+/**
+ * Initialize or update the Meilisearch `users` index settings.
+ *
+ * - `searchableAttributes`: fields used for full-text search
+ * - `filterableAttributes`: fields usable in filter expressions
+ * - `sortableAttributes`: fields usable in sort expressions
+ */
+export async function initUserIndex() {
+  await userIndex.updateSettings({
+    searchableAttributes: ['name', 'slug', 'email', 'bio', 'description'],
+    filterableAttributes: ['slug', 'email', 'type', 'joinDate'],
+    sortableAttributes: ['joinDate', 'followersCount', 'followingsCount'],
+  });
+  userIndex.addDocuments([], {primaryKey: 'id'});
+}

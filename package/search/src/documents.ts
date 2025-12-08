@@ -4,6 +4,7 @@ import {
   unitIndex,
   readlistIndex,
   feedbackIndex,
+  userIndex,
 } from './meili_index';
 
 // ANCHOR: Books
@@ -56,4 +57,17 @@ export async function deleteFeedbacks(ids: string[]) {
 
 export async function deleteAllFeedbacks() {
   return feedbackIndex.deleteAllDocuments();
+}
+
+// ANCHOR: Users
+export async function addOrUpdateUsers(users: any[]) {
+  return userIndex.addDocuments(users);
+}
+
+export async function deleteUsers(ids: string[]) {
+  return userIndex.deleteDocuments(ids);
+}
+
+export async function deleteAllUsers() {
+  return userIndex.deleteAllDocuments();
 }

@@ -15,7 +15,12 @@ import {meiliService} from './meili.service';
 import {verifyAuth} from '@/src/user/utils';
 import {deleteAllUnits} from '@package/search/src/documents';
 import {checkMeiliHealth} from '@package/search/src/client';
-import {isRoot} from '@package/contract';
+import {
+  isRoot,
+  userListQuerySchema,
+  type UserListQuery,
+} from '@package/contract';
+import {mapUserSearchDocToPublicProfile} from './mapper';
 
 /**
  * Meili API - Elysia routes for search and key management.
@@ -139,6 +144,32 @@ export const meiliApi = coreInstance('/meili')
   )
 
   /**
+   * Search users using Meilisearch.
+   *
+   * GET /meili/users/search
+   */
+  .get(
+    '/users/search',
+    async ({query}) => {
+      const options = query as UserListQuery;
+      const result = await meiliService.searchUsers(options);
+      return {
+        users: result.users.map(mapUserSearchDocToPublicProfile),
+        total: result.total,
+      };
+    },
+    {
+      query: userListQuerySchema,
+      detail: {
+        summary: 'Search users (Meilisearch)',
+        description:
+          'Full-text search over users using Meilisearch, driven by contract-based UserListQuery.',
+        tags: ['Meili', 'Users', 'Search'],
+      },
+    },
+  )
+
+  /**
    * Initialize the `books` index (idempotent).
    *
    * POST /meili/books/init
@@ -237,6 +268,32 @@ export const meiliApi = coreInstance('/meili')
     {
       detail: {
         summary: 'Init units index',
+        tags: ['Meili', 'Admin'],
+      },
+    },
+  )
+
+  /**
+   * Initialize the `users` index (idempotent).
+   *
+   * POST /meili/users/init
+   */
+  .post(
+    '/users/init',
+    async ({headers, jwt, set}) => {
+      const payload = await verifyAuth(headers.authorization, jwt, set);
+      if (!isRoot(payload as any)) {
+        set.status = 403;
+        throw new Error(
+          'Forbidden: You are not authorized to init users index',
+        );
+      }
+      await meiliService.initUsersIndex();
+      return {message: 'users index initialized'};
+    },
+    {
+      detail: {
+        summary: 'Init users index',
         tags: ['Meili', 'Admin'],
       },
     },
@@ -342,6 +399,35 @@ export const meiliApi = coreInstance('/meili')
     },
   )
 
+  /**
+   * Trigger a full sync of all users into Meilisearch.
+   *
+   * POST /meili/users/sync
+   */
+  .post(
+    '/users/sync',
+    async ({headers, jwt, set}) => {
+      const payload = await verifyAuth(headers.authorization, jwt, set);
+      if (!isRoot(payload as any)) {
+        set.status = 403;
+        throw new Error('Forbidden: You are not authorized to sync all users');
+      }
+      const task = await meiliService.syncAllUsers();
+      return {task};
+    },
+    {
+      detail: {
+        summary: 'Sync all users to Meilisearch',
+        tags: ['Meili', 'Admin'],
+      },
+    },
+  )
+
+  /**
+   * Delete all units from Meilisearch.
+   *
+   * GET /meili/units/deleteAllUnits
+   */
   .get(
     '/units/deleteAllUnits',
     async ({headers, jwt, set}) => {

@@ -1,9 +1,51 @@
-// Currently Meili API returns documents that are already in a public-safe
-// shape via the `@package/search` package, so this file is kept minimal.
-//
-// If you later want to map Meili documents into contract-level DTOs,
-// you can add that logic here.
+import type {UserDTO} from '@package/contract';
+import type {UserSearchDocument} from '@package/contract';
 
-export {};
+/**
+ * Map a Meili user document into full `UserDTO`.
+ * Mainly used by token/admin flows where email & permission are required.
+ */
+export function mapUserSearchDocToDTO(doc: UserSearchDocument): UserDTO {
+  return {
+    unitId: doc.unitId,
+    email: doc.email,
+    slug: doc.slug ?? undefined,
+    type: doc.type ?? undefined,
+    name: doc.name,
+    avatar: doc.avatar ?? undefined,
+    bio: doc.bio ?? undefined,
+    description: doc.description ?? undefined,
+    followersCount: doc.followersCount ?? undefined,
+    followingsCount: doc.followingsCount ?? undefined,
+    permission: doc.permission,
+    joinDate: doc.joinDate
+      ? typeof doc.joinDate === 'string'
+        ? doc.joinDate
+        : doc.joinDate.toISOString()
+      : undefined,
+  };
+}
 
-
+/**
+ * Map a Meili user document into a public profile
+ * (without sensitive fields like email & permission).
+ */
+export function mapUserSearchDocToPublicProfile(
+  doc: UserSearchDocument,
+): Omit<UserDTO, 'email'> {
+  return {
+    unitId: doc.unitId,
+    slug: doc.slug ?? undefined,
+    name: doc.name,
+    avatar: doc.avatar ?? undefined,
+    bio: doc.bio ?? undefined,
+    description: doc.description ?? undefined,
+    followersCount: doc.followersCount ?? undefined,
+    followingsCount: doc.followingsCount ?? undefined,
+    joinDate: doc.joinDate
+      ? typeof doc.joinDate === 'string'
+        ? doc.joinDate
+        : doc.joinDate.toISOString()
+      : undefined,
+  };
+}

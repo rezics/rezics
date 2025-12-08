@@ -77,7 +77,7 @@ export const userApi = {
     const qs = query
       ? `?${new URLSearchParams(query as Record<string, string>).toString()}`
       : '';
-    return apiFetch(`/users${qs}`);
+    return apiFetch(`/meili/users/search${qs}`);
   },
 
   get: async (unitId: string): Promise<Omit<UserDTO, 'email'>> => {
