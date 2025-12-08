@@ -10,7 +10,6 @@ import {useMediaQuery, useTheme} from '@mui/material';
 import {
   Collapse,
   Divider,
-  Drawer,
   IconButton,
   List,
   ListItem,
@@ -24,6 +23,8 @@ import {Link, useLocation} from 'wouter';
 
 import {useWindowSize} from 'react-use';
 import useMeasure from 'react-use-measure';
+
+import {Sidebar as UiSidebar} from '@/component/ui/sidebar';
 
 function customWrapperOverflow(
   noScrollBar: boolean,
@@ -73,6 +74,9 @@ export function DrawerHeader({
 }
 
 interface SidebarProps {
+  isMobile: boolean;
+  sidebarOpen: boolean;
+  sidebarWidth: number;
   onClose: () => void;
   handleDrawerToggle: () => void;
   NAVIGATION: NavigationItem[];
@@ -85,6 +89,9 @@ interface SidebarProps {
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
+  isMobile,
+  sidebarOpen,
+  sidebarWidth,
   onClose,
   handleDrawerToggle,
   NAVIGATION,
@@ -95,13 +102,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   isDragging = false,
   layoutType = 'type-b',
 }) => {
-  const {
-    sidebarOpen,
-    setSidebarHeightBelow,
-    toggleItem,
-    openItems,
-    drawerWidth,
-  } = useLayoutStore();
+  const {setSidebarHeightBelow, toggleItem, openItems} = useLayoutStore();
 
   const [refAbove, {height}] = useMeasure();
   const {height: windowHeight} = useWindowSize();
@@ -117,7 +118,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
   }, [noScrollBar, onOverflowx, onOverflowy]);
 
   const [location, _setLocation] = useLocation();
-  const isMobile = useMediaQuery(theme => theme.breakpoints.down('md'));
 
   const handleItemClick = (
     // @ts-expect-error - event is not used
@@ -137,98 +137,89 @@ export const Sidebar: React.FC<SidebarProps> = ({
     }
   };
 
-  return (
-    <Drawer
-      variant={isMobile ? 'temporary' : 'permanent'}
-      open={sidebarOpen}
-      onClose={onClose}
-      slotProps={{
-        paper: {
-          style: !isMobile
-            ? {width: drawerWidth, transition: 'width 0.3s ease-out'}
-            : {width: drawerWidth}, // mobile 不动 width，不动 transition
-        },
-      }}
-      sx={{
-        ...(isMobile && {
-          '& .MuiDrawer-paper': {
-            transition: 'transform 225ms cubic-bezier(0, 0, 0.2, 1)',
-          },
-        }),
-      }}
-    >
-      {!isDragging && (
-        <div ref={refAbove}>
-          <DrawerHeader handleDrawerToggle={handleDrawerToggle} />
-          {layoutType === 'type-a' && <Divider />}
-          {layoutType === 'type-b' && <div className="mt-2" />}
-          <List>
-            {NAVIGATION.map((item, index) => {
-              if (item.kind === 'header') {
-                return (
-                  <ListItem key={index}>
-                    <Typography variant="caption">{item.title}</Typography>
-                  </ListItem>
-                );
-              }
-
-              if (item.kind === 'divider') {
-                return <Divider key={index} />;
-              }
-
-              const isActive = location === `/${item.segment}`;
-              const hasChildren = !!item.children && item.children.length > 0;
-              const isOpen = item.segment ? !!openItems[item.segment] : false;
-
+  const sidebarInner = !isDragging && (
+    <>
+      <div ref={refAbove}>
+        <DrawerHeader handleDrawerToggle={handleDrawerToggle} />
+        {layoutType === 'type-a' && <Divider />}
+        {layoutType === 'type-b' && <div className="mt-2" />}
+        <List>
+          {NAVIGATION.map((item, index) => {
+            if (item.kind === 'header') {
               return (
-                <div key={item.segment || index.toString()}>
-                  <ListItemButton
-                    component={Link}
-                    href={hasChildren ? '' : `${item.segment}`}
-                    selected={isActive && !hasChildren}
-                    onClick={(event: any) =>
-                      handleItemClick(event, item.segment, hasChildren)
-                    }
-                  >
-                    <ListItemIcon>{item.icon}</ListItemIcon>
-                    <ListItemText primary={item.title} />
-                    {hasChildren && (
-                      <span>{isOpen ? <ExpandLess /> : <ExpandMore />}</span>
-                    )}
-                  </ListItemButton>
-
-                  {hasChildren && item.segment && (
-                    <Collapse in={isOpen} timeout="auto" unmountOnExit>
-                      <List component="div" disablePadding>
-                        {item.children?.map((child: any) => {
-                          const isChildActive =
-                            location === `/${child.segment}`;
-                          return (
-                            <ListItemButton
-                              key={child.segment}
-                              component={Link}
-                              href={`${child.segment}`}
-                              selected={isChildActive}
-                              onClick={event =>
-                                handleItemClick(event, child.segment, false)
-                              }
-                              sx={{pl: 4}}
-                            >
-                              <ListItemIcon>{child.icon}</ListItemIcon>
-                              <ListItemText primary={child.title} />
-                            </ListItemButton>
-                          );
-                        })}
-                      </List>
-                    </Collapse>
-                  )}
-                </div>
+                <ListItem key={index}>
+                  <Typography variant="caption">{item.title}</Typography>
+                </ListItem>
               );
-            })}
-          </List>
-        </div>
-      )}
-      {!isDragging && <div style={{height: heightBelow}}>{children}</div>}
-    </Drawer>
+            }
+
+            if (item.kind === 'divider') {
+              return <Divider key={index} />;
+            }
+
+            const isActive = location === `/${item.segment}`;
+            const hasChildren = !!item.children && item.children.length > 0;
+            const isOpen = item.segment ? !!openItems[item.segment] : false;
+
+            return (
+              <div key={item.segment || index.toString()}>
+                <ListItemButton
+                  component={Link}
+                  href={hasChildren ? '' : `${item.segment}`}
+                  selected={isActive && !hasChildren}
+                  onClick={(event: any) =>
+                    handleItemClick(event, item.segment, hasChildren)
+                  }
+                >
+                  <ListItemIcon>{item.icon}</ListItemIcon>
+                  <ListItemText primary={item.title} />
+                  {hasChildren && (
+                    <span>{isOpen ? <ExpandLess /> : <ExpandMore />}</span>
+                  )}
+                </ListItemButton>
+
+                {hasChildren && item.segment && (
+                  <Collapse in={isOpen} timeout="auto" unmountOnExit>
+                    <List component="div" disablePadding>
+                      {item.children?.map((child: any) => {
+                        const isChildActive = location === `/${child.segment}`;
+                        return (
+                          <ListItemButton
+                            key={child.segment}
+                            component={Link}
+                            href={`${child.segment}`}
+                            selected={isChildActive}
+                            onClick={event =>
+                              handleItemClick(event, child.segment, false)
+                            }
+                            sx={{pl: 4}}
+                          >
+                            <ListItemIcon>{child.icon}</ListItemIcon>
+                            <ListItemText primary={child.title} />
+                          </ListItemButton>
+                        );
+                      })}
+                    </List>
+                  </Collapse>
+                )}
+              </div>
+            );
+          })}
+        </List>
+      </div>
+      <div style={{height: heightBelow}}>{children}</div>
+    </>
+  );
+
+  // Desktop: simple flex-based sidebar that pushes content by taking width.
+  return (
+    <UiSidebar
+      isOpen={sidebarOpen}
+      onClose={onClose}
+      mode={isMobile ? 'fixed' : 'inline'}
+      // width={`${sidebarWidth}px`}
+    >
+      {sidebarInner}
+    </UiSidebar>
   );
 };

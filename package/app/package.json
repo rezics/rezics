@@ -61,7 +61,6 @@
     "react-use": "17.6.0",
     "react-use-measure": "2.1.7",
     "react-window": "1.8.11",
-    "swiper": "11.2.10",
     "swr": "^2.3.6",
     "tailwind-merge": "^3.4.0",
     "tailwindcss": "4.1.11",

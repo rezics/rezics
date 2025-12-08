@@ -55,6 +55,9 @@ export const BookReadLayout: React.FC<BookReadLayoutProps> = ({
       />
 
       <Sidebar
+        sidebarOpen={sidebarOpen}
+        sidebarWidth={drawerWidth}
+        isMobile={isMobile}
         onClose={() => isMobile && closeSidebar()}
         handleDrawerToggle={handleDrawerToggle}
         NAVIGATION={[]}

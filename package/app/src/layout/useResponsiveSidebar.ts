@@ -48,7 +48,6 @@ export const useResponsiveSidebar = (): ResponsiveSidebarState => {
     useLayoutStore.setState({drawerWidth: width});
   }
   const handleDrawerToggle = () => {
-    console.log('handleDrawerToggle', sidebarOpen);
     setIsSidebarTransitioning(true);
     toggleSidebar();
     window.setTimeout(() => {

@@ -27,10 +27,9 @@ export const useLayoutStore = create<LayoutState>()(
       toggleSidebar: () =>
         set((state: any) => ({
           sidebarOpen: !state.sidebarOpen,
-          drawerWidth: state.drawerWidth === 240 ? 0 : 240,
         })),
 
-      closeSidebar: () => set({sidebarOpen: false, drawerWidth: 0}),
+      closeSidebar: () => set({sidebarOpen: false}),
 
       setSidebarHeightBelow: (h: number) => set({sidebarHeightBelow: h}),
 

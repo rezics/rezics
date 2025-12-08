@@ -7,6 +7,7 @@ import {AppBar, IconButton, Toolbar, Typography} from '@mui/material';
 import {useTheme} from '@mui/material/styles';
 import React from 'react';
 import {useTranslation} from 'react-i18next';
+import {cn} from '@/lib/utils';
 // import clsx from 'clsx';
 
 interface HeaderProps {
@@ -53,7 +54,10 @@ export const Header: React.FC<HeaderProps> = ({
           duration: theme.transitions.duration.enteringScreen,
         }),
       }}
-      className={isDragging ? 'rounded-tl-2xl rounded-bl-2xl' : ''}
+      className={cn(
+        isDragging ? 'rounded-tl-2xl rounded-bl-2xl' : '',
+        'pointer-events-auto',
+      )}
     >
       <Toolbar>
         <IconButton

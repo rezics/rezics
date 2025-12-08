@@ -27,9 +27,9 @@ export const BookEditLayout: React.FC<BookEditLayoutProps> = ({
     themeMode,
     toggleTheme,
     drawerWidth,
+    setDrawerWidth,
     isMobile,
     closeSidebar,
-    setDrawerWidth,
     isDragging,
     setIsDragging,
     isSidebarTransitioning,
@@ -38,6 +38,10 @@ export const BookEditLayout: React.FC<BookEditLayoutProps> = ({
   // UI state
   const {sidebarHeightBelow} = useLayoutStore();
   const [height, setHeight] = useState(sidebarHeightBelow);
+
+  useEffect(() => {
+    console.log('BookEditLayout drawerWidth', drawerWidth);
+  }, [drawerWidth]);
 
   useEffect(() => {
     setHeight(sidebarHeightBelow);
@@ -55,6 +59,9 @@ export const BookEditLayout: React.FC<BookEditLayoutProps> = ({
       />
       <div id="book-edit-sidebar">
         <Sidebar
+          sidebarOpen={sidebarOpen}
+          sidebarWidth={drawerWidth}
+          isMobile={isMobile}
           onClose={() => isMobile && closeSidebar()}
           handleDrawerToggle={handleDrawerToggle}
           NAVIGATION={NAVIGATION(bookId || '')}
