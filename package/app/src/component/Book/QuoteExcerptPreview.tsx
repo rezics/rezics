@@ -4,7 +4,7 @@ import {QuoteExcerptListContainer} from '../Review/QuoteExcerptList.tsx';
 
 import {useQuery} from '@tanstack/react-query';
 import {buildMeiliUnitQuery} from '@/api/meili/meili.queries';
-import {UnitType} from '@package/contract/src/unit';
+import {UnitType} from '@package/contract';
 
 export type QuoteExcerptPreviewContainerProps = {
   id: string;

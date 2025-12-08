@@ -1,0 +1,7 @@
+{
+  "name": "rezics-book-library",
+  "private": true,
+  "workspaces": [
+    "package/*"
+  ]
+}

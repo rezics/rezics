@@ -45,7 +45,7 @@ function buildTextLengthFilter(input: number | {min?: number; max?: number}) {
 /**
  * Higher-level search API for books.
  *
- * - Input is {@link BookQueryOptions} from `@package/contract/src/search.ts`.
+ * - Input is {@link BookQueryOptions} from `@package/contract`.
  * - It uses {@link toBookQueryString} to build the text query.
  * - It maps contract fields like `nsfw`, `tags`, `authorIds` etc. into
  *   Meilisearch filter expressions and sort options.

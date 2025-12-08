@@ -1,7 +1,7 @@
 import React, {useEffect} from 'react';
 import {useState} from 'react';
 import {buildMeiliUnitQuery} from '@/api/meili/meili.queries';
-import {UnitType} from '@package/contract/src/unit';
+import {UnitType} from '@package/contract';
 import {
   Button,
   IconButton,

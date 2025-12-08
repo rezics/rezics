@@ -6,8 +6,7 @@
       "@component/*": ["src/component/*"],
       "@page/*": ["src/page/*"],
       "@util/*": ["src/util/*"],
-      "@locale": ["src/locale/index.ts"],
-      "@package/*": ["../*"]
+      "@locale": ["src/locale/index.ts"]
     },
     /* 输出 */
     "target": "ES2022",

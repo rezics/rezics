@@ -1,5 +1,5 @@
 {
-  "name": "search",
+  "name": "@package/search",
   "module": "src/index.ts",
   "type": "module",
   "private": true,
@@ -12,6 +12,8 @@
   "dependencies": {
     "@types/node": "^24.10.1",
     "dotenv": "^17.2.3",
-    "meilisearch": "^0.54.0"
+    "meilisearch": "^0.54.0",
+    "@package/server": "workspace:*",
+    "@package/contract": "workspace:*"
   }
 }

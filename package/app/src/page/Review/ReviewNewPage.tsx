@@ -1,4 +1,4 @@
-import {type ReviewResponse} from '@package/contract/src/review';
+import {type ReviewResponse} from '@package/contract';
 import {ReviewEditPage} from './ReviewEditPage';
 import {useState} from 'react';
 import {TextField} from '@mui/material';
@@ -8,7 +8,7 @@ import {useCreateReviewMutation} from '@/api/review/review.mutations';
 import {useAlertStore} from '@/global/windowAlertStore';
 import {useUserStore} from '@/global/userStore';
 import {useSearchParams} from 'wouter';
-import {UnitType} from '@package/contract/src/unit';
+import {UnitType} from '@package/contract';
 export function ReviewNewPage({bookUnitId}: {bookUnitId: string}) {
   const [searchParams, _setSearchParams] = useSearchParams();
   const [reviewData, setReviewData] = useState<ReviewResponse>(

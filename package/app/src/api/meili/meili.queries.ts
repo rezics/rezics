@@ -10,7 +10,7 @@ import {
   meiliUnitApi,
 } from './meili.api';
 import {type BookFilters} from '../book/book.types';
-import type {UnitListResponse, UnitType} from '@package/contract/src/unit';
+import type {UnitListResponse, UnitType} from '@package/contract';
 import {hashFn} from '../utils/hash';
 
 export const meiliBookSearchQuery = (filters?: BookFilters) =>

@@ -1,6 +1,6 @@
 import type {UnitListQuery} from '@package/contract';
 import {unitIndex} from '@package/search/src/meili_index';
-import type {UnitSearchDocument, UnitSearchResult} from './index';
+import type {UnitSearchDocument, UnitSearchResult} from '@package/contract';
 import type {SearchResponse} from '@package/search/src/index';
 
 /**
@@ -45,7 +45,7 @@ function escapeValues(values: string[]): string {
 /**
  * Higher-level search API for units.
  *
- * - Input is {@link UnitListQuery} from `@package/contract/src/unit.ts`.
+ * - Input is {@link UnitListQuery} from `@package/contract`.
  * - It maps contract fields like `q`, `types`, `statuses`, `tags`, `userIds`,
  *   `domainIds`, `targetUnitIds`, etc. into Meilisearch filter expressions
  *   and sort options.

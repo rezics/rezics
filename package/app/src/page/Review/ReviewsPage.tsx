@@ -12,7 +12,7 @@ import {useSearchParams} from 'wouter';
 import {SimpleSearchInput} from '@/component/Search/SimpleSearchInput';
 import {buildMeiliUnitQuery} from '@/api/meili/meili.queries';
 import {reactionApi} from '@/api/reaction/reaction.api';
-import {UnitType} from '@package/contract/src/unit';
+import {UnitType} from '@package/contract';
 import {mapUnitListToReviewListResponse} from '@/api/meili/meili.api';
 
 type Review = ReviewDTO;

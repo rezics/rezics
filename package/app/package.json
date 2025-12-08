@@ -12,6 +12,7 @@
     "format:check": "prettier --check ."
   },
   "dependencies": {
+    "@package/contract": "workspace:*",
     "@effect/cli": "^0.69.0",
     "@effect/platform-node": "^0.96.0",
     "@emotion/react": "11.14.0",

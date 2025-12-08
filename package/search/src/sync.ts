@@ -1,4 +1,4 @@
-import {PrismaClient} from '@package/server-elysia/prisma/generated/client';
+import {PrismaClient} from '@package/server';
 import {
   addOrUpdateBooks,
   addOrUpdateUnits,
@@ -7,10 +7,7 @@ import {
   deleteAllUnits,
   deleteAllReadlists,
 } from './documents';
-import type {
-  BookSearchDocument,
-  UnitSearchDocument,
-} from '@package/contract/src/meili';
+import type {BookSearchDocument, UnitSearchDocument} from '@package/contract';
 
 const prisma = new PrismaClient();
 

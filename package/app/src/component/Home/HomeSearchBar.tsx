@@ -1,7 +1,7 @@
 import React from 'react';
 import {useLocation} from 'wouter';
 import {BookSearchContainer} from '@/component/BookLib/BookSearch/BookSearch';
-import type {BookQueryOptions} from '@package/contract/src/search';
+import type {BookQueryOptions} from '@package/contract';
 
 export type HomeSearchBarProps = object;
 

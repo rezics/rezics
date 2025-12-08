@@ -6,7 +6,7 @@ import type {
   ReviewDTO,
   ReviewListResponse,
 } from '@package/contract';
-import type {ReadlistSearchResult} from '@package/contract/src/meili/readlist';
+import type {ReadlistSearchResult} from '@package/contract';
 
 /**
  * Map a single Unit (from Meili unit index) into a ReviewDTO.

@@ -1,13 +1,13 @@
 /* eslint-disable no-undef */
-import tailwindcss from "@tailwindcss/vite";
-import react from "@vitejs/plugin-react";
-import { resolve } from "node:path";
-import process from "node:process";
-import { defineConfig, loadEnv } from "vite";
+import tailwindcss from '@tailwindcss/vite';
+import react from '@vitejs/plugin-react';
+import {resolve} from 'node:path';
+import process from 'node:process';
+import {defineConfig, loadEnv} from 'vite';
 
 // https://vitejs.dev/config/
-export default defineConfig(({ mode }) => {
-  const env = loadEnv(mode, process.cwd(), "ICS");
+export default defineConfig(({mode}) => {
+  const env = loadEnv(mode, process.cwd(), 'ICS');
 
   return {
     plugins: [tailwindcss(), react()],
@@ -16,16 +16,15 @@ export default defineConfig(({ mode }) => {
     },
     resolve: {
       alias: {
-        "@": resolve(__dirname, "./src"),
-        "@component": resolve(__dirname, "./src/component"),
-        "@page": resolve(__dirname, "./src/page"),
-        "@util": resolve(__dirname, "./src/util"),
-        "@locale": resolve(__dirname, "./src/locale/index.ts"),
-        "@package": resolve(__dirname, "../"),
+        '@': resolve(__dirname, './src'),
+        '@component': resolve(__dirname, './src/component'),
+        '@page': resolve(__dirname, './src/page'),
+        '@util': resolve(__dirname, './src/util'),
+        '@locale': resolve(__dirname, './src/locale/index.ts'),
       },
     },
     define: {
-      "process.env": env,
+      'process.env': env,
     },
   };
 });

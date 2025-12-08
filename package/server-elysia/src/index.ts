@@ -15,6 +15,8 @@ import {tokenApi} from './token';
 import {feedbackApi} from './feedback';
 import {cors} from '@elysiajs/cors';
 
+export * from '../prisma/generated/client';
+
 import {getProdState} from './utils/getProdState';
 
 import 'dotenv/config';

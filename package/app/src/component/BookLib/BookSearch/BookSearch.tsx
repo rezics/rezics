@@ -2,8 +2,8 @@ import React, {useMemo, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import {Search} from '@/component/Search';
 import type {SearchInfo} from '@/component/Search/searchParser';
-import type {BookQueryOptions} from '@package/contract/src/search';
-import {bookQueryOptionsSchema} from '@package/contract/src/search';
+import type {BookQueryOptions} from '@package/contract';
+import {bookQueryOptionsSchema} from '@package/contract';
 
 export type BookSortType =
   | 'relevance'

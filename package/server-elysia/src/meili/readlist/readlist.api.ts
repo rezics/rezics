@@ -1,9 +1,6 @@
 import type {ReadlistListQuery} from '@package/contract';
 import {readlistIndex} from '@package/search/src/meili_index';
-import type {
-  ReadlistSearchDocument,
-  ReadlistSearchResult,
-} from './index';
+import type {ReadlistSearchDocument, ReadlistSearchResult} from './index';
 import type {SearchResponse} from '@package/search/src/index';
 
 /**
@@ -48,7 +45,7 @@ function escapeValues(values: string[]): string {
 /**
  * Higher-level search API for readlists.
  *
- * - Input is {@link ReadlistListQuery} from `@package/contract/src/readlist.ts`.
+ * - Input is {@link ReadlistListQuery} from `@package/contract`.
  * - It maps contract fields like `q`, `userId`, `tags`, `hasBookUnitId`,
  *   `hasReviewUnitId`, etc. into Meilisearch filter expressions and sort options.
  *
@@ -63,16 +60,11 @@ export async function searchReadlists(
 
   // User filter
   if (opts.userId) {
-    filter.push(
-      `userId = "${opts.userId.trim().replace(/"/g, '\\"')}"`,
-    );
+    filter.push(`userId = "${opts.userId.trim().replace(/"/g, '\\"')}"`);
   }
 
   // Tags (tag / tags)
-  const tagList = [
-    ...parseCsv(opts.tags),
-    ...(opts.tag ? [opts.tag] : []),
-  ];
+  const tagList = [...parseCsv(opts.tags), ...(opts.tag ? [opts.tag] : [])];
   if (tagList.length > 0) {
     filter.push(`tags IN [${escapeValues(tagList)}]`);
   }
@@ -92,8 +84,7 @@ export async function searchReadlists(
   // Sort
   const sort: string[] = [];
   const sortType = opts.sort?.type ?? 'createdAt';
-  const sortOrder =
-    opts.sort?.order?.toLowerCase() === 'asc' ? 'asc' : 'desc';
+  const sortOrder = opts.sort?.order?.toLowerCase() === 'asc' ? 'asc' : 'desc';
 
   // Meilisearch 里目前只声明了 createdAt / updatedAt 为 sortable
   if (sortType === 'createdAt' || sortType === 'updatedAt') {
@@ -118,8 +109,7 @@ export async function searchReadlists(
     const content = hit.content ?? '';
     return {
       ...hit,
-      content:
-        content.length > 500 ? content.slice(0, 500) + '...' : content,
+      content: content.length > 500 ? content.slice(0, 500) + '...' : content,
     };
   });
 
@@ -130,5 +120,3 @@ export async function searchReadlists(
     query: resp.query ?? q,
   };
 }
-
-

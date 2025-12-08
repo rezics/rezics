@@ -9,7 +9,7 @@ import type {
   ReadlistListQuery,
   UnitListResponse,
 } from '@package/contract';
-import type {ReadlistSearchResult} from '@package/contract/src/meili/readlist';
+import type {ReadlistSearchResult} from '@package/contract';
 import {buildQueryString} from '../utils/buildQuery';
 import {apiFetch} from '../react-query/http';
 import type {BookFilters} from '../book/book.types';

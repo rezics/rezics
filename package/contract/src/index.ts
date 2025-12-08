@@ -13,3 +13,4 @@ export * from './user';
 export * from './reaction';
 export * from './unit';
 export * from './token';
+export * from './meili';

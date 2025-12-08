@@ -3,7 +3,7 @@ import React from 'react';
 import {ShortReviewListShow} from '../Review/ShortReviewList.tsx';
 import {buildMeiliUnitQuery} from '@/api/meili/meili.queries';
 import {mapUnitListToReviewListResponse} from '@/api/meili/meili.api';
-import {UnitType} from '@package/contract/src/unit';
+import {UnitType} from '@package/contract';
 interface ShortBookReviewsProps {
   bookId: string;
 }

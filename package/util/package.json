@@ -1,4 +1,5 @@
 {
+  "name": "util",
   "type": "module",
   "scripts": {
     "install-services": "bun run install-services/install-services.ts",

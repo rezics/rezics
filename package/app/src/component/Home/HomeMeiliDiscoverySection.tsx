@@ -24,7 +24,7 @@ import {
   mapUnitListToReviewListResponse,
 } from '@/api/meili/meili.api';
 import {buildMeiliUnitQuery} from '@/api/meili/meili.queries';
-import {UnitType} from '@package/contract/src/unit';
+import {UnitType} from '@package/contract';
 import {Link} from 'wouter';
 import BookCard from './HomeBookCard';
 import {LazyLoadImage} from '../Common/LazyLoadImage';

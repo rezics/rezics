@@ -7,7 +7,7 @@ import {ReviewListContainer} from '../Review/ReviewList.tsx';
 import {useQuery} from '@tanstack/react-query';
 import {buildMeiliUnitQuery} from '@/api/meili/meili.queries';
 import {mapUnitListToReviewListResponse} from '@/api/meili/meili.api';
-import {UnitType} from '@package/contract/src/unit';
+import {UnitType} from '@package/contract';
 interface BookReviewsProps {
   bookId: string;
   title: string;
