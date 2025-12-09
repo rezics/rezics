@@ -19,10 +19,16 @@ import {WindowAlert} from './component/Common/Overlay/WindowAlert.tsx';
 import {HelpFab} from './component/Common/UI/Button/HelpWidget.tsx';
 import {HelmetProvider} from 'react-helmet-async';
 
+import {useScrollRestore} from './util/useScrollRestore.ts';
+import {startThrottledScroll} from './util/ScrollUtil.ts';
+import {scroll} from './util/ScrollUtil.ts';
+import {useLocation} from 'wouter';
+
 export default function App() {
   const themeMode = appStore(s => s.theme);
   const customColor = appStore(s => s.customColor);
   const useDynamicTheme = appStore(s => s.useDynamicTheme);
+  const [location, _navigate] = useLocation();
 
   const theme = useMemo(() => {
     if (useDynamicTheme && customColor) {
@@ -30,6 +36,8 @@ export default function App() {
     }
     return getTheme(themeMode, customColor);
   }, [themeMode, customColor, useDynamicTheme]);
+
+  useScrollRestore(location, startThrottledScroll, scroll);
 
   useEffect(() => {
     const html = document.documentElement;

@@ -5,7 +5,7 @@ import {AccentBarWithTextContainer} from '@/component/Common/Navigation/AccentBa
 import {TabContext, TabList, TabPanel} from '@mui/lab';
 import {Box, Divider, Grid, Paper, Stack, Tab, Typography} from '@mui/material';
 import React, {useEffect, useMemo, useRef} from 'react';
-import {useLocation} from 'wouter';
+import {useLocation, useSearchParams} from 'wouter';
 
 import {AuthorInfoContainer} from '@/component/Book/AuthorInfo.tsx';
 import {BookDescription} from '@/component/Book/BookDescription';
@@ -17,8 +17,6 @@ import {ChapterListContainer} from '@/component/Book/Chapter/ChapterList';
 
 import {useBookPageStore} from '@/global/page/bookPageStore.ts';
 import {routeStore} from '@/global/routeStore.ts';
-import {scroll, startThrottledScroll} from '@/util/ScrollUtil.ts';
-import {useScrollRestore} from '@/util/useScrollRestore.ts';
 
 import {bookQueries} from '@/api/book/book';
 import {useQuery} from '@tanstack/react-query';
@@ -204,16 +202,25 @@ export type ContainerProps = {
 
 export const BookPageContainer: React.FC<ContainerProps> = ({bookId}) => {
   const [location] = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const getInitialTab = (): TabValue => {
+    const tabParam = searchParams.get('tab');
+    if (tabParam === '0' || tabParam === '1' || tabParam === '2') {
+      return tabParam as TabValue;
+    }
+
     const routeData = routeStore.getState().getRouteData(String(location));
-    return (routeData?.tab as TabValue) || '0';
+    const storeTab = routeData?.tab;
+    if (storeTab === '0' || storeTab === '1' || storeTab === '2') {
+      return storeTab as TabValue;
+    }
+
+    return '0';
   };
   const [activeTab, setActiveTab] = React.useState<TabValue>(getInitialTab);
 
   const tabRef = useRef<TabValue>(getInitialTab());
-
-  useScrollRestore(location, tabRef, startThrottledScroll, scroll);
 
   const handleTabChange = (
     _: React.SyntheticEvent | null,
@@ -222,7 +229,23 @@ export const BookPageContainer: React.FC<ContainerProps> = ({bookId}) => {
     console.log('handleTabChange', newValue);
     tabRef.current = newValue;
     setActiveTab(newValue);
+
+    routeStore.getState().setRouteData(String(location), {
+      tab: newValue,
+    });
+
+    setSearchParams(prev => {
+      prev.set('tab', newValue);
+      return prev;
+    });
   };
+
+  // REVIEW 会导致重复写入嘛？
+  useEffect(() => {
+    routeStore.getState().setRouteData(String(location), {
+      tab: activeTab,
+    });
+  }, [location, activeTab]);
 
   // ANCHOR Data Fetching
   const book: any = useBookPageStore(s => s.books[bookId]);
