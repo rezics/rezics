@@ -9,6 +9,7 @@ import DialogContainer from '../Common/Overlay/DialogContainer.tsx';
 import type {PublicUser} from '@package/contract';
 import {FollowButton} from '../Common/Reaction/FollowButton.tsx';
 import {LazyLoadImage} from '@/component/Common/LazyLoadImage';
+import {useIsMobile} from '@/util/MediaQueryUtil';
 
 // --------- Types ---------
 export type Author = PublicUser;
@@ -20,6 +21,67 @@ export type AuthorInfoShowProps = {
   showEditButton?: boolean;
   editOpen?: boolean;
   setEditOpen?: React.Dispatch<React.SetStateAction<boolean>>;
+};
+
+const AuthorInfoShowMobile: React.FC<AuthorInfoShowProps> = ({
+  author,
+  onEdit,
+  showEditButton = true,
+  editOpen,
+  setEditOpen,
+}) => {
+  return (
+    <div>
+      <ArrowForwardIconContainer size={16} to={`/user/${author?.unitId}`}>
+        <AccentBarWithTextContainer text={`Author: ${author?.name}`} />
+      </ArrowForwardIconContainer>
+      <div className="flex items-start gap-4 px-4 pt-6">
+        {/* 左侧：头像 + Follow */}
+        <div className="flex flex-col items-center w-24 flex-shrink-0">
+          <LazyLoadImage
+            src={author.avatar || ''}
+            alt="avatar"
+            className="w-24 h-24 rounded object-cover shadow-lg"
+          />
+          <div className="mt-3 w-full">
+            <FollowButton
+              userId={author.unitId}
+              initialFollowersCount={author.followersCount}
+              showFollowersText
+              fullWidth
+            />
+          </div>
+        </div>
+
+        {/* 右侧：文字区域 */}
+        <div className="flex flex-col flex-1 min-w-0">
+          {/* Bio */}
+          {author.bio && (
+            <Typography className="text-sm leading-relaxed line-clamp-3 overflow-hidden">
+              {author.bio}
+            </Typography>
+          )}
+
+          {/* Description */}
+          {author.description && (
+            <Typography className="text-sm leading-relaxed mt-2 line-clamp-4 overflow-hidden">
+              {author.description}
+            </Typography>
+          )}
+
+          {/* 编辑 */}
+          <div className="mt-3">
+            <AuthorInfoEditContainer
+              author={author}
+              editOpen={editOpen ?? false}
+              setEditOpen={setEditOpen!}
+              mode="modal"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 const AuthorInfoShow: React.FC<AuthorInfoShowProps> = ({
@@ -47,7 +109,7 @@ const AuthorInfoShow: React.FC<AuthorInfoShowProps> = ({
               <div className="w-1/5 flex-row justify-center">
                 <LazyLoadImage
                   src={author.avatar || ''}
-                  className="max-w-full max-h-full object-contain"
+                  className="max-w-full max-h-full object-contain rounded"
                   alt="avatar"
                 />
                 <div className="mt-2 w-full">
@@ -95,14 +157,20 @@ const AuthorInfoContainer: React.FC<AuthorInfoContainerProps> = ({author}) => {
   const [editOpen, setEditOpen] = useState(false);
   const handleEdit = () => setEditOpen(true);
 
-  return (
-    <AuthorInfoShow
-      author={author}
-      onEdit={handleEdit}
-      editOpen={editOpen}
-      setEditOpen={setEditOpen}
-    />
-  );
+  const isMobile = useIsMobile();
+
+  if (isMobile) {
+    return <AuthorInfoShowMobile author={author} />;
+  } else {
+    return (
+      <AuthorInfoShow
+        author={author}
+        onEdit={handleEdit}
+        editOpen={editOpen}
+        setEditOpen={setEditOpen}
+      />
+    );
+  }
 };
 
 // --------- AuthorInfoEdit.Show ---------

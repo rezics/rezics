@@ -97,7 +97,11 @@ export const SingleQuoteExcerptShow: React.FC<SingleQuoteExcerptShowProps> = ({
               <Typography variant="caption" color="text.secondary">
                 {stats.likes} {t('accessibility.favorite')}
               </Typography> */}
-              <Typography variant="caption" color="text.secondary">
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                className="hidden md:block"
+              >
                 {stats.date}
               </Typography>
             </div>

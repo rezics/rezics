@@ -52,7 +52,11 @@ export function TagByBookPage({
 
       {!isLoading && !error && (
         <div className="mt-4">
-          <TagWrapper filters={{objectId: bookId}} mode="grouped" />
+          <TagWrapper
+            filters={{objectId: bookId}}
+            mode="grouped"
+            renderAll={true}
+          />
         </div>
       )}
 

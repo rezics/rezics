@@ -6,31 +6,41 @@ import TagList from './TagList';
 
 import {RouterLink} from '@/component/Common/Navigation/RouterLink';
 
+import {useIsMobile} from '@/util/MediaQueryUtil';
+
 type Mode = 'flat' | 'grouped';
 
 export type TagWrapperProps = {
   filters?: TagFilters;
-  mode?: Mode; // 默认不分组
-  domainIds?: string[]; // 可选：指定要分组展示的 domain
+  mode?: Mode;
+  domainIds?: string[];
   className?: string;
+  renderAll?: boolean;
 };
 
-/**
- * 构建标签的分组与域元数据（不发起额外请求）
- *
- * 说明：
- * - 遍历每个标签的 domains 字段（为 Unit 对象数组，含 id 与 title）
- * - 根据可选的 domainIds 进行过滤；若提供则仅归入这些域
- * - 没有任何域的标签会被归入 'NO_DOMAIN'
- * - 返回去重后的分组 Map 以及域标题映射 Map
- */
-function buildGroupsAndDomainTitles(
-  tags: TagDTO[],
-  domainIds?: string[],
-): {
+interface buildGroupsAndDomainTitlesProps {
+  tags: TagDTO[];
+  domainIds?: string[];
+  isMobile?: boolean;
+}
+
+interface buildGroupsAndDomainTitlesResult {
   groups: Map<string | 'NO_DOMAIN', TagDTO[]>;
   domainTitleMap: Map<string, string>;
-} {
+}
+
+/**
+ * Build groups and domain titles
+ *
+ * Notes:
+ * - No domain: directly add to NO_DOMAIN
+ * - With domain: add to domain, filter if necessary
+ */
+function buildGroupsAndDomainTitles({
+  tags,
+  domainIds,
+  isMobile = false,
+}: buildGroupsAndDomainTitlesProps): buildGroupsAndDomainTitlesResult {
   const groups = new Map<string | 'NO_DOMAIN', TagDTO[]>();
   const domainTitleMap = new Map<string, string>();
   const allowed = domainIds?.length ? new Set(domainIds) : undefined;
@@ -40,13 +50,13 @@ function buildGroupsAndDomainTitles(
       ? ((tag as any).domains as any[])
       : [];
 
-    // 无域：直接归入 NO_DOMAIN
+    // No domain: directly add to NO_DOMAIN
     if (domainObjs.length === 0) {
       groups.set('NO_DOMAIN', [...(groups.get('NO_DOMAIN') ?? []), tag]);
       continue;
     }
 
-    // 有域：按域归入，必要时做过滤
+    // With domain: add to domain, filter if necessary
     for (const d of domainObjs) {
       const id = d && (d.id ?? d.unitId) ? String(d.id ?? d.unitId) : null;
       if (!id) continue;
@@ -57,32 +67,48 @@ function buildGroupsAndDomainTitles(
     }
   }
 
+  if (isMobile) {
+    // mobile: return max 2 groups
+    const maxGroups = 2;
+    const sortedGroups = Array.from(groups.entries()).sort(
+      (a, b) => b[1].length - a[1].length,
+    );
+    return {groups: new Map(sortedGroups.slice(0, maxGroups)), domainTitleMap};
+  }
+
   return {groups, domainTitleMap};
 }
 
 /**
- * TagWrapper – 负责数据获取与包装渲染
- * - mode = 'flat': 直接渲染全部标签列表
- * - mode = 'grouped': 按 domain 分组渲染，每个 domain 显示其 unit.title 并可跳转
+ * TagWrapper
+ * - mode = 'flat': render all tags list
+ * - mode = 'grouped': render tags grouped by domain, each domain displays its unit.title and can be redirected
  */
 export const TagWrapper: React.FC<TagWrapperProps> = ({
   filters,
   mode = 'flat',
+  renderAll = false,
   domainIds,
   className,
 }) => {
   const {data, isLoading, error} = useQuery(tagQueries.list(filters));
   const tags: TagDTO[] = useMemo(() => data?.tags ?? [], [data]);
+  const isMobile = useIsMobile();
 
   const memo = useMemo(() => {
+    const cutGroupFlag = !renderAll && isMobile;
     if (mode !== 'grouped') {
       return {
         groups: null as unknown as Map<string | 'NO_DOMAIN', TagDTO[]>,
         domainTitleMap: new Map<string, string>(),
       };
     }
-    return buildGroupsAndDomainTitles(tags, domainIds);
-  }, [tags, mode, domainIds]);
+    return buildGroupsAndDomainTitles({
+      tags,
+      domainIds,
+      isMobile: cutGroupFlag,
+    });
+  }, [tags, mode, domainIds, isMobile, renderAll]);
   const groups = memo.groups;
   const domainTitleMap = memo.domainTitleMap;
 
@@ -138,6 +164,14 @@ export const TagWrapper: React.FC<TagWrapperProps> = ({
           </div>
         ))}
       </div>
+      {!renderAll && isMobile && (
+        <div className="mt-4 text-sm text-gray-500">
+          Showing top tags ·
+          <RouterLink href={`/tag/book/${filters?.objectId}/tag`}>
+            View all →
+          </RouterLink>
+        </div>
+      )}
     </div>
   );
 };

@@ -1,6 +1,6 @@
-// useScrollRestore.ts
-import { routeStore } from "@/global/routeStore.ts";
-import { useEffect, useRef } from "react";
+import {routeStore} from '@/global/routeStore.ts';
+import type React from 'react';
+import {useEffect, useRef} from 'react';
 
 type StartFn = (cb: (y: number) => void, interval: number) => () => void;
 
@@ -15,7 +15,7 @@ export function useScrollRestore(
   // 挂载/卸载时记录滚动
   useEffect(() => {
     const timer = globalThis.setTimeout(() => {
-      stopThrottledScroll.current = startThrottledScroll((_y) => {
+      stopThrottledScroll.current = startThrottledScroll(_y => {
         routeStore.getState().setRouteData(String(location), {
           scrollY: globalThis.pageYOffset,
           tab: tabRef.current,
@@ -36,11 +36,16 @@ export function useScrollRestore(
     };
   }, [location]);
 
-  // 路由切换时恢复滚动
+  // When route changes, restore scroll
   useEffect(() => {
+    // match specific route
+    if (!location.startsWith('/book/')) {
+      return;
+    }
     const routeData = routeStore.getState().getRouteData(String(location));
     if (routeData?.scrollY) {
       scroll(routeData.scrollY);
+      // console.log('restore scroll', routeData.scrollY);
     }
   }, [location]);
 }
