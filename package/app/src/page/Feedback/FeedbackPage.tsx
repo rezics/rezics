@@ -1,10 +1,28 @@
 import React from 'react';
-import {Box, Button, Typography, Stack} from '@mui/material';
+import {
+  Box,
+  Button,
+  Typography,
+  Stack,
+  TextField,
+  MenuItem,
+} from '@mui/material';
 import FeedbackDrawer from '@/component/Feedback/FeedbackDrawer';
 import FeedbackList from '@/component/Feedback/FeedbackList';
 
 export const FeedbackPage: React.FC = () => {
   const [open, setOpen] = React.useState(false);
+  const [search, setSearch] = React.useState('');
+  const [resolvedFilter, setResolvedFilter] = React.useState<
+    'all' | 'resolved' | 'unresolved'
+  >('all');
+
+  const resolvedValue =
+    resolvedFilter === 'all'
+      ? undefined
+      : resolvedFilter === 'resolved'
+      ? true
+      : false;
 
   return (
     <Box className="max-w-5xl mx-auto p-4">
@@ -15,7 +33,35 @@ export const FeedbackPage: React.FC = () => {
         </Button>
       </Stack>
 
-      <FeedbackList queryType="mine" />
+      <Stack direction={{xs: 'column', sm: 'row'}} spacing={2} className="mb-4">
+        <TextField
+          label="搜索内容"
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          className="flex-1"
+          size="small"
+          placeholder="搜索反馈内容..."
+        />
+
+        <TextField
+          label="状态"
+          select
+          value={resolvedFilter}
+          onChange={e =>
+            setResolvedFilter(
+              e.target.value as 'all' | 'resolved' | 'unresolved',
+            )
+          }
+          className="w-40"
+          size="small"
+        >
+          <MenuItem value="all">全部</MenuItem>
+          <MenuItem value="unresolved">待处理</MenuItem>
+          <MenuItem value="resolved">已解决</MenuItem>
+        </TextField>
+      </Stack>
+
+      <FeedbackList queryType="mine" search={search} resolved={resolvedValue} />
 
       <FeedbackDrawer open={open} onClose={() => setOpen(false)} />
     </Box>

@@ -1,6 +1,7 @@
 import React from 'react';
 import {
   Box,
+  Paper,
   Stack,
   Typography,
   TextField,
@@ -17,6 +18,16 @@ export const FeedbackAdminPage: React.FC = () => {
   const [type, setType] = React.useState<'all' | 'mine' | 'user'>('all');
   const [userId, setUserId] = React.useState<string>('');
   const [search, setSearch] = React.useState<string>('');
+  const [resolvedFilter, setResolvedFilter] = React.useState<
+    'all' | 'resolved' | 'unresolved'
+  >('all');
+
+  const resolvedValue =
+    resolvedFilter === 'all'
+      ? undefined
+      : resolvedFilter === 'resolved'
+      ? true
+      : false;
 
   // Prefetch general list for smoother UX
   useQuery(feedbackListQuery());
@@ -35,7 +46,7 @@ export const FeedbackAdminPage: React.FC = () => {
         </Button>
       </Stack>
 
-      <Box className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 mb-6">
+      <div className="pb-4">
         <Stack direction={{xs: 'column', md: 'row'}} spacing={2}>
           <TextField
             label="搜索内容"
@@ -45,6 +56,23 @@ export const FeedbackAdminPage: React.FC = () => {
             size="small"
             placeholder="搜索反馈内容..."
           />
+
+          <TextField
+            label="状态"
+            select
+            value={resolvedFilter}
+            onChange={e =>
+              setResolvedFilter(
+                e.target.value as 'all' | 'resolved' | 'unresolved',
+              )
+            }
+            className="w-32"
+            size="small"
+          >
+            <MenuItem value="all">全部</MenuItem>
+            <MenuItem value="unresolved">待处理</MenuItem>
+            <MenuItem value="resolved">已解决</MenuItem>
+          </TextField>
 
           <Stack direction="row" spacing={2} className="min-w-[300px]">
             <TextField
@@ -72,12 +100,13 @@ export const FeedbackAdminPage: React.FC = () => {
             )}
           </Stack>
         </Stack>
-      </Box>
+      </div>
 
       <FeedbackList
         queryType={type}
         userId={userId || undefined}
         search={search}
+        resolved={resolvedValue}
       />
 
       <FeedbackDrawer open={open} onClose={() => setOpen(false)} />

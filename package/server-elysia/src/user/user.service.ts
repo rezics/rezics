@@ -13,8 +13,8 @@ import {syncUserToMeili, deleteUserFromMeili} from '@/src/meili/user/sync';
 
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
-  port: 587,
-  secure: false,
+  port: 465,
+  secure: true,
   auth: {
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASSWORD,
@@ -22,6 +22,9 @@ const transporter = nodemailer.createTransport({
   pool: true,
   maxConnections: 3,
   maxMessages: 50,
+  tls: {
+    rejectUnauthorized: true,
+  },
 });
 
 const SALT_ROUNDS = 10;
@@ -133,12 +136,6 @@ export class UserService {
    */
   async create(req: CreateUserInput): Promise<UserWithRelations> {
     const {email, password, slug, avatar, bio} = req;
-
-    // Check if email already exists
-    const existing = await this.getByEmail(email);
-    if (existing) {
-      throw new Error('Email already exists');
-    }
 
     const user = await prisma.user.create({
       data: {

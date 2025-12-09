@@ -18,7 +18,7 @@ import DoneIcon from '@mui/icons-material/Done';
 import {useQuery, useQueryClient} from '@tanstack/react-query';
 import {buildMeiliFeedbackQuery} from '@/api/meili/meili.queries';
 import {useSetFeedbackResolvedMutation} from '@/api/feedback/feedback.mutations';
-import type {FeedbackDTO} from '@/api/feedback/feedback.types';
+import type {FeedbackDTO, FeedbackType} from '@/api/feedback/feedback.types';
 import {
   UniversalPaginator,
   type UniversalPaginatorHandle,
@@ -26,11 +26,19 @@ import {
 
 import {Popover, PopoverContent, PopoverTrigger} from '@/component/ui/popover';
 import {Link} from 'wouter';
+import {useAlertStore} from '@/global/windowAlertStore';
 
-type FeedbackListProps = {
+export type FeedbackResolvedFilter = boolean | undefined;
+
+export type FeedbackListProps = {
   queryType: 'mine' | 'all' | 'user';
   userId?: string;
+  /** Full-text search keyword. */
   search?: string;
+  /** Filter by feedback type. */
+  typeFilter?: FeedbackType;
+  /** Filter by resolved status; `undefined` means all. */
+  resolved?: FeedbackResolvedFilter;
 };
 
 const typeColor: Record<
@@ -55,34 +63,44 @@ const FeedbackList: React.FC<FeedbackListProps> = ({
   queryType,
   userId,
   search,
+  typeFilter,
+  resolved,
 }) => {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [startAll, setStartAll] = useState<number>(0);
   const [startMine, setStartMine] = useState<number>(0);
   const [startUser, setStartUser] = useState<number>(0);
-
+  const {show: showAlert} = useAlertStore();
   const queryClient = useQueryClient();
   const paginatorRef = useRef<UniversalPaginatorHandle | null>(null);
 
   const listResult = useQuery(
-    buildMeiliFeedbackQuery(startAll, EXTERNAL_PAGE_SIZE, search ?? ''),
+    buildMeiliFeedbackQuery(startAll, EXTERNAL_PAGE_SIZE, search ?? '', {
+      type: typeFilter,
+      resolved,
+    }),
   );
 
   const myResult = useQuery(
-    buildMeiliFeedbackQuery(startMine, EXTERNAL_PAGE_SIZE, search ?? '', {}),
+    buildMeiliFeedbackQuery(startMine, EXTERNAL_PAGE_SIZE, search ?? '', {
+      type: typeFilter,
+      resolved,
+    }),
   );
 
   const byUserResult = useQuery(
     buildMeiliFeedbackQuery(startUser, EXTERNAL_PAGE_SIZE, search ?? '', {
       userId: userId ?? undefined,
+      type: typeFilter,
+      resolved,
     }),
   );
 
   const resolveMutation = useSetFeedbackResolvedMutation();
 
   const handleResolve = (id: string) => {
-    console.log('resolve', id);
-    // resolveMutation.mutate({id, resolved: true});
+    resolveMutation.mutate({id, resolved: true});
+    showAlert('反馈已解决');
   };
 
   const activeResult =
@@ -107,7 +125,7 @@ const FeedbackList: React.FC<FeedbackListProps> = ({
     }
 
     paginatorRef.current?.resetPaginationPageNumber?.();
-  }, [queryType, userId, search]);
+  }, [queryType, userId, search, typeFilter, resolved]);
 
   const handleNeedMoreData = (externalPage: number) => {
     const offset = (externalPage - 1) * EXTERNAL_PAGE_SIZE;
@@ -129,7 +147,10 @@ const FeedbackList: React.FC<FeedbackListProps> = ({
         offset,
         limit,
         search ?? '',
-        {},
+        {
+          type: typeFilter,
+          resolved,
+        },
       );
       const next = await queryClient.fetchQuery({queryKey, queryFn});
       return next?.items?.length ?? 0;
@@ -143,6 +164,8 @@ const FeedbackList: React.FC<FeedbackListProps> = ({
         search ?? '',
         {
           userId,
+          type: typeFilter,
+          resolved,
         },
       );
       const next = await queryClient.fetchQuery({queryKey, queryFn});
@@ -153,6 +176,10 @@ const FeedbackList: React.FC<FeedbackListProps> = ({
       offset,
       limit,
       search ?? '',
+      {
+        type: typeFilter,
+        resolved,
+      },
     );
     const next = await queryClient.fetchQuery({queryKey, queryFn});
     return next?.items?.length ?? 0;
@@ -188,7 +215,7 @@ const FeedbackList: React.FC<FeedbackListProps> = ({
               <ListItem key={item.id} disableGutters className="mb-3">
                 <Paper
                   variant="outlined"
-                  className="w-full px-3 py-2 border-gray-200"
+                  className="w-full px-3 py-2"
                   elevation={0}
                 >
                   <Stack
@@ -243,7 +270,7 @@ const FeedbackList: React.FC<FeedbackListProps> = ({
                         </PopoverTrigger>
                         <PopoverContent>
                           <div className="flex flex-col gap-4 p-4">
-                            <div className="text-base font-medium text-gray-800">
+                            <div className="text-base font-medium">
                               确定将此项目标记为已解决？
                             </div>
 
@@ -286,12 +313,7 @@ const FeedbackList: React.FC<FeedbackListProps> = ({
                   <div>
                     <Link href={item.url ?? ''}>{item.url}</Link>
                   </div>
-                  <Typography
-                    variant="body2"
-                    className="text-gray-700 whitespace-pre-line"
-                  >
-                    {item.content}
-                  </Typography>
+                  <Typography variant="body2">{item.content}</Typography>
                 </Paper>
               </ListItem>
             ))}

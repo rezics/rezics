@@ -189,8 +189,15 @@ export class CommentService {
 
   /** Delete comment */
   async delete(unitId: string): Promise<void> {
-    await prisma.unit.delete({where: {id: unitId}}); // cascades CommentIndex
-    await deleteUnitFromMeili(unitId);
+    const content = 'This unit has been deleted ＞﹏＜';
+    await prisma.commentIndex.update({
+      where: {unitId},
+      data: {
+        unit: {update: {content}},
+      },
+      include: commentInclude,
+    });
+    await syncUnitToMeili(unitId);
   }
 
   async exists(unitId: string): Promise<boolean> {

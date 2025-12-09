@@ -15,6 +15,7 @@ import type {
   UnitListResponse,
   UnitType,
   FeedbackListResponse,
+  FeedbackType,
 } from '@package/contract';
 import {hashFn} from '../utils/hash';
 
@@ -72,6 +73,10 @@ export const buildMeiliUnitQuery = (
 type FeedbackExtraFilterOptions = {
   /** Filter feedbacks created by a specific user. */
   userId?: string;
+  /** Filter by feedback type (BUG / FEATURE / REPORT / OTHER). */
+  type?: FeedbackType;
+  /** Filter by resolved status. */
+  resolved?: boolean;
 };
 
 export const buildMeiliFeedbackQuery = (
@@ -85,6 +90,10 @@ export const buildMeiliFeedbackQuery = (
     limit,
     q: keyword || undefined,
     ...(options?.userId ? {userId: options.userId} : {}),
+    ...(options?.type ? {type: options.type} : {}),
+    ...(typeof options?.resolved === 'boolean'
+      ? {resolved: options.resolved}
+      : {}),
   } as const;
 
   return {
@@ -94,6 +103,8 @@ export const buildMeiliFeedbackQuery = (
       limit,
       keyword,
       options?.userId ?? null,
+      options?.type ?? null,
+      typeof options?.resolved === 'boolean' ? options.resolved : null,
     ],
     queryFn: async (): Promise<FeedbackListResponse> => {
       const searchResult = await meiliFeedbackApi.feedbackSearch(filters);

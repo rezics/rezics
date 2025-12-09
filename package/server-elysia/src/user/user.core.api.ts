@@ -48,6 +48,18 @@ export const coreRoute = (api: ReturnType<typeof coreInstance>) => {
           cookie: {refresh_token},
           set,
         }): Promise<{user: UserDTO; token: string}> => {
+          const {email, slug} = body;
+          // Check if email already exists
+          let existing = await userService.getByEmail(email);
+          if (existing) {
+            throw new Error('Email already exists');
+          }
+
+          existing = await userService.getBySlug(slug);
+          if (existing) {
+            throw new Error(`Slug(username: ${slug}) already exists`);
+          }
+
           const verificationCode = body.verificationCode;
           if (verificationCode) {
             const result = await userService.verifyVerificationCode(

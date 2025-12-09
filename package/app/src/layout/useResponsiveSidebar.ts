@@ -41,7 +41,9 @@ export const useResponsiveSidebar = (): ResponsiveSidebarState => {
   );
 
   useEffect(() => {
-    closeSidebar();
+    if (isMobile) {
+      closeSidebar();
+    }
   }, [isMobile]);
 
   function setDrawerWidth(width: number) {
