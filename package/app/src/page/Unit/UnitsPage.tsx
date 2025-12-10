@@ -151,6 +151,9 @@ export const UnitsPage: React.FC<UnitsPageProps> = ({
     keyword,
     EXTERNAL_PAGE_SIZE,
     mapUnitResponse,
+    {
+      userId,
+    },
   );
 
   const {data: activeData, isLoading} = useQuery({
@@ -173,6 +176,9 @@ export const UnitsPage: React.FC<UnitsPageProps> = ({
       keyword,
       EXTERNAL_PAGE_SIZE,
       mapUnitResponse,
+      {
+        userId,
+      },
     );
     const nextData = await queryClient.fetchQuery({queryKey, queryFn});
     return nextData?.units?.length ?? 0;

@@ -19,6 +19,7 @@ import {userQueries} from '@/api/user/user.queries';
 import {UserError, UserLoading} from './UserState';
 import {useUserStore} from '@/global/userStore';
 import FollowButton from '@/component/Common/Reaction/FollowButton';
+import {UserUnitsPage} from './UserUnitsPage';
 
 export interface UserProfilePageProps {
   unitId: string;
@@ -135,17 +136,6 @@ export const UserProfilePage: FC<UserProfilePageProps> = ({
                   className="!mr-2"
                 />
               )}
-              {isCurrentUser || user.unitId !== currentUser?.unitId ? (
-                <Tooltip title="需要刷新页面再点击刷新" placement="bottom">
-                  <Button
-                    variant="contained"
-                    onClick={refreshUser}
-                    className="!mr-2"
-                  >
-                    刷新
-                  </Button>
-                </Tooltip>
-              ) : null}
               {isCurrentUser ||
               currentUser?.permission?.role?.includes('ADMIN') ? (
                 <Button
@@ -223,6 +213,7 @@ export const UserProfilePage: FC<UserProfilePageProps> = ({
           </CardContent>
         </Card>
       )}
+      <UserUnitsPage userId={user.unitId} />
     </Box>
   );
 };

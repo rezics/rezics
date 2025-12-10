@@ -40,6 +40,11 @@ export const buildMeiliUnitQuery = (
   mapFn: (unitResp: UnitListResponse) => any,
   options?: {
     enabled?: boolean;
+    /**
+     * Optional user filter – when provided, only units created by this user
+     * will be returned. This maps to Meilisearch `userId` filter.
+     */
+    userId?: string;
   },
 ) => {
   const type = kind;
@@ -49,6 +54,7 @@ export const buildMeiliUnitQuery = (
     limit,
     q: keyword || undefined,
     ...(targetUnitId ? {targetUnitId} : {}),
+    ...(options?.userId ? {userId: options.userId} : {}),
   };
 
   return {
@@ -59,6 +65,7 @@ export const buildMeiliUnitQuery = (
       start,
       limit,
       keyword,
+      options?.userId ?? null,
       hashFn(mapFn),
     ],
     queryFn: async () => {
