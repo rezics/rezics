@@ -11,11 +11,12 @@ import {
 } from 'react';
 import {Tree} from 'react-arborist';
 import type {DeleteHandler, MoveHandler, RenameHandler} from 'react-arborist';
-import {v4 as uuidv4} from 'uuid';
 // 分离的 Node 渲染器工厂
 import {createChapterArboristNode} from './ChapterArboristNode.tsx';
-
 import {ChapterArboristContextMenu} from './ChapterArboristContextMenu.tsx';
+import {CreateChapterDialog} from './CreateChapterDialog.tsx';
+import {bookMutations} from '@/api/book/book.mutations.ts';
+import {useAlertStore} from '@/global/windowAlertStore.ts';
 
 import {
   findAndAddChild,
@@ -25,7 +26,9 @@ import {
   findAndRemove,
 } from '@/util/arboristTreeUtil.ts';
 
-type Chapter = {
+import {flattenTree} from '@/util/treeAbstract.ts';
+
+export type Chapter = {
   id: string | number;
   title: string;
   children?: Chapter[];
@@ -41,6 +44,7 @@ interface ChapterArboristProps {
   tHeight: number;
   searchTerm: string;
   selectedId: string;
+  bookUnitId: string;
   baseLink: string;
   width?: number;
   isEditable?: boolean;
@@ -59,6 +63,7 @@ export const ChapterArborist = forwardRef<
       tHeight,
       searchTerm,
       selectedId,
+      bookUnitId,
       baseLink,
       width,
       isEditable = false,
@@ -75,6 +80,13 @@ export const ChapterArborist = forwardRef<
       y: number;
       node: any;
     } | null>(null);
+    const [createChapterDialog, setCreateChapterDialog] =
+      useState<boolean>(false);
+    const [currentEditParentId, setCurrentEditParentId] = useState<
+      string | number | null
+    >(null);
+    const updateChapterIndexMutation = bookMutations.useUpdateChapterIndex();
+    const {show: showAlert} = useAlertStore();
 
     useImperativeHandle(ref, () => ({
       expandAll() {
@@ -88,16 +100,6 @@ export const ChapterArborist = forwardRef<
     useEffect(() => {
       setTreeData(chapterTree);
     }, [chapterTree]);
-
-    function submitTreeData(data: any) {
-      console.log('submitTreeData', data);
-    }
-
-    // commit side-effect simulation
-    useEffect(() => {
-      console.log('Tree Data Changed, Submit', treeData);
-      submitTreeData(treeData);
-    }, [treeData]);
 
     const onMove: MoveHandler<Chapter> = useCallback(
       ({dragIds, parentId, index}) => {
@@ -129,16 +131,48 @@ export const ChapterArborist = forwardRef<
       setTreeData(currentTree => findAndDelete(currentTree, ids) as Chapter[]);
     }, []);
 
-    const handleCreate = useCallback((parentId: string | number) => {
-      const newNode: Chapter = {id: uuidv4(), title: 'New Chapter'};
-      setTreeData(currentTree => {
-        if (parentId) {
-          return findAndAddChild(currentTree, parentId, newNode) as Chapter[];
-        } else {
-          return [...currentTree, newNode];
-        }
-      });
-    }, []);
+    function handleCreate({
+      parentId,
+      newNode,
+    }: {
+      parentId: string | number;
+      newNode: Chapter;
+    }) {
+      const currentTree = treeData;
+      let tmpTreeData;
+      if (parentId) {
+        tmpTreeData = findAndAddChild(
+          currentTree,
+          parentId,
+          newNode,
+        ) as Chapter[];
+      } else {
+        tmpTreeData = [...currentTree, newNode];
+      }
+      const flatTree = flattenTree(tmpTreeData);
+      const flatTreeResult = {
+        chapters: flatTree.nodes,
+        order: flatTree.orders,
+      };
+      console.log('handleCreate flatTreeResult', flatTreeResult, flatTree);
+
+      setTreeData(tmpTreeData);
+      console.log('handleCreate tmpTreeData', tmpTreeData);
+
+      try {
+        updateChapterIndexMutation.mutateAsync({
+          bookUnitId,
+          chaptersIndex: flatTreeResult,
+        });
+      } catch (error) {
+        showAlert(`创建章节失败: ${error}`);
+      }
+    }
+
+    function handlePreCreate(parentId: string | number) {
+      setCreateChapterDialog(true);
+      setCurrentEditParentId(parentId);
+    }
 
     // 创建带有 contextMenu 能力的 Node 渲染器
     const Node = useMemo(
@@ -201,9 +235,16 @@ export const ChapterArborist = forwardRef<
             setContextMenu={setContextMenu}
             treeRef={treeRef}
             setTreeData={setTreeData}
-            handleCreate={handleCreate}
+            handleCreate={handlePreCreate}
           />
         )}
+        <CreateChapterDialog
+          open={createChapterDialog}
+          onClose={() => setCreateChapterDialog(false)}
+          handleCreate={handleCreate}
+          bookUnitId={bookUnitId}
+          currentEditParentId={currentEditParentId}
+        />
       </div>
     );
   },

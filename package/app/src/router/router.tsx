@@ -336,17 +336,17 @@ export default (
             </BookEditLayout>
           )}
         </Route>
-        <Route path="/book/:bookId/edit/chapter/:chapterId">
-          {({bookId, chapterId}) => (
-            <BookEditLayout bookId={bookId} chapterId={chapterId}>
-              <BookEditChapterPage chapterId={chapterId} />
-            </BookEditLayout>
-          )}
-        </Route>
         <Route path="/book/:bookId/edit/tag">
           {({bookId}) => (
             <BookEditLayout bookId={bookId}>
               <BookEditTagPage bookId={bookId} />
+            </BookEditLayout>
+          )}
+        </Route>
+        <Route path="/book/:bookId/edit/:chapterId">
+          {({bookId, chapterId}) => (
+            <BookEditLayout bookId={bookId} chapterId={chapterId}>
+              <BookEditChapterPage chapterId={chapterId} />
             </BookEditLayout>
           )}
         </Route>

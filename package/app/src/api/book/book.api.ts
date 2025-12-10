@@ -55,6 +55,19 @@ export const bookApi = {
   },
 
   /**
+   * Update chapterIndex by bookUnitId
+   */
+  updateChapterIndex: async (
+    bookUnitId: string,
+    chaptersIndex: any,
+  ): Promise<any> => {
+    return apiFetch<any>(`/books/${bookUnitId}/chapterIndex`, {
+      method: 'PUT',
+      body: JSON.stringify(chaptersIndex),
+    });
+  },
+
+  /**
    * Search books by query and filters
    */
   search: async (

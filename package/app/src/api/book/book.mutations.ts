@@ -98,10 +98,44 @@ export function useDeleteBookMutation(
 }
 
 /**
+ * Mutation for updating a book's chapter index
+ */
+export function useUpdateChapterIndexMutation(
+  options?: Omit<
+    UseMutationOptions<
+      any,
+      Error,
+      {
+        bookUnitId: string;
+        chaptersIndex: any;
+      }
+    >,
+    'mutationFn'
+  >,
+) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({bookUnitId, chaptersIndex}) =>
+      bookApi.updateChapterIndex(bookUnitId, chaptersIndex),
+    ...options,
+    onSuccess: (data, variables, onMutateResult, context) => {
+      // Invalidate the cached chapter index for this book
+      queryClient.invalidateQueries({
+        queryKey: bookKeys.chapterIndex(variables.bookUnitId),
+      });
+
+      options?.onSuccess?.(data, variables, onMutateResult, context);
+    },
+  });
+}
+
+/**
  * Combined mutations export
  */
 export const bookMutations = {
   useCreate: useCreateBookMutation,
   useUpdate: useUpdateBookMutation,
   useDelete: useDeleteBookMutation,
+  useUpdateChapterIndex: useUpdateChapterIndexMutation,
 };

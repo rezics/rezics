@@ -1,6 +1,5 @@
 /* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
-/* eslint-disable jsx-a11y/no-static-element-interactions */
 import React from 'react';
 import {v4 as uuidv4} from 'uuid';
 import {
@@ -37,7 +36,7 @@ export const ChapterArboristContextMenu = ({
         onClick={() => setContextMenu(null)}
         onContextMenu={e => e.preventDefault()}
       >
-        <li
+        {/* <li
           className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
           onClick={() => {
             contextMenu.node?.edit();
@@ -54,7 +53,7 @@ export const ChapterArboristContextMenu = ({
           }}
         >
           删除
-        </li>
+        </li> */}
         <li
           className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
           onClick={() => {

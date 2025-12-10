@@ -1,6 +1,6 @@
-import * as Array from "effect/Array";
-import { pipe } from "effect/Function";
-import * as Option from "effect/Option";
+import * as Array from 'effect/Array';
+import {pipe} from 'effect/Function';
+import * as Option from 'effect/Option';
 
 export interface BaseNode {
   id: string | number;
@@ -19,27 +19,31 @@ interface TreeNode extends BaseNode {
 const normalizeId = (id: string | number): string => String(id);
 
 // 辅助函数：检查两个 id 是否相等
-const idsEqual = (id1: string | number, id2: string | number): boolean => normalizeId(id1) === normalizeId(id2);
+const idsEqual = (id1: string | number, id2: string | number): boolean =>
+  normalizeId(id1) === normalizeId(id2);
 
 // 辅助函数：在数组中查找节点索引
 const findNodeIndex = (
   nodes: TreeNode[],
   targetId: string | number,
-): Option.Option<number> => Array.findFirstIndex(nodes, (node: TreeNode) => idsEqual(node.id, targetId));
+): Option.Option<number> =>
+  Array.findFirstIndex(nodes, (node: TreeNode) => idsEqual(node.id, targetId));
 
 // 辅助函数：安全地在指定位置插入元素
-const insertAt = <T>(index: number, items: T[]) => (array: T[]): T[] => {
-  const [before, after] = Array.splitAt(array, index);
-  return [...before, ...items, ...after];
-};
+const insertAt =
+  <T>(index: number, items: T[]) =>
+  (array: T[]): T[] => {
+    const [before, after] = Array.splitAt(array, index);
+    return [...before, ...items, ...after];
+  };
 
 // 辅助函数：深拷贝节点（避免引用共享）
 const cloneNode = (node: TreeNode): TreeNode => {
-  const { children, ...rest } = node;
+  const {children, ...rest} = node;
   if (children) {
-    return { ...rest, id: node.id, children: children.map(cloneNode) };
+    return {...rest, id: node.id, children: children.map(cloneNode)};
   }
-  return { ...rest, id: node.id };
+  return {...rest, id: node.id};
 };
 
 /**
@@ -57,7 +61,7 @@ export function findAndRemove(
   ids: (string | number)[],
   removed: TreeNode[],
 ): any[] {
-  return tree.filter((node) => {
+  return tree.filter(node => {
     const currentNodeId = String(node.id);
     if (ids.includes(currentNodeId)) {
       removed.push(JSON.parse(JSON.stringify(node)));
@@ -86,14 +90,12 @@ export const findAndInsert = (
   const processNode = (node: TreeNode): TreeNode => {
     if (idsEqual(node.id, parentId!)) {
       const currentChildren = node.children ?? [];
-      const newChildren = insertAt(index, [...nodesToInsert])(
-        currentChildren,
-      );
-      return { ...node, children: newChildren };
+      const newChildren = insertAt(index, [...nodesToInsert])(currentChildren);
+      return {...node, children: newChildren};
     }
 
     if (node.children) {
-      return { ...node, children: node.children.map(processNode) };
+      return {...node, children: node.children.map(processNode)};
     }
 
     return node;
@@ -112,11 +114,11 @@ export const findAndEdit = (
 ): TreeNode[] => {
   const processNode = (node: TreeNode): TreeNode => {
     if (idsEqual(node.id, id)) {
-      return { ...node, title: newName } as TreeNode;
+      return {...node, title: newName} as TreeNode;
     }
 
     if (node.children) {
-      return { ...node, children: node.children.map(processNode) };
+      return {...node, children: node.children.map(processNode)};
     }
 
     return node;
@@ -134,7 +136,8 @@ export const findAndDelete = (
 ): TreeNode[] => {
   const idsSet = new Set(ids.map(normalizeId));
 
-  const shouldKeep = (node: TreeNode): boolean => !idsSet.has(normalizeId(node.id));
+  const shouldKeep = (node: TreeNode): boolean =>
+    !idsSet.has(normalizeId(node.id));
 
   const processNode = (node: TreeNode): TreeNode => {
     if (node.children) {
@@ -143,7 +146,7 @@ export const findAndDelete = (
         Array.filter(shouldKeep),
         Array.map(processNode),
       );
-      return { ...node, children: filteredChildren };
+      return {...node, children: filteredChildren};
     }
     return node;
   };
@@ -161,14 +164,12 @@ export const findAndAddChild = (
 ): TreeNode[] => {
   const processNode = (node: TreeNode): TreeNode => {
     if (idsEqual(node.id, parentId)) {
-      const children = node.children
-        ? [...node.children, newNode]
-        : [newNode];
-      return { ...node, children };
+      const children = node.children ? [...node.children, newNode] : [newNode];
+      return {...node, children};
     }
 
     if (node.children) {
-      return { ...node, children: node.children.map(processNode) };
+      return {...node, children: node.children.map(processNode)};
     }
 
     return node;
@@ -194,10 +195,10 @@ export const insertSiblingAfter = (
       findNodeIndex([...nodes], targetId),
       Option.match({
         onNone: () =>
-          nodes.map((node) =>
+          nodes.map(node =>
             node.children
-              ? { ...node, children: processNodes(node.children) }
-              : node
+              ? {...node, children: processNodes(node.children)}
+              : node,
           ),
         onSome: (index: number) => {
           processed = true;
@@ -226,10 +227,10 @@ export const moveSiblingFirst = (
       findNodeIndex([...nodes], targetId),
       Option.match({
         onNone: () =>
-          nodes.map((node) =>
+          nodes.map(node =>
             node.children
-              ? { ...node, children: processNodes(node.children) }
-              : node
+              ? {...node, children: processNodes(node.children)}
+              : node,
           ),
         onSome: (index: number) => {
           processed = true;
@@ -263,10 +264,10 @@ export const moveSiblingLast = (
       findNodeIndex([...nodes], targetId),
       Option.match({
         onNone: () =>
-          nodes.map((node) =>
+          nodes.map(node =>
             node.children
-              ? { ...node, children: processNodes(node.children) }
-              : node
+              ? {...node, children: processNodes(node.children)}
+              : node,
           ),
         onSome: (index: number) => {
           processed = true;

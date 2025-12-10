@@ -180,7 +180,7 @@ model Unit {
 
   // 可选：指向任意 Unit 的“弱引用”
   // 可被用于 Chapter，Review，Quote，Note，ReadList，Image，Video
-  // TODO Check if targetUnitId is needed
+  // TODO Comment Index may need to sync with targetUnitId
   targetUnitId String? @db.Uuid
   targetUnit   Unit?   @relation("UnitTargets", fields: [targetUnitId], references: [id])
   targetedBy   Unit[]  @relation("UnitTargets")

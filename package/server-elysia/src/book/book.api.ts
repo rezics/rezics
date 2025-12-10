@@ -185,17 +185,29 @@ export const bookApi = coreInstance('/books')
     '/:unitId/chapterIndex',
     async ({params, body, headers, jwt, set}): Promise<any> => {
       const payload = await verifyAuth(headers.authorization, jwt, set);
+      const targetBookUnit = await unitService.getByUnitId(params.unitId);
+      if (
+        !hasPermissionToUpdateBook(
+          payload as any,
+          undefined,
+          targetBookUnit as any,
+        )
+      ) {
+        set.status = 403;
+        throw new Error(
+          'Forbidden: you do not have permission to update this book',
+        );
+      }
+      const chaptersIndex = body;
       const chapterIndex = await bookService.updateChapterIndex(
         params.unitId,
-        body.chaptersIndex,
+        chaptersIndex,
       );
       return chapterIndex;
     },
     {
       params: bookParamsSchema,
-      body: t.Object({
-        chaptersIndex: t.String(),
-      }),
+      body: t.Any(),
       detail: {
         summary: 'Update book chapter index',
         description: 'Update the chapter index of a book by unit ID',
@@ -211,6 +223,12 @@ export const bookApi = coreInstance('/books')
     '/:unitId',
     async ({params, headers, jwt, set}): Promise<{message: string}> => {
       const payload = await verifyAuth(headers.authorization, jwt, set);
+      if (!BasicAdminPermission(payload as any)) {
+        set.status = 403;
+        throw new Error(
+          'Forbidden: you do not have permission to delete this book',
+        );
+      }
       const targetBookUnit = await unitService.getByUnitId(params.unitId);
       if (!targetBookUnit) {
         set.status = 404;

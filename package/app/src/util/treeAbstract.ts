@@ -136,7 +136,6 @@ export function flattenTree<T extends NodeBase>(
   const orders: OrderMap = new Map();
 
   function dfs(node: TreeNodeWithChildren<T>, parentId: T['id'] | null) {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const {children, ...rest} = node;
 
     // Filter temporary fields
@@ -165,7 +164,7 @@ export function flattenTree<T extends NodeBase>(
     dfs(root, null);
   }
 
-  return {nodes, orders};
+  return {nodes, orders: Object.fromEntries(orders)};
 }
 
 // --- Tree Manipulation Functions (Immutable) ---

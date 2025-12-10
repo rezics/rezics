@@ -1,4 +1,4 @@
-import React, {useEffect, useMemo, useRef, useState} from 'react';
+import React, {useMemo, useRef, useState} from 'react';
 import {useQuery} from '@tanstack/react-query';
 import {Divider, Switch, TextField, Button, Stack} from '@mui/material';
 
@@ -7,7 +7,6 @@ import {ChapterArborist} from '@/component/Book/Chapter/ChapterArborist';
 import type {ChapterArboristRefHandle} from '@/component/Book/Chapter/ChapterArborist';
 
 import {buildTree} from '@/util/treeAbstract.ts';
-import {useLayoutStore} from '@/global/Layout/layoutStore.ts';
 
 interface LinearChapterListProps {
   width?: number;
@@ -47,8 +46,6 @@ export const LinearChapterList: React.FC<LinearChapterListProps> = ({
   const [enableDrag, setEnableDrag] = useState(false);
   const [enableRename, setEnableRename] = useState(enableDoubleClickRename);
   const arboristRef = useRef<ChapterArboristRefHandle | null>(null);
-
-  function updateChapter() {}
 
   if (!bookId) return null;
   if (isLoading) return <div>Loading...</div>;
@@ -107,7 +104,7 @@ export const LinearChapterList: React.FC<LinearChapterListProps> = ({
                   onChange={(e: any) => setEnableDrag(e.target.checked)}
                 />
               </div>
-              <div className="w-full">
+              {/* <div className="w-full">
                 <Button
                   variant="contained"
                   color="primary"
@@ -116,7 +113,7 @@ export const LinearChapterList: React.FC<LinearChapterListProps> = ({
                 >
                   Update Chapter
                 </Button>
-              </div>
+              </div> */}
             </div>
           )}
         </div>
@@ -128,6 +125,7 @@ export const LinearChapterList: React.FC<LinearChapterListProps> = ({
         chapterTree={chapterTree}
         tHeight={height}
         searchTerm={searchTerm}
+        bookUnitId={bookId}
         selectedId={String(selectedId)}
         width={width}
         baseLink={baseLink}
