@@ -45,7 +45,7 @@ export const ReadListPage: React.FC = () => {
 
   return (
     <div
-      className="w-full max-w-4xl mt-[60px] mx-auto"
+      className="w-full max-w-4xl mt-[60px] mx-auto px-2"
       data-testid="booklist-page"
     >
       {/* Head */}

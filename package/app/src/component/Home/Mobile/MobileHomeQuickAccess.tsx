@@ -1,0 +1,42 @@
+import React, {useMemo} from 'react';
+import {Link} from 'wouter';
+import {echoKvGetQuery} from '@/api/echokv/echokv';
+import {useQuery} from '@tanstack/react-query';
+import {parseEchoKVResponse} from '@/api/echokv/util';
+
+export type MobileHomeQuickAccessProps = {
+  title?: string;
+  kvKey?: string;
+};
+
+export const MobileHomeQuickAccess: React.FC<MobileHomeQuickAccessProps> = ({
+  title = '快速探索',
+  kvKey = 'book_search_tag_group_quick',
+}) => {
+  const {data} = useQuery(echoKvGetQuery(kvKey));
+  const items = useMemo(
+    () => parseEchoKVResponse<any>(data)?.presetTags ?? [],
+    [data],
+  );
+
+  if (!items.length) return null;
+
+  return (
+    <div className="w-full space-y-2">
+      {title && (
+        <div className="text-xs font-medium text-muted-foreground px-1">
+          {title}
+        </div>
+      )}
+      <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide px-1">
+        {(Array.isArray(items) ? items : []).map(name => (
+          <Link key={name} href={`/book?tags=${name}`}>
+            <div className="whitespace-nowrap rounded-full bg-secondary/80 px-3 py-1.5 text-xs font-medium text-secondary-foreground hover:bg-secondary transition-colors border border-transparent hover:border-primary/20">
+              {name}
+            </div>
+          </Link>
+        ))}
+      </div>
+    </div>
+  );
+};

@@ -21,20 +21,25 @@ export const ReplyDrawerShow: React.FC<ReplyDrawerShowProps> = ({
 }) => {
   return (
     <Drawer open={open} onClose={onClose} anchor="bottom" sx={{zIndex: 2000}}>
-      {/* 选择下方div的父元素，可以调整背景为透明 */}
-      <div className="w-3/4 mx-auto flex gap-4 mt-4 min-h-[250px] h-[400px]">
-        {/* 左边编辑器，占大部分宽度 */}
-        <div className="flex-1">
+      <div
+        className="w-11/12 sm:w-3/4 mx-auto my-4 min-h-[250px] h-[400px]
+                  grid gap-4
+                  grid-cols-1 sm:grid-cols-[1fr_auto]"
+      >
+        {/* 内容区域 */}
+        <div className="flex flex-col">
           <EasyEditor value={content} onChange={onContentChange} />
         </div>
 
-        {/* 右边按钮区域，竖排，从下往上 */}
-        {/* 此时 h-full 都不再是必须的，因为 items-stretch (flex默认值) 会自动拉伸此div */}
-        <div className="flex flex-col justify-end space-y-2">
-          <Button variant="contained" onClick={onSubmit} className="!mb-2">
+        {/* 按钮栏：小屏下在底部，大屏右侧对齐 */}
+        <div className="flex sm:flex-col gap-2 self-stretch justify-end sm:justify-end">
+          <Button
+            variant="contained"
+            onClick={onSubmit}
+            className="w-full sm:w-auto mb-4"
+          >
             提交
           </Button>
-          {/* 更多按钮可以继续加 */}
         </div>
       </div>
     </Drawer>
