@@ -22,6 +22,7 @@ export type SearchInputShowProps = {
   onAddTag?: (tag: string) => void;
   placeholder?: string; // already translated text
   tagGroups?: Record<string, string[]>; // group name -> tags
+  hiddenWordCountFilter?: boolean;
 };
 
 export const SearchInputShow: React.FC<SearchInputShowProps> = ({
@@ -31,6 +32,7 @@ export const SearchInputShow: React.FC<SearchInputShowProps> = ({
   onAddTag,
   placeholder,
   tagGroups,
+  hiddenWordCountFilter = false,
 }) => {
   const {t} = useTranslation();
   const groups = useMemo(
@@ -96,17 +98,19 @@ export const SearchInputShow: React.FC<SearchInputShowProps> = ({
         />
         <div className="flex flex-1 gap-2">
           <div className="flex-1 mr-2">
-            <TextField
-              fullWidth
-              size="small"
-              label={'Word Count'}
-              placeholder='Min to Max: "10000-20000"'
-              value={value.textLength ?? ''}
-              onChange={e =>
-                onValueChange({...value, textLength: e.target.value})
-              }
-              onKeyDown={handleKeyDown}
-            />
+            {!hiddenWordCountFilter && (
+              <TextField
+                fullWidth
+                size="small"
+                label={'Word Count'}
+                placeholder='Min to Max: "10000-20000"'
+                value={value.textLength ?? ''}
+                onChange={e =>
+                  onValueChange({...value, textLength: e.target.value})
+                }
+                onKeyDown={handleKeyDown}
+              />
+            )}
           </div>
           <FormControlLabel
             control={
@@ -175,6 +179,7 @@ export type SearchInputContainerProps = {
   defaultValue?: SearchInfo;
   placeholder?: string;
   tagGroups?: Record<string, string[]>;
+  hiddenWordCountFilter?: boolean;
 };
 
 export const SearchInputContainer: React.FC<SearchInputContainerProps> = ({
@@ -182,6 +187,7 @@ export const SearchInputContainer: React.FC<SearchInputContainerProps> = ({
   defaultValue = {keyword: '', tags: []},
   placeholder,
   tagGroups,
+  hiddenWordCountFilter = false,
 }) => {
   const [searchParams] = useSearchParams();
   const [location, _navigate] = useLocation();
@@ -191,9 +197,13 @@ export const SearchInputContainer: React.FC<SearchInputContainerProps> = ({
     if (location === '/book') {
       const keyword = searchParams.get('keyword');
       const tags = searchParams.get('tags')?.split(',') ?? [];
+      const nsfwFlag = searchParams.get('nsfw') === 'true';
+      const isLicensedFlag = searchParams.get('isLicensed') === 'true';
       const currentSearch = {
         keyword: keyword ?? '',
         tags: tags,
+        nsfw: nsfwFlag,
+        isLicensed: isLicensedFlag,
       };
       setValue(currentSearch);
       onSearch(currentSearch);
@@ -220,6 +230,7 @@ export const SearchInputContainer: React.FC<SearchInputContainerProps> = ({
       onAddTag={handleAddTag}
       placeholder={placeholder}
       tagGroups={tagGroups}
+      hiddenWordCountFilter={hiddenWordCountFilter}
     />
   );
 };

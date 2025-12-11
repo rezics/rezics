@@ -18,11 +18,13 @@ export type BookSortType =
 export type BookSearchContainerProps = {
   onSearch: (options: BookQueryOptions) => void;
   defaultValue?: SearchInfo;
+  hiddenWordCountFilter?: boolean;
 };
 
 export const BookSearchContainer: React.FC<BookSearchContainerProps> = ({
   onSearch,
   defaultValue,
+  hiddenWordCountFilter = false,
 }) => {
   const {t} = useTranslation();
   const [sort, _setSort] = useState<{
@@ -84,6 +86,7 @@ export const BookSearchContainer: React.FC<BookSearchContainerProps> = ({
           placeholder={t('placeholders.search_books')}
           tagGroups={tagGroups}
           defaultValue={defaultValue}
+          hiddenWordCountFilter={hiddenWordCountFilter}
         />
       </div>
       <div className="mt-4">

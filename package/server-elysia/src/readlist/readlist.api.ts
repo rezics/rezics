@@ -11,6 +11,7 @@ import {
   updateReadlistSchema,
   hasPermissionToUpdateReadlist,
   hasPermissionToDeleteReadlist,
+  BasicAdminPermission,
 } from '@package/contract';
 import type {
   ReadlistListQuery,
@@ -27,7 +28,14 @@ import type {
 export const readlistApi = coreInstance('/readlists')
   .get(
     '/',
-    async ({query}): Promise<ReadlistListResponse> => {
+    async ({query, headers, jwt, set}): Promise<ReadlistListResponse> => {
+      const payload = await verifyAuth(headers.authorization, jwt, set);
+      if (!BasicAdminPermission(payload as any)) {
+        set.status = 403;
+        throw new Error(
+          'Forbidden: you do not have permission to get all books',
+        );
+      }
       const {readlists, total} = await readlistService.list(query as any);
       return {readlists, total};
     },

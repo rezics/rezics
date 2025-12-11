@@ -572,7 +572,7 @@ export default (
         </Route>
 
         {/* ANCHOR Misc */}
-        <Route path="/misc/notice">
+        <Route path="/notice">
           <MainLayout>
             <NoticePage />
           </MainLayout>

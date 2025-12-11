@@ -1,26 +1,24 @@
-import {
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-} from '@mui/material';
+import {Button, Dialog, DialogActions, DialogContent} from '@mui/material';
 import React from 'react';
 import {useLocation} from 'wouter';
-import {Facebook, Twitter, Instagram} from '@mui/icons-material';
+import {Facebook, Twitter, Instagram, Telegram} from '@mui/icons-material';
 
 export type ReactionBarToolBoxProps = {
   open: boolean;
   onClose: () => void;
   itemUrl?: string;
+  itemText?: string;
 };
 
 export const ReactionBarToolBox: React.FC<ReactionBarToolBoxProps> = ({
   open,
   onClose,
   itemUrl,
+  itemText = 'Source: REZICS',
 }) => {
   const [_, navigate] = useLocation();
+  const origin = window?.location?.origin;
+  const itemFullUrl = origin + itemUrl;
 
   function handleLinkClick() {
     navigator.clipboard.writeText(itemUrl || '');
@@ -52,9 +50,34 @@ export const ReactionBarToolBox: React.FC<ReactionBarToolBoxProps> = ({
           <div>Share</div>
           <div>{itemUrl}</div>
           <div className="flex items-center gap-2 mt-2">
-            <Facebook />
-            <Twitter />
-            <Instagram />
+            <a
+              href={`https://t.me/share/url?url=${itemFullUrl}&text=${itemText}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Telegram />
+            </a>
+            <a
+              href={`https://x.com/intent/tweet?url=${itemFullUrl}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Twitter />
+            </a>
+            <a
+              href={`https://www.facebook.com/sharer/sharer.php?u=${itemFullUrl}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Facebook />
+            </a>
+            <a
+              href={`https://www.instagram.com/share?url=${itemFullUrl}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Instagram />
+            </a>
           </div>
         </div>
         <DialogActions>

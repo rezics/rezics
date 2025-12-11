@@ -13,23 +13,27 @@ export type HomeShowProps = object;
 export const HomeShow: React.FC<HomeShowProps> = () => {
   return (
     <div className="w-10/12 mx-auto mb-10">
-      {/* First Carousel */}
-      <div className="mt-6">
-        <ResponsiveCarouselNotice />
-      </div>
+      <section className="px-4 pt-4 pb-6 space-y-4 bg-background text-foreground rounded-lg">
+        {/* First Carousel */}
+        <div className="mt-2">
+          <ResponsiveCarouselNotice />
+        </div>
 
-      {/* Search and quick links */}
-      <div className="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-        <div className="lg:col-span-1">
-          <HomeSearchBar />
+        {/* Search and quick links */}
+        <div className="mt-4 grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+          <div className="lg:col-span-1">
+            <HomeSearchBar />
+          </div>
+          <div className="lg:col-span-1">
+            <HomeQuickAccessLinks />
+          </div>
         </div>
-        <div className="lg:col-span-1">
-          <HomeQuickAccessLinks />
-        </div>
-      </div>
+      </section>
 
       {/* Discovery section powered by Meilisearch */}
-      <HomeMeiliDiscoverySection />
+      <div className="mt-8">
+        <HomeMeiliDiscoverySection />
+      </div>
     </div>
   );
 };

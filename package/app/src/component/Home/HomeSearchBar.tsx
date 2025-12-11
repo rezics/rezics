@@ -22,9 +22,14 @@ export const HomeSearchBar: React.FC<HomeSearchBarProps> = () => {
     if (options.nsfw) {
       query += `nsfw=true&`;
     }
+    if (options.isLicensed) {
+      query += `isLicensed=true&`;
+    }
     navigate(`/book${query}`);
   }
-  return <BookSearchContainer onSearch={handleSearch} />;
+  return (
+    <BookSearchContainer onSearch={handleSearch} hiddenWordCountFilter={true} />
+  );
 };
 
 export default HomeSearchBar;

@@ -41,7 +41,18 @@ export function ResponsiveCarouselNotice() {
       }`}
     >
       {/* 左侧：BookCarousel */}
-      <div ref={carouselRef} className={`p-4 ${isWide ? 'w-2/3' : 'w-full'}`}>
+      <div ref={carouselRef} className={`${isWide ? 'w-2/3' : 'w-full'}`}>
+        <div className="space-y-2 mb-4">
+          <p className="text-[10px] uppercase tracking-[0.35em] text-primary/80">
+            Library Book
+          </p>
+          <h1 className="text-2xl font-semibold leading-snug">
+            <span className="text-primary"> 与所爱的故事相遇</span>
+          </h1>
+          <p className="text-xs text-muted-foreground">
+            搜索想看的书，发现高质量书单、短评和金句。
+          </p>
+        </div>
         <BookCarousel autoplayIntervalNum={3000} />
       </div>
 

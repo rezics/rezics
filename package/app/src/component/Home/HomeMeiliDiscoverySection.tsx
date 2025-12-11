@@ -5,11 +5,16 @@ import {
   Avatar,
   Card,
   CardContent,
+  CardHeader,
+  CardActionArea,
+  CardMedia,
+  CardActions,
   Chip,
   CircularProgress,
   Typography,
-  CardActionArea,
   Paper,
+  Box,
+  Stack,
 } from '@mui/material';
 import type {
   BookDTO,
@@ -26,16 +31,16 @@ import {
 import {buildMeiliUnitQuery} from '@/api/meili/meili.queries';
 import {UnitType} from '@package/contract';
 import {Link} from 'wouter';
-import BookCard from './HomeBookCard';
 import {LazyLoadImage} from '../Common/LazyLoadImage';
+import {Masonry} from '@mui/lab';
+import {useThrottleMasonryParameters} from '@/util/useMasonryParameters';
 
 type Book = BookDTO;
 type Readlist = ReadlistDTO;
 type Review = ReviewDTO;
 type Quote = QuoteDTO;
 
-const SECTION_CARD_CLASS =
-  'overflow-hidden border border-solid border-gray-100 shadow-sm';
+// compact card aesthetic handled inline where needed
 
 type SimpleQueryState<T> = {
   items: T[];
@@ -153,16 +158,22 @@ const SectionHeader: React.FC<SectionHeaderProps> = ({
   isLoading,
 }) => {
   return (
-    <div className="flex items-baseline justify-between mb-3">
-      <div>
-        <Typography variant="h6">{title}</Typography>
-        {subtitle && (
-          <Typography variant="caption" color="text.secondary">
-            {subtitle}
+    <div className="mb-3">
+      <div className="flex items-center justify-between">
+        <div>
+          <Typography variant="h6" className="font-semibold">
+            {title}
           </Typography>
-        )}
+          {subtitle && (
+            <Typography variant="caption" color="text.secondary">
+              {subtitle}
+            </Typography>
+          )}
+        </div>
+        <div className="flex items-center gap-2">
+          {isLoading && <CircularProgress size={18} />}
+        </div>
       </div>
-      {isLoading && <CircularProgress size={18} />}
     </div>
   );
 };
@@ -171,8 +182,9 @@ type BooksSectionProps = {
   limit?: number;
 };
 
-const BooksSection: React.FC<BooksSectionProps> = ({limit = 12}) => {
+const BooksSection: React.FC<BooksSectionProps> = ({limit = 50}) => {
   const {items, error, isLoading} = useHomeBooks(limit);
+  const {columns, spacing} = useThrottleMasonryParameters();
 
   if (error) {
     return (
@@ -194,9 +206,57 @@ const BooksSection: React.FC<BooksSectionProps> = ({limit = 12}) => {
       />
       <div className="flex-1 overflow-y-auto space-y-3 mt-3">
         <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
-          {items.map(book => (
-            <BookCard key={book.unitId} book={book} />
-          ))}
+          {/* <Masonry columns={columns} spacing={spacing}> */}
+          {items.map(book => {
+            if (book.coverUrl === null) {
+              return null;
+            }
+            return (
+              <div
+                key={book.unitId}
+                className="transition-all duration-300 ease-out"
+              >
+                <Card className="rounded-lg overflow-hidden shadow-sm">
+                  <CardActionArea component={Link} to={`/book/${book.unitId}`}>
+                    {book.coverUrl && (
+                      <CardMedia
+                        component="img"
+                        height="180"
+                        image={book.coverUrl}
+                        alt={book.title}
+                        className="object-cover w-full"
+                      />
+                    )}
+                    <CardContent>
+                      <Typography variant="subtitle2" className="truncate">
+                        {book.title}
+                      </Typography>
+                      <Typography
+                        variant="caption"
+                        color="text.secondary"
+                        className="truncate"
+                      >
+                        {(() => {
+                          const a: any = (book as any).author;
+                          if (!a) return '';
+                          if (typeof a === 'string') return a;
+                          if (Array.isArray(a))
+                            return a
+                              .map((x: any) =>
+                                typeof x === 'string' ? x : x?.name ?? '',
+                              )
+                              .filter(Boolean)
+                              .join(', ');
+                          return (a?.name as string) ?? '';
+                        })()}
+                      </Typography>
+                    </CardContent>
+                  </CardActionArea>
+                </Card>
+              </div>
+            );
+          })}
+          {/* </Masonry> */}
         </div>
       </div>
     </div>
@@ -229,31 +289,25 @@ const ReadlistsSection: React.FC<ReadlistsSectionProps> = ({limit = 6}) => {
         isLoading={isLoading}
       />
       <div className="flex-1 overflow-y-auto space-y-3 mt-3">
-        {items.map(list => (
-          <Card key={list.id} className={SECTION_CARD_CLASS}>
-            <CardActionArea component={Link} to={`/readlist/${list.id}`}>
-              <CardContent className="flex gap-3">
-                {list.coverUrl && (
-                  <div className="shrink-0">
-                    <LazyLoadImage
-                      src={list.coverUrl}
-                      alt={list.title}
-                      className="w-16 h-20 object-cover rounded"
-                    />
-                  </div>
-                )}
-                <div className="min-w-0 flex-1">
-                  <div className="truncate mb-1" title={list.title}>
-                    {list.title}
-                  </div>
-                  {list.creator && (
-                    <div className="mb-1">
-                      {/* <Avatar
-                        src={list.creator.avatar ?? undefined}
-                        alt={list.creator.name}
-                        sx={{width: 20, height: 20}}
-                        className="float-left mr-2 mb-1"
-                      /> */}
+        <Stack spacing={2}>
+          {items.map(list => (
+            <Card key={list.id} className="rounded-lg" elevation={1}>
+              <CardActionArea component={Link} to={`/readlist/${list.id}`}>
+                <CardContent className="flex gap-3 items-start">
+                  {list.coverUrl && (
+                    <div className="shrink-0">
+                      <LazyLoadImage
+                        src={list.coverUrl}
+                        alt={list.title}
+                        className="w-20 h-24 object-cover rounded"
+                      />
+                    </div>
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <Typography variant="subtitle2" className="truncate">
+                      {list.title}
+                    </Typography>
+                    {list.creator && (
                       <Typography
                         variant="caption"
                         color="text.secondary"
@@ -261,25 +315,23 @@ const ReadlistsSection: React.FC<ReadlistsSectionProps> = ({limit = 6}) => {
                       >
                         {list.content}
                       </Typography>
-                    </div>
-                  )}
-                  {list.books?.length > 0 && (
+                    )}
                     <Typography
                       variant="caption"
                       color="text.secondary"
-                      className="truncate"
+                      className="truncate mt-1 block"
                     >
-                      包含 {list.books.length} 本书 ·{' '}
+                      包含 {list.books?.length ?? 0} 本书 ·{' '}
                       {list.reviews?.length
                         ? `${list.reviews.length} 条短评`
                         : ''}
                     </Typography>
-                  )}
-                </div>
-              </CardContent>
-            </CardActionArea>
-          </Card>
-        ))}
+                  </div>
+                </CardContent>
+              </CardActionArea>
+            </Card>
+          ))}
+        </Stack>
       </div>
     </div>
   );
@@ -311,36 +363,33 @@ const ReviewsSection: React.FC<ReviewsSectionProps> = ({limit = 6}) => {
         isLoading={isLoading}
       />
       <div className="flex-1 overflow-y-auto space-y-3 mt-3">
-        {items.map(review => (
-          <Card key={review.unitId} className={SECTION_CARD_CLASS}>
-            <CardActionArea component={Link} to={`/review/${review.unitId}`}>
-              <CardContent>
-                <div className="flex items-center gap-2 mb-1">
-                  {review.user && (
-                    <Avatar
-                      src={review.user.avatar ?? undefined}
-                      alt={review.user.name}
-                      sx={{width: 24, height: 24}}
-                    />
-                  )}
-                  <div className="min-w-0 flex-1">
-                    <Typography
-                      variant="subtitle2"
-                      className="truncate"
-                      title={review.title ?? review.content}
-                    >
-                      {review.title || '短评'}
-                    </Typography>
-                    {review.user && (
-                      <Typography
-                        variant="caption"
-                        color="text.secondary"
-                        className="truncate"
-                      >
-                        {review.user.name}
-                      </Typography>
-                    )}
-                  </div>
+        <Stack spacing={2}>
+          {items.map(review => (
+            <Card key={review.unitId} className="rounded-lg" elevation={1}>
+              <CardActionArea component={Link} to={`/review/${review.unitId}`}>
+                <CardHeader
+                  avatar={
+                    review.user ? (
+                      <Avatar
+                        src={review.user.avatar ?? undefined}
+                        alt={review.user.name}
+                        sx={{width: 36, height: 36}}
+                      />
+                    ) : undefined
+                  }
+                  title={review.title || '短评'}
+                  subheader={review.user?.name}
+                />
+                <CardContent>
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    className="line-clamp-3 mt-1"
+                  >
+                    {review.content}
+                  </Typography>
+                </CardContent>
+                <CardActions className="px-3 pb-3">
                   {typeof review.rating === 'number' && (
                     <Chip
                       size="small"
@@ -348,18 +397,11 @@ const ReviewsSection: React.FC<ReviewsSectionProps> = ({limit = 6}) => {
                       label={`${review.rating.toFixed(1)}`}
                     />
                   )}
-                </div>
-                <Typography
-                  variant="body2"
-                  color="text.secondary"
-                  className="line-clamp-3 mt-1"
-                >
-                  {review.content}
-                </Typography>
-              </CardContent>
-            </CardActionArea>
-          </Card>
-        ))}
+                </CardActions>
+              </CardActionArea>
+            </Card>
+          ))}
+        </Stack>
       </div>
     </div>
   );
@@ -391,30 +433,32 @@ const QuotesSection: React.FC<QuotesSectionProps> = ({limit = 6}) => {
         isLoading={isLoading}
       />
       <div className="flex-1 overflow-y-auto space-y-3 mt-3">
-        {items.map(quote => (
-          <Card key={quote.id} className={SECTION_CARD_CLASS}>
-            <CardActionArea component={Link} to={`/quote/${quote.id}`}>
-              <CardContent>
-                <Typography
-                  variant="body2"
-                  className="mb-1"
-                  color="text.primary"
-                >
-                  “{quote.text}”
-                </Typography>
-                {quote.from && (
+        <Stack spacing={2}>
+          {items.map(quote => (
+            <Card key={quote.id} className="rounded-lg" elevation={1}>
+              <CardActionArea component={Link} to={`/quote/${quote.id}`}>
+                <CardContent>
                   <Typography
-                    variant="caption"
-                    color="text.secondary"
-                    className="truncate"
+                    variant="body1"
+                    className="mb-1"
+                    color="text.primary"
                   >
-                    —— {quote.from}
+                    “{quote.text}”
                   </Typography>
-                )}
-              </CardContent>
-            </CardActionArea>
-          </Card>
-        ))}
+                  {quote.from && (
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                      className="truncate"
+                    >
+                      —— {quote.from}
+                    </Typography>
+                  )}
+                </CardContent>
+              </CardActionArea>
+            </Card>
+          ))}
+        </Stack>
       </div>
     </div>
   );
@@ -426,12 +470,16 @@ const LockedPanel: React.FC<{
 }> = ({children, className}) => {
   return (
     <Paper
-      className={`${className} p-4 lg:h-[42rem]`}
+      className={`${className} p-4 lg:h-[42rem] rounded-lg`}
       sx={{
         height: '32rem',
+        backgroundColor: 'transparent',
       }}
+      elevation={0}
     >
-      {children}
+      <Box className="h-full bg-surface rounded-lg p-3 shadow-sm">
+        {children}
+      </Box>
     </Paper>
   );
 };
@@ -454,7 +502,7 @@ export type HomeMeiliDiscoverySectionProps = {
  */
 export const HomeMeiliDiscoverySection: React.FC<
   HomeMeiliDiscoverySectionProps
-> = ({bookLimit = 12, readlistLimit = 6, reviewLimit = 6, quoteLimit = 6}) => {
+> = ({bookLimit = 50, readlistLimit = 6, reviewLimit = 6, quoteLimit = 6}) => {
   return (
     <div className="mt-8 space-y-6">
       {/* 第一行：为你推荐 + 精选书单 */}
@@ -463,7 +511,7 @@ export const HomeMeiliDiscoverySection: React.FC<
         <div className="lg:col-span-2">
           <LockedPanel>
             {/* 增加 limit 以利用滚动空间 */}
-            <BooksSection limit={bookLimit || 16} />
+            <BooksSection limit={bookLimit} />
           </LockedPanel>
         </div>
         <div className="lg:col-span-1">

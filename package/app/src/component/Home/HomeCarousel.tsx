@@ -77,7 +77,7 @@ export const BookCarousel: React.FC<BookCarouselProps> = ({
       <CarouselContent>
         {products?.map((product, index) => (
           <CarouselItem key={index}>
-            <Link to={product?.link ?? ''}>
+            <Link to={product?.link ?? '#'}>
               <Grid container spacing={2} alignItems="center" sx={{px: 2}}>
                 <Grid size={{xs: 0, sm: 3}}>
                   <LazyLoadImage

@@ -98,7 +98,7 @@ function NoticeBoardHeader({
           </div>
         </Stack>
         <RouterLink
-          href="/misc/notice"
+          href="/notice"
           underline="hover"
           color="primary"
           variant="body2"

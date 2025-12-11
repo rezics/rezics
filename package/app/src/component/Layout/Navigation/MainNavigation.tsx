@@ -8,6 +8,7 @@ import HowToRegIcon from '@mui/icons-material/HowToReg';
 import LayersIcon from '@mui/icons-material/Layers';
 import LoginIcon from '@mui/icons-material/Login';
 import PersonIcon from '@mui/icons-material/Person';
+import NotificationsRoundedIcon from '@mui/icons-material/NotificationsRounded';
 
 import type {NavigationItem} from './navigation';
 
@@ -55,6 +56,13 @@ export const NAVIGATION = (isAdmin = false): NavigationItem[] => {
       segment: '/unit',
       title: 'Units',
       icon: <DescriptionIcon />,
+    },
+    {
+      kind: 'item',
+      segment: '/notice',
+      title: 'Notice',
+      onlyMobile: true,
+      icon: <NotificationsRoundedIcon />,
     },
 
     {kind: 'divider'},

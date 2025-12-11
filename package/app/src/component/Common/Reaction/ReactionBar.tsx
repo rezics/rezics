@@ -20,6 +20,16 @@ import {
   useDeleteReactionMutation,
 } from '@/api/reaction/reaction.mutations';
 
+async function copyCurrentUrl(url?: string) {
+  const theUrl = url || window.location.href;
+  try {
+    await navigator.clipboard.writeText(theUrl);
+    console.log('URL 已复制到剪贴板');
+  } catch (err) {
+    console.error('复制失败：', err);
+  }
+}
+
 export type ReactionAdminBarProps = {
   className?: string;
   size?: 'small' | 'medium' | 'large';
@@ -231,6 +241,9 @@ export const ReactionBar: React.FC<ReactionBarProps> = ({
               sx={{fontSize}}
               onClick={() => {
                 showAlert('链接已经复制到剪贴板');
+                const origin = window?.location?.origin;
+                const theUrl = origin + itemUrl;
+                copyCurrentUrl(theUrl);
                 setIsToolBoxOpen(true);
               }}
             >
