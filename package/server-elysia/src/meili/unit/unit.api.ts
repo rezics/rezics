@@ -2,7 +2,7 @@ import type {UnitListQuery} from '@package/contract';
 import {unitIndex} from '@package/search/src/meili_index';
 import type {UnitSearchDocument, UnitSearchResult} from '@package/contract';
 import type {SearchResponse} from '@package/search/src/index';
-
+import {defaultSort} from '../util';
 /**
  * Low-level search API that accepts a fully-constructed Meilisearch query string.
  *
@@ -144,7 +144,7 @@ export async function searchUnits(
     offset,
     limit,
     filter: filter.length > 0 ? filter : undefined,
-    sort: sort.length > 0 ? sort : undefined,
+    sort: sort.length > 0 ? sort : defaultSort,
   });
 
   function clipContent(resp: any) {

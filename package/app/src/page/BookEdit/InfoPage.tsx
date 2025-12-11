@@ -1,5 +1,5 @@
 import {useQuery} from '@tanstack/react-query';
-import {CreateBookInput, type BookDTO} from '@package/contract';
+import type {CreateBookInput, BookDTO} from '@package/contract';
 import {bookQueries} from '@/api/book/book';
 import {AccentBarWithTextShow} from '@/component/Common/Navigation/AccentBar';
 import {BookMetadataEditor} from '@/component/Book/Metadata/BookMetadataEditor';
@@ -20,7 +20,7 @@ import {useCreateBookMutation, useUpdateBookMutation} from '@/api/book/book';
 import {type UpdateBookInput} from '@package/contract';
 import {useEffect} from 'react';
 import {BookExtraEditor} from '@/component/Book/Metadata/BookExtraEditor';
-// import Paper from "@mui/material/Paper";
+import {RouterLink} from '@/component/Common/Navigation/RouterLink';
 
 function validatePublishURL(publishURL: string[]) {
   return publishURL.every(url => url.startsWith('https://'));
@@ -40,6 +40,13 @@ const updateBookDialog = (
         <Alert severity={text?.error ? 'error' : 'success'}>
           {' '}
           <Typography variant="body1">{text?.message}</Typography>
+          <Typography variant="body1">
+            {text?.showBookLink && (
+              <RouterLink href={`/book/${text.bookId}`}>
+                点击查看书籍
+              </RouterLink>
+            )}
+          </Typography>
         </Alert>
       </DialogContent>
       <DialogActions>
@@ -63,11 +70,13 @@ export interface BookEditInfoShowProps {
 export interface BookEditMainPageProps {
   bookId?: string;
   newBook?: boolean;
+  pageTitle?: string;
 }
 
 export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
   bookId,
   newBook = false,
+  pageTitle = '书籍编辑',
 }) => {
   const {t} = useTranslation();
   const [_location, navigate] = useLocation();
@@ -93,6 +102,8 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
         title: '创建书籍成功',
         message:
           '创建书籍成功，书籍详情页可能需要等待几分钟/手动刷新才能看到最新内容。',
+        showBookLink: true,
+        bookId: data.unitId,
       });
       setUpdateBookErrorOpen(true);
     },
@@ -139,6 +150,7 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
       isbn: metadataState.isbn,
       coverUrl: metadataState.coverUrl,
       nsfw: metadataState.nsfw,
+      isLicensed: metadataState.isLicensed,
       extra: metadataState.extra,
     };
     const createBookData: CreateBookInput = {
@@ -152,7 +164,10 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
       });
     } else {
       const publishURL = metadataState.extra?.publishURL;
-      if (publishURL && validatePublishURL(publishURL)) {
+      if (
+        updateBookData.isLicensed ||
+        (publishURL && validatePublishURL(publishURL))
+      ) {
         createBookMutation.mutateAsync({
           ...createBookData,
         });
@@ -174,7 +189,7 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
   return (
     <div className="mt-10 mx-auto w-11/12">
       <div className="flex justify-between items-center">
-        <div className="text-2xl font-bold mb-4">书籍编辑</div>
+        <div className="text-2xl font-bold mb-4">{pageTitle}</div>
         <div className="flex items-center gap-2">
           {bookId ? (
             <Button

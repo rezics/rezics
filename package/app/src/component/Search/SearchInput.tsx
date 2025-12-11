@@ -10,7 +10,10 @@ import {type SearchInfo} from '@/component/Search/searchParser';
 import React, {useEffect, useMemo, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import {useSearchParams, useLocation} from 'wouter';
-import {NSFWInfo} from '@/component/Book/Metadata/BookMetadataEditor';
+import {
+  IsLicensedInfo,
+  NSFWInfo,
+} from '@/component/Book/Metadata/BookMetadataEditor';
 
 export type SearchInputShowProps = {
   value: SearchInfo;
@@ -91,16 +94,20 @@ export const SearchInputShow: React.FC<SearchInputShowProps> = ({
           }
           onKeyDown={handleKeyDown}
         />
-        <TextField
-          fullWidth
-          size="small"
-          label={'Word Count'}
-          placeholder='Min to Max: "10000-20000"'
-          value={value.textLength ?? ''}
-          onChange={e => onValueChange({...value, textLength: e.target.value})}
-          onKeyDown={handleKeyDown}
-        />
-        <div className="ml-auto">
+        <div className="flex flex-1 gap-2">
+          <div className="flex-1 mr-2">
+            <TextField
+              fullWidth
+              size="small"
+              label={'Word Count'}
+              placeholder='Min to Max: "10000-20000"'
+              value={value.textLength ?? ''}
+              onChange={e =>
+                onValueChange({...value, textLength: e.target.value})
+              }
+              onKeyDown={handleKeyDown}
+            />
+          </div>
           <FormControlLabel
             control={
               <Checkbox
@@ -111,6 +118,17 @@ export const SearchInputShow: React.FC<SearchInputShowProps> = ({
               />
             }
             label={<NSFWInfo />}
+          />
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={!!value.isLicensed}
+                onChange={e =>
+                  onValueChange({...value, isLicensed: e.target.checked})
+                }
+              />
+            }
+            label={<IsLicensedInfo />}
           />
         </div>
       </div>

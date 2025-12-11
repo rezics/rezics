@@ -6,7 +6,7 @@ export function NewBookPage() {
 
   return (
     <div>
-      <BookEditMainPage newBook={true} />
+      <BookEditMainPage newBook={true} pageTitle="创建书籍" />
     </div>
   );
 }

@@ -4,6 +4,7 @@ export interface SearchInfo {
   textLength?: string;
   user?: string;
   nsfw?: boolean;
+  isLicensed?: boolean;
 }
 
 /**

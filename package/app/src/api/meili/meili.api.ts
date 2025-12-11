@@ -1,5 +1,5 @@
 /**
- * Meilisearch Book & Unit API client
+ * Meilisearch API client
  *
  * Frontend wrapper around the backend Meili search endpoints.
  */
@@ -14,6 +14,7 @@ import type {
   ReadlistSearchResult,
   FeedbackSearchResult,
 } from '@package/contract';
+import type {UserDTO, UserListQuery} from '@package/contract';
 import {buildQueryString} from '../utils/buildQuery';
 import {apiFetch} from '../react-query/http';
 import type {BookFilters} from '../book/book.types';
@@ -72,5 +73,22 @@ export const meiliFeedbackApi = {
       method: 'POST',
       body: JSON.stringify(filters),
     });
+  },
+};
+
+export type UserSearchResponse = {
+  users: Omit<UserDTO, 'email'>[];
+  total: number;
+};
+
+export const meiliUserApi = {
+  /**
+   * Search users via backend Meilisearch controller.
+   *
+   * The backend expects a `UserListQuery` object encoded in the query string.
+   */
+  userSearch: async (query?: UserListQuery): Promise<UserSearchResponse> => {
+    const qs = query ? `?${new URLSearchParams(query as any).toString()}` : '';
+    return apiFetch<UserSearchResponse>(`/meili/users/search${qs}`);
   },
 };

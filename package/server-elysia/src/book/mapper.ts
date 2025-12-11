@@ -36,6 +36,7 @@ export function mapBaseBookToDTO(book: BookWithRelations): BookDTO {
     isbn: book.isbn || undefined,
     textLength: book.textLength.toString() || '0',
     nsfw: book.unit.nsfw || undefined,
+    isLicensed: book.isLicensed || undefined,
     userId: book.unit.userId,
     user: sanitizeUser(book.unit.user),
     tags: book.unit.tags?.map(tag => tag.name) || [],

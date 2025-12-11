@@ -65,6 +65,7 @@ export const BookSearchContainer: React.FC<BookSearchContainerProps> = ({
       user: info.user ?? undefined,
       textLength: info.textLength ?? undefined,
       nsfw: info.nsfw ?? false,
+      isLicensed: info.isLicensed ?? undefined,
       sort:
         sort.type || sort.order
           ? {type: sort.type as any, order: sort.order}

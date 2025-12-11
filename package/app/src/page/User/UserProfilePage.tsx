@@ -97,7 +97,7 @@ export const UserProfilePage: FC<UserProfilePageProps> = ({
   }
 
   return (
-    <Box className="w-11/12 mx-auto mt-10">
+    <Box className="w-11/12 mx-auto max-w-4xl mt-10">
       <Card className="shadow-lg rounded-2xl">
         <CardHeader
           avatar={

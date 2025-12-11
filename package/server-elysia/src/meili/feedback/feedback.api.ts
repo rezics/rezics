@@ -5,7 +5,7 @@ import type {
   FeedbackSearchResult,
 } from '@package/contract';
 import type {SearchResponse} from '@package/search/src/index';
-
+import {defaultSort} from '../util';
 /**
  * Low-level search API that accepts a fully-constructed Meilisearch query string.
  *
@@ -89,7 +89,7 @@ export async function searchFeedbacks(
     offset,
     limit,
     filter: filter.length > 0 ? filter : undefined,
-    sort,
+    sort: sort.length > 0 ? sort : defaultSort,
   });
 
   return {

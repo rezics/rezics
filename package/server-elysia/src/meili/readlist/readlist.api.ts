@@ -2,7 +2,7 @@ import type {ReadlistListQuery} from '@package/contract';
 import {readlistIndex} from '@package/search/src/meili_index';
 import type {ReadlistSearchDocument, ReadlistSearchResult} from './index';
 import type {SearchResponse} from '@package/search/src/index';
-
+import {defaultSort} from '../util';
 /**
  * Low-level search API that accepts a fully-constructed Meilisearch query string.
  *
@@ -101,7 +101,7 @@ export async function searchReadlists(
     offset,
     limit,
     filter: filter.length > 0 ? filter : undefined,
-    sort: sort.length > 0 ? sort : undefined,
+    sort: sort.length > 0 ? sort : defaultSort,
   });
 
   // Optionally clip content to keep payload small

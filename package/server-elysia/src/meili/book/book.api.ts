@@ -3,6 +3,7 @@ import {toBookQueryString} from '@package/contract';
 import {bookIndex} from '@package/search/src/meili_index';
 import type {BookSearchDocument, BookSearchResult} from './index';
 import type {SearchResponse} from '@package/search/src/index';
+import {defaultSort} from '../util';
 /**
  * Low-level search API that accepts a fully-constructed Meilisearch query string.
  *
@@ -67,6 +68,12 @@ export async function searchBooks(
     filter.push('nsfw = false');
   }
 
+  if (opts.isLicensed === true) {
+    filter.push('isLicensed = true');
+  } else if (opts.isLicensed === false) {
+    filter.push('isLicensed = false');
+  }
+
   if (opts.tags?.length) {
     filter.push(
       `tagSearch IN [${opts.tags
@@ -126,7 +133,7 @@ export async function searchBooks(
     offset,
     limit,
     filter: filter.length > 0 ? filter : undefined,
-    sort: sort.length > 0 ? sort : undefined,
+    sort: sort.length > 0 ? sort : defaultSort,
   });
 
   return {

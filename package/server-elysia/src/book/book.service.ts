@@ -205,6 +205,7 @@ export class BookService {
       chaptersIndex,
       extra,
       nsfw,
+      description,
     } = req;
 
     const book = await prisma.book.create({
@@ -220,6 +221,7 @@ export class BookService {
           },
         },
         title,
+        description: description || undefined,
         author:
           authorIds && authorIds.length > 0
             ? {connect: authorIds.map((unitId: string) => ({unitId}))}
@@ -259,6 +261,7 @@ export class BookService {
       extra,
       description,
       nsfw,
+      isLicensed,
     } = req;
 
     const book = await prisma.book.update({
@@ -276,6 +279,7 @@ export class BookService {
           : undefined,
         coverUrl: coverUrl || undefined,
         isbn: isbn || undefined,
+        isLicensed: isLicensed || false,
         textLength: Number(textLength || '0') || 0,
         chapterIndex: {
           update: {index: chaptersIndex || undefined},

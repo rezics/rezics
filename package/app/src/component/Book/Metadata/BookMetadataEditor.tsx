@@ -12,7 +12,7 @@ import {
 } from '@mui/material';
 import {InfoOutlined} from '@mui/icons-material';
 import type {BookDTO, UserDTO} from '@package/contract';
-import {userApi} from '@/api/user/user.api';
+import {meiliUserApi} from '@/api/meili/meili.api';
 
 type PublicUserLike = Partial<UserDTO>;
 
@@ -40,7 +40,10 @@ const useUserSearch = () => {
     setLoading(true);
     const handle = setTimeout(async () => {
       try {
-        const {users} = await userApi.list({q: input, limit: 10});
+        const {users} = await meiliUserApi.userSearch({
+          q: input,
+          limit: 10,
+        });
         if (active) setOptions(users as UserOption[]);
       } catch (e) {
         if (active) setOptions([]);
@@ -147,6 +150,32 @@ export function NSFWInfo() {
     </div>
   );
 }
+
+export function IsLicensedInfo() {
+  return (
+    <div className="flex items-center gap-1">
+      <span>Licensed</span>
+
+      <Tooltip
+        title="当书籍已获得版权许可时，如您是版权所有者，请勾选此选项"
+        placement="right"
+        slotProps={{
+          tooltip: {
+            sx: {
+              fontSize: '0.85rem',
+              padding: '6px 10px',
+              maxWidth: 300,
+              lineHeight: 1.4,
+            },
+          },
+        }}
+      >
+        <InfoOutlined fontSize="small" color="action" />
+      </Tooltip>
+    </div>
+  );
+}
+
 export const BookMetadataEditor: React.FC<BookMetadataEditorProps> = ({
   value,
   onChange,
@@ -228,6 +257,21 @@ export const BookMetadataEditor: React.FC<BookMetadataEditorProps> = ({
             disabled={disabled}
             variant="outlined"
             size="small"
+          />
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={value?.isLicensed ?? false}
+                onChange={e =>
+                  onChange?.({
+                    isLicensed: e.target.checked,
+                  })
+                }
+                disabled={disabled}
+              />
+            }
+            label={<IsLicensedInfo />}
+            disabled={disabled}
           />
           <FormControlLabel
             control={

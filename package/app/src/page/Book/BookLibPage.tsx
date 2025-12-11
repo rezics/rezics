@@ -97,6 +97,7 @@ export const BookLibShow = (
                 keyword: info.keyword ?? '',
                 tags: info.tags ?? [],
                 nsfw: info.nsfw ?? false,
+                isLicensed: info.isLicensed ?? undefined,
                 textLength: info.textLength ?? '',
               });
               console.log('onSearch', info);
@@ -125,6 +126,7 @@ export const BookLibContainer: React.FC = () => {
     keyword: '',
     tags: [],
     nsfw: false,
+    isLicensed: undefined,
     textLength: '',
   });
   const [start, setStart] = useState<number>(0);
@@ -136,6 +138,7 @@ export const BookLibContainer: React.FC = () => {
       keyword: currentQuery.keyword ?? '',
       tags: currentQuery.tags ?? [],
       ...(currentQuery.nsfw ? {nsfw: true} : {}),
+      ...(currentQuery.isLicensed ? {isLicensed: true} : {}),
       ...(currentQuery.textLength ? {textLength: currentQuery.textLength} : {}),
     }),
   );

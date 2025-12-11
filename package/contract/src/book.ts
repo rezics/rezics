@@ -17,6 +17,7 @@ export const bookDTOSchema = t.Object({
   isbn: t.Optional(t.String()),
   textLength: t.Optional(t.String()),
   nsfw: t.Optional(t.Boolean()),
+  isLicensed: t.Optional(t.Boolean()),
   // 保持与 Input 一致，允许 null
   chaptersIndex: t.Optional(t.Nullable(t.String())),
   // 保持与 Input 一致
@@ -138,6 +139,7 @@ export const updateBookSchema = t.Object({
   pressIds: t.Optional(t.Array(t.String())),
   producerIds: t.Optional(t.Array(t.String())),
   nsfw: t.Optional(t.Boolean()),
+  isLicensed: t.Optional(t.Boolean()),
   coverUrl: t.Optional(t.String()),
   isbn: t.Optional(t.String()),
   textLength: t.Optional(t.String()),
