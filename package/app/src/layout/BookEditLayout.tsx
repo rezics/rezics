@@ -73,8 +73,6 @@ export const BookEditLayout: React.FC<BookEditLayoutProps> = ({
             chapterId={chapterId || ''}
             width={drawerWidth}
             height={height}
-            isDraggable={true}
-            enableDoubleClickRename={false}
           />
         </Sidebar>
         <DraggableResizer

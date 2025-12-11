@@ -237,6 +237,7 @@ model Book {
   description  String?
   coverUrl     String?
   isbn         String?
+  isLicensed   Boolean    @default(false)
   // chaptersIndex String? // 章节树状信息, 章节信息类似Review,统一使用
   chapterIndex BookIndex?
   extra        Json? // 领域扩展（出版社、出版年、装帧…）

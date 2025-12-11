@@ -21,13 +21,11 @@ export const BookReadLayout: React.FC<BookReadLayoutProps> = ({
 }) => {
   const [match, params] = useRoute('/book/:bookId/read/:chapterId');
   const locationParams = useParams();
-  const [baseUrl, setBaseUrl] = useState('');
   const [selectedId, setSelectedId] = useState(
     match ? String(params.chapterId) : '',
   );
 
   useEffect(() => {
-    console.log('match, params', match, params);
     setSelectedId(match ? String(params.chapterId) : '');
   }, [match, params]);
 
@@ -54,43 +52,44 @@ export const BookReadLayout: React.FC<BookReadLayoutProps> = ({
         disableDrawerToggle={isSidebarTransitioning}
       />
 
-      <Sidebar
-        sidebarOpen={sidebarOpen}
-        sidebarWidth={drawerWidth}
-        isMobile={isMobile}
-        onClose={() => isMobile && closeSidebar()}
-        handleDrawerToggle={handleDrawerToggle}
-        NAVIGATION={[]}
-        noScrollBar={false}
-        onOverflowx={true}
-        onOverflowy={true}
-      >
-        <div>
-          <div className="flex items-center justify-between mb-2 bg-gray-50 text-sm text-gray-800">
-            <div className="font-medium">目录</div>
-            <Link
-              to={`/book/${locationParams[0]}/`}
-              className="text-blue-600 hover:underline"
-            >
-              <Button variant="text">查看详情</Button>
-            </Link>
+      <div id="book-read-sidebar">
+        <Sidebar
+          sidebarOpen={sidebarOpen}
+          sidebarWidth={drawerWidth}
+          isMobile={isMobile}
+          onClose={() => isMobile && closeSidebar()}
+          handleDrawerToggle={handleDrawerToggle}
+          NAVIGATION={[]}
+          noScrollBar={false}
+          onOverflowx={true}
+          onOverflowy={true}
+        >
+          <div>
+            <div className="flex items-center justify-between mb-2 bg-gray-50 text-sm text-gray-800">
+              <div className="font-medium">目录</div>
+              <Link
+                to={`/book/${locationParams[0]}/`}
+                className="text-blue-600 hover:underline"
+              >
+                <Button variant="text">返回书籍</Button>
+              </Link>
+            </div>
+            <Divider className="mb-4" />
+            <LinearChapterList
+              readingMode={true}
+              bookId={bookId || ''}
+              chapterId={chapterId || ''}
+              height={1200}
+            />
           </div>
-          <Divider />
-          <LinearChapterList
-            bookId={bookId || ''}
-            chapterId={chapterId || ''}
-            isDraggable={true}
-            enableDoubleClickRename={false}
-            isEdit={false}
-          />
-        </div>
-      </Sidebar>
+        </Sidebar>
 
-      <DraggableResizer
-        targetId="book-edit-sidebar"
-        setSidebarWidth={setDrawerWidth}
-        onDragging={setIsDragging}
-      />
+        <DraggableResizer
+          targetId="book-read-sidebar"
+          setSidebarWidth={setDrawerWidth}
+          onDragging={setIsDragging}
+        />
+      </div>
 
       <main
         className="flex-grow pt-16 transition-all duration-300"

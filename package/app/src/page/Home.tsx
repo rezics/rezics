@@ -39,7 +39,7 @@ export const HomeShow: React.FC<HomeShowProps> = () => {
  */
 const HomeShowMobile: React.FC = () => {
   return (
-    <div className="min-h-screen bg-background text-foreground pb-20">
+    <div className="min-h-screen bg-background text-foreground">
       {/* 顶部 Banner：轮播 */}
       <MobileHomeCarousel />
 
@@ -54,7 +54,8 @@ const HomeShowMobile: React.FC = () => {
       </section>
 
       {/* 底部浮动导航/状态条 */}
-      <div className="fixed bottom-3 inset-x-0 px-4 z-30 pointer-events-none">
+      {/* TODO 后续可能据此风格制作可选开关的Bottom Navigation */}
+      <div className="fixed bottom-3 inset-x-0 px-4 z-30 pointer-events-none hidden">
         <div className="mx-auto max-w-md rounded-full bg-background/95 border border-border shadow-lg px-4 py-2 flex items-center justify-between text-[11px] text-muted-foreground backdrop-blur-sm pointer-events-auto">
           <span className="font-medium">正在浏览首页推荐</span>
           <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">

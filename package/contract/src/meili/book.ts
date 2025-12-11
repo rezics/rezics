@@ -16,6 +16,7 @@ export interface BookSearchDocument {
   producers: string[];
   textLength: number;
   nsfw: boolean;
+  isLicensed: boolean;
   authorIds: string[];
   pressIds: string[];
   producerIds: string[];

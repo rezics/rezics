@@ -1,6 +1,6 @@
 import React, {useState, useEffect, useRef} from 'react';
 
-import {LinearChapterList} from '@/component/Book/Chapter/LinearChapterList';
+import {LinearChapterListEdit} from '@/component/Book/Chapter/LinearChapterListEdit';
 import {ChapterArboristHeightSlider} from '@/component/Book/Chapter/ChapterArboristHeightSlider';
 import {AccentBarWithTextShow} from '@/component/Common/Navigation/AccentBar';
 import {Alert} from '@mui/material';
@@ -50,7 +50,7 @@ export const BookEditChapterListPage: React.FC<
         height={chapterArboristHeight}
         setHeight={setChapterArboristHeight}
       />
-      <LinearChapterList
+      <LinearChapterListEdit
         bookId={bookId}
         isEdit={true}
         width={parentWidth - 20}

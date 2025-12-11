@@ -6,7 +6,7 @@ import {
   ExpandLess,
   ExpandMore,
 } from '@mui/icons-material';
-import {Box, useMediaQuery, useTheme} from '@mui/material';
+import {Box, useTheme} from '@mui/material';
 import {
   Collapse,
   Divider,
@@ -103,7 +103,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
   layoutType = 'type-b',
 }) => {
   const {setSidebarHeightBelow, toggleItem, openItems} = useLayoutStore();
-
   const [refAbove, {height}] = useMeasure();
   const {height: windowHeight} = useWindowSize();
 
@@ -145,6 +144,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
         {layoutType === 'type-b' && <div className="mt-2" />}
         <List>
           {NAVIGATION.map((item, index) => {
+            if (item.onlyMobile && !isMobile) {
+              return null;
+            }
             if (item.kind === 'header') {
               return (
                 <ListItem key={index}>

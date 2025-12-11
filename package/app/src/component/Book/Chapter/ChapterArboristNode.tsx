@@ -1,13 +1,9 @@
 import React from 'react';
 import type {NodeRendererProps} from 'react-arborist';
-import {RouterLink} from '@/component/Common/Navigation/RouterLink';
 import {Link} from 'wouter';
 import {useTheme, alpha} from '@mui/material/styles';
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
-import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
-import FolderOutlinedIcon from '@mui/icons-material/FolderOutlined';
-import FolderOpenOutlinedIcon from '@mui/icons-material/FolderOpenOutlined';
 import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
 
 // Type used inside the BookEditorSidebar tree

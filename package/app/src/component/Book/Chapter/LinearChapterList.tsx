@@ -1,6 +1,6 @@
 import React, {useMemo, useRef, useState} from 'react';
 import {useQuery} from '@tanstack/react-query';
-import {Divider, Switch, TextField, Button, Stack} from '@mui/material';
+import {Divider, TextField, Button, Stack} from '@mui/material';
 
 import {bookQueries} from '@/api/book/book.queries.ts';
 import {ChapterArborist} from '@/component/Book/Chapter/ChapterArborist';
@@ -11,11 +11,9 @@ import {buildTree} from '@/util/treeAbstract.ts';
 interface LinearChapterListProps {
   width?: number;
   height?: number;
-  isDraggable?: boolean;
-  enableDoubleClickRename?: boolean;
   bookId: string;
   chapterId?: string;
-  isEdit?: boolean;
+  readingMode?: boolean;
 }
 
 export const LinearChapterList: React.FC<LinearChapterListProps> = ({
@@ -23,15 +21,17 @@ export const LinearChapterList: React.FC<LinearChapterListProps> = ({
   chapterId,
   width = 300,
   height = 300,
-  isDraggable = false,
-  enableDoubleClickRename = false,
-  isEdit = false,
+  readingMode = false,
 }) => {
   // Data fetching
   const {data, isLoading, error} = useQuery(bookQueries.chapterIndex(bookId));
 
   const selectedId = chapterId || '';
-  const baseLink = bookId ? `/book/${bookId}/edit` : '';
+  const baseLink = readingMode
+    ? `/book/${bookId}/read`
+    : bookId
+    ? `/book/${bookId}/edit`
+    : '';
 
   const chapterTree: any = useMemo(
     () =>
@@ -43,15 +43,13 @@ export const LinearChapterList: React.FC<LinearChapterListProps> = ({
   );
 
   const [searchTerm, setSearchTerm] = useState('');
-  const [enableDrag, setEnableDrag] = useState(false);
-  const [enableRename, setEnableRename] = useState(enableDoubleClickRename);
   const arboristRef = useRef<ChapterArboristRefHandle | null>(null);
 
   if (!bookId) return null;
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Oh no... {String(error as any)}</div>;
   return (
-    <div>
+    <div className="w-full">
       <div className="mx-auto">
         <div className="space-y-4 mb-4 w-full pl-2 pr-2">
           <Stack direction="row" spacing={1} className="w-full justify-start">
@@ -70,6 +68,7 @@ export const LinearChapterList: React.FC<LinearChapterListProps> = ({
               Collapse All
             </Button>
           </Stack>
+
           <TextField
             id="chapter-search"
             label="Search"
@@ -79,60 +78,24 @@ export const LinearChapterList: React.FC<LinearChapterListProps> = ({
             placeholder="Enter search term"
             className="w-full"
           />
-          {isEdit && (
-            <div className="space-y-3 mt-2">
-              <div className="flex items-center space-x-4 w-full justify-between">
-                <div className="text-gray-700 font-bold">Enable Drag</div>
-                <Switch
-                  checked={enableDrag}
-                  onChange={(e: any) => setEnableDrag(e.target.checked)}
-                />
-              </div>
-              <div className="flex items-center space-x-4 w-full justify-between">
-                <div className="text-gray-700 font-bold">
-                  Double-click Rename
-                </div>
-                <Switch
-                  checked={enableRename}
-                  onChange={(e: any) => setEnableRename(e.target.checked)}
-                />
-              </div>
-              <div className="flex items-center space-x-4 w-full justify-between">
-                <div className="text-gray-700 font-bold">Enable Drag</div>
-                <Switch
-                  checked={enableDrag}
-                  onChange={(e: any) => setEnableDrag(e.target.checked)}
-                />
-              </div>
-              {/* <div className="w-full">
-                <Button
-                  variant="contained"
-                  color="primary"
-                  className="w-full"
-                  onClick={updateChapter}
-                >
-                  Update Chapter
-                </Button>
-              </div> */}
-            </div>
-          )}
         </div>
       </div>
-      <Divider />
 
-      <ChapterArborist
-        ref={arboristRef}
-        chapterTree={chapterTree}
-        tHeight={height}
-        searchTerm={searchTerm}
-        bookUnitId={bookId}
-        selectedId={String(selectedId)}
-        width={width}
-        baseLink={baseLink}
-        isEditable={isEdit}
-        isDraggable={isEdit && isDraggable && enableDrag}
-        enableDoubleClickRename={isEdit && enableRename}
-      />
+      <div>
+        <Divider className="mb-2 md:hidden" />
+
+        <ChapterArborist
+          ref={arboristRef}
+          chapterTree={chapterTree}
+          tHeight={height}
+          searchTerm={searchTerm}
+          bookUnitId={bookId}
+          selectedId={String(selectedId)}
+          width={width}
+          baseLink={baseLink}
+          readingMode={readingMode}
+        />
+      </div>
     </div>
   );
 };

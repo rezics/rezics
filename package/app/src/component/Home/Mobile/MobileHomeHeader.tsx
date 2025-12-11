@@ -20,7 +20,7 @@ export const MobileHomeHeader: React.FC = () => {
           Library Book
         </p>
         <h1 className="text-2xl font-semibold leading-snug">
-          <span className="text-primary"> 与你爱的故事相遇</span>
+          <span className="text-primary"> 与所爱的故事相遇</span>
         </h1>
         <p className="text-xs text-muted-foreground">
           搜索想看的书，发现高质量书单、短评和金句。

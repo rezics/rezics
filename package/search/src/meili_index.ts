@@ -24,6 +24,7 @@ export async function initBookIndex() {
       'extra',
     ],
     filterableAttributes: [
+      'isLicensed',
       'nsfw',
       'tagSearch',
       'authorIds',

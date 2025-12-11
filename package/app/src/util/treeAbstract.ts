@@ -132,6 +132,7 @@ export function flattenTree<T extends NodeBase>(
   forest: Array<TreeNodeWithChildren<T>>,
   filterFields: string[] = [],
 ): FlatTree<T> {
+  console.log('forest', forest);
   const nodes: T[] = [];
   const orders: OrderMap = new Map();
 

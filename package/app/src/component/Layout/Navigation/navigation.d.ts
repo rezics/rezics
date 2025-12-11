@@ -5,5 +5,6 @@ export interface NavigationItem {
   title?: string;
   segment?: string;
   icon?: React.ReactNode;
+  onlyMobile?: boolean;
   children?: NavigationItem[];
 }

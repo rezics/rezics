@@ -27,6 +27,13 @@ export const NAVIGATION = (isAdmin = false): NavigationItem[] => {
     },
     {
       kind: 'item',
+      segment: '/user/me',
+      title: 'My',
+      onlyMobile: true,
+      icon: <PersonIcon />,
+    },
+    {
+      kind: 'item',
       segment: '/book',
       title: 'Books',
       icon: <BookIcon />,

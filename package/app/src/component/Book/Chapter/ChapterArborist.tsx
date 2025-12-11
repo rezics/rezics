@@ -28,6 +28,8 @@ import {
 
 import {flattenTree} from '@/util/treeAbstract.ts';
 
+import {Button} from '@mui/material';
+
 export type Chapter = {
   id: string | number;
   title: string;
@@ -50,6 +52,8 @@ interface ChapterArboristProps {
   isEditable?: boolean;
   isDraggable?: boolean;
   enableDoubleClickRename?: boolean;
+  showUpdateButton?: boolean;
+  readingMode?: boolean;
 }
 
 // you can't use chaptersData = {} to give a default value, because it will cause the Maximum update Warning
@@ -69,6 +73,8 @@ export const ChapterArborist = forwardRef<
       isEditable = false,
       isDraggable = false,
       enableDoubleClickRename = false,
+      showUpdateButton = false,
+      readingMode = false,
     },
     ref,
   ) => {
@@ -131,6 +137,23 @@ export const ChapterArborist = forwardRef<
       setTreeData(currentTree => findAndDelete(currentTree, ids) as Chapter[]);
     }, []);
 
+    function updateChapter(treeData: any) {
+      const flatTree = flattenTree(treeData);
+      const flatTreeResult = {
+        chapters: flatTree.nodes,
+        order: flatTree.orders,
+      };
+
+      try {
+        updateChapterIndexMutation.mutateAsync({
+          bookUnitId,
+          chaptersIndex: flatTreeResult,
+        });
+      } catch (error) {
+        showAlert(`创建章节失败: ${error}`);
+      }
+    }
+
     function handleCreate({
       parentId,
       newNode,
@@ -149,24 +172,8 @@ export const ChapterArborist = forwardRef<
       } else {
         tmpTreeData = [...currentTree, newNode];
       }
-      const flatTree = flattenTree(tmpTreeData);
-      const flatTreeResult = {
-        chapters: flatTree.nodes,
-        order: flatTree.orders,
-      };
-      console.log('handleCreate flatTreeResult', flatTreeResult, flatTree);
-
       setTreeData(tmpTreeData);
-      console.log('handleCreate tmpTreeData', tmpTreeData);
-
-      try {
-        updateChapterIndexMutation.mutateAsync({
-          bookUnitId,
-          chaptersIndex: flatTreeResult,
-        });
-      } catch (error) {
-        showAlert(`创建章节失败: ${error}`);
-      }
+      updateChapter(tmpTreeData);
     }
 
     function handlePreCreate(parentId: string | number) {
@@ -197,55 +204,69 @@ export const ChapterArborist = forwardRef<
     const effectiveDrag = isEditable && isDraggable;
 
     return (
-      <div
-        className="p-2"
-        role="presentation"
-        onClick={() => setContextMenu(null)}
-        onKeyDown={(e: any) => {
-          if (e.key === 'Escape') setContextMenu(null);
-        }}
-      >
-        <Tree<Chapter>
-          ref={treeRef}
-          data={treeData}
-          onMove={onMove}
-          onRename={onRename}
-          onDelete={onDelete}
-          width={width ?? undefined}
-          height={tHeight}
-          // indent={24}
-          indent={0}
-          rowHeight={32}
-          disableDrag={!effectiveDrag}
-          disableDrop={!effectiveDrag}
-          idAccessor="id"
-          searchTerm={searchTerm}
-          selection={selectedId ?? ''}
-          searchMatch={(node, t) =>
-            node.data.title.toLowerCase().includes(t.toLowerCase())
-          }
-          childrenAccessor="children"
-          className="overflow-auto"
+      <>
+        <div className="w-full">
+          {showUpdateButton && (
+            <Button
+              variant="contained"
+              color="primary"
+              className="w-full"
+              onClick={() => updateChapter(treeData)}
+            >
+              Update Chapter
+            </Button>
+          )}
+        </div>
+        <div
+          className="p-2"
+          role="presentation"
+          onClick={() => setContextMenu(null)}
+          onKeyDown={(e: any) => {
+            if (e.key === 'Escape') setContextMenu(null);
+          }}
         >
-          {Node}
-        </Tree>
-        {isEditable && contextMenu && (
-          <ChapterArboristContextMenu
-            contextMenu={contextMenu}
-            setContextMenu={setContextMenu}
-            treeRef={treeRef}
-            setTreeData={setTreeData}
-            handleCreate={handlePreCreate}
+          <Tree<Chapter>
+            ref={treeRef}
+            data={treeData}
+            onMove={onMove}
+            onRename={onRename}
+            onDelete={onDelete}
+            width={width ?? undefined}
+            height={tHeight}
+            // indent={24}
+            indent={0}
+            rowHeight={32}
+            disableDrag={!effectiveDrag}
+            disableDrop={!effectiveDrag}
+            idAccessor="id"
+            searchTerm={searchTerm}
+            selection={selectedId ?? ''}
+            searchMatch={(node, t) =>
+              node.data.title.toLowerCase().includes(t.toLowerCase())
+            }
+            childrenAccessor="children"
+            className="overflow-auto"
+          >
+            {Node}
+          </Tree>
+          {isEditable && contextMenu && (
+            <ChapterArboristContextMenu
+              contextMenu={contextMenu}
+              setContextMenu={setContextMenu}
+              treeRef={treeRef}
+              setTreeData={setTreeData}
+              handleCreate={handlePreCreate}
+            />
+          )}
+          <CreateChapterDialog
+            open={createChapterDialog}
+            onClose={() => setCreateChapterDialog(false)}
+            handleCreate={handleCreate}
+            bookUnitId={bookUnitId}
+            currentEditParentId={currentEditParentId}
           />
-        )}
-        <CreateChapterDialog
-          open={createChapterDialog}
-          onClose={() => setCreateChapterDialog(false)}
-          handleCreate={handleCreate}
-          bookUnitId={bookUnitId}
-          currentEditParentId={currentEditParentId}
-        />
-      </div>
+        </div>
+      </>
     );
   },
 );

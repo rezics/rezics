@@ -72,6 +72,7 @@ export async function syncAllBooks() {
         presses: b.press?.map((p: any) => p.name) ?? [],
         producers: b.producer?.map((p: any) => p.name) ?? [],
         nsfw: b.unit?.nsfw ?? false,
+        isLicensed: b.isLicensed ?? false,
         authorIds: b.author?.map((a: any) => a.unitId) ?? [],
         pressIds: b.press?.map((p: any) => p.unitId) ?? [],
         producerIds: b.producer?.map((p: any) => p.unitId) ?? [],

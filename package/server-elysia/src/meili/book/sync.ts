@@ -32,6 +32,7 @@ export async function syncBookToMeili(unitId: string): Promise<void> {
     presses: book.press?.map((p: User) => p.name) ?? [],
     producers: book.producer?.map((p: User) => p.name) ?? [],
     nsfw: book.unit?.nsfw ?? false,
+    isLicensed: book.isLicensed ?? false,
     authorIds: book.author?.map((a: User) => a.unitId) ?? [],
     pressIds: book.press?.map((p: User) => p.unitId) ?? [],
     producerIds: book.producer?.map((p: User) => p.unitId) ?? [],
