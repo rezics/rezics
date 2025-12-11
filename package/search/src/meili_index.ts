@@ -14,6 +14,7 @@ export const bookIndex = meili.index('books');
 export async function initBookIndex() {
   await bookIndex.updateSettings({
     searchableAttributes: [
+      'id',
       'title',
       'description',
       'tagSearch',
@@ -49,7 +50,7 @@ export const unitIndex = meili.index('units');
  */
 export async function initUnitIndex() {
   await unitIndex.updateSettings({
-    searchableAttributes: ['title', 'content', 'tags'],
+    searchableAttributes: ['id', 'title', 'content', 'tags'],
     filterableAttributes: [
       'targetUnitId',
       'type',
@@ -76,7 +77,7 @@ export const readlistIndex = meili.index('readlists');
  */
 export async function initReadlistIndex() {
   await readlistIndex.updateSettings({
-    searchableAttributes: ['title', 'content', 'tags'],
+    searchableAttributes: ['id', 'title', 'content', 'tags'],
     filterableAttributes: [
       'targetUnitId',
       'bookIds',
@@ -105,7 +106,7 @@ export const feedbackIndex = meili.index('feedbacks');
  */
 export async function initFeedbackIndex() {
   await feedbackIndex.updateSettings({
-    searchableAttributes: ['content', 'url'],
+    searchableAttributes: ['id', 'content', 'url'],
     filterableAttributes: [
       'userId',
       'unitId',

@@ -8,6 +8,34 @@ import {
   moveSiblingLast,
 } from '@/util/arboristTreeUtil.ts';
 
+function attachFirstOrphanToParent(treeData: any[], parentId: string) {
+  // Deep clone
+  const data = treeData.map(n => ({...n}));
+
+  const orphanIndex = data.findIndex(
+    n =>
+      !n.parentId &&
+      (!n.children || n.children.length === 0) &&
+      n.id !== parentId,
+  );
+
+  if (orphanIndex === -1) return data;
+
+  const orphan = data[orphanIndex];
+  const parent = data.find(n => n.id === parentId);
+
+  if (!parent) return data;
+
+  data.splice(orphanIndex, 1);
+
+  orphan.parentId = parentId;
+
+  parent.children = parent.children ? [...parent.children] : [];
+  parent.children.push(orphan);
+
+  return data;
+}
+
 interface ChapterArboristContextMenuProps {
   contextMenu: any;
   setContextMenu: (contextMenu: any) => void;
@@ -85,12 +113,15 @@ export const ChapterArboristContextMenu = ({
               title: 'New Chapter',
             };
             setTreeData(current =>
-              insertSiblingAfter(current, contextMenu.node.id, newNode),
+              attachFirstOrphanToParent(
+                insertSiblingAfter(current, contextMenu.node.id, newNode),
+                newNode.id,
+              ),
             );
             setContextMenu(null);
           }}
         >
-          新建同级节点
+          新建无内容节点
         </li>
         <li
           className="px-4 py-2 hover:bg-gray-100 cursor-pointer"

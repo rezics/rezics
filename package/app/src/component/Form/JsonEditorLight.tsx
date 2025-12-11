@@ -125,7 +125,7 @@ export function JsonEditorLight({value, onChange}: JsonEditorLightProps) {
                 error
                   ? '请修复 JSON 错误'
                   : parsedJson && onChange
-                  ? '失去焦点时自动保存'
+                  ? '失去焦点时自动暂存'
                   : '输入有效的 JSON 格式'
               }
               error={!!error}

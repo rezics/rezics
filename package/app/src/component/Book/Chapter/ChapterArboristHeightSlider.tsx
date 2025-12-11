@@ -35,7 +35,7 @@ export function ChapterArboristHeightSlider({
   };
 
   return (
-    <div className="pr-2 pl-2">
+    <div>
       <Grid container spacing={2} sx={{alignItems: 'center'}}>
         <Grid>
           <Typography id="input-slider" gutterBottom>

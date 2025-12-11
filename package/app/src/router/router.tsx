@@ -346,7 +346,7 @@ export default (
         <Route path="/book/:bookId/edit/:chapterId">
           {({bookId, chapterId}) => (
             <BookEditLayout bookId={bookId} chapterId={chapterId}>
-              <BookEditChapterPage chapterId={chapterId} />
+              <BookEditChapterPage bookId={bookId} chapterId={chapterId} />
             </BookEditLayout>
           )}
         </Route>

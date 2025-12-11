@@ -38,6 +38,7 @@ export {
   booksByAuthorQuery,
   bookByIsbnQuery,
   bookInfiniteListQuery,
+  bookChapterIndexQuery,
 } from './book.queries';
 
 // Mutation Hooks

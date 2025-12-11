@@ -74,7 +74,6 @@ export const ChapterArborist = forwardRef<
       isDraggable = false,
       enableDoubleClickRename = false,
       showUpdateButton = false,
-      readingMode = false,
     },
     ref,
   ) => {
@@ -176,7 +175,7 @@ export const ChapterArborist = forwardRef<
       updateChapter(tmpTreeData);
     }
 
-    function handlePreCreate(parentId: string | number) {
+    function handlePreCreate(parentId: string | number | null) {
       setCreateChapterDialog(true);
       setCurrentEditParentId(parentId);
     }
@@ -205,18 +204,26 @@ export const ChapterArborist = forwardRef<
 
     return (
       <>
-        <div className="w-full">
-          {showUpdateButton && (
-            <Button
-              variant="contained"
-              color="primary"
-              className="w-full"
-              onClick={() => updateChapter(treeData)}
-            >
-              Update Chapter
-            </Button>
-          )}
-        </div>
+        {showUpdateButton && (
+          <Button
+            variant="contained"
+            color="primary"
+            className="w-full"
+            onClick={() => updateChapter(treeData)}
+          >
+            Update Chapter
+          </Button>
+        )}
+        {isEditable && treeData.length === 0 && (
+          <Button
+            variant="outlined"
+            color="primary"
+            className="w-full mt-4"
+            onClick={() => handlePreCreate(null)}
+          >
+            创建新章节
+          </Button>
+        )}
         <div
           className="p-2"
           role="presentation"

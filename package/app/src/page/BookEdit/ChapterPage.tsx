@@ -3,14 +3,16 @@ import {Button, CircularProgress, TextField} from '@mui/material';
 import {useTranslation} from 'react-i18next';
 
 import EasyEditor from '@/component/Form/EasyEditor.tsx';
-import {useQuery} from '@tanstack/react-query';
+import {useQuery, useQueryClient} from '@tanstack/react-query';
 import {
   chapterDetailQuery,
   useUpdateChapterMutation,
 } from '@/api/chapter/chapter';
+import {bookMutations, bookChapterIndexQuery} from '@/api/book/book';
 
 export interface BookEditChapterPageProps {
-  chapterId: string; // unitId of chapter
+  chapterId: string;
+  bookId: string;
 }
 
 /**
@@ -20,6 +22,7 @@ export interface BookEditChapterPageProps {
  */
 export const BookEditChapterPage: React.FC<BookEditChapterPageProps> = ({
   chapterId,
+  bookId,
 }) => {
   const {t} = useTranslation();
 
@@ -43,6 +46,8 @@ export const BookEditChapterPage: React.FC<BookEditChapterPageProps> = ({
   }, [data]);
 
   const updateMutation = useUpdateChapterMutation();
+  const queryClient = useQueryClient();
+  const updateChapterIndexMutation = bookMutations.useUpdateChapterIndex();
 
   const isDirty = useMemo(() => {
     if (!data) return false;
@@ -60,12 +65,40 @@ export const BookEditChapterPage: React.FC<BookEditChapterPageProps> = ({
     await updateMutation.mutateAsync({
       unitId: chapterId,
       input: {
-        // Fields based on contract shape
-        chapterName: title,
+        title,
         content,
       } as any,
     });
-  }, [isInvalid, updateMutation, chapterId, title, content]);
+    const chapterIndex = await queryClient.fetchQuery(
+      bookChapterIndexQuery(bookId),
+    );
+    if (chapterIndex) {
+      console.log(chapterIndex);
+      const order = chapterIndex?.index?.order;
+      let chapters = chapterIndex?.index?.chapters;
+      if (chapters) {
+        chapters = Object.values(chapters).map((chapter: any) => {
+          if (chapter.id === chapterId) {
+            return {id: chapterId, title};
+          }
+          return chapter;
+        });
+      }
+      updateChapterIndexMutation.mutateAsync({
+        bookUnitId: bookId,
+        chaptersIndex: {order, chapters},
+      });
+    }
+  }, [
+    isInvalid,
+    updateMutation,
+    chapterId,
+    title,
+    content,
+    queryClient,
+    updateChapterIndexMutation,
+    bookId,
+  ]);
 
   // Ctrl/Cmd+S to save
   useEffect(() => {

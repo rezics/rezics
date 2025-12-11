@@ -100,6 +100,9 @@ export const LinearChapterListEdit: React.FC<LinearChapterListEditProps> = ({
                     onChange={(e: any) => setEnableRename(e.target.checked)}
                   />
                 </div>
+                <div>
+                  修改此处的章节名称仅影响目录结构展示，不会更新实际章节标题。若需修改章节标题，请前往章节编辑页面，在那里修改标题后会自动更新目录结构。
+                </div>
               </div>
             )}
           </div>
