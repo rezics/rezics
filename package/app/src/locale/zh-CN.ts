@@ -217,7 +217,7 @@ export default {
     },
     flags: {
       nsfw: 'NSFW',
-      licensed: '已获版权许可',
+      licensed: '版权',
     },
     tooltips: {
       nsfw: '当书籍名称或封面包含裸露、色情等敏感内容时，请勾选此选项',
@@ -245,6 +245,16 @@ export default {
       publish_urls: {
         title: '发布链接 (Publish URLs)',
       },
+    },
+  },
+
+  search: {
+    placeholders: {
+      search_books: '搜索图书',
+    },
+    tooltips: {
+      nsfw: '是否搜索工作场所不宜内容',
+      licensed: '是否搜索已获得版权许可的内容',
     },
   },
 

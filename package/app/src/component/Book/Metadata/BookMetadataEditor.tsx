@@ -127,14 +127,14 @@ const UsersMultiSelect: React.FC<{
     </div>
   );
 };
-export function NSFWInfo() {
+export function NSFWInfo({tooltipTitle}: {tooltipTitle?: string}) {
   const {t} = useTranslation();
   return (
     <div className="flex items-center gap-1">
       <span>{t('book.flags.nsfw')}</span>
 
       <Tooltip
-        title={t('book.tooltips.nsfw')}
+        title={tooltipTitle ?? t('book.tooltips.nsfw')}
         placement="right"
         slotProps={{
           tooltip: {
@@ -153,14 +153,14 @@ export function NSFWInfo() {
   );
 }
 
-export function IsLicensedInfo() {
+export function IsLicensedInfo({tooltipTitle}: {tooltipTitle?: string}) {
   const {t} = useTranslation();
   return (
     <div className="flex items-center gap-1">
       <span>{t('book.flags.licensed')}</span>
 
       <Tooltip
-        title={t('book.tooltips.licensed')}
+        title={tooltipTitle ?? t('book.tooltips.licensed')}
         placement="right"
         slotProps={{
           tooltip: {

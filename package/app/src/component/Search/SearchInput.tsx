@@ -121,7 +121,7 @@ export const SearchInputShow: React.FC<SearchInputShowProps> = ({
                 }
               />
             }
-            label={<NSFWInfo />}
+            label={<NSFWInfo tooltipTitle={t('search.tooltips.nsfw')} />}
           />
           <FormControlLabel
             control={
@@ -132,7 +132,9 @@ export const SearchInputShow: React.FC<SearchInputShowProps> = ({
                 }
               />
             }
-            label={<IsLicensedInfo />}
+            label={
+              <IsLicensedInfo tooltipTitle={t('search.tooltips.licensed')} />
+            }
           />
         </div>
       </div>

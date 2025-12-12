@@ -232,6 +232,16 @@ export default {
     },
   },
 
+  search: {
+    placeholders: {
+      search_books: 'Search books',
+    },
+    tooltips: {
+      nsfw: 'Whether to search for content that is not suitable for work',
+      licensed: 'Whether to search for content that has been licensed',
+    },
+  },
+
   // Readlist
   readlist: {
     featured: 'Featured reading lists',
