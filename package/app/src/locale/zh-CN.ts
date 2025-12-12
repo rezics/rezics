@@ -1,6 +1,79 @@
 export default {
-  title: 'ICS',
-  motto: '继承 创造 传播',
+  title: 'REZICS',
+  motto: '传承 创造 传播',
+
+  page: {
+    home: {
+      name: 'Home',
+      hero: {
+        kicker: 'Library Book',
+        title_highlight: '与所爱的故事相遇',
+        subtitle: '搜索想看的书，发现高质量书单、短评和金句。',
+      },
+      quick_access: {
+        title_quick_entry: '快速入口',
+        title_fast_explore: '快速探索',
+        title_quick_explore: '快捷探索',
+      },
+      mobile: {
+        search_placeholder: '搜索书名、作者、ISBN...',
+        floating_status: {
+          browsing_recommendations: '正在浏览首页推荐',
+          beta_experimental: 'Beta · 实验功能',
+        },
+      },
+      noticeboard: {
+        caption: '通知',
+        title: '公告板',
+        empty: '暂无公告',
+        alert: {
+          parse_failed: '公告板数据解析失败: {{error}}',
+        },
+        tag: {
+          notice: '通知',
+          announcement: '公告',
+          event: '活动',
+          update: '更新',
+        },
+        time: {
+          just_now: '刚刚',
+          hours_ago_other: '{{count}} 小时前',
+          days_ago_other: '{{count}} 天前',
+          weeks_ago_other: '{{count}} 周前',
+        },
+      },
+      discovery: {
+        recommended_for_you: '为你推荐',
+        recommendations: '推荐',
+        meili_subtitle: '基于 Meilisearch 实时推荐',
+        featured_readlists_subtitle: '快去制作你的书单吧',
+        top_rated_reviews_subtitle: '看看大家最近在聊些什么',
+      },
+      sections: {
+        trending_wiki: '热门百科',
+        trending_reviews: '热门短评',
+        tag_explore: '主题探索',
+        readlist_recommendation: '书单推荐',
+        ranking: '排行榜',
+        partner_brands: '合作伙伴',
+        new_book_recommendations: '新书推荐',
+        editor_picks: '编辑精选',
+        author_spotlight: '作者专栏',
+        wiki_teaser_placeholder:
+          '条目简介占位文案：收录该书的作者、出版信息、主题标签等内容。',
+        review_teaser_placeholder: '“这本书让我重新思考了……（示例占位短评）”',
+        promotion_item_1: '平台公告：本周新版本已发布',
+        promotion_item_2: '书展活动：秋季读书节',
+        promotion_item_3: '限时优惠：精选书单 8 折',
+        newsletter: {
+          title: '订阅最新资讯',
+          thanks: '感谢订阅！',
+          email_placeholder: '输入你的邮箱',
+          submit: '订阅',
+        },
+      },
+    },
+  },
 
   // Navigation & Menu
   navigation: {
@@ -63,19 +136,11 @@ export default {
     reply: '回复',
     close: '关闭',
     open: '打开',
-  },
-
-  // Pages
-  pages: {
-    not_found: '页面未找到',
-    book_tag_edit: '书籍标签编辑',
-    book_description_edit: '书籍描述编辑',
-    book_edit_page: '书籍编辑页面',
-    review_page: '长篇评论页面',
-    review_edit_page: '长篇评论编辑页面',
-    short_review_page: '短评页面',
-    book_collection_list_page: '书籍收藏列表页面',
-    book_list_edit_page: '书单编辑页面',
+    view_more: '查看更多',
+    view_all: '查看全部',
+    pinned: '置顶',
+    new: '新',
+    no_description: '暂无描述',
   },
 
   // Book
@@ -87,6 +152,30 @@ export default {
     collections: '收藏夹',
     edit: '编辑书籍',
     add_to_collection: '添加到收藏夹',
+    new_releases: '新书上架',
+    no_cover: '暂无封面',
+    unknown_author: '未知作者',
+  },
+
+  // Readlist
+  readlist: {
+    featured: '精选书单',
+    includes_books: '包含 {{count}} 本书',
+    includes_reviews: '包含 {{count}} 条书评评',
+    includes_reviews_other: '{{count}} 条短评',
+  },
+
+  // Review
+  review: {
+    hot: '热门书评',
+    top_rated_short_reviews: '高赞短评',
+    short_review: '短评',
+  },
+
+  // Quote
+  quote: {
+    title: '言',
+    subtitle: '笔落惊风雨，诗成泣鬼神',
   },
 
   // Form & Editor

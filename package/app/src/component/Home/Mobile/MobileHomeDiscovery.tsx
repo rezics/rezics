@@ -15,6 +15,7 @@ import type {
   UnitListResponse,
 } from '@package/contract';
 import {LazyLoadImage} from '@/component/Common/LazyLoadImage';
+import {useTranslation} from 'react-i18next';
 
 type Book = BookDTO;
 type Readlist = ReadlistDTO;
@@ -83,11 +84,16 @@ const SectionHeader: React.FC<{title: string; link?: string}> = ({
     <h2 className="text-lg font-bold text-foreground">{title}</h2>
     {link && (
       <Link href={link} className="text-xs text-primary hover:underline">
-        查看更多
+        <I18nViewMore />
       </Link>
     )}
   </div>
 );
+
+const I18nViewMore: React.FC = () => {
+  const {t} = useTranslation();
+  return <>{t('common.view_more')}</>;
+};
 
 // Book Card Component
 const MobileBookCard: React.FC<{book: Book}> = ({book}) => (
@@ -124,7 +130,7 @@ const MobileReadlistCard: React.FC<{readlist: Readlist}> = ({readlist}) => (
         {readlist.title}
       </h3>
       <p className="text-xs text-muted-foreground line-clamp-2 h-8">
-        {readlist.content || '暂无描述'}
+        {readlist.content || <I18nNoDescription />}
       </p>
       <div className="flex items-center gap-2 pt-1">
         <LazyLoadImage
@@ -139,6 +145,11 @@ const MobileReadlistCard: React.FC<{readlist: Readlist}> = ({readlist}) => (
     </div>
   </Link>
 );
+
+const I18nNoDescription: React.FC = () => {
+  const {t} = useTranslation();
+  return <>{t('common.no_description')}</>;
+};
 
 // Review Card Component
 const MobileReviewCard: React.FC<{review: Review}> = ({review}) => (
@@ -165,6 +176,7 @@ const MobileReviewCard: React.FC<{review: Review}> = ({review}) => (
 );
 
 export const MobileHomeDiscovery: React.FC = () => {
+  const {t} = useTranslation();
   const {items: books} = useHomeBooks(8);
   const {items: readlists} = useHomeReadlists(4);
   const {items: reviews} = useHomeReviews(4);
@@ -173,7 +185,7 @@ export const MobileHomeDiscovery: React.FC = () => {
     <div className="space-y-8 pb-8">
       {/* New Books */}
       <section>
-        <SectionHeader title="新书上架" link="/book" />
+        <SectionHeader title={t('book.new_releases')} link="/book" />
         <div className="flex gap-3 overflow-x-auto px-1 pb-2 scrollbar-hide">
           {books.map(book => (
             <MobileBookCard key={book.unitId} book={book} />
@@ -183,7 +195,7 @@ export const MobileHomeDiscovery: React.FC = () => {
 
       {/* Readlists */}
       <section>
-        <SectionHeader title="精选书单" link="/readlist" />
+        <SectionHeader title={t('readlist.featured')} link="/readlist" />
         <div className="flex gap-3 overflow-x-auto px-1 pb-2 scrollbar-hide">
           {readlists.map(readlist => (
             <MobileReadlistCard key={readlist.id} readlist={readlist} />
@@ -193,7 +205,7 @@ export const MobileHomeDiscovery: React.FC = () => {
 
       {/* Reviews */}
       <section>
-        <SectionHeader title="热门书评" link="/review" />
+        <SectionHeader title={t('review.hot')} link="/review" />
         <div className="flex gap-3 overflow-x-auto px-1 pb-2 scrollbar-hide">
           {reviews.map(review => (
             <MobileReviewCard key={review.unitId} review={review} />

@@ -8,6 +8,7 @@ import {
 } from '@mui/material';
 import type {BookDTO} from '@package/contract';
 import {LazyLoadImage} from '../Common/LazyLoadImage';
+import {useTranslation} from 'react-i18next';
 // 辅助组件或直接在父组件中使用
 const BookCard = ({
   book,
@@ -16,6 +17,7 @@ const BookCard = ({
   book: BookDTO;
   className?: string;
 }) => {
+  const {t} = useTranslation();
   return (
     <Card
       key={book.unitId}
@@ -45,7 +47,7 @@ const BookCard = ({
         ) : (
           // 无图片时的占位符
           <Box className="w-full aspect-[3/4] h-42 bg-gray-200 flex items-center justify-center text-gray-400">
-            No Cover
+            {t('book.no_cover')}
           </Box>
         )}
 
@@ -65,7 +67,7 @@ const BookCard = ({
             component="p"
             className="text-gray-500 truncate mt-auto pt-1"
           >
-            {book.author?.[0]?.name || '未知作者'}
+            {book.author?.[0]?.name || t('book.unknown_author')}
           </Typography>
         </CardContent>
       </CardActionArea>

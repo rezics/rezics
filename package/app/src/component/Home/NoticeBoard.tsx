@@ -17,6 +17,8 @@ import {useQuery} from '@tanstack/react-query';
 import {useAlertStore} from '@/global/windowAlertStore';
 import {parseEchoKVResponse} from '@/api/echokv/util';
 import type {Theme} from '@mui/material/styles';
+import {useTranslation} from 'react-i18next';
+import type {TFunction} from 'i18next';
 
 type Notice = {
   id: string;
@@ -29,17 +31,22 @@ type Notice = {
 };
 
 function formatRelative(dateIso: string): string {
-  const ms = Date.now() - new Date(dateIso).getTime();
-  const h = Math.floor(ms / 36e5);
-  if (h < 1) return '刚刚';
-  if (h < 24) return `${h} 小时前`;
-  const d = Math.floor(h / 24);
-  if (d < 7) return `${d} 天前`;
-  const w = Math.floor(d / 7);
-  return `${w} 周前`;
+  // legacy signature retained below
+  return formatRelativeWithT((x: any) => x, dateIso);
 }
 
-function TagBadge({tag}: {tag?: Notice['tag']}) {
+function formatRelativeWithT(t: TFunction, dateIso: string): string {
+  const ms = Date.now() - new Date(dateIso).getTime();
+  const h = Math.floor(ms / 36e5);
+  if (h < 1) return t('page.home.noticeboard.time.just_now');
+  if (h < 24) return t('page.home.noticeboard.time.hours_ago', {count: h});
+  const d = Math.floor(h / 24);
+  if (d < 7) return t('page.home.noticeboard.time.days_ago', {count: d});
+  const w = Math.floor(d / 7);
+  return t('page.home.noticeboard.time.weeks_ago', {count: w});
+}
+
+function TagBadge({tag, t}: {tag?: Notice['tag']; t: TFunction}) {
   const theme = useTheme();
   const colorMap: Record<
     string,
@@ -50,9 +57,18 @@ function TagBadge({tag}: {tag?: Notice['tag']}) {
     更新: 'success',
   };
   const color = (tag ? colorMap[tag] : 'default') as any;
+
+  const label = (() => {
+    if (!tag) return t('page.home.noticeboard.tag.notice');
+    if (tag === '公告') return t('page.home.noticeboard.tag.announcement');
+    if (tag === '活动') return t('page.home.noticeboard.tag.event');
+    if (tag === '更新') return t('page.home.noticeboard.tag.update');
+    return t('page.home.noticeboard.tag.notice');
+  })();
+
   return (
     <Chip
-      label={tag ?? '通知'}
+      label={label}
       color={color}
       variant={color === 'default' ? 'outlined' : 'outlined'}
       size="small"
@@ -66,9 +82,11 @@ function TagBadge({tag}: {tag?: Notice['tag']}) {
 function NoticeBoardHeader({
   theme,
   className,
+  t,
 }: {
   theme: Theme;
   className?: string;
+  t: TFunction;
 }) {
   return (
     <div className={className}>
@@ -85,10 +103,10 @@ function NoticeBoardHeader({
           </div>
           <div>
             <Typography variant="caption" color="text.secondary">
-              Notice
+              {t('page.home.noticeboard.caption')}
             </Typography>
             <Typography variant="subtitle1" fontWeight={600}>
-              公告板
+              {t('page.home.noticeboard.title')}
             </Typography>
           </div>
         </Stack>
@@ -98,7 +116,7 @@ function NoticeBoardHeader({
           color="primary"
           variant="body2"
         >
-          查看全部
+          {t('common.view_all')}
         </RouterLink>
       </div>
 
@@ -107,7 +125,15 @@ function NoticeBoardHeader({
   );
 }
 
-function NoticeBoardItem({item, theme}: {item: Notice; theme: Theme}) {
+function NoticeBoardItem({
+  item,
+  theme,
+  t,
+}: {
+  item: Notice;
+  theme: Theme;
+  t: TFunction;
+}) {
   return (
     <div key={item.id} className="mb-1">
       <ListItemButton
@@ -138,7 +164,7 @@ function NoticeBoardItem({item, theme}: {item: Notice; theme: Theme}) {
           sx={{width: '100%'}}
         >
           <Chip
-            label={item.pin ? '置顶' : '新'}
+            label={item.pin ? t('common.pinned') : t('common.new')}
             color={item.pin ? 'warning' : 'default'}
             size="small"
             variant={item.pin ? 'filled' : 'outlined'}
@@ -158,7 +184,7 @@ function NoticeBoardItem({item, theme}: {item: Notice; theme: Theme}) {
               >
                 {item.title}
               </Typography>
-              <TagBadge tag={item.tag} />
+              <TagBadge tag={item.tag} t={t} />
             </Stack>
             {item.content && (
               <Typography
@@ -180,7 +206,7 @@ function NoticeBoardItem({item, theme}: {item: Notice; theme: Theme}) {
               color="text.disabled"
               sx={{mt: 0.5, display: 'block'}}
             >
-              {formatRelative(item.date)}
+              {formatRelativeWithT(t, item.date)}
             </Typography>
           </div>
           <Typography
@@ -207,6 +233,7 @@ function NoticeBoardItem({item, theme}: {item: Notice; theme: Theme}) {
 export const NoticeBoard: React.FC = () => {
   const theme = useTheme();
   const {show: showAlert} = useAlertStore();
+  const {t} = useTranslation();
   const [notices, setNotices] = useState<Notice[]>([]);
   const {data, isLoading, error} = useQuery(echoKvGetQuery('home_notice'));
 
@@ -214,9 +241,13 @@ export const NoticeBoard: React.FC = () => {
     try {
       setNotices(parseEchoKVResponse<Notice[]>(data));
     } catch (error) {
-      showAlert(`公告板数据解析失败: ${error}`);
+      showAlert(
+        t('page.home.noticeboard.alert.parse_failed', {
+          error: String(error),
+        }),
+      );
     }
-  }, [data, showAlert]);
+  }, [data, showAlert, t]);
 
   useEffect(() => {
     // 这里有问题，每次都会触发
@@ -229,6 +260,7 @@ export const NoticeBoard: React.FC = () => {
       <NoticeBoardHeader
         theme={theme}
         className="sticky top-0 z-10 rounded-lg"
+        t={t}
       />
 
       {/* Content */}
@@ -244,7 +276,7 @@ export const NoticeBoard: React.FC = () => {
 
         {!isLoading && (!notices || notices.length === 0) && (
           <Typography variant="body2" color="text.secondary">
-            暂无公告
+            {t('page.home.noticeboard.empty')}
           </Typography>
         )}
 
@@ -262,7 +294,7 @@ export const NoticeBoard: React.FC = () => {
             }}
           >
             {notices?.map(item => (
-              <NoticeBoardItem key={item.id} item={item} theme={theme} />
+              <NoticeBoardItem key={item.id} item={item} theme={theme} t={t} />
             ))}
           </List>
         )}

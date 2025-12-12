@@ -9,6 +9,7 @@ import {
 } from '@mui/material';
 import {bookQueries} from '@/api/book/book';
 import type {BookDTO} from '@package/contract';
+import {useTranslation} from 'react-i18next';
 
 type Book = BookDTO;
 
@@ -22,9 +23,12 @@ export type HomeTrendingWikiProps = {
  * Placeholder: uses books as entries to show wiki-like teaser content.
  */
 export const HomeTrendingWiki: React.FC<HomeTrendingWikiProps> = ({
-  title = '热门百科',
+  title,
   limit = 6,
 }) => {
+  const {t} = useTranslation();
+  const resolvedTitle = title ?? t('page.home.sections.trending_wiki');
+
   const {data, isLoading, error} = useQuery(
     bookQueries.list({start: 0, limit}),
   );
@@ -34,7 +38,7 @@ export const HomeTrendingWiki: React.FC<HomeTrendingWikiProps> = ({
     return (
       <div className="w-full">
         <Typography variant="h6" className="mb-3">
-          {title}
+          {resolvedTitle}
         </Typography>
         <Alert severity="error">{String(error)}</Alert>
       </div>
@@ -44,7 +48,7 @@ export const HomeTrendingWiki: React.FC<HomeTrendingWikiProps> = ({
   return (
     <div className="w-full">
       <div className="flex items-center justify-between mb-3">
-        <Typography variant="h6">{title}</Typography>
+        <Typography variant="h6">{resolvedTitle}</Typography>
         {isLoading && <CircularProgress size={20} />}
       </div>
       <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
@@ -59,7 +63,7 @@ export const HomeTrendingWiki: React.FC<HomeTrendingWikiProps> = ({
                 color="text.secondary"
                 className="line-clamp-3"
               >
-                条目简介占位文案：收录该书的作者、出版信息、主题标签等内容。
+                {t('page.home.sections.wiki_teaser_placeholder')}
               </Typography>
             </CardContent>
           </Card>

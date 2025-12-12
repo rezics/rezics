@@ -1,16 +1,23 @@
-import React, { useState } from "react";
-import { useTranslation } from "react-i18next";
+import React, {useState} from 'react';
+import {useTranslation} from 'react-i18next';
 
-import LanguageIcon from "@mui/icons-material/Language";
-import { IconButton, Menu, MenuItem, Tooltip } from "@mui/material";
+import LanguageIcon from '@mui/icons-material/Language';
+import {
+  IconButton,
+  ListItemIcon,
+  ListItemText,
+  Menu,
+  MenuItem,
+  Tooltip,
+} from '@mui/material';
 
 export const LangToggle: React.FC = () => {
-  const { i18n } = useTranslation();
+  const {i18n} = useTranslation();
 
   const changeLang = (lang: string) => {
     i18n.changeLanguage(lang);
-    localStorage.setItem("lang", lang);
-    console.log("set lang to ", lang);
+    localStorage.setItem('lang', lang);
+    console.log('set lang to ', lang);
   };
 
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
@@ -24,7 +31,7 @@ export const LangToggle: React.FC = () => {
 
   return (
     <>
-      <Tooltip title="主题自定义">
+      <Tooltip title="语言切换">
         <IconButton onClick={handleClick}>
           <LanguageIcon className="text-white" />
         </IconButton>
@@ -36,12 +43,27 @@ export const LangToggle: React.FC = () => {
         onClose={handleClose}
         slotProps={{
           list: {
-            "aria-labelledby": "basic-button",
+            'aria-labelledby': 'basic-button',
           },
         }}
+        transformOrigin={{horizontal: 'center', vertical: 'top'}}
+        anchorOrigin={{horizontal: 'center', vertical: 'bottom'}}
       >
-        <MenuItem onClick={() => changeLang("zh-CN")}>中文</MenuItem>
-        <MenuItem onClick={() => changeLang("en-US")}>English</MenuItem>
+        <MenuItem onClick={() => changeLang('zh-CN')}>
+          <ListItemText>简体中文</ListItemText>
+        </MenuItem>
+        <MenuItem onClick={() => changeLang('zh-TW')}>
+          <ListItemText>繁体中文</ListItemText>
+        </MenuItem>
+        <MenuItem onClick={() => changeLang('en-US')}>
+          <ListItemText>English</ListItemText>
+        </MenuItem>
+        <MenuItem onClick={() => changeLang('ja-JP')}>
+          <ListItemText>日本語</ListItemText>
+        </MenuItem>
+        <MenuItem onClick={() => changeLang('de-DE')}>
+          <ListItemText>Deutsch</ListItemText>
+        </MenuItem>
       </Menu>
     </>
   );

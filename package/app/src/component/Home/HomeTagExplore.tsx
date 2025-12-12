@@ -4,6 +4,7 @@ import {Alert, CircularProgress, Typography, Chip} from '@mui/material';
 import {bookQueries} from '@/api/book/book';
 import type {BookDTO} from '@package/contract';
 import {Link} from 'wouter';
+import {useTranslation} from 'react-i18next';
 
 type Book = BookDTO;
 
@@ -18,10 +19,13 @@ export type HomeTagExploreProps = {
  * Collects tags from a sampled list of books and shows popular tags.
  */
 export const HomeTagExplore: React.FC<HomeTagExploreProps> = ({
-  title = '主题探索',
+  title,
   limit = 60,
   maxTags = 18,
 }) => {
+  const {t} = useTranslation();
+  const resolvedTitle = title ?? t('page.home.sections.tag_explore');
+
   const {data, isLoading, error} = useQuery(
     bookQueries.list({start: 0, limit}),
   );
@@ -44,7 +48,7 @@ export const HomeTagExplore: React.FC<HomeTagExploreProps> = ({
     return (
       <div className="w-full">
         <Typography variant="h6" className="mb-3">
-          {title}
+          {resolvedTitle}
         </Typography>
         <Alert severity="error">{String(error)}</Alert>
       </div>
@@ -54,7 +58,7 @@ export const HomeTagExplore: React.FC<HomeTagExploreProps> = ({
   return (
     <div className="w-full">
       <div className="flex items-center justify-between mb-3">
-        <Typography variant="h6">{title}</Typography>
+        <Typography variant="h6">{resolvedTitle}</Typography>
         {isLoading && <CircularProgress size={20} />}
       </div>
       <div className="flex flex-wrap gap-2">

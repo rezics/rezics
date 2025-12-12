@@ -9,6 +9,7 @@ import {
 } from '@mui/material';
 import {bookQueries} from '@/api/book/book';
 import type {BookDTO} from '@package/contract';
+import {useTranslation} from 'react-i18next';
 
 type Book = BookDTO;
 
@@ -22,9 +23,12 @@ export type HomeTrendingReviewsProps = {
  * Placeholder: uses books as anchors to show review-like snippets.
  */
 export const HomeTrendingReviews: React.FC<HomeTrendingReviewsProps> = ({
-  title = '热门短评',
+  title,
   limit = 6,
 }) => {
+  const {t} = useTranslation();
+  const resolvedTitle = title ?? t('page.home.sections.trending_reviews');
+
   const {data, isLoading, error} = useQuery(
     bookQueries.list({start: 0, limit}),
   );
@@ -34,7 +38,7 @@ export const HomeTrendingReviews: React.FC<HomeTrendingReviewsProps> = ({
     return (
       <div className="w-full">
         <Typography variant="h6" className="mb-3">
-          {title}
+          {resolvedTitle}
         </Typography>
         <Alert severity="error">{String(error)}</Alert>
       </div>
@@ -44,7 +48,7 @@ export const HomeTrendingReviews: React.FC<HomeTrendingReviewsProps> = ({
   return (
     <div className="w-full">
       <div className="flex items-center justify-between mb-3">
-        <Typography variant="h6">{title}</Typography>
+        <Typography variant="h6">{resolvedTitle}</Typography>
         {isLoading && <CircularProgress size={20} />}
       </div>
       <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
@@ -59,7 +63,7 @@ export const HomeTrendingReviews: React.FC<HomeTrendingReviewsProps> = ({
                 color="text.secondary"
                 className="line-clamp-3"
               >
-                “这本书让我重新思考了……（示例占位短评）”
+                {t('page.home.sections.review_teaser_placeholder')}
               </Typography>
             </CardContent>
           </Card>

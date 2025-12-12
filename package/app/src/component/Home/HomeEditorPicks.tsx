@@ -10,6 +10,7 @@ import {
 import {bookQueries} from '@/api/book/book';
 import type {BookDTO} from '@package/contract';
 import {LazyLoadImage} from '../Common/LazyLoadImage';
+import {useTranslation} from 'react-i18next';
 
 type Book = BookDTO;
 
@@ -23,9 +24,12 @@ export type HomeEditorPicksProps = {
  * For now, shows a curated-style grid from the same list API.
  */
 export const HomeEditorPicks: React.FC<HomeEditorPicksProps> = ({
-  title = '编辑精选',
+  title,
   limit = 8,
 }) => {
+  const {t} = useTranslation();
+  const resolvedTitle = title ?? t('page.home.sections.editor_picks');
+
   const {data, isLoading, error} = useQuery(
     bookQueries.list({start: 0, limit}),
   );
@@ -35,7 +39,7 @@ export const HomeEditorPicks: React.FC<HomeEditorPicksProps> = ({
     return (
       <div className="w-full">
         <Typography variant="h6" className="mb-3">
-          {title}
+          {resolvedTitle}
         </Typography>
         <Alert severity="error">{String(error)}</Alert>
       </div>
@@ -45,7 +49,7 @@ export const HomeEditorPicks: React.FC<HomeEditorPicksProps> = ({
   return (
     <div className="w-full">
       <div className="flex items-center justify-between mb-3">
-        <Typography variant="h6">{title}</Typography>
+        <Typography variant="h6">{resolvedTitle}</Typography>
         {isLoading && <CircularProgress size={20} />}
       </div>
       <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 md:grid-cols-4">

@@ -34,6 +34,7 @@ import {Link} from 'wouter';
 import {LazyLoadImage} from '../Common/LazyLoadImage';
 import {Masonry} from '@mui/lab';
 import {useThrottleMasonryParameters} from '@/util/useMasonryParameters';
+import {useTranslation} from 'react-i18next';
 
 type Book = BookDTO;
 type Readlist = ReadlistDTO;
@@ -183,13 +184,17 @@ type BooksSectionProps = {
 };
 
 const BooksSection: React.FC<BooksSectionProps> = ({limit = 50}) => {
+  const {t} = useTranslation();
   const {items, error, isLoading} = useHomeBooks(limit);
   const {columns, spacing} = useThrottleMasonryParameters();
 
   if (error) {
     return (
       <div className="w-full">
-        <SectionHeader title="为你推荐" isLoading={isLoading} />
+        <SectionHeader
+          title={t('page.home.discovery.recommended_for_you')}
+          isLoading={isLoading}
+        />
         <Alert severity="error" className="mt-2">
           {String(error)}
         </Alert>
@@ -200,8 +205,8 @@ const BooksSection: React.FC<BooksSectionProps> = ({limit = 50}) => {
   return (
     <div className="w-full h-full flex flex-col">
       <SectionHeader
-        title="推荐"
-        subtitle="基于 Meilisearch 实时推荐"
+        title={t('page.home.discovery.recommendations')}
+        subtitle={t('page.home.discovery.meili_subtitle')}
         isLoading={isLoading}
       />
       <div className="flex-1 overflow-y-auto space-y-3 mt-3">
@@ -268,12 +273,13 @@ type ReadlistsSectionProps = {
 };
 
 const ReadlistsSection: React.FC<ReadlistsSectionProps> = ({limit = 6}) => {
+  const {t} = useTranslation();
   const {items, error, isLoading} = useHomeReadlists(limit);
 
   if (error) {
     return (
       <div className="w-full">
-        <SectionHeader title="精选书单" isLoading={isLoading} />
+        <SectionHeader title={t('readlist.featured')} isLoading={isLoading} />
         <Alert severity="error" className="mt-2">
           {String(error)}
         </Alert>
@@ -284,8 +290,8 @@ const ReadlistsSection: React.FC<ReadlistsSectionProps> = ({limit = 6}) => {
   return (
     <div className="w-full h-full flex flex-col">
       <SectionHeader
-        title="精选书单"
-        subtitle="有看到感兴趣的嘛？"
+        title={t('readlist.featured')}
+        subtitle={t('page.home.discovery.featured_readlists_subtitle')}
         isLoading={isLoading}
       />
       <div className="flex-1 overflow-y-auto space-y-3 mt-3">
@@ -321,9 +327,15 @@ const ReadlistsSection: React.FC<ReadlistsSectionProps> = ({limit = 6}) => {
                       color="text.secondary"
                       className="truncate mt-1 block"
                     >
-                      包含 {list.books?.length ?? 0} 本书 ·{' '}
+                      {list.books?.length
+                        ? t('readlist.includes_books', {
+                            count: list.books.length,
+                          })
+                        : ''}{' '}
                       {list.reviews?.length
-                        ? `${list.reviews.length} 条短评`
+                        ? t('readlist.includes_reviews', {
+                            count: list.reviews.length,
+                          })
                         : ''}
                     </Typography>
                   </div>
@@ -342,12 +354,16 @@ type ReviewsSectionProps = {
 };
 
 const ReviewsSection: React.FC<ReviewsSectionProps> = ({limit = 6}) => {
+  const {t} = useTranslation();
   const {items, error, isLoading} = useHomeReviews(limit);
 
   if (error) {
     return (
       <div className="w-full">
-        <SectionHeader title="高赞短评" isLoading={isLoading} />
+        <SectionHeader
+          title={t('review.top_rated_short_reviews')}
+          isLoading={isLoading}
+        />
         <Alert severity="error" className="mt-2">
           {String(error)}
         </Alert>
@@ -358,8 +374,8 @@ const ReviewsSection: React.FC<ReviewsSectionProps> = ({limit = 6}) => {
   return (
     <div className="w-full h-full flex flex-col">
       <SectionHeader
-        title="高赞短评"
-        subtitle="看看大家最近在聊些什么"
+        title={t('review.top_rated_short_reviews')}
+        subtitle={t('page.home.discovery.top_rated_reviews_subtitle')}
         isLoading={isLoading}
       />
       <div className="flex-1 overflow-y-auto space-y-3 mt-3">
@@ -377,7 +393,7 @@ const ReviewsSection: React.FC<ReviewsSectionProps> = ({limit = 6}) => {
                       />
                     ) : undefined
                   }
-                  title={review.title || '短评'}
+                  title={review.title || t('review.short_review')}
                   subheader={review.user?.name}
                 />
                 <CardContent>
@@ -412,14 +428,15 @@ type QuotesSectionProps = {
 };
 
 const QuotesSection: React.FC<QuotesSectionProps> = ({limit = 6}) => {
+  const {t} = useTranslation();
   const {items, error, isLoading} = useHomeQuotes(limit);
 
   if (error) {
     return (
       <div className="w-full">
         <SectionHeader
-          title="言"
-          subtitle="笔落惊风雨，诗成泣鬼神"
+          title={t('quote.title')}
+          subtitle={t('quote.subtitle')}
           isLoading={isLoading}
         />
         <Alert severity="error" className="mt-2">
@@ -432,8 +449,8 @@ const QuotesSection: React.FC<QuotesSectionProps> = ({limit = 6}) => {
   return (
     <div className="w-full h-full flex flex-col">
       <SectionHeader
-        title="言"
-        subtitle="笔落惊风雨，诗成泣鬼神"
+        title={t('quote.title')}
+        subtitle={t('quote.subtitle')}
         isLoading={isLoading}
       />
       <div className="flex-1 overflow-y-auto space-y-3 mt-3">

@@ -3,6 +3,7 @@ import {Link} from 'wouter';
 import {echoKvGetQuery} from '@/api/echokv/echokv';
 import {useQuery} from '@tanstack/react-query';
 import {parseEchoKVResponse} from '@/api/echokv/util';
+import {useTranslation} from 'react-i18next';
 
 export type MobileHomeQuickAccessProps = {
   title?: string;
@@ -10,9 +11,12 @@ export type MobileHomeQuickAccessProps = {
 };
 
 export const MobileHomeQuickAccess: React.FC<MobileHomeQuickAccessProps> = ({
-  title = '快速探索',
+  title,
   kvKey = 'book_search_tag_group_quick',
 }) => {
+  const {t} = useTranslation();
+  const resolvedTitle = title ?? t('page.home.quick_access.title_fast_explore');
+
   const {data} = useQuery(echoKvGetQuery(kvKey));
   const items = useMemo(
     () => parseEchoKVResponse<any>(data)?.presetTags ?? [],
@@ -23,9 +27,9 @@ export const MobileHomeQuickAccess: React.FC<MobileHomeQuickAccessProps> = ({
 
   return (
     <div className="w-full space-y-2">
-      {title && (
+      {resolvedTitle && (
         <div className="text-xs font-medium text-muted-foreground px-1">
-          {title}
+          {resolvedTitle}
         </div>
       )}
       <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide px-1">

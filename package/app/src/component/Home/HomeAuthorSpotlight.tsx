@@ -3,6 +3,7 @@ import {useQuery} from '@tanstack/react-query';
 import {Alert, CircularProgress, Typography, Avatar} from '@mui/material';
 import {bookQueries} from '@/api/book/book';
 import type {BookDTO, PublicUser} from '@package/contract';
+import {useTranslation} from 'react-i18next';
 
 type Book = BookDTO;
 
@@ -17,10 +18,13 @@ export type HomeAuthorSpotlightProps = {
  * Collect unique authors from recent books and display them.
  */
 export const HomeAuthorSpotlight: React.FC<HomeAuthorSpotlightProps> = ({
-  title = '作者专栏',
+  title,
   limit = 24,
   maxAuthors = 12,
 }) => {
+  const {t} = useTranslation();
+  const resolvedTitle = title ?? t('page.home.sections.author_spotlight');
+
   const {data, isLoading, error} = useQuery(
     bookQueries.list({start: 0, limit}),
   );
@@ -41,7 +45,7 @@ export const HomeAuthorSpotlight: React.FC<HomeAuthorSpotlightProps> = ({
     return (
       <div className="w-full">
         <Typography variant="h6" className="mb-3">
-          {title}
+          {resolvedTitle}
         </Typography>
         <Alert severity="error">{String(error)}</Alert>
       </div>
@@ -51,7 +55,7 @@ export const HomeAuthorSpotlight: React.FC<HomeAuthorSpotlightProps> = ({
   return (
     <div className="w-full">
       <div className="flex items-center justify-between mb-3">
-        <Typography variant="h6">{title}</Typography>
+        <Typography variant="h6">{resolvedTitle}</Typography>
         {isLoading && <CircularProgress size={20} />}
       </div>
       <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">

@@ -7,6 +7,7 @@ import {MobileHomeCarousel} from '@component/Home/Mobile/MobileHomeCarousel';
 import {MobileHomeDiscovery} from '@component/Home/Mobile/MobileHomeDiscovery';
 import React from 'react';
 import {useIsMobile} from '@/util/MediaQueryUtil';
+import {useTranslation} from 'react-i18next';
 
 export type HomeShowProps = object;
 
@@ -42,6 +43,8 @@ export const HomeShow: React.FC<HomeShowProps> = () => {
  * HomeShowMobile
  */
 const HomeShowMobile: React.FC = () => {
+  const {t} = useTranslation();
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* 顶部 Banner：轮播 */}
@@ -61,9 +64,11 @@ const HomeShowMobile: React.FC = () => {
       {/* TODO 后续可能据此风格制作可选开关的Bottom Navigation */}
       <div className="fixed bottom-3 inset-x-0 px-4 z-30 pointer-events-none hidden">
         <div className="mx-auto max-w-md rounded-full bg-background/95 border border-border shadow-lg px-4 py-2 flex items-center justify-between text-[11px] text-muted-foreground backdrop-blur-sm pointer-events-auto">
-          <span className="font-medium">正在浏览首页推荐</span>
+          <span className="font-medium">
+            {t('page.home.mobile.floating_status.browsing_recommendations')}
+          </span>
           <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
-            Beta · 实验功能
+            {t('page.home.mobile.floating_status.beta_experimental')}
           </span>
         </div>
       </div>

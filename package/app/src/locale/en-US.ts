@@ -1,6 +1,84 @@
 export default {
-  title: 'ICS',
+  title: 'REZICS',
   motto: 'Inherited Create Spread',
+
+  page: {
+    home: {
+      name: 'Home',
+      hero: {
+        kicker: 'Library Book',
+        title_highlight: 'Meet the stories you love',
+        subtitle:
+          'Search for books you want, and discover high-quality reading lists, short reviews, and quotes.',
+      },
+      quick_access: {
+        title_quick_entry: 'Quick access',
+        title_fast_explore: 'Fast explore',
+        title_quick_explore: 'Quick explore',
+      },
+      mobile: {
+        search_placeholder: 'Search title, author, ISBN...',
+        floating_status: {
+          browsing_recommendations: 'Browsing home recommendations',
+          beta_experimental: 'Beta · Experimental features',
+        },
+      },
+      noticeboard: {
+        caption: 'Notice',
+        title: 'Noticeboard',
+        empty: 'No notices',
+        alert: {
+          parse_failed: 'Noticeboard data parsing failed: {{error}}',
+        },
+        tag: {
+          notice: 'Notice',
+          announcement: 'Announcement',
+          event: 'Event',
+          update: 'Update',
+        },
+        time: {
+          just_now: 'Just now',
+          hours_ago_one: '{{count}} hour ago',
+          hours_ago_other: '{{count}} hours ago',
+          days_ago_one: '{{count}} day ago',
+          days_ago_other: '{{count}} days ago',
+          weeks_ago_one: '{{count}} week ago',
+          weeks_ago_other: '{{count}} weeks ago',
+        },
+      },
+      discovery: {
+        recommended_for_you: 'Recommended for you',
+        recommendations: 'Recommendations',
+        meili_subtitle: 'Real-time recommendations powered by Meilisearch',
+        featured_readlists_subtitle: 'Go create your own reading list',
+        top_rated_reviews_subtitle: 'See what everyone’s been talking about',
+      },
+      sections: {
+        trending_wiki: 'Trending Wiki',
+        trending_reviews: 'Trending Reviews',
+        tag_explore: 'Tag Explore',
+        readlist_recommendation: 'Reading List Picks',
+        ranking: 'Rankings',
+        partner_brands: 'Partners',
+        new_book_recommendations: 'New Book Picks',
+        editor_picks: "Editor's Picks",
+        author_spotlight: 'Author Spotlight',
+        wiki_teaser_placeholder:
+          'Entry teaser placeholder: includes author, publication info, topic tags, and more.',
+        review_teaser_placeholder:
+          '“This book made me rethink… (sample placeholder review)”',
+        promotion_item_1: "Platform notice: this week's new version is live",
+        promotion_item_2: 'Book fair event: Autumn Reading Festival',
+        promotion_item_3: 'Limited-time offer: featured reading lists 20% off',
+        newsletter: {
+          title: 'Subscribe for updates',
+          thanks: 'Thanks for subscribing!',
+          email_placeholder: 'Enter your email',
+          submit: 'Subscribe',
+        },
+      },
+    },
+  },
 
   // Navigation & Menu
   navigation: {
@@ -67,6 +145,32 @@ export default {
     collections: 'Collections',
     edit: 'Edit Book',
     add_to_collection: 'Add to Collection',
+    new_releases: 'New arrivals',
+    no_cover: 'No cover',
+    unknown_author: 'Unknown author',
+  },
+
+  // Readlist
+  readlist: {
+    featured: 'Featured reading lists',
+    includes_books: 'Includes {{count}} books',
+    includes_reviews: 'Includes {{count}} reviews',
+    includes_reviews_one: '{{count}} short review',
+    includes_reviews_other: '{{count}} short reviews',
+  },
+
+  // Review
+  review: {
+    hot: 'Hot reviews',
+    top_rated_short_reviews: 'Top-rated short reviews',
+    short_review: 'Review',
+  },
+
+  // Quote
+  quote: {
+    title: 'Quotes',
+    subtitle:
+      'A brushstroke stirs wind and rain; a poem moves gods and ghosts to tears.',
   },
 
   // Comment
@@ -101,20 +205,11 @@ export default {
     close: 'Close',
     open: 'Open',
     no_data: 'No data',
-  },
-
-  // Pages
-  pages: {
-    unit_page: 'Unit Page',
-    not_found: 'Page Not Found',
-    book_tag_edit: 'Book Tag Edit',
-    book_description_edit: 'Book Description Edit',
-    book_edit_page: 'Book Edit Page',
-    review_page: 'Book Review',
-    review_edit_page: 'Book Review Edit',
-    short_review_page: 'Short Review Page',
-    book_collection_list_page: 'Book Collection List Page',
-    book_list_edit_page: 'Book List Edit Page',
+    view_more: 'View more',
+    view_all: 'View all',
+    pinned: 'Pinned',
+    new: 'New',
+    no_description: 'No description',
   },
 
   // Form & Editor

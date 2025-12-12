@@ -1,7 +1,9 @@
 import React, {useState} from 'react';
 import {Button, TextField, Typography} from '@mui/material';
+import {useTranslation} from 'react-i18next';
 
 export const HomeNewsletterSignup: React.FC = () => {
+  const {t} = useTranslation();
   const [email, setEmail] = useState('');
   const [submitted, setSubmitted] = useState(false);
 
@@ -15,11 +17,11 @@ export const HomeNewsletterSignup: React.FC = () => {
   return (
     <div className="w-full rounded border p-4 bg-white">
       <Typography variant="subtitle1" className="mb-2">
-        订阅最新资讯
+        {t('page.home.sections.newsletter.title')}
       </Typography>
       {submitted ? (
         <Typography variant="body2" color="success.main">
-          感谢订阅！
+          {t('page.home.sections.newsletter.thanks')}
         </Typography>
       ) : (
         <form className="flex gap-2" onSubmit={onSubmit}>
@@ -27,12 +29,12 @@ export const HomeNewsletterSignup: React.FC = () => {
             size="small"
             type="email"
             required
-            placeholder="输入你的邮箱"
+            placeholder={t('page.home.sections.newsletter.email_placeholder')}
             value={email}
             onChange={e => setEmail(e.target.value)}
           />
           <Button type="submit" variant="contained">
-            订阅
+            {t('page.home.sections.newsletter.submit')}
           </Button>
         </form>
       )}

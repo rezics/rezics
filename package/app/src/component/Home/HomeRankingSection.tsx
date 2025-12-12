@@ -12,6 +12,7 @@ import {
 } from '@mui/material';
 import {bookQueries} from '@/api/book/book';
 import type {BookDTO} from '@package/contract';
+import {useTranslation} from 'react-i18next';
 
 type Book = BookDTO;
 
@@ -25,9 +26,12 @@ export type HomeRankingSectionProps = {
  * A simple top-N ranking using updatedAt desc as a proxy.
  */
 export const HomeRankingSection: React.FC<HomeRankingSectionProps> = ({
-  title = '排行榜',
+  title,
   limit = 10,
 }) => {
+  const {t} = useTranslation();
+  const resolvedTitle = title ?? t('page.home.sections.ranking');
+
   const {data, isLoading, error} = useQuery(
     bookQueries.list({
       start: 0,
@@ -42,7 +46,7 @@ export const HomeRankingSection: React.FC<HomeRankingSectionProps> = ({
     return (
       <div className="w-full">
         <Typography variant="h6" className="mb-3">
-          {title}
+          {resolvedTitle}
         </Typography>
         <Alert severity="error">{String(error)}</Alert>
       </div>
@@ -52,7 +56,7 @@ export const HomeRankingSection: React.FC<HomeRankingSectionProps> = ({
   return (
     <div className="w-full">
       <div className="flex items-center justify-between mb-3">
-        <Typography variant="h6">{title}</Typography>
+        <Typography variant="h6">{resolvedTitle}</Typography>
         {isLoading && <CircularProgress size={20} />}
       </div>
       <List dense>

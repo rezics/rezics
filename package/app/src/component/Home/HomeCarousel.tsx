@@ -6,6 +6,7 @@ import {parseEchoKVResponse} from '@/api/echokv/util';
 import {useAlertStore} from '@/global/windowAlertStore';
 import {Link} from 'wouter';
 import {LazyLoadImage} from '@/component/Common/LazyLoadImage';
+import {useTranslation} from 'react-i18next';
 
 import {
   Carousel,
@@ -30,15 +31,20 @@ export const BookCarousel: React.FC<BookCarouselProps> = ({
 
   const [products, setProducts] = useState<CarouselProduct[]>([]);
   const {show: showAlert} = useAlertStore();
+  const {t} = useTranslation();
   const carouselApiRef = useRef<CarouselApi | null>(null);
 
   useEffect(() => {
     try {
       setProducts(parseEchoKVResponse<CarouselProduct[]>(data) ?? []);
     } catch (error) {
-      showAlert(`公告板数据解析失败: ${error}`);
+      showAlert(
+        t('page.home.noticeboard.alert.parse_failed', {
+          error: String(error),
+        }),
+      );
     }
-  }, [data, showAlert]);
+  }, [data, showAlert, t]);
 
   // autoplay using carousel api
   useEffect(() => {

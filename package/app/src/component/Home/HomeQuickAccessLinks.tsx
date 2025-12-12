@@ -4,6 +4,7 @@ import {Link} from 'wouter';
 import {echoKvGetQuery} from '@/api/echokv/echokv';
 import {useQuery} from '@tanstack/react-query';
 import {parseEchoKVResponse} from '@/api/echokv/util';
+import {useTranslation} from 'react-i18next';
 
 export type HomeQuickAccessLinksProps = {
   title?: string;
@@ -11,9 +12,12 @@ export type HomeQuickAccessLinksProps = {
 };
 
 export const HomeQuickAccessLinks: React.FC<HomeQuickAccessLinksProps> = ({
-  title = '快速入口',
+  title,
   key = 'book_search_tag_group_quick',
 }) => {
+  const {t} = useTranslation();
+  const resolvedTitle = title ?? t('page.home.quick_access.title_quick_entry');
+
   const {data} = useQuery(echoKvGetQuery(key));
   const items = useMemo(
     () => parseEchoKVResponse<any>(data)?.presetTags ?? [],
@@ -22,7 +26,7 @@ export const HomeQuickAccessLinks: React.FC<HomeQuickAccessLinksProps> = ({
   return (
     <div className="w-full">
       <div className="flex items-center justify-between mb-3">
-        <span className="font-semibold">{title}</span>
+        <span className="font-semibold">{resolvedTitle}</span>
       </div>
       <div className="flex flex-wrap gap-2">
         {(Array.isArray(items) ? items : []).map(name => (

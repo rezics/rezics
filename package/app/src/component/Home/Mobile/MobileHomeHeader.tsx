@@ -1,8 +1,10 @@
 import React, {useState} from 'react';
 import {useLocation} from 'wouter';
 import {MobileHomeQuickAccess} from './MobileHomeQuickAccess';
+import {useTranslation} from 'react-i18next';
 
 export const MobileHomeHeader: React.FC = () => {
+  const {t} = useTranslation();
   const [, navigate] = useLocation();
   const [keyword, setKeyword] = useState('');
 
@@ -17,13 +19,16 @@ export const MobileHomeHeader: React.FC = () => {
     <section className="px-4 pt-4 pb-6 space-y-4 bg-background text-foreground">
       <div className="space-y-2">
         <p className="text-[10px] uppercase tracking-[0.35em] text-primary/80">
-          Library Book
+          {t('page.home.hero.kicker')}
         </p>
         <h1 className="text-2xl font-semibold leading-snug">
-          <span className="text-primary"> 与所爱的故事相遇</span>
+          <span className="text-primary">
+            {' '}
+            {t('page.home.hero.title_highlight')}
+          </span>
         </h1>
         <p className="text-xs text-muted-foreground">
-          搜索想看的书，发现高质量书单、短评和金句。
+          {t('page.home.hero.subtitle')}
         </p>
       </div>
 
@@ -49,7 +54,7 @@ export const MobileHomeHeader: React.FC = () => {
           <input
             type="text"
             className="block w-full pl-9 pr-3 py-2 border border-input rounded-xl bg-muted/50 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
-            placeholder="搜索书名、作者、ISBN..."
+            placeholder={t('page.home.mobile.search_placeholder')}
             value={keyword}
             onChange={e => setKeyword(e.target.value)}
           />
@@ -58,7 +63,9 @@ export const MobileHomeHeader: React.FC = () => {
         {/* Quick Access */}
         <div className="-mx-1 overflow-x-auto scrollbar-hide">
           <div className="px-1 pb-1 min-w-max">
-            <MobileHomeQuickAccess title="快捷探索" />
+            <MobileHomeQuickAccess
+              title={t('page.home.quick_access.title_quick_explore')}
+            />
           </div>
         </div>
       </div>

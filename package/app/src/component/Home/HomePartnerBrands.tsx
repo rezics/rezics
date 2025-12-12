@@ -1,5 +1,6 @@
 import React from 'react';
 import {LazyLoadImage} from '../Common/LazyLoadImage';
+import {useTranslation} from 'react-i18next';
 
 const defaultBrands = [
   'https://dummyimage.com/100x40/cccccc/000&text=Brand+A',
@@ -16,12 +17,14 @@ export type HomePartnerBrandsProps = {
 
 export const HomePartnerBrands: React.FC<HomePartnerBrandsProps> = ({
   logos = defaultBrands,
-  title = '合作伙伴',
+  title,
 }) => {
+  const {t} = useTranslation();
+  const resolvedTitle = title ?? t('page.home.sections.partner_brands');
   return (
     <div className="w-full">
       <div className="flex items-center justify-between mb-3">
-        <span className="font-semibold">{title}</span>
+        <span className="font-semibold">{resolvedTitle}</span>
       </div>
       <div className="flex flex-wrap gap-6 items-center">
         {logos.map((src, i) => (

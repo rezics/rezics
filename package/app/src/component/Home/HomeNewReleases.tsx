@@ -10,6 +10,7 @@ import {
 import {bookQueries} from '@/api/book/book';
 import type {BookDTO} from '@package/contract';
 import {LazyLoadImage} from '../Common/LazyLoadImage';
+import {useTranslation} from 'react-i18next';
 
 type Book = BookDTO;
 
@@ -24,9 +25,13 @@ export type HomeNewReleasesProps = {
  * - Displays a responsive grid of book cards
  */
 export const HomeNewReleases: React.FC<HomeNewReleasesProps> = ({
-  title = '新书推荐',
+  title,
   limit = 12,
 }) => {
+  const {t} = useTranslation();
+  const resolvedTitle =
+    title ?? t('page.home.sections.new_book_recommendations');
+
   const {data, isLoading, error} = useQuery(
     bookQueries.list({
       start: 0,
@@ -41,7 +46,7 @@ export const HomeNewReleases: React.FC<HomeNewReleasesProps> = ({
     return (
       <div className="w-full">
         <div className="flex items-center justify-between mb-3">
-          <Typography variant="h6">{title}</Typography>
+          <Typography variant="h6">{resolvedTitle}</Typography>
         </div>
         <Alert severity="error">{String(error)}</Alert>
       </div>
@@ -51,7 +56,7 @@ export const HomeNewReleases: React.FC<HomeNewReleasesProps> = ({
   return (
     <div className="w-full">
       <div className="flex items-center justify-between mb-3">
-        <Typography variant="h6">{title}</Typography>
+        <Typography variant="h6">{resolvedTitle}</Typography>
         {isLoading && <CircularProgress size={20} />}
       </div>
       <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
