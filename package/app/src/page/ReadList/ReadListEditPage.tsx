@@ -25,6 +25,7 @@ import {useLocation} from 'wouter';
 import {ConfirmDeleteDialog} from '@/component/Form/ConfirmDeleteDialog';
 import {useAlertStore} from '@/global/windowAlertStore';
 import {mapUnitListToReviewListResponse} from '@/api/meili/meili.api';
+import {useTranslation} from 'react-i18next';
 
 function extractReviewId(input: string): string | null {
   if (!input) return null;
@@ -40,6 +41,7 @@ function extractReviewId(input: string): string | null {
 const PasteReviewUrlInput: React.FC<{
   onAdd: (id: string) => void;
 }> = ({onAdd}) => {
+  const {t} = useTranslation();
   const [input, setInput] = useState('');
 
   const handleAdd = () => {
@@ -54,13 +56,13 @@ const PasteReviewUrlInput: React.FC<{
     <div className="flex items-end gap-3">
       <TextField
         fullWidth
-        label="黏贴书评链接或ID（/review/:unitId）"
+        label={t('page.readlist.paste_review_input_label')}
         variant="standard"
         value={input}
         onChange={e => setInput(e.target.value)}
       />
       <Button variant="contained" onClick={handleAdd}>
-        添加
+        {t('page.readlist.add_button')}
       </Button>
     </div>
   );
@@ -69,6 +71,7 @@ const PasteReviewUrlInput: React.FC<{
 const ReviewSearchBox: React.FC<{
   onAdd: (id: string) => void;
 }> = ({onAdd}) => {
+  const {t} = useTranslation();
   const [keyword, setKeyword] = useState('');
   const [q, setQ] = useState('');
   const {data, isLoading} = useQuery(
@@ -88,7 +91,7 @@ const ReviewSearchBox: React.FC<{
       <div className="flex items-end gap-3">
         <TextField
           fullWidth
-          label="搜索书评（关键词）"
+          label={t('page.readlist.search_review_label')}
           variant="standard"
           value={keyword}
           onChange={e => setKeyword(e.target.value)}
@@ -105,12 +108,16 @@ const ReviewSearchBox: React.FC<{
           onClick={() => setQ(keyword.trim())}
           disabled={!keyword.trim()}
         >
-          搜索
+          {t('page.readlist.search_button')}
         </Button>
       </div>
 
       <Stack spacing={1}>
-        {isLoading && <div className="text-sm text-gray-500">搜索中...</div>}
+        {isLoading && (
+          <div className="text-sm text-gray-500">
+            {t('page.readlist.searching')}
+          </div>
+        )}
         {!isLoading &&
           reviews?.slice(0, 5).map((rv: any) => (
             <Paper
@@ -120,7 +127,7 @@ const ReviewSearchBox: React.FC<{
             >
               <div className="min-w-0">
                 <div className="text-sm font-medium truncate">
-                  {rv.title || '(无标题)'}{' '}
+                  {rv.title || t('page.readlist.untitled')}{' '}
                   <span className="text-gray-500">#{rv.unitId}</span>
                 </div>
                 <div className="text-xs text-gray-600 line-clamp-1">
@@ -128,7 +135,7 @@ const ReviewSearchBox: React.FC<{
                 </div>
               </div>
               <Button size="small" onClick={() => onAdd(rv.unitId)}>
-                添加
+                {t('page.readlist.add_button')}
               </Button>
             </Paper>
           ))}
@@ -145,24 +152,25 @@ const ReviewItemRow: React.FC<{
   onMoveUp: (id: string) => void;
   onMoveDown: (id: string) => void;
 }> = ({reviewId, bookData, reviewData, onRemove, onMoveUp, onMoveDown}) => {
+  const {t} = useTranslation();
   return (
     <div className="flex items-start gap-3">
       <div className="flex flex-col gap-1">
-        <Tooltip title="上移">
+        <Tooltip title={t('page.readlist.move_up')}>
           <span>
             <IconButton size="small" onClick={() => onMoveUp(reviewId)}>
               <ArrowUpward fontSize="small" />
             </IconButton>
           </span>
         </Tooltip>
-        <Tooltip title="下移">
+        <Tooltip title={t('page.readlist.move_down')}>
           <span>
             <IconButton size="small" onClick={() => onMoveDown(reviewId)}>
               <ArrowDownward fontSize="small" />
             </IconButton>
           </span>
         </Tooltip>
-        <Tooltip title="删除">
+        <Tooltip title={t('common.delete')}>
           <span>
             <IconButton
               size="small"
@@ -186,6 +194,7 @@ export const ReadListEditor: React.FC<{
   readlistData: any;
   setReadlistData: (data: any) => void;
 }> = ({header, readlistData, setReadlistData}) => {
+  const {t} = useTranslation();
   useEffect(() => {
     console.log('readlistData update', readlistData);
   }, [readlistData]);
@@ -240,9 +249,11 @@ export const ReadListEditor: React.FC<{
 
       <div className="space-y-6">
         <Paper variant="outlined" className="p-4 space-y-4">
-          <div className="text-lg font-semibold">元信息</div>
+          <div className="text-lg font-semibold">
+            {t('page.readlist.meta_info')}
+          </div>
           <TextField
-            label="书单名称"
+            label={t('page.readlist.title_label')}
             className="w-full"
             variant="standard"
             value={readlistData?.title}
@@ -252,7 +263,7 @@ export const ReadListEditor: React.FC<{
           />
           <div className="mt-2" />
           <TextField
-            label="书单简介"
+            label={t('page.readlist.summary_label')}
             variant="standard"
             className="w-full"
             value={readlistData?.content}
@@ -261,7 +272,7 @@ export const ReadListEditor: React.FC<{
             }
           />
           <TextField
-            label="书单封面"
+            label={t('page.readlist.cover_label')}
             variant="standard"
             className="w-full"
             value={readlistData?.coverUrl}
@@ -271,18 +282,22 @@ export const ReadListEditor: React.FC<{
           />
         </Paper>
         <Paper variant="outlined" className="p-4 space-y-4">
-          <div className="text-lg font-semibold">添加书评</div>
+          <div className="text-lg font-semibold">
+            {t('page.readlist.add_review')}
+          </div>
           <PasteReviewUrlInput onAdd={addReviewId} />
           <ReviewSearchBox onAdd={addReviewId} />
         </Paper>
 
         <Paper variant="outlined" className="p-4 space-y-4">
           <div className="text-lg font-semibold">
-            当前书评（支持排序与删除）
+            {t('page.readlist.current_reviews_title')}
           </div>
           <Stack spacing={3}>
             {readlistData?.order?.length === 0 && (
-              <div className="text-sm text-gray-500">暂无书评</div>
+              <div className="text-sm text-gray-500">
+                {t('page.readlist.no_reviews_small')}
+              </div>
             )}
             {readlistData?.order?.map(unitId => {
               const reviewData = readlistData?.reviews.find(
@@ -315,6 +330,7 @@ export function ReadListEditPage({readlistId}: {readlistId: string}) {
   const [, navigate] = useLocation();
   const {data, isLoading} = useQuery(readlistQueries.detail(readlistId || ''));
   type ReadlistData = typeof data;
+  const {t} = useTranslation();
 
   const updateReadlistMutation = useUpdateReadlistMutation();
 
@@ -356,7 +372,7 @@ export function ReadListEditPage({readlistId}: {readlistId: string}) {
       },
       {
         onSuccess: () => {
-          useAlertStore.getState().show('书单更新成功');
+          useAlertStore.getState().show(t('page.readlist.update_success'));
         },
         onError: error => {
           useAlertStore.getState().show(String(error));
@@ -370,11 +386,11 @@ export function ReadListEditPage({readlistId}: {readlistId: string}) {
   const handleDelete = () => {
     deleteReadlistMutation.mutate(readlistId, {
       onSuccess: () => {
-        console.log('书单删除成功');
+        console.log(t('page.readlist.delete_success'));
         navigate(`/readlist`);
       },
       onError: error => {
-        console.error('书单删除失败', error);
+        console.error(t('page.readlist.delete_failed'), error);
       },
     });
     setDeleteDialogOpen(false);
@@ -383,7 +399,9 @@ export function ReadListEditPage({readlistId}: {readlistId: string}) {
   const header = (
     <div className="mb-4">
       <div className="flex items-center">
-        <div className="text-2xl font-bold">编辑书单</div>
+        <div className="text-2xl font-bold">
+          {t('page.readlist.edit_readlist')}
+        </div>
         <div className="ml-auto">
           <Button
             variant="outlined"
@@ -391,18 +409,20 @@ export function ReadListEditPage({readlistId}: {readlistId: string}) {
             className="!mr-2"
             onClick={() => navigate(`/readlist/${readlistId}`)}
           >
-            返回
+            {t('common.back')}
           </Button>
           <Button
             variant="contained"
             color="primary"
             onClick={() => handleSubmit(readlistData)}
           >
-            提交
+            {t('common.submit')}
           </Button>
         </div>
       </div>
-      {isLoading && <div className="text-sm text-gray-500 mt-1">加载中...</div>}
+      {isLoading && (
+        <div className="text-sm text-gray-500 mt-1">{t('common.loading')}</div>
+      )}
     </div>
   );
 
@@ -420,7 +440,7 @@ export function ReadListEditPage({readlistId}: {readlistId: string}) {
           color="primary"
           onClick={() => setDeleteDialogOpen(true)}
         >
-          删除
+          {t('common.delete')}
         </Button>
         <ConfirmDeleteDialog
           open={deleteDialogOpen}

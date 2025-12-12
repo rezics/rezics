@@ -11,7 +11,6 @@ import {
 import React from 'react';
 import {useLocation} from 'wouter';
 import {MiniActionBar} from '@/component/Common/Reaction/MiniActionBar';
-import {useTranslation} from 'react-i18next';
 import {LazyLoadImage} from '../Common/LazyLoadImage';
 
 interface SingleReadlistProps {
@@ -31,7 +30,6 @@ export function SingleReadlist({
   handleLike,
 }: SingleReadlistProps) {
   const [, navigate] = useLocation();
-  const {t} = useTranslation();
   return (
     <Card
       sx={{

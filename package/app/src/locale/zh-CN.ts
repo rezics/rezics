@@ -5,6 +5,7 @@ export default {
   pages: {
     review_page: '书评',
     unit_page: '内容',
+    book_collection_list_page: '包含该书的书单',
   },
 
   page: {
@@ -105,6 +106,44 @@ export default {
           publish_url_required:
             '请至少添加一个正确的，书籍发布的链接，譬如起点对应书籍的链接，以https://开头。',
         },
+      },
+    },
+    readlist: {
+      loading: '加载中...',
+      not_found: '未找到书单',
+      open_user_ui: '打开用户界面',
+      likes_comments: '点赞与评论统计',
+      no_reviews: '暂无书评',
+      comments: '评论',
+      meta_info: '元信息',
+      title_label: '书单名称',
+      summary_label: '书单简介',
+      cover_label: '书单封面',
+      add_review: '添加书评',
+      paste_review_input_label: '黏贴书评链接或ID（/review/:unitId）',
+      search_review_label: '搜索书评（关键词）',
+      search_button: '搜索',
+      searching: '搜索中...',
+      add_button: '添加',
+      current_reviews_title: '当前书评（支持排序与删除）',
+      no_reviews_small: '暂无书评',
+      edit_readlist: '编辑书单',
+      back: '返回',
+      submit: '提交',
+      delete: '删除',
+      new_readlist: '新建书单',
+      like_tooltip: '点赞',
+      favorite_tooltip: '收藏',
+      books_count: '{{count}} 本书',
+      reviews_count: '{{count}} 评论',
+      move_up: '上移',
+      move_down: '下移',
+      update_success: '书单更新成功',
+      delete_success: '书单删除成功',
+      delete_failed: '书单删除失败',
+      untitled: '（无标题）',
+      list: {
+        search_placeholder: '搜索书单',
       },
     },
   },
@@ -278,9 +317,13 @@ export default {
   readlist: {
     featured: '精选书单',
     includes_books: '包含 {{count}} 本书',
-    includes_reviews: '包含 {{count}} 条书评评',
+    includes_reviews: '包含 {{count}} 条书评',
+    includes_reviews_one: '{{count}} 条短评',
     includes_reviews_other: '{{count}} 条短评',
     includes_book_title: '包含 {{title}} 的书单',
+    a11y: {
+      book_review: '书评',
+    },
   },
 
   // Review
@@ -290,6 +333,9 @@ export default {
     short_review: '短评',
     open_user_interface: '打开用户界面',
     open_review_page: '打开书评页面',
+    a11y: {
+      open_review_page: '打开书评页面',
+    },
     comments: '评论',
     form: {
       title: '标题',

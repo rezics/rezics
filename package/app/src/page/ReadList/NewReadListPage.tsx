@@ -3,6 +3,7 @@ import {ReadListEditor} from './ReadListEditPage';
 import {Button} from '@mui/material';
 import {useCreateReadlistMutation} from '@/api/readlist/readlist.mutations';
 import {useLocation} from 'wouter';
+import {useTranslation} from 'react-i18next';
 
 export const NewReadListPage: React.FC = () => {
   const [, navigate] = useLocation();
@@ -18,6 +19,8 @@ export const NewReadListPage: React.FC = () => {
       console.error('create readlist failed', error);
     },
   });
+
+  const {t} = useTranslation();
 
   function handleSubmit() {
     const bookConnect = readlistData.books.map(book => book.unitId);
@@ -36,10 +39,12 @@ export const NewReadListPage: React.FC = () => {
   const NewReadListHeader = (
     <div className="mb-4">
       <div className="flex items-center">
-        <div className="text-2xl font-bold">新建书单</div>
+        <div className="text-2xl font-bold">
+          {t('page.readlist.new_readlist')}
+        </div>
         <div className="ml-auto">
           <Button variant="contained" color="primary" onClick={handleSubmit}>
-            新建书单
+            {t('page.readlist.new_readlist')}
           </Button>
         </div>
       </div>

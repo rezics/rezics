@@ -4,6 +4,7 @@ import {ChatBubbleOutline} from '@mui/icons-material';
 import {Avatar, IconButton, Tooltip} from '@mui/material';
 import React, {useRef} from 'react';
 import {Link, useParams} from 'wouter';
+import {useTranslation} from 'react-i18next';
 
 import {readlistQueries} from '@/api/readlist/readlist';
 import {useQuery} from '@tanstack/react-query';
@@ -20,6 +21,7 @@ import {ReactionStatistics} from '@/component/Common/Reaction/ReactionStatistics
 export const ReadListPage: React.FC = () => {
   const {readlistId} = useParams<{readlistId: string}>();
   const commentRef = useRef<HTMLDivElement>(null);
+  const {t} = useTranslation();
   const handleGoToComments = () => {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore: scrollIntoView is not defined in the type declaration
@@ -36,11 +38,15 @@ export const ReadListPage: React.FC = () => {
   } = useQuery(readlistQueries.detail(readlistId || ''));
 
   if (isLoading) {
-    return <div className="text-center py-10">加载中...</div>;
+    return <div className="text-center py-10">{t('common.loading')}</div>;
   }
 
   if (!bookList?.id) {
-    return <div className="text-center py-10 text-red-500">未找到书单</div>;
+    return (
+      <div className="text-center py-10 text-red-500">
+        {t('page.readlist.not_found')}
+      </div>
+    );
   }
 
   return (
@@ -68,7 +74,10 @@ export const ReadListPage: React.FC = () => {
 
         <div className="flex justify-between items-center">
           {bookList.creator && (
-            <Tooltip title={'打开用户界面'} placement="top-start">
+            <Tooltip
+              title={t('page.readlist.open_user_ui')}
+              placement="top-start"
+            >
               <Link
                 href={`/user/${bookList.creator?.unitId}`}
                 className="flex items-center"
@@ -112,7 +121,9 @@ export const ReadListPage: React.FC = () => {
       </div>
 
       {bookList?.order?.length === 0 && (
-        <div className="text-sm text-gray-500">暂无书评</div>
+        <div className="text-sm text-gray-500">
+          {t('page.readlist.no_reviews_small')}
+        </div>
       )}
       {bookList?.order?.map(unitId => {
         const reviewData = bookList?.reviews.find(r => r.unitId === unitId);
@@ -130,7 +141,7 @@ export const ReadListPage: React.FC = () => {
         <div className="flex items-center justify-between w-full">
           <div className="flex items-center gap-2">
             <AccentBarContainer />
-            <p className="text-2xl font-bold">评论</p>
+            <p className="text-2xl font-bold">{t('page.readlist.comments')}</p>
           </div>
 
           <SingleCommentElementWrapper replyUnitId={readlistId || ''}>

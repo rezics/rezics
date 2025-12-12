@@ -10,6 +10,7 @@ import {useQuery, useQueryClient} from '@tanstack/react-query';
 import {buildMeiliReadlistQuery} from '@/api/meili/meili.queries';
 import type {ReadlistDTO} from '@package/contract';
 import {reactionApi} from '@/api/reaction/reaction.api';
+import {useTranslation} from 'react-i18next';
 
 type Readlist = ReadlistDTO;
 
@@ -33,12 +34,13 @@ const ReadlistListView: React.FC<{readlists: Readlist[]}> = ({readlists}) => {
 };
 
 function ErrorView({error}: {error: Error}) {
+  const {t} = useTranslation();
   return (
     <div className="mx-auto max-w-7xl p-4">
       <SimpleSearchInput
         onSearch={() => {}}
         defaultValue={{keyword: ''}}
-        placeholder="Search readlists"
+        placeholder={t('page.readlist.list.search_placeholder')}
       />
       <Alert severity="error" className="my-4">
         {String(error)}
@@ -54,6 +56,7 @@ type SortKey = 'time' | 'name' | 'popular' | 'agree';
  * @returns ReadListsPage
  */
 export function ReadListsPage({bookUnitId}: {bookUnitId?: string}) {
+  const {t} = useTranslation();
   const universalPaginatorRef = useRef<UniversalPaginatorHandle>(null);
   const EXTERNAL_PAGE_SIZE = 100;
   const [currentQuery, setCurrentQuery] = useState<SearchInfo>({
@@ -200,7 +203,7 @@ export function ReadListsPage({bookUnitId}: {bookUnitId?: string}) {
               console.log('onSearch', info);
             }}
             defaultValue={{keyword: currentQuery.keyword ?? ''}}
-            placeholder="Search readlists"
+            placeholder={t('page.readlist.list.search_placeholder')}
           />
         }
         currentPage={currentPage}

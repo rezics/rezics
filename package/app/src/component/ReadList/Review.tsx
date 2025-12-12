@@ -78,7 +78,7 @@ export const CollapsibleReview: React.FC<CollapsibleReviewProps> = ({
       variant="outlined"
       className={`p-3 sm:p-4 rounded-lg backdrop-blur ${className}`}
       role="region"
-      aria-label="Book review"
+      aria-label={t('readlist.a11y.book_review')}
     >
       {header}
       <div className="flex items-start gap-3">
@@ -86,7 +86,7 @@ export const CollapsibleReview: React.FC<CollapsibleReviewProps> = ({
         <div className="hidden md:block">
           <Tooltip title={t('review.open_review_page')}>
             <IconButton
-              aria-label="review"
+              aria-label={t('review.a11y.open_review_page')}
               onClick={() => navigate(`/review/${review?.unitId}`)}
             >
               <ChatBubbleOutline fontSize="small" />
@@ -130,7 +130,10 @@ export const CollapsibleReview: React.FC<CollapsibleReviewProps> = ({
 
               {(isOverflowing || expanded) && (
                 <div className="flex items-center justify-end mt-1.5">
-                  <Tooltip title={expanded ? '收起' : '展开'} placement="top">
+                  <Tooltip
+                    title={expanded ? t('common.collapse') : t('common.expand')}
+                    placement="top"
+                  >
                     <IconButton
                       size="small"
                       aria-expanded={expanded}

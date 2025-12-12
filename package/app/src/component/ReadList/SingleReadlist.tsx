@@ -12,6 +12,7 @@ import ThumbUpAltOutlinedIcon from '@mui/icons-material/ThumbUpAltOutlined';
 import BookmarkAddOutlinedIcon from '@mui/icons-material/BookmarkAddOutlined';
 import {Link} from 'wouter';
 import {LazyLoadImage} from '../Common/LazyLoadImage';
+import {useTranslation} from 'react-i18next';
 
 interface SingleReadlistProps {
   data: ReadlistResponse;
@@ -33,6 +34,7 @@ export function SingleReadlist({
   handleFavorite,
   className = '',
 }: SingleReadlistProps) {
+  const {t} = useTranslation();
   const id = data.id;
   const likeCount =
     data.reactionSummaries?.find(r => r.reaction === 'like')?.count ?? 0;
@@ -80,13 +82,21 @@ export function SingleReadlist({
         </Box>
         <Box className="flex flex-row items-center justify-between mt-2">
           <Box className="flex flex-row items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-            {data.books?.length ? <span>{data.books.length} 本书</span> : null}
+            {data.books?.length ? (
+              <span>
+                {t('page.readlist.books_count', {count: data.books.length})}
+              </span>
+            ) : null}
             {data.reviews?.length ? (
-              <span>{data.reviews.length} 评论</span>
+              <span>
+                {t('page.readlist.reviews_count', {count: data.reviews.length})}
+              </span>
             ) : null}
           </Box>
           <Box className="flex flex-row items-center gap-1">
-            <Tooltip title={`点赞 (${likeCount})`}>
+            <Tooltip
+              title={`${t('page.readlist.like_tooltip')} (${likeCount})`}
+            >
               <IconButton
                 size="small"
                 aria-label="like"
@@ -103,7 +113,7 @@ export function SingleReadlist({
               </IconButton>
             </Tooltip>
             {handleFavorite && (
-              <Tooltip title="收藏">
+              <Tooltip title={t('page.readlist.favorite_tooltip')}>
                 <IconButton
                   size="small"
                   aria-label="favorite"

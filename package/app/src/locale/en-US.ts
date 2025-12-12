@@ -5,6 +5,7 @@ export default {
   pages: {
     review_page: 'Review Page',
     unit_page: 'Unit',
+    book_collection_list_page: 'Reading lists containing this book',
   },
 
   page: {
@@ -110,6 +111,44 @@ export default {
           publish_url_required:
             'Please add at least one valid publish URL (starting with https://), e.g. a Qidian book page URL.',
         },
+      },
+    },
+    readlist: {
+      loading: 'Loading...',
+      not_found: 'Readlist not found',
+      open_user_ui: 'Open user UI',
+      likes_comments: 'Likes & comments',
+      no_reviews: 'No reviews',
+      comments: 'Comments',
+      meta_info: 'Meta',
+      title_label: 'Readlist title',
+      summary_label: 'Readlist summary',
+      cover_label: 'Cover URL',
+      add_review: 'Add review',
+      paste_review_input_label: 'Paste review URL or ID (/review/:unitId)',
+      search_review_label: 'Search reviews (keyword)',
+      search_button: 'Search',
+      searching: 'Searching...',
+      add_button: 'Add',
+      current_reviews_title: 'Current reviews (sortable & deletable)',
+      no_reviews_small: 'No reviews',
+      edit_readlist: 'Edit readlist',
+      back: 'Back',
+      submit: 'Submit',
+      delete: 'Delete',
+      new_readlist: 'New readlist',
+      like_tooltip: 'Like',
+      favorite_tooltip: 'Favorite',
+      books_count: '{{count}} books',
+      reviews_count: '{{count}} reviews',
+      move_up: 'Move up',
+      move_down: 'Move down',
+      update_success: 'Readlist updated',
+      delete_success: 'Readlist deleted',
+      delete_failed: 'Failed to delete readlist',
+      untitled: '(Untitled)',
+      list: {
+        search_placeholder: 'Search readlists',
       },
     },
   },
@@ -260,6 +299,9 @@ export default {
     includes_reviews_one: '{{count}} short review',
     includes_reviews_other: '{{count}} short reviews',
     includes_book_title: 'Reading lists containing {{title}}',
+    a11y: {
+      book_review: 'Book review',
+    },
   },
 
   // Review
@@ -269,6 +311,9 @@ export default {
     short_review: 'Review',
     open_user_interface: 'Open user profile',
     open_review_page: 'Open review page',
+    a11y: {
+      open_review_page: 'Open review page',
+    },
     comments: 'Comments',
     form: {
       title: 'Title',

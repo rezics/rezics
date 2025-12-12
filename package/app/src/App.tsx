@@ -23,12 +23,15 @@ import {useScrollRestore} from './util/useScrollRestore.ts';
 import {startThrottledScroll} from './util/ScrollUtil.ts';
 import {scroll} from './util/ScrollUtil.ts';
 import {useLocation} from 'wouter';
+import {useAppInit} from './plugin/providers/useAppInit.ts';
 
 export default function App() {
   const themeMode = appStore(s => s.theme);
   const customColor = appStore(s => s.customColor);
   const useDynamicTheme = appStore(s => s.useDynamicTheme);
   const [location, _navigate] = useLocation();
+
+  useAppInit();
 
   const theme = useMemo(() => {
     if (useDynamicTheme && customColor) {
