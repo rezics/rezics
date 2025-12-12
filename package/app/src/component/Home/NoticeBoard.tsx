@@ -71,12 +71,7 @@ function NoticeBoardHeader({
   className?: string;
 }) {
   return (
-    <div
-      className={className}
-      style={{
-        backgroundColor: theme.palette.background.default,
-      }}
-    >
+    <div className={className}>
       <div className="p-2 flex items-center justify-between">
         <Stack direction="row" spacing={1.5} alignItems="center">
           <div

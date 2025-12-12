@@ -201,7 +201,7 @@ const BooksSection: React.FC<BooksSectionProps> = ({limit = 50}) => {
     <div className="w-full h-full flex flex-col">
       <SectionHeader
         title="推荐"
-        subtitle="基于 Meilisearch 的实时推荐书单"
+        subtitle="基于 Meilisearch 实时推荐"
         isLoading={isLoading}
       />
       <div className="flex-1 overflow-y-auto space-y-3 mt-3">
@@ -285,7 +285,7 @@ const ReadlistsSection: React.FC<ReadlistsSectionProps> = ({limit = 6}) => {
     <div className="w-full h-full flex flex-col">
       <SectionHeader
         title="精选书单"
-        subtitle="来自用户与编辑整理的主题阅读集"
+        subtitle="有看到感兴趣的嘛？"
         isLoading={isLoading}
       />
       <div className="flex-1 overflow-y-auto space-y-3 mt-3">
@@ -417,7 +417,11 @@ const QuotesSection: React.FC<QuotesSectionProps> = ({limit = 6}) => {
   if (error) {
     return (
       <div className="w-full">
-        <SectionHeader title="金句摘录" isLoading={isLoading} />
+        <SectionHeader
+          title="言"
+          subtitle="笔落惊风雨，诗成泣鬼神"
+          isLoading={isLoading}
+        />
         <Alert severity="error" className="mt-2">
           {String(error)}
         </Alert>
@@ -428,8 +432,8 @@ const QuotesSection: React.FC<QuotesSectionProps> = ({limit = 6}) => {
   return (
     <div className="w-full h-full flex flex-col">
       <SectionHeader
-        title="金句摘录"
-        subtitle="从阅读中摘下的一点光"
+        title="言"
+        subtitle="笔落惊风雨，诗成泣鬼神"
         isLoading={isLoading}
       />
       <div className="flex-1 overflow-y-auto space-y-3 mt-3">
