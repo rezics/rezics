@@ -52,7 +52,7 @@ export function ReviewPage({reviewId}: {reviewId: string}) {
   };
 
   if (isLoading) {
-    return <div className="mt-6">Loading...</div>;
+    return <div className="mt-6">{t('common.loading')}</div>;
   }
 
   if (error instanceof Error) {
@@ -60,18 +60,18 @@ export function ReviewPage({reviewId}: {reviewId: string}) {
   }
 
   if (!review) {
-    return <div className="mt-6">No data</div>;
+    return <div className="mt-6">{t('common.no_data')}</div>;
   }
 
   return (
     <div className="w-11/12 mx-auto mt-10 max-w-4xl">
       {/* ANCHOR Book Info  */}
       {bookLoading ? (
-        <div className="mt-6">Loading...</div>
+        <div className="mt-6">{t('common.loading')}</div>
       ) : bookError instanceof Error ? (
         <div className="mt-6 text-red-500">Error: {bookError.message}</div>
       ) : !book ? (
-        <div className="mt-6">No data</div>
+        <div className="mt-6">{t('common.no_data')}</div>
       ) : (
         <div className="mt-6">
           <BookListViewItem book={book} />
@@ -114,7 +114,10 @@ export function ReviewPage({reviewId}: {reviewId: string}) {
             sx={{width: 56, height: 56, borderRadius: 1}}
           />
           <div className="flex-1">
-            <Tooltip title={'打开用户界面'} placement="top-start">
+            <Tooltip
+              title={t('review.open_user_interface')}
+              placement="top-start"
+            >
               <Link
                 href={`/user/${review.user?.unitId}`}
                 className="flex items-center"
@@ -162,7 +165,7 @@ export function ReviewPage({reviewId}: {reviewId: string}) {
           <div className="flex items-center justify-between w-full">
             <div className="flex items-center gap-2">
               <AccentBarContainer />
-              <p className="text-2xl font-bold">评论</p>
+              <p className="text-2xl font-bold">{t('review.comments')}</p>
             </div>
 
             <SingleCommentElementWrapper replyUnitId={review.unitId || ''}>

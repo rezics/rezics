@@ -65,7 +65,7 @@ export function UnitPage({unitId}: UnitPageProps) {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="space-y-1">
           <Typography variant="h4" className="font-bold">
-            {unit.title || t('pages.unit_page')}
+            {unit.title || t('pages.unit_page', 'Unit')}
           </Typography>
           <Typography
             variant="body2"
@@ -163,7 +163,7 @@ export function UnitPage({unitId}: UnitPageProps) {
         <div className="flex items-center gap-2 mb-4">
           <AccentBarContainer />
           <Typography variant="h6" className="font-bold">
-            Meta Data
+            {t('unit.meta_data')}
           </Typography>
         </div>
 

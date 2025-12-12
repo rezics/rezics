@@ -19,7 +19,7 @@ export function ReviewByBookPage() {
           color="primary"
           onClick={() => navigate(`/book/${bookId}`)}
         >
-          返回
+          {t('common.back')}
         </Button>
       </div>
       <div className="mt-4">

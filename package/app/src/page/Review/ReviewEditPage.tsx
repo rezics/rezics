@@ -9,6 +9,7 @@ import {
 } from '@/api/review/review.mutations';
 import type {ReviewResponse, UpdateReviewInput} from '@package/contract';
 import {TextField} from '@mui/material';
+import {useTranslation} from 'react-i18next';
 import {useAlertStore} from '@/global/windowAlertStore';
 import {DeleteButton} from '@/component/Form/DeleteWrapper';
 import {useLocation} from 'wouter';
@@ -20,12 +21,13 @@ interface ReviewEditPageProps {
 }
 
 export function ReviewEditPage({data, setData}: ReviewEditPageProps) {
+  const {t} = useTranslation();
   return (
     <div className="flex flex-col gap-4 mt-2">
       <div className="flex flex-col gap-2">
         <TextField
           id="standard-basic"
-          label="Title"
+          label={t('review.form.title')}
           variant="standard"
           value={data.title || ''}
           onChange={e => setData({...data, title: e.target.value})}
@@ -33,7 +35,7 @@ export function ReviewEditPage({data, setData}: ReviewEditPageProps) {
       </div>
 
       <div className="flex items-center gap-3">
-        <span className="text-sm font-medium">Rating</span>
+        <span className="text-sm font-medium">{t('review.form.rating')}</span>
         <RatingWithInput
           value={data.rating || 0}
           onChange={value => setData({...data, rating: value ?? 0})}
@@ -54,6 +56,7 @@ export function ReviewEditPage({data, setData}: ReviewEditPageProps) {
 }
 
 export function ReviewEditPageContainer({reviewId}: {reviewId: string}) {
+  const {t} = useTranslation();
   const {data, isLoading, isError} = useQuery(reviewQueries.detail(reviewId));
   const [_location, navigate] = useLocation();
   const [reviewData, setReviewData] = useState<ReviewResponse>(
@@ -69,7 +72,7 @@ export function ReviewEditPageContainer({reviewId}: {reviewId: string}) {
 
   const {mutate, isPending} = useUpdateReviewMutation({
     onSuccess: () => {
-      show('Review updated successfully');
+      show(t('review.messages.update_success'));
     },
     onError: error => {
       show(String(error));
@@ -79,7 +82,7 @@ export function ReviewEditPageContainer({reviewId}: {reviewId: string}) {
   const {mutate: deleteReviewMutation, isPending: _isDeleting} =
     useDeleteReviewMutation({
       onSuccess: () => {
-        show('Review deleted successfully');
+        show(t('review.messages.delete_success'));
       },
       onError: error => {
         show(String(error));
@@ -88,7 +91,7 @@ export function ReviewEditPageContainer({reviewId}: {reviewId: string}) {
   function handleSave() {
     if (reviewData.rating) {
       if (reviewData.rating > 10 || reviewData.rating < 0) {
-        show('Rating must be between 0 and 10');
+        show(t('review.messages.rating_range_error'));
         return;
       }
     }
@@ -105,7 +108,7 @@ export function ReviewEditPageContainer({reviewId}: {reviewId: string}) {
   function handleDelete() {
     deleteReviewMutation(reviewId, {
       onSuccess: () => {
-        show('Review deleted successfully');
+        show(t('review.messages.delete_success'));
         navigate(`/review/book/${reviewData.bookId}`);
       },
       onError: error => {
@@ -115,11 +118,11 @@ export function ReviewEditPageContainer({reviewId}: {reviewId: string}) {
   }
 
   if (isLoading) {
-    return <div>Loading review...</div>;
+    return <div>{t('common.loading')}</div>;
   }
 
   if (isError || !data) {
-    return <div>Failed to load review.</div>;
+    return <div>{t('review.messages.failed_load')}</div>;
   }
 
   return (
@@ -136,7 +139,7 @@ export function ReviewEditPageContainer({reviewId}: {reviewId: string}) {
             onClick={handleSave}
             disabled={isPending}
           >
-            {isPending ? 'Submitting...' : 'Submit'}
+            {isPending ? t('common.submitting') : t('common.submit')}
           </Button>
         </div>
       </div>

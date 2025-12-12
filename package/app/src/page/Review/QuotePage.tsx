@@ -3,6 +3,7 @@ import {TreeReplyComponents} from '@/component/Form/Comment/TreeReplyComponents'
 import {ChatBubbleOutline} from '@mui/icons-material';
 import {IconButton, Typography} from '@mui/material';
 import React, {useRef} from 'react';
+import {useTranslation} from 'react-i18next';
 
 import {useQuery} from '@tanstack/react-query';
 import {unitQueries} from '@/api/unit/unit.queries';
@@ -21,6 +22,7 @@ export interface QuotePageProps {
 }
 
 export const QuotePage: React.FC<QuotePageProps> = ({unitId}) => {
+  const {t} = useTranslation();
   const commentRef = useRef<HTMLDivElement>(null);
   const handleGoToComments = () => {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -45,11 +47,15 @@ export const QuotePage: React.FC<QuotePageProps> = ({unitId}) => {
   } = useQuery(unitQueries.detail(unitId || ''));
 
   if (isLoading) {
-    return <div className="text-center py-10">加载中...</div>;
+    return <div className="text-center py-10">{t('common.loading')}</div>;
   }
 
   if (!Quote?.id) {
-    return <div className="text-center py-10 text-red-500">未找到摘录</div>;
+    return (
+      <div className="text-center py-10 text-red-500">
+        {t('quote.not_found')}
+      </div>
+    );
   }
 
   return (
@@ -133,7 +139,7 @@ export const QuotePage: React.FC<QuotePageProps> = ({unitId}) => {
         <div className="flex items-center justify-between w-full">
           <div className="flex items-center gap-2">
             <AccentBarContainer />
-            <p className="text-2xl font-bold">评论</p>
+            <p className="text-2xl font-bold">{t('review.comments')}</p>
           </div>
 
           <SingleCommentElementWrapper replyUnitId={unitId || ''}>

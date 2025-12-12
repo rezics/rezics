@@ -6,6 +6,7 @@ import {useQuery} from '@tanstack/react-query';
 import {unitQueries} from '@/api/unit/unit.queries';
 import {useUpdateUnitMutation} from '@/api/unit/unit.mutations';
 import {useAlertStore} from '@/global/windowAlertStore';
+import {useTranslation} from 'react-i18next';
 interface QuoteEditPageProps {
   unitId: string;
   data: UnitFormData;
@@ -13,6 +14,7 @@ interface QuoteEditPageProps {
 }
 
 export function QuoteEditPage({unitId, data, setData}: QuoteEditPageProps) {
+  const {t} = useTranslation();
   const {show} = useAlertStore();
   const source = useMemo(
     () => (data.metadata as any)?.source || '',
@@ -21,11 +23,11 @@ export function QuoteEditPage({unitId, data, setData}: QuoteEditPageProps) {
 
   const {mutate, isPending} = useUpdateUnitMutation({
     onSuccess: data => {
-      show('Quote updated successfully');
+      show(t('quote.updated_success'));
       console.log('update quote success', data);
     },
     onError: error => {
-      show(`Update quote failed: ${error}`);
+      show(t('quote.messages.update_failed', {error: String(error)}));
       console.error('update quote failed', error);
     },
   });
@@ -46,7 +48,7 @@ export function QuoteEditPage({unitId, data, setData}: QuoteEditPageProps) {
       <div className="flex flex-col gap-2">
         <TextField
           id="quote-title"
-          label="Title"
+          label={t('quote.form.title')}
           variant="standard"
           value={data.title || ''}
           onChange={e => setData({...data, title: e.target.value})}
@@ -56,7 +58,7 @@ export function QuoteEditPage({unitId, data, setData}: QuoteEditPageProps) {
       <div className="flex flex-col gap-2">
         <TextField
           id="quote-source"
-          label="Source"
+          label={t('quote.form.source')}
           variant="standard"
           value={source}
           onChange={e =>
@@ -75,7 +77,7 @@ export function QuoteEditPage({unitId, data, setData}: QuoteEditPageProps) {
         />
       </div>
       <Button variant="contained" color="primary" onClick={handleSave}>
-        Save
+        {t('common.save')}
       </Button>
     </div>
   );

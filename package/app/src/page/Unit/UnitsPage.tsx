@@ -1,6 +1,7 @@
 import React, {useEffect, useMemo, useRef, useState} from 'react';
 import {Tabs, Tab, Box, Tooltip, Chip, Paper, Typography} from '@mui/material';
 import {useQuery, useQueryClient} from '@tanstack/react-query';
+import {useTranslation} from 'react-i18next';
 import {Link, useSearchParams} from 'wouter';
 
 import {
@@ -96,6 +97,7 @@ export const UnitsPage: React.FC<UnitsPageProps> = ({
   targetUnitId,
   children = defaultChildren,
 }) => {
+  const {t} = useTranslation();
   const ref = useRef<UniversalPaginatorHandle>(null);
   const queryClient = useQueryClient();
   const [searchParams] = useSearchParams();
@@ -215,7 +217,7 @@ export const UnitsPage: React.FC<UnitsPageProps> = ({
                 setKeyword(info ?? '');
               }}
               defaultValue={{keyword: keyword ?? ''}}
-              placeholder="Search units"
+              placeholder={t('units.search_placeholder')}
             />
             {!isSingle && (
               <Box sx={{borderBottom: 1, borderColor: 'divider', mt: 2, mb: 2}}>

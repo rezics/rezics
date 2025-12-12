@@ -2,6 +2,11 @@ export default {
   title: 'REZICS',
   motto: '传承 创造 传播',
 
+  pages: {
+    review_page: '书评',
+    unit_page: '内容',
+  },
+
   page: {
     home: {
       name: 'Home',
@@ -175,11 +180,22 @@ export default {
     new: '新',
     no_description: '暂无描述',
     loading: '加载中...',
+    submitting: '提交中...',
     error: '错误',
     error_generic: '出错了...',
     unknown_error: '未知错误',
     expand_all: '全部展开',
     collapse_all: '全部折叠',
+  },
+
+  unit: {
+    no_content: '暂无内容',
+    meta_data: 'Meta 信息',
+    no_metadata: '暂无 Meta 信息',
+  },
+
+  units: {
+    search_placeholder: '搜索单元',
   },
 
   // Book
@@ -272,12 +288,34 @@ export default {
     hot: '热门书评',
     top_rated_short_reviews: '高赞短评',
     short_review: '短评',
+    open_user_interface: '打开用户界面',
+    comments: '评论',
+    form: {
+      title: '标题',
+      rating: '评分',
+    },
+    messages: {
+      update_success: '书评更新成功',
+      delete_success: '书评删除成功',
+      rating_range_error: '评分必须在0到10之间',
+      failed_load: '加载书评失败。',
+    },
   },
 
   // Quote
   quote: {
     title: '言',
     subtitle: '笔落惊风雨，诗成泣鬼神',
+    not_found: '未找到摘录',
+    excerpts_title: '原文摘录',
+    form: {
+      title: '标题',
+      source: '来源',
+    },
+    updated_success: '摘录更新成功',
+    messages: {
+      update_failed: '更新摘录失败：{{error}}',
+    },
   },
 
   // Tag

@@ -2,6 +2,11 @@ export default {
   title: 'REZICS',
   motto: 'Inherited Create Spread',
 
+  pages: {
+    review_page: 'Review Page',
+    unit_page: 'Unit',
+  },
+
   page: {
     home: {
       name: 'Home',
@@ -161,7 +166,12 @@ export default {
   // ANCHOR Unit
   unit: {
     no_content: 'No content',
+    meta_data: 'Meta Data',
     no_metadata: 'No metadata',
+  },
+
+  units: {
+    search_placeholder: 'Search units',
   },
 
   // Book
@@ -257,6 +267,18 @@ export default {
     hot: 'Hot reviews',
     top_rated_short_reviews: 'Top-rated short reviews',
     short_review: 'Review',
+    open_user_interface: 'Open user profile',
+    comments: 'Comments',
+    form: {
+      title: 'Title',
+      rating: 'Rating',
+    },
+    messages: {
+      update_success: 'Review updated successfully',
+      delete_success: 'Review deleted successfully',
+      rating_range_error: 'Rating must be between 0 and 10',
+      failed_load: 'Failed to load review.',
+    },
   },
 
   // Quote
@@ -264,6 +286,16 @@ export default {
     title: 'Quotes',
     subtitle:
       'A brushstroke stirs wind and rain; a poem moves gods and ghosts to tears.',
+    not_found: 'Quote not found',
+    excerpts_title: 'Quote Excerpts',
+    form: {
+      title: 'Title',
+      source: 'Source',
+    },
+    updated_success: 'Quote updated successfully',
+    messages: {
+      update_failed: 'Update quote failed: {{error}}',
+    },
   },
 
   // Tag
@@ -312,6 +344,7 @@ export default {
     new: 'New',
     no_description: 'No description',
     loading: 'Loading...',
+    submitting: 'Submitting...',
     error: 'Error',
     error_generic: 'Oh no...',
     unknown_error: 'Unknown error',
