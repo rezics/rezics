@@ -5,6 +5,7 @@ import {BookListViewItem} from '@/component/BookLib/BookList/BookListView.tsx';
 import {navigate} from 'wouter/use-browser-location';
 import {MarkdownContent} from '../Common/MarkdownContent';
 import {ReviewHeader} from '@/component/Review/SingleReview';
+import {useTranslation} from 'react-i18next';
 
 export type ReviewData = {
   unitId: string;
@@ -37,6 +38,7 @@ export const CollapsibleReview: React.FC<CollapsibleReviewProps> = ({
   header,
   footer,
 }) => {
+  const {t} = useTranslation();
   const [expanded, setExpanded] = React.useState<boolean>(defaultExpanded);
   const contentId = React.useId();
   const contentRef = React.useRef<HTMLDivElement | null>(null);
@@ -82,7 +84,7 @@ export const CollapsibleReview: React.FC<CollapsibleReviewProps> = ({
       <div className="flex items-start gap-3">
         {/* md 以上才显示 */}
         <div className="hidden md:block">
-          <Tooltip title="打开书评页面">
+          <Tooltip title={t('review.open_review_page')}>
             <IconButton
               aria-label="review"
               onClick={() => navigate(`/review/${review?.unitId}`)}

@@ -28,6 +28,10 @@ export const LangToggle: React.FC = () => {
   const handleClose = () => {
     setAnchorEl(null);
   };
+  function handleChangeLang(lang: string) {
+    handleClose();
+    changeLang(lang);
+  }
 
   return (
     <>
@@ -49,19 +53,19 @@ export const LangToggle: React.FC = () => {
         transformOrigin={{horizontal: 'center', vertical: 'top'}}
         anchorOrigin={{horizontal: 'center', vertical: 'bottom'}}
       >
-        <MenuItem onClick={() => changeLang('zh-CN')}>
+        <MenuItem onClick={() => handleChangeLang('zh-CN')}>
           <ListItemText>简体中文</ListItemText>
         </MenuItem>
-        <MenuItem onClick={() => changeLang('zh-TW')}>
+        <MenuItem onClick={() => handleChangeLang('zh-TW')}>
           <ListItemText>繁体中文</ListItemText>
         </MenuItem>
-        <MenuItem onClick={() => changeLang('en-US')}>
+        <MenuItem onClick={() => handleChangeLang('en-US')}>
           <ListItemText>English</ListItemText>
         </MenuItem>
-        <MenuItem onClick={() => changeLang('ja-JP')}>
+        <MenuItem onClick={() => handleChangeLang('ja-JP')}>
           <ListItemText>日本語</ListItemText>
         </MenuItem>
-        <MenuItem onClick={() => changeLang('de-DE')}>
+        <MenuItem onClick={() => handleChangeLang('de-DE')}>
           <ListItemText>Deutsch</ListItemText>
         </MenuItem>
       </Menu>

@@ -6,14 +6,16 @@ import React from 'react';
 import {CollapsibleReview} from '@/component/ReadList/Review';
 import {parseReactionSummaries} from '@/util/reactionSummariesParser';
 import {ReactionStatistics} from '../Common/Reaction/ReactionStatistics';
+import {useTranslation} from 'react-i18next';
 
 export const ReviewHeader: React.FC<{
   review: ReviewDTO;
 }> = ({review}) => {
+  const {t} = useTranslation();
   const followersCount = review.user?.followersCount ?? 0;
   return (
     <div className="flex flex-wrap items-center mb-2 gap-2">
-      <Tooltip title={'打开用户界面'} placement="top-start">
+      <Tooltip title={t('review.open_user_interface')} placement="top-start">
         <Link
           href={`/user/${review.user?.unitId}`}
           className="flex items-center"
@@ -38,7 +40,7 @@ export const ReviewHeader: React.FC<{
 
       {/* Rating + Time (push to right, but wrap under on small screens) */}
       <div className="ml-auto text-right min-w-[120px]">
-        <Tooltip title={`打开书评页面`} placement="top-end">
+        <Tooltip title={t('review.open_review_page')} placement="top-end">
           <Link href={`/review/${review.unitId}`}>
             <div>
               <Rating defaultValue={review.rating} precision={0.5} readOnly />

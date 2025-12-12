@@ -268,6 +268,7 @@ export default {
     top_rated_short_reviews: 'Top-rated short reviews',
     short_review: 'Review',
     open_user_interface: 'Open user profile',
+    open_review_page: 'Open review page',
     comments: 'Comments',
     form: {
       title: 'Title',

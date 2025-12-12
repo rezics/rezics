@@ -156,7 +156,7 @@ export function NSFWInfo({tooltipTitle}: {tooltipTitle?: string}) {
 export function IsLicensedInfo({tooltipTitle}: {tooltipTitle?: string}) {
   const {t} = useTranslation();
   return (
-    <div className="flex items-center gap-1">
+    <div className="flex items-center gap-1 whitespace-nowrap">
       <span>{t('book.flags.licensed')}</span>
 
       <Tooltip

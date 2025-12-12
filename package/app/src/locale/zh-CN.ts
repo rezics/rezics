@@ -289,6 +289,7 @@ export default {
     top_rated_short_reviews: '高赞短评',
     short_review: '短评',
     open_user_interface: '打开用户界面',
+    open_review_page: '打开书评页面',
     comments: '评论',
     form: {
       title: '标题',
