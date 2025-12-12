@@ -1,6 +1,7 @@
 import {Rating} from '@mui/material';
 import React from 'react';
 import {Link} from 'wouter';
+import {useTranslation} from 'react-i18next';
 
 import type {BookDTO} from '@package/contract';
 import {
@@ -37,6 +38,7 @@ export const BookHeroShow: React.FC<{
   bookInfo: Book;
   rating: number;
 }> = ({bookInfo, rating}) => {
+  const {t} = useTranslation();
   const tags = bookInfo?.tags ?? [];
   return (
     <div
@@ -64,15 +66,23 @@ export const BookHeroShow: React.FC<{
 
             <div className="space-y-1">
               <p>
-                作者：
+                {t('book.fields.author')}：
                 <span className="font-medium">
                   {bookInfo?.author?.[0]?.name}
                 </span>
               </p>
-              <p>出版社：{bookInfo?.press?.[0]?.name}</p>
-              <p>出品方：{bookInfo?.producer?.[0]?.name}</p>
-              <p>字数：{bookInfo?.textLength ?? 0}</p>
-              <p>ISBN：{bookInfo?.isbn}</p>
+              <p>
+                {t('book.fields.press')}：{bookInfo?.press?.[0]?.name}
+              </p>
+              <p>
+                {t('book.fields.producer')}：{bookInfo?.producer?.[0]?.name}
+              </p>
+              <p>
+                {t('book.fields.text_length')}：{bookInfo?.textLength ?? 0}
+              </p>
+              <p>
+                {t('book.fields.isbn')}：{bookInfo?.isbn}
+              </p>
             </div>
 
             {/* Tags */}

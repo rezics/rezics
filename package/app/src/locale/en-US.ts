@@ -78,6 +78,35 @@ export default {
         },
       },
     },
+    book: {
+      tabs: {
+        basic_info: 'Basic info',
+        reviews: 'Reviews',
+        toc: 'Contents',
+      },
+    },
+    book_edit: {
+      info: {
+        title: 'Book editor',
+        dialog: {
+          view_book: 'View book',
+        },
+        toast: {
+          create_success_title: 'Book created',
+          create_success_message:
+            'Book created successfully. The detail page may need a few minutes / a manual refresh to show the latest content.',
+          create_failed_title: 'Create book failed',
+          update_success_title: 'Book updated',
+          update_success_message:
+            'Book updated successfully. The detail page may need a few minutes / a manual refresh to show the latest content.',
+          update_failed_title: 'Update book failed',
+        },
+        validation: {
+          publish_url_required:
+            'Please add at least one valid publish URL (starting with https://), e.g. a Qidian book page URL.',
+        },
+      },
+    },
   },
 
   // Navigation & Menu
@@ -148,6 +177,59 @@ export default {
     new_releases: 'New arrivals',
     no_cover: 'No cover',
     unknown_author: 'Unknown author',
+    toc: 'Contents',
+    remark: 'Remark',
+    quote_excerpts: 'Excerpts',
+    reviews_of_book: 'Reviews for {{title}}',
+    info_panel: {
+      title: 'Book info',
+    },
+    fields: {
+      title: 'Title',
+      isbn: 'ISBN',
+      cover_url: 'Cover URL',
+      author: 'Author',
+      press: 'Publisher',
+      producer: 'Producer',
+      text_length: 'Text length',
+    },
+    placeholders: {
+      search_author: 'Search authors...',
+      search_press: 'Search publishers...',
+      search_producer: 'Search producers...',
+    },
+    flags: {
+      nsfw: 'NSFW',
+      licensed: 'Licensed',
+    },
+    tooltips: {
+      nsfw: 'Please check this option if the book title or cover contains nudity, pornography, or other sensitive content.',
+      licensed:
+        'Please check this option if the book has been licensed (e.g. you are the copyright holder).',
+    },
+    edit_sections: {
+      metadata: 'MetaData',
+      extra: 'Extra',
+    },
+    chapter: {
+      enable_drag: 'Enable drag',
+      double_click_rename: 'Double-click rename',
+      rename_help:
+        'Renaming chapters here only affects the table-of-contents display and will not update the actual chapter title. To rename the chapter title, go to the chapter editor page; after changing the title there, the table of contents will update automatically.',
+    },
+    author_info: {
+      author_line: 'Author: {{name}}',
+      bio_label: 'Bio',
+      description_label: 'Description',
+    },
+    description_editor: {
+      title: 'Edit book description',
+    },
+    extra: {
+      publish_urls: {
+        title: 'Publish URLs',
+      },
+    },
   },
 
   // Readlist
@@ -157,6 +239,7 @@ export default {
     includes_reviews: 'Includes {{count}} reviews',
     includes_reviews_one: '{{count}} short review',
     includes_reviews_other: '{{count}} short reviews',
+    includes_book_title: 'Reading lists containing {{title}}',
   },
 
   // Review
@@ -171,6 +254,14 @@ export default {
     title: 'Quotes',
     subtitle:
       'A brushstroke stirs wind and rain; a poem moves gods and ghosts to tears.',
+  },
+
+  // Tag
+  tag: {
+    loading: 'Loading tags...',
+    load_failed: 'Load failed: {{error}}',
+    ungrouped: 'Ungrouped',
+    showing_top_tags: 'Showing top tags',
   },
 
   // Comment
@@ -210,6 +301,12 @@ export default {
     pinned: 'Pinned',
     new: 'New',
     no_description: 'No description',
+    loading: 'Loading...',
+    error: 'Error',
+    error_generic: 'Oh no...',
+    unknown_error: 'Unknown error',
+    expand_all: 'Expand all',
+    collapse_all: 'Collapse all',
   },
 
   // Form & Editor
@@ -232,6 +329,8 @@ export default {
   placeholders: {
     search_books: 'Search books',
     chapter_title: 'Enter chapter title',
+    enter_search_term: 'Enter search term',
+    enter_url: 'Enter URL',
   },
 
   // Chapters & Books

@@ -8,6 +8,7 @@ import {useQuery} from '@tanstack/react-query';
 import {bookQueries} from '@/api/book/book.queries.ts';
 import {Link} from 'wouter';
 import {AccentBarWithTextContainer} from '../../Common/Navigation/AccentBar.tsx';
+import {useTranslation} from 'react-i18next';
 
 // 扁平结构 + 顺序数组
 
@@ -28,6 +29,7 @@ export interface ChapterListProps {
 }
 
 export const ChapterList: React.FC<ChapterListProps> = ({id, data}) => {
+  const {t} = useTranslation();
   const chapterList = useChapterListStore(s => s.chapterList[id]);
 
   const saveExpanded = useCallback(
@@ -116,7 +118,9 @@ export const ChapterList: React.FC<ChapterListProps> = ({id, data}) => {
               {node.title}
             </button>
             <Button variant="text" onClick={() => toggleNode(node.id)}>
-              {expandedNodes.has(node.id) ? 'Collapse' : 'Expand'}
+              {expandedNodes.has(node.id)
+                ? t('common.collapse')
+                : t('common.expand')}
             </Button>
           </div>
 
@@ -160,13 +164,13 @@ export const ChapterList: React.FC<ChapterListProps> = ({id, data}) => {
   return (
     <div>
       <div className="flex justify-between items-center mb-4">
-        <AccentBarWithTextContainer text="目录" />
+        <AccentBarWithTextContainer text={t('book.toc')} />
         <div className="flex justify-end space-x-2 mb-4">
           <Button variant="contained" onClick={expandAll} className="!mr-2">
-            Expand All
+            {t('common.expand_all')}
           </Button>
           <Button variant="outlined" onClick={collapseAll} className="!mr-2">
-            Collapse All
+            {t('common.collapse_all')}
           </Button>
           {/* This need to be a condition render, if someone maintain the book, only show the edit button to the maintainer */}
           {/* <EditButtonFloatRight.Container /> */}
@@ -191,10 +195,16 @@ interface ChapterListContainerProps {
 export const ChapterListContainer: React.FC<ChapterListContainerProps> = ({
   id,
 }) => {
+  const {t} = useTranslation();
   const {data, isLoading, error} = useQuery(bookQueries.chapterIndex(id));
 
-  if (isLoading) return <div>Loading...</div>;
-  if (error) return <div>Oh no... {String(error)}</div>;
+  if (isLoading) return <div>{t('common.loading')}</div>;
+  if (error)
+    return (
+      <div>
+        {t('common.error_generic')} {String(error)}
+      </div>
+    );
 
   return <ChapterList id={id} data={data.index} />;
 };

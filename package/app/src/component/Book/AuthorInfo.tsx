@@ -30,10 +30,13 @@ const AuthorInfoShowMobile: React.FC<AuthorInfoShowProps> = ({
   editOpen,
   setEditOpen,
 }) => {
+  const {t} = useTranslation();
   return (
     <div>
       <ArrowForwardIconContainer size={16} to={`/user/${author?.unitId}`}>
-        <AccentBarWithTextContainer text={`Author: ${author?.name}`} />
+        <AccentBarWithTextContainer
+          text={t('book.author_info.author_line', {name: author?.name})}
+        />
       </ArrowForwardIconContainer>
       <div className="flex items-start gap-4 px-4 pt-6">
         {/* 左侧：头像 + Follow */}
@@ -98,7 +101,9 @@ const AuthorInfoShow: React.FC<AuthorInfoShowProps> = ({
       <div>
         <div className="flex mb-4">
           <ArrowForwardIconContainer size={16} to={`/user/${author?.unitId}`}>
-            <AccentBarWithTextContainer text={`Author: ${author?.name}`} />
+            <AccentBarWithTextContainer
+              text={t('book.author_info.author_line', {name: author?.name})}
+            />
           </ArrowForwardIconContainer>
         </div>
 
@@ -127,10 +132,12 @@ const AuthorInfoShow: React.FC<AuthorInfoShowProps> = ({
 
               {/* 右侧文本区域 */}
               <div className="flex-1 !text-md">
-                <Typography className="">Bio:{author.bio}</Typography>
+                <Typography className="">
+                  {t('book.author_info.bio_label')}:{author.bio}
+                </Typography>
                 <br />
                 <Typography className="">
-                  Description:{author.description}
+                  {t('book.author_info.description_label')}:{author.description}
                 </Typography>
               </div>
             </div>
@@ -188,6 +195,7 @@ const AuthorInfoEditShow: React.FC<AuthorInfoEditShowProps> = ({
   descriptionState,
   setDescriptionState,
 }) => {
+  const {t} = useTranslation();
   const handleUpdate = () => {
     onUpdate(descriptionState);
     setEditOpen(false);
@@ -199,7 +207,7 @@ const AuthorInfoEditShow: React.FC<AuthorInfoEditShowProps> = ({
       <div className="w-full">
         <div className="w-1/2 float-right">
           <Button onClick={handleUpdate} className="w-full">
-            提交
+            {t('common.submit')}
           </Button>
         </div>
       </div>

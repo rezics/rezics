@@ -13,6 +13,7 @@ import {
 import {InfoOutlined} from '@mui/icons-material';
 import type {BookDTO, UserDTO} from '@package/contract';
 import {meiliUserApi} from '@/api/meili/meili.api';
+import {useTranslation} from 'react-i18next';
 
 type PublicUserLike = Partial<UserDTO>;
 
@@ -127,12 +128,13 @@ const UsersMultiSelect: React.FC<{
   );
 };
 export function NSFWInfo() {
+  const {t} = useTranslation();
   return (
     <div className="flex items-center gap-1">
-      <span>NSFW</span>
+      <span>{t('book.flags.nsfw')}</span>
 
       <Tooltip
-        title="当书籍名称或封面包含裸露、色情等敏感内容时，请勾选此选项"
+        title={t('book.tooltips.nsfw')}
         placement="right"
         slotProps={{
           tooltip: {
@@ -152,12 +154,13 @@ export function NSFWInfo() {
 }
 
 export function IsLicensedInfo() {
+  const {t} = useTranslation();
   return (
     <div className="flex items-center gap-1">
-      <span>Licensed</span>
+      <span>{t('book.flags.licensed')}</span>
 
       <Tooltip
-        title="当书籍已获得版权许可时，如您是版权所有者，请勾选此选项"
+        title={t('book.tooltips.licensed')}
         placement="right"
         slotProps={{
           tooltip: {
@@ -181,12 +184,13 @@ export const BookMetadataEditor: React.FC<BookMetadataEditorProps> = ({
   onChange,
   disabled,
 }) => {
+  const {t} = useTranslation();
   return (
     <div className="flex flex-col gap-6">
       <div>
         <TextField
           fullWidth
-          label="书名"
+          label={t('book.fields.title')}
           value={value?.title ?? ''}
           onChange={e => onChange?.({title: e.target.value})}
           disabled={disabled}
@@ -198,7 +202,7 @@ export const BookMetadataEditor: React.FC<BookMetadataEditorProps> = ({
         <div>
           <TextField
             fullWidth
-            label="ISBN"
+            label={t('book.fields.isbn')}
             value={value?.isbn ?? ''}
             onChange={e => onChange?.({isbn: e.target.value})}
             disabled={disabled}
@@ -209,7 +213,7 @@ export const BookMetadataEditor: React.FC<BookMetadataEditorProps> = ({
         <div>
           <TextField
             fullWidth
-            label="Cover URL"
+            label={t('book.fields.cover_url')}
             value={value?.coverUrl ?? ''}
             onChange={e => onChange?.({coverUrl: e.target.value})}
             disabled={disabled}
@@ -223,35 +227,35 @@ export const BookMetadataEditor: React.FC<BookMetadataEditorProps> = ({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
           <UsersMultiSelect
-            label="作者"
+            label={t('book.fields.author')}
             value={(value?.author as any) ?? []}
             onChange={v => onChange?.({author: v as any})}
-            placeholder="搜索作者..."
+            placeholder={t('book.placeholders.search_author')}
             disabled={disabled}
           />
         </div>
         <div>
           <UsersMultiSelect
-            label="出版社"
+            label={t('book.fields.press')}
             value={(value?.press as any) ?? []}
             onChange={v => onChange?.({press: v as any})}
-            placeholder="搜索出版社..."
+            placeholder={t('book.placeholders.search_press')}
             disabled={disabled}
           />
         </div>
         <div>
           <UsersMultiSelect
-            label="出品方"
+            label={t('book.fields.producer')}
             value={(value?.producer as any) ?? []}
             onChange={v => onChange?.({producer: v as any})}
-            placeholder="搜索出品方..."
+            placeholder={t('book.placeholders.search_producer')}
             disabled={disabled}
           />
         </div>
         <div className="flex items-center gap-2">
           <TextField
             fullWidth
-            label="Text Length"
+            label={t('book.fields.text_length')}
             value={value?.textLength ?? ''}
             onChange={v => onChange?.({textLength: v.target.value})}
             disabled={disabled}

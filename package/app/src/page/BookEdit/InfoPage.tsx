@@ -29,6 +29,7 @@ function validatePublishURL(publishURL: string[]) {
 type BookMetadataValue = Partial<BookDTO>;
 
 const updateBookDialog = (
+  t: any,
   open: boolean,
   onClose: () => void,
   text: any | null,
@@ -43,14 +44,14 @@ const updateBookDialog = (
           <Typography variant="body1">
             {text?.showBookLink && (
               <RouterLink href={`/book/${text.bookId}`}>
-                点击查看书籍
+                {t('page.book_edit.info.dialog.view_book')}
               </RouterLink>
             )}
           </Typography>
         </Alert>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>关闭</Button>
+        <Button onClick={onClose}>{t('common.close')}</Button>
       </DialogActions>
     </Dialog>
   );
@@ -76,7 +77,7 @@ export interface BookEditMainPageProps {
 export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
   bookId,
   newBook = false,
-  pageTitle = '书籍编辑',
+  pageTitle,
 }) => {
   const {t} = useTranslation();
   const [_location, navigate] = useLocation();
@@ -99,9 +100,8 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
     onSuccess: data => {
       console.log('create book success', data);
       setUpdateBookErrorText({
-        title: '创建书籍成功',
-        message:
-          '创建书籍成功，书籍详情页可能需要等待几分钟/手动刷新才能看到最新内容。',
+        title: t('page.book_edit.info.toast.create_success_title'),
+        message: t('page.book_edit.info.toast.create_success_message'),
         showBookLink: true,
         bookId: data.unitId,
       });
@@ -110,8 +110,8 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
     onError: error => {
       console.error('create book failed', error);
       setUpdateBookErrorText({
-        title: '创建书籍失败',
-        message: String(error || 'Unknown error'),
+        title: t('page.book_edit.info.toast.create_failed_title'),
+        message: String(error || t('common.unknown_error')),
         error: true,
       });
       setUpdateBookErrorOpen(true);
@@ -122,17 +122,16 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
     onSuccess: data => {
       console.log('update book success', data);
       setUpdateBookErrorText({
-        title: '更新书籍成功',
-        message:
-          '更新书籍成功，书籍详情页可能需要等待几分钟/手动刷新才能看到最新内容。',
+        title: t('page.book_edit.info.toast.update_success_title'),
+        message: t('page.book_edit.info.toast.update_success_message'),
       });
       setUpdateBookErrorOpen(true);
     },
     onError: error => {
       console.error('update book failed', error);
       setUpdateBookErrorText({
-        title: '更新书籍失败',
-        message: String(error || 'Unknown error'),
+        title: t('page.book_edit.info.toast.update_failed_title'),
+        message: String(error || t('common.unknown_error')),
         error: true,
       });
       setUpdateBookErrorOpen(true);
@@ -173,9 +172,8 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
         });
       } else {
         setUpdateBookErrorText({
-          title: '创建书籍失败',
-          message:
-            '请至少添加一个正确的，书籍发布的链接，譬如起点对应书籍的链接，以https://开头。',
+          title: t('page.book_edit.info.toast.create_failed_title'),
+          message: t('page.book_edit.info.validation.publish_url_required'),
           error: true,
         });
         setUpdateBookErrorOpen(true);
@@ -183,13 +181,21 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
     }
   }
 
-  if (isLoading) return <div>Loading...</div>;
-  if (error) return <div>Error: {String(error)}</div>;
-  if (!data && !newBook) return <div>No data</div>;
+  if (isLoading) return <div>{t('common.loading')}</div>;
+  if (error)
+    return (
+      <div>
+        {t('common.error')}: {String(error)}
+      </div>
+    );
+  if (!data && !newBook) return <div>{t('common.no_data')}</div>;
+
+  const resolvedPageTitle = pageTitle ?? t('page.book_edit.info.title');
+
   return (
     <div className="mt-10 mx-auto w-11/12">
       <div className="flex justify-between items-center">
-        <div className="text-2xl font-bold mb-4">{pageTitle}</div>
+        <div className="text-2xl font-bold mb-4">{resolvedPageTitle}</div>
         <div className="flex items-center gap-2">
           {bookId ? (
             <Button
@@ -199,7 +205,7 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
                 navigate(`/book/${bookId}/`);
               }}
             >
-              返回
+              {t('common.back')}
             </Button>
           ) : null}
           <Button
@@ -209,14 +215,14 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
               handleSubmit();
             }}
           >
-            提交
+            {t('common.submit')}
           </Button>
         </div>
       </div>
       {/* ANCHOR Book Metadata */}
       <div>
         <div className="flex mb-4">
-          <AccentBarWithTextShow text="MetaData" />
+          <AccentBarWithTextShow text={t('book.edit_sections.metadata')} />
         </div>
         <div className="mb-8">
           <BookMetadataEditor
@@ -242,7 +248,7 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
       {/* ANCHOR Book Extra */}
       <div>
         <div className="flex mb-4">
-          <AccentBarWithTextShow text="Extra" />
+          <AccentBarWithTextShow text={t('book.edit_sections.extra')} />
         </div>
         <div className="mb-8">
           <BookExtraEditor
@@ -254,6 +260,7 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
         </div>
       </div>
       {updateBookDialog(
+        t,
         updateBookErrorOpen,
         () => {
           setUpdateBookErrorOpen(false);

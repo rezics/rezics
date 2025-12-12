@@ -1,4 +1,5 @@
 import React, {useEffect, useState} from 'react';
+import {useTranslation} from 'react-i18next';
 
 import {AccentBarWithTextShow} from '../Common/Navigation/AccentBar.tsx';
 import {ArrowForwardIconContainer} from '../Common/Navigation/ArrowForwardIcon.tsx';
@@ -19,6 +20,7 @@ export const BookReviews: React.FC<BookReviewsProps> = ({
   title,
   reviewNumber = 4,
 }) => {
+  const {t} = useTranslation();
   const [reviews, setReviews] = useState<any[]>([]);
 
   const {data} = useQuery(
@@ -44,7 +46,7 @@ export const BookReviews: React.FC<BookReviewsProps> = ({
   return (
     <div>
       <ArrowForwardIconContainer size={16} to={`/review/book/${bookId}/`}>
-        <AccentBarWithTextShow text={`${title}的书评`} />
+        <AccentBarWithTextShow text={t('book.reviews_of_book', {title})} />
       </ArrowForwardIconContainer>
       <ReviewListContainer reviews={reviews?.slice(0, reviewNumber)} />
     </div>

@@ -20,6 +20,7 @@ import {routeStore} from '@/global/routeStore.ts';
 
 import {bookQueries} from '@/api/book/book';
 import {useQuery} from '@tanstack/react-query';
+import {useTranslation} from 'react-i18next';
 
 import type {BookDTO} from '@package/contract';
 
@@ -45,6 +46,7 @@ export const BookPageShow: React.FC<ShowProps> = ({
   activeTab,
   onTabChange,
 }) => {
+  const {t} = useTranslation();
   console.log('BookPageShow render', bookInfo);
   return (
     <Box id="book-detail" ref={ref}>
@@ -58,9 +60,9 @@ export const BookPageShow: React.FC<ShowProps> = ({
           <Grid size={{xs: 12, lg: 9}}>
             <TabContext value={activeTab}>
               <TabList onChange={onTabChange}>
-                <Tab label="基本信息" value="0" />
-                <Tab label="书评" value="1" />
-                <Tab label="目录" value="2" />
+                <Tab label={t('page.book.tabs.basic_info')} value="0" />
+                <Tab label={t('page.book.tabs.reviews')} value="1" />
+                <Tab label={t('page.book.tabs.toc')} value="2" />
               </TabList>
               <TabPanel value="0">
                 <Stack spacing={4}>
@@ -77,7 +79,7 @@ export const BookPageShow: React.FC<ShowProps> = ({
                       size={16}
                       to={`/tag/book/${bookInfo?.unitId}/tag`}
                     >
-                      <AccentBarWithTextContainer text="Tags" />
+                      <AccentBarWithTextContainer text={t('book.tags')} />
                     </ArrowForwardIconContainer>
                   </div>
                   <TagWrapper
@@ -107,7 +109,9 @@ export const BookPageShow: React.FC<ShowProps> = ({
                       size={16}
                       to={`/quote/book/${bookInfo?.unitId}`}
                     >
-                      <AccentBarWithTextContainer text="原文摘录" />
+                      <AccentBarWithTextContainer
+                        text={t('book.quote_excerpts')}
+                      />
                     </ArrowForwardIconContainer>
                   </div>
                   <QuoteExcerptPreviewContainer id={bookInfo?.unitId || ''} />
@@ -120,7 +124,7 @@ export const BookPageShow: React.FC<ShowProps> = ({
                         size={16}
                         to={`/review/book/${bookInfo?.unitId}?tab=remark`}
                       >
-                        <AccentBarWithTextContainer text="Remark" />
+                        <AccentBarWithTextContainer text={t('book.remark')} />
                       </ArrowForwardIconContainer>
                     </div>
                     <RemarkPreview bookId={bookInfo?.unitId || ''} />
@@ -164,27 +168,28 @@ export const BookPageShow: React.FC<ShowProps> = ({
               {/* Book Info */}
               <Box>
                 <Typography variant="h6" className="font-bold mb-4">
-                  书籍信息
+                  {t('book.info_panel.title')}
                 </Typography>
                 <Stack spacing={1}>
                   <Typography variant="body2">
-                    书名：{bookInfo?.title}
+                    {t('book.fields.title')}：{bookInfo?.title}
                   </Typography>
                   <Typography variant="body2">
-                    作者：{bookInfo?.author?.[0]?.name ?? ''}
+                    {t('book.fields.author')}：
+                    {bookInfo?.author?.[0]?.name ?? ''}
                   </Typography>
                   <Typography variant="body2">
-                    出版社：{bookInfo?.press?.[0]?.name ?? ''}
+                    {t('book.fields.press')}：{bookInfo?.press?.[0]?.name ?? ''}
                   </Typography>
                   <Typography variant="body2">
-                    出品方：
+                    {t('book.fields.producer')}：
                     {bookInfo?.producer?.[0]?.name ?? ''}
                   </Typography>
                   <Typography variant="body2">
-                    字数：{bookInfo?.textLength ?? 0}
+                    {t('book.fields.text_length')}：{bookInfo?.textLength ?? 0}
                   </Typography>
                   <Typography variant="body2">
-                    ISBN：{bookInfo?.isbn ?? ' '}
+                    {t('book.fields.isbn')}：{bookInfo?.isbn ?? ' '}
                   </Typography>
                 </Stack>
               </Box>
@@ -203,6 +208,7 @@ export type ContainerProps = {
 export const BookPageContainer: React.FC<ContainerProps> = ({bookId}) => {
   const [location] = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
+  const {t} = useTranslation();
 
   const getInitialTab = (): TabValue => {
     const tabParam = searchParams.get('tab');
@@ -262,11 +268,15 @@ export const BookPageContainer: React.FC<ContainerProps> = ({bookId}) => {
   }, [data, isLoading, bookId]);
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <div>{t('common.loading')}</div>;
   }
 
   if (error) {
-    return <div>Oh no... {String(error)}</div>;
+    return (
+      <div>
+        {t('common.error_generic')} {String(error)}
+      </div>
+    );
   }
 
   return (

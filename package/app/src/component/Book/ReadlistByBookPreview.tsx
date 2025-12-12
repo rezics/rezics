@@ -5,6 +5,7 @@ import {ArrowForwardIconContainer} from '../Common/Navigation/ArrowForwardIcon.t
 
 import {useQuery} from '@tanstack/react-query';
 import {buildMeiliReadlistQuery} from '@/api/meili/meili.queries';
+import {useTranslation} from 'react-i18next';
 
 export function ReadlistByBookPreview({
   title,
@@ -15,19 +16,27 @@ export function ReadlistByBookPreview({
   bookId?: string;
   readlistNumber?: number;
 }) {
+  const {t} = useTranslation();
   const {data, isLoading, error} = useQuery(
     buildMeiliReadlistQuery(0, readlistNumber, '', [], {bookId}),
   );
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <div>{t('common.loading')}</div>;
   }
-  if (error && error instanceof Error) return <div>Error: {error.message}</div>;
+  if (error && error instanceof Error)
+    return (
+      <div>
+        {t('common.error')}: {error.message}
+      </div>
+    );
 
   return (
     <div>
       <ArrowForwardIconContainer size={16} to={`/readlist/book/${bookId}`}>
-        <AccentBarWithTextContainer text={`包含 ${title} 的书单`} />
+        <AccentBarWithTextContainer
+          text={t('readlist.includes_book_title', {title})}
+        />
       </ArrowForwardIconContainer>
       <div className="mb-4" />
       <ReadlistList

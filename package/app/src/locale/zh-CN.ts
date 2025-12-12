@@ -73,6 +73,35 @@ export default {
         },
       },
     },
+    book: {
+      tabs: {
+        basic_info: '基本信息',
+        reviews: '书评',
+        toc: '目录',
+      },
+    },
+    book_edit: {
+      info: {
+        title: '书籍编辑',
+        dialog: {
+          view_book: '点击查看书籍',
+        },
+        toast: {
+          create_success_title: '创建书籍成功',
+          create_success_message:
+            '创建书籍成功，书籍详情页可能需要等待几分钟/手动刷新才能看到最新内容。',
+          create_failed_title: '创建书籍失败',
+          update_success_title: '更新书籍成功',
+          update_success_message:
+            '更新书籍成功，书籍详情页可能需要等待几分钟/手动刷新才能看到最新内容。',
+          update_failed_title: '更新书籍失败',
+        },
+        validation: {
+          publish_url_required:
+            '请至少添加一个正确的，书籍发布的链接，譬如起点对应书籍的链接，以https://开头。',
+        },
+      },
+    },
   },
 
   // Navigation & Menu
@@ -115,10 +144,13 @@ export default {
 
   // Common UI Elements
   common: {
+    created_at: '创建时间',
+    updated_at: '更新时间',
     email: '邮箱',
     password: '密码',
     confirm: '确认密码',
     username: '用户名',
+    nickname: '昵称',
     back: '返回',
     home: '首页',
     cancel: '取消',
@@ -136,11 +168,18 @@ export default {
     reply: '回复',
     close: '关闭',
     open: '打开',
+    no_data: '暂无数据',
     view_more: '查看更多',
     view_all: '查看全部',
     pinned: '置顶',
     new: '新',
     no_description: '暂无描述',
+    loading: '加载中...',
+    error: '错误',
+    error_generic: '出错了...',
+    unknown_error: '未知错误',
+    expand_all: '全部展开',
+    collapse_all: '全部折叠',
   },
 
   // Book
@@ -155,6 +194,58 @@ export default {
     new_releases: '新书上架',
     no_cover: '暂无封面',
     unknown_author: '未知作者',
+    toc: '目录',
+    remark: '短评',
+    quote_excerpts: '原文摘录',
+    reviews_of_book: '{{title}}的书评',
+    info_panel: {
+      title: '书籍信息',
+    },
+    fields: {
+      title: '书名',
+      isbn: 'ISBN',
+      cover_url: '封面链接',
+      author: '作者',
+      press: '出版社',
+      producer: '出品方',
+      text_length: '字数',
+    },
+    placeholders: {
+      search_author: '搜索作者...',
+      search_press: '搜索出版社...',
+      search_producer: '搜索出品方...',
+    },
+    flags: {
+      nsfw: 'NSFW',
+      licensed: '已获版权许可',
+    },
+    tooltips: {
+      nsfw: '当书籍名称或封面包含裸露、色情等敏感内容时，请勾选此选项',
+      licensed: '当书籍已获得版权许可时，如您是版权所有者，请勾选此选项',
+    },
+    edit_sections: {
+      metadata: '元数据',
+      extra: '额外信息',
+    },
+    chapter: {
+      enable_drag: '启用拖拽',
+      double_click_rename: '双击重命名',
+      rename_help:
+        '修改此处的章节名称仅影响目录结构展示，不会更新实际章节标题。若需修改章节标题，请前往章节编辑页面，在那里修改标题后会自动更新目录结构。',
+    },
+    author_info: {
+      author_line: '作者：{{name}}',
+      bio_label: '简介',
+      description_label: '描述',
+    },
+    description_editor: {
+      title: '编辑书籍描述',
+    },
+    extra: {
+      publish_urls: {
+        title: '发布链接 (Publish URLs)',
+      },
+    },
   },
 
   // Readlist
@@ -163,6 +254,7 @@ export default {
     includes_books: '包含 {{count}} 本书',
     includes_reviews: '包含 {{count}} 条书评评',
     includes_reviews_other: '{{count}} 条短评',
+    includes_book_title: '包含 {{title}} 的书单',
   },
 
   // Review
@@ -176,6 +268,14 @@ export default {
   quote: {
     title: '言',
     subtitle: '笔落惊风雨，诗成泣鬼神',
+  },
+
+  // Tag
+  tag: {
+    loading: '正在加载标签…',
+    load_failed: '加载失败：{{error}}',
+    ungrouped: '未分组',
+    showing_top_tags: '显示热门标签',
   },
 
   // Form & Editor
@@ -198,6 +298,8 @@ export default {
   placeholders: {
     search_books: '搜索图书',
     chapter_title: '请输入章节标题',
+    enter_search_term: '输入搜索词',
+    enter_url: '输入 URL 地址',
   },
 
   // Chapters & Books

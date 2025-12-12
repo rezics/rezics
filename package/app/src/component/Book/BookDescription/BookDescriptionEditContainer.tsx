@@ -4,6 +4,7 @@ import {useBookPageStore} from '@/global/page/bookPageStore.ts';
 import {useUpdateBookMutation} from '@/api/book/book.mutations';
 import type {UpdateBookInput} from '@package/contract';
 import {BookDescriptionEditShow} from './BookDescriptionEditShow.tsx';
+import {useTranslation} from 'react-i18next';
 import type {
   BookDescriptionEditContainerProps,
   BookDescriptionEditorInlineProps,
@@ -18,6 +19,7 @@ import type {
 export const BookDescriptionEditContainer: React.FC<
   BookDescriptionEditContainerProps
 > = ({description, editOpen, setEditOpen, mode = 'inline', bookId}) => {
+  const {t} = useTranslation();
   const [descriptionState, setDescriptionState] = useState(description);
 
   useEffect(() => {
@@ -49,7 +51,7 @@ export const BookDescriptionEditContainer: React.FC<
       <DialogContainer
         open={editOpen}
         onClose={() => setEditOpen(false)}
-        title="编辑书籍描述"
+        title={t('book.description_editor.title')}
       >
         {content}
       </DialogContainer>

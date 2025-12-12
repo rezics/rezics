@@ -5,6 +5,7 @@ import {QuoteExcerptListContainer} from '../Review/QuoteExcerptList.tsx';
 import {useQuery} from '@tanstack/react-query';
 import {buildMeiliUnitQuery} from '@/api/meili/meili.queries';
 import {UnitType} from '@package/contract';
+import {useTranslation} from 'react-i18next';
 
 export type QuoteExcerptPreviewContainerProps = {
   id: string;
@@ -14,6 +15,7 @@ export type QuoteExcerptPreviewContainerProps = {
 export const QuoteExcerptPreviewContainer: React.FC<
   QuoteExcerptPreviewContainerProps
 > = ({id, quoteNumber = 3}) => {
+  const {t} = useTranslation();
   const {data, isLoading, error} = useQuery(
     buildMeiliUnitQuery(
       UnitType.QUOTE,
@@ -28,9 +30,13 @@ export const QuoteExcerptPreviewContainer: React.FC<
     ),
   );
 
-  if (isLoading) return <div>Loading...</div>;
+  if (isLoading) return <div>{t('common.loading')}</div>;
   if (error && !isEmptyValue(error))
-    return <div>Oh no... {JSON.stringify(error)}</div>;
+    return (
+      <div>
+        {t('common.error_generic')} {JSON.stringify(error)}
+      </div>
+    );
 
   return (
     <div>

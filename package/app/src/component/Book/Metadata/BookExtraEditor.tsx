@@ -12,6 +12,7 @@ import {
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
+import {useTranslation} from 'react-i18next';
 
 interface BookExtraEditorProps {
   value?: any;
@@ -19,6 +20,7 @@ interface BookExtraEditorProps {
 }
 
 function PublishURL({value, onChange}: BookExtraEditorProps) {
+  const {t} = useTranslation();
   const [newUrl, setNewUrl] = useState('');
   const urls: string[] = Array.isArray(value) ? value : [];
 
@@ -47,7 +49,7 @@ function PublishURL({value, onChange}: BookExtraEditorProps) {
   return (
     <Paper sx={{p: 2, borderRadius: 2}}>
       <Typography variant="h6" sx={{mb: 2}}>
-        发布链接 (Publish URLs)
+        {t('book.extra.publish_urls.title')}
       </Typography>
 
       <div className="space-y-2">
@@ -79,7 +81,7 @@ function PublishURL({value, onChange}: BookExtraEditorProps) {
               size="small"
               color="error"
               onClick={() => handleRemove(index)}
-              aria-label="删除"
+              aria-label={t('common.delete')}
             >
               <DeleteIcon fontSize="small" />
             </IconButton>
@@ -95,7 +97,7 @@ function PublishURL({value, onChange}: BookExtraEditorProps) {
           value={newUrl}
           onChange={e => setNewUrl(e.target.value)}
           onKeyPress={handleKeyPress}
-          placeholder="输入 URL 地址"
+          placeholder={t('placeholders.enter_url')}
           variant="outlined"
         />
         <Button
@@ -105,7 +107,7 @@ function PublishURL({value, onChange}: BookExtraEditorProps) {
           startIcon={<AddIcon />}
           sx={{minWidth: 100}}
         >
-          添加
+          {t('common.add')}
         </Button>
       </div>
     </Paper>

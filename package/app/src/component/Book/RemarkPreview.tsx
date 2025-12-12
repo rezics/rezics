@@ -4,6 +4,7 @@ import {ShortReviewListShow} from '../Review/ShortReviewList.tsx';
 import {buildMeiliUnitQuery} from '@/api/meili/meili.queries';
 import {mapUnitListToReviewListResponse} from '@/api/meili/meili.api';
 import {UnitType} from '@package/contract';
+import {useTranslation} from 'react-i18next';
 interface ShortBookReviewsProps {
   bookId: string;
 }
@@ -11,6 +12,7 @@ interface ShortBookReviewsProps {
 // 短评就是Post评论
 
 export const RemarkPreview: React.FC<ShortBookReviewsProps> = ({bookId}) => {
+  const {t} = useTranslation();
   const {data, isLoading, error} = useQuery(
     buildMeiliUnitQuery(
       UnitType.REMARK,
@@ -34,10 +36,14 @@ export const RemarkPreview: React.FC<ShortBookReviewsProps> = ({bookId}) => {
   };
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <div>{t('common.loading')}</div>;
   }
   if (error && error instanceof Error) {
-    return <div>Error: {error.message}</div>;
+    return (
+      <div>
+        {t('common.error')}: {error.message}
+      </div>
+    );
   }
 
   return (

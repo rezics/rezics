@@ -7,6 +7,7 @@ import TagList from './TagList';
 import {RouterLink} from '@/component/Common/Navigation/RouterLink';
 
 import {useIsMobile} from '@/util/MediaQueryUtil';
+import {useTranslation} from 'react-i18next';
 
 type Mode = 'flat' | 'grouped';
 
@@ -91,6 +92,7 @@ export const TagWrapper: React.FC<TagWrapperProps> = ({
   domainIds,
   className,
 }) => {
+  const {t} = useTranslation();
   const {data, isLoading, error} = useQuery(tagQueries.list(filters));
   const tags: TagDTO[] = useMemo(() => data?.tags ?? [], [data]);
   const isMobile = useIsMobile();
@@ -115,7 +117,7 @@ export const TagWrapper: React.FC<TagWrapperProps> = ({
   if (isLoading) {
     return (
       <div className={className}>
-        <div className="text-sm text-gray-500">正在加载标签…</div>
+        <div className="text-sm text-gray-500">{t('tag.loading')}</div>
       </div>
     );
   }
@@ -124,7 +126,9 @@ export const TagWrapper: React.FC<TagWrapperProps> = ({
     return (
       <div className={className}>
         <div className="text-sm text-red-600">
-          加载失败：{String((error as any)?.message ?? error)}
+          {t('tag.load_failed', {
+            error: String((error as any)?.message ?? error),
+          })}
         </div>
       </div>
     );
@@ -147,7 +151,7 @@ export const TagWrapper: React.FC<TagWrapperProps> = ({
             <div className="flex items-center gap-2">
               {domId === 'NO_DOMAIN' ? (
                 <span className="text-sm font-semibold text-gray-700">
-                  未分组
+                  {t('tag.ungrouped')}
                 </span>
               ) : (
                 <RouterLink
@@ -166,9 +170,9 @@ export const TagWrapper: React.FC<TagWrapperProps> = ({
       </div>
       {!renderAll && isMobile && (
         <div className="mt-4 text-sm text-gray-500">
-          Showing top tags ·
+          {t('tag.showing_top_tags')} ·
           <RouterLink href={`/tag/book/${filters?.objectId}/tag`}>
-            View all →
+            {t('common.view_all')} →
           </RouterLink>
         </div>
       )}
