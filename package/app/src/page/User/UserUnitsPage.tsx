@@ -7,17 +7,19 @@ import {
   type UniversalPaginatorHandle,
 } from '@/component/Common/Navigation/Pagination';
 import {SimpleSearchInput} from '@/component/Search/SimpleSearchInput';
-import type {ReadlistDTO, ReviewDTO, UnitDTO} from '@package/contract';
+import type {BookDTO, ReadlistDTO, ReviewDTO, UnitDTO} from '@package/contract';
 import {UnitType} from '@package/contract';
 import {
   buildMeiliReadlistQuery,
   buildMeiliUnitQuery,
+  meiliBookSearchQuery,
 } from '@/api/meili/meili.queries';
 import {reactionApi} from '@/api/reaction/reaction.api';
 import {mapUnitListToReviewListResponse} from '@/api/meili/meili.api';
 import {SingleReadlist} from '@/component/ReadList/SingleReadlist';
 import {ReviewListContainer} from '@/component/Review/ReviewList';
 import {QuoteExcerptListContainer} from '@component/Review/QuoteExcerptList.tsx';
+import {BookListViewContainer} from '@/component/BookLib/BookList/BookListView';
 
 type Readlist = ReadlistDTO;
 type Review = ReviewDTO;
@@ -72,7 +74,14 @@ const UnitSimpleListView: React.FC<{units: UnitItem[]}> = ({units}) => {
   );
 };
 
-type TabKey = 'readlist' | 'review' | 'remark' | 'comment' | 'note' | 'quote';
+type TabKey =
+  | 'readlist'
+  | 'review'
+  | 'remark'
+  | 'comment'
+  | 'note'
+  | 'quote'
+  | 'book';
 
 /**
  * UserUnitsPage
@@ -97,6 +106,7 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({userId}) => {
 
   const [startReadlist, setStartReadlist] = useState<number>(0);
   const [startReview, setStartReview] = useState<number>(0);
+  const [startBook, setStartBook] = useState<number>(0);
   const [startRemark, setStartRemark] = useState<number>(0);
   const [startComment, setStartComment] = useState<number>(0);
   const [startNote, setStartNote] = useState<number>(0);
@@ -171,6 +181,21 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({userId}) => {
   }, [baseReadlists, readlistReactionSummaryBatch]);
 
   const totalReadlists: number = readlistDataRaw?.total ?? 0;
+
+  // ======= Books (Meili books index with userId filter) =======
+  const bookListQueryOpts = useQuery(
+    meiliBookSearchQuery({
+      authorIds: [userId],
+      start: startBook,
+      limit: EXTERNAL_PAGE_SIZE,
+    }),
+  );
+
+  const {
+    data: bookData,
+    isLoading: isLoadingBook,
+    error: errorBook,
+  } = bookListQueryOpts;
 
   // ======= Reviews / Remarks (Meili units index with userId filter) =======
 
@@ -346,6 +371,8 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({userId}) => {
       setStartReview(start);
     } else if (tab === 'remark') {
       setStartRemark(start);
+    } else if (tab === 'book') {
+      setStartBook(start);
     } else if (tab === 'comment') {
       setStartComment(start);
     } else if (tab === 'note') {
@@ -419,7 +446,7 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({userId}) => {
 
   // 根据当前 Tab 选择数据源
   let isLoading: boolean;
-  let items: (Readlist | Review | UnitItem)[];
+  let items: (Readlist | Review | UnitItem | BookDTO)[];
   let totalItems: number;
   let activeError: Error | null = null;
 
@@ -433,6 +460,11 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({userId}) => {
     items = reviews ?? [];
     totalItems = totalReviews;
     activeError = (errorReview ?? errorRemark) as Error | null;
+  } else if (tab === 'book') {
+    isLoading = isLoadingBook;
+    items = bookData?.books ?? [];
+    totalItems = bookData?.total ?? 0;
+    activeError = errorBook as Error | null;
   } else if (tab === 'comment') {
     isLoading = isLoadingComment;
     items = commentUnits ?? [];
@@ -470,6 +502,7 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({userId}) => {
           >
             <Tab label="READLIST" value="readlist" />
             <Tab label="REVIEW" value="review" />
+            <Tab label="BOOK" value="book" />
             <Tab label="REMARK" value="remark" />
             <Tab label="COMMENT" value="comment" />
             <Tab label="QUOTE" value="quote" />
@@ -484,7 +517,7 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({userId}) => {
         </Alert>
       )}
 
-      <UniversalPaginator<Readlist | Review | UnitItem>
+      <UniversalPaginator<Readlist | Review | UnitItem | BookDTO>
         ref={ref}
         data={items}
         totalExternalItems={totalItems}
@@ -500,7 +533,7 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({userId}) => {
         setCurrentPage={setCurrentPage}
         disableSortControl={true}
       >
-        {(currentPageItems: (Readlist | Review | UnitItem)[]) => {
+        {(currentPageItems: (Readlist | Review | UnitItem | BookDTO)[]) => {
           if (tab === 'readlist') {
             return (
               <ReadlistListView readlists={currentPageItems as Readlist[]} />
@@ -509,6 +542,11 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({userId}) => {
           if (tab === 'review' || tab === 'remark') {
             return (
               <ReviewListContainer reviews={currentPageItems as Review[]} />
+            );
+          }
+          if (tab === 'book') {
+            return (
+              <BookListViewContainer books={currentPageItems as BookDTO[]} />
             );
           }
           if (tab === 'quote') {
