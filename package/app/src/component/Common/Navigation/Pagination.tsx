@@ -25,6 +25,7 @@ import {
 } from 'react';
 
 import React from 'react';
+import {useTranslation} from 'react-i18next';
 
 /**
  * example:
@@ -116,6 +117,7 @@ const PaginationBar: React.FC<PaginationBarProps> = ({
   totalPages,
   onPageChange,
 }) => {
+  const {t} = useTranslation();
   useEffect(() => {
     console.log(
       'PaginationBar',
@@ -148,7 +150,7 @@ const PaginationBar: React.FC<PaginationBarProps> = ({
         </Button> */}
       </Box>
       <div className="text-sm text-gray-500 text-center">
-        Tips: 数据页数并不代表总数据量，请点击最后一页来尝试加载更多数据
+        {t('search.pagination.tips')}
       </div>
     </div>
   );

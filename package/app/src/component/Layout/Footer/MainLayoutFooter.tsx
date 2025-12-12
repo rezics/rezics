@@ -13,8 +13,7 @@ import {
 } from '@mui/material';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import TelegramIcon from '@mui/icons-material/Telegram';
-import TwitterIcon from '@mui/icons-material/Twitter';
-import LinkedInIcon from '@mui/icons-material/LinkedIn';
+import {useTranslation} from 'react-i18next';
 
 function SectionTitle({children}: {children: React.ReactNode}) {
   return (
@@ -49,6 +48,7 @@ function FooterLink({
 }
 
 export function MainLayoutFooter({className}: {className?: string}) {
+  const {t} = useTranslation();
   const year = new Date().getFullYear();
 
   return (
@@ -73,20 +73,20 @@ export function MainLayoutFooter({className}: {className?: string}) {
                 Library.Book
               </Typography>
               <Typography variant="body2" color="text.secondary" sx={{mt: 1.5}}>
-                一个全面的，包含数字时代作品的书库，期待着让人们找到他们所寻的书，让故事遇见正确的人。
+                {t('layout.footer.brand.description')}
                 <br />
-                inherited·create·spread
+                {t('layout.footer.brand.slogan')}
               </Typography>
 
               <Stack
                 direction="row"
                 spacing={1}
                 sx={{mt: 2}}
-                aria-label="社交链接"
+                aria-label={t('layout.footer.social.aria')}
               >
-                <Tooltip title="GitHub">
+                <Tooltip title={t('layout.footer.social.github')}>
                   <IconButton
-                    aria-label="GitHub"
+                    aria-label={t('layout.footer.social.github')}
                     color="primary"
                     size="small"
                     href="https://github.com/REZICS"
@@ -96,9 +96,9 @@ export function MainLayoutFooter({className}: {className?: string}) {
                     <GitHubIcon fontSize="small" />
                   </IconButton>
                 </Tooltip>
-                <Tooltip title="Telegram">
+                <Tooltip title={t('layout.footer.social.telegram')}>
                   <IconButton
-                    aria-label="Telegram"
+                    aria-label={t('layout.footer.social.telegram')}
                     color="primary"
                     size="small"
                     href="https://t.me/REZICSofficial"
@@ -137,31 +137,53 @@ export function MainLayoutFooter({className}: {className?: string}) {
             </div>
 
             {/* Navigation */}
-            <nav aria-label="产品" className="md:col-span-1">
-              <SectionTitle>产品</SectionTitle>
+            <nav
+              aria-label={t('layout.footer.product.aria')}
+              className="md:col-span-1"
+            >
+              <SectionTitle>{t('layout.footer.product.title')}</SectionTitle>
               <Stack spacing={0.5}>
-                <FooterLink href="/book">发现</FooterLink>
-                <FooterLink href="/readlist">阅读单</FooterLink>
-                <FooterLink href="/review">评论与评测</FooterLink>
-                <FooterLink href="/unit">搜索</FooterLink>
+                <FooterLink href="/book">
+                  {t('layout.footer.product.discover')}
+                </FooterLink>
+                <FooterLink href="/readlist">
+                  {t('layout.footer.product.readlist')}
+                </FooterLink>
+                <FooterLink href="/review">
+                  {t('layout.footer.product.reviews')}
+                </FooterLink>
+                <FooterLink href="/unit">
+                  {t('layout.footer.product.search')}
+                </FooterLink>
               </Stack>
             </nav>
 
-            <nav aria-label="资源" className="md:col-span-1">
-              <SectionTitle>资源</SectionTitle>
+            <nav
+              aria-label={t('layout.footer.resources.aria')}
+              className="md:col-span-1"
+            >
+              <SectionTitle>{t('layout.footer.resources.title')}</SectionTitle>
               <Stack spacing={0.5}>
-                <FooterLink href="/docs">文档</FooterLink>
-                <FooterLink href="/api">API</FooterLink>
-                <FooterLink href="/changelog">更新日志</FooterLink>
-                <FooterLink href="/status">系统状态</FooterLink>
+                <FooterLink href="/docs">
+                  {t('layout.footer.resources.docs')}
+                </FooterLink>
+                <FooterLink href="/api">
+                  {t('layout.footer.resources.api')}
+                </FooterLink>
+                <FooterLink href="/changelog">
+                  {t('layout.footer.resources.changelog')}
+                </FooterLink>
+                <FooterLink href="/status">
+                  {t('layout.footer.resources.status')}
+                </FooterLink>
               </Stack>
             </nav>
 
             {/* Newsletter */}
             <div className="md:col-span-1">
-              <SectionTitle>订阅更新</SectionTitle>
+              <SectionTitle>{t('layout.footer.newsletter.title')}</SectionTitle>
               <Typography variant="body2" color="text.secondary" sx={{mb: 1.5}}>
-                获取最新功能与精选书单推送。(开发中)
+                {t('layout.footer.newsletter.description')}
               </Typography>
               <Stack
                 direction={{xs: 'column', sm: 'row'}}
@@ -172,9 +194,9 @@ export function MainLayoutFooter({className}: {className?: string}) {
                 <TextField
                   size="small"
                   type="email"
-                  placeholder="你的邮箱"
+                  placeholder={t('layout.footer.newsletter.email_placeholder')}
                   fullWidth
-                  aria-label="邮箱"
+                  aria-label={t('layout.footer.newsletter.email_aria')}
                 />
                 <Button
                   type="submit"
@@ -183,7 +205,7 @@ export function MainLayoutFooter({className}: {className?: string}) {
                   disableElevation
                   disabled
                 >
-                  订阅
+                  {t('layout.footer.newsletter.submit')}
                 </Button>
               </Stack>
             </div>
@@ -204,7 +226,7 @@ export function MainLayoutFooter({className}: {className?: string}) {
           }}
         >
           <Typography variant="caption" color="text.secondary">
-            © {year} REZICS · 保留所有权利
+            {t('layout.footer.copyright', {year})}
           </Typography>
 
           <Stack direction="row" spacing={2} alignItems="center">
@@ -214,7 +236,7 @@ export function MainLayoutFooter({className}: {className?: string}) {
               underline="hover"
               variant="caption"
             >
-              隐私
+              {t('layout.footer.legal.privacy')}
             </MUILink>
             <MUILink
               href="/terms"
@@ -222,7 +244,7 @@ export function MainLayoutFooter({className}: {className?: string}) {
               underline="hover"
               variant="caption"
             >
-              条款
+              {t('layout.footer.legal.terms')}
             </MUILink>
             <MUILink
               href="/contact"
@@ -230,7 +252,7 @@ export function MainLayoutFooter({className}: {className?: string}) {
               underline="hover"
               variant="caption"
             >
-              联系我们
+              {t('layout.footer.legal.contact')}
             </MUILink>
           </Stack>
         </Box>

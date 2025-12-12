@@ -2,6 +2,51 @@ export default {
   title: 'REZICS',
   motto: 'Inherited Create Spread',
 
+  layout: {
+    footer: {
+      brand: {
+        description:
+          'A comprehensive library of works for the digital era—helping people find the books they seek, and letting stories meet the right readers.',
+        slogan: 'inherited·create·spread',
+      },
+      social: {
+        aria: 'Social links',
+        github: 'GitHub',
+        telegram: 'Telegram',
+      },
+      product: {
+        aria: 'Product',
+        title: 'Product',
+        discover: 'Discover',
+        readlist: 'Readlists',
+        reviews: 'Reviews & Ratings',
+        search: 'Search',
+      },
+      resources: {
+        aria: 'Resources',
+        title: 'Resources',
+        docs: 'Docs',
+        api: 'API',
+        changelog: 'Changelog',
+        status: 'System status',
+      },
+      newsletter: {
+        title: 'Subscribe for updates',
+        description:
+          'Get the latest features and curated readlist picks. (In development)',
+        email_placeholder: 'Your email',
+        email_aria: 'Email',
+        submit: 'Subscribe',
+      },
+      copyright: '© {{year}} REZICS · All rights reserved',
+      legal: {
+        privacy: 'Privacy',
+        terms: 'Terms',
+        contact: 'Contact us',
+      },
+    },
+  },
+
   pages: {
     review_page: 'Review Page',
     unit_page: 'Unit',
@@ -288,6 +333,9 @@ export default {
     tooltips: {
       nsfw: 'Whether to search for content that is not suitable for work',
       licensed: 'Whether to search for content that has been licensed',
+    },
+    pagination: {
+      tips: 'Tips: The page number does not represent the total number of data, please click the last page to try to load more',
     },
   },
 

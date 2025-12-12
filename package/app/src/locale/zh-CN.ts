@@ -2,6 +2,50 @@ export default {
   title: 'REZICS',
   motto: '传承 创造 传播',
 
+  layout: {
+    footer: {
+      brand: {
+        description:
+          '一个全面的，包含数字时代作品的书库，期待着让人们找到他们所寻的书，让故事遇见正确的人。',
+        slogan: 'inherited·create·spread',
+      },
+      social: {
+        aria: '社交链接',
+        github: 'GitHub',
+        telegram: 'Telegram',
+      },
+      product: {
+        aria: '产品',
+        title: '产品',
+        discover: '发现',
+        readlist: '阅读单',
+        reviews: '评论与评测',
+        search: '搜索',
+      },
+      resources: {
+        aria: '资源',
+        title: '资源',
+        docs: '文档',
+        api: 'API',
+        changelog: '更新日志',
+        status: '系统状态',
+      },
+      newsletter: {
+        title: '订阅更新',
+        description: '获取最新功能与精选书单推送。(开发中)',
+        email_placeholder: '你的邮箱',
+        email_aria: '邮箱',
+        submit: '订阅',
+      },
+      copyright: '© {{year}} REZICS · 保留所有权利',
+      legal: {
+        privacy: '隐私',
+        terms: '条款',
+        contact: '联系我们',
+      },
+    },
+  },
+
   pages: {
     review_page: '书评',
     unit_page: '内容',
@@ -310,6 +354,9 @@ export default {
     tooltips: {
       nsfw: '是否搜索工作场所不宜内容',
       licensed: '是否搜索已获得版权许可的内容',
+    },
+    pagination: {
+      tips: 'Tips: 数据页数并不代表总数据量，请点击最后一页来尝试加载更多数据',
     },
   },
 
