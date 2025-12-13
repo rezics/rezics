@@ -6,40 +6,13 @@ import {
   insertSiblingAfter,
   moveSiblingFirst,
   moveSiblingLast,
+  attachFirstOrphanToParent,
 } from '@/util/arboristTreeUtil.ts';
-
-function attachFirstOrphanToParent(treeData: any[], parentId: string) {
-  // Deep clone
-  const data = treeData.map(n => ({...n}));
-
-  const orphanIndex = data.findIndex(
-    n =>
-      !n.parentId &&
-      (!n.children || n.children.length === 0) &&
-      n.id !== parentId,
-  );
-
-  if (orphanIndex === -1) return data;
-
-  const orphan = data[orphanIndex];
-  const parent = data.find(n => n.id === parentId);
-
-  if (!parent) return data;
-
-  data.splice(orphanIndex, 1);
-
-  orphan.parentId = parentId;
-
-  parent.children = parent.children ? [...parent.children] : [];
-  parent.children.push(orphan);
-
-  return data;
-}
 
 interface ChapterArboristContextMenuProps {
   contextMenu: any;
   setContextMenu: (contextMenu: any) => void;
-  treeRef: React.RefObject<any>;
+  treeRef?: React.RefObject<any>;
   setTreeData: (treeData: any) => void;
   handleCreate: (parentId: string | number) => void;
 }
@@ -47,7 +20,6 @@ interface ChapterArboristContextMenuProps {
 export const ChapterArboristContextMenu = ({
   contextMenu,
   setContextMenu,
-  treeRef,
   setTreeData,
   handleCreate,
 }: ChapterArboristContextMenuProps) => {
@@ -113,10 +85,7 @@ export const ChapterArboristContextMenu = ({
               title: 'New Chapter',
             };
             setTreeData(current =>
-              attachFirstOrphanToParent(
-                insertSiblingAfter(current, contextMenu.node.id, newNode),
-                newNode.id,
-              ),
+              insertSiblingAfter(current, contextMenu.node.id, newNode),
             );
             setContextMenu(null);
           }}

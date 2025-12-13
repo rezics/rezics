@@ -43,6 +43,7 @@ export interface ChapterArboristRefHandle {
 
 interface ChapterArboristProps {
   chapterTree: any;
+  treeIndent?: number;
   tHeight: number;
   searchTerm: string;
   selectedId: string;
@@ -64,6 +65,7 @@ export const ChapterArborist = forwardRef<
   (
     {
       chapterTree,
+      treeIndent = 24,
       tHeight,
       searchTerm,
       selectedId,
@@ -240,8 +242,7 @@ export const ChapterArborist = forwardRef<
             onDelete={onDelete}
             width={width ?? undefined}
             height={tHeight}
-            // indent={24}
-            indent={0}
+            indent={treeIndent}
             rowHeight={32}
             disableDrag={!effectiveDrag}
             disableDrop={!effectiveDrag}

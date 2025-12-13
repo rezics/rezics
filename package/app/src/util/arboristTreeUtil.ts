@@ -75,34 +75,49 @@ export function findAndRemove(
 }
 
 /**
- * 查找并在指定位置插入节点
+ * Recursively finds the target parent node and inserts given nodes
+ * into its children array at the specified index.
+ *
+ * @param tree - Current subtree
+ * @param parentId - Target parent id (null means root)
+ * @param index - Insert position within the parent's children
+ * @param nodes - Nodes to insert
+ * @returns Updated subtree
  */
-export const findAndInsert = (
-  tree: ReadonlyArray<TreeNode>,
-  parentId: string | number | null,
+export function findAndInsert(
+  tree: TreeNode[],
+  parentId: string | null,
   index: number,
-  nodesToInsert: ReadonlyArray<TreeNode>,
-): TreeNode[] => {
+  nodes: TreeNode[],
+): TreeNode[] {
+  // Insert at root level
   if (parentId === null) {
-    return insertAt(index, [...nodesToInsert])([...tree]);
+    const next = [...tree];
+    next.splice(index, 0, ...nodes);
+    return next;
   }
 
-  const processNode = (node: TreeNode): TreeNode => {
-    if (idsEqual(node.id, parentId!)) {
-      const currentChildren = node.children ?? [];
-      const newChildren = insertAt(index, [...nodesToInsert])(currentChildren);
-      return {...node, children: newChildren};
+  return tree.map(node => {
+    if (node.id === parentId) {
+      const children = node.children ? [...node.children] : [];
+      children.splice(index, 0, ...nodes);
+
+      return {
+        ...node,
+        children,
+      };
     }
 
     if (node.children) {
-      return {...node, children: node.children.map(processNode)};
+      return {
+        ...node,
+        children: findAndInsert(node.children, parentId, index, nodes),
+      };
     }
 
     return node;
-  };
-
-  return tree.map(processNode);
-};
+  });
+}
 
 /**
  * 查找并编辑节点标题
@@ -210,6 +225,34 @@ export const insertSiblingAfter = (
 
   return processNodes(tree);
 };
+
+export function attachFirstOrphanToParent(treeData: any[], parentId: string) {
+  // Deep clone
+  const data = treeData.map(n => ({...n}));
+
+  const orphanIndex = data.findIndex(
+    n =>
+      !n.parentId &&
+      (!n.children || n.children.length === 0) &&
+      n.id !== parentId,
+  );
+
+  if (orphanIndex === -1) return data;
+
+  const orphan = data[orphanIndex];
+  const parent = data.find(n => n.id === parentId);
+
+  if (!parent) return data;
+
+  data.splice(orphanIndex, 1);
+
+  orphan.parentId = parentId;
+
+  parent.children = parent.children ? [...parent.children] : [];
+  parent.children.push(orphan);
+
+  return data;
+}
 
 /**
  * 将节点移动到同级最前

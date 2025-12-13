@@ -53,6 +53,7 @@ export type TreeNodeWithChildren<T = NodeBase> = T & {
  * Builds a nested tree structure (forest) from a flat tree representation.
  * @param flat The flat tree data.
  * @returns An array of root nodes, each with its descendants nested within.
+ * every node need to have at least an empty array children, this enables ChapterArborist to support dragging onto nodes as children.
  */
 export function buildTree<T extends NodeBase>(
   flat: FlatTree<T>,
@@ -76,10 +77,11 @@ export function buildTree<T extends NodeBase>(
     if (extendFields.size > 0) {
       nodeMap.set(String(node.id), {
         ...node,
+        children: node.children ?? [],
         ...Object.fromEntries(extendFields),
       });
     } else {
-      nodeMap.set(String(node.id), {...node});
+      nodeMap.set(String(node.id), {...node, children: node.children ?? []});
     }
   }
   // console.log('nodeMap', nodeMap);

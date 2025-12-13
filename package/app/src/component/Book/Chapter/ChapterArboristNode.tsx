@@ -80,9 +80,8 @@ export const createChapterArboristNode = (
               <KeyboardArrowRightIcon fontSize="small" />
             )}
           </button>
-        ) : (
-          <span className="w-5 h-5" />
-        )}
+        ) : // <span className="w-5 h-5" />
+        null}
 
         {/* Node icon */}
         {/* <span className="w-5 h-5 flex justify-center items-center text-slate-500 dark:text-slate-400">
