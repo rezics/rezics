@@ -12,15 +12,17 @@ interface SidebarProps {
   width?: string;
   className?: string;
   children: React.ReactNode;
+  isDragging?: boolean;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
   isOpen,
   onClose,
   mode = 'inline',
-  width = 'w-64',
+  width = '320px',
   className,
   children,
+  isDragging = false,
 }) => {
   // handle escape key
   useEffect(() => {
@@ -51,13 +53,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <aside
           className={cn(
             'fixed top-0 left-0 z-50 h-full shadow-xl transition-transform duration-300 ease-in-out',
-            width,
             isOpen ? 'translate-x-0' : '-translate-x-full',
-            className,
           )}
+          style={{width: width}}
         >
           {/* 这里放置一个相对容器，方便放置关闭按钮 */}
-          <div className="relative h-full flex flex-col overflow-hidden bg-light dark:bg-dark">
+          <div
+            className={cn(
+              'relative h-full flex flex-col overflow-hidden bg-light dark:bg-dark',
+              className,
+            )}
+          >
             {/* 仅在 Fixed 模式下，通常需要一个显式的关闭按钮 */}
             <button
               onClick={onClose}
@@ -81,23 +87,23 @@ export const Sidebar: React.FC<SidebarProps> = ({
   return (
     <div className="inline-sidebar-container">
       <div
-        className={cn(
-          `shrink-0 transition-[${width}] duration-300 ease-in-out`,
-          isOpen ? width : 'w-0',
-        )}
+        className={cn(`shrink-0`)}
+        style={{
+          width: isOpen ? width : '0px',
+          transition: !isDragging ? 'width 0.3s ease-in-out' : 'none',
+        }}
       />
       <div
-        className={cn(
-          `fixed inset-y-0 left-0 overflow-hidden transition-[${width}] duration-300 ease-in-out`,
-          isOpen ? width : 'w-0',
-          className,
-        )}
+        className={cn(`fixed inset-y-0 left-0 overflow-hidden`)}
+        style={{
+          width,
+          transform: isOpen ? 'translateX(0)' : `translateX(-${width})`,
+          transition: 'transform 0.3s ease-in-out',
+        }}
       >
-        <div className={cn('h-full', width)}>
+        <div className={cn('h-full', className)}>
           {/* 内容区域 */}
-          <div className="h-full w-full overflow-y-auto overflow-x-hidden">
-            {children}
-          </div>
+          <div className="h-full w-full">{children}</div>
         </div>
       </div>
     </div>

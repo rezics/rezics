@@ -23,7 +23,7 @@ import {RegisterModal} from '@/page/Auth/RegisterPage';
 import {logout} from '@/page/Auth/lib/handler';
 import {userQueries} from '@/api/user/user.queries';
 import {useQuery} from '@tanstack/react-query';
-import {useIsMobile} from '@/util/MediaQueryUtil';
+import {useIsMobile} from '@/util/useMediaQueryUtil';
 
 const LoginPrompt = () => {
   const [loginModalOpen, setLoginModalOpen] = useState(false);

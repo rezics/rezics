@@ -25,29 +25,7 @@ import {useWindowSize} from 'react-use';
 import useMeasure from 'react-use-measure';
 
 import {Sidebar as UiSidebar} from '@/component/ui/sidebar';
-
-function customWrapperOverflow(
-  noScrollBar: boolean,
-  onOverflowx: boolean,
-  onOverflowy: boolean,
-) {
-  const wrapperId = 'ics-sidebar-wrapper';
-  const wrapper = document.getElementById(wrapperId);
-  if (!wrapper) return;
-
-  const firstDiv = wrapper.querySelector('div');
-  if (firstDiv) {
-    if (noScrollBar) {
-      firstDiv.classList.add('no-scrollbar');
-    }
-    if (onOverflowx) {
-      firstDiv.classList.add('!overflow-x-hidden');
-    }
-    if (onOverflowy) {
-      firstDiv.classList.add('!overflow-y-hidden');
-    }
-  }
-}
+import {cn} from '@/lib/utils';
 
 export function DrawerHeader({
   handleDrawerToggle,
@@ -77,13 +55,12 @@ interface SidebarProps {
   isMobile: boolean;
   sidebarOpen: boolean;
   sidebarWidth: number;
+  sidebarClassName?: string;
+  sidebarHeaderClassName?: string;
   onClose: () => void;
   handleDrawerToggle: () => void;
   NAVIGATION: NavigationItem[];
-  noScrollBar?: boolean;
   children?: ReactNode;
-  onOverflowx?: boolean;
-  onOverflowy?: boolean;
   isDragging?: boolean;
   layoutType?: 'type-a' | 'type-b';
 }
@@ -92,13 +69,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
   isMobile,
   sidebarOpen,
   sidebarWidth,
+  sidebarClassName,
+  sidebarHeaderClassName,
   onClose,
   handleDrawerToggle,
   NAVIGATION,
   children = null,
-  noScrollBar = false,
-  onOverflowx = false,
-  onOverflowy = false,
   isDragging = false,
   layoutType = 'type-b',
 }) => {
@@ -111,10 +87,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
   }, [height, windowHeight, setSidebarHeightBelow]);
 
   const heightBelow = `calc(100vh - ${height}px)`;
-
-  useEffect(() => {
-    customWrapperOverflow(noScrollBar, onOverflowx, onOverflowy);
-  }, [noScrollBar, onOverflowx, onOverflowy]);
 
   const [location, _setLocation] = useLocation();
 
@@ -136,9 +108,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
     }
   };
 
-  const sidebarInner = !isDragging && (
+  const sidebarInner = (
     <>
-      <div ref={refAbove}>
+      <div ref={refAbove} className={sidebarHeaderClassName}>
         <DrawerHeader handleDrawerToggle={handleDrawerToggle} />
         {layoutType === 'type-a' && <Divider />}
         {layoutType === 'type-b' && <div className="mt-2" />}
@@ -227,7 +199,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
       isOpen={sidebarOpen}
       onClose={onClose}
       mode={isMobile ? 'fixed' : 'inline'}
-      // width={`${sidebarWidth}px`}
+      width={`${sidebarWidth}px`}
+      className={cn(sidebarClassName, 'rounded-lg')}
+      isDragging={isDragging}
     >
       {sidebarInner}
     </UiSidebar>

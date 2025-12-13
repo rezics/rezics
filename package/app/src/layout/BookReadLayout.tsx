@@ -2,12 +2,12 @@ import {Header} from '@/component/Layout/Header/MainLayoutHeader';
 import {Sidebar} from '@/component/Layout/Sidebar/Sidebar';
 import {Button, Divider, useMediaQuery} from '@mui/material';
 import React, {type ReactNode, useEffect, useState} from 'react';
-// import { Box } from "@mui/material";
 
 import {DraggableResizer} from '@/component/Layout/DraggableResizer';
 import {LinearChapterList} from '@/component/Book/Chapter/LinearChapterList';
 import {Link, useParams, useRoute} from 'wouter';
 import {useResponsiveSidebar} from './useResponsiveSidebar';
+import {useLayoutStore} from '@/global/Layout/layoutStore';
 export interface BookReadLayoutProps {
   children: ReactNode;
   bookId: string;
@@ -24,6 +24,8 @@ export const BookReadLayout: React.FC<BookReadLayoutProps> = ({
   const [selectedId, setSelectedId] = useState(
     match ? String(params.chapterId) : '',
   );
+
+  const {sidebarHeightBelow} = useLayoutStore();
 
   useEffect(() => {
     setSelectedId(match ? String(params.chapterId) : '');
@@ -60,9 +62,7 @@ export const BookReadLayout: React.FC<BookReadLayoutProps> = ({
           onClose={() => isMobile && closeSidebar()}
           handleDrawerToggle={handleDrawerToggle}
           NAVIGATION={[]}
-          noScrollBar={false}
-          onOverflowx={true}
-          onOverflowy={true}
+          sidebarClassName="overflow-x-hidden overflow-y-hidden"
         >
           <div>
             <div className="flex items-center justify-between mb-2 bg-gray-50 text-sm text-gray-800">
@@ -79,7 +79,7 @@ export const BookReadLayout: React.FC<BookReadLayoutProps> = ({
               readingMode={true}
               bookId={bookId || ''}
               chapterId={chapterId || ''}
-              height={1200}
+              height={sidebarHeightBelow}
             />
           </div>
         </Sidebar>

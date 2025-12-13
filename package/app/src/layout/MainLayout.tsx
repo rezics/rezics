@@ -42,6 +42,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({children}) => {
         <Sidebar
           sidebarOpen={sidebarOpen}
           sidebarWidth={drawerWidth}
+          sidebarHeaderClassName="mx-6"
           isMobile={isMobile}
           onClose={() => isMobile && closeSidebar()}
           handleDrawerToggle={handleDrawerToggle}

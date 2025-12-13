@@ -1,5 +1,6 @@
 import throttle from 'lodash/throttle';
 import React, {useEffect, useRef, useState} from 'react';
+import {useIsMobile} from '@/util/useMediaQueryUtil';
 
 interface DraggableResizerProps {
   /** Id of the sidebar wrapper element whose width will be controlled. */
@@ -19,31 +20,28 @@ export const DraggableResizer: React.FC<DraggableResizerProps> = ({
   onDragging,
   minWidth = 180,
   maxWidth = 480,
-  throttleInterval = 50,
+  throttleInterval = 10,
 }) => {
   const resizerRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
-
+  const isMobile = useIsMobile();
   useEffect(() => {
     onDragging(isDragging);
-  }, [isDragging]);
+  }, [isDragging, onDragging]);
 
-  // 用一个 ref 保持对节流函数的引用
   const throttledRef = useRef<any>(null);
 
-  // 在 useEffect 里创建 + 清理节流函数
   useEffect(() => {
     // 创建一个新的节流函数
     throttledRef.current = throttle((newW: number) => {
       setSidebarWidth(newW);
-      console.log('throttled width ➡', newW);
     }, throttleInterval);
     // console.log("throttledRef.current", throttledRef.current);
     return () => {
       // 卸载时取消任何待执行的调用
       throttledRef.current!.cancel();
     };
-  }, []);
+  }, [setSidebarWidth, throttleInterval]);
 
   useEffect(() => {
     const resizer: any = resizerRef.current;
@@ -118,6 +116,8 @@ export const DraggableResizer: React.FC<DraggableResizerProps> = ({
       globalThis.removeEventListener('resize', updatePosition);
     };
   }, []);
+
+  if (isMobile) return null;
 
   return (
     <div

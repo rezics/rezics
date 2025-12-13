@@ -4,6 +4,7 @@ import transformerDirectives from '@unocss/transformer-directives';
 import presetWind4 from '@unocss/preset-wind4';
 import presetAnimations from 'unocss-preset-animations';
 import {builtinColors, presetShadcn} from 'unocss-preset-shadcn';
+import {presetScrollbarHide} from 'unocss-preset-scrollbar-hide';
 
 export default defineConfig({
   content: {
@@ -45,6 +46,7 @@ export default defineConfig({
       prefix: 'un-',
       prefixedOnly: true,
     }), // support <div un-text="red-500">
+    presetScrollbarHide(),
   ],
 
   transformers: [transformerDirectives()],

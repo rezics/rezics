@@ -20,7 +20,7 @@ export const useLayoutStore = create<LayoutState>()(
       // 初始 state
       sidebarOpen: true,
       sidebarHeightBelow: 0,
-      drawerWidth: 240,
+      drawerWidth: 280,
       openItems: {},
 
       // actions

@@ -9,7 +9,7 @@ import DialogContainer from '../Common/Overlay/DialogContainer.tsx';
 import type {PublicUser} from '@package/contract';
 import {FollowButton} from '../Common/Reaction/FollowButton.tsx';
 import {LazyLoadImage} from '@/component/Common/LazyLoadImage';
-import {useIsMobile} from '@/util/MediaQueryUtil';
+import {useIsMobile} from '@/util/useMediaQueryUtil.ts';
 
 // --------- Types ---------
 export type Author = PublicUser;

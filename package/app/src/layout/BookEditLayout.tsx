@@ -37,15 +37,6 @@ export const BookEditLayout: React.FC<BookEditLayoutProps> = ({
 
   // UI state
   const {sidebarHeightBelow} = useLayoutStore();
-  const [height, setHeight] = useState(sidebarHeightBelow);
-
-  useEffect(() => {
-    console.log('BookEditLayout drawerWidth', drawerWidth);
-  }, [drawerWidth]);
-
-  useEffect(() => {
-    setHeight(sidebarHeightBelow);
-  }, [sidebarHeightBelow]);
 
   return (
     <div className="flex min-h-screen">
@@ -65,14 +56,13 @@ export const BookEditLayout: React.FC<BookEditLayoutProps> = ({
           onClose={() => isMobile && closeSidebar()}
           handleDrawerToggle={handleDrawerToggle}
           NAVIGATION={NAVIGATION(bookId || '')}
-          noScrollBar={true}
           isDragging={isDragging}
         >
           <LinearChapterList
             bookId={bookId || ''}
             chapterId={chapterId || ''}
             width={drawerWidth}
-            height={height}
+            height={sidebarHeightBelow + 50}
           />
         </Sidebar>
         <DraggableResizer

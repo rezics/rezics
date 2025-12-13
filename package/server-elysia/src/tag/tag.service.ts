@@ -21,9 +21,9 @@ export class TagService {
       and.push({units: {some: {id: options.objectId}}});
     }
 
-    if (options.q && options.q.trim()) {
-      and.push({name: {contains: options.q, mode: 'insensitive'}});
-    }
+    // if (options.q && options.q.trim()) {
+    //   and.push({name: {contains: options.q, mode: 'insensitive'}});
+    // }
 
     if (options.type) {
       and.push({type: options.type});

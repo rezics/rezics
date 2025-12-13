@@ -6,7 +6,7 @@ import {MobileHomeHeader} from '@component/Home/Mobile/MobileHomeHeader';
 import {MobileHomeCarousel} from '@component/Home/Mobile/MobileHomeCarousel';
 import {MobileHomeDiscovery} from '@component/Home/Mobile/MobileHomeDiscovery';
 import React from 'react';
-import {useIsMobile} from '@/util/MediaQueryUtil';
+import {useIsMobile} from '@/util/useMediaQueryUtil';
 import {useTranslation} from 'react-i18next';
 
 export type HomeShowProps = object;

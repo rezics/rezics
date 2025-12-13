@@ -6,7 +6,7 @@ import TagList from './TagList';
 
 import {RouterLink} from '@/component/Common/Navigation/RouterLink';
 
-import {useIsMobile} from '@/util/MediaQueryUtil';
+import {useIsMobile} from '@/util/useMediaQueryUtil';
 import {useTranslation} from 'react-i18next';
 
 type Mode = 'flat' | 'grouped';

@@ -36,13 +36,13 @@ export const tagApi = coreInstance('/tags')
       jwt,
       set,
     }): Promise<{tags: TagDTO[]; total: number}> => {
-      const payload = await verifyAuth(headers.authorization, jwt, set);
-      if (!BasicAdminPermission(payload as any)) {
-        set.status = 403;
-        throw new Error(
-          'Forbidden: you do not have permission to get all books',
-        );
-      }
+      // const payload = await verifyAuth(headers.authorization, jwt, set);
+      // if (!BasicAdminPermission(payload as any)) {
+      //   set.status = 403;
+      //   throw new Error(
+      //     'Forbidden: you do not have permission to get all books',
+      //   );
+      // }
       const {tags, total} = await tagService.list(query as TagListQuery);
       return {tags: tags.map(mapTagToDTO), total};
     },
