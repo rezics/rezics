@@ -1,5 +1,5 @@
 import EasyMDE from "easymde";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { lazy, useCallback, useEffect, useRef, useState } from "react";
 import "easymde/dist/easymde.min.css";
 import MarkdownIt from "markdown-it";
 
@@ -8,6 +8,10 @@ import {
   EditorMentionPicker,
   type MentionUserOption,
 } from "./EditorMention";
+
+const EmojiMartPicker = lazy(() =>
+  import("./EmojiMart").then(m => ({ default: m.EmojiMartPicker }))
+);
 
 interface EasyEditorProps {
   value: string;
@@ -45,9 +49,18 @@ const EasyEditor: React.FC<EasyEditorProps> = ({
   const mentionOptionsRef = useRef<MentionUserOption[]>([]);
   const mentionSuppressNextRefreshRef = useRef(false);
 
+  const [emojiOpen, setEmojiOpen] = useState(false);
+
+  const emojiOpenRef = useRef(false);
+
   const setMentionActiveIndexSafe = useCallback((idx: number) => {
     mentionActiveIndexRef.current = idx;
     setMentionActiveIndex(idx);
+  }, []);
+
+  const closeEmoji = useCallback(() => {
+    emojiOpenRef.current = false;
+    setEmojiOpen(false);
   }, []);
 
   const closeMention = useCallback(() => {
@@ -63,6 +76,23 @@ const EasyEditor: React.FC<EasyEditorProps> = ({
     setMentionAnchorPosition(null);
     setMentionActiveIndex(0);
   }, []);
+
+  const pickEmoji = useCallback(
+    (nativeEmoji: string) => {
+      const cm = easyMDEInstance.current?.codemirror as any;
+      if (!cm) return;
+
+      if (cm.somethingSelected && cm.somethingSelected()) {
+        cm.replaceSelection(nativeEmoji, "around");
+      } else {
+        const cursor = cm.getCursor() as CMPos;
+        cm.replaceRange(nativeEmoji, cursor, cursor, "+emoji");
+      }
+      cm.focus();
+      closeEmoji();
+    },
+    [closeEmoji],
+  );
 
   const pickMention = useCallback((user: MentionUserOption) => {
     const cm = easyMDEInstance.current?.codemirror as any;
@@ -146,6 +176,17 @@ const EasyEditor: React.FC<EasyEditorProps> = ({
             className: "bx bx-list-ol",
             title: "Numbered List",
           },
+          {
+            name: "emoji",
+            action: () => {
+              const cm = easyMDEInstance.current?.codemirror as any;
+              if (!cm) return;
+              emojiOpenRef.current = !emojiOpenRef.current;
+              setEmojiOpen(emojiOpenRef.current);
+            },
+            className: "bx bx-smile",
+            title: "Insert Emoji",
+          },
           "|",
           {
             name: "link",
@@ -200,6 +241,7 @@ const EasyEditor: React.FC<EasyEditorProps> = ({
           return;
         }
         if (!cm) return;
+        if (emojiOpenRef.current) return;
         if (cm.somethingSelected && cm.somethingSelected()) {
           if (mentionOpenRef.current) closeMention();
           return;
@@ -244,6 +286,13 @@ const EasyEditor: React.FC<EasyEditorProps> = ({
       };
 
       const handleKeyDown = (_: any, e: KeyboardEvent) => {
+        if (emojiOpenRef.current) {
+          if (e.key === "Escape") {
+            e.preventDefault();
+            closeEmoji();
+            return;
+          }
+        }
         if (!mentionOpenRef.current) return;
 
         const options = mentionOptionsRef.current;
@@ -285,9 +334,14 @@ const EasyEditor: React.FC<EasyEditorProps> = ({
         }
       });
 
+      const handleScroll = () => {
+        if (emojiOpenRef.current) closeEmoji();
+        refreshMention();
+      };
+
       cm.on("cursorActivity", refreshMention);
       cm.on("inputRead", refreshMention);
-      cm.on("scroll", refreshMention);
+      cm.on("scroll", handleScroll);
       cm.on("viewportChange", refreshMention);
       cm.on("keydown", handleKeyDown);
 
@@ -298,7 +352,7 @@ const EasyEditor: React.FC<EasyEditorProps> = ({
       const cleanup = () => {
         cm.off("cursorActivity", refreshMention);
         cm.off("inputRead", refreshMention);
-        cm.off("scroll", refreshMention);
+        cm.off("scroll", handleScroll);
         cm.off("viewportChange", refreshMention);
         cm.off("keydown", handleKeyDown);
       };
@@ -336,6 +390,11 @@ const EasyEditor: React.FC<EasyEditorProps> = ({
   return (
     <div className="easymde-wrapper w-full h-full">
       <textarea ref={textareaRef} />
+      <EmojiMartPicker
+        open={emojiOpen}
+        onPick={(emoji) => pickEmoji(emoji)}
+        onClose={closeEmoji}
+      />
       <EditorMentionPicker
         open={mentionOpen}
         query={mentionQuery}
