@@ -95,7 +95,7 @@ model ApiToken {
 
   name      String
   tokenHash String @unique
-  scopes    Json   @default("{}") // example: {main:['admin']}
+  scopes    Json   @default("{}") // example: {main:['admin'], post:['create', 'update', 'delete']}
 
   createdAt  DateTime  @default(now())
   expiresAt  DateTime? // Optional, default no expiration

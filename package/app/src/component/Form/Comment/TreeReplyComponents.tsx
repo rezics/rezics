@@ -1,32 +1,32 @@
 // 暂时就先这样不处理，后面树化，或者使用VirtualList
 
-import {Add, Remove} from '@mui/icons-material';
-import {Avatar, Box, Collapse, IconButton, Typography} from '@mui/material';
-import React, {useEffect, useMemo, useState} from 'react';
-import {useQuery} from '@tanstack/react-query';
+import { Add, Remove } from '@mui/icons-material';
+import { Avatar, Box, Collapse, IconButton, Typography } from '@mui/material';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 //  ;
 
-import {useDialogStore} from '@/global/dialogStore.ts';
+import { useDialogStore } from '@/global/dialogStore.ts';
 import {
   ReactionAdminBar,
   ReactionBar,
 } from '../../Common/Reaction/ReactionBar.tsx';
-import {ReplyDrawerContainer} from './ReplyDrawer.tsx';
+import { ReplyDrawerContainer } from './ReplyDrawer.tsx';
 
-import {commentQueries} from '@/api/comment/comment.queries.ts';
-import type {CommentTreeNode} from '@package/contract';
+import { commentQueries } from '@/api/comment/comment.queries.ts';
+import type { CommentTreeNode } from '@package/contract';
 import {
   useCreateCommentMutation,
   useDeleteCommentMutation,
   useUpdateCommentMutation,
 } from '@/api/comment/comment.mutations';
 
-import {useUserStore} from '@/global/userStore';
-import {buildTree} from '../treeReplyUtil.ts';
+import { useUserStore } from '@/global/userStore';
+import { buildTree } from '../treeReplyUtil.ts';
 
-import {useAlertStore} from '@/global/windowAlertStore';
-import {reactionApi} from '@/api/reaction/reaction';
-import {useTranslation} from 'react-i18next';
+import { useAlertStore } from '@/global/windowAlertStore';
+import { reactionApi } from '@/api/reaction/reaction';
+import { useTranslation } from 'react-i18next';
 // This is a temporary type definition based on the GraphQL schema.
 // Local UI type adapted from CommentTreeNode
 type UiUser = {
@@ -120,7 +120,7 @@ const CommentNode: React.FC<CommentNodeProps> = ({
       <Box display="flex" gap={2} alignItems="flex-start">
         <Avatar
           src={comment.user?.avatar ?? undefined}
-          sx={{width: 32, height: 32}}
+          sx={{ width: 32, height: 32 }}
         />
         <Box flex={1}>
           <Box display="flex" alignItems="center" gap={1}>
@@ -198,14 +198,14 @@ interface ReplyComponentsProps {
   unitId: string;
 }
 
-export function TreeReplyComponents({unitId}: ReplyComponentsProps) {
+export function TreeReplyComponents({ unitId }: ReplyComponentsProps) {
   // Fetch a flat slice of the comment tree for the unit
   const showAlert = useAlertStore(state => state.show);
   const user = useUserStore(state => state.user);
-  const {t} = useTranslation();
+  const { t } = useTranslation();
 
-  function Core({unitId}: {unitId: string}) {
-    const {data, isLoading, error} = useQuery(
+  function Core({ unitId }: { unitId: string }) {
+    const { data, isLoading, error } = useQuery(
       commentQueries.unitCommentTree(unitId, {
         // Fetch up to depth 3 for an initial view; adjust as needed
         maxDepth: 100,
@@ -230,9 +230,9 @@ export function TreeReplyComponents({unitId}: ReplyComponentsProps) {
       [commentItems],
     );
 
-    const {data: myReactions} = useQuery({
-      queryKey: ['reactions', 'my', {targetIds}],
-      queryFn: () => reactionApi.my({targetIds}),
+    const { data: myReactions } = useQuery({
+      queryKey: ['reactions', 'my', { targetIds }],
+      queryFn: () => reactionApi.my({ targetIds }),
       enabled: !!user && targetIds.length > 0,
       staleTime: 1000 * 60, // 1 minute
     });

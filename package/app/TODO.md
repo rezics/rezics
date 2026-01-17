@@ -1,5 +1,7 @@
+- [ ] allow to mention
+- [x] MUI的还没自己写的好用 https://mui.com/x/react-tree-view/ 用这个替换当前的Tree章节View
+- [ ] 树章节检查为啥shift键还是会跳转，感觉就不应该渲染为link，修改一下
 - 完善所有请求暂停逻辑，否则会导致重新渲染！
-- Header pt-16 在 小屏幕（手机上）并不贴合
 - 切换明暗模式之后，SideBar 滚动条隐藏样式失效
 - 调整高度之后，SideBar 滚动条隐藏样式也会失效
 - 通过 ThemeProvider 状态更新机制实现动态主题系统（目前系统损坏）

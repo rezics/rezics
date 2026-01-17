@@ -1,5 +1,5 @@
-import {useDialogStore} from '@/global/dialogStore';
-import {Button, Drawer} from '@mui/material';
+import { useDialogStore } from '@/global/dialogStore';
+import { Button, Drawer } from '@mui/material';
 import React from 'react';
 
 import EasyEditor from '../EasyEditor';
@@ -20,23 +20,22 @@ export const ReplyDrawerShow: React.FC<ReplyDrawerShowProps> = ({
   onContentChange,
 }) => {
   return (
-    <Drawer open={open} onClose={onClose} anchor="bottom" sx={{zIndex: 2000}}>
+    <Drawer open={open} onClose={onClose} anchor="bottom" sx={{ zIndex: 2000 }}>
       <div
-        className="w-11/12 sm:w-3/4 mx-auto my-4 min-h-[250px] h-[400px]
+        className="w-11/12 mx-auto my-4 min-h-[250px] h-[480px]
                   grid gap-4
-                  grid-cols-1 sm:grid-cols-[1fr_auto]"
+                  grid-cols-1"
       >
         {/* 内容区域 */}
         <div className="flex flex-col">
           <EasyEditor value={content} onChange={onContentChange} />
         </div>
 
-        {/* 按钮栏：小屏下在底部，大屏右侧对齐 */}
-        <div className="flex sm:flex-col gap-2 self-stretch justify-end sm:justify-end">
+        <div className="flex gap-2 self-stretch justify-end">
           <Button
             variant="contained"
             onClick={onSubmit}
-            className="w-full sm:w-auto mb-4"
+            className="w-full mb-4"
           >
             提交
           </Button>
@@ -45,6 +44,21 @@ export const ReplyDrawerShow: React.FC<ReplyDrawerShowProps> = ({
     </Drawer>
   );
 };
+
+function extractMentions(text: string): string[] {
+  const result: string[] = [];
+
+  // 全局版本，和你原规则语义一致
+  const mentionRegex = /(^|[\s([{<])@([^\s@]{1,32})/g;
+
+  let match: RegExpExecArray | null;
+  while ((match = mentionRegex.exec(text)) !== null) {
+    result.push(match[2]); // 只要用户名，不要 @ 和前导字符
+  }
+
+  return result;
+}
+
 
 export type ReplyDrawerContainerProps = {
   dialogId: string;
@@ -65,7 +79,18 @@ export const ReplyDrawerContainer: React.FC<ReplyDrawerContainerProps> = ({
 
   const handleSubmit = () => {
     if (onSubmit && entry?.contentMain !== undefined) {
-      onSubmit(entry.contentMain);
+      const mentions = extractMentions(entry.contentMain);
+      let content: string | { text: string; mentions: string[] };
+      if (mentions.length > 0) {
+        content = {
+          text: entry.contentMain,
+          mentions,
+        };
+        content = JSON.stringify(content);
+      } else {
+        content = entry.contentMain;
+      }
+      onSubmit(content);
       handleClose();
     }
   };

@@ -1,6 +1,11 @@
 {
   "name": "rezics-book-library",
   "private": true,
+  "scripts": {
+    "app:dev": "cd package/app && bun run dev",
+    "server:dev": "cd package/server-elysia && bun run dev"
+
+  },
   "workspaces": [
     "package/*"
   ]

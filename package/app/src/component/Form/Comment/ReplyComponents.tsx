@@ -1,7 +1,8 @@
 // 暂时就先这样不处理，后面树化，或者使用VirtualList
 
-import { tsr } from "@/api/swr-query/tsrTypeBuild";
+import { commentQueries } from '@/api/comment/comment.queries.ts';
 import { Avatar } from "@mui/material";
+import { useQuery } from "@tanstack/react-query";
 import React, { useCallback, useRef } from "react";
 // import { scrollToElementWithOffsetUniversal } from "@/util/domUtils";
 
@@ -13,17 +14,17 @@ export const ReplyComponents: React.FC<ReplyComponentsProps> = ({
   bookListId,
 }) => {
   const commentId = bookListId; // TODO 暫時先用這個替代
-  const { data, isLoading, error } = tsr.comments.list.useQuery({
-    queryKey: ["comments", commentId],
-    queryData: {
-      params: {
-        commentId: commentId || "",
-      },
-    },
-  });
-
+  const { data, isLoading, error } = useQuery(
+    commentQueries.unitCommentTree(commentId, {
+      // Fetch up to depth 3 for an initial view; adjust as needed
+      maxDepth: 100,
+      order: 'asc',
+      start: 0,
+      limit: 200,
+    }),
+  );
   const commentRefs = useRef<Record<string, HTMLDivElement | null>>({});
-  const allComments = data.items || [];
+  const allComments = data?.items || [];
 
   // 滚动到指定评论
   const scrollToComment = useCallback((commentId: string) => {
@@ -39,7 +40,7 @@ export const ReplyComponents: React.FC<ReplyComponentsProps> = ({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const parent = allComments.find((c: any) => c.id === parentId);
     if (parent) {
-      return parent.content.slice(0, 10) + "...";
+      return parent.content?.slice(0, 10) + "...";
     }
     return "";
   };
@@ -52,7 +53,9 @@ export const ReplyComponents: React.FC<ReplyComponentsProps> = ({
           key={comment.id}
           id={`comment-${comment.id}`}
           className="flex gap-3 items-start"
-          ref={(el) => (commentRefs.current[comment.id] = el)}
+          ref={(el) => {
+            commentRefs.current[comment.id] = el;
+          }}
         >
           <Avatar src={comment.avatar} className="w-8 h-8" />
           <div className="flex-1">

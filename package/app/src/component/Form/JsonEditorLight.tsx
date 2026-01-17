@@ -1,4 +1,4 @@
-import React, {useState, useMemo, useEffect} from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   TextField,
   Box,
@@ -27,7 +27,7 @@ interface JsonEditorLightProps {
   onChange?: (value: any) => void;
 }
 
-export function JsonEditorLight({value, onChange}: JsonEditorLightProps) {
+export function JsonEditorLight({ value, onChange }: JsonEditorLightProps) {
   const [tabIndex, setTabIndex] = useState(0);
   const [jsonText, setJsonText] = useState(() =>
     JSON.stringify(value || {}, null, 2),
@@ -80,17 +80,17 @@ export function JsonEditorLight({value, onChange}: JsonEditorLightProps) {
 
   return (
     <Box>
-      <Paper sx={{borderRadius: 2, overflow: 'hidden'}}>
-        <Box sx={{borderBottom: 1, borderColor: 'divider', display: 'flex'}}>
+      <Paper sx={{ borderRadius: 2, overflow: 'hidden' }}>
+        <Box sx={{ borderBottom: 1, borderColor: 'divider', display: 'flex' }}>
           <Tabs
             value={tabIndex}
             onChange={(_, newValue) => setTabIndex(newValue)}
-            sx={{flex: 1}}
+            sx={{ flex: 1 }}
           >
             <Tab icon={<EditIcon />} label="编辑" iconPosition="start" />
             <Tab icon={<PreviewIcon />} label="预览" iconPosition="start" />
           </Tabs>
-          <Box sx={{display: 'flex', alignItems: 'center', px: 2}}>
+          <Box sx={{ display: 'flex', alignItems: 'center', px: 2 }}>
             <Tooltip title="格式化 JSON">
               <IconButton onClick={handleFormat} size="small" color="primary">
                 <FormatAlignLeftIcon />
@@ -101,9 +101,9 @@ export function JsonEditorLight({value, onChange}: JsonEditorLightProps) {
 
         {/* 编辑模式 */}
         {tabIndex === 0 && (
-          <Box sx={{p: 2}}>
+          <Box sx={{ p: 2 }}>
             {error && (
-              <Alert severity="error" sx={{mb: 2}}>
+              <Alert severity="error" sx={{ mb: 2 }}>
                 <Typography variant="body2">JSON 解析错误: {error}</Typography>
               </Alert>
             )}
@@ -125,8 +125,8 @@ export function JsonEditorLight({value, onChange}: JsonEditorLightProps) {
                 error
                   ? '请修复 JSON 错误'
                   : parsedJson && onChange
-                  ? '失去焦点时自动暂存'
-                  : '输入有效的 JSON 格式'
+                    ? '失去焦点时自动暂存'
+                    : '输入有效的 JSON 格式'
               }
               error={!!error}
             />
@@ -135,7 +135,7 @@ export function JsonEditorLight({value, onChange}: JsonEditorLightProps) {
 
         {/* 预览模式 */}
         {tabIndex === 1 && (
-          <Box sx={{p: 2, backgroundColor: '#fafafa', minHeight: 400}}>
+          <Box sx={{ p: 2, backgroundColor: '#fafafa', minHeight: 400 }}>
             {parsedJson ? (
               <JsonView
                 data={parsedJson}
