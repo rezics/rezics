@@ -89,9 +89,9 @@ const EasyEditor: React.FC<EasyEditorProps> = ({
         cm.replaceRange(nativeEmoji, cursor, cursor, "+emoji");
       }
       cm.focus();
-      closeEmoji();
+      // closeEmoji();
     },
-    [closeEmoji],
+    [],
   );
 
   const pickMention = useCallback((user: MentionUserOption) => {

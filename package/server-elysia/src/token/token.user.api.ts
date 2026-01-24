@@ -8,6 +8,7 @@ import {
   createUserSchema,
   type UserDTO,
   type UserListQuery,
+  createUserFullSchema,
 } from '@package/contract';
 import {userService} from '../user/user.service';
 import {
@@ -99,7 +100,7 @@ export const userRoute = (api: ReturnType<typeof coreInstance>) => {
           return mapUserToDTO(created);
         },
         {
-          body: createUserSchema,
+          body: createUserFullSchema,
           headers: t.Object(
             {
               authorization: t.String(),

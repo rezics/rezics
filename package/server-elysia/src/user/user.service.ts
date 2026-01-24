@@ -6,7 +6,7 @@ import {UserType} from '@/prisma/client';
 import type {Prisma} from '@/prisma/client';
 import type {UserFilterOptions, UserWithRelations} from './types';
 import {userInclude} from './types';
-import type {CreateUserInput, UpdateUserInput} from '@package/contract';
+import type {CreateUserFull, UpdateUser} from '@package/contract';
 import {hashPassword, verifyPassword} from './utils';
 import nodemailer from 'nodemailer';
 import {syncUserToMeili, deleteUserFromMeili} from '@/src/meili/user/sync';
@@ -134,7 +134,7 @@ export class UserService {
   /**
    * Create new user
    */
-  async create(req: CreateUserInput): Promise<UserWithRelations> {
+  async create(req: CreateUserFull): Promise<UserWithRelations> {
     const {email, password, slug, avatar, bio} = req;
 
     const user = await prisma.user.create({
@@ -159,10 +159,7 @@ export class UserService {
   /**
    * Update user
    */
-  async update(
-    unitId: string,
-    req: UpdateUserInput,
-  ): Promise<UserWithRelations> {
+  async update(unitId: string, req: UpdateUser): Promise<UserWithRelations> {
     const {name, avatar, bio, password} = req;
 
     const updateData: Prisma.UserUpdateInput = {

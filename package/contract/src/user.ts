@@ -1,5 +1,21 @@
 // User contracts
 
+import {t} from 'elysia';
+
+export const UserType = {
+  USER: 'USER',
+  AUTHOR: 'AUTHOR',
+  PRESS: 'PRESS',
+  PRODUCER: 'PRODUCER',
+} as const;
+
+export const UserTypeSchema = t.Union([
+  t.Literal(UserType.USER),
+  t.Literal(UserType.AUTHOR),
+  t.Literal(UserType.PRESS),
+  t.Literal(UserType.PRODUCER),
+]);
+
 export const userDTOSchema = t.Object({
   unitId: t.String(),
   email: t.Optional(t.String()),
@@ -23,23 +39,6 @@ export const userDTOSchema = t.Object({
   ),
 });
 export type UserDTO = (typeof userDTOSchema)['static'];
-
-export type CreateUserInput = {
-  email: string;
-  password: string;
-  slug: string;
-  avatar?: string;
-  bio?: string;
-  description?: string;
-  verificationCode?: string;
-};
-
-export type UpdateUserInput = Partial<Omit<CreateUserInput, 'password'>> & {
-  name?: string;
-  password?: string;
-};
-
-import {t} from 'elysia';
 
 export const userListQuerySchema = t.Object({
   q: t.Optional(t.String()),
@@ -71,6 +70,13 @@ export const createUserSchema = t.Object({
 });
 
 export type CreateUser = (typeof createUserSchema)['static'];
+
+export const createUserFullSchema = t.Object({
+  ...createUserSchema.properties,
+  type: t.Optional(UserTypeSchema),
+});
+
+export type CreateUserFull = (typeof createUserFullSchema)['static'];
 
 export const updateUserSchema = t.Object({
   name: t.Optional(t.String({minLength: 1})),
