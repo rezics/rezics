@@ -16,6 +16,7 @@ import {feedbackApi} from './feedback';
 import {cors} from '@elysiajs/cors';
 
 export * from '../prisma/generated/client';
+export {prisma} from '../prisma/client';
 
 import {getProdState} from './utils/getProdState';
 

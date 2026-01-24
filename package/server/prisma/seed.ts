@@ -27,8 +27,8 @@ const prisma = new PrismaClient();
  */
 async function main() {
   console.time('seed');
-  console.log('🌱 Starting database seeding with Faker.js...');
-  console.log('📊 Counts:', DEFAULT_COUNTS);
+  console.log('[Seed] Starting database seeding with Faker.js...');
+  console.log('[Seed] Counts:', DEFAULT_COUNTS);
 
   try {
     // Reset database
@@ -36,20 +36,20 @@ async function main() {
 
     // Seed users
     const users = await seedUsers(prisma, DEFAULT_COUNTS.users);
-    console.log(`✅ Created ${users.length} users`);
+    console.log(`[Seed] Created ${users.length} users`);
 
     const pressUsers = await seedPressUsers(prisma, DEFAULT_COUNTS.pressUsers);
-    console.log(`✅ Created ${pressUsers.length} press users`);
+    console.log(`[Seed] Created ${pressUsers.length} press users`);
 
     const producerUsers = await seedProducerUsers(
       prisma,
       DEFAULT_COUNTS.producerUsers,
     );
-    console.log(`✅ Created ${producerUsers.length} producer users`);
+    console.log(`[Seed] Created ${producerUsers.length} producer users`);
 
     // Seed tags
     const tagUnitIds = await seedTags(prisma, DEFAULT_COUNTS.tags, users);
-    console.log(`✅ Created ${tagUnitIds.length} tags`);
+    console.log(`[Seed] Created ${tagUnitIds.length} tags`);
 
     // Seed books
     const books = await seedBooks(
@@ -61,7 +61,7 @@ async function main() {
       tagUnitIds,
     );
     const bookIds = books.map(b => b.id);
-    console.log(`✅ Created ${books.length} books`);
+    console.log(`[Seed] Created ${books.length} books`);
 
     // Seed other units
     const others = await seedOtherUnits(
@@ -72,7 +72,7 @@ async function main() {
       tagUnitIds,
     );
     const reviewUnitIds = others.map(o => o.id);
-    console.log(`✅ Created ${others.length} other units`);
+    console.log(`[Seed] Created ${others.length} other units`);
 
     // Seed read lists
     const readLists = await seedReadLists(
@@ -82,7 +82,7 @@ async function main() {
       bookIds,
       reviewUnitIds,
     );
-    console.log(`✅ Created ${readLists.length} read lists`);
+    console.log(`[Seed] Created ${readLists.length} read lists`);
 
     // Generate chapters per book and update chapter index JSON
     for (const bookId of bookIds) {
@@ -106,7 +106,7 @@ async function main() {
       (a, b) => a + b,
       0,
     );
-    console.log(`✅ Created ${totalComments} comments`);
+    console.log(`[Seed] Created ${totalComments} comments`);
 
     // Update stats with comment counts
     await updateStatsWithCommentCounts(prisma, perRootCount);
@@ -124,17 +124,17 @@ async function main() {
       comments: totalComments,
     };
 
-    console.log('🎉 Seed complete!', summary);
+    console.log('[Seed] Seed complete!', summary);
     console.timeEnd('seed');
   } catch (error) {
-    console.error('❌ Seed failed:', error);
+    console.error('[Error] Seed failed:', error);
     throw error;
   }
 }
 
 main()
   .catch(err => {
-    console.error('❌ Seed failed:', err);
+    console.error('[Error] Seed failed:', err);
     process.exitCode = 1;
   })
   .finally(async () => {

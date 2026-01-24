@@ -117,14 +117,7 @@ export const bookApi = coreInstance('/books')
       const payload = await verifyAuth(headers.authorization, jwt, set);
       const bookReq: CreateBookInput = {
         userId: payload.unitId,
-        title: body.title,
-        authorIds: body.authorIds,
-        nsfw: body.nsfw,
-        coverUrl: body.coverUrl,
-        isbn: body.isbn,
-        chaptersIndex: body.chaptersIndex,
-        extra: body.extra,
-        description: body.description,
+        ...body,
       };
 
       const book = await bookService.create(bookReq);

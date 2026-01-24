@@ -1,12 +1,10 @@
-import React, {useMemo, useRef, useState} from 'react';
-import {useQuery} from '@tanstack/react-query';
-import {Divider, TextField, Button, Stack} from '@mui/material';
+import React, { useMemo, useRef, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { Divider, TextField, Button, Stack } from '@mui/material';
 
-import {bookQueries} from '@/api/book/book.queries.ts';
-import {ChapterArborist} from '@/component/Book/Chapter/ChapterArborist';
-import type {ChapterArboristRefHandle} from '@/component/Book/Chapter/ChapterArborist';
-
-import {buildTree} from '@/util/treeAbstract.ts';
+import { bookQueries } from '@/api/book/book.queries.ts';
+import { ChapterArborist } from '@/component/Book/Chapter/ChapterArborist';
+import type { ChapterArboristRefHandle } from '@/component/Book/Chapter/ChapterArborist';
 
 interface LinearChapterListProps {
   width?: number;
@@ -24,21 +22,18 @@ export const LinearChapterList: React.FC<LinearChapterListProps> = ({
   readingMode = false,
 }) => {
   // Data fetching
-  const {data, isLoading, error} = useQuery(bookQueries.chapterIndex(bookId));
+  const { data, isLoading, error } = useQuery(bookQueries.chapterIndex(bookId));
 
   const selectedId = chapterId || '';
   const baseLink = readingMode
     ? `/book/${bookId}/read`
     : bookId
-    ? `/book/${bookId}/edit`
-    : '';
+      ? `/book/${bookId}/edit`
+      : '';
 
   const chapterTree: any = useMemo(
     () =>
-      buildTree({
-        nodes: data?.index?.chapters ?? [],
-        orders: data?.index?.order ?? {},
-      }),
+      data?.index ?? [],
     [data],
   );
 

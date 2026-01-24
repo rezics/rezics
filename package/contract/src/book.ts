@@ -151,6 +151,20 @@ export const updateBookSchema = t.Object({
 // 从 Schema 派生类型，替换原有的 UpdateBookInput
 export type UpdateBookInput = (typeof updateBookSchema)['static'];
 
+export interface ChapterTreeItem {
+  id: string;
+  title: string;
+  noContent: boolean;
+  children?: ChapterTreeItem[];
+}
+
+export interface ChapterIndexResponse {
+  bookUnitId: string;
+  index: ChapterTreeItem[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 // ANCHOR Extra Types
 
 export type Publisher = {};

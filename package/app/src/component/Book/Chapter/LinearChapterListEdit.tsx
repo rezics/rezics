@@ -1,13 +1,11 @@
-import React, {useMemo, useRef, useState} from 'react';
-import {useQuery} from '@tanstack/react-query';
-import {Divider, Switch, TextField, Button, Stack} from '@mui/material';
-import {useTranslation} from 'react-i18next';
+import React, { useMemo, useRef, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { Divider, Switch, TextField, Button, Stack } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 
-import {bookQueries} from '@/api/book/book.queries.ts';
-import {ChapterArborist} from '@/component/Book/Chapter/ChapterArborist';
-import type {ChapterArboristRefHandle} from '@/component/Book/Chapter/ChapterArborist';
-
-import {buildTree} from '@/util/treeAbstract.ts';
+import { bookQueries } from '@/api/book/book.queries.ts';
+import { ChapterArborist } from '@/component/Book/Chapter/ChapterArborist';
+import type { ChapterArboristRefHandle } from '@/component/Book/Chapter/ChapterArborist';
 
 interface LinearChapterListEditProps {
   width?: number;
@@ -27,19 +25,16 @@ export const LinearChapterListEdit: React.FC<LinearChapterListEditProps> = ({
   enableDoubleClickRename = false,
   isEdit = false,
 }) => {
-  const {t} = useTranslation();
+  const { t } = useTranslation();
   // Data fetching
-  const {data, isLoading, error} = useQuery(bookQueries.chapterIndex(bookId));
+  const { data, isLoading, error } = useQuery(bookQueries.chapterIndex(bookId));
 
   const selectedId = chapterId || '';
   const baseLink = bookId ? `/book/${bookId}/edit` : '';
 
   const chapterTree: any = useMemo(
     () =>
-      buildTree({
-        nodes: data?.index?.chapters ?? [],
-        orders: data?.index?.order ?? {},
-      }),
+      data?.index ?? [],
     [data],
   );
 

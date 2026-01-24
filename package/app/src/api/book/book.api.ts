@@ -8,6 +8,7 @@ import type {
   UpdateBookInput,
   BookListResponse,
   BookResponse,
+  ChapterIndexResponse,
 } from '@package/contract';
 import type {BookFilters} from './book.types';
 import {buildQueryString} from '../utils/buildQuery';
@@ -50,8 +51,10 @@ export const bookApi = {
   /**
    * Get chapterIndex by bookUnitId
    */
-  getChapterIndex: async (bookUnitId: string): Promise<any> => {
-    return apiFetch<any>(`/books/${bookUnitId}/chapterIndex`);
+  getChapterIndex: async (
+    bookUnitId: string,
+  ): Promise<ChapterIndexResponse> => {
+    return apiFetch<ChapterIndexResponse>(`/books/${bookUnitId}/chapterIndex`);
   },
 
   /**
@@ -60,8 +63,8 @@ export const bookApi = {
   updateChapterIndex: async (
     bookUnitId: string,
     chaptersIndex: any,
-  ): Promise<any> => {
-    return apiFetch<any>(`/books/${bookUnitId}/chapterIndex`, {
+  ): Promise<ChapterIndexResponse> => {
+    return apiFetch<ChapterIndexResponse>(`/books/${bookUnitId}/chapterIndex`, {
       method: 'PUT',
       body: JSON.stringify(chaptersIndex),
     });

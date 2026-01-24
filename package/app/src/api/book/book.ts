@@ -47,4 +47,5 @@ export {
   useCreateBookMutation,
   useUpdateBookMutation,
   useDeleteBookMutation,
+  useUpdateChapterIndexMutation,
 } from './book.mutations';

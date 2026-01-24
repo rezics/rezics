@@ -8,11 +8,15 @@ import type {PrismaClient} from '../generated/client.js';
 export async function resetDatabase(prisma: PrismaClient): Promise<void> {
   console.log('🗑️  Resetting database...');
   // Order matters due to FKs
+  await prisma.apiToken.deleteMany();
+  await prisma.bookmark.deleteMany();
+  await prisma.follow.deleteMany();
   await prisma.commentIndex.deleteMany();
   await prisma.reaction.deleteMany();
   await prisma.reactionSummary.deleteMany();
   await prisma.rating.deleteMany();
   await prisma.book.deleteMany();
+  await prisma.bookIndex.deleteMany();
   await prisma.tag.deleteMany();
   await prisma.unit.deleteMany();
   await prisma.user.deleteMany();

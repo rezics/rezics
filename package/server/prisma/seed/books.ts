@@ -120,36 +120,36 @@ export async function updateChapterIndex(
   });
 }
 
+import type {ChapterTreeItem} from '@package/contract';
+
 /**
- * Create chapter Units for a book and build a ChapterTreeIndex JSON referencing those Unit IDs.
- * The structure matches app's generateChapterTree: { chapters: Record<id, {id,title,noContent}>, order: Record<parentId, childIds[]> }.
+ * Create chapters for a book and return a nested tree structure array.
+ * The structure is `ChapterTreeItem[]`
  */
 export async function seedChaptersForBook(
   prisma: PrismaClient,
   bookUnitId: string,
   opts?: {topLevelCount?: number; minChildren?: number; maxChildren?: number},
-): Promise<ChapterTreeIndex> {
+): Promise<ChapterTreeItem[]> {
   const topLevelCount =
     opts?.topLevelCount ?? faker.number.int({min: 1, max: 4});
   const minChildren = opts?.minChildren ?? 20;
   const maxChildren = opts?.maxChildren ?? 100;
 
-  const chapters: Record<string, ChapterIndexChapter> = {};
-  const order: Record<string, string[]> = {};
-
-  // Resolve the book's author userId once
+  // Get the book's userId (optimized redundant query)
   const bookUnit = await prisma.unit.findUnique({
     where: {id: bookUnitId},
     select: {userId: true},
   });
-  const bookUserId =
-    bookUnit?.userId ??
-    (await prisma.unit.findFirst({
-      where: {id: bookUnitId},
-      select: {userId: true},
-    }))!.userId;
 
-  // Create top-level chapter groups (noContent=true)
+  if (!bookUnit) {
+    throw new Error('Book unit not found');
+  }
+
+  const bookUserId = bookUnit.userId;
+  const tree: ChapterTreeItem[] = [];
+
+  // Create top-level chapters (usually noContent is true)
   for (let t = 0; t < topLevelCount; t++) {
     const parentTitle = generateTitle(2, 4);
     const parent = await prisma.unit.create({
@@ -160,21 +160,15 @@ export async function seedChaptersForBook(
         title: parentTitle,
         content: null,
         metadata: {},
-        targetUnitId: bookUnitId, // reference the book
+        targetUnitId: bookUnitId,
       },
       select: {id: true},
     });
 
-    chapters[parent.id] = {
-      id: parent.id,
-      title: parentTitle,
-      noContent: true,
-    };
-
-    // For deterministic title, we can reuse the created Unit's title, but since we generated above, keep as is
-    // Generate children under this parent
+    // Loop to generate subchapters under the current parent chapter
     const childCount = faker.number.int({min: minChildren, max: maxChildren});
-    const childIds: string[] = [];
+    const children: ChapterTreeItem[] = [];
+
     for (let i = 0; i < childCount; i++) {
       const noContent = faker.datatype.boolean({probability: 0.2});
       const childTitle = faker.lorem.words({min: 3, max: 6});
@@ -188,18 +182,25 @@ export async function seedChaptersForBook(
           metadata: {},
           targetUnitId: bookUnitId,
         },
-        select: {id: true /* title not needed here */},
+        select: {id: true},
       });
 
-      chapters[child.id] = {
+      // Push the subchapter into the local children array
+      children.push({
         id: child.id,
         title: childTitle,
         noContent,
-      };
-      childIds.push(child.id);
+      });
     }
-    order[parent.id] = childIds;
+
+    // Put the assembled parent chapter and its children into the final tree
+    tree.push({
+      id: parent.id,
+      title: parentTitle,
+      noContent: true,
+      children,
+    });
   }
 
-  return {chapters, order};
+  return tree;
 }

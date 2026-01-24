@@ -6,22 +6,16 @@ import React, {
   useMemo,
   useState,
 } from 'react';
-import {Button, Tooltip} from '@mui/material';
-import {Link} from 'wouter';
-import {useTranslation} from 'react-i18next';
-import {useQuery} from '@tanstack/react-query';
+import { Button, Tooltip } from '@mui/material';
+import { Link } from 'wouter';
+import { useTranslation } from 'react-i18next';
+import { useQuery } from '@tanstack/react-query';
 
-import {buildTree} from '@/util/treeAbstract.ts';
-import type {TreeNodeWithChildren} from '@/util/treeAbstract.ts';
-import {bookQueries} from '@/api/book/book.queries.ts';
-import {AccentBarWithTextContainer} from '../../Common/Navigation/AccentBar.tsx';
-import {useChapterListStore} from '@/global/page/chapterListStore.ts';
+import { bookQueries } from '@/api/book/book.queries.ts';
+import { AccentBarWithTextContainer } from '../../Common/Navigation/AccentBar.tsx';
+import { useChapterListStore } from '@/global/page/chapterListStore.ts';
 
-export interface ChapterTreeNode extends TreeNodeWithChildren {
-  id: string;
-  title: string;
-  children?: ChapterTreeNode[];
-}
+import type { ChapterTreeItem } from '@package/contract';
 
 export type ChapterTreeHandle = {
   expandAll: () => void;
@@ -33,7 +27,7 @@ export type ChapterTreeHandle = {
 
 type ChapterLeafProps = {
   bookId: string;
-  node: ChapterTreeNode;
+  node: ChapterTreeItem;
 };
 
 export const ChapterLeaf = React.memo(function ChapterLeaf({
@@ -68,7 +62,7 @@ export const ChapterLeaf = React.memo(function ChapterLeaf({
   );
 });
 
-function getAllExpandableIds(nodes: ChapterTreeNode[]): Set<string> {
+function getAllExpandableIds(nodes: ChapterTreeItem[]): Set<string> {
   const set = new Set<string>();
   const stack = [...nodes];
   while (stack.length) {
@@ -84,7 +78,7 @@ function getAllExpandableIds(nodes: ChapterTreeNode[]): Set<string> {
 
 type ChapterTreeProps = {
   bookId: string;
-  nodes: ChapterTreeNode[];
+  nodes: ChapterTreeItem[];
   expanded: Set<string>;
   onToggle: (id: string) => void;
   renderGroupActions?: boolean;
@@ -181,7 +175,7 @@ const ChapterTreeInner = React.memo(function ChapterTreeInner({
 
 type ChapterTreeViewProps = {
   bookId: string;
-  nodes: ChapterTreeNode[];
+  nodes: ChapterTreeItem[];
   /**
    * Optional: persist expanded ids externally (e.g. Zustand store).
    * If provided, component will read initial expanded ids from it once on mount,
@@ -195,7 +189,7 @@ export const ChapterTreeView = forwardRef<
   ChapterTreeHandle,
   ChapterTreeViewProps
 >(function ChapterTreeView(
-  {bookId, nodes, storageKey, defaultExpandAll = true},
+  { bookId, nodes, storageKey, defaultExpandAll = true },
   ref,
 ) {
   const persisted = useChapterListStore(s =>
@@ -320,15 +314,11 @@ interface ChapterListContainerProps {
 export const ChapterListContainer: React.FC<ChapterListContainerProps> = ({
   id,
 }) => {
-  const {t} = useTranslation();
-  const {data, isLoading, error} = useQuery(bookQueries.chapterIndex(id));
+  const { t } = useTranslation();
+  const { data, isLoading, error } = useQuery(bookQueries.chapterIndex(id));
 
-  const chapterTree: ChapterTreeNode[] = useMemo(
-    () =>
-      buildTree({
-        nodes: data?.index?.chapters ?? [],
-        orders: data?.index?.order ?? {},
-      }) as ChapterTreeNode[],
+  const chapterTree: ChapterTreeItem[] = useMemo(
+    () => data?.index ?? [],
     [data],
   );
 

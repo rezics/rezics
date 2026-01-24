@@ -9,14 +9,14 @@ import {
   useRef,
   useState,
 } from 'react';
-import {Tree} from 'react-arborist';
-import type {DeleteHandler, MoveHandler, RenameHandler} from 'react-arborist';
+import { Tree } from 'react-arborist';
+import type { DeleteHandler, MoveHandler, RenameHandler } from 'react-arborist';
 // 分离的 Node 渲染器工厂
-import {createChapterArboristNode} from './ChapterArboristNode.tsx';
-import {ChapterArboristContextMenu} from './ChapterArboristContextMenu.tsx';
-import {CreateChapterDialog} from './CreateChapterDialog.tsx';
-import {bookMutations} from '@/api/book/book.mutations.ts';
-import {useAlertStore} from '@/global/windowAlertStore.ts';
+import { createChapterArboristNode } from './ChapterArboristNode.tsx';
+import { ChapterArboristContextMenu } from './ChapterArboristContextMenu.tsx';
+import { CreateChapterDialog } from './CreateChapterDialog.tsx';
+import { bookMutations } from '@/api/book/book.mutations.ts';
+import { useAlertStore } from '@/global/windowAlertStore.ts';
 
 import {
   findAndAddChild,
@@ -26,9 +26,7 @@ import {
   findAndRemove,
 } from '@/util/arboristTreeUtil.ts';
 
-import {flattenTree} from '@/util/treeAbstract.ts';
-
-import {Button} from '@mui/material';
+import { Button } from '@mui/material';
 
 export type Chapter = {
   id: string | number;
@@ -93,7 +91,7 @@ export const ChapterArborist = forwardRef<
       string | number | null
     >(null);
     const updateChapterIndexMutation = bookMutations.useUpdateChapterIndex();
-    const {show: showAlert} = useAlertStore();
+    const { show: showAlert } = useAlertStore();
 
     useImperativeHandle(ref, () => ({
       expandAll() {
@@ -109,7 +107,7 @@ export const ChapterArborist = forwardRef<
     }, [chapterTree]);
 
     const onMove: MoveHandler<Chapter> = useCallback(
-      ({dragIds, parentId, index}) => {
+      ({ dragIds, parentId, index }) => {
         setTreeData(currentTree => {
           const removed: Chapter[] = [];
           const treeWithoutDragged = findAndRemove(
@@ -128,27 +126,21 @@ export const ChapterArborist = forwardRef<
       [],
     );
 
-    const onRename: RenameHandler<Chapter> = useCallback(({id, name}) => {
+    const onRename: RenameHandler<Chapter> = useCallback(({ id, name }) => {
       setTreeData(
         currentTree => findAndEdit(currentTree, String(id), name) as Chapter[],
       );
     }, []);
 
-    const onDelete: DeleteHandler<Chapter> = useCallback(({ids}) => {
+    const onDelete: DeleteHandler<Chapter> = useCallback(({ ids }) => {
       setTreeData(currentTree => findAndDelete(currentTree, ids) as Chapter[]);
     }, []);
 
     function updateChapter(treeData: any) {
-      const flatTree = flattenTree(treeData);
-      const flatTreeResult = {
-        chapters: flatTree.nodes,
-        order: flatTree.orders,
-      };
-
       try {
         updateChapterIndexMutation.mutateAsync({
           bookUnitId,
-          chaptersIndex: flatTreeResult,
+          chaptersIndex: treeData,
         });
       } catch (error) {
         showAlert(`创建章节失败: ${error}`);
