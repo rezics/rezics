@@ -46,6 +46,6 @@ spawn(
 
 spawnService('Frontend', 'bun', ['run', 'dev'], `${ROOT}/package/app`);
 
-spawnService('Backend', 'bun', ['run', 'dev'], `${ROOT}/package/server-elysia`);
+spawnService('Backend', 'bun', ['run', 'dev'], `${ROOT}/package/server`);
 
 console.log('✨ All services started. Live logs streaming below ↓');

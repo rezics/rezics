@@ -4,7 +4,7 @@
  * 部署流程：
  * 1. 强制从远程更新 GIT
  * 2. app/ → bun run build → dist → 部署到 /www/wwwroot/book.rezics.com
- * 3. server-elysia/ → bun run build:linux → 将 server 复制到 /www/wwwroot/Library.Book/server
+ * 3. server/ → bun run build:linux → 将 server 复制到 /www/wwwroot/Library.Book/server
  *
  * 使用方式：
  *   bun run deployScript.ts
@@ -44,11 +44,11 @@ const GIT_ROOT = path.resolve(SCRIPT_DIR, '../../../');
 
 // 各项目目录
 const APP_DIR = path.join(ROOT, 'app');
-const SERVER_DIR = path.join(ROOT, 'server-elysia');
+const SERVER_DIR = path.join(ROOT, 'server');
 
 // 部署输出目录
 const FRONTEND_TARGET = '/opt/1panel/www/sites/book.rezics.com/index';
-const SERVER_TARGET = '/www/wwwroot/Library.Book/server/';
+const SERVER_TARGET = '/www/wwwroot/Library.Book/server-output/';
 
 // 执行命令（打印实时 stdout/stderr）
 async function run(cmd: string, cwd?: string) {
@@ -108,7 +108,7 @@ async function deploy() {
   //
   // 3. 构建 Elysia 后端
   //
-  console.log('\n===== Build backend server-elysia =====');
+  console.log('\n===== Build backend server =====');
   await run('bun install', SERVER_DIR);
   await run('bun run prisma:deploy', SERVER_DIR);
   await run('bun run prisma generate', SERVER_DIR);

@@ -3,8 +3,7 @@
   "private": true,
   "scripts": {
     "app:dev": "cd package/app && bun run dev",
-    "server:dev": "cd package/server-elysia && bun run dev"
-
+    "server:dev": "cd package/server && bun run dev"
   },
   "workspaces": [
     "package/*"

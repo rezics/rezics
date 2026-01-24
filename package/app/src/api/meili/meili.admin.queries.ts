@@ -1,7 +1,7 @@
 /**
  * Meilisearch 管理端 API 封装 & React Query 配置
  *
- * 对应后端 `package/server-elysia/src/meili/meili.api.ts` 中的管理路由：
+ * 对应后端 `package/server/src/meili/meili.api.ts` 中的管理路由：
  * - /meili/health
  * - /meili/books|readlists|units/(init|sync)
  * - /meili/units/deleteAllUnits

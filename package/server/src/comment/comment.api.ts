@@ -1,5 +1,5 @@
 import {t, Elysia} from 'elysia';
-import {coreInstance} from '../core';
+import {coreInstance} from '../core.ts';
 import {verifyAuth} from '@/src/user/utils.ts';
 import {commentService} from './comment.service.ts';
 import {mapCommentToDTO} from './mapper.ts';
