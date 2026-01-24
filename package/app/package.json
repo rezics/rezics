@@ -1,5 +1,5 @@
 {
-  "name": "library-book-client",
+  "name": "@package/app",
   "version": "0.0.1",
   "type": "module",
   "scripts": {
