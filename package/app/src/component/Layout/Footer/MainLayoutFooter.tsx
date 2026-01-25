@@ -13,9 +13,10 @@ import {
 } from '@mui/material';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import TelegramIcon from '@mui/icons-material/Telegram';
-import {useTranslation} from 'react-i18next';
+import { useTranslation } from 'react-i18next';
+import { LazyLoadImage } from '@/component/Common/LazyLoadImage';
 
-function SectionTitle({children}: {children: React.ReactNode}) {
+function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
     <Typography
       variant="subtitle1"
@@ -40,24 +41,24 @@ function FooterLink({
       href={href}
       underline="hover"
       color="text.secondary"
-      sx={{lineHeight: 1.9, display: 'inline-block'}}
+      sx={{ lineHeight: 1.9, display: 'inline-block' }}
     >
       {children}
     </MUILink>
   );
 }
 
-export function MainLayoutFooter({className}: {className?: string}) {
-  const {t} = useTranslation();
+export function MainLayoutFooter({ className }: { className?: string }) {
+  const { t } = useTranslation();
   const year = new Date().getFullYear();
 
   return (
     <Box
       className={className}
       component="footer"
-      sx={{bgcolor: 'background.paper', color: 'text.primary'}}
+      sx={{ bgcolor: 'background.paper', color: 'text.primary' }}
     >
-      <Divider sx={{borderColor: 'divider'}} />
+      <Divider sx={{ borderColor: 'divider' }} />
 
       <Container maxWidth="lg" className="mx-auto px-4">
         {/* Top content */}
@@ -65,14 +66,11 @@ export function MainLayoutFooter({className}: {className?: string}) {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
             {/* Brand / Intro */}
             <div className="md:col-span-1">
-              <Typography
-                variant="h6"
-                fontWeight={800}
-                sx={{letterSpacing: 0.2}}
-              >
-                Library.Book
-              </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{mt: 1.5}}>
+              <div className="flex items-center gap-2 mt-2">
+                <LazyLoadImage src="/logo.svg" alt="logo" className="w-11 h-8" />
+                <Typography variant="h6" fontWeight={800} sx={{ letterSpacing: 0.2 }}>Library.Book</Typography>
+              </div>
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 1.5 }}>
                 {t('layout.footer.brand.description')}
                 <br />
                 {t('layout.footer.brand.slogan')}
@@ -81,7 +79,7 @@ export function MainLayoutFooter({className}: {className?: string}) {
               <Stack
                 direction="row"
                 spacing={1}
-                sx={{mt: 2}}
+                sx={{ mt: 2 }}
                 aria-label={t('layout.footer.social.aria')}
               >
                 <Tooltip title={t('layout.footer.social.github')}>
@@ -182,11 +180,11 @@ export function MainLayoutFooter({className}: {className?: string}) {
             {/* Newsletter */}
             <div className="md:col-span-1">
               <SectionTitle>{t('layout.footer.newsletter.title')}</SectionTitle>
-              <Typography variant="body2" color="text.secondary" sx={{mb: 1.5}}>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
                 {t('layout.footer.newsletter.description')}
               </Typography>
               <Stack
-                direction={{xs: 'column', sm: 'row'}}
+                direction={{ xs: 'column', sm: 'row' }}
                 spacing={1}
                 component="form"
                 onSubmit={e => e.preventDefault()}
@@ -212,7 +210,7 @@ export function MainLayoutFooter({className}: {className?: string}) {
           </div>
         </Box>
 
-        <Divider sx={{borderColor: 'divider'}} />
+        <Divider sx={{ borderColor: 'divider' }} />
 
         {/* Bottom bar */}
         <Box
@@ -226,7 +224,7 @@ export function MainLayoutFooter({className}: {className?: string}) {
           }}
         >
           <Typography variant="caption" color="text.secondary">
-            {t('layout.footer.copyright', {year})}
+            {t('layout.footer.copyright', { year })}
           </Typography>
 
           <Stack direction="row" spacing={2} alignItems="center">
@@ -256,7 +254,7 @@ export function MainLayoutFooter({className}: {className?: string}) {
             </MUILink>
           </Stack>
         </Box>
-      </Container>
-    </Box>
+      </Container >
+    </Box >
   );
 }

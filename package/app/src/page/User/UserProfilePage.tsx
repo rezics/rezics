@@ -9,17 +9,17 @@ import {
   Chip,
   Tooltip,
 } from '@mui/material';
-import {Link} from 'wouter';
+import { Link } from 'wouter';
 import EditIcon from '@mui/icons-material/Edit';
-import {useEffect, type FC} from 'react';
-import {useTranslation} from 'react-i18next';
-import type {UserDTO} from '@package/contract';
-import {useQuery} from '@tanstack/react-query';
-import {userQueries} from '@/api/user/user.queries';
-import {UserError, UserLoading} from './UserState';
-import {useUserStore} from '@/global/userStore';
+import { useEffect, type FC } from 'react';
+import { useTranslation } from 'react-i18next';
+import type { UserDTO } from '@package/contract';
+import { useQuery } from '@tanstack/react-query';
+import { userQueries } from '@/api/user/user.queries';
+import { UserError, UserLoading } from './UserState';
+import { useUserStore } from '@/global/userStore';
 import FollowButton from '@/component/Common/Reaction/FollowButton';
-import {UserUnitsPage} from './UserUnitsPage';
+import { UserUnitsPage } from './UserUnitsPage';
 
 export interface UserProfilePageProps {
   unitId: string;
@@ -37,8 +37,8 @@ export const UserProfilePage: FC<UserProfilePageProps> = ({
   onEditClick,
 }) => {
   const currentUser = useUserStore(state => state.user);
-  const {setUser} = useUserStore();
-  const {t} = useTranslation();
+  const { setUser } = useUserStore();
+  const { t } = useTranslation();
 
   console.log('isCurrentUser', isCurrentUser);
 
@@ -55,24 +55,7 @@ export const UserProfilePage: FC<UserProfilePageProps> = ({
     if (meQuery.data) {
       setUser(meQuery.data);
     }
-    if (detailQuery.data) {
-      setUser(detailQuery.data);
-    }
   }, [meQuery.data, setUser, detailQuery.data]);
-
-  async function refreshUser() {
-    window.location.reload();
-    // const data = await queryClient.fetchQuery(
-    //   userQueries.me(currentUser?.unitId ?? ''),
-    // );
-    // setUser({
-    //   unitId: data?.unitId,
-    //   name: data?.name,
-    //   email: data?.email,
-    //   avatar: data?.avatar,
-    //   permission: data?.permission,
-    // });
-  }
 
   const isLoading = meQuery.isLoading || detailQuery.isLoading;
   const queryError = (meQuery.error ?? detailQuery.error) as Error | null;
@@ -101,7 +84,7 @@ export const UserProfilePage: FC<UserProfilePageProps> = ({
       <Card className="shadow-lg rounded-2xl">
         <CardHeader
           avatar={
-            <Avatar src={user.avatar} sx={{width: 80, height: 80}}>
+            <Avatar src={user.avatar} sx={{ width: 80, height: 80 }}>
               {user.name?.charAt(0).toUpperCase()}
             </Avatar>
           }
@@ -122,7 +105,7 @@ export const UserProfilePage: FC<UserProfilePageProps> = ({
                   label={`@${user.slug}`}
                   size="small"
                   variant="outlined"
-                  sx={{mt: 1}}
+                  sx={{ mt: 1 }}
                 />
               )}
             </Box>
@@ -137,7 +120,7 @@ export const UserProfilePage: FC<UserProfilePageProps> = ({
                 />
               )}
               {isCurrentUser ||
-              currentUser?.permission?.role?.includes('ADMIN') ? (
+                currentUser?.permission?.role?.includes('ADMIN') ? (
                 <Button
                   variant="contained"
                   startIcon={<EditIcon />}

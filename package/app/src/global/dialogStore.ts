@@ -51,6 +51,6 @@ export const useDialogStore = create<DialogState>()(
         getDialogEntry: key => get().dialogs[key],
       })),
     ),
-    {name: 'DialogStore'},
+    {name: 'dialogStore', store: 'dialogStore'},
   ),
 );

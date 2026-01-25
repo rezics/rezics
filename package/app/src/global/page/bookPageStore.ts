@@ -1,5 +1,5 @@
-import { create } from "zustand";
-import { devtools } from "zustand/middleware";
+import {create} from 'zustand';
+import {devtools} from 'zustand/middleware';
 
 /**
  * 书籍元信息
@@ -42,29 +42,32 @@ interface BookPageState {
  * useBookPageStore.getState().updateBook(bookId, {description: "这是新的简介！",})
  */
 export const useBookPageStore = create<BookPageState>()(
-  devtools((set) => ({
-    books: {},
+  devtools(
+    set => ({
+      books: {},
 
-    setBook: (bookId, meta) =>
-      set((state) => ({
-        books: {
-          ...state.books,
-          [bookId]: meta,
-        },
-      })),
-
-    updateBook: (bookId, patch) =>
-      set((state) => {
-        const prev = state.books[bookId] ?? {
-          title: "",
-          description: "",
-        };
-        return {
+      setBook: (bookId, meta) =>
+        set(state => ({
           books: {
             ...state.books,
-            [bookId]: { ...prev, ...patch },
+            [bookId]: meta,
           },
-        };
-      }),
-  })),
+        })),
+
+      updateBook: (bookId, patch) =>
+        set(state => {
+          const prev = state.books[bookId] ?? {
+            title: '',
+            description: '',
+          };
+          return {
+            books: {
+              ...state.books,
+              [bookId]: {...prev, ...patch},
+            },
+          };
+        }),
+    }),
+    {name: 'bookPageStore', store: 'bookPageStore'},
+  ),
 );

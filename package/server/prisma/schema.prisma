@@ -287,6 +287,13 @@ model SeriesBook {
   @@index([seriesId, sortOrder])
 }
 
+model UnitLocalizations {
+  unitId        String   @id @db.Uuid
+  languageIndex Json     @default("{}")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
 model BookIndex {
   bookUnitId String   @id @db.Uuid
   book       Book     @relation(fields: [bookUnitId], references: [unitId], onDelete: Cascade)

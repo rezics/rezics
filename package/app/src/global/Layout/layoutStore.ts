@@ -41,6 +41,6 @@ export const useLayoutStore = create<LayoutState>()(
           },
         })),
     }),
-    {name: 'layoutStore'},
+    {name: 'layoutStore', store: 'layoutStore'},
   ),
 );
