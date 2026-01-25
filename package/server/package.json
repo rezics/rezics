@@ -23,6 +23,7 @@
     "prisma:seed": "bun run prisma/seed.ts",
     "prisma:seed:echokv": "bun run prisma/seed/echokv.ts",
     "prisma:seed:passwordReset": "bun run prisma/seed/utils/passwordReset.ts",
+    "prisma:seed:databaseReset": "bun run prisma/seed/utils/databaseReset.ts",
     "db:migrate": "bun run prisma/db/index.ts"
   },
   "devDependencies": {

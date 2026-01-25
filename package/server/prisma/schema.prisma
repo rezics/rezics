@@ -190,8 +190,7 @@ model Unit {
   updatedAt   DateTime  @updatedAt
 
   // Book relation
-  book   Book?   @relation("BookIndexForUnit")
-  series Series? @relation("SeriesIndexForUnit")
+  book Book? @relation("BookIndexForUnit")
 
   // ReadList relation
   readList          ReadList?  @relation("ReadListIndexForUnit")
@@ -236,7 +235,8 @@ model Book {
   textLength Int      @default(0)
   tags       String[] @default([])
 
-  series SeriesBook[]
+  series SeriesBook[] @relation("BookBelongsToSeries")
+  books  SeriesBook[] @relation("SeriesContainsBooks")
 
   anchorId String? @db.Uuid // 锚点ID，用于关联翻译，多版本
   language String? @default("zh-CN")
@@ -257,22 +257,6 @@ model Book {
   @@index([isbn])
 }
 
-model Series {
-  // main 版本 与 Unit 1:1 绑定；采用 Unit.id 作为主键
-  unitId      String       @id @default(dbgenerated("uuidv7()")) @db.Uuid
-  unit        Unit         @relation("SeriesIndexForUnit", fields: [unitId], references: [id], onDelete: Cascade)
-  books       SeriesBook[]
-  title       String
-  description String?
-
-  anchorId String? @db.Uuid // 锚点ID，用于关联翻译，多版本
-  language String? @default("zh-CN")
-
-  coverUrl  String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
 model SeriesBook {
   seriesId String @db.Uuid
   bookId   String @db.Uuid
@@ -280,8 +264,8 @@ model SeriesBook {
   sortOrder   Int     @default(0)
   volumeLabel String? // 额外元数据，例如在该系列中的特定称呼（如“外传”、“前传”），然而最好不要用
 
-  series Series @relation(fields: [seriesId], references: [unitId], onDelete: Cascade)
-  book   Book   @relation(fields: [bookId], references: [unitId], onDelete: Cascade)
+  series Book @relation("BookBelongsToSeries", fields: [seriesId], references: [unitId], onDelete: Cascade)
+  book   Book @relation("SeriesContainsBooks", fields: [bookId], references: [unitId], onDelete: Cascade)
 
   @@id([seriesId, bookId])
   @@index([seriesId, sortOrder])

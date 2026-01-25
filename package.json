@@ -4,7 +4,7 @@
   "scripts": {
     "app:dev": "cd package/app && bun run dev",
     "server:dev": "cd package/server && bun run dev",
-    "deploy": "cd package/util/deploy-script && bun run deploy-script.ts"
+    "deploy": "cd package/util && bun run deploy"
   },
   "workspaces": [
     "package/*"
