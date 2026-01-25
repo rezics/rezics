@@ -48,7 +48,7 @@ const SERVER_DIR = path.join(ROOT, 'server');
 
 // 部署输出目录
 const FRONTEND_TARGET = '/opt/1panel/www/sites/book.rezics.com/index';
-const SERVER_TARGET = '/www/wwwroot/Library.Book/server-output/';
+const SERVER_TARGET = '/www/wwwroot/Library.Book/server/';
 
 // 执行命令（打印实时 stdout/stderr）
 async function run(cmd: string, cwd?: string) {
