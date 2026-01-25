@@ -3,7 +3,8 @@
   "private": true,
   "scripts": {
     "app:dev": "cd package/app && bun run dev",
-    "server:dev": "cd package/server && bun run dev"
+    "server:dev": "cd package/server && bun run dev",
+    "deploy": "cd package/util/deploy-script && bun run deploy-script.ts"
   },
   "workspaces": [
     "package/*"
