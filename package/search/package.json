@@ -2,6 +2,12 @@
   "name": "@package/search",
   "module": "src/index.ts",
   "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
   "private": true,
   "scripts": {
     "meilisearch": "cd ./bin && ./meilisearch --config-file-path='./config.toml'",

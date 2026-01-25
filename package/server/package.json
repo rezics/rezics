@@ -1,14 +1,12 @@
 {
   "name": "@package/server",
-  "module": "src/index.ts",
+  "module": "src/export.ts",
   "type": "module",
   "private": true,
-  "main": "./src/index.ts",
-  "types": "./src/index.ts",
   "exports": {
     ".": {
-      "types": "./src/index.ts",
-      "default": "./src/index.ts"
+      "types": "./src/export.ts",
+      "default": "./src/export.ts"
     }
   },
   "scripts": {

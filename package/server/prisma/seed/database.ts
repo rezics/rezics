@@ -1,4 +1,4 @@
-import {meili} from '@package/search/src/index.js';
+import {meili} from '@package/search';
 import type {PrismaClient} from '../generated/client.js';
 
 /**
