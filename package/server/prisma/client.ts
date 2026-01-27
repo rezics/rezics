@@ -1,5 +1,5 @@
 import {PrismaClient} from './generated/client';
-import {Pool} from 'pg';
+import {PrismaPg} from '@prisma/adapter-pg';
 
 // Get database URL from environment variable
 const databaseUrl = process.env.PRISMA_DATABASE_URL;
@@ -8,12 +8,13 @@ if (!databaseUrl) {
   throw new Error('PRISMA_DATABASE_URL environment variable is not set');
 }
 
-// Create a PostgreSQL connection pool optimized for Elysia/Bun
-const pool = new Pool({
+// Prisma ORM v7 requires a driver adapter.
+// Keep your pool config for performance + predictable timeouts.
+const adapter = new PrismaPg({
   connectionString: databaseUrl,
   max: 20, // Maximum pool size
-  idleTimeoutMillis: 30000, // Close idle connections after 30s
-  connectionTimeoutMillis: 2000, // Connection timeout
+  idleTimeoutMillis: 30_000, // Close idle connections after 30s
+  connectionTimeoutMillis: 2_000, // Acquire/connect timeout (pg default is 0 = no timeout)
 });
 
 // Enable query logging in development
@@ -24,7 +25,7 @@ const enableQueryEventLogging =
 
 // Initialize Prisma Client with PostgreSQL adapter
 export const prisma = new PrismaClient({
-  // adapter: new PrismaPg(pool), // NOTE Don't use this adapter, it's very slow!
+  adapter,
   log: enableQueryEventLogging
     ? [{emit: 'event', level: 'query'} as const]
     : [],
@@ -40,13 +41,11 @@ if (enableQueryEventLogging) {
 // Handle graceful shutdown for Elysia
 process.on('SIGTERM', async () => {
   await prisma.$disconnect();
-  await pool.end();
   process.exit(0);
 });
 
 process.on('SIGINT', async () => {
   await prisma.$disconnect();
-  await pool.end();
   process.exit(0);
 });
 

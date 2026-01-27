@@ -1,7 +1,7 @@
 import type {UserListQuery} from '@package/contract';
-import {userIndex} from '@package/search/src/meili_index';
+import {userIndex} from '@package/search';
 import type {UserSearchDocument, UserSearchResult} from './index';
-import type {SearchResponse} from '@package/search/src/index';
+import type {SearchResponse} from '@package/search';
 
 function escapeValue(value: string): string {
   return value.trim().replace(/"/g, '\\"');

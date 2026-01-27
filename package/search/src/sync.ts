@@ -1,4 +1,4 @@
-import {PrismaClient} from '@package/server';
+import {prisma} from '@package/server';
 import {
   addOrUpdateBooks,
   addOrUpdateUnits,
@@ -17,8 +17,6 @@ import type {
   FeedbackSearchDocument,
   UserSearchDocument,
 } from '@package/contract';
-
-const prisma = new PrismaClient();
 
 // ANCHOR: Books sync with batching (cursor-based)
 export async function syncAllBooks() {

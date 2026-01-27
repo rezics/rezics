@@ -1,7 +1,5 @@
-import {PrismaClient} from '../../generated/client';
 import {resetMeiliSearchDatabase} from '../database';
-
-const prisma = new PrismaClient();
+import {prisma} from '../../client';
 
 import {resetDatabase} from '../database';
 

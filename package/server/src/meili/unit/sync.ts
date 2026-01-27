@@ -1,6 +1,6 @@
 import {prisma} from '@/prisma/client';
-import {unitIndex} from '@package/search/src/meili_index';
-import type {UnitSearchDocument} from './index';
+import {unitIndex} from '@package/search';
+import type {UnitSearchDocument} from '@package/contract';
 
 export async function syncUnitToMeili(unitId: string): Promise<void> {
   const unit = await prisma.unit.findUnique({

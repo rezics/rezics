@@ -1,13 +1,11 @@
 import {prisma} from '@/prisma/client';
-import {readlistIndex} from '@package/search/src/meili_index';
+import {readlistIndex} from '@package/search';
 import type {ReadlistSearchDocument} from './index';
 
 /**
  * Sync a single readlist (by its unitId) into the Meilisearch `readlists` index.
  */
-export async function syncReadlistToMeili(
-  unitId: string,
-): Promise<void> {
+export async function syncReadlistToMeili(unitId: string): Promise<void> {
   const readlist = await prisma.readList.findUnique({
     where: {unitId},
     include: {
@@ -39,9 +37,7 @@ export async function syncReadlistToMeili(
     ? readlist.review.map((r: any) => r.id)
     : [];
 
-  const tags: string[] = unit.tags
-    ? unit.tags.map((t: any) => t.name)
-    : [];
+  const tags: string[] = unit.tags ? unit.tags.map((t: any) => t.name) : [];
 
   const doc: ReadlistSearchDocument = {
     id: readlist.unitId,
@@ -76,10 +72,6 @@ export async function syncReadlistToMeili(
 /**
  * Remove a single readlist (by its unitId) from the Meilisearch `readlists` index.
  */
-export async function deleteReadlistFromMeili(
-  unitId: string,
-): Promise<void> {
+export async function deleteReadlistFromMeili(unitId: string): Promise<void> {
   await readlistIndex.deleteDocuments([unitId]);
 }
-
-

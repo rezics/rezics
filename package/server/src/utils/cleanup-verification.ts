@@ -1,8 +1,6 @@
 // cleanup-verification.ts
 import 'dotenv/config';
-import {PrismaClient} from '@/prisma/generated/client';
-
-const prisma = new PrismaClient();
+import {prisma} from '../../prisma/client';
 
 async function main() {
   const now = new Date();
@@ -18,11 +16,13 @@ async function main() {
 }
 
 main()
-  .then(() => {
+  .then(async () => {
     console.log('[Cleanup] Done');
+    await prisma.$disconnect();
     process.exit(0);
   })
-  .catch(err => {
+  .catch(async err => {
     console.error('[Cleanup] Error:', err);
+    await prisma.$disconnect();
     process.exit(1);
   });

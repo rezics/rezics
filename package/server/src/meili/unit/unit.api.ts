@@ -1,7 +1,7 @@
 import type {UnitListQuery} from '@package/contract';
-import {unitIndex} from '@package/search/src/meili_index';
+import {unitIndex} from '@package/search';
 import type {UnitSearchDocument, UnitSearchResult} from '@package/contract';
-import type {SearchResponse} from '@package/search/src/index';
+import type {SearchResponse} from '@package/search';
 import {defaultSort} from '../util';
 /**
  * Low-level search API that accepts a fully-constructed Meilisearch query string.

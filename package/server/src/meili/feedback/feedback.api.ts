@@ -1,10 +1,10 @@
 import type {FeedbackListQuery} from '@package/contract';
-import {feedbackIndex} from '@package/search/src/meili_index';
+import {feedbackIndex} from '@package/search';
 import type {
   FeedbackSearchDocument,
   FeedbackSearchResult,
 } from '@package/contract';
-import type {SearchResponse} from '@package/search/src/index';
+import type {SearchResponse} from '@package/search';
 import {defaultSort} from '../util';
 /**
  * Low-level search API that accepts a fully-constructed Meilisearch query string.

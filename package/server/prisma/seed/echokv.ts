@@ -1,5 +1,6 @@
 // 添加 main tag group 以及 公告板
-import {PrismaClient} from '../generated/client';
+import {prisma} from '../client';
+import type {PrismaClient} from '../client';
 
 import {generateNoticeboardData} from './data/home/noticeboard';
 import {products} from './data/home/homeCarousel';
@@ -41,8 +42,7 @@ export const seedEchoKV = async (prisma: PrismaClient) => {
   });
 };
 
-if (require.main === module) {
+if (import.meta.main) {
   // Only run when executed directly from CLI
-  const prisma = new PrismaClient();
   seedEchoKV(prisma).finally(() => prisma.$disconnect());
 }

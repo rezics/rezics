@@ -32,7 +32,7 @@ import {
   syncAllFeedbacks,
   initUserIndex,
   syncAllUsers,
-} from '@package/search/src/index';
+} from '@package/search';
 
 /**
  * MeiliService

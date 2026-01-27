@@ -1,5 +1,5 @@
 import {prisma} from '@/prisma/client';
-import {feedbackIndex} from '@package/search/src/meili_index';
+import {feedbackIndex} from '@package/search';
 import type {FeedbackSearchDocument} from '@package/contract';
 
 /**

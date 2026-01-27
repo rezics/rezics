@@ -1,5 +1,5 @@
 import {prisma} from '@/prisma/client';
-import {userIndex} from '@package/search/src/meili_index';
+import {userIndex} from '@package/search';
 import type {UserSearchDocument} from './index';
 
 /**

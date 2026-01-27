@@ -1,8 +1,6 @@
 import 'dotenv/config';
-import {PrismaClient} from '../../generated/client';
 import {hashPassword} from '../../../src/user/utils';
-
-const prisma = new PrismaClient();
+import {prisma} from '../../client';
 
 /**
  * Reset all users' passwordHash to the given plaintext password.

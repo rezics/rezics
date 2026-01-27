@@ -1,6 +1,6 @@
 import 'dotenv/config';
-import {PrismaClient} from './generated/client';
-import type {Prisma} from './generated/client';
+import {prisma} from './client';
+import type {Prisma} from './client';
 import {DEFAULT_COUNTS} from './seed/config';
 import {resetDatabase} from './seed/database';
 import {seedPressUsers, seedProducerUsers, seedUsers} from './seed/users';
@@ -10,12 +10,6 @@ import {seedOtherUnits} from './seed/units';
 import {seedComments, updateStatsWithCommentCounts} from './seed/comments';
 import {seedReadLists} from './seed/readlist';
 import {seedEchoKV} from './seed/echokv';
-
-// ------------------------------
-// Prisma Client
-// ------------------------------
-
-const prisma = new PrismaClient();
 
 // ------------------------------
 // Main Function

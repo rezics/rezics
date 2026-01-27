@@ -86,7 +86,6 @@
   "[prisma]": {
     "editor.defaultFormatter": "Prisma.prisma-insider"
   },
-  "prisma.pinToPrisma6": true,
   "[powershell]": {
     "editor.defaultFormatter": "ms-vscode.powershell"
   },

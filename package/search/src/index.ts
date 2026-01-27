@@ -3,6 +3,14 @@
 // hiding low-level details and wiring with the rest of the application.
 
 export {meili} from './client';
+export {checkMeiliHealth} from './client';
+export {
+  bookIndex,
+  unitIndex,
+  readlistIndex,
+  feedbackIndex,
+  userIndex,
+} from './meili_index';
 export {
   initBookIndex,
   initUnitIndex,
