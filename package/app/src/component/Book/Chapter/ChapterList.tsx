@@ -7,13 +7,13 @@ import React, {
   useState,
 } from 'react';
 import { Button, Tooltip } from '@mui/material';
-import { Link } from 'wouter';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 
 import { bookQueries } from '@/api/book/book.queries.ts';
 import { AccentBarWithTextContainer } from '../../Common/Navigation/AccentBar.tsx';
 import { useChapterListStore } from '@/global/page/chapterListStore.ts';
+import { Link } from '@/component/Navigation/Link';
 
 import type { ChapterTreeItem } from '@package/contract';
 

@@ -1,15 +1,15 @@
-import {Header} from '@/component/Layout/Header/MainLayoutHeader';
-import {Sidebar} from '@/component/Layout/Sidebar/Sidebar';
-import React, {type ReactNode, useEffect, useState} from 'react';
+import { Header } from '@/component/Layout/Header/MainLayoutHeader';
+import { Sidebar } from '@/component/Layout/Sidebar/Sidebar';
+import React, { type ReactNode, useEffect, useState } from 'react';
 
-import {NAVIGATION} from '@/component/Layout/Navigation/BookEditorNavigation';
-import {useLayoutStore} from '@/global/Layout/layoutStore.ts';
+import { NAVIGATION } from '@/component/Layout/Navigation/BookEditorNavigation';
+import { useLayoutStore } from '@/global/Layout/layoutStore.ts';
 
-import {LinearChapterList} from '@/component/Book/Chapter/LinearChapterList';
+import { LinearChapterList } from '@/component/Book/Chapter/LinearChapterList';
 
-import {DraggableResizer} from '@/component/Layout/DraggableResizer.tsx';
-import {useResponsiveSidebar} from './useResponsiveSidebar';
-import {bookEditChapterRoute, bookEditLayoutRoute} from '@/router/router';
+import { DraggableResizer } from '@/component/Layout/DraggableResizer.tsx';
+import { useResponsiveSidebar } from './useResponsiveSidebar';
+import { bookEditChapterRoute, bookEditLayoutRoute } from '@/router';
 
 export interface BookEditLayoutProps {
   children: ReactNode;
@@ -18,8 +18,8 @@ export interface BookEditLayoutProps {
 export const BookEditLayout: React.FC<BookEditLayoutProps> = ({
   children,
 }) => {
-  const {bookId} = bookEditLayoutRoute.useParams();
-  const chapterMatch = bookEditChapterRoute.useMatch({shouldThrow: false});
+  const { bookId } = bookEditLayoutRoute.useParams();
+  const chapterMatch = bookEditChapterRoute.useMatch({ shouldThrow: false });
   const chapterId = chapterMatch?.params.chapterId;
   const {
     sidebarOpen,
@@ -36,7 +36,7 @@ export const BookEditLayout: React.FC<BookEditLayoutProps> = ({
   } = useResponsiveSidebar();
 
   // UI state
-  const {sidebarHeightBelow} = useLayoutStore();
+  const { sidebarHeightBelow } = useLayoutStore();
 
   return (
     <div className="flex min-h-screen">

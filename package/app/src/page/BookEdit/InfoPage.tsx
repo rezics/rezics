@@ -21,7 +21,7 @@ import { type UpdateBookInput } from '@package/contract';
 import { useEffect } from 'react';
 import { BookExtraEditor } from '@/component/Book/Metadata/BookExtraEditor';
 import { RouterLink } from '@/component/Navigation/RouterLink';
-import { bookEditLayoutRoute } from '@/router/router';
+import { bookEditLayoutRoute } from '@/router';
 
 function validatePublishURL(publishURL: string[]) {
   return publishURL.every(url => url.startsWith('https://'));
@@ -44,7 +44,7 @@ const updateBookDialog = (
           <Typography variant="body1">{text?.message}</Typography>
           <Typography variant="body1">
             {text?.showBookLink && (
-              <RouterLink href={`/book/${text.bookId}`}>
+              <RouterLink to={`/book/${text.bookId}`}>
                 {t('page.book_edit.info.dialog.view_book')}
               </RouterLink>
             )}

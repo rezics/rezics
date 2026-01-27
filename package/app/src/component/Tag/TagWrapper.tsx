@@ -155,7 +155,7 @@ export const TagWrapper: React.FC<TagWrapperProps> = ({
                 </span>
               ) : (
                 <RouterLink
-                  href={`/tag/domain/${domId}/title/${domainTitleMap.get(domId as string) ?? String(domId)
+                  to={`/tag/domain/${domId}/title/${domainTitleMap.get(domId as string) ?? String(domId)
                     }`}
                   className="text-sm font-semibold"
                 >
@@ -170,7 +170,7 @@ export const TagWrapper: React.FC<TagWrapperProps> = ({
       {!renderAll && isMobile && (
         <div className="mt-4 text-sm text-gray-500">
           {t('tag.showing_top_tags')} ·
-          <RouterLink href={`/tag/book/${filters?.objectId}/tag`}>
+          <RouterLink to={`/tag/book/${filters?.objectId}/tag`}>
             {t('common.view_all')} →
           </RouterLink>
         </div>

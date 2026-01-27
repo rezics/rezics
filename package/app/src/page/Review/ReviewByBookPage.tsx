@@ -1,15 +1,15 @@
-import {useNavigate} from '@tanstack/react-router';
+import { useNavigate } from '@tanstack/react-router';
 
-import {ReviewsPage} from '@/page/Review/ReviewsPage';
-import {AccentBarWithTextShow} from '@/component/Common/Navigation/AccentBar';
-import {ReviewNewPage} from '@/page/Review/ReviewNewPage';
-import {useTranslation} from 'react-i18next';
-import {Button, Divider} from '@mui/material';
-import {reviewByBookRoute} from '@/router/router';
+import { ReviewsPage } from '@/page/Review/ReviewsPage';
+import { AccentBarWithTextShow } from '@/component/Common/Navigation/AccentBar';
+import { ReviewNewPage } from '@/page/Review/ReviewNewPage';
+import { useTranslation } from 'react-i18next';
+import { Button, Divider } from '@mui/material';
+import { reviewByBookRoute } from '@/router';
 
 export function ReviewByBookPage() {
-  const {bookId} = reviewByBookRoute.useParams();
-  const {t} = useTranslation();
+  const { bookId } = reviewByBookRoute.useParams();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   return (
     <div className="w-11/12 max-w-4xl mx-auto mt-10">
@@ -18,7 +18,7 @@ export function ReviewByBookPage() {
         <Button
           variant="outlined"
           color="primary"
-          onClick={() => navigate({to: `/book/${bookId}`})}
+          onClick={() => navigate({ to: `/book/${bookId}` })}
         >
           {t('common.back')}
         </Button>

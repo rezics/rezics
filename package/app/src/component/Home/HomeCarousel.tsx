@@ -4,9 +4,9 @@ import {useQuery} from '@tanstack/react-query';
 import {echoKvGetQuery} from '@/api/echokv/echokv';
 import {parseEchoKVResponse} from '@/api/echokv/util';
 import {useAlertStore} from '@/global/windowAlertStore';
-import {Link} from 'wouter';
 import {LazyLoadImage} from '@/component/Common/LazyLoadImage';
 import {useTranslation} from 'react-i18next';
+import { Link } from '@/component/Navigation/Link';
 
 import {
   Carousel,

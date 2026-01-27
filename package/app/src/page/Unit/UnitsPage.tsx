@@ -1,8 +1,9 @@
 import React, {useEffect, useMemo, useRef, useState} from 'react';
 import {Tabs, Tab, Box, Tooltip, Chip, Paper, Typography} from '@mui/material';
 import {useQuery, useQueryClient} from '@tanstack/react-query';
+import { useRouterState } from '@tanstack/react-router';
 import {useTranslation} from 'react-i18next';
-import {Link, useSearchParams} from 'wouter';
+import { Link } from '@/component/Navigation/Link';
 
 import {
   UniversalPaginator,
@@ -100,7 +101,8 @@ export const UnitsPage: React.FC<UnitsPageProps> = ({
   const {t} = useTranslation();
   const ref = useRef<UniversalPaginatorHandle>(null);
   const queryClient = useQueryClient();
-  const [searchParams] = useSearchParams();
+  const search = useRouterState({ select: s => s.location.search ?? '' });
+  const searchParams = useMemo(() => new URLSearchParams(search), [search]);
 
   const isSingle = mode === 'single';
 
@@ -128,7 +130,7 @@ export const UnitsPage: React.FC<UnitsPageProps> = ({
       setTab(types[0]);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams, isSingle]);
+  }, [search, isSingle]);
 
   // ensure startMap has keys for current tabTypes
   useEffect(() => {

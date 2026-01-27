@@ -1,10 +1,10 @@
 import React from 'react';
 import type {NodeRendererProps} from 'react-arborist';
-import {Link} from 'wouter';
 import {useTheme, alpha} from '@mui/material/styles';
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
+import { Link } from '@/component/Navigation/Link';
 
 // Type used inside the BookEditorSidebar tree
 export type Chapter = {
@@ -121,7 +121,7 @@ export const createChapterArboristNode = (
           ) : hasChildren ? (
             <span className="truncate">{node.data.title}</span>
           ) : (
-            <Link href={isEditable ? '#' : `${baseLink}/${node.id}`}>
+            <Link to={isEditable ? '#' : `${baseLink}/${node.id}`}>
               <span className="block truncate">{node.data.title}</span>
             </Link>
           )}

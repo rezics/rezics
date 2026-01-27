@@ -9,7 +9,7 @@ import {
 } from '@mui/material';
 import {useCreateFeedbackMutation} from '@/api/feedback/feedback.mutations';
 import type {CreateFeedbackInput} from '@/api/feedback/feedback.types';
-import {useLocation} from 'wouter';
+import { useRouterState } from '@tanstack/react-router';
 import {useEffect} from 'react';
 
 type FeedbackFormProps = {
@@ -28,7 +28,9 @@ const FeedbackForm: React.FC<FeedbackFormProps> = ({
   defaultValues,
   onSubmitted,
 }) => {
-  const [location] = useLocation();
+  const locationKey = useRouterState({
+    select: s => `${s.location.pathname}${s.location.search ?? ''}`,
+  });
   const [form, setForm] = useState<CreateFeedbackInput>({
     url: '',
     content: defaultValues?.content ?? '',
@@ -36,8 +38,8 @@ const FeedbackForm: React.FC<FeedbackFormProps> = ({
   });
 
   useEffect(() => {
-    setForm(prev => ({...prev, url: location}));
-  }, [location]);
+    setForm(prev => ({...prev, url: locationKey}));
+  }, [locationKey]);
 
   const [errors, setErrors] = useState({
     content: false,

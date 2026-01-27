@@ -1,28 +1,28 @@
-import {useState, useEffect} from 'react';
-import {useQuery} from '@tanstack/react-query';
+import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import EasyEditor from '@/component/Form/EasyEditor';
-import {Button} from '@mui/material';
-import {reviewQueries} from '@/api/review/review.queries';
+import { Button } from '@mui/material';
+import { reviewQueries } from '@/api/review/review.queries';
 import {
   useUpdateReviewMutation,
   useDeleteReviewMutation,
 } from '@/api/review/review.mutations';
-import type {ReviewResponse, UpdateReviewInput} from '@package/contract';
-import {TextField} from '@mui/material';
-import {useTranslation} from 'react-i18next';
-import {useAlertStore} from '@/global/windowAlertStore';
-import {DeleteButton} from '@/component/Form/DeleteWrapper';
-import {useNavigate} from '@tanstack/react-router';
-import {RatingWithInput} from '@/component/Form/Rating';
-import {reviewEditRoute} from '@/router/router';
+import type { ReviewResponse, UpdateReviewInput } from '@package/contract';
+import { TextField } from '@mui/material';
+import { useTranslation } from 'react-i18next';
+import { useAlertStore } from '@/global/windowAlertStore';
+import { DeleteButton } from '@/component/Form/DeleteWrapper';
+import { useNavigate } from '@tanstack/react-router';
+import { RatingWithInput } from '@/component/Form/Rating';
+import { reviewEditRoute } from '@/router';
 
 interface ReviewEditPageProps {
   data: ReviewResponse;
   setData: (data: ReviewResponse) => void;
 }
 
-export function ReviewEditPage({data, setData}: ReviewEditPageProps) {
-  const {t} = useTranslation();
+export function ReviewEditPage({ data, setData }: ReviewEditPageProps) {
+  const { t } = useTranslation();
   return (
     <div className="flex flex-col gap-4 mt-2">
       <div className="flex flex-col gap-2">
@@ -31,7 +31,7 @@ export function ReviewEditPage({data, setData}: ReviewEditPageProps) {
           label={t('review.form.title')}
           variant="standard"
           value={data.title || ''}
-          onChange={e => setData({...data, title: e.target.value})}
+          onChange={e => setData({ ...data, title: e.target.value })}
         />
       </div>
 
@@ -39,7 +39,7 @@ export function ReviewEditPage({data, setData}: ReviewEditPageProps) {
         <span className="text-sm font-medium">{t('review.form.rating')}</span>
         <RatingWithInput
           value={data.rating || 0}
-          onChange={value => setData({...data, rating: value ?? 0})}
+          onChange={value => setData({ ...data, rating: value ?? 0 })}
           max={10}
           precision={0.5}
           size="large"
@@ -49,7 +49,7 @@ export function ReviewEditPage({data, setData}: ReviewEditPageProps) {
       <div className="flex-1 min-h-[300px]">
         <EasyEditor
           value={data.content || ''}
-          onChange={value => setData({...data, content: value})}
+          onChange={value => setData({ ...data, content: value })}
         />
       </div>
     </div>
@@ -57,9 +57,9 @@ export function ReviewEditPage({data, setData}: ReviewEditPageProps) {
 }
 
 export function ReviewEditPageContainer() {
-  const {reviewId} = reviewEditRoute.useParams();
-  const {t} = useTranslation();
-  const {data, isLoading, isError} = useQuery(reviewQueries.detail(reviewId));
+  const { reviewId } = reviewEditRoute.useParams();
+  const { t } = useTranslation();
+  const { data, isLoading, isError } = useQuery(reviewQueries.detail(reviewId));
   const navigate = useNavigate();
   const [reviewData, setReviewData] = useState<ReviewResponse>(
     {} as ReviewResponse,
@@ -70,9 +70,9 @@ export function ReviewEditPageContainer() {
     }
   }, [data]);
 
-  const {show} = useAlertStore();
+  const { show } = useAlertStore();
 
-  const {mutate, isPending} = useUpdateReviewMutation({
+  const { mutate, isPending } = useUpdateReviewMutation({
     onSuccess: () => {
       show(t('review.messages.update_success'));
     },
@@ -81,7 +81,7 @@ export function ReviewEditPageContainer() {
     },
   });
 
-  const {mutate: deleteReviewMutation, isPending: _isDeleting} =
+  const { mutate: deleteReviewMutation, isPending: _isDeleting } =
     useDeleteReviewMutation({
       onSuccess: () => {
         show(t('review.messages.delete_success'));
@@ -104,14 +104,14 @@ export function ReviewEditPageContainer() {
       rating: reviewData.rating || 0,
     };
 
-    mutate({id: reviewId, input});
+    mutate({ id: reviewId, input });
   }
 
   function handleDelete() {
     deleteReviewMutation(reviewId, {
       onSuccess: () => {
         show(t('review.messages.delete_success'));
-        navigate({to: `/review/book/${reviewData.bookId}`});
+        navigate({ to: `/review/book/${reviewData.bookId}` });
       },
       onError: error => {
         show(`Review delete failed: ${error}`);

@@ -1,6 +1,7 @@
 import React, {useEffect, useMemo, useRef, useState} from 'react';
 import {Tabs, Tab, Box} from '@mui/material';
 import {useQuery, useQueryClient} from '@tanstack/react-query';
+import { useRouterState } from '@tanstack/react-router';
 
 import {
   UniversalPaginator,
@@ -8,7 +9,6 @@ import {
 } from '@/component/Common/Navigation/Pagination';
 import {ReviewListContainer} from '@/component/Review/ReviewList';
 import type {ReviewDTO} from '@package/contract';
-import {useSearchParams} from 'wouter';
 import {SimpleSearchInput} from '@/component/Search/SimpleSearchInput';
 import {buildMeiliUnitQuery} from '@/api/meili/meili.queries';
 import {reactionApi} from '@/api/reaction/reaction.api';
@@ -30,7 +30,8 @@ export const ReviewsPage: React.FC<ReviewsPageProps> = ({bookUnitId}) => {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [tab, setTab] = useState<'review' | 'remark'>('review');
   const [keyword, setKeyword] = useState<string>('');
-  const [searchParams, _setSearchParams] = useSearchParams();
+  const search = useRouterState({ select: s => s.location.search ?? '' });
+  const searchParams = useMemo(() => new URLSearchParams(search), [search]);
 
   useEffect(() => {
     const tabParam = searchParams.get('tab');
@@ -39,7 +40,7 @@ export const ReviewsPage: React.FC<ReviewsPageProps> = ({bookUnitId}) => {
         setTab(tabParam as 'review' | 'remark');
       }
     }
-  }, [searchParams]);
+  }, [search]);
 
   const reviewListQueryOpts = useQuery(
     buildMeiliUnitQuery(

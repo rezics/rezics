@@ -1,6 +1,6 @@
 import {Button, Dialog, DialogActions, DialogContent} from '@mui/material';
 import React from 'react';
-import {useLocation} from 'wouter';
+import { useNavigate } from '@tanstack/react-router';
 import {Facebook, Twitter, Instagram, Telegram} from '@mui/icons-material';
 
 export type ReactionBarToolBoxProps = {
@@ -16,13 +16,15 @@ export const ReactionBarToolBox: React.FC<ReactionBarToolBoxProps> = ({
   itemUrl,
   itemText = 'Source: REZICS',
 }) => {
-  const [_, navigate] = useLocation();
+  const navigate = useNavigate();
   const origin = window?.location?.origin;
   const itemFullUrl = origin + itemUrl;
 
   function handleLinkClick() {
     navigator.clipboard.writeText(itemUrl || '');
-    navigate(itemUrl || '');
+    if (itemUrl) {
+      navigate({ to: itemUrl });
+    }
   }
 
   return (

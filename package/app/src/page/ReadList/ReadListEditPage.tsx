@@ -1,7 +1,7 @@
-import React, {useEffect} from 'react';
-import {useState} from 'react';
-import {buildMeiliUnitQuery} from '@/api/meili/meili.queries';
-import {UnitType} from '@package/contract';
+import React, { useEffect } from 'react';
+import { useState } from 'react';
+import { buildMeiliUnitQuery } from '@/api/meili/meili.queries';
+import { UnitType } from '@package/contract';
 import {
   Button,
   IconButton,
@@ -10,23 +10,23 @@ import {
   TextField,
   Tooltip,
 } from '@mui/material';
-import {ArrowDownward, ArrowUpward, Delete} from '@mui/icons-material';
-import {useQuery, useQueryClient} from '@tanstack/react-query';
+import { ArrowDownward, ArrowUpward, Delete } from '@mui/icons-material';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 import {
   readlistQueries,
   useDeleteReadlistMutation,
   useUpdateReadlistMutation,
 } from '@/api/readlist/readlist';
-import {reviewQueries} from '@/api/review/review';
-import {BookReviewGroup} from '@/component/ReadList/Review.tsx';
-import {bookQueries} from '@/api/book/book';
-import {useNavigate} from '@tanstack/react-router';
-import {ConfirmDeleteDialog} from '@/component/Form/ConfirmDeleteDialog';
-import {useAlertStore} from '@/global/windowAlertStore';
-import {mapUnitListToReviewListResponse} from '@/api/meili/meili.api';
-import {useTranslation} from 'react-i18next';
-import {readlistEditRoute} from '@/router/router';
+import { reviewQueries } from '@/api/review/review';
+import { BookReviewGroup } from '@/component/ReadList/Review.tsx';
+import { bookQueries } from '@/api/book/book';
+import { useNavigate } from '@tanstack/react-router';
+import { ConfirmDeleteDialog } from '@/component/Form/ConfirmDeleteDialog';
+import { useAlertStore } from '@/global/windowAlertStore';
+import { mapUnitListToReviewListResponse } from '@/api/meili/meili.api';
+import { useTranslation } from 'react-i18next';
+import { readlistEditRoute } from '@/router';
 
 function extractReviewId(input: string): string | null {
   if (!input) return null;
@@ -41,8 +41,8 @@ function extractReviewId(input: string): string | null {
 
 const PasteReviewUrlInput: React.FC<{
   onAdd: (id: string) => void;
-}> = ({onAdd}) => {
-  const {t} = useTranslation();
+}> = ({ onAdd }) => {
+  const { t } = useTranslation();
   const [input, setInput] = useState('');
 
   const handleAdd = () => {
@@ -71,11 +71,11 @@ const PasteReviewUrlInput: React.FC<{
 
 const ReviewSearchBox: React.FC<{
   onAdd: (id: string) => void;
-}> = ({onAdd}) => {
-  const {t} = useTranslation();
+}> = ({ onAdd }) => {
+  const { t } = useTranslation();
   const [keyword, setKeyword] = useState('');
   const [q, setQ] = useState('');
-  const {data, isLoading} = useQuery(
+  const { data, isLoading } = useQuery(
     buildMeiliUnitQuery(
       UnitType.REVIEW,
       0,
@@ -152,8 +152,8 @@ const ReviewItemRow: React.FC<{
   onRemove: (id: string) => void;
   onMoveUp: (id: string) => void;
   onMoveDown: (id: string) => void;
-}> = ({reviewId, bookData, reviewData, onRemove, onMoveUp, onMoveDown}) => {
-  const {t} = useTranslation();
+}> = ({ reviewId, bookData, reviewData, onRemove, onMoveUp, onMoveDown }) => {
+  const { t } = useTranslation();
   return (
     <div className="flex items-start gap-3">
       <div className="flex flex-col gap-1">
@@ -194,14 +194,14 @@ export const ReadListEditor: React.FC<{
   header?: React.ReactNode;
   readlistData: any;
   setReadlistData: (data: any) => void;
-}> = ({header, readlistData, setReadlistData}) => {
-  const {t} = useTranslation();
+}> = ({ header, readlistData, setReadlistData }) => {
+  const { t } = useTranslation();
   useEffect(() => {
     console.log('readlistData update', readlistData);
   }, [readlistData]);
 
   function updateReviewIds(ids: string[]) {
-    setReadlistData(prev => ({...prev, order: ids}));
+    setReadlistData(prev => ({ ...prev, order: ids }));
   }
 
   const queryClient = useQueryClient();
@@ -259,7 +259,7 @@ export const ReadListEditor: React.FC<{
             variant="standard"
             value={readlistData?.title}
             onChange={e =>
-              setReadlistData(prev => ({...prev, title: e.target.value}))
+              setReadlistData(prev => ({ ...prev, title: e.target.value }))
             }
           />
           <div className="mt-2" />
@@ -269,7 +269,7 @@ export const ReadListEditor: React.FC<{
             className="w-full"
             value={readlistData?.content}
             onChange={e =>
-              setReadlistData(prev => ({...prev, content: e.target.value}))
+              setReadlistData(prev => ({ ...prev, content: e.target.value }))
             }
           />
           <TextField
@@ -278,7 +278,7 @@ export const ReadListEditor: React.FC<{
             className="w-full"
             value={readlistData?.coverUrl}
             onChange={e =>
-              setReadlistData(prev => ({...prev, coverUrl: e.target.value}))
+              setReadlistData(prev => ({ ...prev, coverUrl: e.target.value }))
             }
           />
         </Paper>
@@ -328,11 +328,11 @@ export const ReadListEditor: React.FC<{
 };
 
 export function ReadListEditPage() {
-  const {readlistId} = readlistEditRoute.useParams();
+  const { readlistId } = readlistEditRoute.useParams();
   const navigate = useNavigate();
-  const {data, isLoading} = useQuery(readlistQueries.detail(readlistId || ''));
+  const { data, isLoading } = useQuery(readlistQueries.detail(readlistId || ''));
   type ReadlistData = typeof data;
-  const {t} = useTranslation();
+  const { t } = useTranslation();
 
   const updateReadlistMutation = useUpdateReadlistMutation();
 
@@ -389,7 +389,7 @@ export function ReadListEditPage() {
     deleteReadlistMutation.mutate(readlistId, {
       onSuccess: () => {
         console.log(t('page.readlist.delete_success'));
-        navigate({to: `/readlist`});
+        navigate({ to: `/readlist` });
       },
       onError: error => {
         console.error(t('page.readlist.delete_failed'), error);
@@ -409,7 +409,7 @@ export function ReadListEditPage() {
             variant="outlined"
             color="primary"
             className="!mr-2"
-            onClick={() => navigate({to: `/readlist/${readlistId}`})}
+            onClick={() => navigate({ to: `/readlist/${readlistId}` })}
           >
             {t('common.back')}
           </Button>

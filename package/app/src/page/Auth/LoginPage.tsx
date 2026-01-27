@@ -2,9 +2,9 @@ import Alert from '@mui/material/Alert';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import { Dialog, DialogContent } from '@mui/material';
+import { useNavigate, useRouterState } from '@tanstack/react-router';
 import { type FC, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useLocation } from 'wouter';
 
 import { PasswordField } from '@/component/Form/PasswordField';
 import { RouterLink } from '@/component/Navigation/RouterLink.tsx';
@@ -44,7 +44,8 @@ export const LoginPage: FC<LoginPageProps> = ({
     password: '',
   });
   const { setUser } = useUserStore();
-  const [location, navigate] = useLocation();
+  const navigate = useNavigate();
+  const pathname = useRouterState({ select: s => s.location.pathname });
 
   const handleSubmit = async () => {
     let hasError = false;
@@ -72,8 +73,8 @@ export const LoginPage: FC<LoginPageProps> = ({
     }
     if (!hasError) {
       onClose?.();
-      if (location === '/login') {
-        navigate('/');
+      if (pathname === '/login') {
+        navigate({ to: '/' });
       }
     }
   };
@@ -82,7 +83,7 @@ export const LoginPage: FC<LoginPageProps> = ({
     if (onRegisterClick) {
       onRegisterClick();
     } else {
-      navigate('/register');
+      navigate({ to: '/register' });
       console.log('handleRegisterClick');
       onClose?.();
     }
@@ -114,7 +115,7 @@ export const LoginPage: FC<LoginPageProps> = ({
         New to ReZICS?&nbsp;
         <TextButton onClick={handleRegisterClick}>Create an account</TextButton>
         <br />
-        <RouterLink href="/reset-password">Forget password?</RouterLink>
+        <RouterLink to="/reset-password">Forget password?</RouterLink>
       </div>
     </>
   );

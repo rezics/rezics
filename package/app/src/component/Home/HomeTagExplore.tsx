@@ -3,8 +3,8 @@ import {useQuery} from '@tanstack/react-query';
 import {Alert, CircularProgress, Typography, Chip} from '@mui/material';
 import {bookQueries} from '@/api/book/book';
 import type {BookDTO} from '@package/contract';
-import {Link} from 'wouter';
 import {useTranslation} from 'react-i18next';
+import { Link } from '@/component/Navigation/Link';
 
 type Book = BookDTO;
 
@@ -63,7 +63,7 @@ export const HomeTagExplore: React.FC<HomeTagExploreProps> = ({
       </div>
       <div className="flex flex-wrap gap-2">
         {tags.map(tag => (
-          <Link key={tag} href={`/book`}>
+          <Link key={tag} to={`/book`}>
             <Chip label={tag} clickable variant="outlined" />
           </Link>
         ))}

@@ -9,7 +9,6 @@ import {
   Chip,
   Tooltip,
 } from '@mui/material';
-import { Link } from 'wouter';
 import EditIcon from '@mui/icons-material/Edit';
 import { useEffect, type FC } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -20,6 +19,7 @@ import { UserError, UserLoading } from './UserState';
 import { useUserStore } from '@/global/userStore';
 import FollowButton from '@/component/Common/Reaction/FollowButton';
 import { UserUnitsPage } from './UserUnitsPage';
+import { Link } from '@/component/Navigation/Link';
 
 export interface UserProfilePageProps {
   unitId: string;
@@ -178,17 +178,17 @@ export const UserProfilePage: FC<UserProfilePageProps> = ({
             <Typography variant="h6" className="font-semibold inline-block">
               导航：
             </Typography>
-            <Link href={`/user/me/bookmark`}>
+            <Link to={`/user/me/bookmark`}>
               <Button variant="text" color="primary">
                 书签
               </Button>
             </Link>
-            <Link href={`/user/me/follow`}>
+            <Link to={`/user/me/follow`}>
               <Button variant="text" color="primary">
                 关注
               </Button>
             </Link>
-            <Link href={`/user/me/reaction`}>
+            <Link to={`/user/me/reaction`}>
               <Button variant="text" color="primary">
                 反应
               </Button>

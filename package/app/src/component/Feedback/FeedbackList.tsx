@@ -25,8 +25,8 @@ import {
 } from '@/component/Common/Navigation/Pagination';
 
 import {Popover, PopoverContent, PopoverTrigger} from '@/component/ui/popover';
-import {Link} from 'wouter';
 import {useAlertStore} from '@/global/windowAlertStore';
+import { Link } from '@/component/Navigation/Link';
 
 export type FeedbackResolvedFilter = boolean | undefined;
 
@@ -311,7 +311,18 @@ const FeedbackList: React.FC<FeedbackListProps> = ({
                   <Divider className="my-1" />
 
                   <div>
-                    <Link href={item.url ?? ''}>{item.url}</Link>
+                    {(() => {
+                      const url = item.url ?? '';
+                      if (!url) return null;
+                      const isInternal = url.startsWith('/');
+                      return isInternal ? (
+                        <Link to={url}>{url}</Link>
+                      ) : (
+                        <a href={url} target="_blank" rel="noreferrer">
+                          {url}
+                        </a>
+                      );
+                    })()}
                   </div>
                   <Typography variant="body2">{item.content}</Typography>
                 </Paper>

@@ -8,8 +8,8 @@ import {
 } from '@mui/material';
 import {type SearchInfo} from '@/component/Search/searchParser';
 import React, {useEffect, useMemo, useState} from 'react';
+import { useRouterState } from '@tanstack/react-router';
 import {useTranslation} from 'react-i18next';
-import {useSearchParams, useLocation} from 'wouter';
 import {
   IsLicensedInfo,
   NSFWInfo,
@@ -191,12 +191,13 @@ export const SearchInputContainer: React.FC<SearchInputContainerProps> = ({
   tagGroups,
   hiddenWordCountFilter = false,
 }) => {
-  const [searchParams] = useSearchParams();
-  const [location, _navigate] = useLocation();
+  const pathname = useRouterState({ select: s => s.location.pathname });
+  const search = useRouterState({ select: s => s.location.search ?? '' });
+  const searchParams = useMemo(() => new URLSearchParams(search), [search]);
   const [value, setValue] = useState(defaultValue);
 
   useEffect(() => {
-    if (location === '/book') {
+    if (pathname === '/book') {
       const keyword = searchParams.get('keyword');
       const tags = searchParams.get('tags')?.split(',') ?? [];
       const nsfwFlag = searchParams.get('nsfw') === 'true';
@@ -211,7 +212,7 @@ export const SearchInputContainer: React.FC<SearchInputContainerProps> = ({
       onSearch(currentSearch);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams, location]);
+  }, [search, pathname]);
 
   const handleSearch = () => {
     onSearch({

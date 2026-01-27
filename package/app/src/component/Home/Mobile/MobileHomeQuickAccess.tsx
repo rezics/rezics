@@ -1,9 +1,9 @@
 import React, {useMemo} from 'react';
-import {Link} from 'wouter';
 import {echoKvGetQuery} from '@/api/echokv/echokv';
 import {useQuery} from '@tanstack/react-query';
 import {parseEchoKVResponse} from '@/api/echokv/util';
 import {useTranslation} from 'react-i18next';
+import { Link } from '@/component/Navigation/Link';
 
 export type MobileHomeQuickAccessProps = {
   title?: string;
@@ -34,7 +34,7 @@ export const MobileHomeQuickAccess: React.FC<MobileHomeQuickAccessProps> = ({
       )}
       <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide px-1">
         {(Array.isArray(items) ? items : []).map(name => (
-          <Link key={name} href={`/book?tags=${name}`}>
+          <Link key={name} to={`/book?tags=${name}`}>
             <div className="whitespace-nowrap rounded-full bg-secondary/80 px-3 py-1.5 text-xs font-medium text-secondary-foreground hover:bg-secondary transition-colors border border-transparent hover:border-primary/20">
               {name}
             </div>

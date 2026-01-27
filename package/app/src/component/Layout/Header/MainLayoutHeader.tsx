@@ -4,11 +4,11 @@ import {ThemeQuickToggle} from '@/component/Theme/ThemeCustomizer.tsx';
 import {useLayoutStore} from '@/global/Layout/layoutStore.ts';
 import {Brightness4, Brightness7, Menu} from '@mui/icons-material';
 import {AppBar, IconButton, Toolbar, Typography} from '@mui/material';
-import {Link} from 'wouter';
 import {useTheme} from '@mui/material/styles';
 import React from 'react';
 import {useTranslation} from 'react-i18next';
 import {cn} from '@/lib/utils';
+import { Link } from '@/component/Navigation/Link';
 
 interface HeaderProps {
   handleDrawerToggle: () => void;
@@ -74,7 +74,7 @@ export const Header: React.FC<HeaderProps> = ({
           <Menu />
         </IconButton>
         <Typography variant="h6" noWrap component="div" sx={{flexGrow: 1}}>
-          <Link href="/">REZICS</Link>
+          <Link to="/">REZICS</Link>
         </Typography>
         {/* <ThemeQuickToggle /> */}
         <LangToggle />

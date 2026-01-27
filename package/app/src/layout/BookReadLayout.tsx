@@ -1,14 +1,14 @@
-import {Header} from '@/component/Layout/Header/MainLayoutHeader';
-import {Sidebar} from '@/component/Layout/Sidebar/Sidebar';
-import {Button, Divider, useMediaQuery} from '@mui/material';
-import React, {type ReactNode, useEffect, useState} from 'react';
+import { Header } from '@/component/Layout/Header/MainLayoutHeader';
+import { Sidebar } from '@/component/Layout/Sidebar/Sidebar';
+import { Button, Divider, useMediaQuery } from '@mui/material';
+import React, { type ReactNode, useEffect, useState } from 'react';
 
-import {DraggableResizer} from '@/component/Layout/DraggableResizer';
-import {LinearChapterList} from '@/component/Book/Chapter/LinearChapterList';
-import {useNavigate} from '@tanstack/react-router';
-import {useResponsiveSidebar} from './useResponsiveSidebar';
-import {useLayoutStore} from '@/global/Layout/layoutStore';
-import {bookReadLayoutRoute} from '@/router/router';
+import { DraggableResizer } from '@/component/Layout/DraggableResizer';
+import { LinearChapterList } from '@/component/Book/Chapter/LinearChapterList';
+import { useNavigate } from '@tanstack/react-router';
+import { useResponsiveSidebar } from './useResponsiveSidebar';
+import { useLayoutStore } from '@/global/Layout/layoutStore';
+import { bookReadLayoutRoute } from '@/router';
 export interface BookReadLayoutProps {
   children: ReactNode;
 }
@@ -17,12 +17,12 @@ export const BookReadLayout: React.FC<BookReadLayoutProps> = ({
   children,
 }) => {
   const navigate = useNavigate();
-  const {bookId, chapterId} = bookReadLayoutRoute.useParams();
+  const { bookId, chapterId } = bookReadLayoutRoute.useParams();
   const [selectedId, setSelectedId] = useState(
     String(chapterId ?? ''),
   );
 
-  const {sidebarHeightBelow} = useLayoutStore();
+  const { sidebarHeightBelow } = useLayoutStore();
 
   useEffect(() => {
     setSelectedId(String(chapterId ?? ''));
@@ -67,7 +67,7 @@ export const BookReadLayout: React.FC<BookReadLayoutProps> = ({
               <Button
                 variant="text"
                 onClick={() => {
-                  navigate({to: `/book/${bookId}/`});
+                  navigate({ to: `/book/${bookId}/` });
                 }}
               >
                 返回书籍

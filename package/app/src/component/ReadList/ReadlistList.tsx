@@ -1,12 +1,12 @@
 import type {ReadlistResponse} from '@package/contract';
 import {Grid} from '@mui/material';
 import React from 'react';
-import {useLocation} from 'wouter';
+import { useNavigate } from '@tanstack/react-router';
 import {SingleReadlist} from './SingleReadlistCard';
 
 // * Complete list of book-related reading lists.
 export function ReadlistList({booklists}: {booklists: ReadlistResponse[]}) {
-  const [, navigate] = useLocation();
+  const navigate = useNavigate();
 
   const handleLike = (id: string) => {
     console.log('Liked book ID:', id);
@@ -17,7 +17,7 @@ export function ReadlistList({booklists}: {booklists: ReadlistResponse[]}) {
     console.log('Original event object:', event);
     event.preventDefault();
     event.stopPropagation();
-    navigate(`/readlist/${id}`);
+    navigate({ to: `/readlist/${id}` });
   };
 
   return (

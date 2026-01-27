@@ -14,8 +14,8 @@ import {
 } from '@mui/material';
 import {Delete} from '@mui/icons-material';
 import {type BookmarkEntry} from '@/page/User/BookmarkPage';
-import {Link} from 'wouter';
 import {buildUnitUrl} from '@/util/buildUrlUtil';
+import { Link } from '@/component/Navigation/Link';
 
 type BookmarkItemCardProps = {
   entry: BookmarkEntry;

@@ -1,5 +1,4 @@
 import {ReadlistList} from '@component/ReadList/ReadlistList.tsx';
-import {Link as _Link} from 'wouter';
 import {AccentBarWithTextContainer} from '../Common/Navigation/AccentBar.tsx';
 import {ArrowForwardIconContainer} from '../Common/Navigation/ArrowForwardIcon.tsx';
 

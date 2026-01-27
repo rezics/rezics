@@ -1,15 +1,15 @@
-import React, {useCallback, useEffect, useMemo, useState} from 'react';
-import {Button, CircularProgress, TextField} from '@mui/material';
-import {useTranslation} from 'react-i18next';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { Button, CircularProgress, TextField } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 
 import EasyEditor from '@/component/Form/EasyEditor.tsx';
-import {useQuery, useQueryClient} from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   chapterDetailQuery,
   useUpdateChapterMutation,
 } from '@/api/chapter/chapter';
-import {bookMutations, bookChapterIndexQuery} from '@/api/book/book';
-import {bookEditChapterRoute, bookEditLayoutRoute} from '@/router/router';
+import { bookMutations, bookChapterIndexQuery } from '@/api/book/book';
+import { bookEditChapterRoute, bookEditLayoutRoute } from '@/router';
 
 /**
  * TODO 正常来说，所有的章节分卷管理都需要在这里解决，新增章节的时候选择分卷，或者删除章节。
@@ -17,9 +17,9 @@ import {bookEditChapterRoute, bookEditLayoutRoute} from '@/router/router';
  * @returns
  */
 export const BookEditChapterPage: React.FC = () => {
-  const {bookId} = bookEditLayoutRoute.useParams();
-  const {chapterId} = bookEditChapterRoute.useParams();
-  const {t} = useTranslation();
+  const { bookId } = bookEditLayoutRoute.useParams();
+  const { chapterId } = bookEditChapterRoute.useParams();
+  const { t } = useTranslation();
 
   // Load chapter detail
   const {
@@ -69,19 +69,11 @@ export const BookEditChapterPage: React.FC = () => {
     );
     if (chapterIndex) {
       console.log(chapterIndex);
-      const order = chapterIndex?.index?.order;
-      let chapters = chapterIndex?.index?.chapters;
-      if (chapters) {
-        chapters = Object.values(chapters).map((chapter: any) => {
-          if (chapter.id === chapterId) {
-            return {id: chapterId, title};
-          }
-          return chapter;
-        });
-      }
+      const newChapterIndex = { ...chapterIndex };
+      newChapterIndex.index[chapterId] = { ...newChapterIndex.index[chapterId], title };
       updateChapterIndexMutation.mutateAsync({
         bookUnitId: bookId,
-        chaptersIndex: {order, chapters},
+        chaptersIndex: newChapterIndex,
       });
     }
   }, [

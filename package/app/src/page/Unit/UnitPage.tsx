@@ -6,7 +6,7 @@ import { unitDetailQuery } from '@/api/unit/unit';
 import { AccentBarContainer } from '@/component/Common/Navigation/AccentBar';
 import { MarkdownContent } from '@/component/Common/MarkdownContent';
 import { RouterLink } from '@/component/Navigation/RouterLink';
-import { unitRoute } from '@/router/router';
+import { unitRoute } from '@/router';
 
 function formatMetadataValue(value: unknown): string {
   if (value === null || value === undefined) return '-';
@@ -115,7 +115,7 @@ export function UnitPage() {
               <div className="flex flex-col">
                 <Tooltip title={t('user.open_profile')}>
                   <RouterLink
-                    href={`/user/${unit.user.unitId}`}
+                    to={`/user/${unit.user.unitId}`}
                     className="text-sm font-medium"
                   >
                     {unit.user.name}

@@ -1,7 +1,7 @@
 import ArrowForwardIosRoundedIcon from '@mui/icons-material/ArrowForwardIosRounded';
 import {Box, styled, Typography} from '@mui/material';
 import React from 'react';
-import {Link} from 'wouter';
+import { Link } from '@/component/Navigation/Link';
 
 const LinkWithIcon = styled(Box)(({theme}) => ({
   display: 'inline-flex',

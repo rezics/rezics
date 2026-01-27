@@ -18,7 +18,7 @@ import {
   UniversalPaginator,
   type UniversalPaginatorHandle,
 } from '@/component/Common/Navigation/Pagination';
-import {useLocation} from 'wouter';
+import { useNavigate } from '@tanstack/react-router';
 
 type ReactionInfoPageProps = {
   unitId?: string;
@@ -77,7 +77,7 @@ export const ReactionInfoPage: React.FC<ReactionInfoPageProps> = ({
   unitId,
   isCurrentUser = false,
 }) => {
-  const [_location, navigate] = useLocation();
+  const navigate = useNavigate();
   const currentUser = useUserStore(state => state.user);
   const resolvedUnitId = useMemo(
     () => unitId || (isCurrentUser ? currentUser?.unitId : unitId),
@@ -188,7 +188,7 @@ export const ReactionInfoPage: React.FC<ReactionInfoPageProps> = ({
         <Button
           variant="text"
           color="primary"
-          onClick={() => navigate('/user/me')}
+          onClick={() => navigate({ to: '/user/me' })}
         >
           返回
         </Button>

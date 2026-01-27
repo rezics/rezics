@@ -2,7 +2,6 @@ import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 import ThumbDownIcon from '@mui/icons-material/ThumbDown';
 import ThumbUpIcon from '@mui/icons-material/ThumbUp';
 import {Box, Tooltip, Typography} from '@mui/material';
-import {Link} from 'wouter';
 import type {ReviewDTO} from '@package/contract';
 import React, {useState, useEffect} from 'react';
 import {CollapsibleByLineTextContainer} from '../Common/UI/Text/CollapsibleByLineText';
@@ -12,6 +11,7 @@ import {
 } from '@/util/reactionSummariesParser';
 
 import {LazyLoadImage} from '../Common/LazyLoadImage';
+import { RouterLink } from '@/component/Navigation/RouterLink';
 
 export function MetaInfoBadge({
   review,
@@ -23,8 +23,8 @@ export function MetaInfoBadge({
   return (
     <Tooltip title="阅读完整评测" placement="top-start">
       <Box
-        component={Link}
-        href={`/remark/${review.unitId}`}
+        component={RouterLink}
+        to={`/remark/${review.unitId}`}
         className="flex items-center gap-1"
         sx={{
           textDecoration: 'none',

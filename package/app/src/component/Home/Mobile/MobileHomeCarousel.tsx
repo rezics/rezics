@@ -2,8 +2,8 @@ import React, {useEffect, useRef, useState} from 'react';
 import {useQuery} from '@tanstack/react-query';
 import {echoKvGetQuery} from '@/api/echokv/echokv';
 import {parseEchoKVResponse} from '@/api/echokv/util';
-import {Link} from 'wouter';
 import {LazyLoadImage} from '@/component/Common/LazyLoadImage';
+import { Link } from '@/component/Navigation/Link';
 import {
   Carousel,
   CarouselContent,

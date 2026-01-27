@@ -30,20 +30,15 @@ type Notice = {
   pin?: boolean;
 };
 
-function formatRelative(dateIso: string): string {
-  // legacy signature retained below
-  return formatRelativeWithT((x: any) => x, dateIso);
-}
-
 function formatRelativeWithT(t: TFunction, dateIso: string): string {
   const ms = Date.now() - new Date(dateIso).getTime();
   const h = Math.floor(ms / 36e5);
   if (h < 1) return t('page.home.noticeboard.time.just_now');
-  if (h < 24) return t('page.home.noticeboard.time.hours_ago', { count: h });
+  if (h < 24) return t('page.home.noticeboard.time.hours_ago_other', { count: h });
   const d = Math.floor(h / 24);
-  if (d < 7) return t('page.home.noticeboard.time.days_ago', { count: d });
+  if (d < 7) return t('page.home.noticeboard.time.days_ago_other', { count: d });
   const w = Math.floor(d / 7);
-  return t('page.home.noticeboard.time.weeks_ago', { count: w });
+  return t('page.home.noticeboard.time.weeks_ago_other', { count: w });
 }
 
 function TagBadge({ tag, t }: { tag?: Notice['tag']; t: TFunction }) {

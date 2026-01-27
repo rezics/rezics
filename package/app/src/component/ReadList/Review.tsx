@@ -2,7 +2,7 @@ import React from 'react';
 import {IconButton, Paper, Tooltip} from '@mui/material';
 import {ExpandMore, ExpandLess, ChatBubbleOutline} from '@mui/icons-material';
 import {BookListViewItem} from '@/component/BookLib/BookList/BookListView.tsx';
-import {navigate} from 'wouter/use-browser-location';
+import { useNavigate } from '@tanstack/react-router';
 import {MarkdownContent} from '../Common/MarkdownContent';
 import {ReviewHeader} from '@/component/Review/SingleReview';
 import {useTranslation} from 'react-i18next';
@@ -39,6 +39,7 @@ export const CollapsibleReview: React.FC<CollapsibleReviewProps> = ({
   footer,
 }) => {
   const {t} = useTranslation();
+  const navigate = useNavigate();
   const [expanded, setExpanded] = React.useState<boolean>(defaultExpanded);
   const contentId = React.useId();
   const contentRef = React.useRef<HTMLDivElement | null>(null);
@@ -87,7 +88,7 @@ export const CollapsibleReview: React.FC<CollapsibleReviewProps> = ({
           <Tooltip title={t('review.open_review_page')}>
             <IconButton
               aria-label={t('review.a11y.open_review_page')}
-              onClick={() => navigate(`/review/${review?.unitId}`)}
+              onClick={() => navigate({ to: `/review/${review?.unitId}` })}
             >
               <ChatBubbleOutline fontSize="small" />
             </IconButton>

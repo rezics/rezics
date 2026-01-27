@@ -30,11 +30,11 @@ import {
 } from '@/api/meili/meili.api';
 import {buildMeiliUnitQuery} from '@/api/meili/meili.queries';
 import {UnitType} from '@package/contract';
-import {Link} from 'wouter';
 import {LazyLoadImage} from '../Common/LazyLoadImage';
 import {Masonry} from '@mui/lab';
 import {useThrottleMasonryParameters} from '@/util/useMasonryParameters';
 import {useTranslation} from 'react-i18next';
+import { Link } from '@/component/Navigation/Link';
 
 type Book = BookDTO;
 type Readlist = ReadlistDTO;

@@ -1,5 +1,5 @@
 import React from 'react';
-import {useLocation} from 'wouter';
+import { useNavigate } from '@tanstack/react-router';
 import {BookSearchContainer} from '@/component/BookLib/BookSearch/BookSearch';
 import type {BookQueryOptions} from '@package/contract';
 
@@ -10,7 +10,7 @@ export type HomeSearchBarProps = object;
  * Wraps the BookSearchContainer; on submit, navigate to /book.
  */
 export const HomeSearchBar: React.FC<HomeSearchBarProps> = () => {
-  const [, navigate] = useLocation();
+  const navigate = useNavigate();
   function handleSearch(options: BookQueryOptions) {
     let query = '?';
     if (options.keyword) {
@@ -25,7 +25,7 @@ export const HomeSearchBar: React.FC<HomeSearchBarProps> = () => {
     if (options.isLicensed) {
       query += `isLicensed=true&`;
     }
-    navigate(`/book${query}`);
+    navigate({ to: `/book${query}` });
   }
   return (
     <BookSearchContainer onSearch={handleSearch} hiddenWordCountFilter={true} />

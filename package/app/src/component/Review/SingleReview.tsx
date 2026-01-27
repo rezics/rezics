@@ -1,12 +1,12 @@
 import {ReactionBar} from '@/component/Common/Reaction/ReactionBar';
 import {Avatar, Box, Rating, Tooltip, Typography} from '@mui/material';
-import {Link} from 'wouter';
 import {type ReviewDTO} from '@package/contract';
 import React from 'react';
 import {CollapsibleReview} from '@/component/ReadList/Review';
 import {parseReactionSummaries} from '@/util/reactionSummariesParser';
 import {ReactionStatistics} from '../Common/Reaction/ReactionStatistics';
 import {useTranslation} from 'react-i18next';
+import { Link } from '@/component/Navigation/Link';
 
 export const ReviewHeader: React.FC<{
   review: ReviewDTO;
@@ -17,7 +17,7 @@ export const ReviewHeader: React.FC<{
     <div className="flex flex-wrap items-center mb-2 gap-2">
       <Tooltip title={t('review.open_user_interface')} placement="top-start">
         <Link
-          href={`/user/${review.user?.unitId}`}
+          to={`/user/${review.user?.unitId}`}
           className="flex items-center"
         >
           {/* Avatar */}
@@ -41,7 +41,7 @@ export const ReviewHeader: React.FC<{
       {/* Rating + Time (push to right, but wrap under on small screens) */}
       <div className="ml-auto text-right min-w-[120px]">
         <Tooltip title={t('review.open_review_page')} placement="top-end">
-          <Link href={`/review/${review.unitId}`}>
+          <Link to={`/review/${review.unitId}`}>
             <div>
               <Rating defaultValue={review.rating} precision={0.5} readOnly />
               <Typography variant="body2" color="text.secondary">

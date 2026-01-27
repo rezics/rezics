@@ -4,7 +4,7 @@ import TextField from '@mui/material/TextField';
 import {Dialog, DialogContent} from '@mui/material';
 import {type FC, useRef, useState} from 'react';
 import {useTranslation} from 'react-i18next';
-import {useLocation} from 'wouter';
+import { useNavigate, useRouterState } from '@tanstack/react-router';
 
 import {Turnstile} from '@/component/Form/Turnstile.tsx';
 import {PasswordField} from '@/component/Form/PasswordField';
@@ -48,7 +48,8 @@ export const ResetPasswordPage: FC<ResetPasswordPageProps> = ({
     confirm: '',
   });
   const verificationRef = useRef<GetVerificationCodeHandle | null>(null);
-  const [location, navigate] = useLocation();
+  const navigate = useNavigate();
+  const pathname = useRouterState({ select: s => s.location.pathname });
 
   const handleSubmit = async () => {
     let hasError = false;
@@ -94,8 +95,8 @@ export const ResetPasswordPage: FC<ResetPasswordPageProps> = ({
 
     if (!hasError) {
       onClose?.();
-      if (location === '/reset-password') {
-        navigate('/login');
+      if (pathname === '/reset-password') {
+        navigate({ to: '/login' });
       }
     }
   };
@@ -106,7 +107,7 @@ export const ResetPasswordPage: FC<ResetPasswordPageProps> = ({
   };
 
   const handleLoginClick = () => {
-    navigate('/login');
+    navigate({ to: '/login' });
   };
 
   const LayoutComponent = isModal ? ModalLayout : Layout;

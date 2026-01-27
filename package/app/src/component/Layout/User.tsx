@@ -14,9 +14,9 @@ import {
   Menu,
   MenuItem,
 } from '@mui/material';
+import { useNavigate } from '@tanstack/react-router';
 import React, {useState} from 'react';
-import {Link} from 'wouter';
-import {useLocation} from 'wouter';
+import { Link } from '@/component/Navigation/Link';
 
 import {LoginModal} from '@/page/Auth/LoginPage';
 import {RegisterModal} from '@/page/Auth/RegisterPage';
@@ -166,7 +166,7 @@ export type UserContainerProps = {
 };
 
 export const UserContainer: React.FC<UserContainerProps> = ({onLogout}) => {
-  const [_location, navigate] = useLocation();
+  const navigate = useNavigate();
   const {setUser} = useUserStore();
   const user = useUserStore(state => state.user);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -183,7 +183,7 @@ export const UserContainer: React.FC<UserContainerProps> = ({onLogout}) => {
     handleMenuClose();
     onLogout?.();
     setUser(null);
-    navigate('/login');
+    navigate({ to: '/login' });
     logout();
   };
 

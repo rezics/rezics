@@ -1,6 +1,6 @@
 import {Card, CardContent, CardMedia, Typography} from '@mui/material';
 
-import {Link} from 'wouter';
+import { Link } from '@/component/Navigation/Link';
 
 import type {BookDTO} from '@package/contract';
 import {LazyLoadImage} from '@/component/Common/LazyLoadImage';

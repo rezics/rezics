@@ -1,7 +1,7 @@
 import {Rating} from '@mui/material';
 import React from 'react';
-import {Link} from 'wouter';
 import {useTranslation} from 'react-i18next';
+import { Link } from '@/component/Navigation/Link';
 
 import type {BookDTO} from '@package/contract';
 import {
@@ -88,7 +88,7 @@ export const BookHeroShow: React.FC<{
             {/* Tags */}
             <div className="flex flex-wrap gap-2 mt-1">
               {tags?.map(tag => (
-                <Link key={tag} href={`/book?tags=${tag}`}>
+                <Link key={tag} to={`/book?tags=${tag}`}>
                   <span className="px-2 py-1 rounded bg-white/10 text-white hover:bg-white/20 transition">
                     {tag}
                   </span>

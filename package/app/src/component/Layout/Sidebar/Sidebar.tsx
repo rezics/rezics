@@ -18,14 +18,15 @@ import {
   ListItemText,
   Typography,
 } from '@mui/material';
+import { useRouterState } from '@tanstack/react-router';
 import React, {type ReactNode, useEffect} from 'react';
-import {Link, useLocation} from 'wouter';
 
 import {useWindowSize} from 'react-use';
 import useMeasure from 'react-use-measure';
 
 import {Sidebar as UiSidebar} from '@/component/ui/sidebar';
 import {cn} from '@/lib/utils';
+import { RouterLink } from '@/component/Navigation/RouterLink';
 
 export function DrawerHeader({
   handleDrawerToggle,
@@ -88,7 +89,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   const heightBelow = `calc(100vh - ${height}px)`;
 
-  const [location, _setLocation] = useLocation();
+  const pathname = useRouterState({ select: s => s.location.pathname });
 
   const handleItemClick = (
     // @ts-expect-error - event is not used
@@ -131,15 +132,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
               return <Divider key={index} />;
             }
 
-            const isActive = location === `/${item.segment}`;
+            const isActive = pathname === `/${item.segment}`;
             const hasChildren = !!item.children && item.children.length > 0;
             const isOpen = item.segment ? !!openItems[item.segment] : false;
 
             return (
               <div key={item.segment || index.toString()}>
                 <ListItemButton
-                  component={Link}
-                  href={hasChildren ? '' : `${item.segment}`}
+                  component={hasChildren ? 'div' : RouterLink}
+                  {...(!hasChildren ? {to: `${item.segment}`} : {})}
                   selected={isActive && !hasChildren}
                   onClick={(event: any) =>
                     handleItemClick(event, item.segment, hasChildren)
@@ -161,12 +162,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   <Collapse in={isOpen} timeout="auto" unmountOnExit>
                     <List component="div" disablePadding>
                       {item.children?.map((child: any) => {
-                        const isChildActive = location === `/${child.segment}`;
+                        const isChildActive = pathname === `/${child.segment}`;
                         return (
                           <ListItemButton
                             key={child.segment}
-                            component={Link}
-                            href={`${child.segment}`}
+                            component={RouterLink}
+                            to={`${child.segment}`}
                             selected={isChildActive}
                             onClick={event =>
                               handleItemClick(event, child.segment, false)

@@ -4,7 +4,7 @@ import { AccentBarWithTextShow } from '@/component/Common/Navigation/AccentBar';
 import { tagApi, tagQueries } from '@/api/tag/tag';
 import type { TagDetailDTO } from '@package/contract';
 import { TagWrapper } from '@/component/Tag/TagWrapper';
-import { tagBookFullDomainRoute, tagBookFullRoute, tagBookRoute } from '@/router/router';
+import { tagBookFullDomainRoute, tagBookFullRoute, tagBookRoute } from '@/router';
 
 export function TagByBookPage() {
   const { bookId } = tagBookRoute.useParams();
@@ -54,7 +54,7 @@ export function TagByBookPage() {
 
       {showSeeAll && (
         <div className="mt-4">
-          <RouterLink href={`/tag/book/${bookId}/tag`}>
+          <RouterLink to={`/tag/book/${bookId}/tag`}>
             <span className="text-primary-600 hover:underline">
               查看全部标签（{total}）
             </span>

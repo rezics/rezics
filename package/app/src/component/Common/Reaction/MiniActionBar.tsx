@@ -2,7 +2,7 @@ import {IconButton, Popper, Tooltip} from '@mui/material';
 
 import {Add, Comment, Edit, FavoriteBorder} from '@mui/icons-material';
 import {useTranslation} from 'react-i18next';
-import {useLocation} from 'wouter';
+import { useNavigate } from '@tanstack/react-router';
 import {useUserStore} from '@/global/userStore';
 import {useQuery} from '@tanstack/react-query';
 import {
@@ -29,7 +29,7 @@ export function MiniAdminActionBar({
   const user = useUserStore(state => state.user);
   const isAdmin = user?.permission?.role.includes('ADMIN');
   const isOwner = user?.unitId === userUnitId;
-  const [_location, navigate] = useLocation();
+  const navigate = useNavigate();
 
   if (!isAdmin && !isOwner) {
     return null;
@@ -41,7 +41,7 @@ export function MiniAdminActionBar({
           aria-label={t('common.edit')}
           size="small"
           onClick={() => {
-            navigate(editionURL);
+            navigate({ to: editionURL });
           }}
         >
           <Edit fontSize="small" className={textColor} />

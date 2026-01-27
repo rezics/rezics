@@ -1,19 +1,19 @@
 import React, {useState} from 'react';
 import {ReadListEditor} from './ReadListEditPage';
 import {Button} from '@mui/material';
+import { useNavigate } from '@tanstack/react-router';
 import {useCreateReadlistMutation} from '@/api/readlist/readlist.mutations';
-import {useLocation} from 'wouter';
 import {useTranslation} from 'react-i18next';
 
 export const NewReadListPage: React.FC = () => {
-  const [, navigate] = useLocation();
+  const navigate = useNavigate();
   const [readlistData, setReadlistData] = useState<any>({
     books: [],
     reviews: [],
   });
   const createReadlistMutation = useCreateReadlistMutation({
     onSuccess: data => {
-      navigate(`/readlist/${data.id}`);
+      navigate({ to: `/readlist/${data.id}` });
     },
     onError: error => {
       console.error('create readlist failed', error);

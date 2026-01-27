@@ -3,7 +3,6 @@
 // import {ReviewEditPage} from '@/page/Review/ReviewEditPage';
 // import {ShortReviewListShow} from '@/component/Review/ShortReviewList.tsx';
 // import {useQuery} from '@tanstack/react-query';
-// import {useParams} from 'wouter';
 
 // export function ShortReviewByBookPage() {
 //   const {bookId} = useParams();

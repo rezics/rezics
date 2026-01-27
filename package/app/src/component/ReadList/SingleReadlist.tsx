@@ -10,9 +10,9 @@ import {
 } from '@mui/material';
 import ThumbUpAltOutlinedIcon from '@mui/icons-material/ThumbUpAltOutlined';
 import BookmarkAddOutlinedIcon from '@mui/icons-material/BookmarkAddOutlined';
-import {Link} from 'wouter';
 import {LazyLoadImage} from '../Common/LazyLoadImage';
 import {useTranslation} from 'react-i18next';
+import { RouterLink } from '@/component/Navigation/RouterLink';
 
 interface SingleReadlistProps {
   data: ReadlistResponse;
@@ -43,8 +43,8 @@ export function SingleReadlist({
 
   return (
     <Card
-      component={Link as any}
-      href={`/readlist/${id}`}
+      component={RouterLink as any}
+      to={`/readlist/${id}`}
       onClick={(e: React.MouseEvent) => handleBookListClick(id, e)}
       elevation={0}
       className={`mt-4 h-[200px] flex flex-row items-stretch gap-4 w-full ${className}`}

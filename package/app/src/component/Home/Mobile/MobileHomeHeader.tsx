@@ -1,17 +1,17 @@
 import React, {useState} from 'react';
-import {useLocation} from 'wouter';
+import { useNavigate } from '@tanstack/react-router';
 import {MobileHomeQuickAccess} from './MobileHomeQuickAccess';
 import {useTranslation} from 'react-i18next';
 
 export const MobileHomeHeader: React.FC = () => {
   const {t} = useTranslation();
-  const [, navigate] = useLocation();
+  const navigate = useNavigate();
   const [keyword, setKeyword] = useState('');
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (keyword.trim()) {
-      navigate(`/book?keyword=${encodeURIComponent(keyword)}`);
+      navigate({ to: `/book?keyword=${encodeURIComponent(keyword)}` });
     }
   };
 

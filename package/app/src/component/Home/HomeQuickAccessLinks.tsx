@@ -1,10 +1,10 @@
 import React, {useMemo} from 'react';
 import {Chip} from '@mui/material';
-import {Link} from 'wouter';
 import {echoKvGetQuery} from '@/api/echokv/echokv';
 import {useQuery} from '@tanstack/react-query';
 import {parseEchoKVResponse} from '@/api/echokv/util';
 import {useTranslation} from 'react-i18next';
+import { Link } from '@/component/Navigation/Link';
 
 export type HomeQuickAccessLinksProps = {
   title?: string;
@@ -30,7 +30,7 @@ export const HomeQuickAccessLinks: React.FC<HomeQuickAccessLinksProps> = ({
       </div>
       <div className="flex flex-wrap gap-2">
         {(Array.isArray(items) ? items : []).map(name => (
-          <Link key={name} href={`/book?tags=${name}`}>
+          <Link key={name} to={`/book?tags=${name}`}>
             <Chip label={name} variant="filled" clickable />
           </Link>
         ))}

@@ -14,7 +14,7 @@ import {
 
 import {UserBookmarkTagsCard} from './UserBookmarkTagsCard';
 import {BookmarkItemCard} from '@/component/User/Bookmark/BookmarkItemCard';
-import {useLocation} from 'wouter';
+import { useNavigate } from '@tanstack/react-router';
 
 export type BookmarkEntry = {
   unit: UnitDTO;
@@ -47,7 +47,7 @@ const UNIT_TYPE_OPTIONS = [
  * @returns
  */
 export const BookmarkPage: React.FC = () => {
-  const [_location, navigate] = useLocation();
+  const navigate = useNavigate();
   const user = useUserStore(state => state.user);
   const userId = user?.unitId;
   const {show: showAlert} = useAlertStore();
@@ -370,7 +370,7 @@ export const BookmarkPage: React.FC = () => {
           <Button
             variant="text"
             color="primary"
-            onClick={() => navigate('/user/me')}
+            onClick={() => navigate({ to: '/user/me' })}
           >
             返回
           </Button>

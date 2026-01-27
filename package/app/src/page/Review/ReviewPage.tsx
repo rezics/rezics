@@ -26,7 +26,7 @@ import {
 import { ReactionStatistics } from '@/component/Common/Reaction/ReactionStatistics';
 import { parseReactionSummaries } from '@/util/reactionSummariesParser';
 import { RouterLink } from '@/component/Navigation/RouterLink';
-import { remarkRoute, reviewRoute } from '@/router/router';
+import { remarkRoute, reviewRoute } from '@/router';
 
 export function ReviewPage() {
   const reviewMatch = reviewRoute.useMatch({ shouldThrow: false });
@@ -97,11 +97,11 @@ export function ReviewPage() {
               />
             )}
             <div className="text-xs text-gray-500">
-              <RouterLink href={`/book/${review.bookId}`}>{`/book/${review.bookId}`}</RouterLink>
+              <RouterLink to={`/book/${review.bookId}`}>{`/book/${review.bookId}`}</RouterLink>
             </div>
           </div>
           {/* <Button variant="contained" color="primary">
-            <Link href={`/review/${reviewId}/edit`}>{t('common.edit')}</Link>
+            <Link to={`/review/${reviewId}/edit`}>{t('common.edit')}</Link>
           </Button> */}
         </div>
       </div>
@@ -120,7 +120,7 @@ export function ReviewPage() {
               title={t('review.open_user_interface')}
               placement="top-start"
             >
-              <RouterLink href={`/user/${review.user?.unitId}`} className="flex items-center">
+              <RouterLink to={`/user/${review.user?.unitId}`} className="flex items-center">
                 <div className="flex items-center justify-between">
                   <div>
                     <Typography variant="h6" className="font-bold">

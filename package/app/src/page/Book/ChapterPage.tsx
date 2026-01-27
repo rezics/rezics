@@ -1,13 +1,13 @@
-import {useQuery} from '@tanstack/react-query';
-import {chapterDetailQuery} from '@/api/chapter/chapter';
-import {preserveFormattingPlugin} from '@/component/Form/preserveFormatPlugin.ts';
+import { useQuery } from '@tanstack/react-query';
+import { chapterDetailQuery } from '@/api/chapter/chapter';
+import { preserveFormattingPlugin } from '@/component/Form/preserveFormatPlugin.ts';
 import MarkdownIt from 'markdown-it';
 import React from 'react';
-import {bookReadLayoutRoute} from '@/router/router';
+import { bookReadLayoutRoute } from '@/router';
 
 export const BookReadChapterPage: React.FC = () => {
-  const {chapterId} = bookReadLayoutRoute.useParams();
-  const {data, isPending, error, isError} = useQuery(
+  const { chapterId } = bookReadLayoutRoute.useParams();
+  const { data, isPending, error, isError } = useQuery(
     chapterDetailQuery(chapterId),
   );
 
@@ -36,7 +36,7 @@ export const BookReadChapterPage: React.FC = () => {
       <div className="w-11/12 mx-auto p-4">
         <h1 className="text-2xl font-bold">{data?.title}</h1>
         <div id="markdown-chapter-content" className="markdown-body">
-          <div dangerouslySetInnerHTML={{__html: chapterHtml}} />
+          <div dangerouslySetInnerHTML={{ __html: chapterHtml }} />
         </div>
       </div>
     </div>

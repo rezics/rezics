@@ -7,7 +7,6 @@ import {
   CircularProgress,
   Chip,
 } from '@mui/material';
-import {Link} from 'wouter';
 import {useQuery} from '@tanstack/react-query';
 import {reactionQueries} from '@/api/reaction/reaction';
 import {
@@ -16,6 +15,7 @@ import {
 } from '@/api/reaction/reaction.mutations';
 import {useAlertStore} from '@/global/windowAlertStore';
 import {useUserStore} from '@/global/userStore';
+import { Link } from '@/component/Navigation/Link';
 
 export type BookmarkTagManagerProps = {
   /** 当前内容的 unitId / targetId */
@@ -159,7 +159,7 @@ export const BookmarkTagManager: React.FC<BookmarkTagManagerProps> = ({
             ))
           ) : (
             <div className="text-xs text-gray-500">
-              请前往 <Link href="/user/bookmark">/user/bookmark</Link>{' '}
+              请前往 <Link to="/user/bookmark">/user/bookmark</Link>{' '}
               页面设置书签标签。
             </div>
           )}

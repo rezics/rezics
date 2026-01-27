@@ -1,10 +1,10 @@
-import {useState} from 'react';
-import type {FC} from 'react';
-import {UserProfilePage} from './UserProfilePage';
-import {UserEditPage} from './UserEditPage';
-import type {UserDTO} from '@package/contract';
-import {useUserStore} from '@/global/userStore';
-import {userRoute} from '@/router/router';
+import { useState } from 'react';
+import type { FC } from 'react';
+import { UserProfilePage } from './UserProfilePage';
+import { UserEditPage } from './UserEditPage';
+import type { UserDTO } from '@package/contract';
+import { useUserStore } from '@/global/userStore';
+import { userRoute } from '@/router';
 
 export interface UserPageProps {
   isCurrentUser?: boolean;
@@ -17,7 +17,10 @@ export interface UserPageProps {
 export const UserPage: FC<UserPageProps> = ({
   isCurrentUser = false,
 }) => {
-  const routeMatch = userRoute.useMatch({shouldThrow: false});
+  let routeMatch
+  if (!isCurrentUser) {
+    routeMatch = userRoute.useMatch({ shouldThrow: true });
+  }
   const unitId = routeMatch?.params.unitId;
   const [isEditing, setIsEditing] = useState(false);
   const currentUser = useUserStore(state => state.user);

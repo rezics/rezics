@@ -1,6 +1,5 @@
 import React, {useMemo} from 'react';
 import {useQuery} from '@tanstack/react-query';
-import {Link} from 'wouter';
 import {
   meiliBookApi,
   mapUnitListToReadlistListResponse,
@@ -16,6 +15,7 @@ import type {
 } from '@package/contract';
 import {LazyLoadImage} from '@/component/Common/LazyLoadImage';
 import {useTranslation} from 'react-i18next';
+import { Link } from '@/component/Navigation/Link';
 
 type Book = BookDTO;
 type Readlist = ReadlistDTO;
@@ -83,7 +83,7 @@ const SectionHeader: React.FC<{title: string; link?: string}> = ({
   <div className="flex items-center justify-between mb-3 px-1">
     <h2 className="text-lg font-bold text-foreground">{title}</h2>
     {link && (
-      <Link href={link} className="text-xs text-primary hover:underline">
+      <Link to={link} className="text-xs text-primary hover:underline">
         <I18nViewMore />
       </Link>
     )}
@@ -98,7 +98,7 @@ const I18nViewMore: React.FC = () => {
 // Book Card Component
 const MobileBookCard: React.FC<{book: Book}> = ({book}) => (
   <Link
-    href={`/book/${book.unitId}`}
+    to={`/book/${book.unitId}`}
     className="block space-y-2 w-[100px] flex-shrink-0"
   >
     <div className="aspect-[2/3] rounded-lg overflow-hidden bg-muted shadow-sm">
@@ -122,7 +122,7 @@ const MobileBookCard: React.FC<{book: Book}> = ({book}) => (
 // Readlist Card Component
 const MobileReadlistCard: React.FC<{readlist: Readlist}> = ({readlist}) => (
   <Link
-    href={`/readlist/${readlist.id}`}
+    to={`/readlist/${readlist.id}`}
     className="block w-[240px] flex-shrink-0"
   >
     <div className="rounded-xl bg-card border border-border p-3 space-y-2 shadow-sm h-full">
@@ -154,7 +154,7 @@ const I18nNoDescription: React.FC = () => {
 // Review Card Component
 const MobileReviewCard: React.FC<{review: Review}> = ({review}) => (
   <Link
-    href={`/review/${review.unitId}`}
+    to={`/review/${review.unitId}`}
     className="block w-[240px] flex-shrink-0"
   >
     <div className="rounded-xl bg-card border border-border p-3 space-y-2 shadow-sm h-full">
