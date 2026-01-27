@@ -3,8 +3,10 @@ import type {TagDetailDTO} from '@package/contract';
 import {tagQueries} from '@/api/tag/tag';
 import {AccentBarWithTextShow} from '@/component/Common/Navigation/AccentBar';
 import {TagDetailCard} from '@/component/Tag/TagCards';
+import {tagUnitRoute} from '@/router/router';
 
-export function TagUnitPage({unitId}: {unitId: string}) {
+export function TagUnitPage() {
+  const {unitId} = tagUnitRoute.useParams();
   const {data, isLoading, error} = useQuery(tagQueries.detail(unitId));
   if (isLoading) {
     return (

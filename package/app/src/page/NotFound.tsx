@@ -5,7 +5,7 @@ import CardActions from '@mui/material/CardActions';
 import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
 import React from 'react';
-import {useLocation} from 'wouter';
+import {useNavigate, useRouterState} from '@tanstack/react-router';
 
 export type NotFoundShowProps = {
   path: string;
@@ -39,14 +39,17 @@ export const NotFoundShow: React.FC<NotFoundShowProps> = ({
 export type NotFoundContainerProps = object;
 
 export const NotFoundContainer: React.FC<NotFoundContainerProps> = () => {
-  const [path, navigate] = useLocation();
+  const navigate = useNavigate();
+  const path = useRouterState({
+    select: s => `${s.location.pathname}${s.location.search ?? ''}`,
+  });
 
   const handleBack = () => {
     window.history.back();
   };
 
   const handleHome = () => {
-    navigate('/');
+    navigate({to: '/'});
   };
 
   return <NotFoundShow path={path} onBack={handleBack} onHome={handleHome} />;

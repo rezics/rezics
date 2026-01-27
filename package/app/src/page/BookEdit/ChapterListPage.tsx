@@ -10,17 +10,13 @@ import {bookChapterIndexQuery} from '@/api/book/book';
 import {Tab, Tabs} from '@mui/material';
 import {TabContext, TabPanel} from '@mui/lab';
 import {ChapterTreeJsonEditor} from '@/component/Book/Chapter/ChapterTreeJsonEditor';
-
-export interface BookEditChapterListPageProps {
-  bookId: string;
-}
+import {bookEditLayoutRoute} from '@/router/router';
 
 /**
  * TODO 增加 JSON 编辑
  */
-export const BookEditChapterListPage: React.FC<
-  BookEditChapterListPageProps
-> = ({bookId}) => {
+export const BookEditChapterListPage: React.FC = () => {
+  const {bookId} = bookEditLayoutRoute.useParams();
   const queryClient = useQueryClient();
   const containerRef = useRef<HTMLDivElement>(null);
   const [parentWidth, setParentWidth] = useState<number>(0);

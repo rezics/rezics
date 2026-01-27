@@ -2,12 +2,10 @@ import React from 'react';
 import {AccentBarWithTextShow} from '@/component/Common/Navigation/AccentBar';
 import TagListEdit from '@/component/Tag/Edit/TagListEdit';
 import {Alert} from '@mui/material';
+import {bookEditLayoutRoute} from '@/router/router';
 
-export interface BookEditTagPageProps {
-  bookId: string;
-}
-
-export const BookEditTagPage: React.FC<BookEditTagPageProps> = ({bookId}) => {
+export const BookEditTagPage: React.FC = () => {
+  const {bookId} = bookEditLayoutRoute.useParams();
   return (
     <div className="mt-10 mx-auto w-11/12">
       <div className="pl-4">

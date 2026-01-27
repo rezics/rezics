@@ -1,12 +1,12 @@
 import FormatQuoteIcon from '@mui/icons-material/FormatQuote';
-import {Avatar, Paper, Typography, Tooltip, IconButton} from '@mui/material';
-import {Link} from 'wouter';
+import { Avatar, Paper, Typography, Tooltip, IconButton } from '@mui/material';
+import { Link } from 'wouter';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import React from 'react';
-import {useTranslation} from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 
-import {CollapsibleByLineTextContainer} from '../Common/UI/Text/CollapsibleByLineText';
-import {RouterLink} from '../Common/Navigation/RouterLink';
+import { CollapsibleByLineTextContainer } from '../Common/UI/Text/CollapsibleByLineText';
+import { RouterLink } from '../Navigation/RouterLink';
 
 export type SingleQuoteExcerptShowProps = {
   author: {
@@ -31,7 +31,7 @@ export const SingleQuoteExcerptShow: React.FC<SingleQuoteExcerptShowProps> = ({
   source,
   originalLink,
 }) => {
-  const {t} = useTranslation();
+  const { t } = useTranslation();
   return (
     <Paper
       variant="outlined"
@@ -48,7 +48,7 @@ export const SingleQuoteExcerptShow: React.FC<SingleQuoteExcerptShowProps> = ({
           component={RouterLink}
           href={originalLink}
           size="small"
-          sx={{position: 'absolute', top: 8, right: 8}}
+          sx={{ position: 'absolute', top: 8, right: 8 }}
           aria-label="打开全文"
         >
           <OpenInNewIcon fontSize="small" />
@@ -60,7 +60,7 @@ export const SingleQuoteExcerptShow: React.FC<SingleQuoteExcerptShowProps> = ({
           <Link href={`/user/${author.unitId}`} className="flex items-center">
             <Avatar
               src={author.avatar}
-              sx={{width: 20, height: 20, mr: 1}}
+              sx={{ width: 20, height: 20, mr: 1 }}
               variant="rounded"
             />
             <Typography variant="subtitle2" fontWeight="bold">
@@ -84,7 +84,7 @@ export const SingleQuoteExcerptShow: React.FC<SingleQuoteExcerptShowProps> = ({
             component="div"
             variant="body2"
             color="text.primary"
-            sx={{lineHeight: 1.6}}
+            sx={{ lineHeight: 1.6 }}
           >
             <CollapsibleByLineTextContainer content={content} />
           </Typography>

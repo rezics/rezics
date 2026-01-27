@@ -75,3 +75,4 @@ dist-ssr
 
 # Visual Studio Counter
 .VSCodeCounter/
+.tanstack/

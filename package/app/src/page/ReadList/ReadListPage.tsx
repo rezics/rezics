@@ -1,27 +1,28 @@
-import {AccentBarContainer} from '@/component/Common/Navigation/AccentBar';
-import {TreeReplyComponents} from '@/component/Form/Comment/TreeReplyComponents';
-import {ChatBubbleOutline} from '@mui/icons-material';
-import {Avatar, IconButton, Tooltip} from '@mui/material';
-import React, {useRef} from 'react';
-import {Link, useParams} from 'wouter';
-import {useTranslation} from 'react-i18next';
+import { AccentBarContainer } from '@/component/Common/Navigation/AccentBar';
+import { TreeReplyComponents } from '@/component/Form/Comment/TreeReplyComponents';
+import { ChatBubbleOutline } from '@mui/icons-material';
+import { Avatar, IconButton, Tooltip } from '@mui/material';
+import React, { useRef } from 'react';
+import { Route } from '@/routes/_mainLayout/readlist/$readlistId'
+import { Link } from '@/component/Navigation/Link';
+import { useTranslation } from 'react-i18next';
 
-import {readlistQueries} from '@/api/readlist/readlist';
-import {useQuery} from '@tanstack/react-query';
-import {BookReviewGroup} from '@/component/ReadList/Review.tsx';
-import {SingleCommentElementWrapper} from '@/component/Form/Comment/SingleCommentElementWrapper';
+import { readlistQueries } from '@/api/readlist/readlist';
+import { useQuery } from '@tanstack/react-query';
+import { BookReviewGroup } from '@/component/ReadList/Review.tsx';
+import { SingleCommentElementWrapper } from '@/component/Form/Comment/SingleCommentElementWrapper';
 
 import {
   MiniActionBar,
   MiniAdminActionBar,
 } from '@/component/Common/Reaction/MiniActionBar';
-import {parseReactionSummaries} from '@/util/reactionSummariesParser';
-import {ReactionStatistics} from '@/component/Common/Reaction/ReactionStatistics';
+import { parseReactionSummaries } from '@/util/reactionSummariesParser';
+import { ReactionStatistics } from '@/component/Common/Reaction/ReactionStatistics';
 
 export const ReadListPage: React.FC = () => {
-  const {readlistId} = useParams<{readlistId: string}>();
+  const { readlistId } = Route.useParams();
   const commentRef = useRef<HTMLDivElement>(null);
-  const {t} = useTranslation();
+  const { t } = useTranslation();
   const handleGoToComments = () => {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore: scrollIntoView is not defined in the type declaration
@@ -79,7 +80,7 @@ export const ReadListPage: React.FC = () => {
               placement="top-start"
             >
               <Link
-                href={`/user/${bookList.creator?.unitId}`}
+                to={`/user/${bookList.creator?.unitId}`}
                 className="flex items-center"
               >
                 <div className="flex items-center gap-3">
@@ -145,7 +146,7 @@ export const ReadListPage: React.FC = () => {
           </div>
 
           <SingleCommentElementWrapper replyUnitId={readlistId || ''}>
-            <IconButton size="large" sx={{fontSize: '1.5rem'}}>
+            <IconButton size="large" sx={{ fontSize: '1.5rem' }}>
               <ChatBubbleOutline fontSize="inherit" />
             </IconButton>
           </SingleCommentElementWrapper>

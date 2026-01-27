@@ -1,10 +1,10 @@
-import {useQuery} from '@tanstack/react-query';
-import type {CreateBookInput, BookDTO} from '@package/contract';
-import {bookQueries} from '@/api/book/book';
-import {AccentBarWithTextShow} from '@/component/Common/Navigation/AccentBar';
-import {BookMetadataEditor} from '@/component/Book/Metadata/BookMetadataEditor';
+import { useQuery } from '@tanstack/react-query';
+import type { CreateBookInput, BookDTO } from '@package/contract';
+import { bookQueries } from '@/api/book/book';
+import { AccentBarWithTextShow } from '@/component/Common/Navigation/AccentBar';
+import { BookMetadataEditor } from '@/component/Book/Metadata/BookMetadataEditor';
 import React from 'react';
-import {useTranslation} from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 import {
   Button,
   Dialog,
@@ -14,13 +14,14 @@ import {
   Typography,
   Alert,
 } from '@mui/material';
-import {useLocation} from 'wouter';
+import { useNavigate } from '@tanstack/react-router';
 import EasyEditor from '@component/Form/EasyEditor.tsx';
-import {useCreateBookMutation, useUpdateBookMutation} from '@/api/book/book';
-import {type UpdateBookInput} from '@package/contract';
-import {useEffect} from 'react';
-import {BookExtraEditor} from '@/component/Book/Metadata/BookExtraEditor';
-import {RouterLink} from '@/component/Common/Navigation/RouterLink';
+import { useCreateBookMutation, useUpdateBookMutation } from '@/api/book/book';
+import { type UpdateBookInput } from '@package/contract';
+import { useEffect } from 'react';
+import { BookExtraEditor } from '@/component/Book/Metadata/BookExtraEditor';
+import { RouterLink } from '@/component/Navigation/RouterLink';
+import { bookEditLayoutRoute } from '@/router/router';
 
 function validatePublishURL(publishURL: string[]) {
   return publishURL.every(url => url.startsWith('https://'));
@@ -69,21 +70,21 @@ export interface BookEditInfoShowProps {
 }
 
 export interface BookEditMainPageProps {
-  bookId?: string;
   newBook?: boolean;
   pageTitle?: string;
 }
 
 export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
-  bookId,
   newBook = false,
   pageTitle,
 }) => {
-  const {t} = useTranslation();
-  const [_location, navigate] = useLocation();
-  const {data, isLoading, error} = useQuery({
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const editMatch = bookEditLayoutRoute.useMatch({ shouldThrow: false });
+  const bookId = editMatch?.params.bookId;
+  const { data, isLoading, error } = useQuery({
     ...bookQueries.detail(bookId ?? ''),
-    enabled: !newBook,
+    enabled: !newBook && !!bookId,
   });
   const [metadataState, setMetadataState] = React.useState<BookMetadataValue>(
     {},
@@ -202,7 +203,7 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
               variant="outlined"
               color="primary"
               onClick={() => {
-                navigate(`/book/${bookId}/`);
+                navigate({ to: `/book/${bookId}/` });
               }}
             >
               {t('common.back')}
@@ -228,7 +229,7 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
           <BookMetadataEditor
             value={metadataState}
             onChange={value => {
-              setMetadataState(prev => ({...prev, ...value}));
+              setMetadataState(prev => ({ ...prev, ...value }));
             }}
           />
         </div>
@@ -241,7 +242,7 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
         <EasyEditor
           value={metadataState?.description ?? ''}
           onChange={value => {
-            setMetadataState(prev => ({...prev, description: value}));
+            setMetadataState(prev => ({ ...prev, description: value }));
           }}
         />
       </div>
@@ -254,7 +255,7 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
           <BookExtraEditor
             value={metadataState.extra}
             onChange={value => {
-              setMetadataState(prev => ({...prev, extra: value}));
+              setMetadataState(prev => ({ ...prev, extra: value }));
             }}
           />
         </div>

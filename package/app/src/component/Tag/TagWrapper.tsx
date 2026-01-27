@@ -1,13 +1,13 @@
-import React, {useMemo} from 'react';
-import {useQuery} from '@tanstack/react-query';
-import {tagQueries} from '@/api/tag/tag';
-import type {TagFilters, TagDTO, TagDetailDTO} from '@/api/tag/tag';
+import React, { useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { tagQueries } from '@/api/tag/tag';
+import type { TagFilters, TagDTO, TagDetailDTO } from '@/api/tag/tag';
 import TagList from './TagList';
 
-import {RouterLink} from '@/component/Common/Navigation/RouterLink';
+import { RouterLink } from '@/component/Navigation/RouterLink';
 
-import {useIsMobile} from '@/util/useMediaQueryUtil';
-import {useTranslation} from 'react-i18next';
+import { useIsMobile } from '@/util/useMediaQueryUtil';
+import { useTranslation } from 'react-i18next';
 
 type Mode = 'flat' | 'grouped';
 
@@ -74,10 +74,10 @@ function buildGroupsAndDomainTitles({
     const sortedGroups = Array.from(groups.entries()).sort(
       (a, b) => b[1].length - a[1].length,
     );
-    return {groups: new Map(sortedGroups.slice(0, maxGroups)), domainTitleMap};
+    return { groups: new Map(sortedGroups.slice(0, maxGroups)), domainTitleMap };
   }
 
-  return {groups, domainTitleMap};
+  return { groups, domainTitleMap };
 }
 
 /**
@@ -92,8 +92,8 @@ export const TagWrapper: React.FC<TagWrapperProps> = ({
   domainIds,
   className,
 }) => {
-  const {t} = useTranslation();
-  const {data, isLoading, error} = useQuery(tagQueries.list(filters));
+  const { t } = useTranslation();
+  const { data, isLoading, error } = useQuery(tagQueries.list(filters));
   const tags: TagDTO[] = useMemo(() => data?.tags ?? [], [data]);
   const isMobile = useIsMobile();
 
@@ -155,9 +155,8 @@ export const TagWrapper: React.FC<TagWrapperProps> = ({
                 </span>
               ) : (
                 <RouterLink
-                  href={`/tag/domain/${domId}/title/${
-                    domainTitleMap.get(domId as string) ?? String(domId)
-                  }`}
+                  href={`/tag/domain/${domId}/title/${domainTitleMap.get(domId as string) ?? String(domId)
+                    }`}
                   className="text-sm font-semibold"
                 >
                   {domainTitleMap.get(domId as string) ?? String(domId)}

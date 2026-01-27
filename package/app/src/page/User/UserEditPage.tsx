@@ -22,6 +22,7 @@ import {userQueries} from '@/api/user/user.queries';
 import {UserLoading} from './UserState';
 import {userApi} from '@/api/user/user.api';
 import {PasswordField} from '@/component/Form/PasswordField';
+import {userEditRoute} from '@/router/router';
 
 export interface UserEditPageProps {
   onCancel?: () => void;
@@ -38,13 +39,15 @@ export const UserEditPage: FC<UserEditPageProps> = ({
   onSuccess,
   unitId,
 }) => {
+  const routeMatch = userEditRoute.useMatch({shouldThrow: false});
+  const resolvedUnitId = unitId ?? routeMatch?.params.unitId;
   const {t} = useTranslation();
   const [user, setUser] = useState<UserDTO | null>(null);
   const {
     data,
     isLoading,
     error: queryError,
-  } = useQuery(userQueries.detail(unitId ?? ''));
+  } = useQuery(userQueries.detail(resolvedUnitId ?? ''));
   const [error, setError] = useState<string | any | null>(null);
   const [saving, setSaving] = useState(false);
 
@@ -88,10 +91,10 @@ export const UserEditPage: FC<UserEditPageProps> = ({
         updateData.password = formData.password;
       }
       let updatedUser: UserDTO;
-      if (!unitId) {
+      if (!resolvedUnitId) {
         updatedUser = await userApi.updateMe(updateData);
       } else {
-        updatedUser = await userApi.update(unitId, updateData);
+        updatedUser = await userApi.update(resolvedUnitId, updateData);
       }
       setUser(updatedUser);
 

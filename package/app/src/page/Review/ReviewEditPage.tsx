@@ -12,8 +12,9 @@ import {TextField} from '@mui/material';
 import {useTranslation} from 'react-i18next';
 import {useAlertStore} from '@/global/windowAlertStore';
 import {DeleteButton} from '@/component/Form/DeleteWrapper';
-import {useLocation} from 'wouter';
+import {useNavigate} from '@tanstack/react-router';
 import {RatingWithInput} from '@/component/Form/Rating';
+import {reviewEditRoute} from '@/router/router';
 
 interface ReviewEditPageProps {
   data: ReviewResponse;
@@ -55,10 +56,11 @@ export function ReviewEditPage({data, setData}: ReviewEditPageProps) {
   );
 }
 
-export function ReviewEditPageContainer({reviewId}: {reviewId: string}) {
+export function ReviewEditPageContainer() {
+  const {reviewId} = reviewEditRoute.useParams();
   const {t} = useTranslation();
   const {data, isLoading, isError} = useQuery(reviewQueries.detail(reviewId));
-  const [_location, navigate] = useLocation();
+  const navigate = useNavigate();
   const [reviewData, setReviewData] = useState<ReviewResponse>(
     {} as ReviewResponse,
   );
@@ -109,7 +111,7 @@ export function ReviewEditPageContainer({reviewId}: {reviewId: string}) {
     deleteReviewMutation(reviewId, {
       onSuccess: () => {
         show(t('review.messages.delete_success'));
-        navigate(`/review/book/${reviewData.bookId}`);
+        navigate({to: `/review/book/${reviewData.bookId}`});
       },
       onError: error => {
         show(`Review delete failed: ${error}`);

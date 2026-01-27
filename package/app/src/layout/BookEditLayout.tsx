@@ -9,18 +9,18 @@ import {LinearChapterList} from '@/component/Book/Chapter/LinearChapterList';
 
 import {DraggableResizer} from '@/component/Layout/DraggableResizer.tsx';
 import {useResponsiveSidebar} from './useResponsiveSidebar';
+import {bookEditChapterRoute, bookEditLayoutRoute} from '@/router/router';
 
 export interface BookEditLayoutProps {
-  bookId?: string;
-  chapterId?: string;
   children: ReactNode;
 }
 
 export const BookEditLayout: React.FC<BookEditLayoutProps> = ({
   children,
-  bookId,
-  chapterId,
 }) => {
+  const {bookId} = bookEditLayoutRoute.useParams();
+  const chapterMatch = bookEditChapterRoute.useMatch({shouldThrow: false});
+  const chapterId = chapterMatch?.params.chapterId;
   const {
     sidebarOpen,
     handleDrawerToggle,

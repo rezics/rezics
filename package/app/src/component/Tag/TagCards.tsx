@@ -1,7 +1,7 @@
 import React from 'react';
-import {Card, CardContent, Typography, Chip} from '@mui/material';
-import type {TagDetailDTO} from '@/api/tag/tag';
-import {RouterLink} from '../Common/Navigation/RouterLink';
+import { Card, CardContent, Typography, Chip } from '@mui/material';
+import type { TagDetailDTO } from '@/api/tag/tag';
+import { RouterLink } from '../Navigation/RouterLink';
 
 /**
  * Generic card showing a tag's primary information
@@ -11,7 +11,7 @@ export const TagCard: React.FC<{
   tag: TagDetailDTO;
   onClick?: (tag: TagDetailDTO) => void;
   selected?: boolean;
-}> = ({tag, onClick, selected}) => {
+}> = ({ tag, onClick, selected }) => {
   return (
     <div
       className={
@@ -61,7 +61,7 @@ export const TagCard: React.FC<{
 export const TagDetailCard: React.FC<{
   tag: TagDetailDTO;
   onNavigate?: (tag: TagDetailDTO) => void;
-}> = ({tag}) => {
+}> = ({ tag }) => {
   return (
     <Card elevation={0} className="border border-gray-200 rounded-md">
       <CardContent className="space-y-2">

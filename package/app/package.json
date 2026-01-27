@@ -70,10 +70,13 @@
     "uuid": "^11.1.0",
     "vaul": "^1.1.2",
     "wouter": "3.7.1",
-    "zustand": "5.0.7"
+    "zustand": "5.0.7",
+    "@tanstack/react-router": "^1.157.16",
+    "@tanstack/react-router-devtools": "^1.157.16"
   },
   "devDependencies": {
     "@eslint/js": "^9.35.0",
+    "@tanstack/router-plugin": "^1.157.16",
     "@types/humanize-plus": "1.8.2",
     "@types/lodash": "4.17.20",
     "@types/markdown-it": "14.1.2",

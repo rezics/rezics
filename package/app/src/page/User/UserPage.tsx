@@ -4,9 +4,9 @@ import {UserProfilePage} from './UserProfilePage';
 import {UserEditPage} from './UserEditPage';
 import type {UserDTO} from '@package/contract';
 import {useUserStore} from '@/global/userStore';
+import {userRoute} from '@/router/router';
 
 export interface UserPageProps {
-  unitId?: string;
   isCurrentUser?: boolean;
 }
 
@@ -15,9 +15,10 @@ export interface UserPageProps {
  * 根据状态显示用户资料或编辑表单
  */
 export const UserPage: FC<UserPageProps> = ({
-  unitId,
   isCurrentUser = false,
 }) => {
+  const routeMatch = userRoute.useMatch({shouldThrow: false});
+  const unitId = routeMatch?.params.unitId;
   const [isEditing, setIsEditing] = useState(false);
   const currentUser = useUserStore(state => state.user);
   console.log(isCurrentUser, 'isCurrentUser');

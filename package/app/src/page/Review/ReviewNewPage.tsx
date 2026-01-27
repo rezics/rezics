@@ -7,10 +7,14 @@ import {CooldownButton} from '@/component/Common/UI/Button/CooldownButton';
 import {useCreateReviewMutation} from '@/api/review/review.mutations';
 import {useAlertStore} from '@/global/windowAlertStore';
 import {useUserStore} from '@/global/userStore';
-import {useSearchParams} from 'wouter';
+import {useRouterState} from '@tanstack/react-router';
 import {UnitType} from '@package/contract';
-export function ReviewNewPage({bookUnitId}: {bookUnitId: string}) {
-  const [searchParams, _setSearchParams] = useSearchParams();
+import {reviewNewRoute} from '@/router/router';
+
+export function ReviewNewPage() {
+  const {bookUnitId} = reviewNewRoute.useParams();
+  const search = useRouterState({select: s => s.location.search ?? ''});
+  const searchParams = new URLSearchParams(search);
   const [reviewData, setReviewData] = useState<ReviewResponse>(
     {} as ReviewResponse,
   );

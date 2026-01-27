@@ -7,6 +7,7 @@ import {unitQueries} from '@/api/unit/unit.queries';
 import {useUpdateUnitMutation} from '@/api/unit/unit.mutations';
 import {useAlertStore} from '@/global/windowAlertStore';
 import {useTranslation} from 'react-i18next';
+import {quoteEditRoute} from '@/router/router';
 interface QuoteEditPageProps {
   unitId: string;
   data: UnitFormData;
@@ -83,7 +84,8 @@ export function QuoteEditPage({unitId, data, setData}: QuoteEditPageProps) {
   );
 }
 
-export function QuoteEditPageContainer({unitId}: {unitId: string}) {
+export function QuoteEditPageContainer() {
+  const {unitId} = quoteEditRoute.useParams();
   const {
     data: unitData,
     isLoading,

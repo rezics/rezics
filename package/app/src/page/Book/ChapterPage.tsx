@@ -3,10 +3,10 @@ import {chapterDetailQuery} from '@/api/chapter/chapter';
 import {preserveFormattingPlugin} from '@/component/Form/preserveFormatPlugin.ts';
 import MarkdownIt from 'markdown-it';
 import React from 'react';
+import {bookReadLayoutRoute} from '@/router/router';
 
-export const BookReadChapterPage: React.FC<{chapterId: string}> = ({
-  chapterId,
-}) => {
+export const BookReadChapterPage: React.FC = () => {
+  const {chapterId} = bookReadLayoutRoute.useParams();
   const {data, isPending, error, isError} = useQuery(
     chapterDetailQuery(chapterId),
   );

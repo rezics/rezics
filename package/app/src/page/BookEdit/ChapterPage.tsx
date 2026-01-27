@@ -9,21 +9,16 @@ import {
   useUpdateChapterMutation,
 } from '@/api/chapter/chapter';
 import {bookMutations, bookChapterIndexQuery} from '@/api/book/book';
-
-export interface BookEditChapterPageProps {
-  chapterId: string;
-  bookId: string;
-}
+import {bookEditChapterRoute, bookEditLayoutRoute} from '@/router/router';
 
 /**
  * TODO 正常来说，所有的章节分卷管理都需要在这里解决，新增章节的时候选择分卷，或者删除章节。
  * @param param0
  * @returns
  */
-export const BookEditChapterPage: React.FC<BookEditChapterPageProps> = ({
-  chapterId,
-  bookId,
-}) => {
+export const BookEditChapterPage: React.FC = () => {
+  const {bookId} = bookEditLayoutRoute.useParams();
+  const {chapterId} = bookEditChapterRoute.useParams();
   const {t} = useTranslation();
 
   // Load chapter detail

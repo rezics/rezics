@@ -21,11 +21,12 @@ import {
 import {reviewQueries} from '@/api/review/review';
 import {BookReviewGroup} from '@/component/ReadList/Review.tsx';
 import {bookQueries} from '@/api/book/book';
-import {useLocation} from 'wouter';
+import {useNavigate} from '@tanstack/react-router';
 import {ConfirmDeleteDialog} from '@/component/Form/ConfirmDeleteDialog';
 import {useAlertStore} from '@/global/windowAlertStore';
 import {mapUnitListToReviewListResponse} from '@/api/meili/meili.api';
 import {useTranslation} from 'react-i18next';
+import {readlistEditRoute} from '@/router/router';
 
 function extractReviewId(input: string): string | null {
   if (!input) return null;
@@ -326,8 +327,9 @@ export const ReadListEditor: React.FC<{
   );
 };
 
-export function ReadListEditPage({readlistId}: {readlistId: string}) {
-  const [, navigate] = useLocation();
+export function ReadListEditPage() {
+  const {readlistId} = readlistEditRoute.useParams();
+  const navigate = useNavigate();
   const {data, isLoading} = useQuery(readlistQueries.detail(readlistId || ''));
   type ReadlistData = typeof data;
   const {t} = useTranslation();
@@ -387,7 +389,7 @@ export function ReadListEditPage({readlistId}: {readlistId: string}) {
     deleteReadlistMutation.mutate(readlistId, {
       onSuccess: () => {
         console.log(t('page.readlist.delete_success'));
-        navigate(`/readlist`);
+        navigate({to: `/readlist`});
       },
       onError: error => {
         console.error(t('page.readlist.delete_failed'), error);
@@ -407,7 +409,7 @@ export function ReadListEditPage({readlistId}: {readlistId: string}) {
             variant="outlined"
             color="primary"
             className="!mr-2"
-            onClick={() => navigate(`/readlist/${readlistId}`)}
+            onClick={() => navigate({to: `/readlist/${readlistId}`})}
           >
             {t('common.back')}
           </Button>

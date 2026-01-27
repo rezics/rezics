@@ -2,14 +2,13 @@ import {useQuery} from '@tanstack/react-query';
 import {tagQueries} from '@/api/tag/tag';
 import {AccentBarWithTextShow} from '@/component/Common/Navigation/AccentBar';
 import {TagWrapper} from '@/component/Tag/TagWrapper';
+import {tagDomainRoute, tagDomainTitleRoute} from '@/router/router';
 
-export function TagDomainPage({
-  unitId,
-  title,
-}: {
-  unitId: string;
-  title?: string;
-}) {
+export function TagDomainPage() {
+  const withTitleMatch = tagDomainTitleRoute.useMatch({shouldThrow: false});
+  const baseMatch = tagDomainRoute.useMatch({shouldThrow: false});
+  const unitId = withTitleMatch?.params.unitId ?? baseMatch?.params.unitId ?? '';
+  const title = withTitleMatch?.params.title;
   const {data, isLoading, error} = useQuery(
     tagQueries.list({domainId: unitId}),
   );

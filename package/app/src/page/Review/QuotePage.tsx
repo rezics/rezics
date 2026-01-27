@@ -17,11 +17,10 @@ import {
 import {parseReactionSummaries} from '@/util/reactionSummariesParser';
 import {ReactionStatistics} from '@/component/Common/Reaction/ReactionStatistics';
 import {LazyLoadImage} from '@/component/Common/LazyLoadImage';
-export interface QuotePageProps {
-  unitId: string;
-}
+import {quoteRoute} from '@/router/router';
 
-export const QuotePage: React.FC<QuotePageProps> = ({unitId}) => {
+export const QuotePage: React.FC = () => {
+  const {unitId} = quoteRoute.useParams();
   const {t} = useTranslation();
   const commentRef = useRef<HTMLDivElement>(null);
   const handleGoToComments = () => {

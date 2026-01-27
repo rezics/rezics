@@ -1,4 +1,4 @@
-import {useQuery} from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import {
   Avatar,
   Box,
@@ -7,28 +7,32 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
-import {Link} from 'wouter';
-import {useTranslation} from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 
-import {reviewQueries} from '@/api/review/review';
-import {MarkdownContent} from '@/component/Common/MarkdownContent';
-import {bookQueries} from '@/api/book/book';
-import {BookListViewItem} from '@/component/BookLib/BookList/BookListView';
-import {useRef} from 'react';
+import { reviewQueries } from '@/api/review/review';
+import { MarkdownContent } from '@/component/Common/MarkdownContent';
+import { bookQueries } from '@/api/book/book';
+import { BookListViewItem } from '@/component/BookLib/BookList/BookListView';
+import { useRef } from 'react';
 import TreeReplyComponents from '@/component/Form/Comment/TreeReplyComponents';
-import {ChatBubbleOutline} from '@mui/icons-material';
-import {AccentBarContainer} from '@/component/Common/Navigation/AccentBar';
-import {SingleCommentElementWrapper} from '@/component/Form/Comment/SingleCommentElementWrapper';
+import { ChatBubbleOutline } from '@mui/icons-material';
+import { AccentBarContainer } from '@/component/Common/Navigation/AccentBar';
+import { SingleCommentElementWrapper } from '@/component/Form/Comment/SingleCommentElementWrapper';
 
 import {
   MiniActionBar,
   MiniAdminActionBar,
 } from '@/component/Common/Reaction/MiniActionBar';
-import {ReactionStatistics} from '@/component/Common/Reaction/ReactionStatistics';
-import {parseReactionSummaries} from '@/util/reactionSummariesParser';
+import { ReactionStatistics } from '@/component/Common/Reaction/ReactionStatistics';
+import { parseReactionSummaries } from '@/util/reactionSummariesParser';
+import { RouterLink } from '@/component/Navigation/RouterLink';
+import { remarkRoute, reviewRoute } from '@/router/router';
 
-export function ReviewPage({reviewId}: {reviewId: string}) {
-  const {t} = useTranslation();
+export function ReviewPage() {
+  const reviewMatch = reviewRoute.useMatch({ shouldThrow: false });
+  const remarkMatch = remarkRoute.useMatch({ shouldThrow: false });
+  const reviewId = reviewMatch?.params.reviewId ?? remarkMatch?.params.reviewId ?? '';
+  const { t } = useTranslation();
   const {
     data: review,
     isLoading,
@@ -93,9 +97,7 @@ export function ReviewPage({reviewId}: {reviewId: string}) {
               />
             )}
             <div className="text-xs text-gray-500">
-              <Link
-                href={`/book/${review.bookId}`}
-              >{`/book/${review.bookId}`}</Link>
+              <RouterLink href={`/book/${review.bookId}`}>{`/book/${review.bookId}`}</RouterLink>
             </div>
           </div>
           {/* <Button variant="contained" color="primary">
@@ -111,17 +113,14 @@ export function ReviewPage({reviewId}: {reviewId: string}) {
         <div className="flex items-start gap-4">
           <Avatar
             src={review.user?.avatar ?? ''}
-            sx={{width: 56, height: 56, borderRadius: 1}}
+            sx={{ width: 56, height: 56, borderRadius: 1 }}
           />
           <div className="flex-1">
             <Tooltip
               title={t('review.open_user_interface')}
               placement="top-start"
             >
-              <Link
-                href={`/user/${review.user?.unitId}`}
-                className="flex items-center"
-              >
+              <RouterLink href={`/user/${review.user?.unitId}`} className="flex items-center">
                 <div className="flex items-center justify-between">
                   <div>
                     <Typography variant="h6" className="font-bold">
@@ -132,7 +131,7 @@ export function ReviewPage({reviewId}: {reviewId: string}) {
                     </div>
                   </div>
                 </div>
-              </Link>
+              </RouterLink>
             </Tooltip>
           </div>
           <div className="text-right">
@@ -150,7 +149,7 @@ export function ReviewPage({reviewId}: {reviewId: string}) {
         </div>
 
         {/* Content */}
-        <Box sx={{mt: 3}}>
+        <Box sx={{ mt: 3 }}>
           <MarkdownContent content={review.content || ''} />
         </Box>
 
@@ -169,7 +168,7 @@ export function ReviewPage({reviewId}: {reviewId: string}) {
             </div>
 
             <SingleCommentElementWrapper replyUnitId={review.unitId || ''}>
-              <IconButton size="large" sx={{fontSize: '1.5rem'}}>
+              <IconButton size="large" sx={{ fontSize: '1.5rem' }}>
                 <ChatBubbleOutline fontSize="inherit" />
               </IconButton>
             </SingleCommentElementWrapper>

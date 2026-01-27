@@ -5,31 +5,28 @@ import React, {type ReactNode, useEffect, useState} from 'react';
 
 import {DraggableResizer} from '@/component/Layout/DraggableResizer';
 import {LinearChapterList} from '@/component/Book/Chapter/LinearChapterList';
-import {Link, useParams, useRoute} from 'wouter';
+import {useNavigate} from '@tanstack/react-router';
 import {useResponsiveSidebar} from './useResponsiveSidebar';
 import {useLayoutStore} from '@/global/Layout/layoutStore';
+import {bookReadLayoutRoute} from '@/router/router';
 export interface BookReadLayoutProps {
   children: ReactNode;
-  bookId: string;
-  chapterId: string;
 }
 
 export const BookReadLayout: React.FC<BookReadLayoutProps> = ({
   children,
-  bookId,
-  chapterId,
 }) => {
-  const [match, params] = useRoute('/book/:bookId/read/:chapterId');
-  const locationParams = useParams();
+  const navigate = useNavigate();
+  const {bookId, chapterId} = bookReadLayoutRoute.useParams();
   const [selectedId, setSelectedId] = useState(
-    match ? String(params.chapterId) : '',
+    String(chapterId ?? ''),
   );
 
   const {sidebarHeightBelow} = useLayoutStore();
 
   useEffect(() => {
-    setSelectedId(match ? String(params.chapterId) : '');
-  }, [match, params]);
+    setSelectedId(String(chapterId ?? ''));
+  }, [chapterId]);
 
   const {
     sidebarOpen,
@@ -67,12 +64,14 @@ export const BookReadLayout: React.FC<BookReadLayoutProps> = ({
           <div>
             <div className="flex items-center justify-between mb-2 bg-gray-50 text-sm text-gray-800">
               <div className="font-medium">目录</div>
-              <Link
-                to={`/book/${locationParams[0]}/`}
-                className="text-blue-600 hover:underline"
+              <Button
+                variant="text"
+                onClick={() => {
+                  navigate({to: `/book/${bookId}/`});
+                }}
               >
-                <Button variant="text">返回书籍</Button>
-              </Link>
+                返回书籍
+              </Button>
             </div>
             <Divider className="mb-4" />
             <LinearChapterList

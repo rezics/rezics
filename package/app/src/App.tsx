@@ -1,35 +1,38 @@
-import {ThemeProvider} from '@mui/material';
+import { ThemeProvider } from '@mui/material';
 import CssBaseline from '@mui/material/CssBaseline';
-import {StyledEngineProvider} from '@mui/material/styles';
-import {StrictMode, useEffect, useMemo} from 'react';
+import { StyledEngineProvider } from '@mui/material/styles';
+import { StrictMode, useEffect, useMemo } from 'react';
 import 'github-markdown-css/github-markdown-light.css';
 
 import {
   applyDynamicThemeToDOM,
   generateDynamicColors,
 } from './config/dynamicTheme.ts';
-import {getDynamicTheme, getTheme} from './config/theme.ts';
-import {appStore} from './global/appStore.ts';
-import {PersistentSettingsLoader} from './plugin/providers/PersistentSettingsLoader.tsx';
-import {ReactQueryProvider} from './plugin/providers/react-query.tsx';
-import Router from './router/router.tsx';
+import { getDynamicTheme, getTheme } from './config/theme.ts';
+import { appStore } from './global/appStore.ts';
+import { PersistentSettingsLoader } from './plugin/providers/PersistentSettingsLoader.tsx';
+import { ReactQueryProvider } from './plugin/providers/react-query.tsx';
+import { useRouterState } from '@tanstack/react-router';
+import { ErrorBoundary } from 'react-error-boundary';
+import { WindowAlert } from './component/Common/Overlay/WindowAlert.tsx';
+import { HelpFab } from './component/Common/UI/Button/HelpWidget.tsx';
+import { HelmetProvider } from 'react-helmet-async';
 
-import {ErrorBoundary} from 'react-error-boundary';
-import {WindowAlert} from './component/Common/Overlay/WindowAlert.tsx';
-import {HelpFab} from './component/Common/UI/Button/HelpWidget.tsx';
-import {HelmetProvider} from 'react-helmet-async';
+import { useScrollRestore } from './util/useScrollRestore.ts';
+import { startThrottledScroll } from './util/ScrollUtil.ts';
+import { scroll } from './util/ScrollUtil.ts';
+import { useAppInit } from './plugin/providers/useAppInit.ts';
+import { RouterProvider } from '@tanstack/react-router';
 
-import {useScrollRestore} from './util/useScrollRestore.ts';
-import {startThrottledScroll} from './util/ScrollUtil.ts';
-import {scroll} from './util/ScrollUtil.ts';
-import {useLocation} from 'wouter';
-import {useAppInit} from './plugin/providers/useAppInit.ts';
+import { router } from './router.tsx';
 
 export default function App() {
   const themeMode = appStore(s => s.theme);
   const customColor = appStore(s => s.customColor);
   const useDynamicTheme = appStore(s => s.useDynamicTheme);
-  const [location, _navigate] = useLocation();
+  // const location = useRouterState({
+  //   select: s => `${s.location.pathname}${s.location.search ?? ''}`,
+  // });
 
   useAppInit();
 
@@ -40,7 +43,7 @@ export default function App() {
     return getTheme(themeMode, customColor);
   }, [themeMode, customColor, useDynamicTheme]);
 
-  useScrollRestore(location, startThrottledScroll, scroll);
+  // useScrollRestore(location, startThrottledScroll, scroll);
 
   useEffect(() => {
     const html = document.documentElement;
@@ -64,16 +67,14 @@ export default function App() {
               <CssBaseline />
               <PersistentSettingsLoader />
               <ReactQueryProvider>
-                <>
-                  {Router}
-                  <WindowAlert />
-                  <HelpFab />
-                </>
+                <RouterProvider router={router} />
+                <WindowAlert />
+                <HelpFab />
               </ReactQueryProvider>
             </ThemeProvider>
           </StyledEngineProvider>
         </HelmetProvider>
       </StrictMode>
-    </ErrorBoundary>
+    </ErrorBoundary >
   );
 }

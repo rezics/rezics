@@ -1,5 +1,6 @@
 /* eslint-disable no-undef */
 import react from '@vitejs/plugin-react';
+import {tanstackRouter} from '@tanstack/router-plugin/vite';
 import UnoCSS from 'unocss/vite';
 import {resolve} from 'node:path';
 import process from 'node:process';
@@ -10,7 +11,14 @@ export default defineConfig(({mode}) => {
   const env = loadEnv(mode, process.cwd(), 'ICS');
 
   return {
-    plugins: [UnoCSS(), react()],
+    plugins: [
+      tanstackRouter({
+        target: 'react',
+        autoCodeSplitting: true,
+      }),
+      UnoCSS(),
+      react(),
+    ],
     server: {
       port: 35001,
     },

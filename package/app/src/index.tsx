@@ -1,10 +1,10 @@
-import {createRoot} from 'react-dom/client';
+import { createRoot } from 'react-dom/client';
 import './index.css';
 
 import 'virtual:uno.css';
 
 import App from './App.tsx';
-import {initI18n} from './plugin/providers/i18n.ts';
+import { initI18n } from './plugin/providers/i18n.ts';
 // import { setupMock } from "./plugin/providers/mock.ts";
 
 // 初始化（这类副作用放入口即可，不参与热替换）
