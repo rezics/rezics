@@ -1,0 +1,141 @@
+import {coreInstance} from '../core';
+
+import {bookParamsSchema} from '@package/contract';
+import type {BookDTO} from '@package/contract';
+
+import {bookService} from '@package/server/book/book.service';
+import {mapBookToDTO} from '@package/server/book/mapper';
+
+import React from 'react';
+import {renderToReadableStream} from 'react-dom/server';
+import {BookShareDocument} from '../share/BookShareDocument';
+import {withDoctype} from '../share/htmlStream';
+
+// 之后全部走 MeiliSearch API，不要走 prisma，太慢了
+
+function getRequestOrigin(request: Request): string {
+  const xfProto = request.headers.get('x-forwarded-proto');
+  const xfHost = request.headers.get('x-forwarded-host');
+  const host = xfHost ?? request.headers.get('host');
+
+  if (host) {
+    const proto = xfProto ?? 'http';
+    return `${proto}://${host}`;
+  }
+
+  // Fallback: Bun Request.url is typically absolute.
+  try {
+    return new URL(request.url).origin;
+  } catch {
+    return 'http://localhost';
+  }
+}
+
+function toAbsolute(url: string, origin: string): string {
+  try {
+    return new URL(url).toString();
+  } catch {
+    return new URL(url, origin).toString();
+  }
+}
+
+async function renderBookSharePage(opts: {
+  book: BookDTO;
+  canonicalUrl: string;
+  origin: string;
+}): Promise<Response> {
+  const element = React.createElement(BookShareDocument, {
+    book: opts.book,
+    canonicalUrl: opts.canonicalUrl,
+    origin: opts.origin,
+  });
+
+  const stream = (await renderToReadableStream(
+    element,
+  )) as ReadableStream<Uint8Array> & {
+    allReady?: Promise<void>;
+  };
+
+  // Ensure <head> is fully flushed before sending to bots.
+  // (harmless even without Suspense)
+  if (stream.allReady) await stream.allReady;
+
+  return new Response(withDoctype(stream), {
+    headers: {
+      'content-type': 'text/html; charset=utf-8',
+      // Share pages are frequently re-fetched by bots; keep this short.
+      'cache-control': 'public, max-age=60',
+      'x-robots-tag': 'all',
+    },
+  });
+}
+
+export const bookApi = coreInstance('/book')
+  /**
+   * Shareable HTML page (bots can parse OG/Twitter meta).
+   * GET /book/unit/:unitId
+   */
+  .get(
+    '/unit/:unitId',
+    async ({params, request, set}): Promise<Response> => {
+      try {
+        const origin = getRequestOrigin(request);
+        const canonicalUrl = toAbsolute(`/book/unit/${params.unitId}`, origin);
+        const book = await bookService.getByUnitId(params.unitId);
+        const dto = mapBookToDTO(book as any);
+        return await renderBookSharePage({book: dto, canonicalUrl, origin});
+      } catch (err) {
+        set.status = 404;
+        console.log('bookApi.get /book/unit/:unitId error', err);
+        return new Response(
+          '<!doctype html><title>Not Found</title>Not Found',
+          {
+            status: 404,
+            headers: {'content-type': 'text/html; charset=utf-8'},
+          },
+        );
+      }
+    },
+    {
+      params: bookParamsSchema,
+      detail: {
+        summary: 'Book share page',
+        description:
+          'Bot-friendly HTML page with OpenGraph/Twitter meta for sharing',
+        tags: ['Books'],
+      },
+    },
+  )
+  /**
+   * Alias: GET /book/:unitId
+   */
+  .get(
+    '/:unitId',
+    async ({params, request, set}): Promise<Response> => {
+      try {
+        const origin = getRequestOrigin(request);
+        const canonicalUrl = toAbsolute(`/book/${params.unitId}`, origin);
+        const book = await bookService.getByUnitId(params.unitId);
+        const dto = mapBookToDTO(book as any);
+        return await renderBookSharePage({book: dto, canonicalUrl, origin});
+      } catch {
+        set.status = 404;
+        return new Response(
+          '<!doctype html><title>Not Found</title>Not Found',
+          {
+            status: 404,
+            headers: {'content-type': 'text/html; charset=utf-8'},
+          },
+        );
+      }
+    },
+    {
+      params: bookParamsSchema,
+      detail: {
+        summary: 'Book share page (alias)',
+        description:
+          'Alias of /book/unit/:unitId (bot-friendly HTML for sharing)',
+        tags: ['Books'],
+      },
+    },
+  );

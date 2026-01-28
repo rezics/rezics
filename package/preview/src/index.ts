@@ -1,7 +1,6 @@
 import {Elysia} from 'elysia';
 import {swagger} from '@elysiajs/swagger';
 import {bookApi} from './book/book.api';
-import {prisma} from '@package/server';
 import {envConfig} from './config';
 import {getProdState} from './utils/getProdState';
 
@@ -12,9 +11,7 @@ if (isDev) {
 }
 
 const app = new Elysia()
-  .use(swagger())
-  .decorate('prisma', prisma)
-  .use(bookApi)
+  // .decorate('prisma', prisma)
   .trace(async ({onHandle, context}) => {
     // 监听 handle 阶段
     onHandle(({begin, onStop}) => {
@@ -28,9 +25,14 @@ const app = new Elysia()
         );
       });
     });
-  });
+  })
+  .use(bookApi);
 
-const server = app.listen(envConfig.SERVER_PORT);
+if (isDev) {
+  app.use(swagger());
+}
+
+app.listen(envConfig.SERVER_PORT);
 
 console.log(
   `🦊 Elysia is running at http://${app.server?.hostname}:${app.server?.port}`,
