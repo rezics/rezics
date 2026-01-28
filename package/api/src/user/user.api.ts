@@ -76,6 +76,57 @@ export const userApi = {
     return apiFetch(`/meili/users/search${qs}`);
   },
 
+  /**
+   * Admin: list users (includes email).
+   */
+  adminList: async (
+    query?: Record<string, unknown>,
+  ): Promise<{users: UserDTO[]; total: number}> => {
+    const qs = query
+      ? `?${new URLSearchParams(query as Record<string, string>).toString()}`
+      : '';
+    return apiFetch(`/users/admin${qs}`);
+  },
+
+  /**
+   * Admin: get user detail (includes email).
+   */
+  adminGet: async (unitId: string): Promise<UserDTO> => {
+    return apiFetch(`/users/admin/${unitId}`);
+  },
+
+  /**
+   * Admin: create user.
+   */
+  adminCreate: async (input: CreateUser): Promise<UserDTO> => {
+    return apiFetch(`/users/admin`, {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
+  },
+
+  /**
+   * Admin: update user.
+   */
+  adminUpdate: async (unitId: string, input: UpdateUser): Promise<UserDTO> => {
+    return apiFetch(`/users/admin/${unitId}`, {
+      method: 'PUT',
+      body: JSON.stringify(input),
+    });
+  },
+
+  /**
+   * Create user (legacy route, requires admin permission).
+   */
+  create: async (
+    input: CreateUser,
+  ): Promise<{user: UserDTO; token: string}> => {
+    return apiFetch(`/users/create`, {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
+  },
+
   get: async (unitId: string): Promise<Omit<UserDTO, 'email'>> => {
     return apiFetch(`/users/${unitId}`);
   },

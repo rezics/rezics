@@ -1,6 +1,7 @@
 import {coreInstance} from '../core';
 
 import {coreRoute} from './user.core.api';
+import {adminRoute} from './user.admin.api';
 import {followRoute} from './user.follow.api';
 import {verifyRoute} from './user.verify.api';
 
@@ -9,5 +10,6 @@ import {verifyRoute} from './user.verify.api';
  */
 export const userApi = coreInstance('/users')
   .use(coreRoute)
+  .use(adminRoute)
   .use(followRoute)
   .use(verifyRoute);

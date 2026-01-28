@@ -137,6 +137,64 @@ export const coreRoute = (api: ReturnType<typeof coreInstance>) => {
         },
       )
 
+      .post(
+        '/create',
+        async ({
+          body,
+          jwt,
+          headers,
+          set,
+        }): Promise<{user: UserDTO; token: string}> => {
+          const payload = await verifyAuth(headers.authorization, jwt, set);
+          if (!BasicAdminPermission(payload as any)) {
+            set.status = 403;
+            throw new Error('Forbidden: Cannot create user');
+          }
+
+          // Check if slug is valid
+          const slugValidation = validateSlug(body.slug);
+          if (!slugValidation.ok) {
+            set.status = 400;
+            throw new Error('Invalid slug: ' + slugValidation.reason);
+          }
+
+          // Check if email already exists
+          let existing = await userService.getByEmail(body.email);
+          if (existing) {
+            set.status = 409;
+            throw new Error('Email already exists');
+          }
+
+          existing = await userService.getBySlug(slugValidation.normalized);
+          if (existing) {
+            set.status = 409;
+            throw new Error(
+              `Slug(username: ${slugValidation.normalized}) already exists`,
+            );
+          }
+
+          const passwordHash = await hashPassword(body.password);
+          const userReq: CreateUser = {
+            email: body.email,
+            password: passwordHash,
+            slug: slugValidation.normalized,
+            avatar: body.avatar,
+            bio: body.bio,
+          };
+
+          const user = await userService.create(userReq as any);
+          return {user: mapUserToDTO(user), token: ''};
+        },
+        {
+          body: createUserSchema,
+          detail: {
+            summary: 'Create user',
+            description: 'Create a new user',
+            tags: ['Users'],
+          },
+        },
+      )
+
       /**
        * Login user (public)
        * POST /users/login

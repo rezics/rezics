@@ -135,7 +135,7 @@ export class UserService {
    * Create new user
    */
   async create(req: CreateUserFull): Promise<UserWithRelations> {
-    const {email, password, slug, avatar, bio} = req;
+    const {email, password, slug, avatar, bio, type} = req;
 
     const user = await prisma.user.create({
       data: {
@@ -145,7 +145,7 @@ export class UserService {
         name: slug,
         avatar: avatar || undefined,
         bio: bio || undefined,
-        type: UserType.USER,
+        type: type ?? UserType.USER,
         joinDate: new Date(),
       },
       include: userInclude,
@@ -160,12 +160,13 @@ export class UserService {
    * Update user
    */
   async update(unitId: string, req: UpdateUser): Promise<UserWithRelations> {
-    const {name, avatar, bio, password} = req;
+    const {name, avatar, bio, description, password} = req;
 
     const updateData: Prisma.UserUpdateInput = {
       name: name || undefined,
       avatar: avatar || undefined,
       bio: bio || undefined,
+      description: description || undefined,
     };
 
     // Update password if provided

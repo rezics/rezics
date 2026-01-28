@@ -7,8 +7,14 @@ export const userKeys = {
   lists: () => [...userKeys.all(), 'list'] as const,
   list: (filters?: Record<string, unknown>) =>
     [...userKeys.lists(), filters] as const,
+  adminLists: () => [...userKeys.all(), 'admin', 'list'] as const,
+  adminList: (filters?: Record<string, unknown>) =>
+    [...userKeys.adminLists(), filters] as const,
   details: () => [...userKeys.all(), 'detail'] as const,
   detail: (unitId: string) => [...userKeys.details(), unitId] as const,
+  adminDetails: () => [...userKeys.all(), 'admin', 'detail'] as const,
+  adminDetail: (unitId: string) =>
+    [...userKeys.adminDetails(), unitId] as const,
   meDetail: () => [...userKeys.all(), 'me', 'detail'] as const,
   searches: () => [...userKeys.all(), 'search'] as const,
   search: (q: string, filters?: Record<string, unknown>) =>

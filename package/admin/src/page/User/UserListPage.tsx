@@ -1,5 +1,5 @@
-import SearchIcon from '@mui/icons-material/Search';
 import AddIcon from '@mui/icons-material/Add';
+import SearchIcon from '@mui/icons-material/Search';
 import {
   Box,
   Button,
@@ -16,10 +16,11 @@ import {
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 
-import { unitQueries, type UnitDTO } from '@package/api/unit/unit';
+import { Link } from '@package/ui/Navigation/Link.tsx';
+import type { UserDTO } from '@package/contract';
+import { userQueries } from '@package/api/user/user.queries';
 
 import { Page } from '@/page/Page';
-import { Link } from '@package/ui/Navigation/Link.tsx';
 import { PaginatedTable, type PaginatedColumn } from '@/component/table/PaginatedTable';
 
 function fmtDate(v?: string | Date) {
@@ -29,40 +30,62 @@ function fmtDate(v?: string | Date) {
   return d.toLocaleString();
 }
 
-export default function UnitsPage() {
+export default function UserListPage() {
   const [q, setQ] = React.useState('');
   const [query, setQuery] = React.useState('');
   const [page, setPage] = React.useState(0);
   const [limit, setLimit] = React.useState(20);
 
   const listQuery = useQuery(
-    query.length > 0
-      ? unitQueries.list({ q: query, start: page * limit, limit })
-      : unitQueries.list({ start: page * limit, limit }),
+    userQueries.adminList(
+      query.length > 0
+        ? { q: query, page: page + 1, limit }
+        : { page: page + 1, limit },
+    ),
   );
 
-  const units = listQuery.data?.units ?? [];
-  const total = listQuery.data?.total;
+  const users = listQuery.data?.users ?? [];
+  const total = listQuery.data?.total ?? 0;
 
   const columns = React.useMemo(() => {
-    const cols: PaginatedColumn<UnitDTO>[] = [
+    const cols: PaginatedColumn<UserDTO>[] = [
       {
-        id: 'id',
-        header: 'ID',
+        id: 'unitId',
+        header: 'Unit ID',
         minWidth: 220,
         cell: (u) => (
           <Typography variant="body2" sx={{ fontFamily: 'monospace' }}>
-            {u.id}
+            {u.unitId}
           </Typography>
         ),
       },
       {
-        id: 'title',
-        header: 'Title',
-        minWidth: 220,
+        id: 'email',
+        header: 'Email',
+        minWidth: 240,
         cell: (u) => (
-          <Typography variant="body2" fontWeight={600} noWrap>
-            {u.title || '(no title)'}
+          <Typography variant="body2" noWrap>
+            {u.email ?? '-'}
+          </Typography>
+        ),
+      },
+      {
+        id: 'name',
+        header: 'Name',
+        minWidth: 160,
+        cell: (u) => (
+          <Typography variant="body2" fontWeight={700} noWrap>
+            {u.name}
+          </Typography>
+        ),
+      },
+      {
+        id: 'slug',
+        header: 'Slug',
+        minWidth: 160,
+        cell: (u) => (
+          <Typography variant="body2" noWrap>
+            {u.slug ? `@${u.slug}` : '-'}
           </Typography>
         ),
       },
@@ -73,39 +96,20 @@ export default function UnitsPage() {
         cell: (u) => (u.type ? <Chip size="small" label={u.type} /> : '-'),
       },
       {
-        id: 'status',
-        header: 'Status',
-        minWidth: 120,
-        cell: (u) => u.status || '-',
-      },
-      {
-        id: 'user',
-        header: 'User',
-        minWidth: 200,
+        id: 'roles',
+        header: 'Roles',
+        minWidth: 220,
         cell: (u) => (
-          <Stack spacing={0}>
-            <Typography variant="body2" noWrap>
-              {u.user?.name ?? u.userId}
-            </Typography>
-            {u.user?.slug ? (
-              <Typography variant="caption" color="text.secondary" noWrap>
-                @{u.user.slug}
-              </Typography>
-            ) : null}
-          </Stack>
+          <Typography variant="body2" noWrap>
+            {u.permission?.role?.length ? u.permission.role.join(', ') : '-'}
+          </Typography>
         ),
       },
       {
-        id: 'createdAt',
-        header: 'Created',
+        id: 'joinDate',
+        header: 'Join Date',
         minWidth: 170,
-        cell: (u) => fmtDate(u.createdAt),
-      },
-      {
-        id: 'updatedAt',
-        header: 'Updated',
-        minWidth: 170,
-        cell: (u) => fmtDate(u.updatedAt),
+        cell: (u) => fmtDate(u.joinDate),
       },
       {
         id: 'actions',
@@ -115,7 +119,7 @@ export default function UnitsPage() {
           <Button
             size="small"
             component={Link}
-            to={`/units/${u.id}`}
+            to={`/users/${u.unitId}`}
             variant="outlined"
           >
             Edit
@@ -127,14 +131,18 @@ export default function UnitsPage() {
   }, []);
 
   return (
-    <Page title="Units" description="管理 Unit（搜索 / 列表 / 基础信息）">
+    <Page title="Users" description="管理 User（列表 / 翻页 / 创建 / 编辑）">
       <Card>
         <CardContent>
-          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} alignItems="stretch">
+          <Stack
+            direction={{ xs: 'column', sm: 'row' }}
+            spacing={1.5}
+            alignItems="stretch"
+          >
             <TextField
               size="small"
               label="Search"
-              placeholder="title/content/userId/type..."
+              placeholder="q/email/slug/type..."
               value={q}
               onChange={(e) => setQ(e.target.value)}
               onKeyDown={(e) => {
@@ -159,7 +167,7 @@ export default function UnitsPage() {
               variant="contained"
               startIcon={<AddIcon />}
               component={Link}
-              to="/units/create"
+              to="/users/create"
               sx={{ whiteSpace: 'nowrap' }}
             >
               Create
@@ -174,14 +182,14 @@ export default function UnitsPage() {
             </Box>
           ) : listQuery.isError ? (
             <Typography color="error" variant="body2">
-              Failed to load units.
+              Failed to load users.
             </Typography>
           ) : (
-            <PaginatedTable<UnitDTO>
+            <PaginatedTable<UserDTO>
               columns={columns}
-              rows={units}
-              getRowId={(u) => u.id}
-              count={typeof total === 'number' ? total : 0}
+              rows={users}
+              getRowId={(u) => u.unitId}
+              count={total}
               page={page}
               rowsPerPage={limit}
               onPageChange={(nextPage) => setPage(nextPage)}

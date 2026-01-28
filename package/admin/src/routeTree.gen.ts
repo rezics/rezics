@@ -12,10 +12,14 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AdminRouteImport } from './routes/_admin'
 import { Route as AdminIndexRouteImport } from './routes/_admin/index'
-import { Route as AdminUsersRouteImport } from './routes/_admin/users'
-import { Route as AdminUnitsRouteImport } from './routes/_admin/units'
 import { Route as AdminSettingsRouteImport } from './routes/_admin/settings'
 import { Route as AdminBooksRouteImport } from './routes/_admin/books'
+import { Route as AdminUsersIndexRouteImport } from './routes/_admin/users/index'
+import { Route as AdminUnitsIndexRouteImport } from './routes/_admin/units/index'
+import { Route as AdminUsersCreateRouteImport } from './routes/_admin/users/create'
+import { Route as AdminUsersUnitIdRouteImport } from './routes/_admin/users/$unitId'
+import { Route as AdminUnitsCreateRouteImport } from './routes/_admin/units/create'
+import { Route as AdminUnitsUnitIdRouteImport } from './routes/_admin/units/$unitId'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -31,16 +35,6 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AdminRoute,
 } as any)
-const AdminUsersRoute = AdminUsersRouteImport.update({
-  id: '/users',
-  path: '/users',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminUnitsRoute = AdminUnitsRouteImport.update({
-  id: '/units',
-  path: '/units',
-  getParentRoute: () => AdminRoute,
-} as any)
 const AdminSettingsRoute = AdminSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -51,22 +45,60 @@ const AdminBooksRoute = AdminBooksRouteImport.update({
   path: '/books',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminUsersIndexRoute = AdminUsersIndexRouteImport.update({
+  id: '/users/',
+  path: '/users/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminUnitsIndexRoute = AdminUnitsIndexRouteImport.update({
+  id: '/units/',
+  path: '/units/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminUsersCreateRoute = AdminUsersCreateRouteImport.update({
+  id: '/users/create',
+  path: '/users/create',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminUsersUnitIdRoute = AdminUsersUnitIdRouteImport.update({
+  id: '/users/$unitId',
+  path: '/users/$unitId',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminUnitsCreateRoute = AdminUnitsCreateRouteImport.update({
+  id: '/units/create',
+  path: '/units/create',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminUnitsUnitIdRoute = AdminUnitsUnitIdRouteImport.update({
+  id: '/units/$unitId',
+  path: '/units/$unitId',
+  getParentRoute: () => AdminRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AdminIndexRoute
   '/login': typeof LoginRoute
   '/books': typeof AdminBooksRoute
   '/settings': typeof AdminSettingsRoute
-  '/units': typeof AdminUnitsRoute
-  '/users': typeof AdminUsersRoute
+  '/units/$unitId': typeof AdminUnitsUnitIdRoute
+  '/units/create': typeof AdminUnitsCreateRoute
+  '/users/$unitId': typeof AdminUsersUnitIdRoute
+  '/users/create': typeof AdminUsersCreateRoute
+  '/units/': typeof AdminUnitsIndexRoute
+  '/users/': typeof AdminUsersIndexRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/books': typeof AdminBooksRoute
   '/settings': typeof AdminSettingsRoute
-  '/units': typeof AdminUnitsRoute
-  '/users': typeof AdminUsersRoute
   '/': typeof AdminIndexRoute
+  '/units/$unitId': typeof AdminUnitsUnitIdRoute
+  '/units/create': typeof AdminUnitsCreateRoute
+  '/users/$unitId': typeof AdminUsersUnitIdRoute
+  '/users/create': typeof AdminUsersCreateRoute
+  '/units': typeof AdminUnitsIndexRoute
+  '/users': typeof AdminUsersIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -74,24 +106,52 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/_admin/books': typeof AdminBooksRoute
   '/_admin/settings': typeof AdminSettingsRoute
-  '/_admin/units': typeof AdminUnitsRoute
-  '/_admin/users': typeof AdminUsersRoute
   '/_admin/': typeof AdminIndexRoute
+  '/_admin/units/$unitId': typeof AdminUnitsUnitIdRoute
+  '/_admin/units/create': typeof AdminUnitsCreateRoute
+  '/_admin/users/$unitId': typeof AdminUsersUnitIdRoute
+  '/_admin/users/create': typeof AdminUsersCreateRoute
+  '/_admin/units/': typeof AdminUnitsIndexRoute
+  '/_admin/users/': typeof AdminUsersIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/books' | '/settings' | '/units' | '/users'
+  fullPaths:
+    | '/'
+    | '/login'
+    | '/books'
+    | '/settings'
+    | '/units/$unitId'
+    | '/units/create'
+    | '/users/$unitId'
+    | '/users/create'
+    | '/units/'
+    | '/users/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/login' | '/books' | '/settings' | '/units' | '/users' | '/'
+  to:
+    | '/login'
+    | '/books'
+    | '/settings'
+    | '/'
+    | '/units/$unitId'
+    | '/units/create'
+    | '/users/$unitId'
+    | '/users/create'
+    | '/units'
+    | '/users'
   id:
     | '__root__'
     | '/_admin'
     | '/login'
     | '/_admin/books'
     | '/_admin/settings'
-    | '/_admin/units'
-    | '/_admin/users'
     | '/_admin/'
+    | '/_admin/units/$unitId'
+    | '/_admin/units/create'
+    | '/_admin/users/$unitId'
+    | '/_admin/users/create'
+    | '/_admin/units/'
+    | '/_admin/users/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -122,20 +182,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof AdminRoute
     }
-    '/_admin/users': {
-      id: '/_admin/users'
-      path: '/users'
-      fullPath: '/users'
-      preLoaderRoute: typeof AdminUsersRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/_admin/units': {
-      id: '/_admin/units'
-      path: '/units'
-      fullPath: '/units'
-      preLoaderRoute: typeof AdminUnitsRouteImport
-      parentRoute: typeof AdminRoute
-    }
     '/_admin/settings': {
       id: '/_admin/settings'
       path: '/settings'
@@ -150,23 +196,73 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminBooksRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/_admin/users/': {
+      id: '/_admin/users/'
+      path: '/users'
+      fullPath: '/users/'
+      preLoaderRoute: typeof AdminUsersIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/units/': {
+      id: '/_admin/units/'
+      path: '/units'
+      fullPath: '/units/'
+      preLoaderRoute: typeof AdminUnitsIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/users/create': {
+      id: '/_admin/users/create'
+      path: '/users/create'
+      fullPath: '/users/create'
+      preLoaderRoute: typeof AdminUsersCreateRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/users/$unitId': {
+      id: '/_admin/users/$unitId'
+      path: '/users/$unitId'
+      fullPath: '/users/$unitId'
+      preLoaderRoute: typeof AdminUsersUnitIdRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/units/create': {
+      id: '/_admin/units/create'
+      path: '/units/create'
+      fullPath: '/units/create'
+      preLoaderRoute: typeof AdminUnitsCreateRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/units/$unitId': {
+      id: '/_admin/units/$unitId'
+      path: '/units/$unitId'
+      fullPath: '/units/$unitId'
+      preLoaderRoute: typeof AdminUnitsUnitIdRouteImport
+      parentRoute: typeof AdminRoute
+    }
   }
 }
 
 interface AdminRouteChildren {
   AdminBooksRoute: typeof AdminBooksRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
-  AdminUnitsRoute: typeof AdminUnitsRoute
-  AdminUsersRoute: typeof AdminUsersRoute
   AdminIndexRoute: typeof AdminIndexRoute
+  AdminUnitsUnitIdRoute: typeof AdminUnitsUnitIdRoute
+  AdminUnitsCreateRoute: typeof AdminUnitsCreateRoute
+  AdminUsersUnitIdRoute: typeof AdminUsersUnitIdRoute
+  AdminUsersCreateRoute: typeof AdminUsersCreateRoute
+  AdminUnitsIndexRoute: typeof AdminUnitsIndexRoute
+  AdminUsersIndexRoute: typeof AdminUsersIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
   AdminBooksRoute: AdminBooksRoute,
   AdminSettingsRoute: AdminSettingsRoute,
-  AdminUnitsRoute: AdminUnitsRoute,
-  AdminUsersRoute: AdminUsersRoute,
   AdminIndexRoute: AdminIndexRoute,
+  AdminUnitsUnitIdRoute: AdminUnitsUnitIdRoute,
+  AdminUnitsCreateRoute: AdminUnitsCreateRoute,
+  AdminUsersUnitIdRoute: AdminUsersUnitIdRoute,
+  AdminUsersCreateRoute: AdminUsersCreateRoute,
+  AdminUnitsIndexRoute: AdminUnitsIndexRoute,
+  AdminUsersIndexRoute: AdminUsersIndexRoute,
 }
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)

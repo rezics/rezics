@@ -70,6 +70,45 @@ export function useUpdateMeMutation(
   });
 }
 
+export function useAdminCreateUserMutation(
+  options?: Omit<
+    UseMutationOptions<UserDTO, Error, CreateUserInput>,
+    'mutationFn'
+  >,
+) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (input: CreateUserInput) => userApi.adminCreate(input as any),
+    ...options,
+    onSuccess: (data, variables, onMutateResult, context) => {
+      qc.invalidateQueries({queryKey: userKeys.adminLists()});
+      options?.onSuccess?.(data, variables, onMutateResult, context);
+    },
+  });
+}
+
+export function useAdminUpdateUserMutation(
+  options?: Omit<
+    UseMutationOptions<
+      UserDTO,
+      Error,
+      {unitId: string; input: UpdateUserInput}
+    >,
+    'mutationFn'
+  >,
+) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({unitId, input}) => userApi.adminUpdate(unitId, input as any),
+    ...options,
+    onSuccess: (data, variables, onMutateResult, context) => {
+      qc.setQueryData(userKeys.adminDetail(variables.unitId), data);
+      qc.invalidateQueries({queryKey: userKeys.adminLists()});
+      options?.onSuccess?.(data, variables, onMutateResult, context);
+    },
+  });
+}
+
 export function useDeleteMeMutation(
   options?: Omit<
     UseMutationOptions<{message: string}, Error, void>,
@@ -158,6 +197,8 @@ export const userMutations = {
   useRegister: useRegisterMutation,
   useLogin: useLoginMutation,
   useUpdateMe: useUpdateMeMutation,
+  useAdminCreate: useAdminCreateUserMutation,
+  useAdminUpdate: useAdminUpdateUserMutation,
   useDeleteMe: useDeleteMeMutation,
   useFollow: useFollowMutation,
   useUnfollow: useUnfollowMutation,

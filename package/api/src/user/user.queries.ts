@@ -23,12 +23,27 @@ export const userListQuery = (query?: Record<string, unknown>) =>
     staleTime: 1000 * 60 * 5,
   });
 
+export const userAdminListQuery = (query?: Record<string, unknown>) =>
+  queryOptions({
+    queryKey: userKeys.adminList(query),
+    queryFn: () => userApi.adminList(query),
+    staleTime: 1000 * 60 * 1,
+  });
+
 export const userDetailQuery = (unitId: string) =>
   queryOptions({
     queryKey: userKeys.detail(unitId),
     queryFn: () => userApi.get(unitId),
     enabled: !!unitId,
     staleTime: 1000 * 60 * 10,
+  });
+
+export const userAdminDetailQuery = (unitId: string) =>
+  queryOptions({
+    queryKey: userKeys.adminDetail(unitId),
+    queryFn: () => userApi.adminGet(unitId),
+    enabled: !!unitId,
+    staleTime: 1000 * 60 * 2,
   });
 
 export const userFollowersQuery = (
@@ -62,7 +77,9 @@ export const userQueries = {
   me: userMeQuery,
   jwtPayload: userJwtPayloadQuery,
   list: userListQuery,
+  adminList: userAdminListQuery,
   detail: userDetailQuery,
+  adminDetail: userAdminDetailQuery,
   followers: userFollowersQuery,
   followings: userFollowingsQuery,
   followStatus: userFollowStatusQuery,

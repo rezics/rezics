@@ -30,29 +30,48 @@ export const adminNav = {
       to: '/',
     },
     {
-      id: 'manage',
-      label: 'Manage',
+      id: 'users',
+      label: 'Users',
+      icon: <PeopleIcon fontSize="small" />,
+      children: [
+        {
+          id: 'users.list',
+          label: 'List',
+          icon: <PeopleIcon fontSize="small" />,
+          to: '/users',
+        },
+        {
+          id: 'users.create',
+          label: 'Create',
+          icon: <PeopleIcon fontSize="small" />,
+          to: '/users/create',
+        },
+      ],
+    },
+    {
+      id: 'units',
+      label: 'Units',
       icon: <Inventory2Icon fontSize="small" />,
       children: [
         {
-          id: 'books',
-          label: 'Books',
-          icon: <Inventory2Icon fontSize="small" />,
-          to: '/books',
-        },
-        {
-          id: 'units',
-          label: 'Units',
+          id: 'units.list',
+          label: 'List',
           icon: <Inventory2Icon fontSize="small" />,
           to: '/units',
         },
         {
-          id: 'users',
-          label: 'Users',
-          icon: <PeopleIcon fontSize="small" />,
-          to: '/users',
+          id: 'units.create',
+          label: 'Create',
+          icon: <Inventory2Icon fontSize="small" />,
+          to: '/units/create',
         },
       ],
+    },
+    {
+      id: 'books',
+      label: 'Books',
+      icon: <Inventory2Icon fontSize="small" />,
+      to: '/books',
     },
     {
       id: 'settings',
