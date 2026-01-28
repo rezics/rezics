@@ -1,18 +1,18 @@
-import {IconButton, Popper, Tooltip} from '@mui/material';
+import { IconButton, Popper, Tooltip } from '@mui/material';
 
-import {Add, Comment, Edit, FavoriteBorder} from '@mui/icons-material';
-import {useTranslation} from 'react-i18next';
+import { Add, Comment, Edit, FavoriteBorder } from '@mui/icons-material';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from '@tanstack/react-router';
-import {useUserStore} from '@/global/userStore';
-import {useQuery} from '@tanstack/react-query';
+import { useUserStore } from '@/global/userStore';
+import { useQuery } from '@tanstack/react-query';
 import {
   useCreateReactionMutation,
   useDeleteReactionMutation,
-} from '@/api/reaction/reaction.mutations';
-import {reactionQueries} from '@/api/reaction/reaction.queries';
-import React, {useEffect, useState} from 'react';
-import {BookmarkTagManager} from './BookmarkTagManager';
-import {useAlertStore} from '@/global/windowAlertStore';
+} from '@package/api/reaction/reaction.mutations';
+import { reactionQueries } from '@package/api/reaction/reaction.queries';
+import React, { useEffect, useState } from 'react';
+import { BookmarkTagManager } from './BookmarkTagManager';
+import { useAlertStore } from '@/global/windowAlertStore';
 
 interface MiniAdminActionBarProps {
   editionURL: string;
@@ -25,7 +25,7 @@ export function MiniAdminActionBar({
   textColor,
   userUnitId,
 }: MiniAdminActionBarProps) {
-  const {t} = useTranslation();
+  const { t } = useTranslation();
   const user = useUserStore(state => state.user);
   const isAdmin = user?.permission?.role.includes('ADMIN');
   const isOwner = user?.unitId === userUnitId;
@@ -67,9 +67,9 @@ export function MiniActionBar({
   unitId,
   handleOnCommentClick,
 }: MiniActionBarProps) {
-  const {t} = useTranslation();
-  const {show: showAlert} = useAlertStore();
-  const {data} = useQuery(reactionQueries.my(unitId ?? ''));
+  const { t } = useTranslation();
+  const { show: showAlert } = useAlertStore();
+  const { data } = useQuery(reactionQueries.my(unitId ?? ''));
   const [userReactions, setUserReactions] = useState<string[]>(
     data?.reactionsByTarget?.[unitId ?? ''] ?? [],
   );
@@ -106,10 +106,10 @@ export function MiniActionBar({
     const hasReaction = userReactions?.includes(reaction);
 
     if (hasReaction) {
-      deleteReactionMutation.mutate({targetId: unitId, reaction});
+      deleteReactionMutation.mutate({ targetId: unitId, reaction });
       setUserReactions(prev => prev.filter(r => r !== reaction));
     } else {
-      createReactionMutation.mutate({targetId: unitId, reaction});
+      createReactionMutation.mutate({ targetId: unitId, reaction });
       setUserReactions(prev => [...prev, reaction]);
     }
   };
@@ -150,7 +150,7 @@ export function MiniActionBar({
         anchorEl={anchorBookmarkEl}
         placement="right-start"
         modifiers={[
-          {name: 'flip', enabled: true},
+          { name: 'flip', enabled: true },
           {
             name: 'preventOverflow',
             options: {

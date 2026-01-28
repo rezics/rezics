@@ -1,19 +1,19 @@
-import {useQuery} from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import React from 'react';
-import {ShortReviewListShow} from '../Review/ShortReviewList.tsx';
-import {buildMeiliUnitQuery} from '@/api/meili/meili.queries';
-import {mapUnitListToReviewListResponse} from '@/api/meili/meili.api';
-import {UnitType} from '@package/contract';
-import {useTranslation} from 'react-i18next';
+import { ShortReviewListShow } from '../Review/ShortReviewList.tsx';
+import { buildMeiliUnitQuery } from '@package/api/meili/meili.queries';
+import { mapUnitListToReviewListResponse } from '@package/api/meili/meili.api';
+import { UnitType } from '@package/contract';
+import { useTranslation } from 'react-i18next';
 interface ShortBookReviewsProps {
   bookId: string;
 }
 
 // 短评就是Post评论
 
-export const RemarkPreview: React.FC<ShortBookReviewsProps> = ({bookId}) => {
-  const {t} = useTranslation();
-  const {data, isLoading, error} = useQuery(
+export const RemarkPreview: React.FC<ShortBookReviewsProps> = ({ bookId }) => {
+  const { t } = useTranslation();
+  const { data, isLoading, error } = useQuery(
     buildMeiliUnitQuery(
       UnitType.REMARK,
       0,
@@ -48,7 +48,7 @@ export const RemarkPreview: React.FC<ShortBookReviewsProps> = ({bookId}) => {
 
   return (
     <ShortReviewListShow
-      data={{reviews: data?.reviews?.slice(0, 4) || [], total: data?.total}}
+      data={{ reviews: data?.reviews?.slice(0, 4) || [], total: data?.total }}
       onLike={handleLike}
       onDislike={handleDislike}
     />

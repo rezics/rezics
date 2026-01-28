@@ -1,11 +1,11 @@
-import {isEmptyValue} from '@/util/dataCheck.ts';
+import { isEmptyValue } from '@/util/dataCheck.ts';
 import React from 'react';
-import {QuoteExcerptListContainer} from '../Review/QuoteExcerptList.tsx';
+import { QuoteExcerptListContainer } from '../Review/QuoteExcerptList.tsx';
 
-import {useQuery} from '@tanstack/react-query';
-import {buildMeiliUnitQuery} from '@/api/meili/meili.queries';
-import {UnitType} from '@package/contract';
-import {useTranslation} from 'react-i18next';
+import { useQuery } from '@tanstack/react-query';
+import { buildMeiliUnitQuery } from '@package/api/meili/meili.queries';
+import { UnitType } from '@package/contract';
+import { useTranslation } from 'react-i18next';
 
 export type QuoteExcerptPreviewContainerProps = {
   id: string;
@@ -14,9 +14,9 @@ export type QuoteExcerptPreviewContainerProps = {
 
 export const QuoteExcerptPreviewContainer: React.FC<
   QuoteExcerptPreviewContainerProps
-> = ({id, quoteNumber = 3}) => {
-  const {t} = useTranslation();
-  const {data, isLoading, error} = useQuery(
+> = ({ id, quoteNumber = 3 }) => {
+  const { t } = useTranslation();
+  const { data, isLoading, error } = useQuery(
     buildMeiliUnitQuery(
       UnitType.QUOTE,
       0,

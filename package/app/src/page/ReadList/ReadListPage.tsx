@@ -7,7 +7,7 @@ import { Route } from '@/routes/_mainLayout/readlist/$readlistId'
 import { Link } from '@/component/Navigation/Link';
 import { useTranslation } from 'react-i18next';
 
-import { readlistQueries } from '@/api/readlist/readlist';
+import { readlistQueries } from '@package/api/readlist/readlist';
 import { useQuery } from '@tanstack/react-query';
 import { BookReviewGroup } from '@/component/ReadList/Review.tsx';
 import { SingleCommentElementWrapper } from '@/component/Form/Comment/SingleCommentElementWrapper';

@@ -1,4 +1,4 @@
-// import {reviewQueries} from '@/api/review/review';
+// import {reviewQueries} from '@package/api/review/review';
 // import {AccentBarWithTextShow} from '@/component/Common/AccentBar.tsx';
 // import {ReviewEditPage} from '@/page/Review/ReviewEditPage';
 // import {ShortReviewListShow} from '@/component/Review/ShortReviewList.tsx';

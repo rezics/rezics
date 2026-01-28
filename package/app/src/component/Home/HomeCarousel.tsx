@@ -1,11 +1,11 @@
-import {Grid, Typography, useMediaQuery} from '@mui/material';
-import React, {useEffect, useRef, useState} from 'react';
-import {useQuery} from '@tanstack/react-query';
-import {echoKvGetQuery} from '@/api/echokv/echokv';
-import {parseEchoKVResponse} from '@/api/echokv/util';
-import {useAlertStore} from '@/global/windowAlertStore';
-import {LazyLoadImage} from '@/component/Common/LazyLoadImage';
-import {useTranslation} from 'react-i18next';
+import { Grid, Typography, useMediaQuery } from '@mui/material';
+import React, { useEffect, useRef, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { echoKvGetQuery } from '@package/api/echokv/echokv';
+import { parseEchoKVResponse } from '@package/api/echokv/util';
+import { useAlertStore } from '@/global/windowAlertStore';
+import { LazyLoadImage } from '@/component/Common/LazyLoadImage';
+import { useTranslation } from 'react-i18next';
 import { Link } from '@/component/Navigation/Link';
 
 import {
@@ -21,7 +21,7 @@ interface BookCarouselProps {
 export const BookCarousel: React.FC<BookCarouselProps> = ({
   autoplayIntervalNum = 3000,
 }) => {
-  const {data} = useQuery(echoKvGetQuery('home_carousel'));
+  const { data } = useQuery(echoKvGetQuery('home_carousel'));
   type CarouselProduct = {
     cover?: string;
     title?: string;
@@ -30,8 +30,8 @@ export const BookCarousel: React.FC<BookCarouselProps> = ({
   };
 
   const [products, setProducts] = useState<CarouselProduct[]>([]);
-  const {show: showAlert} = useAlertStore();
-  const {t} = useTranslation();
+  const { show: showAlert } = useAlertStore();
+  const { t } = useTranslation();
   const carouselApiRef = useRef<CarouselApi | null>(null);
 
   useEffect(() => {
@@ -63,7 +63,7 @@ export const BookCarousel: React.FC<BookCarouselProps> = ({
 
   const smallThanXS = useMediaQuery('(max-width: 600px)');
 
-  const CarouselContentInner = ({product}: {product: any}) => {
+  const CarouselContentInner = ({ product }: { product: any }) => {
     return (
       <>
         <Typography variant="h6" fontWeight="bold" gutterBottom>
@@ -76,7 +76,7 @@ export const BookCarousel: React.FC<BookCarouselProps> = ({
 
   return (
     <Carousel
-      opts={{loop: true}}
+      opts={{ loop: true }}
       className="min-h-[200px]"
       setApi={api => (carouselApiRef.current = api)}
     >
@@ -84,15 +84,15 @@ export const BookCarousel: React.FC<BookCarouselProps> = ({
         {products?.map((product, index) => (
           <CarouselItem key={index}>
             <Link to={product?.link ?? '#'}>
-              <Grid container spacing={2} alignItems="center" sx={{px: 2}}>
-                <Grid size={{xs: 0, sm: 3}}>
+              <Grid container spacing={2} alignItems="center" sx={{ px: 2 }}>
+                <Grid size={{ xs: 0, sm: 3 }}>
                   <LazyLoadImage
                     src={product.cover ?? ''}
                     alt={product.title ?? ''}
                     className="w-full h-full object-cover rounded-lg"
                   />
                 </Grid>
-                <Grid size={{xs: 10, sm: 9}}>
+                <Grid size={{ xs: 10, sm: 9 }}>
                   {smallThanXS ? (
                     <div
                       className="relative w-full h-[250px] sm:h-[280px] rounded-lg overflow-hidden flex items-end"

@@ -8,11 +8,11 @@ import {
   Chip,
 } from '@mui/material';
 import { useQuery } from '@tanstack/react-query';
-import { reactionQueries } from '@/api/reaction/reaction';
+import { reactionQueries } from '@package/api/reaction/reaction';
 import {
   useSetBookmarkTagsMutation,
   useDeleteReactionMutation,
-} from '@/api/reaction/reaction.mutations';
+} from '@package/api/reaction/reaction.mutations';
 import { useAlertStore } from '@/global/windowAlertStore';
 import { useUserStore } from '@/global/userStore';
 import { Link } from '@/component/Navigation/Link';

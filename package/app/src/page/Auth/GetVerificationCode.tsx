@@ -1,9 +1,9 @@
-import React, {useState, useImperativeHandle} from 'react';
+import React, { useState, useImperativeHandle } from 'react';
 import TextField from '@mui/material/TextField';
-import {CooldownButton} from '@/component/Common/UI/Button/CooldownButton';
-import {validateEmail} from './lib/validate';
-import {userApi} from '@/api/user/user';
-import {useAlertStore} from '@/global/windowAlertStore';
+import { CooldownButton } from '@/component/Common/UI/Button/CooldownButton';
+import { validateEmail } from './lib/validate';
+import { userApi } from '@package/api/user/user';
+import { useAlertStore } from '@/global/windowAlertStore';
 
 export interface GetVerificationCodeHandle {
   handleTurnstileVerify: (token: string) => Promise<void>;
@@ -24,7 +24,7 @@ export function GetVerificationCode({
   setError,
   ref,
 }: GetVerificationCodeProps) {
-  const {show: showAlert} = useAlertStore();
+  const { show: showAlert } = useAlertStore();
   const [sendingCode, setSendingCode] = useState(false);
   const [emailForVerificationCode, setEmailForVerificationCode] = useState<
     string | null
@@ -67,7 +67,7 @@ export function GetVerificationCode({
         variant="standard"
         value={data?.verificationCode ?? ''}
         onChange={event => {
-          setData({...data, verificationCode: event.target.value});
+          setData({ ...data, verificationCode: event.target.value });
         }}
         margin="none"
         className="flex-grow"

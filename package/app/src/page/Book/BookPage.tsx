@@ -18,7 +18,7 @@ import { ChapterListContainer } from '@/component/Book/Chapter/ChapterList';
 import { useBookPageStore } from '@/global/page/bookPageStore.ts';
 import { routeStore } from '@/global/routeStore.ts';
 
-import { bookQueries } from '@/api/book/book';
+import { bookQueries } from '@package/api/book/book';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 

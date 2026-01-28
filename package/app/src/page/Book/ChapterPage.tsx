@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { chapterDetailQuery } from '@/api/chapter/chapter';
+import { chapterDetailQuery } from '@package/api/chapter/chapter';
 import { preserveFormattingPlugin } from '@/component/Form/preserveFormatPlugin.ts';
 import MarkdownIt from 'markdown-it';
 import React from 'react';

@@ -14,7 +14,7 @@ import { useEffect, type FC } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { UserDTO } from '@package/contract';
 import { useQuery } from '@tanstack/react-query';
-import { userQueries } from '@/api/user/user.queries';
+import { userQueries } from '@package/api/user/user.queries';
 import { UserError, UserLoading } from './UserState';
 import { useUserStore } from '@/global/userStore';
 import FollowButton from '@/component/Common/Reaction/FollowButton';

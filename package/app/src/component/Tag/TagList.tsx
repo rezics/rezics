@@ -1,7 +1,7 @@
-import React, {useState, useCallback} from 'react';
-import {Chip, Typography} from '@mui/material';
-import type {TagDetailDTO} from '@/api/tag/tag';
-import {TagDetailCard} from './TagCards';
+import React, { useState, useCallback } from 'react';
+import { Chip, Typography } from '@mui/material';
+import type { TagDetailDTO } from '@package/api/tag/tag';
+import { TagDetailCard } from './TagCards';
 
 interface SingleTagChipProps {
   tag: TagDetailDTO;
@@ -56,7 +56,7 @@ export const TagList: React.FC<{
   tags: TagDetailDTO[];
   className?: string;
   autoSelectFirst?: boolean;
-}> = ({tags, className, autoSelectFirst}) => {
+}> = ({ tags, className, autoSelectFirst }) => {
   const [activeId, setActiveId] = useState<string | null>(
     autoSelectFirst && tags.length > 0 ? tags[0].id : null,
   );

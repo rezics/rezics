@@ -1,8 +1,8 @@
-import React, {useEffect, useRef, useState} from 'react';
-import {useQuery} from '@tanstack/react-query';
-import {echoKvGetQuery} from '@/api/echokv/echokv';
-import {parseEchoKVResponse} from '@/api/echokv/util';
-import {LazyLoadImage} from '@/component/Common/LazyLoadImage';
+import React, { useEffect, useRef, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { echoKvGetQuery } from '@package/api/echokv/echokv';
+import { parseEchoKVResponse } from '@package/api/echokv/util';
+import { LazyLoadImage } from '@/component/Common/LazyLoadImage';
 import { Link } from '@/component/Navigation/Link';
 import {
   Carousel,
@@ -12,7 +12,7 @@ import {
 } from '@/component/ui/carousel';
 
 export const MobileHomeCarousel: React.FC = () => {
-  const {data} = useQuery(echoKvGetQuery('home_carousel'));
+  const { data } = useQuery(echoKvGetQuery('home_carousel'));
   type CarouselProduct = {
     cover?: string;
     title?: string;
@@ -40,7 +40,7 @@ export const MobileHomeCarousel: React.FC = () => {
   return (
     <div className="w-full">
       <Carousel
-        opts={{loop: true}}
+        opts={{ loop: true }}
         className="w-full"
         setApi={api => (carouselApiRef.current = api)}
       >

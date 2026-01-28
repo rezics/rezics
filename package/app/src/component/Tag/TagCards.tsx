@@ -1,6 +1,6 @@
 import React from 'react';
 import { Card, CardContent, Typography, Chip } from '@mui/material';
-import type { TagDetailDTO } from '@/api/tag/tag';
+import type { TagDetailDTO } from '@package/api/tag/tag';
 import { RouterLink } from '../Navigation/RouterLink';
 
 /**

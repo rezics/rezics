@@ -1,8 +1,8 @@
 import React, { useMemo } from 'react';
 import { Chip } from '@mui/material';
-import { echoKvGetQuery } from '@/api/echokv/echokv';
+import { echoKvGetQuery } from '@package/api/echokv/echokv';
 import { useQuery } from '@tanstack/react-query';
-import { parseEchoKVResponse } from '@/api/echokv/util';
+import { parseEchoKVResponse } from '@package/api/echokv/util';
 import { useTranslation } from 'react-i18next';
 import { Link } from '@/component/Navigation/Link';
 

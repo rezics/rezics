@@ -1,9 +1,9 @@
 import {create} from 'zustand';
 import {createJSONStorage, persist} from 'zustand/middleware';
 import type {QueryClient} from '@tanstack/react-query';
-import {userQueries} from '@/api/user/user.queries';
-import {getToken} from '@/api/react-query/http';
-import {userApi} from '@/api/user/user.api';
+import {userQueries} from '@package/api/user/user.queries';
+import {getToken} from '@package/api/react-query/http';
+import {userApi} from '@package/api/user/user.api';
 import type {UserDTO} from '@package/contract';
 
 import {devtools} from 'zustand/middleware';

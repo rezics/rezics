@@ -6,7 +6,7 @@ import React, { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useQuery } from '@tanstack/react-query';
-import { unitQueries } from '@/api/unit/unit.queries';
+import { unitQueries } from '@package/api/unit/unit.queries';
 import FormatQuoteIcon from '@mui/icons-material/FormatQuote';
 import { SingleCommentElementWrapper } from '@/component/Form/Comment/SingleCommentElementWrapper';
 import { MarkdownContent } from '@/component/Common/MarkdownContent';

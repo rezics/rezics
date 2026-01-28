@@ -1,10 +1,10 @@
-import React, {useEffect, useState} from 'react';
-import {useFixtureInput} from 'react-cosmos/client';
+import React, { useEffect, useState } from 'react';
+import { useFixtureInput } from 'react-cosmos/client';
 import TagEdit from './TagEdit';
-import {QueryClient, QueryClientProvider} from '@tanstack/react-query';
-import type {TagDetailDTO} from '@/api/tag/tag';
-import {tagApi} from '@/api/tag/tag';
-import {unitApi} from '@/api/unit/unit';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import type { TagDetailDTO } from '@package/api/tag/tag';
+import { tagApi } from '@package/api/tag/tag';
+import { unitApi } from '@package/api/unit/unit';
 
 /**
  * Cosmos Fixture: TagEdit
@@ -58,11 +58,11 @@ export default function TagEditFixture() {
       return fake as any;
     };
     unitApi.search = async (query: string, _filters: any) => {
-      const units = Array.from({length: searchResultCount}).map((_, i) => ({
+      const units = Array.from({ length: searchResultCount }).map((_, i) => ({
         id: `domain_${i}_${query}`,
         title: `Domain ${i} (${query})`,
       }));
-      return {units} as any;
+      return { units } as any;
     };
     return () => {
       if ((tagApi as any)._origCreate)
@@ -79,11 +79,11 @@ export default function TagEditFixture() {
   const updateTag: TagDetailDTO | null =
     mode === 'update'
       ? {
-          id: 'tag_existing_1',
-          name: '现有标签',
-          type: 'GENRE',
-          domains: ['domain_old'],
-        }
+        id: 'tag_existing_1',
+        name: '现有标签',
+        type: 'GENRE',
+        domains: ['domain_old'],
+      }
       : null;
 
   const qc = React.useMemo(() => new QueryClient(), []);
@@ -91,8 +91,8 @@ export default function TagEditFixture() {
   return (
     <div className="pt-4 pl-4">
       <QueryClientProvider client={qc}>
-        <div style={{display: 'flex', gap: 24, alignItems: 'flex-start'}}>
-          <div style={{flex: '0 0 420px'}}>
+        <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start' }}>
+          <div style={{ flex: '0 0 420px' }}>
             <TagEdit
               tag={updateTag}
               onSaved={t => {
@@ -102,8 +102,8 @@ export default function TagEditFixture() {
               className="p-4 border rounded-md space-y-4"
             />
           </div>
-          <div style={{flex: 1, fontSize: 12}}>
-            <h3 style={{marginTop: 0}}>TagEdit Fixture 控制台</h3>
+          <div style={{ flex: 1, fontSize: 12 }}>
+            <h3 style={{ marginTop: 0 }}>TagEdit Fixture 控制台</h3>
             <div>
               mode: <code>{mode}</code>
             </div>
@@ -116,16 +116,16 @@ export default function TagEditFixture() {
             <div>
               simulateError: <code>{String(simulateError)}</code>
             </div>
-            <div style={{marginTop: 12}}>
+            <div style={{ marginTop: 12 }}>
               <strong>已保存 (onSaved):</strong>
-              <pre style={{background: '#f5f5f5', padding: 8, borderRadius: 4}}>
+              <pre style={{ background: '#f5f5f5', padding: 8, borderRadius: 4 }}>
                 {saved ? JSON.stringify(saved, null, 2) : '尚未保存'}
               </pre>
             </div>
             {lastError && (
-              <div style={{color: '#d22', marginTop: 8}}>错误: {lastError}</div>
+              <div style={{ color: '#d22', marginTop: 8 }}>错误: {lastError}</div>
             )}
-            <p style={{color: '#666'}}>
+            <p style={{ color: '#666' }}>
               使用上方控制项动态观察组件：
               <br />• 切换 mode 进入创建 / 更新
               <br />• 调整 searchResultCount 观察 Autocomplete 下拉数量

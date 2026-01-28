@@ -1,4 +1,4 @@
-import {useEffect, useRef, useState} from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type React from 'react';
 import {
   Box,
@@ -13,16 +13,16 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import {useQuery} from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import SearchIcon from '@mui/icons-material/Search';
-import {echoKvApi} from '@/api/echokv/echokv';
-import {useAlertStore} from '@/global/windowAlertStore';
-import {JSONEditor} from '@/component/Form/nanojson/NanoJSON.esm.js';
+import { echoKvApi } from '@package/api/echokv/echokv';
+import { useAlertStore } from '@/global/windowAlertStore';
+import { JSONEditor } from '@/component/Form/nanojson/NanoJSON.esm.js';
 
 type JSONEditorInstance = JSONEditor;
 
 export const EchokvEditPage: React.FC = () => {
-  const {show: showAlert} = useAlertStore();
+  const { show: showAlert } = useAlertStore();
 
   const [currentKey, setCurrentKey] = useState('key_name');
   const [searchKey, setSearchKey] = useState('');
@@ -30,7 +30,7 @@ export const EchokvEditPage: React.FC = () => {
   const [saving, setSaving] = useState(false);
   const editorRef = useRef<JSONEditorInstance | null>(null);
 
-  const {data: keyList, isLoading: keyListLoading} = useQuery({
+  const { data: keyList, isLoading: keyListLoading } = useQuery({
     queryKey: ['echokv-keys', searchKey],
     queryFn: () => echoKvApi.listKeys(searchKey),
     staleTime: 1000 * 60,
@@ -71,12 +71,12 @@ export const EchokvEditPage: React.FC = () => {
       let parsed;
       if (typeof raw === 'string') {
         try {
-          parsed = {value: JSON.parse(raw)};
+          parsed = { value: JSON.parse(raw) };
         } catch {
-          parsed = {value: raw};
+          parsed = { value: raw };
         }
       } else {
-        parsed = {value: raw ?? {}};
+        parsed = { value: raw ?? {} };
       }
 
       await editorRef.current.import(parsed); // 自动渲染
@@ -116,12 +116,12 @@ export const EchokvEditPage: React.FC = () => {
   };
 
   return (
-    <Box sx={{maxWidth: 1200, mx: 'auto', mt: 4, mb: 6, px: 2}}>
+    <Box sx={{ maxWidth: 1200, mx: 'auto', mt: 4, mb: 6, px: 2 }}>
       <Typography variant="h4" gutterBottom>
         EchoKV JSON 编辑器
       </Typography>
 
-      <Paper sx={{mt: 2, borderRadius: 2, p: 2}}>
+      <Paper sx={{ mt: 2, borderRadius: 2, p: 2 }}>
         <Typography variant="h6" gutterBottom>
           Key 列表
         </Typography>
@@ -148,7 +148,7 @@ export const EchokvEditPage: React.FC = () => {
             }}
           >
             {keyListLoading && (
-              <Box sx={{p: 1.5}}>
+              <Box sx={{ p: 1.5 }}>
                 <Typography variant="body2" color="text.secondary">
                   加载中…
                 </Typography>
@@ -156,7 +156,7 @@ export const EchokvEditPage: React.FC = () => {
             )}
             {!keyListLoading &&
               (!keyList?.keys || keyList.keys.length === 0) && (
-                <Box sx={{p: 1.5}}>
+                <Box sx={{ p: 1.5 }}>
                   <Typography variant="body2" color="text.secondary">
                     暂无数据
                   </Typography>
@@ -185,15 +185,15 @@ export const EchokvEditPage: React.FC = () => {
         </Stack>
       </Paper>
 
-      <Paper sx={{mt: 3, borderRadius: 2, overflow: 'hidden'}}>
-        <Box sx={{px: 2, py: 1.5}}>
-          <Stack direction={{xs: 'column', sm: 'row'}} spacing={1.5}>
+      <Paper sx={{ mt: 3, borderRadius: 2, overflow: 'hidden' }}>
+        <Box sx={{ px: 2, py: 1.5 }}>
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
             <TextField
               size="small"
               label="Key"
               value={currentKey}
               onChange={e => setCurrentKey(e.target.value)}
-              sx={{minWidth: 260}}
+              sx={{ minWidth: 260 }}
             />
             <Stack
               direction="row"
@@ -232,7 +232,7 @@ export const EchokvEditPage: React.FC = () => {
         <Divider />
 
         {/* 只提供一个静态 div，不让 React 控制内部 DOM */}
-        <Box sx={{p: 2}}>
+        <Box sx={{ p: 2 }}>
           <div id="nanojson-editor" className="min-h-[500px]" />
           <style>
             {`

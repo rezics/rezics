@@ -1,5 +1,5 @@
-import React, {useMemo} from 'react';
-import {useQuery} from '@tanstack/react-query';
+import React, { useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import {
   Alert,
   CircularProgress,
@@ -7,9 +7,9 @@ import {
   Card,
   CardContent,
 } from '@mui/material';
-import {bookQueries} from '@/api/book/book';
-import type {BookDTO} from '@package/contract';
-import {useTranslation} from 'react-i18next';
+import { bookQueries } from '@package/api/book/book';
+import type { BookDTO } from '@package/contract';
+import { useTranslation } from 'react-i18next';
 
 type Book = BookDTO;
 
@@ -26,11 +26,11 @@ export const HomeTrendingReviews: React.FC<HomeTrendingReviewsProps> = ({
   title,
   limit = 6,
 }) => {
-  const {t} = useTranslation();
+  const { t } = useTranslation();
   const resolvedTitle = title ?? t('page.home.sections.trending_reviews');
 
-  const {data, isLoading, error} = useQuery(
-    bookQueries.list({start: 0, limit}),
+  const { data, isLoading, error } = useQuery(
+    bookQueries.list({ start: 0, limit }),
   );
   const books: Book[] = useMemo(() => data?.books ?? [], [data]);
 

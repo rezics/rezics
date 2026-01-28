@@ -5,7 +5,7 @@ import { ChapterArboristHeightSlider } from '@/component/Book/Chapter/ChapterArb
 import { AccentBarWithTextShow } from '@/component/Common/Navigation/AccentBar';
 import { Alert, Button } from '@mui/material';
 import { useQueryClient } from '@tanstack/react-query';
-import { bookChapterIndexQuery } from '@/api/book/book';
+import { bookChapterIndexQuery } from '@package/api/book/book';
 
 import { Tab, Tabs } from '@mui/material';
 import { TabContext, TabPanel } from '@mui/lab';

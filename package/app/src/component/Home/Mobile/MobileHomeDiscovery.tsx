@@ -4,8 +4,8 @@ import {
   meiliBookApi,
   mapUnitListToReadlistListResponse,
   mapUnitListToReviewListResponse,
-} from '@/api/meili/meili.api';
-import { buildMeiliUnitQuery } from '@/api/meili/meili.queries';
+} from '@package/api/meili/meili.api';
+import { buildMeiliUnitQuery } from '@package/api/meili/meili.queries';
 import { UnitType } from '@package/contract';
 import type {
   BookDTO,

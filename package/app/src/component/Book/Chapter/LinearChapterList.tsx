@@ -2,7 +2,7 @@ import React, { useMemo, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Divider, TextField, Button, Stack } from '@mui/material';
 
-import { bookQueries } from '@/api/book/book.queries.ts';
+import { bookQueries } from '@package/api/book/book.queries';
 import { ChapterArborist } from '@/component/Book/Chapter/ChapterArborist';
 import type { ChapterArboristRefHandle } from '@/component/Book/Chapter/ChapterArborist';
 

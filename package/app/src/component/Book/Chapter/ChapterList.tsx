@@ -10,9 +10,9 @@ import { Button, Tooltip } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 
-import { bookQueries } from '@/api/book/book.queries.ts';
-import { AccentBarWithTextContainer } from '../../Common/Navigation/AccentBar.tsx';
-import { useChapterListStore } from '@/global/page/chapterListStore.ts';
+import { bookQueries } from '@package/api/book/book.queries';
+import { AccentBarWithTextContainer } from '../../Common/Navigation/AccentBar';
+import { useChapterListStore } from '@/global/page/chapterListStore';
 import { Link } from '@/component/Navigation/Link';
 
 import type { ChapterTreeItem } from '@package/contract';
@@ -44,7 +44,8 @@ export const ChapterLeaf = React.memo(function ChapterLeaf({
 
   const content = (
     <Link
-      to={`/book/${bookId}/read/${node.id}`}
+      to="/book/$bookId/read/$chapterId"
+      params={{ bookId, chapterId: node.id }}
       className="block hover:text-[var(--mui-palette-primary-main)]"
     >
       <p className="truncate p-2 rounded-md transition-colors duration-200">

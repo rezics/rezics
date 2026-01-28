@@ -1,4 +1,4 @@
-import React, {useMemo, useState} from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   CircularProgress,
   Button,
@@ -7,15 +7,15 @@ import {
   TextField,
   Chip,
 } from '@mui/material';
-import {useQuery} from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import {
   tagByObjectQuery,
   useDetachTagMutation,
   useAttachTagMutation,
   tagApi,
-} from '@/api/tag/tag';
-import type {TagDetailDTO, TagDTO} from '@/api/tag/tag';
-import {SingleTagChip} from '../TagList';
+} from '@package/api/tag/tag';
+import type { TagDetailDTO, TagDTO } from '@package/api/tag/tag';
+import { SingleTagChip } from '../TagList';
 import NewTag from './NewTag';
 import TagEdit from './TagEdit';
 
@@ -33,7 +33,7 @@ export const TagListEdit: React.FC<TagListEditProps> = ({
   objectUnitId,
   className,
 }) => {
-  const {data, isLoading, error, refetch} = useQuery(
+  const { data, isLoading, error, refetch } = useQuery(
     tagByObjectQuery(objectUnitId),
   );
   const list: TagDetailDTO[] = useMemo(() => data?.tags ?? [], [data]);
@@ -73,7 +73,7 @@ export const TagListEdit: React.FC<TagListEditProps> = ({
       for (const d of rawDomains) {
         const id = d && (d.id ?? d.unitId) ? String(d.id ?? d.unitId) : null;
         if (!id) continue;
-        setDomainList(prev => [...prev, {id, title: d.title}]);
+        setDomainList(prev => [...prev, { id, title: d.title }]);
         m.set(id, [...(m.get(id) ?? []), tag]);
       }
     }
@@ -92,7 +92,7 @@ export const TagListEdit: React.FC<TagListEditProps> = ({
   }>({
     queryKey: ['tags', 'search', searchTerm],
     enabled: searchTerm.length > 0,
-    queryFn: () => tagApi.list({q: searchTerm, limit: 20}),
+    queryFn: () => tagApi.list({ q: searchTerm, limit: 20 }),
   });
 
   const searchResults: TagDTO[] = useMemo(

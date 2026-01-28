@@ -2,11 +2,11 @@ import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import EasyEditor from '@/component/Form/EasyEditor';
 import { Button } from '@mui/material';
-import { reviewQueries } from '@/api/review/review.queries';
+import { reviewQueries } from '@package/api/review/review.queries';
 import {
   useUpdateReviewMutation,
   useDeleteReviewMutation,
-} from '@/api/review/review.mutations';
+} from '@package/api/review/review.mutations';
 import type { ReviewResponse, UpdateReviewInput } from '@package/contract';
 import { TextField } from '@mui/material';
 import { useTranslation } from 'react-i18next';

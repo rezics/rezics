@@ -18,9 +18,9 @@ import type React from 'react';
 import { useTranslation } from 'react-i18next';
 import type { UserDTO, UpdateUserInput } from '@package/contract';
 import { useQuery } from '@tanstack/react-query';
-import { userQueries } from '@/api/user/user.queries';
+import { userQueries } from '@package/api/user/user.queries';
 import { UserLoading } from './UserState';
-import { userApi } from '@/api/user/user.api';
+import { userApi } from '@package/api/user/user.api';
 import { PasswordField } from '@/component/Form/PasswordField';
 import { userEditRoute } from '@/router';
 

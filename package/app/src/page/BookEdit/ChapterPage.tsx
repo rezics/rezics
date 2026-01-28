@@ -7,8 +7,8 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   chapterDetailQuery,
   useUpdateChapterMutation,
-} from '@/api/chapter/chapter';
-import { bookMutations, bookChapterIndexQuery } from '@/api/book/book';
+} from '@package/api/chapter/chapter';
+import { bookMutations, bookChapterIndexQuery } from '@package/api/book/book';
 import { bookEditChapterRoute, bookEditLayoutRoute } from '@/router';
 
 /**

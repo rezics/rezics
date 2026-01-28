@@ -1,4 +1,4 @@
-import React, {useMemo, useRef, useState} from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import {
   Avatar,
   Card,
@@ -12,10 +12,10 @@ import {
   Typography,
   Button,
 } from '@mui/material';
-import {useQuery, useQueryClient} from '@tanstack/react-query';
-import type {UserDTO} from '@package/contract';
-import {userQueries} from '@/api/user/user.queries';
-import {useUserStore} from '@/global/userStore';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import type { UserDTO } from '@package/contract';
+import { userQueries } from '@package/api/user/user.queries';
+import { useUserStore } from '@/global/userStore';
 import {
   UniversalPaginator,
   type UniversalPaginatorHandle,
@@ -32,7 +32,7 @@ type FollowInfoPageProps = {
 const ITEMS_PER_PAGE = 20;
 const EXTERNAL_ITEMS_PER_PAGE = 20;
 
-function FollowUserList({users}: {users: SimpleUser[]}) {
+function FollowUserList({ users }: { users: SimpleUser[] }) {
   if (users.length === 0) {
     return <div className="py-10 text-center text-gray-500">暂无用户。</div>;
   }
@@ -199,7 +199,7 @@ export const FollowInfoPage: React.FC<FollowInfoPageProps> = ({
             externalItemsPerPage={EXTERNAL_ITEMS_PER_PAGE}
             sortType="time"
             sortOrder="desc"
-            onSortChange={() => {}}
+            onSortChange={() => { }}
             requestData={handleNeedMoreData}
             preRequestData={handlePreRequestData}
             isLoading={isLoading && activeUsers.length === 0}

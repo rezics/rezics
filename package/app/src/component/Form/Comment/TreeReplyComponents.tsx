@@ -6,26 +6,26 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 //  ;
 
-import { useDialogStore } from '@/global/dialogStore.ts';
+import { useDialogStore } from '@/global/dialogStore';
 import {
   ReactionAdminBar,
   ReactionBar,
 } from '../../Common/Reaction/ReactionBar.tsx';
 import { ReplyDrawerContainer } from './ReplyDrawer.tsx';
 
-import { commentQueries } from '@/api/comment/comment.queries.ts';
+import { commentQueries } from '@package/api/comment/comment.queries';
 import type { CommentTreeNode } from '@package/contract';
 import {
   useCreateCommentMutation,
   useDeleteCommentMutation,
   useUpdateCommentMutation,
-} from '@/api/comment/comment.mutations';
+} from '@package/api/comment/comment.mutations';
 
 import { useUserStore } from '@/global/userStore';
 import { buildTree } from '../treeReplyUtil.ts';
 
 import { useAlertStore } from '@/global/windowAlertStore';
-import { reactionApi } from '@/api/reaction/reaction';
+import { reactionApi } from '@package/api/reaction/reaction';
 import { useTranslation } from 'react-i18next';
 // This is a temporary type definition based on the GraphQL schema.
 // Local UI type adapted from CommentTreeNode

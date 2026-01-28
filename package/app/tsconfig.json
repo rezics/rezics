@@ -1,5 +1,11 @@
 {
   "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "lib": ["DOM", "ES2022"],
+    "jsx": "react-jsx",
+
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"],
@@ -8,34 +14,21 @@
       "@util/*": ["src/util/*"],
       "@locale": ["src/locale/index.ts"]
     },
-    /* 输出 */
-    "target": "ES2022",
-    "module": "ESNext",
-    "lib": ["DOM", "ES2022"],
-    "jsx": "react-jsx",
-    "declaration": true, // 生成 .d.ts 类型声明
-    "emitDeclarationOnly": true, // 既编译 JS 又生成类型声明
-    "outDir": "dist", // 输出目录
-    "rootDir": "../", // 源码目录
-    "moduleResolution": "node", // 兼容 node 模块解析
-    "esModuleInterop": true, // 兼容 commonjs 的导入（比如 require 的库）
-    "skipLibCheck": true, // 跳过第三方库的声明检查，加快编译
-    "forceConsistentCasingInFileNames": true,
-    "allowImportingTsExtensions": true, // 允许导入带扩展名的 TS 文件
 
-    /* 严格性 */
-    "strict": true, // 开启所有严格模式
-    "noImplicitAny": false,
+    "strict": true,
     "strictNullChecks": true,
-    "noUnusedLocals": false,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
 
-    /* 输出优化 */
-    "isolatedModules": true, // 配合 ESM 打包工具
-    "resolveJsonModule": true, // 允许 import JSON
-    "allowSyntheticDefaultImports": true // 对默认导入更宽容
+    "allowImportingTsExtensions": true,
+    "isolatedModules": true,
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true,
+
+    "noEmit": true
   },
-  "include": ["src", "contract/src"],
+  "include": ["src"],
   "exclude": ["node_modules", "dist", "test", "contract"]
 }

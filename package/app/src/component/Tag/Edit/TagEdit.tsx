@@ -1,9 +1,9 @@
-import React, {useEffect, useMemo, useState} from 'react';
-import {TextField, Button, Autocomplete, CircularProgress} from '@mui/material';
-import type {TagDetailDTO, CreateTagInput, UpdateTagInput} from '@/api/tag/tag';
-import {useCreateTagMutation, useUpdateTagMutation} from '@/api/tag/tag';
-import {unitApi} from '@/api/unit/unit';
-import type {UnitDTO} from '@/api/unit/unit';
+import React, { useEffect, useMemo, useState } from 'react';
+import { TextField, Button, Autocomplete, CircularProgress } from '@mui/material';
+import type { TagDetailDTO, CreateTagInput, UpdateTagInput } from '@package/api/tag/tag';
+import { useCreateTagMutation, useUpdateTagMutation } from '@package/api/tag/tag';
+import { unitApi } from '@package/api/unit/unit';
+import type { UnitDTO } from '@package/api/unit/unit';
 
 export type TagEditProps = {
   tag?: TagDetailDTO | null; // 若存在则为更新模式
@@ -15,7 +15,7 @@ export type TagEditProps = {
  * TagEdit – 编辑 Tag 及其绑定的 domains
  * - 搜索 domain 使用 unitApi.search，过滤 type = 'DOMAIN'
  */
-export const TagEdit: React.FC<TagEditProps> = ({tag, onSaved, className}) => {
+export const TagEdit: React.FC<TagEditProps> = ({ tag, onSaved, className }) => {
   const isUpdate = !!tag;
   const [name, setName] = useState(tag?.name ?? '');
   const [type, setType] = useState<string | null>(tag?.type ?? null);
@@ -48,7 +48,7 @@ export const TagEdit: React.FC<TagEditProps> = ({tag, onSaved, className}) => {
       }
       setSearching(true);
       try {
-        const res = await unitApi.search(q, {type: 'DOMAIN', limit: 10});
+        const res = await unitApi.search(q, { type: 'DOMAIN', limit: 10 });
         if (mounted) setOptions(res.units || []);
       } finally {
         if (mounted) setSearching(false);
@@ -77,7 +77,7 @@ export const TagEdit: React.FC<TagEditProps> = ({tag, onSaved, className}) => {
       domains: domainIds,
     };
     if (isUpdate && tag) {
-      await updateMutation.mutateAsync({unitId: tag.id, input: payload});
+      await updateMutation.mutateAsync({ unitId: tag.id, input: payload });
     } else {
       await createMutation.mutateAsync(payload as CreateTagInput);
     }
@@ -142,12 +142,12 @@ export const TagEdit: React.FC<TagEditProps> = ({tag, onSaved, className}) => {
               setDomainIds(values.map(v => (v as any).id));
               setDomains(
                 values.map(v => {
-                  return {id: v.id, title: v.title} as any;
+                  return { id: v.id, title: v.title } as any;
                 }),
               );
             }}
             renderInput={params => {
-              const {InputProps, ...rest} = params;
+              const { InputProps, ...rest } = params;
               return (
                 <TextField
                   {...rest}

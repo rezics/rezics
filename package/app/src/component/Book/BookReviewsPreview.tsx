@@ -1,14 +1,14 @@
-import React, {useEffect, useState} from 'react';
-import {useTranslation} from 'react-i18next';
+import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
-import {AccentBarWithTextShow} from '../Common/Navigation/AccentBar.tsx';
-import {ArrowForwardIconContainer} from '../Common/Navigation/ArrowForwardIcon.tsx';
-import {ReviewListContainer} from '../Review/ReviewList.tsx';
+import { AccentBarWithTextShow } from '../Common/Navigation/AccentBar.tsx';
+import { ArrowForwardIconContainer } from '../Common/Navigation/ArrowForwardIcon.tsx';
+import { ReviewListContainer } from '../Review/ReviewList.tsx';
 
-import {useQuery} from '@tanstack/react-query';
-import {buildMeiliUnitQuery} from '@/api/meili/meili.queries';
-import {mapUnitListToReviewListResponse} from '@/api/meili/meili.api';
-import {UnitType} from '@package/contract';
+import { useQuery } from '@tanstack/react-query';
+import { buildMeiliUnitQuery } from '@package/api/meili/meili.queries';
+import { mapUnitListToReviewListResponse } from '@package/api/meili/meili.api';
+import { UnitType } from '@package/contract';
 interface BookReviewsProps {
   bookId: string;
   title: string;
@@ -20,10 +20,10 @@ export const BookReviews: React.FC<BookReviewsProps> = ({
   title,
   reviewNumber = 4,
 }) => {
-  const {t} = useTranslation();
+  const { t } = useTranslation();
   const [reviews, setReviews] = useState<any[]>([]);
 
-  const {data} = useQuery(
+  const { data } = useQuery(
     buildMeiliUnitQuery(
       UnitType.REVIEW,
       0,
@@ -46,7 +46,7 @@ export const BookReviews: React.FC<BookReviewsProps> = ({
   return (
     <div>
       <ArrowForwardIconContainer size={16} to={`/review/book/${bookId}/`}>
-        <AccentBarWithTextShow text={t('book.reviews_of_book', {title})} />
+        <AccentBarWithTextShow text={t('book.reviews_of_book', { title })} />
       </ArrowForwardIconContainer>
       <ReviewListContainer reviews={reviews?.slice(0, reviewNumber)} />
     </div>

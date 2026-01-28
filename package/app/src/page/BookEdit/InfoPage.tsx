@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import type { CreateBookInput, BookDTO } from '@package/contract';
-import { bookQueries } from '@/api/book/book';
+import { bookQueries } from '@package/api/book/book';
 import { AccentBarWithTextShow } from '@/component/Common/Navigation/AccentBar';
 import { BookMetadataEditor } from '@/component/Book/Metadata/BookMetadataEditor';
 import React from 'react';
@@ -16,7 +16,7 @@ import {
 } from '@mui/material';
 import { useNavigate } from '@tanstack/react-router';
 import EasyEditor from '@component/Form/EasyEditor.tsx';
-import { useCreateBookMutation, useUpdateBookMutation } from '@/api/book/book';
+import { useCreateBookMutation, useUpdateBookMutation } from '@package/api/book/book';
 import { type UpdateBookInput } from '@package/contract';
 import { useEffect } from 'react';
 import { BookExtraEditor } from '@/component/Book/Metadata/BookExtraEditor';

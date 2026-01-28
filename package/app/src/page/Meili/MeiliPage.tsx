@@ -8,14 +8,14 @@ import {
   CircularProgress,
   Typography,
 } from '@mui/material';
-import {useState} from 'react';
-import {useQuery} from '@tanstack/react-query';
+import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 
 import {
   meiliAdminMutations,
   meiliAdminQueries,
   type MeiliKey,
-} from '@/api/meili/meili.admin.queries';
+} from '@package/api/meili/meili.admin.queries';
 
 type MessageState = {
   type: 'success' | 'error' | 'info';
@@ -30,7 +30,7 @@ export function MeiliPage() {
   const [lastSearchKey, setLastSearchKey] = useState<string | null>(null);
   const [lastAdminKey, setLastAdminKey] = useState<string | null>(null);
 
-  const {data: health, isLoading: isHealthLoading} = useQuery(
+  const { data: health, isLoading: isHealthLoading } = useQuery(
     meiliAdminQueries.health(),
   );
 
@@ -48,7 +48,7 @@ export function MeiliPage() {
       });
     },
     onError: err => {
-      setMessage({type: 'error', text: err.message});
+      setMessage({ type: 'error', text: err.message });
     },
   });
 
@@ -59,7 +59,7 @@ export function MeiliPage() {
         text: res.message || 'Readlists 索引初始化完成',
       });
     },
-    onError: err => setMessage({type: 'error', text: err.message}),
+    onError: err => setMessage({ type: 'error', text: err.message }),
   });
 
   const initUnitsMutation = meiliAdminMutations.useInitUnitsIndex({
@@ -69,7 +69,7 @@ export function MeiliPage() {
         text: res.message || 'Units 索引初始化完成',
       });
     },
-    onError: err => setMessage({type: 'error', text: err.message}),
+    onError: err => setMessage({ type: 'error', text: err.message }),
   });
 
   const initUsersMutation = meiliAdminMutations.useInitUsersIndex({
@@ -79,28 +79,28 @@ export function MeiliPage() {
         text: res.message || 'Users 索引初始化完成',
       });
     },
-    onError: err => setMessage({type: 'error', text: err.message}),
+    onError: err => setMessage({ type: 'error', text: err.message }),
   });
 
   const syncBooksMutation = meiliAdminMutations.useSyncBooks({
     onSuccess: () => {
-      setMessage({type: 'success', text: '开始同步全部 Books 到 Meili'});
+      setMessage({ type: 'success', text: '开始同步全部 Books 到 Meili' });
     },
-    onError: err => setMessage({type: 'error', text: err.message}),
+    onError: err => setMessage({ type: 'error', text: err.message }),
   });
 
   const syncReadlistsMutation = meiliAdminMutations.useSyncReadlists({
     onSuccess: () => {
-      setMessage({type: 'success', text: '开始同步全部 Readlists 到 Meili'});
+      setMessage({ type: 'success', text: '开始同步全部 Readlists 到 Meili' });
     },
-    onError: err => setMessage({type: 'error', text: err.message}),
+    onError: err => setMessage({ type: 'error', text: err.message }),
   });
 
   const syncUnitsMutation = meiliAdminMutations.useSyncUnits({
     onSuccess: () => {
-      setMessage({type: 'success', text: '开始同步全部 Units 到 Meili'});
+      setMessage({ type: 'success', text: '开始同步全部 Units 到 Meili' });
     },
-    onError: err => setMessage({type: 'error', text: err.message}),
+    onError: err => setMessage({ type: 'error', text: err.message }),
   });
 
   const initFeedbacksMutation = meiliAdminMutations.useInitFeedbacksIndex({
@@ -110,7 +110,7 @@ export function MeiliPage() {
         text: res.message || 'Feedbacks 索引初始化完成',
       });
     },
-    onError: err => setMessage({type: 'error', text: err.message}),
+    onError: err => setMessage({ type: 'error', text: err.message }),
   });
 
   const syncFeedbacksMutation = meiliAdminMutations.useSyncFeedbacks({
@@ -120,13 +120,13 @@ export function MeiliPage() {
         text: '开始同步全部 Feedbacks 到 Meili',
       });
     },
-    onError: err => setMessage({type: 'error', text: err.message}),
+    onError: err => setMessage({ type: 'error', text: err.message }),
   });
   const syncUsersMutation = meiliAdminMutations.useSyncUsers({
     onSuccess: () => {
-      setMessage({type: 'success', text: '开始同步全部 Users 到 Meili'});
+      setMessage({ type: 'success', text: '开始同步全部 Users 到 Meili' });
     },
-    onError: err => setMessage({type: 'error', text: err.message}),
+    onError: err => setMessage({ type: 'error', text: err.message }),
   });
 
   const deleteAllUnitsMutation = meiliAdminMutations.useDeleteAllUnits({
@@ -136,15 +136,15 @@ export function MeiliPage() {
         text: res.message || '已删除 Meili 中全部 Units',
       });
     },
-    onError: err => setMessage({type: 'error', text: err.message}),
+    onError: err => setMessage({ type: 'error', text: err.message }),
   });
 
   const createSearchKeyMutation = meiliAdminMutations.useCreateSearchKey({
     onSuccess: res => {
       setLastSearchKey(res.key);
-      setMessage({type: 'success', text: 'Search Key 已创建'});
+      setMessage({ type: 'success', text: 'Search Key 已创建' });
     },
-    onError: err => setMessage({type: 'error', text: err.message}),
+    onError: err => setMessage({ type: 'error', text: err.message }),
   });
 
   const createAdminKeyMutation = meiliAdminMutations.useCreateAdminKey({
@@ -162,7 +162,7 @@ export function MeiliPage() {
         console.log('Meili admin key response', res);
       }
     },
-    onError: err => setMessage({type: 'error', text: err.message}),
+    onError: err => setMessage({ type: 'error', text: err.message }),
   });
 
   const deleteKeyMutation = meiliAdminMutations.useDeleteKey({
@@ -173,14 +173,13 @@ export function MeiliPage() {
       });
       await refetchKeys();
     },
-    onError: err => setMessage({type: 'error', text: err.message}),
+    onError: err => setMessage({ type: 'error', text: err.message }),
   });
 
   const handleDeleteKey = (key: MeiliKey) => {
     if (!key.uid) return;
     const ok = window.confirm(
-      `确定要删除 Key: ${key.uid}${
-        key.name ? ` (${key.name})` : ''
+      `确定要删除 Key: ${key.uid}${key.name ? ` (${key.name})` : ''
       } ？此操作不可恢复。`,
     );
     if (!ok) return;

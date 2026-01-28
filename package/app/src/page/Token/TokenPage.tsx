@@ -1,5 +1,5 @@
-import {useEffect, useState} from 'react';
-import type {FC} from 'react';
+import { useEffect, useState } from 'react';
+import type { FC } from 'react';
 import {
   Box,
   Typography,
@@ -8,13 +8,13 @@ import {
   Alert,
   Stack,
 } from '@mui/material';
-import {useQuery} from '@tanstack/react-query';
-import {tokenQueries} from '@/api/token/token.queries';
+import { useQuery } from '@tanstack/react-query';
+import { tokenQueries } from '@package/api/token/token.queries';
 import {
   useCreateTokenMutation,
   useRevokeTokenMutation,
   useUpdateTokenMutation,
-} from '@/api/token/token.mutations';
+} from '@package/api/token/token.mutations';
 import type {
   ApiTokenDTO,
   CreateApiTokenInput,
@@ -35,7 +35,7 @@ import {
  * - 撤销 token
  */
 export const TokenPage: FC = () => {
-  const {data, isLoading, error} = useQuery(tokenQueries.list());
+  const { data, isLoading, error } = useQuery(tokenQueries.list());
 
   const [tokens, setTokens] = useState<ApiTokenDTO[]>([]);
 
@@ -85,7 +85,7 @@ export const TokenPage: FC = () => {
     setUpdatingError(null);
     try {
       setUpdating(true);
-      await updateMutation.mutateAsync({id, input});
+      await updateMutation.mutateAsync({ id, input });
       setOpenEdit(false);
       setEditingToken(null);
     } catch (err) {
@@ -98,12 +98,12 @@ export const TokenPage: FC = () => {
   const handleRevoke = async (id: string) => {
     if (!confirm('Revoke this token? This action cannot be undone.')) return;
     try {
-      setRevokingIds(s => ({...s, [id]: true}));
+      setRevokingIds(s => ({ ...s, [id]: true }));
       await revokeMutation.mutateAsync(id);
     } catch (err) {
       alert((err as Error)?.message ?? 'Revoke failed');
     } finally {
-      setRevokingIds(s => ({...s, [id]: false}));
+      setRevokingIds(s => ({ ...s, [id]: false }));
     }
   };
 

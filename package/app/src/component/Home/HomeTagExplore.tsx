@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Alert, CircularProgress, Typography, Chip } from '@mui/material';
-import { bookQueries } from '@/api/book/book';
+import { bookQueries } from '@package/api/book/book';
 import type { BookDTO } from '@package/contract';
 import { useTranslation } from 'react-i18next';
 import { Link } from '@/component/Navigation/Link';

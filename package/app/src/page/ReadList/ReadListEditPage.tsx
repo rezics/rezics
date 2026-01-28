@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useState } from 'react';
-import { buildMeiliUnitQuery } from '@/api/meili/meili.queries';
+import { buildMeiliUnitQuery } from '@package/api/meili/meili.queries';
 import { UnitType } from '@package/contract';
 import {
   Button,
@@ -17,14 +17,14 @@ import {
   readlistQueries,
   useDeleteReadlistMutation,
   useUpdateReadlistMutation,
-} from '@/api/readlist/readlist';
-import { reviewQueries } from '@/api/review/review';
+} from '@package/api/readlist/readlist';
+import { reviewQueries } from '@package/api/review/review';
 import { BookReviewGroup } from '@/component/ReadList/Review.tsx';
-import { bookQueries } from '@/api/book/book';
+import { bookQueries } from '@package/api/book/book';
 import { useNavigate } from '@tanstack/react-router';
 import { ConfirmDeleteDialog } from '@/component/Form/ConfirmDeleteDialog';
 import { useAlertStore } from '@/global/windowAlertStore';
-import { mapUnitListToReviewListResponse } from '@/api/meili/meili.api';
+import { mapUnitListToReviewListResponse } from '@package/api/meili/meili.api';
 import { useTranslation } from 'react-i18next';
 import { readlistEditRoute } from '@/router';
 

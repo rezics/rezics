@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   TextField,
@@ -7,21 +7,21 @@ import {
   Stack,
   Typography,
 } from '@mui/material';
-import {useCreateFeedbackMutation} from '@/api/feedback/feedback.mutations';
-import type {CreateFeedbackInput} from '@/api/feedback/feedback.types';
+import { useCreateFeedbackMutation } from '@package/api/feedback/feedback.mutations';
+import type { CreateFeedbackInput } from '@package/api/feedback/feedback.types';
 import { useRouterState } from '@tanstack/react-router';
-import {useEffect} from 'react';
+import { useEffect } from 'react';
 
 type FeedbackFormProps = {
   defaultValues?: Partial<CreateFeedbackInput>;
   onSubmitted?: () => void;
 };
 
-const typeOptions: {value: CreateFeedbackInput['type']; label: string}[] = [
-  {value: 'BUG', label: '问题/缺陷'},
-  {value: 'FEATURE', label: '功能建议'},
-  {value: 'REPORT', label: '内容相关'},
-  {value: 'OTHER', label: '其他'},
+const typeOptions: { value: CreateFeedbackInput['type']; label: string }[] = [
+  { value: 'BUG', label: '问题/缺陷' },
+  { value: 'FEATURE', label: '功能建议' },
+  { value: 'REPORT', label: '内容相关' },
+  { value: 'OTHER', label: '其他' },
 ];
 
 const FeedbackForm: React.FC<FeedbackFormProps> = ({
@@ -38,7 +38,7 @@ const FeedbackForm: React.FC<FeedbackFormProps> = ({
   });
 
   useEffect(() => {
-    setForm(prev => ({...prev, url: locationKey}));
+    setForm(prev => ({ ...prev, url: locationKey }));
   }, [locationKey]);
 
   const [errors, setErrors] = useState({
@@ -48,8 +48,8 @@ const FeedbackForm: React.FC<FeedbackFormProps> = ({
   const createMutation = useCreateFeedbackMutation();
 
   const handleChange = (field: keyof CreateFeedbackInput, value: string) => {
-    setForm(prev => ({...prev, [field]: value}));
-    setErrors(prev => ({...prev, [field]: false}));
+    setForm(prev => ({ ...prev, [field]: value }));
+    setErrors(prev => ({ ...prev, [field]: false }));
   };
 
   const validate = () => {
@@ -65,7 +65,7 @@ const FeedbackForm: React.FC<FeedbackFormProps> = ({
       content: '',
       type: 'BUG',
     });
-    setErrors({content: false});
+    setErrors({ content: false });
   };
 
   const onSubmit = (e: React.FormEvent) => {

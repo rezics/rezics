@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Avatar, Chip, Paper, Tooltip, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 
-import { unitDetailQuery } from '@/api/unit/unit';
+import { unitDetailQuery } from '@package/api/unit/unit';
 import { AccentBarContainer } from '@/component/Common/Navigation/AccentBar';
 import { MarkdownContent } from '@/component/Common/MarkdownContent';
 import { RouterLink } from '@/component/Navigation/RouterLink';

@@ -1,7 +1,7 @@
 import { useQueries, useQuery } from '@tanstack/react-query';
 import { RouterLink } from '@/component/Navigation/RouterLink';
 import { AccentBarWithTextShow } from '@/component/Common/Navigation/AccentBar';
-import { tagApi, tagQueries } from '@/api/tag/tag';
+import { tagApi, tagQueries } from '@package/api/tag/tag';
 import type { TagDetailDTO } from '@package/contract';
 import { TagWrapper } from '@/component/Tag/TagWrapper';
 import { tagBookFullDomainRoute, tagBookFullRoute, tagBookRoute } from '@/router';

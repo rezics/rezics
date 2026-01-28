@@ -1,5 +1,5 @@
-// import { attachBroadcast } from "@/api/react-query/broadcast";
-// import { attachPersistence } from "@/api/react-query/persist";
+// import { attachBroadcast } from "@package/api/react-query/broadcast";
+// import { attachPersistence } from "@package/api/react-query/persist";
 import { QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
 import { qc } from './reactQueryUtil';

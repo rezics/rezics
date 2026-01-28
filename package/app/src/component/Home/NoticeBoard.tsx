@@ -12,10 +12,10 @@ import {
 } from '@mui/material';
 import { RouterLink } from '../Navigation/RouterLink';
 import NotificationsRoundedIcon from '@mui/icons-material/NotificationsRounded';
-import { echoKvGetQuery } from '@/api/echokv/echokv';
+import { echoKvGetQuery } from '@package/api/echokv/echokv';
 import { useQuery } from '@tanstack/react-query';
 import { useAlertStore } from '@/global/windowAlertStore';
-import { parseEchoKVResponse } from '@/api/echokv/util';
+import { parseEchoKVResponse } from '@package/api/echokv/util';
 import type { Theme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
@@ -147,7 +147,7 @@ function NoticeBoardItem({
             borderColor: theme.palette.primary.light,
             bgcolor:
               theme.palette.mode === 'light'
-                ? theme.palette.primary[50] ?? 'rgba(25,118,210,0.06)'
+                ? (theme.palette.primary as any)[50] ?? 'rgba(25,118,210,0.06)'
                 : 'rgba(25,118,210,0.12)',
           },
         }}

@@ -1,4 +1,4 @@
-import React, {useMemo, useRef, useState} from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import {
   Card,
   CardContent,
@@ -10,10 +10,10 @@ import {
   Typography,
   Button,
 } from '@mui/material';
-import {useQuery, useQueryClient} from '@tanstack/react-query';
-import {useUserStore} from '@/global/userStore';
-import {reactionQueries} from '@/api/reaction/reaction.queries';
-import type {ReactionDTO} from '@/api/reaction/reaction.types';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useUserStore } from '@/global/userStore';
+import { reactionQueries } from '@package/api/reaction/reaction.queries';
+import type { ReactionDTO } from '@package/api/reaction/reaction.types';
 import {
   UniversalPaginator,
   type UniversalPaginatorHandle,
@@ -30,7 +30,7 @@ type TabKey = 'mine' | 'bookmark';
 const ITEMS_PER_PAGE = 20;
 const EXTERNAL_ITEMS_PER_PAGE = 100;
 
-function ReactionList({reactions}: {reactions: ReactionDTO[]}) {
+function ReactionList({ reactions }: { reactions: ReactionDTO[] }) {
   if (reactions.length === 0) {
     return <div className="py-10 text-center text-gray-500">暂无记录。</div>;
   }
@@ -221,7 +221,7 @@ export const ReactionInfoPage: React.FC<ReactionInfoPageProps> = ({
             externalItemsPerPage={EXTERNAL_ITEMS_PER_PAGE}
             sortType="time"
             sortOrder="desc"
-            onSortChange={() => {}}
+            onSortChange={() => { }}
             requestData={handleNeedMoreData}
             preRequestData={handlePreRequestData}
             isLoading={isLoading && activeReactions.length === 0}

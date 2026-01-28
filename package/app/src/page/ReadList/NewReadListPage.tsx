@@ -1,9 +1,9 @@
-import React, {useState} from 'react';
-import {ReadListEditor} from './ReadListEditPage';
-import {Button} from '@mui/material';
+import React, { useState } from 'react';
+import { ReadListEditor } from './ReadListEditPage';
+import { Button } from '@mui/material';
 import { useNavigate } from '@tanstack/react-router';
-import {useCreateReadlistMutation} from '@/api/readlist/readlist.mutations';
-import {useTranslation} from 'react-i18next';
+import { useCreateReadlistMutation } from '@package/api/readlist/readlist.mutations';
+import { useTranslation } from 'react-i18next';
 
 export const NewReadListPage: React.FC = () => {
   const navigate = useNavigate();
@@ -20,7 +20,7 @@ export const NewReadListPage: React.FC = () => {
     },
   });
 
-  const {t} = useTranslation();
+  const { t } = useTranslation();
 
   function handleSubmit() {
     const bookConnect = readlistData.books.map(book => book.unitId);

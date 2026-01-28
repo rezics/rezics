@@ -1,15 +1,15 @@
-import React, {useEffect, useMemo, useState} from 'react';
-import {useFixtureInput} from 'react-cosmos/client';
-import {faker} from '@faker-js/faker';
-import {QueryClient, QueryClientProvider} from '@tanstack/react-query';
-import type {TagDetailDTO} from '@/api/tag/tag';
-import TagCard, {TagDetailCard} from './TagCards';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useFixtureInput } from 'react-cosmos/client';
+import { faker } from '@faker-js/faker';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import type { TagDetailDTO } from '@package/api/tag/tag';
+import TagCard, { TagDetailCard } from './TagCards';
 import TagList from './TagList';
 import TagWrapper from './TagWrapper';
 
 // MSW v2
-import {http, HttpResponse} from 'msw';
-import {setupWorker} from 'msw/browser';
+import { http, HttpResponse } from 'msw';
+import { setupWorker } from 'msw/browser';
 
 // Infer the base URL used by apiFetch (see src/api/react-query/http.ts)
 const API_BASE =
@@ -25,7 +25,7 @@ const ensureWorker = async () => {
   if (workerStarted) return;
   const worker = setupWorker(
     // GET /tags (list)
-    http.get(`${API_BASE}/tags`, ({request}) => {
+    http.get(`${API_BASE}/tags`, ({ request }) => {
       const url = new URL(request.url);
       const domainId = url.searchParams.get('domainId') || undefined;
       // Basic filter logic for demo
@@ -33,18 +33,18 @@ const ensureWorker = async () => {
       if (domainId) {
         tags = tags.filter(t => (t.domains || []).includes(domainId));
       }
-      return HttpResponse.json({tags, total: tags.length});
+      return HttpResponse.json({ tags, total: tags.length });
     }),
 
     // GET /tags/:unitId (detail)
-    http.get(`${API_BASE}/tags/:unitId`, ({params}) => {
+    http.get(`${API_BASE}/tags/:unitId`, ({ params }) => {
       const tag = store.tags.find(t => t.id === String(params.unitId));
-      if (!tag) return HttpResponse.json({message: 'Not Found'}, {status: 404});
+      if (!tag) return HttpResponse.json({ message: 'Not Found' }, { status: 404 });
       return HttpResponse.json(tag);
     }),
 
     // GET /units/:unitId (used for domain title in grouped mode)
-    http.get(`${API_BASE}/units/:unitId`, ({params}) => {
+    http.get(`${API_BASE}/units/:unitId`, ({ params }) => {
       const id = String(params.unitId);
       // Find a tag that references this domain id and derive a friendly title
       const title = `Domain ${id.slice(0, 6).toUpperCase()}`;
@@ -57,7 +57,7 @@ const ensureWorker = async () => {
       });
     }),
   );
-  await worker.start({onUnhandledRequest: 'bypass'});
+  await worker.start({ onUnhandledRequest: 'bypass' });
   workerStarted = true;
 };
 
@@ -70,18 +70,18 @@ function makeTag(overrides?: Partial<TagDetailDTO>): TagDetailDTO {
     type:
       overrides?.type ??
       faker.helpers.arrayElement(['GENRE', 'TOPIC', 'THEME', null]),
-    content: overrides?.content ?? faker.lorem.paragraphs({min: 1, max: 2}),
+    content: overrides?.content ?? faker.lorem.paragraphs({ min: 1, max: 2 }),
     domains:
       overrides?.domains ??
       faker.helpers.arrayElements(
         [faker.string.uuid(), faker.string.uuid(), faker.string.uuid()],
-        {min: 0, max: 2},
+        { min: 0, max: 2 },
       ),
     i18n: overrides?.i18n ?? null,
   };
 }
 
-const Section: React.FC<{title: string; children: React.ReactNode}> = ({
+const Section: React.FC<{ title: string; children: React.ReactNode }> = ({
   title,
   children,
 }) => (
@@ -91,7 +91,7 @@ const Section: React.FC<{title: string; children: React.ReactNode}> = ({
   </section>
 );
 
-const QueryProvider: React.FC<{children: React.ReactNode}> = ({children}) => {
+const QueryProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [client] = useState(() => new QueryClient());
   return <QueryClientProvider client={client}>{children}</QueryClientProvider>;
 };
@@ -107,12 +107,12 @@ const Fixture: React.FC = () => {
     const domainB = faker.string.uuid();
     const mk = (p?: Partial<TagDetailDTO>) => makeTag(p);
     return [
-      mk({name: 'Fantasy', type: 'GENRE', domains: [domainA]}),
-      mk({name: 'Science', type: 'TOPIC', domains: [domainB]}),
-      mk({name: 'Philosophy', type: 'THEME', domains: [domainA, domainB]}),
-      mk({name: 'NoDomainTag', type: null, domains: []}),
-      mk({name: 'Mystery', type: 'GENRE', domains: [domainA]}),
-      mk({name: 'Space', type: 'TOPIC', domains: [domainB]}),
+      mk({ name: 'Fantasy', type: 'GENRE', domains: [domainA] }),
+      mk({ name: 'Science', type: 'TOPIC', domains: [domainB] }),
+      mk({ name: 'Philosophy', type: 'THEME', domains: [domainA, domainB] }),
+      mk({ name: 'NoDomainTag', type: null, domains: [] }),
+      mk({ name: 'Mystery', type: 'GENRE', domains: [domainA] }),
+      mk({ name: 'Space', type: 'TOPIC', domains: [domainB] }),
     ];
   }, []);
 
@@ -143,7 +143,7 @@ const Fixture: React.FC = () => {
   }, []);
 
   // Controls for sub-components
-  const [cardCtl] = useFixtureInput<{idx: number; selected: boolean}>(
+  const [cardCtl] = useFixtureInput<{ idx: number; selected: boolean }>(
     'TagCard Props',
     {
       idx: 0,
@@ -155,7 +155,7 @@ const Fixture: React.FC = () => {
     demoTags[Math.min(cardCtl.idx, Math.max(0, demoTags.length - 1))] ??
     makeTag();
 
-  const [detailCtl] = useFixtureInput<{idx: number}>('TagDetailCard Props', {
+  const [detailCtl] = useFixtureInput<{ idx: number }>('TagDetailCard Props', {
     idx: 1,
   });
 
@@ -163,7 +163,7 @@ const Fixture: React.FC = () => {
     demoTags[Math.min(detailCtl.idx, Math.max(0, demoTags.length - 1))] ??
     makeTag();
 
-  const [listCtl] = useFixtureInput<{autoSelectFirst: boolean}>(
+  const [listCtl] = useFixtureInput<{ autoSelectFirst: boolean }>(
     'TagList Props',
     {
       autoSelectFirst: false,
@@ -173,15 +173,15 @@ const Fixture: React.FC = () => {
   // TagWrapper controls — test both modes
   const [wrapperFlatCtl] = useFixtureInput<{
     filters:
-      | {
-          q?: string;
-          type?: string | null;
-          domainId?: string | null;
-          limit?: number | null;
-        }
-      | undefined;
+    | {
+      q?: string;
+      type?: string | null;
+      domainId?: string | null;
+      limit?: number | null;
+    }
+    | undefined;
   }>('TagWrapper Flat Controls', {
-    filters: {q: '', type: null, domainId: null, limit: 20},
+    filters: { q: '', type: null, domainId: null, limit: 20 },
   });
 
   const [wrapperGroupedCtl] = useFixtureInput<{
@@ -208,7 +208,7 @@ const Fixture: React.FC = () => {
           <TagCard
             tag={cardTag}
             selected={cardCtl.selected}
-            onClick={() => {}}
+            onClick={() => { }}
           />
           <div className="text-xs text-gray-500 mt-2">
             idx 选择范围 0 ~ {demoTags.length - 1}

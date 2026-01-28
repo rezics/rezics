@@ -1,8 +1,8 @@
 import {useEffect, useMemo} from 'react';
-import {isAuthenticated} from '@/api/react-query/http';
+import {isAuthenticated} from '@package/api/react-query/http';
 import type {UserDTO} from '@package/contract';
 import {useQuery} from '@tanstack/react-query';
-import {userQueries} from '@/api/user/user.queries';
+import {userQueries} from '@package/api/user/user.queries';
 
 /**
  * useAuth - Authentication hook

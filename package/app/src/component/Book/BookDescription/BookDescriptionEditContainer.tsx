@@ -1,10 +1,10 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import DialogContainer from '../../Common/Overlay/DialogContainer.tsx';
-import {useBookPageStore} from '@/global/page/bookPageStore.ts';
-import {useUpdateBookMutation} from '@/api/book/book.mutations';
-import type {UpdateBookInput} from '@package/contract';
-import {BookDescriptionEditShow} from './BookDescriptionEditShow.tsx';
-import {useTranslation} from 'react-i18next';
+import { useBookPageStore } from '@/global/page/bookPageStore.ts';
+import { useUpdateBookMutation } from '@package/api/book/book.mutations';
+import type { UpdateBookInput } from '@package/contract';
+import { BookDescriptionEditShow } from './BookDescriptionEditShow.tsx';
+import { useTranslation } from 'react-i18next';
 import type {
   BookDescriptionEditContainerProps,
   BookDescriptionEditorInlineProps,
@@ -18,8 +18,8 @@ import type {
  */
 export const BookDescriptionEditContainer: React.FC<
   BookDescriptionEditContainerProps
-> = ({description, editOpen, setEditOpen, mode = 'inline', bookId}) => {
-  const {t} = useTranslation();
+> = ({ description, editOpen, setEditOpen, mode = 'inline', bookId }) => {
+  const { t } = useTranslation();
   const [descriptionState, setDescriptionState] = useState(description);
 
   useEffect(() => {
@@ -29,11 +29,11 @@ export const BookDescriptionEditContainer: React.FC<
   const updateBook = useUpdateBookMutation();
 
   const onUpdate = async (newDesc: string) => {
-    const updates: UpdateBookInput = {description: newDesc};
-    updateBook.mutate({postId: bookId, input: updates});
+    const updates: UpdateBookInput = { description: newDesc };
+    updateBook.mutate({ postId: bookId, input: updates });
 
     // Optimistic local update on the page store
-    useBookPageStore.getState().updateBook(bookId, {description: newDesc});
+    useBookPageStore.getState().updateBook(bookId, { description: newDesc });
   };
 
   const content = (
@@ -76,9 +76,9 @@ export const BookDescriptionEditorModal: React.FC<
  */
 export const BookDescriptionEditorInline: React.FC<
   BookDescriptionEditorInlineProps
-> = ({description, bookId}) => {
+> = ({ description, bookId }) => {
   // Inline mode does not require explicit open state; always render.
-  const noop = () => {};
+  const noop = () => { };
   return (
     <BookDescriptionEditContainer
       description={description}

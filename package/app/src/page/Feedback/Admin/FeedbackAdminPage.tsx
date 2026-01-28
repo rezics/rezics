@@ -10,8 +10,8 @@ import {
 } from '@mui/material';
 import FeedbackList from '@/component/Feedback/FeedbackList';
 import FeedbackDrawer from '@/component/Feedback/FeedbackDrawer';
-import {useQuery} from '@tanstack/react-query';
-import {feedbackListQuery} from '@/api/feedback/feedback.queries';
+import { useQuery } from '@tanstack/react-query';
+import { feedbackListQuery } from '@package/api/feedback/feedback.queries';
 
 export const FeedbackAdminPage: React.FC = () => {
   const [open, setOpen] = React.useState(false);
@@ -26,8 +26,8 @@ export const FeedbackAdminPage: React.FC = () => {
     resolvedFilter === 'all'
       ? undefined
       : resolvedFilter === 'resolved'
-      ? true
-      : false;
+        ? true
+        : false;
 
   // Prefetch general list for smoother UX
   useQuery(feedbackListQuery());
@@ -35,7 +35,7 @@ export const FeedbackAdminPage: React.FC = () => {
   return (
     <Box className="max-w-6xl mx-auto p-4">
       <Stack
-        direction={{xs: 'column', sm: 'row'}}
+        direction={{ xs: 'column', sm: 'row' }}
         className="items-center justify-between mb-6 gap-4"
       >
         <Typography variant="h5" className="font-bold">
@@ -47,7 +47,7 @@ export const FeedbackAdminPage: React.FC = () => {
       </Stack>
 
       <div className="pb-4">
-        <Stack direction={{xs: 'column', md: 'row'}} spacing={2}>
+        <Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
           <TextField
             label="搜索内容"
             value={search}

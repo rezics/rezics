@@ -1,9 +1,9 @@
-import React, {useEffect, useState} from 'react';
-import {useQuery} from '@tanstack/react-query';
-import {reactionQueries} from '@/api/reaction/reaction';
-import {useAlertStore} from '@/global/windowAlertStore';
-import {useSetBookmarkTagsMutation} from '@/api/reaction/reaction.mutations';
-import {Typography, TextField, Chip, Button, Paper} from '@mui/material';
+import React, { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { reactionQueries } from '@package/api/reaction/reaction';
+import { useAlertStore } from '@/global/windowAlertStore';
+import { useSetBookmarkTagsMutation } from '@package/api/reaction/reaction.mutations';
+import { Typography, TextField, Chip, Button, Paper } from '@mui/material';
 
 type UserBookmarkTagsCardProps = {
   userId: string;
@@ -12,10 +12,10 @@ type UserBookmarkTagsCardProps = {
 export const UserBookmarkTagsCard: React.FC<UserBookmarkTagsCardProps> = ({
   userId,
 }) => {
-  const {show: showAlert} = useAlertStore();
+  const { show: showAlert } = useAlertStore();
   const targetId = 'tag';
 
-  const {data, isLoading, isError} = useQuery(
+  const { data, isLoading, isError } = useQuery(
     reactionQueries.bookmarkTags(targetId),
   );
 

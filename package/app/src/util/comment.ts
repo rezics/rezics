@@ -1,4 +1,4 @@
-import {commentApi} from '@/api/comment/comment.api.ts';
+import {commentApi} from '@package/api/comment/comment.api.ts';
 import type {CommentDTO, CreateCommentInput} from '@package/contract';
 
 /**

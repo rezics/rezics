@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import type { TagDetailDTO } from '@package/contract';
-import { tagQueries } from '@/api/tag/tag';
+import { tagQueries } from '@package/api/tag/tag';
 import { AccentBarWithTextShow } from '@/component/Common/Navigation/AccentBar';
 import { TagDetailCard } from '@/component/Tag/TagCards';
 import { tagUnitRoute } from '@/router';

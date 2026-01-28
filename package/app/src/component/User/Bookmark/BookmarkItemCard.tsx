@@ -1,7 +1,7 @@
-import React, {useEffect, useState} from 'react';
-import {useAlertStore} from '@/global/windowAlertStore';
-import {useDeleteReactionMutation} from '@/api/reaction/reaction.mutations';
-import {useSetBookmarkTagsMutation} from '@/api/reaction/reaction.mutations';
+import React, { useEffect, useState } from 'react';
+import { useAlertStore } from '@/global/windowAlertStore';
+import { useDeleteReactionMutation } from '@package/api/reaction/reaction.mutations';
+import { useSetBookmarkTagsMutation } from '@package/api/reaction/reaction.mutations';
 import {
   Typography,
   TextField,
@@ -12,9 +12,9 @@ import {
   Paper,
   Tooltip,
 } from '@mui/material';
-import {Delete} from '@mui/icons-material';
-import {type BookmarkEntry} from '@/page/User/BookmarkPage';
-import {buildUnitUrl} from '@/util/buildUrlUtil';
+import { Delete } from '@mui/icons-material';
+import { type BookmarkEntry } from '@/page/User/BookmarkPage';
+import { buildUnitUrl } from '@/util/buildUrlUtil';
 import { Link } from '@/component/Navigation/Link';
 
 type BookmarkItemCardProps = {
@@ -30,10 +30,10 @@ export const BookmarkItemCard: React.FC<BookmarkItemCardProps> = ({
   onRemoved,
   onTagsUpdated,
 }) => {
-  const {unit, createdAt, tags: initialTags} = entry;
+  const { unit, createdAt, tags: initialTags } = entry;
   const [localTags, setLocalTags] = useState<string[]>(initialTags ?? []);
   const [newTag, setNewTag] = useState('');
-  const {show: showAlert} = useAlertStore();
+  const { show: showAlert } = useAlertStore();
 
   const unitUrl = buildUnitUrl(unit);
 
@@ -104,7 +104,7 @@ export const BookmarkItemCard: React.FC<BookmarkItemCardProps> = ({
                 label={unit.type || 'UNKNOWN'}
                 size="small"
                 variant="outlined"
-                onClick={() => {}}
+                onClick={() => { }}
                 className="text-[11px]"
               />
             </Link>
@@ -166,7 +166,7 @@ export const BookmarkItemCard: React.FC<BookmarkItemCardProps> = ({
                 }}
               />
             )}
-            sx={{minWidth: 160}}
+            sx={{ minWidth: 160 }}
           />
 
           <Button

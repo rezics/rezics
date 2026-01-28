@@ -3,11 +3,7 @@
  * Direct API communication layer
  */
 
-import type {
-  CreateUserInput,
-  UpdateUserInput,
-  UserDTO,
-} from '@package/contract';
+import type {CreateUser, UpdateUser, UserDTO} from '@package/contract';
 import {apiFetch} from '../react-query/http';
 
 type FollowSummaryResponse = {
@@ -31,7 +27,7 @@ export const userApi = {
   },
 
   register: async (
-    input: CreateUserInput,
+    input: CreateUser,
   ): Promise<{user: UserDTO; token: string}> => {
     return apiFetch(`/users/register`, {
       method: 'POST',
@@ -84,14 +80,14 @@ export const userApi = {
     return apiFetch(`/users/${unitId}`);
   },
 
-  updateMe: async (input: UpdateUserInput): Promise<UserDTO> => {
+  updateMe: async (input: UpdateUser): Promise<UserDTO> => {
     return apiFetch(`/users/me`, {
       method: 'PUT',
       body: JSON.stringify(input),
     });
   },
 
-  update: async (unitId: string, input: UpdateUserInput): Promise<UserDTO> => {
+  update: async (unitId: string, input: UpdateUser): Promise<UserDTO> => {
     return apiFetch(`/users/${unitId}`, {
       method: 'PUT',
       body: JSON.stringify(input),

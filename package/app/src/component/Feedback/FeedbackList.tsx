@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Box,
   List,
@@ -15,17 +15,17 @@ import {
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
 import DoneIcon from '@mui/icons-material/Done';
-import {useQuery, useQueryClient} from '@tanstack/react-query';
-import {buildMeiliFeedbackQuery} from '@/api/meili/meili.queries';
-import {useSetFeedbackResolvedMutation} from '@/api/feedback/feedback.mutations';
-import type {FeedbackDTO, FeedbackType} from '@/api/feedback/feedback.types';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { buildMeiliFeedbackQuery } from '@package/api/meili/meili.queries';
+import { useSetFeedbackResolvedMutation } from '@package/api/feedback/feedback.mutations';
+import type { FeedbackDTO, FeedbackType } from '@package/api/feedback/feedback.types';
 import {
   UniversalPaginator,
   type UniversalPaginatorHandle,
 } from '@/component/Common/Navigation/Pagination';
 
-import {Popover, PopoverContent, PopoverTrigger} from '@/component/ui/popover';
-import {useAlertStore} from '@/global/windowAlertStore';
+import { Popover, PopoverContent, PopoverTrigger } from '@/component/ui/popover';
+import { useAlertStore } from '@/global/windowAlertStore';
 import { Link } from '@/component/Navigation/Link';
 
 export type FeedbackResolvedFilter = boolean | undefined;
@@ -70,7 +70,7 @@ const FeedbackList: React.FC<FeedbackListProps> = ({
   const [startAll, setStartAll] = useState<number>(0);
   const [startMine, setStartMine] = useState<number>(0);
   const [startUser, setStartUser] = useState<number>(0);
-  const {show: showAlert} = useAlertStore();
+  const { show: showAlert } = useAlertStore();
   const queryClient = useQueryClient();
   const paginatorRef = useRef<UniversalPaginatorHandle | null>(null);
 
@@ -99,7 +99,7 @@ const FeedbackList: React.FC<FeedbackListProps> = ({
   const resolveMutation = useSetFeedbackResolvedMutation();
 
   const handleResolve = (id: string) => {
-    resolveMutation.mutate({id, resolved: true});
+    resolveMutation.mutate({ id, resolved: true });
     showAlert('反馈已解决');
   };
 
@@ -107,8 +107,8 @@ const FeedbackList: React.FC<FeedbackListProps> = ({
     queryType === 'mine'
       ? myResult
       : queryType === 'user'
-      ? byUserResult
-      : listResult;
+        ? byUserResult
+        : listResult;
 
   const currentData = activeResult.data;
   const isLoading = activeResult.isLoading;
@@ -143,7 +143,7 @@ const FeedbackList: React.FC<FeedbackListProps> = ({
     const limit = EXTERNAL_PAGE_SIZE;
 
     if (queryType === 'mine') {
-      const {queryKey, queryFn} = buildMeiliFeedbackQuery(
+      const { queryKey, queryFn } = buildMeiliFeedbackQuery(
         offset,
         limit,
         search ?? '',
@@ -152,13 +152,13 @@ const FeedbackList: React.FC<FeedbackListProps> = ({
           resolved,
         },
       );
-      const next = await queryClient.fetchQuery({queryKey, queryFn});
+      const next = await queryClient.fetchQuery({ queryKey, queryFn });
       return next?.items?.length ?? 0;
     }
 
     if (queryType === 'user') {
       if (!userId) return 0;
-      const {queryKey, queryFn} = buildMeiliFeedbackQuery(
+      const { queryKey, queryFn } = buildMeiliFeedbackQuery(
         offset,
         limit,
         search ?? '',
@@ -168,11 +168,11 @@ const FeedbackList: React.FC<FeedbackListProps> = ({
           resolved,
         },
       );
-      const next = await queryClient.fetchQuery({queryKey, queryFn});
+      const next = await queryClient.fetchQuery({ queryKey, queryFn });
       return next?.items?.length ?? 0;
     }
 
-    const {queryKey, queryFn} = buildMeiliFeedbackQuery(
+    const { queryKey, queryFn } = buildMeiliFeedbackQuery(
       offset,
       limit,
       search ?? '',
@@ -181,7 +181,7 @@ const FeedbackList: React.FC<FeedbackListProps> = ({
         resolved,
       },
     );
-    const next = await queryClient.fetchQuery({queryKey, queryFn});
+    const next = await queryClient.fetchQuery({ queryKey, queryFn });
     return next?.items?.length ?? 0;
   };
 
@@ -201,7 +201,7 @@ const FeedbackList: React.FC<FeedbackListProps> = ({
         externalItemsPerPage={EXTERNAL_PAGE_SIZE}
         sortType={undefined as any}
         sortOrder={undefined as any}
-        onSortChange={() => {}}
+        onSortChange={() => { }}
         requestData={handleNeedMoreData}
         preRequestData={handlePreRequestData}
         isLoading={isLoading && (currentData?.items?.length ?? 0) === 0}

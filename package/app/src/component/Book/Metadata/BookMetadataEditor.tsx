@@ -10,10 +10,10 @@ import {
   FormControlLabel,
   Tooltip,
 } from '@mui/material';
-import {InfoOutlined} from '@mui/icons-material';
-import type {BookDTO, UserDTO} from '@package/contract';
-import {meiliUserApi} from '@/api/meili/meili.api';
-import {useTranslation} from 'react-i18next';
+import { InfoOutlined } from '@mui/icons-material';
+import type { BookDTO, UserDTO } from '@package/contract';
+import { meiliUserApi } from '@package/api/meili/meili.api';
+import { useTranslation } from 'react-i18next';
 
 type PublicUserLike = Partial<UserDTO>;
 
@@ -41,7 +41,7 @@ const useUserSearch = () => {
     setLoading(true);
     const handle = setTimeout(async () => {
       try {
-        const {users} = await meiliUserApi.userSearch({
+        const { users } = await meiliUserApi.userSearch({
           q: input,
           limit: 10,
         });
@@ -58,7 +58,7 @@ const useUserSearch = () => {
     };
   }, [input]);
 
-  return {input, setInput, options, loading};
+  return { input, setInput, options, loading };
 };
 
 const UsersMultiSelect: React.FC<{
@@ -67,8 +67,8 @@ const UsersMultiSelect: React.FC<{
   onChange: (v: UserOption[]) => void;
   placeholder?: string;
   disabled?: boolean;
-}> = ({label, value, onChange, placeholder, disabled}) => {
-  const {input, setInput, options, loading} = useUserSearch();
+}> = ({ label, value, onChange, placeholder, disabled }) => {
+  const { input, setInput, options, loading } = useUserSearch();
   return (
     <div>
       <Autocomplete
@@ -105,7 +105,7 @@ const UsersMultiSelect: React.FC<{
         renderOption={(props, option) => (
           <li {...props} key={option.unitId}>
             <div className="flex items-center gap-2">
-              <Avatar src={option.avatar} sx={{width: 24, height: 24}}>
+              <Avatar src={option.avatar} sx={{ width: 24, height: 24 }}>
                 {option.name?.[0] ?? '?'}
               </Avatar>
               <span>{option.name}</span>
@@ -115,7 +115,7 @@ const UsersMultiSelect: React.FC<{
         renderTags={(value, getTagProps) =>
           value.map((option, index) => (
             <Chip
-              {...getTagProps({index})}
+              {...getTagProps({ index })}
               key={option.unitId}
               avatar={<Avatar src={option.avatar}>{option.name?.[0]}</Avatar>}
               label={option.name}
@@ -127,8 +127,8 @@ const UsersMultiSelect: React.FC<{
     </div>
   );
 };
-export function NSFWInfo({tooltipTitle}: {tooltipTitle?: string}) {
-  const {t} = useTranslation();
+export function NSFWInfo({ tooltipTitle }: { tooltipTitle?: string }) {
+  const { t } = useTranslation();
   return (
     <div className="flex items-center gap-1">
       <span>{t('book.flags.nsfw')}</span>
@@ -153,8 +153,8 @@ export function NSFWInfo({tooltipTitle}: {tooltipTitle?: string}) {
   );
 }
 
-export function IsLicensedInfo({tooltipTitle}: {tooltipTitle?: string}) {
-  const {t} = useTranslation();
+export function IsLicensedInfo({ tooltipTitle }: { tooltipTitle?: string }) {
+  const { t } = useTranslation();
   return (
     <div className="flex items-center gap-1 whitespace-nowrap">
       <span>{t('book.flags.licensed')}</span>
@@ -184,7 +184,7 @@ export const BookMetadataEditor: React.FC<BookMetadataEditorProps> = ({
   onChange,
   disabled,
 }) => {
-  const {t} = useTranslation();
+  const { t } = useTranslation();
   return (
     <div className="flex flex-col gap-6">
       <div>
@@ -192,7 +192,7 @@ export const BookMetadataEditor: React.FC<BookMetadataEditorProps> = ({
           fullWidth
           label={t('book.fields.title')}
           value={value?.title ?? ''}
-          onChange={e => onChange?.({title: e.target.value})}
+          onChange={e => onChange?.({ title: e.target.value })}
           disabled={disabled}
           variant="outlined"
           size="small"
@@ -204,7 +204,7 @@ export const BookMetadataEditor: React.FC<BookMetadataEditorProps> = ({
             fullWidth
             label={t('book.fields.isbn')}
             value={value?.isbn ?? ''}
-            onChange={e => onChange?.({isbn: e.target.value})}
+            onChange={e => onChange?.({ isbn: e.target.value })}
             disabled={disabled}
             variant="outlined"
             size="small"
@@ -215,7 +215,7 @@ export const BookMetadataEditor: React.FC<BookMetadataEditorProps> = ({
             fullWidth
             label={t('book.fields.cover_url')}
             value={value?.coverUrl ?? ''}
-            onChange={e => onChange?.({coverUrl: e.target.value})}
+            onChange={e => onChange?.({ coverUrl: e.target.value })}
             disabled={disabled}
             variant="outlined"
             size="small"
@@ -229,7 +229,7 @@ export const BookMetadataEditor: React.FC<BookMetadataEditorProps> = ({
           <UsersMultiSelect
             label={t('book.fields.author')}
             value={(value?.author as any) ?? []}
-            onChange={v => onChange?.({author: v as any})}
+            onChange={v => onChange?.({ author: v as any })}
             placeholder={t('book.placeholders.search_author')}
             disabled={disabled}
           />
@@ -238,7 +238,7 @@ export const BookMetadataEditor: React.FC<BookMetadataEditorProps> = ({
           <UsersMultiSelect
             label={t('book.fields.press')}
             value={(value?.press as any) ?? []}
-            onChange={v => onChange?.({press: v as any})}
+            onChange={v => onChange?.({ press: v as any })}
             placeholder={t('book.placeholders.search_press')}
             disabled={disabled}
           />
@@ -247,7 +247,7 @@ export const BookMetadataEditor: React.FC<BookMetadataEditorProps> = ({
           <UsersMultiSelect
             label={t('book.fields.producer')}
             value={(value?.producer as any) ?? []}
-            onChange={v => onChange?.({producer: v as any})}
+            onChange={v => onChange?.({ producer: v as any })}
             placeholder={t('book.placeholders.search_producer')}
             disabled={disabled}
           />
@@ -257,7 +257,7 @@ export const BookMetadataEditor: React.FC<BookMetadataEditorProps> = ({
             fullWidth
             label={t('book.fields.text_length')}
             value={value?.textLength ?? ''}
-            onChange={v => onChange?.({textLength: v.target.value})}
+            onChange={v => onChange?.({ textLength: v.target.value })}
             disabled={disabled}
             variant="outlined"
             size="small"

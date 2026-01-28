@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Divider, Switch, TextField, Button, Stack } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 
-import { bookQueries } from '@/api/book/book.queries.ts';
+import { bookQueries } from '@package/api/book/book.queries';
 import { ChapterArborist } from '@/component/Book/Chapter/ChapterArborist';
 import type { ChapterArboristRefHandle } from '@/component/Book/Chapter/ChapterArborist';
 

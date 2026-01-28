@@ -1,6 +1,6 @@
 import { JsonEditorLight } from '@/component/Form/JsonEditorLight';
 import { useQuery } from '@tanstack/react-query';
-import { bookQueries } from '@/api/book/book';
+import { bookQueries } from '@package/api/book/book';
 import { useEffect, useState } from 'react';
 import { Alert } from '@mui/material';
 

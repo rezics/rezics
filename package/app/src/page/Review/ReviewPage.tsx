@@ -9,9 +9,9 @@ import {
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 
-import { reviewQueries } from '@/api/review/review';
+import { reviewQueries } from '@package/api/review/review';
 import { MarkdownContent } from '@/component/Common/MarkdownContent';
-import { bookQueries } from '@/api/book/book';
+import { bookQueries } from '@package/api/book/book';
 import { BookListViewItem } from '@/component/BookLib/BookList/BookListView';
 import { useRef } from 'react';
 import TreeReplyComponents from '@/component/Form/Comment/TreeReplyComponents';

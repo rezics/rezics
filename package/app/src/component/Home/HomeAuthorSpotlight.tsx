@@ -1,9 +1,9 @@
-import React, {useMemo} from 'react';
-import {useQuery} from '@tanstack/react-query';
-import {Alert, CircularProgress, Typography, Avatar} from '@mui/material';
-import {bookQueries} from '@/api/book/book';
-import type {BookDTO, PublicUser} from '@package/contract';
-import {useTranslation} from 'react-i18next';
+import React, { useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { Alert, CircularProgress, Typography, Avatar } from '@mui/material';
+import { bookQueries } from '@package/api/book/book';
+import type { BookDTO, PublicUser } from '@package/contract';
+import { useTranslation } from 'react-i18next';
 
 type Book = BookDTO;
 
@@ -22,11 +22,11 @@ export const HomeAuthorSpotlight: React.FC<HomeAuthorSpotlightProps> = ({
   limit = 24,
   maxAuthors = 12,
 }) => {
-  const {t} = useTranslation();
+  const { t } = useTranslation();
   const resolvedTitle = title ?? t('page.home.sections.author_spotlight');
 
-  const {data, isLoading, error} = useQuery(
-    bookQueries.list({start: 0, limit}),
+  const { data, isLoading, error } = useQuery(
+    bookQueries.list({ start: 0, limit }),
   );
 
   const authors = useMemo(() => {

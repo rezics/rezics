@@ -1,6 +1,6 @@
-import {userApi} from '@/api/user/user';
-import {setToken, removeToken} from '@/api/react-query/http';
-import type {CreateUserInput} from '@package/contract';
+import {userApi} from '@package/api/user/user.api';
+import {setToken, removeToken} from '@package/api/react-query/http';
+import type {CreateUser} from '@package/contract';
 
 export const login = async (email: string, password: string) => {
   const {user, token} = await userApi.login({email, password});
@@ -20,7 +20,7 @@ export const register = async (
   bio?: string,
 ) => {
   try {
-    const input: CreateUserInput = {
+    const input: CreateUser = {
       email,
       verificationCode,
       password,
