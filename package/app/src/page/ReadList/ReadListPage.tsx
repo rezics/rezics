@@ -80,7 +80,8 @@ export const ReadListPage: React.FC = () => {
               placement="top-start"
             >
               <Link
-                to={`/user/${bookList.creator?.unitId}`}
+                to="/user/$unitId"
+                params={{ unitId: bookList.creator?.unitId }}
                 className="flex items-center"
               >
                 <div className="flex items-center gap-3">

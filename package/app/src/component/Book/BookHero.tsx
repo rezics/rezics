@@ -1,21 +1,21 @@
-import {Rating} from '@mui/material';
+import { Rating } from '@mui/material';
 import React from 'react';
-import {useTranslation} from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 import { Link } from '@/component/Navigation/Link';
 
-import type {BookDTO} from '@package/contract';
+import type { BookDTO } from '@package/contract';
 import {
   MiniActionBar,
   MiniAdminActionBar,
 } from '../Common/Reaction/MiniActionBar';
-import {LazyLoadImage} from '../Common/LazyLoadImage';
+import { LazyLoadImage } from '../Common/LazyLoadImage';
 
 type Book = BookDTO;
 
 export const BookHeroReactionBar: React.FC<{
   bookInfo: any;
   className?: string;
-}> = ({bookInfo, className}) => {
+}> = ({ bookInfo, className }) => {
   const color = 'text-white';
   return (
     <div className={className}>
@@ -37,8 +37,8 @@ export const BookHeroReactionBar: React.FC<{
 export const BookHeroShow: React.FC<{
   bookInfo: Book;
   rating: number;
-}> = ({bookInfo, rating}) => {
-  const {t} = useTranslation();
+}> = ({ bookInfo, rating }) => {
+  const { t } = useTranslation();
   const tags = bookInfo?.tags ?? [];
   return (
     <div
@@ -88,7 +88,7 @@ export const BookHeroShow: React.FC<{
             {/* Tags */}
             <div className="flex flex-wrap gap-2 mt-1">
               {tags?.map(tag => (
-                <Link key={tag} to={`/book?tags=${tag}`}>
+                <Link key={tag} to="/book" search={{ tags: tag }}>
                   <span className="px-2 py-1 rounded bg-white/10 text-white hover:bg-white/20 transition">
                     {tag}
                   </span>
@@ -118,6 +118,6 @@ export type Container = {
   rating: number;
 };
 
-export const BookHeroContainer: React.FC<Container> = ({bookInfo, rating}) => {
+export const BookHeroContainer: React.FC<Container> = ({ bookInfo, rating }) => {
   return <BookHeroShow bookInfo={bookInfo} rating={rating} />;
 };

@@ -29,8 +29,8 @@ import { RouterLink } from '@/component/Navigation/RouterLink';
 import { remarkRoute, reviewRoute } from '@/router';
 
 export function ReviewPage() {
-  const reviewMatch = reviewRoute.useMatch({ shouldThrow: false });
-  const remarkMatch = remarkRoute.useMatch({ shouldThrow: false });
+  const reviewMatch = reviewRoute.useMatch();
+  const remarkMatch = remarkRoute.useMatch();
   const reviewId = reviewMatch?.params.reviewId ?? remarkMatch?.params.reviewId ?? '';
   const { t } = useTranslation();
   const {
@@ -97,7 +97,8 @@ export function ReviewPage() {
               />
             )}
             <div className="text-xs text-gray-500">
-              <RouterLink to={`/book/${review.bookId}`}>{`/book/${review.bookId}`}</RouterLink>
+              <RouterLink to="/book/$bookId" params={{ bookId: review.bookId }}
+              >{`/book/${review.bookId}`}</RouterLink>
             </div>
           </div>
           {/* <Button variant="contained" color="primary">
@@ -120,7 +121,7 @@ export function ReviewPage() {
               title={t('review.open_user_interface')}
               placement="top-start"
             >
-              <RouterLink to={`/user/${review.user?.unitId}`} className="flex items-center">
+              <RouterLink to="/user/$unitId" params={{ unitId: review.user?.unitId ?? '' }} className="flex items-center">
                 <div className="flex items-center justify-between">
                   <div>
                     <Typography variant="h6" className="font-bold">

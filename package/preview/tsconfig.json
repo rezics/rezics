@@ -14,6 +14,10 @@
     "verbatimModuleSyntax": true,
     "noEmit": true,
 
+    "paths": {
+      "@/*": ["./*"]
+    },
+
     // Best practices
     "strict": true,
     "skipLibCheck": true,

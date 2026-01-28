@@ -8,6 +8,6 @@ const BookPageContainer = lazyRouteComponent(
 export const Route = createFileRoute('/_mainLayout/book/$bookId')({
   component: () => (
     <BookPageContainer />
-  ),
+  )
 });
 

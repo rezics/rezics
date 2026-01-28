@@ -1,9 +1,9 @@
-import {Card, CardContent, CardMedia, Typography} from '@mui/material';
+import { Card, CardContent, CardMedia, Typography } from '@mui/material';
 
 import { Link } from '@/component/Navigation/Link';
 
-import type {BookDTO} from '@package/contract';
-import {LazyLoadImage} from '@/component/Common/LazyLoadImage';
+import type { BookDTO } from '@package/contract';
+import { LazyLoadImage } from '@/component/Common/LazyLoadImage';
 
 // import { Book } from "contract/schema";
 type Book = BookDTO;
@@ -12,10 +12,10 @@ type BookListViewShowProps = {
   books: Book[];
 };
 
-export const BookListViewItem = ({book}: {book: Book}) => {
+export const BookListViewItem = ({ book }: { book: Book }) => {
   return (
     <div>
-      <Link to={`/book/${book.unitId}`}>
+      <Link to="/book/$bookId" params={{ bookId: book.unitId }}>
         <Card className="mt-4 h-[200px] flex flex-row items-stretch gap-4 w-full">
           {book.coverUrl && (
             <CardMedia className="aspect-[2/3]">
@@ -51,7 +51,7 @@ export const BookListViewItem = ({book}: {book: Book}) => {
   );
 };
 
-export const BookListViewShow = ({books}: BookListViewShowProps) => {
+export const BookListViewShow = ({ books }: BookListViewShowProps) => {
   return (
     <div className="mt-4 grid grid-cols-1">
       {books.map(book => (
@@ -67,6 +67,6 @@ export type BookListViewContainerProps = {
   books: Book[];
 };
 
-export const BookListViewContainer = ({books}: BookListViewContainerProps) => {
+export const BookListViewContainer = ({ books }: BookListViewContainerProps) => {
   return <BookListViewShow books={books} />;
 };

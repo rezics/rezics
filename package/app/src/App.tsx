@@ -12,15 +12,10 @@ import { getDynamicTheme, getTheme } from './config/theme.ts';
 import { appStore } from './global/appStore.ts';
 import { PersistentSettingsLoader } from './plugin/providers/PersistentSettingsLoader.tsx';
 import { ReactQueryProvider } from './plugin/providers/react-query.tsx';
-import { useRouterState } from '@tanstack/react-router';
 import { ErrorBoundary } from 'react-error-boundary';
 import { WindowAlert } from './component/Common/Overlay/WindowAlert.tsx';
 import { HelpFab } from './component/Common/UI/Button/HelpWidget.tsx';
 import { HelmetProvider } from 'react-helmet-async';
-
-import { useScrollRestore } from './util/useScrollRestore.ts';
-import { startThrottledScroll } from './util/ScrollUtil.ts';
-import { scroll } from './util/ScrollUtil.ts';
 import { useAppInit } from './plugin/providers/useAppInit.ts';
 import { RouterProvider } from '@tanstack/react-router';
 
@@ -30,9 +25,16 @@ export default function App() {
   const themeMode = appStore(s => s.theme);
   const customColor = appStore(s => s.customColor);
   const useDynamicTheme = appStore(s => s.useDynamicTheme);
-  // const location = useRouterState({
-  //   select: s => `${s.location.pathname}${s.location.search ?? ''}`,
-  // });
+
+  // ANCHOR 非常好用的Hook，回头看看封装一下
+  useEffect(() => {
+    const onScroll = () => {
+      const ae = document.activeElement as HTMLElement | null
+      console.log('scrollY=', window.scrollY, 'active=', ae?.tagName, ae?.id, ae?.className)
+    }
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
 
   useAppInit();
 
@@ -42,8 +44,6 @@ export default function App() {
     }
     return getTheme(themeMode, customColor);
   }, [themeMode, customColor, useDynamicTheme]);
-
-  // useScrollRestore(location, startThrottledScroll, scroll);
 
   useEffect(() => {
     const html = document.documentElement;

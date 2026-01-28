@@ -57,7 +57,9 @@ export const SingleQuoteExcerptShow: React.FC<SingleQuoteExcerptShowProps> = ({
 
       <div className="flex items-center mb-2">
         <Tooltip title={'打开用户界面'} placement="top-start">
-          <Link to={`/user/${author.unitId}`} className="flex items-center">
+          <Link to="/user/$unitId"
+            params={{ unitId: author.unitId }}
+            className="flex items-center">
             <Avatar
               src={author.avatar}
               sx={{ width: 20, height: 20, mr: 1 }}

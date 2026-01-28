@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Checkbox,
   FormControlLabel,
@@ -7,14 +7,14 @@ import {
   CircularProgress,
   Chip,
 } from '@mui/material';
-import {useQuery} from '@tanstack/react-query';
-import {reactionQueries} from '@/api/reaction/reaction';
+import { useQuery } from '@tanstack/react-query';
+import { reactionQueries } from '@/api/reaction/reaction';
 import {
   useSetBookmarkTagsMutation,
   useDeleteReactionMutation,
 } from '@/api/reaction/reaction.mutations';
-import {useAlertStore} from '@/global/windowAlertStore';
-import {useUserStore} from '@/global/userStore';
+import { useAlertStore } from '@/global/windowAlertStore';
+import { useUserStore } from '@/global/userStore';
 import { Link } from '@/component/Navigation/Link';
 
 export type BookmarkTagManagerProps = {
@@ -35,11 +35,11 @@ export const BookmarkTagManager: React.FC<BookmarkTagManagerProps> = ({
   key,
   hasBookmarked,
 }) => {
-  const {show: showAlert} = useAlertStore();
+  const { show: showAlert } = useAlertStore();
   const user = useUserStore(state => state.user);
 
   const [bookmarked, setBookmarked] = useState(hasBookmarked);
-  const {data: myData} = useQuery(reactionQueries.my(unitId));
+  const { data: myData } = useQuery(reactionQueries.my(unitId));
   useEffect(() => {
     if (myData?.reactionsByTarget?.[unitId ?? '']) {
       setBookmarked(
@@ -61,7 +61,7 @@ export const BookmarkTagManager: React.FC<BookmarkTagManagerProps> = ({
     isError: _isErrorUserBookmarkTags,
   } = useQuery(reactionQueries.bookmarkTags(user?.unitId ?? ''));
 
-  const {data, isLoading, isError} = useQuery(
+  const { data, isLoading, isError } = useQuery(
     reactionQueries.bookmarkTags(unitId),
   );
 
@@ -97,7 +97,7 @@ export const BookmarkTagManager: React.FC<BookmarkTagManagerProps> = ({
 
   const handleDeleteBookmark = () => {
     if (!unitId) return;
-    deleteReactionMutation.mutate({targetId: unitId, reaction: 'bookmark'});
+    deleteReactionMutation.mutate({ targetId: unitId, reaction: 'bookmark' });
   };
 
   if (!open) return null;
@@ -142,7 +142,7 @@ export const BookmarkTagManager: React.FC<BookmarkTagManagerProps> = ({
       ) : (
         <div className="flex-1 overflow-y-auto mt-2 space-y-1">
           {userBookmarkTagsData?.tags &&
-          userBookmarkTagsData.tags.length > 0 ? (
+            userBookmarkTagsData.tags.length > 0 ? (
             userBookmarkTagsData.tags.map(tag => (
               <div key={tag}>
                 <FormControlLabel
@@ -159,7 +159,7 @@ export const BookmarkTagManager: React.FC<BookmarkTagManagerProps> = ({
             ))
           ) : (
             <div className="text-xs text-gray-500">
-              请前往 <Link to="/user/bookmark">/user/bookmark</Link>{' '}
+              请前往 <Link to="/user/$unitId" params={{ unitId: user?.unitId ?? '' }}>/user/bookmark</Link>{' '}
               页面设置书签标签。
             </div>
           )}
