@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as AdminRouteImport } from './routes/_admin'
 import { Route as AdminIndexRouteImport } from './routes/_admin/index'
 import { Route as AdminUsersRouteImport } from './routes/_admin/users'
@@ -16,6 +17,11 @@ import { Route as AdminUnitsRouteImport } from './routes/_admin/units'
 import { Route as AdminSettingsRouteImport } from './routes/_admin/settings'
 import { Route as AdminBooksRouteImport } from './routes/_admin/books'
 
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminRoute = AdminRouteImport.update({
   id: '/_admin',
   getParentRoute: () => rootRouteImport,
@@ -48,12 +54,14 @@ const AdminBooksRoute = AdminBooksRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof AdminIndexRoute
+  '/login': typeof LoginRoute
   '/books': typeof AdminBooksRoute
   '/settings': typeof AdminSettingsRoute
   '/units': typeof AdminUnitsRoute
   '/users': typeof AdminUsersRoute
 }
 export interface FileRoutesByTo {
+  '/login': typeof LoginRoute
   '/books': typeof AdminBooksRoute
   '/settings': typeof AdminSettingsRoute
   '/units': typeof AdminUnitsRoute
@@ -63,6 +71,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_admin': typeof AdminRouteWithChildren
+  '/login': typeof LoginRoute
   '/_admin/books': typeof AdminBooksRoute
   '/_admin/settings': typeof AdminSettingsRoute
   '/_admin/units': typeof AdminUnitsRoute
@@ -71,12 +80,13 @@ export interface FileRoutesById {
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/books' | '/settings' | '/units' | '/users'
+  fullPaths: '/' | '/login' | '/books' | '/settings' | '/units' | '/users'
   fileRoutesByTo: FileRoutesByTo
-  to: '/books' | '/settings' | '/units' | '/users' | '/'
+  to: '/login' | '/books' | '/settings' | '/units' | '/users' | '/'
   id:
     | '__root__'
     | '/_admin'
+    | '/login'
     | '/_admin/books'
     | '/_admin/settings'
     | '/_admin/units'
@@ -86,10 +96,18 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   AdminRoute: typeof AdminRouteWithChildren
+  LoginRoute: typeof LoginRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_admin': {
       id: '/_admin'
       path: ''
@@ -155,6 +173,7 @@ const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRouteWithChildren,
+  LoginRoute: LoginRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

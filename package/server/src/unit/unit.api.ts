@@ -32,6 +32,7 @@ export const unitApi = coreInstance('/units')
     '/',
     async ({query, headers, jwt, set}): Promise<UnitListResponse> => {
       const payload = await verifyAuth(headers.authorization, jwt, set);
+      console.log(payload);
       if (!BasicAdminPermission(payload as any)) {
         set.status = 403;
         throw new Error(
