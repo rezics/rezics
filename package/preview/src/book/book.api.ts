@@ -8,8 +8,8 @@ import {mapBookToDTO} from '@package/server/book/mapper';
 
 import React from 'react';
 import {renderToReadableStream} from 'react-dom/server';
-import {BookShareDocument} from '../share/BookShareDocument';
-import {withDoctype} from '../share/htmlStream';
+import {BookShareDocument} from '../component/BookShareDocument';
+import {withDoctype} from '../utils/htmlStream';
 
 // 之后全部走 MeiliSearch API，不要走 prisma，太慢了
 
@@ -70,44 +70,12 @@ async function renderBookSharePage(opts: {
   });
 }
 
+/**
+ * Shareable HTML page (bots can parse OG/Twitter meta).
+ */
 export const bookApi = coreInstance('/book')
   /**
-   * Shareable HTML page (bots can parse OG/Twitter meta).
-   * GET /book/unit/:unitId
-   */
-  .get(
-    '/unit/:unitId',
-    async ({params, request, set}): Promise<Response> => {
-      try {
-        const origin = getRequestOrigin(request);
-        const canonicalUrl = toAbsolute(`/book/unit/${params.unitId}`, origin);
-        const book = await bookService.getByUnitId(params.unitId);
-        const dto = mapBookToDTO(book as any);
-        return await renderBookSharePage({book: dto, canonicalUrl, origin});
-      } catch (err) {
-        set.status = 404;
-        console.log('bookApi.get /book/unit/:unitId error', err);
-        return new Response(
-          '<!doctype html><title>Not Found</title>Not Found',
-          {
-            status: 404,
-            headers: {'content-type': 'text/html; charset=utf-8'},
-          },
-        );
-      }
-    },
-    {
-      params: bookParamsSchema,
-      detail: {
-        summary: 'Book share page',
-        description:
-          'Bot-friendly HTML page with OpenGraph/Twitter meta for sharing',
-        tags: ['Books'],
-      },
-    },
-  )
-  /**
-   * Alias: GET /book/:unitId
+   * GET /book/:unitId
    */
   .get(
     '/:unitId',
@@ -132,9 +100,9 @@ export const bookApi = coreInstance('/book')
     {
       params: bookParamsSchema,
       detail: {
-        summary: 'Book share page (alias)',
+        summary: 'Book share page',
         description:
-          'Alias of /book/unit/:unitId (bot-friendly HTML for sharing)',
+          'Bot-friendly HTML page with OpenGraph/Twitter meta for sharing',
         tags: ['Books'],
       },
     },

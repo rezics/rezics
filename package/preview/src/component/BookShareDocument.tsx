@@ -1,5 +1,5 @@
-import React from 'react';
-import type {BookDTO} from '@package/contract';
+import type { BookDTO } from '@package/contract';
+import { getBookShareStyles } from '@/utils/shareStyles';
 
 export interface BookShareDocumentProps {
   book: BookDTO;
@@ -40,6 +40,8 @@ export function BookShareDocument({
   );
   const imageUrl = toAbsoluteUrl(book.coverUrl, origin);
 
+  const styles = getBookShareStyles();
+
   // Minimal, bot-friendly HTML: meta in <head>, readable content in <body>.
   return (
     <html lang="zh-CN">
@@ -68,20 +70,7 @@ export function BookShareDocument({
         <style
           // eslint-disable-next-line react/no-danger
           dangerouslySetInnerHTML={{
-            __html: `
-              :root { color-scheme: light dark; }
-              body { margin: 0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji"; }
-              .wrap { max-width: 720px; margin: 0 auto; padding: 24px; }
-              .card { border: 1px solid rgba(0,0,0,.12); border-radius: 16px; overflow: hidden; background: rgba(255,255,255,.7); }
-              @media (prefers-color-scheme: dark) { .card { background: rgba(0,0,0,.2); border-color: rgba(255,255,255,.12); } }
-              .media { display: grid; place-items: center; background: rgba(0,0,0,.05); }
-              .media img { width: 100%; max-height: 420px; object-fit: cover; display: block; }
-              .content { padding: 18px 18px 20px; }
-              h1 { font-size: 24px; line-height: 1.2; margin: 0 0 10px; }
-              p { margin: 0; opacity: .9; line-height: 1.5; }
-              .meta { margin-top: 14px; font-size: 12px; opacity: .7; }
-              a { color: inherit; }
-            `,
+            __html: styles,
           }}
         />
       </head>

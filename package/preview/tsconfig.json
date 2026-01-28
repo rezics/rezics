@@ -1,5 +1,10 @@
 {
   "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    },
+
     // Environment setup & latest features
     "lib": ["ESNext"],
     "target": "ESNext",
@@ -13,11 +18,6 @@
     "allowImportingTsExtensions": true,
     "verbatimModuleSyntax": true,
     "noEmit": true,
-
-    "paths": {
-      "@/*": ["./*"]
-    },
-
     // Best practices
     "strict": true,
     "skipLibCheck": true,
