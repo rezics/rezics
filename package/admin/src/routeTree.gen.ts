@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AdminRouteImport } from './routes/_admin'
 import { Route as AdminIndexRouteImport } from './routes/_admin/index'
 import { Route as AdminUsersRouteImport } from './routes/_admin/users'
+import { Route as AdminUnitsRouteImport } from './routes/_admin/units'
 import { Route as AdminSettingsRouteImport } from './routes/_admin/settings'
 import { Route as AdminBooksRouteImport } from './routes/_admin/books'
 
@@ -29,6 +30,11 @@ const AdminUsersRoute = AdminUsersRouteImport.update({
   path: '/users',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminUnitsRoute = AdminUnitsRouteImport.update({
+  id: '/units',
+  path: '/units',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminSettingsRoute = AdminSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -44,11 +50,13 @@ export interface FileRoutesByFullPath {
   '/': typeof AdminIndexRoute
   '/books': typeof AdminBooksRoute
   '/settings': typeof AdminSettingsRoute
+  '/units': typeof AdminUnitsRoute
   '/users': typeof AdminUsersRoute
 }
 export interface FileRoutesByTo {
   '/books': typeof AdminBooksRoute
   '/settings': typeof AdminSettingsRoute
+  '/units': typeof AdminUnitsRoute
   '/users': typeof AdminUsersRoute
   '/': typeof AdminIndexRoute
 }
@@ -57,19 +65,21 @@ export interface FileRoutesById {
   '/_admin': typeof AdminRouteWithChildren
   '/_admin/books': typeof AdminBooksRoute
   '/_admin/settings': typeof AdminSettingsRoute
+  '/_admin/units': typeof AdminUnitsRoute
   '/_admin/users': typeof AdminUsersRoute
   '/_admin/': typeof AdminIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/books' | '/settings' | '/users'
+  fullPaths: '/' | '/books' | '/settings' | '/units' | '/users'
   fileRoutesByTo: FileRoutesByTo
-  to: '/books' | '/settings' | '/users' | '/'
+  to: '/books' | '/settings' | '/units' | '/users' | '/'
   id:
     | '__root__'
     | '/_admin'
     | '/_admin/books'
     | '/_admin/settings'
+    | '/_admin/units'
     | '/_admin/users'
     | '/_admin/'
   fileRoutesById: FileRoutesById
@@ -101,6 +111,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminUsersRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/_admin/units': {
+      id: '/_admin/units'
+      path: '/units'
+      fullPath: '/units'
+      preLoaderRoute: typeof AdminUnitsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/_admin/settings': {
       id: '/_admin/settings'
       path: '/settings'
@@ -121,6 +138,7 @@ declare module '@tanstack/react-router' {
 interface AdminRouteChildren {
   AdminBooksRoute: typeof AdminBooksRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
+  AdminUnitsRoute: typeof AdminUnitsRoute
   AdminUsersRoute: typeof AdminUsersRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
@@ -128,6 +146,7 @@ interface AdminRouteChildren {
 const AdminRouteChildren: AdminRouteChildren = {
   AdminBooksRoute: AdminBooksRoute,
   AdminSettingsRoute: AdminSettingsRoute,
+  AdminUnitsRoute: AdminUnitsRoute,
   AdminUsersRoute: AdminUsersRoute,
   AdminIndexRoute: AdminIndexRoute,
 }

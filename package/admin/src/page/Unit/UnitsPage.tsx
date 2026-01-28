@@ -19,9 +19,9 @@ import {
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 
-import { Page } from '@/page/Page';
+import { unitQueries, type UnitDTO } from '@package/api/unit/unit';
 
-import { userQueries } from '@package/api/user/user.queries';
+import { Page } from '@/page/Page';
 
 function fmtDate(v?: string | Date) {
   if (!v) return '';
@@ -30,35 +30,31 @@ function fmtDate(v?: string | Date) {
   return d.toLocaleString();
 }
 
-export default function UsersPage() {
+export default function UnitsPage() {
   const [q, setQ] = React.useState('');
   const [query, setQuery] = React.useState('');
 
   const listQuery = useQuery(
-    userQueries.list(
-      query.length > 0 ? { q: query, limit: 50 } : { limit: 50 },
-    ),
+    query.length > 0
+      ? unitQueries.list({ q: query, limit: 50 })
+      : unitQueries.list({ limit: 50 }),
   );
 
-  const users = listQuery.data?.users ?? [];
+  const units = listQuery.data?.units ?? [];
   const total = listQuery.data?.total;
 
   return (
-    <Page title="Users" description="管理 User（搜索 / 列表 / 基础信息）">
+    <Page title="Units" description="管理 Unit（搜索 / 列表 / 基础信息）">
       <Card>
         <CardContent>
-          <Stack
-            direction={{ xs: 'column', sm: 'row' }}
-            spacing={1.5}
-            alignItems="stretch"
-          >
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} alignItems="stretch">
             <TextField
               size="small"
               label="Search"
-              placeholder="q/email/slug/type..."
+              placeholder="title/content/userId/type..."
               value={q}
-              onChange={e => setQ(e.target.value)}
-              onKeyDown={e => {
+              onChange={(e) => setQ(e.target.value)}
+              onKeyDown={(e) => {
                 if (e.key === 'Enter') setQuery(q.trim());
               }}
               fullWidth
@@ -80,57 +76,58 @@ export default function UsersPage() {
             </Box>
           ) : listQuery.isError ? (
             <Typography color="error" variant="body2">
-              Failed to load users.
+              Failed to load units.
             </Typography>
           ) : (
             <>
               <Typography variant="caption" color="text.secondary">
-                {typeof total === 'number' ? `Total: ${total}` : `Count: ${users.length}`}
+                {typeof total === 'number' ? `Total: ${total}` : `Count: ${units.length}`}
               </Typography>
 
               <Box sx={{ overflowX: 'auto', mt: 1 }}>
                 <Table size="small" stickyHeader>
                   <TableHead>
                     <TableRow>
-                      <TableCell sx={{ minWidth: 220 }}>Unit ID</TableCell>
-                      <TableCell sx={{ minWidth: 180 }}>Name</TableCell>
-                      <TableCell sx={{ minWidth: 160 }}>Slug</TableCell>
+                      <TableCell sx={{ minWidth: 220 }}>ID</TableCell>
+                      <TableCell sx={{ minWidth: 180 }}>Title</TableCell>
                       <TableCell sx={{ minWidth: 120 }}>Type</TableCell>
-                      <TableCell sx={{ minWidth: 200 }}>Roles</TableCell>
-                      <TableCell sx={{ minWidth: 120 }}>Followers</TableCell>
-                      <TableCell sx={{ minWidth: 120 }}>Followings</TableCell>
-                      <TableCell sx={{ minWidth: 170 }}>Join Date</TableCell>
+                      <TableCell sx={{ minWidth: 120 }}>Status</TableCell>
+                      <TableCell sx={{ minWidth: 200 }}>User</TableCell>
+                      <TableCell sx={{ minWidth: 170 }}>Created</TableCell>
+                      <TableCell sx={{ minWidth: 170 }}>Updated</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {users.map(u => (
-                      <TableRow key={u.unitId} hover>
+                    {units.map((u: UnitDTO) => (
+                      <TableRow key={u.id} hover>
                         <TableCell>
                           <Typography variant="body2" sx={{ fontFamily: 'monospace' }}>
-                            {u.unitId}
+                            {u.id}
                           </Typography>
                         </TableCell>
                         <TableCell>
                           <Typography variant="body2" fontWeight={600} noWrap>
-                            {u.name}
-                          </Typography>
-                        </TableCell>
-                        <TableCell>
-                          <Typography variant="body2" noWrap>
-                            {u.slug ? `@${u.slug}` : '-'}
+                            {u.title || '(no title)'}
                           </Typography>
                         </TableCell>
                         <TableCell>
                           {u.type ? <Chip size="small" label={u.type} /> : '-'}
                         </TableCell>
+                        <TableCell>{u.status || '-'}</TableCell>
                         <TableCell>
-                          <Typography variant="body2" noWrap>
-                            {u.permission?.role?.length ? u.permission.role.join(', ') : '-'}
-                          </Typography>
+                          <Stack spacing={0}>
+                            <Typography variant="body2" noWrap>
+                              {u.user?.name ?? u.userId}
+                            </Typography>
+                            {u.user?.slug ? (
+                              <Typography variant="caption" color="text.secondary" noWrap>
+                                @{u.user.slug}
+                              </Typography>
+                            ) : null}
+                          </Stack>
                         </TableCell>
-                        <TableCell>{u.followersCount ?? '-'}</TableCell>
-                        <TableCell>{u.followingsCount ?? '-'}</TableCell>
-                        <TableCell>{fmtDate(u.joinDate)}</TableCell>
+                        <TableCell>{fmtDate(u.createdAt)}</TableCell>
+                        <TableCell>{fmtDate(u.updatedAt)}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
