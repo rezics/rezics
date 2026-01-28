@@ -1,41 +1,29 @@
-import { serve } from "bun";
-import index from "./index.html";
+import { CssBaseline } from '@mui/material';
+import { ThemeProvider } from '@mui/material/styles';
+import React from 'react';
+import ReactDOM from 'react-dom/client';
 
-const server = serve({
-  routes: {
-    // Serve index.html for all unmatched routes.
-    "/*": index,
+import 'github-markdown-css/github-markdown-light.css';
 
-    "/api/hello": {
-      async GET(req) {
-        return Response.json({
-          message: "Hello, world!",
-          method: "GET",
-        });
-      },
-      async PUT(req) {
-        return Response.json({
-          message: "Hello, world!",
-          method: "PUT",
-        });
-      },
-    },
+import { getTheme } from '@/config/theme';
+import { ReactQueryProvider } from '@/plugin/providers/react-query';
+import { useAppInit } from '@/plugin/providers/useAppInit';
+import { RouterProvider } from '@tanstack/react-router';
 
-    "/api/hello/:name": async req => {
-      const name = req.params.name;
-      return Response.json({
-        message: `Hello, ${name}!`,
-      });
-    },
-  },
+import { router } from './router.tsx';
 
-  development: process.env.NODE_ENV !== "production" && {
-    // Enable browser hot reloading in development
-    hmr: true,
+export function Bootstrap() {
+  useAppInit();
+  return <RouterProvider router={router} />;
+}
 
-    // Echo console logs from the browser to the server
-    console: true,
-  },
-});
-
-console.log(`🚀 Server running at ${server.url}`);
+ReactDOM.createRoot(document.getElementById('app')!).render(
+  <React.StrictMode>
+    <ThemeProvider theme={getTheme('light')}>
+      <CssBaseline />
+      <ReactQueryProvider>
+        <Bootstrap />
+      </ReactQueryProvider>
+    </ThemeProvider>
+  </React.StrictMode>,
+);

@@ -11,6 +11,13 @@
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },
+  "exports": {
+    "./eslint.config": "./eslint.config.js",
+    "./*": {
+      "types": "./src/*.ts",
+      "default": "./src/*.ts"
+    }
+  },
   "dependencies": {
     "@effect/cli": "^0.69.0",
     "@effect/platform-node": "^0.96.0",
