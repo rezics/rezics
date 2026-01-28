@@ -220,10 +220,15 @@ export default {
     register: '注册',
     resolve: '解决',
     already_login: '您已经登录。重新登录将覆盖之前的登录信息。',
+    help: {
+      slug: '用户名是全局唯一的。',
+      slug_require: '只允许 a-z, 0-9, A-Z, -, 长度范围 6-32',
+      password_require: '至少包含8个字符，必须包含字母和数字。',
+    },
     error: {
       email_required: '邮箱是必填的。',
       invalid_email: '无效的邮箱地址。',
-      invalid_password: '密码必须至少包含6个字符。',
+      invalid_password: '密码必须至少包含8个字符。',
       invalid_username: '无效的用户名。',
       invalid_confirm: '无效的密码确认。',
       passwords_mismatch: '密码不匹配。',

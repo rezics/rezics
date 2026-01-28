@@ -27,15 +27,15 @@ export function validatePassword(password: string) {
   //     error: 'Password must contain at least one uppercase letter.',
   //   };
   // }
-  // if (!/[a-z]/.test(password)) {
-  //   return {
-  //     valid: false,
-  //     error: 'Password must contain at least one lowercase letter.',
-  //   };
-  // }
-  // if (!/[0-9]/.test(password)) {
-  //   return {valid: false, error: 'Password must contain at least one number.'};
-  // }
+  if (!/[A-Za-z]/.test(password)) {
+    return {
+      valid: false,
+      error: 'Password must contain at least one letter (a-z or A-Z).',
+    };
+  }
+  if (!/[0-9]/.test(password)) {
+    return {valid: false, error: 'Password must contain at least one number.'};
+  }
   // if (!/[^A-Za-z0-9]/.test(password)) {
   //   return {
   //     valid: false,
@@ -66,10 +66,10 @@ export function validateSlug(slug: string) {
   if (!slug) {
     return {valid: false, error: 'Slug is required.'};
   }
-  if (slug.length < 5) {
-    return {valid: false, error: 'Slug must be at least 5 characters long.'};
+  if (slug.length < 6) {
+    return {valid: false, error: 'Slug must be at least 6 characters long.'};
   }
-  if (!/^[a-zA-Z0-9-_]+$/.test(slug)) {
+  if (!/^[a-zA-Z0-9-]+$/.test(slug)) {
     return {
       valid: false,
       error:

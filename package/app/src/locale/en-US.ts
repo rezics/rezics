@@ -229,8 +229,9 @@ export default {
       'You have already logged in. Re-login will overwrite the previous login information.',
     help: {
       slug: 'Username is globally unique.',
-      slug_require: 'Only allow a-z, 0-9, A-Z, -, _',
-      password_require: 'Password must be at least 8 characters long.',
+      slug_require: 'Only allow a-z, 0-9, A-Z, -, length range 6-32',
+      password_require:
+        'At least 8 characters long, must include both letters and numbers.',
     },
     error: {
       email_required: 'Email is required.',

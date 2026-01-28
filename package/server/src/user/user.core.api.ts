@@ -1,6 +1,6 @@
 import type {
-  CreateUserInput,
-  UpdateUserInput,
+  CreateUser,
+  UpdateUser,
   UserDTO,
   UserListQuery,
 } from '@package/contract';
@@ -8,6 +8,7 @@ import {userService} from './user.service';
 import {mapUserToDTO, mapUserToPublicProfile} from './mapper';
 import type {JWTPayload, RefreshTokenPayload} from './types';
 import {sessionService} from './user.session.service';
+import {validateSlug} from './slugVerify';
 
 import {v7 as uuidv7} from 'uuid';
 
@@ -48,18 +49,6 @@ export const coreRoute = (api: ReturnType<typeof coreInstance>) => {
           cookie: {refresh_token},
           set,
         }): Promise<{user: UserDTO; token: string}> => {
-          const {email, slug} = body;
-          // Check if email already exists
-          let existing = await userService.getByEmail(email);
-          if (existing) {
-            throw new Error('Email already exists');
-          }
-
-          existing = await userService.getBySlug(slug);
-          if (existing) {
-            throw new Error(`Slug(username: ${slug}) already exists`);
-          }
-
           const verificationCode = body.verificationCode;
           if (verificationCode) {
             const result = await userService.verifyVerificationCode(
@@ -75,11 +64,30 @@ export const coreRoute = (api: ReturnType<typeof coreInstance>) => {
             set.status = 400;
             throw new Error('Verification code is required');
           }
+
+          // Check if slug is valid
+          const slugValidation = validateSlug(body.slug);
+          if (!slugValidation.ok) {
+            set.status = 400;
+            throw new Error('Invalid slug: ' + slugValidation.reason);
+          }
+
+          // Check if email already exists
+          let existing = await userService.getByEmail(body.email);
+          if (existing) {
+            throw new Error('Email already exists');
+          }
+
+          existing = await userService.getBySlug(body.slug);
+          if (existing) {
+            throw new Error(`Slug(username: ${body.slug}) already exists`);
+          }
+
           const passwordHash = await hashPassword(body.password);
-          const userReq: CreateUserInput = {
+          const userReq: CreateUser = {
             email: body.email,
             password: passwordHash,
-            slug: body.slug,
+            slug: slugValidation.normalized,
             avatar: body.avatar,
             bio: body.bio,
           };
@@ -316,7 +324,7 @@ export const coreRoute = (api: ReturnType<typeof coreInstance>) => {
           if (body.password) {
             passwordHash = await hashPassword(body.password);
           }
-          const userReq: UpdateUserInput = {
+          const userReq: UpdateUser = {
             name: body.name,
             avatar: body.avatar,
             bio: body.bio,
@@ -357,7 +365,7 @@ export const coreRoute = (api: ReturnType<typeof coreInstance>) => {
             passwordHash = await hashPassword(body.password);
           }
 
-          const userReq: UpdateUserInput = {
+          const userReq: UpdateUser = {
             name: body.name,
             avatar: body.avatar,
             bio: body.bio,
