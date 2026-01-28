@@ -4,7 +4,7 @@ import { Alert, CircularProgress, Typography, Chip } from '@mui/material';
 import { bookQueries } from '@package/api/book/book';
 import type { BookDTO } from '@package/contract';
 import { useTranslation } from 'react-i18next';
-import { Link } from '@/component/Navigation/Link';
+import { Link } from '@package/ui/Navigation/Link.tsx';
 
 type Book = BookDTO;
 

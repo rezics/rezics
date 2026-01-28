@@ -27,14 +27,14 @@ export default function App() {
   const useDynamicTheme = appStore(s => s.useDynamicTheme);
 
   // ANCHOR 非常好用的Hook，回头看看封装一下
-  useEffect(() => {
-    const onScroll = () => {
-      const ae = document.activeElement as HTMLElement | null
-      console.log('scrollY=', window.scrollY, 'active=', ae?.tagName, ae?.id, ae?.className)
-    }
-    window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
-  }, [])
+  // useEffect(() => {
+  //   const onScroll = () => {
+  //     const ae = document.activeElement as HTMLElement | null
+  //     console.log('scrollY=', window.scrollY, 'active=', ae?.tagName, ae?.id, ae?.className)
+  //   }
+  //   window.addEventListener('scroll', onScroll, { passive: true })
+  //   return () => window.removeEventListener('scroll', onScroll)
+  // }, [])
 
   useAppInit();
 

@@ -5,8 +5,8 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { CollapsibleByLineTextContainer } from '../Common/UI/Text/CollapsibleByLineText';
-import { RouterLink } from '../Navigation/RouterLink';
-import { Link } from '@/component/Navigation/Link';
+import { RouterLink } from '../../../../ui/src/Navigation/RouterLink';
+import { Link } from '@package/ui/Navigation/Link.tsx';
 
 export type SingleQuoteExcerptShowProps = {
   author: {

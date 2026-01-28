@@ -20,7 +20,7 @@ import { useCreateBookMutation, useUpdateBookMutation } from '@package/api/book/
 import { type UpdateBookInput } from '@package/contract';
 import { useEffect } from 'react';
 import { BookExtraEditor } from '@/component/Book/Metadata/BookExtraEditor';
-import { RouterLink } from '@/component/Navigation/RouterLink';
+import { RouterLink } from '@package/ui/Navigation/RouterLink.tsx';
 import { bookEditLayoutRoute } from '@/router';
 
 function validatePublishURL(publishURL: string[]) {
@@ -44,7 +44,7 @@ const updateBookDialog = (
           <Typography variant="body1">{text?.message}</Typography>
           <Typography variant="body1">
             {text?.showBookLink && (
-              <RouterLink to={`/book/${text.bookId}`}>
+              <RouterLink to="/book/$bookId" params={{ bookId: text.bookId as string }}>
                 {t('page.book_edit.info.dialog.view_book')}
               </RouterLink>
             )}
@@ -80,8 +80,11 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
 }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const editMatch = bookEditLayoutRoute.useMatch({ shouldThrow: false });
-  const bookId = editMatch?.params.bookId;
+  let editMatch: any, bookId: string | undefined;
+  if (!newBook) {
+    editMatch = bookEditLayoutRoute.useMatch();
+    bookId = editMatch?.params.bookId;
+  }
   const { data, isLoading, error } = useQuery({
     ...bookQueries.detail(bookId ?? ''),
     enabled: !newBook && !!bookId,

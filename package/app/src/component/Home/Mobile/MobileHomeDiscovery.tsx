@@ -15,7 +15,7 @@ import type {
 } from '@package/contract';
 import { LazyLoadImage } from '@/component/Common/LazyLoadImage';
 import { useTranslation } from 'react-i18next';
-import { Link } from '@/component/Navigation/Link';
+import { Link } from '@package/ui/Navigation/Link.tsx';
 
 type Book = BookDTO;
 type Readlist = ReadlistDTO;

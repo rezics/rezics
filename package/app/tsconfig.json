@@ -29,6 +29,6 @@
 
     "noEmit": true
   },
-  "include": ["src"],
+  "include": ["src", "../ui/src/Navigation"],
   "exclude": ["node_modules", "dist", "test", "contract"]
 }

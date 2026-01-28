@@ -1,17 +1,17 @@
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 import ThumbDownIcon from '@mui/icons-material/ThumbDown';
 import ThumbUpIcon from '@mui/icons-material/ThumbUp';
-import {Box, Tooltip, Typography} from '@mui/material';
-import type {ReviewDTO} from '@package/contract';
-import React, {useState, useEffect} from 'react';
-import {CollapsibleByLineTextContainer} from '../Common/UI/Text/CollapsibleByLineText';
+import { Box, Tooltip, Typography } from '@mui/material';
+import type { ReviewDTO } from '@package/contract';
+import React, { useState, useEffect } from 'react';
+import { CollapsibleByLineTextContainer } from '../Common/UI/Text/CollapsibleByLineText';
 import {
   parseReactionSummaries,
   type ReactionSummaryDTO,
 } from '@/util/reactionSummariesParser';
 
-import {LazyLoadImage} from '../Common/LazyLoadImage';
-import { RouterLink } from '@/component/Navigation/RouterLink';
+import { LazyLoadImage } from '../Common/LazyLoadImage';
+import { RouterLink } from '@package/ui/Navigation/RouterLink.tsx';
 
 export function MetaInfoBadge({
   review,
@@ -139,7 +139,7 @@ export const SingleRemarkShow: React.FC<SingleRemarkShowProps> = ({
             </div>
             <Tooltip title="回复数">
               <div className="flex items-center gap-1 cursor-pointer hover:text-blue-500">
-                <ChatBubbleOutlineIcon style={{fontSize: '1rem'}} />
+                <ChatBubbleOutlineIcon style={{ fontSize: '1rem' }} />
                 <span className="text-xs">
                   {reactionSummaries?.comment ?? 0}{' '}
                 </span>

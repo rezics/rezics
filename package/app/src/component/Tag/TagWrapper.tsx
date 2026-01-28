@@ -4,7 +4,7 @@ import { tagQueries } from '@package/api/tag/tag';
 import type { TagFilters, TagDTO, TagDetailDTO } from '@package/api/tag/tag';
 import TagList from './TagList';
 
-import { RouterLink } from '@/component/Navigation/RouterLink';
+import { RouterLink } from '@package/ui/Navigation/RouterLink.tsx';
 
 import { useIsMobile } from '@/util/useMediaQueryUtil';
 import { useTranslation } from 'react-i18next';
@@ -155,8 +155,11 @@ export const TagWrapper: React.FC<TagWrapperProps> = ({
                 </span>
               ) : (
                 <RouterLink
-                  to={`/tag/domain/${domId}/title/${domainTitleMap.get(domId as string) ?? String(domId)
-                    }`}
+                  to="/tag/domain/$unitId/title/$title"
+                  params={{
+                    unitId: domId,
+                    title: domainTitleMap.get(domId as string) ?? String(domId),
+                  }}
                   className="text-sm font-semibold"
                 >
                   {domainTitleMap.get(domId as string) ?? String(domId)}
@@ -170,7 +173,7 @@ export const TagWrapper: React.FC<TagWrapperProps> = ({
       {!renderAll && isMobile && (
         <div className="mt-4 text-sm text-gray-500">
           {t('tag.showing_top_tags')} ·
-          <RouterLink to={`/tag/book/${filters?.objectId}/tag`}>
+          <RouterLink to="/tag/book/$bookId/tag" params={{ bookId: filters?.objectId as string }}>
             {t('common.view_all')} →
           </RouterLink>
         </div>

@@ -6,7 +6,7 @@ import { CollapsibleReview } from '@/component/ReadList/Review';
 import { parseReactionSummaries } from '@/util/reactionSummariesParser';
 import { ReactionStatistics } from '../Common/Reaction/ReactionStatistics';
 import { useTranslation } from 'react-i18next';
-import { Link } from '@/component/Navigation/Link';
+import { Link } from '@package/ui/Navigation/Link.tsx';
 
 export const ReviewHeader: React.FC<{
   review: ReviewDTO;

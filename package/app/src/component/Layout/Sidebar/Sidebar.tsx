@@ -1,12 +1,12 @@
-import {type NavigationItem} from '@/component/Layout/Navigation/navigation';
-import {useLayoutStore} from '@/global/Layout/layoutStore.ts';
+import { type NavigationItem } from '@/component/Layout/Navigation/navigation';
+import { useLayoutStore } from '@/global/Layout/layoutStore.ts';
 import {
   ChevronLeft,
   ChevronRight,
   ExpandLess,
   ExpandMore,
 } from '@mui/icons-material';
-import {Box, useTheme} from '@mui/material';
+import { Box, useTheme } from '@mui/material';
 import {
   Collapse,
   Divider,
@@ -19,14 +19,14 @@ import {
   Typography,
 } from '@mui/material';
 import { useRouterState } from '@tanstack/react-router';
-import React, {type ReactNode, useEffect} from 'react';
+import React, { type ReactNode, useEffect } from 'react';
 
-import {useWindowSize} from 'react-use';
+import { useWindowSize } from 'react-use';
 import useMeasure from 'react-use-measure';
 
-import {Sidebar as UiSidebar} from '@/component/ui/sidebar';
-import {cn} from '@/lib/utils';
-import { RouterLink } from '@/component/Navigation/RouterLink';
+import { Sidebar as UiSidebar } from '@/component/ui/sidebar';
+import { cn } from '@/lib/utils';
+import { RouterLink } from '@package/ui/Navigation/RouterLink.tsx';
 
 export function DrawerHeader({
   handleDrawerToggle,
@@ -79,9 +79,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
   isDragging = false,
   layoutType = 'type-b',
 }) => {
-  const {setSidebarHeightBelow, toggleItem, openItems} = useLayoutStore();
-  const [refAbove, {height}] = useMeasure();
-  const {height: windowHeight} = useWindowSize();
+  const { setSidebarHeightBelow, toggleItem, openItems } = useLayoutStore();
+  const [refAbove, { height }] = useMeasure();
+  const { height: windowHeight } = useWindowSize();
 
   useEffect(() => {
     setSidebarHeightBelow(windowHeight - height - 200);
@@ -140,7 +140,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <div key={item.segment || index.toString()}>
                 <ListItemButton
                   component={hasChildren ? 'div' : RouterLink}
-                  {...(!hasChildren ? {to: `${item.segment}`} : {})}
+                  {...(!hasChildren ? { to: `${item.segment}` } : {})}
                   selected={isActive && !hasChildren}
                   onClick={(event: any) =>
                     handleItemClick(event, item.segment, hasChildren)
@@ -172,7 +172,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                             onClick={event =>
                               handleItemClick(event, child.segment, false)
                             }
-                            sx={{pl: 4}}
+                            sx={{ pl: 4 }}
                           >
                             <ListItemIcon>{child.icon}</ListItemIcon>
                             <ListItemText
@@ -190,7 +190,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           })}
         </List>
       </div>
-      <div style={{height: heightBelow}}>{children}</div>
+      <div style={{ height: heightBelow }}>{children}</div>
     </>
   );
 

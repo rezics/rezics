@@ -1,5 +1,5 @@
 import { useQueries, useQuery } from '@tanstack/react-query';
-import { RouterLink } from '@/component/Navigation/RouterLink';
+import { RouterLink } from '@package/ui/Navigation/RouterLink.tsx';
 import { AccentBarWithTextShow } from '@/component/Common/Navigation/AccentBar';
 import { tagApi, tagQueries } from '@package/api/tag/tag';
 import type { TagDetailDTO } from '@package/contract';
@@ -54,7 +54,7 @@ export function TagByBookPage() {
 
       {showSeeAll && (
         <div className="mt-4">
-          <RouterLink to={`/tag/book/${bookId}/tag`}>
+          <RouterLink to="/tag/book/$bookId/tag" params={{ bookId }}>
             <span className="text-primary-600 hover:underline">
               查看全部标签（{total}）
             </span>
@@ -66,8 +66,13 @@ export function TagByBookPage() {
 }
 
 export function TagByBookFullPage() {
-  const withDomain = tagBookFullDomainRoute.useMatch({ shouldThrow: false });
-  const base = tagBookFullRoute.useMatch({ shouldThrow: false });
+  let withDomain: any, base: any;
+  try {
+    withDomain = tagBookFullDomainRoute.useMatch();
+    base = tagBookFullRoute.useMatch();
+  } catch (error) {
+    console.error(error);
+  }
   const bookId = withDomain?.params.bookId ?? base?.params.bookId ?? '';
   const domainId = withDomain?.params.domainId;
 

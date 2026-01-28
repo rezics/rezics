@@ -19,7 +19,7 @@ import { UserError, UserLoading } from './UserState';
 import { useUserStore } from '@/global/userStore';
 import FollowButton from '@/component/Common/Reaction/FollowButton';
 import { UserUnitsPage } from './UserUnitsPage';
-import { Link } from '@/component/Navigation/Link';
+import { Link } from '@package/ui/Navigation/Link.tsx';
 
 export interface UserProfilePageProps {
   unitId: string;

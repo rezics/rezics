@@ -1,7 +1,7 @@
 import { Rating } from '@mui/material';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link } from '@/component/Navigation/Link';
+import { Link } from '@package/ui/Navigation/Link.tsx';
 
 import type { BookDTO } from '@package/contract';
 import {

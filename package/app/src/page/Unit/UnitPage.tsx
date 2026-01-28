@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { unitDetailQuery } from '@package/api/unit/unit';
 import { AccentBarContainer } from '@/component/Common/Navigation/AccentBar';
 import { MarkdownContent } from '@/component/Common/MarkdownContent';
-import { RouterLink } from '@/component/Navigation/RouterLink';
+import { RouterLink } from '@package/ui/Navigation/RouterLink.tsx';
 import { unitRoute } from '@/router';
 
 function formatMetadataValue(value: unknown): string {
@@ -115,7 +115,8 @@ export function UnitPage() {
               <div className="flex flex-col">
                 <Tooltip title={t('user.open_profile')}>
                   <RouterLink
-                    to={`/user/${unit.user.unitId}`}
+                    to="/user/$unitId"
+                    params={{ unitId: unit.user.unitId }}
                     className="text-sm font-medium"
                   >
                     {unit.user.name}

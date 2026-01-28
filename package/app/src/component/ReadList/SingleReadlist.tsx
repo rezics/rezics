@@ -1,5 +1,5 @@
 import React from 'react';
-import type {ReadlistResponse} from '@package/contract';
+import type { ReadlistResponse } from '@package/contract';
 import {
   Card,
   CardMedia,
@@ -10,9 +10,9 @@ import {
 } from '@mui/material';
 import ThumbUpAltOutlinedIcon from '@mui/icons-material/ThumbUpAltOutlined';
 import BookmarkAddOutlinedIcon from '@mui/icons-material/BookmarkAddOutlined';
-import {LazyLoadImage} from '../Common/LazyLoadImage';
-import {useTranslation} from 'react-i18next';
-import { RouterLink } from '@/component/Navigation/RouterLink';
+import { LazyLoadImage } from '../Common/LazyLoadImage';
+import { useTranslation } from 'react-i18next';
+import { RouterLink } from '@package/ui/Navigation/RouterLink.tsx';
 
 interface SingleReadlistProps {
   data: ReadlistResponse;
@@ -34,10 +34,10 @@ export function SingleReadlist({
   handleFavorite,
   className = '',
 }: SingleReadlistProps) {
-  const {t} = useTranslation();
+  const { t } = useTranslation();
   const id = data.id;
   const likeCount =
-    data.reactionSummaries?.find(r => r.reaction === 'like')?.count ?? 0;
+    data.reactionSummaries?.find((r: any) => r.reaction === 'like')?.count ?? 0;
   const authorName = data.creator?.name ?? data.creator?.slug ?? '—';
   const cover = data.coverUrl;
 
@@ -50,7 +50,7 @@ export function SingleReadlist({
       className={`mt-4 h-[200px] flex flex-row items-stretch gap-4 w-full ${className}`}
     >
       {/* Cover */}
-      <CardMedia style={{width: '36%', objectFit: 'cover'}}>
+      <CardMedia style={{ width: '36%', objectFit: 'cover' }}>
         <LazyLoadImage
           src={cover ?? ''}
           alt={data.title}
@@ -84,12 +84,12 @@ export function SingleReadlist({
           <Box className="flex flex-row items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
             {data.books?.length ? (
               <span>
-                {t('page.readlist.books_count', {count: data.books.length})}
+                {t('page.readlist.books_count', { count: data.books.length })}
               </span>
             ) : null}
             {data.reviews?.length ? (
               <span>
-                {t('page.readlist.reviews_count', {count: data.reviews.length})}
+                {t('page.readlist.reviews_count', { count: data.reviews.length })}
               </span>
             ) : null}
           </Box>

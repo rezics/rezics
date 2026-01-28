@@ -3,7 +3,7 @@ import { Tabs, Tab, Box, Tooltip, Chip, Paper, Typography } from '@mui/material'
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRouterState } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
-import { Link } from '@/component/Navigation/Link';
+import { Link } from '@package/ui/Navigation/Link.tsx';
 
 import {
   UniversalPaginator,
@@ -144,7 +144,7 @@ export const UnitsPage: React.FC<UnitsPageProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  function mapUnitResponse(unitResp) {
+  function mapUnitResponse(unitResp: any) {
     return unitResp;
   }
 

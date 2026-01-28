@@ -1,14 +1,14 @@
-import {LangToggle} from '@/component/Layout/LangToggle.tsx';
-import {UserContainer} from '@/component/Layout/User.tsx';
-import {ThemeQuickToggle} from '@/component/Theme/ThemeCustomizer.tsx';
-import {useLayoutStore} from '@/global/Layout/layoutStore.ts';
-import {Brightness4, Brightness7, Menu} from '@mui/icons-material';
-import {AppBar, IconButton, Toolbar, Typography} from '@mui/material';
-import {useTheme} from '@mui/material/styles';
+import { LangToggle } from '@/component/Layout/LangToggle.tsx';
+import { UserContainer } from '@/component/Layout/User.tsx';
+import { ThemeQuickToggle } from '@/component/Theme/ThemeCustomizer.tsx';
+import { useLayoutStore } from '@/global/Layout/layoutStore.ts';
+import { Brightness4, Brightness7, Menu } from '@mui/icons-material';
+import { AppBar, IconButton, Toolbar, Typography } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import React from 'react';
-import {useTranslation} from 'react-i18next';
-import {cn} from '@/lib/utils';
-import { Link } from '@/component/Navigation/Link';
+import { useTranslation } from 'react-i18next';
+import { cn } from '@/lib/utils';
+import { Link } from '@package/ui/Navigation/Link.tsx';
 
 interface HeaderProps {
   handleDrawerToggle: () => void;
@@ -29,9 +29,9 @@ export const Header: React.FC<HeaderProps> = ({
   layoutType = 'type-b',
   disableDrawerToggle = false,
 }) => {
-  const {sidebarOpen} = useLayoutStore();
+  const { sidebarOpen } = useLayoutStore();
   const theme = useTheme();
-  const {t} = useTranslation();
+  const { t } = useTranslation();
 
   function handleDrawerToggleInner() {
     if (disableDrawerToggle) return;
@@ -73,7 +73,7 @@ export const Header: React.FC<HeaderProps> = ({
         >
           <Menu />
         </IconButton>
-        <Typography variant="h6" noWrap component="div" sx={{flexGrow: 1}}>
+        <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
           <Link to="/">REZICS</Link>
         </Typography>
         {/* <ThemeQuickToggle /> */}

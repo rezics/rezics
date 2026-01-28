@@ -1,4 +1,4 @@
-import { Link } from '@/component/Navigation/Link';
+import { Link } from '@package/ui/Navigation/Link.tsx';
 import {
   Card,
   CardActionArea,
@@ -6,9 +6,9 @@ import {
   Typography,
   Box,
 } from '@mui/material';
-import type {BookDTO} from '@package/contract';
-import {LazyLoadImage} from '../Common/LazyLoadImage';
-import {useTranslation} from 'react-i18next';
+import type { BookDTO } from '@package/contract';
+import { LazyLoadImage } from '../Common/LazyLoadImage';
+import { useTranslation } from 'react-i18next';
 // 辅助组件或直接在父组件中使用
 const BookCard = ({
   book,
@@ -17,7 +17,7 @@ const BookCard = ({
   book: BookDTO;
   className?: string;
 }) => {
-  const {t} = useTranslation();
+  const { t } = useTranslation();
   return (
     <Card
       key={book.unitId}

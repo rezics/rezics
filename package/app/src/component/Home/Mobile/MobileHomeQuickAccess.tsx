@@ -3,7 +3,7 @@ import { echoKvGetQuery } from '@package/api/echokv/echokv';
 import { useQuery } from '@tanstack/react-query';
 import { parseEchoKVResponse } from '@package/api/echokv/util';
 import { useTranslation } from 'react-i18next';
-import { Link } from '@/component/Navigation/Link';
+import { Link } from '@package/ui/Navigation/Link.tsx';
 
 export type MobileHomeQuickAccessProps = {
   title?: string;

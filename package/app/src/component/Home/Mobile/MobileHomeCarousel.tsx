@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { echoKvGetQuery } from '@package/api/echokv/echokv';
 import { parseEchoKVResponse } from '@package/api/echokv/util';
 import { LazyLoadImage } from '@/component/Common/LazyLoadImage';
-import { Link } from '@/component/Navigation/Link';
+import { Link } from '@package/ui/Navigation/Link.tsx';
 import {
   Carousel,
   CarouselContent,

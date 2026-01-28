@@ -1,9 +1,9 @@
 import ArrowForwardIosRoundedIcon from '@mui/icons-material/ArrowForwardIosRounded';
-import {Box, styled, Typography} from '@mui/material';
+import { Box, styled, Typography } from '@mui/material';
 import React from 'react';
-import { Link } from '@/component/Navigation/Link';
+import { Link } from '@package/ui/Navigation/Link.tsx';
 
-const LinkWithIcon = styled(Box)(({theme}) => ({
+const LinkWithIcon = styled(Box)(({ theme }) => ({
   display: 'inline-flex',
   alignItems: 'center',
   cursor: 'pointer',
@@ -31,7 +31,7 @@ export type Show = {
   to?: string;
 };
 
-export const ArrowForwardIconShow: React.FC<Show> = ({children, to}) => {
+export const ArrowForwardIconShow: React.FC<Show> = ({ children, to }) => {
   return (
     <Link to={to || '/'}>
       <LinkWithIcon>

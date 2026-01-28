@@ -26,7 +26,7 @@ import {
 
 import { Popover, PopoverContent, PopoverTrigger } from '@/component/ui/popover';
 import { useAlertStore } from '@/global/windowAlertStore';
-import { Link } from '@/component/Navigation/Link';
+import { Link } from '@package/ui/Navigation/Link.tsx';
 
 export type FeedbackResolvedFilter = boolean | undefined;
 

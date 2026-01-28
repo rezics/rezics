@@ -34,7 +34,7 @@ import { LazyLoadImage } from '../Common/LazyLoadImage';
 import { Masonry } from '@mui/lab';
 import { useThrottleMasonryParameters } from '@/util/useMasonryParameters';
 import { useTranslation } from 'react-i18next';
-import { Link } from '@/component/Navigation/Link';
+import { Link } from '@package/ui/Navigation/Link.tsx';
 
 type Book = BookDTO;
 type Readlist = ReadlistDTO;

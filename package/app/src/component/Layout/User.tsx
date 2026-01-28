@@ -16,7 +16,7 @@ import {
 } from '@mui/material';
 import { useNavigate } from '@tanstack/react-router';
 import React, { useState } from 'react';
-import { Link } from '@/component/Navigation/Link';
+import { Link } from '@package/ui/Navigation/Link.tsx';
 
 import { LoginModal } from '@/page/Auth/LoginPage';
 import { RegisterModal } from '@/page/Auth/RegisterPage';
