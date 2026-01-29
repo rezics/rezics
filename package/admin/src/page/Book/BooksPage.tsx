@@ -1,11 +1,9 @@
-import AddIcon from '@mui/icons-material/Add';
 import SearchIcon from '@mui/icons-material/Search';
 import {
   Box,
   Button,
   Card,
   CardContent,
-  Chip,
   CircularProgress,
   Divider,
   IconButton,
@@ -17,8 +15,8 @@ import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useMatchRoute } from '@tanstack/react-router';
 
-import { unitQueries, type UnitDTO } from '@package/api/unit/unit';
-import { meiliUnitApi } from '@package/api/meili/meili.api';
+import { bookQueries, type BookDTO } from '@package/api/book/book';
+import { meiliBookApi } from '@package/api/meili/meili.api';
 
 import { Page } from '@/page/Page';
 import { Link } from '@package/ui/Navigation/Link.tsx';
@@ -27,9 +25,16 @@ import { SearchablePaginatedTableCard } from '@/component/list/SearchablePaginat
 import { PaginatedTable } from '@/component/table/PaginatedTable';
 import { fmtDate } from '@/util/format';
 
-export default function UnitsPage() {
+function joinNames(users?: Array<{ name?: string | null }>): string {
+  const names = users
+    ?.map((u) => u.name)
+    .filter((v): v is string => typeof v === 'string' && v.length > 0);
+  return names?.length ? names.join(', ') : '-';
+}
+
+export default function BooksPage() {
   const matchRoute = useMatchRoute();
-  const isMeiliMode = Boolean(matchRoute({ to: '/units/meili' }));
+  const isMeiliMode = Boolean(matchRoute({ to: '/book/meili' }));
 
   const [q, setQ] = React.useState('');
   const [query, setQuery] = React.useState('');
@@ -47,72 +52,72 @@ export default function UnitsPage() {
   }, [isMeiliMode]);
 
   const listQuery = useQuery({
-    ...unitQueries.list({ start, limit }),
+    ...bookQueries.list({ start, limit }),
     enabled: !isMeiliMode && trimmedQuery.length === 0,
   });
 
   const searchQuery = useQuery({
-    ...unitQueries.search(trimmedQuery, { start, limit }),
+    ...bookQueries.search(trimmedQuery, { start, limit }),
     enabled: !isMeiliMode && trimmedQuery.length > 0,
   });
 
   const meiliQuery = useQuery({
-    queryKey: ['meili-units', page, limit, query],
-    queryFn: () => meiliUnitApi.unitSearch({ start, limit, q: query || undefined }),
+    queryKey: ['meili-books', page, limit, query],
+    queryFn: () => meiliBookApi.bookSearch({ start, limit, keyword: query || undefined }),
     enabled: isMeiliMode,
   });
 
   const normalQuery = trimmedQuery.length > 0 ? searchQuery : listQuery;
   const data = isMeiliMode ? meiliQuery.data : normalQuery.data;
-  const units = data?.units ?? [];
+  const books = data?.books ?? [];
   const total = data?.total;
 
   const columns = React.useMemo(() => {
-    const cols: PaginatedColumn<UnitDTO>[] = [
+    const cols: PaginatedColumn<BookDTO>[] = [
       {
-        id: 'id',
-        header: 'ID',
+        id: 'unitId',
+        header: 'Unit ID',
         minWidth: 220,
-        cell: (u) => (
+        cell: (b) => (
           <Typography variant="body2" sx={{ fontFamily: 'monospace' }}>
-            {u.id}
+            {b.unitId}
           </Typography>
         ),
       },
       {
         id: 'title',
         header: 'Title',
-        minWidth: 220,
-        cell: (u) => (
-          <Typography variant="body2" fontWeight={600} noWrap>
-            {u.title || '(no title)'}
+        minWidth: 260,
+        cell: (b) => (
+          <Typography variant="body2" fontWeight={700} noWrap>
+            {b.title || '(no title)'}
           </Typography>
         ),
       },
       {
-        id: 'type',
-        header: 'Type',
-        minWidth: 120,
-        cell: (u) => (u.type ? <Chip size="small" label={u.type} /> : '-'),
+        id: 'isbn',
+        header: 'ISBN',
+        minWidth: 160,
+        cell: (b) => b.isbn || '-',
       },
       {
-        id: 'status',
-        header: 'Status',
-        minWidth: 120,
-        cell: (u) => u.status || '-',
+        id: 'author',
+        header: 'Author',
+        minWidth: 220,
+        cell: (b) => joinNames(b.author as any),
       },
       {
         id: 'user',
         header: 'User',
         minWidth: 200,
-        cell: (u) => (
+        cell: (b) => (
           <Stack spacing={0}>
             <Typography variant="body2" noWrap>
-              {u.user?.name ?? u.userId}
+              {b.user?.name ?? b.userId ?? '-'}
             </Typography>
-            {u.user?.slug ? (
+            {b.user?.slug ? (
               <Typography variant="caption" color="text.secondary" noWrap>
-                @{u.user.slug}
+                @{b.user.slug}
               </Typography>
             ) : null}
           </Stack>
@@ -122,21 +127,21 @@ export default function UnitsPage() {
         id: 'createdAt',
         header: 'Created',
         minWidth: 170,
-        cell: (u) => fmtDate(u.createdAt),
+        cell: (b) => fmtDate(b.createdAt),
       },
       {
         id: 'updatedAt',
         header: 'Updated',
         minWidth: 170,
-        cell: (u) => fmtDate(u.updatedAt),
+        cell: (b) => fmtDate(b.updatedAt),
       },
       {
         id: 'actions',
         header: 'Actions',
-        minWidth: 120,
-        cell: (u) => (
-          <Button size="small" component={Link} to={`/units/${u.id}`} variant="outlined">
-            Edit
+        minWidth: 140,
+        cell: (b) => (
+          <Button size="small" component={Link} to={`/units/${b.unitId}`} variant="outlined">
+            Edit Unit
           </Button>
         ),
       },
@@ -146,37 +151,26 @@ export default function UnitsPage() {
 
   return (
     <Page
-      title={isMeiliMode ? 'Units (Meili)' : 'Units'}
-      description={isMeiliMode ? '管理 Unit（Meili 搜索）' : '管理 Unit（普通列表）'}
+      title={isMeiliMode ? 'Books (Meili)' : 'Books'}
+      description={isMeiliMode ? '管理 Book（Meili 搜索）' : '管理 Book（普通列表）'}
     >
       {isMeiliMode ? (
-        <SearchablePaginatedTableCard<UnitDTO>
-          title="Units"
-          description="管理 Unit（Meili 搜索）"
-          searchPlaceholder="title/content/userId/type..."
+        <SearchablePaginatedTableCard<BookDTO>
+          title="Books"
+          description="管理 Book（Meili 搜索）"
+          searchPlaceholder="title/isbn/keyword..."
           q={q}
           onQChange={setQ}
           onSearch={() => {
             setPage(0);
             setQuery(q.trim());
           }}
-          toolbarRight={
-            <Button
-              variant="contained"
-              startIcon={<AddIcon />}
-              component={Link}
-              to="/units/create"
-              sx={{ whiteSpace: 'nowrap' }}
-            >
-              Create
-            </Button>
-          }
           isLoading={meiliQuery.isLoading}
           isError={meiliQuery.isError}
           error={meiliQuery.error}
           columns={columns}
-          rows={units}
-          getRowId={(u) => u.id}
+          rows={books}
+          getRowId={(b) => b.unitId}
           count={typeof total === 'number' ? total : 0}
           page={page}
           rowsPerPage={limit}
@@ -189,23 +183,19 @@ export default function UnitsPage() {
       ) : (
         <>
           <Typography variant="h5" fontWeight={800} sx={{ mb: 1 }}>
-            Units
+            Books
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            管理 Unit（普通列表）
+            管理 Book（普通列表）
           </Typography>
 
           <Card>
             <CardContent>
-              <Stack
-                direction={{ xs: 'column', sm: 'row' }}
-                spacing={1.5}
-                alignItems="stretch"
-              >
+              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} alignItems="stretch">
                 <TextField
                   size="small"
                   label="Search"
-                  placeholder="q/title/userId/type..."
+                  placeholder="q/title/isbn..."
                   value={q}
                   onChange={(e) => setQ(e.target.value)}
                   onKeyDown={(e) => {
@@ -226,39 +216,29 @@ export default function UnitsPage() {
                 >
                   <SearchIcon />
                 </IconButton>
-                <Button
-                  variant="contained"
-                  startIcon={<AddIcon />}
-                  component={Link}
-                  to="/units/create"
-                  sx={{ whiteSpace: 'nowrap' }}
-                >
-                  Create
-                </Button>
               </Stack>
-
               <Divider sx={{ my: 2 }} />
 
-              {normalQuery.isLoading ? (
+              {(isMeiliMode ? meiliQuery.isLoading : normalQuery.isLoading) ? (
                 <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}>
                   <CircularProgress size={24} />
                 </Box>
-              ) : normalQuery.isError ? (
+              ) : (isMeiliMode ? meiliQuery.isError : normalQuery.isError) ? (
                 <Box>
                   <Typography color="error" variant="body2">
-                    Failed to load units.
+                    Failed to load books.
                   </Typography>
-                  {normalQuery.error ? (
+                  {(isMeiliMode ? meiliQuery.error : normalQuery.error) ? (
                     <Typography color="error" variant="caption">
-                      {String(normalQuery.error)}
+                      {String(isMeiliMode ? meiliQuery.error : normalQuery.error)}
                     </Typography>
                   ) : null}
                 </Box>
               ) : (
-                <PaginatedTable<UnitDTO>
+                <PaginatedTable<BookDTO>
                   columns={columns}
-                  rows={units}
-                  getRowId={(u) => u.id}
+                  rows={books}
+                  getRowId={(b) => b.unitId}
                   count={typeof total === 'number' ? total : 0}
                   page={page}
                   rowsPerPage={limit}

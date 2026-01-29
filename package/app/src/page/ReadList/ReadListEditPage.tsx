@@ -201,7 +201,7 @@ export const ReadListEditor: React.FC<{
   }, [readlistData]);
 
   function updateReviewIds(ids: string[]) {
-    setReadlistData(prev => ({ ...prev, order: ids }));
+    setReadlistData((prev: any) => ({ ...prev, order: ids }));
   }
 
   const queryClient = useQueryClient();
@@ -219,7 +219,7 @@ export const ReadListEditor: React.FC<{
       bookQueries.detail(review?.bookId),
     );
 
-    setReadlistData(prev => ({
+    setReadlistData((prev: any) => ({
       ...prev,
       books: [...prev.books, book],
       reviews: [...prev.reviews, reviewWithTargetUnitId],
@@ -227,7 +227,7 @@ export const ReadListEditor: React.FC<{
     }));
   };
   const removeReviewId = (id: string) => {
-    updateReviewIds(readlistData.order?.filter(x => x !== id) ?? []);
+    updateReviewIds(readlistData.order?.filter((x: any) => x !== id) ?? []);
   };
   const moveUp = (id: string) => {
     const idx = readlistData.order?.indexOf(id);
@@ -259,7 +259,7 @@ export const ReadListEditor: React.FC<{
             variant="standard"
             value={readlistData?.title}
             onChange={e =>
-              setReadlistData(prev => ({ ...prev, title: e.target.value }))
+              setReadlistData((prev: any) => ({ ...prev, title: e.target.value }))
             }
           />
           <div className="mt-2" />
@@ -269,7 +269,7 @@ export const ReadListEditor: React.FC<{
             className="w-full"
             value={readlistData?.content}
             onChange={e =>
-              setReadlistData(prev => ({ ...prev, content: e.target.value }))
+              setReadlistData((prev: any) => ({ ...prev, content: e.target.value }))
             }
           />
           <TextField
@@ -278,7 +278,7 @@ export const ReadListEditor: React.FC<{
             className="w-full"
             value={readlistData?.coverUrl}
             onChange={e =>
-              setReadlistData(prev => ({ ...prev, coverUrl: e.target.value }))
+              setReadlistData((prev: any) => ({ ...prev, coverUrl: e.target.value }))
             }
           />
         </Paper>
@@ -300,12 +300,12 @@ export const ReadListEditor: React.FC<{
                 {t('page.readlist.no_reviews_small')}
               </div>
             )}
-            {readlistData?.order?.map(unitId => {
+            {readlistData?.order?.map((unitId: any) => {
               const reviewData = readlistData?.reviews.find(
-                r => r.unitId === unitId,
+                (r: any) => r.unitId === unitId,
               );
               const bookData = readlistData?.books.find(
-                b => b.unitId === reviewData?.targetUnitId,
+                (b: any) => b.unitId === reviewData?.targetUnitId,
               );
               if (!bookData || !reviewData) return null;
               return (

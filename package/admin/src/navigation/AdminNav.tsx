@@ -76,8 +76,21 @@ export function AdminNav({
     });
   }, [items, pathname]);
 
-  const renderItem = (item: AdminNavItem, depth: number) => {
-    const selected = isActivePath(pathname, item.to);
+  const renderItem = (item: AdminNavItem, depth: number, siblings?: AdminNavItem[]) => {
+    let selected = isActivePath(pathname, item.to);
+
+    // Avoid the "List" item being selected when a more specific sibling route is active.
+    // Example: `/users` matches `/users/create` by prefix, but only `Create` should be selected.
+    if (selected && siblings?.length) {
+      const hasMoreSpecificActiveSibling = siblings.some(
+        (s) =>
+          s.id !== item.id &&
+          s.to.startsWith(`${item.to}/`) &&
+          isActivePath(pathname, s.to),
+      );
+      if (hasMoreSpecificActiveSibling) selected = false;
+    }
+
     return (
       <ListItemButton
         key={item.id}
@@ -143,7 +156,7 @@ export function AdminNav({
               </ListItemButton>
               <Collapse in={open} timeout="auto" unmountOnExit>
                 <List dense sx={{ py: 0.5 }}>
-                  {entry.children.map((child) => renderItem(child, 1))}
+                  {entry.children.map((child) => renderItem(child, 1, entry.children))}
                 </List>
               </Collapse>
             </Box>

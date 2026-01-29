@@ -9,7 +9,8 @@ export const router = createRouter({
     qc,
   },
   defaultPreload: 'intent',
-  defaultPreloadStaleTime: 0,
+  // Keep preloaded routes "fresh" for a short period to avoid constant stale/refetch.
+  defaultPreloadStaleTime: 30_000,
   scrollRestoration: true,
 });
 

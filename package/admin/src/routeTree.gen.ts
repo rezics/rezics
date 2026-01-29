@@ -13,13 +13,16 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as AdminRouteImport } from './routes/_admin'
 import { Route as AdminIndexRouteImport } from './routes/_admin/index'
 import { Route as AdminSettingsRouteImport } from './routes/_admin/settings'
-import { Route as AdminBooksRouteImport } from './routes/_admin/books'
 import { Route as AdminUsersIndexRouteImport } from './routes/_admin/users/index'
 import { Route as AdminUnitsIndexRouteImport } from './routes/_admin/units/index'
+import { Route as AdminBookIndexRouteImport } from './routes/_admin/book/index'
+import { Route as AdminUsersMeiliRouteImport } from './routes/_admin/users/meili'
 import { Route as AdminUsersCreateRouteImport } from './routes/_admin/users/create'
 import { Route as AdminUsersUnitIdRouteImport } from './routes/_admin/users/$unitId'
+import { Route as AdminUnitsMeiliRouteImport } from './routes/_admin/units/meili'
 import { Route as AdminUnitsCreateRouteImport } from './routes/_admin/units/create'
 import { Route as AdminUnitsUnitIdRouteImport } from './routes/_admin/units/$unitId'
+import { Route as AdminBookMeiliRouteImport } from './routes/_admin/book/meili'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -40,11 +43,6 @@ const AdminSettingsRoute = AdminSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => AdminRoute,
 } as any)
-const AdminBooksRoute = AdminBooksRouteImport.update({
-  id: '/books',
-  path: '/books',
-  getParentRoute: () => AdminRoute,
-} as any)
 const AdminUsersIndexRoute = AdminUsersIndexRouteImport.update({
   id: '/users/',
   path: '/users/',
@@ -53,6 +51,16 @@ const AdminUsersIndexRoute = AdminUsersIndexRouteImport.update({
 const AdminUnitsIndexRoute = AdminUnitsIndexRouteImport.update({
   id: '/units/',
   path: '/units/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminBookIndexRoute = AdminBookIndexRouteImport.update({
+  id: '/book/',
+  path: '/book/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminUsersMeiliRoute = AdminUsersMeiliRouteImport.update({
+  id: '/users/meili',
+  path: '/users/meili',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminUsersCreateRoute = AdminUsersCreateRouteImport.update({
@@ -65,6 +73,11 @@ const AdminUsersUnitIdRoute = AdminUsersUnitIdRouteImport.update({
   path: '/users/$unitId',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminUnitsMeiliRoute = AdminUnitsMeiliRouteImport.update({
+  id: '/units/meili',
+  path: '/units/meili',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminUnitsCreateRoute = AdminUnitsCreateRouteImport.update({
   id: '/units/create',
   path: '/units/create',
@@ -75,28 +88,39 @@ const AdminUnitsUnitIdRoute = AdminUnitsUnitIdRouteImport.update({
   path: '/units/$unitId',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminBookMeiliRoute = AdminBookMeiliRouteImport.update({
+  id: '/book/meili',
+  path: '/book/meili',
+  getParentRoute: () => AdminRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AdminIndexRoute
   '/login': typeof LoginRoute
-  '/books': typeof AdminBooksRoute
   '/settings': typeof AdminSettingsRoute
+  '/book/meili': typeof AdminBookMeiliRoute
   '/units/$unitId': typeof AdminUnitsUnitIdRoute
   '/units/create': typeof AdminUnitsCreateRoute
+  '/units/meili': typeof AdminUnitsMeiliRoute
   '/users/$unitId': typeof AdminUsersUnitIdRoute
   '/users/create': typeof AdminUsersCreateRoute
+  '/users/meili': typeof AdminUsersMeiliRoute
+  '/book/': typeof AdminBookIndexRoute
   '/units/': typeof AdminUnitsIndexRoute
   '/users/': typeof AdminUsersIndexRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
-  '/books': typeof AdminBooksRoute
   '/settings': typeof AdminSettingsRoute
   '/': typeof AdminIndexRoute
+  '/book/meili': typeof AdminBookMeiliRoute
   '/units/$unitId': typeof AdminUnitsUnitIdRoute
   '/units/create': typeof AdminUnitsCreateRoute
+  '/units/meili': typeof AdminUnitsMeiliRoute
   '/users/$unitId': typeof AdminUsersUnitIdRoute
   '/users/create': typeof AdminUsersCreateRoute
+  '/users/meili': typeof AdminUsersMeiliRoute
+  '/book': typeof AdminBookIndexRoute
   '/units': typeof AdminUnitsIndexRoute
   '/users': typeof AdminUsersIndexRoute
 }
@@ -104,13 +128,16 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_admin': typeof AdminRouteWithChildren
   '/login': typeof LoginRoute
-  '/_admin/books': typeof AdminBooksRoute
   '/_admin/settings': typeof AdminSettingsRoute
   '/_admin/': typeof AdminIndexRoute
+  '/_admin/book/meili': typeof AdminBookMeiliRoute
   '/_admin/units/$unitId': typeof AdminUnitsUnitIdRoute
   '/_admin/units/create': typeof AdminUnitsCreateRoute
+  '/_admin/units/meili': typeof AdminUnitsMeiliRoute
   '/_admin/users/$unitId': typeof AdminUsersUnitIdRoute
   '/_admin/users/create': typeof AdminUsersCreateRoute
+  '/_admin/users/meili': typeof AdminUsersMeiliRoute
+  '/_admin/book/': typeof AdminBookIndexRoute
   '/_admin/units/': typeof AdminUnitsIndexRoute
   '/_admin/users/': typeof AdminUsersIndexRoute
 }
@@ -119,37 +146,46 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/login'
-    | '/books'
     | '/settings'
+    | '/book/meili'
     | '/units/$unitId'
     | '/units/create'
+    | '/units/meili'
     | '/users/$unitId'
     | '/users/create'
+    | '/users/meili'
+    | '/book/'
     | '/units/'
     | '/users/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/login'
-    | '/books'
     | '/settings'
     | '/'
+    | '/book/meili'
     | '/units/$unitId'
     | '/units/create'
+    | '/units/meili'
     | '/users/$unitId'
     | '/users/create'
+    | '/users/meili'
+    | '/book'
     | '/units'
     | '/users'
   id:
     | '__root__'
     | '/_admin'
     | '/login'
-    | '/_admin/books'
     | '/_admin/settings'
     | '/_admin/'
+    | '/_admin/book/meili'
     | '/_admin/units/$unitId'
     | '/_admin/units/create'
+    | '/_admin/units/meili'
     | '/_admin/users/$unitId'
     | '/_admin/users/create'
+    | '/_admin/users/meili'
+    | '/_admin/book/'
     | '/_admin/units/'
     | '/_admin/users/'
   fileRoutesById: FileRoutesById
@@ -189,13 +225,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminSettingsRouteImport
       parentRoute: typeof AdminRoute
     }
-    '/_admin/books': {
-      id: '/_admin/books'
-      path: '/books'
-      fullPath: '/books'
-      preLoaderRoute: typeof AdminBooksRouteImport
-      parentRoute: typeof AdminRoute
-    }
     '/_admin/users/': {
       id: '/_admin/users/'
       path: '/users'
@@ -208,6 +237,20 @@ declare module '@tanstack/react-router' {
       path: '/units'
       fullPath: '/units/'
       preLoaderRoute: typeof AdminUnitsIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/book/': {
+      id: '/_admin/book/'
+      path: '/book'
+      fullPath: '/book/'
+      preLoaderRoute: typeof AdminBookIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/users/meili': {
+      id: '/_admin/users/meili'
+      path: '/users/meili'
+      fullPath: '/users/meili'
+      preLoaderRoute: typeof AdminUsersMeiliRouteImport
       parentRoute: typeof AdminRoute
     }
     '/_admin/users/create': {
@@ -224,6 +267,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminUsersUnitIdRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/_admin/units/meili': {
+      id: '/_admin/units/meili'
+      path: '/units/meili'
+      fullPath: '/units/meili'
+      preLoaderRoute: typeof AdminUnitsMeiliRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/_admin/units/create': {
       id: '/_admin/units/create'
       path: '/units/create'
@@ -238,29 +288,42 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminUnitsUnitIdRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/_admin/book/meili': {
+      id: '/_admin/book/meili'
+      path: '/book/meili'
+      fullPath: '/book/meili'
+      preLoaderRoute: typeof AdminBookMeiliRouteImport
+      parentRoute: typeof AdminRoute
+    }
   }
 }
 
 interface AdminRouteChildren {
-  AdminBooksRoute: typeof AdminBooksRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
   AdminIndexRoute: typeof AdminIndexRoute
+  AdminBookMeiliRoute: typeof AdminBookMeiliRoute
   AdminUnitsUnitIdRoute: typeof AdminUnitsUnitIdRoute
   AdminUnitsCreateRoute: typeof AdminUnitsCreateRoute
+  AdminUnitsMeiliRoute: typeof AdminUnitsMeiliRoute
   AdminUsersUnitIdRoute: typeof AdminUsersUnitIdRoute
   AdminUsersCreateRoute: typeof AdminUsersCreateRoute
+  AdminUsersMeiliRoute: typeof AdminUsersMeiliRoute
+  AdminBookIndexRoute: typeof AdminBookIndexRoute
   AdminUnitsIndexRoute: typeof AdminUnitsIndexRoute
   AdminUsersIndexRoute: typeof AdminUsersIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
-  AdminBooksRoute: AdminBooksRoute,
   AdminSettingsRoute: AdminSettingsRoute,
   AdminIndexRoute: AdminIndexRoute,
+  AdminBookMeiliRoute: AdminBookMeiliRoute,
   AdminUnitsUnitIdRoute: AdminUnitsUnitIdRoute,
   AdminUnitsCreateRoute: AdminUnitsCreateRoute,
+  AdminUnitsMeiliRoute: AdminUnitsMeiliRoute,
   AdminUsersUnitIdRoute: AdminUsersUnitIdRoute,
   AdminUsersCreateRoute: AdminUsersCreateRoute,
+  AdminUsersMeiliRoute: AdminUsersMeiliRoute,
+  AdminBookIndexRoute: AdminBookIndexRoute,
   AdminUnitsIndexRoute: AdminUnitsIndexRoute,
   AdminUsersIndexRoute: AdminUsersIndexRoute,
 }

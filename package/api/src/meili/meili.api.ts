@@ -88,7 +88,12 @@ export const meiliUserApi = {
    * The backend expects a `UserListQuery` object encoded in the query string.
    */
   userSearch: async (query?: UserListQuery): Promise<UserSearchResponse> => {
-    const qs = query ? `?${new URLSearchParams(query as any).toString()}` : '';
-    return apiFetch<UserSearchResponse>(`/meili/users/search${qs}`);
+    // NOTE:
+    // `URLSearchParams({ q: undefined })` serializes to `q=undefined`,
+    // which breaks "empty search" behavior on the backend.
+    // Use our shared helper to omit undefined/null/'' values.
+    return apiFetch<UserSearchResponse>(
+      `/meili/users/search${buildQueryString(query as any)}`,
+    );
   },
 };

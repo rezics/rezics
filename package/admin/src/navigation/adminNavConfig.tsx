@@ -41,6 +41,12 @@ export const adminNav = {
           to: '/users',
         },
         {
+          id: 'users.meili',
+          label: 'Meili Search',
+          icon: <PeopleIcon fontSize="small" />,
+          to: '/users/meili',
+        },
+        {
           id: 'users.create',
           label: 'Create',
           icon: <PeopleIcon fontSize="small" />,
@@ -60,6 +66,12 @@ export const adminNav = {
           to: '/units',
         },
         {
+          id: 'units.meili',
+          label: 'Meili Search',
+          icon: <Inventory2Icon fontSize="small" />,
+          to: '/units/meili',
+        },
+        {
           id: 'units.create',
           label: 'Create',
           icon: <Inventory2Icon fontSize="small" />,
@@ -71,7 +83,26 @@ export const adminNav = {
       id: 'books',
       label: 'Books',
       icon: <Inventory2Icon fontSize="small" />,
-      to: '/books',
+      children: [
+        {
+          id: 'books.list',
+          label: 'List',
+          icon: <Inventory2Icon fontSize="small" />,
+          to: '/book',
+        },
+        {
+          id: 'books.meili',
+          label: 'Meili Search',
+          icon: <Inventory2Icon fontSize="small" />,
+          to: '/book/meili',
+        },
+        {
+          id: 'books.create',
+          label: 'Create',
+          icon: <Inventory2Icon fontSize="small" />,
+          to: '/book/create',
+        },
+      ],
     },
     {
       id: 'settings',

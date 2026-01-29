@@ -15,10 +15,12 @@ import {
 } from '@mui/material';
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useMatchRoute } from '@tanstack/react-router';
 
 import { Link } from '@package/ui/Navigation/Link.tsx';
 import type { UserDTO } from '@package/contract';
 import { userQueries } from '@package/api/user/user.queries';
+import { meiliUserApi } from '@package/api/meili/meili.api';
 
 import { Page } from '@/page/Page';
 import { PaginatedTable, type PaginatedColumn } from '@/component/table/PaginatedTable';
@@ -31,21 +33,41 @@ function fmtDate(v?: string | Date) {
 }
 
 export default function UserListPage() {
+  const matchRoute = useMatchRoute();
+  const isMeiliMode = Boolean(matchRoute({ to: '/users/meili' }));
+
   const [q, setQ] = React.useState('');
   const [query, setQuery] = React.useState('');
   const [page, setPage] = React.useState(0);
   const [limit, setLimit] = React.useState(20);
 
-  const listQuery = useQuery(
-    userQueries.adminList(
-      query.length > 0
-        ? { q: query, page: page + 1, limit }
-        : { page: page + 1, limit },
-    ),
-  );
+  React.useEffect(() => {
+    setQ('');
+    setQuery('');
+    setPage(0);
+    setLimit(20);
+  }, [isMeiliMode]);
 
-  const users = listQuery.data?.users ?? [];
-  const total = listQuery.data?.total ?? 0;
+  const listQuery = useQuery({
+    ...userQueries.adminList({ page: page + 1, limit, ...(query ? { q: query } : {}) }),
+    enabled: !isMeiliMode,
+  });
+
+  const meiliQuery = useQuery({
+    queryKey: ['meili-users', page, limit, query],
+    queryFn: () =>
+      meiliUserApi.userSearch({
+        q: query || undefined,
+        page: page + 1,
+        limit,
+      }),
+    enabled: isMeiliMode,
+  });
+
+  const data = isMeiliMode ? meiliQuery.data : listQuery.data;
+
+  const users = (data?.users ?? []) as UserDTO[];
+  const total = data?.total ?? 0;
 
   const columns = React.useMemo(() => {
     const cols: PaginatedColumn<UserDTO>[] = [
@@ -131,14 +153,13 @@ export default function UserListPage() {
   }, []);
 
   return (
-    <Page title="Users" description="管理 User（列表 / 翻页 / 创建 / 编辑）">
+    <Page
+      title={isMeiliMode ? 'Users (Meili)' : 'Users'}
+      description={isMeiliMode ? '管理 User（Meili 搜索）' : '管理 User（普通列表 / 翻页 / 创建 / 编辑）'}
+    >
       <Card>
         <CardContent>
-          <Stack
-            direction={{ xs: 'column', sm: 'row' }}
-            spacing={1.5}
-            alignItems="stretch"
-          >
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} alignItems="stretch">
             <TextField
               size="small"
               label="Search"
@@ -176,11 +197,11 @@ export default function UserListPage() {
 
           <Divider sx={{ my: 2 }} />
 
-          {listQuery.isLoading ? (
+          {(isMeiliMode ? meiliQuery.isLoading : listQuery.isLoading) ? (
             <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}>
               <CircularProgress size={24} />
             </Box>
-          ) : listQuery.isError ? (
+          ) : (isMeiliMode ? meiliQuery.isError : listQuery.isError) ? (
             <Typography color="error" variant="body2">
               Failed to load users.
             </Typography>
