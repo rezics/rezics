@@ -7,6 +7,7 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
+import { useMatchRoute } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 
 import { reviewQueries } from '@package/api/review/review';
@@ -29,14 +30,13 @@ import { RouterLink } from '@package/ui/Navigation/RouterLink.tsx';
 import { remarkRoute, reviewRoute } from '@/router';
 
 export function ReviewPage() {
-  let reviewMatch, remarkMatch
-  try {
-    reviewMatch = reviewRoute.useMatch();
-    remarkMatch = remarkRoute.useMatch();
-  } catch (error) {
-    console.error('Error getting review or remark match', error);
-  }
-  const reviewId = reviewMatch?.params.reviewId ?? remarkMatch?.params.reviewId ?? '';
+  const matchRoute = useMatchRoute();
+  const reviewParams = matchRoute({ to: '/review/$reviewId', fuzzy: false });
+  const remarkParams = matchRoute({ to: '/remark/$reviewId', fuzzy: false });
+  const reviewId =
+    (reviewParams ? reviewParams.reviewId : '') ||
+    (remarkParams ? remarkParams.reviewId : '') ||
+    '';
   const { t } = useTranslation();
   const {
     data: review,

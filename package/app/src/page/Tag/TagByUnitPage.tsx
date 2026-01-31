@@ -4,7 +4,8 @@ import { AccentBarWithTextShow } from '@/component/Common/Navigation/AccentBar';
 import { tagApi, tagQueries } from '@package/api/tag/tag';
 import type { TagDetailDTO } from '@package/contract';
 import { TagWrapper } from '@/component/Tag/TagWrapper';
-import { tagBookFullDomainRoute, tagBookFullRoute, tagBookRoute } from '@/router';
+import { tagBookRoute } from '@/router';
+import { useMatchRoute } from '@tanstack/react-router';
 
 export function TagByBookPage() {
   const { bookId } = tagBookRoute.useParams();
@@ -28,7 +29,7 @@ export function TagByBookPage() {
     })),
   });
 
-  const details: TagDetailDTO[] = detailsResults
+  const _details: TagDetailDTO[] = detailsResults
     .map(r => r.data)
     .filter(Boolean) as TagDetailDTO[];
 
@@ -66,15 +67,16 @@ export function TagByBookPage() {
 }
 
 export function TagByBookFullPage() {
-  let withDomain: any, base: any;
-  try {
-    withDomain = tagBookFullDomainRoute.useMatch();
-    base = tagBookFullRoute.useMatch();
-  } catch (error) {
-    console.error(error);
-  }
-  const bookId = withDomain?.params.bookId ?? base?.params.bookId ?? '';
-  const domainId = withDomain?.params.domainId;
+  const matchRoute = useMatchRoute();
+  const withDomain = matchRoute({
+    to: '/tag/book/$bookId/tag/$domainId',
+    fuzzy: false,
+  });
+  const base = matchRoute({ to: '/tag/book/$bookId/tag', fuzzy: false });
+
+  const bookId =
+    (withDomain ? withDomain.bookId : '') || (base ? base.bookId : '') || '';
+  const domainId = withDomain ? withDomain.domainId : undefined;
 
   // List tags attached to this book (object)
   const pageSize = 100;

@@ -14,14 +14,13 @@ import {
   Typography,
   Alert,
 } from '@mui/material';
-import { useNavigate } from '@tanstack/react-router';
+import { useMatchRoute, useNavigate } from '@tanstack/react-router';
 import EasyEditor from '@component/Form/EasyEditor.tsx';
 import { useCreateBookMutation, useUpdateBookMutation } from '@package/api/book/book';
 import { type UpdateBookInput } from '@package/contract';
 import { useEffect } from 'react';
 import { BookExtraEditor } from '@/component/Book/Metadata/BookExtraEditor';
 import { RouterLink } from '@package/ui/Navigation/RouterLink.tsx';
-import { bookEditLayoutRoute } from '@/router';
 
 function validatePublishURL(publishURL: string[]) {
   return publishURL.every(url => url.startsWith('https://'));
@@ -80,11 +79,9 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
 }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  let editMatch: any, bookId: string | undefined;
-  if (!newBook) {
-    editMatch = bookEditLayoutRoute.useMatch();
-    bookId = editMatch?.params.bookId;
-  }
+  const matchRoute = useMatchRoute();
+  const editParams = matchRoute({ to: '/book/$bookId/edit', fuzzy: false });
+  const bookId = !newBook && editParams ? editParams.bookId : undefined;
   const { data, isLoading, error } = useQuery({
     ...bookQueries.detail(bookId ?? ''),
     enabled: !newBook && !!bookId,

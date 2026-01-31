@@ -1,8 +1,8 @@
-import react from '@vitejs/plugin-react';
 import {tanstackRouter} from '@tanstack/router-plugin/vite';
 import UnoCSS from 'unocss/vite';
 import process from 'node:process';
 import {defineConfig, loadEnv} from 'vite';
+import react from '@vitejs/plugin-react';
 import tsconfigPaths from 'vite-tsconfig-paths';
 
 // https://vitejs.dev/config/
@@ -16,7 +16,11 @@ export default defineConfig(({mode}) => {
         autoCodeSplitting: true,
       }),
       UnoCSS(),
-      react(),
+      react({
+        babel: {
+          plugins: ['babel-plugin-react-compiler'],
+        },
+      }),
       tsconfigPaths(),
     ],
     server: {
