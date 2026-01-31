@@ -2,6 +2,15 @@
 import {create} from 'zustand';
 import {devtools} from 'zustand/middleware';
 
+/**
+ * TODO 换到统一媒体查询设置
+ * @returns
+ */
+function getInitialSidebarOpen() {
+  if (typeof window === 'undefined') return true; // SSR 期间保持稳定
+  return window.matchMedia('(max-width: 960px)').matches ? false : true;
+}
+
 interface LayoutState {
   sidebarOpen: boolean;
   sidebarHeightBelow: number;
@@ -18,7 +27,7 @@ export const useLayoutStore = create<LayoutState>()(
   devtools(
     (set: any) => ({
       // 初始 state
-      sidebarOpen: true,
+      sidebarOpen: getInitialSidebarOpen(),
       sidebarHeightBelow: 0,
       drawerWidth: 280,
       openItems: {},

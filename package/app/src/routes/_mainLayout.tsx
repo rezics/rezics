@@ -1,6 +1,13 @@
-import {createFileRoute, lazyRouteComponent, Outlet} from '@tanstack/react-router';
+import {
+  createFileRoute,
+  lazyRouteComponent,
+  Outlet,
+} from '@tanstack/react-router';
 
-const MainLayout = lazyRouteComponent(() => import('@/layout/MainLayout'), 'MainLayout');
+const MainLayout = lazyRouteComponent(
+  () => import('@/layout/MainLayout'),
+  'MainLayout',
+);
 
 export const Route = createFileRoute('/_mainLayout')({
   component: () => (
@@ -9,4 +16,3 @@ export const Route = createFileRoute('/_mainLayout')({
     </MainLayout>
   ),
 });
-

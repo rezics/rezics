@@ -1,5 +1,4 @@
-import {useMediaQuery} from '@mui/material';
-import {useEffect, useState} from 'react';
+import {useState} from 'react';
 import type React from 'react';
 import {useLayoutStore} from '@/global/Layout/layoutStore.ts';
 import {appStore} from '@/global/appStore.ts';
@@ -26,9 +25,11 @@ export interface ResponsiveSidebarState {
 
 export const useResponsiveSidebar = (): ResponsiveSidebarState => {
   const isMobile = useIsMobile();
-  const sidebarOpen = useLayoutStore(state => state.sidebarOpen);
-  const drawerWidth = useLayoutStore(state => state.drawerWidth);
-  const {toggleSidebar, closeSidebar} = useLayoutStore();
+  const sidebarOpen = useLayoutStore(s => s.sidebarOpen);
+  const drawerWidth = useLayoutStore(s => s.drawerWidth);
+  const toggleSidebar = useLayoutStore(s => s.toggleSidebar);
+  const closeSidebar = useLayoutStore(s => s.closeSidebar);
+
   const [isDragging, setIsDragging] = useState(false);
   const [isSidebarTransitioning, setIsSidebarTransitioning] = useState(false);
 
@@ -40,12 +41,6 @@ export const useResponsiveSidebar = (): ResponsiveSidebarState => {
   const isAdmin = useUserStore(state =>
     state.user?.permission?.role?.includes('ADMIN'),
   );
-
-  useEffect(() => {
-    if (isMobile) {
-      closeSidebar();
-    }
-  }, [isMobile]);
 
   function setDrawerWidth(width: number) {
     useLayoutStore.setState({drawerWidth: width});
