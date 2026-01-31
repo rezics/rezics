@@ -151,8 +151,6 @@ export default function UnitsPage() {
     >
       {isMeiliMode ? (
         <SearchablePaginatedTableCard<UnitDTO>
-          title="Units"
-          description="管理 Unit（Meili 搜索）"
           searchPlaceholder="title/content/userId/type..."
           q={q}
           onQChange={setQ}
@@ -187,91 +185,82 @@ export default function UnitsPage() {
           }}
         />
       ) : (
-        <>
-          <Typography variant="h5" fontWeight={800} sx={{ mb: 1 }}>
-            Units
-          </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            管理 Unit（普通列表）
-          </Typography>
-
-          <Card>
-            <CardContent>
-              <Stack
-                direction={{ xs: 'column', sm: 'row' }}
-                spacing={1.5}
-                alignItems="stretch"
-              >
-                <TextField
-                  size="small"
-                  label="Search"
-                  placeholder="q/title/userId/type..."
-                  value={q}
-                  onChange={(e) => setQ(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      setPage(0);
-                      setQuery(q.trim());
-                    }
-                  }}
-                  fullWidth
-                />
-                <IconButton
-                  aria-label="search"
-                  onClick={() => {
+        <Card>
+          <CardContent>
+            <Stack
+              direction={{ xs: 'column', sm: 'row' }}
+              spacing={1.5}
+              alignItems="stretch"
+            >
+              <TextField
+                size="small"
+                label="Search"
+                placeholder="q/title/userId/type..."
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
                     setPage(0);
                     setQuery(q.trim());
-                  }}
-                  sx={{ alignSelf: { xs: 'flex-end', sm: 'center' } }}
-                >
-                  <SearchIcon />
-                </IconButton>
-                <Button
-                  variant="contained"
-                  startIcon={<AddIcon />}
-                  component={Link}
-                  to="/units/create"
-                  sx={{ whiteSpace: 'nowrap' }}
-                >
-                  Create
-                </Button>
-              </Stack>
+                  }
+                }}
+                fullWidth
+              />
+              <IconButton
+                aria-label="search"
+                onClick={() => {
+                  setPage(0);
+                  setQuery(q.trim());
+                }}
+                sx={{ alignSelf: { xs: 'flex-end', sm: 'center' } }}
+              >
+                <SearchIcon />
+              </IconButton>
+              <Button
+                variant="contained"
+                startIcon={<AddIcon />}
+                component={Link}
+                to="/units/create"
+                sx={{ whiteSpace: 'nowrap' }}
+              >
+                Create
+              </Button>
+            </Stack>
 
-              <Divider sx={{ my: 2 }} />
+            <Divider sx={{ my: 2 }} />
 
-              {normalQuery.isLoading ? (
-                <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}>
-                  <CircularProgress size={24} />
-                </Box>
-              ) : normalQuery.isError ? (
-                <Box>
-                  <Typography color="error" variant="body2">
-                    Failed to load units.
+            {normalQuery.isLoading ? (
+              <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}>
+                <CircularProgress size={24} />
+              </Box>
+            ) : normalQuery.isError ? (
+              <Box>
+                <Typography color="error" variant="body2">
+                  Failed to load units.
+                </Typography>
+                {normalQuery.error ? (
+                  <Typography color="error" variant="caption">
+                    {String(normalQuery.error)}
                   </Typography>
-                  {normalQuery.error ? (
-                    <Typography color="error" variant="caption">
-                      {String(normalQuery.error)}
-                    </Typography>
-                  ) : null}
-                </Box>
-              ) : (
-                <PaginatedTable<UnitDTO>
-                  columns={columns}
-                  rows={units}
-                  getRowId={(u) => u.id}
-                  count={typeof total === 'number' ? total : 0}
-                  page={page}
-                  rowsPerPage={limit}
-                  onPageChange={(nextPage) => setPage(nextPage)}
-                  onRowsPerPageChange={(next) => {
-                    setLimit(next);
-                    setPage(0);
-                  }}
-                />
-              )}
-            </CardContent>
-          </Card>
-        </>
+                ) : null}
+              </Box>
+            ) : (
+              <PaginatedTable<UnitDTO>
+                columns={columns}
+                rows={units}
+                getRowId={(u) => u.id}
+                count={typeof total === 'number' ? total : 0}
+                page={page}
+                rowsPerPage={limit}
+                onPageChange={(nextPage) => setPage(nextPage)}
+                onRowsPerPageChange={(next) => {
+                  setLimit(next);
+                  setPage(0);
+                }}
+              />
+            )}
+          </CardContent>
+        </Card>
       )}
     </Page>
   );

@@ -29,8 +29,13 @@ import { RouterLink } from '@package/ui/Navigation/RouterLink.tsx';
 import { remarkRoute, reviewRoute } from '@/router';
 
 export function ReviewPage() {
-  const reviewMatch = reviewRoute.useMatch();
-  const remarkMatch = remarkRoute.useMatch();
+  let reviewMatch, remarkMatch
+  try {
+    reviewMatch = reviewRoute.useMatch();
+    remarkMatch = remarkRoute.useMatch();
+  } catch (error) {
+    console.error('Error getting review or remark match', error);
+  }
   const reviewId = reviewMatch?.params.reviewId ?? remarkMatch?.params.reviewId ?? '';
   const { t } = useTranslation();
   const {
@@ -124,7 +129,7 @@ export function ReviewPage() {
               <RouterLink to="/user/$unitId" params={{ unitId: review.user?.unitId ?? '' }} className="flex items-center">
                 <div className="flex items-center justify-between">
                   <div>
-                    <Typography variant="h6" className="font-bold">
+                    <Typography variant="h6" className="font-bold text-primary">
                       {review.user?.name}
                     </Typography>
                     <div className="text-sm text-gray-500 mt-1">

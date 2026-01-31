@@ -24,7 +24,7 @@ export function ReviewByBookPage() {
         </Button>
       </div>
       <div className="mt-4">
-        <ReviewNewPage />
+        <ReviewNewPage bookUnitId={bookId || ''} />
         <div className="my-4">
           <Divider />
         </div>

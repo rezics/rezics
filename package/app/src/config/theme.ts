@@ -74,6 +74,11 @@ const getDesignTokens = (
 
   // 配置全局组件默认 props / 样式覆写
   components: {
+    MuiLink: {
+      defaultProps: {
+        underline: 'none',
+      },
+    },
     MuiCssBaseline: {
       styleOverrides: {
         body: {

@@ -156,8 +156,6 @@ export default function BooksPage() {
     >
       {isMeiliMode ? (
         <SearchablePaginatedTableCard<BookDTO>
-          title="Books"
-          description="管理 Book（Meili 搜索）"
           searchPlaceholder="title/isbn/keyword..."
           q={q}
           onQChange={setQ}
@@ -181,77 +179,69 @@ export default function BooksPage() {
           }}
         />
       ) : (
-        <>
-          <Typography variant="h5" fontWeight={800} sx={{ mb: 1 }}>
-            Books
-          </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            管理 Book（普通列表）
-          </Typography>
 
-          <Card>
-            <CardContent>
-              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} alignItems="stretch">
-                <TextField
-                  size="small"
-                  label="Search"
-                  placeholder="q/title/isbn..."
-                  value={q}
-                  onChange={(e) => setQ(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      setPage(0);
-                      setQuery(q.trim());
-                    }
-                  }}
-                  fullWidth
-                />
-                <IconButton
-                  aria-label="search"
-                  onClick={() => {
+        <Card>
+          <CardContent>
+            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} alignItems="stretch">
+              <TextField
+                size="small"
+                label="Search"
+                placeholder="q/title/isbn..."
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
                     setPage(0);
                     setQuery(q.trim());
-                  }}
-                  sx={{ alignSelf: { xs: 'flex-end', sm: 'center' } }}
-                >
-                  <SearchIcon />
-                </IconButton>
-              </Stack>
-              <Divider sx={{ my: 2 }} />
+                  }
+                }}
+                fullWidth
+              />
+              <IconButton
+                aria-label="search"
+                onClick={() => {
+                  setPage(0);
+                  setQuery(q.trim());
+                }}
+                sx={{ alignSelf: { xs: 'flex-end', sm: 'center' } }}
+              >
+                <SearchIcon />
+              </IconButton>
+            </Stack>
+            <Divider sx={{ my: 2 }} />
 
-              {(isMeiliMode ? meiliQuery.isLoading : normalQuery.isLoading) ? (
-                <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}>
-                  <CircularProgress size={24} />
-                </Box>
-              ) : (isMeiliMode ? meiliQuery.isError : normalQuery.isError) ? (
-                <Box>
-                  <Typography color="error" variant="body2">
-                    Failed to load books.
+            {(isMeiliMode ? meiliQuery.isLoading : normalQuery.isLoading) ? (
+              <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}>
+                <CircularProgress size={24} />
+              </Box>
+            ) : (isMeiliMode ? meiliQuery.isError : normalQuery.isError) ? (
+              <Box>
+                <Typography color="error" variant="body2">
+                  Failed to load books.
+                </Typography>
+                {(isMeiliMode ? meiliQuery.error : normalQuery.error) ? (
+                  <Typography color="error" variant="caption">
+                    {String(isMeiliMode ? meiliQuery.error : normalQuery.error)}
                   </Typography>
-                  {(isMeiliMode ? meiliQuery.error : normalQuery.error) ? (
-                    <Typography color="error" variant="caption">
-                      {String(isMeiliMode ? meiliQuery.error : normalQuery.error)}
-                    </Typography>
-                  ) : null}
-                </Box>
-              ) : (
-                <PaginatedTable<BookDTO>
-                  columns={columns}
-                  rows={books}
-                  getRowId={(b) => b.unitId}
-                  count={typeof total === 'number' ? total : 0}
-                  page={page}
-                  rowsPerPage={limit}
-                  onPageChange={(nextPage) => setPage(nextPage)}
-                  onRowsPerPageChange={(next) => {
-                    setLimit(next);
-                    setPage(0);
-                  }}
-                />
-              )}
-            </CardContent>
-          </Card>
-        </>
+                ) : null}
+              </Box>
+            ) : (
+              <PaginatedTable<BookDTO>
+                columns={columns}
+                rows={books}
+                getRowId={(b) => b.unitId}
+                count={typeof total === 'number' ? total : 0}
+                page={page}
+                rowsPerPage={limit}
+                onPageChange={(nextPage) => setPage(nextPage)}
+                onRowsPerPageChange={(next) => {
+                  setLimit(next);
+                  setPage(0);
+                }}
+              />
+            )}
+          </CardContent>
+        </Card>
       )}
     </Page>
   );

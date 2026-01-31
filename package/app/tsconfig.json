@@ -5,14 +5,12 @@
     "moduleResolution": "bundler",
     "lib": ["DOM", "ES2022"],
     "jsx": "react-jsx",
-
-    "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"],
-      "@component/*": ["src/component/*"],
-      "@page/*": ["src/page/*"],
-      "@util/*": ["src/util/*"],
-      "@locale": ["src/locale/index.ts"]
+      "@/*": ["./src/*"],
+      "@component/*": ["./src/component/*"],
+      "@page/*": ["./src/page/*"],
+      "@util/*": ["./src/util/*"],
+      "@locale": ["./src/locale/index.ts"]
     },
 
     "strict": true,
