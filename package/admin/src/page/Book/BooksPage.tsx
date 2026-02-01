@@ -12,29 +12,29 @@ import {
   Typography,
 } from '@mui/material';
 import React from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { useMatchRoute } from '@tanstack/react-router';
+import {useQuery} from '@tanstack/react-query';
+import {useMatchRoute} from '@tanstack/react-router';
 
-import { bookQueries, type BookDTO } from '@package/api/book/book';
-import { meiliBookApi } from '@package/api/meili/meili.api';
+import {bookQueries, type BookDTO} from '@package/api/book/book';
+import {meiliBookApi} from '@package/api/meili/meili.api';
 
-import { Page } from '@/page/Page';
-import { Link } from '@package/ui/Navigation/Link.tsx';
-import { type PaginatedColumn } from '@/component/table/PaginatedTable';
-import { SearchablePaginatedTableCard } from '@/component/list/SearchablePaginatedTableCard';
-import { PaginatedTable } from '@/component/table/PaginatedTable';
-import { fmtDate } from '@/util/format';
+import {Page} from '@/page/Page';
+import {Link} from '@package/ui/Navigation/Link.tsx';
+import {type PaginatedColumn} from '@/component/table/PaginatedTable';
+import {SearchablePaginatedTableCard} from '@/component/list/SearchablePaginatedTableCard';
+import {PaginatedTable} from '@/component/table/PaginatedTable';
+import {fmtDate} from '@/util/format';
 
-function joinNames(users?: Array<{ name?: string | null }>): string {
+function joinNames(users?: Array<{name?: string | null}>): string {
   const names = users
-    ?.map((u) => u.name)
+    ?.map(u => u.name)
     .filter((v): v is string => typeof v === 'string' && v.length > 0);
   return names?.length ? names.join(', ') : '-';
 }
 
 export default function BooksPage() {
   const matchRoute = useMatchRoute();
-  const isMeiliMode = Boolean(matchRoute({ to: '/book/meili' }));
+  const isMeiliMode = Boolean(matchRoute({to: '/book/meili'}));
 
   const [q, setQ] = React.useState('');
   const [query, setQuery] = React.useState('');
@@ -52,18 +52,19 @@ export default function BooksPage() {
   }, [isMeiliMode]);
 
   const listQuery = useQuery({
-    ...bookQueries.list({ start, limit }),
+    ...bookQueries.list({start, limit}),
     enabled: !isMeiliMode && trimmedQuery.length === 0,
   });
 
   const searchQuery = useQuery({
-    ...bookQueries.search(trimmedQuery, { start, limit }),
+    ...bookQueries.search(trimmedQuery, {start, limit}),
     enabled: !isMeiliMode && trimmedQuery.length > 0,
   });
 
   const meiliQuery = useQuery({
     queryKey: ['meili-books', page, limit, query],
-    queryFn: () => meiliBookApi.bookSearch({ start, limit, keyword: query || undefined }),
+    queryFn: () =>
+      meiliBookApi.bookSearch({start, limit, keyword: query || undefined}),
     enabled: isMeiliMode,
   });
 
@@ -78,8 +79,8 @@ export default function BooksPage() {
         id: 'unitId',
         header: 'Unit ID',
         minWidth: 220,
-        cell: (b) => (
-          <Typography variant="body2" sx={{ fontFamily: 'monospace' }}>
+        cell: b => (
+          <Typography variant="body2" sx={{fontFamily: 'monospace'}}>
             {b.unitId}
           </Typography>
         ),
@@ -88,7 +89,7 @@ export default function BooksPage() {
         id: 'title',
         header: 'Title',
         minWidth: 260,
-        cell: (b) => (
+        cell: b => (
           <Typography variant="body2" fontWeight={700} noWrap>
             {b.title || '(no title)'}
           </Typography>
@@ -98,19 +99,19 @@ export default function BooksPage() {
         id: 'isbn',
         header: 'ISBN',
         minWidth: 160,
-        cell: (b) => b.isbn || '-',
+        cell: b => b.isbn || '-',
       },
       {
         id: 'author',
         header: 'Author',
         minWidth: 220,
-        cell: (b) => joinNames(b.author as any),
+        cell: b => joinNames(b.author as any),
       },
       {
         id: 'user',
         header: 'User',
         minWidth: 200,
-        cell: (b) => (
+        cell: b => (
           <Stack spacing={0}>
             <Typography variant="body2" noWrap>
               {b.user?.name ?? b.userId ?? '-'}
@@ -127,20 +128,25 @@ export default function BooksPage() {
         id: 'createdAt',
         header: 'Created',
         minWidth: 170,
-        cell: (b) => fmtDate(b.createdAt),
+        cell: b => fmtDate(b.createdAt),
       },
       {
         id: 'updatedAt',
         header: 'Updated',
         minWidth: 170,
-        cell: (b) => fmtDate(b.updatedAt),
+        cell: b => fmtDate(b.updatedAt),
       },
       {
         id: 'actions',
         header: 'Actions',
         minWidth: 140,
-        cell: (b) => (
-          <Button size="small" component={Link} to={`/units/${b.unitId}`} variant="outlined">
+        cell: b => (
+          <Button
+            size="small"
+            component={Link}
+            to={`/units/${b.unitId}`}
+            variant="outlined"
+          >
             Edit Unit
           </Button>
         ),
@@ -152,7 +158,9 @@ export default function BooksPage() {
   return (
     <Page
       title={isMeiliMode ? 'Books (Meili)' : 'Books'}
-      description={isMeiliMode ? '管理 Book（Meili 搜索）' : '管理 Book（普通列表）'}
+      description={
+        isMeiliMode ? '管理 Book（Meili 搜索）' : '管理 Book（普通列表）'
+      }
     >
       {isMeiliMode ? (
         <SearchablePaginatedTableCard<BookDTO>
@@ -168,28 +176,31 @@ export default function BooksPage() {
           error={meiliQuery.error}
           columns={columns}
           rows={books}
-          getRowId={(b) => b.unitId}
+          getRowId={b => b.unitId}
           count={typeof total === 'number' ? total : 0}
           page={page}
           rowsPerPage={limit}
-          onPageChange={(nextPage) => setPage(nextPage)}
-          onRowsPerPageChange={(next) => {
+          onPageChange={nextPage => setPage(nextPage)}
+          onRowsPerPageChange={next => {
             setLimit(next);
             setPage(0);
           }}
         />
       ) : (
-
         <Card>
           <CardContent>
-            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} alignItems="stretch">
+            <Stack
+              direction={{xs: 'column', sm: 'row'}}
+              spacing={1.5}
+              alignItems="stretch"
+            >
               <TextField
                 size="small"
                 label="Search"
                 placeholder="q/title/isbn..."
                 value={q}
-                onChange={(e) => setQ(e.target.value)}
-                onKeyDown={(e) => {
+                onChange={e => setQ(e.target.value)}
+                onKeyDown={e => {
                   if (e.key === 'Enter') {
                     setPage(0);
                     setQuery(q.trim());
@@ -203,15 +214,15 @@ export default function BooksPage() {
                   setPage(0);
                   setQuery(q.trim());
                 }}
-                sx={{ alignSelf: { xs: 'flex-end', sm: 'center' } }}
+                sx={{alignSelf: {xs: 'flex-end', sm: 'center'}}}
               >
                 <SearchIcon />
               </IconButton>
             </Stack>
-            <Divider sx={{ my: 2 }} />
+            <Divider sx={{my: 2}} />
 
             {(isMeiliMode ? meiliQuery.isLoading : normalQuery.isLoading) ? (
-              <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}>
+              <Box sx={{display: 'flex', justifyContent: 'center', py: 6}}>
                 <CircularProgress size={24} />
               </Box>
             ) : (isMeiliMode ? meiliQuery.isError : normalQuery.isError) ? (
@@ -229,12 +240,12 @@ export default function BooksPage() {
               <PaginatedTable<BookDTO>
                 columns={columns}
                 rows={books}
-                getRowId={(b) => b.unitId}
+                getRowId={b => b.unitId}
                 count={typeof total === 'number' ? total : 0}
                 page={page}
                 rowsPerPage={limit}
-                onPageChange={(nextPage) => setPage(nextPage)}
-                onRowsPerPageChange={(next) => {
+                onPageChange={nextPage => setPage(nextPage)}
+                onRowsPerPageChange={next => {
                   setLimit(next);
                   setPage(0);
                 }}
@@ -246,4 +257,3 @@ export default function BooksPage() {
     </Page>
   );
 }
-

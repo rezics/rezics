@@ -36,5 +36,3 @@ export function hasPermissionToDeleteUser(
   }
   return currentUser.unitId === targetUnitId;
 }
-
-

@@ -1,27 +1,27 @@
-import { AccentBarContainer } from '@/component/Common/Navigation/AccentBar';
-import { TreeReplyComponents } from '@/component/Form/Comment/TreeReplyComponents';
-import { ChatBubbleOutline } from '@mui/icons-material';
-import { IconButton, Typography } from '@mui/material';
-import React, { useRef } from 'react';
-import { useTranslation } from 'react-i18next';
+import {AccentBarContainer} from '@/component/Common/Navigation/AccentBar';
+import {TreeReplyComponents} from '@/component/Form/Comment/TreeReplyComponents';
+import {ChatBubbleOutline} from '@mui/icons-material';
+import {IconButton, Typography} from '@mui/material';
+import React, {useRef} from 'react';
+import {useTranslation} from 'react-i18next';
 
-import { useQuery } from '@tanstack/react-query';
-import { unitQueries } from '@package/api/unit/unit.queries';
+import {useQuery} from '@tanstack/react-query';
+import {unitQueries} from '@package/api/unit/unit.queries';
 import FormatQuoteIcon from '@mui/icons-material/FormatQuote';
-import { SingleCommentElementWrapper } from '@/component/Form/Comment/SingleCommentElementWrapper';
-import { MarkdownContent } from '@/component/Common/MarkdownContent';
+import {SingleCommentElementWrapper} from '@/component/Form/Comment/SingleCommentElementWrapper';
+import {MarkdownContent} from '@/component/Common/MarkdownContent';
 import {
   MiniActionBar,
   MiniAdminActionBar,
 } from '@/component/Common/Reaction/MiniActionBar';
-import { parseReactionSummaries } from '@/util/reactionSummariesParser';
-import { ReactionStatistics } from '@/component/Common/Reaction/ReactionStatistics';
-import { LazyLoadImage } from '@/component/Common/LazyLoadImage';
-import { quoteRoute } from '@/router';
+import {parseReactionSummaries} from '@/util/reactionSummariesParser';
+import {ReactionStatistics} from '@/component/Common/Reaction/ReactionStatistics';
+import {LazyLoadImage} from '@/component/Common/LazyLoadImage';
+import {quoteRoute} from '@/router';
 
 export const QuotePage: React.FC = () => {
-  const { unitId } = quoteRoute.useParams();
-  const { t } = useTranslation();
+  const {unitId} = quoteRoute.useParams();
+  const {t} = useTranslation();
   const commentRef = useRef<HTMLDivElement>(null);
   const handleGoToComments = () => {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -142,7 +142,7 @@ export const QuotePage: React.FC = () => {
           </div>
 
           <SingleCommentElementWrapper replyUnitId={unitId || ''}>
-            <IconButton size="large" sx={{ fontSize: '1.5rem' }}>
+            <IconButton size="large" sx={{fontSize: '1.5rem'}}>
               <ChatBubbleOutline fontSize="inherit" />
             </IconButton>
           </SingleCommentElementWrapper>

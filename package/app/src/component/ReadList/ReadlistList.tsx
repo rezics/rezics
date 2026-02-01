@@ -1,7 +1,7 @@
 import type {ReadlistResponse} from '@package/contract';
 import {Grid} from '@mui/material';
 import React from 'react';
-import { useNavigate } from '@tanstack/react-router';
+import {useNavigate} from '@tanstack/react-router';
 import {SingleReadlist} from './SingleReadlistCard';
 
 // * Complete list of book-related reading lists.
@@ -17,7 +17,7 @@ export function ReadlistList({booklists}: {booklists: ReadlistResponse[]}) {
     console.log('Original event object:', event);
     event.preventDefault();
     event.stopPropagation();
-    navigate({ to: `/readlist/${id}` });
+    navigate({to: `/readlist/${id}`});
   };
 
   return (

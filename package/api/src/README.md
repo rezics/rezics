@@ -2,15 +2,16 @@
 
 ## 重构概述
 
-本次重构将API层进行了简化，主要目标：
+本次重构将 API 层进行了简化，主要目标：
 
 1. **类型定义统一管理**：所有 DTO 和 Input 类型迁移到 `contract` 包
-2. **简化API函数**：移除不必要的类型转换和数据重载
+2. **简化 API 函数**：移除不必要的类型转换和数据重载
 3. **前后端类型共享**：后端返回的数据结构直接被前端使用
 
 ## 文件结构
 
 ### Contract Package（类型定义）
+
 ```
 contract/src/
 ├── pagination.ts    # 分页相关类型
@@ -25,7 +26,9 @@ contract/src/
 ```
 
 ### API Files（简化版）
+
 每个 API 文件包含三个部分：
+
 1. **Query Keys** - TanStack Query 缓存键
 2. **API Functions** - HTTP 请求函数
 3. **Query Options** - TanStack Query queryOptions 工厂函数
@@ -33,6 +36,7 @@ contract/src/
 ## 改动说明
 
 ### 移除的内容
+
 - ❌ API 文件中的 DTO 类型定义（已迁移到 contract）
 - ❌ API 文件中的 Input 类型定义（已迁移到 contract）
 - ❌ 不必要的数据转换和重载（如 `BookListItem`, `BookDetail`）
@@ -40,6 +44,7 @@ contract/src/
 - ❌ 冗余的泛型类型标注
 
 ### 新增的内容
+
 - ✅ `contract/src/pagination.ts` - 统一的分页类型
 - ✅ 独立的类型文件，便于前后端共享
 - ✅ 简化的 API 函数，直接返回后端数据
@@ -47,6 +52,7 @@ contract/src/
 ## 使用示例
 
 ### Before (重构前)
+
 ```typescript
 // API 文件中定义类型
 export type BookDTO = {
@@ -61,9 +67,9 @@ export const bookQueries = {
     queryOptions({
       queryKey: bookKeys.detail(id),
       queryFn: () => bookApi.get(id),
-      select: (b) => ({
+      select: b => ({
         id: String(b.id ?? id),
-        title: String(b.title ?? ""),
+        title: String(b.title ?? ''),
         // 复杂的数据转换...
       }),
     }),
@@ -71,9 +77,10 @@ export const bookQueries = {
 ```
 
 ### After (重构后)
+
 ```typescript
 // 从 contract 导入类型
-import { type BookDTO } from "contract";
+import {type BookDTO} from 'contract';
 
 // 直接使用，无需转换
 export const bookQueries = {
@@ -98,26 +105,29 @@ export const bookQueries = {
 如果你的组件代码中使用了旧的类型或数据结构：
 
 ### 1. 更新导入
+
 ```typescript
 // 旧的
-import { type BookDTO } from "@/api/Book";
+import {type BookDTO} from '@/api/Book';
 
 // 新的
-import { type BookDTO } from "contract";
+import {type BookDTO} from 'contract';
 ```
 
 ### 2. 移除数据转换
+
 ```typescript
 // 旧的 - 假设有 select 转换
-const { data } = useQuery(bookQueries.byId(id));
+const {data} = useQuery(bookQueries.byId(id));
 // data 类型是 BookDetail（转换后）
 
 // 新的 - 直接使用
-const { data } = useQuery(bookQueries.byId(id));
+const {data} = useQuery(bookQueries.byId(id));
 // data 类型是 BookDTO（与后端一致）
 ```
 
 ### 3. 更新类型引用
+
 如果代码中引用了被移除的类型（如 `BookListItem`, `BookDetail`），请直接使用 `BookDTO`。
 
 ## 注意事项

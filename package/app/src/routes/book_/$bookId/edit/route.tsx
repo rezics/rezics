@@ -1,4 +1,8 @@
-import {createFileRoute, lazyRouteComponent, Outlet} from '@tanstack/react-router';
+import {
+  createFileRoute,
+  lazyRouteComponent,
+  Outlet,
+} from '@tanstack/react-router';
 
 const BookEditLayout = lazyRouteComponent(
   () => import('@/layout/BookEditLayout'),
@@ -12,4 +16,3 @@ export const Route = createFileRoute('/book_/$bookId/edit')({
     </BookEditLayout>
   ),
 });
-

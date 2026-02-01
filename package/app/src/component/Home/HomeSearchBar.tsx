@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate } from '@tanstack/react-router';
+import {useNavigate} from '@tanstack/react-router';
 import {BookSearchContainer} from '@/component/BookLib/BookSearch/BookSearch';
 import type {BookQueryOptions} from '@package/contract';
 
@@ -25,7 +25,7 @@ export const HomeSearchBar: React.FC<HomeSearchBarProps> = () => {
     if (options.isLicensed) {
       query += `isLicensed=true&`;
     }
-    navigate({ to: `/book${query}` });
+    navigate({to: `/book${query}`});
   }
   return (
     <BookSearchContainer onSearch={handleSearch} hiddenWordCountFilter={true} />

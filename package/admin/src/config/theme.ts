@@ -36,4 +36,3 @@ export function getTheme(mode: AdminThemeMode): Theme {
     },
   });
 }
-

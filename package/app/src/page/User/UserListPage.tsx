@@ -10,12 +10,12 @@ import {
   Chip,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
-import { useEffect, useMemo, useState } from 'react';
-import type { FC } from 'react';
-import type { UserDTO } from '@package/contract';
-import { useQuery } from '@tanstack/react-query';
-import { userQueries } from '@package/api/user/user.queries';
-import { UserError, UserLoading } from './UserState';
+import {useEffect, useMemo, useState} from 'react';
+import type {FC} from 'react';
+import type {UserDTO} from '@package/contract';
+import {useQuery} from '@tanstack/react-query';
+import {userQueries} from '@package/api/user/user.queries';
+import {UserError, UserLoading} from './UserState';
 
 export interface UserListPageProps {
   onUserClick?: (unitId: string) => void;
@@ -25,7 +25,7 @@ export interface UserListPageProps {
  * UserListPage - 用户列表页面
  * 显示所有用户，支持搜索和分页
  */
-export const UserListPage: FC<UserListPageProps> = ({ onUserClick }) => {
+export const UserListPage: FC<UserListPageProps> = ({onUserClick}) => {
   const [users, setUsers] = useState<Omit<UserDTO, 'email'>[]>([]);
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
@@ -53,7 +53,7 @@ export const UserListPage: FC<UserListPageProps> = ({ onUserClick }) => {
     return query;
   }, [page, debouncedQuery]);
 
-  const { data, isLoading, error } = useQuery(userQueries.list(queryParams));
+  const {data, isLoading, error} = useQuery(userQueries.list(queryParams));
 
   useEffect(() => {
     if (data) {
@@ -64,7 +64,7 @@ export const UserListPage: FC<UserListPageProps> = ({ onUserClick }) => {
 
   const handlePageChange = (_event: unknown, value: number) => {
     setPage(value);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({top: 0, behavior: 'smooth'});
   };
 
   const handleUserClick = (unitId: string) => {
@@ -124,7 +124,7 @@ export const UserListPage: FC<UserListPageProps> = ({ onUserClick }) => {
                 <CardContent className="text-center">
                   <Avatar
                     src={user.avatar}
-                    sx={{ width: 64, height: 64, margin: '0 auto' }}
+                    sx={{width: 64, height: 64, margin: '0 auto'}}
                     className="mb-3"
                   >
                     {user.name?.charAt(0).toUpperCase()}

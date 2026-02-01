@@ -1,5 +1,5 @@
-import React, { useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import React, {useMemo} from 'react';
+import {useQuery} from '@tanstack/react-query';
 import {
   Alert,
   CircularProgress,
@@ -10,9 +10,9 @@ import {
   ListItemAvatar,
   Avatar,
 } from '@mui/material';
-import { bookQueries } from '@package/api/book/book';
-import type { BookDTO } from '@package/contract';
-import { useTranslation } from 'react-i18next';
+import {bookQueries} from '@package/api/book/book';
+import type {BookDTO} from '@package/contract';
+import {useTranslation} from 'react-i18next';
 
 type Book = BookDTO;
 
@@ -29,14 +29,14 @@ export const HomeRankingSection: React.FC<HomeRankingSectionProps> = ({
   title,
   limit = 10,
 }) => {
-  const { t } = useTranslation();
+  const {t} = useTranslation();
   const resolvedTitle = title ?? t('page.home.sections.ranking');
 
-  const { data, isLoading, error } = useQuery(
+  const {data, isLoading, error} = useQuery(
     bookQueries.list({
       start: 0,
       limit,
-      sort: { type: 'updatedAt', order: 'desc' },
+      sort: {type: 'updatedAt', order: 'desc'},
     }),
   );
 

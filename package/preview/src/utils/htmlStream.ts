@@ -32,4 +32,3 @@ export function withDoctype(stream: ReadableStream<Uint8Array>) {
     },
   });
 }
-

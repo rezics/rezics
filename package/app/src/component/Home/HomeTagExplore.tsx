@@ -1,10 +1,10 @@
-import React, { useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { Alert, CircularProgress, Typography, Chip } from '@mui/material';
-import { bookQueries } from '@package/api/book/book';
-import type { BookDTO } from '@package/contract';
-import { useTranslation } from 'react-i18next';
-import { Link } from '@package/ui/Navigation/Link.tsx';
+import React, {useMemo} from 'react';
+import {useQuery} from '@tanstack/react-query';
+import {Alert, CircularProgress, Typography, Chip} from '@mui/material';
+import {bookQueries} from '@package/api/book/book';
+import type {BookDTO} from '@package/contract';
+import {useTranslation} from 'react-i18next';
+import {Link} from '@package/ui/Navigation/Link.tsx';
 
 type Book = BookDTO;
 
@@ -23,11 +23,11 @@ export const HomeTagExplore: React.FC<HomeTagExploreProps> = ({
   limit = 60,
   maxTags = 18,
 }) => {
-  const { t } = useTranslation();
+  const {t} = useTranslation();
   const resolvedTitle = title ?? t('page.home.sections.tag_explore');
 
-  const { data, isLoading, error } = useQuery(
-    bookQueries.list({ start: 0, limit }),
+  const {data, isLoading, error} = useQuery(
+    bookQueries.list({start: 0, limit}),
   );
 
   const tags = useMemo(() => {
@@ -63,7 +63,7 @@ export const HomeTagExplore: React.FC<HomeTagExploreProps> = ({
       </div>
       <div className="flex flex-wrap gap-2">
         {tags.map(tag => (
-          <Link key={tag} to="/book" search={{ tags: tag }}>
+          <Link key={tag} to="/book" search={{tags: tag}}>
             <Chip label={tag} clickable variant="outlined" />
           </Link>
         ))}

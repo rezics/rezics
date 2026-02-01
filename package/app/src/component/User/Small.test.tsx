@@ -1,12 +1,12 @@
-import { useFixtureInput } from "react-cosmos/client";
-import { Small } from "./Small";
+import {useFixtureInput} from 'react-cosmos/client';
+import {Small} from './Small';
 
 export default () => {
-  const [props] = useFixtureInput<Small>("Props", {
-    id: "",
-    name: "",
+  const [props] = useFixtureInput<Small>('Props', {
+    id: '',
+    name: '',
     subscriber: 1000,
-    avatar: "https://i.pravatar.cc/300",
+    avatar: 'https://i.pravatar.cc/300',
   });
 
   return (

@@ -81,14 +81,14 @@ export function PaginatedTable<T>({
 
   return (
     <Box sx={sx}>
-      <TableContainer sx={{ overflowX: 'auto' }}>
+      <TableContainer sx={{overflowX: 'auto'}}>
         <Table size={dense ? 'small' : 'medium'} stickyHeader={stickyHeader}>
           <TableHead>
             <TableRow>
-              {columns.map((c) => (
+              {columns.map(c => (
                 <TableCell
                   key={c.id}
-                  sx={{ minWidth: c.minWidth }}
+                  sx={{minWidth: c.minWidth}}
                   align={c.align}
                 >
                   {c.header}
@@ -97,9 +97,9 @@ export function PaginatedTable<T>({
             </TableRow>
           </TableHead>
           <TableBody>
-            {rows.map((row) => (
+            {rows.map(row => (
               <TableRow key={getRowId(row)} hover>
-                {columns.map((c) => (
+                {columns.map(c => (
                   <TableCell key={c.id} align={c.align}>
                     {c.cell(row)}
                   </TableCell>
@@ -125,9 +125,7 @@ export function PaginatedTable<T>({
           page={page}
           onPageChange={(_, nextPage) => onPageChange(nextPage)}
           rowsPerPage={rowsPerPage}
-          onRowsPerPageChange={(e) =>
-            onRowsPerPageChange(Number(e.target.value))
-          }
+          onRowsPerPageChange={e => onRowsPerPageChange(Number(e.target.value))}
           rowsPerPageOptions={[10, 20, 50, 100]}
         />
 
@@ -136,7 +134,7 @@ export function PaginatedTable<T>({
             direction="row"
             spacing={1}
             alignItems="center"
-            sx={{ px: 1, pb: 1, pt: { xs: 0, sm: 1 } }}
+            sx={{px: 1, pb: 1, pt: {xs: 0, sm: 1}}}
           >
             <Typography variant="body2" color="text.secondary">
               Go to page
@@ -144,13 +142,13 @@ export function PaginatedTable<T>({
             <TextField
               size="small"
               value={pageInput}
-              onChange={(e) => {
+              onChange={e => {
                 // Keep numeric only (avoid "e", "+", "-" from number inputs)
                 const next = e.target.value.replace(/[^\d]/g, '');
                 setPageInput(next);
               }}
               onBlur={commitPageInput}
-              onKeyDown={(e) => {
+              onKeyDown={e => {
                 if (e.key === 'Enter') commitPageInput();
               }}
               inputProps={{
@@ -158,7 +156,7 @@ export function PaginatedTable<T>({
                 pattern: '[0-9]*',
                 'aria-label': 'go to page',
               }}
-              sx={{ width: 110 }}
+              sx={{width: 110}}
               disabled={!totalPages}
             />
             <Typography variant="body2" color="text.secondary">
@@ -178,4 +176,3 @@ export function PaginatedTable<T>({
     </Box>
   );
 }
-

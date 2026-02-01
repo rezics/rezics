@@ -1,10 +1,8 @@
-
 ## CORS 配置
 
 > Nginx 的 CORS 配置不应当随便启用，应当采用插件配置
 
-if ($request_method = OPTIONS)  添加 allow-Origin，可以让请求传给 elysia
-
+if ($request_method = OPTIONS) 添加 allow-Origin，可以让请求传给 elysia
 
 推荐放在：root /www/wwwroot/book-server.rezics.com; 后面？
 
@@ -19,8 +17,7 @@ if ($http_origin ~* "^https?://([a-z0-9-]+\.)*rezics\.com(:[0-9]+)?$") {
 }
 ```
 
-
-```    
+```
 location ^~ / {
   if ($request_method = OPTIONS) {
   add_header Access-Control-Allow-Origin $cors_origin;
@@ -33,8 +30,8 @@ location ^~ / {
 
   proxy_pass_request_headers on;
   proxy_pass_request_body on;
-  
-  
+
+
   proxy_pass http://127.0.0.1:3000;
   proxy_set_header Host $http_host;
   proxy_set_header X-Real-IP $remote_addr;
@@ -44,7 +41,7 @@ location ^~ / {
   proxy_set_header X-Forwarded-Host $host;
   proxy_set_header X-Forwarded-Port $server_port;
   proxy_set_header REMOTE-HOST $remote_addr;
-  
+
   proxy_connect_timeout 60s;
   proxy_send_timeout 600s;
   proxy_read_timeout 600s;

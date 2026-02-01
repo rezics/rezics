@@ -1,22 +1,26 @@
 import MenuIcon from '@mui/icons-material/Menu';
-import { AppBar, Box, Drawer, IconButton, Toolbar, Typography } from '@mui/material';
+import {
+  AppBar,
+  Box,
+  Drawer,
+  IconButton,
+  Toolbar,
+  Typography,
+} from '@mui/material';
 import React from 'react';
 
-import { adminNav } from '@/navigation/adminNavConfig';
-import { AdminNav } from '@/navigation/AdminNav';
+import {adminNav} from '@/navigation/adminNavConfig';
+import {AdminNav} from '@/navigation/AdminNav';
 
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
+export default function AdminLayout({children}: {children: React.ReactNode}) {
   const [mobileOpen, setMobileOpen] = React.useState(false);
 
   const drawer = (
-    <AdminNav
-      items={adminNav.items}
-      onNavigate={() => setMobileOpen(false)}
-    />
+    <AdminNav items={adminNav.items} onNavigate={() => setMobileOpen(false)} />
   );
 
   return (
-    <Box sx={{ display: 'flex', minHeight: '100vh' }}>
+    <Box sx={{display: 'flex', minHeight: '100vh'}}>
       <AppBar
         position="fixed"
         color="default"
@@ -24,37 +28,37 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         sx={{
           borderBottom: 1,
           borderColor: 'divider',
-          zIndex: (t) => t.zIndex.drawer + 1,
+          zIndex: t => t.zIndex.drawer + 1,
           bgcolor: 'background.paper',
         }}
       >
-        <Toolbar sx={{ gap: 1 }}>
+        <Toolbar sx={{gap: 1}}>
           <IconButton
             color="inherit"
             edge="start"
             onClick={() => setMobileOpen(true)}
-            sx={{ display: { md: 'none' } }}
+            sx={{display: {md: 'none'}}}
           >
             <MenuIcon />
           </IconButton>
           <Typography variant="h6" fontWeight={700}>
             Admin
           </Typography>
-          <Box sx={{ flex: 1 }} />
+          <Box sx={{flex: 1}} />
         </Toolbar>
       </AppBar>
 
       <Box
         component="nav"
-        sx={{ width: { md: adminNav.drawerWidth }, flexShrink: { md: 0 } }}
+        sx={{width: {md: adminNav.drawerWidth}, flexShrink: {md: 0}}}
       >
         <Drawer
           variant="temporary"
           open={mobileOpen}
           onClose={() => setMobileOpen(false)}
-          ModalProps={{ keepMounted: true }}
+          ModalProps={{keepMounted: true}}
           sx={{
-            display: { xs: 'block', md: 'none' },
+            display: {xs: 'block', md: 'none'},
             '& .MuiDrawer-paper': {
               boxSizing: 'border-box',
               width: adminNav.drawerWidth,
@@ -67,8 +71,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           variant="permanent"
           open
           sx={{
-            display: { xs: 'none', md: 'block' },
-            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: adminNav.drawerWidth },
+            display: {xs: 'none', md: 'block'},
+            '& .MuiDrawer-paper': {
+              boxSizing: 'border-box',
+              width: adminNav.drawerWidth,
+            },
           }}
         >
           {drawer}
@@ -82,7 +89,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           minWidth: 0,
           bgcolor: 'background.default',
           pt: 8,
-          px: { xs: 2, md: 3 },
+          px: {xs: 2, md: 3},
           pb: 3,
         }}
       >
@@ -91,4 +98,3 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     </Box>
   );
 }
-

@@ -22,5 +22,3 @@ export const tokenListQuery = () =>
 export const tokenQueries = {
   list: tokenListQuery,
 };
-
-

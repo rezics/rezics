@@ -8,4 +8,3 @@ const FeedbackPage = lazyRouteComponent(
 export const Route = createFileRoute('/_mainLayout/feedback/')({
   component: FeedbackPage,
 });
-

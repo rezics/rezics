@@ -1,13 +1,13 @@
-import { useQuery } from '@tanstack/react-query';
-import type { TagDetailDTO } from '@package/contract';
-import { tagQueries } from '@package/api/tag/tag';
-import { AccentBarWithTextShow } from '@/component/Common/Navigation/AccentBar';
-import { TagDetailCard } from '@/component/Tag/TagCards';
-import { tagUnitRoute } from '@/router';
+import {useQuery} from '@tanstack/react-query';
+import type {TagDetailDTO} from '@package/contract';
+import {tagQueries} from '@package/api/tag/tag';
+import {AccentBarWithTextShow} from '@/component/Common/Navigation/AccentBar';
+import {TagDetailCard} from '@/component/Tag/TagCards';
+import {tagUnitRoute} from '@/router';
 
 export function TagUnitPage() {
-  const { unitId } = tagUnitRoute.useParams();
-  const { data, isLoading, error } = useQuery(tagQueries.detail(unitId));
+  const {unitId} = tagUnitRoute.useParams();
+  const {data, isLoading, error} = useQuery(tagQueries.detail(unitId));
   if (isLoading) {
     return (
       <div className="w-11/12 mx-auto mt-10">

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import {useEffect, useMemo, useState} from 'react';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
@@ -8,11 +8,11 @@ import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
 
 import EasyEditor from '@/component/Form/EasyEditor.tsx';
-import { useCreateUnitMutation } from '@package/api/unit/unit.mutations';
-import { useUserStore } from '@/global/userStore';
-import { useAlertStore } from '@/global/windowAlertStore';
-import { UnitType } from '@package/contract';
-import { type Chapter } from './ChapterArborist';
+import {useCreateUnitMutation} from '@package/api/unit/unit.mutations';
+import {useUserStore} from '@/global/userStore';
+import {useAlertStore} from '@/global/windowAlertStore';
+import {UnitType} from '@package/contract';
+import {type Chapter} from './ChapterArborist';
 
 interface CreateChapterDialogProps {
   open: boolean;
@@ -35,8 +35,8 @@ export function CreateChapterDialog({
   bookUnitId,
   currentEditParentId,
 }: CreateChapterDialogProps) {
-  const { user } = useUserStore();
-  const { show } = useAlertStore();
+  const {user} = useUserStore();
+  const {show} = useAlertStore();
 
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
@@ -52,7 +52,8 @@ export function CreateChapterDialog({
   const createMutation = useCreateUnitMutation({
     onError: error => {
       show(
-        `创建章节失败: ${error instanceof Error ? error.message : String(error)
+        `创建章节失败: ${
+          error instanceof Error ? error.message : String(error)
         }`,
       );
     },

@@ -1,7 +1,7 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { Button, type ButtonProps, Tooltip } from '@mui/material';
-import { useQuery } from '@tanstack/react-query';
-import { userQueries, userMutations } from '@package/api/user/user';
+import React, {useEffect, useMemo, useState} from 'react';
+import {Button, type ButtonProps, Tooltip} from '@mui/material';
+import {useQuery} from '@tanstack/react-query';
+import {userQueries, userMutations} from '@package/api/user/user';
 
 type FollowButtonProps = {
   /** 目标用户的 unitId */
@@ -41,7 +41,7 @@ export const FollowButton: React.FC<FollowButtonProps> = ({
 
   const enabled = !!userId;
 
-  const { data: followStatus, isLoading: statusLoading } = useQuery({
+  const {data: followStatus, isLoading: statusLoading} = useQuery({
     ...userQueries.followStatus(userId ? [userId] : []),
     enabled,
   });
@@ -94,7 +94,7 @@ export const FollowButton: React.FC<FollowButtonProps> = ({
       onClick={handleClick}
       className={className}
       fullWidth={fullWidth}
-      sx={{ py: size === 'small' ? 0.5 : 1 }}
+      sx={{py: size === 'small' ? 0.5 : 1}}
     >
       {label}
     </Button>

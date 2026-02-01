@@ -32,5 +32,3 @@ export function hasPermissionToDeleteReview(
 ): boolean {
   return hasPermissionToUpdateReview(user, unit);
 }
-
-

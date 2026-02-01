@@ -5,4 +5,3 @@ const TestPage = lazyRouteComponent(() => import('@/page/Test/TestPage'));
 export const Route = createFileRoute('/_mainLayout/test')({
   component: TestPage,
 });
-

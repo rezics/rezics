@@ -8,4 +8,3 @@ const BookEditMainPage = lazyRouteComponent(
 export const Route = createFileRoute('/book_/$bookId/edit/')({
   component: BookEditMainPage,
 });
-

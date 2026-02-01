@@ -1,20 +1,20 @@
-import { useState } from "react";
-import { AuthModal, type AuthModalProps } from "./AuthModal.tsx";
+import {useState} from 'react';
+import {AuthModal, type AuthModalProps} from './AuthModal.tsx';
 
 /**
  * useAuthModal - Hook for managing auth modal state
  */
-export const useAuthModal = (initialMode: "login" | "register" = "login") => {
+export const useAuthModal = (initialMode: 'login' | 'register' = 'login') => {
   const [isOpen, setIsOpen] = useState(false);
-  const [mode, setMode] = useState<"login" | "register">(initialMode);
+  const [mode, setMode] = useState<'login' | 'register'>(initialMode);
 
   const openLogin = () => {
-    setMode("login");
+    setMode('login');
     setIsOpen(true);
   };
 
   const openRegister = () => {
-    setMode("register");
+    setMode('register');
     setIsOpen(true);
   };
 
@@ -29,14 +29,9 @@ export const useAuthModal = (initialMode: "login" | "register" = "login") => {
     openRegister,
     close,
     AuthModal: (
-      props: Omit<AuthModalProps, "open" | "onClose" | "initialMode">,
+      props: Omit<AuthModalProps, 'open' | 'onClose' | 'initialMode'>,
     ) => (
-      <AuthModal
-        {...props}
-        open={isOpen}
-        onClose={close}
-        initialMode={mode}
-      />
+      <AuthModal {...props} open={isOpen} onClose={close} initialMode={mode} />
     ),
   };
 };

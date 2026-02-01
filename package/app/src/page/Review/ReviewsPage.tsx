@@ -1,25 +1,25 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Tabs, Tab, Box } from '@mui/material';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useRouterState } from '@tanstack/react-router';
+import React, {useEffect, useMemo, useRef, useState} from 'react';
+import {Tabs, Tab, Box} from '@mui/material';
+import {useQuery, useQueryClient} from '@tanstack/react-query';
+import {useRouterState} from '@tanstack/react-router';
 
 import {
   UniversalPaginator,
   type UniversalPaginatorHandle,
 } from '@/component/Common/Navigation/Pagination';
-import { ReviewListContainer } from '@/component/Review/ReviewList';
-import type { ReviewDTO } from '@package/contract';
-import { SimpleSearchInput } from '@/component/Search/SimpleSearchInput';
-import { buildMeiliUnitQuery } from '@package/api/meili/meili.queries';
-import { reactionApi } from '@package/api/reaction/reaction.api';
-import { UnitType } from '@package/contract';
-import { mapUnitListToReviewListResponse } from '@package/api/meili/meili.api';
+import {ReviewListContainer} from '@/component/Review/ReviewList';
+import type {ReviewDTO} from '@package/contract';
+import {SimpleSearchInput} from '@/component/Search/SimpleSearchInput';
+import {buildMeiliUnitQuery} from '@package/api/meili/meili.queries';
+import {reactionApi} from '@package/api/reaction/reaction.api';
+import {UnitType} from '@package/contract';
+import {mapUnitListToReviewListResponse} from '@package/api/meili/meili.api';
 
 type Review = ReviewDTO;
 export interface ReviewsPageProps {
   bookUnitId?: string;
 }
-export const ReviewsPage: React.FC<ReviewsPageProps> = ({ bookUnitId }) => {
+export const ReviewsPage: React.FC<ReviewsPageProps> = ({bookUnitId}) => {
   const ref = useRef<UniversalPaginatorHandle>(null);
   const queryClient = useQueryClient();
   const targetUnitId = bookUnitId ?? '';
@@ -30,7 +30,7 @@ export const ReviewsPage: React.FC<ReviewsPageProps> = ({ bookUnitId }) => {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [tab, setTab] = useState<'review' | 'remark'>('review');
   const [keyword, setKeyword] = useState<string>('');
-  const search = useRouterState({ select: s => s.location.search ?? '' });
+  const search = useRouterState({select: s => s.location.search ?? ''});
   const searchParams = useMemo(() => new URLSearchParams(search), [search]);
 
   useEffect(() => {
@@ -64,9 +64,9 @@ export const ReviewsPage: React.FC<ReviewsPageProps> = ({ bookUnitId }) => {
     ),
   );
 
-  const { data: reviewData, isLoading: isLoadingReview } = reviewListQueryOpts;
+  const {data: reviewData, isLoading: isLoadingReview} = reviewListQueryOpts;
 
-  const { data: remarkData, isLoading: isLoadingRemark } = remarkListQueryOpts;
+  const {data: remarkData, isLoading: isLoadingRemark} = remarkListQueryOpts;
 
   function handleNeedMoreData(page: number) {
     if (tab === 'review') {
@@ -79,7 +79,7 @@ export const ReviewsPage: React.FC<ReviewsPageProps> = ({ bookUnitId }) => {
   async function handlePreRequestData(page: number) {
     const isReview = tab === 'review';
     const start = (page - 1) * EXTERNAL_PAGE_SIZE;
-    const { queryKey, queryFn } = buildMeiliUnitQuery(
+    const {queryKey, queryFn} = buildMeiliUnitQuery(
       isReview ? UnitType.REVIEW : UnitType.REMARK,
       start,
       targetUnitId,
@@ -112,7 +112,7 @@ export const ReviewsPage: React.FC<ReviewsPageProps> = ({ bookUnitId }) => {
     [baseReviews],
   );
 
-  const { data: reactionSummaryBatch } = useQuery({
+  const {data: reactionSummaryBatch} = useQuery({
     queryKey: ['reaction-summary-batch', tab, bookUnitId, currentTargetIds],
     queryFn: () => reactionApi.summaryBatch(currentTargetIds as string[]),
     enabled: currentTargetIds.length > 0,
@@ -166,7 +166,7 @@ export const ReviewsPage: React.FC<ReviewsPageProps> = ({ bookUnitId }) => {
         externalItemsPerPage={EXTERNAL_PAGE_SIZE}
         sortType={undefined as any}
         sortOrder={undefined as any}
-        onSortChange={() => { }}
+        onSortChange={() => {}}
         requestData={handleNeedMoreData}
         preRequestData={handlePreRequestData}
         isLoading={isLoading && reviews.length === 0}
@@ -179,10 +179,10 @@ export const ReviewsPage: React.FC<ReviewsPageProps> = ({ bookUnitId }) => {
                 setKeyword(info ?? '');
                 console.log('onSearch', info);
               }}
-              defaultValue={{ keyword: keyword ?? '' }}
+              defaultValue={{keyword: keyword ?? ''}}
               placeholder="Search readlists"
             />
-            <Box sx={{ borderBottom: 1, borderColor: 'divider', mt: 2, mb: 2 }}>
+            <Box sx={{borderBottom: 1, borderColor: 'divider', mt: 2, mb: 2}}>
               <Tabs
                 value={tab}
                 onChange={(_, v) => setTab(v)}

@@ -1,6 +1,6 @@
 declare global {
   var pageYOffset: number;
-  var scrollTo: (options: { top: number }) => void;
+  var scrollTo: (options: {top: number}) => void;
 
   // var setTimeout: (callback: () => void, delay: number) => number;
   // var clearTimeout: (id: number) => void;

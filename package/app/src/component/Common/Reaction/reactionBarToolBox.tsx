@@ -1,6 +1,6 @@
 import {Button, Dialog, DialogActions, DialogContent} from '@mui/material';
 import React from 'react';
-import { useNavigate } from '@tanstack/react-router';
+import {useNavigate} from '@tanstack/react-router';
 import {Facebook, Twitter, Instagram, Telegram} from '@mui/icons-material';
 
 export type ReactionBarToolBoxProps = {
@@ -23,7 +23,7 @@ export const ReactionBarToolBox: React.FC<ReactionBarToolBoxProps> = ({
   function handleLinkClick() {
     navigator.clipboard.writeText(itemUrl || '');
     if (itemUrl) {
-      navigate({ to: itemUrl });
+      navigate({to: itemUrl});
     }
   }
 

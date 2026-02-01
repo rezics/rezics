@@ -8,4 +8,3 @@ const NewReadListPage = lazyRouteComponent(
 export const Route = createFileRoute('/_mainLayout/readlist/new')({
   component: NewReadListPage,
 });
-

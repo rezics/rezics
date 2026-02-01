@@ -1,5 +1,5 @@
-import type { BookDTO } from '@package/contract';
-import { getBookShareStyles } from '@/utils/shareStyles';
+import type {BookDTO} from '@package/contract';
+import {getBookShareStyles} from '@/utils/shareStyles';
 
 export interface BookShareDocumentProps {
   book: BookDTO;
@@ -7,7 +7,10 @@ export interface BookShareDocumentProps {
   origin: string;
 }
 
-function toAbsoluteUrl(url: string | undefined, origin: string): string | undefined {
+function toAbsoluteUrl(
+  url: string | undefined,
+  origin: string,
+): string | undefined {
   if (!url) return undefined;
   try {
     // already absolute
@@ -59,7 +62,10 @@ export function BookShareDocument({
         <meta property="og:url" content={canonicalUrl} />
         {imageUrl ? <meta property="og:image" content={imageUrl} /> : null}
 
-        <meta name="twitter:card" content={imageUrl ? 'summary_large_image' : 'summary'} />
+        <meta
+          name="twitter:card"
+          content={imageUrl ? 'summary_large_image' : 'summary'}
+        />
         <meta name="twitter:title" content={title} />
         <meta name="twitter:description" content={description} />
         {imageUrl ? <meta name="twitter:image" content={imageUrl} /> : null}
@@ -98,4 +104,3 @@ export function BookShareDocument({
     </html>
   );
 }
-

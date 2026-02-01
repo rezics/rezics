@@ -1,4 +1,4 @@
-import { v4 as uuidv4 } from "uuid";
+import {v4 as uuidv4} from 'uuid';
 
 export function pickRandom<T>(arr: T[], count: number): T[] {
   const copy = [...arr];
@@ -20,7 +20,7 @@ export function pickRandomAllowRepeat<T>(arr: T[], count: number): T[] {
   for (let i = 0; i < count; i++) {
     const idx = Math.floor(Math.random() * arr.length);
     let item = arr[idx];
-    item = { ...item, id: uuidv4() } as T;
+    item = {...item, id: uuidv4()} as T;
     result.push(item); // 不删除，允许重复
   }
   return result;

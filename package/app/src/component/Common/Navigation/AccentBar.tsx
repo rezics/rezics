@@ -1,5 +1,5 @@
-import { Box, Typography, useTheme } from "@mui/material";
-import React from "react";
+import {Box, Typography, useTheme} from '@mui/material';
+import React from 'react';
 
 export type AccentBarShowProps = {
   height?: number;
@@ -16,11 +16,11 @@ export const AccentBarShow: React.FC<AccentBarShowProps> = ({
     <Box
       className="mt-auto mb-auto"
       sx={{
-        display: "inline-block",
-        width: "4px",
-        borderRadius: "2px",
+        display: 'inline-block',
+        width: '4px',
+        borderRadius: '2px',
         marginRight: 1,
-        verticalAlign: "middle",
+        verticalAlign: 'middle',
         height: `${height}px`,
         backgroundColor: color || theme.palette.primary.main,
       }}
@@ -29,9 +29,7 @@ export const AccentBarShow: React.FC<AccentBarShowProps> = ({
 };
 
 export type AccentBarContainerProps = AccentBarShowProps;
-export const AccentBarContainer: React.FC<AccentBarContainerProps> = (
-  props,
-) => {
+export const AccentBarContainer: React.FC<AccentBarContainerProps> = props => {
   return <AccentBarShow {...props} />;
 };
 
@@ -62,6 +60,6 @@ export const AccentBarWithTextShow: React.FC<AccentBarWithTextShowProps> = ({
 export type AccentBarWithTextContainerProps = AccentBarWithTextShowProps;
 export const AccentBarWithTextContainer: React.FC<
   AccentBarWithTextContainerProps
-> = (props) => {
+> = props => {
   return <AccentBarWithTextShow {...props} />;
 };

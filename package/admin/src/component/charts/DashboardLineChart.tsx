@@ -56,4 +56,3 @@ export function DashboardLineChart() {
 
   return <Line data={data} options={options} />;
 }
-

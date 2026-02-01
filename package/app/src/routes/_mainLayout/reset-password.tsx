@@ -8,4 +8,3 @@ const ResetPasswordPage = lazyRouteComponent(
 export const Route = createFileRoute('/_mainLayout/reset-password')({
   component: ResetPasswordPage,
 });
-

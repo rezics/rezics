@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import {useQuery} from '@tanstack/react-query';
 import {
   Avatar,
   Box,
@@ -7,37 +7,37 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
-import { useMatchRoute } from '@tanstack/react-router';
-import { useTranslation } from 'react-i18next';
+import {useMatchRoute} from '@tanstack/react-router';
+import {useTranslation} from 'react-i18next';
 
-import { reviewQueries } from '@package/api/review/review';
-import { MarkdownContent } from '@/component/Common/MarkdownContent';
-import { bookQueries } from '@package/api/book/book';
-import { BookListViewItem } from '@/component/BookLib/BookList/BookListView';
-import { useRef } from 'react';
+import {reviewQueries} from '@package/api/review/review';
+import {MarkdownContent} from '@/component/Common/MarkdownContent';
+import {bookQueries} from '@package/api/book/book';
+import {BookListViewItem} from '@/component/BookLib/BookList/BookListView';
+import {useRef} from 'react';
 import TreeReplyComponents from '@/component/Form/Comment/TreeReplyComponents';
-import { ChatBubbleOutline } from '@mui/icons-material';
-import { AccentBarContainer } from '@/component/Common/Navigation/AccentBar';
-import { SingleCommentElementWrapper } from '@/component/Form/Comment/SingleCommentElementWrapper';
+import {ChatBubbleOutline} from '@mui/icons-material';
+import {AccentBarContainer} from '@/component/Common/Navigation/AccentBar';
+import {SingleCommentElementWrapper} from '@/component/Form/Comment/SingleCommentElementWrapper';
 
 import {
   MiniActionBar,
   MiniAdminActionBar,
 } from '@/component/Common/Reaction/MiniActionBar';
-import { ReactionStatistics } from '@/component/Common/Reaction/ReactionStatistics';
-import { parseReactionSummaries } from '@/util/reactionSummariesParser';
-import { RouterLink } from '@package/ui/Navigation/RouterLink.tsx';
-import { remarkRoute, reviewRoute } from '@/router';
+import {ReactionStatistics} from '@/component/Common/Reaction/ReactionStatistics';
+import {parseReactionSummaries} from '@/util/reactionSummariesParser';
+import {RouterLink} from '@package/ui/Navigation/RouterLink.tsx';
+import {remarkRoute, reviewRoute} from '@/router';
 
 export function ReviewPage() {
   const matchRoute = useMatchRoute();
-  const reviewParams = matchRoute({ to: '/review/$reviewId', fuzzy: false });
-  const remarkParams = matchRoute({ to: '/remark/$reviewId', fuzzy: false });
+  const reviewParams = matchRoute({to: '/review/$reviewId', fuzzy: false});
+  const remarkParams = matchRoute({to: '/remark/$reviewId', fuzzy: false});
   const reviewId =
     (reviewParams ? reviewParams.reviewId : '') ||
     (remarkParams ? remarkParams.reviewId : '') ||
     '';
-  const { t } = useTranslation();
+  const {t} = useTranslation();
   const {
     data: review,
     isLoading,
@@ -102,7 +102,9 @@ export function ReviewPage() {
               />
             )}
             <div className="text-xs text-gray-500">
-              <RouterLink to="/book/$bookId" params={{ bookId: review.bookId }}
+              <RouterLink
+                to="/book/$bookId"
+                params={{bookId: review.bookId}}
               >{`/book/${review.bookId}`}</RouterLink>
             </div>
           </div>
@@ -119,14 +121,18 @@ export function ReviewPage() {
         <div className="flex items-start gap-4">
           <Avatar
             src={review.user?.avatar ?? ''}
-            sx={{ width: 56, height: 56, borderRadius: 1 }}
+            sx={{width: 56, height: 56, borderRadius: 1}}
           />
           <div className="flex-1">
             <Tooltip
               title={t('review.open_user_interface')}
               placement="top-start"
             >
-              <RouterLink to="/user/$unitId" params={{ unitId: review.user?.unitId ?? '' }} className="flex items-center">
+              <RouterLink
+                to="/user/$unitId"
+                params={{unitId: review.user?.unitId ?? ''}}
+                className="flex items-center"
+              >
                 <div className="flex items-center justify-between">
                   <div>
                     <Typography variant="h6" className="font-bold text-primary">
@@ -155,7 +161,7 @@ export function ReviewPage() {
         </div>
 
         {/* Content */}
-        <Box sx={{ mt: 3 }}>
+        <Box sx={{mt: 3}}>
           <MarkdownContent content={review.content || ''} />
         </Box>
 
@@ -174,7 +180,7 @@ export function ReviewPage() {
             </div>
 
             <SingleCommentElementWrapper replyUnitId={review.unitId || ''}>
-              <IconButton size="large" sx={{ fontSize: '1.5rem' }}>
+              <IconButton size="large" sx={{fontSize: '1.5rem'}}>
                 <ChatBubbleOutline fontSize="inherit" />
               </IconButton>
             </SingleCommentElementWrapper>

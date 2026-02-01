@@ -14,22 +14,22 @@ import {
   Typography,
 } from '@mui/material';
 import React from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { useMatchRoute } from '@tanstack/react-router';
+import {useQuery} from '@tanstack/react-query';
+import {useMatchRoute} from '@tanstack/react-router';
 
-import { unitQueries, type UnitDTO } from '@package/api/unit/unit';
-import { meiliUnitApi } from '@package/api/meili/meili.api';
+import {unitQueries, type UnitDTO} from '@package/api/unit/unit';
+import {meiliUnitApi} from '@package/api/meili/meili.api';
 
-import { Page } from '@/page/Page';
-import { Link } from '@package/ui/Navigation/Link.tsx';
-import { type PaginatedColumn } from '@/component/table/PaginatedTable';
-import { SearchablePaginatedTableCard } from '@/component/list/SearchablePaginatedTableCard';
-import { PaginatedTable } from '@/component/table/PaginatedTable';
-import { fmtDate } from '@/util/format';
+import {Page} from '@/page/Page';
+import {Link} from '@package/ui/Navigation/Link.tsx';
+import {type PaginatedColumn} from '@/component/table/PaginatedTable';
+import {SearchablePaginatedTableCard} from '@/component/list/SearchablePaginatedTableCard';
+import {PaginatedTable} from '@/component/table/PaginatedTable';
+import {fmtDate} from '@/util/format';
 
 export default function UnitsPage() {
   const matchRoute = useMatchRoute();
-  const isMeiliMode = Boolean(matchRoute({ to: '/units/meili' }));
+  const isMeiliMode = Boolean(matchRoute({to: '/units/meili'}));
 
   const [q, setQ] = React.useState('');
   const [query, setQuery] = React.useState('');
@@ -47,18 +47,19 @@ export default function UnitsPage() {
   }, [isMeiliMode]);
 
   const listQuery = useQuery({
-    ...unitQueries.list({ start, limit }),
+    ...unitQueries.list({start, limit}),
     enabled: !isMeiliMode && trimmedQuery.length === 0,
   });
 
   const searchQuery = useQuery({
-    ...unitQueries.search(trimmedQuery, { start, limit }),
+    ...unitQueries.search(trimmedQuery, {start, limit}),
     enabled: !isMeiliMode && trimmedQuery.length > 0,
   });
 
   const meiliQuery = useQuery({
     queryKey: ['meili-units', page, limit, query],
-    queryFn: () => meiliUnitApi.unitSearch({ start, limit, q: query || undefined }),
+    queryFn: () =>
+      meiliUnitApi.unitSearch({start, limit, q: query || undefined}),
     enabled: isMeiliMode,
   });
 
@@ -73,8 +74,8 @@ export default function UnitsPage() {
         id: 'id',
         header: 'ID',
         minWidth: 220,
-        cell: (u) => (
-          <Typography variant="body2" sx={{ fontFamily: 'monospace' }}>
+        cell: u => (
+          <Typography variant="body2" sx={{fontFamily: 'monospace'}}>
             {u.id}
           </Typography>
         ),
@@ -83,7 +84,7 @@ export default function UnitsPage() {
         id: 'title',
         header: 'Title',
         minWidth: 220,
-        cell: (u) => (
+        cell: u => (
           <Typography variant="body2" fontWeight={600} noWrap>
             {u.title || '(no title)'}
           </Typography>
@@ -93,19 +94,19 @@ export default function UnitsPage() {
         id: 'type',
         header: 'Type',
         minWidth: 120,
-        cell: (u) => (u.type ? <Chip size="small" label={u.type} /> : '-'),
+        cell: u => (u.type ? <Chip size="small" label={u.type} /> : '-'),
       },
       {
         id: 'status',
         header: 'Status',
         minWidth: 120,
-        cell: (u) => u.status || '-',
+        cell: u => u.status || '-',
       },
       {
         id: 'user',
         header: 'User',
         minWidth: 200,
-        cell: (u) => (
+        cell: u => (
           <Stack spacing={0}>
             <Typography variant="body2" noWrap>
               {u.user?.name ?? u.userId}
@@ -122,20 +123,25 @@ export default function UnitsPage() {
         id: 'createdAt',
         header: 'Created',
         minWidth: 170,
-        cell: (u) => fmtDate(u.createdAt),
+        cell: u => fmtDate(u.createdAt),
       },
       {
         id: 'updatedAt',
         header: 'Updated',
         minWidth: 170,
-        cell: (u) => fmtDate(u.updatedAt),
+        cell: u => fmtDate(u.updatedAt),
       },
       {
         id: 'actions',
         header: 'Actions',
         minWidth: 120,
-        cell: (u) => (
-          <Button size="small" component={Link} to={`/units/${u.id}`} variant="outlined">
+        cell: u => (
+          <Button
+            size="small"
+            component={Link}
+            to={`/units/${u.id}`}
+            variant="outlined"
+          >
             Edit
           </Button>
         ),
@@ -147,7 +153,9 @@ export default function UnitsPage() {
   return (
     <Page
       title={isMeiliMode ? 'Units (Meili)' : 'Units'}
-      description={isMeiliMode ? '管理 Unit（Meili 搜索）' : '管理 Unit（普通列表）'}
+      description={
+        isMeiliMode ? '管理 Unit（Meili 搜索）' : '管理 Unit（普通列表）'
+      }
     >
       {isMeiliMode ? (
         <SearchablePaginatedTableCard<UnitDTO>
@@ -164,7 +172,7 @@ export default function UnitsPage() {
               startIcon={<AddIcon />}
               component={Link}
               to="/units/create"
-              sx={{ whiteSpace: 'nowrap' }}
+              sx={{whiteSpace: 'nowrap'}}
             >
               Create
             </Button>
@@ -174,12 +182,12 @@ export default function UnitsPage() {
           error={meiliQuery.error}
           columns={columns}
           rows={units}
-          getRowId={(u) => u.id}
+          getRowId={u => u.id}
           count={typeof total === 'number' ? total : 0}
           page={page}
           rowsPerPage={limit}
-          onPageChange={(nextPage) => setPage(nextPage)}
-          onRowsPerPageChange={(next) => {
+          onPageChange={nextPage => setPage(nextPage)}
+          onRowsPerPageChange={next => {
             setLimit(next);
             setPage(0);
           }}
@@ -188,7 +196,7 @@ export default function UnitsPage() {
         <Card>
           <CardContent>
             <Stack
-              direction={{ xs: 'column', sm: 'row' }}
+              direction={{xs: 'column', sm: 'row'}}
               spacing={1.5}
               alignItems="stretch"
             >
@@ -197,8 +205,8 @@ export default function UnitsPage() {
                 label="Search"
                 placeholder="q/title/userId/type..."
                 value={q}
-                onChange={(e) => setQ(e.target.value)}
-                onKeyDown={(e) => {
+                onChange={e => setQ(e.target.value)}
+                onKeyDown={e => {
                   if (e.key === 'Enter') {
                     setPage(0);
                     setQuery(q.trim());
@@ -212,7 +220,7 @@ export default function UnitsPage() {
                   setPage(0);
                   setQuery(q.trim());
                 }}
-                sx={{ alignSelf: { xs: 'flex-end', sm: 'center' } }}
+                sx={{alignSelf: {xs: 'flex-end', sm: 'center'}}}
               >
                 <SearchIcon />
               </IconButton>
@@ -221,16 +229,16 @@ export default function UnitsPage() {
                 startIcon={<AddIcon />}
                 component={Link}
                 to="/units/create"
-                sx={{ whiteSpace: 'nowrap' }}
+                sx={{whiteSpace: 'nowrap'}}
               >
                 Create
               </Button>
             </Stack>
 
-            <Divider sx={{ my: 2 }} />
+            <Divider sx={{my: 2}} />
 
             {normalQuery.isLoading ? (
-              <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}>
+              <Box sx={{display: 'flex', justifyContent: 'center', py: 6}}>
                 <CircularProgress size={24} />
               </Box>
             ) : normalQuery.isError ? (
@@ -248,12 +256,12 @@ export default function UnitsPage() {
               <PaginatedTable<UnitDTO>
                 columns={columns}
                 rows={units}
-                getRowId={(u) => u.id}
+                getRowId={u => u.id}
                 count={typeof total === 'number' ? total : 0}
                 page={page}
                 rowsPerPage={limit}
-                onPageChange={(nextPage) => setPage(nextPage)}
-                onRowsPerPageChange={(next) => {
+                onPageChange={nextPage => setPage(nextPage)}
+                onRowsPerPageChange={next => {
                   setLimit(next);
                   setPage(0);
                 }}
@@ -265,4 +273,3 @@ export default function UnitsPage() {
     </Page>
   );
 }
-

@@ -77,7 +77,7 @@ function generateDynamicColors(
 ```typescript
 function dynamicColorsToPalette(
   colors: DynamicColorScheme,
-  mode: "light" | "dark",
+  mode: 'light' | 'dark',
 ): PaletteOptions;
 ```
 
@@ -86,7 +86,7 @@ function dynamicColorsToPalette(
 ### getDynamicTheme
 
 ```typescript
-function getDynamicTheme(mode: "light" | "dark", sourceColor?: string): Theme;
+function getDynamicTheme(mode: 'light' | 'dark', sourceColor?: string): Theme;
 ```
 
 生成动态主题对象，如果未提供 `sourceColor` 则回退到默认主题。
@@ -104,19 +104,19 @@ async function extractColorFromImage(imageUrl: string): Promise<string>;
 ### 1. 启用动态主题
 
 ```typescript
-import { appStore } from "@/global/appStore";
+import {appStore} from '@/global/appStore';
 
 // 启用动态主题
 appStore.getState().setUseDynamicTheme(true);
 
 // 设置自定义颜色
-appStore.getState().setCustomColor("#FF5722");
+appStore.getState().setCustomColor('#FF5722');
 ```
 
 ### 2. 在组件中使用
 
 ```typescript
-import { ThemeQuickToggle } from "@/component/Theme/ThemeCustomizer";
+import {ThemeQuickToggle} from '@/component/Theme/ThemeCustomizer';
 
 // 在布局中添加主题自定义按钮
 <ThemeQuickToggle />;
@@ -125,13 +125,13 @@ import { ThemeQuickToggle } from "@/component/Theme/ThemeCustomizer";
 ### 3. 手动生成动态主题
 
 ```typescript
-import { generateDynamicColors, getDynamicTheme } from "@/config/dynamicTheme";
+import {generateDynamicColors, getDynamicTheme} from '@/config/dynamicTheme';
 
 // 生成动态颜色
-const colors = generateDynamicColors("#FF5722", false);
+const colors = generateDynamicColors('#FF5722', false);
 
 // 创建主题
-const theme = getDynamicTheme("light", "#FF5722");
+const theme = getDynamicTheme('light', '#FF5722');
 ```
 
 ## 🌈 预设颜色
@@ -140,31 +140,31 @@ const theme = getDynamicTheme("light", "#FF5722");
 
 ```typescript
 export const PRESET_COLORS = {
-  red: "#f44336",
-  pink: "#e91e63",
-  purple: "#9c27b0",
-  deepPurple: "#673ab7",
-  indigo: "#3f51b5",
-  blue: "#2196f3",
-  lightBlue: "#03a9f4",
-  cyan: "#00bcd4",
-  teal: "#009688",
-  green: "#4caf50",
-  lightGreen: "#8bc34a",
-  lime: "#cddc39",
-  yellow: "#ffeb3b",
-  amber: "#ffc107",
-  orange: "#ff9800",
-  deepOrange: "#ff5722",
-  brown: "#795548",
-  grey: "#9e9e9e",
-  blueGrey: "#607d8b",
+  red: '#f44336',
+  pink: '#e91e63',
+  purple: '#9c27b0',
+  deepPurple: '#673ab7',
+  indigo: '#3f51b5',
+  blue: '#2196f3',
+  lightBlue: '#03a9f4',
+  cyan: '#00bcd4',
+  teal: '#009688',
+  green: '#4caf50',
+  lightGreen: '#8bc34a',
+  lime: '#cddc39',
+  yellow: '#ffeb3b',
+  amber: '#ffc107',
+  orange: '#ff9800',
+  deepOrange: '#ff5722',
+  brown: '#795548',
+  grey: '#9e9e9e',
+  blueGrey: '#607d8b',
   // 自定义颜色
-  coral: "#f4606c",
-  mint: "#00d4aa",
-  lavender: "#b19cd9",
-  peach: "#ffab91",
-  sage: "#a5d6a7",
+  coral: '#f4606c',
+  mint: '#00d4aa',
+  lavender: '#b19cd9',
+  peach: '#ffab91',
+  sage: '#a5d6a7',
 };
 ```
 
@@ -175,7 +175,7 @@ export const PRESET_COLORS = {
 使用 `ThemeDemo` 组件可以查看动态主题的效果：
 
 ```typescript
-import { ThemeDemo } from "@/component/Theme/ThemeDemo";
+import {ThemeDemo} from '@/component/Theme/ThemeDemo';
 
 <ThemeDemo />;
 ```
@@ -203,16 +203,16 @@ pnpm add @material/material-color-utilities
 import {
   applyDynamicThemeToDOM,
   generateDynamicColors,
-} from "./config/dynamicTheme";
-import { getDynamicTheme } from "./config/theme";
+} from './config/dynamicTheme';
+import {getDynamicTheme} from './config/theme';
 
 const theme = useMemo(() => {
   if (useDynamicTheme && customColor) {
     const dynamicColors = generateDynamicColors(
       customColor,
-      themeMode === "dark",
+      themeMode === 'dark',
     );
-    applyDynamicThemeToDOM(dynamicColors, themeMode === "dark");
+    applyDynamicThemeToDOM(dynamicColors, themeMode === 'dark');
     return getDynamicTheme(themeMode, customColor);
   }
   return getTheme(themeMode);
@@ -224,7 +224,7 @@ const theme = useMemo(() => {
 在布局组件中添加主题自定义按钮：
 
 ```typescript
-import { ThemeQuickToggle } from "@/component/Theme/ThemeCustomizer";
+import {ThemeQuickToggle} from '@/component/Theme/ThemeCustomizer';
 
 <ThemeQuickToggle />;
 ```
@@ -265,7 +265,7 @@ import { ThemeQuickToggle } from "@/component/Theme/ThemeCustomizer";
 // 在 dynamicTheme.ts 中扩展 PRESET_COLORS
 export const PRESET_COLORS = {
   ...existingColors,
-  myCustomColor: "#your-color-here",
+  myCustomColor: '#your-color-here',
 };
 ```
 
@@ -275,7 +275,7 @@ export const PRESET_COLORS = {
 // 修改 dynamicColorsToPalette 函数来自定义颜色映射
 export function dynamicColorsToPalette(
   colors: DynamicColorScheme,
-  mode: "light" | "dark",
+  mode: 'light' | 'dark',
 ): PaletteOptions {
   return {
     // 自定义你的颜色映射逻辑
@@ -303,10 +303,10 @@ export function dynamicColorsToPalette(
 ### 查看生成的颜色
 
 ```typescript
-import { generateDynamicColors } from "@/config/dynamicTheme";
+import {generateDynamicColors} from '@/config/dynamicTheme';
 
-const colors = generateDynamicColors("#FF5722", false);
-console.log("Generated colors:", colors);
+const colors = generateDynamicColors('#FF5722', false);
+console.log('Generated colors:', colors);
 ```
 
 ### CSS 自定义属性

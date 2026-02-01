@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import { useNavigate } from '@tanstack/react-router';
+import {useNavigate} from '@tanstack/react-router';
 import {MobileHomeQuickAccess} from './MobileHomeQuickAccess';
 import {useTranslation} from 'react-i18next';
 
@@ -11,7 +11,7 @@ export const MobileHomeHeader: React.FC = () => {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (keyword.trim()) {
-      navigate({ to: `/book?keyword=${encodeURIComponent(keyword)}` });
+      navigate({to: `/book?keyword=${encodeURIComponent(keyword)}`});
     }
   };
 

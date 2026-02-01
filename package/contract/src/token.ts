@@ -65,7 +65,8 @@ export type UpdateApiTokenInput = (typeof updateApiTokenSchema)['static'];
 export const apiTokenListResponseSchema = t.Object({
   tokens: t.Array(apiTokenDTOSchema),
 });
-export type ApiTokenListResponse = (typeof apiTokenListResponseSchema)['static'];
+export type ApiTokenListResponse =
+  (typeof apiTokenListResponseSchema)['static'];
 
 /**
  * Response shape for creating a token.
@@ -77,5 +78,3 @@ export const createApiTokenResponseSchema = t.Object({
 });
 export type CreateApiTokenResponse =
   (typeof createApiTokenResponseSchema)['static'];
-
-

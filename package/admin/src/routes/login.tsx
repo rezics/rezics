@@ -1,6 +1,6 @@
-import { createFileRoute, redirect } from '@tanstack/react-router';
+import {createFileRoute, redirect} from '@tanstack/react-router';
 
-import { getToken } from '@package/api/react-query/http';
+import {getToken} from '@package/api/react-query/http';
 
 import LoginPage from '@/page/Auth/LoginPage';
 
@@ -15,11 +15,10 @@ export const Route = createFileRoute('/login')({
   validateSearch: (search: Record<string, unknown>) => ({
     redirect: typeof search.redirect === 'string' ? search.redirect : undefined,
   }),
-  beforeLoad: ({ search }) => {
+  beforeLoad: ({search}) => {
     if (getToken()) {
-      throw redirect({ to: normalizeRedirect(search.redirect), replace: true });
+      throw redirect({to: normalizeRedirect(search.redirect), replace: true});
     }
   },
   component: LoginPage,
 });
-

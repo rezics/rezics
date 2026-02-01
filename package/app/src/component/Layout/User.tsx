@@ -1,4 +1,4 @@
-import { useUserStore } from '@/global/userStore.ts';
+import {useUserStore} from '@/global/userStore.ts';
 import {
   Logout as LogoutIcon,
   Person as PersonIcon,
@@ -14,16 +14,16 @@ import {
   Menu,
   MenuItem,
 } from '@mui/material';
-import { useNavigate } from '@tanstack/react-router';
-import React, { useState } from 'react';
-import { Link } from '@package/ui/Navigation/Link.tsx';
+import {useNavigate} from '@tanstack/react-router';
+import React, {useState} from 'react';
+import {Link} from '@package/ui/Navigation/Link.tsx';
 
-import { LoginModal } from '@/page/Auth/LoginPage';
-import { RegisterModal } from '@/page/Auth/RegisterPage';
-import { logout } from '@/page/Auth/lib/handler';
-import { userQueries } from '@package/api/user/user.queries';
-import { useQuery } from '@tanstack/react-query';
-import { useIsMobile } from '@/util/useMediaQueryUtil';
+import {LoginModal} from '@/page/Auth/LoginPage';
+import {RegisterModal} from '@/page/Auth/RegisterPage';
+import {logout} from '@/page/Auth/lib/handler';
+import {userQueries} from '@package/api/user/user.queries';
+import {useQuery} from '@tanstack/react-query';
+import {useIsMobile} from '@/util/useMediaQueryUtil';
 
 const LoginPrompt = () => {
   const [loginModalOpen, setLoginModalOpen] = useState(false);
@@ -90,18 +90,18 @@ export const UserShow: React.FC<UserShowProps> = ({
   onProfile,
   onSettings,
 }) => {
-  const { data: user } = useQuery(userQueries.me());
+  const {data: user} = useQuery(userQueries.me());
   return (
     <>
       <IconButton
         onClick={onMenuOpen}
         size="small"
-        sx={{ ml: 2 }}
+        sx={{ml: 2}}
         aria-controls="menu-appbar"
         aria-haspopup="true"
       >
         <Avatar
-          sx={{ width: 32, height: 32 }}
+          sx={{width: 32, height: 32}}
           variant="rounded"
           src={user?.avatar}
         >
@@ -165,9 +165,9 @@ export type UserContainerProps = {
   onLogout?: () => void;
 };
 
-export const UserContainer: React.FC<UserContainerProps> = ({ onLogout }) => {
+export const UserContainer: React.FC<UserContainerProps> = ({onLogout}) => {
   const navigate = useNavigate();
-  const { setUser } = useUserStore();
+  const {setUser} = useUserStore();
   const user = useUserStore(state => state.user);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
@@ -183,7 +183,7 @@ export const UserContainer: React.FC<UserContainerProps> = ({ onLogout }) => {
     handleMenuClose();
     onLogout?.();
     setUser(null);
-    navigate({ to: '/login' });
+    navigate({to: '/login'});
     logout();
   };
 

@@ -1,7 +1,7 @@
-import { createRouter } from '@tanstack/react-router';
-import { routeTree } from './routeTree.gen.ts';
+import {createRouter} from '@tanstack/react-router';
+import {routeTree} from './routeTree.gen.ts';
 
-import { qc } from '@/plugin/providers/reactQueryUtil';
+import {qc} from '@/plugin/providers/reactQueryUtil';
 
 export const router = createRouter({
   routeTree,
@@ -19,4 +19,3 @@ declare module '@tanstack/react-router' {
     router: typeof router;
   }
 }
-

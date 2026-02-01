@@ -1,12 +1,12 @@
 // import { attachBroadcast } from "@/api/react-query/broadcast";
 // import { attachPersistence } from "@/api/react-query/persist";
-import { QueryClientProvider } from '@tanstack/react-query';
+import {QueryClientProvider} from '@tanstack/react-query';
 import React from 'react';
-import { qc } from './reactQueryUtil';
+import {qc} from './reactQueryUtil';
 // attachPersistence(qc);
 // attachBroadcast(qc);
 
-export function ReactQueryProvider({ children }: { children: React.ReactNode }) {
+export function ReactQueryProvider({children}: {children: React.ReactNode}) {
   (window as any).__TANSTACK_QUERY_CLIENT__ = qc;
   return <QueryClientProvider client={qc}>{children}</QueryClientProvider>;
 }

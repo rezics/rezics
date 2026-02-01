@@ -12,14 +12,14 @@ import {
   Typography,
 } from '@mui/material';
 import React from 'react';
-import { useNavigate } from '@tanstack/react-router';
-import { useQuery } from '@tanstack/react-query';
+import {useNavigate} from '@tanstack/react-router';
+import {useQuery} from '@tanstack/react-query';
 
-import { Link } from '@package/ui/Navigation/Link.tsx';
-import { unitMutations } from '@package/api/unit/unit.mutations';
-import { userQueries } from '@package/api/user/user.queries';
+import {Link} from '@package/ui/Navigation/Link.tsx';
+import {unitMutations} from '@package/api/unit/unit.mutations';
+import {userQueries} from '@package/api/user/user.queries';
 
-import { Page } from '@/page/Page';
+import {Page} from '@/page/Page';
 
 export default function UnitCreatePage() {
   const navigate = useNavigate();
@@ -41,7 +41,7 @@ export default function UnitCreatePage() {
   }, [myUnitId, userId]);
 
   const createMutation = unitMutations.useCreate({
-    onError: (err) =>
+    onError: err =>
       setError(err instanceof Error ? err.message : 'Create failed'),
   });
 
@@ -56,14 +56,14 @@ export default function UnitCreatePage() {
       content: content.trim() || undefined,
       targetUnitId: targetUnitId.trim() || undefined,
     } as any);
-    await navigate({ to: `/units/${(unit as any).id}`, replace: true });
+    await navigate({to: `/units/${(unit as any).id}`, replace: true});
   }
 
   return (
     <Page title="Create Unit" description="创建一个新 Unit（Admin）">
       <Card>
         <CardContent>
-          <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
+          <Stack direction="row" spacing={1} alignItems="center" sx={{mb: 1}}>
             <Button
               component={Link}
               to="/units"
@@ -72,13 +72,13 @@ export default function UnitCreatePage() {
             >
               Back
             </Button>
-            <Box sx={{ flex: 1 }} />
+            <Box sx={{flex: 1}} />
           </Stack>
 
-          <Divider sx={{ my: 2 }} />
+          <Divider sx={{my: 2}} />
 
           {error ? (
-            <Alert severity="error" sx={{ mb: 2 }}>
+            <Alert severity="error" sx={{mb: 2}}>
               {error}
             </Alert>
           ) : null}
@@ -88,39 +88,39 @@ export default function UnitCreatePage() {
               <TextField
                 label="User ID"
                 value={userId}
-                onChange={(e) => setUserId(e.target.value)}
+                onChange={e => setUserId(e.target.value)}
                 helperText="后端当前实现会强制用当前登录用户覆盖该字段（后续可按需改为 admin 可指定）。"
                 required
               />
               <TextField
                 label="Type"
                 value={type}
-                onChange={(e) => setType(e.target.value)}
+                onChange={e => setType(e.target.value)}
                 required
                 placeholder="BOOK / COMMENT / NOTE / ..."
               />
               <TextField
                 label="Status"
                 value={status}
-                onChange={(e) => setStatus(e.target.value)}
+                onChange={e => setStatus(e.target.value)}
                 placeholder="ACTIVE / DRAFT / ..."
               />
               <TextField
                 label="Title"
                 value={title}
-                onChange={(e) => setTitle(e.target.value)}
+                onChange={e => setTitle(e.target.value)}
               />
               <TextField
                 label="Content"
                 value={content}
-                onChange={(e) => setContent(e.target.value)}
+                onChange={e => setContent(e.target.value)}
                 multiline
                 minRows={6}
               />
               <TextField
                 label="Target Unit ID"
                 value={targetUnitId}
-                onChange={(e) => setTargetUnitId(e.target.value)}
+                onChange={e => setTargetUnitId(e.target.value)}
               />
 
               <Box>
@@ -143,4 +143,3 @@ export default function UnitCreatePage() {
     </Page>
   );
 }
-

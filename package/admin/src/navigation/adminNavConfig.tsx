@@ -112,4 +112,3 @@ export const adminNav = {
     },
   ] satisfies AdminNavEntry[],
 };
-

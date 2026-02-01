@@ -9,7 +9,7 @@ import {
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import FeedbackForm from './FeedbackForm';
-import type { CreateFeedbackInput } from '@package/api/feedback/feedback.types';
+import type {CreateFeedbackInput} from '@package/api/feedback/feedback.types';
 
 type FeedbackDialogProps = {
   open: boolean;

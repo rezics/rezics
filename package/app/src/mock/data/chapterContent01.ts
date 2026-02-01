@@ -1,10 +1,10 @@
 export const chapterContent01 = {
-  id: "r23a7abx5827",
-  created_at: "2021-01-01",
-  chapterName: "章节名称",
+  id: 'r23a7abx5827',
+  created_at: '2021-01-01',
+  chapterName: '章节名称',
   author: {
-    name: "John Doe",
-    avatar: "https://via.placeholder.com/150",
+    name: 'John Doe',
+    avatar: 'https://via.placeholder.com/150',
   },
   content: `## 第三章 死亡
 

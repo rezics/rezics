@@ -8,4 +8,3 @@ const ThemeSwitch = lazyRouteComponent(
 export const Route = createFileRoute('/_mainLayout/theme-switch')({
   component: ThemeSwitch,
 });
-

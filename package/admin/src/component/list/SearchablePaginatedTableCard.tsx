@@ -12,7 +12,10 @@ import {
 } from '@mui/material';
 import React from 'react';
 
-import { PaginatedTable, type PaginatedColumn } from '@/component/table/PaginatedTable';
+import {
+  PaginatedTable,
+  type PaginatedColumn,
+} from '@/component/table/PaginatedTable';
 
 export function SearchablePaginatedTableCard<T>({
   title,
@@ -58,12 +61,12 @@ export function SearchablePaginatedTableCard<T>({
   return (
     <>
       {title ? (
-        <Typography variant="h5" fontWeight={800} sx={{ mb: 1 }}>
+        <Typography variant="h5" fontWeight={800} sx={{mb: 1}}>
           {title}
         </Typography>
       ) : null}
       {description ? (
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+        <Typography variant="body2" color="text.secondary" sx={{mb: 2}}>
           {description}
         </Typography>
       ) : null}
@@ -71,7 +74,7 @@ export function SearchablePaginatedTableCard<T>({
       <Card>
         <CardContent>
           <Stack
-            direction={{ xs: 'column', sm: 'row' }}
+            direction={{xs: 'column', sm: 'row'}}
             spacing={1.5}
             alignItems="stretch"
           >
@@ -80,8 +83,8 @@ export function SearchablePaginatedTableCard<T>({
               label={searchLabel}
               placeholder={searchPlaceholder}
               value={q}
-              onChange={(e) => onQChange(e.target.value)}
-              onKeyDown={(e) => {
+              onChange={e => onQChange(e.target.value)}
+              onKeyDown={e => {
                 if (e.key === 'Enter') onSearch();
               }}
               fullWidth
@@ -89,17 +92,17 @@ export function SearchablePaginatedTableCard<T>({
             <IconButton
               aria-label="search"
               onClick={onSearch}
-              sx={{ alignSelf: { xs: 'flex-end', sm: 'center' } }}
+              sx={{alignSelf: {xs: 'flex-end', sm: 'center'}}}
             >
               <SearchIcon />
             </IconButton>
             {toolbarRight}
           </Stack>
 
-          <Divider sx={{ my: 2 }} />
+          <Divider sx={{my: 2}} />
 
           {isLoading ? (
-            <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}>
+            <Box sx={{display: 'flex', justifyContent: 'center', py: 6}}>
               <CircularProgress size={24} />
             </Box>
           ) : isError ? (

@@ -1,20 +1,20 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Select, MenuItem, Chip, Typography, Box, Button } from '@mui/material';
-import type { UnitDTO } from '@package/contract';
+import React, {useEffect, useMemo, useState} from 'react';
+import {useQuery, useQueryClient} from '@tanstack/react-query';
+import {Select, MenuItem, Chip, Typography, Box, Button} from '@mui/material';
+import type {UnitDTO} from '@package/contract';
 
-import { reactionApi, reactionQueries } from '@package/api/reaction/reaction';
-import { unitApi } from '@package/api/unit/unit';
-import { useUserStore } from '@/global/userStore';
-import { useAlertStore } from '@/global/windowAlertStore';
+import {reactionApi, reactionQueries} from '@package/api/reaction/reaction';
+import {unitApi} from '@package/api/unit/unit';
+import {useUserStore} from '@/global/userStore';
+import {useAlertStore} from '@/global/windowAlertStore';
 import {
   UniversalPaginator,
   type UniversalPaginatorHandle,
 } from '@/component/Common/Navigation/Pagination';
 
-import { UserBookmarkTagsCard } from './UserBookmarkTagsCard';
-import { BookmarkItemCard } from '@/component/User/Bookmark/BookmarkItemCard';
-import { useNavigate } from '@tanstack/react-router';
+import {UserBookmarkTagsCard} from './UserBookmarkTagsCard';
+import {BookmarkItemCard} from '@/component/User/Bookmark/BookmarkItemCard';
+import {useNavigate} from '@tanstack/react-router';
 
 export type BookmarkEntry = {
   unit: UnitDTO;
@@ -50,7 +50,7 @@ export const BookmarkPage: React.FC = () => {
   const navigate = useNavigate();
   const user = useUserStore(state => state.user);
   const userId = user?.unitId;
-  const { show: showAlert } = useAlertStore();
+  const {show: showAlert} = useAlertStore();
 
   const [typeFilter, setTypeFilter] = useState<string>('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
@@ -64,7 +64,7 @@ export const BookmarkPage: React.FC = () => {
   const [start, setStart] = useState<number>(0);
   const [totalItems, setTotalItems] = useState<number>(0);
 
-  const { data, isLoading, isError } = useQuery<BookmarkPageQueryResult>({
+  const {data, isLoading, isError} = useQuery<BookmarkPageQueryResult>({
     queryKey: [
       'user-bookmarks',
       userId,
@@ -76,7 +76,7 @@ export const BookmarkPage: React.FC = () => {
     enabled: !!userId,
     queryFn: async () => {
       if (!userId) {
-        return { entries: [], total: 0 };
+        return {entries: [], total: 0};
       }
 
       const reactionList = await reactionApi.list({
@@ -90,7 +90,7 @@ export const BookmarkPage: React.FC = () => {
       const total = reactionList.total ?? 0;
 
       if (reactions.length === 0) {
-        return { entries: [], total };
+        return {entries: [], total};
       }
 
       const targetIds = Array.from(
@@ -120,14 +120,14 @@ export const BookmarkPage: React.FC = () => {
         targetIds.map(async targetId => {
           try {
             const res = await reactionApi.getBookmarkTags(targetId);
-            return { targetId, tags: res.tags ?? [] };
+            return {targetId, tags: res.tags ?? []};
           } catch (e) {
             console.error(
               'Failed to load bookmark tags for target',
               targetId,
               e,
             );
-            return { targetId, tags: [] as string[] };
+            return {targetId, tags: [] as string[]};
           }
         }),
       );
@@ -170,7 +170,7 @@ export const BookmarkPage: React.FC = () => {
   }, [data]);
 
   // 用户级别的标签库（targetId === userId，对前端来说用 "tag" 作为占位 key）
-  const { data: userTagLibrary } = useQuery(reactionQueries.bookmarkTags('tag'));
+  const {data: userTagLibrary} = useQuery(reactionQueries.bookmarkTags('tag'));
 
   const allBookmarkTags = useMemo(() => {
     const set = new Set<string>();
@@ -223,7 +223,7 @@ export const BookmarkPage: React.FC = () => {
         const total = reactionList.total ?? 0;
 
         if (reactions.length === 0) {
-          return { entries: [], total };
+          return {entries: [], total};
         }
 
         const targetIds = Array.from(
@@ -252,14 +252,14 @@ export const BookmarkPage: React.FC = () => {
           targetIds.map(async targetId => {
             try {
               const res = await reactionApi.getBookmarkTags(targetId);
-              return { targetId, tags: res.tags ?? [] };
+              return {targetId, tags: res.tags ?? []};
             } catch (e) {
               console.error(
                 'Failed to load bookmark tags for target',
                 targetId,
                 e,
               );
-              return { targetId, tags: [] as string[] };
+              return {targetId, tags: [] as string[]};
             }
           }),
         );
@@ -302,7 +302,7 @@ export const BookmarkPage: React.FC = () => {
   const handleEntryTagsUpdated = (targetId: string, tags: string[]) => {
     setEntries(prev =>
       prev.map(entry =>
-        entry.unit.id === targetId ? { ...entry, tags } : entry,
+        entry.unit.id === targetId ? {...entry, tags} : entry,
       ),
     );
   };
@@ -370,7 +370,7 @@ export const BookmarkPage: React.FC = () => {
           <Button
             variant="text"
             color="primary"
-            onClick={() => navigate({ to: '/user/me' })}
+            onClick={() => navigate({to: '/user/me'})}
           >
             返回
           </Button>
@@ -419,7 +419,7 @@ export const BookmarkPage: React.FC = () => {
             sortType="time"
             sortOrder="desc"
             // Bookmark 列表目前没有排序需求，这里传入占位配置
-            onSortChange={() => { }}
+            onSortChange={() => {}}
             requestData={handleNeedMoreData}
             preRequestData={handlePreRequestData}
             isLoading={isLoading && entries.length === 0}

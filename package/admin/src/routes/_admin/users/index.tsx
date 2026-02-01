@@ -1,4 +1,4 @@
-import { createFileRoute, lazyRouteComponent } from '@tanstack/react-router';
+import {createFileRoute, lazyRouteComponent} from '@tanstack/react-router';
 
 export const Route = createFileRoute('/_admin/users/')({
   component: lazyRouteComponent(
@@ -6,4 +6,3 @@ export const Route = createFileRoute('/_admin/users/')({
     'default',
   ),
 });
-

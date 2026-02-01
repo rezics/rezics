@@ -1,33 +1,37 @@
-import { type ReviewResponse } from '@package/contract';
-import { ReviewEditPage } from './ReviewEditPage';
-import { useState } from 'react';
-import { TextField } from '@mui/material';
-import { CooldownButton } from '@/component/Common/UI/Button/CooldownButton';
+import {type ReviewResponse} from '@package/contract';
+import {ReviewEditPage} from './ReviewEditPage';
+import {useState} from 'react';
+import {TextField} from '@mui/material';
+import {CooldownButton} from '@/component/Common/UI/Button/CooldownButton';
 
-import { useCreateReviewMutation } from '@package/api/review/review.mutations';
-import { useAlertStore } from '@/global/windowAlertStore';
-import { useUserStore } from '@/global/userStore';
-import { useRouterState } from '@tanstack/react-router';
-import { UnitType } from '@package/contract';
-import { reviewNewRoute } from '@/router';
+import {useCreateReviewMutation} from '@package/api/review/review.mutations';
+import {useAlertStore} from '@/global/windowAlertStore';
+import {useUserStore} from '@/global/userStore';
+import {useRouterState} from '@tanstack/react-router';
+import {UnitType} from '@package/contract';
+import {reviewNewRoute} from '@/router';
 
-export function ReviewNewPage({ bookUnitId: bookUnitIdProps }: { bookUnitId?: string }) {
+export function ReviewNewPage({
+  bookUnitId: bookUnitIdProps,
+}: {
+  bookUnitId?: string;
+}) {
   let bookUnitId: string;
   if (bookUnitIdProps) {
     bookUnitId = bookUnitIdProps;
   } else {
     bookUnitId = reviewNewRoute.useParams();
   }
-  const search = useRouterState({ select: s => s.location.search ?? '' });
+  const search = useRouterState({select: s => s.location.search ?? ''});
   const searchParams = new URLSearchParams(search);
   const [reviewData, setReviewData] = useState<ReviewResponse>(
     {} as ReviewResponse,
   );
-  const { show } = useAlertStore();
-  const { user } = useUserStore();
+  const {show} = useAlertStore();
+  const {user} = useUserStore();
   const unitType =
     searchParams.get('tab') === 'remark' ? UnitType.REMARK : UnitType.REVIEW;
-  const { mutate, isPending } = useCreateReviewMutation(
+  const {mutate, isPending} = useCreateReviewMutation(
     {
       onSuccess: data => {
         show('Review created successfully');

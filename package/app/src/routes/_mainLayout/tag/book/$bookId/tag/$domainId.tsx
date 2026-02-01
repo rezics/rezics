@@ -5,7 +5,8 @@ const TagByBookFullPage = lazyRouteComponent(
   'TagByBookFullPage',
 );
 
-export const Route = createFileRoute('/_mainLayout/tag/book/$bookId/tag/$domainId')({
+export const Route = createFileRoute(
+  '/_mainLayout/tag/book/$bookId/tag/$domainId',
+)({
   component: TagByBookFullPage,
 });
-

@@ -1,23 +1,21 @@
-import { useQueries, useQuery } from '@tanstack/react-query';
-import { RouterLink } from '@package/ui/Navigation/RouterLink.tsx';
-import { AccentBarWithTextShow } from '@/component/Common/Navigation/AccentBar';
-import { tagApi, tagQueries } from '@package/api/tag/tag';
-import type { TagDetailDTO } from '@package/contract';
-import { TagWrapper } from '@/component/Tag/TagWrapper';
-import { tagBookRoute } from '@/router';
-import { useMatchRoute } from '@tanstack/react-router';
+import {useQueries, useQuery} from '@tanstack/react-query';
+import {RouterLink} from '@package/ui/Navigation/RouterLink.tsx';
+import {AccentBarWithTextShow} from '@/component/Common/Navigation/AccentBar';
+import {tagApi, tagQueries} from '@package/api/tag/tag';
+import type {TagDetailDTO} from '@package/contract';
+import {TagWrapper} from '@/component/Tag/TagWrapper';
+import {tagBookRoute} from '@/router';
+import {useMatchRoute} from '@tanstack/react-router';
 
 export function TagByBookPage() {
-  const { bookId } = tagBookRoute.useParams();
+  const {bookId} = tagBookRoute.useParams();
   // List tags attached to this book (object)
   const pageSize = 30;
   const {
     data: listData,
     isLoading,
     error,
-  } = useQuery(
-    tagQueries.list({ objectId: bookId, page: 1, limit: pageSize }),
-  );
+  } = useQuery(tagQueries.list({objectId: bookId, page: 1, limit: pageSize}));
 
   // Fetch details to get domains for grouping
   const tagIds = listData?.tags?.map(t => t.id) ?? [];
@@ -46,7 +44,7 @@ export function TagByBookPage() {
       {!isLoading && !error && (
         <div className="mt-4">
           <TagWrapper
-            filters={{ objectId: bookId }}
+            filters={{objectId: bookId}}
             mode="grouped"
             renderAll={true}
           />
@@ -55,7 +53,7 @@ export function TagByBookPage() {
 
       {showSeeAll && (
         <div className="mt-4">
-          <RouterLink to="/tag/book/$bookId/tag" params={{ bookId }}>
+          <RouterLink to="/tag/book/$bookId/tag" params={{bookId}}>
             <span className="text-primary-600 hover:underline">
               查看全部标签（{total}）
             </span>
@@ -72,7 +70,7 @@ export function TagByBookFullPage() {
     to: '/tag/book/$bookId/tag/$domainId',
     fuzzy: false,
   });
-  const base = matchRoute({ to: '/tag/book/$bookId/tag', fuzzy: false });
+  const base = matchRoute({to: '/tag/book/$bookId/tag', fuzzy: false});
 
   const bookId =
     (withDomain ? withDomain.bookId : '') || (base ? base.bookId : '') || '';
@@ -85,7 +83,7 @@ export function TagByBookFullPage() {
     isLoading,
     error,
   } = useQuery(
-    tagQueries.list({ objectId: bookId, domainId, page: 1, limit: pageSize }),
+    tagQueries.list({objectId: bookId, domainId, page: 1, limit: pageSize}),
   );
 
   // Fetch details to get domains for grouping
@@ -114,7 +112,7 @@ export function TagByBookFullPage() {
       {!isLoading && !error && (
         <div className="mt-4">
           <TagWrapper
-            filters={{ objectId: bookId, domainId }}
+            filters={{objectId: bookId, domainId}}
             mode="grouped"
             renderAll={true}
           />

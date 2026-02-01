@@ -1,5 +1,5 @@
-import { useDialogStore } from '@/global/dialogStore';
-import { Button, Drawer } from '@mui/material';
+import {useDialogStore} from '@/global/dialogStore';
+import {Button, Drawer} from '@mui/material';
 import React from 'react';
 
 import EasyEditor from '../EasyEditor';
@@ -20,7 +20,7 @@ export const ReplyDrawerShow: React.FC<ReplyDrawerShowProps> = ({
   onContentChange,
 }) => {
   return (
-    <Drawer open={open} onClose={onClose} anchor="bottom" sx={{ zIndex: 2000 }}>
+    <Drawer open={open} onClose={onClose} anchor="bottom" sx={{zIndex: 2000}}>
       <div
         className="w-11/12 mx-auto my-4 min-h-[250px] h-[480px]
                   grid gap-4
@@ -59,7 +59,6 @@ function extractMentions(text: string): string[] {
   return result;
 }
 
-
 export type ReplyDrawerContainerProps = {
   dialogId: string;
   onSubmit?: (content: string) => void;
@@ -80,7 +79,7 @@ export const ReplyDrawerContainer: React.FC<ReplyDrawerContainerProps> = ({
   const handleSubmit = () => {
     if (onSubmit && entry?.contentMain !== undefined) {
       const mentions = extractMentions(entry.contentMain);
-      let content: string | { text: string; mentions: string[] };
+      let content: string | {text: string; mentions: string[]};
       if (mentions.length > 0) {
         content = {
           text: entry.contentMain,

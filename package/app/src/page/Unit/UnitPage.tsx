@@ -1,12 +1,12 @@
-import { useQuery } from '@tanstack/react-query';
-import { Avatar, Chip, Paper, Tooltip, Typography } from '@mui/material';
-import { useTranslation } from 'react-i18next';
+import {useQuery} from '@tanstack/react-query';
+import {Avatar, Chip, Paper, Tooltip, Typography} from '@mui/material';
+import {useTranslation} from 'react-i18next';
 
-import { unitDetailQuery } from '@package/api/unit/unit';
-import { AccentBarContainer } from '@/component/Common/Navigation/AccentBar';
-import { MarkdownContent } from '@/component/Common/MarkdownContent';
-import { RouterLink } from '@package/ui/Navigation/RouterLink.tsx';
-import { unitRoute } from '@/router';
+import {unitDetailQuery} from '@package/api/unit/unit';
+import {AccentBarContainer} from '@/component/Common/Navigation/AccentBar';
+import {MarkdownContent} from '@/component/Common/MarkdownContent';
+import {RouterLink} from '@package/ui/Navigation/RouterLink.tsx';
+import {unitRoute} from '@/router';
 
 function formatMetadataValue(value: unknown): string {
   if (value === null || value === undefined) return '-';
@@ -24,8 +24,8 @@ function formatMetadataValue(value: unknown): string {
 }
 
 export function UnitPage() {
-  const { unitId } = unitRoute.useParams();
-  const { t } = useTranslation();
+  const {unitId} = unitRoute.useParams();
+  const {t} = useTranslation();
 
   const {
     data: unit,
@@ -97,7 +97,7 @@ export function UnitPage() {
               label={tag}
               size="small"
               variant="outlined"
-              sx={{ borderRadius: 999 }}
+              sx={{borderRadius: 999}}
             />
           ))}
         </div>
@@ -110,13 +110,13 @@ export function UnitPage() {
             <div className="flex items-center gap-3">
               <Avatar
                 src={unit.user.avatar ?? ''}
-                sx={{ width: 40, height: 40, borderRadius: 1 }}
+                sx={{width: 40, height: 40, borderRadius: 1}}
               />
               <div className="flex flex-col">
                 <Tooltip title={t('user.open_profile')}>
                   <RouterLink
                     to="/user/$unitId"
-                    params={{ unitId: unit.user.unitId }}
+                    params={{unitId: unit.user.unitId}}
                     className="text-sm font-medium"
                   >
                     {unit.user.name}

@@ -8,7 +8,7 @@ import {
 } from '@mui/material';
 import {type SearchInfo} from '@/component/Search/searchParser';
 import React, {useEffect, useMemo, useState} from 'react';
-import { useRouterState } from '@tanstack/react-router';
+import {useRouterState} from '@tanstack/react-router';
 import {useTranslation} from 'react-i18next';
 import {
   IsLicensedInfo,
@@ -191,8 +191,8 @@ export const SearchInputContainer: React.FC<SearchInputContainerProps> = ({
   tagGroups,
   hiddenWordCountFilter = false,
 }) => {
-  const pathname = useRouterState({ select: s => s.location.pathname });
-  const search = useRouterState({ select: s => s.location.search ?? '' });
+  const pathname = useRouterState({select: s => s.location.pathname});
+  const search = useRouterState({select: s => s.location.search ?? ''});
   const searchParams = useMemo(() => new URLSearchParams(search), [search]);
   const [value, setValue] = useState(defaultValue);
 

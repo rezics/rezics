@@ -16,7 +16,7 @@ export interface ReviewRow {
   userId: Id;
 }
 
-export interface Review extends Omit<ReviewRow, "userId"> {
+export interface Review extends Omit<ReviewRow, 'userId'> {
   user: User;
 }
 

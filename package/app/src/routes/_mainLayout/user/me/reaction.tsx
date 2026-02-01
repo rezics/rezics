@@ -8,4 +8,3 @@ const ReactionInfoPage = lazyRouteComponent(
 export const Route = createFileRoute('/_mainLayout/user/me/reaction')({
   component: () => <ReactionInfoPage isCurrentUser={true} />,
 });
-

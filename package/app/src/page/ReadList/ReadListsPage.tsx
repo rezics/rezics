@@ -1,31 +1,31 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Alert } from '@mui/material';
+import React, {useEffect, useMemo, useRef, useState} from 'react';
+import {Alert} from '@mui/material';
 import {
   UniversalPaginator,
   type UniversalPaginatorHandle,
 } from '@/component/Common/Navigation/Pagination';
-import { SimpleSearchInput } from '@/component/Search/SimpleSearchInput';
-import type { SearchInfo } from '@/component/Search/searchParser';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { buildMeiliReadlistQuery } from '@package/api/meili/meili.queries';
-import type { ReadlistDTO } from '@package/contract';
-import { reactionApi } from '@package/api/reaction/reaction.api';
-import { useTranslation } from 'react-i18next';
+import {SimpleSearchInput} from '@/component/Search/SimpleSearchInput';
+import type {SearchInfo} from '@/component/Search/searchParser';
+import {useQuery, useQueryClient} from '@tanstack/react-query';
+import {buildMeiliReadlistQuery} from '@package/api/meili/meili.queries';
+import type {ReadlistDTO} from '@package/contract';
+import {reactionApi} from '@package/api/reaction/reaction.api';
+import {useTranslation} from 'react-i18next';
 
 type Readlist = ReadlistDTO;
 
-import { SingleReadlist } from '@/component/ReadList/SingleReadlist';
+import {SingleReadlist} from '@/component/ReadList/SingleReadlist';
 
 // Simple list view for Readlists
-const ReadlistListView: React.FC<{ readlists: Readlist[] }> = ({ readlists }) => {
+const ReadlistListView: React.FC<{readlists: Readlist[]}> = ({readlists}) => {
   return (
     <div>
       {readlists.map(item => (
         <div key={item.id}>
           <SingleReadlist
             data={item}
-            handleBookListClick={() => { }}
-            handleLike={() => { }}
+            handleBookListClick={() => {}}
+            handleLike={() => {}}
           />
         </div>
       ))}
@@ -33,13 +33,13 @@ const ReadlistListView: React.FC<{ readlists: Readlist[] }> = ({ readlists }) =>
   );
 };
 
-function ErrorView({ error }: { error: Error }) {
-  const { t } = useTranslation();
+function ErrorView({error}: {error: Error}) {
+  const {t} = useTranslation();
   return (
     <div className="mx-auto max-w-7xl p-4">
       <SimpleSearchInput
-        onSearch={() => { }}
-        defaultValue={{ keyword: '' }}
+        onSearch={() => {}}
+        defaultValue={{keyword: ''}}
         placeholder={t('page.readlist.list.search_placeholder')}
       />
       <Alert severity="error" className="my-4">
@@ -55,8 +55,8 @@ type SortKey = 'time' | 'name' | 'popular' | 'agree';
  * 后续API调整，Service调整的问题，是否要切换到 unit 查询，还是继续用独立服务。
  * @returns ReadListsPage
  */
-export function ReadListsPage({ bookUnitId }: { bookUnitId?: string }) {
-  const { t } = useTranslation();
+export function ReadListsPage({bookUnitId}: {bookUnitId?: string}) {
+  const {t} = useTranslation();
   const universalPaginatorRef = useRef<UniversalPaginatorHandle>(null);
   const EXTERNAL_PAGE_SIZE = 100;
   const [currentQuery, setCurrentQuery] = useState<SearchInfo>({
@@ -66,13 +66,13 @@ export function ReadListsPage({ bookUnitId }: { bookUnitId?: string }) {
   const [start, setStart] = useState<number>(0);
   const [currentPage, setCurrentPage] = useState(1);
 
-  const { data, isLoading, error } = useQuery(
+  const {data, isLoading, error} = useQuery(
     buildMeiliReadlistQuery(
       start,
       EXTERNAL_PAGE_SIZE,
       currentQuery.keyword ?? '',
       currentQuery.tags ?? [],
-      { bookId: bookUnitId ?? undefined },
+      {bookId: bookUnitId ?? undefined},
     ),
   );
 
@@ -83,14 +83,14 @@ export function ReadListsPage({ bookUnitId }: { bookUnitId?: string }) {
   const queryClient = useQueryClient();
   async function handlePreRequestData(page: number) {
     const startOffset = (page - 1) * EXTERNAL_PAGE_SIZE;
-    const { queryKey, queryFn } = buildMeiliReadlistQuery(
+    const {queryKey, queryFn} = buildMeiliReadlistQuery(
       startOffset,
       EXTERNAL_PAGE_SIZE,
       currentQuery.keyword ?? '',
       currentQuery.tags ?? [],
-      { bookId: bookUnitId ?? undefined },
+      {bookId: bookUnitId ?? undefined},
     );
-    const data = await queryClient.fetchQuery({ queryKey, queryFn });
+    const data = await queryClient.fetchQuery({queryKey, queryFn});
     console.log('handlePreRequestData', data, page);
     return data?.readlists?.length ?? 0;
   }
@@ -114,7 +114,7 @@ export function ReadListsPage({ bookUnitId }: { bookUnitId?: string }) {
     [baseReadlists],
   );
 
-  const { data: reactionSummaryBatch } = useQuery({
+  const {data: reactionSummaryBatch} = useQuery({
     queryKey: ['reaction-summary-batch', 'readlists', currentTargetIds],
     queryFn: () => reactionApi.summaryBatch(currentTargetIds as string[]),
     enabled: currentTargetIds.length > 0,
@@ -202,7 +202,7 @@ export function ReadListsPage({ bookUnitId }: { bookUnitId?: string }) {
               });
               console.log('onSearch', info);
             }}
-            defaultValue={{ keyword: currentQuery.keyword ?? '' }}
+            defaultValue={{keyword: currentQuery.keyword ?? ''}}
             placeholder={t('page.readlist.list.search_placeholder')}
           />
         }

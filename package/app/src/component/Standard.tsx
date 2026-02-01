@@ -2,7 +2,7 @@
  * 组件开发应该遵循本组件的规范，以保证组件的质量。
  */
 
-import { useEffect, useState } from "react";
+import {useEffect, useState} from 'react';
 
 /**
  * 组件应该导出一个命名空间，包含 Show 和 Container 两个类型或函数。
@@ -16,7 +16,7 @@ export namespace Standard {
     title: string;
     description: string;
   };
-  export const Show: React.FC<Show> = ({ title, description }) => {
+  export const Show: React.FC<Show> = ({title, description}) => {
     return (
       <div>
         <h1>{title}</h1>
@@ -32,16 +32,16 @@ export namespace Standard {
   export type Container = {
     link: string;
   };
-  export const Container: React.FC<Container> = ({ link }) => {
+  export const Container: React.FC<Container> = ({link}) => {
     const [data, setData] = useState<Show>({
-      title: "",
-      description: "",
+      title: '',
+      description: '',
     });
 
     useEffect(() => {
       fetch(link)
-        .then((res) => res.json())
-        .then((data) => setData(data));
+        .then(res => res.json())
+        .then(data => setData(data));
     }, [link]);
     return <Show {...data} />;
   };

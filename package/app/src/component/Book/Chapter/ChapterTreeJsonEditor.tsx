@@ -1,15 +1,15 @@
-import { JsonEditorLight } from '@/component/Form/JsonEditorLight';
-import { useQuery } from '@tanstack/react-query';
-import { bookQueries } from '@package/api/book/book';
-import { useEffect, useState } from 'react';
-import { Alert } from '@mui/material';
+import {JsonEditorLight} from '@/component/Form/JsonEditorLight';
+import {useQuery} from '@tanstack/react-query';
+import {bookQueries} from '@package/api/book/book';
+import {useEffect, useState} from 'react';
+import {Alert} from '@mui/material';
 
 interface ChapterTreeJsonEditorProps {
   bookId: string;
 }
 
-export function ChapterTreeJsonEditor({ bookId }: ChapterTreeJsonEditorProps) {
-  const { data, isLoading, error } = useQuery(bookQueries.chapterIndex(bookId));
+export function ChapterTreeJsonEditor({bookId}: ChapterTreeJsonEditorProps) {
+  const {data, isLoading, error} = useQuery(bookQueries.chapterIndex(bookId));
 
   const [jsonData, setJsonData] = useState<any>({});
 

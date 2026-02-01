@@ -1,4 +1,4 @@
-import { Button, CircularProgress } from "@mui/material";
+import {Button, CircularProgress} from '@mui/material';
 
 export function RoseButton({
   label,
@@ -16,9 +16,11 @@ export function RoseButton({
         size="large"
         onClick={onClick}
         disabled={disabled}
-        startIcon={disabled
-          ? <CircularProgress size={16} className="text-white" />
-          : null}
+        startIcon={
+          disabled ? (
+            <CircularProgress size={16} className="text-white" />
+          ) : null
+        }
         className="bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 
                 rounded-xl px-8 py-3 text-base font-semibold normal-case
                 shadow-lg shadow-rose-500/30 hover:shadow-xl hover:shadow-rose-500/40 
@@ -47,9 +49,11 @@ export function GreenButton({
         size="large"
         onClick={onClick}
         disabled={disabled}
-        startIcon={disabled
-          ? <CircularProgress size={16} className="text-white" />
-          : null}
+        startIcon={
+          disabled ? (
+            <CircularProgress size={16} className="text-white" />
+          ) : null
+        }
         className="bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-600 hover:to-green-600 
                 rounded-xl px-8 py-3 text-base font-semibold normal-case
                 shadow-lg shadow-emerald-500/30 hover:shadow-xl hover:shadow-emerald-500/40 
@@ -78,9 +82,11 @@ export function OrangeButton({
         size="large"
         onClick={onClick}
         disabled={disabled}
-        startIcon={disabled
-          ? <CircularProgress size={16} className="text-white" />
-          : null}
+        startIcon={
+          disabled ? (
+            <CircularProgress size={16} className="text-white" />
+          ) : null
+        }
         className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 
                 rounded-xl px-8 py-3 text-base font-semibold normal-case
                 shadow-lg shadow-orange-500/30 hover:shadow-xl hover:shadow-orange-500/40 

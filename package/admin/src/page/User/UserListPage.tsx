@@ -14,16 +14,19 @@ import {
   Typography,
 } from '@mui/material';
 import React from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { useMatchRoute } from '@tanstack/react-router';
+import {useQuery} from '@tanstack/react-query';
+import {useMatchRoute} from '@tanstack/react-router';
 
-import { Link } from '@package/ui/Navigation/Link.tsx';
-import type { UserDTO } from '@package/contract';
-import { userQueries } from '@package/api/user/user.queries';
-import { meiliUserApi } from '@package/api/meili/meili.api';
+import {Link} from '@package/ui/Navigation/Link.tsx';
+import type {UserDTO} from '@package/contract';
+import {userQueries} from '@package/api/user/user.queries';
+import {meiliUserApi} from '@package/api/meili/meili.api';
 
-import { Page } from '@/page/Page';
-import { PaginatedTable, type PaginatedColumn } from '@/component/table/PaginatedTable';
+import {Page} from '@/page/Page';
+import {
+  PaginatedTable,
+  type PaginatedColumn,
+} from '@/component/table/PaginatedTable';
 
 function fmtDate(v?: string | Date) {
   if (!v) return '';
@@ -34,7 +37,7 @@ function fmtDate(v?: string | Date) {
 
 export default function UserListPage() {
   const matchRoute = useMatchRoute();
-  const isMeiliMode = Boolean(matchRoute({ to: '/users/meili' }));
+  const isMeiliMode = Boolean(matchRoute({to: '/users/meili'}));
 
   const [q, setQ] = React.useState('');
   const [query, setQuery] = React.useState('');
@@ -49,7 +52,11 @@ export default function UserListPage() {
   }, [isMeiliMode]);
 
   const listQuery = useQuery({
-    ...userQueries.adminList({ page: page + 1, limit, ...(query ? { q: query } : {}) }),
+    ...userQueries.adminList({
+      page: page + 1,
+      limit,
+      ...(query ? {q: query} : {}),
+    }),
     enabled: !isMeiliMode,
   });
 
@@ -75,8 +82,8 @@ export default function UserListPage() {
         id: 'unitId',
         header: 'Unit ID',
         minWidth: 220,
-        cell: (u) => (
-          <Typography variant="body2" sx={{ fontFamily: 'monospace' }}>
+        cell: u => (
+          <Typography variant="body2" sx={{fontFamily: 'monospace'}}>
             {u.unitId}
           </Typography>
         ),
@@ -85,7 +92,7 @@ export default function UserListPage() {
         id: 'email',
         header: 'Email',
         minWidth: 240,
-        cell: (u) => (
+        cell: u => (
           <Typography variant="body2" noWrap>
             {u.email ?? '-'}
           </Typography>
@@ -95,7 +102,7 @@ export default function UserListPage() {
         id: 'name',
         header: 'Name',
         minWidth: 160,
-        cell: (u) => (
+        cell: u => (
           <Typography variant="body2" fontWeight={700} noWrap>
             {u.name}
           </Typography>
@@ -105,7 +112,7 @@ export default function UserListPage() {
         id: 'slug',
         header: 'Slug',
         minWidth: 160,
-        cell: (u) => (
+        cell: u => (
           <Typography variant="body2" noWrap>
             {u.slug ? `@${u.slug}` : '-'}
           </Typography>
@@ -115,13 +122,13 @@ export default function UserListPage() {
         id: 'type',
         header: 'Type',
         minWidth: 120,
-        cell: (u) => (u.type ? <Chip size="small" label={u.type} /> : '-'),
+        cell: u => (u.type ? <Chip size="small" label={u.type} /> : '-'),
       },
       {
         id: 'roles',
         header: 'Roles',
         minWidth: 220,
-        cell: (u) => (
+        cell: u => (
           <Typography variant="body2" noWrap>
             {u.permission?.role?.length ? u.permission.role.join(', ') : '-'}
           </Typography>
@@ -131,13 +138,13 @@ export default function UserListPage() {
         id: 'joinDate',
         header: 'Join Date',
         minWidth: 170,
-        cell: (u) => fmtDate(u.joinDate),
+        cell: u => fmtDate(u.joinDate),
       },
       {
         id: 'actions',
         header: 'Actions',
         minWidth: 120,
-        cell: (u) => (
+        cell: u => (
           <Button
             size="small"
             component={Link}
@@ -155,18 +162,26 @@ export default function UserListPage() {
   return (
     <Page
       title={isMeiliMode ? 'Users (Meili)' : 'Users'}
-      description={isMeiliMode ? '管理 User（Meili 搜索）' : '管理 User（普通列表 / 翻页 / 创建 / 编辑）'}
+      description={
+        isMeiliMode
+          ? '管理 User（Meili 搜索）'
+          : '管理 User（普通列表 / 翻页 / 创建 / 编辑）'
+      }
     >
       <Card>
         <CardContent>
-          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} alignItems="stretch">
+          <Stack
+            direction={{xs: 'column', sm: 'row'}}
+            spacing={1.5}
+            alignItems="stretch"
+          >
             <TextField
               size="small"
               label="Search"
               placeholder="q/email/slug/type..."
               value={q}
-              onChange={(e) => setQ(e.target.value)}
-              onKeyDown={(e) => {
+              onChange={e => setQ(e.target.value)}
+              onKeyDown={e => {
                 if (e.key === 'Enter') {
                   setPage(0);
                   setQuery(q.trim());
@@ -180,7 +195,7 @@ export default function UserListPage() {
                 setPage(0);
                 setQuery(q.trim());
               }}
-              sx={{ alignSelf: { xs: 'flex-end', sm: 'center' } }}
+              sx={{alignSelf: {xs: 'flex-end', sm: 'center'}}}
             >
               <SearchIcon />
             </IconButton>
@@ -189,16 +204,16 @@ export default function UserListPage() {
               startIcon={<AddIcon />}
               component={Link}
               to="/users/create"
-              sx={{ whiteSpace: 'nowrap' }}
+              sx={{whiteSpace: 'nowrap'}}
             >
               Create
             </Button>
           </Stack>
 
-          <Divider sx={{ my: 2 }} />
+          <Divider sx={{my: 2}} />
 
           {(isMeiliMode ? meiliQuery.isLoading : listQuery.isLoading) ? (
-            <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}>
+            <Box sx={{display: 'flex', justifyContent: 'center', py: 6}}>
               <CircularProgress size={24} />
             </Box>
           ) : (isMeiliMode ? meiliQuery.isError : listQuery.isError) ? (
@@ -209,12 +224,12 @@ export default function UserListPage() {
             <PaginatedTable<UserDTO>
               columns={columns}
               rows={users}
-              getRowId={(u) => u.unitId}
+              getRowId={u => u.unitId}
               count={total}
               page={page}
               rowsPerPage={limit}
-              onPageChange={(nextPage) => setPage(nextPage)}
-              onRowsPerPageChange={(next) => {
+              onPageChange={nextPage => setPage(nextPage)}
+              onRowsPerPageChange={next => {
                 setLimit(next);
                 setPage(0);
               }}
@@ -225,4 +240,3 @@ export default function UserListPage() {
     </Page>
   );
 }
-

@@ -15,8 +15,8 @@ import {
   Box,
   Typography,
 } from '@mui/material';
-import type { BookDTO, UserDTO } from '@package/contract';
-import { meiliUserApi } from '@package/api/meili/meili.api';
+import type {BookDTO, UserDTO} from '@package/contract';
+import {meiliUserApi} from '@package/api/meili/meili.api';
 
 type PublicUserLike = Partial<UserDTO>;
 
@@ -39,7 +39,7 @@ const useUserSearchQuery = (query: string) => {
     setLoading(true);
     const handle = setTimeout(async () => {
       try {
-        const { users } = await meiliUserApi.userSearch({
+        const {users} = await meiliUserApi.userSearch({
           q,
           limit: 10,
         });
@@ -56,13 +56,13 @@ const useUserSearchQuery = (query: string) => {
     };
   }, [query]);
 
-  return { options, loading };
+  return {options, loading};
 };
 
 const useUserSearch = () => {
   const [input, setInput] = React.useState('');
-  const { options, loading } = useUserSearchQuery(input);
-  return { input, setInput, options, loading };
+  const {options, loading} = useUserSearchQuery(input);
+  return {input, setInput, options, loading};
 };
 
 const UsersMultiSelect: React.FC<{
@@ -71,8 +71,8 @@ const UsersMultiSelect: React.FC<{
   onChange: (v: MentionUserOption[]) => void;
   placeholder?: string;
   disabled?: boolean;
-}> = ({ label, value, onChange, placeholder, disabled }) => {
-  const { input, setInput, options, loading } = useUserSearch();
+}> = ({label, value, onChange, placeholder, disabled}) => {
+  const {input, setInput, options, loading} = useUserSearch();
   return (
     <div>
       <Autocomplete
@@ -109,7 +109,7 @@ const UsersMultiSelect: React.FC<{
         renderOption={(props, option) => (
           <li {...props} key={option.unitId}>
             <div className="flex items-center gap-2">
-              <Avatar src={option.avatar} sx={{ width: 24, height: 24 }}>
+              <Avatar src={option.avatar} sx={{width: 24, height: 24}}>
                 {option.name?.[0] ?? '?'}
               </Avatar>
               <span>{option.name}</span>
@@ -119,7 +119,7 @@ const UsersMultiSelect: React.FC<{
         renderTags={(value, getTagProps) =>
           value.map((option, index) => (
             <Chip
-              {...getTagProps({ index })}
+              {...getTagProps({index})}
               key={option.unitId}
               avatar={<Avatar src={option.avatar}>{option.name?.[0]}</Avatar>}
               label={option.name}
@@ -132,14 +132,13 @@ const UsersMultiSelect: React.FC<{
   );
 };
 
-
 interface EditorMentionProps {
   value: MentionUserOption[];
   onChange: (v: MentionUserOption[]) => void;
   disabled?: boolean;
 }
 
-export function EditorMention({ value, onChange, disabled }: EditorMentionProps) {
+export function EditorMention({value, onChange, disabled}: EditorMentionProps) {
   return (
     <UsersMultiSelect
       label="Mention"
@@ -153,7 +152,7 @@ export function EditorMention({ value, onChange, disabled }: EditorMentionProps)
 export interface EditorMentionPickerProps {
   open: boolean;
   query: string;
-  anchorPosition: { top: number; left: number } | null;
+  anchorPosition: {top: number; left: number} | null;
   activeIndex: number;
   setActiveIndex: (idx: number) => void;
   onPick: (user: MentionUserOption) => void;
@@ -171,7 +170,7 @@ export function EditorMentionPicker({
   onClose,
   onOptionsChange,
 }: EditorMentionPickerProps) {
-  const { options, loading } = useUserSearchQuery(query);
+  const {options, loading} = useUserSearchQuery(query);
 
   React.useEffect(() => {
     onOptionsChange?.(options);
@@ -179,7 +178,7 @@ export function EditorMentionPicker({
 
   const virtualAnchorEl = React.useMemo(() => {
     if (!anchorPosition) return null;
-    const { left, top } = anchorPosition;
+    const {left, top} = anchorPosition;
     return {
       getBoundingClientRect: () => ({
         x: left,
@@ -202,11 +201,11 @@ export function EditorMentionPicker({
       open={isOpen}
       anchorEl={virtualAnchorEl as any}
       placement="bottom-start"
-      style={{ zIndex: 2000 }}
+      style={{zIndex: 2000}}
     >
-      <Paper elevation={8} sx={{ minWidth: 260, maxWidth: 420 }}>
+      <Paper elevation={8} sx={{minWidth: 260, maxWidth: 420}}>
         {loading ? (
-          <Box sx={{ p: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Box sx={{p: 1, display: 'flex', alignItems: 'center', gap: 1}}>
             <CircularProgress size={16} />
             <Typography variant="body2" color="text.secondary">
               Searching…
@@ -215,14 +214,14 @@ export function EditorMentionPicker({
         ) : null}
 
         {!loading && options.length === 0 ? (
-          <Box sx={{ p: 1 }}>
+          <Box sx={{p: 1}}>
             <Typography variant="body2" color="text.secondary">
               No matches
             </Typography>
           </Box>
         ) : null}
 
-        <List dense sx={{ maxHeight: 280, overflow: 'auto' }}>
+        <List dense sx={{maxHeight: 280, overflow: 'auto'}}>
           {options.map((option, idx) => (
             <ListItemButton
               key={option.unitId ?? option.name ?? idx}
@@ -231,7 +230,7 @@ export function EditorMentionPicker({
               onClick={() => onPick(option)}
             >
               <ListItemAvatar>
-                <Avatar src={option.avatar} sx={{ width: 24, height: 24 }}>
+                <Avatar src={option.avatar} sx={{width: 24, height: 24}}>
                   {option.name?.[0] ?? '?'}
                 </Avatar>
               </ListItemAvatar>
@@ -244,11 +243,11 @@ export function EditorMentionPicker({
         </List>
 
         {isOpen ? (
-          <Box sx={{ p: 0.5, display: 'flex', justifyContent: 'flex-end' }}>
+          <Box sx={{p: 0.5, display: 'flex', justifyContent: 'flex-end'}}>
             <Typography
               variant="caption"
               color="text.secondary"
-              sx={{ userSelect: 'none' }}
+              sx={{userSelect: 'none'}}
               onClick={onClose}
             >
               Esc to close

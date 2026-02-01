@@ -1,21 +1,21 @@
-import { Alert } from '@mui/material';
-import { useEffect, useImperativeHandle, useMemo, useState } from 'react';
+import {Alert} from '@mui/material';
+import {useEffect, useImperativeHandle, useMemo, useState} from 'react';
 
-import { BookSearchContainer } from '@/component/BookLib/BookSearch/BookSearch';
-import type { BookLibSortKey } from '@/component/Search/SearchFilter';
+import {BookSearchContainer} from '@/component/BookLib/BookSearch/BookSearch';
+import type {BookLibSortKey} from '@/component/Search/SearchFilter';
 import {
   UniversalPaginator,
   type UniversalPaginatorHandle,
 } from '@/component/Common/Navigation/Pagination';
-import type { SearchInfo } from '@/component/Search/searchParser';
-import { BookListViewContainer } from '@/component/BookLib/BookList/BookListView';
+import type {SearchInfo} from '@/component/Search/searchParser';
+import {BookListViewContainer} from '@/component/BookLib/BookList/BookListView';
 
-import React, { forwardRef, useRef } from 'react';
+import React, {forwardRef, useRef} from 'react';
 
-import { meiliQueries } from '@package/api/meili/meili.queries';
-import { useQueryClient, useQuery } from '@tanstack/react-query';
+import {meiliQueries} from '@package/api/meili/meili.queries';
+import {useQueryClient, useQuery} from '@tanstack/react-query';
 
-import type { BookDTO } from '@package/contract';
+import type {BookDTO} from '@package/contract';
 
 type Book = BookDTO;
 
@@ -68,7 +68,7 @@ export const BookLibShow = (
   if (error) {
     return (
       <div className="mx-auto max-w-7xl p-4">
-        <BookSearchContainer onSearch={() => { }} />
+        <BookSearchContainer onSearch={() => {}} />
         <Alert severity="error" className="my-4">
           {String(error)}
         </Alert>
@@ -131,15 +131,15 @@ export const BookLibContainer: React.FC = () => {
   });
   const [start, setStart] = useState<number>(0);
 
-  const { data, isLoading, error } = useQuery(
+  const {data, isLoading, error} = useQuery(
     meiliQueries.booksSearch({
       start,
       limit: EXTERNAL_PAGE_SIZE,
       keyword: currentQuery.keyword ?? '',
       tags: currentQuery.tags ?? [],
-      ...(currentQuery.nsfw ? { nsfw: true } : {}),
-      ...(currentQuery.isLicensed ? { isLicensed: true } : {}),
-      ...(currentQuery.textLength ? { textLength: currentQuery.textLength } : {}),
+      ...(currentQuery.nsfw ? {nsfw: true} : {}),
+      ...(currentQuery.isLicensed ? {isLicensed: true} : {}),
+      ...(currentQuery.textLength ? {textLength: currentQuery.textLength} : {}),
     }),
   );
 
@@ -155,9 +155,9 @@ export const BookLibContainer: React.FC = () => {
         limit: EXTERNAL_PAGE_SIZE,
         keyword: currentQuery.keyword ?? '',
         tags: currentQuery.tags ?? [],
-        ...(currentQuery.nsfw ? { nsfw: true } : {}),
+        ...(currentQuery.nsfw ? {nsfw: true} : {}),
         ...(currentQuery.textLength
-          ? { textLength: currentQuery.textLength }
+          ? {textLength: currentQuery.textLength}
           : {}),
       }),
     );

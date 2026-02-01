@@ -15,5 +15,3 @@ export const tokenKeys = {
   details: () => [...tokenKeys.all(), 'detail'] as const,
   detail: (id: string) => [...tokenKeys.details(), id] as const,
 } as const;
-
-

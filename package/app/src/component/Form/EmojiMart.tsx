@@ -1,7 +1,7 @@
-import React from "react";
+import React from 'react';
 
-import { useTheme, ClickAwayListener, Fade, Paper, Popper } from "@mui/material";
-import EmojiPicker, { Theme, type EmojiClickData } from "emoji-picker-react";
+import {useTheme, ClickAwayListener, Fade, Paper, Popper} from '@mui/material';
+import EmojiPicker, {Theme, type EmojiClickData} from 'emoji-picker-react';
 
 export interface EmojiMartPickerProps {
   open: boolean;
@@ -10,7 +10,7 @@ export interface EmojiMartPickerProps {
   zIndex?: number;
 }
 
-type Placement = "top" | "bottom";
+type Placement = 'top' | 'bottom';
 
 const DEFAULT_PICKER_HEIGHT_PX = 420;
 
@@ -22,10 +22,10 @@ export function EmojiMartPicker({
 }: EmojiMartPickerProps) {
   const theme = useTheme();
   const paperRef = React.useRef<HTMLDivElement | null>(null);
-  const [placement, setPlacement] = React.useState<Placement>("top");
+  const [placement, setPlacement] = React.useState<Placement>('top');
 
   const virtualAnchorEl = document.querySelector(
-    '.editor-toolbar .bx-smile'
+    '.editor-toolbar .bx-smile',
   ) as HTMLElement | null;
 
   const anchorPosition = virtualAnchorEl?.getBoundingClientRect();
@@ -38,13 +38,12 @@ export function EmojiMartPicker({
     const spaceAbove = Math.max(0, anchorPosition.top);
     const spaceBelow = Math.max(0, viewportHeight - anchorPosition.top);
     const pickerHeight =
-      paperRef.current?.getBoundingClientRect().height ?? DEFAULT_PICKER_HEIGHT_PX;
+      paperRef.current?.getBoundingClientRect().height ??
+      DEFAULT_PICKER_HEIGHT_PX;
 
     // Prefer top if it fits OR if it's at least as good as below.
     const nextPlacement: Placement =
-      spaceAbove >= pickerHeight || spaceAbove >= spaceBelow
-        ? "top"
-        : "bottom";
+      spaceAbove >= pickerHeight || spaceAbove >= spaceBelow ? 'top' : 'bottom';
     setPlacement(nextPlacement);
   }, [anchorPosition]);
 
@@ -60,8 +59,8 @@ export function EmojiMartPicker({
   React.useEffect(() => {
     if (!isOpen) return;
     const onResize = () => recomputePlacement();
-    window.addEventListener("resize", onResize);
-    return () => window.removeEventListener("resize", onResize);
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
   }, [isOpen, recomputePlacement]);
 
   return (
@@ -69,18 +68,18 @@ export function EmojiMartPicker({
       open={isOpen}
       anchorEl={virtualAnchorEl as any}
       placement={placement}
-      style={{ zIndex }}
+      style={{zIndex}}
       transition
       modifiers={[
         {
-          name: "offset",
+          name: 'offset',
           options: {
-            offset: placement === "top" ? [0, 8] : [0, -8],
+            offset: placement === 'top' ? [0, 8] : [0, -8],
           },
         },
       ]}
     >
-      {({ TransitionProps }) => (
+      {({TransitionProps}) => (
         <Fade
           {...TransitionProps}
           timeout={160}
@@ -88,14 +87,16 @@ export function EmojiMartPicker({
         >
           <div>
             <ClickAwayListener onClickAway={onClose}>
-              <Paper ref={paperRef} elevation={10} sx={{ overflow: "hidden" }}>
+              <Paper ref={paperRef} elevation={10} sx={{overflow: 'hidden'}}>
                 <EmojiPicker
-                  theme={theme.palette.mode === "dark" ? Theme.DARK : Theme.LIGHT}
-                  previewConfig={{ showPreview: false }}
+                  theme={
+                    theme.palette.mode === 'dark' ? Theme.DARK : Theme.LIGHT
+                  }
+                  previewConfig={{showPreview: false}}
                   height={380}
                   width={340}
                   onEmojiClick={(emoji: EmojiClickData) => {
-                    const native = (emoji?.emoji ?? "").toString();
+                    const native = (emoji?.emoji ?? '').toString();
                     if (!native) return;
                     onPick(native);
                   }}

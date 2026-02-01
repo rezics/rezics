@@ -5,7 +5,8 @@ export const toInt = (v: unknown, fallback: number): number => {
   return Number.isFinite(n) && n > 0 ? n : fallback;
 };
 
-export const safeString = (v: unknown, fallback = ""): string => v === undefined || v === null ? fallback : String(v);
+export const safeString = (v: unknown, fallback = ''): string =>
+  v === undefined || v === null ? fallback : String(v);
 
 // 与 toInt 不同：允许 0，且下限为 0
 export const toNonNegativeInt = (v: unknown, fallback: number): number => {
@@ -24,7 +25,7 @@ export function paginate<T>(list: T[], page: number, limit: number) {
   const totalPages = Math.max(1, Math.ceil(totalItems / Math.max(1, limit)));
   const start = (page - 1) * limit;
   const items = list.slice(start, start + limit);
-  return { items, page, totalItems, totalPages };
+  return {items, page, totalItems, totalPages};
 }
 
 // 新的 offset + limit 规范
@@ -33,7 +34,7 @@ export function paginateOffset<T>(list: T[], offset: number, limit: number) {
   const safeOffset = Math.max(0, Number.isFinite(offset) ? offset : 0);
   const safeLimit = Math.max(0, Number.isFinite(limit) ? limit : 0);
   const items = list.slice(safeOffset, safeOffset + safeLimit);
-  return { items, offset: safeOffset, totalItems };
+  return {items, offset: safeOffset, totalItems};
 }
 
 // 从一组候选里“抽样”N 个（无重复、数量不足则全部返回）

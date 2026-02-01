@@ -1,10 +1,10 @@
-import { useQuery } from '@tanstack/react-query';
-import type { CreateBookInput, BookDTO } from '@package/contract';
-import { bookQueries } from '@package/api/book/book';
-import { AccentBarWithTextShow } from '@/component/Common/Navigation/AccentBar';
-import { BookMetadataEditor } from '@/component/Book/Metadata/BookMetadataEditor';
+import {useQuery} from '@tanstack/react-query';
+import type {CreateBookInput, BookDTO} from '@package/contract';
+import {bookQueries} from '@package/api/book/book';
+import {AccentBarWithTextShow} from '@/component/Common/Navigation/AccentBar';
+import {BookMetadataEditor} from '@/component/Book/Metadata/BookMetadataEditor';
 import React from 'react';
-import { useTranslation } from 'react-i18next';
+import {useTranslation} from 'react-i18next';
 import {
   Button,
   Dialog,
@@ -14,13 +14,16 @@ import {
   Typography,
   Alert,
 } from '@mui/material';
-import { useMatchRoute, useNavigate } from '@tanstack/react-router';
+import {useMatchRoute, useNavigate} from '@tanstack/react-router';
 import EasyEditor from '@component/Form/EasyEditor.tsx';
-import { useCreateBookMutation, useUpdateBookMutation } from '@package/api/book/book';
-import { type UpdateBookInput } from '@package/contract';
-import { useEffect } from 'react';
-import { BookExtraEditor } from '@/component/Book/Metadata/BookExtraEditor';
-import { RouterLink } from '@package/ui/Navigation/RouterLink.tsx';
+import {
+  useCreateBookMutation,
+  useUpdateBookMutation,
+} from '@package/api/book/book';
+import {type UpdateBookInput} from '@package/contract';
+import {useEffect} from 'react';
+import {BookExtraEditor} from '@/component/Book/Metadata/BookExtraEditor';
+import {RouterLink} from '@package/ui/Navigation/RouterLink.tsx';
 
 function validatePublishURL(publishURL: string[]) {
   return publishURL.every(url => url.startsWith('https://'));
@@ -43,7 +46,10 @@ const updateBookDialog = (
           <Typography variant="body1">{text?.message}</Typography>
           <Typography variant="body1">
             {text?.showBookLink && (
-              <RouterLink to="/book/$bookId" params={{ bookId: text.bookId as string }}>
+              <RouterLink
+                to="/book/$bookId"
+                params={{bookId: text.bookId as string}}
+              >
                 {t('page.book_edit.info.dialog.view_book')}
               </RouterLink>
             )}
@@ -77,12 +83,12 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
   newBook = false,
   pageTitle,
 }) => {
-  const { t } = useTranslation();
+  const {t} = useTranslation();
   const navigate = useNavigate();
   const matchRoute = useMatchRoute();
-  const editParams = matchRoute({ to: '/book/$bookId/edit', fuzzy: false });
+  const editParams = matchRoute({to: '/book/$bookId/edit', fuzzy: false});
   const bookId = !newBook && editParams ? editParams.bookId : undefined;
-  const { data, isLoading, error } = useQuery({
+  const {data, isLoading, error} = useQuery({
     ...bookQueries.detail(bookId ?? ''),
     enabled: !newBook && !!bookId,
   });
@@ -203,7 +209,7 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
               variant="outlined"
               color="primary"
               onClick={() => {
-                navigate({ to: `/book/${bookId}/` });
+                navigate({to: `/book/${bookId}/`});
               }}
             >
               {t('common.back')}
@@ -229,7 +235,7 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
           <BookMetadataEditor
             value={metadataState}
             onChange={value => {
-              setMetadataState(prev => ({ ...prev, ...value }));
+              setMetadataState(prev => ({...prev, ...value}));
             }}
           />
         </div>
@@ -242,7 +248,7 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
         <EasyEditor
           value={metadataState?.description ?? ''}
           onChange={value => {
-            setMetadataState(prev => ({ ...prev, description: value }));
+            setMetadataState(prev => ({...prev, description: value}));
           }}
         />
       </div>
@@ -255,7 +261,7 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
           <BookExtraEditor
             value={metadataState.extra}
             onChange={value => {
-              setMetadataState(prev => ({ ...prev, extra: value }));
+              setMetadataState(prev => ({...prev, extra: value}));
             }}
           />
         </div>

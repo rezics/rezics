@@ -8,4 +8,3 @@ const ReviewEditPageContainer = lazyRouteComponent(
 export const Route = createFileRoute('/_mainLayout/review/$reviewId/edit')({
   component: ReviewEditPageContainer,
 });
-

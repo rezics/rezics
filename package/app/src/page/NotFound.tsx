@@ -1,11 +1,16 @@
-import { Place } from '@mui/icons-material';
+import {Place} from '@mui/icons-material';
 import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
 import CardActions from '@mui/material/CardActions';
 import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
 import React from 'react';
-import { useNavigate, useRouterState, useRouter, useCanGoBack } from '@tanstack/react-router';
+import {
+  useNavigate,
+  useRouterState,
+  useRouter,
+  useCanGoBack,
+} from '@tanstack/react-router';
 
 export type NotFoundShowProps = {
   path: string;
@@ -29,7 +34,7 @@ export const NotFoundShow: React.FC<NotFoundShowProps> = ({
           </div>
         </CardContent>
         <CardActions className="flex flex-row justify-between">
-          {canGoBack ? (<Button onClick={onBack}>Back</Button>) : null}
+          {canGoBack ? <Button onClick={onBack}>Back</Button> : null}
           <Button onClick={onHome}>Home</Button>
         </CardActions>
       </Card>
@@ -51,7 +56,7 @@ export const NotFoundContainer: React.FC<NotFoundContainerProps> = () => {
   };
 
   const handleHome = () => {
-    navigate({ to: '/' });
+    navigate({to: '/'});
   };
 
   return <NotFoundShow path={path} onBack={handleBack} onHome={handleHome} />;

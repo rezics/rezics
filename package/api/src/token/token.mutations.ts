@@ -111,5 +111,3 @@ export const tokenMutations = {
   useUpdate: useUpdateTokenMutation,
   useRevoke: useRevokeTokenMutation,
 };
-
-

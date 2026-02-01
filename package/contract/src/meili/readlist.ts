@@ -50,5 +50,3 @@ export interface ReadlistSearchResult {
   /** Final query string actually sent to Meilisearch. */
   query: string;
 }
-
-

@@ -1,5 +1,5 @@
 // src/store/scrollTabStore.ts
-import { create } from "zustand";
+import {create} from 'zustand';
 
 /** 每个路由要保存的数据结构 */
 interface RouteData {
@@ -23,7 +23,7 @@ export const routeStore = create<RouteStore>((set, get) => ({
   routeMap: {},
 
   setRouteData: (routeKey, data) =>
-    set((state) => ({
+    set(state => ({
       routeMap: {
         ...state.routeMap,
         [routeKey]: {
@@ -33,13 +33,13 @@ export const routeStore = create<RouteStore>((set, get) => ({
       },
     })),
 
-  clearRouteData: (routeKey) =>
-    set((state) => {
-      const { [routeKey]: _, ...rest } = state.routeMap;
-      return { routeMap: rest };
+  clearRouteData: routeKey =>
+    set(state => {
+      const {[routeKey]: _, ...rest} = state.routeMap;
+      return {routeMap: rest};
     }),
 
-  getRouteData: (routeKey) => {
+  getRouteData: routeKey => {
     return get().routeMap[routeKey];
   },
 }));

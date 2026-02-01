@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import {useState, useEffect} from 'react';
 import type React from 'react';
-import { useTheme } from '@mui/material/styles';
+import {useTheme} from '@mui/material/styles';
 import {
   Stack,
   Typography,
@@ -10,15 +10,15 @@ import {
   ListItemButton,
   Skeleton,
 } from '@mui/material';
-import { RouterLink } from '@package/ui/Navigation/RouterLink.tsx';
+import {RouterLink} from '@package/ui/Navigation/RouterLink.tsx';
 import NotificationsRoundedIcon from '@mui/icons-material/NotificationsRounded';
-import { echoKvGetQuery } from '@package/api/echokv/echokv';
-import { useQuery } from '@tanstack/react-query';
-import { useAlertStore } from '@/global/windowAlertStore';
-import { parseEchoKVResponse } from '@package/api/echokv/util';
-import type { Theme } from '@mui/material/styles';
-import { useTranslation } from 'react-i18next';
-import type { TFunction } from 'i18next';
+import {echoKvGetQuery} from '@package/api/echokv/echokv';
+import {useQuery} from '@tanstack/react-query';
+import {useAlertStore} from '@/global/windowAlertStore';
+import {parseEchoKVResponse} from '@package/api/echokv/util';
+import type {Theme} from '@mui/material/styles';
+import {useTranslation} from 'react-i18next';
+import type {TFunction} from 'i18next';
 
 type Notice = {
   id: string;
@@ -34,14 +34,15 @@ function formatRelativeWithT(t: TFunction, dateIso: string): string {
   const ms = Date.now() - new Date(dateIso).getTime();
   const h = Math.floor(ms / 36e5);
   if (h < 1) return t('page.home.noticeboard.time.just_now');
-  if (h < 24) return t('page.home.noticeboard.time.hours_ago_other', { count: h });
+  if (h < 24)
+    return t('page.home.noticeboard.time.hours_ago_other', {count: h});
   const d = Math.floor(h / 24);
-  if (d < 7) return t('page.home.noticeboard.time.days_ago_other', { count: d });
+  if (d < 7) return t('page.home.noticeboard.time.days_ago_other', {count: d});
   const w = Math.floor(d / 7);
-  return t('page.home.noticeboard.time.weeks_ago_other', { count: w });
+  return t('page.home.noticeboard.time.weeks_ago_other', {count: w});
 }
 
-function TagBadge({ tag, t }: { tag?: Notice['tag']; t: TFunction }) {
+function TagBadge({tag, t}: {tag?: Notice['tag']; t: TFunction}) {
   const theme = useTheme();
   const colorMap: Record<
     string,
@@ -156,14 +157,14 @@ function NoticeBoardItem({
           direction="row"
           spacing={1.5}
           alignItems="flex-start"
-          sx={{ width: '100%' }}
+          sx={{width: '100%'}}
         >
           <Chip
             label={item.pin ? t('common.pinned') : t('common.new')}
             color={item.pin ? 'warning' : 'default'}
             size="small"
             variant={item.pin ? 'filled' : 'outlined'}
-            sx={{ mt: 0.25 }}
+            sx={{mt: 0.25}}
           />
           <div className="min-w-0 flex-1">
             <Stack direction="row" spacing={1} alignItems="center">
@@ -199,7 +200,7 @@ function NoticeBoardItem({
             <Typography
               variant="caption"
               color="text.disabled"
-              sx={{ mt: 0.5, display: 'block' }}
+              sx={{mt: 0.5, display: 'block'}}
             >
               {formatRelativeWithT(t, item.date)}
             </Typography>
@@ -213,7 +214,7 @@ function NoticeBoardItem({
               transition: theme.transitions.create('opacity', {
                 duration: theme.transitions.duration.shortest,
               }),
-              '.MuiListItemButton-root:hover &': { opacity: 1 },
+              '.MuiListItemButton-root:hover &': {opacity: 1},
             }}
             className={item.link ? 'visible' : 'invisible'}
           >
@@ -227,10 +228,10 @@ function NoticeBoardItem({
 
 export const NoticeBoard: React.FC = () => {
   const theme = useTheme();
-  const { show: showAlert } = useAlertStore();
-  const { t } = useTranslation();
+  const {show: showAlert} = useAlertStore();
+  const {t} = useTranslation();
   const [notices, setNotices] = useState<Notice[]>([]);
-  const { data, isLoading, error } = useQuery(echoKvGetQuery('home_notice'));
+  const {data, isLoading, error} = useQuery(echoKvGetQuery('home_notice'));
 
   useEffect(() => {
     try {

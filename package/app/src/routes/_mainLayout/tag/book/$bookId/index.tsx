@@ -8,4 +8,3 @@ const TagByBookPage = lazyRouteComponent(
 export const Route = createFileRoute('/_mainLayout/tag/book/$bookId/')({
   component: TagByBookPage,
 });
-

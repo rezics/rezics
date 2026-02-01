@@ -1,19 +1,19 @@
 import Alert from '@mui/material/Alert';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
-import { Dialog, DialogContent } from '@mui/material';
-import { useNavigate, useRouterState } from '@tanstack/react-router';
-import { type FC, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import {Dialog, DialogContent} from '@mui/material';
+import {useNavigate, useRouterState} from '@tanstack/react-router';
+import {type FC, useState} from 'react';
+import {useTranslation} from 'react-i18next';
 
-import { PasswordField } from '@/component/Form/PasswordField';
-import { RouterLink } from '@package/ui/Navigation/RouterLink.tsx';
-import { useUserStore } from '@/global/userStore.ts';
-import { login } from './lib/handler.ts';
-import { Layout } from './lib/Layout.tsx';
-import { ModalLayout } from './lib/ModalLayout.tsx';
-import { validateEmail } from './lib/validate.ts';
-import { TextButton } from '@/component/Common/UI/Button/TextButton.tsx';
+import {PasswordField} from '@/component/Form/PasswordField';
+import {RouterLink} from '@package/ui/Navigation/RouterLink.tsx';
+import {useUserStore} from '@/global/userStore.ts';
+import {login} from './lib/handler.ts';
+import {Layout} from './lib/Layout.tsx';
+import {ModalLayout} from './lib/ModalLayout.tsx';
+import {validateEmail} from './lib/validate.ts';
+import {TextButton} from '@/component/Common/UI/Button/TextButton.tsx';
 
 interface LoginData {
   email: string;
@@ -36,16 +36,16 @@ export const LoginPage: FC<LoginPageProps> = ({
   onClose,
   onRegisterClick,
 }) => {
-  const { t } = useTranslation();
+  const {t} = useTranslation();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>();
   const [data, setData] = useState<LoginData>({
     email: '',
     password: '',
   });
-  const { setUser } = useUserStore();
+  const {setUser} = useUserStore();
   const navigate = useNavigate();
-  const pathname = useRouterState({ select: s => s.location.pathname });
+  const pathname = useRouterState({select: s => s.location.pathname});
 
   const handleSubmit = async () => {
     let hasError = false;
@@ -54,7 +54,7 @@ export const LoginPage: FC<LoginPageProps> = ({
 
     try {
       console.log('try to login');
-      let validateData: { valid: boolean; error: string | null } = {
+      let validateData: {valid: boolean; error: string | null} = {
         valid: false,
         error: null,
       };
@@ -74,7 +74,7 @@ export const LoginPage: FC<LoginPageProps> = ({
     if (!hasError) {
       onClose?.();
       if (pathname === '/login') {
-        navigate({ to: '/' });
+        navigate({to: '/'});
       }
     }
   };
@@ -83,7 +83,7 @@ export const LoginPage: FC<LoginPageProps> = ({
     if (onRegisterClick) {
       onRegisterClick();
     } else {
-      navigate({ to: '/register' });
+      navigate({to: '/register'});
       console.log('handleRegisterClick');
       onClose?.();
     }
@@ -102,13 +102,13 @@ export const LoginPage: FC<LoginPageProps> = ({
         required
         value={data?.email}
         onChange={(event: any) => {
-          setData({ ...data, email: event.target.value });
+          setData({...data, email: event.target.value});
         }}
       />
       <PasswordField
         value={data?.password}
         setValue={(value: string) => {
-          setData({ ...data, password: value });
+          setData({...data, password: value});
         }}
       />
       <div>

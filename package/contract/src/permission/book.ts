@@ -24,4 +24,3 @@ export function hasPermissionToDeleteBook(
 ): boolean {
   return hasPermissionToUpdateBook(user, undefined, unit);
 }
-

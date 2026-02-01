@@ -1,10 +1,10 @@
-import { useState } from 'react';
-import type { FC } from 'react';
-import { UserProfilePage } from './UserProfilePage';
-import { UserEditPage } from './UserEditPage';
-import type { UserDTO } from '@package/contract';
-import { useUserStore } from '@/global/userStore';
-import { userRoute } from '@/router';
+import {useState} from 'react';
+import type {FC} from 'react';
+import {UserProfilePage} from './UserProfilePage';
+import {UserEditPage} from './UserEditPage';
+import type {UserDTO} from '@package/contract';
+import {useUserStore} from '@/global/userStore';
+import {userRoute} from '@/router';
 
 export interface UserPageProps {
   isCurrentUser?: boolean;
@@ -14,12 +14,10 @@ export interface UserPageProps {
  * UserPage - 用户页面容器
  * 根据状态显示用户资料或编辑表单
  */
-export const UserPage: FC<UserPageProps> = ({
-  isCurrentUser = false,
-}) => {
-  let routeMatch
+export const UserPage: FC<UserPageProps> = ({isCurrentUser = false}) => {
+  let routeMatch;
   if (!isCurrentUser) {
-    routeMatch = userRoute.useMatch({ shouldThrow: true });
+    routeMatch = userRoute.useMatch({shouldThrow: true});
   }
   const unitId = routeMatch?.params.unitId;
   const [isEditing, setIsEditing] = useState(false);

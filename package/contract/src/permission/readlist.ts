@@ -30,5 +30,3 @@ export function hasPermissionToDeleteReadlist(
 ): boolean {
   return hasPermissionToUpdateReadlist(user, unit);
 }
-
-

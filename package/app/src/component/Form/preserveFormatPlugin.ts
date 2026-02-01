@@ -1,7 +1,7 @@
-import * as Array from "effect/Array";
-import { pipe } from "effect/Function";
-import * as Option from "effect/Option";
-import type MarkdownIt from "markdown-it";
+import * as Array from 'effect/Array';
+import {pipe} from 'effect/Function';
+import * as Option from 'effect/Option';
+import type MarkdownIt from 'markdown-it';
 
 // --- 插件选项接口 ---
 export interface PreserveFormatOptions {
@@ -45,14 +45,14 @@ const multipleEmptyLines = (state: any): void => {
     const transformMatch = (match: string): string => {
       const total = match.length;
       const brCount = total - 1;
-      return "\n\n" + "&nbsp;\n".repeat(brCount);
+      return '\n\n' + '&nbsp;\n'.repeat(brCount);
     };
 
     return src.replace(/\n{2,}/g, transformMatch);
   };
 
   const src = state.src;
-  if (!src.includes("\n\n")) return;
+  if (!src.includes('\n\n')) return;
 
   state.src = processEmptyLines(src);
 };
@@ -70,21 +70,22 @@ interface Token {
 }
 
 // 检查是否为需要处理的文本token
-const isTextTokenWithSpaces = (token: Token): boolean => token.type === "text" && token.content.includes("  ");
+const isTextTokenWithSpaces = (token: Token): boolean =>
+  token.type === 'text' && token.content.includes('  ');
 
 // 创建HTML内联token
 const createHtmlInlineToken = (
   content: string,
   TokenConstructor: any,
 ): Token => {
-  const token = new TokenConstructor("html_inline", "", 0);
+  const token = new TokenConstructor('html_inline', '', 0);
   token.content = content;
   return token;
 };
 
 // 创建文本token
 const createTextToken = (content: string, TokenConstructor: any): Token => {
-  const token = new TokenConstructor("text", "", 0);
+  const token = new TokenConstructor('text', '', 0);
   token.content = content;
   return token;
 };
@@ -96,7 +97,7 @@ const processTextPart = (
 ): Option.Option<Token> => {
   if (part.match(/ {2,}/)) {
     // 连续空格，转换为&nbsp;
-    const content = "&nbsp;".repeat(part.length);
+    const content = '&nbsp;'.repeat(part.length);
     return Option.some(createHtmlInlineToken(content, TokenConstructor));
   }
 
@@ -143,12 +144,12 @@ const processInlineTokenChildren = (
 
 // 处理单个块级token
 const processBlockToken = (blockToken: Token, TokenConstructor: any): Token => {
-  if (blockToken.type === "inline" && blockToken.children) {
+  if (blockToken.type === 'inline' && blockToken.children) {
     const newChildren = processInlineTokenChildren(
       blockToken.children,
       TokenConstructor,
     );
-    return { ...blockToken, children: newChildren };
+    return {...blockToken, children: newChildren};
   }
   return blockToken;
 };
@@ -183,22 +184,18 @@ export const preserveFormattingPlugin = (
   const defaults: Required<PreserveFormatOptions> = {
     preserveSpaces: true,
     preserveEmptyLines: true,
-    emptyLineRender: "<p class=\"preserved-empty-line\">&nbsp;</p>",
+    emptyLineRender: '<p class="preserved-empty-line">&nbsp;</p>',
   };
 
-  const effectiveOptions = { ...defaults, ...options };
+  const effectiveOptions = {...defaults, ...options};
 
   // 注册空行处理规则
   if (effectiveOptions.preserveEmptyLines) {
-    md.core.ruler.before(
-      "normalize",
-      "line_break_to_br",
-      multipleEmptyLines,
-    );
+    md.core.ruler.before('normalize', 'line_break_to_br', multipleEmptyLines);
   }
 
   // 注册空格处理规则
   if (effectiveOptions.preserveSpaces) {
-    md.core.ruler.push("preserve_spaces_core", preserveSpacesCore);
+    md.core.ruler.push('preserve_spaces_core', preserveSpacesCore);
   }
 };

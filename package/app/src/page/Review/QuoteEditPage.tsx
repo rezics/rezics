@@ -1,34 +1,34 @@
-import { Button, TextField } from '@mui/material';
+import {Button, TextField} from '@mui/material';
 import EasyEditor from '@/component/Form/EasyEditor';
-import type { UnitFormData } from '@package/api/unit/unit.types';
-import { useEffect, useMemo, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { unitQueries } from '@package/api/unit/unit.queries';
-import { useUpdateUnitMutation } from '@package/api/unit/unit.mutations';
-import { useAlertStore } from '@/global/windowAlertStore';
-import { useTranslation } from 'react-i18next';
-import { quoteEditRoute } from '@/router';
+import type {UnitFormData} from '@package/api/unit/unit.types';
+import {useEffect, useMemo, useState} from 'react';
+import {useQuery} from '@tanstack/react-query';
+import {unitQueries} from '@package/api/unit/unit.queries';
+import {useUpdateUnitMutation} from '@package/api/unit/unit.mutations';
+import {useAlertStore} from '@/global/windowAlertStore';
+import {useTranslation} from 'react-i18next';
+import {quoteEditRoute} from '@/router';
 interface QuoteEditPageProps {
   unitId: string;
   data: UnitFormData;
   setData: (data: UnitFormData) => void;
 }
 
-export function QuoteEditPage({ unitId, data, setData }: QuoteEditPageProps) {
-  const { t } = useTranslation();
-  const { show } = useAlertStore();
+export function QuoteEditPage({unitId, data, setData}: QuoteEditPageProps) {
+  const {t} = useTranslation();
+  const {show} = useAlertStore();
   const source = useMemo(
     () => (data.metadata as any)?.source || '',
     [data.metadata],
   );
 
-  const { mutate, isPending } = useUpdateUnitMutation({
+  const {mutate, isPending} = useUpdateUnitMutation({
     onSuccess: data => {
       show(t('quote.updated_success'));
       console.log('update quote success', data);
     },
     onError: error => {
-      show(t('quote.messages.update_failed', { error: String(error) }));
+      show(t('quote.messages.update_failed', {error: String(error)}));
       console.error('update quote failed', error);
     },
   });
@@ -52,7 +52,7 @@ export function QuoteEditPage({ unitId, data, setData }: QuoteEditPageProps) {
           label={t('quote.form.title')}
           variant="standard"
           value={data.title || ''}
-          onChange={e => setData({ ...data, title: e.target.value })}
+          onChange={e => setData({...data, title: e.target.value})}
         />
       </div>
 
@@ -65,7 +65,7 @@ export function QuoteEditPage({ unitId, data, setData }: QuoteEditPageProps) {
           onChange={e =>
             setData({
               ...data,
-              metadata: { ...(data.metadata || {}), source: e.target.value },
+              metadata: {...(data.metadata || {}), source: e.target.value},
             })
           }
         />
@@ -74,7 +74,7 @@ export function QuoteEditPage({ unitId, data, setData }: QuoteEditPageProps) {
       <div className="flex-1 min-h-[300px]">
         <EasyEditor
           value={data.content || ''}
-          onChange={value => setData({ ...data, content: value })}
+          onChange={value => setData({...data, content: value})}
         />
       </div>
       <Button variant="contained" color="primary" onClick={handleSave}>
@@ -85,7 +85,7 @@ export function QuoteEditPage({ unitId, data, setData }: QuoteEditPageProps) {
 }
 
 export function QuoteEditPageContainer() {
-  const { unitId } = quoteEditRoute.useParams();
+  const {unitId} = quoteEditRoute.useParams();
   const {
     data: unitData,
     isLoading,

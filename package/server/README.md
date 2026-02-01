@@ -15,6 +15,7 @@ bun run index.ts
 This project was created using `bun init` in bun v1.3.0. [Bun](https://bun.com) is a fast all-in-one JavaScript runtime.
 
 # Library.Book.Backend
+
 Library.Book.Backend
 
 ```
@@ -34,7 +35,7 @@ bun run ./prisma/seed/utils/passwordReset.ts
 bunx prisma migrate reset
 bun run prisma:seed:echokv
 
-# Linux 
+# Linux
 npx prisma generate
 ```
 
@@ -45,7 +46,6 @@ sudo apt install postgresql postgresql-contrib
 sudo service postgresql start
 
 ```
-
 
 ```sh
 sudo systemctl restart rezbooklib.service
@@ -62,12 +62,12 @@ encore daemon restart
 ## Bun 缓存清理
 
 ```powershell
-Remove-Item "$env:USERPROFILE\.bun\install\cache" -Recurse -Force  
+Remove-Item "$env:USERPROFILE\.bun\install\cache" -Recurse -Force
 ```
 
 ## PostgreSQL
 
-``` powershell
+```powershell
 pg_ctl start
 # 启动
 psql -U postgres

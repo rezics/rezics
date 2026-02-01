@@ -1,16 +1,13 @@
-import EasyMDE from "easymde";
-import React, { lazy, useCallback, useEffect, useRef, useState } from "react";
-import "easymde/dist/easymde.min.css";
-import MarkdownIt from "markdown-it";
+import EasyMDE from 'easymde';
+import React, {lazy, useCallback, useEffect, useRef, useState} from 'react';
+import 'easymde/dist/easymde.min.css';
+import MarkdownIt from 'markdown-it';
 
-import { preserveFormattingPlugin } from "./preserveFormatPlugin";
-import {
-  EditorMentionPicker,
-  type MentionUserOption,
-} from "./EditorMention";
+import {preserveFormattingPlugin} from './preserveFormatPlugin';
+import {EditorMentionPicker, type MentionUserOption} from './EditorMention';
 
 const EmojiMartPicker = lazy(() =>
-  import("./EmojiMart").then(m => ({ default: m.EmojiMartPicker }))
+  import('./EmojiMart').then(m => ({default: m.EmojiMartPicker})),
 );
 
 interface EasyEditorProps {
@@ -19,7 +16,7 @@ interface EasyEditorProps {
   initialValue?: string;
 }
 
-type CMPos = { line: number; ch: number };
+type CMPos = {line: number; ch: number};
 
 const EasyEditor: React.FC<EasyEditorProps> = ({
   value,
@@ -32,7 +29,7 @@ const EasyEditor: React.FC<EasyEditorProps> = ({
   onChangeRef.current = onChange;
 
   const [mentionOpen, setMentionOpen] = useState(false);
-  const [mentionQuery, setMentionQuery] = useState("");
+  const [mentionQuery, setMentionQuery] = useState('');
   const [mentionAnchorPosition, setMentionAnchorPosition] = useState<{
     top: number;
     left: number;
@@ -40,9 +37,9 @@ const EasyEditor: React.FC<EasyEditorProps> = ({
   const [mentionActiveIndex, setMentionActiveIndex] = useState(0);
 
   const mentionOpenRef = useRef(false);
-  const mentionQueryRef = useRef("");
+  const mentionQueryRef = useRef('');
   const mentionFromRef = useRef<CMPos | null>(null);
-  const mentionAnchorPositionRef = useRef<{ top: number; left: number } | null>(
+  const mentionAnchorPositionRef = useRef<{top: number; left: number} | null>(
     null,
   );
   const mentionActiveIndexRef = useRef(0);
@@ -65,50 +62,50 @@ const EasyEditor: React.FC<EasyEditorProps> = ({
 
   const closeMention = useCallback(() => {
     mentionOpenRef.current = false;
-    mentionQueryRef.current = "";
+    mentionQueryRef.current = '';
     mentionFromRef.current = null;
     mentionAnchorPositionRef.current = null;
     mentionActiveIndexRef.current = 0;
     mentionOptionsRef.current = [];
 
     setMentionOpen(false);
-    setMentionQuery("");
+    setMentionQuery('');
     setMentionAnchorPosition(null);
     setMentionActiveIndex(0);
   }, []);
 
-  const pickEmoji = useCallback(
-    (nativeEmoji: string) => {
-      const cm = easyMDEInstance.current?.codemirror as any;
-      if (!cm) return;
-
-      if (cm.somethingSelected && cm.somethingSelected()) {
-        cm.replaceSelection(nativeEmoji, "around");
-      } else {
-        const cursor = cm.getCursor() as CMPos;
-        cm.replaceRange(nativeEmoji, cursor, cursor, "+emoji");
-      }
-      cm.focus();
-      // closeEmoji();
-    },
-    [],
-  );
-
-  const pickMention = useCallback((user: MentionUserOption) => {
+  const pickEmoji = useCallback((nativeEmoji: string) => {
     const cm = easyMDEInstance.current?.codemirror as any;
-    const from = mentionFromRef.current;
-    if (!cm || !from) return;
+    if (!cm) return;
 
-    const cursor = cm.getCursor() as CMPos;
-    const display = (user.name ?? user.unitId ?? "").trim();
-    if (!display) return;
-
-    const insertText = `@${display} `;
-    mentionSuppressNextRefreshRef.current = true;
-    cm.replaceRange(insertText, from, cursor, "+mention");
+    if (cm.somethingSelected && cm.somethingSelected()) {
+      cm.replaceSelection(nativeEmoji, 'around');
+    } else {
+      const cursor = cm.getCursor() as CMPos;
+      cm.replaceRange(nativeEmoji, cursor, cursor, '+emoji');
+    }
     cm.focus();
-    closeMention();
-  }, [closeMention]);
+    // closeEmoji();
+  }, []);
+
+  const pickMention = useCallback(
+    (user: MentionUserOption) => {
+      const cm = easyMDEInstance.current?.codemirror as any;
+      const from = mentionFromRef.current;
+      if (!cm || !from) return;
+
+      const cursor = cm.getCursor() as CMPos;
+      const display = (user.name ?? user.unitId ?? '').trim();
+      if (!display) return;
+
+      const insertText = `@${display} `;
+      mentionSuppressNextRefreshRef.current = true;
+      cm.replaceRange(insertText, from, cursor, '+mention');
+      cm.focus();
+      closeMention();
+    },
+    [closeMention],
+  );
 
   // console.log("initialValue", initialValue);
 
@@ -126,109 +123,105 @@ const EasyEditor: React.FC<EasyEditorProps> = ({
 
       easyMDEInstance.current = new EasyMDE({
         element: textareaRef.current,
-        initialValue: value || "",
+        initialValue: value || '',
         spellChecker: false,
         sideBySideFullscreen: false,
         // preview
-        previewClass: [
-          "editor-preview",
-          "ics-md-preview",
-          "markdown-body",
-        ],
-        previewRender: (plainText) => {
+        previewClass: ['editor-preview', 'ics-md-preview', 'markdown-body'],
+        previewRender: plainText => {
           return md.render(plainText);
         },
         toolbar: [
           {
-            name: "bold",
+            name: 'bold',
             action: EasyMDE.toggleBold,
-            className: "bx bx-bold",
-            title: "Bold",
+            className: 'bx bx-bold',
+            title: 'Bold',
           },
           {
-            name: "italic",
+            name: 'italic',
             action: EasyMDE.toggleItalic,
-            className: "bx bx-italic",
-            title: "Italic",
+            className: 'bx bx-italic',
+            title: 'Italic',
           },
           {
-            name: "heading",
+            name: 'heading',
             action: EasyMDE.toggleHeadingSmaller,
-            className: "bx bx-heading",
-            title: "Heading",
+            className: 'bx bx-heading',
+            title: 'Heading',
           },
-          "|",
+          '|',
           {
-            name: "quote",
+            name: 'quote',
             action: EasyMDE.toggleBlockquote,
-            className: "bx bxs-quote-alt-right",
-            title: "Quote",
+            className: 'bx bxs-quote-alt-right',
+            title: 'Quote',
           },
           {
-            name: "unordered-list",
+            name: 'unordered-list',
             action: EasyMDE.toggleUnorderedList,
-            className: "bx bx-list-ul",
-            title: "Generic List",
+            className: 'bx bx-list-ul',
+            title: 'Generic List',
           },
           {
-            name: "ordered-list",
+            name: 'ordered-list',
             action: EasyMDE.toggleOrderedList,
-            className: "bx bx-list-ol",
-            title: "Numbered List",
+            className: 'bx bx-list-ol',
+            title: 'Numbered List',
           },
           {
-            name: "emoji",
+            name: 'emoji',
             action: () => {
               const cm = easyMDEInstance.current?.codemirror as any;
               if (!cm) return;
               emojiOpenRef.current = !emojiOpenRef.current;
               setEmojiOpen(emojiOpenRef.current);
             },
-            className: "bx bx-smile",
-            title: "Insert Emoji",
+            className: 'bx bx-smile',
+            title: 'Insert Emoji',
           },
-          "|",
+          '|',
           {
-            name: "link",
+            name: 'link',
             action: EasyMDE.drawLink,
-            className: "bx bx-link",
-            title: "Create Link",
+            className: 'bx bx-link',
+            title: 'Create Link',
           },
           {
-            name: "image",
+            name: 'image',
             action: EasyMDE.drawImage,
-            className: "bx bx-image",
-            title: "Insert Image",
+            className: 'bx bx-image',
+            title: 'Insert Image',
           },
           {
-            name: "table",
+            name: 'table',
             action: EasyMDE.drawTable,
-            className: "bx bx-table",
-            title: "Insert Table",
+            className: 'bx bx-table',
+            title: 'Insert Table',
           },
-          "|",
+          '|',
           {
-            name: "preview",
+            name: 'preview',
             action: EasyMDE.togglePreview,
-            className: "bx bx-show no-disable",
-            title: "Toggle Preview",
+            className: 'bx bx-show no-disable',
+            title: 'Toggle Preview',
           },
           {
-            name: "side-by-side",
+            name: 'side-by-side',
             action: EasyMDE.toggleSideBySide,
-            className: "bx bxs-book-content",
-            title: "Toggle Side by Side",
+            className: 'bx bxs-book-content',
+            title: 'Toggle Side by Side',
           },
           {
-            name: "guide",
+            name: 'guide',
             action: () => {
               window.open(
-                "https://www.markdownguide.org/basic-syntax/",
-                "_blank",
+                'https://www.markdownguide.org/basic-syntax/',
+                '_blank',
               );
             },
-            className: "bx bx-help-circle no-disable",
-            title: "Markdown Guide",
+            className: 'bx bx-help-circle no-disable',
+            title: 'Markdown Guide',
           },
         ],
       });
@@ -248,7 +241,7 @@ const EasyEditor: React.FC<EasyEditorProps> = ({
         }
 
         const cursor = cm.getCursor() as CMPos;
-        const line = (cm.getLine(cursor.line) as string) ?? "";
+        const line = (cm.getLine(cursor.line) as string) ?? '';
         const before = line.slice(0, cursor.ch);
 
         // Match: start or whitespace/punct + @ + query (no spaces)
@@ -258,16 +251,16 @@ const EasyEditor: React.FC<EasyEditorProps> = ({
           return;
         }
 
-        const atIndex = before.lastIndexOf("@");
+        const atIndex = before.lastIndexOf('@');
         if (atIndex < 0) {
           if (mentionOpenRef.current) closeMention();
           return;
         }
 
-        const query = m[2] ?? "";
-        const coords = cm.cursorCoords(cursor, "window");
-        const anchorPos = { left: coords.left, top: coords.bottom };
-        const fromPos: CMPos = { line: cursor.line, ch: atIndex };
+        const query = m[2] ?? '';
+        const coords = cm.cursorCoords(cursor, 'window');
+        const anchorPos = {left: coords.left, top: coords.bottom};
+        const fromPos: CMPos = {line: cursor.line, ch: atIndex};
 
         if (!mentionOpenRef.current) {
           mentionOpenRef.current = true;
@@ -287,7 +280,7 @@ const EasyEditor: React.FC<EasyEditorProps> = ({
 
       const handleKeyDown = (_: any, e: KeyboardEvent) => {
         if (emojiOpenRef.current) {
-          if (e.key === "Escape") {
+          if (e.key === 'Escape') {
             e.preventDefault();
             closeEmoji();
             return;
@@ -298,20 +291,20 @@ const EasyEditor: React.FC<EasyEditorProps> = ({
         const options = mentionOptionsRef.current;
         const len = options.length;
 
-        if (e.key === "Escape") {
+        if (e.key === 'Escape') {
           e.preventDefault();
           closeMention();
           return;
         }
 
-        if (e.key === "ArrowDown") {
+        if (e.key === 'ArrowDown') {
           if (len <= 0) return;
           e.preventDefault();
           setMentionActiveIndexSafe((mentionActiveIndexRef.current + 1) % len);
           return;
         }
 
-        if (e.key === "ArrowUp") {
+        if (e.key === 'ArrowUp') {
           if (len <= 0) return;
           e.preventDefault();
           setMentionActiveIndexSafe(
@@ -320,7 +313,7 @@ const EasyEditor: React.FC<EasyEditorProps> = ({
           return;
         }
 
-        if (e.key === "Enter" || e.key === "Tab") {
+        if (e.key === 'Enter' || e.key === 'Tab') {
           const picked = options[mentionActiveIndexRef.current];
           if (!picked) return;
           e.preventDefault();
@@ -328,7 +321,7 @@ const EasyEditor: React.FC<EasyEditorProps> = ({
         }
       };
 
-      cm.on("change", () => {
+      cm.on('change', () => {
         if (easyMDEInstance.current) {
           onChangeRef.current(easyMDEInstance.current.value());
         }
@@ -339,22 +332,22 @@ const EasyEditor: React.FC<EasyEditorProps> = ({
         refreshMention();
       };
 
-      cm.on("cursorActivity", refreshMention);
-      cm.on("inputRead", refreshMention);
-      cm.on("scroll", handleScroll);
-      cm.on("viewportChange", refreshMention);
-      cm.on("keydown", handleKeyDown);
+      cm.on('cursorActivity', refreshMention);
+      cm.on('inputRead', refreshMention);
+      cm.on('scroll', handleScroll);
+      cm.on('viewportChange', refreshMention);
+      cm.on('keydown', handleKeyDown);
 
       // initial sync
       refreshMention();
 
       // Cleanup listeners when unmounting
       const cleanup = () => {
-        cm.off("cursorActivity", refreshMention);
-        cm.off("inputRead", refreshMention);
-        cm.off("scroll", handleScroll);
-        cm.off("viewportChange", refreshMention);
-        cm.off("keydown", handleKeyDown);
+        cm.off('cursorActivity', refreshMention);
+        cm.off('inputRead', refreshMention);
+        cm.off('scroll', handleScroll);
+        cm.off('viewportChange', refreshMention);
+        cm.off('keydown', handleKeyDown);
       };
 
       // Attach cleanup to instance for final effect cleanup
@@ -364,7 +357,7 @@ const EasyEditor: React.FC<EasyEditorProps> = ({
     return () => {
       if (easyMDEInstance.current) {
         const cleanup = (easyMDEInstance.current as any).__mentionCleanup;
-        if (typeof cleanup === "function") cleanup();
+        if (typeof cleanup === 'function') cleanup();
         easyMDEInstance.current.toTextArea();
         easyMDEInstance.current = null;
       }
@@ -373,11 +366,8 @@ const EasyEditor: React.FC<EasyEditorProps> = ({
   }, []);
 
   useEffect(() => {
-    if (
-      easyMDEInstance.current
-      && easyMDEInstance.current.value() !== value
-    ) {
-      easyMDEInstance.current.value(value || "");
+    if (easyMDEInstance.current && easyMDEInstance.current.value() !== value) {
+      easyMDEInstance.current.value(value || '');
     }
   }, [value]);
 
@@ -392,7 +382,7 @@ const EasyEditor: React.FC<EasyEditorProps> = ({
       <textarea ref={textareaRef} />
       <EmojiMartPicker
         open={emojiOpen}
-        onPick={(emoji) => pickEmoji(emoji)}
+        onPick={emoji => pickEmoji(emoji)}
         onClose={closeEmoji}
       />
       <EditorMentionPicker
@@ -400,10 +390,10 @@ const EasyEditor: React.FC<EasyEditorProps> = ({
         query={mentionQuery}
         anchorPosition={mentionAnchorPosition}
         activeIndex={mentionActiveIndex}
-        setActiveIndex={(idx) => setMentionActiveIndexSafe(idx)}
-        onPick={(user) => pickMention(user)}
+        setActiveIndex={idx => setMentionActiveIndexSafe(idx)}
+        onPick={user => pickMention(user)}
         onClose={closeMention}
-        onOptionsChange={(options) => {
+        onOptionsChange={options => {
           mentionOptionsRef.current = options;
           if (mentionActiveIndexRef.current >= options.length) {
             setMentionActiveIndexSafe(0);

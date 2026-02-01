@@ -8,4 +8,3 @@ const FeedbackAdminPage = lazyRouteComponent(
 export const Route = createFileRoute('/_mainLayout/feedback/admin')({
   component: FeedbackAdminPage,
 });
-

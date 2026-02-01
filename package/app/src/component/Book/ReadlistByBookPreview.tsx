@@ -1,10 +1,10 @@
-import { ReadlistList } from '@component/ReadList/ReadlistList.tsx';
-import { AccentBarWithTextContainer } from '../Common/Navigation/AccentBar.tsx';
-import { ArrowForwardIconContainer } from '../Common/Navigation/ArrowForwardIcon.tsx';
+import {ReadlistList} from '@component/ReadList/ReadlistList.tsx';
+import {AccentBarWithTextContainer} from '../Common/Navigation/AccentBar.tsx';
+import {ArrowForwardIconContainer} from '../Common/Navigation/ArrowForwardIcon.tsx';
 
-import { useQuery } from '@tanstack/react-query';
-import { buildMeiliReadlistQuery } from '@package/api/meili/meili.queries';
-import { useTranslation } from 'react-i18next';
+import {useQuery} from '@tanstack/react-query';
+import {buildMeiliReadlistQuery} from '@package/api/meili/meili.queries';
+import {useTranslation} from 'react-i18next';
 
 export function ReadlistByBookPreview({
   title,
@@ -15,9 +15,9 @@ export function ReadlistByBookPreview({
   bookId?: string;
   readlistNumber?: number;
 }) {
-  const { t } = useTranslation();
-  const { data, isLoading, error } = useQuery(
-    buildMeiliReadlistQuery(0, readlistNumber, '', [], { bookId }),
+  const {t} = useTranslation();
+  const {data, isLoading, error} = useQuery(
+    buildMeiliReadlistQuery(0, readlistNumber, '', [], {bookId}),
   );
 
   if (isLoading) {
@@ -34,7 +34,7 @@ export function ReadlistByBookPreview({
     <div>
       <ArrowForwardIconContainer size={16} to={`/readlist/book/${bookId}`}>
         <AccentBarWithTextContainer
-          text={t('readlist.includes_book_title', { title })}
+          text={t('readlist.includes_book_title', {title})}
         />
       </ArrowForwardIconContainer>
       <div className="mb-4" />

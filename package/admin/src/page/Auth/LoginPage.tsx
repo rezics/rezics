@@ -1,13 +1,22 @@
-import { Alert, Box, Button, CircularProgress, Container, Paper, TextField, Typography } from '@mui/material';
-import type { FormEvent } from 'react';
-import { useState } from 'react';
+import {
+  Alert,
+  Box,
+  Button,
+  CircularProgress,
+  Container,
+  Paper,
+  TextField,
+  Typography,
+} from '@mui/material';
+import type {FormEvent} from 'react';
+import {useState} from 'react';
 
-import { useNavigate } from '@tanstack/react-router';
+import {useNavigate} from '@tanstack/react-router';
 
-import { userApi } from '@package/api/user/user.api';
-import { setToken } from '@package/api/react-query/http';
+import {userApi} from '@package/api/user/user.api';
+import {setToken} from '@package/api/react-query/http';
 
-import { Route } from '@/routes/login';
+import {Route} from '@/routes/login';
 
 function normalizeRedirect(to?: string) {
   if (!to) return '/';
@@ -17,7 +26,7 @@ function normalizeRedirect(to?: string) {
 
 export default function LoginPage() {
   const navigate = useNavigate();
-  const { redirect: redirectTo } = Route.useSearch();
+  const {redirect: redirectTo} = Route.useSearch();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -29,10 +38,13 @@ export default function LoginPage() {
     setError(null);
     setSubmitting(true);
     try {
-      const { user, token } = await userApi.login({ email, password });
-      if (user.permission?.role?.includes('ADMIN') || user.permission?.role?.includes('ROOT')) {
+      const {user, token} = await userApi.login({email, password});
+      if (
+        user.permission?.role?.includes('ADMIN') ||
+        user.permission?.role?.includes('ROOT')
+      ) {
         setToken(token);
-        await navigate({ to: normalizeRedirect(redirectTo), replace: true });
+        await navigate({to: normalizeRedirect(redirectTo), replace: true});
       } else {
         setError('You are not authorized to access this page');
       }
@@ -45,28 +57,35 @@ export default function LoginPage() {
   }
 
   return (
-    <Container maxWidth="sm" sx={{ py: 8 }}>
-      <Paper elevation={0} sx={{ p: 3, border: 1, borderColor: 'divider', borderRadius: 2 }}>
+    <Container maxWidth="sm" sx={{py: 8}}>
+      <Paper
+        elevation={0}
+        sx={{p: 3, border: 1, borderColor: 'divider', borderRadius: 2}}
+      >
         <Typography variant="h5" fontWeight={800} gutterBottom>
           Admin Login
         </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+        <Typography variant="body2" color="text.secondary" sx={{mb: 2}}>
           Sign in to access the admin console.
         </Typography>
 
         {error && (
-          <Alert severity="error" sx={{ mb: 2 }}>
+          <Alert severity="error" sx={{mb: 2}}>
             {error}
           </Alert>
         )}
 
-        <Box component="form" onSubmit={handleSubmit} sx={{ display: 'grid', gap: 2 }}>
+        <Box
+          component="form"
+          onSubmit={handleSubmit}
+          sx={{display: 'grid', gap: 2}}
+        >
           <TextField
             label="Email"
             type="email"
             autoComplete="email"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={e => setEmail(e.target.value)}
             required
             fullWidth
           />
@@ -75,14 +94,19 @@ export default function LoginPage() {
             type="password"
             autoComplete="current-password"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={e => setPassword(e.target.value)}
             required
             fullWidth
           />
 
-          <Button type="submit" variant="contained" size="large" disabled={submitting}>
+          <Button
+            type="submit"
+            variant="contained"
+            size="large"
+            disabled={submitting}
+          >
             {submitting ? (
-              <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 1 }}>
+              <Box sx={{display: 'inline-flex', alignItems: 'center', gap: 1}}>
                 <CircularProgress size={18} color="inherit" />
                 Signing in…
               </Box>
@@ -95,4 +119,3 @@ export default function LoginPage() {
     </Container>
   );
 }
-

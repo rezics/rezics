@@ -6,16 +6,16 @@ import React, {
   useMemo,
   useState,
 } from 'react';
-import { Button, Tooltip } from '@mui/material';
-import { useTranslation } from 'react-i18next';
-import { useQuery } from '@tanstack/react-query';
+import {Button, Tooltip} from '@mui/material';
+import {useTranslation} from 'react-i18next';
+import {useQuery} from '@tanstack/react-query';
 
-import { bookQueries } from '@package/api/book/book.queries';
-import { AccentBarWithTextContainer } from '../../Common/Navigation/AccentBar';
-import { useChapterListStore } from '@/global/page/chapterListStore';
-import { Link } from '@package/ui/Navigation/Link.tsx';
+import {bookQueries} from '@package/api/book/book.queries';
+import {AccentBarWithTextContainer} from '../../Common/Navigation/AccentBar';
+import {useChapterListStore} from '@/global/page/chapterListStore';
+import {Link} from '@package/ui/Navigation/Link.tsx';
 
-import type { ChapterTreeItem } from '@package/contract';
+import type {ChapterTreeItem} from '@package/contract';
 
 export type ChapterTreeHandle = {
   expandAll: () => void;
@@ -45,7 +45,7 @@ export const ChapterLeaf = React.memo(function ChapterLeaf({
   const content = (
     <Link
       to="/book/$bookId/read/$chapterId"
-      params={{ bookId, chapterId: node.id }}
+      params={{bookId, chapterId: node.id}}
       className="block hover:text-[var(--mui-palette-primary-main)]"
     >
       <p className="truncate p-2 rounded-md transition-colors duration-200">
@@ -190,7 +190,7 @@ export const ChapterTreeView = forwardRef<
   ChapterTreeHandle,
   ChapterTreeViewProps
 >(function ChapterTreeView(
-  { bookId, nodes, storageKey, defaultExpandAll = true },
+  {bookId, nodes, storageKey, defaultExpandAll = true},
   ref,
 ) {
   const persisted = useChapterListStore(s =>
@@ -315,8 +315,8 @@ interface ChapterListContainerProps {
 export const ChapterListContainer: React.FC<ChapterListContainerProps> = ({
   id,
 }) => {
-  const { t } = useTranslation();
-  const { data, isLoading, error } = useQuery(bookQueries.chapterIndex(id));
+  const {t} = useTranslation();
+  const {data, isLoading, error} = useQuery(bookQueries.chapterIndex(id));
 
   const chapterTree: ChapterTreeItem[] = useMemo(
     () => data?.index ?? [],

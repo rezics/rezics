@@ -1,25 +1,25 @@
-import React, { useEffect, useMemo, useRef, useState, type FC } from 'react';
-import { Tabs, Tab, Box, Alert } from '@mui/material';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import React, {useEffect, useMemo, useRef, useState, type FC} from 'react';
+import {Tabs, Tab, Box, Alert} from '@mui/material';
+import {useQuery, useQueryClient} from '@tanstack/react-query';
 
 import {
   UniversalPaginator,
   type UniversalPaginatorHandle,
 } from '@/component/Common/Navigation/Pagination';
-import { SimpleSearchInput } from '@/component/Search/SimpleSearchInput';
-import type { BookDTO, ReadlistDTO, ReviewDTO, UnitDTO } from '@package/contract';
-import { UnitType } from '@package/contract';
+import {SimpleSearchInput} from '@/component/Search/SimpleSearchInput';
+import type {BookDTO, ReadlistDTO, ReviewDTO, UnitDTO} from '@package/contract';
+import {UnitType} from '@package/contract';
 import {
   buildMeiliReadlistQuery,
   buildMeiliUnitQuery,
   meiliBookSearchQuery,
 } from '@package/api/meili/meili.queries';
-import { reactionApi } from '@package/api/reaction/reaction.api';
-import { mapUnitListToReviewListResponse } from '@package/api/meili/meili.api';
-import { SingleReadlist } from '@/component/ReadList/SingleReadlist';
-import { ReviewListContainer } from '@/component/Review/ReviewList';
-import { QuoteExcerptListContainer } from '@component/Review/QuoteExcerptList.tsx';
-import { BookListViewContainer } from '@/component/BookLib/BookList/BookListView';
+import {reactionApi} from '@package/api/reaction/reaction.api';
+import {mapUnitListToReviewListResponse} from '@package/api/meili/meili.api';
+import {SingleReadlist} from '@/component/ReadList/SingleReadlist';
+import {ReviewListContainer} from '@/component/Review/ReviewList';
+import {QuoteExcerptListContainer} from '@component/Review/QuoteExcerptList.tsx';
+import {BookListViewContainer} from '@/component/BookLib/BookList/BookListView';
 
 type Readlist = ReadlistDTO;
 type Review = ReviewDTO;
@@ -30,7 +30,7 @@ export interface UserUnitsPageProps {
 }
 
 // Readlist 列表视图（复用 ReadListsPage 的写法）
-const ReadlistListView: React.FC<{ readlists: Readlist[] }> = ({ readlists }) => {
+const ReadlistListView: React.FC<{readlists: Readlist[]}> = ({readlists}) => {
   return (
     <div>
       {readlists.map(item => (
@@ -38,8 +38,8 @@ const ReadlistListView: React.FC<{ readlists: Readlist[] }> = ({ readlists }) =>
           <SingleReadlist
             data={item}
             // 用户内容页主要是浏览，不在这里处理交互
-            handleBookListClick={() => { }}
-            handleLike={() => { }}
+            handleBookListClick={() => {}}
+            handleLike={() => {}}
           />
         </div>
       ))}
@@ -48,7 +48,7 @@ const ReadlistListView: React.FC<{ readlists: Readlist[] }> = ({ readlists }) =>
 };
 
 // COMMENT / NOTE 的简单通用列表视图
-const UnitSimpleListView: React.FC<{ units: UnitItem[] }> = ({ units }) => {
+const UnitSimpleListView: React.FC<{units: UnitItem[]}> = ({units}) => {
   // TODO 需要为评论做单独的适配，传入targetUnitId
   return (
     <div className="space-y-3">
@@ -94,7 +94,7 @@ type TabKey =
  * - READLIST：SingleReadlist
  * - REVIEW / REMARK：ReviewListContainer
  */
-export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
+export const UserUnitsPage: FC<UserUnitsPageProps> = ({userId}) => {
   const ref = useRef<UniversalPaginatorHandle>(null);
   const queryClient = useQueryClient();
 
@@ -133,7 +133,7 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
     [baseReadlists],
   );
 
-  const { data: readlistReactionSummaryBatch } = useQuery({
+  const {data: readlistReactionSummaryBatch} = useQuery({
     queryKey: [
       'reaction-summary-batch',
       'user',
@@ -207,7 +207,7 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
       keyword,
       EXTERNAL_PAGE_SIZE,
       mapUnitListToReviewListResponse,
-      { userId },
+      {userId},
     ),
   );
 
@@ -219,7 +219,7 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
       keyword,
       EXTERNAL_PAGE_SIZE,
       mapUnitListToReviewListResponse,
-      { userId },
+      {userId},
     ),
   );
 
@@ -249,7 +249,7 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
     [baseReviews],
   );
 
-  const { data: reviewReactionSummaryBatch } = useQuery({
+  const {data: reviewReactionSummaryBatch} = useQuery({
     queryKey: [
       'reaction-summary-batch',
       'user',
@@ -312,7 +312,7 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
       keyword,
       EXTERNAL_PAGE_SIZE,
       unitResp => unitResp,
-      { userId },
+      {userId},
     ),
   );
 
@@ -328,7 +328,7 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
       keyword,
       EXTERNAL_PAGE_SIZE,
       unitResp => unitResp,
-      { userId },
+      {userId},
     ),
   );
 
@@ -344,7 +344,7 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
       keyword,
       EXTERNAL_PAGE_SIZE,
       unitResp => unitResp,
-      { userId },
+      {userId},
     ),
   );
 
@@ -386,28 +386,28 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
     const start = (page - 1) * EXTERNAL_PAGE_SIZE;
 
     if (tab === 'readlist') {
-      const { queryKey, queryFn } = buildMeiliReadlistQuery(
+      const {queryKey, queryFn} = buildMeiliReadlistQuery(
         start,
         EXTERNAL_PAGE_SIZE,
         keyword,
         [],
-        { userId },
+        {userId},
       );
-      const nextData = await queryClient.fetchQuery({ queryKey, queryFn });
+      const nextData = await queryClient.fetchQuery({queryKey, queryFn});
       return nextData?.readlists?.length ?? 0;
     }
 
     // 其他 Tab 共用 Meili units 查询，只是 type / mapFn 不同
     if (tab === 'review' || tab === 'remark') {
       const isReview = tab === 'review';
-      const { queryKey, queryFn } = buildMeiliUnitQuery(
+      const {queryKey, queryFn} = buildMeiliUnitQuery(
         isReview ? UnitType.REVIEW : UnitType.REMARK,
         start,
         undefined,
         keyword,
         EXTERNAL_PAGE_SIZE,
         mapUnitListToReviewListResponse,
-        { userId },
+        {userId},
       );
       const nextReviewData = await queryClient.fetchQuery({
         queryKey,
@@ -420,17 +420,17 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
       tab === 'comment'
         ? UnitType.COMMENT
         : tab === 'note'
-          ? UnitType.NOTE
-          : UnitType.QUOTE;
+        ? UnitType.NOTE
+        : UnitType.QUOTE;
 
-    const { queryKey, queryFn } = buildMeiliUnitQuery(
+    const {queryKey, queryFn} = buildMeiliUnitQuery(
       unitType,
       start,
       undefined,
       keyword,
       EXTERNAL_PAGE_SIZE,
       unitResp => unitResp,
-      { userId },
+      {userId},
     );
     const nextUnitData = await queryClient.fetchQuery({
       queryKey,
@@ -491,10 +491,10 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
           onSearch={info => {
             setKeyword(info ?? '');
           }}
-          defaultValue={{ keyword: keyword ?? '' }}
+          defaultValue={{keyword: keyword ?? ''}}
           placeholder="Search user's content"
         />
-        <Box sx={{ borderBottom: 1, borderColor: 'divider', mt: 2, mb: 2 }}>
+        <Box sx={{borderBottom: 1, borderColor: 'divider', mt: 2, mb: 2}}>
           <Tabs
             value={tab}
             onChange={(_, v) => setTab(v)}
@@ -525,7 +525,7 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
         externalItemsPerPage={EXTERNAL_PAGE_SIZE}
         sortType={undefined as any}
         sortOrder={undefined as any}
-        onSortChange={() => { }}
+        onSortChange={() => {}}
         requestData={handleNeedMoreData}
         preRequestData={handlePreRequestData}
         isLoading={isLoading && items.length === 0}

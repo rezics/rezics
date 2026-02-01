@@ -1,4 +1,4 @@
-import { createFileRoute, lazyRouteComponent } from '@tanstack/react-router';
+import {createFileRoute, lazyRouteComponent} from '@tanstack/react-router';
 
 const BookLibContainer = lazyRouteComponent(
   () => import('@/page/Book/BookLibPage'),
@@ -10,7 +10,6 @@ export const Route = createFileRoute('/_mainLayout/book/')({
   validateSearch: (search: Record<string, unknown>) => {
     return {
       tags: typeof search.tags === 'string' ? search.tags : undefined,
-    }
+    };
   },
 });
-

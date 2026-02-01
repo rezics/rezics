@@ -1,1 +1,1 @@
-export { Link } from '@tanstack/react-router'
+export {Link} from '@tanstack/react-router';

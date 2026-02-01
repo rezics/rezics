@@ -1,5 +1,5 @@
 import {useEffect, useState} from 'react';
-import { useRouterState } from '@tanstack/react-router';
+import {useRouterState} from '@tanstack/react-router';
 import {useFakeProgress} from './useFakeProgress';
 import {SimpleProgress} from './SimpleProgress';
 

@@ -8,4 +8,3 @@ const FollowInfoPage = lazyRouteComponent(
 export const Route = createFileRoute('/_mainLayout/user/me/follow')({
   component: () => <FollowInfoPage isCurrentUser={true} />,
 });
-

@@ -1,6 +1,6 @@
 - [ ] allow to mention
-- [x] MUI的还没自己写的好用 https://mui.com/x/react-tree-view/ 用这个替换当前的Tree章节View
-- [ ] 树章节检查为啥shift键还是会跳转，感觉就不应该渲染为link，修改一下
+- [x] MUI 的还没自己写的好用 https://mui.com/x/react-tree-view/ 用这个替换当前的 Tree 章节 View
+- [ ] 树章节检查为啥 shift 键还是会跳转，感觉就不应该渲染为 link，修改一下
 - 完善所有请求暂停逻辑，否则会导致重新渲染！
 - 切换明暗模式之后，SideBar 滚动条隐藏样式失效
 - 调整高度之后，SideBar 滚动条隐藏样式也会失效
@@ -15,8 +15,8 @@
 - [ ] Clone NanoJSON 优化代码
 - [ ] cookie_consent https://chatgpt.com/share/692d08eb-8160-8005-9134-70c02e82b22b 浏览器级别的组件，等后续引入第三方脚本再添加该组件
 - fix : NODE_ENV=production is not supported in the .env file. Only NODE_ENV=development is supported to create a development build of your project. If you need to set process.env.NODE_ENV, you can set it in the Vite config instead.
-- 好用的JSON编辑器
-- [ ] shadcn ui 的 主题切换的原理，如果定制是由于css的话。
+- 好用的 JSON 编辑器
+- [ ] shadcn ui 的 主题切换的原理，如果定制是由于 css 的话。
 
 ## Complete
 

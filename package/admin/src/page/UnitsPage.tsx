@@ -1,2 +1,1 @@
-export { default } from '@/page/Unit/MeiliUnitsPage';
-
+export {default} from '@/page/Unit/MeiliUnitsPage';

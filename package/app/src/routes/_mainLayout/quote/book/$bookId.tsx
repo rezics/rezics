@@ -8,4 +8,3 @@ const QuoteByBookPage = lazyRouteComponent(
 export const Route = createFileRoute('/_mainLayout/quote/book/$bookId')({
   component: QuoteByBookPage,
 });
-

@@ -1,9 +1,9 @@
 // 暂时就先这样不处理，后面树化，或者使用VirtualList
 
-import { commentQueries } from '@package/api/comment/comment.queries';
-import { Avatar } from "@mui/material";
-import { useQuery } from "@tanstack/react-query";
-import React, { useCallback, useRef } from "react";
+import {commentQueries} from '@package/api/comment/comment.queries';
+import {Avatar} from '@mui/material';
+import {useQuery} from '@tanstack/react-query';
+import React, {useCallback, useRef} from 'react';
 // import { scrollToElementWithOffsetUniversal } from "@/util/domUtils";
 
 interface ReplyComponentsProps {
@@ -14,7 +14,7 @@ export const ReplyComponents: React.FC<ReplyComponentsProps> = ({
   bookListId,
 }) => {
   const commentId = bookListId; // TODO 暫時先用這個替代
-  const { data, isLoading, error } = useQuery(
+  const {data, isLoading, error} = useQuery(
     commentQueries.unitCommentTree(commentId, {
       // Fetch up to depth 3 for an initial view; adjust as needed
       maxDepth: 100,
@@ -40,9 +40,9 @@ export const ReplyComponents: React.FC<ReplyComponentsProps> = ({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const parent = allComments.find((c: any) => c.id === parentId);
     if (parent) {
-      return parent.content?.slice(0, 10) + "...";
+      return parent.content?.slice(0, 10) + '...';
     }
-    return "";
+    return '';
   };
 
   return (
@@ -53,7 +53,7 @@ export const ReplyComponents: React.FC<ReplyComponentsProps> = ({
           key={comment.id}
           id={`comment-${comment.id}`}
           className="flex gap-3 items-start"
-          ref={(el) => {
+          ref={el => {
             commentRefs.current[comment.id] = el;
           }}
         >
@@ -63,20 +63,18 @@ export const ReplyComponents: React.FC<ReplyComponentsProps> = ({
               <span className="font-semibold text-red-800">
                 {comment.author}
               </span>
-              <span className="text-xs text-gray-500">
-                #{comment.id}
-              </span>
+              <span className="text-xs text-gray-500">#{comment.id}</span>
               <span className="text-xs text-gray-500">
                 {comment.created_at}
               </span>
             </div>
             {comment.parent_id && (
               <div className="text-xs text-blue-500 mt-1">
-                回复{" "}
+                回复{' '}
                 <a
                   href={`#comment-${comment.parent_id}`}
                   className="hover:underline"
-                  onClick={(e) => {
+                  onClick={e => {
                     e.preventDefault();
                     scrollToComment(comment.parent_id);
                   }}

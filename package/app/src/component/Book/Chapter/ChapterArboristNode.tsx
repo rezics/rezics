@@ -1,10 +1,10 @@
 import React from 'react';
-import type { NodeRendererProps } from 'react-arborist';
-import { useTheme, alpha } from '@mui/material/styles';
+import type {NodeRendererProps} from 'react-arborist';
+import {useTheme, alpha} from '@mui/material/styles';
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
-import { Link } from '@package/ui/Navigation/Link.tsx';
+import {Link} from '@package/ui/Navigation/Link.tsx';
 
 // Type used inside the BookEditorSidebar tree
 export type Chapter = {
@@ -63,7 +63,7 @@ export const createChapterArboristNode = (
           e.stopPropagation();
           const currentNodeId = String(node.id);
           treeRef.current?.select(currentNodeId);
-          setContextMenu({ x: e.clientX, y: e.clientY, node });
+          setContextMenu({x: e.clientX, y: e.clientY, node});
         }}
       >
         {/* Arrow toggle */}
@@ -81,7 +81,7 @@ export const createChapterArboristNode = (
             )}
           </button>
         ) : // <span className="w-5 h-5" />
-          null}
+        null}
 
         {/* Node icon */}
         {/* <span className="w-5 h-5 flex justify-center items-center text-slate-500 dark:text-slate-400">
@@ -120,17 +120,15 @@ export const createChapterArboristNode = (
             />
           ) : hasChildren ? (
             <span className="truncate">{node.data.title}</span>
+          ) : isEditable ? (
+            <span className="block truncate">{node.data.title}</span>
           ) : (
-            isEditable ? (
+            <Link
+              to="/book/$bookId/read/$chapterId"
+              params={{bookId: bookId, chapterId: node.id}}
+            >
               <span className="block truncate">{node.data.title}</span>
-            ) : (
-              <Link
-                to="/book/$bookId/read/$chapterId"
-                params={{ bookId: bookId, chapterId: node.id }}
-              >
-                <span className="block truncate">{node.data.title}</span>
-              </Link>
-            )
+            </Link>
           )}
         </div>
 

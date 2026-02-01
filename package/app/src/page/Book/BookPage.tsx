@@ -1,29 +1,29 @@
-import { BookReviews } from '@/component/Book/BookReviewsPreview.tsx';
-import { TagWrapper } from '@/component/Tag/TagWrapper.tsx';
-import { RemarkPreview } from '@/component/Book/RemarkPreview';
-import { AccentBarWithTextContainer } from '@/component/Common/Navigation/AccentBar';
-import { TabContext, TabList, TabPanel } from '@mui/lab';
-import { Box, Divider, Grid, Paper, Stack, Tab, Typography } from '@mui/material';
-import React, { useEffect, useMemo, useRef } from 'react';
-import { useNavigate, useRouterState } from '@tanstack/react-router';
+import {BookReviews} from '@/component/Book/BookReviewsPreview.tsx';
+import {TagWrapper} from '@/component/Tag/TagWrapper.tsx';
+import {RemarkPreview} from '@/component/Book/RemarkPreview';
+import {AccentBarWithTextContainer} from '@/component/Common/Navigation/AccentBar';
+import {TabContext, TabList, TabPanel} from '@mui/lab';
+import {Box, Divider, Grid, Paper, Stack, Tab, Typography} from '@mui/material';
+import React, {useEffect, useMemo, useRef} from 'react';
+import {useNavigate, useRouterState} from '@tanstack/react-router';
 
-import { AuthorInfoContainer } from '@/component/Book/AuthorInfo.tsx';
-import { BookDescription } from '@/component/Book/BookDescription';
-import { QuoteExcerptPreviewContainer } from '@/component/Book/QuoteExcerptPreview.tsx';
-import { ReadlistByBookPreview } from '@/component/Book/ReadlistByBookPreview.tsx';
-import { ArrowForwardIconContainer } from '@/component/Common/Navigation/ArrowForwardIcon';
-import { BookHeroContainer } from '@component/Book/BookHero.tsx';
-import { ChapterListContainer } from '@/component/Book/Chapter/ChapterList';
+import {AuthorInfoContainer} from '@/component/Book/AuthorInfo.tsx';
+import {BookDescription} from '@/component/Book/BookDescription';
+import {QuoteExcerptPreviewContainer} from '@/component/Book/QuoteExcerptPreview.tsx';
+import {ReadlistByBookPreview} from '@/component/Book/ReadlistByBookPreview.tsx';
+import {ArrowForwardIconContainer} from '@/component/Common/Navigation/ArrowForwardIcon';
+import {BookHeroContainer} from '@component/Book/BookHero.tsx';
+import {ChapterListContainer} from '@/component/Book/Chapter/ChapterList';
 
-import { useBookPageStore } from '@/global/page/bookPageStore.ts';
-import { routeStore } from '@/global/routeStore.ts';
+import {useBookPageStore} from '@/global/page/bookPageStore.ts';
+import {routeStore} from '@/global/routeStore.ts';
 
-import { bookQueries } from '@package/api/book/book';
-import { useQuery } from '@tanstack/react-query';
-import { useTranslation } from 'react-i18next';
+import {bookQueries} from '@package/api/book/book';
+import {useQuery} from '@tanstack/react-query';
+import {useTranslation} from 'react-i18next';
 
-import type { BookDTO } from '@package/contract';
-import { useParams } from '@tanstack/react-router'
+import type {BookDTO} from '@package/contract';
+import {useParams} from '@tanstack/react-router';
 
 type Book = BookDTO;
 
@@ -47,7 +47,7 @@ export const BookPageShow: React.FC<ShowProps> = ({
   activeTab,
   onTabChange,
 }) => {
-  const { t } = useTranslation();
+  const {t} = useTranslation();
   console.log('BookPageShow render', bookInfo);
   return (
     <Box id="book-detail" ref={ref}>
@@ -58,7 +58,7 @@ export const BookPageShow: React.FC<ShowProps> = ({
       <Box maxWidth="lg" className="mt-4 mb-8 mx-auto">
         <Grid container spacing={4}>
           {/* Main Content */}
-          <Grid size={{ xs: 12, lg: 9 }}>
+          <Grid size={{xs: 12, lg: 9}}>
             <TabContext value={activeTab}>
               <TabList onChange={onTabChange}>
                 <Tab label={t('page.book.tabs.basic_info')} value="0" />
@@ -84,7 +84,7 @@ export const BookPageShow: React.FC<ShowProps> = ({
                     </ArrowForwardIconContainer>
                   </div>
                   <TagWrapper
-                    filters={{ objectId: bookInfo?.unitId || '' }}
+                    filters={{objectId: bookInfo?.unitId || ''}}
                     mode="grouped"
                   />
                   <Divider />
@@ -162,7 +162,7 @@ export const BookPageShow: React.FC<ShowProps> = ({
           </Grid>
 
           {/* ANCHOR Sidebar */}
-          <Grid size={{ xs: 12, lg: 3 }}>
+          <Grid size={{xs: 12, lg: 3}}>
             <Paper className="p-3 mt-4">
               <Divider className="my-4" />
 
@@ -207,19 +207,19 @@ export type ContainerProps = {
 };
 
 export const BookPageContainer: React.FC = () => {
-  const { bookId } = useParams({ strict: false })
+  const {bookId} = useParams({strict: false});
   const navigate = useNavigate();
   const locationKey = useRouterState({
     select: s => s.location.pathname + s.location.searchStr,
-  })
+  });
   const searchStr = useRouterState({
     select: s => s.location.searchStr,
-  })
+  });
   const searchParams = useMemo(
     () => new URLSearchParams(searchStr),
     [searchStr],
-  )
-  const { t } = useTranslation();
+  );
+  const {t} = useTranslation();
 
   const getInitialTab = (): TabValue => {
     const tabParam = searchParams.get('tab');
@@ -251,7 +251,7 @@ export const BookPageContainer: React.FC = () => {
       tab: newValue,
     });
 
-    navigate({ to: `/book/${bookId}?tab=${newValue}` });
+    navigate({to: `/book/${bookId}?tab=${newValue}`});
   };
 
   // REVIEW 会导致重复写入嘛？
@@ -264,15 +264,15 @@ export const BookPageContainer: React.FC = () => {
   // ANCHOR Data Fetching
   const book: any = useBookPageStore(s => s.books[bookId]);
   // const { data, isLoading, error } = useQuery(bookQueries.byId(bookId));
-  const { data, isLoading, error } = useQuery(bookQueries.detail(bookId));
-  const { data: rating } = useQuery(bookQueries.rating(bookId));
+  const {data, isLoading, error} = useQuery(bookQueries.detail(bookId));
+  const {data: rating} = useQuery(bookQueries.rating(bookId));
   const ratingValue = useMemo(() => {
     const average = (rating?.totalScore || 0) / (rating?.totalCount || 1) || 0;
     return Number(average.toFixed(1));
   }, [rating]);
 
   useEffect(() => {
-    useBookPageStore.getState().updateBook(bookId, { ...data });
+    useBookPageStore.getState().updateBook(bookId, {...data});
   }, [data, isLoading, bookId]);
 
   if (isLoading) {

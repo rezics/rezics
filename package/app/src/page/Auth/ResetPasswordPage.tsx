@@ -1,22 +1,22 @@
 import Alert from '@mui/material/Alert';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
-import { Dialog, DialogContent } from '@mui/material';
-import { type FC, useRef, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { useNavigate, useRouterState } from '@tanstack/react-router';
+import {Dialog, DialogContent} from '@mui/material';
+import {type FC, useRef, useState} from 'react';
+import {useTranslation} from 'react-i18next';
+import {useNavigate, useRouterState} from '@tanstack/react-router';
 
-import { Turnstile } from '@/component/Form/Turnstile.tsx';
-import { PasswordField } from '@/component/Form/PasswordField';
-import { Layout } from './lib/Layout.tsx';
-import { ModalLayout } from './lib/ModalLayout.tsx';
-import { validateEmail, validatePassword } from './lib/validate.ts';
-import { userApi } from '@package/api/user/user';
+import {Turnstile} from '@/component/Form/Turnstile.tsx';
+import {PasswordField} from '@/component/Form/PasswordField';
+import {Layout} from './lib/Layout.tsx';
+import {ModalLayout} from './lib/ModalLayout.tsx';
+import {validateEmail, validatePassword} from './lib/validate.ts';
+import {userApi} from '@package/api/user/user';
 import {
   GetVerificationCode,
   type GetVerificationCodeHandle,
 } from './GetVerificationCode.tsx';
-import { TextButton } from '@/component/Common/UI/Button/TextButton.tsx';
+import {TextButton} from '@/component/Common/UI/Button/TextButton.tsx';
 
 interface ResetPasswordData {
   email: string;
@@ -38,7 +38,7 @@ export const ResetPasswordPage: FC<ResetPasswordPageProps> = ({
   isModal = false,
   onClose,
 }) => {
-  const { t } = useTranslation();
+  const {t} = useTranslation();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>();
   const [showTurnstile, setShowTurnstile] = useState(false);
@@ -49,14 +49,14 @@ export const ResetPasswordPage: FC<ResetPasswordPageProps> = ({
   });
   const verificationRef = useRef<GetVerificationCodeHandle | null>(null);
   const navigate = useNavigate();
-  const pathname = useRouterState({ select: s => s.location.pathname });
+  const pathname = useRouterState({select: s => s.location.pathname});
 
   const handleSubmit = async () => {
     let hasError = false;
     setLoading(true);
     setError(undefined);
     try {
-      let validateData: { valid: boolean; error: string | null } = {
+      let validateData: {valid: boolean; error: string | null} = {
         valid: false,
         error: null,
       };
@@ -96,7 +96,7 @@ export const ResetPasswordPage: FC<ResetPasswordPageProps> = ({
     if (!hasError) {
       onClose?.();
       if (pathname === '/reset-password') {
-        navigate({ to: '/login' });
+        navigate({to: '/login'});
       }
     }
   };
@@ -107,7 +107,7 @@ export const ResetPasswordPage: FC<ResetPasswordPageProps> = ({
   };
 
   const handleLoginClick = () => {
-    navigate({ to: '/login' });
+    navigate({to: '/login'});
   };
 
   const LayoutComponent = isModal ? ModalLayout : Layout;
@@ -116,7 +116,7 @@ export const ResetPasswordPage: FC<ResetPasswordPageProps> = ({
     <>
       {showTurnstile && (
         <div
-          style={{ marginTop: '16px', display: 'flex', justifyContent: 'center' }}
+          style={{marginTop: '16px', display: 'flex', justifyContent: 'center'}}
         >
           <Turnstile onVerify={handleTurnstileVerify} />
         </div>
@@ -130,19 +130,19 @@ export const ResetPasswordPage: FC<ResetPasswordPageProps> = ({
         required
         value={data?.email}
         onChange={(event: any) => {
-          setData({ ...data, email: event.target.value });
+          setData({...data, email: event.target.value});
         }}
       />
       <PasswordField
         value={data?.password}
         setValue={(value: string) => {
-          setData({ ...data, password: value });
+          setData({...data, password: value});
         }}
       />
       <PasswordField
         value={data?.confirm}
         setValue={(value: string) => {
-          setData({ ...data, confirm: value });
+          setData({...data, confirm: value});
         }}
       />
       <GetVerificationCode

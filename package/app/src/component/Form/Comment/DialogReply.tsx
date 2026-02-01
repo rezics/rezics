@@ -1,6 +1,12 @@
-import { useDialogStore } from "@/global/dialogStore";
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle } from "@mui/material";
-import React from "react";
+import {useDialogStore} from '@/global/dialogStore';
+import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+} from '@mui/material';
+import React from 'react';
 //  ;
 
 export namespace DialogReply {
@@ -10,13 +16,11 @@ export namespace DialogReply {
     onSubmit?: () => void;
   };
 
-  export const Show: React.FC<Show> = ({ open, onClose, onSubmit }) => {
+  export const Show: React.FC<Show> = ({open, onClose, onSubmit}) => {
     return (
       <Dialog open={open} onClose={onClose}>
         <DialogTitle>{/* Add your dialog content here */}</DialogTitle>
-        <DialogContent>
-          {/* Add your dialog content here */}
-        </DialogContent>
+        <DialogContent>{/* Add your dialog content here */}</DialogContent>
         <DialogActions>
           <Button onClick={onClose}>
             {/* Add your dialog content here */}
@@ -37,7 +41,7 @@ export namespace DialogReply {
     onSubmit?: () => void;
   };
 
-  export const Container: React.FC<Container> = ({ onSubmit }) => {
+  export const Container: React.FC<Container> = ({onSubmit}) => {
     const dialog = useDialogStore();
 
     const handleClose = () => {

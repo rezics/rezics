@@ -8,4 +8,3 @@ const RegisterPage = lazyRouteComponent(
 export const Route = createFileRoute('/_mainLayout/register')({
   component: RegisterPage,
 });
-

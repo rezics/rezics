@@ -8,4 +8,3 @@ const QuoteEditPageContainer = lazyRouteComponent(
 export const Route = createFileRoute('/_mainLayout/quote/$unitId/edit')({
   component: QuoteEditPageContainer,
 });
-

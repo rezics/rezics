@@ -78,12 +78,6 @@
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.formatOnSave": true,
   "typescript.experimental.useTsgo": true,
-  "[json]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
-  },
-  "[typescript]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
-  },
   "[prisma]": {
     "editor.defaultFormatter": "Prisma.prisma-insider"
   },
@@ -92,8 +86,5 @@
   },
   "material-icon-theme.folders.associations": {
     "component": "components"
-  },
-  "[typescriptreact]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
   }
 }

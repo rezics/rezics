@@ -1,5 +1,5 @@
-import React, { useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import React, {useMemo} from 'react';
+import {useQuery} from '@tanstack/react-query';
 import {
   Alert,
   Avatar,
@@ -28,13 +28,13 @@ import {
   mapUnitListToReadlistListResponse,
   mapUnitListToReviewListResponse,
 } from '@package/api/meili/meili.api';
-import { buildMeiliUnitQuery } from '@package/api/meili/meili.queries';
-import { UnitType } from '@package/contract';
-import { LazyLoadImage } from '../Common/LazyLoadImage';
-import { Masonry } from '@mui/lab';
-import { useThrottleMasonryParameters } from '@/util/useMasonryParameters';
-import { useTranslation } from 'react-i18next';
-import { Link } from '@package/ui/Navigation/Link.tsx';
+import {buildMeiliUnitQuery} from '@package/api/meili/meili.queries';
+import {UnitType} from '@package/contract';
+import {LazyLoadImage} from '../Common/LazyLoadImage';
+import {Masonry} from '@mui/lab';
+import {useThrottleMasonryParameters} from '@/util/useMasonryParameters';
+import {useTranslation} from 'react-i18next';
+import {Link} from '@package/ui/Navigation/Link.tsx';
 
 type Book = BookDTO;
 type Readlist = ReadlistDTO;
@@ -51,7 +51,7 @@ type SimpleQueryState<T> = {
 };
 
 function useHomeBooks(limit = 12): SimpleQueryState<Book> {
-  const { data, isLoading, error } = useQuery({
+  const {data, isLoading, error} = useQuery({
     queryKey: [
       'home',
       'meili',
@@ -63,7 +63,7 @@ function useHomeBooks(limit = 12): SimpleQueryState<Book> {
     queryFn: () =>
       meiliBookApi.bookSearch({
         limit,
-        sort: { type: 'createdAt', order: 'desc' },
+        sort: {type: 'createdAt', order: 'desc'},
       } as any),
     staleTime: 1000 * 60,
   });
@@ -76,11 +76,11 @@ function useHomeBooks(limit = 12): SimpleQueryState<Book> {
 
   const total: number | undefined = (data as any)?.total;
 
-  return { items, total, isLoading, error };
+  return {items, total, isLoading, error};
 }
 
 function useHomeReadlists(limit = 6): SimpleQueryState<Readlist> {
-  const { data, isLoading, error } = useQuery(
+  const {data, isLoading, error} = useQuery(
     buildMeiliUnitQuery(
       UnitType.READLIST,
       0,
@@ -95,11 +95,11 @@ function useHomeReadlists(limit = 6): SimpleQueryState<Readlist> {
   const items = useMemo<Readlist[]>(() => data?.readlists ?? [], [data]);
   const total: number | undefined = data?.total;
 
-  return { items, total, isLoading, error };
+  return {items, total, isLoading, error};
 }
 
 function useHomeReviews(limit = 6): SimpleQueryState<Review> {
-  const { data, isLoading, error } = useQuery(
+  const {data, isLoading, error} = useQuery(
     buildMeiliUnitQuery(
       UnitType.REVIEW,
       0,
@@ -113,11 +113,11 @@ function useHomeReviews(limit = 6): SimpleQueryState<Review> {
   const items = useMemo<Review[]>(() => data?.reviews ?? [], [data]);
   const total: number | undefined = data?.total;
 
-  return { items, total, isLoading, error };
+  return {items, total, isLoading, error};
 }
 
 function useHomeQuotes(limit = 6): SimpleQueryState<Quote> {
-  const { data, isLoading, error } = useQuery(
+  const {data, isLoading, error} = useQuery(
     buildMeiliUnitQuery(
       UnitType.QUOTE,
       0,
@@ -125,26 +125,26 @@ function useHomeQuotes(limit = 6): SimpleQueryState<Quote> {
       '',
       limit,
       (unitResp: UnitListResponse) =>
-      ({
-        quotes: (unitResp.units ?? []).map(unit => ({
-          id: unit.id,
-          text: (unit.content as string) ?? '',
-          from: unit.title ?? undefined,
-          bookId: unit.targetUnitId ?? undefined,
-          created_at:
-            typeof unit.createdAt === 'string'
-              ? unit.createdAt
-              : unit.createdAt?.toString(),
-        })),
-        total: unitResp.total,
-      } as { quotes: Quote[]; total?: number }),
+        ({
+          quotes: (unitResp.units ?? []).map(unit => ({
+            id: unit.id,
+            text: (unit.content as string) ?? '',
+            from: unit.title ?? undefined,
+            bookId: unit.targetUnitId ?? undefined,
+            created_at:
+              typeof unit.createdAt === 'string'
+                ? unit.createdAt
+                : unit.createdAt?.toString(),
+          })),
+          total: unitResp.total,
+        } as {quotes: Quote[]; total?: number}),
     ),
   );
 
   const items = useMemo<Quote[]>(() => data?.quotes ?? [], [data]);
   const total: number | undefined = data?.total;
 
-  return { items, total, isLoading, error };
+  return {items, total, isLoading, error};
 }
 
 type SectionHeaderProps = {
@@ -183,10 +183,10 @@ type BooksSectionProps = {
   limit?: number;
 };
 
-const BooksSection: React.FC<BooksSectionProps> = ({ limit = 50 }) => {
-  const { t } = useTranslation();
-  const { items, error, isLoading } = useHomeBooks(limit);
-  const { columns, spacing } = useThrottleMasonryParameters();
+const BooksSection: React.FC<BooksSectionProps> = ({limit = 50}) => {
+  const {t} = useTranslation();
+  const {items, error, isLoading} = useHomeBooks(limit);
+  const {columns, spacing} = useThrottleMasonryParameters();
 
   if (error) {
     return (
@@ -272,9 +272,9 @@ type ReadlistsSectionProps = {
   limit?: number;
 };
 
-const ReadlistsSection: React.FC<ReadlistsSectionProps> = ({ limit = 6 }) => {
-  const { t } = useTranslation();
-  const { items, error, isLoading } = useHomeReadlists(limit);
+const ReadlistsSection: React.FC<ReadlistsSectionProps> = ({limit = 6}) => {
+  const {t} = useTranslation();
+  const {items, error, isLoading} = useHomeReadlists(limit);
 
   if (error) {
     return (
@@ -329,13 +329,13 @@ const ReadlistsSection: React.FC<ReadlistsSectionProps> = ({ limit = 6 }) => {
                     >
                       {list.books?.length
                         ? t('readlist.includes_books', {
-                          count: list.books.length,
-                        })
+                            count: list.books.length,
+                          })
                         : ''}{' '}
                       {list.reviews?.length
                         ? t('readlist.includes_reviews', {
-                          count: list.reviews.length,
-                        })
+                            count: list.reviews.length,
+                          })
                         : ''}
                     </Typography>
                   </div>
@@ -353,9 +353,9 @@ type ReviewsSectionProps = {
   limit?: number;
 };
 
-const ReviewsSection: React.FC<ReviewsSectionProps> = ({ limit = 6 }) => {
-  const { t } = useTranslation();
-  const { items, error, isLoading } = useHomeReviews(limit);
+const ReviewsSection: React.FC<ReviewsSectionProps> = ({limit = 6}) => {
+  const {t} = useTranslation();
+  const {items, error, isLoading} = useHomeReviews(limit);
 
   if (error) {
     return (
@@ -389,7 +389,7 @@ const ReviewsSection: React.FC<ReviewsSectionProps> = ({ limit = 6 }) => {
                       <Avatar
                         src={review.user.avatar ?? undefined}
                         alt={review.user.name}
-                        sx={{ width: 36, height: 36 }}
+                        sx={{width: 36, height: 36}}
                       />
                     ) : undefined
                   }
@@ -427,9 +427,9 @@ type QuotesSectionProps = {
   limit?: number;
 };
 
-const QuotesSection: React.FC<QuotesSectionProps> = ({ limit = 6 }) => {
-  const { t } = useTranslation();
-  const { items, error, isLoading } = useHomeQuotes(limit);
+const QuotesSection: React.FC<QuotesSectionProps> = ({limit = 6}) => {
+  const {t} = useTranslation();
+  const {items, error, isLoading} = useHomeQuotes(limit);
 
   if (error) {
     return (
@@ -488,7 +488,7 @@ const QuotesSection: React.FC<QuotesSectionProps> = ({ limit = 6 }) => {
 const LockedPanel: React.FC<{
   children: React.ReactNode;
   className?: string;
-}> = ({ children, className }) => {
+}> = ({children, className}) => {
   return (
     <Paper
       className={`${className} p-4 lg:h-[42rem] rounded-lg`}
@@ -523,7 +523,7 @@ export type HomeMeiliDiscoverySectionProps = {
  */
 export const HomeMeiliDiscoverySection: React.FC<
   HomeMeiliDiscoverySectionProps
-> = ({ bookLimit = 50, readlistLimit = 6, reviewLimit = 6, quoteLimit = 6 }) => {
+> = ({bookLimit = 50, readlistLimit = 6, reviewLimit = 6, quoteLimit = 6}) => {
   return (
     <div className="mt-8 space-y-6">
       {/* 第一行：为你推荐 + 精选书单 */}

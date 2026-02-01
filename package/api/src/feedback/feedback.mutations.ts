@@ -70,5 +70,3 @@ export const feedbackMutations = {
   useCreate: useCreateFeedbackMutation,
   useSetResolved: useSetFeedbackResolvedMutation,
 };
-
-

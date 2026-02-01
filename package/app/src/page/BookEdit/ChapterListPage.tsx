@@ -1,22 +1,22 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 
-import { LinearChapterListEdit } from '@/component/Book/Chapter/LinearChapterListEdit';
-import { ChapterArboristHeightSlider } from '@/component/Book/Chapter/ChapterArboristHeightSlider';
-import { AccentBarWithTextShow } from '@/component/Common/Navigation/AccentBar';
-import { Alert, Button } from '@mui/material';
-import { useQueryClient } from '@tanstack/react-query';
-import { bookChapterIndexQuery } from '@package/api/book/book';
+import {LinearChapterListEdit} from '@/component/Book/Chapter/LinearChapterListEdit';
+import {ChapterArboristHeightSlider} from '@/component/Book/Chapter/ChapterArboristHeightSlider';
+import {AccentBarWithTextShow} from '@/component/Common/Navigation/AccentBar';
+import {Alert, Button} from '@mui/material';
+import {useQueryClient} from '@tanstack/react-query';
+import {bookChapterIndexQuery} from '@package/api/book/book';
 
-import { Tab, Tabs } from '@mui/material';
-import { TabContext, TabPanel } from '@mui/lab';
-import { ChapterTreeJsonEditor } from '@/component/Book/Chapter/ChapterTreeJsonEditor';
-import { bookEditLayoutRoute } from '@/router';
+import {Tab, Tabs} from '@mui/material';
+import {TabContext, TabPanel} from '@mui/lab';
+import {ChapterTreeJsonEditor} from '@/component/Book/Chapter/ChapterTreeJsonEditor';
+import {bookEditLayoutRoute} from '@/router';
 
 /**
  * TODO 增加 JSON 编辑
  */
 export const BookEditChapterListPage: React.FC = () => {
-  const { bookId } = bookEditLayoutRoute.useParams();
+  const {bookId} = bookEditLayoutRoute.useParams();
   const queryClient = useQueryClient();
   const containerRef = useRef<HTMLDivElement>(null);
   const [parentWidth, setParentWidth] = useState<number>(0);
@@ -44,7 +44,7 @@ export const BookEditChapterListPage: React.FC = () => {
     );
     const json = chapterIndex;
     const jsonString = JSON.stringify(json);
-    const blob = new Blob([jsonString], { type: 'application/json' });
+    const blob = new Blob([jsonString], {type: 'application/json'});
     const url = URL.createObjectURL(blob);
     const date = new Date().toISOString().split('T')[0];
     const a = document.createElement('a');

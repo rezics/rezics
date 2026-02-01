@@ -1,4 +1,8 @@
-import { createFileRoute, lazyRouteComponent, Outlet } from '@tanstack/react-router';
+import {
+  createFileRoute,
+  lazyRouteComponent,
+  Outlet,
+} from '@tanstack/react-router';
 
 export const Route = createFileRoute('/_mainLayout/tag/book/$bookId')({
   component: Outlet,
@@ -7,4 +11,3 @@ export const Route = createFileRoute('/_mainLayout/tag/book/$bookId')({
     'NotFoundContainer',
   ),
 });
-

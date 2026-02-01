@@ -9,11 +9,11 @@ import {
 } from '@mui/icons-material';
 import ThumbDownAltOutlinedIcon from '@mui/icons-material/ThumbDownAltOutlined';
 import ThumbUpAltOutlinedIcon from '@mui/icons-material/ThumbUpAltOutlined';
-import { IconButton, Popper, Tooltip } from '@mui/material';
-import React, { useEffect, useState } from 'react';
-import { ReactionBarToolBox } from './reactionBarToolBox';
-import { useAlertStore } from '@/global/windowAlertStore';
-import { BookmarkTagManager } from './BookmarkTagManager';
+import {IconButton, Popper, Tooltip} from '@mui/material';
+import React, {useEffect, useState} from 'react';
+import {ReactionBarToolBox} from './reactionBarToolBox';
+import {useAlertStore} from '@/global/windowAlertStore';
+import {BookmarkTagManager} from './BookmarkTagManager';
 
 import {
   useCreateReactionMutation,
@@ -47,13 +47,13 @@ export function ReactionAdminBar({
 }: ReactionAdminBarProps) {
   return (
     <div className={`flex items-center ${className}`}>
-      <IconButton size={size} sx={{ fontSize }} onClick={onEdit} className="ml-2">
+      <IconButton size={size} sx={{fontSize}} onClick={onEdit} className="ml-2">
         <EditOutlined fontSize="inherit" />
       </IconButton>
 
       <IconButton
         size={size}
-        sx={{ fontSize }}
+        sx={{fontSize}}
         onClick={onDelete}
         className="ml-2"
       >
@@ -98,7 +98,7 @@ export const ReactionBar: React.FC<ReactionBarProps> = ({
   };
 
   const [isToolBoxOpen, setIsToolBoxOpen] = useState(false);
-  const { show: showAlert } = useAlertStore();
+  const {show: showAlert} = useAlertStore();
 
   const [anchorBookmarkEl, setBookmarkAnchorEl] = useState<null | HTMLElement>(
     null,
@@ -140,10 +140,10 @@ export const ReactionBar: React.FC<ReactionBarProps> = ({
     const hasReaction = userReactions.includes(reaction);
 
     if (hasReaction) {
-      deleteReactionMutation.mutate({ targetId: unitId, reaction });
+      deleteReactionMutation.mutate({targetId: unitId, reaction});
       setUserReactions(prev => prev.filter(r => r !== reaction));
     } else {
-      createReactionMutation.mutate({ targetId: unitId, reaction });
+      createReactionMutation.mutate({targetId: unitId, reaction});
       setUserReactions(prev => [...prev, reaction]);
     }
   };
@@ -155,7 +155,7 @@ export const ReactionBar: React.FC<ReactionBarProps> = ({
           <div>
             <IconButton
               size={size}
-              sx={{ fontSize }}
+              sx={{fontSize}}
               onClick={() => handleToggleReaction('like')}
             >
               <ThumbUpAltOutlinedIcon
@@ -169,7 +169,7 @@ export const ReactionBar: React.FC<ReactionBarProps> = ({
           <div>
             <IconButton
               size={size}
-              sx={{ fontSize }}
+              sx={{fontSize}}
               onClick={() => handleToggleReaction('dislike')}
             >
               <ThumbDownAltOutlinedIcon
@@ -182,7 +182,7 @@ export const ReactionBar: React.FC<ReactionBarProps> = ({
 
         {!hideReply && (
           <div>
-            <IconButton size={size} sx={{ fontSize }} onClick={handleReply}>
+            <IconButton size={size} sx={{fontSize}} onClick={handleReply}>
               <ChatBubbleOutline fontSize="inherit" />
             </IconButton>
           </div>
@@ -192,7 +192,7 @@ export const ReactionBar: React.FC<ReactionBarProps> = ({
           <div>
             <IconButton
               size={size}
-              sx={{ fontSize }}
+              sx={{fontSize}}
               onClick={event => {
                 handleBookmarkMenuToggle(event);
               }}
@@ -210,7 +210,7 @@ export const ReactionBar: React.FC<ReactionBarProps> = ({
           anchorEl={anchorBookmarkEl}
           placement="right-start"
           modifiers={[
-            { name: 'flip', enabled: true },
+            {name: 'flip', enabled: true},
             {
               name: 'preventOverflow',
               options: {
@@ -238,7 +238,7 @@ export const ReactionBar: React.FC<ReactionBarProps> = ({
           <div>
             <IconButton
               size={size}
-              sx={{ fontSize }}
+              sx={{fontSize}}
               onClick={() => {
                 showAlert('链接已经复制到剪贴板');
                 const origin = window?.location?.origin;
@@ -268,12 +268,12 @@ export function AwardReactionBar() {
     <div>
       <Tooltip title="Funny">
         <IconButton size="medium">
-          <SentimentSatisfiedAlt style={{ fontSize: '1rem' }} />
+          <SentimentSatisfiedAlt style={{fontSize: '1rem'}} />
         </IconButton>
       </Tooltip>
       <Tooltip title="Award">
         <IconButton size="medium">
-          <EmojiEvents style={{ fontSize: '1rem' }} />
+          <EmojiEvents style={{fontSize: '1rem'}} />
         </IconButton>
       </Tooltip>
     </div>

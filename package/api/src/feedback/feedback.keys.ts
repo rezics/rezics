@@ -14,7 +14,8 @@ export const feedbackKeys = {
    * Keys for list queries
    */
   lists: () => [...feedbackKeys.all(), 'list'] as const,
-  list: (filters?: FeedbackFilters) => [...feedbackKeys.lists(), filters] as const,
+  list: (filters?: FeedbackFilters) =>
+    [...feedbackKeys.lists(), filters] as const,
 
   /**
    * Keys for "my feedback" queries
@@ -34,5 +35,3 @@ export const feedbackKeys = {
   details: () => [...feedbackKeys.all(), 'detail'] as const,
   detail: (id: string) => [...feedbackKeys.details(), id] as const,
 } as const;
-
-

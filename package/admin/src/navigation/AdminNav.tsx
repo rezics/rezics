@@ -11,12 +11,16 @@ import {
   Typography,
 } from '@mui/material';
 import React from 'react';
-import { useRouterState } from '@tanstack/react-router';
+import {useRouterState} from '@tanstack/react-router';
 
-import { adminConfig } from '@/config/adminConfig';
-import { Link } from '@package/ui/Navigation/Link.tsx';
+import {adminConfig} from '@/config/adminConfig';
+import {Link} from '@package/ui/Navigation/Link.tsx';
 
-import type { AdminNavEntry, AdminNavGroup, AdminNavItem } from './adminNavConfig';
+import type {
+  AdminNavEntry,
+  AdminNavGroup,
+  AdminNavItem,
+} from './adminNavConfig';
 
 function isGroup(entry: AdminNavEntry): entry is AdminNavGroup {
   return 'children' in entry;
@@ -40,13 +44,13 @@ export function AdminNav({
   items: AdminNavEntry[];
   onNavigate?: () => void;
 }) {
-  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const pathname = useRouterState({select: s => s.location.pathname});
 
   const initialOpenGroups = React.useMemo(() => {
     const open: Record<string, boolean> = {};
     for (const entry of items) {
       if (isGroup(entry)) {
-        open[entry.id] = entry.children.some((child) =>
+        open[entry.id] = entry.children.some(child =>
           isActivePath(pathname, child.to),
         );
       }
@@ -58,12 +62,12 @@ export function AdminNav({
     React.useState<Record<string, boolean>>(initialOpenGroups);
 
   React.useEffect(() => {
-    setOpenGroups((prev) => {
+    setOpenGroups(prev => {
       let changed = false;
-      const next = { ...prev };
+      const next = {...prev};
       for (const entry of items) {
         if (isGroup(entry)) {
-          const shouldOpen = entry.children.some((child) =>
+          const shouldOpen = entry.children.some(child =>
             isActivePath(pathname, child.to),
           );
           if (next[entry.id] !== shouldOpen) {
@@ -76,14 +80,18 @@ export function AdminNav({
     });
   }, [items, pathname]);
 
-  const renderItem = (item: AdminNavItem, depth: number, siblings?: AdminNavItem[]) => {
+  const renderItem = (
+    item: AdminNavItem,
+    depth: number,
+    siblings?: AdminNavItem[],
+  ) => {
     let selected = isActivePath(pathname, item.to);
 
     // Avoid the "List" item being selected when a more specific sibling route is active.
     // Example: `/users` matches `/users/create` by prefix, but only `Create` should be selected.
     if (selected && siblings?.length) {
       const hasMoreSpecificActiveSibling = siblings.some(
-        (s) =>
+        s =>
           s.id !== item.id &&
           s.to.startsWith(`${item.to}/`) &&
           isActivePath(pathname, s.to),
@@ -105,15 +113,15 @@ export function AdminNav({
           mx: 1,
         }}
       >
-        <ListItemIcon sx={{ minWidth: 36 }}>{item.icon}</ListItemIcon>
+        <ListItemIcon sx={{minWidth: 36}}>{item.icon}</ListItemIcon>
         <ListItemText primary={item.label} />
       </ListItemButton>
     );
   };
 
   return (
-    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-      <Box sx={{ px: 2, py: 2 }}>
+    <Box sx={{height: '100%', display: 'flex', flexDirection: 'column'}}>
+      <Box sx={{px: 2, py: 2}}>
         <Typography variant="subtitle1" fontWeight={700}>
           {adminConfig.appName}
         </Typography>
@@ -123,13 +131,16 @@ export function AdminNav({
       </Box>
       <Divider />
 
-      <List dense sx={{ py: 1, display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-        {items.map((entry) => {
+      <List
+        dense
+        sx={{py: 1, display: 'flex', flexDirection: 'column', gap: 0.5}}
+      >
+        {items.map(entry => {
           if (isItem(entry)) return renderItem(entry, 0);
           if (!isGroup(entry)) return null;
 
           const open = !!openGroups[entry.id];
-          const anySelected = entry.children.some((child) =>
+          const anySelected = entry.children.some(child =>
             isActivePath(pathname, child.to),
           );
 
@@ -137,7 +148,7 @@ export function AdminNav({
             <Box key={entry.id}>
               <ListItemButton
                 onClick={() =>
-                  setOpenGroups((prev) => ({
+                  setOpenGroups(prev => ({
                     ...prev,
                     [entry.id]: !prev[entry.id],
                   }))
@@ -150,13 +161,15 @@ export function AdminNav({
                   mx: 1,
                 }}
               >
-                <ListItemIcon sx={{ minWidth: 36 }}>{entry.icon}</ListItemIcon>
+                <ListItemIcon sx={{minWidth: 36}}>{entry.icon}</ListItemIcon>
                 <ListItemText primary={entry.label} />
                 {open ? <ExpandLessIcon /> : <ExpandMoreIcon />}
               </ListItemButton>
               <Collapse in={open} timeout="auto" unmountOnExit>
-                <List dense sx={{ py: 0.5 }}>
-                  {entry.children.map((child) => renderItem(child, 1, entry.children))}
+                <List dense sx={{py: 0.5}}>
+                  {entry.children.map(child =>
+                    renderItem(child, 1, entry.children),
+                  )}
                 </List>
               </Collapse>
             </Box>
@@ -164,9 +177,9 @@ export function AdminNav({
         })}
       </List>
 
-      <Box sx={{ flex: 1 }} />
+      <Box sx={{flex: 1}} />
       <Divider />
-      <Box sx={{ px: 2, py: 1.5 }}>
+      <Box sx={{px: 2, py: 1.5}}>
         <Typography variant="caption" color="text.secondary">
           REZICS Book Library
         </Typography>
@@ -174,4 +187,3 @@ export function AdminNav({
     </Box>
   );
 }
-

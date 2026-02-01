@@ -1,16 +1,17 @@
-import { useQuery } from '@tanstack/react-query';
-import { tagQueries } from '@package/api/tag/tag';
-import { AccentBarWithTextShow } from '@/component/Common/Navigation/AccentBar';
-import { TagWrapper } from '@/component/Tag/TagWrapper';
-import { tagDomainRoute, tagDomainTitleRoute } from '@/router';
+import {useQuery} from '@tanstack/react-query';
+import {tagQueries} from '@package/api/tag/tag';
+import {AccentBarWithTextShow} from '@/component/Common/Navigation/AccentBar';
+import {TagWrapper} from '@/component/Tag/TagWrapper';
+import {tagDomainRoute, tagDomainTitleRoute} from '@/router';
 
 export function TagDomainPage() {
-  const withTitleMatch = tagDomainTitleRoute.useMatch({ shouldThrow: false });
-  const baseMatch = tagDomainRoute.useMatch({ shouldThrow: false });
-  const unitId = withTitleMatch?.params.unitId ?? baseMatch?.params.unitId ?? '';
+  const withTitleMatch = tagDomainTitleRoute.useMatch({shouldThrow: false});
+  const baseMatch = tagDomainRoute.useMatch({shouldThrow: false});
+  const unitId =
+    withTitleMatch?.params.unitId ?? baseMatch?.params.unitId ?? '';
   const title = withTitleMatch?.params.title;
-  const { data, isLoading, error } = useQuery(
-    tagQueries.list({ domainId: unitId }),
+  const {data, isLoading, error} = useQuery(
+    tagQueries.list({domainId: unitId}),
   );
   if (isLoading) {
     return (
@@ -33,7 +34,7 @@ export function TagDomainPage() {
   return (
     <div className="w-11/12 mx-auto mt-10">
       <AccentBarWithTextShow text={title ?? `域（${unitId}）`} />
-      <TagWrapper filters={{ domainId: unitId }} mode="flat" />
+      <TagWrapper filters={{domainId: unitId}} mode="flat" />
     </div>
   );
 }

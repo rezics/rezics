@@ -8,7 +8,6 @@ max_wal_senders = 10
 max_replication_slots = 10
 ```
 
-
 pg_hba.conf
 
 如果是远程机器，需要修改

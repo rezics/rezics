@@ -21,5 +21,3 @@ export type {
   CreateApiTokenResponse,
   UpdateApiTokenInput,
 };
-
-

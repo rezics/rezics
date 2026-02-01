@@ -48,5 +48,3 @@ export function hasPermissionToDeleteUnit(
 ): boolean {
   return hasPermissionToUpdateUnit(user, unit);
 }
-
-

@@ -1,9 +1,9 @@
-import "i18next";
-import type enUS from "@/locale/en-US.ts";
+import 'i18next';
+import type enUS from '@/locale/en-US.ts';
 
-declare module "i18next" {
+declare module 'i18next' {
   interface CustomTypeOptions {
-    defaultNS: "translation";
+    defaultNS: 'translation';
     resources: {
       translation: typeof enUS;
     };

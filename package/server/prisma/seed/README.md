@@ -28,12 +28,15 @@ prisma/
 ## Module Details
 
 ### `seed.ts`
+
 **Purpose**: Main entry point that orchestrates the entire seeding process.
 
 **Key Functions**:
+
 - `main()`: Coordinates all seeding operations in the correct order
 
 **Process Flow**:
+
 1. Reset database
 2. Seed users
 3. Seed tags
@@ -45,9 +48,11 @@ prisma/
 ---
 
 ### `types.ts`
+
 **Purpose**: Central type definitions used across all seed modules.
 
 **Exports**:
+
 - `CreatedUser`: User data structure after creation
 - `CreatedUnit`: Unit data structure after creation
 - `SeedCounts`: Configuration interface for seed counts
@@ -55,13 +60,16 @@ prisma/
 ---
 
 ### `config.ts`
+
 **Purpose**: Configuration management and environment variable parsing.
 
 **Exports**:
+
 - `envInt()`: Parse integer from environment variables with fallback
 - `DEFAULT_COUNTS`: Default seed counts from environment or defaults
 
 **Environment Variables**:
+
 - `SEED_USERS` (default: 20)
 - `SEED_TAGS` (default: 40)
 - `SEED_BOOKS` (default: 50)
@@ -71,9 +79,11 @@ prisma/
 ---
 
 ### `utils.ts`
+
 **Purpose**: General-purpose utility functions for random data generation.
 
 **Exports**:
+
 - `randomInt()`: Generate random integer within range
 - `randomFloat()`: Generate random float within range
 - `randomBoolean()`: Generate boolean with configurable probability
@@ -85,9 +95,11 @@ prisma/
 ---
 
 ### `generators.ts`
+
 **Purpose**: Domain-specific data generation functions.
 
 **Exports**:
+
 - `generateBookExtra()`: Generate book metadata (publisher, year, etc.)
 - `generateChapters()`: Generate chapter index JSON
 - `buildUnitTitleByType()`: Generate appropriate title based on unit type
@@ -96,12 +108,15 @@ prisma/
 ---
 
 ### `database.ts`
+
 **Purpose**: Database cleanup and reset operations.
 
 **Exports**:
+
 - `resetDatabase()`: Delete all data in correct order respecting foreign keys
 
 **Delete Order** (important for foreign key constraints):
+
 1. CommentIndex
 2. UnitReactions
 3. UnitStats
@@ -113,12 +128,15 @@ prisma/
 ---
 
 ### `users.ts`
+
 **Purpose**: User account seeding.
 
 **Exports**:
+
 - `seedUsers()`: Create user accounts with profiles
 
 **Generated Data**:
+
 - Email (unique)
 - Password hash
 - Slug (unique, URL-friendly)
@@ -130,12 +148,15 @@ prisma/
 ---
 
 ### `tags.ts`
+
 **Purpose**: Tag creation for categorizing content.
 
 **Exports**:
+
 - `seedTags()`: Create tags with associated units
 
 **Tag Types**:
+
 - `general`: General purpose tags
 - `genre`: Genre classifications
 - `author`: Author-related tags
@@ -144,12 +165,15 @@ prisma/
 ---
 
 ### `books.ts`
+
 **Purpose**: Book content seeding.
 
 **Exports**:
+
 - `seedBooks()`: Create book units with full metadata
 
 **Generated Data**:
+
 - Unit (title, content, status, publishing date)
 - Book details (authors, cover, ISBN, chapters, description)
 - UnitStats (initialized)
@@ -158,12 +182,15 @@ prisma/
 ---
 
 ### `units.ts`
+
 **Purpose**: Seeding for non-book, non-comment unit types.
 
 **Exports**:
+
 - `seedOtherUnits()`: Create various unit types
 
 **Unit Types Generated**:
+
 - `NOTE`: User notes
 - `REVIEW`: Book reviews with ratings
 - `QUOTE`: Book quotes with chapter references
@@ -175,13 +202,16 @@ prisma/
 ---
 
 ### `comments.ts`
+
 **Purpose**: Comment thread generation and statistics updates.
 
 **Exports**:
+
 - `seedComments()`: Create comment threads with parent-child relationships
 - `updateStatsWithCommentCounts()`: Update unit stats with comment counts
 
 **Features**:
+
 - Nested comment threads (max depth configurable)
 - Parent-child relationships
 - Root unit association
@@ -190,9 +220,11 @@ prisma/
 ---
 
 ### `data.ts`
+
 **Purpose**: Static data and fixtures.
 
 **Exports**:
+
 - `getRandomBookCover()`: Get random book cover URL from curated list
 
 ---
@@ -244,8 +276,8 @@ To add a new entity type:
    export async function seedAuthors(
      prisma: PrismaClient,
      total: number,
-     dependencies: DependencyType[]
-   ): Promise<CreatedAuthor[]>
+     dependencies: DependencyType[],
+   ): Promise<CreatedAuthor[]>;
    ```
 3. Import and call in `seed.ts` main function
 4. Add configuration to `config.ts` if needed

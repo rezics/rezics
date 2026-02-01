@@ -1,4 +1,10 @@
-import {Card, CardContent, FormControlLabel, Switch, Typography} from '@mui/material';
+import {
+  Card,
+  CardContent,
+  FormControlLabel,
+  Switch,
+  Typography,
+} from '@mui/material';
 import React from 'react';
 
 import {Page} from '@/page/Page';
@@ -17,7 +23,7 @@ export default function SettingsPage() {
             control={
               <Switch
                 checked={dark}
-                onChange={(e) => setDark(e.target.checked)}
+                onChange={e => setDark(e.target.checked)}
               />
             }
             label="Dark mode（示例：后续可接入持久化 + ThemeProvider）"
@@ -27,4 +33,3 @@ export default function SettingsPage() {
     </Page>
   );
 }
-

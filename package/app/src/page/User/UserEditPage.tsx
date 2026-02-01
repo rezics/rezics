@@ -12,17 +12,17 @@ import {
 } from '@mui/material';
 import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Cancel';
-import { useEffect, useState } from 'react';
-import type { FC } from 'react';
+import {useEffect, useState} from 'react';
+import type {FC} from 'react';
 import type React from 'react';
-import { useTranslation } from 'react-i18next';
-import type { UserDTO, UpdateUserInput } from '@package/contract';
-import { useQuery } from '@tanstack/react-query';
-import { userQueries } from '@package/api/user/user.queries';
-import { UserLoading } from './UserState';
-import { userApi } from '@package/api/user/user.api';
-import { PasswordField } from '@/component/Form/PasswordField';
-import { userEditRoute } from '@/router';
+import {useTranslation} from 'react-i18next';
+import type {UserDTO, UpdateUserInput} from '@package/contract';
+import {useQuery} from '@tanstack/react-query';
+import {userQueries} from '@package/api/user/user.queries';
+import {UserLoading} from './UserState';
+import {userApi} from '@package/api/user/user.api';
+import {PasswordField} from '@/component/Form/PasswordField';
+import {userEditRoute} from '@/router';
 
 export interface UserEditPageProps {
   onCancel?: () => void;
@@ -39,9 +39,9 @@ export const UserEditPage: FC<UserEditPageProps> = ({
   onSuccess,
   unitId,
 }) => {
-  const routeMatch = userEditRoute.useMatch({ shouldThrow: false });
+  const routeMatch = userEditRoute.useMatch({shouldThrow: false});
   const resolvedUnitId = unitId ?? routeMatch?.params.unitId;
-  const { t } = useTranslation();
+  const {t} = useTranslation();
   const [user, setUser] = useState<UserDTO | null>(null);
   const {
     data,
@@ -103,7 +103,7 @@ export const UserEditPage: FC<UserEditPageProps> = ({
       }
 
       // Clear password field after successful update
-      setFormData(prev => ({ ...prev, password: '' }));
+      setFormData(prev => ({...prev, password: ''}));
     } catch (err) {
       setError(err);
     } finally {
@@ -112,7 +112,7 @@ export const UserEditPage: FC<UserEditPageProps> = ({
   };
 
   const handleChange = (field: keyof UpdateUserInput, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData(prev => ({...prev, [field]: value}));
   };
 
   if (isLoading) {
@@ -132,7 +132,7 @@ export const UserEditPage: FC<UserEditPageProps> = ({
       <Card className="shadow-lg rounded-2xl">
         <CardHeader
           avatar={
-            <Avatar src={formData.avatar} sx={{ width: 80, height: 80 }}>
+            <Avatar src={formData.avatar} sx={{width: 80, height: 80}}>
               {formData.name?.charAt(0).toUpperCase()}
             </Avatar>
           }

@@ -1,21 +1,21 @@
-import React, { useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import React, {useMemo} from 'react';
+import {useQuery} from '@tanstack/react-query';
 import {
   meiliBookApi,
   mapUnitListToReadlistListResponse,
   mapUnitListToReviewListResponse,
 } from '@package/api/meili/meili.api';
-import { buildMeiliUnitQuery } from '@package/api/meili/meili.queries';
-import { UnitType } from '@package/contract';
+import {buildMeiliUnitQuery} from '@package/api/meili/meili.queries';
+import {UnitType} from '@package/contract';
 import type {
   BookDTO,
   ReadlistDTO,
   ReviewDTO,
   UnitListResponse,
 } from '@package/contract';
-import { LazyLoadImage } from '@/component/Common/LazyLoadImage';
-import { useTranslation } from 'react-i18next';
-import { Link } from '@package/ui/Navigation/Link.tsx';
+import {LazyLoadImage} from '@/component/Common/LazyLoadImage';
+import {useTranslation} from 'react-i18next';
+import {Link} from '@package/ui/Navigation/Link.tsx';
 
 type Book = BookDTO;
 type Readlist = ReadlistDTO;
@@ -29,12 +29,12 @@ type SimpleQueryState<T> = {
 };
 
 function useHomeBooks(limit = 8): SimpleQueryState<Book> {
-  const { data, isLoading, error } = useQuery({
-    queryKey: ['home', 'meili', 'books', { limit }],
+  const {data, isLoading, error} = useQuery({
+    queryKey: ['home', 'meili', 'books', {limit}],
     queryFn: () =>
       meiliBookApi.bookSearch({
         limit,
-        sort: { type: 'createdAt', order: 'desc' },
+        sort: {type: 'createdAt', order: 'desc'},
       } as any),
     staleTime: 1000 * 60,
   });
@@ -43,11 +43,11 @@ function useHomeBooks(limit = 8): SimpleQueryState<Book> {
     return ((data as any)?.books ?? []) as Book[];
   }, [data]);
 
-  return { items, total: (data as any)?.total, isLoading, error };
+  return {items, total: (data as any)?.total, isLoading, error};
 }
 
 function useHomeReadlists(limit = 4): SimpleQueryState<Readlist> {
-  const { data, isLoading, error } = useQuery(
+  const {data, isLoading, error} = useQuery(
     buildMeiliUnitQuery(
       UnitType.READLIST,
       0,
@@ -58,11 +58,11 @@ function useHomeReadlists(limit = 4): SimpleQueryState<Readlist> {
         mapUnitListToReadlistListResponse(unitResp),
     ),
   );
-  return { items: data?.readlists ?? [], total: data?.total, isLoading, error };
+  return {items: data?.readlists ?? [], total: data?.total, isLoading, error};
 }
 
 function useHomeReviews(limit = 4): SimpleQueryState<Review> {
-  const { data, isLoading, error } = useQuery(
+  const {data, isLoading, error} = useQuery(
     buildMeiliUnitQuery(
       UnitType.REVIEW,
       0,
@@ -72,11 +72,11 @@ function useHomeReviews(limit = 4): SimpleQueryState<Review> {
       (unitResp: UnitListResponse) => mapUnitListToReviewListResponse(unitResp),
     ),
   );
-  return { items: data?.reviews ?? [], total: data?.total, isLoading, error };
+  return {items: data?.reviews ?? [], total: data?.total, isLoading, error};
 }
 
 // Section Header Component
-const SectionHeader: React.FC<{ title: string; link?: string }> = ({
+const SectionHeader: React.FC<{title: string; link?: string}> = ({
   title,
   link,
 }) => (
@@ -91,15 +91,15 @@ const SectionHeader: React.FC<{ title: string; link?: string }> = ({
 );
 
 const I18nViewMore: React.FC = () => {
-  const { t } = useTranslation();
+  const {t} = useTranslation();
   return <>{t('common.view_more')}</>;
 };
 
 // Book Card Component
-const MobileBookCard: React.FC<{ book: Book }> = ({ book }) => (
+const MobileBookCard: React.FC<{book: Book}> = ({book}) => (
   <Link
     to="/book/$bookId"
-    params={{ bookId: book.unitId }}
+    params={{bookId: book.unitId}}
     className="block space-y-2 w-[100px] flex-shrink-0"
   >
     <div className="aspect-[2/3] rounded-lg overflow-hidden bg-muted shadow-sm">
@@ -121,10 +121,10 @@ const MobileBookCard: React.FC<{ book: Book }> = ({ book }) => (
 );
 
 // Readlist Card Component
-const MobileReadlistCard: React.FC<{ readlist: Readlist }> = ({ readlist }) => (
+const MobileReadlistCard: React.FC<{readlist: Readlist}> = ({readlist}) => (
   <Link
     to="/readlist/$readlistId"
-    params={{ readlistId: readlist.id }}
+    params={{readlistId: readlist.id}}
     className="block w-[240px] flex-shrink-0"
   >
     <div className="rounded-xl bg-card border border-border p-3 space-y-2 shadow-sm h-full">
@@ -149,15 +149,15 @@ const MobileReadlistCard: React.FC<{ readlist: Readlist }> = ({ readlist }) => (
 );
 
 const I18nNoDescription: React.FC = () => {
-  const { t } = useTranslation();
+  const {t} = useTranslation();
   return <>{t('common.no_description')}</>;
 };
 
 // Review Card Component
-const MobileReviewCard: React.FC<{ review: Review }> = ({ review }) => (
+const MobileReviewCard: React.FC<{review: Review}> = ({review}) => (
   <Link
     to="/review/$reviewId"
-    params={{ reviewId: review.unitId }}
+    params={{reviewId: review.unitId}}
     className="block w-[240px] flex-shrink-0"
   >
     <div className="rounded-xl bg-card border border-border p-3 space-y-2 shadow-sm h-full">
@@ -179,10 +179,10 @@ const MobileReviewCard: React.FC<{ review: Review }> = ({ review }) => (
 );
 
 export const MobileHomeDiscovery: React.FC = () => {
-  const { t } = useTranslation();
-  const { items: books } = useHomeBooks(8);
-  const { items: readlists } = useHomeReadlists(4);
-  const { items: reviews } = useHomeReviews(4);
+  const {t} = useTranslation();
+  const {items: books} = useHomeBooks(8);
+  const {items: readlists} = useHomeReadlists(4);
+  const {items: reviews} = useHomeReviews(4);
 
   return (
     <div className="space-y-8 pb-8">

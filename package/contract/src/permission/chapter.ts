@@ -34,5 +34,3 @@ export function hasPermissionToDeleteChapter(
 ): boolean {
   return hasPermissionToUpdateChapter(user, unit);
 }
-
-

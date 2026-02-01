@@ -8,4 +8,3 @@ const ReviewNewPage = lazyRouteComponent(
 export const Route = createFileRoute('/_mainLayout/review/new/$bookUnitId')({
   component: ReviewNewPage,
 });
-

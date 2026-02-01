@@ -8,7 +8,7 @@ import {
   Stack,
   Typography,
 } from '@mui/material';
-import { useNavigate } from '@tanstack/react-router';
+import {useNavigate} from '@tanstack/react-router';
 import React from 'react';
 import {MiniActionBar} from '@/component/Common/Reaction/MiniActionBar';
 import {LazyLoadImage} from '../Common/LazyLoadImage';
@@ -39,7 +39,7 @@ export function SingleReadlist({
           boxShadow: 4,
         },
       }}
-      onClick={e => navigate({ to: `/readlist/${data.id}` })}
+      onClick={e => navigate({to: `/readlist/${data.id}`})}
     >
       <CardContent sx={{flex: 1, display: 'flex', flexDirection: 'column'}}>
         <Typography variant="h6" fontWeight="bold" gutterBottom>

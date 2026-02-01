@@ -1,9 +1,9 @@
 import TextField from '@mui/material/TextField';
-import { useTranslation } from 'react-i18next';
-import React, { useState, type FC } from 'react';
+import {useTranslation} from 'react-i18next';
+import React, {useState, type FC} from 'react';
 import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
-import { Visibility, VisibilityOff } from '@mui/icons-material';
+import {Visibility, VisibilityOff} from '@mui/icons-material';
 
 interface PasswordFieldProps {
   name?: string;
@@ -27,7 +27,7 @@ export const PasswordField: FC<PasswordFieldProps> = ({
   className,
   required = true,
 }) => {
-  const { t } = useTranslation();
+  const {t} = useTranslation();
   const [showPassword, setShowPassword] = useState(false);
 
   const handleMouseDownPassword = (

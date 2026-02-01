@@ -1,5 +1,11 @@
-import { applyTheme, argbFromHex, hexFromArgb, Scheme, themeFromSourceColor } from "@material/material-color-utilities";
-import { PaletteOptions } from "@mui/material/styles";
+import {
+  applyTheme,
+  argbFromHex,
+  hexFromArgb,
+  Scheme,
+  themeFromSourceColor,
+} from '@material/material-color-utilities';
+import {PaletteOptions} from '@mui/material/styles';
 
 /**
  * 从源颜色生成 Material Design 3 动态主题颜色
@@ -91,7 +97,7 @@ export function generateDynamicColors(
  */
 export function dynamicColorsToPalette(
   colors: DynamicColorScheme,
-  mode: "light" | "dark",
+  mode: 'light' | 'dark',
 ): PaletteOptions {
   return {
     mode,
@@ -142,23 +148,23 @@ export function dynamicColorsToPalette(
     },
     divider: colors.outlineVariant,
     // 添加自定义颜色到调色板
-    ...(mode === "light"
+    ...(mode === 'light'
       ? {
-        surface: {
-          main: colors.surface,
-          variant: colors.surfaceVariant,
-          container: colors.primaryContainer,
-          onContainer: colors.onPrimaryContainer,
-        },
-      }
+          surface: {
+            main: colors.surface,
+            variant: colors.surfaceVariant,
+            container: colors.primaryContainer,
+            onContainer: colors.onPrimaryContainer,
+          },
+        }
       : {
-        surface: {
-          main: colors.surface,
-          variant: colors.surfaceVariant,
-          container: colors.primaryContainer,
-          onContainer: colors.onPrimaryContainer,
-        },
-      }),
+          surface: {
+            main: colors.surface,
+            variant: colors.surfaceVariant,
+            container: colors.primaryContainer,
+            onContainer: colors.onPrimaryContainer,
+          },
+        }),
   };
 }
 
@@ -166,31 +172,31 @@ export function dynamicColorsToPalette(
  * 预定义的种子颜色选项
  */
 export const PRESET_COLORS = {
-  red: "#f44336",
-  pink: "#e91e63",
-  purple: "#9c27b0",
-  deepPurple: "#673ab7",
-  indigo: "#3f51b5",
-  blue: "#2196f3",
-  lightBlue: "#03a9f4",
-  cyan: "#00bcd4",
-  teal: "#009688",
-  green: "#4caf50",
-  lightGreen: "#8bc34a",
-  lime: "#cddc39",
-  yellow: "#ffeb3b",
-  amber: "#ffc107",
-  orange: "#ff9800",
-  deepOrange: "#ff5722",
-  brown: "#795548",
-  grey: "#9e9e9e",
-  blueGrey: "#607d8b",
+  red: '#f44336',
+  pink: '#e91e63',
+  purple: '#9c27b0',
+  deepPurple: '#673ab7',
+  indigo: '#3f51b5',
+  blue: '#2196f3',
+  lightBlue: '#03a9f4',
+  cyan: '#00bcd4',
+  teal: '#009688',
+  green: '#4caf50',
+  lightGreen: '#8bc34a',
+  lime: '#cddc39',
+  yellow: '#ffeb3b',
+  amber: '#ffc107',
+  orange: '#ff9800',
+  deepOrange: '#ff5722',
+  brown: '#795548',
+  grey: '#9e9e9e',
+  blueGrey: '#607d8b',
   // 自定义颜色
-  coral: "#f4606c",
-  mint: "#00d4aa",
-  lavender: "#b19cd9",
-  peach: "#ffab91",
-  sage: "#a5d6a7",
+  coral: '#f4606c',
+  mint: '#00d4aa',
+  lavender: '#b19cd9',
+  peach: '#ffab91',
+  sage: '#a5d6a7',
 } as const;
 
 /**
@@ -199,14 +205,14 @@ export const PRESET_COLORS = {
 export async function extractColorFromImage(imageUrl: string): Promise<string> {
   return new Promise((resolve, reject) => {
     const img = new Image();
-    img.crossOrigin = "anonymous";
+    img.crossOrigin = 'anonymous';
 
     img.onload = () => {
-      const canvas = document.createElement("canvas");
-      const ctx = canvas.getContext("2d");
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
 
       if (!ctx) {
-        reject(new Error("无法获取 Canvas 上下文"));
+        reject(new Error('无法获取 Canvas 上下文'));
         return;
       }
 
@@ -214,16 +220,11 @@ export async function extractColorFromImage(imageUrl: string): Promise<string> {
       canvas.height = img.height;
       ctx.drawImage(img, 0, 0);
 
-      const imageData = ctx.getImageData(
-        0,
-        0,
-        canvas.width,
-        canvas.height,
-      );
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
       const data = imageData.data;
 
       // 简单的颜色提取算法：找到最常见的颜色
-      const colorCounts: { [key: string]: number } = {};
+      const colorCounts: {[key: string]: number} = {};
 
       for (let i = 0; i < data.length; i += 4) {
         const r = data[i];
@@ -233,11 +234,11 @@ export async function extractColorFromImage(imageUrl: string): Promise<string> {
 
         // 跳过透明像素或无效像素
         if (
-          alpha === undefined
-          || alpha < 128
-          || r === undefined
-          || g === undefined
-          || b === undefined
+          alpha === undefined ||
+          alpha < 128 ||
+          r === undefined ||
+          g === undefined ||
+          b === undefined
         ) {
           continue;
         }
@@ -253,7 +254,7 @@ export async function extractColorFromImage(imageUrl: string): Promise<string> {
 
       // 找到最常见的颜色
       let maxCount = 0;
-      let dominantColor = "128,128,128"; // 默认灰色
+      let dominantColor = '128,128,128'; // 默认灰色
 
       for (const [color, count] of Object.entries(colorCounts)) {
         if (count > maxCount) {
@@ -262,21 +263,19 @@ export async function extractColorFromImage(imageUrl: string): Promise<string> {
         }
       }
 
-      const [r, g, b] = dominantColor.split(",").map(Number);
+      const [r, g, b] = dominantColor.split(',').map(Number);
       if (r !== undefined && g !== undefined && b !== undefined) {
-        const hexColor = `#${r.toString(16).padStart(2, "0")}${
-          g
-            .toString(16)
-            .padStart(2, "0")
-        }${b.toString(16).padStart(2, "0")}`;
+        const hexColor = `#${r.toString(16).padStart(2, '0')}${g
+          .toString(16)
+          .padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
         resolve(hexColor);
       } else {
-        resolve("#808080"); // 默认灰色
+        resolve('#808080'); // 默认灰色
       }
     };
 
     img.onerror = () => {
-      reject(new Error("无法加载图片"));
+      reject(new Error('无法加载图片'));
     };
 
     img.src = imageUrl;
@@ -294,51 +293,51 @@ export function applyDynamicThemeToDOM(
   const root = document.documentElement;
 
   // 应用主要颜色
-  root.style.setProperty("--md-sys-color-primary", colors.primary);
-  root.style.setProperty("--md-sys-color-on-primary", colors.onPrimary);
+  root.style.setProperty('--md-sys-color-primary', colors.primary);
+  root.style.setProperty('--md-sys-color-on-primary', colors.onPrimary);
   root.style.setProperty(
-    "--md-sys-color-primary-container",
+    '--md-sys-color-primary-container',
     colors.primaryContainer,
   );
   root.style.setProperty(
-    "--md-sys-color-on-primary-container",
+    '--md-sys-color-on-primary-container',
     colors.onPrimaryContainer,
   );
 
   // 应用次要颜色
-  root.style.setProperty("--md-sys-color-secondary", colors.secondary);
-  root.style.setProperty("--md-sys-color-on-secondary", colors.onSecondary);
+  root.style.setProperty('--md-sys-color-secondary', colors.secondary);
+  root.style.setProperty('--md-sys-color-on-secondary', colors.onSecondary);
   root.style.setProperty(
-    "--md-sys-color-secondary-container",
+    '--md-sys-color-secondary-container',
     colors.secondaryContainer,
   );
   root.style.setProperty(
-    "--md-sys-color-on-secondary-container",
+    '--md-sys-color-on-secondary-container',
     colors.onSecondaryContainer,
   );
 
   // 应用表面颜色
-  root.style.setProperty("--md-sys-color-surface", colors.surface);
-  root.style.setProperty("--md-sys-color-on-surface", colors.onSurface);
+  root.style.setProperty('--md-sys-color-surface', colors.surface);
+  root.style.setProperty('--md-sys-color-on-surface', colors.onSurface);
   root.style.setProperty(
-    "--md-sys-color-surface-variant",
+    '--md-sys-color-surface-variant',
     colors.surfaceVariant,
   );
   root.style.setProperty(
-    "--md-sys-color-on-surface-variant",
+    '--md-sys-color-on-surface-variant',
     colors.onSurfaceVariant,
   );
 
   // 应用背景颜色
-  root.style.setProperty("--md-sys-color-background", colors.background);
-  root.style.setProperty("--md-sys-color-on-background", colors.onBackground);
+  root.style.setProperty('--md-sys-color-background', colors.background);
+  root.style.setProperty('--md-sys-color-on-background', colors.onBackground);
 
   // 应用其他系统颜色
-  root.style.setProperty("--md-sys-color-outline", colors.outline);
+  root.style.setProperty('--md-sys-color-outline', colors.outline);
   root.style.setProperty(
-    "--md-sys-color-outline-variant",
+    '--md-sys-color-outline-variant',
     colors.outlineVariant,
   );
-  root.style.setProperty("--md-sys-color-shadow", colors.shadow);
-  root.style.setProperty("--md-sys-color-scrim", colors.scrim);
+  root.style.setProperty('--md-sys-color-shadow', colors.shadow);
+  root.style.setProperty('--md-sys-color-scrim', colors.scrim);
 }

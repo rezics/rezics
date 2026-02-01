@@ -1,18 +1,18 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Tabs, Tab, Box, Tooltip, Chip, Paper, Typography } from '@mui/material';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useRouterState } from '@tanstack/react-router';
-import { useTranslation } from 'react-i18next';
-import { Link } from '@package/ui/Navigation/Link.tsx';
+import React, {useEffect, useMemo, useRef, useState} from 'react';
+import {Tabs, Tab, Box, Tooltip, Chip, Paper, Typography} from '@mui/material';
+import {useQuery, useQueryClient} from '@tanstack/react-query';
+import {useRouterState} from '@tanstack/react-router';
+import {useTranslation} from 'react-i18next';
+import {Link} from '@package/ui/Navigation/Link.tsx';
 
 import {
   UniversalPaginator,
   type UniversalPaginatorHandle,
 } from '@/component/Common/Navigation/Pagination';
-import type { UnitDTO, UnitType } from '@package/contract';
-import { SimpleSearchInput } from '@/component/Search/SimpleSearchInput';
-import { buildUnitUrl } from '@/util/buildUrlUtil';
-import { buildMeiliUnitQuery } from '@package/api/meili/meili.queries';
+import type {UnitDTO, UnitType} from '@package/contract';
+import {SimpleSearchInput} from '@/component/Search/SimpleSearchInput';
+import {buildUnitUrl} from '@/util/buildUrlUtil';
+import {buildMeiliUnitQuery} from '@package/api/meili/meili.queries';
 
 type Unit = UnitDTO;
 
@@ -35,7 +35,7 @@ function defaultChildren(units: Unit[]) {
                     label={item.type || 'UNKNOWN'}
                     size="small"
                     variant="outlined"
-                    onClick={() => { }}
+                    onClick={() => {}}
                     className="text-[11px]"
                   />
                 </Link>
@@ -98,10 +98,10 @@ export const UnitsPage: React.FC<UnitsPageProps> = ({
   targetUnitId,
   children = defaultChildren,
 }) => {
-  const { t } = useTranslation();
+  const {t} = useTranslation();
   const ref = useRef<UniversalPaginatorHandle>(null);
   const queryClient = useQueryClient();
-  const search = useRouterState({ select: s => s.location.search ?? '' });
+  const search = useRouterState({select: s => s.location.search ?? ''});
   const searchParams = useMemo(() => new URLSearchParams(search), [search]);
 
   const isSingle = mode === 'single';
@@ -135,7 +135,7 @@ export const UnitsPage: React.FC<UnitsPageProps> = ({
   // ensure startMap has keys for current tabTypes
   useEffect(() => {
     setStartMap(prev => {
-      const next = { ...prev };
+      const next = {...prev};
       types.forEach(t => {
         if (next[t] == null) next[t] = 0;
       });
@@ -148,7 +148,7 @@ export const UnitsPage: React.FC<UnitsPageProps> = ({
     return unitResp;
   }
 
-  const { queryKey, queryFn } = buildMeiliUnitQuery(
+  const {queryKey, queryFn} = buildMeiliUnitQuery(
     tab === 'UNIT' ? undefined : (tab as keyof typeof UnitType),
     startMap[tab] ?? 0,
     targetUnitId ?? '',
@@ -160,7 +160,7 @@ export const UnitsPage: React.FC<UnitsPageProps> = ({
     },
   );
 
-  const { data: activeData, isLoading } = useQuery({
+  const {data: activeData, isLoading} = useQuery({
     queryKey,
     queryFn,
   });
@@ -168,12 +168,12 @@ export const UnitsPage: React.FC<UnitsPageProps> = ({
   function handleNeedMoreData(page: number) {
     const externalStart = (page - 1) * EXTERNAL_PAGE_SIZE;
     const t = tab;
-    setStartMap(prev => ({ ...prev, [t]: externalStart }));
+    setStartMap(prev => ({...prev, [t]: externalStart}));
   }
 
   async function handlePreRequestData(page: number) {
     const start = (page - 1) * EXTERNAL_PAGE_SIZE;
-    const { queryKey, queryFn } = buildMeiliUnitQuery(
+    const {queryKey, queryFn} = buildMeiliUnitQuery(
       tab === 'UNIT' ? undefined : (tab as keyof typeof UnitType),
       start,
       targetUnitId ?? '',
@@ -184,7 +184,7 @@ export const UnitsPage: React.FC<UnitsPageProps> = ({
         userId,
       },
     );
-    const nextData = await queryClient.fetchQuery({ queryKey, queryFn });
+    const nextData = await queryClient.fetchQuery({queryKey, queryFn});
     return nextData?.units?.length ?? 0;
   }
 
@@ -206,7 +206,7 @@ export const UnitsPage: React.FC<UnitsPageProps> = ({
         externalItemsPerPage={EXTERNAL_PAGE_SIZE}
         sortType={undefined as any}
         sortOrder={undefined as any}
-        onSortChange={() => { }}
+        onSortChange={() => {}}
         requestData={handleNeedMoreData}
         preRequestData={handlePreRequestData}
         isLoading={isLoading && units.length === 0}
@@ -218,11 +218,11 @@ export const UnitsPage: React.FC<UnitsPageProps> = ({
               onSearch={info => {
                 setKeyword(info ?? '');
               }}
-              defaultValue={{ keyword: keyword ?? '' }}
+              defaultValue={{keyword: keyword ?? ''}}
               placeholder={t('units.search_placeholder')}
             />
             {!isSingle && (
-              <Box sx={{ borderBottom: 1, borderColor: 'divider', mt: 2, mb: 2 }}>
+              <Box sx={{borderBottom: 1, borderColor: 'divider', mt: 2, mb: 2}}>
                 <Tabs
                   value={tab}
                   onChange={(_, v) => setTab(v)}

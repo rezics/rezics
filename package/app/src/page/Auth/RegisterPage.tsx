@@ -9,7 +9,7 @@ import {Layout} from './lib/Layout.tsx';
 import {ModalLayout} from './lib/ModalLayout.tsx';
 import {validateEmail, validateSlug, validatePassword} from './lib/validate.ts';
 import {useUserStore} from '@/global/userStore.ts';
-import { useNavigate, useRouterState } from '@tanstack/react-router';
+import {useNavigate, useRouterState} from '@tanstack/react-router';
 import {Turnstile} from '@/component/Form/Turnstile.tsx';
 import {PasswordField} from '@/component/Form/PasswordField';
 import {
@@ -55,7 +55,7 @@ export const RegisterPage: FC<RegisterPageProps> = ({
   const verificationRef = useRef<GetVerificationCodeHandle | null>(null);
   const {setUser} = useUserStore();
   const navigate = useNavigate();
-  const pathname = useRouterState({ select: s => s.location.pathname });
+  const pathname = useRouterState({select: s => s.location.pathname});
 
   const handleSubmit = async () => {
     let hasError = false;
@@ -97,7 +97,7 @@ export const RegisterPage: FC<RegisterPageProps> = ({
     if (!hasError) {
       onClose?.();
       if (pathname === '/register') {
-        navigate({ to: '/' });
+        navigate({to: '/'});
       }
     }
   };
@@ -111,7 +111,7 @@ export const RegisterPage: FC<RegisterPageProps> = ({
     if (onLoginClick) {
       onLoginClick();
     } else {
-      navigate({ to: '/login' });
+      navigate({to: '/login'});
       onClose?.();
     }
   };
