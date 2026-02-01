@@ -9,17 +9,17 @@ import {
   generateDynamicColors,
 } from './config/dynamicTheme.ts';
 import {getDynamicTheme, getTheme} from './config/theme.ts';
-import {appStore} from './global/appStore.ts';
-import {PersistentSettingsLoader} from './plugin/providers/PersistentSettingsLoader.tsx';
-import {ReactQueryProvider} from './plugin/providers/react-query.tsx';
+import {appStore} from '@/global/appStore.ts';
+import {PersistentSettingsLoader} from './providers/PersistentSettingsLoader.tsx';
+import {ReactQueryProvider} from './providers/react-query.tsx';
 import {ErrorBoundary} from 'react-error-boundary';
-import {WindowAlert} from './component/Common/Overlay/WindowAlert.tsx';
-import {HelpFab} from './component/Common/UI/Button/HelpWidget.tsx';
+import {WindowAlert} from '@/component/Common/Overlay/WindowAlert.tsx';
+import {HelpFab} from '@/component/Common/UI/Button/HelpWidget.tsx';
 import {HelmetProvider} from 'react-helmet-async';
-import {useAppInit} from './plugin/providers/useAppInit.ts';
+import {useAppInit} from './providers/useAppInit.ts';
 import {RouterProvider} from '@tanstack/react-router';
 
-import {router} from './router.tsx';
+import {router} from '@/routes/router.tsx';
 
 export default function App() {
   const themeMode = appStore(s => s.theme);

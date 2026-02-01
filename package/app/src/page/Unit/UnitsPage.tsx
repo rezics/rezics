@@ -11,7 +11,7 @@ import {
 } from '@/component/Common/Navigation/Pagination';
 import type {UnitDTO, UnitType} from '@package/contract';
 import {SimpleSearchInput} from '@/component/Search/SimpleSearchInput';
-import {buildUnitUrl} from '@/util/buildUrlUtil';
+import {buildUnitUrl} from '@/shared/util/buildUrlUtil';
 import {buildMeiliUnitQuery} from '@package/api/meili/meili.queries';
 
 type Unit = UnitDTO;

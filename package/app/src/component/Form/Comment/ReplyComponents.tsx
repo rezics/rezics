@@ -4,7 +4,7 @@ import {commentQueries} from '@package/api/comment/comment.queries';
 import {Avatar} from '@mui/material';
 import {useQuery} from '@tanstack/react-query';
 import React, {useCallback, useRef} from 'react';
-// import { scrollToElementWithOffsetUniversal } from "@/util/domUtils";
+// import { scrollToElementWithOffsetUniversal } from "@/shared/util/domUtils";
 
 interface ReplyComponentsProps {
   bookListId: string;

@@ -1,6 +1,6 @@
 import throttle from 'lodash/throttle';
 import React, {useEffect, useRef, useState} from 'react';
-import {useIsMobile} from '@/util/useMediaQueryUtil';
+import {useIsMobile} from '@/shared/util/useMediaQueryUtil';
 
 interface DraggableResizerProps {
   /** Id of the sidebar wrapper element whose width will be controlled. */

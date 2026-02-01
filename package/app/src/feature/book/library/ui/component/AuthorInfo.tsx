@@ -7,7 +7,7 @@ import {useTranslation} from 'react-i18next';
 import type {PublicUser} from '@package/contract';
 import {FollowButton} from '@component/Common/Reaction/FollowButton.tsx';
 import {LazyLoadImage} from '@/component/Common/LazyLoadImage';
-import {useIsMobile} from '@/util/useMediaQueryUtil.ts';
+import {useIsMobile} from '@/shared/util/useMediaQueryUtil.ts';
 import {useNavigate} from '@tanstack/react-router';
 
 // --------- Types ---------
@@ -97,7 +97,10 @@ const AuthorInfoDesktop: React.FC<AuthorInfoLayoutProps> = ({
             />
           </ArrowForwardIconContainer>
           {showEditButton && (
-            <EditButtonFloatRightShow onClick={onEdit} text={t('common.edit')} />
+            <EditButtonFloatRightShow
+              onClick={onEdit}
+              text={t('common.edit')}
+            />
           )}
         </div>
 

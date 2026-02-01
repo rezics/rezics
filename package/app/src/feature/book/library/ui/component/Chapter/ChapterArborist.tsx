@@ -24,7 +24,7 @@ import {
   findAndEdit,
   findAndInsert,
   findAndRemove,
-} from '@/util/arboristTreeUtil.ts';
+} from '@/shared/util/arboristTreeUtil.ts';
 
 import {Button} from '@mui/material';
 

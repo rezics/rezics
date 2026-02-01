@@ -1,4 +1,4 @@
-import {isEmptyValue} from '@/util/dataCheck.ts';
+import {isEmptyValue} from '@/shared/util/dataCheck.ts';
 import React from 'react';
 import {QuoteExcerptListContainer} from '@component/Review/QuoteExcerptList.tsx';
 
@@ -18,7 +18,10 @@ export type QuoteExcerptPreviewProps = {
 /**
  * Quote Excerpt Preview - Displays a preview of quotes for a book.
  */
-export const QuoteExcerptPreview: React.FC<QuoteExcerptPreviewProps> = ({id, quoteNumber = 3}) => {
+export const QuoteExcerptPreview: React.FC<QuoteExcerptPreviewProps> = ({
+  id,
+  quoteNumber = 3,
+}) => {
   const {t} = useTranslation();
   const {data, isLoading, error} = useQuery(
     buildMeiliUnitQuery(

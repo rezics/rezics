@@ -13,7 +13,7 @@ import {
   CarouselContent,
   CarouselItem,
   type CarouselApi,
-} from '@/component/ui/carousel';
+} from '@/component/shadcn/carousel';
 interface BookCarouselProps {
   autoplayIntervalNum?: number;
 }

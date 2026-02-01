@@ -8,7 +8,7 @@ import {CollapsibleByLineTextContainer} from '../Common/UI/Text/CollapsibleByLin
 import {
   parseReactionSummaries,
   type ReactionSummaryDTO,
-} from '@/util/reactionSummariesParser';
+} from '@/shared/util/reactionSummariesParser';
 
 import {LazyLoadImage} from '../Common/LazyLoadImage';
 import {RouterLink} from '@package/ui/Navigation/RouterLink.tsx';

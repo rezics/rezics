@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {X, Menu} from 'lucide-react';
-import {cn} from '@/lib/utils';
+import {cn} from '@/shared/shadcn/lib/utils';
 
 // --- 类型定义 ---
 export type SidebarMode = 'fixed' | 'inline';

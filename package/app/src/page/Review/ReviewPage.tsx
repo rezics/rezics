@@ -25,7 +25,7 @@ import {
   MiniAdminActionBar,
 } from '@/component/Common/Reaction/MiniActionBar';
 import {ReactionStatistics} from '@/component/Common/Reaction/ReactionStatistics';
-import {parseReactionSummaries} from '@/util/reactionSummariesParser';
+import {parseReactionSummaries} from '@/shared/util/reactionSummariesParser';
 import {RouterLink} from '@package/ui/Navigation/RouterLink.tsx';
 import {remarkRoute, reviewRoute} from '@/router';
 

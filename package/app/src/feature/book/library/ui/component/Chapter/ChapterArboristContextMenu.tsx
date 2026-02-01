@@ -6,7 +6,7 @@ import {
   insertSiblingAfter,
   moveSiblingFirst,
   moveSiblingLast,
-} from '@/util/arboristTreeUtil.ts';
+} from '@/shared/util/arboristTreeUtil.ts';
 import type {Chapter, ChapterContextMenuState} from './ChapterArborist';
 
 /** Props for ChapterArboristContextMenu component. */

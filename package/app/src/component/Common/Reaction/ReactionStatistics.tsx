@@ -1,4 +1,4 @@
-import {type ReactionSummaryDTO} from '@/util/reactionSummariesParser';
+import {type ReactionSummaryDTO} from '@/shared/util/reactionSummariesParser';
 
 export function ReactionStatistics({
   reactionSummaries,

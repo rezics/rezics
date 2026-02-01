@@ -9,7 +9,7 @@ import {
   CarouselContent,
   CarouselItem,
   type CarouselApi,
-} from '@/component/ui/carousel';
+} from '@/component/shadcn/carousel';
 
 export const MobileHomeCarousel: React.FC = () => {
   const {data} = useQuery(echoKvGetQuery('home_carousel'));
@@ -74,4 +74,3 @@ export const MobileHomeCarousel: React.FC = () => {
     </div>
   );
 };
-

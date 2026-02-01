@@ -1,4 +1,4 @@
-import {Button} from '@/component/ui/button';
+import {Button} from '@/component/shadcn/button';
 import {useState} from 'react';
 
 const builtinColors = [

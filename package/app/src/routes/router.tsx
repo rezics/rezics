@@ -1,6 +1,6 @@
 import {routeTree} from './routeTree.gen';
 import {createRouter} from '@tanstack/react-router';
-import {qc} from '@/plugin/providers/reactQueryUtil';
+import {qc} from '@/app/providers/reactQueryUtil';
 
 export const router = createRouter({
   routeTree,

@@ -7,7 +7,7 @@ import {AppBar, IconButton, Toolbar, Typography} from '@mui/material';
 import {useTheme} from '@mui/material/styles';
 import React from 'react';
 import {useTranslation} from 'react-i18next';
-import {cn} from '@/lib/utils';
+import {cn} from '@/shared/shadcn/lib/utils';
 import {Link} from '@package/ui/Navigation/Link.tsx';
 
 interface HeaderProps {

@@ -1,5 +1,5 @@
 import {atom} from 'jotai';
-import {atomFamily} from 'jotai/utils';
+import {atomFamily} from 'jotai-family';
 
 import type {BookDTO} from '@package/contract';
 
@@ -63,4 +63,3 @@ export const patchBookDetailAtomFamily = atomFamily((bookId: string) => {
 // ============================================================================
 
 export {useAtomValue, useSetAtom} from 'jotai';
-

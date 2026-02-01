@@ -27,7 +27,11 @@ import {
   type UniversalPaginatorHandle,
 } from '@/component/Common/Navigation/Pagination';
 
-import {Popover, PopoverContent, PopoverTrigger} from '@/component/ui/popover';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/component/shadcn/popover';
 import {useAlertStore} from '@/global/windowAlertStore';
 import {Link} from '@package/ui/Navigation/Link.tsx';
 

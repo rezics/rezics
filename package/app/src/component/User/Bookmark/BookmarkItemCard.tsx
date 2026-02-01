@@ -14,7 +14,7 @@ import {
 } from '@mui/material';
 import {Delete} from '@mui/icons-material';
 import {type BookmarkEntry} from '@/page/User/BookmarkPage';
-import {buildUnitUrl} from '@/util/buildUrlUtil';
+import {buildUnitUrl} from '@/shared/util/buildUrlUtil';
 import {Link} from '@package/ui/Navigation/Link.tsx';
 
 type BookmarkItemCardProps = {
