@@ -17,6 +17,7 @@
 - fix : NODE_ENV=production is not supported in the .env file. Only NODE_ENV=development is supported to create a development build of your project. If you need to set process.env.NODE_ENV, you can set it in the Vite config instead.
 - 好用的 JSON 编辑器
 - [ ] shadcn ui 的 主题切换的原理，如果定制是由于 css 的话。
+- [ ] i18n 切换到 Paraglide + (Sherlock 扩展)，或者等到切换的时候看看 i18n Ally 的支持性
 
 ## Complete
 
