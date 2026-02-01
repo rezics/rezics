@@ -11,7 +11,7 @@ import {useTranslation} from 'react-i18next';
 import {useQuery} from '@tanstack/react-query';
 
 import {bookQueries} from '@package/api/book/book.queries';
-import {AccentBarWithTextContainer} from '../../Common/Navigation/AccentBar';
+import {AccentBarWithTextContainer} from '@component/Common/Navigation/AccentBar.tsx';
 import {useChapterListStore} from '@/global/page/chapterListStore';
 import {Link} from '@package/ui/Navigation/Link.tsx';
 
@@ -308,13 +308,18 @@ export const ChapterTreeView = forwardRef<
   );
 });
 
-interface ChapterListContainerProps {
+/** Props for ChapterList component. */
+interface ChapterListProps {
+  /** Book unit ID. */
   id: string;
 }
 
-export const ChapterListContainer: React.FC<ChapterListContainerProps> = ({
-  id,
-}) => {
+/**
+ * Chapter List - Displays chapter tree with expand/collapse controls.
+ *
+ * Fetches chapter data and renders using ChapterTreeView.
+ */
+export const ChapterList: React.FC<ChapterListProps> = ({id}) => {
   const {t} = useTranslation();
   const {data, isLoading, error} = useQuery(bookQueries.chapterIndex(id));
 
@@ -364,3 +369,6 @@ export const ChapterListContainer: React.FC<ChapterListContainerProps> = ({
     </div>
   );
 };
+
+// Legacy export for backward compatibility
+export {ChapterList as ChapterListContainer};

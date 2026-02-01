@@ -1,5 +1,4 @@
-import {Alert} from '@mui/material';
-import {TextField, Button} from '@mui/material';
+import {Alert, Button, TextField} from '@mui/material';
 import {useEffect, useState} from 'react';
 import {echoKvGetQuery} from '@package/api/echokv/echokv';
 import {useQuery} from '@tanstack/react-query';
@@ -10,9 +9,7 @@ export function NewBookByUrl() {
     // TODO 对接爬虫
     console.log('create book', url);
   }
-  const supportedSitesQuery = useQuery(
-    echoKvGetQuery('crawler.supportedSites'),
-  );
+  const supportedSitesQuery = useQuery(echoKvGetQuery('crawler.supportedSites'));
   const [supportedSitesList, setSupportedSitesList] = useState<
     {name: string; url: string}[]
   >([]);
@@ -64,3 +61,4 @@ export function NewBookByUrl() {
     </div>
   );
 }
+

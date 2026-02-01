@@ -5,14 +5,20 @@ import {Link} from '@package/ui/Navigation/Link.tsx';
 import type {BookDTO} from '@package/contract';
 import {LazyLoadImage} from '@/component/Common/LazyLoadImage';
 
-// import { Book } from "contract/schema";
-type Book = BookDTO;
+import React from 'react';
 
-type BookListViewShowProps = {
-  books: Book[];
+/** Props for BookListViewItem component. */
+export type BookListViewItemProps = {
+  /** Book data to display. */
+  book: BookDTO;
 };
 
-export const BookListViewItem = ({book}: {book: Book}) => {
+/**
+ * Book List View Item - Single book card in the list.
+ *
+ * Displays book cover, title, author, and description preview.
+ */
+export const BookListViewItem: React.FC<BookListViewItemProps> = ({book}) => {
   return (
     <div>
       <Link to="/book/$bookId" params={{bookId: book.unitId}}>
@@ -22,7 +28,6 @@ export const BookListViewItem = ({book}: {book: Book}) => {
               <LazyLoadImage
                 src={book.coverUrl}
                 alt={book.title}
-                // style={{width: '36%', objectFit: 'cover'}}
                 className="!h-full object-cover w-full"
               />
             </CardMedia>
@@ -43,7 +48,6 @@ export const BookListViewItem = ({book}: {book: Book}) => {
                 {book.description}
               </Typography>
             </div>
-            {/* 如果需要底部操作按钮之类的，可以放在这里 */}
           </CardContent>
         </Card>
       </Link>
@@ -51,7 +55,18 @@ export const BookListViewItem = ({book}: {book: Book}) => {
   );
 };
 
-export const BookListViewShow = ({books}: BookListViewShowProps) => {
+/** Props for BookListView component. */
+export type BookListViewProps = {
+  /** List of books to display. */
+  books: BookDTO[];
+};
+
+/**
+ * Book List View - Grid of book cards.
+ *
+ * Renders a list of BookListViewItem components.
+ */
+export const BookListView: React.FC<BookListViewProps> = ({books}) => {
   return (
     <div className="mt-4 grid grid-cols-1">
       {books.map(book => (
@@ -61,12 +76,4 @@ export const BookListViewShow = ({books}: BookListViewShowProps) => {
       ))}
     </div>
   );
-};
-
-export type BookListViewContainerProps = {
-  books: Book[];
-};
-
-export const BookListViewContainer = ({books}: BookListViewContainerProps) => {
-  return <BookListViewShow books={books} />;
 };

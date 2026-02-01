@@ -13,7 +13,7 @@ import {useTranslation} from 'react-i18next';
 import {reviewQueries} from '@package/api/review/review';
 import {MarkdownContent} from '@/component/Common/MarkdownContent';
 import {bookQueries} from '@package/api/book/book';
-import {BookListViewItem} from '@/component/BookLib/BookList/BookListView';
+import {BookListViewItem} from '@feature/book/library/ui/component/BookList/BookListView';
 import {useRef} from 'react';
 import TreeReplyComponents from '@/component/Form/Comment/TreeReplyComponents';
 import {ChatBubbleOutline} from '@mui/icons-material';

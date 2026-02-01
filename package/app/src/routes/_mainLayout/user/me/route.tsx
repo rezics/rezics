@@ -7,7 +7,7 @@ import {
 export const Route = createFileRoute('/_mainLayout/user/me')({
   component: Outlet,
   notFoundComponent: lazyRouteComponent(
-    () => import('@/page/NotFound'),
+    () => import('@feature/core/page/NotFound'),
     'NotFoundContainer',
   ),
 });

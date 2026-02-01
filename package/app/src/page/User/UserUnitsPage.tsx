@@ -19,7 +19,7 @@ import {mapUnitListToReviewListResponse} from '@package/api/meili/meili.api';
 import {SingleReadlist} from '@/component/ReadList/SingleReadlist';
 import {ReviewListContainer} from '@/component/Review/ReviewList';
 import {QuoteExcerptListContainer} from '@component/Review/QuoteExcerptList.tsx';
-import {BookListViewContainer} from '@/component/BookLib/BookList/BookListView';
+import {BookListView} from '@feature/book/library/ui/component/BookList/BookListView';
 
 type Readlist = ReadlistDTO;
 type Review = ReviewDTO;

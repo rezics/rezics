@@ -1,6 +1,6 @@
 // https://github.com/brimdata/react-arborist
 
-import {
+import React, {
   forwardRef,
   useCallback,
   useEffect,
@@ -9,7 +9,7 @@ import {
   useRef,
   useState,
 } from 'react';
-import {Tree} from 'react-arborist';
+import {Tree, TreeApi} from 'react-arborist';
 import type {DeleteHandler, MoveHandler, RenameHandler} from 'react-arborist';
 // 分离的 Node 渲染器工厂
 import {createChapterArboristNode} from './ChapterArboristNode.tsx';
@@ -28,30 +28,53 @@ import {
 
 import {Button} from '@mui/material';
 
+/** Chapter tree node structure for arborist. */
 export type Chapter = {
   id: string | number;
   title: string;
   children?: Chapter[];
 };
 
+/** Imperative handle for ChapterArborist component. */
 export interface ChapterArboristRefHandle {
   expandAll: () => void;
   collapseAll: () => void;
 }
 
+/** Context menu state for chapter tree. */
+export type ChapterContextMenuState = {
+  x: number;
+  y: number;
+  node: Chapter & {isOpen: boolean};
+} | null;
+
+/** Props for ChapterArborist component. */
 interface ChapterArboristProps {
-  chapterTree: any;
+  /** Chapter tree data. */
+  chapterTree: Chapter[];
+  /** Tree indentation in pixels. */
   treeIndent?: number;
+  /** Tree height in pixels. */
   tHeight: number;
+  /** Search term for filtering. */
   searchTerm: string;
+  /** Currently selected chapter ID. */
   selectedId: string;
+  /** Book unit ID for mutations. */
   bookUnitId: string;
+  /** Base link for chapter navigation. */
   baseLink: string;
+  /** Tree width in pixels. */
   width?: number;
+  /** Whether editing is enabled. */
   isEditable?: boolean;
+  /** Whether drag-and-drop is enabled. */
   isDraggable?: boolean;
+  /** Whether double-click rename is enabled. */
   enableDoubleClickRename?: boolean;
+  /** Whether to show the update button. */
   showUpdateButton?: boolean;
+  /** Whether in reading mode. */
   readingMode?: boolean;
 }
 
@@ -77,14 +100,11 @@ export const ChapterArborist = forwardRef<
     },
     ref,
   ) => {
-    const treeRef: any = useRef(null);
+    const treeRef = useRef<TreeApi<Chapter> | null>(null);
 
     const [treeData, setTreeData] = useState<Chapter[]>([]);
-    const [contextMenu, setContextMenu] = useState<{
-      x: number;
-      y: number;
-      node: any;
-    } | null>(null);
+    const [contextMenu, setContextMenu] =
+      useState<ChapterContextMenuState>(null);
     const [createChapterDialog, setCreateChapterDialog] =
       useState<boolean>(false);
     const [currentEditParentId, setCurrentEditParentId] = useState<
@@ -136,11 +156,11 @@ export const ChapterArborist = forwardRef<
       setTreeData(currentTree => findAndDelete(currentTree, ids) as Chapter[]);
     }, []);
 
-    function updateChapter(treeData: any) {
+    function updateChapter(data: Chapter[]) {
       try {
         updateChapterIndexMutation.mutateAsync({
           bookUnitId,
-          chaptersIndex: treeData,
+          chaptersIndex: data,
         });
       } catch (error) {
         showAlert(`创建章节失败: ${error}`);
@@ -222,7 +242,7 @@ export const ChapterArborist = forwardRef<
           className="p-2"
           role="presentation"
           onClick={() => setContextMenu(null)}
-          onKeyDown={(e: any) => {
+          onKeyDown={(e: React.KeyboardEvent) => {
             if (e.key === 'Escape') setContextMenu(null);
           }}
         >
@@ -253,7 +273,6 @@ export const ChapterArborist = forwardRef<
             <ChapterArboristContextMenu
               contextMenu={contextMenu}
               setContextMenu={setContextMenu}
-              treeRef={treeRef}
               setTreeData={setTreeData}
               handleCreate={handlePreCreate}
             />

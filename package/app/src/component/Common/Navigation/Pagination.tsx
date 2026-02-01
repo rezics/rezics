@@ -168,7 +168,7 @@ interface UniversalPaginatorProps<T> extends SortControlsProps {
    * @returns
    */
   requestData: (externalPage: number) => void;
-  preRequestData?: (externalPage: number) => Promise<number>;
+  preRequestData?: (page: number) => Promise<number | undefined>;
   children: (currentPageItems: T[]) => React.ReactNode;
   disableSortControl?: boolean;
   sortControl?: React.ReactElement<SortControlsProps>;

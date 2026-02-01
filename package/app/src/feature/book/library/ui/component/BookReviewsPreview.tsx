@@ -1,27 +1,35 @@
 import React, {useEffect, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 
-import {AccentBarWithTextShow} from '../Common/Navigation/AccentBar.tsx';
-import {ArrowForwardIconContainer} from '../Common/Navigation/ArrowForwardIcon.tsx';
-import {ReviewListContainer} from '../Review/ReviewList.tsx';
+import {AccentBarWithTextShow} from '@component/Common/Navigation/AccentBar.tsx';
+import {ArrowForwardIconContainer} from '@component/Common/Navigation/ArrowForwardIcon.tsx';
+import {ReviewListContainer} from '@component/Review/ReviewList.tsx';
 
 import {useQuery} from '@tanstack/react-query';
 import {buildMeiliUnitQuery} from '@package/api/meili/meili.queries';
 import {mapUnitListToReviewListResponse} from '@package/api/meili/meili.api';
-import {UnitType} from '@package/contract';
+import {UnitType, type ReviewDTO} from '@package/contract';
+
+/** Props for BookReviews component. */
 interface BookReviewsProps {
+  /** Book unit ID. */
   bookId: string;
+  /** Book title for display. */
   title: string;
+  /** Number of reviews to show. */
   reviewNumber?: number;
 }
 
+/**
+ * Book Reviews Preview - Displays a preview of reviews for a book.
+ */
 export const BookReviews: React.FC<BookReviewsProps> = ({
   bookId,
   title,
   reviewNumber = 4,
 }) => {
   const {t} = useTranslation();
-  const [reviews, setReviews] = useState<any[]>([]);
+  const [reviews, setReviews] = useState<ReviewDTO[]>([]);
 
   const {data} = useQuery(
     buildMeiliUnitQuery(

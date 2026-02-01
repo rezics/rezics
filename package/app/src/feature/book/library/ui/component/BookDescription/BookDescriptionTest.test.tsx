@@ -1,7 +1,7 @@
 import {useFixtureInput} from 'react-cosmos/client';
 import {faker} from '@faker-js/faker';
 import {BookDescription} from './index';
-import type {BookDescriptionShowProps} from './types';
+import type {BookDescriptionProps} from './types';
 import {useEffect, useState} from 'react';
 
 const Fixture = () => {
@@ -16,7 +16,7 @@ const Fixture = () => {
     setParagraph(faker.lorem.paragraph());
   }, []);
 
-  const [props] = useFixtureInput<BookDescriptionShowProps>('Props', {
+  const [props] = useFixtureInput<BookDescriptionProps>('Props', {
     description: description,
   });
 
@@ -24,17 +24,17 @@ const Fixture = () => {
     <div className="p-4 max-w-2xl">
       <h3 className="mb-4 text-lg font-semibold">Book Description Component</h3>
       <div className="border border-gray-200 rounded-lg p-4">
-        <BookDescription.Show {...props} />
+        <BookDescription {...props} />
       </div>
       <div className="mt-4 space-y-4">
         <div>
           <h4 className="font-medium mb-2">Different lengths</h4>
           <div className="space-y-2">
             <div className="border rounded p-2">
-              <BookDescription.Show description={sentence} />
+              <BookDescription description={sentence} />
             </div>
             <div className="border rounded p-2">
-              <BookDescription.Show description={paragraph} />
+              <BookDescription description={paragraph} />
             </div>
           </div>
         </div>

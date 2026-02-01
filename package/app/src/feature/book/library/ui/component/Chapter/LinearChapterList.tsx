@@ -3,17 +3,27 @@ import {useQuery} from '@tanstack/react-query';
 import {Divider, TextField, Button, Stack} from '@mui/material';
 
 import {bookQueries} from '@package/api/book/book.queries';
-import {ChapterArborist} from '@/component/Book/Chapter/ChapterArborist';
-import type {ChapterArboristRefHandle} from '@/component/Book/Chapter/ChapterArborist';
+import {ChapterArborist} from './ChapterArborist';
+import type {ChapterArboristRefHandle} from './ChapterArborist';
+import type {ChapterTreeItem} from '@package/contract';
 
+/** Props for LinearChapterList component. */
 interface LinearChapterListProps {
+  /** Width of the chapter list. */
   width?: number;
+  /** Height of the chapter list. */
   height?: number;
+  /** Book unit ID. */
   bookId: string;
+  /** Currently selected chapter ID. */
   chapterId?: string;
+  /** Whether in reading mode. */
   readingMode?: boolean;
 }
 
+/**
+ * Linear Chapter List - Displays chapter tree using arborist.
+ */
 export const LinearChapterList: React.FC<LinearChapterListProps> = ({
   bookId,
   chapterId,
@@ -21,7 +31,6 @@ export const LinearChapterList: React.FC<LinearChapterListProps> = ({
   height = 300,
   readingMode = false,
 }) => {
-  // Data fetching
   const {data, isLoading, error} = useQuery(bookQueries.chapterIndex(bookId));
 
   const selectedId = chapterId || '';
@@ -31,14 +40,18 @@ export const LinearChapterList: React.FC<LinearChapterListProps> = ({
     ? `/book/${bookId}/edit`
     : '';
 
-  const chapterTree: any = useMemo(() => data?.index ?? [], [data]);
+  const chapterTree: ChapterTreeItem[] = useMemo(
+    () => data?.index ?? [],
+    [data],
+  );
 
   const [searchTerm, setSearchTerm] = useState('');
   const arboristRef = useRef<ChapterArboristRefHandle | null>(null);
 
   if (!bookId) return null;
   if (isLoading) return <div>Loading...</div>;
-  if (error) return <div>Oh no... {String(error as any)}</div>;
+  if (error) return <div>Oh no... {String(error)}</div>;
+
   return (
     <div className="w-full">
       <div className="mx-auto">
@@ -65,7 +78,9 @@ export const LinearChapterList: React.FC<LinearChapterListProps> = ({
             label="Search"
             variant="standard"
             value={searchTerm}
-            onChange={(e: any) => setSearchTerm(e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setSearchTerm(e.target.value)
+            }
             placeholder="Enter search term"
             className="w-full"
           />

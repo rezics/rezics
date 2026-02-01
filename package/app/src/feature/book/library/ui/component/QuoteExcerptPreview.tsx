@@ -1,20 +1,24 @@
 import {isEmptyValue} from '@/util/dataCheck.ts';
 import React from 'react';
-import {QuoteExcerptListContainer} from '../Review/QuoteExcerptList.tsx';
+import {QuoteExcerptListContainer} from '@component/Review/QuoteExcerptList.tsx';
 
 import {useQuery} from '@tanstack/react-query';
 import {buildMeiliUnitQuery} from '@package/api/meili/meili.queries';
 import {UnitType} from '@package/contract';
 import {useTranslation} from 'react-i18next';
 
-export type QuoteExcerptPreviewContainerProps = {
+/** Props for QuoteExcerptPreview component. */
+export type QuoteExcerptPreviewProps = {
+  /** Book or target unit ID. */
   id: string;
+  /** Number of quotes to display. */
   quoteNumber?: number;
 };
 
-export const QuoteExcerptPreviewContainer: React.FC<
-  QuoteExcerptPreviewContainerProps
-> = ({id, quoteNumber = 3}) => {
+/**
+ * Quote Excerpt Preview - Displays a preview of quotes for a book.
+ */
+export const QuoteExcerptPreview: React.FC<QuoteExcerptPreviewProps> = ({id, quoteNumber = 3}) => {
   const {t} = useTranslation();
   const {data, isLoading, error} = useQuery(
     buildMeiliUnitQuery(
@@ -49,3 +53,6 @@ export const QuoteExcerptPreviewContainer: React.FC<
     </div>
   );
 };
+
+// Legacy export for backward compatibility
+export {QuoteExcerptPreview as QuoteExcerptPreviewContainer};

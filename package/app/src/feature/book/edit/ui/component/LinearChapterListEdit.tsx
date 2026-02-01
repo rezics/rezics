@@ -4,19 +4,31 @@ import {Divider, Switch, TextField, Button, Stack} from '@mui/material';
 import {useTranslation} from 'react-i18next';
 
 import {bookQueries} from '@package/api/book/book.queries';
-import {ChapterArborist} from '@/component/Book/Chapter/ChapterArborist';
-import type {ChapterArboristRefHandle} from '@/component/Book/Chapter/ChapterArborist';
+import {ChapterArborist} from '@feature/book/library/ui/component/Chapter/ChapterArborist';
+import type {ChapterArboristRefHandle} from '@feature/book/library/ui/component/Chapter/ChapterArborist';
+import type {ChapterTreeItem} from '@package/contract';
 
+/** Props for LinearChapterListEdit component. */
 interface LinearChapterListEditProps {
+  /** Width of the chapter list. */
   width?: number;
+  /** Height of the chapter list. */
   height?: number;
+  /** Whether drag-and-drop is enabled. */
   isDraggable?: boolean;
+  /** Whether double-click rename is enabled. */
   enableDoubleClickRename?: boolean;
+  /** Book unit ID. */
   bookId: string;
+  /** Currently selected chapter ID. */
   chapterId?: string;
+  /** Whether in edit mode. */
   isEdit?: boolean;
 }
 
+/**
+ * Linear Chapter List Edit - Editable chapter tree with drag-and-drop support.
+ */
 export const LinearChapterListEdit: React.FC<LinearChapterListEditProps> = ({
   bookId,
   chapterId,
@@ -26,13 +38,15 @@ export const LinearChapterListEdit: React.FC<LinearChapterListEditProps> = ({
   isEdit = false,
 }) => {
   const {t} = useTranslation();
-  // Data fetching
   const {data, isLoading, error} = useQuery(bookQueries.chapterIndex(bookId));
 
   const selectedId = chapterId || '';
   const baseLink = bookId ? `/book/${bookId}/edit` : '';
 
-  const chapterTree: any = useMemo(() => data?.index ?? [], [data]);
+  const chapterTree: ChapterTreeItem[] = useMemo(
+    () => data?.index ?? [],
+    [data],
+  );
 
   const [searchTerm, setSearchTerm] = useState('');
   const [enableDrag, setEnableDrag] = useState(false);
@@ -44,7 +58,7 @@ export const LinearChapterListEdit: React.FC<LinearChapterListEditProps> = ({
   if (error)
     return (
       <div>
-        {t('common.error_generic')} {String(error as any)}
+        {t('common.error_generic')} {String(error)}
       </div>
     );
   return (
@@ -74,7 +88,9 @@ export const LinearChapterListEdit: React.FC<LinearChapterListEditProps> = ({
               label={t('common.search')}
               variant="standard"
               value={searchTerm}
-              onChange={(e: any) => setSearchTerm(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setSearchTerm(e.target.value)
+              }
               placeholder={t('placeholders.enter_search_term')}
               className="w-full"
             />
@@ -87,7 +103,9 @@ export const LinearChapterListEdit: React.FC<LinearChapterListEditProps> = ({
                   </div>
                   <Switch
                     checked={enableDrag}
-                    onChange={(e: any) => setEnableDrag(e.target.checked)}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setEnableDrag(e.target.checked)
+                    }
                   />
                 </div>
 
@@ -97,7 +115,9 @@ export const LinearChapterListEdit: React.FC<LinearChapterListEditProps> = ({
                   </div>
                   <Switch
                     checked={enableRename}
-                    onChange={(e: any) => setEnableRename(e.target.checked)}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setEnableRename(e.target.checked)
+                    }
                   />
                 </div>
                 <div>{t('book.chapter.rename_help')}</div>

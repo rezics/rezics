@@ -2,12 +2,12 @@ import React from 'react';
 
 import {
   Autocomplete,
-  CircularProgress,
-  TextField,
-  Checkbox,
   Avatar,
+  Checkbox,
   Chip,
+  CircularProgress,
   FormControlLabel,
+  TextField,
   Tooltip,
 } from '@mui/material';
 import {InfoOutlined} from '@mui/icons-material';
@@ -46,7 +46,7 @@ const useUserSearch = () => {
           limit: 10,
         });
         if (active) setOptions(users as UserOption[]);
-      } catch (e) {
+      } catch {
         if (active) setOptions([]);
       } finally {
         if (active) setLoading(false);
@@ -127,6 +127,7 @@ const UsersMultiSelect: React.FC<{
     </div>
   );
 };
+
 export function NSFWInfo({tooltipTitle}: {tooltipTitle?: string}) {
   const {t} = useTranslation();
   return (
@@ -222,7 +223,6 @@ export const BookMetadataEditor: React.FC<BookMetadataEditorProps> = ({
           />
         </div>
       </div>
-      {/* TODO add Tag string */}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
@@ -266,11 +266,7 @@ export const BookMetadataEditor: React.FC<BookMetadataEditorProps> = ({
             control={
               <Checkbox
                 checked={value?.isLicensed ?? false}
-                onChange={e =>
-                  onChange?.({
-                    isLicensed: e.target.checked,
-                  })
-                }
+                onChange={e => onChange?.({isLicensed: e.target.checked})}
                 disabled={disabled}
               />
             }
@@ -281,11 +277,7 @@ export const BookMetadataEditor: React.FC<BookMetadataEditorProps> = ({
             control={
               <Checkbox
                 checked={value?.nsfw ?? false}
-                onChange={e =>
-                  onChange?.({
-                    nsfw: e.target.checked,
-                  })
-                }
+                onChange={e => onChange?.({nsfw: e.target.checked})}
                 disabled={disabled}
               />
             }
@@ -299,3 +291,4 @@ export const BookMetadataEditor: React.FC<BookMetadataEditorProps> = ({
 };
 
 export default BookMetadataEditor;
+

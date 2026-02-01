@@ -1,22 +1,31 @@
 import 'react-json-view-lite/dist/index.css';
 import {JsonEditorLight} from '@/component/Form/JsonEditorLight';
-import React, {useState, useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
-  TextField,
   Button,
+  Divider,
   IconButton,
   Link,
-  Typography,
   Paper,
-  Divider,
+  TextField,
+  Typography,
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 import {useTranslation} from 'react-i18next';
 
+/** Book extra data structure. */
+export type BookExtraData = {
+  publishURL?: string[];
+  [key: string]: unknown;
+};
+
+/** Props for BookExtraEditor component. */
 interface BookExtraEditorProps {
-  value?: any;
-  onChange?: (value: any) => void;
+  /** Current extra data value. */
+  value?: BookExtraData | null;
+  /** Callback when extra data changes. */
+  onChange?: (value: BookExtraData) => void;
 }
 
 function PublishURL({value, onChange}: BookExtraEditorProps) {
@@ -114,47 +123,36 @@ function PublishURL({value, onChange}: BookExtraEditorProps) {
   );
 }
 
-export function BookExtraEditor({value, onChange}: BookExtraEditorProps) {
-  // 创建中间状态来管理 extra 对象
-  const [extraData, setExtraData] = useState<any>(value || {});
+/**
+ * Book Extra Editor - Editor for book extra metadata.
+ *
+ * Provides UI for editing publish URLs and other extra JSON data.
+ */
+export const BookExtraEditor: React.FC<BookExtraEditorProps> = ({value, onChange}) => {
+  const [extraData, setExtraData] = useState<BookExtraData>(value || {});
 
-  // 当外部 value 变化时同步到内部状态
   useEffect(() => {
     setExtraData(value || {});
   }, [value]);
 
-  // 当内部状态变化时通知外部
-  const handleExtraChange = (newExtraData: any) => {
+  const handleExtraChange = (newExtraData: BookExtraData) => {
     setExtraData(newExtraData);
-    if (onChange) {
-      onChange(newExtraData);
-    }
+    onChange?.(newExtraData);
   };
 
-  // 处理 PublishURL 的变化
   const handlePublishURLChange = (publishURL: string[]) => {
-    const newExtraData = {
+    handleExtraChange({
       ...extraData,
       publishURL,
-    };
-    handleExtraChange(newExtraData);
-  };
-
-  // 处理 JsonEditor 的变化
-  const handleJsonChange = (newValue: any) => {
-    handleExtraChange(newValue);
+    });
   };
 
   return (
     <div>
-      <PublishURL
-        value={extraData?.publishURL}
-        onChange={handlePublishURLChange}
-      />
-
+      <PublishURL value={extraData?.publishURL} onChange={handlePublishURLChange} />
       <Divider sx={{my: 3}} />
-
-      <JsonEditorLight value={extraData} onChange={handleJsonChange} />
+      <JsonEditorLight value={extraData} onChange={handleExtraChange} />
     </div>
   );
 }
+

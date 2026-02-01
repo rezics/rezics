@@ -1,6 +1,6 @@
 import React from 'react';
 import {useNavigate} from '@tanstack/react-router';
-import {BookSearchContainer} from '@/component/BookLib/BookSearch/BookSearch';
+import {BookSearchInput} from '@feature/book/library/ui/component/BookSearch/BookSearch';
 import type {BookQueryOptions} from '@package/contract';
 
 export type HomeSearchBarProps = object;
@@ -28,9 +28,8 @@ export const HomeSearchBar: React.FC<HomeSearchBarProps> = () => {
     navigate({to: `/book${query}`});
   }
   return (
-    <BookSearchContainer onSearch={handleSearch} hiddenWordCountFilter={true} />
+    <BookSearchInput onSearch={handleSearch} hiddenWordCountFilter={true} />
   );
 };
 
 export default HomeSearchBar;
-

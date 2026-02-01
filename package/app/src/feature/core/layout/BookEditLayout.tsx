@@ -5,7 +5,7 @@ import React, {type ReactNode, useEffect, useState} from 'react';
 import {NAVIGATION} from '@/component/Layout/Navigation/BookEditorNavigation';
 import {useLayoutStore} from '@/global/Layout/layoutStore.ts';
 
-import {LinearChapterList} from '@/component/Book/Chapter/LinearChapterList';
+import {LinearChapterList} from '@feature/book/library/ui/component/Chapter/LinearChapterList';
 
 import {DraggableResizer} from '@/component/Layout/DraggableResizer.tsx';
 import {useResponsiveSidebar} from './useResponsiveSidebar';
@@ -16,9 +16,13 @@ export interface BookEditLayoutProps {
 }
 
 export const BookEditLayout: React.FC<BookEditLayoutProps> = ({children}) => {
-  const {bookId} = bookEditLayoutRoute.useParams();
-  const chapterMatch = bookEditChapterRoute.useMatch();
-  const chapterId = chapterMatch?.params.chapterId;
+  const bookId: string | undefined = bookEditLayoutRoute.useParams().bookId;
+  let chapterId: string | undefined;
+  try {
+    chapterId = bookEditChapterRoute.useParams().chapterId;
+  } catch (error) {
+    chapterId = undefined;
+  }
   const {
     sidebarOpen,
     handleDrawerToggle,

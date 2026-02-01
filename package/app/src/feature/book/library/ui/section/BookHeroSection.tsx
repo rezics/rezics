@@ -7,13 +7,13 @@ import type {BookDTO} from '@package/contract';
 import {
   MiniActionBar,
   MiniAdminActionBar,
-} from '../Common/Reaction/MiniActionBar';
-import {LazyLoadImage} from '../Common/LazyLoadImage';
+} from '@component/Common/Reaction/MiniActionBar.tsx';
+import {LazyLoadImage} from '@component/Common/LazyLoadImage.tsx';
 
 type Book = BookDTO;
 
 export const BookHeroReactionBar: React.FC<{
-  bookInfo: any;
+  bookInfo: Book;
   className?: string;
 }> = ({bookInfo, className}) => {
   const color = 'text-white';
@@ -34,7 +34,7 @@ export const BookHeroReactionBar: React.FC<{
   );
 };
 
-export const BookHeroShow: React.FC<{
+export const BookHeroSection: React.FC<{
   bookInfo: Book;
   rating: number;
 }> = ({bookInfo, rating}) => {
@@ -60,16 +60,12 @@ export const BookHeroShow: React.FC<{
 
           {/* Book Info */}
           <div className="col-span-8 md:col-span-6 text-white flex flex-col gap-3">
-            <h1 className="text-2xl font-bold break-words">
-              {bookInfo?.title}
-            </h1>
+            <h1 className="text-2xl font-bold break-words">{bookInfo?.title}</h1>
 
             <div className="space-y-1">
               <p>
                 {t('book.fields.author')}：
-                <span className="font-medium">
-                  {bookInfo?.author?.[0]?.name}
-                </span>
+                <span className="font-medium">{bookInfo?.author?.[0]?.name}</span>
               </p>
               <p>
                 {t('book.fields.press')}：{bookInfo?.press?.[0]?.name}
@@ -113,11 +109,3 @@ export const BookHeroShow: React.FC<{
   );
 };
 
-export type Container = {
-  bookInfo: Book;
-  rating: number;
-};
-
-export const BookHeroContainer: React.FC<Container> = ({bookInfo, rating}) => {
-  return <BookHeroShow bookInfo={bookInfo} rating={rating} />;
-};

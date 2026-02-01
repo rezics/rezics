@@ -1,24 +1,11 @@
 import React from 'react';
-import type {NodeRendererProps} from 'react-arborist';
+import type {NodeRendererProps, TreeApi} from 'react-arborist';
 import {useTheme, alpha} from '@mui/material/styles';
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
 import {Link} from '@package/ui/Navigation/Link.tsx';
-
-// Type used inside the BookEditorSidebar tree
-export type Chapter = {
-  id: string | number;
-  title: string;
-  children?: Chapter[];
-};
-
-// Context-menu state type reused from the sidebar component
-export type ContextMenuState = {
-  x: number;
-  y: number;
-  node: any;
-} | null;
+import type {Chapter, ChapterContextMenuState} from './ChapterArborist';
 
 /**
  * Factory that returns a Node renderer function bound to the sidebar's state setters.
@@ -26,8 +13,8 @@ export type ContextMenuState = {
  * signature `({ node, style, dragHandle, tree }) => JSX.Element` only.
  */
 export const createChapterArboristNode = (
-  setContextMenu: React.Dispatch<React.SetStateAction<ContextMenuState>>,
-  treeRef: React.RefObject<any>,
+  setContextMenu: React.Dispatch<React.SetStateAction<ChapterContextMenuState>>,
+  treeRef: React.RefObject<TreeApi<Chapter> | null>,
   enableDoubleClickRename: boolean,
   isTreeDraggable: boolean,
   bookId: string,

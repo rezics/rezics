@@ -3,8 +3,8 @@ import {useTranslation} from 'react-i18next';
 import {Search} from '@/component/Search';
 import type {SearchInfo} from '@/component/Search/searchParser';
 import type {BookQueryOptions} from '@package/contract';
-import {bookQueryOptionsSchema} from '@package/contract';
 
+/** Available sort types for book search. */
 export type BookSortType =
   | 'relevance'
   | 'createdAt'
@@ -15,13 +15,22 @@ export type BookSortType =
   | 'recommendation'
   | 'custom';
 
-export type BookSearchContainerProps = {
+/** Props for BookSearchInput component. */
+export type BookSearchInputProps = {
+  /** Callback when search is triggered. */
   onSearch: (options: BookQueryOptions) => void;
+  /** Default search values. */
   defaultValue?: SearchInfo;
+  /** Whether to hide the word count filter. */
   hiddenWordCountFilter?: boolean;
 };
 
-export const BookSearchContainer: React.FC<BookSearchContainerProps> = ({
+/**
+ * Book Search Input - Search bar with filters for book library.
+ *
+ * Provides keyword search, tag filtering, and other search options.
+ */
+export const BookSearchInput: React.FC<BookSearchInputProps> = ({
   onSearch,
   defaultValue,
   hiddenWordCountFilter = false,

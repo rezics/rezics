@@ -1,10 +1,10 @@
 import {createFileRoute, lazyRouteComponent} from '@tanstack/react-router';
 
-const BookPageContainer = lazyRouteComponent(
-  () => import('@/page/Book/BookPage'),
-  'BookPageContainer',
+const BookDetailPage = lazyRouteComponent(
+  () => import('@feature/book/library'),
+  'BookDetailPage',
 );
 
 export const Route = createFileRoute('/_mainLayout/book/$bookId')({
-  component: () => <BookPageContainer />,
+  component: () => <BookDetailPage />,
 });

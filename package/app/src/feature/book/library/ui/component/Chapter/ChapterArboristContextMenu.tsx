@@ -6,14 +6,18 @@ import {
   insertSiblingAfter,
   moveSiblingFirst,
   moveSiblingLast,
-  attachFirstOrphanToParent,
 } from '@/util/arboristTreeUtil.ts';
+import type {Chapter, ChapterContextMenuState} from './ChapterArborist';
 
+/** Props for ChapterArboristContextMenu component. */
 interface ChapterArboristContextMenuProps {
-  contextMenu: any;
-  setContextMenu: (contextMenu: any) => void;
-  treeRef?: React.RefObject<any>;
-  setTreeData: (treeData: any) => void;
+  /** Current context menu state with position and node. */
+  contextMenu: NonNullable<ChapterContextMenuState>;
+  /** Setter to close/update context menu. */
+  setContextMenu: (contextMenu: ChapterContextMenuState) => void;
+  /** Setter for tree data. */
+  setTreeData: React.Dispatch<React.SetStateAction<Chapter[]>>;
+  /** Handler for creating new chapter. */
   handleCreate: (parentId: string | number) => void;
 }
 
@@ -57,9 +61,6 @@ export const ChapterArboristContextMenu = ({
         <li
           className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
           onClick={() => {
-            if (contextMenu.node.isInternal) {
-              contextMenu.node.toggle();
-            }
             setContextMenu(null);
           }}
         >
@@ -80,12 +81,17 @@ export const ChapterArboristContextMenu = ({
           className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
           onClick={() => {
             // 新建后续同级节点
-            const newNode: any = {
+            const newNode: Chapter = {
               id: uuidv4(),
               title: 'New Chapter',
             };
-            setTreeData(current =>
-              insertSiblingAfter(current, contextMenu.node.id, newNode),
+            setTreeData(
+              current =>
+                insertSiblingAfter(
+                  current,
+                  contextMenu.node.id,
+                  newNode,
+                ) as Chapter[],
             );
             setContextMenu(null);
           }}
@@ -97,7 +103,7 @@ export const ChapterArboristContextMenu = ({
           onClick={() => {
             setTreeData(
               current =>
-                moveSiblingFirst(current, contextMenu.node.id) as any[],
+                moveSiblingFirst(current, contextMenu.node.id) as Chapter[],
             );
             setContextMenu(null);
           }}
@@ -108,7 +114,8 @@ export const ChapterArboristContextMenu = ({
           className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
           onClick={() => {
             setTreeData(
-              current => moveSiblingLast(current, contextMenu.node.id) as any[],
+              current =>
+                moveSiblingLast(current, contextMenu.node.id) as Chapter[],
             );
             setContextMenu(null);
           }}

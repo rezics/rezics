@@ -1,17 +1,30 @@
+import React, {useEffect, useState} from 'react';
 import {JsonEditorLight} from '@/component/Form/JsonEditorLight';
 import {useQuery} from '@tanstack/react-query';
 import {bookQueries} from '@package/api/book/book';
-import {useEffect, useState} from 'react';
 import {Alert} from '@mui/material';
+import type {ChapterTreeItem} from '@package/contract';
 
+/** Props for ChapterTreeJsonEditor component. */
 interface ChapterTreeJsonEditorProps {
+  /** Book unit ID. */
   bookId: string;
 }
 
-export function ChapterTreeJsonEditor({bookId}: ChapterTreeJsonEditorProps) {
+/** JSON structure for chapter tree editor. */
+type ChapterTreeJsonData = {
+  index: ChapterTreeItem[];
+};
+
+/**
+ * Chapter Tree JSON Editor - Raw JSON editor for chapter tree.
+ *
+ * Note: This feature is currently disabled.
+ */
+export const ChapterTreeJsonEditor: React.FC<ChapterTreeJsonEditorProps> = ({bookId}) => {
   const {data, isLoading, error} = useQuery(bookQueries.chapterIndex(bookId));
 
-  const [jsonData, setJsonData] = useState<any>({});
+  const [jsonData, setJsonData] = useState<ChapterTreeJsonData>({index: []});
 
   useEffect(() => {
     setJsonData({
@@ -19,11 +32,13 @@ export function ChapterTreeJsonEditor({bookId}: ChapterTreeJsonEditorProps) {
     });
   }, [data]);
 
-  function onChange(value: any) {
+  function onChange(value: ChapterTreeJsonData) {
     console.log(value);
   }
+
   if (isLoading) return <div>Loading...</div>;
-  if (error) return <div>Oh no... {String(error as any)}</div>;
+  if (error) return <div>Oh no... {String(error)}</div>;
+
   return (
     <div>
       <Alert severity="error" className="mb-2">
@@ -32,4 +47,4 @@ export function ChapterTreeJsonEditor({bookId}: ChapterTreeJsonEditorProps) {
       <JsonEditorLight value={jsonData} onChange={onChange} />
     </div>
   );
-}
+};
