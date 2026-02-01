@@ -13,7 +13,7 @@ export const Route = createRootRoute({
     </>
   ),
   notFoundComponent: lazyRouteComponent(
-    () => import('@/page/NotFound'),
+    () => import('@/feature/core/page/NotFound'),
     'NotFoundContainer',
   ),
 });

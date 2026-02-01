@@ -81,10 +81,8 @@
   "[prisma]": {
     "editor.defaultFormatter": "Prisma.prisma-insider"
   },
-  "[powershell]": {
-    "editor.defaultFormatter": "ms-vscode.powershell"
-  },
   "material-icon-theme.folders.associations": {
-    "component": "components"
+    "component": "components",
+    "state": "store"
   }
 }
