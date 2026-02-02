@@ -12,6 +12,7 @@ import {getDynamicTheme, getTheme} from './config/theme.ts';
 import {appStore} from '@/global/appStore.ts';
 import {PersistentSettingsLoader} from './providers/PersistentSettingsLoader.tsx';
 import {ReactQueryProvider} from './providers/react-query.tsx';
+import {AuthProvider} from './providers/AuthProvider.tsx';
 import {ErrorBoundary} from 'react-error-boundary';
 import {WindowAlert} from '@/component/Common/Overlay/WindowAlert.tsx';
 import {HelpFab} from '@/component/Common/UI/Button/HelpWidget.tsx';
@@ -67,6 +68,7 @@ export default function App() {
               <CssBaseline />
               <PersistentSettingsLoader />
               <ReactQueryProvider>
+                <AuthProvider />
                 <RouterProvider router={router} />
                 <WindowAlert />
                 <HelpFab />

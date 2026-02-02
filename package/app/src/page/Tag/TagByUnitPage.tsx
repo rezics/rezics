@@ -4,7 +4,7 @@ import {AccentBarWithTextShow} from '@/component/Common/Navigation/AccentBar';
 import {tagApi, tagQueries} from '@package/api/tag/tag';
 import type {TagDetailDTO} from '@package/contract';
 import {TagWrapper} from '@/component/Tag/TagWrapper';
-import {tagBookRoute} from '@/router';
+import {tagBookRoute} from '@/routes/router';
 import {useMatchRoute} from '@tanstack/react-router';
 
 export function TagByBookPage() {

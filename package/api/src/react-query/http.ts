@@ -43,6 +43,43 @@ export const isAuthenticated = (): boolean => {
   return !!getToken();
 };
 
+export interface JwtPayload {
+  exp?: number;
+  iat?: number;
+  [key: string]: unknown;
+}
+
+function decodeBase64Url(input: string): string {
+  const normalized = input.replace(/-/g, '+').replace(/_/g, '/');
+  const padded = normalized + '='.repeat((4 - (normalized.length % 4)) % 4);
+  if (typeof globalThis.atob === 'function') {
+    return globalThis.atob(padded);
+  }
+  if (typeof Buffer !== 'undefined') {
+    return Buffer.from(padded, 'base64').toString('utf-8');
+  }
+  throw new Error('No base64 decoder available');
+}
+
+/**
+ * Parse JWT payload
+ */
+export function parseJwt<T extends JwtPayload = JwtPayload>(
+  token?: string | null,
+): T | null {
+  if (!token) return null;
+  const parts = token.split('.');
+  if (parts.length < 2) return null;
+  const payloadPart = parts[1];
+  if (!payloadPart) return null;
+  try {
+    const payload = decodeBase64Url(payloadPart);
+    return JSON.parse(payload) as T;
+  } catch {
+    return null;
+  }
+}
+
 function buildHeaders(
   options?: globalThis.RequestInit,
 ): Record<string, string> {
@@ -60,6 +97,24 @@ function buildHeaders(
     });
   }
   return headers;
+}
+
+export async function refreshAuthToken() {
+  const refreshTokenResponse = await fetch(
+    `${API_BASE_URL}/users/refresh-token`,
+    {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    },
+  );
+  const json = await refreshTokenResponse.json();
+  if (!json?.token) {
+    throw new Error('Unauthorized - Please login again');
+  }
+  setToken(json.token);
 }
 
 /**
@@ -90,21 +145,7 @@ export async function apiFetch<T>(
       );
     }
     console.log('Auto refresh token');
-    const refreshTokenResponse = await fetch(
-      `${API_BASE_URL}/users/refresh-token`,
-      {
-        method: 'POST',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      },
-    );
-    const json = await refreshTokenResponse.json();
-    if (!json?.token) {
-      throw new Error('Unauthorized - Please login again');
-    }
-    setToken(json.token);
+    await refreshAuthToken();
     console.log(`Auto retry ${url}`);
     const newHeaders = buildHeaders(options);
     response = await fetch(url, {
