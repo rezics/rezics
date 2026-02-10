@@ -53,10 +53,10 @@ export const LangToggle: React.FC = () => {
         transformOrigin={{horizontal: 'center', vertical: 'top'}}
         anchorOrigin={{horizontal: 'center', vertical: 'bottom'}}
       >
-        <MenuItem onClick={() => handleChangeLang('zh-CN')}>
+        <MenuItem onClick={() => handleChangeLang('zh-SC')}>
           <ListItemText>简体中文</ListItemText>
         </MenuItem>
-        <MenuItem onClick={() => handleChangeLang('zh-TW')}>
+        <MenuItem onClick={() => handleChangeLang('zh-TC')}>
           <ListItemText>繁体中文</ListItemText>
         </MenuItem>
         <MenuItem onClick={() => handleChangeLang('en-US')}>

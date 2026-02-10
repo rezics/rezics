@@ -1,6 +1,6 @@
 import {useUserStore} from '@/global/userStore.ts';
 import {Button, Typography} from '@mui/material';
-import {LinearChapterList} from '@/component/Book/Chapter/LinearChapterList';
+import {LinearChapterList} from '@feature/book/library/ui/component/Chapter/LinearChapterList';
 
 export function TestPage02() {
   const user = useUserStore(state => state.user);

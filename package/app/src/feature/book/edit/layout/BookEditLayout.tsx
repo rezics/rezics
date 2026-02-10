@@ -1,15 +1,15 @@
-import {Header} from '@/component/Layout/Header/MainLayoutHeader';
-import {Sidebar} from '@/component/Layout/Sidebar/Sidebar';
+import {Header} from '../component/Header/MainLayoutHeader';
+import {Sidebar} from '../component/Sidebar/Sidebar';
 import React, {type ReactNode, useEffect, useState} from 'react';
 
-import {NAVIGATION} from '@/component/Layout/Navigation/BookEditorNavigation';
-import {useLayoutStore} from '@/global/Layout/layoutStore.ts';
+import {NAVIGATION} from '../component/Navigation/BookEditorNavigation';
+import {useLayoutStore} from '../state/layoutStore.ts';
 
 import {LinearChapterList} from '@feature/book/library/ui/component/Chapter/LinearChapterList';
 
-import {DraggableResizer} from '@/component/Layout/DraggableResizer.tsx';
+import {DraggableResizer} from '../component/DraggableResizer.tsx';
 import {useResponsiveSidebar} from './useResponsiveSidebar';
-import {bookEditChapterRoute, bookEditLayoutRoute} from '@/router';
+import {bookEditChapterRoute, bookEditLayoutRoute} from '@/routes/router';
 
 export interface BookEditLayoutProps {
   children: ReactNode;

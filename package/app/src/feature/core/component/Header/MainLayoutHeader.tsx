@@ -1,7 +1,7 @@
-import {LangToggle} from '@/component/Layout/LangToggle.tsx';
-import {UserContainer} from '@/component/Layout/User.tsx';
+import {LangToggle} from '../LangToggle.tsx';
+import {UserContainer} from '../User.tsx';
 import {ThemeQuickToggle} from '@/component/Theme/ThemeCustomizer.tsx';
-import {useLayoutStore} from '@/global/Layout/layoutStore.ts';
+import {useLayoutStore} from '../../state/layoutStore.ts';
 import {Brightness4, Brightness7, Menu} from '@mui/icons-material';
 import {AppBar, IconButton, Toolbar, Typography} from '@mui/material';
 import {useTheme} from '@mui/material/styles';

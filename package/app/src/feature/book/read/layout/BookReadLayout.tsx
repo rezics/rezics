@@ -1,14 +1,14 @@
-import {Header} from '@/component/Layout/Header/MainLayoutHeader';
-import {Sidebar} from '@/component/Layout/Sidebar/Sidebar';
+import {Header} from '../component/Header/MainLayoutHeader';
+import {Sidebar} from '../component/Sidebar/Sidebar';
 import {Button, Divider, useMediaQuery} from '@mui/material';
 import React, {type ReactNode, useEffect, useState} from 'react';
 
-import {DraggableResizer} from '@/component/Layout/DraggableResizer';
-import {LinearChapterList} from '@/component/Book/Chapter/LinearChapterList';
+import {DraggableResizer} from '../component/DraggableResizer';
+import {LinearChapterList} from '@feature/book/library/ui/component/Chapter/LinearChapterList';
 import {useNavigate} from '@tanstack/react-router';
 import {useResponsiveSidebar} from './useResponsiveSidebar';
-import {useLayoutStore} from '@/global/Layout/layoutStore';
-import {bookReadLayoutRoute} from '@/router';
+import {useLayoutStore} from '../state/layoutStore.ts';
+import {bookReadLayoutRoute} from '@/routes/router';
 export interface BookReadLayoutProps {
   children: ReactNode;
 }

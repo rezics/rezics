@@ -1,6 +1,6 @@
 import {useState} from 'react';
 import type React from 'react';
-import {useLayoutStore} from '@/global/Layout/layoutStore.ts';
+import {useLayoutStore} from '../state/layoutStore.ts';
 import {appStore} from '@/global/appStore.ts';
 import {useUserStore} from '@/global/userStore';
 import {useIsMobile} from '@/shared/util/useMediaQueryUtil';

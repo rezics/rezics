@@ -1,5 +1,5 @@
-import {type NavigationItem} from '@/component/Layout/Navigation/navigation';
-import {useLayoutStore} from '@/global/Layout/layoutStore.ts';
+import {type NavigationItem} from '../Navigation/navigation';
+import {useLayoutStore} from '../../state/layoutStore.ts';
 import {
   ChevronLeft,
   ChevronRight,
@@ -19,9 +19,8 @@ import {
   Typography,
 } from '@mui/material';
 import {useRouterState} from '@tanstack/react-router';
-import React, {type ReactNode, useEffect} from 'react';
+import React, {type ReactNode} from 'react';
 
-import {useWindowSize} from 'react-use';
 import useMeasure from 'react-use-measure';
 
 import {Sidebar as UiSidebar} from '@/component/shadcn/sidebar';
@@ -79,18 +78,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
   isDragging = false,
   layoutType = 'type-b',
 }) => {
-  const {setSidebarHeightBelow, toggleItem, openItems} = useLayoutStore();
+  const {toggleItem, openItems} = useLayoutStore();
   const [refAbove, {height}] = useMeasure();
-
-  // ERROR cause react hooks order error
-  // const {height: windowHeight} = useWindowSize();
-  // useEffect(() => {
-  //   setSidebarHeightBelow(windowHeight - height - 200);
-  // }, [height, windowHeight, setSidebarHeightBelow]);
-
-  const heightBelow = `calc(100vh - ${height}px)`;
-
   const pathname = useRouterState({select: s => s.location.pathname});
+
+  // All hooks must run unconditionally and in the same order every render.
+  const heightBelow = `calc(100vh - ${height}px)`;
 
   const handleItemClick = (
     // @ts-expect-error - event is not used
@@ -206,7 +199,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
       isDragging={isDragging}
     >
       {sidebarInner}
-      <div>test</div>
     </UiSidebar>
   );
 };
