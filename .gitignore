@@ -1,6 +1,8 @@
 # Visual Studio Counter
 .VSCodeCounter/
 
+remove_node_modules.ts
+
 # Vite
 .vite/
 

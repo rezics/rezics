@@ -25,10 +25,19 @@ export default defineConfig(({mode}) => {
         },
       }),
       tsconfigPaths(),
-      errorOverlay(),
+      errorOverlay({
+        reactPluginName: '@vitejs/plugin-react',
+        forwardConsole: true,
+        forwardedConsoleMethods: ['error', 'warn', 'log'],
+        showBallonButton: true,
+      }),
     ],
+    build: {
+      // sourcemap: true, // Enable sourcemap for production build for debugging tools like Sentry
+    },
     server: {
       port: 35001,
+      // sourcemapIgnoreList: false, // Disable sourcemap ignore list, will include all files like node_modules, etc.
     },
     define: {
       'process.env': env,
