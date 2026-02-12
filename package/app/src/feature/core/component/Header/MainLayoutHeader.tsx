@@ -1,30 +1,22 @@
+import React from 'react';
 import {LangToggle} from '../LangToggle.tsx';
 import {UserContainer} from '../User.tsx';
-import {ThemeQuickToggle} from '@/component/Theme/ThemeCustomizer.tsx';
 import {useLayoutStore} from '../../state/layoutStore.ts';
 import {Brightness4, Brightness7, Menu} from '@mui/icons-material';
 import {AppBar, IconButton, Toolbar, Typography} from '@mui/material';
 import {useTheme} from '@mui/material/styles';
-import React from 'react';
 import {useTranslation} from 'react-i18next';
 import {cn} from '@/shared/shadcn/lib/utils';
 import {Link} from '@package/ui/Navigation/Link.tsx';
+import {appStore} from '@/global/appStore.ts';
 
 interface HeaderProps {
-  handleDrawerToggle: () => void;
-  mode: 'light' | 'dark';
-  onThemeToggle: () => void;
-  drawerWidth: number;
   isDragging?: boolean;
   layoutType?: 'type-a' | 'type-b';
   disableDrawerToggle?: boolean;
 }
 
 export const Header: React.FC<HeaderProps> = ({
-  handleDrawerToggle,
-  mode,
-  onThemeToggle,
-  drawerWidth,
   isDragging = false,
   layoutType = 'type-b',
   disableDrawerToggle = false,
@@ -33,15 +25,24 @@ export const Header: React.FC<HeaderProps> = ({
   const theme = useTheme();
   const {t} = useTranslation();
 
+  const themeMode = appStore(state => state.theme);
+  const toggleTheme = () => {
+    appStore.setState({theme: themeMode === 'light' ? 'dark' : 'light'});
+  };
+
+  const drawerWidth = useLayoutStore(s => s.drawerWidth);
+  const toggleSidebar = useLayoutStore(s => s.toggleSidebar);
+
   function handleDrawerToggleInner() {
     if (disableDrawerToggle) return;
-    handleDrawerToggle();
+    toggleSidebar();
   }
+
   return (
     <AppBar
       position="fixed"
       sx={{
-        zIndex: theme => theme.zIndex.drawer + 1,
+        zIndex: theme.zIndex.drawer + 1,
         ml: layoutType === 'type-a' ? (sidebarOpen ? drawerWidth : 0) : 0,
         width:
           layoutType === 'type-a'
@@ -78,8 +79,8 @@ export const Header: React.FC<HeaderProps> = ({
         </Typography>
         {/* <ThemeQuickToggle /> */}
         <LangToggle />
-        <IconButton color="inherit" onClick={onThemeToggle}>
-          {mode === 'dark' ? <Brightness7 /> : <Brightness4 />}
+        <IconButton color="inherit" onClick={toggleTheme}>
+          {themeMode === 'dark' ? <Brightness7 /> : <Brightness4 />}
         </IconButton>
         <UserContainer onLogout={() => console.log('Logout')} />
       </Toolbar>

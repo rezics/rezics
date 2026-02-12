@@ -25,6 +25,7 @@ import useMeasure from 'react-use-measure';
 
 import {Sidebar as UiSidebar} from '@/component/shadcn/sidebar';
 import {cn} from '@/shared/shadcn/lib/utils';
+import {useIsMobile} from '@/shared/util/useMediaQueryUtil';
 import {RouterLink} from '@package/ui/Navigation/RouterLink.tsx';
 
 export function DrawerHeader({
@@ -52,13 +53,8 @@ export function DrawerHeader({
 }
 
 interface SidebarProps {
-  isMobile: boolean;
-  sidebarOpen: boolean;
-  sidebarWidth: number;
   sidebarClassName?: string;
   sidebarHeaderClassName?: string;
-  onClose: () => void;
-  handleDrawerToggle: () => void;
   NAVIGATION: NavigationItem[];
   children?: ReactNode;
   isDragging?: boolean;
@@ -66,21 +62,26 @@ interface SidebarProps {
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
-  isMobile,
-  sidebarOpen,
-  sidebarWidth,
   sidebarClassName,
   sidebarHeaderClassName,
-  onClose,
-  handleDrawerToggle,
   NAVIGATION,
   children = null,
   isDragging = false,
   layoutType = 'type-b',
 }) => {
+  const isMobile = useIsMobile();
+  const sidebarOpen = useLayoutStore(s => s.sidebarOpen);
+  const sidebarWidth = useLayoutStore(s => s.drawerWidth);
+  const handleDrawerToggle = useLayoutStore(s => s.toggleSidebar);
+  const closeSidebar = useLayoutStore(s => s.closeSidebar);
   const {toggleItem, openItems} = useLayoutStore();
   const [refAbove, {height}] = useMeasure();
   const pathname = useRouterState({select: s => s.location.pathname});
+  const handleSidebarClose = () => {
+    if (isMobile) {
+      closeSidebar();
+    }
+  };
 
   // All hooks must run unconditionally and in the same order every render.
   const heightBelow = `calc(100vh - ${height}px)`;
@@ -98,7 +99,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     } else {
       // setLocation(`${segment}`);
       if (isMobile) {
-        onClose();
+        handleSidebarClose();
       }
     }
   };
@@ -192,7 +193,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   return (
     <UiSidebar
       isOpen={sidebarOpen}
-      onClose={onClose}
+      onClose={handleSidebarClose}
       mode={isMobile ? 'fixed' : 'inline'}
       width={`${sidebarWidth}px`}
       className={cn(sidebarClassName, 'rounded-lg')}

@@ -1,3 +1,4 @@
+- https://react.dev/reference/rules/rules-of-hooks
 - [ ] allow to mention
 - [x] MUI 的还没自己写的好用 https://mui.com/x/react-tree-view/ 用这个替换当前的 Tree 章节 View
 - [ ] 树章节检查为啥 shift 键还是会跳转，感觉就不应该渲染为 link，修改一下

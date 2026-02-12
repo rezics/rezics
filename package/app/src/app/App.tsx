@@ -60,8 +60,9 @@ export default function App() {
   }, [themeMode, customColor, useDynamicTheme]);
 
   return (
-    <ErrorBoundary fallback={<div>Something went wrong</div>}>
-      <StrictMode>
+    <StrictMode>
+      <ErrorBoundary fallback={<div>Something went wrong</div>}>
+        {/* TODO ErrorBoundary 的作用是什么？ */}
         <HelmetProvider>
           <StyledEngineProvider injectFirst>
             <ThemeProvider theme={theme}>
@@ -76,7 +77,7 @@ export default function App() {
             </ThemeProvider>
           </StyledEngineProvider>
         </HelmetProvider>
-      </StrictMode>
-    </ErrorBoundary>
+      </ErrorBoundary>
+    </StrictMode>
   );
 }
