@@ -1,9 +1,9 @@
-import React from 'react';
+import React, {useMemo} from 'react';
 import {LangToggle} from '../LangToggle.tsx';
 import {UserContainer} from '../User.tsx';
 import {useLayoutStore} from '../../state/layoutStore.ts';
 import {Brightness4, Brightness7, Menu} from '@mui/icons-material';
-import {AppBar, IconButton, Toolbar, Typography} from '@mui/material';
+import {AppBar, Avatar, IconButton, Toolbar, Typography} from '@mui/material';
 import {useTheme} from '@mui/material/styles';
 import {useTranslation} from 'react-i18next';
 import {cn} from '@/shared/shadcn/lib/utils';
@@ -27,6 +27,10 @@ export const Header: React.FC<HeaderProps> = ({
 
   const themeMode = useAppStore(state => state.theme);
   const setTheme = useAppStore(state => state.setTheme);
+
+  const logoBgColor = useMemo(() => {
+    return themeMode === 'light' ? 'white' : '#FFEBEE';
+  }, [themeMode]);
 
   const toggleTheme = () => {
     setTheme(themeMode === 'light' ? 'dark' : 'light');
@@ -74,7 +78,12 @@ export const Header: React.FC<HeaderProps> = ({
           <Menu />
         </IconButton>
         <Typography variant="h6" noWrap component="div" sx={{flexGrow: 1}}>
-          <Link to="/">REZICS</Link>
+          <Link to="/" className="flex items-center gap-2">
+            <Avatar sx={{bgcolor: logoBgColor}} variant="rounded">
+              <img src="./logo.svg" alt="logo" />
+            </Avatar>
+            <p className="text-2xl font-bold">REZICS</p>
+          </Link>
         </Typography>
         {/* <ThemeQuickToggle /> */}
         <LangToggle />
