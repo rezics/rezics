@@ -6,6 +6,7 @@ import {NAVIGATION} from '../component/Navigation/MainNavigation';
 import {MainLayoutFooter} from '../component/Footer/MainLayoutFooter.tsx';
 import React from 'react';
 import {useUserStore} from '@/global/userStore';
+import {HelpFab} from '../component/HelpWidget';
 
 export interface MainLayoutProps {
   children: ReactNode;
@@ -35,6 +36,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({children}) => {
           <MainLayoutFooter />
         </main>
       </div>
+      <HelpFab />
     </div>
   );
 };

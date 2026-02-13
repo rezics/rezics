@@ -1,6 +1,10 @@
 import {routeTree} from './routeTree.gen';
-import {createRouter} from '@tanstack/react-router';
-import {qc} from '@/app/providers/reactQueryUtil';
+import {
+  type AnySchema,
+  createRouter,
+  type ParsedLocation,
+} from '@tanstack/react-router';
+import {qc} from '@/app/provider/reactQueryUtil';
 
 export const router = createRouter({
   routeTree,
@@ -12,7 +16,7 @@ export const router = createRouter({
   // This will ensure that the loader is always called when the route is preloaded or visited
   defaultPreloadStaleTime: 0,
   scrollRestoration: true,
-  getScrollRestorationKey: (location: Location) => {
+  getScrollRestorationKey: (location: ParsedLocation<AnySchema>) => {
     const tab = new URLSearchParams(location.search ?? '').get('tab') ?? '';
     return `${location.pathname}::tab=${tab}`;
   },

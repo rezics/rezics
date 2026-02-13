@@ -10,14 +10,13 @@ import {
 } from './config/dynamicTheme.ts';
 import {getDynamicTheme, getTheme} from './config/theme.ts';
 import {useAppStore} from '@/global/appStore.ts';
-import {PersistentSettingsLoader} from './providers/PersistentSettingsLoader.tsx';
-import {ReactQueryProvider} from './providers/react-query.tsx';
-import {AuthProvider} from './providers/AuthProvider.tsx';
+import {PersistentSettingsLoader} from './provider/PersistentSettingsLoader.tsx';
+import {ReactQueryProvider} from './provider/react-query.tsx';
+import {AuthProvider} from './provider/AuthProvider.tsx';
 import {ErrorBoundary} from 'react-error-boundary';
 import {WindowAlert} from './component/WindowAlert.tsx';
-import {HelpFab} from '@/component/Common/UI/Button/HelpWidget.tsx';
 import {HelmetProvider} from 'react-helmet-async';
-import {useAppInit} from './providers/useAppInit.ts';
+import {useAppInit} from './provider/useAppInit.ts';
 import {RouterProvider} from '@tanstack/react-router';
 
 import {router} from '@/router.tsx';
@@ -72,7 +71,6 @@ export default function App() {
                 <AuthProvider />
                 <RouterProvider router={router} />
                 <WindowAlert />
-                <HelpFab />
               </ReactQueryProvider>
             </ThemeProvider>
           </StyledEngineProvider>

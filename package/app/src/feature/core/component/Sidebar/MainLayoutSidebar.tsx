@@ -1,12 +1,13 @@
 import {type NavigationItem} from '../Navigation/navigation';
 import {useLayoutStore} from '../../state/layoutStore.ts';
+import type {SvgIconProps} from '@mui/material/SvgIcon';
 import {
   ChevronLeft,
   ChevronRight,
   ExpandLess,
   ExpandMore,
 } from '@mui/icons-material';
-import {Box, useTheme} from '@mui/material';
+import {Box, Icon, useTheme} from '@mui/material';
 import {
   Collapse,
   Divider,
@@ -112,20 +113,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
         {layoutType === 'type-b' && <div className="mt-2" />}
         <List>
           {NAVIGATION.map((item, index) => {
-            if (item.onlyMobile && !isMobile) {
+            if (item.kind === 'item' && item.onlyMobile && !isMobile) {
               return null;
             }
-            if (item.kind === 'header') {
-              return (
-                <ListItem key={index}>
-                  <Typography variant="caption">{item.title}</Typography>
-                </ListItem>
-              );
-            }
 
-            if (item.kind === 'divider') {
-              return <Divider key={index} />;
-            }
+            if (item.kind === 'divider')
+              return <Divider key={index} className="my-1 mx-2" />;
 
             const isActive = pathname === `/${item.segment}`;
             const hasChildren = !!item.children && item.children.length > 0;
@@ -134,6 +127,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             return (
               <div key={item.segment || index.toString()}>
                 <ListItemButton
+                  className="py-1"
                   component={hasChildren ? 'div' : RouterLink}
                   {...(!hasChildren ? {to: `${item.segment}`} : {})}
                   selected={isActive && !hasChildren}
@@ -141,7 +135,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     handleItemClick(event, item.segment, hasChildren)
                   }
                 >
-                  <ListItemIcon>{item.icon}</ListItemIcon>
+                  <ListItemIcon>
+                    {(() => {
+                      const Icon = item.icon;
+                      return Icon ? <Icon fontSize="small" /> : null;
+                    })()}
+                  </ListItemIcon>
                   <ListItemText
                     className="dark:text-light text-dark"
                     primary={item.title}
@@ -167,9 +166,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
                             onClick={event =>
                               handleItemClick(event, child.segment, false)
                             }
+                            className="py-1"
                             sx={{pl: 4}}
                           >
-                            <ListItemIcon>{child.icon}</ListItemIcon>
+                            {(() => {
+                              const Icon = child.icon;
+                              return <Icon fontSize="small" />;
+                            })()}
                             <ListItemText
                               className="dark:text-light text-dark"
                               primary={child.title}
