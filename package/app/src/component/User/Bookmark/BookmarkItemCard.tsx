@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {useAlertStore} from '@/global/windowAlertStore';
+import {useAlertStore} from '@app/state/windowAlertStore';
 import {useDeleteReactionMutation} from '@package/api/reaction/reaction.mutations';
 import {useSetBookmarkTagsMutation} from '@package/api/reaction/reaction.mutations';
 import {

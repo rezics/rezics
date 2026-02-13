@@ -1,5 +1,5 @@
 import React, {useEffect} from 'react';
-import {useAlertStore} from '@/global/windowAlertStore';
+import {useAlertStore} from '../state/windowAlertStore';
 import {Alert} from '@mui/material';
 import clsx from 'clsx';
 

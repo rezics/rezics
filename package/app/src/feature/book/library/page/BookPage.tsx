@@ -4,11 +4,14 @@ import {useQuery} from '@tanstack/react-query';
 import {useTranslation} from 'react-i18next';
 import {useAtomValue, useSetAtom} from 'jotai';
 
-import {routeStore} from '@/global/routeStore.ts';
+import {useRouteStore} from '@app/state/routeStore';
 
 import {bookQueries} from '@package/api/book/book';
 
-import {BookDetailSection, type BookDetailTabValue} from '../ui/section/BookDetailSection';
+import {
+  BookDetailSection,
+  type BookDetailTabValue,
+} from '../ui/section/BookDetailSection';
 import {
   bookDetailAtomFamily,
   setBookDetailAtomFamily,
@@ -37,7 +40,10 @@ export const BookDetailPage: React.FC = () => {
   const searchStr = useRouterState({
     select: s => s.location.searchStr,
   });
-  const searchParams = useMemo(() => new URLSearchParams(searchStr), [searchStr]);
+  const searchParams = useMemo(
+    () => new URLSearchParams(searchStr),
+    [searchStr],
+  );
   const {t} = useTranslation();
 
   const getInitialTab = (): BookDetailTabValue => {
@@ -46,7 +52,9 @@ export const BookDetailPage: React.FC = () => {
       return tabParam as BookDetailTabValue;
     }
 
-    const routeData = routeStore.getState().getRouteData(String(locationKey));
+    const routeData = useRouteStore
+      .getState()
+      .getRouteData(String(locationKey));
     const storeTab = routeData?.tab;
     if (storeTab === '0' || storeTab === '1' || storeTab === '2') {
       return storeTab as BookDetailTabValue;
@@ -55,14 +63,18 @@ export const BookDetailPage: React.FC = () => {
     return '0';
   };
 
-  const [activeTab, setActiveTab] = React.useState<BookDetailTabValue>(getInitialTab);
+  const [activeTab, setActiveTab] =
+    React.useState<BookDetailTabValue>(getInitialTab);
   const tabRef = useRef<BookDetailTabValue>(getInitialTab());
 
-  const handleTabChange = (_: React.SyntheticEvent | null, newValue: BookDetailTabValue) => {
+  const handleTabChange = (
+    _: React.SyntheticEvent | null,
+    newValue: BookDetailTabValue,
+  ) => {
     tabRef.current = newValue;
     setActiveTab(newValue);
 
-    routeStore.getState().setRouteData(String(locationKey), {
+    useRouteStore.getState().setRouteData(String(locationKey), {
       tab: newValue,
     });
 
@@ -70,7 +82,7 @@ export const BookDetailPage: React.FC = () => {
   };
 
   useEffect(() => {
-    routeStore.getState().setRouteData(String(locationKey), {
+    useRouteStore.getState().setRouteData(String(locationKey), {
       tab: activeTab,
     });
   }, [locationKey, activeTab]);

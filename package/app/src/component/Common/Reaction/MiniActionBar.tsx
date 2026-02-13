@@ -12,7 +12,7 @@ import {
 import {reactionQueries} from '@package/api/reaction/reaction.queries';
 import React, {useEffect, useState} from 'react';
 import {BookmarkTagManager} from './BookmarkTagManager';
-import {useAlertStore} from '@/global/windowAlertStore';
+import {useAlertStore} from '@app/state/windowAlertStore';
 
 interface MiniAdminActionBarProps {
   editionURL: string;

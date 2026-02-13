@@ -5,7 +5,7 @@ import {TextField} from '@mui/material';
 import {CooldownButton} from '@/component/Common/UI/Button/CooldownButton';
 
 import {useCreateReviewMutation} from '@package/api/review/review.mutations';
-import {useAlertStore} from '@/global/windowAlertStore';
+import {useAlertStore} from '@app/state/windowAlertStore';
 import {useUserStore} from '@/global/userStore';
 import {useRouterState} from '@tanstack/react-router';
 import {UnitType} from '@package/contract';

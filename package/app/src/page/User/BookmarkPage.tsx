@@ -6,7 +6,7 @@ import type {UnitDTO} from '@package/contract';
 import {reactionApi, reactionQueries} from '@package/api/reaction/reaction';
 import {unitApi} from '@package/api/unit/unit';
 import {useUserStore} from '@/global/userStore';
-import {useAlertStore} from '@/global/windowAlertStore';
+import {useAlertStore} from '@app/state/windowAlertStore';
 import {
   UniversalPaginator,
   type UniversalPaginatorHandle,

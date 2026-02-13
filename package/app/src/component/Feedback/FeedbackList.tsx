@@ -32,7 +32,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/component/shadcn/popover';
-import {useAlertStore} from '@/global/windowAlertStore';
+import {useAlertStore} from '@app/state/windowAlertStore';
 import {Link} from '@package/ui/Navigation/Link.tsx';
 
 export type FeedbackResolvedFilter = boolean | undefined;
@@ -114,8 +114,8 @@ const FeedbackList: React.FC<FeedbackListProps> = ({
     queryType === 'mine'
       ? myResult
       : queryType === 'user'
-      ? byUserResult
-      : listResult;
+        ? byUserResult
+        : listResult;
 
   const currentData = activeResult.data;
   const isLoading = activeResult.isLoading;

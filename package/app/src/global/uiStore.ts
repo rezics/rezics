@@ -47,7 +47,7 @@ const stateUtils = {
   toggle: (value: boolean): boolean => !value,
 };
 
-export const uiStore = create<UIState>(set => ({
+export const useUiStore = create<UIState>(set => ({
   // 初始状态
   sidebarOpen: true,
   currentPage: 'home',

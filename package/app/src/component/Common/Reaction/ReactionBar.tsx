@@ -12,7 +12,7 @@ import ThumbUpAltOutlinedIcon from '@mui/icons-material/ThumbUpAltOutlined';
 import {IconButton, Popper, Tooltip} from '@mui/material';
 import React, {useEffect, useState} from 'react';
 import {ReactionBarToolBox} from './reactionBarToolBox';
-import {useAlertStore} from '@/global/windowAlertStore';
+import {useAlertStore} from '@app/state/windowAlertStore';
 import {BookmarkTagManager} from './BookmarkTagManager';
 
 import {

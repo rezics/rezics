@@ -2,7 +2,7 @@ import {useState} from 'react';
 import {TextField} from '@mui/material';
 import {CooldownButton} from '@/component/Common/UI/Button/CooldownButton';
 import {useCreateUnitMutation} from '@package/api/unit/unit.mutations';
-import {useAlertStore} from '@/global/windowAlertStore';
+import {useAlertStore} from '@app/state/windowAlertStore';
 import {useUserStore} from '@/global/userStore';
 import type {UnitFormData} from '@package/api/unit/unit.types';
 import {QuoteEditPage} from './QuoteEditPage';
@@ -53,7 +53,7 @@ export function QuoteNewPage({bookUnitId}: {bookUnitId: string}) {
           value={bookUnitId}
           disabled
         />
-        <QuoteEditPage data={quoteData} setData={setQuoteData} />
+        <QuoteEditPage unitId={''} data={quoteData} setData={setQuoteData} />
         <div className="flex justify-end gap-2">
           <CooldownButton
             cooldownMs={10000}

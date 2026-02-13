@@ -10,7 +10,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 import EasyEditor from '@/component/Form/EasyEditor.tsx';
 import {useCreateUnitMutation} from '@package/api/unit/unit.mutations';
 import {useUserStore} from '@/global/userStore';
-import {useAlertStore} from '@/global/windowAlertStore';
+import {useAlertStore} from '@app/state/windowAlertStore';
 import {UnitType} from '@package/contract';
 import {type Chapter} from './ChapterArborist';
 

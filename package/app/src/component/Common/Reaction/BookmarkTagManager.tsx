@@ -13,7 +13,7 @@ import {
   useSetBookmarkTagsMutation,
   useDeleteReactionMutation,
 } from '@package/api/reaction/reaction.mutations';
-import {useAlertStore} from '@/global/windowAlertStore';
+import {useAlertStore} from '@app/state/windowAlertStore';
 import {useUserStore} from '@/global/userStore';
 import {Link} from '@package/ui/Navigation/Link.tsx';
 

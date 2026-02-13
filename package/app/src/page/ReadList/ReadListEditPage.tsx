@@ -23,7 +23,7 @@ import {BookReviewGroup} from '@/component/ReadList/Review.tsx';
 import {bookQueries} from '@package/api/book/book';
 import {useNavigate} from '@tanstack/react-router';
 import {ConfirmDeleteDialog} from '@/component/Form/ConfirmDeleteDialog';
-import {useAlertStore} from '@/global/windowAlertStore';
+import {useAlertStore} from '@app/state/windowAlertStore';
 import {mapUnitListToReviewListResponse} from '@package/api/meili/meili.api';
 import {useTranslation} from 'react-i18next';
 import {readlistEditRoute} from '@/router';

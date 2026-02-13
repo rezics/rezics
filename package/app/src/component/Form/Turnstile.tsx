@@ -1,5 +1,5 @@
 import React, {useEffect, useRef, useState} from 'react';
-import {useAlertStore} from '@/global/windowAlertStore';
+import {useAlertStore} from '@app/state/windowAlertStore';
 
 declare global {
   interface Window {

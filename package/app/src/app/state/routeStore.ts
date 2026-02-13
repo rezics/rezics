@@ -19,7 +19,7 @@ interface RouteStore {
   getRouteData: (routeKey: string) => RouteData | undefined;
 }
 
-export const routeStore = create<RouteStore>((set, get) => ({
+export const useRouteStore = create<RouteStore>((set, get) => ({
   routeMap: {},
 
   setRouteData: (routeKey, data) =>

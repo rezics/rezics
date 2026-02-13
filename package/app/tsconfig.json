@@ -11,7 +11,8 @@
       "@page/*": ["./src/page/*"],
       "@util/*": ["./src/util/*"],
       "@feature/*": ["./src/feature/*"],
-      "@locale": ["./src/locale/index.ts"]
+      "@locale": ["./src/locale/index.ts"],
+      "@app/*": ["./src/app/*"]
     },
 
     "strict": true,

@@ -3,7 +3,7 @@ import TextField from '@mui/material/TextField';
 import {CooldownButton} from '@/component/Common/UI/Button/CooldownButton';
 import {validateEmail} from './lib/validate';
 import {userApi} from '@package/api/user/user';
-import {useAlertStore} from '@/global/windowAlertStore';
+import {useAlertStore} from '@app/state/windowAlertStore';
 
 export interface GetVerificationCodeHandle {
   handleTurnstileVerify: (token: string) => Promise<void>;

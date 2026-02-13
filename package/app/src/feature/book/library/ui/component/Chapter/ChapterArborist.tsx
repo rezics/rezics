@@ -16,7 +16,7 @@ import {createChapterArboristNode} from './ChapterArboristNode.tsx';
 import {ChapterArboristContextMenu} from './ChapterArboristContextMenu.tsx';
 import {CreateChapterDialog} from './CreateChapterDialog.tsx';
 import {bookMutations} from '@package/api/book/book.mutations';
-import {useAlertStore} from '@/global/windowAlertStore.ts';
+import {useAlertStore} from '@app/state/windowAlertStore.ts';
 
 import {
   findAndAddChild,

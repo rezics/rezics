@@ -14,7 +14,7 @@ import {PersistentSettingsLoader} from './providers/PersistentSettingsLoader.tsx
 import {ReactQueryProvider} from './providers/react-query.tsx';
 import {AuthProvider} from './providers/AuthProvider.tsx';
 import {ErrorBoundary} from 'react-error-boundary';
-import {WindowAlert} from '@/component/Common/Overlay/WindowAlert.tsx';
+import {WindowAlert} from './component/WindowAlert.tsx';
 import {HelpFab} from '@/component/Common/UI/Button/HelpWidget.tsx';
 import {HelmetProvider} from 'react-helmet-async';
 import {useAppInit} from './providers/useAppInit.ts';

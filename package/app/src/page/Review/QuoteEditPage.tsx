@@ -5,7 +5,7 @@ import {useEffect, useMemo, useState} from 'react';
 import {useQuery} from '@tanstack/react-query';
 import {unitQueries} from '@package/api/unit/unit.queries';
 import {useUpdateUnitMutation} from '@package/api/unit/unit.mutations';
-import {useAlertStore} from '@/global/windowAlertStore';
+import {useAlertStore} from '@app/state/windowAlertStore';
 import {useTranslation} from 'react-i18next';
 import {quoteEditRoute} from '@/router';
 interface QuoteEditPageProps {

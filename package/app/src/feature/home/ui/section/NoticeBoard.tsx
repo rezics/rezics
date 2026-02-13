@@ -14,7 +14,7 @@ import {RouterLink} from '@package/ui/Navigation/RouterLink.tsx';
 import NotificationsRoundedIcon from '@mui/icons-material/NotificationsRounded';
 import {echoKvGetQuery} from '@package/api/echokv/echokv';
 import {useQuery} from '@tanstack/react-query';
-import {useAlertStore} from '@/global/windowAlertStore';
+import {useAlertStore} from '@app/state/windowAlertStore';
 import {parseEchoKVResponse} from '@package/api/echokv/util';
 import type {Theme} from '@mui/material/styles';
 import {useTranslation} from 'react-i18next';
@@ -148,7 +148,8 @@ function NoticeBoardItem({
             borderColor: theme.palette.primary.light,
             bgcolor:
               theme.palette.mode === 'light'
-                ? (theme.palette.primary as any)[50] ?? 'rgba(25,118,210,0.06)'
+                ? ((theme.palette.primary as any)[50] ??
+                  'rgba(25,118,210,0.06)')
                 : 'rgba(25,118,210,0.12)',
           },
         }}
@@ -311,4 +312,3 @@ export const NoticeBoard: React.FC = () => {
     </div>
   );
 };
-

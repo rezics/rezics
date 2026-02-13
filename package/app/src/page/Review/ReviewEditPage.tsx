@@ -10,7 +10,7 @@ import {
 import type {ReviewResponse, UpdateReviewInput} from '@package/contract';
 import {TextField} from '@mui/material';
 import {useTranslation} from 'react-i18next';
-import {useAlertStore} from '@/global/windowAlertStore';
+import {useAlertStore} from '@app/state/windowAlertStore';
 import {DeleteButton} from '@/component/Form/DeleteWrapper';
 import {useNavigate} from '@tanstack/react-router';
 import {RatingWithInput} from '@/component/Form/Rating';

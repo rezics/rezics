@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {useQuery} from '@tanstack/react-query';
 import {reactionQueries} from '@package/api/reaction/reaction';
-import {useAlertStore} from '@/global/windowAlertStore';
+import {useAlertStore} from '@app/state/windowAlertStore';
 import {useSetBookmarkTagsMutation} from '@package/api/reaction/reaction.mutations';
 import {Typography, TextField, Chip, Button, Paper} from '@mui/material';
 
