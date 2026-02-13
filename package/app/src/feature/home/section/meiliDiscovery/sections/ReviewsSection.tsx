@@ -14,7 +14,7 @@ import {
 import {useTranslation} from 'react-i18next';
 import {Link} from '@package/ui/Navigation/Link.tsx';
 import {SectionHeader} from '../components/SectionHeader';
-import {useHomeReviews} from '../hooks';
+import {useHomeReviews} from '../../hooks/hooks';
 
 export type ReviewsSectionProps = {
   limit?: number;
@@ -48,7 +48,11 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({limit = 6}) => {
       <div className="flex-1 overflow-y-auto space-y-3 mt-3">
         <Stack spacing={2}>
           {items.map(review => (
-            <Card key={(review as any).unitId} className="rounded-lg" elevation={1}>
+            <Card
+              key={(review as any).unitId}
+              className="rounded-lg"
+              elevation={1}
+            >
               <CardActionArea
                 component={Link}
                 to={`/review/${(review as any).unitId}`}
@@ -92,4 +96,3 @@ export const ReviewsSection: React.FC<ReviewsSectionProps> = ({limit = 6}) => {
     </div>
   );
 };
-

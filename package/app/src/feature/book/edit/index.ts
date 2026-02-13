@@ -33,11 +33,11 @@ export {BookEditTagPage} from './page/TagPage';
 export {
   BookExtraEditor,
   type BookExtraData,
-} from './ui/component/Metadata/BookExtraEditor';
+} from './component/Metadata/BookExtraEditor';
 
 export {
   BookMetadataEditor,
   type BookMetadataValue,
-} from './ui/component/Metadata/BookMetadataEditor';
+} from './component/Metadata/BookMetadataEditor';
 
-export {NewBookByUrl} from './ui/component/Metadata/NewBookByUrl';
+export {NewBookByUrl} from './component/Metadata/NewBookByUrl';

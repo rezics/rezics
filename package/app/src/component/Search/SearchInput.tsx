@@ -13,7 +13,7 @@ import {useTranslation} from 'react-i18next';
 import {
   IsLicensedInfo,
   NSFWInfo,
-} from '@feature/book/edit/ui/component/Metadata/BookMetadataEditor';
+} from '@feature/book/edit/component/Metadata/BookMetadataEditor';
 
 export type SearchInputShowProps = {
   value: SearchInfo;

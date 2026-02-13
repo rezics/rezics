@@ -1,10 +1,17 @@
 import React from 'react';
-import {Alert, Card, CardActionArea, CardContent, Stack, Typography} from '@mui/material';
+import {
+  Alert,
+  Card,
+  CardActionArea,
+  CardContent,
+  Stack,
+  Typography,
+} from '@mui/material';
 import {useTranslation} from 'react-i18next';
 import {LazyLoadImage} from '@/component/Common/LazyLoadImage';
 import {Link} from '@package/ui/Navigation/Link.tsx';
 import {SectionHeader} from '../components/SectionHeader';
-import {useHomeReadlists} from '../hooks';
+import {useHomeReadlists} from '../../hooks/hooks';
 
 export type ReadlistsSectionProps = {
   limit?: number;
@@ -38,7 +45,10 @@ export const ReadlistsSection: React.FC<ReadlistsSectionProps> = ({
         <Stack spacing={2}>
           {items.map(list => (
             <Card key={(list as any).id} className="rounded-lg" elevation={1}>
-              <CardActionArea component={Link} to={`/readlist/${(list as any).id}`}>
+              <CardActionArea
+                component={Link}
+                to={`/readlist/${(list as any).id}`}
+              >
                 <CardContent className="flex gap-3 items-start">
                   {(list as any).coverUrl && (
                     <div className="shrink-0">
@@ -88,4 +98,3 @@ export const ReadlistsSection: React.FC<ReadlistsSectionProps> = ({
     </div>
   );
 };
-

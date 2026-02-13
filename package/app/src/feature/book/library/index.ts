@@ -29,20 +29,20 @@ export {
   BookDetailSection,
   type BookDetailSectionProps,
   type BookDetailTabValue,
-} from './ui/section/BookDetailSection';
+} from './section/BookDetailSection';
 
-export {BookHeroSection} from './ui/section/BookHeroSection';
+export {BookHeroSection} from './section/BookHeroSection';
 
 export {
   BookLibSection,
   BookLibSectionRef,
   type BookLibSectionProps,
-} from './ui/section/BookLibSection';
+} from './section/BookLibSection';
 
 // Backward compatible aliases
-export {BookLibSection as BookLibShow} from './ui/section/BookLibSection';
-export {BookLibSectionRef as BookLibShowRef} from './ui/section/BookLibSection';
-export {BookDetailSection as BookDetailView} from './ui/section/BookDetailSection';
+export {BookLibSection as BookLibShow} from './section/BookLibSection';
+export {BookLibSectionRef as BookLibShowRef} from './section/BookLibSection';
+export {BookDetailSection as BookDetailView} from './section/BookDetailSection';
 
 // ============================================================================
 // UI Components (Reusable building blocks)
@@ -51,27 +51,27 @@ export {BookDetailSection as BookDetailView} from './ui/section/BookDetailSectio
 export {
   BookSearchInput,
   type BookSearchInputProps,
-} from './ui/component/BookSearch/BookSearch';
+} from './component/BookSearch/BookSearch';
 
 export {
   BookListView,
   BookListViewItem,
   type BookListViewProps,
   type BookListViewItemProps,
-} from './ui/component/BookList/BookListView';
+} from './component/BookList/BookListView';
 
 export {
   ChapterTreeView,
   ChapterLeaf,
   ChapterList,
   type ChapterTreeHandle,
-} from './ui/component/Chapter/ChapterList';
+} from './component/Chapter/ChapterList';
 
 // Backward compatible aliases
-export {BookSearchInput as BookSearchContainer} from './ui/component/BookSearch/BookSearch';
-export {BookListView as BookListViewContainer} from './ui/component/BookList/BookListView';
-export {BookListView as BookListViewShow} from './ui/component/BookList/BookListView';
-export {ChapterList as ChapterListContainer} from './ui/component/Chapter/ChapterList';
+export {BookSearchInput as BookSearchContainer} from './component/BookSearch/BookSearch';
+export {BookListView as BookListViewContainer} from './component/BookList/BookListView';
+export {BookListView as BookListViewShow} from './component/BookList/BookListView';
+export {ChapterList as ChapterListContainer} from './component/Chapter/ChapterList';
 
 // ============================================================================
 // State (Jotai atoms and hooks)

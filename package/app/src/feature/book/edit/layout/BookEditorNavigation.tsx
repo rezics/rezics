@@ -12,7 +12,7 @@ import DashboardIcon from '@mui/icons-material/Dashboard';
 import DescriptionIcon from '@mui/icons-material/Description';
 // import LibraryBooksIcon from "@mui/icons-material/LibraryBooks";
 
-import type {NavigationItem} from './navigation';
+import type {NavigationItem} from '@feature/core/component/Navigation/navigation';
 
 // segment: router path
 
@@ -21,30 +21,26 @@ export const NAVIGATION = (bookId: string): NavigationItem[] => [
     kind: 'item',
     title: 'Back to Book',
     segment: `~/book/${bookId}`,
-    icon: <DashboardIcon />,
-  },
-  {
-    kind: 'header',
-    title: 'Book Editor Navigation',
+    icon: DashboardIcon,
   },
 
   {
     kind: 'item',
     title: 'Book Edit Main',
     segment: `~/book/${bookId}/edit`,
-    icon: <DescriptionIcon />,
+    icon: DescriptionIcon,
   },
   {
     kind: 'item',
     title: 'Book Edit Tag',
     segment: `~/book/${bookId}/edit/tag`,
-    icon: <DescriptionIcon />,
+    icon: DescriptionIcon,
   },
   {
     kind: 'item',
     title: 'Book Edit Chapter',
     segment: `~/book/${bookId}/edit/chapter/`,
-    icon: <DescriptionIcon />,
+    icon: DescriptionIcon,
   },
   {
     kind: 'divider',

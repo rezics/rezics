@@ -8,6 +8,7 @@ import {MobileHomeDiscovery} from '../section/Mobile/MobileHomeDiscovery';
 import React from 'react';
 import {useIsMobile} from '@/shared/util/useMediaQueryUtil';
 import {useTranslation} from 'react-i18next';
+import {NewBookSection} from '../section/NewBookSection';
 
 export type HomeShowProps = object;
 
@@ -33,6 +34,7 @@ export const HomeShow: React.FC<HomeShowProps> = () => {
 
       {/* Discovery section powered by Meilisearch */}
       <div className="mt-8">
+        <NewBookSection />
         <HomeMeiliDiscoverySection />
       </div>
     </div>

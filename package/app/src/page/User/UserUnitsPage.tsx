@@ -19,7 +19,7 @@ import {mapUnitListToReviewListResponse} from '@package/api/meili/meili.api';
 import {SingleReadlist} from '@/component/ReadList/SingleReadlist';
 import {ReviewListContainer} from '@/component/Review/ReviewList';
 import {QuoteExcerptListContainer} from '@component/Review/QuoteExcerptList.tsx';
-import {BookListView} from '@feature/book/library/ui/component/BookList/BookListView';
+import {BookListView} from '@feature/book/library/component/BookList/BookListView';
 
 type Readlist = ReadlistDTO;
 type Review = ReviewDTO;
@@ -420,8 +420,8 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({userId}) => {
       tab === 'comment'
         ? UnitType.COMMENT
         : tab === 'note'
-        ? UnitType.NOTE
-        : UnitType.QUOTE;
+          ? UnitType.NOTE
+          : UnitType.QUOTE;
 
     const {queryKey, queryFn} = buildMeiliUnitQuery(
       unitType,

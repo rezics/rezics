@@ -1,9 +1,16 @@
 import React from 'react';
-import {Alert, Card, CardActionArea, CardContent, CardMedia, Typography} from '@mui/material';
+import {
+  Alert,
+  Card,
+  CardActionArea,
+  CardContent,
+  CardMedia,
+  Typography,
+} from '@mui/material';
 import {useTranslation} from 'react-i18next';
 import {Link} from '@package/ui/Navigation/Link.tsx';
 import {SectionHeader} from '../components/SectionHeader';
-import {useHomeBooks} from '../hooks';
+import {useHomeBooks} from '../../hooks/hooks';
 
 export type BooksSectionProps = {
   limit?: number;
@@ -75,7 +82,7 @@ export const BooksSection: React.FC<BooksSectionProps> = ({limit = 50}) => {
                           if (Array.isArray(a))
                             return a
                               .map((x: any) =>
-                                typeof x === 'string' ? x : x?.name ?? '',
+                                typeof x === 'string' ? x : (x?.name ?? ''),
                               )
                               .filter(Boolean)
                               .join(', ');
@@ -93,4 +100,3 @@ export const BooksSection: React.FC<BooksSectionProps> = ({limit = 50}) => {
     </div>
   );
 };
-

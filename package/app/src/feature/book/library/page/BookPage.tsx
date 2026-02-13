@@ -11,7 +11,10 @@ import {bookQueries} from '@package/api/book/book';
 import {
   BookDetailSection,
   type BookDetailTabValue,
-} from '../ui/section/BookDetailSection';
+} from '../section/BookDetailSection';
+
+import {BookHeroSection} from '../section/BookHeroSection';
+
 import {
   bookDetailAtomFamily,
   setBookDetailAtomFamily,
@@ -129,11 +132,9 @@ export const BookDetailPage: React.FC = () => {
   }
 
   return (
-    <BookDetailSection
-      bookInfo={bookInfo}
-      rating={ratingValue || 0}
-      activeTab={activeTab}
-      onTabChange={handleTabChange}
-    />
+    <div>
+      <BookHeroSection bookInfo={bookInfo} rating={ratingValue || 0} />
+      <BookDetailSection bookInfo={bookInfo} activeTab={Number(activeTab)} />;
+    </div>
   );
 };

@@ -1,9 +1,16 @@
 import React from 'react';
-import {Alert, Card, CardActionArea, CardContent, Stack, Typography} from '@mui/material';
+import {
+  Alert,
+  Card,
+  CardActionArea,
+  CardContent,
+  Stack,
+  Typography,
+} from '@mui/material';
 import {useTranslation} from 'react-i18next';
 import {Link} from '@package/ui/Navigation/Link.tsx';
 import {SectionHeader} from '../components/SectionHeader';
-import {useHomeQuotes} from '../hooks';
+import {useHomeQuotes} from '../../hooks/hooks';
 
 export type QuotesSectionProps = {
   limit?: number;
@@ -39,7 +46,10 @@ export const QuotesSection: React.FC<QuotesSectionProps> = ({limit = 6}) => {
         <Stack spacing={2}>
           {items.map(quote => (
             <Card key={(quote as any).id} className="rounded-lg" elevation={1}>
-              <CardActionArea component={Link} to={`/quote/${(quote as any).id}`}>
+              <CardActionArea
+                component={Link}
+                to={`/quote/${(quote as any).id}`}
+              >
                 <CardContent>
                   <Typography
                     variant="body1"
@@ -66,4 +76,3 @@ export const QuotesSection: React.FC<QuotesSectionProps> = ({limit = 6}) => {
     </div>
   );
 };
-

@@ -7,7 +7,7 @@ const BookLibPage = lazyRouteComponent(
 
 export const Route = createFileRoute('/_mainLayout/book/')({
   component: BookLibPage,
-  validateSearch: (search: Record<string, unknown>) => {
+  validateSearch: (search: Record<string, unknown>): {tags?: string} => {
     return {
       tags: typeof search.tags === 'string' ? search.tags : undefined,
     };

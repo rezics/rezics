@@ -8,7 +8,7 @@ import {meiliQueries} from '@package/api/meili/meili.queries';
 import {useQuery, useQueryClient} from '@tanstack/react-query';
 import type {BookDTO} from '@package/contract';
 
-import {BookLibSectionRef} from '../ui/section/BookLibSection';
+import {BookLibSectionRef} from '../section/BookLibSection';
 
 /**
  * Book Library Page - Route-level entry point for book list.
@@ -58,7 +58,9 @@ export const BookLibPage: React.FC = () => {
         keyword: currentQuery.keyword ?? '',
         tags: currentQuery.tags ?? [],
         ...(currentQuery.nsfw ? {nsfw: true} : {}),
-        ...(currentQuery.textLength ? {textLength: currentQuery.textLength} : {}),
+        ...(currentQuery.textLength
+          ? {textLength: currentQuery.textLength}
+          : {}),
       }),
     );
     return fetchedData?.books?.length;
