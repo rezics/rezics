@@ -14,7 +14,7 @@ interface AppState {
   setUseDynamicTheme: (use: boolean) => void;
 }
 
-export const appStore = create<AppState>(set => ({
+export const useAppStore = create<AppState>(set => ({
   // 初始状态
   isLoading: false,
   theme: 'light',

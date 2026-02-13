@@ -16,12 +16,12 @@ export default defineConfig(({mode}) => {
         target: 'react',
         autoCodeSplitting: true,
         routesDirectory: 'src/routes',
-        generatedRouteTree: 'src/routes/routeTree.gen.ts',
+        generatedRouteTree: 'src/routeTree.gen.ts',
       }),
       UnoCSS(),
       react({
         babel: {
-          plugins: ['babel-plugin-react-compiler'],
+          plugins: [['babel-plugin-react-compiler', {panicThreshold: 'none'}]],
         },
       }),
       tsconfigPaths(),

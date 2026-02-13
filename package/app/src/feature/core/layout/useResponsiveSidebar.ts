@@ -1,7 +1,7 @@
 import {useState} from 'react';
 import type React from 'react';
 import {useLayoutStore} from '../state/layoutStore.ts';
-import {appStore} from '@/global/appStore.ts';
+import {useAppStore} from '@/global/appStore.ts';
 import {useUserStore} from '@/global/userStore';
 import {useIsMobile} from '@/shared/util/useMediaQueryUtil';
 
@@ -33,9 +33,10 @@ export const useResponsiveSidebar = (): ResponsiveSidebarState => {
   const [isDragging, setIsDragging] = useState(false);
   const [isSidebarTransitioning, setIsSidebarTransitioning] = useState(false);
 
-  const themeMode = appStore(state => state.theme);
+  const themeMode = useAppStore(state => state.theme);
+  const setTheme = useAppStore(state => state.setTheme);
   function toggleTheme() {
-    appStore.setState({theme: themeMode === 'light' ? 'dark' : 'light'});
+    setTheme(themeMode === 'light' ? 'dark' : 'light');
   }
 
   const isAdmin = useUserStore(state =>

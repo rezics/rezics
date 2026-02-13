@@ -8,7 +8,7 @@ import {LinearChapterList} from '@feature/book/library/ui/component/Chapter/Line
 import {useNavigate} from '@tanstack/react-router';
 import {useResponsiveSidebar} from './useResponsiveSidebar';
 import {useLayoutStore} from '../state/layoutStore.ts';
-import {bookReadLayoutRoute} from '@/routes/router';
+import {bookReadLayoutRoute} from '@/router';
 export interface BookReadLayoutProps {
   children: ReactNode;
 }

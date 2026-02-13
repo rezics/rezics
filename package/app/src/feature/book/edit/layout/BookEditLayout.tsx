@@ -9,7 +9,7 @@ import {LinearChapterList} from '@feature/book/library/ui/component/Chapter/Line
 
 import {DraggableResizer} from '../component/DraggableResizer.tsx';
 import {useResponsiveSidebar} from './useResponsiveSidebar';
-import {bookEditChapterRoute, bookEditLayoutRoute} from '@/routes/router';
+import {bookEditChapterRoute, bookEditLayoutRoute} from '@/router';
 
 export interface BookEditLayoutProps {
   children: ReactNode;

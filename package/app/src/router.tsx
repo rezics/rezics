@@ -12,7 +12,7 @@ export const router = createRouter({
   // This will ensure that the loader is always called when the route is preloaded or visited
   defaultPreloadStaleTime: 0,
   scrollRestoration: true,
-  getScrollRestorationKey: location => {
+  getScrollRestorationKey: (location: Location) => {
     const tab = new URLSearchParams(location.search ?? '').get('tab') ?? '';
     return `${location.pathname}::tab=${tab}`;
   },

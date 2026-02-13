@@ -26,7 +26,7 @@ import {ConfirmDeleteDialog} from '@/component/Form/ConfirmDeleteDialog';
 import {useAlertStore} from '@/global/windowAlertStore';
 import {mapUnitListToReviewListResponse} from '@package/api/meili/meili.api';
 import {useTranslation} from 'react-i18next';
-import {readlistEditRoute} from '@/routes/router';
+import {readlistEditRoute} from '@/router';
 
 function extractReviewId(input: string): string | null {
   if (!input) return null;

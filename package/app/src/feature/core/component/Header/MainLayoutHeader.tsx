@@ -8,7 +8,7 @@ import {useTheme} from '@mui/material/styles';
 import {useTranslation} from 'react-i18next';
 import {cn} from '@/shared/shadcn/lib/utils';
 import {Link} from '@package/ui/Navigation/Link.tsx';
-import {appStore} from '@/global/appStore.ts';
+import {useAppStore} from '@/global/appStore.ts';
 
 interface HeaderProps {
   isDragging?: boolean;
@@ -21,17 +21,16 @@ export const Header: React.FC<HeaderProps> = ({
   layoutType = 'type-b',
   disableDrawerToggle = false,
 }) => {
-  const {sidebarOpen} = useLayoutStore();
+  const {sidebarOpen, drawerWidth, toggleSidebar} = useLayoutStore();
   const theme = useTheme();
   const {t} = useTranslation();
 
-  const themeMode = appStore(state => state.theme);
-  const toggleTheme = () => {
-    appStore.setState({theme: themeMode === 'light' ? 'dark' : 'light'});
-  };
+  const themeMode = useAppStore(state => state.theme);
+  const setTheme = useAppStore(state => state.setTheme);
 
-  const drawerWidth = useLayoutStore(s => s.drawerWidth);
-  const toggleSidebar = useLayoutStore(s => s.toggleSidebar);
+  const toggleTheme = () => {
+    setTheme(themeMode === 'light' ? 'dark' : 'light');
+  };
 
   function handleDrawerToggleInner() {
     if (disableDrawerToggle) return;

@@ -9,7 +9,7 @@ import {
   generateDynamicColors,
 } from './config/dynamicTheme.ts';
 import {getDynamicTheme, getTheme} from './config/theme.ts';
-import {appStore} from '@/global/appStore.ts';
+import {useAppStore} from '@/global/appStore.ts';
 import {PersistentSettingsLoader} from './providers/PersistentSettingsLoader.tsx';
 import {ReactQueryProvider} from './providers/react-query.tsx';
 import {AuthProvider} from './providers/AuthProvider.tsx';
@@ -20,12 +20,12 @@ import {HelmetProvider} from 'react-helmet-async';
 import {useAppInit} from './providers/useAppInit.ts';
 import {RouterProvider} from '@tanstack/react-router';
 
-import {router} from '@/routes/router.tsx';
+import {router} from '@/router.tsx';
 
 export default function App() {
-  const themeMode = appStore(s => s.theme);
-  const customColor = appStore(s => s.customColor);
-  const useDynamicTheme = appStore(s => s.useDynamicTheme);
+  const themeMode = useAppStore(s => s.theme);
+  const customColor = useAppStore(s => s.customColor);
+  const useDynamicTheme = useAppStore(s => s.useDynamicTheme);
 
   // ANCHOR 非常好用的Hook，回头看看封装一下
   // useEffect(() => {
