@@ -37,7 +37,7 @@ export const LangToggle: React.FC = () => {
     <>
       <Tooltip title="语言切换">
         <IconButton onClick={handleClick}>
-          <LanguageIcon className="text-white" />
+          <LanguageIcon />
         </IconButton>
       </Tooltip>
       <Menu

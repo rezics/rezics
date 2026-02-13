@@ -28,9 +28,7 @@ export const Header: React.FC<HeaderProps> = ({
   const themeMode = useAppStore(state => state.theme);
   const setTheme = useAppStore(state => state.setTheme);
 
-  const logoBgColor = useMemo(() => {
-    return themeMode === 'light' ? 'white' : '#FFEBEE';
-  }, [themeMode]);
+  const isDark = useMemo(() => themeMode === 'dark', [themeMode]);
 
   const toggleTheme = () => {
     setTheme(themeMode === 'light' ? 'dark' : 'light');
@@ -44,7 +42,9 @@ export const Header: React.FC<HeaderProps> = ({
   return (
     <AppBar
       position="fixed"
+      elevation={0}
       sx={{
+        backgroundColor: 'background.paper',
         zIndex: theme.zIndex.drawer + 1,
         ml: layoutType === 'type-a' ? (sidebarOpen ? drawerWidth : 0) : 0,
         width:
@@ -61,11 +61,12 @@ export const Header: React.FC<HeaderProps> = ({
       className={cn(
         isDragging ? 'rounded-tl-2xl rounded-bl-2xl' : '',
         'pointer-events-auto',
+        'border-b',
+        isDark ? 'border-gray-800' : 'border-gray-200',
       )}
     >
       <Toolbar>
         <IconButton
-          color="inherit"
           aria-label={t('accessibility.open_drawer')}
           onClick={handleDrawerToggleInner}
           edge="start"
@@ -79,15 +80,21 @@ export const Header: React.FC<HeaderProps> = ({
         </IconButton>
         <Typography variant="h6" noWrap component="div" sx={{flexGrow: 1}}>
           <Link to="/" className="flex items-center gap-2">
-            <Avatar sx={{bgcolor: logoBgColor}} variant="rounded">
-              <img src="./logo.svg" alt="logo" />
+            <Avatar sx={{bgcolor: 'transparent'}} variant="rounded">
+              <img src="/logo.svg" alt="logo" />
             </Avatar>
-            <p className="text-2xl font-bold">REZICS</p>
+            <Typography
+              variant="h1"
+              className="text-2xl font-bold"
+              sx={{color: 'primary.main'}}
+            >
+              REZICS
+            </Typography>
           </Link>
         </Typography>
         {/* <ThemeQuickToggle /> */}
         <LangToggle />
-        <IconButton color="inherit" onClick={toggleTheme}>
+        <IconButton onClick={toggleTheme}>
           {themeMode === 'dark' ? <Brightness7 /> : <Brightness4 />}
         </IconButton>
         <UserContainer onLogout={() => console.log('Logout')} />

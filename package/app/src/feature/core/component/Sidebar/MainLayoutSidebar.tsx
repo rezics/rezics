@@ -24,7 +24,7 @@ import React, {type ReactNode} from 'react';
 
 import useMeasure from 'react-use-measure';
 
-import {Sidebar as UiSidebar} from '@/component/shadcn/sidebar';
+import {Sidebar as UiSidebar} from './sidebar';
 import {cn} from '@/shared/shadcn/lib/utils';
 import {useIsMobile} from '@/shared/util/useMediaQueryUtil';
 import {RouterLink} from '@package/ui/Navigation/RouterLink.tsx';
