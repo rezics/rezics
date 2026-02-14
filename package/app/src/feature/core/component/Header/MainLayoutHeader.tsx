@@ -6,7 +6,7 @@ import {Brightness4, Brightness7, Menu} from '@mui/icons-material';
 import {AppBar, Avatar, IconButton, Toolbar, Typography} from '@mui/material';
 import {useTheme} from '@mui/material/styles';
 import {useTranslation} from 'react-i18next';
-import {cn} from '@/shared/shadcn/lib/utils';
+import {cn} from '@/shared/util/cssUtil';
 import {Link} from '@package/ui/Navigation/Link.tsx';
 import {useAppStore} from '@/global/appStore.ts';
 

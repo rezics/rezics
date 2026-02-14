@@ -1,16 +1,6 @@
 // 定义基础的设计 Token，可以根据需要扩展
-import {
-  createTheme,
-  PaletteOptions,
-  responsiveFontSizes,
-  Theme,
-  ThemeOptions,
-} from '@mui/material/styles';
-import {
-  DynamicColorScheme,
-  dynamicColorsToPalette,
-  generateDynamicColors,
-} from './dynamicTheme';
+import {createTheme, type Theme, type ThemeOptions} from '@mui/material/styles';
+import {dynamicColorsToPalette, generateDynamicColors} from './dynamicTheme';
 
 /**
  * 根据 mode（'light' | 'dark'）返回对应的颜色、组件覆盖等设计 Token
@@ -81,60 +71,28 @@ const getDesignTokens = (
     },
     MuiCssBaseline: {
       styleOverrides: {
-        body: {
-          scrollbarColor:
-            mode === 'dark' ? '#6b6b6b #2b2b2b' : '#c1c1c1 #f5f5f5',
-          '&::-webkit-scrollbar, & *::-webkit-scrollbar': {
-            backgroundColor: mode === 'dark' ? '#2b2b2b' : '#f5f5f5',
-            width: '8px',
-          },
-          '&::-webkit-scrollbar-thumb, & *::-webkit-scrollbar-thumb': {
-            borderRadius: 8,
-            backgroundColor: mode === 'dark' ? '#6b6b6b' : '#c1c1c1',
-            minHeight: 24,
-            border: `2px solid ${mode === 'dark' ? '#2b2b2b' : '#f5f5f5'}`,
-          },
-          '&::-webkit-scrollbar-thumb:focus, & *::-webkit-scrollbar-thumb:focus':
-            {
-              backgroundColor: mode === 'dark' ? '#959595' : '#a8a8a8',
-            },
-          '&::-webkit-scrollbar-thumb:active, & *::-webkit-scrollbar-thumb:active':
-            {
-              backgroundColor: mode === 'dark' ? '#959595' : '#a8a8a8',
-            },
-          '&::-webkit-scrollbar-thumb:hover, & *::-webkit-scrollbar-thumb:hover':
-            {
-              backgroundColor: mode === 'dark' ? '#959595' : '#a8a8a8',
-            },
-        },
+        body: {},
       },
     },
-    // 示例：全局修改 Button 的默认属性
     MuiButton: {
       defaultProps: {
         disableElevation: true,
         variant: 'contained',
       },
-      styleOverrides: {
-        root: {
-          borderRadius: 8,
-          textTransform: 'none',
-        },
+    },
+    MuiPaper: {
+      defaultProps: {
+        elevation: 0,
       },
     },
-    // 示例：自定义 AppBar 背景色随模式切换
     MuiAppBar: {
       styleOverrides: {
-        root: {
-          backgroundColor: mode === 'light' ? '#f4606c' : '#f4606c',
-        },
+        root: {},
       },
     },
   },
 
   typography: {
-    // 全局字体设置
-    fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
     h1: {
       fontSize: '2.5rem',
       fontWeight: 700,
@@ -199,7 +157,6 @@ const getDesignTokens = (
     },
   },
 
-  // 剩余的常用全局配置项
   breakpoints: {
     values: {
       xs: 0,

@@ -37,9 +37,8 @@ export const NewBookSection: React.FC<NewBookSectionProps> = ({
       className={['w-full rounded-xl px-6 py-5', className ?? ''].join(' ')}
     >
       {/* Header */}
-      <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-lg font-semibold">最新作品</h2>
-
+      <div className="flex items-center justify-between">
+        <h2 className="font-semibold">最新作品</h2>
         <Button
           variant="text"
           color="primary"

@@ -9,34 +9,58 @@ import React from 'react';
 import {useIsMobile} from '@/shared/util/useMediaQueryUtil';
 import {useTranslation} from 'react-i18next';
 import {NewBookSection} from '../section/NewBookSection';
+import {BookCarousel} from '../component/HomeCarousel';
+import {Paper} from '@mui/material';
 
 export type HomeShowProps = object;
 
 export const HomeShow: React.FC<HomeShowProps> = () => {
+  const {t} = useTranslation();
+
   return (
     <div className="w-10/12 mx-auto mb-10">
-      <section className="px-4 pt-4 pb-6 space-y-4 bg-background text-foreground rounded-lg">
-        {/* First Carousel */}
-        <div className="mt-2">
-          <ResponsiveCarouselNotice />
-        </div>
+      <section>
+        <Paper sx={{p: 2, mt: 2}}>
+          <div className="w-full">
+            <div className="space-y-2 mb-4">
+              <p className="text-[10px] uppercase tracking-[0.35em] text-primary/80">
+                {t('page.home.hero.kicker')}
+              </p>
+              <h1 className="text-2xl font-semibold leading-snug">
+                <span className="text-primary">
+                  {' '}
+                  {t('page.home.hero.title_highlight')}
+                </span>
+              </h1>
+              <p className="text-xs text-muted-foreground">
+                {t('page.home.hero.subtitle')}
+              </p>
+            </div>
+            <BookCarousel autoplayIntervalNum={3000} />
+          </div>
 
-        {/* Search and quick links */}
-        <div className="mt-4 grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-          <div className="lg:col-span-1">
-            <HomeSearchBar />
+          {/* Search and quick links */}
+          <div className="mt-4 grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+            <div className="lg:col-span-1">
+              <HomeSearchBar />
+            </div>
+            <div className="lg:col-span-1">
+              <HomeQuickAccessLinks />
+            </div>
           </div>
-          <div className="lg:col-span-1">
-            <HomeQuickAccessLinks />
-          </div>
-        </div>
+        </Paper>
       </section>
 
       {/* Discovery section powered by Meilisearch */}
-      <div className="mt-8">
+      <Paper sx={{p: 2, mt: 2}}>
         <NewBookSection />
-        <HomeMeiliDiscoverySection />
-      </div>
+      </Paper>
+
+      <section>
+        <Paper sx={{p: 2, mt: 2}}>
+          <HomeMeiliDiscoverySection />
+        </Paper>
+      </section>
     </div>
   );
 };

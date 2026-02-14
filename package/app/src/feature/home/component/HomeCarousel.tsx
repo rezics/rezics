@@ -7,6 +7,8 @@ import {useAlertStore} from '@app/state/windowAlertStore';
 import {LazyLoadImage} from '@/component/Common/LazyLoadImage';
 import {useTranslation} from 'react-i18next';
 import {Link} from '@package/ui/Navigation/Link.tsx';
+import {cn} from '@/shared/util/cssUtil';
+import {CarouselIndicator} from '@/component/Carousel/CarouselIndicator';
 
 import {
   Carousel,
@@ -21,6 +23,8 @@ interface BookCarouselProps {
 export const BookCarousel: React.FC<BookCarouselProps> = ({
   autoplayIntervalNum = 3000,
 }) => {
+  const maxHeightClass = 'max-h-[250px]';
+
   const {data} = useQuery(echoKvGetQuery('home_carousel'));
   type CarouselProduct = {
     cover?: string;
@@ -32,7 +36,11 @@ export const BookCarousel: React.FC<BookCarouselProps> = ({
   const [products, setProducts] = useState<CarouselProduct[]>([]);
   const {show: showAlert} = useAlertStore();
   const {t} = useTranslation();
-  const carouselApiRef = useRef<CarouselApi | null>(null);
+  const [carouselApi, setCarouselApi] = React.useState<CarouselApi | null>(
+    null,
+  );
+  const [current, setCurrent] = React.useState(0);
+  const [count, setCount] = React.useState(0);
 
   useEffect(() => {
     try {
@@ -52,14 +60,14 @@ export const BookCarousel: React.FC<BookCarouselProps> = ({
 
     const id = setInterval(() => {
       try {
-        carouselApiRef.current?.scrollNext();
+        carouselApi?.scrollNext();
       } catch (e) {
         // ignore if api not ready
       }
     }, autoplayIntervalNum);
 
     return () => clearInterval(id);
-  }, [autoplayIntervalNum]);
+  }, [autoplayIntervalNum, carouselApi]);
 
   const smallThanXS = useMediaQuery('(max-width: 600px)');
 
@@ -74,25 +82,36 @@ export const BookCarousel: React.FC<BookCarouselProps> = ({
     );
   };
 
+  useEffect(() => {
+    if (!carouselApi) {
+      return;
+    }
+    setCount(carouselApi.scrollSnapList().length);
+    setCurrent(carouselApi.selectedScrollSnap() + 1);
+    carouselApi.on('select', () => {
+      setCurrent(carouselApi.selectedScrollSnap() + 1);
+    });
+  }, [carouselApi]);
+
   return (
     <Carousel
       opts={{loop: true}}
-      className="min-h-[200px]"
-      setApi={api => (carouselApiRef.current = api)}
+      className={cn('min-h-0', maxHeightClass)}
+      setApi={api => setCarouselApi(api)}
     >
       <CarouselContent>
         {products?.map((product, index) => (
-          <CarouselItem key={index}>
+          <CarouselItem key={index} className="basis-[min(800px,100%)]">
             <Link to={product?.link ?? '#'}>
-              <Grid container spacing={2} alignItems="center" sx={{px: 2}}>
-                <Grid size={{xs: 0, sm: 3}}>
+              <div className="flex items-center gap-4 px-4">
+                <div className="hidden sm:block flex-shrink-0 h-full overflow-hidden rounded-lg">
                   <LazyLoadImage
                     src={product.cover ?? ''}
                     alt={product.title ?? ''}
-                    className="w-full h-full object-cover rounded-lg"
+                    className={cn('w-full h-full object-cover', maxHeightClass)}
                   />
-                </Grid>
-                <Grid size={{xs: 10, sm: 9}}>
+                </div>
+                <div className="flex-1 min-w-0">
                   {smallThanXS ? (
                     <div
                       className="relative w-full h-[250px] sm:h-[280px] rounded-lg overflow-hidden flex items-end"
@@ -120,12 +139,13 @@ export const BookCarousel: React.FC<BookCarouselProps> = ({
                   ) : (
                     <CarouselContentInner product={product} />
                   )}
-                </Grid>
-              </Grid>
+                </div>
+              </div>
             </Link>
           </CarouselItem>
         ))}
       </CarouselContent>
+      <CarouselIndicator api={carouselApi} />
     </Carousel>
   );
 };
