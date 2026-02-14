@@ -1,6 +1,5 @@
 import {HomeSearchBar} from '../section/HomeSearchBar';
 import {HomeQuickAccessLinks} from '../section/HomeQuickAccessLinks';
-import {ResponsiveCarouselNotice} from '../section/ResponsiveCarouselNotice';
 import {HomeMeiliDiscoverySection} from '../section/meiliDiscovery/HomeMeiliDiscoverySection';
 import {MobileHomeHeader} from '../section/Mobile/MobileHomeHeader';
 import {MobileHomeCarousel} from '../section/Mobile/MobileHomeCarousel';
