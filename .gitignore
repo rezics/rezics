@@ -1,6 +1,8 @@
 # Visual Studio Counter
 .VSCodeCounter/
 
+tailwind.config.js
+
 remove_node_modules.ts
 
 # Vite
