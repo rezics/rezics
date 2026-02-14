@@ -85,5 +85,12 @@
   "material-icon-theme.folders.associations": {
     "component": "components",
     "state": "store"
+  },
+  "symbols.folders.associations": {
+    "component": "folder-green-code",
+    "section": "folder-purple-code",
+    "page": "folder-blue-code",
+    "state": "folder-redux-reducer",
+    "model": "folder-models"
   }
 }

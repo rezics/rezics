@@ -1,6 +1,6 @@
 import React from 'react';
 import {Tabs, Tab, Button} from '@mui/material';
-import {HorizontalBookCarousel} from '@feature/book/component/list/HorizontalBookCarousel';
+import {HorizontalBookCarousel} from '@/book-library/component/list/HorizontalBookCarousel';
 import {useHomeBooks} from './hooks/hooks';
 import {useNavigate} from '@tanstack/react-router';
 
