@@ -33,12 +33,7 @@ const LoginPrompt = () => {
 
   if (isMobile) {
     return (
-      <Button
-        variant="text"
-        className="!text-white"
-        component={Link}
-        to="/login"
-      >
+      <Button variant="text" component={Link} to="/login">
         Login
       </Button>
     );
@@ -46,18 +41,10 @@ const LoginPrompt = () => {
 
   return (
     <div className="flex gap-2">
-      <Button
-        variant="text"
-        className="!text-white"
-        onClick={() => setLoginModalOpen(true)}
-      >
+      <Button variant="text" onClick={() => setLoginModalOpen(true)}>
         Login
       </Button>
-      <Button
-        variant="outlined"
-        className="!text-white !border-white"
-        onClick={() => setRegisterModalOpen(true)}
-      >
+      <Button variant="outlined" onClick={() => setRegisterModalOpen(true)}>
         Register
       </Button>
 

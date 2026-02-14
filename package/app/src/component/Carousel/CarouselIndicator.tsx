@@ -24,7 +24,6 @@ export const CarouselIndicator: React.FC<CarouselIndicatorProps> = ({
   const [current, setCurrent] = useState(0);
   const [count, setCount] = useState(0);
   const themeMode = useAppStore(state => state.theme);
-
   const isDark = useMemo(() => themeMode === 'dark', [themeMode]);
 
   useEffect(() => {

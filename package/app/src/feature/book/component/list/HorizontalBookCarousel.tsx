@@ -54,8 +54,8 @@ export const HorizontalBookCarousel: React.FC<HorizontalBookCarouselProps> = ({
         ))}
       </CarouselContent>
 
-      <CarouselPrevious />
-      <CarouselNext />
+      <CarouselPrevious variant="ghost" />
+      <CarouselNext variant="ghost" />
     </Carousel>
   );
 };
