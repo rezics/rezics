@@ -23,6 +23,10 @@ util: 区别于 model/selectors. selectors 负责业务逻辑计算，而 util �
 
 跨 feature、跨领域、具有“平台级”或“应用级”性质的模块，使用根级别名访问，这类代码本来就应该被很多地方依赖，例如全局 UI 基础组件、网络层、状态管理入口、设计系统等。而在单个 feature 内部，尤其是 components、hooks、services 这类强内聚代码，优先使用同层或低层的相对路径，保持“依赖主要在本领域内流动”的形态。这样一眼就能从导入路径判断：这是在用本 feature 的内部实现，还是在依赖应用层能力。
 
+## core
+
+特殊的feature，目前只有core，可以理解为`core-main`，本质上是为一组的feature提供基础设施
+
 ## 层级引用规范
 
 - 严禁 model 层引用 hooks 或 state，保持其纯净度以支持单元测试。

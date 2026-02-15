@@ -34,18 +34,19 @@ export default defineConfig({
   },
 
   presets: [
-    presetAnimations(),
-    presetShadcn(builtinColors.map(c => ({color: c}))),
     presetWind4({
       preflights: {
         reset: true,
       },
     }),
+    presetShadcn(builtinColors.map(c => ({color: c}))),
+    presetAnimations(),
     presetIcons(), // for icons
     presetAttributify({
       prefix: 'un-',
       prefixedOnly: true,
     }), // support <div un-text="red-500">
+    // * small presets below
     presetScrollbarHide(),
   ],
 

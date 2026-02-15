@@ -19,7 +19,7 @@ import {mapUnitListToReviewListResponse} from '@package/api/meili/meili.api';
 import {SingleReadlist} from '@/component/ReadList/SingleReadlist';
 import {ReviewListContainer} from '@/component/Review/ReviewList';
 import {QuoteExcerptListContainer} from '@component/Review/QuoteExcerptList.tsx';
-import {BookListView} from '@feature/book/library/component/BookList/BookListView';
+import {BookListView} from '@/book-library/component/BookList/BookListView';
 
 type Readlist = ReadlistDTO;
 type Review = ReviewDTO;
@@ -545,9 +545,7 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({userId}) => {
             );
           }
           if (tab === 'book') {
-            return (
-              <BookListViewContainer books={currentPageItems as BookDTO[]} />
-            );
+            return <BookListView books={currentPageItems as BookDTO[]} />;
           }
           if (tab === 'quote') {
             return (

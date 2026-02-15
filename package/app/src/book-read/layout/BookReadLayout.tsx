@@ -4,7 +4,7 @@ import {Button, Divider, useMediaQuery} from '@mui/material';
 import React, {type ReactNode, useEffect, useState} from 'react';
 
 import {DraggableResizer} from '../component/DraggableResizer';
-import {LinearChapterList} from '@feature/book/library/component/Chapter/LinearChapterList';
+import {LinearChapterList} from '@/book/library/component/Chapter/LinearChapterList';
 import {useNavigate} from '@tanstack/react-router';
 import {useResponsiveSidebar} from './useResponsiveSidebar';
 import {useLayoutStore} from '../state/layoutStore.ts';

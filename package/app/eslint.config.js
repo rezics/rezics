@@ -34,7 +34,7 @@ export default [
       parserOptions: {
         sourceType: 'module',
         ecmaVersion: 'latest',
-        // 如果你不做类型流分析，这里无需 project/tsconfig
+        // 如果不做类型流分析，这里无需 project/tsconfig
       },
     },
     plugins: {
@@ -44,7 +44,6 @@ export default [
       // 启用 TS 推荐规则（不涉类型流分析）
       ...tsPlugin.configs.recommended.rules,
 
-      // --- 务实微调（常见诉求） ---
       // 允许临时 any（给警告，不让 CI 挂）
       '@typescript-eslint/no-explicit-any': 'off',
 
@@ -60,7 +59,6 @@ export default [
         },
       ],
 
-      // 可按需开启/调整的建议（保持理性，不做过度规训）
       '@typescript-eslint/consistent-type-imports': [
         'warn',
         {

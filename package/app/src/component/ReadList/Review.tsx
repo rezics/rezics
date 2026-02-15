@@ -1,7 +1,7 @@
 import React from 'react';
 import {IconButton, Paper, Tooltip} from '@mui/material';
 import {ExpandMore, ExpandLess, ChatBubbleOutline} from '@mui/icons-material';
-import {BookListViewItem} from '@feature/book/library/component/BookList/BookListView';
+import {BookListViewItem} from '@/book/library/component/BookList/BookListView';
 import {useNavigate} from '@tanstack/react-router';
 import {MarkdownContent} from '../Common/MarkdownContent';
 import {ReviewHeader} from '@/component/Review/SingleReview';

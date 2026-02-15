@@ -1,11 +1,11 @@
 import {
-  applyTheme,
+  // applyTheme,
   argbFromHex,
   hexFromArgb,
-  Scheme,
+  type Scheme,
   themeFromSourceColor,
 } from '@material/material-color-utilities';
-import {PaletteOptions} from '@mui/material/styles';
+import {type PaletteOptions} from '@mui/material/styles';
 
 /**
  * 从源颜色生成 Material Design 3 动态主题颜色

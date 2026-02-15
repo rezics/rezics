@@ -83,4 +83,3 @@ export const HomeAuthorSpotlight: React.FC<HomeAuthorSpotlightProps> = ({
 };
 
 export default HomeAuthorSpotlight;
-

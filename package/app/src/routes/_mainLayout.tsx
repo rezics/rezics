@@ -5,7 +5,7 @@ import {
 } from '@tanstack/react-router';
 
 const MainLayout = lazyRouteComponent(
-  () => import('@/feature/core/layout/MainLayout'),
+  () => import('@/core/layout/MainLayout'),
   'MainLayout',
 );
 

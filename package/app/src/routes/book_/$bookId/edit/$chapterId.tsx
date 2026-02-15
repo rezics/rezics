@@ -1,7 +1,7 @@
 import {createFileRoute, lazyRouteComponent} from '@tanstack/react-router';
 
 const BookEditChapterPage = lazyRouteComponent(
-  () => import('@feature/book/edit'),
+  () => import('@/book-edit'),
   'BookEditChapterPage',
 );
 

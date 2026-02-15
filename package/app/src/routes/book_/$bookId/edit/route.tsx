@@ -5,7 +5,7 @@ import {
 } from '@tanstack/react-router';
 
 const BookEditLayout = lazyRouteComponent(
-  () => import('@feature/core/layout/BookEditLayout'),
+  () => import('@/book-edit/layout/BookEditLayout'),
   'BookEditLayout',
 );
 

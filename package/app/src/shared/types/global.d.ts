@@ -13,4 +13,6 @@ declare global {
   var history: any;
 }
 
+declare module 'babel-plugin-react-compiler';
+
 export {};

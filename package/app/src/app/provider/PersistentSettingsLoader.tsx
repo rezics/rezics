@@ -12,7 +12,7 @@ export function PersistentSettingsLoader() {
     if (lang) {
       i18n.changeLanguage(lang);
     }
-  }, []);
+  });
 
   return null; // 不渲染任何内容
 }

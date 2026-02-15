@@ -1,7 +1,7 @@
 import {createFileRoute, lazyRouteComponent} from '@tanstack/react-router';
 
 const NoticePage = lazyRouteComponent(
-  () => import('@feature/info/notice/page/Notice'),
+  () => import('@/info/notice/page/Notice'),
   'NoticePage',
 );
 

@@ -12,7 +12,7 @@ import DashboardIcon from '@mui/icons-material/Dashboard';
 import DescriptionIcon from '@mui/icons-material/Description';
 // import LibraryBooksIcon from "@mui/icons-material/LibraryBooks";
 
-import type {NavigationItem} from '@feature/core/component/Navigation/navigation';
+import type {NavigationItem} from '@/core/component/Navigation/navigation';
 
 // segment: router path
 

@@ -1,7 +1,7 @@
 import {createFileRoute, lazyRouteComponent} from '@tanstack/react-router';
 
 const BookLibPage = lazyRouteComponent(
-  () => import('@feature/book/library'),
+  () => import('@/book-library'),
   'BookLibPage',
 );
 

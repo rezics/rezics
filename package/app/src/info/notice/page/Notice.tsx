@@ -1,4 +1,4 @@
-import {NoticeBoard} from '@feature/home/ui/section/NoticeBoard';
+import {NoticeBoard} from '@/home/ui/section/NoticeBoard';
 
 export function NoticePage() {
   return (
