@@ -15,5 +15,6 @@
     "outDir": "./dist-types",
 
     "noUnusedParameters": true
-  }
+  },
+  "exclude": ["dist", "dist-types", "node_modules"]
 }

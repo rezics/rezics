@@ -7,5 +7,6 @@
     "outDir": "./dist-types",
     "noUnusedLocals": false,
     "noUnusedParameters": false
-  }
+  },
+  "exclude": ["dist", "dist-types", "node_modules"]
 }

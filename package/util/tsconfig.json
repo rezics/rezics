@@ -4,11 +4,13 @@
     "paths": {
       "@/*": ["./*"]
     },
+    "outDir": "./dist-types",
 
     "noUncheckedIndexedAccess": true,
     "noImplicitOverride": true,
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "noPropertyAccessFromIndexSignature": false
-  }
+  },
+  "exclude": ["dist", "dist-types", "node_modules"]
 }
