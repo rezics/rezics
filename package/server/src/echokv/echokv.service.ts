@@ -1,6 +1,6 @@
 import {prisma, Prisma} from '@/prisma/client';
-import type {JsonValue} from '@prisma/client/runtime/library';
 
+type JsonValue = Prisma.JsonValue;
 export class EchoKvService {
   async get(key: string): Promise<JsonValue> {
     const value = await prisma.echoKV.findUnique({
