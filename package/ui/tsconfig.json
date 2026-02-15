@@ -12,6 +12,7 @@
       "@locale": ["./src/locale/index.ts"],
       "@app/*": ["./src/app/*"]
     },
+    "outDir": "dist-types",
 
     "noUnusedParameters": true
   }

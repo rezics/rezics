@@ -1,8 +1,10 @@
 # Visual Studio Counter
 .VSCodeCounter/
 
+# Shadcn config
 tailwind.config.js
 
+# Temporary Scripts
 remove_node_modules.ts
 
 # Vite
@@ -47,6 +49,7 @@ jspm_packages/
 
 # TypeScript cache
 *.tsbuildinfo
+dist-types/
 
 # Optional npm cache directory
 .npm/
