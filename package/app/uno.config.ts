@@ -12,6 +12,9 @@ export default defineConfig({
   },
 
   theme: {
+    spacing: {
+      '4': '1rem', // TODO 完全不知道到底是谁在用这个东西，不应该有人用才对
+    },
     breakpoints: {
       xs: '0px',
       sm: '600px',

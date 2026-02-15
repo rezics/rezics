@@ -1,5 +1,5 @@
 import {type NavigationItem} from '../Navigation/navigation';
-import {useLayoutStore} from '../../state/layoutStore.ts';
+import {useLayoutStore} from '../../state/layoutStore';
 import type {SvgIconProps} from '@mui/material/SvgIcon';
 import {
   ChevronLeft,
@@ -26,7 +26,7 @@ import useMeasure from 'react-use-measure';
 
 import {Sidebar as UiSidebar} from './sidebar';
 import {cn} from '@/shared/shadcn/lib/utils';
-import {useIsMobile} from '@/shared/util/useMediaQueryUtil';
+import {useIsMobile} from '@/shared/util/use-media-query';
 import {RouterLink} from '@package/ui/Navigation/RouterLink.tsx';
 
 export function DrawerHeader({
@@ -163,7 +163,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                             component={RouterLink}
                             to={`${child.segment}`}
                             selected={isChildActive}
-                            onClick={event =>
+                            onClick={(event: any) =>
                               handleItemClick(event, child.segment, false)
                             }
                             className="py-1"

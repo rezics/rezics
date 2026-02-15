@@ -7,7 +7,7 @@ import {useTranslation} from 'react-i18next';
 import type {PublicUser} from '@package/contract';
 import {FollowButton} from '@component/Common/Reaction/FollowButton.tsx';
 import {LazyLoadImage} from '@/component/Common/LazyLoadImage';
-import {useIsMobile} from '@/shared/util/useMediaQueryUtil.ts';
+import {useIsMobile} from '@/shared/util/use-media-query.ts';
 import {useNavigate} from '@tanstack/react-router';
 
 // --------- Types ---------

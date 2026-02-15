@@ -5,21 +5,17 @@ import clsx from 'clsx';
 
 export interface ArrowButtonProps {
   icon: SvgIconComponent;
-  onClick?: () => void;
   className?: string;
 }
 
 export const ArrowButton: React.FC<ArrowButtonProps> = ({
   icon: Icon,
-  onClick,
   className,
 }) => {
   const isDark = useAppStore(s => s.theme) === 'dark';
 
   return (
-    <button
-      type="button"
-      onClick={onClick}
+    <div
       className={clsx(
         'group inline-flex items-center justify-center',
         'h-10 w-10 rounded-full p-0',
@@ -36,6 +32,6 @@ export const ArrowButton: React.FC<ArrowButtonProps> = ({
       aria-label="arrow"
     >
       <Icon fontSize="inherit" className="pointer-events-none" />
-    </button>
+    </div>
   );
 };

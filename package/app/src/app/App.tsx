@@ -7,19 +7,19 @@ import 'github-markdown-css/github-markdown-light.css';
 import {
   applyDynamicThemeToDOM,
   generateDynamicColors,
-} from './config/dynamicTheme.ts';
-import {getDynamicTheme, getTheme} from './config/theme.ts';
-import {useAppStore} from '@/global/appStore.ts';
-import {PersistentSettingsLoader} from './provider/PersistentSettingsLoader.tsx';
-import {ReactQueryProvider} from './provider/react-query.tsx';
-import {AuthProvider} from './provider/AuthProvider.tsx';
+} from './config/dynamicTheme';
+import {getDynamicTheme, getTheme} from './config/theme';
+import {useAppStore} from '@/global/appStore';
+import {PersistentSettingsLoader} from './provider/PersistentSettingsLoader';
+import {ReactQueryProvider} from './provider/react-query';
+import {AuthProvider} from './provider/AuthProvider';
 import {ErrorBoundary} from 'react-error-boundary';
-import {WindowAlert} from './component/WindowAlert.tsx';
+import {WindowAlert} from './component/WindowAlert';
 import {HelmetProvider} from 'react-helmet-async';
-import {useAppInit} from './provider/useAppInit.ts';
+import {useAppInit} from './provider/useAppInit';
 import {RouterProvider} from '@tanstack/react-router';
 
-import {router} from '@/router.tsx';
+import {router} from '@/router';
 
 export default function App() {
   const themeMode = useAppStore(s => s.theme);

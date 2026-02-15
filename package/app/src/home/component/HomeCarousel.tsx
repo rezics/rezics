@@ -7,7 +7,7 @@ import {useAlertStore} from '@app/state/windowAlertStore';
 import {LazyLoadImage} from '@/component/Common/LazyLoadImage';
 import {useTranslation} from 'react-i18next';
 import {Link} from '@package/ui/Navigation/Link.tsx';
-import {cn} from '@/shared/util/cssUtil';
+import {cn} from '@/shared/util/css-util';
 import {CarouselIndicator} from '@/component/Carousel/CarouselIndicator';
 
 import {

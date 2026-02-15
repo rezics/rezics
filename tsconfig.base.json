@@ -16,6 +16,7 @@
 
     "isolatedModules": true, // toolchain friendly
     "verbatimModuleSyntax": true,
+    "allowImportingTsExtensions": true,
 
     "strict": true,
     "strictNullChecks": true,

@@ -1,7 +1,7 @@
 import React, {useEffect, useMemo, useState} from 'react';
 import {Typography} from '@mui/material';
 import type {CarouselApi} from '../shadcn/carousel';
-import {cn} from '@/shared/util/cssUtil';
+import {cn} from '@/shared/util/css-util';
 import {useAppStore} from '@/global/appStore';
 
 export type CarouselIndicatorProps = {

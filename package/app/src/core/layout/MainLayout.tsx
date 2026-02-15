@@ -3,7 +3,7 @@ import {Sidebar} from '../component/Sidebar/MainLayoutSidebar';
 import type {ReactNode} from 'react';
 import {Helmet} from 'react-helmet-async';
 import {NAVIGATION} from '../component/Navigation/MainNavigation';
-import {MainLayoutFooter} from '../component/Footer/MainLayoutFooter.tsx';
+import {MainLayoutFooter} from '../component/Footer/MainLayoutFooter';
 import React from 'react';
 import {useUserStore} from '@/global/userStore';
 import {HelpFab} from '../component/HelpWidget';

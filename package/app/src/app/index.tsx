@@ -3,8 +3,8 @@ import './index.css';
 
 import 'virtual:uno.css';
 
-import App from './App.tsx';
-import {initI18n} from './provider/i18n.ts';
+import App from './App';
+import {initI18n} from './provider/i18n';
 // import { setupMock } from "./plugin/providers/mock.ts";
 
 // 初始化（这类副作用放入口即可，不参与热替换）
