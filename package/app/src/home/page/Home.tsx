@@ -5,11 +5,12 @@ import {MobileHomeHeader} from '../section/Mobile/MobileHomeHeader';
 import {MobileHomeCarousel} from '../section/Mobile/MobileHomeCarousel';
 import {MobileHomeDiscovery} from '../section/Mobile/MobileHomeDiscovery';
 import React from 'react';
-import {useIsMobile} from '@/shared/util/useMediaQueryUtil';
+import {useIsMobile} from '@/shared/util/use-media-query';
 import {useTranslation} from 'react-i18next';
 import {NewBookSection} from '../section/NewBookSection';
 import {BookCarousel} from '../component/HomeCarousel';
 import {Paper} from '@mui/material';
+import {AnnouncementBarSection} from '../section/AnnouncementBar';
 
 export type HomeShowProps = object;
 
@@ -49,6 +50,10 @@ export const HomeShow: React.FC<HomeShowProps> = () => {
           </div>
         </Paper>
       </section>
+
+      <Paper sx={{mt: 2}}>
+        <AnnouncementBarSection />
+      </Paper>
 
       {/* Discovery section powered by Meilisearch */}
       <Paper sx={{p: 2, mt: 2}}>
