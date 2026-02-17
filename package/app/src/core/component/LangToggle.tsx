@@ -1,57 +1,60 @@
-import React, {useState} from 'react';
+import React from 'react';
 import {useTranslation} from 'react-i18next';
+import {Menu, MenuItem, ListItemText} from '@mui/material';
 
-import LanguageIcon from '@mui/icons-material/Language';
-import {
-  IconButton,
-  ListItemIcon,
-  ListItemText,
-  Menu,
-  MenuItem,
-  Tooltip,
-} from '@mui/material';
+type LangToggleProps = {
+  children: (props: {
+    onClick: (e: React.MouseEvent<HTMLElement>) => void;
+  }) => React.ReactNode;
+};
 
-export const LangToggle: React.FC = () => {
+export const LangToggle: React.FC<LangToggleProps> = ({children}) => {
   const {i18n} = useTranslation();
 
   const changeLang = (lang: string) => {
     i18n.changeLanguage(lang);
     localStorage.setItem('lang', lang);
-    console.log('set lang to ', lang);
   };
 
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+
+  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
+
   const handleClose = () => {
     setAnchorEl(null);
   };
-  function handleChangeLang(lang: string) {
+
+  const handleChangeLang = (lang: string) => {
     handleClose();
     changeLang(lang);
-  }
+  };
 
   return (
     <>
-      <Tooltip title="语言切换">
-        <IconButton onClick={handleClick}>
-          <LanguageIcon />
-        </IconButton>
-      </Tooltip>
+      {children({onClick: handleClick})}
+
       <Menu
-        id="basic-menu"
         anchorEl={anchorEl}
         open={open}
         onClose={handleClose}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'center',
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'center',
+        }}
         slotProps={{
-          list: {
-            'aria-labelledby': 'basic-button',
+          paper: {
+            sx: {
+              minWidth: 180,
+            },
           },
         }}
-        transformOrigin={{horizontal: 'center', vertical: 'top'}}
-        anchorOrigin={{horizontal: 'center', vertical: 'bottom'}}
       >
         <MenuItem onClick={() => handleChangeLang('zh-SC')}>
           <ListItemText>简体中文</ListItemText>

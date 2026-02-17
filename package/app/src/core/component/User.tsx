@@ -24,17 +24,19 @@ import {logout} from '@/page/Auth/lib/handler';
 import {userQueries} from '@package/api/user/user.queries';
 import {useQuery} from '@tanstack/react-query';
 import {useIsMobile} from '@/shared/util/use-media-query';
+import {useTranslation} from 'react-i18next';
 
 const LoginPrompt = () => {
   const [loginModalOpen, setLoginModalOpen] = useState(false);
   const [registerModalOpen, setRegisterModalOpen] = useState(false);
+  const {t} = useTranslation();
 
   const isMobile = useIsMobile();
 
   if (isMobile) {
     return (
       <Button variant="text" component={Link} to="/login">
-        Login
+        {t('auth.login')}
       </Button>
     );
   }
@@ -42,10 +44,10 @@ const LoginPrompt = () => {
   return (
     <div className="flex gap-2">
       <Button variant="text" onClick={() => setLoginModalOpen(true)}>
-        Login
+        {t('auth.login')}
       </Button>
       <Button variant="outlined" onClick={() => setRegisterModalOpen(true)}>
-        Register
+        {t('auth.register')}
       </Button>
 
       <LoginModal
@@ -78,6 +80,7 @@ export const UserShow: React.FC<UserShowProps> = ({
   onSettings,
 }) => {
   const {data: user} = useQuery(userQueries.me());
+  const {t} = useTranslation();
   return (
     <>
       <IconButton
@@ -121,7 +124,7 @@ export const UserShow: React.FC<UserShowProps> = ({
           <ListItemIcon>
             <PersonIcon fontSize="small" />
           </ListItemIcon>
-          <ListItemText>Profile</ListItemText>
+          <ListItemText>{t('navigation.profile')}</ListItemText>
         </MenuItem>
         <MenuItem
           component={Link}
@@ -134,14 +137,14 @@ export const UserShow: React.FC<UserShowProps> = ({
           <ListItemIcon>
             <SettingsIcon fontSize="small" />
           </ListItemIcon>
-          <ListItemText>Settings</ListItemText>
+          <ListItemText>{t('navigation.settings')}</ListItemText>
         </MenuItem>
         <Divider />
         <MenuItem onClick={onLogout}>
           <ListItemIcon>
             <LogoutIcon fontSize="small" />
           </ListItemIcon>
-          <ListItemText>Logout</ListItemText>
+          <ListItemText>{t('auth.logout')}</ListItemText>
         </MenuItem>
       </Menu>
     </>

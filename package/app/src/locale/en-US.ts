@@ -3,6 +3,10 @@ export default {
   motto: 'Inherited Create Spread',
 
   layout: {
+    header: {
+      toggle_language: 'Toggle language',
+      toggle_theme: 'Toggle theme',
+    },
     footer: {
       brand: {
         description:
@@ -206,8 +210,8 @@ export default {
     book: 'Book',
     analytics: 'Analytics',
     auth: 'Auth',
-    login: 'Login',
-    register: 'Register',
+    login: 'Sign in',
+    register: 'Sign up',
     book_edit: 'Book Edit',
     book_edit_main: 'Book Edit Main',
     book_edit_chapter: 'Book Edit Chapter',
@@ -216,14 +220,14 @@ export default {
     book_editor_navigation: 'Book Editor Navigation',
     profile: 'Profile',
     settings: 'Settings',
-    logout: 'Logout',
+    logout: 'Sign out',
   },
 
   // Authentication
   auth: {
-    login: 'Login',
-    logout: 'Logout',
-    register: 'Register',
+    login: 'Sign in',
+    logout: 'Sign out',
+    register: 'Sign up',
     resolve: 'Resolve',
     already_login:
       'You have already logged in. Re-login will overwrite the previous login information.',

@@ -1,14 +1,14 @@
 import React, {useMemo} from 'react';
-import {LangToggle} from '../LangToggle.tsx';
 import {UserContainer} from '../User.tsx';
 import {useLayoutStore} from '../../state/layoutStore.ts';
-import {Brightness4, Brightness7, Menu} from '@mui/icons-material';
-import {AppBar, Avatar, IconButton, Toolbar, Typography} from '@mui/material';
+import {AppBar, Avatar, Toolbar, Typography} from '@mui/material';
 import {useTheme} from '@mui/material/styles';
 import {useTranslation} from 'react-i18next';
 import {cn} from '@/shared/util/css-util';
 import {Link} from '@package/ui/Navigation/Link.tsx';
 import {useAppStore} from '@/global/appStore.ts';
+import {MoreHorizMenu} from './MoreHorizMenu.tsx';
+import {DrawerToggler} from './DrawerToggler.tsx';
 
 interface HeaderProps {
   isDragging?: boolean;
@@ -66,18 +66,11 @@ export const Header: React.FC<HeaderProps> = ({
       )}
     >
       <Toolbar>
-        <IconButton
-          aria-label={t('accessibility.open_drawer')}
-          onClick={handleDrawerToggleInner}
-          edge="start"
-          sx={{
-            mr: 2,
-            display:
-              layoutType == 'type-b' ? 'flex' : sidebarOpen ? 'none' : 'flex',
-          }}
-        >
-          <Menu />
-        </IconButton>
+        <DrawerToggler
+          handleDrawerToggleInner={handleDrawerToggleInner}
+          layoutType={layoutType}
+          sidebarOpen={sidebarOpen}
+        />
         <Typography variant="h6" noWrap component="div" sx={{flexGrow: 1}}>
           <Link to="/" className="flex items-center gap-2">
             <Avatar sx={{bgcolor: 'transparent'}} variant="rounded">
@@ -92,12 +85,8 @@ export const Header: React.FC<HeaderProps> = ({
             </Typography>
           </Link>
         </Typography>
-        {/* <ThemeQuickToggle /> */}
-        <LangToggle />
-        <IconButton onClick={toggleTheme}>
-          {themeMode === 'dark' ? <Brightness7 /> : <Brightness4 />}
-        </IconButton>
         <UserContainer onLogout={() => console.log('Logout')} />
+        <MoreHorizMenu />
       </Toolbar>
     </AppBar>
   );
