@@ -1,5 +1,6 @@
-import {Grid, Typography, useMediaQuery} from '@mui/material';
-import React, {useEffect, useRef, useState} from 'react';
+import {Typography} from '@mui/material';
+import {useIsMobile} from '@/shared/util/use-media-query';
+import React, {useEffect, useMemo, useState} from 'react';
 import {useQuery} from '@tanstack/react-query';
 import {echoKvGetQuery} from '@package/api/echokv/echokv';
 import {parseEchoKVResponse} from '@package/api/echokv/util';
@@ -16,6 +17,78 @@ import {
   CarouselItem,
   type CarouselApi,
 } from '@/component/shadcn/carousel';
+import {useAppStore} from '@/global/appStore';
+
+type ProductType = {
+  cover?: string;
+  title?: string;
+  lorem?: string;
+  link?: string;
+};
+
+type CarouselContentInnerProps = {
+  product: ProductType;
+  maxHeightClass: string;
+};
+
+const CarouselContentInner = ({
+  product,
+  maxHeightClass,
+}: CarouselContentInnerProps) => {
+  return (
+    <Link to={product?.link ?? '#'}>
+      <div className="flex items-center gap-4 px-4">
+        <div className="hidden sm:block flex-shrink-0 h-full overflow-hidden">
+          <LazyLoadImage
+            src={product.cover ?? ''}
+            alt={product.title ?? ''}
+            className={cn(
+              'w-full h-full object-cover rounded-lg',
+              maxHeightClass,
+            )}
+          />
+        </div>
+        <div className="flex-1 min-w-0">
+          <Typography variant="h6" fontWeight="bold" gutterBottom>
+            {product?.title}
+          </Typography>
+          <Typography variant="body2">{product?.lorem}</Typography>
+        </div>
+      </div>
+    </Link>
+  );
+};
+
+type CarouselContentInnerCompactProps = {
+  product: ProductType;
+};
+
+const CarouselContentInnerCompact = ({
+  product,
+}: CarouselContentInnerCompactProps) => {
+  return (
+    <Link to={product?.link ?? '#'}>
+      <div className="flex items-center gap-3 px-3 py-2">
+        <div className="w-1/3 h-38 md:h-52 flex-shrink-0 overflow-hidden">
+          <LazyLoadImage
+            src={product.cover ?? ''}
+            alt={product.title ?? ''}
+            className={cn('h-full object-cover rounded-md')}
+          />
+        </div>
+        <div className="flex-1 min-w-0">
+          <Typography variant="subtitle2" fontWeight="600" noWrap>
+            {product?.title}
+          </Typography>
+          <Typography variant="caption" className="line-clamp-4 leading-snug">
+            {product?.lorem}
+          </Typography>
+        </div>
+      </div>
+    </Link>
+  );
+};
+
 interface BookCarouselProps {
   autoplayIntervalNum?: number;
 }
@@ -39,8 +112,8 @@ export const BookCarousel: React.FC<BookCarouselProps> = ({
   const [carouselApi, setCarouselApi] = React.useState<CarouselApi | null>(
     null,
   );
-  const [current, setCurrent] = React.useState(0);
-  const [count, setCount] = React.useState(0);
+  const [_current, setCurrent] = React.useState(0);
+  const [_count, setCount] = React.useState(0);
 
   useEffect(() => {
     try {
@@ -69,18 +142,7 @@ export const BookCarousel: React.FC<BookCarouselProps> = ({
     return () => clearInterval(id);
   }, [autoplayIntervalNum, carouselApi]);
 
-  const smallThanXS = useMediaQuery('(max-width: 600px)');
-
-  const CarouselContentInner = ({product}: {product: any}) => {
-    return (
-      <>
-        <Typography variant="h6" fontWeight="bold" gutterBottom>
-          {product.title}
-        </Typography>
-        <Typography variant="body2">{product.lorem}</Typography>
-      </>
-    );
-  };
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     if (!carouselApi) {
@@ -101,47 +163,20 @@ export const BookCarousel: React.FC<BookCarouselProps> = ({
     >
       <CarouselContent>
         {products?.map((product, index) => (
-          <CarouselItem key={index} className="basis-[min(800px,100%)]">
-            <Link to={product?.link ?? '#'}>
-              <div className="flex items-center gap-4 px-4">
-                <div className="hidden sm:block flex-shrink-0 h-full overflow-hidden rounded-lg">
-                  <LazyLoadImage
-                    src={product.cover ?? ''}
-                    alt={product.title ?? ''}
-                    className={cn('w-full h-full object-cover', maxHeightClass)}
-                  />
-                </div>
-                <div className="flex-1 min-w-0">
-                  {smallThanXS ? (
-                    <div
-                      className="relative w-full h-[250px] sm:h-[280px] rounded-lg overflow-hidden flex items-end"
-                      style={{
-                        backgroundImage: `url(${product.cover ?? ''})`,
-                        backgroundSize: 'cover',
-                        backgroundPosition: 'center',
-                        backgroundRepeat: 'no-repeat',
-                      }}
-                    >
-                      {/* 暗幕遮罩，向上渐变 → 更读得清 */}
-
-                      {/* 内容层 */}
-                      <div className="relative z-10 w-full space-y-1 text-white p-3 sm:p-6 ">
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent backdrop-blur-sm mb-0" />
-                        <Typography
-                          variant="caption"
-                          className="line-clamp-3 opacity-90"
-                        >
-                          <div className="font-bold">{product.title}</div>
-                          {product.lorem}
-                        </Typography>
-                      </div>
-                    </div>
-                  ) : (
-                    <CarouselContentInner product={product} />
-                  )}
-                </div>
-              </div>
-            </Link>
+          <CarouselItem
+            key={index}
+            className={cn(
+              isMobile ? 'basis-[min(600px,100%)]' : 'basis-[min(800px,100%)]',
+            )}
+          >
+            {isMobile ? (
+              <CarouselContentInnerCompact product={product} />
+            ) : (
+              <CarouselContentInner
+                product={product}
+                maxHeightClass={maxHeightClass}
+              />
+            )}
           </CarouselItem>
         ))}
       </CarouselContent>

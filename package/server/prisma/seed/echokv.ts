@@ -4,6 +4,7 @@ import type {PrismaClient} from '../client';
 
 import {generateNoticeboardData} from './data/home/noticeboard';
 import {products} from './data/home/homeCarousel';
+import {generateQuickTags} from './data/home/quick-tags';
 
 export const seedEchoKV = async (prisma: PrismaClient) => {
   await prisma.echoKV.upsert({
@@ -21,12 +22,12 @@ export const seedEchoKV = async (prisma: PrismaClient) => {
     create: {
       key: 'book_search_tag_group_quick',
       value: JSON.stringify({
-        presetTags: ['fiction', 'nonfiction', 'mystery', 'romance'],
+        presetTags: generateQuickTags(20),
       }),
     },
     update: {
       value: JSON.stringify({
-        presetTags: ['fiction', 'nonfiction', 'mystery', 'romance'],
+        presetTags: generateQuickTags(20),
       }),
     },
   });

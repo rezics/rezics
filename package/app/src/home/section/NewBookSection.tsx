@@ -38,7 +38,7 @@ export const NewBookSection: React.FC<NewBookSectionProps> = ({
     >
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h2 className="font-semibold">最新作品</h2>
+        <h2 className="font-semibold">作品推介</h2>
         <Button
           variant="text"
           color="primary"
@@ -53,7 +53,7 @@ export const NewBookSection: React.FC<NewBookSectionProps> = ({
         <Tabs value={tab} onChange={(_, value) => setTab(value)}>
           <Tab value="latest" label="最新连载" />
           <Tab value="new" label="最新上架" />
-          <Tab value="completed" label="完结作品" />
+          <Tab value="completed" label="近期完结" />
         </Tabs>
       </div>
 

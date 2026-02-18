@@ -3,7 +3,7 @@ import {Avatar, Box, Rating, Tooltip, Typography} from '@mui/material';
 import {type ReviewDTO} from '@package/contract';
 import React from 'react';
 import {CollapsibleReview} from '@/component/ReadList/Review';
-import {parseReactionSummaries} from '@/shared/util/reactionSummariesParser';
+import {parseReactionSummaries} from '@/shared/util/reaction-summaries-parser';
 import {ReactionStatistics} from '../Common/Reaction/ReactionStatistics';
 import {useTranslation} from 'react-i18next';
 import {Link} from '@package/ui/Navigation/Link.tsx';

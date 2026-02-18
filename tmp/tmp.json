@@ -1,0 +1,102 @@
+[
+  {
+    "icon": "ReduxEffects",
+    "name": "light-novel",
+    "color": "default"
+  },
+  {
+    "icon": "NestService",
+    "name": "action",
+    "color": "success"
+  },
+  {
+    "icon": "Video",
+    "name": "romantasy",
+    "color": "error"
+  },
+  {
+    "icon": "Rome",
+    "name": "gothic",
+    "color": "error"
+  },
+  {
+    "icon": "AngularGuard",
+    "name": "monster-romance",
+    "color": "default"
+  },
+  {
+    "icon": "CodePurple",
+    "name": "reincarnation",
+    "color": "secondary"
+  },
+  {
+    "icon": "AngularDirective",
+    "name": "epic",
+    "color": "primary"
+  },
+  {
+    "icon": "UnoCSS",
+    "name": "web-novel",
+    "color": "default"
+  },
+  {
+    "icon": "Sbt",
+    "name": "war",
+    "color": "error"
+  },
+  {
+    "icon": "Gitlab",
+    "name": "cyberpunk",
+    "color": "info"
+  },
+  {
+    "icon": "NestGuard",
+    "name": "fantasy",
+    "color": "error"
+  },
+  {
+    "icon": "DockerRed",
+    "name": "mythology",
+    "color": "success"
+  },
+  {
+    "icon": "Biome",
+    "name": "folklore",
+    "color": "default"
+  },
+  {
+    "icon": "R",
+    "name": "found-family",
+    "color": "secondary"
+  },
+  {
+    "icon": "Swift",
+    "name": "fiction",
+    "color": "info"
+  },
+  {
+    "icon": "Docusaurus",
+    "name": "fairy-tale",
+    "color": "info"
+  },
+  {
+    "icon": "Js",
+    "name": "western",
+    "color": "error"
+  },
+  {
+    "icon": "Rust",
+    "name": "tragedy",
+    "color": "success"
+  },
+  {
+    "icon": "Expressive",
+    "name": "first-person",
+    "color": "warning"
+  },
+  {
+    "icon": "Webpack",
+    "name": "age-gap",
+    "color": "info"
+  }
+]

@@ -1,4 +1,4 @@
-import {isEmptyValue} from '@/shared/util/dataCheck.ts';
+import {isEmptyValue} from '@/shared/util/data-check.ts';
 import React from 'react';
 import {QuoteExcerptListContainer} from '@component/Review/QuoteExcerptList.tsx';
 

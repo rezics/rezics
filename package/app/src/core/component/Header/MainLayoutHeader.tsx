@@ -3,7 +3,6 @@ import {UserContainer} from '../User.tsx';
 import {useLayoutStore} from '../../state/layoutStore.ts';
 import {AppBar, Avatar, Toolbar, Typography} from '@mui/material';
 import {useTheme} from '@mui/material/styles';
-import {useTranslation} from 'react-i18next';
 import {cn} from '@/shared/util/css-util';
 import {Link} from '@package/ui/Navigation/Link.tsx';
 import {useAppStore} from '@/global/appStore.ts';
@@ -23,16 +22,10 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   const {sidebarOpen, drawerWidth, toggleSidebar} = useLayoutStore();
   const theme = useTheme();
-  const {t} = useTranslation();
 
   const themeMode = useAppStore(state => state.theme);
-  const setTheme = useAppStore(state => state.setTheme);
 
   const isDark = useMemo(() => themeMode === 'dark', [themeMode]);
-
-  const toggleTheme = () => {
-    setTheme(themeMode === 'light' ? 'dark' : 'light');
-  };
 
   function handleDrawerToggleInner() {
     if (disableDrawerToggle) return;
@@ -86,6 +79,7 @@ export const Header: React.FC<HeaderProps> = ({
           </Link>
         </Typography>
         <UserContainer onLogout={() => console.log('Logout')} />
+        {/* 手机模式这里添加搜索按钮 */}
         <MoreHorizMenu />
       </Toolbar>
     </AppBar>

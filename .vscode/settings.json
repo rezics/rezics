@@ -99,6 +99,7 @@
     "section": "folder-purple-code",
     "page": "folder-blue-code",
     "state": "folder-redux-reducer",
-    "model": "folder-models"
+    "model": "folder-models",
+    "locale": "folder-i18n"
   }
 }

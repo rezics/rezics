@@ -11,6 +11,7 @@ import {LangToggle} from '../LangToggle';
 import LanguageIcon from '@mui/icons-material/Language';
 import {useTranslation} from 'react-i18next';
 import {ThemeToggler} from './ThemeToggler';
+import {useIsMobile} from '@/shared/util/use-media-query';
 
 type Props = {
   children?: React.ReactNode;
@@ -20,14 +21,14 @@ type Props = {
 export function MoreHorizMenu({children, className}: Props) {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const {t} = useTranslation();
-
   const open = Boolean(anchorEl);
+  const isMobile = useIsMobile();
 
   return (
     <>
       <IconButton
         onClick={e => setAnchorEl(e.currentTarget)}
-        edge="end"
+        edge={isMobile ? false : 'end'}
         className={className}
         sx={{
           ml: 2,
