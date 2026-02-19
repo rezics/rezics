@@ -10,6 +10,7 @@ import {AnnouncementBarSection} from '../section/AnnouncementBarSection';
 import {TrendingBookSection} from '../section/TrendingBookSection';
 import {TrendingReviews} from '../section/TrendingReviewsSection';
 import {TrendingReadListSection} from '../section/TrendingReadListSection';
+import {TrendingQuoteSection} from '../section/TrendingQuoteSection';
 
 export type HomeProps = object;
 
@@ -63,6 +64,9 @@ export const Home: React.FC<HomeProps> = () => {
       </Paper>
 
       {/* 添加引用区块 */}
+      <Paper sx={{mt: 2, p: 2}}>
+        <TrendingQuoteSection />
+      </Paper>
 
       <Paper sx={{mt: 2, p: 2}}>
         <TrendingBookSection />

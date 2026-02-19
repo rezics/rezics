@@ -13,7 +13,7 @@ import {useTranslation} from 'react-i18next';
 import {reviewQueries} from '@package/api/review/review';
 import {MarkdownContent} from '@/component/Common/MarkdownContent';
 import {bookQueries} from '@package/api/book/book';
-import {BookListViewItem} from '@/book/library/component/BookList/BookListView';
+import {BookListViewItem} from '@/book-library/component/BookList/BookListView';
 import {useRef} from 'react';
 import TreeReplyComponents from '@/component/Form/Comment/TreeReplyComponents';
 import {ChatBubbleOutline} from '@mui/icons-material';
@@ -25,7 +25,7 @@ import {
   MiniAdminActionBar,
 } from '@/component/Common/Reaction/MiniActionBar';
 import {ReactionStatistics} from '@/component/Common/Reaction/ReactionStatistics';
-import {parseReactionSummaries} from '@/shared/util/reactionSummariesParser';
+import {parseReactionSummaries} from '@/shared/util/reaction-summaries-parser';
 import {RouterLink} from '@package/ui/Navigation/RouterLink.tsx';
 import {remarkRoute, reviewRoute} from '@/router';
 

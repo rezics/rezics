@@ -70,25 +70,6 @@ export function useHomeReadlists(limit = 6): SimpleQueryState<ReadlistDTO> {
   return {items, total, isLoading, error};
 }
 
-export function useHomeReviews(limit = 6): SimpleQueryState<ReviewDTO> {
-  const {data, isLoading, error} = useQuery(
-    buildMeiliUnitQuery({
-      kind: UnitType.REVIEW,
-      start: 0,
-      targetUnitId: undefined,
-      keyword: '',
-      limit,
-      mapFn: (unitResp: UnitListResponse) =>
-        mapUnitListToReviewListResponse(unitResp),
-    }),
-  );
-
-  const items = useMemo<ReviewDTO[]>(() => data?.reviews ?? [], [data]);
-  const total: number | undefined = data?.total;
-
-  return {items, total, isLoading, error};
-}
-
 type QuoteListResponse = {
   quotes: QuoteDTO[];
   total?: number;
