@@ -13,7 +13,7 @@ import {Link} from '@package/ui/Navigation/Link.tsx';
 
 import {DynamicIcon, type IconKey} from './DynamicIcon';
 
-export type HomeQuickAccessLinksProps = {
+export type QuickAccessLinksProps = {
   key?: string;
 };
 
@@ -23,7 +23,7 @@ type QuickTag = {
   color: string;
 };
 
-export const HomeQuickAccessLinks: React.FC<HomeQuickAccessLinksProps> = ({
+export const QuickAccessLinks: React.FC<QuickAccessLinksProps> = ({
   key = 'book_search_tag_group_quick',
 }) => {
   const {data} = useQuery(echoKvGetQuery(key));
@@ -65,4 +65,4 @@ export const HomeQuickAccessLinks: React.FC<HomeQuickAccessLinksProps> = ({
   );
 };
 
-export default HomeQuickAccessLinks;
+export default QuickAccessLinks;

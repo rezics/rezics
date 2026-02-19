@@ -1,12 +1,12 @@
-import {HomeQuickAccessLinks} from '../section/HomeQuickAccessLinks';
 import React from 'react';
 import {useTranslation} from 'react-i18next';
-import {NewBookSection} from '../section/NewBookSection';
-import {BookCarousel} from '../component/HomeCarousel';
 import {Paper} from '@mui/material';
-import {AnnouncementBarSection} from '../section/AnnouncementBarSection';
 import {useIsMobile} from '@/shared/util/use-media-query';
 import {cn} from '@/shared/util/css-util';
+import {QuickAccessLinks} from '../section/QuickAccessLinks';
+import {NewBookSection} from '../section/NewBookSection';
+import {BookCarousel} from '../component/HomeCarousel';
+import {AnnouncementBarSection} from '../section/AnnouncementBarSection';
 import {TrendingBookSection} from '../section/TrendingBookSection';
 import {TrendingReviews} from '../section/TrendingReviewsSection';
 import {TrendingReadListSection} from '../section/TrendingReadListSection';
@@ -41,7 +41,7 @@ export const Home: React.FC<HomeProps> = () => {
 
           {/* Search and quick links */}
           <div className="mt-6">
-            <HomeQuickAccessLinks />
+            <QuickAccessLinks />
           </div>
         </Paper>
       </section>
