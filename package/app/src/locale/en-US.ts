@@ -111,6 +111,7 @@ export default {
       sections: {
         trending_wiki: 'Trending Wiki',
         trending_reviews: 'Trending Reviews',
+        trending_readlists: 'Trending Readlists',
         tag_explore: 'Tag Explore',
         readlist_recommendation: 'Reading List Picks',
         ranking: 'Rankings',

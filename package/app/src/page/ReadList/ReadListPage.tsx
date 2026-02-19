@@ -16,7 +16,7 @@ import {
   MiniActionBar,
   MiniAdminActionBar,
 } from '@/component/Common/Reaction/MiniActionBar';
-import {parseReactionSummaries} from '@/shared/util/reactionSummariesParser';
+import {parseReactionSummaries} from '@/shared/util/reaction-summaries-parser';
 import {ReactionStatistics} from '@/component/Common/Reaction/ReactionStatistics';
 
 export const ReadListPage: React.FC = () => {

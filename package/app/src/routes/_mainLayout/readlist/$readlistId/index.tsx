@@ -5,6 +5,6 @@ const ReadListPage = lazyRouteComponent(
   'ReadListPage',
 );
 
-export const Route = createFileRoute('/_mainLayout/readlist/$readlistId')({
+export const Route = createFileRoute('/_mainLayout/readlist/$readlistId/')({
   component: ReadListPage,
 });
