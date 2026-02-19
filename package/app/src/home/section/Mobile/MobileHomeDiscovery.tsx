@@ -48,28 +48,30 @@ function useHomeBooks(limit = 8): SimpleQueryState<Book> {
 
 function useHomeReadlists(limit = 4): SimpleQueryState<Readlist> {
   const {data, isLoading, error} = useQuery(
-    buildMeiliUnitQuery(
-      UnitType.READLIST,
-      0,
-      undefined,
-      '',
+    buildMeiliUnitQuery({
+      kind: UnitType.READLIST,
+      start: 0,
+      targetUnitId: undefined,
+      keyword: '',
       limit,
-      (unitResp: UnitListResponse) => mapUnitListToReadlistListResponse(unitResp),
-    ),
+      mapFn: (unitResp: UnitListResponse) =>
+        mapUnitListToReadlistListResponse(unitResp),
+    }),
   );
   return {items: data?.readlists ?? [], total: data?.total, isLoading, error};
 }
 
 function useHomeReviews(limit = 4): SimpleQueryState<Review> {
   const {data, isLoading, error} = useQuery(
-    buildMeiliUnitQuery(
-      UnitType.REVIEW,
-      0,
-      undefined,
-      '',
+    buildMeiliUnitQuery({
+      kind: UnitType.REVIEW,
+      start: 0,
+      targetUnitId: undefined,
+      keyword: '',
       limit,
-      (unitResp: UnitListResponse) => mapUnitListToReviewListResponse(unitResp),
-    ),
+      mapFn: (unitResp: UnitListResponse) =>
+        mapUnitListToReviewListResponse(unitResp),
+    }),
   );
   return {items: data?.reviews ?? [], total: data?.total, isLoading, error};
 }
@@ -217,4 +219,3 @@ export const MobileHomeDiscovery: React.FC = () => {
     </div>
   );
 };
-

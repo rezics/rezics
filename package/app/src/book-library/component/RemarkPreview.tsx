@@ -14,17 +14,15 @@ interface ShortBookReviewsProps {
 export const RemarkPreview: React.FC<ShortBookReviewsProps> = ({bookId}) => {
   const {t} = useTranslation();
   const {data, isLoading, error} = useQuery(
-    buildMeiliUnitQuery(
-      UnitType.REMARK,
-      0,
-      bookId,
-      '',
-      4,
-      mapUnitListToReviewListResponse,
-      {
-        enabled: !!bookId,
-      },
-    ),
+    buildMeiliUnitQuery({
+      kind: UnitType.REMARK,
+      start: 0,
+      targetUnitId: bookId,
+      keyword: '',
+      limit: 4,
+      mapFn: mapUnitListToReviewListResponse,
+      options: {enabled: !!bookId},
+    }),
   );
 
   const handleLike = (reviewId: string) => {

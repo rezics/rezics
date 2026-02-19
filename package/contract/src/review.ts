@@ -21,6 +21,24 @@ export const reviewDTOSchema = t.Object({
 
 export type ReviewDTO = (typeof reviewDTOSchema)['static'];
 
+export const reviewMeiliDTOSchema = t.Intersect([
+  reviewDTOSchema,
+  t.Object({
+    metadata: t.Optional(
+      t.Object({
+        book: t.Optional(
+          t.Object({
+            title: t.String(),
+            coverUrl: t.String(),
+          }),
+        ),
+      }),
+    ),
+  }),
+]);
+
+export type ReviewMeiliDTO = (typeof reviewMeiliDTOSchema)['static'];
+
 export const reviewQuerySchema = t.Object({
   unitType: t.Optional(t.String()), // REVIEW | REMARK
 });

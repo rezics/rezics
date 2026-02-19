@@ -7,10 +7,11 @@ import {useTranslation} from 'react-i18next';
 import {NewBookSection} from '../section/NewBookSection';
 import {BookCarousel} from '../component/HomeCarousel';
 import {Paper} from '@mui/material';
-import {AnnouncementBarSection} from '../section/AnnouncementBar';
+import {AnnouncementBarSection} from '../section/AnnouncementBarSection';
 import {useIsMobile} from '@/shared/util/use-media-query';
 import {cn} from '@/shared/util/css-util';
-import {HotBookSection} from '../section/HotBookSection';
+import {TrendingBookSection} from '../section/TrendingBookSection';
+import {TrendingReviews} from '../section/TrendingReviewsSection';
 
 export type HomeProps = object;
 
@@ -51,13 +52,16 @@ export const Home: React.FC<HomeProps> = () => {
         <AnnouncementBarSection />
       </Paper>
 
-      {/* Discovery section powered by Meilisearch */}
-      <Paper sx={{px: 2, pb: 2, mt: 2}}>
+      <Paper sx={{mt: 2, p: 2}}>
+        <TrendingBookSection />
+      </Paper>
+
+      <Paper sx={{mt: 2, p: 2}}>
         <NewBookSection />
       </Paper>
 
-      <Paper sx={{mt: 2}}>
-        <HotBookSection />
+      <Paper sx={{mt: 2, p: 2}}>
+        <TrendingReviews />
       </Paper>
 
       <section>

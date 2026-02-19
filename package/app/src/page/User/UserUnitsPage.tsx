@@ -200,27 +200,27 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({userId}) => {
   // ======= Reviews / Remarks (Meili units index with userId filter) =======
 
   const reviewListQueryOpts = useQuery(
-    buildMeiliUnitQuery(
-      UnitType.REVIEW,
-      startReview,
-      undefined,
-      keyword,
-      EXTERNAL_PAGE_SIZE,
-      mapUnitListToReviewListResponse,
-      {userId},
-    ),
+    buildMeiliUnitQuery({
+      kind: UnitType.REVIEW,
+      start: startReview,
+      targetUnitId: undefined,
+      keyword: keyword,
+      limit: EXTERNAL_PAGE_SIZE,
+      mapFn: mapUnitListToReviewListResponse,
+      options: {userId},
+    }),
   );
 
   const remarkListQueryOpts = useQuery(
-    buildMeiliUnitQuery(
-      UnitType.REMARK,
-      startRemark,
-      undefined,
-      keyword,
-      EXTERNAL_PAGE_SIZE,
-      mapUnitListToReviewListResponse,
-      {userId},
-    ),
+    buildMeiliUnitQuery({
+      kind: UnitType.REMARK,
+      start: startRemark,
+      targetUnitId: undefined,
+      keyword: keyword,
+      limit: EXTERNAL_PAGE_SIZE,
+      mapFn: mapUnitListToReviewListResponse,
+      options: {userId},
+    }),
   );
 
   const {
@@ -305,15 +305,15 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({userId}) => {
     isLoading: isLoadingComment,
     error: errorComment,
   } = useQuery(
-    buildMeiliUnitQuery(
-      UnitType.COMMENT,
-      startComment,
-      undefined,
-      keyword,
-      EXTERNAL_PAGE_SIZE,
-      unitResp => unitResp,
-      {userId},
-    ),
+    buildMeiliUnitQuery({
+      kind: UnitType.COMMENT,
+      start: startComment,
+      targetUnitId: undefined,
+      keyword: keyword,
+      limit: EXTERNAL_PAGE_SIZE,
+      mapFn: unitResp => unitResp,
+      options: {userId},
+    }),
   );
 
   const {
@@ -321,15 +321,15 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({userId}) => {
     isLoading: isLoadingNote,
     error: errorNote,
   } = useQuery(
-    buildMeiliUnitQuery(
-      UnitType.NOTE,
-      startNote,
-      undefined,
-      keyword,
-      EXTERNAL_PAGE_SIZE,
-      unitResp => unitResp,
-      {userId},
-    ),
+    buildMeiliUnitQuery({
+      kind: UnitType.NOTE,
+      start: startNote,
+      targetUnitId: undefined,
+      keyword: keyword,
+      limit: EXTERNAL_PAGE_SIZE,
+      mapFn: unitResp => unitResp,
+      options: {userId},
+    }),
   );
 
   const {
@@ -337,15 +337,15 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({userId}) => {
     isLoading: isLoadingQuote,
     error: errorQuote,
   } = useQuery(
-    buildMeiliUnitQuery(
-      UnitType.QUOTE,
-      startQuote,
-      undefined,
-      keyword,
-      EXTERNAL_PAGE_SIZE,
-      unitResp => unitResp,
-      {userId},
-    ),
+    buildMeiliUnitQuery({
+      kind: UnitType.QUOTE,
+      start: startQuote,
+      targetUnitId: undefined,
+      keyword: keyword,
+      limit: EXTERNAL_PAGE_SIZE,
+      mapFn: unitResp => unitResp,
+      options: {userId},
+    }),
   );
 
   const commentUnits: UnitItem[] = useMemo(
@@ -400,15 +400,15 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({userId}) => {
     // 其他 Tab 共用 Meili units 查询，只是 type / mapFn 不同
     if (tab === 'review' || tab === 'remark') {
       const isReview = tab === 'review';
-      const {queryKey, queryFn} = buildMeiliUnitQuery(
-        isReview ? UnitType.REVIEW : UnitType.REMARK,
-        start,
-        undefined,
-        keyword,
-        EXTERNAL_PAGE_SIZE,
-        mapUnitListToReviewListResponse,
-        {userId},
-      );
+      const {queryKey, queryFn} = buildMeiliUnitQuery({
+        kind: isReview ? UnitType.REVIEW : UnitType.REMARK,
+        start: start,
+        targetUnitId: undefined,
+        keyword: keyword,
+        limit: EXTERNAL_PAGE_SIZE,
+        mapFn: mapUnitListToReviewListResponse,
+        options: {userId},
+      });
       const nextReviewData = await queryClient.fetchQuery({
         queryKey,
         queryFn,
@@ -423,15 +423,15 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({userId}) => {
           ? UnitType.NOTE
           : UnitType.QUOTE;
 
-    const {queryKey, queryFn} = buildMeiliUnitQuery(
-      unitType,
-      start,
-      undefined,
-      keyword,
-      EXTERNAL_PAGE_SIZE,
-      unitResp => unitResp,
-      {userId},
-    );
+    const {queryKey, queryFn} = buildMeiliUnitQuery({
+      kind: unitType,
+      start: start,
+      targetUnitId: undefined,
+      keyword: keyword,
+      limit: EXTERNAL_PAGE_SIZE,
+      mapFn: unitResp => unitResp,
+      options: {userId},
+    });
     const nextUnitData = await queryClient.fetchQuery({
       queryKey,
       queryFn,

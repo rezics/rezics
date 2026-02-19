@@ -5,6 +5,7 @@ import type {
   UnitListResponse,
   ReviewDTO,
   ReviewListResponse,
+  ReviewMeiliDTO,
 } from '@package/contract';
 import type {ReadlistSearchResult} from '@package/contract';
 
@@ -19,7 +20,7 @@ import type {ReadlistSearchResult} from '@package/contract';
  * - unit.user             -> ReviewDTO.user
  * - unit.reactionSummaries-> ReviewDTO.reactionSummaries
  */
-export function mapUnitToReviewDTO(unit: any): ReviewDTO {
+export function mapUnitToReviewDTO(unit: any): ReviewMeiliDTO {
   return {
     unitId: unit.unitId ?? unit.id,
     bookId: unit.targetUnitId,
@@ -29,6 +30,7 @@ export function mapUnitToReviewDTO(unit: any): ReviewDTO {
     created_at: unit.createdAt,
     user: unit.user,
     reactionSummaries: unit.reactionSummaries,
+    metadata: unit.metadata,
   };
 }
 
@@ -39,7 +41,7 @@ export function mapUnitToReviewDTO(unit: any): ReviewDTO {
 export function mapUnitListToReviewListResponse(
   unitResp: UnitListResponse,
 ): ReviewListResponse {
-  const reviews: ReviewDTO[] =
+  const reviews: ReviewMeiliDTO[] =
     (unitResp.units as any[] | undefined)?.map(mapUnitToReviewDTO) ?? [];
 
   return {

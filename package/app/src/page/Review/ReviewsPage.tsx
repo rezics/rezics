@@ -43,25 +43,25 @@ export const ReviewsPage: React.FC<ReviewsPageProps> = ({bookUnitId}) => {
   }, [search]);
 
   const reviewListQueryOpts = useQuery(
-    buildMeiliUnitQuery(
-      UnitType.REVIEW,
-      startReview,
-      targetUnitId,
-      keyword,
-      EXTERNAL_PAGE_SIZE,
-      mapUnitListToReviewListResponse,
-    ),
+    buildMeiliUnitQuery({
+      kind: UnitType.REVIEW,
+      start: startReview,
+      targetUnitId: targetUnitId,
+      keyword: keyword,
+      limit: EXTERNAL_PAGE_SIZE,
+      mapFn: mapUnitListToReviewListResponse,
+    }),
   );
 
   const remarkListQueryOpts = useQuery(
-    buildMeiliUnitQuery(
-      UnitType.REMARK,
-      startRemark,
-      targetUnitId,
-      keyword,
-      EXTERNAL_PAGE_SIZE,
-      mapUnitListToReviewListResponse,
-    ),
+    buildMeiliUnitQuery({
+      kind: UnitType.REMARK,
+      start: startRemark,
+      targetUnitId: targetUnitId,
+      keyword: keyword,
+      limit: EXTERNAL_PAGE_SIZE,
+      mapFn: mapUnitListToReviewListResponse,
+    }),
   );
 
   const {data: reviewData, isLoading: isLoadingReview} = reviewListQueryOpts;
@@ -79,14 +79,14 @@ export const ReviewsPage: React.FC<ReviewsPageProps> = ({bookUnitId}) => {
   async function handlePreRequestData(page: number) {
     const isReview = tab === 'review';
     const start = (page - 1) * EXTERNAL_PAGE_SIZE;
-    const {queryKey, queryFn} = buildMeiliUnitQuery(
-      isReview ? UnitType.REVIEW : UnitType.REMARK,
-      start,
-      targetUnitId,
-      keyword,
-      EXTERNAL_PAGE_SIZE,
-      mapUnitListToReviewListResponse,
-    );
+    const {queryKey, queryFn} = buildMeiliUnitQuery({
+      kind: isReview ? UnitType.REVIEW : UnitType.REMARK,
+      start: start,
+      targetUnitId: targetUnitId,
+      keyword: keyword,
+      limit: EXTERNAL_PAGE_SIZE,
+      mapFn: mapUnitListToReviewListResponse,
+    });
     const nextData = await queryClient.fetchQuery({
       queryKey,
       queryFn,

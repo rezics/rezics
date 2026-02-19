@@ -53,14 +53,15 @@ export function useHomeBooks(limit = 12): SimpleQueryState<BookDTO> {
 
 export function useHomeReadlists(limit = 6): SimpleQueryState<ReadlistDTO> {
   const {data, isLoading, error} = useQuery(
-    buildMeiliUnitQuery(
-      UnitType.READLIST,
-      0,
-      undefined,
-      '',
+    buildMeiliUnitQuery({
+      kind: UnitType.READLIST,
+      start: 0,
+      targetUnitId: undefined,
+      keyword: '',
       limit,
-      (unitResp: UnitListResponse) => mapUnitListToReadlistListResponse(unitResp),
-    ),
+      mapFn: (unitResp: UnitListResponse) =>
+        mapUnitListToReadlistListResponse(unitResp),
+    }),
   );
 
   const items = useMemo<ReadlistDTO[]>(() => data?.readlists ?? [], [data]);
@@ -71,14 +72,15 @@ export function useHomeReadlists(limit = 6): SimpleQueryState<ReadlistDTO> {
 
 export function useHomeReviews(limit = 6): SimpleQueryState<ReviewDTO> {
   const {data, isLoading, error} = useQuery(
-    buildMeiliUnitQuery(
-      UnitType.REVIEW,
-      0,
-      undefined,
-      '',
+    buildMeiliUnitQuery({
+      kind: UnitType.REVIEW,
+      start: 0,
+      targetUnitId: undefined,
+      keyword: '',
       limit,
-      (unitResp: UnitListResponse) => mapUnitListToReviewListResponse(unitResp),
-    ),
+      mapFn: (unitResp: UnitListResponse) =>
+        mapUnitListToReviewListResponse(unitResp),
+    }),
   );
 
   const items = useMemo<ReviewDTO[]>(() => data?.reviews ?? [], [data]);
@@ -94,13 +96,13 @@ type QuoteListResponse = {
 
 export function useHomeQuotes(limit = 6): SimpleQueryState<QuoteDTO> {
   const {data, isLoading, error} = useQuery(
-    buildMeiliUnitQuery(
-      UnitType.QUOTE,
-      0,
-      undefined,
-      '',
+    buildMeiliUnitQuery({
+      kind: UnitType.QUOTE,
+      start: 0,
+      targetUnitId: undefined,
+      keyword: '',
       limit,
-      (unitResp: UnitListResponse) =>
+      mapFn: (unitResp: UnitListResponse) =>
         ({
           quotes: (unitResp.units ?? []).map(unit => ({
             id: unit.id,
@@ -113,8 +115,8 @@ export function useHomeQuotes(limit = 6): SimpleQueryState<QuoteDTO> {
                 : unit.createdAt?.toString(),
           })),
           total: unitResp.total,
-        } as QuoteListResponse),
-    ),
+        }) as QuoteListResponse,
+    }),
   );
 
   const items = useMemo<QuoteDTO[]>(() => (data as any)?.quotes ?? [], [data]);
@@ -122,4 +124,3 @@ export function useHomeQuotes(limit = 6): SimpleQueryState<QuoteDTO> {
 
   return {items, total, isLoading, error};
 }
-

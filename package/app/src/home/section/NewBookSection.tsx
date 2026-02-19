@@ -33,12 +33,10 @@ export const NewBookSection: React.FC<NewBookSectionProps> = ({
   }, [items]);
 
   return (
-    <section
-      className={['w-full rounded-xl px-6 py-5', className ?? ''].join(' ')}
-    >
+    <section className={className}>
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h2 className="font-semibold">作品推介</h2>
+        <h2 className="font-semibold">最新作品</h2>
         <Button
           variant="text"
           color="primary"

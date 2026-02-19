@@ -1,4 +1,5 @@
 import {prisma} from '@package/server';
+import {UnitType} from '@package/server';
 import {
   addOrUpdateBooks,
   addOrUpdateUnits,
@@ -134,7 +135,7 @@ export async function syncAllUnits() {
     if (units.length === 0) break;
 
     // Format batch
-    const formatted: UnitSearchDocument[] = units.map((u: any) => ({
+    let formatted: UnitSearchDocument[] = units.map((u: any) => ({
       id: u.id,
       // search fields
       title: u.title ?? '',
@@ -156,6 +157,23 @@ export async function syncAllUnits() {
       tagObjects: u.tags,
       reactionSummaries: u.reactionSummaries,
     }));
+
+    formatted = await Promise.all(
+      formatted.map(async (u: any) => {
+        if (u.type === UnitType.REVIEW || u.type === UnitType.REMARK) {
+          const bookId = u.targetUnitId;
+          if (bookId) {
+            const book = await prisma.book.findUnique({
+              where: {unitId: bookId},
+            });
+            if (book) {
+              u.metadata.book = {title: book.title, coverUrl: book.coverUrl};
+            }
+          }
+        }
+        return u;
+      }),
+    );
 
     // Push this batch to Meilisearch
     const addResult = await addOrUpdateUnits(formatted);

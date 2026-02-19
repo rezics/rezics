@@ -32,17 +32,15 @@ export const BookReviews: React.FC<BookReviewsProps> = ({
   const [reviews, setReviews] = useState<ReviewDTO[]>([]);
 
   const {data} = useQuery(
-    buildMeiliUnitQuery(
-      UnitType.REVIEW,
-      0,
-      bookId,
-      '',
-      reviewNumber,
-      mapUnitListToReviewListResponse,
-      {
-        enabled: !!bookId,
-      },
-    ),
+    buildMeiliUnitQuery({
+      kind: UnitType.REVIEW,
+      start: 0,
+      targetUnitId: bookId,
+      keyword: '',
+      limit: reviewNumber,
+      mapFn: mapUnitListToReviewListResponse,
+      options: {enabled: !!bookId},
+    }),
   );
 
   useEffect(() => {

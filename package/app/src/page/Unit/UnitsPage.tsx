@@ -11,7 +11,7 @@ import {
 } from '@/component/Common/Navigation/Pagination';
 import type {UnitDTO, UnitType} from '@package/contract';
 import {SimpleSearchInput} from '@/component/Search/SimpleSearchInput';
-import {buildUnitUrl} from '@/shared/util/buildUrlUtil';
+import {buildUnitUrl} from '@/shared/util/build-url';
 import {buildMeiliUnitQuery} from '@package/api/meili/meili.queries';
 
 type Unit = UnitDTO;
@@ -148,17 +148,15 @@ export const UnitsPage: React.FC<UnitsPageProps> = ({
     return unitResp;
   }
 
-  const {queryKey, queryFn} = buildMeiliUnitQuery(
-    tab === 'UNIT' ? undefined : (tab as keyof typeof UnitType),
-    startMap[tab] ?? 0,
-    targetUnitId ?? '',
-    keyword,
-    EXTERNAL_PAGE_SIZE,
-    mapUnitResponse,
-    {
-      userId,
-    },
-  );
+  const {queryKey, queryFn} = buildMeiliUnitQuery({
+    kind: tab === 'UNIT' ? undefined : (tab as keyof typeof UnitType),
+    start: startMap[tab] ?? 0,
+    targetUnitId: targetUnitId ?? '',
+    keyword: keyword,
+    limit: EXTERNAL_PAGE_SIZE,
+    mapFn: mapUnitResponse,
+    options: {userId},
+  });
 
   const {data: activeData, isLoading} = useQuery({
     queryKey,
@@ -173,17 +171,15 @@ export const UnitsPage: React.FC<UnitsPageProps> = ({
 
   async function handlePreRequestData(page: number) {
     const start = (page - 1) * EXTERNAL_PAGE_SIZE;
-    const {queryKey, queryFn} = buildMeiliUnitQuery(
-      tab === 'UNIT' ? undefined : (tab as keyof typeof UnitType),
-      start,
-      targetUnitId ?? '',
-      keyword,
-      EXTERNAL_PAGE_SIZE,
-      mapUnitResponse,
-      {
-        userId,
-      },
-    );
+    const {queryKey, queryFn} = buildMeiliUnitQuery({
+      kind: tab === 'UNIT' ? undefined : (tab as keyof typeof UnitType),
+      start: start,
+      targetUnitId: targetUnitId ?? '',
+      keyword: keyword,
+      limit: EXTERNAL_PAGE_SIZE,
+      mapFn: mapUnitResponse,
+      options: {userId},
+    });
     const nextData = await queryClient.fetchQuery({queryKey, queryFn});
     return nextData?.units?.length ?? 0;
   }

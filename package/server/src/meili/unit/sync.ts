@@ -1,6 +1,7 @@
 import {prisma} from '@/prisma/client';
 import {unitIndex} from '@package/search';
 import type {UnitSearchDocument} from '@package/contract';
+import {UnitType} from '@/prisma/client';
 
 export async function syncUnitToMeili(unitId: string): Promise<void> {
   const unit = await prisma.unit.findUnique({
@@ -17,7 +18,7 @@ export async function syncUnitToMeili(unitId: string): Promise<void> {
 
   if (!unit) return;
 
-  const doc: UnitSearchDocument = {
+  let doc: UnitSearchDocument = {
     id: unit.id,
     // search fields
     title: unit.title ?? '',
@@ -39,6 +40,24 @@ export async function syncUnitToMeili(unitId: string): Promise<void> {
     tagObjects: unit.tags,
     reactionSummaries: unit.reactionSummaries,
   };
+
+  if (unit.type === UnitType.REVIEW || unit.type === UnitType.REMARK) {
+    const bookId = unit.targetUnitId;
+    if (bookId) {
+      const book = await prisma.book.findUnique({
+        where: {unitId: bookId},
+      });
+      const bookMetadata = book
+        ? {
+            title: book.title,
+            coverUrl: book.coverUrl,
+          }
+        : null;
+      if (bookMetadata) {
+        doc.metadata.append({book: bookMetadata});
+      }
+    }
+  }
 
   await unitIndex.addDocuments([doc]);
 }

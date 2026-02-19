@@ -24,17 +24,15 @@ export const QuoteExcerptPreview: React.FC<QuoteExcerptPreviewProps> = ({
 }) => {
   const {t} = useTranslation();
   const {data, isLoading, error} = useQuery(
-    buildMeiliUnitQuery(
-      UnitType.QUOTE,
-      0,
-      id,
-      '',
-      quoteNumber,
-      unitResp => unitResp,
-      {
-        enabled: !!id,
-      },
-    ),
+    buildMeiliUnitQuery({
+      kind: UnitType.QUOTE,
+      start: 0,
+      targetUnitId: id,
+      keyword: '',
+      limit: quoteNumber,
+      mapFn: unitResp => unitResp,
+      options: {enabled: !!id},
+    }),
   );
 
   if (isLoading) return <div>{t('common.loading')}</div>;

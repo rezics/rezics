@@ -4,12 +4,12 @@ import {useHomeBooks} from './hooks/hooks';
 import {Button} from '@mui/material';
 import {useNavigate} from '@tanstack/react-router';
 
-export interface HotBookSectionProps {
+export interface TrendingBookSectionProps {
   limit?: number;
   className?: string;
 }
 
-export const HotBookSection: React.FC<HotBookSectionProps> = ({
+export const TrendingBookSection: React.FC<TrendingBookSectionProps> = ({
   limit = 12,
   className,
 }) => {
@@ -28,11 +28,9 @@ export const HotBookSection: React.FC<HotBookSectionProps> = ({
   }, [items]);
 
   return (
-    <section
-      className={['w-full rounded-xl px-6 py-5', className ?? ''].join(' ')}
-    >
+    <section className={className}>
       <div className="flex items-center justify-between mb-4">
-        <h2 className="font-semibold">热门作品</h2>
+        <h2 className="font-semibold">热门趋势</h2>
         <Button
           variant="text"
           color="primary"

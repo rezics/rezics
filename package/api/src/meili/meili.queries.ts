@@ -13,11 +13,12 @@ import {
 import {type BookFilters} from '../book/book.types';
 import type {
   UnitListResponse,
-  UnitType,
   FeedbackListResponse,
   FeedbackType,
 } from '@package/contract';
+import {UnitType} from '@package/contract';
 import {hashFn} from '../utils/hash';
+import {mapUnitListToReviewListResponse} from './mapper';
 
 export const meiliBookSearchQuery = (filters?: BookFilters) =>
   queryOptions({
@@ -31,13 +32,13 @@ export const meiliQueries = {
   booksSearch: meiliBookSearchQuery,
 };
 
-export const buildMeiliUnitQuery = (
-  kind: undefined | keyof typeof UnitType,
-  start: number,
-  targetUnitId: string | undefined,
-  keyword: string,
-  limit: number,
-  mapFn: (unitResp: UnitListResponse) => any,
+type buildMeiliUnitQueryProps = {
+  kind: undefined | keyof typeof UnitType;
+  start: number;
+  targetUnitId: string | undefined;
+  keyword: string;
+  limit: number;
+  mapFn: (unitResp: UnitListResponse) => any;
   options?: {
     enabled?: boolean;
     /**
@@ -45,8 +46,18 @@ export const buildMeiliUnitQuery = (
      * will be returned. This maps to Meilisearch `userId` filter.
      */
     userId?: string;
-  },
-) => {
+  };
+};
+
+export const buildMeiliUnitQuery = ({
+  kind,
+  start,
+  targetUnitId,
+  keyword,
+  limit,
+  mapFn,
+  options,
+}: buildMeiliUnitQueryProps) => {
   const type = kind;
   const filters = {
     type,
@@ -174,4 +185,37 @@ export const buildMeiliReadlistQuery = (
     },
     staleTime: 1000 * 60 * 5,
   } as const;
+};
+
+type ReviewExtraFilterOptions = {
+  /** Filter reviews created by a specific user. */
+  userId?: string;
+  /** Filter by book ID. */
+  bookId?: string;
+  /** Filter by keyword. */
+  keyword?: string;
+  /** Filter by tags. */
+  tags?: string[];
+  /** Filter by rating. */
+  ratingMin?: number;
+  /** Filter by rating. */
+  ratingMax?: number;
+  /** Filter by sort. */
+  sort?: string;
+};
+
+export const buildMeiliReviewQuery = (
+  startOffset: number,
+  limit: number,
+  options?: ReviewExtraFilterOptions,
+) => {
+  return buildMeiliUnitQuery({
+    kind: UnitType.REVIEW,
+    start: startOffset,
+    targetUnitId: undefined,
+    keyword: options?.keyword || '',
+    limit,
+    mapFn: mapUnitListToReviewListResponse,
+    options,
+  });
 };
