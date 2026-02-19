@@ -199,7 +199,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       onClose={handleSidebarClose}
       mode={isMobile ? 'fixed' : 'inline'}
       width={`${sidebarWidth}px`}
-      className={cn(sidebarClassName, 'rounded-lg')}
+      className={cn(sidebarClassName, 'rounded-lg overflow-auto')}
       isDragging={isDragging}
     >
       {sidebarInner}

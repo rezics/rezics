@@ -76,14 +76,14 @@ const ReviewSearchBox: React.FC<{
   const [keyword, setKeyword] = useState('');
   const [q, setQ] = useState('');
   const {data, isLoading} = useQuery(
-    buildMeiliUnitQuery(
-      UnitType.REVIEW,
-      0,
-      '',
-      q,
-      5,
-      mapUnitListToReviewListResponse,
-    ),
+    buildMeiliUnitQuery({
+      kind: UnitType.REVIEW,
+      start: 0,
+      targetUnitId: '',
+      keyword: q,
+      limit: 5,
+      mapFn: mapUnitListToReviewListResponse,
+    }),
   );
   const reviews = data?.reviews ?? [];
 

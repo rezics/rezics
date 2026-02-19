@@ -1,5 +1,5 @@
 import {PRESET_COLORS} from '@/app/config/dynamicTheme';
-import {appStore} from '@/global/appStore';
+import {useAppStore} from '@/global/appStore';
 import {
   Add,
   CheckCircle,
@@ -34,8 +34,8 @@ import React from 'react';
 
 export const ThemeDemo: React.FC = () => {
   const theme = useTheme();
-  const useDynamicTheme = appStore(state => state.useDynamicTheme);
-  const customColor = appStore(state => state.customColor);
+  const useDynamicTheme = useAppStore(state => state.useDynamicTheme);
+  const customColor = useAppStore(state => state.customColor);
 
   const demoItems = [
     {icon: <CheckCircle />, text: '任务已完成', color: 'success'},
