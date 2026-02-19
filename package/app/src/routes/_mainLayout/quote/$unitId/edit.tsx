@@ -1,7 +1,7 @@
 import {createFileRoute, lazyRouteComponent} from '@tanstack/react-router';
 
 const QuoteEditPageContainer = lazyRouteComponent(
-  () => import('@/page/Review/QuoteEditPage'),
+  () => import('@/quote/page/QuoteEditPage'),
   'QuoteEditPageContainer',
 );
 

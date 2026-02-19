@@ -1,8 +1,8 @@
 import {useNavigate} from '@tanstack/react-router';
 
-import {ReviewsPage} from '@/page/Review/ReviewsPage';
+import {ReviewsPage} from './ReviewsPage';
 import {AccentBarWithTextShow} from '@/component/Common/Navigation/AccentBar';
-import {ReviewNewPage} from '@/page/Review/ReviewNewPage';
+import {ReviewNewPage} from './ReviewNewPage';
 import {useTranslation} from 'react-i18next';
 import {Button, Divider} from '@mui/material';
 import {reviewByBookRoute} from '@/router';

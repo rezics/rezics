@@ -23,8 +23,10 @@ export const NewReadListPage: React.FC = () => {
   const {t} = useTranslation();
 
   function handleSubmit() {
-    const bookConnect = readlistData.books.map(book => book.unitId);
-    const reviewConnect = readlistData.reviews.map(review => review.unitId);
+    const bookConnect = readlistData.books.map((book: any) => book.unitId);
+    const reviewConnect = readlistData.reviews.map(
+      (review: any) => review.unitId,
+    );
     const order = readlistData.order;
     createReadlistMutation.mutate({
       book: bookConnect,
