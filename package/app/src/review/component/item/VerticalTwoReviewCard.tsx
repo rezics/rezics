@@ -1,6 +1,7 @@
 import React from 'react';
 import type {ReviewMeiliDTO} from '@package/contract';
 import ReviewCard from './ReviewCard';
+import {Divider} from '@mui/material';
 
 interface VerticalTwoReviewCardProps {
   review1: ReviewMeiliDTO;
@@ -12,8 +13,9 @@ export const VerticalTwoReviewCard: React.FC<VerticalTwoReviewCardProps> = ({
   review2,
 }) => {
   return (
-    <div className="flex flex-col gap-4 mb-2">
+    <div className="flex flex-col mb-2">
       <ReviewCard review={review1} />
+      <Divider sx={{my: 1}} />
       <ReviewCard review={review2} />
     </div>
   );

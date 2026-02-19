@@ -38,7 +38,7 @@ export function BookCard({
       <div className="mt-2">
         <div className="line-clamp-1 text-sm font-bold mb-1">{title}</div>
 
-        {author ? <div className="text-sm">{author}</div> : null}
+        {author ? <div className="line-clamp-1 text-sm">{author}</div> : null}
 
         {description ? (
           <div className="text-sm text-gray-500 line-clamp-2">

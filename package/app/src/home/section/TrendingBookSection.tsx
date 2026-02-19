@@ -30,7 +30,7 @@ export const TrendingBookSection: React.FC<TrendingBookSectionProps> = ({
   return (
     <section className={className}>
       <div className="flex items-center justify-between mb-4">
-        <h2 className="font-semibold">热门趋势</h2>
+        <h2 className="font-semibold">趋势好书</h2>
         <Button
           variant="text"
           color="primary"

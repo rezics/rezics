@@ -12,10 +12,7 @@ const ReviewCard: React.FC<ReviewCardProps> = ({review, className}) => {
   const bookMetadata = review.metadata?.book;
 
   return (
-    <Card
-      elevation={0}
-      className={cn('w-full transition-all hover:shadow-md', className)}
-    >
+    <Card className={cn('w-full transition-all hover:shadow-md', className)}>
       <CardContent>
         {/* 中间主体：书籍信息与评论内容 */}
         <Box className="flex gap-4">
