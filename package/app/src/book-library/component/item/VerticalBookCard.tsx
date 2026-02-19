@@ -1,5 +1,6 @@
 import React from 'react';
 import {Link} from '@package/ui/Navigation/Link.tsx';
+import {cn} from '@/shared/util/css-util.ts';
 
 export type BookProps = {
   title: string;
@@ -24,12 +25,8 @@ export function BookCard({
   const rootProps = href ? {to: href} : {type: 'button' as const, onClick};
 
   return (
-    <Root
-      {...rootProps}
-      className={['text-left', className ?? ''].join(' ')}
-      aria-label={title}
-    >
-      <div className="relative w-full overflow-hidden">
+    <Root {...rootProps} className="text-left" aria-label={title}>
+      <div className={cn('relative w-full overflow-hidden', className ?? '')}>
         <img
           src={coverUrl}
           alt={title}

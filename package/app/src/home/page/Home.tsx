@@ -10,6 +10,7 @@ import {Paper} from '@mui/material';
 import {AnnouncementBarSection} from '../section/AnnouncementBar';
 import {useIsMobile} from '@/shared/util/use-media-query';
 import {cn} from '@/shared/util/css-util';
+import {HotBookSection} from '../section/HotBookSection';
 
 export type HomeProps = object;
 
@@ -53,6 +54,10 @@ export const Home: React.FC<HomeProps> = () => {
       {/* Discovery section powered by Meilisearch */}
       <Paper sx={{px: 2, pb: 2, mt: 2}}>
         <NewBookSection />
+      </Paper>
+
+      <Paper sx={{mt: 2}}>
+        <HotBookSection />
       </Paper>
 
       <section>
