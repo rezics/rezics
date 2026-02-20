@@ -21,15 +21,7 @@ import {
 } from '../state/bookDetailAtoms';
 
 /**
- * Book Detail Page - Route-level entry point.
- *
- * Responsibilities:
- * - Parse route parameters (bookId)
- * - Fetch book data and rating
- * - Manage tab state with URL sync
- * - Compose sections (delegates UI to BookDetailSection)
- *
- * This is a thin assembly layer that should NOT contain business logic or complex UI.
+ * Book Page
  */
 export const BookDetailPage: React.FC = () => {
   const params = useParams({strict: false}) as {bookId?: string};

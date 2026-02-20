@@ -12,12 +12,17 @@ export default defineConfig({
   },
 
   theme: {
-    breakpoints: {
+    breakpoint: {
       xs: '0px',
-      sm: '600px',
-      md: '900px',
-      lg: '1200px',
-      xl: '1536px',
+      xsm: '450px', // 基础移动端
+      sm: '640px', // 大屏手机 / 小型平板
+      md: '768px', // 平板电脑 (iPad 纵向)
+      lg: '1024px', // 笔记本电脑 (iPad 横向 / 小屏 PC)
+      xl: '1280px', // 标准桌面显示器
+      '2xl': '1536px', // 大屏显示器 / 高分屏
+    },
+    spacing: {
+      '4': '1rem', // TODO 完全不知道到底是谁在用这个东西，不应该有人用才对
     },
     colors: {
       primary: {
@@ -32,25 +37,28 @@ export default defineConfig({
       },
     },
   },
-
   presets: [
-    presetAnimations(),
-    presetShadcn(builtinColors.map(c => ({color: c}))),
     presetWind4({
       preflights: {
         reset: true,
       },
     }),
+    presetShadcn(builtinColors.map(c => ({color: c}))),
+    presetAnimations(),
     presetIcons(), // for icons
     presetAttributify({
       prefix: 'un-',
       prefixedOnly: true,
     }), // support <div un-text="red-500">
+    // * small presets below
     presetScrollbarHide(),
   ],
 
   transformers: [transformerDirectives()],
 
-  shortcuts: {},
+  shortcuts: {
+    'horizontal-book-carousel':
+      'pl-4 !basis-1/3 xsm:!basis-1/4 sm:!basis-1/5 md:!basis-1/6 lg:!basis-1/7 xl:!basis-1/8',
+  },
   rules: [],
 });
