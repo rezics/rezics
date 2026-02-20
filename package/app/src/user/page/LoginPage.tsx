@@ -7,13 +7,13 @@ import {type FC, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 
 import {PasswordField} from '@/component/Form/PasswordField';
-import {RouterLink} from '@package/ui/Navigation/RouterLink';
-import {useUserStore} from '@/global/userStore.ts';
-import {login} from '../model/handler.ts';
-import {Layout} from '../layout/Layout.tsx';
-import {ModalLayout} from '../layout/ModalLayout.tsx';
-import {validateEmail} from '../model/validate.ts';
-import {TextButton} from '@/component/Common/UI/Button/TextButton.tsx';
+import {RouterLink} from '@package/ui/Navigation';
+import {useUserStore} from '@/global/userStore';
+import {login} from '../model/handler';
+import {Layout} from '../layout/Layout';
+import {ModalLayout} from '../layout/ModalLayout';
+import {validateEmail} from '../model/validate';
+import {TextButton} from '@/component/Common/UI/Button/TextButton';
 
 interface LoginData {
   email: string;
