@@ -9,10 +9,10 @@ import {useTranslation} from 'react-i18next';
 import {PasswordField} from '@/component/Form/PasswordField';
 import {RouterLink} from '@package/ui/Navigation/RouterLink.tsx';
 import {useUserStore} from '@/global/userStore.ts';
-import {login} from './lib/handler.ts';
-import {Layout} from './lib/Layout.tsx';
-import {ModalLayout} from './lib/ModalLayout.tsx';
-import {validateEmail} from './lib/validate.ts';
+import {login} from '../model/handler.ts';
+import {Layout} from '../layout/Layout.tsx';
+import {ModalLayout} from '../layout/ModalLayout.tsx';
+import {validateEmail} from '../model/validate.ts';
 import {TextButton} from '@/component/Common/UI/Button/TextButton.tsx';
 
 interface LoginData {

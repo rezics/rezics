@@ -4,10 +4,14 @@ import TextField from '@mui/material/TextField';
 import {Dialog, DialogContent} from '@mui/material';
 import {type FC, useRef, useState} from 'react';
 import {useTranslation} from 'react-i18next';
-import {register} from './lib/handler.ts';
-import {Layout} from './lib/Layout.tsx';
-import {ModalLayout} from './lib/ModalLayout.tsx';
-import {validateEmail, validateSlug, validatePassword} from './lib/validate.ts';
+import {register} from '../model/handler.ts';
+import {Layout} from '../layout/Layout.tsx';
+import {ModalLayout} from '../layout/ModalLayout.tsx';
+import {
+  validateEmail,
+  validateSlug,
+  validatePassword,
+} from '../model/validate.ts';
 import {useUserStore} from '@/global/userStore.ts';
 import {useNavigate, useRouterState} from '@tanstack/react-router';
 import {Turnstile} from '@/component/Form/Turnstile.tsx';
@@ -15,7 +19,7 @@ import {PasswordField} from '@/component/Form/PasswordField';
 import {
   GetVerificationCode,
   type GetVerificationCodeHandle,
-} from './GetVerificationCode.tsx';
+} from '../component/GetVerificationCode.tsx';
 import {TextButton} from '@/component/Common/UI/Button/TextButton.tsx';
 
 interface RegisterData {

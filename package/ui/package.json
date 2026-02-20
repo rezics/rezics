@@ -9,6 +9,10 @@
     "./*": {
       "types": "./src/*",
       "import": "./src/*"
+    },
+    "./Navigation/*": {
+      "types": "./src/Navigation/index.ts",
+      "import": "./src/Navigation/index.ts"
     }
   },
   "type": "module",

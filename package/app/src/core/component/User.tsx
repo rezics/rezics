@@ -18,9 +18,9 @@ import {useNavigate} from '@tanstack/react-router';
 import React, {useState} from 'react';
 import {Link} from '@package/ui/Navigation/Link.tsx';
 
-import {LoginModal} from '@/page/Auth/LoginPage';
-import {RegisterModal} from '@/page/Auth/RegisterPage';
-import {logout} from '@/page/Auth/lib/handler';
+import {LoginModal} from '@/user/page/LoginPage';
+import {RegisterModal} from '@/user/page/RegisterPage';
+import {logout} from '@/user/model/handler';
 import {userQueries} from '@package/api/user/user.queries';
 import {useQuery} from '@tanstack/react-query';
 import {useIsMobile} from '@/shared/util/use-media-query';

@@ -16,5 +16,6 @@
 
     "noUnusedParameters": true
   },
+  "include": ["src/**/*.ts", "src/**/*.tsx", "../ui/**/*.ts", "../ui/**/*.tsx"],
   "exclude": ["dist", "dist-types", "node_modules"]
 }
