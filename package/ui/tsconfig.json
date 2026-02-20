@@ -12,9 +12,8 @@
       "@locale": ["./src/locale/index.ts"],
       "@app/*": ["./src/app/*"]
     },
-    "outDir": "./dist-types",
 
     "noUnusedParameters": true
   },
-  "exclude": ["dist", "dist-types", "node_modules"]
+  "exclude": ["dist", "node_modules"]
 }

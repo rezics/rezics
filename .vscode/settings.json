@@ -86,7 +86,7 @@
   },
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.formatOnSave": true,
-  "typescript.experimental.useTsgo": true,
+  // "typescript.experimental.useTsgo": true,
   "[prisma]": {
     "editor.defaultFormatter": "Prisma.prisma-insider"
   },

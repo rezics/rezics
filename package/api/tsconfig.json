@@ -4,9 +4,9 @@
     "paths": {
       "@/*": ["./src/*"]
     },
-    "outDir": "./dist-types",
+
     "noUnusedLocals": false,
     "noUnusedParameters": false
   },
-  "exclude": ["dist", "dist-types", "node_modules"]
+  "exclude": ["dist", "node_modules"]
 }

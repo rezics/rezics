@@ -10,7 +10,7 @@
       "types": "./src/*",
       "import": "./src/*"
     },
-    "./Navigation/*": {
+    "./Navigation": {
       "types": "./src/Navigation/index.ts",
       "import": "./src/Navigation/index.ts"
     }

@@ -5,6 +5,11 @@
     "lib": ["DOM", "ES2022"],
     "jsx": "react-jsx",
 
+    "composite": false,
+    "declaration": false,
+    "declarationMap": false,
+    "emitDeclarationOnly": false,
+
     "paths": {
       "@/*": ["./src/*"],
       "@component/*": ["./src/component/*"],
@@ -12,10 +17,9 @@
       "@locale": ["./src/locale/index.ts"],
       "@app/*": ["./src/app/*"]
     },
-    "outDir": "./dist-types",
 
     "noUnusedParameters": true
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx", "../ui/**/*.ts", "../ui/**/*.tsx"],
-  "exclude": ["dist", "dist-types", "node_modules"]
+  "include": ["src/**/*.ts", "src/**/*.tsx"],
+  "exclude": ["dist", "node_modules"]
 }

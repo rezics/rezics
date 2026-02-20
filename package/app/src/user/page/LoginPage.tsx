@@ -7,7 +7,7 @@ import {type FC, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 
 import {PasswordField} from '@/component/Form/PasswordField';
-import {RouterLink} from '@package/ui/Navigation/RouterLink.tsx';
+import {RouterLink} from '@package/ui/Navigation/RouterLink';
 import {useUserStore} from '@/global/userStore.ts';
 import {login} from '../model/handler.ts';
 import {Layout} from '../layout/Layout.tsx';

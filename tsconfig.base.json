@@ -1,28 +1,11 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
   "compilerOptions": {
+    "target": "ESNext",
     "module": "ESNext",
     "moduleResolution": "Bundler",
-    "target": "ESNext",
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "resolveJsonModule": true,
-
-    "composite": true,
-    "declaration": true,
-    "declarationMap": true,
-    "incremental": true,
-    "emitDeclarationOnly": true,
-
-    "isolatedModules": true, // toolchain friendly
-    "verbatimModuleSyntax": true,
-    "allowImportingTsExtensions": true,
 
     "strict": true,
-    "strictNullChecks": true,
-    "noFallthroughCasesInSwitch": true,
-
-    /* performance */
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true
   }

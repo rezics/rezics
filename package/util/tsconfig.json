@@ -4,7 +4,6 @@
     "paths": {
       "@/*": ["./*"]
     },
-    "outDir": "./dist-types",
 
     "noUncheckedIndexedAccess": true,
     "noImplicitOverride": true,
@@ -12,5 +11,5 @@
     "noUnusedParameters": false,
     "noPropertyAccessFromIndexSignature": false
   },
-  "exclude": ["dist", "dist-types", "node_modules"]
+  "exclude": ["dist"]
 }
