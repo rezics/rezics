@@ -1,6 +1,6 @@
 import React from 'react';
 import type {SvgIconComponent} from '@mui/icons-material';
-import {useAppStore} from '@/global/appStore';
+import {useAppStore} from '@/app/state/appStore';
 import clsx from 'clsx';
 
 export interface ArrowButtonProps {

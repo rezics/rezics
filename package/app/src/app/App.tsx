@@ -9,7 +9,7 @@ import {
   generateDynamicColors,
 } from './config/dynamicTheme';
 import {getDynamicTheme, getTheme} from './config/theme';
-import {useAppStore} from '@/global/appStore';
+import {useAppStore} from './state/appStore';
 import {PersistentSettingsLoader} from './provider/PersistentSettingsLoader';
 import {ReactQueryProvider} from './provider/react-query';
 import {AuthProvider} from './provider/AuthProvider';

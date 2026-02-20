@@ -1,4 +1,4 @@
-import {useAppStore} from '@/global/appStore';
+import {useAppStore} from '@/app/state/appStore';
 import {useMemo} from 'react';
 import {MenuItem, ListItemIcon, ListItemText} from '@mui/material';
 import Brightness4Icon from '@mui/icons-material/Brightness4';

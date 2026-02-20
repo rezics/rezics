@@ -17,7 +17,7 @@ import {
   CarouselItem,
   type CarouselApi,
 } from '@/component/shadcn/carousel';
-import {useAppStore} from '@/global/appStore';
+import {useAppStore} from '@/app/state/appStore';
 
 type ProductType = {
   cover?: string;

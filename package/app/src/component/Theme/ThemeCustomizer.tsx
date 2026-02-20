@@ -1,5 +1,5 @@
 import {extractColorFromImage, PRESET_COLORS} from '@/config/dynamicTheme';
-import {useAppStore} from '@/global/appStore';
+import {useAppStore} from '@/app/state/appStore';
 import {
   Close as CloseIcon,
   Palette as PaletteIcon,

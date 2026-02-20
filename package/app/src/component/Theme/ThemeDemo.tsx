@@ -1,5 +1,5 @@
 import {PRESET_COLORS} from '@/app/config/dynamicTheme';
-import {useAppStore} from '@/global/appStore';
+import {useAppStore} from '@/app/state/appStore';
 import {
   Add,
   CheckCircle,

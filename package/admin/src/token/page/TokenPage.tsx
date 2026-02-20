@@ -25,7 +25,7 @@ import {
   CreateTokenDialog,
   EditTokenDialog,
   TokenSecretDialog,
-} from './component';
+} from '../component';
 
 /**
  * TokenPage - 管理当前用户的 API tokens
