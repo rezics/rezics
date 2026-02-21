@@ -22,7 +22,7 @@ import type {UserDTO} from '@package/contract';
 import {userQueries} from '@package/api/user/user.queries';
 import {meiliUserApi} from '@package/api/meili/meili.api';
 
-import {Page} from '@/page/Page';
+import {Page} from '@/core/layout/Page';
 import {
   PaginatedTable,
   type PaginatedColumn,

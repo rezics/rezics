@@ -1,7 +1,7 @@
 import {createFileRoute, lazyRouteComponent} from '@tanstack/react-router';
 
 const ReactionInfoPage = lazyRouteComponent(
-  () => import('@/page/User/ReactionInfoPage'),
+  () => import('@/user/page/ReactionInfoPage'),
   'ReactionInfoPage',
 );
 

@@ -19,7 +19,7 @@ import {Link} from '@package/ui/Navigation/Link.tsx';
 import {unitMutations} from '@package/api/unit/unit.mutations';
 import {userQueries} from '@package/api/user/user.queries';
 
-import {Page} from '@/page/Page';
+import {Page} from '@/core/layout/Page';
 
 export default function UnitCreatePage() {
   const navigate = useNavigate();

@@ -19,7 +19,7 @@ import {Link} from '@package/ui/Navigation/Link.tsx';
 import {unitQueries, type UnitDTO} from '@package/api/unit/unit';
 import {unitMutations} from '@package/api/unit/unit.mutations';
 
-import {Page} from '@/page/Page';
+import {Page} from '@/core/layout/Page';
 import {Route} from '@/routes/_admin/units/$unitId';
 
 function fmtDate(v?: string | Date) {

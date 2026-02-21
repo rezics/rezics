@@ -13,7 +13,7 @@ import {
 import React from 'react';
 import {useRouterState} from '@tanstack/react-router';
 
-import {adminConfig} from '@/config/adminConfig';
+import {adminConfig} from '@/app/config/adminConfig';
 import {Link} from '@package/ui/Navigation/Link.tsx';
 
 import type {

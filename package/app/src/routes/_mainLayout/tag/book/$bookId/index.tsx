@@ -1,7 +1,7 @@
 import {createFileRoute, lazyRouteComponent} from '@tanstack/react-router';
 
 const TagByBookPage = lazyRouteComponent(
-  () => import('@/page/Tag/TagByUnitPage'),
+  () => import('@/tag/page/TagByUnitPage'),
   'TagByBookPage',
 );
 

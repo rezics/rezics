@@ -1,7 +1,7 @@
 import {createFileRoute, lazyRouteComponent} from '@tanstack/react-router';
 
 const ResetPasswordPage = lazyRouteComponent(
-  () => import('@/page/Auth/ResetPasswordPage'),
+  () => import('@/user/page/ResetPasswordPage'),
   'ResetPasswordPage',
 );
 

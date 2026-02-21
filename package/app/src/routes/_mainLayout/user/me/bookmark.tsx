@@ -1,7 +1,7 @@
 import {createFileRoute, lazyRouteComponent} from '@tanstack/react-router';
 
 const BookmarkPage = lazyRouteComponent(
-  () => import('@/page/User/BookmarkPage'),
+  () => import('@/user/page/BookmarkPage'),
   'BookmarkPage',
 );
 

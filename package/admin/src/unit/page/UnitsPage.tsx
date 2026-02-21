@@ -20,7 +20,7 @@ import {useMatchRoute} from '@tanstack/react-router';
 import {unitQueries, type UnitDTO} from '@package/api/unit/unit';
 import {meiliUnitApi} from '@package/api/meili/meili.api';
 
-import {Page} from '@/page/Page';
+import {Page} from '@/core/layout/Page';
 import {Link} from '@package/ui/Navigation/Link.tsx';
 import {type PaginatedColumn} from '@/component/table/PaginatedTable';
 import {SearchablePaginatedTableCard} from '@/component/list/SearchablePaginatedTableCard';

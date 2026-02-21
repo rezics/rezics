@@ -1,7 +1,7 @@
 import {createFileRoute, lazyRouteComponent} from '@tanstack/react-router';
 
 const FollowInfoPage = lazyRouteComponent(
-  () => import('@/page/User/FollowInfoPage'),
+  () => import('@/user/page/FollowInfoPage'),
   'FollowInfoPage',
 );
 

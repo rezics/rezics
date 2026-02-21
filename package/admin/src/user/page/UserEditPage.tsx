@@ -19,7 +19,7 @@ import {Link} from '@package/ui/Navigation/Link.tsx';
 import {userQueries} from '@package/api/user/user.queries';
 import {userMutations} from '@package/api/user/user.mutations';
 
-import {Page} from '@/page/Page';
+import {Page} from '@/core/layout/Page';
 import {Route} from '@/routes/_admin/users/$unitId';
 
 export default function UserEditPage() {

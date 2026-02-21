@@ -1,7 +1,7 @@
 import {createFileRoute, lazyRouteComponent} from '@tanstack/react-router';
 
 const ReviewPage = lazyRouteComponent(
-  () => import('@/page/Review/ReviewPage'),
+  () => import('@/review/page/ReviewPage'),
   'ReviewPage',
 );
 

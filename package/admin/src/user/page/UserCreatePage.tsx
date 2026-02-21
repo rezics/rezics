@@ -17,7 +17,7 @@ import {useNavigate} from '@tanstack/react-router';
 import {Link} from '@package/ui/Navigation/Link.tsx';
 import {userMutations} from '@package/api/user/user.mutations';
 
-import {Page} from '@/page/Page';
+import {Page} from '@/core/layout/Page';
 
 export default function UserCreatePage() {
   const navigate = useNavigate();

@@ -2,7 +2,7 @@ import {createFileRoute, redirect} from '@tanstack/react-router';
 
 import {getToken} from '@package/api/react-query/http';
 
-import LoginPage from '@/page/Auth/LoginPage';
+import LoginPage from '@/user/page/LoginPage';
 
 function normalizeRedirect(to?: string) {
   if (!to) return '/';

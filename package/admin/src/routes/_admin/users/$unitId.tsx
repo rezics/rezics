@@ -2,7 +2,7 @@ import {createFileRoute, lazyRouteComponent} from '@tanstack/react-router';
 
 export const Route = createFileRoute('/_admin/users/$unitId')({
   component: lazyRouteComponent(
-    () => import('@/page/User/UserEditPage'),
+    () => import('@/user/page/UserEditPage'),
     'default',
   ),
 });

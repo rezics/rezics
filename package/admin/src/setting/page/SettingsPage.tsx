@@ -7,7 +7,7 @@ import {
 } from '@mui/material';
 import React from 'react';
 
-import {Page} from '@/page/Page';
+import {Page} from '@/core/layout/Page';
 
 export default function SettingsPage() {
   const [dark, setDark] = React.useState(false);

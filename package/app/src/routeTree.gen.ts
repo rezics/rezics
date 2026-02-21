@@ -11,7 +11,6 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as MainLayoutRouteImport } from './routes/_mainLayout'
 import { Route as MainLayoutIndexRouteImport } from './routes/_mainLayout/index'
-import { Route as MainLayoutTokenRouteImport } from './routes/_mainLayout/token'
 import { Route as MainLayoutThemeSwitchRouteImport } from './routes/_mainLayout/theme-switch'
 import { Route as MainLayoutTest03RouteImport } from './routes/_mainLayout/test03'
 import { Route as MainLayoutTest02RouteImport } from './routes/_mainLayout/test02'
@@ -19,7 +18,6 @@ import { Route as MainLayoutTestRouteImport } from './routes/_mainLayout/test'
 import { Route as MainLayoutResetPasswordRouteImport } from './routes/_mainLayout/reset-password'
 import { Route as MainLayoutRegisterRouteImport } from './routes/_mainLayout/register'
 import { Route as MainLayoutNoticeRouteImport } from './routes/_mainLayout/notice'
-import { Route as MainLayoutMeiliRouteImport } from './routes/_mainLayout/meili'
 import { Route as MainLayoutLoginRouteImport } from './routes/_mainLayout/login'
 import { Route as MainLayoutUnitIndexRouteImport } from './routes/_mainLayout/unit/index'
 import { Route as MainLayoutReviewIndexRouteImport } from './routes/_mainLayout/review/index'
@@ -31,7 +29,6 @@ import { Route as MainLayoutUnitUnitIdRouteImport } from './routes/_mainLayout/u
 import { Route as MainLayoutTagUnitIdRouteImport } from './routes/_mainLayout/tag/$unitId'
 import { Route as MainLayoutRemarkReviewIdRouteImport } from './routes/_mainLayout/remark/$reviewId'
 import { Route as MainLayoutReadlistNewRouteImport } from './routes/_mainLayout/readlist/new'
-import { Route as MainLayoutMiscEchokvRouteImport } from './routes/_mainLayout/misc/echokv'
 import { Route as MainLayoutFeedbackAdminRouteImport } from './routes/_mainLayout/feedback/admin'
 import { Route as MainLayoutBookNewRouteImport } from './routes/_mainLayout/book/new'
 import { Route as MainLayoutBookBookIdRouteImport } from './routes/_mainLayout/book/$bookId'
@@ -77,11 +74,6 @@ const MainLayoutIndexRoute = MainLayoutIndexRouteImport.update({
   path: '/',
   getParentRoute: () => MainLayoutRoute,
 } as any)
-const MainLayoutTokenRoute = MainLayoutTokenRouteImport.update({
-  id: '/token',
-  path: '/token',
-  getParentRoute: () => MainLayoutRoute,
-} as any)
 const MainLayoutThemeSwitchRoute = MainLayoutThemeSwitchRouteImport.update({
   id: '/theme-switch',
   path: '/theme-switch',
@@ -115,11 +107,6 @@ const MainLayoutRegisterRoute = MainLayoutRegisterRouteImport.update({
 const MainLayoutNoticeRoute = MainLayoutNoticeRouteImport.update({
   id: '/notice',
   path: '/notice',
-  getParentRoute: () => MainLayoutRoute,
-} as any)
-const MainLayoutMeiliRoute = MainLayoutMeiliRouteImport.update({
-  id: '/meili',
-  path: '/meili',
   getParentRoute: () => MainLayoutRoute,
 } as any)
 const MainLayoutLoginRoute = MainLayoutLoginRouteImport.update({
@@ -176,11 +163,6 @@ const MainLayoutRemarkReviewIdRoute =
 const MainLayoutReadlistNewRoute = MainLayoutReadlistNewRouteImport.update({
   id: '/readlist/new',
   path: '/readlist/new',
-  getParentRoute: () => MainLayoutRoute,
-} as any)
-const MainLayoutMiscEchokvRoute = MainLayoutMiscEchokvRouteImport.update({
-  id: '/misc/echokv',
-  path: '/misc/echokv',
   getParentRoute: () => MainLayoutRoute,
 } as any)
 const MainLayoutFeedbackAdminRoute = MainLayoutFeedbackAdminRouteImport.update({
@@ -385,7 +367,6 @@ const MainLayoutTagBookBookIdTagDomainIdRoute =
 export interface FileRoutesByFullPath {
   '/': typeof MainLayoutIndexRoute
   '/login': typeof MainLayoutLoginRoute
-  '/meili': typeof MainLayoutMeiliRoute
   '/notice': typeof MainLayoutNoticeRoute
   '/register': typeof MainLayoutRegisterRoute
   '/reset-password': typeof MainLayoutResetPasswordRoute
@@ -393,13 +374,11 @@ export interface FileRoutesByFullPath {
   '/test02': typeof MainLayoutTest02Route
   '/test03': typeof MainLayoutTest03Route
   '/theme-switch': typeof MainLayoutThemeSwitchRoute
-  '/token': typeof MainLayoutTokenRoute
   '/user/me': typeof MainLayoutUserMeRouteRouteWithChildren
   '/book/$bookId/edit': typeof BookBookIdEditRouteRouteWithChildren
   '/book/$bookId': typeof MainLayoutBookBookIdRoute
   '/book/new': typeof MainLayoutBookNewRoute
   '/feedback/admin': typeof MainLayoutFeedbackAdminRoute
-  '/misc/echokv': typeof MainLayoutMiscEchokvRoute
   '/readlist/new': typeof MainLayoutReadlistNewRoute
   '/remark/$reviewId': typeof MainLayoutRemarkReviewIdRoute
   '/tag/$unitId': typeof MainLayoutTagUnitIdRoute
@@ -443,7 +422,6 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/login': typeof MainLayoutLoginRoute
-  '/meili': typeof MainLayoutMeiliRoute
   '/notice': typeof MainLayoutNoticeRoute
   '/register': typeof MainLayoutRegisterRoute
   '/reset-password': typeof MainLayoutResetPasswordRoute
@@ -451,12 +429,10 @@ export interface FileRoutesByTo {
   '/test02': typeof MainLayoutTest02Route
   '/test03': typeof MainLayoutTest03Route
   '/theme-switch': typeof MainLayoutThemeSwitchRoute
-  '/token': typeof MainLayoutTokenRoute
   '/': typeof MainLayoutIndexRoute
   '/book/$bookId': typeof MainLayoutBookBookIdRoute
   '/book/new': typeof MainLayoutBookNewRoute
   '/feedback/admin': typeof MainLayoutFeedbackAdminRoute
-  '/misc/echokv': typeof MainLayoutMiscEchokvRoute
   '/readlist/new': typeof MainLayoutReadlistNewRoute
   '/remark/$reviewId': typeof MainLayoutRemarkReviewIdRoute
   '/tag/$unitId': typeof MainLayoutTagUnitIdRoute
@@ -498,7 +474,6 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_mainLayout': typeof MainLayoutRouteWithChildren
   '/_mainLayout/login': typeof MainLayoutLoginRoute
-  '/_mainLayout/meili': typeof MainLayoutMeiliRoute
   '/_mainLayout/notice': typeof MainLayoutNoticeRoute
   '/_mainLayout/register': typeof MainLayoutRegisterRoute
   '/_mainLayout/reset-password': typeof MainLayoutResetPasswordRoute
@@ -506,14 +481,12 @@ export interface FileRoutesById {
   '/_mainLayout/test02': typeof MainLayoutTest02Route
   '/_mainLayout/test03': typeof MainLayoutTest03Route
   '/_mainLayout/theme-switch': typeof MainLayoutThemeSwitchRoute
-  '/_mainLayout/token': typeof MainLayoutTokenRoute
   '/_mainLayout/': typeof MainLayoutIndexRoute
   '/_mainLayout/user/me': typeof MainLayoutUserMeRouteRouteWithChildren
   '/book_/$bookId/edit': typeof BookBookIdEditRouteRouteWithChildren
   '/_mainLayout/book/$bookId': typeof MainLayoutBookBookIdRoute
   '/_mainLayout/book/new': typeof MainLayoutBookNewRoute
   '/_mainLayout/feedback/admin': typeof MainLayoutFeedbackAdminRoute
-  '/_mainLayout/misc/echokv': typeof MainLayoutMiscEchokvRoute
   '/_mainLayout/readlist/new': typeof MainLayoutReadlistNewRoute
   '/_mainLayout/remark/$reviewId': typeof MainLayoutRemarkReviewIdRoute
   '/_mainLayout/tag/$unitId': typeof MainLayoutTagUnitIdRoute
@@ -560,7 +533,6 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/login'
-    | '/meili'
     | '/notice'
     | '/register'
     | '/reset-password'
@@ -568,13 +540,11 @@ export interface FileRouteTypes {
     | '/test02'
     | '/test03'
     | '/theme-switch'
-    | '/token'
     | '/user/me'
     | '/book/$bookId/edit'
     | '/book/$bookId'
     | '/book/new'
     | '/feedback/admin'
-    | '/misc/echokv'
     | '/readlist/new'
     | '/remark/$reviewId'
     | '/tag/$unitId'
@@ -618,7 +588,6 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/login'
-    | '/meili'
     | '/notice'
     | '/register'
     | '/reset-password'
@@ -626,12 +595,10 @@ export interface FileRouteTypes {
     | '/test02'
     | '/test03'
     | '/theme-switch'
-    | '/token'
     | '/'
     | '/book/$bookId'
     | '/book/new'
     | '/feedback/admin'
-    | '/misc/echokv'
     | '/readlist/new'
     | '/remark/$reviewId'
     | '/tag/$unitId'
@@ -672,7 +639,6 @@ export interface FileRouteTypes {
     | '__root__'
     | '/_mainLayout'
     | '/_mainLayout/login'
-    | '/_mainLayout/meili'
     | '/_mainLayout/notice'
     | '/_mainLayout/register'
     | '/_mainLayout/reset-password'
@@ -680,14 +646,12 @@ export interface FileRouteTypes {
     | '/_mainLayout/test02'
     | '/_mainLayout/test03'
     | '/_mainLayout/theme-switch'
-    | '/_mainLayout/token'
     | '/_mainLayout/'
     | '/_mainLayout/user/me'
     | '/book_/$bookId/edit'
     | '/_mainLayout/book/$bookId'
     | '/_mainLayout/book/new'
     | '/_mainLayout/feedback/admin'
-    | '/_mainLayout/misc/echokv'
     | '/_mainLayout/readlist/new'
     | '/_mainLayout/remark/$reviewId'
     | '/_mainLayout/tag/$unitId'
@@ -752,13 +716,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MainLayoutIndexRouteImport
       parentRoute: typeof MainLayoutRoute
     }
-    '/_mainLayout/token': {
-      id: '/_mainLayout/token'
-      path: '/token'
-      fullPath: '/token'
-      preLoaderRoute: typeof MainLayoutTokenRouteImport
-      parentRoute: typeof MainLayoutRoute
-    }
     '/_mainLayout/theme-switch': {
       id: '/_mainLayout/theme-switch'
       path: '/theme-switch'
@@ -806,13 +763,6 @@ declare module '@tanstack/react-router' {
       path: '/notice'
       fullPath: '/notice'
       preLoaderRoute: typeof MainLayoutNoticeRouteImport
-      parentRoute: typeof MainLayoutRoute
-    }
-    '/_mainLayout/meili': {
-      id: '/_mainLayout/meili'
-      path: '/meili'
-      fullPath: '/meili'
-      preLoaderRoute: typeof MainLayoutMeiliRouteImport
       parentRoute: typeof MainLayoutRoute
     }
     '/_mainLayout/login': {
@@ -890,13 +840,6 @@ declare module '@tanstack/react-router' {
       path: '/readlist/new'
       fullPath: '/readlist/new'
       preLoaderRoute: typeof MainLayoutReadlistNewRouteImport
-      parentRoute: typeof MainLayoutRoute
-    }
-    '/_mainLayout/misc/echokv': {
-      id: '/_mainLayout/misc/echokv'
-      path: '/misc/echokv'
-      fullPath: '/misc/echokv'
-      preLoaderRoute: typeof MainLayoutMiscEchokvRouteImport
       parentRoute: typeof MainLayoutRoute
     }
     '/_mainLayout/feedback/admin': {
@@ -1232,7 +1175,6 @@ const MainLayoutTagDomainUnitIdRouteRouteWithChildren =
 
 interface MainLayoutRouteChildren {
   MainLayoutLoginRoute: typeof MainLayoutLoginRoute
-  MainLayoutMeiliRoute: typeof MainLayoutMeiliRoute
   MainLayoutNoticeRoute: typeof MainLayoutNoticeRoute
   MainLayoutRegisterRoute: typeof MainLayoutRegisterRoute
   MainLayoutResetPasswordRoute: typeof MainLayoutResetPasswordRoute
@@ -1240,13 +1182,11 @@ interface MainLayoutRouteChildren {
   MainLayoutTest02Route: typeof MainLayoutTest02Route
   MainLayoutTest03Route: typeof MainLayoutTest03Route
   MainLayoutThemeSwitchRoute: typeof MainLayoutThemeSwitchRoute
-  MainLayoutTokenRoute: typeof MainLayoutTokenRoute
   MainLayoutIndexRoute: typeof MainLayoutIndexRoute
   MainLayoutUserMeRouteRoute: typeof MainLayoutUserMeRouteRouteWithChildren
   MainLayoutBookBookIdRoute: typeof MainLayoutBookBookIdRoute
   MainLayoutBookNewRoute: typeof MainLayoutBookNewRoute
   MainLayoutFeedbackAdminRoute: typeof MainLayoutFeedbackAdminRoute
-  MainLayoutMiscEchokvRoute: typeof MainLayoutMiscEchokvRoute
   MainLayoutReadlistNewRoute: typeof MainLayoutReadlistNewRoute
   MainLayoutRemarkReviewIdRoute: typeof MainLayoutRemarkReviewIdRoute
   MainLayoutTagUnitIdRoute: typeof MainLayoutTagUnitIdRoute
@@ -1273,7 +1213,6 @@ interface MainLayoutRouteChildren {
 
 const MainLayoutRouteChildren: MainLayoutRouteChildren = {
   MainLayoutLoginRoute: MainLayoutLoginRoute,
-  MainLayoutMeiliRoute: MainLayoutMeiliRoute,
   MainLayoutNoticeRoute: MainLayoutNoticeRoute,
   MainLayoutRegisterRoute: MainLayoutRegisterRoute,
   MainLayoutResetPasswordRoute: MainLayoutResetPasswordRoute,
@@ -1281,13 +1220,11 @@ const MainLayoutRouteChildren: MainLayoutRouteChildren = {
   MainLayoutTest02Route: MainLayoutTest02Route,
   MainLayoutTest03Route: MainLayoutTest03Route,
   MainLayoutThemeSwitchRoute: MainLayoutThemeSwitchRoute,
-  MainLayoutTokenRoute: MainLayoutTokenRoute,
   MainLayoutIndexRoute: MainLayoutIndexRoute,
   MainLayoutUserMeRouteRoute: MainLayoutUserMeRouteRouteWithChildren,
   MainLayoutBookBookIdRoute: MainLayoutBookBookIdRoute,
   MainLayoutBookNewRoute: MainLayoutBookNewRoute,
   MainLayoutFeedbackAdminRoute: MainLayoutFeedbackAdminRoute,
-  MainLayoutMiscEchokvRoute: MainLayoutMiscEchokvRoute,
   MainLayoutReadlistNewRoute: MainLayoutReadlistNewRoute,
   MainLayoutRemarkReviewIdRoute: MainLayoutRemarkReviewIdRoute,
   MainLayoutTagUnitIdRoute: MainLayoutTagUnitIdRoute,

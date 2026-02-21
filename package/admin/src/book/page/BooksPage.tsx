@@ -18,7 +18,7 @@ import {useMatchRoute} from '@tanstack/react-router';
 import {bookQueries, type BookDTO} from '@package/api/book/book';
 import {meiliBookApi} from '@package/api/meili/meili.api';
 
-import {Page} from '@/page/Page';
+import {Page} from '@/core/layout/Page';
 import {Link} from '@package/ui/Navigation/Link.tsx';
 import {type PaginatedColumn} from '@/component/table/PaginatedTable';
 import {SearchablePaginatedTableCard} from '@/component/list/SearchablePaginatedTableCard';

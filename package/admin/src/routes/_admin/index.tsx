@@ -2,7 +2,7 @@ import {createFileRoute, lazyRouteComponent} from '@tanstack/react-router';
 
 export const Route = createFileRoute('/_admin/')({
   component: lazyRouteComponent(
-    () => import('@/page/DashboardPage'),
+    () => import('@/home/page/DashboardPage'),
     'default',
   ),
 });
