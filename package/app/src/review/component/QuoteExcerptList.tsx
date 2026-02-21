@@ -1,4 +1,4 @@
-import {SingleQuoteExcerptShow} from '@component/Review/SingleQuoteExcerpt.tsx';
+import {SingleQuoteExcerptShow} from './SingleQuoteExcerpt';
 import type {UnitDTO, UnitListResponse} from '@package/contract';
 import {Box, Stack} from '@mui/material';
 import React from 'react';

@@ -1,7 +1,7 @@
 import React from 'react';
 import {Card, CardContent, Typography, Chip} from '@mui/material';
 import type {TagDetailDTO} from '@package/api/tag/tag';
-import {RouterLink} from '../../../../ui/src/Navigation/RouterLink';
+import {RouterLink} from '@package/ui/Navigation';
 
 /**
  * Generic card showing a tag's primary information
@@ -41,7 +41,7 @@ export const TagCard: React.FC<{
       </div>
       {tag.domains && tag.domains.length > 0 && (
         <div className="flex flex-wrap gap-1 mt-1">
-          {tag.domains.map(d => (
+          {tag.domains.map((d: string) => (
             <span
               key={d}
               className="text-[10px] px-1 py-0.5 rounded bg-gray-100 text-gray-600"
@@ -87,13 +87,15 @@ export const TagDetailCard: React.FC<{
         )}
         <div>
           <RouterLink
-            href={`/tag/${tag.id}`}
+            to={'/tag/$unitId'}
+            params={{unitId: tag.id}}
             className="text-sm text-blue-600 hover:underline"
           >
             查看详情 →
           </RouterLink>
           <RouterLink
-            href={`/book?tags=${tag.name}`}
+            to={'/book'}
+            search={{tags: tag.name}}
             className="text-sm text-blue-600 hover:underline !ml-8"
           >
             搜索标签 →
