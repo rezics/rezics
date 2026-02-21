@@ -1,6 +1,6 @@
 import React from 'react';
-import {AccentBarWithTextShow} from '@/component/Common/Navigation/AccentBar';
-import TagListEdit from '@/component/Tag/Edit/TagListEdit';
+import {AccentBarWithTextShow} from '@/component/Navigation/AccentBar';
+import TagListEdit from '@/tag/component/Edit/TagListEdit';
 import {Alert} from '@mui/material';
 import {bookEditLayoutRoute} from '@/router';
 

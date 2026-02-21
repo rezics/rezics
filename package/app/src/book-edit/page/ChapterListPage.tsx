@@ -1,15 +1,15 @@
 import React, {useState, useEffect, useRef} from 'react';
 
-import {LinearChapterListEdit} from '@/book/edit/ui/component/LinearChapterListEdit';
-import {ChapterArboristHeightSlider} from '@/book/library/component/Chapter/ChapterArboristHeightSlider';
-import {AccentBarWithTextShow} from '@/component/Common/Navigation/AccentBar';
+import {LinearChapterListEdit} from '@/book-edit/component/LinearChapterListEdit';
+import {ChapterArboristHeightSlider} from '@/book-library/component/Chapter/ChapterArboristHeightSlider';
+import {AccentBarWithTextShow} from '@/component/Navigation/AccentBar';
 import {Alert, Button} from '@mui/material';
 import {useQueryClient} from '@tanstack/react-query';
 import {bookChapterIndexQuery} from '@package/api/book/book';
 
 import {Tab, Tabs} from '@mui/material';
 import {TabContext, TabPanel} from '@mui/lab';
-import {ChapterTreeJsonEditor} from '@/book/library/component/Chapter/ChapterTreeJsonEditor';
+import {ChapterTreeJsonEditor} from '@/book-library/component/Chapter/ChapterTreeJsonEditor';
 import {bookEditLayoutRoute} from '@/router';
 
 /**

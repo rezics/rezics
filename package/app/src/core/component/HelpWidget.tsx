@@ -8,7 +8,7 @@ import {
 } from '@mui/icons-material';
 import AddIcon from '@mui/icons-material/Add';
 import ReportProblemIcon from '@mui/icons-material/ReportProblem';
-import FeedbackDialog from '@/component/Feedback/FeedbackDialog';
+import FeedbackDialog from '@/feedback/component/FeedbackDialog';
 
 export interface HelpFabAction {
   id: string;
@@ -173,7 +173,7 @@ export const HelpFab: React.FC<HelpFabProps> = ({
       >
         <Fab color="primary" aria-label={ariaLabel} onClick={handleToggle}>
           {/* Change to close icon when open, for better UX */}
-          {open ? <CloseIcon /> : icon ?? <AddIcon />}
+          {open ? <CloseIcon /> : (icon ?? <AddIcon />)}
         </Fab>
       </Zoom>
       <FeedbackDialog

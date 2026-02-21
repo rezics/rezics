@@ -25,7 +25,7 @@ import type {
 import {
   UniversalPaginator,
   type UniversalPaginatorHandle,
-} from '@/component/Common/Navigation/Pagination';
+} from '@/component/Navigation/Pagination';
 
 import {
   Popover,

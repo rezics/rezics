@@ -1,5 +1,5 @@
 import React from 'react';
-import {LazyLoadImage} from '@/component/Common/LazyLoadImage';
+import {LazyLoadImage} from '@/component/LazyLoadImage';
 import {useTranslation} from 'react-i18next';
 
 const defaultBrands = [
@@ -41,4 +41,3 @@ export const HomePartnerBrands: React.FC<HomePartnerBrandsProps> = ({
 };
 
 export default HomePartnerBrands;
-

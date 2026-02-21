@@ -1,12 +1,12 @@
-import {AccentBarWithTextContainer} from '@/component/Common/Navigation/AccentBar.tsx';
-import {ArrowForwardIconContainer} from '@/component/Common/Navigation/ArrowForwardIcon.tsx';
-import {EditButtonFloatRightShow} from '@/component/Common/UI/Button/EditButtonFloatRight';
+import {AccentBarWithTextContainer} from '@/component/Navigation/AccentBar.tsx';
+import {ArrowForwardIconContainer} from '@/component/Navigation/ArrowForwardIcon.tsx';
+import {EditButtonFloatRightShow} from '@/component/UI/Button/EditButtonFloatRight';
 import {Typography} from '@mui/material';
 import React from 'react';
 import {useTranslation} from 'react-i18next';
 import type {PublicUser} from '@package/contract';
-import {FollowButton} from '@component/Common/Reaction/FollowButton.tsx';
-import {LazyLoadImage} from '@/component/Common/LazyLoadImage';
+import {FollowButton} from '@/component/Reaction/FollowButton.tsx';
+import {LazyLoadImage} from '@/component/LazyLoadImage';
 import {useIsMobile} from '@/shared/util/use-media-query.ts';
 import {useNavigate} from '@tanstack/react-router';
 

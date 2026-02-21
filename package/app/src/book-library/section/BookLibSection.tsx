@@ -5,7 +5,7 @@ import type {BookLibSortKey} from '@/component/Search/SearchFilter';
 import {
   UniversalPaginator,
   type UniversalPaginatorHandle,
-} from '@/component/Common/Navigation/Pagination';
+} from '@/component/Navigation/Pagination';
 import type {SearchInfo} from '@/component/Search/searchParser';
 
 import type {BookDTO} from '@package/contract';
@@ -124,4 +124,3 @@ export const BookLibSection = (
 
 /** BookLibSection with forwardRef for imperative handle access. */
 export const BookLibSectionRef = forwardRef(BookLibSection);
-

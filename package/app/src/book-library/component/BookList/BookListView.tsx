@@ -3,7 +3,7 @@ import {Card, CardContent, CardMedia, Typography} from '@mui/material';
 import {Link} from '@package/ui/Navigation/Link.tsx';
 
 import type {BookDTO} from '@package/contract';
-import {LazyLoadImage} from '@/component/Common/LazyLoadImage';
+import {LazyLoadImage} from '@/component/LazyLoadImage';
 
 import React from 'react';
 

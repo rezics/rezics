@@ -1,7 +1,7 @@
 import {useQuery} from '@tanstack/react-query';
 import type {CreateBookInput, BookDTO} from '@package/contract';
 import {bookQueries} from '@package/api/book/book';
-import {AccentBarWithTextShow} from '@/component/Common/Navigation/AccentBar';
+import {AccentBarWithTextShow} from '@/component/Navigation/AccentBar';
 import {BookMetadataEditor} from '../component/Metadata/BookMetadataEditor';
 import React from 'react';
 import {useTranslation} from 'react-i18next';
@@ -58,10 +58,7 @@ const UpdateBookDialog: React.FC<{
           <Typography variant="body1">{state?.message}</Typography>
           <Typography variant="body1">
             {state?.showBookLink && state?.bookId && (
-              <RouterLink
-                to="/book/$bookId"
-                params={{bookId: state.bookId}}
-              >
+              <RouterLink to="/book/$bookId" params={{bookId: state.bookId}}>
                 {t('page.book_edit.info.dialog.view_book')}
               </RouterLink>
             )}
@@ -103,7 +100,8 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
     {},
   );
   const [updateBookErrorOpen, setUpdateBookErrorOpen] = React.useState(false);
-  const [dialogState, setDialogState] = React.useState<UpdateBookDialogState>(null);
+  const [dialogState, setDialogState] =
+    React.useState<UpdateBookDialogState>(null);
 
   useEffect(() => {
     setMetadataState(data ?? {});
@@ -278,4 +276,3 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
     </div>
   );
 };
-

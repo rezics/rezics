@@ -1,4 +1,4 @@
-import {AccentBarContainer} from '@/component/Common/Navigation/AccentBar';
+import {AccentBarContainer} from '@/component/Navigation/AccentBar';
 import {TreeReplyComponents} from '@/component/Form/Comment/TreeReplyComponents';
 import {ChatBubbleOutline} from '@mui/icons-material';
 import {IconButton, Typography} from '@mui/material';
@@ -9,14 +9,14 @@ import {useQuery} from '@tanstack/react-query';
 import {unitQueries} from '@package/api/unit/unit.queries';
 import FormatQuoteIcon from '@mui/icons-material/FormatQuote';
 import {SingleCommentElementWrapper} from '@/component/Form/Comment/SingleCommentElementWrapper';
-import {MarkdownContent} from '@/component/Common/MarkdownContent';
+import {MarkdownContent} from '@/component/MarkdownContent';
 import {
   MiniActionBar,
   MiniAdminActionBar,
-} from '@/component/Common/Reaction/MiniActionBar';
+} from '@/component/Reaction/MiniActionBar';
 import {parseReactionSummaries} from '@/shared/util/reaction-summaries-parser';
-import {ReactionStatistics} from '@/component/Common/Reaction/ReactionStatistics';
-import {LazyLoadImage} from '@/component/Common/LazyLoadImage';
+import {ReactionStatistics} from '@/component/Reaction/ReactionStatistics';
+import {LazyLoadImage} from '@/component/LazyLoadImage';
 import {quoteRoute} from '@/router';
 
 export const QuotePage: React.FC = () => {

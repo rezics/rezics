@@ -1,9 +1,15 @@
 import React, {useMemo} from 'react';
 import {useQuery} from '@tanstack/react-query';
-import {Alert, CircularProgress, Typography, Card, CardContent} from '@mui/material';
+import {
+  Alert,
+  CircularProgress,
+  Typography,
+  Card,
+  CardContent,
+} from '@mui/material';
 import {bookQueries} from '@package/api/book/book';
 import type {BookDTO} from '@package/contract';
-import {LazyLoadImage} from '@/component/Common/LazyLoadImage';
+import {LazyLoadImage} from '@/component/LazyLoadImage';
 import {useTranslation} from 'react-i18next';
 
 type Book = BookDTO;
@@ -80,4 +86,3 @@ export const HomeEditorPicks: React.FC<HomeEditorPicksProps> = ({
 };
 
 export default HomeEditorPicks;
-

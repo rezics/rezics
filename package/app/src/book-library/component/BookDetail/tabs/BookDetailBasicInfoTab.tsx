@@ -1,6 +1,6 @@
-import {TagWrapper} from '@/component/Tag/TagWrapper.tsx';
-import {AccentBarWithTextContainer} from '@/component/Common/Navigation/AccentBar';
-import {ArrowForwardIconContainer} from '@/component/Common/Navigation/ArrowForwardIcon';
+import {TagWrapper} from '@/tag/component/TagWrapper.tsx';
+import {AccentBarWithTextContainer} from '@/component/Navigation/AccentBar';
+import {ArrowForwardIconContainer} from '@/component/Navigation/ArrowForwardIcon';
 import {Box, Divider, Stack} from '@mui/material';
 import React from 'react';
 import {useTranslation} from 'react-i18next';
@@ -14,7 +14,9 @@ import {RemarkPreview} from '../../RemarkPreview';
 /**
  * Book Detail Basic Info Tab - Displays book description, tags, author, quotes, and remarks.
  */
-export const BookDetailBasicInfoTab: React.FC<{bookInfo: BookDTO}> = ({bookInfo}) => {
+export const BookDetailBasicInfoTab: React.FC<{bookInfo: BookDTO}> = ({
+  bookInfo,
+}) => {
   const {t} = useTranslation();
 
   return (
@@ -49,7 +51,10 @@ export const BookDetailBasicInfoTab: React.FC<{bookInfo: BookDTO}> = ({bookInfo}
       <Divider />
 
       <div>
-        <ArrowForwardIconContainer size={16} to={`/quote/book/${bookInfo?.unitId}`}>
+        <ArrowForwardIconContainer
+          size={16}
+          to={`/quote/book/${bookInfo?.unitId}`}
+        >
           <AccentBarWithTextContainer text={t('book.quote_excerpts')} />
         </ArrowForwardIconContainer>
       </div>
@@ -70,4 +75,3 @@ export const BookDetailBasicInfoTab: React.FC<{bookInfo: BookDTO}> = ({bookInfo}
     </Stack>
   );
 };
-

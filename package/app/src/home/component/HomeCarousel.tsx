@@ -5,7 +5,7 @@ import {useQuery} from '@tanstack/react-query';
 import {echoKvGetQuery} from '@package/api/echokv/echokv';
 import {parseEchoKVResponse} from '@package/api/echokv/util';
 import {useAlertStore} from '@app/state/windowAlertStore';
-import {LazyLoadImage} from '@/component/Common/LazyLoadImage';
+import {LazyLoadImage} from '@/component/LazyLoadImage';
 import {useTranslation} from 'react-i18next';
 import {Link} from '@package/ui/Navigation/Link.tsx';
 import {cn} from '@/shared/util/css-util';

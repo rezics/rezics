@@ -20,7 +20,7 @@ import {
   GetVerificationCode,
   type GetVerificationCodeHandle,
 } from '../component/GetVerificationCode.tsx';
-import {TextButton} from '@/component/Common/UI/Button/TextButton.tsx';
+import {TextButton} from '@/component/UI/Button/TextButton.tsx';
 
 interface RegisterData {
   slug: string;
