@@ -6,6 +6,7 @@ import {
   CardHeader,
   Chip,
   CircularProgress,
+  Paper,
   Typography,
 } from '@mui/material';
 import {useState} from 'react';
@@ -228,9 +229,9 @@ export function MeiliPage() {
           </Alert>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="flex flex-col gap-4">
           {/* 索引初始化 */}
-          <Card className="shadow-sm">
+          <Card>
             <CardHeader
               title="索引初始化"
               subheader="仅在创建索引或调整索引设置后需要执行，一般是一次性操作。"
@@ -296,7 +297,7 @@ export function MeiliPage() {
           </Card>
 
           {/* 全量同步 */}
-          <Card className="shadow-sm">
+          <Card>
             <CardHeader
               title="全量同步"
               subheader="将数据库中全部数据重新同步到 Meilisearch，一般在批量修改或者导入后使用。"
@@ -356,7 +357,7 @@ export function MeiliPage() {
           </Card>
 
           {/* 危险操作 */}
-          <Card className="shadow-sm md:col-span-2">
+          <Card>
             <CardHeader
               title="危险操作"
               subheader="这些操作会直接影响搜索索引数据，请谨慎使用。"
@@ -389,7 +390,7 @@ export function MeiliPage() {
         </div>
 
         {/* Key 管理 */}
-        <Card className="shadow-sm">
+        <Card>
           <CardHeader
             title="Meili API Key 管理"
             subheader="创建前端 Search Key、临时 Admin Key，并查看 / 删除已有 Key。"

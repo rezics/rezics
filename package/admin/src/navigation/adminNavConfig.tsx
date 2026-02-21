@@ -3,6 +3,9 @@ import Inventory2Icon from '@mui/icons-material/Inventory2';
 import PeopleIcon from '@mui/icons-material/People';
 import SettingsIcon from '@mui/icons-material/Settings';
 import React from 'react';
+import StorageOutlinedIcon from '@mui/icons-material/StorageOutlined';
+import KeyOutlinedIcon from '@mui/icons-material/KeyOutlined';
+import ManageSearchOutlinedIcon from '@mui/icons-material/ManageSearchOutlined';
 
 export type AdminNavItem = {
   id: string;
@@ -101,6 +104,38 @@ export const adminNav = {
           label: 'Create',
           icon: <Inventory2Icon fontSize="small" />,
           to: '/book/create',
+        },
+      ],
+    },
+    {
+      id: 'misc',
+      label: 'Misc',
+      icon: <StorageOutlinedIcon fontSize="small" />,
+      children: [
+        {
+          id: 'misc.echokv',
+          label: 'EchoKV',
+          icon: <StorageOutlinedIcon fontSize="small" />,
+          to: '/misc/echokv',
+        },
+        {
+          id: 'misc.token',
+          label: 'Token',
+          icon: <KeyOutlinedIcon fontSize="small" />,
+          to: '/token',
+        },
+      ],
+    },
+    {
+      id: 'meili',
+      label: 'Meili',
+      icon: <ManageSearchOutlinedIcon fontSize="small" />,
+      children: [
+        {
+          id: 'meili.search',
+          label: 'Meili Search',
+          to: '/meili',
+          icon: <ManageSearchOutlinedIcon fontSize="small" />,
         },
       ],
     },

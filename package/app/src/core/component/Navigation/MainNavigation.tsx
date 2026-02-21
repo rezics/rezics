@@ -10,13 +10,9 @@ import NotificationsOutlinedIcon from '@mui/icons-material/NotificationsOutlined
 import PostAddOutlinedIcon from '@mui/icons-material/PostAddOutlined';
 import PlaylistAddOutlinedIcon from '@mui/icons-material/PlaylistAddOutlined';
 
-import StorageOutlinedIcon from '@mui/icons-material/StorageOutlined';
-import KeyOutlinedIcon from '@mui/icons-material/KeyOutlined';
-import AdminPanelSettingsOutlinedIcon from '@mui/icons-material/AdminPanelSettingsOutlined';
 import ManageAccountsOutlinedIcon from '@mui/icons-material/ManageAccountsOutlined';
 import LoginOutlinedIcon from '@mui/icons-material/LoginOutlined';
 import HowToRegOutlinedIcon from '@mui/icons-material/HowToRegOutlined';
-import ManageSearchOutlinedIcon from '@mui/icons-material/ManageSearchOutlined';
 import FeedbackOutlinedIcon from '@mui/icons-material/FeedbackOutlined';
 import SupportAgentOutlinedIcon from '@mui/icons-material/SupportAgentOutlined';
 import PaletteOutlinedIcon from '@mui/icons-material/PaletteOutlined';
@@ -95,21 +91,6 @@ export const NAVIGATION = (isAdmin = false): NavigationItem[] => {
     ? []
     : [
         {kind: 'divider'},
-
-        {
-          kind: 'item',
-          segment: '/misc/echokv',
-          title: 'EchoKV',
-          icon: StorageOutlinedIcon,
-        },
-        {
-          kind: 'item',
-          segment: '/token',
-          title: 'Token',
-          icon: KeyOutlinedIcon,
-        },
-
-        {kind: 'divider'},
         {
           kind: 'item',
           segment: '/auth',
@@ -132,12 +113,6 @@ export const NAVIGATION = (isAdmin = false): NavigationItem[] => {
         },
 
         {kind: 'divider'},
-        {
-          kind: 'item',
-          segment: '/meili',
-          title: 'Meili Search',
-          icon: ManageSearchOutlinedIcon,
-        },
 
         {kind: 'divider'},
         {

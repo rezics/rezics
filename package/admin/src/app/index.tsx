@@ -1,29 +1,26 @@
-import {CssBaseline} from '@mui/material';
-import {ThemeProvider} from '@mui/material/styles';
-import React from 'react';
-import ReactDOM from 'react-dom/client';
+import {createRoot} from 'react-dom/client';
+import './index.css';
 
-import 'github-markdown-css/github-markdown-light.css';
+import 'virtual:uno.css';
 
-import {getTheme} from './config/theme';
-import {ReactQueryProvider} from './provider/react-query';
-import {useAppInit} from './provider/useAppInit';
-import {RouterProvider} from '@tanstack/react-router';
+import App from './App';
+import {initI18n} from './provider/i18n';
+// import { setupMock } from "./plugin/providers/mock.ts";
 
-import {router} from '@/router';
+// 初始化（这类副作用放入口即可，不参与热替换）
+initI18n();
 
-export function Bootstrap() {
-  useAppInit();
-  return <RouterProvider router={router} />;
-}
+const container = document.getElementById('app') as HTMLElement;
 
-ReactDOM.createRoot(document.getElementById('app')!).render(
-  <React.StrictMode>
-    <ThemeProvider theme={getTheme('light')}>
-      <CssBaseline />
-      <ReactQueryProvider>
-        <Bootstrap />
-      </ReactQueryProvider>
-    </ThemeProvider>
-  </React.StrictMode>,
-);
+// 直接创建 root；Vite/React Refresh 会在 HMR 时优雅处理
+const root = createRoot(container);
+
+// setupMock().then(() => {
+//   root.render(<App />);
+// });
+
+root.render(<App />);
+
+// 如果要在某些环境防止重复创建，也可以：
+// (globalThis as any).__APP_ROOT ??= createRoot(container);
+// (globalThis as any).__APP_ROOT.render(<App />);

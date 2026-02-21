@@ -17,7 +17,7 @@ import {useQuery} from '@tanstack/react-query';
 import SearchIcon from '@mui/icons-material/Search';
 import {echoKvApi} from '@package/api/echokv/echokv';
 import {useAlertStore} from '@app/state/windowAlertStore';
-import {JSONEditor} from '@component/Form/nanojson/NanoJSON.esm.js';
+import {JSONEditor} from '@package/ui/Form';
 
 type JSONEditorInstance = JSONEditor;
 
@@ -42,7 +42,6 @@ export const EchokvEditPage: React.FC = () => {
       id: 'nanojson-editor',
       title: 'JSON 编辑器',
       description: '编辑 EchoKV JSON 值',
-      css: '/css/NanoJSON.css',
       fill: 0,
       button: {
         import: true,

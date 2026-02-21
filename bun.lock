@@ -97,7 +97,6 @@
         "@package/api": "workspace:*",
         "@package/contract": "workspace:*",
         "@package/ui": "workspace:*",
-        "@pardnchiu/nanojson": "^1.1.3",
         "@radix-ui/react-dialog": "^1.1.15",
         "@radix-ui/react-popover": "^1.1.15",
         "@radix-ui/react-separator": "^1.1.8",
@@ -271,6 +270,7 @@
         "@mui/material": "7.3.1",
         "@package/contract": "workspace:*",
         "@package/server": "workspace:*",
+        "@pardnchiu/nanojson": "^1.2.0",
         "@tanstack/react-router": "^1.157.16",
       },
       "devDependencies": {
@@ -746,7 +746,7 @@
 
     "@parcel/watcher-win32-x64": ["@parcel/watcher-win32-x64@2.5.1", "", { "os": "win32", "cpu": "x64" }, "sha512-9lHBdJITeNR++EvSQVUcaZoWupyHfXe1jZvGZ06O/5MflPcuPLtEphScIBL+AiCWBO46tDSHzWyD0uDmmZqsgA=="],
 
-    "@pardnchiu/nanojson": ["@pardnchiu/nanojson@1.1.6", "", {}, "sha512-goBcj2zdGoM8pdkJdWz8RWjuJ9Swj7Nt1q6ZfRVmSSumZc5GGpRehRmn430iH1bu90OraHctL2oK7lVp6OlIcw=="],
+    "@pardnchiu/nanojson": ["@pardnchiu/nanojson@1.2.0", "", {}, "sha512-DK9gXZeBv4sH3nnohm/7ke3geU1niHpo1nKwyCjS5QjOjbm1IV+JS71xVMfuJzeEm85MeZFKYgMBC1R71BX1/w=="],
 
     "@petamoriken/float16": ["@petamoriken/float16@3.9.3", "", {}, "sha512-8awtpHXCx/bNpFt4mt2xdkgtgVvKqty8VbjHI/WWWQuEw+KLzFot3f4+LkQY9YmOtq7A5GdOnqoIC8Pdygjk2g=="],
 

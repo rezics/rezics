@@ -17,8 +17,9 @@
 - [ ] cookie_consent https://chatgpt.com/share/692d08eb-8160-8005-9134-70c02e82b22b 浏览器级别的组件，等后续引入第三方脚本再添加该组件
 - fix : NODE_ENV=production is not supported in the .env file. Only NODE_ENV=development is supported to create a development build of your project. If you need to set process.env.NODE_ENV, you can set it in the Vite config instead.
 - 好用的 JSON 编辑器
-- [ ] shadcn ui 的 主题切换的原理，如果定制是由于 css 的话。
 - [ ] i18n 切换到 Paraglide + (Sherlock 扩展)，或者等到切换的时候看看 i18n Ally 的支持性
+- [ ] 模块化 字体切换 https://chatgpt.com/share/69991605-878c-8005-adaf-3b93dbcb43e7 
+- [ ] user 详情页似乎可能卡住
 
 ## Complete
 
