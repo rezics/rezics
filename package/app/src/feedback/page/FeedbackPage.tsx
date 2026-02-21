@@ -7,8 +7,8 @@ import {
   TextField,
   MenuItem,
 } from '@mui/material';
-import FeedbackDrawer from '@/component/Feedback/FeedbackDrawer';
-import FeedbackList from '@/component/Feedback/FeedbackList';
+import FeedbackDrawer from '../component/FeedbackDrawer';
+import FeedbackList from '../component/FeedbackList';
 
 export const FeedbackPage: React.FC = () => {
   const [open, setOpen] = React.useState(false);
@@ -21,8 +21,8 @@ export const FeedbackPage: React.FC = () => {
     resolvedFilter === 'all'
       ? undefined
       : resolvedFilter === 'resolved'
-      ? true
-      : false;
+        ? true
+        : false;
 
   return (
     <Box className="max-w-5xl mx-auto p-4">

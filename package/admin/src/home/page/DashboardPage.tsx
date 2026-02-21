@@ -2,7 +2,7 @@ import {Card, CardContent, Grid, Typography} from '@mui/material';
 import React from 'react';
 
 import {Page} from '@/core/layout/Page';
-import {DashboardLineChart} from '@/component/charts/DashboardLineChart';
+import {DashboardLineChart} from '../component/charts/DashboardLineChart';
 
 export default function DashboardPage() {
   return (

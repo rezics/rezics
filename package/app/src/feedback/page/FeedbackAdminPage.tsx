@@ -8,8 +8,8 @@ import {
   Button,
   MenuItem,
 } from '@mui/material';
-import FeedbackList from '@/component/Feedback/FeedbackList';
-import FeedbackDrawer from '@/component/Feedback/FeedbackDrawer';
+import FeedbackList from '../component/FeedbackList';
+import FeedbackDrawer from '../component/FeedbackDrawer';
 import {useQuery} from '@tanstack/react-query';
 import {feedbackListQuery} from '@package/api/feedback/feedback.queries';
 
@@ -26,8 +26,8 @@ export const FeedbackAdminPage: React.FC = () => {
     resolvedFilter === 'all'
       ? undefined
       : resolvedFilter === 'resolved'
-      ? true
-      : false;
+        ? true
+        : false;
 
   // Prefetch general list for smoother UX
   useQuery(feedbackListQuery());

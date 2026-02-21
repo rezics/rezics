@@ -13,8 +13,8 @@ import {
   Tooltip,
 } from '@mui/material';
 import {Delete} from '@mui/icons-material';
-import {type BookmarkEntry} from '@/page/User/BookmarkPage';
-import {buildUnitUrl} from '@/shared/util/buildUrlUtil';
+import {type BookmarkEntry} from '../../page/BookmarkPage';
+import {buildUnitUrl} from '@/shared/util/build-url';
 import {Link} from '@package/ui/Navigation/Link.tsx';
 
 type BookmarkItemCardProps = {
