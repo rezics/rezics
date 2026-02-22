@@ -2,7 +2,7 @@ import React, {useState, useEffect, useRef} from 'react';
 
 import {LinearChapterListEdit} from '@/book-edit/component/LinearChapterListEdit';
 import {ChapterArboristHeightSlider} from '@/book-library/component/Chapter/ChapterArboristHeightSlider';
-import {AccentBarWithTextShow} from '@/component/Navigation/AccentBar';
+import {AccentBarWithTextShow} from '@/component/navigation/AccentBar';
 import {Alert, Button} from '@mui/material';
 import {useQueryClient} from '@tanstack/react-query';
 import {bookChapterIndexQuery} from '@package/api/book/book';

@@ -1,4 +1,4 @@
-import {AccentBarContainer} from '@/component/Navigation/AccentBar';
+import {AccentBarContainer} from '@/component/navigation/AccentBar';
 import {TreeReplyComponents} from '@/component/Form/Comment/TreeReplyComponents';
 import {ChatBubbleOutline} from '@mui/icons-material';
 import {IconButton, Typography} from '@mui/material';

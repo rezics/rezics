@@ -7,7 +7,7 @@ import {
   type SearchInputShowProps,
 } from './SearchInput';
 import {BookSearchFilter} from './SearchFilter';
-import type {SortControlsProps} from '@/component/Navigation/Pagination';
+import type {SortControlsProps} from '@/component/navigation/Pagination';
 
 export type SearchPanelShowProps = {
   inputProps: Omit<SearchInputShowProps, 'onAddTag'> & {

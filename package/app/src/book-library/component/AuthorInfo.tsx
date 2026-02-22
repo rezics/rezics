@@ -1,5 +1,5 @@
-import {AccentBarWithTextContainer} from '@/component/Navigation/AccentBar.tsx';
-import {ArrowForwardIconContainer} from '@/component/Navigation/ArrowForwardIcon.tsx';
+import {AccentBarWithTextContainer} from '@/component/navigation/AccentBar.tsx';
+import {ArrowForwardIconContainer} from '@/component/navigation/ArrowForwardIcon.tsx';
 import {EditButtonFloatRightShow} from '@/component/UI/Button/EditButtonFloatRight';
 import {Typography} from '@mui/material';
 import React from 'react';

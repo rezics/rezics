@@ -1,5 +1,5 @@
-import {AccentBarWithTextContainer} from '@/component/Navigation/AccentBar';
-import {ArrowForwardIconContainer} from '@/component/Navigation/ArrowForwardIcon';
+import {AccentBarWithTextContainer} from '@/component/navigation/AccentBar';
+import {ArrowForwardIconContainer} from '@/component/navigation/ArrowForwardIcon';
 import {QuoteNewPage} from './QuoteNewPage';
 import {useTranslation} from 'react-i18next';
 import UnitsPage from '@/unit/page/UnitsPage';

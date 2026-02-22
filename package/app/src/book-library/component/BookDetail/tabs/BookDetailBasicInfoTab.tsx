@@ -1,6 +1,6 @@
 import {TagWrapper} from '@/tag/component/TagWrapper.tsx';
-import {AccentBarWithTextContainer} from '@/component/Navigation/AccentBar';
-import {ArrowForwardIconContainer} from '@/component/Navigation/ArrowForwardIcon';
+import {AccentBarWithTextContainer} from '@/component/navigation/AccentBar';
+import {ArrowForwardIconContainer} from '@/component/navigation/ArrowForwardIcon';
 import {Box, Divider, Stack} from '@mui/material';
 import React from 'react';
 import {useTranslation} from 'react-i18next';

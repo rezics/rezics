@@ -2,7 +2,7 @@ import {Header} from '../component/Header/MainLayoutHeader';
 import {Sidebar} from '../component/Sidebar/MainLayoutSidebar';
 import type {ReactNode} from 'react';
 import {Helmet} from 'react-helmet-async';
-import {NAVIGATION} from '../component/Navigation/MainNavigation';
+import {NAVIGATION} from '../component/navigation/MainNavigation';
 import {MainLayoutFooter} from '../component/Footer/MainLayoutFooter';
 import React from 'react';
 import {useUserStore} from '@/global/userStore';
