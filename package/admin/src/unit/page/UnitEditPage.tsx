@@ -15,7 +15,7 @@ import {
 import React from 'react';
 import {useQuery} from '@tanstack/react-query';
 
-import {Link} from '@package/ui/Navigation/Link.tsx';
+import {Link} from '@package/ui/primitive/link/Link.tsx';
 import {unitQueries, type UnitDTO} from '@package/api/unit/unit';
 import {unitMutations} from '@package/api/unit/unit.mutations';
 

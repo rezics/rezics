@@ -13,7 +13,7 @@ import {useQuery} from '@tanstack/react-query';
 import {bookQueries} from '@package/api/book/book.queries';
 import {AccentBarWithTextContainer} from '@component/Common/Navigation/AccentBar.tsx';
 import {useChapterListStore} from '@/global/page/chapterListStore';
-import {Link} from '@package/ui/Navigation/Link.tsx';
+import {Link} from '@package/ui/primitive/link/Link.tsx';
 
 import type {ChapterTreeItem} from '@package/contract';
 

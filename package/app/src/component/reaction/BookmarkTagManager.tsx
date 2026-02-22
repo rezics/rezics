@@ -15,7 +15,7 @@ import {
 } from '@package/api/reaction/reaction.mutations';
 import {useAlertStore} from '@app/state/windowAlertStore';
 import {useUserStore} from '@/global/userStore';
-import {Link} from '@package/ui/Navigation/Link.tsx';
+import {Link} from '@package/ui/primitive/link/Link.tsx';
 
 export type BookmarkTagManagerProps = {
   /** 当前内容的 unitId / targetId */

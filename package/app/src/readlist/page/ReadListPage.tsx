@@ -4,7 +4,7 @@ import {ChatBubbleOutline} from '@mui/icons-material';
 import {Avatar, IconButton, Tooltip} from '@mui/material';
 import React, {useRef} from 'react';
 import {Route} from '@/routes/_mainLayout/readlist/$readlistId';
-import {Link} from '@package/ui/Navigation/Link.tsx';
+import {Link} from '@package/ui/primitive/link/Link.tsx';
 import {useTranslation} from 'react-i18next';
 
 import {readlistQueries} from '@package/api/readlist/readlist';

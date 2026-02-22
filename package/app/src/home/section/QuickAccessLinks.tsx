@@ -9,7 +9,7 @@ import {Chip, type ChipProps} from '@mui/material';
 import {echoKvGetQuery} from '@package/api/echokv/echokv';
 import {useQuery} from '@tanstack/react-query';
 import {parseEchoKVResponse} from '@package/api/echokv/util';
-import {Link} from '@package/ui/Navigation/Link.tsx';
+import {Link} from '@package/ui/primitive/link/Link.tsx';
 
 import {DynamicIcon, type IconKey} from './DynamicIcon';
 

@@ -3,7 +3,7 @@ import {Tabs, Tab, Box, Tooltip, Chip, Paper, Typography} from '@mui/material';
 import {useQuery, useQueryClient} from '@tanstack/react-query';
 import {useRouterState} from '@tanstack/react-router';
 import {useTranslation} from 'react-i18next';
-import {Link} from '@package/ui/Navigation/Link.tsx';
+import {Link} from '@package/ui/primitive/link/Link.tsx';
 
 import {
   UniversalPaginator,

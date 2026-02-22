@@ -7,7 +7,7 @@ import {parseEchoKVResponse} from '@package/api/echokv/util';
 import {useAlertStore} from '@app/state/windowAlertStore';
 import {LazyLoadImage} from '@/component/LazyLoadImage';
 import {useTranslation} from 'react-i18next';
-import {Link} from '@package/ui/Navigation/Link.tsx';
+import {Link} from '@package/ui/primitive/link/Link.tsx';
 import {cn} from '@/shared/util/css-util';
 import {CarouselIndicator} from '@/component/Carousel/CarouselIndicator';
 

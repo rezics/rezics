@@ -1,4 +1,4 @@
-import {Link} from '@package/ui/Navigation/Link.tsx';
+import {Link} from '@package/ui/primitive/link/Link.tsx';
 import {
   Card,
   CardActionArea,

@@ -14,7 +14,7 @@ export function CustomSidebar({
           <Typography variant="h4" className="font-bold text-gray-900 mb-3">
             Settings
           </Typography>
-          <div className="w-16 h-1 bg-gradient-to-r from-rose-400 to-pink-500 rounded-full"></div>
+          <div className="w-16 h-1 bg-gradient-to-r from-rose-400 to-pink-500 rounded-full" />
         </div>
 
         <nav className="space-y-3">

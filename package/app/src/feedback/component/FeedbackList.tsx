@@ -33,7 +33,7 @@ import {
   PopoverTrigger,
 } from '@/component/shadcn/popover';
 import {useAlertStore} from '@app/state/windowAlertStore';
-import {Link} from '@package/ui/Navigation/Link.tsx';
+import {Link} from '@package/ui/primitive/link/Link.tsx';
 
 export type FeedbackResolvedFilter = boolean | undefined;
 

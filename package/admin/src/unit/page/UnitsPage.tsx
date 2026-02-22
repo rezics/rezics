@@ -21,7 +21,7 @@ import {unitQueries, type UnitDTO} from '@package/api/unit/unit';
 import {meiliUnitApi} from '@package/api/meili/meili.api';
 
 import {Page} from '@/core/layout/Page';
-import {Link} from '@package/ui/Navigation/Link.tsx';
+import {Link} from '@package/ui/primitive/link/Link.tsx';
 import {type PaginatedColumn} from '@/component/table/PaginatedTable';
 import {SearchablePaginatedTableCard} from '@/component/list/SearchablePaginatedTableCard';
 import {PaginatedTable} from '@/component/table/PaginatedTable';

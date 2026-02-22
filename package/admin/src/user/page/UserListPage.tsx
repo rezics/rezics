@@ -17,7 +17,7 @@ import React from 'react';
 import {useQuery} from '@tanstack/react-query';
 import {useMatchRoute} from '@tanstack/react-router';
 
-import {Link} from '@package/ui/Navigation/Link.tsx';
+import {Link} from '@package/ui/primitive/link/Link.tsx';
 import type {UserDTO} from '@package/contract';
 import {userQueries} from '@package/api/user/user.queries';
 import {meiliUserApi} from '@package/api/meili/meili.api';

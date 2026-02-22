@@ -1,5 +1,5 @@
 import React from 'react';
-import {Link} from '@package/ui/Navigation/Link.tsx';
+import {Link} from '@package/ui/primitive/link/Link.tsx';
 import {cn} from '@/shared/util/css-util.ts';
 
 export type BookProps = {
