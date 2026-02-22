@@ -113,8 +113,6 @@ export const NAVIGATION = (isAdmin = false): NavigationItem[] => {
         },
 
         {kind: 'divider'},
-
-        {kind: 'divider'},
         {
           kind: 'item',
           segment: '/feedback',

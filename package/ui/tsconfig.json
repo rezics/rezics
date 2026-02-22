@@ -6,11 +6,7 @@
     "jsx": "react-jsx",
 
     "paths": {
-      "@/*": ["./src/*"],
-      "@component/*": ["./src/component/*"],
-      "@page/*": ["./src/page/*"],
-      "@locale": ["./src/locale/index.ts"],
-      "@app/*": ["./src/app/*"]
+      "@/*": ["./src/*"]
     },
 
     "noUnusedParameters": true

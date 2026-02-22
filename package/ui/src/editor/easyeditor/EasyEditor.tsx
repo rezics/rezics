@@ -3,11 +3,14 @@ import React, {lazy, useCallback, useEffect, useRef, useState} from 'react';
 import 'easymde/dist/easymde.min.css';
 import MarkdownIt from 'markdown-it';
 
-import {preserveFormattingPlugin} from './preserveFormatPlugin';
-import {EditorMentionPicker, type MentionUserOption} from './EditorMention';
+import {preserveFormattingPlugin} from '../plugin/preserveFormatPlugin';
+import {
+  EditorMentionPicker,
+  type MentionUserOption,
+} from '../component/EditorMention';
 
 const EmojiMartPicker = lazy(() =>
-  import('./EmojiMart').then(m => ({default: m.EmojiMartPicker})),
+  import('../component/EmojiMart').then(m => ({default: m.EmojiMartPicker})),
 );
 
 interface EasyEditorProps {

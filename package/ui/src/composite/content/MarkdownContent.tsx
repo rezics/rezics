@@ -1,5 +1,5 @@
 import MarkdownIt from 'markdown-it';
-import {preserveFormattingPlugin} from '../Form/preserveFormatPlugin';
+import {preserveFormattingPlugin} from '@/editor/plugin/preserveFormatPlugin';
 
 export function MarkdownContent({content}: {content: string}) {
   const md = new MarkdownIt({
