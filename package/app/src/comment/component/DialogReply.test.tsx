@@ -1,4 +1,4 @@
-export default () => {
+const DialogReplyTest = () => {
   return (
     <div className="p-4">
       <h3 className="mb-4 text-lg font-semibold">对话框回复组件</h3>
@@ -31,3 +31,5 @@ export default () => {
     </div>
   );
 };
+
+export default DialogReplyTest;

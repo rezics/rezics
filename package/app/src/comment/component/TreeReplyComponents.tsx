@@ -19,7 +19,7 @@ import {
 } from '@package/api/comment/comment.mutations';
 
 import {useUserStore} from '@/global/userStore';
-import {buildTree} from '../treeReplyUtil.ts';
+import {buildTree} from './tree-reply-util';
 
 import {useAlertStore} from '@app/state/windowAlertStore';
 import {reactionApi} from '@package/api/reaction/reaction';
