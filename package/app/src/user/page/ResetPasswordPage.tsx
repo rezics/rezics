@@ -8,15 +8,15 @@ import {useNavigate, useRouterState} from '@tanstack/react-router';
 
 import {Turnstile} from '@/component/Form/Turnstile.tsx';
 import {PasswordField} from '@/component/Form/PasswordField';
-import {Layout} from './lib/Layout.tsx';
-import {ModalLayout} from './lib/ModalLayout.tsx';
-import {validateEmail, validatePassword} from './lib/validate.ts';
+import {Layout} from '../layout/Layout.tsx';
+import {ModalLayout} from '../layout/ModalLayout.tsx';
+import {validateEmail, validatePassword} from '../model/validate.ts';
 import {userApi} from '@package/api/user/user';
 import {
   GetVerificationCode,
   type GetVerificationCodeHandle,
-} from './GetVerificationCode.tsx';
-import {TextButton} from '@/component/Common/UI/Button/TextButton.tsx';
+} from '../component/GetVerificationCode.tsx';
+import {TextButton} from '@/component/UI/Button/TextButton.tsx';
 
 interface ResetPasswordData {
   email: string;

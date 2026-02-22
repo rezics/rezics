@@ -13,7 +13,7 @@ import {login} from '../model/handler';
 import {Layout} from '../layout/Layout';
 import {ModalLayout} from '../layout/ModalLayout';
 import {validateEmail} from '../model/validate';
-import {TextButton} from '@/component/Common/UI/Button/TextButton';
+import {TextButton} from '@/component/UI/Button/TextButton';
 
 interface LoginData {
   email: string;

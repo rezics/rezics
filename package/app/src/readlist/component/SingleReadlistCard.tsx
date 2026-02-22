@@ -10,8 +10,8 @@ import {
 } from '@mui/material';
 import {useNavigate} from '@tanstack/react-router';
 import React from 'react';
-import {MiniActionBar} from '@/component/Common/Reaction/MiniActionBar';
-import {LazyLoadImage} from '../Common/LazyLoadImage';
+import {MiniActionBar} from '@/component/Reaction/MiniActionBar';
+import {LazyLoadImage} from '@/component/LazyLoadImage';
 
 interface SingleReadlistProps {
   data: ReadlistResponse;
@@ -113,7 +113,7 @@ export function SingleReadlist({
               className="flex items-center"
             >
               <Typography color="text.secondary">
-                {data.reactionSummaries.find(r => r.reaction === 'like')
+                {data.reactionSummaries.find((r: any) => r.reaction === 'like')
                   ?.count ?? 0}
               </Typography>
               <MiniActionBar

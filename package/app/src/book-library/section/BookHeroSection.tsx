@@ -7,8 +7,8 @@ import type {BookDTO} from '@package/contract';
 import {
   MiniActionBar,
   MiniAdminActionBar,
-} from '@component/Common/Reaction/MiniActionBar.tsx';
-import {LazyLoadImage} from '@component/Common/LazyLoadImage.tsx';
+} from '@component/Reaction/MiniActionBar.tsx';
+import {LazyLoadImage} from '@component/LazyLoadImage.tsx';
 
 type Book = BookDTO;
 
@@ -60,12 +60,16 @@ export const BookHeroSection: React.FC<{
 
           {/* Book Info */}
           <div className="col-span-8 md:col-span-6 text-white flex flex-col gap-3">
-            <h1 className="text-2xl font-bold break-words">{bookInfo?.title}</h1>
+            <h1 className="text-2xl font-bold break-words">
+              {bookInfo?.title}
+            </h1>
 
             <div className="space-y-1">
               <p>
                 {t('book.fields.author')}：
-                <span className="font-medium">{bookInfo?.author?.[0]?.name}</span>
+                <span className="font-medium">
+                  {bookInfo?.author?.[0]?.name}
+                </span>
               </p>
               <p>
                 {t('book.fields.press')}：{bookInfo?.press?.[0]?.name}
@@ -108,4 +112,3 @@ export const BookHeroSection: React.FC<{
     </div>
   );
 };
-

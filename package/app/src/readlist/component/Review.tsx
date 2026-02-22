@@ -3,8 +3,8 @@ import {IconButton, Paper, Tooltip} from '@mui/material';
 import {ExpandMore, ExpandLess, ChatBubbleOutline} from '@mui/icons-material';
 import {BookListViewItem} from '@/book-library/component/BookList/BookListView';
 import {useNavigate} from '@tanstack/react-router';
-import {MarkdownContent} from '../Common/MarkdownContent';
-import {ReviewHeader} from '@/component/Review/SingleReview';
+import {MarkdownContent} from '@/component/MarkdownContent';
+import {ReviewHeader} from '@/review/component/SingleReview';
 import {useTranslation} from 'react-i18next';
 
 export type ReviewData = {

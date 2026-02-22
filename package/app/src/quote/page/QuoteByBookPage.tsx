@@ -1,9 +1,9 @@
-import {AccentBarWithTextContainer} from '@/component/Common/Navigation/AccentBar';
-import {ArrowForwardIconContainer} from '@/component/Common/Navigation/ArrowForwardIcon';
+import {AccentBarWithTextContainer} from '@/component/Navigation/AccentBar';
+import {ArrowForwardIconContainer} from '@/component/Navigation/ArrowForwardIcon';
 import {QuoteNewPage} from './QuoteNewPage';
 import {useTranslation} from 'react-i18next';
-import UnitsPage from '../Unit/UnitsPage';
-import {QuoteExcerptListContainer} from '@/component/Review/QuoteExcerptList';
+import UnitsPage from '@/unit/page/UnitsPage';
+import {QuoteExcerptListContainer} from '@/review/component/QuoteExcerptList';
 import {quoteByBookRoute} from '@/router';
 
 export function QuoteByBookPage() {
