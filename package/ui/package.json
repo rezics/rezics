@@ -30,6 +30,8 @@
     "@package/server": "workspace:*",
     "@pardnchiu/nanojson": "^1.2.0",
     "@tanstack/react-router": "^1.157.16",
+    "easymde": "^2.20.0",
+    "markdown-it": "^14.1.1",
     "react-lazy-load-image-component": "^1.6.3"
   },
   "devDependencies": {

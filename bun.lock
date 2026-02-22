@@ -272,6 +272,8 @@
         "@package/server": "workspace:*",
         "@pardnchiu/nanojson": "^1.2.0",
         "@tanstack/react-router": "^1.157.16",
+        "easymde": "^2.20.0",
+        "markdown-it": "^14.1.1",
         "react-lazy-load-image-component": "^1.6.3",
       },
       "devDependencies": {
@@ -2679,6 +2681,8 @@
     "@package/preview/uuid": ["uuid@13.0.0", "", { "bin": { "uuid": "dist-node/bin/uuid" } }, "sha512-XQegIaBTVUjSHliKqcnFqYypAd4S+WCYt5NIeRs6w/UAry7z8Y9j5ZwRRL4kzq9U3sD6v+85er9FvkEaBpji2w=="],
 
     "@package/server/uuid": ["uuid@13.0.0", "", { "bin": { "uuid": "dist-node/bin/uuid" } }, "sha512-XQegIaBTVUjSHliKqcnFqYypAd4S+WCYt5NIeRs6w/UAry7z8Y9j5ZwRRL4kzq9U3sD6v+85er9FvkEaBpji2w=="],
+
+    "@package/ui/markdown-it": ["markdown-it@14.1.1", "", { "dependencies": { "argparse": "^2.0.1", "entities": "^4.4.0", "linkify-it": "^5.0.0", "mdurl": "^2.0.0", "punycode.js": "^2.3.1", "uc.micro": "^2.1.0" }, "bin": { "markdown-it": "bin/markdown-it.mjs" } }, "sha512-BuU2qnTti9YKgK5N+IeMubp14ZUKUUw7yeJbkjtosvHiP0AZ5c8IAgEMk79D0eC8F23r4Ac/q8cAIFdm2FtyoA=="],
 
     "@package/ui/react-cosmos": ["react-cosmos@7.1.1", "", { "dependencies": { "@skidding/launch-editor": "2.2.3", "chokidar": "3.6.0", "express": "4.22.1", "glob": "10.5.0", "http-proxy-middleware": "3.0.5", "lodash-es": "4.17.23", "micromatch": "4.0.8", "open": "10.2.0", "pem": "1.15.1", "react-cosmos-core": "^7.1.1", "react-cosmos-renderer": "^7.1.1", "react-cosmos-ui": "^7.1.1", "ws": "8.19.0", "yargs": "17.7.2" }, "bin": { "cosmos": "bin/cosmos.js", "cosmos-export": "bin/cosmos-export.js", "cosmos-native": "bin/cosmos-native.js" } }, "sha512-9n/xV1JLoln4zph3rEYiYVISuJ7WeF1iexRT32ENWOGUaj9By3jA8mQjT+5PeVXZJHdsB/LWOBNZorTQUeQbrw=="],
 
