@@ -27,7 +27,7 @@ import useMeasure from 'react-use-measure';
 import {Sidebar as UiSidebar} from './sidebar';
 import {cn} from '@/shared/shadcn/lib/utils';
 import {useIsMobile} from '@/shared/util/use-media-query';
-import {RouterLink} from '@package/ui/Navigation/RouterLink.tsx';
+import {MUILink} from '@package/ui/primitive/link/MUILink.tsx';
 
 export function DrawerHeader({
   handleDrawerToggle,
@@ -128,7 +128,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <div key={item.segment || index.toString()}>
                 <ListItemButton
                   className="py-1"
-                  component={hasChildren ? 'div' : RouterLink}
+                  component={hasChildren ? 'div' : MUILink}
                   {...(!hasChildren ? {to: `${item.segment}`} : {})}
                   selected={isActive && !hasChildren}
                   onClick={(event: any) =>
@@ -160,7 +160,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                         return (
                           <ListItemButton
                             key={child.segment}
-                            component={RouterLink}
+                            component={MUILink}
                             to={`${child.segment}`}
                             selected={isChildActive}
                             onClick={(event: any) =>

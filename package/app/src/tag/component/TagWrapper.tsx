@@ -4,7 +4,7 @@ import {tagQueries} from '@package/api/tag/tag';
 import type {TagFilters, TagDTO, TagDetailDTO} from '@package/api/tag/tag';
 import TagList from './TagList';
 
-import {RouterLink} from '@package/ui/Navigation/RouterLink.tsx';
+import {MUILink} from '@package/ui/primitive/link/MUILink.tsx';
 
 import {useIsMobile} from '@/shared/util/use-media-query';
 import {useTranslation} from 'react-i18next';
@@ -154,7 +154,7 @@ export const TagWrapper: React.FC<TagWrapperProps> = ({
                   {t('tag.ungrouped')}
                 </span>
               ) : (
-                <RouterLink
+                <MUILink
                   to="/tag/domain/$unitId/title/$title"
                   params={{
                     unitId: domId,
@@ -163,7 +163,7 @@ export const TagWrapper: React.FC<TagWrapperProps> = ({
                   className="text-sm font-semibold"
                 >
                   {domainTitleMap.get(domId as string) ?? String(domId)}
-                </RouterLink>
+                </MUILink>
               )}
             </div>
             <TagList tags={items as unknown as TagDetailDTO[]} />
@@ -173,12 +173,12 @@ export const TagWrapper: React.FC<TagWrapperProps> = ({
       {!renderAll && isMobile && (
         <div className="mt-4 text-sm text-gray-500">
           {t('tag.showing_top_tags')} ·
-          <RouterLink
+          <MUILink
             to="/tag/book/$bookId/tag"
             params={{bookId: filters?.objectId as string}}
           >
             {t('common.view_all')} →
-          </RouterLink>
+          </MUILink>
         </div>
       )}
     </div>

@@ -7,7 +7,7 @@ import {type FC, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 
 import {PasswordField} from '@/component/Form/PasswordField';
-import {RouterLink} from '@package/ui/Navigation';
+import {MUILink} from '@package/ui/Navigation';
 import {useUserStore} from '@/global/userStore';
 import {login} from '../model/handler';
 import {Layout} from '../layout/Layout';
@@ -115,7 +115,7 @@ export const LoginPage: FC<LoginPageProps> = ({
         New to ReZICS?&nbsp;
         <TextButton onClick={handleRegisterClick}>Create an account</TextButton>
         <br />
-        <RouterLink to="/reset-password">Forget password?</RouterLink>
+        <MUILink to="/reset-password">Forget password?</MUILink>
       </div>
     </>
   );

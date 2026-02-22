@@ -1,7 +1,7 @@
 import React from 'react';
 import {Card, CardContent, Typography, Chip} from '@mui/material';
 import type {TagDetailDTO} from '@package/api/tag/tag';
-import {RouterLink} from '@package/ui/Navigation';
+import {MUILink} from '@package/ui/Navigation';
 
 /**
  * Generic card showing a tag's primary information
@@ -86,20 +86,20 @@ export const TagDetailCard: React.FC<{
           </Typography>
         )}
         <div>
-          <RouterLink
+          <MUILink
             to={'/tag/$unitId'}
             params={{unitId: tag.id}}
             className="text-sm text-blue-600 hover:underline"
           >
             查看详情 →
-          </RouterLink>
-          <RouterLink
+          </MUILink>
+          <MUILink
             to={'/book'}
             search={{tags: tag.name}}
             className="text-sm text-blue-600 hover:underline !ml-8"
           >
             搜索标签 →
-          </RouterLink>
+          </MUILink>
         </div>
       </CardContent>
     </Card>

@@ -1,7 +1,7 @@
 import {Typography, Chip, useTheme, Box} from '@mui/material';
 import CampaignRoundedIcon from '@mui/icons-material/CampaignRounded';
 import PushPinRoundedIcon from '@mui/icons-material/PushPinRounded';
-import {RouterLink} from '@package/ui/Navigation/RouterLink.tsx';
+import {MUILink} from '@package/ui/primitive/link/MUILink.tsx';
 import {useEffect, useState, useRef} from 'react';
 import clsx from 'clsx';
 
@@ -70,7 +70,7 @@ export function AnnouncementBar({
       <div className="relative flex-1 overflow-hidden h-[28px] flex items-center">
         {items.map((item, i) => {
           const isActive = i === index;
-          const Wrapper = item.link ? RouterLink : 'div';
+          const Wrapper = item.link ? MUILink : 'div';
 
           return (
             <Wrapper

@@ -5,7 +5,7 @@ import {useTranslation} from 'react-i18next';
 import {unitDetailQuery} from '@package/api/unit/unit';
 import {AccentBarContainer} from '@/component/Common/Navigation/AccentBar';
 import {MarkdownContent} from '@/component/Common/MarkdownContent';
-import {RouterLink} from '@package/ui/Navigation/RouterLink.tsx';
+import {MUILink} from '@package/ui/primitive/link/MUILink.tsx';
 import {unitRoute} from '@/router';
 
 function formatMetadataValue(value: unknown): string {
@@ -114,13 +114,13 @@ export function UnitPage() {
               />
               <div className="flex flex-col">
                 <Tooltip title={t('user.open_profile')}>
-                  <RouterLink
+                  <MUILink
                     to="/user/$unitId"
                     params={{unitId: unit.user.unitId}}
                     className="text-sm font-medium"
                   >
                     {unit.user.name}
-                  </RouterLink>
+                  </MUILink>
                 </Tooltip>
                 <Typography variant="caption" color="text.secondary">
                   {unit.user.slug}

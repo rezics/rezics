@@ -12,7 +12,7 @@ import ThumbUpAltOutlinedIcon from '@mui/icons-material/ThumbUpAltOutlined';
 import BookmarkAddOutlinedIcon from '@mui/icons-material/BookmarkAddOutlined';
 import {LazyLoadImage} from '../Common/LazyLoadImage';
 import {useTranslation} from 'react-i18next';
-import {RouterLink} from '@package/ui/Navigation/RouterLink.tsx';
+import {MUILink} from '@package/ui/primitive/link/MUILink.tsx';
 
 interface SingleReadlistProps {
   data: ReadlistResponse;
@@ -43,7 +43,7 @@ export function SingleReadlist({
 
   return (
     <Card
-      component={RouterLink as any}
+      component={MUILink as any}
       to={`/readlist/${id}`}
       onClick={(e: React.MouseEvent) => handleBookListClick(id, e)}
       elevation={0}

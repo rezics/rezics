@@ -11,7 +11,7 @@ import {
 } from '@/shared/util/reaction-summaries-parser';
 
 import {LazyLoadImage} from '../Common/LazyLoadImage';
-import {RouterLink} from '@package/ui/Navigation/RouterLink.tsx';
+import {MUILink} from '@package/ui/primitive/link/MUILink.tsx';
 
 export function MetaInfoBadge({
   review,
@@ -23,7 +23,7 @@ export function MetaInfoBadge({
   return (
     <Tooltip title="阅读完整评测" placement="top-start">
       <Box
-        component={RouterLink}
+        component={MUILink}
         to={`/remark/${review.unitId}`}
         className="flex items-center gap-1"
         sx={{

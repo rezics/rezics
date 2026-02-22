@@ -26,7 +26,7 @@ import {
 } from '@/component/Common/Reaction/MiniActionBar';
 import {ReactionStatistics} from '@/component/Common/Reaction/ReactionStatistics';
 import {parseReactionSummaries} from '@/shared/util/reaction-summaries-parser';
-import {RouterLink} from '@package/ui/Navigation/RouterLink.tsx';
+import {MUILink} from '@package/ui/primitive/link/MUILink.tsx';
 import {remarkRoute, reviewRoute} from '@/router';
 
 export function ReviewPage() {
@@ -102,10 +102,10 @@ export function ReviewPage() {
               />
             )}
             <div className="text-xs text-gray-500">
-              <RouterLink
+              <MUILink
                 to="/book/$bookId"
                 params={{bookId: review.bookId}}
-              >{`/book/${review.bookId}`}</RouterLink>
+              >{`/book/${review.bookId}`}</MUILink>
             </div>
           </div>
           {/* <Button variant="contained" color="primary">
@@ -128,7 +128,7 @@ export function ReviewPage() {
               title={t('review.open_user_interface')}
               placement="top-start"
             >
-              <RouterLink
+              <MUILink
                 to="/user/$unitId"
                 params={{unitId: review.user?.unitId ?? ''}}
                 className="flex items-center"
@@ -143,7 +143,7 @@ export function ReviewPage() {
                     </div>
                   </div>
                 </div>
-              </RouterLink>
+              </MUILink>
             </Tooltip>
           </div>
           <div className="text-right">

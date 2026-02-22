@@ -1,5 +1,5 @@
 import {useQueries, useQuery} from '@tanstack/react-query';
-import {RouterLink} from '@package/ui/Navigation/RouterLink.tsx';
+import {MUILink} from '@package/ui/primitive/link/MUILink.tsx';
 import {AccentBarWithTextShow} from '@/component/Common/Navigation/AccentBar';
 import {tagApi, tagQueries} from '@package/api/tag/tag';
 import type {TagDetailDTO} from '@package/contract';
@@ -53,11 +53,11 @@ export function TagByBookPage() {
 
       {showSeeAll && (
         <div className="mt-4">
-          <RouterLink to="/tag/book/$bookId/tag" params={{bookId}}>
+          <MUILink to="/tag/book/$bookId/tag" params={{bookId}}>
             <span className="text-primary-600 hover:underline">
               查看全部标签（{total}）
             </span>
-          </RouterLink>
+          </MUILink>
         </div>
       )}
     </div>

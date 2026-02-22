@@ -10,7 +10,7 @@ import {
   ListItemButton,
   Skeleton,
 } from '@mui/material';
-import {RouterLink} from '@package/ui/Navigation/RouterLink.tsx';
+import {MUILink} from '@package/ui/primitive/link/MUILink.tsx';
 import NotificationsRoundedIcon from '@mui/icons-material/NotificationsRounded';
 import {echoKvGetQuery} from '@package/api/echokv/echokv';
 import {useQuery} from '@tanstack/react-query';
@@ -106,14 +106,9 @@ function NoticeBoardHeader({
             </Typography>
           </div>
         </Stack>
-        <RouterLink
-          to="/notice"
-          underline="hover"
-          color="primary"
-          variant="body2"
-        >
+        <MUILink to="/notice" underline="hover" color="primary" variant="body2">
           {t('common.view_all')}
-        </RouterLink>
+        </MUILink>
       </div>
 
       <Divider />

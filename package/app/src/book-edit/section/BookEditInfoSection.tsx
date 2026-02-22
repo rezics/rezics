@@ -16,7 +16,7 @@ import {
   Alert,
 } from '@mui/material';
 import {useMatchRoute, useNavigate} from '@tanstack/react-router';
-import EasyEditor from '@component/Form/EasyEditor.tsx';
+import EasyEditor from '@package/ui/editor/easyeditor/EasyEditor.tsx';
 import {
   useCreateBookMutation,
   useUpdateBookMutation,
@@ -24,7 +24,7 @@ import {
 import {type UpdateBookInput} from '@package/contract';
 import {useEffect} from 'react';
 import {BookExtraEditor} from '../component/Metadata/BookExtraEditor';
-import {RouterLink} from '@package/ui/Navigation/RouterLink.tsx';
+import {MUILink} from '@package/ui/primitive/link/MUILink.tsx';
 
 function validatePublishURL(publishURL: string[]) {
   return publishURL.every(url => url.startsWith('https://'));
@@ -58,9 +58,9 @@ const UpdateBookDialog: React.FC<{
           <Typography variant="body1">{state?.message}</Typography>
           <Typography variant="body1">
             {state?.showBookLink && state?.bookId && (
-              <RouterLink to="/book/$bookId" params={{bookId: state.bookId}}>
+              <MUILink to="/book/$bookId" params={{bookId: state.bookId}}>
                 {t('page.book_edit.info.dialog.view_book')}
-              </RouterLink>
+              </MUILink>
             )}
           </Typography>
         </Alert>

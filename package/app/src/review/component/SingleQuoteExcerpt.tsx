@@ -5,7 +5,7 @@ import React from 'react';
 import {useTranslation} from 'react-i18next';
 
 import {CollapsibleByLineTextContainer} from '../Common/UI/Text/CollapsibleByLineText';
-import {RouterLink} from '../../../../ui/src/Navigation/RouterLink';
+import {MUILink} from '../../../../ui/src/Navigation/MUILink';
 import {Link} from '@package/ui/primitive/link/Link.tsx';
 
 export type SingleQuoteExcerptShowProps = {
@@ -45,7 +45,7 @@ export const SingleQuoteExcerptShow: React.FC<SingleQuoteExcerptShowProps> = ({
     >
       <Tooltip title="打开全文">
         <IconButton
-          component={RouterLink}
+          component={MUILink}
           to={originalLink}
           size="small"
           sx={{position: 'absolute', top: 8, right: 8}}
