@@ -17,7 +17,7 @@ import {BookListViewItem} from '@/book-library/component/BookList/BookListView';
 import {useRef} from 'react';
 import TreeReplyComponents from '@/component/Form/Comment/TreeReplyComponents';
 import {ChatBubbleOutline} from '@mui/icons-material';
-import {AccentBarContainer} from '@/component/Common/Navigation/AccentBar';
+import {AccentBarWithTextShow} from '@/component/navigation/AccentBar';
 import {SingleCommentElementWrapper} from '@/component/Form/Comment/SingleCommentElementWrapper';
 
 import {

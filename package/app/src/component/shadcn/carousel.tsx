@@ -2,8 +2,8 @@ import * as React from 'react';
 import useEmblaCarousel, {
   type UseEmblaCarouselType,
 } from 'embla-carousel-react';
-import {ArrowLeft} from '@/component/Carousel/ArrowLeft';
-import {ArrowRight} from '@/component/Carousel/ArrowRight';
+import {ArrowLeft} from '@package/ui/primitive/carousel/ArrowLeft.tsx';
+import {ArrowRight} from '@package/ui/primitive/carousel/ArrowRight.tsx';
 
 import {cn} from '@/shared/shadcn/lib/utils';
 import {Button} from '@/component/shadcn/button';

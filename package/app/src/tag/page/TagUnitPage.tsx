@@ -1,8 +1,8 @@
 import {useQuery} from '@tanstack/react-query';
 import type {TagDetailDTO} from '@package/contract';
 import {tagQueries} from '@package/api/tag/tag';
-import {AccentBarWithTextShow} from '@/component/Common/Navigation/AccentBar';
-import {TagDetailCard} from '@/component/Tag/TagCards';
+import {AccentBarWithTextShow} from '@/component/navigation/AccentBar';
+import {TagDetailCard} from '../component/TagCards';
 import {tagUnitRoute} from '@/router';
 
 export function TagUnitPage() {

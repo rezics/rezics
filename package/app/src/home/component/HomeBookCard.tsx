@@ -7,7 +7,7 @@ import {
   Box,
 } from '@mui/material';
 import type {BookDTO} from '@package/contract';
-import {LazyLoadImage} from '@/component/LazyLoadImage';
+import {LazyLoadImage} from '@package/ui/primitive/image/LazyLoadImage.tsx';
 import {useTranslation} from 'react-i18next';
 // 辅助组件或直接在父组件中使用
 const BookCard = ({

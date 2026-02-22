@@ -6,7 +6,7 @@ import React from 'react';
 import {useTranslation} from 'react-i18next';
 import type {PublicUser} from '@package/contract';
 import {FollowButton} from '@/component/Reaction/FollowButton.tsx';
-import {LazyLoadImage} from '@/component/LazyLoadImage';
+import {LazyLoadImage} from '@package/ui/primitive/image/LazyLoadImage.tsx';
 import {useIsMobile} from '@/shared/util/use-media-query.ts';
 import {useNavigate} from '@tanstack/react-router';
 

@@ -14,13 +14,13 @@ import {
 } from '../model/validate.ts';
 import {useUserStore} from '@/global/userStore.ts';
 import {useNavigate, useRouterState} from '@tanstack/react-router';
-import {Turnstile} from '@/component/Form/Turnstile.tsx';
-import {PasswordField} from '@/component/Form/PasswordField';
+import {Turnstile} from '@package/ui/composite/auth/Turnstile.tsx';
+import {PasswordField} from '@package/ui/composite/form/field/PasswordField.tsx';
 import {
   GetVerificationCode,
   type GetVerificationCodeHandle,
 } from '../component/GetVerificationCode.tsx';
-import {TextButton} from '@/component/UI/Button/TextButton.tsx';
+import {TextButton} from '@package/ui/primitive/button/TextButton.tsx';
 
 interface RegisterData {
   slug: string;
@@ -120,6 +120,10 @@ export const RegisterPage: FC<RegisterPageProps> = ({
     }
   };
 
+  function handleTurnstileError(error: Error) {
+    setError(error.message);
+  }
+
   const LayoutComponent = isModal ? ModalLayout : Layout;
 
   const content = (
@@ -128,7 +132,10 @@ export const RegisterPage: FC<RegisterPageProps> = ({
         <div
           style={{marginTop: '16px', display: 'flex', justifyContent: 'center'}}
         >
-          <Turnstile onVerify={handleTurnstileVerify} />
+          <Turnstile
+            onVerify={handleTurnstileVerify}
+            onError={handleTurnstileError}
+          />
         </div>
       )}
       {error && <Alert severity="error">{error}</Alert>}

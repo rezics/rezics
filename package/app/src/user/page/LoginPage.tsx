@@ -6,14 +6,14 @@ import {useNavigate, useRouterState} from '@tanstack/react-router';
 import {type FC, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 
-import {PasswordField} from '@/component/Form/PasswordField';
-import {MUILink} from '@package/ui/Navigation';
+import {PasswordField} from '@package/ui/composite/form/field/PasswordField.tsx';
+import {MUILink} from '@package/ui/primitive/link/MUILink.tsx';
 import {useUserStore} from '@/global/userStore';
 import {login} from '../model/handler';
 import {Layout} from '../layout/Layout';
 import {ModalLayout} from '../layout/ModalLayout';
 import {validateEmail} from '../model/validate';
-import {TextButton} from '@/component/UI/Button/TextButton';
+import {TextButton} from '@package/ui/primitive/button/TextButton.tsx';
 
 interface LoginData {
   email: string;

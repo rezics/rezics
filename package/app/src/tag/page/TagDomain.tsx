@@ -1,12 +1,13 @@
 import {useQuery} from '@tanstack/react-query';
 import {tagQueries} from '@package/api/tag/tag';
-import {AccentBarWithTextShow} from '@/component/Common/Navigation/AccentBar';
-import {TagWrapper} from '@/component/Tag/TagWrapper';
+import {AccentBarWithTextShow} from '@/component/navigation/AccentBar';
+import {TagWrapper} from '../component/TagWrapper';
 import {tagDomainRoute, tagDomainTitleRoute} from '@/router';
 
 export function TagDomainPage() {
-  const withTitleMatch = tagDomainTitleRoute.useMatch({shouldThrow: false});
-  const baseMatch = tagDomainRoute.useMatch({shouldThrow: false});
+  // ERROR 不能这么写，会导致错误
+  const withTitleMatch = tagDomainTitleRoute.useMatch({shouldThrow: true});
+  const baseMatch = tagDomainRoute.useMatch({shouldThrow: true});
   const unitId =
     withTitleMatch?.params.unitId ?? baseMatch?.params.unitId ?? '';
   const title = withTitleMatch?.params.title;

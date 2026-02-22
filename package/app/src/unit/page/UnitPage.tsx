@@ -3,7 +3,7 @@ import {Avatar, Chip, Paper, Tooltip, Typography} from '@mui/material';
 import {useTranslation} from 'react-i18next';
 
 import {unitDetailQuery} from '@package/api/unit/unit';
-import {AccentBarContainer} from '@/component/Common/Navigation/AccentBar';
+import {AccentBarWithTextShow} from '@/component/navigation/AccentBar';
 import {MarkdownContent} from '@/component/Common/MarkdownContent';
 import {MUILink} from '@package/ui/primitive/link/MUILink.tsx';
 import {unitRoute} from '@/router';

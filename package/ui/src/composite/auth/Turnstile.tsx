@@ -1,5 +1,4 @@
 import React, {useEffect, useRef, useState} from 'react';
-import {useAlertStore} from '@app/state/windowAlertStore';
 
 declare global {
   interface Window {
@@ -20,6 +19,7 @@ interface TurnstileProps {
   onVerify: (token: string) => void;
   options?: Record<string, any>;
   loadingComponent?: React.ReactNode;
+  onError?: (error: Error) => void;
 }
 
 export function Turnstile({
@@ -27,9 +27,9 @@ export function Turnstile({
   onVerify,
   options = {},
   loadingComponent = defaultLoadingComponent(),
+  onError,
 }: TurnstileProps) {
   const siteKey = siteKeyProps ?? import.meta.env.VITE_TURNSTILE_SITE_KEY;
-  const {show: showAlert} = useAlertStore();
   const containerRef = useRef<HTMLDivElement>(null);
   const widgetIdRef = useRef<string | null>(null);
   const [isVerifiedShow, setIsVerifiedShow] = useState(false);
@@ -71,7 +71,7 @@ export function Turnstile({
         try {
           window.turnstile.remove(widgetIdRef.current);
         } catch (error) {
-          showAlert('Error removing Turnstile widget');
+          onError?.(new Error('Error removing Turnstile widget'));
         }
       }
     };

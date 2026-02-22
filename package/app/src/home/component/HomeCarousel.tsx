@@ -5,11 +5,11 @@ import {useQuery} from '@tanstack/react-query';
 import {echoKvGetQuery} from '@package/api/echokv/echokv';
 import {parseEchoKVResponse} from '@package/api/echokv/util';
 import {useAlertStore} from '@app/state/windowAlertStore';
-import {LazyLoadImage} from '@/component/LazyLoadImage';
+import {LazyLoadImage} from '@package/ui/primitive/image/LazyLoadImage.tsx';
 import {useTranslation} from 'react-i18next';
 import {Link} from '@package/ui/primitive/link/Link.tsx';
 import {cn} from '@/shared/util/css-util';
-import {CarouselIndicator} from '@/component/Carousel/CarouselIndicator';
+import {CarouselIndicator} from '@package/ui/primitive/carousel/CarouselIndicator.tsx';
 
 import {
   Carousel,

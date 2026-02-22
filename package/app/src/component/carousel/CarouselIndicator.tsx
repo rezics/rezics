@@ -1,8 +1,7 @@
 import React, {useEffect, useMemo, useState} from 'react';
-import {Typography} from '@mui/material';
+import {Typography, useTheme} from '@mui/material';
 import type {CarouselApi} from '../shadcn/carousel';
 import {cn} from '@/shared/util/css-util';
-import {useAppStore} from '@/app/state/appStore';
 
 export type CarouselIndicatorProps = {
   api: CarouselApi | null;
@@ -23,7 +22,7 @@ export const CarouselIndicator: React.FC<CarouselIndicatorProps> = ({
 }) => {
   const [current, setCurrent] = useState(0);
   const [count, setCount] = useState(0);
-  const themeMode = useAppStore(state => state.theme);
+  const themeMode = useTheme().palette.mode;
   const isDark = useMemo(() => themeMode === 'dark', [themeMode]);
 
   useEffect(() => {

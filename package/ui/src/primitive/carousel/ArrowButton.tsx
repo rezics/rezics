@@ -1,6 +1,6 @@
 import React from 'react';
 import type {SvgIconComponent} from '@mui/icons-material';
-import {useAppStore} from '@/app/state/appStore';
+import {useTheme} from '@mui/material';
 import clsx from 'clsx';
 
 export interface ArrowButtonProps {
@@ -12,7 +12,7 @@ export const ArrowButton: React.FC<ArrowButtonProps> = ({
   icon: Icon,
   className,
 }) => {
-  const isDark = useAppStore(s => s.theme) === 'dark';
+  const isDark = useTheme().palette.mode === 'dark';
 
   return (
     <div

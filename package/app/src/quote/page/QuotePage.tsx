@@ -16,7 +16,7 @@ import {
 } from '@/component/Reaction/MiniActionBar';
 import {parseReactionSummaries} from '@/shared/util/reaction-summaries-parser';
 import {ReactionStatistics} from '@/component/Reaction/ReactionStatistics';
-import {LazyLoadImage} from '@/component/LazyLoadImage';
+import {LazyLoadImage} from '@package/ui/primitive/image/LazyLoadImage.tsx';
 import {quoteRoute} from '@/router';
 
 export const QuotePage: React.FC = () => {

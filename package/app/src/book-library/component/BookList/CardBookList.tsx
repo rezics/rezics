@@ -1,4 +1,4 @@
-import {LazyLoadImage} from '@/component/LazyLoadImage';
+import {LazyLoadImage} from '@package/ui/primitive/image/LazyLoadImage.tsx';
 import {Card, CardContent, CardMedia, Typography} from '@mui/material';
 
 import type {BookDTO} from '@package/contract';

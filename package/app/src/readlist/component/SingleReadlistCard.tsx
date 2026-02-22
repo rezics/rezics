@@ -11,7 +11,7 @@ import {
 import {useNavigate} from '@tanstack/react-router';
 import React from 'react';
 import {MiniActionBar} from '@/component/Reaction/MiniActionBar';
-import {LazyLoadImage} from '@/component/LazyLoadImage';
+import {LazyLoadImage} from '@package/ui/primitive/image/LazyLoadImage.tsx';
 
 interface SingleReadlistProps {
   data: ReadlistResponse;

@@ -1,9 +1,9 @@
-import {Header} from '../component/Header/MainLayoutHeader';
-import {Sidebar} from '../component/Sidebar/MainLayoutSidebar';
+import {Header} from '../component/header/MainLayoutHeader';
+import {Sidebar} from '../component/sidebar/MainLayoutSidebar';
 import type {ReactNode} from 'react';
 import {Helmet} from 'react-helmet-async';
 import {NAVIGATION} from '../component/navigation/MainNavigation';
-import {MainLayoutFooter} from '../component/Footer/MainLayoutFooter';
+import {MainLayoutFooter} from '../component/footer/MainLayoutFooter';
 import React from 'react';
 import {useUserStore} from '@/global/userStore';
 import {HelpFab} from '../component/HelpWidget';

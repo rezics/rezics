@@ -1,5 +1,5 @@
 import React from 'react';
-import {LazyLoadImage} from '@/component/LazyLoadImage';
+import {LazyLoadImage} from '@package/ui/primitive/image/LazyLoadImage.tsx';
 import {useTranslation} from 'react-i18next';
 
 const defaultBrands = [

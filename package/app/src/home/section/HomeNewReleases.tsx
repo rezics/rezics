@@ -9,7 +9,7 @@ import {
 } from '@mui/material';
 import {bookQueries} from '@package/api/book/book';
 import type {BookDTO} from '@package/contract';
-import {LazyLoadImage} from '@/component/LazyLoadImage';
+import {LazyLoadImage} from '@package/ui/primitive/image/LazyLoadImage.tsx';
 import {useTranslation} from 'react-i18next';
 
 type Book = BookDTO;

@@ -1,6 +1,6 @@
 import {useState, useEffect} from 'react';
 import {useQuery} from '@tanstack/react-query';
-import EasyEditor from '@/component/Form/EasyEditor';
+import EasyEditor from '@package/ui/editor/easyeditor/EasyEditor.tsx';
 import {Button} from '@mui/material';
 import {reviewQueries} from '@package/api/review/review.queries';
 import {
@@ -11,9 +11,9 @@ import type {ReviewResponse, UpdateReviewInput} from '@package/contract';
 import {TextField} from '@mui/material';
 import {useTranslation} from 'react-i18next';
 import {useAlertStore} from '@app/state/windowAlertStore';
-import {DeleteButton} from '@/component/Form/DeleteWrapper';
+import {DeleteButton} from '@package/ui/composite/form/DeleteWrapper.tsx';
 import {useNavigate} from '@tanstack/react-router';
-import {RatingWithInput} from '@/component/Form/Rating';
+import {RatingWithInput} from '@package/ui/primitive/control/rating/Rating.tsx';
 import {reviewEditRoute} from '@/router';
 
 interface ReviewEditPageProps {
