@@ -7,8 +7,8 @@ import type {BookDTO} from '@package/contract';
 import {
   MiniActionBar,
   MiniAdminActionBar,
-} from '@component/Reaction/MiniActionBar.tsx';
-import {LazyLoadImage} from '@component/LazyLoadImage.tsx';
+} from '@/component/reaction/MiniActionBar.tsx';
+import {LazyLoadImage} from '@package/ui/primitive/image/LazyLoadImage.tsx';
 
 type Book = BookDTO;
 

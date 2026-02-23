@@ -1,4 +1,4 @@
-import {type NavigationItem} from '../Navigation/navigation';
+import {type NavigationItem} from '../navigation/navigation';
 import {useLayoutStore} from '../../state/layoutStore';
 import type {SvgIconProps} from '@mui/material/SvgIcon';
 import {
@@ -25,7 +25,7 @@ import React, {type ReactNode} from 'react';
 import useMeasure from 'react-use-measure';
 
 import {Sidebar as UiSidebar} from './sidebar';
-import {cn} from '@/shared/shadcn/lib/utils';
+import {cn} from '@/shared/util/css-util';
 import {useIsMobile} from '@/shared/util/use-media-query';
 import {MUILink} from '@package/ui/primitive/link/MUILink.tsx';
 

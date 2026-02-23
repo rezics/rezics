@@ -1,6 +1,6 @@
-import {ReadlistList} from '@component/ReadList/ReadlistList.tsx';
-import {AccentBarWithTextContainer} from '@component/Common/Navigation/AccentBar.tsx';
-import {ArrowForwardIconContainer} from '@component/Common/Navigation/ArrowForwardIcon.tsx';
+import {ReadlistList} from '@/readlist/component/ReadlistList.tsx';
+import {AccentBarWithTextContainer} from '@/component/navigation/AccentBar.tsx';
+import {ArrowForwardIconContainer} from '@/component/navigation/ArrowForwardIcon.tsx';
 
 import {useQuery} from '@tanstack/react-query';
 import {buildMeiliReadlistQuery} from '@package/api/meili/meili.queries';

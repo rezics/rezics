@@ -1,5 +1,5 @@
 import {AccentBarWithTextShow} from '@/component/navigation/AccentBar';
-import {EditButtonFloatRightShow} from '@/component/UI/Button/EditButtonFloatRight';
+import {EditButtonFloatRightShow} from '@package/ui/composite/button/EditButtonFloatRight.tsx';
 import {Box, Typography} from '@mui/material';
 import React from 'react';
 import {useTranslation} from 'react-i18next';

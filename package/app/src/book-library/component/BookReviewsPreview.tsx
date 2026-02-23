@@ -1,9 +1,9 @@
 import React, {useEffect, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 
-import {AccentBarWithTextShow} from '@component/Common/Navigation/AccentBar.tsx';
-import {ArrowForwardIconContainer} from '@component/Common/Navigation/ArrowForwardIcon.tsx';
-import {ReviewListContainer} from '@component/Review/ReviewList.tsx';
+import {AccentBarWithTextShow} from '@/component/navigation/AccentBar.tsx';
+import {ArrowForwardIconContainer} from '@/component/navigation/ArrowForwardIcon.tsx';
+import {ReviewListContainer} from '@/review/component/ReviewList.tsx';
 
 import {useQuery} from '@tanstack/react-query';
 import {buildMeiliUnitQuery} from '@package/api/meili/meili.queries';

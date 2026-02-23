@@ -6,7 +6,7 @@ import {
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
-} from '@/component/shadcn/carousel';
+} from '@package/ui/shadcn/carousel.tsx';
 
 import {VerticalTwoReviewCard} from '@/review/component/item/VerticalTwoReviewCard';
 import type {ReviewDTO} from '@package/contract';

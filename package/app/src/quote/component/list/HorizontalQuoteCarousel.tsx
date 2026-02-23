@@ -5,7 +5,7 @@ import {
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
-} from '@/component/shadcn/carousel';
+} from '@package/ui/shadcn/carousel.tsx';
 import type {QuoteDTO} from '@package/contract';
 import QuoteCard from '../item/QuoteCard';
 
@@ -14,10 +14,9 @@ export interface HorizontalQuoteCarouselProps {
   className?: string;
 }
 
-export const HorizontalQuoteCarousel: React.FC<HorizontalQuoteCarouselProps> = ({
-  quoteList,
-  className,
-}) => {
+export const HorizontalQuoteCarousel: React.FC<
+  HorizontalQuoteCarouselProps
+> = ({quoteList, className}) => {
   if (!quoteList.length) {
     return null;
   }

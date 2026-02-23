@@ -5,7 +5,7 @@ import {
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
-} from '@/component/shadcn/carousel';
+} from '@package/ui/shadcn/carousel.tsx';
 import type {ReadlistDTO} from '@package/contract';
 import ReadListCard from '../item/ReadListCard';
 

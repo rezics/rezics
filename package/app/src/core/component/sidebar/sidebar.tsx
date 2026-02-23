@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {X, Menu} from 'lucide-react';
-import {cn} from '@/shared/shadcn/lib/utils';
+import {cn} from '@/shared/util/css-util';
 import {Box} from '@mui/material';
 
 // --- 类型定义 ---

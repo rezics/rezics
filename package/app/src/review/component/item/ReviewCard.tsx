@@ -8,7 +8,7 @@ import {
   useTheme,
 } from '@mui/material';
 import type {ReviewMeiliDTO} from '@package/contract';
-import {cn} from '@/shared/shadcn/lib/utils';
+import {cn} from '@/shared/util/css-util';
 import {useNavigate} from '@tanstack/react-router';
 interface ReviewCardProps {
   review: ReviewMeiliDTO;

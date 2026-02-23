@@ -10,7 +10,7 @@ import {
 import FormatQuoteRoundedIcon from '@mui/icons-material/FormatQuoteRounded';
 import {useNavigate} from '@tanstack/react-router';
 import type {QuoteDTO} from '@package/contract';
-import {cn} from '@/shared/shadcn/lib/utils';
+import {cn} from '@/shared/util/css-util';
 
 export interface QuoteCardProps {
   quote: QuoteDTO;

@@ -3,7 +3,7 @@ import {
   Carousel,
   CarouselContent,
   CarouselItem,
-} from '@/component/shadcn/carousel';
+} from '@package/ui/shadcn/carousel.tsx';
 
 import {Chip, type ChipProps} from '@mui/material';
 import {echoKvGetQuery} from '@package/api/echokv/echokv';

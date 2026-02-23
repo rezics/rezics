@@ -5,7 +5,7 @@ import {
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
-} from '@/component/shadcn/carousel';
+} from '@package/ui/shadcn/carousel.tsx';
 import {BookCard, type BookProps} from '../item/VerticalBookCard';
 export interface HorizontalBookCarouselProps {
   bookList: (BookProps & {id: string})[];
