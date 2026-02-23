@@ -1,6 +1,6 @@
 import {Typography} from '@mui/material';
 import {useIsMobile} from '@/shared/util/use-media-query';
-import React, {useEffect, useMemo, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {useQuery} from '@tanstack/react-query';
 import {echoKvGetQuery} from '@package/api/echokv/echokv';
 import {parseEchoKVResponse} from '@package/api/echokv/util';
@@ -16,8 +16,8 @@ import {
   CarouselContent,
   CarouselItem,
   type CarouselApi,
-} from '@/component/shadcn/carousel';
-import {useAppStore} from '@/app/state/appStore';
+} from '@package/ui/shadcn/carousel.tsx';
+import {useEmblaAutoplay} from '@package/ui/primitive/carousel/use-embla-autoplay.ts';
 
 type ProductType = {
   cover?: string;
@@ -112,8 +112,6 @@ export const BookCarousel: React.FC<BookCarouselProps> = ({
   const [carouselApi, setCarouselApi] = React.useState<CarouselApi | null>(
     null,
   );
-  const [_current, setCurrent] = React.useState(0);
-  const [_count, setCount] = React.useState(0);
 
   useEffect(() => {
     try {
@@ -128,32 +126,13 @@ export const BookCarousel: React.FC<BookCarouselProps> = ({
   }, [data, showAlert, t]);
 
   // autoplay using carousel api
-  useEffect(() => {
-    if (!autoplayIntervalNum) return;
-
-    const id = setInterval(() => {
-      try {
-        carouselApi?.scrollNext();
-      } catch (e) {
-        // ignore if api not ready
-      }
-    }, autoplayIntervalNum);
-
-    return () => clearInterval(id);
-  }, [autoplayIntervalNum, carouselApi]);
+  useEmblaAutoplay(carouselApi, {
+    interval: autoplayIntervalNum,
+    enabled: true,
+    stopOnInteraction: true,
+  });
 
   const isMobile = useIsMobile();
-
-  useEffect(() => {
-    if (!carouselApi) {
-      return;
-    }
-    setCount(carouselApi.scrollSnapList().length);
-    setCurrent(carouselApi.selectedScrollSnap() + 1);
-    carouselApi.on('select', () => {
-      setCurrent(carouselApi.selectedScrollSnap() + 1);
-    });
-  }, [carouselApi]);
 
   return (
     <Carousel
@@ -180,7 +159,7 @@ export const BookCarousel: React.FC<BookCarouselProps> = ({
           </CarouselItem>
         ))}
       </CarouselContent>
-      <CarouselIndicator api={carouselApi} />
+      {products.length > 0 && <CarouselIndicator api={carouselApi} />}
     </Carousel>
   );
 };

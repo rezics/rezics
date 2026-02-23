@@ -1,7 +1,7 @@
 import React, {useEffect, useMemo, useState} from 'react';
 import {Typography, useTheme} from '@mui/material';
 import type {CarouselApi} from '@/shadcn/carousel';
-import {cn} from '@/shared/util/css-util';
+import {cn} from '@/shared/lib/utils';
 
 export type CarouselIndicatorProps = {
   api: CarouselApi | null;
@@ -35,9 +35,11 @@ export const CarouselIndicator: React.FC<CarouselIndicatorProps> = ({
 
     update();
     api.on('select', update);
+    api.on('reInit', update);
 
     return () => {
       api.off('select', update);
+      api.off('reInit', update);
     };
   }, [api]);
 
