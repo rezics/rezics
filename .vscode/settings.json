@@ -102,6 +102,7 @@
     "page": "folder-blue-code",
     "state": "folder-redux-reducer",
     "model": "folder-models",
+    "style": "folder-purple-code",
     "locale": "folder-i18n"
   }
 }
