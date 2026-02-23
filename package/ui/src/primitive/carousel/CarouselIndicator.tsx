@@ -1,6 +1,6 @@
 import React, {useEffect, useMemo, useState} from 'react';
 import {Typography, useTheme} from '@mui/material';
-import type {CarouselApi} from '../shadcn/carousel';
+import type {CarouselApi} from '@/shadcn/carousel';
 import {cn} from '@/shared/util/css-util';
 
 export type CarouselIndicatorProps = {

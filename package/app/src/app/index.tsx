@@ -1,6 +1,7 @@
 import {createRoot} from 'react-dom/client';
 import './index.css';
 
+import '@package/ui/foundation/style/layers.css';
 import 'virtual:uno.css';
 
 import App from './App';
