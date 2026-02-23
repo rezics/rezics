@@ -104,6 +104,7 @@ export default [
       // eslint-plugin-react config
       'react/react-in-jsx-scope': 'off',
       'react/jsx-uses-react': 'off',
+      'react/prop-types': 'off',
 
       // 少量语义化微调（可按团队口味增删）
       'react/self-closing-comp': 'warn',

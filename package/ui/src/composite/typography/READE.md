@@ -1,0 +1,1 @@
+Include typography-pattern like AccentBarWithText
