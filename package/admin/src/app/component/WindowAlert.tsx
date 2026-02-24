@@ -1,1 +1,1 @@
-export {WindowAlert} from '@package/design-system/foundation';
+export {WindowAlert} from '@package/app-shell/foundation';

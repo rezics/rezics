@@ -1,7 +1,7 @@
 import 'github-markdown-css/github-markdown-light.css';
-import {AppShell} from '@package/design-system/foundation';
+import {AppShell} from '@package/app-shell/foundation';
 import {AuthProvider} from './provider/AuthProvider';
-import {WindowAlert} from '@package/design-system/foundation';
+import {WindowAlert} from '@package/app-shell/foundation';
 import {RouterProvider} from '@tanstack/react-router';
 import {router} from '@/router';
 

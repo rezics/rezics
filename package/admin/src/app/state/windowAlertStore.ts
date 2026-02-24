@@ -1,1 +1,1 @@
-export {useAlertStore} from '@package/design-system/foundation';
+export {useAlertStore} from '@package/app-shell/foundation';

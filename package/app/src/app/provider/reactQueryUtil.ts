@@ -1,1 +1,1 @@
-export {qc} from '@package/design-system/foundation';
+export {qc} from '@package/app-shell/foundation';

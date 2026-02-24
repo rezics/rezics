@@ -1,1 +1,1 @@
-export {getTheme, getDynamicTheme} from '@package/design-system/foundation';
+export {getTheme, getDynamicTheme} from '@package/app-shell/foundation';

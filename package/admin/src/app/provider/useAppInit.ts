@@ -1,1 +1,1 @@
-export {useAppInit} from '@package/design-system/foundation';
+export {useAppInit} from '@package/app-shell/foundation';

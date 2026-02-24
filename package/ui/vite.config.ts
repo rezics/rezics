@@ -15,8 +15,8 @@ export default defineConfig(({mode}) => {
       tanstackRouter({
         target: 'react',
         autoCodeSplitting: true,
-        routesDirectory: 'src/routes',
-        generatedRouteTree: 'src/routeTree.gen.ts',
+        routesDirectory: 'src/mock/routes',
+        generatedRouteTree: 'src/mock/routeTree.gen.ts',
       }),
       UnoCSS(),
       react({
@@ -32,13 +32,6 @@ export default defineConfig(({mode}) => {
         showBallonButton: true,
       }),
     ],
-    build: {
-      // sourcemap: true, // Enable sourcemap for production build for debugging tools like Sentry
-    },
-    server: {
-      port: 35001,
-      // sourcemapIgnoreList: false, // Disable sourcemap ignore list, will include all files like node_modules, etc.
-    },
     define: {
       'process.env': env,
     },

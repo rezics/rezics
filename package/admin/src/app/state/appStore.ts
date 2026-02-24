@@ -1,1 +1,1 @@
-export {useAppStore} from '@package/design-system/foundation';
+export {useAppStore} from '@package/app-shell/foundation';
