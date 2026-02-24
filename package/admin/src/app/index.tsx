@@ -1,8 +1,6 @@
 import {createRoot} from 'react-dom/client';
 import './index.css';
 
-import 'virtual:uno.css';
-
 import App from './App';
 import {initI18n} from './provider/i18n';
 // import { setupMock } from "./plugin/providers/mock.ts";

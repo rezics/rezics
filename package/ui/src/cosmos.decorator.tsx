@@ -11,6 +11,8 @@ import {
   Outlet,
 } from '@tanstack/react-router';
 
+import 'virtual:uno.css';
+
 function MockRouterWrapper({children}: {children: ReactNode}) {
   const rootRoute = createRootRoute({
     component: () => (

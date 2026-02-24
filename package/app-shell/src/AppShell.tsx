@@ -15,6 +15,9 @@ import {ErrorBoundary} from 'react-error-boundary';
 import {HelmetProvider} from 'react-helmet-async';
 import {useAppInit} from './hook/useAppInit';
 
+import 'virtual:uno.css';
+import '@package/ui/shared/style/layers.css';
+
 export interface AppShellProps {
   children: ReactNode;
   /** Feature-layer slots injected between ReactQueryProvider and children */
