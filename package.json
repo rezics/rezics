@@ -4,12 +4,14 @@
   "scripts": {
     "app:dev": "cd package/app && bun run dev",
     "server:dev": "cd package/server && bun run dev",
-    "deploy": "cd package/util && bun run deploy"
+    "deploy": "cd package/util && bun run deploy",
+    "knip": "knip"
   },
   "workspaces": [
     "package/*"
   ],
   "devDependencies": {
-    "babel-plugin-react-compiler": "^1.0.0"
+    "babel-plugin-react-compiler": "^1.0.0",
+    "knip": "^5.85.0"
   }
 }
