@@ -32,7 +32,7 @@
     "@mui/material": "7.3.1",
     "@package/api": "workspace:*",
     "@package/contract": "workspace:*",
-    "@package/design-system": "workspace:*",
+    "@package/app-shell": "workspace:*",
     "@package/ui": "workspace:*",
     "@radix-ui/react-dialog": "^1.1.15",
     "@radix-ui/react-popover": "^1.1.15",

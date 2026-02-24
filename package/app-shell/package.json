@@ -1,5 +1,5 @@
 {
-  "name": "@package/design-system",
+  "name": "@package/app-shell",
   "version": "0.0.1",
   "type": "module",
   "scripts": {
