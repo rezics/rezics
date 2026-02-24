@@ -1,1 +1,1 @@
-export * from './src/foundation';
+export * from './src';

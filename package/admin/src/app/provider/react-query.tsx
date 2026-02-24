@@ -1,1 +1,1 @@
-export {ReactQueryProvider} from '@package/app-shell/foundation';
+export {ReactQueryProvider} from '@package/app-shell';

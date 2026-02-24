@@ -1,1 +1,1 @@
-export {PersistentSettingsLoader} from '@package/app-shell/foundation';
+export {PersistentSettingsLoader} from '@package/app-shell';

@@ -1,1 +1,1 @@
-export {qc} from '@package/app-shell/foundation';
+export {qc} from '@package/app-shell';

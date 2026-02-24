@@ -5,4 +5,4 @@ export {
   extractColorFromImage,
   PRESET_COLORS,
   type DynamicColorScheme,
-} from '@package/app-shell/foundation';
+} from '@package/app-shell';
