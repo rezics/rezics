@@ -1,81 +1,21 @@
-import {ThemeProvider} from '@mui/material';
-import CssBaseline from '@mui/material/CssBaseline';
-import {StyledEngineProvider} from '@mui/material/styles';
-import {StrictMode, useEffect, useMemo} from 'react';
 import 'github-markdown-css/github-markdown-light.css';
-
-import {
-  applyDynamicThemeToDOM,
-  generateDynamicColors,
-} from './config/dynamicTheme';
-import {getDynamicTheme, getTheme} from './config/theme';
-import {useAppStore} from './state/appStore';
-import {PersistentSettingsLoader} from './provider/PersistentSettingsLoader';
-import {ReactQueryProvider} from './provider/react-query';
+import {AppShell} from '@package/design-system/foundation';
 import {AuthProvider} from './provider/AuthProvider';
-import {ErrorBoundary} from 'react-error-boundary';
-import {WindowAlert} from './component/WindowAlert';
-import {HelmetProvider} from 'react-helmet-async';
-import {useAppInit} from './provider/useAppInit';
+import {WindowAlert} from '@package/design-system/foundation';
 import {RouterProvider} from '@tanstack/react-router';
-
 import {router} from '@/router';
 
 export default function App() {
-  const themeMode = useAppStore(s => s.theme);
-  const customColor = useAppStore(s => s.customColor);
-  const useDynamicTheme = useAppStore(s => s.useDynamicTheme);
-
-  // ANCHOR 非常好用的Hook，回头看看封装一下
-  // useEffect(() => {
-  //   const onScroll = () => {
-  //     const ae = document.activeElement as HTMLElement | null
-  //     console.log('scrollY=', window.scrollY, 'active=', ae?.tagName, ae?.id, ae?.className)
-  //   }
-  //   window.addEventListener('scroll', onScroll, { passive: true })
-  //   return () => window.removeEventListener('scroll', onScroll)
-  // }, [])
-
-  useAppInit();
-
-  const theme = useMemo(() => {
-    if (useDynamicTheme && customColor) {
-      return getDynamicTheme(themeMode, customColor);
-    }
-    return getTheme(themeMode, customColor);
-  }, [themeMode, customColor, useDynamicTheme]);
-
-  useEffect(() => {
-    const html = document.documentElement;
-    html.classList.toggle('dark', themeMode === 'dark');
-
-    if (useDynamicTheme && customColor) {
-      const dynamicColors = generateDynamicColors(
-        customColor,
-        themeMode === 'dark',
-      );
-      applyDynamicThemeToDOM(dynamicColors, themeMode === 'dark');
-    }
-  }, [themeMode, customColor, useDynamicTheme]);
-
   return (
-    <StrictMode>
-      <ErrorBoundary fallback={<div>Something went wrong</div>}>
-        {/* TODO ErrorBoundary 的作用是什么？ */}
-        <HelmetProvider>
-          <StyledEngineProvider injectFirst>
-            <ThemeProvider theme={theme}>
-              <CssBaseline />
-              <PersistentSettingsLoader />
-              <ReactQueryProvider>
-                <AuthProvider />
-                <RouterProvider router={router} />
-                <WindowAlert />
-              </ReactQueryProvider>
-            </ThemeProvider>
-          </StyledEngineProvider>
-        </HelmetProvider>
-      </ErrorBoundary>
-    </StrictMode>
+    <AppShell
+      features={
+        <>
+          <AuthProvider />
+          <WindowAlert />
+        </>
+      }
+    >
+      <RouterProvider router={router} />
+    </AppShell>
   );
 }

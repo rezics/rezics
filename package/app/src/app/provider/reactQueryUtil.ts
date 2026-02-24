@@ -1,3 +1,1 @@
-import {createQueryClient} from '@package/api/react-query/tsr';
-
-export const qc = createQueryClient();
+export {qc} from '@package/design-system/foundation';

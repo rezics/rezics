@@ -1,3 +1,4 @@
+export {getTheme, getDynamicTheme} from './theme';
 export {
   generateDynamicColors,
   applyDynamicThemeToDOM,
@@ -5,4 +6,4 @@ export {
   extractColorFromImage,
   PRESET_COLORS,
   type DynamicColorScheme,
-} from '../src/foundation/config/dynamicTheme';
+} from './dynamicTheme';

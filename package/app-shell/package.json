@@ -11,8 +11,26 @@
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },
+  "module": "index.ts",
   "exports": {
+    ".": {
+      "types": "./index.ts",
+      "import": "./index.ts"
+    },
+    "./foundation": {
+      "types": "./src/foundation/index.ts",
+      "import": "./src/foundation/index.ts"
+    },
+    "./foundation/*": {
+      "types": "./src/foundation/*/index.ts",
+      "import": "./src/foundation/*/index.ts"
+    },
+    "./config/*": {
+      "types": "./config/*.ts",
+      "import": "./config/*.ts"
+    },
     "./eslint.config": "./eslint.config.js",
+    "./uno.config": "./uno.config.ts",
     "./*": {
       "types": "./src/*.ts",
       "default": "./src/*.ts"
