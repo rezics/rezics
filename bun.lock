@@ -301,6 +301,7 @@
         "recharts": "2.15.4",
         "sonner": "^2.0.7",
         "vaul": "^1.1.2",
+        "vite-tsconfig-paths": "^6.1.1",
         "zod": "^4.3.6",
       },
       "devDependencies": {
@@ -2818,6 +2819,8 @@
     "@package/ui/react-cosmos": ["react-cosmos@7.1.1", "", { "dependencies": { "@skidding/launch-editor": "2.2.3", "chokidar": "3.6.0", "express": "4.22.1", "glob": "10.5.0", "http-proxy-middleware": "3.0.5", "lodash-es": "4.17.23", "micromatch": "4.0.8", "open": "10.2.0", "pem": "1.15.1", "react-cosmos-core": "^7.1.1", "react-cosmos-renderer": "^7.1.1", "react-cosmos-ui": "^7.1.1", "ws": "8.19.0", "yargs": "17.7.2" }, "bin": { "cosmos": "bin/cosmos.js", "cosmos-export": "bin/cosmos-export.js", "cosmos-native": "bin/cosmos-native.js" } }, "sha512-9n/xV1JLoln4zph3rEYiYVISuJ7WeF1iexRT32ENWOGUaj9By3jA8mQjT+5PeVXZJHdsB/LWOBNZorTQUeQbrw=="],
 
     "@package/ui/react-cosmos-plugin-vite": ["react-cosmos-plugin-vite@7.1.1", "", { "dependencies": { "parse5": "7.3.0", "react-cosmos-core": "^7.1.1", "react-cosmos-dom": "^7.1.1" }, "peerDependencies": { "vite": "*" } }, "sha512-66/PEr0dWOP0enEDBdMPXJ8wCXmPm5ynxPfISO4UXVH6YudAjf1o9Rb+VasTeu1On8DfuF5CXQEmhuu9S54spw=="],
+
+    "@package/ui/vite-tsconfig-paths": ["vite-tsconfig-paths@6.1.1", "", { "dependencies": { "debug": "^4.1.1", "globrex": "^0.1.2", "tsconfck": "^3.0.3" }, "peerDependencies": { "vite": "*" } }, "sha512-2cihq7zliibCCZ8P9cKJrQBkfgdvcFkOOc3Y02o3GWUDLgqjWsZudaoiuOwO/gzTzy17cS5F7ZPo4bsnS4DGkg=="],
 
     "@parcel/watcher/detect-libc": ["detect-libc@1.0.3", "", { "bin": { "detect-libc": "./bin/detect-libc.js" } }, "sha512-pGjwhsmsp4kL2RTz08wcOlGN83otlqHeD/Z5T8GXZB+/YcpQ/dgo+lbU8ZsGxV0HIvqqxo9l7mqYwyYMD9bKDg=="],
 
