@@ -1,14 +1,18 @@
-'use client';
-
 import * as React from 'react';
 import useEmblaCarousel, {
   type UseEmblaCarouselType,
 } from 'embla-carousel-react';
-import {ArrowLeft} from '@/primitive/carousel/ArrowLeft';
-import {ArrowRight} from '@/primitive/carousel/ArrowRight';
+import {
+  ArrowLeft as ArrowLeftLucide,
+  ArrowRight as ArrowRightLucide,
+} from 'lucide-react';
+
+import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
+import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
 
 import {cn} from '@/shared/lib/utils';
 import {Button} from '@/shadcn/button';
+import {ArrowButton} from '@/primitive/carousel/ArrowButton';
 
 type CarouselApi = UseEmblaCarouselType[1];
 type UseCarouselParameters = Parameters<typeof useEmblaCarousel>;
@@ -195,7 +199,7 @@ const CarouselItem = React.forwardRef<
 });
 CarouselItem.displayName = 'CarouselItem';
 
-const CarouselPrevious = React.forwardRef<
+const CarouselPreviousShadcn = React.forwardRef<
   HTMLButtonElement,
   React.ComponentProps<typeof Button>
 >(({className, variant = 'outline', size = 'icon', ...props}, ref) => {
@@ -207,7 +211,7 @@ const CarouselPrevious = React.forwardRef<
       variant={variant}
       size={size}
       className={cn(
-        'absolute rounded-full',
+        'absolute  h-8 w-8 rounded-full',
         orientation === 'horizontal'
           ? '-left-12 top-1/2 -translate-y-1/2'
           : '-top-12 left-1/2 -translate-x-1/2 rotate-90',
@@ -217,14 +221,14 @@ const CarouselPrevious = React.forwardRef<
       onClick={scrollPrev}
       {...props}
     >
-      <ArrowLeft />
+      <ArrowLeftLucide className="h-4 w-4" />
       <span className="sr-only">Previous slide</span>
     </Button>
   );
 });
-CarouselPrevious.displayName = 'CarouselPrevious';
+CarouselPreviousShadcn.displayName = 'CarouselPreviousShadcn';
 
-const CarouselNext = React.forwardRef<
+const CarouselNextShadcn = React.forwardRef<
   HTMLButtonElement,
   React.ComponentProps<typeof Button>
 >(({className, variant = 'outline', size = 'icon', ...props}, ref) => {
@@ -246,9 +250,63 @@ const CarouselNext = React.forwardRef<
       onClick={scrollNext}
       {...props}
     >
-      <ArrowRight className="h-4 w-4" />
+      <ArrowRightLucide className="h-4 w-4" />
       <span className="sr-only">Next slide</span>
     </Button>
+  );
+});
+CarouselNextShadcn.displayName = 'CarouselNextShadcn';
+
+const CarouselPrevious = React.forwardRef<
+  HTMLButtonElement,
+  Omit<React.ComponentProps<typeof ArrowButton>, 'icon'>
+>(({className, ...props}, ref) => {
+  const {orientation, scrollPrev, canScrollPrev} = useCarousel();
+
+  return (
+    <ArrowButton
+      ref={ref}
+      icon={KeyboardArrowLeftIcon}
+      className={cn(
+        'absolute',
+        orientation === 'horizontal'
+          ? '-left-12 top-1/2 -translate-y-1/2'
+          : '-top-12 left-1/2 -translate-x-1/2 rotate-90',
+        className,
+      )}
+      disabled={!canScrollPrev}
+      onClick={scrollPrev}
+      {...props}
+    >
+      <span className="sr-only">Previous slide</span>
+    </ArrowButton>
+  );
+});
+CarouselPrevious.displayName = 'CarouselPrevious';
+
+const CarouselNext = React.forwardRef<
+  HTMLButtonElement,
+  Omit<React.ComponentProps<typeof ArrowButton>, 'icon'>
+>(({className, ...props}, ref) => {
+  const {orientation, scrollNext, canScrollNext} = useCarousel();
+
+  return (
+    <ArrowButton
+      ref={ref}
+      icon={KeyboardArrowRightIcon}
+      className={cn(
+        'absolute',
+        orientation === 'horizontal'
+          ? '-right-12 top-1/2 -translate-y-1/2'
+          : '-bottom-12 left-1/2 -translate-x-1/2 rotate-90',
+        className,
+      )}
+      disabled={!canScrollNext}
+      onClick={scrollNext}
+      {...props}
+    >
+      <span className="sr-only">Next slide</span>
+    </ArrowButton>
   );
 });
 CarouselNext.displayName = 'CarouselNext';
@@ -258,6 +316,8 @@ export {
   Carousel,
   CarouselContent,
   CarouselItem,
+  CarouselPreviousShadcn,
+  CarouselNextShadcn,
   CarouselPrevious,
   CarouselNext,
 };
