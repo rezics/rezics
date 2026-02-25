@@ -1,11 +1,11 @@
 import {useFixtureInput} from 'react-cosmos/client';
-import {ChapterList} from './index';
+import {ChapterList} from './ChapterList';
 import {useEffect, useState} from 'react';
 import {generateChapterTree} from '@/mock/data/generateChapterTree';
 import type {ChapterListProps} from './ChapterList';
 
 const Fixture = () => {
-  const [data, setData] = useState<any>(null);
+  const [_data, setData] = useState<any>(null);
 
   useEffect(() => {
     setData(generateChapterTree());
@@ -13,7 +13,6 @@ const Fixture = () => {
 
   const [props] = useFixtureInput<ChapterListProps>('Props', {
     id: '1',
-    data: data,
   });
 
   return (

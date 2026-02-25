@@ -1,4 +1,4 @@
-import {AccentBarWithTextShow} from '@/component/navigation/AccentBar';
+import {AccentBarWithText} from '@package/ui/composite/typography/AccentBarWithText.tsx';
 import {EditButtonFloatRightShow} from '@package/ui/composite/button/EditButtonFloatRight.tsx';
 import {Box, Typography} from '@mui/material';
 import React from 'react';
@@ -36,7 +36,7 @@ export const BookDescription: React.FC<BookDescriptionProps> = ({
     <div>
       <Box>
         <div className="flex mb-4">
-          <AccentBarWithTextShow text={t('book.description')} />
+          <AccentBarWithText text={t('book.description')} />
           {shouldShowEdit && (
             <EditButtonFloatRightShow
               onClick={handleEdit}

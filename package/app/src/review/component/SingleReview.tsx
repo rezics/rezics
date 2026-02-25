@@ -1,10 +1,10 @@
-import {ReactionBar} from '@/component/Common/Reaction/ReactionBar';
+import {ReactionBar} from '@/engagement/component/ReactionBar';
 import {Avatar, Box, Rating, Tooltip, Typography} from '@mui/material';
 import {type ReviewDTO} from '@package/contract';
 import React from 'react';
-import {CollapsibleReview} from '@/component/ReadList/Review';
+import {CollapsibleReview} from '@/readlist/component/Review';
 import {parseReactionSummaries} from '@/shared/util/reaction-summaries-parser';
-import {ReactionStatistics} from '../Common/Reaction/ReactionStatistics';
+import {ReactionStatistics} from '@/engagement/component/ReactionStatistics';
 import {useTranslation} from 'react-i18next';
 import {Link} from '@package/ui/primitive/link/Link.tsx';
 

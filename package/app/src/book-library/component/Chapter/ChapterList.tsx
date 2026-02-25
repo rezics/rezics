@@ -11,7 +11,7 @@ import {useTranslation} from 'react-i18next';
 import {useQuery} from '@tanstack/react-query';
 
 import {bookQueries} from '@package/api/book/book.queries';
-import {AccentBarWithTextContainer} from '@component/Common/Navigation/AccentBar.tsx';
+import {AccentBarWithText} from '@package/ui/composite/typography/AccentBarWithText.tsx';
 import {useChapterListStore} from '@/global/page/chapterListStore';
 import {Link} from '@package/ui/primitive/link/Link.tsx';
 
@@ -77,7 +77,7 @@ function getAllExpandableIds(nodes: ChapterTreeItem[]): Set<string> {
   return set;
 }
 
-type ChapterTreeProps = {
+export type ChapterTreeProps = {
   bookId: string;
   nodes: ChapterTreeItem[];
   expanded: Set<string>;
@@ -309,7 +309,7 @@ export const ChapterTreeView = forwardRef<
 });
 
 /** Props for ChapterList component. */
-interface ChapterListProps {
+export interface ChapterListProps {
   /** Book unit ID. */
   id: string;
 }
@@ -341,7 +341,7 @@ export const ChapterList: React.FC<ChapterListProps> = ({id}) => {
   return (
     <div>
       <div className="flex justify-between items-center mb-4">
-        <AccentBarWithTextContainer text={t('book.toc')} />
+        <AccentBarWithText text={t('book.toc')} />
 
         <div className="flex justify-end gap-2">
           <Button

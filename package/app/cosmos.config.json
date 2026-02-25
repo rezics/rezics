@@ -3,5 +3,5 @@
   "plugins": ["react-cosmos-plugin-vite"],
   "fixtureFileSuffix": "test",
   "globalImports": ["./src/app/index.css"],
-  "port": 5173
+  "port": 5181
 }

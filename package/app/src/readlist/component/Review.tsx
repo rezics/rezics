@@ -3,7 +3,7 @@ import {IconButton, Paper, Tooltip} from '@mui/material';
 import {ExpandMore, ExpandLess, ChatBubbleOutline} from '@mui/icons-material';
 import {BookListViewItem} from '@/book-library/component/BookList/BookListView';
 import {useNavigate} from '@tanstack/react-router';
-import {MarkdownContent} from '@/component/MarkdownContent';
+import {MarkdownContent} from '@package/ui/composite/content/MarkdownContent.tsx';
 import {ReviewHeader} from '@/review/component/SingleReview';
 import {useTranslation} from 'react-i18next';
 
