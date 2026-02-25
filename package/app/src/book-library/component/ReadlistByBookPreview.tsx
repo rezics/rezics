@@ -1,4 +1,4 @@
-import {ReadlistList} from '@/readlist/component/ReadlistList.tsx';
+import {HorizontalReadListCarousel} from '@/readlist/component/list/HorizontalReadListCarousel.tsx';
 import {AccentBarWithText} from '@package/ui/composite/typography/AccentBarWithText.tsx';
 import {ArrowForwardIcon} from '@package/ui/composite/navigation/ArrowForwardIcon.tsx';
 
@@ -9,7 +9,7 @@ import {useTranslation} from 'react-i18next';
 export function ReadlistByBookPreview({
   title,
   bookId,
-  readlistNumber = 6,
+  readlistNumber = 12,
 }: {
   title: string;
   bookId?: string;
@@ -36,8 +36,9 @@ export function ReadlistByBookPreview({
         <AccentBarWithText text={t('readlist.includes_book_title', {title})} />
       </ArrowForwardIcon>
       <div className="mb-4" />
-      <ReadlistList
-        booklists={data?.readlists?.slice(0, readlistNumber) || []}
+      <HorizontalReadListCarousel
+        readlistList={data?.readlists?.slice(0, readlistNumber) || []}
+        variant="double-line"
       />
     </div>
   );

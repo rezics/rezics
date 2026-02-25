@@ -14,21 +14,24 @@
 /** Book library list page. */
 export {BookLibPage} from './page/BookLibPage';
 
-/** Book detail page. */
-export {BookDetailPage} from './page/BookPage';
+/** Book detail layout (shared hero + data fetching). */
+export {BookDetailLayout} from './page/BookPage';
+
+/** Book detail sub-pages (routed tabs). */
+export {BookBasicInfoPage} from './page/BookBasicInfoPage';
+export {BookReviewPage} from './page/BookReviewPage';
+export {BookContentPage} from './page/BookContentPage';
 
 // Backward compatible aliases
 export {BookLibPage as BookLibContainer} from './page/BookLibPage';
-export {BookDetailPage as BookPageContainer} from './page/BookPage';
 
 // ============================================================================
 // Section Components (Page-composable modules)
 // ============================================================================
 
 export {
-  BookDetailSection,
-  type BookDetailSectionProps,
-  type BookDetailTabValue,
+  BookDetailShell,
+  type BookDetailShellProps,
 } from './section/BookDetailSection';
 
 export {BookHeroSection} from './section/BookHeroSection';
@@ -42,7 +45,7 @@ export {
 // Backward compatible aliases
 export {BookLibSection as BookLibShow} from './section/BookLibSection';
 export {BookLibSectionRef as BookLibShowRef} from './section/BookLibSection';
-export {BookDetailSection as BookDetailView} from './section/BookDetailSection';
+export {BookDetailShell as BookDetailView} from './section/BookDetailSection';
 
 // ============================================================================
 // UI Components (Reusable building blocks)

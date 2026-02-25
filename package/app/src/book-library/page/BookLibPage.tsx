@@ -1,8 +1,8 @@
 import React, {useEffect, useMemo, useRef, useState} from 'react';
 
-import type {SearchInfo} from '@/component/Search/searchParser';
-import type {BookLibSortKey} from '@/component/Search/SearchFilter';
-import {type UniversalPaginatorHandle} from '@/component/navigation/Pagination';
+import type {SearchInfo} from '@/search/component/searchParser';
+import type {BookLibSortKey} from '@/search/component/SearchFilter';
+import {type UniversalPaginatorHandle} from '@package/ui/composite/pagination/Pagination.tsx';
 
 import {meiliQueries} from '@package/api/meili/meili.queries';
 import {useQuery, useQueryClient} from '@tanstack/react-query';

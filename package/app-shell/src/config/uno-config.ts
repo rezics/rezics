@@ -17,6 +17,15 @@ export function createUnoConfig() {
         xl: '1280px', // 标准桌面显示器
         '2xl': '1536px', // 大屏显示器 / 高分屏
       },
+      container: {
+        xs: '0px',
+        xsm: '450px',
+        sm: '640px',
+        md: '768px',
+        lg: '1024px',
+        xl: '1280px',
+        '2xl': '1536px',
+      },
       spacing: {
         '4': '1rem', // TODO 完全不知道到底是谁在用这个东西，不应该有人用才对，但是没有会报错
       },
