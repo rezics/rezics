@@ -1,4 +1,4 @@
-import {AccentBarWithTextShow} from '@/component/navigation/AccentBar';
+import {AccentBarWithText} from '@package/ui/composite/typography/AccentBarWithText.tsx';
 import {ReadListsPage} from './ReadListsPage.tsx';
 import {useTranslation} from 'react-i18next';
 import {readlistByBookRoute} from '@/router';
@@ -9,7 +9,7 @@ export function ReadlistByBookPage() {
 
   return (
     <div className="w-11/12 mx-auto mt-10">
-      <AccentBarWithTextShow text={`${t('pages.book_collection_list_page')}`} />
+      <AccentBarWithText text={`${t('pages.book_collection_list_page')}`} />
       <div className="mt-4">
         <ReadListsPage bookUnitId={bookId} />
       </div>

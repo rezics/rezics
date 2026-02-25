@@ -24,14 +24,17 @@ const LinkWithIcon = styled(Box)(({theme}) => ({
   },
 }));
 
-export type Show = {
+export type ArrowForwardIconProps = {
   size?: number;
   color?: string;
   children?: React.ReactNode;
   to?: string;
 };
 
-export const ArrowForwardIconShow: React.FC<Show> = ({children, to}) => {
+export const ArrowForwardIcon: React.FC<ArrowForwardIconProps> = ({
+  children,
+  to,
+}) => {
   return (
     <Link to={to || '/'}>
       <LinkWithIcon>
@@ -42,9 +45,4 @@ export const ArrowForwardIconShow: React.FC<Show> = ({children, to}) => {
       </LinkWithIcon>
     </Link>
   );
-};
-
-export type Container = Show;
-export const ArrowForwardIconContainer: React.FC<Container> = props => {
-  return <ArrowForwardIconShow {...props} />;
 };

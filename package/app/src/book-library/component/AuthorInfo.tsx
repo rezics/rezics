@@ -1,11 +1,11 @@
-import {AccentBarWithTextContainer} from '@/component/navigation/AccentBar.tsx';
-import {ArrowForwardIconContainer} from '@/component/navigation/ArrowForwardIcon.tsx';
-import {EditButtonFloatRightShow} from '@/component/UI/Button/EditButtonFloatRight';
+import {AccentBarWithText} from '@package/ui/composite/typography/AccentBarWithText.tsx';
+import {ArrowForwardIcon} from '@package/ui/composite/navigation/ArrowForwardIcon.tsx';
+import {EditButtonFloatRightShow} from '@package/ui/composite/button/EditButtonFloatRight.tsx';
 import {Typography} from '@mui/material';
 import React from 'react';
 import {useTranslation} from 'react-i18next';
 import type {PublicUser} from '@package/contract';
-import {FollowButton} from '@/component/Reaction/FollowButton.tsx';
+import {FollowButton} from '@/engagement/component/FollowButton.tsx';
 import {LazyLoadImage} from '@package/ui/primitive/image/LazyLoadImage.tsx';
 import {useIsMobile} from '@/shared/util/use-media-query.ts';
 import {useNavigate} from '@tanstack/react-router';
@@ -36,11 +36,11 @@ const AuthorInfoMobile: React.FC<AuthorInfoLayoutProps> = ({
   const {t} = useTranslation();
   return (
     <div>
-      <ArrowForwardIconContainer size={16} to={`/user/${author?.unitId}`}>
-        <AccentBarWithTextContainer
+      <ArrowForwardIcon size={16} to={`/user/${author?.unitId}`}>
+        <AccentBarWithText
           text={t('book.author_info.author_line', {name: author?.name})}
         />
-      </ArrowForwardIconContainer>
+      </ArrowForwardIcon>
       {showEditButton && (
         <EditButtonFloatRightShow onClick={onEdit} text={t('common.edit')} />
       )}
@@ -91,11 +91,11 @@ const AuthorInfoDesktop: React.FC<AuthorInfoLayoutProps> = ({
     <div>
       <div>
         <div className="flex mb-4">
-          <ArrowForwardIconContainer size={16} to={`/user/${author?.unitId}`}>
-            <AccentBarWithTextContainer
+          <ArrowForwardIcon size={16} to={`/user/${author?.unitId}`}>
+            <AccentBarWithText
               text={t('book.author_info.author_line', {name: author?.name})}
             />
-          </ArrowForwardIconContainer>
+          </ArrowForwardIcon>
           {showEditButton && (
             <EditButtonFloatRightShow
               onClick={onEdit}

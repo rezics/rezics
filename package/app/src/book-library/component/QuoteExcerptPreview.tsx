@@ -1,6 +1,6 @@
 import {isEmptyValue} from '@/shared/util/data-check.ts';
 import React from 'react';
-import {QuoteExcerptListContainer} from '@component/Review/QuoteExcerptList.tsx';
+import {QuoteExcerptListContainer} from '@/review/component/QuoteExcerptList.tsx';
 
 import {useQuery} from '@tanstack/react-query';
 import {buildMeiliUnitQuery} from '@package/api/meili/meili.queries';

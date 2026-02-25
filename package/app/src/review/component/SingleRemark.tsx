@@ -4,13 +4,13 @@ import ThumbUpIcon from '@mui/icons-material/ThumbUp';
 import {Box, Tooltip, Typography} from '@mui/material';
 import type {ReviewDTO} from '@package/contract';
 import React, {useState, useEffect} from 'react';
-import {CollapsibleByLineTextContainer} from '../Common/UI/Text/CollapsibleByLineText';
+import {CollapsibleByLineTextContainer} from '@package/ui/primitive/typography/collapsible-text/CollapsibleByLineText.tsx';
 import {
   parseReactionSummaries,
   type ReactionSummaryDTO,
 } from '@/shared/util/reaction-summaries-parser';
 
-import {LazyLoadImage} from '../Common/LazyLoadImage';
+import {LazyLoadImage} from '@package/ui/primitive/image/LazyLoadImage.tsx';
 import {MUILink} from '@package/ui/primitive/link/MUILink.tsx';
 
 export function MetaInfoBadge({

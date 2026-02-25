@@ -1,6 +1,6 @@
 import {TagWrapper} from '@/tag/component/TagWrapper.tsx';
-import {AccentBarWithTextContainer} from '@/component/navigation/AccentBar';
-import {ArrowForwardIconContainer} from '@/component/navigation/ArrowForwardIcon';
+import {AccentBarWithText} from '@package/ui/composite/typography/AccentBarWithText.tsx';
+import {ArrowForwardIcon} from '@package/ui/composite/navigation/ArrowForwardIcon.tsx';
 import {Box, Divider, Stack} from '@mui/material';
 import React from 'react';
 import {useTranslation} from 'react-i18next';
@@ -28,12 +28,9 @@ export const BookDetailBasicInfoTab: React.FC<{bookInfo: BookDTO}> = ({
       <Divider />
 
       <div>
-        <ArrowForwardIconContainer
-          size={16}
-          to={`/tag/book/${bookInfo?.unitId}/tag`}
-        >
-          <AccentBarWithTextContainer text={t('book.tags')} />
-        </ArrowForwardIconContainer>
+        <ArrowForwardIcon size={16} to={`/tag/book/${bookInfo?.unitId}/tag`}>
+          <AccentBarWithText text={t('book.tags')} />
+        </ArrowForwardIcon>
       </div>
       <TagWrapper filters={{objectId: bookInfo?.unitId || ''}} mode="grouped" />
       <Divider />
@@ -51,24 +48,21 @@ export const BookDetailBasicInfoTab: React.FC<{bookInfo: BookDTO}> = ({
       <Divider />
 
       <div>
-        <ArrowForwardIconContainer
-          size={16}
-          to={`/quote/book/${bookInfo?.unitId}`}
-        >
-          <AccentBarWithTextContainer text={t('book.quote_excerpts')} />
-        </ArrowForwardIconContainer>
+        <ArrowForwardIcon size={16} to={`/quote/book/${bookInfo?.unitId}`}>
+          <AccentBarWithText text={t('book.quote_excerpts')} />
+        </ArrowForwardIcon>
       </div>
       <QuoteExcerptPreview id={bookInfo?.unitId || ''} />
       <Divider />
 
       <Box>
         <div>
-          <ArrowForwardIconContainer
+          <ArrowForwardIcon
             size={16}
             to={`/review/book/${bookInfo?.unitId}?tab=remark`}
           >
-            <AccentBarWithTextContainer text={t('book.remark')} />
-          </ArrowForwardIconContainer>
+            <AccentBarWithText text={t('book.remark')} />
+          </ArrowForwardIcon>
         </div>
         <RemarkPreview bookId={bookInfo?.unitId || ''} />
       </Box>

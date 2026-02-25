@@ -1,8 +1,8 @@
 import React, {useEffect, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 
-import {AccentBarWithTextShow} from '@/component/navigation/AccentBar.tsx';
-import {ArrowForwardIconContainer} from '@/component/navigation/ArrowForwardIcon.tsx';
+import {AccentBarWithText} from '@package/ui/composite/typography/AccentBarWithText.tsx';
+import {ArrowForwardIcon} from '@package/ui/composite/navigation/ArrowForwardIcon.tsx';
 import {ReviewListContainer} from '@/review/component/ReviewList.tsx';
 
 import {useQuery} from '@tanstack/react-query';
@@ -51,9 +51,9 @@ export const BookReviews: React.FC<BookReviewsProps> = ({
 
   return (
     <div>
-      <ArrowForwardIconContainer size={16} to={`/review/book/${bookId}/`}>
-        <AccentBarWithTextShow text={t('book.reviews_of_book', {title})} />
-      </ArrowForwardIconContainer>
+      <ArrowForwardIcon size={16} to={`/review/book/${bookId}/`}>
+        <AccentBarWithText text={t('book.reviews_of_book', {title})} />
+      </ArrowForwardIcon>
       <ReviewListContainer reviews={reviews?.slice(0, reviewNumber)} />
     </div>
   );

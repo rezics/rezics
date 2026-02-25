@@ -1,6 +1,6 @@
 import {ReadlistList} from '@/readlist/component/ReadlistList.tsx';
-import {AccentBarWithTextContainer} from '@/component/navigation/AccentBar.tsx';
-import {ArrowForwardIconContainer} from '@/component/navigation/ArrowForwardIcon.tsx';
+import {AccentBarWithText} from '@package/ui/composite/typography/AccentBarWithText.tsx';
+import {ArrowForwardIcon} from '@package/ui/composite/navigation/ArrowForwardIcon.tsx';
 
 import {useQuery} from '@tanstack/react-query';
 import {buildMeiliReadlistQuery} from '@package/api/meili/meili.queries';
@@ -32,11 +32,9 @@ export function ReadlistByBookPreview({
 
   return (
     <div>
-      <ArrowForwardIconContainer size={16} to={`/readlist/book/${bookId}`}>
-        <AccentBarWithTextContainer
-          text={t('readlist.includes_book_title', {title})}
-        />
-      </ArrowForwardIconContainer>
+      <ArrowForwardIcon size={16} to={`/readlist/book/${bookId}`}>
+        <AccentBarWithText text={t('readlist.includes_book_title', {title})} />
+      </ArrowForwardIcon>
       <div className="mb-4" />
       <ReadlistList
         booklists={data?.readlists?.slice(0, readlistNumber) || []}

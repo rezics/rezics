@@ -10,7 +10,7 @@ import {
 } from '@mui/material';
 import {useNavigate} from '@tanstack/react-router';
 import React from 'react';
-import {MiniActionBar} from '@/component/reaction/MiniActionBar';
+import {MiniActionBar} from '@/engagement/component/MiniActionBar.tsx';
 import {LazyLoadImage} from '@package/ui/primitive/image/LazyLoadImage.tsx';
 
 interface SingleReadlistProps {
