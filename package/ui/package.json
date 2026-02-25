@@ -10,6 +10,10 @@
       "types": "./src/*",
       "import": "./src/*"
     },
+    "./shadcn": {
+      "types": "./src/shadcn/index.ts",
+      "import": "./src/shadcn/index.ts"
+    },
     "./primitive/link": {
       "types": "./src/primitive/link/index.ts",
       "import": "./src/primitive/link/index.ts"

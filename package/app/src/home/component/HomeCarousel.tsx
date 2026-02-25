@@ -16,7 +16,7 @@ import {
   CarouselContent,
   CarouselItem,
   type CarouselApi,
-} from '@package/ui/shadcn/carousel.tsx';
+} from '@package/ui/shadcn';
 import {useEmblaAutoplay} from '@package/ui/primitive/carousel/use-embla-autoplay.ts';
 
 type ProductType = {

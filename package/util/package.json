@@ -4,7 +4,8 @@
   "version": "0.0.1",
   "scripts": {
     "install-services": "bun run install-services/install-services.ts",
-    "deploy": "bun run deploy-script/deploy-script.ts"
+    "deploy": "bun run deploy-script/deploy-script.ts",
+    "generate-barrel": "bun run scripts/generate-barrel.ts"
   },
   "devDependencies": {
     "@types/node": "^24.10.1"
