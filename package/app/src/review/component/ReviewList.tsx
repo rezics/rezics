@@ -1,73 +1,49 @@
 import {type ReviewDTO} from '@package/contract';
 import {SingleReviewShow} from './SingleReview';
 
-import {Box, Button} from '@mui/material';
+import {Box} from '@mui/material';
 import React, {useEffect, useReducer} from 'react';
 
-export type ReviewListShowProps = {
+export type ReviewListProps = {
+  reviews: ReviewDTO[];
+};
+
+type State = {
   reviews: ReviewDTO[];
   isReplyModalOpen: boolean;
   currentReplyId: string | null;
-  onReply: (reviewId: string) => void;
-  onCloseReplyModal: () => void;
 };
 
-export const ReviewListShow: React.FC<ReviewListShowProps> = ({
-  reviews,
-  onReply,
-}) => {
-  return (
-    <Box>
-      {reviews.map((review: ReviewDTO) => (
-        <SingleReviewShow
-          key={review.unitId}
-          review={review}
-          onReply={onReply}
-        />
-      ))}
-    </Box>
-  );
+type Action =
+  | {type: 'setReviews'; reviews: ReviewDTO[]}
+  | {type: 'openReply'; id: string}
+  | {type: 'closeReply'};
+
+const reducer = (state: State, action: Action): State => {
+  switch (action.type) {
+    case 'setReviews':
+      return {...state, reviews: action.reviews};
+
+    case 'openReply':
+      return {
+        ...state,
+        isReplyModalOpen: true,
+        currentReplyId: action.id,
+      };
+
+    case 'closeReply':
+      return {
+        ...state,
+        isReplyModalOpen: false,
+        currentReplyId: null,
+      };
+
+    default:
+      return state;
+  }
 };
 
-export type ReviewListContainerProps = {
-  reviews: ReviewDTO[];
-};
-
-export const ReviewListContainer: React.FC<ReviewListContainerProps> = ({
-  reviews,
-}) => {
-  type State = {
-    reviews: ReviewDTO[];
-    isReplyModalOpen: boolean;
-    currentReplyId: string | null;
-  };
-
-  type Action =
-    | {type: 'setReviews'; reviews: ReviewDTO[]}
-    | {type: 'openReply'; id: string}
-    | {type: 'closeReply'};
-
-  const reducer = (state: State, action: Action): State => {
-    switch (action.type) {
-      case 'setReviews':
-        return {...state, reviews: action.reviews};
-      case 'openReply':
-        return {
-          ...state,
-          isReplyModalOpen: true,
-          currentReplyId: action.id,
-        };
-      case 'closeReply':
-        return {
-          ...state,
-          isReplyModalOpen: false,
-          currentReplyId: null,
-        };
-      default:
-        return state;
-    }
-  };
-
+export const ReviewList: React.FC<ReviewListProps> = ({reviews}) => {
   const [state, dispatch] = useReducer(reducer, {
     reviews: [],
     isReplyModalOpen: false,
@@ -87,12 +63,22 @@ export const ReviewListContainer: React.FC<ReviewListContainerProps> = ({
   };
 
   return (
-    <ReviewListShow
-      reviews={state.reviews}
-      isReplyModalOpen={state.isReplyModalOpen}
-      currentReplyId={state.currentReplyId}
-      onReply={handleReply}
-      onCloseReplyModal={handleCloseReplyModal}
-    />
+    <Box>
+      {state.reviews.map(review => (
+        <SingleReviewShow
+          key={review.unitId}
+          review={review}
+          onReply={handleReply}
+        />
+      ))}
+
+      {/* 
+      <ReplyModal
+        open={state.isReplyModalOpen}
+        reviewId={state.currentReplyId}
+        onClose={handleCloseReplyModal}
+      />
+      */}
+    </Box>
   );
 };

@@ -11,23 +11,22 @@ import {useMatchRoute} from '@tanstack/react-router';
 import {useTranslation} from 'react-i18next';
 
 import {reviewQueries} from '@package/api/review/review';
-import {MarkdownContent} from '@/component/Common/MarkdownContent';
+import {MarkdownContent} from '@package/ui/composite/content/MarkdownContent.tsx';
 import {bookQueries} from '@package/api/book/book';
 import {BookListViewItem} from '@/book-library/component/BookList/BookListView';
 import {useRef} from 'react';
-import TreeReplyComponents from '@/component/Form/Comment/TreeReplyComponents';
+import TreeReplyComponents from '@/comment/component/TreeReplyComponents';
 import {ChatBubbleOutline} from '@mui/icons-material';
-import {AccentBarWithTextShow} from '@/component/navigation/AccentBar';
-import {SingleCommentElementWrapper} from '@/component/Form/Comment/SingleCommentElementWrapper';
+import {AccentBar} from '@package/ui/primitive/decorative/AccentBar.tsx';
+import {SingleCommentElementWrapper} from '@/comment/component/SingleCommentElementWrapper.tsx';
 
 import {
   MiniActionBar,
   MiniAdminActionBar,
-} from '@/component/Common/Reaction/MiniActionBar';
-import {ReactionStatistics} from '@/component/Common/Reaction/ReactionStatistics';
+} from '@/engagement/component/MiniActionBar.tsx';
+import {ReactionStatistics} from '@/engagement/component/ReactionStatistics.tsx';
 import {parseReactionSummaries} from '@/shared/util/reaction-summaries-parser';
 import {MUILink} from '@package/ui/primitive/link/MUILink.tsx';
-import {remarkRoute, reviewRoute} from '@/router';
 
 export function ReviewPage() {
   const matchRoute = useMatchRoute();
@@ -175,7 +174,7 @@ export function ReviewPage() {
         <div ref={commentRef} className="mt-5">
           <div className="flex items-center justify-between w-full">
             <div className="flex items-center gap-2">
-              <AccentBarContainer />
+              <AccentBar />
               <p className="text-2xl font-bold">{t('review.comments')}</p>
             </div>
 

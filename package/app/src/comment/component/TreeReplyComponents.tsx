@@ -10,7 +10,7 @@ import {useDialogStore} from '@/global/dialogStore';
 import {
   ReactionAdminBar,
   ReactionBar,
-} from '@/component/reaction/ReactionBar.tsx';
+} from '@/engagement/component/ReactionBar.tsx';
 import {ReplyDrawerContainer} from './ReplyDrawer.tsx';
 
 import {commentQueries} from '@package/api/comment/comment.queries';

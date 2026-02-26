@@ -3,7 +3,7 @@ import {useTranslation} from 'react-i18next';
 
 import {AccentBarWithText} from '@package/ui/composite/typography/AccentBarWithText.tsx';
 import {ArrowForwardIcon} from '@package/ui/composite/navigation/ArrowForwardIcon.tsx';
-import {ReviewListContainer} from '@/review/component/ReviewList.tsx';
+import {ReviewList} from '@/review/component/ReviewList.tsx';
 
 import {useQuery} from '@tanstack/react-query';
 import {buildMeiliUnitQuery} from '@package/api/meili/meili.queries';
@@ -26,7 +26,7 @@ interface BookReviewsProps {
 export const BookReviews: React.FC<BookReviewsProps> = ({
   bookId,
   title,
-  reviewNumber = 4,
+  reviewNumber = 3,
 }) => {
   const {t} = useTranslation();
   const [reviews, setReviews] = useState<ReviewDTO[]>([]);
@@ -54,7 +54,7 @@ export const BookReviews: React.FC<BookReviewsProps> = ({
       <ArrowForwardIcon size={16} to={`/review/book/${bookId}/`}>
         <AccentBarWithText text={t('book.reviews_of_book', {title})} />
       </ArrowForwardIcon>
-      <ReviewListContainer reviews={reviews?.slice(0, reviewNumber)} />
+      <ReviewList reviews={reviews?.slice(0, reviewNumber)} />
     </div>
   );
 };

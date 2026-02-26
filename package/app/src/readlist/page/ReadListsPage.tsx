@@ -1,11 +1,8 @@
 import React, {useEffect, useMemo, useRef, useState} from 'react';
 import {Alert} from '@mui/material';
-import {
-  UniversalPaginator,
-  type UniversalPaginatorHandle,
-} from '@/component/Common/Navigation/Pagination';
-import {SimpleSearchInput} from '@/component/Search/SimpleSearchInput';
-import type {SearchInfo} from '@/component/Search/searchParser';
+import {UniversalPaginator, type UniversalPaginatorHandle} from '@package/ui';
+import {SimpleSearchInput} from '@/search/component/SimpleSearchInput.tsx';
+import type {SearchInfo} from '@/search/component/searchParser.tsx';
 import {useQuery, useQueryClient} from '@tanstack/react-query';
 import {buildMeiliReadlistQuery} from '@package/api/meili/meili.queries';
 import type {ReadlistDTO} from '@package/contract';
@@ -14,7 +11,7 @@ import {useTranslation} from 'react-i18next';
 
 type Readlist = ReadlistDTO;
 
-import {SingleReadlist} from '@/component/ReadList/SingleReadlist';
+import {SingleReadlist} from '@/readlist/component/SingleReadlist.tsx';
 
 // Simple list view for Readlists
 const ReadlistListView: React.FC<{readlists: Readlist[]}> = ({readlists}) => {

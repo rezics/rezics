@@ -54,7 +54,8 @@ export async function syncUnitToMeili(unitId: string): Promise<void> {
           }
         : null;
       if (bookMetadata) {
-        doc.metadata.append({book: bookMetadata});
+        doc.metadata = doc.metadata ?? {};
+        doc.metadata.book = bookMetadata;
       }
     }
   }

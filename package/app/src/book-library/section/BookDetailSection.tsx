@@ -42,7 +42,7 @@ export const BookDetailShell: React.FC<BookDetailShellProps> = ({
 
   return (
     <Box id="book-detail">
-      <Box maxWidth="lg" className="mt-4 mb-8 mx-auto">
+      <Box maxWidth="xl" className="mt-4 mb-8 mx-auto">
         <Grid container spacing={4}>
           <Grid size={{xs: 12, lg: 9}}>
             <Tabs value={activeTab} onChange={handleTabChange}>

@@ -3,13 +3,10 @@ import {Tabs, Tab, Box} from '@mui/material';
 import {useQuery, useQueryClient} from '@tanstack/react-query';
 import {useRouterState} from '@tanstack/react-router';
 
-import {
-  UniversalPaginator,
-  type UniversalPaginatorHandle,
-} from '@/component/Common/Navigation/Pagination';
-import {ReviewListContainer} from '@/component/Review/ReviewList';
+import {UniversalPaginator, type UniversalPaginatorHandle} from '@package/ui';
+import {ReviewList} from '@/review/component/ReviewList.tsx';
 import type {ReviewDTO} from '@package/contract';
-import {SimpleSearchInput} from '@/component/Search/SimpleSearchInput';
+import {SimpleSearchInput} from '@/search/component/SimpleSearchInput.tsx';
 import {buildMeiliUnitQuery} from '@package/api/meili/meili.queries';
 import {reactionApi} from '@package/api/reaction/reaction.api';
 import {UnitType} from '@package/contract';
@@ -196,7 +193,7 @@ export const ReviewsPage: React.FC<ReviewsPageProps> = ({bookUnitId}) => {
         }
       >
         {(currentPageItems: Review[]) => (
-          <ReviewListContainer reviews={currentPageItems} />
+          <ReviewList reviews={currentPageItems} />
         )}
       </UniversalPaginator>
     </div>

@@ -1,5 +1,5 @@
-import {AccentBarWithTextShow} from '@/component/navigation/AccentBar';
-import {TreeReplyComponents} from '@/component/Form/Comment/TreeReplyComponents';
+import {AccentBar} from '@package/ui/primitive/decorative/AccentBar.tsx';
+import {TreeReplyComponents} from '@/comment/component/TreeReplyComponents.tsx';
 import {ChatBubbleOutline} from '@mui/icons-material';
 import {Avatar, IconButton, Tooltip} from '@mui/material';
 import React, {useRef} from 'react';
@@ -9,15 +9,15 @@ import {useTranslation} from 'react-i18next';
 
 import {readlistQueries} from '@package/api/readlist/readlist';
 import {useQuery} from '@tanstack/react-query';
-import {BookReviewGroup} from '@/component/ReadList/Review.tsx';
-import {SingleCommentElementWrapper} from '@/component/Form/Comment/SingleCommentElementWrapper';
+import {BookReviewGroup} from '../component/Review';
+import {SingleCommentElementWrapper} from '@/comment/component/SingleCommentElementWrapper.tsx';
 
 import {
   MiniActionBar,
   MiniAdminActionBar,
-} from '@/component/Common/Reaction/MiniActionBar';
+} from '@/engagement/component/MiniActionBar.tsx';
 import {parseReactionSummaries} from '@/shared/util/reaction-summaries-parser';
-import {ReactionStatistics} from '@/component/Common/Reaction/ReactionStatistics';
+import {ReactionStatistics} from '@/engagement/component/ReactionStatistics.tsx';
 
 export const ReadListPage: React.FC = () => {
   const {readlistId} = Route.useParams();
@@ -142,7 +142,7 @@ export const ReadListPage: React.FC = () => {
       <div ref={commentRef} className="mt-5">
         <div className="flex items-center justify-between w-full">
           <div className="flex items-center gap-2">
-            <AccentBarContainer />
+            <AccentBar />
             <p className="text-2xl font-bold">{t('page.readlist.comments')}</p>
           </div>
 

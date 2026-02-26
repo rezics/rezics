@@ -19,7 +19,7 @@ export interface HorizontalReadListCarouselProps {
 
 const CarouselItemClassName =
   // 'pl-4 basis-[100%] xsm:basis-[60%] md:basis-[50%] lg:basis-[30%] xl:basis-[25%] 2xl:basis-[20%]';
-  'pl-4 basis-[100%] @xs:basis-[60%] @sm:basis-[50%] @md:basis-[45%] @lg:basis-[30%] @xl:basis-[25%] @2xl:basis-[20%]';
+  'pl-4 basis-[90%] @xs:basis-[60%] @sm:basis-[50%] @md:basis-[45%] @lg:basis-[30%] @xl:basis-[25%] @2xl:basis-[20%]';
 
 export const HorizontalReadListCarousel: React.FC<
   HorizontalReadListCarouselProps

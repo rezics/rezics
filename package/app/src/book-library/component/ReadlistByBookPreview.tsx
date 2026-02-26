@@ -38,7 +38,6 @@ export function ReadlistByBookPreview({
       <div className="mb-4" />
       <HorizontalReadListCarousel
         readlistList={data?.readlists?.slice(0, readlistNumber) || []}
-        variant="double-line"
       />
     </div>
   );

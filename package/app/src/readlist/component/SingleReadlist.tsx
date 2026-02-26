@@ -10,7 +10,7 @@ import {
 } from '@mui/material';
 import ThumbUpAltOutlinedIcon from '@mui/icons-material/ThumbUpAltOutlined';
 import BookmarkAddOutlinedIcon from '@mui/icons-material/BookmarkAddOutlined';
-import {LazyLoadImage} from '../Common/LazyLoadImage';
+import {LazyLoadImage} from '@package/ui/primitive/image/LazyLoadImage.tsx';
 import {useTranslation} from 'react-i18next';
 import {MUILink} from '@package/ui/primitive/link/MUILink.tsx';
 

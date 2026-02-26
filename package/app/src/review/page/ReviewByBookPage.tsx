@@ -1,7 +1,7 @@
 import {useNavigate} from '@tanstack/react-router';
 
 import {ReviewsPage} from './ReviewsPage';
-import {AccentBarWithTextShow} from '@/component/Common/Navigation/AccentBar';
+import {AccentBarWithText} from '@package/ui/composite/typography/AccentBarWithText.tsx';
 import {ReviewNewPage} from './ReviewNewPage';
 import {useTranslation} from 'react-i18next';
 import {Button, Divider} from '@mui/material';
@@ -14,7 +14,7 @@ export function ReviewByBookPage() {
   return (
     <div className="w-11/12 max-w-4xl mx-auto mt-10">
       <div className="flex items-center justify-between">
-        <AccentBarWithTextShow text={`${t('pages.review_page')}`} />
+        <AccentBarWithText text={`${t('pages.review_page')}`} />
         <Button
           variant="outlined"
           color="primary"
