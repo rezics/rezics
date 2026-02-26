@@ -9,7 +9,7 @@ import type {BookDTO} from '@package/contract';
 
 import {BookDetailSidebar} from '../component/BookDetail/BookDetailSidebar';
 
-const TAB_ROUTES = ['basic-info', 'review', 'content'] as const;
+const TAB_ROUTES = ['info', 'review', 'content'] as const;
 
 function useActiveTabIndex(): number {
   const pathname = useRouterState({select: s => s.location.pathname});
@@ -46,7 +46,7 @@ export const BookDetailShell: React.FC<BookDetailShellProps> = ({
         <Grid container spacing={4}>
           <Grid size={{xs: 12, lg: 9}}>
             <Tabs value={activeTab} onChange={handleTabChange}>
-              <Tab label={t('page.book.tabs.basic_info')} />
+              <Tab label={t('page.book.tabs.info')} />
               <Tab label={t('page.book.tabs.reviews')} />
               <Tab label={t('page.book.tabs.toc')} />
             </Tabs>

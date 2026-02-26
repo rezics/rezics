@@ -15,7 +15,7 @@
 export {BookLibPage} from './page/BookLibPage';
 
 /** Book detail layout (shared hero + data fetching). */
-export {BookDetailLayout} from './page/BookPage';
+export {BookDetailLayout} from './page/BookDetailLayout';
 
 /** Book detail sub-pages (routed tabs). */
 export {BookBasicInfoPage} from './page/BookBasicInfoPage';

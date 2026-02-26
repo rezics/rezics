@@ -56,8 +56,8 @@ import { Route as MainLayoutReadlistReadlistIdEditRouteImport } from './routes/_
 import { Route as MainLayoutQuoteBookBookIdRouteImport } from './routes/_mainLayout/quote/book/$bookId'
 import { Route as MainLayoutQuoteUnitIdEditRouteImport } from './routes/_mainLayout/quote/$unitId/edit'
 import { Route as MainLayoutBookBookIdReviewRouteImport } from './routes/_mainLayout/book/$bookId/review'
+import { Route as MainLayoutBookBookIdInfoRouteImport } from './routes/_mainLayout/book/$bookId/info'
 import { Route as MainLayoutBookBookIdContentRouteImport } from './routes/_mainLayout/book/$bookId/content'
-import { Route as MainLayoutBookBookIdBasicInfoRouteImport } from './routes/_mainLayout/book/$bookId/basic-info'
 import { Route as BookBookIdReadChapterIdRouteRouteImport } from './routes/book_/$bookId/read/$chapterId/route'
 import { Route as MainLayoutTagDomainUnitIdRouteRouteImport } from './routes/_mainLayout/tag/domain/$unitId/route'
 import { Route as MainLayoutTagBookBookIdRouteRouteImport } from './routes/_mainLayout/tag/book/$bookId/route'
@@ -320,16 +320,16 @@ const MainLayoutBookBookIdReviewRoute =
     path: '/review',
     getParentRoute: () => MainLayoutBookBookIdRouteRoute,
   } as any)
+const MainLayoutBookBookIdInfoRoute =
+  MainLayoutBookBookIdInfoRouteImport.update({
+    id: '/info',
+    path: '/info',
+    getParentRoute: () => MainLayoutBookBookIdRouteRoute,
+  } as any)
 const MainLayoutBookBookIdContentRoute =
   MainLayoutBookBookIdContentRouteImport.update({
     id: '/content',
     path: '/content',
-    getParentRoute: () => MainLayoutBookBookIdRouteRoute,
-  } as any)
-const MainLayoutBookBookIdBasicInfoRoute =
-  MainLayoutBookBookIdBasicInfoRouteImport.update({
-    id: '/basic-info',
-    path: '/basic-info',
     getParentRoute: () => MainLayoutBookBookIdRouteRoute,
   } as any)
 const BookBookIdReadChapterIdRouteRoute =
@@ -421,8 +421,8 @@ export interface FileRoutesByFullPath {
   '/tag/book/$bookId': typeof MainLayoutTagBookBookIdRouteRouteWithChildren
   '/tag/domain/$unitId': typeof MainLayoutTagDomainUnitIdRouteRouteWithChildren
   '/book/$bookId/read/$chapterId': typeof BookBookIdReadChapterIdRouteRouteWithChildren
-  '/book/$bookId/basic-info': typeof MainLayoutBookBookIdBasicInfoRoute
   '/book/$bookId/content': typeof MainLayoutBookBookIdContentRoute
+  '/book/$bookId/info': typeof MainLayoutBookBookIdInfoRoute
   '/book/$bookId/review': typeof MainLayoutBookBookIdReviewRoute
   '/quote/$unitId/edit': typeof MainLayoutQuoteUnitIdEditRoute
   '/quote/book/$bookId': typeof MainLayoutQuoteBookBookIdRoute
@@ -475,8 +475,8 @@ export interface FileRoutesByTo {
   '/readlist': typeof MainLayoutReadlistIndexRoute
   '/review': typeof MainLayoutReviewIndexRoute
   '/unit': typeof MainLayoutUnitIndexRoute
-  '/book/$bookId/basic-info': typeof MainLayoutBookBookIdBasicInfoRoute
   '/book/$bookId/content': typeof MainLayoutBookBookIdContentRoute
+  '/book/$bookId/info': typeof MainLayoutBookBookIdInfoRoute
   '/book/$bookId/review': typeof MainLayoutBookBookIdReviewRoute
   '/quote/$unitId/edit': typeof MainLayoutQuoteUnitIdEditRoute
   '/quote/book/$bookId': typeof MainLayoutQuoteBookBookIdRoute
@@ -536,8 +536,8 @@ export interface FileRoutesById {
   '/_mainLayout/tag/book/$bookId': typeof MainLayoutTagBookBookIdRouteRouteWithChildren
   '/_mainLayout/tag/domain/$unitId': typeof MainLayoutTagDomainUnitIdRouteRouteWithChildren
   '/book_/$bookId/read/$chapterId': typeof BookBookIdReadChapterIdRouteRouteWithChildren
-  '/_mainLayout/book/$bookId/basic-info': typeof MainLayoutBookBookIdBasicInfoRoute
   '/_mainLayout/book/$bookId/content': typeof MainLayoutBookBookIdContentRoute
+  '/_mainLayout/book/$bookId/info': typeof MainLayoutBookBookIdInfoRoute
   '/_mainLayout/book/$bookId/review': typeof MainLayoutBookBookIdReviewRoute
   '/_mainLayout/quote/$unitId/edit': typeof MainLayoutQuoteUnitIdEditRoute
   '/_mainLayout/quote/book/$bookId': typeof MainLayoutQuoteBookBookIdRoute
@@ -598,8 +598,8 @@ export interface FileRouteTypes {
     | '/tag/book/$bookId'
     | '/tag/domain/$unitId'
     | '/book/$bookId/read/$chapterId'
-    | '/book/$bookId/basic-info'
     | '/book/$bookId/content'
+    | '/book/$bookId/info'
     | '/book/$bookId/review'
     | '/quote/$unitId/edit'
     | '/quote/book/$bookId'
@@ -652,8 +652,8 @@ export interface FileRouteTypes {
     | '/readlist'
     | '/review'
     | '/unit'
-    | '/book/$bookId/basic-info'
     | '/book/$bookId/content'
+    | '/book/$bookId/info'
     | '/book/$bookId/review'
     | '/quote/$unitId/edit'
     | '/quote/book/$bookId'
@@ -712,8 +712,8 @@ export interface FileRouteTypes {
     | '/_mainLayout/tag/book/$bookId'
     | '/_mainLayout/tag/domain/$unitId'
     | '/book_/$bookId/read/$chapterId'
-    | '/_mainLayout/book/$bookId/basic-info'
     | '/_mainLayout/book/$bookId/content'
+    | '/_mainLayout/book/$bookId/info'
     | '/_mainLayout/book/$bookId/review'
     | '/_mainLayout/quote/$unitId/edit'
     | '/_mainLayout/quote/book/$bookId'
@@ -1082,18 +1082,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MainLayoutBookBookIdReviewRouteImport
       parentRoute: typeof MainLayoutBookBookIdRouteRoute
     }
+    '/_mainLayout/book/$bookId/info': {
+      id: '/_mainLayout/book/$bookId/info'
+      path: '/info'
+      fullPath: '/book/$bookId/info'
+      preLoaderRoute: typeof MainLayoutBookBookIdInfoRouteImport
+      parentRoute: typeof MainLayoutBookBookIdRouteRoute
+    }
     '/_mainLayout/book/$bookId/content': {
       id: '/_mainLayout/book/$bookId/content'
       path: '/content'
       fullPath: '/book/$bookId/content'
       preLoaderRoute: typeof MainLayoutBookBookIdContentRouteImport
-      parentRoute: typeof MainLayoutBookBookIdRouteRoute
-    }
-    '/_mainLayout/book/$bookId/basic-info': {
-      id: '/_mainLayout/book/$bookId/basic-info'
-      path: '/basic-info'
-      fullPath: '/book/$bookId/basic-info'
-      preLoaderRoute: typeof MainLayoutBookBookIdBasicInfoRouteImport
       parentRoute: typeof MainLayoutBookBookIdRouteRoute
     }
     '/book_/$bookId/read/$chapterId': {
@@ -1170,16 +1170,16 @@ declare module '@tanstack/react-router' {
 }
 
 interface MainLayoutBookBookIdRouteRouteChildren {
-  MainLayoutBookBookIdBasicInfoRoute: typeof MainLayoutBookBookIdBasicInfoRoute
   MainLayoutBookBookIdContentRoute: typeof MainLayoutBookBookIdContentRoute
+  MainLayoutBookBookIdInfoRoute: typeof MainLayoutBookBookIdInfoRoute
   MainLayoutBookBookIdReviewRoute: typeof MainLayoutBookBookIdReviewRoute
   MainLayoutBookBookIdIndexRoute: typeof MainLayoutBookBookIdIndexRoute
 }
 
 const MainLayoutBookBookIdRouteRouteChildren: MainLayoutBookBookIdRouteRouteChildren =
   {
-    MainLayoutBookBookIdBasicInfoRoute: MainLayoutBookBookIdBasicInfoRoute,
     MainLayoutBookBookIdContentRoute: MainLayoutBookBookIdContentRoute,
+    MainLayoutBookBookIdInfoRoute: MainLayoutBookBookIdInfoRoute,
     MainLayoutBookBookIdReviewRoute: MainLayoutBookBookIdReviewRoute,
     MainLayoutBookBookIdIndexRoute: MainLayoutBookBookIdIndexRoute,
   }

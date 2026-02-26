@@ -136,7 +136,7 @@ export default {
     },
     book: {
       tabs: {
-        basic_info: 'Basic info',
+        info: 'Info',
         reviews: 'Reviews',
         toc: 'Contents',
       },

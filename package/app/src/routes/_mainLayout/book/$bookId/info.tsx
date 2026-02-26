@@ -5,6 +5,6 @@ const BookBasicInfoPage = lazyRouteComponent(
   'BookBasicInfoPage',
 );
 
-export const Route = createFileRoute('/_mainLayout/book/$bookId/basic-info')({
+export const Route = createFileRoute('/_mainLayout/book/$bookId/info')({
   component: BookBasicInfoPage,
 });
