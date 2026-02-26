@@ -4,9 +4,27 @@ import presetWind4 from '@unocss/preset-wind4';
 import presetAnimations from 'unocss-preset-animations';
 import {builtinColors, presetShadcn} from 'unocss-preset-shadcn';
 import {presetScrollbarHide} from 'unocss-preset-scrollbar-hide';
+import {container as defaultContainer} from '@unocss/preset-wind4/theme';
 
 export function createUnoConfig() {
   return defineConfig({
+    presets: [
+      presetWind4({preflights: {reset: true}}),
+      presetShadcn(builtinColors.map(c => ({color: c}))),
+      presetAnimations(),
+      presetIcons(),
+      presetAttributify({
+        prefix: 'un-',
+        prefixedOnly: true,
+      }), // support <div un-text="red-500">
+      // * small presets below
+      presetScrollbarHide(),
+    ],
+    transformers: [transformerDirectives()],
+    shortcuts: {
+      'horizontal-book-carousel':
+        'pl-4 !basis-1/3 xsm:!basis-1/4 sm:!basis-1/5 md:!basis-1/6 lg:!basis-1/7 xl:!basis-1/8',
+    },
     theme: {
       breakpoint: {
         xs: '0px',
@@ -18,8 +36,9 @@ export function createUnoConfig() {
         '2xl': '1536px', // 大屏显示器 / 高分屏
       },
       container: {
-        xs: '0px',
-        xsm: '450px',
+        // container 只能定义 defaultContainer 中有的key，否则会导致奇怪的覆盖
+        ...defaultContainer,
+        xs: '450px',
         sm: '640px',
         md: '768px',
         lg: '1024px',
@@ -41,23 +60,6 @@ export function createUnoConfig() {
           dark: 'var(--mui-palette-secondary-dark)',
         },
       },
-    },
-    presets: [
-      presetWind4({preflights: {reset: true}}),
-      presetShadcn(builtinColors.map(c => ({color: c}))),
-      presetAnimations(),
-      presetIcons(),
-      presetAttributify({
-        prefix: 'un-',
-        prefixedOnly: true,
-      }), // support <div un-text="red-500">
-      // * small presets below
-      presetScrollbarHide(),
-    ],
-    transformers: [transformerDirectives()],
-    shortcuts: {
-      'horizontal-book-carousel':
-        'pl-4 !basis-1/3 xsm:!basis-1/4 sm:!basis-1/5 md:!basis-1/6 lg:!basis-1/7 xl:!basis-1/8',
     },
   });
 }

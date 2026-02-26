@@ -31,7 +31,7 @@ export function ReadlistByBookPreview({
     );
 
   return (
-    <div>
+    <div className="@container">
       <ArrowForwardIcon size={16} to={`/readlist/book/${bookId}`}>
         <AccentBarWithText text={t('readlist.includes_book_title', {title})} />
       </ArrowForwardIcon>

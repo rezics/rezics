@@ -36,7 +36,7 @@ export const TrendingReadListSection: React.FC<
   }
 
   return (
-    <div className="w-full">
+    <div className="w-full @container">
       <div className="flex items-center justify-between mb-4">
         <h2 className="font-semibold">{resolvedTitle}</h2>
         <Button
