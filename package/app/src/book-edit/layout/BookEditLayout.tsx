@@ -1,11 +1,11 @@
-import {Header} from '@/core/component/Header/MainLayoutHeader.tsx';
-import {Sidebar} from '@/core/component/Sidebar/MainLayoutSidebar.tsx';
+import {Header} from '@/core/component/header/MainLayoutHeader.tsx';
+import {Sidebar} from '@/core/component/sidebar/MainLayoutSidebar.tsx';
 import React, {type ReactNode, useEffect, useState} from 'react';
 
 import {NAVIGATION} from './BookEditorNavigation';
 import {useLayoutStore} from '@/core/state/layoutStore.ts';
 
-import {LinearChapterList} from '@/book/library/component/Chapter/LinearChapterList';
+import {LinearChapterList} from '@/book-library/component/Chapter/LinearChapterList';
 
 import {DraggableResizer} from '@/core/component/DraggableResizer.tsx';
 import {bookEditChapterRoute, bookEditLayoutRoute} from '@/router';

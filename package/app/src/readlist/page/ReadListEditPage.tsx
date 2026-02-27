@@ -19,10 +19,10 @@ import {
   useUpdateReadlistMutation,
 } from '@package/api/readlist/readlist';
 import {reviewQueries} from '@package/api/review/review';
-import {BookReviewGroup} from '@/component/ReadList/Review.tsx';
+import {BookReviewGroup} from '@/readlist/component/Review';
 import {bookQueries} from '@package/api/book/book';
 import {useNavigate} from '@tanstack/react-router';
-import {ConfirmDeleteDialog} from '@/component/Form/ConfirmDeleteDialog';
+import {ConfirmDeleteDialog} from '@package/ui/composite/form/ConfirmDeleteDialog.tsx';
 import {useAlertStore} from '@app/state/windowAlertStore';
 import {mapUnitListToReviewListResponse} from '@package/api/meili/meili.api';
 import {useTranslation} from 'react-i18next';
@@ -257,7 +257,7 @@ export const ReadListEditor: React.FC<{
             label={t('page.readlist.title_label')}
             className="w-full"
             variant="standard"
-            value={readlistData?.title}
+            value={readlistData?.title ?? ''}
             onChange={e =>
               setReadlistData((prev: any) => ({...prev, title: e.target.value}))
             }
@@ -267,7 +267,7 @@ export const ReadListEditor: React.FC<{
             label={t('page.readlist.summary_label')}
             variant="standard"
             className="w-full"
-            value={readlistData?.content}
+            value={readlistData?.content ?? ''}
             onChange={e =>
               setReadlistData((prev: any) => ({
                 ...prev,
@@ -279,7 +279,7 @@ export const ReadListEditor: React.FC<{
             label={t('page.readlist.cover_label')}
             variant="standard"
             className="w-full"
-            value={readlistData?.coverUrl}
+            value={readlistData?.coverUrl ?? ''}
             onChange={e =>
               setReadlistData((prev: any) => ({
                 ...prev,

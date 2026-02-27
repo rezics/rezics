@@ -1,5 +1,5 @@
-import {AccentBarContainer} from '@/component/navigation/AccentBar';
-import {TreeReplyComponents} from '@/component/Form/Comment/TreeReplyComponents';
+import {AccentBar} from '@package/ui/primitive/decorative/AccentBar.tsx';
+import {TreeReplyComponents} from '@/comment/component/TreeReplyComponents';
 import {ChatBubbleOutline} from '@mui/icons-material';
 import {IconButton, Typography} from '@mui/material';
 import React, {useRef} from 'react';
@@ -8,14 +8,14 @@ import {useTranslation} from 'react-i18next';
 import {useQuery} from '@tanstack/react-query';
 import {unitQueries} from '@package/api/unit/unit.queries';
 import FormatQuoteIcon from '@mui/icons-material/FormatQuote';
-import {SingleCommentElementWrapper} from '@/component/Form/Comment/SingleCommentElementWrapper';
-import {MarkdownContent} from '@/component/MarkdownContent';
+import {SingleCommentElementWrapper} from '@/comment/component/SingleCommentElementWrapper';
+import {MarkdownContent} from '@package/ui/composite/content/MarkdownContent.tsx';
 import {
   MiniActionBar,
   MiniAdminActionBar,
-} from '@/component/Reaction/MiniActionBar';
+} from '@/engagement/component/MiniActionBar';
 import {parseReactionSummaries} from '@/shared/util/reaction-summaries-parser';
-import {ReactionStatistics} from '@/component/Reaction/ReactionStatistics';
+import {ReactionStatistics} from '@/engagement/component/ReactionStatistics';
 import {LazyLoadImage} from '@package/ui/primitive/image/LazyLoadImage.tsx';
 import {quoteRoute} from '@/router';
 
@@ -137,7 +137,7 @@ export const QuotePage: React.FC = () => {
       <div ref={commentRef} className="mt-8">
         <div className="flex items-center justify-between w-full">
           <div className="flex items-center gap-2">
-            <AccentBarContainer />
+            <AccentBar />
             <p className="text-2xl font-bold">{t('review.comments')}</p>
           </div>
 

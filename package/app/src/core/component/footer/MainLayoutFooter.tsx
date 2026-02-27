@@ -60,7 +60,7 @@ export function MainLayoutFooter({className}: {className?: string}) {
     >
       <Divider sx={{borderColor: 'divider'}} />
 
-      <Container maxWidth="lg" className="mx-auto px-4">
+      <Container maxWidth="xl" className="mx-auto px-4">
         {/* Top content */}
         <Box className="py-12">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
