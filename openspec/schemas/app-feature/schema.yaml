@@ -1,0 +1,122 @@
+name: app-feature
+version: 1
+description: Web app feature workflow aligned with package/app feature layering standard
+
+artifacts:
+  - id: proposal
+    generates: proposal.md
+    description: Feature proposal for web app package boundaries and behavior impact
+    template: proposal.md
+    instruction: |
+      Create a concise proposal for a web app feature change.
+
+      Required sections:
+      - **Why**: problem/opportunity and user impact.
+      - **What Changes**: high-level behavior and UX changes.
+      - **Feature Scope**: target feature name and affected layer folders:
+        - `model`, `hooks`, `util`, `state`, `component`, `section`, `page`, `index.ts`
+      - **Package Scope**: explicitly list affected packages (e.g. `package/app`, `package/ui`, `package/api`).
+      - **Impact**: compatibility, migration, and operational impact.
+
+      Constraints:
+      - Write in English.
+      - Keep scope minimal and reversible.
+      - Distinguish behavior changes from pure refactor.
+    requires: []
+
+  - id: specs
+    generates: 'specs/**/*.md'
+    description: Behavior requirements and acceptance scenarios for the feature
+    template: spec.md
+    instruction: |
+      Create behavior-first specs for this web app feature.
+
+      Structure rules:
+      - Use delta sections with exact headings:
+        - `## ADDED Requirements`
+        - `## MODIFIED Requirements`
+        - `## REMOVED Requirements`
+        - `## RENAMED Requirements`
+      - Requirement format: `### Requirement: <name>`
+      - Scenario format: `#### Scenario: <name>` with clear GIVEN/WHEN/THEN style bullets.
+      - Every requirement SHALL have at least one scenario.
+
+      Content rules:
+      - Use normative wording (SHALL/MUST where appropriate).
+      - Cover user-visible behavior, error handling, accessibility, and localization when relevant.
+      - Avoid implementation details (keep those in design/tasks).
+      - For REMOVED requirements, include **Reason** and **Migration**.
+    requires:
+      - proposal
+
+  - id: design
+    generates: design.md
+    description: Technical design aligned to feature layering constraints
+    template: design.md
+    instruction: |
+      Create a technical design for implementing the feature in web app architecture.
+
+      Mandatory design sections:
+      - **Context**
+      - **Goals / Non-Goals**
+      - **Layered Design**
+      - **Data and State Flow**
+      - **Risks / Trade-offs**
+      - **Validation Plan**
+      - **Rollout / Migration** (if applicable)
+
+      Layered Design MUST map changes to:
+      - `model`: pure business entities/rules/selectors, no React/hooks/state imports.
+      - `hooks`: feature-local React side effects and event handling.
+      - `util`: feature-local technical helpers (formatting/parsing), not business rules.
+      - `state`: jotai/zustand state containers.
+      - `component`: presentational, side-effect free UI building blocks.
+      - `section`: business composition layer wiring state/hooks/components.
+      - `page`: thin route entry assembly.
+      - `index.ts`: only public feature export.
+
+      Dependency constraints:
+      - Do not let `model` depend on `hooks` or `state`.
+      - Prefer internal relative imports within the same feature for cohesive modules.
+      - Use root-level aliases only for app/platform-level shared modules.
+      - External modules must import the feature via `index.ts` only.
+
+      Special case:
+      - `core` is an infrastructure feature (core-main) serving a group of features.
+      - Document why `core` changes are needed and what feature contracts they provide.
+
+      Write in English.
+    requires:
+      - proposal
+
+  - id: tasks
+    generates: tasks.md
+    description: Executable task checklist for feature implementation and validation
+    template: tasks.md
+    instruction: |
+      Create an implementation checklist for the web app feature.
+
+      Task format requirements:
+      - Use numbered sections (`## 1.`, `## 2.` ...).
+      - Every item MUST be a checkbox in `- [ ] X.Y Description` format.
+      - Keep tasks small, verifiable, and ordered by dependency.
+
+      Task coverage requirements:
+      - Include explicit tasks for each affected layer folder (`model/hooks/util/state/component/section/page/index.ts`).
+      - Include tasks to enforce import boundaries and layering constraints.
+      - Include targeted validation steps in tasks (lint, typecheck, package-level tests/build).
+      - If public exports change, include migration/update steps for call sites.
+      - Do not include unrelated refactors.
+
+      Write in English.
+    requires:
+      - specs
+      - design
+
+apply:
+  requires: [tasks]
+  tracks: tasks.md
+  instruction: |
+    Implement pending tasks incrementally and update checkboxes as work completes.
+    Keep changes scoped to affected packages and feature boundaries.
+    Validate with targeted checks first, then broader checks only if needed.

@@ -1,20 +1,34 @@
 schema: spec-driven
 
-# Project context (optional)
-# This is shown to AI when creating artifacts.
-# Add your tech stack, conventions, style guides, domain knowledge, etc.
-# Example:
-#   context: |
-#     Tech stack: TypeScript, React, Node.js
-#     We use conventional commits
-#     Domain: e-commerce platform
+context: |
+  Monorepo: rezics-book-library
+  Runtime: Bun + TypeScript ESM
+  Frontend: React 19 + Vite
+  Backend: Elysia + Prisma + PostgreSQL
 
-# Per-artifact rules (optional)
-# Add custom rules for specific artifacts.
-# Example:
-#   rules:
-#     proposal:
-#       - Keep proposals under 500 words
-#       - Always include a "Non-goals" section
-#     tasks:
-#       - Break tasks into chunks of max 2 hours
+rules:
+  proposal:
+    - Write in English.
+    - Include Problem, Goals, Non-goals, Scope, and Impact.
+    - Cross-package imports should include the file suffix, while references within the same package should omit the suffix.
+    - Explicitly list affected packages (for example package/app, package/admin, package/server).
+    - State backward-compatibility expectations and migration needs.
+
+  design:
+    - Write in English.
+    - Include current state, target design, alternatives considered, risks, and rollout plan.
+    - Show integration points across packages and data flow boundaries.
+    - Keep design aligned with existing feature layering and shared package contracts.
+
+  specs:
+    - Write requirement statements in normative form (SHALL/SHOULD where applicable).
+    - Include at least one acceptance scenario per requirement.
+    - Separate user-visible behavior from implementation notes.
+    - Call out localization, accessibility, and error-handling expectations when relevant.
+
+  tasks:
+    - Write in English.
+    - Break work into small, testable, implementation-ready tasks.
+    - Tasks SHALL reference affected modules or introduce new modules explicitly.
+    - Include validation steps (build, lint, or targeted tests) for changed areas.
+    - If public exports change, tasks SHALL include repo-wide migration steps (grep/codemod) and compile verification.
