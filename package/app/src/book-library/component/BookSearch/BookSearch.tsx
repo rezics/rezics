@@ -1,7 +1,6 @@
 import React, {useMemo, useState} from 'react';
 import {useTranslation} from 'react-i18next';
-import {Search} from '@/search/component/index.ts';
-import type {SearchInfo} from '@/search/component/searchParser';
+import {SearchInput, type SearchInfo} from '@/search';
 import type {BookQueryOptions} from '@package/contract';
 
 /** Available sort types for book search. */
@@ -90,7 +89,7 @@ export const BookSearchInput: React.FC<BookSearchInputProps> = ({
   return (
     <div>
       <div id="book-search-input">
-        <Search.Container
+        <SearchInput
           onSearch={handleSearch}
           placeholder={t('placeholders.search_books')}
           tagGroups={tagGroups}
@@ -98,19 +97,7 @@ export const BookSearchInput: React.FC<BookSearchInputProps> = ({
           hiddenWordCountFilter={hiddenWordCountFilter}
         />
       </div>
-      <div className="mt-4">
-        {/* <Search.Filter
-          sortType={sort.type ?? 'relevance'}
-          sortOrder={sort.order ?? 'desc'}
-          onSortChange={s =>
-            setSort(prev => ({
-              ...prev,
-              ...(s.type ? {type: s.type as BookSortType} : {}),
-              ...(s.order ? {order: s.order} : {}),
-            }))
-          }
-        /> */}
-      </div>
+      <div className="mt-4" />
     </div>
   );
 };

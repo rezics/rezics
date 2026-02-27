@@ -8,6 +8,11 @@ import {Link} from '@package/ui/primitive/link/Link.tsx';
 import {useAppStore} from '@/app/state/appStore.ts';
 import {MoreHorizMenu} from './MoreHorizMenu.tsx';
 import {DrawerToggler} from './DrawerToggler.tsx';
+import {
+  DesktopHeaderSearchSection,
+  MobileHeaderSearchSection,
+  MobileHeaderSearchToggleSection,
+} from '@/search';
 
 interface HeaderProps {
   isDragging?: boolean;
@@ -64,24 +69,28 @@ export const Header: React.FC<HeaderProps> = ({
           layoutType={layoutType}
           sidebarOpen={sidebarOpen}
         />
-        <Typography variant="h6" noWrap component="div" sx={{flexGrow: 1}}>
-          <Link to="/" className="flex items-center gap-2">
-            <Avatar sx={{bgcolor: 'transparent'}} variant="rounded">
-              <img src="/logo.svg" alt="logo" />
-            </Avatar>
-            <Typography
-              variant="h1"
-              className="text-2xl font-bold"
-              sx={{color: 'primary.main'}}
-            >
-              REZICS
-            </Typography>
-          </Link>
-        </Typography>
+        <div className="flex items-center flex-1 min-w-0">
+          <Typography variant="h6" noWrap component="div" sx={{mr: 1}}>
+            <Link to="/" className="flex items-center gap-2">
+              <Avatar sx={{bgcolor: 'transparent'}} variant="rounded">
+                <img src="/logo.svg" alt="logo" />
+              </Avatar>
+              <Typography
+                variant="h1"
+                className="text-2xl font-bold"
+                sx={{color: 'primary.main'}}
+              >
+                REZICS
+              </Typography>
+            </Link>
+          </Typography>
+          <DesktopHeaderSearchSection />
+        </div>
         <UserContainer onLogout={() => console.log('Logout')} />
-        {/* 手机模式这里添加搜索按钮 */}
+        <MobileHeaderSearchToggleSection />
         <MoreHorizMenu />
       </Toolbar>
+      <MobileHeaderSearchSection />
     </AppBar>
   );
 };

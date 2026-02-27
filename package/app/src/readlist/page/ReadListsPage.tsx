@@ -1,8 +1,7 @@
 import React, {useEffect, useMemo, useRef, useState} from 'react';
 import {Alert} from '@mui/material';
 import {UniversalPaginator, type UniversalPaginatorHandle} from '@package/ui';
-import {SimpleSearchInput} from '@/search/component/SimpleSearchInput.tsx';
-import type {SearchInfo} from '@/search/component/searchParser.tsx';
+import {SimpleSearchInput, type SearchInfo} from '@/search';
 import {useQuery, useQueryClient} from '@tanstack/react-query';
 import {buildMeiliReadlistQuery} from '@package/api/meili/meili.queries';
 import type {ReadlistDTO} from '@package/contract';

@@ -1,44 +1,41 @@
 import React from 'react';
 import {Stack} from '@mui/material';
 import {
-  SearchInputContainer,
-  SearchInputShow,
-  type SearchInputContainerProps,
-  type SearchInputShowProps,
+  SearchInput,
+  SearchInputView,
+  type SearchInputProps,
+  type SearchInputViewProps,
 } from './SearchInput';
 import {BookSearchFilter} from './SearchFilter';
-import type {SortControlsProps} from '@/component/navigation/Pagination';
+import type {SortControlsProps} from '@package/ui/composite/pagination/Pagination.tsx';
 
-export type SearchPanelShowProps = {
-  inputProps: Omit<SearchInputShowProps, 'onAddTag'> & {
+export type SearchPanelViewProps = {
+  inputProps: Omit<SearchInputViewProps, 'onAddTag'> & {
     onAddTag?: (tag: string) => void;
   };
   filterProps?: SortControlsProps;
 };
 
-export const SearchPanelShow: React.FC<SearchPanelShowProps> = ({
+export const SearchPanelView: React.FC<SearchPanelViewProps> = ({
   inputProps,
   filterProps,
 }) => {
   return (
     <div>
       <Stack direction="column" spacing={2}>
-        <SearchInputShow {...inputProps} />
+        <SearchInputView {...inputProps} />
         {filterProps && <BookSearchFilter {...filterProps} />}
       </Stack>
     </div>
   );
 };
 
-export type SearchPanelContainerProps = Omit<
-  SearchInputContainerProps,
-  'placeholder'
-> & {
+export type SearchPanelProps = Omit<SearchInputProps, 'placeholder'> & {
   placeholder?: string;
   filterProps?: SortControlsProps;
 };
 
-export const SearchPanelContainer: React.FC<SearchPanelContainerProps> = ({
+export const SearchPanel: React.FC<SearchPanelProps> = ({
   onSearch,
   defaultValue,
   placeholder,
@@ -47,7 +44,7 @@ export const SearchPanelContainer: React.FC<SearchPanelContainerProps> = ({
 }) => {
   return (
     <div>
-      <SearchInputContainer
+      <SearchInput
         onSearch={onSearch}
         defaultValue={defaultValue}
         placeholder={placeholder}

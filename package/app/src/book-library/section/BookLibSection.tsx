@@ -1,12 +1,11 @@
 import {Alert} from '@mui/material';
 import React, {forwardRef, useImperativeHandle, useRef, useState} from 'react';
 
-import type {BookLibSortKey} from '@/search/component/SearchFilter';
+import type {BookLibSortKey, SearchInfo} from '@/search';
 import {
   UniversalPaginator,
   type UniversalPaginatorHandle,
 } from '@package/ui/composite/pagination/Pagination.tsx';
-import type {SearchInfo} from '@/search/component/searchParser.tsx';
 
 import type {BookDTO} from '@package/contract';
 import {BookListView} from '../component/BookList/BookListView';

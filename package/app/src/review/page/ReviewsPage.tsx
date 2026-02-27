@@ -6,7 +6,7 @@ import {useRouterState} from '@tanstack/react-router';
 import {UniversalPaginator, type UniversalPaginatorHandle} from '@package/ui';
 import {ReviewList} from '@/review/component/ReviewList.tsx';
 import type {ReviewDTO} from '@package/contract';
-import {SimpleSearchInput} from '@/search/component/SimpleSearchInput.tsx';
+import {SimpleSearchInput} from '@/search';
 import {buildMeiliUnitQuery} from '@package/api/meili/meili.queries';
 import {reactionApi} from '@package/api/reaction/reaction.api';
 import {UnitType} from '@package/contract';

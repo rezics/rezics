@@ -6,7 +6,9 @@ import {
   TextField,
   Checkbox,
 } from '@mui/material';
-import {type SearchInfo} from '@/component/Search/searchParser';
+import type {SearchInfo} from '../model/searchInfo';
+import {normalizeSearchInfo} from '../model/searchInfo';
+import {parseBookSearchParams} from '../util/searchQuery';
 import React, {useEffect, useMemo, useState} from 'react';
 import {useRouterState} from '@tanstack/react-router';
 import {useTranslation} from 'react-i18next';
@@ -15,7 +17,7 @@ import {
   NSFWInfo,
 } from '@/book-edit/component/Metadata/BookMetadataEditor';
 
-export type SearchInputShowProps = {
+export type SearchInputViewProps = {
   value: SearchInfo;
   onValueChange: (value: SearchInfo) => void;
   onSearch: () => void;
@@ -25,7 +27,7 @@ export type SearchInputShowProps = {
   hiddenWordCountFilter?: boolean;
 };
 
-export const SearchInputShow: React.FC<SearchInputShowProps> = ({
+export const SearchInputView: React.FC<SearchInputViewProps> = ({
   value,
   onValueChange,
   onSearch,
@@ -176,7 +178,7 @@ export const SearchInputShow: React.FC<SearchInputShowProps> = ({
   );
 };
 
-export type SearchInputContainerProps = {
+export type SearchInputProps = {
   onSearch: (info: SearchInfo) => void;
   defaultValue?: SearchInfo;
   placeholder?: string;
@@ -184,7 +186,7 @@ export type SearchInputContainerProps = {
   hiddenWordCountFilter?: boolean;
 };
 
-export const SearchInputContainer: React.FC<SearchInputContainerProps> = ({
+export const SearchInput: React.FC<SearchInputProps> = ({
   onSearch,
   defaultValue = {keyword: '', tags: []},
   placeholder,
@@ -198,16 +200,7 @@ export const SearchInputContainer: React.FC<SearchInputContainerProps> = ({
 
   useEffect(() => {
     if (pathname === '/book') {
-      const keyword = searchParams.get('keyword');
-      const tags = searchParams.get('tags')?.split(',') ?? [];
-      const nsfwFlag = searchParams.get('nsfw') === 'true';
-      const isLicensedFlag = searchParams.get('isLicensed') === 'true';
-      const currentSearch = {
-        keyword: keyword ?? '',
-        tags: tags,
-        nsfw: nsfwFlag,
-        isLicensed: isLicensedFlag,
-      };
+      const currentSearch = parseBookSearchParams(searchParams.toString());
       setValue(currentSearch);
       onSearch(currentSearch);
     }
@@ -215,10 +208,7 @@ export const SearchInputContainer: React.FC<SearchInputContainerProps> = ({
   }, [search, pathname]);
 
   const handleSearch = () => {
-    onSearch({
-      ...value,
-      tags: value.tags?.filter(tag => tag.trim() !== '') ?? [],
-    });
+    onSearch(normalizeSearchInfo(value));
   };
 
   const handleAddTag = (tag: string) => {
@@ -226,7 +216,7 @@ export const SearchInputContainer: React.FC<SearchInputContainerProps> = ({
   };
 
   return (
-    <SearchInputShow
+    <SearchInputView
       value={value}
       onValueChange={setValue}
       onSearch={handleSearch}
