@@ -10,7 +10,7 @@ import {
   type UniversalPaginatorHandle,
 } from '@/component/Common/Navigation/Pagination';
 import type {UnitDTO, UnitType} from '@package/contract';
-import {SimpleSearchInput} from '@/component/Search/SimpleSearchInput';
+import {FullTextSearchInputWithIcon} from '@/search/component/FullTextSearchInputWithIcon';
 import {buildUnitUrl} from '@/shared/util/build-url';
 import {buildMeiliUnitQuery} from '@package/api/meili/meili.queries';
 
@@ -210,7 +210,7 @@ export const UnitsPage: React.FC<UnitsPageProps> = ({
         setCurrentPage={setCurrentPage}
         sortControl={
           <div className="mb-4">
-            <SimpleSearchInput
+            <FullTextSearchInputWithIcon
               onSearch={info => {
                 setKeyword(info ?? '');
               }}

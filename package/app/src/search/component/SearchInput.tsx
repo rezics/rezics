@@ -82,39 +82,43 @@ export const SearchInputView: React.FC<SearchInputViewProps> = ({
         </IconButton>
       </div>
       <div className="flex items-center gap-2 mt-4">
-        <TextField
-          fullWidth
-          size="small"
-          label={'Tags'}
-          placeholder="Click tags below or enter tags separated by commas"
-          className="max-w-xl"
-          value={
-            value.tags
-              ? value.tags.filter(tag => tag.trim() !== '').join(', ')
-              : ''
-          }
-          onChange={e =>
-            onValueChange({...value, tags: e.target.value.split(', ')})
-          }
-          onKeyDown={handleKeyDown}
-        />
-        <div className="flex flex-1 gap-2">
-          <div className="flex-1 mr-2">
-            {!hiddenWordCountFilter && (
-              <TextField
-                fullWidth
-                size="small"
-                label={'Word Count'}
-                placeholder='Min to Max: "10000-20000"'
-                value={value.textLength ?? ''}
-                onChange={e =>
-                  onValueChange({...value, textLength: e.target.value})
-                }
-                onKeyDown={handleKeyDown}
-              />
-            )}
-          </div>
+        {/* TAGS */}
+        <div className="flex-1 min-w-0">
+          <TextField
+            fullWidth
+            size="small"
+            label="Tags"
+            placeholder="Click tags below or enter tags separated by commas"
+            value={
+              value.tags
+                ? value.tags.filter(tag => tag.trim() !== '').join(', ')
+                : ''
+            }
+            onChange={e =>
+              onValueChange({...value, tags: e.target.value.split(', ')})
+            }
+            onKeyDown={handleKeyDown}
+          />
+        </div>
+
+        {/* RIGHT SIDE */}
+        <div className="flex items-center gap-2 shrink-0">
+          {!hiddenWordCountFilter && (
+            <TextField
+              size="small"
+              label="Word Count"
+              placeholder="10000-20000"
+              className="w-40"
+              value={value.textLength ?? ''}
+              onChange={e =>
+                onValueChange({...value, textLength: e.target.value})
+              }
+              onKeyDown={handleKeyDown}
+            />
+          )}
+
           <FormControlLabel
+            className="m-0"
             control={
               <Checkbox
                 checked={!!value.nsfw}
@@ -125,7 +129,9 @@ export const SearchInputView: React.FC<SearchInputViewProps> = ({
             }
             label={<NSFWInfo tooltipTitle={t('search.tooltips.nsfw')} />}
           />
+
           <FormControlLabel
+            className="m-0"
             control={
               <Checkbox
                 checked={!!value.isLicensed}

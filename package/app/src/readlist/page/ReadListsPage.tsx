@@ -1,7 +1,7 @@
 import React, {useEffect, useMemo, useRef, useState} from 'react';
 import {Alert} from '@mui/material';
 import {UniversalPaginator, type UniversalPaginatorHandle} from '@package/ui';
-import {SimpleSearchInput, type SearchInfo} from '@/search';
+import {FullTextSearchInputWithIcon, type SearchInfo} from '@/search';
 import {useQuery, useQueryClient} from '@tanstack/react-query';
 import {buildMeiliReadlistQuery} from '@package/api/meili/meili.queries';
 import type {ReadlistDTO} from '@package/contract';
@@ -33,7 +33,7 @@ function ErrorView({error}: {error: Error}) {
   const {t} = useTranslation();
   return (
     <div className="mx-auto max-w-7xl p-4">
-      <SimpleSearchInput
+      <FullTextSearchInputWithIcon
         onSearch={() => {}}
         defaultValue={{keyword: ''}}
         placeholder={t('page.readlist.list.search_placeholder')}
@@ -190,7 +190,7 @@ export function ReadListsPage({bookUnitId}: {bookUnitId?: string}) {
         preRequestData={handlePreRequestData}
         isLoading={isLoading && readlists.length === 0}
         sortControl={
-          <SimpleSearchInput
+          <FullTextSearchInputWithIcon
             onSearch={info => {
               setCurrentQuery({
                 keyword: info ?? '',

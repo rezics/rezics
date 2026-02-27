@@ -1,9 +1,9 @@
 import SearchIcon from '@mui/icons-material/Search';
 import {IconButton, Paper} from '@mui/material';
-import React, {useEffect, useState} from 'react';
+import React, {useEffect} from 'react';
 import {useRouterState} from '@tanstack/react-router';
 import {useTranslation} from 'react-i18next';
-import {HomeSearchInputBase} from '../component/HomeSearchInputBase';
+import {FullTextSearchInputWithIcon} from '../component/FullTextSearchInputWithIcon';
 import {useHomeSearchNavigate} from '../hooks/useHomeSearchNavigate';
 import {useHeaderSearchState} from '../state/headerSearchState';
 import {useIsMobile} from '@/shared/util/use-media-query';
@@ -41,8 +41,6 @@ export const MobileHeaderSearchSection: React.FC = () => {
   const closeMobileSearch = useHeaderSearchState(
     state => state.closeMobileSearch,
   );
-  const [keyword, setKeyword] = useState('');
-
   useEffect(() => {
     if (pathname !== '/') {
       closeMobileSearch();
@@ -66,13 +64,12 @@ export const MobileHeaderSearchSection: React.FC = () => {
         borderBottom: theme => `1px solid ${theme.palette.divider}`,
       }}
     >
-      <HomeSearchInputBase
-        value={keyword}
-        onValueChange={setKeyword}
-        onSubmit={value => {
+      <FullTextSearchInputWithIcon
+        onSearch={value => {
           navigateByKeyword(value);
           closeMobileSearch();
         }}
+        defaultValue={{keyword: ''}}
         placeholder={t('placeholders.search_books')}
       />
     </Paper>

@@ -1,7 +1,8 @@
 import {Alert} from '@mui/material';
 import React, {forwardRef, useImperativeHandle, useRef, useState} from 'react';
 
-import type {BookLibSortKey, SearchInfo} from '@/search';
+import type {SearchInfo} from '@/search';
+import type {BookLibSortKey} from '@/search/component/SearchFilter';
 import {
   UniversalPaginator,
   type UniversalPaginatorHandle,

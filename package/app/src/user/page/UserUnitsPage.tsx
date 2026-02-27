@@ -6,7 +6,7 @@ import {
   UniversalPaginator,
   type UniversalPaginatorHandle,
 } from '@/component/Common/Navigation/Pagination';
-import {SimpleSearchInput} from '@/component/Search/SimpleSearchInput';
+import {FullTextSearchInputWithIcon} from '@/search/component/FullTextSearchInputWithIcon';
 import type {BookDTO, ReadlistDTO, ReviewDTO, UnitDTO} from '@package/contract';
 import {UnitType} from '@package/contract';
 import {
@@ -487,7 +487,7 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({userId}) => {
     <div className="mx-auto p-2 mt-4">
       {/* 顶部搜索 + Tab */}
       <div className="mb-4">
-        <SimpleSearchInput
+        <FullTextSearchInputWithIcon
           onSearch={info => {
             setKeyword(info ?? '');
           }}
