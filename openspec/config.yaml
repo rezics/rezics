@@ -13,6 +13,7 @@ rules:
     - Cross-package imports should include the file suffix, while references within the same package should omit the suffix.
     - Explicitly list affected packages (for example package/app, package/admin, package/server).
     - State backward-compatibility expectations and migration needs.
+    - If unnecessary container/show encapsulation is encountered, it should be removed.
 
   design:
     - Write in English.
