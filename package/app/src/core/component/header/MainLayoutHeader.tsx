@@ -10,6 +10,9 @@ import {MoreHorizMenu} from './MoreHorizMenu.tsx';
 import {DrawerToggler} from './DrawerToggler.tsx';
 import {HomeSearch} from '@/search';
 import {useIsMobile} from '@/shared/util/use-media-query';
+import {useMatch} from '@tanstack/react-router';
+import {Route as HomeRoute} from '@/routes/_mainLayout/index.tsx';
+import {useUserStore} from '@/global/userStore';
 
 interface HeaderProps {
   isDragging?: boolean;
@@ -28,11 +31,13 @@ export const Header: React.FC<HeaderProps> = ({
   const themeMode = useAppStore(state => state.theme);
 
   const isDark = useMemo(() => themeMode === 'dark', [themeMode]);
-
+  const matchHomeRoute = useMatch({from: HomeRoute.id, shouldThrow: false});
   function handleDrawerToggleInner() {
     if (disableDrawerToggle) return;
     toggleSidebar();
   }
+
+  const currentUser = useUserStore(state => state.user);
 
   return (
     <AppBar
@@ -60,21 +65,23 @@ export const Header: React.FC<HeaderProps> = ({
         isDark ? 'border-gray-800' : 'border-gray-200',
       )}
     >
-      <Toolbar>
+      <Toolbar disableGutters>
         <DrawerToggler
           handleDrawerToggleInner={handleDrawerToggleInner}
           layoutType={layoutType}
           sidebarOpen={sidebarOpen}
         />
-        <div className="flex items-center min-w-0">
+        <div className="flex items-center min-w-0 h-full">
           <Typography variant="h6" noWrap component="div" sx={{mr: 1}}>
             <Link to="/" className="flex items-center gap-2">
-              <Avatar sx={{bgcolor: 'transparent'}} variant="rounded">
-                <img src="/logo.svg" alt="logo" />
-              </Avatar>
+              {!matchHomeRoute && (
+                <Avatar sx={{bgcolor: 'transparent'}} variant="rounded">
+                  <img src="/logo.svg" alt="logo" />
+                </Avatar>
+              )}
               <Typography
                 variant="h1"
-                className="text-2xl font-bold"
+                className="text-3xl font-bold"
                 sx={{color: 'primary.main'}}
               >
                 REZICS
@@ -83,10 +90,12 @@ export const Header: React.FC<HeaderProps> = ({
           </Typography>
         </div>
         <div className="flex-1 min-w-0 flex justify-center">
-          {!isMobile && <HomeSearch className="w-full max-w-md" />}
+          {!isMobile && matchHomeRoute && (
+            <HomeSearch className="w-full max-w-md" />
+          )}
         </div>
         <UserContainer onLogout={() => console.log('Logout')} />
-        <MoreHorizMenu />
+        {!currentUser && <MoreHorizMenu />}
       </Toolbar>
     </AppBar>
   );

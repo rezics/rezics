@@ -25,6 +25,7 @@ import {userQueries} from '@package/api/user/user.queries';
 import {useQuery} from '@tanstack/react-query';
 import {useIsMobile} from '@/shared/util/use-media-query';
 import {useTranslation} from 'react-i18next';
+import {MiscMenuItems} from './header/MiscMenuItems';
 
 const LoginPrompt = () => {
   const [loginModalOpen, setLoginModalOpen] = useState(false);
@@ -91,7 +92,7 @@ export const UserShow: React.FC<UserShowProps> = ({
         aria-haspopup="true"
       >
         <Avatar
-          sx={{width: 32, height: 32}}
+          sx={{width: 36, height: 36}}
           variant="rounded"
           src={user?.avatar}
         >
@@ -139,6 +140,7 @@ export const UserShow: React.FC<UserShowProps> = ({
           </ListItemIcon>
           <ListItemText>{t('navigation.settings')}</ListItemText>
         </MenuItem>
+        <MiscMenuItems />
         <Divider />
         <MenuItem onClick={onLogout}>
           <ListItemIcon>

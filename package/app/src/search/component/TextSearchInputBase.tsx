@@ -3,6 +3,8 @@ import React, {useState} from 'react';
 
 export type TextSearchInputBaseProps = {
   value: string;
+  size?: 'small' | 'medium';
+  height?: number;
   onValueChange: (value: string) => void;
   onSubmit: (value: string) => void;
   label?: string;
@@ -13,6 +15,8 @@ export type TextSearchInputBaseProps = {
 
 export const TextSearchInputBase: React.FC<TextSearchInputBaseProps> = ({
   value,
+  size = 'small',
+  height,
   onValueChange,
   onSubmit,
   label,
@@ -25,7 +29,12 @@ export const TextSearchInputBase: React.FC<TextSearchInputBaseProps> = ({
     <div className={className}>
       <TextField
         fullWidth
-        size="small"
+        size={size}
+        sx={{
+          '& .MuiInputBase-root': {
+            height: height,
+          },
+        }}
         label={label ?? ''}
         placeholder={placeholder ?? 'Find anything'}
         value={value}

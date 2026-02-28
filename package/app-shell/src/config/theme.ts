@@ -100,6 +100,16 @@ const getDesignTokens = (
   shape: {
     borderRadius: 8,
   },
+
+  mixins: {
+    toolbar: {
+      minHeight: 60,
+
+      '@media (min-width:768px)': {
+        minHeight: 60,
+      },
+    },
+  },
 });
 
 export const getDynamicTheme = (

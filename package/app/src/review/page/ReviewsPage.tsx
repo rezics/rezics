@@ -6,7 +6,7 @@ import {useRouterState} from '@tanstack/react-router';
 import {UniversalPaginator, type UniversalPaginatorHandle} from '@package/ui';
 import {ReviewList} from '@/review/component/ReviewList.tsx';
 import type {ReviewDTO} from '@package/contract';
-import {SimpleSearchInput} from '@/search';
+import {TextSearchInput} from '@/search/component/TextSearchInput';
 import {buildMeiliUnitQuery} from '@package/api/meili/meili.queries';
 import {reactionApi} from '@package/api/reaction/reaction.api';
 import {UnitType} from '@package/contract';
@@ -171,7 +171,7 @@ export const ReviewsPage: React.FC<ReviewsPageProps> = ({bookUnitId}) => {
         setCurrentPage={setCurrentPage}
         sortControl={
           <div>
-            <SimpleSearchInput
+            <TextSearchInput
               onSearch={info => {
                 setKeyword(info ?? '');
                 console.log('onSearch', info);

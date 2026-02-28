@@ -10,6 +10,8 @@ export type TextSearchInputProps = {
   enableSuggestions?: boolean;
   className?: string;
   startAdornmentIcon?: React.ReactNode;
+  size?: 'small' | 'medium';
+  height?: number;
 };
 
 export const TextSearchInput = ({
@@ -19,6 +21,8 @@ export const TextSearchInput = ({
   enableSuggestions = false,
   className,
   startAdornmentIcon,
+  size = 'small',
+  height,
 }: TextSearchInputProps) => {
   const rootRef = useRef<HTMLDivElement>(null);
 
@@ -60,6 +64,8 @@ export const TextSearchInput = ({
     >
       <TextSearchInputBase
         value={keyword}
+        size={size}
+        height={height}
         onValueChange={handleValueChange}
         onSubmit={handleSubmit}
         placeholder={placeholder}
