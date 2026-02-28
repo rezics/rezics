@@ -13,6 +13,7 @@ import {useIsMobile} from '@/shared/util/use-media-query';
 import {useMatch} from '@tanstack/react-router';
 import {Route as HomeRoute} from '@/routes/_mainLayout/index.tsx';
 import {useUserStore} from '@/global/userStore';
+import {CreateMenu} from '../create-menu/CreateMenu.tsx';
 
 interface HeaderProps {
   isDragging?: boolean;
@@ -94,6 +95,7 @@ export const Header: React.FC<HeaderProps> = ({
             <HomeSearch className="w-full max-w-md" />
           )}
         </div>
+        {currentUser && <CreateMenu />}
         <UserContainer onLogout={() => console.log('Logout')} />
         {!currentUser && <MoreHorizMenu />}
       </Toolbar>
