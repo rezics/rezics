@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {JsonEditorLight} from '@/component/Form/JsonEditorLight';
+import {JsonEditorLight} from '@package/ui/editor/jsoneditor/JsonEditorLight.tsx';
 import {useQuery} from '@tanstack/react-query';
 import {bookQueries} from '@package/api/book/book';
 import {Alert} from '@mui/material';
@@ -21,7 +21,9 @@ type ChapterTreeJsonData = {
  *
  * Note: This feature is currently disabled.
  */
-export const ChapterTreeJsonEditor: React.FC<ChapterTreeJsonEditorProps> = ({bookId}) => {
+export const ChapterTreeJsonEditor: React.FC<ChapterTreeJsonEditorProps> = ({
+  bookId,
+}) => {
   const {data, isLoading, error} = useQuery(bookQueries.chapterIndex(bookId));
 
   const [jsonData, setJsonData] = useState<ChapterTreeJsonData>({index: []});

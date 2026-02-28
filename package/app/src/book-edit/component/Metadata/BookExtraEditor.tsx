@@ -1,5 +1,5 @@
 import 'react-json-view-lite/dist/index.css';
-import {JsonEditorLight} from '@/component/Form/JsonEditorLight';
+import {JsonEditorLight} from '@package/ui/editor/jsoneditor/JsonEditorLight.tsx';
 import React, {useEffect, useState} from 'react';
 import {
   Button,
@@ -36,7 +36,7 @@ function PublishURL({value, onChange}: BookExtraEditorProps) {
   const handleAdd = () => {
     if (newUrl.trim() && onChange) {
       const updatedUrls = [...urls, newUrl.trim()];
-      onChange(updatedUrls);
+      onChange({...value, publishURL: updatedUrls});
       setNewUrl('');
     }
   };
@@ -44,7 +44,7 @@ function PublishURL({value, onChange}: BookExtraEditorProps) {
   const handleRemove = (index: number) => {
     if (onChange) {
       const updatedUrls = urls.filter((_, i) => i !== index);
-      onChange(updatedUrls);
+      onChange({...value, publishURL: updatedUrls});
     }
   };
 
@@ -128,7 +128,10 @@ function PublishURL({value, onChange}: BookExtraEditorProps) {
  *
  * Provides UI for editing publish URLs and other extra JSON data.
  */
-export const BookExtraEditor: React.FC<BookExtraEditorProps> = ({value, onChange}) => {
+export const BookExtraEditor: React.FC<BookExtraEditorProps> = ({
+  value,
+  onChange,
+}) => {
   const [extraData, setExtraData] = useState<BookExtraData>(value || {});
 
   useEffect(() => {
@@ -149,10 +152,9 @@ export const BookExtraEditor: React.FC<BookExtraEditorProps> = ({value, onChange
 
   return (
     <div>
-      <PublishURL value={extraData?.publishURL} onChange={handlePublishURLChange} />
+      <PublishURL value={extraData || undefined} onChange={handleExtraChange} />
       <Divider sx={{my: 3}} />
       <JsonEditorLight value={extraData} onChange={handleExtraChange} />
     </div>
   );
-}
-
+};

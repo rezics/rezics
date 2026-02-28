@@ -2,7 +2,7 @@ import React, {useState, useEffect, useRef} from 'react';
 
 import {LinearChapterListEdit} from '@/book-edit/component/LinearChapterListEdit';
 import {ChapterArboristHeightSlider} from '@/book-library/component/Chapter/ChapterArboristHeightSlider';
-import {AccentBarWithTextShow} from '@/component/navigation/AccentBar';
+import {AccentBarWithText} from '@package/ui/composite/typography/AccentBarWithText.tsx';
 import {Alert, Button} from '@mui/material';
 import {useQueryClient} from '@tanstack/react-query';
 import {bookChapterIndexQuery} from '@package/api/book/book';
@@ -57,7 +57,7 @@ export const BookEditChapterListPage: React.FC = () => {
   return (
     <div className="mt-10 mx-auto w-11/12" ref={containerRef}>
       <div className="flex mb-4">
-        <AccentBarWithTextShow text="章節编辑" />
+        <AccentBarWithText text="章節编辑" />
       </div>
       <Alert severity="info" className="my-4">
         右擊支持新增，頂部按鈕開啓后支持拖拽，重命名請开启Double-click Rename

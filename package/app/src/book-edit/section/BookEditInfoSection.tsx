@@ -1,7 +1,7 @@
 import {useQuery} from '@tanstack/react-query';
 import type {CreateBookInput, BookDTO} from '@package/contract';
 import {bookQueries} from '@package/api/book/book';
-import {AccentBarWithTextShow} from '@/component/navigation/AccentBar';
+import {AccentBarWithText} from '@package/ui/composite/typography/AccentBarWithText.tsx';
 import {BookMetadataEditor} from '../component/Metadata/BookMetadataEditor';
 import React from 'react';
 import {useTranslation} from 'react-i18next';
@@ -229,7 +229,7 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
 
       <div>
         <div className="flex mb-4">
-          <AccentBarWithTextShow text={t('book.edit_sections.metadata')} />
+          <AccentBarWithText text={t('book.edit_sections.metadata')} />
         </div>
         <div className="mb-8">
           <BookMetadataEditor
@@ -243,7 +243,7 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
 
       <div>
         <div className="flex mb-4">
-          <AccentBarWithTextShow text={t('book.description')} />
+          <AccentBarWithText text={t('book.description')} />
         </div>
         <EasyEditor
           value={metadataState?.description ?? ''}
@@ -255,7 +255,7 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
 
       <div>
         <div className="flex mb-4">
-          <AccentBarWithTextShow text={t('book.edit_sections.extra')} />
+          <AccentBarWithText text={t('book.edit_sections.extra')} />
         </div>
         <div className="mb-8">
           <BookExtraEditor

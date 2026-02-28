@@ -2,7 +2,7 @@ import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import {Button, CircularProgress, TextField} from '@mui/material';
 import {useTranslation} from 'react-i18next';
 
-import EasyEditor from '@/component/Form/EasyEditor.tsx';
+import EasyEditor from '@package/ui/editor/easyeditor/EasyEditor.tsx';
 import {useQuery, useQueryClient} from '@tanstack/react-query';
 import {
   chapterDetailQuery,
@@ -13,6 +13,7 @@ import {bookEditChapterRoute, bookEditLayoutRoute} from '@/router';
 
 /**
  * TODO 正常来说，所有的章节分卷管理都需要在这里解决，新增章节的时候选择分卷，或者删除章节。
+ * TODO Chapter List 换成 Tree 模式之后，编辑还没有校验
  * @param param0
  * @returns
  */
@@ -70,9 +71,13 @@ export const BookEditChapterPage: React.FC = () => {
     if (chapterIndex) {
       console.log(chapterIndex);
       const newChapterIndex = {...chapterIndex};
-      newChapterIndex.index[chapterId] = {
-        ...newChapterIndex.index[chapterId],
-        title,
+      newChapterIndex.index = {
+        ...newChapterIndex.index,
+        [chapterId]: {
+          id: chapterId,
+          title,
+          content,
+        },
       };
       updateChapterIndexMutation.mutateAsync({
         bookUnitId: bookId,

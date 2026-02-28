@@ -7,7 +7,7 @@ import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
 
-import EasyEditor from '@/component/Form/EasyEditor.tsx';
+import EasyEditor from '@package/ui/editor/easyeditor/EasyEditor.tsx';
 import {useCreateUnitMutation} from '@package/api/unit/unit.mutations';
 import {useUserStore} from '@/user/state';
 import {useAlertStore} from '@app/state/windowAlertStore';

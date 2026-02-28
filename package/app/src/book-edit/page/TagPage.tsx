@@ -1,5 +1,5 @@
 import React from 'react';
-import {AccentBarWithTextShow} from '@/component/navigation/AccentBar';
+import {AccentBarWithText} from '@package/ui/composite/typography/AccentBarWithText.tsx';
 import TagListEdit from '@/tag/component/Edit/TagListEdit';
 import {Alert} from '@mui/material';
 import {bookEditLayoutRoute} from '@/router';
@@ -10,7 +10,7 @@ export const BookEditTagPage: React.FC = () => {
     <div className="mt-10 mx-auto w-11/12">
       <div className="pl-4">
         <div className="flex mb-4">
-          <AccentBarWithTextShow text="Tag编辑" />
+          <AccentBarWithText text="Tag编辑" />
         </div>
         <div className="text-sm text-gray-500 mb-4">
           为当前书籍管理标签：可新建标签，并按列表/域分组方式查看与解绑。

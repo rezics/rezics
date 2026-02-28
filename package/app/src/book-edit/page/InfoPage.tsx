@@ -1,1 +1,1 @@
-export {BookEditMainPage} from '../ui/section/BookEditInfoSection';
+export {BookEditMainPage} from '../section/BookEditInfoSection';
