@@ -11,6 +11,7 @@ import {TrendingBookSection} from '../section/TrendingBookSection';
 import {TrendingReviews} from '../section/TrendingReviewsSection';
 import {TrendingReadListSection} from '../section/TrendingReadListSection';
 import {TrendingQuoteSection} from '../section/TrendingQuoteSection';
+import {HomeSearch} from '@/search';
 
 export type HomeProps = object;
 
@@ -22,6 +23,11 @@ export const Home: React.FC<HomeProps> = () => {
     <div className={cn('mx-auto mb-10', isMobile ? 'w-full' : 'w-10/12')}>
       <section>
         <Paper sx={{p: 2, mt: 2}}>
+          {isMobile && (
+            <div className="mb-4">
+              <HomeSearch />
+            </div>
+          )}
           <div className="w-full">
             <div className="space-y-2 mb-4">
               <p className="text-[10px] uppercase tracking-[0.35em] text-primary/80">

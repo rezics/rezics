@@ -2,23 +2,23 @@ import SearchIcon from '@mui/icons-material/Search';
 import {IconButton} from '@mui/material';
 import {useState} from 'react';
 import {useTranslation} from 'react-i18next';
-import {FullTextSearchInputBase} from './FullTextSearchInputBase';
+import {TextSearchInputBase} from './TextSearchInputBase';
 
-export const FullTextSearchInputWithIcon = ({
+export const TextSearchInputWithIcon = ({
   onSearch,
   defaultValue,
   placeholder,
 }: {
   onSearch: (value: string) => void;
   defaultValue: {keyword: string};
-  placeholder: string;
+  placeholder?: string;
 }) => {
   const {t} = useTranslation();
   const [value, setValue] = useState(defaultValue);
 
   return (
     <div className="flex items-center gap-2">
-      <FullTextSearchInputBase
+      <TextSearchInputBase
         value={value.keyword ?? ''}
         onValueChange={keyword => setValue({keyword})}
         onSubmit={onSearch}

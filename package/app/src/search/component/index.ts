@@ -1,8 +1,8 @@
 export {SearchInput, SearchInputView} from './SearchInput';
 export {BookSearchFilter} from './SearchFilter';
 export {SearchPanel, SearchPanelView} from './SearchPanel';
-export {FullTextSearchInputBase} from './FullTextSearchInputBase';
-export {FullTextSearchInputWithIcon} from './FullTextSearchInputWithIcon';
+export {TextSearchInputBase} from './TextSearchInputBase';
+export {TextSearchInputWithIcon} from './TextSearchInputWithIcon';
 
 export type {SearchInputProps, SearchInputViewProps} from './SearchInput';
 export type {BookSearchFilterProps} from './SearchFilter';

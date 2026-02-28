@@ -8,11 +8,8 @@ import {Link} from '@package/ui/primitive/link/Link.tsx';
 import {useAppStore} from '@/app/state/appStore.ts';
 import {MoreHorizMenu} from './MoreHorizMenu.tsx';
 import {DrawerToggler} from './DrawerToggler.tsx';
-import {
-  DesktopHeaderSearchSection,
-  MobileHeaderSearchSection,
-  MobileHeaderSearchToggleSection,
-} from '@/search';
+import {HomeSearch} from '@/search';
+import {useIsMobile} from '@/shared/util/use-media-query';
 
 interface HeaderProps {
   isDragging?: boolean;
@@ -27,7 +24,7 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   const {sidebarOpen, drawerWidth, toggleSidebar} = useLayoutStore();
   const theme = useTheme();
-
+  const isMobile = useIsMobile();
   const themeMode = useAppStore(state => state.theme);
 
   const isDark = useMemo(() => themeMode === 'dark', [themeMode]);
@@ -69,7 +66,7 @@ export const Header: React.FC<HeaderProps> = ({
           layoutType={layoutType}
           sidebarOpen={sidebarOpen}
         />
-        <div className="flex items-center flex-1 min-w-0">
+        <div className="flex items-center min-w-0">
           <Typography variant="h6" noWrap component="div" sx={{mr: 1}}>
             <Link to="/" className="flex items-center gap-2">
               <Avatar sx={{bgcolor: 'transparent'}} variant="rounded">
@@ -84,13 +81,13 @@ export const Header: React.FC<HeaderProps> = ({
               </Typography>
             </Link>
           </Typography>
-          <DesktopHeaderSearchSection />
+        </div>
+        <div className="flex-1 min-w-0 flex justify-center">
+          {!isMobile && <HomeSearch className="w-full max-w-md" />}
         </div>
         <UserContainer onLogout={() => console.log('Logout')} />
-        <MobileHeaderSearchToggleSection />
         <MoreHorizMenu />
       </Toolbar>
-      <MobileHeaderSearchSection />
     </AppBar>
   );
 };
