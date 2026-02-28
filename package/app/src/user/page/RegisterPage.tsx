@@ -12,7 +12,7 @@ import {
   validateSlug,
   validatePassword,
 } from '../model/validate.ts';
-import {useUserStore} from '@/global/userStore.ts';
+import {useUserStore} from '@/user/state';
 import {useNavigate, useRouterState} from '@tanstack/react-router';
 import {Turnstile} from '@package/ui/composite/auth/Turnstile.tsx';
 import {PasswordField} from '@package/ui/composite/form/field/PasswordField.tsx';

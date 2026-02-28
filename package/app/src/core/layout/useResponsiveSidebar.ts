@@ -2,7 +2,7 @@ import {useState} from 'react';
 import type React from 'react';
 import {useLayoutStore} from '../state/layoutStore.ts';
 import {useAppStore} from '@/app/state/appStore.ts';
-import {useUserStore} from '@/global/userStore';
+import {useUserStore} from '@/user/state';
 import {useIsMobile} from '@/shared/util/use-media-query';
 
 // TODO Introduce Layout Store instead of useState for drawer width and sidebar open state

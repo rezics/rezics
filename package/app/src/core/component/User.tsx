@@ -1,4 +1,4 @@
-import {useUserStore} from '@/global/userStore.ts';
+import {useUserStore} from '@/user/state';
 import {
   Logout as LogoutIcon,
   Person as PersonIcon,

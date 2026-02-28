@@ -14,7 +14,7 @@ import {
   useDeleteReactionMutation,
 } from '@package/api/reaction/reaction.mutations';
 import {useAlertStore} from '@app/state/windowAlertStore';
-import {useUserStore} from '@/global/userStore';
+import {useUserStore} from '@/user/state';
 import {Link} from '@package/ui/primitive/link/Link.tsx';
 
 export type BookmarkTagManagerProps = {

@@ -3,7 +3,7 @@ import {TextField} from '@mui/material';
 import {CooldownButton} from '@/component/UI/Button/CooldownButton';
 import {useCreateUnitMutation} from '@package/api/unit/unit.mutations';
 import {useAlertStore} from '@app/state/windowAlertStore';
-import {useUserStore} from '@/global/userStore';
+import {useUserStore} from '@/user/state';
 import type {UnitFormData} from '@package/api/unit/unit.types';
 import {QuoteEditPage} from './QuoteEditPage';
 

@@ -6,7 +6,7 @@ import {
   DialogContent,
   DialogTitle,
 } from '@mui/material';
-import {useDialogStore} from '@/global/dialogStore';
+import {useDialogStore} from '../state/dialogStore';
 
 export type DialogReplyProps = {
   onSubmit?: () => void;

@@ -3,7 +3,7 @@ import {IconButton, Popper, Tooltip} from '@mui/material';
 import {Add, Comment, Edit, FavoriteBorder} from '@mui/icons-material';
 import {useTranslation} from 'react-i18next';
 import {useNavigate} from '@tanstack/react-router';
-import {useUserStore} from '@/global/userStore';
+import {useUserStore} from '@/user/state';
 import {useQuery} from '@tanstack/react-query';
 import {
   useCreateReactionMutation,

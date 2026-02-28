@@ -6,7 +6,7 @@ import {CooldownButton} from '@package/ui/composite/button/CooldownButton.tsx';
 
 import {useCreateReviewMutation} from '@package/api/review/review.mutations';
 import {useAlertStore} from '@app/state/windowAlertStore';
-import {useUserStore} from '@/global/userStore';
+import {useUserStore} from '@/user/state';
 import {useRouterState} from '@tanstack/react-router';
 import {UnitType} from '@package/contract';
 import {reviewNewRoute} from '@/router';

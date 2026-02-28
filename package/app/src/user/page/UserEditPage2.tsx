@@ -5,7 +5,7 @@ import {
 } from '@/component/Common/UI/Button/CustomButton';
 import {ShadowRoundedCard} from '@/component/Common/UI/Card/CustomCard';
 import {RoseTextField} from '@/component/Common/UI/Text/CustomTextField';
-import {useUserStore} from '@/global/userStore';
+import {useUserStore} from '@/user/state';
 import {Box, CircularProgress, Tab, Tabs, Typography} from '@mui/material';
 import {useEffect, useState} from 'react';
 

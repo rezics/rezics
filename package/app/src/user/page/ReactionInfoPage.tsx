@@ -11,7 +11,7 @@ import {
   Button,
 } from '@mui/material';
 import {useQuery, useQueryClient} from '@tanstack/react-query';
-import {useUserStore} from '@/global/userStore';
+import {useUserStore} from '@/user/state';
 import {reactionQueries} from '@package/api/reaction/reaction.queries';
 import type {ReactionDTO} from '@package/api/reaction/reaction.types';
 import {

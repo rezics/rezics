@@ -1,4 +1,4 @@
-import {useDialogStore} from '@/global/dialogStore';
+import {useDialogStore} from '../state/dialogStore';
 import {Button, Drawer} from '@mui/material';
 import React from 'react';
 

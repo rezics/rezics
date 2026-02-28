@@ -1,4 +1,4 @@
-import {useUserStore} from '@/global/userStore.ts';
+import {useUserStore} from '@/user/state';
 import {Button, Typography} from '@mui/material';
 import {LinearChapterList} from '@/book-library/component/Chapter/LinearChapterList';
 

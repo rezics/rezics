@@ -5,7 +5,7 @@ import {Helmet} from 'react-helmet-async';
 import {NAVIGATION} from '../component/navigation/MainNavigation';
 import {MainLayoutFooter} from '../component/footer/MainLayoutFooter';
 import React from 'react';
-import {useUserStore} from '@/global/userStore';
+import {useUserStore} from '@/user/state';
 import {HelpFab} from '../component/HelpWidget';
 
 export interface MainLayoutProps {

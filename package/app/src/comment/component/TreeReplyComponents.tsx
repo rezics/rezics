@@ -6,7 +6,7 @@ import React, {useEffect, useMemo, useState} from 'react';
 import {useQuery} from '@tanstack/react-query';
 //  ;
 
-import {useDialogStore} from '@/global/dialogStore';
+import {useDialogStore} from '../state/dialogStore';
 import {
   ReactionAdminBar,
   ReactionBar,
@@ -21,7 +21,7 @@ import {
   useUpdateCommentMutation,
 } from '@package/api/comment/comment.mutations';
 
-import {useUserStore} from '@/global/userStore';
+import {useUserStore} from '@/user/state';
 import {buildTree} from './tree-reply-util';
 
 import {useAlertStore} from '@app/state/windowAlertStore';

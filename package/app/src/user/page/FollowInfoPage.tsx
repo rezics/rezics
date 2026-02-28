@@ -15,7 +15,7 @@ import {
 import {useQuery, useQueryClient} from '@tanstack/react-query';
 import type {UserDTO} from '@package/contract';
 import {userQueries} from '@package/api/user/user.queries';
-import {useUserStore} from '@/global/userStore';
+import {useUserStore} from '@/user/state';
 import {
   UniversalPaginator,
   type UniversalPaginatorHandle,

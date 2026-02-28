@@ -3,7 +3,7 @@ import type {FC} from 'react';
 import {UserProfilePage} from './UserProfilePage';
 import {UserEditPage} from './UserEditPage';
 import type {UserDTO} from '@package/contract';
-import {useUserStore} from '@/global/userStore';
+import {useUserStore} from '@/user/state';
 import {userRoute} from '@/router';
 
 export interface UserPageProps {

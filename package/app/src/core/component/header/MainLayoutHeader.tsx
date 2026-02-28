@@ -12,7 +12,7 @@ import {HomeSearch} from '@/search';
 import {useIsMobile} from '@/shared/util/use-media-query';
 import {useMatch} from '@tanstack/react-router';
 import {Route as HomeRoute} from '@/routes/_mainLayout/index.tsx';
-import {useUserStore} from '@/global/userStore';
+import {useUserStore} from '@/user/state';
 import {CreateMenu} from '../create-menu/CreateMenu.tsx';
 
 interface HeaderProps {

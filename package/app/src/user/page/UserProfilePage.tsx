@@ -16,7 +16,7 @@ import type {UserDTO} from '@package/contract';
 import {useQuery} from '@tanstack/react-query';
 import {userQueries} from '@package/api/user/user.queries';
 import {UserError, UserLoading} from './UserState';
-import {useUserStore} from '@/global/userStore';
+import {useUserStore} from '@/user/state';
 import FollowButton from '@/component/Common/Reaction/FollowButton';
 import {UserUnitsPage} from './UserUnitsPage';
 import {Link} from '@package/ui/primitive/link/Link.tsx';

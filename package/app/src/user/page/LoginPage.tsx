@@ -8,7 +8,7 @@ import {useTranslation} from 'react-i18next';
 
 import {PasswordField} from '@package/ui/composite/form/field/PasswordField.tsx';
 import {MUILink} from '@package/ui/primitive/link/MUILink.tsx';
-import {useUserStore} from '@/global/userStore';
+import {useUserStore} from '@/user/state';
 import {login} from '../model/handler';
 import {Layout} from '../layout/Layout';
 import {ModalLayout} from '../layout/ModalLayout';

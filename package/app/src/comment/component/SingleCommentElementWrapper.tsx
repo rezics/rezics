@@ -2,7 +2,7 @@ import React, {useState} from 'react';
 import {ReplyDrawerContainer} from './ReplyDrawer';
 import {useCreateCommentMutation} from '@package/api/comment/comment.mutations';
 import {useAlertStore} from '@app/state/windowAlertStore';
-import {useDialogStore} from '@/global/dialogStore';
+import {useDialogStore} from '../state/dialogStore';
 
 export function SingleCommentElementWrapper({
   replyUnitId,
