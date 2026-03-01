@@ -1,6 +1,6 @@
 import {useQueries, useQuery} from '@tanstack/react-query';
 import {MUILink} from '@package/ui/primitive/link/MUILink.tsx';
-import {AccentBarWithTextShow} from '@/component/navigation/AccentBar';
+import {AccentBarWithText} from '@package/ui/composite/typography/AccentBarWithText.tsx';
 import {tagApi, tagQueries} from '@package/api/tag/tag';
 import type {TagDetailDTO} from '@package/contract';
 import {TagWrapper} from '../component/TagWrapper';
@@ -36,7 +36,7 @@ export function TagByBookPage() {
 
   return (
     <div className="w-11/12 mx-auto mt-10">
-      <AccentBarWithTextShow text={`标签`} />
+      <AccentBarWithText text={`标签`} />
 
       {isLoading && <div>加载中…</div>}
       {error && <div>加载失败</div>}
@@ -104,7 +104,7 @@ export function TagByBookFullPage() {
 
   return (
     <div className="w-11/12 mx-auto mt-10">
-      <AccentBarWithTextShow text={`标签`} />
+      <AccentBarWithText text={`标签`} />
 
       {isLoading && <div>加载中…</div>}
       {error && <div>加载失败</div>}

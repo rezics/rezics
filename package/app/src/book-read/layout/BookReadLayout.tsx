@@ -1,13 +1,11 @@
-import {Header} from '../component/Header/MainLayoutHeader';
-import {Sidebar} from '../component/Sidebar/Sidebar';
-import {Button, Divider, useMediaQuery} from '@mui/material';
-import React, {type ReactNode, useEffect, useState} from 'react';
+import {Header} from '@/core/component/header/MainLayoutHeader';
+import {Sidebar} from '@/core/component/sidebar/MainLayoutSidebar';
+import {Button, Divider} from '@mui/material';
+import React, {type ReactNode} from 'react';
 
-import {DraggableResizer} from '../component/DraggableResizer';
-import {LinearChapterList} from '@/book/library/component/Chapter/LinearChapterList';
+import {LinearChapterList} from '@/book-library/component/Chapter/LinearChapterList';
 import {useNavigate} from '@tanstack/react-router';
-import {useResponsiveSidebar} from './useResponsiveSidebar';
-import {useLayoutStore} from '../state/layoutStore.ts';
+import {useLayoutStore} from '@/core/state/layoutStore.ts';
 import {bookReadLayoutRoute} from '@/router';
 export interface BookReadLayoutProps {
   children: ReactNode;
@@ -16,47 +14,14 @@ export interface BookReadLayoutProps {
 export const BookReadLayout: React.FC<BookReadLayoutProps> = ({children}) => {
   const navigate = useNavigate();
   const {bookId, chapterId} = bookReadLayoutRoute.useParams();
-  const [selectedId, setSelectedId] = useState(String(chapterId ?? ''));
-
   const {sidebarHeightBelow} = useLayoutStore();
-
-  useEffect(() => {
-    setSelectedId(String(chapterId ?? ''));
-  }, [chapterId]);
-
-  const {
-    sidebarOpen,
-    handleDrawerToggle,
-    themeMode,
-    toggleTheme,
-    drawerWidth,
-    isMobile,
-    closeSidebar,
-    setDrawerWidth,
-    setIsDragging,
-    isSidebarTransitioning,
-  } = useResponsiveSidebar();
 
   return (
     <div className="flex min-h-screen">
-      <Header
-        handleDrawerToggle={handleDrawerToggle}
-        mode={themeMode}
-        onThemeToggle={toggleTheme}
-        drawerWidth={drawerWidth}
-        disableDrawerToggle={isSidebarTransitioning}
-      />
+      <Header />
 
-      <div id="book-read-sidebar">
-        <Sidebar
-          sidebarOpen={sidebarOpen}
-          sidebarWidth={drawerWidth}
-          isMobile={isMobile}
-          onClose={() => isMobile && closeSidebar()}
-          handleDrawerToggle={handleDrawerToggle}
-          NAVIGATION={[]}
-          sidebarClassName="overflow-x-hidden overflow-y-hidden"
-        >
+      <div>
+        <Sidebar NAVIGATION={[]} sidebarHeaderClassName="mx-6">
           <div>
             <div className="flex items-center justify-between mb-2 bg-gray-50 text-sm text-gray-800">
               <div className="font-medium">目录</div>
@@ -78,20 +43,9 @@ export const BookReadLayout: React.FC<BookReadLayoutProps> = ({children}) => {
             />
           </div>
         </Sidebar>
-
-        <DraggableResizer
-          targetId="book-read-sidebar"
-          setSidebarWidth={setDrawerWidth}
-          onDragging={setIsDragging}
-        />
       </div>
 
-      <main
-        className="flex-grow pt-16 transition-all duration-300"
-        style={{
-          width: `calc(100% - ${!isMobile && sidebarOpen ? drawerWidth : 0}px)`,
-        }}
-      >
+      <main className="flex-grow pt-16 transition-all duration-300">
         {children}
       </main>
     </div>

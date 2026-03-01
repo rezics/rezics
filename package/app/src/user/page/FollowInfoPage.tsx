@@ -19,7 +19,7 @@ import {useUserStore} from '@/user/state';
 import {
   UniversalPaginator,
   type UniversalPaginatorHandle,
-} from '@/component/Common/Navigation/Pagination';
+} from '@package/ui/composite/pagination/Pagination.tsx';
 import {useNavigate} from '@tanstack/react-router';
 
 type SimpleUser = Omit<UserDTO, 'email'>;

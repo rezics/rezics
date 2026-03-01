@@ -1,7 +1,7 @@
 import {useQuery} from '@tanstack/react-query';
 import type {TagDetailDTO} from '@package/contract';
 import {tagQueries} from '@package/api/tag/tag';
-import {AccentBarWithTextShow} from '@/component/navigation/AccentBar';
+import {AccentBarWithText} from '@package/ui/composite/typography/AccentBarWithText.tsx';
 import {TagDetailCard} from '../component/TagCards';
 import {tagUnitRoute} from '@/router';
 
@@ -26,7 +26,7 @@ export function TagUnitPage() {
   }
   return (
     <div className="w-11/12 mx-auto mt-10">
-      <AccentBarWithTextShow text={data?.name ?? `标签（${unitId}）`} />
+      <AccentBarWithText text={data?.name ?? `标签（${unitId}）`} />
       <div className="mt-4">
         <TagDetailCard tag={data as TagDetailDTO} />
       </div>

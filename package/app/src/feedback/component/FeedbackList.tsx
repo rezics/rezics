@@ -25,13 +25,13 @@ import type {
 import {
   UniversalPaginator,
   type UniversalPaginatorHandle,
-} from '@/component/navigation/Pagination';
+} from '@package/ui/composite/pagination/Pagination.tsx';
 
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from '@/component/shadcn/popover';
+} from '@package/ui/shadcn/popover.tsx';
 import {useAlertStore} from '@app/state/windowAlertStore';
 import {Link} from '@package/ui/primitive/link/Link.tsx';
 

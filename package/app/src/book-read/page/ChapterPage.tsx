@@ -1,1 +1,1 @@
-export {BookReadChapterPage} from '../ui/section/BookReadChapterSection';
+export {BookReadChapterPage} from '../section/BookReadChapterSection.tsx';

@@ -8,9 +8,9 @@ import {Link} from '@package/ui/primitive/link/Link.tsx';
 import {
   UniversalPaginator,
   type UniversalPaginatorHandle,
-} from '@/component/Common/Navigation/Pagination';
+} from '@package/ui/composite/pagination/Pagination.tsx';
 import type {UnitDTO, UnitType} from '@package/contract';
-import {FullTextSearchInputWithIcon} from '@/search/component/FullTextSearchInputWithIcon';
+import {TextSearchInputWithIcon} from '@/search/component/TextSearchInputWithIcon.tsx';
 import {buildUnitUrl} from '@/shared/util/build-url';
 import {buildMeiliUnitQuery} from '@package/api/meili/meili.queries';
 
@@ -210,7 +210,7 @@ export const UnitsPage: React.FC<UnitsPageProps> = ({
         setCurrentPage={setCurrentPage}
         sortControl={
           <div className="mb-4">
-            <FullTextSearchInputWithIcon
+            <TextSearchInputWithIcon
               onSearch={info => {
                 setKeyword(info ?? '');
               }}

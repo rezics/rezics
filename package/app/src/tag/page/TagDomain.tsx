@@ -1,6 +1,6 @@
 import {useQuery} from '@tanstack/react-query';
 import {tagQueries} from '@package/api/tag/tag';
-import {AccentBarWithTextShow} from '@/component/navigation/AccentBar';
+import {AccentBarWithText} from '@package/ui/composite/typography/AccentBarWithText.tsx';
 import {TagWrapper} from '../component/TagWrapper';
 import {tagDomainRoute, tagDomainTitleRoute} from '@/router';
 
@@ -34,7 +34,7 @@ export function TagDomainPage() {
 
   return (
     <div className="w-11/12 mx-auto mt-10">
-      <AccentBarWithTextShow text={title ?? `域（${unitId}）`} />
+      <AccentBarWithText text={title ?? `域（${unitId}）`} />
       <TagWrapper filters={{domainId: unitId}} mode="flat" />
     </div>
   );

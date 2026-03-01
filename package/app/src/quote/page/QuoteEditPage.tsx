@@ -1,5 +1,5 @@
 import {Button, TextField} from '@mui/material';
-import EasyEditor from '@/component/Form/EasyEditor';
+import EasyEditor from '@package/ui/editor/easyeditor/EasyEditor.tsx';
 import type {UnitFormData} from '@package/api/unit/unit.types';
 import {useEffect, useMemo, useState} from 'react';
 import {useQuery} from '@tanstack/react-query';

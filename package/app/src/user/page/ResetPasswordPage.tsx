@@ -6,8 +6,8 @@ import {type FC, useRef, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import {useNavigate, useRouterState} from '@tanstack/react-router';
 
-import {Turnstile} from '@/component/Form/Turnstile.tsx';
-import {PasswordField} from '@/component/Form/PasswordField';
+import {Turnstile} from '@package/ui/composite/auth/Turnstile.tsx';
+import {PasswordField} from '@package/ui/composite/form/field/PasswordField.tsx';
 import {Layout} from '../layout/Layout.tsx';
 import {ModalLayout} from '../layout/ModalLayout.tsx';
 import {validateEmail, validatePassword} from '../model/validate.ts';
@@ -16,7 +16,7 @@ import {
   GetVerificationCode,
   type GetVerificationCodeHandle,
 } from '../component/GetVerificationCode.tsx';
-import {TextButton} from '@/component/UI/Button/TextButton.tsx';
+import {TextButton} from '@package/ui/primitive/button/TextButton.tsx';
 
 interface ResetPasswordData {
   email: string;

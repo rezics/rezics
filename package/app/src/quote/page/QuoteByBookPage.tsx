@@ -1,5 +1,5 @@
-import {AccentBarWithTextContainer} from '@/component/navigation/AccentBar';
-import {ArrowForwardIconContainer} from '@/component/navigation/ArrowForwardIcon';
+import {AccentBarWithText} from '@package/ui/composite/typography/AccentBarWithText.tsx';
+import {ArrowForwardIcon} from '@package/ui/composite/navigation/ArrowForwardIcon.tsx';
 import {QuoteNewPage} from './QuoteNewPage';
 import {useTranslation} from 'react-i18next';
 import UnitsPage from '@/unit/page/UnitsPage';
@@ -11,9 +11,9 @@ export function QuoteByBookPage() {
   const {t} = useTranslation();
   return (
     <div className="mt-10 mx-auto max-w-4xl w-11/12">
-      <ArrowForwardIconContainer size={16}>
-        <AccentBarWithTextContainer text={t('quote.excerpts_title')} />
-      </ArrowForwardIconContainer>
+      <ArrowForwardIcon size={16}>
+        <AccentBarWithText text={t('quote.excerpts_title')} />
+      </ArrowForwardIcon>
       <QuoteNewPage bookUnitId={bookId || ''} />
       <UnitsPage type="QUOTE" targetUnitId={bookId || ''} mode="single">
         {(units: any[]) => <QuoteExcerptListContainer data={{units}} />}

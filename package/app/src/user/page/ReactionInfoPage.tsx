@@ -17,7 +17,7 @@ import type {ReactionDTO} from '@package/api/reaction/reaction.types';
 import {
   UniversalPaginator,
   type UniversalPaginatorHandle,
-} from '@/component/Common/Navigation/Pagination';
+} from '@package/ui/composite/pagination/Pagination.tsx';
 import {useNavigate} from '@tanstack/react-router';
 
 type ReactionInfoPageProps = {

@@ -5,8 +5,8 @@ import {useQuery, useQueryClient} from '@tanstack/react-query';
 import {
   UniversalPaginator,
   type UniversalPaginatorHandle,
-} from '@/component/Common/Navigation/Pagination';
-import {FullTextSearchInputWithIcon} from '@/search/component/FullTextSearchInputWithIcon';
+} from '@package/ui/composite/pagination/Pagination.tsx';
+import {TextSearchInputWithIcon} from '@/search/component/TextSearchInputWithIcon.tsx';
 import type {BookDTO, ReadlistDTO, ReviewDTO, UnitDTO} from '@package/contract';
 import {UnitType} from '@package/contract';
 import {
@@ -16,9 +16,9 @@ import {
 } from '@package/api/meili/meili.queries';
 import {reactionApi} from '@package/api/reaction/reaction.api';
 import {mapUnitListToReviewListResponse} from '@package/api/meili/meili.api';
-import {SingleReadlist} from '@/component/ReadList/SingleReadlist';
-import {ReviewListContainer} from '@/component/Review/ReviewList';
-import {QuoteExcerptListContainer} from '@component/Review/QuoteExcerptList.tsx';
+import {SingleReadlist} from '@/readlist/component/SingleReadlist.tsx';
+import {ReviewList} from '@/review/component/ReviewList.tsx';
+import {QuoteExcerptListContainer} from '@/review/component/QuoteExcerptList.tsx';
 import {BookListView} from '@/book-library/component/BookList/BookListView';
 
 type Readlist = ReadlistDTO;
@@ -487,7 +487,7 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({userId}) => {
     <div className="mx-auto p-2 mt-4">
       {/* 顶部搜索 + Tab */}
       <div className="mb-4">
-        <FullTextSearchInputWithIcon
+        <TextSearchInputWithIcon
           onSearch={info => {
             setKeyword(info ?? '');
           }}
@@ -540,9 +540,7 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({userId}) => {
             );
           }
           if (tab === 'review' || tab === 'remark') {
-            return (
-              <ReviewListContainer reviews={currentPageItems as Review[]} />
-            );
+            return <ReviewList reviews={currentPageItems as Review[]} />;
           }
           if (tab === 'book') {
             return <BookListView books={currentPageItems as BookDTO[]} />;

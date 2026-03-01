@@ -3,8 +3,8 @@ import {Avatar, Chip, Paper, Tooltip, Typography} from '@mui/material';
 import {useTranslation} from 'react-i18next';
 
 import {unitDetailQuery} from '@package/api/unit/unit';
-import {AccentBarWithTextShow} from '@/component/navigation/AccentBar';
-import {MarkdownContent} from '@/component/Common/MarkdownContent';
+import {AccentBar} from '@package/ui/primitive/decorative/AccentBar.tsx';
+import {MarkdownContent} from '@package/ui/composite/content/MarkdownContent.tsx';
 import {MUILink} from '@package/ui/primitive/link/MUILink.tsx';
 import {unitRoute} from '@/router';
 
@@ -160,7 +160,7 @@ export function UnitPage() {
       {/* ANCHOR Metadata */}
       <div className="mt-10">
         <div className="flex items-center gap-2 mb-4">
-          <AccentBarContainer />
+          <AccentBar />
           <Typography variant="h6" className="font-bold">
             {t('unit.meta_data')}
           </Typography>

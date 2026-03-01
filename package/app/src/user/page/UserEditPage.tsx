@@ -16,13 +16,14 @@ import {useEffect, useState} from 'react';
 import type {FC} from 'react';
 import type React from 'react';
 import {useTranslation} from 'react-i18next';
-import type {UserDTO, UpdateUserInput} from '@package/contract';
+import type {UserDTO, UpdateUser} from '@package/contract';
 import {useQuery} from '@tanstack/react-query';
 import {userQueries} from '@package/api/user/user.queries';
 import {UserLoading} from './UserState';
 import {userApi} from '@package/api/user/user.api';
-import {PasswordField} from '@/component/Form/PasswordField';
-import {userEditRoute} from '@/router';
+import {PasswordField} from '@package/ui/composite/form/field/PasswordField.tsx';
+import {useMatch} from '@tanstack/react-router';
+import {Route as UserEditRoute} from '@/routes/_mainLayout/user/$unitId/edit';
 
 export interface UserEditPageProps {
   onCancel?: () => void;
@@ -39,7 +40,7 @@ export const UserEditPage: FC<UserEditPageProps> = ({
   onSuccess,
   unitId,
 }) => {
-  const routeMatch = userEditRoute.useMatch({shouldThrow: false});
+  const routeMatch = useMatch({from: UserEditRoute.id, shouldThrow: false});
   const resolvedUnitId = unitId ?? routeMatch?.params.unitId;
   const {t} = useTranslation();
   const [user, setUser] = useState<UserDTO | null>(null);
@@ -51,7 +52,7 @@ export const UserEditPage: FC<UserEditPageProps> = ({
   const [error, setError] = useState<string | any | null>(null);
   const [saving, setSaving] = useState(false);
 
-  const [formData, setFormData] = useState<UpdateUserInput>({
+  const [formData, setFormData] = useState<UpdateUser>({
     name: '',
     avatar: '',
     bio: '',
@@ -80,7 +81,7 @@ export const UserEditPage: FC<UserEditPageProps> = ({
     setSaving(true);
 
     try {
-      const updateData: UpdateUserInput = {
+      const updateData: UpdateUser = {
         name: formData.name,
         avatar: formData.avatar || undefined,
         bio: formData.bio || undefined,
@@ -111,7 +112,7 @@ export const UserEditPage: FC<UserEditPageProps> = ({
     }
   };
 
-  const handleChange = (field: keyof UpdateUserInput, value: string) => {
+  const handleChange = (field: keyof UpdateUser, value: string) => {
     setFormData(prev => ({...prev, [field]: value}));
   };
 

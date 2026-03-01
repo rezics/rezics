@@ -10,10 +10,10 @@ import {useAlertStore} from '@app/state/windowAlertStore';
 import {
   UniversalPaginator,
   type UniversalPaginatorHandle,
-} from '@/component/Common/Navigation/Pagination';
+} from '@package/ui/composite/pagination/Pagination.tsx';
 
 import {UserBookmarkTagsCard} from './UserBookmarkTagsCard';
-import {BookmarkItemCard} from '@/component/User/Bookmark/BookmarkItemCard';
+import {BookmarkItemCard} from '@/user/component/Bookmark/BookmarkItemCard.tsx';
 import {useNavigate} from '@tanstack/react-router';
 
 export type BookmarkEntry = {

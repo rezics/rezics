@@ -1,6 +1,6 @@
 import {useState} from 'react';
 import {TextField} from '@mui/material';
-import {CooldownButton} from '@/component/UI/Button/CooldownButton';
+import {CooldownButton} from '@package/ui/composite/button/CooldownButton.tsx';
 import {useCreateUnitMutation} from '@package/api/unit/unit.mutations';
 import {useAlertStore} from '@app/state/windowAlertStore';
 import {useUserStore} from '@/user/state';

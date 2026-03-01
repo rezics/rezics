@@ -17,7 +17,7 @@ import {useQuery} from '@tanstack/react-query';
 import {userQueries} from '@package/api/user/user.queries';
 import {UserError, UserLoading} from './UserState';
 import {useUserStore} from '@/user/state';
-import FollowButton from '@/component/Common/Reaction/FollowButton';
+import FollowButton from '@/engagement/component/FollowButton';
 import {UserUnitsPage} from './UserUnitsPage';
 import {Link} from '@package/ui/primitive/link/Link.tsx';
 

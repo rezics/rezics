@@ -1,7 +1,7 @@
 import {createFileRoute, lazyRouteComponent} from '@tanstack/react-router';
 
 const ThemeSwitch = lazyRouteComponent(
-  () => import('@/component/shadcn/theme-switch'),
+  () => import('@package/ui/shadcn/theme-switch.tsx'),
   'ThemeSwitch',
 );
 
