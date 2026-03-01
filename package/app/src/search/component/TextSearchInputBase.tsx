@@ -36,6 +36,7 @@ export const TextSearchInputBase: React.FC<TextSearchInputBaseProps> = ({
           },
         }}
         label={label ?? ''}
+        autoComplete="off"
         placeholder={placeholder ?? 'Find anything'}
         value={value}
         onChange={event => onValueChange(event.target.value)}

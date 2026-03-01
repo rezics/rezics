@@ -1,19 +1,19 @@
 import React, {useMemo} from 'react';
-import {UserContainer} from '../User.tsx';
 import {useLayoutStore} from '../../state/layoutStore.ts';
 import {AppBar, Avatar, Toolbar, Typography} from '@mui/material';
 import {useTheme} from '@mui/material/styles';
 import {cn} from '@/shared/util/css-util';
 import {Link} from '@package/ui/primitive/link/Link.tsx';
 import {useAppStore} from '@/app/state/appStore.ts';
-import {MoreHorizMenu} from './MoreHorizMenu.tsx';
+
 import {DrawerToggler} from './DrawerToggler.tsx';
 import {HomeSearch} from '@/search';
 import {useIsMobile} from '@/shared/util/use-media-query';
 import {useMatch} from '@tanstack/react-router';
 import {Route as HomeRoute} from '@/routes/_mainLayout/index.tsx';
 import {useUserStore} from '@/user/state';
-import {CreateMenu} from '../create-menu/CreateMenu.tsx';
+import {AuthenticatedSection} from '@/core/section/header/AuthenticatedSection.tsx';
+import {UnauthenticatedSection} from '@/core/section/header/UnauthenticatedSection.tsx';
 
 interface HeaderProps {
   isDragging?: boolean;
@@ -90,14 +90,13 @@ export const Header: React.FC<HeaderProps> = ({
             </Link>
           </Typography>
         </div>
-        <div className="flex-1 min-w-0 flex justify-center">
+        <div className="flex-1 min-w-0 mx-2 flex justify-center">
           {!isMobile && matchHomeRoute && (
             <HomeSearch className="w-full max-w-md" />
           )}
         </div>
-        {currentUser && <CreateMenu />}
-        <UserContainer onLogout={() => console.log('Logout')} />
-        {!currentUser && <MoreHorizMenu />}
+        {currentUser && <AuthenticatedSection />}
+        {!currentUser && <UnauthenticatedSection />}
       </Toolbar>
     </AppBar>
   );

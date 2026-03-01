@@ -1,4 +1,4 @@
-import {PRESET_COLORS} from '@/app/config/dynamicTheme';
+import {PRESET_COLORS} from '@package/app-shell';
 import {useAppStore} from '@/app/state/appStore';
 import {
   Add,

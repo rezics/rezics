@@ -1,6 +1,7 @@
 import React, {useState} from 'react';
 import {IconButton, Menu} from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 
 import {CreateMenuItem} from './CreateMenuItem';
 
@@ -19,8 +20,17 @@ export const CreateMenu: React.FC = () => {
 
   return (
     <>
-      <IconButton onClick={handleOpen}>
-        <AddIcon />
+      <IconButton
+        onClick={handleOpen}
+        sx={{
+          borderRadius: 1,
+          border: theme => `1px solid ${theme.palette.divider}`,
+          px: 1,
+          gap: 0.5,
+        }}
+      >
+        <AddIcon fontSize="small" />
+        <ArrowDropDownIcon fontSize="small" />
       </IconButton>
 
       <Menu

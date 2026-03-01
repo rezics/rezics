@@ -12,7 +12,7 @@ import {useQuery} from '@tanstack/react-query';
 
 import {bookQueries} from '@package/api/book/book.queries';
 import {AccentBarWithText} from '@package/ui/composite/typography/AccentBarWithText.tsx';
-import {useChapterListStore} from '@/global/page/chapterListStore';
+import {useChapterListStore} from '@/book-library/state/chapterListStore';
 import {Link} from '@package/ui/primitive/link/Link.tsx';
 
 import type {ChapterTreeItem} from '@package/contract';

@@ -3,7 +3,7 @@ import Box from '@mui/material/Box';
 import Tab from '@mui/material/Tab';
 import * as React from 'react';
 
-import {ThemeDemo} from '@/component/Theme/ThemeDemo.tsx';
+import {ThemeDemo} from '@/preferences/section/ThemeDemo.tsx';
 
 export default function PersistentTabs() {
   const [value, setValue] = React.useState<'1' | '2'>('1');
