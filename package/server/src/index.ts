@@ -25,7 +25,11 @@ if (isDev) {
   await import('./utils/logger-hook');
 }
 
-const devOrigins = ['http://localhost:35001', 'http://localhost:35002'];
+const devOrigins = [
+  'http://localhost:35001',
+  'http://localhost:35002',
+  'http://localhost:8000',
+];
 
 const prodOrigins = ['https://book.rezics.com', 'https://rezics.com'];
 
