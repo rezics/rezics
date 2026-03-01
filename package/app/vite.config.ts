@@ -6,7 +6,7 @@ import react from '@vitejs/plugin-react';
 import tsconfigPaths from 'vite-tsconfig-paths';
 import errorOverlay from '@visulima/vite-overlay';
 import svgr from 'vite-plugin-svgr';
-import {visualizer} from 'rollup-plugin-visualizer';
+// import {visualizer} from 'rollup-plugin-visualizer';
 
 // https://vitejs.dev/config/
 export default defineConfig(({mode}) => {
@@ -36,19 +36,26 @@ export default defineConfig(({mode}) => {
         showBallonButton: true,
       }),
       svgr(),
-      visualizer({
-        filename: 'dist/stats.html',
-        template: 'treemap', // or sunburst / network
-        gzipSize: true,
-        brotliSize: true,
-        open: true, // auto open
-      }),
+      // visualizer({
+      //   filename: 'dist/stats.html',
+      //   template: 'treemap', // or sunburst / network
+      //   gzipSize: true,
+      //   brotliSize: true,
+      //   open: true, // auto open
+      // }),
     ],
     build: {
       manifest: true,
       sourcemap: true, // Enable sourcemap for production build for debugging tools like Sentry
       rollupOptions: {
         output: {},
+        treeshake: {
+          preset: 'smallest',
+          moduleSideEffects: false,
+          propertyReadSideEffects: false,
+          tryCatchDeoptimization: false,
+          unknownGlobalSideEffects: false,
+        },
       },
     },
     server: {

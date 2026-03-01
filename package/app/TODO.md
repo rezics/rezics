@@ -1,5 +1,7 @@
 - https://react.dev/reference/rules/rules-of-hooks
-- [ ] allow to mention
+- [ ] Helmet 迁移到 Tanstack 原生，优化包体积
+- [ ] user/me page似乎可能卡住
+
 - [x] MUI 的还没自己写的好用 https://mui.com/x/react-tree-view/ 用这个替换当前的 Tree 章节 View
 - [ ] 树章节检查为啥 shift 键还是会跳转，感觉就不应该渲染为 link，修改一下
 - 完善所有请求暂停逻辑，否则会导致重新渲染！
@@ -19,7 +21,6 @@
 - 好用的 JSON 编辑器
 - [ ] i18n 切换到 Paraglide + (Sherlock 扩展)，或者等到切换的时候看看 i18n Ally 的支持性
 - [ ] 模块化 字体切换 https://chatgpt.com/share/69991605-878c-8005-adaf-3b93dbcb43e7 
-- [ ] user 详情页似乎可能卡住
 
 ## Complete
 
