@@ -19,11 +19,12 @@ export default defineConfig(({mode}) => {
         generatedRouteTree: 'src/mock/routeTree.gen.ts',
       }),
       UnoCSS(),
-      react({
-        babel: {
-          plugins: [['babel-plugin-react-compiler', {panicThreshold: 'none'}]],
-        },
-      }),
+      react(),
+      // react({
+      //   babel: {
+      //     plugins: [['babel-plugin-react-compiler', {panicThreshold: 'none'}]],
+      //   },
+      // }),
       tsconfigPaths(),
       errorOverlay({
         reactPluginName: '@vitejs/plugin-react',
