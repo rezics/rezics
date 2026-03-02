@@ -29,6 +29,7 @@ import { Route as MainLayoutUnitUnitIdRouteImport } from './routes/_mainLayout/u
 import { Route as MainLayoutTagUnitIdRouteImport } from './routes/_mainLayout/tag/$unitId'
 import { Route as MainLayoutRemarkReviewIdRouteImport } from './routes/_mainLayout/remark/$reviewId'
 import { Route as MainLayoutReadlistNewRouteImport } from './routes/_mainLayout/readlist/new'
+import { Route as MainLayoutInboxNotificationRouteImport } from './routes/_mainLayout/inbox/notification'
 import { Route as MainLayoutFeedbackAdminRouteImport } from './routes/_mainLayout/feedback/admin'
 import { Route as MainLayoutBookNewRouteImport } from './routes/_mainLayout/book/new'
 import { Route as BookBookIdEditRouteRouteImport } from './routes/book_/$bookId/edit/route'
@@ -169,6 +170,12 @@ const MainLayoutReadlistNewRoute = MainLayoutReadlistNewRouteImport.update({
   path: '/readlist/new',
   getParentRoute: () => MainLayoutRoute,
 } as any)
+const MainLayoutInboxNotificationRoute =
+  MainLayoutInboxNotificationRouteImport.update({
+    id: '/inbox/notification',
+    path: '/inbox/notification',
+    getParentRoute: () => MainLayoutRoute,
+  } as any)
 const MainLayoutFeedbackAdminRoute = MainLayoutFeedbackAdminRouteImport.update({
   id: '/feedback/admin',
   path: '/feedback/admin',
@@ -408,6 +415,7 @@ export interface FileRoutesByFullPath {
   '/book/$bookId/edit': typeof BookBookIdEditRouteRouteWithChildren
   '/book/new': typeof MainLayoutBookNewRoute
   '/feedback/admin': typeof MainLayoutFeedbackAdminRoute
+  '/inbox/notification': typeof MainLayoutInboxNotificationRoute
   '/readlist/new': typeof MainLayoutReadlistNewRoute
   '/remark/$reviewId': typeof MainLayoutRemarkReviewIdRoute
   '/tag/$unitId': typeof MainLayoutTagUnitIdRoute
@@ -465,6 +473,7 @@ export interface FileRoutesByTo {
   '/': typeof MainLayoutIndexRoute
   '/book/new': typeof MainLayoutBookNewRoute
   '/feedback/admin': typeof MainLayoutFeedbackAdminRoute
+  '/inbox/notification': typeof MainLayoutInboxNotificationRoute
   '/readlist/new': typeof MainLayoutReadlistNewRoute
   '/remark/$reviewId': typeof MainLayoutRemarkReviewIdRoute
   '/tag/$unitId': typeof MainLayoutTagUnitIdRoute
@@ -523,6 +532,7 @@ export interface FileRoutesById {
   '/book_/$bookId/edit': typeof BookBookIdEditRouteRouteWithChildren
   '/_mainLayout/book/new': typeof MainLayoutBookNewRoute
   '/_mainLayout/feedback/admin': typeof MainLayoutFeedbackAdminRoute
+  '/_mainLayout/inbox/notification': typeof MainLayoutInboxNotificationRoute
   '/_mainLayout/readlist/new': typeof MainLayoutReadlistNewRoute
   '/_mainLayout/remark/$reviewId': typeof MainLayoutRemarkReviewIdRoute
   '/_mainLayout/tag/$unitId': typeof MainLayoutTagUnitIdRoute
@@ -585,6 +595,7 @@ export interface FileRouteTypes {
     | '/book/$bookId/edit'
     | '/book/new'
     | '/feedback/admin'
+    | '/inbox/notification'
     | '/readlist/new'
     | '/remark/$reviewId'
     | '/tag/$unitId'
@@ -642,6 +653,7 @@ export interface FileRouteTypes {
     | '/'
     | '/book/new'
     | '/feedback/admin'
+    | '/inbox/notification'
     | '/readlist/new'
     | '/remark/$reviewId'
     | '/tag/$unitId'
@@ -699,6 +711,7 @@ export interface FileRouteTypes {
     | '/book_/$bookId/edit'
     | '/_mainLayout/book/new'
     | '/_mainLayout/feedback/admin'
+    | '/_mainLayout/inbox/notification'
     | '/_mainLayout/readlist/new'
     | '/_mainLayout/remark/$reviewId'
     | '/_mainLayout/tag/$unitId'
@@ -891,6 +904,13 @@ declare module '@tanstack/react-router' {
       path: '/readlist/new'
       fullPath: '/readlist/new'
       preLoaderRoute: typeof MainLayoutReadlistNewRouteImport
+      parentRoute: typeof MainLayoutRoute
+    }
+    '/_mainLayout/inbox/notification': {
+      id: '/_mainLayout/inbox/notification'
+      path: '/inbox/notification'
+      fullPath: '/inbox/notification'
+      preLoaderRoute: typeof MainLayoutInboxNotificationRouteImport
       parentRoute: typeof MainLayoutRoute
     }
     '/_mainLayout/feedback/admin': {
@@ -1286,6 +1306,7 @@ interface MainLayoutRouteChildren {
   MainLayoutUserMeRouteRoute: typeof MainLayoutUserMeRouteRouteWithChildren
   MainLayoutBookNewRoute: typeof MainLayoutBookNewRoute
   MainLayoutFeedbackAdminRoute: typeof MainLayoutFeedbackAdminRoute
+  MainLayoutInboxNotificationRoute: typeof MainLayoutInboxNotificationRoute
   MainLayoutReadlistNewRoute: typeof MainLayoutReadlistNewRoute
   MainLayoutRemarkReviewIdRoute: typeof MainLayoutRemarkReviewIdRoute
   MainLayoutTagUnitIdRoute: typeof MainLayoutTagUnitIdRoute
@@ -1324,6 +1345,7 @@ const MainLayoutRouteChildren: MainLayoutRouteChildren = {
   MainLayoutUserMeRouteRoute: MainLayoutUserMeRouteRouteWithChildren,
   MainLayoutBookNewRoute: MainLayoutBookNewRoute,
   MainLayoutFeedbackAdminRoute: MainLayoutFeedbackAdminRoute,
+  MainLayoutInboxNotificationRoute: MainLayoutInboxNotificationRoute,
   MainLayoutReadlistNewRoute: MainLayoutReadlistNewRoute,
   MainLayoutRemarkReviewIdRoute: MainLayoutRemarkReviewIdRoute,
   MainLayoutTagUnitIdRoute: MainLayoutTagUnitIdRoute,
