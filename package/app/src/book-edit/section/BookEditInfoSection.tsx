@@ -1,3 +1,5 @@
+// 重构组件，去除 effect 影响，修正 publishURL 添加逻辑，支持添加多个 url
+
 import {useQuery} from '@tanstack/react-query';
 import type {CreateBookInput, BookDTO} from '@package/contract';
 import {bookQueries} from '@package/api/book/book';
@@ -96,16 +98,13 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
     ...bookQueries.detail(bookId ?? ''),
     enabled: !newBook && !!bookId,
   });
-  const [metadataState, setMetadataState] = React.useState<BookMetadataValue>(
-    {},
-  );
+  const [metadataState, setMetadataState] =
+    React.useState<BookMetadataValue | null>(null);
   const [updateBookErrorOpen, setUpdateBookErrorOpen] = React.useState(false);
   const [dialogState, setDialogState] =
     React.useState<UpdateBookDialogState>(null);
 
-  useEffect(() => {
-    setMetadataState(data ?? {});
-  }, [data]);
+  const metadata = metadataState ?? data ?? {};
 
   const createBookMutation = useCreateBookMutation({
     onSuccess: responseData => {
@@ -147,21 +146,21 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
 
   async function handleSubmit() {
     const updateBookData: UpdateBookInput = {
-      title: metadataState.title,
-      description: metadataState.description,
-      authorIds: metadataState.author?.map(author => author.unitId),
-      pressIds: metadataState.press?.map(press => press.unitId),
-      producerIds: metadataState.producer?.map(producer => producer.unitId),
-      textLength: metadataState.textLength,
-      isbn: metadataState.isbn,
-      coverUrl: metadataState.coverUrl,
-      nsfw: metadataState.nsfw,
-      isLicensed: metadataState.isLicensed,
-      extra: metadataState.extra,
+      title: metadataState?.title,
+      description: metadataState?.description,
+      authorIds: metadataState?.author?.map(author => author.unitId),
+      pressIds: metadataState?.press?.map(press => press.unitId),
+      producerIds: metadataState?.producer?.map(producer => producer.unitId),
+      textLength: metadataState?.textLength,
+      isbn: metadataState?.isbn,
+      coverUrl: metadataState?.coverUrl,
+      nsfw: metadataState?.nsfw,
+      isLicensed: metadataState?.isLicensed,
+      extra: metadataState?.extra,
     };
     const createBookData: CreateBookInput = {
       ...updateBookData,
-      title: metadataState.title ?? '',
+      title: metadataState?.title ?? '',
     };
     if (bookId) {
       updateBookMutation.mutateAsync({
@@ -169,7 +168,7 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
         input: updateBookData,
       });
     } else {
-      const publishURL = metadataState.extra?.publishURL;
+      const publishURL = metadataState?.extra?.publishURL;
       if (
         updateBookData.isLicensed ||
         (publishURL && validatePublishURL(publishURL))
@@ -233,7 +232,7 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
         </div>
         <div className="mb-8">
           <BookMetadataEditor
-            value={metadataState}
+            value={metadata}
             onChange={value => {
               setMetadataState(prev => ({...prev, ...value}));
             }}
@@ -246,7 +245,7 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
           <AccentBarWithText text={t('book.description')} />
         </div>
         <EasyEditor
-          value={metadataState?.description ?? ''}
+          value={metadata?.description ?? ''}
           onChange={value => {
             setMetadataState(prev => ({...prev, description: value}));
           }}
@@ -259,7 +258,7 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
         </div>
         <div className="mb-8">
           <BookExtraEditor
-            value={metadataState.extra}
+            value={metadata.extra}
             onChange={value => {
               setMetadataState(prev => ({...prev, extra: value}));
             }}
