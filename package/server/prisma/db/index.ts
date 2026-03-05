@@ -2,7 +2,7 @@ import {Client} from 'pg';
 import {readFile} from 'node:fs/promises';
 import {join} from 'node:path';
 import {sequence, keyOrder} from './sequence.js';
-import 'dotenv/config';
+import {env} from '@/src/env';
 import {fileURLToPath} from 'node:url';
 
 const SQL_BASE_DIR = fileURLToPath(new URL('./sql', import.meta.url));
@@ -18,20 +18,7 @@ type PgClientConfig =
     };
 
 function createPgClient(): Client {
-  const connectionString = process.env.PRISMA_DATABASE_URL;
-
-  let config: PgClientConfig;
-  if (connectionString) {
-    config = {connectionString};
-  } else {
-    config = {
-      host: process.env.PGHOST,
-      port: process.env.PGPORT ? Number(process.env.PGPORT) : undefined,
-      user: process.env.PGUSER,
-      password: process.env.PGPASSWORD,
-      database: process.env.PGDATABASE,
-    };
-  }
+  const config = {connectionString: env.DATABASE_URL};
 
   console.log('🔌 Creating PostgreSQL client...', config);
 

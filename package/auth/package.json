@@ -11,6 +11,10 @@
     "./*": {
       "types": "./src/*.ts",
       "default": "./src/*.ts"
+    },
+    "./jwt": {
+      "types": "./src/jwt/export.ts",
+      "default": "./src/jwt/export.ts"
     }
   },
   "scripts": {
@@ -58,4 +62,3 @@
     "uuid": "^13.0.0"
   }
 }
-

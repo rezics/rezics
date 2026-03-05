@@ -1,6 +1,6 @@
 import type {JWTPayload, RefreshTokenPayload} from '@/src/user/types';
 import bcrypt from 'bcrypt';
-import {verifyBearerToken} from '@package/auth';
+import {verifyBearerToken} from '@package/auth/jwt';
 import {env} from '@/src/env';
 
 type CommonPayload = JWTPayload | RefreshTokenPayload;

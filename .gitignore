@@ -5,7 +5,6 @@
 tailwind.config.js
 
 # Temporary Scripts
-remove_node_modules.ts
 
 # Vite
 .vite/
