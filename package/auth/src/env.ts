@@ -21,6 +21,8 @@ export const env = createEnv({
     AUTH_JWT_TTL_SECONDS: v.optional(v.string()),
     AUTH_JWKS_ROTATION_INTERVAL_SECONDS: v.optional(v.string()),
     AUTH_JWKS_GRACE_PERIOD_SECONDS: v.optional(v.string()),
+    RESEND_API_KEY: v.optional(v.string()),
+    AUTH_INVITATION_FROM_EMAIL: v.optional(v.string()),
     GOOGLE_CLIENT_ID: v.optional(v.string()),
     GOOGLE_CLIENT_SECRET: v.optional(v.string()),
     MICROSOFT_CLIENT_ID: v.optional(v.string()),
