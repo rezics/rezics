@@ -29,7 +29,7 @@ const app = coreInstance()
   )
   .get('/health', () => ({status: 'ok'}));
 
-const port = env.PORT ? Number(env.PORT) : 35003;
+const port = env.PORT ? Number(env.PORT) : 3001;
 app.listen(port);
 
 console.log(
