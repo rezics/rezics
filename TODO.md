@@ -1,3 +1,3 @@
 - [ ] add Paraglide i18n package
-- [ ] add better-auth package build independent auth service include oauth provider
+- [ ] https://better-auth.com/docs/plugins/admin https://better-auth.com/docs/plugins/organization 参考相关文档为 auth service 添加用户管理功能
 - [ ] add editor package use code mirror 6 build markdown and json editor

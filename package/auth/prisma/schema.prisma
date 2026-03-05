@@ -84,35 +84,35 @@ model Jwks {
 }
 
 model OAuthClient {
-  id                       String    @id @default(dbgenerated("uuidv7()")) @db.Uuid
-  clientId                 String    @unique
-  clientSecret             String?
-  disabled                 Boolean   @default(false)
-  skipConsent              Boolean?
-  enableEndSession         Boolean?
-  scopes                   String[]
-  userId                   String?   @db.Uuid
-  referenceId              String?
-  createdAt                DateTime  @default(now())
-  updatedAt                DateTime  @updatedAt
-  name                     String?
-  uri                      String?
-  icon                     String?
-  contacts                 String[]
-  tos                      String?
-  policy                   String?
-  softwareId               String?
-  softwareVersion          String?
-  softwareStatement        String?
-  redirectUris             String[]
-  postLogoutRedirectUris   String[]
-  tokenEndpointAuthMethod  String?
-  grantTypes               String[]
-  responseTypes            String[]
-  public                   Boolean?
-  type                     String?
-  requirePKCE              Boolean?
-  metadata                 Json?
+  id                      String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  clientId                String   @unique
+  clientSecret            String?
+  disabled                Boolean  @default(false)
+  skipConsent             Boolean?
+  enableEndSession        Boolean?
+  scopes                  String[]
+  userId                  String?  @db.Uuid
+  referenceId             String?
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+  name                    String?
+  uri                     String?
+  icon                    String?
+  contacts                String[]
+  tos                     String?
+  policy                  String?
+  softwareId              String?
+  softwareVersion         String?
+  softwareStatement       String?
+  redirectUris            String[]
+  postLogoutRedirectUris  String[]
+  tokenEndpointAuthMethod String?
+  grantTypes              String[]
+  responseTypes           String[]
+  public                  Boolean?
+  type                    String?
+  requirePKCE             Boolean?
+  metadata                Json?
 
   @@index([userId])
   @@index([referenceId])

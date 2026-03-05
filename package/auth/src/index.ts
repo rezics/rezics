@@ -6,6 +6,9 @@ import {
   handleOpenIdConfigRequest,
 } from './auth/routes';
 import {env} from './env';
+import {swagger} from '@elysiajs/swagger';
+
+const isDev = env.NODE_ENV === 'development';
 
 const app = coreInstance()
   .onError(({error, set}) => {
@@ -29,9 +32,14 @@ const app = coreInstance()
   )
   .get('/health', () => ({status: 'ok'}));
 
+if (isDev) {
+  app.use(swagger());
+}
+
 const port = env.PORT ? Number(env.PORT) : 3001;
 app.listen(port);
 
 console.log(
-  `Auth service running at http://${app.server?.hostname}:${app.server?.port}`,
+  `🦊 Elysia is running at http://${app.server?.hostname}:${app.server?.port}`,
+  `\n🔗 Swagger UI: http://${app.server?.hostname}:${app.server?.port}/swagger`,
 );
