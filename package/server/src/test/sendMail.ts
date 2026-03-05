@@ -1,14 +1,15 @@
 import 'dotenv/config';
 
+import {env} from '../env';
 import nodemailer from 'nodemailer';
 
 const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
+  host: env.SMTP_HOST as string,
   port: 465,
   secure: true,
   auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASSWORD,
+    user: env.SMTP_USER as string,
+    pass: env.SMTP_PASSWORD as string,
   },
   pool: true,
   maxConnections: 3,
@@ -21,7 +22,7 @@ const transporter = nodemailer.createTransport({
 console.log('Sending email...');
 
 const result = await transporter.sendMail({
-  from: `${process.env.SMTP_USER_NAME} <${process.env.SMTP_USER}>`,
+  from: `${env.SMTP_USER_NAME} <${env.SMTP_USER}>`,
   to: 'edgecoordinates@gmail.com',
   subject: 'Test Email',
   text: 'This is a test email',

@@ -1,11 +1,12 @@
 import {PrismaClient} from './generated/client';
 import {PrismaPg} from '@prisma/adapter-pg';
+import {env} from '../src/env';
 
 // Get database URL from environment variable
-const databaseUrl = process.env.PRISMA_DATABASE_URL;
+const databaseUrl = env.DATABASE_URL;
 
 if (!databaseUrl) {
-  throw new Error('PRISMA_DATABASE_URL environment variable is not set');
+  throw new Error('DATABASE_URL environment variable is not set');
 }
 
 // Prisma ORM v7 requires a driver adapter.

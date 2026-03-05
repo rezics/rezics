@@ -10,14 +10,15 @@ import type {CreateUserFull, UpdateUser} from '@package/contract';
 import {hashPassword, verifyPassword} from './utils';
 import nodemailer from 'nodemailer';
 import {syncUserToMeili, deleteUserFromMeili} from '@/src/meili/user/sync';
+import {env} from '../env';
 
 const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
+  host: env.SMTP_HOST as string,
   port: 465,
   secure: true,
   auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASSWORD,
+    user: env.SMTP_USER as string,
+    pass: env.SMTP_PASSWORD as string,
   },
   pool: true,
   maxConnections: 3,
@@ -279,7 +280,7 @@ export class UserService {
     const expiresAt = new Date(nowTime.getTime() + 1000 * 60 * 30); // 30 minutes
     const theUserId = userId ?? '019aca29-e86c-79ba-a29e-cd6b1c653c55'; // we don't need user id for verification code
     transporter.sendMail({
-      from: `${process.env.SMTP_USER_NAME} <${process.env.SMTP_USER}>`,
+      from: `${env.SMTP_USER_NAME} <${env.SMTP_USER}>`,
       to: email,
       subject: 'REZICS - Verification Code',
       text: `Your verification code is: ${code}. It will expire in 30 minutes.`,

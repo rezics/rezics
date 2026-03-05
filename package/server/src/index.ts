@@ -16,6 +16,7 @@ import {feedbackApi} from './feedback';
 import {cors} from '@elysiajs/cors';
 
 import {getProdState} from './utils/getProdState';
+import {env} from './env';
 
 import 'dotenv/config';
 
@@ -96,7 +97,9 @@ if (isDev) {
   app.use(swagger());
 }
 
-app.listen(process.env.PORT ?? 3000);
+const port = env.PORT ? Number(env.PORT) : 3000;
+
+app.listen(port);
 
 console.log(
   `🦊 Elysia is running at http://${app.server?.hostname}:${app.server?.port}`,

@@ -16,6 +16,8 @@
     "knip": "^5.85.0"
   },
   "dependencies": {
-    "@vitejs/plugin-react": "^5.1.4"
+    "@t3-oss/env-core": "^0.13.10",
+    "@vitejs/plugin-react": "^5.1.4",
+    "valibot": "^1.2.0"
   }
 }

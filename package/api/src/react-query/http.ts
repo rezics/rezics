@@ -1,7 +1,9 @@
+import {env} from '@package/app/env';
+
 /**
  * Base API URL - should be configured via environment
  */
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+const API_BASE_URL = env.VITE_API_URL || 'http://localhost:4000';
 
 /**
  * JWT Token Storage Keys
