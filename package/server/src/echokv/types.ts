@@ -1,4 +1,6 @@
-import type {JsonValue} from '@prisma/client/runtime/library';
+import type {Prisma} from '@/prisma/client';
+
+type JsonValue = Prisma.JsonValue;
 
 export type EchoKVResponse = {
   value: JsonValue;

@@ -1,0 +1,35 @@
+import {createEnv} from '@t3-oss/env-core';
+import * as v from 'valibot';
+
+export const env = createEnv({
+  server: {
+    NODE_ENV: v.optional(
+      v.union([
+        v.literal('development'),
+        v.literal('test'),
+        v.literal('production'),
+      ]),
+    ),
+    PORT: v.optional(v.string()),
+    DATABASE_URL: v.string(),
+    BETTER_AUTH_URL: v.string(),
+    BETTER_AUTH_SECRET: v.string(),
+    BETTER_AUTH_SECRETS: v.optional(v.string()),
+    AUTH_INTERNAL_TOKEN_GATEWAY_SECRET: v.string(),
+    AUTH_JWT_AUDIENCE: v.optional(v.string()),
+    AUTH_JWT_ISSUER: v.optional(v.string()),
+    AUTH_JWT_TTL_SECONDS: v.optional(v.string()),
+    AUTH_JWKS_ROTATION_INTERVAL_SECONDS: v.optional(v.string()),
+    AUTH_JWKS_GRACE_PERIOD_SECONDS: v.optional(v.string()),
+    GOOGLE_CLIENT_ID: v.optional(v.string()),
+    GOOGLE_CLIENT_SECRET: v.optional(v.string()),
+    MICROSOFT_CLIENT_ID: v.optional(v.string()),
+    MICROSOFT_CLIENT_SECRET: v.optional(v.string()),
+    GITHUB_CLIENT_ID: v.optional(v.string()),
+    GITHUB_CLIENT_SECRET: v.optional(v.string()),
+    TWITTER_CLIENT_ID: v.optional(v.string()),
+    TWITTER_CLIENT_SECRET: v.optional(v.string()),
+  },
+  runtimeEnv: process.env,
+  emptyStringAsUndefined: true,
+});

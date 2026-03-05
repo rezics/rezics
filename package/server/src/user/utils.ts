@@ -1,5 +1,7 @@
 import type {JWTPayload, RefreshTokenPayload} from '@/src/user/types';
 import bcrypt from 'bcrypt';
+import {verifyBearerToken} from '@package/auth';
+import {env} from '@/src/env';
 
 type CommonPayload = JWTPayload | RefreshTokenPayload;
 
@@ -11,28 +13,22 @@ export async function verifyAuth<T extends CommonPayload>(
   jwtInstance: any,
   set: any,
 ): Promise<T> {
-  if (!authorization) {
-    set.status = 401;
-    throw new Error('Unauthorized: No authorization header provided');
-  }
+  void jwtInstance;
+  try {
+    const verified = await verifyBearerToken(authorization, {
+      jwksUrl:
+        env.AUTH_JWKS_URL ??
+        `${(env.AUTH_JWT_ISSUER ?? 'http://localhost:35003').replace(/\/$/, '')}/.well-known/jwks.json`,
+      issuer: env.AUTH_JWT_ISSUER ?? 'http://localhost:35003',
+      audience: env.AUTH_JWT_AUDIENCE ?? 'rezics-api',
+      clockTolerance: Number(env.AUTH_JWT_CLOCK_TOLERANCE_SECONDS ?? '5'),
+    });
 
-  if (typeof authorization != 'string') {
-    set.status = 401;
-    throw new Error('Unauthorized: Invalid authorization header');
-  }
-
-  // Extract token from "Bearer <token>" format
-  const token = authorization.startsWith('Bearer ')
-    ? authorization.slice(7)
-    : authorization;
-
-  const payload = (await jwtInstance.verify(token)) as T | false;
-  if (!payload) {
+    return verified.payload as T;
+  } catch {
     set.status = 401;
     throw new Error('Unauthorized: Invalid token');
   }
-
-  return payload;
 }
 
 /**
