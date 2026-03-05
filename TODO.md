@@ -1,0 +1,3 @@
+- [ ] add Paraglide i18n package
+- [ ] add better-auth package build independent auth service include oauth provider
+- [ ] add editor package use code mirror 6 build markdown and json editor
