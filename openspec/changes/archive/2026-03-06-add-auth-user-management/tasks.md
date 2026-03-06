@@ -30,7 +30,7 @@
 ## 6. Validation
 
 - [x] 6.1 Start the auth service (`bun run dev` in `package/auth`) and verify it boots without errors
-- [ ] 6.2 Verify admin endpoints respond (e.g., `GET /api/auth/admin/list-users` returns 403 for unauthenticated requests)
-- [ ] 6.3 Register a test user, promote to admin via SQL, and verify admin API calls succeed (list users, ban/unban, set role)
-- [ ] 6.4 Verify organization endpoints respond (create organization, invite member, list organizations)
+- [x] 6.2 Verify admin endpoints respond (e.g., `GET /api/auth/admin/list-users` returns 403 for unauthenticated requests)
+- [x] 6.3 Register a test user, promote to admin via SQL, and verify admin API calls succeed (list users, ban/unban, set role)
+- [x] 6.4 Verify organization endpoints respond (create organization, invite member, list organizations)
 - [x] 6.5 Run `bunx tsc --noEmit` in `package/auth` to confirm no type errors
