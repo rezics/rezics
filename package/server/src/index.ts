@@ -103,5 +103,5 @@ app.listen(port);
 
 console.log(
   `🦊 Elysia is running at http://${app.server?.hostname}:${app.server?.port}`,
-  `\n🔗 Swagger UI: http://${app.server?.hostname}:${app.server?.port}/swagger`,
+  `\n🔗 Openapi UI: http://${app.server?.hostname}:${app.server?.port}/openapi`,
 );

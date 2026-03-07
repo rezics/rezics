@@ -1,10 +1,10 @@
 import {coreInstance} from './core';
 import {
-  handleAuthRequest,
   handleJwksCompatibilityRequest,
   handleOAuthAuthorizationServerRequest,
   handleOpenIdConfigRequest,
 } from './auth/routes';
+import {authOpenApiRouter} from './openapi';
 import {env} from './env';
 import {openapi} from '@elysiajs/openapi';
 
@@ -20,7 +20,7 @@ const app = coreInstance()
       error: error instanceof Error ? error.message : 'Internal Server Error',
     };
   })
-  .all('/api/auth/*', ({request}) => handleAuthRequest(request))
+  .use(authOpenApiRouter)
   .get('/.well-known/jwks.json', ({request}) =>
     handleJwksCompatibilityRequest(request),
   )
@@ -41,5 +41,5 @@ app.listen(port);
 
 console.log(
   `🦊 Elysia is running at http://${app.server?.hostname}:${app.server?.port}`,
-  `\n🔗 Swagger UI: http://${app.server?.hostname}:${app.server?.port}/swagger`,
+  `\n🔗 Openapi UI: http://${app.server?.hostname}:${app.server?.port}/openapi`,
 );

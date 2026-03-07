@@ -15,3 +15,4 @@ export * from './reaction';
 export * from './unit';
 export * from './token';
 export * from './meili';
+export * from './auth';
