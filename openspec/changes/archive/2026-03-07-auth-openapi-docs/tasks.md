@@ -26,5 +26,5 @@
 
 - [x] 4.1 Run `bun run build` (or `tsc --noEmit`) in `package/contract` to verify schema files compile
 - [x] 4.2 Run `bun run build` (or `tsc --noEmit`) in `package/auth` to verify the router and integration compile
-- [ ] 4.3 Start the auth server in dev mode and verify `/openapi` shows all documented auth endpoints with correct schemas, summaries, and tags
-- [ ] 4.4 Verify existing auth functionality is unchanged by testing sign-in, session, and an undocumented endpoint via the catch-all
+- [x] 4.3 Start the auth server in dev mode and verify `/openapi` shows all documented auth endpoints with correct schemas, summaries, and tags
+- [x] 4.4 Verify existing auth functionality is unchanged by testing sign-in, session, and an undocumented endpoint via the catch-all
