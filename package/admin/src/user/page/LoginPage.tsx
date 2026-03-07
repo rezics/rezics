@@ -13,8 +13,7 @@ import {useState} from 'react';
 
 import {useNavigate} from '@tanstack/react-router';
 
-import {userApi} from '@package/api/user/user.api';
-import {setToken} from '@package/api/react-query/http';
+import {authApi} from '@package/api/auth/auth.api';
 
 import {Route} from '@/routes/login';
 
@@ -38,12 +37,8 @@ export default function LoginPage() {
     setError(null);
     setSubmitting(true);
     try {
-      const {user, token} = await userApi.login({email, password});
-      if (
-        user.permission?.role?.includes('ADMIN') ||
-        user.permission?.role?.includes('ROOT')
-      ) {
-        setToken(token);
+      const {user} = await authApi.signIn({email, password});
+      if (user?.role === 'admin' || user?.role === 'owner') {
         await navigate({to: normalizeRedirect(redirectTo), replace: true});
       } else {
         setError('You are not authorized to access this page');

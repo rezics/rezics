@@ -6,6 +6,7 @@ import React from 'react';
 import StorageOutlinedIcon from '@mui/icons-material/StorageOutlined';
 import KeyOutlinedIcon from '@mui/icons-material/KeyOutlined';
 import ManageSearchOutlinedIcon from '@mui/icons-material/ManageSearchOutlined';
+import AdminPanelSettingsOutlinedIcon from '@mui/icons-material/AdminPanelSettingsOutlined';
 
 export type AdminNavItem = {
   id: string;
@@ -136,6 +137,25 @@ export const adminNav = {
           label: 'Meili Search',
           to: '/meili',
           icon: <ManageSearchOutlinedIcon fontSize="small" />,
+        },
+      ],
+    },
+    {
+      id: 'auth',
+      label: 'Auth',
+      icon: <AdminPanelSettingsOutlinedIcon fontSize="small" />,
+      children: [
+        {
+          id: 'auth.users',
+          label: 'Users',
+          icon: <AdminPanelSettingsOutlinedIcon fontSize="small" />,
+          to: '/auth/users',
+        },
+        {
+          id: 'auth.sessions',
+          label: 'Sessions',
+          icon: <AdminPanelSettingsOutlinedIcon fontSize="small" />,
+          to: '/auth/sessions',
         },
       ],
     },

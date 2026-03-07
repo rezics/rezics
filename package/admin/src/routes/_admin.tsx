@@ -1,13 +1,15 @@
 import {createFileRoute, Outlet, redirect} from '@tanstack/react-router';
 
 import AdminLayout from '@/core/layout/AdminLayout';
-import {getToken} from '@package/api/react-query/http';
+import {authApi} from '@package/api/auth/auth.api';
 
 export const Route = createFileRoute('/_admin')({
-  beforeLoad: ({location}) => {
+  beforeLoad: async ({location}) => {
     // Protect all admin routes.
-    // If unauthenticated, redirect to /login and remember the attempted path.
-    if (!getToken()) {
+    // Check auth-server session instead of localStorage JWT.
+    try {
+      await authApi.getSession();
+    } catch {
       const attempted =
         typeof (location as any)?.pathname === 'string'
           ? `${(location as any).pathname ?? ''}${
