@@ -40,6 +40,10 @@ export const jwtPayloadSchema = t.Object({
   unitId: t.String(),
   email: t.String(),
   slug: t.String(),
+  scope: t.Array(t.String()),
+  /**
+   * @deprecated use scope instead
+   */
   permission: t.Object(
     {
       role: t.Array(t.String()),
