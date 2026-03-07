@@ -6,7 +6,7 @@ import {
   handleOpenIdConfigRequest,
 } from './auth/routes';
 import {env} from './env';
-import {swagger} from '@elysiajs/swagger';
+import {openapi} from '@elysiajs/openapi';
 
 const isDev = env.NODE_ENV === 'development';
 
@@ -33,7 +33,7 @@ const app = coreInstance()
   .get('/health', () => ({status: 'ok'}));
 
 if (isDev) {
-  app.use(swagger());
+  app.use(openapi());
 }
 
 const port = env.PORT ? Number(env.PORT) : 3001;

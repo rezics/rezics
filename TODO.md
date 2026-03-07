@@ -1,4 +1,3 @@
 - [ ] add Paraglide i18n package
 - [ ] https://better-auth.com/docs/plugins/admin https://better-auth.com/docs/plugins/organization 参考相关文档为 auth service 添加用户管理功能
 - [ ] add editor package use code mirror 6 build markdown and json editor
-- [ ] Test 文件夹应该合并到各个项目里面，比如针对 server 的 stress 也是可以合并到 server/ 文件夹里面的

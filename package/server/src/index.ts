@@ -1,5 +1,5 @@
 import {Elysia} from 'elysia';
-import {swagger} from '@elysiajs/swagger';
+import {openapi} from '@elysiajs/openapi';
 import {bookApi} from './book';
 import {chapterApi} from './chapter';
 import {readlistApi} from './readlist';
@@ -94,7 +94,7 @@ const app = new Elysia()
   .get('/health', () => ({status: 'ok'}));
 
 if (isDev) {
-  app.use(swagger());
+  app.use(openapi());
 }
 
 const port = env.PORT ? Number(env.PORT) : 3000;
