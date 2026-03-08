@@ -1,5 +1,4 @@
 import type {JWTPayload, RefreshTokenPayload} from '@/src/user/types';
-import bcrypt from 'bcrypt';
 import {verifyBearerToken} from '@package/auth/jwt';
 import {env} from '@/src/env';
 
@@ -10,10 +9,10 @@ type CommonPayload = JWTPayload | RefreshTokenPayload;
  * */
 export async function verifyAuth<T extends CommonPayload>(
   authorization: string | undefined,
-  jwtInstance: any,
-  set: any,
+  setOrJwtInstance: any,
+  maybeSet?: any,
 ): Promise<T> {
-  void jwtInstance;
+  const set = maybeSet ?? setOrJwtInstance;
   try {
     const verified = await verifyBearerToken(authorization, {
       jwksUrl:
@@ -29,21 +28,4 @@ export async function verifyAuth<T extends CommonPayload>(
     set.status = 401;
     throw new Error('Unauthorized: Invalid token');
   }
-}
-
-/**
- * Hash password
- */
-export async function hashPassword(password: string): Promise<string> {
-  return await bcrypt.hash(password, 11);
-}
-
-/**
- * Verify password
- */
-export async function verifyPassword(
-  password: string,
-  passwordHash: string,
-): Promise<boolean> {
-  return await bcrypt.compare(password, passwordHash);
 }

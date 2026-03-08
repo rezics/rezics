@@ -17,8 +17,8 @@ export const followRoute = (api: ReturnType<typeof coreInstance>) => {
        */
       .post(
         '/follow/:targetId',
-        async ({headers, jwt, params, set}) => {
-          const payload = await verifyAuth(headers.authorization, jwt, set);
+        async ({headers, params, set}) => {
+          const payload = await verifyAuth(headers.authorization, set);
           await userService.follow(payload.unitId, params.targetId);
           return {message: 'Followed successfully'};
         },
@@ -40,8 +40,8 @@ export const followRoute = (api: ReturnType<typeof coreInstance>) => {
        */
       .delete(
         '/follow/:targetId',
-        async ({headers, jwt, params, set}) => {
-          const payload = await verifyAuth(headers.authorization, jwt, set);
+        async ({headers, params, set}) => {
+          const payload = await verifyAuth(headers.authorization, set);
           await userService.unfollow(payload.unitId, params.targetId);
           return {message: 'Unfollowed successfully'};
         },
@@ -63,8 +63,8 @@ export const followRoute = (api: ReturnType<typeof coreInstance>) => {
        */
       .get(
         '/follow/status',
-        async ({headers, jwt, query, set}) => {
-          const payload = await verifyAuth(headers.authorization, jwt, set);
+        async ({headers, query, set}) => {
+          const payload = await verifyAuth(headers.authorization, set);
           const {targetIds} = query;
 
           let ids: string[] = [];
@@ -89,8 +89,8 @@ export const followRoute = (api: ReturnType<typeof coreInstance>) => {
 
       .get(
         '/follow/summary',
-        async ({headers, jwt, query, set}) => {
-          await verifyAuth(headers.authorization, jwt, set);
+        async ({headers, query, set}) => {
+          await verifyAuth(headers.authorization, set);
           const {targetIds} = query;
 
           let ids: string[] = [];
@@ -189,7 +189,7 @@ export const followRoute = (api: ReturnType<typeof coreInstance>) => {
        */
       .get(
         '/:unitId',
-        async ({params}): Promise<Omit<UserDTO, 'email'>> => {
+        async ({params}): Promise<UserDTO> => {
           const user = await userService.getByUnitId(params.unitId);
           return mapUserToPublicProfile(user);
         },

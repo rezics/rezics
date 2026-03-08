@@ -5,10 +5,8 @@ import {
   userParamsSchema,
   updateUserSchema,
   userListQuerySchema,
-  createUserSchema,
   type UserDTO,
   type UserListQuery,
-  createUserFullSchema,
 } from '@package/contract';
 import {userService} from '../user/user.service';
 import {
@@ -18,6 +16,24 @@ import {
 } from './permission';
 import {meiliService} from '../meili/meili.service';
 import {mapUserSearchDocToDTO} from '../meili/mapper';
+
+const createUserProfileSchema = t.Object({
+  unitId: t.Optional(t.String()),
+  slug: t.String({
+    minLength: 5,
+    pattern: '^[a-zA-Z0-9](?:[a-zA-Z0-9-_]*[a-zA-Z0-9])?$',
+  }),
+  avatar: t.Optional(t.String()),
+  bio: t.Optional(t.String()),
+  type: t.Optional(
+    t.Union([
+      t.Literal('USER'),
+      t.Literal('AUTHOR'),
+      t.Literal('PRESS'),
+      t.Literal('PRODUCER'),
+    ]),
+  ),
+});
 
 export const userRoute = (api: ReturnType<typeof coreInstance>) => {
   return (
@@ -100,7 +116,7 @@ export const userRoute = (api: ReturnType<typeof coreInstance>) => {
           return mapUserToDTO(created);
         },
         {
-          body: createUserFullSchema,
+          body: createUserProfileSchema,
           headers: t.Object(
             {
               authorization: t.String(),

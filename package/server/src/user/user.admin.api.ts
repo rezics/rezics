@@ -3,30 +3,21 @@ import {
   userListQuerySchema,
   userParamsSchema,
   updateUserSchema,
-  createUserSchema,
-  type CreateUser,
 } from '@package/contract';
 
-import {t} from 'elysia';
 import {coreInstance} from '../core';
 
 import {userService} from './user.service';
 import {mapUserToDTO} from './mapper';
-import {validateSlug} from './slugVerify';
-import {hashPassword, verifyAuth} from './utils';
+import {verifyAuth} from './utils';
 import {BasicAdminPermission} from '@package/contract';
 
 export const adminRoute = (api: ReturnType<typeof coreInstance>) => {
   return api
     .get(
       '/admin',
-      async ({
-        query,
-        headers,
-        jwt,
-        set,
-      }): Promise<{users: UserDTO[]; total: number}> => {
-        const payload = await verifyAuth(headers.authorization, jwt, set);
+      async ({query, headers, set}): Promise<{users: UserDTO[]; total: number}> => {
+        const payload = await verifyAuth(headers.authorization, set);
         if (!BasicAdminPermission(payload as any)) {
           set.status = 403;
           throw new Error('Forbidden: Cannot list users');
@@ -38,15 +29,15 @@ export const adminRoute = (api: ReturnType<typeof coreInstance>) => {
         query: userListQuerySchema,
         detail: {
           summary: 'Admin list users',
-          description: 'List users for admin (includes email)',
+          description: 'List users for admin',
           tags: ['Users', 'Admin'],
         },
       },
     )
     .get(
       '/admin/:unitId',
-      async ({params, headers, jwt, set}): Promise<UserDTO> => {
-        const payload = await verifyAuth(headers.authorization, jwt, set);
+      async ({params, headers, set}): Promise<UserDTO> => {
+        const payload = await verifyAuth(headers.authorization, set);
         if (!BasicAdminPermission(payload as any)) {
           set.status = 403;
           throw new Error('Forbidden: Cannot get user');
@@ -58,78 +49,18 @@ export const adminRoute = (api: ReturnType<typeof coreInstance>) => {
         params: userParamsSchema,
         detail: {
           summary: 'Admin get user',
-          description: 'Get user detail for admin (includes email)',
-          tags: ['Users', 'Admin'],
-        },
-      },
-    )
-    .post(
-      '/admin',
-      async ({body, headers, jwt, set}): Promise<UserDTO> => {
-        const payload = await verifyAuth(headers.authorization, jwt, set);
-        if (!BasicAdminPermission(payload as any)) {
-          set.status = 403;
-          throw new Error('Forbidden: Cannot create user');
-        }
-
-        const slugValidation = validateSlug(body.slug);
-        if (!slugValidation.ok) {
-          set.status = 400;
-          throw new Error('Invalid slug: ' + slugValidation.reason);
-        }
-
-        const existingEmail = await userService.getByEmail(body.email);
-        if (existingEmail) {
-          set.status = 409;
-          throw new Error('Email already exists');
-        }
-        const existingSlug = await userService.getBySlug(
-          slugValidation.normalized,
-        );
-        if (existingSlug) {
-          set.status = 409;
-          throw new Error(
-            `Slug(username: ${slugValidation.normalized}) already exists`,
-          );
-        }
-
-        const passwordHash = await hashPassword(body.password);
-        const user = await userService.create({
-          email: body.email,
-          password: passwordHash,
-          slug: slugValidation.normalized,
-          avatar: body.avatar,
-          bio: body.bio,
-        } as any);
-
-        return mapUserToDTO(user);
-      },
-      {
-        body: t.Intersect([
-          createUserSchema,
-          t.Object({
-            verificationCode: t.Optional(t.String()), // ignored in admin create
-          }),
-        ]),
-        detail: {
-          summary: 'Admin create user',
-          description: 'Create user as admin (no verification code required)',
+          description: 'Get user detail for admin',
           tags: ['Users', 'Admin'],
         },
       },
     )
     .put(
       '/admin/:unitId',
-      async ({params, body, headers, jwt, set}): Promise<UserDTO> => {
-        const payload = await verifyAuth(headers.authorization, jwt, set);
+      async ({params, body, headers, set}): Promise<UserDTO> => {
+        const payload = await verifyAuth(headers.authorization, set);
         if (!BasicAdminPermission(payload as any)) {
           set.status = 403;
           throw new Error('Forbidden: Cannot update user');
-        }
-
-        let passwordHash: string | undefined;
-        if (body.password) {
-          passwordHash = await hashPassword(body.password);
         }
 
         const userReq: UpdateUser = {
@@ -137,7 +68,6 @@ export const adminRoute = (api: ReturnType<typeof coreInstance>) => {
           avatar: body.avatar,
           bio: body.bio,
           description: body.description,
-          password: passwordHash,
         };
 
         const user = await userService.update(params.unitId, userReq);
@@ -155,8 +85,8 @@ export const adminRoute = (api: ReturnType<typeof coreInstance>) => {
     )
     .delete(
       '/admin/:unitId',
-      async ({params, headers, jwt, set}): Promise<{message: string}> => {
-        const payload = await verifyAuth(headers.authorization, jwt, set);
+      async ({params, headers, set}): Promise<{message: string}> => {
+        const payload = await verifyAuth(headers.authorization, set);
         if (!BasicAdminPermission(payload as any)) {
           set.status = 403;
           throw new Error('Forbidden: Cannot delete user');

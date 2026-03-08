@@ -17,7 +17,7 @@ import {useQuery} from '@tanstack/react-query';
 import SearchIcon from '@mui/icons-material/Search';
 import {echoKvApi} from '@package/api/echokv/echokv';
 import {useAlertStore} from '@app/state/windowAlertStore';
-import {JSONEditor} from '@package/ui/Form';
+import {JSONEditor} from '@package/ui/editor/nanojson/index.ts';
 
 type JSONEditorInstance = JSONEditor;
 

@@ -8,7 +8,6 @@ import type {UserWithRelations} from './types';
 export function mapUserToDTO(user: User | UserWithRelations): UserDTO {
   return {
     unitId: user.unitId,
-    email: user.email,
     slug: user.slug,
     type: user.type,
     name: user.name,
@@ -23,11 +22,11 @@ export function mapUserToDTO(user: User | UserWithRelations): UserDTO {
 }
 
 /**
- * Map User to public profile (without sensitive data like email)
+ * Map User to public profile
  */
 export function mapUserToPublicProfile(
   user: User | UserWithRelations,
-): Omit<UserDTO, 'email'> {
+): UserDTO {
   return {
     unitId: user.unitId,
     slug: user.slug,

@@ -53,10 +53,10 @@ describe('auth bearer e2e flow', () => {
       .sign(privateKey);
 
     const set = {status: 200};
-    const payload = await verifyAuth<JWTPayload>(`Bearer ${token}`, null, set);
+    const payload = await verifyAuth<JWTPayload>(`Bearer ${token}`, set);
 
     expect(payload.unitId).toBe('4f1af8b5-6c9f-4c32-8c17-9108fb6af001');
-    expect(payload.scope).toContain('user');
+    expect(String(payload.scope)).toContain('user');
 
     jwksServer.stop(true);
   });

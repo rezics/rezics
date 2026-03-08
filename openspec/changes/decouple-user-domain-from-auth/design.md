@@ -249,8 +249,8 @@ Rollback strategy:
 
 ## Open Questions
 
-- Should the lazy-provisioned user record include `email` from JWT claims, or should email remain auth-only data that the server never stores? (Currently `email` is on server `User` model and used for admin views.)
-- A: We do not rely on email for any form of identity verification, so the server should not store email addresses，When necessary, it will be obtained from the auth service.
+- Should the lazy-provisioned user record include `email` from JWT claims, or should email remain auth-only data that the server never stores? (Resolved)
+- A: The server does not store email addresses. Lazy provisioning only persists `unitId`, `slug`, and profile defaults. When email is needed, it must be obtained from the auth service.
 - Should `package/server/src/user/user.core.api.ts` `POST /create` (admin user creation) be retained as an admin-only provisioning endpoint, or should admin user creation also go through auth?
 - A: The server backend should remove the administrator's ability to create users. The relevant functionality is implemented in the auth service. 
 - What `VITE_AUTH_URL` environment variable should `package/app` use to locate the auth service, and should it be the same origin or a separate subdomain?

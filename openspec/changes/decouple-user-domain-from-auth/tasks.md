@@ -1,58 +1,59 @@
 ## 1. Server auth route removal
 
-- [ ] 1.1 Remove `POST /register` route from `user.core.api.ts` (lines 43–138).
-- [ ] 1.2 Remove `POST /login` route from `user.core.api.ts` (lines 202–260).
-- [ ] 1.3 Remove `POST /create` route from `user.core.api.ts` (lines 140–196) — admin creation moves to `user.admin.api.ts` `POST /admin` which already exists.
-- [ ] 1.4 Remove `POST /change-password` route from `user.core.api.ts` (lines 261–282).
-- [ ] 1.5 Remove `POST /reset-password` route from `user.core.api.ts` (lines 284–305).
-- [ ] 1.6 Remove `POST /refresh-token` route from `user.verify.api.ts` (lines 23–96).
-- [ ] 1.7 Remove `POST /send-verification-code` route from `user.verify.api.ts` (lines 101–140).
-- [ ] 1.8 Remove `POST /verify-verification-code` route from `user.verify.api.ts` (lines 146–168).
-- [ ] 1.9 If `user.verify.api.ts` has no remaining routes, delete the file and remove `.use(verifyRoute)` from `user.api.ts`.
-- [ ] 1.10 Remove the `onBeforeHandle` 410-guard block from `user.api.ts` (lines 12–29).
-- [ ] 1.11 Remove unused imports across all modified route files (`sessionService`, `setCookie`, `v7 as uuidv7`, `hashPassword`, `loginSchema`, `createUserSchema` where no longer referenced, `allowEmailDomains`, `verifyTurnstileToken`).
+- [x] 1.1 Remove `POST /register` route from `user.core.api.ts` (lines 43–138).
+- [x] 1.2 Remove `POST /login` route from `user.core.api.ts` (lines 202–260).
+- [x] 1.3 Remove `POST /create` route from `user.core.api.ts` (lines 140–196) — user creation is now fully owned by the auth service.
+- [x] 1.4 Remove `POST /admin` route from `user.admin.api.ts` — administrator user creation is also owned by the auth service.
+- [x] 1.5 Remove `POST /change-password` route from `user.core.api.ts` (lines 261–282).
+- [x] 1.6 Remove `POST /reset-password` route from `user.core.api.ts` (lines 284–305).
+- [x] 1.7 Remove `POST /refresh-token` route from `user.verify.api.ts` (lines 23–96).
+- [x] 1.8 Remove `POST /send-verification-code` route from `user.verify.api.ts` (lines 101–140).
+- [x] 1.9 Remove `POST /verify-verification-code` route from `user.verify.api.ts` (lines 146–168).
+- [x] 1.10 If `user.verify.api.ts` has no remaining routes, delete the file and remove `.use(verifyRoute)` from `user.api.ts`.
+- [x] 1.11 Remove the `onBeforeHandle` 410-guard block from `user.api.ts` (lines 12–29).
+- [x] 1.12 Remove unused imports across all modified route files (`sessionService`, `setCookie`, `v7 as uuidv7`, `hashPassword`, `loginSchema`, `createUserSchema`, `allowEmailDomains`, `verifyTurnstileToken`).
 
 ## 2. Server service and utility cleanup
 
-- [ ] 2.1 Remove `authenticate()` method from `user.service.ts` (lines 220–235).
-- [ ] 2.2 Remove `verifyPassword()` method from `user.service.ts` (lines 208–215).
-- [ ] 2.3 Remove `resetPassword()` method from `user.service.ts` (lines 237–260).
-- [ ] 2.4 Remove `sendVerificationCode()` method from `user.service.ts` (lines 262–297).
-- [ ] 2.5 Remove `verifyVerificationCode()` method from `user.service.ts` (lines 302–323).
-- [ ] 2.6 Remove `resendVerificationCode()` method from `user.service.ts` (lines 327–329).
-- [ ] 2.7 Remove `nodemailer` import, `transporter` setup, and `SALT_ROUNDS` constant from `user.service.ts` (lines 11–31).
-- [ ] 2.8 Remove `hashPassword` and `verifyPassword` imports from `user.service.ts`.
-- [ ] 2.9 Delete `user.session.service.ts` entirely.
-- [ ] 2.10 Delete `allowEmailDomains.ts`.
-- [ ] 2.11 Remove `hashPassword()` and `verifyPassword()` functions from `utils.ts`. Remove `bcrypt` import. Keep only `verifyAuth()`.
-- [ ] 2.12 Update `index.ts` exports to remove `JWTPayload` type export if no longer needed externally, and remove any re-exports of deleted modules.
+- [x] 2.1 Remove `authenticate()` method from `user.service.ts` (lines 220–235).
+- [x] 2.2 Remove `verifyPassword()` method from `user.service.ts` (lines 208–215).
+- [x] 2.3 Remove `resetPassword()` method from `user.service.ts` (lines 237–260).
+- [x] 2.4 Remove `sendVerificationCode()` method from `user.service.ts` (lines 262–297).
+- [x] 2.5 Remove `verifyVerificationCode()` method from `user.service.ts` (lines 302–323).
+- [x] 2.6 Remove `resendVerificationCode()` method from `user.service.ts` (lines 327–329).
+- [x] 2.7 Remove `nodemailer` import, `transporter` setup, and `SALT_ROUNDS` constant from `user.service.ts` (lines 11–31).
+- [x] 2.8 Remove `hashPassword` and `verifyPassword` imports from `user.service.ts`.
+- [x] 2.9 Delete `user.session.service.ts` entirely.
+- [x] 2.10 Delete `allowEmailDomains.ts`.
+- [x] 2.11 Remove `hashPassword()` and `verifyPassword()` functions from `utils.ts`. Remove `bcrypt` import. Keep only `verifyAuth()`.
+- [x] 2.12 Update `index.ts` exports to remove `JWTPayload` type export if no longer needed externally, and remove any re-exports of deleted modules.
 
 ## 3. Server core instance cleanup
 
-- [ ] 3.1 Remove the two `jwt({...})` plugin registrations from `core.ts`.
-- [ ] 3.2 Remove `@elysiajs/bearer` usage from `core.ts`.
-- [ ] 3.3 Remove `jwt` and `bearer` imports from `core.ts`.
-- [ ] 3.4 Update all route handlers in `user.core.api.ts`, `user.admin.api.ts`, `user.follow.api.ts` to remove `jwt`, `refreshToken`, `cookie: {refresh_token}` from destructured context parameters.
-- [ ] 3.5 Verify `verifyAuth()` function signature — it already ignores `jwtInstance` (`void jwtInstance`); consider simplifying to accept only `authorization` string and `set` object.
-- [ ] 3.6 Remove `@elysiajs/jwt`, `@elysiajs/bearer`, `bcrypt`, `@types/bcrypt`, `nodemailer`, `@types/nodemailer`, `uuid` from `package/server/package.json` dependencies (verify each is truly unused first with repo-wide grep).
-- [ ] 3.7 Run `tsc` (or `bun run build`) for `package/server` to verify no type errors.
+- [x] 3.1 Remove the two `jwt({...})` plugin registrations from `core.ts`.
+- [x] 3.2 Remove `@elysiajs/bearer` usage from `core.ts`.
+- [x] 3.3 Remove `jwt` and `bearer` imports from `core.ts`.
+- [x] 3.4 Update all route handlers in `user.core.api.ts`, `user.admin.api.ts`, `user.follow.api.ts` to remove `jwt`, `refreshToken`, `cookie: {refresh_token}` from destructured context parameters.
+- [x] 3.5 Verify `verifyAuth()` function signature — it already ignores `jwtInstance` (`void jwtInstance`); consider simplifying to accept only `authorization` string and `set` object.
+- [x] 3.6 Remove `@elysiajs/jwt`, `@elysiajs/bearer`, `bcrypt`, `@types/bcrypt`, `nodemailer`, `@types/nodemailer`, `uuid` from `package/server/package.json` dependencies (verify each is truly unused first with repo-wide grep).
+- [x] 3.7 Run `tsc` (or `bun run build`) for `package/server` to verify no type errors.
 
 ## 4. Server Prisma schema migration
 
-- [ ] 4.1 Remove `passwordHash String` field from `User` model in `package/server/prisma/schema.prisma`.
-- [ ] 4.2 Remove `AuthSession` model from `package/server/prisma/schema.prisma`.
-- [ ] 4.3 Remove `VerificationCode` model from `package/server/prisma/schema.prisma`.
-- [ ] 4.4 Run `bunx prisma migrate dev --name remove-auth-owned-models` to generate and apply migration.
-- [ ] 4.5 Run `bun run prisma:generate` to regenerate Prisma client.
-- [ ] 4.6 Fix any type errors in `user.service.ts` `create()` method that previously set `passwordHash`.
-- [ ] 4.7 Verify `mapper.ts` does not reference `passwordHash` (it does not currently, but confirm).
+- [x] 4.1 Remove `passwordHash String` field from `User` model in `package/server/prisma/schema.prisma`.
+- [x] 4.2 Remove `AuthSession` model from `package/server/prisma/schema.prisma`.
+- [x] 4.3 Remove `VerificationCode` model from `package/server/prisma/schema.prisma`.
+- [x] 4.4 Run `bunx prisma migrate dev --name remove-auth-owned-models` to generate and apply migration.
+- [x] 4.5 Run `bun run prisma:generate` to regenerate Prisma client.
+- [x] 4.6 Fix any type errors in `user.service.ts` `create()` method that previously set `passwordHash`.
+- [x] 4.7 Verify `mapper.ts` does not reference `passwordHash` (it does not currently, but confirm).
 
 ## 5. Lazy user provisioning
 
-- [ ] 5.1 Add a `provisionFromJwt(payload: {unitId: string; slug?: string; email?: string})` method to `user.service.ts` that creates a minimal `User` record with defaults.
-- [ ] 5.2 Update `GET /users/me` handler in `user.core.api.ts`: after `verifyAuth()`, if `userService.getByUnitId(unitId)` throws (not found), call `provisionFromJwt()` and return the new record.
-- [ ] 5.3 Add a test for lazy provisioning: valid JWT + no existing user → user is created and returned.
-- [ ] 5.4 Decide and document whether `email` is provisioned from JWT claims or left null (see open question in design).
+- [x] 5.1 Add a `provisionFromJwt(payload: {unitId: string; slug?: string; email?: string})` method to `user.service.ts` that creates a minimal `User` record with defaults.
+- [x] 5.2 Update `GET /users/me` handler in `user.core.api.ts`: after `verifyAuth()`, if `userService.getByUnitId(unitId)` throws (not found), call `provisionFromJwt()` and return the new record.
+- [x] 5.3 Add a test for lazy provisioning: valid JWT + no existing user → user is created and returned.
+- [x] 5.4 Decide and document whether `email` is provisioned from JWT claims or left null (see open question in design).
 
 ## 6. Frontend auth API client (package/api)
 

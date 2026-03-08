@@ -38,9 +38,7 @@
     "typescript": "^5"
   },
   "dependencies": {
-    "@elysiajs/bearer": "^1.4.1",
     "@elysiajs/cors": "^1.4.0",
-    "@elysiajs/jwt": "^1.4.0",
     "@elysiajs/openapi": "^1.4.14",
     "@faker-js/faker": "^10.1.0",
     "@package/auth": "workspace:*",
@@ -48,16 +46,11 @@
     "@package/search": "workspace:*",
     "@prisma/adapter-pg": "^7.4.2",
     "@prisma/client": "^7.4.2",
-    "@types/bcrypt": "^6.0.0",
-    "@types/nodemailer": "^7.0.4",
-    "bcrypt": "^6.0.0",
     "chalk": "^5.6.2",
     "dotenv": "^17.2.3",
     "elysia": "^1.4.22",
     "jose": "^6.2.0",
-    "nodemailer": "^7.0.11",
     "pg": "^8.16.3",
-    "resend": "^6.5.2",
-    "uuid": "^13.0.0"
+    "resend": "^6.5.2"
   }
 }

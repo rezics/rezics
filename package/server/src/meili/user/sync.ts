@@ -16,7 +16,6 @@ export async function syncUserToMeili(unitId: string): Promise<void> {
     id: user.unitId,
     unitId: user.unitId,
     name: user.name,
-    email: user.email,
     slug: user.slug,
     type: user.type,
     avatar: user.avatar,

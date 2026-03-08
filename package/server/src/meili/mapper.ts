@@ -3,12 +3,11 @@ import type {UserSearchDocument} from '@package/contract';
 
 /**
  * Map a Meili user document into full `UserDTO`.
- * Mainly used by token/admin flows where email & permission are required.
+ * Mainly used by token/admin flows where permission is required.
  */
 export function mapUserSearchDocToDTO(doc: UserSearchDocument): UserDTO {
   return {
     unitId: doc.unitId,
-    email: doc.email,
     slug: doc.slug ?? undefined,
     type: doc.type ?? undefined,
     name: doc.name,
@@ -28,11 +27,11 @@ export function mapUserSearchDocToDTO(doc: UserSearchDocument): UserDTO {
 
 /**
  * Map a Meili user document into a public profile
- * (without sensitive fields like email & permission).
+ * (without sensitive fields like permission).
  */
 export function mapUserSearchDocToPublicProfile(
   doc: UserSearchDocument,
-): Omit<UserDTO, 'email'> {
+): UserDTO {
   return {
     unitId: doc.unitId,
     slug: doc.slug ?? undefined,

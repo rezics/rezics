@@ -40,7 +40,7 @@ export async function searchUsersRaw(
  * Higher-level search API for users.
  *
  * - Input is {@link UserListQuery} from `@package/contract`.
- * - It maps contract fields like `q`, `email`, `slug`, `type`, `page`, `limit`
+ * - It maps contract fields like `q`, `slug`, `type`, `page`, `limit`
  *   into Meilisearch filter expressions and pagination options.
  */
 export async function searchUsers(
@@ -49,10 +49,6 @@ export async function searchUsers(
   const q = opts.q ?? '';
 
   const filter: string[] = [];
-
-  if (opts.email) {
-    filter.push(`email = "${escapeValue(opts.email)}"`);
-  }
 
   if (opts.slug) {
     filter.push(`slug = "${escapeValue(opts.slug)}"`);

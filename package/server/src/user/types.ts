@@ -15,8 +15,7 @@ export type UserWithRelations = User & {
  * Query filter types
  */
 export type UserFilterOptions = {
-  q?: string; // search in name, email, or slug
-  email?: string;
+  q?: string; // search in name or slug
   slug?: string;
   type?: string;
   page?: number;
@@ -38,17 +37,18 @@ export const userInclude = {
  */
 export const jwtPayloadSchema = t.Object({
   unitId: t.String(),
-  email: t.String(),
-  slug: t.String(),
-  scope: t.Array(t.String()),
+  slug: t.Optional(t.String()),
+  scope: t.Union([t.String(), t.Array(t.String())]),
   /**
    * @deprecated use scope instead
    */
-  permission: t.Object(
-    {
-      role: t.Array(t.String()),
-    },
-    {additionalProperties: true},
+  permission: t.Optional(
+    t.Object(
+      {
+        role: t.Array(t.String()),
+      },
+      {additionalProperties: true},
+    ),
   ),
 });
 

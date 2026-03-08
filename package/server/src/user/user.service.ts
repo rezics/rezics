@@ -6,29 +6,21 @@ import {UserType} from '@/prisma/client';
 import type {Prisma} from '@/prisma/client';
 import type {UserFilterOptions, UserWithRelations} from './types';
 import {userInclude} from './types';
-import type {CreateUserFull, UpdateUser} from '@package/contract';
-import {hashPassword, verifyPassword} from './utils';
-import nodemailer from 'nodemailer';
+import type {UpdateUser} from '@package/contract';
 import {syncUserToMeili, deleteUserFromMeili} from '@/src/meili/user/sync';
-import {env} from '../env';
 
-const transporter = nodemailer.createTransport({
-  host: env.SMTP_HOST as string,
-  port: 465,
-  secure: true,
-  auth: {
-    user: env.SMTP_USER as string,
-    pass: env.SMTP_PASSWORD as string,
-  },
-  pool: true,
-  maxConnections: 3,
-  maxMessages: 50,
-  tls: {
-    rejectUnauthorized: true,
-  },
-});
+export type CreateUserProfileInput = {
+  unitId?: string;
+  slug: string;
+  avatar?: string;
+  bio?: string;
+  type?: UserType;
+};
 
-const SALT_ROUNDS = 10;
+export type ProvisionFromJwtInput = {
+  unitId: string;
+  slug?: string;
+};
 
 /**
  * User Service - Business logic layer
@@ -40,20 +32,14 @@ export class UserService {
   private buildWhereClause(options: UserFilterOptions): Prisma.UserWhereInput {
     const andWhere: Prisma.UserWhereInput[] = [];
 
-    // Search in name, email, or slug
+    // Search in name or slug
     if (options.q && options.q.trim()) {
       andWhere.push({
         OR: [
           {name: {contains: options.q, mode: 'insensitive'}},
-          {email: {contains: options.q, mode: 'insensitive'}},
           {slug: {contains: options.q, mode: 'insensitive'}},
         ],
       });
-    }
-
-    // Filter by email
-    if (options.email && options.email.trim()) {
-      andWhere.push({email: {equals: options.email, mode: 'insensitive'}});
     }
 
     // Filter by slug
@@ -109,18 +95,6 @@ export class UserService {
   }
 
   /**
-   * Get user by email
-   */
-  async getByEmail(email: string): Promise<UserWithRelations | null> {
-    const user = await prisma.user.findUnique({
-      where: {email},
-      include: userInclude,
-    });
-
-    return user as UserWithRelations | null;
-  }
-
-  /**
    * Get user by slug
    */
   async getBySlug(slug: string): Promise<UserWithRelations | null> {
@@ -135,14 +109,13 @@ export class UserService {
   /**
    * Create new user
    */
-  async create(req: CreateUserFull): Promise<UserWithRelations> {
-    const {email, password, slug, avatar, bio, type} = req;
+  async create(req: CreateUserProfileInput): Promise<UserWithRelations> {
+    const {unitId, slug, avatar, bio, type} = req;
 
     const user = await prisma.user.create({
       data: {
-        email,
+        unitId,
         slug,
-        passwordHash: password,
         name: slug,
         avatar: avatar || undefined,
         bio: bio || undefined,
@@ -157,11 +130,34 @@ export class UserService {
     return user as UserWithRelations;
   }
 
+  async provisionFromJwt(
+    payload: ProvisionFromJwtInput,
+  ): Promise<UserWithRelations> {
+    const slug = payload.slug?.trim() || payload.unitId;
+
+    const user = await prisma.user.upsert({
+      where: {unitId: payload.unitId},
+      update: {},
+      create: {
+        unitId: payload.unitId,
+        slug,
+        name: slug,
+        type: UserType.USER,
+        joinDate: new Date(),
+      },
+      include: userInclude,
+    });
+
+    await syncUserToMeili(user.unitId);
+
+    return user as UserWithRelations;
+  }
+
   /**
    * Update user
    */
   async update(unitId: string, req: UpdateUser): Promise<UserWithRelations> {
-    const {name, avatar, bio, description, password} = req;
+    const {name, avatar, bio, description} = req;
 
     const updateData: Prisma.UserUpdateInput = {
       name: name || undefined,
@@ -169,11 +165,6 @@ export class UserService {
       bio: bio || undefined,
       description: description || undefined,
     };
-
-    // Update password if provided
-    if (password) {
-      updateData.passwordHash = password;
-    }
 
     const user = await prisma.user.update({
       where: {unitId},
@@ -200,132 +191,6 @@ export class UserService {
   async exists(unitId: string): Promise<boolean> {
     const count = await prisma.user.count({where: {unitId}});
     return count > 0;
-  }
-
-  /**
-   * Verify user password
-   */
-  async verifyPassword(email: string, password: string): Promise<boolean> {
-    const user = await this.getByEmail(email);
-    if (!user) {
-      return false;
-    }
-
-    return verifyPassword(password, user.passwordHash);
-  }
-
-  /**
-   * Authenticate user and return user data
-   */
-  async authenticate(
-    email: string,
-    password: string,
-  ): Promise<UserWithRelations | null> {
-    const user = await this.getByEmail(email);
-    if (!user) {
-      return null;
-    }
-
-    const isValid = await verifyPassword(password, user.passwordHash);
-    if (!isValid) {
-      return null;
-    }
-
-    return user;
-  }
-
-  async resetPassword(
-    email: string,
-    verificationCode: string,
-    newPassword: string,
-  ): Promise<void> {
-    const verificationCodeRecord = await prisma.verificationCode.findUnique({
-      where: {email, code: verificationCode},
-    });
-    if (!verificationCodeRecord) {
-      throw new Error('Verification code not found');
-    }
-    const passwordHash = await hashPassword(newPassword);
-    await prisma.user.update({
-      where: {email},
-      data: {passwordHash},
-    });
-  }
-
-  // ANCHOR Verification Code Logic
-  /**
-   * Send verification code
-   */
-  async sendVerificationCode(
-    email: string,
-    userId?: string,
-  ): Promise<{status: 'success' | 'error'; data: any}> {
-    const nowTime = new Date();
-    const isEmailExist = await prisma.verificationCode.findUnique({
-      where: {email},
-    });
-    const minResendTime = 1000 * 30; // 30 seconds
-    if (isEmailExist) {
-      const elapsed = nowTime.getTime() - isEmailExist.createdAt.getTime();
-      if (elapsed < minResendTime) {
-        return {
-          status: 'error',
-          data: `You can only resend the code after ${
-            minResendTime / 1000
-          } seconds`,
-        };
-      }
-    }
-    const code = Math.floor(100000 + Math.random() * 900000).toString();
-    const expiresAt = new Date(nowTime.getTime() + 1000 * 60 * 30); // 30 minutes
-    const theUserId = userId ?? '019aca29-e86c-79ba-a29e-cd6b1c653c55'; // we don't need user id for verification code
-    transporter.sendMail({
-      from: `${env.SMTP_USER_NAME} <${env.SMTP_USER}>`,
-      to: email,
-      subject: 'REZICS - Verification Code',
-      text: `Your verification code is: ${code}. It will expire in 30 minutes.`,
-      html: `<strong>Your verification code is: ${code}. It will expire in 30 minutes.</strong>`,
-    });
-
-    await prisma.verificationCode.upsert({
-      where: {email},
-      update: {code, expiresAt, createdAt: nowTime, usedAt: null},
-      create: {email, userId: theUserId, code, expiresAt, usedAt: null},
-    });
-
-    return {status: 'success', data: 'Verification code sent successfully'};
-  }
-
-  /**
-   * Verify verification code
-   */
-  async verifyVerificationCode(
-    email: string,
-    code: string,
-  ): Promise<{status: 'success' | 'error'; message?: string}> {
-    const verificationCode = await prisma.verificationCode.findUnique({
-      where: {email, code},
-    });
-    if (!verificationCode) {
-      return {status: 'error', message: 'Verification code not found'};
-    }
-    if (verificationCode.expiresAt < new Date()) {
-      return {status: 'error', message: 'Verification code expired'};
-    }
-    if (verificationCode.usedAt) {
-      return {status: 'error', message: 'Verification code already used'};
-    }
-    await prisma.verificationCode.update({
-      where: {id: verificationCode.id},
-      data: {usedAt: new Date()},
-    });
-    return {status: 'success'};
-  }
-  /**
-   * Resend verification code
-   */
-  async resendVerificationCode(email: string, userId: string): Promise<void> {
-    await this.sendVerificationCode(email, userId);
   }
 
   /**
