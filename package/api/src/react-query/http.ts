@@ -7,6 +7,7 @@ import type {AuthTokenResponse} from '@package/contract';
 const API_BASE_URL = env.VITE_API_URL || 'http://localhost:4000';
 const AUTH_BASE_URL = env.VITE_AUTH_API_URL || 'http://localhost:3001';
 const AUTH_STORE_KEY = 'auth-store';
+export const AUTH_TOKEN_STORAGE_EVENT = 'package-auth-token-storage';
 
 /**
  * JWT Token Storage Keys
@@ -44,6 +45,11 @@ function writeAuthSnapshot(token: string | null): void {
       version: 0,
     }),
   );
+  window.dispatchEvent(
+    new CustomEvent(AUTH_TOKEN_STORAGE_EVENT, {
+      detail: {token},
+    }),
+  );
 }
 
 /**
@@ -70,6 +76,11 @@ export const setToken = (token: string | null): void => {
 export const removeToken = (): void => {
   if (typeof window === 'undefined') return;
   localStorage.removeItem(AUTH_STORE_KEY);
+  window.dispatchEvent(
+    new CustomEvent(AUTH_TOKEN_STORAGE_EVENT, {
+      detail: {token: null},
+    }),
+  );
 };
 
 /**

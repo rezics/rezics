@@ -120,7 +120,14 @@ export function AdminNav({
   };
 
   return (
-    <Box sx={{height: '100%', display: 'flex', flexDirection: 'column'}}>
+    <Box
+      sx={{
+        marginTop: 8,
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+      }}
+    >
       <Box sx={{px: 2, py: 2}}>
         <Typography variant="subtitle1" fontWeight={700}>
           {adminConfig.appName}
