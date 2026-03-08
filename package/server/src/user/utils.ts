@@ -1,13 +1,11 @@
-import type {JWTPayload, RefreshTokenPayload} from '@/src/user/types';
+import type {JWTPayload} from '@/src/user/types';
 import {verifyBearerToken} from '@package/auth/jwt';
 import {env} from '@/src/env';
-
-type CommonPayload = JWTPayload | RefreshTokenPayload;
 
 /**
  * Helper function to extract and verify JWT from Authorization header
  * */
-export async function verifyAuth<T extends CommonPayload>(
+export async function verifyAuth<T extends JWTPayload>(
   authorization: string | undefined,
   setOrJwtInstance: any,
   maybeSet?: any,

@@ -57,39 +57,39 @@
 
 ## 6. Frontend auth API client (package/api)
 
-- [ ] 6.1 Create `package/api/src/auth/auth.api.ts` with methods wrapping auth service calls: `signIn(email, password)`, `signUp(email, password, slug)`, `signOut()`, `getSession()`.
-- [ ] 6.2 Add auth service base URL configuration (e.g., `VITE_AUTH_URL` env var) to `package/api` or `package/app` env.
-- [ ] 6.3 Update `refreshAuthToken()` in `http.ts` to call auth service token endpoint instead of `POST /users/refresh-token`.
-- [ ] 6.4 Remove `login()` and `register()` from `package/api/src/user/user.api.ts`.
-- [ ] 6.5 Remove `sendVerificationCode()` from `user.api.ts` if verification is fully handled by auth.
-- [ ] 6.6 Remove `resetPassword()` from `user.api.ts` if password reset is fully handled by auth.
+- [x] 6.1 Create `package/api/src/auth/auth.api.ts` with methods wrapping auth service calls: `signIn(email, password)`, `signUp(email, password, slug)`, `signOut()`, `getSession()`.
+- [x] 6.2 Add auth service base URL configuration (e.g., `VITE_AUTH_URL` env var) to `package/api` or `package/app` env.
+- [x] 6.3 Update `refreshAuthToken()` in `http.ts` to call auth service token endpoint instead of `POST /users/refresh-token`.
+- [x] 6.4 Remove `login()` and `register()` from `package/api/src/user/user.api.ts`.
+- [x] 6.5 Remove `sendVerificationCode()` from `user.api.ts` if verification is fully handled by auth.
+- [x] 6.6 Remove `resetPassword()` from `user.api.ts` if password reset is fully handled by auth.
 
 ## 7. Frontend state store split (package/app)
 
-- [ ] 7.1 Create `package/app/src/user/state/authStore.ts` with Zustand store: `accessToken`, `isAuthenticated`, `setToken()`, `clearAuth()`, `init()` (reads token from localStorage).
-- [ ] 7.2 Rename `userStore.ts` to `userProfileStore.ts`. Remove token/auth logic. Keep only `user: PartialUserDTO`, `setUser()`, `clearProfile()`.
-- [ ] 7.3 Update `package/app/src/user/state/index.ts` to export both stores.
-- [ ] 7.4 Update `getToken()` in `package/api/src/react-query/http.ts` to read from `authStore` (or keep localStorage key aligned with `authStore` persistence key).
-- [ ] 7.5 Update all `useUserStore` import sites across `package/app` to use either `useAuthStore` or `useUserProfileStore` as appropriate.
-- [ ] 7.6 Run repo-wide grep for `useUserStore` and `user-store` localStorage key to find and update all references.
+- [x] 7.1 Create `package/app/src/user/state/authStore.ts` with Zustand store: `accessToken`, `isAuthenticated`, `setToken()`, `clearAuth()`, `init()` (reads token from localStorage).
+- [x] 7.2 Rename `userStore.ts` to `userProfileStore.ts`. Remove token/auth logic. Keep only `user: PartialUserDTO`, `setUser()`, `clearProfile()`.
+- [x] 7.3 Update `package/app/src/user/state/index.ts` to export both stores.
+- [x] 7.4 Update `getToken()` in `package/api/src/react-query/http.ts` to read from `authStore` (or keep localStorage key aligned with `authStore` persistence key).
+- [x] 7.5 Update all `useUserStore` import sites across `package/app` to use either `useAuthStore` or `useUserProfileStore` as appropriate.
+- [x] 7.6 Run repo-wide grep for `useUserStore` and `user-store` localStorage key to find and update all references.
 
 ## 8. Frontend handler and page updates (package/app)
 
-- [ ] 8.1 Update `handler.ts` `login()` to call `authApi.signIn()` → store token in `authStore` → fetch `/users/me` → store profile in `userProfileStore`.
-- [ ] 8.2 Update `handler.ts` `register()` to call `authApi.signUp()` → same flow as login.
-- [ ] 8.3 Update `handler.ts` `logout()` to call `authApi.signOut()` → clear `authStore` → clear `userProfileStore`.
-- [ ] 8.4 Update `LoginPage.tsx` to use updated `login()` handler (no API change needed if handler interface stays the same).
-- [ ] 8.5 Update `RegisterPage.tsx` to use updated `register()` handler.
-- [ ] 8.6 Update `useAuth.ts` to read `isAuthenticated` from `authStore` and `user` from `userProfileStore`.
-- [ ] 8.7 Update `ResetPasswordPage.tsx` to call auth service for password reset instead of server.
+- [x] 8.1 Update `handler.ts` `login()` to call `authApi.signIn()` → store token in `authStore` → fetch `/users/me` → store profile in `userProfileStore`.
+- [x] 8.2 Update `handler.ts` `register()` to call `authApi.signUp()` → same flow as login.
+- [x] 8.3 Update `handler.ts` `logout()` to call `authApi.signOut()` → clear `authStore` → clear `userProfileStore`.
+- [x] 8.4 Update `LoginPage.tsx` to use updated `login()` handler (no API change needed if handler interface stays the same).
+- [x] 8.5 Update `RegisterPage.tsx` to use updated `register()` handler.
+- [x] 8.6 Update `useAuth.ts` to read `isAuthenticated` from `authStore` and `user` from `userProfileStore`.
+- [x] 8.7 Update `ResetPasswordPage.tsx` to call auth service for password reset instead of server.
 
 ## 9. Validation and cleanup
 
 - [ ] 9.1 Run `tsc` for `package/server`, `package/api`, `package/app` — fix all type errors.
-- [ ] 9.2 Update `auth.e2e.test.ts` to remove tests for deleted routes and add tests for JWKS-only verification path.
+- [x] 9.2 Update `auth.e2e.test.ts` to remove tests for deleted routes and add tests for JWKS-only verification path.
 - [ ] 9.3 Run full end-to-end test: auth sign-in → bearer call to server `/users/me` → profile returned.
 - [ ] 9.4 Run end-to-end test for lazy provisioning: new auth user → `/users/me` → auto-provisioned profile.
 - [ ] 9.5 Run end-to-end test for token refresh: expired JWT → auth refresh → retry succeeds.
-- [ ] 9.6 Grep repo-wide for any remaining references to deleted functions/files (`sessionService`, `allowEmailDomains`, `hashPassword`, `verifyPassword`, `authenticate`, `user.session.service`, `refreshToken` in core.ts context).
-- [ ] 9.7 Run `bun install` to verify dependency tree is clean after removing packages from `package.json`.
+- [x] 9.6 Grep repo-wide for any remaining references to deleted functions/files (`sessionService`, `allowEmailDomains`, `hashPassword`, `verifyPassword`, `authenticate`, `user.session.service`, `refreshToken` in core.ts context).
+- [x] 9.7 Run `bun install` to verify dependency tree is clean after removing packages from `package.json`.
 - [ ] 9.8 Verify `knip` (dead code detector) passes or update `knip.config.ts` if needed.

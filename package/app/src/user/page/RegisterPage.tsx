@@ -12,14 +12,8 @@ import {
   validateSlug,
   validatePassword,
 } from '../model/validate.ts';
-import {useUserStore} from '@/user/state';
 import {useNavigate, useRouterState} from '@tanstack/react-router';
-import {Turnstile} from '@package/ui/composite/auth/Turnstile.tsx';
 import {PasswordField} from '@package/ui/composite/form/field/PasswordField.tsx';
-import {
-  GetVerificationCode,
-  type GetVerificationCodeHandle,
-} from '../component/GetVerificationCode.tsx';
 import {TextButton} from '@package/ui/primitive/button/TextButton.tsx';
 
 interface RegisterData {
@@ -27,7 +21,6 @@ interface RegisterData {
   email: string;
   password: string;
   confirm: string;
-  verificationCode?: string;
 }
 
 export interface RegisterPageProps {
@@ -49,15 +42,12 @@ export const RegisterPage: FC<RegisterPageProps> = ({
   const {t} = useTranslation();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>();
-  const [showTurnstile, setShowTurnstile] = useState(false);
   const [data, setData] = useState<RegisterData>({
     slug: '',
     email: '',
     password: '',
     confirm: '',
   });
-  const verificationRef = useRef<GetVerificationCodeHandle | null>(null);
-  const {setUser} = useUserStore();
   const navigate = useNavigate();
   const pathname = useRouterState({select: s => s.location.pathname});
 
@@ -87,11 +77,7 @@ export const RegisterPage: FC<RegisterPageProps> = ({
       if (!validateData.valid) throw new Error(validateData.error ?? '');
       if (password !== confirm) throw new Error('Passwords do not match.');
 
-      const verificationCode = data?.verificationCode;
-      if (!verificationCode) throw new Error('Verification code is required.');
-
-      const result = await register(slug, email, password, verificationCode);
-      setUser(result?.user);
+      await register(slug, email, password);
     } catch (e) {
       setError((e as Error).message);
       hasError = true;
@@ -106,11 +92,6 @@ export const RegisterPage: FC<RegisterPageProps> = ({
     }
   };
 
-  const handleTurnstileVerify = async (token: string) => {
-    if (!verificationRef.current) return;
-    await verificationRef.current.handleTurnstileVerify(token);
-  };
-
   const handleLoginClickInternal = () => {
     if (onLoginClick) {
       onLoginClick();
@@ -120,24 +101,10 @@ export const RegisterPage: FC<RegisterPageProps> = ({
     }
   };
 
-  function handleTurnstileError(error: Error) {
-    setError(error.message);
-  }
-
   const LayoutComponent = isModal ? ModalLayout : Layout;
 
   const content = (
     <>
-      {showTurnstile && (
-        <div
-          style={{marginTop: '16px', display: 'flex', justifyContent: 'center'}}
-        >
-          <Turnstile
-            onVerify={handleTurnstileVerify}
-            onError={handleTurnstileError}
-          />
-        </div>
-      )}
       {error && <Alert severity="error">{error}</Alert>}
       <TextField
         name="email"
@@ -174,13 +141,6 @@ export const RegisterPage: FC<RegisterPageProps> = ({
         setValue={(value: string) => {
           setData({...data, confirm: value});
         }}
-      />
-      <GetVerificationCode
-        data={data}
-        setData={setData}
-        setShowTurnstile={setShowTurnstile}
-        setError={setError}
-        ref={verificationRef}
       />
       <div>
         Already have an account?&nbsp;

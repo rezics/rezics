@@ -10,8 +10,6 @@ export async function resetDatabase(prisma: PrismaClient): Promise<void> {
   console.log('Resetting database...');
   // Order matters due to FKs
   await prisma.apiToken.deleteMany();
-  await prisma.authSession.deleteMany();
-  await prisma.verificationCode.deleteMany();
   await prisma.bookmark.deleteMany();
   await prisma.follow.deleteMany();
   await prisma.commentIndex.deleteMany();

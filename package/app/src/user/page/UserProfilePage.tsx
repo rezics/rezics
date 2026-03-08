@@ -16,7 +16,7 @@ import type {UserDTO} from '@package/contract';
 import {useQuery} from '@tanstack/react-query';
 import {userQueries} from '@package/api/user/user.queries';
 import {UserError, UserLoading} from './UserState';
-import {useUserStore} from '@/user/state';
+import {useUserProfileStore} from '@/user/state';
 import FollowButton from '@/engagement/component/FollowButton';
 import {UserUnitsPage} from './UserUnitsPage';
 import {Link} from '@package/ui/primitive/link/Link.tsx';
@@ -36,8 +36,8 @@ export const UserProfilePage: FC<UserProfilePageProps> = ({
   isCurrentUser = false,
   onEditClick,
 }) => {
-  const currentUser = useUserStore(state => state.user);
-  const {setUser} = useUserStore();
+  const currentUser = useUserProfileStore(state => state.user);
+  const {setUser} = useUserProfileStore();
   const {t} = useTranslation();
 
   console.log('isCurrentUser', isCurrentUser);

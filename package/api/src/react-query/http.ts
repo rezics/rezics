@@ -1,32 +1,66 @@
 import {env} from '@package/app/env';
+import type {AuthTokenResponse} from '@package/contract';
 
 /**
  * Base API URL - should be configured via environment
  */
 const API_BASE_URL = env.VITE_API_URL || 'http://localhost:4000';
+const AUTH_BASE_URL = env.VITE_AUTH_API_URL || 'http://localhost:3001';
+const AUTH_STORE_KEY = 'auth-store';
 
 /**
  * JWT Token Storage Keys
  */
-const TOKEN_KEY = 'jwt_token';
+type PersistedAuthSnapshot = {
+  state?: {
+    accessToken?: string | null;
+    isAuthenticated?: boolean;
+  };
+  version?: number;
+};
+
+function readAuthSnapshot(): PersistedAuthSnapshot | null {
+  if (typeof window === 'undefined') return null;
+  const raw = localStorage.getItem(AUTH_STORE_KEY);
+  if (!raw) return null;
+
+  try {
+    return JSON.parse(raw) as PersistedAuthSnapshot;
+  } catch {
+    return null;
+  }
+}
+
+function writeAuthSnapshot(token: string | null): void {
+  if (typeof window === 'undefined') return;
+
+  localStorage.setItem(
+    AUTH_STORE_KEY,
+    JSON.stringify({
+      state: {
+        accessToken: token,
+        isAuthenticated: !!token,
+      },
+      version: 0,
+    }),
+  );
+}
 
 /**
  * Get JWT token from localStorage
  */
 export const getToken = (): string | null => {
-  if (typeof window === 'undefined') return null;
-  return localStorage.getItem(TOKEN_KEY);
+  return readAuthSnapshot()?.state?.accessToken ?? null;
 };
 
 /**
  * Set JWT token to localStorage
  */
 export const setToken = (token: string | null): void => {
-  if (typeof window === 'undefined') return;
   if (token) {
-    localStorage.setItem(TOKEN_KEY, token);
+    writeAuthSnapshot(token);
   } else {
-    localStorage.removeItem(TOKEN_KEY);
+    removeToken();
   }
 };
 
@@ -35,7 +69,7 @@ export const setToken = (token: string | null): void => {
  */
 export const removeToken = (): void => {
   if (typeof window === 'undefined') return;
-  localStorage.removeItem(TOKEN_KEY);
+  localStorage.removeItem(AUTH_STORE_KEY);
 };
 
 /**
@@ -102,21 +136,19 @@ function buildHeaders(
 }
 
 export async function refreshAuthToken() {
-  const refreshTokenResponse = await fetch(
-    `${API_BASE_URL}/users/refresh-token`,
-    {
-      method: 'POST',
-      credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+  const refreshTokenResponse = await fetch(`${AUTH_BASE_URL}/api/auth/token`, {
+    method: 'GET',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
     },
-  );
-  const json = await refreshTokenResponse.json();
-  if (!json?.token) {
+  });
+  const json = (await refreshTokenResponse.json()) as Partial<AuthTokenResponse>;
+  const token = json.token ?? null;
+  if (!token) {
     throw new Error('Unauthorized - Please login again');
   }
-  setToken(json.token);
+  setToken(token);
 }
 
 /**

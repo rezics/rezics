@@ -5,7 +5,7 @@ import {Helmet} from 'react-helmet-async';
 import {NAVIGATION} from '../component/navigation/MainNavigation';
 import {MainLayoutFooter} from '../component/footer/MainLayoutFooter';
 import React from 'react';
-import {useUserStore} from '@/user/state';
+import {useUserProfileStore} from '@/user/state';
 import {HelpFab} from '../component/HelpWidget';
 
 export interface MainLayoutProps {
@@ -14,7 +14,7 @@ export interface MainLayoutProps {
 
 export const MainLayout: React.FC<MainLayoutProps> = ({children}) => {
   const isAdmin =
-    useUserStore(state => state.user?.permission?.role?.includes('ADMIN')) ??
+    useUserProfileStore(state => state.user?.permission?.role?.includes('ADMIN')) ??
     false;
 
   return (

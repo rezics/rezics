@@ -15,7 +15,7 @@ import {
 import {useQuery, useQueryClient} from '@tanstack/react-query';
 import type {UserDTO} from '@package/contract';
 import {userQueries} from '@package/api/user/user.queries';
-import {useUserStore} from '@/user/state';
+import {useUserProfileStore} from '@/user/state';
 import {
   UniversalPaginator,
   type UniversalPaginatorHandle,
@@ -65,7 +65,7 @@ export const FollowInfoPage: React.FC<FollowInfoPageProps> = ({
   isCurrentUser = false,
 }) => {
   const navigate = useNavigate();
-  const currentUser = useUserStore(state => state.user);
+  const currentUser = useUserProfileStore(state => state.user);
   const resolvedUnitId = useMemo(
     () => unitId || (isCurrentUser ? currentUser?.unitId : unitId),
     [unitId, isCurrentUser, currentUser?.unitId],

@@ -6,7 +6,7 @@ import {CooldownButton} from '@package/ui/composite/button/CooldownButton.tsx';
 
 import {useCreateReviewMutation} from '@package/api/review/review.mutations';
 import {useAlertStore} from '@app/state/windowAlertStore';
-import {useUserStore} from '@/user/state';
+import {useUserProfileStore} from '@/user/state';
 import {useRouterState} from '@tanstack/react-router';
 import {UnitType} from '@package/contract';
 import {reviewNewRoute} from '@/router';
@@ -28,7 +28,7 @@ export function ReviewNewPage({
     {} as ReviewResponse,
   );
   const {show} = useAlertStore();
-  const {user} = useUserStore();
+  const {user} = useUserProfileStore();
   const unitType =
     searchParams.get('tab') === 'remark' ? UnitType.REMARK : UnitType.REVIEW;
   const {mutate, isPending} = useCreateReviewMutation(

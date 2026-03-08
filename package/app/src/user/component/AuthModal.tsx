@@ -1,7 +1,7 @@
 import {Dialog, DialogContent} from '@mui/material';
 import {type FC, useState} from 'react';
-import {LoginPage} from './LoginPage.tsx';
-import {RegisterPage} from './RegisterPage.tsx';
+import {LoginPage} from '../page/LoginPage.tsx';
+import {RegisterPage} from '../page/RegisterPage.tsx';
 
 export interface AuthModalProps {
   open: boolean;

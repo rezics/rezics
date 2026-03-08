@@ -5,7 +5,7 @@ import {
 } from '@/component/Common/UI/Button/CustomButton';
 import {ShadowRoundedCard} from '@/component/Common/UI/Card/CustomCard';
 import {RoseTextField} from '@/component/Common/UI/Text/CustomTextField';
-import {useUserStore} from '@/user/state';
+import {useUserProfileStore} from '@/user/state';
 import {Box, CircularProgress, Tab, Tabs, Typography} from '@mui/material';
 import {useEffect, useState} from 'react';
 
@@ -72,7 +72,7 @@ export function CustomTopbar({
 }
 
 export function MainConfigPage() {
-  const user = useUserStore(state => state.user);
+  const user = useUserProfileStore(state => state.user);
   const userId = user?.id as string;
   const [config, setConfig] = useState<UserConfig | null>(null);
   const [loading, setLoading] = useState(true);

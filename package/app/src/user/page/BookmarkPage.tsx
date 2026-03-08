@@ -5,7 +5,7 @@ import type {UnitDTO} from '@package/contract';
 
 import {reactionApi, reactionQueries} from '@package/api/reaction/reaction';
 import {unitApi} from '@package/api/unit/unit';
-import {useUserStore} from '@/user/state';
+import {useUserProfileStore} from '@/user/state';
 import {useAlertStore} from '@app/state/windowAlertStore';
 import {
   UniversalPaginator,
@@ -48,7 +48,7 @@ const UNIT_TYPE_OPTIONS = [
  */
 export const BookmarkPage: React.FC = () => {
   const navigate = useNavigate();
-  const user = useUserStore(state => state.user);
+  const user = useUserProfileStore(state => state.user);
   const userId = user?.unitId;
   const {show: showAlert} = useAlertStore();
 

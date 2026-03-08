@@ -3,7 +3,7 @@ import type {FC} from 'react';
 import {UserProfilePage} from './UserProfilePage';
 import {UserEditPage} from './UserEditPage';
 import type {UserDTO} from '@package/contract';
-import {useUserStore} from '@/user/state';
+import {useUserProfileStore} from '@/user/state';
 import {userRoute} from '@/router';
 
 export interface UserPageProps {
@@ -21,7 +21,7 @@ export const UserPage: FC<UserPageProps> = ({isCurrentUser = false}) => {
   }
   const unitId = routeMatch?.params.unitId;
   const [isEditing, setIsEditing] = useState(false);
-  const currentUser = useUserStore(state => state.user);
+  const currentUser = useUserProfileStore(state => state.user);
   console.log(isCurrentUser, 'isCurrentUser');
 
   const handleEditClick = () => {

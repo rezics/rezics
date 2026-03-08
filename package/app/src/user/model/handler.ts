@@ -1,13 +1,22 @@
+import {authApi} from '@package/api/auth/auth.api';
 import {userApi} from '@package/api/user/user.api';
-import {setToken, removeToken} from '@package/api/react-query/http';
-import type {CreateUser} from '@package/contract';
+import {useAuthStore} from '@/user/state/authStore';
+import {useUserProfileStore} from '@/user/state/userProfileStore';
+
+async function loadProfile() {
+  const user = await userApi.me();
+  useUserProfileStore.getState().setUser(user);
+  return user;
+}
 
 export const login = async (email: string, password: string) => {
-  const {user, token} = await userApi.login({email, password});
-  setToken(token);
-  if (!user || !token) {
+  const result = await authApi.signIn({email, password});
+  const token = result.token ?? result.session?.token ?? null;
+  if (!token) {
     throw new Error('Login failed');
   }
+  useAuthStore.getState().setToken(token);
+  const user = await loadProfile();
   return {user, token};
 };
 
@@ -15,21 +24,23 @@ export const register = async (
   slug: string,
   email: string,
   password: string,
-  verificationCode?: string,
   avatar?: string,
   bio?: string,
 ) => {
   try {
-    const input: CreateUser = {
+    void avatar;
+    void bio;
+    const result = await authApi.signUp({
       email,
-      verificationCode,
       password,
       slug,
-      avatar,
-      bio,
-    };
-    const {user, token} = await userApi.register(input);
-    setToken(token);
+    });
+    const token = result.token ?? result.session?.token ?? null;
+    if (!token) {
+      throw new Error('Registration failed');
+    }
+    useAuthStore.getState().setToken(token);
+    const user = await loadProfile();
     return {user, token};
   } catch (error) {
     console.error('Error during registration:', error);
@@ -37,10 +48,11 @@ export const register = async (
   }
 };
 
-export const logout = (disableReload = false) => {
-  removeToken();
+export const logout = async (disableReload = false) => {
+  await authApi.signOut();
+  useAuthStore.getState().clearAuth();
+  useUserProfileStore.getState().clearProfile();
   if (typeof window === 'undefined') return;
-  localStorage.removeItem('user-store');
   if (!disableReload) {
     setTimeout(() => location.reload(), 500);
   }

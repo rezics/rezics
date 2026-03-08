@@ -1,5 +1,6 @@
 import {Elysia} from 'elysia';
 import {
+  authTokenResponseSchema,
   getSessionResponseSchema,
   listSessionsResponseSchema,
   revokeSessionBodySchema,
@@ -7,6 +8,15 @@ import {
 import {handleAuthRequest} from '../auth/routes';
 
 export const sessionRouter = new Elysia()
+  .get('/token', ({request}) => handleAuthRequest(request), {
+    response: authTokenResponseSchema,
+    detail: {
+      summary: 'Get auth JWT',
+      description:
+        'Get a JWT for the current authenticated browser session.',
+      tags: ['Session'],
+    },
+  })
   .get('/get-session', ({request}) => handleAuthRequest(request), {
     response: getSessionResponseSchema,
     detail: {

@@ -3,7 +3,7 @@
  * Direct API communication layer
  */
 
-import type {CreateUser, UpdateUser, UserDTO} from '@package/contract';
+import type {UpdateUser, UserDTO} from '@package/contract';
 import {apiFetch} from '../react-query/http';
 
 type FollowSummaryResponse = {
@@ -12,53 +12,6 @@ type FollowSummaryResponse = {
 };
 
 export const userApi = {
-  /**
-   * Reset password with verification code.
-   */
-  resetPassword: async (input: {
-    email: string;
-    verificationCode: string;
-    newPassword: string;
-  }): Promise<{message: string}> => {
-    return apiFetch(`/users/reset-password`, {
-      method: 'POST',
-      body: JSON.stringify(input),
-    });
-  },
-
-  register: async (
-    input: CreateUser,
-  ): Promise<{user: UserDTO; token: string}> => {
-    return apiFetch(`/users/register`, {
-      method: 'POST',
-      body: JSON.stringify(input),
-    });
-  },
-
-  /**
-   * Send verification code to user email.
-   * Optionally includes a Turnstile token for bot protection.
-   */
-  sendVerificationCode: async (input: {
-    email: string;
-    turnstileToken?: string;
-  }): Promise<{data: {status: string; info: string}}> => {
-    return apiFetch(`/users/send-verification-code`, {
-      method: 'POST',
-      body: JSON.stringify(input),
-    });
-  },
-
-  login: async (input: {
-    email: string;
-    password: string;
-  }): Promise<{user: UserDTO; token: string}> => {
-    return apiFetch(`/users/login`, {
-      method: 'POST',
-      body: JSON.stringify(input),
-    });
-  },
-
   me: async (): Promise<UserDTO> => {
     return apiFetch(`/users/me`);
   },
@@ -88,21 +41,8 @@ export const userApi = {
     return apiFetch(`/users/admin${qs}`);
   },
 
-  /**
-   * Admin: get user detail (includes email).
-   */
   adminGet: async (unitId: string): Promise<UserDTO> => {
     return apiFetch(`/users/admin/${unitId}`);
-  },
-
-  /**
-   * Admin: create user.
-   */
-  adminCreate: async (input: CreateUser): Promise<UserDTO> => {
-    return apiFetch(`/users/admin`, {
-      method: 'POST',
-      body: JSON.stringify(input),
-    });
   },
 
   /**
@@ -115,19 +55,7 @@ export const userApi = {
     });
   },
 
-  /**
-   * Create user (legacy route, requires admin permission).
-   */
-  create: async (
-    input: CreateUser,
-  ): Promise<{user: UserDTO; token: string}> => {
-    return apiFetch(`/users/create`, {
-      method: 'POST',
-      body: JSON.stringify(input),
-    });
-  },
-
-  get: async (unitId: string): Promise<Omit<UserDTO, 'email'>> => {
+  get: async (unitId: string): Promise<UserDTO> => {
     return apiFetch(`/users/${unitId}`);
   },
 
@@ -182,7 +110,7 @@ export const userApi = {
   getFollowers: async (
     unitId: string,
     query?: {page?: number; limit?: number},
-  ): Promise<{users: Omit<UserDTO, 'email'>[]; total: number}> => {
+  ): Promise<{users: UserDTO[]; total: number}> => {
     const qs = query ? `?${new URLSearchParams(query as any).toString()}` : '';
     return apiFetch(`/users/${unitId}/followers${qs}`);
   },
@@ -190,7 +118,7 @@ export const userApi = {
   getFollowings: async (
     unitId: string,
     query?: {page?: number; limit?: number},
-  ): Promise<{users: Omit<UserDTO, 'email'>[]; total: number}> => {
+  ): Promise<{users: UserDTO[]; total: number}> => {
     const qs = query ? `?${new URLSearchParams(query as any).toString()}` : '';
     return apiFetch(`/users/${unitId}/followings${qs}`);
   },

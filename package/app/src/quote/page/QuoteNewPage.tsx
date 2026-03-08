@@ -3,14 +3,14 @@ import {TextField} from '@mui/material';
 import {CooldownButton} from '@package/ui/composite/button/CooldownButton.tsx';
 import {useCreateUnitMutation} from '@package/api/unit/unit.mutations';
 import {useAlertStore} from '@app/state/windowAlertStore';
-import {useUserStore} from '@/user/state';
+import {useUserProfileStore} from '@/user/state';
 import type {UnitFormData} from '@package/api/unit/unit.types';
 import {QuoteEditPage} from './QuoteEditPage';
 
 export function QuoteNewPage({bookUnitId}: {bookUnitId: string}) {
   const [quoteData, setQuoteData] = useState<UnitFormData>({} as UnitFormData);
   const {show} = useAlertStore();
-  const {user} = useUserStore();
+  const {user} = useUserProfileStore();
 
   const {mutate, isPending} = useCreateUnitMutation({
     onSuccess: data => {

@@ -1,9 +1,9 @@
-import {useUserStore} from '@/user/state';
+import {useUserProfileStore} from '@/user/state';
 import {Button, Typography} from '@mui/material';
 import {LinearChapterList} from '@/book-library/component/Chapter/LinearChapterList';
 
 export function TestPage02() {
-  const user = useUserStore(state => state.user);
+  const user = useUserProfileStore(state => state.user);
   const product = {
     title: 'Product 1',
     lorem: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',

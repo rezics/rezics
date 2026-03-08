@@ -2,7 +2,7 @@ import {useState} from 'react';
 import type React from 'react';
 import {useLayoutStore} from '../state/layoutStore.ts';
 import {useAppStore} from '@/app/state/appStore.ts';
-import {useUserStore} from '@/user/state';
+import {useUserProfileStore} from '@/user/state';
 import {useIsMobile} from '@/shared/util/use-media-query';
 
 // TODO Introduce Layout Store instead of useState for drawer width and sidebar open state
@@ -39,7 +39,7 @@ export const useResponsiveSidebar = (): ResponsiveSidebarState => {
     setTheme(themeMode === 'light' ? 'dark' : 'light');
   }
 
-  const isAdmin = useUserStore(state =>
+  const isAdmin = useUserProfileStore(state =>
     state.user?.permission?.role?.includes('ADMIN'),
   );
 

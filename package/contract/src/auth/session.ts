@@ -8,6 +8,11 @@ export const getSessionResponseSchema = t.Object({
 });
 export type GetSessionResponse = (typeof getSessionResponseSchema)['static'];
 
+export const authTokenResponseSchema = t.Object({
+  token: t.String(),
+});
+export type AuthTokenResponse = (typeof authTokenResponseSchema)['static'];
+
 export const listSessionsResponseSchema = t.Array(authSessionSchema);
 export type ListSessionsResponse = (typeof listSessionsResponseSchema)['static'];
 

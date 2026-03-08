@@ -21,7 +21,7 @@ import {
   useUpdateCommentMutation,
 } from '@package/api/comment/comment.mutations';
 
-import {useUserStore} from '@/user/state';
+import {useUserProfileStore} from '@/user/state';
 import {buildTree} from './tree-reply-util';
 
 import {useAlertStore} from '@app/state/windowAlertStore';
@@ -65,7 +65,7 @@ const CommentNode: React.FC<CommentNodeProps> = ({
 }) => {
   // Expand first two levels by default
   const [isExpanded, setIsExpanded] = useState(level < 2);
-  const user = useUserStore(state => state.user);
+  const user = useUserProfileStore(state => state.user);
   const handleToggleExpand = () => {
     if (comment.replies && comment.replies.length > 0) {
       setIsExpanded(!isExpanded);
@@ -201,7 +201,7 @@ interface ReplyComponentsProps {
 export function TreeReplyComponents({unitId}: ReplyComponentsProps) {
   // Fetch a flat slice of the comment tree for the unit
   const showAlert = useAlertStore(state => state.show);
-  const user = useUserStore(state => state.user);
+  const user = useUserProfileStore(state => state.user);
   const {t} = useTranslation();
 
   function Core({unitId}: {unitId: string}) {

@@ -1,3 +1,3 @@
-import merge from '@package/app/eslint.config';
+import merge from '../app/eslint.config.js';
 
 export default [...merge];

@@ -1,5 +1,6 @@
 import {env} from '../env';
 import {AuthPolicyError} from './errors';
+import {isTrustedOrigin} from './trusted-origins';
 
 function parseHostFromOrigin(origin: string | null): string | null {
   if (!origin) {
@@ -22,10 +23,17 @@ export function enforceInternalTokenSurface(request: Request): void {
 
   const internalSecret = request.headers.get('x-internal-auth-token');
   if (internalSecret !== env.AUTH_INTERNAL_TOKEN_GATEWAY_SECRET) {
+    const referer = request.headers.get('referer');
+    const origin = request.headers.get('origin');
+
+    if (isTrustedOrigin(origin) || isTrustedOrigin(referer)) {
+      return;
+    }
+
     throw new AuthPolicyError(
       403,
       'AUTH_TOKEN_SURFACE_BLOCKED',
-      'Token endpoint is restricted to internal callers',
+      'Token endpoint is restricted to trusted browser origins or internal callers',
     );
   }
 

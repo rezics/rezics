@@ -1,5 +1,6 @@
 import {Elysia} from 'elysia';
 import {signInRouter} from './sign-in';
+import {passwordRouter} from './password';
 import {sessionRouter} from './session';
 import {adminRouter} from './admin';
 import {organizationRouter} from './organization';
@@ -8,6 +9,7 @@ import {handleAuthRequest} from '../auth/routes';
 
 export const authOpenApiRouter = new Elysia({prefix: '/api/auth'})
   .use(signInRouter)
+  .use(passwordRouter)
   .use(sessionRouter)
   .use(adminRouter)
   .use(organizationRouter)

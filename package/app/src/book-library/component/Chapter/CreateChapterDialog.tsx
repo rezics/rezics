@@ -9,7 +9,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 
 import EasyEditor from '@package/ui/editor/easyeditor/EasyEditor.tsx';
 import {useCreateUnitMutation} from '@package/api/unit/unit.mutations';
-import {useUserStore} from '@/user/state';
+import {useUserProfileStore} from '@/user/state';
 import {useAlertStore} from '@app/state/windowAlertStore';
 import {UnitType} from '@package/contract';
 import {type Chapter} from './ChapterArborist';
@@ -35,7 +35,7 @@ export function CreateChapterDialog({
   bookUnitId,
   currentEditParentId,
 }: CreateChapterDialogProps) {
-  const {user} = useUserStore();
+  const {user} = useUserProfileStore();
   const {show} = useAlertStore();
 
   const [title, setTitle] = useState('');

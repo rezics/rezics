@@ -4,6 +4,17 @@
  */
 
 import {env} from '@package/app/env';
+import type {
+  AuthTokenResponse,
+  AuthResponse,
+  AuthSession,
+  AuthUser,
+  RequestPasswordResetBody,
+  RequestPasswordResetResponse,
+  ResetPasswordBody,
+  ResetPasswordResponse,
+  SignInBody,
+} from '@package/contract';
 
 const AUTH_BASE_URL = env.VITE_AUTH_API_URL || 'http://localhost:3001';
 
@@ -36,28 +47,63 @@ async function authFetch<T>(
 }
 
 export const authApi = {
-  signIn: async (input: {email: string; password: string}) => {
-    return authFetch<{user: any; session: any}>('/api/auth/sign-in/email', {
+  signIn: async (input: SignInBody): Promise<AuthResponse> => {
+    return authFetch<AuthResponse>('/api/auth/sign-in/email', {
       method: 'POST',
       body: JSON.stringify(input),
     });
   },
 
-  signUp: async (input: {name: string; email: string; password: string}) => {
-    return authFetch<{user: any; session: any}>('/api/auth/sign-up/email', {
+  signUp: async (input: {
+    email: string;
+    password: string;
+    slug: string;
+  }): Promise<AuthResponse> => {
+    return authFetch<AuthResponse>('/api/auth/sign-up/email', {
       method: 'POST',
-      body: JSON.stringify(input),
+      body: JSON.stringify({
+        email: input.email,
+        password: input.password,
+        name: input.slug,
+      }),
     });
   },
 
-  signOut: async () => {
+  signOut: async (): Promise<{success: boolean}> => {
     return authFetch<{success: boolean}>('/api/auth/sign-out', {
       method: 'POST',
     });
   },
 
-  getSession: async () => {
-    return authFetch<{session: any; user: any}>('/api/auth/get-session');
+  getSession: async (): Promise<{session: AuthSession; user: AuthUser}> => {
+    return authFetch<{session: AuthSession; user: AuthUser}>(
+      '/api/auth/get-session',
+    );
+  },
+
+  getToken: async (): Promise<AuthTokenResponse> => {
+    return authFetch<AuthTokenResponse>('/api/auth/token');
+  },
+
+  requestPasswordReset: async (
+    input: RequestPasswordResetBody,
+  ): Promise<RequestPasswordResetResponse> => {
+    return authFetch<RequestPasswordResetResponse>(
+      '/api/auth/request-password-reset',
+      {
+        method: 'POST',
+        body: JSON.stringify(input),
+      },
+    );
+  },
+
+  resetPassword: async (
+    input: ResetPasswordBody,
+  ): Promise<ResetPasswordResponse> => {
+    return authFetch<ResetPasswordResponse>('/api/auth/reset-password', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
   },
 
   listSessions: async () => {

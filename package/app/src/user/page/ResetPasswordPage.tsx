@@ -2,156 +2,140 @@ import Alert from '@mui/material/Alert';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import {Dialog, DialogContent} from '@mui/material';
-import {type FC, useRef, useState} from 'react';
-import {useTranslation} from 'react-i18next';
+import {type FC, useMemo, useState} from 'react';
 import {useNavigate, useRouterState} from '@tanstack/react-router';
 
-import {Turnstile} from '@package/ui/composite/auth/Turnstile.tsx';
+import {authApi} from '@package/api/auth/auth.api';
 import {PasswordField} from '@package/ui/composite/form/field/PasswordField.tsx';
 import {Layout} from '../layout/Layout.tsx';
 import {ModalLayout} from '../layout/ModalLayout.tsx';
 import {validateEmail, validatePassword} from '../model/validate.ts';
-import {userApi} from '@package/api/user/user';
-import {
-  GetVerificationCode,
-  type GetVerificationCodeHandle,
-} from '../component/GetVerificationCode.tsx';
 import {TextButton} from '@package/ui/primitive/button/TextButton.tsx';
-
-interface ResetPasswordData {
-  email: string;
-  password: string;
-  confirm: string;
-  verificationCode?: string;
-}
 
 export interface ResetPasswordPageProps {
   isModal?: boolean;
   onClose?: () => void;
 }
-
-/**
- * ResetPasswordPage - 完整的重置密码页面容器
- * 合并了原来的 Show/Page 结构，并复用 GetVerificationCode 组件
- */
 export const ResetPasswordPage: FC<ResetPasswordPageProps> = ({
   isModal = false,
   onClose,
 }) => {
-  const {t} = useTranslation();
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string>();
-  const [showTurnstile, setShowTurnstile] = useState(false);
-  const [data, setData] = useState<ResetPasswordData>({
-    email: '',
-    password: '',
-    confirm: '',
-  });
-  const verificationRef = useRef<GetVerificationCodeHandle | null>(null);
   const navigate = useNavigate();
   const pathname = useRouterState({select: s => s.location.pathname});
-
-  const handleSubmit = async () => {
-    let hasError = false;
-    setLoading(true);
-    setError(undefined);
-    try {
-      let validateData: {valid: boolean; error: string | null} = {
-        valid: false,
-        error: null,
-      };
-
-      const email = data?.email;
-      validateData = validateEmail(email);
-      if (!validateData.valid) throw new Error(validateData.error ?? '');
-
-      const password = data?.password;
-      validateData = validatePassword(password);
-      if (!validateData.valid) throw new Error(validateData.error ?? '');
-
-      const confirm = data?.confirm;
-      validateData = validatePassword(confirm);
-      if (!validateData.valid) throw new Error(validateData.error ?? '');
-      if (password !== confirm) {
-        throw new Error('Passwords do not match.');
-      }
-
-      const verificationCode = data?.verificationCode;
-      if (!verificationCode) {
-        throw new Error('Verification code is required.');
-      }
-
-      await userApi.resetPassword({
-        email,
-        verificationCode,
-        newPassword: password,
-      });
-    } catch (e) {
-      setError((e as Error).message);
-      hasError = true;
-    } finally {
-      setLoading(false);
+  const query = useMemo(() => {
+    if (typeof window === 'undefined') {
+      return new URLSearchParams();
     }
 
-    if (!hasError) {
-      onClose?.();
-      if (pathname === '/reset-password') {
-        navigate({to: '/login'});
-      }
-    }
-  };
-
-  const handleTurnstileVerify = async (token: string) => {
-    if (!verificationRef.current) return;
-    await verificationRef.current.handleTurnstileVerify(token);
-  };
+    return new URLSearchParams(window.location.search);
+  }, []);
+  const resetToken = query.get('token');
+  const linkError = query.get('error');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState<string | undefined>();
+  const [error, setError] = useState<string | undefined>(
+    linkError === 'INVALID_TOKEN'
+      ? 'This password reset link is invalid or expired.'
+      : undefined,
+  );
 
   const handleLoginClick = () => {
     navigate({to: '/login'});
+  };
+
+  const handleRequestReset = async () => {
+    setLoading(true);
+    setError(undefined);
+    setMessage(undefined);
+
+    try {
+      const validated = validateEmail(email);
+      if (!validated.valid) {
+        throw new Error(validated.error ?? 'Invalid email address');
+      }
+
+      const redirectTo =
+        typeof window === 'undefined'
+          ? '/reset-password'
+          : `${window.location.origin}/reset-password`;
+
+      const response = await authApi.requestPasswordReset({
+        email,
+        redirectTo,
+      });
+      setMessage(response.message);
+    } catch (caughtError) {
+      setError((caughtError as Error).message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResetPassword = async () => {
+    setLoading(true);
+    setError(undefined);
+    setMessage(undefined);
+
+    try {
+      const validated = validatePassword(password);
+      if (!validated.valid) {
+        throw new Error(validated.error ?? 'Invalid password');
+      }
+
+      if (password !== confirmPassword) {
+        throw new Error('Passwords do not match.');
+      }
+
+      if (!resetToken) {
+        throw new Error('Missing password reset token.');
+      }
+
+      await authApi.resetPassword({
+        newPassword: password,
+        token: resetToken,
+      });
+
+      setMessage('Password updated. Redirecting to login...');
+      onClose?.();
+
+      if (pathname === '/reset-password') {
+        setTimeout(() => navigate({to: '/login'}), 600);
+      }
+    } catch (caughtError) {
+      setError((caughtError as Error).message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const LayoutComponent = isModal ? ModalLayout : Layout;
 
   const content = (
     <>
-      {showTurnstile && (
-        <div
-          style={{marginTop: '16px', display: 'flex', justifyContent: 'center'}}
-        >
-          <Turnstile onVerify={handleTurnstileVerify} />
-        </div>
-      )}
       {error && <Alert severity="error">{error}</Alert>}
-      <TextField
-        name="email"
-        type="email"
-        label={t('common.email')}
-        variant="standard"
-        required
-        value={data?.email}
-        onChange={(event: any) => {
-          setData({...data, email: event.target.value});
-        }}
-      />
-      <PasswordField
-        value={data?.password}
-        setValue={(value: string) => {
-          setData({...data, password: value});
-        }}
-      />
-      <PasswordField
-        value={data?.confirm}
-        setValue={(value: string) => {
-          setData({...data, confirm: value});
-        }}
-      />
-      <GetVerificationCode
-        data={data}
-        setData={setData}
-        setShowTurnstile={setShowTurnstile}
-        setError={setError}
-        ref={verificationRef}
-      />
+      {message && <Alert severity="success">{message}</Alert>}
+      {!resetToken ? (
+        <TextField
+          name="email"
+          type="email"
+          label="Email"
+          variant="standard"
+          required
+          value={email}
+          onChange={event => setEmail(event.target.value)}
+        />
+      ) : (
+        <>
+          <PasswordField value={password} setValue={setPassword} />
+          <PasswordField
+            value={confirmPassword}
+            setValue={setConfirmPassword}
+          />
+        </>
+      )}
       <div>
         <TextButton onClick={handleLoginClick}>Back to Login</TextButton>
       </div>
@@ -160,16 +144,17 @@ export const ResetPasswordPage: FC<ResetPasswordPageProps> = ({
 
   const actions = (
     <>
-      {/* <Button variant="text" type="button" onClick={handleLoginClick}>
-        {t('auth.login')}
-      </Button> */}
       <Button
         type="button"
         variant="contained"
         disabled={loading}
-        onClick={handleSubmit}
+        onClick={resetToken ? handleResetPassword : handleRequestReset}
       >
-        {loading ? 'Loading...' : 'Reset Password'}
+        {loading
+          ? 'Loading...'
+          : resetToken
+            ? 'Reset Password'
+            : 'Send Reset Link'}
       </Button>
     </>
   );

@@ -11,7 +11,7 @@ import {
   Button,
 } from '@mui/material';
 import {useQuery, useQueryClient} from '@tanstack/react-query';
-import {useUserStore} from '@/user/state';
+import {useUserProfileStore} from '@/user/state';
 import {reactionQueries} from '@package/api/reaction/reaction.queries';
 import type {ReactionDTO} from '@package/api/reaction/reaction.types';
 import {
@@ -78,7 +78,7 @@ export const ReactionInfoPage: React.FC<ReactionInfoPageProps> = ({
   isCurrentUser = false,
 }) => {
   const navigate = useNavigate();
-  const currentUser = useUserStore(state => state.user);
+  const currentUser = useUserProfileStore(state => state.user);
   const resolvedUnitId = useMemo(
     () => unitId || (isCurrentUser ? currentUser?.unitId : unitId),
     [unitId, isCurrentUser, currentUser?.unitId],

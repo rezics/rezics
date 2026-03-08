@@ -8,7 +8,6 @@ import {useTranslation} from 'react-i18next';
 
 import {PasswordField} from '@package/ui/composite/form/field/PasswordField.tsx';
 import {MUILink} from '@package/ui/primitive/link/MUILink.tsx';
-import {useUserStore} from '@/user/state';
 import {login} from '../model/handler';
 import {Layout} from '../layout/Layout';
 import {ModalLayout} from '../layout/ModalLayout';
@@ -43,7 +42,6 @@ export const LoginPage: FC<LoginPageProps> = ({
     email: '',
     password: '',
   });
-  const {setUser} = useUserStore();
   const navigate = useNavigate();
   const pathname = useRouterState({select: s => s.location.pathname});
 
@@ -63,8 +61,7 @@ export const LoginPage: FC<LoginPageProps> = ({
       if (!validateData.valid) throw new Error(validateData.error ?? '');
 
       const password = data?.password;
-      const result = await login(email, password);
-      setUser(result?.user);
+      await login(email, password);
     } catch (e: any) {
       hasError = true;
       setError((e as Error).message);

@@ -7,6 +7,7 @@ import {Resend} from 'resend';
 import {prisma} from './prisma';
 import {env} from '../env';
 import {ac, authRoles, organizationRoles} from './permissions';
+import {trustedOrigins} from './trusted-origins';
 
 const authAudience = env.AUTH_JWT_AUDIENCE ?? 'rezics-api';
 const authIssuer = env.AUTH_JWT_ISSUER ?? env.BETTER_AUTH_URL;
@@ -33,6 +34,15 @@ type InvitationEmailPayload = {
       email: string;
     };
   };
+};
+
+type PasswordResetEmailPayload = {
+  user: {
+    email: string;
+    name: string;
+  };
+  url: string;
+  token: string;
 };
 
 function deriveDeterministicKid(publicKey: string): string {
@@ -74,6 +84,44 @@ async function sendInvitationEmail(data: InvitationEmailPayload): Promise<void> 
   });
 }
 
+async function sendPasswordResetEmail(
+  data: PasswordResetEmailPayload,
+): Promise<void> {
+  if (env.NODE_ENV !== 'production') {
+    console.info('[auth] password reset (dev mode)', {
+      email: data.user.email,
+      resetUrl: data.url,
+      token: data.token,
+    });
+    return;
+  }
+
+  const fromEmail =
+    env.AUTH_PASSWORD_RESET_FROM_EMAIL ?? env.AUTH_INVITATION_FROM_EMAIL;
+
+  if (!env.RESEND_API_KEY || !fromEmail) {
+    console.warn(
+      '[auth] Password reset email skipped: RESEND_API_KEY or sender email not configured.',
+    );
+    return;
+  }
+
+  const resend = new Resend(env.RESEND_API_KEY);
+  await resend.emails.send({
+    from: fromEmail,
+    to: data.user.email,
+    subject: 'Reset your password',
+    text: [
+      `Hello ${data.user.name || 'there'},`,
+      '',
+      'We received a request to reset your password.',
+      `Reset link: ${data.url}`,
+      '',
+      'If you did not request this change, you can ignore this email.',
+    ].join('\n'),
+  });
+}
+
 export const auth = betterAuth({
   appName: 'Rezics Auth',
   baseURL: env.BETTER_AUTH_URL,
@@ -82,9 +130,19 @@ export const auth = betterAuth({
   database: prismaAdapter(prisma, {
     provider: 'postgresql',
   }),
-  trustedOrigins: [env.BETTER_AUTH_URL],
+  trustedOrigins,
   emailAndPassword: {
     enabled: true,
+    sendResetPassword: async ({user, url, token}) =>
+      sendPasswordResetEmail({
+        user: {
+          email: user.email,
+          name: user.name,
+        },
+        url,
+        token,
+      }),
+    revokeSessionsOnPasswordReset: true,
   },
   account: {
     accountLinking: {

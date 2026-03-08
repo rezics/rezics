@@ -5,83 +5,21 @@ import {
 } from '@tanstack/react-query';
 import {userApi} from './user.api';
 import {userKeys} from './user.keys';
-import type {
-  CreateUserInput,
-  UpdateUserInput,
-  UserDTO,
-} from '@package/contract';
-
-export function useRegisterMutation(
-  options?: Omit<
-    UseMutationOptions<{user: UserDTO; token: string}, Error, CreateUserInput>,
-    'mutationFn'
-  >,
-) {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: (input: CreateUserInput) => userApi.register(input),
-    ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      // Seed current user
-      qc.setQueryData(userKeys.detail('me'), data.user);
-      qc.invalidateQueries({queryKey: userKeys.lists()});
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
-  });
-}
-
-export function useLoginMutation(
-  options?: Omit<
-    UseMutationOptions<
-      {user: UserDTO; token: string},
-      Error,
-      {email: string; password: string}
-    >,
-    'mutationFn'
-  >,
-) {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: (input: {email: string; password: string}) =>
-      userApi.login(input),
-    ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      qc.setQueryData(userKeys.detail('me'), data.user);
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
-  });
-}
+import type {UpdateUser, UserDTO} from '@package/contract';
 
 export function useUpdateMeMutation(
   options?: Omit<
-    UseMutationOptions<UserDTO, Error, UpdateUserInput>,
+    UseMutationOptions<UserDTO, Error, UpdateUser>,
     'mutationFn'
   >,
 ) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (input: UpdateUserInput) => userApi.updateMe(input),
+    mutationFn: (input: UpdateUser) => userApi.updateMe(input),
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
       qc.setQueryData(userKeys.detail('me'), data);
       qc.invalidateQueries({queryKey: userKeys.lists()});
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
-  });
-}
-
-export function useAdminCreateUserMutation(
-  options?: Omit<
-    UseMutationOptions<UserDTO, Error, CreateUserInput>,
-    'mutationFn'
-  >,
-) {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: (input: CreateUserInput) => userApi.adminCreate(input as any),
-    ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      qc.invalidateQueries({queryKey: userKeys.adminLists()});
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
   });
@@ -92,7 +30,7 @@ export function useAdminUpdateUserMutation(
     UseMutationOptions<
       UserDTO,
       Error,
-      {unitId: string; input: UpdateUserInput}
+      {unitId: string; input: UpdateUser}
     >,
     'mutationFn'
   >,
@@ -194,10 +132,7 @@ export function useUnfollowMutation(
 }
 
 export const userMutations = {
-  useRegister: useRegisterMutation,
-  useLogin: useLoginMutation,
   useUpdateMe: useUpdateMeMutation,
-  useAdminCreate: useAdminCreateUserMutation,
   useAdminUpdate: useAdminUpdateUserMutation,
   useDeleteMe: useDeleteMeMutation,
   useFollow: useFollowMutation,

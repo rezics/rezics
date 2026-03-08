@@ -14,7 +14,7 @@ import {
   useDeleteReactionMutation,
 } from '@package/api/reaction/reaction.mutations';
 import {useAlertStore} from '@app/state/windowAlertStore';
-import {useUserStore} from '@/user/state';
+import {useUserProfileStore} from '@/user/state';
 import {Link} from '@package/ui/primitive/link/Link.tsx';
 
 export type BookmarkTagManagerProps = {
@@ -36,7 +36,7 @@ export const BookmarkTagManager: React.FC<BookmarkTagManagerProps> = ({
   hasBookmarked,
 }) => {
   const {show: showAlert} = useAlertStore();
-  const user = useUserStore(state => state.user);
+  const user = useUserProfileStore(state => state.user);
 
   const [bookmarked, setBookmarked] = useState(hasBookmarked);
   const {data: myData} = useQuery(reactionQueries.my(unitId));

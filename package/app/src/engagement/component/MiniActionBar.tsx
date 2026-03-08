@@ -3,7 +3,7 @@ import {IconButton, Popper, Tooltip} from '@mui/material';
 import {Add, Comment, Edit, FavoriteBorder} from '@mui/icons-material';
 import {useTranslation} from 'react-i18next';
 import {useNavigate} from '@tanstack/react-router';
-import {useUserStore} from '@/user/state';
+import {useUserProfileStore} from '@/user/state';
 import {useQuery} from '@tanstack/react-query';
 import {
   useCreateReactionMutation,
@@ -26,7 +26,7 @@ export function MiniAdminActionBar({
   userUnitId,
 }: MiniAdminActionBarProps) {
   const {t} = useTranslation();
-  const user = useUserStore(state => state.user);
+  const user = useUserProfileStore(state => state.user);
   const isAdmin = user?.permission?.role.includes('ADMIN');
   const isOwner = user?.unitId === userUnitId;
   const navigate = useNavigate();

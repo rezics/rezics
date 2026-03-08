@@ -1,4 +1,4 @@
-import {useUserStore} from '@/user/state';
+import {useUserProfileStore} from '@/user/state';
 import {
   Logout as LogoutIcon,
   Person as PersonIcon,
@@ -28,7 +28,7 @@ export type AccountMenuProps = {
 
 export const AccountMenu: React.FC<AccountMenuProps> = ({onLogout}) => {
   const navigate = useNavigate();
-  const {setUser} = useUserStore();
+  const {clearProfile} = useUserProfileStore();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   const {data: user} = useQuery(userQueries.me());
@@ -45,9 +45,9 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({onLogout}) => {
   const handleLogout = () => {
     handleMenuClose();
     onLogout?.();
-    setUser(null);
+    clearProfile();
     navigate({to: '/login'});
-    logout();
+    void logout();
   };
 
   const handleProfile = () => {
