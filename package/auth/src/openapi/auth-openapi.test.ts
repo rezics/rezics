@@ -99,4 +99,60 @@ describe('auth openapi routes', () => {
       search: '',
     });
   });
+
+  test('forwards sign-up requests without openapi runtime body validation', async () => {
+    const {signInRouter} = await import('./sign-in');
+
+    const response = await signInRouter.handle(
+      new Request('http://localhost/sign-up/email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: 'reader@example.com',
+        }),
+      }),
+    );
+
+    expect(response.status).toBe(200);
+    expect(handleAuthRequest).toHaveBeenCalledTimes(1);
+    expect(await response.json()).toEqual({
+      method: 'POST',
+      pathname: '/sign-up/email',
+      search: '',
+    });
+  });
+
+  test('forwards oauth authorize requests without openapi runtime query validation', async () => {
+    const {oauthRouter} = await import('./oauth');
+
+    const response = await oauthRouter.handle(
+      new Request('http://localhost/oauth/authorize'),
+    );
+
+    expect(response.status).toBe(200);
+    expect(handleAuthRequest).toHaveBeenCalledTimes(1);
+    expect(await response.json()).toEqual({
+      method: 'GET',
+      pathname: '/oauth/authorize',
+      search: '',
+    });
+  });
+
+  test('forwards reset-password callback requests without openapi runtime query validation', async () => {
+    const {passwordRouter} = await import('./password');
+
+    const response = await passwordRouter.handle(
+      new Request('http://localhost/reset-password/reset-token'),
+    );
+
+    expect(response.status).toBe(200);
+    expect(handleAuthRequest).toHaveBeenCalledTimes(1);
+    expect(await response.json()).toEqual({
+      method: 'GET',
+      pathname: '/reset-password/reset-token',
+      search: '',
+    });
+  });
 });

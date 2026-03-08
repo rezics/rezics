@@ -9,39 +9,75 @@ import {
   clientRegistrationResponseSchema,
 } from '@package/contract';
 import {handleAuthRequest} from '../auth/routes';
+import {jsonRequestBody, jsonResponse, parameter} from './docs';
 
 export const oauthRouter = new Elysia()
   .get('/oauth/authorize', ({request}) => handleAuthRequest(request), {
-    query: authorizeQuerySchema,
     detail: {
       summary: 'OAuth authorize',
       description: 'OAuth 2.0 authorization endpoint.',
       tags: ['OAuth'],
+      parameters: [
+        parameter({
+          name: 'client_id',
+          in: 'query',
+          required: true,
+          schema: authorizeQuerySchema.properties.client_id,
+        }),
+        parameter({
+          name: 'redirect_uri',
+          in: 'query',
+          required: true,
+          schema: authorizeQuerySchema.properties.redirect_uri,
+        }),
+        parameter({
+          name: 'response_type',
+          in: 'query',
+          required: true,
+          schema: authorizeQuerySchema.properties.response_type,
+        }),
+        parameter({
+          name: 'scope',
+          in: 'query',
+          required: false,
+          schema: authorizeQuerySchema.properties.scope,
+        }),
+        parameter({
+          name: 'state',
+          in: 'query',
+          required: false,
+          schema: authorizeQuerySchema.properties.state,
+        }),
+      ],
     },
   })
   .post('/oauth/token', ({request}) => handleAuthRequest(request), {
-    body: tokenRequestBodySchema,
-    response: tokenResponseSchema,
     detail: {
       summary: 'OAuth token',
       description: 'OAuth 2.0 token endpoint. Exchange authorization code for tokens.',
       tags: ['OAuth'],
+      requestBody: jsonRequestBody(tokenRequestBodySchema),
+      responses: {
+        200: jsonResponse('OAuth token response.', tokenResponseSchema),
+      },
     },
   })
   .get('/oauth/userinfo', ({request}) => handleAuthRequest(request), {
-    response: userinfoResponseSchema,
     detail: {
       summary: 'OAuth userinfo',
       description: 'OpenID Connect UserInfo endpoint.',
       tags: ['OAuth'],
+      responses: {
+        200: jsonResponse('OpenID user info.', userinfoResponseSchema),
+      },
     },
   })
   .post('/oauth/revoke', ({request}) => handleAuthRequest(request), {
-    body: revokeTokenBodySchema,
     detail: {
       summary: 'Revoke token',
       description: 'Revoke an access or refresh token.',
       tags: ['OAuth'],
+      requestBody: jsonRequestBody(revokeTokenBodySchema),
     },
   })
   .get('/jwks', ({request}) => handleAuthRequest(request), {
@@ -52,12 +88,17 @@ export const oauthRouter = new Elysia()
     },
   })
   .post('/oauth/register', ({request}) => handleAuthRequest(request), {
-    body: clientRegistrationBodySchema,
-    response: clientRegistrationResponseSchema,
     detail: {
       summary: 'Register OAuth client',
       description: 'Dynamic client registration endpoint.',
       tags: ['OAuth'],
+      requestBody: jsonRequestBody(clientRegistrationBodySchema),
+      responses: {
+        200: jsonResponse(
+          'OAuth client registration result.',
+          clientRegistrationResponseSchema,
+        ),
+      },
     },
   })
   .get('/callback/:provider', ({request}) => handleAuthRequest(request), {
@@ -65,5 +106,15 @@ export const oauthRouter = new Elysia()
       summary: 'Social provider callback',
       description: 'OAuth callback endpoint for social authentication providers.',
       tags: ['Authentication'],
+      parameters: [
+        parameter({
+          name: 'provider',
+          in: 'path',
+          required: true,
+          schema: {
+            type: 'string',
+          },
+        }),
+      ],
     },
   });
