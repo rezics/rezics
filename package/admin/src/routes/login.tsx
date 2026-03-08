@@ -17,7 +17,14 @@ export const Route = createFileRoute('/login')({
   }),
   beforeLoad: async ({search}) => {
     try {
-      await authApi.getSession();
+      const {session, user} = await authApi.getSession();
+      if (
+        session.expiresAt !== null &&
+        new Date(session.expiresAt) < new Date()
+      ) {
+        throw new Error('Unauthorized');
+      }
+      console.log(session);
       // Already authenticated — redirect away from login
       throw redirect({to: normalizeRedirect(search.redirect), replace: true});
     } catch (e) {

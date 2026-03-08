@@ -154,7 +154,8 @@ export async function refreshAuthToken() {
       'Content-Type': 'application/json',
     },
   });
-  const json = (await refreshTokenResponse.json()) as Partial<AuthTokenResponse>;
+  const json =
+    (await refreshTokenResponse.json()) as Partial<AuthTokenResponse>;
   const token = json.token ?? null;
   if (!token) {
     throw new Error('Unauthorized - Please login again');

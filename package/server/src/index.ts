@@ -22,10 +22,6 @@ import 'dotenv/config';
 
 const {isProd, isDev} = getProdState();
 
-if (isDev) {
-  await import('./utils/logger-hook');
-}
-
 const devOrigins = [
   'http://localhost:35001',
   'http://localhost:35002',
@@ -63,20 +59,6 @@ const app = new Elysia()
       message,
     };
   })
-  .trace(async ({onHandle, context}) => {
-    // 监听 handle 阶段
-    onHandle(({begin, onStop}) => {
-      const {route, params, request} = context;
-
-      onStop(({end}) => {
-        console.log(
-          `[${request.method}] ${route} took ${end - begin}ms`,
-          'params:',
-          params,
-        );
-      });
-    });
-  })
   .use(bookApi)
   .use(chapterApi)
   .use(readlistApi)
@@ -94,7 +76,21 @@ const app = new Elysia()
   .get('/health', () => ({status: 'ok'}));
 
 if (isDev) {
-  app.use(openapi());
+  await import('./utils/logger-hook');
+  app.use(openapi()).trace(async ({onHandle, context}) => {
+    // 监听 handle 阶段
+    onHandle(({begin, onStop}) => {
+      const {route, params, request} = context;
+
+      onStop(({end}) => {
+        console.log(
+          `[${request.method}] ${route} took ${end - begin}ms`,
+          'params:',
+          params,
+        );
+      });
+    });
+  });
 }
 
 const port = env.PORT ? Number(env.PORT) : 3000;

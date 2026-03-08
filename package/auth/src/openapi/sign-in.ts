@@ -9,12 +9,19 @@ import {handleAuthRequest} from '../auth/routes';
 
 export const signInRouter = new Elysia()
   .post('/sign-in/email', ({request}) => handleAuthRequest(request), {
-    body: signInBodySchema,
+    // body: signInBodySchema,
     response: authResponseSchema,
     detail: {
       summary: 'Sign in with email',
       description: 'Authenticate a user with email and password credentials.',
       tags: ['Authentication'],
+      requestBody: {
+        content: {
+          'application/json': {
+            schema: signInBodySchema,
+          },
+        },
+      },
     },
   })
   .post('/sign-up/email', ({request}) => handleAuthRequest(request), {

@@ -49,7 +49,9 @@ function deriveDeterministicKid(publicKey: string): string {
   return createHash('sha256').update(publicKey).digest('hex').slice(0, 32);
 }
 
-async function sendInvitationEmail(data: InvitationEmailPayload): Promise<void> {
+async function sendInvitationEmail(
+  data: InvitationEmailPayload,
+): Promise<void> {
   const inviteLink = `${inviteBaseUrl}/accept-invitation/${data.id}`;
   const roleText = Array.isArray(data.role) ? data.role.join(', ') : data.role;
 
@@ -65,7 +67,9 @@ async function sendInvitationEmail(data: InvitationEmailPayload): Promise<void> 
   }
 
   if (!env.RESEND_API_KEY || !env.AUTH_INVITATION_FROM_EMAIL) {
-    console.warn('[auth] Invitation email skipped: RESEND_API_KEY or AUTH_INVITATION_FROM_EMAIL not configured.');
+    console.warn(
+      '[auth] Invitation email skipped: RESEND_API_KEY or AUTH_INVITATION_FROM_EMAIL not configured.',
+    );
     return;
   }
 
@@ -130,6 +134,11 @@ export const auth = betterAuth({
   database: prismaAdapter(prisma, {
     provider: 'postgresql',
   }),
+  advanced: {
+    database: {
+      generateId: false, // "serial" for auto-incrementing numeric IDs
+    },
+  },
   trustedOrigins,
   emailAndPassword: {
     enabled: true,
@@ -152,22 +161,34 @@ export const auth = betterAuth({
     },
   },
   socialProviders: {
-    google: env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET ? {
-      clientId: env.GOOGLE_CLIENT_ID,
-      clientSecret: env.GOOGLE_CLIENT_SECRET,
-    } : undefined,
-    microsoft: env.MICROSOFT_CLIENT_ID && env.MICROSOFT_CLIENT_SECRET ? {
-      clientId: env.MICROSOFT_CLIENT_ID,
-      clientSecret: env.MICROSOFT_CLIENT_SECRET,
-    } : undefined,
-    github: env.GITHUB_CLIENT_ID && env.GITHUB_CLIENT_SECRET ? {
-      clientId: env.GITHUB_CLIENT_ID,
-      clientSecret: env.GITHUB_CLIENT_SECRET,
-    } : undefined,
-    twitter: env.TWITTER_CLIENT_ID && env.TWITTER_CLIENT_SECRET ? {
-      clientId: env.TWITTER_CLIENT_ID,
-      clientSecret: env.TWITTER_CLIENT_SECRET,
-    } : undefined,
+    google:
+      env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET
+        ? {
+            clientId: env.GOOGLE_CLIENT_ID,
+            clientSecret: env.GOOGLE_CLIENT_SECRET,
+          }
+        : undefined,
+    microsoft:
+      env.MICROSOFT_CLIENT_ID && env.MICROSOFT_CLIENT_SECRET
+        ? {
+            clientId: env.MICROSOFT_CLIENT_ID,
+            clientSecret: env.MICROSOFT_CLIENT_SECRET,
+          }
+        : undefined,
+    github:
+      env.GITHUB_CLIENT_ID && env.GITHUB_CLIENT_SECRET
+        ? {
+            clientId: env.GITHUB_CLIENT_ID,
+            clientSecret: env.GITHUB_CLIENT_SECRET,
+          }
+        : undefined,
+    twitter:
+      env.TWITTER_CLIENT_ID && env.TWITTER_CLIENT_SECRET
+        ? {
+            clientId: env.TWITTER_CLIENT_ID,
+            clientSecret: env.TWITTER_CLIENT_SECRET,
+          }
+        : undefined,
   },
   plugins: [
     jwt({
@@ -225,7 +246,11 @@ export const auth = betterAuth({
         issuer: authIssuer,
         audience: authAudience,
         expirationTime: `${authJwtTtlSeconds}s`,
-        definePayload: ({user}: {user: Record<string, unknown> & {id: string; slug?: string}}) => ({
+        definePayload: ({
+          user,
+        }: {
+          user: Record<string, unknown> & {id: string; slug?: string};
+        }) => ({
           unitId: user.id,
           slug: user.slug,
           scope: 'user',
@@ -272,8 +297,13 @@ export const auth = betterAuth({
 
         return klass === 'public';
       },
-      shouldSkipConsent: ({client}: {client: {type?: string; public?: boolean; skipConsent?: boolean}}) => {
-        const clientType = client.type ?? (client.public ? 'public' : 'confidential');
+      shouldSkipConsent: ({
+        client,
+      }: {
+        client: {type?: string; public?: boolean; skipConsent?: boolean};
+      }) => {
+        const clientType =
+          client.type ?? (client.public ? 'public' : 'confidential');
         return clientType === 'trusted' || Boolean(client.skipConsent);
       },
       endSessionEndpoint: {

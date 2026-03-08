@@ -1,4 +1,5 @@
 import {env} from '../env';
+import {allowedOrigins} from '../core';
 
 function normalizeOrigins(raw: string | undefined): string[] {
   return (raw ?? '')
@@ -8,7 +9,11 @@ function normalizeOrigins(raw: string | undefined): string[] {
 }
 
 export const trustedOrigins = Array.from(
-  new Set([env.BETTER_AUTH_URL, ...normalizeOrigins(env.AUTH_TRUSTED_ORIGINS)]),
+  new Set([
+    env.BETTER_AUTH_URL,
+    ...normalizeOrigins(env.AUTH_TRUSTED_ORIGINS),
+    ...allowedOrigins,
+  ]),
 );
 
 export const trustedOriginHosts = trustedOrigins

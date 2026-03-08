@@ -33,7 +33,21 @@ const app = coreInstance()
   .get('/health', () => ({status: 'ok'}));
 
 if (isDev) {
-  app.use(openapi());
+  await import('./utils/logger-hook');
+  app.use(openapi()).trace(async ({onHandle, context}) => {
+    // 监听 handle 阶段
+    onHandle(({begin, onStop}) => {
+      const {route, params, request} = context;
+
+      onStop(({end}) => {
+        console.log(
+          `[${request.method}] ${route} took ${end - begin}ms`,
+          'params:',
+          params,
+        );
+      });
+    });
+  });
 }
 
 const port = env.PORT ? Number(env.PORT) : 3001;
