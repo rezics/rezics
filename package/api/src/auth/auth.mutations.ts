@@ -1,14 +1,16 @@
 import {useMutation, useQueryClient} from '@tanstack/react-query';
 import {authApi} from './auth.api';
 import {authKeys} from './auth.keys';
+import {setToken, queryAccessToken} from '../react-query/jwt';
 
 export function useSignInMutation() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (input: {email: string; password: string}) =>
       authApi.signIn(input),
-    onSuccess: () => {
+    onSuccess: async () => {
       qc.invalidateQueries({queryKey: authKeys.session()});
+      await queryAccessToken();
     },
   });
 }

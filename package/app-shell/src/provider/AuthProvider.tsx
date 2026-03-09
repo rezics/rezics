@@ -3,8 +3,8 @@ import {
   AUTH_TOKEN_STORAGE_EVENT,
   getToken,
   parseJwt,
-  refreshAuthToken,
-} from '@package/api/react-query/http';
+  queryAccessToken,
+} from '@package/api/react-query/jwt';
 import {AUTH_STORE_KEY, useAuthStore} from '../state/authStore';
 import {createRefreshRetryPolicy} from './refreshRetryPolicy';
 
@@ -77,8 +77,9 @@ export function AuthProvider() {
           }
 
           isRefreshingRef.current = true;
+
           try {
-            await refreshAuthToken();
+            await queryAccessToken();
             refreshRetryPolicy.reset();
             useAuthStore.getState().syncFromStorage();
           } catch {
@@ -106,6 +107,13 @@ export function AuthProvider() {
     const retryPolicy = refreshRetryPolicyRef.current;
     retryPolicy.reset();
     useAuthStore.getState().init();
+
+    function handleStorageChange(event: StorageEvent) {
+      if (event.key !== AUTH_STORE_KEY) {
+        return;
+      }
+      handleTokenChange(event);
+    }
 
     const handleTokenChange = (event?: Event) => {
       retryPolicy.reset();
@@ -136,7 +144,7 @@ export function AuthProvider() {
       retryPolicy.reset();
       clearRefreshTimer();
       window.removeEventListener(AUTH_TOKEN_STORAGE_EVENT, handleTokenChange);
-      window.removeEventListener('storage', handleTokenChange);
+      window.removeEventListener('storage', handleStorageChange);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, [clearRefreshTimer, scheduleRefresh]);

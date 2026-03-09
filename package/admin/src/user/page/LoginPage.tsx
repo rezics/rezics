@@ -13,9 +13,11 @@ import {useState} from 'react';
 
 import {useNavigate} from '@tanstack/react-router';
 
-import {authApi} from '@package/api/auth/auth.api';
+import {useSignInMutation} from '@package/api/auth/auth.mutations';
 
 import {Route} from '@/routes/login';
+import {useAuthStore} from '@package/app-shell';
+import {getToken, parseJwt} from '@package/api/react-query/jwt';
 
 function normalizeRedirect(to?: string) {
   if (!to) return '/';
@@ -32,17 +34,31 @@ export default function LoginPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const signInMutation = useSignInMutation();
+
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
     setSubmitting(true);
     try {
-      const {user} = await authApi.signIn({email, password});
-      if (user?.role === 'admin' || user?.role === 'owner') {
-        await navigate({to: normalizeRedirect(redirectTo), replace: true});
-      } else {
-        setError('You are not authorized to access this page');
-      }
+      await signInMutation.mutateAsync(
+        {email, password},
+        {
+          onSuccess: () => {
+            const token = getToken();
+            const user = parseJwt(token);
+            if (user?.role === 'admin' || user?.role === 'owner') {
+              useAuthStore.getState().setToken(token);
+              navigate({
+                to: normalizeRedirect(redirectTo),
+                replace: true,
+              });
+            } else {
+              setError('You are not authorized to access this page');
+            }
+          },
+        },
+      );
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Login failed';
       setError(message);

@@ -8,6 +8,7 @@ export type SignInBody = (typeof signInBodySchema)['static'];
 
 export const signUpBodySchema = t.Object({
   name: t.String(),
+  slug: t.String(),
   email: t.String({format: 'email'}),
   password: t.String(),
 });
@@ -16,6 +17,7 @@ export type SignUpBody = (typeof signUpBodySchema)['static'];
 export const authUserSchema = t.Object({
   id: t.String(),
   name: t.String(),
+  role: t.String(),
   email: t.String(),
   emailVerified: t.Boolean(),
   image: t.Optional(t.Nullable(t.String())),

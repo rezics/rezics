@@ -25,20 +25,20 @@ function generatePassword(): string {
 async function ensureUniqueSlug(email: string, desiredSlug: string) {
   const existingUser = await prisma.user.findUnique({
     where: {email},
-    select: {slug: true},
+    select: {profile: {select: {slug: true}}},
   });
 
-  if (existingUser?.slug) {
-    return existingUser.slug;
+  if (existingUser?.profile?.slug) {
+    return existingUser.profile.slug;
   }
 
   let slug = desiredSlug;
   let suffix = 1;
 
   while (true) {
-    const conflict = await prisma.user.findUnique({
+    const conflict = await prisma.userProfile.findUnique({
       where: {slug},
-      select: {id: true},
+      select: {userId: true},
     });
 
     if (!conflict) return slug;
@@ -79,25 +79,28 @@ export async function seedAdmin() {
   const user = await prisma.user.upsert({
     where: {email: ADMIN_EMAIL},
     update: {
-      name: ADMIN_NAME,
       role: ADMIN_ROLE,
-      slug,
       emailVerified: true,
     },
     create: {
-      email: ADMIN_EMAIL,
       name: ADMIN_NAME,
+      email: ADMIN_EMAIL,
       role: ADMIN_ROLE,
-      slug,
       emailVerified: true,
     },
     select: {
       id: true,
-      email: true,
-      slug: true,
-      role: true,
       name: true,
+      email: true,
+      role: true,
     },
+  });
+
+  const profile = await prisma.userProfile.upsert({
+    where: {userId: user.id},
+    update: {slug},
+    create: {userId: user.id, slug},
+    select: {slug: true},
   });
 
   await prisma.account.upsert({
@@ -121,9 +124,9 @@ export async function seedAdmin() {
 
   printSeedResult({
     email: user.email,
-    name: user.name,
     role: user.role,
-    slug: user.slug,
+    name: user.name,
+    slug: profile.slug,
     password,
   });
 }

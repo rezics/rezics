@@ -1,10 +1,6 @@
 - [ ] add Paraglide i18n package
 - [x] https://better-auth.com/docs/plugins/admin https://better-auth.com/docs/plugins/organization 参考相关文档为 auth service 添加用户管理功能
 - [ ] add editor package use code mirror 6 build markdown and json editor
-
-迁移到
-
-accessToken  → JS 可读 cookie
-refreshToken → HttpOnly cookie
-
-- [] 确保登陆状态全局共享
+- [ ] 我需要整理spc规范嘛？
+- [ ] 我需要做到auth-store规范，如果 access token 不存在，则不主动请求任何 内容，所有请求都依赖于auth-store
+- [ ] 实现session失效后的主动登录退出机制，但是我又担心网络波动引起恶意退出？better-auth session 到底是如何工作的

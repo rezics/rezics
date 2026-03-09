@@ -249,11 +249,15 @@ export const auth = betterAuth({
         definePayload: ({
           user,
         }: {
-          user: Record<string, unknown> & {id: string; slug?: string};
+          user: Record<string, unknown> & {
+            id: string;
+            slug?: string;
+            role?: string;
+          };
         }) => ({
-          unitId: user.id,
+          id: user.id,
           slug: user.slug,
-          scope: 'user',
+          role: user.role,
         }),
         getSubject: ({user}: {user: {id: string}}) => user.id,
       },

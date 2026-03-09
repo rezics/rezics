@@ -10,24 +10,35 @@ datasource db {
 }
 
 model User {
-  id            String    @id @default(dbgenerated("uuidv7()")) @db.Uuid
-  slug          String    @unique
+  id            String       @id @default(dbgenerated("uuidv7()")) @db.Uuid
   name          String
-  email         String    @unique
-  emailVerified Boolean   @default(false)
-  role          String    @default("user")
-  banned        Boolean   @default(false)
+  image         String?
+  email         String       @unique
+  emailVerified Boolean      @default(false)
+  role          String       @default("user")
+  banned        Boolean      @default(false)
   banReason     String?
   banExpires    DateTime?
-  image         String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
   sessions      Session[]
   accounts      Account[]
   members       Member[]
   invitations   Invitation[] @relation("InvitationInviter")
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  profile UserProfile?
 
   @@index([email])
+}
+
+model UserProfile {
+  userId String  @id @db.Uuid
+  slug   String  @unique
+  bio    String?
+  avatar String?
+
+  user User @relation(fields: [userId], references: [id])
+
   @@index([slug])
 }
 
