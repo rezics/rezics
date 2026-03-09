@@ -53,22 +53,27 @@ export function AuthProvider() {
           const refreshRetryPolicy = refreshRetryPolicyRef.current;
           useAuthStore.getState().syncFromStorage();
           const token = getToken();
-          if (token) {
-            const payload = parseJwt(token);
-            const expSeconds = payload?.exp;
-            if (!expSeconds) {
-              refreshRetryPolicy.reset();
-              useAuthStore.getState().clearAuth();
-              return;
-            }
+          if (!token) {
+            refreshRetryPolicy.reset();
+            clearRefreshTimer();
+            return;
+          }
 
-            const expMs = expSeconds * 1000;
-            const msUntilRefresh = expMs - REFRESH_BUFFER_MS - Date.now();
+          const payload = parseJwt(token);
+          const expSeconds = payload?.exp;
 
-            if (msUntilRefresh > 0) {
-              scheduleRefresh(msUntilRefresh);
-              return;
-            }
+          if (!expSeconds) {
+            refreshRetryPolicy.reset();
+            useAuthStore.getState().clearAuth();
+            return;
+          }
+
+          const expMs = expSeconds * 1000;
+          const msUntilRefresh = expMs - REFRESH_BUFFER_MS - Date.now();
+
+          if (msUntilRefresh > 0) {
+            scheduleRefresh(msUntilRefresh);
+            return;
           }
 
           isRefreshingRef.current = true;

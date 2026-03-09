@@ -85,11 +85,11 @@
 
 ## 9. Validation and cleanup
 
-- [ ] 9.1 Run `tsc` for `package/server`, `package/api`, `package/app` — fix all type errors.
+- [x] 9.1 Run `tsc` for `package/server`, `package/api`, `package/app` — fix all type errors.
 - [x] 9.2 Update `auth.e2e.test.ts` to remove tests for deleted routes and add tests for JWKS-only verification path.
-- [ ] 9.3 Run full end-to-end test: auth sign-in → bearer call to server `/users/me` → profile returned.
-- [ ] 9.4 Run end-to-end test for lazy provisioning: new auth user → `/users/me` → auto-provisioned profile.
-- [ ] 9.5 Run end-to-end test for token refresh: expired JWT → auth refresh → retry succeeds.
+- [x] 9.3 Run full end-to-end test: auth sign-in → bearer call to server `/users/me` → profile returned.
+- [x] 9.4 Run end-to-end test for lazy provisioning: new auth user → `/users/me` → auto-provisioned profile.
+- [x] 9.5 Run end-to-end test for token refresh: expired JWT → auth refresh → retry succeeds.
 - [x] 9.6 Grep repo-wide for any remaining references to deleted functions/files (`sessionService`, `allowEmailDomains`, `hashPassword`, `verifyPassword`, `authenticate`, `user.session.service`, `refreshToken` in core.ts context).
 - [x] 9.7 Run `bun install` to verify dependency tree is clean after removing packages from `package.json`.
-- [ ] 9.8 Verify `knip` (dead code detector) passes or update `knip.config.ts` if needed.
+- [x] 9.8 Verify `knip` (dead code detector) passes or update `knip.config.ts` if needed.

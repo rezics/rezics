@@ -1,5 +1,10 @@
 - [ ] add Paraglide i18n package
-- [ ] https://better-auth.com/docs/plugins/admin https://better-auth.com/docs/plugins/organization 参考相关文档为 auth service 添加用户管理功能
+- [x] https://better-auth.com/docs/plugins/admin https://better-auth.com/docs/plugins/organization 参考相关文档为 auth service 添加用户管理功能
 - [ ] add editor package use code mirror 6 build markdown and json editor
-- [ ] 权限判断/自动跳转到 登录页面 以及 权限判断，非管理员不准进入 后台
-- [ ] 更新 openapi schema
+
+迁移到
+
+accessToken  → JS 可读 cookie
+refreshToken → HttpOnly cookie
+
+- [] 确保登陆状态全局共享
