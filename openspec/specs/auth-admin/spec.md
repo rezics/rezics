@@ -102,9 +102,11 @@ The first admin user SHALL be created by registering through the normal sign-up 
 - **WHEN** a platform operator follows the README instructions
 - **THEN** they SHALL be able to promote a registered user to admin via SQL and subsequently use the admin API
 
-### Requirement: JWT payload independence
-The JWT payload (`definePayload`) SHALL NOT include the user's role. Auth roles and downstream service roles SHALL remain independent.
+### Requirement: JWT payload exposes frontend auth identity
+The JWT plugin configuration in `src/auth/instance.ts` SHALL include `id`, optional `slug`, and optional `role` in `definePayload()` so frontend auth state can be derived directly from the token.
 
-#### Scenario: JWT does not contain role
+#### Scenario: JWT contains role-aware identity claims
 - **WHEN** a JWT is issued for a user with any role (user, admin, owner)
-- **THEN** the JWT payload SHALL contain only `unitId`, `slug`, and `scope` — no `role` field
+- **THEN** the JWT payload SHALL contain `id`
+- **AND** it SHALL include `slug` when the user profile has one
+- **AND** it SHALL include `role` when the user record has one

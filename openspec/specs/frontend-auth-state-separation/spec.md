@@ -6,14 +6,17 @@ TBD - created by archiving change decouple-user-domain-from-auth. Update Purpose
 ### Requirement: Authentication state and profile state are managed by separate stores
 
 The frontend SHALL maintain two independent Zustand stores:
-- `authStore`: owns access token, authentication status, and token lifecycle.
+- `authStore`: owns the persisted access token, authentication status, and JWT-derived identity fields (`id`, `slug`, `role`).
 - `userProfileStore`: owns user profile data (`PartialUserDTO`) for display purposes.
+
+The low-level token read/write, JWT parsing, and token refresh helpers SHALL live in `package/api/src/react-query/jwt.ts`. `package/api/src/react-query/http.ts` SHALL consume those helpers instead of implementing token persistence itself.
 
 #### Scenario: Login populates both stores
 
 - GIVEN an unauthenticated user
 - WHEN the user successfully signs in via the auth service
-- THEN `authStore` SHALL contain the access token and `isAuthenticated = true`
+- THEN `useSignInMutation()` SHALL obtain a fresh access token via `queryAccessToken()`
+- AND `authStore` SHALL contain the access token, `isAuthenticated = true`, and JWT-derived `id`/`slug`/`role`
 - AND `userProfileStore` SHALL contain the user's profile data fetched from `GET /users/me`
 
 #### Scenario: Logout clears both stores
@@ -22,13 +25,14 @@ The frontend SHALL maintain two independent Zustand stores:
 - WHEN the user logs out
 - THEN `authStore` SHALL be cleared (`accessToken = null`, `isAuthenticated = false`)
 - AND `userProfileStore` SHALL be cleared (`user = null`)
-- AND the corresponding localStorage keys SHALL be removed
+- AND the persisted `auth-store` localStorage entry SHALL be removed
 
 #### Scenario: Token refresh updates only authStore
 
 - GIVEN an authenticated user whose access token has expired
-- WHEN the token is automatically refreshed via the auth service
-- THEN `authStore` SHALL be updated with the new access token
+- WHEN `queryAccessToken()` is triggered by `http.ts` retry logic or `AuthProvider`
+- THEN `jwt.ts` SHALL fetch `GET /api/auth/token`, persist the new token, and dispatch a token storage event
+- AND `authStore` SHALL be re-synced from the persisted token with updated JWT-derived fields
 - AND `userProfileStore` SHALL NOT be affected
 
 ### Requirement: Frontend auth flows target the auth service directly
@@ -38,22 +42,22 @@ All authentication operations (sign-in, sign-up, sign-out, token refresh, passwo
 #### Scenario: Sign-in calls auth service
 
 - GIVEN the user submits credentials on the login page
-- WHEN `handler.login()` is invoked
+- WHEN the sign-in mutation is invoked
 - THEN it SHALL call the auth service's sign-in endpoint (e.g., `POST /api/auth/sign-in/email`)
 - AND it SHALL NOT call `POST /users/login` on the server
 
 #### Scenario: Sign-up calls auth service
 
 - GIVEN the user submits registration data
-- WHEN `handler.register()` is invoked
+- WHEN the sign-up handler is invoked
 - THEN it SHALL call the auth service's sign-up endpoint (e.g., `POST /api/auth/sign-up/email`)
 - AND it SHALL NOT call `POST /users/register` on the server
 
 #### Scenario: Token refresh calls auth service
 
 - GIVEN an API call returns `401` due to expired token
-- WHEN `refreshAuthToken()` is invoked in `http.ts`
-- THEN it SHALL call the auth service's token refresh endpoint
+- WHEN `queryAccessToken()` is invoked from `jwt.ts`
+- THEN it SHALL call the auth service's `GET /api/auth/token` endpoint
 - AND it SHALL NOT call `POST /users/refresh-token` on the server
 
 ### Requirement: userApi no longer exposes auth operations
@@ -86,4 +90,3 @@ The `useAuth()` hook SHALL read `isAuthenticated` from `authStore` and `user` da
 - THEN `isAuthenticated` SHALL be `true`
 - AND `user` SHALL contain the `UserDTO` data
 - AND `loading` SHALL be `false`
-

@@ -1,11 +1,13 @@
 ## ADDED Requirements
 
 ### Requirement: Admin login page uses auth server
-The login page at `/login` (`package/admin/src/user/page/LoginPage.tsx`) SHALL call `authApi.signIn()` from `@package/api/auth/auth.api` instead of `userApi.login()`. On successful sign-in, it SHALL verify the user has admin or owner role from the auth response, then navigate to the redirect target.
+The login page at `/login` (`package/admin/src/user/page/LoginPage.tsx`) SHALL use `useSignInMutation()` from `@package/api/auth/auth.mutations`. On successful sign-in, it SHALL read the freshly persisted JWT via `getToken()`/`parseJwt()`, verify the payload role is `admin` or `owner`, hydrate `useAuthStore`, then navigate to the redirect target.
 
 #### Scenario: Admin signs in successfully
 - **WHEN** an admin user enters valid email and password and submits the login form
-- **THEN** the page SHALL call `authApi.signIn({ email, password })`, verify the user role includes admin/owner privileges, and redirect to the admin dashboard
+- **THEN** the page SHALL execute `useSignInMutation()`
+- **AND** the mutation success path SHALL obtain a JWT via `queryAccessToken()`
+- **AND** the page SHALL parse the JWT payload, verify `role` includes admin/owner privileges, and redirect to the admin dashboard
 
 #### Scenario: Non-admin user denied access
 - **WHEN** a regular user signs in with valid credentials but no admin role
@@ -15,15 +17,15 @@ The login page at `/login` (`package/admin/src/user/page/LoginPage.tsx`) SHALL c
 - **WHEN** a user submits invalid email or password
 - **THEN** the page SHALL display the error message from the auth server
 
-### Requirement: Admin auth guard uses auth server session
-The admin route guard in `package/admin/src/routes/_admin.tsx` SHALL check authentication via the auth server session (using `authApi.getSession()` or checking session cookies) instead of checking `getToken()` from localStorage.
+### Requirement: Admin auth guard uses authStore role state
+The admin route guard in `package/admin/src/routes/_admin.tsx` SHALL authorize access from `useAuthStore` state populated from the JWT payload, instead of calling `authApi.getSession()` during route resolution.
 
 #### Scenario: Unauthenticated user redirected to login
 - **WHEN** an unauthenticated user tries to access any `/_admin/*` route
 - **THEN** the guard SHALL redirect to `/login` with the attempted path as a `redirect` search parameter
 
 #### Scenario: Authenticated user accesses admin routes
-- **WHEN** a user with a valid auth server session accesses an `/_admin/*` route
+- **WHEN** a user with `role = admin` or `role = owner` in `useAuthStore` accesses an `/_admin/*` route
 - **THEN** the guard SHALL allow access and render the admin layout
 
 ### Requirement: Auth users management page

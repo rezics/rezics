@@ -43,6 +43,13 @@ The `authApi` object SHALL expose a `getSession` method that sends `GET /api/aut
 - **WHEN** `authApi.getSession()` is called with a valid session cookie
 - **THEN** the current session and user data SHALL be returned
 
+### Requirement: Get access token API
+The `authApi` object SHALL expose a `getToken` method that sends `GET /api/auth/token` and returns `AuthTokenResponse`.
+
+#### Scenario: Access token retrieval
+- **WHEN** `authApi.getToken()` is called with a valid auth session cookie
+- **THEN** the auth server SHALL return an access token payload suitable for JWT persistence and downstream bearer requests
+
 ### Requirement: List sessions API
 The `authApi` object SHALL expose a `listSessions` method that sends `POST /api/auth/list-sessions` and returns `ListSessionsResponse`.
 
@@ -112,6 +119,7 @@ The module SHALL export mutation hooks in `package/api/src/auth/auth.mutations.t
 #### Scenario: Sign-in mutation invalidates session cache
 - **WHEN** `useSignInMutation` succeeds
 - **THEN** it SHALL invalidate the `authKeys.session()` query cache
+- **AND** it SHALL fetch and persist a fresh access token via `queryAccessToken()`
 
 #### Scenario: Ban user mutation invalidates admin users cache
 - **WHEN** `useAdminBanUserMutation` succeeds
