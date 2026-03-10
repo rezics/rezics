@@ -82,6 +82,15 @@ async function getSessionStateResponse(request: Request): Promise<Response> {
   const hasPassword = accounts.some(
     account => account.providerId === 'credential' && Boolean(account.password),
   );
+  const needsOnboarding =
+    providerIds.length > 0 && !sessionData.user.emailVerified;
+  const canAcquireMemberToken =
+    sessionData.user.emailVerified && !needsOnboarding;
+  const readinessStatus = needsOnboarding
+    ? 'needs-onboarding'
+    : sessionData.user.emailVerified
+      ? 'ready'
+      : 'needs-verification';
 
   return Response.json({
     ...sessionData,
@@ -89,6 +98,9 @@ async function getSessionStateResponse(request: Request): Promise<Response> {
       email: sessionData.user.email,
       emailVerified: sessionData.user.emailVerified,
       needsEmailVerification: !sessionData.user.emailVerified,
+      needsOnboarding,
+      canAcquireMemberToken,
+      readinessStatus,
       hasPassword,
       canSetPassword: !hasPassword,
       providerIds,

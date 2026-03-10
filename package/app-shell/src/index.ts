@@ -6,6 +6,14 @@ export {
   useAuthStore,
   type AuthStoreState,
 } from './state/authStore';
+export {
+  clearAuthSessionState,
+  hydrateAuthSessionState,
+  useAuthSessionStore,
+  type AuthCapabilityLevel,
+  type AuthSessionHydrationStatus,
+  type AuthSessionStoreState,
+} from './state/authSessionStore';
 export {useAlertStore} from './state/windowAlertStore';
 
 export {AuthProvider} from './provider/AuthProvider';

@@ -5,6 +5,7 @@ export const authProviderIdSchema = t.Union([
   t.Literal('microsoft'),
   t.Literal('github'),
   t.Literal('twitter'),
+  t.Literal('telegram'),
 ]);
 export type AuthProviderId = (typeof authProviderIdSchema)['static'];
 
@@ -14,10 +15,21 @@ export const authProviderSchema = t.Object({
 });
 export type AuthProvider = (typeof authProviderSchema)['static'];
 
+export const authReadinessStatusSchema = t.Union([
+  t.Literal('needs-onboarding'),
+  t.Literal('needs-verification'),
+  t.Literal('ready'),
+]);
+export type AuthReadinessStatus =
+  (typeof authReadinessStatusSchema)['static'];
+
 export const authSessionStateSchema = t.Object({
   email: t.String({format: 'email'}),
   emailVerified: t.Boolean(),
   needsEmailVerification: t.Boolean(),
+  needsOnboarding: t.Boolean(),
+  canAcquireMemberToken: t.Boolean(),
+  readinessStatus: authReadinessStatusSchema,
   hasPassword: t.Boolean(),
   canSetPassword: t.Boolean(),
   providerIds: t.Array(authProviderIdSchema),

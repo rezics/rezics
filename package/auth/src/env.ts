@@ -39,6 +39,8 @@ export const env = createEnv({
     GITHUB_CLIENT_SECRET: v.optional(v.string()),
     TWITTER_CLIENT_ID: v.optional(v.string()),
     TWITTER_CLIENT_SECRET: v.optional(v.string()),
+    TELEGRAM_CLIENT_ID: v.optional(v.string()),
+    TELEGRAM_CLIENT_SECRET: v.optional(v.string()),
   },
   runtimeEnv: process.env,
   emptyStringAsUndefined: true,

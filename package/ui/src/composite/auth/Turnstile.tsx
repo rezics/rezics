@@ -19,7 +19,9 @@ interface TurnstileProps {
   onVerify: (token: string) => void;
   options?: Record<string, any>;
   loadingComponent?: React.ReactNode;
+  initTimeoutMs?: number;
   onError?: (error: Error) => void;
+  onReady?: () => void;
 }
 
 export function Turnstile({
@@ -27,7 +29,9 @@ export function Turnstile({
   onVerify,
   options = {},
   loadingComponent = defaultLoadingComponent(),
+  initTimeoutMs = 5000,
   onError,
+  onReady,
 }: TurnstileProps) {
   const siteKey = siteKeyProps ?? import.meta.env.VITE_TURNSTILE_SITE_KEY;
   const containerRef = useRef<HTMLDivElement>(null);
@@ -39,8 +43,8 @@ export function Turnstile({
   }
 
   useEffect(() => {
-    // 1. 动态加载 Turnstile 脚本
     const scriptId = 'cf-turnstile-script';
+    let mounted = true;
 
     if (!document.getElementById(scriptId)) {
       const script = document.createElement('script');
@@ -49,10 +53,15 @@ export function Turnstile({
       script.defer = true;
       script.id = scriptId;
       script.crossOrigin = 'anonymous';
+      script.onerror = () => {
+        if (!mounted) {
+          return;
+        }
+        onError?.(new Error('Failed to load Turnstile widget.'));
+      };
       document.body.appendChild(script);
     }
 
-    // 等待 window.turnstile 可用
     const interval = setInterval(() => {
       if (window.turnstile && containerRef.current && !widgetIdRef.current) {
         widgetIdRef.current = window.turnstile.render(containerRef.current, {
@@ -61,16 +70,24 @@ export function Turnstile({
           ...options,
         });
         setIsVerifiedShow(true);
+        onReady?.();
       }
     }, 100);
 
-    // cleanup
+    const timeout = window.setTimeout(() => {
+      if (!widgetIdRef.current && mounted) {
+        onError?.(new Error('Turnstile widget did not initialize in time.'));
+      }
+    }, initTimeoutMs);
+
     return () => {
+      mounted = false;
       clearInterval(interval);
+      clearTimeout(timeout);
       if (widgetIdRef.current && window.turnstile) {
         try {
           window.turnstile.remove(widgetIdRef.current);
-        } catch (error) {
+        } catch {
           onError?.(new Error('Error removing Turnstile widget'));
         }
       }

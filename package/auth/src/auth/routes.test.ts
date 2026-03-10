@@ -23,6 +23,8 @@ process.env.GITHUB_CLIENT_ID ??= 'github-client';
 process.env.GITHUB_CLIENT_SECRET ??= 'github-secret';
 process.env.TWITTER_CLIENT_ID ??= 'twitter-client';
 process.env.TWITTER_CLIENT_SECRET ??= 'twitter-secret';
+process.env.TELEGRAM_CLIENT_ID ??= 'telegram-client';
+process.env.TELEGRAM_CLIENT_SECRET ??= 'telegram-secret';
 
 describe('Auth discovery routes', () => {
   test('serves openid and oauth metadata', async () => {
@@ -56,13 +58,16 @@ describe('Auth discovery routes', () => {
 
   test('configures required external providers', async () => {
     const {auth} = await import('./instance');
+    const options = (auth as any).options;
 
-    const providers = (auth as any).options?.socialProviders;
+    const providers = options?.socialProviders;
+    const pluginIds = options?.plugins?.map((plugin: {id: string}) => plugin.id);
 
     expect(providers.google).toBeDefined();
     expect(providers.microsoft).toBeDefined();
     expect(providers.github).toBeDefined();
     expect(providers.twitter).toBeDefined();
+    expect(pluginIds).toContain('generic-oauth');
   });
 
   test('configures notification-backed auth email handlers', async () => {

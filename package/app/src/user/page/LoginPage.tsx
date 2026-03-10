@@ -13,6 +13,8 @@ import {Layout} from '../layout/Layout';
 import {ModalLayout} from '../layout/ModalLayout';
 import {validateEmail} from '../model/validate';
 import {TextButton} from '@package/ui/primitive/button/TextButton.tsx';
+import {SocialAuthButtons} from '../component/SocialAuthButtons';
+import {resolvePostAuthDestination} from '../model/authRedirect';
 
 interface LoginData {
   email: string;
@@ -71,7 +73,15 @@ export const LoginPage: FC<LoginPageProps> = ({
     if (!hasError) {
       onClose?.();
       if (pathname === '/login') {
-        navigate({to: '/'});
+        const {useAuthSessionStore} = await import('@/user/state');
+        const authSessionState = useAuthSessionStore.getState();
+        navigate({
+          to: resolvePostAuthDestination({
+            needsOnboarding: authSessionState.needsOnboarding,
+            needsVerification: authSessionState.needsVerification,
+            readyForApp: authSessionState.capabilityLevel === 'member',
+          }),
+        });
       }
     }
   };
@@ -109,11 +119,14 @@ export const LoginPage: FC<LoginPageProps> = ({
         }}
       />
       <div>
-        New to ReZICS?&nbsp;
-        <TextButton onClick={handleRegisterClick}>Create an account</TextButton>
+        {t('auth.flow.new_to_app')}&nbsp;
+        <TextButton onClick={handleRegisterClick}>
+          {t('auth.flow.create_account')}
+        </TextButton>
         <br />
-        <MUILink to="/reset-password">Forget password?</MUILink>
+        <MUILink to="/reset-password">{t('auth.flow.forgot_password')}</MUILink>
       </div>
+      <SocialAuthButtons mode="login" />
     </>
   );
 
@@ -129,7 +142,7 @@ export const LoginPage: FC<LoginPageProps> = ({
         disabled={loading}
         onClick={handleSubmit}
       >
-        {loading ? 'Loading...' : t('auth.login')}
+        {loading ? t('common.loading') : t('auth.login')}
       </Button>
     </>
   );

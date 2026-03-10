@@ -31,8 +31,7 @@ export function useSignOutMutation() {
 export function useSignUpMutation() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (input: {email: string; password: string; slug: string}) =>
-      authApi.signUp(input),
+    mutationFn: (input: {email: string; password: string}) => authApi.signUp(input),
     onSuccess: () => {
       qc.invalidateQueries({queryKey: authKeys.session()});
       qc.invalidateQueries({queryKey: authKeys.sessionState()});

@@ -6,6 +6,11 @@ import {
   queryAccessToken,
 } from '@package/api/react-query/jwt';
 import {AUTH_STORE_KEY, useAuthStore} from '../state/authStore';
+import {
+  clearAuthSessionState,
+  hydrateAuthSessionState,
+  useAuthSessionStore,
+} from '../state/authSessionStore';
 import {createRefreshRetryPolicy} from './refreshRetryPolicy';
 
 const REFRESH_BUFFER_MS = 60 * 1000;
@@ -82,6 +87,7 @@ export function AuthProvider() {
             await queryAccessToken();
             refreshRetryPolicy.reset();
             useAuthStore.getState().syncFromStorage();
+            await hydrateAuthSessionState();
           } catch {
             const retryDelayMs = refreshRetryPolicy.registerFailure();
             if (isMountedRef.current) {
@@ -107,6 +113,7 @@ export function AuthProvider() {
     const retryPolicy = refreshRetryPolicyRef.current;
     retryPolicy.reset();
     useAuthStore.getState().init();
+    useAuthSessionStore.getState().syncBusinessToken(getToken());
 
     function handleStorageChange(event: StorageEvent) {
       if (event.key !== AUTH_STORE_KEY) {
@@ -115,28 +122,32 @@ export function AuthProvider() {
       handleTokenChange(event);
     }
 
-    const handleTokenChange = (event?: Event) => {
+    const handleTokenChange = async (event?: Event) => {
       retryPolicy.reset();
       useAuthStore.getState().syncFromStorage();
+      useAuthSessionStore.getState().syncBusinessToken(getToken());
 
       if (isTokenClearedEvent(event)) {
         clearRefreshTimer();
+        clearAuthSessionState();
         return;
       }
 
+      await hydrateAuthSessionState();
       scheduleRefresh();
     };
 
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
+        void hydrateAuthSessionState();
         scheduleRefresh();
       }
     };
 
-    scheduleRefresh();
+    void handleTokenChange();
 
     window.addEventListener(AUTH_TOKEN_STORAGE_EVENT, handleTokenChange);
-    window.addEventListener('storage', handleTokenChange);
+    window.addEventListener('storage', handleStorageChange);
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
     return () => {

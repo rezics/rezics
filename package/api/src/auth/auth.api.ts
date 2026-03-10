@@ -67,14 +67,15 @@ export const authApi = {
   signUp: async (input: {
     email: string;
     password: string;
-    slug: string;
   }): Promise<AuthResponse> => {
+    const inferredName = input.email.split('@')[0]?.trim() || 'Reader';
+
     return authFetch<AuthResponse>('/api/auth/sign-up/email', {
       method: 'POST',
       body: JSON.stringify({
         email: input.email,
         password: input.password,
-        name: input.slug,
+        name: inferredName,
       }),
     });
   },

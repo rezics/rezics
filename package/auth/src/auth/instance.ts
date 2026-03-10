@@ -1,13 +1,16 @@
 import {betterAuth} from 'better-auth';
 import {prismaAdapter} from '@better-auth/prisma-adapter';
-import {admin, jwt, organization} from 'better-auth/plugins';
+import {admin, genericOAuth, jwt, organization} from 'better-auth/plugins';
 import {oauthProvider} from '@better-auth/oauth-provider';
 import {createHash} from 'node:crypto';
 import {prisma} from './prisma';
 import {env} from '../env';
 import {ac, authRoles, organizationRoles} from './permissions';
 import {trustedOrigins} from './trusted-origins';
-import {buildSocialProviderOptions} from './providers';
+import {
+  buildSocialProviderOptions,
+  getTelegramGenericOAuthConfig,
+} from './providers';
 import {createAuthNotificationService} from '../notification';
 
 const authAudience = env.AUTH_JWT_AUDIENCE ?? 'rezics-api';
@@ -20,6 +23,7 @@ const authJwksGracePeriodSeconds = Number(
   env.AUTH_JWKS_GRACE_PERIOD_SECONDS ?? '3900',
 );
 const prismaAny = prisma as any;
+const telegramOAuthConfig = getTelegramGenericOAuthConfig();
 const notificationService = createAuthNotificationService(env, {
   telegram: {
     enabled: false,
@@ -168,6 +172,13 @@ export const auth = betterAuth({
         getSubject: ({user}: {user: {id: string}}) => user.id,
       },
     }),
+    ...(telegramOAuthConfig
+      ? [
+          genericOAuth({
+            config: [telegramOAuthConfig],
+          }),
+        ]
+      : []),
     oauthProvider({
       scopes: ['openid', 'profile', 'email', 'offline_access', 'user'],
       loginPage: '/login',

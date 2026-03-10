@@ -38,6 +38,62 @@ export default {
       invalid_confirm: 'Ungültige Passwort-Bestätigung.',
       passwords_mismatch: 'Passwörter stimmen nicht überein.',
     },
+    flow: {
+      new_to_app: 'Neu bei REZICS?',
+      create_account: 'Konto erstellen',
+      forgot_password: 'Passwort vergessen?',
+      already_have_account: 'Haben Sie bereits ein Konto?',
+      sign_in_instead: 'Anmelden',
+      providers_divider: 'oder fortfahren mit',
+      providers_loading: 'Anmeldeanbieter werden geladen…',
+      continue_with_provider: 'Weiter mit {{provider}}',
+      onboarding_title: 'Onboarding abschließen',
+      onboarding_sign_in_first: 'Bitte melden Sie sich zuerst an, um das Onboarding abzuschließen.',
+      onboarding_social_only: 'Diese Seite ist nur für Social-Sign-in-Konten vorgesehen.',
+      onboarding_complete: 'Ihr Onboarding ist bereits abgeschlossen.',
+      onboarding_intro:
+        'Für Social Sign-in wird eine nutzbare E-Mail-Adresse benötigt, bevor das Konto als mitgliedsbereit gilt. Ein Passwort ist optional.',
+      onboarding_trusted_email:
+        'Diese E-Mail-Adresse wird von Ihrem Anbieter als vertrauenswürdig eingestuft. Wenn Sie sie ändern, ist eine erneute Verifizierung erforderlich.',
+      onboarding_editable_email:
+        'Wenn Sie die E-Mail-Adresse ändern, ist vor dem Mitgliederzugriff eine Verifizierung erforderlich.',
+      onboarding_optional_password:
+        'Lassen Sie das Passwort leer, wenn das Konto vorerst nur per Social Sign-in genutzt werden soll.',
+      onboarding_saved: 'Onboarding-Daten gespeichert.',
+      onboarding_submit: 'Onboarding abschließen',
+      onboarding_saving: 'Wird gespeichert…',
+      verify_title: 'E-Mail verifizieren',
+      verify_sign_in_first: 'Bitte melden Sie sich zuerst an, um mit der E-Mail-Verifizierung fortzufahren.',
+      verify_already_done: 'Ihre E-Mail-Adresse ist bereits verifiziert.',
+      verify_intro_prefix: 'Verifizieren Sie',
+      verify_intro_suffix: 'um Mitgliederzugriff freizuschalten.',
+      verify_email_fallback: 'Ihre E-Mail-Adresse',
+      verify_widget_loading: 'Verifizierungs-Widget wird geladen…',
+      verify_widget_required:
+        'Das erneute Senden der Bestätigungs-E-Mail bleibt deaktiviert, bis das Widget geladen wurde.',
+      verify_guest_notice:
+        'Sie können weiterhin gastzugängliche Seiten nutzen, aber Mitgliedsfunktionen bleiben bis zur Verifizierung gesperrt.',
+      verify_refresh: 'Status aktualisieren',
+      verify_resend: 'E-Mail erneut senden',
+      verify_refreshed: 'Verifizierungsstatus aktualisiert.',
+      verify_sent: 'Bestätigungs-E-Mail gesendet.',
+      verify_missing_email:
+        'Für die Verifizierung ist keine Konto-E-Mail-Adresse vorhanden.',
+      verify_complete_widget:
+        'Schließen Sie das Verifizierungs-Widget ab, bevor Sie eine weitere E-Mail anfordern.',
+      verify_checking_state: 'Verifizierungsstatus wird geprüft…',
+      verify_banner_action: 'E-Mail verifizieren',
+      verify_banner_message:
+        'Ihr Konto kann gastzugängliche Seiten weiterhin nutzen, aber Mitgliedsfunktionen bleiben gesperrt, bis Ihre E-Mail verifiziert ist.',
+      retry: 'Erneut versuchen',
+      providers: {
+        github: 'GitHub',
+        google: 'Google',
+        microsoft: 'Microsoft',
+        telegram: 'Telegram',
+        twitter: 'X / Twitter',
+      },
+    },
   },
 
   // Common UI Elements
@@ -56,6 +112,7 @@ export default {
     add: 'Hinzufügen',
     remove: 'Entfernen',
     create: 'Erstellen',
+    continue: 'Weiter',
     update: 'Aktualisieren',
     search: 'Suchen',
     expand: 'Erweitern',

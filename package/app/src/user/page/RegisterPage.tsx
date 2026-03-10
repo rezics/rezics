@@ -2,22 +2,20 @@ import Alert from '@mui/material/Alert';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import {Dialog, DialogContent} from '@mui/material';
-import {type FC, useRef, useState} from 'react';
+import {type FC, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import {register} from '../model/handler.ts';
 import {Layout} from '../layout/Layout.tsx';
 import {ModalLayout} from '../layout/ModalLayout.tsx';
-import {
-  validateEmail,
-  validateSlug,
-  validatePassword,
-} from '../model/validate.ts';
+import {validateEmail, validatePassword} from '../model/validate.ts';
 import {useNavigate, useRouterState} from '@tanstack/react-router';
 import {PasswordField} from '@package/ui/composite/form/field/PasswordField.tsx';
 import {TextButton} from '@package/ui/primitive/button/TextButton.tsx';
+import {useAuthSessionStore} from '@/user/state';
+import {SocialAuthButtons} from '../component/SocialAuthButtons';
+import {resolvePostAuthDestination} from '../model/authRedirect';
 
 interface RegisterData {
-  slug: string;
   email: string;
   password: string;
   confirm: string;
@@ -43,7 +41,6 @@ export const RegisterPage: FC<RegisterPageProps> = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>();
   const [data, setData] = useState<RegisterData>({
-    slug: '',
     email: '',
     password: '',
     confirm: '',
@@ -60,10 +57,6 @@ export const RegisterPage: FC<RegisterPageProps> = ({
         valid: false,
         error: null,
       };
-      const slug = data?.slug;
-      validateData = validateSlug(slug);
-      if (!validateData.valid) throw new Error(validateData.error ?? '');
-
       const email = data?.email;
       validateData = validateEmail(email);
       if (!validateData.valid) throw new Error(validateData.error ?? '');
@@ -75,9 +68,11 @@ export const RegisterPage: FC<RegisterPageProps> = ({
       const confirm = data?.confirm;
       validateData = validatePassword(confirm);
       if (!validateData.valid) throw new Error(validateData.error ?? '');
-      if (password !== confirm) throw new Error('Passwords do not match.');
+      if (password !== confirm) {
+        throw new Error(t('auth.error.passwords_mismatch'));
+      }
 
-      await register(slug, email, password);
+      await register(email, password);
     } catch (e) {
       setError((e as Error).message);
       hasError = true;
@@ -87,7 +82,14 @@ export const RegisterPage: FC<RegisterPageProps> = ({
     if (!hasError) {
       onClose?.();
       if (pathname === '/register') {
-        navigate({to: '/'});
+        const authSessionState = useAuthSessionStore.getState();
+        navigate({
+          to: resolvePostAuthDestination({
+            needsOnboarding: authSessionState.needsOnboarding,
+            needsVerification: authSessionState.needsVerification,
+            readyForApp: authSessionState.capabilityLevel === 'member',
+          }),
+        });
       }
     }
   };
@@ -117,19 +119,6 @@ export const RegisterPage: FC<RegisterPageProps> = ({
           setData({...data, email: event.target.value});
         }}
       />
-      <TextField
-        name="slug"
-        type="text"
-        label={t('common.username')}
-        variant="standard"
-        placeholder={t('auth.help.slug')}
-        helperText={t('auth.help.slug_require')}
-        required
-        value={data?.slug}
-        onChange={(event: any) => {
-          setData({...data, slug: event.target.value});
-        }}
-      />
       <PasswordField
         value={data?.password}
         setValue={(value: string) => {
@@ -143,9 +132,12 @@ export const RegisterPage: FC<RegisterPageProps> = ({
         }}
       />
       <div>
-        Already have an account?&nbsp;
-        <TextButton onClick={handleLoginClickInternal}>Sign in →</TextButton>
+        {t('auth.flow.already_have_account')}&nbsp;
+        <TextButton onClick={handleLoginClickInternal}>
+          {t('auth.flow.sign_in_instead')}
+        </TextButton>
       </div>
+      <SocialAuthButtons mode="register" />
     </>
   );
 
@@ -160,7 +152,7 @@ export const RegisterPage: FC<RegisterPageProps> = ({
         disabled={loading}
         onClick={handleSubmit}
       >
-        {loading ? 'Loading...' : t('auth.register')}
+        {loading ? t('common.loading') : t('auth.register')}
       </Button>
     </>
   );

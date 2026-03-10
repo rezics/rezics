@@ -246,6 +246,61 @@ export default {
       invalid_confirm: 'Invalid password confirmation.',
       passwords_mismatch: 'Passwords do not match.',
     },
+    flow: {
+      new_to_app: 'New to ReZICS?',
+      create_account: 'Create an account',
+      forgot_password: 'Forgot password?',
+      already_have_account: 'Already have an account?',
+      sign_in_instead: 'Sign in',
+      providers_divider: 'or continue with',
+      providers_loading: 'Loading sign-in providers…',
+      continue_with_provider: 'Continue with {{provider}}',
+      onboarding_title: 'Finish Onboarding',
+      onboarding_sign_in_first: 'Sign in first to complete account onboarding.',
+      onboarding_social_only: 'This onboarding page is only used for social sign-in accounts.',
+      onboarding_complete: 'Your onboarding is already complete.',
+      onboarding_intro:
+        'Social sign-in needs a usable email before the app can treat your account as member-ready. Password is optional.',
+      onboarding_trusted_email:
+        'This email is trusted by your provider. Edit it only if you want to verify a different address.',
+      onboarding_editable_email:
+        'Changing email will require verification before member access is available.',
+      onboarding_optional_password:
+        'Leave password blank if you want to keep this account social-only for now.',
+      onboarding_saved: 'Onboarding details saved.',
+      onboarding_submit: 'Complete Onboarding',
+      onboarding_saving: 'Saving…',
+      verify_title: 'Verify Email',
+      verify_sign_in_first: 'Sign in first to continue with email verification.',
+      verify_already_done: 'Your email is already verified.',
+      verify_intro_prefix: 'Verify',
+      verify_intro_suffix: 'to unlock member access.',
+      verify_email_fallback: 'your email address',
+      verify_widget_loading: 'Loading verification widget…',
+      verify_widget_required:
+        'Verification email resend stays disabled until the widget finishes loading.',
+      verify_guest_notice:
+        'You can keep browsing guest-accessible pages, but member-only actions stay locked until verification completes.',
+      verify_refresh: 'Refresh Status',
+      verify_resend: 'Resend Email',
+      verify_refreshed: 'Verification status refreshed.',
+      verify_sent: 'Verification email sent.',
+      verify_missing_email: 'Missing account email for verification.',
+      verify_complete_widget:
+        'Complete the verification widget before requesting another email.',
+      verify_checking_state: 'Checking verification state…',
+      verify_banner_action: 'Verify Email',
+      verify_banner_message:
+        'Your account can browse guest-accessible pages, but member features stay locked until your email is verified.',
+      retry: 'Retry',
+      providers: {
+        github: 'GitHub',
+        google: 'Google',
+        microsoft: 'Microsoft',
+        telegram: 'Telegram',
+        twitter: 'X / Twitter',
+      },
+    },
   },
 
   // ANCHOR User
@@ -430,6 +485,7 @@ export default {
     add: 'Add',
     remove: 'Remove',
     create: 'Create',
+    continue: 'Continue',
     update: 'Update',
     search: 'Search',
     expand: 'Expand',

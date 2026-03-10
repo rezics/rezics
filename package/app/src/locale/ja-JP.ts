@@ -38,6 +38,61 @@ export default {
       invalid_confirm: '無効なパスワード確認です。',
       passwords_mismatch: 'パスワードが一致しません。',
     },
+    flow: {
+      new_to_app: 'REZICS は初めてですか？',
+      create_account: 'アカウントを作成',
+      forgot_password: 'パスワードをお忘れですか？',
+      already_have_account: 'すでにアカウントをお持ちですか？',
+      sign_in_instead: 'ログインする',
+      providers_divider: 'または次の方法で続行',
+      providers_loading: 'ログイン方法を読み込み中…',
+      continue_with_provider: '{{provider}} で続行',
+      onboarding_title: 'オンボーディングを完了',
+      onboarding_sign_in_first: 'アカウント設定を完了するには、まずログインしてください。',
+      onboarding_social_only: 'このページはソーシャルログインのアカウント専用です。',
+      onboarding_complete: 'オンボーディングはすでに完了しています。',
+      onboarding_intro:
+        'ソーシャルログインのアカウントは、利用可能なメールアドレスを設定するまでメンバー利用可能状態になりません。パスワードは任意です。',
+      onboarding_trusted_email:
+        'このメールアドレスはプロバイダーにより信頼済みです。変更する場合は再確認が必要です。',
+      onboarding_editable_email:
+        'メールアドレスを変更すると、メンバー機能を使う前に確認が必要になります。',
+      onboarding_optional_password:
+        '当面はソーシャルログインのみで利用する場合、パスワードは空欄のままで構いません。',
+      onboarding_saved: 'オンボーディング情報を保存しました。',
+      onboarding_submit: 'オンボーディングを完了',
+      onboarding_saving: '保存中…',
+      verify_title: 'メール確認',
+      verify_sign_in_first: 'メール確認を続けるには、まずログインしてください。',
+      verify_already_done: 'メールアドレスはすでに確認済みです。',
+      verify_intro_prefix: '',
+      verify_intro_suffix: 'を確認するとメンバー機能が利用可能になります。',
+      verify_email_fallback: 'あなたのメールアドレス',
+      verify_widget_loading: '確認ウィジェットを読み込み中…',
+      verify_widget_required:
+        '確認ウィジェットの読み込みが完了するまで、確認メールの再送は無効です。',
+      verify_guest_notice:
+        '確認が完了するまで、ゲスト向けページの閲覧は続けられますが、メンバー限定機能は利用できません。',
+      verify_refresh: '状態を更新',
+      verify_resend: '確認メールを再送',
+      verify_refreshed: '確認状態を更新しました。',
+      verify_sent: '確認メールを送信しました。',
+      verify_missing_email: '確認に使用するアカウントのメールアドレスがありません。',
+      verify_complete_widget:
+        '再送信を行う前に、確認ウィジェットを完了してください。',
+      verify_checking_state: '確認状態を確認中…',
+      verify_banner_action: 'メールを確認',
+      verify_banner_message:
+        'このアカウントは引き続きゲスト向けページを閲覧できますが、メール確認が完了するまでメンバー機能はロックされたままです。',
+      retry: '再試行',
+      providers: {
+        github: 'GitHub',
+        google: 'Google',
+        microsoft: 'Microsoft',
+        telegram: 'Telegram',
+        twitter: 'X / Twitter',
+      },
+    },
   },
 
   // Common UI Elements
@@ -56,6 +111,7 @@ export default {
     add: '追加',
     remove: '削除',
     create: '作成',
+    continue: '続行',
     update: '更新',
     search: '検索',
     expand: '展開',
