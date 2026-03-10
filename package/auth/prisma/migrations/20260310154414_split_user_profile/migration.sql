@@ -17,7 +17,6 @@ ALTER TABLE "User" DROP COLUMN "slug";
 CREATE TABLE "UserProfile" (
     "userId" UUID NOT NULL,
     "slug" TEXT NOT NULL,
-    "bio" TEXT,
     "avatar" TEXT,
 
     CONSTRAINT "UserProfile_pkey" PRIMARY KEY ("userId")

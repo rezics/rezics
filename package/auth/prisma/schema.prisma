@@ -34,7 +34,6 @@ model User {
 model UserProfile {
   userId String  @id @db.Uuid
   slug   String  @unique
-  bio    String?
   avatar String?
 
   user User @relation(fields: [userId], references: [id])
