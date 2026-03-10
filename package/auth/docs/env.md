@@ -176,6 +176,19 @@ BETTER_AUTH_SECRET=replace-with-random-secret
 
 # Internal service gateway secret
 AUTH_INTERNAL_TOKEN_GATEWAY_SECRET=replace-with-random-secret
+
+# SMTP mail delivery
+SMTP_HOST=smtp.example.com
+SMTP_PORT=465
+SMTP_SECURE=true
+SMTP_USER=mailer@example.com
+SMTP_PASSWORD=replace-with-mail-password
+SMTP_USER_NAME=Rezics Auth
+
+# Sender addresses
+AUTH_INVITATION_FROM_EMAIL=invite@example.com
+AUTH_PASSWORD_RESET_FROM_EMAIL=reset@example.com
+AUTH_VERIFICATION_FROM_EMAIL=verify@example.com
 ```
 
 ---
@@ -189,3 +202,31 @@ AUTH_INTERNAL_TOKEN_GATEWAY_SECRET=replace-with-random-secret
 | Secret Rotation                    | 每 6–12 个月轮换             |
 | Secret Storage                     | 使用 Secret Manager / Vault  |
 | Git                                | `.env` 必须加入 `.gitignore` |
+
+---
+
+## SMTP / Nodemailer Delivery
+
+`package/auth` 使用 SMTP + `nodemailer` 发送身份相关通知邮件，不使用 `resend`。
+
+必需 SMTP 配置：
+
+- `SMTP_HOST`
+- `SMTP_USER`
+- `SMTP_PASSWORD`
+
+可选 SMTP 配置：
+
+- `SMTP_PORT`，默认 `465`
+- `SMTP_SECURE`，默认 `true`
+- `SMTP_USER_NAME`，用于构造 `Name <email>` 形式的发件人
+
+发件人优先级：
+
+- 邀请邮件：`AUTH_INVITATION_FROM_EMAIL`
+- 密码重置：`AUTH_PASSWORD_RESET_FROM_EMAIL ?? AUTH_INVITATION_FROM_EMAIL`
+- 验证/改邮箱：`AUTH_VERIFICATION_FROM_EMAIL ?? AUTH_INVITATION_FROM_EMAIL`
+
+在 `development` / `test` 环境中，通知服务默认只记录日志，不发送真实邮件。
+
+该通知层为后续 Telegram 通知扩展预留了结构，但当前版本仅实现邮件通道。

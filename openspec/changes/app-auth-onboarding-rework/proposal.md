@@ -11,6 +11,7 @@ This change is needed now because the app must support email/password registrati
 - Add OAuth sign-in entry points to the app login/register surfaces, including support for the providers already configured in auth and newly added Telegram support.
 - Introduce a dedicated onboarding page for OAuth sign-ins where email is required and password is optional.
 - Add self-service UI components and client abstractions for setting email, setting password, and verifying email.
+- Route auth-owned notification delivery through an extensible backend notification layer in `package/auth`, with SMTP/nodemailer email delivery now and room for future Telegram notifications after account linking.
 - Embed `Turnstile` in the email verification flow to protect resend or verification actions from abuse.
 - Add a global in-app verification banner so registered but unverified users can continue browsing with guest-level capabilities while being reminded to return to the verification flow.
 - Extend frontend auth state so the app can reason about auth-session identity fields such as `email`, `emailVerified`, provider-backed onboarding state, guest-vs-member capability boundaries, and redirect requirements instead of only checking JWT presence.
@@ -30,6 +31,6 @@ This change is needed now because the app must support email/password registrati
 - Affected packages: `package/app`, `package/api`, `package/auth`, `package/ui`.
 - Affected frontend surfaces: login page, register page, auth modal, app bootstrap, main layout, header/account surfaces, and new auth routes for verification and onboarding.
 - Affected auth client API surface: additional self-service auth actions, OAuth redirect helpers, and readiness-aware token acquisition will be needed in `package/api`.
-- Affected auth backend surface: Telegram provider support and frontend-consumable self-service endpoints/contracts must be available through `package/auth`.
+- Affected auth backend surface: frontend-consumable self-service endpoints/contracts and auth-owned notification delivery must be available through `package/auth`; notification delivery uses SMTP/nodemailer rather than the `resend` library.
 - Backward compatibility: existing email/password sign-in should remain functional for verified users, but registration behavior, post-auth redirects, and member-token issuance assumptions will change. Existing direct assumptions that "authenticated means fully ready" will need migration in `package/app`.
 - Migration needs: app routes, stores, and auth helpers must be updated together so no page relies on stale `slug`-first registration, on `UserDTO` alone for `emailVerified` checks, or on auth-session existence alone as proof of member-level access.

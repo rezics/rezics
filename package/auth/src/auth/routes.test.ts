@@ -8,6 +8,13 @@ process.env.BETTER_AUTH_SECRET ??= 'this-is-a-long-auth-secret-for-tests-123456'
 process.env.AUTH_INTERNAL_TOKEN_GATEWAY_SECRET ??= 'internal-test-secret';
 process.env.AUTH_JWT_AUDIENCE ??= 'rezics-api';
 process.env.AUTH_JWT_ISSUER ??= 'http://localhost:35003';
+process.env.SMTP_HOST ??= 'smtp.example.com';
+process.env.SMTP_USER ??= 'smtp-user';
+process.env.SMTP_PASSWORD ??= 'smtp-password';
+process.env.SMTP_USER_NAME ??= 'Rezics Auth';
+process.env.AUTH_INVITATION_FROM_EMAIL ??= 'invite@example.com';
+process.env.AUTH_PASSWORD_RESET_FROM_EMAIL ??= 'reset@example.com';
+process.env.AUTH_VERIFICATION_FROM_EMAIL ??= 'verify@example.com';
 process.env.GOOGLE_CLIENT_ID ??= 'google-client';
 process.env.GOOGLE_CLIENT_SECRET ??= 'google-secret';
 process.env.MICROSOFT_CLIENT_ID ??= 'microsoft-client';
@@ -56,5 +63,14 @@ describe('Auth discovery routes', () => {
     expect(providers.microsoft).toBeDefined();
     expect(providers.github).toBeDefined();
     expect(providers.twitter).toBeDefined();
+  });
+
+  test('configures notification-backed auth email handlers', async () => {
+    const {auth} = await import('./instance');
+    const options = (auth as any).options;
+
+    expect(options.emailAndPassword.sendResetPassword).toBeDefined();
+    expect(options.emailVerification.sendVerificationEmail).toBeDefined();
+    expect(options.user.changeEmail.sendChangeEmailConfirmation).toBeDefined();
   });
 });

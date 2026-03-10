@@ -4,6 +4,8 @@
 
 The target change spans `package/app`, `package/api`, `package/auth`, and `package/ui`. It introduces new user-facing flows (email registration, OAuth login, email verification, post-OAuth onboarding), new provider coverage (Telegram), new app-level routing, and new self-service auth actions. The design must preserve the current JWT refresh architecture while adding a higher-level auth-session lifecycle that can drive redirects, banners, and guest-vs-member capability boundaries consistently.
 
+Auth notifications are implemented in `package/auth` through a dedicated notification module. The initial delivery channel is SMTP/nodemailer email delivery, and the design must preserve a clean extension seam for future Telegram notifications after Telegram identity linking is available. The change must not rely on the `resend` library.
+
 Constraints:
 
 - Existing JWT refresh behavior in `package/api/src/react-query/jwt.ts` and `package/app-shell/src/provider/AuthProvider.tsx` must remain the source of bearer-token persistence.
@@ -151,6 +153,12 @@ Rationale:
 
 - `package/app` should orchestrate flows, not construct ad hoc auth URLs or raw fetch payloads.
 - Typed wrappers preserve the same architecture used elsewhere in the repo.
+
+Implementation note:
+
+- Auth notifications are delivered through an auth-owned notification module in `package/auth`.
+- The initial delivery channel is email via SMTP/nodemailer.
+- Telegram is a future notification extension and is not part of the current delivery implementation.
 
 Alternatives considered:
 

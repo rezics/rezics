@@ -1,15 +1,15 @@
 ## 1. Auth backend and contract preparation
 
-- [ ] 1.1 Audit better-auth self-service endpoints needed for app onboarding and verification, then add or document typed contract coverage in `package/contract/src/auth/*` and `package/auth/src/openapi/*`.
+- [x] 1.1 Audit better-auth self-service endpoints needed for app onboarding and verification, then add or document typed contract coverage in `package/contract/src/auth/*`, `package/auth/src/openapi/*`, and the auth-owned notification layer.
 - [ ] 1.2 Add Telegram provider support in `package/auth/src/auth/instance.ts` behind environment-driven configuration and keep unsupported providers disabled cleanly.
-- [ ] 1.3 Expose or normalize auth-session fields needed by the frontend onboarding flow (for example trusted email state, verification state, provider context, and password presence) through the auth-facing session/self-service surface.
-- [ ] 1.4 Add or update backend tests covering Telegram provider configuration and any new self-service auth contracts used by the frontend.
+- [x] 1.3 Expose or normalize auth-session fields needed by the frontend onboarding flow (for example trusted email state, verification state, provider context, and password presence) through the auth-facing session/self-service surface.
+- [x] 1.4 Add or update backend tests covering the new auth notification module, Telegram-provider-adjacent configuration surfaces, and self-service auth contracts used by the frontend.
 
 ## 2. Frontend auth API surface
 
-- [ ] 2.1 Extend `package/api/src/auth/auth.api.ts` with typed helpers for auth-session retrieval, OAuth initiation, email verification actions, set-email, set-password, and readiness-gated member JWT acquisition.
-- [ ] 2.2 Update `package/api/src/auth/auth.keys.ts`, `auth.queries.ts`, `auth.mutations.ts`, and `auth.ts` exports so the new auth actions are available through the existing shared API layer.
-- [ ] 2.3 Grep `package/app`, `package/app-shell`, and other consumers for direct auth fetches or inline provider URLs and migrate them to the shared `authApi` abstractions.
+- [x] 2.1 Extend `package/api/src/auth/auth.api.ts` with typed helpers for auth-session retrieval, OAuth initiation, email verification actions, set-email, set-password, and readiness-gated member JWT acquisition.
+- [x] 2.2 Update `package/api/src/auth/auth.keys.ts`, `auth.queries.ts`, `auth.mutations.ts`, and `auth.ts` exports so the new auth actions are available through the existing shared API layer.
+- [x] 2.3 Grep `package/app`, `package/app-shell`, and other consumers for direct auth fetches or inline provider URLs and migrate them to the shared `authApi` abstractions.
 
 ## 3. Frontend auth state and bootstrap
 

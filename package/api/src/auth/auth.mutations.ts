@@ -10,6 +10,7 @@ export function useSignInMutation() {
       authApi.signIn(input),
     onSuccess: async () => {
       qc.invalidateQueries({queryKey: authKeys.session()});
+      qc.invalidateQueries({queryKey: authKeys.sessionState()});
       await queryAccessToken();
     },
   });
@@ -21,7 +22,53 @@ export function useSignOutMutation() {
     mutationFn: () => authApi.signOut(),
     onSuccess: () => {
       qc.invalidateQueries({queryKey: authKeys.session()});
+      qc.invalidateQueries({queryKey: authKeys.sessionState()});
       qc.invalidateQueries({queryKey: authKeys.sessions()});
+    },
+  });
+}
+
+export function useSignUpMutation() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (input: {email: string; password: string; slug: string}) =>
+      authApi.signUp(input),
+    onSuccess: () => {
+      qc.invalidateQueries({queryKey: authKeys.session()});
+      qc.invalidateQueries({queryKey: authKeys.sessionState()});
+    },
+  });
+}
+
+export function useSendVerificationEmailMutation() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (input: {email: string; callbackURL?: string}) =>
+      authApi.sendVerificationEmail(input),
+    onSuccess: () => {
+      qc.invalidateQueries({queryKey: authKeys.sessionState()});
+    },
+  });
+}
+
+export function useChangeEmailMutation() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (input: {newEmail: string; callbackURL?: string}) =>
+      authApi.changeEmail(input),
+    onSuccess: () => {
+      qc.invalidateQueries({queryKey: authKeys.session()});
+      qc.invalidateQueries({queryKey: authKeys.sessionState()});
+    },
+  });
+}
+
+export function useSetPasswordMutation() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (input: {newPassword: string}) => authApi.setPassword(input),
+    onSuccess: () => {
+      qc.invalidateQueries({queryKey: authKeys.sessionState()});
     },
   });
 }
@@ -80,7 +127,11 @@ export function useRevokeSessionMutation() {
 
 export const authMutations = {
   useSignIn: useSignInMutation,
+  useSignUp: useSignUpMutation,
   useSignOut: useSignOutMutation,
+  useSendVerificationEmail: useSendVerificationEmailMutation,
+  useChangeEmail: useChangeEmailMutation,
+  useSetPassword: useSetPasswordMutation,
   useAdminBanUser: useAdminBanUserMutation,
   useAdminUnbanUser: useAdminUnbanUserMutation,
   useAdminSetRole: useAdminSetRoleMutation,

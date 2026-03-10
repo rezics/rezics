@@ -5,6 +5,7 @@ import {sessionRouter} from './session';
 import {adminRouter} from './admin';
 import {organizationRouter} from './organization';
 import {oauthRouter} from './oauth';
+import {selfServiceRouter} from './self-service';
 import {handleAuthRequest} from '../auth/routes';
 
 export const authOpenApiRouter = new Elysia({prefix: '/api/auth'})
@@ -14,6 +15,7 @@ export const authOpenApiRouter = new Elysia({prefix: '/api/auth'})
   .use(adminRouter)
   .use(organizationRouter)
   .use(oauthRouter)
+  .use(selfServiceRouter)
   .all('/*', ({request}) => handleAuthRequest(request), {
     detail: {
       summary: 'Catch All',

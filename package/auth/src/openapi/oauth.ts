@@ -1,6 +1,9 @@
 import {Elysia} from 'elysia';
 import {
   authorizeQuerySchema,
+  listAuthProvidersResponseSchema,
+  signInSocialBodySchema,
+  signInSocialResponseSchema,
   tokenRequestBodySchema,
   tokenResponseSchema,
   userinfoResponseSchema,
@@ -10,8 +13,40 @@ import {
 } from '@package/contract';
 import {handleAuthRequest} from '../auth/routes';
 import {jsonRequestBody, jsonResponse, parameter} from './docs';
+import {getConfiguredSocialProviders} from '../auth/providers';
 
 export const oauthRouter = new Elysia()
+  .get('/providers', () => ({
+    providers: getConfiguredSocialProviders().filter(provider => provider.enabled),
+  }), {
+    detail: {
+      summary: 'List configured social providers',
+      description:
+        'Return the social sign-in providers that are enabled by backend configuration.',
+      tags: ['OAuth'],
+      responses: {
+        200: jsonResponse(
+          'Configured social providers.',
+          listAuthProvidersResponseSchema,
+        ),
+      },
+    },
+  })
+  .post('/sign-in/social', ({request}) => handleAuthRequest(request), {
+    detail: {
+      summary: 'Start social sign-in',
+      description:
+        'Start a Better Auth social provider flow and optionally return the redirect URL without navigating.',
+      tags: ['Authentication'],
+      requestBody: jsonRequestBody(signInSocialBodySchema),
+      responses: {
+        200: jsonResponse(
+          'Social sign-in redirect payload.',
+          signInSocialResponseSchema,
+        ),
+      },
+    },
+  })
   .get('/oauth/authorize', ({request}) => handleAuthRequest(request), {
     detail: {
       summary: 'OAuth authorize',

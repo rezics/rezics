@@ -1,4 +1,14 @@
 import {t} from 'elysia';
+import {
+  changeEmailBodySchema,
+  changeEmailResponseSchema,
+  sendVerificationEmailBodySchema,
+  sendVerificationEmailResponseSchema,
+  setPasswordBodySchema,
+  setPasswordResponseSchema,
+  verifyEmailQuerySchema,
+  verifyEmailResponseSchema,
+} from './self-service';
 
 export const requestPasswordResetBodySchema = t.Object({
   email: t.String({format: 'email'}),
@@ -43,3 +53,24 @@ export const resetPasswordResponseSchema = t.Object({
 });
 export type ResetPasswordResponse =
   (typeof resetPasswordResponseSchema)['static'];
+
+export {
+  changeEmailBodySchema,
+  changeEmailResponseSchema,
+  sendVerificationEmailBodySchema,
+  sendVerificationEmailResponseSchema,
+  setPasswordBodySchema,
+  setPasswordResponseSchema,
+  verifyEmailQuerySchema,
+  verifyEmailResponseSchema,
+};
+export type ChangeEmailBody = (typeof changeEmailBodySchema)['static'];
+export type ChangeEmailResponse = (typeof changeEmailResponseSchema)['static'];
+export type SendVerificationEmailBody =
+  (typeof sendVerificationEmailBodySchema)['static'];
+export type SendVerificationEmailResponse =
+  (typeof sendVerificationEmailResponseSchema)['static'];
+export type SetPasswordBody = (typeof setPasswordBodySchema)['static'];
+export type SetPasswordResponse = (typeof setPasswordResponseSchema)['static'];
+export type VerifyEmailQuery = (typeof verifyEmailQuerySchema)['static'];
+export type VerifyEmailResponse = (typeof verifyEmailResponseSchema)['static'];

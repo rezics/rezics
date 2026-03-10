@@ -46,6 +46,22 @@ describe('auth openapi routes', () => {
     });
   });
 
+  test('exposes the normalized auth session state endpoint', async () => {
+    const {sessionRouter} = await import('./session');
+
+    const response = await sessionRouter.handle(
+      new Request('http://localhost/get-session-state'),
+    );
+
+    expect(response.status).toBe(200);
+    expect(handleAuthRequest).toHaveBeenCalledTimes(1);
+    expect(await response.json()).toEqual({
+      method: 'GET',
+      pathname: '/get-session',
+      search: '',
+    });
+  });
+
   test('exposes password reset request and completion endpoints', async () => {
     const {passwordRouter} = await import('./password');
 
@@ -136,6 +152,72 @@ describe('auth openapi routes', () => {
     expect(await response.json()).toEqual({
       method: 'GET',
       pathname: '/oauth/authorize',
+      search: '',
+    });
+  });
+
+  test('exposes self-service auth endpoints without runtime validation blockers', async () => {
+    const {selfServiceRouter} = await import('./self-service');
+
+    const sendVerificationResponse = await selfServiceRouter.handle(
+      new Request('http://localhost/send-verification-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: 'reader@example.com',
+        }),
+      }),
+    );
+
+    const verifyEmailResponse = await selfServiceRouter.handle(
+      new Request('http://localhost/verify-email?token=verify-token'),
+    );
+
+    const changeEmailResponse = await selfServiceRouter.handle(
+      new Request('http://localhost/change-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          newEmail: 'reader+new@example.com',
+        }),
+      }),
+    );
+
+    const setPasswordResponse = await selfServiceRouter.handle(
+      new Request('http://localhost/set-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          newPassword: 'new-password',
+        }),
+      }),
+    );
+
+    expect(handleAuthRequest).toHaveBeenCalledTimes(4);
+    expect(await sendVerificationResponse.json()).toEqual({
+      method: 'POST',
+      pathname: '/send-verification-email',
+      search: '',
+    });
+    expect(await verifyEmailResponse.json()).toEqual({
+      method: 'GET',
+      pathname: '/verify-email',
+      search: '?token=verify-token',
+    });
+    expect(await changeEmailResponse.json()).toEqual({
+      method: 'POST',
+      pathname: '/change-email',
+      search: '',
+    });
+    expect(await setPasswordResponse.json()).toEqual({
+      method: 'POST',
+      pathname: '/set-password',
       search: '',
     });
   });

@@ -2,11 +2,101 @@ import {Elysia} from 'elysia';
 import {
   authTokenResponseSchema,
   getSessionResponseSchema,
+  getSessionStateResponseSchema,
   listSessionsResponseSchema,
   revokeSessionBodySchema,
 } from '@package/contract';
 import {handleAuthRequest} from '../auth/routes';
 import {jsonRequestBody, jsonResponse} from './docs';
+import {listEnabledSocialProviderIds} from '../auth/providers';
+
+async function forwardAuthRequest(
+  request: Request,
+  path: string,
+): Promise<Response> {
+  const url = new URL(request.url);
+  url.pathname = path;
+  return handleAuthRequest(new Request(url, request));
+}
+
+async function getSessionStateResponse(request: Request): Promise<Response> {
+  const response = await forwardAuthRequest(request, '/get-session');
+
+  if (!response.ok) {
+    return response;
+  }
+
+  const sessionData = (await response.json()) as Partial<{
+    session: {
+      id: string;
+      token: string;
+      expiresAt: string;
+      userId: string;
+    };
+    user: {
+      id: string;
+      name: string;
+      role: string;
+      email: string;
+      emailVerified: boolean;
+      image?: string | null;
+      createdAt: string;
+      updatedAt: string;
+    };
+  }> &
+    Record<string, unknown>;
+
+  if (!sessionData.session || !sessionData.user?.id) {
+    return Response.json(sessionData);
+  }
+
+  const {prisma} = await import('../auth/prisma');
+  const accounts = await prisma.account.findMany({
+    where: {
+      userId: sessionData.user.id,
+    },
+    select: {
+      providerId: true,
+      password: true,
+    },
+  });
+
+  const providerIds = Array.from(
+    new Set(
+      accounts
+        .map(account => account.providerId)
+        .filter(
+          (providerId): providerId is ReturnType<
+            typeof listEnabledSocialProviderIds
+          >[number] =>
+            providerId !== 'credential' &&
+            listEnabledSocialProviderIds().includes(
+              providerId as ReturnType<
+                typeof listEnabledSocialProviderIds
+              >[number],
+            ),
+        ),
+    ),
+  );
+
+  const hasPassword = accounts.some(
+    account => account.providerId === 'credential' && Boolean(account.password),
+  );
+
+  return Response.json({
+    ...sessionData,
+    authSession: {
+      email: sessionData.user.email,
+      emailVerified: sessionData.user.emailVerified,
+      needsEmailVerification: !sessionData.user.emailVerified,
+      hasPassword,
+      canSetPassword: !hasPassword,
+      providerIds,
+      primaryProviderId: providerIds[0],
+      trustedProviderId: sessionData.user.emailVerified ? providerIds[0] : undefined,
+    },
+  });
+}
 
 export const sessionRouter = new Elysia()
   .get('/token', ({request}) => handleAuthRequest(request), {
@@ -27,6 +117,20 @@ export const sessionRouter = new Elysia()
       tags: ['Session'],
       responses: {
         200: jsonResponse('Current session details.', getSessionResponseSchema),
+      },
+    },
+  })
+  .get('/get-session-state', ({request}) => getSessionStateResponse(request), {
+    detail: {
+      summary: 'Get normalized session state',
+      description:
+        'Retrieve the current authenticated session together with readiness fields used by onboarding flows.',
+      tags: ['Session'],
+      responses: {
+        200: jsonResponse(
+          'Current session details with onboarding state.',
+          getSessionStateResponseSchema,
+        ),
       },
     },
   })

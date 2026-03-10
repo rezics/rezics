@@ -1,4 +1,9 @@
 import {t} from 'elysia';
+import {
+  authProviderSchema,
+  signInSocialBodySchema,
+  signInSocialResponseSchema,
+} from './self-service';
 
 export const authorizeQuerySchema = t.Object({
   client_id: t.String(),
@@ -60,3 +65,14 @@ export const revokeTokenBodySchema = t.Object({
   token_type_hint: t.Optional(t.String()),
 });
 export type RevokeTokenBody = (typeof revokeTokenBodySchema)['static'];
+
+export const listAuthProvidersResponseSchema = t.Object({
+  providers: t.Array(authProviderSchema),
+});
+export type ListAuthProvidersResponse =
+  (typeof listAuthProvidersResponseSchema)['static'];
+export type AuthProvider = (typeof authProviderSchema)['static'];
+
+export {signInSocialBodySchema, signInSocialResponseSchema};
+export type SignInSocialBody = (typeof signInSocialBodySchema)['static'];
+export type SignInSocialResponse = (typeof signInSocialResponseSchema)['static'];

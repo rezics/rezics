@@ -8,6 +8,16 @@ import type {
   AuthTokenResponse,
   AuthResponse,
   AuthSession,
+  AuthProvider,
+  ChangeEmailBody,
+  ChangeEmailResponse,
+  GetSessionStateResponse,
+  SendVerificationEmailBody,
+  SendVerificationEmailResponse,
+  SetPasswordBody,
+  SetPasswordResponse,
+  SignInSocialBody,
+  SignInSocialResponse,
   AuthUser,
   RequestPasswordResetBody,
   RequestPasswordResetResponse,
@@ -81,8 +91,55 @@ export const authApi = {
     );
   },
 
+  getSessionState: async (): Promise<GetSessionStateResponse> => {
+    return authFetch<GetSessionStateResponse>('/api/auth/get-session-state');
+  },
+
   getToken: async (): Promise<AuthTokenResponse> => {
     return authFetch<AuthTokenResponse>('/api/auth/token');
+  },
+
+  listProviders: async (): Promise<{providers: AuthProvider[]}> => {
+    return authFetch<{providers: AuthProvider[]}>('/api/auth/providers');
+  },
+
+  signInSocial: async (
+    input: SignInSocialBody,
+  ): Promise<SignInSocialResponse> => {
+    return authFetch<SignInSocialResponse>('/api/auth/sign-in/social', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
+  },
+
+  sendVerificationEmail: async (
+    input: SendVerificationEmailBody,
+  ): Promise<SendVerificationEmailResponse> => {
+    return authFetch<SendVerificationEmailResponse>(
+      '/api/auth/send-verification-email',
+      {
+        method: 'POST',
+        body: JSON.stringify(input),
+      },
+    );
+  },
+
+  changeEmail: async (
+    input: ChangeEmailBody,
+  ): Promise<ChangeEmailResponse> => {
+    return authFetch<ChangeEmailResponse>('/api/auth/change-email', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
+  },
+
+  setPassword: async (
+    input: SetPasswordBody,
+  ): Promise<SetPasswordResponse> => {
+    return authFetch<SetPasswordResponse>('/api/auth/set-password', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
   },
 
   requestPasswordReset: async (

@@ -2,6 +2,18 @@
 
 `package/auth` is the standalone identity provider for Rezics. It owns user lifecycle, session management, OAuth/OIDC issuance, and now admin + organization management APIs.
 
+## Notifications
+
+Auth notifications are delivered by an auth-owned notification module in `package/auth/src/notification`.
+
+- Email delivery uses SMTP via `nodemailer`.
+- Sender precedence is:
+  - invitations: `AUTH_INVITATION_FROM_EMAIL`
+  - password reset: `AUTH_PASSWORD_RESET_FROM_EMAIL ?? AUTH_INVITATION_FROM_EMAIL`
+  - verification/change-email: `AUTH_VERIFICATION_FROM_EMAIL ?? AUTH_INVITATION_FROM_EMAIL`
+- Non-production environments log notification payloads instead of sending mail.
+- The notification layer is designed to support future non-email channels, including Telegram notifications after account linking or Telegram OAuth support is in place.
+
 ## Capabilities
 
 1. Better Auth core identity APIs (`/api/auth/*`)
