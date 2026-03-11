@@ -1,14 +1,21 @@
 import Alert from '@mui/material/Alert';
+import Box from '@mui/material/Box';
 import Divider from '@mui/material/Divider';
-import {Stack, Typography} from '@mui/material';
-import {authApi, authQueries} from '@package/api/auth/auth.ts';
+import Skeleton from '@mui/material/Skeleton';
+import {Stack} from '@mui/material';
+import {authApi, authQueries} from '@package/api/auth/auth';
+import type {AuthProvider} from '@package/contract';
 import {AuthProviderButton} from '@package/ui/composite/auth/AuthProviderButton.tsx';
 import {useQuery} from '@tanstack/react-query';
-import {type FC, useState} from 'react';
+import type {TFunction} from 'i18next';
+import {type FC, useMemo, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import {buildOAuthCallbackTargets} from '../model/authRedirect';
+import {providerIcons} from './providerIcons';
 
-function formatProviderLabel(providerId: string, t: (key: string, options?: any) => string): string {
+// TODO 横条文字应该居中一点，更美观
+
+function formatProviderLabel(providerId: string, t: TFunction): string {
   switch (providerId) {
     case 'github':
       return t('auth.flow.providers.github');
@@ -25,6 +32,13 @@ function formatProviderLabel(providerId: string, t: (key: string, options?: any)
   }
 }
 
+const FEATURED_COUNT = 2;
+
+const OPTIMISTIC_PROVIDER: AuthProvider = {
+  id: 'google',
+  enabled: true,
+};
+
 export const SocialAuthButtons: FC<{
   mode: 'login' | 'register';
 }> = ({mode}) => {
@@ -33,18 +47,26 @@ export const SocialAuthButtons: FC<{
   const [providerLoading, setProviderLoading] = useState<string>();
   const {data, isLoading} = useQuery(authQueries.providers());
 
-  const providers = data?.providers ?? [];
+  const providers = useMemo(() => data?.providers ?? [], [data?.providers]);
 
-  const startProviderSignIn = async (provider: (typeof providers)[number]) => {
+  const {featured, compact} = useMemo(() => {
+    const list = providers.length > 0 ? providers : [OPTIMISTIC_PROVIDER];
+    return {
+      featured: list.slice(0, FEATURED_COUNT),
+      compact: list.slice(FEATURED_COUNT),
+    };
+  }, [providers]);
+
+  const startProviderSignIn = async (providerId: AuthProvider['id']) => {
     setError(undefined);
-    setProviderLoading(provider.id);
+    setProviderLoading(providerId);
 
     try {
       const origin =
         typeof window === 'undefined' ? '' : window.location.origin;
       const callbackTargets = buildOAuthCallbackTargets(origin, mode);
       const response = await authApi.signInSocial({
-        provider: provider.id,
+        provider: providerId,
         disableRedirect: true,
         callbackURL: callbackTargets.callbackURL,
         newUserCallbackURL: callbackTargets.newUserCallbackURL,
@@ -63,35 +85,60 @@ export const SocialAuthButtons: FC<{
     }
   };
 
-  if (isLoading) {
+  const renderProviderButton = (provider: AuthProvider, isCompact: boolean) => {
+    const Icon = providerIcons[provider.id];
     return (
-      <Typography variant="body2" color="text.secondary">
-        {t('auth.flow.providers_loading')}
-      </Typography>
+      <AuthProviderButton
+        key={provider.id}
+        compact={isCompact}
+        icon={Icon ? <Icon size={20} /> : undefined}
+        loading={providerLoading === provider.id}
+        disabled={Boolean(providerLoading && providerLoading !== provider.id)}
+        label={
+          isCompact
+            ? formatProviderLabel(provider.id, t)
+            : t('auth.flow.continue_with_provider', {
+                provider: formatProviderLabel(provider.id, t),
+              })
+        }
+        onClick={() => void startProviderSignIn(provider.id)}
+      />
     );
-  }
-
-  if (providers.length === 0) {
-    return null;
-  }
+  };
 
   return (
-    <Stack spacing={2}>
+    <Stack spacing={1.5}>
       <Divider>{t('auth.flow.providers_divider')}</Divider>
+
       {error && <Alert severity="error">{error}</Alert>}
+
       <Stack spacing={1}>
-        {providers.map(provider => (
-          <AuthProviderButton
-            key={provider.id}
-            loading={providerLoading === provider.id}
-            disabled={Boolean(providerLoading && providerLoading !== provider.id)}
-            label={t('auth.flow.continue_with_provider', {
-              provider: formatProviderLabel(provider.id, t),
-            })}
-            onClick={() => void startProviderSignIn(provider)}
-          />
-        ))}
+        {featured.map(p => renderProviderButton(p, false))}
       </Stack>
+
+      {isLoading && providers.length === 0 && (
+        <Stack spacing={0.75}>
+          <Skeleton variant="rounded" height={36} />
+          <Box
+            sx={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 0.75}}
+          >
+            <Skeleton variant="rounded" height={34} />
+            <Skeleton variant="rounded" height={34} />
+          </Box>
+        </Stack>
+      )}
+
+      {compact.length > 0 && (
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(2, 1fr)',
+            gap: 0.75,
+          }}
+        >
+          {compact.map(p => renderProviderButton(p, true))}
+        </Box>
+      )}
     </Stack>
   );
 };

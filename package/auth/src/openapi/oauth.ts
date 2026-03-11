@@ -16,22 +16,31 @@ import {jsonRequestBody, jsonResponse, parameter} from './docs';
 import {getConfiguredSocialProviders} from '../auth/providers';
 
 export const oauthRouter = new Elysia()
-  .get('/providers', () => ({
-    providers: getConfiguredSocialProviders().filter(provider => provider.enabled),
-  }), {
-    detail: {
-      summary: 'List configured social providers',
-      description:
-        'Return the social sign-in providers that are enabled by backend configuration.',
-      tags: ['OAuth'],
-      responses: {
-        200: jsonResponse(
-          'Configured social providers.',
-          listAuthProvidersResponseSchema,
-        ),
+  .get(
+    '/providers',
+    () => ({
+      /**
+       * TODO Add location information related sort logic
+       */
+      providers: getConfiguredSocialProviders().filter(
+        provider => provider.enabled,
+      ),
+    }),
+    {
+      detail: {
+        summary: 'List configured social providers',
+        description:
+          'Return the social sign-in providers that are enabled by backend configuration.',
+        tags: ['OAuth'],
+        responses: {
+          200: jsonResponse(
+            'Configured social providers.',
+            listAuthProvidersResponseSchema,
+          ),
+        },
       },
     },
-  })
+  )
   .post('/sign-in/social', ({request}) => handleAuthRequest(request), {
     detail: {
       summary: 'Start social sign-in',
@@ -89,7 +98,8 @@ export const oauthRouter = new Elysia()
   .post('/oauth/token', ({request}) => handleAuthRequest(request), {
     detail: {
       summary: 'OAuth token',
-      description: 'OAuth 2.0 token endpoint. Exchange authorization code for tokens.',
+      description:
+        'OAuth 2.0 token endpoint. Exchange authorization code for tokens.',
       tags: ['OAuth'],
       requestBody: jsonRequestBody(tokenRequestBodySchema),
       responses: {
@@ -139,7 +149,8 @@ export const oauthRouter = new Elysia()
   .get('/callback/:provider', ({request}) => handleAuthRequest(request), {
     detail: {
       summary: 'Social provider callback',
-      description: 'OAuth callback endpoint for social authentication providers.',
+      description:
+        'OAuth callback endpoint for social authentication providers.',
       tags: ['Authentication'],
       parameters: [
         parameter({
