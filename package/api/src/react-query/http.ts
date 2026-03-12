@@ -1,4 +1,5 @@
-import {env} from '@/env';
+import {env} from '@package/app/env';
+import {clearAuthPresence, hasAuthPresence} from './authPresence';
 import {getToken, queryAccessToken} from './jwt';
 
 /**
@@ -52,8 +53,26 @@ export async function apiFetch<T>(
         }),
       );
     }
+    if (!hasAuthPresence()) {
+      throw new Error(
+        JSON.stringify({
+          status: response?.status,
+          message: responseJson?.message,
+        }),
+      );
+    }
     console.log('Auto refresh token');
-    await queryAccessToken();
+    try {
+      await queryAccessToken();
+    } catch {
+      clearAuthPresence();
+      throw new Error(
+        JSON.stringify({
+          status: response?.status,
+          message: responseJson?.message,
+        }),
+      );
+    }
     console.log(`Auto retry ${url}`);
     const newHeaders = buildHeaders(options);
     response = await fetch(url, {

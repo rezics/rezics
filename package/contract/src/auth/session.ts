@@ -3,6 +3,10 @@ import {t} from 'elysia';
 import {authSessionSchema, authUserSchema} from './sign-in';
 import {authSessionStateSchema} from './self-service';
 
+export const AUTH_PRESENCE_COOKIE_NAME = 'rezics_open_session';
+export const AUTH_PRESENCE_COOKIE_VALUE = '1';
+export const AUTH_PRESENCE_COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24 * 30;
+
 export const getSessionResponseSchema = t.Object({
   session: authSessionSchema,
   user: authUserSchema,

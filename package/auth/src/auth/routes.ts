@@ -3,6 +3,10 @@ import {
   oauthProviderOpenIdConfigMetadata,
 } from '@better-auth/oauth-provider';
 import {auth} from './instance';
+import {
+  buildAuthPresenceClearCookie,
+  buildAuthPresenceSetCookie,
+} from './auth-presence';
 import {enforceInternalTokenSurface} from './token-boundary';
 import {AuthPolicyError} from './errors';
 
@@ -21,6 +25,37 @@ function toJsonError(status: number, code: string, message: string): Response {
   );
 }
 
+function isSessionEstablishingPath(pathname: string): boolean {
+  return (
+    pathname.includes('/sign-in') ||
+    pathname.includes('/oauth/callback') ||
+    pathname.endsWith('/token')
+  );
+}
+
+function isSessionClearingPath(pathname: string): boolean {
+  return pathname.endsWith('/sign-out') || pathname.endsWith('/revoke-session');
+}
+
+function isSessionCheckPath(pathname: string): boolean {
+  return (
+    pathname.endsWith('/token') ||
+    pathname.endsWith('/get-session') ||
+    pathname.endsWith('/get-session-state')
+  );
+}
+
+function withCookie(response: Response, cookie: string): Response {
+  const nextHeaders = new Headers(response.headers);
+  nextHeaders.append('set-cookie', cookie);
+
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers: nextHeaders,
+  });
+}
+
 export async function handleAuthRequest(request: Request): Promise<Response> {
   try {
     enforceInternalTokenSurface(request);
@@ -36,7 +71,23 @@ export async function handleAuthRequest(request: Request): Promise<Response> {
     );
   }
 
-  return auth.handler(request);
+  const response = await auth.handler(request);
+  const {pathname} = new URL(request.url);
+  const requestUrl = new URL(request.url);
+
+  if (response.ok && isSessionEstablishingPath(pathname)) {
+    return withCookie(response, buildAuthPresenceSetCookie(requestUrl));
+  }
+
+  if (response.ok && isSessionClearingPath(pathname)) {
+    return withCookie(response, buildAuthPresenceClearCookie(requestUrl));
+  }
+
+  if ((response.status === 401 || response.status === 403) && isSessionCheckPath(pathname)) {
+    return withCookie(response, buildAuthPresenceClearCookie(requestUrl));
+  }
+
+  return response;
 }
 
 export async function handleJwksCompatibilityRequest(

@@ -1,11 +1,12 @@
 import {beforeEach, describe, expect, mock, test} from 'bun:test';
 
 const fetchMock = mock();
+let authPresence = false;
 
-mock.module('@package/app/env', () => ({
-  env: {
-    VITE_API_URL: 'http://api.example',
-    VITE_AUTH_API_URL: 'http://auth.example',
+mock.module('./authPresence', () => ({
+  hasAuthPresence: () => authPresence,
+  clearAuthPresence: () => {
+    authPresence = false;
   },
 }));
 
@@ -37,13 +38,34 @@ function createMemoryStorage(): MemoryStorage {
 
 describe('refreshAuthToken', () => {
   beforeEach(() => {
-    fetchMock.mockClear();
+    fetchMock.mockReset();
+    authPresence = false;
+    process.env.VITE_API_URL = 'http://api.example';
+    process.env.VITE_AUTH_API_URL = 'http://auth.example';
+    process.env.VITE_TURNSTILE_SITE_KEY = 'turnstile-test-key';
     globalThis.fetch = fetchMock as unknown as typeof fetch;
-    globalThis.window = {} as Window & typeof globalThis;
+    globalThis.window = {
+      dispatchEvent: () => true,
+      location: {
+        hostname: 'app.example',
+      },
+    } as unknown as Window & typeof globalThis;
     globalThis.localStorage = createMemoryStorage() as Storage;
+    globalThis.document = {
+      cookie: '',
+    } as Document;
   });
 
-  test('refreshes tokens through the auth service token endpoint', async () => {
+  test('retries 401 responses only when auth presence exists', async () => {
+    authPresence = true;
+    fetchMock.mockResolvedValueOnce(
+      new Response(JSON.stringify({message: 'Expired'}), {
+        status: 401,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }),
+    );
     fetchMock.mockResolvedValueOnce(
       new Response(JSON.stringify({token: 'fresh-token'}), {
         status: 200,
@@ -52,23 +74,8 @@ describe('refreshAuthToken', () => {
         },
       }),
     );
-
-    const {getToken, refreshAuthToken} = await import('./http');
-
-    await refreshAuthToken();
-
-    const [url, options] = fetchMock.mock.calls[0]!;
-    expect(url).toBe('http://auth.example/api/auth/token');
-    expect(options).toMatchObject({
-      method: 'GET',
-      credentials: 'include',
-    });
-    expect(getToken()).toBe('fresh-token');
-  });
-
-  test('throws when the auth service does not return a token', async () => {
     fetchMock.mockResolvedValueOnce(
-      new Response(JSON.stringify({}), {
+      new Response(JSON.stringify({ok: true}), {
         status: 200,
         headers: {
           'Content-Type': 'application/json',
@@ -76,10 +83,30 @@ describe('refreshAuthToken', () => {
       }),
     );
 
-    const {refreshAuthToken} = await import('./http');
+    const {apiFetch} = await import('./http');
+    const {getToken} = await import('./jwt');
 
-    await expect(refreshAuthToken()).rejects.toThrow(
-      'Unauthorized - Please login again',
+    const result = await apiFetch<{ok: boolean}>('/books');
+
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+    expect(fetchMock.mock.calls[1]?.[0]).toBe('http://auth.example/api/auth/token');
+    expect(result).toEqual({ok: true});
+    expect(getToken()).toBe('fresh-token');
+  });
+
+  test('does not probe auth token refresh when auth presence is absent', async () => {
+    fetchMock.mockResolvedValueOnce(
+      new Response(JSON.stringify({message: 'Expired'}), {
+        status: 401,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }),
     );
+
+    const {apiFetch} = await import('./http');
+
+    await expect(apiFetch('/books')).rejects.toThrow('Expired');
+    expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 });

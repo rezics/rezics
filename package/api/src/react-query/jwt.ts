@@ -1,4 +1,5 @@
-import {env} from '@/env';
+import {env} from '@package/app/env';
+import {clearAuthPresence, hasAuthPresence} from './authPresence';
 const AUTH_BASE_URL = env.VITE_AUTH_API_URL;
 const AUTH_STORE_KEY = 'auth-store';
 export const AUTH_TOKEN_STORAGE_EVENT = 'package-auth-token-storage';
@@ -89,7 +90,11 @@ export const isAuthenticated = (): boolean => {
   return !!getToken();
 };
 
-export async function queryAccessToken() {
+export async function queryAccessToken(options?: {requirePresence?: boolean}) {
+  if (options?.requirePresence !== false && !hasAuthPresence()) {
+    return null;
+  }
+
   const refreshTokenResponse = await fetch(`${AUTH_BASE_URL}/api/auth/token`, {
     method: 'GET',
     credentials: 'include',
@@ -101,6 +106,8 @@ export async function queryAccessToken() {
     (await refreshTokenResponse.json()) as Partial<AuthTokenResponse>;
   const token = json.token ?? null;
   if (!token) {
+    clearAuthPresence();
+    removeToken();
     throw new Error('Unauthorized - Please login again');
   }
   setToken(token);

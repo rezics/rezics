@@ -4,7 +4,12 @@ import {
   getToken,
   parseJwt,
   queryAccessToken,
+  removeToken,
 } from '@package/api/react-query/jwt';
+import {
+  clearAuthPresence,
+  hasAuthPresence,
+} from '@package/api/react-query/authPresence';
 import {AUTH_STORE_KEY, useAuthStore} from '../state/authStore';
 import {
   clearAuthSessionState,
@@ -59,6 +64,9 @@ export function AuthProvider() {
           useAuthStore.getState().syncFromStorage();
           const token = getToken();
           if (!token) {
+            if (!hasAuthPresence()) {
+              clearAuthSessionState();
+            }
             refreshRetryPolicy.reset();
             clearRefreshTimer();
             return;
@@ -89,6 +97,9 @@ export function AuthProvider() {
             useAuthStore.getState().syncFromStorage();
             await hydrateAuthSessionState();
           } catch {
+            clearAuthPresence();
+            removeToken();
+            clearAuthSessionState();
             const retryDelayMs = refreshRetryPolicy.registerFailure();
             if (isMountedRef.current) {
               scheduleRefresh(retryDelayMs);
@@ -129,17 +140,35 @@ export function AuthProvider() {
 
       if (isTokenClearedEvent(event)) {
         clearRefreshTimer();
+        if (!hasAuthPresence()) {
+          clearAuthSessionState();
+        }
+        return;
+      }
+
+      const token = getToken();
+      if (!token && !hasAuthPresence()) {
+        clearRefreshTimer();
         clearAuthSessionState();
         return;
       }
 
-      await hydrateAuthSessionState();
-      scheduleRefresh();
+      await hydrateAuthSessionState({requirePresence: !token});
+      if (token || hasAuthPresence()) {
+        scheduleRefresh();
+      }
     };
 
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
-        void hydrateAuthSessionState();
+        const token = getToken();
+        if (!token && !hasAuthPresence()) {
+          clearRefreshTimer();
+          clearAuthSessionState();
+          return;
+        }
+
+        void hydrateAuthSessionState({requirePresence: !token});
         scheduleRefresh();
       }
     };

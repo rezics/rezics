@@ -1,10 +1,19 @@
 import {beforeEach, describe, expect, mock, test} from 'bun:test';
+import type {GetSessionStateResponse} from '@package/contract';
 
 let currentToken: string | null = null;
+let presence = false;
 const getSessionStateMock = mock();
 
 mock.module('@package/api/react-query/jwt', () => ({
   getToken: () => currentToken,
+}));
+
+mock.module('@package/api/react-query/authPresence', () => ({
+  hasAuthPresence: () => presence,
+  clearAuthPresence: () => {
+    presence = false;
+  },
 }));
 
 mock.module('@package/api/auth/auth.api', () => ({
@@ -13,7 +22,7 @@ mock.module('@package/api/auth/auth.api', () => ({
   },
 }));
 
-const readySession = {
+const readySession: GetSessionStateResponse = {
   session: {
     id: 'session-1',
     token: 'session-token',
@@ -39,8 +48,8 @@ const readySession = {
     hasPassword: true,
     canSetPassword: false,
     providerIds: ['google'],
-    primaryProviderId: 'google' as const,
-    trustedProviderId: 'google' as const,
+    primaryProviderId: 'google',
+    trustedProviderId: 'google',
   },
 };
 
@@ -59,6 +68,7 @@ const guestSession = {
 describe('authSessionStore', () => {
   beforeEach(async () => {
     currentToken = null;
+    presence = false;
     getSessionStateMock.mockReset();
     const {clearAuthSessionState, useAuthSessionStore} = await import(
       './authSessionStore'
@@ -69,6 +79,7 @@ describe('authSessionStore', () => {
 
   test('hydrates member-ready state on reload when a business token already exists', async () => {
     currentToken = 'member-token';
+    presence = true;
     getSessionStateMock.mockResolvedValueOnce(readySession);
 
     const {hydrateAuthSessionState, useAuthSessionStore} = await import(
@@ -103,6 +114,7 @@ describe('authSessionStore', () => {
 
   test('hydrates authenticated but unverified sessions as guest-capable', async () => {
     currentToken = null;
+    presence = true;
     getSessionStateMock.mockResolvedValueOnce(guestSession);
 
     const {hydrateAuthSessionState, useAuthSessionStore} = await import(
@@ -117,6 +129,40 @@ describe('authSessionStore', () => {
       hasBusinessToken: false,
       capabilityLevel: 'guest',
       needsVerification: true,
+    });
+  });
+
+  test('skips passive hydration when no token and no auth presence exist', async () => {
+    const {hydrateAuthSessionState, useAuthSessionStore} = await import(
+      './authSessionStore'
+    );
+
+    const result = await hydrateAuthSessionState();
+
+    expect(result).toBeNull();
+    expect(getSessionStateMock).not.toHaveBeenCalled();
+    expect(useAuthSessionStore.getState()).toMatchObject({
+      status: 'ready',
+      capabilityLevel: 'anonymous',
+      hasAuthSession: false,
+    });
+  });
+
+  test('fails closed and clears presence on stale passive auth presence', async () => {
+    presence = true;
+    getSessionStateMock.mockRejectedValueOnce(new Error('Unauthorized'));
+
+    const {hydrateAuthSessionState, useAuthSessionStore} = await import(
+      './authSessionStore'
+    );
+
+    await hydrateAuthSessionState();
+
+    expect(presence).toBe(false);
+    expect(useAuthSessionStore.getState()).toMatchObject({
+      status: 'error',
+      hasAuthSession: false,
+      capabilityLevel: 'anonymous',
     });
   });
 });

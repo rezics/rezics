@@ -1,6 +1,7 @@
 import {useMutation, useQueryClient} from '@tanstack/react-query';
 import {authApi} from './auth.api';
 import {authKeys} from './auth.keys';
+import {clearAuthPresence} from '../react-query/authPresence';
 import {setToken, queryAccessToken} from '../react-query/jwt';
 
 export function useSignInMutation() {
@@ -11,7 +12,7 @@ export function useSignInMutation() {
     onSuccess: async () => {
       qc.invalidateQueries({queryKey: authKeys.session()});
       qc.invalidateQueries({queryKey: authKeys.sessionState()});
-      await queryAccessToken();
+      await queryAccessToken({requirePresence: false});
     },
   });
 }
@@ -21,6 +22,8 @@ export function useSignOutMutation() {
   return useMutation({
     mutationFn: () => authApi.signOut(),
     onSuccess: () => {
+      clearAuthPresence();
+      setToken(null);
       qc.invalidateQueries({queryKey: authKeys.session()});
       qc.invalidateQueries({queryKey: authKeys.sessionState()});
       qc.invalidateQueries({queryKey: authKeys.sessions()});
