@@ -46,7 +46,11 @@ export const AuthProviderButton: FC<AuthProviderButtonProps> = ({
         color: theme.palette.text.primary,
 
         border: `1px solid ${theme.palette.grey[400]}`,
-        borderRadius: theme.shape.borderRadius,
+        /**
+         * In MUI, numeric borderRadius values are multipliers of theme.shape.borderRadius,
+         * So the generated CSS becomes `calc(n * var(--mui-shape-borderRadius))`.
+         */
+        // borderRadius: theme.shape.borderRadius,
 
         backgroundColor: theme.palette.background.paper,
 
