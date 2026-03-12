@@ -14,6 +14,9 @@ function parseHostFromOrigin(origin: string | null): string | null {
   }
 }
 
+/**
+ * Token interface access policy validation
+ */
 export function enforceInternalTokenSurface(request: Request): void {
   const {pathname} = new URL(request.url);
 

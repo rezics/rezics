@@ -14,6 +14,7 @@ import {reactionApi} from './reaction';
 import {tokenApi} from './token';
 import {feedbackApi} from './feedback';
 import {cors} from '@elysiajs/cors';
+import {coreInstance} from './core';
 
 import {getProdState} from './utils/getProdState';
 import {env} from './env';
@@ -32,7 +33,27 @@ const prodOrigins = ['https://book.rezics.com', 'https://rezics.com'];
 
 const allowedOrigins = isDev ? devOrigins : prodOrigins;
 
-const app = new Elysia()
+const app = new Elysia();
+
+if (isDev) {
+  await import('./utils/logger-hook');
+  app.use(openapi()).trace(async ({onHandle, context}) => {
+    // 监听 handle 阶段
+    onHandle(({begin, onStop}) => {
+      const {route, params, request} = context;
+
+      onStop(({end}) => {
+        console.log(
+          `[${request.method}] ${route} took ${end - begin}ms`,
+          'params:',
+          params,
+        );
+      });
+    });
+  });
+}
+
+app
   // CORS The policy may need to be updated
   .use(
     cors({
@@ -74,24 +95,6 @@ const app = new Elysia()
   .use(feedbackApi)
   .get('/', () => 'Hello Elysia')
   .get('/health', () => ({status: 'ok'}));
-
-if (isDev) {
-  await import('./utils/logger-hook');
-  app.use(openapi()).trace(async ({onHandle, context}) => {
-    // 监听 handle 阶段
-    onHandle(({begin, onStop}) => {
-      const {route, params, request} = context;
-
-      onStop(({end}) => {
-        console.log(
-          `[${request.method}] ${route} took ${end - begin}ms`,
-          'params:',
-          params,
-        );
-      });
-    });
-  });
-}
 
 const port = env.PORT ? Number(env.PORT) : 3000;
 

@@ -9,6 +9,7 @@ import {
 import {handleAuthRequest} from '../auth/routes';
 import {jsonRequestBody, jsonResponse} from './docs';
 import {listEnabledSocialProviderIds} from '../auth/providers';
+import {env} from '@/env';
 
 async function forwardAuthRequest(
   request: Request,
@@ -20,7 +21,10 @@ async function forwardAuthRequest(
 }
 
 async function getSessionStateResponse(request: Request): Promise<Response> {
-  const response = await forwardAuthRequest(request, '/get-session');
+  const response = await forwardAuthRequest(
+    request,
+    `${env.AUTH_OPENAPI_ROUTER_PREFIX}/get-session`,
+  );
 
   if (!response.ok) {
     return response;
@@ -64,9 +68,11 @@ async function getSessionStateResponse(request: Request): Promise<Response> {
   const providerIds = Array.from(
     new Set(
       accounts
-        .map(account => account.providerId)
+        .map((account: {providerId: string}) => account.providerId)
         .filter(
-          (providerId): providerId is ReturnType<
+          (
+            providerId: string,
+          ): providerId is ReturnType<
             typeof listEnabledSocialProviderIds
           >[number] =>
             providerId !== 'credential' &&
@@ -80,7 +86,8 @@ async function getSessionStateResponse(request: Request): Promise<Response> {
   );
 
   const hasPassword = accounts.some(
-    account => account.providerId === 'credential' && Boolean(account.password),
+    (account: {providerId: string; password: string | null}) =>
+      account.providerId === 'credential' && Boolean(account.password),
   );
   const needsOnboarding =
     providerIds.length > 0 && !sessionData.user.emailVerified;
@@ -105,7 +112,9 @@ async function getSessionStateResponse(request: Request): Promise<Response> {
       canSetPassword: !hasPassword,
       providerIds,
       primaryProviderId: providerIds[0],
-      trustedProviderId: sessionData.user.emailVerified ? providerIds[0] : undefined,
+      trustedProviderId: sessionData.user.emailVerified
+        ? providerIds[0]
+        : undefined,
     },
   });
 }
@@ -114,8 +123,7 @@ export const sessionRouter = new Elysia()
   .get('/token', ({request}) => handleAuthRequest(request), {
     detail: {
       summary: 'Get auth JWT',
-      description:
-        'Get a JWT for the current authenticated browser session.',
+      description: 'Get a JWT for the current authenticated browser session.',
       tags: ['Session'],
       responses: {
         200: jsonResponse('Session JWT.', authTokenResponseSchema),
@@ -152,7 +160,10 @@ export const sessionRouter = new Elysia()
       description: 'List all active sessions for the current user.',
       tags: ['Session'],
       responses: {
-        200: jsonResponse('List of active sessions.', listSessionsResponseSchema),
+        200: jsonResponse(
+          'List of active sessions.',
+          listSessionsResponseSchema,
+        ),
       },
     },
   })

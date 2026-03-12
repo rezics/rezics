@@ -10,7 +10,32 @@ import {openapi} from '@elysiajs/openapi';
 
 const isDev = env.NODE_ENV === 'development';
 
-const app = coreInstance()
+const app = coreInstance();
+
+if (isDev) {
+  await import('./utils/logger-hook');
+  app
+    .use(openapi())
+    .trace(async ({onHandle, context}) => {
+      // 监听 handle 阶段
+      onHandle(({begin, onStop}) => {
+        const {route, params, request} = context;
+
+        onStop(({end}) => {
+          console.log(
+            `[${request.method}] ${route} took ${end - begin}ms`,
+            'params:',
+            params,
+          );
+        });
+      });
+    })
+    .onError(({code, error, set}) => {
+      console.log('[Error] ', code, error, set);
+    });
+}
+
+app
   .onError(({error, set}) => {
     if (!set.status) {
       set.status = 500;
@@ -32,25 +57,8 @@ const app = coreInstance()
   )
   .get('/health', () => ({status: 'ok'}));
 
-if (isDev) {
-  await import('./utils/logger-hook');
-  app.use(openapi()).trace(async ({onHandle, context}) => {
-    // 监听 handle 阶段
-    onHandle(({begin, onStop}) => {
-      const {route, params, request} = context;
-
-      onStop(({end}) => {
-        console.log(
-          `[${request.method}] ${route} took ${end - begin}ms`,
-          'params:',
-          params,
-        );
-      });
-    });
-  });
-}
-
-const port = env.PORT ? Number(env.PORT) : 3001;
+console.log('env.PORT', env.PORT);
+const port = Number(env.PORT);
 app.listen(port);
 
 console.log(
