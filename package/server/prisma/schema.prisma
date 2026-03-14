@@ -63,6 +63,8 @@ model User {
 
   /**
    * schema: {role: ['ROOT', 'ADMIN', 'USER', 'BLOCKED'], resource: {book: ['create', 'update', 'delete'], comment: ['create', 'update', 'delete'] ...}}
+   * resource 的部分还有待商榷，我的目的是为全局管理员提供一个快速筛选的方法，比如有权限管理所有书本的管理员，而不是具体管理某一个组织的那种
+   * TODO add independent userId-unitId permission database table
    */
   permission Json?
 
