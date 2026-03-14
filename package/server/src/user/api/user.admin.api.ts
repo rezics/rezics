@@ -9,7 +9,7 @@ import {coreInstance} from '@/src/core';
 
 import {userService} from '../service/user.service';
 import {mapUserToDTO} from '../model/mapper';
-import {verifyAuth} from '../util/utils';
+import {verifyAuth} from '../util';
 import {BasicAdminPermission} from '@package/contract';
 
 export const adminRoute = (api: ReturnType<typeof coreInstance>) => {

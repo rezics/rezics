@@ -8,7 +8,7 @@ import {
   type UserDTO,
   type UserListQuery,
 } from '@package/contract';
-import {userService} from '../user/user.service';
+import {userService} from '@/src/user';
 import {
   hasPermissionToReadUser,
   hasPermissionToUpdateUser,
@@ -16,6 +16,7 @@ import {
 } from './permission';
 import {meiliService} from '../meili/meili.service';
 import {mapUserSearchDocToDTO} from '../meili/mapper';
+import {mapUserToDTO} from '@/src/user';
 
 const createUserProfileSchema = t.Object({
   unitId: t.Optional(t.String()),
@@ -112,7 +113,6 @@ export const userRoute = (api: ReturnType<typeof coreInstance>) => {
           }
 
           const created = await userService.create(body);
-          const {mapUserToDTO} = await import('../user/mapper');
           return mapUserToDTO(created);
         },
         {
@@ -158,7 +158,6 @@ export const userRoute = (api: ReturnType<typeof coreInstance>) => {
           }
 
           const user = await userService.getByUnitId(userId);
-          const {mapUserToDTO} = await import('../user/mapper');
           return mapUserToDTO(user);
         },
         {
@@ -203,7 +202,6 @@ export const userRoute = (api: ReturnType<typeof coreInstance>) => {
           }
 
           const user = await userService.getByUnitId(params.unitId);
-          const {mapUserToDTO} = await import('../user/mapper');
           return mapUserToDTO(user);
         },
         {
@@ -255,7 +253,6 @@ export const userRoute = (api: ReturnType<typeof coreInstance>) => {
           }
 
           const updated = await userService.update(params.unitId, body);
-          const {mapUserToDTO} = await import('../user/mapper');
           return mapUserToDTO(updated);
         },
         {

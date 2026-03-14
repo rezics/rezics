@@ -6,7 +6,7 @@ import type {
   EchoKVUpsertRequest,
 } from './types';
 import {echoKvService} from './echokv.service';
-import {verifyAuth} from '../user/utils';
+import {verifyAuth} from '@/src/user';
 import {BasicAdminPermission} from '@package/contract';
 
 export const echoKvApi = coreInstance('/echokv')

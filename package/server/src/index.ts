@@ -14,7 +14,6 @@ import {reactionApi} from './reaction';
 import {tokenApi} from './token';
 import {feedbackApi} from './feedback';
 import {cors} from '@elysiajs/cors';
-import {coreInstance} from './core';
 
 import {getProdState} from './utils/getProdState';
 import {env} from './env';

@@ -21,4 +21,4 @@ export type {
 // Utilities
 export {mapUserToDTO, mapUserToPublicProfile} from './model/mapper';
 
-export * from './util/utils';
+export * from './util';

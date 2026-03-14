@@ -2,7 +2,7 @@ import type {UserDTO} from '@package/contract';
 import {userService} from '../service/user.service';
 import {mapUserToPublicProfile} from '../model/mapper';
 
-import {verifyAuth} from '../util/utils';
+import {verifyAuth} from '../util';
 
 import {userParamsSchema} from '@package/contract';
 import {t} from 'elysia';

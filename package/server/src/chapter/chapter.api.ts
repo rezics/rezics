@@ -1,5 +1,5 @@
-import {coreInstance} from '../core.ts';
-import {verifyAuth} from '@/src/user.ts';
+import {coreInstance} from '@/src/core';
+import {verifyAuth} from '@/src/user';
 import {
   chapterListQuerySchema,
   chapterParamsSchema,
@@ -9,11 +9,8 @@ import {
   type ChapterResponse,
   type CreateChapterInput,
 } from '@package/contract';
-import {chapterService} from './chapter.service.ts';
-import {
-  mapUnitToChapterDetailDTO,
-  mapUnitToChapterListItemDTO,
-} from './mapper.ts';
+import {chapterService} from './chapter.service';
+import {mapUnitToChapterDetailDTO, mapUnitToChapterListItemDTO} from './mapper';
 import {unitService} from '@/src/unit/unit.service';
 
 import {

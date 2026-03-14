@@ -2,7 +2,7 @@ import type {UpdateUser, UserDTO, UserListQuery} from '@package/contract';
 import {userService} from '../service/user.service';
 import {mapUserToDTO, mapUserToPublicProfile} from '../model/mapper';
 import type {JWTPayload} from '../model/types';
-import {verifyAuth} from '../util/utils';
+import {verifyAuth} from '../util';
 
 import {
   userListQuerySchema,
@@ -49,6 +49,25 @@ export const coreRoute = (api: ReturnType<typeof coreInstance>) => {
           },
         },
       )
+
+      .get('/ensure', async ({headers, set}): Promise<UserDTO> => {
+        const payload = await verifyAuth(headers.authorization, set);
+        const userId = payload.unitId
+        let user;
+        try {
+          user = await userService.getByUnitId(payload.unitId);
+        }
+        if (!user) {
+          user = await // 创建 用户
+        }
+        return mapUserToDTO(user);
+      }, {
+        detail: {
+          summary: 'Ensure current user',
+          description: 'Ensure current authenticated user profile',
+          tags: ['Users'],
+        },
+      })
 
       /**
        * Get current user jwt payload
