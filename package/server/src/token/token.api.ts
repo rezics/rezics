@@ -1,6 +1,6 @@
 import {t} from 'elysia';
 import {coreInstance} from '../core';
-import {verifyAuth} from '@/src/user/utils';
+import {verifyAuth} from '@/src/user';
 import {tokenService} from './token.service';
 import {
   apiTokenDTOSchema,

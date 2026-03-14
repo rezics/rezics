@@ -3,7 +3,7 @@ import {t} from 'elysia';
 import {authSessionSchema, authUserSchema} from './sign-in';
 import {authSessionStateSchema} from './self-service';
 
-export const AUTH_PRESENCE_COOKIE_NAME = 'rezics_open_session';
+export const AUTH_PRESENCE_COOKIE_NAME = 'rezics_logged_in';
 export const AUTH_PRESENCE_COOKIE_VALUE = '1';
 export const AUTH_PRESENCE_COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24 * 30;
 
@@ -27,7 +27,8 @@ export const authTokenResponseSchema = t.Object({
 export type AuthTokenResponse = (typeof authTokenResponseSchema)['static'];
 
 export const listSessionsResponseSchema = t.Array(authSessionSchema);
-export type ListSessionsResponse = (typeof listSessionsResponseSchema)['static'];
+export type ListSessionsResponse =
+  (typeof listSessionsResponseSchema)['static'];
 
 export const revokeSessionBodySchema = t.Object({
   token: t.String(),

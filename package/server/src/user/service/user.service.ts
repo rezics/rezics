@@ -4,8 +4,8 @@
 import {prisma} from '@/prisma/client';
 import {UserType} from '@/prisma/client';
 import type {Prisma} from '@/prisma/client';
-import type {UserFilterOptions, UserWithRelations} from './types';
-import {userInclude} from './types';
+import type {UserFilterOptions, UserWithRelations} from '../model/types';
+import {userInclude} from '../model/types';
 import type {UpdateUser} from '@package/contract';
 import {syncUserToMeili, deleteUserFromMeili} from '@/src/meili/user/sync';
 

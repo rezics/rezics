@@ -17,7 +17,7 @@ import {
 } from '@package/contract';
 import {unitService} from './unit.service';
 import {mapUnitToDTO} from './mapper';
-import {verifyAuth} from '@/src/user/utils';
+import {verifyAuth} from '@/src/user';
 
 /**
  * Unit Controller - Elysia.js routes

@@ -1,6 +1,6 @@
 import {describe, expect, test} from 'bun:test';
 import {SignJWT, exportJWK, generateKeyPair} from 'jose';
-import type {JWTPayload} from './types';
+import type {JWTPayload} from '../model/types';
 
 process.env.NODE_ENV = 'test';
 process.env.DATABASE_URL ??=
@@ -39,7 +39,7 @@ describe('auth bearer e2e flow', () => {
     });
 
     process.env.AUTH_JWKS_URL = `http://localhost:${jwksServer.port}/.well-known/jwks.json`;
-    const {verifyAuth} = await import('./utils');
+    const {verifyAuth} = await import('../util/utils');
 
     const token = await new SignJWT({
       unitId: '4f1af8b5-6c9f-4c32-8c17-9108fb6af001',

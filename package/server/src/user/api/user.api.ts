@@ -1,4 +1,4 @@
-import {coreInstance} from '../core';
+import {coreInstance} from '@/src/core';
 
 import {coreRoute} from './user.core.api';
 import {adminRoute} from './user.admin.api';

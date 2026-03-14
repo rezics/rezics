@@ -2,14 +2,19 @@ import {beforeEach, describe, expect, mock, test} from 'bun:test';
 
 process.env.NODE_ENV ??= 'test';
 process.env.BETTER_AUTH_URL ??= 'http://localhost:35003';
-process.env.BETTER_AUTH_SECRET ??= 'this-is-a-long-auth-secret-for-tests-123456';
+process.env.BETTER_AUTH_SECRET ??=
+  'this-is-a-long-auth-secret-for-tests-123456';
 process.env.AUTH_INTERNAL_TOKEN_GATEWAY_SECRET ??= 'internal-test-secret';
-process.env.DATABASE_URL ??= 'postgresql://postgres:postgres@localhost:5432/rezics_auth';
+process.env.DATABASE_URL ??=
+  'postgresql://postgres:postgres@localhost:5432/rezics_auth';
+
+import {AUTH_PRESENCE_COOKIE_NAME} from '@package/contract';
 
 const authHandlerMock = mock();
 
 mock.module('@better-auth/oauth-provider', () => ({
-  oauthProviderOpenIdConfigMetadata: () => () => Response.json({issuer: 'test'}),
+  oauthProviderOpenIdConfigMetadata: () => () =>
+    Response.json({issuer: 'test'}),
   oauthProviderAuthServerMetadata: () => () => Response.json({issuer: 'test'}),
 }));
 
@@ -35,7 +40,7 @@ describe('auth presence cookies', () => {
     );
 
     expect(response.headers.get('set-cookie')).toContain(
-      'rezics_open_session=1',
+      `${AUTH_PRESENCE_COOKIE_NAME}=1`,
     );
   });
 

@@ -12,3 +12,15 @@
 login page 太窄了，左侧可以添加图片之类的以美观，参考https://www.deviantart.com/join/
 
 审计超级多，过多的 api 请求，不应该一直请求tokn，得想个办法，比如添加一个shared session，标记未登录状态？
+
+policy 允许 用户同意多个网站上的 cookie 使用权力，auth 应该建一个 cookie 授权同意表嘛？
+
+然后授权是有开关的，多个不同的部分的授权
+
+basic 是锁死必须同意，
+
+然后别的部分，日后可以这样加, 然后 cookie 可以存 json这样
+
+session key 重命名 到比如 rezics_login_state
+
+

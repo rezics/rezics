@@ -4,19 +4,21 @@ const getByUnitId = mock(async () => {
   throw new Error('not found');
 });
 
-const provisionFromJwt = mock(async (payload: {unitId: string; slug?: string}) => ({
-  unitId: payload.unitId,
-  slug: payload.slug ?? payload.unitId,
-  type: 'USER',
-  name: payload.slug ?? payload.unitId,
-  avatar: null,
-  bio: null,
-  description: null,
-  followersCount: 0,
-  followingsCount: 0,
-  permission: null,
-  joinDate: new Date('2026-03-08T00:00:00.000Z'),
-}));
+const provisionFromJwt = mock(
+  async (payload: {unitId: string; slug?: string}) => ({
+    unitId: payload.unitId,
+    slug: payload.slug ?? payload.unitId,
+    type: 'USER',
+    name: payload.slug ?? payload.unitId,
+    avatar: null,
+    bio: null,
+    description: null,
+    followersCount: 0,
+    followingsCount: 0,
+    permission: null,
+    joinDate: new Date('2026-03-08T00:00:00.000Z'),
+  }),
+);
 
 mock.module('./user.service', () => ({
   userService: {
@@ -40,7 +42,7 @@ describe('user core route', () => {
   });
 
   test('GET /users/me provisions a profile when the user does not exist', async () => {
-    const {userApi} = await import('./user.api');
+    const {userApi} = await import('../api/user.api');
 
     const response = await userApi.handle(
       new Request('http://localhost/users/me', {

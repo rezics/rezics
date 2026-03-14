@@ -1,4 +1,4 @@
-import type {JWTPayload} from '@/src/user/types';
+import type {JWTPayload} from '../model/types';
 import {verifyBearerToken} from '@package/auth/jwt';
 import {env} from '@/src/env';
 

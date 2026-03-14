@@ -1,12 +1,12 @@
 import type {UserDTO} from '@package/contract';
-import {userService} from './user.service';
-import {mapUserToPublicProfile} from './mapper';
+import {userService} from '../service/user.service';
+import {mapUserToPublicProfile} from '../model/mapper';
 
-import {verifyAuth} from './utils';
+import {verifyAuth} from '../util/utils';
 
 import {userParamsSchema} from '@package/contract';
 import {t} from 'elysia';
-import {coreInstance} from '../core';
+import {coreInstance} from '@/src/core';
 
 export const followRoute = (api: ReturnType<typeof coreInstance>) => {
   return (

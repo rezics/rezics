@@ -1,12 +1,8 @@
-import type {
-  UpdateUser,
-  UserDTO,
-  UserListQuery,
-} from '@package/contract';
-import {userService} from './user.service';
-import {mapUserToDTO, mapUserToPublicProfile} from './mapper';
-import type {JWTPayload} from './types';
-import {verifyAuth} from './utils';
+import type {UpdateUser, UserDTO, UserListQuery} from '@package/contract';
+import {userService} from '../service/user.service';
+import {mapUserToDTO, mapUserToPublicProfile} from '../model/mapper';
+import type {JWTPayload} from '../model/types';
+import {verifyAuth} from '../util/utils';
 
 import {
   userListQuerySchema,
@@ -19,7 +15,7 @@ import {
   BasicAdminPermission,
 } from '@package/contract';
 
-import {coreInstance} from '../core';
+import {coreInstance} from '@/src/core';
 import {meiliService} from '@/src/meili/meili.service';
 import {mapUserSearchDocToPublicProfile} from '@/src/meili/mapper';
 
@@ -60,7 +56,10 @@ export const coreRoute = (api: ReturnType<typeof coreInstance>) => {
       .get(
         '/me/jwt-payload',
         async ({headers, set}): Promise<JWTPayload> => {
-          const payload = await verifyAuth<JWTPayload>(headers.authorization, set);
+          const payload = await verifyAuth<JWTPayload>(
+            headers.authorization,
+            set,
+          );
           return payload;
         },
         {
@@ -78,9 +77,7 @@ export const coreRoute = (api: ReturnType<typeof coreInstance>) => {
        */
       .get(
         '/',
-        async ({
-          query,
-        }): Promise<{users: UserDTO[]; total: number}> => {
+        async ({query}): Promise<{users: UserDTO[]; total: number}> => {
           const result = await meiliService.searchUsers(query as UserListQuery);
           return {
             users: result.users.map(mapUserSearchDocToPublicProfile),

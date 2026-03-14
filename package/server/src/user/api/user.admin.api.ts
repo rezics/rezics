@@ -5,18 +5,22 @@ import {
   updateUserSchema,
 } from '@package/contract';
 
-import {coreInstance} from '../core';
+import {coreInstance} from '@/src/core';
 
-import {userService} from './user.service';
-import {mapUserToDTO} from './mapper';
-import {verifyAuth} from './utils';
+import {userService} from '../service/user.service';
+import {mapUserToDTO} from '../model/mapper';
+import {verifyAuth} from '../util/utils';
 import {BasicAdminPermission} from '@package/contract';
 
 export const adminRoute = (api: ReturnType<typeof coreInstance>) => {
   return api
     .get(
       '/admin',
-      async ({query, headers, set}): Promise<{users: UserDTO[]; total: number}> => {
+      async ({
+        query,
+        headers,
+        set,
+      }): Promise<{users: UserDTO[]; total: number}> => {
         const payload = await verifyAuth(headers.authorization, set);
         if (!BasicAdminPermission(payload as any)) {
           set.status = 403;

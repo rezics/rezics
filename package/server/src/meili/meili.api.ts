@@ -12,7 +12,7 @@ import {
   BasicAdminPermission,
 } from '@package/contract';
 import {meiliService} from './meili.service';
-import {verifyAuth} from '@/src/user/utils';
+import {verifyAuth} from '@/src/user';
 import {deleteAllUnits} from '@package/search';
 import {checkMeiliHealth} from '@package/search';
 import {
