@@ -1,5 +1,5 @@
+import {Elysia} from 'elysia';
 import {coreInstance} from '@/src/core';
-import {verifyAuth} from '@/src/user';
 import {
   chapterListQuerySchema,
   chapterParamsSchema,
@@ -8,47 +8,20 @@ import {
   type ChapterListResponse,
   type ChapterResponse,
   type CreateChapterInput,
+  BasicAdminPermission,
+  hasPermissionToDeleteChapter,
+  hasPermissionToUpdateChapter,
 } from '@package/contract';
 import {chapterService} from './chapter.service';
 import {mapUnitToChapterDetailDTO, mapUnitToChapterListItemDTO} from './mapper';
 import {unitService} from '@/src/unit/unit.service';
-
 import {
-  hasPermissionToUpdateChapter,
-  hasPermissionToDeleteChapter,
-  BasicAdminPermission,
-} from '@package/contract';
+  buildActorFromContext,
+  identityContextPlugin,
+  sessionContextPlugin,
+} from '@/src/auth/context';
 
 export const chapterApi = coreInstance('/chapters')
-  // List chapters
-  .get(
-    '/',
-    async ({query, headers, jwt, set}): Promise<ChapterListResponse> => {
-      const payload = await verifyAuth(headers.authorization, jwt, set);
-      if (!BasicAdminPermission(payload as any)) {
-        set.status = 403;
-        throw new Error(
-          'Forbidden: you do not have permission to get all books',
-        );
-      }
-      const {items, total} = await chapterService.list(query);
-      return {
-        items: items.map(mapUnitToChapterListItemDTO),
-        total,
-      };
-    },
-    {
-      query: chapterListQuerySchema,
-      detail: {
-        summary: 'List chapters',
-        description:
-          'List chapter units with advanced filters (search, tags, status, targetUnitId, user, time range) and pagination',
-        tags: ['Chapters'],
-      },
-    },
-  )
-
-  // Get chapter by unitId
   .get(
     '/:unitId',
     async ({params}): Promise<ChapterResponse> => {
@@ -64,84 +37,129 @@ export const chapterApi = coreInstance('/chapters')
       },
     },
   )
-
-  // Create a chapter
-  .post(
-    '/',
-    async ({body, headers, jwt, set}): Promise<ChapterResponse> => {
-      const payload = await verifyAuth(headers.authorization, jwt, set);
-      const req: CreateChapterInput = {
-        userId: payload.unitId,
-        title: body.title,
-        content: body.content,
-        targetUnitId: body.targetUnitId,
-        metadata: body.metadata,
-        status: body.status,
-      };
-      const unit = await chapterService.create(req);
-      return mapUnitToChapterDetailDTO(unit);
-    },
-    {
-      body: createChapterSchema,
-      detail: {
-        summary: 'Create chapter',
-        description: 'Create a new chapter unit (CHAPTER)',
-        tags: ['Chapters'],
+  .use(
+    new Elysia().use(sessionContextPlugin).get(
+      '/',
+      async ({query, currentUser, set}): Promise<ChapterListResponse> => {
+        if (!BasicAdminPermission(currentUser)) {
+          set.status = 403;
+          throw new Error(
+            'Forbidden: you do not have permission to get all books',
+          );
+        }
+        const {items, total} = await chapterService.list(query);
+        return {
+          items: items.map(mapUnitToChapterListItemDTO),
+          total,
+        };
       },
-    },
+      {
+        query: chapterListQuerySchema,
+        detail: {
+          summary: 'List chapters',
+          description:
+            'List chapter units with advanced filters (search, tags, status, targetUnitId, user, time range) and pagination',
+          tags: ['Chapters'],
+        },
+      },
+    ),
   )
-
-  // Update a chapter
-  .put(
-    '/:unitId',
-    async ({params, body, headers, jwt, set}): Promise<ChapterResponse> => {
-      const payload = await verifyAuth(headers.authorization, jwt, set);
-      const target = await unitService.getByUnitId(params.unitId);
-      if (!target) {
-        set.status = 404;
-        throw new Error(`Chapter not found: ${params.unitId}`);
-      }
-      if (!hasPermissionToUpdateChapter(payload as any, target as any)) {
-        set.status = 403;
-        throw new Error('Forbidden: you do not have permission to update');
-      }
-      const unit = await chapterService.update(params.unitId, body);
-      return mapUnitToChapterDetailDTO(unit);
-    },
-    {
-      params: chapterParamsSchema,
-      body: updateChapterSchema,
-      detail: {
-        summary: 'Update chapter',
-        description: 'Update an existing chapter (by unit ID)',
-        tags: ['Chapters'],
+  .use(
+    new Elysia().use(identityContextPlugin).post(
+      '/',
+      async ({body, identity}): Promise<ChapterResponse> => {
+        const req: CreateChapterInput = {
+          userId: identity.unitId,
+          title: body.title,
+          content: body.content,
+          targetUnitId: body.targetUnitId,
+          metadata: body.metadata,
+          status: body.status,
+        };
+        const unit = await chapterService.create(req);
+        return mapUnitToChapterDetailDTO(unit);
       },
-    },
+      {
+        body: createChapterSchema,
+        detail: {
+          summary: 'Create chapter',
+          description: 'Create a new chapter unit (CHAPTER)',
+          tags: ['Chapters'],
+        },
+      },
+    ),
   )
-
-  // Delete a chapter
-  .delete(
-    '/:unitId',
-    async ({params, headers, jwt, set}): Promise<{message: string}> => {
-      const payload = await verifyAuth(headers.authorization, jwt, set);
-      const target = await unitService.getByUnitId(params.unitId);
-      if (!target) {
-        set.status = 404;
-        throw new Error(`Chapter not found: ${params.unitId}`);
-      }
-      if (!hasPermissionToDeleteChapter(payload as any, target as any)) {
-        set.status = 403;
-        throw new Error('Forbidden: you do not have permission to delete');
-      }
-      await chapterService.delete(params.unitId);
-      return {message: 'Chapter deleted successfully'};
-    },
-    {
-      params: chapterParamsSchema,
-      detail: {
-        summary: 'Delete chapter',
-        description: 'Delete a chapter unit by unit ID',
-        tags: ['Chapters'],
-      },
-    },
+  .use(
+    new Elysia()
+      .use(sessionContextPlugin)
+      .put(
+        '/:unitId',
+        async ({
+          params,
+          body,
+          identity,
+          currentUser,
+          set,
+        }): Promise<ChapterResponse> => {
+          const target = await unitService.getByUnitId(params.unitId);
+          if (!target) {
+            set.status = 404;
+            throw new Error(`Chapter not found: ${params.unitId}`);
+          }
+          if (
+            !hasPermissionToUpdateChapter(
+              buildActorFromContext({identity, currentUser}),
+              target as any,
+            )
+          ) {
+            set.status = 403;
+            throw new Error('Forbidden: you do not have permission to update');
+          }
+          const unit = await chapterService.update(params.unitId, body);
+          return mapUnitToChapterDetailDTO(unit);
+        },
+        {
+          params: chapterParamsSchema,
+          body: updateChapterSchema,
+          detail: {
+            summary: 'Update chapter',
+            description: 'Update an existing chapter (by unit ID)',
+            tags: ['Chapters'],
+          },
+        },
+      )
+      .delete(
+        '/:unitId',
+        async ({
+          params,
+          identity,
+          currentUser,
+          set,
+        }): Promise<{message: string}> => {
+          const target = await unitService.getByUnitId(params.unitId);
+          if (!target) {
+            set.status = 404;
+            throw new Error(`Chapter not found: ${params.unitId}`);
+          }
+          if (
+            !hasPermissionToDeleteChapter(
+              buildActorFromContext({identity, currentUser}),
+              target as any,
+            )
+          ) {
+            set.status = 403;
+            throw new Error('Forbidden: you do not have permission to delete');
+          }
+          await chapterService.delete(params.unitId);
+          return {message: 'Chapter deleted successfully'};
+        },
+        {
+          params: chapterParamsSchema,
+          detail: {
+            summary: 'Delete chapter',
+            description: 'Delete a chapter unit by unit ID',
+            tags: ['Chapters'],
+          },
+        },
+      ),
   );

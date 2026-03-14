@@ -1,4 +1,5 @@
 import type {AuthSession, AuthUser, GetSessionStateResponse} from '@package/contract';
+import {NormalizedTokenName} from '@package/contract';
 import {authApi} from '@package/api/auth/auth.api';
 import {clearAuthPresence, hasAuthPresence} from '@package/api/react-query/authPresence';
 import {getToken} from '@package/api/react-query/jwt';
@@ -60,7 +61,11 @@ function deriveState(
 export const useAuthSessionStore = create<AuthSessionStoreState>()(
   devtools(
     set => ({
-      ...deriveState(null, getToken(), 'idle'),
+      ...deriveState(
+        null,
+        getToken(NormalizedTokenName.REZICS_SESSION),
+        'idle',
+      ),
       setPending: () =>
         set(state => ({
           ...state,
@@ -68,7 +73,13 @@ export const useAuthSessionStore = create<AuthSessionStoreState>()(
           error: null,
         })),
       setSessionState: state =>
-        set(deriveState(state, getToken(), 'ready')),
+        set(
+          deriveState(
+            state,
+            getToken(NormalizedTokenName.REZICS_SESSION),
+            'ready',
+          ),
+        ),
       syncBusinessToken: token =>
         set(state =>
           deriveState(
@@ -84,7 +95,14 @@ export const useAuthSessionStore = create<AuthSessionStoreState>()(
             state.error,
           ),
         ),
-      clearSessionState: () => set(deriveState(null, getToken(), 'ready')),
+      clearSessionState: () =>
+        set(
+          deriveState(
+            null,
+            getToken(NormalizedTokenName.REZICS_SESSION),
+            'ready',
+          ),
+        ),
     }),
     {name: 'authSessionStore', store: 'authSessionStore'},
   ),
@@ -92,16 +110,17 @@ export const useAuthSessionStore = create<AuthSessionStoreState>()(
 
 export async function hydrateAuthSessionState(options?: {requirePresence?: boolean}) {
   const store = useAuthSessionStore.getState();
-  const token = getToken();
+  const token = getToken(NormalizedTokenName.AUTH_IDENTITY);
+  const businessToken = getToken(NormalizedTokenName.REZICS_SESSION);
   const requiresPresence = options?.requirePresence ?? !token;
 
   if (requiresPresence && !hasAuthPresence()) {
-    useAuthSessionStore.setState(deriveState(null, token, 'ready'));
+    useAuthSessionStore.setState(deriveState(null, businessToken, 'ready'));
     return null;
   }
 
   store.setPending();
-  store.syncBusinessToken(token);
+  store.syncBusinessToken(businessToken);
 
   try {
     const sessionState = await authApi.getSessionState();
@@ -110,7 +129,14 @@ export async function hydrateAuthSessionState(options?: {requirePresence?: boole
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown auth session error';
     clearAuthPresence();
-    useAuthSessionStore.setState(deriveState(null, getToken(), 'error', message));
+    useAuthSessionStore.setState(
+      deriveState(
+        null,
+        getToken(NormalizedTokenName.REZICS_SESSION),
+        'error',
+        message,
+      ),
+    );
     return null;
   }
 }

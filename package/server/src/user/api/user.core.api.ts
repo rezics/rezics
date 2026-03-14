@@ -1,132 +1,76 @@
-import type {UpdateUser, UserDTO, UserListQuery} from '@package/contract';
-import {userService} from '../service/user.service';
-import {mapUserToDTO, mapUserToPublicProfile} from '../model/mapper';
-import type {JWTPayload} from '../model/types';
-import {verifyAuth} from '../util';
-
+import {Elysia} from 'elysia';
+import type {
+  AuthIdentityTokenClaims,
+  UpdateUser,
+  UserDTO,
+  UserListQuery,
+} from '@package/contract';
 import {
   userListQuerySchema,
   userParamsSchema,
   updateUserSchema,
 } from '@package/contract';
-
 import {
   hasPermissionToUpdateUser,
   BasicAdminPermission,
 } from '@package/contract';
-
-import {coreInstance} from '@/src/core';
+import {userService} from '../service/user.service';
+import {mapUserToDTO} from '../model/mapper';
 import {meiliService} from '@/src/meili/meili.service';
 import {mapUserSearchDocToPublicProfile} from '@/src/meili/mapper';
+import {
+  assertMainServerEligibility,
+  getAuthSessionState,
+} from '@/src/auth/session-state';
+import {
+  identityContextPlugin,
+  sessionContextPlugin,
+} from '@/src/auth/context';
+import {
+  buildRezicsSessionClaims,
+  REZICS_SESSION_HEADER,
+} from '@/src/session/jwt';
 
-export const coreRoute = (api: ReturnType<typeof coreInstance>) => {
-  return (
-    api
-      /**
-       * Get current user profile (requires JWT)
-       * GET /users/me
-       */
+function setRezicsSessionHeader(
+  set: {headers?: unknown},
+  token: string,
+): void {
+  const headers = (set.headers ?? {}) as Record<string, string>;
+  set.headers = {
+    ...headers,
+    [REZICS_SESSION_HEADER]: token,
+  };
+}
+
+export const coreRoute = new Elysia()
+  .use(
+    new Elysia()
+      .use(sessionContextPlugin)
       .get(
         '/me',
-        async ({headers, set}): Promise<UserDTO> => {
-          const payload = await verifyAuth(headers.authorization, set);
-          let user;
-          try {
-            user = await userService.getByUnitId(payload.unitId);
-          } catch {
-            user = await userService.provisionFromJwt({
-              unitId: payload.unitId,
-              slug: payload.slug,
-            });
-          }
+        async ({currentUser}): Promise<UserDTO> => {
+          const user = await userService.getByUnitId(currentUser.unitId);
           return mapUserToDTO(user);
         },
         {
           detail: {
             summary: 'Get current user',
-            description: 'Get current authenticated user profile',
+            description:
+              'Get current authenticated user profile without implicit provisioning.',
             tags: ['Users'],
           },
         },
       )
-
-      .get('/ensure', async ({headers, set}): Promise<UserDTO> => {
-        const payload = await verifyAuth(headers.authorization, set);
-        const userId = payload.unitId
-        let user;
-        try {
-          user = await userService.getByUnitId(payload.unitId);
-        }
-        if (!user) {
-          user = await // 创建 用户
-        }
-        return mapUserToDTO(user);
-      }, {
-        detail: {
-          summary: 'Ensure current user',
-          description: 'Ensure current authenticated user profile',
-          tags: ['Users'],
-        },
-      })
-
-      /**
-       * Get current user jwt payload
-       */
-      .get(
-        '/me/jwt-payload',
-        async ({headers, set}): Promise<JWTPayload> => {
-          const payload = await verifyAuth<JWTPayload>(
-            headers.authorization,
-            set,
-          );
-          return payload;
-        },
-        {
-          detail: {
-            summary: 'Get current user jwt payload',
-            description: 'Get current authenticated user jwt payload',
-            tags: ['Users'],
-          },
-        },
-      )
-
-      /**
-       * Get all users with filters and pagination (public)
-       * GET /users?q=search&page=1&limit=20
-       */
-      .get(
-        '/',
-        async ({query}): Promise<{users: UserDTO[]; total: number}> => {
-          const result = await meiliService.searchUsers(query as UserListQuery);
-          return {
-            users: result.users.map(mapUserSearchDocToPublicProfile),
-            total: result.total,
-          };
-        },
-        {
-          query: userListQuerySchema,
-          detail: {
-            summary: 'Get all users',
-            description: 'Get all users with filters and pagination',
-            tags: ['Users'],
-          },
-        },
-      )
-      /**
-       * Update current user (requires JWT)
-       * PUT /users/me
-       */
       .put(
         '/me',
-        async ({headers, body, set}): Promise<UserDTO> => {
-          const payload = await verifyAuth(headers.authorization, set);
+        async ({identity, body}): Promise<UserDTO> => {
           const userReq: UpdateUser = {
             name: body.name,
             avatar: body.avatar,
             bio: body.bio,
           };
 
-          const user = await userService.update(payload.unitId, userReq);
+          const user = await userService.update(identity.unitId, userReq);
           return mapUserToDTO(user);
         },
         {
@@ -138,19 +82,18 @@ export const coreRoute = (api: ReturnType<typeof coreInstance>) => {
           },
         },
       )
-
-      /**
-       * Update user by unitId (requires JWT + admin permission)
-       * PUT /users/:unitId
-       * Note: For now, this only allows users to update their own profile
-       */
       .put(
         '/:unitId',
-        async ({headers, params, body, set}): Promise<UserDTO> => {
-          const payload = await verifyAuth(headers.authorization, set);
-
-          // Only allow users to update their own profile
-          if (!hasPermissionToUpdateUser(payload as any, params.unitId)) {
+        async ({identity, currentUser, params, body, set}): Promise<UserDTO> => {
+          if (
+            !hasPermissionToUpdateUser(
+              {
+                ...currentUser,
+                unitId: identity.unitId,
+              } as never,
+              params.unitId,
+            )
+          ) {
             set.status = 403;
             throw new Error('Forbidden: Cannot update other users');
           }
@@ -175,21 +118,14 @@ export const coreRoute = (api: ReturnType<typeof coreInstance>) => {
           },
         },
       )
-
-      /**
-       * Delete current user (requires JWT)
-       * DELETE /users/me
-       */
       .delete(
         '/me',
-        async ({headers, set}): Promise<{message: string}> => {
-          const payload = await verifyAuth(headers.authorization, set);
-          // TODO Temporarily allow admin to delete any user
-          if (!BasicAdminPermission(payload as any)) {
+        async ({identity, currentUser, set}): Promise<{message: string}> => {
+          if (!BasicAdminPermission(currentUser)) {
             set.status = 403;
             throw new Error('Forbidden: Cannot delete current user');
           }
-          await userService.delete(payload.unitId);
+          await userService.delete(identity.unitId);
           return {message: 'User deleted successfully'};
         },
         {
@@ -200,21 +136,19 @@ export const coreRoute = (api: ReturnType<typeof coreInstance>) => {
           },
         },
       )
-
-      /**
-       * Delete user by unitId (requires JWT + admin permission)
-       * DELETE /users/:unitId
-       * Note: For now, this only allows users to delete their own profile
-       */
       .delete(
         '/:unitId',
-        async ({headers, params, set}): Promise<{message: string}> => {
-          const payload = await verifyAuth(headers.authorization, set);
-
-          // TODO Temporarily allow admin to delete any user
-          if (!BasicAdminPermission(payload as any)) {
+        async ({session, currentUser, params, set}): Promise<{message: string}> => {
+          if (
+            session.permission.role !== 'ROOT' &&
+            session.permission.role !== 'ADMIN'
+          ) {
             set.status = 403;
-            throw new Error('Forbidden: Cannot delete other users');
+            throw new Error('Forbidden: Admin role required');
+          }
+          if (!BasicAdminPermission(currentUser)) {
+            set.status = 403;
+            throw new Error('Forbidden: Persisted admin permission required');
           }
 
           await userService.delete(params.unitId);
@@ -228,6 +162,113 @@ export const coreRoute = (api: ReturnType<typeof coreInstance>) => {
             tags: ['Users'],
           },
         },
+      ),
+  )
+  .use(
+    new Elysia()
+      .use(identityContextPlugin)
+      .get(
+        '/ensure',
+        async ({headers, identity, jwt, set}): Promise<UserDTO> => {
+          const authorization = headers.authorization;
+          if (!authorization) {
+            set.status = 401;
+            throw new Error('Unauthorized: Missing Authorization header');
+          }
+
+          const sessionState = await getAuthSessionState(authorization);
+          assertMainServerEligibility(sessionState);
+
+          let user;
+          try {
+            user = await userService.getByUnitId(identity.unitId);
+          } catch {
+            user = await userService.provisionFromJwt({
+              unitId: identity.unitId,
+              slug: identity.slug,
+            });
+          }
+
+          const sessionToken = await jwt.sign(
+            buildRezicsSessionClaims({
+              unitId: user.unitId,
+              roles: (user.permission as {role?: string[]} | null)?.role,
+            }),
+          );
+          setRezicsSessionHeader(set, sessionToken);
+
+          return mapUserToDTO(user);
+        },
+        {
+          detail: {
+            summary: 'Ensure current user',
+            description:
+              'Verify auth identity, confirm auth-owned readiness, provision the business user if needed, and issue the main-server session token.',
+            tags: ['Users'],
+          },
+        },
       )
+      .get(
+        '/session/refresh',
+        async ({headers, identity, jwt, set}): Promise<{ok: true}> => {
+          const authorization = headers.authorization;
+          if (!authorization) {
+            set.status = 401;
+            throw new Error('Unauthorized: Missing Authorization header');
+          }
+
+          const sessionState = await getAuthSessionState(authorization);
+          assertMainServerEligibility(sessionState);
+
+          const user = await userService.getByUnitId(identity.unitId);
+          const sessionToken = await jwt.sign(
+            buildRezicsSessionClaims({
+              unitId: user.unitId,
+              roles: (user.permission as {role?: string[]} | null)?.role,
+            }),
+          );
+          setRezicsSessionHeader(set, sessionToken);
+
+          return {ok: true};
+        },
+        {
+          detail: {
+            summary: 'Refresh main-server session',
+            description:
+              'Reissue `rezics_session_token` from a still-valid auth identity after re-checking auth-owned session readiness.',
+            tags: ['Users'],
+          },
+        },
+      )
+      .get(
+        '/me/jwt-payload',
+        async ({identity}): Promise<AuthIdentityTokenClaims> => {
+          return identity;
+        },
+        {
+          detail: {
+            summary: 'Get current user jwt payload',
+            description: 'Get current authenticated user jwt payload',
+            tags: ['Users'],
+          },
+        },
+      ),
+  )
+  .get(
+    '/',
+    async ({query}): Promise<{users: UserDTO[]; total: number}> => {
+      const result = await meiliService.searchUsers(query as UserListQuery);
+      return {
+        users: result.users.map(mapUserSearchDocToPublicProfile),
+        total: result.total,
+      };
+    },
+    {
+      query: userListQuerySchema,
+      detail: {
+        summary: 'Get all users',
+        description: 'Get all users with filters and pagination',
+        tags: ['Users'],
+      },
+    },
   );
-};

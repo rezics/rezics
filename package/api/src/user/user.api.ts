@@ -4,7 +4,8 @@
  */
 
 import type {UpdateUser, UserDTO} from '@package/contract';
-import {apiFetch} from '../react-query/http';
+import {NormalizedTokenName, normalizedTokenTransportMap} from '@package/contract';
+import {apiFetch, apiFetchResponse} from '../react-query/http';
 
 type FollowSummaryResponse = {
   targetIds: string[];
@@ -12,6 +13,32 @@ type FollowSummaryResponse = {
 };
 
 export const userApi = {
+  ensure: async (): Promise<{user: UserDTO; sessionToken: string | null}> => {
+    const {data, response} = await apiFetchResponse<UserDTO>(`/users/ensure`);
+    return {
+      user: data,
+      sessionToken:
+        response.headers.get(
+          normalizedTokenTransportMap[NormalizedTokenName.REZICS_SESSION]
+            .headerName,
+        ) ?? null,
+    };
+  },
+
+  refreshSession: async (): Promise<{ok: true; sessionToken: string | null}> => {
+    const {data, response} = await apiFetchResponse<{ok: true}>(
+      `/users/session/refresh`,
+    );
+    return {
+      ok: data.ok,
+      sessionToken:
+        response.headers.get(
+          normalizedTokenTransportMap[NormalizedTokenName.REZICS_SESSION]
+            .headerName,
+        ) ?? null,
+    };
+  },
+
   me: async (): Promise<UserDTO> => {
     return apiFetch(`/users/me`);
   },

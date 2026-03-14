@@ -1,9 +1,7 @@
-import {Elysia, t} from 'elysia';
+import {Elysia} from 'elysia';
 import {coreInstance} from '../core';
-import {verifyAuth} from '@/src/user';
 import {unitService} from '@/src/unit/unit.service';
 import {readlistService} from './readlist.service';
-// mapper now used inside service; no direct mapping required here
 import {
   readlistListQuerySchema,
   readlistParamsSchema,
@@ -14,49 +12,21 @@ import {
   BasicAdminPermission,
 } from '@package/contract';
 import type {
-  ReadlistListQuery,
   ReadlistListResponse,
   ReadlistResponse,
   CreateReadlistInput,
-  UpdateReadlistInput,
 } from '@package/contract';
+import {
+  buildActorFromContext,
+  identityContextPlugin,
+  sessionContextPlugin,
+} from '@/src/auth/context';
 
-/**
- * Readlist Controller - Elysia.js routes
- * GET /readlists
- */
 export const readlistApi = coreInstance('/readlists')
-  .get(
-    '/',
-    async ({query, headers, jwt, set}): Promise<ReadlistListResponse> => {
-      const payload = await verifyAuth(headers.authorization, jwt, set);
-      if (!BasicAdminPermission(payload as any)) {
-        set.status = 403;
-        throw new Error(
-          'Forbidden: you do not have permission to get all books',
-        );
-      }
-      const {readlists, total} = await readlistService.list(query as any);
-      return {readlists, total};
-    },
-    {
-      query: readlistListQuerySchema,
-      detail: {
-        summary: 'Get all readlists',
-        description: 'List readlists with rich filters and pagination',
-        tags: ['Readlists'],
-      },
-    },
-  )
-
-  /**
-   * Get readlist by unitId
-   */
   .get(
     '/:unitId',
     async ({params}): Promise<ReadlistResponse> => {
-      const rl = await readlistService.getByUnitId(params.unitId);
-      return rl;
+      return readlistService.getByUnitId(params.unitId);
     },
     {
       params: readlistParamsSchema,
@@ -67,100 +37,124 @@ export const readlistApi = coreInstance('/readlists')
       },
     },
   )
-
-  /**
-   * Create readlist
-   */
-  .post(
-    '/',
-    async ({body, headers, jwt, set}): Promise<ReadlistResponse> => {
-      const payload = await verifyAuth(headers.authorization, jwt, set);
-      const req: CreateReadlistInput = {
-        title: body.title,
-        coverUrl: body.coverUrl,
-        book: body.book,
-        review: body.review,
-        order: body.order,
-      };
-      const rl = await readlistService.create(req, payload.unitId);
-      return rl;
-    },
-    {
-      body: createReadlistSchema,
-      detail: {
-        summary: 'Create readlist',
-        description: 'Create a new readlist',
-        tags: ['Readlists'],
+  .use(
+    new Elysia().use(sessionContextPlugin).get(
+      '/',
+      async ({query, currentUser, set}): Promise<ReadlistListResponse> => {
+        if (!BasicAdminPermission(currentUser)) {
+          set.status = 403;
+          throw new Error(
+            'Forbidden: you do not have permission to get all books',
+          );
+        }
+        const {readlists, total} = await readlistService.list(query as any);
+        return {readlists, total};
       },
-    },
+      {
+        query: readlistListQuerySchema,
+        detail: {
+          summary: 'Get all readlists',
+          description: 'List readlists with rich filters and pagination',
+          tags: ['Readlists'],
+        },
+      },
+    ),
   )
-
-  /**
-   * Update readlist
-   */
-  .put(
-    '/:unitId',
-    async ({params, body, headers, jwt, set}): Promise<ReadlistResponse> => {
-      const payload = await verifyAuth(headers.authorization, jwt, set);
-      const target = await unitService.getByUnitId(params.unitId);
-      if (!hasPermissionToUpdateReadlist(payload as any, target as any)) {
-        set.status = 403;
-        throw new Error(
-          'Forbidden: you do not have permission to update this readlist',
-        );
-      }
-      if (!target) {
-        set.status = 404;
-        throw new Error(`Readlist not found: ${params.unitId}`);
-      }
-      // if (
-      //   target.userId !== payload.unitId &&
-      //   !payload?.permission?.roles?.includes('ADMIN')
-      // ) {
-      //   set.status = 403;
-      //   throw new Error(
-      //     'Forbidden: you do not have permission to update this readlist',
-      //   );
-      // }
-      const rl = await readlistService.update(params.unitId, body);
-      return rl;
-    },
-    {
-      params: readlistParamsSchema,
-      body: updateReadlistSchema,
-      detail: {
-        summary: 'Update readlist',
-        description: 'Update an existing readlist by unit ID',
-        tags: ['Readlists'],
+  .use(
+    new Elysia().use(identityContextPlugin).post(
+      '/',
+      async ({body, identity}): Promise<ReadlistResponse> => {
+        const req: CreateReadlistInput = {
+          title: body.title,
+          coverUrl: body.coverUrl,
+          book: body.book,
+          review: body.review,
+          order: body.order,
+        };
+        return readlistService.create(req, identity.unitId);
       },
-    },
+      {
+        body: createReadlistSchema,
+        detail: {
+          summary: 'Create readlist',
+          description: 'Create a new readlist',
+          tags: ['Readlists'],
+        },
+      },
+    ),
   )
-
-  /**
-   * Delete readlist
-   */
-  .delete(
-    '/:unitId',
-    async ({params, headers, jwt, set}): Promise<{message: string}> => {
-      const payload = await verifyAuth(headers.authorization, jwt, set);
-      const target = await unitService.getByUnitId(params.unitId);
-      if (!hasPermissionToDeleteReadlist(payload as any, target as any)) {
-        set.status = 403;
-        throw new Error(
-          'Forbidden: you do not have permission to delete this readlist',
-        );
-      }
-      await readlistService.delete(params.unitId);
-      return {message: 'Readlist deleted successfully'};
-    },
-    {
-      params: readlistParamsSchema,
-      detail: {
-        summary: 'Delete readlist',
-        description: 'Delete a readlist by unit ID',
-        tags: ['Readlists'],
-      },
-    },
+  .use(
+    new Elysia()
+      .use(sessionContextPlugin)
+      .put(
+        '/:unitId',
+        async ({
+          params,
+          body,
+          identity,
+          currentUser,
+          set,
+        }): Promise<ReadlistResponse> => {
+          const target = await unitService.getByUnitId(params.unitId);
+          if (!target) {
+            set.status = 404;
+            throw new Error(`Readlist not found: ${params.unitId}`);
+          }
+          if (
+            !hasPermissionToUpdateReadlist(
+              buildActorFromContext({identity, currentUser}),
+              target as any,
+            )
+          ) {
+            set.status = 403;
+            throw new Error(
+              'Forbidden: you do not have permission to update this readlist',
+            );
+          }
+          return readlistService.update(params.unitId, body);
+        },
+        {
+          params: readlistParamsSchema,
+          body: updateReadlistSchema,
+          detail: {
+            summary: 'Update readlist',
+            description: 'Update an existing readlist by unit ID',
+            tags: ['Readlists'],
+          },
+        },
+      )
+      .delete(
+        '/:unitId',
+        async ({
+          params,
+          identity,
+          currentUser,
+          set,
+        }): Promise<{message: string}> => {
+          const target = await unitService.getByUnitId(params.unitId);
+          if (
+            !hasPermissionToDeleteReadlist(
+              buildActorFromContext({identity, currentUser}),
+              target as any,
+            )
+          ) {
+            set.status = 403;
+            throw new Error(
+              'Forbidden: you do not have permission to delete this readlist',
+            );
+          }
+          await readlistService.delete(params.unitId);
+          return {message: 'Readlist deleted successfully'};
+        },
+        {
+          params: readlistParamsSchema,
+          detail: {
+            summary: 'Delete readlist',
+            description: 'Delete a readlist by unit ID',
+            tags: ['Readlists'],
+          },
+        },
+      ),
   );
 
 export default readlistApi;

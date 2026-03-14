@@ -1,4 +1,5 @@
-import {env} from '@package/app/env';
+import {NormalizedTokenName, normalizedTokenTransportMap} from '@package/contract';
+import {env} from '../env';
 import {clearAuthPresence, hasAuthPresence} from './authPresence';
 import {getToken, queryAccessToken} from './jwt';
 
@@ -13,9 +14,14 @@ function buildHeaders(
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
   };
-  const token = getToken();
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
+  const authToken = getToken(NormalizedTokenName.AUTH_IDENTITY);
+  if (authToken) {
+    headers.Authorization = `Bearer ${authToken}`;
+  }
+  const rezicsSessionToken = getToken(NormalizedTokenName.REZICS_SESSION);
+  if (rezicsSessionToken) {
+    headers[normalizedTokenTransportMap[NormalizedTokenName.REZICS_SESSION].headerName] =
+      rezicsSessionToken;
   }
   if (options?.headers) {
     const existingHeaders = new Headers(options.headers);
@@ -26,62 +32,48 @@ function buildHeaders(
   return headers;
 }
 
-/**
- * Generic fetch wrapper with error handling and JWT support
- */
-export async function apiFetch<T>(
-  endpoint: string,
+async function requestWithAuthRetry(
+  url: string,
   options?: globalThis.RequestInit,
-): Promise<T> {
-  const url = `${API_BASE_URL}${endpoint}`;
-  const headers = buildHeaders(options);
+): Promise<Response> {
   let response = await fetch(url, {
     ...options,
     credentials: 'include',
-    headers: headers,
+    headers: buildHeaders(options),
   });
 
-  let responseJson = await response.json();
-
-  // Handle 401 Unauthorized - token might be expired
-  if (response.status === 401) {
-    if (responseJson?.message?.includes('No authorization')) {
-      throw new Error(
-        JSON.stringify({
-          status: response?.status,
-          message: responseJson?.message,
-        }),
-      );
-    }
-    if (!hasAuthPresence()) {
-      throw new Error(
-        JSON.stringify({
-          status: response?.status,
-          message: responseJson?.message,
-        }),
-      );
-    }
-    console.log('Auto refresh token');
-    try {
-      await queryAccessToken();
-    } catch {
-      clearAuthPresence();
-      throw new Error(
-        JSON.stringify({
-          status: response?.status,
-          message: responseJson?.message,
-        }),
-      );
-    }
-    console.log(`Auto retry ${url}`);
-    const newHeaders = buildHeaders(options);
-    response = await fetch(url, {
-      ...options,
-      credentials: 'include',
-      headers: newHeaders,
-    });
-    responseJson = await response.json();
+  if (response.status !== 401) {
+    return response;
   }
+
+  const cloned = response.clone();
+  const responseJson = await cloned.json().catch(() => null);
+
+  if (responseJson?.message?.includes('No authorization') || !hasAuthPresence()) {
+    return response;
+  }
+
+  try {
+    await queryAccessToken();
+  } catch {
+    clearAuthPresence();
+    return response;
+  }
+
+  return fetch(url, {
+    ...options,
+    credentials: 'include',
+    headers: buildHeaders(options),
+  });
+}
+
+export async function apiFetchResponse<T>(
+  endpoint: string,
+  options?: globalThis.RequestInit,
+): Promise<{data: T; response: Response}> {
+  const url = `${API_BASE_URL}${endpoint}`;
+  const response = await requestWithAuthRetry(url, options);
+  const responseJson = await response.json();
 
   if (!response.ok) {
     throw new Error(
@@ -92,5 +84,19 @@ export async function apiFetch<T>(
     );
   }
 
-  return responseJson;
+  return {
+    data: responseJson as T,
+    response,
+  };
+}
+
+/**
+ * Generic fetch wrapper with error handling and JWT support
+ */
+export async function apiFetch<T>(
+  endpoint: string,
+  options?: globalThis.RequestInit,
+): Promise<T> {
+  const {data} = await apiFetchResponse<T>(endpoint, options);
+  return data;
 }

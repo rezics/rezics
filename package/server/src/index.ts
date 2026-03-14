@@ -64,8 +64,13 @@ app
         'Authorization',
         'Accept',
         'X-Requested-With',
+        'x-rezics_session_token',
       ],
-      exposeHeaders: ['Content-Type', 'Authorization'],
+      exposeHeaders: [
+        'Content-Type',
+        'Authorization',
+        'x-rezics_session_token',
+      ],
     }),
   )
   .onError(({code, error, set}) => {

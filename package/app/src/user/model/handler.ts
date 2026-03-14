@@ -1,5 +1,7 @@
 import {authApi} from '@package/api/auth/auth.api';
 import {authKeys} from '@package/api/auth/auth.keys';
+import {NormalizedTokenName} from '@package/contract';
+import {clearAllTokens, setToken} from '@package/api/react-query/jwt';
 import {userKeys} from '@package/api/user/user.keys';
 import {qc} from '@/app/provider/reactQueryUtil';
 import {userApi} from '@package/api/user/user.api';
@@ -11,10 +13,38 @@ import {
   useUserProfileStore,
 } from '@/user/state';
 
-async function loadProfile() {
-  const user = await userApi.me();
-  useUserProfileStore.getState().setUser(user);
-  return user;
+async function ensureMemberAccess() {
+  const sessionState = await hydrateAuthSessionState();
+  const hasAuthSession = Boolean(sessionState?.session?.id);
+
+  if (!hasAuthSession) {
+    throw new Error('Authentication session unavailable');
+  }
+
+  if (!sessionState?.authSession.canAcquireMemberToken) {
+    setToken(null, NormalizedTokenName.REZICS_SESSION);
+    useAuthSessionStore.getState().syncBusinessToken(null);
+    useUserProfileStore.getState().clearProfile();
+    return {sessionState, user: null};
+  }
+
+  const ensured = await userApi.ensure();
+  if (!ensured.sessionToken) {
+    throw new Error('Failed to acquire rezics session token');
+  }
+
+  setToken(ensured.sessionToken, NormalizedTokenName.REZICS_SESSION);
+  useAuthSessionStore.getState().syncBusinessToken(ensured.sessionToken);
+  useUserProfileStore.getState().setUser(ensured.user);
+
+  return {
+    sessionState,
+    user: ensured.user,
+  };
+}
+
+export async function acquireMemberAccessIfReady() {
+  return ensureMemberAccess();
 }
 
 export const login = async (email: string, password: string) => {
@@ -32,11 +62,11 @@ export const login = async (email: string, password: string) => {
   if (!token && !hasAuthSession) {
     throw new Error('Login failed');
   }
-  const shouldLoadProfile = useAuthSessionStore.getState().hasBusinessToken;
-  const user = shouldLoadProfile ? await loadProfile() : null;
-  if (!shouldLoadProfile) {
-    useUserProfileStore.getState().clearProfile();
-  }
+
+  const user = sessionState?.authSession.canAcquireMemberToken
+    ? (await ensureMemberAccess()).user
+    : null;
+
   return {user, token};
 };
 
@@ -66,11 +96,11 @@ export const register = async (
     if (!token && !hasAuthSession) {
       throw new Error('Registration failed');
     }
-    const shouldLoadProfile = useAuthSessionStore.getState().hasBusinessToken;
-    const user = shouldLoadProfile ? await loadProfile() : null;
-    if (!shouldLoadProfile) {
-      useUserProfileStore.getState().clearProfile();
-    }
+
+    const user = sessionState?.authSession.canAcquireMemberToken
+      ? (await ensureMemberAccess()).user
+      : null;
+
     return {user, token};
   } catch (error) {
     console.error('Error during registration:', error);
@@ -80,6 +110,7 @@ export const register = async (
 
 export const logout = async (disableReload = false) => {
   await authApi.signOut();
+  clearAllTokens();
   useAuthStore.getState().clearAuth();
   clearAuthSessionState();
   useUserProfileStore.getState().clearProfile();

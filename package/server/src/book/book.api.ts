@@ -1,4 +1,4 @@
-import {t} from 'elysia';
+import {Elysia, t} from 'elysia';
 import {
   bookListQuerySchema,
   bookParamsSchema,
@@ -10,51 +10,22 @@ import type {
   BookResponse,
   CreateBookInput,
 } from '@package/contract';
+import {
+  BasicAdminPermission,
+  hasPermissionToUpdateBook,
+} from '@package/contract';
+import type {Rating} from '@/prisma/client';
 import {bookService} from './book.service';
 import {mapBookToDTO} from './mapper';
 import {unitService} from '@/src/unit/unit.service';
 import {coreInstance} from '../core';
-import {verifyAuth} from '@/src/user';
 import {
-  hasPermissionToUpdateBook,
-  BasicAdminPermission,
-} from '@package/contract';
-import type {Rating} from '@/prisma/client';
+  buildActorFromContext,
+  identityContextPlugin,
+  sessionContextPlugin,
+} from '@/src/auth/context';
 
-/**
- * Book Controller - Elysia.js routes
- * Get all books with filters and pagination
- * GET /books?q=search&tag=fiction&page=1&limit=20
- */
 export const bookApi = coreInstance('/books')
-  .get(
-    '/',
-    async ({query, headers, jwt, set}): Promise<BookListResponse> => {
-      const payload = await verifyAuth(headers.authorization, jwt, set);
-      if (!BasicAdminPermission(payload as any)) {
-        set.status = 403;
-        throw new Error(
-          'Forbidden: you do not have permission to get all books',
-        );
-      }
-      const {books, total} = await bookService.list(query);
-      // return {books: books.map(mapBaseBookToDTO), total};
-      return {books: books as any, total};
-    },
-    {
-      query: bookListQuerySchema,
-      detail: {
-        summary: 'Get all books',
-        description: 'Get all books with filters and pagination',
-        tags: ['Books'],
-      },
-    },
-  )
-
-  /**
-   * Get book by unitId
-   * GET /books/:unitId
-   */
   .get(
     '/:unitId',
     async ({params}): Promise<BookResponse> => {
@@ -70,12 +41,10 @@ export const bookApi = coreInstance('/books')
       },
     },
   )
-
   .get(
     '/:unitId/rating',
     async ({params}): Promise<Rating> => {
-      const rating = await bookService.getRatingByBookUnitId(params.unitId);
-      return rating;
+      return bookService.getRatingByBookUnitId(params.unitId);
     },
     {
       params: bookParamsSchema,
@@ -84,18 +53,10 @@ export const bookApi = coreInstance('/books')
       },
     },
   )
-
-  /**
-   * Get chapterIndex by bookUnitId
-   * GET /books/:unitId/chapterIndex
-   */
   .get(
     '/:unitId/chapterIndex',
     async ({params}): Promise<any> => {
-      const chapterIndex = await bookService.getChapterIndexByBookUnitId(
-        params.unitId,
-      );
-      return chapterIndex;
+      return bookService.getChapterIndexByBookUnitId(params.unitId);
     },
     {
       params: bookParamsSchema,
@@ -106,144 +67,173 @@ export const bookApi = coreInstance('/books')
       },
     },
   )
-
-  /**
-   * Create new book
-   * POST /books
-   */
-  .post(
-    '/',
-    async ({body, headers, jwt, set}): Promise<BookResponse> => {
-      const payload = await verifyAuth(headers.authorization, jwt, set);
-      const bookReq: CreateBookInput = {
-        userId: payload.unitId,
-        ...body,
-      };
-
-      const book = await bookService.create(bookReq);
-      return mapBookToDTO(book);
-    },
-    {
-      body: createBookSchema,
-      detail: {
-        summary: 'Create book',
-        description: 'Create a new book',
-        tags: ['Books'],
+  .use(
+    new Elysia().use(sessionContextPlugin).get(
+      '/',
+      async ({query, currentUser, set}): Promise<BookListResponse> => {
+        if (!BasicAdminPermission(currentUser)) {
+          set.status = 403;
+          throw new Error(
+            'Forbidden: you do not have permission to get all books',
+          );
+        }
+        const {books, total} = await bookService.list(query);
+        return {books: books as any, total};
       },
-    },
+      {
+        query: bookListQuerySchema,
+        detail: {
+          summary: 'Get all books',
+          description: 'Get all books with filters and pagination',
+          tags: ['Books'],
+        },
+      },
+    ),
   )
+  .use(
+    new Elysia().use(identityContextPlugin).post(
+      '/',
+      async ({body, identity}): Promise<BookResponse> => {
+        const bookReq: CreateBookInput = {
+          userId: identity.unitId,
+          ...body,
+        };
 
-  /**
-   * Update book
-   * PUT /books/:unitId
-   * NOTE Please provide only the keys that require updating. Otherwise, even if the string is empty, it will trigger a field update.
-   */
-  .put(
-    '/:unitId',
-    async ({params, body, headers, jwt, set}): Promise<BookResponse> => {
-      const payload = await verifyAuth(headers.authorization, jwt, set);
-      const targetBookUnit = await unitService.getByUnitId(params.unitId);
-      if (!targetBookUnit) {
-        set.status = 404;
-        throw new Error(`Book not found: ${params.unitId}`);
-      }
-      if (
-        !hasPermissionToUpdateBook(
-          payload as any,
-          undefined,
-          targetBookUnit as any,
-        )
-      ) {
-        set.status = 403;
-        throw new Error(
-          'Forbidden: you do not have permission to update this book',
-        );
-      }
-      const book = await bookService.update(params.unitId, body);
-      console.log('book updated');
-      return mapBookToDTO(book);
-    },
-    {
-      params: bookParamsSchema,
-      body: updateBookSchema,
-      detail: {
-        summary: 'Update book',
-        description: 'Update an existing book by unit ID',
-        tags: ['Books'],
+        const book = await bookService.create(bookReq);
+        return mapBookToDTO(book);
       },
-    },
+      {
+        body: createBookSchema,
+        detail: {
+          summary: 'Create book',
+          description: 'Create a new book',
+          tags: ['Books'],
+        },
+      },
+    ),
   )
+  .use(
+    new Elysia()
+      .use(sessionContextPlugin)
+      .put(
+        '/:unitId',
+        async ({
+          params,
+          body,
+          identity,
+          currentUser,
+          set,
+        }): Promise<BookResponse> => {
+          const targetBookUnit = await unitService.getByUnitId(params.unitId);
+          if (!targetBookUnit) {
+            set.status = 404;
+            throw new Error(`Book not found: ${params.unitId}`);
+          }
 
-  .put(
-    '/:unitId/chapterIndex',
-    async ({params, body, headers, jwt, set}): Promise<any> => {
-      const payload = await verifyAuth(headers.authorization, jwt, set);
-      const targetBookUnit = await unitService.getByUnitId(params.unitId);
-      if (
-        !hasPermissionToUpdateBook(
-          payload as any,
-          undefined,
-          targetBookUnit as any,
-        )
-      ) {
-        set.status = 403;
-        throw new Error(
-          'Forbidden: you do not have permission to update this book',
-        );
-      }
-      const chaptersIndex = body;
-      const chapterIndex = await bookService.updateChapterIndex(
-        params.unitId,
-        chaptersIndex,
-      );
-      return chapterIndex;
-    },
-    {
-      params: bookParamsSchema,
-      body: t.Any(),
-      detail: {
-        summary: 'Update book chapter index',
-        description: 'Update the chapter index of a book by unit ID',
-        tags: ['Books'],
-      },
-    },
-  )
-  /**
-   * Delete book
-   * DELETE /books/:unitId
-   */
-  .delete(
-    '/:unitId',
-    async ({params, headers, jwt, set}): Promise<{message: string}> => {
-      const payload = await verifyAuth(headers.authorization, jwt, set);
-      if (!BasicAdminPermission(payload as any)) {
-        set.status = 403;
-        throw new Error(
-          'Forbidden: you do not have permission to delete this book',
-        );
-      }
-      const targetBookUnit = await unitService.getByUnitId(params.unitId);
-      if (!targetBookUnit) {
-        set.status = 404;
-        throw new Error(`Book not found: ${params.unitId}`);
-      }
+          if (
+            !hasPermissionToUpdateBook(
+              buildActorFromContext({identity, currentUser}),
+              undefined,
+              targetBookUnit as any,
+            )
+          ) {
+            set.status = 403;
+            throw new Error(
+              'Forbidden: you do not have permission to update this book',
+            );
+          }
 
-      if (targetBookUnit.userId !== payload.unitId) {
-        set.status = 403;
-        throw new Error(
-          'Forbidden: you do not have permission to delete this book',
-        );
-      }
+          const book = await bookService.update(params.unitId, body);
+          return mapBookToDTO(book);
+        },
+        {
+          params: bookParamsSchema,
+          body: updateBookSchema,
+          detail: {
+            summary: 'Update book',
+            description: 'Update an existing book by unit ID',
+            tags: ['Books'],
+          },
+        },
+      )
+      .put(
+        '/:unitId/chapterIndex',
+        async ({
+          params,
+          body,
+          identity,
+          currentUser,
+          set,
+        }): Promise<any> => {
+          const targetBookUnit = await unitService.getByUnitId(params.unitId);
+          if (!targetBookUnit) {
+            set.status = 404;
+            throw new Error(`Book not found: ${params.unitId}`);
+          }
 
-      await bookService.delete(params.unitId);
-      return {message: 'Book and related post deleted successfully'};
-    },
-    {
-      params: bookParamsSchema,
-      detail: {
-        summary: 'Delete book',
-        description: 'Delete a book and its related unit by unit ID',
-        tags: ['Books'],
-      },
-    },
+          if (
+            !hasPermissionToUpdateBook(
+              buildActorFromContext({identity, currentUser}),
+              undefined,
+              targetBookUnit as any,
+            )
+          ) {
+            set.status = 403;
+            throw new Error(
+              'Forbidden: you do not have permission to update this book',
+            );
+          }
+
+          return bookService.updateChapterIndex(params.unitId, body);
+        },
+        {
+          params: bookParamsSchema,
+          body: t.Any(),
+          detail: {
+            summary: 'Update book chapter index',
+            description: 'Update the chapter index of a book by unit ID',
+            tags: ['Books'],
+          },
+        },
+      )
+      .delete(
+        '/:unitId',
+        async ({
+          params,
+          identity,
+          currentUser,
+          set,
+        }): Promise<{message: string}> => {
+          if (!BasicAdminPermission(currentUser)) {
+            set.status = 403;
+            throw new Error(
+              'Forbidden: you do not have permission to delete this book',
+            );
+          }
+
+          const targetBookUnit = await unitService.getByUnitId(params.unitId);
+          if (!targetBookUnit) {
+            set.status = 404;
+            throw new Error(`Book not found: ${params.unitId}`);
+          }
+
+          if (targetBookUnit.userId !== identity.unitId) {
+            set.status = 403;
+            throw new Error(
+              'Forbidden: you do not have permission to delete this book',
+            );
+          }
+
+          await bookService.delete(params.unitId);
+          return {message: 'Book and related post deleted successfully'};
+        },
+        {
+          params: bookParamsSchema,
+          detail: {
+            summary: 'Delete book',
+            description: 'Delete a book and its related unit by unit ID',
+            tags: ['Books'],
+          },
+        },
+      ),
   );

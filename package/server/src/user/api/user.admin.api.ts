@@ -1,3 +1,4 @@
+import {Elysia} from 'elysia';
 import type {UpdateUser, UserDTO, UserListQuery} from '@package/contract';
 import {
   userListQuerySchema,
@@ -5,26 +6,26 @@ import {
   updateUserSchema,
 } from '@package/contract';
 
-import {coreInstance} from '@/src/core';
-
 import {userService} from '../service/user.service';
 import {mapUserToDTO} from '../model/mapper';
-import {verifyAuth} from '../util';
+import {sessionContextPlugin} from '@/src/auth/context';
 import {BasicAdminPermission} from '@package/contract';
 
-export const adminRoute = (api: ReturnType<typeof coreInstance>) => {
-  return api
+export const adminRoute = new Elysia()
+  .use(sessionContextPlugin)
     .get(
       '/admin',
-      async ({
-        query,
-        headers,
-        set,
-      }): Promise<{users: UserDTO[]; total: number}> => {
-        const payload = await verifyAuth(headers.authorization, set);
-        if (!BasicAdminPermission(payload as any)) {
+      async ({query, session, currentUser, set}): Promise<{users: UserDTO[]; total: number}> => {
+        if (
+          session.permission.role !== 'ROOT' &&
+          session.permission.role !== 'ADMIN'
+        ) {
           set.status = 403;
-          throw new Error('Forbidden: Cannot list users');
+          throw new Error('Forbidden: Admin role required');
+        }
+        if (!BasicAdminPermission(currentUser)) {
+          set.status = 403;
+          throw new Error('Forbidden: Persisted admin permission required');
         }
         const {users, total} = await userService.list(query as any);
         return {users: users.map(mapUserToDTO), total};
@@ -40,11 +41,17 @@ export const adminRoute = (api: ReturnType<typeof coreInstance>) => {
     )
     .get(
       '/admin/:unitId',
-      async ({params, headers, set}): Promise<UserDTO> => {
-        const payload = await verifyAuth(headers.authorization, set);
-        if (!BasicAdminPermission(payload as any)) {
+      async ({params, session, currentUser, set}): Promise<UserDTO> => {
+        if (
+          session.permission.role !== 'ROOT' &&
+          session.permission.role !== 'ADMIN'
+        ) {
           set.status = 403;
-          throw new Error('Forbidden: Cannot get user');
+          throw new Error('Forbidden: Admin role required');
+        }
+        if (!BasicAdminPermission(currentUser)) {
+          set.status = 403;
+          throw new Error('Forbidden: Persisted admin permission required');
         }
         const user = await userService.getByUnitId(params.unitId);
         return mapUserToDTO(user);
@@ -60,11 +67,17 @@ export const adminRoute = (api: ReturnType<typeof coreInstance>) => {
     )
     .put(
       '/admin/:unitId',
-      async ({params, body, headers, set}): Promise<UserDTO> => {
-        const payload = await verifyAuth(headers.authorization, set);
-        if (!BasicAdminPermission(payload as any)) {
+      async ({params, body, session, currentUser, set}): Promise<UserDTO> => {
+        if (
+          session.permission.role !== 'ROOT' &&
+          session.permission.role !== 'ADMIN'
+        ) {
           set.status = 403;
-          throw new Error('Forbidden: Cannot update user');
+          throw new Error('Forbidden: Admin role required');
+        }
+        if (!BasicAdminPermission(currentUser)) {
+          set.status = 403;
+          throw new Error('Forbidden: Persisted admin permission required');
         }
 
         const userReq: UpdateUser = {
@@ -89,11 +102,17 @@ export const adminRoute = (api: ReturnType<typeof coreInstance>) => {
     )
     .delete(
       '/admin/:unitId',
-      async ({params, headers, set}): Promise<{message: string}> => {
-        const payload = await verifyAuth(headers.authorization, set);
-        if (!BasicAdminPermission(payload as any)) {
+      async ({params, session, currentUser, set}): Promise<{message: string}> => {
+        if (
+          session.permission.role !== 'ROOT' &&
+          session.permission.role !== 'ADMIN'
+        ) {
           set.status = 403;
-          throw new Error('Forbidden: Cannot delete user');
+          throw new Error('Forbidden: Admin role required');
+        }
+        if (!BasicAdminPermission(currentUser)) {
+          set.status = 403;
+          throw new Error('Forbidden: Persisted admin permission required');
         }
         await userService.delete(params.unitId);
         return {message: 'User deleted successfully'};
@@ -107,4 +126,3 @@ export const adminRoute = (api: ReturnType<typeof coreInstance>) => {
         },
       },
     );
-};

@@ -1,4 +1,4 @@
-import {t} from 'elysia';
+import {t, Elysia} from 'elysia';
 import {coreInstance} from '../core';
 import {
   bookQueryOptionsSchema,
@@ -9,32 +9,22 @@ import {
   type ReadlistListQuery,
   feedbackListQuerySchema,
   type FeedbackListQuery,
-  BasicAdminPermission,
-} from '@package/contract';
-import {meiliService} from './meili.service';
-import {verifyAuth} from '@/src/user';
-import {deleteAllUnits} from '@package/search';
-import {checkMeiliHealth} from '@package/search';
-import {
   isRoot,
   userListQuerySchema,
   type UserListQuery,
 } from '@package/contract';
+import {meiliService} from './meili.service';
+import {deleteAllUnits, checkMeiliHealth} from '@package/search';
 import {mapUserSearchDocToPublicProfile} from './mapper';
+import {
+  identityContextPlugin,
+  sessionContextPlugin,
+} from '@/src/auth/context';
 
-/**
- * Meili API - Elysia routes for search and key management.
- *
- * Routes are mounted under `/meili`.
- */
 export const meiliApi = coreInstance('/meili')
-  /**
-   * Health check for Meilisearch via backend.
-   */
   .get(
     '/health',
     async () => {
-      // Lazy import to avoid creating the client eagerly if not needed.
       const ok = await checkMeiliHealth();
       return {status: ok ? 'available' : 'unavailable'};
     },
@@ -45,17 +35,10 @@ export const meiliApi = coreInstance('/meili')
       },
     },
   )
-
-  /**
-   * Search books using Meilisearch.
-   *
-   * GET /meili/books/search
-   */
   .post(
     '/books/search',
     async ({body}) => {
-      const options = body as BookQueryOptions;
-      return meiliService.searchBooks(options);
+      return meiliService.searchBooks(body as BookQueryOptions);
     },
     {
       body: bookQueryOptionsSchema,
@@ -67,17 +50,10 @@ export const meiliApi = coreInstance('/meili')
       },
     },
   )
-
-  /**
-   * Search readlists using Meilisearch.
-   *
-   * POST /meili/readlists/search
-   */
   .post(
     '/readlists/search',
     async ({body}) => {
-      const options = body as ReadlistListQuery;
-      return meiliService.searchReadlists(options);
+      return meiliService.searchReadlists(body as ReadlistListQuery);
     },
     {
       body: readlistListQuerySchema,
@@ -89,48 +65,10 @@ export const meiliApi = coreInstance('/meili')
       },
     },
   )
-
-  /**
-   * Search feedbacks using Meilisearch.
-   *
-   * POST /meili/feedbacks/search
-   */
-  .post(
-    '/feedbacks/search',
-    async ({body, headers, jwt, set}) => {
-      const payload = await verifyAuth(headers.authorization, jwt, set);
-      const isAdmin = BasicAdminPermission(payload as any);
-
-      const options = {...(body as FeedbackListQuery)};
-
-      // 非管理员只能查看自己的反馈，即使传入 userId 也会被覆盖。
-      if (!isAdmin) {
-        options.userId = (payload as any).unitId;
-      }
-
-      return meiliService.searchFeedbacks(options);
-    },
-    {
-      body: feedbackListQuerySchema,
-      detail: {
-        summary: 'Search feedbacks (Meilisearch)',
-        description:
-          'Search feedbacks using Meilisearch with filters, respecting admin and non-admin permissions.',
-        tags: ['Meili', 'Feedback', 'Search'],
-      },
-    },
-  )
-
-  /**
-   * Search units using Meilisearch.
-   *
-   * GET /meili/units/search
-   */
   .get(
     '/units/search',
     async ({query}) => {
-      const options = query as UnitListQuery;
-      return meiliService.searchUnits(options);
+      return meiliService.searchUnits(query as UnitListQuery);
     },
     {
       query: unitListQuerySchema,
@@ -142,17 +80,10 @@ export const meiliApi = coreInstance('/meili')
       },
     },
   )
-
-  /**
-   * Search users using Meilisearch.
-   *
-   * GET /meili/users/search
-   */
   .get(
     '/users/search',
     async ({query}) => {
-      const options = query as UserListQuery;
-      const result = await meiliService.searchUsers(options);
+      const result = await meiliService.searchUsers(query as UserListQuery);
       return {
         users: result.users.map(mapUserSearchDocToPublicProfile),
         total: result.total,
@@ -168,386 +99,303 @@ export const meiliApi = coreInstance('/meili')
       },
     },
   )
-
-  /**
-   * Initialize the `books` index (idempotent).
-   *
-   * POST /meili/books/init
-   */
-  .post(
-    '/books/init',
-    async ({headers, jwt, set}) => {
-      const payload = await verifyAuth(headers.authorization, jwt, set);
-      if (!isRoot(payload as any)) {
-        set.status = 403;
-        throw new Error(
-          'Forbidden: You are not authorized to init books index',
-        );
-      }
-      await meiliService.initBooksIndex();
-      return {message: 'books index initialized'};
-    },
-    {
-      detail: {
-        summary: 'Init books index',
-        tags: ['Meili', 'Admin'],
+  .use(
+    new Elysia().use(sessionContextPlugin).post(
+      '/feedbacks/search',
+      async ({body, currentUser}) => {
+        const options = {...(body as FeedbackListQuery)};
+        if (!isRoot(currentUser as any)) {
+          options.userId = currentUser.unitId;
+        }
+        return meiliService.searchFeedbacks(options);
       },
-    },
+      {
+        body: feedbackListQuerySchema,
+        detail: {
+          summary: 'Search feedbacks (Meilisearch)',
+          description:
+            'Search feedbacks using Meilisearch with filters, respecting admin and non-admin permissions.',
+          tags: ['Meili', 'Feedback', 'Search'],
+        },
+      },
+    ),
   )
-
-  /**
-   * Initialize the `readlists` index (idempotent).
-   *
-   * POST /meili/readlists/init
-   */
-  .post(
-    '/readlists/init',
-    async ({headers, jwt, set}) => {
-      const payload = await verifyAuth(headers.authorization, jwt, set);
-      if (!isRoot(payload as any)) {
-        set.status = 403;
-        throw new Error(
-          'Forbidden: You are not authorized to init readlists index',
-        );
-      }
-      await meiliService.initReadlistsIndex();
-      return {message: 'readlists index initialized'};
-    },
-    {
-      detail: {
-        summary: 'Init readlists index',
-        tags: ['Meili', 'Admin'],
-      },
-    },
-  )
-
-  /**
-   * Initialize the `feedbacks` index (idempotent).
-   *
-   * POST /meili/feedbacks/init
-   */
-  .post(
-    '/feedbacks/init',
-    async ({headers, jwt, set}) => {
-      const payload = await verifyAuth(headers.authorization, jwt, set);
-      if (!isRoot(payload as any)) {
-        set.status = 403;
-        throw new Error(
-          'Forbidden: You are not authorized to init feedbacks index',
-        );
-      }
-      await meiliService.initFeedbacksIndex();
-      return {message: 'feedbacks index initialized'};
-    },
-    {
-      detail: {
-        summary: 'Init feedbacks index',
-        tags: ['Meili', 'Admin'],
-      },
-    },
-  )
-
-  /**
-   * Initialize the `units` index (idempotent).
-   *
-   * POST /meili/units/init
-   */
-  .post(
-    '/units/init',
-    async ({headers, jwt, set}) => {
-      const payload = await verifyAuth(headers.authorization, jwt, set);
-      if (!isRoot(payload as any)) {
-        set.status = 403;
-        throw new Error(
-          'Forbidden: You are not authorized to init units index',
-        );
-      }
-      await meiliService.initUnitsIndex();
-      return {message: 'units index initialized'};
-    },
-    {
-      detail: {
-        summary: 'Init units index',
-        tags: ['Meili', 'Admin'],
-      },
-    },
-  )
-
-  /**
-   * Initialize the `users` index (idempotent).
-   *
-   * POST /meili/users/init
-   */
-  .post(
-    '/users/init',
-    async ({headers, jwt, set}) => {
-      const payload = await verifyAuth(headers.authorization, jwt, set);
-      if (!isRoot(payload as any)) {
-        set.status = 403;
-        throw new Error(
-          'Forbidden: You are not authorized to init users index',
-        );
-      }
-      await meiliService.initUsersIndex();
-      return {message: 'users index initialized'};
-    },
-    {
-      detail: {
-        summary: 'Init users index',
-        tags: ['Meili', 'Admin'],
-      },
-    },
-  )
-
-  /**
-   * Trigger a full sync of all books into Meilisearch.
-   *
-   * POST /meili/books/sync
-   */
-  .post(
-    '/books/sync',
-    async ({headers, jwt, set}) => {
-      const payload = await verifyAuth(headers.authorization, jwt, set);
-      if (!isRoot(payload as any)) {
-        set.status = 403;
-        throw new Error('Forbidden: You are not authorized to sync all books');
-      }
-      const task = await meiliService.syncAllBooks();
-      return {task};
-    },
-    {
-      detail: {
-        summary: 'Sync all books to Meilisearch',
-        tags: ['Meili', 'Admin'],
-      },
-    },
-  )
-
-  /**
-   * Trigger a full sync of all readlists into Meilisearch.
-   *
-   * POST /meili/readlists/sync
-   */
-  .post(
-    '/readlists/sync',
-    async ({headers, jwt, set}) => {
-      const payload = await verifyAuth(headers.authorization, jwt, set);
-      if (!isRoot(payload as any)) {
-        set.status = 403;
-        throw new Error(
-          'Forbidden: You are not authorized to sync all readlists',
-        );
-      }
-      const task = await meiliService.syncAllReadlists();
-      return {task};
-    },
-    {
-      detail: {
-        summary: 'Sync all readlists to Meilisearch',
-        tags: ['Meili', 'Admin'],
-      },
-    },
-  )
-
-  /**
-   * Trigger a full sync of all feedbacks into Meilisearch.
-   *
-   * POST /meili/feedbacks/sync
-   */
-  .post(
-    '/feedbacks/sync',
-    async ({headers, jwt, set}) => {
-      const payload = await verifyAuth(headers.authorization, jwt, set);
-      if (!isRoot(payload as any)) {
-        set.status = 403;
-        throw new Error(
-          'Forbidden: You are not authorized to sync all feedbacks',
-        );
-      }
-      const task = await meiliService.syncAllFeedbacks();
-      return {task};
-    },
-    {
-      detail: {
-        summary: 'Sync all feedbacks to Meilisearch',
-        tags: ['Meili', 'Admin'],
-      },
-    },
-  )
-
-  /**
-   * Trigger a full sync of all units into Meilisearch.
-   *
-   * POST /meili/units/sync
-   */
-  .post(
-    '/units/sync',
-    async ({headers, jwt, set}) => {
-      const payload = await verifyAuth(headers.authorization, jwt, set);
-      if (!isRoot(payload as any)) {
-        set.status = 403;
-        throw new Error('Forbidden: You are not authorized to sync all units');
-      }
-      const task = await meiliService.syncAllUnits();
-      return {task};
-    },
-    {
-      detail: {
-        summary: 'Sync all units to Meilisearch',
-        tags: ['Meili', 'Admin'],
-      },
-    },
-  )
-
-  /**
-   * Trigger a full sync of all users into Meilisearch.
-   *
-   * POST /meili/users/sync
-   */
-  .post(
-    '/users/sync',
-    async ({headers, jwt, set}) => {
-      const payload = await verifyAuth(headers.authorization, jwt, set);
-      if (!isRoot(payload as any)) {
-        set.status = 403;
-        throw new Error('Forbidden: You are not authorized to sync all users');
-      }
-      const task = await meiliService.syncAllUsers();
-      return {task};
-    },
-    {
-      detail: {
-        summary: 'Sync all users to Meilisearch',
-        tags: ['Meili', 'Admin'],
-      },
-    },
-  )
-
-  /**
-   * Delete all units from Meilisearch.
-   *
-   * GET /meili/units/deleteAllUnits
-   */
-  .get(
-    '/units/deleteAllUnits',
-    async ({headers, jwt, set}) => {
-      const payload = await verifyAuth(headers.authorization, jwt, set);
-      if (!isRoot(payload as any)) {
-        set.status = 403;
-        throw new Error(
-          'Forbidden: You are not authorized to delete all units',
-        );
-      }
-      await deleteAllUnits();
-      return {message: 'all units deleted'};
-    },
-    {
-      detail: {
-        summary: 'Delete all units from Meilisearch',
-        tags: ['Meili', 'Admin'],
-      },
-    },
-  )
-
-  /**
-   * Create a frontend-safe search key.
-   *
-   * POST /meili/keys/search
-   */
-  .post(
-    '/keys/search',
-    // Require authentication before issuing a search key.
-    async ({headers, jwt, set}) => {
-      const payload = await verifyAuth(headers.authorization, jwt, set);
-      if (!isRoot(payload as any)) {
-        set.status = 403;
-        throw new Error(
-          'Forbidden: You are not authorized to create search key',
-        );
-      }
-      const key = await meiliService.createSearchKey();
-      return {key};
-    },
-    {
-      detail: {
-        summary: 'Create search-only API key',
-        tags: ['Meili', 'Keys'],
-      },
-    },
-  )
-
-  /**
-   * Create an admin key (server-side only).
-   *
-   * POST /meili/keys/admin
-   */
-  .post(
-    '/keys/admin',
-    async ({headers, jwt, set}) => {
-      const payload = await verifyAuth(headers.authorization, jwt, set);
-      if (!isRoot(payload as any)) {
-        set.status = 403;
-        throw new Error(
-          'Forbidden: You are not authorized to create admin key',
-        );
-      }
-      const key = await meiliService.createAdminKey();
-      return key;
-    },
-    {
-      detail: {
-        summary: 'Create admin API key',
-        tags: ['Meili', 'Keys', 'Admin'],
-      },
-    },
-  )
-
-  /**
-   * List Meilisearch keys.
-   *
-   * GET /meili/keys
-   */
-  .get(
-    '/keys',
-    async ({headers, jwt, set}) => {
-      const payload = await verifyAuth(headers.authorization, jwt, set);
-      if (!isRoot(payload as any)) {
-        set.status = 403;
-        throw new Error('Forbidden: You are not authorized to list keys');
-      }
-      return meiliService.listKeys();
-    },
-    {
-      detail: {
-        summary: 'List Meilisearch keys',
-        tags: ['Meili', 'Keys', 'Admin'],
-      },
-    },
-  )
-
-  /**
-   * Delete a Meilisearch key by UID.
-   *
-   * DELETE /meili/keys/:uid
-   */
-  .delete(
-    '/keys/:uid',
-    async ({params, headers, jwt, set}) => {
-      const payload = await verifyAuth(headers.authorization, jwt, set);
-      if (!isRoot(payload as any)) {
-        set.status = 403;
-        throw new Error('Forbidden: You are not authorized to delete key');
-      }
-      await meiliService.deleteKey(params.uid);
-      return {message: 'key deleted'};
-    },
-    {
-      params: t.Object({
-        uid: t.String(),
-      }),
-      detail: {
-        summary: 'Delete Meilisearch key',
-        tags: ['Meili', 'Keys', 'Admin'],
-      },
-    },
+  .use(
+    new Elysia().use(sessionContextPlugin)
+      .post(
+        '/books/init',
+        async ({currentUser, set}) => {
+          if (!isRoot(currentUser as any)) {
+            set.status = 403;
+            throw new Error(
+              'Forbidden: You are not authorized to init books index',
+            );
+          }
+          await meiliService.initBooksIndex();
+          return {message: 'books index initialized'};
+        },
+        {
+          detail: {
+            summary: 'Init books index',
+            tags: ['Meili', 'Admin'],
+          },
+        },
+      )
+      .post(
+        '/readlists/init',
+        async ({currentUser, set}) => {
+          if (!isRoot(currentUser as any)) {
+            set.status = 403;
+            throw new Error(
+              'Forbidden: You are not authorized to init readlists index',
+            );
+          }
+          await meiliService.initReadlistsIndex();
+          return {message: 'readlists index initialized'};
+        },
+        {
+          detail: {
+            summary: 'Init readlists index',
+            tags: ['Meili', 'Admin'],
+          },
+        },
+      )
+      .post(
+        '/feedbacks/init',
+        async ({currentUser, set}) => {
+          if (!isRoot(currentUser as any)) {
+            set.status = 403;
+            throw new Error(
+              'Forbidden: You are not authorized to init feedbacks index',
+            );
+          }
+          await meiliService.initFeedbacksIndex();
+          return {message: 'feedbacks index initialized'};
+        },
+        {
+          detail: {
+            summary: 'Init feedbacks index',
+            tags: ['Meili', 'Admin'],
+          },
+        },
+      )
+      .post(
+        '/units/init',
+        async ({currentUser, set}) => {
+          if (!isRoot(currentUser as any)) {
+            set.status = 403;
+            throw new Error(
+              'Forbidden: You are not authorized to init units index',
+            );
+          }
+          await meiliService.initUnitsIndex();
+          return {message: 'units index initialized'};
+        },
+        {
+          detail: {
+            summary: 'Init units index',
+            tags: ['Meili', 'Admin'],
+          },
+        },
+      )
+      .post(
+        '/users/init',
+        async ({currentUser, set}) => {
+          if (!isRoot(currentUser as any)) {
+            set.status = 403;
+            throw new Error(
+              'Forbidden: You are not authorized to init users index',
+            );
+          }
+          await meiliService.initUsersIndex();
+          return {message: 'users index initialized'};
+        },
+        {
+          detail: {
+            summary: 'Init users index',
+            tags: ['Meili', 'Admin'],
+          },
+        },
+      )
+      .post(
+        '/books/sync',
+        async ({currentUser, set}) => {
+          if (!isRoot(currentUser as any)) {
+            set.status = 403;
+            throw new Error('Forbidden: You are not authorized to sync all books');
+          }
+          const task = await meiliService.syncAllBooks();
+          return {task};
+        },
+        {
+          detail: {
+            summary: 'Sync all books to Meilisearch',
+            tags: ['Meili', 'Admin'],
+          },
+        },
+      )
+      .post(
+        '/readlists/sync',
+        async ({currentUser, set}) => {
+          if (!isRoot(currentUser as any)) {
+            set.status = 403;
+            throw new Error(
+              'Forbidden: You are not authorized to sync all readlists',
+            );
+          }
+          const task = await meiliService.syncAllReadlists();
+          return {task};
+        },
+        {
+          detail: {
+            summary: 'Sync all readlists to Meilisearch',
+            tags: ['Meili', 'Admin'],
+          },
+        },
+      )
+      .post(
+        '/feedbacks/sync',
+        async ({currentUser, set}) => {
+          if (!isRoot(currentUser as any)) {
+            set.status = 403;
+            throw new Error(
+              'Forbidden: You are not authorized to sync all feedbacks',
+            );
+          }
+          const task = await meiliService.syncAllFeedbacks();
+          return {task};
+        },
+        {
+          detail: {
+            summary: 'Sync all feedbacks to Meilisearch',
+            tags: ['Meili', 'Admin'],
+          },
+        },
+      )
+      .post(
+        '/units/sync',
+        async ({currentUser, set}) => {
+          if (!isRoot(currentUser as any)) {
+            set.status = 403;
+            throw new Error('Forbidden: You are not authorized to sync all units');
+          }
+          const task = await meiliService.syncAllUnits();
+          return {task};
+        },
+        {
+          detail: {
+            summary: 'Sync all units to Meilisearch',
+            tags: ['Meili', 'Admin'],
+          },
+        },
+      )
+      .post(
+        '/users/sync',
+        async ({currentUser, set}) => {
+          if (!isRoot(currentUser as any)) {
+            set.status = 403;
+            throw new Error('Forbidden: You are not authorized to sync all users');
+          }
+          const task = await meiliService.syncAllUsers();
+          return {task};
+        },
+        {
+          detail: {
+            summary: 'Sync all users to Meilisearch',
+            tags: ['Meili', 'Admin'],
+          },
+        },
+      )
+      .get(
+        '/units/deleteAllUnits',
+        async ({currentUser, set}) => {
+          if (!isRoot(currentUser as any)) {
+            set.status = 403;
+            throw new Error(
+              'Forbidden: You are not authorized to delete all units',
+            );
+          }
+          await deleteAllUnits();
+          return {message: 'all units deleted'};
+        },
+        {
+          detail: {
+            summary: 'Delete all units from Meilisearch',
+            tags: ['Meili', 'Admin'],
+          },
+        },
+      )
+      .post(
+        '/keys/search',
+        async ({currentUser, set}) => {
+          if (!isRoot(currentUser as any)) {
+            set.status = 403;
+            throw new Error(
+              'Forbidden: You are not authorized to create search key',
+            );
+          }
+          const key = await meiliService.createSearchKey();
+          return {key};
+        },
+        {
+          detail: {
+            summary: 'Create search-only API key',
+            tags: ['Meili', 'Keys'],
+          },
+        },
+      )
+      .post(
+        '/keys/admin',
+        async ({currentUser, set}) => {
+          if (!isRoot(currentUser as any)) {
+            set.status = 403;
+            throw new Error(
+              'Forbidden: You are not authorized to create admin key',
+            );
+          }
+          return meiliService.createAdminKey();
+        },
+        {
+          detail: {
+            summary: 'Create admin API key',
+            tags: ['Meili', 'Keys', 'Admin'],
+          },
+        },
+      )
+      .get(
+        '/keys',
+        async ({currentUser, set}) => {
+          if (!isRoot(currentUser as any)) {
+            set.status = 403;
+            throw new Error('Forbidden: You are not authorized to list keys');
+          }
+          return meiliService.listKeys();
+        },
+        {
+          detail: {
+            summary: 'List Meilisearch keys',
+            tags: ['Meili', 'Keys', 'Admin'],
+          },
+        },
+      )
+      .delete(
+        '/keys/:uid',
+        async ({params, currentUser, set}) => {
+          if (!isRoot(currentUser as any)) {
+            set.status = 403;
+            throw new Error('Forbidden: You are not authorized to delete key');
+          }
+          await meiliService.deleteKey(params.uid);
+          return {message: 'key deleted'};
+        },
+        {
+          params: t.Object({
+            uid: t.String(),
+          }),
+          detail: {
+            summary: 'Delete Meilisearch key',
+            tags: ['Meili', 'Keys', 'Admin'],
+          },
+        },
+      ),
   );

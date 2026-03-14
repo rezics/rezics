@@ -9,7 +9,7 @@ import {useAuthSessionStore, useAuthStore, useUserProfileStore} from '@/user/sta
  * Provides current user data and authentication state
  */
 export const useAuth = () => {
-  const hasBusinessToken = useAuthStore(state => state.isAuthenticated);
+  const hasIdentityToken = useAuthStore(state => state.isAuthenticated);
   const {
     authSession,
     capabilityLevel,
@@ -30,10 +30,10 @@ export const useAuth = () => {
 
   const {data, isLoading, error} = useQuery({
     ...userQueries.me(),
-    enabled: hasBusinessToken && !user,
+    enabled: capabilityLevel === 'member' && !user,
   });
 
-  const resolvedUser = hasBusinessToken ? (user ?? data ?? null) : null;
+  const resolvedUser = capabilityLevel === 'member' ? (user ?? data ?? null) : null;
 
   useEffect(() => {
     if (data) {
@@ -45,12 +45,13 @@ export const useAuth = () => {
     user: resolvedUser,
     authSession,
     loading:
-      status === 'loading' || (hasBusinessToken && !resolvedUser ? isLoading : false),
+      status === 'loading' ||
+      (capabilityLevel === 'member' && !resolvedUser ? isLoading : false),
     error: error ? (error as Error).message : undefined,
-    authenticated: hasAuthSession,
-    isAuthenticated: hasBusinessToken,
+    authenticated: hasIdentityToken || hasAuthSession,
+    isAuthenticated: hasIdentityToken,
     hasAuthSession,
-    hasBusinessToken,
+    hasBusinessToken: capabilityLevel === 'member',
     needsOnboarding,
     needsVerification,
     capabilityLevel,

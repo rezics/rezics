@@ -1,12 +1,28 @@
-import {env} from '@package/app/env';
+import {env} from '../env';
 import {clearAuthPresence, hasAuthPresence} from './authPresence';
+import {
+  NormalizedTokenName,
+  type AuthTokenResponse,
+  type NormalizedTokenName as NormalizedTokenNameType,
+  normalizedTokenTransportMap,
+} from '@package/contract';
+
 const AUTH_BASE_URL = env.VITE_AUTH_API_URL;
 const AUTH_STORE_KEY = 'auth-store';
+const DEFAULT_TOKEN_STORAGE_KEYS = {
+  [NormalizedTokenName.AUTH_IDENTITY]: 'auth-store',
+  [NormalizedTokenName.REZICS_SESSION]: 'rezics-session-store',
+  [NormalizedTokenName.NOTIFICATION_SESSION]: 'notification-session-store',
+  [NormalizedTokenName.SEARCH_SESSION]: 'search-session-store',
+} satisfies Record<NormalizedTokenNameType, string>;
+
 export const AUTH_TOKEN_STORAGE_EVENT = 'package-auth-token-storage';
-import type {AuthTokenResponse} from '@package/contract';
+export const DEFAULT_AUTH_STORE_KEY = AUTH_STORE_KEY;
 
 /**
- * JWT Token Storage Keys
+ * Shared packages use these defaults. Consuming apps may override token storage
+ * keys or auth base URL through `configureJwtTokenStrategy` without changing
+ * the persisted auth-store key.
  */
 type PersistedAuthSnapshot = {
   state?: {
@@ -16,9 +32,56 @@ type PersistedAuthSnapshot = {
   version?: number;
 };
 
-function readAuthSnapshot(): PersistedAuthSnapshot | null {
+export type JwtTokenRecord = {
+  tokenName: NormalizedTokenNameType;
+  token: string | null;
+  payload: JwtPayload | null;
+};
+
+export type JwtTokenStrategy = {
+  authBaseUrl: string;
+  storeKeyByToken: Record<NormalizedTokenNameType, string>;
+};
+
+let tokenStrategy: JwtTokenStrategy = {
+  authBaseUrl: AUTH_BASE_URL,
+  storeKeyByToken: {
+    ...DEFAULT_TOKEN_STORAGE_KEYS,
+  },
+};
+
+export function configureJwtTokenStrategy(
+  overrides: Partial<JwtTokenStrategy> & {
+    storeKeyByToken?: Partial<Record<NormalizedTokenNameType, string>>;
+  },
+) {
+  tokenStrategy = {
+    authBaseUrl: overrides.authBaseUrl ?? tokenStrategy.authBaseUrl,
+    storeKeyByToken: {
+      ...tokenStrategy.storeKeyByToken,
+      ...overrides.storeKeyByToken,
+      [NormalizedTokenName.AUTH_IDENTITY]:
+        overrides.storeKeyByToken?.[NormalizedTokenName.AUTH_IDENTITY] ??
+        tokenStrategy.storeKeyByToken[NormalizedTokenName.AUTH_IDENTITY] ??
+        AUTH_STORE_KEY,
+    },
+  };
+}
+
+export function getJwtTokenStrategy(): JwtTokenStrategy {
+  return {
+    authBaseUrl: tokenStrategy.authBaseUrl,
+    storeKeyByToken: {...tokenStrategy.storeKeyByToken},
+  };
+}
+
+function getStoreKey(tokenName: NormalizedTokenNameType): string {
+  return tokenStrategy.storeKeyByToken[tokenName];
+}
+
+function readAuthSnapshot(storeKey = AUTH_STORE_KEY): PersistedAuthSnapshot | null {
   if (typeof window === 'undefined') return null;
-  const raw = localStorage.getItem(AUTH_STORE_KEY);
+  const raw = localStorage.getItem(storeKey);
   if (!raw) return null;
 
   try {
@@ -28,12 +91,16 @@ function readAuthSnapshot(): PersistedAuthSnapshot | null {
   }
 }
 
-function writeAuthSnapshot(token: string | null): void {
+function writeAuthSnapshot(
+  tokenName: NormalizedTokenNameType,
+  token: string | null,
+): void {
   if (typeof window === 'undefined') return;
 
   const payload = parseJwt(token);
+  const storeKey = getStoreKey(tokenName);
   localStorage.setItem(
-    AUTH_STORE_KEY,
+    storeKey,
     JSON.stringify({
       state: {
         accessToken: token,
@@ -47,7 +114,7 @@ function writeAuthSnapshot(token: string | null): void {
   );
   window.dispatchEvent(
     new CustomEvent(AUTH_TOKEN_STORAGE_EVENT, {
-      detail: {token},
+      detail: {tokenName, token},
     }),
   );
 }
@@ -55,30 +122,37 @@ function writeAuthSnapshot(token: string | null): void {
 /**
  * Get JWT token from localStorage
  */
-export const getToken = (): string | null => {
-  return readAuthSnapshot()?.state?.accessToken ?? null;
+export const getToken = (
+  tokenName: NormalizedTokenNameType = NormalizedTokenName.AUTH_IDENTITY,
+): string | null => {
+  return readAuthSnapshot(getStoreKey(tokenName))?.state?.accessToken ?? null;
 };
 
 /**
  * Set JWT token to localStorage
  */
-export const setToken = (token: string | null): void => {
+export const setToken = (
+  token: string | null,
+  tokenName: NormalizedTokenNameType = NormalizedTokenName.AUTH_IDENTITY,
+): void => {
   if (token) {
-    writeAuthSnapshot(token);
+    writeAuthSnapshot(tokenName, token);
   } else {
-    removeToken();
+    removeToken(tokenName);
   }
 };
 
 /**
  * Remove JWT token from localStorage
  */
-export const removeToken = (): void => {
+export const removeToken = (
+  tokenName: NormalizedTokenNameType = NormalizedTokenName.AUTH_IDENTITY,
+): void => {
   if (typeof window === 'undefined') return;
-  localStorage.removeItem(AUTH_STORE_KEY);
+  localStorage.removeItem(getStoreKey(tokenName));
   window.dispatchEvent(
     new CustomEvent(AUTH_TOKEN_STORAGE_EVENT, {
-      detail: {token: null},
+      detail: {tokenName, token: null},
     }),
   );
 };
@@ -87,7 +161,7 @@ export const removeToken = (): void => {
  * Check if user is authenticated
  */
 export const isAuthenticated = (): boolean => {
-  return !!getToken();
+  return !!getToken(NormalizedTokenName.AUTH_IDENTITY);
 };
 
 export async function queryAccessToken(options?: {requirePresence?: boolean}) {
@@ -95,23 +169,51 @@ export async function queryAccessToken(options?: {requirePresence?: boolean}) {
     return null;
   }
 
-  const refreshTokenResponse = await fetch(`${AUTH_BASE_URL}/api/auth/token`, {
-    method: 'GET',
-    credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json',
+  const refreshTokenResponse = await fetch(
+    `${tokenStrategy.authBaseUrl}/api/auth/token`,
+    {
+      method: 'GET',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
     },
-  });
+  );
   const json =
     (await refreshTokenResponse.json()) as Partial<AuthTokenResponse>;
   const token = json.token ?? null;
   if (!token) {
     clearAuthPresence();
-    removeToken();
+    removeToken(NormalizedTokenName.AUTH_IDENTITY);
     throw new Error('Unauthorized - Please login again');
   }
-  setToken(token);
+  setToken(token, NormalizedTokenName.AUTH_IDENTITY);
   return token;
+}
+
+export function getTokenRecord(
+  tokenName: NormalizedTokenNameType,
+): JwtTokenRecord {
+  const token = getToken(tokenName);
+  return {
+    tokenName,
+    token,
+    payload: parseJwt(token),
+  };
+}
+
+export function getAllTokenRecords(): JwtTokenRecord[] {
+  return (
+    Object.keys(normalizedTokenTransportMap) as NormalizedTokenNameType[]
+  ).map(tokenName => getTokenRecord(tokenName));
+}
+
+export function clearAllTokens(): void {
+  (
+    Object.keys(normalizedTokenTransportMap) as NormalizedTokenNameType[]
+  ).forEach(tokenName => {
+    removeToken(tokenName);
+  });
 }
 
 export interface JwtPayload {

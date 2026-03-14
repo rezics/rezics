@@ -20,3 +20,21 @@
 - **WHEN** a token is presented under the wrong normalized header contract or fails issuer-specific validation
 - **THEN** the shared verifier SHALL reject the token as unauthorized
 - **AND** downstream business logic SHALL NOT treat the token as valid
+
+### Requirement: Server middleware hydrates verified identity and session payloads onto request context
+
+`package/server` SHALL use middleware to verify normalized token transports once per request and hydrate verified payloads onto request context so handlers can consume `ctx.identity` and `ctx.session` directly.
+
+#### Scenario: Identity-only route receives verified auth context
+
+- **WHEN** a route requires authenticated identity but not permission-bearing authorization
+- **THEN** middleware SHALL verify `Authorization: Bearer <auth_identity_token>`
+- **AND** it SHALL expose the verified payload as `ctx.identity`
+- **AND** handlers on that route SHALL NOT need to call JWT verification again
+
+#### Scenario: Permission route requires both verified identity and verified session context
+
+- **WHEN** a route requires permission-bearing authorization
+- **THEN** middleware SHALL verify both `Authorization: Bearer <auth_identity_token>` and `x-rezics_session_token`
+- **AND** it SHALL expose the verified payloads as `ctx.identity` and `ctx.session`
+- **AND** handlers on that route SHALL consume those context values directly instead of calling `jwt.verify()` again

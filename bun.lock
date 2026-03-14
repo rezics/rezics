@@ -328,6 +328,7 @@
       "name": "@package/server",
       "dependencies": {
         "@elysiajs/cors": "^1.4.0",
+        "@elysiajs/jwt": "^1.4.0",
         "@elysiajs/openapi": "^1.4.14",
         "@faker-js/faker": "^10.1.0",
         "@package/auth": "workspace:*",

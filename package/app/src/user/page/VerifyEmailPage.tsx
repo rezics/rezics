@@ -10,6 +10,7 @@ import {Layout} from '../layout/Layout';
 import {hydrateAuthSessionState} from '@/user/state';
 import {useAuth} from './useAuth';
 import {resolvePostAuthDestination} from '../model/authRedirect';
+import {acquireMemberAccessIfReady} from '../model/handler';
 
 export const VerifyEmailPage: FC = () => {
   const {t} = useTranslation();
@@ -38,6 +39,7 @@ export const VerifyEmailPage: FC = () => {
         !sessionState.authSession.needsEmailVerification &&
         !sessionState.authSession.needsOnboarding
       ) {
+        await acquireMemberAccessIfReady();
         navigate({
           to: resolvePostAuthDestination({
             needsOnboarding: sessionState.authSession.needsOnboarding,

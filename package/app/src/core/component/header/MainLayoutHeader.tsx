@@ -13,7 +13,9 @@ import {useMatch} from '@tanstack/react-router';
 import {Route as HomeRoute} from '@/routes/_mainLayout/index.tsx';
 import {useUserProfileStore} from '@/user/state';
 import {AuthenticatedSection} from '@/core/section/header/AuthenticatedSection.tsx';
+import {PendingVerificationSection} from '@/core/section/header/PendingVerificationSection.tsx';
 import {UnauthenticatedSection} from '@/core/section/header/UnauthenticatedSection.tsx';
+import {useAuth} from '@/user/page/useAuth';
 
 interface HeaderProps {
   isDragging?: boolean;
@@ -39,6 +41,7 @@ export const Header: React.FC<HeaderProps> = ({
   }
 
   const currentUser = useUserProfileStore(state => state.user);
+  const auth = useAuth();
 
   return (
     <AppBar
@@ -95,8 +98,11 @@ export const Header: React.FC<HeaderProps> = ({
             <HomeSearch className="w-full max-w-md" />
           )}
         </div>
-        {currentUser && <AuthenticatedSection />}
-        {!currentUser && <UnauthenticatedSection />}
+        {auth.hasBusinessToken && currentUser && <AuthenticatedSection />}
+        {!auth.hasBusinessToken && auth.authenticated && (
+          <PendingVerificationSection />
+        )}
+        {!auth.authenticated && <UnauthenticatedSection />}
       </Toolbar>
     </AppBar>
   );

@@ -1,4 +1,4 @@
-import {t} from 'elysia';
+import {t, Elysia} from 'elysia';
 import {coreInstance} from '../core';
 import type {
   EchoKVKeyListResponse,
@@ -6,11 +6,10 @@ import type {
   EchoKVUpsertRequest,
 } from './types';
 import {echoKvService} from './echokv.service';
-import {verifyAuth} from '@/src/user';
 import {BasicAdminPermission} from '@package/contract';
+import {sessionContextPlugin} from '@/src/auth/context';
 
 export const echoKvApi = coreInstance('/echokv')
-  // List all keys (with optional search)
   .get(
     '/',
     async ({query}): Promise<EchoKVKeyListResponse> => {
@@ -28,8 +27,6 @@ export const echoKvApi = coreInstance('/echokv')
       },
     },
   )
-
-  // Get value by key
   .get(
     '/:key',
     async ({params}): Promise<EchoKVResponse> => {
@@ -47,35 +44,33 @@ export const echoKvApi = coreInstance('/echokv')
       },
     },
   )
-
-  // Upsert value by key
-  .put(
-    '/:key',
-    async ({params, body, headers, jwt, set}): Promise<EchoKVResponse> => {
-      const payload = await verifyAuth(headers.authorization, jwt, set);
-      if (!BasicAdminPermission(payload as any)) {
-        set.status = 403;
-        throw new Error('Forbidden: You are not authorized to update EchoKV');
-      }
-      const value = await echoKvService.set(
-        params.key,
-        body.value as EchoKVUpsertRequest['value'],
-      );
-      return {value};
-    },
-    {
-      params: t.Object({
-        key: t.String(),
-      }),
-      body: t.Object({
-        // Accept any JSON-compatible value
-        value: t.Any(),
-      }),
-      detail: {
-        summary: 'Upsert value by key',
-        description:
-          'Create or update a value by key in the EchoKV store. Existing keys are updated, new keys are created.',
-        tags: ['EchoKV'],
+  .use(
+    new Elysia().use(sessionContextPlugin).put(
+      '/:key',
+      async ({params, body, currentUser, set}): Promise<EchoKVResponse> => {
+        if (!BasicAdminPermission(currentUser)) {
+          set.status = 403;
+          throw new Error('Forbidden: You are not authorized to update EchoKV');
+        }
+        const value = await echoKvService.set(
+          params.key,
+          body.value as EchoKVUpsertRequest['value'],
+        );
+        return {value};
       },
-    },
+      {
+        params: t.Object({
+          key: t.String(),
+        }),
+        body: t.Object({
+          value: t.Any(),
+        }),
+        detail: {
+          summary: 'Upsert value by key',
+          description:
+            'Create or update a value by key in the EchoKV store. Existing keys are updated, new keys are created.',
+          tags: ['EchoKV'],
+        },
+      },
+    ),
   );

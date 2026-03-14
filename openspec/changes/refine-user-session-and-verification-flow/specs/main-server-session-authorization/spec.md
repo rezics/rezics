@@ -59,3 +59,14 @@ Main-server permission-protected routes SHALL re-check the user's persisted perm
 
 - **WHEN** the token snapshot and the current database permission both allow the requested action
 - **THEN** the route SHALL continue to the business handler normally
+
+### Requirement: Permission-protected routes use middleware-hydrated session context
+
+Main-server routes that require permission authorization SHALL verify `x-rezics_session_token` in middleware, expose the verified payload as request context, and consume that context directly in handlers rather than re-verifying the token per handler.
+
+#### Scenario: Permission route consumes session context from middleware
+
+- **WHEN** a main-server route requires permission authorization
+- **THEN** middleware SHALL verify `x-rezics_session_token` before the handler runs
+- **AND** the verified payload SHALL be available to the handler as `ctx.session`
+- **AND** the handler SHALL use `ctx.session.permission.role` for the prefilter step before loading database permissions

@@ -4,6 +4,7 @@ import {
   setToken as persistToken,
   parseJwt,
 } from '@package/api/react-query/jwt';
+import {NormalizedTokenName} from '@package/contract';
 import {create} from 'zustand';
 import {devtools} from 'zustand/middleware';
 
@@ -35,17 +36,18 @@ function toState(token: string | null) {
 export const useAuthStore = create<AuthStoreState>()(
   devtools(
     set => ({
-      ...toState(getToken()),
+      ...toState(getToken(NormalizedTokenName.AUTH_IDENTITY)),
       setToken: token => {
-        persistToken(token);
+        persistToken(token, NormalizedTokenName.AUTH_IDENTITY);
         set(toState(token));
       },
       clearAuth: () => {
-        removeToken();
+        removeToken(NormalizedTokenName.AUTH_IDENTITY);
         set(toState(null));
       },
-      syncFromStorage: () => set(toState(getToken())),
-      init: () => set(toState(getToken())),
+      syncFromStorage: () =>
+        set(toState(getToken(NormalizedTokenName.AUTH_IDENTITY))),
+      init: () => set(toState(getToken(NormalizedTokenName.AUTH_IDENTITY))),
     }),
     {name: 'authStore', store: 'authStore'},
   ),

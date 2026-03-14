@@ -142,9 +142,39 @@ Alternatives considered:
 - Keep separate verifier implementations in auth and server. Rejected because the user explicitly wants `package/auth/jwt/verify` to own the major responsibility.
 - Move all verification into `package/server`. Rejected because auth already owns the core asymmetric verification stack and issuer metadata.
 
+### Decision: Hydrate verified token payloads into request context middleware once per request
+
+`package/server` will verify normalized JWT transports in middleware and write the verified payloads onto request context so handlers do not parse or verify JWTs repeatedly. The request context contract will be:
+
+- `ctx.identity`: verified `auth_identity_token` payload from `Authorization: Bearer <token>` when the route requires login identity
+- `ctx.session`: verified `rezics_session_token` payload from `x-rezics_session_token` when the route requires permission-bearing main-server authorization
+
+Route-level behavior will follow this split:
+
+1. Routes that require login but not business authorization must require `ctx.identity`.
+2. Routes that require permissions must require both `ctx.identity` and `ctx.session`.
+3. Permission-protected routes must still re-check persisted database permissions after the `ctx.session.permission.role` prefilter.
+
+Rationale:
+
+- JWT verification runs once per request rather than once per helper or service call.
+- Handlers become simpler and use `ctx.identity` / `ctx.session` directly instead of calling verifier utilities repeatedly.
+- Identity proof and permission-bearing authorization remain distinct without duplicating parsing or verification work.
+
+Alternatives considered:
+
+- Keep helper functions that verify tokens inside each handler. Rejected because it repeats work and spreads transport/auth rules across handlers.
+- Decode payloads without central middleware and trust unverified headers downstream. Rejected because every consumer would need to reason about verification state manually.
+
 ### Decision: Keep frontend multi-token wiring configurable at package boundaries
 
 `package/api/src/react-query/jwt.ts` and `package/app-shell/src/provider/AuthProvider.tsx` are shared package surfaces, so they should expose configuration inputs rather than hardcoding app-specific token keys. The app package will provide env-derived token key lists with safe defaults while the persisted Zustand `auth-store` key remains unchanged.
+
+Configuration boundary:
+
+- Shared packages (`package/api`, `package/app-shell`) own token primitives, refresh sequencing, and default token-key names.
+- Consuming apps may override token storage keys and auth base URL through configuration hooks, but they must not rename or repurpose the legacy `auth-store` key used for `auth_identity_token`.
+- `rezics_session_token` storage may vary by app, but its transport header and normalized token name remain fixed across packages.
 
 Rationale:
 
@@ -189,7 +219,7 @@ Alternatives considered:
 2. Refactor `package/auth/src/jwt/verify.ts` into an issuer-aware verification module with injected secret or JWKS inputs, and convert `package/server/src/user/util/index.ts` into a re-export layer.
 3. Reintroduce `@elysiajs/jwt` in `package/server` with an independent main-server signing secret for `rezics_session_token`.
 4. Implement `/users/ensure` and the related main-server refresh flow so auth status is checked through `/api/auth/get-session-state` before provisioning or reissuing a session token.
-5. Update permission-protected server routes to prefilter with `rezics_session_token.permission.role` and then re-check database permissions.
+5. Add request middleware that hydrates verified `ctx.identity` and `ctx.session`, then update permission-protected server routes to prefilter with `rezics_session_token.permission.role` and re-check database permissions.
 6. Update `package/api/src/react-query/jwt.ts`, `package/app-shell/src/provider/AuthProvider.tsx`, and app-level header/bootstrap wiring so pending-verification users show `PendingVerificationSection` until the main-server session is available.
 
 Rollback strategy:
@@ -198,8 +228,9 @@ Rollback strategy:
 - Disable main-server session issuance and route prefilter middleware while preserving auth bearer verification.
 - Restore the previous server verifier wiring only if the centralized auth verifier proves incompatible during rollout.
 
-## Open Questions
+## Refresh Timing
 
-- All tokens should include expiration metadata so the frontend can proactively refresh them, but only after confirming `auth_identity_token` exists and refreshing it first. The remaining implementation choice is whether `rezics_session_token` renewal should be fully proactive on a timer or opportunistic immediately after auth-token refresh.
-
-All refreshes should be timer-based. Essentially, when another token needs to be refreshed, you should first check the status of the `auth_identity_token`. If the `auth_identity_token` has reached its refresh interval, refresh it first before refreshing the current token. The refresh interval is refresh_time = exp - (ttl * 0.2 ~ 0.3)
+- All token refreshes should be timer-based.
+- When a downstream token such as `rezics_session_token` reaches its refresh interval, the frontend must first evaluate `auth_identity_token`.
+- If `auth_identity_token` is also within its refresh interval, the frontend must refresh `auth_identity_token` first and only then refresh the downstream token.
+- The refresh interval should be derived from token expiry metadata as `refresh_time = exp - (ttl * 0.2 ~ 0.3)`, allowing refresh before hard expiry without waiting until the final minute.

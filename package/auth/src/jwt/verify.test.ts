@@ -1,6 +1,13 @@
 import {describe, expect, test} from 'bun:test';
 import {SignJWT, exportJWK, generateKeyPair} from 'jose';
-import {verifyBearerToken} from './verify';
+
+process.env.DATABASE_URL ??=
+  'postgresql://postgres:postgres@localhost:5432/rezics_auth';
+process.env.BETTER_AUTH_URL ??= 'http://localhost:35003';
+process.env.BETTER_AUTH_SECRET ??=
+  'better-auth-secret-for-tests-abcdefghijklmnopqrstuvwxyz';
+process.env.AUTH_INTERNAL_TOKEN_GATEWAY_SECRET ??=
+  'internal-auth-gateway-test';
 
 async function createEcJwkWithKid(kid: string) {
   const {publicKey, privateKey} = await generateKeyPair('ES256');
@@ -18,6 +25,7 @@ async function createEcJwkWithKid(kid: string) {
 
 describe('verifyBearerToken', () => {
   test('rejects non-ES256 tokens', async () => {
+    const {verifyBearerToken} = await import('./verify');
     const token = await new SignJWT({scope: 'user'})
       .setProtectedHeader({alg: 'HS256', kid: 'hs'})
       .setIssuer('https://issuer.example')
@@ -35,6 +43,7 @@ describe('verifyBearerToken', () => {
   });
 
   test('refreshes JWKS on unknown kid and verifies token', async () => {
+    const {verifyBearerToken} = await import('./verify');
     const key1 = await createEcJwkWithKid('kid-old');
     const key2 = await createEcJwkWithKid('kid-new');
 
