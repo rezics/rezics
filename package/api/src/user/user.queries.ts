@@ -9,13 +9,6 @@ export const userMeQuery = () =>
     staleTime: 1000 * 60 * 5,
   });
 
-export const userJwtPayloadQuery = () =>
-  queryOptions({
-    queryKey: userKeys.detail('me-jwt-payload'),
-    queryFn: () => userApi.jwtPayload(),
-    staleTime: 1000 * 60 * 1,
-  });
-
 export const userListQuery = (query?: Record<string, unknown>) =>
   queryOptions({
     queryKey: userKeys.list(query),
@@ -75,7 +68,6 @@ export const userFollowStatusQuery = (targetIds: string[]) =>
 
 export const userQueries = {
   me: userMeQuery,
-  jwtPayload: userJwtPayloadQuery,
   list: userListQuery,
   adminList: userAdminListQuery,
   detail: userDetailQuery,

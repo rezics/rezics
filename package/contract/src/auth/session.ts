@@ -2,6 +2,7 @@ import {t} from 'elysia';
 
 import {authSessionSchema, authUserSchema} from './sign-in';
 import {authSessionStateSchema} from './self-service';
+import {authContextTokenClaimsSchema} from '../token';
 
 export const AUTH_PRESENCE_COOKIE_NAME = 'rezics_logged_in';
 export const AUTH_PRESENCE_COOKIE_VALUE = '1';
@@ -25,6 +26,13 @@ export const authTokenResponseSchema = t.Object({
   token: t.String(),
 });
 export type AuthTokenResponse = (typeof authTokenResponseSchema)['static'];
+
+export const authContextTokenResponseSchema = t.Object({
+  token: t.String(),
+  claims: authContextTokenClaimsSchema,
+});
+export type AuthContextTokenResponse =
+  (typeof authContextTokenResponseSchema)['static'];
 
 export const listSessionsResponseSchema = t.Array(authSessionSchema);
 export type ListSessionsResponse =

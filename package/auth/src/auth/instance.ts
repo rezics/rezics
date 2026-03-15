@@ -22,7 +22,6 @@ const authJwksRotationIntervalSeconds = Number(
 const authJwksGracePeriodSeconds = Number(
   env.AUTH_JWKS_GRACE_PERIOD_SECONDS ?? '3900',
 );
-const prismaAny = prisma as any;
 const telegramOAuthConfig = getTelegramGenericOAuthConfig();
 const notificationService = createAuthNotificationService(env, {
   telegram: {
@@ -112,7 +111,7 @@ export const auth = betterAuth({
       adapter: {
         getJwks: async _ctx => {
           void _ctx;
-          const keys = await prismaAny.jwks.findMany();
+          const keys = await prisma.jwks.findMany();
           return keys.map((key: any) => ({
             ...key,
             alg: key.alg ?? undefined,
@@ -123,7 +122,7 @@ export const auth = betterAuth({
         createJwk: async (data, _ctx) => {
           void _ctx;
           const kid = deriveDeterministicKid(data.publicKey);
-          const record = await prismaAny.jwks.upsert({
+          const record = await prisma.jwks.upsert({
             where: {id: kid},
             update: {
               publicKey: data.publicKey,

@@ -7,30 +7,20 @@ import {
   type JWTVerifyOptions,
 } from 'jose';
 import {
-  type AuthIdentityTokenClaims,
   NormalizedTokenName,
   normalizedTokenTransportMap,
   type NormalizedTokenName as NormalizedTokenNameType,
 } from '@package/contract';
-import {env} from '@/env';
 import type {KeyObject} from 'node:crypto';
 
 type JwtKeySource =
-  | {
-      jwksUrl: string;
-      verificationKey?: never;
-      verificationKeyPem?: never;
-    }
+  | {jwksUrl: string; verificationKey?: never; verificationKeyPem?: never}
   | {
       jwksUrl?: never;
       verificationKey: CryptoKey | KeyObject | Uint8Array;
       verificationKeyPem?: never;
     }
-  | {
-      jwksUrl?: never;
-      verificationKey?: never;
-      verificationKeyPem: string;
-    };
+  | {jwksUrl?: never; verificationKey?: never; verificationKeyPem: string};
 
 export type VerifyOptions = JwtKeySource & {
   issuer: string;
@@ -43,187 +33,185 @@ export type VerifyOptions = JwtKeySource & {
 
 export type VerifiedToken<TPayload extends JWTPayload = JWTPayload> = {
   payload: TPayload;
-  protectedHeader: {
-    alg?: string;
-    kid?: string;
-  };
+  protectedHeader: {alg?: string; kid?: string};
   token: string;
 };
 
-const jwksStore = new Map<string, ReturnType<typeof createRemoteJWKSet>>();
-const pemStore = new Map<string, Promise<CryptoKey>>();
+// ---------------------------------------------------------------------------
+// Internal caches
+// ---------------------------------------------------------------------------
 
-function getJwks(jwksUrl: string): ReturnType<typeof createRemoteJWKSet> {
-  if (!jwksStore.has(jwksUrl)) {
-    jwksStore.set(
-      jwksUrl,
-      createRemoteJWKSet(new URL(jwksUrl), {
-        cooldownDuration: 1_000,
-      }),
-    );
+const jwksCache = new Map<string, ReturnType<typeof createRemoteJWKSet>>();
+const pemCache = new Map<string, Promise<CryptoKey>>();
+
+function getOrCreateJwks(url: string): ReturnType<typeof createRemoteJWKSet> {
+  let resolver = jwksCache.get(url);
+  if (!resolver) {
+    resolver = createRemoteJWKSet(new URL(url), {cooldownDuration: 1_000});
+    jwksCache.set(url, resolver);
   }
-
-  return jwksStore.get(jwksUrl)!;
+  return resolver;
 }
 
-function getPemVerificationKey(verificationKeyPem: string): Promise<CryptoKey> {
-  if (!pemStore.has(verificationKeyPem)) {
-    pemStore.set(verificationKeyPem, importSPKI(verificationKeyPem, 'ES256'));
+function getOrImportPem(pem: string): Promise<CryptoKey> {
+  let key = pemCache.get(pem);
+  if (!key) {
+    key = importSPKI(pem, 'ES256');
+    pemCache.set(pem, key);
   }
-
-  return pemStore.get(verificationKeyPem)!;
+  return key;
 }
 
-function parseTransportToken(
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+/**
+ * Extract the raw JWT string from a transport-layer header value.
+ * Handles Bearer prefix stripping and transport enforcement based on
+ * the token name's registered transport configuration.
+ */
+function extractRawToken(
   input: string | undefined,
   tokenName: NormalizedTokenNameType,
-  enforceTransport = true,
+  enforceTransport: boolean,
 ): string {
+  const transport = normalizedTokenTransportMap[tokenName];
+
   if (!input) {
-    const headerName = normalizedTokenTransportMap[tokenName].headerName;
-    throw new Error(`Unauthorized: Missing ${headerName} header`);
+    throw new Error(`Unauthorized: Missing ${transport.headerName} header`);
   }
 
-  const transport = normalizedTokenTransportMap[tokenName];
   if (transport.usesBearer) {
-    if (input.startsWith('Bearer ')) {
-      return input.slice('Bearer '.length);
-    }
-    if (enforceTransport) {
-      throw new Error('Unauthorized: Missing Bearer token');
-    }
+    if (input.startsWith('Bearer ')) return input.slice(7);
+    if (enforceTransport) throw new Error('Unauthorized: Missing Bearer token');
     return input;
   }
 
   if (enforceTransport && input.startsWith('Bearer ')) {
     throw new Error('Unauthorized: Wrong token transport');
   }
-
   return input;
 }
 
-async function resolveVerificationKey(options: VerifyOptions) {
-  if ('jwksUrl' in options && typeof options.jwksUrl === 'string') {
-    return getJwks(options.jwksUrl);
-  }
-  if (
-    'verificationKeyPem' in options &&
-    typeof options.verificationKeyPem === 'string'
-  ) {
-    return getPemVerificationKey(options.verificationKeyPem);
-  }
+/**
+ * Resolve the verification key / JWKS function from the provided options.
+ */
+async function resolveKey(
+  options: VerifyOptions,
+): Promise<
+  CryptoKey | KeyObject | Uint8Array | ReturnType<typeof createRemoteJWKSet>
+> {
+  if (options.jwksUrl !== undefined) return getOrCreateJwks(options.jwksUrl);
+  if (options.verificationKeyPem !== undefined)
+    return getOrImportPem(options.verificationKeyPem);
   return options.verificationKey;
 }
 
-function shouldRequireKid(options: VerifyOptions): boolean {
-  return 'jwksUrl' in options && typeof options.jwksUrl === 'string';
-}
+// ---------------------------------------------------------------------------
+// Public API — env-free, usable by any service
+// ---------------------------------------------------------------------------
 
-function defaultVerifyOptions(
-  overrides?: Partial<VerifyOptions>,
-): VerifyOptions {
-  const issuer =
-    overrides?.issuer ?? env.AUTH_JWT_ISSUER ?? env.BETTER_AUTH_URL;
-  const audience = overrides?.audience ?? env.AUTH_JWT_AUDIENCE ?? 'rezics-api';
-  const jwksUrl =
-    typeof overrides?.jwksUrl === 'string'
-      ? overrides.jwksUrl
-      : new URL('/api/auth/jwks', issuer).toString();
-
-  if (!jwksUrl) {
-    throw new Error('Unauthorized: Missing JWKS configuration');
-  }
-
-  return {
-    issuer,
-    audience,
-    jwksUrl,
-    tokenName: overrides?.tokenName ?? NormalizedTokenName.AUTH_IDENTITY,
-    clockTolerance: overrides?.clockTolerance ?? 5,
-    requiredScope: overrides?.requiredScope ?? 'user',
-    enforceTransport: overrides?.enforceTransport ?? true,
-  };
-}
-
+/**
+ * Verify a JWT token with full control over verification parameters.
+ *
+ * This is the foundational verification function. It handles:
+ * - Transport-layer extraction (Bearer prefix, custom headers)
+ * - Algorithm enforcement (ES256 only)
+ * - Key resolution (JWKS URL, PEM, or raw key)
+ * - Automatic JWKS cache refresh on key-not-found errors
+ * - Optional scope enforcement
+ *
+ * @param tokenInput - Raw header value (may include "Bearer " prefix)
+ * @param options    - Verification parameters (key source, issuer, audience, etc.)
+ * @returns Verified token payload, protected header, and raw JWT string
+ */
 export async function verifyToken<TPayload extends JWTPayload = JWTPayload>(
   tokenInput: string | undefined,
   options: VerifyOptions,
 ): Promise<VerifiedToken<TPayload>> {
   const tokenName = options.tokenName ?? NormalizedTokenName.AUTH_IDENTITY;
-  const token = parseTransportToken(
+  const token = extractRawToken(
     tokenInput,
     tokenName,
     options.enforceTransport ?? true,
   );
-  const protectedHeader = decodeProtectedHeader(token);
 
-  if (protectedHeader.alg !== 'ES256') {
+  const header = decodeProtectedHeader(token);
+  if (header.alg !== 'ES256') {
     throw new Error('Unauthorized: Invalid token algorithm');
   }
-
-  if (shouldRequireKid(options) && !protectedHeader.kid) {
+  if (options.jwksUrl !== undefined && !header.kid) {
     throw new Error('Unauthorized: Missing key id');
   }
 
-  const verifyOptions: JWTVerifyOptions = {
+  const jwtOptions: JWTVerifyOptions = {
     issuer: options.issuer,
     audience: options.audience,
     clockTolerance: options.clockTolerance ?? 5,
   };
 
-  const verificationKey = await resolveVerificationKey(options);
+  const key = await resolveKey(options);
 
-  // TODO 优化这里的代码
-  let verified;
+  let result;
   try {
-    if (typeof verificationKey === 'function') {
-      // JWKS resolver
-      verified = await jwtVerify(token, verificationKey, verifyOptions);
-    } else {
-      // static key
-      verified = await jwtVerify(token, verificationKey, verifyOptions);
-    }
+    result = await jwtVerify(
+      token,
+      key as Parameters<typeof jwtVerify>[1],
+      jwtOptions,
+    );
   } catch (error) {
-    const code = (error as {code?: string} | undefined)?.code;
+    // On JWKS key-miss, invalidate cache and retry once
     if (
-      !('jwksUrl' in options) ||
-      typeof options.jwksUrl !== 'string' ||
-      code !== 'ERR_JWKS_NO_MATCHING_KEY'
+      options.jwksUrl !== undefined &&
+      (error as {code?: string} | undefined)?.code ===
+        'ERR_JWKS_NO_MATCHING_KEY'
     ) {
+      jwksCache.delete(options.jwksUrl);
+      result = await jwtVerify(
+        token,
+        getOrCreateJwks(options.jwksUrl),
+        jwtOptions,
+      );
+    } else {
       throw error;
     }
-
-    jwksStore.delete(options.jwksUrl);
-    verified = await jwtVerify(token, getJwks(options.jwksUrl), verifyOptions);
   }
 
   if (
     options.requiredScope &&
-    (!verified.payload.scope ||
-      !String(verified.payload.scope).includes(options.requiredScope))
+    !String(result.payload.scope ?? '').includes(options.requiredScope)
   ) {
     throw new Error('Unauthorized: Missing required scope');
   }
 
   return {
     token,
-    payload: verified.payload as TPayload,
-    protectedHeader: {
-      alg: protectedHeader.alg,
-      kid: protectedHeader.kid,
-    },
+    payload: result.payload as TPayload,
+    protectedHeader: {alg: header.alg, kid: header.kid},
   };
 }
 
-export async function verifyAuthIdentityToken<
-  TPayload extends JWTPayload = AuthIdentityTokenClaims & JWTPayload,
+/**
+ * Verify a Bearer-transported identity token (Authorization header).
+ * Defaults tokenName to AUTH_IDENTITY.
+ */
+export async function verifyBearerToken<
+  TPayload extends JWTPayload = JWTPayload,
 >(
   authorization: string | undefined,
-  options?: Partial<VerifyOptions>,
+  options: VerifyOptions,
 ): Promise<VerifiedToken<TPayload>> {
-  return verifyToken<TPayload>(authorization, defaultVerifyOptions(options));
+  return verifyToken<TPayload>(authorization, {
+    ...options,
+    tokenName: options.tokenName ?? NormalizedTokenName.AUTH_IDENTITY,
+  });
 }
 
+/**
+ * Verify a session token transported via a custom header.
+ * Defaults tokenName to REZICS_SESSION and disables scope enforcement.
+ */
 export async function verifySessionToken<
   TPayload extends JWTPayload = JWTPayload,
 >(
@@ -235,81 +223,4 @@ export async function verifySessionToken<
     tokenName: options.tokenName ?? NormalizedTokenName.REZICS_SESSION,
     requiredScope: undefined,
   });
-}
-
-export async function verifyBearerToken<
-  TPayload extends JWTPayload = AuthIdentityTokenClaims & JWTPayload,
->(
-  authorization: string | undefined,
-  options: VerifyOptions,
-): Promise<VerifiedToken<TPayload>> {
-  return verifyToken<TPayload>(authorization, {
-    ...options,
-    tokenName: options.tokenName ?? NormalizedTokenName.AUTH_IDENTITY,
-  });
-}
-
-function isVerifyOptions(value: unknown): value is Partial<VerifyOptions> {
-  if (!value || typeof value !== 'object') {
-    return false;
-  }
-
-  const record = value as Record<string, unknown>;
-  return (
-    'issuer' in record ||
-    'audience' in record ||
-    'jwksUrl' in record ||
-    'verificationKey' in record ||
-    'verificationKeyPem' in record ||
-    'tokenName' in record
-  );
-}
-
-function isSetLike(value: unknown): value is {status?: number} {
-  return Boolean(
-    value &&
-    typeof value === 'object' &&
-    'status' in (value as Record<string, unknown>),
-  );
-}
-
-export async function verifyAuth<
-  TPayload extends JWTPayload = AuthIdentityTokenClaims & JWTPayload,
->(
-  authorization: string | undefined,
-  jwtOrSetOrOptions?: unknown,
-  setOrOptions?: unknown,
-  maybeOptions?: Partial<VerifyOptions>,
-): Promise<TPayload> {
-  let set: {status?: number} | undefined;
-  let explicitOptions: Partial<VerifyOptions> | undefined;
-
-  if (isVerifyOptions(jwtOrSetOrOptions)) {
-    explicitOptions = jwtOrSetOrOptions;
-  } else if (isSetLike(jwtOrSetOrOptions)) {
-    set = jwtOrSetOrOptions;
-  }
-
-  if (isSetLike(setOrOptions)) {
-    set = setOrOptions;
-  } else if (isVerifyOptions(setOrOptions)) {
-    explicitOptions = setOrOptions;
-  }
-
-  if (maybeOptions) {
-    explicitOptions = maybeOptions;
-  }
-
-  try {
-    const verified = await verifyAuthIdentityToken<TPayload>(
-      authorization,
-      explicitOptions,
-    );
-    return verified.payload;
-  } catch (error) {
-    if (set) {
-      set.status = 401;
-    }
-    throw error;
-  }
 }

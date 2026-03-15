@@ -4,6 +4,7 @@ import {
   setToken as persistToken,
   parseJwt,
 } from '@package/api/react-query/jwt';
+import type {AuthIdentityTokenClaims} from '@package/contract';
 import {NormalizedTokenName} from '@package/contract';
 import {create} from 'zustand';
 import {devtools} from 'zustand/middleware';
@@ -23,11 +24,11 @@ export type AuthStoreState = {
 export const AUTH_STORE_KEY = 'auth-store';
 
 function toState(token: string | null) {
-  const payload = parseJwt(token);
+  const payload = parseJwt<AuthIdentityTokenClaims>(token);
   return {
     accessToken: token,
     isAuthenticated: !!token,
-    id: payload?.id ?? null,
+    id: payload?.unitId ?? payload?.sub ?? null,
     slug: payload?.slug ?? null,
     role: payload?.role ?? null,
   };

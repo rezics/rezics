@@ -1,30 +1,24 @@
-## ADDED Requirements
+## MODIFIED Requirements
 
-### Requirement: Pending verification users render authenticated-but-not-ready header chrome
+### Requirement: Pending-verification UI is driven by auth context and separated session steps
 
-The main app SHALL render a dedicated `PendingVerificationSection` in the main layout header when the browser session has authenticated auth identity but the user still requires verification or has not yet received a ready `rezics_session_token`.
+The main app SHALL derive onboarding and pending-verification UI from `auth_context_token` claims together with the separated ensure/session flow.
 
-#### Scenario: Newly registered user sees pending verification header state
+#### Scenario: Pending-verification header uses auth context before business user exists
 
-- **WHEN** a user completes registration, has an active auth session, and has not yet completed email verification
-- **THEN** `MainLayoutHeader` SHALL render `PendingVerificationSection`
-- **AND** it SHALL NOT render `AuthenticatedSection`
-- **AND** the section SHALL expose clear verification guidance or actions using the available auth-session data
+- WHEN the browser has `auth_identity_token` and `auth_context_token`
+- AND the user is authenticated in auth but has not completed the full ensure or main-session bootstrap
+- THEN `MainLayoutHeader` SHALL be able to render `PendingVerificationSection`
+- AND that section SHALL use auth-owned fields such as avatar, name, slug, and verification status from `auth_context_token`
 
-#### Scenario: Verified member-ready user sees authenticated header state
+#### Scenario: Ready header requires ensured user and main-server session
 
-- **WHEN** the auth session is verified and the frontend has obtained a valid `rezics_session_token`
-- **THEN** `MainLayoutHeader` SHALL render `AuthenticatedSection`
-- **AND** it SHALL stop rendering `PendingVerificationSection`
+- WHEN the user has completed the required ensure flow
+- AND the frontend has obtained the main-server session token from `/session/token`
+- THEN the main app SHALL render the ready authenticated header state instead of the pending-verification state
 
-#### Scenario: Pending verification header tolerates partial business profile data
+#### Scenario: Existing user can skip duplicate provisioning while preserving onboarding state
 
-- **WHEN** the user has auth identity but the main-server user has not yet been loaded or some business fields are unavailable
-- **THEN** `PendingVerificationSection` SHALL still render without crashing
-- **AND** it SHALL rely on auth-session data or optional fallbacks for any account summary it shows
-
-#### Scenario: Pending verification header avoids authenticated avatar dropdown
-
-- **WHEN** `PendingVerificationSection` is rendered
-- **THEN** it SHALL show basic auth-owned user information without the authenticated avatar-triggered dropdown
-- **AND** it SHALL render a verify-email button together with `MoreHorizMenu` on the right side of the header
+- WHEN `GET /users/ensure` returns that the user is already created
+- THEN the frontend SHALL treat that as a successful ensure result
+- AND it SHALL continue the bootstrap flow toward `/session/token` without trying to create the user again

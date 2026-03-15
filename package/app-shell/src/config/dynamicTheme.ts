@@ -256,7 +256,7 @@ export async function extractColorFromImage(imageUrl: string): Promise<string> {
 
 export function applyDynamicThemeToDOM(
   colors: DynamicColorScheme,
-  isDark: boolean = false,
+  _isDark: boolean = false,
 ) {
   const root = document.documentElement;
 

@@ -11,8 +11,11 @@ import {useAuthSessionStore, useAuthStore, useUserProfileStore} from '@/user/sta
 export const useAuth = () => {
   const hasIdentityToken = useAuthStore(state => state.isAuthenticated);
   const authSession = useAuthSessionStore(state => state.authSession);
+  const authContext = useAuthSessionStore(state => state.authContext);
   const capabilityLevel = useAuthSessionStore(state => state.capabilityLevel);
   const hasAuthSession = useAuthSessionStore(state => state.hasAuthSession);
+  const hasAuthContext = useAuthSessionStore(state => state.hasAuthContext);
+  const hasBusinessToken = useAuthSessionStore(state => state.hasBusinessToken);
   const needsOnboarding = useAuthSessionStore(state => state.needsOnboarding);
   const needsVerification = useAuthSessionStore(state => state.needsVerification);
   const status = useAuthSessionStore(state => state.status);
@@ -35,22 +38,23 @@ export const useAuth = () => {
   return {
     user: resolvedUser,
     authSession,
+    authContext,
     loading:
       status === 'loading' ||
       (capabilityLevel === 'member' && !resolvedUser ? isLoading : false),
     error: error ? (error as Error).message : undefined,
-    authenticated: hasIdentityToken || hasAuthSession,
+    authenticated: hasIdentityToken || hasAuthSession || hasAuthContext,
     isAuthenticated: hasIdentityToken,
     hasAuthSession,
-    hasBusinessToken: capabilityLevel === 'member',
+    hasBusinessToken,
     needsOnboarding,
     needsVerification,
     capabilityLevel,
     readyForApp:
-      hasAuthSession &&
+      (hasAuthSession || hasAuthContext) &&
       !needsOnboarding &&
       !needsVerification &&
-      capabilityLevel === 'member',
+      hasBusinessToken,
   };
 };
 

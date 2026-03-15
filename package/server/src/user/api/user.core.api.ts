@@ -1,46 +1,36 @@
 import {Elysia} from 'elysia';
 import type {
+  AuthContextTokenClaims,
   AuthIdentityTokenClaims,
+  EnsureUserResponse,
   UpdateUser,
   UserDTO,
   UserListQuery,
 } from '@package/contract';
 import {
+  NormalizedTokenName,
   userListQuerySchema,
   userParamsSchema,
+  ensureUserResponseSchema,
   updateUserSchema,
 } from '@package/contract';
 import {
   hasPermissionToUpdateUser,
   BasicAdminPermission,
+  normalizedTokenTransportMap,
 } from '@package/contract';
 import {userService} from '../service/user.service';
 import {mapUserToDTO} from '../model/mapper';
 import {meiliService} from '@/src/meili/meili.service';
 import {mapUserSearchDocToPublicProfile} from '@/src/meili/mapper';
 import {
-  assertMainServerEligibility,
-  getAuthSessionState,
-} from '@/src/auth/session-state';
-import {
   identityContextPlugin,
   sessionContextPlugin,
 } from '@/src/auth/context';
-import {
-  buildRezicsSessionClaims,
-  REZICS_SESSION_HEADER,
-} from '@/src/session/jwt';
+import {verifyAuthContextToken} from '../util';
 
-function setRezicsSessionHeader(
-  set: {headers?: unknown},
-  token: string,
-): void {
-  const headers = (set.headers ?? {}) as Record<string, string>;
-  set.headers = {
-    ...headers,
-    [REZICS_SESSION_HEADER]: token,
-  };
-}
+const AUTH_CONTEXT_HEADER =
+  normalizedTokenTransportMap[NormalizedTokenName.AUTH_CONTEXT].headerName;
 
 export const coreRoute = new Elysia()
   .use(
@@ -169,86 +159,61 @@ export const coreRoute = new Elysia()
       .use(identityContextPlugin)
       .get(
         '/ensure',
-        async ({headers, identity, jwt, set}): Promise<UserDTO> => {
+        async ({headers, identity, set}): Promise<EnsureUserResponse> => {
           const authorization = headers.authorization;
           if (!authorization) {
             set.status = 401;
             throw new Error('Unauthorized: Missing Authorization header');
           }
 
-          const sessionState = await getAuthSessionState(authorization);
-          assertMainServerEligibility(sessionState);
+          const existingUser = await userService
+            .getByUnitId(identity.unitId)
+            .catch(() => null);
 
-          let user;
-          try {
-            user = await userService.getByUnitId(identity.unitId);
-          } catch {
-            user = await userService.provisionFromJwt({
-              unitId: identity.unitId,
-              slug: identity.slug,
-            });
+          if (existingUser) {
+            return {
+              user: mapUserToDTO(existingUser),
+              alreadyCreated: true,
+            };
           }
 
-          const sessionToken = await jwt.sign(
-            buildRezicsSessionClaims({
-              unitId: user.unitId,
-              roles: (user.permission as {role?: string[]} | null)?.role,
-            }),
-          );
-          setRezicsSessionHeader(set, sessionToken);
+          const authContextHeader = headers[AUTH_CONTEXT_HEADER];
+          if (!authContextHeader) {
+            set.status = 401;
+            throw new Error(`Unauthorized: Missing ${AUTH_CONTEXT_HEADER} header`);
+          }
 
-          return mapUserToDTO(user);
+          const authContext = (
+            await verifyAuthContextToken<AuthContextTokenClaims>(
+              authContextHeader,
+            )
+          ).payload;
+          const authContextUnitId =
+            authContext.unitId ?? authContext.sub ?? authContext.id;
+
+          if (authContextUnitId !== identity.unitId) {
+            set.status = 401;
+            throw new Error('Unauthorized: Auth context token mismatch');
+          }
+
+          const user = await userService.provisionFromAuthContext({
+            unitId: identity.unitId,
+            slug: authContext.slug,
+            name: authContext.name,
+            avatar: authContext.avatar,
+          });
+
+          return {
+            user: mapUserToDTO(user),
+            alreadyCreated: false,
+          };
         },
         {
+          response: ensureUserResponseSchema,
           detail: {
             summary: 'Ensure current user',
             description:
-              'Verify auth identity, confirm auth-owned readiness, provision the business user if needed, and issue the main-server session token.',
-            tags: ['Users'],
-          },
-        },
-      )
-      .get(
-        '/session/refresh',
-        async ({headers, identity, jwt, set}): Promise<{ok: true}> => {
-          const authorization = headers.authorization;
-          if (!authorization) {
-            set.status = 401;
-            throw new Error('Unauthorized: Missing Authorization header');
-          }
-
-          const sessionState = await getAuthSessionState(authorization);
-          assertMainServerEligibility(sessionState);
-
-          const user = await userService.getByUnitId(identity.unitId);
-          const sessionToken = await jwt.sign(
-            buildRezicsSessionClaims({
-              unitId: user.unitId,
-              roles: (user.permission as {role?: string[]} | null)?.role,
-            }),
-          );
-          setRezicsSessionHeader(set, sessionToken);
-
-          return {ok: true};
-        },
-        {
-          detail: {
-            summary: 'Refresh main-server session',
-            description:
-              'Reissue `rezics_session_token` from a still-valid auth identity after re-checking auth-owned session readiness.',
-            tags: ['Users'],
-          },
-        },
-      )
-      .get(
-        '/me/jwt-payload',
-        async ({identity}): Promise<AuthIdentityTokenClaims> => {
-          return identity;
-        },
-        {
-          detail: {
-            summary: 'Get current user jwt payload',
-            description: 'Get current authenticated user jwt payload',
+              'Verify auth identity, ensure the local business user exists, and return whether the user already existed.',
             tags: ['Users'],
           },
         },

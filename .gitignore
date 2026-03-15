@@ -83,3 +83,5 @@ jspm_packages/
 .tanstack/
 
 dist/
+
+git-staged.txt

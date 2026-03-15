@@ -9,6 +9,7 @@ import {
   queryAccessToken,
   removeToken,
 } from '@package/api/react-query/jwt';
+import {authApi} from '@package/api/auth/auth.api';
 import {NormalizedTokenName} from '@package/contract';
 import {userApi} from '@package/api/user/user.api';
 import {
@@ -62,6 +63,24 @@ export function AuthProvider() {
     }
   }, []);
 
+  const syncDerivedTokenState = useCallback(() => {
+    useAuthStore.getState().syncFromStorage();
+    useAuthSessionStore
+      .getState()
+      .syncAuthContext(getToken(NormalizedTokenName.AUTH_CONTEXT));
+    useAuthSessionStore
+      .getState()
+      .syncBusinessToken(getToken(NormalizedTokenName.REZICS_SESSION));
+  }, []);
+
+  const clearMemberTokenState = useCallback(() => {
+    removeToken(NormalizedTokenName.AUTH_CONTEXT);
+    removeToken(NormalizedTokenName.REZICS_SESSION);
+    useAuthSessionStore.getState().syncAuthContext(null);
+    useAuthSessionStore.getState().syncBusinessToken(null);
+    clearAuthSessionState();
+  }, []);
+
   const scheduleRefresh = useCallback(
     (delayMs = 0) => {
       clearRefreshTimer();
@@ -73,22 +92,19 @@ export function AuthProvider() {
           }
 
           const refreshRetryPolicy = refreshRetryPolicyRef.current;
-          useAuthStore.getState().syncFromStorage();
-          useAuthSessionStore
-            .getState()
-            .syncBusinessToken(getToken(NormalizedTokenName.REZICS_SESSION));
+          syncDerivedTokenState();
 
           let authToken = getToken(NormalizedTokenName.AUTH_IDENTITY);
+          let authContextToken = getToken(NormalizedTokenName.AUTH_CONTEXT);
           let sessionToken = getToken(NormalizedTokenName.REZICS_SESSION);
 
           if (!authToken) {
             if (!hasAuthPresence()) {
-              removeToken(NormalizedTokenName.REZICS_SESSION);
-              clearAuthSessionState();
+              clearMemberTokenState();
             }
             try {
               authToken = await queryAccessToken({requirePresence: true});
-              useAuthStore.getState().syncFromStorage();
+              syncDerivedTokenState();
             } catch {
               refreshRetryPolicy.reset();
               clearRefreshTimer();
@@ -99,6 +115,10 @@ export function AuthProvider() {
           const authPayload = parseJwt(authToken);
           const authExpMs = authPayload?.exp
             ? authPayload.exp * 1000
+            : undefined;
+          const authContextPayload = parseJwt(authContextToken);
+          const authContextExpMs = authContextPayload?.exp
+            ? authContextPayload.exp * 1000
             : undefined;
           const sessionPayload = parseJwt(sessionToken);
           const sessionExpMs = sessionPayload?.exp
@@ -111,8 +131,15 @@ export function AuthProvider() {
           const sessionRefreshInMs = sessionExpMs
             ? sessionExpMs - REFRESH_BUFFER_MS - now
             : null;
+          const authContextRefreshInMs = authContextExpMs
+            ? authContextExpMs - REFRESH_BUFFER_MS - now
+            : 0;
 
-          const nextDelayMs = [authRefreshInMs, sessionRefreshInMs]
+          const nextDelayMs = [
+            authRefreshInMs,
+            authContextRefreshInMs,
+            sessionRefreshInMs,
+          ]
             .filter((value): value is number => value !== null && value > 0)
             .sort((left, right) => left - right)[0];
 
@@ -126,33 +153,47 @@ export function AuthProvider() {
           try {
             if (authRefreshInMs <= 0) {
               authToken = await queryAccessToken({requirePresence: true});
-              useAuthStore.getState().syncFromStorage();
+              syncDerivedTokenState();
+            }
+
+            if (authContextRefreshInMs <= 0 || !authContextToken) {
+              authContextToken = (await authApi.getContextToken(authToken ?? undefined)).token;
+              setToken(authContextToken, NormalizedTokenName.AUTH_CONTEXT);
+              useAuthSessionStore.getState().syncAuthContext(authContextToken);
             }
 
             const sessionState = await hydrateAuthSessionState({
               requirePresence: false,
             });
+            const authContextClaims = parseJwt(authContextToken);
+            if (authContextClaims?.verificationStatus === 'pending') {
+              removeToken(NormalizedTokenName.REZICS_SESSION);
+              useAuthSessionStore.getState().syncBusinessToken(null);
+              refreshRetryPolicy.reset();
+              if (isMountedRef.current) {
+                scheduleRefresh();
+              }
+              return;
+            }
             sessionToken = getToken(NormalizedTokenName.REZICS_SESSION);
             const refreshedSessionPayload = parseJwt(sessionToken);
             const refreshedSessionExpMs = refreshedSessionPayload?.exp
               ? refreshedSessionPayload.exp * 1000
               : undefined;
             const shouldRefreshSession =
-              Boolean(sessionToken) &&
               Boolean(sessionState?.authSession.canAcquireMemberToken) &&
-              (!refreshedSessionExpMs ||
+              (!sessionToken ||
+                !refreshedSessionExpMs ||
                 refreshedSessionExpMs - REFRESH_BUFFER_MS - Date.now() <= 0);
 
             if (shouldRefreshSession) {
-              const refreshedSession = await userApi.refreshSession();
-              if (refreshedSession.sessionToken) {
-                setToken(
-                  refreshedSession.sessionToken,
-                  NormalizedTokenName.REZICS_SESSION,
-                );
+              await userApi.ensure();
+              const refreshedSession = await userApi.issueSessionToken();
+              if (refreshedSession.token) {
+                setToken(refreshedSession.token, NormalizedTokenName.REZICS_SESSION);
                 useAuthSessionStore
                   .getState()
-                  .syncBusinessToken(refreshedSession.sessionToken);
+                  .syncBusinessToken(refreshedSession.token);
               }
             }
 
@@ -160,6 +201,8 @@ export function AuthProvider() {
           } catch {
             clearAuthPresence();
             clearAllTokens();
+            useAuthStore.getState().syncFromStorage();
+            useAuthSessionStore.getState().syncAuthContext(null);
             clearAuthSessionState();
             const retryDelayMs = refreshRetryPolicy.registerFailure();
             if (isMountedRef.current) {
@@ -177,7 +220,7 @@ export function AuthProvider() {
         Math.max(0, delayMs),
       );
     },
-    [clearRefreshTimer],
+    [clearMemberTokenState, clearRefreshTimer, syncDerivedTokenState],
   );
 
   useEffect(() => {
@@ -185,9 +228,7 @@ export function AuthProvider() {
     const retryPolicy = refreshRetryPolicyRef.current;
     retryPolicy.reset();
     useAuthStore.getState().init();
-    useAuthSessionStore
-      .getState()
-      .syncBusinessToken(getToken(NormalizedTokenName.REZICS_SESSION));
+    syncDerivedTokenState();
 
     function handleStorageChange(event: StorageEvent) {
       const strategy = getJwtTokenStrategy();
@@ -199,10 +240,7 @@ export function AuthProvider() {
 
     const handleTokenChange = async (event?: Event) => {
       retryPolicy.reset();
-      useAuthStore.getState().syncFromStorage();
-      useAuthSessionStore
-        .getState()
-        .syncBusinessToken(getToken(NormalizedTokenName.REZICS_SESSION));
+      syncDerivedTokenState();
 
       if (isTokenClearedEvent(event)) {
         clearRefreshTimer();
@@ -215,12 +253,50 @@ export function AuthProvider() {
       const authToken = getToken(NormalizedTokenName.AUTH_IDENTITY);
       if (!authToken && !hasAuthPresence()) {
         clearRefreshTimer();
-        removeToken(NormalizedTokenName.REZICS_SESSION);
+        clearMemberTokenState();
+        return;
+      }
+
+      let activeAuthToken = authToken;
+      if (!activeAuthToken) {
+        try {
+          activeAuthToken = await queryAccessToken({requirePresence: true});
+          syncDerivedTokenState();
+        } catch {
+          clearMemberTokenState();
+          return;
+        }
+      }
+
+      try {
+        const authContextToken = (await authApi.getContextToken(activeAuthToken ?? undefined)).token;
+        setToken(authContextToken, NormalizedTokenName.AUTH_CONTEXT);
+        useAuthSessionStore.getState().syncAuthContext(authContextToken);
+
+        const sessionState = await hydrateAuthSessionState({requirePresence: false});
+        if (
+          parseJwt(authContextToken)?.verificationStatus !== 'pending' &&
+          sessionState?.authSession.canAcquireMemberToken
+        ) {
+          await userApi.ensure();
+          const sessionTokenResponse = await userApi.issueSessionToken();
+          setToken(sessionTokenResponse.token, NormalizedTokenName.REZICS_SESSION);
+          useAuthSessionStore
+            .getState()
+            .syncBusinessToken(sessionTokenResponse.token);
+        } else {
+          removeToken(NormalizedTokenName.REZICS_SESSION);
+          useAuthSessionStore.getState().syncBusinessToken(null);
+        }
+      } catch {
+        clearAuthPresence();
+        clearAllTokens();
+        useAuthStore.getState().syncFromStorage();
+        useAuthSessionStore.getState().syncAuthContext(null);
         clearAuthSessionState();
         return;
       }
 
-      await hydrateAuthSessionState({requirePresence: !authToken});
       if (authToken || hasAuthPresence()) {
         scheduleRefresh();
       }
@@ -231,12 +307,11 @@ export function AuthProvider() {
         const authToken = getToken(NormalizedTokenName.AUTH_IDENTITY);
         if (!authToken && !hasAuthPresence()) {
           clearRefreshTimer();
-          removeToken(NormalizedTokenName.REZICS_SESSION);
-          clearAuthSessionState();
+          clearMemberTokenState();
           return;
         }
 
-        void hydrateAuthSessionState({requirePresence: !authToken});
+        void handleTokenChange();
         scheduleRefresh();
       }
     };
@@ -255,7 +330,7 @@ export function AuthProvider() {
       window.removeEventListener('storage', handleStorageChange);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [clearRefreshTimer, scheduleRefresh]);
+  }, [clearMemberTokenState, clearRefreshTimer, scheduleRefresh, syncDerivedTokenState]);
 
   return null;
 }

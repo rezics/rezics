@@ -1,14 +1,50 @@
 import {beforeEach, describe, expect, mock, test} from 'bun:test';
+import {NormalizedTokenName} from '@package/contract';
+
+process.env.VITE_API_URL ??= 'http://api.example';
+process.env.VITE_AUTH_API_URL ??= 'http://auth.example';
+process.env.VITE_TURNSTILE_SITE_KEY ??= 'turnstile-test-key';
 
 const signOutMock = mock(async () => ({success: true}));
+const getContextTokenMock = mock(async () => ({
+  token: 'context-token',
+  claims: {
+    id: 'user-1',
+    unitId: 'user-1',
+    sub: 'user-1',
+    slug: 'reader',
+    name: 'Reader',
+    avatar: null,
+    emailVerified: true,
+    verificationStatus: 'verified',
+  },
+}));
+const ensureMock = mock(async () => ({
+  user: {unitId: 'user-1', name: 'Reader'},
+  alreadyCreated: false,
+}));
+const issueSessionTokenMock = mock(async () => ({token: 'member-token'}));
 const removeQueriesMock = mock(() => undefined);
 const clearAuthMock = mock(() => undefined);
 const clearProfileMock = mock(() => undefined);
 const clearAuthSessionStateMock = mock(() => undefined);
+const syncAuthContextMock = mock(() => undefined);
+const syncBusinessTokenMock = mock(() => undefined);
+const setUserMock = mock(() => undefined);
+const hydrateAuthSessionStateMock = mock(async () => ({
+  session: {id: 'session-1'},
+  user: {id: 'user-1'},
+  authSession: {
+    canAcquireMemberToken: true,
+    needsOnboarding: false,
+    needsEmailVerification: false,
+  },
+}));
 
 mock.module('@package/api/auth/auth.api', () => ({
   authApi: {
     signOut: signOutMock,
+    getContextToken: getContextTokenMock,
   },
 }));
 
@@ -27,6 +63,8 @@ mock.module('@package/api/user/user.keys', () => ({
 mock.module('@package/api/user/user.api', () => ({
   userApi: {
     me: mock(),
+    ensure: ensureMock,
+    issueSessionToken: issueSessionTokenMock,
   },
 }));
 
@@ -38,9 +76,13 @@ mock.module('@/app/provider/reactQueryUtil', () => ({
 
 mock.module('@/user/state', () => ({
   clearAuthSessionState: clearAuthSessionStateMock,
-  hydrateAuthSessionState: mock(),
+  hydrateAuthSessionState: hydrateAuthSessionStateMock,
   useAuthSessionStore: {
-    getState: () => ({hasBusinessToken: false}),
+    getState: () => ({
+      hasBusinessToken: false,
+      syncAuthContext: syncAuthContextMock,
+      syncBusinessToken: syncBusinessTokenMock,
+    }),
   },
   useAuthStore: {
     getState: () => ({
@@ -51,32 +93,92 @@ mock.module('@/user/state', () => ({
   useUserProfileStore: {
     getState: () => ({
       clearProfile: clearProfileMock,
-      setUser: mock(),
+      setUser: setUserMock,
     }),
   },
 }));
 
-describe('logout', () => {
+describe('auth handlers', () => {
   beforeEach(() => {
+    globalThis.window = {
+      dispatchEvent: () => true,
+      location: {
+        reload: () => undefined,
+      },
+    } as unknown as Window & typeof globalThis;
+    globalThis.localStorage = (() => {
+      const store = new Map<string, string>();
+      return {
+        getItem: (key: string) => store.get(key) ?? null,
+        setItem: (key: string, value: string) => {
+          store.set(key, value);
+        },
+        removeItem: (key: string) => {
+          store.delete(key);
+        },
+        clear: () => {
+          store.clear();
+        },
+      };
+    })() as Storage;
     signOutMock.mockClear();
+    getContextTokenMock.mockClear();
+    ensureMock.mockClear();
+    issueSessionTokenMock.mockClear();
+    hydrateAuthSessionStateMock.mockClear();
     removeQueriesMock.mockClear();
     clearAuthMock.mockClear();
     clearProfileMock.mockClear();
     clearAuthSessionStateMock.mockClear();
+    syncAuthContextMock.mockClear();
+    syncBusinessTokenMock.mockClear();
+    setUserMock.mockClear();
+  });
+
+  test('acquires auth context before ensuring the user and issuing the member session', async () => {
+    const {acquireMemberAccessIfReady} = await import('./handler');
+    const {getToken} = await import('@package/api/react-query/jwt');
+
+    await acquireMemberAccessIfReady();
+
+    expect(getContextTokenMock).toHaveBeenCalledTimes(1);
+    expect(hydrateAuthSessionStateMock).toHaveBeenCalledTimes(1);
+    expect(ensureMock).toHaveBeenCalledTimes(1);
+    expect(issueSessionTokenMock).toHaveBeenCalledTimes(1);
+    expect(getToken(NormalizedTokenName.AUTH_CONTEXT)).toBe('context-token');
+    expect(getToken(NormalizedTokenName.REZICS_SESSION)).toBe('member-token');
+    expect(syncAuthContextMock).toHaveBeenCalledWith('context-token');
+    expect(syncBusinessTokenMock).toHaveBeenCalledWith('member-token');
+    expect(setUserMock).toHaveBeenCalledWith({
+      unitId: 'user-1',
+      name: 'Reader',
+    });
   });
 
   test('clears auth, auth-session, profile, and cached auth queries', async () => {
     const {logout} = await import('./handler');
+    const {getToken, setToken} = await import('@package/api/react-query/jwt');
+
+    setToken('identity-token', NormalizedTokenName.AUTH_IDENTITY);
+    setToken('context-token', NormalizedTokenName.AUTH_CONTEXT);
+    setToken('member-token', NormalizedTokenName.REZICS_SESSION);
 
     await logout(true);
 
     expect(signOutMock).toHaveBeenCalledTimes(1);
+    expect(getToken(NormalizedTokenName.AUTH_IDENTITY)).toBeNull();
+    expect(getToken(NormalizedTokenName.AUTH_CONTEXT)).toBeNull();
+    expect(getToken(NormalizedTokenName.REZICS_SESSION)).toBeNull();
     expect(clearAuthMock).toHaveBeenCalledTimes(1);
+    expect(syncAuthContextMock).toHaveBeenCalledWith(null);
+    expect(syncBusinessTokenMock).toHaveBeenCalledWith(null);
     expect(clearAuthSessionStateMock).toHaveBeenCalledTimes(1);
     expect(clearProfileMock).toHaveBeenCalledTimes(1);
-    expect(removeQueriesMock.mock.calls).toEqual([
-      [{queryKey: ['auth']}],
-      [{queryKey: ['user']}],
-    ]);
+    expect(removeQueriesMock).toHaveBeenCalledTimes(2);
+    const calls = removeQueriesMock.mock.calls as unknown as Array<
+      [{queryKey: string[]}]
+    >;
+    expect(calls[0]?.[0]).toEqual({queryKey: ['auth']});
+    expect(calls[1]?.[0]).toEqual({queryKey: ['user']});
   });
 });

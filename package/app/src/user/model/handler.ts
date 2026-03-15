@@ -1,7 +1,7 @@
 import {authApi} from '@package/api/auth/auth.api';
 import {authKeys} from '@package/api/auth/auth.keys';
 import {NormalizedTokenName} from '@package/contract';
-import {clearAllTokens, setToken} from '@package/api/react-query/jwt';
+import {clearAllTokens, getToken, setToken} from '@package/api/react-query/jwt';
 import {userKeys} from '@package/api/user/user.keys';
 import {qc} from '@/app/provider/reactQueryUtil';
 import {userApi} from '@package/api/user/user.api';
@@ -13,7 +13,20 @@ import {
   useUserProfileStore,
 } from '@/user/state';
 
+function clearMemberState() {
+  setToken(null, NormalizedTokenName.AUTH_CONTEXT);
+  setToken(null, NormalizedTokenName.REZICS_SESSION);
+  useAuthSessionStore.getState().syncAuthContext(null);
+  useAuthSessionStore.getState().syncBusinessToken(null);
+  useUserProfileStore.getState().clearProfile();
+}
+
 async function ensureMemberAccess() {
+  const authToken = getToken(NormalizedTokenName.AUTH_IDENTITY);
+  const authContext = await authApi.getContextToken(authToken ?? undefined);
+  setToken(authContext.token, NormalizedTokenName.AUTH_CONTEXT);
+  useAuthSessionStore.getState().syncAuthContext(authContext.token);
+
   const sessionState = await hydrateAuthSessionState();
   const hasAuthSession = Boolean(sessionState?.session?.id);
 
@@ -21,20 +34,19 @@ async function ensureMemberAccess() {
     throw new Error('Authentication session unavailable');
   }
 
-  if (!sessionState?.authSession.canAcquireMemberToken) {
-    setToken(null, NormalizedTokenName.REZICS_SESSION);
-    useAuthSessionStore.getState().syncBusinessToken(null);
-    useUserProfileStore.getState().clearProfile();
+  if (
+    authContext.claims.verificationStatus !== 'verified' ||
+    !sessionState?.authSession.canAcquireMemberToken
+  ) {
+    clearMemberState();
     return {sessionState, user: null};
   }
 
   const ensured = await userApi.ensure();
-  if (!ensured.sessionToken) {
-    throw new Error('Failed to acquire rezics session token');
-  }
+  const sessionToken = (await userApi.issueSessionToken()).token;
 
-  setToken(ensured.sessionToken, NormalizedTokenName.REZICS_SESSION);
-  useAuthSessionStore.getState().syncBusinessToken(ensured.sessionToken);
+  setToken(sessionToken, NormalizedTokenName.REZICS_SESSION);
+  useAuthSessionStore.getState().syncBusinessToken(sessionToken);
   useUserProfileStore.getState().setUser(ensured.user);
 
   return {
@@ -112,6 +124,8 @@ export const logout = async (disableReload = false) => {
   await authApi.signOut();
   clearAllTokens();
   useAuthStore.getState().clearAuth();
+  useAuthSessionStore.getState().syncAuthContext(null);
+  useAuthSessionStore.getState().syncBusinessToken(null);
   clearAuthSessionState();
   useUserProfileStore.getState().clearProfile();
   qc.removeQueries({queryKey: authKeys.all()});

@@ -1,236 +1,178 @@
 ## Context
 
-`package/auth` already verifies and issues ES256 JWTs with JOSE-based verification helpers, while `package/server` recently removed `@elysiajs/jwt` and now depends on auth-issued bearer tokens more directly. That simplified the stack temporarily, but it left three gaps:
+The current draft for `refine-user-session-and-verification-flow` still centers the main server around two behaviors that are no longer acceptable:
 
-- `GET /users/ensure` is not implemented even though the frontend needs it in both registration and login handoffs.
-- `package/server` no longer has its own session token for fast permission screening and route-local metadata.
-- `package/app` still maps account chrome primarily from business-user presence, which does not work for newly registered users who are authenticated in auth but are not yet verified or member-ready.
+- `package/server` calls auth-owned session-state APIs directly to decide whether it can ensure a user or refresh a session.
+- `GET /users/ensure` is treated as both the provisioning handoff and the place where the main-server JWT is issued.
 
-The target design spans `package/auth`, `package/server`, `package/app`, `package/app-shell`, `package/api`, and `package/contract`. It must preserve asymmetric JWT verification, keep verification logic centralized in `package/auth/src/jwt/verify.ts`, and define a clear contract between auth identity, main-server session state, and business-domain permissions.
+That design makes `package/server` depend on auth availability, duplicates auth-owned verification state, and couples two operations that now need different responsibilities. It also leaves `package/auth/src/jwt/verify.ts` too close to env-bound configuration, which would leak auth-only setup into `package/server`.
+
+The revised target design keeps auth as the issuer of identity and user-context tokens, keeps the frontend as the handoff layer between auth and main, and makes the main server verify only the tokens it receives from the client.
 
 ## Goals / Non-Goals
 
 **Goals:**
 
-- Make `/users/ensure` the explicit verified handoff for business-user provisioning in login and registration flows.
-- Standardize token naming and transport so each token has one issuer, one purpose, and one header contract.
-- Reintroduce a main-server-issued `rezics_session_token` for permission prefiltering with an independent main-server signing secret.
-- Keep main-server permission enforcement two-layered: token snapshot first, database truth second.
-- Move issuer-aware JWT parsing and verification into `package/auth/src/jwt/verify.ts`, with `package/server` consuming re-exported helpers only and passing verifier inputs explicitly instead of relying on env-bound global state.
-- Render a dedicated pending-verification header state in `package/app` whenever the user has auth identity but is not yet member-ready.
-- Support a multi-token frontend strategy where `package/api` and `package/app-shell` expose configuration hooks or props, and feature packages provide env-derived token key lists with safe defaults.
+- Add an auth-owned `auth_context_token` that contains the fields required for onboarding, verification-aware UI, and first-time user creation.
+- Ensure `package/server` does not call auth server APIs directly during ensure or session issuance.
+- Make `/users/ensure` responsible only for checking login state and creating the business user when missing.
+- Move main-server JWT issuance to a dedicated `/session/token` endpoint.
+- Disable `/jwt-payload` and let frontend packages parse payloads locally.
+- Refactor `package/auth/src/jwt/verify.ts` so the core verifier accepts all secrets, keys, and issuer settings as parameters rather than reading env.
+- Keep env-bound verifier helpers available only through auth-local wrapper files, and prevent `package/server` from depending on them.
+- Preserve the existing pending-verification UX intent, but source it from `auth_context_token` and the separated ensure/session workflow.
 
 **Non-Goals:**
 
-- Redesign the full permissions schema beyond encoding the current main-server role into the session token.
-- Replace database-backed permission checks with token-only authorization.
-- Introduce symmetric JWT algorithms or opaque session cookies for these flows.
-- Solve notification-server or search-server token issuance in this change beyond reserving normalized names such as `notification_session_token` and `search_session_token`.
+- Redesign the full auth provider integration or token-issuance stack beyond adding `auth_context_token`.
+- Introduce a new cookie-based session model.
+- Define a new generic payload-inspection endpoint to replace `/jwt-payload`.
+- Expand the main-server session token payload beyond what is already needed for main-server authorization.
 
 ## Decisions
 
-### Decision: Adopt a dual-token model with normalized issuer-specific names
+### Decision: Auth issues a dedicated `auth_context_token` for user-context handoff
 
-The system will distinguish between:
+`package/auth` will expose a new endpoint that returns `auth_context_token`. The token will be signed with the same signing key material as `auth_identity_token`, but it serves a different purpose: it packages the auth-owned user context required by frontend onboarding and first-time main-server provisioning.
 
-- `auth_identity_token`: issued by `package/auth`, transported as `Authorization: Bearer <token>`, used to prove user identity and readiness claims from the auth service.
-- `rezics_session_token`: issued by `package/server`, transported as `x-rezics_session_token: <token>`, used for main-server permission prefiltering and lightweight session metadata.
+Minimum required claims or equivalent payload fields:
 
-Future service tokens such as `notification_session_token` and `search_session_token` will follow the same `<issuer>_<token-type>` naming contract, but they are out of implementation scope for this change.
+- stable user id
+- verification status
+- avatar
+- name
+- slug
+- any other auth-owned fields needed to create the main-server `User`
 
-Rationale:
-
-- Each token becomes unambiguous in logs, headers, and frontend persistence.
-- The transport contract itself documents issuer intent.
-- Cross-service confusion between auth identity and business authorization is reduced.
-
-Alternatives considered:
-
-- Continue overloading `Authorization` for every token. Rejected because it hides issuer boundaries and encourages accidental token reuse.
-- Keep server routes auth-only with no local session token. Rejected because permission-prefiltering and quick metadata access become more expensive and less explicit.
-
-### Decision: Make `/users/ensure` the only provisioning endpoint for auth-to-business handoff
-
-`GET /users/ensure` will verify `auth_identity_token`, call the existing auth session-state surface at `/api/auth/get-session-state` to confirm the current login and verification state, create the user if missing, and return the canonical `UserDTO`. The same flow will mint `rezics_session_token` once the user is member-ready according to auth-owned readiness fields.
-
-`GET /users/me` remains a business-profile read endpoint and no longer needs to be the place where first-time provisioning happens.
+The frontend will request this token after login or session recovery and pass it onward when it needs verification-aware UI or first-time ensure.
 
 Rationale:
 
-- Registration and login now share one explicit handoff contract.
-- Provisioning rules become easier to reason about and test.
-- The frontend can separate "authenticated in auth" from "ready in main server" cleanly.
-- The readiness gate is backed by explicit auth-server state rather than by frontend assumptions alone.
-- Main-server readiness logic stays a thin proxy over auth-owned state instead of becoming a second user-state system.
+- The auth server remains the source of truth for verification and user-profile context.
+- The main server no longer needs to call auth just to learn onboarding fields.
+- The frontend becomes the explicit boundary between auth and main services.
 
 Alternatives considered:
 
-- Keep provisioning inside `GET /users/me`. Rejected because the frontend already needs a dedicated ensure step and the old behavior blurs read vs bootstrap responsibilities.
-- Provision immediately during auth registration. Rejected because the user specifically wants provisioning gated behind the verified handoff to the main server.
+- Keep calling auth session-state APIs from `package/server`. Rejected because the user explicitly wants the main server offline from auth.
+- Expand `auth_identity_token` until it doubles as the full context token. Rejected because identity proof and provisioning context have different responsibilities and lifecycles.
 
-### Decision: Reintroduce main-server JWT issuance for permission snapshotting, but keep database truth authoritative
+### Decision: `GET /users/ensure` only ensures the business user
 
-`package/server` will use `@elysiajs/jwt` again to issue its own asymmetric session token. The token payload will be intentionally narrow and will currently include only:
+`GET /users/ensure` will:
 
-- `permission.role`: one of `ROOT`, `ADMIN`, `USER`, `BLOCKED`
+1. Verify `auth_identity_token` to confirm the caller is logged in.
+2. Query the main-server database for an existing business user.
+3. If the user already exists, return an explicit "already created" success result and stop.
+4. If the user does not exist, verify `auth_context_token`.
+5. Create the user from verified `auth_context_token` claims.
 
-Permission-protected routes will:
-
-1. Verify `x-rezics_session_token`.
-2. Reject clearly unauthorized requests from the token snapshot before querying the database.
-3. Load the current user permissions from the database.
-4. Re-evaluate authorization against the persisted permission state before completing the handler.
+`GET /users/ensure` will not issue the main-server JWT and will not contact auth server APIs.
 
 Rationale:
 
-- Most unauthorized traffic is rejected cheaply.
-- Permission freezes or downgrades still take effect immediately because the database remains authoritative.
-- The token avoids becoming a second source of truth for mutable business data.
-- Main-server user readiness does not depend on local business-user state beyond the existence of service-specific data.
+- The endpoint now has one responsibility: ensuring the local user exists.
+- Existing users are handled cheaply with a local lookup.
+- New-user creation uses auth-owned context without adding service-to-service coupling.
 
 Alternatives considered:
 
-- Token-only permission enforcement. Rejected because it delays revocations until token refresh.
-- Database-only permission checks. Rejected because it removes the requested prefilter and increases load on protected endpoints.
+- Keep issuing the main-server JWT inside `/users/ensure`. Rejected because "ensure" should not also be "create session".
+- Create the user directly from `auth_identity_token`. Rejected because the user wants `auth_context_token` to carry the full provisioning fields.
 
-### Decision: Refresh main-server session tokens from verified auth identity
+### Decision: Main-server JWT issuance moves to `/session/token`
 
-When `rezics_session_token` expires, the frontend will first refresh or confirm `auth_identity_token`. Only if auth identity is still available should any downstream token refresh proceed. The frontend will then present `auth_identity_token` to a main-server refresh endpoint. The main server will verify the auth token, request `/api/auth/get-session-state`, and sign a replacement `rezics_session_token` only if the user is still logged in and still eligible according to auth-owned readiness.
+The main server will expose a dedicated `/session/token` endpoint for minting its own JWT. This endpoint is independent from `/users/ensure` and should operate only after login has been proven and the business user has already been ensured.
+
+The endpoint may verify `auth_identity_token` and use locally persisted user data to mint the main-server session token, but it must not call auth services directly. If verification-specific behavior is needed by the session endpoint, the frontend must supply the required auth token context rather than relying on a server-to-server call.
 
 Rationale:
 
-- The auth server remains the source of truth for login state.
-- Main-server session refresh can stay low-retry and high-performance because it reuses current auth identity instead of requiring a full sign-in flow.
-- Revocations and verification regressions are caught during refresh rather than only during business requests.
-- The refresh order is deterministic: no non-auth token may refresh when `auth_identity_token` is unavailable.
+- Session issuance becomes explicit and separately testable.
+- The frontend can control the sequence: auth login -> auth context fetch -> ensure -> session token.
+- Main-server session semantics no longer leak into onboarding/provisioning.
 
 Alternatives considered:
 
-- Refresh `rezics_session_token` without re-checking auth status. Rejected because it allows stale auth sessions to outlive the source of truth.
-- Force the frontend to call `/users/ensure` on every expiration. Rejected because refresh and provisioning are related but distinct concerns.
+- Keep a hidden session side effect in `/users/ensure`. Rejected because it makes retries and error handling ambiguous.
+- Eliminate the main-server JWT entirely. Rejected because the broader change still expects a main-server session token.
 
-### Decision: Use `@elysiajs/jwt` only for main-server token issuance
+### Decision: `/jwt-payload` is disabled and frontend packages parse JWT payloads locally
 
-`@elysiajs/jwt` will be used in `package/server` only to sign `rezics_session_token`. All verification paths will remain in auth-owned shared helpers exported from `package/auth`, even for main-server tokens. This is acceptable because the Elysia plugin delegates JWT behavior to JOSE-compatible configuration rather than introducing an incompatible verification model.
+Any frontend package that needs token claims will decode the JWT payload client-side. Shared packages such as `package/api` and `package/app-shell` may provide helpers for safe payload parsing, but they will not rely on `/jwt-payload`.
 
 Rationale:
 
-- Signing remains integrated with Elysia where it is useful.
-- Verification remains centralized and reusable.
-- Main and auth services can keep separate private/public key systems without duplicating verification logic.
+- Payload inspection does not need a network call.
+- Removing the endpoint reduces backend surface area and simplifies auth/session orchestration.
+- The client already has the token and can parse non-secret claims locally.
 
 Alternatives considered:
 
-- Verify main-server tokens with `@elysiajs/jwt` inside `package/server`. Rejected because it would split verification logic across packages.
-- Avoid `@elysiajs/jwt` entirely. Rejected because the requested server integration benefits from its Elysia-native issuance flow.
+- Keep `/jwt-payload` as a convenience API. Rejected because it adds little value and complicates the contract.
 
-### Decision: Centralize issuer-aware verification in `package/auth/src/jwt/verify.ts`
+### Decision: `package/auth/src/jwt/verify.ts` becomes a pure verification core
 
-`package/auth/src/jwt/verify.ts` will become the shared verification entry point for all normalized token types. It will parse transport input, infer or validate token purpose, and verify tokens against issuer-specific asymmetric keys or JWKS configuration supplied by callers.
+`package/auth/src/jwt/verify.ts` will expose verification functions that require callers to pass issuer configuration, verification keys or secrets, transport expectations, and token-purpose rules explicitly. It will not import env values directly.
 
-`package/server/src/user/util/index.ts` and other server-local utility layers should only re-export auth-owned verification helpers or lightweight adapters.
+Auth-local env readers and convenience wrappers will move into separate files under `package/auth/src/jwt/`, and `package/auth/src/jwt/index.ts` may re-export them for auth-package usage. `package/server` must not import those env-bound wrappers. If `package/server` needs a simpler call site, it should implement its own wrapper that supplies parameters from server-local configuration.
 
 Rationale:
 
-- One verification contract avoids issuer drift across packages.
-- New token types can be added without duplicating JOSE logic across services.
-- The server package stays focused on business behavior rather than cryptographic plumbing.
-- The auth package remains reusable because verification secrets and key sources are injected instead of hidden behind package-local env assumptions.
+- The shared verifier stays reusable and deterministic.
+- Auth-local env assumptions stop leaking across package boundaries.
+- The server can remain explicit about which issuer and key material it is verifying against.
 
 Alternatives considered:
 
-- Keep separate verifier implementations in auth and server. Rejected because the user explicitly wants `package/auth/jwt/verify` to own the major responsibility.
-- Move all verification into `package/server`. Rejected because auth already owns the core asymmetric verification stack and issuer metadata.
+- Keep env access inside `verify.ts`. Rejected because it violates the desired package boundary.
+- Duplicate verifier logic in `package/server`. Rejected because the user still wants auth to own the shared verification core.
 
-### Decision: Hydrate verified token payloads into request context middleware once per request
+### Decision: Frontend state tracks three token contexts
 
-`package/server` will verify normalized JWT transports in middleware and write the verified payloads onto request context so handlers do not parse or verify JWTs repeatedly. The request context contract will be:
+The client will model:
 
-- `ctx.identity`: verified `auth_identity_token` payload from `Authorization: Bearer <token>` when the route requires login identity
-- `ctx.session`: verified `rezics_session_token` payload from `x-rezics_session_token` when the route requires permission-bearing main-server authorization
+- `auth_identity_token` for login proof
+- `auth_context_token` for auth-owned user context and verification-aware UI
+- the main-server session token for server authorization
 
-Route-level behavior will follow this split:
+The frontend sequence becomes:
 
-1. Routes that require login but not business authorization must require `ctx.identity`.
-2. Routes that require permissions must require both `ctx.identity` and `ctx.session`.
-3. Permission-protected routes must still re-check persisted database permissions after the `ctx.session.permission.role` prefilter.
+1. Recover or acquire `auth_identity_token`.
+2. Request `auth_context_token`.
+3. Call `/users/ensure`.
+4. Request `/session/token`.
+
+UI selectors will derive pending-verification and ready states from `auth_context_token` claims plus the presence of the main-server session token, without calling `/jwt-payload`.
 
 Rationale:
 
-- JWT verification runs once per request rather than once per helper or service call.
-- Handlers become simpler and use `ctx.identity` / `ctx.session` directly instead of calling verifier utilities repeatedly.
-- Identity proof and permission-bearing authorization remain distinct without duplicating parsing or verification work.
+- Each token has one job.
+- The client can orchestrate the cross-service handoff explicitly.
+- Pending-verification UI can use auth-owned fields before the business profile exists.
 
 Alternatives considered:
 
-- Keep helper functions that verify tokens inside each handler. Rejected because it repeats work and spreads transport/auth rules across handlers.
-- Decode payloads without central middleware and trust unverified headers downstream. Rejected because every consumer would need to reason about verification state manually.
-
-### Decision: Keep frontend multi-token wiring configurable at package boundaries
-
-`package/api/src/react-query/jwt.ts` and `package/app-shell/src/provider/AuthProvider.tsx` are shared package surfaces, so they should expose configuration inputs rather than hardcoding app-specific token keys. The app package will provide env-derived token key lists with safe defaults while the persisted Zustand `auth-store` key remains unchanged.
-
-Configuration boundary:
-
-- Shared packages (`package/api`, `package/app-shell`) own token primitives, refresh sequencing, and default token-key names.
-- Consuming apps may override token storage keys and auth base URL through configuration hooks, but they must not rename or repurpose the legacy `auth-store` key used for `auth_identity_token`.
-- `rezics_session_token` storage may vary by app, but its transport header and normalized token name remain fixed across packages.
-
-Rationale:
-
-- Shared packages stay reusable across apps and shells.
-- Token-key configuration can evolve without rewriting the storage primitives.
-- The refresh loop can be optimized for low retry behavior while still supporting multiple token types cleanly.
-- One coordinator can enforce auth-first refresh order and prevent recursive retries.
-
-Alternatives considered:
-
-- Hardcode token keys inside `package/api` and `package/app-shell`. Rejected because those packages should not own app-specific env policy.
-- Introduce separate stores per token immediately. Rejected because the current requirement only needs configurable token handling while preserving the existing auth store key.
-
-### Decision: Derive header chrome from auth readiness, not only from business profile existence
-
-`package/app` will render a new `PendingVerificationSection` when the user has auth identity but has not completed verification or is still missing `rezics_session_token`. `AuthenticatedSection` renders only when the main-server session is ready.
-
-`PendingVerificationSection` should use basic auth-owned user info, should not render the authenticated avatar-triggered dropdown, and should instead render a verify-email button together with `MoreHorizMenu`.
-
-Rationale:
-
-- The existing `currentUser ? AuthenticatedSection : UnauthenticatedSection` split is too coarse for the requested lifecycle.
-- Registration and login now both require a visible intermediate authenticated state.
-- The UI behavior matches the backend handoff contract more closely.
-
-Alternatives considered:
-
-- Keep rendering `AuthenticatedSection` for all auth-session users. Rejected because it implies member readiness before verification is complete.
-- Keep rendering `UnauthenticatedSection` until `UserDTO` exists. Rejected because the user is signed in and should see account-aware verification guidance.
+- Collapse context back into one token. Rejected because the new boundary depends on distinct identity and user-context responsibilities.
 
 ## Risks / Trade-offs
 
-- [Risk] `auth_identity_token` and `rezics_session_token` can drift in freshness during rollout. → Mitigation: refresh `auth_identity_token` first, never refresh any downstream token without it, and make invalidation order explicit in the shared frontend token helpers.
-- [Risk] Reintroducing `@elysiajs/jwt` could diverge from the JOSE verification model already used in auth. → Mitigation: use `@elysiajs/jwt` only for main-server token issuance, keep verification in auth-owned shared helpers, and rely on the plugin's JOSE-compatible configuration surface. Plugin document https://elysiajs.com/plugins/jwt
-- [Risk] Main-server readiness checks could still drift if auth status and local rules are evaluated in different places. → Mitigation: treat auth as the single source of truth for session readiness, proxy readiness through `/api/auth/get-session-state`, and test verified, unverified, and expired-session cases explicitly. [get-session-state](@/package/auth/src/openapi/session.ts)
-- [Risk] Pending-verification UI may lack some business-profile fields and break assumptions in shared header components. → Mitigation: design `PendingVerificationSection` around auth-owned fields (name, avatar, How to query reference auth prisma schema), a verify-email button, and `MoreHorizMenu` rather than the authenticated avatar dropdown.
-- [Risk] Frontend multi-token refresh can become noisy or recursive if each token path retries independently. → Mitigation: keep `AuthProvider` as the single refresh coordinator, enforce auth-first refresh order, and make token strategy configurable rather than duplicating loops. 
+- [Risk] `auth_context_token` may drift from the current auth user record if its issue cadence is too loose. -> Mitigation: issue it on demand from auth session endpoints and treat it as short-lived onboarding context.
+- [Risk] Existing frontend code may still assume `/users/ensure` returns a user DTO and a ready session in one step. -> Mitigation: update contracts and bootstrap flows together, and add tests for the new multi-step sequence.
+- [Risk] Removing `/jwt-payload` can break hidden callers. -> Mitigation: grep the repo during implementation, migrate callers to local parsing helpers, and add compile/test coverage for shared auth utilities.
+- [Risk] Auth-local wrapper exports could still be imported by `package/server` accidentally. -> Mitigation: keep the pure verifier and env-bound wrappers in separate files, document the boundary in `index.ts`, and add server-side lint or test coverage around the intended import surface.
 
 ## Migration Plan
 
-1. Extend shared token contracts in `package/contract` and `package/api` to distinguish `auth_identity_token` from `rezics_session_token` and define configurable token-key inputs with safe defaults.
-2. Refactor `package/auth/src/jwt/verify.ts` into an issuer-aware verification module with injected secret or JWKS inputs, and convert `package/server/src/user/util/index.ts` into a re-export layer.
-3. Reintroduce `@elysiajs/jwt` in `package/server` with an independent main-server signing secret for `rezics_session_token`.
-4. Implement `/users/ensure` and the related main-server refresh flow so auth status is checked through `/api/auth/get-session-state` before provisioning or reissuing a session token.
-5. Add request middleware that hydrates verified `ctx.identity` and `ctx.session`, then update permission-protected server routes to prefilter with `rezics_session_token.permission.role` and re-check database permissions.
-6. Update `package/api/src/react-query/jwt.ts`, `package/app-shell/src/provider/AuthProvider.tsx`, and app-level header/bootstrap wiring so pending-verification users show `PendingVerificationSection` until the main-server session is available.
+1. Add the new auth endpoint and DTO/helper wiring for `auth_context_token` in `package/auth` and `package/api`.
+2. Refactor `package/auth/src/jwt/verify.ts` into a parameter-driven core, move env-bound auth wrappers into sibling files, and update exports in `package/auth/src/jwt/index.ts`.
+3. Update `package/server` so `/users/ensure` performs login check plus local ensure only, with no direct auth-server calls and no session-token issuance side effect.
+4. Implement the dedicated main-server `/session/token` endpoint and remove or disable `/jwt-payload`.
+5. Update `package/app-shell` and `package/app` to fetch `auth_context_token`, parse payloads locally, call `/users/ensure`, then call `/session/token`.
+6. Run targeted tests and compile checks across auth, server, api, app-shell, and app.
 
 Rollback strategy:
 
-- Revert frontend header and token-helper changes first so the app falls back to the previous profile-driven state.
-- Disable main-server session issuance and route prefilter middleware while preserving auth bearer verification.
-- Restore the previous server verifier wiring only if the centralized auth verifier proves incompatible during rollout.
-
-## Refresh Timing
-
-- All token refreshes should be timer-based.
-- When a downstream token such as `rezics_session_token` reaches its refresh interval, the frontend must first evaluate `auth_identity_token`.
-- If `auth_identity_token` is also within its refresh interval, the frontend must refresh `auth_identity_token` first and only then refresh the downstream token.
-- The refresh interval should be derived from token expiry metadata as `refresh_time = exp - (ttl * 0.2 ~ 0.3)`, allowing refresh before hard expiry without waiting until the final minute.
+- Re-enable the previous frontend bootstrap only if the code change is fully reverted in the same release.
+- Avoid partial rollback that restores `/users/ensure` side effects without also restoring the old client flow.
+- If the verifier refactor causes issues, keep the pure verifier API and patch only the wrapper layer rather than reintroducing env access into `verify.ts`.

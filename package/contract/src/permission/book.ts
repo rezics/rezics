@@ -3,7 +3,7 @@ import {BasicAdminPermission, isBlocked} from './core';
 
 export function hasPermissionToUpdateBook(
   user: UserDTO,
-  book?: BookDTO,
+  _book?: BookDTO,
   unit?: UnitDTO,
 ): boolean {
   if (isBlocked(user)) return false;

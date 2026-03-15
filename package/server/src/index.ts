@@ -13,6 +13,7 @@ import {commentApi} from './comment';
 import {reactionApi} from './reaction';
 import {tokenApi} from './token';
 import {feedbackApi} from './feedback';
+import {sessionApi} from './session';
 import {cors} from '@elysiajs/cors';
 
 import {getProdState} from './utils/getProdState';
@@ -64,6 +65,7 @@ app
         'Authorization',
         'Accept',
         'X-Requested-With',
+        'x-auth_context_token',
         'x-rezics_session_token',
       ],
       exposeHeaders: [
@@ -97,6 +99,7 @@ app
   .use(tokenApi)
   .use(echoKvApi)
   .use(feedbackApi)
+  .use(sessionApi)
   .get('/', () => 'Hello Elysia')
   .get('/health', () => ({status: 'ok'}));
 

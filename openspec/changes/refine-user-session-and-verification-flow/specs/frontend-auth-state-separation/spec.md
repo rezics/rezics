@@ -1,41 +1,45 @@
-## ADDED Requirements
+## MODIFIED Requirements
 
-### Requirement: Frontend stores auth identity and main-server session tokens separately
+### Requirement: Frontend tracks identity, auth context, and main-server session separately
 
-The frontend SHALL model `auth_identity_token` and `rezics_session_token` as separate concerns with normalized names, distinct transport rules, independent readiness selectors, and configurable token-key inputs supplied by consuming apps.
+The frontend SHALL treat `auth_identity_token`, `auth_context_token`, and the main-server session token as separate token contexts with distinct purposes and lifecycle steps.
 
-#### Scenario: Auth identity is sent with the bearer contract
+#### Scenario: Frontend fetches auth context before ensure
 
-- **WHEN** the frontend calls auth-backed identity or ensure endpoints that require the auth-server token
-- **THEN** it SHALL send `auth_identity_token` as `Authorization: Bearer <auth_identity_token>`
-- **AND** it SHALL NOT alias that token under a server-session name
+- WHEN the frontend has an authenticated auth session
+- THEN it SHALL request `auth_context_token` through the auth API before attempting first-time ensure
+- AND it SHALL keep `auth_context_token` distinct from `auth_identity_token`
 
-#### Scenario: Main-server session token is sent with the dedicated header
+#### Scenario: Frontend uses auth identity as login proof for ensure
 
-- **WHEN** the frontend calls a main-server endpoint that requires main-server session authorization
-- **THEN** it SHALL send `rezics_session_token` as `x-rezics_session_token: <rezics_session_token>`
-- **AND** it SHALL keep that token distinct from bearer-token persistence and parsing logic
+- WHEN the frontend calls `GET /users/ensure`
+- THEN it SHALL present `auth_identity_token` as the login-proof token
+- AND it SHALL present `auth_context_token` when first-time user creation requires auth-owned profile context
 
-#### Scenario: Shared frontend packages accept token-key configuration
+#### Scenario: Frontend requests main-server session after ensure
 
-- **WHEN** a consuming app configures the frontend token strategy
-- **THEN** shared package surfaces such as `jwt.ts` and `AuthProvider` SHALL accept configurable token-key inputs rather than hardcoding app-specific env policy
-- **AND** the app-level env configuration SHALL provide safe defaults while preserving the existing `auth-store` key
+- WHEN `GET /users/ensure` has completed successfully
+- THEN the frontend SHALL obtain the main-server JWT through `/session/token`
+- AND it SHALL not assume the ensure response also returns the main-server session token
 
-#### Scenario: Auth identity token refresh runs before any downstream token refresh
+### Requirement: Frontend parses JWT payloads locally
 
-- **WHEN** the frontend determines that tokens should be refreshed proactively or reactively
-- **THEN** it SHALL refresh or confirm `auth_identity_token` before attempting to refresh `rezics_session_token`
-- **AND** it SHALL NOT attempt any non-auth token refresh if `auth_identity_token` is unavailable
+Frontend packages SHALL decode JWT payloads locally when they need token claims and SHALL NOT depend on `/jwt-payload`.
 
-#### Scenario: Pending verification state exists without main-server session token
+#### Scenario: Client reads claims without backend payload endpoint
 
-- **WHEN** the browser has authenticated auth-session state but has not yet obtained `rezics_session_token`
-- **THEN** frontend readiness selectors SHALL report that the user is authenticated but not member-ready
-- **AND** the UI SHALL be able to render pending-verification account chrome without assuming business-session availability
+- WHEN frontend code needs token claims such as verification state, name, or slug
+- THEN it SHALL parse the JWT payload locally
+- AND it SHALL NOT call `/jwt-payload`
 
-#### Scenario: Logout clears both token contexts
+### Requirement: Logout and invalidation clear all token contexts
 
-- **WHEN** the user logs out
-- **THEN** the frontend SHALL clear both `auth_identity_token` and `rezics_session_token`
-- **AND** it SHALL clear any derived readiness or permission snapshot state associated with those tokens
+Logout and invalid-token handling SHALL clear the auth identity token, auth context token, and main-server session token together with their derived state.
+
+#### Scenario: Logout clears all token state
+
+- WHEN the user logs out
+- THEN the frontend SHALL clear `auth_identity_token`
+- AND it SHALL clear `auth_context_token`
+- AND it SHALL clear the main-server session token
+- AND it SHALL reset any derived onboarding or authorization state built from those tokens

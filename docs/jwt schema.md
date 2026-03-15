@@ -2,6 +2,8 @@
 
 auth_identity_token
 
+auth_context_token
+
 rezics_session_token
 
 notification_session_token

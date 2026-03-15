@@ -1,5 +1,6 @@
 import {describe, expect, test} from 'bun:test';
 import {SignJWT, exportJWK, generateKeyPair} from 'jose';
+import {NormalizedTokenName} from '@package/contract';
 
 process.env.DATABASE_URL ??=
   'postgresql://postgres:postgres@localhost:5432/rezics_auth';
@@ -79,6 +80,85 @@ describe('verifyBearerToken', () => {
     expect(verified.protectedHeader.kid).toBe('kid-new');
     expect(jwksRequestCount).toBeGreaterThan(1);
 
+    server.stop(true);
+  });
+
+  test('verifies auth context tokens with explicit transport settings', async () => {
+    const {verifyToken} = await import('./verify');
+    const key = await createEcJwkWithKid('kid-context');
+
+    const token = await new SignJWT({
+      id: 'user-1',
+      sub: 'user-1',
+      unitId: 'user-1',
+      slug: 'reader',
+      name: 'Reader',
+      avatar: 'https://example.com/avatar.png',
+      emailVerified: false,
+      verificationStatus: 'pending',
+      scope: 'user',
+    })
+      .setProtectedHeader({alg: 'ES256', kid: 'kid-context'})
+      .setIssuer('https://issuer.example')
+      .setAudience('rezics-api')
+      .setIssuedAt()
+      .setExpirationTime('1h')
+      .sign(key.privateKey);
+
+    const verified = await verifyToken(token, {
+      issuer: 'https://issuer.example',
+      audience: 'rezics-api',
+      verificationKey: await crypto.subtle.importKey(
+        'jwk',
+        key.publicJwk as JsonWebKey,
+        {name: 'ECDSA', namedCurve: 'P-256'},
+        true,
+        ['verify'],
+      ),
+      tokenName: NormalizedTokenName.AUTH_CONTEXT,
+      requiredScope: undefined,
+    });
+
+    expect(verified.payload.slug).toBe('reader');
+    expect(verified.payload.verificationStatus).toBe('pending');
+  });
+});
+
+describe('auth-local verifier wrappers', () => {
+  test('uses auth env defaults for auth identity verification', async () => {
+    const key = await createEcJwkWithKid('kid-auth-local');
+
+    const server = Bun.serve({
+      port: 0,
+      fetch(request) {
+        const url = new URL(request.url);
+        if (url.pathname === '/api/auth/jwks') {
+          return Response.json({keys: [key.publicJwk]});
+        }
+        return new Response('not found', {status: 404});
+      },
+    });
+
+    process.env.AUTH_JWT_ISSUER = `http://localhost:${server.port}`;
+    process.env.AUTH_JWT_AUDIENCE = 'rezics-api';
+    const {verifyAuthIdentityToken} = await import('./auth-local');
+
+    const token = await new SignJWT({
+      unitId: 'user-1',
+      sub: 'user-1',
+      slug: 'reader',
+      scope: 'user',
+    })
+      .setProtectedHeader({alg: 'ES256', kid: 'kid-auth-local'})
+      .setIssuer(`http://localhost:${server.port}`)
+      .setAudience('rezics-api')
+      .setIssuedAt()
+      .setExpirationTime('1h')
+      .sign(key.privateKey);
+
+    const verified = await verifyAuthIdentityToken(`Bearer ${token}`);
+
+    expect(verified.payload.sub).toBe('user-1');
     server.stop(true);
   });
 });

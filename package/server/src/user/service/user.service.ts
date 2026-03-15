@@ -22,6 +22,13 @@ export type ProvisionFromJwtInput = {
   slug?: string;
 };
 
+export type ProvisionFromAuthContextInput = {
+  unitId: string;
+  slug: string;
+  name: string;
+  avatar?: string | null;
+};
+
 /**
  * User Service - Business logic layer
  */
@@ -142,6 +149,28 @@ export class UserService {
         unitId: payload.unitId,
         slug,
         name: slug,
+        type: UserType.USER,
+        joinDate: new Date(),
+      },
+      include: userInclude,
+    });
+
+    await syncUserToMeili(user.unitId);
+
+    return user as UserWithRelations;
+  }
+
+  async provisionFromAuthContext(
+    payload: ProvisionFromAuthContextInput,
+  ): Promise<UserWithRelations> {
+    const user = await prisma.user.upsert({
+      where: {unitId: payload.unitId},
+      update: {},
+      create: {
+        unitId: payload.unitId,
+        slug: payload.slug,
+        name: payload.name,
+        avatar: payload.avatar ?? undefined,
         type: UserType.USER,
         joinDate: new Date(),
       },

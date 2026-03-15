@@ -1,27 +1,26 @@
-## 1. Shared token contracts
+## 1. Auth context token and verifier refactor
 
-- [x] 1.1 Define normalized token names, header contracts, and related DTO or helper types in `package/contract` and any shared API types consumed by `package/api`, `package/auth`, and `package/server`.
-- [x] 1.2 Add configurable multi-token key inputs with safe defaults for app-level env wiring while preserving the existing `auth-store` key, and document the configuration boundary between shared packages and app packages.
-- [x] 1.3 Refactor `package/auth/src/jwt/verify.ts` into the primary issuer-aware verifier for `auth_identity_token` and `rezics_session_token`, with injected verification secrets or JWKS inputs, and convert `package/server/src/user/util/index.ts` into a re-export-only surface.
-- [x] 1.4 Reintroduce `@elysiajs/jwt` in `package/server` with an independent main-server signing secret and compile the affected JWT wiring.
+- [x] 1.1 Add the auth-server endpoint and shared client contract for `auth_context_token` in `package/auth/src/openapi/session.ts`, `package/auth/src/openapi/index.ts`, and the matching `package/api/src/auth/*` helpers.
+- [x] 1.2 Implement `auth_context_token` issuance in `package/auth` with the same signing key material as `auth_identity_token`, and include the claims needed for onboarding and first-time user creation such as verification status, avatar, name, slug, and id.
+- [x] 1.3 Refactor `package/auth/src/jwt/verify.ts` into a parameter-driven verification core that accepts issuer settings and keys explicitly, then move env-bound auth-only wrappers into separate files under `package/auth/src/jwt/` and re-export them through `package/auth/src/jwt/index.ts`.
+- [x] 1.4 Update `package/auth/src/jwt/verify.test.ts` and related auth tests to cover `auth_identity_token`, `auth_context_token`, the pure verifier API, and the auth-local env wrapper behavior.
 
-## 2. Main-server ensure and authorization flow
+## 2. Main-server ensure and session separation
 
-- [x] 2.1 Implement `GET /users/ensure` in `package/server/src/user/api/user.core.api.ts` so it verifies `Authorization: Bearer <auth_identity_token>`, checks auth-owned session state before provisioning, and returns the ensured `UserDTO`.
-- [x] 2.2 Add a small server-local adapter around the existing auth session-state surface in `package/auth/src/openapi/session.ts` so main-server ensure and refresh can consume `/api/auth/get-session-state` consistently.
-- [x] 2.3 Add main-server session issuance and refresh logic that emits `x-rezics_session_token: <rezics_session_token>` after successful ensure handoff and can reissue the token from valid `auth_identity_token` when the main-server session expires.
-- [x] 2.4 Keep main-server readiness auth-owned by removing local readiness gating beyond the auth session-state check, while preserving local permission checks for authorized routes.
-- [x] 2.5 Update permission-protected main-server routes and middleware to prefilter with `rezics_session_token.permission.role` and then re-check persisted user permissions from the database.
+- [x] 2.1 Update `package/server/src/user/api/user.core.api.ts`, `package/server/src/user/service/user.service.ts`, and related DTO/contracts so `GET /users/ensure` verifies `auth_identity_token`, checks whether the user already exists, returns an explicit already-created result when it does, and never issues the main-server JWT.
+- [x] 2.2 Add `auth_context_token` verification to the missing-user path in `package/server` and map its verified claims to the local `User` creation fields without introducing any direct call from `package/server` to auth-server APIs.
+- [x] 2.3 Implement the dedicated main-server JWT issuance endpoint in `package/server/src/session/*` and its API surface as `/session/token`, ensuring it is separate from `/users/ensure` and uses only verified client-supplied tokens plus local server state.
+- [x] 2.4 Disable or remove `/jwt-payload` in the server token/session surface, and update any server-side contract or route registration that still exposes it.
+- [x] 2.5 Add a server-local wrapper around the parameterized auth verifier where needed, and verify that `package/server` imports only the pure verification entry points rather than auth env-bound wrappers.
 
-## 3. Frontend auth-state and header updates
+## 3. Frontend bootstrap and onboarding flow
 
-- [x] 3.1 Update [jwt.ts](D:/ICS/Library.Book/Library.Book/package/api/src/react-query/jwt.ts) so it supports a configurable multi-token strategy, env-backed token key defaults supplied by consuming apps, and distinct handling for `auth_identity_token` and `rezics_session_token`.
-- [x] 3.2 Update [AuthProvider.tsx](D:/ICS/Library.Book/Library.Book/package/app-shell/src/provider/AuthProvider.tsx) so refresh orchestration can coordinate multiple token types through props/config inputs, always refresh `auth_identity_token` first, and never refresh downstream tokens when auth identity is unavailable.
-- [x] 3.3 Update frontend auth/bootstrap wiring in `package/app` so `auth_identity_token` and `rezics_session_token` are stored, parsed, proactively refreshed, and cleared separately.
-- [x] 3.4 Add `PendingVerificationSection` and update `package/app/src/core/component/header/MainLayoutHeader.tsx` to render auth-owned summary data, a verify-email button, and `MoreHorizMenu` whenever auth identity exists but main-server readiness is incomplete.
-- [x] 3.5 Adjust login and registration bootstrap flows so the frontend calls `/users/ensure` only at the verified handoff and transitions from pending verification to member-ready when `rezics_session_token` is available.
+- [x] 3.1 Update `package/api/src/react-query/jwt.ts`, auth query/mutation helpers, and related token utilities so the client stores `auth_identity_token`, `auth_context_token`, and the main-server session token separately and no longer depends on `/jwt-payload`.
+- [x] 3.2 Update `package/app-shell/src/provider/AuthProvider.tsx`, `package/app-shell/src/state/authStore.ts`, and `package/app-shell/src/state/authSessionStore.ts` so the bootstrap sequence becomes auth identity -> auth context -> `/users/ensure` -> `/session/token`.
+- [x] 3.3 Update `package/app/src/app/provider/AuthProvider.tsx`, `package/app/src/user/state/*`, and header/onboarding components so pending-verification and ready states are derived from `auth_context_token` claims plus ensured-user/session status.
+- [x] 3.4 Ensure logout, token-expiry handling, and verification failure paths clear all three token contexts and reset any derived user/session state consistently.
 
 ## 4. Validation
 
-- [ ] 4.1 Add or update targeted tests for JWT verification, secret-injected verifier configuration, auth-first refresh ordering, `/users/ensure` provisioning, main-server refresh via auth session-state, role-prefilter authorization, and pending-verification header rendering.
-- [ ] 4.2 Run the relevant build, lint, and targeted test commands for `package/auth`, `package/server`, `package/app`, `package/app-shell`, and shared contract consumers to verify the migration end to end.
+- [x] 4.1 Add or update targeted tests in `package/auth`, `package/server`, `package/api`, `package/app-shell`, and `package/app` for auth-context issuance, ensure existing-user behavior, ensure new-user creation from `auth_context_token`, `/session/token`, and `/jwt-payload` removal.
+- [x] 4.2 Run the relevant build, lint, and targeted test commands for `package/auth`, `package/server`, `package/api`, `package/app-shell`, and `package/app`, and fix any repo-wide compile errors caused by the verifier export changes.

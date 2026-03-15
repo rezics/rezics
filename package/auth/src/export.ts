@@ -1,10 +1,13 @@
 export {auth} from './auth/instance';
 export {
+  getAuthContextVerifyOptions,
+  getAuthIdentityVerifyOptions,
   verifyAuth,
+  verifyAuthContextToken,
   verifyAuthIdentityToken,
   verifyBearerToken,
   verifySessionToken,
   verifyToken,
-} from './jwt/verify';
+} from './jwt';
 export {createAuthGuard} from './hooks/guard';
 export {env} from './env';

@@ -1,12 +1,16 @@
 import {beforeEach, describe, expect, mock, test} from 'bun:test';
-import type {GetSessionStateResponse} from '@package/contract';
+import type {AuthContextTokenClaims, GetSessionStateResponse} from '@package/contract';
+import {NormalizedTokenName} from '@package/contract';
 
-let currentToken: string | null = null;
+const tokenState: Partial<Record<NormalizedTokenName, string | null>> = {};
+let authContextClaims: AuthContextTokenClaims | null = null;
 let presence = false;
 const getSessionStateMock = mock();
 
 mock.module('@package/api/react-query/jwt', () => ({
-  getToken: () => currentToken,
+  getToken: (tokenName?: NormalizedTokenName) =>
+    tokenName ? tokenState[tokenName] ?? null : null,
+  getAuthContextClaims: () => authContextClaims,
 }));
 
 mock.module('@package/api/react-query/authPresence', () => ({
@@ -65,20 +69,42 @@ const guestSession = {
   },
 };
 
+const verifiedAuthContext: AuthContextTokenClaims = {
+  id: 'user-1',
+  unitId: 'user-1',
+  sub: 'user-1',
+  slug: 'reader',
+  name: 'Reader',
+  avatar: null,
+  emailVerified: true,
+  verificationStatus: 'verified',
+};
+
+const pendingAuthContext: AuthContextTokenClaims = {
+  ...verifiedAuthContext,
+  emailVerified: false,
+  verificationStatus: 'pending',
+};
+
 describe('authSessionStore', () => {
   beforeEach(async () => {
-    currentToken = null;
+    tokenState[NormalizedTokenName.AUTH_CONTEXT] = null;
+    tokenState[NormalizedTokenName.REZICS_SESSION] = null;
     presence = false;
+    authContextClaims = null;
     getSessionStateMock.mockReset();
     const {clearAuthSessionState, useAuthSessionStore} = await import(
       './authSessionStore'
     );
     clearAuthSessionState();
+    useAuthSessionStore.getState().syncAuthContext(null);
     useAuthSessionStore.getState().syncBusinessToken(null);
   });
 
   test('hydrates member-ready state on reload when a business token already exists', async () => {
-    currentToken = 'member-token';
+    tokenState[NormalizedTokenName.AUTH_CONTEXT] = 'context-token';
+    tokenState[NormalizedTokenName.REZICS_SESSION] = 'member-token';
+    authContextClaims = verifiedAuthContext;
     presence = true;
     getSessionStateMock.mockResolvedValueOnce(readySession);
 
@@ -90,6 +116,7 @@ describe('authSessionStore', () => {
 
     expect(useAuthSessionStore.getState()).toMatchObject({
       status: 'ready',
+      hasAuthContext: true,
       hasAuthSession: true,
       hasBusinessToken: true,
       capabilityLevel: 'member',
@@ -98,14 +125,18 @@ describe('authSessionStore', () => {
     });
   });
 
-  test('keeps auth-session lifecycle flags intact across token syncs', async () => {
+  test('keeps auth-context verification flags intact across token syncs', async () => {
     const {useAuthSessionStore} = await import('./authSessionStore');
 
     useAuthSessionStore.getState().setSessionState(guestSession);
-    currentToken = 'refreshed-token';
-    useAuthSessionStore.getState().syncBusinessToken(currentToken);
+    authContextClaims = pendingAuthContext;
+    tokenState[NormalizedTokenName.AUTH_CONTEXT] = 'context-token';
+    useAuthSessionStore.getState().syncAuthContext('context-token');
+    tokenState[NormalizedTokenName.REZICS_SESSION] = 'refreshed-token';
+    useAuthSessionStore.getState().syncBusinessToken('refreshed-token');
 
     expect(useAuthSessionStore.getState()).toMatchObject({
+      authContext: pendingAuthContext,
       hasBusinessToken: true,
       needsVerification: true,
       capabilityLevel: 'member',
@@ -113,7 +144,8 @@ describe('authSessionStore', () => {
   });
 
   test('hydrates authenticated but unverified sessions as guest-capable', async () => {
-    currentToken = null;
+    tokenState[NormalizedTokenName.AUTH_CONTEXT] = 'context-token';
+    authContextClaims = pendingAuthContext;
     presence = true;
     getSessionStateMock.mockResolvedValueOnce(guestSession);
 
@@ -125,6 +157,7 @@ describe('authSessionStore', () => {
 
     expect(useAuthSessionStore.getState()).toMatchObject({
       status: 'ready',
+      hasAuthContext: true,
       hasAuthSession: true,
       hasBusinessToken: false,
       capabilityLevel: 'guest',

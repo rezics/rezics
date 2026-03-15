@@ -2,6 +2,7 @@ import {t} from 'elysia';
 
 export const NormalizedTokenName = {
   AUTH_IDENTITY: 'auth_identity_token',
+  AUTH_CONTEXT: 'auth_context_token',
   REZICS_SESSION: 'rezics_session_token',
   NOTIFICATION_SESSION: 'notification_session_token',
   SEARCH_SESSION: 'search_session_token',
@@ -11,6 +12,7 @@ export type NormalizedTokenName =
 
 export const normalizedTokenNameSchema = t.Union([
   t.Literal(NormalizedTokenName.AUTH_IDENTITY),
+  t.Literal(NormalizedTokenName.AUTH_CONTEXT),
   t.Literal(NormalizedTokenName.REZICS_SESSION),
   t.Literal(NormalizedTokenName.NOTIFICATION_SESSION),
   t.Literal(NormalizedTokenName.SEARCH_SESSION),
@@ -18,6 +20,7 @@ export const normalizedTokenNameSchema = t.Union([
 
 export const TokenTransportHeader = {
   AUTHORIZATION: 'Authorization',
+  AUTH_CONTEXT: 'x-auth_context_token',
   REZICS_SESSION: 'x-rezics_session_token',
   NOTIFICATION_SESSION: 'x-notification_session_token',
   SEARCH_SESSION: 'x-search_session_token',
@@ -62,6 +65,8 @@ export const authIdentityTokenClaimsSchema = t.Object({
   unitId: t.Optional(t.String()),
   sub: t.Optional(t.String()),
   slug: t.Optional(t.String()),
+  name: t.Optional(t.String()),
+  role: t.Optional(t.String()),
   scope: t.Optional(t.Union([t.String(), t.Array(t.String())])),
   exp: t.Optional(t.Number()),
   iat: t.Optional(t.Number()),
@@ -71,8 +76,30 @@ export const authIdentityTokenClaimsSchema = t.Object({
 export type AuthIdentityTokenClaims =
   (typeof authIdentityTokenClaimsSchema)['static'];
 
+export const authContextTokenClaimsSchema = t.Object({
+  id: t.String(),
+  unitId: t.Optional(t.String()),
+  sub: t.Optional(t.String()),
+  slug: t.String(),
+  name: t.String(),
+  avatar: t.Optional(t.Nullable(t.String())),
+  emailVerified: t.Boolean(),
+  verificationStatus: t.Union([
+    t.Literal('verified'),
+    t.Literal('pending'),
+  ]),
+  scope: t.Optional(t.Union([t.String(), t.Array(t.String())])),
+  exp: t.Optional(t.Number()),
+  iat: t.Optional(t.Number()),
+  iss: t.Optional(t.String()),
+  aud: t.Optional(t.Union([t.String(), t.Array(t.String())])),
+});
+export type AuthContextTokenClaims =
+  (typeof authContextTokenClaimsSchema)['static'];
+
 export const normalizedTokenHeaderMap = {
   [NormalizedTokenName.AUTH_IDENTITY]: TokenTransportHeader.AUTHORIZATION,
+  [NormalizedTokenName.AUTH_CONTEXT]: TokenTransportHeader.AUTH_CONTEXT,
   [NormalizedTokenName.REZICS_SESSION]: TokenTransportHeader.REZICS_SESSION,
   [NormalizedTokenName.NOTIFICATION_SESSION]:
     TokenTransportHeader.NOTIFICATION_SESSION,
@@ -84,6 +111,11 @@ export const normalizedTokenTransportMap = {
     tokenName: NormalizedTokenName.AUTH_IDENTITY,
     headerName: TokenTransportHeader.AUTHORIZATION,
     usesBearer: true,
+  },
+  [NormalizedTokenName.AUTH_CONTEXT]: {
+    tokenName: NormalizedTokenName.AUTH_CONTEXT,
+    headerName: TokenTransportHeader.AUTH_CONTEXT,
+    usesBearer: false,
   },
   [NormalizedTokenName.REZICS_SESSION]: {
     tokenName: NormalizedTokenName.REZICS_SESSION,

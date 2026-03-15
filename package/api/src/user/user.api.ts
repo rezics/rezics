@@ -3,9 +3,15 @@
  * Direct API communication layer
  */
 
-import type {UpdateUser, UserDTO} from '@package/contract';
+import type {
+  EnsureUserResponse,
+  SessionTokenResponse,
+  UpdateUser,
+  UserDTO,
+} from '@package/contract';
 import {NormalizedTokenName, normalizedTokenTransportMap} from '@package/contract';
-import {apiFetch, apiFetchResponse} from '../react-query/http';
+import {getToken} from '../react-query/jwt';
+import {apiFetch} from '../react-query/http';
 
 type FollowSummaryResponse = {
   targetIds: string[];
@@ -13,38 +19,26 @@ type FollowSummaryResponse = {
 };
 
 export const userApi = {
-  ensure: async (): Promise<{user: UserDTO; sessionToken: string | null}> => {
-    const {data, response} = await apiFetchResponse<UserDTO>(`/users/ensure`);
-    return {
-      user: data,
-      sessionToken:
-        response.headers.get(
-          normalizedTokenTransportMap[NormalizedTokenName.REZICS_SESSION]
-            .headerName,
-        ) ?? null,
-    };
+  ensure: async (): Promise<EnsureUserResponse> => {
+    const authContextToken = getToken(NormalizedTokenName.AUTH_CONTEXT);
+    return apiFetch(`/users/ensure`, {
+      headers: authContextToken
+        ? {
+            [normalizedTokenTransportMap[NormalizedTokenName.AUTH_CONTEXT]
+              .headerName]: authContextToken,
+          }
+        : undefined,
+    });
   },
 
-  refreshSession: async (): Promise<{ok: true; sessionToken: string | null}> => {
-    const {data, response} = await apiFetchResponse<{ok: true}>(
-      `/users/session/refresh`,
-    );
-    return {
-      ok: data.ok,
-      sessionToken:
-        response.headers.get(
-          normalizedTokenTransportMap[NormalizedTokenName.REZICS_SESSION]
-            .headerName,
-        ) ?? null,
-    };
+  issueSessionToken: async (): Promise<SessionTokenResponse> => {
+    return apiFetch(`/session/token`, {
+      method: 'POST',
+    });
   },
 
   me: async (): Promise<UserDTO> => {
     return apiFetch(`/users/me`);
-  },
-
-  jwtPayload: async (): Promise<any> => {
-    return apiFetch(`/users/me/jwt-payload`);
   },
 
   list: async (

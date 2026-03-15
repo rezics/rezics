@@ -6,12 +6,12 @@
 - [ ] 实现session失效后的主动登录退出机制，但是我又担心网络波动引起恶意退出？better-auth session 到底是如何工作的
 - [ ] ICON 品牌SVG (https://simpleicons.org/), Font Awesome, https://tabler.io/icons
 
-- 如果有这样一系列的网站，他们 除了 Homepage，aboutpage，或者一些特殊 page 不一样，以及 laytout 不一样以外，公用 完全一样的代码，包括 比如 /book/unitid or ……，最适合的架构是怎样？ 
+- 如果有这样一系列的网站，他们 除了 Homepage，aboutPage，或者一些特殊 page 不一样，以及 layout 不一样以外，公用 完全一样的代码，包括 比如 /book/unitId or ……，最适合的架构是怎样？ 
 - routes 通过虚拟文件路由似乎就能够做到跨package继承哦
 
 login page 太窄了，左侧可以添加图片之类的以美观，参考https://www.deviantart.com/join/
 
-审计超级多，过多的 api 请求，不应该一直请求tokn，得想个办法，比如添加一个shared session，标记未登录状态？
+审计超级多，过多的 api 请求，不应该一直请求token，得想个办法，比如添加一个shared session，标记未登录状态？
 
 policy 允许 用户同意多个网站上的 cookie 使用权力，auth 应该建一个 cookie 授权同意表嘛？
 
@@ -25,5 +25,17 @@ session key 重命名 到比如 rezics_login_state
 
 - [] ENV use @/env 有神奇功效，可以将导入自动重定向到自己的package，但是这依然不能够解决导入文件依赖env就会导致报错的现实，也许我们应该切割，任何export的file，都不应该包括任何env依赖
 - verifyAuth 的 env 依赖清理
+- PendingVerificationSection 需要能够退出登录
+- Refresh main-server session 就加上(token)
 
 
+refine-user-session-and-verification-flow 这个 change 应当做如下调整
+
+- main server 不应当直接与 auth server 通讯， auth server 新增一个 auth_context_token token 端口，采用和auth_identity_token同样的密钥，auth_context_token应当包括验证状态，avatar,name,slug，id，总之，就是建立用户的所有需要的字段，前端先通过接口请求 auth_context_token ，main server ensure 接口依据auth_identity_token 判断登录， 如果登录了就进行一次查询，判断用户是否已经创建，如果创建了就返回 用户已创建。
+如果没创建的话，就验证auth_context_token，然后根据auth_context_token的内容创建用户
+- /ensure 只应该 ensure，main server jwt token 的 发放应该有单独的端口 /session/token
+- /jwt-payload 建议禁用，感觉不是很有用的东西, 前端需要 payload 就自己解析
+
+- \package\auth\src\jwt\verify 必须确保不依赖 env，而是通过参数运行，任何依赖env 的实现都应当 放到 同文件夹下新独立文件然后，在 index.ts 中导出供 package/auth 使用，但是 package/server 绝对不能用，然后 package/server 如果想要更方便快捷的校验，可以自己对 package/auth 导入的 verify 提供一个 提供参数的 包装层
+
+你应当这么调整，依据新的prompt修改之前的 所有 冲突的内容，调整之前的 task，并新增 task 以满足这次prompt 的需要

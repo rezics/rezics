@@ -1,5 +1,6 @@
 import {Elysia} from 'elysia';
 import {
+  authContextTokenResponseSchema,
   authTokenResponseSchema,
   getSessionResponseSchema,
   getSessionStateResponseSchema,
@@ -10,6 +11,7 @@ import {handleAuthRequest} from '../auth/routes';
 import {jsonRequestBody, jsonResponse} from './docs';
 import {listEnabledSocialProviderIds} from '../auth/providers';
 import {env} from '@/env';
+import {signAuthContextToken} from '../jwt/context-token';
 
 async function forwardAuthRequest(
   request: Request,
@@ -119,6 +121,67 @@ async function getSessionStateResponse(request: Request): Promise<Response> {
   });
 }
 
+/**
+ * Issue a context token from a verified auth identity Bearer token.
+ * Extracts the userId from the identity token claims, queries the
+ * user record directly, and signs a new context token using the
+ * same JWKS signing key as `/auth/token`.
+ */
+async function getContextTokenResponse(request: Request): Promise<Response> {
+  const authorization = request.headers.get('authorization');
+  if (!authorization) {
+    return Response.json(
+      {message: 'Unauthorized: Missing Authorization header'},
+      {status: 401},
+    );
+  }
+
+  let userId: string;
+  try {
+    const {verifyAuthIdentityToken} = await import('../jwt/auth-local');
+    const verified = await verifyAuthIdentityToken(authorization);
+    userId = verified.payload.sub ?? '';
+  } catch {
+    return Response.json(
+      {message: 'Unauthorized: Invalid identity token'},
+      {status: 401},
+    );
+  }
+
+  if (!userId) {
+    return Response.json(
+      {message: 'Unauthorized: Missing user identity'},
+      {status: 401},
+    );
+  }
+
+  const {prisma} = await import('../auth/prisma');
+  const user = await prisma.user.findUnique({
+    where: {id: userId},
+    select: {
+      id: true,
+      name: true,
+      emailVerified: true,
+      image: true,
+      profile: {
+        select: {
+          slug: true,
+          avatar: true,
+        },
+      },
+    },
+  });
+
+  if (!user) {
+    return Response.json(
+      {message: 'Unauthorized: User not found'},
+      {status: 401},
+    );
+  }
+
+  return Response.json(await signAuthContextToken(user));
+}
+
 export const sessionRouter = new Elysia()
   .get('/token', ({request}) => handleAuthRequest(request), {
     detail: {
@@ -150,6 +213,20 @@ export const sessionRouter = new Elysia()
         200: jsonResponse(
           'Current session details with onboarding state.',
           getSessionStateResponseSchema,
+        ),
+      },
+    },
+  })
+  .get('/context-token', ({request}) => getContextTokenResponse(request), {
+    detail: {
+      summary: 'Get auth context JWT',
+      description:
+        'Get an auth-owned context token for onboarding and first-time user provisioning.',
+      tags: ['Session'],
+      responses: {
+        200: jsonResponse(
+          'Auth context JWT and decoded claims.',
+          authContextTokenResponseSchema,
         ),
       },
     },

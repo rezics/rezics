@@ -1,5 +1,5 @@
 import type {Context} from 'elysia';
-import {verifyBearerToken, type VerifyOptions} from '../jwt/verify';
+import {verifyBearerToken, type VerifyOptions} from '../jwt';
 
 export function createAuthGuard(options: VerifyOptions) {
   return async (context: Context): Promise<void> => {

@@ -33,28 +33,37 @@ function matchesSnapshotRole(
   }
 }
 
-export const identityContextPlugin = new Elysia().derive(async ctx => {
-  const identity = await verifyAuth<AuthIdentityTokenClaims>(
-    ctx.headers.authorization,
-    ctx.set,
-  );
-  const unitId = identity.unitId || identity.sub;
-  if (!unitId) {
-    ctx.set.status = 401;
-    throw new Error('Unauthorized: Missing identity unitId');
-  }
+export const identityContextPlugin = new Elysia().derive(
+  {as: 'scoped'},
+  async ctx => {
+    const identity = await verifyAuth<AuthIdentityTokenClaims>(
+      ctx.headers.authorization,
+      ctx.set,
+    );
+    const unitId = identity.unitId || identity.sub;
+    if (!unitId) {
+      ctx.set.status = 401;
+      throw new Error('Unauthorized: Missing identity unitId');
+    }
 
-  return {
-    identity: {
-      ...identity,
-      unitId,
-    },
-  };
-});
+    return {
+      identity: {
+        ...identity,
+        unitId,
+      },
+    };
+  },
+);
 
 export const sessionContextPlugin = new Elysia()
   .use(identityContextPlugin)
-  .derive(async ctx => {
+  .derive({as: 'scoped'}, async ctx => {
+    const identity = ctx.identity;
+    if (!identity) {
+      ctx.set.status = 401;
+      throw new Error('Unauthorized: Missing identity context');
+    }
+
     const session = (
       await verifySessionToken<RezicsSessionTokenClaims>(
         ctx.headers[REZICS_SESSION_HEADER],
@@ -64,12 +73,12 @@ export const sessionContextPlugin = new Elysia()
       )
     ).payload;
 
-    if (session.unitId !== ctx.identity.unitId) {
+    if (session.unitId !== identity.unitId) {
       ctx.set.status = 401;
       throw new Error('Unauthorized: Identity and session token mismatch');
     }
 
-    const persistedUser = await userService.getByUnitId(ctx.identity.unitId);
+    const persistedUser = await userService.getByUnitId(identity.unitId);
     const currentUser = mapUserToDTO(persistedUser);
     const persistedRoles = currentUser.permission?.role;
 
@@ -84,6 +93,7 @@ export const sessionContextPlugin = new Elysia()
     }
 
     return {
+      identity,
       session,
       currentUser,
     };

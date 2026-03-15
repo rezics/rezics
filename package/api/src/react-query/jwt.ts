@@ -2,6 +2,9 @@ import {env} from '../env';
 import {clearAuthPresence, hasAuthPresence} from './authPresence';
 import {
   NormalizedTokenName,
+  type AuthContextTokenClaims,
+  type AuthIdentityTokenClaims,
+  type RezicsSessionTokenClaims,
   type AuthTokenResponse,
   type NormalizedTokenName as NormalizedTokenNameType,
   normalizedTokenTransportMap,
@@ -11,6 +14,7 @@ const AUTH_BASE_URL = env.VITE_AUTH_API_URL;
 const AUTH_STORE_KEY = 'auth-store';
 const DEFAULT_TOKEN_STORAGE_KEYS = {
   [NormalizedTokenName.AUTH_IDENTITY]: 'auth-store',
+  [NormalizedTokenName.AUTH_CONTEXT]: 'auth-context-store',
   [NormalizedTokenName.REZICS_SESSION]: 'rezics-session-store',
   [NormalizedTokenName.NOTIFICATION_SESSION]: 'notification-session-store',
   [NormalizedTokenName.SEARCH_SESSION]: 'search-session-store',
@@ -217,11 +221,19 @@ export function clearAllTokens(): void {
 }
 
 export interface JwtPayload {
-  id: string;
+  id?: string;
+  unitId?: string;
+  sub?: string;
+  name?: string;
+  avatar?: string | null;
+  emailVerified?: boolean;
+  verificationStatus?: string;
   slug?: string;
   role?: string;
   exp?: number;
   iat?: number;
+  iss?: string;
+  aud?: string | string[];
   [key: string]: unknown;
 }
 
@@ -254,4 +266,28 @@ export function parseJwt<T extends JwtPayload = JwtPayload>(
   } catch {
     return null;
   }
+}
+
+export function getParsedToken<T extends JwtPayload = JwtPayload>(
+  tokenName: NormalizedTokenNameType,
+): T | null {
+  return parseJwt<T>(getToken(tokenName));
+}
+
+export function getAuthIdentityClaims(): AuthIdentityTokenClaims | null {
+  return getParsedToken<AuthIdentityTokenClaims>(
+    NormalizedTokenName.AUTH_IDENTITY,
+  );
+}
+
+export function getAuthContextClaims(): AuthContextTokenClaims | null {
+  return getParsedToken<AuthContextTokenClaims>(
+    NormalizedTokenName.AUTH_CONTEXT,
+  );
+}
+
+export function getRezicsSessionClaims(): RezicsSessionTokenClaims | null {
+  return getParsedToken<RezicsSessionTokenClaims>(
+    NormalizedTokenName.REZICS_SESSION,
+  );
 }

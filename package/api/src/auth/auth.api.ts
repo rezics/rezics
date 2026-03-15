@@ -5,6 +5,7 @@
 
 import {env} from '@package/app/env';
 import type {
+  AuthContextTokenResponse,
   AuthTokenResponse,
   AuthResponse,
   AuthSession,
@@ -98,6 +99,14 @@ export const authApi = {
 
   getToken: async (): Promise<AuthTokenResponse> => {
     return authFetch<AuthTokenResponse>('/api/auth/token');
+  },
+
+  getContextToken: async (authToken?: string): Promise<AuthContextTokenResponse> => {
+    return authFetch<AuthContextTokenResponse>('/api/auth/context-token', {
+      ...(authToken && {
+        headers: {Authorization: `Bearer ${authToken}`},
+      }),
+    });
   },
 
   listProviders: async (): Promise<{providers: AuthProvider[]}> => {

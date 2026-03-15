@@ -1,55 +1,46 @@
 ## MODIFIED Requirements
 
-### Requirement: Auto-provision business user record on first authenticated access
+### Requirement: `GET /users/ensure` only ensures the business user
 
-When a valid `auth_identity_token` is presented to the main server and the server has confirmed the caller's current status through the auth-owned session-state API, the server SHALL use `GET /users/ensure` as the provisioning endpoint for creating or loading the business `User` record.
+When a valid `auth_identity_token` is presented to the main server, the server SHALL use `GET /users/ensure` only to confirm that the caller is logged in and that a business `User` record exists locally. The endpoint SHALL NOT contact auth-server APIs directly and SHALL NOT issue the main-server session token.
 
-#### Scenario: First verified ensure request creates the business user
+#### Scenario: Existing user returns an explicit already-created result
 
-- GIVEN a user who has signed up via `package/auth`, completed the required verification flow, and received a valid `auth_identity_token` containing `unitId: "abc-123"` and `slug: "alice"`
-- AND no `User` record with `unitId = "abc-123"` exists in the server database
-- WHEN the user calls `GET /users/ensure` with `Authorization: Bearer <auth_identity_token>`
-- THEN the server SHALL verify the auth token before any provisioning logic runs
-- AND the server SHALL request the auth-owned session-state surface needed to confirm the user is still verified and logged in
-- AND the server SHALL create a new `User` record with:
-  - `unitId` = the auth token `unitId` claim (or `sub`)
-  - `slug` = the auth token `slug` claim
-  - `name` = the auth token `slug` claim by default
-  - `type` = `USER` by default
-  - `joinDate` = the current timestamp
-- AND the server SHALL return the newly created `UserDTO` with status `200`
+- GIVEN a caller with a valid `auth_identity_token`
+- AND a `User` record for that caller already exists in the main-server database
+- WHEN the caller requests `GET /users/ensure`
+- THEN the main server SHALL verify `auth_identity_token` before the lookup
+- AND it SHALL return a success result that explicitly indicates the user is already created
+- AND it SHALL NOT create a duplicate user
+- AND it SHALL NOT issue the main-server session token as part of the ensure response
 
-#### Scenario: Subsequent ensure request returns the existing user
+#### Scenario: Missing user is created from verified auth context
 
-- GIVEN a verified auth user with `unitId = "abc-123"` already stored in the server database
-- WHEN the user calls `GET /users/ensure` with a valid `auth_identity_token` containing `unitId: "abc-123"`
-- THEN the server SHALL re-check auth-owned session state before returning the existing `UserDTO`
-- AND it SHALL NOT create a duplicate user record
+- GIVEN a caller with a valid `auth_identity_token`
+- AND no matching `User` record exists in the main-server database
+- AND the caller also provides a valid `auth_context_token`
+- WHEN the caller requests `GET /users/ensure`
+- THEN the main server SHALL verify that the caller is logged in from `auth_identity_token`
+- AND it SHALL verify `auth_context_token` before creating the local user
+- AND it SHALL create the local `User` from verified auth-context claims such as id, slug, name, avatar, and verification-related fields needed by the business model
+- AND it SHALL complete without calling an auth-server session-state endpoint
 
-#### Scenario: Ensure uses minimal verified claims when slug is missing
+#### Scenario: Invalid auth context blocks first-time user creation
 
-- GIVEN a verified `auth_identity_token` that contains `unitId` and `scope: "user"` but no `slug` claim
-- AND no `User` record exists for that `unitId`
-- WHEN the user calls `GET /users/ensure`
-- THEN the server SHALL create a new `User` record using `unitId` as the fallback value for `slug` and `name`
-- AND the response SHALL remain a valid `UserDTO`
+- GIVEN a caller with a valid `auth_identity_token`
+- AND no matching `User` record exists in the main-server database
+- AND the provided `auth_context_token` is missing, invalid, or does not pass verification
+- WHEN the caller requests `GET /users/ensure`
+- THEN the main server SHALL reject the ensure request
+- AND it SHALL NOT create a local user record
 
-### Requirement: Lazy provisioning does not apply to all endpoints
+### Requirement: Other endpoints do not provision the user implicitly
 
-Only `GET /users/ensure` SHALL trigger lazy provisioning. Other authenticated endpoints that reference a server `User` record SHALL treat missing business users as absent data rather than provisioning implicitly.
+Only `GET /users/ensure` SHALL create a missing business user. Other authenticated endpoints SHALL treat a missing user as missing data rather than provisioning implicitly.
 
-#### Scenario: Business read endpoint does not provision unknown user
+#### Scenario: Business read endpoint does not create missing user
 
-- GIVEN a valid `auth_identity_token` for `unitId = "new-user-id"`
-- AND no `User` record exists in the server database
-- WHEN a client calls `GET /users/me` before `GET /users/ensure` has provisioned that user
-- THEN the server SHALL NOT create a new `User` record as a side effect of `GET /users/me`
-- AND the server SHALL respond according to the explicit endpoint contract for a missing ensured user
-
-#### Scenario: Unverified ensure request is rejected before provisioning
-
-- GIVEN an auth-session user whose email verification or readiness flow is not yet complete
-- AND no matching `User` record exists in the server database
-- WHEN the client calls `GET /users/ensure` with that user's `auth_identity_token`
-- THEN the server SHALL reject the request before creating a business user
-- AND it SHALL NOT mint a main-server session token for that user
+- GIVEN a caller with a valid `auth_identity_token`
+- AND no matching `User` record exists in the main-server database
+- WHEN the caller requests another authenticated user endpoint before `GET /users/ensure`
+- THEN the server SHALL NOT create a new `User` record as a side effect of that request

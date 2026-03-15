@@ -1,38 +1,40 @@
 ## Why
 
-The current auth split between `package/auth` and `package/server` is incomplete for the real login and registration lifecycle. The app can authenticate against the auth service, but `package/server` no longer owns a lightweight session token for its own permission snapshot, `/users/ensure` is unfinished, and the frontend still treats "has user profile" as the only authenticated header state.
+The current change still assumes that `package/server` can call auth-owned session-state APIs directly, that `GET /users/ensure` can both provision a user and issue the main-server JWT, and that shared JWT verification may resolve secrets from env implicitly. Those assumptions now conflict with the intended boundary: the auth server must hand the frontend a richer `auth_context_token`, while the main server must stay offline from auth and only verify tokens presented by the client.
 
-This change is needed now because registration and login must converge on a verified handoff: the frontend should use `auth_identity_token` to prove identity to `package/server`, `package/server` should treat the auth service as the single source of truth for session readiness by consulting the existing auth session-state API before provisioning or refresh, and the app should render a pending-verification account state until a `rezics_session_token` is available.
+This change is needed now because the login, verification, ensure, and session-token flow must be simplified before implementation starts. Without rewriting the contract first, `package/auth`, `package/server`, `package/api`, `package/app-shell`, and `package/app` would implement the wrong trust boundary and the wrong endpoint responsibilities.
 
 ## What Changes
 
-- Complete `GET /users/ensure` in `package/server` so login and registration flows can create or load the business user from a verified `auth_identity_token`.
-- Reintroduce `@elysiajs/jwt` in `package/server` and let the main server issue its own asymmetric `rezics_session_token` with an independent main-server signing secret for server-side permission prefiltering.
-- Standardize token naming and transport conventions across services: `auth_identity_token` stays in `Authorization: Bearer <token>`, and server-issued tokens use dedicated `x-<token-name>` headers such as `x-rezics_session_token`.
-- Refactor shared JWT verification so `package/auth/src/jwt/verify.ts` becomes the primary issuer-aware verification entry point with injected verification secrets or JWKS configuration, while `package/server/src/user/util/index.ts` only re-exports auth-owned helpers.
-- Add a main-server refresh flow so expired `rezics_session_token` values can be renewed only after `auth_identity_token` has been refreshed or confirmed first, then re-check auth session state before signing a replacement token.
-- Update permission-protected main-server routes to check `rezics_session_token.permission.role` before database access, then re-check persisted user permissions from the database to support immediate freezes or permission downgrades.
-- Update `package/app` header behavior so newly registered or otherwise unverified users render a new `PendingVerificationSection` instead of `AuthenticatedSection`, showing basic auth-owned user info, a verify-email action, and `MoreHorizMenu` without the authenticated avatar dropdown.
-- Update `package/api/src/react-query/jwt.ts` and `package/app-shell/src/provider/AuthProvider.tsx` to support a parameterized multi-token strategy driven by props and env-backed token key lists with safe defaults while preserving the existing `auth-store` key.
-- **BREAKING** Replace the previous assumption that all protected main-server routes can authorize directly from auth-issued bearer tokens alone.
-- **BREAKING** Normalize token names and transport contracts, which requires frontend and backend callers to stop using ad hoc token naming.
+- Add an auth-server endpoint that issues `auth_context_token`, signed with the same key material as `auth_identity_token`, and containing the user fields needed for onboarding and provisioning such as verification status, avatar, name, slug, and id.
+- Change the frontend bootstrap flow so it fetches `auth_context_token` first, uses `auth_identity_token` only to prove login state to the main server, and parses JWT payloads locally instead of relying on `/jwt-payload`.
+- Redefine `GET /users/ensure` in `package/server` so it only ensures the business user: it checks login with `auth_identity_token`, returns an explicit "user already created" result when the user already exists, and otherwise verifies `auth_context_token` before creating the user from its claims.
+- Move main-server JWT issuance to a dedicated `/session/token` endpoint and remove token issuance from `/users/ensure`.
+- Disable `/jwt-payload` because frontend consumers should decode payloads locally when they need token claims.
+- Refactor `package/auth/src/jwt/verify.ts` into a parameter-driven verifier with no direct env dependency; move env-bound wrappers into separate files under the same folder and export them through `index.ts` for auth-internal use only.
+- Require `package/server` to use the parameterized verifier directly or through its own server-local wrapper, and forbid it from importing env-bound auth verifier wrappers.
+- **BREAKING** Remove the previously proposed server-to-auth session-state call pattern from the main-server ensure and session-token flow.
+- **BREAKING** Split the previous combined ensure-and-session contract into two endpoints: `/users/ensure` and `/session/token`.
+- **BREAKING** Disable `/jwt-payload`, which requires frontend callers to stop depending on that endpoint.
 
 ## Capabilities
 
 ### New Capabilities
-- `main-server-session-authorization`: Main-server session token issuance, transport, and permission-prefilter behavior for `rezics_session_token`.
+
+- None.
 
 ### Modified Capabilities
-- `lazy-user-provisioning`: Move business-user provisioning responsibility to the verified `/users/ensure` flow instead of relying on implicit provisioning behavior elsewhere.
-- `app-auth-onboarding`: Show a pending-verification authenticated header state until verification completes and the main-server session is ready.
-- `frontend-auth-state-separation`: Track auth-server identity and main-server session tokens separately with normalized token names, parameterized token-key configuration, and readiness selectors.
-- `es256-jwks-jwt-verification`: Expand token verification to support issuer-scoped token parsing and verification for both auth-server and main-server asymmetric JWTs.
+
+- `app-auth-onboarding`: derive onboarding and pending-verification UI from `auth_context_token` and the separated ensure/session steps.
+- `es256-jwks-jwt-verification`: require parameter-driven verification helpers, add `auth_context_token` verification, and remove env-bound verifier usage from shared entry points.
+- `frontend-auth-state-separation`: track `auth_identity_token`, `auth_context_token`, and the main-server session token separately while disabling `/jwt-payload`.
+- `lazy-user-provisioning`: make `/users/ensure` validate login with `auth_identity_token`, create only when needed from `auth_context_token`, and stop issuing session tokens.
+- `main-server-session-authorization`: move main-server JWT issuance to `/session/token` and keep session creation independent from ensure.
 
 ## Impact
 
-- Affected packages: `package/server`, `package/auth`, `package/app`, `package/api`, `package/contract`.
-- Affected APIs: `GET /users/ensure`, main-server session refresh, `GET /api/auth/get-session-state`, main-server protected routes, shared JWT verification utilities, and frontend token/header handling.
-- Affected UI: `MainLayoutHeader`, new `PendingVerificationSection`, and login/registration bootstrap behavior after auth-session completion.
-- Affected dependencies: `package/server` reintroduces `@elysiajs/jwt`; all JWTs remain asymmetric and issuer-scoped.
-- Backward compatibility: no compatibility layer for previously unpublished contracts is required; the implementation can adopt the new token, refresh, and transport rules directly.
-- Migration needs: update frontend HTTP/token helpers, route guards, and server authorization middleware together so `auth_identity_token` and `rezics_session_token` are never confused during rollout.
+- Affected packages: `package/auth`, `package/server`, `package/api`, `package/app-shell`, `package/app`, and any shared contract modules used by those packages.
+- Affected APIs: new auth endpoint for `auth_context_token`, `GET /users/ensure`, `POST /session/token` (or equivalent main-server session issuance route), and removal or disablement of `/jwt-payload`.
+- Affected UI and client state: login/register bootstrap, pending-verification handling, ensured-user creation flow, session bootstrap, logout cleanup, and any header logic that currently depends on `/jwt-payload`.
+- Backward compatibility: no compatibility shim is planned for the previous direct auth-session lookup or ensure-issued session-token design; implementation should adopt the new boundary directly.
+- Migration needs: update shared JWT helpers, server wrappers, API clients, frontend token stores, and onboarding/session bootstrap in the same rollout so the client never mixes the old and new contracts.

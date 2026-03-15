@@ -7,12 +7,19 @@ import {MoreHorizMenu} from '../../component/header/MoreHorizMenu';
 export function PendingVerificationSection() {
   const {t} = useTranslation();
   const auth = useAuth();
+  const authContextName = auth.authContext?.name?.trim();
+  const authContextSlug = auth.authContext?.slug?.trim();
+  const headline =
+    authContextName ||
+    (authContextSlug ? `@${authContextSlug}` : null) ||
+    auth.authSession?.email ||
+    t('auth.flow.verify_title');
 
   return (
     <div className="flex items-center gap-2">
       <div className="hidden md:flex flex-col items-end leading-tight">
         <Typography variant="body2" fontWeight={600}>
-          {auth.authSession?.email ?? t('auth.flow.verify_title')}
+          {headline}
         </Typography>
         <Typography variant="caption" color="text.secondary">
           {auth.needsVerification
