@@ -23,4 +23,7 @@ basic 是锁死必须同意，
 
 session key 重命名 到比如 rezics_login_state
 
+- [] ENV use @/env 有神奇功效，可以将导入自动重定向到自己的package，但是这依然不能够解决导入文件依赖env就会导致报错的现实，也许我们应该切割，任何export的file，都不应该包括任何env依赖
+- verifyAuth 的 env 依赖清理
+
 

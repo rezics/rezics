@@ -10,21 +10,12 @@ import {useAuthSessionStore, useAuthStore, useUserProfileStore} from '@/user/sta
  */
 export const useAuth = () => {
   const hasIdentityToken = useAuthStore(state => state.isAuthenticated);
-  const {
-    authSession,
-    capabilityLevel,
-    hasAuthSession,
-    needsOnboarding,
-    needsVerification,
-    status,
-  } = useAuthSessionStore(state => ({
-    authSession: state.authSession,
-    capabilityLevel: state.capabilityLevel,
-    hasAuthSession: state.hasAuthSession,
-    needsOnboarding: state.needsOnboarding,
-    needsVerification: state.needsVerification,
-    status: state.status,
-  }));
+  const authSession = useAuthSessionStore(state => state.authSession);
+  const capabilityLevel = useAuthSessionStore(state => state.capabilityLevel);
+  const hasAuthSession = useAuthSessionStore(state => state.hasAuthSession);
+  const needsOnboarding = useAuthSessionStore(state => state.needsOnboarding);
+  const needsVerification = useAuthSessionStore(state => state.needsVerification);
+  const status = useAuthSessionStore(state => state.status);
   const user = useUserProfileStore(state => state.user as UserDTO | null);
   const setUser = useUserProfileStore(state => state.setUser);
 

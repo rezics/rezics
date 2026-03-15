@@ -12,7 +12,7 @@ import {
   normalizedTokenTransportMap,
   type NormalizedTokenName as NormalizedTokenNameType,
 } from '@package/contract';
-import {env} from '../env';
+import {env} from '@/env';
 import type {KeyObject} from 'node:crypto';
 
 type JwtKeySource =
@@ -66,9 +66,7 @@ function getJwks(jwksUrl: string): ReturnType<typeof createRemoteJWKSet> {
   return jwksStore.get(jwksUrl)!;
 }
 
-function getPemVerificationKey(
-  verificationKeyPem: string,
-): Promise<CryptoKey> {
+function getPemVerificationKey(verificationKeyPem: string): Promise<CryptoKey> {
   if (!pemStore.has(verificationKeyPem)) {
     pemStore.set(verificationKeyPem, importSPKI(verificationKeyPem, 'ES256'));
   }
@@ -124,7 +122,8 @@ function shouldRequireKid(options: VerifyOptions): boolean {
 function defaultVerifyOptions(
   overrides?: Partial<VerifyOptions>,
 ): VerifyOptions {
-  const issuer = overrides?.issuer ?? env.AUTH_JWT_ISSUER ?? env.BETTER_AUTH_URL;
+  const issuer =
+    overrides?.issuer ?? env.AUTH_JWT_ISSUER ?? env.BETTER_AUTH_URL;
   const audience = overrides?.audience ?? env.AUTH_JWT_AUDIENCE ?? 'rezics-api';
   const jwksUrl =
     typeof overrides?.jwksUrl === 'string'
@@ -174,9 +173,16 @@ export async function verifyToken<TPayload extends JWTPayload = JWTPayload>(
 
   const verificationKey = await resolveVerificationKey(options);
 
+  // TODO 优化这里的代码
   let verified;
   try {
-    verified = await jwtVerify(token, verificationKey, verifyOptions);
+    if (typeof verificationKey === 'function') {
+      // JWKS resolver
+      verified = await jwtVerify(token, verificationKey, verifyOptions);
+    } else {
+      // static key
+      verified = await jwtVerify(token, verificationKey, verifyOptions);
+    }
   } catch (error) {
     const code = (error as {code?: string} | undefined)?.code;
     if (
@@ -260,7 +266,11 @@ function isVerifyOptions(value: unknown): value is Partial<VerifyOptions> {
 }
 
 function isSetLike(value: unknown): value is {status?: number} {
-  return Boolean(value && typeof value === 'object' && 'status' in (value as Record<string, unknown>));
+  return Boolean(
+    value &&
+    typeof value === 'object' &&
+    'status' in (value as Record<string, unknown>),
+  );
 }
 
 export async function verifyAuth<
