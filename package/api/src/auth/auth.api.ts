@@ -3,7 +3,7 @@
  * Direct API communication layer targeting the auth server
  */
 
-import {env} from '@package/app/env';
+import {env} from '../env';
 import type {
   AuthContextTokenResponse,
   AuthTokenResponse,
@@ -26,20 +26,31 @@ import type {
   ResetPasswordResponse,
   SignInBody,
 } from '@package/contract';
+import {NormalizedTokenName} from '@package/contract';
+import {buildTokenHeaders, ensureAuthIdentityToken} from '../react-query/jwt';
 
-const AUTH_BASE_URL = env.VITE_AUTH_API_URL || 'http://localhost:3001';
+type AuthRequestInit = globalThis.RequestInit & {
+  includeTokens?: NormalizedTokenName[];
+};
+
+function getAuthBaseUrl(): string {
+  return env.VITE_AUTH_API_URL || 'http://localhost:3001';
+}
 
 async function authFetch<T>(
   endpoint: string,
-  options?: globalThis.RequestInit,
+  options?: AuthRequestInit,
 ): Promise<T> {
-  const url = `${AUTH_BASE_URL}${endpoint}`;
+  const url = `${getAuthBaseUrl()}${endpoint}`;
+  const existingHeaders = new Headers(options?.headers);
+  const authHeaders = buildTokenHeaders({include: options?.includeTokens});
   const response = await fetch(url, {
     ...options,
     credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
-      ...((options?.headers as Record<string, string>) ?? {}),
+      ...Object.fromEntries(existingHeaders.entries()),
+      ...authHeaders,
     },
   });
 
@@ -101,11 +112,14 @@ export const authApi = {
     return authFetch<AuthTokenResponse>('/api/auth/token');
   },
 
-  getContextToken: async (authToken?: string): Promise<AuthContextTokenResponse> => {
+  /**
+   * Fetch an auth-owned context token using the locally managed identity JWT.
+   */
+  getContextToken: async (): Promise<AuthContextTokenResponse> => {
+    await ensureAuthIdentityToken({requirePresence: true});
+
     return authFetch<AuthContextTokenResponse>('/api/auth/context-token', {
-      ...(authToken && {
-        headers: {Authorization: `Bearer ${authToken}`},
-      }),
+      includeTokens: [NormalizedTokenName.AUTH_IDENTITY],
     });
   },
 
@@ -134,18 +148,14 @@ export const authApi = {
     );
   },
 
-  changeEmail: async (
-    input: ChangeEmailBody,
-  ): Promise<ChangeEmailResponse> => {
+  changeEmail: async (input: ChangeEmailBody): Promise<ChangeEmailResponse> => {
     return authFetch<ChangeEmailResponse>('/api/auth/change-email', {
       method: 'POST',
       body: JSON.stringify(input),
     });
   },
 
-  setPassword: async (
-    input: SetPasswordBody,
-  ): Promise<SetPasswordResponse> => {
+  setPassword: async (input: SetPasswordBody): Promise<SetPasswordResponse> => {
     return authFetch<SetPasswordResponse>('/api/auth/set-password', {
       method: 'POST',
       body: JSON.stringify(input),

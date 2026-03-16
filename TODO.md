@@ -39,3 +39,5 @@ refine-user-session-and-verification-flow 这个 change 应当做如下调整
 - \package\auth\src\jwt\verify 必须确保不依赖 env，而是通过参数运行，任何依赖env 的实现都应当 放到 同文件夹下新独立文件然后，在 index.ts 中导出供 package/auth 使用，但是 package/server 绝对不能用，然后 package/server 如果想要更方便快捷的校验，可以自己对 package/auth 导入的 verify 提供一个 提供参数的 包装层
 
 你应当这么调整，依据新的prompt修改之前的 所有 冲突的内容，调整之前的 task，并新增 task 以满足这次prompt 的需要
+
+- [ ] requiredScope 是什么东西，token 应该没有哪个有scop吧？不过可以想想以后怎么利用，比如，很多权限都可以签发为 token，然后可以存在 index,用于初步筛选

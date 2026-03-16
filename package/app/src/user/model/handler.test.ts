@@ -5,6 +5,27 @@ process.env.VITE_API_URL ??= 'http://api.example';
 process.env.VITE_AUTH_API_URL ??= 'http://auth.example';
 process.env.VITE_TURNSTILE_SITE_KEY ??= 'turnstile-test-key';
 
+const fetchMock = mock();
+const signInMock = mock(async () => ({
+  user: {
+    id: 'user-1',
+    email: 'reader@example.com',
+  },
+  session: {
+    id: 'session-1',
+    token: 'better-auth-session-token',
+  },
+}));
+const signUpMock = mock(async () => ({
+  user: {
+    id: 'user-1',
+    email: 'reader@example.com',
+  },
+  session: {
+    id: 'session-1',
+    token: 'better-auth-session-token',
+  },
+}));
 const signOutMock = mock(async () => ({success: true}));
 const getContextTokenMock = mock(async () => ({
   token: 'context-token',
@@ -43,6 +64,8 @@ const hydrateAuthSessionStateMock = mock(async () => ({
 
 mock.module('@package/api/auth/auth.api', () => ({
   authApi: {
+    signIn: signInMock,
+    signUp: signUpMock,
     signOut: signOutMock,
     getContextToken: getContextTokenMock,
   },
@@ -100,6 +123,7 @@ mock.module('@/user/state', () => ({
 
 describe('auth handlers', () => {
   beforeEach(() => {
+    globalThis.fetch = fetchMock as unknown as typeof fetch;
     globalThis.window = {
       dispatchEvent: () => true,
       location: {
@@ -121,6 +145,12 @@ describe('auth handlers', () => {
         },
       };
     })() as Storage;
+    globalThis.document = {
+      cookie: '',
+    } as Document;
+    fetchMock.mockClear();
+    signInMock.mockClear();
+    signUpMock.mockClear();
     signOutMock.mockClear();
     getContextTokenMock.mockClear();
     ensureMock.mockClear();
@@ -135,9 +165,76 @@ describe('auth handlers', () => {
     setUserMock.mockClear();
   });
 
+  test('login acquires auth identity from the token endpoint instead of session.token', async () => {
+    fetchMock.mockResolvedValueOnce(
+      new Response(
+        JSON.stringify({
+          token:
+            'eyJhbGciOiJub25lIn0.eyJzdWIiOiJ1c2VyLTEiLCJleHAiOjQ3NjYwMDAwMDB9.c2ln',
+        }),
+        {
+          status: 200,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        },
+      ),
+    );
+
+    const {login} = await import('./handler');
+    const {getToken} = await import('@package/api/react-query/jwt');
+
+    const result = await login('reader@example.com', 'secret');
+
+    expect(signInMock).toHaveBeenCalledTimes(1);
+    expect(fetchMock.mock.calls[0]?.[0]).toBe('http://auth.example/api/auth/token');
+    expect(result.token).toBe(
+      'eyJhbGciOiJub25lIn0.eyJzdWIiOiJ1c2VyLTEiLCJleHAiOjQ3NjYwMDAwMDB9.c2ln',
+    );
+    expect(getToken(NormalizedTokenName.AUTH_IDENTITY)).toBe(
+      'eyJhbGciOiJub25lIn0.eyJzdWIiOiJ1c2VyLTEiLCJleHAiOjQ3NjYwMDAwMDB9.c2ln',
+    );
+  });
+
+  test('registration acquires auth identity from the token endpoint instead of session.token', async () => {
+    fetchMock.mockResolvedValueOnce(
+      new Response(
+        JSON.stringify({
+          token:
+            'eyJhbGciOiJub25lIn0.eyJzdWIiOiJ1c2VyLTIiLCJleHAiOjQ3NjYwMDAwMDB9.c2ln',
+        }),
+        {
+          status: 200,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        },
+      ),
+    );
+
+    const {register} = await import('./handler');
+    const {getToken} = await import('@package/api/react-query/jwt');
+
+    const result = await register('reader@example.com', 'secret');
+
+    expect(signUpMock).toHaveBeenCalledTimes(1);
+    expect(fetchMock.mock.calls[0]?.[0]).toBe('http://auth.example/api/auth/token');
+    expect(result.token).toBe(
+      'eyJhbGciOiJub25lIn0.eyJzdWIiOiJ1c2VyLTIiLCJleHAiOjQ3NjYwMDAwMDB9.c2ln',
+    );
+    expect(getToken(NormalizedTokenName.AUTH_IDENTITY)).toBe(
+      'eyJhbGciOiJub25lIn0.eyJzdWIiOiJ1c2VyLTIiLCJleHAiOjQ3NjYwMDAwMDB9.c2ln',
+    );
+  });
+
   test('acquires auth context before ensuring the user and issuing the member session', async () => {
     const {acquireMemberAccessIfReady} = await import('./handler');
-    const {getToken} = await import('@package/api/react-query/jwt');
+    const {getToken, setToken} = await import('@package/api/react-query/jwt');
+
+    setToken(
+      'eyJhbGciOiJub25lIn0.eyJzdWIiOiJ1c2VyLTEiLCJleHAiOjQ3NjYwMDAwMDB9.c2ln',
+      NormalizedTokenName.AUTH_IDENTITY,
+    );
 
     await acquireMemberAccessIfReady();
 

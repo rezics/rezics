@@ -95,6 +95,22 @@ function extractRawToken(
 }
 
 /**
+ * Validate that the supplied token string has a compact JWT shape before
+ * handing it to JOSE. This keeps transport errors from surfacing as library
+ * formatting exceptions.
+ */
+function assertJwtFormat(token: string): void {
+  const parts = token.split('.');
+  if (
+    parts.length !== 3 ||
+    parts.some(part => part.length === 0) ||
+    parts.some(part => !/^[A-Za-z0-9_-]+$/.test(part))
+  ) {
+    throw new Error('Unauthorized: Invalid JWT format');
+  }
+}
+
+/**
  * Resolve the verification key / JWKS function from the provided options.
  */
 async function resolveKey(
@@ -137,7 +153,14 @@ export async function verifyToken<TPayload extends JWTPayload = JWTPayload>(
     options.enforceTransport ?? true,
   );
 
-  const header = decodeProtectedHeader(token);
+  assertJwtFormat(token);
+
+  let header;
+  try {
+    header = decodeProtectedHeader(token);
+  } catch {
+    throw new Error('Unauthorized: Invalid JWT format');
+  }
   if (header.alg !== 'ES256') {
     throw new Error('Unauthorized: Invalid token algorithm');
   }

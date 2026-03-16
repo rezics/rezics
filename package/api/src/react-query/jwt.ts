@@ -10,7 +10,6 @@ import {
   normalizedTokenTransportMap,
 } from '@package/contract';
 
-const AUTH_BASE_URL = env.VITE_AUTH_API_URL;
 const AUTH_STORE_KEY = 'auth-store';
 const DEFAULT_TOKEN_STORAGE_KEYS = {
   [NormalizedTokenName.AUTH_IDENTITY]: 'auth-store',
@@ -48,11 +47,15 @@ export type JwtTokenStrategy = {
 };
 
 let tokenStrategy: JwtTokenStrategy = {
-  authBaseUrl: AUTH_BASE_URL,
+  authBaseUrl: '',
   storeKeyByToken: {
     ...DEFAULT_TOKEN_STORAGE_KEYS,
   },
 };
+
+function getAuthBaseUrl(): string {
+  return tokenStrategy.authBaseUrl || env.VITE_AUTH_API_URL;
+}
 
 export function configureJwtTokenStrategy(
   overrides: Partial<JwtTokenStrategy> & {
@@ -74,9 +77,16 @@ export function configureJwtTokenStrategy(
 
 export function getJwtTokenStrategy(): JwtTokenStrategy {
   return {
-    authBaseUrl: tokenStrategy.authBaseUrl,
+    authBaseUrl: getAuthBaseUrl(),
     storeKeyByToken: {...tokenStrategy.storeKeyByToken},
   };
+}
+
+/**
+ * Read the currently persisted token value for a normalized token type.
+ */
+function readStoredToken(tokenName: NormalizedTokenNameType): string | null {
+  return readAuthSnapshot(getStoreKey(tokenName))?.state?.accessToken ?? null;
 }
 
 function getStoreKey(tokenName: NormalizedTokenNameType): string {
@@ -129,7 +139,7 @@ function writeAuthSnapshot(
 export const getToken = (
   tokenName: NormalizedTokenNameType = NormalizedTokenName.AUTH_IDENTITY,
 ): string | null => {
-  return readAuthSnapshot(getStoreKey(tokenName))?.state?.accessToken ?? null;
+  return readStoredToken(tokenName);
 };
 
 /**
@@ -174,7 +184,7 @@ export async function queryAccessToken(options?: {requirePresence?: boolean}) {
   }
 
   const refreshTokenResponse = await fetch(
-    `${tokenStrategy.authBaseUrl}/api/auth/token`,
+    `${getAuthBaseUrl()}/api/auth/token`,
     {
       method: 'GET',
       credentials: 'include',
@@ -193,6 +203,48 @@ export async function queryAccessToken(options?: {requirePresence?: boolean}) {
   }
   setToken(token, NormalizedTokenName.AUTH_IDENTITY);
   return token;
+}
+
+/**
+ * Ensure an auth identity JWT exists in client storage, using the auth
+ * session cookie to mint one when needed.
+ */
+export async function ensureAuthIdentityToken(options?: {
+  requirePresence?: boolean;
+}) {
+  const existingToken = getToken(NormalizedTokenName.AUTH_IDENTITY);
+  if (existingToken) {
+    return existingToken;
+  }
+
+  return queryAccessToken(options);
+}
+
+/**
+ * Build transport-correct headers for the requested normalized token types.
+ * Bearer and custom header transports are derived from the shared contract.
+ */
+export function buildTokenHeaders(options?: {
+  include?: NormalizedTokenNameType[];
+}): Record<string, string> {
+  const requestedTokenNames =
+    options?.include ?? [NormalizedTokenName.AUTH_IDENTITY];
+  const headers: Record<string, string> = {};
+
+  for (const tokenName of requestedTokenNames) {
+    const transport = normalizedTokenTransportMap[tokenName];
+    const token = readStoredToken(tokenName);
+
+    if (!token) {
+      continue;
+    }
+
+    headers[transport.headerName] = transport.usesBearer
+      ? `Bearer ${token}`
+      : token;
+  }
+
+  return headers;
 }
 
 export function getTokenRecord(

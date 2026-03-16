@@ -1,40 +1,50 @@
-import {NormalizedTokenName, normalizedTokenTransportMap} from '@package/contract';
+import {
+  NormalizedTokenName,
+  type NormalizedTokenName as NormalizedTokenNameType,
+} from '@package/contract';
 import {env} from '../env';
 import {clearAuthPresence, hasAuthPresence} from './authPresence';
-import {getToken, queryAccessToken} from './jwt';
+import {
+  buildTokenHeaders,
+  queryAccessToken,
+} from './jwt';
 
 /**
  * Base API URL - should be configured via environment
  */
-const API_BASE_URL = env.VITE_API_URL || 'http://localhost:4000';
+function getApiBaseUrl(): string {
+  return env.VITE_API_URL || 'http://localhost:4000';
+}
 
+export type ApiRequestInit = globalThis.RequestInit & {
+  includeTokens?: NormalizedTokenNameType[];
+};
+
+/**
+ * Build request headers for business API calls using the normalized token
+ * transport contract. Caller-provided headers are preserved, but managed
+ * auth transports always win when present.
+ */
 function buildHeaders(
-  options?: globalThis.RequestInit,
+  options?: ApiRequestInit,
 ): Record<string, string> {
-  const headers: Record<string, string> = {
+  const headers = {
     'Content-Type': 'application/json',
+    ...Object.fromEntries(new Headers(options?.headers).entries()),
+    ...buildTokenHeaders({
+      include: options?.includeTokens ?? [
+        NormalizedTokenName.AUTH_IDENTITY,
+        NormalizedTokenName.REZICS_SESSION,
+      ],
+    }),
   };
-  const authToken = getToken(NormalizedTokenName.AUTH_IDENTITY);
-  if (authToken) {
-    headers.Authorization = `Bearer ${authToken}`;
-  }
-  const rezicsSessionToken = getToken(NormalizedTokenName.REZICS_SESSION);
-  if (rezicsSessionToken) {
-    headers[normalizedTokenTransportMap[NormalizedTokenName.REZICS_SESSION].headerName] =
-      rezicsSessionToken;
-  }
-  if (options?.headers) {
-    const existingHeaders = new Headers(options.headers);
-    existingHeaders.forEach((value, key) => {
-      headers[key] = value;
-    });
-  }
+
   return headers;
 }
 
 async function requestWithAuthRetry(
   url: string,
-  options?: globalThis.RequestInit,
+  options?: ApiRequestInit,
 ): Promise<Response> {
   let response = await fetch(url, {
     ...options,
@@ -69,9 +79,9 @@ async function requestWithAuthRetry(
 
 export async function apiFetchResponse<T>(
   endpoint: string,
-  options?: globalThis.RequestInit,
+  options?: ApiRequestInit,
 ): Promise<{data: T; response: Response}> {
-  const url = `${API_BASE_URL}${endpoint}`;
+  const url = `${getApiBaseUrl()}${endpoint}`;
   const response = await requestWithAuthRetry(url, options);
   const responseJson = await response.json();
 
@@ -95,7 +105,7 @@ export async function apiFetchResponse<T>(
  */
 export async function apiFetch<T>(
   endpoint: string,
-  options?: globalThis.RequestInit,
+  options?: ApiRequestInit,
 ): Promise<T> {
   const {data} = await apiFetchResponse<T>(endpoint, options);
   return data;

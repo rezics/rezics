@@ -1,4 +1,5 @@
 import {beforeEach, describe, expect, mock, test} from 'bun:test';
+import {NormalizedTokenName} from '@package/contract';
 
 const fetchMock = mock();
 let authPresence = false;
@@ -108,5 +109,41 @@ describe('refreshAuthToken', () => {
 
     await expect(apiFetch('/books')).rejects.toThrow('Expired');
     expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  test('builds managed auth headers from normalized token storage', async () => {
+    fetchMock.mockResolvedValueOnce(
+      new Response(JSON.stringify({ok: true}), {
+        status: 200,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }),
+    );
+
+    const {apiFetch} = await import('./http');
+    const {setToken} = await import('./jwt');
+
+    setToken(
+      'eyJhbGciOiJub25lIn0.eyJzdWIiOiJ1c2VyLTEiLCJleHAiOjQ3NjYwMDAwMDB9.c2ln',
+      NormalizedTokenName.AUTH_IDENTITY,
+    );
+    setToken('member-token', NormalizedTokenName.REZICS_SESSION);
+
+    await apiFetch('/books', {
+      headers: {
+        Authorization: 'Bearer wrong-token',
+        'x-trace-id': 'trace-1',
+      },
+    });
+
+    expect(fetchMock.mock.calls[0]?.[1]).toMatchObject({
+      headers: {
+        Authorization:
+          'Bearer eyJhbGciOiJub25lIn0.eyJzdWIiOiJ1c2VyLTEiLCJleHAiOjQ3NjYwMDAwMDB9.c2ln',
+        'x-rezics_session_token': 'member-token',
+        'x-trace-id': 'trace-1',
+      },
+    });
   });
 });

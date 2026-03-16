@@ -23,7 +23,8 @@ function buildLocalDefaults(
   overrides?: Partial<VerifyOptions>,
   tokenName: VerifyOptions['tokenName'] = NormalizedTokenName.AUTH_IDENTITY,
 ): VerifyOptions {
-  const issuer = overrides?.issuer ?? env.AUTH_JWT_ISSUER ?? env.BETTER_AUTH_URL;
+  const issuer =
+    overrides?.issuer ?? env.AUTH_JWT_ISSUER ?? env.BETTER_AUTH_URL;
   const audience = overrides?.audience ?? env.AUTH_JWT_AUDIENCE ?? 'rezics-api';
   const jwksUrl =
     typeof overrides?.jwksUrl === 'string'
@@ -36,7 +37,7 @@ function buildLocalDefaults(
     jwksUrl,
     tokenName,
     clockTolerance: overrides?.clockTolerance ?? 5,
-    requiredScope: overrides?.requiredScope ?? 'user',
+    requiredScope: overrides?.requiredScope ?? undefined,
     enforceTransport: overrides?.enforceTransport ?? true,
   };
 }
@@ -134,9 +135,7 @@ export async function verifyAuth<
   }
 }
 
-function isResponseSet(
-  value: unknown,
-): value is {status?: number} {
+function isResponseSet(value: unknown): value is {status?: number} {
   return (
     value !== null &&
     value !== undefined &&

@@ -1,18 +1,48 @@
 import {beforeEach, describe, expect, mock, test} from 'bun:test';
+import {NormalizedTokenName} from '@package/contract';
 
 const fetchMock = mock();
+const identityToken =
+  'eyJhbGciOiJub25lIn0.eyJzdWIiOiJ1c2VyLTEiLCJleHAiOjQ3NjYwMDAwMDB9.c2ln';
 
-mock.module('@package/app/env', () => ({
-  env: {
-    VITE_API_URL: 'http://api.example',
-    VITE_AUTH_API_URL: 'http://auth.example',
-  },
-}));
+type MemoryStorage = {
+  getItem(key: string): string | null;
+  setItem(key: string, value: string): void;
+  removeItem(key: string): void;
+  clear(): void;
+};
+
+function createMemoryStorage(): MemoryStorage {
+  const store = new Map<string, string>();
+
+  return {
+    getItem(key) {
+      return store.get(key) ?? null;
+    },
+    setItem(key, value) {
+      store.set(key, value);
+    },
+    removeItem(key) {
+      store.delete(key);
+    },
+    clear() {
+      store.clear();
+    },
+  };
+}
+
+process.env.VITE_API_URL ??= 'http://api.example';
+process.env.VITE_AUTH_API_URL ??= 'http://auth.example';
+process.env.VITE_TURNSTILE_SITE_KEY ??= 'turnstile-test-key';
 
 describe('authApi', () => {
   beforeEach(() => {
     fetchMock.mockClear();
     globalThis.fetch = fetchMock as unknown as typeof fetch;
+    globalThis.window = {
+      dispatchEvent: () => true,
+    } as unknown as Window & typeof globalThis;
+    globalThis.localStorage = createMemoryStorage() as Storage;
   });
 
   test('reads browser session tokens from the auth service', async () => {
@@ -38,6 +68,9 @@ describe('authApi', () => {
   });
 
   test('reads auth context tokens from the auth service', async () => {
+    const {setToken} = await import('../react-query/jwt');
+    setToken(identityToken, NormalizedTokenName.AUTH_IDENTITY);
+
     fetchMock.mockResolvedValueOnce(
       new Response(
         JSON.stringify({
@@ -70,6 +103,11 @@ describe('authApi', () => {
 
     const [url] = fetchMock.mock.calls[0]!;
     expect(url).toBe('http://auth.example/api/auth/context-token');
+    expect(fetchMock.mock.calls[0]?.[1]).toMatchObject({
+      headers: {
+        Authorization: `Bearer ${identityToken}`,
+      },
+    });
   });
 
   test('reads normalized auth session state from the auth service', async () => {

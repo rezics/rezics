@@ -25,6 +25,18 @@ async function createEcJwkWithKid(kid: string) {
 }
 
 describe('verifyBearerToken', () => {
+  test('rejects malformed JWT formatting before JOSE parsing', async () => {
+    const {verifyBearerToken} = await import('./verify');
+
+    await expect(
+      verifyBearerToken('Bearer not-a-jwt', {
+        issuer: 'https://issuer.example',
+        audience: 'rezics-api',
+        jwksUrl: 'http://localhost:1/jwks',
+      }),
+    ).rejects.toThrow('Invalid JWT format');
+  });
+
   test('rejects non-ES256 tokens', async () => {
     const {verifyBearerToken} = await import('./verify');
     const token = await new SignJWT({scope: 'user'})
@@ -141,6 +153,9 @@ describe('auth-local verifier wrappers', () => {
 
     process.env.AUTH_JWT_ISSUER = `http://localhost:${server.port}`;
     process.env.AUTH_JWT_AUDIENCE = 'rezics-api';
+    // Some client-side tests set a global window in the same Bun process.
+    // Ensure auth-local resolves env in server mode for this verifier test.
+    (globalThis as {window?: Window}).window = undefined;
     const {verifyAuthIdentityToken} = await import('./auth-local');
 
     const token = await new SignJWT({

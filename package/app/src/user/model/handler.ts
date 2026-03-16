@@ -1,7 +1,12 @@
 import {authApi} from '@package/api/auth/auth.api';
 import {authKeys} from '@package/api/auth/auth.keys';
 import {NormalizedTokenName} from '@package/contract';
-import {clearAllTokens, getToken, setToken} from '@package/api/react-query/jwt';
+import {
+  clearAllTokens,
+  ensureAuthIdentityToken,
+  getToken,
+  setToken,
+} from '@package/api/react-query/jwt';
 import {userKeys} from '@package/api/user/user.keys';
 import {qc} from '@/app/provider/reactQueryUtil';
 import {userApi} from '@package/api/user/user.api';
@@ -22,8 +27,8 @@ function clearMemberState() {
 }
 
 async function ensureMemberAccess() {
-  const authToken = getToken(NormalizedTokenName.AUTH_IDENTITY);
-  const authContext = await authApi.getContextToken(authToken ?? undefined);
+  await ensureAuthIdentityToken({requirePresence: true});
+  const authContext = await authApi.getContextToken();
   setToken(authContext.token, NormalizedTokenName.AUTH_CONTEXT);
   useAuthSessionStore.getState().syncAuthContext(authContext.token);
 
@@ -60,8 +65,8 @@ export async function acquireMemberAccessIfReady() {
 }
 
 export const login = async (email: string, password: string) => {
-  const result = await authApi.signIn({email, password});
-  const token = result.token ?? result.session?.token ?? null;
+  await authApi.signIn({email, password});
+  const token = await ensureAuthIdentityToken({requirePresence: false});
   if (token) {
     useAuthStore.getState().setToken(token);
   } else {
@@ -91,11 +96,11 @@ export const register = async (
   try {
     void avatar;
     void bio;
-    const result = await authApi.signUp({
+    await authApi.signUp({
       email,
       password,
     });
-    const token = result.token ?? result.session?.token ?? null;
+    const token = await ensureAuthIdentityToken({requirePresence: false});
     if (token) {
       useAuthStore.getState().setToken(token);
     } else {

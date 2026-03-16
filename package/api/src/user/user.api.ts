@@ -9,8 +9,7 @@ import type {
   UpdateUser,
   UserDTO,
 } from '@package/contract';
-import {NormalizedTokenName, normalizedTokenTransportMap} from '@package/contract';
-import {getToken} from '../react-query/jwt';
+import {NormalizedTokenName} from '@package/contract';
 import {apiFetch} from '../react-query/http';
 
 type FollowSummaryResponse = {
@@ -20,14 +19,12 @@ type FollowSummaryResponse = {
 
 export const userApi = {
   ensure: async (): Promise<EnsureUserResponse> => {
-    const authContextToken = getToken(NormalizedTokenName.AUTH_CONTEXT);
     return apiFetch(`/users/ensure`, {
-      headers: authContextToken
-        ? {
-            [normalizedTokenTransportMap[NormalizedTokenName.AUTH_CONTEXT]
-              .headerName]: authContextToken,
-          }
-        : undefined,
+      includeTokens: [
+        NormalizedTokenName.AUTH_IDENTITY,
+        NormalizedTokenName.REZICS_SESSION,
+        NormalizedTokenName.AUTH_CONTEXT,
+      ],
     });
   },
 

@@ -8,6 +8,7 @@ import {
   parseJwt,
   queryAccessToken,
   removeToken,
+  ensureAuthIdentityToken,
 } from '@package/api/react-query/jwt';
 import {authApi} from '@package/api/auth/auth.api';
 import {NormalizedTokenName} from '@package/contract';
@@ -103,7 +104,7 @@ export function AuthProvider() {
               clearMemberTokenState();
             }
             try {
-              authToken = await queryAccessToken({requirePresence: true});
+              authToken = await ensureAuthIdentityToken({requirePresence: true});
               syncDerivedTokenState();
             } catch {
               refreshRetryPolicy.reset();
@@ -157,7 +158,7 @@ export function AuthProvider() {
             }
 
             if (authContextRefreshInMs <= 0 || !authContextToken) {
-              authContextToken = (await authApi.getContextToken(authToken ?? undefined)).token;
+              authContextToken = (await authApi.getContextToken()).token;
               setToken(authContextToken, NormalizedTokenName.AUTH_CONTEXT);
               useAuthSessionStore.getState().syncAuthContext(authContextToken);
             }
@@ -257,10 +258,9 @@ export function AuthProvider() {
         return;
       }
 
-      let activeAuthToken = authToken;
-      if (!activeAuthToken) {
+      if (!authToken) {
         try {
-          activeAuthToken = await queryAccessToken({requirePresence: true});
+          await ensureAuthIdentityToken({requirePresence: true});
           syncDerivedTokenState();
         } catch {
           clearMemberTokenState();
@@ -269,7 +269,7 @@ export function AuthProvider() {
       }
 
       try {
-        const authContextToken = (await authApi.getContextToken(activeAuthToken ?? undefined)).token;
+        const authContextToken = (await authApi.getContextToken()).token;
         setToken(authContextToken, NormalizedTokenName.AUTH_CONTEXT);
         useAuthSessionStore.getState().syncAuthContext(authContextToken);
 

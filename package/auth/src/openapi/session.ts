@@ -12,6 +12,7 @@ import {jsonRequestBody, jsonResponse} from './docs';
 import {listEnabledSocialProviderIds} from '../auth/providers';
 import {env} from '@/env';
 import {signAuthContextToken} from '../jwt/context-token';
+import {verifyAuthIdentityToken} from '@/jwt';
 
 async function forwardAuthRequest(
   request: Request,
@@ -138,12 +139,17 @@ async function getContextTokenResponse(request: Request): Promise<Response> {
 
   let userId: string;
   try {
-    const {verifyAuthIdentityToken} = await import('../jwt/auth-local');
     const verified = await verifyAuthIdentityToken(authorization);
     userId = verified.payload.sub ?? '';
-  } catch {
+  } catch (error) {
+    console.error(error);
     return Response.json(
-      {message: 'Unauthorized: Invalid identity token'},
+      {
+        message:
+          error instanceof Error
+            ? error.message
+            : 'Unauthorized: Invalid identity token',
+      },
       {status: 401},
     );
   }

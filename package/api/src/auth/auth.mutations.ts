@@ -35,9 +35,10 @@ export function useSignUpMutation() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (input: {email: string; password: string}) => authApi.signUp(input),
-    onSuccess: () => {
+    onSuccess: async () => {
       qc.invalidateQueries({queryKey: authKeys.session()});
       qc.invalidateQueries({queryKey: authKeys.sessionState()});
+      await queryAccessToken({requirePresence: false});
     },
   });
 }
