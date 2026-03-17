@@ -1,9 +1,4 @@
 import {coreInstance} from './core';
-import {
-  handleJwksCompatibilityRequest,
-  handleOAuthAuthorizationServerRequest,
-  handleOpenIdConfigRequest,
-} from './auth/routes';
 import {authOpenApiRouter} from './openapi';
 import {env} from './env';
 import {openapi} from '@elysiajs/openapi';
@@ -46,15 +41,6 @@ app
     };
   })
   .use(authOpenApiRouter)
-  .get('/.well-known/jwks.json', ({request}) =>
-    handleJwksCompatibilityRequest(request),
-  )
-  .get('/.well-known/openid-configuration', ({request}) =>
-    handleOpenIdConfigRequest(request),
-  )
-  .get('/.well-known/oauth-authorization-server', ({request}) =>
-    handleOAuthAuthorizationServerRequest(request),
-  )
   .get('/health', () => ({status: 'ok'}));
 
 console.log('env.PORT', env.PORT);

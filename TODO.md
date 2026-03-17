@@ -41,3 +41,5 @@ refine-user-session-and-verification-flow 这个 change 应当做如下调整
 你应当这么调整，依据新的prompt修改之前的 所有 冲突的内容，调整之前的 task，并新增 task 以满足这次prompt 的需要
 
 - [ ] requiredScope 是什么东西，token 应该没有哪个有scop吧？不过可以想想以后怎么利用，比如，很多权限都可以签发为 token，然后可以存在 index,用于初步筛选
+
+- [ ] jwks 相关端口的权限校验问题，cors开放访问
