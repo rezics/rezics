@@ -1,14 +1,20 @@
 import {describe, expect, test} from 'bun:test';
 import {SignJWT, exportJWK, generateKeyPair} from 'jose';
 import {NormalizedTokenName} from '@package/contract';
+import {JwtAlgorithm, verifyBearerToken, verifyTokenFromHeader} from '@package/jwt';
 
-process.env.DATABASE_URL ??=
+process.env.DATABASE_URL =
+  process.env.DATABASE_URL ??
   'postgresql://postgres:postgres@localhost:5432/rezics_auth';
-process.env.BETTER_AUTH_URL ??= 'http://localhost:35003';
-process.env.BETTER_AUTH_SECRET ??=
+process.env.BETTER_AUTH_URL = 'http://localhost:35003';
+process.env.BETTER_AUTH_SECRET =
+  process.env.BETTER_AUTH_SECRET ??
   'better-auth-secret-for-tests-abcdefghijklmnopqrstuvwxyz';
-process.env.AUTH_INTERNAL_TOKEN_GATEWAY_SECRET ??=
+process.env.AUTH_INTERNAL_TOKEN_GATEWAY_SECRET =
+  process.env.AUTH_INTERNAL_TOKEN_GATEWAY_SECRET ??
   'internal-auth-gateway-test';
+process.env.AUTH_JWT_ISSUER = 'http://localhost:35003';
+process.env.AUTH_JWT_AUDIENCE = 'rezics-api';
 
 async function createEcJwkWithKid(kid: string) {
   const {publicKey, privateKey} = await generateKeyPair('ES256');
@@ -26,19 +32,17 @@ async function createEcJwkWithKid(kid: string) {
 
 describe('verifyBearerToken', () => {
   test('rejects malformed JWT formatting before JOSE parsing', async () => {
-    const {verifyBearerToken} = await import('./verify');
-
     await expect(
       verifyBearerToken('Bearer not-a-jwt', {
         issuer: 'https://issuer.example',
         audience: 'rezics-api',
         jwksUrl: 'http://localhost:1/jwks',
+        algorithm: JwtAlgorithm.ES256,
       }),
     ).rejects.toThrow('Invalid JWT format');
   });
 
   test('rejects non-ES256 tokens', async () => {
-    const {verifyBearerToken} = await import('./verify');
     const token = await new SignJWT({scope: 'user'})
       .setProtectedHeader({alg: 'HS256', kid: 'hs'})
       .setIssuer('https://issuer.example')
@@ -51,12 +55,12 @@ describe('verifyBearerToken', () => {
         issuer: 'https://issuer.example',
         audience: 'rezics-api',
         jwksUrl: 'http://localhost:1/jwks',
+        algorithm: JwtAlgorithm.ES256,
       }),
     ).rejects.toThrow('Invalid token algorithm');
   });
 
   test('refreshes JWKS on unknown kid and verifies token', async () => {
-    const {verifyBearerToken} = await import('./verify');
     const key1 = await createEcJwkWithKid('kid-old');
     const key2 = await createEcJwkWithKid('kid-new');
 
@@ -87,6 +91,7 @@ describe('verifyBearerToken', () => {
       issuer: 'https://issuer.example',
       audience: 'rezics-api',
       jwksUrl: `http://localhost:${server.port}/jwks`,
+      algorithm: JwtAlgorithm.ES256,
     });
 
     expect(verified.protectedHeader.kid).toBe('kid-new');
@@ -96,7 +101,6 @@ describe('verifyBearerToken', () => {
   });
 
   test('verifies auth context tokens with explicit transport settings', async () => {
-    const {verifyToken} = await import('./verify');
     const key = await createEcJwkWithKid('kid-context');
 
     const token = await new SignJWT({
@@ -117,7 +121,7 @@ describe('verifyBearerToken', () => {
       .setExpirationTime('1h')
       .sign(key.privateKey);
 
-    const verified = await verifyToken(token, {
+    const verified = await verifyTokenFromHeader(token, {
       issuer: 'https://issuer.example',
       audience: 'rezics-api',
       verificationKey: await crypto.subtle.importKey(
@@ -127,6 +131,7 @@ describe('verifyBearerToken', () => {
         true,
         ['verify'],
       ),
+      algorithm: JwtAlgorithm.ES256,
       tokenName: NormalizedTokenName.AUTH_CONTEXT,
       requiredScope: undefined,
     });
@@ -144,7 +149,7 @@ describe('auth-local verifier wrappers', () => {
       port: 0,
       fetch(request) {
         const url = new URL(request.url);
-        if (url.pathname === '/api/auth/jwks') {
+        if (url.pathname === '/api/auth/session/jwks') {
           return Response.json({keys: [key.publicJwk]});
         }
         return new Response('not found', {status: 404});
@@ -156,7 +161,7 @@ describe('auth-local verifier wrappers', () => {
     // Some client-side tests set a global window in the same Bun process.
     // Ensure auth-local resolves env in server mode for this verifier test.
     (globalThis as {window?: Window}).window = undefined;
-    const {verifyAuthIdentityToken} = await import('./auth-local');
+    const {verifyAuthIdentityToken} = await import('../session/jwt/verify');
 
     const token = await new SignJWT({
       unitId: 'user-1',

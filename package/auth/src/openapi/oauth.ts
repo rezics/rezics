@@ -19,8 +19,11 @@ import {
 } from '../auth/routes';
 import {jsonRequestBody, jsonResponse, parameter} from './docs';
 import {getConfiguredSocialProviders} from '../auth/providers';
+import {
+  coreInstance,
+} from '../core';
 
-export const oauthRouter = new Elysia()
+export const oauthRouter = coreInstance()
   .get(
     '/providers',
     () => ({
@@ -130,14 +133,6 @@ export const oauthRouter = new Elysia()
       requestBody: jsonRequestBody(revokeTokenBodySchema),
     },
   })
-  .get('/jwks', ({request}) => handleAuthRequest(request), {
-    detail: {
-      summary: 'JWKS public keys',
-      description:
-        'Primary JSON Web Key Set (JWKS) endpoint. Clients and resource servers use this endpoint to fetch the public signing keys required to verify JWTs issued by this authorization server. The returned keys correspond to the same signing material exposed through the compatibility endpoint `/.well-known/jwks.json`.',
-      tags: ['OAuth'],
-    },
-  })
   .post('/oauth/register', ({request}) => handleAuthRequest(request), {
     detail: {
       summary: 'Register OAuth client',
@@ -176,7 +171,7 @@ export const oauthRouter = new Elysia()
       detail: {
         summary: 'JWKS compatibility endpoint',
         description:
-          'Compatibility JWKS endpoint for OAuth/OIDC clients and resource servers that expect the standard discovery path `/.well-known/jwks.json`. It returns the same public signing keys as `/jwks`, enabling offline JWT verification without relying on the non-well-known route.',
+          'Compatibility JWKS endpoint for OAuth/OIDC clients and resource servers that expect the standard discovery path `/.well-known/jwks.json`. It returns the same public signing keys as the canonical session-owned endpoint `/session/jwks`.',
         tags: ['OAuth'],
       },
     },

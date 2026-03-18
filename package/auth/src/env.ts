@@ -71,10 +71,28 @@ export const env = createEnv({
      * Settings for token issuance and signing key rotation.
      */
 
+    /**
+     * Bootstrap-only override for the auth-local JWT audience.
+     * Steady-state runtime metadata is persisted in the auth JWT service registry.
+     */
     AUTH_JWT_AUDIENCE: v.optional(v.string()),
+    /**
+     * Bootstrap-only override for the auth-local JWT issuer.
+     * Steady-state runtime metadata is persisted in the auth JWT service registry.
+     */
     AUTH_JWT_ISSUER: v.optional(v.string()),
+    /**
+     * Bootstrap-only override for auth-issued JWT lifetime.
+     * Use only for migration or emergency rotation tuning.
+     */
     AUTH_JWT_TTL_SECONDS: v.optional(v.string()),
+    /**
+     * Bootstrap-only override for auth signing-key rotation cadence.
+     */
     AUTH_JWKS_ROTATION_INTERVAL_SECONDS: v.optional(v.string()),
+    /**
+     * Bootstrap-only override for auth JWKS grace-period publication.
+     */
     AUTH_JWKS_GRACE_PERIOD_SECONDS: v.optional(v.string()),
 
     /*

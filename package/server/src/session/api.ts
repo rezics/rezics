@@ -3,12 +3,27 @@ import {
   sessionTokenResponseSchema,
   type SessionTokenResponse,
 } from '@package/contract';
-import {coreInstance} from '@/src/core';
+import {
+  coreInstance,
+} from '@/src/core';
 import {identityContextPlugin} from '@/src/auth/context';
 import {userService} from '@/src/user/service/user.service';
-import {buildRezicsSessionClaims} from './jwt';
+import {buildRezicsSessionClaims, getMainSessionPublicJwks} from './jwt';
 
-export const sessionApi = coreInstance('/session')
+const publicSessionApi = coreInstance('/session').get(
+  '/jwks',
+  async () => getMainSessionPublicJwks(),
+  {
+    detail: {
+      summary: 'Publish main-server JWKS',
+      description:
+        'Expose the canonical JWKS document for all main-server issued session tokens.',
+      tags: ['Session'],
+    },
+  },
+);
+
+const credentialedSessionApi = coreInstance('/session')
   .use(identityContextPlugin)
   .post(
     '/token',
@@ -34,3 +49,7 @@ export const sessionApi = coreInstance('/session')
       },
     },
   );
+
+export const sessionApi = new Elysia()
+  .use(publicSessionApi)
+  .use(credentialedSessionApi);

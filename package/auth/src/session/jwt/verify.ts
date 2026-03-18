@@ -1,60 +1,54 @@
 import type {JWTPayload} from 'jose';
-import {
-  type AuthContextTokenClaims,
-  type AuthIdentityTokenClaims,
-  NormalizedTokenName,
+import type {
+  AuthContextTokenClaims,
+  AuthIdentityTokenClaims,
 } from '@package/contract';
-import {env} from '../env';
 import {
   verifyBearerToken,
-  verifyToken,
-  type VerifiedToken,
-  type VerifyOptions,
-} from './verify';
+  verifyTokenFromHeader,
+  type JwtVerifyInput,
+  type VerifiedJwt,
+} from '@package/jwt';
+import {NormalizedTokenName} from '@package/contract';
+import {
+  getAuthJwtAudience,
+  getAuthJwtIssuer,
+  getAuthSessionJwksPath,
+} from './config';
 
-// ---------------------------------------------------------------------------
-// Option builders — inject auth-service env defaults
-// ---------------------------------------------------------------------------
+export type VerifyOptions = JwtVerifyInput;
+export type VerifiedToken<TPayload extends JWTPayload = JWTPayload> =
+  VerifiedJwt<TPayload>;
 
-/**
- * Build VerifyOptions for auth-service-local use, filling gaps from env.
- */
 function buildLocalDefaults(
   overrides?: Partial<VerifyOptions>,
   tokenName: VerifyOptions['tokenName'] = NormalizedTokenName.AUTH_IDENTITY,
 ): VerifyOptions {
-  const issuer =
-    overrides?.issuer ?? env.AUTH_JWT_ISSUER ?? env.BETTER_AUTH_URL;
-  const audience = overrides?.audience ?? env.AUTH_JWT_AUDIENCE ?? 'rezics-api';
+  const issuer = overrides?.issuer ?? getAuthJwtIssuer();
+  const audience = overrides?.audience ?? getAuthJwtAudience();
   const jwksUrl =
     typeof overrides?.jwksUrl === 'string'
       ? overrides.jwksUrl
-      : new URL('/api/auth/jwks', issuer).toString();
+      : new URL(getAuthSessionJwksPath(), issuer).toString();
 
   return {
     issuer,
     audience,
     jwksUrl,
+    algorithm: overrides?.algorithm ?? 'ES256',
     tokenName,
-    clockTolerance: overrides?.clockTolerance ?? 5,
+    clockToleranceSeconds: overrides?.clockToleranceSeconds ?? 5,
     requiredScope: overrides?.requiredScope ?? undefined,
     enforceTransport: overrides?.enforceTransport ?? true,
   };
 }
 
-/**
- * Build VerifyOptions pre-filled for AUTH_IDENTITY tokens using local env.
- */
 export function getAuthIdentityVerifyOptions(
   overrides?: Partial<VerifyOptions>,
 ): VerifyOptions {
   return buildLocalDefaults(overrides, NormalizedTokenName.AUTH_IDENTITY);
 }
 
-/**
- * Build VerifyOptions pre-filled for AUTH_CONTEXT tokens using local env.
- * Scope enforcement is disabled by default for context tokens.
- */
 export function getAuthContextVerifyOptions(
   overrides?: Partial<VerifyOptions>,
 ): VerifyOptions {
@@ -64,13 +58,6 @@ export function getAuthContextVerifyOptions(
   );
 }
 
-// ---------------------------------------------------------------------------
-// Local verification wrappers
-// ---------------------------------------------------------------------------
-
-/**
- * Verify an auth identity token using auth-service env defaults.
- */
 export async function verifyAuthIdentityToken<
   TPayload extends JWTPayload = AuthIdentityTokenClaims & JWTPayload,
 >(
@@ -83,29 +70,18 @@ export async function verifyAuthIdentityToken<
   );
 }
 
-/**
- * Verify an auth context token using auth-service env defaults.
- */
 export async function verifyAuthContextToken<
   TPayload extends JWTPayload = AuthContextTokenClaims & JWTPayload,
 >(
   token: string | undefined,
   overrides?: Partial<VerifyOptions>,
 ): Promise<VerifiedToken<TPayload>> {
-  return verifyToken<TPayload>(token, getAuthContextVerifyOptions(overrides));
+  return verifyTokenFromHeader<TPayload>(
+    token,
+    getAuthContextVerifyOptions(overrides),
+  );
 }
 
-/**
- * Convenience wrapper: verify an auth identity Bearer token and return only
- * the payload. Optionally sets `set.status = 401` on failure when a
- * response-set object is provided.
- *
- * Accepts a flexible argument list for ergonomic use in Elysia handlers:
- *   verifyAuth(authorization)
- *   verifyAuth(authorization, set)
- *   verifyAuth(authorization, options)
- *   verifyAuth(authorization, set, options)
- */
 export async function verifyAuth<
   TPayload extends JWTPayload = AuthIdentityTokenClaims & JWTPayload,
 >(
@@ -116,7 +92,12 @@ export async function verifyAuth<
   let set: {status?: number} | undefined;
   let options: Partial<VerifyOptions> | undefined;
 
-  if (isResponseSet(setOrOptions)) {
+  if (
+    setOrOptions !== null &&
+    setOrOptions !== undefined &&
+    typeof setOrOptions === 'object' &&
+    'status' in setOrOptions
+  ) {
     set = setOrOptions;
     options = maybeOptions;
   } else if (setOrOptions) {
@@ -133,13 +114,4 @@ export async function verifyAuth<
     if (set) set.status = 401;
     throw error;
   }
-}
-
-function isResponseSet(value: unknown): value is {status?: number} {
-  return (
-    value !== null &&
-    value !== undefined &&
-    typeof value === 'object' &&
-    'status' in (value as Record<string, unknown>)
-  );
 }

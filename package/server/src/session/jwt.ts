@@ -1,65 +1,161 @@
-import {jwt} from '@elysiajs/jwt';
-import {createPrivateKey, createPublicKey, generateKeyPairSync} from 'node:crypto';
-import type {KeyObject} from 'node:crypto';
+import {Elysia} from 'elysia';
+import {createPrivateKey, createPublicKey} from 'node:crypto';
+import {
+  createRotationEngine,
+  defaultJwtCryptoProvider,
+  JwtAlgorithm,
+  verifySessionToken,
+  type JwtCryptoProvider,
+} from '@package/jwt';
 import {
   NormalizedTokenName,
   TokenTransportHeader,
   type RezicsSessionTokenClaims,
   type TokenPermissionRole,
 } from '@package/contract';
-import {env} from '../env';
+import {SignJWT} from 'jose';
+import {serverJwtPersistence} from './jwt-persistence';
+import {getServerSessionJwtMetadata, serverSessionJwksPath} from './jwt-metadata';
 
 function normalizePem(value?: string): string | undefined {
   return value?.replace(/\\n/g, '\n');
 }
 
-function buildDevelopmentKeyPair(): {privateKey: KeyObject; publicKey: KeyObject} {
-  return generateKeyPairSync('ec', {
-    namedCurve: 'P-256',
-  });
+function createSeededCryptoProvider(): JwtCryptoProvider {
+  const privateKeyPem = normalizePem(process.env.MAIN_SESSION_JWT_PRIVATE_KEY);
+  const publicKeyPem = normalizePem(process.env.MAIN_SESSION_JWT_PUBLIC_KEY);
+  let seeded = false;
+
+  return {
+    generateKey() {
+      if (privateKeyPem && !seeded) {
+        seeded = true;
+
+        return {
+          privateKeyPem,
+          publicKeyPem:
+            publicKeyPem ??
+            createPublicKey(privateKeyPem)
+              .export({format: 'pem', type: 'spki'})
+              .toString(),
+        };
+      }
+
+      return defaultJwtCryptoProvider.generateKey();
+    },
+  };
 }
 
-const configuredPrivateKeyPem = normalizePem(env.MAIN_SESSION_JWT_PRIVATE_KEY);
-const configuredPublicKeyPem = normalizePem(env.MAIN_SESSION_JWT_PUBLIC_KEY);
+function getMainSessionJwtTtlSeconds() {
+  return Number(process.env.MAIN_SESSION_JWT_TTL_SECONDS ?? '900');
+}
 
-const runtimeKeyPair = configuredPrivateKeyPem
-  ? {
-      privateKey: createPrivateKey(configuredPrivateKeyPem),
-      publicKey: configuredPublicKeyPem
-        ? createPublicKey(configuredPublicKeyPem)
-        : createPublicKey(configuredPrivateKeyPem),
+const mainSessionMetadata = getServerSessionJwtMetadata();
+let mainSessionRotationPromise:
+  | Promise<
+      ReturnType<typeof createRotationEngine>
+    >
+  | null = null;
+
+async function getMainSessionRotation() {
+  if (!mainSessionRotationPromise) {
+    mainSessionRotationPromise = (async () => {
+      const rotation = createRotationEngine({
+        issuer: {
+          issuer: mainSessionMetadata.issuer,
+          audience: mainSessionMetadata.audience,
+          algorithm: JwtAlgorithm.ES256,
+          jwksPath: serverSessionJwksPath,
+        },
+        config: {
+          tokenTtlMs: getMainSessionJwtTtlSeconds() * 1000,
+        },
+        persistence: serverJwtPersistence,
+        cryptoProvider: createSeededCryptoProvider(),
+      });
+
+      await rotation.ensureActiveKey();
+      return rotation;
+    })();
+  }
+
+  return mainSessionRotationPromise;
+}
+
+export const mainSessionJwtPlugin = new Elysia({
+  name: '@rezics/main-session-jwt',
+}).decorate('jwt', {
+  async sign(
+    signValue: Record<string, unknown> & {
+      aud?: string | string[];
+      iss?: string;
+      jti?: string;
+      sub?: string;
+      nbf?: string | number;
+      exp?: string | number;
+      iat?: boolean;
+    },
+  ) {
+    const rotation = await getMainSessionRotation();
+    const activeKey = await rotation.getActiveSigningKey();
+    const {nbf, exp, iat, aud, iss, jti, sub, ...data} = signValue;
+
+    let token = new SignJWT({
+      ...data,
+      ...(jti ? {jti} : {}),
+      ...(sub ? {sub} : {}),
+    })
+      .setProtectedHeader({
+        alg: activeKey.algorithm,
+        kid: activeKey.kid,
+        typ: 'JWT',
+      })
+      .setIssuer(iss ?? mainSessionMetadata.issuer)
+      .setAudience(aud ?? mainSessionMetadata.audience);
+
+    if (nbf !== undefined) token = token.setNotBefore(nbf);
+    token =
+      exp !== undefined
+        ? token.setExpirationTime(exp)
+        : token.setExpirationTime(`${getMainSessionJwtTtlSeconds()}s`);
+    if (iat !== false) token = token.setIssuedAt(new Date());
+    if (sub) token = token.setSubject(sub);
+    if (jti) token = token.setJti(jti);
+
+    return token.sign(createPrivateKey(activeKey.privateKeyPem));
+  },
+  async verify(token: string | undefined) {
+    if (!token) return false;
+
+    try {
+      const context = await getMainSessionJwtContext();
+      return (
+        await verifySessionToken(token, {
+          ...context,
+          clockToleranceSeconds: 5,
+        })
+      ).payload;
+    } catch {
+      return false;
     }
-  : buildDevelopmentKeyPair();
-
-if (env.NODE_ENV === 'production' && !configuredPrivateKeyPem) {
-  throw new Error(
-    'MAIN_SESSION_JWT_PRIVATE_KEY is required in production for main-server session signing',
-  );
-}
-
-const mainSessionIssuer =
-  env.MAIN_SESSION_JWT_ISSUER ?? `http://localhost:${env.PORT ?? '3000'}`;
-const mainSessionAudience =
-  env.MAIN_SESSION_JWT_AUDIENCE ?? 'rezics-main-server';
-const mainSessionTtlSeconds = Number(env.MAIN_SESSION_JWT_TTL_SECONDS ?? '900');
-
-export const mainSessionJwtPlugin = jwt({
-  name: 'jwt',
-  secret: runtimeKeyPair.privateKey,
-  alg: 'ES256',
-  iss: mainSessionIssuer,
-  aud: mainSessionAudience,
-  exp: `${mainSessionTtlSeconds}s`,
+  },
 });
 
-export function getMainSessionJwtContext() {
+export async function getMainSessionJwtContext() {
+  const rotation = await getMainSessionRotation();
+
   return {
-    issuer: mainSessionIssuer,
-    audience: mainSessionAudience,
-    ttlSeconds: mainSessionTtlSeconds,
+    issuer: mainSessionMetadata.issuer,
+    audience: mainSessionMetadata.audience,
+    algorithm: JwtAlgorithm.ES256,
+    ttlSeconds: getMainSessionJwtTtlSeconds(),
     tokenName: NormalizedTokenName.REZICS_SESSION,
-    verificationKey: runtimeKeyPair.publicKey,
+    jwks: await rotation.getPublicJwks(),
   } as const;
+}
+
+export async function getMainSessionPublicJwks() {
+  return (await getMainSessionRotation()).getPublicJwks();
 }
 
 function hasRole(roles: string[] | undefined, role: TokenPermissionRole): boolean {
@@ -87,5 +183,4 @@ export function buildRezicsSessionClaims(input: {
   };
 }
 
-export const REZICS_SESSION_HEADER =
-  TokenTransportHeader.REZICS_SESSION;
+export const REZICS_SESSION_HEADER = TokenTransportHeader.REZICS_SESSION;

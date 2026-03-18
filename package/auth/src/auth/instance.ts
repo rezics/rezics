@@ -2,7 +2,6 @@ import {betterAuth} from 'better-auth';
 import {prismaAdapter} from '@better-auth/prisma-adapter';
 import {admin, genericOAuth, jwt, organization} from 'better-auth/plugins';
 import {oauthProvider} from '@better-auth/oauth-provider';
-import {createHash} from 'node:crypto';
 import {prisma} from './prisma';
 import {env} from '../env';
 import {ac, authRoles, organizationRoles} from './permissions';
@@ -12,26 +11,20 @@ import {
   getTelegramGenericOAuthConfig,
 } from './providers';
 import {createAuthNotificationService} from '../notification';
-
-const authAudience = env.AUTH_JWT_AUDIENCE ?? 'rezics-api';
-const authIssuer = env.AUTH_JWT_ISSUER ?? env.BETTER_AUTH_URL;
-const authJwtTtlSeconds = Number(env.AUTH_JWT_TTL_SECONDS ?? '3600');
-const authJwksRotationIntervalSeconds = Number(
-  env.AUTH_JWKS_ROTATION_INTERVAL_SECONDS ?? '86400',
-);
-const authJwksGracePeriodSeconds = Number(
-  env.AUTH_JWKS_GRACE_PERIOD_SECONDS ?? '3900',
-);
+import {
+  createBetterAuthJwtAdapter,
+  getAuthJwtAudience,
+  getAuthJwtIssuer,
+  getAuthJwtTtlSeconds,
+  getAuthJwksGracePeriodSeconds,
+  getAuthJwksRotationIntervalSeconds,
+} from '../session/jwt/export';
 const telegramOAuthConfig = getTelegramGenericOAuthConfig();
 const notificationService = createAuthNotificationService(env, {
   telegram: {
     enabled: false,
   },
 });
-
-function deriveDeterministicKid(publicKey: string): string {
-  return createHash('sha256').update(publicKey).digest('hex').slice(0, 32);
-}
 
 export const auth = betterAuth({
   appName: 'Rezics Auth',
@@ -105,56 +98,14 @@ export const auth = betterAuth({
         keyPairConfig: {
           alg: 'ES256',
         },
-        rotationInterval: authJwksRotationIntervalSeconds,
-        gracePeriod: authJwksGracePeriodSeconds,
+        rotationInterval: getAuthJwksRotationIntervalSeconds(),
+        gracePeriod: getAuthJwksGracePeriodSeconds(),
       },
-      adapter: {
-        getJwks: async _ctx => {
-          void _ctx;
-          const keys = await prisma.jwks.findMany();
-          return keys.map((key: any) => ({
-            ...key,
-            alg: key.alg ?? undefined,
-            crv: key.crv ?? undefined,
-            expiresAt: key.expiresAt ?? undefined,
-          })) as any;
-        },
-        createJwk: async (data, _ctx) => {
-          void _ctx;
-          const kid = deriveDeterministicKid(data.publicKey);
-          const record = await prisma.jwks.upsert({
-            where: {id: kid},
-            update: {
-              publicKey: data.publicKey,
-              privateKey: data.privateKey,
-              createdAt: data.createdAt,
-              expiresAt: data.expiresAt ?? null,
-              alg: data.alg ?? null,
-              crv: data.crv ?? null,
-            },
-            create: {
-              id: kid,
-              publicKey: data.publicKey,
-              privateKey: data.privateKey,
-              createdAt: data.createdAt,
-              expiresAt: data.expiresAt ?? null,
-              alg: data.alg ?? null,
-              crv: data.crv ?? null,
-            },
-          });
-
-          return {
-            ...record,
-            alg: record.alg ?? undefined,
-            crv: record.crv ?? undefined,
-            expiresAt: record.expiresAt ?? undefined,
-          } as any;
-        },
-      },
+      adapter: createBetterAuthJwtAdapter() as any,
       jwt: {
-        issuer: authIssuer,
-        audience: authAudience,
-        expirationTime: `${authJwtTtlSeconds}s`,
+        issuer: getAuthJwtIssuer(),
+        audience: getAuthJwtAudience(),
+        expirationTime: `${getAuthJwtTtlSeconds()}s`,
         definePayload: ({
           user,
         }: {
@@ -185,8 +136,8 @@ export const auth = betterAuth({
       grantTypes: ['authorization_code', 'refresh_token', 'client_credentials'],
       allowDynamicClientRegistration: true,
       allowUnauthenticatedClientRegistration: false,
-      accessTokenExpiresIn: authJwtTtlSeconds,
-      idTokenExpiresIn: authJwtTtlSeconds,
+      accessTokenExpiresIn: getAuthJwtTtlSeconds(),
+      idTokenExpiresIn: getAuthJwtTtlSeconds(),
       refreshTokenExpiresIn: 60 * 60 * 24 * 30,
       authorizationResponseIssParameterSupported: true,
       disableJwtPlugin: false,

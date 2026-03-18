@@ -21,6 +21,17 @@ Auth notifications are delivered by an auth-owned notification module in `packag
 3. Admin APIs for user management (`/api/auth/admin/*`)
 4. Organization APIs for member and invitation workflows (`/api/auth/organization/*`)
 
+## JWT Metadata And Public Routes
+
+Auth now persists JWT service metadata in its own database and treats JWT/JWKS env values as bootstrap-only inputs for migration, local seeding, or emergency overrides.
+
+- Canonical auth JWKS: `/api/auth/session/jwks`
+- Compatibility JWKS: `/.well-known/jwks.json`
+- Session/browser routes continue to use credentialed CORS
+- Public JWKS and OAuth/OIDC discovery routes use explicit non-credentialed CORS
+
+Steady-state auth JWT verification and signing should read the local JWT service metadata record rather than relying on long-lived env state.
+
 ## First Admin Bootstrapping
 
 The first admin is intentionally created via a manual database update.

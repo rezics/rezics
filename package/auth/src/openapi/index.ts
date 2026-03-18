@@ -7,7 +7,7 @@ import {organizationRouter} from './organization';
 import {oauthRouter} from './oauth';
 import {selfServiceRouter} from './self-service';
 import {handleAuthRequest} from '../auth/routes';
-import {env} from '@/env';
+import {env} from '../env';
 
 export const authOpenApiRouter = new Elysia({
   prefix: env.AUTH_OPENAPI_ROUTER_PREFIX,

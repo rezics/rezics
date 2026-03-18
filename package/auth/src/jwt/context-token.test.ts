@@ -9,18 +9,29 @@ process.env.AUTH_INTERNAL_TOKEN_GATEWAY_SECRET ??=
   'internal-auth-gateway-test';
 
 const findFirst = mock();
+const findMany = mock();
+const upsert = mock();
 
 mock.module('../auth/prisma', () => ({
   prisma: {
+    jwtService: {
+      upsert,
+    },
     jwks: {
       findFirst,
+      findMany,
     },
   },
 }));
 
 describe('auth context token signing', () => {
   beforeEach(() => {
+    process.env.BETTER_AUTH_URL = 'http://localhost:35003';
+    process.env.AUTH_JWT_ISSUER = 'http://localhost:35003';
+    process.env.AUTH_JWT_AUDIENCE = 'rezics-api';
     findFirst.mockReset();
+    findMany.mockReset();
+    upsert.mockReset();
   });
 
   test('builds verified onboarding claims from auth user data', async () => {
@@ -29,11 +40,29 @@ describe('auth context token signing', () => {
       namedCurve: 'P-256',
     });
 
-    findFirst.mockResolvedValue({
-      id: 'kid-context',
-      alg: 'ES256',
-      privateKey: privateKey.export({type: 'pkcs8', format: 'pem'}).toString(),
+    upsert.mockResolvedValue({
+      id: 'jwt-service-auth',
+      serviceKey: 'auth-local',
+      issuer: 'http://localhost:35003',
+      audience: 'rezics-api',
+      jwksUrl: 'http://localhost:35003/api/auth/session/jwks',
+      jwksPath: '/api/auth/session/jwks',
+      isLocalIssuer: true,
+      isActive: true,
     });
+    findMany.mockResolvedValue([
+      {
+        id: 'kid-context',
+        alg: 'ES256',
+        publicKey: 'public-key',
+        privateKey: privateKey.export({type: 'pkcs8', format: 'pem'}).toString(),
+        createdAt: new Date('2026-03-17T00:00:00.000Z'),
+        expiresAt: null,
+        jwtService: {
+          issuer: 'http://localhost:35003',
+        },
+      },
+    ]);
 
     const {buildAuthContextClaims, signAuthContextToken} = await import(
       './context-token'

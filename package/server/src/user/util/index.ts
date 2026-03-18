@@ -5,48 +5,69 @@ import {
   type NormalizedTokenName as NormalizedTokenNameType,
 } from '@package/contract';
 import {
+  JwtAlgorithm,
   verifyBearerToken,
   verifySessionToken,
-  verifyToken,
-  type VerifiedToken,
-  type VerifyOptions,
-} from '@package/auth/jwt';
+  verifyTokenFromHeader,
+  type JwtVerifyInput as VerifyOptions,
+  type VerifiedJwt as VerifiedToken,
+} from '@package/jwt';
 import type {JWTPayload} from 'jose';
-import {env} from '@/src/env';
+import {env} from '../../env';
+import {getTrustedAuthJwtServiceRecord} from '../../session/jwt-metadata';
 
-function buildAuthVerifyOptions(
+function getRuntimeEnv(name: keyof NodeJS.ProcessEnv, fallback?: string) {
+  return process.env[name] ?? fallback;
+}
+
+export function buildTrustedAuthVerifyOptions(
+  trustedAuth: {
+    issuer: string;
+    audience: string;
+    jwksUrl: string;
+  },
   overrides?: Partial<VerifyOptions>,
   tokenName: NormalizedTokenNameType = NormalizedTokenName.AUTH_IDENTITY,
 ): VerifyOptions {
-  const issuer = overrides?.issuer ?? env.AUTH_JWT_ISSUER ?? 'http://localhost:35003';
-  const audience = overrides?.audience ?? env.AUTH_JWT_AUDIENCE ?? 'rezics-api';
-  const jwksUrl =
-    typeof overrides?.jwksUrl === 'string'
-      ? overrides.jwksUrl
-      : env.AUTH_JWKS_URL ?? new URL('/api/auth/jwks', issuer).toString();
-
   return {
-    issuer,
-    audience,
-    jwksUrl,
+    issuer: overrides?.issuer ?? trustedAuth.issuer,
+    audience: overrides?.audience ?? trustedAuth.audience,
+    jwksUrl:
+      typeof overrides?.jwksUrl === 'string'
+        ? overrides.jwksUrl
+        : trustedAuth.jwksUrl,
+    algorithm: overrides?.algorithm ?? JwtAlgorithm.ES256,
     tokenName,
-    clockTolerance:
-      overrides?.clockTolerance ??
-      Number(env.AUTH_JWT_CLOCK_TOLERANCE_SECONDS ?? '5'),
+    clockToleranceSeconds:
+      overrides?.clockToleranceSeconds ??
+      Number(
+        getRuntimeEnv(
+          'AUTH_JWT_CLOCK_TOLERANCE_SECONDS',
+          env.AUTH_JWT_CLOCK_TOLERANCE_SECONDS,
+        ) ?? '5',
+      ),
     requiredScope: overrides?.requiredScope ?? 'user',
     enforceTransport: overrides?.enforceTransport ?? true,
   };
 }
 
-export function getServerAuthIdentityVerifyOptions(
+async function buildAuthVerifyOptions(
   overrides?: Partial<VerifyOptions>,
-): VerifyOptions {
+  tokenName: NormalizedTokenNameType = NormalizedTokenName.AUTH_IDENTITY,
+): Promise<VerifyOptions> {
+  const trustedAuth = await getTrustedAuthJwtServiceRecord();
+  return buildTrustedAuthVerifyOptions(trustedAuth, overrides, tokenName);
+}
+
+export async function getServerAuthIdentityVerifyOptions(
+  overrides?: Partial<VerifyOptions>,
+): Promise<VerifyOptions> {
   return buildAuthVerifyOptions(overrides, NormalizedTokenName.AUTH_IDENTITY);
 }
 
-export function getServerAuthContextVerifyOptions(
+export async function getServerAuthContextVerifyOptions(
   overrides?: Partial<VerifyOptions>,
-): VerifyOptions {
+): Promise<VerifyOptions> {
   return buildAuthVerifyOptions(
     {
       ...overrides,
@@ -64,7 +85,7 @@ export async function verifyAuthIdentityToken<
 ): Promise<VerifiedToken<TPayload>> {
   return verifyBearerToken<TPayload>(
     authorization,
-    getServerAuthIdentityVerifyOptions(overrides),
+    await getServerAuthIdentityVerifyOptions(overrides),
   );
 }
 
@@ -74,9 +95,9 @@ export async function verifyAuthContextToken<
   token: string | undefined,
   overrides?: Partial<VerifyOptions>,
 ): Promise<VerifiedToken<TPayload>> {
-  return verifyToken<TPayload>(
+  return verifyTokenFromHeader<TPayload>(
     token,
-    getServerAuthContextVerifyOptions(overrides),
+    await getServerAuthContextVerifyOptions(overrides),
   );
 }
 
@@ -148,6 +169,6 @@ export async function verifyAuth<
 export {
   verifyBearerToken,
   verifySessionToken,
-  verifyToken,
+  verifyTokenFromHeader as verifyToken,
 };
 export type {VerifiedToken, VerifyOptions};

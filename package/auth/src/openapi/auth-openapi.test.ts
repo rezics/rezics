@@ -23,6 +23,17 @@ const handleAuthRequest = mock((request: Request) => {
 
 mock.module('../auth/routes', () => ({
   handleAuthRequest,
+  handleJwksCompatibilityRequest: () =>
+    Response.json({pathname: '/api/auth/session/jwks'}),
+  handleOpenIdConfigRequest: () =>
+    Response.json({issuer: 'http://localhost:35003'}),
+  handleOAuthAuthorizationServerRequest: () =>
+    Response.json({issuer: 'http://localhost:35003'}),
+}));
+
+mock.module('../session/jwt/routes', () => ({
+  getAuthSessionJwksResponse: () =>
+    Response.json({pathname: '/api/auth/session/jwks'}),
 }));
 
 describe('auth openapi routes', () => {
@@ -57,7 +68,7 @@ describe('auth openapi routes', () => {
     expect(handleAuthRequest).toHaveBeenCalledTimes(1);
     expect(await response.json()).toEqual({
       method: 'GET',
-      pathname: '/get-session',
+      pathname: '/api/auth/get-session',
       search: '',
     });
   });
@@ -154,6 +165,60 @@ describe('auth openapi routes', () => {
       pathname: '/oauth/authorize',
       search: '',
     });
+  });
+
+  test('exposes public session and compatibility jwks endpoints', async () => {
+    const {sessionRouter} = await import('./session');
+    const {oauthRouter} = await import('./oauth');
+
+    const sessionJwksResponse = await sessionRouter.handle(
+      new Request('http://localhost/session/jwks'),
+    );
+    const compatibilityJwksResponse = await oauthRouter.handle(
+      new Request('http://localhost/.well-known/jwks.json'),
+    );
+
+    expect(sessionJwksResponse.status).toBe(200);
+    expect(compatibilityJwksResponse.status).toBe(200);
+    expect(handleAuthRequest).not.toHaveBeenCalled();
+    expect(await sessionJwksResponse.json()).toEqual({
+      pathname: '/api/auth/session/jwks',
+    });
+    expect(await compatibilityJwksResponse.json()).toEqual({
+      pathname: '/api/auth/session/jwks',
+    });
+  });
+
+  test('applies public cors to jwks and credentialed cors to browser session routes', async () => {
+    const {sessionRouter} = await import('./session');
+
+    const publicResponse = await sessionRouter.handle(
+      new Request('http://localhost/session/jwks', {
+        headers: {
+          Origin: 'https://rezics.com',
+        },
+      }),
+    );
+    const credentialedResponse = await sessionRouter.handle(
+      new Request('http://localhost/token', {
+        headers: {
+          Origin: 'https://rezics.com',
+        },
+      }),
+    );
+
+    expect(publicResponse.headers.get('access-control-allow-origin')).toBe(
+      'https://rezics.com',
+    );
+    expect(
+      publicResponse.headers.get('access-control-allow-credentials'),
+    ).toBeNull();
+    expect(credentialedResponse.headers.get('access-control-allow-origin')).toBe(
+      'https://rezics.com',
+    );
+    expect(
+      credentialedResponse.headers.get('access-control-allow-credentials'),
+    ).toBe('true');
   });
 
   test('exposes self-service auth endpoints without runtime validation blockers', async () => {

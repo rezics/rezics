@@ -1,4 +1,4 @@
-import {describe, expect, test} from 'bun:test';
+import {describe, expect, mock, test} from 'bun:test';
 
 process.env.NODE_ENV ??= 'test';
 process.env.PORT ??= '35003';
@@ -25,6 +25,49 @@ process.env.TWITTER_CLIENT_ID ??= 'twitter-client';
 process.env.TWITTER_CLIENT_SECRET ??= 'twitter-secret';
 process.env.TELEGRAM_CLIENT_ID ??= 'telegram-client';
 process.env.TELEGRAM_CLIENT_SECRET ??= 'telegram-secret';
+
+const authHandler = mock(async () => new Response(null, {status: 204}));
+
+mock.module('./instance', () => ({
+  auth: {
+    handler: authHandler,
+    options: {
+      socialProviders: {
+        google: {},
+        microsoft: {},
+        github: {},
+        twitter: {},
+      },
+      plugins: [{id: 'generic-oauth'}],
+      emailAndPassword: {
+        sendResetPassword: async () => {},
+      },
+      emailVerification: {
+        sendVerificationEmail: async () => {},
+      },
+      user: {
+        changeEmail: {
+          sendChangeEmailConfirmation: async () => {},
+        },
+      },
+    },
+  },
+}));
+
+mock.module('@better-auth/oauth-provider', () => ({
+  oauthProviderOpenIdConfigMetadata: () => async () =>
+    Response.json({
+      issuer: 'http://localhost:35003',
+      userinfo_endpoint: 'http://localhost:35003/api/auth/oauth/userinfo',
+      id_token_signing_alg_values_supported: ['ES256'],
+    }),
+  oauthProviderAuthServerMetadata: () => async () =>
+    Response.json({
+      issuer: 'http://localhost:35003',
+      authorization_endpoint: 'http://localhost:35003/api/auth/oauth/authorize',
+      token_endpoint: 'http://localhost:35003/api/auth/oauth/token',
+    }),
+}));
 
 describe('Auth discovery routes', () => {
   test('serves openid and oauth metadata', async () => {

@@ -1,16 +1,13 @@
-// Local barrel — re-exports everything for auth-service internal use.
-
 export {
-  verifyToken,
+  getAuthContextVerifyOptions,
+  getAuthIdentityVerifyOptions,
+  verifyAuth,
+  verifyAuthContextToken,
+  verifyAuthIdentityToken,
+} from '../session/jwt/verify';
+export type {VerifiedToken, VerifyOptions} from '../session/jwt/verify';
+export {
   verifyBearerToken,
   verifySessionToken,
-} from './verify';
-export type {VerifiedToken, VerifyOptions} from './verify';
-
-export {
-  getAuthIdentityVerifyOptions,
-  getAuthContextVerifyOptions,
-  verifyAuthIdentityToken,
-  verifyAuthContextToken,
-  verifyAuth,
-} from './auth-local';
+  verifyTokenFromHeader as verifyToken,
+} from '@package/jwt';

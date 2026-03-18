@@ -7,12 +7,14 @@ import {
   listSessionsResponseSchema,
   revokeSessionBodySchema,
 } from '@package/contract';
+import {
+  coreInstance,
+} from '../core';
 import {handleAuthRequest} from '../auth/routes';
 import {jsonRequestBody, jsonResponse} from './docs';
 import {listEnabledSocialProviderIds} from '../auth/providers';
-import {env} from '@/env';
-import {signAuthContextToken} from '../jwt/context-token';
-import {verifyAuthIdentityToken} from '@/jwt';
+import {env} from '../env';
+import {verifyAuthIdentityToken} from '../session/jwt/verify';
 
 async function forwardAuthRequest(
   request: Request,
@@ -185,10 +187,22 @@ async function getContextTokenResponse(request: Request): Promise<Response> {
     );
   }
 
+  const {signAuthContextToken} = await import('../session/jwt/context-token');
   return Response.json(await signAuthContextToken(user));
 }
 
-export const sessionRouter = new Elysia()
+const credentialedSessionRouter = coreInstance()
+  .get('/session/token', ({request}) => handleAuthRequest(request), {
+    detail: {
+      summary: 'Get auth JWT',
+      description:
+        'Get a JWT for the current authenticated browser session from the session domain.',
+      tags: ['Session'],
+      responses: {
+        200: jsonResponse('Session JWT.', authTokenResponseSchema),
+      },
+    },
+  })
   .get('/token', ({request}) => handleAuthRequest(request), {
     detail: {
       summary: 'Get auth JWT',
@@ -237,6 +251,31 @@ export const sessionRouter = new Elysia()
       },
     },
   })
+  .get('/session/context-token', ({request}) => getContextTokenResponse(request), {
+    detail: {
+      summary: 'Get auth context JWT',
+      description:
+        'Get an auth-owned context token for onboarding and first-time user provisioning from the session domain.',
+      tags: ['Session'],
+      responses: {
+        200: jsonResponse(
+          'Auth context JWT and decoded claims.',
+          authContextTokenResponseSchema,
+        ),
+      },
+    },
+  })
+  .get('/session/jwks', async () => {
+    const {getAuthSessionJwksResponse} = await import('../session/jwt/routes');
+    return getAuthSessionJwksResponse();
+  }, {
+    detail: {
+      summary: 'Session JWKS public keys',
+      description:
+        'Canonical session-owned JSON Web Key Set (JWKS) endpoint for offline verification of auth-issued JWTs.',
+      tags: ['Session'],
+    },
+  })
   .post('/list-sessions', ({request}) => handleAuthRequest(request), {
     detail: {
       summary: 'List sessions',
@@ -258,3 +297,19 @@ export const sessionRouter = new Elysia()
       requestBody: jsonRequestBody(revokeSessionBodySchema),
     },
   });
+
+const publicSessionRouter = coreInstance().get('/session/jwks', async () => {
+    const {getAuthSessionJwksResponse} = await import('../session/jwt/routes');
+    return getAuthSessionJwksResponse();
+  }, {
+    detail: {
+      summary: 'Session JWKS public keys',
+      description:
+        'Canonical session-owned JSON Web Key Set (JWKS) endpoint for offline verification of auth-issued JWTs.',
+      tags: ['Session'],
+    },
+  });
+
+export const sessionRouter = new Elysia()
+  .use(credentialedSessionRouter)
+  .use(publicSessionRouter);

@@ -38,7 +38,7 @@ describe('auth bearer e2e flow', () => {
       },
     });
 
-    process.env.AUTH_JWKS_URL = `http://localhost:${jwksServer.port}/.well-known/jwks.json`;
+    process.env.AUTH_JWKS_URL = `http://localhost:${jwksServer.port}/api/auth/session/jwks`;
     const {verifyAuth} = await import('../util/utils');
 
     const token = await new SignJWT({
@@ -53,7 +53,11 @@ describe('auth bearer e2e flow', () => {
       .sign(privateKey);
 
     const set = {status: 200};
-    const payload = await verifyAuth<JWTPayload>(`Bearer ${token}`, set);
+    const payload = await verifyAuth<JWTPayload>(`Bearer ${token}`, set, {
+      issuer: 'http://localhost:3001',
+      audience: 'rezics-api',
+      jwksUrl: process.env.AUTH_JWKS_URL!,
+    });
 
     expect(payload.unitId).toBe('4f1af8b5-6c9f-4c32-8c17-9108fb6af001');
     expect(String(payload.scope)).toContain('user');

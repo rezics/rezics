@@ -1,14 +1,20 @@
 import type {GetSessionStateResponse} from '@package/contract';
 import {env} from '../env';
+import {getTrustedAuthJwtServiceRecord} from '../session/jwt-metadata';
 
-function getAuthApiBaseUrl(): string {
-  return env.AUTH_API_URL ?? env.AUTH_JWT_ISSUER ?? 'http://localhost:35003';
+async function getAuthApiBaseUrl(): Promise<string> {
+  if (env.AUTH_API_URL) {
+    return env.AUTH_API_URL;
+  }
+
+  const trustedAuth = await getTrustedAuthJwtServiceRecord();
+  return trustedAuth.issuer;
 }
 
 export async function getAuthSessionState(
   authorization: string,
 ): Promise<GetSessionStateResponse> {
-  const response = await fetch(`${getAuthApiBaseUrl()}/api/auth/get-session-state`, {
+  const response = await fetch(`${await getAuthApiBaseUrl()}/api/auth/get-session-state`, {
     method: 'GET',
     headers: {
       Authorization: authorization,

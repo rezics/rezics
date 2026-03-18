@@ -34,26 +34,24 @@ export const env = createEnv({
     REFRESH_TOKEN_SECRET: v.string(),
 
     /**
-     * Optional explicit JWKS endpoint used to validate tokens issued by the auth service.
-     * When omitted, the server derives it from `AUTH_JWT_ISSUER` plus `/.well-known/jwks.json`.
+     * Bootstrap-only explicit JWKS endpoint used to seed the trusted auth JWT service record.
+     * Steady-state verification reads the persisted trusted-issuer metadata table.
      */
     AUTH_JWKS_URL: v.optional(v.string()),
 
     /**
-     * Expected issuer for auth JWT validation.
-     * Defaults to `http://localhost:35003` when omitted.
+     * Bootstrap-only issuer for auth JWT validation metadata seeding.
      */
     AUTH_JWT_ISSUER: v.optional(v.string()),
 
     /**
-     * Expected audience for auth JWT validation.
-     * Defaults to `rezics-api` when omitted.
+     * Bootstrap-only audience for auth JWT validation metadata seeding.
      */
     AUTH_JWT_AUDIENCE: v.optional(v.string()),
 
     /**
-     * Optional explicit auth-service base URL for server-to-server session-state checks.
-     * Defaults to `AUTH_JWT_ISSUER` when omitted.
+     * Optional explicit auth-service base URL for session-state checks.
+     * When omitted, the server uses the persisted trusted auth issuer metadata.
      */
     AUTH_API_URL: v.optional(v.string()),
 
@@ -64,32 +62,28 @@ export const env = createEnv({
     AUTH_JWT_CLOCK_TOLERANCE_SECONDS: v.optional(v.string()),
 
     /**
-     * Optional explicit PEM private key used to sign main-server session JWTs.
-     * In production this should be configured explicitly and must be independent from auth-service keys.
+     * Bootstrap-only PEM private key used to seed the local server signing key.
+     * Steady-state signing uses the persisted server JWKS key store.
      */
     MAIN_SESSION_JWT_PRIVATE_KEY: v.optional(v.string()),
 
     /**
-     * Optional PEM public key used to verify main-server session JWTs.
-     * When omitted the server derives it from the configured private key.
+     * Bootstrap-only PEM public key paired with `MAIN_SESSION_JWT_PRIVATE_KEY`.
      */
     MAIN_SESSION_JWT_PUBLIC_KEY: v.optional(v.string()),
 
     /**
-     * Expected issuer for main-server session JWTs.
-     * Defaults to `http://localhost:<PORT>` when omitted.
+     * Bootstrap-only issuer used to seed the local server JWT service metadata.
      */
     MAIN_SESSION_JWT_ISSUER: v.optional(v.string()),
 
     /**
-     * Expected audience for main-server session JWT validation.
-     * Defaults to `rezics-main-server` when omitted.
+     * Bootstrap-only audience used to seed the local server JWT service metadata.
      */
     MAIN_SESSION_JWT_AUDIENCE: v.optional(v.string()),
 
     /**
-     * Main-server session JWT lifetime in seconds.
-     * Defaults to `900` when omitted.
+     * Bootstrap-only main-server session JWT lifetime in seconds.
      */
     MAIN_SESSION_JWT_TTL_SECONDS: v.optional(v.string()),
 

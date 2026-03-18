@@ -68,7 +68,7 @@ export const sessionContextPlugin = new Elysia()
       await verifySessionToken<RezicsSessionTokenClaims>(
         ctx.headers[REZICS_SESSION_HEADER],
         {
-          ...getMainSessionJwtContext(),
+          ...(await getMainSessionJwtContext()),
         },
       )
     ).payload;

@@ -379,6 +379,38 @@ model EchoKV {
   updatedAt DateTime @updatedAt
 }
 
+model JwtService {
+  id            String @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  serviceKey    String @unique
+  issuer        String
+  audience      String
+  jwksUrl       String
+  jwksPath      String
+  isLocalIssuer Boolean @default(false)
+  isActive      Boolean @default(true)
+
+  jwks Jwks[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([issuer, audience])
+  @@index([isLocalIssuer, isActive])
+}
+
+model Jwks {
+  id           String     @id
+  jwtServiceId String     @db.Uuid
+  jwtService   JwtService @relation(fields: [jwtServiceId], references: [id], onDelete: Cascade)
+  publicKey    String
+  privateKey   String
+  alg          String?
+  createdAt    DateTime   @default(now())
+  expiresAt    DateTime?
+
+  @@index([jwtServiceId])
+}
+
 /**
  * Feedback
  */

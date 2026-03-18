@@ -1,9 +1,13 @@
-// External export — env-free functions only.
-// Other services import from '@package/auth/jwt' and receive these.
-
 export {
-  verifyToken,
+  getAuthContextVerifyOptions,
+  getAuthIdentityVerifyOptions,
+  verifyAuth,
+  verifyAuthContextToken,
+  verifyAuthIdentityToken,
+} from '../session/jwt/verify';
+export type {VerifiedToken, VerifyOptions} from '../session/jwt/verify';
+export {
   verifyBearerToken,
   verifySessionToken,
-} from './verify';
-export type {VerifiedToken, VerifyOptions} from './verify';
+  verifyTokenFromHeader as verifyToken,
+} from '@package/jwt';

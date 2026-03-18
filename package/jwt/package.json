@@ -1,0 +1,42 @@
+{
+  "name": "@package/jwt",
+  "module": "src/export.ts",
+  "type": "module",
+  "private": true,
+  "exports": {
+    ".": {
+      "types": "./src/export.ts",
+      "default": "./src/export.ts"
+    },
+    "./*": {
+      "types": "./src/*.ts",
+      "default": "./src/*.ts"
+    },
+    "./core": {
+      "types": "./src/core/export.ts",
+      "default": "./src/core/export.ts"
+    },
+    "./contracts": {
+      "types": "./src/contracts/export.ts",
+      "default": "./src/contracts/export.ts"
+    },
+    "./rotation": {
+      "types": "./src/rotation/export.ts",
+      "default": "./src/rotation/export.ts"
+    },
+    "./adapters": {
+      "types": "./src/adapters/export.ts",
+      "default": "./src/adapters/export.ts"
+    }
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.3.0"
+  },
+  "dependencies": {
+    "@package/contract": "workspace:*",
+    "jose": "^6.2.0"
+  }
+}

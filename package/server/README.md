@@ -73,3 +73,17 @@ pg_ctl start
 psql -U postgres
 
 ```
+
+## JWT Metadata And Session Routes
+
+The main server now stores JWT service metadata in its own database for both the local issuer and trusted upstream issuers such as auth.
+
+- Canonical server JWKS: `/api/session/jwks`
+- Session token issuance: `/api/session/token`
+- Trusted auth issuer, audience, and JWKS location are persisted in the local JWT service registry
+- `AUTH_JWKS_URL`, `AUTH_JWT_ISSUER`, `AUTH_JWT_AUDIENCE`, and `MAIN_SESSION_JWT_*` are bootstrap inputs, not the steady-state source of truth
+
+Route policy is explicit:
+
+- Public verification surfaces such as JWKS are exposed with non-credentialed CORS
+- Session-protected surfaces stay on the credentialed policy

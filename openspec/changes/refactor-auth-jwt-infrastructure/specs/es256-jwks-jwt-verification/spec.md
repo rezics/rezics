@@ -41,3 +41,10 @@ Each issuing service SHALL support key rotation by publishing active and retaine
 #### Scenario: Server verifies auth-issued bearer token after decoupling
 - **WHEN** a protected `package/server` endpoint receives `Authorization: Bearer <token>`
 - **THEN** the server SHALL authorize the request only after offline verification against `AUTH_JWKS_URL` through shared verifier contracts and required claim validation
+
+### Requirement: Verification inputs remain explicit and trusted
+Services that verify JWTs SHALL continue to validate trusted issuer and audience values explicitly, and those verifier inputs SHALL be sourced from persisted service metadata records once the migration is complete.
+
+#### Scenario: Server verifies auth-issued token with persisted verifier metadata
+- **WHEN** `package/server` handles an auth-issued bearer token after the metadata migration
+- **THEN** it SHALL read the trusted auth issuer, audience, and canonical JWKS location from its local JWT service metadata record and SHALL validate all three during verification

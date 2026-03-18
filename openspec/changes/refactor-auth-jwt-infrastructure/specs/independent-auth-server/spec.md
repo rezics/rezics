@@ -22,3 +22,14 @@ The auth service SHALL issue all of its JWT token types from one active private 
 #### Scenario: Auth issues identity and context tokens
 - **WHEN** the auth service issues both identity and context JWTs
 - **THEN** both JWTs SHALL be signed by the same active auth-private key and SHALL be verifiable from the same auth JWKS document
+
+### Requirement: Services persist JWT service metadata locally
+Each service SHALL persist JWT service metadata for itself and trusted peer issuers in its own database, including issuer, audience, and canonical JWKS location, rather than treating those values as ad hoc runtime-only configuration.
+
+#### Scenario: Auth service stores its local JWT metadata
+- **WHEN** the auth service starts after migrations or bootstrap
+- **THEN** it SHALL have a local persisted record describing its own issuer, audience, and canonical session-owned JWKS endpoint
+
+#### Scenario: Resource server stores trusted auth metadata
+- **WHEN** `package/server` verifies auth-issued JWTs offline
+- **THEN** it SHALL load the trusted auth issuer, audience, and JWKS location from its local persisted JWT service metadata rather than auth-owned helper code

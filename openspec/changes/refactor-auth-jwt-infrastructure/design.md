@@ -8,7 +8,7 @@ Constraints:
 - `package/jwt` must not read Prisma or any database client directly.
 - Every server gets one private signing key and one JWKS endpoint, regardless of token count.
 - Old verify paths are removed, not preserved.
-- The only auth-runtime dependency retained by `package/server` should be `AUTH_JWKS_URL`.
+- Issuer and audience information remain mandatory for verification, but runtime services should source them from persisted service metadata rather than ad hoc auth-specific env once migrations complete.
 
 Stakeholders:
 - `package/auth` maintainers responsible for Better Auth and OAuth/OIDC surfaces.
@@ -163,6 +163,48 @@ Why this design:
 Alternatives considered:
 - Share Prisma schema types in `package/jwt`: rejected because it hard-codes storage assumptions into the core package.
 
+### Decision: Persist per-service JWT metadata in each service database
+
+Both `package/auth` and `package/server` will own a local JWT metadata registry table that stores JWT-related information for trusted issuers, including the local service itself. This registry will be the source of truth for:
+- `issuer`
+- `audience`
+- canonical `jwksUrl` or `jwksPath`
+- service identity / ownership marker
+- activation state and timestamps needed for safe rollout
+
+Recommended shape:
+
+```ts
+type JwtServiceRegistryRecord = {
+  id: string;
+  serviceKey: string;
+  issuer: string;
+  audience: string;
+  jwksUrl: string;
+  isLocalIssuer: boolean;
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+};
+```
+
+Recommended relational direction:
+- Auth DB:
+  - add a `JwtService`-style table for auth itself plus downstream servers that verify or consume auth-issued JWTs;
+  - update auth-owned key material rows to reference the local auth service record.
+- Server DB:
+  - add a `JwtService`-style table for the server itself plus trusted upstream issuers such as auth;
+  - add a local signing-key table or equivalent linkage so server-owned keys reference the server’s own registry record.
+
+Why this design:
+- Retains explicit `iss` and `aud` validation, which is a security requirement rather than optional metadata.
+- Scales beyond a single auth-server relationship to multiple trusted issuers without re-expanding env sprawl.
+- Creates a durable migration path where env can bootstrap initial records, but steady-state runtime reads from the database.
+
+Alternatives considered:
+- Keep issuer/audience only in env: rejected because it recreates drift and makes multi-server rollout brittle.
+- Derive issuer/audience purely from JWKS URL: rejected because JOSE verification still needs an independently trusted `iss` and expected `aud`.
+
 ### Decision: Standardize on one signing keypair and one JWKS endpoint per server
 
 Each server will issue all of its JWT token types from one active private signing key and publish one JWKS document containing the active key plus retained grace-period keys.
@@ -187,10 +229,10 @@ Alternatives considered:
 
 `package/server` stops importing `@package/auth/jwt`. Instead it will:
 - use `@package/jwt` verification helpers directly;
-- load only `AUTH_JWKS_URL` to verify auth-issued tokens;
+- load auth verifier inputs from its local JWT metadata registry, with `AUTH_JWKS_URL` retained only as a bootstrap or migration input if needed;
 - maintain its own verification wrapper local to the server package for route ergonomics.
 
-This reduces auth-to-server coupling to a runtime contract: auth publishes JWKS, server consumes it.
+This reduces auth-to-server coupling to a runtime contract: auth publishes JWKS, and server consumes auth metadata through persisted trusted-issuer records rather than auth-owned helper code.
 
 Alternatives considered:
 - Keep auth-owned helper wrappers for convenience: rejected because it preserves the exact coupling this refactor is trying to remove.
@@ -240,6 +282,20 @@ Why this design:
 - Matches the requested defaults.
 - Keeps rollover safe without hard-coding storage behavior.
 
+### Decision: Use explicit database migrations and backfill steps for JWT metadata
+
+This refactor now includes schema evolution, so the rollout must treat migrations as first-class work:
+- add new JWT metadata tables and foreign keys in auth and server;
+- backfill one local-service record in each DB before switching readers;
+- backfill auth trusted-issuer metadata into server DB and server trusted-issuer metadata into auth DB where cross-service verification is required;
+- only remove env-backed fallback reads after code and data have converged.
+
+Engineering practices to enforce:
+- unique constraints on `serviceKey`, `issuer`, and any canonical JWKS URL field;
+- foreign keys from signing-key rows to the owning local service record;
+- repository-level tests for backfill and lookup behavior;
+- idempotent migration scripts that can run safely across environments.
+
 ## Risks / Trade-offs
 
 - [Better Auth plugin behavior may not align perfectly with the desired session-owned route model] -> Mitigation: treat Better Auth as session authority, but move custom route ownership and JWKS publishing into explicit session modules even if Better Auth internals remain plugin-driven.
@@ -256,7 +312,7 @@ Why this design:
 4. Replace auth-local verify exports and server imports with direct `@package/jwt` verifier usage.
 5. Refactor `package/server` session signing and JWKS publication to use local adapter + shared rotation engine + Elysia JWT integration.
 6. Remove `@package/auth` dependency from `package/server` where no longer needed.
-7. Clean env schemas and deployment docs so `package/server` retains only `AUTH_JWKS_URL` for auth verification.
+7. Add auth/server DB migrations and backfill steps for JWT service metadata before removing runtime env fallbacks.
 8. Update OpenAPI/session route documentation, CORS policies, and public endpoint tests.
 9. Delete legacy verify implementations, stale helpers, dead env vars, and compatibility code.
 
@@ -314,10 +370,7 @@ Auth retain:
 Server remove:
 - `JWT_SECRET`
 - `REFRESH_TOKEN_SECRET` if no longer used elsewhere
-- `AUTH_JWT_ISSUER`
-- `AUTH_JWT_AUDIENCE`
 - `AUTH_API_URL`
-- `AUTH_JWT_CLOCK_TOLERANCE_SECONDS`
 - `MAIN_SESSION_JWT_PRIVATE_KEY`
 - `MAIN_SESSION_JWT_PUBLIC_KEY`
 - `MAIN_SESSION_JWT_ISSUER`
@@ -325,8 +378,12 @@ Server remove:
 - `MAIN_SESSION_JWT_TTL_SECONDS`
 
 Server retain:
-- `AUTH_JWKS_URL`
-- server-local issuer/audience/TTL settings only if still required for its own token issuance after the refactor, preferably renamed into a cohesive server-session namespace.
+- bootstrap-only env needed to seed local DB records during migration
+- server-local issuer/audience/TTL settings only if still required during transitional backfill, with the steady-state source of truth moved into the server DB
+
+Service metadata persistence replaces long-lived runtime auth verifier env:
+- auth DB stores auth-local issuer/audience/JWKS metadata and any trusted downstream issuer records it must reason about;
+- server DB stores server-local issuer/audience/JWKS metadata plus trusted auth issuer metadata used for offline verification.
 
 ### CORS review checklist
 

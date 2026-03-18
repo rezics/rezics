@@ -247,11 +247,11 @@
         "@better-auth/oauth-provider": "^1.5.3",
         "@better-auth/prisma-adapter": "^1.5.3",
         "@elysiajs/bearer": "^1.4.1",
-        "@elysiajs/cors": "^1.4.0",
         "@elysiajs/jwt": "^1.4.0",
         "@elysiajs/openapi": "^1.4.14",
         "@faker-js/faker": "^10.1.0",
         "@package/contract": "workspace:*",
+        "@package/jwt": "workspace:*",
         "@package/search": "workspace:*",
         "@prisma/adapter-pg": "^7.4.2",
         "@prisma/client": "^7.4.2",
@@ -290,6 +290,19 @@
       "name": "@package/editor",
       "version": "1.0.50",
     },
+    "package/jwt": {
+      "name": "@package/jwt",
+      "dependencies": {
+        "@package/contract": "workspace:*",
+        "jose": "^6.2.0",
+      },
+      "devDependencies": {
+        "@types/bun": "^1.3.0",
+      },
+      "peerDependencies": {
+        "typescript": "^5",
+      },
+    },
     "package/preview": {
       "name": "@package/preview",
       "version": "1.0.50",
@@ -327,12 +340,11 @@
     "package/server": {
       "name": "@package/server",
       "dependencies": {
-        "@elysiajs/cors": "^1.4.0",
         "@elysiajs/jwt": "^1.4.0",
         "@elysiajs/openapi": "^1.4.14",
         "@faker-js/faker": "^10.1.0",
-        "@package/auth": "workspace:*",
         "@package/contract": "workspace:*",
+        "@package/jwt": "workspace:*",
         "@package/search": "workspace:*",
         "@prisma/adapter-pg": "^7.4.2",
         "@prisma/client": "^7.4.2",
@@ -909,6 +921,8 @@
     "@package/contract": ["@package/contract@workspace:package/contract"],
 
     "@package/editor": ["@package/editor@workspace:package/editor"],
+
+    "@package/jwt": ["@package/jwt@workspace:package/jwt"],
 
     "@package/preview": ["@package/preview@workspace:package/preview"],
 

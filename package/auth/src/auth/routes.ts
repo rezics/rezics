@@ -93,8 +93,9 @@ export async function handleAuthRequest(request: Request): Promise<Response> {
 export async function handleJwksCompatibilityRequest(
   request: Request,
 ): Promise<Response> {
-  const jwksUrl = new URL('/api/auth/jwks', request.url);
-  return auth.handler(new Request(jwksUrl, request));
+  void request;
+  const {getAuthSessionJwksResponse} = await import('../session/jwt/routes');
+  return getAuthSessionJwksResponse();
 }
 
 export async function handleOpenIdConfigRequest(

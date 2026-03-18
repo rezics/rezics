@@ -131,15 +131,36 @@ model Verification {
 
 model Jwks {
   id         String    @id
+  jwtServiceId String  @db.Uuid
   publicKey  String
   privateKey String
   alg        String?
   crv        String?
   createdAt  DateTime  @default(now())
   expiresAt  DateTime?
+  jwtService JwtService @relation(fields: [jwtServiceId], references: [id], onDelete: Cascade)
 
+  @@index([jwtServiceId])
   @@index([createdAt])
   @@index([expiresAt])
+}
+
+model JwtService {
+  id            String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  serviceKey    String   @unique
+  issuer        String
+  audience      String
+  jwksUrl       String
+  jwksPath      String
+  isLocalIssuer Boolean  @default(false)
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  jwks Jwks[]
+
+  @@unique([issuer, audience])
+  @@index([isLocalIssuer, isActive])
 }
 
 model OAuthClient {

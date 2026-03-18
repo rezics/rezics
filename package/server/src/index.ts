@@ -14,7 +14,6 @@ import {reactionApi} from './reaction';
 import {tokenApi} from './token';
 import {feedbackApi} from './feedback';
 import {sessionApi} from './session';
-import {cors} from '@elysiajs/cors';
 
 import {getProdState} from './utils/getProdState';
 import {env} from './env';
@@ -22,16 +21,6 @@ import {env} from './env';
 import 'dotenv/config';
 
 const {isProd, isDev} = getProdState();
-
-const devOrigins = [
-  'http://localhost:35001',
-  'http://localhost:35002',
-  'http://localhost:8000',
-];
-
-const prodOrigins = ['https://book.rezics.com', 'https://rezics.com'];
-
-const allowedOrigins = isDev ? devOrigins : prodOrigins;
 
 const app = new Elysia();
 
@@ -54,27 +43,6 @@ if (isDev) {
 }
 
 app
-  // CORS The policy may need to be updated
-  .use(
-    cors({
-      origin: allowedOrigins,
-      credentials: true,
-      methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-      allowedHeaders: [
-        'Content-Type',
-        'Authorization',
-        'Accept',
-        'X-Requested-With',
-        'x-auth_context_token',
-        'x-rezics_session_token',
-      ],
-      exposeHeaders: [
-        'Content-Type',
-        'Authorization',
-        'x-rezics_session_token',
-      ],
-    }),
-  )
   .onError(({code, error, set}) => {
     set.status ||= 500;
     const message =
