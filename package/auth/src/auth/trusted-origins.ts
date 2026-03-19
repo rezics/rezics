@@ -1,5 +1,5 @@
 import {env} from '../env';
-import {allowedOrigins} from '../core';
+import {allowedOrigins} from '../cors';
 
 function normalizeOrigins(raw: string | undefined): string[] {
   return (raw ?? '')

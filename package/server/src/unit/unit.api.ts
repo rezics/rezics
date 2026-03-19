@@ -1,5 +1,6 @@
 import {Elysia} from 'elysia';
 import {coreInstance} from '../core';
+import {withCredentialedCors} from '../cors';
 import {
   unitListQuerySchema,
   unitParamsSchema,
@@ -24,7 +25,7 @@ import {
   sessionContextPlugin,
 } from '@/src/auth/context';
 
-export const unitApi = coreInstance('/units')
+export const unitApi = withCredentialedCors(coreInstance('/units'))
   .get(
     '/:unitId',
     async ({params}): Promise<UnitResponse> => {

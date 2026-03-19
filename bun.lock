@@ -247,6 +247,7 @@
         "@better-auth/oauth-provider": "^1.5.3",
         "@better-auth/prisma-adapter": "^1.5.3",
         "@elysiajs/bearer": "^1.4.1",
+        "@elysiajs/cors": "^1.4.1",
         "@elysiajs/jwt": "^1.4.0",
         "@elysiajs/openapi": "^1.4.14",
         "@faker-js/faker": "^10.1.0",
@@ -340,6 +341,7 @@
     "package/server": {
       "name": "@package/server",
       "dependencies": {
+        "@elysiajs/cors": "^1.4.1",
         "@elysiajs/jwt": "^1.4.0",
         "@elysiajs/openapi": "^1.4.14",
         "@faker-js/faker": "^10.1.0",

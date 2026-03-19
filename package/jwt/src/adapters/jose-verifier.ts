@@ -17,14 +17,21 @@ import {
 import {JwtAlgorithm} from '../core/jwt-algorithm';
 import {JwtTransportError, JwtVerificationError} from '../core/jwt-errors';
 import type {JwtJwks} from '../core/jwks';
-import type {JwtKeySource, JwtVerifyInput, JwtVerifier} from '../contracts/verifier';
+import type {
+  JwtKeySource,
+  JwtVerifyInput,
+  JwtVerifier,
+} from '../contracts/verifier';
 import type {VerifiedJwt} from '../core/verification';
 
 type JwksResolver =
   | ReturnType<typeof createRemoteJWKSet>
   | ReturnType<typeof createLocalJWKSet>;
 
-const remoteJwksCache = new Map<string, ReturnType<typeof createRemoteJWKSet>>();
+const remoteJwksCache = new Map<
+  string,
+  ReturnType<typeof createRemoteJWKSet>
+>();
 const pemCache = new Map<string, Promise<CryptoKey>>();
 
 function getOrCreateRemoteJwks(
@@ -95,13 +102,13 @@ async function resolveKeySource(
   options: JwtKeySource,
 ): Promise<CryptoKey | KeyObject | Uint8Array | JwksResolver> {
   if ('jwksUrl' in options) {
-    return getOrCreateRemoteJwks(options.jwksUrl);
+    return getOrCreateRemoteJwks(options.jwksUrl!);
   }
   if ('jwks' in options) {
-    return createLocalJWKSet(normalizeJwks(options.jwks));
+    return createLocalJWKSet(normalizeJwks(options.jwks!));
   }
   if ('verificationKeyPem' in options) {
-    return getOrImportPem(options.verificationKeyPem);
+    return getOrImportPem(options.verificationKeyPem!);
   }
   return options.verificationKey;
 }
@@ -154,10 +161,10 @@ async function verifyTokenInput<TPayload extends JWTPayload = JWTPayload>(
       (error as {code?: string} | undefined)?.code ===
         'ERR_JWKS_NO_MATCHING_KEY'
     ) {
-      remoteJwksCache.delete(options.jwksUrl);
+      remoteJwksCache.delete(options.jwksUrl!);
       result = await jwtVerify(
         token,
-        getOrCreateRemoteJwks(options.jwksUrl),
+        getOrCreateRemoteJwks(options.jwksUrl!),
         jwtOptions,
       );
     } else {

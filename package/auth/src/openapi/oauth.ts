@@ -22,8 +22,9 @@ import {getConfiguredSocialProviders} from '../auth/providers';
 import {
   coreInstance,
 } from '../core';
+import {withPublicCors} from '../cors';
 
-export const oauthRouter = coreInstance()
+const oauthFlowRouter = withPublicCors(coreInstance())
   .get(
     '/providers',
     () => ({
@@ -164,7 +165,9 @@ export const oauthRouter = coreInstance()
         }),
       ],
     },
-  })
+  });
+
+const oauthDiscoveryRouter = withPublicCors(coreInstance())
   .get('/.well-known/jwks.json', ({request}) =>
     handleJwksCompatibilityRequest(request),
     {
@@ -198,3 +201,7 @@ export const oauthRouter = coreInstance()
       },
     },
   );
+
+export const oauthRouter = new Elysia()
+  .use(oauthFlowRouter)
+  .use(oauthDiscoveryRouter);

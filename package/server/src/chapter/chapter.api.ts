@@ -20,8 +20,9 @@ import {
   identityContextPlugin,
   sessionContextPlugin,
 } from '@/src/auth/context';
+import {withCredentialedCors} from '@/src/cors';
 
-export const chapterApi = coreInstance('/chapters')
+export const chapterApi = withCredentialedCors(coreInstance('/chapters'))
   .get(
     '/:unitId',
     async ({params}): Promise<ChapterResponse> => {

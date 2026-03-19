@@ -10,8 +10,9 @@ import {
 } from '@package/contract';
 import {handleAuthRequest} from '../auth/routes';
 import {jsonRequestBody, jsonResponse} from './docs';
+import {withCredentialedCors} from '../cors';
 
-export const organizationRouter = new Elysia()
+export const organizationRouter = withCredentialedCors(new Elysia())
   .post('/organization/create', ({request}) => handleAuthRequest(request), {
     detail: {
       summary: 'Create organization',

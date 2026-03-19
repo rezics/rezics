@@ -49,6 +49,7 @@
     "PGPASSWORD",
     "PGPORT",
     "PGUSER",
+    "PKCE",
     "plpgsql",
     "pnpx",
     "preflights",

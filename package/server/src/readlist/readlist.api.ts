@@ -1,5 +1,6 @@
 import {Elysia} from 'elysia';
 import {coreInstance} from '../core';
+import {withCredentialedCors} from '../cors';
 import {unitService} from '@/src/unit/unit.service';
 import {readlistService} from './readlist.service';
 import {
@@ -22,7 +23,7 @@ import {
   sessionContextPlugin,
 } from '@/src/auth/context';
 
-export const readlistApi = coreInstance('/readlists')
+export const readlistApi = withCredentialedCors(coreInstance('/readlists'))
   .get(
     '/:unitId',
     async ({params}): Promise<ReadlistResponse> => {

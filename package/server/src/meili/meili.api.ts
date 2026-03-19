@@ -1,5 +1,6 @@
 import {t, Elysia} from 'elysia';
 import {coreInstance} from '../core';
+import {withCredentialedCors} from '../cors';
 import {
   bookQueryOptionsSchema,
   type BookQueryOptions,
@@ -21,7 +22,7 @@ import {
   sessionContextPlugin,
 } from '@/src/auth/context';
 
-export const meiliApi = coreInstance('/meili')
+export const meiliApi = withCredentialedCors(coreInstance('/meili'))
   .get(
     '/health',
     async () => {

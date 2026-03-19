@@ -8,6 +8,7 @@ import {oauthRouter} from './oauth';
 import {selfServiceRouter} from './self-service';
 import {handleAuthRequest} from '../auth/routes';
 import {env} from '../env';
+import {withCredentialedCors} from '../cors';
 
 export const authOpenApiRouter = new Elysia({
   prefix: env.AUTH_OPENAPI_ROUTER_PREFIX,
@@ -19,10 +20,15 @@ export const authOpenApiRouter = new Elysia({
   .use(organizationRouter)
   .use(oauthRouter)
   .use(selfServiceRouter)
-  .all('/*', ({request}) => handleAuthRequest(request), {
-    detail: {
-      summary: 'Catch All',
-      description: 'Catch all route for all requests.',
-      tags: ['Catch All'],
-    },
-  });
+  .use(
+    withCredentialedCors(new Elysia()).all('/*', ({request}) =>
+      handleAuthRequest(request),
+      {
+        detail: {
+          summary: 'Catch All',
+          description: 'Catch all route for all requests.',
+          tags: ['Catch All'],
+        },
+      },
+    ),
+  );

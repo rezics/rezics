@@ -1,5 +1,6 @@
 import {t, Elysia} from 'elysia';
 import {coreInstance} from '../core';
+import {withCredentialedCors} from '../cors';
 import {reactionService} from './reaction.service';
 import {prisma, type ReactionSummary} from '@/prisma/client';
 import {
@@ -12,7 +13,7 @@ import {
 } from '@package/contract';
 import {identityContextPlugin} from '@/src/auth/context';
 
-export const reactionApi = coreInstance('/reactions')
+export const reactionApi = withCredentialedCors(coreInstance('/reactions'))
   .get(
     '/',
     async ({query}) => {

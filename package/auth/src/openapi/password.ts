@@ -10,8 +10,9 @@ import {
 } from '@package/contract';
 import {handleAuthRequest} from '../auth/routes';
 import {jsonRequestBody, jsonResponse, parameter} from './docs';
+import {withCredentialedCors} from '../cors';
 
-export const passwordRouter = new Elysia()
+export const passwordRouter = withCredentialedCors(new Elysia())
   .post('/request-password-reset', ({request}) => handleAuthRequest(request), {
     detail: {
       summary: 'Request password reset',

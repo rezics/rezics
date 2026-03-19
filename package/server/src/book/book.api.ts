@@ -19,13 +19,14 @@ import {bookService} from './book.service';
 import {mapBookToDTO} from './mapper';
 import {unitService} from '@/src/unit/unit.service';
 import {coreInstance} from '../core';
+import {withCredentialedCors} from '../cors';
 import {
   buildActorFromContext,
   identityContextPlugin,
   sessionContextPlugin,
 } from '@/src/auth/context';
 
-export const bookApi = coreInstance('/books')
+export const bookApi = withCredentialedCors(coreInstance('/books'))
   .get(
     '/:unitId',
     async ({params}): Promise<BookResponse> => {

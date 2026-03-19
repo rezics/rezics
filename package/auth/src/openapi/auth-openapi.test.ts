@@ -221,6 +221,38 @@ describe('auth openapi routes', () => {
     ).toBe('true');
   });
 
+  test('keeps oauth and discovery routes on public cors', async () => {
+    const {oauthRouter} = await import('./oauth');
+
+    const providersResponse = await oauthRouter.handle(
+      new Request('http://localhost/providers', {
+        headers: {
+          Origin: 'https://rezics.com',
+        },
+      }),
+    );
+    const discoveryResponse = await oauthRouter.handle(
+      new Request('http://localhost/.well-known/openid-configuration', {
+        headers: {
+          Origin: 'https://rezics.com',
+        },
+      }),
+    );
+
+    expect(providersResponse.headers.get('access-control-allow-origin')).toBe(
+      'https://rezics.com',
+    );
+    expect(
+      providersResponse.headers.get('access-control-allow-credentials'),
+    ).toBeNull();
+    expect(discoveryResponse.headers.get('access-control-allow-origin')).toBe(
+      'https://rezics.com',
+    );
+    expect(
+      discoveryResponse.headers.get('access-control-allow-credentials'),
+    ).toBeNull();
+  });
+
   test('exposes self-service auth endpoints without runtime validation blockers', async () => {
     const {selfServiceRouter} = await import('./self-service');
 

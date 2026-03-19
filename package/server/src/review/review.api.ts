@@ -1,5 +1,6 @@
 import {Elysia} from 'elysia';
 import {coreInstance} from '../core';
+import {withCredentialedCors} from '../cors';
 import {UnitType} from '@/prisma/client';
 import {
   createReviewSchema,
@@ -22,7 +23,7 @@ import {
   sessionContextPlugin,
 } from '@/src/auth/context';
 
-export const reviewApi = coreInstance('/reviews')
+export const reviewApi = withCredentialedCors(coreInstance('/reviews'))
   .get(
     '/:id',
     async ({params, query}): Promise<ReviewResponse> => {
