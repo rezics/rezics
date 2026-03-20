@@ -8,6 +8,7 @@ tailwind.config.js
 
 # Vite
 .vite/
+*.exe
 
 # Logs
 *.log
