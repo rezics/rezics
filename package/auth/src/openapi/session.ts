@@ -7,9 +7,7 @@ import {
   listSessionsResponseSchema,
   revokeSessionBodySchema,
 } from '@package/contract';
-import {
-  coreInstance,
-} from '../core';
+import {coreInstance} from '../core';
 import {
   createPolicyCorsPreflightResponse,
   withPolicyCorsResponse,
@@ -202,17 +200,6 @@ const credentialedSessionRouter = coreInstance()
   .onAfterHandle(({request, response}) =>
     withPolicyCorsResponse(request, response, 'credentialed'),
   )
-  .get('/session/token', ({request}) => handleAuthRequest(request), {
-    detail: {
-      summary: 'Get auth JWT',
-      description:
-        'Get a JWT for the current authenticated browser session from the session domain.',
-      tags: ['Session'],
-      responses: {
-        200: jsonResponse('Session JWT.', authTokenResponseSchema),
-      },
-    },
-  })
   .get('/token', ({request}) => handleAuthRequest(request), {
     detail: {
       summary: 'Get auth JWT',
@@ -261,20 +248,6 @@ const credentialedSessionRouter = coreInstance()
       },
     },
   })
-  .get('/session/context-token', ({request}) => getContextTokenResponse(request), {
-    detail: {
-      summary: 'Get auth context JWT',
-      description:
-        'Get an auth-owned context token for onboarding and first-time user provisioning from the session domain.',
-      tags: ['Session'],
-      responses: {
-        200: jsonResponse(
-          'Auth context JWT and decoded claims.',
-          authContextTokenResponseSchema,
-        ),
-      },
-    },
-  })
   .post('/list-sessions', ({request}) => handleAuthRequest(request), {
     detail: {
       summary: 'List sessions',
@@ -301,19 +274,24 @@ const publicSessionRouter = coreInstance()
   .options('/session/jwks', ({request}) =>
     createPolicyCorsPreflightResponse(request, 'public'),
   )
-  .get('/session/jwks', async () => {
-    const {getAuthSessionJwksResponse} = await import('../session/jwt/routes');
-    return getAuthSessionJwksResponse();
-  }, {
-    detail: {
-      summary: 'Session JWKS public keys',
-      description:
-        'Canonical session-owned JSON Web Key Set (JWKS) endpoint for offline verification of auth-issued JWTs.',
-      tags: ['Session'],
+  .get(
+    '/session/jwks',
+    async () => {
+      const {getAuthSessionJwksResponse} =
+        await import('../session/jwt/routes');
+      return getAuthSessionJwksResponse();
     },
-    afterHandle: ({request, response}) =>
-      withPolicyCorsResponse(request, response, 'public'),
-  });
+    {
+      detail: {
+        summary: 'Session JWKS public keys',
+        description:
+          'Canonical session-owned JSON Web Key Set (JWKS) endpoint for offline verification of auth-issued JWTs.',
+        tags: ['Session'],
+      },
+      afterHandle: ({request, response}) =>
+        withPolicyCorsResponse(request, response, 'public'),
+    },
+  );
 
 export const sessionRouter = new Elysia()
   .use(credentialedSessionRouter)

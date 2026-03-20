@@ -6,5 +6,5 @@ The `Docs` folder is for manually written documentation, while the `tsDocs`
 folder stores automatically generated documentation.
 
 ```sh
-git diff --cached > staged.log
+git diff --cached > git-staged.txt
 ```
