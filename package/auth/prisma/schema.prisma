@@ -132,10 +132,9 @@ model Verification {
 model Jwks {
   id         String    @id
   jwtServiceId String  @db.Uuid
-  publicKey  String
-  privateKey String
+  publicJwk  Json
+  privateJwk Json
   alg        String?
-  crv        String?
   createdAt  DateTime  @default(now())
   expiresAt  DateTime?
   jwtService JwtService @relation(fields: [jwtServiceId], references: [id], onDelete: Cascade)

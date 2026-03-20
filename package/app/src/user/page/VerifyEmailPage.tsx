@@ -11,6 +11,7 @@ import {hydrateAuthSessionState} from '@/user/state';
 import {useAuth} from './useAuth';
 import {resolvePostAuthDestination} from '../model/authRedirect';
 import {acquireMemberAccessIfReady} from '../model/handler';
+import {env} from '@/env';
 
 export const VerifyEmailPage: FC = () => {
   const {t} = useTranslation();
@@ -143,6 +144,7 @@ export const VerifyEmailPage: FC = () => {
           </Typography>
           <Turnstile
             key={turnstileRetryKey}
+            siteKeyProps={env.VITE_TURNSTILE_SITE_KEY}
             onVerify={(token: string) => {
               setTurnstileToken(token);
               setTurnstileError(undefined);

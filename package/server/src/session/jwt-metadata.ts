@@ -8,18 +8,13 @@ export const authSessionJwksPath = '/api/auth/session/jwks';
 
 function getServerBaseUrl() {
   return (
-    process.env.MAIN_SESSION_JWT_ISSUER ??
-    env.MAIN_SESSION_JWT_ISSUER ??
-    `http://localhost:${process.env.PORT ?? env.PORT ?? '3000'}`
+    env.MAIN_SESSION_JWT_ISSUER ?? `http://localhost:${env.PORT ?? '3000'}`
   );
 }
 
 export function getServerSessionJwtMetadata() {
   const issuer = getServerBaseUrl();
-  const audience =
-    process.env.MAIN_SESSION_JWT_AUDIENCE ??
-    env.MAIN_SESSION_JWT_AUDIENCE ??
-    'rezics-main-server';
+  const audience = env.MAIN_SESSION_JWT_AUDIENCE ?? 'rezics-main-server';
 
   return {
     serviceKey: serverJwtLocalServiceKey,
@@ -33,14 +28,10 @@ export function getServerSessionJwtMetadata() {
 }
 
 export function getTrustedAuthJwtMetadata() {
-  const issuer =
-    process.env.AUTH_JWT_ISSUER ?? env.AUTH_JWT_ISSUER ?? 'http://localhost:35003';
-  const audience =
-    process.env.AUTH_JWT_AUDIENCE ?? env.AUTH_JWT_AUDIENCE ?? 'rezics-api';
+  const issuer = env.AUTH_JWT_ISSUER ?? 'http://localhost:35003';
+  const audience = env.AUTH_JWT_AUDIENCE ?? 'rezics-api';
   const jwksUrl =
-    process.env.AUTH_JWKS_URL ??
-    env.AUTH_JWKS_URL ??
-    new URL(authSessionJwksPath, issuer).toString();
+    env.AUTH_JWKS_URL ?? new URL(authSessionJwksPath, issuer).toString();
 
   return {
     serviceKey: authJwtUpstreamServiceKey,
@@ -63,29 +54,28 @@ function isMissingJwtMetadataStorage(error: unknown) {
 }
 
 export async function ensureLocalServerJwtServiceRecord() {
-  const metadata = getServerSessionJwtMetadata();
-
   return prisma.jwtService.upsert({
     where: {
-      serviceKey: metadata.serviceKey,
+      serviceKey: serverJwtLocalServiceKey,
     },
-    update: metadata,
-    create: metadata,
+    update: {},
+    create: getServerSessionJwtMetadata(),
   });
 }
 
 export async function ensureTrustedAuthJwtServiceRecord() {
-  const metadata = getTrustedAuthJwtMetadata();
   try {
+    const metadata = getTrustedAuthJwtMetadata();
     return await prisma.jwtService.upsert({
       where: {
-        serviceKey: metadata.serviceKey,
+        serviceKey: authJwtUpstreamServiceKey,
       },
-      update: metadata,
+      update: {},
       create: metadata,
     });
   } catch (error) {
     if (isMissingJwtMetadataStorage(error)) {
+      const metadata = getTrustedAuthJwtMetadata();
       return {
         id: 'auth-upstream-bootstrap',
         ...metadata,

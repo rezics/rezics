@@ -14,7 +14,7 @@ import {
   getAuthJwtAudience,
   getAuthJwtIssuer,
   getAuthSessionJwksPath,
-} from './config';
+} from './options';
 
 export type VerifyOptions = JwtVerifyInput;
 export type VerifiedToken<TPayload extends JWTPayload = JWTPayload> =

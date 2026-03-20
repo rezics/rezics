@@ -1,9 +1,11 @@
 import {generateKeyPairSync} from 'node:crypto';
+import {exportJWK} from 'jose';
 import {JwtAlgorithm} from '../core/jwt-algorithm';
+import {asJwtPrivateJwk, asJwtPublicJwk, type JwtPrivateJwk, type JwtPublicJwk} from '../core/jwk';
 
 export type JwtKeyMaterial = {
-  privateKeyPem: string;
-  publicKeyPem: string;
+  privateJwk: JwtPrivateJwk;
+  publicJwk: JwtPublicJwk;
 };
 
 export type JwtCryptoProvider = {
@@ -11,14 +13,14 @@ export type JwtCryptoProvider = {
 };
 
 export const defaultJwtCryptoProvider: JwtCryptoProvider = {
-  generateKey() {
+  async generateKey() {
     const {privateKey, publicKey} = generateKeyPairSync('ec', {
       namedCurve: 'P-256',
     });
 
     return {
-      privateKeyPem: privateKey.export({format: 'pem', type: 'pkcs8'}).toString(),
-      publicKeyPem: publicKey.export({format: 'pem', type: 'spki'}).toString(),
+      privateJwk: asJwtPrivateJwk(await exportJWK(privateKey)),
+      publicJwk: asJwtPublicJwk(await exportJWK(publicKey)),
     };
   },
 };

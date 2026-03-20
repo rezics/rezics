@@ -1,11 +1,15 @@
 import {Elysia} from 'elysia';
-import {createPrivateKey, createPublicKey} from 'node:crypto';
 import {
+  asJwtPrivateJwk,
+  asJwtPublicJwk,
   createRotationEngine,
   defaultJwtCryptoProvider,
+  importPrivateJwk,
   JwtAlgorithm,
   verifySessionToken,
   type JwtCryptoProvider,
+  type JwtPrivateJwk,
+  type JwtPublicJwk,
 } from '@package/jwt';
 import {
   NormalizedTokenName,
@@ -16,28 +20,35 @@ import {
 import {SignJWT} from 'jose';
 import {serverJwtPersistence} from './jwt-persistence';
 import {getServerSessionJwtMetadata, serverSessionJwksPath} from './jwt-metadata';
+import {env} from '../env';
 
-function normalizePem(value?: string): string | undefined {
-  return value?.replace(/\\n/g, '\n');
+function parseSeededJwk<TJwk extends JwtPublicJwk | JwtPrivateJwk>(
+  value: string | undefined,
+): TJwk | null {
+  if (!value) {
+    return null;
+  }
+
+  return JSON.parse(value) as TJwk;
 }
 
 function createSeededCryptoProvider(): JwtCryptoProvider {
-  const privateKeyPem = normalizePem(process.env.MAIN_SESSION_JWT_PRIVATE_KEY);
-  const publicKeyPem = normalizePem(process.env.MAIN_SESSION_JWT_PUBLIC_KEY);
+  const privateJwk = parseSeededJwk<JwtPrivateJwk>(
+    env.MAIN_SESSION_JWT_PRIVATE_JWK,
+  );
+  const publicJwk = parseSeededJwk<JwtPublicJwk>(
+    env.MAIN_SESSION_JWT_PUBLIC_JWK,
+  );
   let seeded = false;
 
   return {
     generateKey() {
-      if (privateKeyPem && !seeded) {
+      if (privateJwk && publicJwk && !seeded) {
         seeded = true;
 
         return {
-          privateKeyPem,
-          publicKeyPem:
-            publicKeyPem ??
-            createPublicKey(privateKeyPem)
-              .export({format: 'pem', type: 'spki'})
-              .toString(),
+          privateJwk: asJwtPrivateJwk(privateJwk),
+          publicJwk: asJwtPublicJwk(publicJwk),
         };
       }
 
@@ -47,7 +58,7 @@ function createSeededCryptoProvider(): JwtCryptoProvider {
 }
 
 function getMainSessionJwtTtlSeconds() {
-  return Number(process.env.MAIN_SESSION_JWT_TTL_SECONDS ?? '900');
+  return Number(env.MAIN_SESSION_JWT_TTL_SECONDS ?? '900');
 }
 
 const mainSessionMetadata = getServerSessionJwtMetadata();
@@ -98,6 +109,7 @@ export const mainSessionJwtPlugin = new Elysia({
   ) {
     const rotation = await getMainSessionRotation();
     const activeKey = await rotation.getActiveSigningKey();
+    const signingKey = await importPrivateJwk(activeKey.privateJwk);
     const {nbf, exp, iat, aud, iss, jti, sub, ...data} = signValue;
 
     let token = new SignJWT({
@@ -122,7 +134,7 @@ export const mainSessionJwtPlugin = new Elysia({
     if (sub) token = token.setSubject(sub);
     if (jti) token = token.setJti(jti);
 
-    return token.sign(createPrivateKey(activeKey.privateKeyPem));
+    return token.sign(signingKey);
   },
   async verify(token: string | undefined) {
     if (!token) return false;

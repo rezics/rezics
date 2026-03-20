@@ -16,10 +16,6 @@ import type {JWTPayload} from 'jose';
 import {env} from '../../env';
 import {getTrustedAuthJwtServiceRecord} from '../../session/jwt-metadata';
 
-function getRuntimeEnv(name: keyof NodeJS.ProcessEnv, fallback?: string) {
-  return process.env[name] ?? fallback;
-}
-
 export function buildTrustedAuthVerifyOptions(
   trustedAuth: {
     issuer: string;
@@ -40,12 +36,7 @@ export function buildTrustedAuthVerifyOptions(
     tokenName,
     clockToleranceSeconds:
       overrides?.clockToleranceSeconds ??
-      Number(
-        getRuntimeEnv(
-          'AUTH_JWT_CLOCK_TOLERANCE_SECONDS',
-          env.AUTH_JWT_CLOCK_TOLERANCE_SECONDS,
-        ) ?? '5',
-      ),
+      Number(env.AUTH_JWT_CLOCK_TOLERANCE_SECONDS ?? '5'),
     requiredScope: overrides?.requiredScope ?? 'user',
     enforceTransport: overrides?.enforceTransport ?? true,
   };

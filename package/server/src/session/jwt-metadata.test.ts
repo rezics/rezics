@@ -45,14 +45,7 @@ describe('server jwt metadata registry', () => {
       where: {
         serviceKey: 'server-local',
       },
-      update: {
-        issuer: 'http://localhost:3000',
-        audience: 'rezics-main-server',
-        jwksUrl: 'http://localhost:3000/api/session/jwks',
-        jwksPath: '/api/session/jwks',
-        isLocalIssuer: true,
-        isActive: true,
-      },
+      update: {},
       create: {
         serviceKey: 'server-local',
         issuer: 'http://localhost:3000',
@@ -79,7 +72,9 @@ describe('server jwt metadata registry', () => {
       where: {
         serviceKey: 'auth-upstream',
       },
-      update: {
+      update: {},
+      create: {
+        serviceKey: 'auth-upstream',
         issuer: 'http://localhost:35003',
         audience: 'rezics-api',
         jwksUrl: 'http://localhost:35003/api/auth/session/jwks',
@@ -93,16 +88,14 @@ describe('server jwt metadata registry', () => {
   test('keeps migration bootstrap rows for local and trusted services', () => {
     const migrationPath = join(
       import.meta.dir,
-      '../../prisma/migrations/20260317121500_add_jwt_service_registry/migration.sql',
+      '../../prisma/migrations/20260319121000_jwk_storage/migration.sql',
     );
     const migrationSql = readFileSync(migrationPath, 'utf8');
 
-    expect(migrationSql).toContain('CREATE TABLE "JwtService"');
-    expect(migrationSql).toContain('CREATE TABLE "Jwks"');
-    expect(migrationSql).toContain(`'server-local'`);
-    expect(migrationSql).toContain(`'auth-upstream'`);
-    expect(migrationSql).toContain(
-      'FOREIGN KEY ("jwtServiceId") REFERENCES "JwtService"("id")',
-    );
+    expect(migrationSql).toContain('ADD COLUMN "publicJwk" JSONB');
+    expect(migrationSql).toContain('ADD COLUMN "privateJwk" JSONB');
+    expect(migrationSql).toContain(`"publicKey"::jsonb`);
+    expect(migrationSql).toContain('DELETE FROM "Jwks"');
+    expect(migrationSql).toContain('DROP COLUMN "privateKey"');
   });
 });

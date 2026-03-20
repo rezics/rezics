@@ -1,7 +1,7 @@
 import {Elysia} from 'elysia';
 import {swagger} from '@elysiajs/swagger';
 import {bookApi} from './book/book.api';
-import {envConfig} from './config';
+import {env} from './env';
 import {getProdState} from './utils/getProdState';
 
 const {isProd, isDev} = getProdState();
@@ -32,7 +32,7 @@ if (isDev) {
   app.use(swagger());
 }
 
-app.listen(envConfig.SERVER_PORT);
+app.listen(env.SERVER_PORT);
 
 console.log(
   `🦊 Elysia is running at http://${app.server?.hostname}:${app.server?.port}`,

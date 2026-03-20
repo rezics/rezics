@@ -1,10 +1,10 @@
 // meili.client.ts
 import {MeiliSearch} from 'meilisearch';
-import 'dotenv/config';
+import {env} from './env';
 
 export const meili = new MeiliSearch({
-  host: process.env.MEILI_HOST ?? 'http://localhost:7700',
-  apiKey: process.env.MEILI_MASTER_KEY ?? 'masterKey',
+  host: env.MEILI_HOST,
+  apiKey: env.MEILI_MASTER_KEY,
 });
 
 export async function checkMeiliHealth() {

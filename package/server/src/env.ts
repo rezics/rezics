@@ -65,12 +65,12 @@ export const env = createEnv({
      * Bootstrap-only PEM private key used to seed the local server signing key.
      * Steady-state signing uses the persisted server JWKS key store.
      */
-    MAIN_SESSION_JWT_PRIVATE_KEY: v.optional(v.string()),
+    MAIN_SESSION_JWT_PRIVATE_JWK: v.optional(v.string()),
 
     /**
-     * Bootstrap-only PEM public key paired with `MAIN_SESSION_JWT_PRIVATE_KEY`.
+     * Bootstrap-only public JWK paired with `MAIN_SESSION_JWT_PRIVATE_JWK`.
      */
-    MAIN_SESSION_JWT_PUBLIC_KEY: v.optional(v.string()),
+    MAIN_SESSION_JWT_PUBLIC_JWK: v.optional(v.string()),
 
     /**
      * Bootstrap-only issuer used to seed the local server JWT service metadata.
@@ -110,6 +110,11 @@ export const env = createEnv({
      * Typically used to format a sender as `Name <email>`.
      */
     SMTP_USER_NAME: v.optional(v.string()),
+
+    /**
+     * Cloudflare Turnstile secret used for server-side token verification.
+     */
+    TURNSTILE_SECRET: v.optional(v.string()),
 
     /**
      * Configures the server HTTP listen port as a string value.

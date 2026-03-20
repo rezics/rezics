@@ -1,5 +1,11 @@
 import type {JwtKeyPersistence, JwtKeyRecord} from '@package/jwt';
-import {JwtAlgorithm} from '@package/jwt';
+import {
+  JwtAlgorithm,
+  asJwtPrivateJwk,
+  asJwtPublicJwk,
+  type JwtPrivateJwk,
+  type JwtPublicJwk,
+} from '@package/jwt';
 import {prisma} from '../../prisma/client';
 import {
   ensureLocalServerJwtServiceRecord,
@@ -8,8 +14,8 @@ import {
 
 function mapRowToRecord(row: {
   id: string;
-  publicKey: string;
-  privateKey: string;
+  publicJwk: unknown;
+  privateJwk: unknown;
   alg: string | null;
   createdAt: Date;
   expiresAt: Date | null;
@@ -21,8 +27,8 @@ function mapRowToRecord(row: {
     issuer: row.jwtService.issuer,
     kid: row.id,
     algorithm: (row.alg as JwtAlgorithm | null) ?? JwtAlgorithm.ES256,
-    publicKeyPem: row.publicKey,
-    privateKeyPem: row.privateKey,
+    publicJwk: asJwtPublicJwk(row.publicJwk as JwtPublicJwk),
+    privateJwk: asJwtPrivateJwk(row.privateJwk as JwtPrivateJwk),
     createdAt: row.createdAt,
     activatesAt: row.createdAt,
     retiresAt: row.expiresAt,
@@ -63,8 +69,8 @@ export const serverJwtPersistence: JwtKeyPersistence = {
       where: {id: key.kid},
       update: {
         jwtServiceId: localService.id,
-        publicKey: key.publicKeyPem,
-        privateKey: key.privateKeyPem,
+        publicJwk: key.publicJwk,
+        privateJwk: key.privateJwk,
         alg: key.algorithm,
         createdAt: key.createdAt,
         expiresAt: key.expiresAt,
@@ -72,8 +78,8 @@ export const serverJwtPersistence: JwtKeyPersistence = {
       create: {
         id: key.kid,
         jwtServiceId: localService.id,
-        publicKey: key.publicKeyPem,
-        privateKey: key.privateKeyPem,
+        publicJwk: key.publicJwk,
+        privateJwk: key.privateJwk,
         alg: key.algorithm,
         createdAt: key.createdAt,
         expiresAt: key.expiresAt,

@@ -1,5 +1,4 @@
 import {JwtAlgorithm} from '../core/jwt-algorithm';
-import {publicPemToJwk} from '../core/jwk';
 import type {JwtCryptoProvider} from '../contracts/crypto-provider';
 import type {JwtIssuerDescriptor} from '../contracts/issuer';
 import type {JwtKeyPersistence, JwtKeyRecord} from '../contracts/persistence';
@@ -25,12 +24,13 @@ async function createKeyRecord(params: {
   cryptoProvider: JwtCryptoProvider;
 }): Promise<JwtKeyRecord> {
   const material = await params.cryptoProvider.generateKey();
+  const kid = createKid(params.now);
   return {
     issuer: params.issuer,
-    kid: createKid(params.now),
+    kid,
     algorithm: JwtAlgorithm.ES256,
-    publicKeyPem: material.publicKeyPem,
-    privateKeyPem: material.privateKeyPem,
+    publicJwk: {...material.publicJwk, kid},
+    privateJwk: {...material.privateJwk, kid},
     createdAt: params.now,
     activatesAt: params.now,
     retiresAt: null,
@@ -135,7 +135,7 @@ export function createRotationEngine(params: {
 
     return {
       keys: await Promise.all(
-        keys.map(key => publicPemToJwk(key.publicKeyPem, key.kid)),
+        keys.map(async key => key.publicJwk),
       ),
     };
   }

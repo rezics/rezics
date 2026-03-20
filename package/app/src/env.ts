@@ -12,3 +12,7 @@ export const env = createEnv({
   runtimeEnv: import.meta.env,
   emptyStringAsUndefined: true,
 });
+
+export const appRuntime = {
+  isDev: import.meta.env.DEV,
+} as const;

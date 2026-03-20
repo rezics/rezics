@@ -1,7 +1,9 @@
+import {appRuntime} from '../../env';
+
 // 仅在开发环境启用 MSW
 
 export const setupMock = async () => {
-  if (import.meta.env.DEV) {
+  if (appRuntime.isDev) {
     const {worker} = await import('../../mock/browser.ts');
     await worker.start({
       onUnhandledRequest(request, _print) {

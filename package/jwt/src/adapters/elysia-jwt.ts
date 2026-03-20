@@ -1,4 +1,3 @@
-import {createPrivateKey} from 'node:crypto';
 import type {JwtKeyRecord} from '../contracts/persistence';
 
 export function createElysiaJwtConfig(input: {
@@ -10,7 +9,7 @@ export function createElysiaJwtConfig(input: {
 }) {
   return {
     name: input.name ?? 'jwt',
-    secret: createPrivateKey(input.key.privateKeyPem),
+    secret: input.key.privateJwk,
     alg: input.key.algorithm,
     iss: input.issuer,
     aud: input.audience,

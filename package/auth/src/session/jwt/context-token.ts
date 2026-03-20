@@ -5,7 +5,7 @@ import {
   getAuthJwtAudience,
   getAuthJwtIssuer,
   getAuthJwtTtlSeconds,
-} from './config';
+} from './options';
 
 type AuthUserContext = {
   id: string;

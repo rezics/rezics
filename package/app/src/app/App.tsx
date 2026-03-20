@@ -6,7 +6,6 @@ import {RouterProvider} from '@tanstack/react-router';
 import {router} from '@/router';
 
 export default function App() {
-  console.log(import.meta.env);
   return (
     <AppShell
       features={

@@ -1,4 +1,5 @@
 import {beforeEach, describe, expect, mock, test} from 'bun:test';
+import {JwtAlgorithm} from '@package/jwt';
 
 process.env.NODE_ENV = 'test';
 process.env.DATABASE_URL ??=
@@ -54,8 +55,25 @@ describe('server jwt persistence', () => {
     jwksFindMany.mockResolvedValue([
       {
         id: 'server-kid',
-        publicKey: 'public-key',
-        privateKey: 'private-key',
+        publicJwk: {
+          kid: 'server-kid',
+          kty: 'EC',
+          crv: 'P-256',
+          x: 'public-x',
+          y: 'public-y',
+          alg: JwtAlgorithm.ES256,
+          use: 'sig',
+        },
+        privateJwk: {
+          kid: 'server-kid',
+          kty: 'EC',
+          crv: 'P-256',
+          x: 'public-x',
+          y: 'public-y',
+          d: 'private-d',
+          alg: JwtAlgorithm.ES256,
+          use: 'sig',
+        },
         alg: 'ES256',
         createdAt: new Date('2026-03-17T00:00:00.000Z'),
         expiresAt: null,
@@ -87,9 +105,26 @@ describe('server jwt persistence', () => {
       key: {
         issuer: 'http://localhost:3000',
         kid: 'server-kid',
-        algorithm: 'ES256',
-        publicKeyPem: 'public-key',
-        privateKeyPem: 'private-key',
+        algorithm: JwtAlgorithm.ES256,
+        publicJwk: {
+          kid: 'server-kid',
+          kty: 'EC',
+          crv: 'P-256',
+          x: 'public-x',
+          y: 'public-y',
+          alg: JwtAlgorithm.ES256,
+          use: 'sig',
+        },
+        privateJwk: {
+          kid: 'server-kid',
+          kty: 'EC',
+          crv: 'P-256',
+          x: 'public-x',
+          y: 'public-y',
+          d: 'private-d',
+          alg: JwtAlgorithm.ES256,
+          use: 'sig',
+        },
         createdAt: new Date('2026-03-17T00:00:00.000Z'),
         activatesAt: new Date('2026-03-17T00:00:00.000Z'),
         retiresAt: null,

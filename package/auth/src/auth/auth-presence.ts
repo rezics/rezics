@@ -1,3 +1,4 @@
+import {env} from '../env';
 import {
   AUTH_PRESENCE_COOKIE_MAX_AGE_SECONDS,
   AUTH_PRESENCE_COOKIE_NAME,
@@ -39,7 +40,7 @@ function buildCookieAttributes(url: URL, maxAge: number): string[] {
     'SameSite=Lax',
   ];
 
-  const authBaseUrl = process.env.BETTER_AUTH_URL ?? url.origin;
+  const authBaseUrl = env.BETTER_AUTH_URL ?? url.origin;
   const domain = deriveCookieDomain(new URL(authBaseUrl).hostname);
   if (domain) {
     attributes.push(`Domain=${domain}`);

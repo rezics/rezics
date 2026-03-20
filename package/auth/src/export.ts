@@ -10,4 +10,3 @@ export {
   verifyToken,
 } from './jwt';
 export {createAuthGuard} from './hooks/guard';
-export {env} from './env';

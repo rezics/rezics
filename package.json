@@ -5,6 +5,7 @@
     "app:dev": "cd package/app && bun run dev",
     "server:dev": "cd package/server && bun run dev",
     "deploy": "cd package/util && bun run deploy",
+    "check:runtime-env": "node scripts/check-no-runtime-env.mjs",
     "knip": "knip"
   },
   "workspaces": [

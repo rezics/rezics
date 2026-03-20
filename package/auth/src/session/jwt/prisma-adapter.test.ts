@@ -1,6 +1,8 @@
 import {beforeEach, describe, expect, mock, test} from 'bun:test';
 import {readFileSync} from 'node:fs';
 import {join} from 'node:path';
+import {symmetricDecrypt, symmetricEncrypt} from 'better-auth/crypto';
+import {JwtAlgorithm} from '@package/jwt';
 
 process.env.DATABASE_URL =
   process.env.DATABASE_URL ??
@@ -62,14 +64,7 @@ describe('auth jwt prisma adapter', () => {
       where: {
         serviceKey: 'auth-local',
       },
-      update: {
-        issuer: 'http://localhost:35003',
-        audience: 'rezics-api',
-        jwksUrl: 'http://localhost:35003/api/auth/session/jwks',
-        jwksPath: '/api/auth/session/jwks',
-        isLocalIssuer: true,
-        isActive: true,
-      },
+      update: {},
       create: {
         serviceKey: 'auth-local',
         issuer: 'http://localhost:35003',
@@ -101,9 +96,26 @@ describe('auth jwt prisma adapter', () => {
       key: {
         issuer: 'http://localhost:35003',
         kid: 'kid-auth',
-        algorithm: 'ES256',
-        publicKeyPem: 'public-key',
-        privateKeyPem: 'private-key',
+        algorithm: JwtAlgorithm.ES256,
+        publicJwk: {
+          kid: 'kid-auth',
+          kty: 'EC',
+          crv: 'P-256',
+          x: 'public-x',
+          y: 'public-y',
+          alg: JwtAlgorithm.ES256,
+          use: 'sig',
+        },
+        privateJwk: {
+          kid: 'kid-auth',
+          kty: 'EC',
+          crv: 'P-256',
+          x: 'public-x',
+          y: 'public-y',
+          d: 'private-d',
+          alg: JwtAlgorithm.ES256,
+          use: 'sig',
+        },
         createdAt: new Date('2026-03-17T00:00:00.000Z'),
         activatesAt: new Date('2026-03-17T00:00:00.000Z'),
         retiresAt: null,
@@ -122,20 +134,268 @@ describe('auth jwt prisma adapter', () => {
     });
   });
 
+  test('accepts better-auth serialized jwk payloads without private key encryption', async () => {
+    jwtServiceUpsert.mockResolvedValue({
+      id: 'jwt-service-auth',
+      serviceKey: 'auth-local',
+      issuer: 'http://localhost:35003',
+      audience: 'rezics-api',
+      jwksUrl: 'http://localhost:35003/api/auth/session/jwks',
+      jwksPath: '/api/auth/session/jwks',
+      isLocalIssuer: true,
+      isActive: true,
+    });
+    jwksUpsert.mockResolvedValue({});
+
+    const {createBetterAuthJwtAdapter} = await import('./prisma-adapter');
+    const adapter = createBetterAuthJwtAdapter({
+      disablePrivateKeyEncryption: true,
+    });
+    const createdAt = new Date('2026-03-20T04:31:47.000Z');
+
+    const result = await adapter.createJwk(
+      {
+        alg: JwtAlgorithm.ES256,
+        crv: 'P-256',
+        publicKey: JSON.stringify({
+          kty: 'EC',
+          crv: 'P-256',
+          x: 'public-x',
+          y: 'public-y',
+        }),
+        privateKey: JSON.stringify({
+          kty: 'EC',
+          crv: 'P-256',
+          x: 'public-x',
+          y: 'public-y',
+          d: 'private-d',
+        }),
+        createdAt,
+      },
+      {},
+    );
+    const publicJwk = JSON.parse(String(result.publicKey));
+    const privateJwk = JSON.parse(String(result.privateKey));
+
+    expect(result).toMatchObject({
+      id: expect.any(String),
+      createdAt,
+      crv: 'P-256',
+      publicKey: expect.any(String),
+      privateKey: expect.any(String),
+      alg: JwtAlgorithm.ES256,
+    });
+    expect(publicJwk).toMatchObject({
+      kty: 'EC',
+      crv: 'P-256',
+      x: 'public-x',
+      y: 'public-y',
+    });
+    expect(privateJwk).toMatchObject({
+      kty: 'EC',
+      crv: 'P-256',
+      x: 'public-x',
+      y: 'public-y',
+      d: 'private-d',
+    });
+    expect(jwksUpsert).toHaveBeenCalledTimes(1);
+    expect(jwksUpsert.mock.calls[0]?.[0]).toMatchObject({
+      create: {
+        jwtServiceId: 'jwt-service-auth',
+        publicJwk: expect.objectContaining({
+          kty: 'EC',
+          crv: 'P-256',
+          x: 'public-x',
+          y: 'public-y',
+        }),
+        privateJwk: expect.objectContaining({
+          kty: 'EC',
+          crv: 'P-256',
+          x: 'public-x',
+          y: 'public-y',
+          d: 'private-d',
+        }),
+      },
+    });
+  });
+
+  test('accepts better-auth serialized jwk payloads with encrypted private keys', async () => {
+    jwtServiceUpsert.mockResolvedValue({
+      id: 'jwt-service-auth',
+      serviceKey: 'auth-local',
+      issuer: 'http://localhost:35003',
+      audience: 'rezics-api',
+      jwksUrl: 'http://localhost:35003/api/auth/session/jwks',
+      jwksPath: '/api/auth/session/jwks',
+      isLocalIssuer: true,
+      isActive: true,
+    });
+    jwksUpsert.mockResolvedValue({});
+
+    const {createBetterAuthJwtAdapter} = await import('./prisma-adapter');
+    const adapter = createBetterAuthJwtAdapter();
+    const createdAt = new Date('2026-03-20T04:31:47.000Z');
+    const secret = process.env.BETTER_AUTH_SECRET!;
+
+    const encryptedPrivateKey = JSON.stringify(
+      await symmetricEncrypt({
+        key: secret,
+        data: JSON.stringify({
+          kty: 'EC',
+          crv: 'P-256',
+          x: 'public-x',
+          y: 'public-y',
+          d: 'private-d',
+        }),
+      }),
+    );
+
+    const result = await adapter.createJwk(
+      {
+        alg: JwtAlgorithm.ES256,
+        crv: 'P-256',
+        publicKey: JSON.stringify({
+          kty: 'EC',
+          crv: 'P-256',
+          x: 'public-x',
+          y: 'public-y',
+        }),
+        privateKey: encryptedPrivateKey,
+        createdAt,
+      },
+      {
+        context: {
+          secretConfig: secret,
+        },
+      },
+    );
+    const publicJwk = JSON.parse(String(result.publicKey));
+    const privateJwk = JSON.parse(
+      await symmetricDecrypt({
+        key: secret,
+        data: JSON.parse(String(result.privateKey)),
+      }),
+    );
+
+    expect(result).toMatchObject({
+      id: expect.any(String),
+      createdAt,
+      crv: 'P-256',
+      publicKey: expect.any(String),
+      privateKey: expect.any(String),
+      alg: JwtAlgorithm.ES256,
+    });
+    expect(publicJwk).toMatchObject({
+      kty: 'EC',
+      crv: 'P-256',
+      x: 'public-x',
+      y: 'public-y',
+    });
+    expect(privateJwk).toMatchObject({
+      kty: 'EC',
+      crv: 'P-256',
+      x: 'public-x',
+      y: 'public-y',
+      d: 'private-d',
+    });
+    expect(jwksUpsert).toHaveBeenCalledTimes(1);
+  });
+
+  test('returns better-auth jwk rows from getJwks', async () => {
+    jwtServiceUpsert.mockResolvedValue({
+      id: 'jwt-service-auth',
+      serviceKey: 'auth-local',
+      issuer: 'http://localhost:35003',
+      audience: 'rezics-api',
+      jwksUrl: 'http://localhost:35003/api/auth/session/jwks',
+      jwksPath: '/api/auth/session/jwks',
+      isLocalIssuer: true,
+      isActive: true,
+    });
+    jwksFindMany.mockResolvedValue([
+      {
+        id: 'kid-auth',
+        alg: JwtAlgorithm.ES256,
+        createdAt: new Date('2026-03-20T04:31:47.000Z'),
+        expiresAt: null,
+        publicJwk: {
+          kid: 'kid-auth',
+          kty: 'EC',
+          crv: 'P-256',
+          x: 'public-x',
+          y: 'public-y',
+          alg: JwtAlgorithm.ES256,
+          use: 'sig',
+        },
+        privateJwk: {
+          kid: 'kid-auth',
+          kty: 'EC',
+          crv: 'P-256',
+          x: 'public-x',
+          y: 'public-y',
+          d: 'private-d',
+          alg: JwtAlgorithm.ES256,
+          use: 'sig',
+        },
+        jwtService: {
+          issuer: 'http://localhost:35003',
+        },
+      },
+    ]);
+
+    const {createBetterAuthJwtAdapter} = await import('./prisma-adapter');
+    const adapter = createBetterAuthJwtAdapter();
+    const secret = process.env.BETTER_AUTH_SECRET!;
+    const result = (
+      await adapter.getJwks({
+        context: {
+          secretConfig: secret,
+        },
+      })
+    )[0]!;
+    const publicJwk = JSON.parse(String(result.publicKey));
+    const privateJwk = JSON.parse(
+      await symmetricDecrypt({
+        key: secret,
+        data: JSON.parse(String(result.privateKey)),
+      }),
+    );
+
+    expect(result).toMatchObject({
+      id: 'kid-auth',
+      alg: JwtAlgorithm.ES256,
+      crv: 'P-256',
+      publicKey: expect.any(String),
+      privateKey: expect.any(String),
+    });
+    expect(publicJwk).toMatchObject({
+      kid: 'kid-auth',
+      kty: 'EC',
+      crv: 'P-256',
+      x: 'public-x',
+      y: 'public-y',
+    });
+    expect(privateJwk).toMatchObject({
+      kid: 'kid-auth',
+      kty: 'EC',
+      crv: 'P-256',
+      x: 'public-x',
+      y: 'public-y',
+      d: 'private-d',
+    });
+  });
+
   test('keeps migration bootstrap and backfill steps for legacy jwks rows', () => {
     const migrationPath = join(
       import.meta.dir,
-      '../../../prisma/migrations/20260317103000_add_jwt_service_registry/migration.sql',
+      '../../../prisma/migrations/20260319120000_jwk_storage/migration.sql',
     );
     const migrationSql = readFileSync(migrationPath, 'utf8');
 
-    expect(migrationSql).toContain('CREATE TABLE "JwtService"');
-    expect(migrationSql).toContain(`'auth-local'`);
-    expect(migrationSql).toContain(
-      'UPDATE "Jwks"\nSET "jwtServiceId" = (SELECT "id" FROM "JwtService" WHERE "serviceKey" = \'auth-local\')',
-    );
-    expect(migrationSql).toContain(
-      'ALTER TABLE "Jwks" ALTER COLUMN "jwtServiceId" SET NOT NULL',
-    );
+    expect(migrationSql).toContain('ADD COLUMN "publicJwk" JSONB');
+    expect(migrationSql).toContain('ADD COLUMN "privateJwk" JSONB');
+    expect(migrationSql).toContain(`"publicKey"::jsonb`);
+    expect(migrationSql).toContain('DELETE FROM "Jwks"');
+    expect(migrationSql).toContain('DROP COLUMN "publicKey"');
   });
 });

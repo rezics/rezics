@@ -2,6 +2,7 @@ import {describe, expect, test} from 'bun:test';
 import type {JwtCryptoProvider} from '../contracts/crypto-provider';
 import type {JwtKeyPersistence, JwtKeyRecord} from '../contracts/persistence';
 import {JwtAlgorithm} from '../core/jwt-algorithm';
+import {type JwtPrivateJwk, type JwtPublicJwk} from '../core/jwk';
 import {createRotationEngine} from './rotation-engine';
 import type {JwtClock} from './rotation-types';
 
@@ -45,10 +46,29 @@ function createCryptoProvider(): JwtCryptoProvider {
     generateKey() {
       counter += 1;
       return {
-        privateKeyPem: `private-${counter}`,
-        publicKeyPem: `public-${counter}`,
+        privateJwk: createPrivateJwk(`kid-${counter}`, `d-${counter}`),
+        publicJwk: createPublicJwk(`kid-${counter}`, `x-${counter}`, `y-${counter}`),
       };
     },
+  };
+}
+
+function createPublicJwk(kid: string, x: string, y: string): JwtPublicJwk {
+  return {
+    kid,
+    kty: 'EC',
+    crv: 'P-256',
+    x,
+    y,
+    use: 'sig',
+    alg: JwtAlgorithm.ES256,
+  };
+}
+
+function createPrivateJwk(kid: string, d: string): JwtPrivateJwk {
+  return {
+    ...createPublicJwk(kid, `${kid}-x`, `${kid}-y`),
+    d,
   };
 }
 
@@ -86,8 +106,8 @@ describe('rotation engine', () => {
       issuer: 'https://issuer.example',
       kid: 'kid-old',
       algorithm: JwtAlgorithm.ES256,
-      publicKeyPem: 'public-old',
-      privateKeyPem: 'private-old',
+      publicJwk: createPublicJwk('kid-old', 'public-old-x', 'public-old-y'),
+      privateJwk: createPrivateJwk('kid-old', 'private-old'),
       createdAt,
       activatesAt: createdAt,
       retiresAt: null,
@@ -135,8 +155,8 @@ describe('rotation engine', () => {
           issuer: 'https://issuer.example',
           kid: 'older',
           algorithm: JwtAlgorithm.ES256,
-          publicKeyPem: 'public-1',
-          privateKeyPem: 'private-1',
+          publicJwk: createPublicJwk('older', 'public-1-x', 'public-1-y'),
+          privateJwk: createPrivateJwk('older', 'private-1'),
           createdAt: new Date('2026-01-01T00:00:00.000Z'),
           activatesAt: new Date('2026-01-01T00:00:00.000Z'),
           retiresAt: new Date('2026-01-09T00:00:00.000Z'),
@@ -146,8 +166,8 @@ describe('rotation engine', () => {
           issuer: 'https://issuer.example',
           kid: 'newer',
           algorithm: JwtAlgorithm.ES256,
-          publicKeyPem: 'public-2',
-          privateKeyPem: 'private-2',
+          publicJwk: createPublicJwk('newer', 'public-2-x', 'public-2-y'),
+          privateJwk: createPrivateJwk('newer', 'private-2'),
           createdAt: new Date('2026-01-09T00:00:00.000Z'),
           activatesAt: new Date('2026-01-09T00:00:00.000Z'),
           retiresAt: null,

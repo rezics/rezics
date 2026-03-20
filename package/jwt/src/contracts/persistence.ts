@@ -1,11 +1,12 @@
+import type {JwtPrivateJwk, JwtPublicJwk} from '../core/jwk';
 import type {JwtAlgorithm} from '../core/jwt-algorithm';
 
 export type JwtKeyRecord = {
   issuer: string;
   kid: string;
   algorithm: JwtAlgorithm;
-  publicKeyPem: string;
-  privateKeyPem: string;
+  publicJwk: JwtPublicJwk;
+  privateJwk: JwtPrivateJwk;
   createdAt: Date;
   activatesAt: Date;
   retiresAt: Date | null;

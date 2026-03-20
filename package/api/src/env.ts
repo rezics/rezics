@@ -13,6 +13,7 @@ export const env = createEnv({
     VITE_API_URL: v.string(),
     VITE_AUTH_API_URL: v.string(),
     VITE_TURNSTILE_SITE_KEY: v.string(),
+    VITE_APP_VERSION: v.optional(v.string()),
   },
   runtimeEnv,
   emptyStringAsUndefined: true,

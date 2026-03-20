@@ -101,7 +101,9 @@ export const auth = betterAuth({
         rotationInterval: getAuthJwksRotationIntervalSeconds(),
         gracePeriod: getAuthJwksGracePeriodSeconds(),
       },
-      adapter: createBetterAuthJwtAdapter() as any,
+      adapter: createBetterAuthJwtAdapter({
+        disablePrivateKeyEncryption: false,
+      }) as any,
       jwt: {
         issuer: getAuthJwtIssuer(),
         audience: getAuthJwtAudience(),

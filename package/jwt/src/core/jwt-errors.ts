@@ -1,6 +1,6 @@
 export class JwtVerificationError extends Error {
-  constructor(message: string, readonly cause?: unknown) {
-    super(message);
+  constructor(message: string, cause?: unknown) {
+    super(message, {cause});
     this.name = 'JwtVerificationError';
   }
 }

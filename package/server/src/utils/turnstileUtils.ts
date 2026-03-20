@@ -1,4 +1,5 @@
 import 'dotenv/config';
+import {env} from '../env';
 
 interface TurnstileResponse {
   success: boolean;
@@ -15,7 +16,7 @@ export async function verifyTurnstileToken(
   if (!token) return {success: false};
 
   const params = new URLSearchParams();
-  const secret = process.env.TURNSTILE_SECRET ?? '';
+  const secret = env.TURNSTILE_SECRET ?? '';
   params.append('secret', secret);
   params.append('response', token);
 

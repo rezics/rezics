@@ -15,7 +15,7 @@ function defaultLoadingComponent() {
 }
 
 interface TurnstileProps {
-  siteKeyProps?: string;
+  siteKeyProps: string;
   onVerify: (token: string) => void;
   options?: Record<string, any>;
   loadingComponent?: React.ReactNode;
@@ -33,7 +33,6 @@ export function Turnstile({
   onError,
   onReady,
 }: TurnstileProps) {
-  const siteKey = siteKeyProps ?? import.meta.env.VITE_TURNSTILE_SITE_KEY;
   const containerRef = useRef<HTMLDivElement>(null);
   const widgetIdRef = useRef<string | null>(null);
   const [isVerifiedShow, setIsVerifiedShow] = useState(false);
@@ -65,7 +64,7 @@ export function Turnstile({
     const interval = setInterval(() => {
       if (window.turnstile && containerRef.current && !widgetIdRef.current) {
         widgetIdRef.current = window.turnstile.render(containerRef.current, {
-          sitekey: siteKey,
+          sitekey: siteKeyProps,
           callback: handleVerify,
           ...options,
         });

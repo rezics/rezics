@@ -1,10 +1,9 @@
-import {importPKCS8} from 'jose';
-import {publicPemToJwk} from '@package/jwt';
+import {importPrivateJwk} from '@package/jwt';
 import {
   authJwtPersistence,
   getLocalAuthJwtServiceRecord,
 } from './prisma-adapter';
-import {getAuthJwtIssuer} from './config';
+import {getAuthJwtIssuer} from './options';
 
 export async function listAuthJwtKeys() {
   return authJwtPersistence.listKeys({issuer: getAuthJwtIssuer()});
@@ -33,7 +32,7 @@ export async function getAuthPrivateSigningKey() {
   return {
     kid: active.kid,
     alg: active.algorithm,
-    key: await importPKCS8(active.privateKeyPem, active.algorithm),
+    key: await importPrivateJwk(active.privateJwk),
   };
 }
 
@@ -45,8 +44,6 @@ export async function getAuthPublicJwks() {
   );
 
   return {
-    keys: await Promise.all(
-      published.map(key => publicPemToJwk(key.publicKeyPem, key.kid)),
-    ),
+    keys: published.map(key => key.publicJwk),
   };
 }
