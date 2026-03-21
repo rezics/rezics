@@ -1,11 +1,24 @@
 import {t} from 'elysia';
 
+/**
+ * <issuer>-<token-type>
+ *
+ * @example
+ * auth-identity-token
+ * auth-context-token
+ * rezics-session-token
+ * notification-session-token
+ * search-session-token
+ * Authorization: Bearer <auth-identity-token>
+ * x-rezics-session-token: <rezics-session-token>
+ */
+
 export const NormalizedTokenName = {
-  AUTH_IDENTITY: 'auth_identity_token',
-  AUTH_CONTEXT: 'auth_context_token',
-  REZICS_SESSION: 'rezics_session_token',
-  NOTIFICATION_SESSION: 'notification_session_token',
-  SEARCH_SESSION: 'search_session_token',
+  AUTH_IDENTITY: 'auth-identity-token',
+  AUTH_CONTEXT: 'auth-context-token',
+  REZICS_SESSION: 'rezics-session-token',
+  NOTIFICATION_SESSION: 'notification-session-token',
+  SEARCH_SESSION: 'search-session-token',
 } as const;
 export type NormalizedTokenName =
   (typeof NormalizedTokenName)[keyof typeof NormalizedTokenName];
@@ -20,10 +33,10 @@ export const normalizedTokenNameSchema = t.Union([
 
 export const TokenTransportHeader = {
   AUTHORIZATION: 'Authorization',
-  AUTH_CONTEXT: 'x-auth_context_token',
-  REZICS_SESSION: 'x-rezics_session_token',
-  NOTIFICATION_SESSION: 'x-notification_session_token',
-  SEARCH_SESSION: 'x-search_session_token',
+  AUTH_CONTEXT: 'x-auth-context-token',
+  REZICS_SESSION: 'x-rezics-session-token',
+  NOTIFICATION_SESSION: 'x-notification-session-token',
+  SEARCH_SESSION: 'x-search-session-token',
 } as const;
 export type TokenTransportHeader =
   (typeof TokenTransportHeader)[keyof typeof TokenTransportHeader];
@@ -84,10 +97,7 @@ export const authContextTokenClaimsSchema = t.Object({
   name: t.String(),
   avatar: t.Optional(t.Nullable(t.String())),
   emailVerified: t.Boolean(),
-  verificationStatus: t.Union([
-    t.Literal('verified'),
-    t.Literal('pending'),
-  ]),
+  verificationStatus: t.Union([t.Literal('verified'), t.Literal('pending')]),
   scope: t.Optional(t.Union([t.String(), t.Array(t.String())])),
   exp: t.Optional(t.Number()),
   iat: t.Optional(t.Number()),
