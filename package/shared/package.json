@@ -1,0 +1,9 @@
+{
+  "name": "@package/shared",
+  "type": "module",
+  "version": "0.0.1",
+  "scripts": {},
+  "devDependencies": {
+    "@types/bun": "^1.3.11"
+  }
+}

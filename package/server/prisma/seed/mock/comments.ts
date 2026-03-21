@@ -1,6 +1,6 @@
 import {faker} from '@faker-js/faker';
-import type {PrismaClient} from '../generated/client.js';
-import {UnitType, UnitStatus} from '../generated/client.js';
+import type {PrismaClient} from '@/prisma/generated/client.js';
+import {UnitType, UnitStatus} from '@/prisma/generated/client.js';
 import type {CreatedUser} from './types.js';
 import {randomInt, randomBoolean, generateParagraph} from './utils.js';
 import {upsertCommentCountForUnit} from './unitStats.js';

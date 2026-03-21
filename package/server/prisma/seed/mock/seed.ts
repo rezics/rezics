@@ -1,15 +1,26 @@
 import 'dotenv/config';
-import {prisma} from './client';
-import type {Prisma} from './client';
-import {DEFAULT_COUNTS} from './seed/config';
-import {resetDatabase} from './seed/database';
-import {seedPressUsers, seedProducerUsers, seedUsers} from './seed/users';
-import {seedTags} from './seed/tags';
-import {seedBooks, updateChapterIndex, seedChaptersForBook} from './seed/books';
-import {seedOtherUnits} from './seed/units';
-import {seedComments, updateStatsWithCommentCounts} from './seed/comments';
-import {seedReadLists} from './seed/readlist';
-import {seedEchoKV} from './seed/echokv';
+import {prisma} from '@/prisma/client';
+import type {Prisma} from '@/prisma/client';
+import {DEFAULT_COUNTS} from '@/prisma/seed/mock/config';
+import {resetDatabase} from '@/prisma/seed/mock/database';
+import {
+  seedPressUsers,
+  seedProducerUsers,
+  seedUsers,
+} from '@/prisma/seed/mock/users';
+import {seedTags} from '@/prisma/seed/mock/tags';
+import {
+  seedBooks,
+  updateChapterIndex,
+  seedChaptersForBook,
+} from '@/prisma/seed/mock/books';
+import {seedOtherUnits} from '@/prisma/seed/mock/units';
+import {
+  seedComments,
+  updateStatsWithCommentCounts,
+} from '@/prisma/seed/mock/comments';
+import {seedReadLists} from '@/prisma/seed/mock/readlist';
+import {seedEchoKV} from '@/prisma/seed/mock/echokv';
 
 // ------------------------------
 // Main Function

@@ -366,6 +366,13 @@
         "typescript": "^5",
       },
     },
+    "package/shared": {
+      "name": "@package/shared",
+      "version": "0.0.1",
+      "devDependencies": {
+        "@types/bun": "^1.3.11",
+      },
+    },
     "package/ui": {
       "name": "@package/ui",
       "version": "1.0.50",
@@ -429,7 +436,7 @@
       "name": "@package/util",
       "version": "0.0.1",
       "devDependencies": {
-        "@types/node": "^24.10.1",
+        "@types/bun": "^1.3.11",
       },
     },
   },
@@ -929,6 +936,8 @@
     "@package/search": ["@package/search@workspace:package/search"],
 
     "@package/server": ["@package/server@workspace:package/server"],
+
+    "@package/shared": ["@package/shared@workspace:package/shared"],
 
     "@package/ui": ["@package/ui@workspace:package/ui"],
 

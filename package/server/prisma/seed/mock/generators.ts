@@ -1,6 +1,6 @@
 import {faker} from '@faker-js/faker';
-import type {UnitType, Prisma} from '../generated/client.js';
-import {UnitType as UnitTypeEnum} from '../generated/client.js';
+import type {UnitType, Prisma} from '@/prisma/generated/client.js';
+import {UnitType as UnitTypeEnum} from '@/prisma/generated/client.js';
 import {
   randomInt,
   randomFloat,
@@ -22,11 +22,10 @@ export function generateBookExtra(): Prisma.InputJsonValue {
   };
 }
 
-import chapterList01 from '../../../app/src/mock/data/chapterlist01.json' with { type: 'json' };
-
 /**
  * Generate chapters index as JSON string
  * @returns JSON string of chapter array
+ * TODO Need refactor, chapter structure has changed
  */
 export function generateChapters(): Prisma.InputJsonValue {
   // const chapterCount = randomInt(5, 20);
@@ -37,7 +36,8 @@ export function generateChapters(): Prisma.InputJsonValue {
   //     pages: randomInt(5, 30),
   //   })),
   // );
-  return chapterList01;
+  // return chapterList01;
+  return [];
 }
 
 /**
