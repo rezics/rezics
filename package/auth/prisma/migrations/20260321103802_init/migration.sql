@@ -1,19 +1,27 @@
 -- CreateTable
 CREATE TABLE "User" (
     "id" UUID NOT NULL DEFAULT uuidv7(),
-    "slug" TEXT NOT NULL,
     "name" TEXT NOT NULL,
+    "image" TEXT,
     "email" TEXT NOT NULL,
     "emailVerified" BOOLEAN NOT NULL DEFAULT false,
     "role" TEXT NOT NULL DEFAULT 'user',
     "banned" BOOLEAN NOT NULL DEFAULT false,
     "banReason" TEXT,
     "banExpires" TIMESTAMP(3),
-    "image" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "UserProfile" (
+    "userId" UUID NOT NULL,
+    "slug" TEXT NOT NULL,
+    "avatar" TEXT,
+
+    CONSTRAINT "UserProfile_pkey" PRIMARY KEY ("userId")
 );
 
 -- CreateTable
@@ -102,14 +110,30 @@ CREATE TABLE "Verification" (
 -- CreateTable
 CREATE TABLE "Jwks" (
     "id" TEXT NOT NULL,
-    "publicKey" TEXT NOT NULL,
-    "privateKey" TEXT NOT NULL,
+    "jwtServiceId" UUID NOT NULL,
+    "publicJwk" JSONB NOT NULL,
+    "privateJwk" JSONB NOT NULL,
     "alg" TEXT,
-    "crv" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "expiresAt" TIMESTAMP(3),
 
     CONSTRAINT "Jwks_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "JwtService" (
+    "id" UUID NOT NULL DEFAULT uuidv7(),
+    "serviceKey" TEXT NOT NULL,
+    "issuer" TEXT NOT NULL,
+    "audience" TEXT NOT NULL,
+    "jwksUrl" TEXT NOT NULL,
+    "jwksPath" TEXT NOT NULL,
+    "isLocalIssuer" BOOLEAN NOT NULL DEFAULT false,
+    "isActive" BOOLEAN NOT NULL DEFAULT true,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "JwtService_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -194,16 +218,16 @@ CREATE TABLE "OAuthConsent" (
 );
 
 -- CreateIndex
-CREATE UNIQUE INDEX "User_slug_key" ON "User"("slug");
-
--- CreateIndex
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 
 -- CreateIndex
 CREATE INDEX "User_email_idx" ON "User"("email");
 
 -- CreateIndex
-CREATE INDEX "User_slug_idx" ON "User"("slug");
+CREATE UNIQUE INDEX "UserProfile_slug_key" ON "UserProfile"("slug");
+
+-- CreateIndex
+CREATE INDEX "UserProfile_slug_idx" ON "UserProfile"("slug");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Session_token_key" ON "Session"("token");
@@ -242,10 +266,22 @@ CREATE INDEX "Invitation_email_idx" ON "Invitation"("email");
 CREATE INDEX "Verification_identifier_idx" ON "Verification"("identifier");
 
 -- CreateIndex
+CREATE INDEX "Jwks_jwtServiceId_idx" ON "Jwks"("jwtServiceId");
+
+-- CreateIndex
 CREATE INDEX "Jwks_createdAt_idx" ON "Jwks"("createdAt");
 
 -- CreateIndex
 CREATE INDEX "Jwks_expiresAt_idx" ON "Jwks"("expiresAt");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "JwtService_serviceKey_key" ON "JwtService"("serviceKey");
+
+-- CreateIndex
+CREATE INDEX "JwtService_isLocalIssuer_isActive_idx" ON "JwtService"("isLocalIssuer", "isActive");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "JwtService_issuer_audience_key" ON "JwtService"("issuer", "audience");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "OAuthClient_clientId_key" ON "OAuthClient"("clientId");
@@ -293,6 +329,9 @@ CREATE INDEX "OAuthConsent_userId_idx" ON "OAuthConsent"("userId");
 CREATE INDEX "OAuthConsent_referenceId_idx" ON "OAuthConsent"("referenceId");
 
 -- AddForeignKey
+ALTER TABLE "UserProfile" ADD CONSTRAINT "UserProfile_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "Session" ADD CONSTRAINT "Session_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -309,3 +348,6 @@ ALTER TABLE "Invitation" ADD CONSTRAINT "Invitation_organizationId_fkey" FOREIGN
 
 -- AddForeignKey
 ALTER TABLE "Invitation" ADD CONSTRAINT "Invitation_inviterId_fkey" FOREIGN KEY ("inviterId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Jwks" ADD CONSTRAINT "Jwks_jwtServiceId_fkey" FOREIGN KEY ("jwtServiceId") REFERENCES "JwtService"("id") ON DELETE CASCADE ON UPDATE CASCADE;
