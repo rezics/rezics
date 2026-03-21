@@ -3,35 +3,32 @@ import {
   sessionTokenResponseSchema,
   type SessionTokenResponse,
 } from '@package/contract';
-import {
-  coreInstance,
-} from '@/src/core';
+import {coreInstance} from '@/src/core';
 import {
   createPolicyCorsPreflightResponse,
   withPolicyCorsResponse,
 } from '@/src/cors';
 import {identityContextPlugin} from '@/src/auth/context';
 import {userService} from '@/src/user/service/user.service';
-import {buildRezicsSessionClaims, getMainSessionPublicJwks} from './jwt';
+import {
+  buildRezicsSessionClaims,
+  getMainSessionPublicJwks,
+} from './jwt/jwt.service.ts';
 
 const publicSessionApi = coreInstance('/session')
   .options('/jwks', ({request}) =>
     createPolicyCorsPreflightResponse(request, 'public'),
   )
-  .get(
-    '/jwks',
-    async () => getMainSessionPublicJwks(),
-    {
-      detail: {
-        summary: 'Publish main-server JWKS',
-        description:
-          'Expose the canonical JWKS document for all main-server issued session tokens.',
-        tags: ['Session'],
-      },
-      afterHandle: ({request, response}) =>
-        withPolicyCorsResponse(request, response, 'public'),
+  .get('/jwks', async () => getMainSessionPublicJwks(), {
+    detail: {
+      summary: 'Publish main-server JWKS',
+      description:
+        'Expose the canonical JWKS document for all main-server issued session tokens.',
+      tags: ['Session'],
     },
-  );
+    afterHandle: ({request, response}) =>
+      withPolicyCorsResponse(request, response, 'public'),
+  });
 
 const credentialedSessionApi = coreInstance('/session')
   .options('/*', ({request}) =>

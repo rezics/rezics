@@ -5,6 +5,7 @@ export type JwtPublicJwk = JWK & {
   kid: string;
   use: 'sig';
   alg: typeof JwtAlgorithm.ES256;
+  [key: string]: unknown;
 };
 
 export type JwtPrivateJwk = JWK & {
@@ -12,9 +13,12 @@ export type JwtPrivateJwk = JWK & {
   use: 'sig';
   alg: typeof JwtAlgorithm.ES256;
   d: string;
+  [key: string]: unknown;
 };
 
-function withJwtMetadata<TJwk extends JWK>(jwk: TJwk): TJwk & {
+function withJwtMetadata<TJwk extends JWK>(
+  jwk: TJwk,
+): TJwk & {
   use: 'sig';
   alg: typeof JwtAlgorithm.ES256;
 } {

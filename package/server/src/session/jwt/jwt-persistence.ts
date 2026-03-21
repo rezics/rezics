@@ -6,7 +6,7 @@ import {
   type JwtPrivateJwk,
   type JwtPublicJwk,
 } from '@package/jwt';
-import {prisma} from '../../prisma/client';
+import {prisma, Prisma} from '@/prisma/client';
 import {
   ensureLocalServerJwtServiceRecord,
   getServerSessionJwtMetadata,
@@ -69,8 +69,8 @@ export const serverJwtPersistence: JwtKeyPersistence = {
       where: {id: key.kid},
       update: {
         jwtServiceId: localService.id,
-        publicJwk: key.publicJwk,
-        privateJwk: key.privateJwk,
+        publicJwk: key.publicJwk as Prisma.InputJsonValue,
+        privateJwk: key.privateJwk as Prisma.InputJsonValue,
         alg: key.algorithm,
         createdAt: key.createdAt,
         expiresAt: key.expiresAt,
@@ -78,8 +78,8 @@ export const serverJwtPersistence: JwtKeyPersistence = {
       create: {
         id: key.kid,
         jwtServiceId: localService.id,
-        publicJwk: key.publicJwk,
-        privateJwk: key.privateJwk,
+        publicJwk: key.publicJwk as Prisma.InputJsonValue,
+        privateJwk: key.privateJwk as Prisma.InputJsonValue,
         alg: key.algorithm,
         createdAt: key.createdAt,
         expiresAt: key.expiresAt,

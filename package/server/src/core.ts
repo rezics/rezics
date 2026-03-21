@@ -1,5 +1,5 @@
 import {Elysia} from 'elysia';
-import {mainSessionJwtPlugin} from './session/jwt';
+import {mainSessionJwtPlugin} from '@/src/session';
 
 export function coreInstance(prefix: string) {
   return new Elysia({prefix}).use(mainSessionJwtPlugin);

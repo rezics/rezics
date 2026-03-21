@@ -14,7 +14,7 @@ import {
 } from '@package/jwt';
 import type {JWTPayload} from 'jose';
 import {env} from '../../env';
-import {getTrustedAuthJwtServiceRecord} from '../../session/jwt-metadata';
+import {getTrustedAuthJwtServiceRecord} from '@/src/session';
 
 export function buildTrustedAuthVerifyOptions(
   trustedAuth: {
@@ -111,8 +111,8 @@ function isVerifyOptions(value: unknown): value is Partial<VerifyOptions> {
 function isSetLike(value: unknown): value is {status?: number} {
   return Boolean(
     value &&
-      typeof value === 'object' &&
-      'status' in (value as Record<string, unknown>),
+    typeof value === 'object' &&
+    'status' in (value as Record<string, unknown>),
   );
 }
 

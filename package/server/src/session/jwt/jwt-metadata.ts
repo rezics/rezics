@@ -1,5 +1,5 @@
-import {prisma} from '../../prisma/client';
-import {env} from '../env';
+import {prisma} from '@/prisma/client';
+import {env} from '@/src/env';
 
 export const serverJwtLocalServiceKey = 'server-local';
 export const authJwtUpstreamServiceKey = 'auth-upstream';

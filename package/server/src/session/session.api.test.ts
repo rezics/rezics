@@ -53,7 +53,7 @@ mock.module('./jwt', () => ({
 
 describe('session jwks route', () => {
   test('publishes the canonical public jwks document without auth', async () => {
-    const {sessionApi} = await import('./api');
+    const {sessionApi} = await import('./session.api');
 
     const response = await sessionApi.handle(
       new Request('http://localhost/session/jwks'),
@@ -77,7 +77,7 @@ describe('session jwks route', () => {
   });
 
   test('keeps jwks public while session token issuance remains credentialed', async () => {
-    const {sessionApi} = await import('./api');
+    const {sessionApi} = await import('./session.api');
 
     const jwksResponse = await sessionApi.handle(
       new Request('http://localhost/session/jwks', {
@@ -107,8 +107,8 @@ describe('session jwks route', () => {
     expect(tokenResponse.headers.get('access-control-allow-origin')).toBe(
       'https://rezics.com',
     );
-    expect(
-      tokenResponse.headers.get('access-control-allow-credentials'),
-    ).toBe('true');
+    expect(tokenResponse.headers.get('access-control-allow-credentials')).toBe(
+      'true',
+    );
   });
 });

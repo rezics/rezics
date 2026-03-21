@@ -7,11 +7,14 @@ import type {
 } from '@package/contract';
 import {BasicAdminPermission} from '@package/contract';
 import {verifyAuth, verifySessionToken} from '../user/util';
-import {getMainSessionJwtContext, REZICS_SESSION_HEADER} from '../session/jwt';
+import {getMainSessionJwtContext, REZICS_SESSION_HEADER} from '@/src/session';
 import {userService} from '../user/service/user.service';
 import {mapUserToDTO} from '../user/model/mapper';
 
-function hasRole(roles: string[] | undefined, role: TokenPermissionRole): boolean {
+function hasRole(
+  roles: string[] | undefined,
+  role: TokenPermissionRole,
+): boolean {
   return Boolean(roles?.includes(role));
 }
 
@@ -23,7 +26,9 @@ function matchesSnapshotRole(
     case 'ROOT':
       return hasRole(persistedRoles, 'ROOT');
     case 'ADMIN':
-      return hasRole(persistedRoles, 'ROOT') || hasRole(persistedRoles, 'ADMIN');
+      return (
+        hasRole(persistedRoles, 'ROOT') || hasRole(persistedRoles, 'ADMIN')
+      );
     case 'USER':
       return !hasRole(persistedRoles, 'BLOCKED');
     case 'BLOCKED':
@@ -84,7 +89,9 @@ export const sessionContextPlugin = new Elysia()
 
     if (!matchesSnapshotRole(session.permission.role, persistedRoles)) {
       ctx.set.status = 403;
-      throw new Error('Forbidden: Persisted permissions no longer match session');
+      throw new Error(
+        'Forbidden: Persisted permissions no longer match session',
+      );
     }
 
     if (persistedRoles?.includes('BLOCKED')) {

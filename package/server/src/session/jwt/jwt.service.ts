@@ -19,8 +19,11 @@ import {
 } from '@package/contract';
 import {SignJWT} from 'jose';
 import {serverJwtPersistence} from './jwt-persistence';
-import {getServerSessionJwtMetadata, serverSessionJwksPath} from './jwt-metadata';
-import {env} from '../env';
+import {
+  getServerSessionJwtMetadata,
+  serverSessionJwksPath,
+} from './jwt-metadata';
+import {env} from '@/src/env';
 
 function parseSeededJwk<TJwk extends JwtPublicJwk | JwtPrivateJwk>(
   value: string | undefined,
@@ -62,11 +65,9 @@ function getMainSessionJwtTtlSeconds() {
 }
 
 const mainSessionMetadata = getServerSessionJwtMetadata();
-let mainSessionRotationPromise:
-  | Promise<
-      ReturnType<typeof createRotationEngine>
-    >
-  | null = null;
+let mainSessionRotationPromise: Promise<
+  ReturnType<typeof createRotationEngine>
+> | null = null;
 
 async function getMainSessionRotation() {
   if (!mainSessionRotationPromise) {
@@ -170,7 +171,10 @@ export async function getMainSessionPublicJwks() {
   return (await getMainSessionRotation()).getPublicJwks();
 }
 
-function hasRole(roles: string[] | undefined, role: TokenPermissionRole): boolean {
+function hasRole(
+  roles: string[] | undefined,
+  role: TokenPermissionRole,
+): boolean {
   return Boolean(roles?.includes(role));
 }
 
