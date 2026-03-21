@@ -1,15 +1,11 @@
 ## ADDED Requirements
 
 ### Requirement: Independent auth service boundary
-The system SHALL provide a standalone authentication service in `package/auth` implemented with Elysia, Better Auth, and Prisma, and SHALL keep auth modules organized directly under `/src/<module>` names instead of a nested `feature/` directory. The auth service SHALL additionally integrate the `admin` and `organization` plugins from better-auth, extending the API surface with user management and organization management endpoints.
+The system SHALL provide a standalone authentication service in `package/auth` where Better Auth owns session handling, JWT and JWKS concerns are modularized under session ownership, and downstream services depend on published contracts and public endpoints rather than auth-internal verification helpers.
 
-#### Scenario: Auth service starts with independent routing surface
+#### Scenario: Auth service boots with session-owned JWT modules
 - **WHEN** the auth service boots in development or production
-- **THEN** authentication endpoints SHALL be served by `package/auth` without relying on `package/server` auth route handlers
-
-#### Scenario: Auth service exposes admin and organization endpoints
-- **WHEN** the auth service boots
-- **THEN** `/api/auth/admin/*` and `/api/auth/organization/*` endpoints SHALL be routable alongside existing auth endpoints
+- **THEN** session handling SHALL be owned by Better Auth while JWT/JWKS route ownership and adapter composition remain isolated inside `package/auth`
 
 ### Requirement: Explicit runtime configuration
 The auth service SHALL validate environment configuration through t3-env and SHALL explicitly configure Better Auth `baseURL`, `basePath` (`/api/auth`), and `BETTER_AUTH_SECRET`.
@@ -34,8 +30,26 @@ The auth service SHALL use Prisma against database `rezics_auth` and SHALL defin
 - **THEN** the database SHALL contain `Organization`, `Member`, and `Invitation` tables with proper foreign key relationships
 
 ### Requirement: Internal token surface isolation
-The auth service SHALL keep `/api/auth/token` available for same-origin/internal workflows and SHALL enforce explicit security isolation from external/public OAuth attack surface. Isolation is ensured by enforcing HttpOnly sessions and prohibiting external OAuth clients from obtaining session context.
+The auth service SHALL keep internal or same-origin session token surfaces isolated from external/public OAuth surfaces, SHALL make JWKS verification endpoints publicly reachable where required, and SHALL avoid exposing legacy verify-only compatibility paths.
 
-#### Scenario: External/public misuse attempt on internal token surface
-- **WHEN** a request violates internal token-surface security policy
-- **THEN** the service SHALL deny the request and SHALL return a deterministic authentication/authorization error response
+#### Scenario: Public verifier requests JWKS while internal session routes stay protected
+- **WHEN** a public verifier fetches JWKS and an unrelated caller requests a protected session-only route
+- **THEN** the JWKS request SHALL succeed without session credentials and the protected route SHALL continue enforcing its intended auth boundary
+
+### Requirement: Auth service exposes one auth-owned signing surface
+The auth service SHALL issue all of its JWT token types from one active private signing key and SHALL publish one auth-owned JWKS surface that covers all retained public keys needed to verify auth-issued tokens.
+
+#### Scenario: Auth issues identity and context tokens
+- **WHEN** the auth service issues both identity and context JWTs
+- **THEN** both JWTs SHALL be signed by the same active auth-private key and SHALL be verifiable from the same auth JWKS document
+
+### Requirement: Services persist JWT service metadata locally
+Each service SHALL persist JWT service metadata for itself and trusted peer issuers in its own database, including issuer, audience, and canonical JWKS location, rather than treating those values as ad hoc runtime-only configuration.
+
+#### Scenario: Auth service stores its local JWT metadata
+- **WHEN** the auth service starts after migrations or bootstrap
+- **THEN** it SHALL have a local persisted record describing its own issuer, audience, and canonical session-owned JWKS endpoint
+
+#### Scenario: Resource server stores trusted auth metadata
+- **WHEN** `package/server` verifies auth-issued JWTs offline
+- **THEN** it SHALL load the trusted auth issuer, audience, and JWKS location from its local persisted JWT service metadata rather than auth-owned helper code
