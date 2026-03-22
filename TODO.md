@@ -43,3 +43,5 @@ refine-user-session-and-verification-flow 这个 change 应当做如下调整
 - [ ] requiredScope 是什么东西，token 应该没有哪个有scop吧？不过可以想想以后怎么利用，比如，很多权限都可以签发为 token，然后可以存在 index,用于初步筛选
 
 - [ ] jwks 相关端口的权限校验问题，cors开放访问
+
+- [ ] 将 admin 相关代码内化到各个feature里面

@@ -5,7 +5,9 @@
       "Bash(cd:*)",
       "Bash(openspec status:*)",
       "Bash(openspec instructions:*)",
-      "Bash(curl -sL https://elysiajs.com/*)"
+      "Bash(openspec new:*)",
+      "WebFetch(domain:elysiajs.com)",
+      "Bash(bun test:*)"
     ]
   }
 }
