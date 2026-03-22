@@ -1,0 +1,16 @@
+{
+  "sandbox": {
+    "enabled": true
+  },
+  "permissions": {
+    "defaultMode": "acceptEdits",
+    "deny": [
+      "Bash(git commit *)",
+      "Bash(git push *)",
+      "Bash(git reset --hard *)",
+      "PowerShell(git commit *)",
+      "PowerShell(git push *)",
+      "PowerShell(git reset --hard *)"
+    ]
+  }
+}
