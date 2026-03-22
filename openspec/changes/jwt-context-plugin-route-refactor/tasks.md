@@ -21,29 +21,40 @@
 
 ## 4. Domain API Refactoring
 
-- [ ] 4.1 Refactor `book.api.ts`: remove all inline `new Elysia()` wrappers, flatten to single `new Elysia({ prefix: '/books' })` with `.use(requireOwner)` / `.use(requireAdmin)` guards. Create `book.permission.ts` for book-specific ownership checks if needed
-- [ ] 4.2 Refactor `chapter.api.ts`: same pattern — single Elysia instance, scoped guards
+> **Coordination note:** This phase runs in parallel with `elysia-native-cors-policy` change. Each domain API is rewritten ONCE applying both JWT flattening and CORS plugin migration together. The target pattern for every domain API is:
+>
+> ```ts
+> export const bookApi = new Elysia({ prefix: '/books' })
+>   .use(serverCorsPolicy('credentialed'))   // ← from CORS change
+>   .get('/:unitId', handler)                // public route
+>   .use(requireOwner)                       // ← guard from JWT change
+>   .post('/', handler)                      // protected route
+> ```
+>
+> `coreInstance` and `withCredentialedCors` are both removed in the same edit.
+
+- [ ] 4.1 Refactor `book.api.ts`: flatten to single `new Elysia({ prefix: '/books' })`, add `.use(serverCorsPolicy('credentialed'))`, replace sub-instances with `.use(requireOwner)` / `.use(requireAdmin)` guards. Create `book.permission.ts` for book-specific ownership checks if needed
+- [ ] 4.2 Refactor `chapter.api.ts`: same pattern — single Elysia instance, CORS plugin, scoped guards
 - [ ] 4.3 Refactor `readlist.api.ts`: same pattern
 - [ ] 4.4 Refactor `review.api.ts`: same pattern
 - [ ] 4.5 Refactor `comment.api.ts`: same pattern
 - [ ] 4.6 Refactor `reaction.api.ts`: same pattern
 - [ ] 4.7 Refactor `tag.api.ts`: same pattern
 - [ ] 4.8 Refactor `unit.api.ts`: same pattern
-- [ ] 4.9 Refactor `user/api/user.core.api.ts`, `user.admin.api.ts`, `user.follow.api.ts`, `user.api.ts`: flatten sub-routes, use guards
-- [ ] 4.10 Refactor `token/token.api.ts`, `token.book.api.ts`, `token.user.api.ts`: flatten HOF pattern to single instances with guards
+- [ ] 4.9 Refactor `user/api/user.core.api.ts`, `user.admin.api.ts`, `user.follow.api.ts`, `user.api.ts`: flatten sub-routes, CORS plugin, guards
+- [ ] 4.10 Refactor `token/token.api.ts`, `token.book.api.ts`, `token.user.api.ts`: flatten HOF pattern to single instances with CORS plugin and guards
 - [ ] 4.11 Refactor `feedback.api.ts`: same pattern
 - [ ] 4.12 Refactor `echokv.api.ts`: same pattern
 - [ ] 4.13 Refactor `meili.api.ts`: same pattern
-- [ ] 4.14 Refactor `session/session.api.ts`: merge public and credentialed instances into single flat chain (session signing remains local)
+- [ ] 4.14 Refactor `session/session.api.ts`: merge public and credentialed sub-routers into single flat chain with `.use(serverCorsPolicy('credentialed'))` and `{ corsPolicy: 'public' }` on `/jwks` route. Session signing remains local
 - [ ] 4.15 Refactor `admin/jwt-service/jwt-service.api.ts`: same pattern
 
-## 5. Cleanup & CORS
+## 5. Cleanup
 
 - [ ] 5.1 Delete `package/server/src/core.ts` and remove all `coreInstance` imports
 - [ ] 5.2 Remove or reduce `package/server/src/auth/context.ts` — delete `identityContextPlugin`, `sessionContextPlugin`, keep `requireAdminSession` only if still referenced (otherwise delete)
 - [ ] 5.3 Clean up `package/server/src/user/util/index.ts` — remove `verifyAuth`, `verifyAuthIdentityToken`, `verifyAuthContextToken` and related helpers that are no longer called from domain APIs. Keep re-exports only if needed by permission guards internally
-- [ ] 5.4 Ensure CORS handling is preserved: either apply `withCredentialedCors` per domain API or extract to a root-level CORS plugin. Verify preflight and credentialed request behavior
-- [ ] 5.5 Grep entire `package/server/src` for any remaining imports of `identityContextPlugin`, `sessionContextPlugin`, `coreInstance`, `verifyAuth` — ensure zero results
+- [ ] 5.4 Grep entire `package/server/src` for any remaining imports of `identityContextPlugin`, `sessionContextPlugin`, `coreInstance`, `verifyAuth`, `withCredentialedCors`, `withPublicCors` — ensure zero results
 
 ## 6. Verification
 

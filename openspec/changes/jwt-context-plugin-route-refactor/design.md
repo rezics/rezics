@@ -80,18 +80,19 @@ request → domain.api.ts
 
 ### 4. Remove `core.ts` and flatten domain APIs
 
-**Decision:** Each domain API file creates `new Elysia({ prefix: '/domain' })` directly. The `withCredentialedCors()` wrapper moves to a shared CORS plugin registered at root, or is applied per-domain where needed. `mainSessionJwtPlugin` is no longer used — session JWT signing moves to a `decorate` at root or remains in the session API only.
+**Decision:** Each domain API file creates `new Elysia({ prefix: '/domain' })` directly. CORS is handled by the `corsPolicy` plugin from the parallel `elysia-native-cors-policy` change — each domain applies `.use(serverCorsPolicy('credentialed'))` at the top of its chain. `mainSessionJwtPlugin` is no longer used — session JWT signing moves to a `decorate` at root or remains in the session API only.
 
 **Target pattern for domain APIs:**
 ```
 export const bookApi = new Elysia({ prefix: '/books' })
-  .get('/:unitId', handler)             // public
-  .get('/:unitId/rating', handler)      // public
-  .use(requireOwner)                    // guard: everything below needs auth
-  .get('/', handler)                    // protected
-  .post('/', handler)                   // protected
-  .put('/:unitId', handler)             // protected
-  .delete('/:unitId', handler)          // protected
+  .use(serverCorsPolicy('credentialed'))  // CORS (from elysia-native-cors-policy change)
+  .get('/:unitId', handler)               // public
+  .get('/:unitId/rating', handler)        // public
+  .use(requireOwner)                      // guard: everything below needs auth
+  .get('/', handler)                      // protected
+  .post('/', handler)                     // protected
+  .put('/:unitId', handler)              // protected
+  .delete('/:unitId', handler)           // protected
 ```
 
 ### 5. Token context key naming convention
@@ -113,4 +114,4 @@ These are defined as constants in `@package/contract` alongside the existing `No
 
 **[Startup-time verifier binding]** → If JWT service config changes at runtime (e.g., JWKS URL rotation), the verifier won't pick it up. Mitigating: JWKS key rotation is handled by `jose`'s remote JWKS set which re-fetches automatically. The service record (issuer, audience) is static.
 
-**[CORS handling]** → Removing `withCredentialedCors(coreInstance(...))` requires an alternative. Options: global CORS plugin at root, or per-domain CORS. This should be decided during implementation based on which routes need credentialed CORS.
+**[CORS handling]** → Removing `withCredentialedCors(coreInstance(...))` is handled by the parallel `elysia-native-cors-policy` change. Each domain applies `serverCorsPolicy('credentialed')` from the new `@package/cors` shared package. Mixed-policy routers (session API) use a route-level `{ corsPolicy: 'public' }` macro override. Domain API refactoring (Phase 4) applies both changes in a single pass per file.
