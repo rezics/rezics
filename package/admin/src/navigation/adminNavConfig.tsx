@@ -5,6 +5,7 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import React from 'react';
 import StorageOutlinedIcon from '@mui/icons-material/StorageOutlined';
 import KeyOutlinedIcon from '@mui/icons-material/KeyOutlined';
+import VpnKeyOutlinedIcon from '@mui/icons-material/VpnKeyOutlined';
 import ManageSearchOutlinedIcon from '@mui/icons-material/ManageSearchOutlined';
 import AdminPanelSettingsOutlinedIcon from '@mui/icons-material/AdminPanelSettingsOutlined';
 
@@ -124,6 +125,12 @@ export const adminNav = {
           label: 'Token',
           icon: <KeyOutlinedIcon fontSize="small" />,
           to: '/token',
+        },
+        {
+          id: 'misc.jwt-services',
+          label: 'JWT Services',
+          icon: <VpnKeyOutlinedIcon fontSize="small" />,
+          to: '/jwt-services',
         },
       ],
     },

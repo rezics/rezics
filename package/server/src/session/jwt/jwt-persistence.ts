@@ -7,10 +7,7 @@ import {
   type JwtPublicJwk,
 } from '@package/jwt';
 import {prisma, Prisma} from '@/prisma/client';
-import {
-  ensureLocalServerJwtServiceRecord,
-  getServerSessionJwtMetadata,
-} from './jwt-metadata';
+import {getJwtService} from '@/src/jwt';
 
 function mapRowToRecord(row: {
   id: string;
@@ -38,14 +35,14 @@ function mapRowToRecord(row: {
 
 export const serverJwtPersistence: JwtKeyPersistence = {
   async listKeys({issuer}) {
-    const localService = await ensureLocalServerJwtServiceRecord();
-    if (issuer !== localService.issuer) {
+    const service = await getJwtService('server-local');
+    if (issuer !== service.issuer) {
       return [];
     }
 
     const rows = await prisma.jwks.findMany({
       where: {
-        jwtServiceId: localService.id,
+        jwtServiceId: service.id,
       },
       include: {
         jwtService: {
@@ -60,15 +57,15 @@ export const serverJwtPersistence: JwtKeyPersistence = {
     return rows.map(mapRowToRecord);
   },
   async saveKey({issuer, key}) {
-    const localService = await ensureLocalServerJwtServiceRecord();
-    if (issuer !== localService.issuer) {
+    const service = await getJwtService('server-local');
+    if (issuer !== service.issuer) {
       throw new Error(`Unsupported issuer ${issuer}`);
     }
 
     await prisma.jwks.upsert({
       where: {id: key.kid},
       update: {
-        jwtServiceId: localService.id,
+        jwtServiceId: service.id,
         publicJwk: key.publicJwk as Prisma.InputJsonValue,
         privateJwk: key.privateJwk as Prisma.InputJsonValue,
         alg: key.algorithm,
@@ -77,7 +74,7 @@ export const serverJwtPersistence: JwtKeyPersistence = {
       },
       create: {
         id: key.kid,
-        jwtServiceId: localService.id,
+        jwtServiceId: service.id,
         publicJwk: key.publicJwk as Prisma.InputJsonValue,
         privateJwk: key.privateJwk as Prisma.InputJsonValue,
         alg: key.algorithm,
@@ -87,8 +84,8 @@ export const serverJwtPersistence: JwtKeyPersistence = {
     });
   },
   async markKeyRetiring({issuer, kid, expiresAt}) {
-    const localMetadata = getServerSessionJwtMetadata();
-    if (issuer !== localMetadata.issuer) {
+    const service = await getJwtService('server-local');
+    if (issuer !== service.issuer) {
       throw new Error(`Unsupported issuer ${issuer}`);
     }
 
@@ -98,8 +95,8 @@ export const serverJwtPersistence: JwtKeyPersistence = {
     });
   },
   async getKeyByKid({issuer, kid}) {
-    const localMetadata = getServerSessionJwtMetadata();
-    if (issuer !== localMetadata.issuer) {
+    const service = await getJwtService('server-local');
+    if (issuer !== service.issuer) {
       return null;
     }
 

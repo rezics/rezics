@@ -14,7 +14,7 @@ import {
 } from '@package/jwt';
 import type {JWTPayload} from 'jose';
 import {env} from '../../env';
-import {getTrustedAuthJwtServiceRecord} from '@/src/session';
+import {getJwtService} from '@/src/jwt';
 
 export function buildTrustedAuthVerifyOptions(
   trustedAuth: {
@@ -46,7 +46,7 @@ async function buildAuthVerifyOptions(
   overrides?: Partial<VerifyOptions>,
   tokenName: NormalizedTokenNameType = NormalizedTokenName.AUTH_IDENTITY,
 ): Promise<VerifyOptions> {
-  const trustedAuth = await getTrustedAuthJwtServiceRecord();
+  const trustedAuth = await getJwtService('auth-upstream');
   return buildTrustedAuthVerifyOptions(trustedAuth, overrides, tokenName);
 }
 

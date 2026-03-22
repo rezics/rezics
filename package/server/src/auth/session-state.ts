@@ -1,13 +1,13 @@
 import type {GetSessionStateResponse} from '@package/contract';
 import {env} from '../env';
-import {getTrustedAuthJwtServiceRecord} from '../session/jwt-metadata';
+import {getJwtService} from '../jwt';
 
 async function getAuthApiBaseUrl(): Promise<string> {
   if (env.AUTH_API_URL) {
     return env.AUTH_API_URL;
   }
 
-  const trustedAuth = await getTrustedAuthJwtServiceRecord();
+  const trustedAuth = await getJwtService('auth-upstream');
   return trustedAuth.issuer;
 }
 

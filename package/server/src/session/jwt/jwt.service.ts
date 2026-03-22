@@ -1,15 +1,11 @@
 import {Elysia} from 'elysia';
 import {
   asJwtPrivateJwk,
-  asJwtPublicJwk,
   createRotationEngine,
   defaultJwtCryptoProvider,
   importPrivateJwk,
   JwtAlgorithm,
   verifySessionToken,
-  type JwtCryptoProvider,
-  type JwtPrivateJwk,
-  type JwtPublicJwk,
 } from '@package/jwt';
 import {
   NormalizedTokenName,
@@ -19,52 +15,13 @@ import {
 } from '@package/contract';
 import {SignJWT} from 'jose';
 import {serverJwtPersistence} from './jwt-persistence';
-import {
-  getServerSessionJwtMetadata,
-  serverSessionJwksPath,
-} from './jwt-metadata';
+import {getJwtService} from '@/src/jwt';
 import {env} from '@/src/env';
-
-function parseSeededJwk<TJwk extends JwtPublicJwk | JwtPrivateJwk>(
-  value: string | undefined,
-): TJwk | null {
-  if (!value) {
-    return null;
-  }
-
-  return JSON.parse(value) as TJwk;
-}
-
-function createSeededCryptoProvider(): JwtCryptoProvider {
-  const privateJwk = parseSeededJwk<JwtPrivateJwk>(
-    env.MAIN_SESSION_JWT_PRIVATE_JWK,
-  );
-  const publicJwk = parseSeededJwk<JwtPublicJwk>(
-    env.MAIN_SESSION_JWT_PUBLIC_JWK,
-  );
-  let seeded = false;
-
-  return {
-    generateKey() {
-      if (privateJwk && publicJwk && !seeded) {
-        seeded = true;
-
-        return {
-          privateJwk: asJwtPrivateJwk(privateJwk),
-          publicJwk: asJwtPublicJwk(publicJwk),
-        };
-      }
-
-      return defaultJwtCryptoProvider.generateKey();
-    },
-  };
-}
 
 function getMainSessionJwtTtlSeconds() {
   return Number(env.MAIN_SESSION_JWT_TTL_SECONDS ?? '900');
 }
 
-const mainSessionMetadata = getServerSessionJwtMetadata();
 let mainSessionRotationPromise: Promise<
   ReturnType<typeof createRotationEngine>
 > | null = null;
@@ -72,18 +29,19 @@ let mainSessionRotationPromise: Promise<
 async function getMainSessionRotation() {
   if (!mainSessionRotationPromise) {
     mainSessionRotationPromise = (async () => {
+      const service = await getJwtService('server-local');
       const rotation = createRotationEngine({
         issuer: {
-          issuer: mainSessionMetadata.issuer,
-          audience: mainSessionMetadata.audience,
+          issuer: service.issuer,
+          audience: service.audience,
           algorithm: JwtAlgorithm.ES256,
-          jwksPath: serverSessionJwksPath,
+          jwksPath: service.jwksPath,
         },
         config: {
           tokenTtlMs: getMainSessionJwtTtlSeconds() * 1000,
         },
         persistence: serverJwtPersistence,
-        cryptoProvider: createSeededCryptoProvider(),
+        cryptoProvider: defaultJwtCryptoProvider,
       });
 
       await rotation.ensureActiveKey();
@@ -108,9 +66,14 @@ export const mainSessionJwtPlugin = new Elysia({
       iat?: boolean;
     },
   ) {
+    const service = await getJwtService('server-local');
     const rotation = await getMainSessionRotation();
     const activeKey = await rotation.getActiveSigningKey();
-    const signingKey = await importPrivateJwk(activeKey.privateJwk);
+    const signingKey = await importPrivateJwk(
+      asJwtPrivateJwk(
+        service.jwks[0]?.privateJwk ?? activeKey.privateJwk,
+      ),
+    );
     const {nbf, exp, iat, aud, iss, jti, sub, ...data} = signValue;
 
     let token = new SignJWT({
@@ -123,8 +86,8 @@ export const mainSessionJwtPlugin = new Elysia({
         kid: activeKey.kid,
         typ: 'JWT',
       })
-      .setIssuer(iss ?? mainSessionMetadata.issuer)
-      .setAudience(aud ?? mainSessionMetadata.audience);
+      .setIssuer(iss ?? service.issuer)
+      .setAudience(aud ?? service.audience);
 
     if (nbf !== undefined) token = token.setNotBefore(nbf);
     token =
@@ -155,20 +118,25 @@ export const mainSessionJwtPlugin = new Elysia({
 });
 
 export async function getMainSessionJwtContext() {
-  const rotation = await getMainSessionRotation();
+  const service = await getJwtService('server-local');
 
   return {
-    issuer: mainSessionMetadata.issuer,
-    audience: mainSessionMetadata.audience,
+    issuer: service.issuer,
+    audience: service.audience,
     algorithm: JwtAlgorithm.ES256,
     ttlSeconds: getMainSessionJwtTtlSeconds(),
     tokenName: NormalizedTokenName.REZICS_SESSION,
-    jwks: await rotation.getPublicJwks(),
+    jwks: {
+      keys: service.jwks.map(k => k.publicJwk),
+    },
   } as const;
 }
 
 export async function getMainSessionPublicJwks() {
-  return (await getMainSessionRotation()).getPublicJwks();
+  const service = await getJwtService('server-local');
+  return {
+    keys: service.jwks.map(k => k.publicJwk),
+  };
 }
 
 function hasRole(

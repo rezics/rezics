@@ -14,9 +14,15 @@ import {reactionApi} from './reaction';
 import {tokenApi} from './token';
 import {feedbackApi} from './feedback';
 import {sessionApi} from './session';
+import {jwtServiceAdminApi} from './admin/jwt-service';
 
 import {getProdState} from './utils/getProdState';
 import {env} from './env';
+import {bootstrapJwtServiceRecord} from './jwt';
+import {
+  serverSessionJwksPath,
+  authSessionJwksPath,
+} from './session/jwt/jwt-metadata';
 
 import 'dotenv/config';
 
@@ -68,10 +74,35 @@ app
   .use(echoKvApi)
   .use(feedbackApi)
   .use(sessionApi)
+  .use(jwtServiceAdminApi)
   .get('/', () => 'Hello Elysia')
   .get('/health', () => ({status: 'ok'}));
 
 const port = env.PORT ? Number(env.PORT) : 3000;
+
+const serverBaseUrl =
+  env.MAIN_SESSION_JWT_ISSUER ?? `http://localhost:${port}`;
+const authIssuer = env.AUTH_JWT_ISSUER ?? 'http://localhost:35003';
+const authAudience = env.AUTH_JWT_AUDIENCE ?? 'rezics-api';
+const authJwksUrl =
+  env.AUTH_JWKS_URL ?? new URL(authSessionJwksPath, authIssuer).toString();
+
+await Promise.all([
+  bootstrapJwtServiceRecord('server-local', {
+    issuer: serverBaseUrl,
+    audience: env.MAIN_SESSION_JWT_AUDIENCE ?? 'rezics-main-server',
+    jwksUrl: new URL(serverSessionJwksPath, serverBaseUrl).toString(),
+    jwksPath: serverSessionJwksPath,
+    isLocalIssuer: true,
+  }),
+  bootstrapJwtServiceRecord('auth-upstream', {
+    issuer: authIssuer,
+    audience: authAudience,
+    jwksUrl: authJwksUrl,
+    jwksPath: authSessionJwksPath,
+    isLocalIssuer: false,
+  }),
+]);
 
 app.listen(port);
 

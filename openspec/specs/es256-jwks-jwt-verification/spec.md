@@ -15,11 +15,16 @@ Each issuing service SHALL expose one canonical JWKS endpoint per server, and an
 - **THEN** both responses SHALL publish the same active and retained public keys for that server
 
 ### Requirement: Resource-service offline verification contract
-Services that verify JWTs offline SHALL use shared JWT verification contracts, SHALL validate `alg`, `kid`, `iss`, `aud`, `exp`, and `nbf` with configurable clock tolerance, and SHALL NOT depend on `@package/auth` verification helpers.
+Services that verify JWTs offline SHALL use shared JWT verification contracts, SHALL
+validate `alg`, `kid`, `iss`, `aud`, `exp`, and `nbf` with configurable clock tolerance,
+and SHALL resolve the JWKS URL from `getJwtService(serviceKey)` rather than from the
+`AUTH_JWKS_URL` environment variable.
 
-#### Scenario: Server verifies auth-issued token through shared verifier
+#### Scenario: Server verifies auth-issued token through cached metadata
 - **WHEN** `package/server` receives an auth-issued bearer token
-- **THEN** it SHALL verify that token through shared JWT contracts using `AUTH_JWKS_URL` rather than importing auth-owned verification code
+- **THEN** it SHALL verify that token through shared JWT contracts using the `jwksUrl`
+  resolved from `getJwtService('auth-upstream')` rather than reading `AUTH_JWKS_URL`
+  from the environment
 
 ### Requirement: Unknown key refresh behavior
 Services that verify JWTs from remote JWKS SHALL cache JWKS for normal verification and SHALL trigger one JWKS refresh when verification encounters an unknown `kid` before returning failure.
@@ -43,8 +48,26 @@ Each issuing service SHALL support key rotation by publishing active and retaine
 - **THEN** the server SHALL authorize the request only after offline verification against `AUTH_JWKS_URL` through shared verifier contracts and required claim validation
 
 ### Requirement: Verification inputs remain explicit and trusted
-Services that verify JWTs SHALL continue to validate trusted issuer and audience values explicitly, and those verifier inputs SHALL be sourced from persisted service metadata records once the migration is complete.
+Services that verify JWTs SHALL continue to validate trusted issuer and audience values
+explicitly. Verifier inputs SHALL be sourced from `getJwtService(serviceKey)` - the
+DB-backed cached repository - rather than from environment variables or module-level
+constants.
 
-#### Scenario: Server verifies auth-issued token with persisted verifier metadata
-- **WHEN** `package/server` handles an auth-issued bearer token after the metadata migration
-- **THEN** it SHALL read the trusted auth issuer, audience, and canonical JWKS location from its local JWT service metadata record and SHALL validate all three during verification
+#### Scenario: Server verifies auth-issued token with DB-backed metadata
+- **WHEN** `package/server` handles an auth-issued bearer token
+- **THEN** it SHALL call `getJwtService('auth-upstream')` to obtain the trusted issuer,
+  audience, and canonical JWKS URL, and SHALL validate all three during verification
+
+#### Scenario: Metadata change takes effect without restart
+- **WHEN** the trusted auth issuer is updated via the admin API
+- **THEN** subsequent verification calls SHALL use the updated issuer from the cache
+  (repopulated from DB) without requiring a process restart
+
+### Requirement: JWKS publication uses DB-backed keys
+The JWKS endpoint SHALL return public keys sourced from the `JwtService` cache entry
+rather than from the rotation engine's in-memory state alone.
+
+#### Scenario: JWKS endpoint returns DB-sourced keys
+- **WHEN** a verifier requests `GET /session/jwks`
+- **THEN** the endpoint SHALL call `getJwtService('server-local')` and return all
+  non-expired `publicJwk` values from the cached entry's `jwks` array

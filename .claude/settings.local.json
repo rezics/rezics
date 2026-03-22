@@ -2,7 +2,10 @@
   "permissions": {
     "allow": [
       "Bash(bunx openspec:*)",
-      "Bash(cd:*)"
+      "Bash(cd:*)",
+      "Bash(openspec status:*)",
+      "Bash(openspec instructions:*)",
+      "Bash(curl -sL https://elysiajs.com/*)"
     ]
   }
 }

@@ -9,7 +9,7 @@ export const AnnouncementBarSection = () => {
 
   if (isLoading) return <Skeleton variant="rectangular" height={40} />;
 
-  if (!data) return;
+  if (!data || !Array.isArray(data)) return;
 
   return (
     <AnnouncementBar
