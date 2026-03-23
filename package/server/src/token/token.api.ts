@@ -1,6 +1,6 @@
 import {t, Elysia} from 'elysia';
 import {coreInstance} from '../core';
-import {serverCorsPolicy} from '../cors';
+import {serverCorsPolicy} from '@/src/middleware';
 import {tokenService} from './token.service';
 import {
   apiTokenDTOSchema,
@@ -10,7 +10,7 @@ import {
   updateApiTokenSchema,
   BasicAdminPermission,
 } from '@package/contract';
-import {sessionContextPlugin} from '@/src/auth/context';
+import {sessionContextPlugin} from '@/src/middleware';
 import {bookRoute} from './token.book.api';
 import {userRoute} from './token.user.api';
 

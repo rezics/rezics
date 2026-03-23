@@ -1,17 +1,17 @@
 import {Elysia, t} from 'elysia';
 import {coreInstance} from '@/src/core';
-import {serverCorsPolicy} from '@/src/cors';
 import {
+  serverCorsPolicy,
   sessionContextPlugin,
   requireAdminSession,
-} from '@/src/auth/context';
+} from '@/src/middleware';
 import {
   jwtServiceDTOSchema,
   jwtServiceListResponseSchema,
   createJwtServiceInputSchema,
   updateJwtServiceInputSchema,
 } from '@package/contract';
-import {jwtServiceAdminService} from './jwt-service.service';
+import {jwtServiceAdminService} from './jwt.admin.service';
 
 export const jwtServiceAdminApi = coreInstance('/admin/jwt-services').use(serverCorsPolicy('credentialed')).use(
   new Elysia()

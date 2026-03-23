@@ -1,6 +1,6 @@
 import {t, Elysia} from 'elysia';
 import {coreInstance} from '../core';
-import {serverCorsPolicy} from '../cors';
+import {serverCorsPolicy} from '@/src/middleware';
 import {feedbackService} from './feedback.service';
 import {
   createFeedbackSchema,
@@ -12,7 +12,7 @@ import {
 import {
   identityContextPlugin,
   sessionContextPlugin,
-} from '@/src/auth/context';
+} from '@/src/middleware';
 
 export const feedbackApi = coreInstance('/feedbacks').use(serverCorsPolicy('credentialed'))
   .use(

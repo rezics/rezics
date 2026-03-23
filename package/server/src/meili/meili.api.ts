@@ -1,6 +1,6 @@
 import {t, Elysia} from 'elysia';
 import {coreInstance} from '../core';
-import {serverCorsPolicy} from '../cors';
+import {serverCorsPolicy} from '@/src/middleware';
 import {
   bookQueryOptionsSchema,
   type BookQueryOptions,
@@ -20,7 +20,7 @@ import {mapUserSearchDocToPublicProfile} from './mapper';
 import {
   identityContextPlugin,
   sessionContextPlugin,
-} from '@/src/auth/context';
+} from '@/src/middleware';
 
 export const meiliApi = coreInstance('/meili').use(serverCorsPolicy('credentialed'))
   .get(

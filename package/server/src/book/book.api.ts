@@ -19,12 +19,12 @@ import {bookService} from './book.service';
 import {mapBookToDTO} from './mapper';
 import {unitService} from '@/src/unit/unit.service';
 import {coreInstance} from '../core';
-import {serverCorsPolicy} from '../cors';
+import {serverCorsPolicy} from '@/src/middleware';
 import {
   buildActorFromContext,
   identityContextPlugin,
   sessionContextPlugin,
-} from '@/src/auth/context';
+} from '@/src/middleware';
 
 export const bookApi = coreInstance('/books').use(serverCorsPolicy('credentialed'))
   .get(

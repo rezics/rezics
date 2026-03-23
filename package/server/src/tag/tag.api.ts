@@ -18,7 +18,7 @@ import type {
   TagListQuery,
 } from '@package/contract';
 import {coreInstance} from '../core';
-import {serverCorsPolicy} from '../cors';
+import {serverCorsPolicy} from '@/src/middleware';
 import {tagService} from './tag.service';
 import {mapTagDetailToDTO, mapTagToDTO} from './mapper';
 import {unitService} from '../unit/unit.service';
@@ -26,7 +26,7 @@ import {
   buildActorFromContext,
   identityContextPlugin,
   sessionContextPlugin,
-} from '@/src/auth/context';
+} from '@/src/middleware';
 
 export const tagApi = coreInstance('/tags').use(serverCorsPolicy('credentialed'))
   .get(

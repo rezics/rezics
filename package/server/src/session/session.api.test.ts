@@ -23,7 +23,7 @@ const getMainSessionPublicJwks = mock(async () => ({
   ],
 }));
 
-mock.module('@/src/auth/context', () => ({
+mock.module('@/src/middleware/context', () => ({
   identityContextPlugin: new Elysia().derive(() => ({
     identity: {
       unitId: 'user-1',

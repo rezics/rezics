@@ -1,6 +1,6 @@
 import {t, Elysia} from 'elysia';
 import {coreInstance} from '../core';
-import {serverCorsPolicy} from '../cors';
+import {serverCorsPolicy} from '@/src/middleware';
 import {commentService} from './comment.service';
 import {mapCommentToDTO} from './mapper';
 import type {CreateCommentInput} from '@package/contract';
@@ -19,7 +19,7 @@ import {
   buildActorFromContext,
   identityContextPlugin,
   sessionContextPlugin,
-} from '@/src/auth/context';
+} from '@/src/middleware';
 
 export const commentApi = coreInstance('/comments').use(serverCorsPolicy('credentialed'))
   .get(

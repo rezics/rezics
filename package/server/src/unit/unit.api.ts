@@ -1,6 +1,6 @@
 import {Elysia} from 'elysia';
 import {coreInstance} from '../core';
-import {serverCorsPolicy} from '../cors';
+import {serverCorsPolicy} from '@/src/middleware';
 import {
   unitListQuerySchema,
   unitParamsSchema,
@@ -23,7 +23,7 @@ import {
   buildActorFromContext,
   identityContextPlugin,
   sessionContextPlugin,
-} from '@/src/auth/context';
+} from '@/src/middleware';
 
 export const unitApi = coreInstance('/units').use(serverCorsPolicy('credentialed'))
   .get(

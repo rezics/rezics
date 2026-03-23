@@ -14,7 +14,7 @@ import {reactionApi} from './reaction';
 import {tokenApi} from './token';
 import {feedbackApi} from './feedback';
 import {sessionApi} from './session';
-import {jwtServiceAdminApi} from './admin/jwt-service';
+import {jwtServiceAdminApi} from './jwt';
 
 import {getProdState} from './utils/getProdState';
 import {env} from './env';

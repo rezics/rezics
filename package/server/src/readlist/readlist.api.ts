@@ -1,6 +1,6 @@
 import {Elysia} from 'elysia';
 import {coreInstance} from '../core';
-import {serverCorsPolicy} from '../cors';
+import {serverCorsPolicy} from '@/src/middleware';
 import {unitService} from '@/src/unit/unit.service';
 import {readlistService} from './readlist.service';
 import {
@@ -21,7 +21,7 @@ import {
   buildActorFromContext,
   identityContextPlugin,
   sessionContextPlugin,
-} from '@/src/auth/context';
+} from '@/src/middleware';
 
 export const readlistApi = coreInstance('/readlists').use(serverCorsPolicy('credentialed'))
   .get(

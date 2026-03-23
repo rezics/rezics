@@ -3,8 +3,8 @@ import {
   type SessionTokenResponse,
 } from '@package/contract';
 import {coreInstance} from '@/src/core';
-import {serverCorsPolicy} from '@/src/cors';
-import {identityContextPlugin} from '@/src/auth/context';
+import {serverCorsPolicy} from '@/src/middleware';
+import {identityContextPlugin} from '@/src/middleware';
 import {userService} from '@/src/user/service/user.service';
 import {
   buildRezicsSessionClaims,

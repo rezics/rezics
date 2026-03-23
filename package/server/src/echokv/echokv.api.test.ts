@@ -9,7 +9,7 @@ process.env.JWT_SECRET ??=
 process.env.REFRESH_TOKEN_SECRET ??=
   'server-refresh-secret-for-tests-abcdefghijklmnopqrstuvwxyz';
 
-mock.module('@/src/auth/context', () => ({
+mock.module('@/src/middleware/context', () => ({
   identityContextPlugin: new Elysia(),
   sessionContextPlugin: new Elysia(),
 }));

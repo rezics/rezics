@@ -1,6 +1,6 @@
 import {t, Elysia} from 'elysia';
 import {coreInstance} from '../core';
-import {serverCorsPolicy} from '../cors';
+import {serverCorsPolicy} from '@/src/middleware';
 import {reactionService} from './reaction.service';
 import {prisma, type ReactionSummary} from '@/prisma/client';
 import {
@@ -11,7 +11,7 @@ import {
   summaryQuerySchema,
   myQuerySchema,
 } from '@package/contract';
-import {identityContextPlugin} from '@/src/auth/context';
+import {identityContextPlugin} from '@/src/middleware';
 
 export const reactionApi = coreInstance('/reactions').use(serverCorsPolicy('credentialed'))
   .get(

@@ -26,7 +26,7 @@ import {mapUserSearchDocToPublicProfile} from '@/src/meili/mapper';
 import {
   identityContextPlugin,
   sessionContextPlugin,
-} from '@/src/auth/context';
+} from '@/src/middleware';
 import {verifyAuthContextToken} from '../util';
 
 const AUTH_CONTEXT_HEADER =

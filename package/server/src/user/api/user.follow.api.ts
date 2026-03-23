@@ -4,7 +4,7 @@ import {userService} from '../service/user.service';
 import {mapUserToPublicProfile} from '../model/mapper';
 
 import {userParamsSchema} from '@package/contract';
-import {sessionContextPlugin} from '@/src/auth/context';
+import {sessionContextPlugin} from '@/src/middleware';
 
 export const followRoute = new Elysia()
       .use(

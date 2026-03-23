@@ -19,8 +19,8 @@ import {
   buildActorFromContext,
   identityContextPlugin,
   sessionContextPlugin,
-} from '@/src/auth/context';
-import {serverCorsPolicy} from '@/src/cors';
+} from '@/src/middleware';
+import {serverCorsPolicy} from '@/src/middleware';
 
 export const chapterApi = coreInstance('/chapters').use(serverCorsPolicy('credentialed'))
   .get(

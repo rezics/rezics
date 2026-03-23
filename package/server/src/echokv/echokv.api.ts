@@ -1,6 +1,6 @@
 import {t, Elysia} from 'elysia';
 import {coreInstance} from '../core';
-import {serverCorsPolicy} from '../cors';
+import {serverCorsPolicy} from '@/src/middleware';
 import type {
   EchoKVKeyListResponse,
   EchoKVResponse,
@@ -8,7 +8,7 @@ import type {
 } from './types';
 import {echoKvService} from './echokv.service';
 import {BasicAdminPermission} from '@package/contract';
-import {sessionContextPlugin} from '@/src/auth/context';
+import {sessionContextPlugin} from '@/src/middleware';
 
 export const echoKvApi = coreInstance('/echokv').use(serverCorsPolicy('credentialed'))
   .get(

@@ -1,5 +1,5 @@
 import {coreInstance} from '@/src/core';
-import {serverCorsPolicy} from '@/src/cors';
+import {serverCorsPolicy} from '@/src/middleware';
 
 import {coreRoute} from './user.core.api';
 import {adminRoute} from './user.admin.api';
