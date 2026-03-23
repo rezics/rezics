@@ -1,6 +1,6 @@
 import {Elysia} from 'elysia';
 import {coreInstance} from '../core';
-import {withCredentialedCors} from '../cors';
+import {serverCorsPolicy} from '../cors';
 import {
   unitListQuerySchema,
   unitParamsSchema,
@@ -25,7 +25,7 @@ import {
   sessionContextPlugin,
 } from '@/src/auth/context';
 
-export const unitApi = withCredentialedCors(coreInstance('/units'))
+export const unitApi = coreInstance('/units').use(serverCorsPolicy('credentialed'))
   .get(
     '/:unitId',
     async ({params}): Promise<UnitResponse> => {

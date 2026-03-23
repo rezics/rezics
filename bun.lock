@@ -247,11 +247,11 @@
         "@better-auth/oauth-provider": "^1.5.3",
         "@better-auth/prisma-adapter": "^1.5.3",
         "@elysiajs/bearer": "^1.4.1",
-        "@elysiajs/cors": "^1.4.1",
         "@elysiajs/jwt": "^1.4.0",
         "@elysiajs/openapi": "^1.4.14",
         "@faker-js/faker": "^10.1.0",
         "@package/contract": "workspace:*",
+        "@package/cors": "workspace:*",
         "@package/jwt": "workspace:*",
         "@package/search": "workspace:*",
         "@prisma/adapter-pg": "^7.5.0",
@@ -285,6 +285,16 @@
         "@sinclair/typebox": "^0.34.41",
         "elysia": "^1.4.12",
         "memoirist": "^0.4.0",
+      },
+    },
+    "package/cors": {
+      "name": "@package/cors",
+      "devDependencies": {
+        "@types/bun": "^1.3.0",
+      },
+      "peerDependencies": {
+        "elysia": "^1.4.22",
+        "typescript": "^5",
       },
     },
     "package/editor": {
@@ -341,11 +351,11 @@
     "package/server": {
       "name": "@package/server",
       "dependencies": {
-        "@elysiajs/cors": "^1.4.1",
         "@elysiajs/jwt": "^1.4.0",
         "@elysiajs/openapi": "^1.4.14",
         "@faker-js/faker": "^10.1.0",
         "@package/contract": "workspace:*",
+        "@package/cors": "workspace:*",
         "@package/jwt": "workspace:*",
         "@package/search": "workspace:*",
         "@prisma/adapter-pg": "^7.5.0",
@@ -926,6 +936,8 @@
     "@package/auth": ["@package/auth@workspace:package/auth"],
 
     "@package/contract": ["@package/contract@workspace:package/contract"],
+
+    "@package/cors": ["@package/cors@workspace:package/cors"],
 
     "@package/editor": ["@package/editor@workspace:package/editor"],
 

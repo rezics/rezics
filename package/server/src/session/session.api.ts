@@ -1,13 +1,9 @@
-import {Elysia} from 'elysia';
 import {
   sessionTokenResponseSchema,
   type SessionTokenResponse,
 } from '@package/contract';
 import {coreInstance} from '@/src/core';
-import {
-  createPolicyCorsPreflightResponse,
-  withPolicyCorsResponse,
-} from '@/src/cors';
+import {serverCorsPolicy} from '@/src/cors';
 import {identityContextPlugin} from '@/src/auth/context';
 import {userService} from '@/src/user/service/user.service';
 import {
@@ -15,28 +11,17 @@ import {
   getMainSessionPublicJwks,
 } from './jwt/jwt.service.ts';
 
-const publicSessionApi = coreInstance('/session')
-  .options('/jwks', ({request}) =>
-    createPolicyCorsPreflightResponse(request, 'public'),
-  )
+export const sessionApi = coreInstance('/session')
+  .use(serverCorsPolicy('credentialed'))
   .get('/jwks', async () => getMainSessionPublicJwks(), {
+    corsPolicy: 'public',
     detail: {
       summary: 'Publish main-server JWKS',
       description:
         'Expose the canonical JWKS document for all main-server issued session tokens.',
       tags: ['Session'],
     },
-    afterHandle: ({request, response}) =>
-      withPolicyCorsResponse(request, response, 'public'),
-  });
-
-const credentialedSessionApi = coreInstance('/session')
-  .options('/*', ({request}) =>
-    createPolicyCorsPreflightResponse(request, 'credentialed'),
-  )
-  .onAfterHandle(({request, response}) =>
-    withPolicyCorsResponse(request, response, 'credentialed'),
-  )
+  })
   .use(identityContextPlugin)
   .post(
     '/token',
@@ -62,7 +47,3 @@ const credentialedSessionApi = coreInstance('/session')
       },
     },
   );
-
-export const sessionApi = new Elysia()
-  .use(credentialedSessionApi)
-  .use(publicSessionApi);

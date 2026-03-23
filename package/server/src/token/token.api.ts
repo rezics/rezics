@@ -1,6 +1,6 @@
 import {t, Elysia} from 'elysia';
 import {coreInstance} from '../core';
-import {withCredentialedCors} from '../cors';
+import {serverCorsPolicy} from '../cors';
 import {tokenService} from './token.service';
 import {
   apiTokenDTOSchema,
@@ -14,7 +14,7 @@ import {sessionContextPlugin} from '@/src/auth/context';
 import {bookRoute} from './token.book.api';
 import {userRoute} from './token.user.api';
 
-export const tokenApi = withCredentialedCors(coreInstance('/token'))
+export const tokenApi = coreInstance('/token').use(serverCorsPolicy('credentialed'))
   .use(bookRoute)
   .use(userRoute)
   .use(

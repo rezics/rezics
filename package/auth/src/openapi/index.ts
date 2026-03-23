@@ -8,7 +8,7 @@ import {oauthRouter} from './oauth';
 import {selfServiceRouter} from './self-service';
 import {handleAuthRequest} from '../auth/routes';
 import {env} from '../env';
-import {withCredentialedCors} from '../cors';
+import {authCorsPolicy} from '../cors';
 
 export const authOpenApiRouter = new Elysia({
   prefix: env.AUTH_OPENAPI_ROUTER_PREFIX,
@@ -21,7 +21,7 @@ export const authOpenApiRouter = new Elysia({
   .use(oauthRouter)
   .use(selfServiceRouter)
   .use(
-    withCredentialedCors(new Elysia()).all('/*', ({request}) =>
+    new Elysia().use(authCorsPolicy('credentialed')).all('/*', ({request}) =>
       handleAuthRequest(request),
       {
         detail: {

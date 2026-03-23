@@ -34,18 +34,18 @@ bun run knip             # Detect unused exports/dependencies (root)
 
 ### Package Map
 
-| Package | Role |
-|---------|------|
-| `@package/server` | Main Elysia API server (PostgreSQL via Prisma) |
-| `@package/auth` | Authentication service (better-auth, separate DB + Prisma schema) |
-| `@package/jwt` | Shared JWT/JWKS utilities (jose) |
-| `@package/contract` | Shared TypeScript API contracts (Elysia + Typebox schemas) |
-| `@package/api` | Frontend API client (TanStack Query hooks + query options) |
-| `@package/app` | Main React SPA (Vite + TanStack Router) |
-| `@package/admin` | Admin dashboard (Vite + React + Material-UI) |
-| `@package/ui` | Shared UI components (Radix/shadcn, dnd-kit) |
-| `@package/app-shell` | Shared shell/layout components |
-| `@package/search` | Meilisearch integration |
+| Package              | Role                                                              |
+| -------------------- | ----------------------------------------------------------------- |
+| `@package/server`    | Main Elysia API server (PostgreSQL via Prisma)                    |
+| `@package/auth`      | Authentication service (better-auth, separate DB + Prisma schema) |
+| `@package/jwt`       | Shared JWT/JWKS utilities (jose)                                  |
+| `@package/contract`  | Shared TypeScript API contracts (Elysia + Typebox schemas)        |
+| `@package/api`       | Frontend API client (TanStack Query hooks + query options)        |
+| `@package/app`       | Main React SPA (Vite + TanStack Router)                           |
+| `@package/admin`     | Admin dashboard (Vite + React + Material-UI)                      |
+| `@package/ui`        | Shared UI components (Radix/shadcn, dnd-kit)                      |
+| `@package/app-shell` | Shared shell/layout components                                    |
+| `@package/search`    | Meilisearch integration                                           |
 
 ### Backend Pattern (Elysia)
 
@@ -104,3 +104,9 @@ Keep implementation scoped to affected packages. Respect monorepo boundaries and
 ## Git
 
 - Main branch: `dev`
+
+## Global Instructions
+
+- Prefer reading local files and fetching docs over answering from memory
+- Use `rg` for all codebase text search (recursive and `.gitignore`-aware by default)
+- Use bash as a last resort; never run destructive commands without explicit confirmation

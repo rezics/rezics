@@ -1,6 +1,6 @@
 import {t, Elysia} from 'elysia';
 import {coreInstance} from '../core';
-import {withCredentialedCors} from '../cors';
+import {serverCorsPolicy} from '../cors';
 import {commentService} from './comment.service';
 import {mapCommentToDTO} from './mapper';
 import type {CreateCommentInput} from '@package/contract';
@@ -21,7 +21,7 @@ import {
   sessionContextPlugin,
 } from '@/src/auth/context';
 
-export const commentApi = withCredentialedCors(coreInstance('/comments'))
+export const commentApi = coreInstance('/comments').use(serverCorsPolicy('credentialed'))
   .get(
     '/comment-tree/:unitId',
     async ({params, query}): Promise<CommentTreeResponse> => {

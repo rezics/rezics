@@ -1,6 +1,6 @@
 import {Elysia} from 'elysia';
 import {coreInstance} from '../core';
-import {withCredentialedCors} from '../cors';
+import {serverCorsPolicy} from '../cors';
 import {UnitType} from '@/prisma/client';
 import {
   createReviewSchema,
@@ -23,7 +23,7 @@ import {
   sessionContextPlugin,
 } from '@/src/auth/context';
 
-export const reviewApi = withCredentialedCors(coreInstance('/reviews'))
+export const reviewApi = coreInstance('/reviews').use(serverCorsPolicy('credentialed'))
   .get(
     '/:id',
     async ({params, query}): Promise<ReviewResponse> => {

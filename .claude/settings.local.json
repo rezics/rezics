@@ -7,7 +7,14 @@
       "Bash(openspec instructions:*)",
       "Bash(openspec new:*)",
       "WebFetch(domain:elysiajs.com)",
-      "Bash(bun test:*)"
+      "Bash(bun test:*)",
+      "Bash(grep:*)",
+      "Bash(ls *)",
+      "Bash(cat *)",
+      "Bash(bun install:*)"
     ]
+  },
+  "sandbox": {
+    "enabled": true
   }
 }

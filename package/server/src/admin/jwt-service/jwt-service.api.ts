@@ -1,6 +1,6 @@
 import {Elysia, t} from 'elysia';
 import {coreInstance} from '@/src/core';
-import {withCredentialedCors} from '@/src/cors';
+import {serverCorsPolicy} from '@/src/cors';
 import {
   sessionContextPlugin,
   requireAdminSession,
@@ -13,9 +13,7 @@ import {
 } from '@package/contract';
 import {jwtServiceAdminService} from './jwt-service.service';
 
-export const jwtServiceAdminApi = withCredentialedCors(
-  coreInstance('/admin/jwt-services'),
-).use(
+export const jwtServiceAdminApi = coreInstance('/admin/jwt-services').use(serverCorsPolicy('credentialed')).use(
   new Elysia()
     .use(sessionContextPlugin)
     .get(

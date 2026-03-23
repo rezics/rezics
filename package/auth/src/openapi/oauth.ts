@@ -22,9 +22,9 @@ import {getConfiguredSocialProviders} from '../auth/providers';
 import {
   coreInstance,
 } from '../core';
-import {withPublicCors} from '../cors';
+import {authCorsPolicy} from '../cors';
 
-const oauthFlowRouter = withPublicCors(coreInstance())
+const oauthFlowRouter = coreInstance().use(authCorsPolicy('public'))
   .get(
     '/providers',
     () => ({
@@ -167,7 +167,7 @@ const oauthFlowRouter = withPublicCors(coreInstance())
     },
   });
 
-const oauthDiscoveryRouter = withPublicCors(coreInstance())
+const oauthDiscoveryRouter = coreInstance().use(authCorsPolicy('public'))
   .get('/.well-known/jwks.json', ({request}) =>
     handleJwksCompatibilityRequest(request),
     {

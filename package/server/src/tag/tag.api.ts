@@ -18,7 +18,7 @@ import type {
   TagListQuery,
 } from '@package/contract';
 import {coreInstance} from '../core';
-import {withCredentialedCors} from '../cors';
+import {serverCorsPolicy} from '../cors';
 import {tagService} from './tag.service';
 import {mapTagDetailToDTO, mapTagToDTO} from './mapper';
 import {unitService} from '../unit/unit.service';
@@ -28,7 +28,7 @@ import {
   sessionContextPlugin,
 } from '@/src/auth/context';
 
-export const tagApi = withCredentialedCors(coreInstance('/tags'))
+export const tagApi = coreInstance('/tags').use(serverCorsPolicy('credentialed'))
   .get(
     '/',
     async ({query}): Promise<{tags: TagDTO[]; total: number}> => {

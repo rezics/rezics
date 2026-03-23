@@ -40,7 +40,7 @@ mock.module('@/src/user/service/user.service', () => ({
   },
 }));
 
-mock.module('./jwt', () => ({
+mock.module('./jwt/jwt.service', () => ({
   mainSessionJwtPlugin: new Elysia().decorate('jwt', {
     sign: async () => 'signed-token',
   }),
@@ -49,6 +49,8 @@ mock.module('./jwt', () => ({
     unitId: 'user-1',
     permission: {role: 'USER'},
   }),
+  REZICS_SESSION_HEADER: 'x-rezics_session_token',
+  getMainSessionJwtContext: () => ({}),
 }));
 
 describe('session jwks route', () => {

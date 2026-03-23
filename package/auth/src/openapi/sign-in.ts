@@ -7,9 +7,9 @@ import {
 } from '@package/contract';
 import {handleAuthRequest} from '../auth/routes';
 import {jsonRequestBody, jsonResponse} from './docs';
-import {withCredentialedCors} from '../cors';
+import {authCorsPolicy} from '../cors';
 
-export const signInRouter = withCredentialedCors(new Elysia())
+export const signInRouter = new Elysia().use(authCorsPolicy('credentialed'))
   .post('/sign-in/email', ({request}) => handleAuthRequest(request), {
     detail: {
       summary: 'Sign in with email',
