@@ -16,11 +16,20 @@ const tokenInstance = new Elysia({prefix: '/token'}).use(
   serverCorsPolicy('credentialed'),
 );
 
-export const tokenApi = bookRoute(userRoute(tokenInstance))
+// Token-auth book & user routes (independent auth via API token header)
+const tokenExternalRoutes = bookRoute(userRoute(tokenInstance));
+
+// Owner-authenticated token management routes
+const tokenManagementRoutes = new Elysia({prefix: '/token'})
+  .use(serverCorsPolicy('credentialed'))
   .use(requireOwner)
   .get(
     '/tokens',
     async ({identity, currentUser, set}) => {
+      if (!identity || !currentUser) {
+        set.status = 401;
+        throw new Error('Unauthorized');
+      }
       if (!BasicAdminPermission(currentUser)) {
         set.status = 403;
         throw new Error('Forbidden: Cannot list tokens');
@@ -40,6 +49,10 @@ export const tokenApi = bookRoute(userRoute(tokenInstance))
   .post(
     '/tokens',
     async ({identity, currentUser, set, body, request}) => {
+      if (!identity || !currentUser) {
+        set.status = 401;
+        throw new Error('Unauthorized');
+      }
       if (!BasicAdminPermission(currentUser)) {
         set.status = 403;
         throw new Error('Forbidden: Cannot create token');
@@ -73,6 +86,10 @@ export const tokenApi = bookRoute(userRoute(tokenInstance))
   .put(
     '/tokens/:id',
     async ({identity, currentUser, set, params, body}) => {
+      if (!identity || !currentUser) {
+        set.status = 401;
+        throw new Error('Unauthorized');
+      }
       if (!BasicAdminPermission(currentUser)) {
         set.status = 403;
         throw new Error('Forbidden: Cannot update token');
@@ -94,6 +111,10 @@ export const tokenApi = bookRoute(userRoute(tokenInstance))
   .delete(
     '/tokens/:id',
     async ({identity, currentUser, set, params}) => {
+      if (!identity || !currentUser) {
+        set.status = 401;
+        throw new Error('Unauthorized');
+      }
       if (!BasicAdminPermission(currentUser)) {
         set.status = 403;
         throw new Error('Forbidden: Cannot revoke token');
@@ -110,3 +131,7 @@ export const tokenApi = bookRoute(userRoute(tokenInstance))
       },
     },
   );
+
+export const tokenApi = new Elysia()
+  .use(tokenExternalRoutes)
+  .use(tokenManagementRoutes);

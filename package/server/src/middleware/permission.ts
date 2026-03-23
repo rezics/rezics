@@ -9,6 +9,23 @@ import {BasicAdminPermission} from '@package/contract';
 import {userService} from '../user/service/user.service';
 import {mapUserToDTO} from '../user/model/mapper';
 
+/**
+ * Type-declaration plugin that tells Elysia about globally-resolved token
+ * context properties. The actual resolution is done by createTokenResolver
+ * plugins at the app level; this plugin only provides the type information
+ * so downstream guards can reference them with full inference.
+ *
+ * TODO Here need to have some problem, which needs to be fixed
+ */
+const tokenContext = new Elysia({name: 'ctx/tokenContext'}).derive(
+  {as: 'scoped'},
+  ({store: _, ...ctx}) =>
+    ctx as unknown as {
+      authIdentityToken: AuthIdentityTokenClaims | null;
+      rezicsSessionToken: RezicsSessionTokenClaims | null;
+    },
+);
+
 function hasRole(
   roles: string[] | undefined,
   role: TokenPermissionRole,
@@ -36,15 +53,9 @@ function matchesSnapshotRole(
   }
 }
 
-export const requireLogin = new Elysia({name: 'guard/requireLogin'}).resolve(
-  {as: 'scoped'},
-  async ({
-    authIdentityToken,
-    set,
-  }: {
-    authIdentityToken: AuthIdentityTokenClaims | null;
-    set: {status?: number | string};
-  }) => {
+export const requireLogin = new Elysia({name: 'guard/requireLogin'})
+  .use(tokenContext)
+  .resolve({as: 'scoped'}, async ({authIdentityToken, set}) => {
     if (!authIdentityToken) {
       set.status = 401;
       throw new Error('Unauthorized: Missing identity token');
@@ -62,89 +73,75 @@ export const requireLogin = new Elysia({name: 'guard/requireLogin'}).resolve(
         unitId,
       },
     };
-  },
-);
+  });
 
 export const requireOwner = new Elysia({name: 'guard/requireOwner'})
+  .use(tokenContext)
   .use(requireLogin)
-  .resolve(
-    {as: 'scoped'},
-    async ({
+  .resolve({as: 'scoped'}, async ({identity, rezicsSessionToken, set}) => {
+    if (!identity) {
+      set.status = 401;
+      throw new Error('Unauthorized: Missing identity');
+    }
+
+    if (!rezicsSessionToken) {
+      set.status = 401;
+      throw new Error('Unauthorized: Missing session token');
+    }
+
+    if (rezicsSessionToken.unitId !== identity.unitId) {
+      set.status = 401;
+      throw new Error('Unauthorized: Identity and session token mismatch');
+    }
+
+    const persistedUser = await userService.getByUnitId(identity.unitId);
+    const currentUser = mapUserToDTO(persistedUser);
+    const persistedRoles = currentUser.permission?.role;
+
+    if (
+      !matchesSnapshotRole(rezicsSessionToken.permission.role, persistedRoles)
+    ) {
+      set.status = 403;
+      throw new Error(
+        'Forbidden: Persisted permissions no longer match session',
+      );
+    }
+
+    if (persistedRoles?.includes('BLOCKED')) {
+      set.status = 403;
+      throw new Error('Forbidden: User is blocked');
+    }
+
+    return {
       identity,
-      rezicsSessionToken,
-      set,
-    }: {
-      identity: AuthIdentityTokenClaims & {unitId: string};
-      rezicsSessionToken: RezicsSessionTokenClaims | null;
-      set: {status?: number | string};
-    }) => {
-      if (!rezicsSessionToken) {
-        set.status = 401;
-        throw new Error('Unauthorized: Missing session token');
-      }
-
-      if (rezicsSessionToken.unitId !== identity.unitId) {
-        set.status = 401;
-        throw new Error('Unauthorized: Identity and session token mismatch');
-      }
-
-      const persistedUser = await userService.getByUnitId(identity.unitId);
-      const currentUser = mapUserToDTO(persistedUser);
-      const persistedRoles = currentUser.permission?.role;
-
-      if (
-        !matchesSnapshotRole(rezicsSessionToken.permission.role, persistedRoles)
-      ) {
-        set.status = 403;
-        throw new Error(
-          'Forbidden: Persisted permissions no longer match session',
-        );
-      }
-
-      if (persistedRoles?.includes('BLOCKED')) {
-        set.status = 403;
-        throw new Error('Forbidden: User is blocked');
-      }
-
-      return {
-        identity,
-        session: rezicsSessionToken,
-        currentUser,
-      };
-    },
-  );
+      session: rezicsSessionToken,
+      currentUser,
+    };
+  });
 
 export const requireAdmin = new Elysia({name: 'guard/requireAdmin'})
   .use(requireOwner)
-  .resolve(
-    {as: 'scoped'},
-    async ({
-      identity,
-      session,
-      currentUser,
-      set,
-    }: {
-      identity: AuthIdentityTokenClaims & {unitId: string};
-      session: RezicsSessionTokenClaims;
-      currentUser: UserDTO;
-      set: {status?: number | string};
-    }) => {
-      if (
-        session.permission.role !== 'ROOT' &&
-        session.permission.role !== 'ADMIN'
-      ) {
-        set.status = 403;
-        throw new Error('Forbidden: Admin role required');
-      }
+  .resolve({as: 'scoped'}, async ({identity, session, currentUser, set}) => {
+    if (!session || !currentUser) {
+      set.status = 401;
+      throw new Error('Unauthorized: Missing session or user context');
+    }
 
-      if (!BasicAdminPermission(currentUser)) {
-        set.status = 403;
-        throw new Error('Forbidden: Persisted admin permission required');
-      }
+    if (
+      session.permission.role !== 'ROOT' &&
+      session.permission.role !== 'ADMIN'
+    ) {
+      set.status = 403;
+      throw new Error('Forbidden: Admin role required');
+    }
 
-      return {identity, session, currentUser};
-    },
-  );
+    if (!BasicAdminPermission(currentUser)) {
+      set.status = 403;
+      throw new Error('Forbidden: Persisted admin permission required');
+    }
+
+    return {identity, session, currentUser};
+  });
 
 export function buildActorFromContext(input: {
   identity: {unitId: string};
