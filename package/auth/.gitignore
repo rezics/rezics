@@ -1,3 +1,5 @@
+server
+server.exe
 # dependencies (bun install)
 node_modules
 
