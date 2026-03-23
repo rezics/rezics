@@ -1,10 +1,11 @@
 export {serverCorsPolicy, allowedOrigins} from './cors';
 export {
-  identityContextPlugin,
-  sessionContextPlugin,
+  requireLogin,
+  requireOwner,
+  requireAdmin,
   buildActorFromContext,
   requireAdminSession,
-} from './context';
+} from './permission';
 export {
   getAuthSessionState,
   assertMainServerEligibility,

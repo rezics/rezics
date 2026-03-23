@@ -1,6 +1,10 @@
 import {t, Elysia} from 'elysia';
-import {coreInstance} from '../core';
-import {serverCorsPolicy} from '@/src/middleware';
+import {
+  serverCorsPolicy,
+  requireOwner,
+  buildActorFromContext,
+  requireLogin,
+} from '@/src/middleware';
 import {commentService} from './comment.service';
 import {mapCommentToDTO} from './mapper';
 import type {CreateCommentInput} from '@package/contract';
@@ -15,13 +19,9 @@ import {
   hasPermissionToUpdateComment,
   hasPermissionToDeleteComment,
 } from '@package/contract';
-import {
-  buildActorFromContext,
-  identityContextPlugin,
-  sessionContextPlugin,
-} from '@/src/middleware';
 
-export const commentApi = coreInstance('/comments').use(serverCorsPolicy('credentialed'))
+export const commentApi = new Elysia({prefix: '/comments'})
+  .use(serverCorsPolicy('credentialed'))
   .get(
     '/comment-tree/:unitId',
     async ({params, query}): Promise<CommentTreeResponse> => {
@@ -84,83 +84,79 @@ export const commentApi = coreInstance('/comments').use(serverCorsPolicy('creden
       },
     },
   )
-  .use(
-    new Elysia().use(identityContextPlugin).post(
-      '/',
-      async ({body, identity}) => {
-        const req: CreateCommentInput = {
-          rootPostId: body.rootPostId,
-          parentCommentId: body.parentCommentId ?? null,
-          content: body.content,
-        };
-        const comment = await commentService.create({
-          ...req,
-          userId: identity.unitId,
-        });
-        return mapCommentToDTO(comment);
+  .use(requireLogin)
+  .post(
+    '/',
+    async ({body, identity}) => {
+      const req: CreateCommentInput = {
+        rootPostId: body.rootPostId,
+        parentCommentId: body.parentCommentId ?? null,
+        content: body.content,
+      };
+      const comment = await commentService.create({
+        ...req,
+        userId: identity.unitId,
+      });
+      return mapCommentToDTO(comment);
+    },
+    {
+      body: createCommentSchema,
+      detail: {
+        summary: 'Create comment',
+        description: 'Create a new comment under a root unit',
+        tags: ['Comments'],
       },
-      {
-        body: createCommentSchema,
-        detail: {
-          summary: 'Create comment',
-          description: 'Create a new comment under a root unit',
-          tags: ['Comments'],
-        },
-      },
-    ),
+    },
   )
-  .use(
-    new Elysia()
-      .use(sessionContextPlugin)
-      .put(
-        '/:unitId',
-        async ({params, body, identity, currentUser, set}) => {
-          const target = await commentService.getByUnitId(params.unitId);
-          if (
-            !hasPermissionToUpdateComment(
-              buildActorFromContext({identity, currentUser}),
-              target.unit as any,
-            )
-          ) {
-            set.status = 403;
-            throw new Error('Forbidden: you do not own this comment');
-          }
-          const updated = await commentService.update(params.unitId, body);
-          return mapCommentToDTO(updated);
-        },
-        {
-          params: t.Object({unitId: t.String()}),
-          body: updateCommentSchema,
-          detail: {
-            summary: 'Update comment',
-            description: 'Update an existing comment content',
-            tags: ['Comments'],
-          },
-        },
-      )
-      .delete(
-        '/:unitId',
-        async ({params, identity, currentUser, set}) => {
-          const target = await commentService.getByUnitId(params.unitId);
-          if (
-            !hasPermissionToDeleteComment(
-              buildActorFromContext({identity, currentUser}),
-              target.unit as any,
-            )
-          ) {
-            set.status = 403;
-            throw new Error('Forbidden: you do not own this comment');
-          }
-          await commentService.delete(params.unitId);
-          return {message: 'Comment deleted successfully'};
-        },
-        {
-          params: t.Object({unitId: t.String()}),
-          detail: {
-            summary: 'Delete comment',
-            description: 'Delete a comment by unit ID',
-            tags: ['Comments'],
-          },
-        },
-      ),
+  .use(requireOwner)
+  .put(
+    '/:unitId',
+    async ({params, body, identity, currentUser, set}) => {
+      const target = await commentService.getByUnitId(params.unitId);
+      if (
+        !hasPermissionToUpdateComment(
+          buildActorFromContext({identity, currentUser}),
+          target.unit as any,
+        )
+      ) {
+        set.status = 403;
+        throw new Error('Forbidden: you do not own this comment');
+      }
+      const updated = await commentService.update(params.unitId, body);
+      return mapCommentToDTO(updated);
+    },
+    {
+      params: t.Object({unitId: t.String()}),
+      body: updateCommentSchema,
+      detail: {
+        summary: 'Update comment',
+        description: 'Update an existing comment content',
+        tags: ['Comments'],
+      },
+    },
+  )
+  .delete(
+    '/:unitId',
+    async ({params, identity, currentUser, set}) => {
+      const target = await commentService.getByUnitId(params.unitId);
+      if (
+        !hasPermissionToDeleteComment(
+          buildActorFromContext({identity, currentUser}),
+          target.unit as any,
+        )
+      ) {
+        set.status = 403;
+        throw new Error('Forbidden: you do not own this comment');
+      }
+      await commentService.delete(params.unitId);
+      return {message: 'Comment deleted successfully'};
+    },
+    {
+      params: t.Object({unitId: t.String()}),
+      detail: {
+        summary: 'Delete comment',
+        description: 'Delete a comment by unit ID',
+        tags: ['Comments'],
+      },
+    },
   );

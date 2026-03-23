@@ -17,18 +17,18 @@ import type {
   TagDetailDTO,
   TagListQuery,
 } from '@package/contract';
-import {coreInstance} from '../core';
-import {serverCorsPolicy} from '@/src/middleware';
+import {
+  serverCorsPolicy,
+  requireLogin,
+  requireOwner,
+  buildActorFromContext,
+} from '@/src/middleware';
 import {tagService} from './tag.service';
 import {mapTagDetailToDTO, mapTagToDTO} from './mapper';
 import {unitService} from '../unit/unit.service';
-import {
-  buildActorFromContext,
-  identityContextPlugin,
-  sessionContextPlugin,
-} from '@/src/middleware';
 
-export const tagApi = coreInstance('/tags').use(serverCorsPolicy('credentialed'))
+export const tagApi = new Elysia({prefix: '/tags'})
+  .use(serverCorsPolicy('credentialed'))
   .get(
     '/',
     async ({query}): Promise<{tags: TagDTO[]; total: number}> => {
@@ -80,143 +80,139 @@ export const tagApi = coreInstance('/tags').use(serverCorsPolicy('credentialed')
       detail: {summary: 'Get tag by name in domain', tags: ['Tags']},
     },
   )
-  .use(
-    new Elysia().use(identityContextPlugin).post(
-      '/',
-      async ({body, identity}): Promise<TagDetailDTO> => {
-        const created = await tagService.create(
-          identity.unitId,
-          body as CreateTagInput,
-        );
-        return mapTagDetailToDTO(created);
-      },
-      {
-        body: createTagSchema,
-        detail: {summary: 'Create tag', tags: ['Tags']},
-      },
-    ),
+  .use(requireLogin)
+  .post(
+    '/',
+    async ({body, identity}): Promise<TagDetailDTO> => {
+      const created = await tagService.create(
+        identity.unitId,
+        body as CreateTagInput,
+      );
+      return mapTagDetailToDTO(created);
+    },
+    {
+      body: createTagSchema,
+      detail: {summary: 'Create tag', tags: ['Tags']},
+    },
   )
-  .use(
-    new Elysia()
-      .use(sessionContextPlugin)
-      .put(
-        '/:unitId',
-        async ({
-          params,
-          body,
-          identity,
-          currentUser,
-          set,
-        }): Promise<TagDetailDTO> => {
-          const existing = await tagService.getByUnitId(params.unitId);
+  .use(requireOwner)
+  .put(
+    '/:unitId',
+    async ({
+      params,
+      body,
+      identity,
+      currentUser,
+      set,
+    }): Promise<TagDetailDTO> => {
+      const existing = await tagService.getByUnitId(params.unitId);
 
-          if (
-            !hasPermissionToUpdateTag(
-              buildActorFromContext({identity, currentUser}),
-              existing.unit as any,
-            )
-          ) {
-            set.status = 403;
-            throw new Error('Forbidden: you do not own this tag');
-          }
-          const updated = await tagService.update(
-            params.unitId,
-            body as UpdateTagInput,
-          );
-          return mapTagDetailToDTO(updated);
-        },
-        {
-          params: tagParamsSchema,
-          body: updateTagSchema,
-          detail: {summary: 'Update tag', tags: ['Tags']},
-        },
-      )
-      .delete(
-        '/:unitId',
-        async ({
-          params,
-          identity,
-          currentUser,
-          set,
-        }): Promise<{message: string}> => {
-          const existing = await tagService.getByUnitId(params.unitId);
-          if (
-            !hasPermissionToDeleteTag(
-              buildActorFromContext({identity, currentUser}),
-              existing.unit as any,
-            )
-          ) {
-            set.status = 403;
-            throw new Error('Forbidden: you do not own this tag');
-          }
-          await tagService.delete(params.unitId);
-          return {message: 'Tag deleted successfully'};
-        },
-        {
-          params: tagParamsSchema,
-          detail: {summary: 'Delete tag', tags: ['Tags']},
-        },
-      )
-      .post(
-        '/:unitId/attach',
-        async ({
-          params,
-          body,
-          identity,
-          currentUser,
-          set,
-        }): Promise<{message: string}> => {
-          const existing = await tagService.getByUnitId(params.unitId);
-          const target = await unitService.getByUnitId(body.targetUnitId);
-          if (
-            !existing ||
-            !target ||
-            !hasPermissionToUpdateUnit(
-              buildActorFromContext({identity, currentUser}),
-              target as any,
-            )
-          ) {
-            set.status = 403;
-            throw new Error('Forbidden: you do not own this tag');
-          }
-          await tagService.attachToUnit(params.unitId, body.targetUnitId);
-          return {message: 'Tag attached successfully'};
-        },
-        {
-          params: tagParamsSchema,
-          body: attachTagSchema,
-          detail: {summary: 'Attach tag to unit', tags: ['Tags']},
-        },
-      )
-      .post(
-        '/:unitId/detach',
-        async ({
-          params,
-          body,
-          identity,
-          currentUser,
-          set,
-        }): Promise<{message: string}> => {
-          const existing = await tagService.getByUnitId(params.unitId);
-          if (
-            !hasPermissionToDeleteUnit(
-              buildActorFromContext({identity, currentUser}),
-              existing.unit as any,
-            )
-          ) {
-            set.status = 403;
-            throw new Error('Forbidden: you do not own this tag');
-          }
-          await tagService.detachFromUnit(
-            params.unitId,
-            (body as any).targetUnitId,
-          );
-          return {message: 'Tag detached successfully'};
-        },
-        {
-          params: tagParamsSchema,
-          body: attachTagSchema,
-          detail: {summary: 'Detach tag from unit', tags: ['Tags']},
-        },
-      ),
+      if (
+        !hasPermissionToUpdateTag(
+          buildActorFromContext({identity, currentUser}),
+          existing.unit as any,
+        )
+      ) {
+        set.status = 403;
+        throw new Error('Forbidden: you do not own this tag');
+      }
+      const updated = await tagService.update(
+        params.unitId,
+        body as UpdateTagInput,
+      );
+      return mapTagDetailToDTO(updated);
+    },
+    {
+      params: tagParamsSchema,
+      body: updateTagSchema,
+      detail: {summary: 'Update tag', tags: ['Tags']},
+    },
+  )
+  .delete(
+    '/:unitId',
+    async ({
+      params,
+      identity,
+      currentUser,
+      set,
+    }): Promise<{message: string}> => {
+      const existing = await tagService.getByUnitId(params.unitId);
+      if (
+        !hasPermissionToDeleteTag(
+          buildActorFromContext({identity, currentUser}),
+          existing.unit as any,
+        )
+      ) {
+        set.status = 403;
+        throw new Error('Forbidden: you do not own this tag');
+      }
+      await tagService.delete(params.unitId);
+      return {message: 'Tag deleted successfully'};
+    },
+    {
+      params: tagParamsSchema,
+      detail: {summary: 'Delete tag', tags: ['Tags']},
+    },
+  )
+  .post(
+    '/:unitId/attach',
+    async ({
+      params,
+      body,
+      identity,
+      currentUser,
+      set,
+    }): Promise<{message: string}> => {
+      const existing = await tagService.getByUnitId(params.unitId);
+      const target = await unitService.getByUnitId(body.targetUnitId);
+      if (
+        !existing ||
+        !target ||
+        !hasPermissionToUpdateUnit(
+          buildActorFromContext({identity, currentUser}),
+          target as any,
+        )
+      ) {
+        set.status = 403;
+        throw new Error('Forbidden: you do not own this tag');
+      }
+      await tagService.attachToUnit(params.unitId, body.targetUnitId);
+      return {message: 'Tag attached successfully'};
+    },
+    {
+      params: tagParamsSchema,
+      body: attachTagSchema,
+      detail: {summary: 'Attach tag to unit', tags: ['Tags']},
+    },
+  )
+  .post(
+    '/:unitId/detach',
+    async ({
+      params,
+      body,
+      identity,
+      currentUser,
+      set,
+    }): Promise<{message: string}> => {
+      const existing = await tagService.getByUnitId(params.unitId);
+      if (
+        !hasPermissionToDeleteUnit(
+          buildActorFromContext({identity, currentUser}),
+          existing.unit as any,
+        )
+      ) {
+        set.status = 403;
+        throw new Error('Forbidden: you do not own this tag');
+      }
+      await tagService.detachFromUnit(
+        params.unitId,
+        (body as any).targetUnitId,
+      );
+      return {message: 'Tag detached successfully'};
+    },
+    {
+      params: tagParamsSchema,
+      body: attachTagSchema,
+      detail: {summary: 'Detach tag from unit', tags: ['Tags']},
+    },
   );

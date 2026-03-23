@@ -1,18 +1,19 @@
+import {Elysia} from 'elysia';
 import {
   sessionTokenResponseSchema,
   type SessionTokenResponse,
 } from '@package/contract';
-import {coreInstance} from '@/src/core';
-import {serverCorsPolicy} from '@/src/middleware';
-import {identityContextPlugin} from '@/src/middleware';
+import {serverCorsPolicy, requireLogin} from '@/src/middleware';
 import {userService} from '@/src/user/service/user.service';
 import {
   buildRezicsSessionClaims,
   getMainSessionPublicJwks,
+  mainSessionJwtPlugin,
 } from './jwt/jwt.service.ts';
 
-export const sessionApi = coreInstance('/session')
+export const sessionApi = new Elysia({prefix: '/session'})
   .use(serverCorsPolicy('credentialed'))
+  .use(mainSessionJwtPlugin)
   .get('/jwks', async () => getMainSessionPublicJwks(), {
     corsPolicy: 'public',
     detail: {
@@ -22,7 +23,7 @@ export const sessionApi = coreInstance('/session')
       tags: ['Session'],
     },
   })
-  .use(identityContextPlugin)
+  .use(requireLogin)
   .post(
     '/token',
     async ({identity, jwt}): Promise<SessionTokenResponse> => {

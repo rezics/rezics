@@ -1,6 +1,5 @@
 import {t, Elysia} from 'elysia';
-import {coreInstance} from '../core';
-import {serverCorsPolicy} from '@/src/middleware';
+import {serverCorsPolicy, requireOwner} from '@/src/middleware';
 import type {
   EchoKVKeyListResponse,
   EchoKVResponse,
@@ -8,9 +7,9 @@ import type {
 } from './types';
 import {echoKvService} from './echokv.service';
 import {BasicAdminPermission} from '@package/contract';
-import {sessionContextPlugin} from '@/src/middleware';
 
-export const echoKvApi = coreInstance('/echokv').use(serverCorsPolicy('credentialed'))
+export const echoKvApi = new Elysia({prefix: '/echokv'})
+  .use(serverCorsPolicy('credentialed'))
   .get(
     '/',
     async ({query}): Promise<EchoKVKeyListResponse> => {
@@ -45,33 +44,32 @@ export const echoKvApi = coreInstance('/echokv').use(serverCorsPolicy('credentia
       },
     },
   )
-  .use(
-    new Elysia().use(sessionContextPlugin).put(
-      '/:key',
-      async ({params, body, currentUser, set}): Promise<EchoKVResponse> => {
-        if (!BasicAdminPermission(currentUser)) {
-          set.status = 403;
-          throw new Error('Forbidden: You are not authorized to update EchoKV');
-        }
-        const value = await echoKvService.set(
-          params.key,
-          body.value as EchoKVUpsertRequest['value'],
-        );
-        return {value};
+  .use(requireOwner)
+  .put(
+    '/:key',
+    async ({params, body, currentUser, set}): Promise<EchoKVResponse> => {
+      if (!BasicAdminPermission(currentUser)) {
+        set.status = 403;
+        throw new Error('Forbidden: You are not authorized to update EchoKV');
+      }
+      const value = await echoKvService.set(
+        params.key,
+        body.value as EchoKVUpsertRequest['value'],
+      );
+      return {value};
+    },
+    {
+      params: t.Object({
+        key: t.String(),
+      }),
+      body: t.Object({
+        value: t.Any(),
+      }),
+      detail: {
+        summary: 'Upsert value by key',
+        description:
+          'Create or update a value by key in the EchoKV store. Existing keys are updated, new keys are created.',
+        tags: ['EchoKV'],
       },
-      {
-        params: t.Object({
-          key: t.String(),
-        }),
-        body: t.Object({
-          value: t.Any(),
-        }),
-        detail: {
-          summary: 'Upsert value by key',
-          description:
-            'Create or update a value by key in the EchoKV store. Existing keys are updated, new keys are created.',
-          tags: ['EchoKV'],
-        },
-      },
-    ),
+    },
   );

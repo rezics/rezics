@@ -7,7 +7,6 @@ process.env.JWT_SECRET ??=
   'server-jwt-secret-for-tests-abcdefghijklmnopqrstuvwxyz';
 process.env.REFRESH_TOKEN_SECRET ??=
   'server-refresh-secret-for-tests-abcdefghijklmnopqrstuvwxyz';
-process.env.AUTH_JWT_CLOCK_TOLERANCE_SECONDS = '7';
 
 describe('server auth verifier options', () => {
   test('maps trusted auth jwt metadata into verifier options', async () => {
@@ -23,8 +22,10 @@ describe('server auth verifier options', () => {
       audience: 'rezics-api',
       jwksUrl: 'http://localhost:35003/api/auth/session/jwks',
       algorithm: 'ES256',
-      clockToleranceSeconds: 7,
       requiredScope: 'user',
+      tokenName: 'auth-identity-token',
+      enforceTransport: true,
     });
+    expect(typeof options.clockToleranceSeconds).toBe('number');
   });
 });

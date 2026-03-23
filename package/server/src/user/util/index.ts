@@ -1,13 +1,10 @@
 import {
   NormalizedTokenName,
   type AuthContextTokenClaims,
-  type AuthIdentityTokenClaims,
   type NormalizedTokenName as NormalizedTokenNameType,
 } from '@package/contract';
 import {
   JwtAlgorithm,
-  verifyBearerToken,
-  verifySessionToken,
   verifyTokenFromHeader,
   type JwtVerifyInput as VerifyOptions,
   type VerifiedJwt as VerifiedToken,
@@ -50,12 +47,6 @@ async function buildAuthVerifyOptions(
   return buildTrustedAuthVerifyOptions(trustedAuth, overrides, tokenName);
 }
 
-export async function getServerAuthIdentityVerifyOptions(
-  overrides?: Partial<VerifyOptions>,
-): Promise<VerifyOptions> {
-  return buildAuthVerifyOptions(overrides, NormalizedTokenName.AUTH_IDENTITY);
-}
-
 export async function getServerAuthContextVerifyOptions(
   overrides?: Partial<VerifyOptions>,
 ): Promise<VerifyOptions> {
@@ -65,18 +56,6 @@ export async function getServerAuthContextVerifyOptions(
       requiredScope: overrides?.requiredScope ?? undefined,
     },
     NormalizedTokenName.AUTH_CONTEXT,
-  );
-}
-
-export async function verifyAuthIdentityToken<
-  TPayload extends JWTPayload = AuthIdentityTokenClaims & JWTPayload,
->(
-  authorization: string | undefined,
-  overrides?: Partial<VerifyOptions>,
-): Promise<VerifiedToken<TPayload>> {
-  return verifyBearerToken<TPayload>(
-    authorization,
-    await getServerAuthIdentityVerifyOptions(overrides),
   );
 }
 
@@ -91,75 +70,3 @@ export async function verifyAuthContextToken<
     await getServerAuthContextVerifyOptions(overrides),
   );
 }
-
-function isVerifyOptions(value: unknown): value is Partial<VerifyOptions> {
-  if (!value || typeof value !== 'object') {
-    return false;
-  }
-
-  const record = value as Record<string, unknown>;
-  return (
-    'issuer' in record ||
-    'audience' in record ||
-    'jwksUrl' in record ||
-    'verificationKey' in record ||
-    'verificationKeyPem' in record ||
-    'tokenName' in record
-  );
-}
-
-function isSetLike(value: unknown): value is {status?: number} {
-  return Boolean(
-    value &&
-    typeof value === 'object' &&
-    'status' in (value as Record<string, unknown>),
-  );
-}
-
-export async function verifyAuth<
-  TPayload extends JWTPayload = AuthIdentityTokenClaims & JWTPayload,
->(
-  authorization: string | undefined,
-  jwtOrSetOrOptions?: unknown,
-  setOrOptions?: unknown,
-  maybeOptions?: Partial<VerifyOptions>,
-): Promise<TPayload> {
-  let set: {status?: number} | undefined;
-  let explicitOptions: Partial<VerifyOptions> | undefined;
-
-  if (isVerifyOptions(jwtOrSetOrOptions)) {
-    explicitOptions = jwtOrSetOrOptions;
-  } else if (isSetLike(jwtOrSetOrOptions)) {
-    set = jwtOrSetOrOptions;
-  }
-
-  if (isSetLike(setOrOptions)) {
-    set = setOrOptions;
-  } else if (isVerifyOptions(setOrOptions)) {
-    explicitOptions = setOrOptions;
-  }
-
-  if (maybeOptions) {
-    explicitOptions = maybeOptions;
-  }
-
-  try {
-    const verified = await verifyAuthIdentityToken<TPayload>(
-      authorization,
-      explicitOptions,
-    );
-    return verified.payload;
-  } catch (error) {
-    if (set) {
-      set.status = 401;
-    }
-    throw error;
-  }
-}
-
-export {
-  verifyBearerToken,
-  verifySessionToken,
-  verifyTokenFromHeader as verifyToken,
-};
-export type {VerifiedToken, VerifyOptions};

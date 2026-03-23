@@ -116,6 +116,16 @@ export const normalizedTokenHeaderMap = {
   [NormalizedTokenName.SEARCH_SESSION]: TokenTransportHeader.SEARCH_SESSION,
 } satisfies Record<NormalizedTokenName, TokenTransportHeader>;
 
+export const TokenContextKey = {
+  AUTH_IDENTITY: 'authIdentityToken',
+  AUTH_CONTEXT: 'authContextToken',
+  REZICS_SESSION: 'rezicsSessionToken',
+  NOTIFICATION_SESSION: 'notificationSessionToken',
+  SEARCH_SESSION: 'searchSessionToken',
+} as const;
+export type TokenContextKey =
+  (typeof TokenContextKey)[keyof typeof TokenContextKey];
+
 export const normalizedTokenTransportMap = {
   [NormalizedTokenName.AUTH_IDENTITY]: {
     tokenName: NormalizedTokenName.AUTH_IDENTITY,

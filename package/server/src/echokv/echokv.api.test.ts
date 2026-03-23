@@ -9,9 +9,12 @@ process.env.JWT_SECRET ??=
 process.env.REFRESH_TOKEN_SECRET ??=
   'server-refresh-secret-for-tests-abcdefghijklmnopqrstuvwxyz';
 
-mock.module('@/src/middleware/context', () => ({
-  identityContextPlugin: new Elysia(),
-  sessionContextPlugin: new Elysia(),
+mock.module('@/src/auth/auth.permission', () => ({
+  requireLogin: new Elysia(),
+  requireOwner: new Elysia(),
+  requireAdmin: new Elysia(),
+  buildActorFromContext: () => ({}),
+  requireAdminSession: () => {},
 }));
 
 mock.module('./echokv.service', () => ({

@@ -1,5 +1,5 @@
 import {t} from 'elysia';
-import {coreInstance} from '../core';
+import type {Elysia} from 'elysia';
 import {tokenService} from './token.service';
 import {
   userParamsSchema,
@@ -36,7 +36,7 @@ const createUserProfileSchema = t.Object({
   ),
 });
 
-export const userRoute = (api: ReturnType<typeof coreInstance>) => {
+export const userRoute = <T extends Elysia<any, any, any, any, any, any, any, any>>(api: T) => {
   return (
     api
       /**

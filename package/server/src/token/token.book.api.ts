@@ -1,5 +1,5 @@
 import {t} from 'elysia';
-import {coreInstance} from '../core';
+import type {Elysia} from 'elysia';
 import {tokenService} from './token.service';
 import {
   bookParamsSchema,
@@ -15,7 +15,7 @@ import {
   hasPermissionToUpdateBook,
 } from './permission';
 
-export const bookRoute = (api: ReturnType<typeof coreInstance>) => {
+export const bookRoute = <T extends Elysia<any, any, any, any, any, any, any, any>>(api: T) => {
   return (
     api
       /**
