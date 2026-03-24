@@ -1,11 +1,9 @@
-import {t} from 'elysia';
-import type {Elysia} from 'elysia';
+import {Elysia, t} from 'elysia';
 import {tokenService} from './token.service';
 import {
   bookParamsSchema,
   createBookSchema,
   updateBookSchema,
-  type BookResponse,
 } from '@package/contract';
 import {bookService} from '../book/book.service';
 import {unitService} from '../unit/unit.service';
@@ -15,197 +13,192 @@ import {
   hasPermissionToUpdateBook,
 } from './permission';
 
-export const bookRoute = <T extends Elysia<any, any, any, any, any, any, any, any>>(api: T) => {
-  return (
-    api
-      /**
-       * Token-authenticated: Get book by unitId
-       * GET /token/books/:unitId
-       */
-      .get(
-        '/books/:unitId',
-        async ({headers, set, params, request}): Promise<BookResponse> => {
-          const ip =
-            request.headers.get('x-forwarded-for') ??
-            request.headers.get('x-real-ip') ??
-            null;
-          const userAgent = request.headers.get('user-agent') ?? null;
+const tokenAuthHeaders = t.Object(
+  {
+    authorization: t.String(),
+  },
+  {
+    additionalProperties: true,
+  },
+);
 
-          const {scopes} = await tokenService.authenticateFromHeader(
-            headers.authorization,
-            {status: set.status as number | undefined},
-            {ip, userAgent},
-          );
+export const bookRoute = new Elysia()
+  /**
+   * Token-authenticated: Get book by unitId
+   * GET /token/books/:unitId
+   */
+  .get(
+    '/books/:unitId',
+    async ({headers, set, params, request}) => {
+      const ip =
+        request.headers.get('x-forwarded-for') ??
+        request.headers.get('x-real-ip') ??
+        null;
+      const userAgent = request.headers.get('user-agent') ?? null;
 
-          if (!hasPermissionToReadBook(scopes)) {
-            set.status = 403;
-            throw new Error('Forbidden: token does not have book:read scope');
-          }
+      const {scopes} = await tokenService.authenticateFromHeader(
+        headers.authorization,
+        {status: set.status as number | undefined},
+        {ip, userAgent},
+      );
 
-          const book = await bookService.getByUnitId(params.unitId);
+      if (!hasPermissionToReadBook(scopes)) {
+        set.status = 403;
+        throw new Error('Forbidden: token does not have book:read scope');
+      }
 
-          // Reuse existing DTO mapper through the book service index
-          const {mapBookToDTO} = await import('../book/mapper');
-          return mapBookToDTO(book as any);
-        },
-        {
-          params: bookParamsSchema,
-          headers: t.Object(
-            {
-              authorization: t.String(),
-            },
-            {
-              additionalProperties: true, // 👈 允许任意 header 扩展
-            },
-          ),
-          detail: {
-            summary: 'Get book (token)',
-            description:
-              'Get a single book by unit ID using an API token instead of JWT auth',
-            tags: ['Token', 'Books'],
-          },
-        },
-      )
+      const book = await bookService.getByUnitId(params.unitId);
 
-      /**
-       * Token-authenticated: Create a book
-       * POST /token/books
-       */
-      .post(
-        '/books',
-        async ({headers, set, body, request}): Promise<BookResponse> => {
-          const ip =
-            request.headers.get('x-forwarded-for') ??
-            request.headers.get('x-real-ip') ??
-            null;
-          const userAgent = request.headers.get('user-agent') ?? null;
+      // Reuse existing DTO mapper through the book service index
+      const {mapBookToDTO} = await import('../book/mapper');
+      return mapBookToDTO(book as any);
+    },
+    {
+      params: bookParamsSchema,
+      headers: tokenAuthHeaders,
+      detail: {
+        summary: 'Get book (token)',
+        description:
+          'Get a single book by unit ID using an API token instead of JWT auth',
+        tags: ['Token', 'Books'],
+      },
+    },
+  )
 
-          const {userId, scopes} = await tokenService.authenticateFromHeader(
-            headers.authorization,
-            {status: set.status as number | undefined},
-            {ip, userAgent},
-          );
+  /**
+   * Token-authenticated: Create a book
+   * POST /token/books
+   */
+  .post(
+    '/books',
+    async ({headers, set, body, request}) => {
+      const ip =
+        request.headers.get('x-forwarded-for') ??
+        request.headers.get('x-real-ip') ??
+        null;
+      const userAgent = request.headers.get('user-agent') ?? null;
 
-          if (!hasPermissionToCreateBook(scopes)) {
-            set.status = 403;
-            throw new Error('Forbidden: token does not have book:write scope');
-          }
+      const {userId, scopes} = await tokenService.authenticateFromHeader(
+        headers.authorization,
+        {status: set.status as number | undefined},
+        {ip, userAgent},
+      );
 
-          // Force owner to be the token's user
-          const created = await bookService.create({
-            ...body,
-            userId,
-          } as any);
+      if (!hasPermissionToCreateBook(scopes)) {
+        set.status = 403;
+        throw new Error('Forbidden: token does not have book:write scope');
+      }
 
-          const {mapBookToDTO} = await import('../book/mapper');
-          return mapBookToDTO(created as any);
-        },
-        {
-          body: createBookSchema,
-          detail: {
-            summary: 'Create book (token)',
-            description:
-              'Create a new book owned by the token user, authenticated via API token',
-            tags: ['Token', 'Books'],
-          },
-        },
-      )
+      // Force owner to be the token's user
+      const created = await bookService.create({
+        ...body,
+        userId,
+      } as any);
 
-      /**
-       * Token-authenticated: Update a book
-       * PUT /token/books/:unitId
-       */
-      .put(
-        '/books/:unitId',
-        async ({
-          headers,
-          set,
-          params,
-          body,
-          request,
-        }): Promise<BookResponse> => {
-          const ip =
-            request.headers.get('x-forwarded-for') ??
-            request.headers.get('x-real-ip') ??
-            null;
-          const userAgent = request.headers.get('user-agent') ?? null;
+      const {mapBookToDTO} = await import('../book/mapper');
+      return mapBookToDTO(created as any);
+    },
+    {
+      body: createBookSchema,
+      headers: tokenAuthHeaders,
+      detail: {
+        summary: 'Create book (token)',
+        description:
+          'Create a new book owned by the token user, authenticated via API token',
+        tags: ['Token', 'Books'],
+      },
+    },
+  )
 
-          const {scopes} = await tokenService.authenticateFromHeader(
-            headers.authorization,
-            {status: set.status as number | undefined},
-            {ip, userAgent},
-          );
+  /**
+   * Token-authenticated: Update a book
+   * PUT /token/books/:unitId
+   */
+  .put(
+    '/books/:unitId',
+    async ({headers, set, params, body, request}) => {
+      const ip =
+        request.headers.get('x-forwarded-for') ??
+        request.headers.get('x-real-ip') ??
+        null;
+      const userAgent = request.headers.get('user-agent') ?? null;
 
-          if (!(await hasPermissionToUpdateBook(scopes))) {
-            set.status = 403;
-            throw new Error('Forbidden: token does not have book:write scope');
-          }
+      const {scopes} = await tokenService.authenticateFromHeader(
+        headers.authorization,
+        {status: set.status as number | undefined},
+        {ip, userAgent},
+      );
 
-          const updated = await bookService.update(params.unitId, body as any);
-          const {mapBookToDTO} = await import('../book/mapper');
-          return mapBookToDTO(updated as any);
-        },
-        {
-          params: bookParamsSchema,
-          body: updateBookSchema,
-          detail: {
-            summary: 'Update book (token)',
-            description:
-              'Update a book by unit ID using an API token, restricted to the token owner',
-            tags: ['Token', 'Books'],
-          },
-        },
-      )
+      if (!(await hasPermissionToUpdateBook(scopes))) {
+        set.status = 403;
+        throw new Error('Forbidden: token does not have book:write scope');
+      }
 
-      /**
-       * Token-authenticated: Delete a book
-       * DELETE /token/books/:unitId
-       */
-      .delete(
-        '/books/:unitId',
-        async ({headers, set, params, request}) => {
-          set.status = 403;
-          return {
-            message: "Forbidden: now don't allow use token to delete book",
-          };
-          const ip =
-            request.headers.get('x-forwarded-for') ??
-            request.headers.get('x-real-ip') ??
-            null;
-          const userAgent = request.headers.get('user-agent') ?? null;
+      const updated = await bookService.update(params.unitId, body as any);
+      const {mapBookToDTO} = await import('../book/mapper');
+      return mapBookToDTO(updated as any);
+    },
+    {
+      params: bookParamsSchema,
+      body: updateBookSchema,
+      headers: tokenAuthHeaders,
+      detail: {
+        summary: 'Update book (token)',
+        description:
+          'Update a book by unit ID using an API token, restricted to the token owner',
+        tags: ['Token', 'Books'],
+      },
+    },
+  )
 
-          const {userId, scopes} = await tokenService.authenticateFromHeader(
-            headers.authorization,
-            {status: set.status as number | undefined},
-            {ip, userAgent},
-          );
+  /**
+   * Token-authenticated: Delete a book
+   * DELETE /token/books/:unitId
+   */
+  .delete(
+    '/books/:unitId',
+    async ({headers, set, params, request}) => {
+      set.status = 403;
+      return {
+        message: "Forbidden: now don't allow use token to delete book",
+      };
+      const ip =
+        request.headers.get('x-forwarded-for') ??
+        request.headers.get('x-real-ip') ??
+        null;
+      const userAgent = request.headers.get('user-agent') ?? null;
 
-          if (
-            !tokenService.hasAdminScope(scopes) &&
-            !tokenService.hasScope(scopes, 'book', 'delete')
-          ) {
-            set.status = 403;
-            throw new Error('Forbidden: token does not have book:delete scope');
-          }
+      const {userId, scopes} = await tokenService.authenticateFromHeader(
+        headers.authorization,
+        {status: set.status as number | undefined},
+        {ip, userAgent},
+      );
 
-          const unit = await unitService.getByUnitId(params.unitId);
-          if (!unit || unit.userId !== userId) {
-            set.status = 403;
-            throw new Error('Forbidden: token does not own this book');
-          }
+      if (
+        !tokenService.hasAdminScope(scopes) &&
+        !tokenService.hasScope(scopes, 'book', 'delete')
+      ) {
+        set.status = 403;
+        throw new Error('Forbidden: token does not have book:delete scope');
+      }
 
-          await bookService.delete(params.unitId);
-          return {message: 'Book and related post deleted successfully'};
-        },
-        {
-          params: bookParamsSchema,
-          detail: {
-            summary: 'Delete book (token)',
-            description:
-              'Delete a book and its related unit by unit ID using an API token',
-            tags: ['Token', 'Books'],
-          },
-        },
-      )
+      const unit = await unitService.getByUnitId(params.unitId);
+      if (!unit || unit.userId !== userId) {
+        set.status = 403;
+        throw new Error('Forbidden: token does not own this book');
+      }
+
+      await bookService.delete(params.unitId);
+      return {message: 'Book and related post deleted successfully'};
+    },
+    {
+      params: bookParamsSchema,
+      headers: tokenAuthHeaders,
+      detail: {
+        summary: 'Delete book (token)',
+        description:
+          'Delete a book and its related unit by unit ID using an API token',
+        tags: ['Token', 'Books'],
+      },
+    },
   );
-};

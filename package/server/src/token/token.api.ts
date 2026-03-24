@@ -12,12 +12,11 @@ import {
 import {bookRoute} from './token.book.api';
 import {userRoute} from './token.user.api';
 
-const tokenInstance = new Elysia({prefix: '/token'}).use(
-  serverCorsPolicy('credentialed'),
-);
-
 // Token-auth book & user routes (independent auth via API token header)
-const tokenExternalRoutes = bookRoute(userRoute(tokenInstance));
+const tokenExternalRoutes = new Elysia({prefix: '/token'})
+  .use(serverCorsPolicy('credentialed'))
+  .use(bookRoute)
+  .use(userRoute);
 
 // Owner-authenticated token management routes
 const tokenManagementRoutes = new Elysia({prefix: '/token'})
