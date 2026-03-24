@@ -6,7 +6,7 @@ import {
   type JwtPrivateJwk,
   type JwtPublicJwk,
 } from '@package/jwt';
-import {prisma, Prisma} from '@/prisma/client';
+import {prisma, Prisma} from '#/prisma/client';
 import {getJwtService} from '@/jwt';
 
 function mapRowToRecord(row: {

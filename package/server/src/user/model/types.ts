@@ -1,6 +1,6 @@
 // Type only used in server, otherwise use contract
 
-import type {User, Unit, Prisma} from '@/prisma/client';
+import type {User, Unit, Prisma} from '#/prisma/client';
 
 import {t} from 'elysia';
 

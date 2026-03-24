@@ -1,4 +1,4 @@
-import {prisma, Prisma} from '@/prisma/client';
+import {prisma, Prisma} from '#/prisma/client';
 
 type JsonValue = Prisma.JsonValue;
 export class EchoKvService {

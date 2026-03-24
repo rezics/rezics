@@ -1,6 +1,6 @@
-import {prisma} from '@/prisma/client';
-import {UnitStatus, UnitType} from '@/prisma/client';
-import type {Prisma, Rating} from '@/prisma/client';
+import {prisma} from '#/prisma/client';
+import {UnitStatus, UnitType} from '#/prisma/client';
+import type {Prisma, Rating} from '#/prisma/client';
 import type {BookWithRelations} from './types';
 import {bookInclude} from './types';
 import type {

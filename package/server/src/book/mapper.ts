@@ -1,4 +1,4 @@
-import type {User} from '@/prisma/client';
+import type {User} from '#/prisma/client';
 import type {PublicUser, BookDTO} from '@package/contract';
 import type {BookWithRelations} from './types';
 

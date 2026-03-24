@@ -1,7 +1,7 @@
 import {t, Elysia} from 'elysia';
 import {serverCorsPolicy, requireLogin} from '@/middleware';
 import {reactionService} from './reaction.service';
-import {prisma, type ReactionSummary} from '@/prisma/client';
+import {prisma, type ReactionSummary} from '#/prisma/client';
 import {
   listQuerySchema,
   createSchema,

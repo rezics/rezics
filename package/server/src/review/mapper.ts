@@ -1,11 +1,11 @@
-import type {Prisma, User} from '@/prisma/client';
+import type {Prisma, User} from '#/prisma/client';
 import type {
   PublicUser,
   ReviewDTO,
   ReviewListQuery,
   UnitListQuery,
 } from '@package/contract';
-import {UnitType} from '@/prisma/client';
+import {UnitType} from '#/prisma/client';
 import type {ReviewWithRelations} from './types';
 
 /**

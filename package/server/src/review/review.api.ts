@@ -5,7 +5,7 @@ import {
   requireOwner,
   buildActorFromContext,
 } from '@/middleware';
-import {UnitType} from '@/prisma/client';
+import {UnitType} from '#/prisma/client';
 import {
   createReviewSchema,
   updateReviewSchema,

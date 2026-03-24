@@ -1,4 +1,4 @@
-import type {Prisma, Unit, User, Tag} from '@/prisma/client';
+import type {Prisma, Unit, User, Tag} from '#/prisma/client';
 
 export type ChapterUnitWithRelations = Unit & {
   user?: User;

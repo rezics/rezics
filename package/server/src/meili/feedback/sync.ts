@@ -1,4 +1,4 @@
-import {prisma} from '@/prisma/client';
+import {prisma} from '#/prisma/client';
 import {feedbackIndex} from '@package/search';
 import type {FeedbackSearchDocument} from '@package/contract';
 

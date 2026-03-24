@@ -1,4 +1,4 @@
-import type {ApiToken} from '@/prisma/client';
+import type {ApiToken} from '#/prisma/client';
 import type {ApiTokenDTO, ApiTokenScopes} from '@package/contract';
 
 /**

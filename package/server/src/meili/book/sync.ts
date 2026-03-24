@@ -1,5 +1,5 @@
-import {prisma} from '@/prisma/client';
-import type {Tag, User} from '@/prisma/client';
+import {prisma} from '#/prisma/client';
+import type {Tag, User} from '#/prisma/client';
 import {bookIndex} from '@package/search';
 import type {BookSearchDocument} from './index';
 import {bookInclude} from '../../book/types';

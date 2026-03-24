@@ -1,6 +1,6 @@
-import {prisma} from '@/prisma/client';
-import type {Prisma} from '@/prisma/client';
-import {UnitType, UnitStatus} from '@/prisma/client';
+import {prisma} from '#/prisma/client';
+import type {Prisma} from '#/prisma/client';
+import {UnitType, UnitStatus} from '#/prisma/client';
 import type {
   CreateCommentInput,
   UpdateCommentInput,

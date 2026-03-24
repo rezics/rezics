@@ -1,5 +1,5 @@
-import {prisma, UnitStatus, UnitType} from '@/prisma/client';
-import type {Prisma} from '@/prisma/client';
+import {prisma, UnitStatus, UnitType} from '#/prisma/client';
+import type {Prisma} from '#/prisma/client';
 import type {ChapterUnitWithRelations} from './types';
 import {chapterUnitInclude} from './types';
 import type {

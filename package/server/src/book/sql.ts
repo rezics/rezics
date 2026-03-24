@@ -1,4 +1,4 @@
-import {prisma} from '@/prisma/client';
+import {prisma} from '#/prisma/client';
 
 /**
  * Get approximate count of Book

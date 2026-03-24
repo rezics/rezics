@@ -1,5 +1,5 @@
-import {prisma} from '@/prisma/client';
-import type {Prisma} from '@/prisma/client';
+import {prisma} from '#/prisma/client';
+import type {Prisma} from '#/prisma/client';
 import {
   type ApiTokenDTO,
   type ApiTokenScopes,

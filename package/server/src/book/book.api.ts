@@ -14,7 +14,7 @@ import {
   BasicAdminPermission,
   hasPermissionToUpdateBook,
 } from '@package/contract';
-import type {Rating} from '@/prisma/client';
+import type {Rating} from '#/prisma/client';
 import {bookService} from './book.service';
 import {mapBookToDTO} from './mapper';
 import {unitService} from '@/unit/unit.service';

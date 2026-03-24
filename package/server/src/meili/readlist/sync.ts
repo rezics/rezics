@@ -1,4 +1,4 @@
-import {prisma} from '@/prisma/client';
+import {prisma} from '#/prisma/client';
 import {readlistIndex} from '@package/search';
 import type {ReadlistSearchDocument} from './index';
 

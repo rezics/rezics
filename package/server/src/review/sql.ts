@@ -1,4 +1,4 @@
-import {prisma, UnitType} from '@/prisma/client';
+import {prisma, UnitType} from '#/prisma/client';
 
 /**
  * Get approximate/fast count of reviews

@@ -7,7 +7,7 @@ import type {
   Prisma,
   Tag,
   ReactionSummary,
-} from '@/prisma/client';
+} from '#/prisma/client';
 
 /**
  * Internal book type with relations

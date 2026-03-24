@@ -1,9 +1,9 @@
 /**
  * Never send unHashed passwords to server
  */
-import {prisma} from '@/prisma/client';
-import {UserType} from '@/prisma/client';
-import type {Prisma} from '@/prisma/client';
+import {prisma} from '#/prisma/client';
+import {UserType} from '#/prisma/client';
+import type {Prisma} from '#/prisma/client';
 import type {UserFilterOptions, UserWithRelations} from '../model/types';
 import {userInclude} from '../model/types';
 import type {UpdateUser} from '@package/contract';

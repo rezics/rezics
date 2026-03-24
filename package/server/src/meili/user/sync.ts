@@ -1,4 +1,4 @@
-import {prisma} from '@/prisma/client';
+import {prisma} from '#/prisma/client';
 import {userIndex} from '@package/search';
 import type {UserSearchDocument} from './index';
 

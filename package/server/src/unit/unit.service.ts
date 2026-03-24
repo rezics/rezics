@@ -1,6 +1,6 @@
-import {prisma} from '@/prisma/client';
-import type {Prisma} from '@/prisma/client';
-import {UnitStatus, UnitType} from '@/prisma/client';
+import {prisma} from '#/prisma/client';
+import type {Prisma} from '#/prisma/client';
+import {UnitStatus, UnitType} from '#/prisma/client';
 import type {
   UnitListQuery,
   CreateUnitInput,

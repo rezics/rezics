@@ -1,4 +1,4 @@
-import type {Prisma, CommentIndex, Unit, User} from '@/prisma/client';
+import type {Prisma, CommentIndex, Unit, User} from '#/prisma/client';
 
 // Internal comment type with relations
 export type CommentWithRelations = CommentIndex & {

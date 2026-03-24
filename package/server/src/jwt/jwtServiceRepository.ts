@@ -1,4 +1,4 @@
-import {prisma} from '@/prisma/client';
+import {prisma} from '#/prisma/client';
 import type {JwtPrivateJwk, JwtPublicJwk} from '@package/jwt';
 
 export type CachedJwksEntry = {
