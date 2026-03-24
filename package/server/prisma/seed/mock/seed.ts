@@ -2,7 +2,7 @@ import 'dotenv/config';
 import {prisma} from '#/prisma/client';
 import type {Prisma} from '#/prisma/client';
 import {DEFAULT_COUNTS} from '#/prisma/seed/mock/config';
-import {resetDatabase} from '#/prisma/seed/mock/database';
+import {resetDatabase} from '#/prisma/seed/database';
 import {
   seedPressUsers,
   seedProducerUsers,

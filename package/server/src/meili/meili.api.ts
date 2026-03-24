@@ -1,8 +1,5 @@
 import {t, Elysia} from 'elysia';
-import {
-  serverCorsPolicy,
-  permissionGuard,
-} from '@/middleware';
+import {serverCorsPolicy, requireOwner} from '@/middleware';
 import {
   bookQueryOptionsSchema,
   type BookQueryOptions,
