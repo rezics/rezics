@@ -1,6 +1,6 @@
 // 添加 main tag group 以及 公告板
-import {prisma} from '@/prisma/client';
-import type {PrismaClient} from '@/prisma/generated/client.js';
+import {prisma} from '#/prisma/client';
+import type {PrismaClient} from '#/prisma/generated/client.js';
 
 import {generateNoticeboardData} from './data/home/noticeboard';
 import {products} from './data/home/homeCarousel';

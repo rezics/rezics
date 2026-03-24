@@ -1,5 +1,5 @@
 import {t, Elysia} from 'elysia';
-import {serverCorsPolicy, requireOwner} from '@/src/middleware';
+import {serverCorsPolicy, requireOwner} from '@/middleware';
 import {tokenService} from './token.service';
 import {
   apiTokenDTOSchema,

@@ -5,7 +5,7 @@ import {
   type JwtPrivateJwk,
   type JwtPublicJwk,
 } from '@package/jwt';
-import {env} from '@/src/env';
+import {env} from '@/env';
 
 type BootstrapDefaults = {
   issuer: string;

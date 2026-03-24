@@ -22,7 +22,7 @@ import {
   requireLogin,
   requireOwner,
   buildActorFromContext,
-} from '@/src/middleware';
+} from '@/middleware';
 
 export const unitApi = new Elysia({prefix: '/units'})
   .use(serverCorsPolicy('credentialed'))

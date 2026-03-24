@@ -8,7 +8,7 @@ import {
 
 import {userService} from '../service/user.service';
 import {mapUserToDTO} from '../model/mapper';
-import {requireAdmin} from '@/src/middleware';
+import {requireAdmin} from '@/middleware';
 import {BasicAdminPermission} from '@package/contract';
 
 export const adminRoute = new Elysia()

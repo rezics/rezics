@@ -4,8 +4,8 @@ import {
   requireLogin,
   requireOwner,
   buildActorFromContext,
-} from '@/src/middleware';
-import {unitService} from '@/src/unit/unit.service';
+} from '@/middleware';
+import {unitService} from '@/unit/unit.service';
 import {readlistService} from './readlist.service';
 import {
   readlistListQuerySchema,

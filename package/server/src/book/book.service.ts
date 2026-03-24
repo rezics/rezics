@@ -8,7 +8,7 @@ import type {
   UpdateBookInput,
   CreateBookInput,
 } from '@package/contract';
-import {syncBookToMeili, deleteBookFromMeili} from '@/src/meili/book/sync';
+import {syncBookToMeili, deleteBookFromMeili} from '@/meili/book/sync';
 import {getBookApproxCount} from './sql';
 
 /**

@@ -15,8 +15,8 @@ import {
 } from '@package/contract';
 import {SignJWT} from 'jose';
 import {serverJwtPersistence} from './jwt-persistence';
-import {getJwtService} from '@/src/jwt';
-import {env} from '@/src/env';
+import {getJwtService} from '@/jwt';
+import {env} from '@/env';
 
 function getMainSessionJwtTtlSeconds() {
   return Number(env.MAIN_SESSION_JWT_TTL_SECONDS ?? '900');

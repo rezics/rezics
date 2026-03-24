@@ -9,7 +9,7 @@ import type {
 import {commentInclude} from './types';
 import type {CommentWithRelations} from './types';
 import {getCommentApproxCount} from './sql';
-import {syncUnitToMeili, deleteUnitFromMeili} from '@/src/meili/unit/sync';
+import {syncUnitToMeili, deleteUnitFromMeili} from '@/meili/unit/sync';
 
 export class CommentService {
   /**

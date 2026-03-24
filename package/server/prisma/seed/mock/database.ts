@@ -1,5 +1,5 @@
 import {meili} from '@package/search';
-import type {PrismaClient} from '@/prisma/generated/client.js';
+import type {PrismaClient} from '#/prisma/generated/client.js';
 
 /**
  * Reset database by deleting all data in correct order

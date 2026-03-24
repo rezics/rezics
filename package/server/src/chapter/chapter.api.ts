@@ -13,12 +13,12 @@ import {
 } from '@package/contract';
 import {chapterService} from './chapter.service';
 import {mapUnitToChapterDetailDTO, mapUnitToChapterListItemDTO} from './mapper';
-import {unitService} from '@/src/unit/unit.service';
+import {unitService} from '@/unit/unit.service';
 import {
   serverCorsPolicy,
   requireOwner,
   buildActorFromContext,
-} from '@/src/middleware';
+} from '@/middleware';
 
 export const chapterApi = new Elysia({prefix: '/chapters'})
   .use(serverCorsPolicy('credentialed'))

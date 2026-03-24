@@ -21,10 +21,15 @@ function deriveCookieDomain(hostname: string): string | null {
     return null;
   }
 
+  const topLevel = parts.at(-1);
+  const secondLevel = parts.at(-2);
+
   if (
     parts.length >= 3 &&
-    parts.at(-1)?.length === 2 &&
-    parts.at(-2)?.length <= 3
+    topLevel &&
+    secondLevel &&
+    topLevel.length === 2 &&
+    secondLevel.length <= 3
   ) {
     return `.${parts.slice(-3).join('.')}`;
   }
@@ -54,10 +59,9 @@ function buildCookieAttributes(url: URL, maxAge: number): string[] {
 }
 
 export function buildAuthPresenceSetCookie(url: URL): string {
-  return buildCookieAttributes(
-    url,
-    AUTH_PRESENCE_COOKIE_MAX_AGE_SECONDS,
-  ).join('; ');
+  return buildCookieAttributes(url, AUTH_PRESENCE_COOKIE_MAX_AGE_SECONDS).join(
+    '; ',
+  );
 }
 
 export function buildAuthPresenceClearCookie(url: URL): string {

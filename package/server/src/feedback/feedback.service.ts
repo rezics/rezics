@@ -6,7 +6,7 @@ import type {
   FeedbackListResponse,
 } from '@package/contract';
 import {mapFeedbackToDTO} from './mapper';
-import {syncFeedbackToMeili} from '@/src/meili/feedback/sync';
+import {syncFeedbackToMeili} from '@/meili/feedback/sync';
 
 export class FeedbackService {
   async create(

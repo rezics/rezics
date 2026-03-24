@@ -1,5 +1,5 @@
 import {Elysia} from 'elysia';
-import {serverCorsPolicy} from '@/src/middleware';
+import {serverCorsPolicy} from '@/middleware';
 
 import {coreRoute} from './user.core.api';
 import {adminRoute} from './user.admin.api';

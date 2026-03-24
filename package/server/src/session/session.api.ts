@@ -3,8 +3,8 @@ import {
   sessionTokenResponseSchema,
   type SessionTokenResponse,
 } from '@package/contract';
-import {serverCorsPolicy, requireLogin} from '@/src/middleware';
-import {userService} from '@/src/user/service/user.service';
+import {serverCorsPolicy, requireLogin} from '@/middleware';
+import {userService} from '@/user/service/user.service';
 import {
   buildRezicsSessionClaims,
   getMainSessionPublicJwks,

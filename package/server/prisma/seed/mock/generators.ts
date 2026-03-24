@@ -1,6 +1,6 @@
 import {faker} from '@faker-js/faker';
-import type {UnitType, Prisma} from '@/prisma/generated/client.js';
-import {UnitType as UnitTypeEnum} from '@/prisma/generated/client.js';
+import type {UnitType, Prisma} from '#/prisma/generated/client.js';
+import {UnitType as UnitTypeEnum} from '#/prisma/generated/client.js';
 import {
   randomInt,
   randomFloat,

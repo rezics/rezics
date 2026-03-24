@@ -4,7 +4,7 @@ import {userService} from '../service/user.service';
 import {mapUserToPublicProfile} from '../model/mapper';
 
 import {userParamsSchema} from '@package/contract';
-import {requireOwner} from '@/src/middleware';
+import {requireOwner} from '@/middleware';
 
 export const followRoute = new Elysia()
   .get(

@@ -8,7 +8,7 @@ import {
   type UserDTO,
   type UserListQuery,
 } from '@package/contract';
-import {userService} from '@/src/user';
+import {userService} from '@/user';
 import {
   hasPermissionToReadUser,
   hasPermissionToUpdateUser,
@@ -16,7 +16,7 @@ import {
 } from './permission';
 import {meiliService} from '../meili/meili.service';
 import {mapUserSearchDocToDTO} from '../meili/mapper';
-import {mapUserToDTO} from '@/src/user';
+import {mapUserToDTO} from '@/user';
 
 const createUserProfileSchema = t.Object({
   unitId: t.Optional(t.String()),
@@ -36,7 +36,11 @@ const createUserProfileSchema = t.Object({
   ),
 });
 
-export const userRoute = <T extends Elysia<any, any, any, any, any, any, any, any>>(api: T) => {
+export const userRoute = <
+  T extends Elysia<any, any, any, any, any, any, any, any>,
+>(
+  api: T,
+) => {
   return (
     api
       /**

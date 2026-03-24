@@ -11,7 +11,7 @@ import {
 } from '@package/jwt';
 import type {JWTPayload} from 'jose';
 import {env} from '../../env';
-import {getJwtService} from '@/src/jwt';
+import {getJwtService} from '@/jwt';
 
 export function buildTrustedAuthVerifyOptions(
   trustedAuth: {

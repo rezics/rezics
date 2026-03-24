@@ -1,4 +1,4 @@
-import type {PrismaClient} from '../generated/client.js';
+import type {PrismaClient} from '#/prisma/generated/client.js';
 import {faker} from '@faker-js/faker';
 import {randomInt} from './utils.js';
 

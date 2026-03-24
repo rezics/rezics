@@ -1,5 +1,5 @@
 import {prisma} from '@/prisma/client';
-import {invalidateJwtService} from '@/src/jwt';
+import {invalidateJwtService} from '@/jwt';
 import type {
   CreateJwtServiceInput,
   JwtServiceDTO,

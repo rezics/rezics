@@ -17,12 +17,12 @@ import {
 import type {Rating} from '@/prisma/client';
 import {bookService} from './book.service';
 import {mapBookToDTO} from './mapper';
-import {unitService} from '@/src/unit/unit.service';
+import {unitService} from '@/unit/unit.service';
 import {
   serverCorsPolicy,
   requireOwner,
   buildActorFromContext,
-} from '@/src/middleware';
+} from '@/middleware';
 
 export const bookApi = new Elysia({prefix: '/books'})
   .use(serverCorsPolicy('credentialed'))

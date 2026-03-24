@@ -4,7 +4,7 @@ import {
   requireOwner,
   buildActorFromContext,
   requireLogin,
-} from '@/src/middleware';
+} from '@/middleware';
 import {commentService} from './comment.service';
 import {mapCommentToDTO} from './mapper';
 import type {CreateCommentInput} from '@package/contract';

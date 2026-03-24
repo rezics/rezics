@@ -22,7 +22,7 @@ import {
   requireLogin,
   requireOwner,
   buildActorFromContext,
-} from '@/src/middleware';
+} from '@/middleware';
 import {tagService} from './tag.service';
 import {mapTagDetailToDTO, mapTagToDTO} from './mapper';
 import {unitService} from '../unit/unit.service';

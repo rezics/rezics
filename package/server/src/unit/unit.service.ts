@@ -8,7 +8,7 @@ import type {
 } from '@package/contract';
 import {unitInclude} from './types';
 import type {UnitWithRelations} from './types';
-import {syncUnitToMeili, deleteUnitFromMeili} from '@/src/meili/unit/sync';
+import {syncUnitToMeili, deleteUnitFromMeili} from '@/meili/unit/sync';
 
 type MaybeInclude = Prisma.UnitInclude | undefined;
 type ResolvedInclude<TInclude extends MaybeInclude> =

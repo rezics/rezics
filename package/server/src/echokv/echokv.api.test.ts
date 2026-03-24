@@ -9,7 +9,7 @@ process.env.JWT_SECRET ??=
 process.env.REFRESH_TOKEN_SECRET ??=
   'server-refresh-secret-for-tests-abcdefghijklmnopqrstuvwxyz';
 
-mock.module('@/src/auth/auth.permission', () => ({
+mock.module('@/auth/auth.permission', () => ({
   requireLogin: new Elysia(),
   requireOwner: new Elysia(),
   requireAdmin: new Elysia(),

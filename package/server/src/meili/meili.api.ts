@@ -2,7 +2,7 @@ import {t, Elysia} from 'elysia';
 import {
   serverCorsPolicy,
   permissionGuard,
-} from '@/src/middleware';
+} from '@/middleware';
 import {
   bookQueryOptionsSchema,
   type BookQueryOptions,

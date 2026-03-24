@@ -1,9 +1,9 @@
 import {Elysia, t} from 'elysia';
 import {
   serverCorsPolicy,
-  permissionGuard,
+  requireAdmin,
   requireAdminSession,
-} from '@/src/middleware';
+} from '@/middleware';
 import {
   jwtServiceDTOSchema,
   jwtServiceListResponseSchema,
@@ -95,10 +95,7 @@ export const jwtServiceAdminApi = new Elysia({prefix: '/admin/jwt-services'})
         }
       }
       try {
-        return await jwtServiceAdminService.update(
-          params.serviceKey,
-          body,
-        );
+        return await jwtServiceAdminService.update(params.serviceKey, body);
       } catch (error) {
         if (
           error &&
@@ -107,9 +104,7 @@ export const jwtServiceAdminApi = new Elysia({prefix: '/admin/jwt-services'})
           (error as {code: string}).code === 'P2025'
         ) {
           set.status = 404;
-          throw new Error(
-            `JwtService not found: ${params.serviceKey}`,
-          );
+          throw new Error(`JwtService not found: ${params.serviceKey}`);
         }
         throw error;
       }
@@ -138,9 +133,7 @@ export const jwtServiceAdminApi = new Elysia({prefix: '/admin/jwt-services'})
           (error as {code: string}).code === 'P2025'
         ) {
           set.status = 404;
-          throw new Error(
-            `JwtService not found: ${params.serviceKey}`,
-          );
+          throw new Error(`JwtService not found: ${params.serviceKey}`);
         }
         throw error;
       }
@@ -168,9 +161,7 @@ export const jwtServiceAdminApi = new Elysia({prefix: '/admin/jwt-services'})
           (error as {code: string}).code === 'P2025'
         ) {
           set.status = 404;
-          throw new Error(
-            `JwtService not found: ${params.serviceKey}`,
-          );
+          throw new Error(`JwtService not found: ${params.serviceKey}`);
         }
         throw error;
       }

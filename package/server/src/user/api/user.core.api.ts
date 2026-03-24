@@ -20,9 +20,9 @@ import {
 } from '@package/contract';
 import {userService} from '../service/user.service';
 import {mapUserToDTO} from '../model/mapper';
-import {meiliService} from '@/src/meili/meili.service';
-import {mapUserSearchDocToPublicProfile} from '@/src/meili/mapper';
-import {requireLogin, requireOwner} from '@/src/middleware';
+import {meiliService} from '@/meili/meili.service';
+import {mapUserSearchDocToPublicProfile} from '@/meili/mapper';
+import {requireLogin, requireOwner} from '@/middleware';
 import {verifyAuthContextToken} from '../util';
 
 const AUTH_CONTEXT_HEADER =

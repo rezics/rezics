@@ -23,7 +23,7 @@ const getMainSessionPublicJwks = mock(async () => ({
   ],
 }));
 
-mock.module('@/src/auth/auth.permission', () => ({
+mock.module('@/auth/auth.permission', () => ({
   requireLogin: new Elysia().derive(() => ({
     identity: {
       unitId: 'user-1',
@@ -35,7 +35,7 @@ mock.module('@/src/auth/auth.permission', () => ({
   requireAdminSession: () => {},
 }));
 
-mock.module('@/src/user/service/user.service', () => ({
+mock.module('@/user/service/user.service', () => ({
   userService: {
     getByUnitId: async () => ({
       unitId: 'user-1',

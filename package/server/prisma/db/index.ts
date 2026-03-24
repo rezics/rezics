@@ -2,7 +2,7 @@ import {Client} from 'pg';
 import {readFile} from 'node:fs/promises';
 import {join} from 'node:path';
 import {sequence, keyOrder} from './sequence.js';
-import {env} from '@/src/env';
+import {env} from '@/env';
 import {fileURLToPath} from 'node:url';
 
 const SQL_BASE_DIR = fileURLToPath(new URL('./sql', import.meta.url));

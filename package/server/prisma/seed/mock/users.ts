@@ -1,5 +1,5 @@
 import {faker} from '@faker-js/faker';
-import type {PrismaClient} from '../generated/client.js';
+import type {PrismaClient} from '#/prisma/generated/client.js';
 import type {CreatedUser} from './types.js';
 import {createUsernameGenerator, generateParagraph} from './utils.js';
 import {getRandomPressUserName, getRandomProducerUserName} from './data.js';

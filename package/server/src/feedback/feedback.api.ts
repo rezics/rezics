@@ -1,5 +1,5 @@
 import {t, Elysia} from 'elysia';
-import {serverCorsPolicy, requireLogin, requireOwner} from '@/src/middleware';
+import {serverCorsPolicy, requireLogin, requireOwner} from '@/middleware';
 import {feedbackService} from './feedback.service';
 import {
   createFeedbackSchema,

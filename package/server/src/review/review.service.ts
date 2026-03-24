@@ -1,6 +1,6 @@
 import {prisma, UnitStatus, UnitType} from '@/prisma/client';
 import type {Prisma} from '@/prisma/client';
-import {unitService} from '@/src/unit/unit.service';
+import {unitService} from '@/unit/unit.service';
 import type {
   CreateReviewInput,
   UpdateReviewInput,
@@ -15,7 +15,7 @@ import {
   normalizeRatingValue,
   buildMetadataWithRating,
 } from './mapper';
-import {syncUnitToMeili, deleteUnitFromMeili} from '@/src/meili/unit/sync';
+import {syncUnitToMeili, deleteUnitFromMeili} from '@/meili/unit/sync';
 
 type UnitTypeOption = {unitType?: UnitType};
 

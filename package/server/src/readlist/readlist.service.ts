@@ -9,7 +9,7 @@ import type {
 } from '@package/contract';
 import type {ReadlistDTO} from '@package/contract';
 import {mapReadlistListRowToDTO, mapReadlistRowToDTO} from './mapper';
-import {syncUnitToMeili, deleteUnitFromMeili} from '@/src/meili/unit/sync';
+import {syncUnitToMeili, deleteUnitFromMeili} from '@/meili/unit/sync';
 import {
   deleteReadlistFromMeili,
   syncReadlistToMeili,
