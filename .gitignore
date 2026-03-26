@@ -3,6 +3,8 @@
 
 example-gitignore/
 
+.claude/worktrees/
+
 # Shadcn config
 tailwind.config.js
 
