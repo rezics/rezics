@@ -75,6 +75,7 @@
       "version": "1.0.50",
       "dependencies": {
         "@package/app": "workspace:*",
+        "@package/app-shell": "workspace:*",
         "@package/contract": "workspace:*",
         "@package/server": "workspace:*",
         "@tanstack/query-broadcast-client-experimental": "^5.89.0",

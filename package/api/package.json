@@ -24,7 +24,8 @@
     "@tanstack/react-query-persist-client": "^5.89.0",
     "@package/server": "workspace:*",
     "@package/contract": "workspace:*",
-    "@package/app": "workspace:*"
+    "@package/app": "workspace:*",
+    "@package/app-shell": "workspace:*"
   },
   "devDependencies": {
     "bun-types": "latest"
