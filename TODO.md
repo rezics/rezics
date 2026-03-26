@@ -1,5 +1,4 @@
-- [ ] add Paraglide i18n package
-- [ ] i18n package 要实现 inlang plugin，以支持 .ts 语言文件
+- [ ] add typesafe-i18n i18n package  https://claude.ai/chat/fa0940fb-c796-4690-8dfc-5699c4ecb673
 - [x] https://better-auth.com/docs/plugins/admin https://better-auth.com/docs/plugins/organization 参考相关文档为 auth service 添加用户管理功能
 - [ ] add editor package use code mirror 6 build markdown and json editor
 - [ ] 我需要整理spc规范嘛？

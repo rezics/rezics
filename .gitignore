@@ -1,6 +1,8 @@
 # Visual Studio Counter
 .VSCodeCounter/
 
+example-gitignore/
+
 # Shadcn config
 tailwind.config.js
 
