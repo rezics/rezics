@@ -8,6 +8,7 @@ import {useTranslation} from 'react-i18next';
 
 import {PasswordField} from '@package/ui/composite/form/field/PasswordField.tsx';
 import {MUILink} from '@package/ui/primitive/link/MUILink.tsx';
+import {useAuthSessionStore} from '@/user/state';
 import {login} from '../model/handler';
 import {Layout} from '../layout/Layout';
 import {ModalLayout} from '../layout/ModalLayout';
@@ -73,7 +74,6 @@ export const LoginPage: FC<LoginPageProps> = ({
     if (!hasError) {
       onClose?.();
       if (pathname === '/login') {
-        const {useAuthSessionStore} = await import('@/user/state');
         const authSessionState = useAuthSessionStore.getState();
         navigate({
           to: resolvePostAuthDestination({

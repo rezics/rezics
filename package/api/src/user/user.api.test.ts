@@ -71,15 +71,14 @@ describe('userApi', () => {
       'eyJhbGciOiJub25lIn0.eyJzdWIiOiJ1c2VyLTEiLCJleHAiOjQ3NjYwMDAwMDB9.c2ln',
       NormalizedTokenName.AUTH_IDENTITY,
     );
-    setToken('context-token', NormalizedTokenName.AUTH_CONTEXT);
 
-    await userApi.ensure();
+    await userApi.ensure('context-token');
 
     expect(fetchMock.mock.calls[0]?.[1]).toMatchObject({
       headers: {
         Authorization:
           'Bearer eyJhbGciOiJub25lIn0.eyJzdWIiOiJ1c2VyLTEiLCJleHAiOjQ3NjYwMDAwMDB9.c2ln',
-        'x-auth_context_token': 'context-token',
+        'x-auth-context-token': 'context-token',
       },
     });
   });

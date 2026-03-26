@@ -7,11 +7,7 @@ import {MoreHorizMenu} from '../../component/header/MoreHorizMenu';
 export function PendingVerificationSection() {
   const {t} = useTranslation();
   const auth = useAuth();
-  const authContextName = auth.authContext?.name?.trim();
-  const authContextSlug = auth.authContext?.slug?.trim();
   const headline =
-    authContextName ||
-    (authContextSlug ? `@${authContextSlug}` : null) ||
     auth.authSession?.email ||
     t('auth.flow.verify_title');
 

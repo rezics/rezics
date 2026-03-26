@@ -1,5 +1,4 @@
 import type {
-  AuthContextTokenClaims,
   AuthSession,
   AuthUser,
   GetSessionStateResponse,
@@ -7,7 +6,7 @@ import type {
 import {NormalizedTokenName} from '@package/contract';
 import {authApi} from '@package/api/auth/auth.api';
 import {clearAuthPresence, hasAuthPresence} from '@package/api/react-query/authPresence';
-import {getAuthContextClaims, getToken} from '@package/api/react-query/jwt';
+import {getToken} from '@package/api/react-query/jwt';
 import {create} from 'zustand';
 import {devtools} from 'zustand/middleware';
 
@@ -21,9 +20,7 @@ export type AuthSessionStoreState = {
   session: AuthSession | null;
   user: AuthUser | null;
   authSession: GetSessionStateResponse['authSession'] | null;
-  authContext: AuthContextTokenClaims | null;
   hasAuthSession: boolean;
-  hasAuthContext: boolean;
   hasBusinessToken: boolean;
   capabilityLevel: AuthCapabilityLevel;
   needsVerification: boolean;
@@ -31,28 +28,23 @@ export type AuthSessionStoreState = {
   error: string | null;
   setPending: () => void;
   setSessionState: (state: AuthSessionSnapshot | null) => void;
-  syncAuthContext: (token: string | null) => void;
   syncBusinessToken: (token: string | null) => void;
   clearSessionState: () => void;
 };
 
 function deriveState(
   snapshot: AuthSessionSnapshot | null,
-  authContext: AuthContextTokenClaims | null,
   businessToken: string | null,
   status: AuthSessionHydrationStatus = 'ready',
   error: string | null = null,
 ) {
   const hasAuthSession = Boolean(snapshot?.session?.id && snapshot?.user?.id);
-  const hasAuthContext = Boolean(authContext?.id);
   const hasBusinessToken = Boolean(businessToken);
-  const needsVerification = authContext
-    ? authContext.verificationStatus !== 'verified'
-    : Boolean(snapshot?.authSession?.needsEmailVerification);
+  const needsVerification = Boolean(snapshot?.authSession?.needsEmailVerification);
   const needsOnboarding = Boolean(snapshot?.authSession?.needsOnboarding);
 
   let capabilityLevel: AuthCapabilityLevel = 'anonymous';
-  if (hasAuthSession || hasAuthContext) {
+  if (hasAuthSession) {
     capabilityLevel = hasBusinessToken ? 'member' : 'guest';
   }
 
@@ -61,9 +53,7 @@ function deriveState(
     session: snapshot?.session ?? null,
     user: snapshot?.user ?? null,
     authSession: snapshot?.authSession ?? null,
-    authContext,
     hasAuthSession,
-    hasAuthContext,
     hasBusinessToken,
     capabilityLevel,
     needsVerification,
@@ -77,7 +67,6 @@ export const useAuthSessionStore = create<AuthSessionStoreState>()(
     set => ({
       ...deriveState(
         null,
-        getAuthContextClaims(),
         getToken(NormalizedTokenName.REZICS_SESSION),
         'idle',
       ),
@@ -91,25 +80,8 @@ export const useAuthSessionStore = create<AuthSessionStoreState>()(
         set(
           deriveState(
             state,
-            getAuthContextClaims(),
             getToken(NormalizedTokenName.REZICS_SESSION),
             'ready',
-          ),
-        ),
-      syncAuthContext: token =>
-        set(state =>
-          deriveState(
-            state.session && state.user && state.authSession
-              ? {
-                  session: state.session,
-                  user: state.user,
-                  authSession: state.authSession,
-                }
-              : null,
-            token ? getAuthContextClaims() : null,
-            getToken(NormalizedTokenName.REZICS_SESSION),
-            state.status === 'idle' ? 'ready' : state.status,
-            state.error,
           ),
         ),
       syncBusinessToken: token =>
@@ -122,7 +94,6 @@ export const useAuthSessionStore = create<AuthSessionStoreState>()(
                   authSession: state.authSession,
                 }
               : null,
-            state.authContext,
             token,
             state.status === 'idle' ? 'ready' : state.status,
             state.error,
@@ -132,7 +103,6 @@ export const useAuthSessionStore = create<AuthSessionStoreState>()(
         set(
           deriveState(
             null,
-            getAuthContextClaims(),
             getToken(NormalizedTokenName.REZICS_SESSION),
             'ready',
           ),
@@ -150,13 +120,12 @@ export async function hydrateAuthSessionState(options?: {requirePresence?: boole
 
   if (requiresPresence && !hasAuthPresence()) {
     useAuthSessionStore.setState(
-      deriveState(null, getAuthContextClaims(), businessToken, 'ready'),
+      deriveState(null, businessToken, 'ready'),
     );
     return null;
   }
 
   store.setPending();
-  store.syncAuthContext(getToken(NormalizedTokenName.AUTH_CONTEXT));
   store.syncBusinessToken(businessToken);
 
   try {
@@ -169,7 +138,6 @@ export async function hydrateAuthSessionState(options?: {requirePresence?: boole
     useAuthSessionStore.setState(
       deriveState(
         null,
-        getAuthContextClaims(),
         getToken(NormalizedTokenName.REZICS_SESSION),
         'error',
         message,

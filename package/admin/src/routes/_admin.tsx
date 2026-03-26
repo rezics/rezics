@@ -1,15 +1,14 @@
 import {createFileRoute, Outlet, redirect} from '@tanstack/react-router';
 
 import AdminLayout from '@/core/layout/AdminLayout';
-import {useAuthStore} from '@package/app-shell';
+import {getToken, parseJwt} from '@package/api/react-query/jwt';
 
 export const Route = createFileRoute('/_admin')({
   beforeLoad: async ({location}) => {
-    // Protect all admin routes.
-    // Check auth-server session instead of localStorage JWT.
     try {
-      const user = useAuthStore.getState();
-      if (!(user.role === 'admin' || user.role === 'owner')) {
+      const token = getToken();
+      const claims = parseJwt(token);
+      if (!(claims?.role === 'admin' || claims?.role === 'owner')) {
         throw new Error(
           'Unauthorized, only admins and owners can access this page',
         );

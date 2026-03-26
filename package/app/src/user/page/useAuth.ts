@@ -2,19 +2,16 @@ import {useEffect} from 'react';
 import type {UserDTO} from '@package/contract';
 import {useQuery} from '@tanstack/react-query';
 import {userQueries} from '@package/api/user/user.queries';
-import {useAuthSessionStore, useAuthStore, useUserProfileStore} from '@/user/state';
+import {useAuthSessionStore, useUserProfileStore} from '@/user/state';
 
 /**
  * useAuth - Authentication hook
- * Provides current user data and authentication state
+ * Derives all state from authSessionStore + userProfileStore.
  */
 export const useAuth = () => {
-  const hasIdentityToken = useAuthStore(state => state.isAuthenticated);
   const authSession = useAuthSessionStore(state => state.authSession);
-  const authContext = useAuthSessionStore(state => state.authContext);
   const capabilityLevel = useAuthSessionStore(state => state.capabilityLevel);
   const hasAuthSession = useAuthSessionStore(state => state.hasAuthSession);
-  const hasAuthContext = useAuthSessionStore(state => state.hasAuthContext);
   const hasBusinessToken = useAuthSessionStore(state => state.hasBusinessToken);
   const needsOnboarding = useAuthSessionStore(state => state.needsOnboarding);
   const needsVerification = useAuthSessionStore(state => state.needsVerification);
@@ -38,20 +35,19 @@ export const useAuth = () => {
   return {
     user: resolvedUser,
     authSession,
-    authContext,
     loading:
       status === 'loading' ||
       (capabilityLevel === 'member' && !resolvedUser ? isLoading : false),
     error: error ? (error as Error).message : undefined,
-    authenticated: hasIdentityToken || hasAuthSession || hasAuthContext,
-    isAuthenticated: hasIdentityToken,
+    authenticated: hasAuthSession,
+    isAuthenticated: hasAuthSession,
     hasAuthSession,
     hasBusinessToken,
     needsOnboarding,
     needsVerification,
     capabilityLevel,
     readyForApp:
-      (hasAuthSession || hasAuthContext) &&
+      hasAuthSession &&
       !needsOnboarding &&
       !needsVerification &&
       hasBusinessToken,

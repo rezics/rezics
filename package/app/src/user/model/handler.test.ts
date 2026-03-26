@@ -46,10 +46,8 @@ const ensureMock = mock(async () => ({
 }));
 const issueSessionTokenMock = mock(async () => ({token: 'member-token'}));
 const removeQueriesMock = mock(() => undefined);
-const clearAuthMock = mock(() => undefined);
 const clearProfileMock = mock(() => undefined);
 const clearAuthSessionStateMock = mock(() => undefined);
-const syncAuthContextMock = mock(() => undefined);
 const syncBusinessTokenMock = mock(() => undefined);
 const setUserMock = mock(() => undefined);
 const hydrateAuthSessionStateMock = mock(async () => ({
@@ -103,14 +101,7 @@ mock.module('@/user/state', () => ({
   useAuthSessionStore: {
     getState: () => ({
       hasBusinessToken: false,
-      syncAuthContext: syncAuthContextMock,
       syncBusinessToken: syncBusinessTokenMock,
-    }),
-  },
-  useAuthStore: {
-    getState: () => ({
-      clearAuth: clearAuthMock,
-      setToken: mock(),
     }),
   },
   useUserProfileStore: {
@@ -157,10 +148,8 @@ describe('auth handlers', () => {
     issueSessionTokenMock.mockClear();
     hydrateAuthSessionStateMock.mockClear();
     removeQueriesMock.mockClear();
-    clearAuthMock.mockClear();
     clearProfileMock.mockClear();
     clearAuthSessionStateMock.mockClear();
-    syncAuthContextMock.mockClear();
     syncBusinessTokenMock.mockClear();
     setUserMock.mockClear();
   });
@@ -227,8 +216,8 @@ describe('auth handlers', () => {
     );
   });
 
-  test('acquires auth context before ensuring the user and issuing the member session', async () => {
-    const {acquireMemberAccessIfReady} = await import('./handler');
+  test('establishBusinessSession fetches context, ensures user, and issues session token', async () => {
+    const {establishBusinessSession} = await import('./handler');
     const {getToken, setToken} = await import('@package/api/react-query/jwt');
 
     setToken(
@@ -236,15 +225,13 @@ describe('auth handlers', () => {
       NormalizedTokenName.AUTH_IDENTITY,
     );
 
-    await acquireMemberAccessIfReady();
+    await establishBusinessSession();
 
     expect(getContextTokenMock).toHaveBeenCalledTimes(1);
-    expect(hydrateAuthSessionStateMock).toHaveBeenCalledTimes(1);
     expect(ensureMock).toHaveBeenCalledTimes(1);
+    expect(ensureMock).toHaveBeenCalledWith('context-token');
     expect(issueSessionTokenMock).toHaveBeenCalledTimes(1);
-    expect(getToken(NormalizedTokenName.AUTH_CONTEXT)).toBe('context-token');
     expect(getToken(NormalizedTokenName.REZICS_SESSION)).toBe('member-token');
-    expect(syncAuthContextMock).toHaveBeenCalledWith('context-token');
     expect(syncBusinessTokenMock).toHaveBeenCalledWith('member-token');
     expect(setUserMock).toHaveBeenCalledWith({
       unitId: 'user-1',
@@ -252,22 +239,33 @@ describe('auth handlers', () => {
     });
   });
 
-  test('clears auth, auth-session, profile, and cached auth queries', async () => {
+  test('AUTH_CONTEXT is not persisted after establishBusinessSession', async () => {
+    const {establishBusinessSession} = await import('./handler');
+    const {getToken, setToken} = await import('@package/api/react-query/jwt');
+
+    setToken(
+      'eyJhbGciOiJub25lIn0.eyJzdWIiOiJ1c2VyLTEiLCJleHAiOjQ3NjYwMDAwMDB9.c2ln',
+      NormalizedTokenName.AUTH_IDENTITY,
+    );
+
+    await establishBusinessSession();
+
+    // AUTH_CONTEXT should not be in localStorage (no storage key configured)
+    expect(getToken(NormalizedTokenName.AUTH_CONTEXT)).toBeNull();
+  });
+
+  test('clears auth-session, profile, and cached auth queries on logout', async () => {
     const {logout} = await import('./handler');
     const {getToken, setToken} = await import('@package/api/react-query/jwt');
 
     setToken('identity-token', NormalizedTokenName.AUTH_IDENTITY);
-    setToken('context-token', NormalizedTokenName.AUTH_CONTEXT);
     setToken('member-token', NormalizedTokenName.REZICS_SESSION);
 
     await logout(true);
 
     expect(signOutMock).toHaveBeenCalledTimes(1);
     expect(getToken(NormalizedTokenName.AUTH_IDENTITY)).toBeNull();
-    expect(getToken(NormalizedTokenName.AUTH_CONTEXT)).toBeNull();
     expect(getToken(NormalizedTokenName.REZICS_SESSION)).toBeNull();
-    expect(clearAuthMock).toHaveBeenCalledTimes(1);
-    expect(syncAuthContextMock).toHaveBeenCalledWith(null);
     expect(syncBusinessTokenMock).toHaveBeenCalledWith(null);
     expect(clearAuthSessionStateMock).toHaveBeenCalledTimes(1);
     expect(clearProfileMock).toHaveBeenCalledTimes(1);

@@ -2,11 +2,6 @@ export {AppShell, type AppShellProps} from './AppShell';
 
 export {useAppStore} from './state/appStore';
 export {
-  AUTH_STORE_KEY,
-  useAuthStore,
-  type AuthStoreState,
-} from './state/authStore';
-export {
   clearAuthSessionState,
   hydrateAuthSessionState,
   useAuthSessionStore,
@@ -16,7 +11,7 @@ export {
 } from './state/authSessionStore';
 export {useAlertStore} from './state/windowAlertStore';
 
-export {AuthProvider} from './provider/AuthProvider';
+export {AuthProvider, type AuthProviderProps} from './provider/AuthProvider';
 export {ReactQueryProvider} from './provider/ReactQueryProvider';
 export {PersistentSettingsLoader} from './provider/PersistentSettingsLoader';
 export {qc} from './provider/reactQueryUtil';

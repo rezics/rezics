@@ -2,11 +2,11 @@ type AuthRedirectState = {
   needsOnboarding: boolean;
   needsVerification: boolean;
   readyForApp?: boolean;
+  redirectTo?: string;
 };
 
 export function resolvePostAuthDestination(
   state: AuthRedirectState,
-  fallback = '/',
 ): string {
   if (state.needsOnboarding) {
     return '/onboarding';
@@ -16,7 +16,7 @@ export function resolvePostAuthDestination(
     return '/verify-email';
   }
 
-  return state.readyForApp === false ? fallback : fallback;
+  return state.redirectTo ?? '/';
 }
 
 export function buildOAuthCallbackTargets(origin: string, mode: 'login' | 'register') {

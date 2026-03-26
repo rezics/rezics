@@ -3,7 +3,12 @@ import {
   sessionTokenResponseSchema,
   type SessionTokenResponse,
 } from '@package/contract';
-import {serverCorsPolicy, requireLogin} from '@/middleware';
+import {
+  serverCorsPolicy,
+  requireLogin,
+  getAuthSessionState,
+  assertMainServerEligibility,
+} from '@/middleware';
 import {userService} from '@/user/service/user.service';
 import {
   buildRezicsSessionClaims,
@@ -26,7 +31,36 @@ export const sessionApi = new Elysia({prefix: '/session'})
   .use(requireLogin)
   .post(
     '/token',
-    async ({identity, jwt}): Promise<SessionTokenResponse> => {
+    async ({identity, headers, jwt, set}): Promise<SessionTokenResponse> => {
+      const authorization = headers.authorization;
+      if (!authorization) {
+        set.status = 401;
+        throw new Error('Unauthorized: Missing authorization header');
+      }
+
+      let sessionState;
+      try {
+        sessionState = await getAuthSessionState(authorization);
+      } catch {
+        set.status = 503;
+        throw new Error(
+          'Service Unavailable: Unable to verify auth session eligibility',
+        );
+      }
+
+      try {
+        assertMainServerEligibility(sessionState);
+      } catch (error) {
+        const message =
+          error instanceof Error ? error.message : 'Eligibility check failed';
+        if (message.includes('Unauthorized')) {
+          set.status = 401;
+        } else {
+          set.status = 403;
+        }
+        throw error;
+      }
+
       const user = await userService.getByUnitId(identity.unitId);
 
       return {

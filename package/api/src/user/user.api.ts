@@ -18,13 +18,15 @@ type FollowSummaryResponse = {
 };
 
 export const userApi = {
-  ensure: async (): Promise<EnsureUserResponse> => {
+  ensure: async (contextToken: string): Promise<EnsureUserResponse> => {
     return apiFetch(`/users/ensure`, {
       includeTokens: [
         NormalizedTokenName.AUTH_IDENTITY,
         NormalizedTokenName.REZICS_SESSION,
-        NormalizedTokenName.AUTH_CONTEXT,
       ],
+      headers: {
+        'x-auth-context-token': contextToken,
+      },
     });
   },
 

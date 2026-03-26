@@ -23,16 +23,30 @@ const getMainSessionPublicJwks = mock(async () => ({
   ],
 }));
 
-mock.module('@/auth/auth.permission', () => ({
-  requireLogin: new Elysia().derive(() => ({
-    identity: {
-      unitId: 'user-1',
-    },
-  })),
+const mockGetAuthSessionState = mock(async () => ({
+  session: {id: 'session-1', token: 'token-1', expiresAt: '', userId: 'u-1'},
+  user: {id: 'u-1', name: 'Test', role: 'user', email: 'test@test.com', emailVerified: true},
+  authSession: {canAcquireMemberToken: true, readinessStatus: 'ready' as const},
+}));
+
+const mockAssertMainServerEligibility = mock(() => {});
+
+mock.module('@/middleware', () => ({
+  serverCorsPolicy: () => new Elysia(),
+  requireLogin: new Elysia({name: 'guard/requireLogin'}).resolve(
+    {as: 'scoped'},
+    () => ({
+      identity: {
+        unitId: 'user-1',
+      },
+    }),
+  ),
   requireOwner: new Elysia(),
   requireAdmin: new Elysia(),
   buildActorFromContext: () => ({}),
   requireAdminSession: () => {},
+  getAuthSessionState: mockGetAuthSessionState,
+  assertMainServerEligibility: mockAssertMainServerEligibility,
 }));
 
 mock.module('@/user/service/user.service', () => ({
@@ -81,40 +95,89 @@ describe('session jwks route', () => {
       ],
     });
   });
+});
 
-  test('keeps jwks public while session token issuance remains credentialed', async () => {
+describe('POST /session/token eligibility enforcement', () => {
+  test('verified user receives session token', async () => {
+    mockGetAuthSessionState.mockResolvedValueOnce({
+      session: {id: 's-1', token: 't-1', expiresAt: '', userId: 'u-1'},
+      user: {id: 'u-1', name: 'Test', role: 'user', email: 'test@test.com', emailVerified: true},
+      authSession: {canAcquireMemberToken: true, readinessStatus: 'ready' as const},
+    });
+    mockAssertMainServerEligibility.mockImplementationOnce(() => {});
+
     const {sessionApi} = await import('./session.api');
 
-    const jwksResponse = await sessionApi.handle(
-      new Request('http://localhost/session/jwks', {
-        headers: {
-          Origin: 'https://rezics.com',
-        },
-      }),
-    );
-    const tokenResponse = await sessionApi.handle(
+    const response = await sessionApi.handle(
       new Request('http://localhost/session/token', {
-        method: 'OPTIONS',
-        headers: {
-          Origin: 'https://rezics.com',
-          'Access-Control-Request-Method': 'POST',
-        },
+        method: 'POST',
+        headers: {Authorization: 'Bearer valid-token'},
       }),
     );
 
-    expect(jwksResponse.status).toBe(200);
-    expect(tokenResponse.status).toBe(204);
-    expect(jwksResponse.headers.get('access-control-allow-origin')).toBe(
-      'https://rezics.com',
+    expect(response.status).toBe(200);
+    const body = await response.json();
+    expect(body).toHaveProperty('token');
+  });
+
+  test('unverified user gets 403', async () => {
+    mockGetAuthSessionState.mockResolvedValueOnce({
+      session: {id: 's-1', token: 't-1', expiresAt: '', userId: 'u-1'},
+      user: {id: 'u-1', name: 'Test', role: 'user', email: 'test@test.com', emailVerified: false},
+      authSession: {canAcquireMemberToken: false, readinessStatus: 'needs-verification'},
+    } as any);
+    mockAssertMainServerEligibility.mockImplementationOnce(() => {
+      throw new Error('Forbidden: Auth session is not ready for main-server access');
+    });
+
+    const {sessionApi} = await import('./session.api');
+
+    const response = await sessionApi.handle(
+      new Request('http://localhost/session/token', {
+        method: 'POST',
+        headers: {Authorization: 'Bearer valid-token'},
+      }),
     );
-    expect(
-      jwksResponse.headers.get('access-control-allow-credentials'),
-    ).toBeNull();
-    expect(tokenResponse.headers.get('access-control-allow-origin')).toBe(
-      'https://rezics.com',
+
+    expect(response.status).toBe(403);
+  });
+
+  test('missing session gets 401', async () => {
+    mockGetAuthSessionState.mockResolvedValueOnce({
+      session: {id: null, token: null, expiresAt: '', userId: ''},
+      user: {id: null, name: '', role: '', email: '', emailVerified: false},
+      authSession: {canAcquireMemberToken: false, readinessStatus: 'needs-onboarding'},
+    } as any);
+    mockAssertMainServerEligibility.mockImplementationOnce(() => {
+      throw new Error('Unauthorized: Missing auth session state');
+    });
+
+    const {sessionApi} = await import('./session.api');
+
+    const response = await sessionApi.handle(
+      new Request('http://localhost/session/token', {
+        method: 'POST',
+        headers: {Authorization: 'Bearer valid-token'},
+      }),
     );
-    expect(tokenResponse.headers.get('access-control-allow-credentials')).toBe(
-      'true',
+
+    expect(response.status).toBe(401);
+  });
+
+  test('auth service unavailable returns 503', async () => {
+    mockGetAuthSessionState.mockRejectedValueOnce(
+      new Error('Network error: auth service unreachable'),
     );
+
+    const {sessionApi} = await import('./session.api');
+
+    const response = await sessionApi.handle(
+      new Request('http://localhost/session/token', {
+        method: 'POST',
+        headers: {Authorization: 'Bearer valid-token'},
+      }),
+    );
+
+    expect(response.status).toBe(503);
   });
 });

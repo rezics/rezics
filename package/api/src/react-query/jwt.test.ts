@@ -45,34 +45,39 @@ describe('jwt token storage', () => {
     } as unknown as Window & typeof globalThis;
   });
 
-  test('stores auth identity, auth context, and member session tokens separately', async () => {
+  test('stores auth identity and member session tokens separately', async () => {
     const jwt = await import('./jwt');
 
     const identityToken = createToken({sub: 'user-1', slug: 'reader'});
-    const contextToken = createToken({
-      id: 'user-1',
-      slug: 'reader',
-      name: 'Reader',
-      verificationStatus: 'pending',
-    });
     const sessionToken = createToken({
       unitId: 'user-1',
       permission: {role: 'USER'},
     });
 
     jwt.setToken(identityToken, NormalizedTokenName.AUTH_IDENTITY);
-    jwt.setToken(contextToken, NormalizedTokenName.AUTH_CONTEXT);
     jwt.setToken(sessionToken, NormalizedTokenName.REZICS_SESSION);
 
     expect(jwt.getToken(NormalizedTokenName.AUTH_IDENTITY)).toBe(identityToken);
-    expect(jwt.getToken(NormalizedTokenName.AUTH_CONTEXT)).toBe(contextToken);
     expect(jwt.getToken(NormalizedTokenName.REZICS_SESSION)).toBe(sessionToken);
-    expect(jwt.getAuthContextClaims()).toMatchObject({
-      id: 'user-1',
-      verificationStatus: 'pending',
-    });
     expect(jwt.getRezicsSessionClaims()).toMatchObject({
       unitId: 'user-1',
     });
+  });
+
+  test('AUTH_CONTEXT is not persisted but can be parsed from raw token', async () => {
+    const jwt = await import('./jwt');
+
+    const contextToken = createToken({
+      id: 'user-1',
+      slug: 'reader',
+      name: 'Reader',
+      verificationStatus: 'pending',
+    });
+
+    expect(jwt.getAuthContextClaims(contextToken)).toMatchObject({
+      id: 'user-1',
+      verificationStatus: 'pending',
+    });
+    expect(jwt.getAuthContextClaims()).toBeNull();
   });
 });

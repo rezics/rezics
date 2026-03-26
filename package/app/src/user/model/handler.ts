@@ -4,7 +4,6 @@ import {NormalizedTokenName} from '@package/contract';
 import {
   clearAllTokens,
   ensureAuthIdentityToken,
-  getToken,
   setToken,
 } from '@package/api/react-query/jwt';
 import {userKeys} from '@package/api/user/user.keys';
@@ -14,64 +13,38 @@ import {
   clearAuthSessionState,
   hydrateAuthSessionState,
   useAuthSessionStore,
-  useAuthStore,
   useUserProfileStore,
 } from '@/user/state';
 
-function clearMemberState() {
-  setToken(null, NormalizedTokenName.AUTH_CONTEXT);
-  setToken(null, NormalizedTokenName.REZICS_SESSION);
-  useAuthSessionStore.getState().syncAuthContext(null);
-  useAuthSessionStore.getState().syncBusinessToken(null);
-  useUserProfileStore.getState().clearProfile();
-}
+/**
+ * One-shot provisioning sequence for establishing a business session.
+ * 1. Ensure AUTH_IDENTITY exists
+ * 2. Fetch AUTH_CONTEXT (ephemeral, in memory only)
+ * 3. Provision user on business server via ensure()
+ * 4. Issue REZICS_SESSION
+ * 5. Hydrate authSessionStore
+ */
+export async function establishBusinessSession() {
+  await ensureAuthIdentityToken({requirePresence: false});
 
-async function ensureMemberAccess() {
-  await ensureAuthIdentityToken({requirePresence: true});
   const authContext = await authApi.getContextToken();
-  setToken(authContext.token, NormalizedTokenName.AUTH_CONTEXT);
-  useAuthSessionStore.getState().syncAuthContext(authContext.token);
+  const contextToken = authContext.token;
 
-  const sessionState = await hydrateAuthSessionState();
-  const hasAuthSession = Boolean(sessionState?.session?.id);
-
-  if (!hasAuthSession) {
-    throw new Error('Authentication session unavailable');
-  }
-
-  if (
-    authContext.claims.verificationStatus !== 'verified' ||
-    !sessionState?.authSession.canAcquireMemberToken
-  ) {
-    clearMemberState();
-    return {sessionState, user: null};
-  }
-
-  const ensured = await userApi.ensure();
+  const ensured = await userApi.ensure(contextToken);
   const sessionToken = (await userApi.issueSessionToken()).token;
 
   setToken(sessionToken, NormalizedTokenName.REZICS_SESSION);
   useAuthSessionStore.getState().syncBusinessToken(sessionToken);
+
+  await hydrateAuthSessionState();
   useUserProfileStore.getState().setUser(ensured.user);
 
-  return {
-    sessionState,
-    user: ensured.user,
-  };
-}
-
-export async function acquireMemberAccessIfReady() {
-  return ensureMemberAccess();
+  return {user: ensured.user};
 }
 
 export const login = async (email: string, password: string) => {
   await authApi.signIn({email, password});
   const token = await ensureAuthIdentityToken({requirePresence: false});
-  if (token) {
-    useAuthStore.getState().setToken(token);
-  } else {
-    useAuthStore.getState().clearAuth();
-  }
 
   const sessionState = await hydrateAuthSessionState();
   const hasAuthSession = Boolean(sessionState?.session?.id);
@@ -81,7 +54,7 @@ export const login = async (email: string, password: string) => {
   }
 
   const user = sessionState?.authSession.canAcquireMemberToken
-    ? (await ensureMemberAccess()).user
+    ? (await establishBusinessSession()).user
     : null;
 
   return {user, token};
@@ -96,16 +69,8 @@ export const register = async (
   try {
     void avatar;
     void bio;
-    await authApi.signUp({
-      email,
-      password,
-    });
+    await authApi.signUp({email, password});
     const token = await ensureAuthIdentityToken({requirePresence: false});
-    if (token) {
-      useAuthStore.getState().setToken(token);
-    } else {
-      useAuthStore.getState().clearAuth();
-    }
 
     const sessionState = await hydrateAuthSessionState();
     const hasAuthSession = Boolean(sessionState?.session?.id);
@@ -115,7 +80,7 @@ export const register = async (
     }
 
     const user = sessionState?.authSession.canAcquireMemberToken
-      ? (await ensureMemberAccess()).user
+      ? (await establishBusinessSession()).user
       : null;
 
     return {user, token};
@@ -128,8 +93,6 @@ export const register = async (
 export const logout = async (disableReload = false) => {
   await authApi.signOut();
   clearAllTokens();
-  useAuthStore.getState().clearAuth();
-  useAuthSessionStore.getState().syncAuthContext(null);
   useAuthSessionStore.getState().syncBusinessToken(null);
   clearAuthSessionState();
   useUserProfileStore.getState().clearProfile();

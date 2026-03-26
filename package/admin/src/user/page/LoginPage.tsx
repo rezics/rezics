@@ -16,7 +16,6 @@ import {useNavigate} from '@tanstack/react-router';
 import {useSignInMutation} from '@package/api/auth/auth.mutations';
 
 import {Route} from '@/routes/login';
-import {useAuthStore} from '@package/app-shell';
 import {getToken, parseJwt} from '@package/api/react-query/jwt';
 
 function normalizeRedirect(to?: string) {
@@ -48,7 +47,6 @@ export default function LoginPage() {
             const token = getToken();
             const user = parseJwt(token);
             if (user?.role === 'admin' || user?.role === 'owner') {
-              useAuthStore.getState().setToken(token);
               navigate({
                 to: normalizeRedirect(redirectTo),
                 replace: true,

@@ -11,13 +11,12 @@ import {
 } from '@package/contract';
 
 const AUTH_STORE_KEY = 'auth-store';
-const DEFAULT_TOKEN_STORAGE_KEYS = {
+const DEFAULT_TOKEN_STORAGE_KEYS: Record<string, string> = {
   [NormalizedTokenName.AUTH_IDENTITY]: 'auth-store',
-  [NormalizedTokenName.AUTH_CONTEXT]: 'auth-context-store',
   [NormalizedTokenName.REZICS_SESSION]: 'rezics-session-store',
   [NormalizedTokenName.NOTIFICATION_SESSION]: 'notification-session-store',
   [NormalizedTokenName.SEARCH_SESSION]: 'search-session-store',
-} satisfies Record<NormalizedTokenNameType, string>;
+};
 
 export const AUTH_TOKEN_STORAGE_EVENT = 'package-auth-token-storage';
 export const DEFAULT_AUTH_STORE_KEY = AUTH_STORE_KEY;
@@ -43,7 +42,7 @@ export type JwtTokenRecord = {
 
 export type JwtTokenStrategy = {
   authBaseUrl: string;
-  storeKeyByToken: Record<NormalizedTokenNameType, string>;
+  storeKeyByToken: Partial<Record<NormalizedTokenNameType, string>>;
 };
 
 let tokenStrategy: JwtTokenStrategy = {
@@ -86,10 +85,12 @@ export function getJwtTokenStrategy(): JwtTokenStrategy {
  * Read the currently persisted token value for a normalized token type.
  */
 function readStoredToken(tokenName: NormalizedTokenNameType): string | null {
-  return readAuthSnapshot(getStoreKey(tokenName))?.state?.accessToken ?? null;
+  const storeKey = getStoreKey(tokenName);
+  if (!storeKey) return null;
+  return readAuthSnapshot(storeKey)?.state?.accessToken ?? null;
 }
 
-function getStoreKey(tokenName: NormalizedTokenNameType): string {
+function getStoreKey(tokenName: NormalizedTokenNameType): string | undefined {
   return tokenStrategy.storeKeyByToken[tokenName];
 }
 
@@ -111,8 +112,10 @@ function writeAuthSnapshot(
 ): void {
   if (typeof window === 'undefined') return;
 
-  const payload = parseJwt(token);
   const storeKey = getStoreKey(tokenName);
+  if (!storeKey) return;
+
+  const payload = parseJwt(token);
   localStorage.setItem(
     storeKey,
     JSON.stringify({
@@ -163,7 +166,9 @@ export const removeToken = (
   tokenName: NormalizedTokenNameType = NormalizedTokenName.AUTH_IDENTITY,
 ): void => {
   if (typeof window === 'undefined') return;
-  localStorage.removeItem(getStoreKey(tokenName));
+  const storeKey = getStoreKey(tokenName);
+  if (!storeKey) return;
+  localStorage.removeItem(storeKey);
   window.dispatchEvent(
     new CustomEvent(AUTH_TOKEN_STORAGE_EVENT, {
       detail: {tokenName, token: null},
@@ -265,9 +270,10 @@ export function getAllTokenRecords(): JwtTokenRecord[] {
 }
 
 export function clearAllTokens(): void {
-  (
-    Object.keys(normalizedTokenTransportMap) as NormalizedTokenNameType[]
-  ).forEach(tokenName => {
+  const managedTokens = Object.keys(
+    tokenStrategy.storeKeyByToken,
+  ) as NormalizedTokenNameType[];
+  managedTokens.forEach(tokenName => {
     removeToken(tokenName);
   });
 }
@@ -332,10 +338,10 @@ export function getAuthIdentityClaims(): AuthIdentityTokenClaims | null {
   );
 }
 
-export function getAuthContextClaims(): AuthContextTokenClaims | null {
-  return getParsedToken<AuthContextTokenClaims>(
-    NormalizedTokenName.AUTH_CONTEXT,
-  );
+export function getAuthContextClaims(
+  token?: string | null,
+): AuthContextTokenClaims | null {
+  return parseJwt<AuthContextTokenClaims>(token ?? null);
 }
 
 export function getRezicsSessionClaims(): RezicsSessionTokenClaims | null {

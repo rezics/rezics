@@ -12,7 +12,7 @@ import {validateEmail, validatePassword} from '../model/validate';
 import {hydrateAuthSessionState} from '@/user/state';
 import {useAuth} from './useAuth';
 import {resolvePostAuthDestination} from '../model/authRedirect';
-import {acquireMemberAccessIfReady} from '../model/handler';
+import {establishBusinessSession} from '../model/handler';
 
 export const OAuthOnboardingPage: FC = () => {
   const {t} = useTranslation();
@@ -72,7 +72,7 @@ export const OAuthOnboardingPage: FC = () => {
       const sessionState = await hydrateAuthSessionState();
       if (sessionState) {
         if (sessionState.authSession.canAcquireMemberToken) {
-          await acquireMemberAccessIfReady();
+          await establishBusinessSession();
         }
         navigate({
           to: resolvePostAuthDestination({

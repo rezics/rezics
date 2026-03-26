@@ -1,6 +1,5 @@
 - [ ] add typesafe-i18n i18n package  https://claude.ai/chat/fa0940fb-c796-4690-8dfc-5699c4ecb673
-- [x] https://better-auth.com/docs/plugins/admin https://better-auth.com/docs/plugins/organization 参考相关文档为 auth service 添加用户管理功能
-- [ ] add editor package use code mirror 6 build markdown and json editor
+- [ ] 重新制作章节编辑器，功能完整，美观好用的组件
 - [ ] 我需要整理spc规范嘛？
 - [ ] 我需要做到auth-store规范，如果 access token 不存在，则不主动请求任何 内容，所有请求都依赖于auth-store
 - [ ] 实现session失效后的主动登录退出机制，但是我又担心网络波动引起恶意退出？better-auth session 到底是如何工作的
