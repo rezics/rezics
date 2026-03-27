@@ -1,17 +1,16 @@
 {
   "permissions": {
     "allow": [
-      "Bash(bunx openspec:*)",
-      "Bash(cd:*)",
-      "Bash(openspec status:*)",
-      "Bash(openspec instructions:*)",
-      "Bash(openspec new:*)",
+      "WebSearch",
       "WebFetch(domain:elysiajs.com)",
+      "Bash(openspec:*)",
+      "Bash(cd:*)",
       "Bash(bun test:*)",
+      "Bash(bun install:*)",
       "Bash(grep:*)",
       "Bash(ls *)",
       "Bash(cat *)",
-      "Bash(bun install:*)"
+      "Bash(rg:*)"
     ]
   },
   "sandbox": {
