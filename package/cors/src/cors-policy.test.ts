@@ -1,6 +1,7 @@
 import {describe, expect, test} from 'bun:test';
 import {Elysia} from 'elysia';
 import {corsPolicy} from './plugin';
+import {applyCorsToSet} from './headers';
 import type {CorsPolicyConfig, CorsPolicyName} from './types';
 
 const allowedOrigins = ['https://book.rezics.com', 'https://rezics.com'];
@@ -151,6 +152,18 @@ describe('corsPolicy plugin', () => {
     });
   });
 
+  describe('error responses respect route-level policy override', () => {
+    const app = new Elysia()
+      .use(corsPolicy('credentialed', configs))
+      .get('/public-error', () => { throw new Error('oops'); }, {corsPolicy: 'public'});
+
+    test('error on public-override route omits credentials header', async () => {
+      const res = await app.handle(makeRequest('/public-error'));
+      expect(res.headers.get('access-control-allow-credentials')).toBeNull();
+      expect(res.headers.get('access-control-allow-methods')).toBe('GET, OPTIONS');
+    });
+  });
+
   describe('scope isolation', () => {
     const routerA = new Elysia({prefix: '/a'})
       .use(corsPolicy('credentialed', configs))
@@ -169,5 +182,41 @@ describe('corsPolicy plugin', () => {
       const res = await app.handle(makeRequest('/b/test'));
       expect(res.headers.get('access-control-allow-origin')).toBeNull();
     });
+  });
+});
+
+describe('applyCorsToSet', () => {
+  test('sets CORS headers on a plain object for allowed origin', () => {
+    const headers: Record<string, string | undefined> = {};
+    const request = new Request('http://localhost/test', {
+      headers: {Origin: 'https://book.rezics.com'},
+    });
+    applyCorsToSet(request, headers, configs.credentialed);
+
+    expect(headers['access-control-allow-origin']).toBe('https://book.rezics.com');
+    expect(headers['access-control-allow-credentials']).toBe('true');
+    expect(headers['vary']).toBe('Origin');
+    expect(headers['access-control-allow-methods']).toContain('POST');
+  });
+
+  test('does not set origin for disallowed origins', () => {
+    const headers: Record<string, string | undefined> = {};
+    const request = new Request('http://localhost/test', {
+      headers: {Origin: 'https://evil.com'},
+    });
+    applyCorsToSet(request, headers, configs.credentialed);
+
+    expect(headers['access-control-allow-origin']).toBeUndefined();
+  });
+
+  test('omits credentials header for public policy', () => {
+    const headers: Record<string, string | undefined> = {};
+    const request = new Request('http://localhost/test', {
+      headers: {Origin: 'https://book.rezics.com'},
+    });
+    applyCorsToSet(request, headers, configs.public);
+
+    expect(headers['access-control-allow-credentials']).toBeUndefined();
+    expect(headers['access-control-allow-origin']).toBe('https://book.rezics.com');
   });
 });

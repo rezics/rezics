@@ -1,4 +1,4 @@
-export {serverCorsPolicy, allowedOrigins} from './cors';
+export {serverCorsPolicy, allowedOrigins, serverConfigs} from './cors';
 export {
   requireLogin,
   requireOwner,

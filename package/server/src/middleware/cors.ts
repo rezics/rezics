@@ -59,7 +59,7 @@ const internalCorsConfig: CorsPolicyConfig = {
   exposeHeaders: ['Content-Type'],
 };
 
-const serverConfigs: Record<CorsPolicyName, CorsPolicyConfig> = {
+export const serverConfigs: Record<CorsPolicyName, CorsPolicyConfig> = {
   credentialed: credentialedCorsConfig,
   public: publicCorsConfig,
   internal: internalCorsConfig,

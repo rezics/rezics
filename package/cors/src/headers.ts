@@ -34,6 +34,33 @@ export function applyHeaders(
   }
 }
 
+/**
+ * Apply CORS headers to a plain header record (Elysia `set.headers`).
+ * Use this in app-level `onError` handlers where the `Headers` API is not
+ * available.
+ */
+export function applyCorsToSet(
+  request: Request,
+  setHeaders: Record<string, string | undefined>,
+  config: CorsPolicyConfig,
+): void {
+  const origin = request.headers.get('origin');
+  if (origin && config.origin.includes(origin)) {
+    setHeaders['access-control-allow-origin'] = origin;
+    setHeaders['vary'] = 'Origin';
+  }
+  setHeaders['access-control-allow-methods'] = config.methods.join(', ');
+  setHeaders['access-control-allow-headers'] =
+    config.allowedHeaders.join(', ');
+  if (config.exposeHeaders.length > 0) {
+    setHeaders['access-control-expose-headers'] =
+      config.exposeHeaders.join(', ');
+  }
+  if (config.credentials) {
+    setHeaders['access-control-allow-credentials'] = 'true';
+  }
+}
+
 export function preflightResponse(
   request: Request,
   config: CorsPolicyConfig,

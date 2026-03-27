@@ -2,6 +2,8 @@ import {coreInstance} from './core';
 import {authOpenApiRouter} from './openapi';
 import {env} from './env';
 import {openapi} from '@elysiajs/openapi';
+import {applyCorsToSet} from '@package/cors';
+import {authConfigs} from './cors';
 
 const isDev = env.NODE_ENV === 'development';
 
@@ -31,7 +33,11 @@ if (isDev) {
 }
 
 app
-  .onError(({error, set}) => {
+  .onError(({error, request, set}) => {
+    if (!set.headers['access-control-allow-origin']) {
+      applyCorsToSet(request, set.headers, authConfigs['credentialed']);
+    }
+
     if (!set.status) {
       set.status = 500;
     }

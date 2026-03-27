@@ -31,6 +31,7 @@ import {feedbackApi} from './feedback';
 import {sessionApi} from './session';
 import {jwtServiceAdminApi} from './jwt';
 
+import {applyCorsToSet} from '@package/cors';
 import {getProdState} from './utils/getProdState';
 import {env} from './env';
 import {bootstrapJwtServiceRecord, getJwtService} from './jwt';
@@ -38,6 +39,7 @@ import {
   serverSessionJwksPath,
   authSessionJwksPath,
 } from './session/jwt/jwt-metadata';
+import {serverConfigs} from '@/middleware';
 
 import 'dotenv/config';
 
@@ -113,7 +115,11 @@ const rezicsSessionVerifier = createJwtVerifier<RezicsSessionTokenClaims>({
 });
 
 app
-  .onError(({code, error, set}) => {
+  .onError(({code, error, request, set}) => {
+    if (!set.headers['access-control-allow-origin']) {
+      applyCorsToSet(request, set.headers, serverConfigs['credentialed']);
+    }
+
     set.status ||= 500;
     const message =
       error instanceof Error ? error.message : 'Internal Server Error';

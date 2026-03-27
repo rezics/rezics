@@ -30,8 +30,8 @@ export function corsPolicy(
       applyHeaders(request, res.headers, config);
       return res;
     })
-    .onError({as: 'scoped'}, ({request, set}) => {
-      const config = configs[defaultPolicy];
+    .onError({as: 'scoped'}, ({request, set, __corsPolicy}) => {
+      const config = configs[__corsPolicy ?? defaultPolicy];
       const origin = request.headers.get('origin');
       if (origin && config.origin.includes(origin)) {
         set.headers['access-control-allow-origin'] = origin;
