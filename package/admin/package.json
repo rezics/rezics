@@ -41,8 +41,7 @@
     "react-chartjs-2": "^5.3.1",
     "react-dom": "^19",
     "tailwind-merge": "^3.4.0",
-    "unocss-preset-scrollbar-hide": "^1.0.1",
-    "vite-tsconfig-paths": "^6.0.5"
+    "unocss-preset-scrollbar-hide": "^1.0.1"
   },
   "devDependencies": {
     "@types/react": "^19",
