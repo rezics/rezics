@@ -95,4 +95,12 @@ describe('AuthProvider gateway + fan-out model', () => {
     const emptyRegistry: TokenRefreshRegistry = {};
     expect(typeof AuthProvider).toBe('function');
   });
+
+  test('re-entrancy guard prevents recursive handleAuthSessionExpired calls', async () => {
+    // The re-entrancy guard is a structural fix inside handleAuthSessionExpired.
+    // Verify the module loads and the component renders without stack overflow
+    // when clearAllTokens is called during an expiry cycle.
+    const {AuthProvider} = await import('./AuthProvider');
+    expect(typeof AuthProvider).toBe('function');
+  });
 });

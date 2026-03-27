@@ -115,6 +115,7 @@ export function AuthProvider({
   useEffect(() => {
     let mounted = true;
     let refreshTimeout: number | null = null;
+    let isHandlingExpiry = false;
 
     const serviceTokenNames = tokens.filter(
       t => t !== NormalizedTokenName.AUTH_IDENTITY,
@@ -148,10 +149,16 @@ export function AuthProvider({
     }
 
     function handleAuthSessionExpired() {
-      clearTimer();
-      clearAuthPresence();
-      clearAllTokens();
-      clearAuthSessionState();
+      if (isHandlingExpiry) return;
+      isHandlingExpiry = true;
+      try {
+        clearTimer();
+        clearAuthPresence();
+        clearAllTokens();
+        clearAuthSessionState();
+      } finally {
+        isHandlingExpiry = false;
+      }
     }
 
     async function runRefreshCycle() {
