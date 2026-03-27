@@ -203,7 +203,6 @@ export async function queryAccessToken(options?: {requirePresence?: boolean}) {
   const token = json.token ?? null;
   if (!token) {
     clearAuthPresence();
-    removeToken(NormalizedTokenName.AUTH_IDENTITY);
     throw new Error('Unauthorized - Please login again');
   }
   setToken(token, NormalizedTokenName.AUTH_IDENTITY);
