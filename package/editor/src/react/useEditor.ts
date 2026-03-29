@@ -1,9 +1,12 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { EditorState, type Extension } from '@codemirror/state';
 import { EditorView, type KeyBinding } from '@codemirror/view';
 import { resolvePlugins } from '../core/plugin';
 import { mergeKeybindings } from '../core/keybindings';
 import type { EditorPlugin } from '../core/types';
+
+const EMPTY_PLUGINS: EditorPlugin[] = [];
+const EMPTY_KEYBINDINGS: KeyBinding[] = [];
 
 export interface UseEditorOptions {
   doc?: string;
@@ -14,16 +17,25 @@ export interface UseEditorOptions {
 }
 
 export function useEditor(options: UseEditorOptions) {
-  const { doc = '', plugins = [], keybindings = [], theme, onChange } = options;
+  const {
+    doc = '',
+    plugins = EMPTY_PLUGINS,
+    keybindings = EMPTY_KEYBINDINGS,
+    theme,
+    onChange,
+  } = options;
   const viewRef = useRef<EditorView | null>(null);
   const onChangeRef = useRef(onChange);
   onChangeRef.current = onChange;
+
+  const [view, setView] = useState<EditorView | null>(null);
 
   const containerRef = useCallback(
     (node: HTMLElement | null) => {
       if (viewRef.current) {
         viewRef.current.destroy();
         viewRef.current = null;
+        setView(null);
       }
 
       if (!node) return;
@@ -45,10 +57,12 @@ export function useEditor(options: UseEditorOptions) {
         extensions.push(theme);
       }
 
-      viewRef.current = new EditorView({
+      const created = new EditorView({
         state: EditorState.create({ doc, extensions }),
         parent: node,
       });
+      viewRef.current = created;
+      setView(created);
     },
     // Recreate on plugin/keybinding/theme identity change
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -75,5 +89,5 @@ export function useEditor(options: UseEditorOptions) {
     };
   }, []);
 
-  return { containerRef, viewRef };
+  return { containerRef, view };
 }

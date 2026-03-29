@@ -19,13 +19,13 @@ export interface EditorProps {
 export function Editor({
   value,
   onChange,
-  plugins = [],
-  keybindings = [],
+  plugins,
+  keybindings,
   toolbar,
   theme,
   className,
 }: EditorProps) {
-  const { containerRef, viewRef } = useEditor({
+  const { containerRef, view } = useEditor({
     doc: value,
     plugins,
     keybindings,
@@ -33,11 +33,11 @@ export function Editor({
     onChange,
   });
 
-  const toolbarItems = resolvePlugins(plugins).toolbar;
+  const toolbarItems = resolvePlugins(plugins ?? []).toolbar;
   const showReactToolbar = toolbar === 'react' && toolbarItems.length > 0;
 
   return (
-    <EditorContext.Provider value={viewRef.current}>
+    <EditorContext.Provider value={view}>
       <div className={className}>
         {showReactToolbar && <ReactToolbar items={toolbarItems} />}
         <div ref={containerRef} />
