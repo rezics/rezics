@@ -33,7 +33,7 @@ export default defineConfig(({mode}) => {
       // sourcemap: true, // Enable sourcemap for production build for debugging tools like Sentry
     },
     server: {
-      port: 35001,
+      port: 35002,
       // sourcemapIgnoreList: false, // Disable sourcemap ignore list, will include all files like node_modules, etc.
     },
     define: {

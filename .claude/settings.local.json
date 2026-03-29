@@ -1,5 +1,21 @@
 {
+  "sandbox": {
+    "enabled": true,
+    "autoAllowBashIfSandboxed": true,
+    "filesystem": {
+      "allowWrite": ["."],
+      "denyWrite": [
+        "~/.ssh/**",
+        "~/.gnupg/**",
+        "~/.config/**",
+        "~/.bashrc",
+        "~/.zshrc"
+      ],
+      "denyRead": ["~/.ssh/**", "~/.gnupg/**"]
+    }
+  },
   "permissions": {
+    "defaultMode": "bypassPermissions",
     "allow": [
       "WebSearch",
       "WebFetch(domain:elysiajs.com)",
@@ -16,7 +32,5 @@
       "Bash(rg:*)"
     ]
   },
-  "sandbox": {
-    "enabled": true
-  }
+  "deny": ["Bash(sudo:*)", "Bash(rm -rf /*)"]
 }
