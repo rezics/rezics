@@ -3,16 +3,11 @@
   "compilerOptions": {
     "target": "ES2022",
     "lib": ["DOM", "ES2022"],
+    "types": ["bun-types"],
     "jsx": "react-jsx",
-
     "paths": {
-      "@/*": ["./src/*"],
-      "@component/*": ["./src/component/*"],
-      "@page/*": ["./src/page/*"],
-      "@locale": ["./src/locale/index.ts"],
-      "@app/*": ["./src/app/*"]
+      "@/*": ["./src/*"]
     },
-
     "noUnusedParameters": true
   },
   "include": ["src/**/*.ts", "src/**/*.tsx"],

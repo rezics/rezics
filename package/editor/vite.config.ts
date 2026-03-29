@@ -1,41 +1,31 @@
-import {tanstackRouter} from '@tanstack/router-plugin/vite';
-import UnoCSS from 'unocss/vite';
-import process from 'node:process';
-import {defineConfig, loadEnv} from 'vite';
-import react from '@vitejs/plugin-react';
-import errorOverlay from '@visulima/vite-overlay';
+import { resolve } from 'node:path';
+import { defineConfig } from 'vite';
 
-// https://vitejs.dev/config/
-export default defineConfig(({mode}) => {
-  const env = loadEnv(mode, process.cwd(), 'ICS');
-
-  return {
-    resolve: {
-      tsconfigPaths: true,
+export default defineConfig({
+  build: {
+    lib: {
+      entry: {
+        index: resolve(__dirname, 'src/index.ts'),
+        markdown: resolve(__dirname, 'src/markdown/index.ts'),
+        json: resolve(__dirname, 'src/json/index.ts'),
+      },
+      formats: ['es'],
     },
-    plugins: [
-      tanstackRouter({
-        target: 'react',
-        autoCodeSplitting: true,
-        routesDirectory: 'src/mock/routes',
-        generatedRouteTree: 'src/mock/routeTree.gen.ts',
-      }),
-      UnoCSS(),
-      react(),
-      // react({
-      //   babel: {
-      //     plugins: [['babel-plugin-react-compiler', {panicThreshold: 'none'}]],
-      //   },
-      // }),
-      errorOverlay({
-        reactPluginName: '@vitejs/plugin-react',
-        forwardConsole: true,
-        forwardedConsoleMethods: ['error', 'warn', 'log'],
-        showBallonButton: true,
-      }),
-    ],
-    define: {
-      'process.env': env,
+    rollupOptions: {
+      external: [
+        'react',
+        'react-dom',
+        'react/jsx-runtime',
+        /^@codemirror\//,
+        /^@lezer\//,
+        'markdown-it',
+      ],
+      output: {
+        preserveModules: true,
+        entryFileNames: '[name].js',
+      },
     },
-  };
+    target: 'es2022',
+    minify: false,
+  },
 });
