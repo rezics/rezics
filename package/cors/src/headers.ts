@@ -41,7 +41,7 @@ export function applyHeaders(
  */
 export function applyCorsToSet(
   request: Request,
-  setHeaders: Record<string, string | undefined>,
+  setHeaders: Record<string, string | number | undefined>,
   config: CorsPolicyConfig,
 ): void {
   const origin = request.headers.get('origin');

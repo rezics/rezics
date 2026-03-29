@@ -1,5 +1,4 @@
 {
-  // "typescript.experimental.useTsgo": true,
   "cSpell.words": [
     "appbar",
     "Argb",
@@ -39,6 +38,8 @@
     "meilisearch",
     "Millis",
     "nanojson",
+    "njsproj",
+    "ntvs",
     "openspec",
     "OPSX",
     "Overflowx",

@@ -66,8 +66,7 @@ if (isDev) {
 
 const port = env.PORT ? Number(env.PORT) : 3000;
 
-const serverBaseUrl =
-  env.MAIN_SESSION_JWT_ISSUER ?? `http://localhost:${port}`;
+const serverBaseUrl = env.MAIN_SESSION_JWT_ISSUER ?? `http://localhost:${port}`;
 const authIssuer = env.AUTH_JWT_ISSUER ?? 'http://localhost:35003';
 const authAudience = env.AUTH_JWT_AUDIENCE ?? 'rezics-api';
 const authJwksUrl =
