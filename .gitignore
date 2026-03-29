@@ -1,9 +1,10 @@
 # Visual Studio Counter
 .VSCodeCounter/
-
 example-gitignore/
 
+#claude
 .claude/worktrees/
+.claude/settings.local.json
 
 # Shadcn config
 tailwind.config.js
