@@ -32,6 +32,7 @@
       "Bash(git shortlog:*)",
       "WebSearch",
       "WebFetch(domain:elysiajs.com)",
+      "WebFetch(domain:registry.npmjs.org)",
       "Bash(openspec:*)",
       "Bash(openspec new:*)",
       "Bash(openspec status:*)",
