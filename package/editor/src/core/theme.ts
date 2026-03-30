@@ -46,7 +46,11 @@ export function createTheme(config: ThemeConfig): Extension {
     { dark: variant === 'dark' },
   );
 
-  const highlighting = HighlightStyle.define(styles);
+  const extensions: Extension[] = [theme];
 
-  return [theme, syntaxHighlighting(highlighting)];
+  if (styles.length > 0) {
+    extensions.push(syntaxHighlighting(HighlightStyle.define(styles)));
+  }
+
+  return extensions;
 }

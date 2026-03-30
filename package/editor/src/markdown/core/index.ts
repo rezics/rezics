@@ -1,12 +1,12 @@
 import type { EditorPlugin } from '../../core/types';
-import { markdownLanguageSupport } from './language';
+import { markdownLanguageSupport, type MarkdownLanguageConfig } from './language';
 import { markdownKeybindings } from './keybindings';
 import { markdownToolbarItems } from '../toolbar/index';
 
-export function markdown(): EditorPlugin {
+export function markdown(config?: MarkdownLanguageConfig): EditorPlugin {
   return {
     name: 'markdown',
-    extensions: markdownLanguageSupport(),
+    extensions: markdownLanguageSupport(config),
     keybindings: markdownKeybindings,
     toolbar: markdownToolbarItems,
   };

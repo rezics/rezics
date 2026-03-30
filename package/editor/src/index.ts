@@ -17,6 +17,7 @@ export type { ToolbarItem, ToolbarEntry, ToolbarSeparator } from './toolbar/type
 // Markdown (granular + preset)
 export { markdownFull } from './markdown/index';
 export { markdown } from './markdown/core/index';
+export type { MarkdownLanguageConfig } from './markdown/core/language';
 export { preview } from './markdown/preview/index';
 export { mention } from './markdown/mention/index';
 export { emoji } from './markdown/emoji/index';

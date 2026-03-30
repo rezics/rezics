@@ -21,10 +21,13 @@
     "@codemirror/lang-json": "^6.0.2",
     "@codemirror/lang-markdown": "^6.5.0",
     "@codemirror/language": "^6.12.3",
+    "@codemirror/language-data": "^6.5.2",
     "@codemirror/lint": "^6.9.5",
     "@codemirror/state": "^6.6.0",
     "@codemirror/view": "^6.40.0",
+    "@lezer/highlight": "^1.2.3",
     "@lezer/markdown": "^1.6.3",
+    "highlight.js": "^11.11.1",
     "markdown-it": "^14.1.1"
   },
   "peerDependencies": {

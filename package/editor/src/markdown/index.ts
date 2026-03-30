@@ -1,17 +1,21 @@
 import type { EditorPlugin } from '../core/types';
+import type { MarkdownLanguageConfig } from './core/language';
 import { markdown } from './core/index';
 import { mention, type MentionConfig } from './mention/index';
 import { emoji, type EmojiConfig } from './emoji/index';
 import { preview, type PreviewConfig } from './preview/index';
+import { languages } from '@codemirror/language-data';
 
-export interface MarkdownFullConfig {
+export interface MarkdownFullConfig extends MarkdownLanguageConfig {
   mention?: MentionConfig;
   emoji?: EmojiConfig;
   preview?: boolean | PreviewConfig;
 }
 
 export function markdownFull(config?: MarkdownFullConfig): EditorPlugin[] {
-  const plugins: EditorPlugin[] = [markdown()];
+  const plugins: EditorPlugin[] = [
+    markdown({ codeLanguages: config?.codeLanguages ?? languages }),
+  ];
 
   if (config?.mention) {
     plugins.push(mention(config.mention));
