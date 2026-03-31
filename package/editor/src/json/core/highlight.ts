@@ -4,7 +4,7 @@ import type {Extension} from '@codemirror/state';
 
 const jsonHighlightStyle = HighlightStyle.define([
   // Object keys
-  {tag: tags.propertyName, color: '#0969da'},
+  {tag: tags.propertyName, color: '#1976d2'},
 
   // Values
   {tag: tags.string, color: '#1a7f37'},
