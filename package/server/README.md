@@ -35,6 +35,9 @@ bun run ./prisma/seed/utils/passwordReset.ts
 bunx prisma migrate reset
 bun run prisma:seed:echokv
 
+# Apply existing migrations
+bunx prisma migrate deploy
+
 # Linux
 npx prisma generate
 ```
