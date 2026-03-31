@@ -62,7 +62,7 @@ export function ReactToolbar({ items, className }: ReactToolbarProps) {
               fontSize: 13,
             }}
           >
-            {typeof item.icon === 'string' ? item.icon : item.label}
+            {item.icon ?? item.label}
           </button>
         );
       })}

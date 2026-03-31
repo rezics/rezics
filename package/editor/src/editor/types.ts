@@ -1,0 +1,45 @@
+import type { Extension } from '@codemirror/state';
+import type { EditorView, KeyBinding } from '@codemirror/view';
+import type { ReactNode } from 'react';
+import type { EditorPlugin } from '../core/types';
+import type { ToolbarItem } from '../toolbar/types';
+import type { MentionConfig } from '../markdown/mention/index';
+import type { EmojiConfig } from '../markdown/emoji/index';
+import type { PreviewConfig } from '../markdown/preview/index';
+
+export interface ToolbarOverride {
+  /** Replace default icons by toolbar item name */
+  icons?: Record<string, ReactNode>;
+
+  /** Transform the default toolbar items array.
+   *  Receives items with icons already applied.
+   *  Return the final items array. */
+  extend?: (items: ToolbarItem[]) => ToolbarItem[];
+
+  /** Fully replace the toolbar rendering.
+   *  Receives the final items array and the EditorView. */
+  render?: (items: ToolbarItem[], view: EditorView) => ReactNode;
+}
+
+export interface BaseEditorProps {
+  value?: string;
+  onChange?: (value: string) => void;
+  theme?: Extension;
+  className?: string;
+  keybindings?: KeyBinding[];
+  plugins?: EditorPlugin[];
+}
+
+export interface MarkdownEditorProps extends BaseEditorProps {
+  preview?: boolean | PreviewConfig;
+  mention?: MentionConfig;
+  emoji?: EmojiConfig;
+  toolbar?: false | ToolbarOverride;
+}
+
+export interface JsonEditorProps extends BaseEditorProps {
+  lint?: boolean;
+  toolbar?: false | ToolbarOverride;
+}
+
+export interface CodeEditorProps extends BaseEditorProps {}
