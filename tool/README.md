@@ -1,5 +1,5 @@
 ```sh
-cd /www/wwwroot/Library.Book/Library.Book/package/util/
+cd /www/wwwroot/Library.Book/Library.Book/tool/
 bun run deploy
 ```
 

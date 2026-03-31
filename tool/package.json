@@ -1,5 +1,5 @@
 {
-  "name": "@package/util",
+  "name": "@tool/util",
   "version": "0.0.1",
   "scripts": {
     "install-services": "bun run install-services/install-services.ts",
