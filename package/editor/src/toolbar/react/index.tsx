@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useState } from 'react';
 import { EditorView } from '@codemirror/view';
 import { StateEffect } from '@codemirror/state';
-import type { ToolbarItem } from '../types';
+import type { ToolbarItem, ToolbarEntry } from '../types';
 import { useEditorContext } from '../../react/context';
 
 export interface ReactToolbarProps {
-  items: ToolbarItem[];
+  items: ToolbarEntry[];
   className?: string;
 }
 
@@ -104,6 +104,20 @@ function ToolbarButton({
   );
 }
 
+function ToolbarSeparatorEl() {
+  return (
+    <div
+      role="separator"
+      style={{
+        width: 1,
+        alignSelf: 'stretch',
+        margin: '4px 4px',
+        background: '#d0d7de',
+      }}
+    />
+  );
+}
+
 export function ReactToolbar({ items, className }: ReactToolbarProps) {
   const view = useEditorContext();
   useEditorUpdate(view);
@@ -114,17 +128,20 @@ export function ReactToolbar({ items, className }: ReactToolbarProps) {
     <div
       role="toolbar"
       className={className}
-      style={{ display: 'flex', gap: 2, padding: '4px 8px' }}
+      style={{ display: 'flex', gap: 2, padding: '4px 8px', alignItems: 'center' }}
     >
-      {items.map((item) => {
-        const active = item.isActive?.(view.state) ?? false;
+      {items.map((entry, i) => {
+        if (entry === '|') {
+          return <ToolbarSeparatorEl key={`sep-${i}`} />;
+        }
+        const active = entry.isActive?.(view.state) ?? false;
         return (
           <ToolbarButton
-            key={item.name}
-            item={item}
+            key={entry.name}
+            item={entry}
             active={active}
             onClick={() => {
-              item.action(view);
+              entry.action(view);
               view.focus();
             }}
           />

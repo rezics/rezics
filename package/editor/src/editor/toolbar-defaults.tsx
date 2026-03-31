@@ -12,6 +12,8 @@ import {
   Code,
   Eye,
   Braces,
+  Columns2,
+  Maximize,
 } from 'lucide-react';
 
 export const markdownIconMap: Record<string, ReactNode> = {
@@ -26,6 +28,8 @@ export const markdownIconMap: Record<string, ReactNode> = {
   table: <Table size={16} />,
   'code-block': <Code size={16} />,
   preview: <Eye size={16} />,
+  'dual-column': <Columns2 size={16} />,
+  fullscreen: <Maximize size={16} />,
 };
 
 export const jsonIconMap: Record<string, ReactNode> = {

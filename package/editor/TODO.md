@@ -1,0 +1,2 @@
+- [ ] The test structure needs optimization; the current test coverage is clearly too narrow, for example, custom themes are not being tested.
+- [ ] Is setting `preview = true` useful in a Markdown editor? Can it be removed?
