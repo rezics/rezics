@@ -1,10 +1,12 @@
-import { JsonEditor } from './JsonEditor';
+import {JsonEditor} from './JsonEditor';
 
 const validJson = JSON.stringify(
   {
     name: '@package/editor',
     version: '1.0.50',
     type: 'module',
+    published: true,
+    mock_number_data: 1234567890,
     dependencies: {
       '@codemirror/state': '^6.6.0',
       '@codemirror/view': '^6.40.0',
@@ -23,13 +25,9 @@ const invalidJson = `{
 }`;
 
 export default {
-  Default: () => (
-    <JsonEditor value={validJson} className="h-screen" />
-  ),
+  Default: () => <JsonEditor value={validJson} className="h-screen" />,
 
-  WithLint: () => (
-    <JsonEditor value={invalidJson} className="h-screen" />
-  ),
+  WithLint: () => <JsonEditor value={invalidJson} className="h-screen" />,
 
   NoLint: () => (
     <JsonEditor value={validJson} lint={false} className="h-screen" />
