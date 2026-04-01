@@ -141,7 +141,7 @@ describe('refreshAuthToken', () => {
       headers: {
         Authorization:
           'Bearer eyJhbGciOiJub25lIn0.eyJzdWIiOiJ1c2VyLTEiLCJleHAiOjQ3NjYwMDAwMDB9.c2ln',
-        'x-rezics_session_token': 'member-token',
+        'x-rezics-session-token': 'member-token',
         'x-trace-id': 'trace-1',
       },
     });

@@ -67,7 +67,7 @@ mock.module('./jwt/jwt.service', () => ({
     unitId: 'user-1',
     permission: {role: 'USER'},
   }),
-  REZICS_SESSION_HEADER: 'x-rezics_session_token',
+  REZICS_SESSION_HEADER: 'x-rezics-session-token',
   getMainSessionJwtContext: () => ({}),
 }));
 

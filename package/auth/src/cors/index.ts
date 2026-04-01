@@ -3,6 +3,7 @@ import {
   type CorsPolicyConfig,
   type CorsPolicyName,
 } from '@package/cors';
+import {TokenTransportHeader} from '@package/contract';
 import {env} from '../env';
 
 const devOrigins = [
@@ -17,6 +18,13 @@ const isDev = env.NODE_ENV === 'development';
 
 export const allowedOrigins = isDev ? devOrigins : prodOrigins;
 
+const tokenHeaders = [
+  TokenTransportHeader.AUTH_CONTEXT,
+  TokenTransportHeader.REZICS_SESSION,
+  TokenTransportHeader.NOTIFICATION_SESSION,
+  TokenTransportHeader.SEARCH_SESSION,
+];
+
 const credentialedCorsConfig: CorsPolicyConfig = {
   origin: allowedOrigins,
   credentials: true,
@@ -25,26 +33,32 @@ const credentialedCorsConfig: CorsPolicyConfig = {
     'content-type',
     'authorization',
     'x-internal-auth-token',
+    ...tokenHeaders,
   ],
   exposeHeaders: [],
 };
 
 const publicCorsConfig: CorsPolicyConfig = {
   origin: allowedOrigins,
-  credentials: false,
+  credentials: true,
   methods: ['GET', 'POST', 'OPTIONS'],
-  allowedHeaders: ['content-type', 'authorization'],
+  allowedHeaders: [
+    'content-type',
+    'authorization',
+    ...tokenHeaders,
+  ],
   exposeHeaders: [],
 };
 
 const internalCorsConfig: CorsPolicyConfig = {
   origin: allowedOrigins,
-  credentials: false,
+  credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: [
     'content-type',
     'authorization',
     'x-internal-auth-token',
+    ...tokenHeaders,
   ],
   exposeHeaders: [],
 };

@@ -3,6 +3,7 @@ import {
   type CorsPolicyConfig,
   type CorsPolicyName,
 } from '@package/cors';
+import {TokenTransportHeader} from '@package/contract';
 import {getProdState} from '../utils/getProdState';
 
 const {isDev} = getProdState();
@@ -17,46 +18,52 @@ const prodOrigins = ['https://book.rezics.com', 'https://rezics.com'];
 
 export const allowedOrigins = isDev ? devOrigins : prodOrigins;
 
+const tokenHeaders = [
+  TokenTransportHeader.AUTH_CONTEXT,
+  TokenTransportHeader.REZICS_SESSION,
+  TokenTransportHeader.NOTIFICATION_SESSION,
+  TokenTransportHeader.SEARCH_SESSION,
+];
+
 const credentialedCorsConfig: CorsPolicyConfig = {
   origin: allowedOrigins,
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: [
-    'Content-Type',
-    'Authorization',
-    'Accept',
-    'X-Requested-With',
-    'x-auth_context_token',
-    'x-rezics_session_token',
+    'content-type',
+    'authorization',
+    'accept',
+    ...tokenHeaders,
   ],
   exposeHeaders: [
-    'Content-Type',
-    'Authorization',
-    'x-rezics_session_token',
+    TokenTransportHeader.REZICS_SESSION,
   ],
 };
 
 const publicCorsConfig: CorsPolicyConfig = {
   origin: allowedOrigins,
-  credentials: false,
+  credentials: true,
   methods: ['GET', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
-  exposeHeaders: ['Content-Type'],
+  allowedHeaders: [
+    'content-type',
+    'authorization',
+    'accept',
+    ...tokenHeaders,
+  ],
+  exposeHeaders: [],
 };
 
 const internalCorsConfig: CorsPolicyConfig = {
   origin: allowedOrigins,
-  credentials: false,
+  credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: [
-    'Content-Type',
-    'Authorization',
-    'Accept',
-    'X-Requested-With',
-    'x-auth_context_token',
-    'x-rezics_session_token',
+    'content-type',
+    'authorization',
+    'accept',
+    ...tokenHeaders,
   ],
-  exposeHeaders: ['Content-Type'],
+  exposeHeaders: [],
 };
 
 export const serverConfigs: Record<CorsPolicyName, CorsPolicyConfig> = {
