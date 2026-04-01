@@ -1,0 +1,11 @@
+tab name="auth" focus=true {
+    pane command="bun" cwd="../../../package/auth" {
+        args "dev"
+    }
+}
+
+tab name="server" {
+    pane command="bun" cwd="../../../package/server" {
+        args "dev"
+    }
+}

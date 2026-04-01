@@ -1,0 +1,11 @@
+tab name="app" {
+    pane command="bun" cwd="../../../package/app" {
+        args "dev"
+    }
+}
+
+tab name="admin" {
+    pane command="bun" cwd="../../../package/admin" {
+        args "dev"
+    }
+}

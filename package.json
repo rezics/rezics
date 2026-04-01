@@ -2,6 +2,7 @@
   "name": "rezics-book-library",
   "private": true,
   "scripts": {
+    "dev": "cd tool && bun run dev-script/dev.ts",
     "app:dev": "cd package/app && bun run dev",
     "server:dev": "cd package/server && bun run dev",
     "deploy": "cd tool && bun run deploy",

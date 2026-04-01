@@ -1,7 +1,8 @@
 {
-  "name": "@tool/util",
+  "name": "tool",
   "version": "0.0.1",
   "scripts": {
+    "dev": "bun run dev-script/dev.ts",
     "install-services": "bun run install-services/install-services.ts",
     "deploy": "bun run deploy-script/deploy-script.ts",
     "generate-barrel": "bun run scripts/generate-barrel.ts"

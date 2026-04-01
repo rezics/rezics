@@ -10,6 +10,7 @@ Library.Book (rezics-book-library) is a full-stack TypeScript monorepo for a boo
 
 ```bash
 # Development
+bun run dev              # Start all dev services (Zellij on Linux/macOS, tmux on Windows)
 bun run app:dev          # Start frontend dev server (Vite, port 35001)
 bun run server:dev       # Start backend dev server (Elysia with --watch)
 
