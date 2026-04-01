@@ -1,20 +1,10 @@
 import type {GetSessionStateResponse} from '@package/contract';
 import {env} from '../env';
-import {getJwtService} from '../jwt';
-
-async function getAuthApiBaseUrl(): Promise<string> {
-  if (env.AUTH_API_URL) {
-    return env.AUTH_API_URL;
-  }
-
-  const trustedAuth = await getJwtService('auth-upstream');
-  return trustedAuth.issuer;
-}
 
 export async function getAuthSessionState(
   authorization: string,
 ): Promise<GetSessionStateResponse> {
-  const response = await fetch(`${await getAuthApiBaseUrl()}/api/auth/get-session-state`, {
+  const response = await fetch(`${env.AUTH_BASE_URL}/api/auth/get-session-state`, {
     method: 'GET',
     headers: {
       Authorization: authorization,

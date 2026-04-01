@@ -69,10 +69,8 @@ jspm_packages/
 
 # dotenv environment variables file
 .env
-.env.development.local
-.env.test.local
-.env.production.local
-.env.local
+.env.*
+!.env.example
 
 # Editor directories and files
 # .vscode/*

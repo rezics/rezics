@@ -6,11 +6,7 @@ import {verifyBearerToken, JwtAlgorithm} from '@package/jwt';
 process.env.NODE_ENV = 'test';
 process.env.DATABASE_URL ??=
   'postgresql://postgres:postgres@localhost:5432/rezics_book';
-process.env.JWT_SECRET ??=
-  'server-jwt-secret-for-tests-abcdefghijklmnopqrstuvwxyz';
-process.env.REFRESH_TOKEN_SECRET ??=
-  'server-refresh-secret-for-tests-abcdefghijklmnopqrstuvwxyz';
-process.env.AUTH_JWT_ISSUER = 'http://localhost:3001';
+process.env.AUTH_BASE_URL ??= 'http://localhost:3001';
 process.env.AUTH_JWT_AUDIENCE = 'rezics-api';
 process.env.AUTH_JWT_CLOCK_TOLERANCE_SECONDS = '5';
 process.env.BETTER_AUTH_URL ??= 'http://localhost:3001';

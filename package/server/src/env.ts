@@ -22,38 +22,17 @@ export const env = createEnv({
     DATABASE_URL: v.string(),
 
     /**
-     * Secret used by the server for local JWT signing or verification flows.
-     * Keep this secret private and unique per environment.
+     * Public base URL of the auth service.
+     * Used to derive issuer, JWKS (via /.well-known/jwks.json), and API calls.
+     * Defaults to 'http://localhost:3001'.
      */
-    JWT_SECRET: v.string(),
-
-    /**
-     * Secret used by the server for refresh token handling.
-     * Keep this secret private and different from other signing secrets.
-     */
-    REFRESH_TOKEN_SECRET: v.string(),
-
-    /**
-     * Bootstrap-only explicit JWKS endpoint used to seed the trusted auth JWT service record.
-     * Steady-state verification reads the persisted trusted-issuer metadata table.
-     */
-    AUTH_JWKS_URL: v.optional(v.string()),
-
-    /**
-     * Bootstrap-only issuer for auth JWT validation metadata seeding.
-     */
-    AUTH_JWT_ISSUER: v.optional(v.string()),
+    AUTH_BASE_URL: v.fallback(v.string(), 'http://localhost:3001'),
 
     /**
      * Bootstrap-only audience for auth JWT validation metadata seeding.
+     * Defaults to 'rezics-api'.
      */
     AUTH_JWT_AUDIENCE: v.optional(v.string()),
-
-    /**
-     * Optional explicit auth-service base URL for session-state checks.
-     * When omitted, the server uses the persisted trusted auth issuer metadata.
-     */
-    AUTH_API_URL: v.optional(v.string()),
 
     /**
      * Allowed JWT clock skew in seconds, provided as a string.

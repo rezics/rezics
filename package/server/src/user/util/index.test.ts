@@ -3,10 +3,7 @@ import {describe, expect, test} from 'bun:test';
 process.env.NODE_ENV = 'test';
 process.env.DATABASE_URL ??=
   'postgresql://postgres:postgres@localhost:5432/rezics_book';
-process.env.JWT_SECRET ??=
-  'server-jwt-secret-for-tests-abcdefghijklmnopqrstuvwxyz';
-process.env.REFRESH_TOKEN_SECRET ??=
-  'server-refresh-secret-for-tests-abcdefghijklmnopqrstuvwxyz';
+process.env.AUTH_BASE_URL ??= 'http://localhost:3001';
 
 describe('server auth verifier options', () => {
   test('maps trusted auth jwt metadata into verifier options', async () => {

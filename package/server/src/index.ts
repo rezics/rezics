@@ -35,10 +35,7 @@ import {applyCorsToSet} from '@package/cors';
 import {getProdState} from './utils/getProdState';
 import {env} from './env';
 import {bootstrapJwtServiceRecord, getJwtService} from './jwt';
-import {
-  serverSessionJwksPath,
-  authSessionJwksPath,
-} from './session/jwt/jwt-metadata';
+import {serverSessionJwksPath} from './session/jwt/jwt-metadata';
 import {serverConfigs} from '@/middleware';
 import {wellKnownApi} from './well-known/well-known.api';
 
@@ -68,10 +65,9 @@ if (isDev) {
 const port = env.PORT ? Number(env.PORT) : 3000;
 
 const serverBaseUrl = env.MAIN_SESSION_JWT_ISSUER ?? `http://localhost:${port}`;
-const authIssuer = env.AUTH_JWT_ISSUER ?? 'http://localhost:3001';
+const authBaseUrl = env.AUTH_BASE_URL;
 const authAudience = env.AUTH_JWT_AUDIENCE ?? 'rezics-api';
-const authJwksUrl =
-  env.AUTH_JWKS_URL ?? new URL(authSessionJwksPath, authIssuer).toString();
+const authJwksUrl = new URL('/.well-known/jwks.json', authBaseUrl).toString();
 
 await Promise.all([
   bootstrapJwtServiceRecord('server-local', {
@@ -82,10 +78,10 @@ await Promise.all([
     isLocalIssuer: true,
   }),
   bootstrapJwtServiceRecord('auth-upstream', {
-    issuer: authIssuer,
+    issuer: authBaseUrl,
     audience: authAudience,
     jwksUrl: authJwksUrl,
-    jwksPath: authSessionJwksPath,
+    jwksPath: '/.well-known/jwks.json',
     isLocalIssuer: false,
   }),
 ]);
