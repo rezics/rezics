@@ -10,22 +10,14 @@ import {
   normalizedTokenTransportMap,
 } from '@package/contract';
 
-const AUTH_STORE_KEY = 'auth-store';
 const DEFAULT_TOKEN_STORAGE_KEYS: Record<string, string> = {
-  [NormalizedTokenName.AUTH_IDENTITY]: 'auth-store',
-  [NormalizedTokenName.REZICS_SESSION]: 'rezics-session-store',
-  [NormalizedTokenName.NOTIFICATION_SESSION]: 'notification-session-store',
-  [NormalizedTokenName.SEARCH_SESSION]: 'search-session-store',
+  [NormalizedTokenName.AUTH_IDENTITY]: NormalizedTokenName.AUTH_IDENTITY,
+  [NormalizedTokenName.REZICS_SESSION]: NormalizedTokenName.REZICS_SESSION,
+  [NormalizedTokenName.NOTIFICATION_SESSION]: NormalizedTokenName.NOTIFICATION_SESSION,
+  [NormalizedTokenName.SEARCH_SESSION]: NormalizedTokenName.SEARCH_SESSION,
 };
 
 export const AUTH_TOKEN_STORAGE_EVENT = 'package-auth-token-storage';
-export const DEFAULT_AUTH_STORE_KEY = AUTH_STORE_KEY;
-
-/**
- * Shared packages use these defaults. Consuming apps may override token storage
- * keys or auth base URL through `configureJwtTokenStrategy` without changing
- * the persisted auth-store key.
- */
 type PersistedAuthSnapshot = {
   state?: {
     accessToken?: string | null;
@@ -66,10 +58,6 @@ export function configureJwtTokenStrategy(
     storeKeyByToken: {
       ...tokenStrategy.storeKeyByToken,
       ...overrides.storeKeyByToken,
-      [NormalizedTokenName.AUTH_IDENTITY]:
-        overrides.storeKeyByToken?.[NormalizedTokenName.AUTH_IDENTITY] ??
-        tokenStrategy.storeKeyByToken[NormalizedTokenName.AUTH_IDENTITY] ??
-        AUTH_STORE_KEY,
     },
   };
 }
@@ -94,7 +82,7 @@ function getStoreKey(tokenName: NormalizedTokenNameType): string | undefined {
   return tokenStrategy.storeKeyByToken[tokenName];
 }
 
-function readAuthSnapshot(storeKey = AUTH_STORE_KEY): PersistedAuthSnapshot | null {
+function readAuthSnapshot(storeKey: string): PersistedAuthSnapshot | null {
   if (typeof window === 'undefined') return null;
   const raw = localStorage.getItem(storeKey);
   if (!raw) return null;

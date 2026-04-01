@@ -32,9 +32,11 @@ export function createTokenResolver<
       try {
         const result = await config.verifier(token);
         return {[name]: result.payload} as {[K in Name]: TPayload | null};
-      } catch {
+      } catch (error) {
+        const reason =
+          error instanceof Error ? error.message : 'Unknown verification error';
         set.status = 401;
-        throw new Error('Unauthorized: Invalid token');
+        throw new Error(`Unauthorized: Invalid ${name} — ${reason}`);
       }
     },
   );

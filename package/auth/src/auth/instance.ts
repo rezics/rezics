@@ -120,6 +120,7 @@ export const auth = betterAuth({
           id: user.id,
           slug: user.slug,
           role: user.role,
+          scope: 'user',
         }),
         getSubject: ({user}: {user: {id: string}}) => user.id,
       },
