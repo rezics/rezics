@@ -1,5 +1,6 @@
 import {coreInstance} from './core';
 import {authOpenApiRouter} from './openapi';
+import {wellKnownApi} from './well-known/well-known.api';
 import {env} from './env';
 import {openapi} from '@elysiajs/openapi';
 import {applyCorsToSet} from '@package/cors';
@@ -12,7 +13,7 @@ const app = coreInstance();
 if (isDev) {
   await import('./utils/logger-hook');
   app
-    .use(openapi())
+    .use(openapi({exclude: {staticFile: false}}))
     .trace(async ({onHandle, context}) => {
       // 监听 handle 阶段
       onHandle(({begin, onStop}) => {
@@ -46,6 +47,7 @@ app
       error: error instanceof Error ? error.message : 'Internal Server Error',
     };
   })
+  .use(wellKnownApi)
   .use(authOpenApiRouter)
   .get('/health', () => ({status: 'ok'}));
 

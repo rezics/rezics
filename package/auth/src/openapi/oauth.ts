@@ -13,9 +13,6 @@ import {
 } from '@package/contract';
 import {
   handleAuthRequest,
-  handleJwksCompatibilityRequest,
-  handleOAuthAuthorizationServerRequest,
-  handleOpenIdConfigRequest,
 } from '../auth/routes';
 import {jsonRequestBody, jsonResponse, parameter} from './docs';
 import {getConfiguredSocialProviders} from '../auth/providers';
@@ -167,41 +164,5 @@ const oauthFlowRouter = coreInstance().use(authCorsPolicy('public'))
     },
   });
 
-const oauthDiscoveryRouter = coreInstance().use(authCorsPolicy('public'))
-  .get('/.well-known/jwks.json', ({request}) =>
-    handleJwksCompatibilityRequest(request),
-    {
-      detail: {
-        summary: 'JWKS compatibility endpoint',
-        description:
-          'Compatibility JWKS endpoint for OAuth/OIDC clients and resource servers that expect the standard discovery path `/.well-known/jwks.json`. It returns the same public signing keys as the canonical session-owned endpoint `/session/jwks`.',
-        tags: ['OAuth'],
-      },
-    },
-  )
-  .get('/.well-known/openid-configuration', ({request}) =>
-    handleOpenIdConfigRequest(request),
-    {
-      detail: {
-        summary: 'OpenID Connect discovery document',
-        description:
-          'OpenID Connect discovery metadata endpoint. Clients use this document to discover the issuer, authorization endpoint, token endpoint, userinfo endpoint, JWKS URI, supported scopes, and other OIDC capabilities exposed by this authorization server.',
-        tags: ['OAuth'],
-      },
-    },
-  )
-  .get('/.well-known/oauth-authorization-server', ({request}) =>
-    handleOAuthAuthorizationServerRequest(request),
-    {
-      detail: {
-        summary: 'OAuth authorization server metadata',
-        description:
-          'OAuth 2.0 Authorization Server Metadata endpoint. OAuth clients can use this document to discover server capabilities such as issuer identity, authorization and token endpoints, supported grant types, and related protocol metadata without depending on OIDC-specific discovery.',
-        tags: ['OAuth'],
-      },
-    },
-  );
-
 export const oauthRouter = new Elysia()
-  .use(oauthFlowRouter)
-  .use(oauthDiscoveryRouter);
+  .use(oauthFlowRouter);

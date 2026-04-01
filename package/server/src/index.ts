@@ -40,6 +40,7 @@ import {
   authSessionJwksPath,
 } from './session/jwt/jwt-metadata';
 import {serverConfigs} from '@/middleware';
+import {wellKnownApi} from './well-known/well-known.api';
 
 import 'dotenv/config';
 
@@ -49,7 +50,7 @@ const app = new Elysia();
 
 if (isDev) {
   await import('./utils/logger-hook');
-  app.use(openapi()).trace(async ({onHandle, context}) => {
+  app.use(openapi({exclude: {staticFile: false}})).trace(async ({onHandle, context}) => {
     onHandle(({begin, onStop}) => {
       const {route, params, request} = context;
 
@@ -149,6 +150,7 @@ app
       verifier: rezicsSessionVerifier,
     }),
   )
+  .use(wellKnownApi)
   .use(bookApi)
   .use(chapterApi)
   .use(readlistApi)
