@@ -8,11 +8,6 @@ export interface TokenResolverConfig<TPayload extends JWTPayload = JWTPayload> {
   verifier: JwtVerifier<TPayload>;
 }
 
-function extractBearer(value: string): string {
-  if (value.startsWith('Bearer ')) return value.slice(7);
-  return value;
-}
-
 export function createTokenResolver<
   Name extends string,
   TPayload extends JWTPayload = JWTPayload,
@@ -27,10 +22,8 @@ export function createTokenResolver<
         return {[name]: null} as {[K in Name]: TPayload | null};
       }
 
-      const token = config.usesBearer ? extractBearer(raw) : raw;
-
       try {
-        const result = await config.verifier(token);
+        const result = await config.verifier(raw);
         return {[name]: result.payload} as {[K in Name]: TPayload | null};
       } catch (error) {
         const reason =

@@ -77,7 +77,7 @@ describe('createTokenResolver', () => {
     expect(res.status).toBe(401);
   });
 
-  test('bearer extraction strips prefix', async () => {
+  test('passes raw header value to verifier (bearer extraction is verifier responsibility)', async () => {
     let receivedToken = '';
     const verifier = async (token: string | undefined) => {
       receivedToken = token!;
@@ -103,10 +103,10 @@ describe('createTokenResolver', () => {
         headers: {Authorization: 'Bearer my-jwt-token'},
       }),
     );
-    expect(receivedToken).toBe('my-jwt-token');
+    expect(receivedToken).toBe('Bearer my-jwt-token');
   });
 
-  test('non-bearer passes raw value', async () => {
+  test('non-bearer passes raw value to verifier', async () => {
     let receivedToken = '';
     const verifier = async (token: string | undefined) => {
       receivedToken = token!;

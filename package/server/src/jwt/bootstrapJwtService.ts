@@ -49,7 +49,12 @@ export async function bootstrapJwtServiceRecord(
 ): Promise<void> {
   const service = await prisma.jwtService.upsert({
     where: {serviceKey},
-    update: {},
+    update: {
+      issuer: defaults.issuer,
+      audience: defaults.audience,
+      jwksUrl: defaults.jwksUrl,
+      jwksPath: defaults.jwksPath,
+    },
     create: {
       serviceKey,
       issuer: defaults.issuer,
