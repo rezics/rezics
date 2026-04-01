@@ -1,5 +1,5 @@
 import {prisma} from '#/prisma/client';
-import {readlistIndex} from '@package/search';
+import {searchClient} from '../search-client';
 import type {ReadlistSearchDocument} from './index';
 
 /**
@@ -66,12 +66,12 @@ export async function syncReadlistToMeili(unitId: string): Promise<void> {
     reactionSummaries: unit.reactionSummaries,
   };
 
-  await readlistIndex.addDocuments([doc]);
+  await searchClient.readlistIndex.addDocuments([doc]);
 }
 
 /**
  * Remove a single readlist (by its unitId) from the Meilisearch `readlists` index.
  */
 export async function deleteReadlistFromMeili(unitId: string): Promise<void> {
-  await readlistIndex.deleteDocuments([unitId]);
+  await searchClient.readlistIndex.deleteDocuments([unitId]);
 }

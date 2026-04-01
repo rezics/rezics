@@ -1,5 +1,5 @@
 import type {UnitListQuery} from '@package/contract';
-import {unitIndex} from '@package/search';
+import {searchClient} from '../search-client';
 import type {UnitSearchDocument, UnitSearchResult} from '@package/contract';
 import type {SearchResponse} from '@package/search';
 import {defaultSort} from '../util';
@@ -23,7 +23,7 @@ export async function searchUnitsRaw(
 
   // eslint-disable-next-line no-console
   console.log('searchUnitsRaw', q, options);
-  return unitIndex.search<UnitSearchDocument>(q, {
+  return searchClient.unitIndex.search<UnitSearchDocument>(q, {
     offset,
     limit,
     filter: options?.filter,

@@ -14,7 +14,7 @@ import {
   type UserListQuery,
 } from '@package/contract';
 import {meiliService} from './meili.service';
-import {deleteAllUnits, checkMeiliHealth} from '@package/search';
+import {searchClient} from './search-client';
 import {mapUserSearchDocToPublicProfile} from './mapper';
 
 export const meiliApi = new Elysia({prefix: '/meili'})
@@ -22,7 +22,7 @@ export const meiliApi = new Elysia({prefix: '/meili'})
   .get(
     '/health',
     async () => {
-      const ok = await checkMeiliHealth();
+      const ok = await searchClient.checkHealth();
       return {status: ok ? 'available' : 'unavailable'};
     },
     {
@@ -309,7 +309,7 @@ export const meiliApi = new Elysia({prefix: '/meili'})
           'Forbidden: You are not authorized to delete all units',
         );
       }
-      await deleteAllUnits();
+      await searchClient.deleteAllUnits();
       return {message: 'all units deleted'};
     },
     {

@@ -1,5 +1,5 @@
 import type {FeedbackListQuery} from '@package/contract';
-import {feedbackIndex} from '@package/search';
+import {searchClient} from '../search-client';
 import type {
   FeedbackSearchDocument,
   FeedbackSearchResult,
@@ -26,7 +26,7 @@ export async function searchFeedbacksRaw(
 
   // eslint-disable-next-line no-console
   console.log('searchFeedbacksRaw', q, options);
-  return feedbackIndex.search<FeedbackSearchDocument>(q, {
+  return searchClient.feedbackIndex.search<FeedbackSearchDocument>(q, {
     offset,
     limit,
     filter: options?.filter,

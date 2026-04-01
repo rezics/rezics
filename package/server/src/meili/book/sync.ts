@@ -1,6 +1,6 @@
 import {prisma} from '#/prisma/client';
 import type {Tag, User} from '#/prisma/client';
-import {bookIndex} from '@package/search';
+import {searchClient} from '../search-client';
 import type {BookSearchDocument} from './index';
 import {bookInclude} from '../../book/types';
 
@@ -49,12 +49,12 @@ export async function syncBookToMeili(unitId: string): Promise<void> {
     tags: book.unit?.tags ?? [],
   };
 
-  await bookIndex.addDocuments([doc]);
+  await searchClient.bookIndex.addDocuments([doc]);
 }
 
 /**
  * Remove a single book (by its unitId) from the Meilisearch `books` index.
  */
 export async function deleteBookFromMeili(unitId: string): Promise<void> {
-  await bookIndex.deleteDocuments([unitId]);
+  await searchClient.bookIndex.deleteDocuments([unitId]);
 }

@@ -1,5 +1,5 @@
 import {prisma} from '#/prisma/client';
-import {unitIndex} from '@package/search';
+import {searchClient} from '../search-client';
 import type {UnitSearchDocument} from '@package/contract';
 import {UnitType} from '#/prisma/client';
 
@@ -60,9 +60,9 @@ export async function syncUnitToMeili(unitId: string): Promise<void> {
     }
   }
 
-  await unitIndex.addDocuments([doc]);
+  await searchClient.unitIndex.addDocuments([doc]);
 }
 
 export async function deleteUnitFromMeili(unitId: string): Promise<void> {
-  await unitIndex.deleteDocuments([unitId]);
+  await searchClient.unitIndex.deleteDocuments([unitId]);
 }

@@ -1,5 +1,5 @@
 import type {ReadlistListQuery} from '@package/contract';
-import {readlistIndex} from '@package/search';
+import {searchClient} from '../search-client';
 import type {ReadlistSearchDocument, ReadlistSearchResult} from './index';
 import type {SearchResponse} from '@package/search';
 import {defaultSort} from '../util';
@@ -23,7 +23,7 @@ export async function searchReadlistsRaw(
 
   // eslint-disable-next-line no-console
   console.log('searchReadlistsRaw', q, options);
-  return readlistIndex.search<ReadlistSearchDocument>(q, {
+  return searchClient.readlistIndex.search<ReadlistSearchDocument>(q, {
     offset,
     limit,
     filter: options?.filter,

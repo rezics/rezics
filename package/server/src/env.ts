@@ -117,6 +117,18 @@ export const env = createEnv({
     TURNSTILE_SECRET: v.optional(v.string()),
 
     /**
+     * Meilisearch host URL.
+     * Defaults to `http://localhost:7700` when omitted.
+     */
+    MEILI_HOST: v.fallback(v.string(), 'http://127.0.0.1:7700'),
+
+    /**
+     * Meilisearch master/admin API key.
+     * Defaults to `masterKey` when omitted.
+     */
+    MEILI_MASTER_KEY: v.fallback(v.string(), 'masterKey'),
+
+    /**
      * Configures the server HTTP listen port as a string value.
      * Defaults to `3000` when omitted.
      */

@@ -1,4 +1,4 @@
-import {meili} from '@package/search';
+import {searchClient} from '../../src/meili/search-client';
 import type {PrismaClient} from '#/prisma/generated/client.js';
 
 /**
@@ -30,9 +30,9 @@ export async function resetDatabase(prisma: PrismaClient): Promise<void> {
 
 export async function resetMeiliSearchDatabase(): Promise<void> {
   console.log('Resetting MeiliSearch database...');
-  await meili.index('books').deleteAllDocuments();
-  await meili.index('units').deleteAllDocuments();
-  await meili.index('readlists').deleteAllDocuments();
-  await meili.index('feedbacks').deleteAllDocuments();
-  await meili.index('users').deleteAllDocuments();
+  await searchClient.deleteAllBooks();
+  await searchClient.deleteAllUnits();
+  await searchClient.deleteAllReadlists();
+  await searchClient.deleteAllFeedbacks();
+  await searchClient.deleteAllUsers();
 }

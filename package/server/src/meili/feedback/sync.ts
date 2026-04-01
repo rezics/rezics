@@ -1,5 +1,5 @@
 import {prisma} from '#/prisma/client';
-import {feedbackIndex} from '@package/search';
+import {searchClient} from '../search-client';
 import type {FeedbackSearchDocument} from '@package/contract';
 
 /**
@@ -25,12 +25,12 @@ export async function syncFeedbackToMeili(id: string): Promise<void> {
     updatedAt: feedback.updatedAt,
   };
 
-  await feedbackIndex.addDocuments([doc]);
+  await searchClient.feedbackIndex.addDocuments([doc]);
 }
 
 /**
  * Remove a single feedback (by its id) from the Meilisearch `feedbacks` index.
  */
 export async function deleteFeedbackFromMeili(id: string): Promise<void> {
-  await feedbackIndex.deleteDocuments([id]);
+  await searchClient.feedbackIndex.deleteDocuments([id]);
 }

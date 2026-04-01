@@ -1,6 +1,6 @@
 import type {BookQueryOptions} from '@package/contract';
 import {toBookQueryString} from '@package/contract';
-import {bookIndex} from '@package/search';
+import {searchClient} from '../search-client';
 import type {BookSearchDocument, BookSearchResult} from './index';
 import type {SearchResponse} from '@package/search';
 import {defaultSort} from '../util';
@@ -23,7 +23,7 @@ export async function searchBooksRaw(
   const limit = options?.limit ?? 20;
 
   console.log('searchBooksRaw', q, options);
-  return bookIndex.search<BookSearchDocument>(q, {
+  return searchClient.bookIndex.search<BookSearchDocument>(q, {
     offset,
     limit,
     filter: options?.filter,

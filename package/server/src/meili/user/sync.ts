@@ -1,5 +1,5 @@
 import {prisma} from '#/prisma/client';
-import {userIndex} from '@package/search';
+import {searchClient} from '../search-client';
 import type {UserSearchDocument} from './index';
 
 /**
@@ -27,12 +27,12 @@ export async function syncUserToMeili(unitId: string): Promise<void> {
     permission: (user.permission ?? null) as any,
   };
 
-  await userIndex.addDocuments([doc]);
+  await searchClient.userIndex.addDocuments([doc]);
 }
 
 /**
  * Remove a single user (by its unitId) from the Meilisearch `users` index.
  */
 export async function deleteUserFromMeili(unitId: string): Promise<void> {
-  await userIndex.deleteDocuments([unitId]);
+  await searchClient.userIndex.deleteDocuments([unitId]);
 }

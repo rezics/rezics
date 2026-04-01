@@ -1,17 +1,6 @@
 import {prisma} from '@package/server';
 import {UnitType} from '@package/server';
-import {
-  addOrUpdateBooks,
-  addOrUpdateUnits,
-  addOrUpdateReadlists,
-  addOrUpdateFeedbacks,
-  addOrUpdateUsers,
-  deleteAllBooks,
-  deleteAllUnits,
-  deleteAllReadlists,
-  deleteAllFeedbacks,
-  deleteAllUsers,
-} from './documents';
+import type {SearchClient} from './client';
 import type {
   BookSearchDocument,
   UnitSearchDocument,
@@ -20,11 +9,10 @@ import type {
 } from '@package/contract';
 
 // ANCHOR: Books sync with batching (cursor-based)
-export async function syncAllBooks() {
+export async function syncAllBooks(client: SearchClient) {
   const BATCH_SIZE = 5000;
 
-  // Step 1: 清空索引
-  const deleteResult = await deleteAllBooks();
+  const deleteResult = await client.deleteAllBooks();
   console.log('sync all books, deleteResult', deleteResult);
 
   let cursor: string | undefined = undefined;
@@ -53,7 +41,6 @@ export async function syncAllBooks() {
     if (books.length === 0) break;
 
     const formatted: BookSearchDocument[] = books.map(b => {
-      // 合并 Book.tags 与 Unit.tags 作为 tagSearch
       const tagSearch: string[] = [
         ...(Array.isArray(b.tags) ? b.tags : []),
         ...(b.unit?.tags?.map((t: any) => t.name) ?? []),
@@ -61,7 +48,6 @@ export async function syncAllBooks() {
 
       const base: BookSearchDocument = {
         id: b.unitId,
-        // search fields
         title: b.title,
         description: b.description ?? null,
         coverUrl: b.coverUrl ?? null,
@@ -80,7 +66,6 @@ export async function syncAllBooks() {
         updatedAt: b.updatedAt,
         extra: b.extra ?? null,
         metadata: b.unit?.metadata ?? null,
-        // result fields
         unitId: b.unitId,
         author: b.author,
         press: b.press,
@@ -91,7 +76,7 @@ export async function syncAllBooks() {
       return base;
     });
 
-    const addResult = await addOrUpdateBooks(formatted);
+    const addResult = await client.addOrUpdateBooks(formatted);
     console.log('sync all books, addResult', addResult);
 
     total += formatted.length;
@@ -105,11 +90,10 @@ export async function syncAllBooks() {
 }
 
 // ANCHOR: Units sync with batching
-export async function syncAllUnits() {
+export async function syncAllUnits(client: SearchClient) {
   const BATCH_SIZE = 5000;
 
-  // Step 1: 清空索引（你自己现有的函数）
-  const deleteResult = await deleteAllUnits();
+  const deleteResult = await client.deleteAllUnits();
   console.log('sync all units, deleteResult', deleteResult);
 
   let cursor: string | undefined = undefined;
@@ -134,10 +118,8 @@ export async function syncAllUnits() {
 
     if (units.length === 0) break;
 
-    // Format batch
     let formatted: UnitSearchDocument[] = units.map((u: any) => ({
       id: u.id,
-      // search fields
       title: u.title ?? '',
       content: u.content ?? '',
       tags: u.tags ? u.tags.map((t: any) => t.name) : [],
@@ -150,7 +132,6 @@ export async function syncAllUnits() {
       nsfw: u.nsfw,
       createdAt: u.createdAt,
       updatedAt: u.updatedAt,
-      // result fields
       unitId: u.id,
       user: u.user,
       metadata: u.metadata,
@@ -175,8 +156,7 @@ export async function syncAllUnits() {
       }),
     );
 
-    // Push this batch to Meilisearch
-    const addResult = await addOrUpdateUnits(formatted);
+    const addResult = await client.addOrUpdateUnits(formatted);
     console.log('sync all units, addResult', addResult);
 
     total += formatted.length;
@@ -190,11 +170,10 @@ export async function syncAllUnits() {
 }
 
 // ANCHOR: Readlists sync with batching (cursor-based)
-export async function syncAllReadlists() {
+export async function syncAllReadlists(client: SearchClient) {
   const BATCH_SIZE = 5000;
 
-  // Step 1: 清空索引
-  const deleteResult = await deleteAllReadlists();
+  const deleteResult = await client.deleteAllReadlists();
   console.log('sync all readlists, deleteResult', deleteResult);
 
   let cursor: string | undefined = undefined;
@@ -243,7 +222,6 @@ export async function syncAllReadlists() {
 
       const doc: any = {
         id: rl.unitId,
-        // search fields
         title: unit?.title ?? '',
         content: unit?.content ?? '',
         tags,
@@ -255,11 +233,9 @@ export async function syncAllReadlists() {
         targetUnitId: unit?.targetUnitId ?? null,
         bookIds,
         reviewIds,
-        // optional visual field from metadata
         coverUrl: (metadata as any)?.coverUrl ?? null,
         createdAt: unit?.createdAt ?? rl.createdAt,
         updatedAt: unit?.updatedAt ?? rl.updatedAt,
-        // result / denormalized fields
         unitId: rl.unitId,
         user: unit?.user ?? null,
         metadata,
@@ -270,7 +246,7 @@ export async function syncAllReadlists() {
       return doc;
     });
 
-    const addResult = await addOrUpdateReadlists(formatted);
+    const addResult = await client.addOrUpdateReadlists(formatted);
     console.log('sync all readlists, addResult', addResult);
 
     total += formatted.length;
@@ -284,11 +260,10 @@ export async function syncAllReadlists() {
 }
 
 // ANCHOR: Feedbacks sync with batching (cursor-based)
-export async function syncAllFeedbacks() {
+export async function syncAllFeedbacks(client: SearchClient) {
   const BATCH_SIZE = 5000;
 
-  // Step 1: 清空索引
-  const deleteResult = await deleteAllFeedbacks();
+  const deleteResult = await client.deleteAllFeedbacks();
   console.log('sync all feedbacks, deleteResult', deleteResult);
 
   let cursor: string | undefined = undefined;
@@ -323,7 +298,7 @@ export async function syncAllFeedbacks() {
       return doc;
     });
 
-    const addResult = await addOrUpdateFeedbacks(formatted);
+    const addResult = await client.addOrUpdateFeedbacks(formatted);
     console.log('sync all feedbacks, addResult', addResult);
 
     total += formatted.length;
@@ -337,10 +312,10 @@ export async function syncAllFeedbacks() {
 }
 
 // ANCHOR: Users sync with batching (cursor-based)
-export async function syncAllUsers() {
+export async function syncAllUsers(client: SearchClient) {
   const BATCH_SIZE = 5000;
 
-  const deleteResult = await deleteAllUsers();
+  const deleteResult = await client.deleteAllUsers();
   console.log('sync all users, deleteResult', deleteResult);
 
   let cursor: string | undefined = undefined;
@@ -374,7 +349,7 @@ export async function syncAllUsers() {
       permission: (u.permission ?? null) as any,
     }));
 
-    const addResult = await addOrUpdateUsers(formatted);
+    const addResult = await client.addOrUpdateUsers(formatted);
     console.log('sync all users, addResult', addResult);
 
     total += formatted.length;

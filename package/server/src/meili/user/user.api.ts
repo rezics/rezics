@@ -1,5 +1,5 @@
 import type {UserListQuery} from '@package/contract';
-import {userIndex} from '@package/search';
+import {searchClient} from '../search-client';
 import type {UserSearchDocument, UserSearchResult} from './index';
 import type {SearchResponse} from '@package/search';
 
@@ -28,7 +28,7 @@ export async function searchUsersRaw(
   // eslint-disable-next-line no-console
   console.log('searchUsersRaw', q, options);
 
-  return userIndex.search<UserSearchDocument>(q, {
+  return searchClient.userIndex.search<UserSearchDocument>(q, {
     offset,
     limit,
     filter: options?.filter,
