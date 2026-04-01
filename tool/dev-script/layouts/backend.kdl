@@ -1,11 +1,11 @@
 tab name="auth" focus=true {
-    pane command="bun" cwd="../../../package/auth" {
+    pane command="bun" cwd="../../../package/auth" start_suspended=false {
         args "dev"
     }
 }
 
 tab name="server" {
-    pane command="bun" cwd="../../../package/server" {
+    pane command="bun" cwd="../../../package/server" start_suspended=false {
         args "dev"
     }
 }
