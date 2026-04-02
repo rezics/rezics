@@ -63,7 +63,6 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({onLogout}) => {
       <IconButton
         onClick={handleMenuOpen}
         size="small"
-        sx={{ml: 2}}
         aria-controls="menu-appbar"
         aria-haspopup="true"
       >

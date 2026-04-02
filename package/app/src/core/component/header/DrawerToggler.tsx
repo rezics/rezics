@@ -19,8 +19,6 @@ export const DrawerToggler = ({
       aria-label={t('accessibility.open_drawer')}
       onClick={handleDrawerToggleInner}
       sx={{
-        mr: 2,
-        ml: 1,
         display:
           layoutType == 'type-b' ? 'flex' : sidebarOpen ? 'none' : 'flex',
       }}

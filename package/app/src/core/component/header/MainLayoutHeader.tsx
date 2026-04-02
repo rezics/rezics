@@ -5,7 +5,6 @@ import {useTheme} from '@mui/material/styles';
 import {cn} from '@/shared/util/css-util';
 import {Link} from '@package/ui/primitive/link/Link.tsx';
 import {useAppStore} from '@/app/state/appStore.ts';
-
 import {DrawerToggler} from './DrawerToggler.tsx';
 import {HomeSearch} from '@/search';
 import {useIsMobile} from '@/shared/util/use-media-query';
@@ -34,12 +33,18 @@ export const Header: React.FC<HeaderProps> = ({
 
   const isDark = useMemo(() => themeMode === 'dark', [themeMode]);
   const matchHomeRoute = useMatch({from: HomeRoute.id, shouldThrow: false});
-  function handleDrawerToggleInner() {
-    if (disableDrawerToggle) return;
-    toggleSidebar();
-  }
+
+  const handleDrawerToggle = () => {
+    if (!disableDrawerToggle) toggleSidebar();
+  };
 
   const auth = useAuth();
+
+  const authSection = (() => {
+    if (auth.readyForApp && auth.user) return <AuthenticatedSection />;
+    if (auth.authenticated) return <PendingVerificationSection />;
+    return <UnauthenticatedSection />;
+  })();
 
   return (
     <AppBar
@@ -48,12 +53,10 @@ export const Header: React.FC<HeaderProps> = ({
       sx={{
         backgroundColor: 'background.paper',
         zIndex: theme.zIndex.drawer + 1,
-        ml: layoutType === 'type-a' ? (sidebarOpen ? drawerWidth : 0) : 0,
+        ml: layoutType === 'type-a' && sidebarOpen ? drawerWidth : 0,
         width:
-          layoutType === 'type-a'
-            ? sidebarOpen
-              ? `calc(100% - ${drawerWidth}px)`
-              : '100%'
+          layoutType === 'type-a' && sidebarOpen
+            ? `calc(100% - ${drawerWidth}px)`
             : '100%',
         transition: theme.transitions.create(['margin', 'width'], {
           easing: theme.transitions.easing.easeOut,
@@ -61,46 +64,41 @@ export const Header: React.FC<HeaderProps> = ({
         }),
       }}
       className={cn(
-        isDragging ? 'rounded-tl-2xl rounded-bl-2xl' : '',
+        isDragging && 'rounded-tl-2xl rounded-bl-2xl',
         'pointer-events-auto',
         'border-b',
         isDark ? 'border-gray-800' : 'border-gray-200',
       )}
     >
-      <Toolbar disableGutters>
+      <Toolbar className="px-2 gap-2">
         <DrawerToggler
-          handleDrawerToggleInner={handleDrawerToggleInner}
+          handleDrawerToggleInner={handleDrawerToggle}
           layoutType={layoutType}
           sidebarOpen={sidebarOpen}
         />
-        <div className="flex items-center min-w-0 h-full">
-          <Typography variant="h6" noWrap component="div" sx={{mr: 1}}>
-            <Link to="/" className="flex items-center gap-2">
-              {!matchHomeRoute && (
-                <Avatar sx={{bgcolor: 'transparent'}} variant="rounded">
-                  <img src="/logo.svg" alt="logo" />
-                </Avatar>
-              )}
-              <Typography
-                variant="h1"
-                className="text-3xl font-bold"
-                sx={{color: 'primary.main'}}
-              >
-                REZICS
-              </Typography>
-            </Link>
+
+        <Link to="/" className="flex items-center gap-2 shrink-0">
+          {!matchHomeRoute && (
+            <Avatar sx={{bgcolor: 'transparent'}} variant="rounded">
+              <img src="/logo.svg" alt="logo" />
+            </Avatar>
+          )}
+          <Typography
+            variant="h1"
+            className="text-3xl font-bold"
+            sx={{color: 'primary.main'}}
+          >
+            REZICS
           </Typography>
-        </div>
-        <div className="flex-1 min-w-0 mx-2 flex justify-center">
+        </Link>
+
+        <div className="flex-1 min-w-0 flex justify-center">
           {!isMobile && matchHomeRoute && (
             <HomeSearch className="w-full max-w-md" />
           )}
         </div>
-        {auth.readyForApp && auth.user && <AuthenticatedSection />}
-        {auth.authenticated && !auth.readyForApp && (
-          <PendingVerificationSection />
-        )}
-        {!auth.authenticated && <UnauthenticatedSection />}
+
+        {authSection}
       </Toolbar>
     </AppBar>
   );
