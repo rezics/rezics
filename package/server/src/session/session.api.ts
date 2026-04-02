@@ -22,10 +22,11 @@ export const sessionApi = new Elysia({prefix: '/session'})
   .get('/jwks', async () => getMainSessionPublicJwks(), {
     corsPolicy: 'public',
     detail: {
-      summary: 'Publish main-server JWKS',
+      summary: 'Publish main-server JWKS (legacy)',
       description:
-        'Expose the canonical JWKS document for all main-server issued session tokens.',
+        'Legacy JWKS endpoint. Use `/.well-known/jwks.json` instead. Returns the same public signing keys used by this resource server for session tokens.',
       tags: ['Session'],
+      deprecated: true,
     },
   })
   .use(requireLogin)
@@ -40,7 +41,7 @@ export const sessionApi = new Elysia({prefix: '/session'})
 
       let sessionState;
       try {
-        sessionState = await getAuthSessionState(authorization);
+        sessionState = await getAuthSessionState(authorization, headers.cookie);
       } catch {
         set.status = 503;
         throw new Error(

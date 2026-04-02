@@ -8,7 +8,7 @@ export const wellKnownApi = new Elysia({prefix: '/.well-known'})
     detail: {
       summary: 'JWKS endpoint',
       description:
-        'RFC 7517 JWKS endpoint. Returns the public signing keys used by this resource server for session tokens.',
+        'Canonical RFC 7517 JWKS endpoint. Returns the public signing keys used by this resource server for session tokens. This is the primary JWKS discovery URL used for token verification.',
       tags: ['Well-Known'],
     },
   });

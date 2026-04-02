@@ -43,8 +43,14 @@ mock.module('@package/api/react-query/authPresence', () => ({
   },
 }));
 
+const hydrateAuthSessionStateMock = mock(async () => null);
+
 mock.module('../state/authSessionStore', () => ({
   clearAuthSessionState: clearAuthSessionStateMock,
+  hydrateAuthSessionState: hydrateAuthSessionStateMock,
+  useAuthSessionStore: {
+    getState: () => ({status: 'idle'}),
+  },
 }));
 
 describe('AuthProvider gateway + fan-out model', () => {

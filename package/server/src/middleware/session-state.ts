@@ -3,13 +3,19 @@ import {env} from '../env';
 
 export async function getAuthSessionState(
   authorization: string,
+  cookie?: string,
 ): Promise<GetSessionStateResponse> {
+  const headers: Record<string, string> = {
+    Authorization: authorization,
+    'Content-Type': 'application/json',
+  };
+  if (cookie) {
+    headers['Cookie'] = cookie;
+  }
+
   const response = await fetch(`${env.AUTH_BASE_URL}/api/auth/get-session-state`, {
     method: 'GET',
-    headers: {
-      Authorization: authorization,
-      'Content-Type': 'application/json',
-    },
+    headers,
   });
 
   const json = await response.json();

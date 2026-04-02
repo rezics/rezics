@@ -17,7 +17,11 @@ import {
   clearAuthPresence,
   hasAuthPresence,
 } from '@package/api/react-query/authPresence';
-import {clearAuthSessionState} from '../state/authSessionStore';
+import {
+  clearAuthSessionState,
+  hydrateAuthSessionState,
+  useAuthSessionStore,
+} from '../state/authSessionStore';
 import {createRefreshRetryPolicy} from './refreshRetryPolicy';
 
 const REFRESH_BUFFER_MS = 60 * 1000;
@@ -192,6 +196,13 @@ export function AuthProvider({
         gatewaySlot.retryPolicy.reset();
       } else {
         gatewaySlot.state = 'managing';
+      }
+
+      if (!mounted) return;
+
+      // Hydrate auth session state on first successful gateway confirmation
+      if (useAuthSessionStore.getState().status === 'idle') {
+        await hydrateAuthSessionState();
       }
 
       if (!mounted) return;

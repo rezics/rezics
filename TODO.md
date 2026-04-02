@@ -4,6 +4,7 @@
 - [ ] 我需要做到auth-store规范，如果 access token 不存在，则不主动请求任何 内容，所有请求都依赖于auth-store
 - [ ] 实现session失效后的主动登录退出机制，但是我又担心网络波动引起恶意退出？better-auth session 到底是如何工作的
 - [ ] 引入prismabox優化contract package, 但是對於這種有唯一 contract來源的，到底要如何處理其實是個問題
+- [ ] 有沒有一個將所有 test 收集起來並以文檔展示，也方便測試的工具？
 
 - 如果有这样一系列的网站，他们 除了 Homepage，aboutPage，或者一些特殊 page 不一样，以及 layout 不一样以外，公用 完全一样的代码，包括 比如 /book/unitId or ……，最适合的架构是怎样？ 
 - routes 通过虚拟文件路由似乎就能够做到跨package继承哦

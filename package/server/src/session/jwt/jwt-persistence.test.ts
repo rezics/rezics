@@ -41,8 +41,8 @@ describe('server jwt persistence', () => {
       serviceKey: 'server-local',
       issuer: 'http://localhost:3000',
       audience: 'rezics-main-server',
-      jwksUrl: 'http://localhost:3000/api/session/jwks',
-      jwksPath: '/api/session/jwks',
+      jwksUrl: 'http://localhost:3000/.well-known/jwks.json',
+      jwksPath: '/.well-known/jwks.json',
       isLocalIssuer: true,
       isActive: true,
     });

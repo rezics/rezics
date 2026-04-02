@@ -1,2 +1,3 @@
 - [ ] https://github.com/valtyr/prisma-kysely
 - [ ] https://docs.convex.dev/tutorial/
+- [ ] When the database is not open, a clearer error message should be displayed.
