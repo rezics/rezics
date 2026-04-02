@@ -1,5 +1,6 @@
 import {beforeEach, describe, expect, mock, test} from 'bun:test';
 import {NormalizedTokenName} from '@package/contract';
+import {configureApi} from '../config';
 
 const fetchMock = mock();
 
@@ -32,9 +33,10 @@ function createMemoryStorage(): MemoryStorage {
 describe('userApi', () => {
   beforeEach(() => {
     fetchMock.mockReset();
-    process.env.VITE_API_URL = 'http://api.example';
-    process.env.VITE_AUTH_API_URL = 'http://auth.example';
-    process.env.VITE_TURNSTILE_SITE_KEY = 'turnstile-test-key';
+    configureApi({
+      apiBaseUrl: 'http://api.example',
+      authBaseUrl: 'http://auth.example',
+    });
     globalThis.fetch = fetchMock as unknown as typeof fetch;
     globalThis.window = {
       dispatchEvent: () => true,

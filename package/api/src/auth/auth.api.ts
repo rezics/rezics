@@ -3,7 +3,7 @@
  * Direct API communication layer targeting the auth server
  */
 
-import {env} from '../env';
+import {getApiConfig} from '../config';
 import type {
   AuthContextTokenResponse,
   AuthTokenResponse,
@@ -34,7 +34,7 @@ type AuthRequestInit = globalThis.RequestInit & {
 };
 
 function getAuthBaseUrl(): string {
-  return env.VITE_AUTH_API_URL || 'http://localhost:3001';
+  return getApiConfig().authBaseUrl;
 }
 
 async function authFetch<T>(

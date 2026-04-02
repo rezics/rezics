@@ -1,7 +1,7 @@
 import {createSyncStoragePersister} from '@tanstack/query-sync-storage-persister';
 import type {QueryClient} from '@tanstack/react-query';
 import {persistQueryClient} from '@tanstack/react-query-persist-client';
-import {env} from '../env';
+import {getApiConfig} from '../config';
 
 /**
  * localStorage 持久化 react-query
@@ -13,7 +13,7 @@ export function attachPersistence(
   {
     key = 'rq-cache',
     maxAge = 24 * 60 * 60 * 1000, // 24h
-    buster = env.VITE_APP_VERSION ?? 'v1',
+    buster = getApiConfig().appVersion ?? 'v1',
   } = {},
 ) {
   const persister = createSyncStoragePersister({

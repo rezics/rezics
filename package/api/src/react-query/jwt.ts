@@ -1,4 +1,4 @@
-import {env} from '../env';
+import {getApiConfig} from '../config';
 import {clearAuthPresence, hasAuthPresence} from './authPresence';
 import {
   NormalizedTokenName,
@@ -45,7 +45,7 @@ let tokenStrategy: JwtTokenStrategy = {
 };
 
 function getAuthBaseUrl(): string {
-  return tokenStrategy.authBaseUrl || env.VITE_AUTH_API_URL;
+  return tokenStrategy.authBaseUrl || getApiConfig().authBaseUrl;
 }
 
 export function configureJwtTokenStrategy(

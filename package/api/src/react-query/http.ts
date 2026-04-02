@@ -2,7 +2,7 @@ import {
   NormalizedTokenName,
   type NormalizedTokenName as NormalizedTokenNameType,
 } from '@package/contract';
-import {env} from '../env';
+import {getApiConfig} from '../config';
 import {clearAuthPresence, hasAuthPresence} from './authPresence';
 import {
   buildTokenHeaders,
@@ -13,7 +13,7 @@ import {
  * Base API URL - should be configured via environment
  */
 function getApiBaseUrl(): string {
-  return env.VITE_API_URL || 'http://localhost:4000';
+  return getApiConfig().apiBaseUrl;
 }
 
 export type ApiRequestInit = globalThis.RequestInit & {

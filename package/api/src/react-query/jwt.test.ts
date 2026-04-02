@@ -1,5 +1,6 @@
 import {beforeEach, describe, expect, test} from 'bun:test';
 import {NormalizedTokenName} from '@package/contract';
+import {configureApi} from '../config';
 
 type MemoryStorage = {
   getItem(key: string): string | null;
@@ -36,9 +37,10 @@ function createToken(payload: Record<string, unknown>) {
 
 describe('jwt token storage', () => {
   beforeEach(() => {
-    process.env.VITE_API_URL = 'http://api.example';
-    process.env.VITE_AUTH_API_URL = 'http://auth.example';
-    process.env.VITE_TURNSTILE_SITE_KEY = 'turnstile-test-key';
+    configureApi({
+      apiBaseUrl: 'http://api.example',
+      authBaseUrl: 'http://auth.example',
+    });
     globalThis.localStorage = createMemoryStorage() as Storage;
     globalThis.window = {
       dispatchEvent: () => true,
