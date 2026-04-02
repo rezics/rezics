@@ -32,7 +32,12 @@ const SERVICES: ServiceConfig[] = [
     enable: true,
     start: true,
   },
-  // 你可以继续添加……
+  {
+    name: 'rezbookauth.service',
+    src: './rezbookauth.service',
+    enable: true,
+    start: true,
+  },
 ];
 
 const SYSTEMD_DIR = '/etc/systemd/system';
