@@ -15,6 +15,12 @@ tailwind.config.js
 .vite/
 *.exe
 
+# vitepress build output
+**/.vitepress/dist
+
+# vitepress cache directory
+**/.vitepress/cache
+
 # Logs
 *.log
 npm-debug.log*

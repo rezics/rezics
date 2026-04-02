@@ -3,6 +3,7 @@
   "private": true,
   "scripts": {
     "dev": "cd tool && bun run dev-script/dev.ts",
+    "docs:dev": "cd docs && bun run dev",
     "app:dev": "cd package/app && bun run dev",
     "server:dev": "cd package/server && bun run dev",
     "deploy": "cd tool && bun run deploy",
