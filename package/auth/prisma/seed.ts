@@ -1,12 +1,3 @@
-import {seedAdmin} from './seed/init-admin';
-
-async function main() {
-  console.log('Start Seeding');
-  await seedAdmin();
-  console.log('Seeding Complete');
-}
-
-main().catch(err => {
-  console.error(err);
-  process.exit(1);
-});
+export {seedAuthUser} from './seed/seed-auth-user';
+export type {SeedAuthUserInput, SeedAuthUserResult} from './seed/seed-auth-user';
+export {slugify, generatePassword, ensureUniqueSlug} from './seed/helpers';
