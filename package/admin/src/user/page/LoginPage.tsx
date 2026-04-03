@@ -13,10 +13,8 @@ import {useState} from 'react';
 
 import {useNavigate} from '@tanstack/react-router';
 
-import {useSignInMutation} from '@package/api/auth/auth.mutations';
-
 import {Route} from '@/routes/login';
-import {getToken, parseJwt} from '@package/api/react-query/jwt';
+import {adminLogin} from '@/user/model/handler';
 
 function normalizeRedirect(to?: string) {
   if (!to) return '/';
@@ -33,30 +31,16 @@ export default function LoginPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const signInMutation = useSignInMutation();
-
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
     setSubmitting(true);
     try {
-      await signInMutation.mutateAsync(
-        {email, password},
-        {
-          onSuccess: () => {
-            const token = getToken();
-            const user = parseJwt(token);
-            if (user?.role === 'admin' || user?.role === 'owner') {
-              navigate({
-                to: normalizeRedirect(redirectTo),
-                replace: true,
-              });
-            } else {
-              setError('You are not authorized to access this page');
-            }
-          },
-        },
-      );
+      await adminLogin(email, password);
+      navigate({
+        to: normalizeRedirect(redirectTo),
+        replace: true,
+      });
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Login failed';
       setError(message);

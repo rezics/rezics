@@ -164,6 +164,12 @@ export const adminNav = {
           icon: <AdminPanelSettingsOutlinedIcon fontSize="small" />,
           to: '/auth/sessions',
         },
+        {
+          id: 'auth.status',
+          label: 'Auth Status',
+          icon: <VpnKeyOutlinedIcon fontSize="small" />,
+          to: '/auth/status',
+        },
       ],
     },
     {

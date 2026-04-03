@@ -28,6 +28,7 @@ import { Route as AdminUnitsUnitIdRouteImport } from './routes/_admin/units/$uni
 import { Route as AdminMiscEchokvRouteImport } from './routes/_admin/misc/echokv'
 import { Route as AdminBookMeiliRouteImport } from './routes/_admin/book/meili'
 import { Route as AdminAuthUsersRouteImport } from './routes/_admin/auth/users'
+import { Route as AdminAuthStatusRouteImport } from './routes/_admin/auth/status'
 import { Route as AdminAuthSessionsRouteImport } from './routes/_admin/auth/sessions'
 
 const LoginRoute = LoginRouteImport.update({
@@ -124,6 +125,11 @@ const AdminAuthUsersRoute = AdminAuthUsersRouteImport.update({
   path: '/auth/users',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminAuthStatusRoute = AdminAuthStatusRouteImport.update({
+  id: '/auth/status',
+  path: '/auth/status',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminAuthSessionsRoute = AdminAuthSessionsRouteImport.update({
   id: '/auth/sessions',
   path: '/auth/sessions',
@@ -138,6 +144,7 @@ export interface FileRoutesByFullPath {
   '/settings': typeof AdminSettingsRoute
   '/token': typeof AdminTokenRoute
   '/auth/sessions': typeof AdminAuthSessionsRoute
+  '/auth/status': typeof AdminAuthStatusRoute
   '/auth/users': typeof AdminAuthUsersRoute
   '/book/meili': typeof AdminBookMeiliRoute
   '/misc/echokv': typeof AdminMiscEchokvRoute
@@ -159,6 +166,7 @@ export interface FileRoutesByTo {
   '/token': typeof AdminTokenRoute
   '/': typeof AdminIndexRoute
   '/auth/sessions': typeof AdminAuthSessionsRoute
+  '/auth/status': typeof AdminAuthStatusRoute
   '/auth/users': typeof AdminAuthUsersRoute
   '/book/meili': typeof AdminBookMeiliRoute
   '/misc/echokv': typeof AdminMiscEchokvRoute
@@ -182,6 +190,7 @@ export interface FileRoutesById {
   '/_admin/token': typeof AdminTokenRoute
   '/_admin/': typeof AdminIndexRoute
   '/_admin/auth/sessions': typeof AdminAuthSessionsRoute
+  '/_admin/auth/status': typeof AdminAuthStatusRoute
   '/_admin/auth/users': typeof AdminAuthUsersRoute
   '/_admin/book/meili': typeof AdminBookMeiliRoute
   '/_admin/misc/echokv': typeof AdminMiscEchokvRoute
@@ -205,6 +214,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/token'
     | '/auth/sessions'
+    | '/auth/status'
     | '/auth/users'
     | '/book/meili'
     | '/misc/echokv'
@@ -226,6 +236,7 @@ export interface FileRouteTypes {
     | '/token'
     | '/'
     | '/auth/sessions'
+    | '/auth/status'
     | '/auth/users'
     | '/book/meili'
     | '/misc/echokv'
@@ -248,6 +259,7 @@ export interface FileRouteTypes {
     | '/_admin/token'
     | '/_admin/'
     | '/_admin/auth/sessions'
+    | '/_admin/auth/status'
     | '/_admin/auth/users'
     | '/_admin/book/meili'
     | '/_admin/misc/echokv'
@@ -402,6 +414,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAuthUsersRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/_admin/auth/status': {
+      id: '/_admin/auth/status'
+      path: '/auth/status'
+      fullPath: '/auth/status'
+      preLoaderRoute: typeof AdminAuthStatusRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/_admin/auth/sessions': {
       id: '/_admin/auth/sessions'
       path: '/auth/sessions'
@@ -419,6 +438,7 @@ interface AdminRouteChildren {
   AdminTokenRoute: typeof AdminTokenRoute
   AdminIndexRoute: typeof AdminIndexRoute
   AdminAuthSessionsRoute: typeof AdminAuthSessionsRoute
+  AdminAuthStatusRoute: typeof AdminAuthStatusRoute
   AdminAuthUsersRoute: typeof AdminAuthUsersRoute
   AdminBookMeiliRoute: typeof AdminBookMeiliRoute
   AdminMiscEchokvRoute: typeof AdminMiscEchokvRoute
@@ -440,6 +460,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminTokenRoute: AdminTokenRoute,
   AdminIndexRoute: AdminIndexRoute,
   AdminAuthSessionsRoute: AdminAuthSessionsRoute,
+  AdminAuthStatusRoute: AdminAuthStatusRoute,
   AdminAuthUsersRoute: AdminAuthUsersRoute,
   AdminBookMeiliRoute: AdminBookMeiliRoute,
   AdminMiscEchokvRoute: AdminMiscEchokvRoute,
