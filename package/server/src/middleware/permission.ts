@@ -5,7 +5,7 @@ import type {
   TokenPermissionRole,
   UserDTO,
 } from '@package/contract';
-import {BasicAdminPermission} from '@package/contract';
+import {BasicAdminPermission, TokenTransportHeader} from '@package/contract';
 import {userService} from '../user/service/user.service';
 import {mapUserToDTO} from '../user/model/mapper';
 
@@ -55,16 +55,22 @@ function matchesSnapshotRole(
 
 export const requireLogin = new Elysia({name: 'guard/requireLogin'})
   .use(tokenContext)
-  .resolve({as: 'scoped'}, async ({authIdentityToken, set}) => {
+  .resolve({as: 'scoped'}, async ({authIdentityToken, headers, set}) => {
     if (!authIdentityToken) {
+      const headerKey = TokenTransportHeader.AUTHORIZATION.toLowerCase();
+      const hadHeader = !!(headers as Record<string, string | undefined>)[headerKey];
       set.status = 401;
-      throw new Error('Unauthorized: Missing identity token');
+      throw new Error(
+        hadHeader
+          ? 'Unauthorized: Identity token is invalid or expired'
+          : 'Unauthorized: No authorization header provided',
+      );
     }
 
     const unitId = authIdentityToken.unitId || authIdentityToken.sub;
     if (!unitId) {
       set.status = 401;
-      throw new Error('Unauthorized: Missing identity unitId');
+      throw new Error('Unauthorized: Identity token missing unitId claim');
     }
 
     return {
@@ -78,15 +84,21 @@ export const requireLogin = new Elysia({name: 'guard/requireLogin'})
 export const requireOwner = new Elysia({name: 'guard/requireOwner'})
   .use(tokenContext)
   .use(requireLogin)
-  .resolve({as: 'scoped'}, async ({identity, rezicsSessionToken, set}) => {
+  .resolve({as: 'scoped'}, async ({identity, rezicsSessionToken, headers, set}) => {
     if (!identity) {
       set.status = 401;
       throw new Error('Unauthorized: Missing identity');
     }
 
     if (!rezicsSessionToken) {
+      const headerKey = TokenTransportHeader.REZICS_SESSION.toLowerCase();
+      const hadHeader = !!(headers as Record<string, string | undefined>)[headerKey];
       set.status = 401;
-      throw new Error('Unauthorized: Missing session token');
+      throw new Error(
+        hadHeader
+          ? 'Unauthorized: Session token is invalid or expired'
+          : 'Unauthorized: No session token header provided',
+      );
     }
 
     if (rezicsSessionToken.unitId !== identity.unitId) {

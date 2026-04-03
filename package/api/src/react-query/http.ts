@@ -59,7 +59,7 @@ async function requestWithAuthRetry(
   const cloned = response.clone();
   const responseJson = await cloned.json().catch(() => null);
 
-  if (responseJson?.message?.includes('No authorization') || !hasAuthPresence()) {
+  if (responseJson?.message?.includes('No authorization header') || !hasAuthPresence()) {
     return response;
   }
 

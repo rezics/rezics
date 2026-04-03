@@ -58,7 +58,7 @@ describe('createTokenResolver', () => {
     expect(body.token).toEqual(payload);
   });
 
-  test('invalid token returns 401', async () => {
+  test('invalid token resolves to null', async () => {
     const app = new Elysia()
       .use(
         createTokenResolver('authIdentityToken', {
@@ -74,7 +74,9 @@ describe('createTokenResolver', () => {
         headers: {Authorization: 'Bearer bad-token'},
       }),
     );
-    expect(res.status).toBe(401);
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.token).toBeNull();
   });
 
   test('passes raw header value to verifier (bearer extraction is verifier responsibility)', async () => {
