@@ -8,7 +8,6 @@ import {
   revokeSessionBodySchema,
 } from '@rezics/contract';
 import {coreInstance} from '../core';
-import {authCorsPolicy} from '../cors';
 import {handleAuthRequest} from '../auth/routes';
 import {jsonRequestBody, jsonResponse} from './docs';
 import {listEnabledSocialProviderIds} from '../auth/providers';
@@ -191,7 +190,6 @@ async function getContextTokenResponse(request: Request): Promise<Response> {
 }
 
 export const sessionRouter = coreInstance()
-  .use(authCorsPolicy('credentialed'))
   .get(
     '/session/jwks',
     async () => {
@@ -200,7 +198,6 @@ export const sessionRouter = coreInstance()
       return getAuthSessionJwksResponse();
     },
     {
-      corsPolicy: 'public',
       detail: {
         summary: 'Session JWKS public keys',
         description:

@@ -18,13 +18,11 @@ import {
 import {unitService} from './unit.service';
 import {mapUnitToDTO} from './mapper';
 import {
-  serverCorsPolicy,
   authMacro,
   buildActorFromContext,
 } from '@/middleware';
 
 export const unitApi = new Elysia({prefix: '/units'})
-  .use(serverCorsPolicy('credentialed'))
   .use(authMacro)
   .get(
     '/:unitId',

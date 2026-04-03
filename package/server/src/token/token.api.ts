@@ -1,5 +1,5 @@
 import {t, Elysia} from 'elysia';
-import {serverCorsPolicy, authMacro} from '@/middleware';
+import {authMacro} from '@/middleware';
 import {tokenService} from './token.service';
 import {
   apiTokenDTOSchema,
@@ -14,13 +14,11 @@ import {userRoute} from './token.user.api';
 
 // Token-auth book & user routes (independent auth via API token header)
 const tokenExternalRoutes = new Elysia({prefix: '/token'})
-  .use(serverCorsPolicy('credentialed'))
   .use(bookRoute)
   .use(userRoute);
 
 // Owner-authenticated token management routes
 const tokenManagementRoutes = new Elysia({prefix: '/token'})
-  .use(serverCorsPolicy('credentialed'))
   .use(authMacro)
   .get(
     '/tokens',

@@ -1,5 +1,5 @@
 import {t, Elysia} from 'elysia';
-import {serverCorsPolicy, authMacro} from '@/middleware';
+import {authMacro} from '@/middleware';
 import {
   bookQueryOptionsSchema,
   type BookQueryOptions,
@@ -18,7 +18,6 @@ import {searchClient} from './search-client';
 import {mapUserSearchDocToPublicProfile} from './mapper';
 
 export const meiliApi = new Elysia({prefix: '/meili'})
-  .use(serverCorsPolicy('credentialed'))
   .use(authMacro)
   .get(
     '/health',

@@ -11,9 +11,7 @@ import {
 } from '@rezics/contract';
 import {handleAuthRequest} from '../auth/routes';
 import {jsonRequestBody, jsonResponse, parameter} from './docs';
-import {authCorsPolicy} from '../cors';
-
-export const selfServiceRouter = new Elysia().use(authCorsPolicy('credentialed'))
+export const selfServiceRouter = new Elysia()
   .post('/send-verification-email', ({request}) => handleAuthRequest(request), {
     detail: {
       summary: 'Send verification email',

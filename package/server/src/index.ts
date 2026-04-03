@@ -31,12 +31,12 @@ import {feedbackApi} from './feedback';
 import {sessionApi} from './session';
 import {jwtServiceAdminApi} from './jwt';
 
-import {applyCorsToSet} from '@rezics/cors';
+import {cors} from '@elysiajs/cors';
+import {TokenTransportHeader} from '@rezics/contract';
 import {getProdState} from './utils/getProdState';
 import {env} from './env';
 import {bootstrapJwtServiceRecord, getJwtService} from './jwt';
 import {serverSessionJwksPath} from './session/jwt/jwt-metadata';
-import {serverConfigs} from '@/middleware';
 import {wellKnownApi} from './well-known/well-known.api';
 
 import 'dotenv/config';
@@ -110,12 +110,34 @@ const rezicsSessionVerifier = createJwtVerifier<RezicsSessionTokenClaims>({
   enforceTransport: true,
 });
 
-app
-  .onError(({code, error, request, set}) => {
-    if (!set.headers['access-control-allow-origin']) {
-      applyCorsToSet(request, set.headers, serverConfigs['credentialed']);
-    }
+const devOrigins = [
+  'http://localhost:35001',
+  'http://localhost:35002',
+  'http://localhost:8000',
+];
 
+const prodOrigins = ['https://book.rezics.com', 'https://rezics.com'];
+
+app
+  .use(
+    cors({
+      origin: isDev ? devOrigins : prodOrigins,
+      credentials: true,
+      methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+      allowedHeaders: [
+        'content-type',
+        'authorization',
+        'accept',
+        TokenTransportHeader.AUTH_CONTEXT,
+        TokenTransportHeader.REZICS_SESSION,
+        TokenTransportHeader.NOTIFICATION_SESSION,
+        TokenTransportHeader.SEARCH_SESSION,
+      ],
+      exposeHeaders: [TokenTransportHeader.REZICS_SESSION],
+      maxAge: 600,
+    }),
+  )
+  .onError(({code, error, set}) => {
     set.status ||= 500;
     const message =
       error instanceof Error ? error.message : 'Internal Server Error';

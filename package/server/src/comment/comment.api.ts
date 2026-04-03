@@ -1,6 +1,5 @@
 import {t, Elysia} from 'elysia';
 import {
-  serverCorsPolicy,
   authMacro,
   buildActorFromContext,
 } from '@/middleware';
@@ -20,7 +19,6 @@ import {
 } from '@rezics/contract';
 
 export const commentApi = new Elysia({prefix: '/comments'})
-  .use(serverCorsPolicy('credentialed'))
   .use(authMacro)
   .get(
     '/comment-tree/:unitId',

@@ -14,13 +14,11 @@ import {chapterService} from './chapter.service';
 import {mapUnitToChapterDetailDTO, mapUnitToChapterListItemDTO} from './mapper';
 import {unitService} from '@/unit/unit.service';
 import {
-  serverCorsPolicy,
   authMacro,
   buildActorFromContext,
 } from '@/middleware';
 
 export const chapterApi = new Elysia({prefix: '/chapters'})
-  .use(serverCorsPolicy('credentialed'))
   .use(authMacro)
   .get(
     '/:unitId',

@@ -4,7 +4,6 @@ import {
   type SessionTokenResponse,
 } from '@rezics/contract';
 import {
-  serverCorsPolicy,
   authMacro,
   getAuthSessionState,
   assertMainServerEligibility,
@@ -17,11 +16,9 @@ import {
 } from './jwt/jwt.service.ts';
 
 export const sessionApi = new Elysia({prefix: '/session'})
-  .use(serverCorsPolicy('credentialed'))
   .use(mainSessionJwtPlugin)
   .use(authMacro)
   .get('/jwks', async () => getMainSessionPublicJwks(), {
-    corsPolicy: 'public',
     detail: {
       summary: 'Publish main-server JWKS (legacy)',
       description:

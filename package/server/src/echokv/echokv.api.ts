@@ -1,5 +1,5 @@
 import {t, Elysia} from 'elysia';
-import {serverCorsPolicy, authMacro} from '@/middleware';
+import {authMacro} from '@/middleware';
 import type {
   EchoKVKeyListResponse,
   EchoKVResponse,
@@ -9,7 +9,6 @@ import {echoKvService} from './echokv.service';
 import {BasicAdminPermission} from '@rezics/contract';
 
 export const echoKvApi = new Elysia({prefix: '/echokv'})
-  .use(serverCorsPolicy('credentialed'))
   .use(authMacro)
   .get(
     '/',

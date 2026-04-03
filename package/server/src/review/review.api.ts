@@ -1,6 +1,5 @@
 import {Elysia} from 'elysia';
 import {
-  serverCorsPolicy,
   authMacro,
   buildActorFromContext,
 } from '@/middleware';
@@ -22,7 +21,6 @@ import {reviewService} from './review.service';
 import {mapReviewToDTO} from './mapper';
 
 export const reviewApi = new Elysia({prefix: '/reviews'})
-  .use(serverCorsPolicy('credentialed'))
   .use(authMacro)
   .get(
     '/:id',

@@ -39,12 +39,12 @@
   "dependencies": {
     "@better-auth/oauth-provider": "^1.5.3",
     "@better-auth/prisma-adapter": "^1.5.3",
+    "@elysiajs/cors": "^1.4.0",
     "@elysiajs/bearer": "^1.4.1",
     "@elysiajs/jwt": "^1.4.0",
     "@elysiajs/openapi": "^1.4.14",
     "@faker-js/faker": "^10.1.0",
     "@rezics/contract": "workspace:*",
-    "@rezics/cors": "workspace:*",
     "@rezics/jwt": "workspace:*",
     "@rezics/search": "workspace:*",
     "@prisma/adapter-pg": "^7.6.0",

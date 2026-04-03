@@ -1,5 +1,5 @@
 import {t, Elysia} from 'elysia';
-import {serverCorsPolicy, authMacro} from '@/middleware';
+import {authMacro} from '@/middleware';
 import {reactionService} from './reaction.service';
 import {prisma, type ReactionSummary} from '#/prisma/client';
 import {
@@ -12,7 +12,6 @@ import {
 } from '@rezics/contract';
 
 export const reactionApi = new Elysia({prefix: '/reactions'})
-  .use(serverCorsPolicy('credentialed'))
   .use(authMacro)
   .get(
     '/',

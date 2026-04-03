@@ -4,10 +4,7 @@ import {
   handleOAuthAuthorizationServerRequest,
   handleOpenIdConfigRequest,
 } from '../auth/routes';
-import {authCorsPolicy} from '../cors';
-
 export const wellKnownApi = new Elysia({prefix: '/.well-known'})
-  .use(authCorsPolicy('public'))
   .get('/jwks.json', ({request}) => handleJwksCompatibilityRequest(request), {
     detail: {
       summary: 'JWKS endpoint',

@@ -19,9 +19,7 @@ import {getConfiguredSocialProviders} from '../auth/providers';
 import {
   coreInstance,
 } from '../core';
-import {authCorsPolicy} from '../cors';
-
-const oauthFlowRouter = coreInstance().use(authCorsPolicy('public'))
+const oauthFlowRouter = coreInstance()
   .get(
     '/providers',
     () => ({

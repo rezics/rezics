@@ -18,7 +18,6 @@ import type {
   TagListQuery,
 } from '@rezics/contract';
 import {
-  serverCorsPolicy,
   authMacro,
   buildActorFromContext,
 } from '@/middleware';
@@ -27,7 +26,6 @@ import {mapTagDetailToDTO, mapTagToDTO} from './mapper';
 import {unitService} from '../unit/unit.service';
 
 export const tagApi = new Elysia({prefix: '/tags'})
-  .use(serverCorsPolicy('credentialed'))
   .use(authMacro)
   .get(
     '/',

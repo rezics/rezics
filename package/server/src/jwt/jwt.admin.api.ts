@@ -1,5 +1,5 @@
 import {Elysia, t} from 'elysia';
-import {serverCorsPolicy, authMacro} from '@/middleware';
+import {authMacro} from '@/middleware';
 import {
   jwtServiceDTOSchema,
   jwtServiceListResponseSchema,
@@ -9,7 +9,6 @@ import {
 import {jwtServiceAdminService} from './jwt.admin.service';
 
 export const jwtServiceAdminApi = new Elysia({prefix: '/admin/jwt-services'})
-  .use(serverCorsPolicy('credentialed'))
   .use(authMacro)
   .get(
     '/',

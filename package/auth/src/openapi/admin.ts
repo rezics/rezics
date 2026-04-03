@@ -8,9 +8,7 @@ import {
 } from '@rezics/contract';
 import {handleAuthRequest} from '../auth/routes';
 import {jsonRequestBody, jsonResponse} from './docs';
-import {authCorsPolicy} from '../cors';
-
-export const adminRouter = new Elysia().use(authCorsPolicy('credentialed'))
+export const adminRouter = new Elysia()
   .get('/admin/list-users', ({request}) => handleAuthRequest(request), {
     detail: {
       summary: 'List users',

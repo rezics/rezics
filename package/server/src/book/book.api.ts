@@ -19,13 +19,11 @@ import {bookService} from './book.service';
 import {mapBookToDTO} from './mapper';
 import {unitService} from '@/unit/unit.service';
 import {
-  serverCorsPolicy,
   authMacro,
   buildActorFromContext,
 } from '@/middleware';
 
 export const bookApi = new Elysia({prefix: '/books'})
-  .use(serverCorsPolicy('credentialed'))
   .use(authMacro)
   .get(
     '/:unitId',

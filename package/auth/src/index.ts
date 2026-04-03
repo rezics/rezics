@@ -3,8 +3,8 @@ import {authOpenApiRouter} from './openapi';
 import {wellKnownApi} from './well-known/well-known.api';
 import {env} from './env';
 import {openapi} from '@elysiajs/openapi';
-import {applyCorsToSet} from '@rezics/cors';
-import {authConfigs} from './cors';
+import {cors} from '@elysiajs/cors';
+import {TokenTransportHeader} from '@rezics/contract';
 
 const isDev = env.NODE_ENV === 'development';
 
@@ -33,12 +33,33 @@ if (isDev) {
     });
 }
 
-app
-  .onError(({error, request, set}) => {
-    if (!set.headers['access-control-allow-origin']) {
-      applyCorsToSet(request, set.headers, authConfigs['credentialed']);
-    }
+const devOrigins = [
+  'http://localhost:35001',
+  'http://localhost:35002',
+  'http://localhost:8000',
+];
 
+const prodOrigins = ['https://book.rezics.com', 'https://rezics.com'];
+
+app
+  .use(
+    cors({
+      origin: isDev ? devOrigins : prodOrigins,
+      credentials: true,
+      methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+      allowedHeaders: [
+        'content-type',
+        'authorization',
+        'x-internal-auth-token',
+        TokenTransportHeader.AUTH_CONTEXT,
+        TokenTransportHeader.REZICS_SESSION,
+        TokenTransportHeader.NOTIFICATION_SESSION,
+        TokenTransportHeader.SEARCH_SESSION,
+      ],
+      maxAge: 600,
+    }),
+  )
+  .onError(({error, set}) => {
     if (!set.status) {
       set.status = 500;
     }

@@ -1,5 +1,5 @@
 import {t, Elysia} from 'elysia';
-import {serverCorsPolicy, authMacro} from '@/middleware';
+import {authMacro} from '@/middleware';
 import {feedbackService} from './feedback.service';
 import {
   createFeedbackSchema,
@@ -10,7 +10,6 @@ import {
 } from '@rezics/contract';
 
 export const feedbackApi = new Elysia({prefix: '/feedbacks'})
-  .use(serverCorsPolicy('credentialed'))
   .use(authMacro)
   .post(
     '/',

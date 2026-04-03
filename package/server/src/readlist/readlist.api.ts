@@ -1,6 +1,5 @@
 import {Elysia} from 'elysia';
 import {
-  serverCorsPolicy,
   authMacro,
   buildActorFromContext,
 } from '@/middleware';
@@ -22,7 +21,6 @@ import type {
 } from '@rezics/contract';
 
 export const readlistApi = new Elysia({prefix: '/readlists'})
-  .use(serverCorsPolicy('credentialed'))
   .use(authMacro)
   .get(
     '/:unitId',
