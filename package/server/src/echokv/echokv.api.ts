@@ -1,5 +1,5 @@
 import {t, Elysia} from 'elysia';
-import {serverCorsPolicy, requireOwner} from '@/middleware';
+import {serverCorsPolicy, authMacro} from '@/middleware';
 import type {
   EchoKVKeyListResponse,
   EchoKVResponse,
@@ -10,6 +10,7 @@ import {BasicAdminPermission} from '@package/contract';
 
 export const echoKvApi = new Elysia({prefix: '/echokv'})
   .use(serverCorsPolicy('credentialed'))
+  .use(authMacro)
   .get(
     '/',
     async ({query}): Promise<EchoKVKeyListResponse> => {
@@ -44,7 +45,6 @@ export const echoKvApi = new Elysia({prefix: '/echokv'})
       },
     },
   )
-  .use(requireOwner)
   .put(
     '/:key',
     async ({params, body, currentUser, set}): Promise<EchoKVResponse> => {
@@ -59,6 +59,7 @@ export const echoKvApi = new Elysia({prefix: '/echokv'})
       return {value};
     },
     {
+      requireOwner: true,
       params: t.Object({
         key: t.String(),
       }),

@@ -8,34 +8,18 @@ import {
 
 import {userService} from '../service/user.service';
 import {mapUserToDTO} from '../model/mapper';
-import {requireAdmin} from '@/middleware';
-import {BasicAdminPermission} from '@package/contract';
+import {authMacro} from '@/middleware';
 
 export const adminRoute = new Elysia()
-  .use(requireAdmin)
+  .use(authMacro)
   .get(
     '/admin',
-    async ({
-      query,
-      session,
-      currentUser,
-      set,
-    }): Promise<{users: UserDTO[]; total: number}> => {
-      if (
-        session.permission.role !== 'ROOT' &&
-        session.permission.role !== 'ADMIN'
-      ) {
-        set.status = 403;
-        throw new Error('Forbidden: Admin role required');
-      }
-      if (!BasicAdminPermission(currentUser)) {
-        set.status = 403;
-        throw new Error('Forbidden: Persisted admin permission required');
-      }
+    async ({query}): Promise<{users: UserDTO[]; total: number}> => {
       const {users, total} = await userService.list(query as any);
       return {users: users.map(mapUserToDTO), total};
     },
     {
+      requireAdmin: true,
       query: userListQuerySchema,
       detail: {
         summary: 'Admin list users',
@@ -46,22 +30,12 @@ export const adminRoute = new Elysia()
   )
   .get(
     '/admin/:unitId',
-    async ({params, session, currentUser, set}): Promise<UserDTO> => {
-      if (
-        session.permission.role !== 'ROOT' &&
-        session.permission.role !== 'ADMIN'
-      ) {
-        set.status = 403;
-        throw new Error('Forbidden: Admin role required');
-      }
-      if (!BasicAdminPermission(currentUser)) {
-        set.status = 403;
-        throw new Error('Forbidden: Persisted admin permission required');
-      }
+    async ({params}): Promise<UserDTO> => {
       const user = await userService.getByUnitId(params.unitId);
       return mapUserToDTO(user);
     },
     {
+      requireAdmin: true,
       params: userParamsSchema,
       detail: {
         summary: 'Admin get user',
@@ -72,19 +46,7 @@ export const adminRoute = new Elysia()
   )
   .put(
     '/admin/:unitId',
-    async ({params, body, session, currentUser, set}): Promise<UserDTO> => {
-      if (
-        session.permission.role !== 'ROOT' &&
-        session.permission.role !== 'ADMIN'
-      ) {
-        set.status = 403;
-        throw new Error('Forbidden: Admin role required');
-      }
-      if (!BasicAdminPermission(currentUser)) {
-        set.status = 403;
-        throw new Error('Forbidden: Persisted admin permission required');
-      }
-
+    async ({params, body}): Promise<UserDTO> => {
       const userReq: UpdateUser = {
         name: body.name,
         avatar: body.avatar,
@@ -96,6 +58,7 @@ export const adminRoute = new Elysia()
       return mapUserToDTO(user);
     },
     {
+      requireAdmin: true,
       params: userParamsSchema,
       body: updateUserSchema,
       detail: {
@@ -107,22 +70,12 @@ export const adminRoute = new Elysia()
   )
   .delete(
     '/admin/:unitId',
-    async ({params, session, currentUser, set}): Promise<{message: string}> => {
-      if (
-        session.permission.role !== 'ROOT' &&
-        session.permission.role !== 'ADMIN'
-      ) {
-        set.status = 403;
-        throw new Error('Forbidden: Admin role required');
-      }
-      if (!BasicAdminPermission(currentUser)) {
-        set.status = 403;
-        throw new Error('Forbidden: Persisted admin permission required');
-      }
+    async ({params}): Promise<{message: string}> => {
       await userService.delete(params.unitId);
       return {message: 'User deleted successfully'};
     },
     {
+      requireAdmin: true,
       params: userParamsSchema,
       detail: {
         summary: 'Admin delete user',

@@ -4,9 +4,10 @@ import {userService} from '../service/user.service';
 import {mapUserToPublicProfile} from '../model/mapper';
 
 import {userParamsSchema} from '@package/contract';
-import {requireOwner} from '@/middleware';
+import {authMacro} from '@/middleware';
 
 export const followRoute = new Elysia()
+  .use(authMacro)
   .get(
     '/:unitId/followers',
     async ({params, query}) => {
@@ -66,7 +67,6 @@ export const followRoute = new Elysia()
       },
     },
   )
-  .use(requireOwner)
   .post(
     '/follow/:targetId',
     async ({identity, params}) => {
@@ -74,6 +74,7 @@ export const followRoute = new Elysia()
       return {message: 'Followed successfully'};
     },
     {
+      requireOwner: true,
       params: t.Object({
         targetId: t.String(),
       }),
@@ -91,6 +92,7 @@ export const followRoute = new Elysia()
       return {message: 'Unfollowed successfully'};
     },
     {
+      requireOwner: true,
       params: t.Object({
         targetId: t.String(),
       }),
@@ -115,6 +117,7 @@ export const followRoute = new Elysia()
       return status;
     },
     {
+      requireOwner: true,
       query: t.Object({
         targetIds: t.Optional(t.Union([t.String(), t.Array(t.String())])),
       }),

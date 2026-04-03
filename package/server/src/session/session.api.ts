@@ -5,7 +5,7 @@ import {
 } from '@package/contract';
 import {
   serverCorsPolicy,
-  requireLogin,
+  authMacro,
   getAuthSessionState,
   assertMainServerEligibility,
 } from '@/middleware';
@@ -19,6 +19,7 @@ import {
 export const sessionApi = new Elysia({prefix: '/session'})
   .use(serverCorsPolicy('credentialed'))
   .use(mainSessionJwtPlugin)
+  .use(authMacro)
   .get('/jwks', async () => getMainSessionPublicJwks(), {
     corsPolicy: 'public',
     detail: {
@@ -29,7 +30,6 @@ export const sessionApi = new Elysia({prefix: '/session'})
       deprecated: true,
     },
   })
-  .use(requireLogin)
   .post(
     '/token',
     async ({identity, headers, jwt, set}): Promise<SessionTokenResponse> => {
@@ -74,6 +74,7 @@ export const sessionApi = new Elysia({prefix: '/session'})
       };
     },
     {
+      requireLogin: true,
       response: sessionTokenResponseSchema,
       detail: {
         summary: 'Issue main-server session token',

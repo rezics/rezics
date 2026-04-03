@@ -1,4 +1,4 @@
-import {Elysia} from 'elysia';
+import {Elysia, status} from 'elysia';
 import type {
   AuthIdentityTokenClaims,
   RezicsSessionTokenClaims,
@@ -9,22 +9,11 @@ import {BasicAdminPermission, TokenTransportHeader} from '@package/contract';
 import {userService} from '../user/service/user.service';
 import {mapUserToDTO} from '../user/model/mapper';
 
-/**
- * Type-declaration plugin that tells Elysia about globally-resolved token
- * context properties. The actual resolution is done by createTokenResolver
- * plugins at the app level; this plugin only provides the type information
- * so downstream guards can reference them with full inference.
- *
- * TODO Here need to have some problem, which needs to be fixed
- */
-const tokenContext = new Elysia({name: 'ctx/tokenContext'}).derive(
-  {as: 'scoped'},
-  ({store: _, ...ctx}) =>
-    ctx as unknown as {
-      authIdentityToken: AuthIdentityTokenClaims | null;
-      rezicsSessionToken: RezicsSessionTokenClaims | null;
-    },
-);
+interface GlobalTokenContext {
+  authIdentityToken: AuthIdentityTokenClaims | null;
+  rezicsSessionToken: RezicsSessionTokenClaims | null;
+  headers: Record<string, string | undefined>;
+}
 
 function hasRole(
   roles: string[] | undefined,
@@ -53,106 +42,105 @@ function matchesSnapshotRole(
   }
 }
 
-export const requireLogin = new Elysia({name: 'guard/requireLogin'})
-  .use(tokenContext)
-  .resolve({as: 'scoped'}, async ({authIdentityToken, headers, set}) => {
-    if (!authIdentityToken) {
-      const headerKey = TokenTransportHeader.AUTHORIZATION.toLowerCase();
-      const hadHeader = !!(headers as Record<string, string | undefined>)[headerKey];
-      set.status = 401;
-      throw new Error(
-        hadHeader
-          ? 'Unauthorized: Identity token is invalid or expired'
-          : 'Unauthorized: No authorization header provided',
-      );
-    }
+export const authMacro = new Elysia({name: 'macro/auth'})
+  .macro('requireLogin', {
+    async resolve(ctx) {
+      const {authIdentityToken, headers} = ctx as unknown as GlobalTokenContext;
 
-    const unitId = authIdentityToken.unitId || authIdentityToken.sub;
-    if (!unitId) {
-      set.status = 401;
-      throw new Error('Unauthorized: Identity token missing unitId claim');
-    }
+      if (!authIdentityToken) {
+        const headerKey = TokenTransportHeader.AUTHORIZATION.toLowerCase();
+        const hadHeader = !!headers[headerKey];
+        return status(
+          401,
+          hadHeader
+            ? 'Unauthorized: Identity token is invalid or expired'
+            : 'Unauthorized: No authorization header provided',
+        );
+      }
 
-    return {
-      identity: {
-        ...authIdentityToken,
-        unitId,
-      },
-    };
-  });
+      const unitId = authIdentityToken.unitId || authIdentityToken.sub;
+      if (!unitId) {
+        return status(401, 'Unauthorized: Identity token missing unitId claim');
+      }
 
-export const requireOwner = new Elysia({name: 'guard/requireOwner'})
-  .use(tokenContext)
-  .use(requireLogin)
-  .resolve({as: 'scoped'}, async ({identity, rezicsSessionToken, headers, set}) => {
-    if (!identity) {
-      set.status = 401;
-      throw new Error('Unauthorized: Missing identity');
-    }
+      return {
+        identity: {
+          ...authIdentityToken,
+          unitId,
+        },
+      };
+    },
+  })
+  .macro('requireOwner', {
+    requireLogin: true,
+    async resolve(ctx) {
+      const {identity, rezicsSessionToken, headers} = ctx as unknown as {
+        identity: {unitId: string} & AuthIdentityTokenClaims;
+        rezicsSessionToken: RezicsSessionTokenClaims | null;
+        headers: Record<string, string | undefined>;
+      };
 
-    if (!rezicsSessionToken) {
-      const headerKey = TokenTransportHeader.REZICS_SESSION.toLowerCase();
-      const hadHeader = !!(headers as Record<string, string | undefined>)[headerKey];
-      set.status = 401;
-      throw new Error(
-        hadHeader
-          ? 'Unauthorized: Session token is invalid or expired'
-          : 'Unauthorized: No session token header provided',
-      );
-    }
+      if (!rezicsSessionToken) {
+        const headerKey = TokenTransportHeader.REZICS_SESSION.toLowerCase();
+        const hadHeader = !!headers[headerKey];
+        return status(
+          401,
+          hadHeader
+            ? 'Unauthorized: Session token is invalid or expired'
+            : 'Unauthorized: No session token header provided',
+        );
+      }
 
-    if (rezicsSessionToken.unitId !== identity.unitId) {
-      set.status = 401;
-      throw new Error('Unauthorized: Identity and session token mismatch');
-    }
+      if (rezicsSessionToken.unitId !== identity.unitId) {
+        return status(
+          401,
+          'Unauthorized: Identity and session token mismatch',
+        );
+      }
 
-    const persistedUser = await userService.getByUnitId(identity.unitId);
-    const currentUser = mapUserToDTO(persistedUser);
-    const persistedRoles = currentUser.permission?.role;
+      const persistedUser = await userService.getByUnitId(identity.unitId);
+      const currentUser = mapUserToDTO(persistedUser);
+      const persistedRoles = currentUser.permission?.role;
 
-    if (
-      !matchesSnapshotRole(rezicsSessionToken.permission.role, persistedRoles)
-    ) {
-      set.status = 403;
-      throw new Error(
-        'Forbidden: Persisted permissions no longer match session',
-      );
-    }
+      if (
+        !matchesSnapshotRole(rezicsSessionToken.permission.role, persistedRoles)
+      ) {
+        return status(
+          403,
+          'Forbidden: Persisted permissions no longer match session',
+        );
+      }
 
-    if (persistedRoles?.includes('BLOCKED')) {
-      set.status = 403;
-      throw new Error('Forbidden: User is blocked');
-    }
+      if (persistedRoles?.includes('BLOCKED')) {
+        return status(403, 'Forbidden: User is blocked');
+      }
 
-    return {
-      identity,
-      session: rezicsSessionToken,
-      currentUser,
-    };
-  });
+      return {
+        identity,
+        session: rezicsSessionToken,
+        currentUser,
+      };
+    },
+  })
+  .macro('requireAdmin', {
+    requireOwner: true,
+    resolve(ctx) {
+      const {session, currentUser} = ctx as unknown as {
+        session: RezicsSessionTokenClaims;
+        currentUser: UserDTO;
+      };
 
-export const requireAdmin = new Elysia({name: 'guard/requireAdmin'})
-  .use(requireOwner)
-  .resolve({as: 'scoped'}, async ({identity, session, currentUser, set}) => {
-    if (!session || !currentUser) {
-      set.status = 401;
-      throw new Error('Unauthorized: Missing session or user context');
-    }
+      if (
+        session.permission.role !== 'ROOT' &&
+        session.permission.role !== 'ADMIN'
+      ) {
+        return status(403, 'Forbidden: Admin role required');
+      }
 
-    if (
-      session.permission.role !== 'ROOT' &&
-      session.permission.role !== 'ADMIN'
-    ) {
-      set.status = 403;
-      throw new Error('Forbidden: Admin role required');
-    }
-
-    if (!BasicAdminPermission(currentUser)) {
-      set.status = 403;
-      throw new Error('Forbidden: Persisted admin permission required');
-    }
-
-    return {identity, session, currentUser};
+      if (!BasicAdminPermission(currentUser)) {
+        return status(403, 'Forbidden: Persisted admin permission required');
+      }
+    },
   });
 
 export function buildActorFromContext(input: {
@@ -163,23 +151,4 @@ export function buildActorFromContext(input: {
     ...input.currentUser,
     unitId: input.identity.unitId,
   };
-}
-
-export function requireAdminSession(input: {
-  session: RezicsSessionTokenClaims;
-  currentUser: UserDTO;
-  set: {status?: number | string};
-}): void {
-  if (
-    input.session.permission.role !== 'ROOT' &&
-    input.session.permission.role !== 'ADMIN'
-  ) {
-    input.set.status = 403;
-    throw new Error('Forbidden: Admin role required');
-  }
-
-  if (!BasicAdminPermission(input.currentUser)) {
-    input.set.status = 403;
-    throw new Error('Forbidden: Persisted admin permission required');
-  }
 }

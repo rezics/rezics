@@ -19,13 +19,13 @@ import {unitService} from './unit.service';
 import {mapUnitToDTO} from './mapper';
 import {
   serverCorsPolicy,
-  requireLogin,
-  requireOwner,
+  authMacro,
   buildActorFromContext,
 } from '@/middleware';
 
 export const unitApi = new Elysia({prefix: '/units'})
   .use(serverCorsPolicy('credentialed'))
+  .use(authMacro)
   .get(
     '/:unitId',
     async ({params}): Promise<UnitResponse> => {
@@ -42,7 +42,6 @@ export const unitApi = new Elysia({prefix: '/units'})
       },
     },
   )
-  .use(requireLogin)
   .post(
     '/',
     async ({body, identity}): Promise<UnitResponse> => {
@@ -54,6 +53,7 @@ export const unitApi = new Elysia({prefix: '/units'})
       return mapUnitToDTO(unit);
     },
     {
+      requireLogin: true,
       body: createUnitSchema,
       response: unitResponseSchema,
       detail: {
@@ -63,7 +63,6 @@ export const unitApi = new Elysia({prefix: '/units'})
       },
     },
   )
-  .use(requireOwner)
   .get(
     '/',
     async ({query, currentUser, set}): Promise<UnitListResponse> => {
@@ -77,6 +76,7 @@ export const unitApi = new Elysia({prefix: '/units'})
       return {units: units.map(mapUnitToDTO), total};
     },
     {
+      requireOwner: true,
       query: unitListQuerySchema,
       response: unitListResponseSchema,
       detail: {
@@ -113,6 +113,7 @@ export const unitApi = new Elysia({prefix: '/units'})
       return mapUnitToDTO(unit);
     },
     {
+      requireOwner: true,
       params: unitParamsSchema,
       body: updateUnitSchema,
       response: unitResponseSchema,
@@ -145,6 +146,7 @@ export const unitApi = new Elysia({prefix: '/units'})
       return {message: 'Unit deleted successfully'};
     },
     {
+      requireOwner: true,
       params: unitParamsSchema,
       detail: {
         summary: 'Delete unit',

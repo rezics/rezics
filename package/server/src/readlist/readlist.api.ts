@@ -1,8 +1,7 @@
 import {Elysia} from 'elysia';
 import {
   serverCorsPolicy,
-  requireLogin,
-  requireOwner,
+  authMacro,
   buildActorFromContext,
 } from '@/middleware';
 import {unitService} from '@/unit/unit.service';
@@ -24,6 +23,7 @@ import type {
 
 export const readlistApi = new Elysia({prefix: '/readlists'})
   .use(serverCorsPolicy('credentialed'))
+  .use(authMacro)
   .get(
     '/:unitId',
     async ({params}): Promise<ReadlistResponse> => {
@@ -38,7 +38,6 @@ export const readlistApi = new Elysia({prefix: '/readlists'})
       },
     },
   )
-  .use(requireLogin)
   .post(
     '/',
     async ({body, identity}): Promise<ReadlistResponse> => {
@@ -52,6 +51,7 @@ export const readlistApi = new Elysia({prefix: '/readlists'})
       return readlistService.create(req, identity.unitId);
     },
     {
+      requireLogin: true,
       body: createReadlistSchema,
       detail: {
         summary: 'Create readlist',
@@ -60,7 +60,6 @@ export const readlistApi = new Elysia({prefix: '/readlists'})
       },
     },
   )
-  .use(requireOwner)
   .get(
     '/',
     async ({query, currentUser, set}): Promise<ReadlistListResponse> => {
@@ -74,6 +73,7 @@ export const readlistApi = new Elysia({prefix: '/readlists'})
       return {readlists, total};
     },
     {
+      requireOwner: true,
       query: readlistListQuerySchema,
       detail: {
         summary: 'Get all readlists',
@@ -110,6 +110,7 @@ export const readlistApi = new Elysia({prefix: '/readlists'})
       return readlistService.update(params.unitId, body);
     },
     {
+      requireOwner: true,
       params: readlistParamsSchema,
       body: updateReadlistSchema,
       detail: {
@@ -143,6 +144,7 @@ export const readlistApi = new Elysia({prefix: '/readlists'})
       return {message: 'Readlist deleted successfully'};
     },
     {
+      requireOwner: true,
       params: readlistParamsSchema,
       detail: {
         summary: 'Delete readlist',

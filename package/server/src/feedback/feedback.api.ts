@@ -1,5 +1,5 @@
 import {t, Elysia} from 'elysia';
-import {serverCorsPolicy, requireLogin, requireOwner} from '@/middleware';
+import {serverCorsPolicy, authMacro} from '@/middleware';
 import {feedbackService} from './feedback.service';
 import {
   createFeedbackSchema,
@@ -11,7 +11,7 @@ import {
 
 export const feedbackApi = new Elysia({prefix: '/feedbacks'})
   .use(serverCorsPolicy('credentialed'))
-  .use(requireLogin)
+  .use(authMacro)
   .post(
     '/',
     async ({body, identity}): Promise<FeedbackDTO> => {
@@ -21,6 +21,7 @@ export const feedbackApi = new Elysia({prefix: '/feedbacks'})
       });
     },
     {
+      requireLogin: true,
       body: createFeedbackSchema,
       detail: {
         summary: 'Create feedback',
@@ -40,6 +41,7 @@ export const feedbackApi = new Elysia({prefix: '/feedbacks'})
       });
     },
     {
+      requireLogin: true,
       query: feedbackListQuerySchema,
       detail: {
         summary: 'List my feedbacks',
@@ -49,7 +51,6 @@ export const feedbackApi = new Elysia({prefix: '/feedbacks'})
       },
     },
   )
-  .use(requireOwner)
   .get(
     '/by-user/:userId',
     async ({
@@ -74,6 +75,7 @@ export const feedbackApi = new Elysia({prefix: '/feedbacks'})
       });
     },
     {
+      requireOwner: true,
       params: t.Object({userId: t.String()}),
       query: feedbackListQuerySchema,
       detail: {
@@ -96,6 +98,7 @@ export const feedbackApi = new Elysia({prefix: '/feedbacks'})
       return feedbackService.list(query as any);
     },
     {
+      requireOwner: true,
       query: feedbackListQuerySchema,
       detail: {
         summary: 'List feedbacks (admin)',
@@ -117,6 +120,7 @@ export const feedbackApi = new Elysia({prefix: '/feedbacks'})
       return feedbackService.getById(params.id);
     },
     {
+      requireOwner: true,
       params: t.Object({id: t.String()}),
       detail: {
         summary: 'Get feedback (admin)',
@@ -138,6 +142,7 @@ export const feedbackApi = new Elysia({prefix: '/feedbacks'})
       return feedbackService.setResolved(params.id, resolved);
     },
     {
+      requireOwner: true,
       params: t.Object({id: t.String()}),
       body: t.Object({
         resolved: t.Boolean(),

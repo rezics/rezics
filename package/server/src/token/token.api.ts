@@ -1,5 +1,5 @@
 import {t, Elysia} from 'elysia';
-import {serverCorsPolicy, requireOwner} from '@/middleware';
+import {serverCorsPolicy, authMacro} from '@/middleware';
 import {tokenService} from './token.service';
 import {
   apiTokenDTOSchema,
@@ -21,7 +21,7 @@ const tokenExternalRoutes = new Elysia({prefix: '/token'})
 // Owner-authenticated token management routes
 const tokenManagementRoutes = new Elysia({prefix: '/token'})
   .use(serverCorsPolicy('credentialed'))
-  .use(requireOwner)
+  .use(authMacro)
   .get(
     '/tokens',
     async ({identity, currentUser, set}) => {
@@ -37,6 +37,7 @@ const tokenManagementRoutes = new Elysia({prefix: '/token'})
       return {tokens};
     },
     {
+      requireOwner: true,
       detail: {
         summary: 'List API tokens',
         description: 'List non-revoked API tokens for the current user',
@@ -72,6 +73,7 @@ const tokenManagementRoutes = new Elysia({prefix: '/token'})
       return {token, tokenInfo};
     },
     {
+      requireOwner: true,
       body: createApiTokenSchema,
       response: createApiTokenResponseSchema,
       detail: {
@@ -96,6 +98,7 @@ const tokenManagementRoutes = new Elysia({prefix: '/token'})
       return tokenService.updateToken(identity.unitId, params.id, body);
     },
     {
+      requireOwner: true,
       params: t.Object({id: t.String()}),
       body: updateApiTokenSchema,
       response: apiTokenDTOSchema,
@@ -122,6 +125,7 @@ const tokenManagementRoutes = new Elysia({prefix: '/token'})
       return {message: 'Token revoked successfully'};
     },
     {
+      requireOwner: true,
       params: t.Object({id: t.String()}),
       detail: {
         summary: 'Revoke API token',

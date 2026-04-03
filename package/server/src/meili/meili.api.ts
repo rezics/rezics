@@ -1,5 +1,5 @@
 import {t, Elysia} from 'elysia';
-import {serverCorsPolicy, requireOwner} from '@/middleware';
+import {serverCorsPolicy, authMacro} from '@/middleware';
 import {
   bookQueryOptionsSchema,
   type BookQueryOptions,
@@ -19,6 +19,7 @@ import {mapUserSearchDocToPublicProfile} from './mapper';
 
 export const meiliApi = new Elysia({prefix: '/meili'})
   .use(serverCorsPolicy('credentialed'))
+  .use(authMacro)
   .get(
     '/health',
     async () => {
@@ -96,7 +97,6 @@ export const meiliApi = new Elysia({prefix: '/meili'})
       },
     },
   )
-  .use(requireOwner)
   .post(
     '/feedbacks/search',
     async ({body, currentUser}) => {
@@ -107,6 +107,7 @@ export const meiliApi = new Elysia({prefix: '/meili'})
       return meiliService.searchFeedbacks(options);
     },
     {
+      requireOwner: true,
       body: feedbackListQuerySchema,
       detail: {
         summary: 'Search feedbacks (Meilisearch)',
@@ -129,6 +130,7 @@ export const meiliApi = new Elysia({prefix: '/meili'})
       return {message: 'books index initialized'};
     },
     {
+      requireOwner: true,
       detail: {
         summary: 'Init books index',
         tags: ['Meili', 'Admin'],
@@ -148,6 +150,7 @@ export const meiliApi = new Elysia({prefix: '/meili'})
       return {message: 'readlists index initialized'};
     },
     {
+      requireOwner: true,
       detail: {
         summary: 'Init readlists index',
         tags: ['Meili', 'Admin'],
@@ -167,6 +170,7 @@ export const meiliApi = new Elysia({prefix: '/meili'})
       return {message: 'feedbacks index initialized'};
     },
     {
+      requireOwner: true,
       detail: {
         summary: 'Init feedbacks index',
         tags: ['Meili', 'Admin'],
@@ -186,6 +190,7 @@ export const meiliApi = new Elysia({prefix: '/meili'})
       return {message: 'units index initialized'};
     },
     {
+      requireOwner: true,
       detail: {
         summary: 'Init units index',
         tags: ['Meili', 'Admin'],
@@ -205,6 +210,7 @@ export const meiliApi = new Elysia({prefix: '/meili'})
       return {message: 'users index initialized'};
     },
     {
+      requireOwner: true,
       detail: {
         summary: 'Init users index',
         tags: ['Meili', 'Admin'],
@@ -222,6 +228,7 @@ export const meiliApi = new Elysia({prefix: '/meili'})
       return {task};
     },
     {
+      requireOwner: true,
       detail: {
         summary: 'Sync all books to Meilisearch',
         tags: ['Meili', 'Admin'],
@@ -241,6 +248,7 @@ export const meiliApi = new Elysia({prefix: '/meili'})
       return {task};
     },
     {
+      requireOwner: true,
       detail: {
         summary: 'Sync all readlists to Meilisearch',
         tags: ['Meili', 'Admin'],
@@ -260,6 +268,7 @@ export const meiliApi = new Elysia({prefix: '/meili'})
       return {task};
     },
     {
+      requireOwner: true,
       detail: {
         summary: 'Sync all feedbacks to Meilisearch',
         tags: ['Meili', 'Admin'],
@@ -277,6 +286,7 @@ export const meiliApi = new Elysia({prefix: '/meili'})
       return {task};
     },
     {
+      requireOwner: true,
       detail: {
         summary: 'Sync all units to Meilisearch',
         tags: ['Meili', 'Admin'],
@@ -294,6 +304,7 @@ export const meiliApi = new Elysia({prefix: '/meili'})
       return {task};
     },
     {
+      requireOwner: true,
       detail: {
         summary: 'Sync all users to Meilisearch',
         tags: ['Meili', 'Admin'],
@@ -313,6 +324,7 @@ export const meiliApi = new Elysia({prefix: '/meili'})
       return {message: 'all units deleted'};
     },
     {
+      requireOwner: true,
       detail: {
         summary: 'Delete all units from Meilisearch',
         tags: ['Meili', 'Admin'],
@@ -332,6 +344,7 @@ export const meiliApi = new Elysia({prefix: '/meili'})
       return {key};
     },
     {
+      requireOwner: true,
       detail: {
         summary: 'Create search-only API key',
         tags: ['Meili', 'Keys'],
@@ -350,6 +363,7 @@ export const meiliApi = new Elysia({prefix: '/meili'})
       return meiliService.createAdminKey();
     },
     {
+      requireOwner: true,
       detail: {
         summary: 'Create admin API key',
         tags: ['Meili', 'Keys', 'Admin'],
@@ -366,6 +380,7 @@ export const meiliApi = new Elysia({prefix: '/meili'})
       return meiliService.listKeys();
     },
     {
+      requireOwner: true,
       detail: {
         summary: 'List Meilisearch keys',
         tags: ['Meili', 'Keys', 'Admin'],
@@ -383,6 +398,7 @@ export const meiliApi = new Elysia({prefix: '/meili'})
       return {message: 'key deleted'};
     },
     {
+      requireOwner: true,
       params: t.Object({
         uid: t.String(),
       }),

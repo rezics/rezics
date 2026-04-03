@@ -1,9 +1,8 @@
 import {t, Elysia} from 'elysia';
 import {
   serverCorsPolicy,
-  requireOwner,
+  authMacro,
   buildActorFromContext,
-  requireLogin,
 } from '@/middleware';
 import {commentService} from './comment.service';
 import {mapCommentToDTO} from './mapper';
@@ -22,6 +21,7 @@ import {
 
 export const commentApi = new Elysia({prefix: '/comments'})
   .use(serverCorsPolicy('credentialed'))
+  .use(authMacro)
   .get(
     '/comment-tree/:unitId',
     async ({params, query}): Promise<CommentTreeResponse> => {
@@ -84,7 +84,6 @@ export const commentApi = new Elysia({prefix: '/comments'})
       },
     },
   )
-  .use(requireLogin)
   .post(
     '/',
     async ({body, identity}) => {
@@ -100,6 +99,7 @@ export const commentApi = new Elysia({prefix: '/comments'})
       return mapCommentToDTO(comment);
     },
     {
+      requireLogin: true,
       body: createCommentSchema,
       detail: {
         summary: 'Create comment',
@@ -108,7 +108,6 @@ export const commentApi = new Elysia({prefix: '/comments'})
       },
     },
   )
-  .use(requireOwner)
   .put(
     '/:unitId',
     async ({params, body, identity, currentUser, set}) => {
@@ -126,6 +125,7 @@ export const commentApi = new Elysia({prefix: '/comments'})
       return mapCommentToDTO(updated);
     },
     {
+      requireOwner: true,
       params: t.Object({unitId: t.String()}),
       body: updateCommentSchema,
       detail: {
@@ -152,6 +152,7 @@ export const commentApi = new Elysia({prefix: '/comments'})
       return {message: 'Comment deleted successfully'};
     },
     {
+      requireOwner: true,
       params: t.Object({unitId: t.String()}),
       detail: {
         summary: 'Delete comment',

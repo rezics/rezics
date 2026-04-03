@@ -22,13 +22,14 @@ import {userService} from '../service/user.service';
 import {mapUserToDTO} from '../model/mapper';
 import {meiliService} from '@/meili/meili.service';
 import {mapUserSearchDocToPublicProfile} from '@/meili/mapper';
-import {requireLogin, requireOwner} from '@/middleware';
+import {authMacro} from '@/middleware';
 import {verifyAuthContextToken} from '../util';
 
 const AUTH_CONTEXT_HEADER =
   normalizedTokenTransportMap[NormalizedTokenName.AUTH_CONTEXT].headerName;
 
 export const coreRoute = new Elysia()
+  .use(authMacro)
   .get(
     '/',
     async ({query}): Promise<{users: UserDTO[]; total: number}> => {
@@ -47,7 +48,6 @@ export const coreRoute = new Elysia()
       },
     },
   )
-  .use(requireLogin)
   .get(
     '/ensure',
     async ({headers, identity, set}): Promise<EnsureUserResponse> => {
@@ -98,6 +98,7 @@ export const coreRoute = new Elysia()
       };
     },
     {
+      requireLogin: true,
       response: ensureUserResponseSchema,
       detail: {
         summary: 'Ensure current user',
@@ -107,7 +108,6 @@ export const coreRoute = new Elysia()
       },
     },
   )
-  .use(requireOwner)
   .get(
     '/me',
     async ({currentUser}): Promise<UserDTO> => {
@@ -115,6 +115,7 @@ export const coreRoute = new Elysia()
       return mapUserToDTO(user);
     },
     {
+      requireOwner: true,
       detail: {
         summary: 'Get current user',
         description:
@@ -136,6 +137,7 @@ export const coreRoute = new Elysia()
       return mapUserToDTO(user);
     },
     {
+      requireOwner: true,
       body: updateUserSchema,
       detail: {
         summary: 'Update current user',
@@ -171,6 +173,7 @@ export const coreRoute = new Elysia()
       return mapUserToDTO(user);
     },
     {
+      requireOwner: true,
       params: userParamsSchema,
       body: updateUserSchema,
       detail: {
@@ -191,6 +194,7 @@ export const coreRoute = new Elysia()
       return {message: 'User deleted successfully'};
     },
     {
+      requireOwner: true,
       detail: {
         summary: 'Delete current user',
         description: 'Delete current authenticated user account',
@@ -217,6 +221,7 @@ export const coreRoute = new Elysia()
       return {message: 'User deleted successfully'};
     },
     {
+      requireOwner: true,
       params: userParamsSchema,
       detail: {
         summary: 'Delete user',

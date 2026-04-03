@@ -6,12 +6,12 @@ process.env.DATABASE_URL ??=
   'postgresql://postgres:postgres@localhost:5432/rezics_book';
 process.env.AUTH_BASE_URL ??= 'http://localhost:3001';
 
-mock.module('@/auth/auth.permission', () => ({
-  requireLogin: new Elysia(),
-  requireOwner: new Elysia(),
-  requireAdmin: new Elysia(),
+mock.module('@/middleware/permission', () => ({
+  authMacro: new Elysia({name: 'macro/auth'})
+    .macro('requireLogin', {resolve: () => ({identity: {unitId: 'test'}})})
+    .macro('requireOwner', {requireLogin: true, resolve: () => ({session: {}, currentUser: {}})})
+    .macro('requireAdmin', {requireOwner: true}),
   buildActorFromContext: () => ({}),
-  requireAdminSession: () => {},
 }));
 
 mock.module('./echokv.service', () => ({

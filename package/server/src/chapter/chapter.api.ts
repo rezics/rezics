@@ -7,7 +7,6 @@ import {
   type ChapterListResponse,
   type ChapterResponse,
   type CreateChapterInput,
-  BasicAdminPermission,
   hasPermissionToDeleteChapter,
   hasPermissionToUpdateChapter,
 } from '@package/contract';
@@ -16,13 +15,13 @@ import {mapUnitToChapterDetailDTO, mapUnitToChapterListItemDTO} from './mapper';
 import {unitService} from '@/unit/unit.service';
 import {
   serverCorsPolicy,
-  requireOwner,
+  authMacro,
   buildActorFromContext,
 } from '@/middleware';
 
 export const chapterApi = new Elysia({prefix: '/chapters'})
   .use(serverCorsPolicy('credentialed'))
-  .use(requireOwner)
+  .use(authMacro)
   .get(
     '/:unitId',
     async ({params}): Promise<ChapterResponse> => {
@@ -64,13 +63,7 @@ export const chapterApi = new Elysia({prefix: '/chapters'})
   )
   .get(
     '/',
-    async ({query, currentUser, set}): Promise<ChapterListResponse> => {
-      if (!BasicAdminPermission(currentUser)) {
-        set.status = 403;
-        throw new Error(
-          'Forbidden: you do not have permission to get all books',
-        );
-      }
+    async ({query}): Promise<ChapterListResponse> => {
       const {items, total} = await chapterService.list(query);
       return {
         items: items.map(mapUnitToChapterListItemDTO),
@@ -78,7 +71,7 @@ export const chapterApi = new Elysia({prefix: '/chapters'})
       };
     },
     {
-      requireOwner: true,
+      requireAdmin: true,
       query: chapterListQuerySchema,
       detail: {
         summary: 'List chapters',

@@ -20,13 +20,13 @@ import {mapBookToDTO} from './mapper';
 import {unitService} from '@/unit/unit.service';
 import {
   serverCorsPolicy,
-  requireOwner,
+  authMacro,
   buildActorFromContext,
 } from '@/middleware';
 
 export const bookApi = new Elysia({prefix: '/books'})
   .use(serverCorsPolicy('credentialed'))
-  .use(requireOwner)
+  .use(authMacro)
   .get(
     '/:unitId',
     async ({params}): Promise<BookResponse> => {
@@ -91,18 +91,12 @@ export const bookApi = new Elysia({prefix: '/books'})
   )
   .get(
     '/',
-    async ({query, currentUser, set}): Promise<BookListResponse> => {
-      if (!BasicAdminPermission(currentUser)) {
-        set.status = 403;
-        throw new Error(
-          'Forbidden: you do not have permission to get all books',
-        );
-      }
+    async ({query}): Promise<BookListResponse> => {
       const {books, total} = await bookService.list(query);
       return {books: books as any, total};
     },
     {
-      requireOwner: true,
+      requireAdmin: true,
       query: bookListQuerySchema,
       detail: {
         summary: 'Get all books',

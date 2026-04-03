@@ -28,20 +28,20 @@ const mockGetAuthSessionState = mock(async () => ({
 
 const mockAssertMainServerEligibility = mock(() => {});
 
-mock.module('@/middleware', () => ({
-  serverCorsPolicy: () => new Elysia(),
-  requireLogin: new Elysia({name: 'guard/requireLogin'}).resolve(
-    {as: 'scoped'},
-    () => ({
-      identity: {
-        unitId: 'user-1',
-      },
-    }),
-  ),
-  requireOwner: new Elysia(),
-  requireAdmin: new Elysia(),
+mock.module('@/middleware/permission', () => ({
+  authMacro: new Elysia({name: 'macro/auth'})
+    .macro('requireLogin', {
+      resolve: () => ({identity: {unitId: 'user-1'}}),
+    })
+    .macro('requireOwner', {
+      requireLogin: true,
+      resolve: () => ({session: {}, currentUser: {}}),
+    })
+    .macro('requireAdmin', {requireOwner: true}),
   buildActorFromContext: () => ({}),
-  requireAdminSession: () => {},
+}));
+
+mock.module('@/middleware/session-state', () => ({
   getAuthSessionState: mockGetAuthSessionState,
   assertMainServerEligibility: mockAssertMainServerEligibility,
 }));

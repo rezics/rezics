@@ -1,9 +1,5 @@
 import {Elysia, t} from 'elysia';
-import {
-  serverCorsPolicy,
-  requireAdmin,
-  requireAdminSession,
-} from '@/middleware';
+import {serverCorsPolicy, authMacro} from '@/middleware';
 import {
   jwtServiceDTOSchema,
   jwtServiceListResponseSchema,
@@ -14,15 +10,15 @@ import {jwtServiceAdminService} from './jwt.admin.service';
 
 export const jwtServiceAdminApi = new Elysia({prefix: '/admin/jwt-services'})
   .use(serverCorsPolicy('credentialed'))
-  .use(requireAdmin)
+  .use(authMacro)
   .get(
     '/',
-    async ({session, currentUser, set}) => {
-      requireAdminSession({session, currentUser, set});
+    async () => {
       const services = await jwtServiceAdminService.list();
       return {services};
     },
     {
+      requireAdmin: true,
       response: jwtServiceListResponseSchema,
       detail: {
         summary: 'List all JWT services',
@@ -32,8 +28,7 @@ export const jwtServiceAdminApi = new Elysia({prefix: '/admin/jwt-services'})
   )
   .get(
     '/:serviceKey',
-    async ({params, session, currentUser, set}) => {
-      requireAdminSession({session, currentUser, set});
+    async ({params, set}) => {
       const service = await jwtServiceAdminService.fetch(params.serviceKey);
       if (!service) {
         set.status = 404;
@@ -42,6 +37,7 @@ export const jwtServiceAdminApi = new Elysia({prefix: '/admin/jwt-services'})
       return service;
     },
     {
+      requireAdmin: true,
       params: t.Object({serviceKey: t.String()}),
       response: jwtServiceDTOSchema,
       detail: {
@@ -52,8 +48,7 @@ export const jwtServiceAdminApi = new Elysia({prefix: '/admin/jwt-services'})
   )
   .post(
     '/',
-    async ({body, session, currentUser, set}) => {
-      requireAdminSession({session, currentUser, set});
+    async ({body, set}) => {
       try {
         const service = await jwtServiceAdminService.create(body);
         set.status = 201;
@@ -74,6 +69,7 @@ export const jwtServiceAdminApi = new Elysia({prefix: '/admin/jwt-services'})
       }
     },
     {
+      requireAdmin: true,
       body: createJwtServiceInputSchema,
       response: jwtServiceDTOSchema,
       detail: {
@@ -84,8 +80,7 @@ export const jwtServiceAdminApi = new Elysia({prefix: '/admin/jwt-services'})
   )
   .patch(
     '/:serviceKey',
-    async ({params, body, session, currentUser, set}) => {
-      requireAdminSession({session, currentUser, set});
+    async ({params, body, set}) => {
       if (body.jwksUrl !== undefined) {
         try {
           new URL(body.jwksUrl);
@@ -110,6 +105,7 @@ export const jwtServiceAdminApi = new Elysia({prefix: '/admin/jwt-services'})
       }
     },
     {
+      requireAdmin: true,
       params: t.Object({serviceKey: t.String()}),
       body: updateJwtServiceInputSchema,
       response: jwtServiceDTOSchema,
@@ -121,8 +117,7 @@ export const jwtServiceAdminApi = new Elysia({prefix: '/admin/jwt-services'})
   )
   .post(
     '/:serviceKey/activate',
-    async ({params, session, currentUser, set}) => {
-      requireAdminSession({session, currentUser, set});
+    async ({params, set}) => {
       try {
         return await jwtServiceAdminService.activate(params.serviceKey);
       } catch (error) {
@@ -139,6 +134,7 @@ export const jwtServiceAdminApi = new Elysia({prefix: '/admin/jwt-services'})
       }
     },
     {
+      requireAdmin: true,
       params: t.Object({serviceKey: t.String()}),
       response: jwtServiceDTOSchema,
       detail: {
@@ -149,8 +145,7 @@ export const jwtServiceAdminApi = new Elysia({prefix: '/admin/jwt-services'})
   )
   .post(
     '/:serviceKey/deactivate',
-    async ({params, session, currentUser, set}) => {
-      requireAdminSession({session, currentUser, set});
+    async ({params, set}) => {
       try {
         return await jwtServiceAdminService.deactivate(params.serviceKey);
       } catch (error) {
@@ -167,6 +162,7 @@ export const jwtServiceAdminApi = new Elysia({prefix: '/admin/jwt-services'})
       }
     },
     {
+      requireAdmin: true,
       params: t.Object({serviceKey: t.String()}),
       response: jwtServiceDTOSchema,
       detail: {

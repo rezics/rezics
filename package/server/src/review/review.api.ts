@@ -1,8 +1,7 @@
 import {Elysia} from 'elysia';
 import {
   serverCorsPolicy,
-  requireLogin,
-  requireOwner,
+  authMacro,
   buildActorFromContext,
 } from '@/middleware';
 import {UnitType} from '#/prisma/client';
@@ -24,6 +23,7 @@ import {mapReviewToDTO} from './mapper';
 
 export const reviewApi = new Elysia({prefix: '/reviews'})
   .use(serverCorsPolicy('credentialed'))
+  .use(authMacro)
   .get(
     '/:id',
     async ({params, query}): Promise<ReviewResponse> => {
@@ -76,7 +76,6 @@ export const reviewApi = new Elysia({prefix: '/reviews'})
       },
     },
   )
-  .use(requireLogin)
   .post(
     '/',
     async ({body, identity, query}): Promise<ReviewResponse> => {
@@ -91,6 +90,7 @@ export const reviewApi = new Elysia({prefix: '/reviews'})
       return mapReviewToDTO(review);
     },
     {
+      requireLogin: true,
       body: createReviewSchema,
       detail: {
         summary: 'Create review',
@@ -99,7 +99,6 @@ export const reviewApi = new Elysia({prefix: '/reviews'})
       },
     },
   )
-  .use(requireOwner)
   .get(
     '/',
     async ({query, currentUser, set}): Promise<ReviewListResponse> => {
@@ -113,6 +112,7 @@ export const reviewApi = new Elysia({prefix: '/reviews'})
       return {reviews: reviews.map(mapReviewToDTO), total};
     },
     {
+      requireOwner: true,
       query: reviewListQuerySchema,
       detail: {
         summary: 'Get all reviews',
@@ -146,6 +146,7 @@ export const reviewApi = new Elysia({prefix: '/reviews'})
       return mapReviewToDTO(review);
     },
     {
+      requireOwner: true,
       params: reviewParamsSchema,
       body: updateReviewSchema,
       detail: {
@@ -179,6 +180,7 @@ export const reviewApi = new Elysia({prefix: '/reviews'})
       return {message: 'Review deleted successfully'};
     },
     {
+      requireOwner: true,
       params: reviewParamsSchema,
       detail: {
         summary: 'Delete review',

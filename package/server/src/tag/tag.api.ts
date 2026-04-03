@@ -19,8 +19,7 @@ import type {
 } from '@package/contract';
 import {
   serverCorsPolicy,
-  requireLogin,
-  requireOwner,
+  authMacro,
   buildActorFromContext,
 } from '@/middleware';
 import {tagService} from './tag.service';
@@ -29,6 +28,7 @@ import {unitService} from '../unit/unit.service';
 
 export const tagApi = new Elysia({prefix: '/tags'})
   .use(serverCorsPolicy('credentialed'))
+  .use(authMacro)
   .get(
     '/',
     async ({query}): Promise<{tags: TagDTO[]; total: number}> => {
@@ -80,7 +80,6 @@ export const tagApi = new Elysia({prefix: '/tags'})
       detail: {summary: 'Get tag by name in domain', tags: ['Tags']},
     },
   )
-  .use(requireLogin)
   .post(
     '/',
     async ({body, identity}): Promise<TagDetailDTO> => {
@@ -91,11 +90,11 @@ export const tagApi = new Elysia({prefix: '/tags'})
       return mapTagDetailToDTO(created);
     },
     {
+      requireLogin: true,
       body: createTagSchema,
       detail: {summary: 'Create tag', tags: ['Tags']},
     },
   )
-  .use(requireOwner)
   .put(
     '/:unitId',
     async ({
@@ -123,6 +122,7 @@ export const tagApi = new Elysia({prefix: '/tags'})
       return mapTagDetailToDTO(updated);
     },
     {
+      requireOwner: true,
       params: tagParamsSchema,
       body: updateTagSchema,
       detail: {summary: 'Update tag', tags: ['Tags']},
@@ -150,6 +150,7 @@ export const tagApi = new Elysia({prefix: '/tags'})
       return {message: 'Tag deleted successfully'};
     },
     {
+      requireOwner: true,
       params: tagParamsSchema,
       detail: {summary: 'Delete tag', tags: ['Tags']},
     },
@@ -180,6 +181,7 @@ export const tagApi = new Elysia({prefix: '/tags'})
       return {message: 'Tag attached successfully'};
     },
     {
+      requireOwner: true,
       params: tagParamsSchema,
       body: attachTagSchema,
       detail: {summary: 'Attach tag to unit', tags: ['Tags']},
@@ -211,6 +213,7 @@ export const tagApi = new Elysia({prefix: '/tags'})
       return {message: 'Tag detached successfully'};
     },
     {
+      requireOwner: true,
       params: tagParamsSchema,
       body: attachTagSchema,
       detail: {summary: 'Detach tag from unit', tags: ['Tags']},

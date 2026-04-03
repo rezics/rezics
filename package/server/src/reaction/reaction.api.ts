@@ -1,5 +1,5 @@
 import {t, Elysia} from 'elysia';
-import {serverCorsPolicy, requireLogin} from '@/middleware';
+import {serverCorsPolicy, authMacro} from '@/middleware';
 import {reactionService} from './reaction.service';
 import {prisma, type ReactionSummary} from '#/prisma/client';
 import {
@@ -13,6 +13,7 @@ import {
 
 export const reactionApi = new Elysia({prefix: '/reactions'})
   .use(serverCorsPolicy('credentialed'))
+  .use(authMacro)
   .get(
     '/',
     async ({query}) => {
@@ -77,7 +78,6 @@ export const reactionApi = new Elysia({prefix: '/reactions'})
       },
     },
   )
-  .use(requireLogin)
   .get(
     '/my',
     async ({query, identity}) => {
@@ -120,6 +120,7 @@ export const reactionApi = new Elysia({prefix: '/reactions'})
       };
     },
     {
+      requireLogin: true,
       query: myQuerySchema,
       detail: {
         summary: 'Get my reactions (single or multiple targets)',
@@ -139,6 +140,7 @@ export const reactionApi = new Elysia({prefix: '/reactions'})
       });
     },
     {
+      requireLogin: true,
       body: createSchema,
       detail: {
         summary: 'Create reaction',
@@ -159,6 +161,7 @@ export const reactionApi = new Elysia({prefix: '/reactions'})
       return reaction;
     },
     {
+      requireLogin: true,
       body: updateSchema,
       detail: {
         summary: 'Update reaction',
@@ -178,6 +181,7 @@ export const reactionApi = new Elysia({prefix: '/reactions'})
       return {deleted};
     },
     {
+      requireLogin: true,
       query: deleteQuerySchema,
       detail: {
         summary: 'Delete reaction',
@@ -208,6 +212,7 @@ export const reactionApi = new Elysia({prefix: '/reactions'})
       };
     },
     {
+      requireLogin: true,
       params: t.Object({
         targetId: t.String(),
       }),
@@ -256,6 +261,7 @@ export const reactionApi = new Elysia({prefix: '/reactions'})
       };
     },
     {
+      requireLogin: true,
       body: t.Object({
         tags: t.Array(t.String()),
       }),
@@ -307,6 +313,7 @@ export const reactionApi = new Elysia({prefix: '/reactions'})
       };
     },
     {
+      requireLogin: true,
       params: t.Object({
         targetId: t.String(),
       }),
