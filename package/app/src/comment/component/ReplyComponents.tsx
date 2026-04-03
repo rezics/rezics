@@ -1,6 +1,6 @@
 // 暂时就先这样不处理，后面树化，或者使用VirtualList
 
-import {commentQueries} from '@package/api/comment/comment.queries';
+import {commentQueries} from '@rezics/api/comment/comment.queries';
 import {Avatar} from '@mui/material';
 import {useQuery} from '@tanstack/react-query';
 import React, {useCallback, useRef} from 'react';

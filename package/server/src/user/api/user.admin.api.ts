@@ -1,10 +1,10 @@
 import {Elysia} from 'elysia';
-import type {UpdateUser, UserDTO, UserListQuery} from '@package/contract';
+import type {UpdateUser, UserDTO, UserListQuery} from '@rezics/contract';
 import {
   userListQuerySchema,
   userParamsSchema,
   updateUserSchema,
-} from '@package/contract';
+} from '@rezics/contract';
 
 import {userService} from '../service/user.service';
 import {mapUserToDTO} from '../model/mapper';

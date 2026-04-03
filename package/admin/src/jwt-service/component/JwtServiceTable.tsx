@@ -12,7 +12,7 @@ import {
   Tooltip,
 } from '@mui/material';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
-import type {JwtServiceDTO} from '@package/contract';
+import type {JwtServiceDTO} from '@rezics/contract';
 
 type Props = {
   services: JwtServiceDTO[];

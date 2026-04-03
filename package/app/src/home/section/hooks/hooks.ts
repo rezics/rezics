@@ -6,14 +6,14 @@ import type {
   ReviewDTO,
   QuoteDTO,
   UnitListResponse,
-} from '@package/contract';
+} from '@rezics/contract';
 import {
   meiliBookApi,
   mapUnitListToReadlistListResponse,
   mapUnitListToReviewListResponse,
-} from '@package/api/meili/meili.api';
-import {buildMeiliUnitQuery} from '@package/api/meili/meili.queries';
-import {UnitType} from '@package/contract';
+} from '@rezics/api/meili/meili.api';
+import {buildMeiliUnitQuery} from '@rezics/api/meili/meili.queries';
+import {UnitType} from '@rezics/contract';
 
 export type SimpleQueryState<T> = {
   items: T[];

@@ -13,8 +13,8 @@ import {
   useDetachTagMutation,
   useAttachTagMutation,
   tagApi,
-} from '@package/api/tag/tag';
-import type {TagDetailDTO, TagDTO} from '@package/api/tag/tag';
+} from '@rezics/api/tag/tag';
+import type {TagDetailDTO, TagDTO} from '@rezics/api/tag/tag';
 import {SingleTagChip} from '../TagList';
 import NewTag from './NewTag';
 import TagEdit from './TagEdit';

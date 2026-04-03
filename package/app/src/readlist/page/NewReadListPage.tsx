@@ -2,7 +2,7 @@ import React, {useState} from 'react';
 import {ReadListEditor} from './ReadListEditPage';
 import {Button} from '@mui/material';
 import {useNavigate} from '@tanstack/react-router';
-import {useCreateReadlistMutation} from '@package/api/readlist/readlist.mutations';
+import {useCreateReadlistMutation} from '@rezics/api/readlist/readlist.mutations';
 import {useTranslation} from 'react-i18next';
 
 export const NewReadListPage: React.FC = () => {

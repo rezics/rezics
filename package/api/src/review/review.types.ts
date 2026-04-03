@@ -7,7 +7,7 @@ import type {
   CreateReviewInput,
   UpdateReviewInput,
   ReviewListQuery,
-} from '@package/contract';
+} from '@rezics/contract';
 
 // Re-export contract types
 export type {ReviewDTO, CreateReviewInput, UpdateReviewInput, ReviewListQuery};

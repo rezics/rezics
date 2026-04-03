@@ -1,5 +1,5 @@
 import {beforeEach, describe, expect, mock, test} from 'bun:test';
-import {NormalizedTokenName} from '@package/contract';
+import {NormalizedTokenName} from '@rezics/contract';
 import {configureApi} from '../config';
 
 const fetchMock = mock();

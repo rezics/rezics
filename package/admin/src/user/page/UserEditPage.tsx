@@ -15,9 +15,9 @@ import {
 import React from 'react';
 import {useQuery} from '@tanstack/react-query';
 
-import {Link} from '@package/ui/primitive/link/Link.tsx';
-import {userQueries} from '@package/api/user/user.queries';
-import {userMutations} from '@package/api/user/user.mutations';
+import {Link} from '@rezics/ui/primitive/link/Link.tsx';
+import {userQueries} from '@rezics/api/user/user.queries';
+import {userMutations} from '@rezics/api/user/user.mutations';
 
 import {Page} from '@/core/layout/Page';
 import {Route} from '@/routes/_admin/users/$unitId';

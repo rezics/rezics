@@ -4,7 +4,7 @@ import {
   asJwtPublicJwk,
   type JwtPrivateJwk,
   type JwtPublicJwk,
-} from '@package/jwt';
+} from '@rezics/jwt';
 import {env} from '@/env';
 
 type BootstrapDefaults = {

@@ -2,14 +2,14 @@ import type {JWTPayload} from 'jose';
 import type {
   AuthContextTokenClaims,
   AuthIdentityTokenClaims,
-} from '@package/contract';
+} from '@rezics/contract';
 import {
   verifyBearerToken,
   verifyTokenFromHeader,
   type JwtVerifyInput,
   type VerifiedJwt,
-} from '@package/jwt';
-import {NormalizedTokenName} from '@package/contract';
+} from '@rezics/jwt';
+import {NormalizedTokenName} from '@rezics/contract';
 import {
   getAuthJwtAudience,
   getAuthJwtIssuer,

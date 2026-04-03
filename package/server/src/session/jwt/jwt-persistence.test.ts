@@ -1,5 +1,5 @@
 import {beforeEach, describe, expect, mock, test} from 'bun:test';
-import {JwtAlgorithm} from '@package/jwt';
+import {JwtAlgorithm} from '@rezics/jwt';
 
 process.env.NODE_ENV = 'test';
 process.env.DATABASE_URL ??=

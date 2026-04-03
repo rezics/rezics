@@ -1,12 +1,12 @@
 import {createFileRoute, Outlet, redirect} from '@tanstack/react-router';
 
 import AdminLayout from '@/core/layout/AdminLayout';
-import {getToken, parseJwt} from '@package/api/react-query/jwt';
-import {NormalizedTokenName} from '@package/contract';
+import {getToken, parseJwt} from '@rezics/api/react-query/jwt';
+import {NormalizedTokenName} from '@rezics/contract';
 import {
   hydrateAuthSessionState,
   useAuthSessionStore,
-} from '@package/app-shell';
+} from '@rezics/app-shell';
 import {establishBusinessSession} from '@/user/model/handler';
 
 function resolveAttemptedPath(location: any): string {

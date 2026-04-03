@@ -66,7 +66,7 @@ The plugin's `onAfterHandle` hook SHALL apply CORS headers to all responses, inc
 - **THEN** the response SHALL include the same CORS headers as a successful response for the effective policy
 
 ### Requirement: Shared package with injected configs
-The `corsPolicy` plugin SHALL live in `@package/cors` and accept policy configs as a parameter. Each service (`package/server`, `package/auth`) SHALL provide its own config map with service-specific header lists.
+The `corsPolicy` plugin SHALL live in `@rezics/cors` and accept policy configs as a parameter. Each service (`package/server`, `package/auth`) SHALL provide its own config map with service-specific header lists.
 
 #### Scenario: Server and auth use different header configs
 - **WHEN** `package/server` provides configs with `x-rezics_session_token` in allowed headers and `package/auth` provides configs with `x-internal-auth-token`

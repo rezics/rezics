@@ -9,7 +9,7 @@ import {
   type CreateChapterInput,
   hasPermissionToDeleteChapter,
   hasPermissionToUpdateChapter,
-} from '@package/contract';
+} from '@rezics/contract';
 import {chapterService} from './chapter.service';
 import {mapUnitToChapterDetailDTO, mapUnitToChapterListItemDTO} from './mapper';
 import {unitService} from '@/unit/unit.service';

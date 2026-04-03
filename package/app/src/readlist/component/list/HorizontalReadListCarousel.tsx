@@ -6,8 +6,8 @@ import {
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
-} from '@package/ui/shadcn/carousel.tsx';
-import type {ReadlistDTO} from '@package/contract';
+} from '@rezics/ui/shadcn/carousel.tsx';
+import type {ReadlistDTO} from '@rezics/contract';
 import ReadListCard from '../item/ReadListCard';
 import {VerticalTwoReadListCard} from '../item/VerticalTwoReadListCard';
 

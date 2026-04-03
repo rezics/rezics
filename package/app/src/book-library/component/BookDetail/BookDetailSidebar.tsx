@@ -2,7 +2,7 @@ import {Box, Divider, Paper, Stack, Typography} from '@mui/material';
 import React from 'react';
 import {useTranslation} from 'react-i18next';
 
-import type {BookDTO} from '@package/contract';
+import type {BookDTO} from '@rezics/contract';
 
 type Book = BookDTO;
 

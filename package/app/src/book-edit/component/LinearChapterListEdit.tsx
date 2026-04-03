@@ -3,10 +3,10 @@ import {useQuery} from '@tanstack/react-query';
 import {Divider, Switch, TextField, Button, Stack} from '@mui/material';
 import {useTranslation} from 'react-i18next';
 
-import {bookQueries} from '@package/api/book/book.queries';
+import {bookQueries} from '@rezics/api/book/book.queries';
 import {ChapterArborist} from '@/book-library/component/Chapter/ChapterArborist';
 import type {ChapterArboristRefHandle} from '@/book-library/component/Chapter/ChapterArborist';
-import type {ChapterTreeItem} from '@package/contract';
+import type {ChapterTreeItem} from '@rezics/contract';
 
 /** Props for LinearChapterListEdit component. */
 interface LinearChapterListEditProps {

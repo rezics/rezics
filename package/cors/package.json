@@ -1,5 +1,5 @@
 {
-  "name": "@package/cors",
+  "name": "@rezics/cors",
   "module": "src/index.ts",
   "type": "module",
   "private": true,

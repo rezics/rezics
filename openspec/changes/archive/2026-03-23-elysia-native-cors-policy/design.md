@@ -15,7 +15,7 @@ Both packages duplicate ~220 lines of structurally identical CORS code differing
 **Goals:**
 
 - Single declarative API: `use(corsPolicy('credentialed'))` + route-level `{ corsPolicy: 'public' }` overrides
-- Shared `@package/cors` package eliminating duplication between server and auth
+- Shared `@rezics/cors` package eliminating duplication between server and auth
 - Drop `@elysiajs/cors` — own the header logic directly for full per-route control
 - Eliminate manual `.options()` preflight declarations from API files
 - Preserve all existing CORS header behavior exactly
@@ -75,12 +75,12 @@ Per-route preflight policy differentiation would require registering parallel OP
 
 **Trade-off:** A `corsPolicy: 'public'` route's preflight will carry the `credentialed` default's headers (wider `Allow-Methods`, extra `Allow-Headers`). This is safe — CORS headers are permissive, not restrictive. The actual response enforces the correct narrow policy.
 
-### Decision 4: Shared `@package/cors` with per-service config injection
+### Decision 4: Shared `@rezics/cors` with per-service config injection
 
 **Choice:** The plugin factory accepts a policy config map. Each service provides its own configs.
 
 ```ts
-// @package/cors — shared plugin
+// @rezics/cors — shared plugin
 export function corsPolicy(
   defaultPolicy: CorsPolicyName,
   configs: Record<CorsPolicyName, CorsPolicyConfig>,

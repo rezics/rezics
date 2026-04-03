@@ -10,14 +10,14 @@ import {
 import {useMatchRoute} from '@tanstack/react-router';
 import {useTranslation} from 'react-i18next';
 
-import {reviewQueries} from '@package/api/review/review';
-import {MarkdownContent} from '@package/ui/composite/content/MarkdownContent.tsx';
-import {bookQueries} from '@package/api/book/book';
+import {reviewQueries} from '@rezics/api/review/review';
+import {MarkdownContent} from '@rezics/ui/composite/content/MarkdownContent.tsx';
+import {bookQueries} from '@rezics/api/book/book';
 import {BookListViewItem} from '@/book-library/component/BookList/BookListView';
 import {useRef} from 'react';
 import TreeReplyComponents from '@/comment/component/TreeReplyComponents';
 import {ChatBubbleOutline} from '@mui/icons-material';
-import {AccentBar} from '@package/ui/primitive/decorative/AccentBar.tsx';
+import {AccentBar} from '@rezics/ui/primitive/decorative/AccentBar.tsx';
 import {SingleCommentElementWrapper} from '@/comment/component/SingleCommentElementWrapper.tsx';
 
 import {
@@ -26,7 +26,7 @@ import {
 } from '@/engagement/component/MiniActionBar.tsx';
 import {ReactionStatistics} from '@/engagement/component/ReactionStatistics.tsx';
 import {parseReactionSummaries} from '@/shared/util/reaction-summaries-parser';
-import {MUILink} from '@package/ui/primitive/link/MUILink.tsx';
+import {MUILink} from '@rezics/ui/primitive/link/MUILink.tsx';
 
 export function ReviewPage() {
   const matchRoute = useMatchRoute();

@@ -25,7 +25,7 @@ request → domain.api.ts
 
 **Goals:**
 - Separate JWT token parsing (shared, root-level) from authorization (route-level scoped guards)
-- Provide typed token payloads directly on Elysia context (`authIdentityToken`, `rezicsSessionToken`) via a reusable plugin factory in `@package/jwt`
+- Provide typed token payloads directly on Elysia context (`authIdentityToken`, `rezicsSessionToken`) via a reusable plugin factory in `@rezics/jwt`
 - Replace all inline `new Elysia()` sub-instances in domain APIs with flat route chains
 - Establish a standard permission guard pattern (`requireLogin`, `requireAdmin`, `requireOwner`) with domain-extensible permission files
 - Remove `core.ts` and the `coreInstance()` factory
@@ -33,16 +33,16 @@ request → domain.api.ts
 
 **Non-Goals:**
 - Changing HTTP API contracts (routes, request/response shapes)
-- Modifying the JWT verification algorithm or key resolution logic in `@package/jwt`
+- Modifying the JWT verification algorithm or key resolution logic in `@rezics/jwt`
 - Adding cookie or query-string JWT transport
-- Modifying the auth server or `@package/auth`
-- Refactoring `@package/contract` token type definitions
+- Modifying the auth server or `@rezics/auth`
+- Refactoring `@rezics/contract` token type definitions
 
 ## Decisions
 
 ### 1. Per-token factory plugin using `resolve` with `as: 'global'`
 
-**Decision:** Create a `createTokenResolver<Name, TPayload>(name, config)` factory in `@package/jwt/src/adapters/` that returns an Elysia plugin. Each call produces one plugin for one token type.
+**Decision:** Create a `createTokenResolver<Name, TPayload>(name, config)` factory in `@rezics/jwt/src/adapters/` that returns an Elysia plugin. Each call produces one plugin for one token type.
 
 **Why `resolve` over `derive`:** Elysia docs recommend `resolve` for request-scoped context that doesn't need to run before validation. It executes at `beforeHandle` with typed request properties.
 
@@ -102,7 +102,7 @@ export const bookApi = new Elysia({ prefix: '/books' })
 - `REZICS_SESSION` → `rezicsSessionToken`
 - `AUTH_CONTEXT` → `authContextToken`
 
-These are defined as constants in `@package/contract` alongside the existing `NormalizedTokenName` to keep naming centralized.
+These are defined as constants in `@rezics/contract` alongside the existing `NormalizedTokenName` to keep naming centralized.
 
 ## Risks / Trade-offs
 
@@ -114,4 +114,4 @@ These are defined as constants in `@package/contract` alongside the existing `No
 
 **[Startup-time verifier binding]** → If JWT service config changes at runtime (e.g., JWKS URL rotation), the verifier won't pick it up. Mitigating: JWKS key rotation is handled by `jose`'s remote JWKS set which re-fetches automatically. The service record (issuer, audience) is static.
 
-**[CORS handling]** → Removing `withCredentialedCors(coreInstance(...))` is handled by the parallel `elysia-native-cors-policy` change. Each domain applies `serverCorsPolicy('credentialed')` from the new `@package/cors` shared package. Mixed-policy routers (session API) use a route-level `{ corsPolicy: 'public' }` macro override. Domain API refactoring (Phase 4) applies both changes in a single pass per file.
+**[CORS handling]** → Removing `withCredentialedCors(coreInstance(...))` is handled by the parallel `elysia-native-cors-policy` change. Each domain applies `serverCorsPolicy('credentialed')` from the new `@rezics/cors` shared package. Mixed-policy routers (session API) use a route-level `{ corsPolicy: 'public' }` macro override. Domain API refactoring (Phase 4) applies both changes in a single pass per file.

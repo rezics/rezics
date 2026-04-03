@@ -1,6 +1,6 @@
 import {prisma} from '#/prisma/client';
 import {searchClient} from '../search-client';
-import type {FeedbackSearchDocument} from '@package/contract';
+import type {FeedbackSearchDocument} from '@rezics/contract';
 
 /**
  * Sync a single feedback (by its id) into the Meilisearch `feedbacks` index.

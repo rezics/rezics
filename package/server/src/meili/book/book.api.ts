@@ -1,8 +1,8 @@
-import type {BookQueryOptions} from '@package/contract';
-import {toBookQueryString} from '@package/contract';
+import type {BookQueryOptions} from '@rezics/contract';
+import {toBookQueryString} from '@rezics/contract';
 import {searchClient} from '../search-client';
 import type {BookSearchDocument, BookSearchResult} from './index';
-import type {SearchResponse} from '@package/search';
+import type {SearchResponse} from '@rezics/search';
 import {defaultSort} from '../util';
 /**
  * Low-level search API that accepts a fully-constructed Meilisearch query string.
@@ -46,7 +46,7 @@ function buildTextLengthFilter(input: number | {min?: number; max?: number}) {
 /**
  * Higher-level search API for books.
  *
- * - Input is {@link BookQueryOptions} from `@package/contract`.
+ * - Input is {@link BookQueryOptions} from `@rezics/contract`.
  * - It uses {@link toBookQueryString} to build the text query.
  * - It maps contract fields like `nsfw`, `tags`, `authorIds` etc. into
  *   Meilisearch filter expressions and sort options.

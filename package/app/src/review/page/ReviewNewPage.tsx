@@ -1,14 +1,14 @@
-import {type ReviewResponse} from '@package/contract';
+import {type ReviewResponse} from '@rezics/contract';
 import {ReviewEditPage} from './ReviewEditPage';
 import {useState} from 'react';
 import {TextField} from '@mui/material';
-import {CooldownButton} from '@package/ui/composite/button/CooldownButton.tsx';
+import {CooldownButton} from '@rezics/ui/composite/button/CooldownButton.tsx';
 
-import {useCreateReviewMutation} from '@package/api/review/review.mutations';
+import {useCreateReviewMutation} from '@rezics/api/review/review.mutations';
 import {useAlertStore} from '@app/state/windowAlertStore';
 import {useUserProfileStore} from '@/user/state';
 import {useRouterState} from '@tanstack/react-router';
-import {UnitType} from '@package/contract';
+import {UnitType} from '@rezics/contract';
 import {reviewNewRoute} from '@/router';
 
 export function ReviewNewPage({

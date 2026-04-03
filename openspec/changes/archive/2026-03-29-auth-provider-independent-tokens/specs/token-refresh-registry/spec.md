@@ -2,7 +2,7 @@
 
 ### Requirement: Token refresh registry maps token names to refresh functions
 
-The system SHALL provide a `TokenRefreshRegistry` type and a default registry instance in `@package/api`. Each entry maps a `NormalizedTokenName` to an async function that obtains a fresh token from the corresponding service endpoint.
+The system SHALL provide a `TokenRefreshRegistry` type and a default registry instance in `@rezics/api`. Each entry maps a `NormalizedTokenName` to an async function that obtains a fresh token from the corresponding service endpoint.
 
 #### Scenario: Registry contains entry for REZICS_SESSION
 

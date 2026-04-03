@@ -1,7 +1,7 @@
 import {Typography, Chip, useTheme, Box} from '@mui/material';
 import CampaignRoundedIcon from '@mui/icons-material/CampaignRounded';
 import PushPinRoundedIcon from '@mui/icons-material/PushPinRounded';
-import {MUILink} from '@package/ui/primitive/link/MUILink.tsx';
+import {MUILink} from '@rezics/ui/primitive/link/MUILink.tsx';
 import {useEffect, useState, useRef} from 'react';
 import clsx from 'clsx';
 

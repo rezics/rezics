@@ -5,4 +5,4 @@ export {
   type AuthCapabilityLevel,
   type AuthSessionHydrationStatus,
   type AuthSessionStoreState,
-} from '@package/app-shell';
+} from '@rezics/app-shell';

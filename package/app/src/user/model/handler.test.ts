@@ -1,8 +1,8 @@
 import {beforeEach, describe, expect, mock, test} from 'bun:test';
-import {NormalizedTokenName} from '@package/contract';
-import {configureApi} from '@package/api/config';
+import {NormalizedTokenName} from '@rezics/contract';
+import {configureApi} from '@rezics/api/config';
 
-// Required for @package/app env.ts validation
+// Required for @rezics/app env.ts validation
 process.env.VITE_API_URL ??= 'http://api.example';
 process.env.VITE_AUTH_API_URL ??= 'http://auth.example';
 process.env.VITE_TURNSTILE_SITE_KEY ??= 'turnstile-test-key';
@@ -67,7 +67,7 @@ const hydrateAuthSessionStateMock = mock(async () => ({
   },
 }));
 
-mock.module('@package/api/auth/auth.api', () => ({
+mock.module('@rezics/api/auth/auth.api', () => ({
   authApi: {
     signIn: signInMock,
     signUp: signUpMock,
@@ -76,19 +76,19 @@ mock.module('@package/api/auth/auth.api', () => ({
   },
 }));
 
-mock.module('@package/api/auth/auth.keys', () => ({
+mock.module('@rezics/api/auth/auth.keys', () => ({
   authKeys: {
     all: () => ['auth'],
   },
 }));
 
-mock.module('@package/api/user/user.keys', () => ({
+mock.module('@rezics/api/user/user.keys', () => ({
   userKeys: {
     all: () => ['user'],
   },
 }));
 
-mock.module('@package/api/user/user.api', () => ({
+mock.module('@rezics/api/user/user.api', () => ({
   userApi: {
     me: mock(),
     ensure: ensureMock,
@@ -178,7 +178,7 @@ describe('auth handlers', () => {
     );
 
     const {login} = await import('./handler');
-    const {getToken} = await import('@package/api/react-query/jwt');
+    const {getToken} = await import('@rezics/api/react-query/jwt');
 
     const result = await login('reader@example.com', 'secret');
 
@@ -209,7 +209,7 @@ describe('auth handlers', () => {
     );
 
     const {register} = await import('./handler');
-    const {getToken} = await import('@package/api/react-query/jwt');
+    const {getToken} = await import('@rezics/api/react-query/jwt');
 
     const result = await register('reader@example.com', 'secret');
 
@@ -225,7 +225,7 @@ describe('auth handlers', () => {
 
   test('establishBusinessSession fetches context, ensures user, and issues session token', async () => {
     const {establishBusinessSession} = await import('./handler');
-    const {getToken, setToken} = await import('@package/api/react-query/jwt');
+    const {getToken, setToken} = await import('@rezics/api/react-query/jwt');
 
     setToken(
       'eyJhbGciOiJub25lIn0.eyJzdWIiOiJ1c2VyLTEiLCJleHAiOjQ3NjYwMDAwMDB9.c2ln',
@@ -248,7 +248,7 @@ describe('auth handlers', () => {
 
   test('AUTH_CONTEXT is not persisted after establishBusinessSession', async () => {
     const {establishBusinessSession} = await import('./handler');
-    const {getToken, setToken} = await import('@package/api/react-query/jwt');
+    const {getToken, setToken} = await import('@rezics/api/react-query/jwt');
 
     setToken(
       'eyJhbGciOiJub25lIn0.eyJzdWIiOiJ1c2VyLTEiLCJleHAiOjQ3NjYwMDAwMDB9.c2ln',
@@ -263,7 +263,7 @@ describe('auth handlers', () => {
 
   test('clears auth-session, profile, and cached auth queries on logout', async () => {
     const {logout} = await import('./handler');
-    const {getToken, setToken} = await import('@package/api/react-query/jwt');
+    const {getToken, setToken} = await import('@rezics/api/react-query/jwt');
 
     setToken('identity-token', NormalizedTokenName.AUTH_IDENTITY);
     setToken('member-token', NormalizedTokenName.REZICS_SESSION);

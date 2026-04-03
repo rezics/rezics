@@ -5,7 +5,7 @@ import type {
   CreateReviewInput,
   UpdateReviewInput,
   ReviewListQuery,
-} from '@package/contract';
+} from '@rezics/contract';
 import type {ReviewWithRelations} from './types';
 import {reviewInclude} from './types';
 import {

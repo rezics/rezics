@@ -15,7 +15,7 @@ Each issuing service SHALL expose one canonical JWKS endpoint per server, and an
 - **THEN** both responses SHALL publish the same active and retained public keys for that server
 
 ### Requirement: Resource-service offline verification contract
-Services that verify JWTs offline SHALL use shared JWT verification contracts, SHALL validate `alg`, `kid`, `iss`, `aud`, `exp`, and `nbf` with configurable clock tolerance, and SHALL NOT depend on `@package/auth` verification helpers.
+Services that verify JWTs offline SHALL use shared JWT verification contracts, SHALL validate `alg`, `kid`, `iss`, `aud`, `exp`, and `nbf` with configurable clock tolerance, and SHALL NOT depend on `@rezics/auth` verification helpers.
 
 #### Scenario: Server verifies auth-issued token through shared verifier
 - **WHEN** `package/server` receives an auth-issued bearer token

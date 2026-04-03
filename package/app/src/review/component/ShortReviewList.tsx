@@ -1,7 +1,7 @@
 import {Stack} from '@mui/material';
 import React from 'react';
 import {SingleRemarkShow} from './SingleRemark';
-import type {ReviewListResponse} from '@package/contract';
+import type {ReviewListResponse} from '@rezics/contract';
 
 export type ShortReviewListShowProps = {
   data: ReviewListResponse;

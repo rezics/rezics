@@ -1,7 +1,7 @@
 import React, {useEffect, useMemo, useState} from 'react';
 import {Button, type ButtonProps, Tooltip} from '@mui/material';
 import {useQuery} from '@tanstack/react-query';
-import {userQueries, userMutations} from '@package/api/user/user';
+import {userQueries, userMutations} from '@rezics/api/user/user';
 
 type FollowButtonProps = {
   /** 目标用户的 unitId */

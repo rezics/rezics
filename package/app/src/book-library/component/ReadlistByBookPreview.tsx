@@ -1,9 +1,9 @@
 import {HorizontalReadListCarousel} from '@/readlist/component/list/HorizontalReadListCarousel.tsx';
-import {AccentBarWithText} from '@package/ui/composite/typography/AccentBarWithText.tsx';
-import {ArrowForwardIcon} from '@package/ui/composite/navigation/ArrowForwardIcon.tsx';
+import {AccentBarWithText} from '@rezics/ui/composite/typography/AccentBarWithText.tsx';
+import {ArrowForwardIcon} from '@rezics/ui/composite/navigation/ArrowForwardIcon.tsx';
 
 import {useQuery} from '@tanstack/react-query';
-import {buildMeiliReadlistQuery} from '@package/api/meili/meili.queries';
+import {buildMeiliReadlistQuery} from '@rezics/api/meili/meili.queries';
 import {useTranslation} from 'react-i18next';
 
 export function ReadlistByBookPreview({

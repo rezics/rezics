@@ -7,7 +7,7 @@ import type {
   CreateReadlistInput,
   UpdateReadlistInput,
   ReadlistListQuery,
-} from '@package/contract';
+} from '@rezics/contract';
 
 // Re-export contract types
 export type {

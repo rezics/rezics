@@ -1,6 +1,6 @@
 import React from 'react';
-import type {TagDetailDTO} from '@package/api/tag/tag';
-import {useAttachTagMutation} from '@package/api/tag/tag';
+import type {TagDetailDTO} from '@rezics/api/tag/tag';
+import {useAttachTagMutation} from '@rezics/api/tag/tag';
 import TagEdit from './TagEdit';
 
 export type NewTagProps = {

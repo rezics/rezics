@@ -6,7 +6,7 @@ import {
 } from '@/middleware';
 import {commentService} from './comment.service';
 import {mapCommentToDTO} from './mapper';
-import type {CreateCommentInput} from '@package/contract';
+import type {CreateCommentInput} from '@rezics/contract';
 import {
   commentListQuerySchema,
   createCommentSchema,
@@ -17,7 +17,7 @@ import {
   type CommentTreeResponse,
   hasPermissionToUpdateComment,
   hasPermissionToDeleteComment,
-} from '@package/contract';
+} from '@rezics/contract';
 
 export const commentApi = new Elysia({prefix: '/comments'})
   .use(serverCorsPolicy('credentialed'))

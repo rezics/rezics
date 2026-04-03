@@ -9,7 +9,7 @@ import {
 } from '@mui/material';
 import FormatQuoteRoundedIcon from '@mui/icons-material/FormatQuoteRounded';
 import {useNavigate} from '@tanstack/react-router';
-import type {QuoteDTO} from '@package/contract';
+import type {QuoteDTO} from '@rezics/contract';
 import {cn} from '@/shared/util/css-util';
 
 export interface QuoteCardProps {

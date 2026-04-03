@@ -31,7 +31,7 @@
 - [x] 5.3 Implement dormant-state reactivation: listen for `AUTH_TOKEN_STORAGE_EVENT` (same-tab) and `StorageEvent` (cross-tab) on the dormant token's localStorage key. On detection, exit dormant and begin managing.
 - [x] 5.4 Implement dependency chain: process tokens in array order. If an upstream token fails, do not attempt downstream tokens.
 - [x] 5.5 Implement visibility-change recovery: on `visibilitychange` to visible, check all managed tokens and refresh expired/missing ones.
-- [x] 5.6 Remove the AuthProvider re-export proxy in `package/app/src/app/provider/AuthProvider.tsx` — import directly from `@package/app-shell`.
+- [x] 5.6 Remove the AuthProvider re-export proxy in `package/app/src/app/provider/AuthProvider.tsx` — import directly from `@rezics/app-shell`.
 - [x] 5.7 Update AuthProvider usage in `package/app` to pass `tokens={[NormalizedTokenName.AUTH_IDENTITY, NormalizedTokenName.REZICS_SESSION]}`.
 - [x] 5.8 Add tests for AuthProvider: refresh scheduling, backoff on retryable error, dormant on non-retryable, reactivation on localStorage write, dependency chain ordering, visibility recovery.
 

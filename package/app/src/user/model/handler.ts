@@ -1,14 +1,14 @@
-import {authApi} from '@package/api/auth/auth.api';
-import {authKeys} from '@package/api/auth/auth.keys';
-import {NormalizedTokenName} from '@package/contract';
+import {authApi} from '@rezics/api/auth/auth.api';
+import {authKeys} from '@rezics/api/auth/auth.keys';
+import {NormalizedTokenName} from '@rezics/contract';
 import {
   clearAllTokens,
   ensureAuthIdentityToken,
   setToken,
-} from '@package/api/react-query/jwt';
-import {userKeys} from '@package/api/user/user.keys';
+} from '@rezics/api/react-query/jwt';
+import {userKeys} from '@rezics/api/user/user.keys';
 import {qc} from '@/app/provider/reactQueryUtil';
-import {userApi} from '@package/api/user/user.api';
+import {userApi} from '@rezics/api/user/user.api';
 import {
   clearAuthSessionState,
   hydrateAuthSessionState,

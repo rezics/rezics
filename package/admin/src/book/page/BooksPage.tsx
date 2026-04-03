@@ -15,11 +15,11 @@ import React from 'react';
 import {useQuery} from '@tanstack/react-query';
 import {useMatchRoute} from '@tanstack/react-router';
 
-import {bookQueries, type BookDTO} from '@package/api/book/book';
-import {meiliBookApi} from '@package/api/meili/meili.api';
+import {bookQueries, type BookDTO} from '@rezics/api/book/book';
+import {meiliBookApi} from '@rezics/api/meili/meili.api';
 
 import {Page} from '@/core/layout/Page';
-import {Link} from '@package/ui/primitive/link/Link.tsx';
+import {Link} from '@rezics/ui/primitive/link/Link.tsx';
 import {type PaginatedColumn} from '@/component/table/PaginatedTable';
 import {SearchablePaginatedTableCard} from '@/component/list/SearchablePaginatedTableCard';
 import {PaginatedTable} from '@/component/table/PaginatedTable';

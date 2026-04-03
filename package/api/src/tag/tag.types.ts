@@ -8,7 +8,7 @@ import type {
   CreateTagInput,
   UpdateTagInput,
   TagListQuery,
-} from '@package/contract';
+} from '@rezics/contract';
 
 // Re-export contract types
 export type {

@@ -1,13 +1,13 @@
-import {AccentBar} from '@package/ui/primitive/decorative/AccentBar.tsx';
+import {AccentBar} from '@rezics/ui/primitive/decorative/AccentBar.tsx';
 import {TreeReplyComponents} from '@/comment/component/TreeReplyComponents.tsx';
 import {ChatBubbleOutline} from '@mui/icons-material';
 import {Avatar, IconButton, Tooltip} from '@mui/material';
 import React, {useRef} from 'react';
 import {Route} from '@/routes/_mainLayout/readlist/$readlistId';
-import {Link} from '@package/ui/primitive/link/Link.tsx';
+import {Link} from '@rezics/ui/primitive/link/Link.tsx';
 import {useTranslation} from 'react-i18next';
 
-import {readlistQueries} from '@package/api/readlist/readlist';
+import {readlistQueries} from '@rezics/api/readlist/readlist';
 import {useQuery} from '@tanstack/react-query';
 import {BookReviewGroup} from '../component/Review';
 import {SingleCommentElementWrapper} from '@/comment/component/SingleCommentElementWrapper.tsx';

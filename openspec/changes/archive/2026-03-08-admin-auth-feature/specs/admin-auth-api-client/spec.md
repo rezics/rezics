@@ -1,7 +1,7 @@
 ## ADDED Requirements
 
 ### Requirement: Auth API fetch utility
-The auth API client module SHALL provide an `authFetch` function in `package/api/src/auth/auth.api.ts` that sends HTTP requests to the auth server base URL (`VITE_AUTH_API_URL` from `@package/app/env`). All requests SHALL include `credentials: 'include'` for cookie-based session handling and `Content-Type: application/json`.
+The auth API client module SHALL provide an `authFetch` function in `package/api/src/auth/auth.api.ts` that sends HTTP requests to the auth server base URL (`VITE_AUTH_API_URL` from `@rezics/app/env`). All requests SHALL include `credentials: 'include'` for cookie-based session handling and `Content-Type: application/json`.
 
 #### Scenario: Auth fetch sends request to auth server
 - **WHEN** `authFetch('/api/auth/get-session')` is called
@@ -121,7 +121,7 @@ The module SHALL export mutation hooks in `package/api/src/auth/auth.mutations.t
 The module SHALL export all public APIs from `package/api/src/auth/auth.ts` following the same barrel export pattern as other API modules (`export { authApi } from './auth.api'`, etc.).
 
 #### Scenario: Importing auth API from barrel
-- **WHEN** a consumer imports `import { authApi } from '@package/api/auth/auth.api'`
+- **WHEN** a consumer imports `import { authApi } from '@rezics/api/auth/auth.api'`
 - **THEN** the import SHALL resolve to the auth API client object
 
 ### Requirement: Remove login APIs from user module

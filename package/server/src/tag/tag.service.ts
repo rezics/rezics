@@ -2,7 +2,7 @@ import {prisma, UnitStatus, UnitType} from '#/prisma/client';
 import type {Prisma} from '#/prisma/client';
 import type {TagWithRelations} from './types';
 import {tagInclude} from './types';
-import type {CreateTagInput, UpdateTagInput} from '@package/contract';
+import type {CreateTagInput, UpdateTagInput} from '@rezics/contract';
 
 export type TagFilterOptions = {
   q?: string;

@@ -21,7 +21,7 @@ import type {
   UpdateCommentInput,
   CommentTreeQuery,
   CommentTreeResponse,
-} from '@package/contract';
+} from '@rezics/contract';
 import type {CommentListFilters} from './comment';
 import {buildQueryString} from '../utils/buildQuery';
 import {apiFetch} from '../react-query/http';

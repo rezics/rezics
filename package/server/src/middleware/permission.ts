@@ -4,8 +4,8 @@ import type {
   RezicsSessionTokenClaims,
   TokenPermissionRole,
   UserDTO,
-} from '@package/contract';
-import {BasicAdminPermission, TokenTransportHeader} from '@package/contract';
+} from '@rezics/contract';
+import {BasicAdminPermission, TokenTransportHeader} from '@rezics/contract';
 import {userService} from '../user/service/user.service';
 import {mapUserToDTO} from '../user/model/mapper';
 

@@ -1,5 +1,5 @@
-import {commentApi} from '@package/api/comment/comment.api.ts';
-import type {CommentDTO, CreateCommentInput} from '@package/contract';
+import {commentApi} from '@rezics/api/comment/comment.api.ts';
+import type {CommentDTO, CreateCommentInput} from '@rezics/contract';
 
 /**
  * Submit a comment or reply.

@@ -1,4 +1,4 @@
-import {type SortControlsProps} from '@package/ui/composite/pagination/Pagination.tsx';
+import {type SortControlsProps} from '@rezics/ui/composite/pagination/Pagination.tsx';
 import {ArrowDownward, ArrowUpward} from '@mui/icons-material';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import {Button, Menu, MenuItem, Stack, Typography} from '@mui/material';

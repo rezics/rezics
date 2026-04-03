@@ -8,13 +8,13 @@ import {
   Stack,
 } from '@mui/material';
 import {useQuery} from '@tanstack/react-query';
-import {jwtServiceQueries} from '@package/api/jwt-service/jwt-service.queries';
+import {jwtServiceQueries} from '@rezics/api/jwt-service/jwt-service.queries';
 import {
   useUpdateJwtServiceMutation,
   useActivateJwtServiceMutation,
   useDeactivateJwtServiceMutation,
-} from '@package/api/jwt-service/jwt-service.mutations';
-import type {JwtServiceDTO, UpdateJwtServiceInput} from '@package/contract';
+} from '@rezics/api/jwt-service/jwt-service.mutations';
+import type {JwtServiceDTO, UpdateJwtServiceInput} from '@rezics/contract';
 import {JwtServiceTable, JwtServiceEditDialog} from '../component';
 
 export const JwtServicesPage: FC = () => {

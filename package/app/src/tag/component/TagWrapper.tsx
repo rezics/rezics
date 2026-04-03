@@ -1,10 +1,10 @@
 import React, {useMemo} from 'react';
 import {useQuery} from '@tanstack/react-query';
-import {tagQueries} from '@package/api/tag/tag';
-import type {TagFilters, TagDTO, TagDetailDTO} from '@package/api/tag/tag';
+import {tagQueries} from '@rezics/api/tag/tag';
+import type {TagFilters, TagDTO, TagDetailDTO} from '@rezics/api/tag/tag';
 import TagList from './TagList';
 
-import {MUILink} from '@package/ui/primitive/link/MUILink.tsx';
+import {MUILink} from '@rezics/ui/primitive/link/MUILink.tsx';
 
 import {useIsMobile} from '@/shared/util/use-media-query';
 import {useTranslation} from 'react-i18next';

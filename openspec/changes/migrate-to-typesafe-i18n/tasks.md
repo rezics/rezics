@@ -1,7 +1,7 @@
 ## 1. Package Scaffold
 
-- [ ] 1.1 Create `package/i18n/` directory with `package.json` (name: `@package/i18n`, `"sideEffects": false`, exports map, workspace dependency on `typesafe-i18n`), and `tsconfig.json` extending the root config
-- [ ] 1.2 Add `typesafe-i18n` as a devDependency (generator) and dependency (runtime) in `package/i18n/package.json`. Add `@package/i18n` as a workspace dependency in `package/app`, `package/admin`, and `package/app-shell`
+- [ ] 1.1 Create `package/i18n/` directory with `package.json` (name: `@rezics/i18n`, `"sideEffects": false`, exports map, workspace dependency on `typesafe-i18n`), and `tsconfig.json` extending the root config
+- [ ] 1.2 Add `typesafe-i18n` as a devDependency (generator) and dependency (runtime) in `package/i18n/package.json`. Add `@rezics/i18n` as a workspace dependency in `package/app`, `package/admin`, and `package/app-shell`
 - [ ] 1.3 Create `.typesafe-i18n.json` in `package/i18n/` with config: adapter `react`, baseLocale `en-US`, outputPath `./src/i18n/`, outputFormat `TypeScript`, esmImports `true`
 - [ ] 1.4 Add scripts to `package/i18n/package.json`: `"dev": "typesafe-i18n"` (watch mode), `"generate": "typesafe-i18n --no-watch"` (one-shot for CI)
 
@@ -32,12 +32,12 @@
 
 - [ ] 5.1 Create `package/i18n/src/index.ts` re-exporting: `TypesafeI18n` (provider), `useI18nContext` (hook), `loadLocaleAsync`, `loadNamespaceAsync`, `setLocale`, `getLocale`, `locales`, `isLocale`, type exports (`Locales`, `TranslationFunctions`, `Namespaces`)
 - [ ] 5.2 Configure `package/i18n/package.json` exports field with entry points and types
-- [ ] 5.3 Verify `@package/i18n` is importable from `package/app` and `package/admin` — run `tsc --noEmit` in both
+- [ ] 5.3 Verify `@rezics/i18n` is importable from `package/app` and `package/admin` — run `tsc --noEmit` in both
 
 ## 6. Provider Integration
 
 - [ ] 6.1 In `package/app/src/app/App.tsx`, replace i18next `initI18n()` with typesafe-i18n provider: load detected locale via `loadLocaleAsync()`, render `<TypesafeI18n locale={locale}>` wrapping the app tree
-- [ ] 6.2 In `package/admin`, replace admin i18n initialization with the same `<TypesafeI18n>` provider pattern from `@package/i18n`
+- [ ] 6.2 In `package/admin`, replace admin i18n initialization with the same `<TypesafeI18n>` provider pattern from `@rezics/i18n`
 - [ ] 6.3 Update `package/app-shell` locale management: replace `i18n.changeLanguage()` calls with `setLocale()` + `loadLocaleAsync()`. Preserve localStorage persistence logic
 
 ## 7. Route Namespace Loading

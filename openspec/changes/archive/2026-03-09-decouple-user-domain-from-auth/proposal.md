@@ -7,7 +7,7 @@ The `build-independent-auth-server` change successfully established `package/aut
 - `package/server/src/user/user.core.api.ts` still contains `POST /register`, `POST /login`, `POST /change-password`, `POST /reset-password` routes. Although the top-level `user.api.ts` returns 410 for some of these, the dead code and its dependencies remain.
 - `package/server/src/user/user.service.ts` contains `authenticate()`, `verifyPassword()`, `resetPassword()`, `sendVerificationCode()`, and `verifyVerificationCode()` — all identity lifecycle operations that belong exclusively to `package/auth`.
 - `package/server/src/user/user.session.service.ts` manages a parallel `AuthSession` model in the server DB, duplicating the session management already handled by better-auth in `package/auth`.
-- `package/server/src/core.ts` still instantiates two `@elysiajs/jwt` plugins (HMAC-based `jwt` and `refreshToken`), even though all verification now uses JWKS-based `verifyBearerToken()` from `@package/auth/jwt`.
+- `package/server/src/core.ts` still instantiates two `@elysiajs/jwt` plugins (HMAC-based `jwt` and `refreshToken`), even though all verification now uses JWKS-based `verifyBearerToken()` from `@rezics/auth/jwt`.
 - `package/server/src/user/user.verify.api.ts` contains `POST /refresh-token`, `POST /send-verification-code`, and `POST /verify-verification-code` — all auth concerns.
 - `package/server/src/user/utils.ts` retains `hashPassword()` and `verifyPassword()` — credential operations that belong to the auth boundary.
 - `package/api/src/user/user.api.ts` exposes `login()` and `register()` that call server endpoints, rather than the auth service.
@@ -20,7 +20,7 @@ The `build-independent-auth-server` change successfully established `package/aut
 ### Goals
 
 - Remove all identity lifecycle operations (login, register, password management, email verification, session management) from `package/server`.
-- Remove legacy `@elysiajs/jwt` HMAC plugins from server's `core.ts`, keeping only JWKS-based verification via `@package/auth/jwt`.
+- Remove legacy `@elysiajs/jwt` HMAC plugins from server's `core.ts`, keeping only JWKS-based verification via `@rezics/auth/jwt`.
 - Remove `AuthSession` and `VerificationCode` models from the server Prisma schema.
 - Remove `passwordHash` from the server's `User` model (credentials are owned by auth DB `Account`).
 - Redirect frontend auth flows (`package/api`, `package/app`) to call `package/auth` directly for sign-in, sign-up, token refresh, and sign-out.

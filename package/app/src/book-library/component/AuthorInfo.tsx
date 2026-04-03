@@ -1,12 +1,12 @@
-import {AccentBarWithText} from '@package/ui/composite/typography/AccentBarWithText.tsx';
-import {ArrowForwardIcon} from '@package/ui/composite/navigation/ArrowForwardIcon.tsx';
-import {EditButtonFloatRightShow} from '@package/ui/composite/button/EditButtonFloatRight.tsx';
+import {AccentBarWithText} from '@rezics/ui/composite/typography/AccentBarWithText.tsx';
+import {ArrowForwardIcon} from '@rezics/ui/composite/navigation/ArrowForwardIcon.tsx';
+import {EditButtonFloatRightShow} from '@rezics/ui/composite/button/EditButtonFloatRight.tsx';
 import {Typography} from '@mui/material';
 import React from 'react';
 import {useTranslation} from 'react-i18next';
-import type {PublicUser} from '@package/contract';
+import type {PublicUser} from '@rezics/contract';
 import {FollowButton} from '@/engagement/component/FollowButton.tsx';
-import {LazyLoadImage} from '@package/ui/primitive/image/LazyLoadImage.tsx';
+import {LazyLoadImage} from '@rezics/ui/primitive/image/LazyLoadImage.tsx';
 import {useIsMobile} from '@/shared/util/use-media-query.ts';
 import {useNavigate} from '@tanstack/react-router';
 

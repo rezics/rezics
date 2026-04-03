@@ -2,10 +2,10 @@ import {useQuery} from '@tanstack/react-query';
 import {Avatar, Chip, Paper, Tooltip, Typography} from '@mui/material';
 import {useTranslation} from 'react-i18next';
 
-import {unitDetailQuery} from '@package/api/unit/unit';
-import {AccentBar} from '@package/ui/primitive/decorative/AccentBar.tsx';
-import {MarkdownContent} from '@package/ui/composite/content/MarkdownContent.tsx';
-import {MUILink} from '@package/ui/primitive/link/MUILink.tsx';
+import {unitDetailQuery} from '@rezics/api/unit/unit';
+import {AccentBar} from '@rezics/ui/primitive/decorative/AccentBar.tsx';
+import {MarkdownContent} from '@rezics/ui/composite/content/MarkdownContent.tsx';
+import {MUILink} from '@rezics/ui/primitive/link/MUILink.tsx';
 import {unitRoute} from '@/router';
 
 function formatMetadataValue(value: unknown): string {

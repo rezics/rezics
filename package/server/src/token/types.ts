@@ -1,5 +1,5 @@
 import type {ApiToken} from '#/prisma/client';
-import type {ApiTokenDTO, ApiTokenScopes} from '@package/contract';
+import type {ApiTokenDTO, ApiTokenScopes} from '@rezics/contract';
 
 /**
  * Internal representation of an API token row with normalized scopes.

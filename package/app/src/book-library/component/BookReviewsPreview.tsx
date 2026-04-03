@@ -1,14 +1,14 @@
 import React, {useEffect, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 
-import {AccentBarWithText} from '@package/ui/composite/typography/AccentBarWithText.tsx';
-import {ArrowForwardIcon} from '@package/ui/composite/navigation/ArrowForwardIcon.tsx';
+import {AccentBarWithText} from '@rezics/ui/composite/typography/AccentBarWithText.tsx';
+import {ArrowForwardIcon} from '@rezics/ui/composite/navigation/ArrowForwardIcon.tsx';
 import {ReviewList} from '@/review/component/ReviewList.tsx';
 
 import {useQuery} from '@tanstack/react-query';
-import {buildMeiliUnitQuery} from '@package/api/meili/meili.queries';
-import {mapUnitListToReviewListResponse} from '@package/api/meili/meili.api';
-import {UnitType, type ReviewDTO} from '@package/contract';
+import {buildMeiliUnitQuery} from '@rezics/api/meili/meili.queries';
+import {mapUnitListToReviewListResponse} from '@rezics/api/meili/meili.api';
+import {UnitType, type ReviewDTO} from '@rezics/contract';
 
 /** Props for BookReviews component. */
 interface BookReviewsProps {

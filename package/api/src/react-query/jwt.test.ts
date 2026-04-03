@@ -1,5 +1,5 @@
 import {beforeEach, describe, expect, test} from 'bun:test';
-import {NormalizedTokenName} from '@package/contract';
+import {NormalizedTokenName} from '@rezics/contract';
 import {configureApi} from '../config';
 
 type MemoryStorage = {

@@ -1,7 +1,7 @@
 import ArrowForwardIosRoundedIcon from '@mui/icons-material/ArrowForwardIosRounded';
 import {Box, styled, Typography} from '@mui/material';
 import React from 'react';
-import {Link} from '@package/ui/primitive/link/Link.tsx';
+import {Link} from '@rezics/ui/primitive/link/Link.tsx';
 
 const LinkWithIcon = styled(Box)(({theme}) => ({
   display: 'inline-flex',

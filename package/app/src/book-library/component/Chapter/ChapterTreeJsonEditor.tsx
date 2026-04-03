@@ -1,9 +1,9 @@
 import React, {useEffect, useState} from 'react';
-import {JsonEditorLight} from '@package/ui/editor/jsoneditor/JsonEditorLight.tsx';
+import {JsonEditorLight} from '@rezics/ui/editor/jsoneditor/JsonEditorLight.tsx';
 import {useQuery} from '@tanstack/react-query';
-import {bookQueries} from '@package/api/book/book';
+import {bookQueries} from '@rezics/api/book/book';
 import {Alert} from '@mui/material';
-import type {ChapterTreeItem} from '@package/contract';
+import type {ChapterTreeItem} from '@rezics/contract';
 
 /** Props for ChapterTreeJsonEditor component. */
 interface ChapterTreeJsonEditorProps {

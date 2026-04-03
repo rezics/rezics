@@ -1,5 +1,5 @@
 import type {Feedback} from '#/prisma/client';
-import type {FeedbackDTO} from '@package/contract';
+import type {FeedbackDTO} from '@rezics/contract';
 
 export function mapFeedbackToDTO(model: Feedback): FeedbackDTO {
   return {

@@ -3,16 +3,16 @@ import {Tabs, Tab, Box, Tooltip, Chip, Paper, Typography} from '@mui/material';
 import {useQuery, useQueryClient} from '@tanstack/react-query';
 import {useRouterState} from '@tanstack/react-router';
 import {useTranslation} from 'react-i18next';
-import {Link} from '@package/ui/primitive/link/Link.tsx';
+import {Link} from '@rezics/ui/primitive/link/Link.tsx';
 
 import {
   UniversalPaginator,
   type UniversalPaginatorHandle,
-} from '@package/ui/composite/pagination/Pagination.tsx';
-import type {UnitDTO, UnitType} from '@package/contract';
+} from '@rezics/ui/composite/pagination/Pagination.tsx';
+import type {UnitDTO, UnitType} from '@rezics/contract';
 import {TextSearchInputWithIcon} from '@/search/component/TextSearchInputWithIcon.tsx';
 import {buildUnitUrl} from '@/shared/util/build-url';
-import {buildMeiliUnitQuery} from '@package/api/meili/meili.queries';
+import {buildMeiliUnitQuery} from '@rezics/api/meili/meili.queries';
 
 type Unit = UnitDTO;
 

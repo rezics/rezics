@@ -15,9 +15,9 @@ import {
 import React from 'react';
 import {useQuery} from '@tanstack/react-query';
 
-import {Link} from '@package/ui/primitive/link/Link.tsx';
-import {unitQueries, type UnitDTO} from '@package/api/unit/unit';
-import {unitMutations} from '@package/api/unit/unit.mutations';
+import {Link} from '@rezics/ui/primitive/link/Link.tsx';
+import {unitQueries, type UnitDTO} from '@rezics/api/unit/unit';
+import {unitMutations} from '@rezics/api/unit/unit.mutations';
 
 import {Page} from '@/core/layout/Page';
 import {Route} from '@/routes/_admin/units/$unitId';

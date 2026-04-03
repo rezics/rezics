@@ -1,5 +1,5 @@
 import type {UiComment} from './TreeReplyComponents';
-import type {CommentTreeNode} from '@package/contract';
+import type {CommentTreeNode} from '@rezics/contract';
 
 export function buildTree(items: CommentTreeNode[] | undefined): UiComment[] {
   if (!items || items.length === 0) return [];

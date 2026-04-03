@@ -2,11 +2,11 @@ import type {
   AuthSession,
   AuthUser,
   GetSessionStateResponse,
-} from '@package/contract';
-import {NormalizedTokenName} from '@package/contract';
-import {authApi} from '@package/api/auth/auth.api';
-import {clearAuthPresence, hasAuthPresence} from '@package/api/react-query/authPresence';
-import {getToken} from '@package/api/react-query/jwt';
+} from '@rezics/contract';
+import {NormalizedTokenName} from '@rezics/contract';
+import {authApi} from '@rezics/api/auth/auth.api';
+import {clearAuthPresence, hasAuthPresence} from '@rezics/api/react-query/authPresence';
+import {getToken} from '@rezics/api/react-query/jwt';
 import {create} from 'zustand';
 import {devtools} from 'zustand/middleware';
 

@@ -1,9 +1,9 @@
-import type {UserDTO} from '@package/contract';
+import type {UserDTO} from '@rezics/contract';
 import {Elysia, t} from 'elysia';
 import {userService} from '../service/user.service';
 import {mapUserToPublicProfile} from '../model/mapper';
 
-import {userParamsSchema} from '@package/contract';
+import {userParamsSchema} from '@rezics/contract';
 import {authMacro} from '@/middleware';
 
 export const followRoute = new Elysia()

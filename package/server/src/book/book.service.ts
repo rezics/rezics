@@ -7,7 +7,7 @@ import type {
   BookListQuery,
   UpdateBookInput,
   CreateBookInput,
-} from '@package/contract';
+} from '@rezics/contract';
 import {syncBookToMeili, deleteBookFromMeili} from '@/meili/book/sync';
 import {getBookApproxCount} from './sql';
 

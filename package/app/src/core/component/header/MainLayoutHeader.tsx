@@ -3,7 +3,7 @@ import {useLayoutStore} from '../../state/layoutStore.ts';
 import {AppBar, Avatar, Toolbar, Typography} from '@mui/material';
 import {useTheme} from '@mui/material/styles';
 import {cn} from '@/shared/util/css-util';
-import {Link} from '@package/ui/primitive/link/Link.tsx';
+import {Link} from '@rezics/ui/primitive/link/Link.tsx';
 import {useAppStore} from '@/app/state/appStore.ts';
 import {DrawerToggler} from './DrawerToggler.tsx';
 import {HomeSearch} from '@/search';

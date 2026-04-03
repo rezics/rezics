@@ -2,7 +2,7 @@ import {useState} from 'react';
 import type {FC} from 'react';
 import {UserProfilePage} from './UserProfilePage';
 import {UserEditPage} from './UserEditPage';
-import type {UserDTO} from '@package/contract';
+import type {UserDTO} from '@rezics/contract';
 import {useUserProfileStore} from '@/user/state';
 import {userRoute} from '@/router';
 

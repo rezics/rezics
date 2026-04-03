@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 import {ReplyDrawerContainer} from './ReplyDrawer';
-import {useCreateCommentMutation} from '@package/api/comment/comment.mutations';
+import {useCreateCommentMutation} from '@rezics/api/comment/comment.mutations';
 import {useAlertStore} from '@app/state/windowAlertStore';
 import {useDialogStore} from '../state/dialogStore';
 

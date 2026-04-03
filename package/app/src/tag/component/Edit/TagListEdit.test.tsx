@@ -2,9 +2,9 @@ import {useEffect, useMemo, useState} from 'react';
 import {useFixtureInput} from 'react-cosmos/client';
 import {QueryClient, QueryClientProvider} from '@tanstack/react-query';
 import TagListEdit from './TagListEdit';
-import type {TagDetailDTO} from '@package/api/tag/tag';
-import {tagApi} from '@package/api/tag/tag';
-import {unitApi} from '@package/api/unit/unit';
+import type {TagDetailDTO} from '@rezics/api/tag/tag';
+import {tagApi} from '@rezics/api/tag/tag';
+import {unitApi} from '@rezics/api/unit/unit';
 
 /**
  * Cosmos Fixture: TagListEdit

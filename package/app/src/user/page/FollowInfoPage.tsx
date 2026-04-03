@@ -13,13 +13,13 @@ import {
   Button,
 } from '@mui/material';
 import {useQuery, useQueryClient} from '@tanstack/react-query';
-import type {UserDTO} from '@package/contract';
-import {userQueries} from '@package/api/user/user.queries';
+import type {UserDTO} from '@rezics/contract';
+import {userQueries} from '@rezics/api/user/user.queries';
 import {useUserProfileStore} from '@/user/state';
 import {
   UniversalPaginator,
   type UniversalPaginatorHandle,
-} from '@package/ui/composite/pagination/Pagination.tsx';
+} from '@rezics/ui/composite/pagination/Pagination.tsx';
 import {useNavigate} from '@tanstack/react-router';
 
 type SimpleUser = Omit<UserDTO, 'email'>;

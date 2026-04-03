@@ -1,5 +1,5 @@
 import React from 'react';
-import type {ReadlistResponse} from '@package/contract';
+import type {ReadlistResponse} from '@rezics/contract';
 import {
   Card,
   CardMedia,
@@ -10,9 +10,9 @@ import {
 } from '@mui/material';
 import ThumbUpAltOutlinedIcon from '@mui/icons-material/ThumbUpAltOutlined';
 import BookmarkAddOutlinedIcon from '@mui/icons-material/BookmarkAddOutlined';
-import {LazyLoadImage} from '@package/ui/primitive/image/LazyLoadImage.tsx';
+import {LazyLoadImage} from '@rezics/ui/primitive/image/LazyLoadImage.tsx';
 import {useTranslation} from 'react-i18next';
-import {MUILink} from '@package/ui/primitive/link/MUILink.tsx';
+import {MUILink} from '@rezics/ui/primitive/link/MUILink.tsx';
 
 interface SingleReadlistProps {
   data: ReadlistResponse;

@@ -3,7 +3,7 @@ import {
   AUTH_PRESENCE_COOKIE_MAX_AGE_SECONDS,
   AUTH_PRESENCE_COOKIE_NAME,
   AUTH_PRESENCE_COOKIE_VALUE,
-} from '@package/contract';
+} from '@rezics/contract';
 
 const LOCALHOST_HOSTS = new Set(['localhost', '127.0.0.1', '::1']);
 

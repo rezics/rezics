@@ -1,10 +1,10 @@
 import {useState} from 'react';
 import {TextField} from '@mui/material';
-import {CooldownButton} from '@package/ui/composite/button/CooldownButton.tsx';
-import {useCreateUnitMutation} from '@package/api/unit/unit.mutations';
+import {CooldownButton} from '@rezics/ui/composite/button/CooldownButton.tsx';
+import {useCreateUnitMutation} from '@rezics/api/unit/unit.mutations';
 import {useAlertStore} from '@app/state/windowAlertStore';
 import {useUserProfileStore} from '@/user/state';
-import type {UnitFormData} from '@package/api/unit/unit.types';
+import type {UnitFormData} from '@rezics/api/unit/unit.types';
 import {QuoteEditPage} from './QuoteEditPage';
 
 export function QuoteNewPage({bookUnitId}: {bookUnitId: string}) {

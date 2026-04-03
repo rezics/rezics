@@ -8,14 +8,14 @@ import {
   Chip,
 } from '@mui/material';
 import {useQuery} from '@tanstack/react-query';
-import {reactionQueries} from '@package/api/reaction/reaction';
+import {reactionQueries} from '@rezics/api/reaction/reaction';
 import {
   useSetBookmarkTagsMutation,
   useDeleteReactionMutation,
-} from '@package/api/reaction/reaction.mutations';
+} from '@rezics/api/reaction/reaction.mutations';
 import {useAlertStore} from '@app/state/windowAlertStore';
 import {useUserProfileStore} from '@/user/state';
-import {Link} from '@package/ui/primitive/link/Link.tsx';
+import {Link} from '@rezics/ui/primitive/link/Link.tsx';
 
 export type BookmarkTagManagerProps = {
   /** 当前内容的 unitId / targetId */

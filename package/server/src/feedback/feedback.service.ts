@@ -4,7 +4,7 @@ import type {
   CreateFeedbackInput,
   FeedbackListQuery,
   FeedbackListResponse,
-} from '@package/contract';
+} from '@rezics/contract';
 import {mapFeedbackToDTO} from './mapper';
 import {syncFeedbackToMeili} from '@/meili/feedback/sync';
 

@@ -2,7 +2,7 @@ import React, {useEffect, useMemo, useState} from 'react';
 import {useFixtureInput} from 'react-cosmos/client';
 import {faker} from '@faker-js/faker';
 import {QueryClient, QueryClientProvider} from '@tanstack/react-query';
-import type {TagDetailDTO} from '@package/api/tag/tag';
+import type {TagDetailDTO} from '@rezics/api/tag/tag';
 import TagCard, {TagDetailCard} from './TagCards';
 import TagList from './TagList';
 import TagWrapper from './TagWrapper';

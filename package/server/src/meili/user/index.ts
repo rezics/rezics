@@ -1,2 +1,2 @@
 export * from './user.api';
-export * from '@package/contract';
+export * from '@rezics/contract';

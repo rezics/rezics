@@ -4,9 +4,9 @@ import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import React from 'react';
 import {useTranslation} from 'react-i18next';
 
-import {CollapsibleByLineTextContainer} from '@package/ui/primitive/typography/collapsible-text/CollapsibleByLineText.tsx';
-import {MUILink} from '@package/ui/primitive/link/MUILink.tsx';
-import {Link} from '@package/ui/primitive/link/Link.tsx';
+import {CollapsibleByLineTextContainer} from '@rezics/ui/primitive/typography/collapsible-text/CollapsibleByLineText.tsx';
+import {MUILink} from '@rezics/ui/primitive/link/MUILink.tsx';
+import {Link} from '@rezics/ui/primitive/link/Link.tsx';
 
 export type SingleQuoteExcerptShowProps = {
   author: {

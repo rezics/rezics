@@ -3,7 +3,7 @@ import {authOpenApiRouter} from './openapi';
 import {wellKnownApi} from './well-known/well-known.api';
 import {env} from './env';
 import {openapi} from '@elysiajs/openapi';
-import {applyCorsToSet} from '@package/cors';
+import {applyCorsToSet} from '@rezics/cors';
 import {authConfigs} from './cors';
 
 const isDev = env.NODE_ENV === 'development';

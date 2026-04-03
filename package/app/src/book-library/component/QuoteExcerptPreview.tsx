@@ -3,8 +3,8 @@ import React from 'react';
 import {QuoteExcerptListContainer} from '@/review/component/QuoteExcerptList.tsx';
 
 import {useQuery} from '@tanstack/react-query';
-import {buildMeiliUnitQuery} from '@package/api/meili/meili.queries';
-import {UnitType} from '@package/contract';
+import {buildMeiliUnitQuery} from '@rezics/api/meili/meili.queries';
+import {UnitType} from '@rezics/contract';
 import {useTranslation} from 'react-i18next';
 
 /** Props for QuoteExcerptPreview component. */

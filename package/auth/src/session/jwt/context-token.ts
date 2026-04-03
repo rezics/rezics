@@ -1,5 +1,5 @@
 import {SignJWT} from 'jose';
-import type {AuthContextTokenClaims} from '@package/contract';
+import type {AuthContextTokenClaims} from '@rezics/contract';
 import {getAuthPrivateSigningKey} from './service';
 import {
   getAuthJwtAudience,

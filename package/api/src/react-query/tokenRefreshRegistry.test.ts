@@ -1,5 +1,5 @@
 import {describe, expect, mock, test} from 'bun:test';
-import {NormalizedTokenName} from '@package/contract';
+import {NormalizedTokenName} from '@rezics/contract';
 
 mock.module('../user/user.api', () => ({
   userApi: {
@@ -7,7 +7,7 @@ mock.module('../user/user.api', () => ({
   },
 }));
 
-mock.module('@package/app-shell/state/authSessionStore', () => ({
+mock.module('@rezics/app-shell/state/authSessionStore', () => ({
   useAuthSessionStore: {
     getState: () => ({
       syncBusinessToken: mock(() => undefined),

@@ -1,7 +1,7 @@
 import React from 'react';
 import {Card, CardContent, Typography, Chip} from '@mui/material';
-import type {TagDetailDTO} from '@package/api/tag/tag';
-import {MUILink} from '@package/ui/primitive/link/MUILink.tsx';
+import type {TagDetailDTO} from '@rezics/api/tag/tag';
+import {MUILink} from '@rezics/ui/primitive/link/MUILink.tsx';
 
 /**
  * Generic card showing a tag's primary information

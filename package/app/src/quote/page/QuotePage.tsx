@@ -1,4 +1,4 @@
-import {AccentBar} from '@package/ui/primitive/decorative/AccentBar.tsx';
+import {AccentBar} from '@rezics/ui/primitive/decorative/AccentBar.tsx';
 import {TreeReplyComponents} from '@/comment/component/TreeReplyComponents';
 import {ChatBubbleOutline} from '@mui/icons-material';
 import {IconButton, Typography} from '@mui/material';
@@ -6,17 +6,17 @@ import React, {useRef} from 'react';
 import {useTranslation} from 'react-i18next';
 
 import {useQuery} from '@tanstack/react-query';
-import {unitQueries} from '@package/api/unit/unit.queries';
+import {unitQueries} from '@rezics/api/unit/unit.queries';
 import FormatQuoteIcon from '@mui/icons-material/FormatQuote';
 import {SingleCommentElementWrapper} from '@/comment/component/SingleCommentElementWrapper';
-import {MarkdownContent} from '@package/ui/composite/content/MarkdownContent.tsx';
+import {MarkdownContent} from '@rezics/ui/composite/content/MarkdownContent.tsx';
 import {
   MiniActionBar,
   MiniAdminActionBar,
 } from '@/engagement/component/MiniActionBar';
 import {parseReactionSummaries} from '@/shared/util/reaction-summaries-parser';
 import {ReactionStatistics} from '@/engagement/component/ReactionStatistics';
-import {LazyLoadImage} from '@package/ui/primitive/image/LazyLoadImage.tsx';
+import {LazyLoadImage} from '@rezics/ui/primitive/image/LazyLoadImage.tsx';
 import {quoteRoute} from '@/router';
 
 export const QuotePage: React.FC = () => {

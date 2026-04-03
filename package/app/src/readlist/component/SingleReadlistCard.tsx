@@ -1,4 +1,4 @@
-import type {ReadlistResponse} from '@package/contract';
+import type {ReadlistResponse} from '@rezics/contract';
 import {
   Avatar,
   Box,
@@ -11,7 +11,7 @@ import {
 import {useNavigate} from '@tanstack/react-router';
 import React from 'react';
 import {MiniActionBar} from '@/engagement/component/MiniActionBar.tsx';
-import {LazyLoadImage} from '@package/ui/primitive/image/LazyLoadImage.tsx';
+import {LazyLoadImage} from '@rezics/ui/primitive/image/LazyLoadImage.tsx';
 
 interface SingleReadlistProps {
   data: ReadlistResponse;

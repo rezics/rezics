@@ -1,6 +1,6 @@
 import {prisma} from '#/prisma/client';
 import type {Prisma, Reaction, ReactionSummary} from '#/prisma/client';
-import type {ReactionListQuery} from '@package/contract';
+import type {ReactionListQuery} from '@rezics/contract';
 
 /**
  * Reaction Service - CRUD + summary counters

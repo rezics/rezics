@@ -9,7 +9,7 @@ import type {
   CreateApiTokenInput,
   CreateApiTokenResponse,
   UpdateApiTokenInput,
-} from '@package/contract';
+} from '@rezics/contract';
 import {apiFetch} from '../react-query/http';
 
 /**

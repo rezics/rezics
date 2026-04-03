@@ -36,16 +36,16 @@ bun run knip             # Detect unused exports/dependencies (root)
 
 | Package              | Role                                                              |
 | -------------------- | ----------------------------------------------------------------- |
-| `@package/server`    | Main Elysia API server (PostgreSQL via Prisma)                    |
-| `@package/auth`      | Authentication service (better-auth, separate DB + Prisma schema) |
-| `@package/jwt`       | Shared JWT/JWKS utilities (jose)                                  |
-| `@package/contract`  | Shared TypeScript API contracts (Elysia + Typebox schemas)        |
-| `@package/api`       | Frontend API client (TanStack Query hooks + query options)        |
-| `@package/app`       | Main React SPA (Vite + TanStack Router)                           |
-| `@package/admin`     | Admin dashboard (Vite + React + Material-UI)                      |
-| `@package/ui`        | Shared UI components (Radix/shadcn, dnd-kit)                      |
-| `@package/app-shell` | Shared shell/layout components                                    |
-| `@package/search`    | Meilisearch integration                                           |
+| `@rezics/server`    | Main Elysia API server (PostgreSQL via Prisma)                    |
+| `@rezics/auth`      | Authentication service (better-auth, separate DB + Prisma schema) |
+| `@rezics/jwt`       | Shared JWT/JWKS utilities (jose)                                  |
+| `@rezics/contract`  | Shared TypeScript API contracts (Elysia + Typebox schemas)        |
+| `@rezics/api`       | Frontend API client (TanStack Query hooks + query options)        |
+| `@rezics/app`       | Main React SPA (Vite + TanStack Router)                           |
+| `@rezics/admin`     | Admin dashboard (Vite + React + Material-UI)                      |
+| `@rezics/ui`        | Shared UI components (Radix/shadcn, dnd-kit)                      |
+| `@rezics/app-shell` | Shared shell/layout components                                    |
+| `@rezics/search`    | Meilisearch integration                                           |
 
 ### Backend Pattern (Elysia)
 
@@ -59,7 +59,7 @@ Each domain API is mounted via `.use()` in `package/server/src/index.ts`.
 
 ### Contract-First API Design
 
-Types are defined once in `@package/contract` using Typebox and shared across frontend/backend. The `@package/api` layer wraps these into TanStack Query hooks and query options — avoid duplicating type definitions in API functions.
+Types are defined once in `@rezics/contract` using Typebox and shared across frontend/backend. The `@rezics/api` layer wraps these into TanStack Query hooks and query options — avoid duplicating type definitions in API functions.
 
 ### Frontend Feature Structure
 

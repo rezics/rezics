@@ -1,5 +1,5 @@
 import type {TagWithRelations} from './types';
-import type {TagDTO, TagDetailDTO} from '@package/contract';
+import type {TagDTO, TagDetailDTO} from '@rezics/contract';
 
 export function mapTagToDTO(tag: TagWithRelations): TagDTO {
   return {

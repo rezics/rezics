@@ -1,5 +1,5 @@
 {
-  "name": "@package/search",
+  "name": "@rezics/search",
   "module": "src/index.ts",
   "type": "module",
   "exports": {
@@ -22,7 +22,7 @@
   "dependencies": {
     "@types/node": "^24.10.1",
     "meilisearch": "^0.54.0",
-    "@package/server": "workspace:*",
-    "@package/contract": "workspace:*"
+    "@rezics/server": "workspace:*",
+    "@rezics/contract": "workspace:*"
   }
 }

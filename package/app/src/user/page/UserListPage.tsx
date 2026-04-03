@@ -12,9 +12,9 @@ import {
 import SearchIcon from '@mui/icons-material/Search';
 import {useEffect, useMemo, useState} from 'react';
 import type {FC} from 'react';
-import type {UserDTO} from '@package/contract';
+import type {UserDTO} from '@rezics/contract';
 import {useQuery} from '@tanstack/react-query';
-import {userQueries} from '@package/api/user/user.queries';
+import {userQueries} from '@rezics/api/user/user.queries';
 import {UserError, UserLoading} from './UserState';
 
 export interface UserListPageProps {

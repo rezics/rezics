@@ -10,8 +10,8 @@ import {
   ListItemAvatar,
   Avatar,
 } from '@mui/material';
-import {bookQueries} from '@package/api/book/book';
-import type {BookDTO} from '@package/contract';
+import {bookQueries} from '@rezics/api/book/book';
+import type {BookDTO} from '@rezics/contract';
 import {useTranslation} from 'react-i18next';
 
 type Book = BookDTO;

@@ -18,7 +18,7 @@ import {BookmarkTagManager} from './BookmarkTagManager';
 import {
   useCreateReactionMutation,
   useDeleteReactionMutation,
-} from '@package/api/reaction/reaction.mutations';
+} from '@rezics/api/reaction/reaction.mutations';
 
 async function copyCurrentUrl(url?: string) {
   const theUrl = url || window.location.href;

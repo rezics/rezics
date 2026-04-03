@@ -1,6 +1,6 @@
 ## Context
 
-`@package/editor` is a CodeMirror 6 wrapper library with a plugin-based architecture. It currently has:
+`@rezics/editor` is a CodeMirror 6 wrapper library with a plugin-based architecture. It currently has:
 
 - **core/** — `createEditor()`, plugin resolution, keybinding merging, theme system
 - **react/** — generic `<Editor>` component, `useEditor` hook, `EditorContext`
@@ -234,7 +234,7 @@ The fixture files in `react/` are currently composing plugins manually — they'
 - TypeScript compilation: `bun run build` in `package/editor`
 - Co-located tests: `bun test` in `package/editor` (MarkdownEditor.test.tsx, JsonEditor.test.tsx, CodeEditor.test.tsx)
 - Cosmos fixtures: `bun run cosmos` and verify all fixtures render correctly after migration
-- Package export: verify `import { MarkdownEditor } from '@package/editor/editor'` resolves
+- Package export: verify `import { MarkdownEditor } from '@rezics/editor/editor'` resolves
 
 ## Rollout / Migration
 

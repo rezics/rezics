@@ -1,5 +1,5 @@
 import React from 'react';
-import type {ReadlistDTO} from '@package/contract';
+import type {ReadlistDTO} from '@rezics/contract';
 import ReadListCard from './ReadListCard';
 
 interface VerticalTwoReadListCardProps {

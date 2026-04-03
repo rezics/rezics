@@ -6,7 +6,7 @@ import {queryOptions, infiniteQueryOptions} from '@tanstack/react-query';
 import {commentApi} from './comment.api';
 import {commentKeys} from './comment.keys';
 import type {CommentListFilters} from './comment.types';
-import type {CommentTreeQuery} from '@package/contract';
+import type {CommentTreeQuery} from '@rezics/contract';
 
 /**
  * Query options for listing a slice of comments.

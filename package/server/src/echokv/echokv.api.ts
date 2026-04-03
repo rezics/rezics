@@ -6,7 +6,7 @@ import type {
   EchoKVUpsertRequest,
 } from './types';
 import {echoKvService} from './echokv.service';
-import {BasicAdminPermission} from '@package/contract';
+import {BasicAdminPermission} from '@rezics/contract';
 
 export const echoKvApi = new Elysia({prefix: '/echokv'})
   .use(serverCorsPolicy('credentialed'))

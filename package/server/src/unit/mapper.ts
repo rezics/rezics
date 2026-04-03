@@ -1,5 +1,5 @@
 import type {User} from '#/prisma/client';
-import type {PublicUser, UnitDTO} from '@package/contract';
+import type {PublicUser, UnitDTO} from '@rezics/contract';
 import type {UnitWithRelations} from './types';
 
 /**

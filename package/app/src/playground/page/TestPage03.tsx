@@ -1,5 +1,5 @@
-import {MUILink} from '@package/ui/primitive/link/MUILink.tsx';
-import {CookieConsentBanner} from '@package/ui/composite/cookie-consent/CookieConsentBanner.tsx';
+import {MUILink} from '@rezics/ui/primitive/link/MUILink.tsx';
+import {CookieConsentBanner} from '@rezics/ui/composite/cookie-consent/CookieConsentBanner.tsx';
 
 export function TestPage03() {
   const bookurl = '/book/019c3be6-2ffb-7cf0-b4eb-ecbd57c25f18';

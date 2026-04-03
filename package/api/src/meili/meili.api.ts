@@ -9,12 +9,12 @@ import type {
   ReadlistListQuery,
   UnitListResponse,
   FeedbackListQuery,
-} from '@package/contract';
+} from '@rezics/contract';
 import type {
   ReadlistSearchResult,
   FeedbackSearchResult,
-} from '@package/contract';
-import type {UserDTO, UserListQuery} from '@package/contract';
+} from '@rezics/contract';
+import type {UserDTO, UserListQuery} from '@rezics/contract';
 import {buildQueryString} from '../utils/buildQuery';
 import {apiFetch} from '../react-query/http';
 import type {BookFilters} from '../book/book.types';

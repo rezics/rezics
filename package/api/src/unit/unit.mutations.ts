@@ -13,7 +13,7 @@ import type {
   CreateUnitInput,
   UpdateUnitInput,
   UnitResponse,
-} from '@package/contract';
+} from '@rezics/contract';
 
 /**
  * Mutation for creating a unit

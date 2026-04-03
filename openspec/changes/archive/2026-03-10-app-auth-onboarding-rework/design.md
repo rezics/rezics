@@ -18,12 +18,12 @@ When importing files **from a different package**, file extensions **should be i
 
 Example:
 ```
-// in @package/app
+// in @rezics/app
 import {RemarkPreview} from '../component/RemarkPreview';
-import {ArrowForwardIcon} from '@package/ui/composite/navigation/ArrowForwardIcon.tsx';
+import {ArrowForwardIcon} from '@rezics/ui/composite/navigation/ArrowForwardIcon.tsx';
 ```
 
-API schema in @package/contract
+API schema in @rezics/contract
 
 
 ## Goals / Non-Goals
@@ -239,8 +239,8 @@ Rollback strategy:
 ## Open Questions
 
 - Which exact better-auth self-service endpoints are already exposed and typed versus needing new OpenAPI contract wrappers?
-- A: Please check @package/auth/src/openapi
+- A: Please check @rezics/auth/src/openapi
 - Should guest-capable registered users see authenticated account chrome, guest chrome, or a hybrid header state before member JWT issuance?
 - A: The header should be rendered as if the user is logged in. Most headers require data that the authentication server will provide. Naturally, this may cause some data to be unavailable and therefore prevent the header from being fully rendered. This is normal, and components should be designed to tolerate such partial data. At the same time, a verify email banner should be displayed.
 - Should provider availability be discovered dynamically from auth backend configuration or kept as frontend environment/config for now?
-- A: no, The specifications for services enabled on the backend should be documented in @package/contract.
+- A: no, The specifications for services enabled on the backend should be documented in @rezics/contract.

@@ -14,7 +14,7 @@ import {
   hasPermissionToUpdateUnit,
   hasPermissionToDeleteUnit,
   BasicAdminPermission,
-} from '@package/contract';
+} from '@rezics/contract';
 import {unitService} from './unit.service';
 import {mapUnitToDTO} from './mapper';
 import {

@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {useAlertStore} from '@app/state/windowAlertStore';
-import {useDeleteReactionMutation} from '@package/api/reaction/reaction.mutations';
-import {useSetBookmarkTagsMutation} from '@package/api/reaction/reaction.mutations';
+import {useDeleteReactionMutation} from '@rezics/api/reaction/reaction.mutations';
+import {useSetBookmarkTagsMutation} from '@rezics/api/reaction/reaction.mutations';
 import {
   Typography,
   TextField,
@@ -15,7 +15,7 @@ import {
 import {Delete} from '@mui/icons-material';
 import {type BookmarkEntry} from '../../page/BookmarkPage';
 import {buildUnitUrl} from '@/shared/util/build-url';
-import {Link} from '@package/ui/primitive/link/Link.tsx';
+import {Link} from '@rezics/ui/primitive/link/Link.tsx';
 
 type BookmarkItemCardProps = {
   entry: BookmarkEntry;

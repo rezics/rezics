@@ -7,9 +7,9 @@ import {
   Card,
   CardContent,
 } from '@mui/material';
-import {bookQueries} from '@package/api/book/book';
-import type {BookDTO} from '@package/contract';
-import {LazyLoadImage} from '@package/ui/primitive/image/LazyLoadImage.tsx';
+import {bookQueries} from '@rezics/api/book/book';
+import type {BookDTO} from '@rezics/contract';
+import {LazyLoadImage} from '@rezics/ui/primitive/image/LazyLoadImage.tsx';
 import {useTranslation} from 'react-i18next';
 
 type Book = BookDTO;

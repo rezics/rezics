@@ -7,7 +7,7 @@ import type {
   FeedbackDTO,
   CreateFeedbackInput,
   FeedbackListResponse,
-} from '@package/contract';
+} from '@rezics/contract';
 import type {FeedbackFilters} from './feedback.types';
 import {buildQueryString} from '../utils/buildQuery';
 import {apiFetch} from '../react-query/http';

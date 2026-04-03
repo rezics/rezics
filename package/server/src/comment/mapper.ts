@@ -1,5 +1,5 @@
 import type {CommentWithRelations} from './types';
-import type {CommentDTO} from '@package/contract';
+import type {CommentDTO} from '@rezics/contract';
 
 function sanitizeUser(u: CommentWithRelations['unit']['user']) {
   return {

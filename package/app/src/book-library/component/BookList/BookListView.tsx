@@ -1,9 +1,9 @@
 import {Card, CardContent, CardMedia, Typography} from '@mui/material';
 
-import {Link} from '@package/ui/primitive/link/Link.tsx';
+import {Link} from '@rezics/ui/primitive/link/Link.tsx';
 
-import type {BookDTO} from '@package/contract';
-import {LazyLoadImage} from '@package/ui/primitive/image/LazyLoadImage.tsx';
+import type {BookDTO} from '@rezics/contract';
+import {LazyLoadImage} from '@rezics/ui/primitive/image/LazyLoadImage.tsx';
 
 import React from 'react';
 

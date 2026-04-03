@@ -13,19 +13,19 @@ import {
 } from '@/engagement/component/ReactionBar.tsx';
 import {ReplyDrawerContainer} from './ReplyDrawer.tsx';
 
-import {commentQueries} from '@package/api/comment/comment.queries';
-import type {CommentTreeNode} from '@package/contract';
+import {commentQueries} from '@rezics/api/comment/comment.queries';
+import type {CommentTreeNode} from '@rezics/contract';
 import {
   useCreateCommentMutation,
   useDeleteCommentMutation,
   useUpdateCommentMutation,
-} from '@package/api/comment/comment.mutations';
+} from '@rezics/api/comment/comment.mutations';
 
 import {useUserProfileStore} from '@/user/state';
 import {buildTree} from './tree-reply-util';
 
 import {useAlertStore} from '@app/state/windowAlertStore';
-import {reactionApi} from '@package/api/reaction/reaction';
+import {reactionApi} from '@rezics/api/reaction/reaction';
 import {useTranslation} from 'react-i18next';
 // This is a temporary type definition based on the GraphQL schema.
 // Local UI type adapted from CommentTreeNode

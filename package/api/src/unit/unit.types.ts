@@ -12,7 +12,7 @@ import type {
   CommentTreeQuery,
   CommentTreeResponse,
   CommentTreeNode,
-} from '@package/contract';
+} from '@rezics/contract';
 
 // Re-export contract types
 export type {

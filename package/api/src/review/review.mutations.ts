@@ -13,7 +13,7 @@ import type {
   CreateReviewInput,
   UpdateReviewInput,
   ReviewResponse,
-} from '@package/contract';
+} from '@rezics/contract';
 
 /**
  * Mutation for creating a review

@@ -6,13 +6,13 @@ import {
   importPrivateJwk,
   JwtAlgorithm,
   verifySessionToken,
-} from '@package/jwt';
+} from '@rezics/jwt';
 import {
   NormalizedTokenName,
   TokenTransportHeader,
   type RezicsSessionTokenClaims,
   type TokenPermissionRole,
-} from '@package/contract';
+} from '@rezics/contract';
 import {SignJWT} from 'jose';
 import {serverJwtPersistence} from './jwt-persistence';
 import {getJwtService} from '@/jwt';

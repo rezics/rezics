@@ -16,12 +16,12 @@ import {
 } from '@mui/material';
 import {useState} from 'react';
 
-import {NormalizedTokenName} from '@package/contract';
-import {getToken, parseJwt, queryAccessToken} from '@package/api/react-query/jwt';
+import {NormalizedTokenName} from '@rezics/contract';
+import {getToken, parseJwt, queryAccessToken} from '@rezics/api/react-query/jwt';
 import {
   hydrateAuthSessionState,
   useAuthSessionStore,
-} from '@package/app-shell';
+} from '@rezics/app-shell';
 
 import {Page} from '@/core/layout/Page';
 import {establishBusinessSession, adminLogout} from '@/user/model/handler';

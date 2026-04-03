@@ -4,10 +4,10 @@ import type {
   TagDetailDTO,
   CreateTagInput,
   UpdateTagInput,
-} from '@package/api/tag/tag';
-import {useCreateTagMutation, useUpdateTagMutation} from '@package/api/tag/tag';
-import {unitApi} from '@package/api/unit/unit';
-import type {UnitDTO} from '@package/api/unit/unit';
+} from '@rezics/api/tag/tag';
+import {useCreateTagMutation, useUpdateTagMutation} from '@rezics/api/tag/tag';
+import {unitApi} from '@rezics/api/unit/unit';
+import type {UnitDTO} from '@rezics/api/unit/unit';
 
 export type TagEditProps = {
   tag?: TagDetailDTO | null; // 若存在则为更新模式

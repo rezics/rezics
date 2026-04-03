@@ -1,6 +1,6 @@
 ## Context
 
-`package/auth` currently mixes Better Auth session ownership, Better Auth JWT plugin persistence, custom jose verification helpers, OAuth-oriented JWKS routes, and OpenAPI session routes. `package/server` separately signs its own session JWTs, imports verification helpers from `@package/auth/jwt`, derives auth JWKS URLs from auth issuer env vars, and keeps its own env surface for local JWT material. The result is a cross-cutting security subsystem with duplicated logic, inconsistent CORS behavior, and a server-to-auth dependency that is stronger than the runtime contract actually requires.
+`package/auth` currently mixes Better Auth session ownership, Better Auth JWT plugin persistence, custom jose verification helpers, OAuth-oriented JWKS routes, and OpenAPI session routes. `package/server` separately signs its own session JWTs, imports verification helpers from `@rezics/auth/jwt`, derives auth JWKS URLs from auth issuer env vars, and keeps its own env surface for local JWT material. The result is a cross-cutting security subsystem with duplicated logic, inconsistent CORS behavior, and a server-to-auth dependency that is stronger than the runtime contract actually requires.
 
 The target state is a shared `package/jwt` package that centralizes storage-agnostic JWT contracts, rotation orchestration, JWKS serialization, and jose-based verification helpers. Each issuing service remains responsible for its own persistence adapter and framework wiring. Better Auth owns session handling in `package/auth`; Elysia JWT remains the service integration layer where it fits; jose-backed logic lives in the shared package. JWT/JWKS routes move under session ownership, while OAuth endpoints remain public and explicitly documented.
 
@@ -71,14 +71,14 @@ package/jwt/
       fixtures.ts
 ```
 
-`src/export.ts` will export only stable package-level contracts and builders. Subpath exports such as `@package/jwt/rotation` or `@package/jwt/contracts` can be added only if they mirror the existing package style used in `package/auth`.
+`src/export.ts` will export only stable package-level contracts and builders. Subpath exports such as `@rezics/jwt/rotation` or `@rezics/jwt/contracts` can be added only if they mirror the existing package style used in `package/auth`.
 
 Why this design:
 - Keeps jose-specific code in one place without leaking Prisma or Elysia concerns into the core package.
 - Matches current repo preference for explicit folder boundaries and small `export.ts` barrel files.
 
 Alternatives considered:
-- Extend `@package/auth/jwt`: rejected because it keeps `package/server` coupled to auth ownership.
+- Extend `@rezics/auth/jwt`: rejected because it keeps `package/server` coupled to auth ownership.
 - Put all JWT code directly in each server: rejected because it recreates duplicated security logic and drift.
 
 ### Decision: Split core package responsibilities into contracts, rotation, and adapters
@@ -227,8 +227,8 @@ Alternatives considered:
 
 ### Decision: Auth verification becomes a shared contract, not a package dependency
 
-`package/server` stops importing `@package/auth/jwt`. Instead it will:
-- use `@package/jwt` verification helpers directly;
+`package/server` stops importing `@rezics/auth/jwt`. Instead it will:
+- use `@rezics/jwt` verification helpers directly;
 - load auth verifier inputs from its local JWT metadata registry, with `AUTH_JWKS_URL` retained only as a bootstrap or migration input if needed;
 - maintain its own verification wrapper local to the server package for route ergonomics.
 
@@ -241,7 +241,7 @@ Alternatives considered:
 
 Auth server:
 - Better Auth continues to own session issuance and session lifecycle.
-- If Better Auth cannot satisfy the needed rotation/JWKS ownership model directly, `package/auth` wraps or supplements it with `@package/jwt` abstractions rather than adding more ad hoc auth-local JWT code.
+- If Better Auth cannot satisfy the needed rotation/JWKS ownership model directly, `package/auth` wraps or supplements it with `@rezics/jwt` abstractions rather than adding more ad hoc auth-local JWT code.
 
 Elysia servers:
 - Use `@elysiajs/jwt` as the route/plugin integration layer for signing and verification ergonomics.
@@ -308,10 +308,10 @@ Engineering practices to enforce:
 
 1. Create `package/jwt` with typed contracts, rotation engine, jose verifier helpers, and adapter-facing tests.
 2. Refactor `package/auth` JWT modules into session-owned modules and route ownership, with Prisma adapter implementations kept local to auth.
-3. Update Better Auth integration to consume the new auth-local adapter wrapper built on `@package/jwt` contracts.
-4. Replace auth-local verify exports and server imports with direct `@package/jwt` verifier usage.
+3. Update Better Auth integration to consume the new auth-local adapter wrapper built on `@rezics/jwt` contracts.
+4. Replace auth-local verify exports and server imports with direct `@rezics/jwt` verifier usage.
 5. Refactor `package/server` session signing and JWKS publication to use local adapter + shared rotation engine + Elysia JWT integration.
-6. Remove `@package/auth` dependency from `package/server` where no longer needed.
+6. Remove `@rezics/auth` dependency from `package/server` where no longer needed.
 7. Add auth/server DB migrations and backfill steps for JWT service metadata before removing runtime env fallbacks.
 8. Update OpenAPI/session route documentation, CORS policies, and public endpoint tests.
 9. Delete legacy verify implementations, stale helpers, dead env vars, and compatibility code.
@@ -331,7 +331,7 @@ Rollback strategy:
 ### Auth integration strategy
 
 - Introduce `package/auth/src/session/jwt/` for auth-owned adapter glue, route handlers, and Better Auth bridging.
-- Replace `src/jwt/verify.ts`, `src/jwt/auth-local.ts`, and related exports with service-local verifier wrappers built on `@package/jwt`.
+- Replace `src/jwt/verify.ts`, `src/jwt/auth-local.ts`, and related exports with service-local verifier wrappers built on `@rezics/jwt`.
 - Move current JWKS logic out of `src/openapi/oauth.ts` and into session-owned route modules, leaving OAuth docs to reference the public compatibility endpoints where required.
 - Keep OAuth discovery, authorization, token, userinfo, revoke, and callback endpoints public and correctly documented.
 
@@ -339,13 +339,13 @@ Rollback strategy:
 
 - Introduce local modules such as `package/server/src/session/jwt/issuer.ts`, `rotation-adapter.ts`, `jwks-route.ts`, and `verify-auth.ts`.
 - Replace `package/server/src/session/jwt.ts` with a composition root that sources its active key from the shared rotation engine and wires that into `@elysiajs/jwt`.
-- Replace `package/server/src/user/util/index.ts` auth verification imports from `@package/auth/jwt` with direct `@package/jwt` verifier creation.
+- Replace `package/server/src/user/util/index.ts` auth verification imports from `@rezics/auth/jwt` with direct `@rezics/jwt` verifier creation.
 
 ### Verification flow redesign
 
 - Auth-issued token verification in `package/server` becomes:
   1. Read `AUTH_JWKS_URL`.
-  2. Build a jose verifier from `@package/jwt`.
+  2. Build a jose verifier from `@rezics/jwt`.
   3. Validate `alg`, `kid`, `iss`, `aud`, `exp`, `nbf`, transport, and required claims.
   4. On unknown `kid`, refresh JWKS once and retry.
 - Server-issued token verification follows the same contract, but uses server-local issuer/audience/JWKS settings.
@@ -403,8 +403,8 @@ Service metadata persistence replaces long-lived runtime auth verifier env:
 - Delete `package/auth/src/jwt/verify.ts`
 - Delete `package/auth/src/jwt/auth-local.ts`
 - Delete any auth re-exports that expose verifier helpers as shared public API
-- Delete server imports from `@package/auth/jwt`
-- Delete legacy verify tests and replace them with `@package/jwt` contract tests plus service integration tests
+- Delete server imports from `@rezics/auth/jwt`
+- Delete legacy verify tests and replace them with `@rezics/jwt` contract tests plus service integration tests
 - Delete stale OAuth-centric JWKS route ownership where session ownership replaces it
 - Delete obsolete env declarations and docs
 - Delete any dead token helper, fallback path, or transport shim left behind by the migration

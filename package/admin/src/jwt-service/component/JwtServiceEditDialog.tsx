@@ -14,7 +14,7 @@ import {
   Divider,
   Chip,
 } from '@mui/material';
-import type {JwtServiceDTO, UpdateJwtServiceInput} from '@package/contract';
+import type {JwtServiceDTO, UpdateJwtServiceInput} from '@rezics/contract';
 
 type Props = {
   open: boolean;

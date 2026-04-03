@@ -15,10 +15,10 @@ import {
 } from '@mui/material';
 import {useNavigate} from '@tanstack/react-router';
 import React, {useState} from 'react';
-import {Link} from '@package/ui/primitive/link/Link.tsx';
+import {Link} from '@rezics/ui/primitive/link/Link.tsx';
 
 import {logout} from '@/user/model/handler';
-import {userQueries} from '@package/api/user/user.queries';
+import {userQueries} from '@rezics/api/user/user.queries';
 import {useQuery} from '@tanstack/react-query';
 import {useTranslation} from 'react-i18next';
 import {MiscMenuItems} from '../../component/header/MiscMenuItems';

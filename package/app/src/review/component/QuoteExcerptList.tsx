@@ -1,5 +1,5 @@
 import {SingleQuoteExcerptShow} from './SingleQuoteExcerpt';
-import type {UnitDTO, UnitListResponse} from '@package/contract';
+import type {UnitDTO, UnitListResponse} from '@rezics/contract';
 import {Box, Stack} from '@mui/material';
 import React from 'react';
 

@@ -1,10 +1,10 @@
 import React, {useMemo} from 'react';
 import {useQuery} from '@tanstack/react-query';
 import {Alert, CircularProgress, Typography, Chip} from '@mui/material';
-import {bookQueries} from '@package/api/book/book';
-import type {BookDTO} from '@package/contract';
+import {bookQueries} from '@rezics/api/book/book';
+import type {BookDTO} from '@rezics/contract';
 import {useTranslation} from 'react-i18next';
-import {Link} from '@package/ui/primitive/link/Link.tsx';
+import {Link} from '@rezics/ui/primitive/link/Link.tsx';
 
 type Book = BookDTO;
 

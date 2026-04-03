@@ -6,10 +6,10 @@ import {
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
-} from '@package/ui/shadcn/carousel.tsx';
+} from '@rezics/ui/shadcn/carousel.tsx';
 
 import {VerticalTwoReviewCard} from '@/review/component/item/VerticalTwoReviewCard';
-import type {ReviewDTO} from '@package/contract';
+import type {ReviewDTO} from '@rezics/contract';
 
 export interface HorizontalReviewCarouselProps {
   reviewList: ReviewDTO[];

@@ -14,8 +14,8 @@ import {
 import React from 'react';
 import {useQuery} from '@tanstack/react-query';
 
-import {authQueries} from '@package/api/auth/auth.queries';
-import {useRevokeSessionMutation} from '@package/api/auth/auth.mutations';
+import {authQueries} from '@rezics/api/auth/auth.queries';
+import {useRevokeSessionMutation} from '@rezics/api/auth/auth.mutations';
 
 import {Page} from '@/core/layout/Page';
 import {

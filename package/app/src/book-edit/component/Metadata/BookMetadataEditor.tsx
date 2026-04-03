@@ -11,8 +11,8 @@ import {
   Tooltip,
 } from '@mui/material';
 import {InfoOutlined} from '@mui/icons-material';
-import type {BookDTO, UserDTO} from '@package/contract';
-import {meiliUserApi} from '@package/api/meili/meili.api';
+import type {BookDTO, UserDTO} from '@rezics/contract';
+import {meiliUserApi} from '@rezics/api/meili/meili.api';
 import {useTranslation} from 'react-i18next';
 
 type PublicUserLike = Partial<UserDTO>;

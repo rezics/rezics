@@ -4,7 +4,7 @@ import {
   bookParamsSchema,
   createBookSchema,
   updateBookSchema,
-} from '@package/contract';
+} from '@rezics/contract';
 import {bookService} from '../book/book.service';
 import {unitService} from '../unit/unit.service';
 import {

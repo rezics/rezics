@@ -1,5 +1,5 @@
 {
-  "name": "@package/app-shell",
+  "name": "@rezics/app-shell",
   "version": "0.0.1",
   "type": "module",
   "scripts": {
@@ -29,7 +29,7 @@
     "@emotion/styled": "11.14.1",
     "@material/material-color-utilities": "0.3.0",
     "@mui/material": "7.3.1",
-    "@package/api": "workspace:*",
+    "@rezics/api": "workspace:*",
     "@tanstack/react-query": "^5.89.0",
     "clsx": "^2.1.1",
     "i18next": "25.3.5",
@@ -40,8 +40,8 @@
     "zustand": "5.0.7"
   },
   "devDependencies": {
-    "@package/contract": "workspace:*",
-    "@package/ui": "workspace:*",
+    "@rezics/contract": "workspace:*",
+    "@rezics/ui": "workspace:*",
     "@eslint/js": "^9.35.0",
     "@tanstack/router-plugin": "^1.157.16",
     "@types/react": "19.1.10",

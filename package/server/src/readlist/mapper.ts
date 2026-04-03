@@ -1,4 +1,4 @@
-import type {PublicUser, ReadlistDTO} from '@package/contract';
+import type {PublicUser, ReadlistDTO} from '@rezics/contract';
 import type {ReadlistSelected, ReadlistListSelected} from './types';
 import {mapReviewToDTO} from '../review/mapper';
 

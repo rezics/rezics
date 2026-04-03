@@ -8,7 +8,7 @@ import {
   createApiTokenResponseSchema,
   updateApiTokenSchema,
   BasicAdminPermission,
-} from '@package/contract';
+} from '@rezics/contract';
 import {bookRoute} from './token.book.api';
 import {userRoute} from './token.user.api';
 

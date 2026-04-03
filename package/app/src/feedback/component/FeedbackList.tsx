@@ -16,24 +16,24 @@ import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
 import DoneIcon from '@mui/icons-material/Done';
 import {useQuery, useQueryClient} from '@tanstack/react-query';
-import {buildMeiliFeedbackQuery} from '@package/api/meili/meili.queries';
-import {useSetFeedbackResolvedMutation} from '@package/api/feedback/feedback.mutations';
+import {buildMeiliFeedbackQuery} from '@rezics/api/meili/meili.queries';
+import {useSetFeedbackResolvedMutation} from '@rezics/api/feedback/feedback.mutations';
 import type {
   FeedbackDTO,
   FeedbackType,
-} from '@package/api/feedback/feedback.types';
+} from '@rezics/api/feedback/feedback.types';
 import {
   UniversalPaginator,
   type UniversalPaginatorHandle,
-} from '@package/ui/composite/pagination/Pagination.tsx';
+} from '@rezics/ui/composite/pagination/Pagination.tsx';
 
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from '@package/ui/shadcn/popover.tsx';
+} from '@rezics/ui/shadcn/popover.tsx';
 import {useAlertStore} from '@app/state/windowAlertStore';
-import {Link} from '@package/ui/primitive/link/Link.tsx';
+import {Link} from '@rezics/ui/primitive/link/Link.tsx';
 
 export type FeedbackResolvedFilter = boolean | undefined;
 

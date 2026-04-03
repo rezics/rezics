@@ -1,7 +1,7 @@
 import React from 'react';
 import {useNavigate} from '@tanstack/react-router';
 import {BookSearchInput} from '@/book-library/component/BookSearch/BookSearch';
-import type {BookQueryOptions} from '@package/contract';
+import type {BookQueryOptions} from '@rezics/contract';
 
 export type HomeSearchBarProps = object;
 

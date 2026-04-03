@@ -13,7 +13,7 @@ import {
   NormalizedTokenName,
   normalizedTokenTransportMap,
   type NormalizedTokenName as NormalizedTokenNameType,
-} from '@package/contract';
+} from '@rezics/contract';
 import {JwtAlgorithm} from '../core/jwt-algorithm';
 import {JwtTransportError, JwtVerificationError} from '../core/jwt-errors';
 import type {JwtJwks} from '../core/jwks';

@@ -5,8 +5,8 @@ import {
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
-} from '@package/ui/shadcn/carousel.tsx';
-import type {QuoteDTO} from '@package/contract';
+} from '@rezics/ui/shadcn/carousel.tsx';
+import type {QuoteDTO} from '@rezics/contract';
 import QuoteCard from '../item/QuoteCard';
 
 export interface HorizontalQuoteCarouselProps {

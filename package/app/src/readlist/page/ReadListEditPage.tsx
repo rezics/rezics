@@ -1,7 +1,7 @@
 import React, {useEffect} from 'react';
 import {useState} from 'react';
-import {buildMeiliUnitQuery} from '@package/api/meili/meili.queries';
-import {UnitType} from '@package/contract';
+import {buildMeiliUnitQuery} from '@rezics/api/meili/meili.queries';
+import {UnitType} from '@rezics/contract';
 import {
   Button,
   IconButton,
@@ -17,14 +17,14 @@ import {
   readlistQueries,
   useDeleteReadlistMutation,
   useUpdateReadlistMutation,
-} from '@package/api/readlist/readlist';
-import {reviewQueries} from '@package/api/review/review';
+} from '@rezics/api/readlist/readlist';
+import {reviewQueries} from '@rezics/api/review/review';
 import {BookReviewGroup} from '@/readlist/component/Review';
-import {bookQueries} from '@package/api/book/book';
+import {bookQueries} from '@rezics/api/book/book';
 import {useNavigate} from '@tanstack/react-router';
-import {ConfirmDeleteDialog} from '@package/ui/composite/form/ConfirmDeleteDialog.tsx';
+import {ConfirmDeleteDialog} from '@rezics/ui/composite/form/ConfirmDeleteDialog.tsx';
 import {useAlertStore} from '@app/state/windowAlertStore';
-import {mapUnitListToReviewListResponse} from '@package/api/meili/meili.api';
+import {mapUnitListToReviewListResponse} from '@rezics/api/meili/meili.api';
 import {useTranslation} from 'react-i18next';
 import {readlistEditRoute} from '@/router';
 

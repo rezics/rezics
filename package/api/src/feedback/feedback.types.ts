@@ -10,7 +10,7 @@ import type {
   CreateFeedbackInput,
   FeedbackListQuery,
   FeedbackType,
-} from '@package/contract';
+} from '@rezics/contract';
 
 // Re-export contract types
 export type {FeedbackDTO, CreateFeedbackInput, FeedbackListQuery, FeedbackType};

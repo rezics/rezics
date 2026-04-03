@@ -13,7 +13,7 @@ import type {
   CreateChapterInput,
   UpdateChapterInput,
   ChapterResponse,
-} from '@package/contract';
+} from '@rezics/contract';
 
 /**
  * Mutation for creating a chapter

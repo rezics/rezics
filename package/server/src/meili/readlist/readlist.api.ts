@@ -1,7 +1,7 @@
-import type {ReadlistListQuery} from '@package/contract';
+import type {ReadlistListQuery} from '@rezics/contract';
 import {searchClient} from '../search-client';
 import type {ReadlistSearchDocument, ReadlistSearchResult} from './index';
-import type {SearchResponse} from '@package/search';
+import type {SearchResponse} from '@rezics/search';
 import {defaultSort} from '../util';
 /**
  * Low-level search API that accepts a fully-constructed Meilisearch query string.
@@ -45,7 +45,7 @@ function escapeValues(values: string[]): string {
 /**
  * Higher-level search API for readlists.
  *
- * - Input is {@link ReadlistListQuery} from `@package/contract`.
+ * - Input is {@link ReadlistListQuery} from `@rezics/contract`.
  * - It maps contract fields like `q`, `userId`, `tags`, `hasBookUnitId`,
  *   `hasReviewUnitId`, etc. into Meilisearch filter expressions and sort options.
  *

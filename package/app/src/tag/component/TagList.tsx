@@ -1,6 +1,6 @@
 import React, {useState, useCallback} from 'react';
 import {Chip, Typography} from '@mui/material';
-import type {TagDetailDTO} from '@package/api/tag/tag';
+import type {TagDetailDTO} from '@rezics/api/tag/tag';
 import {TagDetailCard} from './TagCards';
 
 interface SingleTagChipProps {

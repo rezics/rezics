@@ -2,8 +2,8 @@ import {
   corsPolicy,
   type CorsPolicyConfig,
   type CorsPolicyName,
-} from '@package/cors';
-import {TokenTransportHeader} from '@package/contract';
+} from '@rezics/cors';
+import {TokenTransportHeader} from '@rezics/contract';
 import {env} from '../env';
 
 const devOrigins = [

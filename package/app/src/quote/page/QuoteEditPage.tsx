@@ -1,10 +1,10 @@
 import {Button, TextField} from '@mui/material';
-import EasyEditor from '@package/ui/editor/easyeditor/EasyEditor.tsx';
-import type {UnitFormData} from '@package/api/unit/unit.types';
+import EasyEditor from '@rezics/ui/editor/easyeditor/EasyEditor.tsx';
+import type {UnitFormData} from '@rezics/api/unit/unit.types';
 import {useEffect, useMemo, useState} from 'react';
 import {useQuery} from '@tanstack/react-query';
-import {unitQueries} from '@package/api/unit/unit.queries';
-import {useUpdateUnitMutation} from '@package/api/unit/unit.mutations';
+import {unitQueries} from '@rezics/api/unit/unit.queries';
+import {useUpdateUnitMutation} from '@rezics/api/unit/unit.mutations';
 import {useAlertStore} from '@app/state/windowAlertStore';
 import {useTranslation} from 'react-i18next';
 import {quoteEditRoute} from '@/router';

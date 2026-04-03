@@ -5,19 +5,19 @@ import type {
   UpdateUser,
   UserDTO,
   UserListQuery,
-} from '@package/contract';
+} from '@rezics/contract';
 import {
   NormalizedTokenName,
   userListQuerySchema,
   userParamsSchema,
   ensureUserResponseSchema,
   updateUserSchema,
-} from '@package/contract';
+} from '@rezics/contract';
 import {
   hasPermissionToUpdateUser,
   BasicAdminPermission,
   normalizedTokenTransportMap,
-} from '@package/contract';
+} from '@rezics/contract';
 import {userService} from '../service/user.service';
 import {mapUserToDTO} from '../model/mapper';
 import {meiliService} from '@/meili/meili.service';

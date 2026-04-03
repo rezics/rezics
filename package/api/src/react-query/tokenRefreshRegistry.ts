@@ -1,9 +1,9 @@
 import {
   NormalizedTokenName,
   type NormalizedTokenName as NormalizedTokenNameType,
-} from '@package/contract';
+} from '@rezics/contract';
 import {userApi} from '../user/user.api';
-import {useAuthSessionStore} from '@package/app-shell/state/authSessionStore';
+import {useAuthSessionStore} from '@rezics/app-shell/state/authSessionStore';
 
 export type TokenRefreshFn = () => Promise<{token: string}>;
 

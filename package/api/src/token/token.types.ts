@@ -1,6 +1,6 @@
 /**
  * Token-related TypeScript types for the frontend.
- * Raw DTO & input types come from `@package/contract`.
+ * Raw DTO & input types come from `@rezics/contract`.
  */
 
 import type {
@@ -10,7 +10,7 @@ import type {
   CreateApiTokenInput,
   CreateApiTokenResponse,
   UpdateApiTokenInput,
-} from '@package/contract';
+} from '@rezics/contract';
 
 // Re-export contract types for convenience
 export type {

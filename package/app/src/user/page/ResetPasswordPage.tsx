@@ -5,12 +5,12 @@ import {Dialog, DialogContent} from '@mui/material';
 import {type FC, useMemo, useState} from 'react';
 import {useNavigate, useRouterState} from '@tanstack/react-router';
 
-import {authApi} from '@package/api/auth/auth.api';
-import {PasswordField} from '@package/ui/composite/form/field/PasswordField.tsx';
+import {authApi} from '@rezics/api/auth/auth.api';
+import {PasswordField} from '@rezics/ui/composite/form/field/PasswordField.tsx';
 import {Layout} from '../layout/Layout.tsx';
 import {ModalLayout} from '../layout/ModalLayout.tsx';
 import {validateEmail, validatePassword} from '../model/validate.ts';
-import {TextButton} from '@package/ui/primitive/button/TextButton.tsx';
+import {TextButton} from '@rezics/ui/primitive/button/TextButton.tsx';
 
 export interface ResetPasswordPageProps {
   isModal?: boolean;

@@ -1,4 +1,4 @@
-import type {UnitDTO} from '@package/contract';
+import type {UnitDTO} from '@rezics/contract';
 
 export function buildUnitUrl(unit: UnitDTO): string {
   switch (unit.type) {

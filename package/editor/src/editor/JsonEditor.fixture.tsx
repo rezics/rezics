@@ -2,7 +2,7 @@ import {JsonEditor} from './JsonEditor';
 
 const validJson = JSON.stringify(
   {
-    name: '@package/editor',
+    name: '@rezics/editor',
     version: '1.0.50',
     type: 'module',
     published: true,
@@ -18,7 +18,7 @@ const validJson = JSON.stringify(
 );
 
 const invalidJson = `{
-  "name": "@package/editor",
+  "name": "@rezics/editor",
   "version": "1.0.50",
   "missing_comma": true
   "this_will_error": false

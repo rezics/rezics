@@ -1,5 +1,5 @@
-import {AccentBarWithText} from '@package/ui/composite/typography/AccentBarWithText.tsx';
-import {EditButtonFloatRightShow} from '@package/ui/composite/button/EditButtonFloatRight.tsx';
+import {AccentBarWithText} from '@rezics/ui/composite/typography/AccentBarWithText.tsx';
+import {EditButtonFloatRightShow} from '@rezics/ui/composite/button/EditButtonFloatRight.tsx';
 import {Box, Typography} from '@mui/material';
 import React from 'react';
 import {useTranslation} from 'react-i18next';

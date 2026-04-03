@@ -1,4 +1,4 @@
-import type {GetSessionStateResponse} from '@package/contract';
+import type {GetSessionStateResponse} from '@rezics/contract';
 import {env} from '../env';
 
 export async function getAuthSessionState(

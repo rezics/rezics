@@ -1,11 +1,11 @@
 import React, {useEffect, useMemo, useRef, useState} from 'react';
 import {Alert} from '@mui/material';
-import {UniversalPaginator, type UniversalPaginatorHandle} from '@package/ui';
+import {UniversalPaginator, type UniversalPaginatorHandle} from '@rezics/ui';
 import {TextSearchInputWithIcon, type SearchInfo} from '@/search';
 import {useQuery, useQueryClient} from '@tanstack/react-query';
-import {buildMeiliReadlistQuery} from '@package/api/meili/meili.queries';
-import type {ReadlistDTO} from '@package/contract';
-import {reactionApi} from '@package/api/reaction/reaction.api';
+import {buildMeiliReadlistQuery} from '@rezics/api/meili/meili.queries';
+import type {ReadlistDTO} from '@rezics/contract';
+import {reactionApi} from '@rezics/api/reaction/reaction.api';
 import {useTranslation} from 'react-i18next';
 
 type Readlist = ReadlistDTO;

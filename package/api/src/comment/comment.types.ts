@@ -1,6 +1,6 @@
 /**
  * Comment domain types (frontend-specific helpers)
- * Raw DTO & input types come from `@package/contract`.
+ * Raw DTO & input types come from `@rezics/contract`.
  */
 
 import type {
@@ -8,7 +8,7 @@ import type {
   CreateCommentInput,
   UpdateCommentInput,
   CommentTreeQuery,
-} from '@package/contract';
+} from '@rezics/contract';
 
 /**
  * Filters used for listing comments.

@@ -1,7 +1,7 @@
 import {useEffect} from 'react';
-import type {UserDTO} from '@package/contract';
+import type {UserDTO} from '@rezics/contract';
 import {useQuery} from '@tanstack/react-query';
-import {userQueries} from '@package/api/user/user.queries';
+import {userQueries} from '@rezics/api/user/user.queries';
 import {useAuthSessionStore, useUserProfileStore} from '@/user/state';
 
 /**

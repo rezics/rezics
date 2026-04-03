@@ -8,7 +8,7 @@ import type {
   UpdateChapterInput,
   ChapterListResponse,
   ChapterResponse,
-} from '@package/contract';
+} from '@rezics/contract';
 import type {ChapterFilters} from './chapter.types.ts';
 import {buildQueryString} from '../utils/buildQuery';
 

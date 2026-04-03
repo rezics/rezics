@@ -12,7 +12,7 @@ import {
   isRoot,
   userListQuerySchema,
   type UserListQuery,
-} from '@package/contract';
+} from '@rezics/contract';
 import {meiliService} from './meili.service';
 import {searchClient} from './search-client';
 import {mapUserSearchDocToPublicProfile} from './mapper';

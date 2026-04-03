@@ -5,7 +5,7 @@ import type {
   CreateCommentInput,
   UpdateCommentInput,
   CommentTreeNode,
-} from '@package/contract';
+} from '@rezics/contract';
 import {commentInclude} from './types';
 import type {CommentWithRelations} from './types';
 import {getCommentApproxCount} from './sql';

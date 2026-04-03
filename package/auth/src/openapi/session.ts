@@ -6,7 +6,7 @@ import {
   getSessionStateResponseSchema,
   listSessionsResponseSchema,
   revokeSessionBodySchema,
-} from '@package/contract';
+} from '@rezics/contract';
 import {coreInstance} from '../core';
 import {authCorsPolicy} from '../cors';
 import {handleAuthRequest} from '../auth/routes';

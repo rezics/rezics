@@ -1,4 +1,4 @@
-import {AccentBarWithText} from '@package/ui/composite/typography/AccentBarWithText.tsx';
+import {AccentBarWithText} from '@rezics/ui/composite/typography/AccentBarWithText.tsx';
 import React from 'react';
 
 export const NotificationPage: React.FC = () => {

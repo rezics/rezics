@@ -29,6 +29,6 @@ The auth server (`package/auth`) already exposes a full set of authentication, a
 
 - **Affected packages**: `package/api`, `package/admin`
 - **APIs**: Auth server endpoints are already deployed; this change adds client-side consumption. Main server `/users/login` and `/users/register` endpoints remain but are no longer called from admin.
-- **Dependencies**: `@package/contract` types (auth schemas) are already published and will be reused.
+- **Dependencies**: `@rezics/contract` types (auth schemas) are already published and will be reused.
 - **Backward compatibility**: The main-server user API (`userApi`) retains all non-login functionality. Admin login switches from main-server JWT to auth-server session-based auth. Existing `getToken`/`setToken` in `http.ts` will be updated to work with auth-server session tokens.
 - **No migration needed**: Auth server is already running; admin just needs to point at it.

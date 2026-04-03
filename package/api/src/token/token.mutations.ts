@@ -14,7 +14,7 @@ import type {
   CreateApiTokenInput,
   CreateApiTokenResponse,
   UpdateApiTokenInput,
-} from '@package/contract';
+} from '@rezics/contract';
 
 /**
  * Mutation for creating a token

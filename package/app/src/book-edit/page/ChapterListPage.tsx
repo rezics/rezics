@@ -2,10 +2,10 @@ import React, {useState, useEffect, useRef} from 'react';
 
 import {LinearChapterListEdit} from '@/book-edit/component/LinearChapterListEdit';
 import {ChapterArboristHeightSlider} from '@/book-library/component/Chapter/ChapterArboristHeightSlider';
-import {AccentBarWithText} from '@package/ui/composite/typography/AccentBarWithText.tsx';
+import {AccentBarWithText} from '@rezics/ui/composite/typography/AccentBarWithText.tsx';
 import {Alert, Button} from '@mui/material';
 import {useQueryClient} from '@tanstack/react-query';
-import {bookChapterIndexQuery} from '@package/api/book/book';
+import {bookChapterIndexQuery} from '@rezics/api/book/book';
 
 import {Tab, Tabs} from '@mui/material';
 import {TabContext, TabPanel} from '@mui/lab';

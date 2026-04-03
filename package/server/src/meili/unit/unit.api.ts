@@ -1,7 +1,7 @@
-import type {UnitListQuery} from '@package/contract';
+import type {UnitListQuery} from '@rezics/contract';
 import {searchClient} from '../search-client';
-import type {UnitSearchDocument, UnitSearchResult} from '@package/contract';
-import type {SearchResponse} from '@package/search';
+import type {UnitSearchDocument, UnitSearchResult} from '@rezics/contract';
+import type {SearchResponse} from '@rezics/search';
 import {defaultSort} from '../util';
 /**
  * Low-level search API that accepts a fully-constructed Meilisearch query string.
@@ -45,7 +45,7 @@ function escapeValues(values: string[]): string {
 /**
  * Higher-level search API for units.
  *
- * - Input is {@link UnitListQuery} from `@package/contract`.
+ * - Input is {@link UnitListQuery} from `@rezics/contract`.
  * - It maps contract fields like `q`, `types`, `statuses`, `tags`, `userIds`,
  *   `domainIds`, `targetUnitIds`, etc. into Meilisearch filter expressions
  *   and sort options.

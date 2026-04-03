@@ -1,9 +1,9 @@
 // 重构组件，去除 effect 影响，修正 publishURL 添加逻辑，支持添加多个 url
 
 import {useQuery} from '@tanstack/react-query';
-import type {CreateBookInput, BookDTO} from '@package/contract';
-import {bookQueries} from '@package/api/book/book';
-import {AccentBarWithText} from '@package/ui/composite/typography/AccentBarWithText.tsx';
+import type {CreateBookInput, BookDTO} from '@rezics/contract';
+import {bookQueries} from '@rezics/api/book/book';
+import {AccentBarWithText} from '@rezics/ui/composite/typography/AccentBarWithText.tsx';
 import {BookMetadataEditor} from '../component/Metadata/BookMetadataEditor';
 import React from 'react';
 import {useTranslation} from 'react-i18next';
@@ -18,15 +18,15 @@ import {
   Alert,
 } from '@mui/material';
 import {useMatchRoute, useNavigate} from '@tanstack/react-router';
-import EasyEditor from '@package/ui/editor/easyeditor/EasyEditor.tsx';
+import EasyEditor from '@rezics/ui/editor/easyeditor/EasyEditor.tsx';
 import {
   useCreateBookMutation,
   useUpdateBookMutation,
-} from '@package/api/book/book';
-import {type UpdateBookInput} from '@package/contract';
+} from '@rezics/api/book/book';
+import {type UpdateBookInput} from '@rezics/contract';
 import {useEffect} from 'react';
 import {BookExtraEditor} from '../component/Metadata/BookExtraEditor';
-import {MUILink} from '@package/ui/primitive/link/MUILink.tsx';
+import {MUILink} from '@rezics/ui/primitive/link/MUILink.tsx';
 
 function validatePublishURL(publishURL: string[]) {
   return publishURL.every(url => url.startsWith('https://'));

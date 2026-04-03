@@ -60,9 +60,9 @@ The `package/app` already has `VITE_AUTH_API_URL` in its env config, showing the
 
 ### 6. Add `VITE_AUTH_API_URL` to admin env config
 
-**Decision**: Add `VITE_AUTH_API_URL` to `package/admin/src/env.ts` using the existing `@t3-oss/env-core` + `valibot` pattern. The admin env already imports from `@package/app/env` via `apiFetch`, so we either add it to `package/app/src/env.ts` (already has it) or to admin's own env.
+**Decision**: Add `VITE_AUTH_API_URL` to `package/admin/src/env.ts` using the existing `@t3-oss/env-core` + `valibot` pattern. The admin env already imports from `@rezics/app/env` via `apiFetch`, so we either add it to `package/app/src/env.ts` (already has it) or to admin's own env.
 
-**Rationale**: Since `package/app/src/env.ts` already defines `VITE_AUTH_API_URL`, and `apiFetch` in `package/api/src/react-query/http.ts` imports `env` from `@package/app/env`, the auth API client can also import from `@package/app/env` for `VITE_AUTH_API_URL`. The admin `.env` file needs the variable added.
+**Rationale**: Since `package/app/src/env.ts` already defines `VITE_AUTH_API_URL`, and `apiFetch` in `package/api/src/react-query/http.ts` imports `env` from `@rezics/app/env`, the auth API client can also import from `@rezics/app/env` for `VITE_AUTH_API_URL`. The admin `.env` file needs the variable added.
 
 ## Risks / Trade-offs
 

@@ -7,7 +7,7 @@ import {
   Box,
   useTheme,
 } from '@mui/material';
-import type {ReviewMeiliDTO} from '@package/contract';
+import type {ReviewMeiliDTO} from '@rezics/contract';
 import {cn} from '@/shared/util/css-util';
 import {useNavigate} from '@tanstack/react-router';
 interface ReviewCardProps {

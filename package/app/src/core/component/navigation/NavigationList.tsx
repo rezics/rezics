@@ -8,7 +8,7 @@ import {
   Collapse,
 } from '@mui/material';
 import {ExpandLess, ExpandMore} from '@mui/icons-material';
-import {MUILink} from '@package/ui/primitive/link/MUILink.tsx';
+import {MUILink} from '@rezics/ui/primitive/link/MUILink.tsx';
 
 interface NavigationListProps {
   NAVIGATION: NavigationItem[];

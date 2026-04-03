@@ -8,7 +8,7 @@ process.env.AUTH_INTERNAL_TOKEN_GATEWAY_SECRET ??= 'internal-test-secret';
 process.env.DATABASE_URL ??=
   'postgresql://postgres:postgres@localhost:5432/rezics_auth';
 
-import {AUTH_PRESENCE_COOKIE_NAME} from '@package/contract';
+import {AUTH_PRESENCE_COOKIE_NAME} from '@rezics/contract';
 
 const authHandlerMock = mock();
 

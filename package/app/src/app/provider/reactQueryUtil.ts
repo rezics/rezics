@@ -1,1 +1,1 @@
-export {qc} from '@package/app-shell';
+export {qc} from '@rezics/app-shell';

@@ -108,10 +108,10 @@ All composed editors SHALL forward common editor props to the underlying `<Edito
 
 ### Requirement: Package export entry
 
-The `@package/editor` package SHALL expose a new export path for composed editors.
+The `@rezics/editor` package SHALL expose a new export path for composed editors.
 
 #### Scenario: Import composed editors
-- **GIVEN** a consumer adds `import { MarkdownEditor } from '@package/editor/editor'`
+- **GIVEN** a consumer adds `import { MarkdownEditor } from '@rezics/editor/editor'`
 - **WHEN** the module resolves
 - **THEN** the MarkdownEditor component SHALL be available
 - **AND** all composed editors (MarkdownEditor, JsonEditor, CodeEditor) SHALL be re-exported from `src/editor/index.ts`

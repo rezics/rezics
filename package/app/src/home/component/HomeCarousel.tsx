@@ -2,22 +2,22 @@ import {Typography} from '@mui/material';
 import {useIsMobile} from '@/shared/util/use-media-query';
 import React, {useEffect, useState} from 'react';
 import {useQuery} from '@tanstack/react-query';
-import {echoKvGetQuery} from '@package/api/echokv/echokv';
-import {parseEchoKVResponse} from '@package/api/echokv/util';
+import {echoKvGetQuery} from '@rezics/api/echokv/echokv';
+import {parseEchoKVResponse} from '@rezics/api/echokv/util';
 import {useAlertStore} from '@app/state/windowAlertStore';
-import {LazyLoadImage} from '@package/ui/primitive/image/LazyLoadImage.tsx';
+import {LazyLoadImage} from '@rezics/ui/primitive/image/LazyLoadImage.tsx';
 import {useTranslation} from 'react-i18next';
-import {Link} from '@package/ui/primitive/link/Link.tsx';
+import {Link} from '@rezics/ui/primitive/link/Link.tsx';
 import {cn} from '@/shared/util/css-util';
-import {CarouselIndicator} from '@package/ui/primitive/carousel/CarouselIndicator.tsx';
+import {CarouselIndicator} from '@rezics/ui/primitive/carousel/CarouselIndicator.tsx';
 
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
   type CarouselApi,
-} from '@package/ui/shadcn';
-import {useEmblaAutoplay} from '@package/ui/primitive/carousel/use-embla-autoplay.ts';
+} from '@rezics/ui/shadcn';
+import {useEmblaAutoplay} from '@rezics/ui/primitive/carousel/use-embla-autoplay.ts';
 
 type ProductType = {
   cover?: string;

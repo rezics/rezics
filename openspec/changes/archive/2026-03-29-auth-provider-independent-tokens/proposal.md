@@ -15,7 +15,7 @@ AuthProvider currently processes tokens as a linear dependency chain — if any 
 
 ### New Capabilities
 
-- `token-refresh-registry`: A configurable map from `NormalizedTokenName` to refresh function, allowing service tokens to declare their refresh strategy without modifying AuthProvider. Lives in `@package/api` alongside the existing token infrastructure.
+- `token-refresh-registry`: A configurable map from `NormalizedTokenName` to refresh function, allowing service tokens to declare their refresh strategy without modifying AuthProvider. Lives in `@rezics/api` alongside the existing token infrastructure.
 
 ### Modified Capabilities
 

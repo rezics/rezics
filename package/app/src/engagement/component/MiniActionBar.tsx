@@ -8,8 +8,8 @@ import {useQuery} from '@tanstack/react-query';
 import {
   useCreateReactionMutation,
   useDeleteReactionMutation,
-} from '@package/api/reaction/reaction.mutations';
-import {reactionQueries} from '@package/api/reaction/reaction.queries';
+} from '@rezics/api/reaction/reaction.mutations';
+import {reactionQueries} from '@rezics/api/reaction/reaction.queries';
 import React, {useEffect, useState} from 'react';
 import {BookmarkTagManager} from './BookmarkTagManager';
 import {useAlertStore} from '@app/state/windowAlertStore';

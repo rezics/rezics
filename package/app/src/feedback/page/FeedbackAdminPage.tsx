@@ -11,7 +11,7 @@ import {
 import FeedbackList from '../component/FeedbackList';
 import FeedbackDrawer from '../component/FeedbackDrawer';
 import {useQuery} from '@tanstack/react-query';
-import {feedbackListQuery} from '@package/api/feedback/feedback.queries';
+import {feedbackListQuery} from '@rezics/api/feedback/feedback.queries';
 
 export const FeedbackAdminPage: React.FC = () => {
   const [open, setOpen] = React.useState(false);

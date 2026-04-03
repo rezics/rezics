@@ -5,7 +5,7 @@ import type {
   UnitListQuery,
   CreateUnitInput,
   UpdateUnitInput,
-} from '@package/contract';
+} from '@rezics/contract';
 import {unitInclude} from './types';
 import type {UnitWithRelations} from './types';
 import {syncUnitToMeili, deleteUnitFromMeili} from '@/meili/unit/sync';

@@ -15,7 +15,7 @@ import type {DeleteHandler, MoveHandler, RenameHandler} from 'react-arborist';
 import {createChapterArboristNode} from './ChapterArboristNode.tsx';
 import {ChapterArboristContextMenu} from './ChapterArboristContextMenu.tsx';
 import {CreateChapterDialog} from './CreateChapterDialog.tsx';
-import {bookMutations} from '@package/api/book/book.mutations';
+import {bookMutations} from '@rezics/api/book/book.mutations';
 import {useAlertStore} from '@app/state/windowAlertStore.ts';
 
 import {

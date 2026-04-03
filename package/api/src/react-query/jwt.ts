@@ -8,7 +8,7 @@ import {
   type AuthTokenResponse,
   type NormalizedTokenName as NormalizedTokenNameType,
   normalizedTokenTransportMap,
-} from '@package/contract';
+} from '@rezics/contract';
 
 const DEFAULT_TOKEN_STORAGE_KEYS: Record<string, string> = {
   [NormalizedTokenName.AUTH_IDENTITY]: NormalizedTokenName.AUTH_IDENTITY,

@@ -24,7 +24,7 @@ The admin panel also needs multiple tokens since it manages both the auth server
 - Adding new service tokens (notification, search) — this change only builds the infrastructure
 - Changing how `establishBusinessSession()` works — login flow provisioning is unaffected
 - Modifying the server-side token issuance endpoints
-- Changing the `@package/contract` token types or transport maps
+- Changing the `@rezics/contract` token types or transport maps
 
 ## Decisions
 
@@ -68,7 +68,7 @@ runRefreshCycle():
 
 **Alternative considered:** Per-token independent timers instead of a single refresh cycle. Rejected because it adds complexity (N timers instead of one) and makes the common case (all tokens healthy, schedule based on earliest expiry) harder to optimize.
 
-### Decision 2: Token refresh registry in `@package/api`
+### Decision 2: Token refresh registry in `@rezics/api`
 
 A new module `package/api/src/react-query/tokenRefreshRegistry.ts` exports:
 
@@ -92,11 +92,11 @@ function createTokenRefreshRegistry(
 
 AuthProvider receives a `registry` prop (optional, defaults to `defaultRegistry`). When refreshing a service token, it calls `registry[tokenName]()`. If no entry exists for a token, it enters dormant immediately (unknown token type = non-retryable).
 
-**Why in `@package/api`?** The refresh functions call API client methods that live in `@package/api`. Colocating the registry with the API layer keeps the dependency direction clean: `app-shell` (AuthProvider) → `api` (registry + API clients). The API package already exports token utilities from `jwt.ts`.
+**Why in `@rezics/api`?** The refresh functions call API client methods that live in `@rezics/api`. Colocating the registry with the API layer keeps the dependency direction clean: `app-shell` (AuthProvider) → `api` (registry + API clients). The API package already exports token utilities from `jwt.ts`.
 
 **Why not pass refresh functions as AuthProvider props?** The registry pattern keeps the component API clean. `tokens` declares *what* to manage, the registry declares *how*. Passing individual refresh functions per token would make the props unwieldy as tokens grow.
 
-**Alternative considered:** Putting the registry in `@package/contract`. Rejected because the registry contains runtime functions (API calls), not type definitions.
+**Alternative considered:** Putting the registry in `@rezics/contract`. Rejected because the registry contains runtime functions (API calls), not type definitions.
 
 ### Decision 3: AUTH_IDENTITY refresh remains special-cased
 

@@ -6,7 +6,7 @@ The current JWT setup is split across `package/auth` and `package/server`, mixes
 
 - Create `package/jwt` as a storage-agnostic shared package for jose-based JWT key rotation orchestration, key lifecycle contracts, JWKS serialization, and verification helpers.
 - Refactor `package/auth` so Better Auth owns session issuance while JWT and JWKS concerns move under session-oriented modules and routes instead of the old OAuth-centric layout.
-- Refactor `package/server` so it owns its own signing and verification flow through the shared contracts, exposes its own JWKS endpoint, and drops unnecessary runtime dependency on `@package/auth`.
+- Refactor `package/server` so it owns its own signing and verification flow through the shared contracts, exposes its own JWKS endpoint, and drops unnecessary runtime dependency on `@rezics/auth`.
 - Standardize the monorepo on one private signing key and one JWKS endpoint per server, regardless of how many token types that server issues.
 - Replace direct database assumptions in JWT infrastructure with injected persistence adapters typed by `package/jwt`.
 - Use Elysia JWT integration where appropriate in Elysia services while keeping core rotation and JWKS behavior framework-agnostic.

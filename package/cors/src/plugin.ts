@@ -6,7 +6,7 @@ export function corsPolicy(
   defaultPolicy: CorsPolicyName,
   configs: Record<CorsPolicyName, CorsPolicyConfig>,
 ) {
-  return new Elysia({name: '@package/cors'})
+  return new Elysia({name: '@rezics/cors'})
     .resolve({as: 'scoped'}, () => ({
       __corsPolicy: defaultPolicy as CorsPolicyName,
     }))

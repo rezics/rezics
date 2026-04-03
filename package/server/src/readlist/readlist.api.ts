@@ -14,12 +14,12 @@ import {
   hasPermissionToUpdateReadlist,
   hasPermissionToDeleteReadlist,
   BasicAdminPermission,
-} from '@package/contract';
+} from '@rezics/contract';
 import type {
   ReadlistListResponse,
   ReadlistResponse,
   CreateReadlistInput,
-} from '@package/contract';
+} from '@rezics/contract';
 
 export const readlistApi = new Elysia({prefix: '/readlists'})
   .use(serverCorsPolicy('credentialed'))

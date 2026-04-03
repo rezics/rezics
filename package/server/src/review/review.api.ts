@@ -17,7 +17,7 @@ import {
   hasPermissionToDeleteReview,
   hasPermissionToUpdateReview,
   BasicAdminPermission,
-} from '@package/contract';
+} from '@rezics/contract';
 import {reviewService} from './review.service';
 import {mapReviewToDTO} from './mapper';
 

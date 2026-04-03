@@ -5,7 +5,7 @@ import {
 } from '@tanstack/react-query';
 import {tagApi} from './tag.api';
 import {tagKeys} from './tag.keys';
-import type {CreateTagInput, UpdateTagInput} from '@package/contract';
+import type {CreateTagInput, UpdateTagInput} from '@rezics/contract';
 
 export function useCreateTagMutation(
   options?: Omit<UseMutationOptions<any, Error, CreateTagInput>, 'mutationFn'>,

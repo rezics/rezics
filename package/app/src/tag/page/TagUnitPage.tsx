@@ -1,7 +1,7 @@
 import {useQuery} from '@tanstack/react-query';
-import type {TagDetailDTO} from '@package/contract';
-import {tagQueries} from '@package/api/tag/tag';
-import {AccentBarWithText} from '@package/ui/composite/typography/AccentBarWithText.tsx';
+import type {TagDetailDTO} from '@rezics/contract';
+import {tagQueries} from '@rezics/api/tag/tag';
+import {AccentBarWithText} from '@rezics/ui/composite/typography/AccentBarWithText.tsx';
 import {TagDetailCard} from '../component/TagCards';
 import {tagUnitRoute} from '@/router';
 

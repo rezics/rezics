@@ -3,8 +3,8 @@ import {Alert, Button, CircularProgress, Typography} from '@mui/material';
 import {useTranslation} from 'react-i18next';
 import {useNavigate} from '@tanstack/react-router';
 import {useQuery} from '@tanstack/react-query';
-import {buildMeiliReadlistQuery} from '@package/api/meili/meili.queries';
-import type {ReadlistDTO} from '@package/contract';
+import {buildMeiliReadlistQuery} from '@rezics/api/meili/meili.queries';
+import type {ReadlistDTO} from '@rezics/contract';
 import {HorizontalReadListCarousel} from '@/readlist/component/list/HorizontalReadListCarousel';
 
 export type TrendingReadListSectionProps = {

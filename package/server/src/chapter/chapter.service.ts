@@ -6,7 +6,7 @@ import type {
   ChapterListQuery,
   CreateChapterInput,
   UpdateChapterInput,
-} from '@package/contract';
+} from '@rezics/contract';
 
 export class ChapterService {
   private buildWhereClause(options: ChapterListQuery): Prisma.UnitWhereInput {

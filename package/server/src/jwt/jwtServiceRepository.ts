@@ -1,5 +1,5 @@
 import {prisma} from '#/prisma/client';
-import type {JwtPrivateJwk, JwtPublicJwk} from '@package/jwt';
+import type {JwtPrivateJwk, JwtPublicJwk} from '@rezics/jwt';
 
 export type CachedJwksEntry = {
   kid: string;

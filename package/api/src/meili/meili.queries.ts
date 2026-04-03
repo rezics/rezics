@@ -15,8 +15,8 @@ import type {
   UnitListResponse,
   FeedbackListResponse,
   FeedbackType,
-} from '@package/contract';
-import {UnitType} from '@package/contract';
+} from '@rezics/contract';
+import {UnitType} from '@rezics/contract';
 import {hashFn} from '../utils/hash';
 import {mapUnitListToReviewListResponse} from './mapper';
 

@@ -2,13 +2,13 @@ import {
   NormalizedTokenName,
   type AuthContextTokenClaims,
   type NormalizedTokenName as NormalizedTokenNameType,
-} from '@package/contract';
+} from '@rezics/contract';
 import {
   JwtAlgorithm,
   verifyTokenFromHeader,
   type JwtVerifyInput as VerifyOptions,
   type VerifiedJwt as VerifiedToken,
-} from '@package/jwt';
+} from '@rezics/jwt';
 import type {JWTPayload} from 'jose';
 import {env} from '../../env';
 import {getJwtService} from '@/jwt';

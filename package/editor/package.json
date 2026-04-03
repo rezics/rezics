@@ -1,5 +1,5 @@
 {
-  "name": "@package/editor",
+  "name": "@rezics/editor",
   "version": "1.0.50",
   "type": "module",
   "sideEffects": false,

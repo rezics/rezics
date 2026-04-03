@@ -25,8 +25,8 @@ import type {
   ResetPasswordBody,
   ResetPasswordResponse,
   SignInBody,
-} from '@package/contract';
-import {NormalizedTokenName} from '@package/contract';
+} from '@rezics/contract';
+import {NormalizedTokenName} from '@rezics/contract';
 import {buildTokenHeaders, ensureAuthIdentityToken} from '../react-query/jwt';
 
 type AuthRequestInit = globalThis.RequestInit & {

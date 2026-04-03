@@ -2,11 +2,11 @@ import React, {useEffect, useMemo, useRef, useState} from 'react';
 
 import type {SearchInfo} from '@/search';
 import type {BookLibSortKey} from '@/search/component/SearchFilter';
-import {type UniversalPaginatorHandle} from '@package/ui/composite/pagination/Pagination.tsx';
+import {type UniversalPaginatorHandle} from '@rezics/ui/composite/pagination/Pagination.tsx';
 
-import {meiliQueries} from '@package/api/meili/meili.queries';
+import {meiliQueries} from '@rezics/api/meili/meili.queries';
 import {useQuery, useQueryClient} from '@tanstack/react-query';
-import type {BookDTO} from '@package/contract';
+import type {BookDTO} from '@rezics/contract';
 
 import {BookLibSectionRef} from '../section/BookLibSection';
 

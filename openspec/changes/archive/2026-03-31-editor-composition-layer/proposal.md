@@ -1,6 +1,6 @@
 ## Why
 
-Consumers of `@package/editor` must manually compose plugins, choose toolbar variants, and wire configuration to get a working markdown or JSON editor. This leaks implementation details (plugin names, preset factories, toolbar modes) into every call site and makes the simple case unnecessarily verbose.
+Consumers of `@rezics/editor` must manually compose plugins, choose toolbar variants, and wire configuration to get a working markdown or JSON editor. This leaks implementation details (plugin names, preset factories, toolbar modes) into every call site and makes the simple case unnecessarily verbose.
 
 A composition layer (`src/editor/`) would let consumers write `<MarkdownEditor />` or `<JsonEditor />` and get a fully configured, opinionated editor out of the box — while still allowing toolbar customization, icon replacement, and full render overrides for advanced use cases.
 
@@ -29,7 +29,7 @@ Additionally, the existing toolbar items lack icons (text-only labels), which fa
   - component (MarkdownEditor, JsonEditor, CodeEditor wrapper components)
   - index.ts (barrel export from `src/editor/index.ts`)
 
-Note: This is a library package (`@package/editor`), not an app feature. The layered architecture maps as:
+Note: This is a library package (`@rezics/editor`), not an app feature. The layered architecture maps as:
 - `component` = the composed editor components
 - `index.ts` = `src/editor/index.ts` barrel export
 

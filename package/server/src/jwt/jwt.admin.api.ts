@@ -5,7 +5,7 @@ import {
   jwtServiceListResponseSchema,
   createJwtServiceInputSchema,
   updateJwtServiceInputSchema,
-} from '@package/contract';
+} from '@rezics/contract';
 import {jwtServiceAdminService} from './jwt.admin.service';
 
 export const jwtServiceAdminApi = new Elysia({prefix: '/admin/jwt-services'})

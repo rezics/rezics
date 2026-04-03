@@ -2,7 +2,7 @@ import {Elysia} from 'elysia';
 import {
   sessionTokenResponseSchema,
   type SessionTokenResponse,
-} from '@package/contract';
+} from '@rezics/contract';
 import {
   serverCorsPolicy,
   authMacro,

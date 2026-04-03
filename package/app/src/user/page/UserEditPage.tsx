@@ -16,12 +16,12 @@ import {useEffect, useState} from 'react';
 import type {FC} from 'react';
 import type React from 'react';
 import {useTranslation} from 'react-i18next';
-import type {UserDTO, UpdateUser} from '@package/contract';
+import type {UserDTO, UpdateUser} from '@rezics/contract';
 import {useQuery} from '@tanstack/react-query';
-import {userQueries} from '@package/api/user/user.queries';
+import {userQueries} from '@rezics/api/user/user.queries';
 import {UserLoading} from './UserState';
-import {userApi} from '@package/api/user/user.api';
-import {PasswordField} from '@package/ui/composite/form/field/PasswordField.tsx';
+import {userApi} from '@rezics/api/user/user.api';
+import {PasswordField} from '@rezics/ui/composite/form/field/PasswordField.tsx';
 import {useMatch} from '@tanstack/react-router';
 import {Route as UserEditRoute} from '@/routes/_mainLayout/user/$unitId/edit';
 

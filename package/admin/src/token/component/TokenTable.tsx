@@ -11,7 +11,7 @@ import {
   Chip,
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
-import type {ApiTokenDTO} from '@package/contract';
+import type {ApiTokenDTO} from '@rezics/contract';
 
 interface TokenTableProps {
   tokens: ApiTokenDTO[];

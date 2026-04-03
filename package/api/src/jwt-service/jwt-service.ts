@@ -3,7 +3,7 @@ export type {
   JwtServiceListResponse,
   CreateJwtServiceInput,
   UpdateJwtServiceInput,
-} from '@package/contract';
+} from '@rezics/contract';
 
 export {jwtServiceKeys} from './jwt-service.keys';
 export {jwtServiceApi} from './jwt-service.api';

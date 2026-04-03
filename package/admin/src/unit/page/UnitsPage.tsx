@@ -17,11 +17,11 @@ import React from 'react';
 import {useQuery} from '@tanstack/react-query';
 import {useMatchRoute} from '@tanstack/react-router';
 
-import {unitQueries, type UnitDTO} from '@package/api/unit/unit';
-import {meiliUnitApi} from '@package/api/meili/meili.api';
+import {unitQueries, type UnitDTO} from '@rezics/api/unit/unit';
+import {meiliUnitApi} from '@rezics/api/meili/meili.api';
 
 import {Page} from '@/core/layout/Page';
-import {Link} from '@package/ui/primitive/link/Link.tsx';
+import {Link} from '@rezics/ui/primitive/link/Link.tsx';
 import {type PaginatedColumn} from '@/component/table/PaginatedTable';
 import {SearchablePaginatedTableCard} from '@/component/list/SearchablePaginatedTableCard';
 import {PaginatedTable} from '@/component/table/PaginatedTable';

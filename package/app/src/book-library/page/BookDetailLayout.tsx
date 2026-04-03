@@ -4,7 +4,7 @@ import {useQuery} from '@tanstack/react-query';
 import {useTranslation} from 'react-i18next';
 import {useAtomValue, useSetAtom} from 'jotai';
 
-import {bookQueries} from '@package/api/book/book';
+import {bookQueries} from '@rezics/api/book/book';
 
 import {BookHeroSection} from '../section/BookHeroSection';
 import {

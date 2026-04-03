@@ -6,7 +6,7 @@ import {UserType} from '#/prisma/client';
 import type {Prisma} from '#/prisma/client';
 import type {UserFilterOptions, UserWithRelations} from '../model/types';
 import {userInclude} from '../model/types';
-import type {UpdateUser} from '@package/contract';
+import type {UpdateUser} from '@rezics/contract';
 import {syncUserToMeili, deleteUserFromMeili} from '@/meili/user/sync';
 
 export type CreateUserProfileInput = {

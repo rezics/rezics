@@ -9,7 +9,7 @@ Vite is configured with aggressive tree-shaking (`preset: 'smallest'`, `moduleSi
 ## Goals / Non-Goals
 
 **Goals:**
-- Create a standalone `@package/i18n` that both app and admin consume
+- Create a standalone `@rezics/i18n` that both app and admin consume
 - Migrate from i18next to typesafe-i18n for native TypeScript-first type generation
 - Split translations into feature-aligned namespaces (~12) for per-route code splitting
 - Lazy-load locales so only the active language is in the initial bundle
@@ -148,7 +148,7 @@ export const Route = createFileRoute('/_mainLayout/')({
 ## Migration Plan
 
 1. **Phase 1 — Package scaffold**: Create `package/i18n` with typesafe-i18n config, migrate en-US translations as the base locale (splitting into namespaces), derive the other 4 locales.
-2. **Phase 2 — Integration**: Wire `@package/i18n` into app and admin providers. Update route loaders with namespace loading. Update `app-shell` locale switching to use the new API.
+2. **Phase 2 — Integration**: Wire `@rezics/i18n` into app and admin providers. Update route loaders with namespace loading. Update `app-shell` locale switching to use the new API.
 3. **Phase 3 — Consumer migration**: Migrate all `useTranslation()` / `t()` call sites to `useI18nContext()` / `LL`. This is done per feature directory.
 4. **Phase 4 — Cleanup**: Remove i18next and react-i18next dependencies, delete old locale directories and the i18next type declaration file.
 

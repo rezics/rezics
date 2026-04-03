@@ -14,7 +14,7 @@ import {
 import GitHubIcon from '@mui/icons-material/GitHub';
 import TelegramIcon from '@mui/icons-material/Telegram';
 import {useTranslation} from 'react-i18next';
-import {LazyLoadImage} from '@package/ui/primitive/image/LazyLoadImage.tsx';
+import {LazyLoadImage} from '@rezics/ui/primitive/image/LazyLoadImage.tsx';
 
 function SectionTitle({children}: {children: React.ReactNode}) {
   return (

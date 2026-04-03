@@ -2,11 +2,11 @@
 
 ### Requirement: Standalone i18n package
 
-The system SHALL provide a standalone `@package/i18n` workspace package that contains all translation content, the typesafe-i18n generator configuration, generated type utilities, and the React adapter.
+The system SHALL provide a standalone `@rezics/i18n` workspace package that contains all translation content, the typesafe-i18n generator configuration, generated type utilities, and the React adapter.
 
 #### Scenario: Package is consumable by app and admin
-- **WHEN** `package/app` or `package/admin` adds `@package/i18n` as a workspace dependency
-- **THEN** it can import the React provider, locale loading functions, and typed translation accessors from `@package/i18n`
+- **WHEN** `package/app` or `package/admin` adds `@rezics/i18n` as a workspace dependency
+- **THEN** it can import the React provider, locale loading functions, and typed translation accessors from `@rezics/i18n`
 
 #### Scenario: Package builds without errors
 - **WHEN** `typesafe-i18n --no-watch` is run in `package/i18n`
@@ -62,12 +62,12 @@ The system SHALL provide formatters for any interpolation patterns used in trans
 
 ### Requirement: Package exports
 
-The `@package/i18n` package.json SHALL declare exports that allow consumers to import the public API. The package SHALL set `"sideEffects": false` to enable tree-shaking.
+The `@rezics/i18n` package.json SHALL declare exports that allow consumers to import the public API. The package SHALL set `"sideEffects": false` to enable tree-shaking.
 
 #### Scenario: Consumer imports provider
-- **WHEN** a consumer imports `{ TypesafeI18n, useI18nContext }` from `@package/i18n`
+- **WHEN** a consumer imports `{ TypesafeI18n, useI18nContext }` from `@rezics/i18n`
 - **THEN** the imports resolve correctly and are fully typed
 
 #### Scenario: Unused namespaces are excluded
-- **WHEN** admin imports `@package/i18n` but never calls `loadNamespaceAsync(locale, 'home')`
+- **WHEN** admin imports `@rezics/i18n` but never calls `loadNamespaceAsync(locale, 'home')`
 - **THEN** the `home` namespace chunks for all locales are excluded from the admin build output

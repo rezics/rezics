@@ -3,7 +3,7 @@ import type {
   JwtServiceListResponse,
   CreateJwtServiceInput,
   UpdateJwtServiceInput,
-} from '@package/contract';
+} from '@rezics/contract';
 import {apiFetch} from '../react-query/http';
 
 export const jwtServiceApi = {

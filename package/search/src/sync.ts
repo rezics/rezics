@@ -1,12 +1,12 @@
-import {prisma} from '@package/server';
-import {UnitType} from '@package/server';
+import {prisma} from '@rezics/server';
+import {UnitType} from '@rezics/server';
 import type {SearchClient} from './client';
 import type {
   BookSearchDocument,
   UnitSearchDocument,
   FeedbackSearchDocument,
   UserSearchDocument,
-} from '@package/contract';
+} from '@rezics/contract';
 
 // ANCHOR: Books sync with batching (cursor-based)
 export async function syncAllBooks(client: SearchClient) {

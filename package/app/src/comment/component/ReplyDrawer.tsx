@@ -2,7 +2,7 @@ import {useDialogStore} from '../state/dialogStore';
 import {Button, Drawer} from '@mui/material';
 import React from 'react';
 
-import EasyEditor from '@package/ui/editor/easyeditor/EasyEditor.tsx';
+import EasyEditor from '@rezics/ui/editor/easyeditor/EasyEditor.tsx';
 
 export type ReplyDrawerShowProps = {
   open: boolean;

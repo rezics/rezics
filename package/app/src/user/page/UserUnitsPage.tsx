@@ -5,17 +5,17 @@ import {useQuery, useQueryClient} from '@tanstack/react-query';
 import {
   UniversalPaginator,
   type UniversalPaginatorHandle,
-} from '@package/ui/composite/pagination/Pagination.tsx';
+} from '@rezics/ui/composite/pagination/Pagination.tsx';
 import {TextSearchInputWithIcon} from '@/search/component/TextSearchInputWithIcon.tsx';
-import type {BookDTO, ReadlistDTO, ReviewDTO, UnitDTO} from '@package/contract';
-import {UnitType} from '@package/contract';
+import type {BookDTO, ReadlistDTO, ReviewDTO, UnitDTO} from '@rezics/contract';
+import {UnitType} from '@rezics/contract';
 import {
   buildMeiliReadlistQuery,
   buildMeiliUnitQuery,
   meiliBookSearchQuery,
-} from '@package/api/meili/meili.queries';
-import {reactionApi} from '@package/api/reaction/reaction.api';
-import {mapUnitListToReviewListResponse} from '@package/api/meili/meili.api';
+} from '@rezics/api/meili/meili.queries';
+import {reactionApi} from '@rezics/api/reaction/reaction.api';
+import {mapUnitListToReviewListResponse} from '@rezics/api/meili/meili.api';
 import {SingleReadlist} from '@/readlist/component/SingleReadlist.tsx';
 import {ReviewList} from '@/review/component/ReviewList.tsx';
 import {QuoteExcerptListContainer} from '@/review/component/QuoteExcerptList.tsx';

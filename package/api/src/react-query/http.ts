@@ -1,7 +1,7 @@
 import {
   NormalizedTokenName,
   type NormalizedTokenName as NormalizedTokenNameType,
-} from '@package/contract';
+} from '@rezics/contract';
 import {getApiConfig} from '../config';
 import {clearAuthPresence, hasAuthPresence} from './authPresence';
 import {

@@ -5,7 +5,7 @@ import {
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
-} from '@package/ui/shadcn/carousel.tsx';
+} from '@rezics/ui/shadcn/carousel.tsx';
 import {BookCard, type BookProps} from '../item/VerticalBookCard';
 export interface HorizontalBookCarouselProps {
   bookList: (BookProps & {id: string})[];

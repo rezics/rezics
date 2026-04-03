@@ -5,7 +5,7 @@ import {
   banUserBodySchema,
   unbanUserBodySchema,
   setRoleBodySchema,
-} from '@package/contract';
+} from '@rezics/contract';
 import {handleAuthRequest} from '../auth/routes';
 import {jsonRequestBody, jsonResponse} from './docs';
 import {authCorsPolicy} from '../cors';

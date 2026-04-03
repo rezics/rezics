@@ -5,7 +5,7 @@ import {
 } from '@tanstack/react-query';
 import {userApi} from './user.api';
 import {userKeys} from './user.keys';
-import type {UpdateUser, UserDTO} from '@package/contract';
+import type {UpdateUser, UserDTO} from '@rezics/contract';
 
 export function useUpdateMeMutation(
   options?: Omit<

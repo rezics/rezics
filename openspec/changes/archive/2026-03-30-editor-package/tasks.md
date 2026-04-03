@@ -90,4 +90,4 @@
 - [x] 13.1 Finalize `src/index.ts` — export `Editor`, `useEditor`, `EditorContext`, `createEditor`, `createTheme`, `EditorPlugin` type, `markdownFull`, `jsonFull`, and granular plugin factories (`markdown`, `preview`, `mention`, `emoji`, `json`, `jsonLint`)
 - [x] 13.2 Verify full build passes: `bun run build` in `package/editor`
 - [x] 13.3 Verify all tests pass: `bun test` in `package/editor`
-- [x] 13.4 Verify tree-shaking: importing only `@package/editor/json` does not pull in markdown dependencies (inspect build output)
+- [x] 13.4 Verify tree-shaking: importing only `@rezics/editor/json` does not pull in markdown dependencies (inspect build output)

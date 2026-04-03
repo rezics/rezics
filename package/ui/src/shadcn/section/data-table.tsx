@@ -53,7 +53,7 @@ import {
 import {Area, AreaChart, CartesianGrid, XAxis} from 'recharts';
 import {toast} from 'sonner';
 import {Static} from '@sinclair/typebox';
-import {t} from '@package/contract';
+import {t} from '@rezics/contract';
 
 import {useIsMobile} from '@/shared/hooks/use-mobile';
 import {Badge} from '@/shadcn/badge';

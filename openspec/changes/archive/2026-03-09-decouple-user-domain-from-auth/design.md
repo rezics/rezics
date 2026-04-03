@@ -2,7 +2,7 @@
 
 Current state:
 - `build-independent-auth-server` is complete: `package/auth` runs as a dedicated IdP with better-auth, ES256 JWKS, OAuth 2.1/OIDC, and exported verification utilities.
-- `package/server` has migrated JWT **verification** to JWKS-based `verifyBearerToken()` from `@package/auth/jwt`, but still retains all legacy auth **issuance** code paths (registration, login, refresh, password management, email verification, session management).
+- `package/server` has migrated JWT **verification** to JWKS-based `verifyBearerToken()` from `@rezics/auth/jwt`, but still retains all legacy auth **issuance** code paths (registration, login, refresh, password management, email verification, session management).
 - `package/server/src/core.ts` still instantiates two `@elysiajs/jwt` HMAC plugins (`jwt` and `refreshToken`) even though they are bypassed by `verifyAuth()` in `utils.ts`.
 - `package/app` and `package/api` still call server endpoints for login, register, and token refresh instead of the auth service.
 - Two parallel user tables exist: `auth.User` (identity) and `server.User` (business profile), linked by matching UUIDv7 `id`/`unitId`.

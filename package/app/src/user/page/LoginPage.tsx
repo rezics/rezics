@@ -6,14 +6,14 @@ import {useNavigate, useRouterState} from '@tanstack/react-router';
 import {type FC, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 
-import {PasswordField} from '@package/ui/composite/form/field/PasswordField.tsx';
-import {MUILink} from '@package/ui/primitive/link/MUILink.tsx';
+import {PasswordField} from '@rezics/ui/composite/form/field/PasswordField.tsx';
+import {MUILink} from '@rezics/ui/primitive/link/MUILink.tsx';
 import {useAuthSessionStore} from '@/user/state';
 import {login} from '../model/handler';
 import {Layout} from '../layout/Layout';
 import {ModalLayout} from '../layout/ModalLayout';
 import {validateEmail} from '../model/validate';
-import {TextButton} from '@package/ui/primitive/button/TextButton.tsx';
+import {TextButton} from '@rezics/ui/primitive/button/TextButton.tsx';
 import {SocialAuthButtons} from '../component/SocialAuthButtons';
 import {resolvePostAuthDestination} from '../model/authRedirect';
 

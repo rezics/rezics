@@ -1,6 +1,6 @@
 import {prisma} from '#/prisma/client';
 import {searchClient} from '../search-client';
-import type {UnitSearchDocument} from '@package/contract';
+import type {UnitSearchDocument} from '@rezics/contract';
 import {UnitType} from '#/prisma/client';
 
 export async function syncUnitToMeili(unitId: string): Promise<void> {

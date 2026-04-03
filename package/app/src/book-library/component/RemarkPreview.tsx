@@ -1,9 +1,9 @@
 import {useQuery} from '@tanstack/react-query';
 import React from 'react';
 import {ShortReviewListShow} from '@/review/component/ShortReviewList.tsx';
-import {buildMeiliUnitQuery} from '@package/api/meili/meili.queries';
-import {mapUnitListToReviewListResponse} from '@package/api/meili/meili.api';
-import {UnitType} from '@package/contract';
+import {buildMeiliUnitQuery} from '@rezics/api/meili/meili.queries';
+import {mapUnitListToReviewListResponse} from '@rezics/api/meili/meili.api';
+import {UnitType} from '@rezics/contract';
 import {useTranslation} from 'react-i18next';
 interface ShortBookReviewsProps {
   bookId: string;

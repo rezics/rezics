@@ -37,5 +37,5 @@
 
 - [x] 6.1 Run `bun test` in `package/editor` — all tests pass
 - [x] 6.2 Run TypeScript type-check (verify no type errors in new files)
-- [x] 6.3 Verify `import { MarkdownEditor, JsonEditor, CodeEditor } from '@package/editor/editor'` resolves from a consuming package
+- [x] 6.3 Verify `import { MarkdownEditor, JsonEditor, CodeEditor } from '@rezics/editor/editor'` resolves from a consuming package
 - [ ] 6.4 Run `bun run cosmos` and verify all migrated fixtures render correctly with icons and toolbar overrides

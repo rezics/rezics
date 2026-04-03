@@ -8,7 +8,7 @@ import type {
   UpdateReadlistInput,
   ReadlistListResponse,
   ReadlistResponse,
-} from '@package/contract';
+} from '@rezics/contract';
 import type {ReadlistFilters} from './readlist.types';
 import {buildQueryString} from '../utils/buildQuery';
 

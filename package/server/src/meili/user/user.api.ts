@@ -1,7 +1,7 @@
-import type {UserListQuery} from '@package/contract';
+import type {UserListQuery} from '@rezics/contract';
 import {searchClient} from '../search-client';
 import type {UserSearchDocument, UserSearchResult} from './index';
-import type {SearchResponse} from '@package/search';
+import type {SearchResponse} from '@rezics/search';
 
 function escapeValue(value: string): string {
   return value.trim().replace(/"/g, '\\"');
@@ -39,7 +39,7 @@ export async function searchUsersRaw(
 /**
  * Higher-level search API for users.
  *
- * - Input is {@link UserListQuery} from `@package/contract`.
+ * - Input is {@link UserListQuery} from `@rezics/contract`.
  * - It maps contract fields like `q`, `slug`, `type`, `page`, `limit`
  *   into Meilisearch filter expressions and pagination options.
  */

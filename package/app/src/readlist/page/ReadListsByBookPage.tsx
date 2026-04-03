@@ -1,4 +1,4 @@
-import {AccentBarWithText} from '@package/ui/composite/typography/AccentBarWithText.tsx';
+import {AccentBarWithText} from '@rezics/ui/composite/typography/AccentBarWithText.tsx';
 import {ReadListsPage} from './ReadListsPage.tsx';
 import {useTranslation} from 'react-i18next';
 import {readlistByBookRoute} from '@/router';

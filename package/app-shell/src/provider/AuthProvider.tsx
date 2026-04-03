@@ -7,16 +7,16 @@ import {
   setToken,
   parseJwt,
   queryAccessToken,
-} from '@package/api/react-query/jwt';
+} from '@rezics/api/react-query/jwt';
 import {
   NormalizedTokenName,
   type NormalizedTokenName as NormalizedTokenNameType,
-} from '@package/contract';
-import type {TokenRefreshRegistry} from '@package/api/react-query/tokenRefreshRegistry';
+} from '@rezics/contract';
+import type {TokenRefreshRegistry} from '@rezics/api/react-query/tokenRefreshRegistry';
 import {
   clearAuthPresence,
   hasAuthPresence,
-} from '@package/api/react-query/authPresence';
+} from '@rezics/api/react-query/authPresence';
 import {
   clearAuthSessionState,
   hydrateAuthSessionState,

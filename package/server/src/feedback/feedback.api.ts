@@ -7,7 +7,7 @@ import {
   type FeedbackListResponse,
   type FeedbackDTO,
   BasicAdminPermission,
-} from '@package/contract';
+} from '@rezics/contract';
 
 export const feedbackApi = new Elysia({prefix: '/feedbacks'})
   .use(serverCorsPolicy('credentialed'))

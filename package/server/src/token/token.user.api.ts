@@ -4,7 +4,7 @@ import {
   userParamsSchema,
   updateUserSchema,
   userListQuerySchema,
-} from '@package/contract';
+} from '@rezics/contract';
 import {userService} from '@/user';
 import {
   hasPermissionToReadUser,

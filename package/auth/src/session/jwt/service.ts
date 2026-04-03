@@ -1,4 +1,4 @@
-import {importPrivateJwk} from '@package/jwt';
+import {importPrivateJwk} from '@rezics/jwt';
 import {
   authJwtPersistence,
   getLocalAuthJwtServiceRecord,

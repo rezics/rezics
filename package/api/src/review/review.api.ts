@@ -7,7 +7,7 @@ import type {
   UpdateReviewInput,
   ReviewListResponse,
   ReviewResponse,
-} from '@package/contract';
+} from '@rezics/contract';
 import type {ReviewFilters} from './review.types';
 import {buildQueryString} from '../utils/buildQuery';
 import {apiFetch} from '../react-query/http';

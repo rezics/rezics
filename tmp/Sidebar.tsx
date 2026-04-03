@@ -26,7 +26,7 @@ import useMeasure from 'react-use-measure';
 
 import {Sidebar as UiSidebar} from '@/component/shadcn/sidebar';
 import {cn} from '@/shared/shadcn/lib/utils';
-import {RouterLink} from '@package/ui/Navigation/RouterLink.tsx';
+import {RouterLink} from '@rezics/ui/Navigation/RouterLink.tsx';
 
 export function DrawerHeader({
   handleDrawerToggle,

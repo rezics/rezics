@@ -1,6 +1,6 @@
 import {beforeEach, describe, expect, mock, test} from 'bun:test';
-import {NormalizedTokenName} from '@package/contract';
-import type {TokenRefreshRegistry} from '@package/api/react-query/tokenRefreshRegistry';
+import {NormalizedTokenName} from '@rezics/contract';
+import type {TokenRefreshRegistry} from '@rezics/api/react-query/tokenRefreshRegistry';
 
 process.env.VITE_API_URL ??= 'http://api.example';
 process.env.VITE_AUTH_API_URL ??= 'http://auth.example';
@@ -11,7 +11,7 @@ let presence = false;
 const queryAccessTokenMock = mock(async () => 'identity-token');
 const clearAuthSessionStateMock = mock(() => undefined);
 
-mock.module('@package/api/react-query/jwt', () => ({
+mock.module('@rezics/api/react-query/jwt', () => ({
   AUTH_TOKEN_STORAGE_EVENT: 'package-auth-token-storage',
   getToken: (name?: string) => (name ? tokenState[name] ?? null : null),
   setToken: (token: string | null, name?: string) => {
@@ -36,7 +36,7 @@ mock.module('@package/api/react-query/jwt', () => ({
   }),
 }));
 
-mock.module('@package/api/react-query/authPresence', () => ({
+mock.module('@rezics/api/react-query/authPresence', () => ({
   hasAuthPresence: () => presence,
   clearAuthPresence: () => {
     presence = false;

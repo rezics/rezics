@@ -9,7 +9,7 @@ import type {
   BookListResponse,
   BookResponse,
   ChapterIndexResponse,
-} from '@package/contract';
+} from '@rezics/contract';
 import type {BookFilters} from './book.types';
 import {buildQueryString} from '../utils/buildQuery';
 

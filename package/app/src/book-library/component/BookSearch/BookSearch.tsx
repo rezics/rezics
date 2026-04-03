@@ -1,7 +1,7 @@
 import React, {useMemo, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import {SearchInput, type SearchInfo} from '@/search';
-import type {BookQueryOptions} from '@package/contract';
+import type {BookQueryOptions} from '@rezics/contract';
 
 /** Available sort types for book search. */
 export type BookSortType =

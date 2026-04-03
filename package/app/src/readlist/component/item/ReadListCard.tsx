@@ -7,7 +7,7 @@ import {
   Typography,
   useTheme,
 } from '@mui/material';
-import type {ReadlistDTO} from '@package/contract';
+import type {ReadlistDTO} from '@rezics/contract';
 import {cn} from '@/shared/util/css-util';
 import {useNavigate} from '@tanstack/react-router';
 

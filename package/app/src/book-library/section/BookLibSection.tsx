@@ -6,9 +6,9 @@ import type {BookLibSortKey} from '@/search/component/SearchFilter';
 import {
   UniversalPaginator,
   type UniversalPaginatorHandle,
-} from '@package/ui/composite/pagination/Pagination.tsx';
+} from '@rezics/ui/composite/pagination/Pagination.tsx';
 
-import type {BookDTO} from '@package/contract';
+import type {BookDTO} from '@rezics/contract';
 import {BookListView} from '../component/BookList/BookListView';
 import {BookSearchInput} from '../component/BookSearch/BookSearch';
 

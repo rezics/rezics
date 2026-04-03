@@ -1,7 +1,7 @@
 ## ADDED Requirements
 
 ### Requirement: Admin login page uses auth server
-The login page at `/login` (`package/admin/src/user/page/LoginPage.tsx`) SHALL use `useSignInMutation()` from `@package/api/auth/auth.mutations`. On successful sign-in, it SHALL read the freshly persisted JWT via `getToken()`/`parseJwt()`, verify the payload role is `admin` or `owner`, hydrate `useAuthStore`, then navigate to the redirect target.
+The login page at `/login` (`package/admin/src/user/page/LoginPage.tsx`) SHALL use `useSignInMutation()` from `@rezics/api/auth/auth.mutations`. On successful sign-in, it SHALL read the freshly persisted JWT via `getToken()`/`parseJwt()`, verify the payload role is `admin` or `owner`, hydrate `useAuthStore`, then navigate to the redirect target.
 
 #### Scenario: Admin signs in successfully
 - **WHEN** an admin user enters valid email and password and submits the login form

@@ -13,7 +13,7 @@ import type {
   CreateReadlistInput,
   UpdateReadlistInput,
   ReadlistResponse,
-} from '@package/contract';
+} from '@rezics/contract';
 
 /**
  * Mutation for creating a readlist

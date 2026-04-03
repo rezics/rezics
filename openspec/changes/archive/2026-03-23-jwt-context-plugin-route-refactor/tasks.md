@@ -1,8 +1,8 @@
-## 1. Token Resolver Plugin (`@package/jwt`)
+## 1. Token Resolver Plugin (`@rezics/jwt`)
 
 - [x] 1.1 Create `package/jwt/src/adapters/elysia-token-resolver.ts` with `createTokenResolver<Name, TPayload>(name, config)` factory. Implement `resolve` with `as: 'global'`, bearer extraction, null-on-absent, and error-on-invalid semantics
 - [x] 1.2 Export `createTokenResolver` from `package/jwt/src/adapters/export.ts` and `package/jwt/src/export.ts` (root)
-- [x] 1.3 Add context key name constants to `@package/contract` (e.g., `TokenContextKey.AUTH_IDENTITY = 'authIdentityToken'`) alongside existing `NormalizedTokenName`
+- [x] 1.3 Add context key name constants to `@rezics/contract` (e.g., `TokenContextKey.AUTH_IDENTITY = 'authIdentityToken'`) alongside existing `NormalizedTokenName`
 - [x] 1.4 Write tests in `package/jwt/src/adapters/elysia-token-resolver.test.ts`: absent header → null, valid token → payload, invalid token → 401, bearer extraction, multiple resolvers compose, deduplication
 
 ## 2. Permission Guards (`package/server`)

@@ -7,11 +7,11 @@ import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
 
-import EasyEditor from '@package/ui/editor/easyeditor/EasyEditor.tsx';
-import {useCreateUnitMutation} from '@package/api/unit/unit.mutations';
+import EasyEditor from '@rezics/ui/editor/easyeditor/EasyEditor.tsx';
+import {useCreateUnitMutation} from '@rezics/api/unit/unit.mutations';
 import {useUserProfileStore} from '@/user/state';
 import {useAlertStore} from '@app/state/windowAlertStore';
-import {UnitType} from '@package/contract';
+import {UnitType} from '@rezics/contract';
 import {type Chapter} from './ChapterArborist';
 
 interface CreateChapterDialogProps {

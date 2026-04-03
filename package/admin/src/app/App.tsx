@@ -1,7 +1,7 @@
 import 'github-markdown-css/github-markdown-light.css';
-import {AppShell, AuthProvider, WindowAlert} from '@package/app-shell';
-import {NormalizedTokenName} from '@package/contract';
-import {createTokenRefreshRegistry} from '@package/api/react-query/tokenRefreshRegistry';
+import {AppShell, AuthProvider, WindowAlert} from '@rezics/app-shell';
+import {NormalizedTokenName} from '@rezics/contract';
+import {createTokenRefreshRegistry} from '@rezics/api/react-query/tokenRefreshRegistry';
 import {RouterProvider} from '@tanstack/react-router';
 import {router} from '@/router';
 

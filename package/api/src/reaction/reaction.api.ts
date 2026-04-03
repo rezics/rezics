@@ -3,7 +3,7 @@
  * Direct API communication layer for reaction endpoints
  */
 
-import type {ReactionListQuery} from '@package/contract';
+import type {ReactionListQuery} from '@rezics/contract';
 import {buildQueryString} from '../utils/buildQuery';
 import {apiFetch} from '../react-query/http';
 import type {

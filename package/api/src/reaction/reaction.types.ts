@@ -2,7 +2,7 @@
  * Types for Reaction API
  */
 
-import type {ReactionListQuery} from '@package/contract';
+import type {ReactionListQuery} from '@rezics/contract';
 
 export type ReactionSummary = {
   targetId: string;

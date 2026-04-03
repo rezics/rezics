@@ -1,5 +1,5 @@
 import 'react-json-view-lite/dist/index.css';
-import {JsonEditorLight} from '@package/ui/editor/jsoneditor/JsonEditorLight.tsx';
+import {JsonEditorLight} from '@rezics/ui/editor/jsoneditor/JsonEditorLight.tsx';
 import React, {useEffect, useState} from 'react';
 import {
   Button,

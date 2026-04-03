@@ -1,24 +1,24 @@
 import {beforeEach, describe, expect, mock, test} from 'bun:test';
-import type {GetSessionStateResponse} from '@package/contract';
-import {NormalizedTokenName} from '@package/contract';
+import type {GetSessionStateResponse} from '@rezics/contract';
+import {NormalizedTokenName} from '@rezics/contract';
 
 const tokenState: Partial<Record<NormalizedTokenName, string | null>> = {};
 let presence = false;
 const getSessionStateMock = mock();
 
-mock.module('@package/api/react-query/jwt', () => ({
+mock.module('@rezics/api/react-query/jwt', () => ({
   getToken: (tokenName?: NormalizedTokenName) =>
     tokenName ? tokenState[tokenName] ?? null : null,
 }));
 
-mock.module('@package/api/react-query/authPresence', () => ({
+mock.module('@rezics/api/react-query/authPresence', () => ({
   hasAuthPresence: () => presence,
   clearAuthPresence: () => {
     presence = false;
   },
 }));
 
-mock.module('@package/api/auth/auth.api', () => ({
+mock.module('@rezics/api/auth/auth.api', () => ({
   authApi: {
     getSessionState: getSessionStateMock,
   },

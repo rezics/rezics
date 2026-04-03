@@ -14,7 +14,7 @@ import React from 'react';
 import {useRouterState} from '@tanstack/react-router';
 
 import {adminConfig} from '@/app/config/adminConfig';
-import {Link} from '@package/ui/primitive/link/Link.tsx';
+import {Link} from '@rezics/ui/primitive/link/Link.tsx';
 
 import type {
   AdminNavEntry,

@@ -1,7 +1,7 @@
 import {
   AUTH_PRESENCE_COOKIE_NAME,
   AUTH_PRESENCE_COOKIE_VALUE,
-} from '@package/contract';
+} from '@rezics/contract';
 
 function deriveCookieDomain(hostname: string): string | null {
   if (

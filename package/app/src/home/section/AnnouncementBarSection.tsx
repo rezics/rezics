@@ -1,6 +1,6 @@
 import {useQuery} from '@tanstack/react-query';
-import {echoKvGetQuery} from '@package/api/echokv/echokv';
-import {parseEchoKVResponse} from '@package/api/echokv/util';
+import {echoKvGetQuery} from '@rezics/api/echokv/echokv';
+import {parseEchoKVResponse} from '@rezics/api/echokv/util';
 import {AnnouncementBar, type Announcement} from '../component/AnnouncementBar';
 import {Skeleton} from '@mui/material';
 

@@ -15,17 +15,17 @@
 - [x] 2.5 Add repository/service tests for auth JWT metadata lookup, key ownership linkage, and migration/backfill safety.
 - [x] 2.6 Move auth JWT and JWKS route ownership from the old OAuth-centric arrangement into session-owned routes and keep any required `/.well-known/jwks.json` compatibility endpoint public.
 - [x] 2.7 Update `package/auth/src/openapi/session.ts`, `package/auth/src/openapi/oauth.ts`, and related contract/docs modules so session-owned JWT/JWKS routes and public OAuth/OIDC routes remain explicit and correctly documented.
-- [x] 2.8 Replace auth-local verifier wrappers and exports with auth-internal wrappers built on `@package/jwt`, then delete `package/auth/src/jwt/verify.ts`, `package/auth/src/jwt/auth-local.ts`, and any dead re-exports.
+- [x] 2.8 Replace auth-local verifier wrappers and exports with auth-internal wrappers built on `@rezics/jwt`, then delete `package/auth/src/jwt/verify.ts`, `package/auth/src/jwt/auth-local.ts`, and any dead re-exports.
 
 ## 3. Refactor server service ownership
 
 - [x] 3.1 Add a server-side JWT service metadata table plus migration/backfill for this server’s own issuer, audience, canonical JWKS endpoint, and trusted upstream issuers such as auth.
 - [x] 3.2 Add a server-owned signing-key persistence table or linkage that references the local server JWT service metadata record and supports shared rotation contracts.
-- [x] 3.3 Replace `package/server/src/session/jwt.ts` with a composition root that sources active signing keys through a server-local adapter plus `@package/jwt` rotation contracts and wires them into `@elysiajs/jwt`.
+- [x] 3.3 Replace `package/server/src/session/jwt.ts` with a composition root that sources active signing keys through a server-local adapter plus `@rezics/jwt` rotation contracts and wires them into `@elysiajs/jwt`.
 - [x] 3.4 Add server-local JWKS publication under the session domain and ensure the server exposes exactly one canonical JWKS endpoint for all server-issued JWTs.
-- [x] 3.5 Replace `package/server/src/user/util/index.ts` auth verification imports from `@package/auth/jwt` with direct `@package/jwt` verifier creation based on `AUTH_JWKS_URL`.
+- [x] 3.5 Replace `package/server/src/user/util/index.ts` auth verification imports from `@rezics/auth/jwt` with direct `@rezics/jwt` verifier creation based on `AUTH_JWKS_URL`.
 - [x] 3.6 Switch server auth verification wrappers to read trusted auth issuer/audience/JWKS values from the local JWT service metadata table instead of runtime auth env.
-- [x] 3.7 Remove any unnecessary `@package/auth` dependency usage from `package/server` and update local verification helpers, route guards, and tests to use shared contracts only.
+- [x] 3.7 Remove any unnecessary `@rezics/auth` dependency usage from `package/server` and update local verification helpers, route guards, and tests to use shared contracts only.
 - [x] 3.8 Confirm every server-issued token type uses the same active private signing key and the same published JWKS surface.
 
 ## 4. Clean env, CORS, and public surface contracts

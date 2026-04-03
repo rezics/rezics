@@ -8,8 +8,8 @@ import type {
   SessionTokenResponse,
   UpdateUser,
   UserDTO,
-} from '@package/contract';
-import {NormalizedTokenName} from '@package/contract';
+} from '@rezics/contract';
+import {NormalizedTokenName} from '@rezics/contract';
 import {apiFetch} from '../react-query/http';
 
 type FollowSummaryResponse = {

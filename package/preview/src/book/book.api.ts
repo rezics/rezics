@@ -1,10 +1,10 @@
 import {coreInstance} from '../core';
 
-import {bookParamsSchema} from '@package/contract';
-import type {BookDTO} from '@package/contract';
+import {bookParamsSchema} from '@rezics/contract';
+import type {BookDTO} from '@rezics/contract';
 
-import {bookService} from '@package/server/book/book.service';
-import {mapBookToDTO} from '@package/server/book/mapper';
+import {bookService} from '@rezics/server/book/book.service';
+import {mapBookToDTO} from '@rezics/server/book/mapper';
 
 import React from 'react';
 import {renderToReadableStream} from 'react-dom/server';

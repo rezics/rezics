@@ -2,7 +2,7 @@
 
 - [x] 1.1 Create `package/api/src/react-query/tokenRefreshRegistry.ts` — define `TokenRefreshFn` type (`() => Promise<{token: string}>`), `TokenRefreshRegistry` type (`Partial<Record<NormalizedTokenName, TokenRefreshFn>>`), and `createTokenRefreshRegistry(overrides?)` factory that merges overrides with defaults.
 - [x] 1.2 Add default registry entry for `REZICS_SESSION` — calls `userApi.issueSessionToken()`, syncs `useAuthSessionStore.getState().syncBusinessToken(token)`, returns `{token}`.
-- [x] 1.3 Export `createTokenRefreshRegistry`, `TokenRefreshRegistry`, and `TokenRefreshFn` from `package/api/src/react-query/tokenRefreshRegistry.ts` and from the `@package/api` barrel.
+- [x] 1.3 Export `createTokenRefreshRegistry`, `TokenRefreshRegistry`, and `TokenRefreshFn` from `package/api/src/react-query/tokenRefreshRegistry.ts` and from the `@rezics/api` barrel.
 - [x] 1.4 Add tests for `createTokenRefreshRegistry`: default entries present, override replaces default, custom entries merge with defaults, missing entry returns undefined.
 
 ## 2. Refactor AuthProvider to Gateway + Fan-Out Model
@@ -12,7 +12,7 @@
 - [x] 2.3 Refactor `runRefreshCycle()` — first refresh `AUTH_IDENTITY` (gateway). If gateway fails non-retryably, call `handleAuthSessionExpired()` and return. If gateway succeeds, collect all service tokens that need refresh and process them via `Promise.allSettled()`.
 - [x] 2.4 Handle per-token results from `Promise.allSettled()` — for each settled result: success → `setToken()` + state='managing' + reset retry; retryable error → schedule retry for that token; non-retryable → state='dormant'. No token blocks another.
 - [x] 2.5 Update `computeNextRefreshDelay()` to also consider retry delays for tokens in backoff state, not just expiry times.
-- [x] 2.6 Remove direct imports of `userApi` from `AuthProvider.tsx`. AuthProvider SHALL only import from `@package/api/react-query/*` and `@package/contract`.
+- [x] 2.6 Remove direct imports of `userApi` from `AuthProvider.tsx`. AuthProvider SHALL only import from `@rezics/api/react-query/*` and `@rezics/contract`.
 
 ## 3. Update Consuming Apps
 

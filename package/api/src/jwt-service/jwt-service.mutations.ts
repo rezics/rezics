@@ -9,7 +9,7 @@ import type {
   JwtServiceDTO,
   CreateJwtServiceInput,
   UpdateJwtServiceInput,
-} from '@package/contract';
+} from '@rezics/contract';
 
 export function useCreateJwtServiceMutation(
   options?: Omit<

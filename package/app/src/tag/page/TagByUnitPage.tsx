@@ -1,8 +1,8 @@
 import {useQueries, useQuery} from '@tanstack/react-query';
-import {MUILink} from '@package/ui/primitive/link/MUILink.tsx';
-import {AccentBarWithText} from '@package/ui/composite/typography/AccentBarWithText.tsx';
-import {tagApi, tagQueries} from '@package/api/tag/tag';
-import type {TagDetailDTO} from '@package/contract';
+import {MUILink} from '@rezics/ui/primitive/link/MUILink.tsx';
+import {AccentBarWithText} from '@rezics/ui/composite/typography/AccentBarWithText.tsx';
+import {tagApi, tagQueries} from '@rezics/api/tag/tag';
+import type {TagDetailDTO} from '@rezics/contract';
 import {TagWrapper} from '../component/TagWrapper';
 import {tagBookRoute} from '@/router';
 import {useMatchRoute} from '@tanstack/react-router';

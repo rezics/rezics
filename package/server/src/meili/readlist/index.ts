@@ -1,2 +1,2 @@
 export * from './readlist.api';
-export * from '@package/contract';
+export * from '@rezics/contract';

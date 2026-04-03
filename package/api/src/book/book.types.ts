@@ -8,7 +8,7 @@ import type {
   UpdateBookInput,
   BookListQuery,
   BookQueryOptions,
-} from '@package/contract';
+} from '@rezics/contract';
 
 // Re-export contract types
 export type {BookDTO, CreateBookInput, UpdateBookInput, BookListQuery};

@@ -10,4 +10,4 @@ export {
   verifyBearerToken,
   verifySessionToken,
   verifyTokenFromHeader as verifyToken,
-} from '@package/jwt';
+} from '@rezics/jwt';

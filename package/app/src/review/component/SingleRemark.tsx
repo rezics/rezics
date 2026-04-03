@@ -2,16 +2,16 @@ import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 import ThumbDownIcon from '@mui/icons-material/ThumbDown';
 import ThumbUpIcon from '@mui/icons-material/ThumbUp';
 import {Box, Tooltip, Typography} from '@mui/material';
-import type {ReviewDTO} from '@package/contract';
+import type {ReviewDTO} from '@rezics/contract';
 import React, {useState, useEffect} from 'react';
-import {CollapsibleByLineTextContainer} from '@package/ui/primitive/typography/collapsible-text/CollapsibleByLineText.tsx';
+import {CollapsibleByLineTextContainer} from '@rezics/ui/primitive/typography/collapsible-text/CollapsibleByLineText.tsx';
 import {
   parseReactionSummaries,
   type ReactionSummaryDTO,
 } from '@/shared/util/reaction-summaries-parser';
 
-import {LazyLoadImage} from '@package/ui/primitive/image/LazyLoadImage.tsx';
-import {MUILink} from '@package/ui/primitive/link/MUILink.tsx';
+import {LazyLoadImage} from '@rezics/ui/primitive/image/LazyLoadImage.tsx';
+import {MUILink} from '@rezics/ui/primitive/link/MUILink.tsx';
 
 export function MetaInfoBadge({
   review,

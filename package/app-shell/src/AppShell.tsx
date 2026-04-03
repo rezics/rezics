@@ -16,7 +16,7 @@ import {HelmetProvider} from 'react-helmet-async';
 import {useAppInit} from './hook/useAppInit';
 
 import 'virtual:uno.css';
-import '@package/ui/shared/style/layers.css';
+import '@rezics/ui/shared/style/layers.css';
 import './global.css';
 
 export interface AppShellProps {

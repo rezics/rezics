@@ -1,7 +1,7 @@
 import {create} from 'zustand';
 import {createJSONStorage, persist} from 'zustand/middleware';
 import {devtools} from 'zustand/middleware';
-import type {UserDTO} from '@package/contract';
+import type {UserDTO} from '@rezics/contract';
 
 export type PartialUserDTO = Partial<UserDTO> & Record<string, unknown>;
 

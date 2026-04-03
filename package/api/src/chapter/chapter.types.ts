@@ -10,7 +10,7 @@ import type {
   ChapterResponse,
   ChapterListItemDTO,
   ChapterDetailDTO,
-} from '@package/contract';
+} from '@rezics/contract';
 
 // Re-export contract types
 export type {

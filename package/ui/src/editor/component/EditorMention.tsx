@@ -15,8 +15,8 @@ import {
   Box,
   Typography,
 } from '@mui/material';
-import type {BookDTO, UserDTO} from '@package/contract';
-import {meiliUserApi} from '@package/api/meili/meili.api';
+import type {BookDTO, UserDTO} from '@rezics/contract';
+import {meiliUserApi} from '@rezics/api/meili/meili.api';
 
 type PublicUserLike = Partial<UserDTO>;
 

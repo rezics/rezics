@@ -1,1 +1,1 @@
-export {useAlertStore} from '@package/app-shell';
+export {useAlertStore} from '@rezics/app-shell';

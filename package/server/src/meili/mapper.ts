@@ -1,5 +1,5 @@
-import type {UserDTO} from '@package/contract';
-import type {UserSearchDocument} from '@package/contract';
+import type {UserDTO} from '@rezics/contract';
+import type {UserSearchDocument} from '@rezics/contract';
 
 /**
  * Map a Meili user document into full `UserDTO`.

@@ -4,14 +4,14 @@ import type {
   ReadlistListQuery,
   FeedbackListQuery,
   UserListQuery,
-} from '@package/contract';
-import type {BookSearchResult} from '@package/contract';
+} from '@rezics/contract';
+import type {BookSearchResult} from '@rezics/contract';
 import type {
   UnitSearchResult,
   ReadlistSearchResult,
   FeedbackSearchResult,
   UserSearchResult,
-} from '@package/contract';
+} from '@rezics/contract';
 import {searchBooks} from './book/book.api';
 import {searchUnits} from './unit/unit.api';
 import {searchReadlists} from './readlist/readlist.api';
@@ -23,7 +23,7 @@ import {
   syncAllReadlists,
   syncAllFeedbacks,
   syncAllUsers,
-} from '@package/search';
+} from '@rezics/search';
 import {searchClient} from './search-client';
 
 export class MeiliService {

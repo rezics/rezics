@@ -2,7 +2,7 @@
 
 ### Requirement: Replace useTranslation with useI18nContext
 
-All consumer components SHALL use `useI18nContext()` from `@package/i18n` instead of `useTranslation()` from `react-i18next`. The `LL` object returned by the context SHALL be used to access translations as typed function calls.
+All consumer components SHALL use `useI18nContext()` from `@rezics/i18n` instead of `useTranslation()` from `react-i18next`. The `LL` object returned by the context SHALL be used to access translations as typed function calls.
 
 #### Scenario: Component accesses translation
 - **WHEN** a component needs a translated string
@@ -27,7 +27,7 @@ After all consumer components are migrated, the following SHALL be removed:
 
 ### Requirement: Provider replacement
 
-The app and admin root components SHALL replace the i18next provider setup with the typesafe-i18n `<TypesafeI18n>` provider from `@package/i18n`.
+The app and admin root components SHALL replace the i18next provider setup with the typesafe-i18n `<TypesafeI18n>` provider from `@rezics/i18n`.
 
 #### Scenario: App root provider
 - **WHEN** the app initializes

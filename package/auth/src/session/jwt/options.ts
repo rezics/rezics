@@ -1,5 +1,5 @@
 import {env} from '../../env';
-import {JwtAlgorithm, type JwtIssuerDescriptor} from '@package/jwt';
+import {JwtAlgorithm, type JwtIssuerDescriptor} from '@rezics/jwt';
 
 export const authJwtLocalServiceKey = 'auth-local';
 

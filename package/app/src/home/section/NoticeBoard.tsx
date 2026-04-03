@@ -10,12 +10,12 @@ import {
   ListItemButton,
   Skeleton,
 } from '@mui/material';
-import {MUILink} from '@package/ui/primitive/link/MUILink.tsx';
+import {MUILink} from '@rezics/ui/primitive/link/MUILink.tsx';
 import NotificationsRoundedIcon from '@mui/icons-material/NotificationsRounded';
-import {echoKvGetQuery} from '@package/api/echokv/echokv';
+import {echoKvGetQuery} from '@rezics/api/echokv/echokv';
 import {useQuery} from '@tanstack/react-query';
 import {useAlertStore} from '@app/state/windowAlertStore';
-import {parseEchoKVResponse} from '@package/api/echokv/util';
+import {parseEchoKVResponse} from '@rezics/api/echokv/util';
 import type {Theme} from '@mui/material/styles';
 import {useTranslation} from 'react-i18next';
 import type {TFunction} from 'i18next';

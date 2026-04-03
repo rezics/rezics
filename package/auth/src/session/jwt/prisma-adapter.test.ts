@@ -2,7 +2,7 @@ import {beforeEach, describe, expect, mock, test} from 'bun:test';
 import {readFileSync} from 'node:fs';
 import {join} from 'node:path';
 import {symmetricDecrypt, symmetricEncrypt} from 'better-auth/crypto';
-import {JwtAlgorithm} from '@package/jwt';
+import {JwtAlgorithm} from '@rezics/jwt';
 
 process.env.DATABASE_URL =
   process.env.DATABASE_URL ??

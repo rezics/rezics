@@ -1,11 +1,11 @@
 ## Context
 
-The monorepo currently has two editor implementations in `@package/ui`:
+The monorepo currently has two editor implementations in `@rezics/ui`:
 
 1. **EasyEditor** — Wraps EasyMDE (CodeMirror 5). ~410 lines with tightly coupled mention/emoji ref-juggling. Markdown only.
 2. **JsonEditorLight** — MUI `TextField` with `react-json-view-lite` for preview. No syntax highlighting, no keyboard shortcuts.
 
-Both are embedded in `@package/ui`, making it impossible to use editor functionality without pulling in the entire UI package. There is also an empty `package/editor` shell (package.json + vite config, no source).
+Both are embedded in `@rezics/ui`, making it impossible to use editor functionality without pulling in the entire UI package. There is also an empty `package/editor` shell (package.json + vite config, no source).
 
 CodeMirror 6 is a ground-up rewrite with a functional, immutable state model and a composable extension system. It replaces CM5's imperative API with transactions and facets, making it well-suited for a plugin architecture.
 
@@ -13,17 +13,17 @@ CodeMirror 6 is a ground-up rewrite with a functional, immutable state model and
 
 **Goals:**
 
-- Provide a unified editor package (`@package/editor`) supporting Markdown and JSON via a plugin system.
+- Provide a unified editor package (`@rezics/editor`) supporting Markdown and JSON via a plugin system.
 - Design a plugin interface that maps cleanly to CM6's extension system while remaining ergonomic.
 - Support two toolbar rendering strategies (CM6 panel and React component) swappable via configuration.
 - Implement headless mention and emoji plugins that are domain-agnostic.
 - Rewrite `preserveFormatting` as a clean markdown-it plugin without the `effect` dependency.
-- Keep `@package/editor` fully independent — zero internal monorepo dependencies, publishable standalone.
+- Keep `@rezics/editor` fully independent — zero internal monorepo dependencies, publishable standalone.
 
 **Non-Goals:**
 
 - Migrating existing consumers from `EasyEditor`/`JsonEditorLight` (separate future change).
-- Removing the existing editors from `@package/ui`.
+- Removing the existing editors from `@rezics/ui`.
 - Collaborative editing or real-time sync (CRDT/OT).
 - Supporting languages beyond Markdown and JSON in this change.
 - Building a full-featured emoji picker — the plugin is headless, consumers provide the UI.
@@ -106,7 +106,7 @@ emoji({
 ```
 The plugin manages open/close state and insertion. The picker UI is entirely consumer-provided.
 
-**Rationale:** Keeps `@package/editor` domain-agnostic. No Rezics user API, no specific emoji dataset. Consumers wire in their data sources and UI components.
+**Rationale:** Keeps `@rezics/editor` domain-agnostic. No Rezics user API, no specific emoji dataset. Consumers wire in their data sources and UI components.
 
 ### 6. JSON formatting via `JSON.stringify`
 
@@ -133,7 +133,7 @@ The plugin lives in `markdown/preview/` since it only affects rendered output, n
 **Choice:** `EditorView.theme()` for editor chrome. CSS variables for toolbar and preview panel styling.
 
 ```ts
-import { createTheme } from '@package/editor'
+import { createTheme } from '@rezics/editor'
 
 const darkTheme = createTheme({
   variant: 'dark',
@@ -149,7 +149,7 @@ const darkTheme = createTheme({
 ## Architecture
 
 ```
-@package/editor/src/
+@rezics/editor/src/
 ├── core/
 │   ├── create.ts              EditorView + EditorState factory
 │   ├── keybindings.ts         Keymap merging (3-layer resolution)
@@ -234,7 +234,7 @@ Consumer
 
 ## Risks / Trade-offs
 
-**[Risk] CM6 bundle size** → The full CM6 stack (`state`, `view`, `commands`, `language`, `autocomplete`, `lint`, two lang packages) adds ~80-120KB gzipped. Mitigated by tree-shaking — consumers who only use JSON don't pull in markdown dependencies thanks to separate entry points (`@package/editor/markdown`, `@package/editor/json`).
+**[Risk] CM6 bundle size** → The full CM6 stack (`state`, `view`, `commands`, `language`, `autocomplete`, `lint`, two lang packages) adds ~80-120KB gzipped. Mitigated by tree-shaking — consumers who only use JSON don't pull in markdown dependencies thanks to separate entry points (`@rezics/editor/markdown`, `@rezics/editor/json`).
 
 **[Risk] React toolbar state sync lag** → The React toolbar variant relies on `updateListener` to reflect editor state changes. Fast typing with format toggling could show stale toolbar state for a frame. Mitigated by debouncing toolbar updates and using `requestAnimationFrame` for visual sync.
 

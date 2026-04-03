@@ -1,1 +1,1 @@
-export {PersistentSettingsLoader} from '@package/app-shell';
+export {PersistentSettingsLoader} from '@rezics/app-shell';

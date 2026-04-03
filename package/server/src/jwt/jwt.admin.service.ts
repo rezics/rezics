@@ -4,7 +4,7 @@ import type {
   CreateJwtServiceInput,
   JwtServiceDTO,
   UpdateJwtServiceInput,
-} from '@package/contract';
+} from '@rezics/contract';
 
 function mapToDTO(record: {
   id: string;

@@ -1,5 +1,5 @@
 import React from 'react';
-import {Link} from '@package/ui/primitive/link/Link.tsx';
+import {Link} from '@rezics/ui/primitive/link/Link.tsx';
 
 export type HorizontalBookProps = {
   title: string;

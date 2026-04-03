@@ -9,7 +9,7 @@ import {
   deleteQuerySchema,
   summaryQuerySchema,
   myQuerySchema,
-} from '@package/contract';
+} from '@rezics/contract';
 
 export const reactionApi = new Elysia({prefix: '/reactions'})
   .use(serverCorsPolicy('credentialed'))

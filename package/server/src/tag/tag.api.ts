@@ -9,14 +9,14 @@ import {
   hasPermissionToDeleteTag,
   hasPermissionToUpdateUnit,
   hasPermissionToDeleteUnit,
-} from '@package/contract';
+} from '@rezics/contract';
 import type {
   CreateTagInput,
   UpdateTagInput,
   TagDTO,
   TagDetailDTO,
   TagListQuery,
-} from '@package/contract';
+} from '@rezics/contract';
 import {
   serverCorsPolicy,
   authMacro,

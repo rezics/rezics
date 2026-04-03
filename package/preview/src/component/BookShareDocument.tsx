@@ -1,4 +1,4 @@
-import type {BookDTO} from '@package/contract';
+import type {BookDTO} from '@rezics/contract';
 import {getBookShareStyles} from '@/utils/shareStyles';
 
 export interface BookShareDocumentProps {

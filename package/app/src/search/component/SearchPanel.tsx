@@ -7,7 +7,7 @@ import {
   type SearchInputViewProps,
 } from './SearchInput';
 import {BookSearchFilter} from './SearchFilter';
-import type {SortControlsProps} from '@package/ui/composite/pagination/Pagination.tsx';
+import type {SortControlsProps} from '@rezics/ui/composite/pagination/Pagination.tsx';
 
 export type SearchPanelViewProps = {
   inputProps: Omit<SearchInputViewProps, 'onAddTag'> & {

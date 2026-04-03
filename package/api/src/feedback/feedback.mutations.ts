@@ -9,7 +9,7 @@ import {
 } from '@tanstack/react-query';
 import {feedbackApi} from './feedback.api';
 import {feedbackKeys} from './feedback.keys';
-import type {CreateFeedbackInput, FeedbackDTO} from '@package/contract';
+import type {CreateFeedbackInput, FeedbackDTO} from '@rezics/contract';
 
 /**
  * Mutation for creating feedback

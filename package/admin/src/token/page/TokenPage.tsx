@@ -9,17 +9,17 @@ import {
   Stack,
 } from '@mui/material';
 import {useQuery} from '@tanstack/react-query';
-import {tokenQueries} from '@package/api/token/token.queries';
+import {tokenQueries} from '@rezics/api/token/token.queries';
 import {
   useCreateTokenMutation,
   useRevokeTokenMutation,
   useUpdateTokenMutation,
-} from '@package/api/token/token.mutations';
+} from '@rezics/api/token/token.mutations';
 import type {
   ApiTokenDTO,
   CreateApiTokenInput,
   UpdateApiTokenInput,
-} from '@package/contract';
+} from '@rezics/contract';
 import {
   TokenTable,
   CreateTokenDialog,

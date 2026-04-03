@@ -10,7 +10,7 @@ import {
   revokeTokenBodySchema,
   clientRegistrationBodySchema,
   clientRegistrationResponseSchema,
-} from '@package/contract';
+} from '@rezics/contract';
 import {
   handleAuthRequest,
 } from '../auth/routes';

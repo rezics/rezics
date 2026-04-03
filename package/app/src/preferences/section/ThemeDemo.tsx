@@ -1,4 +1,4 @@
-import {PRESET_COLORS} from '@package/app-shell';
+import {PRESET_COLORS} from '@rezics/app-shell';
 import {useAppStore} from '@/app/state/appStore';
 import {
   Add,

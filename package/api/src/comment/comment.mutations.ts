@@ -13,7 +13,7 @@ import type {
   CommentDTO,
   CreateCommentInput,
   UpdateCommentInput,
-} from '@package/contract';
+} from '@rezics/contract';
 
 /**
  * Mutation for creating a comment

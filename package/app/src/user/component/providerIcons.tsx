@@ -5,7 +5,7 @@ import {
   XIcon,
   MicrosoftIcon,
 } from '@rezics/icons';
-import type {AuthProvider} from '@package/contract';
+import type {AuthProvider} from '@rezics/contract';
 import type {ComponentType} from 'react';
 
 type IconProps = {size?: number; className?: string};

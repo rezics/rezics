@@ -70,8 +70,8 @@ AuthProvider SHALL NOT import `userApi`, `notificationApi`, or any other service
 #### Scenario: AuthProvider import graph
 
 - **WHEN** AuthProvider's import statements are inspected
-- **THEN** it SHALL NOT contain imports from `@package/api/user/*`, `@package/api/notification/*`, or similar service-specific paths
-- **AND** it SHALL only import from `@package/api/react-query/*` (token utilities) and `@package/contract` (token types)
+- **THEN** it SHALL NOT contain imports from `@rezics/api/user/*`, `@rezics/api/notification/*`, or similar service-specific paths
+- **AND** it SHALL only import from `@rezics/api/react-query/*` (token utilities) and `@rezics/contract` (token types)
 
 ### Requirement: AuthProvider reacts to failure type
 

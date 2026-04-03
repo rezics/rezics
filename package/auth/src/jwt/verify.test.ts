@@ -1,7 +1,7 @@
 import {describe, expect, test} from 'bun:test';
 import {SignJWT, exportJWK, generateKeyPair} from 'jose';
-import {NormalizedTokenName} from '@package/contract';
-import {JwtAlgorithm, verifyBearerToken, verifyTokenFromHeader} from '@package/jwt';
+import {NormalizedTokenName} from '@rezics/contract';
+import {JwtAlgorithm, verifyBearerToken, verifyTokenFromHeader} from '@rezics/jwt';
 
 process.env.DATABASE_URL =
   process.env.DATABASE_URL ??

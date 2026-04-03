@@ -1,16 +1,16 @@
 import React, {useEffect, useMemo, useState} from 'react';
 import {useQuery, useQueryClient} from '@tanstack/react-query';
 import {Select, MenuItem, Chip, Typography, Box, Button} from '@mui/material';
-import type {UnitDTO} from '@package/contract';
+import type {UnitDTO} from '@rezics/contract';
 
-import {reactionApi, reactionQueries} from '@package/api/reaction/reaction';
-import {unitApi} from '@package/api/unit/unit';
+import {reactionApi, reactionQueries} from '@rezics/api/reaction/reaction';
+import {unitApi} from '@rezics/api/unit/unit';
 import {useUserProfileStore} from '@/user/state';
 import {useAlertStore} from '@app/state/windowAlertStore';
 import {
   UniversalPaginator,
   type UniversalPaginatorHandle,
-} from '@package/ui/composite/pagination/Pagination.tsx';
+} from '@rezics/ui/composite/pagination/Pagination.tsx';
 
 import {UserBookmarkTagsCard} from './UserBookmarkTagsCard';
 import {BookmarkItemCard} from '@/user/component/Bookmark/BookmarkItemCard.tsx';

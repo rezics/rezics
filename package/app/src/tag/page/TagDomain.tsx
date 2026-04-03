@@ -1,6 +1,6 @@
 import {useQuery} from '@tanstack/react-query';
-import {tagQueries} from '@package/api/tag/tag';
-import {AccentBarWithText} from '@package/ui/composite/typography/AccentBarWithText.tsx';
+import {tagQueries} from '@rezics/api/tag/tag';
+import {AccentBarWithText} from '@rezics/ui/composite/typography/AccentBarWithText.tsx';
 import {TagWrapper} from '../component/TagWrapper';
 import {tagDomainRoute, tagDomainTitleRoute} from '@/router';
 

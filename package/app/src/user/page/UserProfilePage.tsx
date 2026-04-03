@@ -12,14 +12,14 @@ import {
 import EditIcon from '@mui/icons-material/Edit';
 import {useEffect, type FC} from 'react';
 import {useTranslation} from 'react-i18next';
-import type {UserDTO} from '@package/contract';
+import type {UserDTO} from '@rezics/contract';
 import {useQuery} from '@tanstack/react-query';
-import {userQueries} from '@package/api/user/user.queries';
+import {userQueries} from '@rezics/api/user/user.queries';
 import {UserError, UserLoading} from './UserState';
 import {useUserProfileStore} from '@/user/state';
 import FollowButton from '@/engagement/component/FollowButton';
 import {UserUnitsPage} from './UserUnitsPage';
-import {Link} from '@package/ui/primitive/link/Link.tsx';
+import {Link} from '@rezics/ui/primitive/link/Link.tsx';
 
 export interface UserProfilePageProps {
   unitId: string;

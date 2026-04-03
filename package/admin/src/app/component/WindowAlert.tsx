@@ -1,1 +1,1 @@
-export {WindowAlert} from '@package/app-shell';
+export {WindowAlert} from '@rezics/app-shell';

@@ -21,9 +21,9 @@ The two global token resolvers (`authIdentityToken`, `rezicsSessionToken`) regis
 
 **Non-Goals:**
 - Adding new permission roles (e.g., `requireRoot`, `requireModerator`)
-- Changing the global token resolver mechanism in `index.ts` or `@package/jwt`
+- Changing the global token resolver mechanism in `index.ts` or `@rezics/jwt`
 - Modifying frontend API client or auth token storage
-- Changing the `@package/contract` permission functions (`BasicAdminPermission`, `hasPermissionToUpdateBook`, etc.)
+- Changing the `@rezics/contract` permission functions (`BasicAdminPermission`, `hasPermissionToUpdateBook`, etc.)
 
 ## Decisions
 

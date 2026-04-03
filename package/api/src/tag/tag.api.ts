@@ -3,7 +3,7 @@ import type {
   TagDetailDTO,
   CreateTagInput,
   UpdateTagInput,
-} from '@package/contract';
+} from '@rezics/contract';
 import type {TagFilters} from './tag.types';
 import {buildQueryString} from '../utils/buildQuery';
 import {apiFetch} from '../react-query/http';

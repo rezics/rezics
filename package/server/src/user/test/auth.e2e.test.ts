@@ -1,7 +1,7 @@
 import {describe, expect, test} from 'bun:test';
 import {SignJWT, exportJWK, generateKeyPair} from 'jose';
 import type {JWTPayload} from '../model/types';
-import {verifyBearerToken, JwtAlgorithm} from '@package/jwt';
+import {verifyBearerToken, JwtAlgorithm} from '@rezics/jwt';
 
 process.env.NODE_ENV = 'test';
 process.env.DATABASE_URL ??=

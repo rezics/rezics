@@ -5,7 +5,7 @@ import React from 'react';
 import {useTranslation} from 'react-i18next';
 import {useNavigate, useParams, useRouterState} from '@tanstack/react-router';
 
-import type {BookDTO} from '@package/contract';
+import type {BookDTO} from '@rezics/contract';
 
 import {BookDetailSidebar} from '../component/BookDetail/BookDetailSidebar';
 

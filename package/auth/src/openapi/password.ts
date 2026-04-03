@@ -7,7 +7,7 @@ import {
   resetPasswordCallbackQuerySchema,
   resetPasswordCallbackResponseSchema,
   resetPasswordResponseSchema,
-} from '@package/contract';
+} from '@rezics/contract';
 import {handleAuthRequest} from '../auth/routes';
 import {jsonRequestBody, jsonResponse, parameter} from './docs';
 import {authCorsPolicy} from '../cors';

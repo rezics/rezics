@@ -4,7 +4,7 @@ import type {
   ReviewDTO,
   ReviewListQuery,
   UnitListQuery,
-} from '@package/contract';
+} from '@rezics/contract';
 import {UnitType} from '#/prisma/client';
 import type {ReviewWithRelations} from './types';
 

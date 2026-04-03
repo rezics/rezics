@@ -4,17 +4,17 @@ import {
   createJwtVerifier,
   createTokenResolver,
   JwtAlgorithm,
-} from '@package/jwt';
+} from '@rezics/jwt';
 import type {
   AuthIdentityTokenClaims,
   RezicsSessionTokenClaims,
-} from '@package/contract';
+} from '@rezics/contract';
 import {
   NormalizedTokenName,
   TokenContextKey,
   TokenTransportHeader,
   normalizedTokenTransportMap,
-} from '@package/contract';
+} from '@rezics/contract';
 import {bookApi} from './book';
 import {chapterApi} from './chapter';
 import {readlistApi} from './readlist';
@@ -31,7 +31,7 @@ import {feedbackApi} from './feedback';
 import {sessionApi} from './session';
 import {jwtServiceAdminApi} from './jwt';
 
-import {applyCorsToSet} from '@package/cors';
+import {applyCorsToSet} from '@rezics/cors';
 import {getProdState} from './utils/getProdState';
 import {env} from './env';
 import {bootstrapJwtServiceRecord, getJwtService} from './jwt';

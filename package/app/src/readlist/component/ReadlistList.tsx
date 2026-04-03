@@ -1,4 +1,4 @@
-import type {ReadlistResponse} from '@package/contract';
+import type {ReadlistResponse} from '@rezics/contract';
 import {Grid} from '@mui/material';
 import React from 'react';
 import {useNavigate} from '@tanstack/react-router';

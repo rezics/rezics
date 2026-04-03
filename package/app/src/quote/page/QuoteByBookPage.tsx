@@ -1,5 +1,5 @@
-import {AccentBarWithText} from '@package/ui/composite/typography/AccentBarWithText.tsx';
-import {ArrowForwardIcon} from '@package/ui/composite/navigation/ArrowForwardIcon.tsx';
+import {AccentBarWithText} from '@rezics/ui/composite/typography/AccentBarWithText.tsx';
+import {ArrowForwardIcon} from '@rezics/ui/composite/navigation/ArrowForwardIcon.tsx';
 import {QuoteNewPage} from './QuoteNewPage';
 import {useTranslation} from 'react-i18next';
 import UnitsPage from '@/unit/page/UnitsPage';

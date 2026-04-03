@@ -1,14 +1,14 @@
 ## Why
 
-Currently, the codebase uses Zod for some validations (e.g., in the `ui` package) and TypeBox (via Elysia) for others, leading to inconsistent schema validation. Furthermore, environment variables are not strictly validated or unified across the monorepo packages. We need a unified schema validation strategy using TypeBox (`import { t } from '@package/contract'`) and a robust environment variable validation leveraging `@t3-oss/env-core` (t3-env) to ensure type safety and consistency across both frontend (Vite) and backend (Elysia Node) applications.
+Currently, the codebase uses Zod for some validations (e.g., in the `ui` package) and TypeBox (via Elysia) for others, leading to inconsistent schema validation. Furthermore, environment variables are not strictly validated or unified across the monorepo packages. We need a unified schema validation strategy using TypeBox (`import { t } from '@rezics/contract'`) and a robust environment variable validation leveraging `@t3-oss/env-core` (t3-env) to ensure type safety and consistency across both frontend (Vite) and backend (Elysia Node) applications.
 
 ## What Changes
 
-- **BREAKING**: Remove `zod` dependency entirely from the workspace, replacing all usages with `@sinclair/typebox` via `import { t } from '@package/contract'`.
+- **BREAKING**: Remove `zod` dependency entirely from the workspace, replacing all usages with `@sinclair/typebox` via `import { t } from '@rezics/contract'`.
 - Introduce `@t3-oss/env-core` to the workspace.
 - Each application package (`app`, `admin`, `preview`, `search`, `server`) will define its own `env.ts` file to validate its specific environment variables.
 - Configure `t3-env` to distinguish between frontend (`clientPrefix: "VITE_"`, `client: {}`) and backend (`server: {}`) environments.
-- Refactor Shadcn forms and other Zod-dependent components in `@package/ui` to utilize TypeBox resolvers.
+- Refactor Shadcn forms and other Zod-dependent components in `@rezics/ui` to utilize TypeBox resolvers.
 
 ## Capabilities
 
@@ -21,7 +21,7 @@ Currently, the codebase uses Zod for some validations (e.g., in the `ui` package
 Inconsistent schema definitions (Zod vs. TypeBox) cause friction when sharing types between the frontend and backend. Unvalidated environment variables can lead to runtime crashes that are difficult to debug.
 
 ## Goals
-- Unify all schema validations using TypeBox (`import { t } from '@package/contract'`).
+- Unify all schema validations using TypeBox (`import { t } from '@rezics/contract'`).
 - Ensure all environment variables are validated at startup for each application.
 - Maintain type safety without shipping server dependencies to the frontend.
 

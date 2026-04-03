@@ -25,7 +25,7 @@ The `package/server` user module SHALL NOT contain any code that issues, refresh
 
 ### Requirement: Server authenticates requests exclusively via JWKS verification
 
-All authenticated server endpoints SHALL validate incoming JWTs using the `verifyBearerToken()` function from `@package/auth/jwt`, which performs ES256 JWKS-based verification against the auth service's published key set.
+All authenticated server endpoints SHALL validate incoming JWTs using the `verifyBearerToken()` function from `@rezics/auth/jwt`, which performs ES256 JWKS-based verification against the auth service's published key set.
 
 #### Scenario: Valid auth-issued JWT accepted
 

@@ -1,6 +1,6 @@
 import {describe, expect, test} from 'bun:test';
 import {SignJWT, exportJWK, generateKeyPair} from 'jose';
-import {NormalizedTokenName} from '@package/contract';
+import {NormalizedTokenName} from '@rezics/contract';
 import type {JwtKeyPersistence} from '../contracts/persistence';
 import {defaultJwtCryptoProvider} from '../contracts/crypto-provider';
 import {JwtAlgorithm} from '../core/jwt-algorithm';

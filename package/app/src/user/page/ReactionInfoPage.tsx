@@ -12,12 +12,12 @@ import {
 } from '@mui/material';
 import {useQuery, useQueryClient} from '@tanstack/react-query';
 import {useUserProfileStore} from '@/user/state';
-import {reactionQueries} from '@package/api/reaction/reaction.queries';
-import type {ReactionDTO} from '@package/api/reaction/reaction.types';
+import {reactionQueries} from '@rezics/api/reaction/reaction.queries';
+import type {ReactionDTO} from '@rezics/api/reaction/reaction.types';
 import {
   UniversalPaginator,
   type UniversalPaginatorHandle,
-} from '@package/ui/composite/pagination/Pagination.tsx';
+} from '@rezics/ui/composite/pagination/Pagination.tsx';
 import {useNavigate} from '@tanstack/react-router';
 
 type ReactionInfoPageProps = {

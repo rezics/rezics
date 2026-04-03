@@ -3,7 +3,7 @@ import './index.css';
 
 import App from './App';
 import {initI18n} from './provider/i18n';
-import {configureApi} from '@package/api/config';
+import {configureApi} from '@rezics/api/config';
 import {env} from '@/env';
 // import { setupMock } from "./plugin/providers/mock.ts";
 

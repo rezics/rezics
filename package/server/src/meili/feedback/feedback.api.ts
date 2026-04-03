@@ -1,10 +1,10 @@
-import type {FeedbackListQuery} from '@package/contract';
+import type {FeedbackListQuery} from '@rezics/contract';
 import {searchClient} from '../search-client';
 import type {
   FeedbackSearchDocument,
   FeedbackSearchResult,
-} from '@package/contract';
-import type {SearchResponse} from '@package/search';
+} from '@rezics/contract';
+import type {SearchResponse} from '@rezics/search';
 import {defaultSort} from '../util';
 /**
  * Low-level search API that accepts a fully-constructed Meilisearch query string.
@@ -41,7 +41,7 @@ function escape(value: string): string {
 /**
  * Higher-level search API for feedbacks.
  *
- * - Input is {@link FeedbackListQuery} from `@package/contract`.
+ * - Input is {@link FeedbackListQuery} from `@rezics/contract`.
  * - It maps contract fields like `userId`, `unitId`, `type`, `resolved`,
  *   `createdAtFrom`, `createdAtTo` into Meilisearch filter expressions.
  *

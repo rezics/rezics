@@ -1,14 +1,14 @@
 import {Rating} from '@mui/material';
 import React from 'react';
 import {useTranslation} from 'react-i18next';
-import {Link} from '@package/ui/primitive/link/Link.tsx';
+import {Link} from '@rezics/ui/primitive/link/Link.tsx';
 
-import type {BookDTO} from '@package/contract';
+import type {BookDTO} from '@rezics/contract';
 import {
   MiniActionBar,
   MiniAdminActionBar,
 } from '@/engagement/component/MiniActionBar.tsx';
-import {LazyLoadImage} from '@package/ui/primitive/image/LazyLoadImage.tsx';
+import {LazyLoadImage} from '@rezics/ui/primitive/image/LazyLoadImage.tsx';
 
 type Book = BookDTO;
 

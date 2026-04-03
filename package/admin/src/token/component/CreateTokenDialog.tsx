@@ -10,7 +10,7 @@ import {
   Box,
   Alert,
 } from '@mui/material';
-import type {CreateApiTokenInput} from '@package/contract';
+import type {CreateApiTokenInput} from '@rezics/contract';
 import {ScopesEditor} from './ScopesEditor';
 
 interface CreateTokenDialogProps {

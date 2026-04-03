@@ -1,1 +1,1 @@
-export {useAppStore} from '@package/app-shell';
+export {useAppStore} from '@rezics/app-shell';

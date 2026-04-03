@@ -4,7 +4,7 @@
 TBD - created by archiving change jwt-context-plugin-route-refactor. Update Purpose after archive.
 ## Requirements
 ### Requirement: Token resolver plugin factory
-The `@package/jwt` package SHALL export a `createTokenResolver` factory function from its adapters module. The factory SHALL accept a context key name (string literal), a header name, a bearer flag, and a `JwtVerifier<TPayload>` function. It SHALL return an Elysia plugin instance.
+The `@rezics/jwt` package SHALL export a `createTokenResolver` factory function from its adapters module. The factory SHALL accept a context key name (string literal), a header name, a bearer flag, and a `JwtVerifier<TPayload>` function. It SHALL return an Elysia plugin instance.
 
 #### Scenario: Create a token resolver for a bearer token
 - **WHEN** `createTokenResolver('authIdentityToken', { headerName: 'authorization', usesBearer: true, verifier })` is called
@@ -80,9 +80,9 @@ The factory SHALL use TypeScript generics so that the returned plugin carries ty
 - **THEN** TypeScript infers `authIdentityToken` as `AuthIdentityTokenClaims | null`
 
 ### Requirement: Package export
-The `createTokenResolver` factory SHALL be exported from `@package/jwt` root export and from the `@package/jwt/adapters` sub-export.
+The `createTokenResolver` factory SHALL be exported from `@rezics/jwt` root export and from the `@rezics/jwt/adapters` sub-export.
 
 #### Scenario: Import from package root
-- **WHEN** a consumer imports `{ createTokenResolver } from '@package/jwt'`
+- **WHEN** a consumer imports `{ createTokenResolver } from '@rezics/jwt'`
 - **THEN** the import resolves successfully
 

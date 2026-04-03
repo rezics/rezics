@@ -10,7 +10,7 @@ export type {
   CreateTagInput,
   UpdateTagInput,
   TagListQuery,
-} from '@package/contract';
+} from '@rezics/contract';
 export type {TagFormData, TagFilters, TagView} from './tag.types';
 
 // Keys

@@ -1,20 +1,20 @@
-import {authApi} from '@package/api/auth/auth.api';
-import {authKeys} from '@package/api/auth/auth.keys';
-import {NormalizedTokenName} from '@package/contract';
+import {authApi} from '@rezics/api/auth/auth.api';
+import {authKeys} from '@rezics/api/auth/auth.keys';
+import {NormalizedTokenName} from '@rezics/contract';
 import {
   clearAllTokens,
   ensureAuthIdentityToken,
   parseJwt,
   setToken,
-} from '@package/api/react-query/jwt';
-import {userKeys} from '@package/api/user/user.keys';
-import {userApi} from '@package/api/user/user.api';
+} from '@rezics/api/react-query/jwt';
+import {userKeys} from '@rezics/api/user/user.keys';
+import {userApi} from '@rezics/api/user/user.api';
 import {qc} from '@/app/provider/reactQueryUtil';
 import {
   clearAuthSessionState,
   hydrateAuthSessionState,
   useAuthSessionStore,
-} from '@package/app-shell';
+} from '@rezics/app-shell';
 
 /**
  * Provision business session: AUTH_IDENTITY -> context token -> ensure user -> REZICS_SESSION.

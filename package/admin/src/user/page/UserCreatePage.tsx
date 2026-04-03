@@ -14,8 +14,8 @@ import {
 import React from 'react';
 import {useNavigate} from '@tanstack/react-router';
 
-import {Link} from '@package/ui/primitive/link/Link.tsx';
-import {userMutations} from '@package/api/user/user.mutations';
+import {Link} from '@rezics/ui/primitive/link/Link.tsx';
+import {userMutations} from '@rezics/api/user/user.mutations';
 
 import {Page} from '@/core/layout/Page';
 

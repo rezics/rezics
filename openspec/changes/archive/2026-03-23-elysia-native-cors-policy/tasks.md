@@ -1,6 +1,6 @@
 ## 1. Shared Package Setup
 
-- [x] 1.1 Create `package/cors` workspace with `package.json` (`@package/cors`), `tsconfig.json`, and entry point `src/index.ts`
+- [x] 1.1 Create `package/cors` workspace with `package.json` (`@rezics/cors`), `tsconfig.json`, and entry point `src/index.ts`
 - [x] 1.2 Define `CorsPolicyName` type and `CorsPolicyConfig` interface in `package/cors/src/types.ts`
 - [x] 1.3 Implement `applyHeaders(request, response, config)` utility — origin validation, method/header/credentials/expose header logic (~40 lines)
 - [x] 1.4 Implement `preflightResponse(request, config)` utility — returns 204 with CORS headers and `Access-Control-Max-Age`
@@ -9,9 +9,9 @@
 
 ## 2. Service-Specific Wrappers
 
-- [x] 2.1 Add `@package/cors` dependency to `package/server/package.json`
+- [x] 2.1 Add `@rezics/cors` dependency to `package/server/package.json`
 - [x] 2.2 Create `package/server/src/cors/index.ts` thin wrapper: export `serverCorsPolicy(defaultPolicy)` that calls `corsPolicy()` with server-specific configs (`credentialedCorsConfig`, `publicCorsConfig`, `internalCorsConfig`), and re-export `allowedOrigins`
-- [x] 2.3 Add `@package/cors` dependency to `package/auth/package.json`
+- [x] 2.3 Add `@rezics/cors` dependency to `package/auth/package.json`
 - [x] 2.4 Create `package/auth/src/cors/index.ts` thin wrapper: export `authCorsPolicy(defaultPolicy)` with auth-specific configs, and re-export `allowedOrigins`
 
 ## 3. Migrate `package/server` Domain APIs

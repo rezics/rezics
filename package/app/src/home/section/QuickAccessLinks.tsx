@@ -3,13 +3,13 @@ import {
   Carousel,
   CarouselContent,
   CarouselItem,
-} from '@package/ui/shadcn/carousel.tsx';
+} from '@rezics/ui/shadcn/carousel.tsx';
 
 import {Chip, type ChipProps} from '@mui/material';
-import {echoKvGetQuery} from '@package/api/echokv/echokv';
+import {echoKvGetQuery} from '@rezics/api/echokv/echokv';
 import {useQuery} from '@tanstack/react-query';
-import {parseEchoKVResponse} from '@package/api/echokv/util';
-import {Link} from '@package/ui/primitive/link/Link.tsx';
+import {parseEchoKVResponse} from '@rezics/api/echokv/util';
+import {Link} from '@rezics/ui/primitive/link/Link.tsx';
 
 import {DynamicIcon, type IconKey} from './DynamicIcon';
 

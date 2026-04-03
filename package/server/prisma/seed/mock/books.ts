@@ -120,7 +120,7 @@ export async function updateChapterIndex(
   });
 }
 
-import type {ChapterTreeItem} from '@package/contract';
+import type {ChapterTreeItem} from '@rezics/contract';
 
 /**
  * Create chapters for a book and return a nested tree structure array.

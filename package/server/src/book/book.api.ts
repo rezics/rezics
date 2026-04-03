@@ -4,16 +4,16 @@ import {
   bookParamsSchema,
   createBookSchema,
   updateBookSchema,
-} from '@package/contract';
+} from '@rezics/contract';
 import type {
   BookListResponse,
   BookResponse,
   CreateBookInput,
-} from '@package/contract';
+} from '@rezics/contract';
 import {
   BasicAdminPermission,
   hasPermissionToUpdateBook,
-} from '@package/contract';
+} from '@rezics/contract';
 import type {Rating} from '#/prisma/client';
 import {bookService} from './book.service';
 import {mapBookToDTO} from './mapper';

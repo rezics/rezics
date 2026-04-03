@@ -1,7 +1,7 @@
 ## ADDED Requirements
 
 ### Requirement: Admin login page uses auth server
-The login page at `/login` (`package/admin/src/user/page/LoginPage.tsx`) SHALL call `authApi.signIn()` from `@package/api/auth/auth.api` instead of `userApi.login()`. On successful sign-in, it SHALL verify the user has admin or owner role from the auth response, then navigate to the redirect target.
+The login page at `/login` (`package/admin/src/user/page/LoginPage.tsx`) SHALL call `authApi.signIn()` from `@rezics/api/auth/auth.api` instead of `userApi.login()`. On successful sign-in, it SHALL verify the user has admin or owner role from the auth response, then navigate to the redirect target.
 
 #### Scenario: Admin signs in successfully
 - **WHEN** an admin user enters valid email and password and submits the login form

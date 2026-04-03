@@ -1,5 +1,5 @@
 import React from 'react';
-import {AppShell} from '@package/app-shell';
+import {AppShell} from '@rezics/app-shell';
 export default function GlobalDecorator({
   children,
 }: {

@@ -10,12 +10,12 @@ import {Button, Tooltip} from '@mui/material';
 import {useTranslation} from 'react-i18next';
 import {useQuery} from '@tanstack/react-query';
 
-import {bookQueries} from '@package/api/book/book.queries';
-import {AccentBarWithText} from '@package/ui/composite/typography/AccentBarWithText.tsx';
+import {bookQueries} from '@rezics/api/book/book.queries';
+import {AccentBarWithText} from '@rezics/ui/composite/typography/AccentBarWithText.tsx';
 import {useChapterListStore} from '@/book-library/state/chapterListStore';
-import {Link} from '@package/ui/primitive/link/Link.tsx';
+import {Link} from '@rezics/ui/primitive/link/Link.tsx';
 
-import type {ChapterTreeItem} from '@package/contract';
+import type {ChapterTreeItem} from '@rezics/contract';
 
 export type ChapterTreeHandle = {
   expandAll: () => void;

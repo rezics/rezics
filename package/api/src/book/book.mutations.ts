@@ -13,7 +13,7 @@ import type {
   CreateBookInput,
   UpdateBookInput,
   BookResponse,
-} from '@package/contract';
+} from '@rezics/contract';
 
 /**
  * Mutation for creating a book

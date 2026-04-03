@@ -6,8 +6,8 @@ import type {
   ReadlistListQuery,
   CreateReadlistInput,
   UpdateReadlistInput,
-} from '@package/contract';
-import type {ReadlistDTO} from '@package/contract';
+} from '@rezics/contract';
+import type {ReadlistDTO} from '@rezics/contract';
 import {mapReadlistListRowToDTO, mapReadlistRowToDTO} from './mapper';
 import {syncUnitToMeili, deleteUnitFromMeili} from '@/meili/unit/sync';
 import {

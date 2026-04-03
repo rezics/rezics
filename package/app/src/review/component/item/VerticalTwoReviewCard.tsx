@@ -1,5 +1,5 @@
 import React from 'react';
-import type {ReviewMeiliDTO} from '@package/contract';
+import type {ReviewMeiliDTO} from '@rezics/contract';
 import ReviewCard from './ReviewCard';
 import {Divider} from '@mui/material';
 

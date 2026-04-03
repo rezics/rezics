@@ -8,7 +8,7 @@ import type {
   UpdateUnitInput,
   UnitListResponse,
   UnitResponse,
-} from '@package/contract';
+} from '@rezics/contract';
 import type {UnitFilters} from './unit.types';
 import {buildQueryString} from '../utils/buildQuery';
 import {apiFetch} from '../react-query/http';

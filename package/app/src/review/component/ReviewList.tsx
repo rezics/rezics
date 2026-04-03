@@ -1,4 +1,4 @@
-import {type ReviewDTO} from '@package/contract';
+import {type ReviewDTO} from '@rezics/contract';
 import {SingleReviewShow} from './SingleReview';
 
 import {Box} from '@mui/material';

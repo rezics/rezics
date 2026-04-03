@@ -1,6 +1,6 @@
 import {Alert, Button, TextField} from '@mui/material';
 import {useEffect, useState} from 'react';
-import {echoKvGetQuery} from '@package/api/echokv/echokv';
+import {echoKvGetQuery} from '@rezics/api/echokv/echokv';
 import {useQuery} from '@tanstack/react-query';
 
 export function NewBookByUrl() {

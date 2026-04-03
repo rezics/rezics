@@ -1,4 +1,4 @@
-import type {ApiTokenScopes} from '@package/contract';
+import type {ApiTokenScopes} from '@rezics/contract';
 import {tokenService} from './token.service';
 import {unitService} from '../unit/unit.service';
 

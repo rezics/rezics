@@ -2,13 +2,13 @@ import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import {Button, CircularProgress, TextField} from '@mui/material';
 import {useTranslation} from 'react-i18next';
 
-import EasyEditor from '@package/ui/editor/easyeditor/EasyEditor.tsx';
+import EasyEditor from '@rezics/ui/editor/easyeditor/EasyEditor.tsx';
 import {useQuery, useQueryClient} from '@tanstack/react-query';
 import {
   chapterDetailQuery,
   useUpdateChapterMutation,
-} from '@package/api/chapter/chapter';
-import {bookMutations, bookChapterIndexQuery} from '@package/api/book/book';
+} from '@rezics/api/chapter/chapter';
+import {bookMutations, bookChapterIndexQuery} from '@rezics/api/book/book';
 import {bookEditChapterRoute, bookEditLayoutRoute} from '@/router';
 
 /**

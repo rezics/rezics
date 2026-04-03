@@ -1,11 +1,11 @@
-import type {JwtKeyPersistence, JwtKeyRecord} from '@package/jwt';
+import type {JwtKeyPersistence, JwtKeyRecord} from '@rezics/jwt';
 import {
   JwtAlgorithm,
   asJwtPrivateJwk,
   asJwtPublicJwk,
   type JwtPrivateJwk,
   type JwtPublicJwk,
-} from '@package/jwt';
+} from '@rezics/jwt';
 import {prisma, Prisma} from '#/prisma/client';
 import {getJwtService} from '@/jwt';
 

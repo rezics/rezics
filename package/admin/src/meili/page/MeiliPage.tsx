@@ -16,7 +16,7 @@ import {
   meiliAdminMutations,
   meiliAdminQueries,
   type MeiliKey,
-} from '@package/api/meili/meili.admin.queries';
+} from '@rezics/api/meili/meili.admin.queries';
 
 type MessageState = {
   type: 'success' | 'error' | 'info';

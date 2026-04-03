@@ -3,8 +3,8 @@ import {Alert, Button, CircularProgress, Typography} from '@mui/material';
 import {useTranslation} from 'react-i18next';
 import {useNavigate} from '@tanstack/react-router';
 import {useQuery} from '@tanstack/react-query';
-import {buildMeiliReviewQuery} from '@package/api/meili/meili.queries';
-import type {ReviewDTO} from '@package/contract';
+import {buildMeiliReviewQuery} from '@rezics/api/meili/meili.queries';
+import type {ReviewDTO} from '@rezics/contract';
 import {HorizontalReviewCarousel} from '@/review/component/list/HorizontalReviewCarousel';
 
 export type TrendingReviewsProps = {

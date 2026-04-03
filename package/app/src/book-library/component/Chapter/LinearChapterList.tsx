@@ -2,10 +2,10 @@ import React, {useMemo, useRef, useState} from 'react';
 import {useQuery} from '@tanstack/react-query';
 import {Divider, TextField, Button, Stack} from '@mui/material';
 
-import {bookQueries} from '@package/api/book/book.queries';
+import {bookQueries} from '@rezics/api/book/book.queries';
 import {ChapterArborist} from './ChapterArborist';
 import type {ChapterArboristRefHandle} from './ChapterArborist';
-import type {ChapterTreeItem} from '@package/contract';
+import type {ChapterTreeItem} from '@rezics/contract';
 
 /** Props for LinearChapterList component. */
 interface LinearChapterListProps {

@@ -3,14 +3,14 @@ import {Tabs, Tab, Box} from '@mui/material';
 import {useQuery, useQueryClient} from '@tanstack/react-query';
 import {useRouterState} from '@tanstack/react-router';
 
-import {UniversalPaginator, type UniversalPaginatorHandle} from '@package/ui';
+import {UniversalPaginator, type UniversalPaginatorHandle} from '@rezics/ui';
 import {ReviewList} from '@/review/component/ReviewList.tsx';
-import type {ReviewDTO} from '@package/contract';
+import type {ReviewDTO} from '@rezics/contract';
 import {TextSearchInput} from '@/search/component/TextSearchInput';
-import {buildMeiliUnitQuery} from '@package/api/meili/meili.queries';
-import {reactionApi} from '@package/api/reaction/reaction.api';
-import {UnitType} from '@package/contract';
-import {mapUnitListToReviewListResponse} from '@package/api/meili/meili.api';
+import {buildMeiliUnitQuery} from '@rezics/api/meili/meili.queries';
+import {reactionApi} from '@rezics/api/reaction/reaction.api';
+import {UnitType} from '@rezics/contract';
+import {mapUnitListToReviewListResponse} from '@rezics/api/meili/meili.api';
 
 type Review = ReviewDTO;
 export interface ReviewsPageProps {

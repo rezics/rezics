@@ -1,4 +1,4 @@
-import type {ChapterDetailDTO, ChapterListItemDTO} from '@package/contract';
+import type {ChapterDetailDTO, ChapterListItemDTO} from '@rezics/contract';
 import type {ChapterUnitWithRelations} from './types';
 
 export function mapUnitToChapterListItemDTO(

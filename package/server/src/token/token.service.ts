@@ -5,7 +5,7 @@ import {
   type ApiTokenScopes,
   type CreateApiTokenInput,
   type UpdateApiTokenInput,
-} from '@package/contract';
+} from '@rezics/contract';
 import {generateSecureToken, hashToken, verifyTokenHash} from './utils';
 import {mapApiTokenToDTO, type ApiTokenWithScopes} from './types';
 

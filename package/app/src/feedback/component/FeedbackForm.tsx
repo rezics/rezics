@@ -7,8 +7,8 @@ import {
   Stack,
   Typography,
 } from '@mui/material';
-import {useCreateFeedbackMutation} from '@package/api/feedback/feedback.mutations';
-import type {CreateFeedbackInput} from '@package/api/feedback/feedback.types';
+import {useCreateFeedbackMutation} from '@rezics/api/feedback/feedback.mutations';
+import type {CreateFeedbackInput} from '@rezics/api/feedback/feedback.types';
 import {useRouterState} from '@tanstack/react-router';
 import {useEffect} from 'react';
 
