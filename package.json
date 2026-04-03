@@ -8,7 +8,7 @@
     "server:dev": "cd package/server && bun run dev",
     "deploy": "cd tool && bun run deploy",
     "check:runtime-env": "node tool/scripts/check-no-runtime-env.mjs",
-    "seed:cross": "bun run tool/seed/cross-seed.ts",
+    "seed:cross": "cd tool && bun run seed/cross-seed.ts",
     "knip": "knip"
   },
   "workspaces": [
