@@ -1,5 +1,4 @@
 import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
-import MarkdownIt from 'markdown-it';
 import {EditorContext} from '../react/context';
 import {useEditor} from '../react/useEditor';
 import {languages} from '@codemirror/language-data';
@@ -10,7 +9,7 @@ import {resolvePlugins} from '../core/plugin';
 import {ReactToolbar} from '../toolbar/react/index';
 import {markdownIconMap} from './toolbar-defaults';
 import {applyIconDefaults, applyToolbarOverrides} from './toolbar-utils';
-import {preserveFormattingPlugin} from '../markdown/preview/index';
+import {createNovelRenderer} from '../markdown/preview/index';
 import {highlightCode} from '../markdown/preview/highlight';
 import {addCopyButtons} from '../markdown/preview/copyButton';
 import type {EditorPlugin} from '../core/types';
@@ -29,14 +28,7 @@ function createMarkdownRenderer(config?: PreviewConfig) {
       ? undefined
       : (config?.highlight ?? highlightCode);
 
-  const md = new MarkdownIt({
-    html: true,
-    linkify: true,
-    typographer: true,
-    highlight: highlighter,
-  });
-  preserveFormattingPlugin(md);
-  return md;
+  return createNovelRenderer({html: true, highlight: highlighter});
 }
 
 export function MarkdownEditor({

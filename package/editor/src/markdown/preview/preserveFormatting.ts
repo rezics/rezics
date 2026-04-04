@@ -1,26 +1,51 @@
-import type MarkdownIt from 'markdown-it';
+import MarkdownIt from 'markdown-it';
 
 export interface PreserveFormatOptions {
   preserveSpaces?: boolean;
   preserveEmptyLines?: boolean;
 }
 
-/**
- * Rewrites the markdown source so that consecutive blank lines beyond
- * the standard paragraph break (\n\n) are rendered as visible &nbsp; lines.
- * Only activates on 3+ consecutive newlines (standard \n\n is left alone).
- */
-function multipleEmptyLines(state: { src: string }): void {
-  if (!state.src.includes('\n\n\n')) return;
-
-  state.src = state.src.replace(/\n{3,}/g, (match) => {
-    const extraLines = match.length - 2;
-    return '\n\n' + '&nbsp;\n\n'.repeat(extraLines);
-  });
+export interface NovelRendererOptions {
+  html?: boolean;
+  linkify?: boolean;
+  typographer?: boolean;
+  highlight?: ((code: string, lang: string) => string) | false;
 }
 
 /**
- * Walks inline tokens and replaces runs of 2+ spaces with &nbsp; entities
+ * Reads `token.map` gaps between block elements and injects `empty_line` tokens.
+ * A single empty line (standard paragraph break) is ignored; gaps of 2+ empty lines
+ * emit the full count as tokens so the visual spacing is faithfully preserved.
+ */
+function emptyLinesCore(state: {
+  tokens: Array<{ type: string; map?: [number, number] | null }>;
+  Token: new (type: string, tag: string, nesting: number) => {
+    type: string;
+    map?: [number, number] | null;
+  };
+}): void {
+  const out: typeof state.tokens = [];
+  let prevEnd = -1;
+
+  for (const token of state.tokens) {
+    if (token.map) {
+      if (prevEnd >= 0) {
+        const gap = token.map[0] - prevEnd;
+        if (gap >= 2) {
+          for (let i = 0; i < gap; i++)
+            out.push(new state.Token('empty_line', '', 0));
+        }
+      }
+      prevEnd = token.map[1];
+    }
+    out.push(token);
+  }
+
+  state.tokens = out;
+}
+
+/**
+ * Walks inline tokens and replaces runs of 2+ spaces with `&nbsp;` entities
  * so they render visibly instead of collapsing.
  */
 function preserveSpacesCore(state: {
@@ -64,24 +89,45 @@ function preserveSpacesCore(state: {
   }
 }
 
+/** markdown-it plugin: preserves extra blank lines as `<br>` elements. */
+export function emptyLinesPlugin(md: MarkdownIt): void {
+  md.core.ruler.push(
+    'empty_lines',
+    emptyLinesCore as Parameters<typeof md.core.ruler.push>[1],
+  );
+  md.renderer.rules.empty_line = () => '<br class="preserved-empty-line">';
+}
+
+/** markdown-it plugin: preserves runs of 2+ inline spaces as `&nbsp;` entities. */
+export function preserveSpacesPlugin(md: MarkdownIt): void {
+  md.core.ruler.push(
+    'preserve_spaces',
+    preserveSpacesCore as Parameters<typeof md.core.ruler.push>[1],
+  );
+}
+
+/** markdown-it plugin: enables `breaks`, blank-line preservation, and space preservation. */
+export function novelModePlugin(md: MarkdownIt): void {
+  md.options.breaks = true;
+  md.use(emptyLinesPlugin).use(preserveSpacesPlugin);
+}
+
+/** markdown-it plugin: selectively applies blank-line and space preservation. */
 export function preserveFormattingPlugin(
   md: MarkdownIt,
   options?: PreserveFormatOptions,
 ): void {
   const { preserveSpaces = true, preserveEmptyLines = true } = options ?? {};
+  if (preserveEmptyLines) md.use(emptyLinesPlugin);
+  if (preserveSpaces) md.use(preserveSpacesPlugin);
+}
 
-  if (preserveEmptyLines) {
-    md.core.ruler.before(
-      'normalize',
-      'line_break_to_br',
-      multipleEmptyLines as Parameters<typeof md.core.ruler.before>[2],
-    );
-  }
-
-  if (preserveSpaces) {
-    md.core.ruler.push(
-      'preserve_spaces_core',
-      preserveSpacesCore as Parameters<typeof md.core.ruler.push>[1],
-    );
-  }
+/** Returns a fully configured `MarkdownIt` instance for novel/prose content. */
+export function createNovelRenderer(options?: NovelRendererOptions): MarkdownIt {
+  return new MarkdownIt({
+    html: options?.html ?? false,
+    linkify: options?.linkify ?? true,
+    typographer: options?.typographer ?? true,
+    highlight: options?.highlight === false ? undefined : options?.highlight,
+  }).use(novelModePlugin);
 }

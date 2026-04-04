@@ -21,7 +21,16 @@ export function preview(config?: PreviewConfig): EditorPlugin {
 }
 
 export type { PreviewConfig } from './preview';
-export { preserveFormattingPlugin } from './preserveFormatting';
-export type { PreserveFormatOptions } from './preserveFormatting';
+export {
+  preserveFormattingPlugin,
+  emptyLinesPlugin,
+  preserveSpacesPlugin,
+  novelModePlugin,
+  createNovelRenderer,
+} from './preserveFormatting';
+export type {
+  PreserveFormatOptions,
+  NovelRendererOptions,
+} from './preserveFormatting';
 export { highlightCode } from './highlight';
 export { addCopyButtons } from './copyButton';

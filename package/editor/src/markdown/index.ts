@@ -43,4 +43,8 @@ export type { MentionItem, MentionConfig } from './mention/index';
 export { emoji } from './emoji/index';
 export type { EmojiConfig } from './emoji/index';
 export { preview } from './preview/index';
-export { preserveFormattingPlugin } from './preview/index';
+export {
+  preserveFormattingPlugin,
+  novelModePlugin,
+  createNovelRenderer,
+} from './preview/index';

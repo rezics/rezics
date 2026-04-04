@@ -1,9 +1,7 @@
 import EasyMDE from 'easymde';
 import React, {lazy, useCallback, useEffect, useRef, useState} from 'react';
 import 'easymde/dist/easymde.min.css';
-import MarkdownIt from 'markdown-it';
-
-import {preserveFormattingPlugin} from '../plugin/preserveFormatPlugin';
+import {createNovelRenderer} from '@rezics/editor/markdown';
 import {
   EditorMentionPicker,
   type MentionUserOption,
@@ -114,15 +112,7 @@ const EasyEditor: React.FC<EasyEditorProps> = ({
 
   useEffect(() => {
     if (textareaRef.current) {
-      const md = new MarkdownIt({
-        html: false,
-        // html: true,
-        linkify: true,
-        breaks: true, // key: convert \n to <br>
-        typographer: false,
-      });
-
-      md.use(preserveFormattingPlugin);
+      const md = createNovelRenderer({typographer: false});
 
       easyMDEInstance.current = new EasyMDE({
         element: textareaRef.current,

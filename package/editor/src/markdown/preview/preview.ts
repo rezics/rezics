@@ -1,7 +1,7 @@
 import { showPanel, EditorView, type Panel } from '@codemirror/view';
 import type { Extension } from '@codemirror/state';
-import MarkdownIt from 'markdown-it';
-import { preserveFormattingPlugin } from './preserveFormatting';
+import type MarkdownIt from 'markdown-it';
+import { createNovelRenderer } from './preserveFormatting';
 import { highlightCode } from './highlight';
 import { addCopyButtons } from './copyButton';
 
@@ -52,13 +52,7 @@ export function previewExtension(config?: PreviewConfig): Extension {
       ? undefined
       : config?.highlight ?? highlightCode;
 
-  const md = new MarkdownIt({
-    html: true,
-    linkify: true,
-    typographer: true,
-    highlight: highlighter,
-  });
-  preserveFormattingPlugin(md);
+  const md = createNovelRenderer({ html: true, highlight: highlighter });
 
   return [
     showPanel.of(createPreviewPanel(md, mode)),

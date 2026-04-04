@@ -1,7 +1,6 @@
 import {useQuery} from '@tanstack/react-query';
 import {chapterDetailQuery} from '@rezics/api/chapter/chapter';
-import {preserveFormattingPlugin} from '@rezics/ui/editor/plugin/preserveFormatPlugin.ts';
-import MarkdownIt from 'markdown-it';
+import {createNovelRenderer} from '@rezics/editor/markdown';
 import React from 'react';
 import {bookReadLayoutRoute} from '@/router';
 
@@ -11,15 +10,7 @@ export const BookReadChapterPage: React.FC = () => {
     chapterDetailQuery(chapterId),
   );
 
-  const md = new MarkdownIt({
-    html: false,
-    linkify: true,
-    breaks: true,
-    typographer: true,
-  });
-
-  md.use(preserveFormattingPlugin);
-
+  const md = createNovelRenderer();
   const chapterHtml = md.render(data?.content || '');
 
   if (isPending) return <div>Loading...</div>;
