@@ -1,4 +1,2 @@
-- [ ] The test structure needs optimization; the current test coverage is clearly too narrow, for example, custom themes are not being tested.
 - [ ] Is setting `preview = true` useful in a Markdown editor? Can it be removed?
 - [ ] The editor needs a theming system. A theme defines a set of syntax highlighting rules and a set of default enabled plugins—for example, separate highlighting schemes for light and dark modes, along with enabling the preserveFormattingPlugin by default.
-- [ ] 
