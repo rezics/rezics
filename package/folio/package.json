@@ -11,7 +11,8 @@
   },
   "scripts": {
     "test": "bun test",
-    "dev": "bun run --watch src/index.ts"
+    "dev": "bun run --watch src/index.ts",
+    "cosmos": "cosmos"
   },
   "dependencies": {
     "@use-gesture/react": "^10.3.1",
@@ -26,6 +27,9 @@
   "devDependencies": {
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
-    "bun-types": "latest"
+    "@vitejs/plugin-react": "^5.1.4",
+    "bun-types": "latest",
+    "react-cosmos": "^7.2.0",
+    "react-cosmos-plugin-vite": "^7.2.0"
   }
 }
