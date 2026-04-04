@@ -1,24 +1,25 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import MarkdownIt from 'markdown-it';
-import { EditorContext } from '../react/context';
-import { useEditor } from '../react/useEditor';
-import { languages } from '@codemirror/language-data';
-import { markdown } from '../markdown/core/index';
-import { mention } from '../markdown/mention/index';
-import { emoji } from '../markdown/emoji/index';
-import { resolvePlugins } from '../core/plugin';
-import { ReactToolbar } from '../toolbar/react/index';
-import { markdownIconMap } from './toolbar-defaults';
-import { applyIconDefaults, applyToolbarOverrides } from './toolbar-utils';
-import { preserveFormattingPlugin } from '../markdown/preview/index';
-import { highlightCode } from '../markdown/preview/highlight';
-import { addCopyButtons } from '../markdown/preview/copyButton';
-import type { EditorPlugin } from '../core/types';
-import type { ToolbarEntry } from '../toolbar/types';
-import type { MarkdownEditorProps } from './types';
-import type { PreviewConfig } from '../markdown/preview/index';
+import {EditorContext} from '../react/context';
+import {useEditor} from '../react/useEditor';
+import {languages} from '@codemirror/language-data';
+import {markdown} from '../markdown/core/index';
+import {mention} from '../markdown/mention/index';
+import {emoji} from '../markdown/emoji/index';
+import {resolvePlugins} from '../core/plugin';
+import {ReactToolbar} from '../toolbar/react/index';
+import {markdownIconMap} from './toolbar-defaults';
+import {applyIconDefaults, applyToolbarOverrides} from './toolbar-utils';
+import {preserveFormattingPlugin} from '../markdown/preview/index';
+import {highlightCode} from '../markdown/preview/highlight';
+import {addCopyButtons} from '../markdown/preview/copyButton';
+import type {EditorPlugin} from '../core/types';
+import type {ToolbarEntry} from '../toolbar/types';
+import type {MarkdownEditorProps} from './types';
+import type {PreviewConfig} from '../markdown/preview/index';
+import './MarkdownEditor.css';
 
-export type { MarkdownEditorProps };
+export type {MarkdownEditorProps};
 
 type ViewMode = 'write' | 'preview' | 'dual';
 
@@ -26,7 +27,7 @@ function createMarkdownRenderer(config?: PreviewConfig) {
   const highlighter =
     config?.highlight === false
       ? undefined
-      : config?.highlight ?? highlightCode;
+      : (config?.highlight ?? highlightCode);
 
   const md = new MarkdownIt({
     html: true,
@@ -58,11 +59,7 @@ export function MarkdownEditor({
 
   const previewConfig = useMemo(
     () =>
-      typeof preview === 'object'
-        ? preview
-        : preview
-          ? undefined
-          : undefined,
+      typeof preview === 'object' ? preview : preview ? undefined : undefined,
     [preview],
   );
 
@@ -79,10 +76,13 @@ export function MarkdownEditor({
     [onChange],
   );
 
-  const md = useMemo(() => createMarkdownRenderer(previewConfig), [previewConfig]);
+  const md = useMemo(
+    () => createMarkdownRenderer(previewConfig),
+    [previewConfig],
+  );
 
   const allPlugins = useMemo(() => {
-    const plugins: EditorPlugin[] = [markdown({ codeLanguages: languages })];
+    const plugins: EditorPlugin[] = [markdown({codeLanguages: languages})];
 
     if (mentionConfig) {
       plugins.push(mention(mentionConfig));
@@ -115,7 +115,7 @@ export function MarkdownEditor({
 
     for (const group of groups) {
       const groupItems = group
-        .map((name) => items.find((item) => item.name === name))
+        .map(name => items.find(item => item.name === name))
         .filter(Boolean) as typeof items;
       if (groupItems.length > 0) {
         if (entries.length > 0) entries.push('|');
@@ -125,7 +125,7 @@ export function MarkdownEditor({
 
     // Append any remaining items not in predefined groups
     const knownNames = new Set(groups.flat());
-    const remaining = items.filter((item) => !knownNames.has(item.name));
+    const remaining = items.filter(item => !knownNames.has(item.name));
     if (remaining.length > 0) {
       if (entries.length > 0) entries.push('|');
       entries.push(...remaining);
@@ -139,14 +139,14 @@ export function MarkdownEditor({
           name: 'dual-column',
           label: 'Dual column',
           icon: markdownIconMap['dual-column'],
-          action: () => setViewMode((m) => (m === 'dual' ? 'write' : 'dual')),
+          action: () => setViewMode(m => (m === 'dual' ? 'write' : 'dual')),
           isActive: () => viewMode === 'dual',
         },
         {
           name: 'fullscreen',
           label: 'Fullscreen',
           icon: markdownIconMap.fullscreen,
-          action: () => setIsFullscreen((v) => !v),
+          action: () => setIsFullscreen(v => !v),
         },
       );
     }
@@ -154,7 +154,7 @@ export function MarkdownEditor({
     return entries;
   }, [allPlugins, toolbar, preview, viewMode]);
 
-  const { containerRef, view } = useEditor({
+  const {containerRef, view} = useEditor({
     doc: value,
     plugins: allPlugins,
     keybindings,
@@ -184,13 +184,6 @@ export function MarkdownEditor({
   const showDefaultToolbar =
     toolbar !== false && !hasCustomRender && toolbarEntries.length > 0;
 
-  const previewStyle: React.CSSProperties = {
-    padding: '16px',
-    fontFamily: 'sans-serif',
-    fontSize: '14px',
-    lineHeight: '1.6',
-  };
-
   const fullscreenStyle: React.CSSProperties = isFullscreen
     ? {
         position: 'fixed',
@@ -200,165 +193,29 @@ export function MarkdownEditor({
         display: 'flex',
         flexDirection: 'column',
       }
-    : { display: 'flex', flexDirection: 'column' };
+    : {display: 'flex', flexDirection: 'column'};
 
   return (
     <EditorContext.Provider value={view}>
-      <style>{`
-        .markdown-body blockquote {
-          border-left: 4px solid #d0d7de;
-          margin: 0 0 16px;
-          padding: 0 1em;
-          color: #656d76;
-        }
-        .markdown-body h1 {
-          font-size: 2em;
-          font-weight: 600;
-          border-bottom: 1px solid #d0d7de;
-          padding-bottom: .3em;
-          margin-top: 24px;
-          margin-bottom: 16px;
-        }
-        .markdown-body h2 {
-          font-size: 1.5em;
-          font-weight: 600;
-          border-bottom: 1px solid #d0d7de;
-          padding-bottom: .3em;
-          margin-top: 24px;
-          margin-bottom: 16px;
-        }
-        .markdown-body h3 {
-          font-size: 1.25em;
-          font-weight: 600;
-          margin-top: 24px;
-          margin-bottom: 16px;
-        }
-        .markdown-body pre {
-          background-color: #f6f8fa;
-          border-radius: 6px;
-          padding: 16px;
-          overflow: auto;
-          margin-bottom: 16px;
-          line-height: 1.45;
-        }
-        .markdown-body code {
-          font-family: ui-monospace, monospace;
-          font-size: 85%;
-        }
-        .markdown-body :not(pre) > code {
-          background-color: rgba(175, 184, 193, 0.2);
-          border-radius: 6px;
-          padding: 0.2em 0.4em;
-        }
-        .markdown-body table {
-          border-collapse: collapse;
-          width: 100%;
-          margin-bottom: 16px;
-        }
-        .markdown-body th, .markdown-body td {
-          border: 1px solid #d0d7de;
-          padding: 6px 13px;
-        }
-        .markdown-body th {
-          font-weight: 600;
-          background-color: #f6f8fa;
-        }
-        .markdown-body hr {
-          border: none;
-          border-top: 1px solid #d0d7de;
-          margin: 24px 0;
-        }
-        .markdown-body img {
-          max-width: 100%;
-        }
-        .markdown-body pre {
-          position: relative;
-        }
-        .markdown-body .hljs-keyword { color: #cf222e; }
-        .markdown-body .hljs-string { color: #0a3069; }
-        .markdown-body .hljs-comment { color: #6e7781; font-style: italic; }
-        .markdown-body .hljs-number { color: #0550ae; }
-        .markdown-body .hljs-literal { color: #0550ae; }
-        .markdown-body .hljs-built_in { color: #953800; }
-        .markdown-body .hljs-type { color: #953800; }
-        .markdown-body .hljs-function { color: #8250df; }
-        .markdown-body .hljs-title { color: #8250df; }
-        .markdown-body .hljs-attr { color: #0550ae; }
-        .markdown-body .hljs-attribute { color: #0550ae; }
-        .markdown-body .hljs-selector-class { color: #0550ae; }
-        .markdown-body .hljs-selector-tag { color: #116329; }
-        .markdown-body .hljs-selector-id { color: #0550ae; }
-        .markdown-body .hljs-variable { color: #953800; }
-        .markdown-body .hljs-meta { color: #6e7781; }
-        .markdown-body .hljs-regexp { color: #0a3069; }
-        .markdown-body .hljs-tag { color: #116329; }
-        .markdown-body .hljs-name { color: #116329; }
-        .markdown-body .code-copy-btn {
-          position: absolute;
-          top: 8px;
-          right: 8px;
-          padding: 4px 8px;
-          border: 1px solid #d0d7de;
-          border-radius: 6px;
-          background: #f6f8fa;
-          cursor: pointer;
-          opacity: 0;
-          transition: opacity 0.15s;
-          display: flex;
-          align-items: center;
-          font-size: 12px;
-          color: #656d76;
-          line-height: 1;
-        }
-        .markdown-body pre:hover .code-copy-btn {
-          opacity: 1;
-        }
-        .markdown-body .code-copy-btn:hover {
-          background: #eaeef2;
-        }
-      `}</style>
       <div ref={containerElRef} className={className} style={fullscreenStyle}>
         {/* Tab bar + toolbar row */}
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            borderBottom: '1px solid #d0d7de',
-            padding: '0 8px',
-          }}
-        >
+        <div className="md-editor-header">
           {/* Left: Write / Preview tabs */}
           {preview && (
-            <div style={{ display: 'flex', gap: 0, marginRight: 8 }}>
+            <div className="md-editor-tabs">
               <button
                 type="button"
+                className="md-editor-tab"
+                data-active={viewMode === 'write'}
                 onClick={() => setViewMode('write')}
-                style={{
-                  padding: '6px 12px',
-                  border: 'none',
-                  borderBottom: viewMode === 'write' ? '2px solid #0969da' : '2px solid transparent',
-                  background: 'none',
-                  cursor: 'pointer',
-                  fontSize: 13,
-                  fontWeight: viewMode === 'write' ? 600 : 400,
-                  color: viewMode === 'write' ? '#24292f' : '#656d76',
-                }}
               >
                 Write
               </button>
               <button
                 type="button"
+                className="md-editor-tab"
+                data-active={viewMode === 'preview'}
                 onClick={() => setViewMode('preview')}
-                style={{
-                  padding: '6px 12px',
-                  border: 'none',
-                  borderBottom: viewMode === 'preview' ? '2px solid #0969da' : '2px solid transparent',
-                  background: 'none',
-                  cursor: 'pointer',
-                  fontSize: 13,
-                  fontWeight: viewMode === 'preview' ? 600 : 400,
-                  color: viewMode === 'preview' ? '#24292f' : '#656d76',
-                }}
               >
                 Preview
               </button>
@@ -366,8 +223,13 @@ export function MarkdownEditor({
           )}
 
           {/* Right: toolbar (formatting groups + dual-column / fullscreen) */}
-          <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
-            {hasCustomRender && view && toolbar!.render!(toolbarEntries.filter((e) => e !== '|') as any, view)}
+          <div className="md-editor-toolbar-right">
+            {hasCustomRender &&
+              view &&
+              toolbar!.render!(
+                toolbarEntries.filter(e => e !== '|') as any,
+                view,
+              )}
             {showDefaultToolbar && viewMode !== 'preview' && (
               <ReactToolbar items={toolbarEntries} />
             )}
@@ -389,7 +251,8 @@ export function MarkdownEditor({
               display: viewMode === 'preview' ? 'none' : 'block',
               flex: viewMode === 'dual' ? 1 : undefined,
               overflow: viewMode === 'dual' ? 'auto' : undefined,
-              borderRight: viewMode === 'dual' ? '1px solid #d0d7de' : undefined,
+              borderRight:
+                viewMode === 'dual' ? '1px solid #d0d7de' : undefined,
             }}
           />
 
@@ -397,9 +260,8 @@ export function MarkdownEditor({
           {preview && viewMode !== 'write' && (
             <div
               ref={previewRef}
-              className="markdown-body"
+              className="markdown-body md-editor-preview"
               style={{
-                ...previewStyle,
                 flex: viewMode === 'dual' ? 1 : undefined,
                 overflow: viewMode === 'dual' ? 'auto' : undefined,
               }}

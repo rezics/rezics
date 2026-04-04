@@ -3,6 +3,7 @@ import { EditorView } from '@codemirror/view';
 import { StateEffect } from '@codemirror/state';
 import type { ToolbarItem, ToolbarEntry } from '../types';
 import { useEditorContext } from '../../react/context';
+import './toolbar.css';
 
 export interface ReactToolbarProps {
   items: ToolbarEntry[];
@@ -36,29 +37,6 @@ function useEditorUpdate(view: EditorView | null) {
   }, [view]);
 }
 
-const TOOLTIP_STYLE: React.CSSProperties = {
-  position: 'absolute',
-  top: '100%',
-  left: '50%',
-  transform: 'translateX(-50%)',
-  marginTop: 4,
-  padding: '2px 6px',
-  fontSize: 11,
-  lineHeight: '16px',
-  whiteSpace: 'nowrap',
-  color: '#fff',
-  background: '#333',
-  borderRadius: 3,
-  pointerEvents: 'none',
-  opacity: 0,
-  transition: 'opacity 0.12s',
-};
-
-const TOOLTIP_VISIBLE_STYLE: React.CSSProperties = {
-  ...TOOLTIP_STYLE,
-  opacity: 1,
-};
-
 function ToolbarButton({
   item,
   active,
@@ -80,24 +58,17 @@ function ToolbarButton({
   return (
     <button
       type="button"
+      className="editor-toolbar-btn"
+      data-active={active}
       aria-label={item.label}
       onPointerEnter={show}
       onPointerLeave={hide}
       onFocus={show}
       onBlur={hide}
       onClick={handleClick}
-      style={{
-        position: 'relative',
-        padding: '2px 8px',
-        border: active ? '1px solid #ccc' : '1px solid transparent',
-        borderRadius: 3,
-        background: active ? '#e0e0e0' : 'none',
-        cursor: 'pointer',
-        fontSize: 13,
-      }}
     >
       {item.icon ?? item.label}
-      <span role="tooltip" style={showTooltip ? TOOLTIP_VISIBLE_STYLE : TOOLTIP_STYLE}>
+      <span role="tooltip" className="editor-toolbar-tooltip" data-visible={showTooltip}>
         {item.label}
       </span>
     </button>
@@ -105,17 +76,7 @@ function ToolbarButton({
 }
 
 function ToolbarSeparatorEl() {
-  return (
-    <div
-      role="separator"
-      style={{
-        width: 1,
-        alignSelf: 'stretch',
-        margin: '4px 4px',
-        background: '#d0d7de',
-      }}
-    />
-  );
+  return <div role="separator" className="editor-toolbar-separator" />;
 }
 
 export function ReactToolbar({ items, className }: ReactToolbarProps) {
@@ -127,8 +88,7 @@ export function ReactToolbar({ items, className }: ReactToolbarProps) {
   return (
     <div
       role="toolbar"
-      className={className}
-      style={{ display: 'flex', gap: 2, padding: '4px 8px', alignItems: 'center' }}
+      className={`editor-toolbar${className ? ` ${className}` : ''}`}
     >
       {items.map((entry, i) => {
         if (entry === '|') {

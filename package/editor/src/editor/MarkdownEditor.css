@@ -1,0 +1,172 @@
+.markdown-body blockquote {
+  border-left: 4px solid #d0d7de;
+  margin: 0 0 16px;
+  padding: 0 1em;
+  color: #656d76;
+}
+
+.markdown-body h1 {
+  font-size: 2em;
+  font-weight: 600;
+  border-bottom: 1px solid #d0d7de;
+  padding-bottom: 0.3em;
+  margin-top: 24px;
+  margin-bottom: 16px;
+}
+
+.markdown-body h2 {
+  font-size: 1.5em;
+  font-weight: 600;
+  border-bottom: 1px solid #d0d7de;
+  padding-bottom: 0.3em;
+  margin-top: 24px;
+  margin-bottom: 16px;
+}
+
+.markdown-body h3 {
+  font-size: 1.25em;
+  font-weight: 600;
+  margin-top: 24px;
+  margin-bottom: 16px;
+}
+
+.markdown-body pre {
+  position: relative;
+  background-color: #f6f8fa;
+  border-radius: 6px;
+  padding: 16px;
+  overflow: auto;
+  margin-bottom: 16px;
+  line-height: 1.45;
+}
+
+.markdown-body code {
+  font-family: ui-monospace, monospace;
+  font-size: 85%;
+}
+
+.markdown-body :not(pre) > code {
+  background-color: rgba(175, 184, 193, 0.2);
+  border-radius: 6px;
+  padding: 0.2em 0.4em;
+}
+
+.markdown-body table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.markdown-body th,
+.markdown-body td {
+  border: 1px solid #d0d7de;
+  padding: 6px 13px;
+}
+
+.markdown-body th {
+  font-weight: 600;
+  background-color: #f6f8fa;
+}
+
+.markdown-body hr {
+  border: none;
+  border-top: 1px solid #d0d7de;
+  margin: 24px 0;
+}
+
+.markdown-body img {
+  max-width: 100%;
+}
+
+/* Syntax highlighting */
+.markdown-body .hljs-keyword { color: #cf222e; }
+.markdown-body .hljs-string { color: #0a3069; }
+.markdown-body .hljs-comment { color: #6e7781; font-style: italic; }
+.markdown-body .hljs-number { color: #0550ae; }
+.markdown-body .hljs-literal { color: #0550ae; }
+.markdown-body .hljs-built_in { color: #953800; }
+.markdown-body .hljs-type { color: #953800; }
+.markdown-body .hljs-function { color: #8250df; }
+.markdown-body .hljs-title { color: #8250df; }
+.markdown-body .hljs-attr { color: #0550ae; }
+.markdown-body .hljs-attribute { color: #0550ae; }
+.markdown-body .hljs-selector-class { color: #0550ae; }
+.markdown-body .hljs-selector-tag { color: #116329; }
+.markdown-body .hljs-selector-id { color: #0550ae; }
+.markdown-body .hljs-variable { color: #953800; }
+.markdown-body .hljs-meta { color: #6e7781; }
+.markdown-body .hljs-regexp { color: #0a3069; }
+.markdown-body .hljs-tag { color: #116329; }
+.markdown-body .hljs-name { color: #116329; }
+
+/* Copy button */
+.markdown-body .code-copy-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  padding: 4px 8px;
+  border: 1px solid #d0d7de;
+  border-radius: 6px;
+  background: #f6f8fa;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s;
+  display: flex;
+  align-items: center;
+  font-size: 12px;
+  color: #656d76;
+  line-height: 1;
+}
+
+.markdown-body pre:hover .code-copy-btn {
+  opacity: 1;
+}
+
+.markdown-body .code-copy-btn:hover {
+  background: #eaeef2;
+}
+
+/* Static layout */
+.md-editor-preview {
+  padding: 16px;
+  font-family: sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.md-editor-header {
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid #d0d7de;
+  padding: 0 8px;
+}
+
+.md-editor-tabs {
+  display: flex;
+  gap: 0;
+  margin-right: 8px;
+}
+
+.md-editor-tab {
+  padding: 6px 12px;
+  border: none;
+  border-bottom: 2px solid transparent;
+  background: none;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 400;
+  color: #656d76;
+}
+
+.md-editor-tab[data-active='true'] {
+  border-bottom-color: #f4606c;
+  font-weight: 600;
+  color: #24292f;
+}
+
+.md-editor-toolbar-right {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}

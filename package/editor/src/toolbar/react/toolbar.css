@@ -1,0 +1,50 @@
+.editor-toolbar {
+  display: flex;
+  gap: 2px;
+  padding: 4px 8px;
+  align-items: center;
+}
+
+.editor-toolbar-btn {
+  position: relative;
+  padding: 2px 8px;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  background: none;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.editor-toolbar-btn[data-active='true'] {
+  border-color: #ccc;
+  background: #e0e0e0;
+}
+
+.editor-toolbar-tooltip {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-top: 4px;
+  padding: 2px 6px;
+  font-size: 11px;
+  line-height: 16px;
+  white-space: nowrap;
+  color: #fff;
+  background: #333;
+  border-radius: 3px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.12s;
+}
+
+.editor-toolbar-tooltip[data-visible='true'] {
+  opacity: 1;
+}
+
+.editor-toolbar-separator {
+  width: 1px;
+  align-self: stretch;
+  margin: 4px;
+  background: #d0d7de;
+}
