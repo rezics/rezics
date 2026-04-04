@@ -30,6 +30,7 @@ import {tokenApi} from './token';
 import {feedbackApi} from './feedback';
 import {sessionApi} from './session';
 import {jwtServiceAdminApi} from './jwt';
+import {statsAdminApi} from './stats';
 
 import {cors} from '@elysiajs/cors';
 import {TokenTransportHeader} from '@rezics/contract';
@@ -184,6 +185,7 @@ app
   .use(feedbackApi)
   .use(sessionApi)
   .use(jwtServiceAdminApi)
+  .use(statsAdminApi)
   .get('/', () => 'Hello Elysia')
   .get('/health', () => ({status: 'ok'}));
 
