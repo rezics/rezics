@@ -18,10 +18,15 @@ export interface NovelRendererOptions {
  * emit the full count as tokens so the visual spacing is faithfully preserved.
  */
 function emptyLinesCore(state: {
-  tokens: Array<{ type: string; map?: [number, number] | null }>;
+  tokens: Array<{
+    type: string;
+    map?: [number, number] | null;
+    meta?: unknown;
+  }>;
   Token: new (type: string, tag: string, nesting: number) => {
     type: string;
     map?: [number, number] | null;
+    meta?: unknown;
   };
 }): void {
   const out: typeof state.tokens = [];
@@ -32,8 +37,9 @@ function emptyLinesCore(state: {
       if (prevEnd >= 0) {
         const gap = token.map[0] - prevEnd;
         if (gap >= 2) {
-          for (let i = 0; i < gap; i++)
-            out.push(new state.Token('empty_line', '', 0));
+          const spacer = new state.Token('empty_lines', '', 0);
+          spacer.meta = { count: gap };
+          out.push(spacer);
         }
       }
       prevEnd = token.map[1];
@@ -89,13 +95,20 @@ function preserveSpacesCore(state: {
   }
 }
 
-/** markdown-it plugin: preserves extra blank lines as `<br>` elements. */
+/** markdown-it plugin: preserves extra blank lines as a height-compensated spacer. */
 export function emptyLinesPlugin(md: MarkdownIt): void {
   md.core.ruler.push(
     'empty_lines',
     emptyLinesCore as Parameters<typeof md.core.ruler.push>[1],
   );
-  md.renderer.rules.empty_line = () => '<br class="preserved-empty-line">';
+  md.renderer.rules.empty_lines = (tokens, idx) => {
+    const count = (tokens[idx].meta as { count: number }).count;
+    return (
+      `<div class="preserved-empty-lines" ` +
+      `style="height:calc(${count} * 1lh);margin-block:calc(-0.5 * var(--p-margin, 1em))" ` +
+      `aria-hidden="true"></div>`
+    );
+  };
 }
 
 /** markdown-it plugin: preserves runs of 2+ inline spaces as `&nbsp;` entities. */

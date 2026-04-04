@@ -16,35 +16,38 @@ describe('emptyLinesPlugin', () => {
     return { tokens: md.parse(src, {}), html: md.render(src) };
   }
 
-  test('two empty lines produce two empty_line tokens', () => {
+  test('two empty lines produce one empty_lines token with count 2', () => {
     // A\n\n\nB = 2 empty lines between A and B
     const { tokens } = setup('Hello\n\n\nWorld');
-    const empties = tokens.filter(t => t.type === 'empty_line');
-    expect(empties).toHaveLength(2);
+    const empties = tokens.filter(t => t.type === 'empty_lines');
+    expect(empties).toHaveLength(1);
+    expect((empties[0].meta as { count: number }).count).toBe(2);
   });
 
-  test('standard paragraph break produces no empty_line tokens', () => {
+  test('standard paragraph break produces no empty_lines tokens', () => {
     const { tokens } = setup('Hello\n\nWorld');
-    const empties = tokens.filter(t => t.type === 'empty_line');
+    const empties = tokens.filter(t => t.type === 'empty_lines');
     expect(empties).toHaveLength(0);
   });
 
-  test('renders empty_line as br', () => {
+  test('renders empty_lines as a spacer div', () => {
     const { html } = setup('Hello\n\n\nWorld');
-    expect(html).toContain('<br class="preserved-empty-line">');
+    expect(html).toContain('class="preserved-empty-lines"');
+    expect(html).toContain('2 * 1lh');
   });
 
   test('leading blank lines produce no tokens', () => {
     const { tokens } = setup('\n\n\nHello');
-    const empties = tokens.filter(t => t.type === 'empty_line');
+    const empties = tokens.filter(t => t.type === 'empty_lines');
     expect(empties).toHaveLength(0);
   });
 
-  test('three empty lines produce three empty_line tokens', () => {
+  test('three empty lines produce one empty_lines token with count 3', () => {
     // A\n\n\n\nB = 3 empty lines between A and B
     const { tokens } = setup('A\n\n\n\nB');
-    const empties = tokens.filter(t => t.type === 'empty_line');
-    expect(empties).toHaveLength(3);
+    const empties = tokens.filter(t => t.type === 'empty_lines');
+    expect(empties).toHaveLength(1);
+    expect((empties[0].meta as { count: number }).count).toBe(3);
   });
 });
 
@@ -80,7 +83,7 @@ describe('novelModePlugin', () => {
 
   test('extra blank lines are preserved', () => {
     const html = render('A\n\n\nB');
-    expect(html).toContain('<br class="preserved-empty-line">');
+    expect(html).toContain('class="preserved-empty-lines"');
   });
 
   test('inline spaces are preserved', () => {
