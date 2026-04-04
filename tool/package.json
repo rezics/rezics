@@ -6,7 +6,8 @@
     "install-services": "bun run install-services/install-services.ts",
     "deploy": "bun run deploy-script/deploy-script.ts",
     "generate-barrel": "bun run scripts/generate-barrel.ts",
-    "seed:cross": "bun run seed/cross-seed.ts"
+    "seed:cross": "bun run seed/cross-seed.ts",
+    "seed:cross:overwrite": "bun run seed/cross-seed.ts overwrite"
   },
   "type": "module",
   "devDependencies": {

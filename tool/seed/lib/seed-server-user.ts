@@ -6,7 +6,7 @@ export interface SeedServerUserInput {
   name: string;
   avatar?: string;
   bio?: string;
-  permission?: unknown;
+  permission?: any;
 }
 
 export async function seedServerUser(
