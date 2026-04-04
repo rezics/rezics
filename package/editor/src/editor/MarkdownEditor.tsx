@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import MarkdownIt from 'markdown-it';
 import { EditorContext } from '../react/context';
 import { useEditor } from '../react/useEditor';
+import { languages } from '@codemirror/language-data';
 import { markdown } from '../markdown/core/index';
 import { mention } from '../markdown/mention/index';
 import { emoji } from '../markdown/emoji/index';
@@ -11,6 +12,7 @@ import { markdownIconMap } from './toolbar-defaults';
 import { applyIconDefaults, applyToolbarOverrides } from './toolbar-utils';
 import { preserveFormattingPlugin } from '../markdown/preview/index';
 import { highlightCode } from '../markdown/preview/highlight';
+import { addCopyButtons } from '../markdown/preview/copyButton';
 import type { EditorPlugin } from '../core/types';
 import type { ToolbarEntry } from '../toolbar/types';
 import type { MarkdownEditorProps } from './types';
@@ -80,7 +82,7 @@ export function MarkdownEditor({
   const md = useMemo(() => createMarkdownRenderer(previewConfig), [previewConfig]);
 
   const allPlugins = useMemo(() => {
-    const plugins: EditorPlugin[] = [markdown()];
+    const plugins: EditorPlugin[] = [markdown({ codeLanguages: languages })];
 
     if (mentionConfig) {
       plugins.push(mention(mentionConfig));
@@ -164,6 +166,7 @@ export function MarkdownEditor({
   useEffect(() => {
     if (viewMode !== 'write' && previewRef.current) {
       previewRef.current.innerHTML = md.render(liveContent);
+      addCopyButtons(previewRef.current);
     }
   }, [viewMode, liveContent, md]);
 
@@ -267,6 +270,51 @@ export function MarkdownEditor({
         }
         .markdown-body img {
           max-width: 100%;
+        }
+        .markdown-body pre {
+          position: relative;
+        }
+        .markdown-body .hljs-keyword { color: #cf222e; }
+        .markdown-body .hljs-string { color: #0a3069; }
+        .markdown-body .hljs-comment { color: #6e7781; font-style: italic; }
+        .markdown-body .hljs-number { color: #0550ae; }
+        .markdown-body .hljs-literal { color: #0550ae; }
+        .markdown-body .hljs-built_in { color: #953800; }
+        .markdown-body .hljs-type { color: #953800; }
+        .markdown-body .hljs-function { color: #8250df; }
+        .markdown-body .hljs-title { color: #8250df; }
+        .markdown-body .hljs-attr { color: #0550ae; }
+        .markdown-body .hljs-attribute { color: #0550ae; }
+        .markdown-body .hljs-selector-class { color: #0550ae; }
+        .markdown-body .hljs-selector-tag { color: #116329; }
+        .markdown-body .hljs-selector-id { color: #0550ae; }
+        .markdown-body .hljs-variable { color: #953800; }
+        .markdown-body .hljs-meta { color: #6e7781; }
+        .markdown-body .hljs-regexp { color: #0a3069; }
+        .markdown-body .hljs-tag { color: #116329; }
+        .markdown-body .hljs-name { color: #116329; }
+        .markdown-body .code-copy-btn {
+          position: absolute;
+          top: 8px;
+          right: 8px;
+          padding: 4px 8px;
+          border: 1px solid #d0d7de;
+          border-radius: 6px;
+          background: #f6f8fa;
+          cursor: pointer;
+          opacity: 0;
+          transition: opacity 0.15s;
+          display: flex;
+          align-items: center;
+          font-size: 12px;
+          color: #656d76;
+          line-height: 1;
+        }
+        .markdown-body pre:hover .code-copy-btn {
+          opacity: 1;
+        }
+        .markdown-body .code-copy-btn:hover {
+          background: #eaeef2;
         }
       `}</style>
       <div ref={containerElRef} className={className} style={fullscreenStyle}>

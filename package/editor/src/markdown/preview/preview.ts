@@ -3,6 +3,7 @@ import type { Extension } from '@codemirror/state';
 import MarkdownIt from 'markdown-it';
 import { preserveFormattingPlugin } from './preserveFormatting';
 import { highlightCode } from './highlight';
+import { addCopyButtons } from './copyButton';
 
 export interface PreviewConfig {
   mode?: 'side-by-side' | 'toggle';
@@ -22,6 +23,7 @@ function createPreviewPanel(md: MarkdownIt, mode: string) {
 
     function renderPreview() {
       dom.innerHTML = md.render(view.state.doc.toString());
+      addCopyButtons(dom);
     }
 
     renderPreview();
@@ -104,6 +106,7 @@ export function previewExtension(config?: PreviewConfig): Extension {
         color: '#656d76',
       },
       '.cm-preview-panel pre': {
+        position: 'relative',
         backgroundColor: '#f6f8fa',
         borderRadius: '6px',
         padding: '16px',
@@ -161,6 +164,29 @@ export function previewExtension(config?: PreviewConfig): Extension {
       '.cm-preview-panel .hljs-regexp': { color: '#0a3069' },
       '.cm-preview-panel .hljs-tag': { color: '#116329' },
       '.cm-preview-panel .hljs-name': { color: '#116329' },
+      '.cm-preview-panel .code-copy-btn': {
+        position: 'absolute',
+        top: '8px',
+        right: '8px',
+        padding: '4px 8px',
+        border: '1px solid #d0d7de',
+        borderRadius: '6px',
+        background: '#f6f8fa',
+        cursor: 'pointer',
+        opacity: '0',
+        transition: 'opacity 0.15s',
+        display: 'flex',
+        alignItems: 'center',
+        fontSize: '12px',
+        color: '#656d76',
+        lineHeight: '1',
+      },
+      '.cm-preview-panel pre:hover .code-copy-btn': {
+        opacity: '1',
+      },
+      '.cm-preview-panel .code-copy-btn:hover': {
+        background: '#eaeef2',
+      },
     }),
   ];
 }
