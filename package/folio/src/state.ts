@@ -19,7 +19,7 @@ export function folioReducer(
 ): FolioState {
   switch (action.type) {
     case 'SET_READ_MODE':
-      return { ...state, readMode: action.mode };
+      return { ...state, readMode: action.mode, pageIndex: 0, pageCount: 0, scrollOffset: 0 };
     case 'SET_CHAPTER':
       return {
         ...state,

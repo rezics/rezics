@@ -84,7 +84,7 @@ export function PageContainer({ children }: PageContainerProps) {
         ref={innerRef}
         className="folio-page-inner"
         style={{
-          columnWidth: `${containerWidth || 100}vw`,
+          columnWidth: containerWidth ? `${containerWidth}px` : '100vw',
           columnGap: 0,
           columnFill: 'auto',
           height: '100%',
