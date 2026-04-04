@@ -1,4 +1,4 @@
-import { useMemo, useState, useRef, useEffect } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import MarkdownIt from 'markdown-it';
 import { EditorContext } from '../react/context';
 import { useEditor } from '../react/useEditor';
@@ -50,6 +50,7 @@ export function MarkdownEditor({
 }: MarkdownEditorProps) {
   const [viewMode, setViewMode] = useState<ViewMode>('write');
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [liveContent, setLiveContent] = useState(value ?? '');
   const previewRef = useRef<HTMLDivElement>(null);
   const containerElRef = useRef<HTMLDivElement>(null);
 
@@ -61,6 +62,19 @@ export function MarkdownEditor({
           ? undefined
           : undefined,
     [preview],
+  );
+
+  // Sync liveContent when the value prop changes externally
+  useEffect(() => {
+    setLiveContent(value ?? '');
+  }, [value]);
+
+  const handleChange = useCallback(
+    (newValue: string) => {
+      setLiveContent(newValue);
+      onChange?.(newValue);
+    },
+    [onChange],
   );
 
   const md = useMemo(() => createMarkdownRenderer(previewConfig), [previewConfig]);
@@ -143,15 +157,15 @@ export function MarkdownEditor({
     plugins: allPlugins,
     keybindings,
     theme,
-    onChange,
+    onChange: handleChange,
   });
 
   // Update preview HTML when in preview or dual-column mode
   useEffect(() => {
     if (viewMode !== 'write' && previewRef.current) {
-      previewRef.current.innerHTML = md.render(value ?? '');
+      previewRef.current.innerHTML = md.render(liveContent);
     }
-  }, [viewMode, value, md]);
+  }, [viewMode, liveContent, md]);
 
   // Fullscreen toggle with Escape key
   useEffect(() => {
@@ -187,6 +201,74 @@ export function MarkdownEditor({
 
   return (
     <EditorContext.Provider value={view}>
+      <style>{`
+        .markdown-body blockquote {
+          border-left: 4px solid #d0d7de;
+          margin: 0 0 16px;
+          padding: 0 1em;
+          color: #656d76;
+        }
+        .markdown-body h1 {
+          font-size: 2em;
+          font-weight: 600;
+          border-bottom: 1px solid #d0d7de;
+          padding-bottom: .3em;
+          margin-top: 24px;
+          margin-bottom: 16px;
+        }
+        .markdown-body h2 {
+          font-size: 1.5em;
+          font-weight: 600;
+          border-bottom: 1px solid #d0d7de;
+          padding-bottom: .3em;
+          margin-top: 24px;
+          margin-bottom: 16px;
+        }
+        .markdown-body h3 {
+          font-size: 1.25em;
+          font-weight: 600;
+          margin-top: 24px;
+          margin-bottom: 16px;
+        }
+        .markdown-body pre {
+          background-color: #f6f8fa;
+          border-radius: 6px;
+          padding: 16px;
+          overflow: auto;
+          margin-bottom: 16px;
+          line-height: 1.45;
+        }
+        .markdown-body code {
+          font-family: ui-monospace, monospace;
+          font-size: 85%;
+        }
+        .markdown-body :not(pre) > code {
+          background-color: rgba(175, 184, 193, 0.2);
+          border-radius: 6px;
+          padding: 0.2em 0.4em;
+        }
+        .markdown-body table {
+          border-collapse: collapse;
+          width: 100%;
+          margin-bottom: 16px;
+        }
+        .markdown-body th, .markdown-body td {
+          border: 1px solid #d0d7de;
+          padding: 6px 13px;
+        }
+        .markdown-body th {
+          font-weight: 600;
+          background-color: #f6f8fa;
+        }
+        .markdown-body hr {
+          border: none;
+          border-top: 1px solid #d0d7de;
+          margin: 24px 0;
+        }
+        .markdown-body img {
+          max-width: 100%;
+        }
+      `}</style>
       <div ref={containerElRef} className={className} style={fullscreenStyle}>
         {/* Tab bar + toolbar row */}
         <div

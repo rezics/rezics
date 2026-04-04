@@ -8,13 +8,14 @@ export interface PreserveFormatOptions {
 /**
  * Rewrites the markdown source so that consecutive blank lines beyond
  * the standard paragraph break (\n\n) are rendered as visible &nbsp; lines.
+ * Only activates on 3+ consecutive newlines (standard \n\n is left alone).
  */
 function multipleEmptyLines(state: { src: string }): void {
-  if (!state.src.includes('\n\n')) return;
+  if (!state.src.includes('\n\n\n')) return;
 
-  state.src = state.src.replace(/\n{2,}/g, (match) => {
-    const brCount = match.length - 1;
-    return '\n\n' + '&nbsp;\n'.repeat(brCount);
+  state.src = state.src.replace(/\n{3,}/g, (match) => {
+    const extraLines = match.length - 2;
+    return '\n\n' + '&nbsp;\n\n'.repeat(extraLines);
   });
 }
 
