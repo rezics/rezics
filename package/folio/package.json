@@ -1,0 +1,31 @@
+{
+  "name": "@rezics/folio",
+  "version": "0.1.0",
+  "type": "module",
+  "sideEffects": false,
+  "module": "src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./plugin/txt": "./src/plugin/txt/index.ts",
+    "./plugin/epub": "./src/plugin/epub/index.tsx"
+  },
+  "scripts": {
+    "test": "bun test",
+    "dev": "bun run --watch src/index.ts"
+  },
+  "dependencies": {
+    "@use-gesture/react": "^10.3.1",
+    "fflate": "^0.8.2",
+    "fast-xml-parser": "^5.2.3"
+  },
+  "peerDependencies": {
+    "react": ">=18",
+    "react-dom": ">=18",
+    "@rezics/editor": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "bun-types": "latest"
+  }
+}
