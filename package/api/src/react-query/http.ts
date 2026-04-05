@@ -83,13 +83,13 @@ export async function apiFetchResponse<T>(
 ): Promise<{data: T; response: Response}> {
   const url = `${getApiBaseUrl()}${endpoint}`;
   const response = await requestWithAuthRetry(url, options);
-  const responseJson = await response.json();
+  const responseJson = await response.json().catch(() => null);
 
   if (!response.ok) {
     throw new Error(
       JSON.stringify({
-        status: response?.status,
-        message: responseJson?.message,
+        status: response.status,
+        message: responseJson?.message ?? response.statusText,
       }),
     );
   }

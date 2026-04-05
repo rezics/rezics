@@ -28,7 +28,7 @@ describe('auth context token signing', () => {
   beforeEach(() => {
     process.env.BETTER_AUTH_URL = 'http://localhost:35003';
     process.env.AUTH_JWT_ISSUER = 'http://localhost:35003';
-    process.env.AUTH_JWT_AUDIENCE = 'rezics-api';
+    process.env.AUTH_JWT_AUDIENCE = 'rezics';
     findFirst.mockReset();
     findMany.mockReset();
     upsert.mockReset();
@@ -44,7 +44,7 @@ describe('auth context token signing', () => {
       id: 'jwt-service-auth',
       serviceKey: 'auth-local',
       issuer: 'http://localhost:35003',
-      audience: 'rezics-api',
+      audience: 'rezics',
       jwksUrl: 'http://localhost:35003/api/auth/session/jwks',
       jwksPath: '/api/auth/session/jwks',
       isLocalIssuer: true,

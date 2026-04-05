@@ -17,6 +17,7 @@ export const statement = {
   organization: ['create', 'update', 'delete'],
   member: ['create', 'update', 'delete', 'invite', 'remove', 'update-role'],
   invitation: ['create', 'cancel'],
+  'jwt-service': ['list', 'get', 'create', 'update', 'activate', 'deactivate'],
 } as const;
 
 export const ac = createAccessControl(statement);
@@ -27,6 +28,7 @@ export const owner = ac.newRole({
   organization: statement.organization,
   member: statement.member,
   invitation: statement.invitation,
+  'jwt-service': statement['jwt-service'],
 });
 
 export const admin = ac.newRole({

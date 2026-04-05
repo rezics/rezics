@@ -4,7 +4,7 @@ import {JwtAlgorithm, type JwtIssuerDescriptor} from '@rezics/jwt';
 export const authJwtLocalServiceKey = 'auth-local';
 
 export function getAuthJwtAudience() {
-  return env.AUTH_JWT_AUDIENCE ?? 'rezics-api';
+  return env.AUTH_JWT_AUDIENCE ?? 'rezics';
 }
 
 export function getAuthJwtIssuer() {

@@ -2,12 +2,12 @@ import {createFileRoute, lazyRouteComponent, redirect} from '@tanstack/react-rou
 import {getToken, parseJwt} from '@rezics/api/react-query/jwt';
 import {NormalizedTokenName} from '@rezics/contract';
 
-const JwtServicesPage = lazyRouteComponent(
-  () => import('@/jwt-service/page/JwtServicesPage'),
-  'JwtServicesPage',
+const AuthJwtServicesPage = lazyRouteComponent(
+  () => import('@/auth-jwt-service/page/AuthJwtServicesPage'),
+  'AuthJwtServicesPage',
 );
 
-export const Route = createFileRoute('/_admin/jwt-services')({
+export const Route = createFileRoute('/_admin/auth/jwt-services')({
   beforeLoad: () => {
     const token = getToken(NormalizedTokenName.AUTH_IDENTITY);
     const role = token ? parseJwt(token)?.role : null;
@@ -15,5 +15,5 @@ export const Route = createFileRoute('/_admin/jwt-services')({
       throw redirect({to: '/', replace: true});
     }
   },
-  component: JwtServicesPage,
+  component: AuthJwtServicesPage,
 });

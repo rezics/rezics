@@ -1,0 +1,115 @@
+import {
+  useMutation,
+  useQueryClient,
+  type UseMutationOptions,
+} from '@tanstack/react-query';
+import {authJwtServiceApi} from './auth-jwt-service.api';
+import {authJwtServiceKeys} from './auth-jwt-service.keys';
+import type {
+  JwtServiceDTO,
+  CreateJwtServiceInput,
+  UpdateJwtServiceInput,
+} from '@rezics/contract';
+
+export function useCreateAuthJwtServiceMutation(
+  options?: Omit<
+    UseMutationOptions<JwtServiceDTO, Error, CreateJwtServiceInput>,
+    'mutationFn'
+  >,
+) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (input: CreateJwtServiceInput) =>
+      authJwtServiceApi.create(input),
+    ...options,
+    onSuccess: (data, variables, context) => {
+      queryClient.invalidateQueries({queryKey: authJwtServiceKeys.lists()});
+      queryClient.setQueryData(
+        authJwtServiceKeys.detail(data.serviceKey),
+        data,
+      );
+      options?.onSuccess?.(data, variables, context);
+    },
+  });
+}
+
+export function useUpdateAuthJwtServiceMutation(
+  options?: Omit<
+    UseMutationOptions<
+      JwtServiceDTO,
+      Error,
+      {serviceKey: string; input: UpdateJwtServiceInput}
+    >,
+    'mutationFn'
+  >,
+) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({serviceKey, input}) =>
+      authJwtServiceApi.update(serviceKey, input),
+    ...options,
+    onSuccess: (data, variables, context) => {
+      queryClient.setQueryData(
+        authJwtServiceKeys.detail(variables.serviceKey),
+        data,
+      );
+      queryClient.invalidateQueries({queryKey: authJwtServiceKeys.lists()});
+      options?.onSuccess?.(data, variables, context);
+    },
+  });
+}
+
+export function useActivateAuthJwtServiceMutation(
+  options?: Omit<
+    UseMutationOptions<JwtServiceDTO, Error, string>,
+    'mutationFn'
+  >,
+) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (serviceKey: string) =>
+      authJwtServiceApi.activate(serviceKey),
+    ...options,
+    onSuccess: (data, serviceKey, context) => {
+      queryClient.setQueryData(
+        authJwtServiceKeys.detail(serviceKey),
+        data,
+      );
+      queryClient.invalidateQueries({queryKey: authJwtServiceKeys.lists()});
+      options?.onSuccess?.(data, serviceKey, context);
+    },
+  });
+}
+
+export function useDeactivateAuthJwtServiceMutation(
+  options?: Omit<
+    UseMutationOptions<JwtServiceDTO, Error, string>,
+    'mutationFn'
+  >,
+) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (serviceKey: string) =>
+      authJwtServiceApi.deactivate(serviceKey),
+    ...options,
+    onSuccess: (data, serviceKey, context) => {
+      queryClient.setQueryData(
+        authJwtServiceKeys.detail(serviceKey),
+        data,
+      );
+      queryClient.invalidateQueries({queryKey: authJwtServiceKeys.lists()});
+      options?.onSuccess?.(data, serviceKey, context);
+    },
+  });
+}
+
+export const authJwtServiceMutations = {
+  useCreate: useCreateAuthJwtServiceMutation,
+  useUpdate: useUpdateAuthJwtServiceMutation,
+  useActivate: useActivateAuthJwtServiceMutation,
+  useDeactivate: useDeactivateAuthJwtServiceMutation,
+};

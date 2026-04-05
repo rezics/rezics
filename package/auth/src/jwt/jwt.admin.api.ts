@@ -1,34 +1,47 @@
 import {Elysia, t} from 'elysia';
-import {authMacro} from '@/middleware';
 import {
   jwtServiceDTOSchema,
   jwtServiceListResponseSchema,
   createJwtServiceInputSchema,
   updateJwtServiceInputSchema,
 } from '@rezics/contract';
-import {jwtServiceAdminService} from './jwt.admin.service';
+import {auth} from '../auth/instance';
+import {authJwtServiceAdminService} from './jwt.admin.service';
 
-export const jwtServiceAdminApi = new Elysia({prefix: '/admin/jwt-services'})
-  .use(authMacro)
+async function requireOwnerSession(request: Request) {
+  const session = await auth.api.getSession({headers: request.headers});
+  if (!session) {
+    throw new Response('Unauthorized', {status: 401});
+  }
+  if ((session.user as {role?: string}).role !== 'owner') {
+    throw new Response('Forbidden', {status: 403});
+  }
+  return session;
+}
+
+export const jwtServiceAdminRouter = new Elysia({
+  prefix: '/admin/jwt-services',
+})
   .get(
     '/',
-    async () => {
-      const services = await jwtServiceAdminService.list();
+    async ({request}) => {
+      await requireOwnerSession(request);
+      const services = await authJwtServiceAdminService.list();
       return {services};
     },
     {
-      requireRoot: true,
       response: jwtServiceListResponseSchema,
       detail: {
-        summary: 'List all JWT services',
+        summary: 'List all auth JWT services',
         tags: ['Admin', 'JWT Service'],
       },
     },
   )
   .get(
     '/:serviceKey',
-    async ({params, set}) => {
-      const service = await jwtServiceAdminService.fetch(params.serviceKey);
+    async ({request, params, set}) => {
+      await requireOwnerSession(request);
+      const service = await authJwtServiceAdminService.fetch(params.serviceKey);
       if (!service) {
         set.status = 404;
         throw new Error(`JwtService not found: ${params.serviceKey}`);
@@ -36,20 +49,20 @@ export const jwtServiceAdminApi = new Elysia({prefix: '/admin/jwt-services'})
       return service;
     },
     {
-      requireRoot: true,
       params: t.Object({serviceKey: t.String()}),
       response: jwtServiceDTOSchema,
       detail: {
-        summary: 'Fetch a JWT service by serviceKey',
+        summary: 'Fetch an auth JWT service by serviceKey',
         tags: ['Admin', 'JWT Service'],
       },
     },
   )
   .post(
     '/',
-    async ({body, set}) => {
+    async ({request, body, set}) => {
+      await requireOwnerSession(request);
       try {
-        const service = await jwtServiceAdminService.create(body);
+        const service = await authJwtServiceAdminService.create(body);
         set.status = 201;
         return service;
       } catch (error) {
@@ -68,18 +81,18 @@ export const jwtServiceAdminApi = new Elysia({prefix: '/admin/jwt-services'})
       }
     },
     {
-      requireRoot: true,
       body: createJwtServiceInputSchema,
       response: jwtServiceDTOSchema,
       detail: {
-        summary: 'Create a JWT service',
+        summary: 'Create an auth JWT service',
         tags: ['Admin', 'JWT Service'],
       },
     },
   )
   .patch(
     '/:serviceKey',
-    async ({params, body, set}) => {
+    async ({request, params, body, set}) => {
+      await requireOwnerSession(request);
       if (body.jwksUrl !== undefined) {
         try {
           new URL(body.jwksUrl);
@@ -89,7 +102,10 @@ export const jwtServiceAdminApi = new Elysia({prefix: '/admin/jwt-services'})
         }
       }
       try {
-        return await jwtServiceAdminService.update(params.serviceKey, body);
+        return await authJwtServiceAdminService.update(
+          params.serviceKey,
+          body,
+        );
       } catch (error) {
         if (
           error &&
@@ -104,21 +120,21 @@ export const jwtServiceAdminApi = new Elysia({prefix: '/admin/jwt-services'})
       }
     },
     {
-      requireRoot: true,
       params: t.Object({serviceKey: t.String()}),
       body: updateJwtServiceInputSchema,
       response: jwtServiceDTOSchema,
       detail: {
-        summary: 'Update a JWT service',
+        summary: 'Update an auth JWT service',
         tags: ['Admin', 'JWT Service'],
       },
     },
   )
   .post(
     '/:serviceKey/activate',
-    async ({params, set}) => {
+    async ({request, params, set}) => {
+      await requireOwnerSession(request);
       try {
-        return await jwtServiceAdminService.activate(params.serviceKey);
+        return await authJwtServiceAdminService.activate(params.serviceKey);
       } catch (error) {
         if (
           error &&
@@ -133,20 +149,20 @@ export const jwtServiceAdminApi = new Elysia({prefix: '/admin/jwt-services'})
       }
     },
     {
-      requireRoot: true,
       params: t.Object({serviceKey: t.String()}),
       response: jwtServiceDTOSchema,
       detail: {
-        summary: 'Activate a JWT service',
+        summary: 'Activate an auth JWT service',
         tags: ['Admin', 'JWT Service'],
       },
     },
   )
   .post(
     '/:serviceKey/deactivate',
-    async ({params, set}) => {
+    async ({request, params, set}) => {
+      await requireOwnerSession(request);
       try {
-        return await jwtServiceAdminService.deactivate(params.serviceKey);
+        return await authJwtServiceAdminService.deactivate(params.serviceKey);
       } catch (error) {
         if (
           error &&
@@ -161,11 +177,10 @@ export const jwtServiceAdminApi = new Elysia({prefix: '/admin/jwt-services'})
       }
     },
     {
-      requireRoot: true,
       params: t.Object({serviceKey: t.String()}),
       response: jwtServiceDTOSchema,
       detail: {
-        summary: 'Deactivate a JWT service',
+        summary: 'Deactivate an auth JWT service',
         tags: ['Admin', 'JWT Service'],
       },
     },

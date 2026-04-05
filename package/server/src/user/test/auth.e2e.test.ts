@@ -7,7 +7,7 @@ process.env.NODE_ENV = 'test';
 process.env.DATABASE_URL ??=
   'postgresql://postgres:postgres@localhost:5432/rezics_book';
 process.env.AUTH_BASE_URL ??= 'http://localhost:3001';
-process.env.AUTH_JWT_AUDIENCE = 'rezics-api';
+process.env.AUTH_JWT_AUDIENCE = 'rezics';
 process.env.AUTH_JWT_CLOCK_TOLERANCE_SECONDS = '5';
 process.env.BETTER_AUTH_URL ??= 'http://localhost:3001';
 process.env.BETTER_AUTH_SECRET ??=
@@ -43,7 +43,7 @@ describe('auth bearer e2e flow', () => {
     })
       .setProtectedHeader({alg: 'ES256', kid: 'rezics-active'})
       .setIssuer('http://localhost:3001')
-      .setAudience('rezics-api')
+      .setAudience('rezics')
       .setIssuedAt()
       .setExpirationTime('15m')
       .sign(privateKey);
@@ -52,7 +52,7 @@ describe('auth bearer e2e flow', () => {
       `Bearer ${token}`,
       {
         issuer: 'http://localhost:3001',
-        audience: 'rezics-api',
+        audience: 'rezics',
         jwksUrl,
         algorithm: JwtAlgorithm.ES256,
         requiredScope: 'user',

@@ -8,7 +8,7 @@ process.env.BETTER_AUTH_SECRET ??=
   'this-is-a-long-auth-secret-for-tests-123456';
 process.env.AUTH_INTERNAL_TOKEN_GATEWAY_SECRET ??= 'internal-test-secret';
 process.env.AUTH_TRUSTED_ORIGINS ??= 'http://localhost:3000';
-process.env.AUTH_JWT_AUDIENCE ??= 'rezics-api';
+process.env.AUTH_JWT_AUDIENCE ??= 'rezics';
 process.env.AUTH_JWT_ISSUER ??= 'http://localhost:35003';
 
 const handleAuthRequest = mock((request: Request) => {

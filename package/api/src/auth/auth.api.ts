@@ -54,7 +54,7 @@ async function authFetch<T>(
     },
   });
 
-  const json = await response.json();
+  const json = await response.json().catch(() => null);
 
   if (!response.ok) {
     throw new Error(
@@ -65,7 +65,7 @@ async function authFetch<T>(
     );
   }
 
-  return json;
+  return json as T;
 }
 
 export const authApi = {

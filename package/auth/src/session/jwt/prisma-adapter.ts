@@ -116,14 +116,18 @@ async function parseSerializedPrivateJwk(
 
   const secretConfig = ctx.context?.secretConfig;
   if (!secretConfig) {
-    throw new Error('Missing Better Auth secret config for encrypted privateKey');
+    throw new Error(
+      'Missing Better Auth secret config for encrypted privateKey',
+    );
   }
 
   const decrypted = await symmetricDecrypt({
     key: secretConfig,
     data: parsed,
   });
-  return asCompletePrivateJwk(parseJsonValue(decrypted, 'decrypted privateKey'));
+  return asCompletePrivateJwk(
+    parseJsonValue(decrypted, 'decrypted privateKey'),
+  );
 }
 
 async function toJwtKeyRecord(

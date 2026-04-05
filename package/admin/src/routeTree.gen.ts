@@ -30,6 +30,7 @@ import { Route as AdminBookMeiliRouteImport } from './routes/_admin/book/meili'
 import { Route as AdminAuthUsersRouteImport } from './routes/_admin/auth/users'
 import { Route as AdminAuthStatusRouteImport } from './routes/_admin/auth/status'
 import { Route as AdminAuthSessionsRouteImport } from './routes/_admin/auth/sessions'
+import { Route as AdminAuthJwtServicesRouteImport } from './routes/_admin/auth/jwt-services'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -135,6 +136,11 @@ const AdminAuthSessionsRoute = AdminAuthSessionsRouteImport.update({
   path: '/auth/sessions',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminAuthJwtServicesRoute = AdminAuthJwtServicesRouteImport.update({
+  id: '/auth/jwt-services',
+  path: '/auth/jwt-services',
+  getParentRoute: () => AdminRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AdminIndexRoute
@@ -143,6 +149,7 @@ export interface FileRoutesByFullPath {
   '/meili': typeof AdminMeiliRoute
   '/settings': typeof AdminSettingsRoute
   '/token': typeof AdminTokenRoute
+  '/auth/jwt-services': typeof AdminAuthJwtServicesRoute
   '/auth/sessions': typeof AdminAuthSessionsRoute
   '/auth/status': typeof AdminAuthStatusRoute
   '/auth/users': typeof AdminAuthUsersRoute
@@ -165,6 +172,7 @@ export interface FileRoutesByTo {
   '/settings': typeof AdminSettingsRoute
   '/token': typeof AdminTokenRoute
   '/': typeof AdminIndexRoute
+  '/auth/jwt-services': typeof AdminAuthJwtServicesRoute
   '/auth/sessions': typeof AdminAuthSessionsRoute
   '/auth/status': typeof AdminAuthStatusRoute
   '/auth/users': typeof AdminAuthUsersRoute
@@ -189,6 +197,7 @@ export interface FileRoutesById {
   '/_admin/settings': typeof AdminSettingsRoute
   '/_admin/token': typeof AdminTokenRoute
   '/_admin/': typeof AdminIndexRoute
+  '/_admin/auth/jwt-services': typeof AdminAuthJwtServicesRoute
   '/_admin/auth/sessions': typeof AdminAuthSessionsRoute
   '/_admin/auth/status': typeof AdminAuthStatusRoute
   '/_admin/auth/users': typeof AdminAuthUsersRoute
@@ -213,6 +222,7 @@ export interface FileRouteTypes {
     | '/meili'
     | '/settings'
     | '/token'
+    | '/auth/jwt-services'
     | '/auth/sessions'
     | '/auth/status'
     | '/auth/users'
@@ -235,6 +245,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/token'
     | '/'
+    | '/auth/jwt-services'
     | '/auth/sessions'
     | '/auth/status'
     | '/auth/users'
@@ -258,6 +269,7 @@ export interface FileRouteTypes {
     | '/_admin/settings'
     | '/_admin/token'
     | '/_admin/'
+    | '/_admin/auth/jwt-services'
     | '/_admin/auth/sessions'
     | '/_admin/auth/status'
     | '/_admin/auth/users'
@@ -428,6 +440,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAuthSessionsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/_admin/auth/jwt-services': {
+      id: '/_admin/auth/jwt-services'
+      path: '/auth/jwt-services'
+      fullPath: '/auth/jwt-services'
+      preLoaderRoute: typeof AdminAuthJwtServicesRouteImport
+      parentRoute: typeof AdminRoute
+    }
   }
 }
 
@@ -437,6 +456,7 @@ interface AdminRouteChildren {
   AdminSettingsRoute: typeof AdminSettingsRoute
   AdminTokenRoute: typeof AdminTokenRoute
   AdminIndexRoute: typeof AdminIndexRoute
+  AdminAuthJwtServicesRoute: typeof AdminAuthJwtServicesRoute
   AdminAuthSessionsRoute: typeof AdminAuthSessionsRoute
   AdminAuthStatusRoute: typeof AdminAuthStatusRoute
   AdminAuthUsersRoute: typeof AdminAuthUsersRoute
@@ -459,6 +479,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminSettingsRoute: AdminSettingsRoute,
   AdminTokenRoute: AdminTokenRoute,
   AdminIndexRoute: AdminIndexRoute,
+  AdminAuthJwtServicesRoute: AdminAuthJwtServicesRoute,
   AdminAuthSessionsRoute: AdminAuthSessionsRoute,
   AdminAuthStatusRoute: AdminAuthStatusRoute,
   AdminAuthUsersRoute: AdminAuthUsersRoute,

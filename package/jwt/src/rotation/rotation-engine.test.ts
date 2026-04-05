@@ -78,7 +78,7 @@ describe('rotation engine', () => {
     const engine = createRotationEngine({
       issuer: {
         issuer: 'https://issuer.example',
-        audience: 'rezics-api',
+        audience: 'rezics',
         algorithm: JwtAlgorithm.ES256,
         jwksPath: '/jwks',
       },
@@ -118,7 +118,7 @@ describe('rotation engine', () => {
     const engine = createRotationEngine({
       issuer: {
         issuer: 'https://issuer.example',
-        audience: 'rezics-api',
+        audience: 'rezics',
         algorithm: JwtAlgorithm.ES256,
         jwksPath: '/jwks',
       },
@@ -143,7 +143,7 @@ describe('rotation engine', () => {
     const engine = createRotationEngine({
       issuer: {
         issuer: 'https://issuer.example',
-        audience: 'rezics-api',
+        audience: 'rezics',
         algorithm: JwtAlgorithm.ES256,
         jwksPath: '/jwks',
       },

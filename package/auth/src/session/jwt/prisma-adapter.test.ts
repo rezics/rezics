@@ -9,7 +9,7 @@ process.env.DATABASE_URL =
   'postgresql://postgres:postgres@localhost:5432/rezics_auth';
 process.env.BETTER_AUTH_URL = 'http://localhost:35003';
 process.env.AUTH_JWT_ISSUER = 'http://localhost:35003';
-process.env.AUTH_JWT_AUDIENCE = 'rezics-api';
+process.env.AUTH_JWT_AUDIENCE = 'rezics';
 process.env.BETTER_AUTH_SECRET =
   process.env.BETTER_AUTH_SECRET ??
   'better-auth-secret-for-tests-abcdefghijklmnopqrstuvwxyz';
@@ -37,7 +37,7 @@ describe('auth jwt prisma adapter', () => {
   beforeEach(() => {
     process.env.BETTER_AUTH_URL = 'http://localhost:35003';
     process.env.AUTH_JWT_ISSUER = 'http://localhost:35003';
-    process.env.AUTH_JWT_AUDIENCE = 'rezics-api';
+    process.env.AUTH_JWT_AUDIENCE = 'rezics';
     jwtServiceUpsert.mockReset();
     jwksFindMany.mockReset();
     jwksUpsert.mockReset();
@@ -48,7 +48,7 @@ describe('auth jwt prisma adapter', () => {
       id: 'jwt-service-auth',
       serviceKey: 'auth-local',
       issuer: 'http://localhost:35003',
-      audience: 'rezics-api',
+      audience: 'rezics',
       jwksUrl: 'http://localhost:35003/api/auth/session/jwks',
       jwksPath: '/api/auth/session/jwks',
       isLocalIssuer: true,
@@ -68,7 +68,7 @@ describe('auth jwt prisma adapter', () => {
       create: {
         serviceKey: 'auth-local',
         issuer: 'http://localhost:35003',
-        audience: 'rezics-api',
+        audience: 'rezics',
         jwksUrl: 'http://localhost:35003/api/auth/session/jwks',
         jwksPath: '/api/auth/session/jwks',
         isLocalIssuer: true,
@@ -82,7 +82,7 @@ describe('auth jwt prisma adapter', () => {
       id: 'jwt-service-auth',
       serviceKey: 'auth-local',
       issuer: 'http://localhost:35003',
-      audience: 'rezics-api',
+      audience: 'rezics',
       jwksUrl: 'http://localhost:35003/api/auth/session/jwks',
       jwksPath: '/api/auth/session/jwks',
       isLocalIssuer: true,
@@ -139,7 +139,7 @@ describe('auth jwt prisma adapter', () => {
       id: 'jwt-service-auth',
       serviceKey: 'auth-local',
       issuer: 'http://localhost:35003',
-      audience: 'rezics-api',
+      audience: 'rezics',
       jwksUrl: 'http://localhost:35003/api/auth/session/jwks',
       jwksPath: '/api/auth/session/jwks',
       isLocalIssuer: true,
@@ -224,7 +224,7 @@ describe('auth jwt prisma adapter', () => {
       id: 'jwt-service-auth',
       serviceKey: 'auth-local',
       issuer: 'http://localhost:35003',
-      audience: 'rezics-api',
+      audience: 'rezics',
       jwksUrl: 'http://localhost:35003/api/auth/session/jwks',
       jwksPath: '/api/auth/session/jwks',
       isLocalIssuer: true,
@@ -306,7 +306,7 @@ describe('auth jwt prisma adapter', () => {
       id: 'jwt-service-auth',
       serviceKey: 'auth-local',
       issuer: 'http://localhost:35003',
-      audience: 'rezics-api',
+      audience: 'rezics',
       jwksUrl: 'http://localhost:35003/api/auth/session/jwks',
       jwksPath: '/api/auth/session/jwks',
       isLocalIssuer: true,

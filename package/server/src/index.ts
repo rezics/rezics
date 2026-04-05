@@ -67,13 +67,13 @@ const port = env.PORT ? Number(env.PORT) : 3000;
 
 const serverBaseUrl = env.MAIN_SESSION_JWT_ISSUER ?? `http://localhost:${port}`;
 const authBaseUrl = env.AUTH_BASE_URL;
-const authAudience = env.AUTH_JWT_AUDIENCE ?? 'rezics-api';
+const authAudience = env.AUTH_JWT_AUDIENCE ?? 'rezics';
 const authJwksUrl = new URL('/.well-known/jwks.json', authBaseUrl).toString();
 
 await Promise.all([
   bootstrapJwtServiceRecord('server-local', {
     issuer: serverBaseUrl,
-    audience: env.MAIN_SESSION_JWT_AUDIENCE ?? 'rezics-main-server',
+    audience: env.MAIN_SESSION_JWT_AUDIENCE ?? 'rezics',
     jwksUrl: new URL(serverSessionJwksPath, serverBaseUrl).toString(),
     jwksPath: serverSessionJwksPath,
     isLocalIssuer: true,

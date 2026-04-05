@@ -14,6 +14,7 @@ export type AdminNavItem = {
   label: string;
   icon: React.ReactNode;
   to: string;
+  requiredRole?: 'owner';
 };
 
 export type AdminNavGroup = {
@@ -131,6 +132,7 @@ export const adminNav = {
           label: 'JWT Services',
           icon: <VpnKeyOutlinedIcon fontSize="small" />,
           to: '/jwt-services',
+          requiredRole: 'owner',
         },
       ],
     },
@@ -169,6 +171,13 @@ export const adminNav = {
           label: 'Auth Status',
           icon: <VpnKeyOutlinedIcon fontSize="small" />,
           to: '/auth/status',
+        },
+        {
+          id: 'auth.jwt-services',
+          label: 'Auth JWT Services',
+          icon: <VpnKeyOutlinedIcon fontSize="small" />,
+          to: '/auth/jwt-services',
+          requiredRole: 'owner',
         },
       ],
     },

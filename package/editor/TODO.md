@@ -1,2 +1,1 @@
-- [ ] Is setting `preview = true` useful in a Markdown editor? Can it be removed?
-- [ ] The editor needs a theming system. A theme defines a set of syntax highlighting rules and a set of default enabled plugins—for example, separate highlighting schemes for light and dark modes, along with enabling the preserveFormattingPlugin by default.
+- [ ] The editor needs to support a fixed viewport size mode, where both the editing and preview areas can be fixed and kept consistent in size.

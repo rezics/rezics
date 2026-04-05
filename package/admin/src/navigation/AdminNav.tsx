@@ -15,6 +15,8 @@ import {useRouterState} from '@tanstack/react-router';
 
 import {adminConfig} from '@/app/config/adminConfig';
 import {Link} from '@rezics/ui/primitive/link/Link.tsx';
+import {getToken, parseJwt} from '@rezics/api/react-query/jwt';
+import {NormalizedTokenName} from '@rezics/contract';
 
 import type {
   AdminNavEntry,
@@ -35,6 +37,17 @@ function isActivePath(pathname: string, to: string) {
     return pathname === '/_admin' || pathname === '/_admin/';
   }
   return pathname === to || pathname.startsWith(`${to}/`);
+}
+
+function getCurrentUserRole(): string | null {
+  const token = getToken(NormalizedTokenName.AUTH_IDENTITY);
+  if (!token) return null;
+  return parseJwt(token)?.role ?? null;
+}
+
+function isItemVisible(item: AdminNavItem): boolean {
+  if (!item.requiredRole) return true;
+  return getCurrentUserRole() === item.requiredRole;
 }
 
 export function AdminNav({
@@ -143,11 +156,17 @@ export function AdminNav({
         sx={{py: 1, display: 'flex', flexDirection: 'column', gap: 0.5}}
       >
         {items.map(entry => {
-          if (isItem(entry)) return renderItem(entry, 0);
+          if (isItem(entry)) {
+            if (!isItemVisible(entry)) return null;
+            return renderItem(entry, 0);
+          }
           if (!isGroup(entry)) return null;
 
+          const visibleChildren = entry.children.filter(isItemVisible);
+          if (visibleChildren.length === 0) return null;
+
           const open = !!openGroups[entry.id];
-          const anySelected = entry.children.some(child =>
+          const anySelected = visibleChildren.some(child =>
             isActivePath(pathname, child.to),
           );
 
@@ -174,8 +193,8 @@ export function AdminNav({
               </ListItemButton>
               <Collapse in={open} timeout="auto" unmountOnExit>
                 <List dense sx={{py: 0.5}}>
-                  {entry.children.map(child =>
-                    renderItem(child, 1, entry.children),
+                  {visibleChildren.map(child =>
+                    renderItem(child, 1, visibleChildren),
                   )}
                 </List>
               </Collapse>

@@ -30,7 +30,7 @@ describe('server jwt persistence', () => {
   beforeEach(() => {
     process.env.PORT = '3000';
     process.env.MAIN_SESSION_JWT_ISSUER = 'http://localhost:3000';
-    process.env.MAIN_SESSION_JWT_AUDIENCE = 'rezics-main-server';
+    process.env.MAIN_SESSION_JWT_AUDIENCE = 'rezics';
     jwtServiceUpsert.mockReset();
     jwksFindMany.mockReset();
     jwksFindUnique.mockReset();
@@ -40,7 +40,7 @@ describe('server jwt persistence', () => {
       id: 'server-local-id',
       serviceKey: 'server-local',
       issuer: 'http://localhost:3000',
-      audience: 'rezics-main-server',
+      audience: 'rezics',
       jwksUrl: 'http://localhost:3000/.well-known/jwks.json',
       jwksPath: '/.well-known/jwks.json',
       isLocalIssuer: true,

@@ -10,13 +10,13 @@ describe('server auth verifier options', () => {
     const {buildTrustedAuthVerifyOptions} = await import('./index');
     const options = buildTrustedAuthVerifyOptions({
       issuer: 'http://localhost:35003',
-      audience: 'rezics-api',
+      audience: 'rezics',
       jwksUrl: 'http://localhost:35003/api/auth/session/jwks',
     });
 
     expect(options).toMatchObject({
       issuer: 'http://localhost:35003',
-      audience: 'rezics-api',
+      audience: 'rezics',
       jwksUrl: 'http://localhost:35003/api/auth/session/jwks',
       algorithm: 'ES256',
       requiredScope: 'user',

@@ -30,7 +30,7 @@ export const env = createEnv({
 
     /**
      * Bootstrap-only audience for auth JWT validation metadata seeding.
-     * Defaults to 'rezics-api'.
+     * Defaults to 'rezics'.
      */
     AUTH_JWT_AUDIENCE: v.optional(v.string()),
 

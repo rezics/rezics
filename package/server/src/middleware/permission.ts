@@ -141,6 +141,18 @@ export const authMacro = new Elysia({name: 'macro/auth'})
         return status(403, 'Forbidden: Persisted admin permission required');
       }
     },
+  })
+  .macro('requireRoot', {
+    requireOwner: true,
+    resolve(ctx) {
+      const {session} = ctx as unknown as {
+        session: RezicsSessionTokenClaims;
+      };
+
+      if (session.permission.role !== 'ROOT') {
+        return status(403, 'Forbidden: Root role required');
+      }
+    },
   });
 
 export function buildActorFromContext(input: {

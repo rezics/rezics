@@ -26,7 +26,7 @@ describe('jose verifier', () => {
     await expect(
       verifyBearerToken('Bearer not-a-jwt', {
         issuer: 'https://issuer.example',
-        audience: 'rezics-api',
+        audience: 'rezics',
         jwksUrl: 'http://localhost:1/jwks',
         algorithm: JwtAlgorithm.ES256,
       }),
@@ -55,14 +55,14 @@ describe('jose verifier', () => {
       const token = await new SignJWT({scope: 'user'})
         .setProtectedHeader({alg: 'ES256', kid: 'kid-new'})
         .setIssuer('https://issuer.example')
-        .setAudience('rezics-api')
+        .setAudience('rezics')
         .setIssuedAt()
         .setExpirationTime('1h')
         .sign(key2.privateKey);
 
       const verified = await verifyBearerToken(`Bearer ${token}`, {
         issuer: 'https://issuer.example',
-        audience: 'rezics-api',
+        audience: 'rezics',
         jwksUrl: `http://localhost:${server.port}/jwks`,
         algorithm: JwtAlgorithm.ES256,
       });
@@ -90,14 +90,14 @@ describe('jose verifier', () => {
     })
       .setProtectedHeader({alg: 'ES256', kid: 'kid-context'})
       .setIssuer('https://issuer.example')
-      .setAudience('rezics-api')
+      .setAudience('rezics')
       .setIssuedAt()
       .setExpirationTime('1h')
       .sign(key.privateKey);
 
     const verified = await verifyTokenFromHeader(token, {
       issuer: 'https://issuer.example',
-      audience: 'rezics-api',
+      audience: 'rezics',
       jwks: {keys: [key.publicJwk]},
       algorithm: JwtAlgorithm.ES256,
       tokenName: NormalizedTokenName.AUTH_CONTEXT,
@@ -134,7 +134,7 @@ describe('jose verifier', () => {
     const engine = createRotationEngine({
       issuer: {
         issuer: 'https://issuer.example',
-        audience: 'rezics-api',
+        audience: 'rezics',
         algorithm: JwtAlgorithm.ES256,
         jwksPath: '/jwks',
       },
