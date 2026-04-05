@@ -1,10 +1,11 @@
+import Chip from '@mui/material/Chip';
 import type {ImageProvider} from './types';
 import {ExternalImageGuide} from './ExternalImageGuide';
 
 export const imgboxGuide: ImageProvider = {
   name: 'imgbox',
   label: 'Imgbox',
-  icon: <span className="text-xs font-bold">IB</span>,
+  icon: <Chip label="IB" size="small" variant="outlined" />,
   render: ({onInsert}) => (
     <ExternalImageGuide
       name="Imgbox"

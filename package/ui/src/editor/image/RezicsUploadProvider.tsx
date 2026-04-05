@@ -1,5 +1,11 @@
 import {useState, useRef, useCallback} from 'react';
-import {Button} from '@/shadcn/button';
+import Button from '@mui/material/Button';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
+import CircularProgress from '@mui/material/CircularProgress';
+import Alert from '@mui/material/Alert';
+import CameraAltIcon from '@mui/icons-material/CameraAlt';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import {useImageUpload} from '@rezics/api/upload/upload.mutations';
 import type {ImageProvider} from './types';
 
@@ -77,14 +83,26 @@ function UploadContent({onInsert}: UploadContentProps) {
   );
 
   return (
-    <div className="flex flex-col gap-3 p-2" onPaste={handlePaste}>
-      <div
-        className={`flex flex-col items-center justify-center rounded-lg border-2 border-dashed p-8 transition-colors cursor-pointer ${
-          dragActive
-            ? 'border-primary bg-primary/5'
-            : 'border-muted-foreground/25 hover:border-muted-foreground/50'
-        }`}
-        onDragOver={(e) => {
+    <Box sx={{display: 'flex', flexDirection: 'column', gap: 1.5, p: 1}} onPaste={handlePaste}>
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          borderRadius: 2,
+          border: 2,
+          borderStyle: 'dashed',
+          borderColor: dragActive ? 'primary.main' : 'divider',
+          bgcolor: dragActive ? 'action.hover' : 'transparent',
+          p: 4,
+          cursor: 'pointer',
+          transition: 'border-color 0.2s, background-color 0.2s',
+          '&:hover': {
+            borderColor: 'text.secondary',
+          },
+        }}
+        onDragOver={(e: React.DragEvent) => {
           e.preventDefault();
           setDragActive(true);
         }}
@@ -93,46 +111,45 @@ function UploadContent({onInsert}: UploadContentProps) {
         onClick={() => inputRef.current?.click()}
       >
         {mutation.isPending ? (
-          <div className="flex flex-col items-center gap-2 text-sm text-muted-foreground">
-            <div className="i-lucide-loader-2 h-8 w-8 animate-spin" />
-            <span>Uploading...</span>
-          </div>
+          <Box sx={{display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1}}>
+            <CircularProgress size={32} />
+            <Typography variant="body2" color="text.secondary">
+              Uploading...
+            </Typography>
+          </Box>
         ) : (
-          <div className="flex flex-col items-center gap-2 text-sm text-muted-foreground">
-            <span className="text-2xl">📷</span>
-            <span>Drop image here, paste, or click to browse</span>
-            <span className="text-xs">JPEG, PNG, WebP, GIF — max 5MB</span>
-          </div>
+          <Box sx={{display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1}}>
+            <CameraAltIcon sx={{fontSize: 32}} color="action" />
+            <Typography variant="body2" color="text.secondary">
+              Drop image here, paste, or click to browse
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              JPEG, PNG, WebP, GIF — max 5MB
+            </Typography>
+          </Box>
         )}
-      </div>
+      </Box>
 
       <input
         ref={inputRef}
         type="file"
         accept={ACCEPTED_EXTENSIONS}
-        className="hidden"
+        style={{display: 'none'}}
         onChange={handleFileChange}
       />
 
       {error && (
-        <div className="flex items-center justify-between rounded bg-destructive/10 px-3 py-2 text-sm text-destructive">
-          <span>{error}</span>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setError(null)}
-          >
-            Dismiss
-          </Button>
-        </div>
+        <Alert severity="error" onClose={() => setError(null)}>
+          {error}
+        </Alert>
       )}
-    </div>
+    </Box>
   );
 }
 
 export const rezicsUploadProvider: ImageProvider = {
   name: 'rezics-upload',
   label: 'Upload',
-  icon: <span className="text-xs">📤</span>,
+  icon: <CloudUploadIcon fontSize="small" />,
   render: ({onInsert}) => <UploadContent onInsert={onInsert} />,
 };

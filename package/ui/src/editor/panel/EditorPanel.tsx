@@ -1,5 +1,6 @@
 import type {ReactNode} from 'react';
-import {cn} from '@/shared/lib/utils';
+import Toolbar from '@mui/material/Toolbar';
+import Box from '@mui/material/Box';
 
 export interface EditorPanelProps {
   left?: ReactNode;
@@ -9,10 +10,10 @@ export interface EditorPanelProps {
 
 export function EditorPanel({left, right, className}: EditorPanelProps) {
   return (
-    <div className={cn('flex items-center gap-2 px-2 py-1.5', className)}>
-      {left && <div className="flex items-center gap-1">{left}</div>}
-      <div className="flex-1" />
-      {right && <div className="flex items-center gap-1">{right}</div>}
-    </div>
+    <Toolbar variant="dense" disableGutters className={className} sx={{gap: 1}}>
+      {left && <Box sx={{display: 'flex', alignItems: 'center', gap: 0.5}}>{left}</Box>}
+      <Box sx={{flex: 1}} />
+      {right && <Box sx={{display: 'flex', alignItems: 'center', gap: 0.5}}>{right}</Box>}
+    </Toolbar>
   );
 }

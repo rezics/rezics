@@ -1,10 +1,9 @@
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/shadcn/dialog';
-import {Tabs, TabsList, TabsTrigger, TabsContent} from '@/shadcn/tabs';
+import {useState} from 'react';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import Tabs from '@mui/material/Tabs';
+import Tab from '@mui/material/Tab';
 import type {ImageProvider} from './types';
 import {rezicsUploadProvider} from './RezicsUploadProvider';
 import {imgbbGuide} from './imgbb-guide';
@@ -31,32 +30,28 @@ export function ImageModal({
   onInsert,
   providers = defaultProviders,
 }: ImageModalProps) {
+  const [tabIndex, setTabIndex] = useState(0);
+
   const handleInsert = (url: string, alt?: string) => {
     onInsert(url, alt);
     onClose();
   };
 
   return (
-    <Dialog open={open} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-lg">
-        <DialogHeader>
-          <DialogTitle>Insert Image</DialogTitle>
-        </DialogHeader>
-        <Tabs defaultValue={providers[0]?.name}>
-          <TabsList>
-            {providers.map((p) => (
-              <TabsTrigger key={p.name} value={p.name}>
-                <span className="mr-1">{p.icon}</span>
-                {p.label}
-              </TabsTrigger>
-            ))}
-          </TabsList>
+    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+      <DialogTitle>Insert Image</DialogTitle>
+      <DialogContent dividers>
+        <Tabs
+          value={tabIndex}
+          onChange={(_, v) => setTabIndex(v)}
+          variant="scrollable"
+          scrollButtons="auto"
+        >
           {providers.map((p) => (
-            <TabsContent key={p.name} value={p.name}>
-              {p.render({onInsert: handleInsert})}
-            </TabsContent>
+            <Tab key={p.name} icon={p.icon} label={p.label} iconPosition="start" />
           ))}
         </Tabs>
+        {providers[tabIndex]?.render({onInsert: handleInsert})}
       </DialogContent>
     </Dialog>
   );

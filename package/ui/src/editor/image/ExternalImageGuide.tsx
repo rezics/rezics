@@ -1,6 +1,9 @@
 import {useState} from 'react';
-import {Button} from '@/shadcn/button';
-import {Input} from '@/shadcn/input';
+import Button from '@mui/material/Button';
+import TextField from '@mui/material/TextField';
+import Link from '@mui/material/Link';
+import Typography from '@mui/material/Typography';
+import Box from '@mui/material/Box';
 
 export interface ExternalImageGuideConfig {
   name: string;
@@ -37,26 +40,25 @@ export function ExternalImageGuide({
   };
 
   return (
-    <div className="flex flex-col gap-3 p-2">
-      <p className="text-sm font-medium">
+    <Box sx={{display: 'flex', flexDirection: 'column', gap: 1.5, p: 1}}>
+      <Typography variant="body2" fontWeight={500}>
         Upload your image to{' '}
-        <a
-          href={url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-primary underline"
-        >
+        <Link href={url} target="_blank" rel="noopener noreferrer">
           {name}
-        </a>
+        </Link>
         , then paste the direct image URL below.
-      </p>
-      <ol className="list-decimal pl-5 text-sm text-muted-foreground space-y-1">
+      </Typography>
+      <Box component="ol" sx={{pl: 2.5, m: 0, '& li': {mb: 0.5}}}>
         {steps.map((step, i) => (
-          <li key={i}>{step}</li>
+          <Typography component="li" variant="body2" color="text.secondary" key={i}>
+            {step}
+          </Typography>
         ))}
-      </ol>
-      <div className="flex gap-2">
-        <Input
+      </Box>
+      <Box sx={{display: 'flex', gap: 1}}>
+        <TextField
+          size="small"
+          fullWidth
           placeholder="https://..."
           value={imageUrl}
           onChange={(e) => setImageUrl(e.target.value)}
@@ -64,10 +66,15 @@ export function ExternalImageGuide({
             if (e.key === 'Enter') handleSubmit();
           }}
         />
-        <Button onClick={handleSubmit} disabled={!valid} size="sm">
+        <Button
+          variant="contained"
+          size="small"
+          onClick={handleSubmit}
+          disabled={!valid}
+        >
           Insert
         </Button>
-      </div>
-    </div>
+      </Box>
+    </Box>
   );
 }

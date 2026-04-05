@@ -1,10 +1,11 @@
+import Chip from '@mui/material/Chip';
 import type {ImageProvider} from './types';
 import {ExternalImageGuide} from './ExternalImageGuide';
 
 export const postimagesGuide: ImageProvider = {
   name: 'postimages',
   label: 'Postimages',
-  icon: <span className="text-xs font-bold">PI</span>,
+  icon: <Chip label="PI" size="small" variant="outlined" />,
   render: ({onInsert}) => (
     <ExternalImageGuide
       name="Postimages"
