@@ -10,6 +10,7 @@ export function CodeEditor({
   className,
   keybindings,
   plugins,
+  resize,
 }: CodeEditorProps) {
   return (
     <Editor
@@ -20,6 +21,7 @@ export function CodeEditor({
       toolbar={false}
       theme={theme}
       className={className}
+      resize={resize}
     />
   );
 }

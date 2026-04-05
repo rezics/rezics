@@ -25,3 +25,6 @@ export { emoji } from './markdown/emoji/index';
 export { jsonFull } from './json/index';
 export { json } from './json/core/index';
 export { jsonLint } from './json/lint/index';
+
+// Resize
+export type { ResizeConfig } from './editor/types';

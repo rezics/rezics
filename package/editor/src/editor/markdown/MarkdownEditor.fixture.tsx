@@ -51,4 +51,11 @@ export default {
   EmptyContent: () => (
     <MarkdownEditor value="" preview={false} className="h-screen" />
   ),
+
+  Resizable: () => (
+    <MarkdownEditor
+      value={sampleMarkdown}
+      resize={{height: 400, minHeight: 200, maxHeight: 800}}
+    />
+  ),
 };

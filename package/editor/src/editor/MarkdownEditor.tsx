@@ -14,6 +14,7 @@ import {highlightCode} from '../markdown/preview/highlight';
 import {addCopyButtons} from '../markdown/preview/copyButton';
 import type {EditorPlugin} from '../core/types';
 import type {ToolbarEntry} from '../toolbar/types';
+import {ResizableWrapper} from '../react/ResizableWrapper';
 import type {MarkdownEditorProps} from './types';
 import type {PreviewConfig} from '../markdown/preview/index';
 import './MarkdownEditor.css';
@@ -42,6 +43,7 @@ export function MarkdownEditor({
   mention: mentionConfig,
   emoji: emojiConfig,
   toolbar,
+  resize,
 }: MarkdownEditorProps) {
   const [viewMode, setViewMode] = useState<ViewMode>('write');
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -187,80 +189,100 @@ export function MarkdownEditor({
       }
     : {display: 'flex', flexDirection: 'column'};
 
-  return (
-    <EditorContext.Provider value={view}>
-      <div ref={containerElRef} className={className} style={fullscreenStyle}>
-        {/* Tab bar + toolbar row */}
-        <div className="md-editor-header">
-          {/* Left: Write / Preview tabs */}
-          {preview && (
-            <div className="md-editor-tabs">
-              <button
-                type="button"
-                className="md-editor-tab"
-                data-active={viewMode === 'write'}
-                onClick={() => setViewMode('write')}
-              >
-                Write
-              </button>
-              <button
-                type="button"
-                className="md-editor-tab"
-                data-active={viewMode === 'preview'}
-                onClick={() => setViewMode('preview')}
-              >
-                Preview
-              </button>
-            </div>
-          )}
+  const useResize = resize && !isFullscreen;
 
-          {/* Right: toolbar (formatting groups + dual-column / fullscreen) */}
-          <div className="md-editor-toolbar-right">
-            {hasCustomRender &&
-              view &&
-              toolbar!.render!(
-                toolbarEntries.filter(e => e !== '|') as any,
-                view,
-              )}
-            {showDefaultToolbar && viewMode !== 'preview' && (
-              <ReactToolbar items={toolbarEntries} />
-            )}
+  const editorContent = (
+    <div
+      ref={containerElRef}
+      className={useResize ? undefined : className}
+      style={
+        useResize
+          ? {display: 'flex', flexDirection: 'column' as const, height: '100%'}
+          : fullscreenStyle
+      }
+    >
+      {/* Tab bar + toolbar row */}
+      <div className="md-editor-header">
+        {/* Left: Write / Preview tabs */}
+        {preview && (
+          <div className="md-editor-tabs">
+            <button
+              type="button"
+              className="md-editor-tab"
+              data-active={viewMode === 'write'}
+              onClick={() => setViewMode('write')}
+            >
+              Write
+            </button>
+            <button
+              type="button"
+              className="md-editor-tab"
+              data-active={viewMode === 'preview'}
+              onClick={() => setViewMode('preview')}
+            >
+              Preview
+            </button>
           </div>
-        </div>
+        )}
 
-        {/* Content area */}
-        <div
-          style={{
-            flex: 1,
-            overflow: 'auto',
-            display: viewMode === 'dual' ? 'flex' : 'block',
-          }}
-        >
-          {/* Editor — always mounted, hidden in preview-only mode */}
-          <div
-            ref={containerRef}
-            style={{
-              display: viewMode === 'preview' ? 'none' : 'block',
-              flex: viewMode === 'dual' ? 1 : undefined,
-              overflow: viewMode === 'dual' ? 'auto' : undefined,
-              borderRight:
-                viewMode === 'dual' ? '1px solid #d0d7de' : undefined,
-            }}
-          />
-
-          {/* Preview — shown in preview and dual modes */}
-          {preview && viewMode !== 'write' && (
-            <div
-              ref={previewRef}
-              className="markdown-body md-editor-preview"
-              style={{
-                flex: viewMode === 'dual' ? 1 : undefined,
-                overflow: viewMode === 'dual' ? 'auto' : undefined,
-              }}
-            />
+        {/* Right: toolbar (formatting groups + dual-column / fullscreen) */}
+        <div className="md-editor-toolbar-right">
+          {hasCustomRender &&
+            view &&
+            toolbar!.render!(
+              toolbarEntries.filter(e => e !== '|') as any,
+              view,
+            )}
+          {showDefaultToolbar && viewMode !== 'preview' && (
+            <ReactToolbar items={toolbarEntries} />
           )}
         </div>
       </div>
+
+      {/* Content area */}
+      <div
+        style={{
+          flex: 1,
+          overflow: 'auto',
+          display: viewMode === 'dual' ? 'flex' : 'block',
+        }}
+      >
+        {/* Editor — always mounted, hidden in preview-only mode */}
+        <div
+          ref={containerRef}
+          style={{
+            display: viewMode === 'preview' ? 'none' : 'block',
+            flex: viewMode === 'dual' ? 1 : undefined,
+            overflow: viewMode === 'dual' ? 'auto' : undefined,
+            borderRight:
+              viewMode === 'dual' ? '1px solid #d0d7de' : undefined,
+          }}
+        />
+
+        {/* Preview — shown in preview and dual modes */}
+        {preview && viewMode !== 'write' && (
+          <div
+            ref={previewRef}
+            className="markdown-body md-editor-preview"
+            style={{
+              flex: viewMode === 'dual' ? 1 : undefined,
+              overflow: viewMode === 'dual' ? 'auto' : undefined,
+            }}
+          />
+        )}
+      </div>
+    </div>
+  );
+
+  return (
+    <EditorContext.Provider value={view}>
+      {useResize ? (
+        <ResizableWrapper config={resize} className={className}>
+          {editorContent}
+        </ResizableWrapper>
+      ) : (
+        editorContent
+      )}
     </EditorContext.Provider>
   );
 }

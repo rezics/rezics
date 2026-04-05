@@ -4,4 +4,4 @@ export { JsonEditor } from './JsonEditor';
 export type { JsonEditorProps } from './JsonEditor';
 export { CodeEditor } from './CodeEditor';
 export type { CodeEditorProps } from './CodeEditor';
-export type { ToolbarOverride } from './types';
+export type { ToolbarOverride, ResizeConfig } from './types';

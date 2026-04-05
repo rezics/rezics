@@ -21,6 +21,17 @@ export interface ToolbarOverride {
   render?: (items: ToolbarItem[], view: EditorView) => ReactNode;
 }
 
+export interface ResizeConfig {
+  /** Initial height in pixels. Enables fixed-height mode. */
+  height: number;
+  /** Minimum height in pixels. Default: 100 */
+  minHeight?: number;
+  /** Maximum height in pixels. Default: unlimited */
+  maxHeight?: number;
+  /** Called when the user finishes dragging. Receives final height. */
+  onHeightChange?: (height: number) => void;
+}
+
 export interface BaseEditorProps {
   value?: string;
   onChange?: (value: string) => void;
@@ -28,6 +39,7 @@ export interface BaseEditorProps {
   className?: string;
   keybindings?: KeyBinding[];
   plugins?: EditorPlugin[];
+  resize?: ResizeConfig;
 }
 
 export interface MarkdownEditorProps extends BaseEditorProps {
