@@ -1,7 +1,7 @@
 - https://react.dev/reference/rules/rules-of-hooks
 - [ ] Helmet 迁移到 Tanstack 原生，优化包体积
 - [ ] user/me page似乎可能卡住
-
+- [ ] Switching between tabs for an extended period may also cause the homepage carousel to go blank(till next carousel), only firefox or ?
 - [x] MUI 的还没自己写的好用 https://mui.com/x/react-tree-view/ 用这个替换当前的 Tree 章节 View
 - [ ] 树章节检查为啥 shift 键还是会跳转，感觉就不应该渲染为 link，修改一下
 - 完善所有请求暂停逻辑，否则会导致重新渲染！

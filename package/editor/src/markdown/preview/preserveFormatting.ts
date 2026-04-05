@@ -1,4 +1,5 @@
 import MarkdownIt from 'markdown-it';
+import {sourceLinePlugin} from './sourceLine';
 
 export interface PreserveFormatOptions {
   preserveSpaces?: boolean;
@@ -142,5 +143,7 @@ export function createNovelRenderer(options?: NovelRendererOptions): MarkdownIt 
     linkify: options?.linkify ?? true,
     typographer: options?.typographer ?? true,
     highlight: options?.highlight === false ? undefined : options?.highlight,
-  }).use(novelModePlugin);
+  })
+    .use(novelModePlugin)
+    .use(sourceLinePlugin);
 }

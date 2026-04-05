@@ -1,1 +1,4 @@
-- [ ] The editor needs to support a fixed viewport size mode, where both the editing and preview areas can be fixed and kept consistent in size.
+- [ ] The markdown editing and preview views are not synchronized.
+
+- [ ] in resizable mode, the minimum height of both the editor and preview should be at least equal to the editor’s minimum height.
+

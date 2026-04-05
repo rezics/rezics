@@ -15,6 +15,7 @@ import {addCopyButtons} from '../markdown/preview/copyButton';
 import type {EditorPlugin} from '../core/types';
 import type {ToolbarEntry} from '../toolbar/types';
 import {ResizableWrapper} from '../react/ResizableWrapper';
+import {useScrollSync} from '../react/useScrollSync';
 import type {MarkdownEditorProps} from './types';
 import type {PreviewConfig} from '../markdown/preview/index';
 import './MarkdownEditor.css';
@@ -51,6 +52,8 @@ export function MarkdownEditor({
   const [liveContent, setLiveContent] = useState(value ?? '');
   const previewRef = useRef<HTMLDivElement>(null);
   const containerElRef = useRef<HTMLDivElement>(null);
+  const headerRef = useRef<HTMLDivElement>(null);
+  const [headerHeight, setHeaderHeight] = useState(0);
 
   const previewConfig = useMemo(
     () =>
@@ -161,6 +164,20 @@ export function MarkdownEditor({
     viewRef?.(view);
   }, [view, viewRef]);
 
+  // Bidirectional scroll sync between editor and preview in dual-column mode
+  useScrollSync(view, previewRef, viewMode);
+
+  // Measure header height for ResizableWrapper minHeight adjustment
+  useEffect(() => {
+    const header = headerRef.current;
+    if (!header) return;
+    const observer = new ResizeObserver(([entry]) => {
+      setHeaderHeight(entry.contentRect.height);
+    });
+    observer.observe(header);
+    return () => observer.disconnect();
+  }, []);
+
   // Update preview HTML when in preview or dual-column mode
   useEffect(() => {
     if (viewMode !== 'write' && previewRef.current) {
@@ -196,6 +213,15 @@ export function MarkdownEditor({
 
   const useResize = resize && !isFullscreen;
 
+  // Adjust minHeight to account for header so content area stays >= configured min
+  const adjustedResize = useMemo(() => {
+    if (!resize || !headerHeight) return resize;
+    return {
+      ...resize,
+      minHeight: (resize.minHeight ?? 100) + headerHeight,
+    };
+  }, [resize, headerHeight]);
+
   const editorContent = (
     <div
       ref={containerElRef}
@@ -207,7 +233,7 @@ export function MarkdownEditor({
       }
     >
       {/* Tab bar + toolbar row */}
-      <div className="md-editor-header">
+      <div ref={headerRef} className="md-editor-header">
         {/* Left: Write / Preview tabs */}
         {preview && (
           <div className="md-editor-tabs">
@@ -281,8 +307,8 @@ export function MarkdownEditor({
 
   return (
     <EditorContext.Provider value={view}>
-      {useResize ? (
-        <ResizableWrapper config={resize} className={className}>
+      {useResize && adjustedResize ? (
+        <ResizableWrapper config={adjustedResize} className={className}>
           {editorContent}
         </ResizableWrapper>
       ) : (
