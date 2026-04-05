@@ -34,6 +34,7 @@
     "@rezics/app-shell": "workspace:*",
     "@rezics/contract": "workspace:*",
     "@rezics/ui": "workspace:*",
+    "@rezics/editor": "workspace:*",
     "@radix-ui/react-dialog": "^1.1.15",
     "@radix-ui/react-popover": "^1.1.15",
     "@radix-ui/react-separator": "^1.1.8",

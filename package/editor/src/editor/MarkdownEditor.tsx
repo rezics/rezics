@@ -44,6 +44,7 @@ export function MarkdownEditor({
   emoji: emojiConfig,
   toolbar,
   resize,
+  viewRef,
 }: MarkdownEditorProps) {
   const [viewMode, setViewMode] = useState<ViewMode>('write');
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -155,6 +156,10 @@ export function MarkdownEditor({
     theme,
     onChange: handleChange,
   });
+
+  useEffect(() => {
+    viewRef?.(view);
+  }, [view, viewRef]);
 
   // Update preview HTML when in preview or dual-column mode
   useEffect(() => {

@@ -2,7 +2,7 @@ import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import {Button, CircularProgress, TextField} from '@mui/material';
 import {useTranslation} from 'react-i18next';
 
-import EasyEditor from '@rezics/ui/editor/easyeditor/EasyEditor.tsx';
+import {RezicsMarkdownEditor} from '@rezics/ui/editor';
 import {useQuery, useQueryClient} from '@tanstack/react-query';
 import {
   chapterDetailQuery,
@@ -164,7 +164,11 @@ export const BookEditChapterPage: React.FC = () => {
           />
         </div>
         <div className="min-h-[400px]">
-          <EasyEditor value={content} onChange={setContent} />
+          <RezicsMarkdownEditor
+            value={content}
+            onChange={setContent}
+            onSubmit={handleSubmit}
+          />
           {!content.trim() && (
             <div className="text-sm text-red-600 mt-2">
               {t('validation.required', '必填')}

@@ -1,4 +1,4 @@
-import {useEffect, useRef, useState} from 'react';
+import {useState} from 'react';
 import type React from 'react';
 import {
   Box,
@@ -17,9 +17,7 @@ import {useQuery} from '@tanstack/react-query';
 import SearchIcon from '@mui/icons-material/Search';
 import {echoKvApi} from '@rezics/api/echokv/echokv';
 import {useAlertStore} from '@app/state/windowAlertStore';
-import {JSONEditor} from '@rezics/ui/editor/nanojson/index.ts';
-
-type JSONEditorInstance = JSONEditor;
+import {RezicsJsonEditor} from '@rezics/ui/editor';
 
 export const EchokvEditPage: React.FC = () => {
   const {show: showAlert} = useAlertStore();
@@ -28,7 +26,7 @@ export const EchokvEditPage: React.FC = () => {
   const [searchKey, setSearchKey] = useState('');
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
-  const editorRef = useRef<JSONEditorInstance | null>(null);
+  const [editorValue, setEditorValue] = useState('{}');
 
   const {data: keyList, isLoading: keyListLoading} = useQuery({
     queryKey: ['echokv-keys', searchKey],
@@ -36,30 +34,7 @@ export const EchokvEditPage: React.FC = () => {
     staleTime: 1000 * 60,
   });
 
-  // 初始化一次，不依赖 React 的 DOM 变动
-  useEffect(() => {
-    const config = {
-      id: 'nanojson-editor',
-      title: 'JSON 编辑器',
-      description: '编辑 EchoKV JSON 值',
-      fill: 0,
-      button: {
-        import: true,
-        export: true,
-        reset: true,
-      },
-    };
-
-    editorRef.current = new JSONEditor(config);
-
-    return () => {
-      editorRef.current = null; // 不 destroy，让 React 卸载 DOM
-    };
-  }, []);
-
-  // 加载
   const handleLoad = async () => {
-    if (!editorRef.current) return;
     if (!currentKey.trim()) return showAlert('请输入 key');
 
     setLoading(true);
@@ -78,7 +53,7 @@ export const EchokvEditPage: React.FC = () => {
         parsed = {value: raw ?? {}};
       }
 
-      await editorRef.current.import(parsed); // 自动渲染
+      setEditorValue(JSON.stringify(parsed, null, 2));
       showAlert('加载成功');
     } catch (err) {
       showAlert(`加载失败：${String(err)}`);
@@ -88,21 +63,16 @@ export const EchokvEditPage: React.FC = () => {
   };
 
   const handleClear = () => {
-    if (!editorRef.current) return;
-    editorRef.current.reset();
+    setEditorValue('{}');
   };
 
-  // 保存
   const handleSave = async () => {
-    if (!editorRef.current) return;
     if (!currentKey.trim()) return showAlert('请输入 key');
 
     setSaving(true);
     try {
-      const jsonText = editorRef.current.json; // ★ 一次性获取最终 JSON 字符串
-      const dataObject = JSON.parse(jsonText);
+      const dataObject = JSON.parse(editorValue);
       const value = dataObject.value;
-      console.log(value, editorRef.current);
 
       const result = await echoKvApi.set(currentKey.trim(), value);
 
@@ -209,14 +179,6 @@ export const EchokvEditPage: React.FC = () => {
                 {loading ? '加载中…' : '加载'}
               </Button>
               <Button
-                variant="contained"
-                size="small"
-                onClick={handleSave}
-                disabled={saving}
-              >
-                {saving ? '保存中…' : '保存'}
-              </Button>
-              <Button
                 variant="outlined"
                 size="small"
                 onClick={handleClear}
@@ -230,16 +192,12 @@ export const EchokvEditPage: React.FC = () => {
 
         <Divider />
 
-        {/* 只提供一个静态 div，不让 React 控制内部 DOM */}
-        <Box sx={{p: 2}}>
-          <div id="nanojson-editor" className="min-h-[500px]" />
-          <style>
-            {`
-              #nanojson-editor option {
-                color: var(--color-rose-400) !important;
-              }
-            `}
-          </style>
+        <Box sx={{p: 2}} className="min-h-[500px]">
+          <RezicsJsonEditor
+            value={editorValue}
+            onChange={setEditorValue}
+            onSubmit={handleSave}
+          />
         </Box>
       </Paper>
     </Box>

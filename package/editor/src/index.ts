@@ -20,6 +20,7 @@ export { markdown } from './markdown/core/index';
 export type { MarkdownLanguageConfig } from './markdown/core/language';
 export { mention } from './markdown/mention/index';
 export { emoji } from './markdown/emoji/index';
+export { insertImageUrl } from './markdown/core/commands';
 
 // JSON (granular + preset)
 export { jsonFull } from './json/index';

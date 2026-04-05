@@ -32,6 +32,7 @@ export { mention } from './mention/index';
 export type { MentionItem, MentionConfig } from './mention/index';
 export { emoji } from './emoji/index';
 export type { EmojiConfig } from './emoji/index';
+export { insertImageUrl } from './core/commands';
 export {
   preserveFormattingPlugin,
   novelModePlugin,

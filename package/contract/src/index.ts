@@ -18,3 +18,4 @@ export * from './meili';
 export * from './auth';
 export * from './jwt-service';
 export * from './admin-stats';
+export * from './upload';

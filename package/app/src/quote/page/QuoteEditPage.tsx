@@ -1,5 +1,5 @@
-import {Button, TextField} from '@mui/material';
-import EasyEditor from '@rezics/ui/editor/easyeditor/EasyEditor.tsx';
+import {TextField} from '@mui/material';
+import {RezicsMarkdownEditor} from '@rezics/ui/editor';
 import type {UnitFormData} from '@rezics/api/unit/unit.types';
 import {useEffect, useMemo, useState} from 'react';
 import {useQuery} from '@tanstack/react-query';
@@ -72,14 +72,13 @@ export function QuoteEditPage({unitId, data, setData}: QuoteEditPageProps) {
       </div>
 
       <div className="flex-1 min-h-[300px]">
-        <EasyEditor
+        <RezicsMarkdownEditor
           value={data.content || ''}
           onChange={value => setData({...data, content: value})}
+          onSubmit={handleSave}
+          submitLabel={t('common.save')}
         />
       </div>
-      <Button variant="contained" color="primary" onClick={handleSave}>
-        {t('common.save')}
-      </Button>
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { EditorContext } from '../react/context';
 import { useEditor } from '../react/useEditor';
 import { jsonFull } from '../json/index';
@@ -21,6 +21,7 @@ export function JsonEditor({
   lint = true,
   toolbar,
   resize,
+  viewRef,
 }: JsonEditorProps) {
   const allPlugins = useMemo(() => {
     const jsonPlugins = jsonFull({ lint });
@@ -41,6 +42,10 @@ export function JsonEditor({
     theme,
     onChange,
   });
+
+  useEffect(() => {
+    viewRef?.(view);
+  }, [view, viewRef]);
 
   const hasCustomRender = toolbar !== false && toolbar?.render != null;
   const showDefaultToolbar =

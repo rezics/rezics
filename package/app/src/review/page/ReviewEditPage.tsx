@@ -1,6 +1,6 @@
 import {useState, useEffect} from 'react';
 import {useQuery} from '@tanstack/react-query';
-import EasyEditor from '@rezics/ui/editor/easyeditor/EasyEditor.tsx';
+import {RezicsMarkdownEditor} from '@rezics/ui/editor';
 import {Button} from '@mui/material';
 import {reviewQueries} from '@rezics/api/review/review.queries';
 import {
@@ -47,7 +47,7 @@ export function ReviewEditPage({data, setData}: ReviewEditPageProps) {
         />
       </div>
       <div className="flex-1 min-h-[300px]">
-        <EasyEditor
+        <RezicsMarkdownEditor
           value={data.content || ''}
           onChange={value => setData({...data, content: value})}
         />

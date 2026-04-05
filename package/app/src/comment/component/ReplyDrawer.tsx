@@ -1,8 +1,8 @@
 import {useDialogStore} from '../state/dialogStore';
-import {Button, Drawer} from '@mui/material';
+import {Drawer} from '@mui/material';
 import React from 'react';
 
-import EasyEditor from '@rezics/ui/editor/easyeditor/EasyEditor.tsx';
+import {RezicsMarkdownEditor} from '@rezics/ui/editor';
 
 export type ReplyDrawerShowProps = {
   open: boolean;
@@ -28,18 +28,14 @@ export const ReplyDrawerShow: React.FC<ReplyDrawerShowProps> = ({
       >
         {/* 内容区域 */}
         <div className="flex flex-col">
-          <EasyEditor value={content} onChange={onContentChange} />
+          <RezicsMarkdownEditor
+            value={content}
+            onChange={onContentChange}
+            onSubmit={onSubmit}
+            submitLabel="提交"
+          />
         </div>
 
-        <div className="flex gap-2 self-stretch justify-end">
-          <Button
-            variant="contained"
-            onClick={onSubmit}
-            className="w-full mb-4"
-          >
-            提交
-          </Button>
-        </div>
       </div>
     </Drawer>
   );

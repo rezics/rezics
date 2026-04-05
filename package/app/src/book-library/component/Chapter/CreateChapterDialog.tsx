@@ -7,7 +7,7 @@ import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
 
-import EasyEditor from '@rezics/ui/editor/easyeditor/EasyEditor.tsx';
+import {RezicsMarkdownEditor} from '@rezics/ui/editor';
 import {useCreateUnitMutation} from '@rezics/api/unit/unit.mutations';
 import {useUserProfileStore} from '@/user/state';
 import {useAlertStore} from '@app/state/windowAlertStore';
@@ -119,7 +119,7 @@ export function CreateChapterDialog({
             helperText={!title.trim() ? '必填' : ' '}
           />
           <div className="min-h-[300px]">
-            <EasyEditor value={content} onChange={setContent} />
+            <RezicsMarkdownEditor value={content} onChange={setContent} />
             {!content.trim() && (
               <div className="text-sm text-red-600 mt-2">内容为必填</div>
             )}

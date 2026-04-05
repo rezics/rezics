@@ -18,7 +18,7 @@ import {
   Alert,
 } from '@mui/material';
 import {useMatchRoute, useNavigate} from '@tanstack/react-router';
-import EasyEditor from '@rezics/ui/editor/easyeditor/EasyEditor.tsx';
+import {RezicsMarkdownEditor} from '@rezics/ui/editor';
 import {
   useCreateBookMutation,
   useUpdateBookMutation,
@@ -244,7 +244,7 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
         <div className="flex mb-4">
           <AccentBarWithText text={t('book.description')} />
         </div>
-        <EasyEditor
+        <RezicsMarkdownEditor
           value={metadata?.description ?? ''}
           onChange={value => {
             setMetadataState(prev => ({...prev, description: value}));

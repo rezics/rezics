@@ -1,6 +1,6 @@
 import type { Extension } from '@codemirror/state';
 import type { EditorView, KeyBinding } from '@codemirror/view';
-import type { ReactNode } from 'react';
+import type { ReactNode, RefCallback } from 'react';
 import type { EditorPlugin } from '../core/types';
 import type { ToolbarItem } from '../toolbar/types';
 import type { MentionConfig } from '../markdown/mention/index';
@@ -40,6 +40,8 @@ export interface BaseEditorProps {
   keybindings?: KeyBinding[];
   plugins?: EditorPlugin[];
   resize?: ResizeConfig;
+  /** Callback ref that receives the underlying EditorView when available. */
+  viewRef?: RefCallback<EditorView>;
 }
 
 export interface MarkdownEditorProps extends BaseEditorProps {

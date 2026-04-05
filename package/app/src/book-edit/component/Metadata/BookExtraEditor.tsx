@@ -1,5 +1,4 @@
-import 'react-json-view-lite/dist/index.css';
-import {JsonEditorLight} from '@rezics/ui/editor/jsoneditor/JsonEditorLight.tsx';
+import {RezicsJsonEditor} from '@rezics/ui/editor';
 import React, {useEffect, useState} from 'react';
 import {
   Button,
@@ -154,7 +153,16 @@ export const BookExtraEditor: React.FC<BookExtraEditorProps> = ({
     <div>
       <PublishURL value={extraData || undefined} onChange={handleExtraChange} />
       <Divider sx={{my: 3}} />
-      <JsonEditorLight value={extraData} onChange={handleExtraChange} />
+      <RezicsJsonEditor
+        value={JSON.stringify(extraData, null, 2)}
+        onChange={(text) => {
+          try {
+            handleExtraChange(JSON.parse(text));
+          } catch {
+            // Invalid JSON — ignore until user fixes it
+          }
+        }}
+      />
     </div>
   );
 };

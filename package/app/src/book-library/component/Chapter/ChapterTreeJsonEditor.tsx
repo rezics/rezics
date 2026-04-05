@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {JsonEditorLight} from '@rezics/ui/editor/jsoneditor/JsonEditorLight.tsx';
+import {RezicsJsonEditor} from '@rezics/ui/editor';
 import {useQuery} from '@tanstack/react-query';
 import {bookQueries} from '@rezics/api/book/book';
 import {Alert} from '@mui/material';
@@ -46,7 +46,16 @@ export const ChapterTreeJsonEditor: React.FC<ChapterTreeJsonEditorProps> = ({
       <Alert severity="error" className="mb-2">
         该功能暂未启用
       </Alert>
-      <JsonEditorLight value={jsonData} onChange={onChange} />
+      <RezicsJsonEditor
+        value={JSON.stringify(jsonData, null, 2)}
+        onChange={(text) => {
+          try {
+            onChange(JSON.parse(text));
+          } catch {
+            // Invalid JSON
+          }
+        }}
+      />
     </div>
   );
 };

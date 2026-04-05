@@ -234,6 +234,19 @@ export function insertImage(view: EditorView): boolean {
   return true;
 }
 
+export function insertImageUrl(
+  view: EditorView,
+  url: string,
+  alt = 'image',
+): void {
+  const { from, to } = view.state.selection.main;
+  const insert = `![${alt}](${url})`;
+  view.dispatch({
+    changes: { from, to, insert },
+    selection: { anchor: from + insert.length },
+  });
+}
+
 export function insertTable(view: EditorView): boolean {
   const { from, to } = view.state.selection.main;
   const table =

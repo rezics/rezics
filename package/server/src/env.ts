@@ -112,6 +112,17 @@ export const env = createEnv({
      * Defaults to `3000` when omitted.
      */
     PORT: v.optional(v.string()),
+
+    /** Cloudflare R2 S3-compatible endpoint URL. */
+    R2_ENDPOINT: v.optional(v.string()),
+    /** Cloudflare R2 access key ID. */
+    R2_ACCESS_KEY_ID: v.optional(v.string()),
+    /** Cloudflare R2 secret access key. */
+    R2_SECRET_ACCESS_KEY: v.optional(v.string()),
+    /** Cloudflare R2 bucket name. */
+    R2_BUCKET: v.optional(v.string()),
+    /** Public base URL for serving uploaded images from R2. */
+    R2_PUBLIC_URL: v.optional(v.string()),
   },
   runtimeEnv: process.env,
   emptyStringAsUndefined: true,

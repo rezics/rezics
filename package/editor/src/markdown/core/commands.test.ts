@@ -1,13 +1,13 @@
 import { describe, expect, test } from 'bun:test';
 import { EditorState } from '@codemirror/state';
-import { toggleBold, toggleItalic, toggleCode } from './commands';
+import { toggleBold, toggleItalic, toggleCode, insertImageUrl } from './commands';
 
 // Use a minimal mock that captures dispatches without needing DOM
 function runCommand(
   doc: string,
   from: number,
   to: number | undefined,
-  command: (view: any) => boolean,
+  command: (view: any) => boolean | void,
 ) {
   const state = EditorState.create({
     doc,
@@ -62,6 +62,38 @@ describe('toggleItalic', () => {
   test('unwraps *-wrapped selection', () => {
     const { text } = runCommand('*hello*', 0, 7, toggleItalic);
     expect(text).toBe('hello');
+  });
+});
+
+describe('insertImageUrl', () => {
+  test('inserts image with URL and alt text', () => {
+    const { text, head } = runCommand('hello', 5, undefined, (view) =>
+      insertImageUrl(view, 'https://example.com/img.png', 'photo'),
+    );
+    expect(text).toBe('hello![photo](https://example.com/img.png)');
+    expect(head).toBe('hello![photo](https://example.com/img.png)'.length);
+  });
+
+  test('defaults alt to "image" when not provided', () => {
+    const { text } = runCommand('', 0, undefined, (view) =>
+      insertImageUrl(view, 'https://example.com/img.png'),
+    );
+    expect(text).toBe('![image](https://example.com/img.png)');
+  });
+
+  test('replaces selected text', () => {
+    const { text, head } = runCommand('replace me', 0, 10, (view) =>
+      insertImageUrl(view, 'https://example.com/img.png', 'photo'),
+    );
+    expect(text).toBe('![photo](https://example.com/img.png)');
+    expect(head).toBe('![photo](https://example.com/img.png)'.length);
+  });
+
+  test('inserts at cursor position in middle of text', () => {
+    const { text } = runCommand('before after', 7, undefined, (view) =>
+      insertImageUrl(view, 'https://example.com/img.png'),
+    );
+    expect(text).toBe('before ![image](https://example.com/img.png)after');
   });
 });
 
