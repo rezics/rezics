@@ -3,21 +3,25 @@
 ### Requirement: JWT services list page in admin dashboard
 
 The admin dashboard SHALL include a "JWT Services" page accessible from the navigation menu.
-The page SHALL display all `JwtService` records in a table with columns for serviceKey,
-issuer, audience, isLocalIssuer, and isActive status.
+The page SHALL display all `JwtService` records from the **main server** in a table with columns for serviceKey,
+issuer, audience, isLocalIssuer, and isActive status. The page SHALL only be visible to users with **owner/root** permissions.
 
-#### Scenario: Admin navigates to JWT services page
-- **WHEN** an admin clicks "JWT Services" in the admin navigation
-- **THEN** the dashboard SHALL display a table listing all JWT service records
+#### Scenario: Owner navigates to JWT services page
+- **WHEN** an owner/root user clicks "JWT Services" in the admin navigation
+- **THEN** the dashboard SHALL display a table listing all JWT service records from the main server
+
+#### Scenario: Non-owner user does not see JWT services navigation
+- **WHEN** a user without owner/root role views the admin navigation
+- **THEN** the "JWT Services" and "Auth JWT Services" menu entries SHALL NOT be visible
 
 ### Requirement: JWT service detail view
 
 The admin dashboard SHALL provide a detail view for each `JwtService` record, showing all
 fields and allowing edits to mutable fields (issuer, audience, jwksUrl, jwksPath,
-isLocalIssuer).
+isLocalIssuer). The detail view SHALL only be accessible to owner/root users.
 
-#### Scenario: Admin views service detail
-- **WHEN** an admin clicks a row in the JWT services table
+#### Scenario: Owner views service detail
+- **WHEN** an owner clicks a row in the JWT services table
 - **THEN** the dashboard SHALL display the full record details with editable fields
 
 ### Requirement: Activate and deactivate controls
@@ -26,8 +30,8 @@ The admin dashboard SHALL provide activate and deactivate controls for each `Jwt
 record. The controls SHALL call the corresponding API endpoints and refresh the UI state
 after success.
 
-#### Scenario: Admin deactivates a service
-- **WHEN** an admin clicks the deactivate control for an active service
+#### Scenario: Owner deactivates a service
+- **WHEN** an owner clicks the deactivate control for an active service
 - **THEN** the dashboard SHALL call `POST /admin/jwt-services/:serviceKey/deactivate`
   and update the displayed status to inactive
 
@@ -37,7 +41,7 @@ After any successful mutation (create, update, activate, deactivate), the admin 
 invalidate the relevant TanStack Query cache keys and re-fetch to display the current state.
 
 #### Scenario: UI updates after edit
-- **WHEN** an admin saves changes to a JWT service record
+- **WHEN** an owner saves changes to a JWT service record
 - **THEN** the dashboard SHALL invalidate query caches for `['jwtServices']` and
   `['jwtServices', serviceKey]` and display the updated data without manual refresh
 
