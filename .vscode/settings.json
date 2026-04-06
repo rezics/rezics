@@ -130,5 +130,8 @@
     "model": "folder-models",
     "style": "folder-purple-code",
     "locale": "folder-i18n"
+  },
+  "[css]": {
+    "editor.defaultFormatter": "biomejs.biome"
   }
 }
