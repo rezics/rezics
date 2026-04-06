@@ -112,7 +112,7 @@
   "files.exclude": {
     "package/database/dbschema/migrations": true
   },
-  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.defaultFormatter": "biomejs.biome",
   "editor.formatOnSave": true,
   "typescript.experimental.useTsgo": true,
   "[prisma]": {
