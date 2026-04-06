@@ -1,3 +1,17 @@
+/* ── Root container ── */
+.md-editor-root {
+  border: 1px solid var(--editor-border-color, #d0d7de);
+  border-radius: 6px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: var(--editor-write-bg, #fff);
+}
+
+.md-editor-root.md-editor-root--resize {
+  height: 100%;
+}
+
 .markdown-body blockquote {
   border-left: 4px solid #d0d7de;
   margin: 0 0 16px;
@@ -170,42 +184,63 @@
   background: #eaeef2;
 }
 
-/* Static layout */
+/* ── Static layout ── */
 .md-editor-preview {
   padding: 16px;
   font-family: sans-serif;
   font-size: 14px;
   line-height: var(--md-line-height, 1.3);
+  background: var(--editor-preview-bg, #fafbfc);
 }
 
 .md-editor-header {
   display: flex;
   align-items: center;
-  border-bottom: 1px solid #d0d7de;
-  padding: 0 8px;
+  background: var(--editor-header-bg, #f6f8fa);
+  border-bottom: 1px solid var(--editor-border-color, #d0d7de);
+  padding: 0 8px 0 0;
+  min-height: 38px;
 }
 
 .md-editor-tabs {
   display: flex;
   gap: 0;
-  margin-right: 8px;
+  margin-right: 4px;
+  position: relative;
 }
 
 .md-editor-tab {
-  padding: 6px 12px;
+  position: relative;
+  padding: 8px 12px;
   border: none;
-  border-bottom: 2px solid transparent;
   background: none;
   cursor: pointer;
   font-size: 13px;
-  font-weight: 400;
-  color: #656d76;
+  font-weight: 500;
+  color: var(--editor-tab-color, #57606a);
+  transition: color 0.15s, background-color 0.15s;
+}
+
+.md-editor-tab:hover {
+  color: var(--editor-tab-hover-color, #24292f);
 }
 
 .md-editor-tab[data-active='true'] {
-  border-bottom-color: #f4606c;
   font-weight: 600;
-  color: #24292f;
+  color: var(--editor-tab-active-color, #24292f);
+  margin-bottom: -1px;
+  padding-bottom: 9px;
+  border-bottom: 1px solid transparent;
+}
+
+.md-editor-tab[data-tab='write'][data-active='true'] {
+  background: var(--editor-write-bg, #fff);
+  border-bottom-color: var(--editor-write-bg, #fff);
+}
+
+.md-editor-tab[data-tab='preview'][data-active='true'] {
+  background: var(--editor-preview-bg, #fafbfc);
+  border-bottom-color: var(--editor-preview-bg, #fafbfc);
 }
 
 .md-editor-toolbar-right {

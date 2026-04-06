@@ -8,6 +8,7 @@ import {ImageModal} from './image/ImageModal';
 import Button from '@mui/material/Button';
 import ImageIcon from '@mui/icons-material/Image';
 import type {ImageProvider} from './image/types';
+import './editor.css';
 
 export const DEFAULT_RESIZE_CONFIG: ResizeConfig = {
   height: 300,
@@ -15,8 +16,10 @@ export const DEFAULT_RESIZE_CONFIG: ResizeConfig = {
   maxHeight: 800,
 };
 
-export interface RezicsMarkdownEditorProps
-  extends Omit<MarkdownEditorProps, 'viewRef'> {
+export interface RezicsMarkdownEditorProps extends Omit<
+  MarkdownEditorProps,
+  'viewRef'
+> {
   onSubmit?: () => void;
   onCancel?: () => void;
   submitLabel?: string;
@@ -50,17 +53,22 @@ export function RezicsMarkdownEditor({
     : (editorProps.resize ?? DEFAULT_RESIZE_CONFIG);
 
   return (
-    <div>
-      <MarkdownEditor {...editorProps} resize={resolvedResize} viewRef={handleViewRef} />
+    <div className="rezics-editor-wrapper">
+      <MarkdownEditor
+        {...editorProps}
+        resize={resolvedResize}
+        viewRef={handleViewRef}
+      />
       <EditorPanel
         left={
           <Button
             size="small"
+            variant="text"
             startIcon={<ImageIcon />}
             onClick={() => setImageModalOpen(true)}
             title="Insert image"
           >
-            Image
+            upload image
           </Button>
         }
         right={

@@ -39,16 +39,22 @@ export function ImageModal({
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle>Insert Image</DialogTitle>
       <DialogContent dividers>
         <Tabs
           value={tabIndex}
           onChange={(_, v) => setTabIndex(v)}
           variant="scrollable"
           scrollButtons="auto"
+          sx={{minHeight: 36, mb: 1}}
         >
-          {providers.map((p) => (
-            <Tab key={p.name} icon={p.icon} label={p.label} iconPosition="start" />
+          {providers.map(p => (
+            <Tab
+              key={p.name}
+              icon={p.icon}
+              label={p.label}
+              iconPosition="start"
+              sx={{minHeight: 36, py: 0.5, px: 1.5, fontSize: '0.8125rem'}}
+            />
           ))}
         </Tabs>
         {providers[tabIndex]?.render({onInsert: handleInsert})}

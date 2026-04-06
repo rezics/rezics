@@ -4,6 +4,7 @@ import type {JsonEditorProps} from '@rezics/editor/editor';
 import {formatJson} from '@rezics/editor/json';
 import {EditorPanel} from './panel/EditorPanel';
 import {Button} from '@/shadcn/button';
+import './editor.css';
 
 export interface RezicsJsonEditorProps
   extends Omit<JsonEditorProps, 'viewRef'> {
@@ -29,7 +30,7 @@ export function RezicsJsonEditor({
   }, []);
 
   return (
-    <div>
+    <div className="rezics-editor-wrapper">
       <JsonEditor {...editorProps} viewRef={handleViewRef} />
       <EditorPanel
         right={

@@ -242,7 +242,9 @@ export function MarkdownEditor({
     flex: 1,
     minHeight: 0,
     minWidth: 0,
-    borderRight: isDual ? '1px solid #d0d7de' : undefined,
+    borderRight: isDual
+      ? '1px solid var(--editor-border-color, #d0d7de)'
+      : undefined,
   };
 
   const previewPaneStyle: React.CSSProperties = {
@@ -253,14 +255,23 @@ export function MarkdownEditor({
     overflow: 'auto',
   };
 
+  const rootClasses = [
+    'md-editor-root',
+    useResize && 'md-editor-root--resize',
+    !useResize && className,
+  ]
+    .filter(Boolean)
+    .join(' ');
+
   const editorContent = (
-    <div className={useResize ? undefined : className} style={containerStyle}>
+    <div className={rootClasses} style={containerStyle}>
       <div ref={headerRef} className="md-editor-header">
         {preview && (
           <div className="md-editor-tabs">
             <button
               type="button"
               className="md-editor-tab"
+              data-tab="write"
               data-active={viewMode === 'write'}
               onClick={() => setViewMode('write')}
             >
@@ -269,6 +280,7 @@ export function MarkdownEditor({
             <button
               type="button"
               className="md-editor-tab"
+              data-tab="preview"
               data-active={viewMode === 'preview'}
               onClick={() => setViewMode('preview')}
             >
