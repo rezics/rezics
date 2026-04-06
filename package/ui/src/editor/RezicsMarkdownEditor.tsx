@@ -6,7 +6,7 @@ import {insertImageUrl} from '@rezics/editor/markdown';
 import {EditorPanel} from './panel/EditorPanel';
 import {ImageModal} from './image/ImageModal';
 import Button from '@mui/material/Button';
-import ImageIcon from '@mui/icons-material/Image';
+import {Paperclip} from 'lucide-react';
 import type {ImageProvider} from './image/types';
 import './editor.css';
 
@@ -53,20 +53,31 @@ export function RezicsMarkdownEditor({
     : (editorProps.resize ?? DEFAULT_RESIZE_CONFIG);
 
   return (
-    <div className="rezics-editor-wrapper">
+    <div>
       <MarkdownEditor
         {...editorProps}
+        className="rezics-editor-wrapper"
         resize={resolvedResize}
         viewRef={handleViewRef}
       />
       <EditorPanel
         left={
           <Button
-            size="small"
             variant="text"
-            startIcon={<ImageIcon />}
+            startIcon={<Paperclip />}
             onClick={() => setImageModalOpen(true)}
             title="Insert image"
+            sx={{
+              textTransform: 'none',
+              fontSize: '0.9rem',
+              lineHeight: 1,
+              px: 1,
+              '& .MuiButton-startIcon': {
+                '& svg': {
+                  height: '0.9em',
+                },
+              },
+            }}
           >
             upload image
           </Button>
