@@ -1,25 +1,25 @@
-import Alert from '@mui/material/Alert';
-import Button from '@mui/material/Button';
-import {Typography} from '@mui/material';
-import {useNavigate} from '@tanstack/react-router';
-import {type FC, useEffect, useMemo, useState} from 'react';
-import {authApi} from '@rezics/api/auth/auth.api';
-import {OptionalPasswordField} from '@rezics/ui/composite/auth/OptionalPasswordField.tsx';
-import {TrustedEmailField} from '@rezics/ui/composite/auth/TrustedEmailField.tsx';
-import {useTranslation} from 'react-i18next';
-import {Layout} from '../layout/Layout';
-import {validateEmail, validatePassword} from '../model/validate';
-import {hydrateAuthSessionState} from '@/user/state';
-import {useAuth} from './useAuth';
-import {resolvePostAuthDestination} from '../model/authRedirect';
-import {establishBusinessSession} from '../model/handler';
+import { Typography } from "@mui/material";
+import Alert from "@mui/material/Alert";
+import Button from "@mui/material/Button";
+import { authApi } from "@rezics/api/auth/auth.api";
+import { OptionalPasswordField } from "@rezics/ui/composite/auth/OptionalPasswordField.tsx";
+import { TrustedEmailField } from "@rezics/ui/composite/auth/TrustedEmailField.tsx";
+import { useNavigate } from "@tanstack/react-router";
+import { type FC, useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { hydrateAuthSessionState } from "@/user/state";
+import { Layout } from "../layout/Layout";
+import { resolvePostAuthDestination } from "../model/authRedirect";
+import { establishBusinessSession } from "../model/handler";
+import { validateEmail, validatePassword } from "../model/validate";
+import { useAuth } from "./useAuth";
 
 export const OAuthOnboardingPage: FC = () => {
-  const {t} = useTranslation();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const auth = useAuth();
-  const [email, setEmail] = useState(auth.authSession?.email ?? '');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState(auth.authSession?.email ?? "");
+  const [password, setPassword] = useState("");
   const [emailLocked, setEmailLocked] = useState(
     Boolean(auth.authSession?.trustedProviderId),
   );
@@ -28,7 +28,7 @@ export const OAuthOnboardingPage: FC = () => {
   const [message, setMessage] = useState<string>();
 
   useEffect(() => {
-    setEmail(auth.authSession?.email ?? '');
+    setEmail(auth.authSession?.email ?? "");
     setEmailLocked(Boolean(auth.authSession?.trustedProviderId));
   }, [auth.authSession?.email, auth.authSession?.trustedProviderId]);
 
@@ -43,30 +43,30 @@ export const OAuthOnboardingPage: FC = () => {
     setMessage(undefined);
 
     try {
-      const currentEmail = auth.authSession?.email ?? '';
+      const currentEmail = auth.authSession?.email ?? "";
       const nextEmail = email.trim();
 
       if (!nextEmail) {
-        throw new Error(t('auth.error.email_required'));
+        throw new Error(t("auth.error.email_required"));
       }
 
       const emailValidation = validateEmail(nextEmail);
       if (!emailValidation.valid) {
-        throw new Error(emailValidation.error ?? t('auth.error.invalid_email'));
+        throw new Error(emailValidation.error ?? t("auth.error.invalid_email"));
       }
 
       if (nextEmail !== currentEmail) {
-        await authApi.changeEmail({newEmail: nextEmail});
+        await authApi.changeEmail({ newEmail: nextEmail });
       }
 
       if (password.trim()) {
         const passwordValidation = validatePassword(password);
         if (!passwordValidation.valid) {
           throw new Error(
-            passwordValidation.error ?? t('auth.error.invalid_password'),
+            passwordValidation.error ?? t("auth.error.invalid_password"),
           );
         }
-        await authApi.setPassword({newPassword: password});
+        await authApi.setPassword({ newPassword: password });
       }
 
       const sessionState = await hydrateAuthSessionState();
@@ -84,8 +84,8 @@ export const OAuthOnboardingPage: FC = () => {
         return;
       }
 
-      setMessage(t('auth.flow.onboarding_saved'));
-      navigate({to: '/'});
+      setMessage(t("auth.flow.onboarding_saved"));
+      navigate({ to: "/" });
     } catch (caughtError) {
       setError((caughtError as Error).message);
     } finally {
@@ -96,15 +96,18 @@ export const OAuthOnboardingPage: FC = () => {
   if (!auth.authenticated) {
     return (
       <Layout
-        title={t('auth.flow.onboarding_title')}
+        title={t("auth.flow.onboarding_title")}
         content={
           <Alert severity="info">
-            {t('auth.flow.onboarding_sign_in_first')}
+            {t("auth.flow.onboarding_sign_in_first")}
           </Alert>
         }
         actions={
-          <Button variant="contained" onClick={() => navigate({to: '/login'})}>
-            {t('auth.login')}
+          <Button
+            variant="contained"
+            onClick={() => navigate({ to: "/login" })}
+          >
+            {t("auth.login")}
           </Button>
         }
       />
@@ -114,15 +117,13 @@ export const OAuthOnboardingPage: FC = () => {
   if (!isOAuthSession) {
     return (
       <Layout
-        title={t('auth.flow.onboarding_title')}
+        title={t("auth.flow.onboarding_title")}
         content={
-          <Alert severity="info">
-            {t('auth.flow.onboarding_social_only')}
-          </Alert>
+          <Alert severity="info">{t("auth.flow.onboarding_social_only")}</Alert>
         }
         actions={
-          <Button variant="contained" onClick={() => navigate({to: '/'})}>
-            {t('common.continue')}
+          <Button variant="contained" onClick={() => navigate({ to: "/" })}>
+            {t("common.continue")}
           </Button>
         }
       />
@@ -132,11 +133,9 @@ export const OAuthOnboardingPage: FC = () => {
   if (!auth.needsOnboarding) {
     return (
       <Layout
-        title={t('auth.flow.onboarding_title')}
+        title={t("auth.flow.onboarding_title")}
         content={
-          <Alert severity="success">
-            {t('auth.flow.onboarding_complete')}
-          </Alert>
+          <Alert severity="success">{t("auth.flow.onboarding_complete")}</Alert>
         }
         actions={
           <Button
@@ -151,7 +150,7 @@ export const OAuthOnboardingPage: FC = () => {
               })
             }
           >
-            {t('common.continue')}
+            {t("common.continue")}
           </Button>
         }
       />
@@ -160,33 +159,35 @@ export const OAuthOnboardingPage: FC = () => {
 
   return (
     <Layout
-      title={t('auth.flow.onboarding_title')}
+      title={t("auth.flow.onboarding_title")}
       content={
         <>
           {error && <Alert severity="error">{error}</Alert>}
           {message && <Alert severity="success">{message}</Alert>}
           <Typography variant="body2" color="text.secondary">
-            {t('auth.flow.onboarding_intro')}
+            {t("auth.flow.onboarding_intro")}
           </Typography>
           <TrustedEmailField
             value={email}
             locked={emailLocked}
             onChange={setEmail}
             onUnlock={() => setEmailLocked(false)}
-            lockedHelperText={t('auth.flow.onboarding_trusted_email')}
-            editableHelperText={t('auth.flow.onboarding_editable_email')}
+            lockedHelperText={t("auth.flow.onboarding_trusted_email")}
+            editableHelperText={t("auth.flow.onboarding_editable_email")}
           />
           <OptionalPasswordField
             value={password}
             setValue={setPassword}
-            helperText={t('auth.flow.onboarding_optional_password')}
-            note={t('auth.flow.onboarding_optional_password')}
+            helperText={t("auth.flow.onboarding_optional_password")}
+            note={t("auth.flow.onboarding_optional_password")}
           />
         </>
       }
       actions={
         <Button variant="contained" disabled={loading} onClick={handleSubmit}>
-          {loading ? t('auth.flow.onboarding_saving') : t('auth.flow.onboarding_submit')}
+          {loading
+            ? t("auth.flow.onboarding_saving")
+            : t("auth.flow.onboarding_submit")}
         </Button>
       }
     />

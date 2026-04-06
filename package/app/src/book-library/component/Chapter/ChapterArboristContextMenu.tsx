@@ -1,13 +1,13 @@
 /* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
-import React from 'react';
-import {v4 as uuidv4} from 'uuid';
+import type React from "react";
+import { v4 as uuidv4 } from "uuid";
 import {
   insertSiblingAfter,
   moveSiblingFirst,
   moveSiblingLast,
-} from '@/shared/util/arborist-tree';
-import type {Chapter, ChapterContextMenuState} from './ChapterArborist';
+} from "@/shared/util/arborist-tree";
+import type { Chapter, ChapterContextMenuState } from "./ChapterArborist";
 
 /** Props for ChapterArboristContextMenu component. */
 interface ChapterArboristContextMenuProps {
@@ -34,11 +34,11 @@ export const ChapterArboristContextMenu = ({
         style={{
           top: contextMenu.y,
           left: contextMenu.x,
-          transform: 'translateY(-100%)',
+          transform: "translateY(-100%)",
           minWidth: 120,
         }}
         onClick={() => setContextMenu(null)}
-        onContextMenu={e => e.preventDefault()}
+        onContextMenu={(e) => e.preventDefault()}
       >
         {/* <li
           className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
@@ -64,7 +64,7 @@ export const ChapterArboristContextMenu = ({
             setContextMenu(null);
           }}
         >
-          {contextMenu.node?.isOpen ? 'Collapse' : 'Expand'}
+          {contextMenu.node?.isOpen ? "Collapse" : "Expand"}
         </li>
         <li
           className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
@@ -83,10 +83,10 @@ export const ChapterArboristContextMenu = ({
             // 新建后续同级节点
             const newNode: Chapter = {
               id: uuidv4(),
-              title: 'New Chapter',
+              title: "New Chapter",
             };
             setTreeData(
-              current =>
+              (current) =>
                 insertSiblingAfter(
                   current,
                   contextMenu.node.id,
@@ -102,7 +102,7 @@ export const ChapterArboristContextMenu = ({
           className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
           onClick={() => {
             setTreeData(
-              current =>
+              (current) =>
                 moveSiblingFirst(current, contextMenu.node.id) as Chapter[],
             );
             setContextMenu(null);
@@ -114,7 +114,7 @@ export const ChapterArboristContextMenu = ({
           className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
           onClick={() => {
             setTreeData(
-              current =>
+              (current) =>
                 moveSiblingLast(current, contextMenu.node.id) as Chapter[],
             );
             setContextMenu(null);

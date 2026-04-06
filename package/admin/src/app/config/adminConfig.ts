@@ -1,6 +1,6 @@
-import {adminRuntime} from '../../env';
+import { adminRuntime } from "../../env";
 
 export const adminConfig = {
-  appName: 'REZICS Admin',
+  appName: "REZICS Admin",
   env: adminRuntime.appEnv,
 };

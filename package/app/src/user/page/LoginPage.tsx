@@ -1,21 +1,20 @@
-import Alert from '@mui/material/Alert';
-import Button from '@mui/material/Button';
-import TextField from '@mui/material/TextField';
-import {Dialog, DialogContent} from '@mui/material';
-import {useNavigate, useRouterState} from '@tanstack/react-router';
-import {type FC, useState} from 'react';
-import {useTranslation} from 'react-i18next';
-
-import {PasswordField} from '@rezics/ui/composite/form/field/PasswordField.tsx';
-import {MUILink} from '@rezics/ui/primitive/link/MUILink.tsx';
-import {useAuthSessionStore} from '@/user/state';
-import {login} from '../model/handler';
-import {Layout} from '../layout/Layout';
-import {ModalLayout} from '../layout/ModalLayout';
-import {validateEmail} from '../model/validate';
-import {TextButton} from '@rezics/ui/primitive/button/TextButton.tsx';
-import {SocialAuthButtons} from '../component/SocialAuthButtons';
-import {resolvePostAuthDestination} from '../model/authRedirect';
+import { Dialog, DialogContent } from "@mui/material";
+import Alert from "@mui/material/Alert";
+import Button from "@mui/material/Button";
+import TextField from "@mui/material/TextField";
+import { PasswordField } from "@rezics/ui/composite/form/field/PasswordField.tsx";
+import { TextButton } from "@rezics/ui/primitive/button/TextButton.tsx";
+import { MUILink } from "@rezics/ui/primitive/link/MUILink.tsx";
+import { useNavigate, useRouterState } from "@tanstack/react-router";
+import { type FC, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { useAuthSessionStore } from "@/user/state";
+import { SocialAuthButtons } from "../component/SocialAuthButtons";
+import { Layout } from "../layout/Layout";
+import { ModalLayout } from "../layout/ModalLayout";
+import { resolvePostAuthDestination } from "../model/authRedirect";
+import { login } from "../model/handler";
+import { validateEmail } from "../model/validate";
 
 interface LoginData {
   email: string;
@@ -38,15 +37,15 @@ export const LoginPage: FC<LoginPageProps> = ({
   onClose,
   onRegisterClick,
 }) => {
-  const {t} = useTranslation();
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>();
   const [data, setData] = useState<LoginData>({
-    email: '',
-    password: '',
+    email: "",
+    password: "",
   });
   const navigate = useNavigate();
-  const pathname = useRouterState({select: s => s.location.pathname});
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   const handleSubmit = async () => {
     let hasError = false;
@@ -54,14 +53,14 @@ export const LoginPage: FC<LoginPageProps> = ({
     setError(undefined);
 
     try {
-      console.log('try to login');
-      let validateData: {valid: boolean; error: string | null} = {
+      console.log("try to login");
+      let validateData: { valid: boolean; error: string | null } = {
         valid: false,
         error: null,
       };
       const email = data?.email;
       validateData = validateEmail(email);
-      if (!validateData.valid) throw new Error(validateData.error ?? '');
+      if (!validateData.valid) throw new Error(validateData.error ?? "");
 
       const password = data?.password;
       await login(email, password);
@@ -73,13 +72,13 @@ export const LoginPage: FC<LoginPageProps> = ({
     }
     if (!hasError) {
       onClose?.();
-      if (pathname === '/login') {
+      if (pathname === "/login") {
         const authSessionState = useAuthSessionStore.getState();
         navigate({
           to: resolvePostAuthDestination({
             needsOnboarding: authSessionState.needsOnboarding,
             needsVerification: authSessionState.needsVerification,
-            readyForApp: authSessionState.capabilityLevel === 'member',
+            readyForApp: authSessionState.capabilityLevel === "member",
           }),
         });
       }
@@ -90,8 +89,8 @@ export const LoginPage: FC<LoginPageProps> = ({
     if (onRegisterClick) {
       onRegisterClick();
     } else {
-      navigate({to: '/register'});
-      console.log('handleRegisterClick');
+      navigate({ to: "/register" });
+      console.log("handleRegisterClick");
       onClose?.();
     }
   };
@@ -104,27 +103,27 @@ export const LoginPage: FC<LoginPageProps> = ({
       <TextField
         name="email"
         type="email"
-        label={t('common.email')}
+        label={t("common.email")}
         variant="standard"
         required
         value={data?.email}
         onChange={(event: any) => {
-          setData({...data, email: event.target.value});
+          setData({ ...data, email: event.target.value });
         }}
       />
       <PasswordField
         value={data?.password}
         setValue={(value: string) => {
-          setData({...data, password: value});
+          setData({ ...data, password: value });
         }}
       />
       <div>
-        {t('auth.flow.new_to_app')}&nbsp;
+        {t("auth.flow.new_to_app")}&nbsp;
         <TextButton onClick={handleRegisterClick}>
-          {t('auth.flow.create_account')}
+          {t("auth.flow.create_account")}
         </TextButton>
         <br />
-        <MUILink to="/reset-password">{t('auth.flow.forgot_password')}</MUILink>
+        <MUILink to="/reset-password">{t("auth.flow.forgot_password")}</MUILink>
       </div>
       <SocialAuthButtons mode="login" />
     </>
@@ -142,14 +141,14 @@ export const LoginPage: FC<LoginPageProps> = ({
         disabled={loading}
         onClick={handleSubmit}
       >
-        {loading ? t('common.loading') : t('auth.login')}
+        {loading ? t("common.loading") : t("auth.login")}
       </Button>
     </>
   );
 
   return (
     <LayoutComponent
-      title={t('auth.login')}
+      title={t("auth.login")}
       content={content}
       actions={actions}
     />

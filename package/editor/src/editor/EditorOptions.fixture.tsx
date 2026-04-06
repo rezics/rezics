@@ -1,41 +1,41 @@
-import { useMemo } from 'react';
-import { useFixtureInput, useFixtureSelect } from 'react-cosmos/client';
-import { MarkdownEditor } from './MarkdownEditor';
-import { JsonEditor } from './JsonEditor';
-import { CodeEditor } from './CodeEditor';
-import { createTheme } from '../core/theme';
+import { useMemo } from "react";
+import { useFixtureInput, useFixtureSelect } from "react-cosmos/client";
+import { createTheme } from "../core/theme";
+import { CodeEditor } from "./CodeEditor";
+import { JsonEditor } from "./JsonEditor";
+import { MarkdownEditor } from "./MarkdownEditor";
 
 const sampleContent: Record<string, string> = {
   markdown:
-    '# Heading\n\nSome **bold** and *italic* text.\n\n- Item 1\n- Item 2\n',
-  json: JSON.stringify({ hello: 'world', count: 42 }, null, 2),
-  plain: 'Plain text editor with no language plugins.',
+    "# Heading\n\nSome **bold** and *italic* text.\n\n- Item 1\n- Item 2\n",
+  json: JSON.stringify({ hello: "world", count: 42 }, null, 2),
+  plain: "Plain text editor with no language plugins.",
 };
 
 export default function EditorOptionsFixture() {
-  const [mode] = useFixtureSelect('Mode', {
-    options: ['markdown', 'json', 'plain'],
-    defaultValue: 'markdown',
+  const [mode] = useFixtureSelect("Mode", {
+    options: ["markdown", "json", "plain"],
+    defaultValue: "markdown",
   });
 
-  const [themeVariant] = useFixtureSelect('Theme', {
-    options: ['light', 'dark'],
-    defaultValue: 'light',
+  const [themeVariant] = useFixtureSelect("Theme", {
+    options: ["light", "dark"],
+    defaultValue: "light",
   });
 
-  const [content] = useFixtureInput('Content', sampleContent[mode] ?? '');
+  const [content] = useFixtureInput("Content", sampleContent[mode] ?? "");
 
   const theme = useMemo(
-    () => createTheme({ variant: themeVariant as 'light' | 'dark' }),
+    () => createTheme({ variant: themeVariant as "light" | "dark" }),
     [themeVariant],
   );
 
   const editor = useMemo(() => {
-    const props = { value: content, theme, className: 'h-full' };
+    const props = { value: content, theme, className: "h-full" };
     switch (mode) {
-      case 'markdown':
+      case "markdown":
         return <MarkdownEditor key={themeVariant} preview={true} {...props} />;
-      case 'json':
+      case "json":
         return <JsonEditor key={themeVariant} {...props} />;
       default:
         return <CodeEditor key={themeVariant} {...props} />;
@@ -45,8 +45,8 @@ export default function EditorOptionsFixture() {
   return (
     <div
       style={{
-        height: '100vh',
-        background: themeVariant === 'dark' ? '#1e1e1e' : '#ffffff',
+        height: "100vh",
+        background: themeVariant === "dark" ? "#1e1e1e" : "#ffffff",
       }}
     >
       {editor}

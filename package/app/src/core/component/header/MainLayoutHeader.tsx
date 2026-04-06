@@ -1,38 +1,39 @@
-import React, {useMemo} from 'react';
-import {useLayoutStore} from '../../state/layoutStore.ts';
-import {AppBar, Avatar, Toolbar, Typography} from '@mui/material';
-import {useTheme} from '@mui/material/styles';
-import {cn} from '@/shared/util/css-util';
-import {Link} from '@rezics/ui/primitive/link/Link.tsx';
-import {useAppStore} from '@/app/state/appStore.ts';
-import {DrawerToggler} from './DrawerToggler.tsx';
-import {HomeSearch} from '@/search';
-import {useIsMobile} from '@/shared/util/use-media-query';
-import {useMatch} from '@tanstack/react-router';
-import {Route as HomeRoute} from '@/routes/_mainLayout/index.tsx';
-import {AuthenticatedSection} from '@/core/section/header/AuthenticatedSection.tsx';
-import {PendingVerificationSection} from '@/core/section/header/PendingVerificationSection.tsx';
-import {UnauthenticatedSection} from '@/core/section/header/UnauthenticatedSection.tsx';
-import {useAuth} from '@/user/page/useAuth';
+import { AppBar, Avatar, Toolbar, Typography } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
+import { Link } from "@rezics/ui/primitive/link/Link.tsx";
+import { useMatch } from "@tanstack/react-router";
+import type React from "react";
+import { useMemo } from "react";
+import { useAppStore } from "@/app/state/appStore.ts";
+import { AuthenticatedSection } from "@/core/section/header/AuthenticatedSection.tsx";
+import { PendingVerificationSection } from "@/core/section/header/PendingVerificationSection.tsx";
+import { UnauthenticatedSection } from "@/core/section/header/UnauthenticatedSection.tsx";
+import { Route as HomeRoute } from "@/routes/_mainLayout/index.tsx";
+import { HomeSearch } from "@/search";
+import { cn } from "@/shared/util/css-util";
+import { useIsMobile } from "@/shared/util/use-media-query";
+import { useAuth } from "@/user/page/useAuth";
+import { useLayoutStore } from "../../state/layoutStore.ts";
+import { DrawerToggler } from "./DrawerToggler.tsx";
 
 interface HeaderProps {
   isDragging?: boolean;
-  layoutType?: 'type-a' | 'type-b';
+  layoutType?: "type-a" | "type-b";
   disableDrawerToggle?: boolean;
 }
 
 export const Header: React.FC<HeaderProps> = ({
   isDragging = false,
-  layoutType = 'type-b',
+  layoutType = "type-b",
   disableDrawerToggle = false,
 }) => {
-  const {sidebarOpen, drawerWidth, toggleSidebar} = useLayoutStore();
+  const { sidebarOpen, drawerWidth, toggleSidebar } = useLayoutStore();
   const theme = useTheme();
   const isMobile = useIsMobile();
-  const themeMode = useAppStore(state => state.theme);
+  const themeMode = useAppStore((state) => state.theme);
 
-  const isDark = useMemo(() => themeMode === 'dark', [themeMode]);
-  const matchHomeRoute = useMatch({from: HomeRoute.id, shouldThrow: false});
+  const isDark = useMemo(() => themeMode === "dark", [themeMode]);
+  const matchHomeRoute = useMatch({ from: HomeRoute.id, shouldThrow: false });
 
   const handleDrawerToggle = () => {
     if (!disableDrawerToggle) toggleSidebar();
@@ -51,23 +52,23 @@ export const Header: React.FC<HeaderProps> = ({
       position="fixed"
       elevation={0}
       sx={{
-        backgroundColor: 'background.paper',
+        backgroundColor: "background.paper",
         zIndex: theme.zIndex.drawer + 1,
-        ml: layoutType === 'type-a' && sidebarOpen ? drawerWidth : 0,
+        ml: layoutType === "type-a" && sidebarOpen ? drawerWidth : 0,
         width:
-          layoutType === 'type-a' && sidebarOpen
+          layoutType === "type-a" && sidebarOpen
             ? `calc(100% - ${drawerWidth}px)`
-            : '100%',
-        transition: theme.transitions.create(['margin', 'width'], {
+            : "100%",
+        transition: theme.transitions.create(["margin", "width"], {
           easing: theme.transitions.easing.easeOut,
           duration: theme.transitions.duration.enteringScreen,
         }),
       }}
       className={cn(
-        isDragging && 'rounded-tl-2xl rounded-bl-2xl',
-        'pointer-events-auto',
-        'border-b',
-        isDark ? 'border-gray-800' : 'border-gray-200',
+        isDragging && "rounded-tl-2xl rounded-bl-2xl",
+        "pointer-events-auto",
+        "border-b",
+        isDark ? "border-gray-800" : "border-gray-200",
       )}
     >
       <Toolbar className="px-2 gap-2">
@@ -79,14 +80,14 @@ export const Header: React.FC<HeaderProps> = ({
 
         <Link to="/" className="flex items-center gap-2 shrink-0">
           {!matchHomeRoute && (
-            <Avatar sx={{bgcolor: 'transparent'}} variant="rounded">
+            <Avatar sx={{ bgcolor: "transparent" }} variant="rounded">
               <img src="/logo.svg" alt="logo" />
             </Avatar>
           )}
           <Typography
             variant="h1"
             className="text-3xl font-bold"
-            sx={{color: 'primary.main'}}
+            sx={{ color: "primary.main" }}
           >
             REZICS
           </Typography>

@@ -1,6 +1,6 @@
-import {beforeEach, describe, expect, test} from 'bun:test';
-import {NormalizedTokenName} from '@rezics/contract';
-import {configureApi} from '../config';
+import { beforeEach, describe, expect, test } from "bun:test";
+import { NormalizedTokenName } from "@rezics/contract";
+import { configureApi } from "../config";
 
 type MemoryStorage = {
   getItem(key: string): string | null;
@@ -30,16 +30,16 @@ function createMemoryStorage(): MemoryStorage {
 
 function createToken(payload: Record<string, unknown>) {
   const encoded = Buffer.from(JSON.stringify(payload))
-    .toString('base64url')
-    .replace(/=/g, '');
+    .toString("base64url")
+    .replace(/=/g, "");
   return `header.${encoded}.signature`;
 }
 
-describe('jwt token storage', () => {
+describe("jwt token storage", () => {
   beforeEach(() => {
     configureApi({
-      apiBaseUrl: 'http://api.example',
-      authBaseUrl: 'http://auth.example',
+      apiBaseUrl: "http://api.example",
+      authBaseUrl: "http://auth.example",
     });
     globalThis.localStorage = createMemoryStorage() as Storage;
     globalThis.window = {
@@ -47,13 +47,13 @@ describe('jwt token storage', () => {
     } as unknown as Window & typeof globalThis;
   });
 
-  test('stores auth identity and member session tokens separately', async () => {
-    const jwt = await import('./jwt');
+  test("stores auth identity and member session tokens separately", async () => {
+    const jwt = await import("./jwt");
 
-    const identityToken = createToken({sub: 'user-1', slug: 'reader'});
+    const identityToken = createToken({ sub: "user-1", slug: "reader" });
     const sessionToken = createToken({
-      unitId: 'user-1',
-      permission: {role: 'USER'},
+      unitId: "user-1",
+      permission: { role: "USER" },
     });
 
     jwt.setToken(identityToken, NormalizedTokenName.AUTH_IDENTITY);
@@ -62,23 +62,23 @@ describe('jwt token storage', () => {
     expect(jwt.getToken(NormalizedTokenName.AUTH_IDENTITY)).toBe(identityToken);
     expect(jwt.getToken(NormalizedTokenName.REZICS_SESSION)).toBe(sessionToken);
     expect(jwt.getRezicsSessionClaims()).toMatchObject({
-      unitId: 'user-1',
+      unitId: "user-1",
     });
   });
 
-  test('AUTH_CONTEXT is not persisted but can be parsed from raw token', async () => {
-    const jwt = await import('./jwt');
+  test("AUTH_CONTEXT is not persisted but can be parsed from raw token", async () => {
+    const jwt = await import("./jwt");
 
     const contextToken = createToken({
-      id: 'user-1',
-      slug: 'reader',
-      name: 'Reader',
-      verificationStatus: 'pending',
+      id: "user-1",
+      slug: "reader",
+      name: "Reader",
+      verificationStatus: "pending",
     });
 
     expect(jwt.getAuthContextClaims(contextToken)).toMatchObject({
-      id: 'user-1',
-      verificationStatus: 'pending',
+      id: "user-1",
+      verificationStatus: "pending",
     });
     expect(jwt.getAuthContextClaims()).toBeNull();
   });

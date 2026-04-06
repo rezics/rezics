@@ -13,21 +13,24 @@ import {
   TableCell,
   TableRow,
   Typography,
-} from '@mui/material';
-import {useState} from 'react';
-
-import {NormalizedTokenName} from '@rezics/contract';
-import {getToken, parseJwt, queryAccessToken} from '@rezics/api/react-query/jwt';
+} from "@mui/material";
+import {
+  getToken,
+  parseJwt,
+  queryAccessToken,
+} from "@rezics/api/react-query/jwt";
 import {
   hydrateAuthSessionState,
   useAuthSessionStore,
-} from '@rezics/app-shell';
+} from "@rezics/app-shell";
+import { NormalizedTokenName } from "@rezics/contract";
+import { useState } from "react";
 
-import {Page} from '@/core/layout/Page';
-import {establishBusinessSession, adminLogout} from '@/user/model/handler';
+import { Page } from "@/core/layout/Page";
+import { adminLogout, establishBusinessSession } from "@/user/model/handler";
 
 function formatExpiry(exp?: number) {
-  if (!exp) return 'N/A';
+  if (!exp) return "N/A";
   const date = new Date(exp * 1000);
   const now = Date.now();
   const diff = exp * 1000 - now;
@@ -39,35 +42,36 @@ function formatExpiry(exp?: number) {
   return `${date.toLocaleString()} (${hours}h remaining)`;
 }
 
-type TokenStatus = 'active' | 'expired' | 'missing';
+type TokenStatus = "active" | "expired" | "missing";
 
 function getTokenStatus(tokenName: NormalizedTokenName): TokenStatus {
   const token = getToken(tokenName);
-  if (!token) return 'missing';
+  if (!token) return "missing";
   const claims = parseJwt(token);
-  if (!claims?.exp) return 'active';
-  return claims.exp * 1000 > Date.now() ? 'active' : 'expired';
+  if (!claims?.exp) return "active";
+  return claims.exp * 1000 > Date.now() ? "active" : "expired";
 }
 
-function StatusChip({status}: {status: TokenStatus}) {
+function StatusChip({ status }: { status: TokenStatus }) {
   const map = {
-    active: {label: 'Active', color: 'success' as const},
-    expired: {label: 'Expired', color: 'error' as const},
-    missing: {label: 'Not Present', color: 'default' as const},
+    active: { label: "Active", color: "success" as const },
+    expired: { label: "Expired", color: "error" as const },
+    missing: { label: "Not Present", color: "default" as const },
   };
-  const {label, color} = map[status];
+  const { label, color } = map[status];
   return <Chip label={label} color={color} size="small" />;
 }
 
-function ClaimsTable({tokenName}: {tokenName: NormalizedTokenName}) {
+function ClaimsTable({ tokenName }: { tokenName: NormalizedTokenName }) {
   const token = getToken(tokenName);
   if (!token) return <Typography color="text.secondary">No token</Typography>;
 
   const claims = parseJwt(token);
-  if (!claims) return <Typography color="text.secondary">Invalid token</Typography>;
+  if (!claims)
+    return <Typography color="text.secondary">Invalid token</Typography>;
 
   const entries = Object.entries(claims).filter(
-    ([k]) => !['iat', 'nbf'].includes(k),
+    ([k]) => !["iat", "nbf"].includes(k),
   );
 
   return (
@@ -75,9 +79,9 @@ function ClaimsTable({tokenName}: {tokenName: NormalizedTokenName}) {
       <TableBody>
         {entries.map(([key, value]) => (
           <TableRow key={key}>
-            <TableCell sx={{fontWeight: 600, width: 140}}>{key}</TableCell>
-            <TableCell sx={{fontFamily: 'monospace', fontSize: 13}}>
-              {key === 'exp' ? formatExpiry(value as number) : String(value)}
+            <TableCell sx={{ fontWeight: 600, width: 140 }}>{key}</TableCell>
+            <TableCell sx={{ fontFamily: "monospace", fontSize: 13 }}>
+              {key === "exp" ? formatExpiry(value as number) : String(value)}
             </TableCell>
           </TableRow>
         ))}
@@ -110,7 +114,7 @@ function TokenCard({
       await onRefresh();
       setSuccess(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed');
+      setError(err instanceof Error ? err.message : "Failed");
     } finally {
       setLoading(false);
     }
@@ -119,14 +123,14 @@ function TokenCard({
   return (
     <Card variant="outlined">
       <CardContent>
-        <Box sx={{display: 'flex', alignItems: 'center', gap: 1, mb: 2}}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
           <Typography variant="h6" fontWeight={700}>
             {title}
           </Typography>
           <StatusChip status={status} />
         </Box>
         <ClaimsTable tokenName={tokenName} />
-        <Box sx={{mt: 2}}>
+        <Box sx={{ mt: 2 }}>
           <Button
             variant="outlined"
             size="small"
@@ -138,12 +142,12 @@ function TokenCard({
           </Button>
         </Box>
         {error && (
-          <Alert severity="error" sx={{mt: 1}}>
+          <Alert severity="error" sx={{ mt: 1 }}>
             {error}
           </Alert>
         )}
         {success && (
-          <Alert severity="success" sx={{mt: 1}}>
+          <Alert severity="success" sx={{ mt: 1 }}>
             Done
           </Alert>
         )}
@@ -153,48 +157,53 @@ function TokenCard({
 }
 
 function SessionStoreCard() {
-  const status = useAuthSessionStore(s => s.status);
-  const hasAuthSession = useAuthSessionStore(s => s.hasAuthSession);
-  const hasBusinessToken = useAuthSessionStore(s => s.hasBusinessToken);
-  const capabilityLevel = useAuthSessionStore(s => s.capabilityLevel);
-  const needsVerification = useAuthSessionStore(s => s.needsVerification);
-  const needsOnboarding = useAuthSessionStore(s => s.needsOnboarding);
-  const user = useAuthSessionStore(s => s.user);
-  const session = useAuthSessionStore(s => s.session);
-  const error = useAuthSessionStore(s => s.error);
+  const status = useAuthSessionStore((s) => s.status);
+  const hasAuthSession = useAuthSessionStore((s) => s.hasAuthSession);
+  const hasBusinessToken = useAuthSessionStore((s) => s.hasBusinessToken);
+  const capabilityLevel = useAuthSessionStore((s) => s.capabilityLevel);
+  const needsVerification = useAuthSessionStore((s) => s.needsVerification);
+  const needsOnboarding = useAuthSessionStore((s) => s.needsOnboarding);
+  const user = useAuthSessionStore((s) => s.user);
+  const session = useAuthSessionStore((s) => s.session);
+  const error = useAuthSessionStore((s) => s.error);
 
   const rows: [string, React.ReactNode][] = [
-    ['Hydration Status', status],
-    ['Has Auth Session', hasAuthSession ? 'Yes' : 'No'],
-    ['Has Business Token', hasBusinessToken ? 'Yes' : 'No'],
-    ['Capability Level', <Chip key="cap" label={capabilityLevel} size="small" />],
-    ['Needs Verification', needsVerification ? 'Yes' : 'No'],
-    ['Needs Onboarding', needsOnboarding ? 'Yes' : 'No'],
-    ['User ID', user?.id ?? '-'],
-    ['User Name', user?.name ?? '-'],
-    ['User Email', user?.email ?? '-'],
-    ['User Role', user?.role ?? '-'],
-    ['Session ID', session?.id ?? '-'],
+    ["Hydration Status", status],
+    ["Has Auth Session", hasAuthSession ? "Yes" : "No"],
+    ["Has Business Token", hasBusinessToken ? "Yes" : "No"],
+    [
+      "Capability Level",
+      <Chip key="cap" label={capabilityLevel} size="small" />,
+    ],
+    ["Needs Verification", needsVerification ? "Yes" : "No"],
+    ["Needs Onboarding", needsOnboarding ? "Yes" : "No"],
+    ["User ID", user?.id ?? "-"],
+    ["User Name", user?.name ?? "-"],
+    ["User Email", user?.email ?? "-"],
+    ["User Role", user?.role ?? "-"],
+    ["Session ID", session?.id ?? "-"],
   ];
 
   return (
     <Card variant="outlined">
       <CardContent>
-        <Typography variant="h6" fontWeight={700} sx={{mb: 2}}>
+        <Typography variant="h6" fontWeight={700} sx={{ mb: 2 }}>
           Auth Session Store
         </Typography>
         <Table size="small">
           <TableBody>
             {rows.map(([label, value]) => (
               <TableRow key={label}>
-                <TableCell sx={{fontWeight: 600, width: 180}}>{label}</TableCell>
+                <TableCell sx={{ fontWeight: 600, width: 180 }}>
+                  {label}
+                </TableCell>
                 <TableCell>{value}</TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
         {error && (
-          <Alert severity="error" sx={{mt: 2}}>
+          <Alert severity="error" sx={{ mt: 2 }}>
             {error}
           </Alert>
         )}
@@ -206,7 +215,7 @@ function SessionStoreCard() {
 function ActionsCard() {
   const [loading, setLoading] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<{
-    type: 'success' | 'error';
+    type: "success" | "error";
     message: string;
   } | null>(null);
 
@@ -215,11 +224,11 @@ function ActionsCard() {
     setFeedback(null);
     try {
       await fn();
-      setFeedback({type: 'success', message: `${key} completed`});
+      setFeedback({ type: "success", message: `${key} completed` });
     } catch (err) {
       setFeedback({
-        type: 'error',
-        message: err instanceof Error ? err.message : 'Failed',
+        type: "error",
+        message: err instanceof Error ? err.message : "Failed",
       });
     } finally {
       setLoading(null);
@@ -229,20 +238,20 @@ function ActionsCard() {
   return (
     <Card variant="outlined">
       <CardContent>
-        <Typography variant="h6" fontWeight={700} sx={{mb: 2}}>
+        <Typography variant="h6" fontWeight={700} sx={{ mb: 2 }}>
           Actions
         </Typography>
-        <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 1}}>
+        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
           <Button
             variant="outlined"
             size="small"
             disabled={loading !== null}
             onClick={() =>
-              run('Hydrate', () => hydrateAuthSessionState().then(() => {}))
+              run("Hydrate", () => hydrateAuthSessionState().then(() => {}))
             }
           >
-            {loading === 'Hydrate' ? (
-              <CircularProgress size={16} sx={{mr: 1}} />
+            {loading === "Hydrate" ? (
+              <CircularProgress size={16} sx={{ mr: 1 }} />
             ) : null}
             Re-hydrate Session
           </Button>
@@ -250,10 +259,10 @@ function ActionsCard() {
             variant="outlined"
             size="small"
             disabled={loading !== null}
-            onClick={() => run('Business', establishBusinessSession)}
+            onClick={() => run("Business", establishBusinessSession)}
           >
-            {loading === 'Business' ? (
-              <CircularProgress size={16} sx={{mr: 1}} />
+            {loading === "Business" ? (
+              <CircularProgress size={16} sx={{ mr: 1 }} />
             ) : null}
             Establish Business Session
           </Button>
@@ -263,16 +272,16 @@ function ActionsCard() {
             size="small"
             color="error"
             disabled={loading !== null}
-            onClick={() => run('Logout', adminLogout)}
+            onClick={() => run("Logout", adminLogout)}
           >
-            {loading === 'Logout' ? (
-              <CircularProgress size={16} sx={{mr: 1}} />
+            {loading === "Logout" ? (
+              <CircularProgress size={16} sx={{ mr: 1 }} />
             ) : null}
             Logout
           </Button>
         </Box>
         {feedback && (
-          <Alert severity={feedback.type} sx={{mt: 2}}>
+          <Alert severity={feedback.type} sx={{ mt: 2 }}>
             {feedback.message}
           </Alert>
         )}
@@ -288,17 +297,17 @@ export default function AuthStatusPage() {
       description="View login status across services and manage tokens"
     >
       <Grid container spacing={2}>
-        <Grid size={{xs: 12, md: 6}}>
+        <Grid size={{ xs: 12, md: 6 }}>
           <TokenCard
             title="AUTH_IDENTITY"
             tokenName={NormalizedTokenName.AUTH_IDENTITY}
             onRefresh={async () => {
-              await queryAccessToken({requirePresence: false});
+              await queryAccessToken({ requirePresence: false });
             }}
             refreshLabel="Refresh Token"
           />
         </Grid>
-        <Grid size={{xs: 12, md: 6}}>
+        <Grid size={{ xs: 12, md: 6 }}>
           <TokenCard
             title="REZICS_SESSION"
             tokenName={NormalizedTokenName.REZICS_SESSION}
@@ -306,10 +315,10 @@ export default function AuthStatusPage() {
             refreshLabel="Establish Business Session"
           />
         </Grid>
-        <Grid size={{xs: 12, md: 6}}>
+        <Grid size={{ xs: 12, md: 6 }}>
           <SessionStoreCard />
         </Grid>
-        <Grid size={{xs: 12, md: 6}}>
+        <Grid size={{ xs: 12, md: 6 }}>
           <ActionsCard />
         </Grid>
       </Grid>

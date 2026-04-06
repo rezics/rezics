@@ -1,2 +1,2 @@
-export {feedbackService, FeedbackService} from './feedback.service';
-export {feedbackApi} from './feedback.api';
+export { feedbackApi } from "./feedback.api";
+export { FeedbackService, feedbackService } from "./feedback.service";

@@ -17,14 +17,14 @@
 
 import type {
   CommentDTO,
-  CreateCommentInput,
-  UpdateCommentInput,
   CommentTreeQuery,
   CommentTreeResponse,
-} from '@rezics/contract';
-import type {CommentListFilters} from './comment';
-import {buildQueryString} from '../utils/buildQuery';
-import {apiFetch} from '../react-query/http';
+  CreateCommentInput,
+  UpdateCommentInput,
+} from "@rezics/contract";
+import { apiFetch } from "../react-query/http";
+import { buildQueryString } from "../utils/buildQuery";
+import type { CommentListFilters } from "./comment";
 
 /**
  * Comment API methods
@@ -50,8 +50,8 @@ export const commentApi = {
    */
   list: async (
     filters: CommentListFilters,
-  ): Promise<{rootUnitId: string; items: CommentDTO[]}> => {
-    return apiFetch<{rootUnitId: string; items: CommentDTO[]}>(
+  ): Promise<{ rootUnitId: string; items: CommentDTO[] }> => {
+    return apiFetch<{ rootUnitId: string; items: CommentDTO[] }>(
       `/comments${buildQueryString(filters)}`,
     );
   },
@@ -71,8 +71,8 @@ export const commentApi = {
    * @returns Newly created CommentDTO
    */
   create: async (input: CreateCommentInput): Promise<CommentDTO> => {
-    return apiFetch<CommentDTO>('/comments', {
-      method: 'POST',
+    return apiFetch<CommentDTO>("/comments", {
+      method: "POST",
       body: JSON.stringify(input),
     });
   },
@@ -88,7 +88,7 @@ export const commentApi = {
     input: UpdateCommentInput,
   ): Promise<CommentDTO> => {
     return apiFetch<CommentDTO>(`/comments/${unitId}`, {
-      method: 'PUT',
+      method: "PUT",
       body: JSON.stringify(input),
     });
   },
@@ -98,9 +98,9 @@ export const commentApi = {
    * @param unitId Comment Unit identifier
    * @returns Status message
    */
-  remove: async (unitId: string): Promise<{message: string}> => {
-    return apiFetch<{message: string}>(`/comments/${unitId}`, {
-      method: 'DELETE',
+  remove: async (unitId: string): Promise<{ message: string }> => {
+    return apiFetch<{ message: string }>(`/comments/${unitId}`, {
+      method: "DELETE",
     });
   },
 };

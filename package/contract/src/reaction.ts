@@ -1,4 +1,4 @@
-import {t} from 'elysia';
+import { t } from "elysia";
 
 export const listQuerySchema = t.Object({
   targetId: t.Optional(t.String()),

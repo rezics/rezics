@@ -1,22 +1,22 @@
-import { useState, useMemo, useCallback } from 'react';
-import { useFolio } from '../context';
-import { buildToc, type TocEntry } from './buildToc';
+import { useCallback, useMemo, useState } from "react";
+import { useFolio } from "../context";
+import type { TocEntry } from "./buildToc";
 
 const DEPTH_COLORS: Record<string, Record<number, string>> = {
   light: {
-    0: 'rgba(0, 0, 0, 0.08)',
-    1: 'rgba(0, 0, 0, 0.04)',
-    2: 'rgba(0, 0, 0, 0.02)',
+    0: "rgba(0, 0, 0, 0.08)",
+    1: "rgba(0, 0, 0, 0.04)",
+    2: "rgba(0, 0, 0, 0.02)",
   },
   dark: {
-    0: 'rgba(255, 255, 255, 0.12)',
-    1: 'rgba(255, 255, 255, 0.06)',
-    2: 'rgba(255, 255, 255, 0.03)',
+    0: "rgba(255, 255, 255, 0.12)",
+    1: "rgba(255, 255, 255, 0.06)",
+    2: "rgba(255, 255, 255, 0.03)",
   },
   sepia: {
-    0: 'rgba(139, 90, 43, 0.12)',
-    1: 'rgba(139, 90, 43, 0.06)',
-    2: 'rgba(139, 90, 43, 0.03)',
+    0: "rgba(139, 90, 43, 0.12)",
+    1: "rgba(139, 90, 43, 0.06)",
+    2: "rgba(139, 90, 43, 0.03)",
   },
 };
 
@@ -61,20 +61,17 @@ export function TocPanel() {
   const visibleEntries = useMemo(() => {
     const visible: TocEntry[] = [];
 
-    function walkVisible(
-      nodes: typeof tree,
-      depth: number,
-    ) {
+    function walkVisible(nodes: typeof tree, depth: number) {
       for (const node of nodes) {
         if (node.children) {
-          visible.push({ kind: 'branch', node, depth });
+          visible.push({ kind: "branch", node, depth });
           if (!collapsed.has(node.id) && node.children) {
             walkVisible(node.children, depth + 1);
           }
         } else {
           const chapter = flatChapters.find((f) => f.node.id === node.id);
           if (chapter) {
-            visible.push({ kind: 'leaf', node, chapter });
+            visible.push({ kind: "leaf", node, chapter });
           }
         }
       }
@@ -85,25 +82,25 @@ export function TocPanel() {
   }, [tree, flatChapters, collapsed]);
 
   return (
-    <div className="folio-toc" style={{ overflow: 'auto', height: '100%' }}>
+    <div className="folio-toc" style={{ overflow: "auto", height: "100%" }}>
       <div
         className="folio-toc-controls"
         style={{
-          display: 'flex',
-          gap: '8px',
-          padding: '8px 12px',
-          borderBottom: '1px solid rgba(128, 128, 128, 0.2)',
+          display: "flex",
+          gap: "8px",
+          padding: "8px 12px",
+          borderBottom: "1px solid rgba(128, 128, 128, 0.2)",
         }}
       >
         <button
           onClick={expandAll}
-          style={{ fontSize: '12px', cursor: 'pointer' }}
+          style={{ fontSize: "12px", cursor: "pointer" }}
         >
           Expand All
         </button>
         <button
           onClick={collapseAll}
-          style={{ fontSize: '12px', cursor: 'pointer' }}
+          style={{ fontSize: "12px", cursor: "pointer" }}
         >
           Collapse All
         </button>
@@ -111,7 +108,7 @@ export function TocPanel() {
 
       <div className="folio-toc-list">
         {visibleEntries.map((entry) => {
-          if (entry.kind === 'branch') {
+          if (entry.kind === "branch") {
             const isCollapsed = collapsed.has(entry.node.id);
             return (
               <div
@@ -119,46 +116,45 @@ export function TocPanel() {
                 className="folio-toc-branch"
                 onClick={() => toggleBranch(entry.node.id)}
                 style={{
-                  padding: '10px 12px',
+                  padding: "10px 12px",
                   background: getDepthBg(state.theme, entry.depth),
-                  cursor: 'pointer',
+                  cursor: "pointer",
                   fontWeight: 600,
-                  fontSize: '13px',
-                  userSelect: 'none',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px',
+                  fontSize: "13px",
+                  userSelect: "none",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px",
                 }}
               >
-                <span style={{ fontSize: '10px' }}>
-                  {isCollapsed ? '▶' : '▼'}
+                <span style={{ fontSize: "10px" }}>
+                  {isCollapsed ? "▶" : "▼"}
                 </span>
                 {entry.node.title}
               </div>
             );
           }
 
-          const isActive =
-            entry.chapter.index === state.chapterIndex;
+          const isActive = entry.chapter.index === state.chapterIndex;
           return (
             <div
               key={`leaf-${entry.node.id}`}
               className="folio-toc-leaf"
               onClick={() =>
-                dispatch({ type: 'SET_CHAPTER', index: entry.chapter.index })
+                dispatch({ type: "SET_CHAPTER", index: entry.chapter.index })
               }
               style={{
-                padding: '10px 12px',
-                cursor: 'pointer',
-                fontSize: '14px',
+                padding: "10px 12px",
+                cursor: "pointer",
+                fontSize: "14px",
                 fontWeight: isActive ? 600 : 400,
                 background: isActive
-                  ? 'rgba(59, 130, 246, 0.1)'
-                  : 'transparent',
+                  ? "rgba(59, 130, 246, 0.1)"
+                  : "transparent",
                 borderLeft: isActive
-                  ? '3px solid rgb(59, 130, 246)'
-                  : '3px solid transparent',
-                userSelect: 'none',
+                  ? "3px solid rgb(59, 130, 246)"
+                  : "3px solid transparent",
+                userSelect: "none",
               }}
             >
               {entry.node.title}

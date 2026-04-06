@@ -2,18 +2,22 @@
 
 import type {
   Book,
-  User,
-  Unit,
   Prisma,
-  Tag,
   ReactionSummary,
-} from '#/prisma/client';
+  Tag,
+  Unit,
+  User,
+} from "#/prisma/client";
 
 /**
  * Internal book type with relations
  */
 export type BookWithRelations = Book & {
-  unit: Unit & {user: User; tags: Tag[]; reactionSummaries: ReactionSummary[]};
+  unit: Unit & {
+    user: User;
+    tags: Tag[];
+    reactionSummaries: ReactionSummary[];
+  };
   author: User[];
   press: User[];
   producer: User[];
@@ -23,7 +27,7 @@ export type BookWithRelations = Book & {
  * Prisma include for book relations
  */
 export const bookInclude = {
-  unit: {include: {user: true, tags: true, reactionSummaries: true}},
+  unit: { include: { user: true, tags: true, reactionSummaries: true } },
   author: true,
   press: true,
   producer: true,

@@ -1,8 +1,7 @@
-import {type NavigationItem} from '../navigation/navigation';
-import {Divider} from '@mui/material';
-
-import {MainSidebarDrawerHeader} from './MainSidebarDrawerHeader';
-import {NavigationList} from '../navigation/NavigationList';
+import { Divider } from "@mui/material";
+import { NavigationList } from "../navigation/NavigationList";
+import type { NavigationItem } from "../navigation/navigation";
+import { MainSidebarDrawerHeader } from "./MainSidebarDrawerHeader";
 
 interface MainSidebarMenuSectionProps {
   handleDrawerToggle: () => void;
@@ -11,7 +10,7 @@ interface MainSidebarMenuSectionProps {
     segment: string | undefined,
     hasChildren: boolean,
   ) => void;
-  layoutType: 'type-a' | 'type-b';
+  layoutType: "type-a" | "type-b";
   NAVIGATION: NavigationItem[];
   isMobile: boolean;
   pathname: string;
@@ -30,8 +29,8 @@ export function MainSidebarMenuSection({
   return (
     <div>
       <MainSidebarDrawerHeader handleDrawerToggle={handleDrawerToggle} />
-      {layoutType === 'type-a' && <Divider />}
-      {layoutType === 'type-b' && <div className="mt-2" />}
+      {layoutType === "type-a" && <Divider />}
+      {layoutType === "type-b" && <div className="mt-2" />}
       <NavigationList
         NAVIGATION={NAVIGATION}
         isMobile={isMobile}

@@ -1,5 +1,11 @@
-import {useTheme, ClickAwayListener, Fade, Paper, Popper} from '@mui/material';
-import EmojiPicker, {Theme, type EmojiClickData} from 'emoji-picker-react';
+import {
+  ClickAwayListener,
+  Fade,
+  Paper,
+  Popper,
+  useTheme,
+} from "@mui/material";
+import EmojiPicker, { type EmojiClickData, Theme } from "emoji-picker-react";
 
 export interface EmojiPickerOverlayProps {
   open: boolean;
@@ -21,23 +27,23 @@ export function EmojiPickerOverlay({
       open={open && !!anchorEl}
       anchorEl={anchorEl}
       placement="bottom-start"
-      style={{zIndex: 2000}}
+      style={{ zIndex: 2000 }}
       transition
     >
-      {({TransitionProps}) => (
+      {({ TransitionProps }) => (
         <Fade {...TransitionProps} timeout={160}>
           <div>
             <ClickAwayListener onClickAway={onClose}>
-              <Paper elevation={10} sx={{overflow: 'hidden'}}>
+              <Paper elevation={10} sx={{ overflow: "hidden" }}>
                 <EmojiPicker
                   theme={
-                    theme.palette.mode === 'dark' ? Theme.DARK : Theme.LIGHT
+                    theme.palette.mode === "dark" ? Theme.DARK : Theme.LIGHT
                   }
-                  previewConfig={{showPreview: false}}
+                  previewConfig={{ showPreview: false }}
                   height={380}
                   width={340}
                   onEmojiClick={(emoji: EmojiClickData) => {
-                    const native = (emoji?.emoji ?? '').toString();
+                    const native = (emoji?.emoji ?? "").toString();
                     if (!native) return;
                     onPick(native);
                   }}

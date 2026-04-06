@@ -1,2 +1,2 @@
-export * from './readlist.api';
-export * from '@rezics/contract';
+export * from "@rezics/contract";
+export * from "./readlist.api";

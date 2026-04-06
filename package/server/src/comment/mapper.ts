@@ -1,7 +1,7 @@
-import type {CommentWithRelations} from './types';
-import type {CommentDTO} from '@rezics/contract';
+import type { CommentDTO } from "@rezics/contract";
+import type { CommentWithRelations } from "./types";
 
-function sanitizeUser(u: CommentWithRelations['unit']['user']) {
+function sanitizeUser(u: CommentWithRelations["unit"]["user"]) {
   return {
     id: u.unitId,
     name: u.name,

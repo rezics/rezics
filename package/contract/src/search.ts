@@ -1,14 +1,14 @@
-import {t} from 'elysia';
+import { t } from "elysia";
 
 export const bookSortTypeSchema = t.Enum({
-  relevance: 'relevance',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt',
-  favorites: 'favorites',
-  wordCount: 'wordCount',
-  monthlyVotes: 'monthlyVotes',
-  recommendation: 'recommendation',
-  custom: 'custom',
+  relevance: "relevance",
+  createdAt: "createdAt",
+  updatedAt: "updatedAt",
+  favorites: "favorites",
+  wordCount: "wordCount",
+  monthlyVotes: "monthlyVotes",
+  recommendation: "recommendation",
+  custom: "custom",
 });
 
 export const bookQueryOptionsSchema = t.Object({
@@ -24,7 +24,7 @@ export const bookQueryOptionsSchema = t.Object({
   sort: t.Optional(
     t.Object({
       type: t.Optional(bookSortTypeSchema),
-      order: t.Optional(t.Enum({asc: 'asc', desc: 'desc'})),
+      order: t.Optional(t.Enum({ asc: "asc", desc: "desc" })),
     }),
   ),
   start: t.Optional(t.Number()),
@@ -40,7 +40,7 @@ export const bookQueryOptionsSchema = t.Object({
   // experimental: t.Optional(t.Record(t.String(), t.Any())),
 });
 
-export type BookQueryOptions = (typeof bookQueryOptionsSchema)['static'];
+export type BookQueryOptions = (typeof bookQueryOptionsSchema)["static"];
 
 /**
  * Build a compact search `q` string from structured BookQueryOptions.
@@ -49,18 +49,18 @@ export type BookQueryOptions = (typeof bookQueryOptionsSchema)['static'];
 export function toBookQueryString(opts: BookQueryOptions): string {
   const tokens: string[] = [];
   if (opts.keyword) tokens.push(opts.keyword);
-  if (opts.tags?.length) tokens.push(...opts.tags.map(t => `[${t}]`));
+  if (opts.tags?.length) tokens.push(...opts.tags.map((t) => `[${t}]`));
   if (opts.authorIds?.length)
-    tokens.push(...opts.authorIds.map(id => `author:${id}`));
+    tokens.push(...opts.authorIds.map((id) => `author:${id}`));
   if (opts.pressIds?.length)
-    tokens.push(...opts.pressIds.map(id => `press:${id}`));
+    tokens.push(...opts.pressIds.map((id) => `press:${id}`));
   if (opts.producerIds?.length)
-    tokens.push(...opts.producerIds.map(id => `producer:${id}`));
+    tokens.push(...opts.producerIds.map((id) => `producer:${id}`));
   if (opts.keywordFields?.length)
-    tokens.push(`fields:${opts.keywordFields.join(',')}`);
+    tokens.push(`fields:${opts.keywordFields.join(",")}`);
   if (opts.sort?.type)
     tokens.push(
-      `sort:${opts.sort.type}${opts.sort.order ? ':' + opts.sort.order : ''}`,
+      `sort:${opts.sort.type}${opts.sort.order ? `:${opts.sort.order}` : ""}`,
     );
-  return tokens.join(' ').trim();
+  return tokens.join(" ").trim();
 }

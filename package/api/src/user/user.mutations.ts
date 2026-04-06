@@ -1,25 +1,22 @@
+import type { UpdateUser, UserDTO } from "@rezics/contract";
 import {
+  type UseMutationOptions,
   useMutation,
   useQueryClient,
-  type UseMutationOptions,
-} from '@tanstack/react-query';
-import {userApi} from './user.api';
-import {userKeys} from './user.keys';
-import type {UpdateUser, UserDTO} from '@rezics/contract';
+} from "@tanstack/react-query";
+import { userApi } from "./user.api";
+import { userKeys } from "./user.keys";
 
 export function useUpdateMeMutation(
-  options?: Omit<
-    UseMutationOptions<UserDTO, Error, UpdateUser>,
-    'mutationFn'
-  >,
+  options?: Omit<UseMutationOptions<UserDTO, Error, UpdateUser>, "mutationFn">,
 ) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (input: UpdateUser) => userApi.updateMe(input),
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
-      qc.setQueryData(userKeys.detail('me'), data);
-      qc.invalidateQueries({queryKey: userKeys.lists()});
+      qc.setQueryData(userKeys.detail("me"), data);
+      qc.invalidateQueries({ queryKey: userKeys.lists() });
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
   });
@@ -27,21 +24,18 @@ export function useUpdateMeMutation(
 
 export function useAdminUpdateUserMutation(
   options?: Omit<
-    UseMutationOptions<
-      UserDTO,
-      Error,
-      {unitId: string; input: UpdateUser}
-    >,
-    'mutationFn'
+    UseMutationOptions<UserDTO, Error, { unitId: string; input: UpdateUser }>,
+    "mutationFn"
   >,
 ) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({unitId, input}) => userApi.adminUpdate(unitId, input as any),
+    mutationFn: ({ unitId, input }) =>
+      userApi.adminUpdate(unitId, input as any),
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
       qc.setQueryData(userKeys.adminDetail(variables.unitId), data);
-      qc.invalidateQueries({queryKey: userKeys.adminLists()});
+      qc.invalidateQueries({ queryKey: userKeys.adminLists() });
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
   });
@@ -49,8 +43,8 @@ export function useAdminUpdateUserMutation(
 
 export function useDeleteMeMutation(
   options?: Omit<
-    UseMutationOptions<{message: string}, Error, void>,
-    'mutationFn'
+    UseMutationOptions<{ message: string }, Error, void>,
+    "mutationFn"
   >,
 ) {
   const qc = useQueryClient();
@@ -58,8 +52,8 @@ export function useDeleteMeMutation(
     mutationFn: () => userApi.deleteMe(),
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
-      qc.removeQueries({queryKey: userKeys.detail('me')});
-      qc.invalidateQueries({queryKey: userKeys.lists()});
+      qc.removeQueries({ queryKey: userKeys.detail("me") });
+      qc.invalidateQueries({ queryKey: userKeys.lists() });
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
   });
@@ -67,8 +61,8 @@ export function useDeleteMeMutation(
 
 export function useFollowMutation(
   options?: Omit<
-    UseMutationOptions<{message: string}, Error, string>,
-    'mutationFn'
+    UseMutationOptions<{ message: string }, Error, string>,
+    "mutationFn"
   >,
 ) {
   const qc = useQueryClient();
@@ -76,23 +70,23 @@ export function useFollowMutation(
     mutationFn: (targetId: string) => userApi.follow(targetId),
     ...options,
     onSuccess: (data, targetId, onMutateResult, context) => {
-      qc.invalidateQueries({queryKey: userKeys.detail(targetId)});
-      qc.invalidateQueries({queryKey: userKeys.detail('me')});
+      qc.invalidateQueries({ queryKey: userKeys.detail(targetId) });
+      qc.invalidateQueries({ queryKey: userKeys.detail("me") });
       // Invalidate specific follow status
       qc.invalidateQueries({
-        predicate: query => {
+        predicate: (query) => {
           const key = query.queryKey;
           return (
-            key[0] === 'users' &&
-            key[1] === 'detail' &&
-            key[2] === 'me' &&
-            key[3] === 'follow-status' &&
+            key[0] === "users" &&
+            key[1] === "detail" &&
+            key[2] === "me" &&
+            key[3] === "follow-status" &&
             Array.isArray(key[4]) &&
             key[4].includes(targetId)
           );
         },
       });
-      qc.invalidateQueries({queryKey: userKeys.followers(targetId)});
+      qc.invalidateQueries({ queryKey: userKeys.followers(targetId) });
       options?.onSuccess?.(data, targetId, onMutateResult, context);
     },
   });
@@ -100,8 +94,8 @@ export function useFollowMutation(
 
 export function useUnfollowMutation(
   options?: Omit<
-    UseMutationOptions<{message: string}, Error, string>,
-    'mutationFn'
+    UseMutationOptions<{ message: string }, Error, string>,
+    "mutationFn"
   >,
 ) {
   const qc = useQueryClient();
@@ -109,23 +103,23 @@ export function useUnfollowMutation(
     mutationFn: (targetId: string) => userApi.unfollow(targetId),
     ...options,
     onSuccess: (data, targetId, onMutateResult, context) => {
-      qc.invalidateQueries({queryKey: userKeys.detail(targetId)});
-      qc.invalidateQueries({queryKey: userKeys.detail('me')});
+      qc.invalidateQueries({ queryKey: userKeys.detail(targetId) });
+      qc.invalidateQueries({ queryKey: userKeys.detail("me") });
       // Invalidate specific follow status
       qc.invalidateQueries({
-        predicate: query => {
+        predicate: (query) => {
           const key = query.queryKey;
           return (
-            key[0] === 'users' &&
-            key[1] === 'detail' &&
-            key[2] === 'me' &&
-            key[3] === 'follow-status' &&
+            key[0] === "users" &&
+            key[1] === "detail" &&
+            key[2] === "me" &&
+            key[3] === "follow-status" &&
             Array.isArray(key[4]) &&
             key[4].includes(targetId)
           );
         },
       });
-      qc.invalidateQueries({queryKey: userKeys.followers(targetId)});
+      qc.invalidateQueries({ queryKey: userKeys.followers(targetId) });
       options?.onSuccess?.(data, targetId, onMutateResult, context);
     },
   });

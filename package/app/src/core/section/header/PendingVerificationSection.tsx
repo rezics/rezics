@@ -1,15 +1,13 @@
-import {Button, Typography} from '@mui/material';
-import {useTranslation} from 'react-i18next';
-import {Link} from '@tanstack/react-router';
-import {useAuth} from '@/user/page/useAuth';
-import {MoreHorizMenu} from '../../component/header/MoreHorizMenu';
+import { Button, Typography } from "@mui/material";
+import { Link } from "@tanstack/react-router";
+import { useTranslation } from "react-i18next";
+import { useAuth } from "@/user/page/useAuth";
+import { MoreHorizMenu } from "../../component/header/MoreHorizMenu";
 
 export function PendingVerificationSection() {
-  const {t} = useTranslation();
+  const { t } = useTranslation();
   const auth = useAuth();
-  const headline =
-    auth.authSession?.email ||
-    t('auth.flow.verify_title');
+  const headline = auth.authSession?.email || t("auth.flow.verify_title");
 
   return (
     <div className="flex items-center gap-2">
@@ -19,8 +17,8 @@ export function PendingVerificationSection() {
         </Typography>
         <Typography variant="caption" color="text.secondary">
           {auth.needsVerification
-            ? t('auth.flow.verify_guest_notice')
-            : t('auth.flow.onboarding_title')}
+            ? t("auth.flow.verify_guest_notice")
+            : t("auth.flow.onboarding_title")}
         </Typography>
       </div>
       {auth.needsVerification ? (
@@ -30,7 +28,7 @@ export function PendingVerificationSection() {
           component={Link}
           to="/verify-email"
         >
-          {t('auth.flow.verify_resend')}
+          {t("auth.flow.verify_resend")}
         </Button>
       ) : (
         <Button
@@ -39,7 +37,7 @@ export function PendingVerificationSection() {
           component={Link}
           to="/onboarding"
         >
-          {t('common.continue')}
+          {t("common.continue")}
         </Button>
       )}
       <MoreHorizMenu />

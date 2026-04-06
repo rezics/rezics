@@ -5,14 +5,13 @@
 
 import type {
   CreateReadlistInput,
-  UpdateReadlistInput,
   ReadlistListResponse,
   ReadlistResponse,
-} from '@rezics/contract';
-import type {ReadlistFilters} from './readlist.types';
-import {buildQueryString} from '../utils/buildQuery';
-
-import {apiFetch} from '../react-query/http';
+  UpdateReadlistInput,
+} from "@rezics/contract";
+import { apiFetch } from "../react-query/http";
+import { buildQueryString } from "../utils/buildQuery";
+import type { ReadlistFilters } from "./readlist.types";
 
 /**
  * Readlist API methods
@@ -42,7 +41,7 @@ export const readlistApi = {
     filters?: ReadlistFilters,
   ): Promise<ReadlistListResponse> => {
     return apiFetch<ReadlistListResponse>(
-      `/readlists${buildQueryString({q: query, ...filters})}`,
+      `/readlists${buildQueryString({ q: query, ...filters })}`,
     );
   },
 
@@ -54,7 +53,7 @@ export const readlistApi = {
     filters?: ReadlistFilters,
   ): Promise<ReadlistListResponse> => {
     return apiFetch<ReadlistListResponse>(
-      `/readlists${buildQueryString({userId, ...filters})}`,
+      `/readlists${buildQueryString({ userId, ...filters })}`,
     );
   },
 
@@ -62,8 +61,8 @@ export const readlistApi = {
    * Create new readlist
    */
   create: async (input: CreateReadlistInput): Promise<ReadlistResponse> => {
-    return apiFetch<ReadlistResponse>('/readlists', {
-      method: 'POST',
+    return apiFetch<ReadlistResponse>("/readlists", {
+      method: "POST",
       body: JSON.stringify(input),
     });
   },
@@ -76,7 +75,7 @@ export const readlistApi = {
     input: UpdateReadlistInput,
   ): Promise<ReadlistResponse> => {
     return apiFetch<ReadlistResponse>(`/readlists/${unitId}`, {
-      method: 'PUT',
+      method: "PUT",
       body: JSON.stringify(input),
     });
   },
@@ -84,9 +83,9 @@ export const readlistApi = {
   /**
    * Delete readlist
    */
-  remove: async (unitId: string): Promise<{message: string}> => {
-    return apiFetch<{message: string}>(`/readlists/${unitId}`, {
-      method: 'DELETE',
+  remove: async (unitId: string): Promise<{ message: string }> => {
+    return apiFetch<{ message: string }>(`/readlists/${unitId}`, {
+      method: "DELETE",
     });
   },
 };

@@ -1,22 +1,21 @@
-import {Rating} from '@mui/material';
-import React from 'react';
-import {useTranslation} from 'react-i18next';
-import {Link} from '@rezics/ui/primitive/link/Link.tsx';
-
-import type {BookDTO} from '@rezics/contract';
+import { Rating } from "@mui/material";
+import type { BookDTO } from "@rezics/contract";
+import { LazyLoadImage } from "@rezics/ui/primitive/image/LazyLoadImage.tsx";
+import { Link } from "@rezics/ui/primitive/link/Link.tsx";
+import type React from "react";
+import { useTranslation } from "react-i18next";
 import {
   MiniActionBar,
   MiniAdminActionBar,
-} from '@/engagement/component/MiniActionBar.tsx';
-import {LazyLoadImage} from '@rezics/ui/primitive/image/LazyLoadImage.tsx';
+} from "@/engagement/component/MiniActionBar.tsx";
 
 type Book = BookDTO;
 
 export const BookHeroReactionBar: React.FC<{
   bookInfo: Book;
   className?: string;
-}> = ({bookInfo, className}) => {
-  const color = 'text-white';
+}> = ({ bookInfo, className }) => {
+  const color = "text-white";
   return (
     <div className={className}>
       <MiniAdminActionBar
@@ -26,7 +25,7 @@ export const BookHeroReactionBar: React.FC<{
       />
       <MiniActionBar
         hideReply={true}
-        className={className ?? ''}
+        className={className ?? ""}
         textColor={color}
         unitId={bookInfo?.unitId}
       />
@@ -37,14 +36,14 @@ export const BookHeroReactionBar: React.FC<{
 export const BookHeroSection: React.FC<{
   bookInfo: Book;
   rating: number;
-}> = ({bookInfo, rating}) => {
-  const {t} = useTranslation();
+}> = ({ bookInfo, rating }) => {
+  const { t } = useTranslation();
   const tags = bookInfo?.tags ?? [];
   return (
     <div
       className="bg-cover bg-center relative"
       style={{
-        backgroundImage: `url(${bookInfo?.coverUrl || ''})`,
+        backgroundImage: `url(${bookInfo?.coverUrl || ""})`,
       }}
     >
       <div className="bg-black/60 backdrop-blur-md shadow-lg w-full">
@@ -52,7 +51,7 @@ export const BookHeroSection: React.FC<{
           {/* Cover Image */}
           <div className="col-span-4 md:col-span-3 lg:col-span-2 flex justify-center">
             <LazyLoadImage
-              src={bookInfo?.coverUrl || ''}
+              src={bookInfo?.coverUrl || ""}
               alt={bookInfo?.title}
               className="max-h-[300px] rounded-lg"
             />
@@ -66,29 +65,29 @@ export const BookHeroSection: React.FC<{
 
             <div className="space-y-1">
               <p>
-                {t('book.fields.author')}：
+                {t("book.fields.author")}：
                 <span className="font-medium">
                   {bookInfo?.author?.[0]?.name}
                 </span>
               </p>
               <p>
-                {t('book.fields.press')}：{bookInfo?.press?.[0]?.name}
+                {t("book.fields.press")}：{bookInfo?.press?.[0]?.name}
               </p>
               <p>
-                {t('book.fields.producer')}：{bookInfo?.producer?.[0]?.name}
+                {t("book.fields.producer")}：{bookInfo?.producer?.[0]?.name}
               </p>
               <p>
-                {t('book.fields.text_length')}：{bookInfo?.textLength ?? 0}
+                {t("book.fields.text_length")}：{bookInfo?.textLength ?? 0}
               </p>
               <p>
-                {t('book.fields.isbn')}：{bookInfo?.isbn}
+                {t("book.fields.isbn")}：{bookInfo?.isbn}
               </p>
             </div>
 
             {/* Tags */}
             <div className="flex flex-wrap gap-2 mt-1">
-              {tags?.map(tag => (
-                <Link key={tag} to="/book" search={{tags: tag}}>
+              {tags?.map((tag) => (
+                <Link key={tag} to="/book" search={{ tags: tag }}>
                   <span className="px-2 py-1 rounded bg-white/10 text-white hover:bg-white/20 transition">
                     {tag}
                   </span>

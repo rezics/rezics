@@ -1,5 +1,5 @@
-import {createEnv} from '@t3-oss/env-core';
-import * as v from 'valibot';
+import { createEnv } from "@t3-oss/env-core";
+import * as v from "valibot";
 
 export const env = createEnv({
   server: {
@@ -9,9 +9,9 @@ export const env = createEnv({
      */
     NODE_ENV: v.optional(
       v.union([
-        v.literal('development'),
-        v.literal('test'),
-        v.literal('production'),
+        v.literal("development"),
+        v.literal("test"),
+        v.literal("production"),
       ]),
     ),
 
@@ -26,7 +26,7 @@ export const env = createEnv({
      * Used to derive issuer, JWKS (via /.well-known/jwks.json), and API calls.
      * Defaults to 'http://localhost:3001'.
      */
-    AUTH_BASE_URL: v.fallback(v.string(), 'http://localhost:3001'),
+    AUTH_BASE_URL: v.fallback(v.string(), "http://localhost:3001"),
 
     /**
      * Bootstrap-only audience for auth JWT validation metadata seeding.
@@ -99,13 +99,13 @@ export const env = createEnv({
      * Meilisearch host URL.
      * Defaults to `http://localhost:7700` when omitted.
      */
-    MEILI_HOST: v.fallback(v.string(), 'http://127.0.0.1:7700'),
+    MEILI_HOST: v.fallback(v.string(), "http://127.0.0.1:7700"),
 
     /**
      * Meilisearch master/admin API key.
      * Defaults to `masterKey` when omitted.
      */
-    MEILI_MASTER_KEY: v.fallback(v.string(), 'masterKey'),
+    MEILI_MASTER_KEY: v.fallback(v.string(), "masterKey"),
 
     /**
      * Configures the server HTTP listen port as a string value.

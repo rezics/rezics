@@ -1,5 +1,5 @@
-import React from 'react';
-import {Link} from '@rezics/ui/primitive/link/Link.tsx';
+import { Link } from "@rezics/ui/primitive/link/Link.tsx";
+import type React from "react";
 
 export type HorizontalBookProps = {
   title: string;
@@ -20,8 +20,8 @@ export function HorizontalBookCard({
   onClick,
   className,
 }: HorizontalBookProps) {
-  const Root: React.ElementType = href ? Link : 'button';
-  const rootProps = href ? {to: href} : {type: 'button' as const, onClick};
+  const Root: React.ElementType = href ? Link : "button";
+  const rootProps = href ? { to: href } : { type: "button" as const, onClick };
 
   return (
     <Root
@@ -37,8 +37,8 @@ export function HorizontalBookCard({
         duration-200
         hover:bg-white/5
         `,
-        className ?? '',
-      ].join(' ')}
+        className ?? "",
+      ].join(" ")}
       aria-label={title}
     >
       <div className="flex gap-4 items-start">

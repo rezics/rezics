@@ -1,13 +1,13 @@
-import {useQuery} from '@tanstack/react-query';
-import type {TagDetailDTO} from '@rezics/contract';
-import {tagQueries} from '@rezics/api/tag/tag';
-import {AccentBarWithText} from '@rezics/ui/composite/typography/AccentBarWithText.tsx';
-import {TagDetailCard} from '../component/TagCards';
-import {tagUnitRoute} from '@/router';
+import { tagQueries } from "@rezics/api/tag/tag";
+import type { TagDetailDTO } from "@rezics/contract";
+import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
+import { useQuery } from "@tanstack/react-query";
+import { tagUnitRoute } from "@/router";
+import { TagDetailCard } from "../component/TagCards";
 
 export function TagUnitPage() {
-  const {unitId} = tagUnitRoute.useParams();
-  const {data, isLoading, error} = useQuery(tagQueries.detail(unitId));
+  const { unitId } = tagUnitRoute.useParams();
+  const { data, isLoading, error } = useQuery(tagQueries.detail(unitId));
   if (isLoading) {
     return (
       <div className="w-11/12 mx-auto mt-10">

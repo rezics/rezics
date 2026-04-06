@@ -1,13 +1,22 @@
-import React, {useEffect, useMemo, useState} from 'react';
-import {TextField, Button, Autocomplete, CircularProgress} from '@mui/material';
+import {
+  Autocomplete,
+  Button,
+  CircularProgress,
+  TextField,
+} from "@mui/material";
 import type {
-  TagDetailDTO,
   CreateTagInput,
+  TagDetailDTO,
   UpdateTagInput,
-} from '@rezics/api/tag/tag';
-import {useCreateTagMutation, useUpdateTagMutation} from '@rezics/api/tag/tag';
-import {unitApi} from '@rezics/api/unit/unit';
-import type {UnitDTO} from '@rezics/api/unit/unit';
+} from "@rezics/api/tag/tag";
+import {
+  useCreateTagMutation,
+  useUpdateTagMutation,
+} from "@rezics/api/tag/tag";
+import type { UnitDTO } from "@rezics/api/unit/unit";
+import { unitApi } from "@rezics/api/unit/unit";
+import type React from "react";
+import { useEffect, useMemo, useState } from "react";
 
 export type TagEditProps = {
   tag?: TagDetailDTO | null; // 若存在则为更新模式
@@ -19,9 +28,13 @@ export type TagEditProps = {
  * TagEdit – 编辑 Tag 及其绑定的 domains
  * - 搜索 domain 使用 unitApi.search，过滤 type = 'DOMAIN'
  */
-export const TagEdit: React.FC<TagEditProps> = ({tag, onSaved, className}) => {
+export const TagEdit: React.FC<TagEditProps> = ({
+  tag,
+  onSaved,
+  className,
+}) => {
   const isUpdate = !!tag;
-  const [name, setName] = useState(tag?.name ?? '');
+  const [name, setName] = useState(tag?.name ?? "");
   const [type, setType] = useState<string | null>(tag?.type ?? null);
   const [domains, setDomains] = useState<UnitDTO[]>();
   const [domainIds, setDomainIds] = useState<string[]>(() => {
@@ -30,16 +43,16 @@ export const TagEdit: React.FC<TagEditProps> = ({tag, onSaved, className}) => {
     // - string[]: 直接是域的 unitId
     // - object[]: 域对象，包含 { id | unitId, ... }
     return (tag.domains as any[])
-      .map(d =>
-        typeof d === 'string'
+      .map((d) =>
+        typeof d === "string"
           ? d
-          : String((d as any).id ?? (d as any).unitId ?? ''),
+          : String((d as any).id ?? (d as any).unitId ?? ""),
       )
       .filter(Boolean);
   });
 
   // domain 搜索
-  const [q, setQ] = useState('');
+  const [q, setQ] = useState("");
   const [searching, setSearching] = useState(false);
   const [options, setOptions] = useState<UnitDTO[]>([]);
 
@@ -52,7 +65,7 @@ export const TagEdit: React.FC<TagEditProps> = ({tag, onSaved, className}) => {
       }
       setSearching(true);
       try {
-        const res = await unitApi.search(q, {type: 'DOMAIN', limit: 10});
+        const res = await unitApi.search(q, { type: "DOMAIN", limit: 10 });
         if (mounted) setOptions(res.units || []);
       } finally {
         if (mounted) setSearching(false);
@@ -65,10 +78,10 @@ export const TagEdit: React.FC<TagEditProps> = ({tag, onSaved, className}) => {
   }, [q]);
 
   const createMutation = useCreateTagMutation({
-    onSuccess: data => onSaved?.(data as TagDetailDTO),
+    onSuccess: (data) => onSaved?.(data as TagDetailDTO),
   });
   const updateMutation = useUpdateTagMutation({
-    onSuccess: data => onSaved?.(data as TagDetailDTO),
+    onSuccess: (data) => onSaved?.(data as TagDetailDTO),
   });
 
   const busy = createMutation.isPending || updateMutation.isPending;
@@ -81,7 +94,7 @@ export const TagEdit: React.FC<TagEditProps> = ({tag, onSaved, className}) => {
       domains: domainIds,
     };
     if (isUpdate && tag) {
-      await updateMutation.mutateAsync({unitId: tag.id, input: payload});
+      await updateMutation.mutateAsync({ unitId: tag.id, input: payload });
     } else {
       await createMutation.mutateAsync(payload as CreateTagInput);
     }
@@ -89,7 +102,7 @@ export const TagEdit: React.FC<TagEditProps> = ({tag, onSaved, className}) => {
 
   const selectedDomainOptions = useMemo(() => {
     return (
-      domains?.map(d => ({
+      domains?.map((d) => ({
         id: d.id,
         title: d.title,
       })) ?? []
@@ -107,7 +120,7 @@ export const TagEdit: React.FC<TagEditProps> = ({tag, onSaved, className}) => {
             id="tag-name"
             size="small"
             value={name}
-            onChange={e => setName(e.target.value)}
+            onChange={(e) => setName(e.target.value)}
             required
           />
         </div>
@@ -120,9 +133,9 @@ export const TagEdit: React.FC<TagEditProps> = ({tag, onSaved, className}) => {
             id="tag-type"
             size="small"
             // value={type ?? ''}
-            value={'book'}
+            value={"book"}
             disabled
-            onChange={e => setType(e.target.value || null)}
+            onChange={(e) => setType(e.target.value || null)}
             placeholder="可选，如：TOPIC / GENRE"
           />
         </div>
@@ -135,30 +148,30 @@ export const TagEdit: React.FC<TagEditProps> = ({tag, onSaved, className}) => {
             multiple
             options={options}
             loading={searching}
-            getOptionLabel={o => {
+            getOptionLabel={(o) => {
               const anyO = o as any;
               const label = anyO.title ?? anyO.name ?? anyO.id;
-              return typeof label === 'string' ? label : String(label ?? '');
+              return typeof label === "string" ? label : String(label ?? "");
             }}
-            filterOptions={x => x} // 保留远程结果
+            filterOptions={(x) => x} // 保留远程结果
             value={selectedDomainOptions as any}
             onChange={(_, values) => {
-              setDomainIds(values.map(v => (v as any).id));
+              setDomainIds(values.map((v) => (v as any).id));
               setDomains(
-                values.map(v => {
-                  return {id: v.id, title: v.title} as any;
+                values.map((v) => {
+                  return { id: v.id, title: v.title } as any;
                 }),
               );
             }}
-            renderInput={params => {
-              const {InputProps, ...rest} = params;
+            renderInput={(params) => {
+              const { InputProps, ...rest } = params;
               return (
                 <TextField
                   {...rest}
                   id="tag-domains"
                   size="small"
                   placeholder="搜索域（DOMAIN）"
-                  onChange={e => setQ(e.target.value)}
+                  onChange={(e) => setQ(e.target.value)}
                   InputProps={{
                     ...InputProps,
                     endAdornment: (
@@ -186,7 +199,7 @@ export const TagEdit: React.FC<TagEditProps> = ({tag, onSaved, className}) => {
             size="small"
             disabled={busy}
           >
-            {isUpdate ? '保存修改' : '创建标签'}
+            {isUpdate ? "保存修改" : "创建标签"}
           </Button>
           {busy && <CircularProgress size={18} />}
         </div>

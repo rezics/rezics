@@ -2,13 +2,10 @@
  * React Query configurations for Reaction queries
  */
 
-import {queryOptions} from '@tanstack/react-query';
-import {reactionApi} from './reaction.api';
-import {reactionKeys} from './reaction.keys';
-import type {
-  ReactionListQuery,
-  BookmarkTagsResponse,
-} from './reaction.types.ts';
+import { queryOptions } from "@tanstack/react-query";
+import { reactionApi } from "./reaction.api";
+import { reactionKeys } from "./reaction.keys";
+import type { ReactionListQuery } from "./reaction.types.ts";
 
 /**
  * Query options for listing reactions
@@ -37,7 +34,7 @@ export const reactionSummaryQuery = (targetId: string) =>
 export const reactionMyQuery = (targetId: string) =>
   queryOptions({
     queryKey: reactionKeys.my(targetId),
-    queryFn: () => reactionApi.my({targetId}),
+    queryFn: () => reactionApi.my({ targetId }),
     enabled: !!targetId,
     staleTime: 1000 * 60 * 1, // 1 minute
   });

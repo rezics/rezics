@@ -1,6 +1,4 @@
-import React from 'react';
-
-export function SimpleProgress({progress}: {progress: number}) {
+export function SimpleProgress({ progress }: { progress: number }) {
   return (
     <div className="pointer-events-none fixed left-0 right-0 top-0 z-[9999] h-1.5 md:h-2">
       <div

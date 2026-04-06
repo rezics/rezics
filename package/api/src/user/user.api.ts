@@ -8,9 +8,9 @@ import type {
   SessionTokenResponse,
   UpdateUser,
   UserDTO,
-} from '@rezics/contract';
-import {NormalizedTokenName} from '@rezics/contract';
-import {apiFetch} from '../react-query/http';
+} from "@rezics/contract";
+import { NormalizedTokenName } from "@rezics/contract";
+import { apiFetch } from "../react-query/http";
 
 type FollowSummaryResponse = {
   targetIds: string[];
@@ -25,14 +25,14 @@ export const userApi = {
         NormalizedTokenName.REZICS_SESSION,
       ],
       headers: {
-        'x-auth-context-token': contextToken,
+        "x-auth-context-token": contextToken,
       },
     });
   },
 
   issueSessionToken: async (): Promise<SessionTokenResponse> => {
     return apiFetch(`/session/token`, {
-      method: 'POST',
+      method: "POST",
     });
   },
 
@@ -42,10 +42,10 @@ export const userApi = {
 
   list: async (
     query?: Record<string, unknown>,
-  ): Promise<{users: Omit<UserDTO, 'email'>[]; total: number}> => {
+  ): Promise<{ users: Omit<UserDTO, "email">[]; total: number }> => {
     const qs = query
       ? `?${new URLSearchParams(query as Record<string, string>).toString()}`
-      : '';
+      : "";
     return apiFetch(`/meili/users/search${qs}`);
   },
 
@@ -54,10 +54,10 @@ export const userApi = {
    */
   adminList: async (
     query?: Record<string, unknown>,
-  ): Promise<{users: UserDTO[]; total: number}> => {
+  ): Promise<{ users: UserDTO[]; total: number }> => {
     const qs = query
       ? `?${new URLSearchParams(query as Record<string, string>).toString()}`
-      : '';
+      : "";
     return apiFetch(`/users/admin${qs}`);
   },
 
@@ -70,7 +70,7 @@ export const userApi = {
    */
   adminUpdate: async (unitId: string, input: UpdateUser): Promise<UserDTO> => {
     return apiFetch(`/users/admin/${unitId}`, {
-      method: 'PUT',
+      method: "PUT",
       body: JSON.stringify(input),
     });
   },
@@ -81,39 +81,39 @@ export const userApi = {
 
   updateMe: async (input: UpdateUser): Promise<UserDTO> => {
     return apiFetch(`/users/me`, {
-      method: 'PUT',
+      method: "PUT",
       body: JSON.stringify(input),
     });
   },
 
   update: async (unitId: string, input: UpdateUser): Promise<UserDTO> => {
     return apiFetch(`/users/${unitId}`, {
-      method: 'PUT',
+      method: "PUT",
       body: JSON.stringify(input),
     });
   },
 
-  deleteMe: async (): Promise<{message: string}> => {
-    return apiFetch(`/users/me`, {method: 'DELETE'});
+  deleteMe: async (): Promise<{ message: string }> => {
+    return apiFetch(`/users/me`, { method: "DELETE" });
   },
 
-  delete: async (unitId: string): Promise<{message: string}> => {
-    return apiFetch(`/users/${unitId}`, {method: 'DELETE'});
+  delete: async (unitId: string): Promise<{ message: string }> => {
+    return apiFetch(`/users/${unitId}`, { method: "DELETE" });
   },
 
-  follow: async (targetId: string): Promise<{message: string}> => {
-    return apiFetch(`/users/follow/${targetId}`, {method: 'POST'});
+  follow: async (targetId: string): Promise<{ message: string }> => {
+    return apiFetch(`/users/follow/${targetId}`, { method: "POST" });
   },
 
-  unfollow: async (targetId: string): Promise<{message: string}> => {
-    return apiFetch(`/users/follow/${targetId}`, {method: 'DELETE'});
+  unfollow: async (targetId: string): Promise<{ message: string }> => {
+    return apiFetch(`/users/follow/${targetId}`, { method: "DELETE" });
   },
 
   getFollowStatus: async (
     targetIds: string[],
   ): Promise<Record<string, boolean>> => {
     const qs = new URLSearchParams();
-    targetIds.forEach(id => qs.append('targetIds', id));
+    targetIds.forEach((id) => qs.append("targetIds", id));
     return apiFetch(`/users/follow/status?${qs.toString()}`);
   },
 
@@ -121,7 +121,7 @@ export const userApi = {
     targetIds: string[],
   ): Promise<FollowSummaryResponse> => {
     const qs = new URLSearchParams();
-    targetIds.forEach(id => qs.append('targetIds', id));
+    targetIds.forEach((id) => qs.append("targetIds", id));
     return apiFetch<FollowSummaryResponse>(
       `/users/follow/summary?${qs.toString()}`,
     );
@@ -129,17 +129,17 @@ export const userApi = {
 
   getFollowers: async (
     unitId: string,
-    query?: {page?: number; limit?: number},
-  ): Promise<{users: UserDTO[]; total: number}> => {
-    const qs = query ? `?${new URLSearchParams(query as any).toString()}` : '';
+    query?: { page?: number; limit?: number },
+  ): Promise<{ users: UserDTO[]; total: number }> => {
+    const qs = query ? `?${new URLSearchParams(query as any).toString()}` : "";
     return apiFetch(`/users/${unitId}/followers${qs}`);
   },
 
   getFollowings: async (
     unitId: string,
-    query?: {page?: number; limit?: number},
-  ): Promise<{users: UserDTO[]; total: number}> => {
-    const qs = query ? `?${new URLSearchParams(query as any).toString()}` : '';
+    query?: { page?: number; limit?: number },
+  ): Promise<{ users: UserDTO[]; total: number }> => {
+    const qs = query ? `?${new URLSearchParams(query as any).toString()}` : "";
     return apiFetch(`/users/${unitId}/followings${qs}`);
   },
 };

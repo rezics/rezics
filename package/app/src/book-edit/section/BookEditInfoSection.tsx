@@ -1,35 +1,37 @@
 // 重构组件，去除 effect 影响，修正 publishURL 添加逻辑，支持添加多个 url
 
-import {useQuery} from '@tanstack/react-query';
-import type {CreateBookInput, BookDTO} from '@rezics/contract';
-import {bookQueries} from '@rezics/api/book/book';
-import {AccentBarWithText} from '@rezics/ui/composite/typography/AccentBarWithText.tsx';
-import {BookMetadataEditor} from '../component/Metadata/BookMetadataEditor';
-import React from 'react';
-import {useTranslation} from 'react-i18next';
-import type {TFunction} from 'i18next';
 import {
+  Alert,
   Button,
   Dialog,
-  DialogContent,
   DialogActions,
+  DialogContent,
   DialogTitle,
   Typography,
-  Alert,
-} from '@mui/material';
-import {useMatchRoute, useNavigate} from '@tanstack/react-router';
-import {RezicsMarkdownEditor} from '@rezics/ui/editor';
+} from "@mui/material";
 import {
+  bookQueries,
   useCreateBookMutation,
   useUpdateBookMutation,
-} from '@rezics/api/book/book';
-import {type UpdateBookInput} from '@rezics/contract';
-import {useEffect} from 'react';
-import {BookExtraEditor} from '../component/Metadata/BookExtraEditor';
-import {MUILink} from '@rezics/ui/primitive/link/MUILink.tsx';
+} from "@rezics/api/book/book";
+import type {
+  BookDTO,
+  CreateBookInput,
+  UpdateBookInput,
+} from "@rezics/contract";
+import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
+import { RezicsMarkdownEditor } from "@rezics/ui/editor";
+import { MUILink } from "@rezics/ui/primitive/link/MUILink.tsx";
+import { useQuery } from "@tanstack/react-query";
+import { useMatchRoute, useNavigate } from "@tanstack/react-router";
+import type { TFunction } from "i18next";
+import React from "react";
+import { useTranslation } from "react-i18next";
+import { BookExtraEditor } from "../component/Metadata/BookExtraEditor";
+import { BookMetadataEditor } from "../component/Metadata/BookMetadataEditor";
 
 function validatePublishURL(publishURL: string[]) {
-  return publishURL.every(url => url.startsWith('https://'));
+  return publishURL.every((url) => url.startsWith("https://"));
 }
 
 type BookMetadataValue = Partial<BookDTO>;
@@ -51,24 +53,24 @@ const UpdateBookDialog: React.FC<{
   open: boolean;
   onClose: () => void;
   state: UpdateBookDialogState;
-}> = ({t, open, onClose, state}) => {
+}> = ({ t, open, onClose, state }) => {
   return (
     <Dialog open={open} onClose={onClose}>
       <DialogTitle>{state?.title}</DialogTitle>
       <DialogContent>
-        <Alert severity={state?.error ? 'error' : 'success'}>
+        <Alert severity={state?.error ? "error" : "success"}>
           <Typography variant="body1">{state?.message}</Typography>
           <Typography variant="body1">
             {state?.showBookLink && state?.bookId && (
-              <MUILink to="/book/$bookId" params={{bookId: state.bookId}}>
-                {t('page.book_edit.info.dialog.view_book')}
+              <MUILink to="/book/$bookId" params={{ bookId: state.bookId }}>
+                {t("page.book_edit.info.dialog.view_book")}
               </MUILink>
             )}
           </Typography>
         </Alert>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>{t('common.close')}</Button>
+        <Button onClick={onClose}>{t("common.close")}</Button>
       </DialogActions>
     </Dialog>
   );
@@ -89,13 +91,13 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
   newBook = false,
   pageTitle,
 }) => {
-  const {t} = useTranslation();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const matchRoute = useMatchRoute();
-  const editParams = matchRoute({to: '/book/$bookId/edit', fuzzy: false});
+  const editParams = matchRoute({ to: "/book/$bookId/edit", fuzzy: false });
   const bookId = !newBook && editParams ? editParams.bookId : undefined;
-  const {data, isLoading, error} = useQuery({
-    ...bookQueries.detail(bookId ?? ''),
+  const { data, isLoading, error } = useQuery({
+    ...bookQueries.detail(bookId ?? ""),
     enabled: !newBook && !!bookId,
   });
   const [metadataState, setMetadataState] =
@@ -107,19 +109,19 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
   const metadata = metadataState ?? data ?? {};
 
   const createBookMutation = useCreateBookMutation({
-    onSuccess: responseData => {
+    onSuccess: (responseData) => {
       setDialogState({
-        title: t('page.book_edit.info.toast.create_success_title'),
-        message: t('page.book_edit.info.toast.create_success_message'),
+        title: t("page.book_edit.info.toast.create_success_title"),
+        message: t("page.book_edit.info.toast.create_success_message"),
         showBookLink: true,
         bookId: responseData.unitId,
       });
       setUpdateBookErrorOpen(true);
     },
-    onError: err => {
+    onError: (err) => {
       setDialogState({
-        title: t('page.book_edit.info.toast.create_failed_title'),
-        message: String(err || t('common.unknown_error')),
+        title: t("page.book_edit.info.toast.create_failed_title"),
+        message: String(err || t("common.unknown_error")),
         error: true,
       });
       setUpdateBookErrorOpen(true);
@@ -129,15 +131,15 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
   const updateBookMutation = useUpdateBookMutation({
     onSuccess: () => {
       setDialogState({
-        title: t('page.book_edit.info.toast.update_success_title'),
-        message: t('page.book_edit.info.toast.update_success_message'),
+        title: t("page.book_edit.info.toast.update_success_title"),
+        message: t("page.book_edit.info.toast.update_success_message"),
       });
       setUpdateBookErrorOpen(true);
     },
-    onError: err => {
+    onError: (err) => {
       setDialogState({
-        title: t('page.book_edit.info.toast.update_failed_title'),
-        message: String(err || t('common.unknown_error')),
+        title: t("page.book_edit.info.toast.update_failed_title"),
+        message: String(err || t("common.unknown_error")),
         error: true,
       });
       setUpdateBookErrorOpen(true);
@@ -148,9 +150,9 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
     const updateBookData: UpdateBookInput = {
       title: metadataState?.title,
       description: metadataState?.description,
-      authorIds: metadataState?.author?.map(author => author.unitId),
-      pressIds: metadataState?.press?.map(press => press.unitId),
-      producerIds: metadataState?.producer?.map(producer => producer.unitId),
+      authorIds: metadataState?.author?.map((author) => author.unitId),
+      pressIds: metadataState?.press?.map((press) => press.unitId),
+      producerIds: metadataState?.producer?.map((producer) => producer.unitId),
       textLength: metadataState?.textLength,
       isbn: metadataState?.isbn,
       coverUrl: metadataState?.coverUrl,
@@ -160,7 +162,7 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
     };
     const createBookData: CreateBookInput = {
       ...updateBookData,
-      title: metadataState?.title ?? '',
+      title: metadataState?.title ?? "",
     };
     if (bookId) {
       updateBookMutation.mutateAsync({
@@ -178,8 +180,8 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
         });
       } else {
         setDialogState({
-          title: t('page.book_edit.info.toast.create_failed_title'),
-          message: t('page.book_edit.info.validation.publish_url_required'),
+          title: t("page.book_edit.info.toast.create_failed_title"),
+          message: t("page.book_edit.info.validation.publish_url_required"),
           error: true,
         });
         setUpdateBookErrorOpen(true);
@@ -187,16 +189,16 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
     }
   }
 
-  if (isLoading) return <div>{t('common.loading')}</div>;
+  if (isLoading) return <div>{t("common.loading")}</div>;
   if (error)
     return (
       <div>
-        {t('common.error')}: {String(error)}
+        {t("common.error")}: {String(error)}
       </div>
     );
-  if (!data && !newBook) return <div>{t('common.no_data')}</div>;
+  if (!data && !newBook) return <div>{t("common.no_data")}</div>;
 
-  const resolvedPageTitle = pageTitle ?? t('page.book_edit.info.title');
+  const resolvedPageTitle = pageTitle ?? t("page.book_edit.info.title");
 
   return (
     <div className="mt-10 mx-auto w-11/12">
@@ -208,10 +210,10 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
               variant="outlined"
               color="primary"
               onClick={() => {
-                navigate({to: `/book/${bookId}/`});
+                navigate({ to: `/book/${bookId}/` });
               }}
             >
-              {t('common.back')}
+              {t("common.back")}
             </Button>
           ) : null}
           <Button
@@ -221,20 +223,20 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
               handleSubmit();
             }}
           >
-            {t('common.submit')}
+            {t("common.submit")}
           </Button>
         </div>
       </div>
 
       <div>
         <div className="flex mb-4">
-          <AccentBarWithText text={t('book.edit_sections.metadata')} />
+          <AccentBarWithText text={t("book.edit_sections.metadata")} />
         </div>
         <div className="mb-8">
           <BookMetadataEditor
             value={metadata}
-            onChange={value => {
-              setMetadataState(prev => ({...prev, ...value}));
+            onChange={(value) => {
+              setMetadataState((prev) => ({ ...prev, ...value }));
             }}
           />
         </div>
@@ -242,25 +244,25 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
 
       <div>
         <div className="flex mb-4">
-          <AccentBarWithText text={t('book.description')} />
+          <AccentBarWithText text={t("book.description")} />
         </div>
         <RezicsMarkdownEditor
-          value={metadata?.description ?? ''}
-          onChange={value => {
-            setMetadataState(prev => ({...prev, description: value}));
+          value={metadata?.description ?? ""}
+          onChange={(value) => {
+            setMetadataState((prev) => ({ ...prev, description: value }));
           }}
         />
       </div>
 
       <div>
         <div className="flex mb-4">
-          <AccentBarWithText text={t('book.edit_sections.extra')} />
+          <AccentBarWithText text={t("book.edit_sections.extra")} />
         </div>
         <div className="mb-8">
           <BookExtraEditor
             value={metadata.extra}
-            onChange={value => {
-              setMetadataState(prev => ({...prev, extra: value}));
+            onChange={(value) => {
+              setMetadataState((prev) => ({ ...prev, extra: value }));
             }}
           />
         </div>

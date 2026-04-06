@@ -1,27 +1,35 @@
-import React, {useEffect, useMemo, useRef, useState} from 'react';
-import {Tabs, Tab, Box, Tooltip, Chip, Paper, Typography} from '@mui/material';
-import {useQuery, useQueryClient} from '@tanstack/react-query';
-import {useRouterState} from '@tanstack/react-router';
-import {useTranslation} from 'react-i18next';
-import {Link} from '@rezics/ui/primitive/link/Link.tsx';
-
+import {
+  Box,
+  Chip,
+  Paper,
+  Tab,
+  Tabs,
+  Tooltip,
+  Typography,
+} from "@mui/material";
+import { buildMeiliUnitQuery } from "@rezics/api/meili/meili.queries";
+import type { UnitDTO, UnitType } from "@rezics/contract";
 import {
   UniversalPaginator,
   type UniversalPaginatorHandle,
-} from '@rezics/ui/composite/pagination/Pagination.tsx';
-import type {UnitDTO, UnitType} from '@rezics/contract';
-import {TextSearchInputWithIcon} from '@/search/component/TextSearchInputWithIcon.tsx';
-import {buildUnitUrl} from '@/shared/util/build-url';
-import {buildMeiliUnitQuery} from '@rezics/api/meili/meili.queries';
+} from "@rezics/ui/composite/pagination/Pagination.tsx";
+import { Link } from "@rezics/ui/primitive/link/Link.tsx";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useRouterState } from "@tanstack/react-router";
+import type React from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { TextSearchInputWithIcon } from "@/search/component/TextSearchInputWithIcon.tsx";
+import { buildUnitUrl } from "@/shared/util/build-url";
 
 type Unit = UnitDTO;
 
-type UnitsPageMode = 'tab' | 'single';
+type UnitsPageMode = "tab" | "single";
 
 function defaultChildren(units: Unit[]) {
   return (
     <div className="space-y-3">
-      {units.map(item => (
+      {units.map((item) => (
         <Paper
           key={item.id}
           elevation={2}
@@ -32,7 +40,7 @@ function defaultChildren(units: Unit[]) {
               <Tooltip title="打开内容页面" placement="top">
                 <Link to={buildUnitUrl(item)}>
                   <Chip
-                    label={item.type || 'UNKNOWN'}
+                    label={item.type || "UNKNOWN"}
                     size="small"
                     variant="outlined"
                     onClick={() => {}}
@@ -44,7 +52,7 @@ function defaultChildren(units: Unit[]) {
                 variant="subtitle1"
                 className="font-semibold truncate mb-1"
               >
-                {item.title || '(未命名内容)'}
+                {item.title || "(未命名内容)"}
               </Typography>
             </div>
             {item.content && (
@@ -91,26 +99,26 @@ export interface UnitsPageProps {
 }
 
 export const UnitsPage: React.FC<UnitsPageProps> = ({
-  mode = 'tab',
+  mode = "tab",
   type,
-  types = ['UNIT', 'REVIEW', 'REMARK', 'QUOTE', 'BOOK'],
+  types = ["UNIT", "REVIEW", "REMARK", "QUOTE", "BOOK"],
   userId,
   targetUnitId,
   children = defaultChildren,
 }) => {
-  const {t} = useTranslation();
+  const { t } = useTranslation();
   const ref = useRef<UniversalPaginatorHandle>(null);
   const queryClient = useQueryClient();
-  const search = useRouterState({select: s => s.location.search ?? ''});
+  const search = useRouterState({ select: (s) => s.location.search ?? "" });
   const searchParams = useMemo(() => new URLSearchParams(search), [search]);
 
-  const isSingle = mode === 'single';
+  const isSingle = mode === "single";
 
   const EXTERNAL_PAGE_SIZE = 50;
 
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const [keyword, setKeyword] = useState<string>('');
-  const [tab, setTab] = useState<string>(types[0] ?? '');
+  const [keyword, setKeyword] = useState<string>("");
+  const [tab, setTab] = useState<string>(types[0] ?? "");
   const [startMap, setStartMap] = useState<Record<string, number>>({});
 
   // initialize tab from URL (only in tab mode)
@@ -123,42 +131,49 @@ export const UnitsPage: React.FC<UnitsPageProps> = ({
       }
       return;
     }
-    const tabParam = searchParams.get('tab');
+    const tabParam = searchParams.get("tab");
     if (tabParam && types.includes(tabParam)) {
       setTab(tabParam);
     } else if (types.length > 0) {
       setTab(types[0]);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [search, isSingle]);
+  }, [
+    isSingle,
+    types.includes,
+    types.length,
+    type,
+    types[0],
+    searchParams.get,
+  ]);
 
   // ensure startMap has keys for current tabTypes
   useEffect(() => {
-    setStartMap(prev => {
-      const next = {...prev};
-      types.forEach(t => {
+    setStartMap((prev) => {
+      const next = { ...prev };
+      types.forEach((t) => {
         if (next[t] == null) next[t] = 0;
       });
       return next;
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [types.forEach]);
 
   function mapUnitResponse(unitResp: any) {
     return unitResp;
   }
 
-  const {queryKey, queryFn} = buildMeiliUnitQuery({
-    kind: tab === 'UNIT' ? undefined : (tab as keyof typeof UnitType),
+  const { queryKey, queryFn } = buildMeiliUnitQuery({
+    kind: tab === "UNIT" ? undefined : (tab as keyof typeof UnitType),
     start: startMap[tab] ?? 0,
-    targetUnitId: targetUnitId ?? '',
+    targetUnitId: targetUnitId ?? "",
     keyword: keyword,
     limit: EXTERNAL_PAGE_SIZE,
     mapFn: mapUnitResponse,
-    options: {userId},
+    options: { userId },
   });
 
-  const {data: activeData, isLoading} = useQuery({
+  const { data: activeData, isLoading } = useQuery({
     queryKey,
     queryFn,
   });
@@ -166,28 +181,28 @@ export const UnitsPage: React.FC<UnitsPageProps> = ({
   function handleNeedMoreData(page: number) {
     const externalStart = (page - 1) * EXTERNAL_PAGE_SIZE;
     const t = tab;
-    setStartMap(prev => ({...prev, [t]: externalStart}));
+    setStartMap((prev) => ({ ...prev, [t]: externalStart }));
   }
 
   async function handlePreRequestData(page: number) {
     const start = (page - 1) * EXTERNAL_PAGE_SIZE;
-    const {queryKey, queryFn} = buildMeiliUnitQuery({
-      kind: tab === 'UNIT' ? undefined : (tab as keyof typeof UnitType),
+    const { queryKey, queryFn } = buildMeiliUnitQuery({
+      kind: tab === "UNIT" ? undefined : (tab as keyof typeof UnitType),
       start: start,
-      targetUnitId: targetUnitId ?? '',
+      targetUnitId: targetUnitId ?? "",
       keyword: keyword,
       limit: EXTERNAL_PAGE_SIZE,
       mapFn: mapUnitResponse,
-      options: {userId},
+      options: { userId },
     });
-    const nextData = await queryClient.fetchQuery({queryKey, queryFn});
+    const nextData = await queryClient.fetchQuery({ queryKey, queryFn });
     return nextData?.units?.length ?? 0;
   }
 
   useEffect(() => {
     ref.current?.resetPaginationPageNumber?.();
     setCurrentPage(1);
-  }, [tab, keyword]);
+  }, []);
 
   const units: Unit[] = useMemo(() => activeData?.units ?? [], [activeData]);
   const totalItems: number = activeData?.total ?? 10000;
@@ -211,20 +226,22 @@ export const UnitsPage: React.FC<UnitsPageProps> = ({
         sortControl={
           <div className="mb-4">
             <TextSearchInputWithIcon
-              onSearch={info => {
-                setKeyword(info ?? '');
+              onSearch={(info) => {
+                setKeyword(info ?? "");
               }}
-              defaultValue={{keyword: keyword ?? ''}}
-              placeholder={t('units.search_placeholder')}
+              defaultValue={{ keyword: keyword ?? "" }}
+              placeholder={t("units.search_placeholder")}
             />
             {!isSingle && (
-              <Box sx={{borderBottom: 1, borderColor: 'divider', mt: 2, mb: 2}}>
+              <Box
+                sx={{ borderBottom: 1, borderColor: "divider", mt: 2, mb: 2 }}
+              >
                 <Tabs
                   value={tab}
                   onChange={(_, v) => setTab(v)}
                   aria-label="unit type tabs"
                 >
-                  {types.map(t => (
+                  {types.map((t) => (
                     <Tab key={t} label={t} value={t} />
                   ))}
                 </Tabs>

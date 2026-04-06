@@ -1,23 +1,23 @@
-import {useState} from 'react';
-import {useTranslation} from 'react-i18next';
-import {useIsMobile} from '@/shared/util/use-media-query';
-import {Button} from '@mui/material';
-import {Link} from '@tanstack/react-router';
-import {MoreHorizMenu} from '../../component/header/MoreHorizMenu';
-import {LoginModal} from '@/user/page/LoginPage';
-import {RegisterModal} from '@/user/page/RegisterPage';
+import { Button } from "@mui/material";
+import { Link } from "@tanstack/react-router";
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
+import { useIsMobile } from "@/shared/util/use-media-query";
+import { LoginModal } from "@/user/page/LoginPage";
+import { RegisterModal } from "@/user/page/RegisterPage";
+import { MoreHorizMenu } from "../../component/header/MoreHorizMenu";
 
 const LoginPrompt = () => {
   const [loginModalOpen, setLoginModalOpen] = useState(false);
   const [registerModalOpen, setRegisterModalOpen] = useState(false);
-  const {t} = useTranslation();
+  const { t } = useTranslation();
 
   const isMobile = useIsMobile();
 
   if (isMobile) {
     return (
       <Button variant="text" component={Link} to="/login">
-        {t('auth.login')}
+        {t("auth.login")}
       </Button>
     );
   }
@@ -25,10 +25,10 @@ const LoginPrompt = () => {
   return (
     <div className="flex gap-2">
       <Button variant="text" onClick={() => setLoginModalOpen(true)}>
-        {t('auth.login')}
+        {t("auth.login")}
       </Button>
       <Button variant="outlined" onClick={() => setRegisterModalOpen(true)}>
-        {t('auth.register')}
+        {t("auth.register")}
       </Button>
 
       <LoginModal

@@ -1,5 +1,5 @@
-import type {UserDTO, BookDTO, UnitDTO} from '../index';
-import {BasicAdminPermission, isBlocked} from './core';
+import type { BookDTO, UnitDTO, UserDTO } from "../index";
+import { BasicAdminPermission, isBlocked } from "./core";
 
 export function hasPermissionToUpdateBook(
   user: UserDTO,

@@ -1,7 +1,8 @@
-import React, {useEffect, useMemo, useState} from 'react';
-import {Button, type ButtonProps, Tooltip} from '@mui/material';
-import {useQuery} from '@tanstack/react-query';
-import {userQueries, userMutations} from '@rezics/api/user/user';
+import { Button, type ButtonProps, Tooltip } from "@mui/material";
+import { userMutations, userQueries } from "@rezics/api/user/user";
+import { useQuery } from "@tanstack/react-query";
+import type React from "react";
+import { useEffect, useMemo, useState } from "react";
 
 type FollowButtonProps = {
   /** 目标用户的 unitId */
@@ -14,9 +15,9 @@ type FollowButtonProps = {
   /** 是否显示粉丝统计文案，例如 “123 followers” */
   showFollowersText?: boolean;
   /** 覆盖 Button 尺寸 */
-  size?: ButtonProps['size'];
+  size?: ButtonProps["size"];
   /** 覆盖 Button 变体 */
-  variant?: ButtonProps['variant'];
+  variant?: ButtonProps["variant"];
   /** 是否铺满宽度 */
   fullWidth?: boolean;
   className?: string;
@@ -26,8 +27,8 @@ export const FollowButton: React.FC<FollowButtonProps> = ({
   userId,
   initialFollowersCount,
   showFollowersText = false,
-  size = 'small',
-  variant = 'outlined',
+  size = "small",
+  variant = "outlined",
   fullWidth = false,
   className,
 }) => {
@@ -41,7 +42,7 @@ export const FollowButton: React.FC<FollowButtonProps> = ({
 
   const enabled = !!userId;
 
-  const {data: followStatus, isLoading: statusLoading} = useQuery({
+  const { data: followStatus, isLoading: statusLoading } = useQuery({
     ...userQueries.followStatus(userId ? [userId] : []),
     enabled,
   });
@@ -62,10 +63,10 @@ export const FollowButton: React.FC<FollowButtonProps> = ({
 
     const willUnfollow = isFollowing;
     const delta = willUnfollow ? -1 : 1;
-    const hasLocalCount = typeof localFollowers === 'number';
+    const hasLocalCount = typeof localFollowers === "number";
 
     if (hasLocalCount) {
-      setLocalFollowers(prev => (prev ?? 0) + delta);
+      setLocalFollowers((prev) => (prev ?? 0) + delta);
     }
 
     try {
@@ -77,13 +78,13 @@ export const FollowButton: React.FC<FollowButtonProps> = ({
     } catch {
       // 回滚本地计数
       if (hasLocalCount) {
-        setLocalFollowers(prev => (prev ?? 0) - delta);
+        setLocalFollowers((prev) => (prev ?? 0) - delta);
       }
     }
   };
 
-  const label = isFollowing ? 'Following' : 'Follow';
-  const color: ButtonProps['color'] = isFollowing ? 'secondary' : 'primary';
+  const label = isFollowing ? "Following" : "Follow";
+  const color: ButtonProps["color"] = isFollowing ? "secondary" : "primary";
 
   const button = (
     <Button
@@ -94,14 +95,14 @@ export const FollowButton: React.FC<FollowButtonProps> = ({
       onClick={handleClick}
       className={className}
       fullWidth={fullWidth}
-      sx={{py: size === 'small' ? 0.5 : 1}}
+      sx={{ py: size === "small" ? 0.5 : 1 }}
     >
       {label}
     </Button>
   );
 
   const followersText =
-    showFollowersText && typeof localFollowers === 'number'
+    showFollowersText && typeof localFollowers === "number"
       ? `${localFollowers} followers`
       : null;
 

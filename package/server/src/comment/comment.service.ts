@@ -1,15 +1,14 @@
-import {prisma} from '#/prisma/client';
-import type {Prisma} from '#/prisma/client';
-import {UnitType, UnitStatus} from '#/prisma/client';
 import type {
+  CommentTreeNode,
   CreateCommentInput,
   UpdateCommentInput,
-  CommentTreeNode,
-} from '@rezics/contract';
-import {commentInclude} from './types';
-import type {CommentWithRelations} from './types';
-import {getCommentApproxCount} from './sql';
-import {syncUnitToMeili, deleteUnitFromMeili} from '@/meili/unit/sync';
+} from "@rezics/contract";
+import type { Prisma } from "#/prisma/client";
+import { prisma, UnitStatus, UnitType } from "#/prisma/client";
+import { syncUnitToMeili } from "@/meili/unit/sync";
+import { getCommentApproxCount } from "./sql";
+import type { CommentWithRelations } from "./types";
+import { commentInclude } from "./types";
 
 export class CommentService {
   /**
@@ -25,32 +24,32 @@ export class CommentService {
       maxDepth?: number;
       start?: number;
       limit?: number;
-      order?: 'asc' | 'desc';
+      order?: "asc" | "desc";
     } = {},
   ): Promise<CommentTreeNode[]> {
     const limitNum = Math.max(1, Math.min(Number(options.limit ?? 50), 200));
     const skipNum = options.start ?? 0;
-    const order = options.order ?? 'asc';
+    const order = options.order ?? "asc";
 
-    const where: Prisma.CommentIndexWhereInput = {rootUnitId};
+    const where: Prisma.CommentIndexWhereInput = { rootUnitId };
 
     if (options.parentId) {
       // Only direct children of the given parent
       where.parentCommentId = options.parentId;
-    } else if (typeof options.maxDepth === 'number') {
+    } else if (typeof options.maxDepth === "number") {
       // Depth from root (0 = direct reply to root object)
-      where.depth = {lte: options.maxDepth};
+      where.depth = { lte: options.maxDepth };
     }
 
     const items = await prisma.commentIndex.findMany({
       where,
-      orderBy: [{unit: {createdAt: order}}],
+      orderBy: [{ unit: { createdAt: order } }],
       skip: skipNum,
       take: limitNum,
-      include: {unit: {include: {user: true}}},
+      include: { unit: { include: { user: true } } },
     });
 
-    return items.map(ci => ({
+    return items.map((ci) => ({
       id: ci.unitId,
       rootUnitId: ci.rootUnitId,
       parentCommentId: ci.parentCommentId ?? undefined,
@@ -77,25 +76,25 @@ export class CommentService {
       maxDepth?: number;
       start?: number;
       limit?: number;
-      order?: 'asc' | 'desc';
+      order?: "asc" | "desc";
     } = {},
   ) {
     const limitNum = Math.max(1, Math.min(Number(options.limit ?? 50), 200));
     const skipNum = options.start ?? 0;
-    const order = options.order ?? 'asc';
+    const order = options.order ?? "asc";
 
-    const where: Prisma.CommentIndexWhereInput = {rootUnitId};
+    const where: Prisma.CommentIndexWhereInput = { rootUnitId };
 
     if (options.parentId) {
       where.parentCommentId = options.parentId;
-    } else if (typeof options.maxDepth === 'number') {
-      where.depth = {lte: options.maxDepth};
+    } else if (typeof options.maxDepth === "number") {
+      where.depth = { lte: options.maxDepth };
     }
 
-    const [rows, total] = await Promise.all([
+    const [rows, _total] = await Promise.all([
       prisma.commentIndex.findMany({
         where,
-        orderBy: [{unit: {createdAt: order}}],
+        orderBy: [{ unit: { createdAt: order } }],
         skip: skipNum,
         take: limitNum,
         include: commentInclude,
@@ -109,7 +108,7 @@ export class CommentService {
   /** Get single comment by Unit id */
   async getByUnitId(unitId: string): Promise<CommentWithRelations> {
     const comment = await prisma.commentIndex.findUniqueOrThrow({
-      where: {unitId},
+      where: { unitId },
       include: commentInclude,
     });
     return comment as CommentWithRelations;
@@ -117,19 +116,19 @@ export class CommentService {
 
   /** Create a comment (Unit + CommentIndex) */
   async create(
-    input: CreateCommentInput & {userId: string},
+    input: CreateCommentInput & { userId: string },
   ): Promise<CommentWithRelations> {
-    const {rootPostId, parentCommentId, content, userId} = input;
+    const { rootPostId, parentCommentId, content, userId } = input;
 
     let depth = 0;
     if (parentCommentId) {
       const parent = await prisma.commentIndex.findUnique({
-        where: {unitId: parentCommentId},
-        select: {depth: true, rootUnitId: true},
+        where: { unitId: parentCommentId },
+        select: { depth: true, rootUnitId: true },
       });
-      if (!parent) throw new Error('Parent comment not found');
+      if (!parent) throw new Error("Parent comment not found");
       if (parent.rootUnitId !== rootPostId)
-        throw new Error('Parent comment belongs to a different root');
+        throw new Error("Parent comment belongs to a different root");
       depth = parent.depth + 1;
     }
 
@@ -143,9 +142,9 @@ export class CommentService {
             content,
           },
         },
-        rootUnit: {connect: {id: rootPostId}},
+        rootUnit: { connect: { id: rootPostId } },
         parentComment: parentCommentId
-          ? {connect: {id: parentCommentId}}
+          ? { connect: { id: parentCommentId } }
           : undefined,
         depth,
       },
@@ -158,13 +157,13 @@ export class CommentService {
       where: {
         targetId_reaction: {
           targetId: rootPostId,
-          reaction: 'comment',
+          reaction: "comment",
         },
       },
-      update: {count: {increment: 1}},
+      update: { count: { increment: 1 } },
       create: {
         targetId: rootPostId,
-        reaction: 'comment',
+        reaction: "comment",
         count: 1,
       },
     });
@@ -177,9 +176,9 @@ export class CommentService {
     input: UpdateCommentInput,
   ): Promise<CommentWithRelations> {
     const updated = await prisma.commentIndex.update({
-      where: {unitId},
+      where: { unitId },
       data: {
-        unit: {update: {content: input.content}},
+        unit: { update: { content: input.content } },
       },
       include: commentInclude,
     });
@@ -189,11 +188,11 @@ export class CommentService {
 
   /** Delete comment */
   async delete(unitId: string): Promise<void> {
-    const content = 'This unit has been deleted ＞﹏＜';
+    const content = "This unit has been deleted ＞﹏＜";
     await prisma.commentIndex.update({
-      where: {unitId},
+      where: { unitId },
       data: {
-        unit: {update: {content}},
+        unit: { update: { content } },
       },
       include: commentInclude,
     });
@@ -201,7 +200,7 @@ export class CommentService {
   }
 
   async exists(unitId: string): Promise<boolean> {
-    const count = await prisma.commentIndex.count({where: {unitId}});
+    const count = await prisma.commentIndex.count({ where: { unitId } });
     return count > 0;
   }
 }

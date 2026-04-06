@@ -1,17 +1,17 @@
-import {Elysia, t} from 'elysia';
-import {tokenService} from './token.service';
 import {
   bookParamsSchema,
   createBookSchema,
   updateBookSchema,
-} from '@rezics/contract';
-import {bookService} from '../book/book.service';
-import {unitService} from '../unit/unit.service';
+} from "@rezics/contract";
+import { Elysia, t } from "elysia";
+import { bookService } from "../book/book.service";
+import { unitService } from "../unit/unit.service";
 import {
   hasPermissionToCreateBook,
   hasPermissionToReadBook,
   hasPermissionToUpdateBook,
-} from './permission';
+} from "./permission";
+import { tokenService } from "./token.service";
 
 const tokenAuthHeaders = t.Object(
   {
@@ -28,39 +28,39 @@ export const bookRoute = new Elysia()
    * GET /token/books/:unitId
    */
   .get(
-    '/books/:unitId',
-    async ({headers, set, params, request}) => {
+    "/books/:unitId",
+    async ({ headers, set, params, request }) => {
       const ip =
-        request.headers.get('x-forwarded-for') ??
-        request.headers.get('x-real-ip') ??
+        request.headers.get("x-forwarded-for") ??
+        request.headers.get("x-real-ip") ??
         null;
-      const userAgent = request.headers.get('user-agent') ?? null;
+      const userAgent = request.headers.get("user-agent") ?? null;
 
-      const {scopes} = await tokenService.authenticateFromHeader(
+      const { scopes } = await tokenService.authenticateFromHeader(
         headers.authorization,
-        {status: set.status as number | undefined},
-        {ip, userAgent},
+        { status: set.status as number | undefined },
+        { ip, userAgent },
       );
 
       if (!hasPermissionToReadBook(scopes)) {
         set.status = 403;
-        throw new Error('Forbidden: token does not have book:read scope');
+        throw new Error("Forbidden: token does not have book:read scope");
       }
 
       const book = await bookService.getByUnitId(params.unitId);
 
       // Reuse existing DTO mapper through the book service index
-      const {mapBookToDTO} = await import('../book/mapper');
+      const { mapBookToDTO } = await import("../book/mapper");
       return mapBookToDTO(book as any);
     },
     {
       params: bookParamsSchema,
       headers: tokenAuthHeaders,
       detail: {
-        summary: 'Get book (token)',
+        summary: "Get book (token)",
         description:
-          'Get a single book by unit ID using an API token instead of JWT auth',
-        tags: ['Token', 'Books'],
+          "Get a single book by unit ID using an API token instead of JWT auth",
+        tags: ["Token", "Books"],
       },
     },
   )
@@ -70,23 +70,23 @@ export const bookRoute = new Elysia()
    * POST /token/books
    */
   .post(
-    '/books',
-    async ({headers, set, body, request}) => {
+    "/books",
+    async ({ headers, set, body, request }) => {
       const ip =
-        request.headers.get('x-forwarded-for') ??
-        request.headers.get('x-real-ip') ??
+        request.headers.get("x-forwarded-for") ??
+        request.headers.get("x-real-ip") ??
         null;
-      const userAgent = request.headers.get('user-agent') ?? null;
+      const userAgent = request.headers.get("user-agent") ?? null;
 
-      const {userId, scopes} = await tokenService.authenticateFromHeader(
+      const { userId, scopes } = await tokenService.authenticateFromHeader(
         headers.authorization,
-        {status: set.status as number | undefined},
-        {ip, userAgent},
+        { status: set.status as number | undefined },
+        { ip, userAgent },
       );
 
       if (!hasPermissionToCreateBook(scopes)) {
         set.status = 403;
-        throw new Error('Forbidden: token does not have book:write scope');
+        throw new Error("Forbidden: token does not have book:write scope");
       }
 
       // Force owner to be the token's user
@@ -95,17 +95,17 @@ export const bookRoute = new Elysia()
         userId,
       } as any);
 
-      const {mapBookToDTO} = await import('../book/mapper');
+      const { mapBookToDTO } = await import("../book/mapper");
       return mapBookToDTO(created as any);
     },
     {
       body: createBookSchema,
       headers: tokenAuthHeaders,
       detail: {
-        summary: 'Create book (token)',
+        summary: "Create book (token)",
         description:
-          'Create a new book owned by the token user, authenticated via API token',
-        tags: ['Token', 'Books'],
+          "Create a new book owned by the token user, authenticated via API token",
+        tags: ["Token", "Books"],
       },
     },
   )
@@ -115,27 +115,27 @@ export const bookRoute = new Elysia()
    * PUT /token/books/:unitId
    */
   .put(
-    '/books/:unitId',
-    async ({headers, set, params, body, request}) => {
+    "/books/:unitId",
+    async ({ headers, set, params, body, request }) => {
       const ip =
-        request.headers.get('x-forwarded-for') ??
-        request.headers.get('x-real-ip') ??
+        request.headers.get("x-forwarded-for") ??
+        request.headers.get("x-real-ip") ??
         null;
-      const userAgent = request.headers.get('user-agent') ?? null;
+      const userAgent = request.headers.get("user-agent") ?? null;
 
-      const {scopes} = await tokenService.authenticateFromHeader(
+      const { scopes } = await tokenService.authenticateFromHeader(
         headers.authorization,
-        {status: set.status as number | undefined},
-        {ip, userAgent},
+        { status: set.status as number | undefined },
+        { ip, userAgent },
       );
 
       if (!(await hasPermissionToUpdateBook(scopes))) {
         set.status = 403;
-        throw new Error('Forbidden: token does not have book:write scope');
+        throw new Error("Forbidden: token does not have book:write scope");
       }
 
       const updated = await bookService.update(params.unitId, body as any);
-      const {mapBookToDTO} = await import('../book/mapper');
+      const { mapBookToDTO } = await import("../book/mapper");
       return mapBookToDTO(updated as any);
     },
     {
@@ -143,10 +143,10 @@ export const bookRoute = new Elysia()
       body: updateBookSchema,
       headers: tokenAuthHeaders,
       detail: {
-        summary: 'Update book (token)',
+        summary: "Update book (token)",
         description:
-          'Update a book by unit ID using an API token, restricted to the token owner',
-        tags: ['Token', 'Books'],
+          "Update a book by unit ID using an API token, restricted to the token owner",
+        tags: ["Token", "Books"],
       },
     },
   )
@@ -156,49 +156,49 @@ export const bookRoute = new Elysia()
    * DELETE /token/books/:unitId
    */
   .delete(
-    '/books/:unitId',
-    async ({headers, set, params, request}) => {
+    "/books/:unitId",
+    async ({ headers, set, params, request }) => {
       set.status = 403;
       return {
         message: "Forbidden: now don't allow use token to delete book",
       };
       const ip =
-        request.headers.get('x-forwarded-for') ??
-        request.headers.get('x-real-ip') ??
+        request.headers.get("x-forwarded-for") ??
+        request.headers.get("x-real-ip") ??
         null;
-      const userAgent = request.headers.get('user-agent') ?? null;
+      const userAgent = request.headers.get("user-agent") ?? null;
 
-      const {userId, scopes} = await tokenService.authenticateFromHeader(
+      const { userId, scopes } = await tokenService.authenticateFromHeader(
         headers.authorization,
-        {status: set.status as number | undefined},
-        {ip, userAgent},
+        { status: set.status as number | undefined },
+        { ip, userAgent },
       );
 
       if (
         !tokenService.hasAdminScope(scopes) &&
-        !tokenService.hasScope(scopes, 'book', 'delete')
+        !tokenService.hasScope(scopes, "book", "delete")
       ) {
         set.status = 403;
-        throw new Error('Forbidden: token does not have book:delete scope');
+        throw new Error("Forbidden: token does not have book:delete scope");
       }
 
       const unit = await unitService.getByUnitId(params.unitId);
       if (!unit || unit.userId !== userId) {
         set.status = 403;
-        throw new Error('Forbidden: token does not own this book');
+        throw new Error("Forbidden: token does not own this book");
       }
 
       await bookService.delete(params.unitId);
-      return {message: 'Book and related post deleted successfully'};
+      return { message: "Book and related post deleted successfully" };
     },
     {
       params: bookParamsSchema,
       headers: tokenAuthHeaders,
       detail: {
-        summary: 'Delete book (token)',
+        summary: "Delete book (token)",
         description:
-          'Delete a book and its related unit by unit ID using an API token',
-        tags: ['Token', 'Books'],
+          "Delete a book and its related unit by unit ID using an API token",
+        tags: ["Token", "Books"],
       },
     },
   );

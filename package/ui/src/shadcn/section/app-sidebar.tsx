@@ -1,6 +1,5 @@
-"use client"
+"use client";
 
-import * as React from "react"
 import {
   ArrowUpCircleIcon,
   BarChartIcon,
@@ -17,12 +16,13 @@ import {
   SearchIcon,
   SettingsIcon,
   UsersIcon,
-} from "lucide-react"
+} from "lucide-react";
+import type * as React from "react";
 
-import { NavDocuments } from "@/shadcn/section/nav-documents"
-import { NavMain } from "@/shadcn/section/nav-main"
-import { NavSecondary } from "@/shadcn/section/nav-secondary"
-import { NavUser } from "@/shadcn/section/nav-user"
+import { NavDocuments } from "@/shadcn/section/nav-documents";
+import { NavMain } from "@/shadcn/section/nav-main";
+import { NavSecondary } from "@/shadcn/section/nav-secondary";
+import { NavUser } from "@/shadcn/section/nav-user";
 import {
   Sidebar,
   SidebarContent,
@@ -31,7 +31,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/shadcn/sidebar"
+} from "@/shadcn/sidebar";
 
 const data = {
   user: {
@@ -148,7 +148,7 @@ const data = {
       icon: FileIcon,
     },
   ],
-}
+};
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
@@ -177,5 +177,5 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavUser user={data.user} />
       </SidebarFooter>
     </Sidebar>
-  )
+  );
 }

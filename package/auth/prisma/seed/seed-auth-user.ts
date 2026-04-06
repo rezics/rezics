@@ -1,6 +1,6 @@
-import {hashPassword} from 'better-auth/crypto';
-import type {PrismaClient} from '../generated/client';
-import {slugify, generatePassword, ensureUniqueSlug} from './helpers';
+import { hashPassword } from "better-auth/crypto";
+import type { PrismaClient } from "../generated/client";
+import { ensureUniqueSlug, generatePassword, slugify } from "./helpers";
 
 export interface SeedAuthUserInput {
   email: string;
@@ -23,14 +23,14 @@ export async function seedAuthUser(
   prisma: PrismaClient,
   input: SeedAuthUserInput,
 ): Promise<SeedAuthUserResult> {
-  const role = input.role ?? 'user';
+  const role = input.role ?? "user";
   const password = input.password ?? generatePassword();
   const desiredSlug = input.slug ?? slugify(input.name);
   const slug = await ensureUniqueSlug(prisma, input.email, desiredSlug);
   const passwordHash = await hashPassword(password);
 
   const user = await prisma.user.upsert({
-    where: {email: input.email},
+    where: { email: input.email },
     update: {
       role,
       emailVerified: true,
@@ -50,16 +50,16 @@ export async function seedAuthUser(
   });
 
   const profile = await prisma.userProfile.upsert({
-    where: {userId: user.id},
-    update: {slug},
-    create: {userId: user.id, slug},
-    select: {slug: true},
+    where: { userId: user.id },
+    update: { slug },
+    create: { userId: user.id, slug },
+    select: { slug: true },
   });
 
   await prisma.account.upsert({
     where: {
       providerId_accountId: {
-        providerId: 'credential',
+        providerId: "credential",
         accountId: user.id,
       },
     },
@@ -69,7 +69,7 @@ export async function seedAuthUser(
     },
     create: {
       userId: user.id,
-      providerId: 'credential',
+      providerId: "credential",
       accountId: user.id,
       password: passwordHash,
     },

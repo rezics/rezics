@@ -1,4 +1,4 @@
-import type { FileMap } from './zip';
+import type { FileMap } from "./zip";
 
 const ASSET_ATTR_REGEX = /(?:src|href)\s*=\s*["']([^"']+)["']/gi;
 
@@ -22,40 +22,40 @@ export function createAssetTracker(): AssetTracker {
 
 function resolveRelativePath(basePath: string, relative: string): string {
   // Remove the file name from basePath to get directory
-  const dir = basePath.includes('/')
-    ? basePath.slice(0, basePath.lastIndexOf('/') + 1)
-    : '';
+  const dir = basePath.includes("/")
+    ? basePath.slice(0, basePath.lastIndexOf("/") + 1)
+    : "";
 
-  const parts = (dir + relative).split('/');
+  const parts = (dir + relative).split("/");
   const resolved: string[] = [];
 
   for (const part of parts) {
-    if (part === '..') {
+    if (part === "..") {
       resolved.pop();
-    } else if (part !== '.' && part !== '') {
+    } else if (part !== "." && part !== "") {
       resolved.push(part);
     }
   }
 
-  return resolved.join('/');
+  return resolved.join("/");
 }
 
 function getMimeType(path: string): string {
-  const ext = path.split('.').pop()?.toLowerCase() ?? '';
+  const ext = path.split(".").pop()?.toLowerCase() ?? "";
   const mimeMap: Record<string, string> = {
-    jpg: 'image/jpeg',
-    jpeg: 'image/jpeg',
-    png: 'image/png',
-    gif: 'image/gif',
-    svg: 'image/svg+xml',
-    webp: 'image/webp',
-    woff: 'font/woff',
-    woff2: 'font/woff2',
-    ttf: 'font/ttf',
-    otf: 'font/otf',
-    css: 'text/css',
+    jpg: "image/jpeg",
+    jpeg: "image/jpeg",
+    png: "image/png",
+    gif: "image/gif",
+    svg: "image/svg+xml",
+    webp: "image/webp",
+    woff: "font/woff",
+    woff2: "font/woff2",
+    ttf: "font/ttf",
+    otf: "font/otf",
+    css: "text/css",
   };
-  return mimeMap[ext] ?? 'application/octet-stream';
+  return mimeMap[ext] ?? "application/octet-stream";
 }
 
 export function resolveAssets(
@@ -67,9 +67,9 @@ export function resolveAssets(
   return html.replace(ASSET_ATTR_REGEX, (match, relativePath: string) => {
     // Skip external URLs and data URIs
     if (
-      relativePath.startsWith('http://') ||
-      relativePath.startsWith('https://') ||
-      relativePath.startsWith('data:')
+      relativePath.startsWith("http://") ||
+      relativePath.startsWith("https://") ||
+      relativePath.startsWith("data:")
     ) {
       return match;
     }
@@ -82,12 +82,14 @@ export function resolveAssets(
       return match;
     }
 
-    const blob = new Blob([data.buffer as ArrayBuffer], { type: getMimeType(resolvedPath) });
+    const blob = new Blob([data.buffer as ArrayBuffer], {
+      type: getMimeType(resolvedPath),
+    });
     const blobUrl = URL.createObjectURL(blob);
     tracker.blobUrls.push(blobUrl);
 
     // Replace the relative path with the blob URL
-    const attr = match.startsWith('src') ? 'src' : 'href';
+    const attr = match.startsWith("src") ? "src" : "href";
     return `${attr}="${blobUrl}"`;
   });
 }

@@ -1,34 +1,33 @@
-import {AccentBar} from '@rezics/ui/primitive/decorative/AccentBar.tsx';
-import {TreeReplyComponents} from '@/comment/component/TreeReplyComponents.tsx';
-import {ChatBubbleOutline} from '@mui/icons-material';
-import {Avatar, IconButton, Tooltip} from '@mui/material';
-import React, {useRef} from 'react';
-import {Route} from '@/routes/_mainLayout/readlist/$readlistId';
-import {Link} from '@rezics/ui/primitive/link/Link.tsx';
-import {useTranslation} from 'react-i18next';
-
-import {readlistQueries} from '@rezics/api/readlist/readlist';
-import {useQuery} from '@tanstack/react-query';
-import {BookReviewGroup} from '../component/Review';
-import {SingleCommentElementWrapper} from '@/comment/component/SingleCommentElementWrapper.tsx';
-
+import { ChatBubbleOutline } from "@mui/icons-material";
+import { Avatar, IconButton, Tooltip } from "@mui/material";
+import { readlistQueries } from "@rezics/api/readlist/readlist";
+import { AccentBar } from "@rezics/ui/primitive/decorative/AccentBar.tsx";
+import { Link } from "@rezics/ui/primitive/link/Link.tsx";
+import { useQuery } from "@tanstack/react-query";
+import type React from "react";
+import { useRef } from "react";
+import { useTranslation } from "react-i18next";
+import { SingleCommentElementWrapper } from "@/comment/component/SingleCommentElementWrapper.tsx";
+import { TreeReplyComponents } from "@/comment/component/TreeReplyComponents.tsx";
 import {
   MiniActionBar,
   MiniAdminActionBar,
-} from '@/engagement/component/MiniActionBar.tsx';
-import {parseReactionSummaries} from '@/shared/util/reaction-summaries-parser';
-import {ReactionStatistics} from '@/engagement/component/ReactionStatistics.tsx';
+} from "@/engagement/component/MiniActionBar.tsx";
+import { ReactionStatistics } from "@/engagement/component/ReactionStatistics.tsx";
+import { Route } from "@/routes/_mainLayout/readlist/$readlistId";
+import { parseReactionSummaries } from "@/shared/util/reaction-summaries-parser";
+import { BookReviewGroup } from "../component/Review";
 
 export const ReadListPage: React.FC = () => {
-  const {readlistId} = Route.useParams();
+  const { readlistId } = Route.useParams();
   const commentRef = useRef<HTMLDivElement>(null);
-  const {t} = useTranslation();
+  const { t } = useTranslation();
   const handleGoToComments = () => {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore: scrollIntoView is not defined in the type declaration
+    // @ts-expect-error: scrollIntoView is not defined in the type declaration
     commentRef.current?.scrollIntoView({
-      behavior: 'smooth',
-      block: 'start',
+      behavior: "smooth",
+      block: "start",
     });
   };
 
@@ -36,16 +35,16 @@ export const ReadListPage: React.FC = () => {
     data: bookList,
     isLoading,
     error: _error,
-  } = useQuery(readlistQueries.detail(readlistId || ''));
+  } = useQuery(readlistQueries.detail(readlistId || ""));
 
   if (isLoading) {
-    return <div className="text-center py-10">{t('common.loading')}</div>;
+    return <div className="text-center py-10">{t("common.loading")}</div>;
   }
 
   if (!bookList?.id) {
     return (
       <div className="text-center py-10 text-red-500">
-        {t('page.readlist.not_found')}
+        {t("page.readlist.not_found")}
       </div>
     );
   }
@@ -76,18 +75,18 @@ export const ReadListPage: React.FC = () => {
         <div className="flex justify-between items-center">
           {bookList.creator && (
             <Tooltip
-              title={t('page.readlist.open_user_ui')}
+              title={t("page.readlist.open_user_ui")}
               placement="top-start"
             >
               <Link
                 to="/user/$unitId"
-                params={{unitId: bookList.creator?.unitId}}
+                params={{ unitId: bookList.creator?.unitId }}
                 className="flex items-center"
               >
                 <div className="flex items-center gap-3">
                   <Avatar
-                    src={bookList.creator.avatar || ''}
-                    alt={bookList.creator.name || 'Avatar'}
+                    src={bookList.creator.avatar || ""}
+                    alt={bookList.creator.name || "Avatar"}
                     variant="rounded"
                     className="shadow"
                   />
@@ -101,7 +100,7 @@ export const ReadListPage: React.FC = () => {
           <div className="flex items-center gap-2">
             <MiniActionBar
               handleOnCommentClick={handleGoToComments}
-              unitId={readlistId || ''}
+              unitId={readlistId || ""}
             />
           </div>
         </div>
@@ -124,13 +123,13 @@ export const ReadListPage: React.FC = () => {
 
       {bookList?.order?.length === 0 && (
         <div className="text-sm text-gray-500">
-          {t('page.readlist.no_reviews_small')}
+          {t("page.readlist.no_reviews_small")}
         </div>
       )}
-      {bookList?.order?.map(unitId => {
-        const reviewData = bookList?.reviews.find(r => r.unitId === unitId);
+      {bookList?.order?.map((unitId) => {
+        const reviewData = bookList?.reviews.find((r) => r.unitId === unitId);
         const bookData = bookList?.books.find(
-          b => b.unitId === reviewData?.targetUnitId,
+          (b) => b.unitId === reviewData?.targetUnitId,
         );
         if (!bookData || !reviewData) return null;
         return (
@@ -143,17 +142,17 @@ export const ReadListPage: React.FC = () => {
         <div className="flex items-center justify-between w-full">
           <div className="flex items-center gap-2">
             <AccentBar />
-            <p className="text-2xl font-bold">{t('page.readlist.comments')}</p>
+            <p className="text-2xl font-bold">{t("page.readlist.comments")}</p>
           </div>
 
-          <SingleCommentElementWrapper replyUnitId={readlistId || ''}>
-            <IconButton size="large" sx={{fontSize: '1.5rem'}}>
+          <SingleCommentElementWrapper replyUnitId={readlistId || ""}>
+            <IconButton size="large" sx={{ fontSize: "1.5rem" }}>
               <ChatBubbleOutline fontSize="inherit" />
             </IconButton>
           </SingleCommentElementWrapper>
         </div>
 
-        <TreeReplyComponents unitId={readlistId || ''} />
+        <TreeReplyComponents unitId={readlistId || ""} />
         {/* 供评论区占位符 */}
         <div className="mb-[200px]" />
       </div>

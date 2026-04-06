@@ -1,14 +1,14 @@
-import * as React from 'react';
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
-} from '@rezics/ui/shadcn/carousel.tsx';
-import {BookCard, type BookProps} from '../item/VerticalBookCard';
+} from "@rezics/ui/shadcn/carousel.tsx";
+import type * as React from "react";
+import { BookCard, type BookProps } from "../item/VerticalBookCard";
 export interface HorizontalBookCarouselProps {
-  bookList: (BookProps & {id: string})[];
+  bookList: (BookProps & { id: string })[];
   className?: string;
 }
 
@@ -22,14 +22,14 @@ export const HorizontalBookCarousel: React.FC<HorizontalBookCarouselProps> = ({
 
   return (
     <Carousel
-      className={['w-full', className ?? ''].join(' ')}
+      className={["w-full", className ?? ""].join(" ")}
       opts={{
-        align: 'start',
+        align: "start",
         dragFree: true,
       }}
     >
       <CarouselContent className="-ml-4">
-        {bookList.map(book => (
+        {bookList.map((book) => (
           <CarouselItem key={book.id} className="horizontal-book-carousel">
             <BookCard
               title={book.title}

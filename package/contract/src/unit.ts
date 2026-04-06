@@ -1,20 +1,20 @@
-import {t} from 'elysia';
+import { t } from "elysia";
 
 // ANCHOR Shared schemas based on Prisma `Unit` and public user view
 
 export const UnitType = {
-  BOOK: 'BOOK',
-  COMMENT: 'COMMENT',
-  NOTE: 'NOTE',
-  REMARK: 'REMARK',
-  REVIEW: 'REVIEW',
-  DOMAIN: 'DOMAIN',
-  TAG: 'TAG',
-  QUOTE: 'QUOTE',
-  READLIST: 'READLIST',
-  IMAGE: 'IMAGE',
-  VIDEO: 'VIDEO',
-  CHAPTER: 'CHAPTER',
+  BOOK: "BOOK",
+  COMMENT: "COMMENT",
+  NOTE: "NOTE",
+  REMARK: "REMARK",
+  REVIEW: "REVIEW",
+  DOMAIN: "DOMAIN",
+  TAG: "TAG",
+  QUOTE: "QUOTE",
+  READLIST: "READLIST",
+  IMAGE: "IMAGE",
+  VIDEO: "VIDEO",
+  CHAPTER: "CHAPTER",
 } as const;
 
 /**
@@ -33,7 +33,7 @@ export const publicUserSchema = t.Object({
   followingsCount: t.Optional(t.Number()),
 });
 
-export type PublicUser = (typeof publicUserSchema)['static'];
+export type PublicUser = (typeof publicUserSchema)["static"];
 
 /**
  * Minimal, reusable Unit shape (not exported to APIs directly)
@@ -54,7 +54,7 @@ export const baseUnitSchema = t.Object({
   updatedAt: t.Optional(t.Union([t.String(), t.Date()])),
 });
 
-export type BaseUnit = (typeof baseUnitSchema)['static'];
+export type BaseUnit = (typeof baseUnitSchema)["static"];
 
 // ANCHOR Unit DTO for API responses
 export const unitDTOSchema = t.Object({
@@ -63,7 +63,7 @@ export const unitDTOSchema = t.Object({
   reactionSummaries: t.Optional(t.Any()),
 });
 
-export type UnitDTO = (typeof unitDTOSchema)['static'];
+export type UnitDTO = (typeof unitDTOSchema)["static"];
 
 // ANCHOR List/query schemas for Unit
 export const unitListQuerySchema = t.Object({
@@ -101,23 +101,23 @@ export const unitListQuerySchema = t.Object({
   limit: t.Optional(t.Number()),
 });
 
-export type UnitListQuery = (typeof unitListQuerySchema)['static'];
+export type UnitListQuery = (typeof unitListQuerySchema)["static"];
 
 export const unitListResponseSchema = t.Object({
   units: t.Array(unitDTOSchema),
   total: t.Optional(t.Number()),
 });
 
-export type UnitListResponse = (typeof unitListResponseSchema)['static'];
+export type UnitListResponse = (typeof unitListResponseSchema)["static"];
 
 export const unitParamsSchema = t.Object({
   unitId: t.String(),
 });
 
-export type UnitParams = (typeof unitParamsSchema)['static'];
+export type UnitParams = (typeof unitParamsSchema)["static"];
 
 export const unitResponseSchema = unitDTOSchema;
-export type UnitResponse = (typeof unitResponseSchema)['static'];
+export type UnitResponse = (typeof unitResponseSchema)["static"];
 
 // ANCHOR Create/Update Unit
 export const createUnitSchema = t.Object({
@@ -131,7 +131,7 @@ export const createUnitSchema = t.Object({
   publishedAt: t.Optional(t.Union([t.String(), t.Date()])),
 });
 
-export type CreateUnitInput = (typeof createUnitSchema)['static'];
+export type CreateUnitInput = (typeof createUnitSchema)["static"];
 
 export const updateUnitSchema = t.Object({
   status: t.Optional(t.String()),
@@ -142,4 +142,4 @@ export const updateUnitSchema = t.Object({
   publishedAt: t.Optional(t.Union([t.String(), t.Date()])),
 });
 
-export type UpdateUnitInput = (typeof updateUnitSchema)['static'];
+export type UpdateUnitInput = (typeof updateUnitSchema)["static"];

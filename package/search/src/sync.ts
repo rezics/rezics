@@ -1,31 +1,30 @@
-import {prisma} from '@rezics/server';
-import {UnitType} from '@rezics/server';
-import type {SearchClient} from './client';
 import type {
   BookSearchDocument,
-  UnitSearchDocument,
   FeedbackSearchDocument,
+  UnitSearchDocument,
   UserSearchDocument,
-} from '@rezics/contract';
+} from "@rezics/contract";
+import { prisma, UnitType } from "@rezics/server";
+import type { SearchClient } from "./client";
 
 // ANCHOR: Books sync with batching (cursor-based)
 export async function syncAllBooks(client: SearchClient) {
   const BATCH_SIZE = 5000;
 
   const deleteResult = await client.deleteAllBooks();
-  console.log('sync all books, deleteResult', deleteResult);
+  console.log("sync all books, deleteResult", deleteResult);
 
-  let cursor: string | undefined = undefined;
+  let cursor: string | undefined;
   let total = 0;
 
   while (true) {
-    console.log('sync all books, cursor', cursor, 'total', total);
+    console.log("sync all books, cursor", cursor, "total", total);
 
     const books: any[] = await prisma.book.findMany({
       take: BATCH_SIZE,
       skip: cursor ? 1 : 0,
-      cursor: cursor ? {unitId: cursor} : undefined,
-      orderBy: {unitId: 'asc'},
+      cursor: cursor ? { unitId: cursor } : undefined,
+      orderBy: { unitId: "asc" },
       include: {
         author: true,
         press: true,
@@ -40,7 +39,7 @@ export async function syncAllBooks(client: SearchClient) {
 
     if (books.length === 0) break;
 
-    const formatted: BookSearchDocument[] = books.map(b => {
+    const formatted: BookSearchDocument[] = books.map((b) => {
       const tagSearch: string[] = [
         ...(Array.isArray(b.tags) ? b.tags : []),
         ...(b.unit?.tags?.map((t: any) => t.name) ?? []),
@@ -77,14 +76,14 @@ export async function syncAllBooks(client: SearchClient) {
     });
 
     const addResult = await client.addOrUpdateBooks(formatted);
-    console.log('sync all books, addResult', addResult);
+    console.log("sync all books, addResult", addResult);
 
     total += formatted.length;
     cursor = books[books.length - 1]!.unitId;
   }
 
   return {
-    message: 'sync all books success',
+    message: "sync all books success",
     totalSynced: total,
   };
 }
@@ -94,24 +93,24 @@ export async function syncAllUnits(client: SearchClient) {
   const BATCH_SIZE = 5000;
 
   const deleteResult = await client.deleteAllUnits();
-  console.log('sync all units, deleteResult', deleteResult);
+  console.log("sync all units, deleteResult", deleteResult);
 
-  let cursor: string | undefined = undefined;
+  let cursor: string | undefined;
   let total = 0;
 
   while (true) {
-    console.log('sync all units, cursor', cursor, 'total', total);
+    console.log("sync all units, cursor", cursor, "total", total);
     const units: any = await prisma.unit.findMany({
       take: BATCH_SIZE,
       skip: cursor ? 1 : 0,
-      cursor: cursor ? {id: cursor} : undefined,
-      orderBy: {id: 'asc'},
+      cursor: cursor ? { id: cursor } : undefined,
+      orderBy: { id: "asc" },
       include: {
         user: true,
         tags: true,
         reactionSummaries: true,
         domains: {
-          select: {id: true},
+          select: { id: true },
         },
       },
     });
@@ -120,12 +119,12 @@ export async function syncAllUnits(client: SearchClient) {
 
     let formatted: UnitSearchDocument[] = units.map((u: any) => ({
       id: u.id,
-      title: u.title ?? '',
-      content: u.content ?? '',
+      title: u.title ?? "",
+      content: u.content ?? "",
       tags: u.tags ? u.tags.map((t: any) => t.name) : [],
-      type: u.type ?? '',
-      status: u.status ?? '',
-      userId: u.userId ?? '',
+      type: u.type ?? "",
+      status: u.status ?? "",
+      userId: u.userId ?? "",
       domainIds: u.domains ? u.domains.map((d: any) => d.id) : [],
       targetUnitId: u.targetUnitId,
       hasTarget: u.targetUnitId !== null,
@@ -145,10 +144,10 @@ export async function syncAllUnits(client: SearchClient) {
           const bookId = u.targetUnitId;
           if (bookId) {
             const book = await prisma.book.findUnique({
-              where: {unitId: bookId},
+              where: { unitId: bookId },
             });
             if (book) {
-              u.metadata.book = {title: book.title, coverUrl: book.coverUrl};
+              u.metadata.book = { title: book.title, coverUrl: book.coverUrl };
             }
           }
         }
@@ -157,14 +156,14 @@ export async function syncAllUnits(client: SearchClient) {
     );
 
     const addResult = await client.addOrUpdateUnits(formatted);
-    console.log('sync all units, addResult', addResult);
+    console.log("sync all units, addResult", addResult);
 
     total += formatted.length;
     cursor = units[units.length - 1].id;
   }
 
   return {
-    message: 'sync all units success',
+    message: "sync all units success",
     totalSynced: total,
   };
 }
@@ -174,19 +173,19 @@ export async function syncAllReadlists(client: SearchClient) {
   const BATCH_SIZE = 5000;
 
   const deleteResult = await client.deleteAllReadlists();
-  console.log('sync all readlists, deleteResult', deleteResult);
+  console.log("sync all readlists, deleteResult", deleteResult);
 
-  let cursor: string | undefined = undefined;
+  let cursor: string | undefined;
   let total = 0;
 
   while (true) {
-    console.log('sync all readlists, cursor', cursor, 'total', total);
+    console.log("sync all readlists, cursor", cursor, "total", total);
 
     const readlists: any[] = await prisma.readList.findMany({
       take: BATCH_SIZE,
       skip: cursor ? 1 : 0,
-      cursor: cursor ? {unitId: cursor} : undefined,
-      orderBy: {unitId: 'asc'},
+      cursor: cursor ? { unitId: cursor } : undefined,
+      orderBy: { unitId: "asc" },
       include: {
         unit: {
           include: {
@@ -194,7 +193,7 @@ export async function syncAllReadlists(client: SearchClient) {
             tags: true,
             reactionSummaries: true,
             domains: {
-              select: {id: true},
+              select: { id: true },
             },
           },
         },
@@ -205,7 +204,7 @@ export async function syncAllReadlists(client: SearchClient) {
 
     if (readlists.length === 0) break;
 
-    const formatted = readlists.map(rl => {
+    const formatted = readlists.map((rl) => {
       const unit = rl.unit;
       const metadata = unit?.metadata ?? {};
 
@@ -222,13 +221,13 @@ export async function syncAllReadlists(client: SearchClient) {
 
       const doc: any = {
         id: rl.unitId,
-        title: unit?.title ?? '',
-        content: unit?.content ?? '',
+        title: unit?.title ?? "",
+        content: unit?.content ?? "",
         tags,
         nsfw: unit?.nsfw ?? false,
-        userId: unit?.userId ?? '',
-        type: unit?.type ?? 'READLIST',
-        status: unit?.status ?? '',
+        userId: unit?.userId ?? "",
+        type: unit?.type ?? "READLIST",
+        status: unit?.status ?? "",
         domainIds: unit?.domains ? unit.domains.map((d: any) => d.id) : [],
         targetUnitId: unit?.targetUnitId ?? null,
         bookIds,
@@ -247,14 +246,14 @@ export async function syncAllReadlists(client: SearchClient) {
     });
 
     const addResult = await client.addOrUpdateReadlists(formatted);
-    console.log('sync all readlists, addResult', addResult);
+    console.log("sync all readlists, addResult", addResult);
 
     total += formatted.length;
     cursor = readlists[readlists.length - 1]!.unitId;
   }
 
   return {
-    message: 'sync all readlists success',
+    message: "sync all readlists success",
     totalSynced: total,
   };
 }
@@ -264,24 +263,24 @@ export async function syncAllFeedbacks(client: SearchClient) {
   const BATCH_SIZE = 5000;
 
   const deleteResult = await client.deleteAllFeedbacks();
-  console.log('sync all feedbacks, deleteResult', deleteResult);
+  console.log("sync all feedbacks, deleteResult", deleteResult);
 
-  let cursor: string | undefined = undefined;
+  let cursor: string | undefined;
   let total = 0;
 
   while (true) {
-    console.log('sync all feedbacks, cursor', cursor, 'total', total);
+    console.log("sync all feedbacks, cursor", cursor, "total", total);
 
     const feedbacks: any[] = await prisma.feedback.findMany({
       take: BATCH_SIZE,
       skip: cursor ? 1 : 0,
-      cursor: cursor ? {id: cursor} : undefined,
-      orderBy: {id: 'asc'},
+      cursor: cursor ? { id: cursor } : undefined,
+      orderBy: { id: "asc" },
     });
 
     if (feedbacks.length === 0) break;
 
-    const formatted: FeedbackSearchDocument[] = feedbacks.map(f => {
+    const formatted: FeedbackSearchDocument[] = feedbacks.map((f) => {
       const doc: FeedbackSearchDocument = {
         id: f.id,
         userId: f.userId,
@@ -299,14 +298,14 @@ export async function syncAllFeedbacks(client: SearchClient) {
     });
 
     const addResult = await client.addOrUpdateFeedbacks(formatted);
-    console.log('sync all feedbacks, addResult', addResult);
+    console.log("sync all feedbacks, addResult", addResult);
 
     total += formatted.length;
     cursor = feedbacks[feedbacks.length - 1]!.id;
   }
 
   return {
-    message: 'sync all feedbacks success',
+    message: "sync all feedbacks success",
     totalSynced: total,
   };
 }
@@ -316,24 +315,24 @@ export async function syncAllUsers(client: SearchClient) {
   const BATCH_SIZE = 5000;
 
   const deleteResult = await client.deleteAllUsers();
-  console.log('sync all users, deleteResult', deleteResult);
+  console.log("sync all users, deleteResult", deleteResult);
 
-  let cursor: string | undefined = undefined;
+  let cursor: string | undefined;
   let total = 0;
 
   while (true) {
-    console.log('sync all users, cursor', cursor, 'total', total);
+    console.log("sync all users, cursor", cursor, "total", total);
 
     const users: any[] = await prisma.user.findMany({
       take: BATCH_SIZE,
       skip: cursor ? 1 : 0,
-      cursor: cursor ? {unitId: cursor} : undefined,
-      orderBy: {unitId: 'asc'},
+      cursor: cursor ? { unitId: cursor } : undefined,
+      orderBy: { unitId: "asc" },
     });
 
     if (users.length === 0) break;
 
-    const formatted: UserSearchDocument[] = users.map(u => ({
+    const formatted: UserSearchDocument[] = users.map((u) => ({
       id: u.unitId,
       unitId: u.unitId,
       name: u.name,
@@ -350,14 +349,14 @@ export async function syncAllUsers(client: SearchClient) {
     }));
 
     const addResult = await client.addOrUpdateUsers(formatted);
-    console.log('sync all users, addResult', addResult);
+    console.log("sync all users, addResult", addResult);
 
     total += formatted.length;
     cursor = users[users.length - 1]!.unitId;
   }
 
   return {
-    message: 'sync all users success',
+    message: "sync all users success",
     totalSynced: total,
   };
 }

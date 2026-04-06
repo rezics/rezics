@@ -1,37 +1,36 @@
-import {useQuery} from '@tanstack/react-query';
-import {Avatar, Chip, Paper, Tooltip, Typography} from '@mui/material';
-import {useTranslation} from 'react-i18next';
-
-import {unitDetailQuery} from '@rezics/api/unit/unit';
-import {AccentBar} from '@rezics/ui/primitive/decorative/AccentBar.tsx';
-import {MarkdownContent} from '@rezics/ui/composite/content/MarkdownContent.tsx';
-import {MUILink} from '@rezics/ui/primitive/link/MUILink.tsx';
-import {unitRoute} from '@/router';
+import { Avatar, Chip, Paper, Tooltip, Typography } from "@mui/material";
+import { unitDetailQuery } from "@rezics/api/unit/unit";
+import { MarkdownContent } from "@rezics/ui/composite/content/MarkdownContent.tsx";
+import { AccentBar } from "@rezics/ui/primitive/decorative/AccentBar.tsx";
+import { MUILink } from "@rezics/ui/primitive/link/MUILink.tsx";
+import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
+import { unitRoute } from "@/router";
 
 function formatMetadataValue(value: unknown): string {
-  if (value === null || value === undefined) return '-';
+  if (value === null || value === undefined) return "-";
 
-  if (typeof value === 'string') return value;
-  if (typeof value === 'number' || typeof value === 'boolean') {
+  if (typeof value === "string") return value;
+  if (typeof value === "number" || typeof value === "boolean") {
     return String(value);
   }
 
   try {
     return JSON.stringify(value, null, 2);
-  } catch (e) {
+  } catch (_e) {
     return String(value);
   }
 }
 
 export function UnitPage() {
-  const {unitId} = unitRoute.useParams();
-  const {t} = useTranslation();
+  const { unitId } = unitRoute.useParams();
+  const { t } = useTranslation();
 
   const {
     data: unit,
     isLoading,
     error,
-  } = useQuery(unitDetailQuery(unitId || ''));
+  } = useQuery(unitDetailQuery(unitId || ""));
 
   if (isLoading) {
     return (
@@ -50,7 +49,7 @@ export function UnitPage() {
   if (!unit) {
     return (
       <div className="mt-6 text-center text-sm text-gray-500">
-        {t('common.no_data')}
+        {t("common.no_data")}
       </div>
     );
   }
@@ -63,7 +62,7 @@ export function UnitPage() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="space-y-1">
           <Typography variant="h4" className="font-bold">
-            {unit.title || t('pages.unit_page', 'Unit')}
+            {unit.title || t("pages.unit_page", "Unit")}
           </Typography>
           <Typography
             variant="body2"
@@ -91,13 +90,13 @@ export function UnitPage() {
               color="default"
             />
           )}
-          {unit.tags?.map(tag => (
+          {unit.tags?.map((tag) => (
             <Chip
               key={tag}
               label={tag}
               size="small"
               variant="outlined"
-              sx={{borderRadius: 999}}
+              sx={{ borderRadius: 999 }}
             />
           ))}
         </div>
@@ -109,14 +108,14 @@ export function UnitPage() {
           {unit.user && (
             <div className="flex items-center gap-3">
               <Avatar
-                src={unit.user.avatar ?? ''}
-                sx={{width: 40, height: 40, borderRadius: 1}}
+                src={unit.user.avatar ?? ""}
+                sx={{ width: 40, height: 40, borderRadius: 1 }}
               />
               <div className="flex flex-col">
-                <Tooltip title={t('user.open_profile')}>
+                <Tooltip title={t("user.open_profile")}>
                   <MUILink
                     to="/user/$unitId"
-                    params={{unitId: unit.user.unitId}}
+                    params={{ unitId: unit.user.unitId }}
                     className="text-sm font-medium"
                   >
                     {unit.user.name}
@@ -132,12 +131,12 @@ export function UnitPage() {
           <div className="text-xs space-y-0.5 sm:text-right">
             {unit.createdAt && (
               <div>
-                {t('common.created_at')}: {String(unit.createdAt)}
+                {t("common.created_at")}: {String(unit.createdAt)}
               </div>
             )}
             {unit.updatedAt && (
               <div>
-                {t('common.updated_at')}: {String(unit.updatedAt)}
+                {t("common.updated_at")}: {String(unit.updatedAt)}
               </div>
             )}
           </div>
@@ -151,7 +150,7 @@ export function UnitPage() {
             <MarkdownContent content={unit.content} />
           ) : (
             <Typography variant="body2" color="text.secondary">
-              {t('unit.no_content')}
+              {t("unit.no_content")}
             </Typography>
           )}
         </Paper>
@@ -162,13 +161,13 @@ export function UnitPage() {
         <div className="flex items-center gap-2 mb-4">
           <AccentBar />
           <Typography variant="h6" className="font-bold">
-            {t('unit.meta_data')}
+            {t("unit.meta_data")}
           </Typography>
         </div>
 
         {metadataEntries.length === 0 ? (
           <Typography variant="body2" color="text.secondary">
-            {t('unit.no_metadata', '暂无 Meta 信息')}
+            {t("unit.no_metadata", "暂无 Meta 信息")}
           </Typography>
         ) : (
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">

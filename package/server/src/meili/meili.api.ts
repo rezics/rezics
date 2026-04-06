@@ -1,85 +1,85 @@
-import {t, Elysia} from 'elysia';
-import {authMacro} from '@/middleware';
 import {
-  bookQueryOptionsSchema,
   type BookQueryOptions,
-  unitListQuerySchema,
-  type UnitListQuery,
-  readlistListQuerySchema,
-  type ReadlistListQuery,
-  feedbackListQuerySchema,
+  bookQueryOptionsSchema,
   type FeedbackListQuery,
+  feedbackListQuerySchema,
   isRoot,
-  userListQuerySchema,
+  type ReadlistListQuery,
+  readlistListQuerySchema,
+  type UnitListQuery,
   type UserListQuery,
-} from '@rezics/contract';
-import {meiliService} from './meili.service';
-import {searchClient} from './search-client';
-import {mapUserSearchDocToPublicProfile} from './mapper';
+  unitListQuerySchema,
+  userListQuerySchema,
+} from "@rezics/contract";
+import { Elysia, t } from "elysia";
+import { authMacro } from "@/middleware";
+import { mapUserSearchDocToPublicProfile } from "./mapper";
+import { meiliService } from "./meili.service";
+import { searchClient } from "./search-client";
 
-export const meiliApi = new Elysia({prefix: '/meili'})
+export const meiliApi = new Elysia({ prefix: "/meili" })
   .use(authMacro)
   .get(
-    '/health',
+    "/health",
     async () => {
       const ok = await searchClient.checkHealth();
-      return {status: ok ? 'available' : 'unavailable'};
+      return { status: ok ? "available" : "unavailable" };
     },
     {
       detail: {
-        summary: 'Meilisearch health check',
-        tags: ['Meili'],
+        summary: "Meilisearch health check",
+        tags: ["Meili"],
       },
     },
   )
   .post(
-    '/books/search',
-    async ({body}) => {
+    "/books/search",
+    async ({ body }) => {
       return meiliService.searchBooks(body as BookQueryOptions);
     },
     {
       body: bookQueryOptionsSchema,
       detail: {
-        summary: 'Search books (Meilisearch)',
+        summary: "Search books (Meilisearch)",
         description:
-          'Full-text search over books using Meilisearch, driven by contract-based BookQueryOptions.',
-        tags: ['Meili', 'Books', 'Search'],
+          "Full-text search over books using Meilisearch, driven by contract-based BookQueryOptions.",
+        tags: ["Meili", "Books", "Search"],
       },
     },
   )
   .post(
-    '/readlists/search',
-    async ({body}) => {
+    "/readlists/search",
+    async ({ body }) => {
       return meiliService.searchReadlists(body as ReadlistListQuery);
     },
     {
       body: readlistListQuerySchema,
       detail: {
-        summary: 'Search readlists (Meilisearch)',
+        summary: "Search readlists (Meilisearch)",
         description:
-          'Full-text search over readlists using Meilisearch, driven by contract-based ReadlistListQuery.',
-        tags: ['Meili', 'Readlists', 'Search'],
+          "Full-text search over readlists using Meilisearch, driven by contract-based ReadlistListQuery.",
+        tags: ["Meili", "Readlists", "Search"],
       },
     },
   )
   .get(
-    '/units/search',
-    async ({query}) => {
+    "/units/search",
+    async ({ query }) => {
       return meiliService.searchUnits(query as UnitListQuery);
     },
     {
       query: unitListQuerySchema,
       detail: {
-        summary: 'Search units (Meilisearch)',
+        summary: "Search units (Meilisearch)",
         description:
-          'Full-text search over generic units using Meilisearch, driven by contract-based UnitListQuery.',
-        tags: ['Meili', 'Units', 'Search'],
+          "Full-text search over generic units using Meilisearch, driven by contract-based UnitListQuery.",
+        tags: ["Meili", "Units", "Search"],
       },
     },
   )
   .get(
-    '/users/search',
-    async ({query}) => {
+    "/users/search",
+    async ({ query }) => {
       const result = await meiliService.searchUsers(query as UserListQuery);
       return {
         users: result.users.map(mapUserSearchDocToPublicProfile),
@@ -89,17 +89,17 @@ export const meiliApi = new Elysia({prefix: '/meili'})
     {
       query: userListQuerySchema,
       detail: {
-        summary: 'Search users (Meilisearch)',
+        summary: "Search users (Meilisearch)",
         description:
-          'Full-text search over users using Meilisearch, driven by contract-based UserListQuery.',
-        tags: ['Meili', 'Users', 'Search'],
+          "Full-text search over users using Meilisearch, driven by contract-based UserListQuery.",
+        tags: ["Meili", "Users", "Search"],
       },
     },
   )
   .post(
-    '/feedbacks/search',
-    async ({body, currentUser}) => {
-      const options = {...(body as FeedbackListQuery)};
+    "/feedbacks/search",
+    async ({ body, currentUser }) => {
+      const options = { ...(body as FeedbackListQuery) };
       if (!isRoot(currentUser as any)) {
         options.userId = currentUser.unitId;
       }
@@ -109,254 +109,254 @@ export const meiliApi = new Elysia({prefix: '/meili'})
       requireOwner: true,
       body: feedbackListQuerySchema,
       detail: {
-        summary: 'Search feedbacks (Meilisearch)',
+        summary: "Search feedbacks (Meilisearch)",
         description:
-          'Search feedbacks using Meilisearch with filters, respecting admin and non-admin permissions.',
-        tags: ['Meili', 'Feedback', 'Search'],
+          "Search feedbacks using Meilisearch with filters, respecting admin and non-admin permissions.",
+        tags: ["Meili", "Feedback", "Search"],
       },
     },
   )
   .post(
-    '/books/init',
-    async ({currentUser, set}) => {
+    "/books/init",
+    async ({ currentUser, set }) => {
       if (!isRoot(currentUser as any)) {
         set.status = 403;
         throw new Error(
-          'Forbidden: You are not authorized to init books index',
+          "Forbidden: You are not authorized to init books index",
         );
       }
       await meiliService.initBooksIndex();
-      return {message: 'books index initialized'};
+      return { message: "books index initialized" };
     },
     {
       requireOwner: true,
       detail: {
-        summary: 'Init books index',
-        tags: ['Meili', 'Admin'],
+        summary: "Init books index",
+        tags: ["Meili", "Admin"],
       },
     },
   )
   .post(
-    '/readlists/init',
-    async ({currentUser, set}) => {
+    "/readlists/init",
+    async ({ currentUser, set }) => {
       if (!isRoot(currentUser as any)) {
         set.status = 403;
         throw new Error(
-          'Forbidden: You are not authorized to init readlists index',
+          "Forbidden: You are not authorized to init readlists index",
         );
       }
       await meiliService.initReadlistsIndex();
-      return {message: 'readlists index initialized'};
+      return { message: "readlists index initialized" };
     },
     {
       requireOwner: true,
       detail: {
-        summary: 'Init readlists index',
-        tags: ['Meili', 'Admin'],
+        summary: "Init readlists index",
+        tags: ["Meili", "Admin"],
       },
     },
   )
   .post(
-    '/feedbacks/init',
-    async ({currentUser, set}) => {
+    "/feedbacks/init",
+    async ({ currentUser, set }) => {
       if (!isRoot(currentUser as any)) {
         set.status = 403;
         throw new Error(
-          'Forbidden: You are not authorized to init feedbacks index',
+          "Forbidden: You are not authorized to init feedbacks index",
         );
       }
       await meiliService.initFeedbacksIndex();
-      return {message: 'feedbacks index initialized'};
+      return { message: "feedbacks index initialized" };
     },
     {
       requireOwner: true,
       detail: {
-        summary: 'Init feedbacks index',
-        tags: ['Meili', 'Admin'],
+        summary: "Init feedbacks index",
+        tags: ["Meili", "Admin"],
       },
     },
   )
   .post(
-    '/units/init',
-    async ({currentUser, set}) => {
+    "/units/init",
+    async ({ currentUser, set }) => {
       if (!isRoot(currentUser as any)) {
         set.status = 403;
         throw new Error(
-          'Forbidden: You are not authorized to init units index',
+          "Forbidden: You are not authorized to init units index",
         );
       }
       await meiliService.initUnitsIndex();
-      return {message: 'units index initialized'};
+      return { message: "units index initialized" };
     },
     {
       requireOwner: true,
       detail: {
-        summary: 'Init units index',
-        tags: ['Meili', 'Admin'],
+        summary: "Init units index",
+        tags: ["Meili", "Admin"],
       },
     },
   )
   .post(
-    '/users/init',
-    async ({currentUser, set}) => {
+    "/users/init",
+    async ({ currentUser, set }) => {
       if (!isRoot(currentUser as any)) {
         set.status = 403;
         throw new Error(
-          'Forbidden: You are not authorized to init users index',
+          "Forbidden: You are not authorized to init users index",
         );
       }
       await meiliService.initUsersIndex();
-      return {message: 'users index initialized'};
+      return { message: "users index initialized" };
     },
     {
       requireOwner: true,
       detail: {
-        summary: 'Init users index',
-        tags: ['Meili', 'Admin'],
+        summary: "Init users index",
+        tags: ["Meili", "Admin"],
       },
     },
   )
   .post(
-    '/books/sync',
-    async ({currentUser, set}) => {
+    "/books/sync",
+    async ({ currentUser, set }) => {
       if (!isRoot(currentUser as any)) {
         set.status = 403;
-        throw new Error('Forbidden: You are not authorized to sync all books');
+        throw new Error("Forbidden: You are not authorized to sync all books");
       }
       const task = await meiliService.syncAllBooks();
-      return {task};
+      return { task };
     },
     {
       requireOwner: true,
       detail: {
-        summary: 'Sync all books to Meilisearch',
-        tags: ['Meili', 'Admin'],
+        summary: "Sync all books to Meilisearch",
+        tags: ["Meili", "Admin"],
       },
     },
   )
   .post(
-    '/readlists/sync',
-    async ({currentUser, set}) => {
+    "/readlists/sync",
+    async ({ currentUser, set }) => {
       if (!isRoot(currentUser as any)) {
         set.status = 403;
         throw new Error(
-          'Forbidden: You are not authorized to sync all readlists',
+          "Forbidden: You are not authorized to sync all readlists",
         );
       }
       const task = await meiliService.syncAllReadlists();
-      return {task};
+      return { task };
     },
     {
       requireOwner: true,
       detail: {
-        summary: 'Sync all readlists to Meilisearch',
-        tags: ['Meili', 'Admin'],
+        summary: "Sync all readlists to Meilisearch",
+        tags: ["Meili", "Admin"],
       },
     },
   )
   .post(
-    '/feedbacks/sync',
-    async ({currentUser, set}) => {
+    "/feedbacks/sync",
+    async ({ currentUser, set }) => {
       if (!isRoot(currentUser as any)) {
         set.status = 403;
         throw new Error(
-          'Forbidden: You are not authorized to sync all feedbacks',
+          "Forbidden: You are not authorized to sync all feedbacks",
         );
       }
       const task = await meiliService.syncAllFeedbacks();
-      return {task};
+      return { task };
     },
     {
       requireOwner: true,
       detail: {
-        summary: 'Sync all feedbacks to Meilisearch',
-        tags: ['Meili', 'Admin'],
+        summary: "Sync all feedbacks to Meilisearch",
+        tags: ["Meili", "Admin"],
       },
     },
   )
   .post(
-    '/units/sync',
-    async ({currentUser, set}) => {
+    "/units/sync",
+    async ({ currentUser, set }) => {
       if (!isRoot(currentUser as any)) {
         set.status = 403;
-        throw new Error('Forbidden: You are not authorized to sync all units');
+        throw new Error("Forbidden: You are not authorized to sync all units");
       }
       const task = await meiliService.syncAllUnits();
-      return {task};
+      return { task };
     },
     {
       requireOwner: true,
       detail: {
-        summary: 'Sync all units to Meilisearch',
-        tags: ['Meili', 'Admin'],
+        summary: "Sync all units to Meilisearch",
+        tags: ["Meili", "Admin"],
       },
     },
   )
   .post(
-    '/users/sync',
-    async ({currentUser, set}) => {
+    "/users/sync",
+    async ({ currentUser, set }) => {
       if (!isRoot(currentUser as any)) {
         set.status = 403;
-        throw new Error('Forbidden: You are not authorized to sync all users');
+        throw new Error("Forbidden: You are not authorized to sync all users");
       }
       const task = await meiliService.syncAllUsers();
-      return {task};
+      return { task };
     },
     {
       requireOwner: true,
       detail: {
-        summary: 'Sync all users to Meilisearch',
-        tags: ['Meili', 'Admin'],
+        summary: "Sync all users to Meilisearch",
+        tags: ["Meili", "Admin"],
       },
     },
   )
   .get(
-    '/units/deleteAllUnits',
-    async ({currentUser, set}) => {
+    "/units/deleteAllUnits",
+    async ({ currentUser, set }) => {
       if (!isRoot(currentUser as any)) {
         set.status = 403;
         throw new Error(
-          'Forbidden: You are not authorized to delete all units',
+          "Forbidden: You are not authorized to delete all units",
         );
       }
       await searchClient.deleteAllUnits();
-      return {message: 'all units deleted'};
+      return { message: "all units deleted" };
     },
     {
       requireOwner: true,
       detail: {
-        summary: 'Delete all units from Meilisearch',
-        tags: ['Meili', 'Admin'],
+        summary: "Delete all units from Meilisearch",
+        tags: ["Meili", "Admin"],
       },
     },
   )
   .post(
-    '/keys/search',
-    async ({currentUser, set}) => {
+    "/keys/search",
+    async ({ currentUser, set }) => {
       if (!isRoot(currentUser as any)) {
         set.status = 403;
         throw new Error(
-          'Forbidden: You are not authorized to create search key',
+          "Forbidden: You are not authorized to create search key",
         );
       }
       const key = await meiliService.createSearchKey();
-      return {key};
+      return { key };
     },
     {
       requireOwner: true,
       detail: {
-        summary: 'Create search-only API key',
-        tags: ['Meili', 'Keys'],
+        summary: "Create search-only API key",
+        tags: ["Meili", "Keys"],
       },
     },
   )
   .post(
-    '/keys/admin',
-    async ({currentUser, set}) => {
+    "/keys/admin",
+    async ({ currentUser, set }) => {
       if (!isRoot(currentUser as any)) {
         set.status = 403;
         throw new Error(
-          'Forbidden: You are not authorized to create admin key',
+          "Forbidden: You are not authorized to create admin key",
         );
       }
       return meiliService.createAdminKey();
@@ -364,37 +364,37 @@ export const meiliApi = new Elysia({prefix: '/meili'})
     {
       requireOwner: true,
       detail: {
-        summary: 'Create admin API key',
-        tags: ['Meili', 'Keys', 'Admin'],
+        summary: "Create admin API key",
+        tags: ["Meili", "Keys", "Admin"],
       },
     },
   )
   .get(
-    '/keys',
-    async ({currentUser, set}) => {
+    "/keys",
+    async ({ currentUser, set }) => {
       if (!isRoot(currentUser as any)) {
         set.status = 403;
-        throw new Error('Forbidden: You are not authorized to list keys');
+        throw new Error("Forbidden: You are not authorized to list keys");
       }
       return meiliService.listKeys();
     },
     {
       requireOwner: true,
       detail: {
-        summary: 'List Meilisearch keys',
-        tags: ['Meili', 'Keys', 'Admin'],
+        summary: "List Meilisearch keys",
+        tags: ["Meili", "Keys", "Admin"],
       },
     },
   )
   .delete(
-    '/keys/:uid',
-    async ({params, currentUser, set}) => {
+    "/keys/:uid",
+    async ({ params, currentUser, set }) => {
       if (!isRoot(currentUser as any)) {
         set.status = 403;
-        throw new Error('Forbidden: You are not authorized to delete key');
+        throw new Error("Forbidden: You are not authorized to delete key");
       }
       await meiliService.deleteKey(params.uid);
-      return {message: 'key deleted'};
+      return { message: "key deleted" };
     },
     {
       requireOwner: true,
@@ -402,8 +402,8 @@ export const meiliApi = new Elysia({prefix: '/meili'})
         uid: t.String(),
       }),
       detail: {
-        summary: 'Delete Meilisearch key',
-        tags: ['Meili', 'Keys', 'Admin'],
+        summary: "Delete Meilisearch key",
+        tags: ["Meili", "Keys", "Admin"],
       },
     },
   );

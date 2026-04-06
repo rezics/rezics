@@ -1,10 +1,11 @@
-import {createRoot} from 'react-dom/client';
-import './index.css';
+import { createRoot } from "react-dom/client";
+import "./index.css";
 
-import App from './App';
-import {initI18n} from './provider/i18n';
-import {configureApi} from '@rezics/api/config';
-import {env} from '@/env';
+import { configureApi } from "@rezics/api/config";
+import { env } from "@/env";
+import App from "./App";
+import { initI18n } from "./provider/i18n";
+
 // import { setupMock } from "./plugin/providers/mock.ts";
 
 // Initialization (this type of side effect can be ingested and is not involved in hot-swap).
@@ -14,7 +15,7 @@ configureApi({
 });
 initI18n();
 
-const container = document.getElementById('app') as HTMLElement;
+const container = document.getElementById("app") as HTMLElement;
 
 // directly create root; Vite/React Refresh will handle HMR gracefully.
 const root = createRoot(container);

@@ -1,25 +1,31 @@
+import { authApi } from "@rezics/api/auth/auth.api";
+import {
+  clearAuthPresence,
+  hasAuthPresence,
+} from "@rezics/api/react-query/authPresence";
+import { getToken } from "@rezics/api/react-query/jwt";
 import type {
   AuthSession,
   AuthUser,
   GetSessionStateResponse,
-} from '@rezics/contract';
-import {NormalizedTokenName} from '@rezics/contract';
-import {authApi} from '@rezics/api/auth/auth.api';
-import {clearAuthPresence, hasAuthPresence} from '@rezics/api/react-query/authPresence';
-import {getToken} from '@rezics/api/react-query/jwt';
-import {create} from 'zustand';
-import {devtools} from 'zustand/middleware';
+} from "@rezics/contract";
+import { NormalizedTokenName } from "@rezics/contract";
+import { create } from "zustand";
+import { devtools } from "zustand/middleware";
 
-export type AuthCapabilityLevel = 'anonymous' | 'guest' | 'member';
-export type AuthSessionHydrationStatus = 'idle' | 'loading' | 'ready' | 'error';
+export type AuthCapabilityLevel = "anonymous" | "guest" | "member";
+export type AuthSessionHydrationStatus = "idle" | "loading" | "ready" | "error";
 
-type AuthSessionSnapshot = Pick<GetSessionStateResponse, 'session' | 'user' | 'authSession'>;
+type AuthSessionSnapshot = Pick<
+  GetSessionStateResponse,
+  "session" | "user" | "authSession"
+>;
 
 export type AuthSessionStoreState = {
   status: AuthSessionHydrationStatus;
   session: AuthSession | null;
   user: AuthUser | null;
-  authSession: GetSessionStateResponse['authSession'] | null;
+  authSession: GetSessionStateResponse["authSession"] | null;
   hasAuthSession: boolean;
   hasBusinessToken: boolean;
   capabilityLevel: AuthCapabilityLevel;
@@ -35,17 +41,19 @@ export type AuthSessionStoreState = {
 function deriveState(
   snapshot: AuthSessionSnapshot | null,
   businessToken: string | null,
-  status: AuthSessionHydrationStatus = 'ready',
+  status: AuthSessionHydrationStatus = "ready",
   error: string | null = null,
 ) {
   const hasAuthSession = Boolean(snapshot?.session?.id && snapshot?.user?.id);
   const hasBusinessToken = Boolean(businessToken);
-  const needsVerification = Boolean(snapshot?.authSession?.needsEmailVerification);
+  const needsVerification = Boolean(
+    snapshot?.authSession?.needsEmailVerification,
+  );
   const needsOnboarding = Boolean(snapshot?.authSession?.needsOnboarding);
 
-  let capabilityLevel: AuthCapabilityLevel = 'anonymous';
+  let capabilityLevel: AuthCapabilityLevel = "anonymous";
   if (hasAuthSession) {
-    capabilityLevel = hasBusinessToken ? 'member' : 'guest';
+    capabilityLevel = hasBusinessToken ? "member" : "guest";
   }
 
   return {
@@ -64,28 +72,28 @@ function deriveState(
 
 export const useAuthSessionStore = create<AuthSessionStoreState>()(
   devtools(
-    set => ({
+    (set) => ({
       ...deriveState(
         null,
         getToken(NormalizedTokenName.REZICS_SESSION),
-        'idle',
+        "idle",
       ),
       setPending: () =>
-        set(state => ({
+        set((state) => ({
           ...state,
-          status: 'loading',
+          status: "loading",
           error: null,
         })),
-      setSessionState: state =>
+      setSessionState: (state) =>
         set(
           deriveState(
             state,
             getToken(NormalizedTokenName.REZICS_SESSION),
-            'ready',
+            "ready",
           ),
         ),
-      syncBusinessToken: token =>
-        set(state =>
+      syncBusinessToken: (token) =>
+        set((state) =>
           deriveState(
             state.session && state.user && state.authSession
               ? {
@@ -95,7 +103,7 @@ export const useAuthSessionStore = create<AuthSessionStoreState>()(
                 }
               : null,
             token,
-            state.status === 'idle' ? 'ready' : state.status,
+            state.status === "idle" ? "ready" : state.status,
             state.error,
           ),
         ),
@@ -104,24 +112,24 @@ export const useAuthSessionStore = create<AuthSessionStoreState>()(
           deriveState(
             null,
             getToken(NormalizedTokenName.REZICS_SESSION),
-            'ready',
+            "ready",
           ),
         ),
     }),
-    {name: 'authSessionStore', store: 'authSessionStore'},
+    { name: "authSessionStore", store: "authSessionStore" },
   ),
 );
 
-export async function hydrateAuthSessionState(options?: {requirePresence?: boolean}) {
+export async function hydrateAuthSessionState(options?: {
+  requirePresence?: boolean;
+}) {
   const store = useAuthSessionStore.getState();
   const token = getToken(NormalizedTokenName.AUTH_IDENTITY);
   const businessToken = getToken(NormalizedTokenName.REZICS_SESSION);
   const requiresPresence = options?.requirePresence ?? !token;
 
   if (requiresPresence && !hasAuthPresence()) {
-    useAuthSessionStore.setState(
-      deriveState(null, businessToken, 'ready'),
-    );
+    useAuthSessionStore.setState(deriveState(null, businessToken, "ready"));
     return null;
   }
 
@@ -133,13 +141,14 @@ export async function hydrateAuthSessionState(options?: {requirePresence?: boole
     useAuthSessionStore.getState().setSessionState(sessionState);
     return sessionState;
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unknown auth session error';
+    const message =
+      error instanceof Error ? error.message : "Unknown auth session error";
     clearAuthPresence();
     useAuthSessionStore.setState(
       deriveState(
         null,
         getToken(NormalizedTokenName.REZICS_SESSION),
-        'error',
+        "error",
         message,
       ),
     );

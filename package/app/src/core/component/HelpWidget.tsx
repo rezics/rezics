@@ -1,14 +1,14 @@
-import * as React from 'react';
-import {Box, Fab, Zoom} from '@mui/material';
 import {
-  ChatBubbleOutline,
   ArticleOutlined,
   BugReport,
+  ChatBubbleOutline,
   Close as CloseIcon,
-} from '@mui/icons-material';
-import AddIcon from '@mui/icons-material/Add';
-import ReportProblemIcon from '@mui/icons-material/ReportProblem';
-import FeedbackDialog from '@/feedback/component/FeedbackDialog';
+} from "@mui/icons-material";
+import AddIcon from "@mui/icons-material/Add";
+import ReportProblemIcon from "@mui/icons-material/ReportProblem";
+import { Box, Fab, Zoom } from "@mui/material";
+import * as React from "react";
+import FeedbackDialog from "@/feedback/component/FeedbackDialog";
 
 export interface HelpFabAction {
   id: string;
@@ -27,43 +27,43 @@ export interface HelpFabProps {
 
 const _defaultHelpActionsFutureExample: HelpFabAction[] = [
   {
-    id: 'quick-start',
-    label: '快速上手',
+    id: "quick-start",
+    label: "快速上手",
     icon: <ArticleOutlined fontSize="small" />,
     onClick: () => {
-      console.log('打开快速上手文档');
+      console.log("打开快速上手文档");
     },
   },
   {
-    id: 'faq',
-    label: '常见问题 FAQ',
+    id: "faq",
+    label: "常见问题 FAQ",
     icon: <ArticleOutlined fontSize="small" />,
     onClick: () => {
-      console.log('打开 FAQ 页面');
+      console.log("打开 FAQ 页面");
     },
   },
   {
-    id: 'bug',
-    label: '提交 Bug',
+    id: "bug",
+    label: "提交 Bug",
     icon: <BugReport fontSize="small" />,
     onClick: () => {
-      console.log('打开 Bug 反馈入口');
+      console.log("打开 Bug 反馈入口");
     },
   },
   {
-    id: 'suggestion',
-    label: '功能建议',
+    id: "suggestion",
+    label: "功能建议",
     icon: <ChatBubbleOutline fontSize="small" />,
     onClick: () => {
-      console.log('打开功能建议入口');
+      console.log("打开功能建议入口");
     },
   },
 ];
 
 const defaultHelpActions: HelpFabAction[] = [
   {
-    id: 'feedback',
-    label: '反馈',
+    id: "feedback",
+    label: "反馈",
     icon: <ReportProblemIcon fontSize="small" />,
   },
 ];
@@ -74,7 +74,7 @@ const defaultHelpActions: HelpFabAction[] = [
 export const HelpFab: React.FC<HelpFabProps> = ({
   actions,
   icon,
-  ariaLabel = '帮助',
+  ariaLabel = "帮助",
   visible = true,
   enterDelayMs = 0,
 }) => {
@@ -86,12 +86,12 @@ export const HelpFab: React.FC<HelpFabProps> = ({
   if (!list.length) return null;
 
   const handleToggle = () => {
-    setOpen(prev => !prev);
+    setOpen((prev) => !prev);
   };
 
   const handleActionClick = (item: HelpFabAction) => {
     item.onClick?.();
-    if (item.id == 'feedback') {
+    if (item.id === "feedback") {
       setFeedbackDialogOpen(true);
     }
     setOpen(false);
@@ -107,20 +107,20 @@ export const HelpFab: React.FC<HelpFabProps> = ({
   return (
     <Box
       sx={{
-        position: 'fixed',
+        position: "fixed",
         bottom: 24,
         right: 24,
-        zIndex: theme => theme.zIndex.tooltip + 1,
+        zIndex: (theme) => theme.zIndex.tooltip + 1,
       }}
     >
       {/* Action FAB list */}
       <Box
         sx={{
-          display: 'flex',
-          flexDirection: 'column-reverse', // Stack from bottom to top, for delay
-          alignItems: 'flex-end',
+          display: "flex",
+          flexDirection: "column-reverse", // Stack from bottom to top, for delay
+          alignItems: "flex-end",
           mb: 1.5,
-          pointerEvents: 'none', // Only allow internal FAB to handle events
+          pointerEvents: "none", // Only allow internal FAB to handle events
         }}
       >
         {list.map((item, index) => {
@@ -145,8 +145,8 @@ export const HelpFab: React.FC<HelpFabProps> = ({
                 onClick={() => handleActionClick(item)}
                 sx={{
                   mt: 1,
-                  pointerEvents: 'auto',
-                  boxShadow: theme => theme.shadows[6],
+                  pointerEvents: "auto",
+                  boxShadow: (theme) => theme.shadows[6],
                   px: 1.5,
                   minHeight: 32,
                 }}
@@ -167,7 +167,7 @@ export const HelpFab: React.FC<HelpFabProps> = ({
         className="float-end"
         timeout={transitionDuration}
         style={{
-          transitionDelay: visible ? `${enterDelayMs}ms` : '0ms',
+          transitionDelay: visible ? `${enterDelayMs}ms` : "0ms",
         }}
         unmountOnExit
       >

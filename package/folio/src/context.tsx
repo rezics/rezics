@@ -1,27 +1,27 @@
 import {
   createContext,
+  type ReactNode,
   useContext,
-  useReducer,
-  useMemo,
   useEffect,
+  useMemo,
+  useReducer,
   useRef,
   useState,
-  type ReactNode,
-} from 'react';
-import { flattenTree } from './tree';
-import { PluginRegistry } from './registry';
-import { folioReducer, DEFAULT_STATE } from './state';
+} from "react";
+import { PluginRegistry } from "./registry";
+import { DEFAULT_STATE, folioReducer } from "./state";
+import { flattenTree } from "./tree";
 import type {
-  FolioState,
+  FlatChapter,
+  FolioConfig,
+  FolioContent,
   FolioDispatch,
+  FolioNode,
   FolioPosition,
   FolioProgress,
-  FolioConfig,
-  FlatChapter,
-  FolioNode,
+  FolioState,
   RendererPlugin,
-  FolioContent,
-} from './types';
+} from "./types";
 
 // ── Context ─────────────────────────────────────────────────
 
@@ -39,7 +39,7 @@ const FolioContext = createContext<FolioContextValue | null>(null);
 export function useFolio(): FolioContextValue {
   const ctx = useContext(FolioContext);
   if (!ctx) {
-    throw new Error('useFolio must be used within a <FolioProvider>');
+    throw new Error("useFolio must be used within a <FolioProvider>");
   }
   return ctx;
 }
@@ -94,7 +94,7 @@ export function FolioProvider({
     () => resolveInitialChapterIndex(flatChapters, initialPosition),
     // Only compute on mount
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [],
+    [flatChapters, initialPosition],
   );
 
   const [state, dispatch] = useReducer(folioReducer, {
@@ -121,7 +121,7 @@ export function FolioProvider({
     const cached = contentCache.current.get(chapterId);
     if (cached) {
       setContent(cached);
-      dispatch({ type: 'SET_STATUS', status: { state: 'ready' } });
+      dispatch({ type: "SET_STATUS", status: { state: "ready" } });
       return;
     }
 
@@ -130,8 +130,8 @@ export function FolioProvider({
     abortRef.current = controller;
 
     dispatch({
-      type: 'SET_STATUS',
-      status: { state: 'loading', chapterIndex: state.chapterIndex },
+      type: "SET_STATUS",
+      status: { state: "loading", chapterIndex: state.chapterIndex },
     });
 
     currentChapter.node
@@ -140,18 +140,18 @@ export function FolioProvider({
         if (controller.signal.aborted) return;
         contentCache.current.set(chapterId, result);
         setContent(result);
-        dispatch({ type: 'SET_STATUS', status: { state: 'ready' } });
+        dispatch({ type: "SET_STATUS", status: { state: "ready" } });
       })
       .catch((err) => {
         if (controller.signal.aborted) return;
         dispatch({
-          type: 'SET_STATUS',
+          type: "SET_STATUS",
           status: {
-            state: 'error',
+            state: "error",
             error: err instanceof Error ? err : new Error(String(err)),
             retry: () =>
               dispatch({
-                type: 'SET_CHAPTER',
+                type: "SET_CHAPTER",
                 index: state.chapterIndex,
               }),
           },
@@ -164,7 +164,7 @@ export function FolioProvider({
   // ── Prefetch ────────────────────────────────────────────
 
   useEffect(() => {
-    if (state.readMode !== 'page') return;
+    if (state.readMode !== "page") return;
     if (state.pageCount === 0) return;
 
     const pagesLeft = state.pageCount - 1 - state.pageIndex;
@@ -211,7 +211,7 @@ export function FolioProvider({
     if (flatChapters.length === 0) return;
 
     const chapterFraction =
-      state.readMode === 'page' && state.pageCount > 0
+      state.readMode === "page" && state.pageCount > 0
         ? state.pageIndex / state.pageCount
         : 0;
 
@@ -249,7 +249,7 @@ export function FolioProvider({
       content,
       tree,
     }),
-    [state, dispatch, flatChapters, registry, content, tree],
+    [state, flatChapters, registry, content, tree],
   );
 
   return (

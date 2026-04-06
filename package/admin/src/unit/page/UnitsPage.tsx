@@ -1,5 +1,5 @@
-import AddIcon from '@mui/icons-material/Add';
-import SearchIcon from '@mui/icons-material/Search';
+import AddIcon from "@mui/icons-material/Add";
+import SearchIcon from "@mui/icons-material/Search";
 import {
   Box,
   Button,
@@ -12,27 +12,27 @@ import {
   Stack,
   TextField,
   Typography,
-} from '@mui/material';
-import React from 'react';
-import {useQuery} from '@tanstack/react-query';
-import {useMatchRoute} from '@tanstack/react-router';
-
-import {unitQueries, type UnitDTO} from '@rezics/api/unit/unit';
-import {meiliUnitApi} from '@rezics/api/meili/meili.api';
-
-import {Page} from '@/core/layout/Page';
-import {Link} from '@rezics/ui/primitive/link/Link.tsx';
-import {type PaginatedColumn} from '@/component/table/PaginatedTable';
-import {SearchablePaginatedTableCard} from '@/component/list/SearchablePaginatedTableCard';
-import {PaginatedTable} from '@/component/table/PaginatedTable';
-import {fmtDate} from '@/util/format';
+} from "@mui/material";
+import { meiliUnitApi } from "@rezics/api/meili/meili.api";
+import { type UnitDTO, unitQueries } from "@rezics/api/unit/unit";
+import { Link } from "@rezics/ui/primitive/link/Link.tsx";
+import { useQuery } from "@tanstack/react-query";
+import { useMatchRoute } from "@tanstack/react-router";
+import React from "react";
+import { SearchablePaginatedTableCard } from "@/component/list/SearchablePaginatedTableCard";
+import {
+  type PaginatedColumn,
+  PaginatedTable,
+} from "@/component/table/PaginatedTable";
+import { Page } from "@/core/layout/Page";
+import { fmtDate } from "@/util/format";
 
 export default function UnitsPage() {
   const matchRoute = useMatchRoute();
-  const isMeiliMode = Boolean(matchRoute({to: '/units/meili'}));
+  const isMeiliMode = Boolean(matchRoute({ to: "/units/meili" }));
 
-  const [q, setQ] = React.useState('');
-  const [query, setQuery] = React.useState('');
+  const [q, setQ] = React.useState("");
+  const [query, setQuery] = React.useState("");
   const [page, setPage] = React.useState(0);
   const [limit, setLimit] = React.useState(20);
 
@@ -40,26 +40,26 @@ export default function UnitsPage() {
   const start = page * limit;
 
   React.useEffect(() => {
-    setQ('');
-    setQuery('');
+    setQ("");
+    setQuery("");
     setPage(0);
     setLimit(20);
-  }, [isMeiliMode]);
+  }, []);
 
   const listQuery = useQuery({
-    ...unitQueries.list({start, limit}),
+    ...unitQueries.list({ start, limit }),
     enabled: !isMeiliMode && trimmedQuery.length === 0,
   });
 
   const searchQuery = useQuery({
-    ...unitQueries.search(trimmedQuery, {start, limit}),
+    ...unitQueries.search(trimmedQuery, { start, limit }),
     enabled: !isMeiliMode && trimmedQuery.length > 0,
   });
 
   const meiliQuery = useQuery({
-    queryKey: ['meili-units', page, limit, query],
+    queryKey: ["meili-units", page, limit, query],
     queryFn: () =>
-      meiliUnitApi.unitSearch({start, limit, q: query || undefined}),
+      meiliUnitApi.unitSearch({ start, limit, q: query || undefined }),
     enabled: isMeiliMode,
   });
 
@@ -71,42 +71,42 @@ export default function UnitsPage() {
   const columns = React.useMemo(() => {
     const cols: PaginatedColumn<UnitDTO>[] = [
       {
-        id: 'id',
-        header: 'ID',
+        id: "id",
+        header: "ID",
         minWidth: 220,
-        cell: u => (
-          <Typography variant="body2" sx={{fontFamily: 'monospace'}}>
+        cell: (u) => (
+          <Typography variant="body2" sx={{ fontFamily: "monospace" }}>
             {u.id}
           </Typography>
         ),
       },
       {
-        id: 'title',
-        header: 'Title',
+        id: "title",
+        header: "Title",
         minWidth: 220,
-        cell: u => (
+        cell: (u) => (
           <Typography variant="body2" fontWeight={600} noWrap>
-            {u.title || '(no title)'}
+            {u.title || "(no title)"}
           </Typography>
         ),
       },
       {
-        id: 'type',
-        header: 'Type',
+        id: "type",
+        header: "Type",
         minWidth: 120,
-        cell: u => (u.type ? <Chip size="small" label={u.type} /> : '-'),
+        cell: (u) => (u.type ? <Chip size="small" label={u.type} /> : "-"),
       },
       {
-        id: 'status',
-        header: 'Status',
+        id: "status",
+        header: "Status",
         minWidth: 120,
-        cell: u => u.status || '-',
+        cell: (u) => u.status || "-",
       },
       {
-        id: 'user',
-        header: 'User',
+        id: "user",
+        header: "User",
         minWidth: 200,
-        cell: u => (
+        cell: (u) => (
           <Stack spacing={0}>
             <Typography variant="body2" noWrap>
               {u.user?.name ?? u.userId}
@@ -120,22 +120,22 @@ export default function UnitsPage() {
         ),
       },
       {
-        id: 'createdAt',
-        header: 'Created',
+        id: "createdAt",
+        header: "Created",
         minWidth: 170,
-        cell: u => fmtDate(u.createdAt),
+        cell: (u) => fmtDate(u.createdAt),
       },
       {
-        id: 'updatedAt',
-        header: 'Updated',
+        id: "updatedAt",
+        header: "Updated",
         minWidth: 170,
-        cell: u => fmtDate(u.updatedAt),
+        cell: (u) => fmtDate(u.updatedAt),
       },
       {
-        id: 'actions',
-        header: 'Actions',
+        id: "actions",
+        header: "Actions",
         minWidth: 120,
-        cell: u => (
+        cell: (u) => (
           <Button
             size="small"
             component={Link}
@@ -152,9 +152,9 @@ export default function UnitsPage() {
 
   return (
     <Page
-      title={isMeiliMode ? 'Units (Meili)' : 'Units'}
+      title={isMeiliMode ? "Units (Meili)" : "Units"}
       description={
-        isMeiliMode ? '管理 Unit（Meili 搜索）' : '管理 Unit（普通列表）'
+        isMeiliMode ? "管理 Unit（Meili 搜索）" : "管理 Unit（普通列表）"
       }
     >
       {isMeiliMode ? (
@@ -172,7 +172,7 @@ export default function UnitsPage() {
               startIcon={<AddIcon />}
               component={Link}
               to="/units/create"
-              sx={{whiteSpace: 'nowrap'}}
+              sx={{ whiteSpace: "nowrap" }}
             >
               Create
             </Button>
@@ -182,12 +182,12 @@ export default function UnitsPage() {
           error={meiliQuery.error}
           columns={columns}
           rows={units}
-          getRowId={u => u.id}
-          count={typeof total === 'number' ? total : 0}
+          getRowId={(u) => u.id}
+          count={typeof total === "number" ? total : 0}
           page={page}
           rowsPerPage={limit}
-          onPageChange={nextPage => setPage(nextPage)}
-          onRowsPerPageChange={next => {
+          onPageChange={(nextPage) => setPage(nextPage)}
+          onRowsPerPageChange={(next) => {
             setLimit(next);
             setPage(0);
           }}
@@ -196,7 +196,7 @@ export default function UnitsPage() {
         <Card>
           <CardContent>
             <Stack
-              direction={{xs: 'column', sm: 'row'}}
+              direction={{ xs: "column", sm: "row" }}
               spacing={1.5}
               alignItems="stretch"
             >
@@ -205,9 +205,9 @@ export default function UnitsPage() {
                 label="Search"
                 placeholder="q/title/userId/type..."
                 value={q}
-                onChange={e => setQ(e.target.value)}
-                onKeyDown={e => {
-                  if (e.key === 'Enter') {
+                onChange={(e) => setQ(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
                     setPage(0);
                     setQuery(q.trim());
                   }
@@ -220,7 +220,7 @@ export default function UnitsPage() {
                   setPage(0);
                   setQuery(q.trim());
                 }}
-                sx={{alignSelf: {xs: 'flex-end', sm: 'center'}}}
+                sx={{ alignSelf: { xs: "flex-end", sm: "center" } }}
               >
                 <SearchIcon />
               </IconButton>
@@ -229,16 +229,16 @@ export default function UnitsPage() {
                 startIcon={<AddIcon />}
                 component={Link}
                 to="/units/create"
-                sx={{whiteSpace: 'nowrap'}}
+                sx={{ whiteSpace: "nowrap" }}
               >
                 Create
               </Button>
             </Stack>
 
-            <Divider sx={{my: 2}} />
+            <Divider sx={{ my: 2 }} />
 
             {normalQuery.isLoading ? (
-              <Box sx={{display: 'flex', justifyContent: 'center', py: 6}}>
+              <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
                 <CircularProgress size={24} />
               </Box>
             ) : normalQuery.isError ? (
@@ -256,12 +256,12 @@ export default function UnitsPage() {
               <PaginatedTable<UnitDTO>
                 columns={columns}
                 rows={units}
-                getRowId={u => u.id}
-                count={typeof total === 'number' ? total : 0}
+                getRowId={(u) => u.id}
+                count={typeof total === "number" ? total : 0}
                 page={page}
                 rowsPerPage={limit}
-                onPageChange={nextPage => setPage(nextPage)}
-                onRowsPerPageChange={next => {
+                onPageChange={(nextPage) => setPage(nextPage)}
+                onRowsPerPageChange={(next) => {
                   setLimit(next);
                   setPage(0);
                 }}

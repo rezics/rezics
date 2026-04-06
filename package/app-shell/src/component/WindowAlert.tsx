@@ -1,10 +1,11 @@
-import React, {useEffect} from 'react';
-import {useAlertStore} from '../state/windowAlertStore';
-import {Alert} from '@mui/material';
-import clsx from 'clsx';
+import { Alert } from "@mui/material";
+import clsx from "clsx";
+import type React from "react";
+import { useEffect } from "react";
+import { useAlertStore } from "../state/windowAlertStore";
 
 export const WindowAlert: React.FC = () => {
-  const {open, message} = useAlertStore();
+  const { open, message } = useAlertStore();
 
   useEffect(() => {
     if (!open) return;
@@ -18,15 +19,15 @@ export const WindowAlert: React.FC = () => {
   return (
     <div
       className={clsx(
-        'fixed left-1/2 -translate-x-1/2 top-0 z-[9999] transition-transform duration-300',
-        open ? 'translate-y-3' : '-translate-y-full',
+        "fixed left-1/2 -translate-x-1/2 top-0 z-[9999] transition-transform duration-300",
+        open ? "translate-y-3" : "-translate-y-full",
       )}
     >
       <Alert
         severity="info"
         variant="standard"
         className="shadow-lg"
-        sx={{minWidth: '280px'}}
+        sx={{ minWidth: "280px" }}
       >
         {message}
       </Alert>

@@ -1,6 +1,7 @@
-import throttle from 'lodash/throttle';
-import React, {useEffect, useRef, useState} from 'react';
-import {useIsMobile} from '@/shared/util/use-media-query';
+import throttle from "lodash/throttle";
+import type React from "react";
+import { useEffect, useRef, useState } from "react";
+import { useIsMobile } from "@/shared/util/use-media-query";
 
 interface DraggableResizerProps {
   /** Id of the sidebar wrapper element whose width will be controlled. */
@@ -53,8 +54,8 @@ export const DraggableResizer: React.FC<DraggableResizerProps> = ({
     if (!resizer || !target) return;
 
     // 保证容器相对定位
-    if (getComputedStyle(target).position === 'static') {
-      target.style.position = 'relative';
+    if (getComputedStyle(target).position === "static") {
+      target.style.position = "relative";
     }
 
     const onPointerDown = (e: PointerEvent | any) => {
@@ -62,7 +63,7 @@ export const DraggableResizer: React.FC<DraggableResizerProps> = ({
       // 捕获后续所有指针事件
       (resizer as any).setPointerCapture(e.pointerId);
       setIsDragging(true);
-      document.body.style.userSelect = 'none';
+      document.body.style.userSelect = "none";
     };
 
     const onPointerMove = (e: PointerEvent | any) => {
@@ -75,7 +76,7 @@ export const DraggableResizer: React.FC<DraggableResizerProps> = ({
 
     const onPointerUp = (e: PointerEvent | any) => {
       setIsDragging(false);
-      document.body.style.userSelect = '';
+      document.body.style.userSelect = "";
       try {
         (resizer as any).releasePointerCapture(e.pointerId);
       } catch (error) {
@@ -83,17 +84,17 @@ export const DraggableResizer: React.FC<DraggableResizerProps> = ({
       }
     };
 
-    resizer.addEventListener('pointerdown', onPointerDown);
-    globalThis.addEventListener('pointermove', onPointerMove);
-    globalThis.addEventListener('pointerup', onPointerUp);
+    resizer.addEventListener("pointerdown", onPointerDown);
+    globalThis.addEventListener("pointermove", onPointerMove);
+    globalThis.addEventListener("pointerup", onPointerUp);
 
     return () => {
-      resizer.removeEventListener('pointerdown', onPointerDown);
-      globalThis.removeEventListener('pointermove', onPointerMove);
-      globalThis.removeEventListener('pointerup', onPointerUp);
-      document.body.style.userSelect = '';
+      resizer.removeEventListener("pointerdown", onPointerDown);
+      globalThis.removeEventListener("pointermove", onPointerMove);
+      globalThis.removeEventListener("pointerup", onPointerUp);
+      document.body.style.userSelect = "";
     };
-  }, [targetId, minWidth, maxWidth, isDragging, setSidebarWidth]);
+  }, [targetId, minWidth, maxWidth, isDragging]);
 
   const [topValue, setTopValue] = useState(0);
 
@@ -109,11 +110,11 @@ export const DraggableResizer: React.FC<DraggableResizerProps> = ({
 
     // Run on mount and window resize
     updatePosition();
-    globalThis.addEventListener('resize', updatePosition);
+    globalThis.addEventListener("resize", updatePosition);
 
     // Cleanup event listener on unmount
     return () => {
-      globalThis.removeEventListener('resize', updatePosition);
+      globalThis.removeEventListener("resize", updatePosition);
     };
   }, []);
 

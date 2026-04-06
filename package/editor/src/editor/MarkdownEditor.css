@@ -229,7 +229,7 @@
   color: var(--editor-tab-hover-color, #24292f);
 }
 
-.md-editor-tab[data-active='true'] {
+.md-editor-tab[data-active="true"] {
   font-weight: 600;
   color: var(--editor-tab-active-color, #24292f);
   border-color: var(--editor-border-color, #d0d7de);
@@ -238,7 +238,7 @@
   z-index: 1;
 }
 
-.md-editor-tab[data-tab='write'][data-active='true'] {
+.md-editor-tab[data-tab="write"][data-active="true"] {
   background: var(--editor-write-bg, #fff);
   border-bottom: 1px solid var(--editor-write-bg, #fff);
   border-left-color: transparent;
@@ -246,7 +246,7 @@
   border-top-left-radius: 0;
 }
 
-.md-editor-tab[data-tab='preview'][data-active='true'] {
+.md-editor-tab[data-tab="preview"][data-active="true"] {
   background: var(--editor-preview-bg, #fafbfc);
   border-bottom: 1px solid var(--editor-preview-bg, #fafbfc);
   border-top-color: transparent;

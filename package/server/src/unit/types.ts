@@ -1,6 +1,6 @@
 // Type only used in server, otherwise use contract
 
-import type {Unit, User, Prisma, Tag, ReactionSummary} from '#/prisma/client';
+import type { Prisma, ReactionSummary, Tag, Unit, User } from "#/prisma/client";
 
 /**
  * Internal Unit type with relations

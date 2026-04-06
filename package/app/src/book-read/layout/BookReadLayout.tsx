@@ -1,20 +1,20 @@
-import {Header} from '@/core/component/header/MainLayoutHeader';
-import {Sidebar} from '@/core/component/sidebar/MainLayoutSidebar';
-import {Button, Divider} from '@mui/material';
-import React, {type ReactNode} from 'react';
-
-import {LinearChapterList} from '@/book-library/component/Chapter/LinearChapterList';
-import {useNavigate} from '@tanstack/react-router';
-import {useLayoutStore} from '@/core/state/layoutStore.ts';
-import {bookReadLayoutRoute} from '@/router';
+import { Button, Divider } from "@mui/material";
+import { useNavigate } from "@tanstack/react-router";
+import type React from "react";
+import type { ReactNode } from "react";
+import { LinearChapterList } from "@/book-library/component/Chapter/LinearChapterList";
+import { Header } from "@/core/component/header/MainLayoutHeader";
+import { Sidebar } from "@/core/component/sidebar/MainLayoutSidebar";
+import { useLayoutStore } from "@/core/state/layoutStore.ts";
+import { bookReadLayoutRoute } from "@/router";
 export interface BookReadLayoutProps {
   children: ReactNode;
 }
 
-export const BookReadLayout: React.FC<BookReadLayoutProps> = ({children}) => {
+export const BookReadLayout: React.FC<BookReadLayoutProps> = ({ children }) => {
   const navigate = useNavigate();
-  const {bookId, chapterId} = bookReadLayoutRoute.useParams();
-  const {sidebarHeightBelow} = useLayoutStore();
+  const { bookId, chapterId } = bookReadLayoutRoute.useParams();
+  const { sidebarHeightBelow } = useLayoutStore();
 
   return (
     <div className="flex min-h-screen">
@@ -28,7 +28,7 @@ export const BookReadLayout: React.FC<BookReadLayoutProps> = ({children}) => {
               <Button
                 variant="text"
                 onClick={() => {
-                  navigate({to: `/book/${bookId}/`});
+                  navigate({ to: `/book/${bookId}/` });
                 }}
               >
                 返回书籍
@@ -37,8 +37,8 @@ export const BookReadLayout: React.FC<BookReadLayoutProps> = ({children}) => {
             <Divider className="mb-4" />
             <LinearChapterList
               readingMode={true}
-              bookId={bookId || ''}
-              chapterId={chapterId || ''}
+              bookId={bookId || ""}
+              chapterId={chapterId || ""}
               height={sidebarHeightBelow}
             />
           </div>

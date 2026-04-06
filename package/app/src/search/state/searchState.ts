@@ -1,12 +1,12 @@
-import {create} from 'zustand';
-import type {SearchInfo} from '../model/searchInfo';
-import {normalizeSearchInfo} from '../model/searchInfo';
+import { create } from "zustand";
+import type { SearchInfo } from "../model/searchInfo";
+import { normalizeSearchInfo } from "../model/searchInfo";
 
-export type SearchRequestStatus = 'idle' | 'loading' | 'success' | 'error';
+export type SearchRequestStatus = "idle" | "loading" | "success" | "error";
 
 type SearchFilterState = {
   sortType?: string;
-  sortOrder?: 'asc' | 'desc';
+  sortOrder?: "asc" | "desc";
 };
 
 type SearchResultState<T = unknown> = {
@@ -28,33 +28,33 @@ type SearchState = {
 };
 
 const initialQuery: SearchInfo = {
-  keyword: '',
+  keyword: "",
   tags: [],
-  textLength: '',
+  textLength: "",
   nsfw: false,
   isLicensed: false,
 };
 
-export const useSearchState = create<SearchState>()(set => ({
+export const useSearchState = create<SearchState>()((set) => ({
   query: initialQuery,
-  filter: {sortOrder: 'desc'},
-  status: 'idle',
-  result: {items: [], total: 0},
-  setQuery: value => set({query: normalizeSearchInfo(value)}),
-  setFilter: value =>
-    set(state => ({
+  filter: { sortOrder: "desc" },
+  status: "idle",
+  result: { items: [], total: 0 },
+  setQuery: (value) => set({ query: normalizeSearchInfo(value) }),
+  setFilter: (value) =>
+    set((state) => ({
       filter: {
         ...state.filter,
         ...value,
       },
     })),
-  setStatus: value => set({status: value}),
-  setResult: value => set({result: value}),
+  setStatus: (value) => set({ status: value }),
+  setResult: (value) => set({ result: value }),
   reset: () =>
     set({
       query: initialQuery,
-      filter: {sortOrder: 'desc'},
-      status: 'idle',
-      result: {items: [], total: 0},
+      filter: { sortOrder: "desc" },
+      status: "idle",
+      result: { items: [], total: 0 },
     }),
 }));

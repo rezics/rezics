@@ -1,16 +1,16 @@
-import type {FC} from 'react';
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  Box,
-  Typography,
-  IconButton,
   Alert,
-} from '@mui/material';
-import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  IconButton,
+  Typography,
+} from "@mui/material";
+import type { FC } from "react";
 
 interface TokenSecretDialogProps {
   open: boolean;
@@ -49,7 +49,7 @@ export const TokenSecretDialog: FC<TokenSecretDialogProps> = ({
             <Typography
               variant="body1"
               component="pre"
-              style={{whiteSpace: 'pre-wrap', wordBreak: 'break-all'}}
+              style={{ whiteSpace: "pre-wrap", wordBreak: "break-all" }}
             >
               {secret}
             </Typography>

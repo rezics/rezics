@@ -1,5 +1,5 @@
-import {create} from 'zustand';
-import {devtools} from 'zustand/middleware';
+import { create } from "zustand";
+import { devtools } from "zustand/middleware";
 
 export interface ChapterListStoreData {
   expandedNodes: string;
@@ -38,11 +38,11 @@ interface ChapterListState {
  */
 export const useChapterListStore = create<ChapterListState>()(
   devtools(
-    set => ({
+    (set) => ({
       chapterList: {},
 
       setChapterList: (bookId, data) =>
-        set(state => ({
+        set((state) => ({
           chapterList: {
             ...state.chapterList,
             [bookId]: data,
@@ -50,17 +50,17 @@ export const useChapterListStore = create<ChapterListState>()(
         })),
 
       updateChapterList: (bookId, data) =>
-        set(state => {
+        set((state) => {
           const prev = state.chapterList[bookId] ?? {};
           // console.log("updateChapterList", bookId, data, state);
           return {
             chapterList: {
               ...state.chapterList,
-              [bookId]: {...prev, ...data},
+              [bookId]: { ...prev, ...data },
             },
           };
         }),
     }),
-    {name: 'chapterListStore', store: 'chapterListStore'},
+    { name: "chapterListStore", store: "chapterListStore" },
   ),
 );

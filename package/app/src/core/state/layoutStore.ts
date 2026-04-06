@@ -1,14 +1,14 @@
 // src/stores/useLayoutStore.ts
-import {create} from 'zustand';
-import {devtools} from 'zustand/middleware';
+import { create } from "zustand";
+import { devtools } from "zustand/middleware";
 
 /**
  * TODO 换到统一媒体查询设置
  * @returns
  */
 function getInitialSidebarOpen() {
-  if (typeof window === 'undefined') return true; // SSR 期间保持稳定
-  return window.matchMedia('(max-width: 960px)').matches ? false : true;
+  if (typeof window === "undefined") return true; // SSR 期间保持稳定
+  return !window.matchMedia("(max-width: 960px)").matches;
 }
 
 interface LayoutState {
@@ -38,9 +38,9 @@ export const useLayoutStore = create<LayoutState>()(
           sidebarOpen: !state.sidebarOpen,
         })),
 
-      closeSidebar: () => set({sidebarOpen: false}),
+      closeSidebar: () => set({ sidebarOpen: false }),
 
-      setSidebarHeightBelow: (h: number) => set({sidebarHeightBelow: h}),
+      setSidebarHeightBelow: (h: number) => set({ sidebarHeightBelow: h }),
 
       toggleItem: (segment: string) =>
         set((state: any) => ({
@@ -50,6 +50,6 @@ export const useLayoutStore = create<LayoutState>()(
           },
         })),
     }),
-    {name: 'layoutStore', store: 'layoutStore'},
+    { name: "layoutStore", store: "layoutStore" },
   ),
 );

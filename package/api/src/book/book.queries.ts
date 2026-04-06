@@ -2,10 +2,10 @@
  * React Query configurations for Book queries
  */
 
-import {queryOptions, infiniteQueryOptions} from '@tanstack/react-query';
-import {bookApi} from './book.api';
-import {bookKeys} from './book.keys';
-import type {BookFilters} from './book.types';
+import { infiniteQueryOptions, queryOptions } from "@tanstack/react-query";
+import { bookApi } from "./book.api";
+import { bookKeys } from "./book.keys";
+import type { BookFilters } from "./book.types";
 
 /**
  * Query options for listing books
@@ -75,13 +75,14 @@ export const bookByIsbnQuery = (isbn: string) =>
  * Infinite query options for paginated book list
  * @todo Migrating from page to offset
  */
-export const bookInfiniteListQuery = (filters?: Omit<BookFilters, 'page'>) =>
+export const bookInfiniteListQuery = (filters?: Omit<BookFilters, "page">) =>
   infiniteQueryOptions({
     queryKey: bookKeys.list(filters),
-    queryFn: ({pageParam = 1}) => bookApi.list({...filters, start: pageParam}),
+    queryFn: ({ pageParam = 1 }) =>
+      bookApi.list({ ...filters, start: pageParam }),
     initialPageParam: 1,
     getNextPageParam: (lastPage, allPages, lastPageParam) => {
-      const {books, total} = lastPage;
+      const { books, total } = lastPage;
       const limit = filters?.limit || 20;
       const hasMore =
         books.length === limit && allPages.length * limit < (total || 0);

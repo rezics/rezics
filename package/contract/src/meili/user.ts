@@ -1,4 +1,4 @@
-import type {UserDTO} from '../user';
+import type { UserDTO } from "../user";
 
 /**
  * Shape of a user document stored in the Meilisearch `users` index.
@@ -31,7 +31,7 @@ export interface UserSearchDocument {
    * Raw permission object (role etc.).
    * Stored as-is so that admin/token flows can reconstruct a UserDTO.
    */
-  permission?: UserDTO['permission'];
+  permission?: UserDTO["permission"];
 }
 
 /**

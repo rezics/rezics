@@ -1,25 +1,25 @@
-import {prisma} from '#/prisma/client';
-import type {Prisma} from '#/prisma/client';
 import type {
   CreateFeedbackInput,
   FeedbackListQuery,
   FeedbackListResponse,
-} from '@rezics/contract';
-import {mapFeedbackToDTO} from './mapper';
-import {syncFeedbackToMeili} from '@/meili/feedback/sync';
+} from "@rezics/contract";
+import type { Prisma } from "#/prisma/client";
+import { prisma } from "#/prisma/client";
+import { syncFeedbackToMeili } from "@/meili/feedback/sync";
+import { mapFeedbackToDTO } from "./mapper";
 
 export class FeedbackService {
   async create(
-    input: CreateFeedbackInput & {userId: string},
+    input: CreateFeedbackInput & { userId: string },
   ): Promise<ReturnType<typeof mapFeedbackToDTO>> {
-    const {userId, unitId, url, content, type} = input;
+    const { userId, unitId, url, content, type } = input;
     const created = await prisma.feedback.create({
       data: {
         userId,
         unitId: unitId ?? null,
         url: url ?? null,
         content,
-        type: type ?? 'REPORT',
+        type: type ?? "REPORT",
       },
     });
     await syncFeedbackToMeili(created.id);
@@ -28,7 +28,7 @@ export class FeedbackService {
 
   async getById(id: string) {
     const feedback = await prisma.feedback.findUniqueOrThrow({
-      where: {id},
+      where: { id },
     });
     return mapFeedbackToDTO(feedback);
   }
@@ -53,7 +53,7 @@ export class FeedbackService {
     if (query.unitId) {
       where.unitId = query.unitId;
     }
-    if (typeof query.resolved === 'boolean') {
+    if (typeof query.resolved === "boolean") {
       where.resolved = query.resolved;
     }
     if (query.type) {
@@ -76,11 +76,11 @@ export class FeedbackService {
     const [rows, total] = await Promise.all([
       prisma.feedback.findMany({
         where,
-        orderBy: {createdAt: 'desc'},
+        orderBy: { createdAt: "desc" },
         skip: offset,
         take: limit,
       }),
-      prisma.feedback.count({where}),
+      prisma.feedback.count({ where }),
     ]);
 
     return {
@@ -101,7 +101,7 @@ export class FeedbackService {
       resolvedAt: resolved ? new Date() : null,
     };
     const updated = await prisma.feedback.update({
-      where: {id},
+      where: { id },
       data,
     });
     await syncFeedbackToMeili(id);

@@ -3,20 +3,20 @@ export function isEmptyValue(value: unknown): boolean {
   if (value == null) return true;
 
   // 字符串
-  if (typeof value === 'string') {
-    if (value === 'null') return true;
-    if (value === 'undefined') return true;
+  if (typeof value === "string") {
+    if (value === "null") return true;
+    if (value === "undefined") return true;
     return value.trim().length === 0;
   }
 
   // 数字
-  if (typeof value === 'number') {
+  if (typeof value === "number") {
     // NaN 或 ±Infinity 算空
     return !Number.isFinite(value);
   }
 
   // 布尔
-  if (typeof value === 'boolean') {
+  if (typeof value === "boolean") {
     // 布尔值永远不算空（true/false 都是有效值）
     return false;
   }
@@ -27,7 +27,7 @@ export function isEmptyValue(value: unknown): boolean {
   }
 
   // 对象
-  if (typeof value === 'object') {
+  if (typeof value === "object") {
     return Object.keys(value as object).length === 0;
   }
 
@@ -37,5 +37,5 @@ export function isEmptyValue(value: unknown): boolean {
 
 // 安全 toString，空值返回 ''
 export function safeToString(value: unknown): string {
-  return isEmptyValue(value) ? '' : String(value);
+  return isEmptyValue(value) ? "" : String(value);
 }

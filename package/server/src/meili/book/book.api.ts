@@ -1,9 +1,9 @@
-import type {BookQueryOptions} from '@rezics/contract';
-import {toBookQueryString} from '@rezics/contract';
-import {searchClient} from '../search-client';
-import type {BookSearchDocument, BookSearchResult} from './index';
-import type {SearchResponse} from '@rezics/search';
-import {defaultSort} from '../util';
+import type { BookQueryOptions } from "@rezics/contract";
+import { toBookQueryString } from "@rezics/contract";
+import type { SearchResponse } from "@rezics/search";
+import { searchClient } from "../search-client";
+import { defaultSort } from "../util";
+import type { BookSearchDocument, BookSearchResult } from "./index";
 /**
  * Low-level search API that accepts a fully-constructed Meilisearch query string.
  *
@@ -22,7 +22,7 @@ export async function searchBooksRaw(
   const offset = options?.offset ?? 1;
   const limit = options?.limit ?? 20;
 
-  console.log('searchBooksRaw', q, options);
+  console.log("searchBooksRaw", q, options);
   return searchClient.bookIndex.search<BookSearchDocument>(q, {
     offset,
     limit,
@@ -31,8 +31,8 @@ export async function searchBooksRaw(
   });
 }
 
-function buildTextLengthFilter(input: number | {min?: number; max?: number}) {
-  if (typeof input === 'number') {
+function buildTextLengthFilter(input: number | { min?: number; max?: number }) {
+  if (typeof input === "number") {
     return `textLength = ${input}`;
   }
 
@@ -40,7 +40,7 @@ function buildTextLengthFilter(input: number | {min?: number; max?: number}) {
   if (input.min != null) clauses.push(`textLength >= ${input.min}`);
   if (input.max != null) clauses.push(`textLength <= ${input.max}`);
 
-  return clauses.length ? clauses.join(' AND ') : undefined;
+  return clauses.length ? clauses.join(" AND ") : undefined;
 }
 
 /**
@@ -57,40 +57,40 @@ export async function searchBooks(
   opts: BookQueryOptions,
 ): Promise<BookSearchResult> {
   // const q = toBookQueryString(opts);
-  const q = opts.keyword ?? '';
+  const q = opts.keyword ?? "";
 
   const filter: string[] = [];
 
   // NSFW filter: default to non-NSFW if caller does not explicitly request NSFW.
   if (opts.nsfw === true) {
-    filter.push('nsfw = true');
+    filter.push("nsfw = true");
   } else if (opts.nsfw === false || opts.nsfw === undefined) {
-    filter.push('nsfw = false');
+    filter.push("nsfw = false");
   }
 
   if (opts.isLicensed === true) {
-    filter.push('isLicensed = true');
+    filter.push("isLicensed = true");
   } else if (opts.isLicensed === false) {
-    filter.push('isLicensed = false');
+    filter.push("isLicensed = false");
   }
 
   if (opts.tags?.length) {
     filter.push(
       `tagSearch IN [${opts.tags
-        .map(t => `"${t.replace(/"/g, '\\"')}"`)
-        .join(', ')}]`,
+        .map((t) => `"${t.replace(/"/g, '\\"')}"`)
+        .join(", ")}]`,
     );
   }
 
   if (opts.textLength) {
-    const tmp: any[] = opts.textLength.split('-').map(Number);
+    const tmp: any[] = opts.textLength.split("-").map(Number);
     let min = 0,
       max = 0;
     if (tmp.length === 2) {
       min = tmp[0];
       max = tmp[1];
     }
-    const tmpFilter = buildTextLengthFilter({min, max});
+    const tmpFilter = buildTextLengthFilter({ min, max });
     if (tmpFilter) {
       filter.push(tmpFilter);
     }
@@ -99,30 +99,30 @@ export async function searchBooks(
   if (opts.authorIds?.length) {
     filter.push(
       `authorIds IN [${opts.authorIds
-        .map(id => `"${id.replace(/"/g, '\\"')}"`)
-        .join(', ')}]`,
+        .map((id) => `"${id.replace(/"/g, '\\"')}"`)
+        .join(", ")}]`,
     );
   }
 
   if (opts.pressIds?.length) {
     filter.push(
       `pressIds IN [${opts.pressIds
-        .map(id => `"${id.replace(/"/g, '\\"')}"`)
-        .join(', ')}]`,
+        .map((id) => `"${id.replace(/"/g, '\\"')}"`)
+        .join(", ")}]`,
     );
   }
 
   if (opts.producerIds?.length) {
     filter.push(
       `producerIds IN [${opts.producerIds
-        .map(id => `"${id.replace(/"/g, '\\"')}"`)
-        .join(', ')}]`,
+        .map((id) => `"${id.replace(/"/g, '\\"')}"`)
+        .join(", ")}]`,
     );
   }
 
   const sort: string[] = [];
-  if (opts.sort?.type && opts.sort.type !== 'relevance') {
-    const order = opts.sort.order ?? 'desc';
+  if (opts.sort?.type && opts.sort.type !== "relevance") {
+    const order = opts.sort.order ?? "desc";
     sort.push(`${opts.sort.type}:${order}`);
   }
 

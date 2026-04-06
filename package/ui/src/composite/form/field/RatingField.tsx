@@ -1,5 +1,6 @@
-import {Rating} from '@mui/material';
-import React, {useEffect} from 'react';
+import { Rating } from "@mui/material";
+import type React from "react";
+import { useEffect } from "react";
 
 export type ScoreFormEditProps = {
   defaultValue?: number;
@@ -28,8 +29,8 @@ export const ScoreFormEdit: React.FC<ScoreFormEditProps> = ({
         defaultValue={initScore}
         precision={precision ?? 0.5}
         max={max ?? 10}
-        onChange={(event, value) => onScoreChange?.(value ?? 0)}
-        onChangeActive={(event, value) => onChangeActive?.(value ?? 0)}
+        onChange={(_event, value) => onScoreChange?.(value ?? 0)}
+        onChangeActive={(_event, value) => onChangeActive?.(value ?? 0)}
         className="inline-block align-middle items-center"
       />
     </div>

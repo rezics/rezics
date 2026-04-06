@@ -1,15 +1,15 @@
-import {useFixtureInput} from 'react-cosmos/client';
-import type {ComponentProps} from 'react';
-import {BookCarousel} from './HomeCarousel';
+import type { ComponentProps } from "react";
+import { useFixtureInput } from "react-cosmos/client";
+import { BookCarousel } from "./HomeCarousel";
 
 type BookCarouselProps = ComponentProps<typeof BookCarousel>;
 
 const Fixture = () => {
   // Control props in Cosmos via the "Props" panel with sensible defaults
-  const [fixtureProps] = useFixtureInput<BookCarouselProps>('Props', {
+  const [fixtureProps] = useFixtureInput<BookCarouselProps>("Props", {
     autoplayIntervalNum: 3000,
   });
-  const {autoplayIntervalNum} = fixtureProps;
+  const { autoplayIntervalNum } = fixtureProps;
 
   return (
     <div className="p-4 max-w-10/12 mx-auto">
@@ -84,6 +84,6 @@ const Fixture = () => {
   );
 };
 
-Fixture.displayName = 'HomeCarouselFixture';
+Fixture.displayName = "HomeCarouselFixture";
 
 export default Fixture;

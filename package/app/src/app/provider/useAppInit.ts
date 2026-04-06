@@ -1,1 +1,1 @@
-export {useAppInit} from '@rezics/app-shell';
+export { useAppInit } from "@rezics/app-shell";

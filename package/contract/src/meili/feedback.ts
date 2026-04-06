@@ -1,4 +1,4 @@
-import type {FeedbackType} from '../feedback';
+import type { FeedbackType } from "../feedback";
 
 /**
  * Shape of a feedback document stored in the Meilisearch `feedbacks` index.

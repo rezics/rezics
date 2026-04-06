@@ -1,7 +1,5 @@
-import {resetMeiliSearchDatabase} from '../database';
-import {prisma} from '../../client';
-
-import {resetDatabase} from '../database';
+import { prisma } from "../../client";
+import { resetDatabase, resetMeiliSearchDatabase } from "../database";
 
 async function main() {
   await resetDatabase(prisma);
@@ -9,8 +7,8 @@ async function main() {
 }
 
 main()
-  .catch(err => {
-    console.error('Failed to reset database:', err);
+  .catch((err) => {
+    console.error("Failed to reset database:", err);
     process.exitCode = 1;
   })
   .finally(async () => {

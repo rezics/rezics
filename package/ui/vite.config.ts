@@ -1,13 +1,13 @@
-import {tanstackRouter} from '@tanstack/router-plugin/vite';
-import UnoCSS from 'unocss/vite';
-import process from 'node:process';
-import {defineConfig, loadEnv} from 'vite';
-import react from '@vitejs/plugin-react';
-import errorOverlay from '@visulima/vite-overlay';
+import process from "node:process";
+import { tanstackRouter } from "@tanstack/router-plugin/vite";
+import errorOverlay from "@visulima/vite-overlay";
+import react from "@vitejs/plugin-react";
+import UnoCSS from "unocss/vite";
+import { defineConfig, loadEnv } from "vite";
 
 // https://vitejs.dev/config/
-export default defineConfig(({mode}) => {
-  const env = loadEnv(mode, process.cwd(), 'ICS');
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), "ICS");
 
   return {
     resolve: {
@@ -15,10 +15,10 @@ export default defineConfig(({mode}) => {
     },
     plugins: [
       tanstackRouter({
-        target: 'react',
+        target: "react",
         autoCodeSplitting: true,
-        routesDirectory: 'src/mock/routes',
-        generatedRouteTree: 'src/mock/routeTree.gen.ts',
+        routesDirectory: "src/mock/routes",
+        generatedRouteTree: "src/mock/routeTree.gen.ts",
       }),
       UnoCSS(),
       react(),
@@ -28,14 +28,14 @@ export default defineConfig(({mode}) => {
       //   },
       // }),
       errorOverlay({
-        reactPluginName: '@vitejs/plugin-react',
+        reactPluginName: "@vitejs/plugin-react",
         forwardConsole: true,
-        forwardedConsoleMethods: ['error', 'warn', 'log'],
+        forwardedConsoleMethods: ["error", "warn", "log"],
         showBallonButton: true,
       }),
     ],
     define: {
-      'process.env': env,
+      "process.env": env,
     },
   };
 });

@@ -1,39 +1,39 @@
-import {Elysia} from 'elysia';
 import {
-  sessionTokenResponseSchema,
   type SessionTokenResponse,
-} from '@rezics/contract';
+  sessionTokenResponseSchema,
+} from "@rezics/contract";
+import { Elysia } from "elysia";
 import {
+  assertMainServerEligibility,
   authMacro,
   getAuthSessionState,
-  assertMainServerEligibility,
-} from '@/middleware';
-import {userService} from '@/user/service/user.service';
+} from "@/middleware";
+import { userService } from "@/user/service/user.service";
 import {
   buildRezicsSessionClaims,
   getMainSessionPublicJwks,
   mainSessionJwtPlugin,
-} from './jwt/jwt.service.ts';
+} from "./jwt/jwt.service.ts";
 
-export const sessionApi = new Elysia({prefix: '/session'})
+export const sessionApi = new Elysia({ prefix: "/session" })
   .use(mainSessionJwtPlugin)
   .use(authMacro)
-  .get('/jwks', async () => getMainSessionPublicJwks(), {
+  .get("/jwks", async () => getMainSessionPublicJwks(), {
     detail: {
-      summary: 'Publish main-server JWKS (legacy)',
+      summary: "Publish main-server JWKS (legacy)",
       description:
-        'Legacy JWKS endpoint. Use `/.well-known/jwks.json` instead. Returns the same public signing keys used by this resource server for session tokens.',
-      tags: ['Session'],
+        "Legacy JWKS endpoint. Use `/.well-known/jwks.json` instead. Returns the same public signing keys used by this resource server for session tokens.",
+      tags: ["Session"],
       deprecated: true,
     },
   })
   .post(
-    '/token',
-    async ({identity, headers, jwt, set}): Promise<SessionTokenResponse> => {
+    "/token",
+    async ({ identity, headers, jwt, set }): Promise<SessionTokenResponse> => {
       const authorization = headers.authorization;
       if (!authorization) {
         set.status = 401;
-        throw new Error('Unauthorized: Missing authorization header');
+        throw new Error("Unauthorized: Missing authorization header");
       }
 
       let sessionState;
@@ -42,7 +42,7 @@ export const sessionApi = new Elysia({prefix: '/session'})
       } catch {
         set.status = 503;
         throw new Error(
-          'Service Unavailable: Unable to verify auth session eligibility',
+          "Service Unavailable: Unable to verify auth session eligibility",
         );
       }
 
@@ -50,8 +50,8 @@ export const sessionApi = new Elysia({prefix: '/session'})
         assertMainServerEligibility(sessionState);
       } catch (error) {
         const message =
-          error instanceof Error ? error.message : 'Eligibility check failed';
-        if (message.includes('Unauthorized')) {
+          error instanceof Error ? error.message : "Eligibility check failed";
+        if (message.includes("Unauthorized")) {
           set.status = 401;
         } else {
           set.status = 403;
@@ -65,7 +65,7 @@ export const sessionApi = new Elysia({prefix: '/session'})
         token: await jwt.sign(
           buildRezicsSessionClaims({
             unitId: user.unitId,
-            roles: (user.permission as {role?: string[]} | null)?.role,
+            roles: (user.permission as { role?: string[] } | null)?.role,
           }),
         ),
       };
@@ -74,10 +74,10 @@ export const sessionApi = new Elysia({prefix: '/session'})
       requireLogin: true,
       response: sessionTokenResponseSchema,
       detail: {
-        summary: 'Issue main-server session token',
+        summary: "Issue main-server session token",
         description:
-          'Issue the main-server session token after auth identity verification and local user ensure.',
-        tags: ['Session'],
+          "Issue the main-server session token after auth identity verification and local user ensure.",
+        tags: ["Session"],
       },
     },
   );

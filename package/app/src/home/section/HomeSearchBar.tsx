@@ -1,7 +1,7 @@
-import React from 'react';
-import {useNavigate} from '@tanstack/react-router';
-import {BookSearchInput} from '@/book-library/component/BookSearch/BookSearch';
-import type {BookQueryOptions} from '@rezics/contract';
+import type { BookQueryOptions } from "@rezics/contract";
+import { useNavigate } from "@tanstack/react-router";
+import type React from "react";
+import { BookSearchInput } from "@/book-library/component/BookSearch/BookSearch";
 
 export type HomeSearchBarProps = object;
 
@@ -12,12 +12,12 @@ export type HomeSearchBarProps = object;
 export const HomeSearchBar: React.FC<HomeSearchBarProps> = () => {
   const navigate = useNavigate();
   function handleSearch(options: BookQueryOptions) {
-    let query = '?';
+    let query = "?";
     if (options.keyword) {
       query += `keyword=${options.keyword}&`;
     }
     if (options.tags?.length) {
-      query += `tags=${options.tags?.join(',')}&`;
+      query += `tags=${options.tags?.join(",")}&`;
     }
     if (options.nsfw) {
       query += `nsfw=true&`;
@@ -25,7 +25,7 @@ export const HomeSearchBar: React.FC<HomeSearchBarProps> = () => {
     if (options.isLicensed) {
       query += `isLicensed=true&`;
     }
-    navigate({to: `/book${query}`});
+    navigate({ to: `/book${query}` });
   }
   return (
     <BookSearchInput onSearch={handleSearch} hiddenWordCountFilter={true} />

@@ -1,8 +1,8 @@
+export { panelToolbar } from "./panel/index";
+export { ReactToolbar } from "./react/index";
 export type {
+  ToolbarConfig,
+  ToolbarEntry,
   ToolbarItem,
   ToolbarSeparator,
-  ToolbarEntry,
-  ToolbarConfig,
-} from './types';
-export { panelToolbar } from './panel/index';
-export { ReactToolbar } from './react/index';
+} from "./types";

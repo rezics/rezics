@@ -1,20 +1,20 @@
-import {faker} from '@faker-js/faker';
-import type {PrismaClient, Prisma} from '#/prisma/generated/client.js';
-import {UnitType, UnitStatus} from '#/prisma/generated/client.js';
-import type {CreatedUser, CreatedUnit} from './types.js';
+import { faker } from "@faker-js/faker";
+import type { Prisma, PrismaClient } from "#/prisma/generated/client.js";
+import { UnitStatus, UnitType } from "#/prisma/generated/client.js";
+import { getRandomBookCover } from "./data.js";
+import { buildUnitTitleByType, generateBookExtra } from "./generators.js";
+import type { CreatedUnit, CreatedUser } from "./types.js";
 import {
-  randomInt,
-  randomBoolean,
-  pickN,
-  generateTitle,
-  generateParagraph,
-} from './utils.js';
-import {buildUnitTitleByType, generateBookExtra} from './generators.js';
-import {getRandomBookCover} from './data.js';
-import {
-  upsertReactionSummariesForUnit,
   upsertBookmarkCountForUnit,
-} from './unitStats.js';
+  upsertReactionSummariesForUnit,
+} from "./unitStats.js";
+import {
+  generateParagraph,
+  generateTitle,
+  pickN,
+  randomBoolean,
+  randomInt,
+} from "./utils.js";
 
 // Chapter tree structure to store into BookIndex.index
 interface ChapterIndexChapter {
@@ -50,7 +50,9 @@ export async function seedBooks(
   for (let i = 0; i < total; i++) {
     const author = faker.helpers.arrayElement(users);
     const title = buildUnitTitleByType(UnitType.BOOK) ?? generateTitle(2, 5);
-    const publishedAt = randomBoolean(0.9) ? faker.date.past({years: 3}) : null;
+    const publishedAt = randomBoolean(0.9)
+      ? faker.date.past({ years: 3 })
+      : null;
 
     const unit = await prisma.unit.create({
       data: {
@@ -62,10 +64,12 @@ export async function seedBooks(
         metadata: {},
         publishedAt,
         tags: {
-          connect: pickN(tagUnitIds, randomInt(1, 5)).map(unitId => ({unitId})),
+          connect: pickN(tagUnitIds, randomInt(1, 5)).map((unitId) => ({
+            unitId,
+          })),
         },
       },
-      select: {id: true, type: true},
+      select: { id: true, type: true },
     });
 
     await prisma.book.create({
@@ -73,15 +77,17 @@ export async function seedBooks(
         unitId: unit.id,
         title,
         author: {
-          connect: pickN(users, randomInt(1, 3)).map(u => ({unitId: u.unitId})),
+          connect: pickN(users, randomInt(1, 3)).map((u) => ({
+            unitId: u.unitId,
+          })),
         },
         press: {
-          connect: pickN(pressUsers, randomInt(1, 3)).map(u => ({
+          connect: pickN(pressUsers, randomInt(1, 3)).map((u) => ({
             unitId: u.unitId,
           })),
         },
         producer: {
-          connect: pickN(producerUsers, randomInt(1, 3)).map(u => ({
+          connect: pickN(producerUsers, randomInt(1, 3)).map((u) => ({
             unitId: u.unitId,
           })),
         },
@@ -89,7 +95,7 @@ export async function seedBooks(
         isbn: randomBoolean(0.8) ? faker.commerce.isbn() : null,
         chapterIndex: {
           // Create placeholder JSON; will be updated after we actually create chapter units per book
-          create: {index: {} as Prisma.InputJsonValue},
+          create: { index: {} as Prisma.InputJsonValue },
         },
         description: generateParagraph(1, 2),
         extra: generateBookExtra(),
@@ -115,12 +121,12 @@ export async function updateChapterIndex(
   chapterIndex: Prisma.InputJsonValue,
 ): Promise<void> {
   await prisma.bookIndex.update({
-    where: {bookUnitId: bookId},
-    data: {index: chapterIndex},
+    where: { bookUnitId: bookId },
+    data: { index: chapterIndex },
   });
 }
 
-import type {ChapterTreeItem} from '@rezics/contract';
+import type { ChapterTreeItem } from "@rezics/contract";
 
 /**
  * Create chapters for a book and return a nested tree structure array.
@@ -129,21 +135,21 @@ import type {ChapterTreeItem} from '@rezics/contract';
 export async function seedChaptersForBook(
   prisma: PrismaClient,
   bookUnitId: string,
-  opts?: {topLevelCount?: number; minChildren?: number; maxChildren?: number},
+  opts?: { topLevelCount?: number; minChildren?: number; maxChildren?: number },
 ): Promise<ChapterTreeItem[]> {
   const topLevelCount =
-    opts?.topLevelCount ?? faker.number.int({min: 1, max: 4});
+    opts?.topLevelCount ?? faker.number.int({ min: 1, max: 4 });
   const minChildren = opts?.minChildren ?? 20;
   const maxChildren = opts?.maxChildren ?? 100;
 
   // Get the book's userId (optimized redundant query)
   const bookUnit = await prisma.unit.findUnique({
-    where: {id: bookUnitId},
-    select: {userId: true},
+    where: { id: bookUnitId },
+    select: { userId: true },
   });
 
   if (!bookUnit) {
-    throw new Error('Book unit not found');
+    throw new Error("Book unit not found");
   }
 
   const bookUserId = bookUnit.userId;
@@ -162,16 +168,16 @@ export async function seedChaptersForBook(
         metadata: {},
         targetUnitId: bookUnitId,
       },
-      select: {id: true},
+      select: { id: true },
     });
 
     // Loop to generate subchapters under the current parent chapter
-    const childCount = faker.number.int({min: minChildren, max: maxChildren});
+    const childCount = faker.number.int({ min: minChildren, max: maxChildren });
     const children: ChapterTreeItem[] = [];
 
     for (let i = 0; i < childCount; i++) {
-      const noContent = faker.datatype.boolean({probability: 0.2});
-      const childTitle = faker.lorem.words({min: 3, max: 6});
+      const noContent = faker.datatype.boolean({ probability: 0.2 });
+      const childTitle = faker.lorem.words({ min: 3, max: 6 });
       const child = await prisma.unit.create({
         data: {
           userId: bookUserId,
@@ -182,7 +188,7 @@ export async function seedChaptersForBook(
           metadata: {},
           targetUnitId: bookUnitId,
         },
-        select: {id: true},
+        select: { id: true },
       });
 
       // Push the subchapter into the local children array

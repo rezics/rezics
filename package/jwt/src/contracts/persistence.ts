@@ -1,5 +1,5 @@
-import type {JwtPrivateJwk, JwtPublicJwk} from '../core/jwk';
-import type {JwtAlgorithm} from '../core/jwt-algorithm';
+import type { JwtPrivateJwk, JwtPublicJwk } from "../core/jwk";
+import type { JwtAlgorithm } from "../core/jwt-algorithm";
 
 export type JwtKeyRecord = {
   issuer: string;
@@ -14,8 +14,8 @@ export type JwtKeyRecord = {
 };
 
 export type JwtKeyPersistence = {
-  listKeys(params: {issuer: string}): Promise<JwtKeyRecord[]>;
-  saveKey(params: {issuer: string; key: JwtKeyRecord}): Promise<void>;
+  listKeys(params: { issuer: string }): Promise<JwtKeyRecord[]>;
+  saveKey(params: { issuer: string; key: JwtKeyRecord }): Promise<void>;
   markKeyRetiring(params: {
     issuer: string;
     kid: string;

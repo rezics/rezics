@@ -2,18 +2,18 @@
  * React Query mutations for Review operations
  */
 
-import {
-  useMutation,
-  useQueryClient,
-  type UseMutationOptions,
-} from '@tanstack/react-query';
-import {reviewApi} from './review.api';
-import {reviewKeys} from './review.keys';
 import type {
   CreateReviewInput,
-  UpdateReviewInput,
   ReviewResponse,
-} from '@rezics/contract';
+  UpdateReviewInput,
+} from "@rezics/contract";
+import {
+  type UseMutationOptions,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
+import { reviewApi } from "./review.api";
+import { reviewKeys } from "./review.keys";
 
 /**
  * Mutation for creating a review
@@ -21,7 +21,7 @@ import type {
 export function useCreateReviewMutation(
   options?: Omit<
     UseMutationOptions<ReviewResponse, Error, CreateReviewInput>,
-    'mutationFn'
+    "mutationFn"
   >,
   unitType?: string,
 ) {
@@ -35,7 +35,7 @@ export function useCreateReviewMutation(
       // const allQueries = queryClient.getQueryCache().getAll();
 
       // Invalidate and refetch review lists
-      queryClient.invalidateQueries({queryKey: reviewKeys.lists()});
+      queryClient.invalidateQueries({ queryKey: reviewKeys.lists() });
 
       // Pre-populate the cache with the new review
       queryClient.setQueryData(reviewKeys.detail(data.unitId), data);
@@ -53,22 +53,22 @@ export function useUpdateReviewMutation(
     UseMutationOptions<
       ReviewResponse,
       Error,
-      {id: string; input: UpdateReviewInput}
+      { id: string; input: UpdateReviewInput }
     >,
-    'mutationFn'
+    "mutationFn"
   >,
 ) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({id, input}) => reviewApi.update(id, input),
+    mutationFn: ({ id, input }) => reviewApi.update(id, input),
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
       // Update the cache for this specific review
       queryClient.setQueryData(reviewKeys.detail(variables.id), data);
 
       // Invalidate lists to ensure they're refreshed
-      queryClient.invalidateQueries({queryKey: reviewKeys.lists()});
+      queryClient.invalidateQueries({ queryKey: reviewKeys.lists() });
 
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
@@ -80,8 +80,8 @@ export function useUpdateReviewMutation(
  */
 export function useDeleteReviewMutation(
   options?: Omit<
-    UseMutationOptions<{message: string}, Error, string>,
-    'mutationFn'
+    UseMutationOptions<{ message: string }, Error, string>,
+    "mutationFn"
   >,
 ) {
   const queryClient = useQueryClient();
@@ -91,10 +91,10 @@ export function useDeleteReviewMutation(
     ...options,
     onSuccess: (data, id, onMutateResult, context) => {
       // Remove from cache
-      queryClient.removeQueries({queryKey: reviewKeys.detail(id)});
+      queryClient.removeQueries({ queryKey: reviewKeys.detail(id) });
 
       // Invalidate all lists
-      queryClient.invalidateQueries({queryKey: reviewKeys.lists()});
+      queryClient.invalidateQueries({ queryKey: reviewKeys.lists() });
 
       options?.onSuccess?.(data, id, onMutateResult, context);
     },

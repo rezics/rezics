@@ -1,25 +1,24 @@
+import EditIcon from "@mui/icons-material/Edit";
 import {
   Avatar,
+  Box,
   Button,
   Card,
   CardContent,
   CardHeader,
-  Typography,
-  Box,
   Chip,
-  Tooltip,
-} from '@mui/material';
-import EditIcon from '@mui/icons-material/Edit';
-import {useEffect, type FC} from 'react';
-import {useTranslation} from 'react-i18next';
-import type {UserDTO} from '@rezics/contract';
-import {useQuery} from '@tanstack/react-query';
-import {userQueries} from '@rezics/api/user/user.queries';
-import {UserError, UserLoading} from './UserState';
-import {useUserProfileStore} from '@/user/state';
-import FollowButton from '@/engagement/component/FollowButton';
-import {UserUnitsPage} from './UserUnitsPage';
-import {Link} from '@rezics/ui/primitive/link/Link.tsx';
+  Typography,
+} from "@mui/material";
+import { userQueries } from "@rezics/api/user/user.queries";
+import type { UserDTO } from "@rezics/contract";
+import { Link } from "@rezics/ui/primitive/link/Link.tsx";
+import { useQuery } from "@tanstack/react-query";
+import { type FC, useEffect } from "react";
+import { useTranslation } from "react-i18next";
+import FollowButton from "@/engagement/component/FollowButton";
+import { useUserProfileStore } from "@/user/state";
+import { UserError, UserLoading } from "./UserState";
+import { UserUnitsPage } from "./UserUnitsPage";
 
 export interface UserProfilePageProps {
   unitId: string;
@@ -32,15 +31,15 @@ export interface UserProfilePageProps {
  * 显示用户的详细信息，包括头像、名字、简介等
  */
 export const UserProfilePage: FC<UserProfilePageProps> = ({
-  unitId = '',
+  unitId = "",
   isCurrentUser = false,
   onEditClick,
 }) => {
-  const currentUser = useUserProfileStore(state => state.user);
-  const {setUser} = useUserProfileStore();
-  const {t} = useTranslation();
+  const currentUser = useUserProfileStore((state) => state.user);
+  const { setUser } = useUserProfileStore();
+  const { t } = useTranslation();
 
-  console.log('isCurrentUser', isCurrentUser);
+  console.log("isCurrentUser", isCurrentUser);
 
   const meQuery = useQuery({
     ...userQueries.me(),
@@ -48,14 +47,14 @@ export const UserProfilePage: FC<UserProfilePageProps> = ({
   });
   const detailQuery = useQuery({
     ...userQueries.detail(unitId),
-    enabled: !isCurrentUser && unitId !== '',
+    enabled: !isCurrentUser && unitId !== "",
   });
 
   useEffect(() => {
     if (meQuery.data) {
       setUser(meQuery.data);
     }
-  }, [meQuery.data, setUser, detailQuery.data]);
+  }, [meQuery.data, setUser]);
 
   const isLoading = meQuery.isLoading || detailQuery.isLoading;
   const queryError = (meQuery.error ?? detailQuery.error) as Error | null;
@@ -84,7 +83,7 @@ export const UserProfilePage: FC<UserProfilePageProps> = ({
       <Card className="shadow-lg rounded-2xl">
         <CardHeader
           avatar={
-            <Avatar src={user.avatar} sx={{width: 80, height: 80}}>
+            <Avatar src={user.avatar} sx={{ width: 80, height: 80 }}>
               {user.name?.charAt(0).toUpperCase()}
             </Avatar>
           }
@@ -105,7 +104,7 @@ export const UserProfilePage: FC<UserProfilePageProps> = ({
                   label={`@${user.slug}`}
                   size="small"
                   variant="outlined"
-                  sx={{mt: 1}}
+                  sx={{ mt: 1 }}
                 />
               )}
             </Box>
@@ -120,13 +119,13 @@ export const UserProfilePage: FC<UserProfilePageProps> = ({
                 />
               )}
               {isCurrentUser ||
-              currentUser?.permission?.role?.includes('ADMIN') ? (
+              currentUser?.permission?.role?.includes("ADMIN") ? (
                 <Button
                   variant="contained"
                   startIcon={<EditIcon />}
                   onClick={onEditClick}
                 >
-                  {t('common.edit')}
+                  {t("common.edit")}
                 </Button>
               ) : null}
             </div>
@@ -146,7 +145,7 @@ export const UserProfilePage: FC<UserProfilePageProps> = ({
           {user.email && (
             <Box className="mb-4">
               <Typography variant="subtitle1" className="font-semibold mb-2">
-                {t('common.email')}
+                {t("common.email")}
               </Typography>
               <Typography variant="body2" color="textSecondary">
                 {user.email}
@@ -172,7 +171,7 @@ export const UserProfilePage: FC<UserProfilePageProps> = ({
           )}
         </CardContent>
       </Card>
-      {(isCurrentUser || user.unitId == currentUser?.unitId) && (
+      {(isCurrentUser || user.unitId === currentUser?.unitId) && (
         <Card className="shadow-lg rounded-2xl mt-4">
           <CardContent>
             <Typography variant="h6" className="font-semibold inline-block">

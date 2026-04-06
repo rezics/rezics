@@ -14,6 +14,6 @@ export {
   type BookDetailLoadingState,
   // Atoms
   bookDetailAtomFamily,
-  setBookDetailAtomFamily,
   patchBookDetailAtomFamily,
-} from './bookDetailAtoms';
+  setBookDetailAtomFamily,
+} from "./bookDetailAtoms";

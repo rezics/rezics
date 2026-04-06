@@ -1,1 +1,1 @@
-export {WindowAlert} from './WindowAlert';
+export { WindowAlert } from "./WindowAlert";

@@ -1,7 +1,7 @@
-import Button from '@mui/material/Button';
-import Stack from '@mui/material/Stack';
-import Typography from '@mui/material/Typography';
-import type {FC, ReactNode} from 'react';
+import Button from "@mui/material/Button";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
+import type { FC, ReactNode } from "react";
 
 export interface CookieConsentBannerProps {
   title: string;
@@ -23,7 +23,7 @@ export const CookieConsentBanner: FC<CookieConsentBannerProps> = ({
   policyLabel,
   onAccept,
   onPolicyClick,
-  acceptLabel = 'Accept',
+  acceptLabel = "Accept",
   secondaryAction,
   policyAction,
 }) => {
@@ -33,10 +33,10 @@ export const CookieConsentBanner: FC<CookieConsentBannerProps> = ({
         spacing={2}
         role="region"
         sx={{
-          border: theme => `1px solid ${theme.palette.divider}`,
+          border: (theme) => `1px solid ${theme.palette.divider}`,
           borderRadius: 2,
           p: 2,
-          backgroundColor: theme => theme.palette.background.paper,
+          backgroundColor: (theme) => theme.palette.background.paper,
         }}
       >
         <div>
@@ -54,7 +54,11 @@ export const CookieConsentBanner: FC<CookieConsentBannerProps> = ({
             </Button>
           )}
           {secondaryAction ? (
-            <Button type="button" variant="outlined" onClick={secondaryAction.onClick}>
+            <Button
+              type="button"
+              variant="outlined"
+              onClick={secondaryAction.onClick}
+            >
               {secondaryAction.label}
             </Button>
           ) : null}

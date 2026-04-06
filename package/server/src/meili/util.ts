@@ -1,1 +1,1 @@
-export const defaultSort = ['updatedAt:desc'];
+export const defaultSort = ["updatedAt:desc"];

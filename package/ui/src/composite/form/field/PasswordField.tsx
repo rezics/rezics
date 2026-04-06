@@ -1,15 +1,15 @@
-import TextField from '@mui/material/TextField';
-import {useTranslation} from 'react-i18next';
-import React, {useState, type FC} from 'react';
-import IconButton from '@mui/material/IconButton';
-import InputAdornment from '@mui/material/InputAdornment';
-import {Visibility, VisibilityOff} from '@mui/icons-material';
+import { Visibility, VisibilityOff } from "@mui/icons-material";
+import IconButton from "@mui/material/IconButton";
+import InputAdornment from "@mui/material/InputAdornment";
+import TextField from "@mui/material/TextField";
+import React, { type FC, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 interface PasswordFieldProps {
   name?: string;
   label?: string;
   value: string;
-  variant?: 'standard' | 'outlined' | 'filled';
+  variant?: "standard" | "outlined" | "filled";
   onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
   setValue: (value: string) => void;
   helperText?: string;
@@ -22,12 +22,12 @@ export const PasswordField: FC<PasswordFieldProps> = ({
   label,
   value,
   setValue,
-  variant = 'standard',
+  variant = "standard",
   helperText,
   className,
   required = true,
 }) => {
-  const {t} = useTranslation();
+  const { t } = useTranslation();
   const [showPassword, setShowPassword] = useState(false);
 
   const handleMouseDownPassword = (
@@ -45,10 +45,10 @@ export const PasswordField: FC<PasswordFieldProps> = ({
   return (
     <TextField
       className={className}
-      name={name ?? 'password'}
-      type={showPassword ? 'text' : 'password'}
-      label={label ?? t('common.password')}
-      helperText={helperText ?? t('auth.help.password_require')}
+      name={name ?? "password"}
+      type={showPassword ? "text" : "password"}
+      label={label ?? t("common.password")}
+      helperText={helperText ?? t("auth.help.password_require")}
       variant={variant}
       required={required}
       value={value}
@@ -60,7 +60,7 @@ export const PasswordField: FC<PasswordFieldProps> = ({
           <InputAdornment position="end">
             <IconButton
               aria-label={
-                showPassword ? 'hide the password' : 'display the password'
+                showPassword ? "hide the password" : "display the password"
               }
               onClick={() => setShowPassword(!showPassword)}
               onMouseDown={handleMouseDownPassword}

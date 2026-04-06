@@ -1,10 +1,10 @@
 import type {
+  CreateJwtServiceInput,
   JwtServiceDTO,
   JwtServiceListResponse,
-  CreateJwtServiceInput,
   UpdateJwtServiceInput,
-} from '@rezics/contract';
-import {getApiConfig} from '../config';
+} from "@rezics/contract";
+import { getApiConfig } from "../config";
 
 function getAuthBaseUrl(): string {
   return getApiConfig().authBaseUrl;
@@ -17,9 +17,9 @@ async function authAdminFetch<T>(
   const url = `${getAuthBaseUrl()}/api/auth${endpoint}`;
   const response = await fetch(url, {
     ...options,
-    credentials: 'include',
+    credentials: "include",
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
       ...Object.fromEntries(new Headers(options?.headers).entries()),
     },
   });
@@ -40,18 +40,16 @@ async function authAdminFetch<T>(
 
 export const authJwtServiceApi = {
   list: async (): Promise<JwtServiceListResponse> => {
-    return authAdminFetch<JwtServiceListResponse>('/admin/jwt-services');
+    return authAdminFetch<JwtServiceListResponse>("/admin/jwt-services");
   },
 
   fetch: async (serviceKey: string): Promise<JwtServiceDTO> => {
-    return authAdminFetch<JwtServiceDTO>(
-      `/admin/jwt-services/${serviceKey}`,
-    );
+    return authAdminFetch<JwtServiceDTO>(`/admin/jwt-services/${serviceKey}`);
   },
 
   create: async (input: CreateJwtServiceInput): Promise<JwtServiceDTO> => {
-    return authAdminFetch<JwtServiceDTO>('/admin/jwt-services', {
-      method: 'POST',
+    return authAdminFetch<JwtServiceDTO>("/admin/jwt-services", {
+      method: "POST",
       body: JSON.stringify(input),
     });
   },
@@ -60,26 +58,23 @@ export const authJwtServiceApi = {
     serviceKey: string,
     input: UpdateJwtServiceInput,
   ): Promise<JwtServiceDTO> => {
-    return authAdminFetch<JwtServiceDTO>(
-      `/admin/jwt-services/${serviceKey}`,
-      {
-        method: 'PATCH',
-        body: JSON.stringify(input),
-      },
-    );
+    return authAdminFetch<JwtServiceDTO>(`/admin/jwt-services/${serviceKey}`, {
+      method: "PATCH",
+      body: JSON.stringify(input),
+    });
   },
 
   activate: async (serviceKey: string): Promise<JwtServiceDTO> => {
     return authAdminFetch<JwtServiceDTO>(
       `/admin/jwt-services/${serviceKey}/activate`,
-      {method: 'POST'},
+      { method: "POST" },
     );
   },
 
   deactivate: async (serviceKey: string): Promise<JwtServiceDTO> => {
     return authAdminFetch<JwtServiceDTO>(
       `/admin/jwt-services/${serviceKey}/deactivate`,
-      {method: 'POST'},
+      { method: "POST" },
     );
   },
 };

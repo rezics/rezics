@@ -10,15 +10,20 @@
     "check:runtime-env": "node tool/scripts/check-no-runtime-env.mjs",
     "seed:cross": "cd tool && bun run seed/cross-seed.ts",
     "seed:cross:overwrite": "cd tool && bun run seed/cross-seed.ts overwrite",
+    "lint": "biome lint .",
+    "format": "biome format --write .",
+    "format:check": "biome format .",
+    "check": "biome check --write .",
     "knip": "knip"
   },
   "workspaces": [
     "package/*"
   ],
   "devDependencies": {
+    "@biomejs/biome": "^2.4.10",
     "babel-plugin-react-compiler": "^1.0.0",
-    "vite": "^8.0.0-beta.16",
-    "knip": "^5.85.0"
+    "knip": "^5.85.0",
+    "vite": "^8.0.0-beta.16"
   },
   "dependencies": {
     "@t3-oss/env-core": "^0.13.10",

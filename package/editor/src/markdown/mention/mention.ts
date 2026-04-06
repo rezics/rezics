@@ -2,9 +2,9 @@ import {
   autocompletion,
   type CompletionContext,
   type CompletionResult,
-} from '@codemirror/autocomplete';
-import type { Extension } from '@codemirror/state';
-import type { MentionConfig, MentionItem } from './types';
+} from "@codemirror/autocomplete";
+import type { Extension } from "@codemirror/state";
+import type { MentionConfig, MentionItem } from "./types";
 
 function defaultFormatMention(item: MentionItem): string {
   return `@${item.label} `;

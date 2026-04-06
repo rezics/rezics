@@ -1,17 +1,18 @@
-import {Rating, type RatingProps, TextField} from '@mui/material';
-import React, {useState, useEffect} from 'react';
+import { Rating, type RatingProps, TextField } from "@mui/material";
+import type React from "react";
+import { useEffect, useState } from "react";
 
 type RatingWithInputProps = {
   value: number | null;
   onChange: (value: number | null) => void;
   max?: number;
   precision?: number;
-  size?: 'small' | 'medium' | 'large';
+  size?: "small" | "medium" | "large";
   name?: string;
   disabled?: boolean;
 } & Omit<
   RatingProps,
-  'value' | 'onChange' | 'max' | 'precision' | 'size' | 'name' | 'disabled'
+  "value" | "onChange" | "max" | "precision" | "size" | "name" | "disabled"
 >;
 
 export function RatingWithInput({
@@ -19,17 +20,17 @@ export function RatingWithInput({
   onChange,
   max = 10,
   precision = 0.5,
-  size = 'large',
-  name = 'score-rating',
+  size = "large",
+  name = "score-rating",
   disabled = false,
   ...rest
 }: RatingWithInputProps) {
   // 内部临时输入状态
-  const [inputValue, setInputValue] = useState<string>(String(value ?? ''));
+  const [inputValue, setInputValue] = useState<string>(String(value ?? ""));
 
   // 当外部 value 变化时，同步更新输入框
   useEffect(() => {
-    setInputValue(String(value ?? ''));
+    setInputValue(String(value ?? ""));
   }, [value]);
 
   const handleRatingChange = (
@@ -53,9 +54,9 @@ export function RatingWithInput({
 
       // 如果是有效数字，立即更新外部值
       const numValue = parseFloat(val);
-      if (!isNaN(numValue) && numValue >= 0 && numValue <= max) {
+      if (!Number.isNaN(numValue) && numValue >= 0 && numValue <= max) {
         onChange(numValue);
-      } else if (val === '') {
+      } else if (val === "") {
         onChange(null);
       }
     }
@@ -65,20 +66,20 @@ export function RatingWithInput({
     let finalValue = inputValue;
 
     // 失焦时自动修正，例如 "7." -> "7"
-    if (finalValue.endsWith('.')) {
+    if (finalValue.endsWith(".")) {
       finalValue = finalValue.slice(0, -1);
     }
 
     // 如果是空字符串，设置为 null
-    if (finalValue === '') {
-      setInputValue('');
+    if (finalValue === "") {
+      setInputValue("");
       onChange(null);
       return;
     }
 
     // 验证并限制范围
     let numValue = parseFloat(finalValue);
-    if (isNaN(numValue)) {
+    if (Number.isNaN(numValue)) {
       numValue = value ?? 0;
     } else {
       numValue = Math.max(0, Math.min(max, numValue));
@@ -89,7 +90,7 @@ export function RatingWithInput({
   };
 
   return (
-    <div style={{display: 'flex', alignItems: 'center', gap: '16px'}}>
+    <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
       <Rating
         name={name}
         size={size}
@@ -107,7 +108,7 @@ export function RatingWithInput({
         onBlur={handleInputBlur}
         disabled={disabled}
         inputProps={{
-          style: {width: '60px', textAlign: 'center'},
+          style: { width: "60px", textAlign: "center" },
         }}
       />
     </div>

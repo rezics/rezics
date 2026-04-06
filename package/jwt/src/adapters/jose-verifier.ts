@@ -1,28 +1,28 @@
-import type {KeyObject} from 'node:crypto';
+import type { KeyObject } from "node:crypto";
+import {
+  NormalizedTokenName,
+  type NormalizedTokenName as NormalizedTokenNameType,
+  normalizedTokenTransportMap,
+} from "@rezics/contract";
 import {
   createLocalJWKSet,
   createRemoteJWKSet,
   decodeProtectedHeader,
   importSPKI,
-  jwtVerify,
   type JWK,
   type JWTPayload,
   type JWTVerifyOptions,
-} from 'jose';
-import {
-  NormalizedTokenName,
-  normalizedTokenTransportMap,
-  type NormalizedTokenName as NormalizedTokenNameType,
-} from '@rezics/contract';
-import {JwtAlgorithm} from '../core/jwt-algorithm';
-import {JwtTransportError, JwtVerificationError} from '../core/jwt-errors';
-import type {JwtJwks} from '../core/jwks';
+  jwtVerify,
+} from "jose";
 import type {
   JwtKeySource,
-  JwtVerifyInput,
   JwtVerifier,
-} from '../contracts/verifier';
-import type {VerifiedJwt} from '../core/verification';
+  JwtVerifyInput,
+} from "../contracts/verifier";
+import type { JwtJwks } from "../core/jwks";
+import { JwtAlgorithm } from "../core/jwt-algorithm";
+import { JwtTransportError, JwtVerificationError } from "../core/jwt-errors";
+import type { VerifiedJwt } from "../core/verification";
 
 type JwksResolver =
   | ReturnType<typeof createRemoteJWKSet>
@@ -40,7 +40,7 @@ function getOrCreateRemoteJwks(
 ): ReturnType<typeof createRemoteJWKSet> {
   let resolver = remoteJwksCache.get(url);
   if (!resolver) {
-    resolver = createRemoteJWKSet(new URL(url), {cooldownDuration});
+    resolver = createRemoteJWKSet(new URL(url), { cooldownDuration });
     remoteJwksCache.set(url, resolver);
   }
   return resolver;
@@ -55,8 +55,8 @@ async function getOrImportPem(pem: string): Promise<CryptoKey> {
   return key;
 }
 
-function normalizeJwks(value: JwtJwks | {keys: JWK[]}) {
-  return {keys: value.keys as JWK[]};
+function normalizeJwks(value: JwtJwks | { keys: JWK[] }) {
+  return { keys: value.keys as JWK[] };
 }
 
 function extractRawToken(
@@ -73,41 +73,41 @@ function extractRawToken(
   }
 
   if (transport.usesBearer) {
-    if (input.startsWith('Bearer ')) return input.slice(7);
+    if (input.startsWith("Bearer ")) return input.slice(7);
     if (enforceTransport) {
-      throw new JwtTransportError('Unauthorized: Missing Bearer token');
+      throw new JwtTransportError("Unauthorized: Missing Bearer token");
     }
     return input;
   }
 
-  if (enforceTransport && input.startsWith('Bearer ')) {
-    throw new JwtTransportError('Unauthorized: Wrong token transport');
+  if (enforceTransport && input.startsWith("Bearer ")) {
+    throw new JwtTransportError("Unauthorized: Wrong token transport");
   }
 
   return input;
 }
 
 function assertJwtFormat(token: string): void {
-  const parts = token.split('.');
+  const parts = token.split(".");
   if (
     parts.length !== 3 ||
-    parts.some(part => part.length === 0) ||
-    parts.some(part => !/^[A-Za-z0-9_-]+$/.test(part))
+    parts.some((part) => part.length === 0) ||
+    parts.some((part) => !/^[A-Za-z0-9_-]+$/.test(part))
   ) {
-    throw new JwtVerificationError('Unauthorized: Invalid JWT format');
+    throw new JwtVerificationError("Unauthorized: Invalid JWT format");
   }
 }
 
 async function resolveKeySource(
   options: JwtKeySource,
 ): Promise<CryptoKey | KeyObject | Uint8Array | JwksResolver> {
-  if ('jwksUrl' in options) {
+  if ("jwksUrl" in options) {
     return getOrCreateRemoteJwks(options.jwksUrl!);
   }
-  if ('jwks' in options) {
+  if ("jwks" in options) {
     return createLocalJWKSet(normalizeJwks(options.jwks!));
   }
-  if ('verificationKeyPem' in options) {
+  if ("verificationKeyPem" in options) {
     return getOrImportPem(options.verificationKeyPem!);
   }
   return options.verificationKey;
@@ -130,14 +130,14 @@ async function verifyTokenInput<TPayload extends JWTPayload = JWTPayload>(
   try {
     header = decodeProtectedHeader(token);
   } catch (error) {
-    throw new JwtVerificationError('Unauthorized: Invalid JWT format', error);
+    throw new JwtVerificationError("Unauthorized: Invalid JWT format", error);
   }
 
   if (header.alg !== JwtAlgorithm.ES256) {
-    throw new JwtVerificationError('Unauthorized: Invalid token algorithm');
+    throw new JwtVerificationError("Unauthorized: Invalid token algorithm");
   }
-  if ('jwksUrl' in options && !header.kid) {
-    throw new JwtVerificationError('Unauthorized: Missing key id');
+  if ("jwksUrl" in options && !header.kid) {
+    throw new JwtVerificationError("Unauthorized: Missing key id");
   }
 
   const jwtOptions: JWTVerifyOptions = {
@@ -157,9 +157,9 @@ async function verifyTokenInput<TPayload extends JWTPayload = JWTPayload>(
     );
   } catch (error) {
     if (
-      'jwksUrl' in options &&
-      (error as {code?: string} | undefined)?.code ===
-        'ERR_JWKS_NO_MATCHING_KEY'
+      "jwksUrl" in options &&
+      (error as { code?: string } | undefined)?.code ===
+        "ERR_JWKS_NO_MATCHING_KEY"
     ) {
       remoteJwksCache.delete(options.jwksUrl!);
       result = await jwtVerify(
@@ -174,9 +174,9 @@ async function verifyTokenInput<TPayload extends JWTPayload = JWTPayload>(
 
   if (
     options.requiredScope &&
-    !String(result.payload.scope ?? '').includes(options.requiredScope)
+    !String(result.payload.scope ?? "").includes(options.requiredScope)
   ) {
-    throw new JwtVerificationError('Unauthorized: Missing required scope');
+    throw new JwtVerificationError("Unauthorized: Missing required scope");
   }
 
   return {
@@ -199,7 +199,7 @@ export function createRemoteJwksCache(input: {
 export function createJwtVerifier<TPayload extends JWTPayload = JWTPayload>(
   options: JwtVerifyInput,
 ): JwtVerifier<TPayload> {
-  return tokenInput => verifyTokenInput<TPayload>(tokenInput, options);
+  return (tokenInput) => verifyTokenInput<TPayload>(tokenInput, options);
 }
 
 export async function verifyBearerToken<

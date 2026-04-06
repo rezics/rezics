@@ -1,1 +1,1 @@
-export {qc} from '@rezics/app-shell';
+export { qc } from "@rezics/app-shell";

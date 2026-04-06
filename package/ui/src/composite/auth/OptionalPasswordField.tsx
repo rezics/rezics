@@ -1,6 +1,6 @@
-import {Typography} from '@mui/material';
-import type {FC} from 'react';
-import {PasswordField} from '../form/field/PasswordField';
+import { Typography } from "@mui/material";
+import type { FC } from "react";
+import { PasswordField } from "../form/field/PasswordField";
 
 interface OptionalPasswordFieldProps {
   value: string;
@@ -12,7 +12,7 @@ interface OptionalPasswordFieldProps {
 export const OptionalPasswordField: FC<OptionalPasswordFieldProps> = ({
   value,
   setValue,
-  helperText = 'Leave blank if you do not want to set a password yet.',
+  helperText = "Leave blank if you do not want to set a password yet.",
   note,
 }) => {
   return (

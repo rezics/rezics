@@ -1,9 +1,10 @@
-import React, {useEffect, useState} from 'react';
-import {RezicsJsonEditor} from '@rezics/ui/editor';
-import {useQuery} from '@tanstack/react-query';
-import {bookQueries} from '@rezics/api/book/book';
-import {Alert} from '@mui/material';
-import type {ChapterTreeItem} from '@rezics/contract';
+import { Alert } from "@mui/material";
+import { bookQueries } from "@rezics/api/book/book";
+import type { ChapterTreeItem } from "@rezics/contract";
+import { RezicsJsonEditor } from "@rezics/ui/editor";
+import { useQuery } from "@tanstack/react-query";
+import type React from "react";
+import { useEffect, useState } from "react";
 
 /** Props for ChapterTreeJsonEditor component. */
 interface ChapterTreeJsonEditorProps {
@@ -24,9 +25,9 @@ type ChapterTreeJsonData = {
 export const ChapterTreeJsonEditor: React.FC<ChapterTreeJsonEditorProps> = ({
   bookId,
 }) => {
-  const {data, isLoading, error} = useQuery(bookQueries.chapterIndex(bookId));
+  const { data, isLoading, error } = useQuery(bookQueries.chapterIndex(bookId));
 
-  const [jsonData, setJsonData] = useState<ChapterTreeJsonData>({index: []});
+  const [jsonData, setJsonData] = useState<ChapterTreeJsonData>({ index: [] });
 
   useEffect(() => {
     setJsonData({

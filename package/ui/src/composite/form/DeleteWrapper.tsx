@@ -1,6 +1,6 @@
-import React, {useState} from 'react';
-import {Button, type ButtonProps} from '@mui/material';
-import {ConfirmDeleteDialog} from './ConfirmDeleteDialog';
+import { Button, type ButtonProps } from "@mui/material";
+import React, { useState } from "react";
+import { ConfirmDeleteDialog } from "./ConfirmDeleteDialog";
 
 export interface DeleteWrapperProps {
   /** 点击确认后执行的删除逻辑 */
@@ -25,7 +25,7 @@ export const DeleteWrapper: React.FC<DeleteWrapperProps> = ({
   const [open, setOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  const handleTriggerClick: React.MouseEventHandler<any> = event => {
+  const handleTriggerClick: React.MouseEventHandler<any> = (event) => {
     if (disabled) return;
 
     const originalOnClick = (children.props as any).onClick as
@@ -60,7 +60,7 @@ export const DeleteWrapper: React.FC<DeleteWrapperProps> = ({
 
   const trigger = React.cloneElement(children, {
     onClick: handleTriggerClick,
-    ...(disabled !== undefined ? {disabled} : {}),
+    ...(disabled !== undefined ? { disabled } : {}),
   } as any);
 
   return (
@@ -76,12 +76,12 @@ export const DeleteWrapper: React.FC<DeleteWrapperProps> = ({
 };
 
 export interface DeleteButtonProps
-  extends Omit<ButtonProps, 'onClick' | 'children'> {
+  extends Omit<ButtonProps, "onClick" | "children"> {
   /** 点击确认后执行的删除逻辑 */
   onDelete: () => Promise<unknown> | unknown;
   /** 按钮文案，默认“删除” */
   label?: React.ReactNode;
-  variant?: 'contained' | 'outlined';
+  variant?: "contained" | "outlined";
 }
 
 /**
@@ -93,9 +93,9 @@ export interface DeleteButtonProps
  */
 export const DeleteButton: React.FC<DeleteButtonProps> = ({
   onDelete,
-  label = '删除',
+  label = "删除",
   disabled,
-  variant = 'outlined',
+  variant = "outlined",
   ...buttonProps
 }) => {
   return (

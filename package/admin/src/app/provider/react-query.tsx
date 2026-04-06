@@ -1,1 +1,1 @@
-export {ReactQueryProvider} from '@rezics/app-shell';
+export { ReactQueryProvider } from "@rezics/app-shell";

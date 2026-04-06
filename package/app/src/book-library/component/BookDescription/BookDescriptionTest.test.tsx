@@ -1,22 +1,22 @@
-import {useFixtureInput} from 'react-cosmos/client';
-import {faker} from '@faker-js/faker';
-import {BookDescription} from './index';
-import type {BookDescriptionProps} from './types';
-import {useEffect, useState} from 'react';
+import { faker } from "@faker-js/faker";
+import { useEffect, useState } from "react";
+import { useFixtureInput } from "react-cosmos/client";
+import { BookDescription } from "./index";
+import type { BookDescriptionProps } from "./types";
 
 const Fixture = () => {
-  const [description, setDescription] = useState<string>('');
-  const [sentence, setSentence] = useState<string>('');
-  const [paragraph, setParagraph] = useState<string>('');
+  const [description, setDescription] = useState<string>("");
+  const [sentence, setSentence] = useState<string>("");
+  const [paragraph, setParagraph] = useState<string>("");
 
   useEffect(() => {
     // faker 只在组件第一次挂载时生成
-    setDescription(faker.lorem.paragraphs({min: 2, max: 5}));
+    setDescription(faker.lorem.paragraphs({ min: 2, max: 5 }));
     setSentence(faker.lorem.sentence());
     setParagraph(faker.lorem.paragraph());
   }, []);
 
-  const [props] = useFixtureInput<BookDescriptionProps>('Props', {
+  const [props] = useFixtureInput<BookDescriptionProps>("Props", {
     description: description,
   });
 
@@ -43,6 +43,6 @@ const Fixture = () => {
   );
 };
 
-Fixture.displayName = 'BookDescriptionFixture';
+Fixture.displayName = "BookDescriptionFixture";
 
 export default Fixture;

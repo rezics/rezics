@@ -1,11 +1,11 @@
-import { useState, useEffect } from 'react';
-import { Folio } from '@rezics/folio';
-import { createTxtPlugin } from '@rezics/folio/plugin/txt';
-import { WRAPPER_STYLE } from '../../_stubs';
-import { useFileUpload } from '../../_fixture-helpers';
+import { Folio } from "@rezics/folio";
+import { createTxtPlugin } from "@rezics/folio/plugin/txt";
+import { useEffect, useState } from "react";
+import { useFileUpload } from "../../_fixture-helpers";
+import { WRAPPER_STYLE } from "../../_stubs";
 
 function Default() {
-  const { file, FileInput } = useFileUpload('.txt,.text,.md');
+  const { file, FileInput } = useFileUpload(".txt,.text,.md");
   const [text, setText] = useState<string | null>(null);
 
   useEffect(() => {

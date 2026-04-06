@@ -1,12 +1,12 @@
-import FormatQuoteIcon from '@mui/icons-material/FormatQuote';
-import {Avatar, Paper, Typography, Tooltip, IconButton} from '@mui/material';
-import OpenInNewIcon from '@mui/icons-material/OpenInNew';
-import React from 'react';
-import {useTranslation} from 'react-i18next';
+import FormatQuoteIcon from "@mui/icons-material/FormatQuote";
+import OpenInNewIcon from "@mui/icons-material/OpenInNew";
+import { Avatar, IconButton, Paper, Tooltip, Typography } from "@mui/material";
+import { Link } from "@rezics/ui/primitive/link/Link.tsx";
+import { MUILink } from "@rezics/ui/primitive/link/MUILink.tsx";
 
-import {CollapsibleByLineTextContainer} from '@rezics/ui/primitive/typography/collapsible-text/CollapsibleByLineText.tsx';
-import {MUILink} from '@rezics/ui/primitive/link/MUILink.tsx';
-import {Link} from '@rezics/ui/primitive/link/Link.tsx';
+import { CollapsibleByLineTextContainer } from "@rezics/ui/primitive/typography/collapsible-text/CollapsibleByLineText.tsx";
+import type React from "react";
+import { useTranslation } from "react-i18next";
 
 export type SingleQuoteExcerptShowProps = {
   author: {
@@ -31,15 +31,15 @@ export const SingleQuoteExcerptShow: React.FC<SingleQuoteExcerptShowProps> = ({
   source,
   originalLink,
 }) => {
-  const {t} = useTranslation();
+  const { t } = useTranslation();
   return (
     <Paper
       variant="outlined"
       sx={{
         p: 2,
-        position: 'relative',
-        '& .MuiPaper-root': {
-          borderColor: 'divider',
+        position: "relative",
+        "& .MuiPaper-root": {
+          borderColor: "divider",
         },
       }}
     >
@@ -48,7 +48,7 @@ export const SingleQuoteExcerptShow: React.FC<SingleQuoteExcerptShowProps> = ({
           component={MUILink}
           to={originalLink}
           size="small"
-          sx={{position: 'absolute', top: 8, right: 8}}
+          sx={{ position: "absolute", top: 8, right: 8 }}
           aria-label="打开全文"
         >
           <OpenInNewIcon fontSize="small" />
@@ -56,15 +56,15 @@ export const SingleQuoteExcerptShow: React.FC<SingleQuoteExcerptShowProps> = ({
       </Tooltip>
 
       <div className="flex items-center mb-2">
-        <Tooltip title={'打开用户界面'} placement="top-start">
+        <Tooltip title={"打开用户界面"} placement="top-start">
           <Link
             to="/user/$unitId"
-            params={{unitId: author.unitId}}
+            params={{ unitId: author.unitId }}
             className="flex items-center"
           >
             <Avatar
               src={author.avatar}
-              sx={{width: 20, height: 20, mr: 1}}
+              sx={{ width: 20, height: 20, mr: 1 }}
               variant="rounded"
             />
             <Typography variant="subtitle2" fontWeight="bold">
@@ -78,7 +78,7 @@ export const SingleQuoteExcerptShow: React.FC<SingleQuoteExcerptShowProps> = ({
         <FormatQuoteIcon
           sx={{
             fontSize: 30,
-            color: 'text.secondary',
+            color: "text.secondary",
             mr: 1,
             mt: 0.5,
           }}
@@ -88,7 +88,7 @@ export const SingleQuoteExcerptShow: React.FC<SingleQuoteExcerptShowProps> = ({
             component="div"
             variant="body2"
             color="text.primary"
-            sx={{lineHeight: 1.6}}
+            sx={{ lineHeight: 1.6 }}
           >
             <CollapsibleByLineTextContainer content={content} />
           </Typography>

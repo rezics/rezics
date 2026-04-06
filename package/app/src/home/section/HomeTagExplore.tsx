@@ -1,10 +1,11 @@
-import React, {useMemo} from 'react';
-import {useQuery} from '@tanstack/react-query';
-import {Alert, CircularProgress, Typography, Chip} from '@mui/material';
-import {bookQueries} from '@rezics/api/book/book';
-import type {BookDTO} from '@rezics/contract';
-import {useTranslation} from 'react-i18next';
-import {Link} from '@rezics/ui/primitive/link/Link.tsx';
+import { Alert, Chip, CircularProgress, Typography } from "@mui/material";
+import { bookQueries } from "@rezics/api/book/book";
+import type { BookDTO } from "@rezics/contract";
+import { Link } from "@rezics/ui/primitive/link/Link.tsx";
+import { useQuery } from "@tanstack/react-query";
+import type React from "react";
+import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 
 type Book = BookDTO;
 
@@ -23,11 +24,11 @@ export const HomeTagExplore: React.FC<HomeTagExploreProps> = ({
   limit = 60,
   maxTags = 18,
 }) => {
-  const {t} = useTranslation();
-  const resolvedTitle = title ?? t('page.home.sections.tag_explore');
+  const { t } = useTranslation();
+  const resolvedTitle = title ?? t("page.home.sections.tag_explore");
 
-  const {data, isLoading, error} = useQuery(
-    bookQueries.list({start: 0, limit}),
+  const { data, isLoading, error } = useQuery(
+    bookQueries.list({ start: 0, limit }),
   );
 
   const tags = useMemo(() => {
@@ -62,8 +63,8 @@ export const HomeTagExplore: React.FC<HomeTagExploreProps> = ({
         {isLoading && <CircularProgress size={20} />}
       </div>
       <div className="flex flex-wrap gap-2">
-        {tags.map(tag => (
-          <Link key={tag} to="/book" search={{tags: tag}}>
+        {tags.map((tag) => (
+          <Link key={tag} to="/book" search={{ tags: tag }}>
             <Chip label={tag} clickable variant="outlined" />
           </Link>
         ))}

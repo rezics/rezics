@@ -1,9 +1,9 @@
-import 'dotenv/config';
-import {env} from '../env';
+import "dotenv/config";
+import { env } from "../env";
 
 interface TurnstileResponse {
   success: boolean;
-  'error-codes'?: string[];
+  "error-codes"?: string[];
   challenge_ts?: string;
   hostname?: string;
   action?: string;
@@ -13,17 +13,17 @@ interface TurnstileResponse {
 export async function verifyTurnstileToken(
   token: string,
 ): Promise<TurnstileResponse> {
-  if (!token) return {success: false};
+  if (!token) return { success: false };
 
   const params = new URLSearchParams();
-  const secret = env.TURNSTILE_SECRET ?? '';
-  params.append('secret', secret);
-  params.append('response', token);
+  const secret = env.TURNSTILE_SECRET ?? "";
+  params.append("secret", secret);
+  params.append("response", token);
 
   const resp: any = await fetch(
-    'https://challenges.cloudflare.com/turnstile/v0/siteverify',
+    "https://challenges.cloudflare.com/turnstile/v0/siteverify",
     {
-      method: 'POST',
+      method: "POST",
       body: params,
     },
   );

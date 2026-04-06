@@ -1,2 +1,2 @@
-export {JwtServiceTable} from './JwtServiceTable';
-export {JwtServiceEditDialog} from './JwtServiceEditDialog';
+export { JwtServiceEditDialog } from "./JwtServiceEditDialog";
+export { JwtServiceTable } from "./JwtServiceTable";

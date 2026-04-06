@@ -1,18 +1,18 @@
+import type { AuthProvider } from "@rezics/contract";
 import {
   GithubIcon,
   GoogleIcon,
+  MicrosoftIcon,
   TelegramIcon,
   XIcon,
-  MicrosoftIcon,
-} from '@rezics/icons';
-import type {AuthProvider} from '@rezics/contract';
-import type {ComponentType} from 'react';
+} from "@rezics/icons";
+import type { ComponentType } from "react";
 
-type IconProps = {size?: number; className?: string};
+type IconProps = { size?: number; className?: string };
 
 // TODO: replace with proper branded/colored SVG icons
 export const providerIcons: Record<
-  AuthProvider['id'],
+  AuthProvider["id"],
   ComponentType<IconProps>
 > = {
   google: GoogleIcon,

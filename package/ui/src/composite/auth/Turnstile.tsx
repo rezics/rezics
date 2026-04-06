@@ -1,4 +1,5 @@
-import React, {useEffect, useRef, useState} from 'react';
+import type React from "react";
+import { useEffect, useRef, useState } from "react";
 
 declare global {
   interface Window {
@@ -42,21 +43,21 @@ export function Turnstile({
   }
 
   useEffect(() => {
-    const scriptId = 'cf-turnstile-script';
+    const scriptId = "cf-turnstile-script";
     let mounted = true;
 
     if (!document.getElementById(scriptId)) {
-      const script = document.createElement('script');
-      script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
+      const script = document.createElement("script");
+      script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js";
       script.async = true;
       script.defer = true;
       script.id = scriptId;
-      script.crossOrigin = 'anonymous';
+      script.crossOrigin = "anonymous";
       script.onerror = () => {
         if (!mounted) {
           return;
         }
-        onError?.(new Error('Failed to load Turnstile widget.'));
+        onError?.(new Error("Failed to load Turnstile widget."));
       };
       document.body.appendChild(script);
     }
@@ -75,7 +76,7 @@ export function Turnstile({
 
     const timeout = window.setTimeout(() => {
       if (!widgetIdRef.current && mounted) {
-        onError?.(new Error('Turnstile widget did not initialize in time.'));
+        onError?.(new Error("Turnstile widget did not initialize in time."));
       }
     }, initTimeoutMs);
 
@@ -87,12 +88,12 @@ export function Turnstile({
         try {
           window.turnstile.remove(widgetIdRef.current);
         } catch {
-          onError?.(new Error('Error removing Turnstile widget'));
+          onError?.(new Error("Error removing Turnstile widget"));
         }
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [options, initTimeoutMs, siteKeyProps, onReady, onError, handleVerify]);
 
   return (
     <div>

@@ -1,8 +1,8 @@
-import {useFixtureInput} from 'react-cosmos/client';
-import {ChapterList} from './ChapterList';
-import {useEffect, useState} from 'react';
-import {generateChapterTree} from '@/mock/data/generateChapterTree';
-import type {ChapterListProps} from './ChapterList';
+import { useEffect, useState } from "react";
+import { useFixtureInput } from "react-cosmos/client";
+import { generateChapterTree } from "@/mock/data/generateChapterTree";
+import type { ChapterListProps } from "./ChapterList";
+import { ChapterList } from "./ChapterList";
 
 const Fixture = () => {
   const [_data, setData] = useState<any>(null);
@@ -11,8 +11,8 @@ const Fixture = () => {
     setData(generateChapterTree());
   }, []);
 
-  const [props] = useFixtureInput<ChapterListProps>('Props', {
-    id: '1',
+  const [props] = useFixtureInput<ChapterListProps>("Props", {
+    id: "1",
   });
 
   return (
@@ -22,6 +22,6 @@ const Fixture = () => {
   );
 };
 
-Fixture.displayName = 'ChapterListFixture';
+Fixture.displayName = "ChapterListFixture";
 
 export default Fixture;

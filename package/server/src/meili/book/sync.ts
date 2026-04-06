@@ -1,15 +1,15 @@
-import {prisma} from '#/prisma/client';
-import type {Tag, User} from '#/prisma/client';
-import {searchClient} from '../search-client';
-import type {BookSearchDocument} from './index';
-import {bookInclude} from '../../book/types';
+import type { Tag, User } from "#/prisma/client";
+import { prisma } from "#/prisma/client";
+import { bookInclude } from "../../book/types";
+import { searchClient } from "../search-client";
+import type { BookSearchDocument } from "./index";
 
 /**
  * Sync a single book (by its unitId) into the Meilisearch `books` index.
  */
 export async function syncBookToMeili(unitId: string): Promise<void> {
   const book = await prisma.book.findUnique({
-    where: {unitId},
+    where: { unitId },
     include: bookInclude,
   });
 

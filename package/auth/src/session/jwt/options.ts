@@ -1,10 +1,10 @@
-import {env} from '../../env';
-import {JwtAlgorithm, type JwtIssuerDescriptor} from '@rezics/jwt';
+import { JwtAlgorithm, type JwtIssuerDescriptor } from "@rezics/jwt";
+import { env } from "../../env";
 
-export const authJwtLocalServiceKey = 'auth-local';
+export const authJwtLocalServiceKey = "auth-local";
 
 export function getAuthJwtAudience() {
-  return env.AUTH_JWT_AUDIENCE ?? 'rezics';
+  return env.AUTH_JWT_AUDIENCE ?? "rezics";
 }
 
 export function getAuthJwtIssuer() {
@@ -12,7 +12,7 @@ export function getAuthJwtIssuer() {
 }
 
 export function getAuthJwtTtlSeconds() {
-  return Number(env.AUTH_JWT_TTL_SECONDS ?? '3600');
+  return Number(env.AUTH_JWT_TTL_SECONDS ?? "3600");
 }
 
 export function getAuthJwksRotationIntervalSeconds() {
@@ -28,7 +28,7 @@ export function getAuthJwksGracePeriodSeconds() {
 }
 
 export function getAuthSessionJwksPath() {
-  return `${env.AUTH_OPENAPI_ROUTER_PREFIX ?? '/api/auth'}/session/jwks`;
+  return `${env.AUTH_OPENAPI_ROUTER_PREFIX ?? "/api/auth"}/session/jwks`;
 }
 
 export function getAuthSessionJwksUrl() {

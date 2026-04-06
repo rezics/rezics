@@ -2,10 +2,10 @@
  * React Query configurations for Readlist queries
  */
 
-import {queryOptions, infiniteQueryOptions} from '@tanstack/react-query';
-import {readlistApi} from './readlist.api';
-import {readlistKeys} from './readlist.keys';
-import type {ReadlistFilters} from './readlist.types';
+import { infiniteQueryOptions, queryOptions } from "@tanstack/react-query";
+import { readlistApi } from "./readlist.api";
+import { readlistKeys } from "./readlist.keys";
+import type { ReadlistFilters } from "./readlist.types";
 
 /**
  * Query options for listing readlists
@@ -57,15 +57,15 @@ export const readlistsByUserQuery = (
  * Uses offset-like start pagination (same as books)
  */
 export const readlistInfiniteListQuery = (
-  filters?: Omit<ReadlistFilters, 'page'>,
+  filters?: Omit<ReadlistFilters, "page">,
 ) =>
   infiniteQueryOptions({
     queryKey: readlistKeys.list(filters),
-    queryFn: ({pageParam = 1}) =>
-      readlistApi.list({...filters, start: pageParam}),
+    queryFn: ({ pageParam = 1 }) =>
+      readlistApi.list({ ...filters, start: pageParam }),
     initialPageParam: 1,
     getNextPageParam: (lastPage, allPages, lastPageParam) => {
-      const {readlists, total} = lastPage;
+      const { readlists, total } = lastPage;
       const limit = filters?.limit || 20;
       const hasMore =
         readlists.length === limit && allPages.length * limit < (total || 0);

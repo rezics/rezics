@@ -1,5 +1,5 @@
-import {Elysia} from 'elysia';
+import { Elysia } from "elysia";
 
 export function coreInstance(prefix: string) {
-  return new Elysia({prefix: prefix});
+  return new Elysia({ prefix: prefix });
 }

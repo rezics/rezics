@@ -1,11 +1,11 @@
-import { Prec } from '@codemirror/state';
-import { keymap, type KeyBinding } from '@codemirror/view';
 import {
   defaultKeymap,
   history,
   historyKeymap,
   indentWithTab,
-} from '@codemirror/commands';
+} from "@codemirror/commands";
+import { Prec } from "@codemirror/state";
+import { type KeyBinding, keymap } from "@codemirror/view";
 
 export function mergeKeybindings(
   consumerBindings: KeyBinding[],

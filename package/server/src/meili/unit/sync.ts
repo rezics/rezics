@@ -1,33 +1,32 @@
-import {prisma} from '#/prisma/client';
-import {searchClient} from '../search-client';
-import type {UnitSearchDocument} from '@rezics/contract';
-import {UnitType} from '#/prisma/client';
+import type { UnitSearchDocument } from "@rezics/contract";
+import { prisma, UnitType } from "#/prisma/client";
+import { searchClient } from "../search-client";
 
 export async function syncUnitToMeili(unitId: string): Promise<void> {
   const unit = await prisma.unit.findUnique({
-    where: {id: unitId},
+    where: { id: unitId },
     include: {
       user: true,
       tags: true,
       reactionSummaries: true,
       domains: {
-        select: {id: true},
+        select: { id: true },
       },
     },
   });
 
   if (!unit) return;
 
-  let doc: UnitSearchDocument = {
+  const doc: UnitSearchDocument = {
     id: unit.id,
     // search fields
-    title: unit.title ?? '',
-    content: unit.content ?? '',
-    tags: unit.tags ? unit.tags.map(t => t.name) : [],
-    type: unit.type ?? '',
-    status: unit.status ?? '',
-    userId: unit.userId ?? '',
-    domainIds: unit.domains ? unit.domains.map(d => d.id) : [],
+    title: unit.title ?? "",
+    content: unit.content ?? "",
+    tags: unit.tags ? unit.tags.map((t) => t.name) : [],
+    type: unit.type ?? "",
+    status: unit.status ?? "",
+    userId: unit.userId ?? "",
+    domainIds: unit.domains ? unit.domains.map((d) => d.id) : [],
     targetUnitId: unit.targetUnitId,
     hasTarget: unit.targetUnitId !== null,
     nsfw: unit.nsfw,
@@ -45,7 +44,7 @@ export async function syncUnitToMeili(unitId: string): Promise<void> {
     const bookId = unit.targetUnitId;
     if (bookId) {
       const book = await prisma.book.findUnique({
-        where: {unitId: bookId},
+        where: { unitId: bookId },
       });
       const bookMetadata = book
         ? {

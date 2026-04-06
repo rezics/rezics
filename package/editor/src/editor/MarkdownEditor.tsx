@@ -1,29 +1,29 @@
-import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
-import {EditorContext} from '../react/context';
-import {useEditor} from '../react/useEditor';
-import {languages} from '@codemirror/language-data';
-import {markdown} from '../markdown/core/index';
-import {mention} from '../markdown/mention/index';
-import {emoji} from '../markdown/emoji/index';
-import {resolvePlugins} from '../core/plugin';
-import {fixedHeightEditor} from '../core/fixedHeight';
-import {ReactToolbar} from '../toolbar/react/index';
-import {markdownIconMap} from './toolbar-defaults';
-import {applyIconDefaults, applyToolbarOverrides} from './toolbar-utils';
-import {createNovelRenderer} from '../markdown/preview/index';
-import {highlightCode} from '../markdown/preview/highlight';
-import {addCopyButtons} from '../markdown/preview/copyButton';
-import type {EditorPlugin} from '../core/types';
-import type {ToolbarEntry} from '../toolbar/types';
-import {ResizableWrapper} from '../react/ResizableWrapper';
-import {useScrollSync} from '../react/useScrollSync';
-import type {MarkdownEditorProps} from './types';
-import type {PreviewConfig} from '../markdown/preview/index';
-import './MarkdownEditor.css';
+import { languages } from "@codemirror/language-data";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { fixedHeightEditor } from "../core/fixedHeight";
+import { resolvePlugins } from "../core/plugin";
+import type { EditorPlugin } from "../core/types";
+import { markdown } from "../markdown/core/index";
+import { emoji } from "../markdown/emoji/index";
+import { mention } from "../markdown/mention/index";
+import { addCopyButtons } from "../markdown/preview/copyButton";
+import { highlightCode } from "../markdown/preview/highlight";
+import type { PreviewConfig } from "../markdown/preview/index";
+import { createNovelRenderer } from "../markdown/preview/index";
+import { EditorContext } from "../react/context";
+import { ResizableWrapper } from "../react/ResizableWrapper";
+import { useEditor } from "../react/useEditor";
+import { useScrollSync } from "../react/useScrollSync";
+import { ReactToolbar } from "../toolbar/react/index";
+import type { ToolbarEntry } from "../toolbar/types";
+import { markdownIconMap } from "./toolbar-defaults";
+import { applyIconDefaults, applyToolbarOverrides } from "./toolbar-utils";
+import type { MarkdownEditorProps } from "./types";
+import "./MarkdownEditor.css";
 
-export type {MarkdownEditorProps};
+export type { MarkdownEditorProps };
 
-type ViewMode = 'write' | 'preview' | 'dual';
+type ViewMode = "write" | "preview" | "dual";
 
 function createMarkdownRenderer(config?: PreviewConfig) {
   const highlighter =
@@ -31,7 +31,7 @@ function createMarkdownRenderer(config?: PreviewConfig) {
       ? undefined
       : (config?.highlight ?? highlightCode);
 
-  return createNovelRenderer({html: true, highlight: highlighter});
+  return createNovelRenderer({ html: true, highlight: highlighter });
 }
 
 export function MarkdownEditor({
@@ -48,20 +48,20 @@ export function MarkdownEditor({
   resize,
   viewRef,
 }: MarkdownEditorProps) {
-  const [viewMode, setViewMode] = useState<ViewMode>('write');
+  const [viewMode, setViewMode] = useState<ViewMode>("write");
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [liveContent, setLiveContent] = useState(value ?? '');
+  const [liveContent, setLiveContent] = useState(value ?? "");
   const previewRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLDivElement>(null);
   const [headerHeight, setHeaderHeight] = useState(0);
 
   const previewConfig = useMemo(
-    () => (typeof preview === 'object' ? preview : undefined),
+    () => (typeof preview === "object" ? preview : undefined),
     [preview],
   );
 
   useEffect(() => {
-    setLiveContent(value ?? '');
+    setLiveContent(value ?? "");
   }, [value]);
 
   const handleChange = useCallback(
@@ -78,7 +78,7 @@ export function MarkdownEditor({
   );
 
   const allPlugins = useMemo(() => {
-    const plugins: EditorPlugin[] = [markdown({codeLanguages: languages})];
+    const plugins: EditorPlugin[] = [markdown({ codeLanguages: languages })];
 
     if (mentionConfig) {
       plugins.push(mention(mentionConfig));
@@ -100,47 +100,47 @@ export function MarkdownEditor({
     const withIcons = applyIconDefaults(resolved, markdownIconMap);
     const items = applyToolbarOverrides(withIcons, toolbar);
 
-    const textGroup = ['bold', 'italic', 'heading'];
-    const blockGroup = ['blockquote', 'unordered-list', 'ordered-list'];
-    const insertGroup = ['link', 'image', 'table', 'code-block'];
+    const textGroup = ["bold", "italic", "heading"];
+    const blockGroup = ["blockquote", "unordered-list", "ordered-list"];
+    const insertGroup = ["link", "image", "table", "code-block"];
     const groups = [textGroup, blockGroup, insertGroup];
 
     const entries: ToolbarEntry[] = [];
 
     for (const group of groups) {
       const groupItems = group
-        .map(name => items.find(item => item.name === name))
+        .map((name) => items.find((item) => item.name === name))
         .filter(Boolean) as typeof items;
 
       if (groupItems.length === 0) continue;
-      if (entries.length > 0) entries.push('|');
+      if (entries.length > 0) entries.push("|");
       entries.push(...groupItems);
     }
 
     const knownNames = new Set(groups.flat());
-    const remaining = items.filter(item => !knownNames.has(item.name));
+    const remaining = items.filter((item) => !knownNames.has(item.name));
 
     if (remaining.length > 0) {
-      if (entries.length > 0) entries.push('|');
+      if (entries.length > 0) entries.push("|");
       entries.push(...remaining);
     }
 
     if (preview) {
-      if (entries.length > 0) entries.push('|');
+      if (entries.length > 0) entries.push("|");
       entries.push(
         {
-          name: 'dual-column',
-          label: 'Dual column',
-          icon: markdownIconMap['dual-column'],
+          name: "dual-column",
+          label: "Dual column",
+          icon: markdownIconMap["dual-column"],
           action: () =>
-            setViewMode(mode => (mode === 'dual' ? 'write' : 'dual')),
-          isActive: () => viewMode === 'dual',
+            setViewMode((mode) => (mode === "dual" ? "write" : "dual")),
+          isActive: () => viewMode === "dual",
         },
         {
-          name: 'fullscreen',
-          label: 'Fullscreen',
+          name: "fullscreen",
+          label: "Fullscreen",
           icon: markdownIconMap.fullscreen,
-          action: () => setIsFullscreen(value => !value),
+          action: () => setIsFullscreen((value) => !value),
         },
       );
     }
@@ -153,7 +153,7 @@ export function MarkdownEditor({
     [resize],
   );
 
-  const {containerRef, view} = useEditor({
+  const { containerRef, view } = useEditor({
     doc: value,
     plugins: allPlugins,
     keybindings,
@@ -181,7 +181,7 @@ export function MarkdownEditor({
   }, []);
 
   useEffect(() => {
-    if (viewMode === 'write' || !previewRef.current) return;
+    if (viewMode === "write" || !previewRef.current) return;
 
     previewRef.current.innerHTML = md.render(liveContent);
     addCopyButtons(previewRef.current);
@@ -191,11 +191,11 @@ export function MarkdownEditor({
     if (!isFullscreen) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setIsFullscreen(false);
+      if (e.key === "Escape") setIsFullscreen(false);
     };
 
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
   }, [isFullscreen]);
 
   const hasCustomRender = toolbar !== false && toolbar?.render != null;
@@ -203,9 +203,9 @@ export function MarkdownEditor({
     toolbar !== false && !hasCustomRender && toolbarEntries.length > 0;
 
   const useResize = Boolean(resize) && !isFullscreen;
-  const isDual = viewMode === 'dual';
-  const showEditorPane = viewMode !== 'preview';
-  const showPreviewPane = Boolean(preview) && viewMode !== 'write';
+  const isDual = viewMode === "dual";
+  const showEditorPane = viewMode !== "preview";
+  const showPreviewPane = Boolean(preview) && viewMode !== "write";
 
   const adjustedResize = useMemo(() => {
     if (!resize || !headerHeight) return resize;
@@ -217,51 +217,51 @@ export function MarkdownEditor({
   }, [resize, headerHeight]);
 
   const containerStyle: React.CSSProperties = useResize
-    ? {display: 'flex', flexDirection: 'column', height: '100%'}
+    ? { display: "flex", flexDirection: "column", height: "100%" }
     : isFullscreen
       ? {
-          position: 'fixed',
+          position: "fixed",
           inset: 0,
           zIndex: 9999,
-          background: '#fff',
-          display: 'flex',
-          flexDirection: 'column',
+          background: "#fff",
+          display: "flex",
+          flexDirection: "column",
         }
-      : {display: 'flex', flexDirection: 'column'};
+      : { display: "flex", flexDirection: "column" };
 
   const contentStyle: React.CSSProperties = {
     flex: 1,
-    display: 'flex',
+    display: "flex",
     minHeight: 0,
     minWidth: 0,
-    overflow: 'hidden',
+    overflow: "hidden",
   };
 
   const editorPaneStyle: React.CSSProperties = {
-    display: showEditorPane ? 'block' : 'none',
+    display: showEditorPane ? "block" : "none",
     flex: 1,
     minHeight: 0,
     minWidth: 0,
     borderRight: isDual
-      ? '1px solid var(--editor-border-color, #d0d7de)'
+      ? "1px solid var(--editor-border-color, #d0d7de)"
       : undefined,
   };
 
   const previewPaneStyle: React.CSSProperties = {
-    display: showPreviewPane ? 'block' : 'none',
+    display: showPreviewPane ? "block" : "none",
     flex: 1,
     minHeight: 0,
     minWidth: 0,
-    overflow: 'auto',
+    overflow: "auto",
   };
 
   const rootClasses = [
-    'md-editor-root',
-    useResize && 'md-editor-root--resize',
+    "md-editor-root",
+    useResize && "md-editor-root--resize",
     !useResize && className,
   ]
     .filter(Boolean)
-    .join(' ');
+    .join(" ");
 
   const editorContent = (
     <div className={rootClasses} style={containerStyle}>
@@ -272,8 +272,8 @@ export function MarkdownEditor({
               type="button"
               className="md-editor-tab"
               data-tab="write"
-              data-active={viewMode === 'write'}
-              onClick={() => setViewMode('write')}
+              data-active={viewMode === "write"}
+              onClick={() => setViewMode("write")}
             >
               Write
             </button>
@@ -281,8 +281,8 @@ export function MarkdownEditor({
               type="button"
               className="md-editor-tab"
               data-tab="preview"
-              data-active={viewMode === 'preview'}
-              onClick={() => setViewMode('preview')}
+              data-active={viewMode === "preview"}
+              onClick={() => setViewMode("preview")}
             >
               Preview
             </button>
@@ -293,10 +293,10 @@ export function MarkdownEditor({
           {hasCustomRender &&
             view &&
             toolbar!.render!(
-              toolbarEntries.filter(entry => entry !== '|') as any,
+              toolbarEntries.filter((entry) => entry !== "|") as any,
               view,
             )}
-          {showDefaultToolbar && viewMode !== 'preview' && (
+          {showDefaultToolbar && viewMode !== "preview" && (
             <ReactToolbar items={toolbarEntries} />
           )}
         </div>

@@ -1,14 +1,14 @@
-import type {UnitDTO} from '@rezics/contract';
+import type { UnitDTO } from "@rezics/contract";
 
 export function buildUnitUrl(unit: UnitDTO): string {
   switch (unit.type) {
-    case 'BOOK':
+    case "BOOK":
       return `/book/${unit.id}`;
-    case 'REVIEW':
+    case "REVIEW":
       return `/review/${unit.id}`;
-    case 'QUOTE':
+    case "QUOTE":
       return `/quote/${unit.id}`;
-    case 'READLIST':
+    case "READLIST":
       return `/readlist/${unit.id}`;
     default:
       return `/unit/${unit.id}`;

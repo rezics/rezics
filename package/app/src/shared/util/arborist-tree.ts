@@ -1,6 +1,6 @@
-import * as Array from 'effect/Array';
-import {pipe} from 'effect/Function';
-import * as Option from 'effect/Option';
+import * as Array from "effect/Array";
+import { pipe } from "effect/Function";
+import * as Option from "effect/Option";
 
 export interface BaseNode {
   id: string | number;
@@ -38,12 +38,12 @@ const insertAt =
   };
 
 // 辅助函数：深拷贝节点（避免引用共享）
-const cloneNode = (node: TreeNode): TreeNode => {
-  const {children, ...rest} = node;
+const _cloneNode = (node: TreeNode): TreeNode => {
+  const { children, ...rest } = node;
   if (children) {
-    return {...rest, id: node.id, children: children.map(cloneNode)};
+    return { ...rest, id: node.id, children: children.map(_cloneNode) };
   }
-  return {...rest, id: node.id};
+  return { ...rest, id: node.id };
 };
 
 /**
@@ -61,7 +61,7 @@ export function findAndRemove(
   ids: (string | number)[],
   removed: TreeNode[],
 ): any[] {
-  return tree.filter(node => {
+  return tree.filter((node) => {
     const currentNodeId = String(node.id);
     if (ids.includes(currentNodeId)) {
       removed.push(JSON.parse(JSON.stringify(node)));
@@ -97,7 +97,7 @@ export function findAndInsert(
     return next;
   }
 
-  return tree.map(node => {
+  return tree.map((node) => {
     if (node.id === parentId) {
       const children = node.children ? [...node.children] : [];
       children.splice(index, 0, ...nodes);
@@ -129,11 +129,11 @@ export const findAndEdit = (
 ): TreeNode[] => {
   const processNode = (node: TreeNode): TreeNode => {
     if (idsEqual(node.id, id)) {
-      return {...node, title: newName} as TreeNode;
+      return { ...node, title: newName } as TreeNode;
     }
 
     if (node.children) {
-      return {...node, children: node.children.map(processNode)};
+      return { ...node, children: node.children.map(processNode) };
     }
 
     return node;
@@ -161,7 +161,7 @@ export const findAndDelete = (
         Array.filter(shouldKeep),
         Array.map(processNode),
       );
-      return {...node, children: filteredChildren};
+      return { ...node, children: filteredChildren };
     }
     return node;
   };
@@ -180,11 +180,11 @@ export const findAndAddChild = (
   const processNode = (node: TreeNode): TreeNode => {
     if (idsEqual(node.id, parentId)) {
       const children = node.children ? [...node.children, newNode] : [newNode];
-      return {...node, children};
+      return { ...node, children };
     }
 
     if (node.children) {
-      return {...node, children: node.children.map(processNode)};
+      return { ...node, children: node.children.map(processNode) };
     }
 
     return node;
@@ -210,9 +210,9 @@ export const insertSiblingAfter = (
       findNodeIndex([...nodes], targetId),
       Option.match({
         onNone: () =>
-          nodes.map(node =>
+          nodes.map((node) =>
             node.children
-              ? {...node, children: processNodes(node.children)}
+              ? { ...node, children: processNodes(node.children) }
               : node,
           ),
         onSome: (index: number) => {
@@ -228,10 +228,10 @@ export const insertSiblingAfter = (
 
 export function attachFirstOrphanToParent(treeData: any[], parentId: string) {
   // Deep clone
-  const data = treeData.map(n => ({...n}));
+  const data = treeData.map((n) => ({ ...n }));
 
   const orphanIndex = data.findIndex(
-    n =>
+    (n) =>
       !n.parentId &&
       (!n.children || n.children.length === 0) &&
       n.id !== parentId,
@@ -240,7 +240,7 @@ export function attachFirstOrphanToParent(treeData: any[], parentId: string) {
   if (orphanIndex === -1) return data;
 
   const orphan = data[orphanIndex];
-  const parent = data.find(n => n.id === parentId);
+  const parent = data.find((n) => n.id === parentId);
 
   if (!parent) return data;
 
@@ -270,9 +270,9 @@ export const moveSiblingFirst = (
       findNodeIndex([...nodes], targetId),
       Option.match({
         onNone: () =>
-          nodes.map(node =>
+          nodes.map((node) =>
             node.children
-              ? {...node, children: processNodes(node.children)}
+              ? { ...node, children: processNodes(node.children) }
               : node,
           ),
         onSome: (index: number) => {
@@ -307,9 +307,9 @@ export const moveSiblingLast = (
       findNodeIndex([...nodes], targetId),
       Option.match({
         onNone: () =>
-          nodes.map(node =>
+          nodes.map((node) =>
             node.children
-              ? {...node, children: processNodes(node.children)}
+              ? { ...node, children: processNodes(node.children) }
               : node,
           ),
         onSome: (index: number) => {

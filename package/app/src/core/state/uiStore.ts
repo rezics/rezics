@@ -1,6 +1,6 @@
-import * as Array from 'effect/Array';
-import {pipe} from 'effect/Function';
-import {create} from 'zustand';
+import * as Array from "effect/Array";
+import { pipe } from "effect/Function";
+import { create } from "zustand";
 
 interface UIState {
   // 状态
@@ -34,7 +34,7 @@ const stateUtils = {
   removeNotification:
     (index: number) =>
     (notifications: ReadonlyArray<string>): ReadonlyArray<string> =>
-      pipe(notifications, arr => arr.filter((_, i) => i !== index)),
+      pipe(notifications, (arr) => arr.filter((_, i) => i !== index)),
 
   /**
    * 清空通知数组
@@ -47,27 +47,27 @@ const stateUtils = {
   toggle: (value: boolean): boolean => !value,
 };
 
-export const useUiStore = create<UIState>(set => ({
+export const useUiStore = create<UIState>((set) => ({
   // 初始状态
   sidebarOpen: true,
-  currentPage: 'home',
+  currentPage: "home",
   notifications: [],
 
   // Actions
   toggleSidebar: () =>
-    set(state => ({
+    set((state) => ({
       sidebarOpen: stateUtils.toggle(state.sidebarOpen),
     })),
 
-  setCurrentPage: page => set(state => ({...state, currentPage: page})),
+  setCurrentPage: (page) => set((state) => ({ ...state, currentPage: page })),
 
-  addNotification: message =>
-    set(state => ({
+  addNotification: (message) =>
+    set((state) => ({
       notifications: stateUtils.addNotification(message)(state.notifications),
     })),
 
-  removeNotification: index =>
-    set(state => ({
+  removeNotification: (index) =>
+    set((state) => ({
       notifications: stateUtils.removeNotification(index)(state.notifications),
     })),
 

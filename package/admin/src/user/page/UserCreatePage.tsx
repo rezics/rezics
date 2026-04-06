@@ -1,5 +1,5 @@
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import SaveIcon from '@mui/icons-material/Save';
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import SaveIcon from "@mui/icons-material/Save";
 import {
   Alert,
   Box,
@@ -10,28 +10,27 @@ import {
   Stack,
   TextField,
   Typography,
-} from '@mui/material';
-import React from 'react';
-import {useNavigate} from '@tanstack/react-router';
+} from "@mui/material";
+import { userMutations } from "@rezics/api/user/user.mutations";
+import { Link } from "@rezics/ui/primitive/link/Link.tsx";
+import { useNavigate } from "@tanstack/react-router";
+import React from "react";
 
-import {Link} from '@rezics/ui/primitive/link/Link.tsx';
-import {userMutations} from '@rezics/api/user/user.mutations';
-
-import {Page} from '@/core/layout/Page';
+import { Page } from "@/core/layout/Page";
 
 export default function UserCreatePage() {
   const navigate = useNavigate();
 
-  const [email, setEmail] = React.useState('');
-  const [password, setPassword] = React.useState('');
-  const [slug, setSlug] = React.useState('');
-  const [avatar, setAvatar] = React.useState('');
-  const [bio, setBio] = React.useState('');
+  const [email, setEmail] = React.useState("");
+  const [password, setPassword] = React.useState("");
+  const [slug, setSlug] = React.useState("");
+  const [avatar, setAvatar] = React.useState("");
+  const [bio, setBio] = React.useState("");
   const [error, setError] = React.useState<string | null>(null);
 
   const createMutation = userMutations.useAdminCreate({
-    onError: err =>
-      setError(err instanceof Error ? err.message : 'Create failed'),
+    onError: (err) =>
+      setError(err instanceof Error ? err.message : "Create failed"),
   });
 
   async function onSubmit(e: React.FormEvent) {
@@ -44,14 +43,14 @@ export default function UserCreatePage() {
       avatar: avatar.trim() || undefined,
       bio: bio.trim() || undefined,
     } as any);
-    await navigate({to: `/users/${user.unitId}`, replace: true});
+    await navigate({ to: `/users/${user.unitId}`, replace: true });
   }
 
   return (
     <Page title="Create User" description="创建一个新用户（Admin）">
       <Card>
         <CardContent>
-          <Stack direction="row" spacing={1} alignItems="center" sx={{mb: 1}}>
+          <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
             <Button
               component={Link}
               to="/users"
@@ -60,13 +59,13 @@ export default function UserCreatePage() {
             >
               Back
             </Button>
-            <Box sx={{flex: 1}} />
+            <Box sx={{ flex: 1 }} />
           </Stack>
 
-          <Divider sx={{my: 2}} />
+          <Divider sx={{ my: 2 }} />
 
           {error ? (
-            <Alert severity="error" sx={{mb: 2}}>
+            <Alert severity="error" sx={{ mb: 2 }}>
               {error}
             </Alert>
           ) : null}
@@ -76,14 +75,14 @@ export default function UserCreatePage() {
               <TextField
                 label="Email"
                 value={email}
-                onChange={e => setEmail(e.target.value)}
+                onChange={(e) => setEmail(e.target.value)}
                 required
                 type="email"
               />
               <TextField
                 label="Password"
                 value={password}
-                onChange={e => setPassword(e.target.value)}
+                onChange={(e) => setPassword(e.target.value)}
                 required
                 type="password"
                 helperText="至少 6 位"
@@ -91,19 +90,19 @@ export default function UserCreatePage() {
               <TextField
                 label="Slug (username)"
                 value={slug}
-                onChange={e => setSlug(e.target.value)}
+                onChange={(e) => setSlug(e.target.value)}
                 required
                 helperText="5+ chars, letters/numbers, may include - _"
               />
               <TextField
                 label="Avatar URL"
                 value={avatar}
-                onChange={e => setAvatar(e.target.value)}
+                onChange={(e) => setAvatar(e.target.value)}
               />
               <TextField
                 label="Bio"
                 value={bio}
-                onChange={e => setBio(e.target.value)}
+                onChange={(e) => setBio(e.target.value)}
                 multiline
                 minRows={3}
               />
@@ -115,7 +114,7 @@ export default function UserCreatePage() {
                   startIcon={<SaveIcon />}
                   disabled={createMutation.isPending}
                 >
-                  {createMutation.isPending ? 'Creating…' : 'Create'}
+                  {createMutation.isPending ? "Creating…" : "Create"}
                 </Button>
               </Box>
               <Typography variant="caption" color="text.secondary">

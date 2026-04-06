@@ -4,16 +4,15 @@
  */
 
 import type {
-  CreateBookInput,
-  UpdateBookInput,
   BookListResponse,
   BookResponse,
   ChapterIndexResponse,
-} from '@rezics/contract';
-import type {BookFilters} from './book.types';
-import {buildQueryString} from '../utils/buildQuery';
-
-import {apiFetch} from '../react-query/http';
+  CreateBookInput,
+  UpdateBookInput,
+} from "@rezics/contract";
+import { apiFetch } from "../react-query/http";
+import { buildQueryString } from "../utils/buildQuery";
+import type { BookFilters } from "./book.types";
 
 type Rating = {
   unitId: string;
@@ -65,7 +64,7 @@ export const bookApi = {
     chaptersIndex: any,
   ): Promise<ChapterIndexResponse> => {
     return apiFetch<ChapterIndexResponse>(`/books/${bookUnitId}/chapterIndex`, {
-      method: 'PUT',
+      method: "PUT",
       body: JSON.stringify(chaptersIndex),
     });
   },
@@ -78,7 +77,7 @@ export const bookApi = {
     filters?: BookFilters,
   ): Promise<BookListResponse> => {
     return apiFetch<BookListResponse>(
-      `/books${buildQueryString({q: query, ...filters})}`,
+      `/books${buildQueryString({ q: query, ...filters })}`,
     );
   },
 
@@ -90,7 +89,7 @@ export const bookApi = {
     filters?: BookFilters,
   ): Promise<BookListResponse> => {
     return apiFetch<BookListResponse>(
-      `/books${buildQueryString({userId, ...filters})}`,
+      `/books${buildQueryString({ userId, ...filters })}`,
     );
   },
 
@@ -102,7 +101,7 @@ export const bookApi = {
     filters?: BookFilters,
   ): Promise<BookListResponse> => {
     return apiFetch<BookListResponse>(
-      `/books${buildQueryString({authorId, ...filters})}`,
+      `/books${buildQueryString({ authorId, ...filters })}`,
     );
   },
 
@@ -110,15 +109,15 @@ export const bookApi = {
    * Get book by ISBN
    */
   getByIsbn: async (isbn: string): Promise<BookListResponse> => {
-    return apiFetch<BookListResponse>(`/books${buildQueryString({isbn})}`);
+    return apiFetch<BookListResponse>(`/books${buildQueryString({ isbn })}`);
   },
 
   /**
    * Create new book
    */
   create: async (input: CreateBookInput): Promise<BookResponse> => {
-    return apiFetch<BookResponse>('/books', {
-      method: 'POST',
+    return apiFetch<BookResponse>("/books", {
+      method: "POST",
       body: JSON.stringify(input),
     });
   },
@@ -131,7 +130,7 @@ export const bookApi = {
     input: UpdateBookInput,
   ): Promise<BookResponse> => {
     return apiFetch<BookResponse>(`/books/${postId}`, {
-      method: 'PUT',
+      method: "PUT",
       body: JSON.stringify(input),
     });
   },
@@ -139,9 +138,9 @@ export const bookApi = {
   /**
    * Delete book
    */
-  remove: async (postId: string): Promise<{message: string}> => {
-    return apiFetch<{message: string}>(`/books/${postId}`, {
-      method: 'DELETE',
+  remove: async (postId: string): Promise<{ message: string }> => {
+    return apiFetch<{ message: string }>(`/books/${postId}`, {
+      method: "DELETE",
     });
   },
 };

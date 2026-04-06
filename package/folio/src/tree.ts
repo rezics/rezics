@@ -1,4 +1,4 @@
-import type { FlatChapter, FolioNode } from './types';
+import type { FlatChapter, FolioNode } from "./types";
 
 export function flattenTree(nodes: FolioNode[]): FlatChapter[] {
   const result: FlatChapter[] = [];

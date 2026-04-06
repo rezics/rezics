@@ -1,6 +1,10 @@
 // https://github.com/brimdata/react-arborist
 
-import React, {
+import { useAlertStore } from "@app/state/windowAlertStore.ts";
+import { Button } from "@mui/material";
+import { bookMutations } from "@rezics/api/book/book.mutations";
+import type React from "react";
+import {
   forwardRef,
   useCallback,
   useEffect,
@@ -8,25 +12,20 @@ import React, {
   useMemo,
   useRef,
   useState,
-} from 'react';
-import {Tree, TreeApi} from 'react-arborist';
-import type {DeleteHandler, MoveHandler, RenameHandler} from 'react-arborist';
-// 分离的 Node 渲染器工厂
-import {createChapterArboristNode} from './ChapterArboristNode.tsx';
-import {ChapterArboristContextMenu} from './ChapterArboristContextMenu.tsx';
-import {CreateChapterDialog} from './CreateChapterDialog.tsx';
-import {bookMutations} from '@rezics/api/book/book.mutations';
-import {useAlertStore} from '@app/state/windowAlertStore.ts';
-
+} from "react";
+import type { DeleteHandler, MoveHandler, RenameHandler } from "react-arborist";
+import { Tree, type TreeApi } from "react-arborist";
 import {
   findAndAddChild,
   findAndDelete,
   findAndEdit,
   findAndInsert,
   findAndRemove,
-} from '@/shared/util/arborist-tree';
-
-import {Button} from '@mui/material';
+} from "@/shared/util/arborist-tree";
+import { ChapterArboristContextMenu } from "./ChapterArboristContextMenu.tsx";
+// 分离的 Node 渲染器工厂
+import { createChapterArboristNode } from "./ChapterArboristNode.tsx";
+import { CreateChapterDialog } from "./CreateChapterDialog.tsx";
 
 /** Chapter tree node structure for arborist. */
 export type Chapter = {
@@ -45,7 +44,7 @@ export interface ChapterArboristRefHandle {
 export type ChapterContextMenuState = {
   x: number;
   y: number;
-  node: Chapter & {isOpen: boolean};
+  node: Chapter & { isOpen: boolean };
 } | null;
 
 /** Props for ChapterArborist component. */
@@ -111,7 +110,7 @@ export const ChapterArborist = forwardRef<
       string | number | null
     >(null);
     const updateChapterIndexMutation = bookMutations.useUpdateChapterIndex();
-    const {show: showAlert} = useAlertStore();
+    const { show: showAlert } = useAlertStore();
 
     useImperativeHandle(ref, () => ({
       expandAll() {
@@ -127,8 +126,8 @@ export const ChapterArborist = forwardRef<
     }, [chapterTree]);
 
     const onMove: MoveHandler<Chapter> = useCallback(
-      ({dragIds, parentId, index}) => {
-        setTreeData(currentTree => {
+      ({ dragIds, parentId, index }) => {
+        setTreeData((currentTree) => {
           const removed: Chapter[] = [];
           const treeWithoutDragged = findAndRemove(
             currentTree,
@@ -146,14 +145,17 @@ export const ChapterArborist = forwardRef<
       [],
     );
 
-    const onRename: RenameHandler<Chapter> = useCallback(({id, name}) => {
+    const onRename: RenameHandler<Chapter> = useCallback(({ id, name }) => {
       setTreeData(
-        currentTree => findAndEdit(currentTree, String(id), name) as Chapter[],
+        (currentTree) =>
+          findAndEdit(currentTree, String(id), name) as Chapter[],
       );
     }, []);
 
-    const onDelete: DeleteHandler<Chapter> = useCallback(({ids}) => {
-      setTreeData(currentTree => findAndDelete(currentTree, ids) as Chapter[]);
+    const onDelete: DeleteHandler<Chapter> = useCallback(({ ids }) => {
+      setTreeData(
+        (currentTree) => findAndDelete(currentTree, ids) as Chapter[],
+      );
     }, []);
 
     function updateChapter(data: Chapter[]) {
@@ -205,13 +207,7 @@ export const ChapterArborist = forwardRef<
           baseLink,
           isEditable,
         ),
-      [
-        setContextMenu,
-        isEditable,
-        enableDoubleClickRename,
-        isDraggable,
-        baseLink,
-      ],
+      [isEditable, enableDoubleClickRename, isDraggable, baseLink],
     );
 
     const effectiveDrag = isEditable && isDraggable;
@@ -243,7 +239,7 @@ export const ChapterArborist = forwardRef<
           role="presentation"
           onClick={() => setContextMenu(null)}
           onKeyDown={(e: React.KeyboardEvent) => {
-            if (e.key === 'Escape') setContextMenu(null);
+            if (e.key === "Escape") setContextMenu(null);
           }}
         >
           <Tree<Chapter>
@@ -260,7 +256,7 @@ export const ChapterArborist = forwardRef<
             disableDrop={!effectiveDrag}
             idAccessor="id"
             searchTerm={searchTerm}
-            selection={selectedId ?? ''}
+            selection={selectedId ?? ""}
             searchMatch={(node, t) =>
               node.data.title.toLowerCase().includes(t.toLowerCase())
             }
@@ -290,4 +286,4 @@ export const ChapterArborist = forwardRef<
   },
 );
 
-ChapterArborist.displayName = 'ChapterArborist';
+ChapterArborist.displayName = "ChapterArborist";

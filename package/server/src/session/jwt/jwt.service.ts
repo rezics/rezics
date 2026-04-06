@@ -1,4 +1,9 @@
-import {Elysia} from 'elysia';
+import {
+  NormalizedTokenName,
+  type RezicsSessionTokenClaims,
+  type TokenPermissionRole,
+  TokenTransportHeader,
+} from "@rezics/contract";
 import {
   asJwtPrivateJwk,
   createRotationEngine,
@@ -6,20 +11,15 @@ import {
   importPrivateJwk,
   JwtAlgorithm,
   verifySessionToken,
-} from '@rezics/jwt';
-import {
-  NormalizedTokenName,
-  TokenTransportHeader,
-  type RezicsSessionTokenClaims,
-  type TokenPermissionRole,
-} from '@rezics/contract';
-import {SignJWT} from 'jose';
-import {serverJwtPersistence} from './jwt-persistence';
-import {getJwtService} from '@/jwt';
-import {env} from '@/env';
+} from "@rezics/jwt";
+import { Elysia } from "elysia";
+import { SignJWT } from "jose";
+import { env } from "@/env";
+import { getJwtService } from "@/jwt";
+import { serverJwtPersistence } from "./jwt-persistence";
 
 function getMainSessionJwtTtlSeconds() {
-  return Number(env.MAIN_SESSION_JWT_TTL_SECONDS ?? '900');
+  return Number(env.MAIN_SESSION_JWT_TTL_SECONDS ?? "900");
 }
 
 let mainSessionRotationPromise: Promise<
@@ -29,7 +29,7 @@ let mainSessionRotationPromise: Promise<
 async function getMainSessionRotation() {
   if (!mainSessionRotationPromise) {
     mainSessionRotationPromise = (async () => {
-      const service = await getJwtService('server-local');
+      const service = await getJwtService("server-local");
       const rotation = createRotationEngine({
         issuer: {
           issuer: service.issuer,
@@ -53,8 +53,8 @@ async function getMainSessionRotation() {
 }
 
 export const mainSessionJwtPlugin = new Elysia({
-  name: '@rezics/main-session-jwt',
-}).decorate('jwt', {
+  name: "@rezics/main-session-jwt",
+}).decorate("jwt", {
   async sign(
     signValue: Record<string, unknown> & {
       aud?: string | string[];
@@ -66,25 +66,23 @@ export const mainSessionJwtPlugin = new Elysia({
       iat?: boolean;
     },
   ) {
-    const service = await getJwtService('server-local');
+    const service = await getJwtService("server-local");
     const rotation = await getMainSessionRotation();
     const activeKey = await rotation.getActiveSigningKey();
     const signingKey = await importPrivateJwk(
-      asJwtPrivateJwk(
-        service.jwks[0]?.privateJwk ?? activeKey.privateJwk,
-      ),
+      asJwtPrivateJwk(service.jwks[0]?.privateJwk ?? activeKey.privateJwk),
     );
-    const {nbf, exp, iat, aud, iss, jti, sub, ...data} = signValue;
+    const { nbf, exp, iat, aud, iss, jti, sub, ...data } = signValue;
 
     let token = new SignJWT({
       ...data,
-      ...(jti ? {jti} : {}),
-      ...(sub ? {sub} : {}),
+      ...(jti ? { jti } : {}),
+      ...(sub ? { sub } : {}),
     })
       .setProtectedHeader({
         alg: activeKey.algorithm,
         kid: activeKey.kid,
-        typ: 'JWT',
+        typ: "JWT",
       })
       .setIssuer(iss ?? service.issuer)
       .setAudience(aud ?? service.audience);
@@ -118,7 +116,7 @@ export const mainSessionJwtPlugin = new Elysia({
 });
 
 export async function getMainSessionJwtContext() {
-  const service = await getJwtService('server-local');
+  const service = await getJwtService("server-local");
 
   return {
     issuer: service.issuer,
@@ -127,15 +125,15 @@ export async function getMainSessionJwtContext() {
     ttlSeconds: getMainSessionJwtTtlSeconds(),
     tokenName: NormalizedTokenName.REZICS_SESSION,
     jwks: {
-      keys: service.jwks.map(k => k.publicJwk),
+      keys: service.jwks.map((k) => k.publicJwk),
     },
   } as const;
 }
 
 export async function getMainSessionPublicJwks() {
-  const service = await getJwtService('server-local');
+  const service = await getJwtService("server-local");
   return {
-    keys: service.jwks.map(k => k.publicJwk),
+    keys: service.jwks.map((k) => k.publicJwk),
   };
 }
 
@@ -149,16 +147,16 @@ function hasRole(
 export function resolveMainSessionRole(
   roles: string[] | undefined,
 ): TokenPermissionRole {
-  if (hasRole(roles, 'BLOCKED')) return 'BLOCKED';
-  if (hasRole(roles, 'ROOT')) return 'ROOT';
-  if (hasRole(roles, 'ADMIN')) return 'ADMIN';
-  return 'USER';
+  if (hasRole(roles, "BLOCKED")) return "BLOCKED";
+  if (hasRole(roles, "ROOT")) return "ROOT";
+  if (hasRole(roles, "ADMIN")) return "ADMIN";
+  return "USER";
 }
 
 export function buildRezicsSessionClaims(input: {
   unitId: string;
   roles?: string[];
-}): Omit<RezicsSessionTokenClaims, 'exp' | 'iat' | 'iss' | 'aud'> {
+}): Omit<RezicsSessionTokenClaims, "exp" | "iat" | "iss" | "aud"> {
   return {
     unitId: input.unitId,
     permission: {

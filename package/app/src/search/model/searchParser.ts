@@ -1,4 +1,4 @@
-import type {SearchInfo} from './searchInfo';
+import type { SearchInfo } from "./searchInfo";
 
 const TAG_REGEX = /\[([^\]]+)\]/g;
 const FILTER_REGEX = /(\w+):("[^"]+"|\S+)/g;
@@ -13,10 +13,10 @@ export function parseSearchString(raw: string): SearchInfo {
     if (tag) {
       tags.push(tag);
     }
-    text = text.replace(match[0], '');
+    text = text.replace(match[0], "");
   }
 
-  text = text.replace(FILTER_REGEX, '').trim();
+  text = text.replace(FILTER_REGEX, "").trim();
 
   return {
     keyword: text,

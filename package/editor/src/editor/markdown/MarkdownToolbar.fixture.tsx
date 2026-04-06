@@ -1,5 +1,5 @@
-import {MarkdownEditor} from '../MarkdownEditor';
-import type {ToolbarItem} from '../../toolbar/types';
+import type { ToolbarItem } from "../../toolbar/types";
+import { MarkdownEditor } from "../MarkdownEditor";
 
 const sampleMarkdown = `# Toolbar Fixture
 
@@ -39,9 +39,9 @@ export default {
       preview={false}
       toolbar={{
         icons: {
-          bold: <span style={{fontWeight: 700, fontSize: 14}}>B</span>,
-          italic: <span style={{fontStyle: 'italic', fontSize: 14}}>I</span>,
-          heading: <span style={{fontWeight: 700, fontSize: 12}}>H₁</span>,
+          bold: <span style={{ fontWeight: 700, fontSize: 14 }}>B</span>,
+          italic: <span style={{ fontStyle: "italic", fontSize: 14 }}>I</span>,
+          heading: <span style={{ fontWeight: 700, fontSize: 12 }}>H₁</span>,
         },
       }}
       className="h-screen"
@@ -56,10 +56,10 @@ export default {
         extend: (items: ToolbarItem[]) => [
           ...items,
           {
-            name: 'custom-action',
-            label: 'Custom Action',
-            icon: <span style={{fontSize: 14}}>★</span>,
-            action: () => alert('Custom toolbar action triggered'),
+            name: "custom-action",
+            label: "Custom Action",
+            icon: <span style={{ fontSize: 14 }}>★</span>,
+            action: () => alert("Custom toolbar action triggered"),
           },
         ],
       }}

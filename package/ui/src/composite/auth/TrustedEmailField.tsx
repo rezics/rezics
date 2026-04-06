@@ -1,7 +1,7 @@
-import Button from '@mui/material/Button';
-import Stack from '@mui/material/Stack';
-import TextField from '@mui/material/TextField';
-import type {ChangeEvent, FC} from 'react';
+import Button from "@mui/material/Button";
+import Stack from "@mui/material/Stack";
+import TextField from "@mui/material/TextField";
+import type { ChangeEvent, FC } from "react";
 
 interface TrustedEmailFieldProps {
   value: string;
@@ -18,7 +18,7 @@ export const TrustedEmailField: FC<TrustedEmailFieldProps> = ({
   value,
   locked,
   required = true,
-  label = 'Email',
+  label = "Email",
   lockedHelperText,
   editableHelperText,
   onChange,

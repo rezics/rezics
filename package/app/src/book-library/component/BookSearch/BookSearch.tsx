@@ -1,18 +1,19 @@
-import React, {useMemo, useState} from 'react';
-import {useTranslation} from 'react-i18next';
-import {SearchInput, type SearchInfo} from '@/search';
-import type {BookQueryOptions} from '@rezics/contract';
+import type { BookQueryOptions } from "@rezics/contract";
+import type React from "react";
+import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { type SearchInfo, SearchInput } from "@/search";
 
 /** Available sort types for book search. */
 export type BookSortType =
-  | 'relevance'
-  | 'createdAt'
-  | 'updatedAt'
-  | 'favorites'
-  | 'wordCount'
-  | 'monthlyVotes'
-  | 'recommendation'
-  | 'custom';
+  | "relevance"
+  | "createdAt"
+  | "updatedAt"
+  | "favorites"
+  | "wordCount"
+  | "monthlyVotes"
+  | "recommendation"
+  | "custom";
 
 /** Props for BookSearchInput component. */
 export type BookSearchInputProps = {
@@ -34,11 +35,11 @@ export const BookSearchInput: React.FC<BookSearchInputProps> = ({
   defaultValue,
   hiddenWordCountFilter = false,
 }) => {
-  const {t} = useTranslation();
+  const { t } = useTranslation();
   const [sort, _setSort] = useState<{
     type?: BookSortType;
-    order?: 'asc' | 'desc';
-  }>({order: 'desc'});
+    order?: "asc" | "desc";
+  }>({ order: "desc" });
 
   // TODO 实际上应该由 echokv 提供data
   // const tagGroups = useMemo(
@@ -78,7 +79,7 @@ export const BookSearchInput: React.FC<BookSearchInputProps> = ({
       isLicensed: info.isLicensed ?? undefined,
       sort:
         sort.type || sort.order
-          ? {type: sort.type as any, order: sort.order}
+          ? { type: sort.type as any, order: sort.order }
           : undefined,
     } as BookQueryOptions;
 
@@ -91,7 +92,7 @@ export const BookSearchInput: React.FC<BookSearchInputProps> = ({
       <div id="book-search-input">
         <SearchInput
           onSearch={handleSearch}
-          placeholder={t('placeholders.search_books')}
+          placeholder={t("placeholders.search_books")}
           tagGroups={tagGroups}
           defaultValue={defaultValue}
           hiddenWordCountFilter={hiddenWordCountFilter}

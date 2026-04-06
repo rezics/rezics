@@ -1,6 +1,6 @@
-import type { EditorView } from '@codemirror/view';
-import type { EditorState } from '@codemirror/state';
-import type { ReactNode } from 'react';
+import type { EditorState } from "@codemirror/state";
+import type { EditorView } from "@codemirror/view";
+import type { ReactNode } from "react";
 
 export interface ToolbarItem {
   name: string;
@@ -11,11 +11,11 @@ export interface ToolbarItem {
   group?: string;
 }
 
-export type ToolbarSeparator = '|';
+export type ToolbarSeparator = "|";
 
 export type ToolbarEntry = ToolbarItem | ToolbarSeparator;
 
 export interface ToolbarConfig {
   items: ToolbarEntry[];
-  variant: 'panel' | 'react';
+  variant: "panel" | "react";
 }

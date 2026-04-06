@@ -1,16 +1,17 @@
-import React, {useMemo} from 'react';
-import {useQuery} from '@tanstack/react-query';
 import {
   Alert,
-  CircularProgress,
-  Typography,
   Card,
   CardContent,
-} from '@mui/material';
-import {bookQueries} from '@rezics/api/book/book';
-import type {BookDTO} from '@rezics/contract';
-import {LazyLoadImage} from '@rezics/ui/primitive/image/LazyLoadImage.tsx';
-import {useTranslation} from 'react-i18next';
+  CircularProgress,
+  Typography,
+} from "@mui/material";
+import { bookQueries } from "@rezics/api/book/book";
+import type { BookDTO } from "@rezics/contract";
+import { LazyLoadImage } from "@rezics/ui/primitive/image/LazyLoadImage.tsx";
+import { useQuery } from "@tanstack/react-query";
+import type React from "react";
+import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 
 type Book = BookDTO;
 
@@ -27,11 +28,11 @@ export const HomeEditorPicks: React.FC<HomeEditorPicksProps> = ({
   title,
   limit = 8,
 }) => {
-  const {t} = useTranslation();
-  const resolvedTitle = title ?? t('page.home.sections.editor_picks');
+  const { t } = useTranslation();
+  const resolvedTitle = title ?? t("page.home.sections.editor_picks");
 
-  const {data, isLoading, error} = useQuery(
-    bookQueries.list({start: 0, limit}),
+  const { data, isLoading, error } = useQuery(
+    bookQueries.list({ start: 0, limit }),
   );
   const books: Book[] = useMemo(() => data?.books ?? [], [data]);
 
@@ -53,7 +54,7 @@ export const HomeEditorPicks: React.FC<HomeEditorPicksProps> = ({
         {isLoading && <CircularProgress size={20} />}
       </div>
       <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 md:grid-cols-4">
-        {books.map(book => (
+        {books.map((book) => (
           <Card key={book.unitId} className="overflow-hidden">
             {book.coverUrl && (
               <LazyLoadImage
@@ -75,7 +76,7 @@ export const HomeEditorPicks: React.FC<HomeEditorPicksProps> = ({
                 color="text.secondary"
                 className="truncate"
               >
-                {book.author?.[0]?.name || ''}
+                {book.author?.[0]?.name || ""}
               </Typography>
             </CardContent>
           </Card>

@@ -1,4 +1,4 @@
-import type {Prisma} from '#/prisma/client';
+import type { Prisma } from "#/prisma/client";
 
 export const readlistListSelect = {
   unitId: true,
@@ -12,7 +12,7 @@ export const readlistListSelect = {
       updatedAt: true,
       publishedAt: true,
       reactionSummaries: true,
-      user: {select: {unitId: true, slug: true, name: true, avatar: true}},
+      user: { select: { unitId: true, slug: true, name: true, avatar: true } },
     },
   },
 };
@@ -40,7 +40,7 @@ export const readlistSelect = {
       updatedAt: true,
       publishedAt: true,
       reactionSummaries: true,
-      user: {select: {unitId: true, slug: true, name: true, avatar: true}},
+      user: { select: { unitId: true, slug: true, name: true, avatar: true } },
     },
   },
   // Books in the readlist
@@ -50,7 +50,7 @@ export const readlistSelect = {
       title: true,
       description: true,
       coverUrl: true,
-      author: {select: {unitId: true, name: true, avatar: true}},
+      author: { select: { unitId: true, name: true, avatar: true } },
     },
   },
   // Reviews in the readlist
@@ -62,7 +62,7 @@ export const readlistSelect = {
       targetUnitId: true,
       createdAt: true,
       metadata: true,
-      user: {select: {unitId: true, slug: true, name: true, avatar: true}},
+      user: { select: { unitId: true, slug: true, name: true, avatar: true } },
       reactionSummaries: true,
     },
   },

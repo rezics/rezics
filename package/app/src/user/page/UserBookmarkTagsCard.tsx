@@ -1,9 +1,10 @@
-import React, {useEffect, useState} from 'react';
-import {useQuery} from '@tanstack/react-query';
-import {reactionQueries} from '@rezics/api/reaction/reaction';
-import {useAlertStore} from '@app/state/windowAlertStore';
-import {useSetBookmarkTagsMutation} from '@rezics/api/reaction/reaction.mutations';
-import {Typography, TextField, Chip, Button, Paper} from '@mui/material';
+import { useAlertStore } from "@app/state/windowAlertStore";
+import { Button, Chip, Paper, TextField, Typography } from "@mui/material";
+import { reactionQueries } from "@rezics/api/reaction/reaction";
+import { useSetBookmarkTagsMutation } from "@rezics/api/reaction/reaction.mutations";
+import { useQuery } from "@tanstack/react-query";
+import type React from "react";
+import { useEffect, useState } from "react";
 
 type UserBookmarkTagsCardProps = {
   userId: string;
@@ -12,15 +13,15 @@ type UserBookmarkTagsCardProps = {
 export const UserBookmarkTagsCard: React.FC<UserBookmarkTagsCardProps> = ({
   userId,
 }) => {
-  const {show: showAlert} = useAlertStore();
-  const targetId = 'tag';
+  const { show: showAlert } = useAlertStore();
+  const targetId = "tag";
 
-  const {data, isLoading, isError} = useQuery(
+  const { data, isLoading, isError } = useQuery(
     reactionQueries.bookmarkTags(targetId),
   );
 
   const [localTags, setLocalTags] = useState<string[]>([]);
-  const [newTag, setNewTag] = useState('');
+  const [newTag, setNewTag] = useState("");
 
   useEffect(() => {
     if (data?.tags) {
@@ -32,12 +33,12 @@ export const UserBookmarkTagsCard: React.FC<UserBookmarkTagsCardProps> = ({
 
   const setBookmarkTagsMutation = useSetBookmarkTagsMutation({
     onSuccess: () => {
-      showAlert('标签库已更新');
+      showAlert("标签库已更新");
     },
   });
 
   const handleRemoveTag = (tag: string) => {
-    const next = localTags.filter(t => t !== tag);
+    const next = localTags.filter((t) => t !== tag);
     setLocalTags(next);
     setBookmarkTagsMutation.mutate({
       targetId,
@@ -49,12 +50,12 @@ export const UserBookmarkTagsCard: React.FC<UserBookmarkTagsCardProps> = ({
     const trimmed = newTag.trim();
     if (!trimmed) return;
     if (localTags.includes(trimmed)) {
-      showAlert('该标签已存在');
+      showAlert("该标签已存在");
       return;
     }
     const next = [...localTags, trimmed];
     setLocalTags(next);
-    setNewTag('');
+    setNewTag("");
     setBookmarkTagsMutation.mutate({
       targetId,
       tags: next,
@@ -107,7 +108,7 @@ export const UserBookmarkTagsCard: React.FC<UserBookmarkTagsCardProps> = ({
               暂无标签
             </Typography>
           ) : (
-            localTags.map(tag => (
+            localTags.map((tag) => (
               <Chip
                 key={tag}
                 label={tag}
@@ -123,9 +124,9 @@ export const UserBookmarkTagsCard: React.FC<UserBookmarkTagsCardProps> = ({
             size="small"
             placeholder="添加新标签"
             value={newTag}
-            onChange={e => setNewTag(e.target.value)}
-            onKeyDown={e => {
-              if (e.key === 'Enter') {
+            onChange={(e) => setNewTag(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
                 e.preventDefault();
                 handleAddTag();
               }

@@ -5,5 +5,5 @@
  * with Meilisearch (search, index sync, key management).
  */
 
-export {meiliApi} from './meili.api';
-export {MeiliService, meiliService} from './meili.service';
+export { meiliApi } from "./meili.api";
+export { MeiliService, meiliService } from "./meili.service";

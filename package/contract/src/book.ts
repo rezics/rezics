@@ -1,5 +1,5 @@
-import {t} from 'elysia';
-import {publicUserSchema} from './unit';
+import { t } from "elysia";
+import { publicUserSchema } from "./unit";
 
 // ANCHOR Core Data Transfer Objects (DTOs)
 
@@ -32,7 +32,7 @@ export const bookDTOSchema = t.Object({
   updatedAt: t.Optional(t.Union([t.String(), t.Date()])),
 });
 
-export type BookDTO = (typeof bookDTOSchema)['static'];
+export type BookDTO = (typeof bookDTOSchema)["static"];
 
 // ANCHOR API Endpoint Schemas & Types
 
@@ -71,7 +71,7 @@ export const bookListQuerySchema = t.Object({
   limit: t.Optional(t.Number()), // default 20
 });
 
-export type BookListQuery = (typeof bookListQuerySchema)['static'];
+export type BookListQuery = (typeof bookListQuerySchema)["static"];
 
 /**
  * [Response] /books 的响应体 Schema
@@ -82,7 +82,7 @@ export const bookListResponseSchema = t.Object({
   total: t.Optional(t.Number()), // 响应体中使用 t.Number()
 });
 
-export type BookListResponse = (typeof bookListResponseSchema)['static'];
+export type BookListResponse = (typeof bookListResponseSchema)["static"];
 
 // --- Book Detail (GET /books/:unitId) ---
 
@@ -93,7 +93,7 @@ export const bookParamsSchema = t.Object({
   unitId: t.String(),
 });
 
-export type BookParams = (typeof bookParamsSchema)['static'];
+export type BookParams = (typeof bookParamsSchema)["static"];
 
 /**
  * [Response] /books/:postId 的响应体 Schema
@@ -101,7 +101,7 @@ export type BookParams = (typeof bookParamsSchema)['static'];
  */
 export const bookResponseSchema = bookDTOSchema; // 直接复用 DTO
 
-export type BookResponse = (typeof bookResponseSchema)['static']; // 等同于 BookDTO
+export type BookResponse = (typeof bookResponseSchema)["static"]; // 等同于 BookDTO
 
 // --- Create Book (POST /books) ---
 
@@ -125,7 +125,7 @@ export const createBookSchema = t.Object({
 });
 
 // 从 Schema 派生类型，替换原有的 CreateBookInput
-export type CreateBookInput = (typeof createBookSchema)['static'];
+export type CreateBookInput = (typeof createBookSchema)["static"];
 
 // --- Update Book (PUT /books/:postId) ---
 
@@ -149,7 +149,7 @@ export const updateBookSchema = t.Object({
 });
 
 // 从 Schema 派生类型，替换原有的 UpdateBookInput
-export type UpdateBookInput = (typeof updateBookSchema)['static'];
+export type UpdateBookInput = (typeof updateBookSchema)["static"];
 
 export interface ChapterTreeItem {
   id: string;

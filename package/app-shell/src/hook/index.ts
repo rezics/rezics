@@ -1,1 +1,1 @@
-export {useAppInit} from './useAppInit';
+export { useAppInit } from "./useAppInit";

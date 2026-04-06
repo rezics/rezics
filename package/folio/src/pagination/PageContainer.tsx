@@ -1,10 +1,5 @@
-import {
-  useRef,
-  useEffect,
-  useCallback,
-  type ReactNode,
-} from 'react';
-import { useFolio } from '../context';
+import { type ReactNode, useCallback, useEffect, useRef } from "react";
+import { useFolio } from "../context";
 
 interface PageContainerProps {
   children: ReactNode;
@@ -24,7 +19,7 @@ export function PageContainer({ children }: PageContainerProps) {
     if (containerWidth === 0) return;
 
     const count = Math.max(1, Math.round(inner.scrollWidth / containerWidth));
-    dispatch({ type: 'SET_PAGE_COUNT', count });
+    dispatch({ type: "SET_PAGE_COUNT", count });
   }, [dispatch]);
 
   // Recalculate on mount and resize
@@ -46,26 +41,26 @@ export function PageContainer({ children }: PageContainerProps) {
   // Recalculate when content changes
   useEffect(() => {
     recalculate();
-  }, [children, recalculate]);
+  }, [recalculate]);
 
   // Observe image loads within content
   useEffect(() => {
     const inner = innerRef.current;
     if (!inner) return;
 
-    const images = inner.querySelectorAll('img');
+    const images = inner.querySelectorAll("img");
     const handlers: Array<() => void> = [];
 
     for (const img of images) {
       if (!img.complete) {
         const handler = () => recalculate();
-        img.addEventListener('load', handler, { once: true });
-        handlers.push(() => img.removeEventListener('load', handler));
+        img.addEventListener("load", handler, { once: true });
+        handlers.push(() => img.removeEventListener("load", handler));
       }
     }
 
     return () => handlers.forEach((cleanup) => cleanup());
-  }, [children, recalculate]);
+  }, [recalculate]);
 
   const containerWidth = containerRef.current?.clientWidth ?? 0;
   const translateX = -(state.pageIndex * containerWidth);
@@ -75,21 +70,21 @@ export function PageContainer({ children }: PageContainerProps) {
       ref={containerRef}
       className="folio-page-container"
       style={{
-        overflow: 'hidden',
-        height: '100%',
-        position: 'relative',
+        overflow: "hidden",
+        height: "100%",
+        position: "relative",
       }}
     >
       <div
         ref={innerRef}
         className="folio-page-inner"
         style={{
-          columnWidth: containerWidth ? `${containerWidth}px` : '100vw',
+          columnWidth: containerWidth ? `${containerWidth}px` : "100vw",
           columnGap: 0,
-          columnFill: 'auto',
-          height: '100%',
+          columnFill: "auto",
+          height: "100%",
           transform: `translateX(${translateX}px)`,
-          transition: 'none',
+          transition: "none",
         }}
       >
         {children}
@@ -97,4 +92,3 @@ export function PageContainer({ children }: PageContainerProps) {
     </div>
   );
 }
-

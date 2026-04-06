@@ -1,21 +1,20 @@
-import type {UserDTO} from '@rezics/contract';
-import {Elysia, t} from 'elysia';
-import {userService} from '../service/user.service';
-import {mapUserToPublicProfile} from '../model/mapper';
-
-import {userParamsSchema} from '@rezics/contract';
-import {authMacro} from '@/middleware';
+import type { UserDTO } from "@rezics/contract";
+import { userParamsSchema } from "@rezics/contract";
+import { Elysia, t } from "elysia";
+import { authMacro } from "@/middleware";
+import { mapUserToPublicProfile } from "../model/mapper";
+import { userService } from "../service/user.service";
 
 export const followRoute = new Elysia()
   .use(authMacro)
   .get(
-    '/:unitId/followers',
-    async ({params, query}) => {
-      const {users, total} = await userService.getFollowers(
+    "/:unitId/followers",
+    async ({ params, query }) => {
+      const { users, total } = await userService.getFollowers(
         params.unitId,
         query,
       );
-      return {users: users.map(mapUserToPublicProfile), total};
+      return { users: users.map(mapUserToPublicProfile), total };
     },
     {
       params: userParamsSchema,
@@ -24,20 +23,20 @@ export const followRoute = new Elysia()
         limit: t.Optional(t.Numeric()),
       }),
       detail: {
-        summary: 'Get followers',
-        description: 'Get followers of a user',
-        tags: ['Users', 'Follow'],
+        summary: "Get followers",
+        description: "Get followers of a user",
+        tags: ["Users", "Follow"],
       },
     },
   )
   .get(
-    '/:unitId/followings',
-    async ({params, query}) => {
-      const {users, total} = await userService.getFollowings(
+    "/:unitId/followings",
+    async ({ params, query }) => {
+      const { users, total } = await userService.getFollowings(
         params.unitId,
         query,
       );
-      return {users: users.map(mapUserToPublicProfile), total};
+      return { users: users.map(mapUserToPublicProfile), total };
     },
     {
       params: userParamsSchema,
@@ -46,32 +45,32 @@ export const followRoute = new Elysia()
         limit: t.Optional(t.Numeric()),
       }),
       detail: {
-        summary: 'Get followings',
-        description: 'Get followings of a user',
-        tags: ['Users', 'Follow'],
+        summary: "Get followings",
+        description: "Get followings of a user",
+        tags: ["Users", "Follow"],
       },
     },
   )
   .get(
-    '/:unitId',
-    async ({params}): Promise<UserDTO> => {
+    "/:unitId",
+    async ({ params }): Promise<UserDTO> => {
       const user = await userService.getByUnitId(params.unitId);
       return mapUserToPublicProfile(user);
     },
     {
       params: userParamsSchema,
       detail: {
-        summary: 'Get user',
-        description: 'Get a single user by unit ID',
-        tags: ['Users'],
+        summary: "Get user",
+        description: "Get a single user by unit ID",
+        tags: ["Users"],
       },
     },
   )
   .post(
-    '/follow/:targetId',
-    async ({identity, params}) => {
+    "/follow/:targetId",
+    async ({ identity, params }) => {
       await userService.follow(identity.unitId, params.targetId);
-      return {message: 'Followed successfully'};
+      return { message: "Followed successfully" };
     },
     {
       requireOwner: true,
@@ -79,17 +78,17 @@ export const followRoute = new Elysia()
         targetId: t.String(),
       }),
       detail: {
-        summary: 'Follow user',
-        description: 'Follow a user',
-        tags: ['Users', 'Follow'],
+        summary: "Follow user",
+        description: "Follow a user",
+        tags: ["Users", "Follow"],
       },
     },
   )
   .delete(
-    '/follow/:targetId',
-    async ({identity, params}) => {
+    "/follow/:targetId",
+    async ({ identity, params }) => {
       await userService.unfollow(identity.unitId, params.targetId);
-      return {message: 'Unfollowed successfully'};
+      return { message: "Unfollowed successfully" };
     },
     {
       requireOwner: true,
@@ -97,16 +96,16 @@ export const followRoute = new Elysia()
         targetId: t.String(),
       }),
       detail: {
-        summary: 'Unfollow user',
-        description: 'Unfollow a user',
-        tags: ['Users', 'Follow'],
+        summary: "Unfollow user",
+        description: "Unfollow a user",
+        tags: ["Users", "Follow"],
       },
     },
   )
   .get(
-    '/follow/status',
-    async ({identity, query}) => {
-      const {targetIds} = query;
+    "/follow/status",
+    async ({ identity, query }) => {
+      const { targetIds } = query;
 
       let ids: string[] = [];
       if (targetIds) {
@@ -122,16 +121,16 @@ export const followRoute = new Elysia()
         targetIds: t.Optional(t.Union([t.String(), t.Array(t.String())])),
       }),
       detail: {
-        summary: 'Get follow status',
-        description: 'Check if current user follows specified targets',
-        tags: ['Users', 'Follow'],
+        summary: "Get follow status",
+        description: "Check if current user follows specified targets",
+        tags: ["Users", "Follow"],
       },
     },
   )
   .get(
-    '/follow/summary',
-    async ({query}) => {
-      const {targetIds} = query;
+    "/follow/summary",
+    async ({ query }) => {
+      const { targetIds } = query;
 
       let ids: string[] = [];
       if (targetIds) {
@@ -162,9 +161,9 @@ export const followRoute = new Elysia()
         targetIds: t.Optional(t.Union([t.String(), t.Array(t.String())])),
       }),
       detail: {
-        summary: 'Get follow summary',
-        description: 'Get follower counts for one or many target users',
-        tags: ['Users', 'Follow'],
+        summary: "Get follow summary",
+        description: "Get follower counts for one or many target users",
+        tags: ["Users", "Follow"],
       },
     },
   );

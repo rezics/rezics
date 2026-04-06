@@ -1,5 +1,5 @@
-import type { EditorView } from '@codemirror/view';
-import { forceLinting } from '@codemirror/lint';
+import { forceLinting } from "@codemirror/lint";
+import type { EditorView } from "@codemirror/view";
 
 export function formatJson(view: EditorView): boolean {
   const text = view.state.doc.toString();

@@ -1,5 +1,5 @@
-import {MarkdownEditor} from '../MarkdownEditor';
-import {stubMentionConfig, stubEmojiConfig} from './_stubs';
+import { MarkdownEditor } from "../MarkdownEditor";
+import { stubEmojiConfig, stubMentionConfig } from "./_stubs";
 
 const sampleMarkdown = `# Plugin Demo
 

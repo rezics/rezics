@@ -3,28 +3,28 @@
  * Following TanStack Query best practices for key management
  */
 
-import type {ReactionListQuery} from './reaction.types.ts';
+import type { ReactionListQuery } from "./reaction.types.ts";
 
 export const reactionKeys = {
   /** Base key for all reaction queries */
-  all: () => ['reactions'] as const,
+  all: () => ["reactions"] as const,
 
   /** Keys for list queries */
-  lists: () => [...reactionKeys.all(), 'list'] as const,
+  lists: () => [...reactionKeys.all(), "list"] as const,
   list: (filters?: ReactionListQuery) =>
     [...reactionKeys.lists(), filters] as const,
 
   /** Keys for summary queries (per target) */
-  summaries: () => [...reactionKeys.all(), 'summary'] as const,
+  summaries: () => [...reactionKeys.all(), "summary"] as const,
   summary: (targetId: string) =>
-    [...reactionKeys.summaries(), {targetId}] as const,
+    [...reactionKeys.summaries(), { targetId }] as const,
 
   /** Keys for current user's reactions on a target */
-  mine: () => [...reactionKeys.all(), 'my'] as const,
-  my: (targetId: string) => [...reactionKeys.mine(), {targetId}] as const,
+  mine: () => [...reactionKeys.all(), "my"] as const,
+  my: (targetId: string) => [...reactionKeys.mine(), { targetId }] as const,
 
   /** Keys for bookmark tags of current user on a target */
-  bookmarkTagsRoot: () => [...reactionKeys.all(), 'bookmarkTags'] as const,
+  bookmarkTagsRoot: () => [...reactionKeys.all(), "bookmarkTags"] as const,
   bookmarkTags: (targetId: string) =>
-    [...reactionKeys.bookmarkTagsRoot(), {targetId}] as const,
+    [...reactionKeys.bookmarkTagsRoot(), { targetId }] as const,
 } as const;

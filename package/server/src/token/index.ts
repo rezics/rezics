@@ -6,5 +6,5 @@
  * - `tokenService`: Business logic layer for API tokens
  */
 
-export {tokenApi} from './token.api';
-export {tokenService, TokenService} from './token.service';
+export { tokenApi } from "./token.api";
+export { TokenService, tokenService } from "./token.service";

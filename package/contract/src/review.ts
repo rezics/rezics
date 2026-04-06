@@ -1,5 +1,5 @@
-import {t} from 'elysia';
-import {publicUserSchema} from './unit';
+import { t } from "elysia";
+import { publicUserSchema } from "./unit";
 
 // ANCHOR Review contracts (Unit.type = 'REVIEW')
 
@@ -19,7 +19,7 @@ export const reviewDTOSchema = t.Object({
   reactionSummaries: t.Optional(t.Any()),
 });
 
-export type ReviewDTO = (typeof reviewDTOSchema)['static'];
+export type ReviewDTO = (typeof reviewDTOSchema)["static"];
 
 export const reviewMeiliDTOSchema = t.Intersect([
   reviewDTOSchema,
@@ -37,15 +37,15 @@ export const reviewMeiliDTOSchema = t.Intersect([
   }),
 ]);
 
-export type ReviewMeiliDTO = (typeof reviewMeiliDTOSchema)['static'];
+export type ReviewMeiliDTO = (typeof reviewMeiliDTOSchema)["static"];
 
 export const reviewQuerySchema = t.Object({
   unitType: t.Optional(t.String()), // REVIEW | REMARK
 });
 
-export type reviewQuerySchemaType = (typeof reviewQuerySchema)['static'];
+export type reviewQuerySchemaType = (typeof reviewQuerySchema)["static"];
 
-export type ReviewQuery = (typeof reviewQuerySchema)['static'];
+export type ReviewQuery = (typeof reviewQuerySchema)["static"];
 
 /**
  * Create Review Input
@@ -60,7 +60,7 @@ export const createReviewSchema = t.Object({
   title: t.Optional(t.String()),
 });
 
-export type CreateReviewInput = (typeof createReviewSchema)['static'];
+export type CreateReviewInput = (typeof createReviewSchema)["static"];
 
 /**
  * Update Review Input (partial)
@@ -71,7 +71,7 @@ export const updateReviewSchema = t.Object({
   title: t.Optional(t.String()),
 });
 
-export type UpdateReviewInput = (typeof updateReviewSchema)['static'];
+export type UpdateReviewInput = (typeof updateReviewSchema)["static"];
 
 // ANCHOR Quote contracts (Unit.type = 'QUOTE')
 
@@ -84,7 +84,7 @@ export const quoteDTOSchema = t.Object({
   created_at: t.Optional(t.String()),
 });
 
-export type QuoteDTO = (typeof quoteDTOSchema)['static'];
+export type QuoteDTO = (typeof quoteDTOSchema)["static"];
 
 // ANCHOR Review list/query contracts
 
@@ -114,21 +114,21 @@ export const reviewListQuerySchema = t.Object({
   limit: t.Optional(t.Number()),
 });
 
-export type ReviewListQuery = (typeof reviewListQuerySchema)['static'];
+export type ReviewListQuery = (typeof reviewListQuerySchema)["static"];
 
 export const reviewListResponseSchema = t.Object({
   reviews: t.Array(reviewDTOSchema),
   total: t.Optional(t.Number()),
 });
 
-export type ReviewListResponse = (typeof reviewListResponseSchema)['static'];
+export type ReviewListResponse = (typeof reviewListResponseSchema)["static"];
 
 export const reviewParamsSchema = t.Object({
   id: t.String(),
 });
 
-export type ReviewParams = (typeof reviewParamsSchema)['static'];
+export type ReviewParams = (typeof reviewParamsSchema)["static"];
 
 export const reviewResponseSchema = reviewDTOSchema;
 
-export type ReviewResponse = (typeof reviewResponseSchema)['static'];
+export type ReviewResponse = (typeof reviewResponseSchema)["static"];

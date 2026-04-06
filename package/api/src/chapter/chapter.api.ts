@@ -4,15 +4,14 @@
  */
 
 import type {
-  CreateChapterInput,
-  UpdateChapterInput,
   ChapterListResponse,
   ChapterResponse,
-} from '@rezics/contract';
-import type {ChapterFilters} from './chapter.types.ts';
-import {buildQueryString} from '../utils/buildQuery';
-
-import {apiFetch} from '../react-query/http';
+  CreateChapterInput,
+  UpdateChapterInput,
+} from "@rezics/contract";
+import { apiFetch } from "../react-query/http";
+import { buildQueryString } from "../utils/buildQuery";
+import type { ChapterFilters } from "./chapter.types.ts";
 
 /**
  * Chapter API methods
@@ -42,7 +41,7 @@ export const chapterApi = {
     filters?: ChapterFilters,
   ): Promise<ChapterListResponse> => {
     return apiFetch<ChapterListResponse>(
-      `/chapters${buildQueryString({q: query, ...filters})}`,
+      `/chapters${buildQueryString({ q: query, ...filters })}`,
     );
   },
 
@@ -54,7 +53,7 @@ export const chapterApi = {
     filters?: ChapterFilters,
   ): Promise<ChapterListResponse> => {
     return apiFetch<ChapterListResponse>(
-      `/chapters${buildQueryString({userId, ...filters})}`,
+      `/chapters${buildQueryString({ userId, ...filters })}`,
     );
   },
 
@@ -66,7 +65,7 @@ export const chapterApi = {
     filters?: ChapterFilters,
   ): Promise<ChapterListResponse> => {
     return apiFetch<ChapterListResponse>(
-      `/chapters${buildQueryString({targetUnitId, ...filters})}`,
+      `/chapters${buildQueryString({ targetUnitId, ...filters })}`,
     );
   },
 
@@ -74,8 +73,8 @@ export const chapterApi = {
    * Create new chapter
    */
   create: async (input: CreateChapterInput): Promise<ChapterResponse> => {
-    return apiFetch<ChapterResponse>('/chapters', {
-      method: 'POST',
+    return apiFetch<ChapterResponse>("/chapters", {
+      method: "POST",
       body: JSON.stringify(input),
     });
   },
@@ -88,7 +87,7 @@ export const chapterApi = {
     input: UpdateChapterInput,
   ): Promise<ChapterResponse> => {
     return apiFetch<ChapterResponse>(`/chapters/${unitId}`, {
-      method: 'PUT',
+      method: "PUT",
       body: JSON.stringify(input),
     });
   },
@@ -96,9 +95,9 @@ export const chapterApi = {
   /**
    * Delete chapter
    */
-  remove: async (unitId: string): Promise<{message: string}> => {
-    return apiFetch<{message: string}>(`/chapters/${unitId}`, {
-      method: 'DELETE',
+  remove: async (unitId: string): Promise<{ message: string }> => {
+    return apiFetch<{ message: string }>(`/chapters/${unitId}`, {
+      method: "DELETE",
     });
   },
 };

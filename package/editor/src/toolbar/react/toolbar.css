@@ -17,7 +17,9 @@
   cursor: pointer;
   font-size: 13px;
   color: var(--editor-toolbar-color, #656d76);
-  transition: color 0.12s, background-color 0.12s;
+  transition:
+    color 0.12s,
+    background-color 0.12s;
   line-height: 1;
 }
 
@@ -26,7 +28,7 @@
   background: var(--editor-toolbar-hover-bg, rgba(175, 184, 193, 0.2));
 }
 
-.editor-toolbar-btn[data-active='true'] {
+.editor-toolbar-btn[data-active="true"] {
   color: var(--editor-toolbar-active-color, #f4606c);
   background: var(--editor-toolbar-active-bg, rgba(244, 96, 108, 0.08));
   border-color: var(--editor-toolbar-active-border, rgba(244, 96, 108, 0.2));
@@ -56,7 +58,7 @@
   z-index: 10;
 }
 
-.editor-toolbar-tooltip[data-visible='true'] {
+.editor-toolbar-tooltip[data-visible="true"] {
   opacity: 1;
 }
 

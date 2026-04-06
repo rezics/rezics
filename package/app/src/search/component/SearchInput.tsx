@@ -1,21 +1,22 @@
-import SearchIcon from '@mui/icons-material/Search';
+import SearchIcon from "@mui/icons-material/Search";
 import {
+  Checkbox,
   Chip,
   FormControlLabel,
   IconButton,
   TextField,
-  Checkbox,
-} from '@mui/material';
-import type {SearchInfo} from '../model/searchInfo';
-import {normalizeSearchInfo} from '../model/searchInfo';
-import {parseBookSearchParams} from '../util/searchQuery';
-import React, {useEffect, useMemo, useState} from 'react';
-import {useRouterState} from '@tanstack/react-router';
-import {useTranslation} from 'react-i18next';
+} from "@mui/material";
+import { useRouterState } from "@tanstack/react-router";
+import type React from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   IsLicensedInfo,
   NSFWInfo,
-} from '@/book-edit/component/Metadata/BookMetadataEditor';
+} from "@/book-edit/component/Metadata/BookMetadataEditor";
+import type { SearchInfo } from "../model/searchInfo";
+import { normalizeSearchInfo } from "../model/searchInfo";
+import { parseBookSearchParams } from "../util/searchQuery";
 
 export type SearchInputViewProps = {
   value: SearchInfo;
@@ -36,26 +37,26 @@ export const SearchInputView: React.FC<SearchInputViewProps> = ({
   tagGroups,
   hiddenWordCountFilter = false,
 }) => {
-  const {t} = useTranslation();
+  const { t } = useTranslation();
   const groups = useMemo(
     () =>
       tagGroups ?? {
         presetTags: [
-          'fiction',
-          'nonfiction',
-          'mystery',
-          'romance',
-          'history',
-          'science',
-          'fantasy',
-          'philosophy',
+          "fiction",
+          "nonfiction",
+          "mystery",
+          "romance",
+          "history",
+          "science",
+          "fantasy",
+          "philosophy",
         ],
       },
     [tagGroups],
   );
 
-  const handleKeyDown: React.KeyboardEventHandler<HTMLInputElement> = e => {
-    if (e.key === 'Enter') {
+  const handleKeyDown: React.KeyboardEventHandler<HTMLInputElement> = (e) => {
+    if (e.key === "Enter") {
       e.preventDefault();
       onSearch();
     }
@@ -67,15 +68,15 @@ export const SearchInputView: React.FC<SearchInputViewProps> = ({
         <TextField
           fullWidth
           size="small"
-          label={placeholder ?? t('placeholders.search_books')}
+          label={placeholder ?? t("placeholders.search_books")}
           placeholder="Title, ISBN, Author, Publisher, Producer"
-          value={value.keyword ?? ''}
-          onChange={e => onValueChange({...value, keyword: e.target.value})}
+          value={value.keyword ?? ""}
+          onChange={(e) => onValueChange({ ...value, keyword: e.target.value })}
           onKeyDown={handleKeyDown}
         />
         <IconButton
           color="primary"
-          aria-label={t('accessibility.search')}
+          aria-label={t("accessibility.search")}
           onClick={onSearch}
         >
           <SearchIcon />
@@ -91,11 +92,11 @@ export const SearchInputView: React.FC<SearchInputViewProps> = ({
             placeholder="Click tags below or enter tags separated by commas"
             value={
               value.tags
-                ? value.tags.filter(tag => tag.trim() !== '').join(', ')
-                : ''
+                ? value.tags.filter((tag) => tag.trim() !== "").join(", ")
+                : ""
             }
-            onChange={e =>
-              onValueChange({...value, tags: e.target.value.split(', ')})
+            onChange={(e) =>
+              onValueChange({ ...value, tags: e.target.value.split(", ") })
             }
             onKeyDown={handleKeyDown}
           />
@@ -109,9 +110,9 @@ export const SearchInputView: React.FC<SearchInputViewProps> = ({
               label="Word Count"
               placeholder="10000-20000"
               className="w-40"
-              value={value.textLength ?? ''}
-              onChange={e =>
-                onValueChange({...value, textLength: e.target.value})
+              value={value.textLength ?? ""}
+              onChange={(e) =>
+                onValueChange({ ...value, textLength: e.target.value })
               }
               onKeyDown={handleKeyDown}
             />
@@ -122,12 +123,12 @@ export const SearchInputView: React.FC<SearchInputViewProps> = ({
             control={
               <Checkbox
                 checked={!!value.nsfw}
-                onChange={e =>
-                  onValueChange({...value, nsfw: e.target.checked})
+                onChange={(e) =>
+                  onValueChange({ ...value, nsfw: e.target.checked })
                 }
               />
             }
-            label={<NSFWInfo tooltipTitle={t('search.tooltips.nsfw')} />}
+            label={<NSFWInfo tooltipTitle={t("search.tooltips.nsfw")} />}
           />
 
           <FormControlLabel
@@ -135,13 +136,13 @@ export const SearchInputView: React.FC<SearchInputViewProps> = ({
             control={
               <Checkbox
                 checked={!!value.isLicensed}
-                onChange={e =>
-                  onValueChange({...value, isLicensed: e.target.checked})
+                onChange={(e) =>
+                  onValueChange({ ...value, isLicensed: e.target.checked })
                 }
               />
             }
             label={
-              <IsLicensedInfo tooltipTitle={t('search.tooltips.licensed')} />
+              <IsLicensedInfo tooltipTitle={t("search.tooltips.licensed")} />
             }
           />
         </div>
@@ -164,7 +165,7 @@ export const SearchInputView: React.FC<SearchInputViewProps> = ({
             <div key={key} className="flex flex-wrap gap-2 mb-2">
               <div className="font-bold">{key}</div>
               <div>
-                {tags.map(tag => (
+                {tags.map((tag) => (
                   <Chip
                     key={tag}
                     label={tag}
@@ -194,31 +195,31 @@ export type SearchInputProps = {
 
 export const SearchInput: React.FC<SearchInputProps> = ({
   onSearch,
-  defaultValue = {keyword: '', tags: []},
+  defaultValue = { keyword: "", tags: [] },
   placeholder,
   tagGroups,
   hiddenWordCountFilter = false,
 }) => {
-  const pathname = useRouterState({select: s => s.location.pathname});
-  const search = useRouterState({select: s => s.location.search ?? ''});
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const search = useRouterState({ select: (s) => s.location.search ?? "" });
   const searchParams = useMemo(() => new URLSearchParams(search), [search]);
   const [value, setValue] = useState(defaultValue);
 
   useEffect(() => {
-    if (pathname === '/book') {
+    if (pathname === "/book") {
       const currentSearch = parseBookSearchParams(searchParams.toString());
       setValue(currentSearch);
       onSearch(currentSearch);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [search, pathname]);
+  }, [pathname, searchParams.toString, onSearch]);
 
   const handleSearch = () => {
     onSearch(normalizeSearchInfo(value));
   };
 
   const handleAddTag = (tag: string) => {
-    setValue({...value, tags: [...(value.tags ?? []), tag]});
+    setValue({ ...value, tags: [...(value.tags ?? []), tag] });
   };
 
   return (

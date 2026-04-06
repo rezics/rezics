@@ -5,13 +5,13 @@
 
 import type {
   CreateUnitInput,
-  UpdateUnitInput,
   UnitListResponse,
   UnitResponse,
-} from '@rezics/contract';
-import type {UnitFilters} from './unit.types';
-import {buildQueryString} from '../utils/buildQuery';
-import {apiFetch} from '../react-query/http';
+  UpdateUnitInput,
+} from "@rezics/contract";
+import { apiFetch } from "../react-query/http";
+import { buildQueryString } from "../utils/buildQuery";
+import type { UnitFilters } from "./unit.types";
 
 /**
  * Unit API methods
@@ -32,7 +32,7 @@ export const unitApi = {
     filters?: UnitFilters,
   ): Promise<UnitListResponse> => {
     return apiFetch<UnitListResponse>(
-      `/units${buildQueryString({q: query, ...filters})}`,
+      `/units${buildQueryString({ q: query, ...filters })}`,
     );
   },
 
@@ -44,7 +44,7 @@ export const unitApi = {
     filters?: UnitFilters,
   ): Promise<UnitListResponse> => {
     return apiFetch<UnitListResponse>(
-      `/units${buildQueryString({userId, ...filters})}`,
+      `/units${buildQueryString({ userId, ...filters })}`,
     );
   },
 
@@ -59,8 +59,8 @@ export const unitApi = {
    * Create new unit
    */
   create: async (input: CreateUnitInput): Promise<UnitResponse> => {
-    return apiFetch<UnitResponse>('/units', {
-      method: 'POST',
+    return apiFetch<UnitResponse>("/units", {
+      method: "POST",
       body: JSON.stringify(input),
     });
   },
@@ -73,7 +73,7 @@ export const unitApi = {
     input: UpdateUnitInput,
   ): Promise<UnitResponse> => {
     return apiFetch<UnitResponse>(`/units/${unitId}`, {
-      method: 'PUT',
+      method: "PUT",
       body: JSON.stringify(input),
     });
   },
@@ -81,9 +81,9 @@ export const unitApi = {
   /**
    * Delete unit
    */
-  remove: async (unitId: string): Promise<{message: string}> => {
-    return apiFetch<{message: string}>(`/units/${unitId}`, {
-      method: 'DELETE',
+  remove: async (unitId: string): Promise<{ message: string }> => {
+    return apiFetch<{ message: string }>(`/units/${unitId}`, {
+      method: "DELETE",
     });
   },
 };

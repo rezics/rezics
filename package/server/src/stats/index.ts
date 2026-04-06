@@ -1,1 +1,1 @@
-export {statsAdminApi} from './stats.admin.api';
+export { statsAdminApi } from "./stats.admin.api";

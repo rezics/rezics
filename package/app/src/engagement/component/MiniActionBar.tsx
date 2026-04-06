@@ -1,18 +1,19 @@
-import {IconButton, Popper, Tooltip} from '@mui/material';
+import { useAlertStore } from "@app/state/windowAlertStore";
 
-import {Add, Comment, Edit, FavoriteBorder} from '@mui/icons-material';
-import {useTranslation} from 'react-i18next';
-import {useNavigate} from '@tanstack/react-router';
-import {useUserProfileStore} from '@/user/state';
-import {useQuery} from '@tanstack/react-query';
+import { Add, Comment, Edit, FavoriteBorder } from "@mui/icons-material";
+import { IconButton, Popper, Tooltip } from "@mui/material";
 import {
   useCreateReactionMutation,
   useDeleteReactionMutation,
-} from '@rezics/api/reaction/reaction.mutations';
-import {reactionQueries} from '@rezics/api/reaction/reaction.queries';
-import React, {useEffect, useState} from 'react';
-import {BookmarkTagManager} from './BookmarkTagManager';
-import {useAlertStore} from '@app/state/windowAlertStore';
+} from "@rezics/api/reaction/reaction.mutations";
+import { reactionQueries } from "@rezics/api/reaction/reaction.queries";
+import { useQuery } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
+import type React from "react";
+import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { useUserProfileStore } from "@/user/state";
+import { BookmarkTagManager } from "./BookmarkTagManager";
 
 interface MiniAdminActionBarProps {
   editionURL: string;
@@ -25,9 +26,9 @@ export function MiniAdminActionBar({
   textColor,
   userUnitId,
 }: MiniAdminActionBarProps) {
-  const {t} = useTranslation();
-  const user = useUserProfileStore(state => state.user);
-  const isAdmin = user?.permission?.role.includes('ADMIN');
+  const { t } = useTranslation();
+  const user = useUserProfileStore((state) => state.user);
+  const isAdmin = user?.permission?.role.includes("ADMIN");
   const isOwner = user?.unitId === userUnitId;
   const navigate = useNavigate();
 
@@ -36,12 +37,12 @@ export function MiniAdminActionBar({
   }
   return (
     <span>
-      <Tooltip title={t('common.edit')} placement="top">
+      <Tooltip title={t("common.edit")} placement="top">
         <IconButton
-          aria-label={t('common.edit')}
+          aria-label={t("common.edit")}
           size="small"
           onClick={() => {
-            navigate({to: editionURL});
+            navigate({ to: editionURL });
           }}
         >
           <Edit fontSize="small" className={textColor} />
@@ -67,21 +68,21 @@ export function MiniActionBar({
   unitId,
   handleOnCommentClick,
 }: MiniActionBarProps) {
-  const {t} = useTranslation();
-  const {show: showAlert} = useAlertStore();
-  const {data} = useQuery(reactionQueries.my(unitId ?? ''));
+  const { t } = useTranslation();
+  const { show: showAlert } = useAlertStore();
+  const { data } = useQuery(reactionQueries.my(unitId ?? ""));
   const [userReactions, setUserReactions] = useState<string[]>(
-    data?.reactionsByTarget?.[unitId ?? ''] ?? [],
+    data?.reactionsByTarget?.[unitId ?? ""] ?? [],
   );
 
   useEffect(() => {
-    if (data?.reactionsByTarget?.[unitId ?? '']) {
-      setUserReactions(data?.reactionsByTarget?.[unitId ?? '']);
+    if (data?.reactionsByTarget?.[unitId ?? ""]) {
+      setUserReactions(data?.reactionsByTarget?.[unitId ?? ""]);
     }
   }, [data, unitId]);
 
-  const hasLike = userReactions.includes('like');
-  const hasBookmark = userReactions.includes('bookmark');
+  const hasLike = userReactions.includes("like");
+  const hasBookmark = userReactions.includes("bookmark");
 
   const [anchorBookmarkEl, setBookmarkAnchorEl] = useState<null | HTMLElement>(
     null,
@@ -90,27 +91,27 @@ export function MiniActionBar({
 
   const createReactionMutation = useCreateReactionMutation({
     onSuccess: () => {
-      showAlert('Reaction updated successfully');
+      showAlert("Reaction updated successfully");
     },
   });
 
   const deleteReactionMutation = useDeleteReactionMutation({
     onSuccess: () => {
-      showAlert('Reaction updated successfully');
+      showAlert("Reaction updated successfully");
     },
   });
 
-  const handleToggleReaction = (reaction: 'like' | 'dislike') => {
+  const handleToggleReaction = (reaction: "like" | "dislike") => {
     if (!unitId) return;
 
     const hasReaction = userReactions?.includes(reaction);
 
     if (hasReaction) {
-      deleteReactionMutation.mutate({targetId: unitId, reaction});
-      setUserReactions(prev => prev.filter(r => r !== reaction));
+      deleteReactionMutation.mutate({ targetId: unitId, reaction });
+      setUserReactions((prev) => prev.filter((r) => r !== reaction));
     } else {
-      createReactionMutation.mutate({targetId: unitId, reaction});
-      setUserReactions(prev => [...prev, reaction]);
+      createReactionMutation.mutate({ targetId: unitId, reaction });
+      setUserReactions((prev) => [...prev, reaction]);
     }
   };
 
@@ -121,23 +122,23 @@ export function MiniActionBar({
   // const [_location, navigate] = useLocation();
   return (
     <span className={className}>
-      <Tooltip title={t('accessibility.favorite')} placement="top">
+      <Tooltip title={t("accessibility.favorite")} placement="top">
         <IconButton
-          aria-label={t('accessibility.favorite')}
+          aria-label={t("accessibility.favorite")}
           size="small"
-          onClick={() => handleToggleReaction('like')}
+          onClick={() => handleToggleReaction("like")}
         >
           <FavoriteBorder
             fontSize="small"
-            color={hasLike ? 'primary' : 'inherit'}
+            color={hasLike ? "primary" : "inherit"}
             className={textColor}
           />
         </IconButton>
       </Tooltip>
       {!hideReply && (
-        <Tooltip title={t('accessibility.comments')} placement="top">
+        <Tooltip title={t("accessibility.comments")} placement="top">
           <IconButton
-            aria-label={t('accessibility.comments')}
+            aria-label={t("accessibility.comments")}
             size="small"
             onClick={handleOnCommentClick ?? undefined}
           >
@@ -150,9 +151,9 @@ export function MiniActionBar({
         anchorEl={anchorBookmarkEl}
         placement="right-start"
         modifiers={[
-          {name: 'flip', enabled: true},
+          { name: "flip", enabled: true },
           {
-            name: 'preventOverflow',
+            name: "preventOverflow",
             options: {
               altAxis: true, // 允许上下、左右溢出检测
               padding: 8,
@@ -160,7 +161,7 @@ export function MiniActionBar({
           },
         ]}
         sx={{
-          zIndex: theme => theme.zIndex.modal + 1,
+          zIndex: (theme) => theme.zIndex.modal + 1,
         }}
       >
         {unitId && (
@@ -173,15 +174,15 @@ export function MiniActionBar({
           />
         )}
       </Popper>
-      <Tooltip title={t('accessibility.collection')} placement="top">
+      <Tooltip title={t("accessibility.collection")} placement="top">
         <IconButton
-          aria-label={t('accessibility.collection')}
+          aria-label={t("accessibility.collection")}
           size="small"
           onClick={handleBookmarkMenuToggle}
         >
           <Add
             fontSize="small"
-            color={hasBookmark ? 'primary' : 'inherit'}
+            color={hasBookmark ? "primary" : "inherit"}
             className={textColor}
           />
         </IconButton>

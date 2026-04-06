@@ -1,22 +1,22 @@
-import React from 'react';
 import {
   Box,
   Card,
-  CardContent,
   CardActionArea,
+  CardContent,
   Typography,
   useTheme,
-} from '@mui/material';
-import type {ReadlistDTO} from '@rezics/contract';
-import {cn} from '@/shared/util/css-util';
-import {useNavigate} from '@tanstack/react-router';
+} from "@mui/material";
+import type { ReadlistDTO } from "@rezics/contract";
+import { useNavigate } from "@tanstack/react-router";
+import type React from "react";
+import { cn } from "@/shared/util/css-util";
 
 interface ReadListCardProps {
   readlist: ReadlistDTO;
   className?: string;
 }
 
-const ReadListCard: React.FC<ReadListCardProps> = ({readlist, className}) => {
+const ReadListCard: React.FC<ReadListCardProps> = ({ readlist, className }) => {
   const theme = useTheme();
   const navigate = useNavigate();
   const booksCount = readlist.books?.length ?? 0;
@@ -24,15 +24,18 @@ const ReadListCard: React.FC<ReadListCardProps> = ({readlist, className}) => {
 
   const handleOpenReadList = () => {
     if (!readlist.id) return;
-    navigate({to: '/readlist/$readlistId', params: {readlistId: readlist.id}});
+    navigate({
+      to: "/readlist/$readlistId",
+      params: { readlistId: readlist.id },
+    });
   };
 
   return (
-    <Card elevation={0} className={cn('w-full transition-all mb-1', className)}>
+    <Card elevation={0} className={cn("w-full transition-all mb-1", className)}>
       <CardActionArea onClick={handleOpenReadList} disabled={!readlist.id}>
         <Box
           className="w-full aspect-[16/9] overflow-hidden relative"
-          sx={{borderBottom: `1px solid ${theme.palette.divider}`}}
+          sx={{ borderBottom: `1px solid ${theme.palette.divider}` }}
         >
           {readlist.coverUrl ? (
             <img
@@ -56,7 +59,7 @@ const ReadListCard: React.FC<ReadListCardProps> = ({readlist, className}) => {
 
         <CardContent>
           <Typography variant="h6" className="truncate">
-            {readlist.title || '未命名书单'}
+            {readlist.title || "未命名书单"}
           </Typography>
 
           <Typography
@@ -64,7 +67,7 @@ const ReadListCard: React.FC<ReadListCardProps> = ({readlist, className}) => {
             color="text.secondary"
             className="line-clamp-2 mt-1"
           >
-            {readlist.content || '暂无简介'}
+            {readlist.content || "暂无简介"}
           </Typography>
 
           <Box className="flex items-center justify-between text-xs text-muted-foreground mt-3">
@@ -81,9 +84,9 @@ const ReadListCard: React.FC<ReadListCardProps> = ({readlist, className}) => {
               variant="caption"
               color="primary"
               noWrap
-              sx={{lineHeight: 1}}
+              sx={{ lineHeight: 1 }}
             >
-              {readlist.creator?.name || '匿名'}
+              {readlist.creator?.name || "匿名"}
             </Typography>
           </Box>
         </CardContent>

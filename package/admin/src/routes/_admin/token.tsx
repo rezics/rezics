@@ -1,10 +1,10 @@
-import {createFileRoute, lazyRouteComponent} from '@tanstack/react-router';
+import { createFileRoute, lazyRouteComponent } from "@tanstack/react-router";
 
 const TokenPage = lazyRouteComponent(
-  () => import('@/token/page/TokenPage'),
-  'TokenPage',
+  () => import("@/token/page/TokenPage"),
+  "TokenPage",
 );
 
-export const Route = createFileRoute('/_admin/token')({
+export const Route = createFileRoute("/_admin/token")({
   component: TokenPage,
 });

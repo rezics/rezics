@@ -1,1 +1,1 @@
-export {NoticeBoard} from './section/NoticeBoard';
+export { NoticeBoard } from "./section/NoticeBoard";

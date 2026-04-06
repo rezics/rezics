@@ -1,16 +1,17 @@
-import React, {useRef, useState} from 'react';
-import {TextSearchInputBase} from './TextSearchInputBase';
-import {SearchSuggestions} from './SearchSuggestions';
-import {cn} from '@/shared/util/css-util';
+import type React from "react";
+import { useRef, useState } from "react";
+import { cn } from "@/shared/util/css-util";
+import { SearchSuggestions } from "./SearchSuggestions";
+import { TextSearchInputBase } from "./TextSearchInputBase";
 
 export type TextSearchInputProps = {
   onSearch: (value: string) => void;
-  defaultValue: {keyword: string};
+  defaultValue: { keyword: string };
   placeholder?: string;
   enableSuggestions?: boolean;
   className?: string;
   startAdornmentIcon?: React.ReactNode;
-  size?: 'small' | 'medium';
+  size?: "small" | "medium";
   height?: number;
 };
 
@@ -21,7 +22,7 @@ export const TextSearchInput = ({
   enableSuggestions = false,
   className,
   startAdornmentIcon,
-  size = 'small',
+  size = "small",
   height,
 }: TextSearchInputProps) => {
   const rootRef = useRef<HTMLDivElement>(null);
@@ -29,10 +30,10 @@ export const TextSearchInput = ({
   const [value, setValue] = useState(defaultValue);
   const [openSuggestion, setOpenSuggestion] = useState(false);
 
-  const keyword = value.keyword ?? '';
+  const keyword = value.keyword ?? "";
 
   const handleValueChange = (keyword: string) => {
-    setValue({keyword});
+    setValue({ keyword });
     setOpenSuggestion(true);
   };
 
@@ -42,16 +43,16 @@ export const TextSearchInput = ({
   };
 
   const handleSelectSuggestion = (keyword: string) => {
-    setValue({keyword});
+    setValue({ keyword });
     setOpenSuggestion(false);
     onSearch(keyword);
   };
 
   return (
     <div
-      className={cn('relative', className)}
+      className={cn("relative", className)}
       ref={rootRef}
-      onBlur={event => {
+      onBlur={(event) => {
         const nextFocus = event.relatedTarget as Node | null;
 
         // if focus moves to internal element, do not close

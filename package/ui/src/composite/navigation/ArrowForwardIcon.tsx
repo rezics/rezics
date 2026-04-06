@@ -1,26 +1,26 @@
-import ArrowForwardIosRoundedIcon from '@mui/icons-material/ArrowForwardIosRounded';
-import {Box, styled, Typography} from '@mui/material';
-import React from 'react';
-import {Link} from '@rezics/ui/primitive/link/Link.tsx';
+import ArrowForwardIosRoundedIcon from "@mui/icons-material/ArrowForwardIosRounded";
+import { Box, styled, Typography } from "@mui/material";
+import { Link } from "@rezics/ui/primitive/link/Link.tsx";
+import type React from "react";
 
-const LinkWithIcon = styled(Box)(({theme}) => ({
-  display: 'inline-flex',
-  alignItems: 'center',
-  cursor: 'pointer',
+const LinkWithIcon = styled(Box)(({ theme }) => ({
+  display: "inline-flex",
+  alignItems: "center",
+  cursor: "pointer",
   color: theme.palette.text.primary,
-  transition: 'color var(--default-transition-duration) var(--ease-out)',
-  '& .arrow-icon': {
+  transition: "color var(--default-transition-duration) var(--ease-out)",
+  "& .arrow-icon": {
     fontWeight: 900,
-    marginLeft: '0.125rem',
-    lineHeight: '1',
-    fontSize: '24px', // 让 size 从 props 控制
-    color: 'var(--color-on-base)',
+    marginLeft: "0.125rem",
+    lineHeight: "1",
+    fontSize: "24px", // 让 size 从 props 控制
+    color: "var(--color-on-base)",
     transition:
-      'color var(--default-transition-duration) var(--ease-out), transform var(--default-transition-duration) var(--ease-out)',
+      "color var(--default-transition-duration) var(--ease-out), transform var(--default-transition-duration) var(--ease-out)",
   },
-  '&:hover .arrow-icon': {
+  "&:hover .arrow-icon": {
     color: theme.palette.primary.main,
-    transform: 'scale(1.1)',
+    transform: "scale(1.1)",
   },
 }));
 
@@ -36,7 +36,7 @@ export const ArrowForwardIcon: React.FC<ArrowForwardIconProps> = ({
   to,
 }) => {
   return (
-    <Link to={to || '/'}>
+    <Link to={to || "/"}>
       <LinkWithIcon>
         {/* 文本部分，用 Typography 能保证行高一致 */}
         <Typography component="span">{children}</Typography>

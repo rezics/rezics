@@ -3,7 +3,7 @@
  * @module ChapterGenerator
  */
 
-import {faker} from '@faker-js/faker';
+import { faker } from "@faker-js/faker";
 
 /**
  * Represents a single chapter node.
@@ -39,27 +39,27 @@ export function generateChapterTree(
   const order: Record<string, string[]> = {};
 
   // Create top-level chapters
-  const topLevelIds: string[] = Array.from({length: topLevelCount}).map(() =>
+  const topLevelIds: string[] = Array.from({ length: topLevelCount }).map(() =>
     faker.string.uuid(),
   );
 
   for (const parentId of topLevelIds) {
     chapters[parentId] = {
       id: parentId,
-      title: faker.lorem.words({min: 2, max: 4}),
+      title: faker.lorem.words({ min: 2, max: 4 }),
       noContent: true,
     };
 
     // Generate subchapters
-    const subCount = faker.number.int({min: minChildren, max: maxChildren});
+    const subCount = faker.number.int({ min: minChildren, max: maxChildren });
     const subIds: string[] = [];
 
     for (let i = 0; i < subCount; i++) {
       const childId = faker.string.uuid();
       chapters[childId] = {
         id: childId,
-        title: faker.lorem.words({min: 3, max: 6}),
-        noContent: faker.datatype.boolean({probability: 0.2}),
+        title: faker.lorem.words({ min: 3, max: 6 }),
+        noContent: faker.datatype.boolean({ probability: 0.2 }),
       };
       subIds.push(childId);
     }
@@ -67,7 +67,7 @@ export function generateChapterTree(
     order[parentId] = subIds;
   }
 
-  return {chapters, order};
+  return { chapters, order };
 }
 
 /**

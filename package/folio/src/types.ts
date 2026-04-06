@@ -1,4 +1,4 @@
-import type { ReactNode, ComponentType } from 'react';
+import type { ComponentType, ReactNode } from "react";
 
 // ── Tree Types ──────────────────────────────────────────────
 
@@ -33,21 +33,21 @@ export interface FolioProgress {
 // ── State ────────��──────────────────────────────────────────
 
 export type FolioStatus =
-  | { state: 'idle' }
-  | { state: 'loading'; chapterIndex?: number }
-  | { state: 'ready' }
-  | { state: 'error'; error: Error; retry: () => void };
+  | { state: "idle" }
+  | { state: "loading"; chapterIndex?: number }
+  | { state: "ready" }
+  | { state: "error"; error: Error; retry: () => void };
 
 export interface FolioState {
-  readMode: 'scroll' | 'page';
+  readMode: "scroll" | "page";
   chapterIndex: number;
   pageIndex: number;
   pageCount: number;
   scrollOffset: number;
   fontSize: number;
   lineHeight: number;
-  theme: 'light' | 'dark' | 'sepia';
-  turnStyle: 'rotate' | 'slide' | 'fade';
+  theme: "light" | "dark" | "sepia";
+  turnStyle: "rotate" | "slide" | "fade";
   status: FolioStatus;
 }
 
@@ -58,16 +58,16 @@ export interface FolioConfig {
 // ── Actions & Dispatch ──────────────────────────────────────
 
 export type FolioAction =
-  | { type: 'SET_READ_MODE'; mode: 'scroll' | 'page' }
-  | { type: 'SET_CHAPTER'; index: number }
-  | { type: 'SET_PAGE'; index: number }
-  | { type: 'SET_FONT_SIZE'; size: number }
-  | { type: 'SET_LINE_HEIGHT'; height: number }
-  | { type: 'SET_THEME'; theme: 'light' | 'dark' | 'sepia' }
-  | { type: 'SET_TURN_STYLE'; style: 'rotate' | 'slide' | 'fade' }
-  | { type: 'SET_PAGE_COUNT'; count: number }
-  | { type: 'SET_SCROLL_OFFSET'; offset: number }
-  | { type: 'SET_STATUS'; status: FolioStatus };
+  | { type: "SET_READ_MODE"; mode: "scroll" | "page" }
+  | { type: "SET_CHAPTER"; index: number }
+  | { type: "SET_PAGE"; index: number }
+  | { type: "SET_FONT_SIZE"; size: number }
+  | { type: "SET_LINE_HEIGHT"; height: number }
+  | { type: "SET_THEME"; theme: "light" | "dark" | "sepia" }
+  | { type: "SET_TURN_STYLE"; style: "rotate" | "slide" | "fade" }
+  | { type: "SET_PAGE_COUNT"; count: number }
+  | { type: "SET_SCROLL_OFFSET"; offset: number }
+  | { type: "SET_STATUS"; status: FolioStatus };
 
 export type FolioDispatch = (action: FolioAction) => void;
 
@@ -81,7 +81,7 @@ export interface PanelProps {
 }
 
 export interface RendererPlugin {
-  kind: 'renderer';
+  kind: "renderer";
   id: string;
   contentTypes: string[];
   Renderer: ComponentType<{ raw: string; meta?: Record<string, unknown> }>;

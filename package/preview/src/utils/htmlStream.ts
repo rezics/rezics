@@ -10,12 +10,12 @@ export function withDoctype(stream: ReadableStream<Uint8Array>) {
 
   return new ReadableStream<Uint8Array>({
     start(controller) {
-      controller.enqueue(encoder.encode('<!doctype html>'));
+      controller.enqueue(encoder.encode("<!doctype html>"));
 
       const pump = async (): Promise<void> => {
         try {
           while (true) {
-            const {done, value} = await reader.read();
+            const { done, value } = await reader.read();
             if (done) break;
             if (value) controller.enqueue(value);
           }

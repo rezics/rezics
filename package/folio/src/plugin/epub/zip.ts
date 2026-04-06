@@ -1,4 +1,4 @@
-import { unzipSync } from 'fflate';
+import { unzipSync } from "fflate";
 
 export type FileMap = Map<string, Uint8Array>;
 

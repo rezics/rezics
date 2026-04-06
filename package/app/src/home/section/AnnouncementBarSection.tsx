@@ -1,11 +1,14 @@
-import {useQuery} from '@tanstack/react-query';
-import {echoKvGetQuery} from '@rezics/api/echokv/echokv';
-import {parseEchoKVResponse} from '@rezics/api/echokv/util';
-import {AnnouncementBar, type Announcement} from '../component/AnnouncementBar';
-import {Skeleton} from '@mui/material';
+import { Skeleton } from "@mui/material";
+import { echoKvGetQuery } from "@rezics/api/echokv/echokv";
+import { parseEchoKVResponse } from "@rezics/api/echokv/util";
+import { useQuery } from "@tanstack/react-query";
+import {
+  type Announcement,
+  AnnouncementBar,
+} from "../component/AnnouncementBar";
 
 export const AnnouncementBarSection = () => {
-  const {data, isLoading} = useQuery(echoKvGetQuery('home_notice'));
+  const { data, isLoading } = useQuery(echoKvGetQuery("home_notice"));
 
   if (isLoading) return <Skeleton variant="rectangular" height={40} />;
 

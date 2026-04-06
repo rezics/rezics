@@ -1,9 +1,9 @@
-import {faker} from '@faker-js/faker';
-import type {PrismaClient} from '#/prisma/generated/client.js';
-import {UnitType, UnitStatus} from '#/prisma/generated/client.js';
-import type {CreatedUser} from './types.js';
-import {randomInt, randomBoolean, generateParagraph} from './utils.js';
-import {upsertCommentCountForUnit} from './unitStats.js';
+import { faker } from "@faker-js/faker";
+import type { PrismaClient } from "#/prisma/generated/client.js";
+import { UnitStatus, UnitType } from "#/prisma/generated/client.js";
+import type { CreatedUser } from "./types.js";
+import { upsertCommentCountForUnit } from "./unitStats.js";
+import { generateParagraph, randomBoolean, randomInt } from "./utils.js";
 
 /**
  * Result of seeding comments
@@ -49,9 +49,9 @@ export async function seedComments(
         content: generateParagraph(2, 5),
         metadata: {},
         targetUnitId: null,
-        publishedAt: faker.date.past({years: 1}),
+        publishedAt: faker.date.past({ years: 1 }),
       },
-      select: {id: true},
+      select: { id: true },
     });
 
     await prisma.commentIndex.create({
@@ -68,7 +68,7 @@ export async function seedComments(
     perRootCount.set(root, (perRootCount.get(root) ?? 0) + 1);
   }
 
-  return {perRootCount};
+  return { perRootCount };
 }
 
 /**
@@ -80,7 +80,7 @@ export async function updateStatsWithCommentCounts(
   prisma: PrismaClient,
   perRootCount: Map<string, number>,
 ): Promise<void> {
-  console.log('📊 Updating unit stats with comment counts...');
+  console.log("📊 Updating unit stats with comment counts...");
   const updates: Promise<void>[] = [];
   perRootCount.forEach((count, unitId) => {
     updates.push(upsertCommentCountForUnit(prisma, unitId, count));

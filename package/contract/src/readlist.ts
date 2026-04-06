@@ -1,5 +1,5 @@
-import {t} from 'elysia';
-import {publicUserSchema} from './unit';
+import { t } from "elysia";
+import { publicUserSchema } from "./unit";
 
 // ANCHOR Readlist contracts (Unit.type = 'READLIST')
 
@@ -19,7 +19,7 @@ export const readlistMetadataSchema = t.Object({
   ),
 });
 
-export type ReadlistMetadata = (typeof readlistMetadataSchema)['static'];
+export type ReadlistMetadata = (typeof readlistMetadataSchema)["static"];
 
 /**
  * Readlist DTO
@@ -67,7 +67,7 @@ export const readlistDTOSchema = t.Object({
   order: t.Optional(t.Array(t.String())),
 });
 
-export type ReadlistDTO = (typeof readlistDTOSchema)['static'];
+export type ReadlistDTO = (typeof readlistDTOSchema)["static"];
 
 // List & Params & Response
 
@@ -82,15 +82,15 @@ export const readlistListQuerySchema = t.Object({
     t.Object({
       type: t.Optional(
         t.Union([
-          t.Literal('createdAt'),
-          t.Literal('updatedAt'),
-          t.Literal('publishedAt'),
-          t.Literal('likeCount'),
-          t.Literal('commentCount'),
-          t.Literal('viewCount'),
+          t.Literal("createdAt"),
+          t.Literal("updatedAt"),
+          t.Literal("publishedAt"),
+          t.Literal("likeCount"),
+          t.Literal("commentCount"),
+          t.Literal("viewCount"),
         ]),
       ),
-      order: t.Optional(t.Union([t.Literal('asc'), t.Literal('desc')])),
+      order: t.Optional(t.Union([t.Literal("asc"), t.Literal("desc")])),
     }),
   ),
   start: t.Optional(t.Number()),
@@ -103,7 +103,7 @@ export const readlistListQuerySchema = t.Object({
   limit: t.Optional(t.Number()),
 });
 
-export type ReadlistListQuery = (typeof readlistListQuerySchema)['static'];
+export type ReadlistListQuery = (typeof readlistListQuerySchema)["static"];
 
 export const readlistListResponseSchema = t.Object({
   readlists: t.Array(readlistDTOSchema),
@@ -111,17 +111,17 @@ export const readlistListResponseSchema = t.Object({
 });
 
 export type ReadlistListResponse =
-  (typeof readlistListResponseSchema)['static'];
+  (typeof readlistListResponseSchema)["static"];
 
 export const readlistParamsSchema = t.Object({
   unitId: t.String(),
 });
 
-export type ReadlistParams = (typeof readlistParamsSchema)['static'];
+export type ReadlistParams = (typeof readlistParamsSchema)["static"];
 
 export const readlistResponseSchema = readlistDTOSchema;
 
-export type ReadlistResponse = (typeof readlistResponseSchema)['static'];
+export type ReadlistResponse = (typeof readlistResponseSchema)["static"];
 
 /**
  * Create Readlist Input
@@ -139,11 +139,11 @@ export const createReadlistSchema = t.Object({
   coverUrl: t.Optional(t.String()),
 });
 
-export type CreateReadlistInput = (typeof createReadlistSchema)['static'];
+export type CreateReadlistInput = (typeof createReadlistSchema)["static"];
 
 /**
  * Update Readlist Input (partial)
  */
 export const updateReadlistSchema = t.Partial(createReadlistSchema);
 
-export type UpdateReadlistInput = (typeof updateReadlistSchema)['static'];
+export type UpdateReadlistInput = (typeof updateReadlistSchema)["static"];

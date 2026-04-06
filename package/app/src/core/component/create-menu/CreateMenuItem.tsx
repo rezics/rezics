@@ -1,24 +1,24 @@
-import PostAddOutlinedIcon from '@mui/icons-material/PostAddOutlined';
-import PlaylistAddOutlinedIcon from '@mui/icons-material/PlaylistAddOutlined';
-import {NavigationList} from '../navigation/NavigationList';
-import type {NavigationItem} from '../navigation/navigation';
+import PlaylistAddOutlinedIcon from "@mui/icons-material/PlaylistAddOutlined";
+import PostAddOutlinedIcon from "@mui/icons-material/PostAddOutlined";
+import { NavigationList } from "../navigation/NavigationList";
+import type { NavigationItem } from "../navigation/navigation";
 
 const CreateMenuNavigation: NavigationItem[] = [
   {
-    kind: 'item',
-    segment: '/book/new',
-    title: 'New Book',
+    kind: "item",
+    segment: "/book/new",
+    title: "New Book",
     icon: PostAddOutlinedIcon,
   },
   {
-    kind: 'item',
-    title: 'New Read List',
-    segment: '/readlist/new',
+    kind: "item",
+    title: "New Read List",
+    segment: "/readlist/new",
     icon: PlaylistAddOutlinedIcon,
   },
 ];
 
-export const CreateMenuItem = ({onClose}: {onClose: () => void}) => {
+export const CreateMenuItem = ({ onClose }: { onClose: () => void }) => {
   const handleClick = () => {
     onClose();
   };
@@ -27,7 +27,7 @@ export const CreateMenuItem = ({onClose}: {onClose: () => void}) => {
     <NavigationList
       NAVIGATION={CreateMenuNavigation}
       isMobile={false}
-      pathname={'/'}
+      pathname={"/"}
       openItems={{}}
       handleItemClick={handleClick}
     />

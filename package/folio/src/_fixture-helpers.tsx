@@ -1,12 +1,12 @@
-import { useState, useEffect, useCallback, type ChangeEvent } from 'react';
 import {
-  FolioProvider,
-  useFolio,
   type FolioAction,
   type FolioNode,
+  FolioProvider,
   type RendererPlugin,
-} from '@rezics/folio';
-import { WRAPPER_STYLE } from './_stubs';
+  useFolio,
+} from "@rezics/folio";
+import { type ChangeEvent, useCallback, useEffect, useState } from "react";
+import { WRAPPER_STYLE } from "./_stubs";
 
 // ---------------------------------------------------------------------------
 // File upload hook
@@ -26,13 +26,13 @@ export function useFileUpload(accept: string) {
     return (
       <div
         style={{
-          height: '100vh',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          flexDirection: 'column',
+          height: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          flexDirection: "column",
           gap: 12,
-          color: '#666',
+          color: "#666",
           fontSize: 14,
         }}
       >
@@ -50,9 +50,9 @@ export function useFileUpload(accept: string) {
 // ---------------------------------------------------------------------------
 
 export const THEMES: Record<string, React.CSSProperties> = {
-  light: { background: '#ffffff', color: '#1a1a1a' },
-  dark: { background: '#1a1a1a', color: '#e0e0e0' },
-  sepia: { background: '#f4ecd8', color: '#5b4636' },
+  light: { background: "#ffffff", color: "#1a1a1a" },
+  dark: { background: "#1a1a1a", color: "#e0e0e0" },
+  sepia: { background: "#f4ecd8", color: "#5b4636" },
 };
 
 // ---------------------------------------------------------------------------
@@ -63,7 +63,7 @@ export function StateOverride({ actions }: { actions: FolioAction[] }) {
   const { dispatch } = useFolio();
   useEffect(() => {
     for (const action of actions) dispatch(action);
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [dispatch, actions]); // eslint-disable-line react-hooks/exhaustive-deps
   return null;
 }
 
@@ -75,15 +75,15 @@ export function FixtureReader() {
   const { state, content, registry } = useFolio();
   const themeStyle = THEMES[state.theme] ?? THEMES.light;
 
-  if (state.status.state === 'loading') {
+  if (state.status.state === "loading") {
     return (
       <div
         style={{
           ...themeStyle,
-          height: '100%',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
+          height: "100%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
         }}
       >
         Loading...
@@ -91,15 +91,15 @@ export function FixtureReader() {
     );
   }
 
-  if (state.status.state === 'error') {
+  if (state.status.state === "error") {
     return (
       <div
         style={{
           ...themeStyle,
-          height: '100%',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
+          height: "100%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
         }}
       >
         Error: {state.status.error.message}
@@ -108,7 +108,7 @@ export function FixtureReader() {
   }
 
   if (!content) {
-    return <div style={{ ...themeStyle, height: '100%' }} />;
+    return <div style={{ ...themeStyle, height: "100%" }} />;
   }
 
   const plugin = registry.resolveRenderer(content.contentType);
@@ -126,11 +126,11 @@ export function FixtureReader() {
     <div
       style={{
         ...themeStyle,
-        height: '100%',
-        padding: '24px 32px',
+        height: "100%",
+        padding: "24px 32px",
         fontSize: `${state.fontSize}px`,
         lineHeight: state.lineHeight,
-        overflow: 'auto',
+        overflow: "auto",
       }}
     >
       <Renderer raw={content.raw} meta={content.meta} />

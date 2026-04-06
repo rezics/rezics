@@ -1,5 +1,5 @@
-import type { ComponentType } from 'react';
-import type { PanelProps, RendererPlugin } from './types';
+import type { ComponentType } from "react";
+import type { PanelProps, RendererPlugin } from "./types";
 
 export class PluginRegistry {
   private renderers: RendererPlugin[] = [];
@@ -15,7 +15,7 @@ export class PluginRegistry {
     return this.renderers.find((p) => p.contentTypes.includes(contentType));
   }
 
-  collectSlot<K extends 'Toolbar' | 'Controls' | 'Settings'>(
+  collectSlot<K extends "Toolbar" | "Controls" | "Settings">(
     slot: K,
   ): ComponentType<PanelProps>[] {
     return this.renderers

@@ -1,5 +1,6 @@
-import React, {useEffect, useState} from 'react';
-import {Button, type ButtonProps} from '@mui/material';
+import { Button, type ButtonProps } from "@mui/material";
+import type React from "react";
+import { useEffect, useState } from "react";
 
 interface CooldownButtonProps extends ButtonProps {
   cooldownMs: number; // 冷却时间，单位 ms，比如 5000 = 5 秒
@@ -31,7 +32,7 @@ export const CooldownButton: React.FC<CooldownButtonProps> = ({
   const remainingMs = inCooldown ? cooldownUntil! - now : 0;
   const remainingSec = Math.ceil(remainingMs / 1000);
 
-  const handleClick: React.MouseEventHandler<HTMLButtonElement> = e => {
+  const handleClick: React.MouseEventHandler<HTMLButtonElement> = (e) => {
     if (inCooldown) {
       // 冷却期内点击（如果你想完全无反应，可以去掉这个分支）
       onCooldownClick?.();

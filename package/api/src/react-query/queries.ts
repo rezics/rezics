@@ -1,12 +1,12 @@
 // An Example of React Query
 
-import {queryOptions} from '@tanstack/react-query';
-import {apiFetch} from './http';
+import { queryOptions } from "@tanstack/react-query";
+import { apiFetch } from "./http";
 
 // 1) key 工厂（便于层级失效/选择性匹配）
 export const userKeys = {
-  all: () => ['users'] as const,
-  byId: (id: string) => [...userKeys.all(), 'by-id', id] as const,
+  all: () => ["users"] as const,
+  byId: (id: string) => [...userKeys.all(), "by-id", id] as const,
 };
 
 // 2) 原始返回类型（服务端契约）
@@ -32,7 +32,7 @@ export const userQueries = {
       queryKey: userKeys.byId(id),
       queryFn: () => apiFetch<UserDTO>(`/users/${id}`),
       // select 的返回值（UserView）就是 *最终* data 类型
-      select: u => ({
+      select: (u) => ({
         id: u.id,
         displayName: u.name,
         avatarUrl: u.avatar,

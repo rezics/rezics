@@ -1,20 +1,20 @@
+import type {
+  CreateJwtServiceInput,
+  JwtServiceDTO,
+  UpdateJwtServiceInput,
+} from "@rezics/contract";
 import {
+  type UseMutationOptions,
   useMutation,
   useQueryClient,
-  type UseMutationOptions,
-} from '@tanstack/react-query';
-import {authJwtServiceApi} from './auth-jwt-service.api';
-import {authJwtServiceKeys} from './auth-jwt-service.keys';
-import type {
-  JwtServiceDTO,
-  CreateJwtServiceInput,
-  UpdateJwtServiceInput,
-} from '@rezics/contract';
+} from "@tanstack/react-query";
+import { authJwtServiceApi } from "./auth-jwt-service.api";
+import { authJwtServiceKeys } from "./auth-jwt-service.keys";
 
 export function useCreateAuthJwtServiceMutation(
   options?: Omit<
     UseMutationOptions<JwtServiceDTO, Error, CreateJwtServiceInput>,
-    'mutationFn'
+    "mutationFn"
   >,
 ) {
   const queryClient = useQueryClient();
@@ -24,7 +24,7 @@ export function useCreateAuthJwtServiceMutation(
       authJwtServiceApi.create(input),
     ...options,
     onSuccess: (data, variables, context) => {
-      queryClient.invalidateQueries({queryKey: authJwtServiceKeys.lists()});
+      queryClient.invalidateQueries({ queryKey: authJwtServiceKeys.lists() });
       queryClient.setQueryData(
         authJwtServiceKeys.detail(data.serviceKey),
         data,
@@ -39,15 +39,15 @@ export function useUpdateAuthJwtServiceMutation(
     UseMutationOptions<
       JwtServiceDTO,
       Error,
-      {serviceKey: string; input: UpdateJwtServiceInput}
+      { serviceKey: string; input: UpdateJwtServiceInput }
     >,
-    'mutationFn'
+    "mutationFn"
   >,
 ) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({serviceKey, input}) =>
+    mutationFn: ({ serviceKey, input }) =>
       authJwtServiceApi.update(serviceKey, input),
     ...options,
     onSuccess: (data, variables, context) => {
@@ -55,7 +55,7 @@ export function useUpdateAuthJwtServiceMutation(
         authJwtServiceKeys.detail(variables.serviceKey),
         data,
       );
-      queryClient.invalidateQueries({queryKey: authJwtServiceKeys.lists()});
+      queryClient.invalidateQueries({ queryKey: authJwtServiceKeys.lists() });
       options?.onSuccess?.(data, variables, context);
     },
   });
@@ -64,21 +64,17 @@ export function useUpdateAuthJwtServiceMutation(
 export function useActivateAuthJwtServiceMutation(
   options?: Omit<
     UseMutationOptions<JwtServiceDTO, Error, string>,
-    'mutationFn'
+    "mutationFn"
   >,
 ) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (serviceKey: string) =>
-      authJwtServiceApi.activate(serviceKey),
+    mutationFn: (serviceKey: string) => authJwtServiceApi.activate(serviceKey),
     ...options,
     onSuccess: (data, serviceKey, context) => {
-      queryClient.setQueryData(
-        authJwtServiceKeys.detail(serviceKey),
-        data,
-      );
-      queryClient.invalidateQueries({queryKey: authJwtServiceKeys.lists()});
+      queryClient.setQueryData(authJwtServiceKeys.detail(serviceKey), data);
+      queryClient.invalidateQueries({ queryKey: authJwtServiceKeys.lists() });
       options?.onSuccess?.(data, serviceKey, context);
     },
   });
@@ -87,7 +83,7 @@ export function useActivateAuthJwtServiceMutation(
 export function useDeactivateAuthJwtServiceMutation(
   options?: Omit<
     UseMutationOptions<JwtServiceDTO, Error, string>,
-    'mutationFn'
+    "mutationFn"
   >,
 ) {
   const queryClient = useQueryClient();
@@ -97,11 +93,8 @@ export function useDeactivateAuthJwtServiceMutation(
       authJwtServiceApi.deactivate(serviceKey),
     ...options,
     onSuccess: (data, serviceKey, context) => {
-      queryClient.setQueryData(
-        authJwtServiceKeys.detail(serviceKey),
-        data,
-      );
-      queryClient.invalidateQueries({queryKey: authJwtServiceKeys.lists()});
+      queryClient.setQueryData(authJwtServiceKeys.detail(serviceKey), data);
+      queryClient.invalidateQueries({ queryKey: authJwtServiceKeys.lists() });
       options?.onSuccess?.(data, serviceKey, context);
     },
   });

@@ -2,7 +2,7 @@
  * Types for Reaction API
  */
 
-import type {ReactionListQuery} from '@rezics/contract';
+import type { ReactionListQuery } from "@rezics/contract";
 
 export type ReactionSummary = {
   targetId: string;
@@ -106,4 +106,4 @@ export type BookmarkTagsUpdateInput = {
   tags: string[];
 };
 
-export type {ReactionListQuery};
+export type { ReactionListQuery };

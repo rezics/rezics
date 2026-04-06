@@ -1,6 +1,6 @@
-import {queryOptions} from '@tanstack/react-query';
-import {authJwtServiceApi} from './auth-jwt-service.api';
-import {authJwtServiceKeys} from './auth-jwt-service.keys';
+import { queryOptions } from "@tanstack/react-query";
+import { authJwtServiceApi } from "./auth-jwt-service.api";
+import { authJwtServiceKeys } from "./auth-jwt-service.keys";
 
 export const authJwtServiceListQuery = () =>
   queryOptions({

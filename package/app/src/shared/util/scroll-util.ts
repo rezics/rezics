@@ -1,4 +1,4 @@
-import throttle from 'lodash/throttle';
+import throttle from "lodash/throttle";
 
 type ScrollHandler = (scrollY: number) => void;
 
@@ -20,11 +20,11 @@ export function startThrottledScroll(
   }, interval);
 
   // 2. 注册滚动事件
-  window.addEventListener('scroll', throttled, {passive: true});
+  window.addEventListener("scroll", throttled, { passive: true });
 
   // 3. 返回一个停止监听的函数
   return () => {
-    window.removeEventListener('scroll', throttled);
+    window.removeEventListener("scroll", throttled);
     throttled.cancel(); // 取消任何待执行的节流调用
   };
 }
@@ -42,7 +42,7 @@ export const scroll = async (distance: number, count = 0) => {
   });
 
   if (Math.abs(globalThis.pageYOffset - before) > 10) {
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise((resolve) => setTimeout(resolve, 100));
     return scroll(distance, count + 1);
   }
 };

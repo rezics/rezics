@@ -1,5 +1,6 @@
-import {Box, Link, useTheme} from '@mui/material';
-import React, {useMemo, useState} from 'react';
+import { Box, Link, useTheme } from "@mui/material";
+import type React from "react";
+import { useMemo, useState } from "react";
 
 export type CollapsibleTextShowProps = {
   content: string;
@@ -21,27 +22,27 @@ export const CollapsibleTextShow: React.FC<CollapsibleTextShowProps> = ({
   }, [content, threshold]);
 
   return (
-    <Box sx={{position: 'relative'}}>
+    <Box sx={{ position: "relative" }}>
       <Box>
         {isExpanded ? content : truncatedContent}
         {content.length > threshold && (
           <>
-            {!isExpanded && '…'}{' '}
+            {!isExpanded && "…"}{" "}
             <Link
               component="button"
               onClick={onToggle}
               sx={{
-                fontSize: '0.875rem',
+                fontSize: "0.875rem",
                 color: theme.palette.primary.main,
-                textDecoration: 'none',
-                '&:hover': {
-                  textDecoration: 'underline',
-                  cursor: 'pointer',
+                textDecoration: "none",
+                "&:hover": {
+                  textDecoration: "underline",
+                  cursor: "pointer",
                 },
-                transition: 'color 0.2s',
+                transition: "color 0.2s",
               }}
             >
-              {isExpanded ? '收起' : '展開'}
+              {isExpanded ? "收起" : "展開"}
             </Link>
           </>
         )}
@@ -57,11 +58,11 @@ export type CollapsibleTextContainerProps = {
 
 export const CollapsibleTextContainer: React.FC<
   CollapsibleTextContainerProps
-> = ({content, threshold = 200}) => {
+> = ({ content, threshold = 200 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
   const toggle = () => {
-    setIsExpanded(prev => !prev);
+    setIsExpanded((prev) => !prev);
   };
 
   return (

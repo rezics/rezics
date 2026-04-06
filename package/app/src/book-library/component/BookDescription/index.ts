@@ -1,2 +1,2 @@
-export {BookDescription} from './BookDescription';
-export type {BookDescriptionProps} from './types';
+export { BookDescription } from "./BookDescription";
+export type { BookDescriptionProps } from "./types";

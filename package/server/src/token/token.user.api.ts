@@ -1,34 +1,33 @@
-import {Elysia, t} from 'elysia';
-import {tokenService} from './token.service';
 import {
-  userParamsSchema,
   updateUserSchema,
   userListQuerySchema,
-} from '@rezics/contract';
-import {userService} from '@/user';
+  userParamsSchema,
+} from "@rezics/contract";
+import { Elysia, t } from "elysia";
+import { mapUserToDTO, userService } from "@/user";
+import { mapUserSearchDocToDTO } from "../meili/mapper";
+import { meiliService } from "../meili/meili.service";
 import {
+  hasPermissionToCreateUser,
   hasPermissionToReadUser,
   hasPermissionToUpdateUser,
-  hasPermissionToCreateUser,
-} from './permission';
-import {meiliService} from '../meili/meili.service';
-import {mapUserSearchDocToDTO} from '../meili/mapper';
-import {mapUserToDTO} from '@/user';
+} from "./permission";
+import { tokenService } from "./token.service";
 
 const createUserProfileSchema = t.Object({
   unitId: t.Optional(t.String()),
   slug: t.String({
     minLength: 5,
-    pattern: '^[a-zA-Z0-9](?:[a-zA-Z0-9-_]*[a-zA-Z0-9])?$',
+    pattern: "^[a-zA-Z0-9](?:[a-zA-Z0-9-_]*[a-zA-Z0-9])?$",
   }),
   avatar: t.Optional(t.String()),
   bio: t.Optional(t.String()),
   type: t.Optional(
     t.Union([
-      t.Literal('USER'),
-      t.Literal('AUTHOR'),
-      t.Literal('PRESS'),
-      t.Literal('PRODUCER'),
+      t.Literal("USER"),
+      t.Literal("AUTHOR"),
+      t.Literal("PRESS"),
+      t.Literal("PRODUCER"),
     ]),
   ),
 });
@@ -48,23 +47,23 @@ export const userRoute = new Elysia()
    * GET /token/users
    */
   .get(
-    '/users',
-    async ({headers, set, query, request}) => {
+    "/users",
+    async ({ headers, set, query, request }) => {
       const ip =
-        request.headers.get('x-forwarded-for') ??
-        request.headers.get('x-real-ip') ??
+        request.headers.get("x-forwarded-for") ??
+        request.headers.get("x-real-ip") ??
         null;
-      const userAgent = request.headers.get('user-agent') ?? null;
+      const userAgent = request.headers.get("user-agent") ?? null;
 
-      const {scopes} = await tokenService.authenticateFromHeader(
+      const { scopes } = await tokenService.authenticateFromHeader(
         headers.authorization,
-        {status: set.status as number | undefined},
-        {ip, userAgent},
+        { status: set.status as number | undefined },
+        { ip, userAgent },
       );
 
       if (!hasPermissionToReadUser(scopes)) {
         set.status = 403;
-        throw new Error('Forbidden: token does not have user:read scope');
+        throw new Error("Forbidden: token does not have user:read scope");
       }
 
       const result = await meiliService.searchUsers(query);
@@ -78,9 +77,9 @@ export const userRoute = new Elysia()
       query: userListQuerySchema,
       headers: tokenAuthHeaders,
       detail: {
-        summary: 'List users (token)',
-        description: 'List users with pagination and filtering',
-        tags: ['Token', 'Users'],
+        summary: "List users (token)",
+        description: "List users with pagination and filtering",
+        tags: ["Token", "Users"],
       },
     },
   )
@@ -90,23 +89,23 @@ export const userRoute = new Elysia()
    * POST /token/users
    */
   .post(
-    '/users',
-    async ({headers, set, body, request}) => {
+    "/users",
+    async ({ headers, set, body, request }) => {
       const ip =
-        request.headers.get('x-forwarded-for') ??
-        request.headers.get('x-real-ip') ??
+        request.headers.get("x-forwarded-for") ??
+        request.headers.get("x-real-ip") ??
         null;
-      const userAgent = request.headers.get('user-agent') ?? null;
+      const userAgent = request.headers.get("user-agent") ?? null;
 
-      const {scopes} = await tokenService.authenticateFromHeader(
+      const { scopes } = await tokenService.authenticateFromHeader(
         headers.authorization,
-        {status: set.status as number | undefined},
-        {ip, userAgent},
+        { status: set.status as number | undefined },
+        { ip, userAgent },
       );
 
       if (!hasPermissionToCreateUser(scopes)) {
         set.status = 403;
-        throw new Error('Forbidden: token does not have user:write scope');
+        throw new Error("Forbidden: token does not have user:write scope");
       }
 
       const created = await userService.create(body);
@@ -116,9 +115,9 @@ export const userRoute = new Elysia()
       body: createUserProfileSchema,
       headers: tokenAuthHeaders,
       detail: {
-        summary: 'Create user (token)',
-        description: 'Create a new user using an API token',
-        tags: ['Token', 'Users'],
+        summary: "Create user (token)",
+        description: "Create a new user using an API token",
+        tags: ["Token", "Users"],
       },
     },
   )
@@ -128,23 +127,23 @@ export const userRoute = new Elysia()
    * GET /token/users/me
    */
   .get(
-    '/users/me',
-    async ({headers, set, request}) => {
+    "/users/me",
+    async ({ headers, set, request }) => {
       const ip =
-        request.headers.get('x-forwarded-for') ??
-        request.headers.get('x-real-ip') ??
+        request.headers.get("x-forwarded-for") ??
+        request.headers.get("x-real-ip") ??
         null;
-      const userAgent = request.headers.get('user-agent') ?? null;
+      const userAgent = request.headers.get("user-agent") ?? null;
 
-      const {userId, scopes} = await tokenService.authenticateFromHeader(
+      const { userId, scopes } = await tokenService.authenticateFromHeader(
         headers.authorization,
-        {status: set.status as number | undefined},
-        {ip, userAgent},
+        { status: set.status as number | undefined },
+        { ip, userAgent },
       );
 
       if (!hasPermissionToReadUser(scopes)) {
         set.status = 403;
-        throw new Error('Forbidden: token does not have user:read scope');
+        throw new Error("Forbidden: token does not have user:read scope");
       }
 
       const user = await userService.getByUnitId(userId);
@@ -153,9 +152,9 @@ export const userRoute = new Elysia()
     {
       headers: tokenAuthHeaders,
       detail: {
-        summary: 'Get current user (token)',
-        description: 'Get the user associated with the API token',
-        tags: ['Token', 'Users'],
+        summary: "Get current user (token)",
+        description: "Get the user associated with the API token",
+        tags: ["Token", "Users"],
       },
     },
   )
@@ -165,23 +164,23 @@ export const userRoute = new Elysia()
    * GET /token/users/:unitId
    */
   .get(
-    '/users/:unitId',
-    async ({headers, set, params, request}) => {
+    "/users/:unitId",
+    async ({ headers, set, params, request }) => {
       const ip =
-        request.headers.get('x-forwarded-for') ??
-        request.headers.get('x-real-ip') ??
+        request.headers.get("x-forwarded-for") ??
+        request.headers.get("x-real-ip") ??
         null;
-      const userAgent = request.headers.get('user-agent') ?? null;
+      const userAgent = request.headers.get("user-agent") ?? null;
 
-      const {scopes} = await tokenService.authenticateFromHeader(
+      const { scopes } = await tokenService.authenticateFromHeader(
         headers.authorization,
-        {status: set.status as number | undefined},
-        {ip, userAgent},
+        { status: set.status as number | undefined },
+        { ip, userAgent },
       );
 
       if (!hasPermissionToReadUser(scopes)) {
         set.status = 403;
-        throw new Error('Forbidden: token does not have user:read scope');
+        throw new Error("Forbidden: token does not have user:read scope");
       }
 
       const user = await userService.getByUnitId(params.unitId);
@@ -191,9 +190,9 @@ export const userRoute = new Elysia()
       params: userParamsSchema,
       headers: tokenAuthHeaders,
       detail: {
-        summary: 'Get user (token)',
-        description: 'Get a user by unit ID using an API token',
-        tags: ['Token', 'Users'],
+        summary: "Get user (token)",
+        description: "Get a user by unit ID using an API token",
+        tags: ["Token", "Users"],
       },
     },
   )
@@ -203,29 +202,29 @@ export const userRoute = new Elysia()
    * PUT /token/users/:unitId
    */
   .put(
-    '/users/:unitId',
-    async ({headers, set, params, body, request}) => {
+    "/users/:unitId",
+    async ({ headers, set, params, body, request }) => {
       const ip =
-        request.headers.get('x-forwarded-for') ??
-        request.headers.get('x-real-ip') ??
+        request.headers.get("x-forwarded-for") ??
+        request.headers.get("x-real-ip") ??
         null;
-      const userAgent = request.headers.get('user-agent') ?? null;
+      const userAgent = request.headers.get("user-agent") ?? null;
 
-      const {userId, scopes} = await tokenService.authenticateFromHeader(
+      const { userId, scopes } = await tokenService.authenticateFromHeader(
         headers.authorization,
-        {status: set.status as number | undefined},
-        {ip, userAgent},
+        { status: set.status as number | undefined },
+        { ip, userAgent },
       );
 
       if (!hasPermissionToUpdateUser(scopes)) {
         set.status = 403;
-        throw new Error('Forbidden: token does not have user:write scope');
+        throw new Error("Forbidden: token does not have user:write scope");
       }
 
       const isAdmin = tokenService.hasAdminScope(scopes);
       if (!isAdmin && userId !== params.unitId) {
         set.status = 403;
-        throw new Error('Forbidden: you can only update your own profile');
+        throw new Error("Forbidden: you can only update your own profile");
       }
 
       const updated = await userService.update(params.unitId, body);
@@ -236,9 +235,9 @@ export const userRoute = new Elysia()
       body: updateUserSchema,
       headers: tokenAuthHeaders,
       detail: {
-        summary: 'Update user (token)',
-        description: 'Update a user by unit ID using an API token',
-        tags: ['Token', 'Users'],
+        summary: "Update user (token)",
+        description: "Update a user by unit ID using an API token",
+        tags: ["Token", "Users"],
       },
     },
   );

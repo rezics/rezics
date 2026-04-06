@@ -1,14 +1,18 @@
-import {JwtAlgorithm} from '../core/jwt-algorithm';
-import type {JwtCryptoProvider} from '../contracts/crypto-provider';
-import type {JwtIssuerDescriptor} from '../contracts/issuer';
-import type {JwtKeyPersistence, JwtKeyRecord} from '../contracts/persistence';
+import type { JwtCryptoProvider } from "../contracts/crypto-provider";
+import type { JwtIssuerDescriptor } from "../contracts/issuer";
+import type { JwtKeyPersistence, JwtKeyRecord } from "../contracts/persistence";
+import { JwtAlgorithm } from "../core/jwt-algorithm";
+import { selectActiveKey, selectPublishedKeys } from "./key-selection";
 import {
-  resolveRotationConfig,
   type JwtRotationConfig,
   type JwtRotationConfigInput,
-} from './rotation-config';
-import {selectActiveKey, selectPublishedKeys} from './key-selection';
-import type {JwtClock, JwtRotationEngine, RotationSchedule} from './rotation-types';
+  resolveRotationConfig,
+} from "./rotation-config";
+import type {
+  JwtClock,
+  JwtRotationEngine,
+  RotationSchedule,
+} from "./rotation-types";
 
 const systemClock: JwtClock = {
   now: () => new Date(),
@@ -29,8 +33,8 @@ async function createKeyRecord(params: {
     issuer: params.issuer,
     kid,
     algorithm: JwtAlgorithm.ES256,
-    publicJwk: {...material.publicJwk, kid},
-    privateJwk: {...material.privateJwk, kid},
+    publicJwk: { ...material.publicJwk, kid },
+    privateJwk: { ...material.privateJwk, kid },
     createdAt: params.now,
     activatesAt: params.now,
     retiresAt: null,
@@ -50,8 +54,8 @@ async function loadKeys(
   persistence: JwtKeyPersistence,
   issuer: string,
 ): Promise<JwtKeyRecord[]> {
-  const keys = await persistence.listKeys({issuer});
-  return keys.map(key => ({
+  const keys = await persistence.listKeys({ issuer });
+  return keys.map((key) => ({
     ...key,
     createdAt: new Date(key.createdAt),
     activatesAt: new Date(key.activatesAt),
@@ -134,9 +138,7 @@ export function createRotationEngine(params: {
     );
 
     return {
-      keys: await Promise.all(
-        keys.map(async key => key.publicJwk),
-      ),
+      keys: await Promise.all(keys.map(async (key) => key.publicJwk)),
     };
   }
 
@@ -151,7 +153,8 @@ export function createRotationEngine(params: {
       nextCheckAt: new Date(checkedAt.getTime() + config.checkIntervalMs),
       nextRotationAt,
       isRotationDue:
-        nextRotationAt !== null && nextRotationAt.getTime() <= checkedAt.getTime(),
+        nextRotationAt !== null &&
+        nextRotationAt.getTime() <= checkedAt.getTime(),
     };
   }
 

@@ -1,6 +1,6 @@
-import type { ReactNode } from 'react';
-import type { ToolbarItem } from '../toolbar/types';
-import type { ToolbarOverride } from './types';
+import type { ReactNode } from "react";
+import type { ToolbarItem } from "../toolbar/types";
+import type { ToolbarOverride } from "./types";
 
 export function applyIconDefaults(
   items: ToolbarItem[],

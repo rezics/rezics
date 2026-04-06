@@ -1,4 +1,4 @@
-import {MeiliSearch, type Index} from 'meilisearch';
+import { type Index, MeiliSearch } from "meilisearch";
 
 export interface MeiliConfig {
   host: string;
@@ -14,18 +14,18 @@ export class SearchClient {
   readonly userIndex: Index;
 
   constructor(config: MeiliConfig) {
-    this.meili = new MeiliSearch({host: config.host, apiKey: config.apiKey});
-    this.bookIndex = this.meili.index('books');
-    this.unitIndex = this.meili.index('units');
-    this.readlistIndex = this.meili.index('readlists');
-    this.feedbackIndex = this.meili.index('feedbacks');
-    this.userIndex = this.meili.index('users');
+    this.meili = new MeiliSearch({ host: config.host, apiKey: config.apiKey });
+    this.bookIndex = this.meili.index("books");
+    this.unitIndex = this.meili.index("units");
+    this.readlistIndex = this.meili.index("readlists");
+    this.feedbackIndex = this.meili.index("feedbacks");
+    this.userIndex = this.meili.index("users");
   }
 
   async checkHealth(): Promise<boolean> {
     try {
       const health = await this.meili.health();
-      return health.status === 'available';
+      return health.status === "available";
     } catch {
       return false;
     }
@@ -36,89 +36,89 @@ export class SearchClient {
   async initBookIndex(): Promise<void> {
     await this.bookIndex.updateSettings({
       searchableAttributes: [
-        'id',
-        'title',
-        'description',
-        'tagSearch',
-        'authors',
-        'presses',
-        'isbn',
-        'producers',
-        'extra',
+        "id",
+        "title",
+        "description",
+        "tagSearch",
+        "authors",
+        "presses",
+        "isbn",
+        "producers",
+        "extra",
       ],
       filterableAttributes: [
-        'isLicensed',
-        'nsfw',
-        'tagSearch',
-        'authorIds',
-        'pressIds',
-        'producerIds',
-        'textLength',
+        "isLicensed",
+        "nsfw",
+        "tagSearch",
+        "authorIds",
+        "pressIds",
+        "producerIds",
+        "textLength",
       ],
-      sortableAttributes: ['createdAt', 'updatedAt'],
+      sortableAttributes: ["createdAt", "updatedAt"],
     });
-    this.bookIndex.addDocuments([], {primaryKey: 'id'});
+    this.bookIndex.addDocuments([], { primaryKey: "id" });
   }
 
   async initUnitIndex(): Promise<void> {
     await this.unitIndex.updateSettings({
-      searchableAttributes: ['id', 'title', 'content', 'tags'],
+      searchableAttributes: ["id", "title", "content", "tags"],
       filterableAttributes: [
-        'targetUnitId',
-        'type',
-        'status',
-        'userId',
-        'domainIds',
-        'nsfw',
-        'tags',
+        "targetUnitId",
+        "type",
+        "status",
+        "userId",
+        "domainIds",
+        "nsfw",
+        "tags",
       ],
-      sortableAttributes: ['createdAt', 'updatedAt'],
+      sortableAttributes: ["createdAt", "updatedAt"],
     });
-    this.unitIndex.addDocuments([], {primaryKey: 'id'});
+    this.unitIndex.addDocuments([], { primaryKey: "id" });
   }
 
   async initReadlistIndex(): Promise<void> {
     await this.readlistIndex.updateSettings({
-      searchableAttributes: ['id', 'title', 'content', 'tags'],
+      searchableAttributes: ["id", "title", "content", "tags"],
       filterableAttributes: [
-        'targetUnitId',
-        'bookIds',
-        'reviewIds',
-        'type',
-        'status',
-        'userId',
-        'domainIds',
-        'nsfw',
-        'tags',
+        "targetUnitId",
+        "bookIds",
+        "reviewIds",
+        "type",
+        "status",
+        "userId",
+        "domainIds",
+        "nsfw",
+        "tags",
       ],
-      sortableAttributes: ['createdAt', 'updatedAt'],
+      sortableAttributes: ["createdAt", "updatedAt"],
     });
-    this.readlistIndex.addDocuments([], {primaryKey: 'id'});
+    this.readlistIndex.addDocuments([], { primaryKey: "id" });
   }
 
   async initFeedbackIndex(): Promise<void> {
     await this.feedbackIndex.updateSettings({
-      searchableAttributes: ['id', 'content', 'url'],
+      searchableAttributes: ["id", "content", "url"],
       filterableAttributes: [
-        'userId',
-        'unitId',
-        'type',
-        'resolved',
-        'createdAt',
-        'updatedAt',
+        "userId",
+        "unitId",
+        "type",
+        "resolved",
+        "createdAt",
+        "updatedAt",
       ],
-      sortableAttributes: ['createdAt', 'updatedAt'],
+      sortableAttributes: ["createdAt", "updatedAt"],
     });
-    this.feedbackIndex.addDocuments([], {primaryKey: 'id'});
+    this.feedbackIndex.addDocuments([], { primaryKey: "id" });
   }
 
   async initUserIndex(): Promise<void> {
     await this.userIndex.updateSettings({
-      searchableAttributes: ['name', 'slug', 'email', 'bio', 'description'],
-      filterableAttributes: ['slug', 'email', 'type', 'joinDate'],
-      sortableAttributes: ['joinDate', 'followersCount', 'followingsCount'],
+      searchableAttributes: ["name", "slug", "email", "bio", "description"],
+      filterableAttributes: ["slug", "email", "type", "joinDate"],
+      sortableAttributes: ["joinDate", "followersCount", "followingsCount"],
     });
-    this.userIndex.addDocuments([], {primaryKey: 'id'});
+    this.userIndex.addDocuments([], { primaryKey: "id" });
   }
 
   // ANCHOR: Document operations
@@ -177,8 +177,8 @@ export class SearchClient {
 
   async getSearchKey(): Promise<string> {
     const resp = await this.meili.createKey({
-      actions: ['search'],
-      indexes: ['books', 'units', 'readlists'],
+      actions: ["search"],
+      indexes: ["books", "units", "readlists"],
       expiresAt: null,
     });
     return resp.key;
@@ -186,8 +186,8 @@ export class SearchClient {
 
   async getAdminKey() {
     return this.meili.createKey({
-      actions: ['*'],
-      indexes: ['*'],
+      actions: ["*"],
+      indexes: ["*"],
       expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30),
     });
   }

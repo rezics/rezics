@@ -4,15 +4,15 @@
 
 import type {
   CreateReviewInput,
-  UpdateReviewInput,
   ReviewListResponse,
   ReviewResponse,
-} from '@rezics/contract';
-import type {ReviewFilters} from './review.types';
-import {buildQueryString} from '../utils/buildQuery';
-import {apiFetch} from '../react-query/http';
+  UpdateReviewInput,
+} from "@rezics/contract";
+import { apiFetch } from "../react-query/http";
+import { buildQueryString } from "../utils/buildQuery";
+import type { ReviewFilters } from "./review.types";
 
-const shortBasePath = '/reviews/short';
+const shortBasePath = "/reviews/short";
 
 export const reviewApi = {
   /**
@@ -37,7 +37,7 @@ export const reviewApi = {
     filters?: ReviewFilters,
   ): Promise<ReviewListResponse> => {
     return apiFetch<ReviewListResponse>(
-      `/reviews${buildQueryString({q: query, ...filters})}`,
+      `/reviews${buildQueryString({ q: query, ...filters })}`,
     );
   },
 
@@ -49,7 +49,7 @@ export const reviewApi = {
     filters?: ReviewFilters,
   ): Promise<ReviewListResponse> => {
     return apiFetch<ReviewListResponse>(
-      `/reviews${buildQueryString({userId, ...filters})}`,
+      `/reviews${buildQueryString({ userId, ...filters })}`,
     );
   },
 
@@ -61,7 +61,7 @@ export const reviewApi = {
     filters?: ReviewFilters,
   ): Promise<ReviewListResponse> => {
     return apiFetch<ReviewListResponse>(
-      `/reviews${buildQueryString({bookId, ...filters})}`,
+      `/reviews${buildQueryString({ bookId, ...filters })}`,
     );
   },
 
@@ -72,9 +72,9 @@ export const reviewApi = {
     input: CreateReviewInput,
     unitType?: string,
   ): Promise<ReviewResponse> => {
-    const suffix = unitType ? `?unitType=${unitType}` : '';
+    const suffix = unitType ? `?unitType=${unitType}` : "";
     return apiFetch<ReviewResponse>(`/reviews${suffix}`, {
-      method: 'POST',
+      method: "POST",
       body: JSON.stringify(input),
     });
   },
@@ -87,18 +87,18 @@ export const reviewApi = {
     input: UpdateReviewInput,
     unitType?: string,
   ): Promise<ReviewResponse> => {
-    const suffix = unitType ? `?unitType=${unitType}` : '';
+    const suffix = unitType ? `?unitType=${unitType}` : "";
     return apiFetch<ReviewResponse>(`/reviews/${id}${suffix}`, {
-      method: 'PUT',
+      method: "PUT",
       body: JSON.stringify(input),
     });
   },
   /**
    * Delete review
    */
-  remove: async (id: string): Promise<{message: string}> => {
-    return apiFetch<{message: string}>(`/reviews/${id}`, {
-      method: 'DELETE',
+  remove: async (id: string): Promise<{ message: string }> => {
+    return apiFetch<{ message: string }>(`/reviews/${id}`, {
+      method: "DELETE",
     });
   },
 

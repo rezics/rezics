@@ -1,7 +1,6 @@
-import {create} from 'zustand';
-import {createJSONStorage, persist} from 'zustand/middleware';
-import {devtools} from 'zustand/middleware';
-import type {UserDTO} from '@rezics/contract';
+import type { UserDTO } from "@rezics/contract";
+import { create } from "zustand";
+import { createJSONStorage, devtools, persist } from "zustand/middleware";
 
 export type PartialUserDTO = Partial<UserDTO> & Record<string, unknown>;
 
@@ -11,21 +10,21 @@ type UserProfileState = {
   clearProfile: () => void;
 };
 
-export const USER_PROFILE_STORE_KEY = 'user-profile';
+export const USER_PROFILE_STORE_KEY = "user-profile";
 
 export const useUserProfileStore = create<UserProfileState>()(
   devtools(
     persist(
-      set => ({
+      (set) => ({
         user: null,
-        setUser: user => set({user}),
-        clearProfile: () => set({user: null}),
+        setUser: (user) => set({ user }),
+        clearProfile: () => set({ user: null }),
       }),
       {
         name: USER_PROFILE_STORE_KEY,
         storage: createJSONStorage(() => localStorage),
       },
     ),
-    {name: 'userProfileStore', store: 'userProfileStore'},
+    { name: "userProfileStore", store: "userProfileStore" },
   ),
 );

@@ -1,5 +1,5 @@
-import type {CachedJwtService} from './jwtServiceRepository';
-import {fetchJwtService} from './jwtServiceRepository';
+import type { CachedJwtService } from "./jwtServiceRepository";
+import { fetchJwtService } from "./jwtServiceRepository";
 
 const TTL_MS = 2 * 60 * 1000; // 2 minutes
 
@@ -21,7 +21,7 @@ export async function getJwtService(
   }
 
   const entry = await fetchJwtService(serviceKey);
-  cache.set(serviceKey, {entry, expiresAt: now + TTL_MS});
+  cache.set(serviceKey, { entry, expiresAt: now + TTL_MS });
   return entry;
 }
 

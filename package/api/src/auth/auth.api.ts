@@ -3,31 +3,31 @@
  * Direct API communication layer targeting the auth server
  */
 
-import {getApiConfig} from '../config';
 import type {
   AuthContextTokenResponse,
-  AuthTokenResponse,
+  AuthProvider,
   AuthResponse,
   AuthSession,
-  AuthProvider,
+  AuthTokenResponse,
+  AuthUser,
   ChangeEmailBody,
   ChangeEmailResponse,
   GetSessionStateResponse,
-  SendVerificationEmailBody,
-  SendVerificationEmailResponse,
-  SetPasswordBody,
-  SetPasswordResponse,
-  SignInSocialBody,
-  SignInSocialResponse,
-  AuthUser,
   RequestPasswordResetBody,
   RequestPasswordResetResponse,
   ResetPasswordBody,
   ResetPasswordResponse,
+  SendVerificationEmailBody,
+  SendVerificationEmailResponse,
+  SetPasswordBody,
+  SetPasswordResponse,
   SignInBody,
-} from '@rezics/contract';
-import {NormalizedTokenName} from '@rezics/contract';
-import {buildTokenHeaders, ensureAuthIdentityToken} from '../react-query/jwt';
+  SignInSocialBody,
+  SignInSocialResponse,
+} from "@rezics/contract";
+import { NormalizedTokenName } from "@rezics/contract";
+import { getApiConfig } from "../config";
+import { buildTokenHeaders, ensureAuthIdentityToken } from "../react-query/jwt";
 
 type AuthRequestInit = globalThis.RequestInit & {
   includeTokens?: NormalizedTokenName[];
@@ -43,12 +43,12 @@ async function authFetch<T>(
 ): Promise<T> {
   const url = `${getAuthBaseUrl()}${endpoint}`;
   const existingHeaders = new Headers(options?.headers);
-  const authHeaders = buildTokenHeaders({include: options?.includeTokens});
+  const authHeaders = buildTokenHeaders({ include: options?.includeTokens });
   const response = await fetch(url, {
     ...options,
-    credentials: 'include',
+    credentials: "include",
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
       ...Object.fromEntries(existingHeaders.entries()),
       ...authHeaders,
     },
@@ -70,8 +70,8 @@ async function authFetch<T>(
 
 export const authApi = {
   signIn: async (input: SignInBody): Promise<AuthResponse> => {
-    return authFetch<AuthResponse>('/api/auth/sign-in/email', {
-      method: 'POST',
+    return authFetch<AuthResponse>("/api/auth/sign-in/email", {
+      method: "POST",
       body: JSON.stringify(input),
     });
   },
@@ -80,10 +80,10 @@ export const authApi = {
     email: string;
     password: string;
   }): Promise<AuthResponse> => {
-    const inferredName = input.email.split('@')[0]?.trim() || 'Reader';
+    const inferredName = input.email.split("@")[0]?.trim() || "Reader";
 
-    return authFetch<AuthResponse>('/api/auth/sign-up/email', {
-      method: 'POST',
+    return authFetch<AuthResponse>("/api/auth/sign-up/email", {
+      method: "POST",
       body: JSON.stringify({
         email: input.email,
         password: input.password,
@@ -92,46 +92,46 @@ export const authApi = {
     });
   },
 
-  signOut: async (): Promise<{success: boolean}> => {
-    return authFetch<{success: boolean}>('/api/auth/sign-out', {
-      method: 'POST',
+  signOut: async (): Promise<{ success: boolean }> => {
+    return authFetch<{ success: boolean }>("/api/auth/sign-out", {
+      method: "POST",
     });
   },
 
-  getSession: async (): Promise<{session: AuthSession; user: AuthUser}> => {
-    return authFetch<{session: AuthSession; user: AuthUser}>(
-      '/api/auth/get-session',
+  getSession: async (): Promise<{ session: AuthSession; user: AuthUser }> => {
+    return authFetch<{ session: AuthSession; user: AuthUser }>(
+      "/api/auth/get-session",
     );
   },
 
   getSessionState: async (): Promise<GetSessionStateResponse> => {
-    return authFetch<GetSessionStateResponse>('/api/auth/get-session-state');
+    return authFetch<GetSessionStateResponse>("/api/auth/get-session-state");
   },
 
   getToken: async (): Promise<AuthTokenResponse> => {
-    return authFetch<AuthTokenResponse>('/api/auth/token');
+    return authFetch<AuthTokenResponse>("/api/auth/token");
   },
 
   /**
    * Fetch an auth-owned context token using the locally managed identity JWT.
    */
   getContextToken: async (): Promise<AuthContextTokenResponse> => {
-    await ensureAuthIdentityToken({requirePresence: true});
+    await ensureAuthIdentityToken({ requirePresence: true });
 
-    return authFetch<AuthContextTokenResponse>('/api/auth/context-token', {
+    return authFetch<AuthContextTokenResponse>("/api/auth/context-token", {
       includeTokens: [NormalizedTokenName.AUTH_IDENTITY],
     });
   },
 
-  listProviders: async (): Promise<{providers: AuthProvider[]}> => {
-    return authFetch<{providers: AuthProvider[]}>('/api/auth/providers');
+  listProviders: async (): Promise<{ providers: AuthProvider[] }> => {
+    return authFetch<{ providers: AuthProvider[] }>("/api/auth/providers");
   },
 
   signInSocial: async (
     input: SignInSocialBody,
   ): Promise<SignInSocialResponse> => {
-    return authFetch<SignInSocialResponse>('/api/auth/sign-in/social', {
-      method: 'POST',
+    return authFetch<SignInSocialResponse>("/api/auth/sign-in/social", {
+      method: "POST",
       body: JSON.stringify(input),
     });
   },
@@ -140,24 +140,24 @@ export const authApi = {
     input: SendVerificationEmailBody,
   ): Promise<SendVerificationEmailResponse> => {
     return authFetch<SendVerificationEmailResponse>(
-      '/api/auth/send-verification-email',
+      "/api/auth/send-verification-email",
       {
-        method: 'POST',
+        method: "POST",
         body: JSON.stringify(input),
       },
     );
   },
 
   changeEmail: async (input: ChangeEmailBody): Promise<ChangeEmailResponse> => {
-    return authFetch<ChangeEmailResponse>('/api/auth/change-email', {
-      method: 'POST',
+    return authFetch<ChangeEmailResponse>("/api/auth/change-email", {
+      method: "POST",
       body: JSON.stringify(input),
     });
   },
 
   setPassword: async (input: SetPasswordBody): Promise<SetPasswordResponse> => {
-    return authFetch<SetPasswordResponse>('/api/auth/set-password', {
-      method: 'POST',
+    return authFetch<SetPasswordResponse>("/api/auth/set-password", {
+      method: "POST",
       body: JSON.stringify(input),
     });
   },
@@ -166,9 +166,9 @@ export const authApi = {
     input: RequestPasswordResetBody,
   ): Promise<RequestPasswordResetResponse> => {
     return authFetch<RequestPasswordResetResponse>(
-      '/api/auth/request-password-reset',
+      "/api/auth/request-password-reset",
       {
-        method: 'POST',
+        method: "POST",
         body: JSON.stringify(input),
       },
     );
@@ -177,53 +177,53 @@ export const authApi = {
   resetPassword: async (
     input: ResetPasswordBody,
   ): Promise<ResetPasswordResponse> => {
-    return authFetch<ResetPasswordResponse>('/api/auth/reset-password', {
-      method: 'POST',
+    return authFetch<ResetPasswordResponse>("/api/auth/reset-password", {
+      method: "POST",
       body: JSON.stringify(input),
     });
   },
 
   listSessions: async () => {
-    return authFetch<{sessions: any[]}>('/api/auth/list-sessions', {
-      method: 'POST',
+    return authFetch<{ sessions: any[] }>("/api/auth/list-sessions", {
+      method: "POST",
     });
   },
 
-  revokeSession: async (input: {token: string}) => {
-    return authFetch<{success: boolean}>('/api/auth/revoke-session', {
-      method: 'POST',
+  revokeSession: async (input: { token: string }) => {
+    return authFetch<{ success: boolean }>("/api/auth/revoke-session", {
+      method: "POST",
       body: JSON.stringify(input),
     });
   },
 
   adminListUsers: async () => {
-    return authFetch<{users: any[]}>('/api/auth/admin/list-users');
+    return authFetch<{ users: any[] }>("/api/auth/admin/list-users");
   },
 
-  adminRemoveUser: async (input: {userId: string}) => {
-    return authFetch<{success: boolean}>('/api/auth/admin/remove-user', {
-      method: 'POST',
+  adminRemoveUser: async (input: { userId: string }) => {
+    return authFetch<{ success: boolean }>("/api/auth/admin/remove-user", {
+      method: "POST",
       body: JSON.stringify(input),
     });
   },
 
-  adminBanUser: async (input: {userId: string; reason?: string}) => {
-    return authFetch<{success: boolean}>('/api/auth/admin/ban-user', {
-      method: 'POST',
+  adminBanUser: async (input: { userId: string; reason?: string }) => {
+    return authFetch<{ success: boolean }>("/api/auth/admin/ban-user", {
+      method: "POST",
       body: JSON.stringify(input),
     });
   },
 
-  adminUnbanUser: async (input: {userId: string}) => {
-    return authFetch<{success: boolean}>('/api/auth/admin/unban-user', {
-      method: 'POST',
+  adminUnbanUser: async (input: { userId: string }) => {
+    return authFetch<{ success: boolean }>("/api/auth/admin/unban-user", {
+      method: "POST",
       body: JSON.stringify(input),
     });
   },
 
-  adminSetRole: async (input: {userId: string; role: string}) => {
-    return authFetch<{success: boolean}>('/api/auth/admin/set-role', {
-      method: 'POST',
+  adminSetRole: async (input: { userId: string; role: string }) => {
+    return authFetch<{ success: boolean }>("/api/auth/admin/set-role", {
+      method: "POST",
       body: JSON.stringify(input),
     });
   },

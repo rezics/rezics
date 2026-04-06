@@ -1,14 +1,14 @@
 import {
   oauthProviderAuthServerMetadata,
   oauthProviderOpenIdConfigMetadata,
-} from '@better-auth/oauth-provider';
-import {auth} from './instance';
+} from "@better-auth/oauth-provider";
 import {
   buildAuthPresenceClearCookie,
   buildAuthPresenceSetCookie,
-} from './auth-presence';
-import {enforceInternalTokenSurface} from './token-boundary';
-import {AuthPolicyError} from './errors';
+} from "./auth-presence";
+import { AuthPolicyError } from "./errors";
+import { auth } from "./instance";
+import { enforceInternalTokenSurface } from "./token-boundary";
 
 const openIdMetadataHandler = oauthProviderOpenIdConfigMetadata(auth);
 const authServerMetadataHandler = oauthProviderAuthServerMetadata(auth);
@@ -21,33 +21,33 @@ function toJsonError(status: number, code: string, message: string): Response {
         message,
       },
     },
-    {status},
+    { status },
   );
 }
 
 function isSessionEstablishingPath(pathname: string): boolean {
   return (
-    pathname.includes('/sign-in') ||
-    pathname.includes('/oauth/callback') ||
-    pathname.endsWith('/token')
+    pathname.includes("/sign-in") ||
+    pathname.includes("/oauth/callback") ||
+    pathname.endsWith("/token")
   );
 }
 
 function isSessionClearingPath(pathname: string): boolean {
-  return pathname.endsWith('/sign-out') || pathname.endsWith('/revoke-session');
+  return pathname.endsWith("/sign-out") || pathname.endsWith("/revoke-session");
 }
 
 function isSessionCheckPath(pathname: string): boolean {
   return (
-    pathname.endsWith('/token') ||
-    pathname.endsWith('/get-session') ||
-    pathname.endsWith('/get-session-state')
+    pathname.endsWith("/token") ||
+    pathname.endsWith("/get-session") ||
+    pathname.endsWith("/get-session-state")
   );
 }
 
 function withCookie(response: Response, cookie: string): Response {
   const nextHeaders = new Headers(response.headers);
-  nextHeaders.append('set-cookie', cookie);
+  nextHeaders.append("set-cookie", cookie);
 
   return new Response(response.body, {
     status: response.status,
@@ -66,13 +66,13 @@ export async function handleAuthRequest(request: Request): Promise<Response> {
 
     return toJsonError(
       500,
-      'AUTH_POLICY_ERROR',
-      'Unexpected auth policy error',
+      "AUTH_POLICY_ERROR",
+      "Unexpected auth policy error",
     );
   }
 
   const response = await auth.handler(request);
-  const {pathname} = new URL(request.url);
+  const { pathname } = new URL(request.url);
   const requestUrl = new URL(request.url);
 
   if (response.ok && isSessionEstablishingPath(pathname)) {
@@ -83,7 +83,10 @@ export async function handleAuthRequest(request: Request): Promise<Response> {
     return withCookie(response, buildAuthPresenceClearCookie(requestUrl));
   }
 
-  if ((response.status === 401 || response.status === 403) && isSessionCheckPath(pathname)) {
+  if (
+    (response.status === 401 || response.status === 403) &&
+    isSessionCheckPath(pathname)
+  ) {
     return withCookie(response, buildAuthPresenceClearCookie(requestUrl));
   }
 
@@ -94,7 +97,7 @@ export async function handleJwksCompatibilityRequest(
   request: Request,
 ): Promise<Response> {
   void request;
-  const {getAuthSessionJwksResponse} = await import('../session/jwt/routes');
+  const { getAuthSessionJwksResponse } = await import("../session/jwt/routes");
   return getAuthSessionJwksResponse();
 }
 

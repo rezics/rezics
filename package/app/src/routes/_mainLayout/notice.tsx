@@ -1,10 +1,10 @@
-import {createFileRoute, lazyRouteComponent} from '@tanstack/react-router';
+import { createFileRoute, lazyRouteComponent } from "@tanstack/react-router";
 
 const NoticePage = lazyRouteComponent(
-  () => import('@/info/notice/page/Notice'),
-  'NoticePage',
+  () => import("@/info/notice/page/Notice"),
+  "NoticePage",
 );
 
-export const Route = createFileRoute('/_mainLayout/notice')({
+export const Route = createFileRoute("/_mainLayout/notice")({
   component: NoticePage,
 });

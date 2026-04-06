@@ -1,23 +1,24 @@
-import React, {useMemo, useState} from 'react';
 import {
-  CircularProgress,
   Button,
-  ToggleButtonGroup,
-  ToggleButton,
-  TextField,
   Chip,
-} from '@mui/material';
-import {useQuery} from '@tanstack/react-query';
+  CircularProgress,
+  TextField,
+  ToggleButton,
+  ToggleButtonGroup,
+} from "@mui/material";
+import type { TagDetailDTO, TagDTO } from "@rezics/api/tag/tag";
 import {
-  tagByObjectQuery,
-  useDetachTagMutation,
-  useAttachTagMutation,
   tagApi,
-} from '@rezics/api/tag/tag';
-import type {TagDetailDTO, TagDTO} from '@rezics/api/tag/tag';
-import {SingleTagChip} from '../TagList';
-import NewTag from './NewTag';
-import TagEdit from './TagEdit';
+  tagByObjectQuery,
+  useAttachTagMutation,
+  useDetachTagMutation,
+} from "@rezics/api/tag/tag";
+import { useQuery } from "@tanstack/react-query";
+import type React from "react";
+import { useMemo, useState } from "react";
+import { SingleTagChip } from "../TagList";
+import NewTag from "./NewTag";
+import TagEdit from "./TagEdit";
 
 export type TagListEditProps = {
   objectUnitId: string; // 目标对象 unitId
@@ -33,15 +34,15 @@ export const TagListEdit: React.FC<TagListEditProps> = ({
   objectUnitId,
   className,
 }) => {
-  const {data, isLoading, error, refetch} = useQuery(
+  const { data, isLoading, error, refetch } = useQuery(
     tagByObjectQuery(objectUnitId),
   );
   const list: TagDetailDTO[] = useMemo(() => data?.tags ?? [], [data]);
 
-  const [view, setView] = useState<'list' | 'grouped'>('list');
+  const [view, setView] = useState<"list" | "grouped">("list");
   const [showCreate, setShowCreate] = useState(false);
   const [editingTag, setEditingTag] = useState<TagDetailDTO | null>(null);
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState("");
   const [domainList, setDomainList] = useState<any[]>([]);
 
   const detachMutation = useDetachTagMutation({
@@ -55,8 +56,8 @@ export const TagListEdit: React.FC<TagListEditProps> = ({
   // 新建逻辑放在子组件 TagEdit 中通过回调刷新
 
   const grouped = useMemo(() => {
-    if (view !== 'grouped') return null;
-    const m = new Map<string | 'NO_DOMAIN', TagDetailDTO[]>();
+    if (view !== "grouped") return null;
+    const m = new Map<string | "NO_DOMAIN", TagDetailDTO[]>();
 
     for (const tag of list) {
       const rawDomains: any[] = Array.isArray((tag as any).domains)
@@ -65,7 +66,7 @@ export const TagListEdit: React.FC<TagListEditProps> = ({
 
       // 无域：归入 NO_DOMAIN
       if (rawDomains.length === 0) {
-        m.set('NO_DOMAIN', [...(m.get('NO_DOMAIN') ?? []), tag]);
+        m.set("NO_DOMAIN", [...(m.get("NO_DOMAIN") ?? []), tag]);
         continue;
       }
 
@@ -73,7 +74,7 @@ export const TagListEdit: React.FC<TagListEditProps> = ({
       for (const d of rawDomains) {
         const id = d && (d.id ?? d.unitId) ? String(d.id ?? d.unitId) : null;
         if (!id) continue;
-        setDomainList(prev => [...prev, {id, title: d.title}]);
+        setDomainList((prev) => [...prev, { id, title: d.title }]);
         m.set(id, [...(m.get(id) ?? []), tag]);
       }
     }
@@ -90,15 +91,15 @@ export const TagListEdit: React.FC<TagListEditProps> = ({
     tags: TagDTO[];
     total: number;
   }>({
-    queryKey: ['tags', 'search', searchTerm],
+    queryKey: ["tags", "search", searchTerm],
     enabled: searchTerm.length > 0,
-    queryFn: () => tagApi.list({q: searchTerm, limit: 20}),
+    queryFn: () => tagApi.list({ q: searchTerm, limit: 20 }),
   });
 
   const searchResults: TagDTO[] = useMemo(
     () =>
       (searchData?.tags ?? []).filter(
-        t => !list.some(attached => attached.id === t.id),
+        (t) => !list.some((attached) => attached.id === t.id),
       ),
     [searchData, list],
   );
@@ -126,7 +127,7 @@ export const TagListEdit: React.FC<TagListEditProps> = ({
     if (list.length === 0) return null;
     return (
       <div className="space-y-2">
-        {list.map(t => (
+        {list.map((t) => (
           <div key={t.id} className="flex items-center justify-between gap-2">
             <SingleTagChip tag={t} />
             <div className="flex items-center gap-2">
@@ -155,12 +156,12 @@ export const TagListEdit: React.FC<TagListEditProps> = ({
         {[...grouped.entries()].map(([dom, items]) => (
           <div key={dom} className="space-y-2">
             <div className="text-sm font-semibold text-gray-700">
-              {dom === 'NO_DOMAIN'
-                ? '未分组'
-                : domainList.find(d => d.id === dom)?.title ?? dom}
+              {dom === "NO_DOMAIN"
+                ? "未分组"
+                : (domainList.find((d) => d.id === dom)?.title ?? dom)}
             </div>
             <div className="space-y-1">
-              {items.map(t => (
+              {items.map((t) => (
                 <div
                   key={t.id}
                   className="flex items-center justify-between gap-2"
@@ -213,10 +214,10 @@ export const TagListEdit: React.FC<TagListEditProps> = ({
         <div className="flex items-center gap-2">
           <Button
             size="small"
-            variant={showCreate ? 'outlined' : 'contained'}
-            onClick={() => setShowCreate(v => !v)}
+            variant={showCreate ? "outlined" : "contained"}
+            onClick={() => setShowCreate((v) => !v)}
           >
-            {showCreate ? '取消' : '新建标签'}
+            {showCreate ? "取消" : "新建标签"}
           </Button>
         </div>
       </div>
@@ -255,8 +256,8 @@ export const TagListEdit: React.FC<TagListEditProps> = ({
         <div className="text-sm text-gray-500">暂无标签</div>
       )}
 
-      {!isLoading && !error && view === 'list' && renderListView()}
-      {!isLoading && !error && view === 'grouped' && renderGroupedView()}
+      {!isLoading && !error && view === "list" && renderListView()}
+      {!isLoading && !error && view === "grouped" && renderGroupedView()}
 
       {/* 搜索并添加已有标签 */}
       <div className="mt-6 pt-4 border-t">
@@ -269,7 +270,7 @@ export const TagListEdit: React.FC<TagListEditProps> = ({
             fullWidth
             placeholder="输入标签名搜索…"
             value={search}
-            onChange={e => setSearch(e.target.value)}
+            onChange={(e) => setSearch(e.target.value)}
           />
           {isSearching && <CircularProgress size={18} />}
         </div>
@@ -283,7 +284,7 @@ export const TagListEdit: React.FC<TagListEditProps> = ({
         )}
         {searchResults.length > 0 && (
           <div className="space-y-1">
-            {searchResults.map(t => (
+            {searchResults.map((t) => (
               <div
                 key={t.id}
                 className="flex items-center justify-between gap-2"

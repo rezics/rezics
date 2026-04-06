@@ -2,11 +2,11 @@
  * React Query configurations for Comment queries
  */
 
-import {queryOptions, infiniteQueryOptions} from '@tanstack/react-query';
-import {commentApi} from './comment.api';
-import {commentKeys} from './comment.keys';
-import type {CommentListFilters} from './comment.types';
-import type {CommentTreeQuery} from '@rezics/contract';
+import type { CommentTreeQuery } from "@rezics/contract";
+import { infiniteQueryOptions, queryOptions } from "@tanstack/react-query";
+import { commentApi } from "./comment.api";
+import { commentKeys } from "./comment.keys";
+import type { CommentListFilters } from "./comment.types";
 
 /**
  * Query options for listing a slice of comments.
@@ -37,12 +37,12 @@ export const commentDetailQuery = (unitId: string) =>
  * Stops when fewer than requested limit items are returned.
  */
 export const commentInfiniteListQuery = (
-  filters: Omit<CommentListFilters, 'start'>,
+  filters: Omit<CommentListFilters, "start">,
 ) =>
   infiniteQueryOptions({
     queryKey: commentKeys.list(filters),
-    queryFn: ({pageParam = 0}) =>
-      commentApi.list({...filters, start: pageParam}),
+    queryFn: ({ pageParam = 0 }) =>
+      commentApi.list({ ...filters, start: pageParam }),
     initialPageParam: 0,
     getNextPageParam: (lastPage, _allPages, lastPageParam) => {
       const limit = filters.limit || 20;

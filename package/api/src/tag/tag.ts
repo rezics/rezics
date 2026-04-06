@@ -5,36 +5,34 @@
 
 // Types
 export type {
-  TagDTO,
-  TagDetailDTO,
   CreateTagInput,
-  UpdateTagInput,
+  TagDetailDTO,
+  TagDTO,
   TagListQuery,
-} from '@rezics/contract';
-export type {TagFormData, TagFilters, TagView} from './tag.types';
+  UpdateTagInput,
+} from "@rezics/contract";
+// API client
+export { tagApi } from "./tag.api";
 
 // Keys
-export {tagKeys} from './tag.keys';
-
-// API client
-export {tagApi} from './tag.api';
-
-// Queries
-export {
-  tagQueries,
-  tagListQuery,
-  tagDetailQuery,
-  tagByNameQuery,
-  tagByObjectQuery,
-  tagInfiniteListQuery,
-} from './tag.queries';
-
+export { tagKeys } from "./tag.keys";
 // Mutations
 export {
   tagMutations,
-  useCreateTagMutation,
-  useUpdateTagMutation,
-  useDeleteTagMutation,
   useAttachTagMutation,
+  useCreateTagMutation,
+  useDeleteTagMutation,
   useDetachTagMutation,
-} from './tag.mutations';
+  useUpdateTagMutation,
+} from "./tag.mutations";
+
+// Queries
+export {
+  tagByNameQuery,
+  tagByObjectQuery,
+  tagDetailQuery,
+  tagInfiniteListQuery,
+  tagListQuery,
+  tagQueries,
+} from "./tag.queries";
+export type { TagFilters, TagFormData, TagView } from "./tag.types";

@@ -1,6 +1,6 @@
-export {createAuthMailer, isMailerConfigured} from './mailer';
-export {createAuthNotificationService} from './service';
-export * from './templates';
+export { createAuthMailer, isMailerConfigured } from "./mailer";
+export { createAuthNotificationService } from "./service";
+export * from "./templates";
 export type {
   AuthNotificationService,
   AuthNotificationServiceOptions,
@@ -9,4 +9,4 @@ export type {
   NotificationChannel,
   PasswordResetEmailPayload,
   VerificationEmailPayload,
-} from './types';
+} from "./types";

@@ -3,21 +3,21 @@ const CLIPBOARD_ICON = `<svg xmlns="http://www.w3.org/2000/svg" width="16" heigh
 const CHECK_ICON = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
 
 export function addCopyButtons(container: HTMLElement): void {
-  const pres = container.querySelectorAll('pre');
+  const pres = container.querySelectorAll("pre");
 
   for (const pre of pres) {
     if (pre.dataset.copyButton) continue;
-    pre.dataset.copyButton = 'true';
+    pre.dataset.copyButton = "true";
 
-    const btn = document.createElement('button');
-    btn.className = 'code-copy-btn';
-    btn.type = 'button';
+    const btn = document.createElement("button");
+    btn.className = "code-copy-btn";
+    btn.type = "button";
     btn.innerHTML = CLIPBOARD_ICON;
-    btn.setAttribute('aria-label', 'Copy code');
+    btn.setAttribute("aria-label", "Copy code");
 
-    btn.addEventListener('click', () => {
-      const code = pre.querySelector('code');
-      const text = (code ?? pre).textContent ?? '';
+    btn.addEventListener("click", () => {
+      const code = pre.querySelector("code");
+      const text = (code ?? pre).textContent ?? "";
       navigator.clipboard.writeText(text).then(() => {
         btn.innerHTML = CHECK_ICON;
         setTimeout(() => {

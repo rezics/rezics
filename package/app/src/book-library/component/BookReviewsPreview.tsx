@@ -1,14 +1,14 @@
-import React, {useEffect, useState} from 'react';
-import {useTranslation} from 'react-i18next';
+import { mapUnitListToReviewListResponse } from "@rezics/api/meili/meili.api";
+import { buildMeiliUnitQuery } from "@rezics/api/meili/meili.queries";
+import { type ReviewDTO, UnitType } from "@rezics/contract";
+import { ArrowForwardIcon } from "@rezics/ui/composite/navigation/ArrowForwardIcon.tsx";
+import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
 
-import {AccentBarWithText} from '@rezics/ui/composite/typography/AccentBarWithText.tsx';
-import {ArrowForwardIcon} from '@rezics/ui/composite/navigation/ArrowForwardIcon.tsx';
-import {ReviewList} from '@/review/component/ReviewList.tsx';
-
-import {useQuery} from '@tanstack/react-query';
-import {buildMeiliUnitQuery} from '@rezics/api/meili/meili.queries';
-import {mapUnitListToReviewListResponse} from '@rezics/api/meili/meili.api';
-import {UnitType, type ReviewDTO} from '@rezics/contract';
+import { useQuery } from "@tanstack/react-query";
+import type React from "react";
+import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { ReviewList } from "@/review/component/ReviewList.tsx";
 
 /** Props for BookReviews component. */
 interface BookReviewsProps {
@@ -28,18 +28,18 @@ export const BookReviews: React.FC<BookReviewsProps> = ({
   title,
   reviewNumber = 3,
 }) => {
-  const {t} = useTranslation();
+  const { t } = useTranslation();
   const [reviews, setReviews] = useState<ReviewDTO[]>([]);
 
-  const {data} = useQuery(
+  const { data } = useQuery(
     buildMeiliUnitQuery({
       kind: UnitType.REVIEW,
       start: 0,
       targetUnitId: bookId,
-      keyword: '',
+      keyword: "",
       limit: reviewNumber,
       mapFn: mapUnitListToReviewListResponse,
-      options: {enabled: !!bookId},
+      options: { enabled: !!bookId },
     }),
   );
 
@@ -52,7 +52,7 @@ export const BookReviews: React.FC<BookReviewsProps> = ({
   return (
     <div>
       <ArrowForwardIcon size={16} to={`/review/book/${bookId}/`}>
-        <AccentBarWithText text={t('book.reviews_of_book', {title})} />
+        <AccentBarWithText text={t("book.reviews_of_book", { title })} />
       </ArrowForwardIcon>
       <ReviewList reviews={reviews?.slice(0, reviewNumber)} />
     </div>

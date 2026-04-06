@@ -2,14 +2,14 @@ import {
   createFileRoute,
   lazyRouteComponent,
   Outlet,
-} from '@tanstack/react-router';
+} from "@tanstack/react-router";
 
 const MainLayout = lazyRouteComponent(
-  () => import('@/core/layout/MainLayout'),
-  'MainLayout',
+  () => import("@/core/layout/MainLayout"),
+  "MainLayout",
 );
 
-export const Route = createFileRoute('/_mainLayout')({
+export const Route = createFileRoute("/_mainLayout")({
   component: () => (
     <MainLayout>
       <Outlet />

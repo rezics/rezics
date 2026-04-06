@@ -1,6 +1,6 @@
-import {queryOptions} from '@tanstack/react-query';
-import {authApi} from './auth.api';
-import {authKeys} from './auth.keys';
+import { queryOptions } from "@tanstack/react-query";
+import { authApi } from "./auth.api";
+import { authKeys } from "./auth.keys";
 
 export const authSessionQuery = () =>
   queryOptions({

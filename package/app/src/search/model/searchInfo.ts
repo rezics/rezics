@@ -8,11 +8,11 @@ export interface SearchInfo {
 }
 
 export function normalizeKeyword(value?: string): string {
-  return (value ?? '').trim();
+  return (value ?? "").trim();
 }
 
 export function normalizeTags(tags?: string[]): string[] {
-  return (tags ?? []).map(tag => tag.trim()).filter(Boolean);
+  return (tags ?? []).map((tag) => tag.trim()).filter(Boolean);
 }
 
 export function normalizeSearchInfo(value: SearchInfo): SearchInfo {

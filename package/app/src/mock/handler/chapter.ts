@@ -1,4 +1,4 @@
-import { http, HttpResponse } from "msw";
+import { HttpResponse, http } from "msw";
 import { chapterContent01 } from "../data/chapterContent01.ts";
 import chapterList01 from "../data/chapterlist01.json" with { type: "json" };
 
@@ -19,10 +19,14 @@ export function chapterReadHandler(_body: any) {
 // =========================
 export const chapterHttpHandlers = [
   http.get("/api/books/:bookId/chapters", ({ params }) => {
-    return chapterListHandler({ parameter: { bookId: (params as any).bookId } } as any);
+    return chapterListHandler({
+      parameter: { bookId: (params as any).bookId },
+    } as any);
   }),
   http.get("/api/chapters/:id", ({ params }) => {
-    return chapterReadHandler({ parameter: { id: Number((params as any).id) } } as any);
+    return chapterReadHandler({
+      parameter: { id: Number((params as any).id) },
+    } as any);
   }),
   http.post("/api/chapters", async ({ request }) => {
     const body = (await request.json().catch(() => ({}))) as any;

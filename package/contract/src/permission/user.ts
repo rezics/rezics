@@ -1,5 +1,5 @@
-import type {UserDTO} from '../index';
-import {BasicAdminPermission, isBlocked} from './core';
+import type { UserDTO } from "../index";
+import { BasicAdminPermission, isBlocked } from "./core";
 
 /**
  * User-level permissions.

@@ -1,26 +1,26 @@
-import 'dotenv/config';
-import {prisma} from '#/prisma/client';
-import type {Prisma} from '#/prisma/client';
-import {DEFAULT_COUNTS} from '#/prisma/seed/mock/config';
-import {resetDatabase} from '#/prisma/seed/database';
+import "dotenv/config";
+import type { Prisma } from "#/prisma/client";
+import { prisma } from "#/prisma/client";
+import { resetDatabase } from "#/prisma/seed/database";
+import {
+  seedBooks,
+  seedChaptersForBook,
+  updateChapterIndex,
+} from "#/prisma/seed/mock/books";
+import {
+  seedComments,
+  updateStatsWithCommentCounts,
+} from "#/prisma/seed/mock/comments";
+import { DEFAULT_COUNTS } from "#/prisma/seed/mock/config";
+import { seedEchoKV } from "#/prisma/seed/mock/echokv";
+import { seedReadLists } from "#/prisma/seed/mock/readlist";
+import { seedTags } from "#/prisma/seed/mock/tags";
+import { seedOtherUnits } from "#/prisma/seed/mock/units";
 import {
   seedPressUsers,
   seedProducerUsers,
   seedUsers,
-} from '#/prisma/seed/mock/users';
-import {seedTags} from '#/prisma/seed/mock/tags';
-import {
-  seedBooks,
-  updateChapterIndex,
-  seedChaptersForBook,
-} from '#/prisma/seed/mock/books';
-import {seedOtherUnits} from '#/prisma/seed/mock/units';
-import {
-  seedComments,
-  updateStatsWithCommentCounts,
-} from '#/prisma/seed/mock/comments';
-import {seedReadLists} from '#/prisma/seed/mock/readlist';
-import {seedEchoKV} from '#/prisma/seed/mock/echokv';
+} from "#/prisma/seed/mock/users";
 
 // ------------------------------
 // Main Function
@@ -31,9 +31,9 @@ import {seedEchoKV} from '#/prisma/seed/mock/echokv';
  * Orchestrates the entire database seeding process
  */
 async function main() {
-  console.time('seed');
-  console.log('[Seed] Starting database seeding with Faker.js...');
-  console.log('[Seed] Counts:', DEFAULT_COUNTS);
+  console.time("seed");
+  console.log("[Seed] Starting database seeding with Faker.js...");
+  console.log("[Seed] Counts:", DEFAULT_COUNTS);
 
   try {
     // Reset database
@@ -65,7 +65,7 @@ async function main() {
       producerUsers,
       tagUnitIds,
     );
-    const bookIds = books.map(b => b.id);
+    const bookIds = books.map((b) => b.id);
     console.log(`[Seed] Created ${books.length} books`);
 
     // Seed other units
@@ -76,7 +76,7 @@ async function main() {
       bookIds,
       tagUnitIds,
     );
-    const reviewUnitIds = others.map(o => o.id);
+    const reviewUnitIds = others.map((o) => o.id);
     console.log(`[Seed] Created ${others.length} other units`);
 
     // Seed read lists
@@ -100,8 +100,8 @@ async function main() {
     }
 
     // Seed comments
-    const allRootUnitIds: string[] = [...bookIds, ...others.map(o => o.id)];
-    const {perRootCount} = await seedComments(
+    const allRootUnitIds: string[] = [...bookIds, ...others.map((o) => o.id)];
+    const { perRootCount } = await seedComments(
       prisma,
       DEFAULT_COUNTS.comments,
       users,
@@ -129,17 +129,17 @@ async function main() {
       comments: totalComments,
     };
 
-    console.log('[Seed] Seed complete!', summary);
-    console.timeEnd('seed');
+    console.log("[Seed] Seed complete!", summary);
+    console.timeEnd("seed");
   } catch (error) {
-    console.error('[Error] Seed failed:', error);
+    console.error("[Error] Seed failed:", error);
     throw error;
   }
 }
 
 main()
-  .catch(err => {
-    console.error('[Error] Seed failed:', err);
+  .catch((err) => {
+    console.error("[Error] Seed failed:", err);
     process.exitCode = 1;
   })
   .finally(async () => {

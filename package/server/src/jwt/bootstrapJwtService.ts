@@ -1,11 +1,11 @@
-import {prisma, Prisma} from '#/prisma/client';
 import {
   asJwtPrivateJwk,
   asJwtPublicJwk,
   type JwtPrivateJwk,
   type JwtPublicJwk,
-} from '@rezics/jwt';
-import {env} from '@/env';
+} from "@rezics/jwt";
+import { type Prisma, prisma } from "#/prisma/client";
+import { env } from "@/env";
 
 type BootstrapDefaults = {
   issuer: string;
@@ -48,7 +48,7 @@ export async function bootstrapJwtServiceRecord(
   defaults: BootstrapDefaults,
 ): Promise<void> {
   const service = await prisma.jwtService.upsert({
-    where: {serviceKey},
+    where: { serviceKey },
     update: {},
     create: {
       serviceKey,
@@ -61,11 +61,11 @@ export async function bootstrapJwtServiceRecord(
     },
   });
 
-  if (serviceKey === 'server-local') {
+  if (serviceKey === "server-local") {
     const seeded = getSeededKeyPair();
     if (seeded) {
       const existingKeys = await prisma.jwks.count({
-        where: {jwtServiceId: service.id},
+        where: { jwtServiceId: service.id },
       });
 
       if (existingKeys === 0) {
@@ -82,7 +82,7 @@ export async function bootstrapJwtServiceRecord(
               ...seeded.privateJwk,
               kid,
             } as unknown as Prisma.InputJsonValue,
-            alg: 'ES256',
+            alg: "ES256",
           },
         });
       }

@@ -1,5 +1,5 @@
-import {useEffect, useRef} from 'react';
-import type {CarouselApi} from '@/shadcn/carousel';
+import { useEffect, useRef } from "react";
+import type { CarouselApi } from "@/shadcn/carousel";
 
 type UseEmblaAutoplayOptions = {
   interval?: number;
@@ -38,16 +38,16 @@ export function useEmblaAutoplay(
     play();
 
     if (stopOnInteraction) {
-      api.on('pointerDown', stop);
-      api.on('pointerUp', play);
+      api.on("pointerDown", stop);
+      api.on("pointerUp", play);
     }
 
     return () => {
       stop();
 
       if (stopOnInteraction) {
-        api.off('pointerDown', stop);
-        api.off('pointerUp', play);
+        api.off("pointerDown", stop);
+        api.off("pointerUp", play);
       }
     };
   }, [api, interval, enabled, stopOnInteraction]);

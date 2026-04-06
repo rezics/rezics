@@ -1,10 +1,9 @@
-import * as React from 'react';
-import {styled} from '@mui/material/styles';
-import Box from '@mui/material/Box';
-import Grid from '@mui/material/Grid';
-import Typography from '@mui/material/Typography';
-import Slider from '@mui/material/Slider';
-import MuiInput from '@mui/material/Input';
+import Grid from "@mui/material/Grid";
+import MuiInput from "@mui/material/Input";
+import Slider from "@mui/material/Slider";
+import { styled } from "@mui/material/styles";
+import Typography from "@mui/material/Typography";
+import type * as React from "react";
 
 const Input = styled(MuiInput)`
   width: 42px;
@@ -18,12 +17,12 @@ export function ChapterArboristHeightSlider({
   setHeight: (height: number) => void;
 }) {
   const maxHeight = 2000;
-  const handleSliderChange = (event: Event, newValue: number) => {
+  const handleSliderChange = (_event: Event, newValue: number) => {
     setHeight(newValue);
   };
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setHeight(event.target.value === '' ? 0 : Number(event.target.value));
+    setHeight(event.target.value === "" ? 0 : Number(event.target.value));
   };
 
   const handleBlur = () => {
@@ -36,7 +35,7 @@ export function ChapterArboristHeightSlider({
 
   return (
     <div>
-      <Grid container spacing={2} sx={{alignItems: 'center'}}>
+      <Grid container spacing={2} sx={{ alignItems: "center" }}>
         <Grid>
           <Typography id="input-slider" gutterBottom>
             Chapter Arborist Height
@@ -44,7 +43,7 @@ export function ChapterArboristHeightSlider({
         </Grid>
         <Grid size="grow">
           <Slider
-            value={typeof height === 'number' ? height : 0}
+            value={typeof height === "number" ? height : 0}
             onChange={handleSliderChange}
             aria-labelledby="input-slider"
             max={maxHeight}

@@ -1,42 +1,42 @@
-import {useState} from 'react';
-import {TextField} from '@mui/material';
-import {CooldownButton} from '@rezics/ui/composite/button/CooldownButton.tsx';
-import {useCreateUnitMutation} from '@rezics/api/unit/unit.mutations';
-import {useAlertStore} from '@app/state/windowAlertStore';
-import {useUserProfileStore} from '@/user/state';
-import type {UnitFormData} from '@rezics/api/unit/unit.types';
-import {QuoteEditPage} from './QuoteEditPage';
+import { useAlertStore } from "@app/state/windowAlertStore";
+import { TextField } from "@mui/material";
+import { useCreateUnitMutation } from "@rezics/api/unit/unit.mutations";
+import type { UnitFormData } from "@rezics/api/unit/unit.types";
+import { CooldownButton } from "@rezics/ui/composite/button/CooldownButton.tsx";
+import { useState } from "react";
+import { useUserProfileStore } from "@/user/state";
+import { QuoteEditPage } from "./QuoteEditPage";
 
-export function QuoteNewPage({bookUnitId}: {bookUnitId: string}) {
+export function QuoteNewPage({ bookUnitId }: { bookUnitId: string }) {
   const [quoteData, setQuoteData] = useState<UnitFormData>({} as UnitFormData);
-  const {show} = useAlertStore();
-  const {user} = useUserProfileStore();
+  const { show } = useAlertStore();
+  const { user } = useUserProfileStore();
 
-  const {mutate, isPending} = useCreateUnitMutation({
-    onSuccess: data => {
-      show('Quote created successfully');
-      console.log('create quote success', data);
+  const { mutate, isPending } = useCreateUnitMutation({
+    onSuccess: (data) => {
+      show("Quote created successfully");
+      console.log("create quote success", data);
     },
-    onError: error => {
+    onError: (error) => {
       show(`Create quote failed: ${error}`);
-      console.error('create quote failed', error);
+      console.error("create quote failed", error);
     },
   });
 
   function handleSave() {
     const userId = user?.unitId as string;
     if (!userId) {
-      show('Please login first');
+      show("Please login first");
       return;
     }
     mutate({
       userId,
-      type: 'QUOTE',
+      type: "QUOTE",
       title: quoteData.title || undefined,
-      content: quoteData.content || '',
+      content: quoteData.content || "",
       metadata: {
         ...(quoteData.metadata || {}),
-        source: (quoteData.metadata as any)?.source || '',
+        source: (quoteData.metadata as any)?.source || "",
       },
       targetUnitId: bookUnitId,
     });
@@ -53,7 +53,7 @@ export function QuoteNewPage({bookUnitId}: {bookUnitId: string}) {
           value={bookUnitId}
           disabled
         />
-        <QuoteEditPage unitId={''} data={quoteData} setData={setQuoteData} />
+        <QuoteEditPage unitId={""} data={quoteData} setData={setQuoteData} />
         <div className="flex justify-end gap-2">
           <CooldownButton
             cooldownMs={10000}
@@ -62,7 +62,7 @@ export function QuoteNewPage({bookUnitId}: {bookUnitId: string}) {
             onClick={handleSave}
             disabled={isPending}
           >
-            {isPending ? 'Submitting...' : 'Submit'}
+            {isPending ? "Submitting..." : "Submit"}
           </CooldownButton>
         </div>
       </div>

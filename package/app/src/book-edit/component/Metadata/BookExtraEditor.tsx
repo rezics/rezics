@@ -1,5 +1,5 @@
-import {RezicsJsonEditor} from '@rezics/ui/editor';
-import React, {useEffect, useState} from 'react';
+import AddIcon from "@mui/icons-material/Add";
+import DeleteIcon from "@mui/icons-material/Delete";
 import {
   Button,
   Divider,
@@ -8,10 +8,11 @@ import {
   Paper,
   TextField,
   Typography,
-} from '@mui/material';
-import DeleteIcon from '@mui/icons-material/Delete';
-import AddIcon from '@mui/icons-material/Add';
-import {useTranslation} from 'react-i18next';
+} from "@mui/material";
+import { RezicsJsonEditor } from "@rezics/ui/editor";
+import type React from "react";
+import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 /** Book extra data structure. */
 export type BookExtraData = {
@@ -27,37 +28,37 @@ interface BookExtraEditorProps {
   onChange?: (value: BookExtraData) => void;
 }
 
-function PublishURL({value, onChange}: BookExtraEditorProps) {
-  const {t} = useTranslation();
-  const [newUrl, setNewUrl] = useState('');
+function PublishURL({ value, onChange }: BookExtraEditorProps) {
+  const { t } = useTranslation();
+  const [newUrl, setNewUrl] = useState("");
   const urls: string[] = Array.isArray(value) ? value : [];
 
   const handleAdd = () => {
     if (newUrl.trim() && onChange) {
       const updatedUrls = [...urls, newUrl.trim()];
-      onChange({...value, publishURL: updatedUrls});
-      setNewUrl('');
+      onChange({ ...value, publishURL: updatedUrls });
+      setNewUrl("");
     }
   };
 
   const handleRemove = (index: number) => {
     if (onChange) {
       const updatedUrls = urls.filter((_, i) => i !== index);
-      onChange({...value, publishURL: updatedUrls});
+      onChange({ ...value, publishURL: updatedUrls });
     }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       e.preventDefault();
       handleAdd();
     }
   };
 
   return (
-    <Paper sx={{p: 2, borderRadius: 2}}>
-      <Typography variant="h6" sx={{mb: 2}}>
-        {t('book.extra.publish_urls.title')}
+    <Paper sx={{ p: 2, borderRadius: 2 }}>
+      <Typography variant="h6" sx={{ mb: 2 }}>
+        {t("book.extra.publish_urls.title")}
       </Typography>
 
       <div className="space-y-2">
@@ -67,8 +68,8 @@ function PublishURL({value, onChange}: BookExtraEditorProps) {
             variant="outlined"
             sx={{
               p: 1.5,
-              display: 'flex',
-              alignItems: 'center',
+              display: "flex",
+              alignItems: "center",
               gap: 1,
             }}
           >
@@ -78,9 +79,9 @@ function PublishURL({value, onChange}: BookExtraEditorProps) {
               rel="noopener noreferrer"
               sx={{
                 flex: 1,
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
               }}
             >
               {url}
@@ -89,7 +90,7 @@ function PublishURL({value, onChange}: BookExtraEditorProps) {
               size="small"
               color="error"
               onClick={() => handleRemove(index)}
-              aria-label={t('common.delete')}
+              aria-label={t("common.delete")}
             >
               <DeleteIcon fontSize="small" />
             </IconButton>
@@ -103,9 +104,9 @@ function PublishURL({value, onChange}: BookExtraEditorProps) {
           size="small"
           type="url"
           value={newUrl}
-          onChange={e => setNewUrl(e.target.value)}
+          onChange={(e) => setNewUrl(e.target.value)}
           onKeyPress={handleKeyPress}
-          placeholder={t('placeholders.enter_url')}
+          placeholder={t("placeholders.enter_url")}
           variant="outlined"
         />
         <Button
@@ -113,9 +114,9 @@ function PublishURL({value, onChange}: BookExtraEditorProps) {
           onClick={handleAdd}
           disabled={!newUrl.trim()}
           startIcon={<AddIcon />}
-          sx={{minWidth: 100}}
+          sx={{ minWidth: 100 }}
         >
-          {t('common.add')}
+          {t("common.add")}
         </Button>
       </div>
     </Paper>
@@ -142,7 +143,7 @@ export const BookExtraEditor: React.FC<BookExtraEditorProps> = ({
     onChange?.(newExtraData);
   };
 
-  const handlePublishURLChange = (publishURL: string[]) => {
+  const _handlePublishURLChange = (publishURL: string[]) => {
     handleExtraChange({
       ...extraData,
       publishURL,
@@ -152,7 +153,7 @@ export const BookExtraEditor: React.FC<BookExtraEditorProps> = ({
   return (
     <div>
       <PublishURL value={extraData || undefined} onChange={handleExtraChange} />
-      <Divider sx={{my: 3}} />
+      <Divider sx={{ my: 3 }} />
       <RezicsJsonEditor
         value={JSON.stringify(extraData, null, 2)}
         onChange={(text) => {

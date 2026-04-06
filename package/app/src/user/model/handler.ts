@@ -1,20 +1,20 @@
-import {authApi} from '@rezics/api/auth/auth.api';
-import {authKeys} from '@rezics/api/auth/auth.keys';
-import {NormalizedTokenName} from '@rezics/contract';
+import { authApi } from "@rezics/api/auth/auth.api";
+import { authKeys } from "@rezics/api/auth/auth.keys";
 import {
   clearAllTokens,
   ensureAuthIdentityToken,
   setToken,
-} from '@rezics/api/react-query/jwt';
-import {userKeys} from '@rezics/api/user/user.keys';
-import {qc} from '@/app/provider/reactQueryUtil';
-import {userApi} from '@rezics/api/user/user.api';
+} from "@rezics/api/react-query/jwt";
+import { userApi } from "@rezics/api/user/user.api";
+import { userKeys } from "@rezics/api/user/user.keys";
+import { NormalizedTokenName } from "@rezics/contract";
+import { qc } from "@/app/provider/reactQueryUtil";
 import {
   clearAuthSessionState,
   hydrateAuthSessionState,
   useAuthSessionStore,
   useUserProfileStore,
-} from '@/user/state';
+} from "@/user/state";
 
 /**
  * One-shot provisioning sequence for establishing a business session.
@@ -25,7 +25,7 @@ import {
  * 5. Hydrate authSessionStore
  */
 export async function establishBusinessSession() {
-  await ensureAuthIdentityToken({requirePresence: false});
+  await ensureAuthIdentityToken({ requirePresence: false });
 
   const authContext = await authApi.getContextToken();
   const contextToken = authContext.token;
@@ -39,25 +39,25 @@ export async function establishBusinessSession() {
   await hydrateAuthSessionState();
   useUserProfileStore.getState().setUser(ensured.user);
 
-  return {user: ensured.user};
+  return { user: ensured.user };
 }
 
 export const login = async (email: string, password: string) => {
-  await authApi.signIn({email, password});
-  const token = await ensureAuthIdentityToken({requirePresence: false});
+  await authApi.signIn({ email, password });
+  const token = await ensureAuthIdentityToken({ requirePresence: false });
 
   const sessionState = await hydrateAuthSessionState();
   const hasAuthSession = Boolean(sessionState?.session?.id);
 
   if (!token && !hasAuthSession) {
-    throw new Error('Login failed');
+    throw new Error("Login failed");
   }
 
   const user = sessionState?.authSession.canAcquireMemberToken
     ? (await establishBusinessSession()).user
     : null;
 
-  return {user, token};
+  return { user, token };
 };
 
 export const register = async (
@@ -69,23 +69,23 @@ export const register = async (
   try {
     void avatar;
     void bio;
-    await authApi.signUp({email, password});
-    const token = await ensureAuthIdentityToken({requirePresence: false});
+    await authApi.signUp({ email, password });
+    const token = await ensureAuthIdentityToken({ requirePresence: false });
 
     const sessionState = await hydrateAuthSessionState();
     const hasAuthSession = Boolean(sessionState?.session?.id);
 
     if (!token && !hasAuthSession) {
-      throw new Error('Registration failed');
+      throw new Error("Registration failed");
     }
 
     const user = sessionState?.authSession.canAcquireMemberToken
       ? (await establishBusinessSession()).user
       : null;
 
-    return {user, token};
+    return { user, token };
   } catch (error) {
-    console.error('Error during registration:', error);
+    console.error("Error during registration:", error);
     throw error;
   }
 };
@@ -96,9 +96,9 @@ export const logout = async (disableReload = false) => {
   useAuthSessionStore.getState().syncBusinessToken(null);
   clearAuthSessionState();
   useUserProfileStore.getState().clearProfile();
-  qc.removeQueries({queryKey: authKeys.all()});
-  qc.removeQueries({queryKey: userKeys.all()});
-  if (typeof window === 'undefined') return;
+  qc.removeQueries({ queryKey: authKeys.all() });
+  qc.removeQueries({ queryKey: userKeys.all() });
+  if (typeof window === "undefined") return;
   if (!disableReload) {
     setTimeout(() => location.reload(), 500);
   }

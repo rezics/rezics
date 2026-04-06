@@ -1,7 +1,7 @@
-import type {UserListQuery} from '@rezics/contract';
-import {searchClient} from '../search-client';
-import type {UserSearchDocument, UserSearchResult} from './index';
-import type {SearchResponse} from '@rezics/search';
+import type { UserListQuery } from "@rezics/contract";
+import type { SearchResponse } from "@rezics/search";
+import { searchClient } from "../search-client";
+import type { UserSearchDocument, UserSearchResult } from "./index";
 
 function escapeValue(value: string): string {
   return value.trim().replace(/"/g, '\\"');
@@ -26,7 +26,7 @@ export async function searchUsersRaw(
   const limit = options?.limit ?? 20;
 
   // eslint-disable-next-line no-console
-  console.log('searchUsersRaw', q, options);
+  console.log("searchUsersRaw", q, options);
 
   return searchClient.userIndex.search<UserSearchDocument>(q, {
     offset,
@@ -46,7 +46,7 @@ export async function searchUsersRaw(
 export async function searchUsers(
   opts: UserListQuery,
 ): Promise<UserSearchResult> {
-  const q = opts.q ?? '';
+  const q = opts.q ?? "";
 
   const filter: string[] = [];
 
@@ -62,7 +62,7 @@ export async function searchUsers(
   const rawLimit = Math.max(1, Math.min(Number(opts.limit ?? 20), 100));
   const offset = (pageNum - 1) * rawLimit;
 
-  const sort: string[] = ['joinDate:desc'];
+  const sort: string[] = ["joinDate:desc"];
 
   const resp = await searchUsersRaw(q, {
     offset,

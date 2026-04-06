@@ -1,8 +1,8 @@
-import React from 'react';
-import {useTranslation} from 'react-i18next';
+import type React from "react";
+import { useTranslation } from "react-i18next";
 
 export type HomePromotionStripProps = {
-  items?: {text: string; href?: string}[];
+  items?: { text: string; href?: string }[];
 };
 
 /**
@@ -12,11 +12,11 @@ export type HomePromotionStripProps = {
 export const HomePromotionStrip: React.FC<HomePromotionStripProps> = ({
   items,
 }) => {
-  const {t} = useTranslation();
+  const { t } = useTranslation();
   const resolvedItems = items ?? [
-    {text: t('page.home.sections.promotion_item_1')},
-    {text: t('page.home.sections.promotion_item_2')},
-    {text: t('page.home.sections.promotion_item_3')},
+    { text: t("page.home.sections.promotion_item_1") },
+    { text: t("page.home.sections.promotion_item_2") },
+    { text: t("page.home.sections.promotion_item_3") },
   ];
 
   return (
@@ -25,7 +25,7 @@ export const HomePromotionStrip: React.FC<HomePromotionStripProps> = ({
         {resolvedItems.map((item, i) => (
           <a
             key={i}
-            href={item.href || '#'}
+            href={item.href || "#"}
             className="text-purple-700 hover:underline"
           >
             {item.text}
@@ -37,4 +37,3 @@ export const HomePromotionStrip: React.FC<HomePromotionStripProps> = ({
 };
 
 export default HomePromotionStrip;
-

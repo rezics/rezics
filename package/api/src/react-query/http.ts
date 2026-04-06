@@ -1,13 +1,10 @@
 import {
   NormalizedTokenName,
   type NormalizedTokenName as NormalizedTokenNameType,
-} from '@rezics/contract';
-import {getApiConfig} from '../config';
-import {clearAuthPresence, hasAuthPresence} from './authPresence';
-import {
-  buildTokenHeaders,
-  queryAccessToken,
-} from './jwt';
+} from "@rezics/contract";
+import { getApiConfig } from "../config";
+import { clearAuthPresence, hasAuthPresence } from "./authPresence";
+import { buildTokenHeaders, queryAccessToken } from "./jwt";
 
 /**
  * Base API URL - should be configured via environment
@@ -25,11 +22,9 @@ export type ApiRequestInit = globalThis.RequestInit & {
  * transport contract. Caller-provided headers are preserved, but managed
  * auth transports always win when present.
  */
-function buildHeaders(
-  options?: ApiRequestInit,
-): Record<string, string> {
+function buildHeaders(options?: ApiRequestInit): Record<string, string> {
   const headers = {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
     ...Object.fromEntries(new Headers(options?.headers).entries()),
     ...buildTokenHeaders({
       include: options?.includeTokens ?? [
@@ -46,9 +41,9 @@ async function requestWithAuthRetry(
   url: string,
   options?: ApiRequestInit,
 ): Promise<Response> {
-  let response = await fetch(url, {
+  const response = await fetch(url, {
     ...options,
-    credentials: 'include',
+    credentials: "include",
     headers: buildHeaders(options),
   });
 
@@ -59,7 +54,10 @@ async function requestWithAuthRetry(
   const cloned = response.clone();
   const responseJson = await cloned.json().catch(() => null);
 
-  if (responseJson?.message?.includes('No authorization header') || !hasAuthPresence()) {
+  if (
+    responseJson?.message?.includes("No authorization header") ||
+    !hasAuthPresence()
+  ) {
     return response;
   }
 
@@ -72,7 +70,7 @@ async function requestWithAuthRetry(
 
   return fetch(url, {
     ...options,
-    credentials: 'include',
+    credentials: "include",
     headers: buildHeaders(options),
   });
 }
@@ -80,7 +78,7 @@ async function requestWithAuthRetry(
 export async function apiFetchResponse<T>(
   endpoint: string,
   options?: ApiRequestInit,
-): Promise<{data: T; response: Response}> {
+): Promise<{ data: T; response: Response }> {
   const url = `${getApiBaseUrl()}${endpoint}`;
   const response = await requestWithAuthRetry(url, options);
   const responseJson = await response.json().catch(() => null);
@@ -107,6 +105,6 @@ export async function apiFetch<T>(
   endpoint: string,
   options?: ApiRequestInit,
 ): Promise<T> {
-  const {data} = await apiFetchResponse<T>(endpoint, options);
+  const { data } = await apiFetchResponse<T>(endpoint, options);
   return data;
 }

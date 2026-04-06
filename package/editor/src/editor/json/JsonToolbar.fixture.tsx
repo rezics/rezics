@@ -1,7 +1,7 @@
-import {JsonEditor} from '../JsonEditor';
+import { JsonEditor } from "../JsonEditor";
 
 const sampleJson = JSON.stringify(
-  {hello: 'world', count: 42, nested: {key: 'value'}},
+  { hello: "world", count: 42, nested: { key: "value" } },
   null,
   2,
 );
@@ -14,7 +14,11 @@ export default {
       value={sampleJson}
       toolbar={{
         icons: {
-          format: <span style={{fontSize: 14, fontFamily: 'monospace'}}>{'{}'}</span>,
+          format: (
+            <span style={{ fontSize: 14, fontFamily: "monospace" }}>
+              {"{}"}
+            </span>
+          ),
         },
       }}
       className="h-screen"

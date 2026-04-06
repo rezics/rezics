@@ -2,10 +2,10 @@
  * React Query configurations for Feedback queries
  */
 
-import {queryOptions} from '@tanstack/react-query';
-import {feedbackApi} from './feedback.api';
-import {feedbackKeys} from './feedback.keys';
-import type {FeedbackFilters} from './feedback.types';
+import { queryOptions } from "@tanstack/react-query";
+import { feedbackApi } from "./feedback.api";
+import { feedbackKeys } from "./feedback.keys";
+import type { FeedbackFilters } from "./feedback.types";
 
 /**
  * Query options for listing all feedbacks (admin)

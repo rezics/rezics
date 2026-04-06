@@ -1,11 +1,11 @@
-import { describe, expect, it } from 'bun:test';
-import { XMLParser } from 'fast-xml-parser';
+import { describe, expect, it } from "bun:test";
+import { XMLParser } from "fast-xml-parser";
 
 // Test the XML parsing logic used by container/opf/toc modules
 // Since these modules depend on FileMap from zip.ts, we test the parsing logic directly
 
-describe('epub container.xml parsing', () => {
-  it('extracts rootfile full-path', () => {
+describe("epub container.xml parsing", () => {
+  it("extracts rootfile full-path", () => {
     const xml = `<?xml version="1.0"?>
 <container version="1.0" xmlns="urn:oasis:names:tc:opendocument:xmlns:container">
   <rootfiles>
@@ -16,14 +16,14 @@ describe('epub container.xml parsing', () => {
     const parser = new XMLParser({ ignoreAttributes: false });
     const doc = parser.parse(xml);
     const rootfile = doc.container.rootfiles.rootfile;
-    const fullPath = rootfile['@_full-path'];
+    const fullPath = rootfile["@_full-path"];
 
-    expect(fullPath).toBe('OEBPS/content.opf');
+    expect(fullPath).toBe("OEBPS/content.opf");
   });
 });
 
-describe('epub OPF parsing', () => {
-  it('extracts manifest items and spine order', () => {
+describe("epub OPF parsing", () => {
+  it("extracts manifest items and spine order", () => {
     const xml = `<?xml version="1.0"?>
 <package xmlns="http://www.idpf.org/2007/opf" version="3.0">
   <metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
@@ -50,28 +50,28 @@ describe('epub OPF parsing', () => {
       ? pkg.manifest.item
       : [pkg.manifest.item];
     expect(items).toHaveLength(3);
-    expect(items[0]['@_id']).toBe('ch1');
-    expect(items[0]['@_href']).toBe('chapter1.xhtml');
+    expect(items[0]["@_id"]).toBe("ch1");
+    expect(items[0]["@_href"]).toBe("chapter1.xhtml");
 
     // Spine
     const spineItems = Array.isArray(pkg.spine.itemref)
       ? pkg.spine.itemref
       : [pkg.spine.itemref];
     expect(spineItems).toHaveLength(2);
-    expect(spineItems[0]['@_idref']).toBe('ch1');
-    expect(spineItems[1]['@_idref']).toBe('ch2');
+    expect(spineItems[0]["@_idref"]).toBe("ch1");
+    expect(spineItems[1]["@_idref"]).toBe("ch2");
 
     // Toc reference
-    expect(pkg.spine['@_toc']).toBe('ncx');
+    expect(pkg.spine["@_toc"]).toBe("ncx");
 
     // Metadata
-    expect(pkg.metadata['dc:title']).toBe('Test Book');
-    expect(pkg.metadata['dc:creator']).toBe('Test Author');
+    expect(pkg.metadata["dc:title"]).toBe("Test Book");
+    expect(pkg.metadata["dc:creator"]).toBe("Test Author");
   });
 });
 
-describe('epub NCX TOC parsing', () => {
-  it('extracts hierarchical navPoints', () => {
+describe("epub NCX TOC parsing", () => {
+  it("extracts hierarchical navPoints", () => {
     const xml = `<?xml version="1.0"?>
 <ncx xmlns="http://www.daisy.org/z3986/2005/ncx/">
   <navMap>
@@ -101,35 +101,33 @@ describe('epub NCX TOC parsing', () => {
 
     // First has nested navPoint
     const part1 = navPoints[0];
-    expect(part1.navLabel.text).toBe('Part 1');
-    expect(part1.content['@_src']).toBe('part1.xhtml');
+    expect(part1.navLabel.text).toBe("Part 1");
+    expect(part1.content["@_src"]).toBe("part1.xhtml");
 
     const nested = part1.navPoint;
-    expect(nested.navLabel.text).toBe('Chapter 1');
-    expect(nested.content['@_src']).toBe('ch1.xhtml');
+    expect(nested.navLabel.text).toBe("Chapter 1");
+    expect(nested.content["@_src"]).toBe("ch1.xhtml");
 
     // Second is flat
     const ch2 = navPoints[1];
-    expect(ch2.navLabel.text).toBe('Chapter 2');
+    expect(ch2.navLabel.text).toBe("Chapter 2");
   });
 });
 
-describe('asset URL rewriting', () => {
-  it('rewrites relative src attributes', () => {
+describe("asset URL rewriting", () => {
+  it("rewrites relative src attributes", () => {
     const html = '<img src="../images/cover.jpg" />';
     // The regex from assets.ts
     const ASSET_ATTR_REGEX = /(?:src|href)\s*=\s*["']([^"']+)["']/gi;
 
     const matches = [...html.matchAll(ASSET_ATTR_REGEX)];
     expect(matches).toHaveLength(1);
-    expect(matches[0][1]).toBe('../images/cover.jpg');
+    expect(matches[0][1]).toBe("../images/cover.jpg");
   });
 
-  it('skips external URLs', () => {
-    const html = '<img src="https://example.com/img.jpg" />';
-    const src = 'https://example.com/img.jpg';
-    expect(
-      src.startsWith('http://') || src.startsWith('https://'),
-    ).toBe(true);
+  it("skips external URLs", () => {
+    const _html = '<img src="https://example.com/img.jpg" />';
+    const src = "https://example.com/img.jpg";
+    expect(src.startsWith("http://") || src.startsWith("https://")).toBe(true);
   });
 });

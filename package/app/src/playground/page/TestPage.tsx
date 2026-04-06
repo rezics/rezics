@@ -1,14 +1,14 @@
-import {TabContext, TabList, TabPanel} from '@mui/lab';
-import Box from '@mui/material/Box';
-import Tab from '@mui/material/Tab';
-import * as React from 'react';
+import { TabContext, TabList, TabPanel } from "@mui/lab";
+import Box from "@mui/material/Box";
+import Tab from "@mui/material/Tab";
+import * as React from "react";
 
-import {ThemeDemo} from '@/preferences/section/ThemeDemo.tsx';
+import { ThemeDemo } from "@/preferences/section/ThemeDemo.tsx";
 
 export default function PersistentTabs() {
-  const [value, setValue] = React.useState<'1' | '2'>('1');
+  const [value, setValue] = React.useState<"1" | "2">("1");
 
-  const handleChange = (_: React.SyntheticEvent, newValue: '1' | '2') => {
+  const handleChange = (_: React.SyntheticEvent, newValue: "1" | "2") => {
     setValue(newValue);
   };
 
@@ -22,9 +22,9 @@ export default function PersistentTabs() {
       </div>
       <ThemeDemo />
       <TabContext value={value}>
-        {' '}
+        {" "}
         {/* ① 提供上下文 */}
-        <Box sx={{borderBottom: 1, borderColor: 'divider'}}>
+        <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
           <TabList onChange={handleChange} aria-label="lab API tabs example">
             <Tab label="面板一" value="1" />
             <Tab label="面板二" value="2" />

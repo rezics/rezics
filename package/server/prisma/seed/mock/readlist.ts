@@ -1,22 +1,21 @@
-import {faker} from '@faker-js/faker';
-import type {PrismaClient} from '#/prisma/generated/client.js';
+import { faker } from "@faker-js/faker";
+import type { PrismaClient } from "#/prisma/generated/client.js";
 import {
-  UnitType as UnitTypeEnum,
   UnitStatus,
-} from '#/prisma/generated/client.js';
-import type {CreatedUser, CreatedUnit} from './types.js';
+  UnitType as UnitTypeEnum,
+} from "#/prisma/generated/client.js";
+import { seedComments } from "./comments.js";
+import type { CreatedUnit, CreatedUser } from "./types.js";
 import {
-  randomInt,
-  randomBoolean,
-  generateParagraph,
-  randomFloat,
-} from './utils.js';
-
-import {seedComments} from './comments.js';
-import {
-  upsertReactionSummariesForUnit,
   upsertBookmarkCountForUnit,
-} from './unitStats.js';
+  upsertReactionSummariesForUnit,
+} from "./unitStats.js";
+import {
+  generateParagraph,
+  randomBoolean,
+  randomFloat,
+  randomInt,
+} from "./utils.js";
 
 /**
  * Seed ReadList units and their Book connections
@@ -28,11 +27,11 @@ export async function seedReadLists(
   total: number,
   users: CreatedUser[],
   bookUnitIds: string[],
-  reviewUnitIds: string[],
+  _reviewUnitIds: string[],
 ): Promise<CreatedUnit[]> {
   if (bookUnitIds.length < 3) {
     console.warn(
-      '📚 Not enough books to seed read lists (need >= 3). Skipping readlist seeding.',
+      "📚 Not enough books to seed read lists (need >= 3). Skipping readlist seeding.",
     );
     return [];
   }
@@ -52,16 +51,16 @@ export async function seedReadLists(
     // For each selected book, we'll create a corresponding review Unit below
 
     const title = faker.lorem
-      .words({min: 2, max: 4})
-      .split(' ')
-      .map(w => w.charAt(0).toUpperCase() + w.slice(1))
-      .join(' ');
+      .words({ min: 2, max: 4 })
+      .split(" ")
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(" ");
     const metadata = {
-      coverUrl: faker.image.url({width: 400, height: 600}),
+      coverUrl: faker.image.url({ width: 400, height: 600 }),
       books: selectedBooks,
     } as const;
     const publishedAt = randomBoolean(0.85)
-      ? faker.date.past({years: 2})
+      ? faker.date.past({ years: 2 })
       : null;
 
     const unit = await prisma.unit.create({
@@ -74,12 +73,12 @@ export async function seedReadLists(
         metadata,
         publishedAt,
       },
-      select: {id: true, type: true},
+      select: { id: true, type: true },
     });
 
     // Create a review Unit for each selected book and attach both books and reviews to the readlist
     const createdReviewIds = await Promise.all(
-      selectedBooks.map(bookUnitId =>
+      selectedBooks.map((bookUnitId) =>
         createReviewUnit(prisma, {
           authorUserUnitId: author.unitId,
           bookUnitId,
@@ -91,11 +90,11 @@ export async function seedReadLists(
       data: {
         unitId: unit.id,
         book: {
-          connect: selectedBooks.map(unitId => ({unitId})),
+          connect: selectedBooks.map((unitId) => ({ unitId })),
         },
         review: {
           // Connect by Unit.id for review relations
-          connect: createdReviewIds.map(id => ({id})),
+          connect: createdReviewIds.map((id) => ({ id })),
         },
         order: createdReviewIds,
       },
@@ -121,10 +120,13 @@ async function createCommentTreeForReadlist(
   readlistUnitId: string,
   users: CreatedUser[],
 ): Promise<string> {
-  const {perRootCount} = await seedComments(prisma, randomInt(20, 200), users, [
-    readlistUnitId,
-  ]);
-  return '';
+  const { perRootCount } = await seedComments(
+    prisma,
+    randomInt(20, 200),
+    users,
+    [readlistUnitId],
+  );
+  return "";
 }
 /**
  * Create a Review Unit for a given Book (by book's Unit ID)
@@ -132,18 +134,18 @@ async function createCommentTreeForReadlist(
  */
 async function createReviewUnit(
   prisma: PrismaClient,
-  params: {authorUserUnitId: string; bookUnitId: string},
+  params: { authorUserUnitId: string; bookUnitId: string },
 ): Promise<string> {
-  const {authorUserUnitId, bookUnitId} = params;
+  const { authorUserUnitId, bookUnitId } = params;
 
   const rating = Math.round(randomFloat(1, 5) * 10) / 10; // one decimal between 1.0 and 5.0
   const hasTitle = randomBoolean(0.7);
   const reviewTitle = hasTitle
     ? faker.lorem
-        .words({min: 2, max: 5})
-        .split(' ')
-        .map(w => w.charAt(0).toUpperCase() + w.slice(1))
-        .join(' ')
+        .words({ min: 2, max: 5 })
+        .split(" ")
+        .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+        .join(" ")
     : null;
 
   const review = await prisma.unit.create({
@@ -153,11 +155,11 @@ async function createReviewUnit(
       status: randomBoolean(0.9) ? UnitStatus.ACTIVE : UnitStatus.DRAFT,
       title: reviewTitle,
       content: generateParagraph(40, 400),
-      metadata: {rating},
+      metadata: { rating },
       targetUnitId: bookUnitId,
-      publishedAt: faker.date.past({years: 2}),
+      publishedAt: faker.date.past({ years: 2 }),
     },
-    select: {id: true},
+    select: { id: true },
   });
 
   await upsertBookmarkCountForUnit(prisma, review.id, randomInt(0, 100));

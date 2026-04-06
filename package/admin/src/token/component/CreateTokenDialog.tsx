@@ -1,17 +1,17 @@
-import {useState} from 'react';
-import type {FC} from 'react';
 import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  Button,
-  Box,
   Alert,
-} from '@mui/material';
-import type {CreateApiTokenInput} from '@rezics/contract';
-import {ScopesEditor} from './ScopesEditor';
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  TextField,
+} from "@mui/material";
+import type { CreateApiTokenInput } from "@rezics/contract";
+import type { FC } from "react";
+import { useState } from "react";
+import { ScopesEditor } from "./ScopesEditor";
 
 interface CreateTokenDialogProps {
   open: boolean;
@@ -31,22 +31,22 @@ export const CreateTokenDialog: FC<CreateTokenDialogProps> = ({
   creating,
   error,
 }) => {
-  const [name, setName] = useState('');
-  const [expiresAt, setExpiresAt] = useState<string>('');
+  const [name, setName] = useState("");
+  const [expiresAt, setExpiresAt] = useState<string>("");
   const [scopes, setScopes] = useState<Record<string, string[]>>({});
 
   const handleCreate = async () => {
     const input: CreateApiTokenInput = {
-      name: name || 'New Token',
-      ...(expiresAt ? {expiresAt} : {}),
-      ...(Object.keys(scopes).length > 0 ? {scopes} : {}),
+      name: name || "New Token",
+      ...(expiresAt ? { expiresAt } : {}),
+      ...(Object.keys(scopes).length > 0 ? { scopes } : {}),
     };
     await onCreate(input);
   };
 
   const handleClose = () => {
-    setName('');
-    setExpiresAt('');
+    setName("");
+    setExpiresAt("");
     setScopes({});
     onClose();
   };
@@ -60,16 +60,16 @@ export const CreateTokenDialog: FC<CreateTokenDialogProps> = ({
             fullWidth
             label="Token name"
             value={name}
-            onChange={e => setName(e.target.value)}
+            onChange={(e) => setName(e.target.value)}
           />
           <div className="my-6" />
           <TextField
             fullWidth
             type="datetime-local"
             label="Expires At (optional)"
-            InputLabelProps={{shrink: true}}
+            InputLabelProps={{ shrink: true }}
             value={expiresAt}
-            onChange={e => setExpiresAt(e.target.value)}
+            onChange={(e) => setExpiresAt(e.target.value)}
           />
           <div className="my-6" />
           <ScopesEditor scopes={scopes} onChange={setScopes} />
@@ -84,7 +84,7 @@ export const CreateTokenDialog: FC<CreateTokenDialogProps> = ({
           color="primary"
           disabled={creating}
         >
-          {creating ? 'Creating…' : 'Create'}
+          {creating ? "Creating…" : "Create"}
         </Button>
       </DialogActions>
     </Dialog>

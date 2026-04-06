@@ -1,31 +1,31 @@
-import {useEffect, useState} from 'react';
-import type {FC} from 'react';
 import {
+  Alert,
   Box,
-  Typography,
   Button,
   CircularProgress,
-  Alert,
   Stack,
-} from '@mui/material';
-import {useQuery} from '@tanstack/react-query';
-import {tokenQueries} from '@rezics/api/token/token.queries';
+  Typography,
+} from "@mui/material";
 import {
   useCreateTokenMutation,
   useRevokeTokenMutation,
   useUpdateTokenMutation,
-} from '@rezics/api/token/token.mutations';
+} from "@rezics/api/token/token.mutations";
+import { tokenQueries } from "@rezics/api/token/token.queries";
 import type {
   ApiTokenDTO,
   CreateApiTokenInput,
   UpdateApiTokenInput,
-} from '@rezics/contract';
+} from "@rezics/contract";
+import { useQuery } from "@tanstack/react-query";
+import type { FC } from "react";
+import { useEffect, useState } from "react";
 import {
-  TokenTable,
   CreateTokenDialog,
   EditTokenDialog,
   TokenSecretDialog,
-} from '../component';
+  TokenTable,
+} from "../component";
 
 /**
  * TokenPage - 管理当前用户的 API tokens
@@ -35,7 +35,7 @@ import {
  * - 撤销 token
  */
 export const TokenPage: FC = () => {
-  const {data, isLoading, error} = useQuery(tokenQueries.list());
+  const { data, isLoading, error } = useQuery(tokenQueries.list());
 
   const [tokens, setTokens] = useState<ApiTokenDTO[]>([]);
 
@@ -69,7 +69,7 @@ export const TokenPage: FC = () => {
       setCreatedSecret(res.token);
       setOpenCreate(false);
     } catch (err) {
-      setCreatingError((err as Error)?.message ?? 'Create failed');
+      setCreatingError((err as Error)?.message ?? "Create failed");
     } finally {
       setCreating(false);
     }
@@ -85,25 +85,25 @@ export const TokenPage: FC = () => {
     setUpdatingError(null);
     try {
       setUpdating(true);
-      await updateMutation.mutateAsync({id, input});
+      await updateMutation.mutateAsync({ id, input });
       setOpenEdit(false);
       setEditingToken(null);
     } catch (err) {
-      setUpdatingError((err as Error)?.message ?? 'Update failed');
+      setUpdatingError((err as Error)?.message ?? "Update failed");
     } finally {
       setUpdating(false);
     }
   };
 
   const handleRevoke = async (id: string) => {
-    if (!confirm('Revoke this token? This action cannot be undone.')) return;
+    if (!confirm("Revoke this token? This action cannot be undone.")) return;
     try {
-      setRevokingIds(s => ({...s, [id]: true}));
+      setRevokingIds((s) => ({ ...s, [id]: true }));
       await revokeMutation.mutateAsync(id);
     } catch (err) {
-      alert((err as Error)?.message ?? 'Revoke failed');
+      alert((err as Error)?.message ?? "Revoke failed");
     } finally {
-      setRevokingIds(s => ({...s, [id]: false}));
+      setRevokingIds((s) => ({ ...s, [id]: false }));
     }
   };
 

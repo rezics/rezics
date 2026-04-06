@@ -2,6 +2,7 @@ import {
   Box,
   Button,
   Stack,
+  type SxProps,
   Table,
   TableBody,
   TableCell,
@@ -10,18 +11,17 @@ import {
   TablePagination,
   TableRow,
   TextField,
-  Typography,
-  type SxProps,
   type Theme,
-} from '@mui/material';
-import React from 'react';
+  Typography,
+} from "@mui/material";
+import React from "react";
 
 export type PaginatedColumn<T> = {
   id: string;
   header: React.ReactNode;
   cell: (row: T) => React.ReactNode;
   minWidth?: number;
-  align?: 'left' | 'right' | 'center';
+  align?: "left" | "right" | "center";
 };
 
 export function PaginatedTable<T>({
@@ -81,14 +81,14 @@ export function PaginatedTable<T>({
 
   return (
     <Box sx={sx}>
-      <TableContainer sx={{overflowX: 'auto'}}>
-        <Table size={dense ? 'small' : 'medium'} stickyHeader={stickyHeader}>
+      <TableContainer sx={{ overflowX: "auto" }}>
+        <Table size={dense ? "small" : "medium"} stickyHeader={stickyHeader}>
           <TableHead>
             <TableRow>
-              {columns.map(c => (
+              {columns.map((c) => (
                 <TableCell
                   key={c.id}
-                  sx={{minWidth: c.minWidth}}
+                  sx={{ minWidth: c.minWidth }}
                   align={c.align}
                 >
                   {c.header}
@@ -97,9 +97,9 @@ export function PaginatedTable<T>({
             </TableRow>
           </TableHead>
           <TableBody>
-            {rows.map(row => (
+            {rows.map((row) => (
               <TableRow key={getRowId(row)} hover>
-                {columns.map(c => (
+                {columns.map((c) => (
                   <TableCell key={c.id} align={c.align}>
                     {c.cell(row)}
                   </TableCell>
@@ -112,10 +112,10 @@ export function PaginatedTable<T>({
 
       <Box
         sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          flexWrap: 'wrap',
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          flexWrap: "wrap",
           gap: 1,
         }}
       >
@@ -125,7 +125,9 @@ export function PaginatedTable<T>({
           page={page}
           onPageChange={(_, nextPage) => onPageChange(nextPage)}
           rowsPerPage={rowsPerPage}
-          onRowsPerPageChange={e => onRowsPerPageChange(Number(e.target.value))}
+          onRowsPerPageChange={(e) =>
+            onRowsPerPageChange(Number(e.target.value))
+          }
           rowsPerPageOptions={[10, 20, 50, 100]}
         />
 
@@ -134,7 +136,7 @@ export function PaginatedTable<T>({
             direction="row"
             spacing={1}
             alignItems="center"
-            sx={{px: 1, pb: 1, pt: {xs: 0, sm: 1}}}
+            sx={{ px: 1, pb: 1, pt: { xs: 0, sm: 1 } }}
           >
             <Typography variant="body2" color="text.secondary">
               Go to page
@@ -142,21 +144,21 @@ export function PaginatedTable<T>({
             <TextField
               size="small"
               value={pageInput}
-              onChange={e => {
+              onChange={(e) => {
                 // Keep numeric only (avoid "e", "+", "-" from number inputs)
-                const next = e.target.value.replace(/[^\d]/g, '');
+                const next = e.target.value.replace(/[^\d]/g, "");
                 setPageInput(next);
               }}
               onBlur={commitPageInput}
-              onKeyDown={e => {
-                if (e.key === 'Enter') commitPageInput();
+              onKeyDown={(e) => {
+                if (e.key === "Enter") commitPageInput();
               }}
               inputProps={{
-                inputMode: 'numeric',
-                pattern: '[0-9]*',
-                'aria-label': 'go to page',
+                inputMode: "numeric",
+                pattern: "[0-9]*",
+                "aria-label": "go to page",
               }}
-              sx={{width: 110}}
+              sx={{ width: 110 }}
               disabled={!totalPages}
             />
             <Typography variant="body2" color="text.secondary">

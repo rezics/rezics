@@ -1,6 +1,5 @@
-import type {PrismaClient} from '#/prisma/generated/client.js';
-import {faker} from '@faker-js/faker';
-import {randomInt} from './utils.js';
+import type { PrismaClient } from "#/prisma/generated/client.js";
+import { randomInt } from "./utils.js";
 
 export type ReactionCounts = Partial<Record<string, number>>;
 
@@ -15,13 +14,13 @@ export async function upsertReactionSummary(
     count: number;
   },
 ): Promise<void> {
-  const {targetId, reaction, count} = params;
+  const { targetId, reaction, count } = params;
   await prisma.reactionSummary.upsert({
     where: {
-      targetId_reaction: {targetId, reaction},
+      targetId_reaction: { targetId, reaction },
     },
-    create: {targetId, reaction, count},
-    update: {count},
+    create: { targetId, reaction, count },
+    update: { count },
   });
 }
 
@@ -57,7 +56,7 @@ export async function upsertBookmarkCountForUnit(
 ): Promise<void> {
   await upsertReactionSummary(prisma, {
     targetId: unitId,
-    reaction: 'bookmark',
+    reaction: "bookmark",
     count: bookmarkCount,
   });
 }
@@ -72,7 +71,7 @@ export async function upsertCommentCountForUnit(
 ): Promise<void> {
   await upsertReactionSummary(prisma, {
     targetId: unitId,
-    reaction: 'comment',
+    reaction: "comment",
     count: commentCount,
   });
 }
@@ -90,12 +89,12 @@ export async function upsertRatingAggregate(
     totalCount: number;
   },
 ): Promise<void> {
-  const {unitId, totalScore, totalCount} = params;
+  const { unitId, totalScore, totalCount } = params;
   const domain = params.domain ?? unitId;
   await prisma.rating.upsert({
-    where: {unitId_domain: {unitId, domain}},
-    create: {unitId, domain, totalScore, totalCount},
-    update: {totalScore, totalCount},
+    where: { unitId_domain: { unitId, domain } },
+    create: { unitId, domain, totalScore, totalCount },
+    update: { totalScore, totalCount },
   });
 }
 

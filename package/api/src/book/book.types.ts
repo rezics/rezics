@@ -4,22 +4,22 @@
 
 import type {
   BookDTO,
-  CreateBookInput,
-  UpdateBookInput,
   BookListQuery,
   BookQueryOptions,
-} from '@rezics/contract';
+  CreateBookInput,
+  UpdateBookInput,
+} from "@rezics/contract";
 
 // Re-export contract types
-export type {BookDTO, CreateBookInput, UpdateBookInput, BookListQuery};
+export type { BookDTO, BookListQuery, CreateBookInput, UpdateBookInput };
 
 /**
  * Extended frontend types
  */
-export type BookFormData = Omit<CreateBookInput, 'userId'>;
+export type BookFormData = Omit<CreateBookInput, "userId">;
 
 export type BookFilters = Partial<BookQueryOptions>;
 
-export type BookSortOption = 'title' | 'createdAt' | 'updatedAt';
+export type BookSortOption = "title" | "createdAt" | "updatedAt";
 
-export type BookView = 'grid' | 'list' | 'table';
+export type BookView = "grid" | "list" | "table";

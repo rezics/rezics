@@ -2,10 +2,10 @@
  * React Query configurations for Unit queries
  */
 
-import {queryOptions, infiniteQueryOptions} from '@tanstack/react-query';
-import {unitApi} from './unit.api';
-import {unitKeys} from './unit.keys';
-import type {UnitFilters} from './unit.types';
+import { infiniteQueryOptions, queryOptions } from "@tanstack/react-query";
+import { unitApi } from "./unit.api";
+import { unitKeys } from "./unit.keys";
+import type { UnitFilters } from "./unit.types";
 
 /**
  * Query options for listing units
@@ -53,13 +53,14 @@ export const unitDetailQuery = (unitId: string) =>
  * Infinite query options for paginated unit list
  * @todo Align with backend pagination (offset/cursor)
  */
-export const unitInfiniteListQuery = (filters?: Omit<UnitFilters, 'page'>) =>
+export const unitInfiniteListQuery = (filters?: Omit<UnitFilters, "page">) =>
   infiniteQueryOptions({
     queryKey: unitKeys.list(filters),
-    queryFn: ({pageParam = 1}) => unitApi.list({...filters, start: pageParam}),
+    queryFn: ({ pageParam = 1 }) =>
+      unitApi.list({ ...filters, start: pageParam }),
     initialPageParam: 1,
     getNextPageParam: (lastPage, allPages, lastPageParam) => {
-      const {units, total} = lastPage;
+      const { units, total } = lastPage;
       const limit = filters?.limit || 20;
       const hasMore =
         units.length === limit && allPages.length * limit < (total || 0);

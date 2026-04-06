@@ -1,12 +1,14 @@
-import {describe, test, expect} from 'bun:test';
-import MarkdownIt from 'markdown-it';
-import {sourceLinePlugin} from './sourceLine';
-import {novelModePlugin} from './preserveFormatting';
+import { describe, expect, test } from "bun:test";
+import MarkdownIt from "markdown-it";
+import { novelModePlugin } from "./preserveFormatting";
+import { sourceLinePlugin } from "./sourceLine";
 
-describe('sourceLinePlugin', () => {
-  const md = new MarkdownIt({html: true}).use(novelModePlugin).use(sourceLinePlugin);
+describe("sourceLinePlugin", () => {
+  const md = new MarkdownIt({ html: true })
+    .use(novelModePlugin)
+    .use(sourceLinePlugin);
 
-  test('injects data-source-line on block elements', () => {
+  test("injects data-source-line on block elements", () => {
     const sample = `# Heading 1
 
 A paragraph here.
@@ -35,14 +37,16 @@ const x = 1;
     expect(result).toMatch(/<blockquote[^>]*data-source-line="\d+"/);
 
     // fence token - attr ends up on <code> inside <pre>
-    expect(result).toMatch(/<code data-source-line="11"/)
+    expect(result).toMatch(/<code data-source-line="11"/);
   });
 
-  test('composes with novelModePlugin without conflict', () => {
-    const result = md.render('Line one\n\n\n\nLine after gaps\n\n  double  spaces');
+  test("composes with novelModePlugin without conflict", () => {
+    const result = md.render(
+      "Line one\n\n\n\nLine after gaps\n\n  double  spaces",
+    );
     // novelModePlugin features should still work
-    expect(result).toContain('preserved-empty-lines');
-    expect(result).toContain('&nbsp;');
+    expect(result).toContain("preserved-empty-lines");
+    expect(result).toContain("&nbsp;");
     // source-line attrs should also be present
     expect(result).toMatch(/data-source-line/);
   });

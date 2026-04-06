@@ -1,4 +1,4 @@
-import type {JwtRotationEngine} from '../rotation/rotation-types';
+import type { JwtRotationEngine } from "../rotation/rotation-types";
 
 export function createBetterAuthJwksHandler(engine: JwtRotationEngine) {
   return async function getJwksResponse() {

@@ -1,13 +1,13 @@
+import { Box, CircularProgress, Tab, Tabs, Typography } from "@mui/material";
+import { useEffect, useState } from "react";
 import {
   GreenButton,
   OrangeButton,
   RoseButton,
-} from '@/component/Common/UI/Button/CustomButton';
-import {ShadowRoundedCard} from '@/component/Common/UI/Card/CustomCard';
-import {RoseTextField} from '@/component/Common/UI/Text/CustomTextField';
-import {useUserProfileStore} from '@/user/state';
-import {Box, CircularProgress, Tab, Tabs, Typography} from '@mui/material';
-import {useEffect, useState} from 'react';
+} from "@/component/Common/UI/Button/CustomButton";
+import { ShadowRoundedCard } from "@/component/Common/UI/Card/CustomCard";
+import { RoseTextField } from "@/component/Common/UI/Text/CustomTextField";
+import { useUserProfileStore } from "@/user/state";
 
 interface UserConfig {
   name: string;
@@ -17,14 +17,14 @@ interface UserConfig {
 }
 
 function fetchUserConfig(userId: string): Promise<UserConfig> {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     setTimeout(() => {
       resolve({
         name: `User ${userId}`,
         email: `user${userId}@example.com`,
-        bio: 'This is a short bio for configuration.',
+        bio: "This is a short bio for configuration.",
         privateKey:
-          '-----BEGIN PRIVATE KEY-----\nMIIEv...\n-----END PRIVATE KEY-----',
+          "-----BEGIN PRIVATE KEY-----\nMIIEv...\n-----END PRIVATE KEY-----",
       });
     }, 800);
   });
@@ -35,14 +35,14 @@ export function CustomTopbar({
   setSection,
 }: {
   section: string;
-  setSection: (section: 'Profile' | 'Security') => void;
+  setSection: (section: "Profile" | "Security") => void;
 }) {
   return (
     <Box
       sx={{
         borderBottom: 1,
-        borderColor: 'divider',
-        bgcolor: 'background.paper',
+        borderColor: "divider",
+        bgcolor: "background.paper",
         px: 3,
       }}
       className="rounded-3xl"
@@ -57,13 +57,13 @@ export function CustomTopbar({
         <Tab
           value="Profile"
           label="Profile Settings"
-          icon={<span style={{fontSize: 18}}>👤</span>}
+          icon={<span style={{ fontSize: 18 }}>👤</span>}
           iconPosition="start"
         />
         <Tab
           value="Security"
           label="Security & Privacy"
-          icon={<span style={{fontSize: 18}}>🔒</span>}
+          icon={<span style={{ fontSize: 18 }}>🔒</span>}
           iconPosition="start"
         />
       </Tabs>
@@ -72,20 +72,20 @@ export function CustomTopbar({
 }
 
 export function MainConfigPage() {
-  const user = useUserProfileStore(state => state.user);
+  const user = useUserProfileStore((state) => state.user);
   const userId = user?.id as string;
   const [config, setConfig] = useState<UserConfig | null>(null);
   const [loading, setLoading] = useState(true);
-  const [section, setSection] = useState<'Profile' | 'Security'>('Profile');
+  const [section, setSection] = useState<"Profile" | "Security">("Profile");
   const [passwords, setPasswords] = useState({
-    oldPwd: '',
-    newPwd: '',
-    confirm: '',
+    oldPwd: "",
+    newPwd: "",
+    confirm: "",
   });
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    fetchUserConfig(userId!).then(data => {
+    fetchUserConfig(userId!).then((data) => {
       setConfig(data);
       setLoading(false);
     });
@@ -96,20 +96,20 @@ export function MainConfigPage() {
     setSaving(true);
     setTimeout(() => {
       setSaving(false);
-      alert('Profile saved');
+      alert("Profile saved");
     }, 800);
   };
 
   const handlePasswordSave = () => {
     if (passwords.newPwd !== passwords.confirm) {
-      alert('New passwords do not match');
+      alert("New passwords do not match");
       return;
     }
     setSaving(true);
     setTimeout(() => {
       setSaving(false);
-      alert('Password updated');
-      setPasswords({oldPwd: '', newPwd: '', confirm: ''});
+      alert("Password updated");
+      setPasswords({ oldPwd: "", newPwd: "", confirm: "" });
     }, 800);
   };
 
@@ -117,15 +117,15 @@ export function MainConfigPage() {
     setSaving(true);
     setTimeout(() => {
       setConfig(
-        prev =>
+        (prev) =>
           prev && {
             ...prev,
             privateKey:
-              '-----BEGIN PRIVATE KEY-----\nNEWKEY123456...\n-----END PRIVATE KEY-----',
+              "-----BEGIN PRIVATE KEY-----\nNEWKEY123456...\n-----END PRIVATE KEY-----",
           },
       );
       setSaving(false);
-      alert('Private key regenerated');
+      alert("Private key regenerated");
     }, 800);
   };
 
@@ -155,19 +155,21 @@ export function MainConfigPage() {
                 {section} Settings
               </Typography>
               <Typography variant="body1" className="text-gray-600">
-                {section === 'Profile'
-                  ? 'Update your profile information and preferences'
-                  : 'Manage your account security and access keys'}
+                {section === "Profile"
+                  ? "Update your profile information and preferences"
+                  : "Manage your account security and access keys"}
               </Typography>
             </div>
             {/* ANCHOR Profile Section */}
-            {section === 'Profile' && (
+            {section === "Profile" && (
               <ShadowRoundedCard>
                 <div className="flex flex-col [&>*+*]:!mt-4">
                   <RoseTextField
                     label="Full Name"
                     value={config.name}
-                    onChange={e => setConfig({...config, name: e.target.value})}
+                    onChange={(e) =>
+                      setConfig({ ...config, name: e.target.value })
+                    }
                     type="text"
                   />
 
@@ -175,8 +177,8 @@ export function MainConfigPage() {
                     label="Email Address"
                     type="email"
                     value={config.email}
-                    onChange={e =>
-                      setConfig({...config, email: e.target.value})
+                    onChange={(e) =>
+                      setConfig({ ...config, email: e.target.value })
                     }
                   />
 
@@ -186,12 +188,14 @@ export function MainConfigPage() {
                     multiline
                     rows={4}
                     value={config.bio}
-                    onChange={e => setConfig({...config, bio: e.target.value})}
+                    onChange={(e) =>
+                      setConfig({ ...config, bio: e.target.value })
+                    }
                   />
 
                   <div>
                     <RoseButton
-                      label={saving ? 'Saving Profile...' : 'Save Profile'}
+                      label={saving ? "Saving Profile..." : "Save Profile"}
                       onClick={handleProfileSave}
                       disabled={saving}
                     />
@@ -200,7 +204,7 @@ export function MainConfigPage() {
               </ShadowRoundedCard>
             )}
 
-            {section === 'Security' && (
+            {section === "Security" && (
               <div className="space-y-8">
                 {/* Password Section */}
                 <ShadowRoundedCard>
@@ -222,8 +226,8 @@ export function MainConfigPage() {
                       type="password"
                       label="Current Password"
                       value={passwords.oldPwd}
-                      onChange={e =>
-                        setPasswords({...passwords, oldPwd: e.target.value})
+                      onChange={(e) =>
+                        setPasswords({ ...passwords, oldPwd: e.target.value })
                       }
                     />
 
@@ -231,8 +235,8 @@ export function MainConfigPage() {
                       type="password"
                       label="New Password"
                       value={passwords.newPwd}
-                      onChange={e =>
-                        setPasswords({...passwords, newPwd: e.target.value})
+                      onChange={(e) =>
+                        setPasswords({ ...passwords, newPwd: e.target.value })
                       }
                     />
 
@@ -240,15 +244,15 @@ export function MainConfigPage() {
                       type="password"
                       label="Confirm New Password"
                       value={passwords.confirm}
-                      onChange={e =>
-                        setPasswords({...passwords, confirm: e.target.value})
+                      onChange={(e) =>
+                        setPasswords({ ...passwords, confirm: e.target.value })
                       }
                     />
 
                     <div>
                       <GreenButton
                         label={
-                          saving ? 'Updating Password...' : 'Update Password'
+                          saving ? "Updating Password..." : "Update Password"
                         }
                         onClick={handlePasswordSave}
                         disabled={
@@ -283,13 +287,13 @@ export function MainConfigPage() {
                       value={config.privateKey}
                       InputProps={{
                         readOnly: true,
-                        className: 'font-mono text-sm bg-gray-50/80',
+                        className: "font-mono text-sm bg-gray-50/80",
                       }}
                       onChange={() => {}}
                     />
 
                     <OrangeButton
-                      label={saving ? 'Regenerating Key...' : 'Regenerate Key'}
+                      label={saving ? "Regenerating Key..." : "Regenerate Key"}
                       onClick={handleRegenerateKey}
                       disabled={saving}
                     />

@@ -1,5 +1,5 @@
-import type {UiComment} from './TreeReplyComponents';
-import type {CommentTreeNode} from '@rezics/contract';
+import type { CommentTreeNode } from "@rezics/contract";
+import type { UiComment } from "./TreeReplyComponents";
 
 export function buildTree(items: CommentTreeNode[] | undefined): UiComment[] {
   if (!items || items.length === 0) return [];
@@ -14,7 +14,7 @@ export function buildTree(items: CommentTreeNode[] | undefined): UiComment[] {
       id: n.id,
       content: n.content ?? null,
       created_at: n.createdAt
-        ? typeof n.createdAt === 'string'
+        ? typeof n.createdAt === "string"
           ? n.createdAt
           : new Date(n.createdAt as any).toISOString()
         : undefined,

@@ -1,8 +1,11 @@
-import type {UnitListQuery} from '@rezics/contract';
-import {searchClient} from '../search-client';
-import type {UnitSearchDocument, UnitSearchResult} from '@rezics/contract';
-import type {SearchResponse} from '@rezics/search';
-import {defaultSort} from '../util';
+import type {
+  UnitListQuery,
+  UnitSearchDocument,
+  UnitSearchResult,
+} from "@rezics/contract";
+import type { SearchResponse } from "@rezics/search";
+import { searchClient } from "../search-client";
+import { defaultSort } from "../util";
 /**
  * Low-level search API that accepts a fully-constructed Meilisearch query string.
  *
@@ -22,7 +25,7 @@ export async function searchUnitsRaw(
   const limit = options?.limit ?? 20;
 
   // eslint-disable-next-line no-console
-  console.log('searchUnitsRaw', q, options);
+  console.log("searchUnitsRaw", q, options);
   return searchClient.unitIndex.search<UnitSearchDocument>(q, {
     offset,
     limit,
@@ -32,14 +35,14 @@ export async function searchUnitsRaw(
 }
 
 function parseCsv(value?: string | null): string[] {
-  return (value ?? '')
-    .split(',')
-    .map(s => s.trim())
+  return (value ?? "")
+    .split(",")
+    .map((s) => s.trim())
     .filter(Boolean);
 }
 
 function escapeValues(values: string[]): string {
-  return values.map(v => `"${v.replace(/"/g, '\\"')}"`).join(', ');
+  return values.map((v) => `"${v.replace(/"/g, '\\"')}"`).join(", ");
 }
 
 /**
@@ -55,7 +58,7 @@ function escapeValues(values: string[]): string {
 export async function searchUnits(
   opts: UnitListQuery,
 ): Promise<UnitSearchResult> {
-  const q = opts.q ?? '';
+  const q = opts.q ?? "";
 
   const filter: string[] = [];
 
@@ -105,10 +108,10 @@ export async function searchUnits(
   } else if (combinedTargets.length > 1) {
     filter.push(`targetUnitId IN [${escapeValues(combinedTargets)}]`);
   }
-  if (opts.hasTarget === 'true') {
-    filter.push('hasTarget = true');
-  } else if (opts.hasTarget === 'false') {
-    filter.push('hasTarget = false');
+  if (opts.hasTarget === "true") {
+    filter.push("hasTarget = true");
+  } else if (opts.hasTarget === "false") {
+    filter.push("hasTarget = false");
   }
 
   // Tags (tag / tags)
@@ -133,8 +136,8 @@ export async function searchUnits(
 
   // Sort
   const sort: string[] = [];
-  const sortField = opts.sort?.field ?? 'createdAt';
-  const sortOrder = opts.sort?.order?.toLowerCase() === 'asc' ? 'asc' : 'desc';
+  const sortField = opts.sort?.field ?? "createdAt";
+  const sortOrder = opts.sort?.order?.toLowerCase() === "asc" ? "asc" : "desc";
   sort.push(`${sortField}:${sortOrder}`);
 
   const limit = opts.limit ?? 20;
@@ -153,7 +156,7 @@ export async function searchUnits(
         ...hit,
         content:
           (hit.content?.length ?? 0) > 500
-            ? hit.content?.slice(0, 500) + '...'
+            ? `${hit.content?.slice(0, 500)}...`
             : hit.content,
       };
     });

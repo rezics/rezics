@@ -1,8 +1,8 @@
-import { EditorState, type Extension } from '@codemirror/state';
-import { EditorView, type KeyBinding } from '@codemirror/view';
-import { resolvePlugins } from './plugin';
-import { mergeKeybindings } from './keybindings';
-import type { EditorPlugin } from './types';
+import { EditorState, type Extension } from "@codemirror/state";
+import { EditorView, type KeyBinding } from "@codemirror/view";
+import { mergeKeybindings } from "./keybindings";
+import { resolvePlugins } from "./plugin";
+import type { EditorPlugin } from "./types";
 
 export function createEditor(options: {
   parent: HTMLElement;
@@ -11,7 +11,7 @@ export function createEditor(options: {
   keybindings?: KeyBinding[];
   theme?: Extension;
 }): EditorView {
-  const { parent, doc = '', plugins = [], keybindings = [], theme } = options;
+  const { parent, doc = "", plugins = [], keybindings = [], theme } = options;
   const resolved = resolvePlugins(plugins);
 
   const extensions: Extension[] = [

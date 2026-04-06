@@ -1,8 +1,8 @@
-import {AccountMenu} from './AccountMenu.tsx';
-import {CreateMenu} from '../../component/create-menu/CreateMenu.tsx';
-import NotificationsIcon from '@mui/icons-material/Notifications';
-import {IconButton} from '@mui/material';
-import {Link} from '@rezics/ui/primitive/link/Link.tsx';
+import NotificationsIcon from "@mui/icons-material/Notifications";
+import { IconButton } from "@mui/material";
+import { Link } from "@rezics/ui/primitive/link/Link.tsx";
+import { CreateMenu } from "../../component/create-menu/CreateMenu.tsx";
+import { AccountMenu } from "./AccountMenu.tsx";
 
 export function AuthenticatedSection() {
   return (
@@ -13,7 +13,7 @@ export function AuthenticatedSection() {
         </IconButton>
       </Link>
       <CreateMenu />
-      <AccountMenu onLogout={() => console.log('Logout')} />
+      <AccountMenu onLogout={() => console.log("Logout")} />
     </div>
   );
 }

@@ -1,24 +1,21 @@
-import {useEffect, useState} from 'react';
-import type {FC} from 'react';
+import { Alert, Box, CircularProgress, Stack, Typography } from "@mui/material";
 import {
-  Box,
-  Typography,
-  CircularProgress,
-  Alert,
-  Stack,
-} from '@mui/material';
-import {useQuery} from '@tanstack/react-query';
-import {authJwtServiceQueries} from '@rezics/api/auth-jwt-service/auth-jwt-service.queries';
-import {
-  useUpdateAuthJwtServiceMutation,
   useActivateAuthJwtServiceMutation,
   useDeactivateAuthJwtServiceMutation,
-} from '@rezics/api/auth-jwt-service/auth-jwt-service.mutations';
-import type {JwtServiceDTO, UpdateJwtServiceInput} from '@rezics/contract';
-import {JwtServiceTable, JwtServiceEditDialog} from '../../jwt-service/component';
+  useUpdateAuthJwtServiceMutation,
+} from "@rezics/api/auth-jwt-service/auth-jwt-service.mutations";
+import { authJwtServiceQueries } from "@rezics/api/auth-jwt-service/auth-jwt-service.queries";
+import type { JwtServiceDTO, UpdateJwtServiceInput } from "@rezics/contract";
+import { useQuery } from "@tanstack/react-query";
+import type { FC } from "react";
+import { useEffect, useState } from "react";
+import {
+  JwtServiceEditDialog,
+  JwtServiceTable,
+} from "../../jwt-service/component";
 
 export const AuthJwtServicesPage: FC = () => {
-  const {data, isLoading, error} = useQuery(authJwtServiceQueries.list());
+  const { data, isLoading, error } = useQuery(authJwtServiceQueries.list());
 
   const [services, setServices] = useState<JwtServiceDTO[]>([]);
 
@@ -50,11 +47,11 @@ export const AuthJwtServicesPage: FC = () => {
     setUpdatingError(null);
     try {
       setUpdating(true);
-      await updateMutation.mutateAsync({serviceKey, input});
+      await updateMutation.mutateAsync({ serviceKey, input });
       setOpenEdit(false);
       setEditingService(null);
     } catch (err) {
-      setUpdatingError((err as Error)?.message ?? 'Update failed');
+      setUpdatingError((err as Error)?.message ?? "Update failed");
     } finally {
       setUpdating(false);
     }
@@ -67,7 +64,7 @@ export const AuthJwtServicesPage: FC = () => {
       const updated = await activateMutation.mutateAsync(serviceKey);
       setEditingService(updated);
     } catch (err) {
-      setUpdatingError((err as Error)?.message ?? 'Activate failed');
+      setUpdatingError((err as Error)?.message ?? "Activate failed");
     } finally {
       setUpdating(false);
     }
@@ -80,7 +77,7 @@ export const AuthJwtServicesPage: FC = () => {
       const updated = await deactivateMutation.mutateAsync(serviceKey);
       setEditingService(updated);
     } catch (err) {
-      setUpdatingError((err as Error)?.message ?? 'Deactivate failed');
+      setUpdatingError((err as Error)?.message ?? "Deactivate failed");
     } finally {
       setUpdating(false);
     }
@@ -88,11 +85,7 @@ export const AuthJwtServicesPage: FC = () => {
 
   return (
     <Box className="w-11/12 mx-auto mt-10">
-      <Stack
-        direction="row"
-        justifyContent="space-between"
-        alignItems="center"
-      >
+      <Stack direction="row" justifyContent="space-between" alignItems="center">
         <Typography variant="h3" className="font-bold mb-6">
           Auth JWT Services
         </Typography>

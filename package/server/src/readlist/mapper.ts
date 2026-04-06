@@ -1,6 +1,6 @@
-import type {PublicUser, ReadlistDTO} from '@rezics/contract';
-import type {ReadlistSelected, ReadlistListSelected} from './types';
-import {mapReviewToDTO} from '../review/mapper';
+import type { PublicUser, ReadlistDTO } from "@rezics/contract";
+import { mapReviewToDTO } from "../review/mapper";
+import type { ReadlistListSelected, ReadlistSelected } from "./types";
 
 export function sanitizeUser(u: {
   unitId: string;
@@ -24,7 +24,7 @@ export function mapReadlistListRowToDTO(
   const coverUrl = meta?.coverUrl ?? undefined;
   return {
     id: row.unitId,
-    title: row.unit?.title ?? '',
+    title: row.unit?.title ?? "",
     coverUrl,
     content: row.unit?.content ?? undefined,
     creator: row.unit?.user ? sanitizeUser(row.unit.user) : undefined,
@@ -39,20 +39,20 @@ export function mapReadlistRowToDTO(row: ReadlistSelected): ReadlistDTO {
   const coverUrl = meta?.coverUrl ?? undefined;
   return {
     id: row.unitId,
-    title: row.unit?.title ?? '',
+    title: row.unit?.title ?? "",
     content: row.unit?.content ?? undefined,
     reactionSummaries: row.unit?.reactionSummaries ?? [],
     coverUrl,
     creator: row.unit?.user ? sanitizeUser(row.unit.user) : undefined,
-    books: (row.book ?? []).map(b => ({
+    books: (row.book ?? []).map((b) => ({
       unitId: b.unitId,
       title: b.title,
       description: b.description ?? undefined,
       coverUrl: b.coverUrl ?? undefined,
       author: b.author,
     })),
-    reviews: (row.review ?? []).map(r => {
-      let result: any = mapReviewToDTO(r as any);
+    reviews: (row.review ?? []).map((r) => {
+      const result: any = mapReviewToDTO(r as any);
       result.targetUnitId = r.targetUnitId;
       return result;
     }),

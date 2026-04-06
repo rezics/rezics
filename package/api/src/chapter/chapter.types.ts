@@ -3,24 +3,24 @@
  */
 
 import type {
-  CreateChapterInput,
-  UpdateChapterInput,
+  ChapterDetailDTO,
+  ChapterListItemDTO,
   ChapterListQuery,
   ChapterListResponse,
   ChapterResponse,
-  ChapterListItemDTO,
-  ChapterDetailDTO,
-} from '@rezics/contract';
+  CreateChapterInput,
+  UpdateChapterInput,
+} from "@rezics/contract";
 
 // Re-export contract types
 export type {
-  CreateChapterInput,
-  UpdateChapterInput,
+  ChapterDetailDTO,
+  ChapterListItemDTO,
   ChapterListQuery,
   ChapterListResponse,
   ChapterResponse,
-  ChapterListItemDTO,
-  ChapterDetailDTO,
+  CreateChapterInput,
+  UpdateChapterInput,
 };
 
 // Convenience alias for detail DTO as the primary Chapter DTO
@@ -29,10 +29,10 @@ export type ChapterDTO = ChapterDetailDTO;
 /**
  * Extended frontend types
  */
-export type ChapterFormData = Omit<CreateChapterInput, 'userId'>;
+export type ChapterFormData = Omit<CreateChapterInput, "userId">;
 
 export type ChapterFilters = Partial<ChapterListQuery>;
 
-export type ChapterSortOption = 'createdAt' | 'updatedAt';
+export type ChapterSortOption = "createdAt" | "updatedAt";
 
-export type ChapterView = 'list' | 'table' | 'grid';
+export type ChapterView = "list" | "table" | "grid";

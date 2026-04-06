@@ -1,12 +1,12 @@
-import React, {useMemo, useRef, useState} from 'react';
-import {useQuery} from '@tanstack/react-query';
-import {Divider, Switch, TextField, Button, Stack} from '@mui/material';
-import {useTranslation} from 'react-i18next';
-
-import {bookQueries} from '@rezics/api/book/book.queries';
-import {ChapterArborist} from '@/book-library/component/Chapter/ChapterArborist';
-import type {ChapterArboristRefHandle} from '@/book-library/component/Chapter/ChapterArborist';
-import type {ChapterTreeItem} from '@rezics/contract';
+import { Button, Divider, Stack, Switch, TextField } from "@mui/material";
+import { bookQueries } from "@rezics/api/book/book.queries";
+import type { ChapterTreeItem } from "@rezics/contract";
+import { useQuery } from "@tanstack/react-query";
+import type React from "react";
+import { useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
+import type { ChapterArboristRefHandle } from "@/book-library/component/Chapter/ChapterArborist";
+import { ChapterArborist } from "@/book-library/component/Chapter/ChapterArborist";
 
 /** Props for LinearChapterListEdit component. */
 interface LinearChapterListEditProps {
@@ -37,28 +37,28 @@ export const LinearChapterListEdit: React.FC<LinearChapterListEditProps> = ({
   enableDoubleClickRename = false,
   isEdit = false,
 }) => {
-  const {t} = useTranslation();
-  const {data, isLoading, error} = useQuery(bookQueries.chapterIndex(bookId));
+  const { t } = useTranslation();
+  const { data, isLoading, error } = useQuery(bookQueries.chapterIndex(bookId));
 
-  const selectedId = chapterId || '';
-  const baseLink = bookId ? `/book/${bookId}/edit` : '';
+  const selectedId = chapterId || "";
+  const baseLink = bookId ? `/book/${bookId}/edit` : "";
 
   const chapterTree: ChapterTreeItem[] = useMemo(
     () => data?.index ?? [],
     [data],
   );
 
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [enableDrag, setEnableDrag] = useState(false);
   const [enableRename, setEnableRename] = useState(enableDoubleClickRename);
   const arboristRef = useRef<ChapterArboristRefHandle | null>(null);
 
   if (!bookId) return null;
-  if (isLoading) return <div>{t('common.loading')}</div>;
+  if (isLoading) return <div>{t("common.loading")}</div>;
   if (error)
     return (
       <div>
-        {t('common.error_generic')} {String(error)}
+        {t("common.error_generic")} {String(error)}
       </div>
     );
   return (
@@ -72,26 +72,26 @@ export const LinearChapterListEdit: React.FC<LinearChapterListEditProps> = ({
                 size="small"
                 onClick={() => arboristRef.current?.expandAll()}
               >
-                {t('common.expand_all')}
+                {t("common.expand_all")}
               </Button>
               <Button
                 variant="outlined"
                 size="small"
                 onClick={() => arboristRef.current?.collapseAll()}
               >
-                {t('common.collapse_all')}
+                {t("common.collapse_all")}
               </Button>
             </Stack>
 
             <TextField
               id="chapter-search"
-              label={t('common.search')}
+              label={t("common.search")}
               variant="standard"
               value={searchTerm}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 setSearchTerm(e.target.value)
               }
-              placeholder={t('placeholders.enter_search_term')}
+              placeholder={t("placeholders.enter_search_term")}
               className="w-full"
             />
 
@@ -99,7 +99,7 @@ export const LinearChapterListEdit: React.FC<LinearChapterListEditProps> = ({
               <div className="space-y-3 mt-2">
                 <div className="flex items-center space-x-4 w-full justify-between">
                   <div className="text-gray-700 font-bold">
-                    {t('book.chapter.enable_drag')}
+                    {t("book.chapter.enable_drag")}
                   </div>
                   <Switch
                     checked={enableDrag}
@@ -111,7 +111,7 @@ export const LinearChapterListEdit: React.FC<LinearChapterListEditProps> = ({
 
                 <div className="flex items-center space-x-4 w-full justify-between">
                   <div className="text-gray-700 font-bold">
-                    {t('book.chapter.double_click_rename')}
+                    {t("book.chapter.double_click_rename")}
                   </div>
                   <Switch
                     checked={enableRename}
@@ -120,7 +120,7 @@ export const LinearChapterListEdit: React.FC<LinearChapterListEditProps> = ({
                     }
                   />
                 </div>
-                <div>{t('book.chapter.rename_help')}</div>
+                <div>{t("book.chapter.rename_help")}</div>
               </div>
             )}
           </div>

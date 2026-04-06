@@ -1,19 +1,17 @@
-import {useMemo} from 'react';
-import {useQuery} from '@tanstack/react-query';
+import {
+  mapUnitListToReadlistListResponse,
+  meiliBookApi,
+} from "@rezics/api/meili/meili.api";
+import { buildMeiliUnitQuery } from "@rezics/api/meili/meili.queries";
 import type {
   BookDTO,
-  ReadlistDTO,
-  ReviewDTO,
   QuoteDTO,
+  ReadlistDTO,
   UnitListResponse,
-} from '@rezics/contract';
-import {
-  meiliBookApi,
-  mapUnitListToReadlistListResponse,
-  mapUnitListToReviewListResponse,
-} from '@rezics/api/meili/meili.api';
-import {buildMeiliUnitQuery} from '@rezics/api/meili/meili.queries';
-import {UnitType} from '@rezics/contract';
+} from "@rezics/contract";
+import { UnitType } from "@rezics/contract";
+import { useQuery } from "@tanstack/react-query";
+import { useMemo } from "react";
 
 export type SimpleQueryState<T> = {
   items: T[];
@@ -23,11 +21,11 @@ export type SimpleQueryState<T> = {
 };
 
 export function useHomeBooks(limit = 12): SimpleQueryState<BookDTO> {
-  const {data, isLoading, error} = useQuery({
+  const { data, isLoading, error } = useQuery({
     queryKey: [
-      'home',
-      'meili',
-      'books',
+      "home",
+      "meili",
+      "books",
       {
         limit,
       },
@@ -35,7 +33,7 @@ export function useHomeBooks(limit = 12): SimpleQueryState<BookDTO> {
     queryFn: () =>
       meiliBookApi.bookSearch({
         limit,
-        sort: {type: 'createdAt', order: 'desc'},
+        sort: { type: "createdAt", order: "desc" },
       } as any),
     staleTime: 1000 * 60,
   });
@@ -48,16 +46,16 @@ export function useHomeBooks(limit = 12): SimpleQueryState<BookDTO> {
 
   const total: number | undefined = (data as any)?.total;
 
-  return {items, total, isLoading, error};
+  return { items, total, isLoading, error };
 }
 
 export function useHomeReadlists(limit = 6): SimpleQueryState<ReadlistDTO> {
-  const {data, isLoading, error} = useQuery(
+  const { data, isLoading, error } = useQuery(
     buildMeiliUnitQuery({
       kind: UnitType.READLIST,
       start: 0,
       targetUnitId: undefined,
-      keyword: '',
+      keyword: "",
       limit,
       mapFn: (unitResp: UnitListResponse) =>
         mapUnitListToReadlistListResponse(unitResp),
@@ -67,7 +65,7 @@ export function useHomeReadlists(limit = 6): SimpleQueryState<ReadlistDTO> {
   const items = useMemo<ReadlistDTO[]>(() => data?.readlists ?? [], [data]);
   const total: number | undefined = data?.total;
 
-  return {items, total, isLoading, error};
+  return { items, total, isLoading, error };
 }
 
 type QuoteListResponse = {
@@ -76,22 +74,22 @@ type QuoteListResponse = {
 };
 
 export function useHomeQuotes(limit = 6): SimpleQueryState<QuoteDTO> {
-  const {data, isLoading, error} = useQuery(
+  const { data, isLoading, error } = useQuery(
     buildMeiliUnitQuery({
       kind: UnitType.QUOTE,
       start: 0,
       targetUnitId: undefined,
-      keyword: '',
+      keyword: "",
       limit,
       mapFn: (unitResp: UnitListResponse) =>
         ({
-          quotes: (unitResp.units ?? []).map(unit => ({
+          quotes: (unitResp.units ?? []).map((unit) => ({
             id: unit.id,
-            text: (unit.content as string) ?? '',
+            text: (unit.content as string) ?? "",
             from: unit.title ?? undefined,
             bookId: unit.targetUnitId ?? undefined,
             created_at:
-              typeof unit.createdAt === 'string'
+              typeof unit.createdAt === "string"
                 ? unit.createdAt
                 : unit.createdAt?.toString(),
           })),
@@ -103,5 +101,5 @@ export function useHomeQuotes(limit = 6): SimpleQueryState<QuoteDTO> {
   const items = useMemo<QuoteDTO[]>(() => (data as any)?.quotes ?? [], [data]);
   const total: number | undefined = (data as any)?.total;
 
-  return {items, total, isLoading, error};
+  return { items, total, isLoading, error };
 }

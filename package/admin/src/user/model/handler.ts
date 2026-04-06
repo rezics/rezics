@@ -1,26 +1,26 @@
-import {authApi} from '@rezics/api/auth/auth.api';
-import {authKeys} from '@rezics/api/auth/auth.keys';
-import {NormalizedTokenName} from '@rezics/contract';
+import { authApi } from "@rezics/api/auth/auth.api";
+import { authKeys } from "@rezics/api/auth/auth.keys";
 import {
   clearAllTokens,
   ensureAuthIdentityToken,
   parseJwt,
   setToken,
-} from '@rezics/api/react-query/jwt';
-import {userKeys} from '@rezics/api/user/user.keys';
-import {userApi} from '@rezics/api/user/user.api';
-import {qc} from '@/app/provider/reactQueryUtil';
+} from "@rezics/api/react-query/jwt";
+import { userApi } from "@rezics/api/user/user.api";
+import { userKeys } from "@rezics/api/user/user.keys";
 import {
   clearAuthSessionState,
   hydrateAuthSessionState,
   useAuthSessionStore,
-} from '@rezics/app-shell';
+} from "@rezics/app-shell";
+import { NormalizedTokenName } from "@rezics/contract";
+import { qc } from "@/app/provider/reactQueryUtil";
 
 /**
  * Provision business session: AUTH_IDENTITY -> context token -> ensure user -> REZICS_SESSION.
  */
 export async function establishBusinessSession() {
-  await ensureAuthIdentityToken({requirePresence: false});
+  await ensureAuthIdentityToken({ requirePresence: false });
 
   const authContext = await authApi.getContextToken();
   const contextToken = authContext.token;
@@ -38,12 +38,12 @@ export async function establishBusinessSession() {
  * Admin login: sign in -> verify admin role -> hydrate session -> fire-and-forget business session.
  */
 export async function adminLogin(email: string, password: string) {
-  await authApi.signIn({email, password});
-  const token = await ensureAuthIdentityToken({requirePresence: false});
+  await authApi.signIn({ email, password });
+  const token = await ensureAuthIdentityToken({ requirePresence: false });
 
   const claims = parseJwt(token);
-  if (!(claims?.role === 'admin' || claims?.role === 'owner')) {
-    throw new Error('You are not authorized to access this page');
+  if (!(claims?.role === "admin" || claims?.role === "owner")) {
+    throw new Error("You are not authorized to access this page");
   }
 
   await hydrateAuthSessionState();
@@ -51,7 +51,7 @@ export async function adminLogin(email: string, password: string) {
   // Fire-and-forget: don't block admin access on business session
   establishBusinessSession().catch(() => {});
 
-  return {token};
+  return { token };
 }
 
 /**
@@ -62,9 +62,9 @@ export async function adminLogout() {
   clearAllTokens();
   useAuthSessionStore.getState().syncBusinessToken(null);
   clearAuthSessionState();
-  qc.removeQueries({queryKey: authKeys.all()});
-  qc.removeQueries({queryKey: userKeys.all()});
-  if (typeof window !== 'undefined') {
+  qc.removeQueries({ queryKey: authKeys.all() });
+  qc.removeQueries({ queryKey: userKeys.all() });
+  if (typeof window !== "undefined") {
     setTimeout(() => location.reload(), 500);
   }
 }

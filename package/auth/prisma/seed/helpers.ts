@@ -1,20 +1,20 @@
-import {randomBytes} from 'node:crypto';
-import type {PrismaClient} from '../generated/client';
+import { randomBytes } from "node:crypto";
+import type { PrismaClient } from "../generated/client";
 
 export function slugify(input: string): string {
   return input
     .trim()
     .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-    .replace(/-{2,}/g, '-');
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .replace(/-{2,}/g, "-");
 }
 
 /**
  * 生成 24 位安全随机密码
  */
 export function generatePassword(): string {
-  return randomBytes(18).toString('base64').replace(/[+/=]/g, '').slice(0, 24);
+  return randomBytes(18).toString("base64").replace(/[+/=]/g, "").slice(0, 24);
 }
 
 export async function ensureUniqueSlug(
@@ -23,8 +23,8 @@ export async function ensureUniqueSlug(
   desiredSlug: string,
 ) {
   const existingUser = await prisma.user.findUnique({
-    where: {email},
-    select: {profile: {select: {slug: true}}},
+    where: { email },
+    select: { profile: { select: { slug: true } } },
   });
 
   if (existingUser?.profile?.slug) {
@@ -36,8 +36,8 @@ export async function ensureUniqueSlug(
 
   while (true) {
     const conflict = await prisma.userProfile.findUnique({
-      where: {slug},
-      select: {userId: true},
+      where: { slug },
+      select: { userId: true },
     });
 
     if (!conflict) return slug;

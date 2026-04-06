@@ -1,8 +1,8 @@
-import React from 'react';
-import {Alert, Button, CircularProgress, Typography} from '@mui/material';
-import {useNavigate} from '@tanstack/react-router';
-import {HorizontalQuoteCarousel} from '@/quote/component/list/HorizontalQuoteCarousel';
-import {useHomeQuotes} from './hooks/hooks';
+import { Alert, Button, CircularProgress, Typography } from "@mui/material";
+import { useNavigate } from "@tanstack/react-router";
+import type React from "react";
+import { HorizontalQuoteCarousel } from "@/quote/component/list/HorizontalQuoteCarousel";
+import { useHomeQuotes } from "./hooks/hooks";
 
 export type TrendingQuoteSectionProps = {
   title?: string;
@@ -14,20 +14,20 @@ export const TrendingQuoteSection: React.FC<TrendingQuoteSectionProps> = ({
   limit = 8,
 }) => {
   const navigate = useNavigate();
-  const resolvedTitle = title ?? '热门摘录';
-  const {items, isLoading, error} = useHomeQuotes(limit);
+  const resolvedTitle = title ?? "热门摘录";
+  const { items, isLoading, error } = useHomeQuotes(limit);
 
   const handleMoreClick = () => {
     const first = items[0];
     if (first?.bookId) {
-      navigate({to: '/quote/book/$bookId', params: {bookId: first.bookId}});
+      navigate({ to: "/quote/book/$bookId", params: { bookId: first.bookId } });
       return;
     }
     if (first?.id) {
-      navigate({to: '/quote/$unitId', params: {unitId: first.id}});
+      navigate({ to: "/quote/$unitId", params: { unitId: first.id } });
       return;
     }
-    navigate({to: '/review'});
+    navigate({ to: "/review" });
   };
 
   if (error) {

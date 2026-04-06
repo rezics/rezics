@@ -1,12 +1,12 @@
 import type {
-  TagDTO,
-  TagDetailDTO,
   CreateTagInput,
+  TagDetailDTO,
+  TagDTO,
   UpdateTagInput,
-} from '@rezics/contract';
-import type {TagFilters} from './tag.types';
-import {buildQueryString} from '../utils/buildQuery';
-import {apiFetch} from '../react-query/http';
+} from "@rezics/contract";
+import { apiFetch } from "../react-query/http";
+import { buildQueryString } from "../utils/buildQuery";
+import type { TagFilters } from "./tag.types";
 
 /**
  * Tag API methods
@@ -17,8 +17,8 @@ export const tagApi = {
    */
   list: async (
     filters?: TagFilters,
-  ): Promise<{tags: TagDTO[]; total: number}> => {
-    return apiFetch<{tags: TagDTO[]; total: number}>(
+  ): Promise<{ tags: TagDTO[]; total: number }> => {
+    return apiFetch<{ tags: TagDTO[]; total: number }>(
       `/tags${buildQueryString(filters)}`,
     );
   },
@@ -38,7 +38,7 @@ export const tagApi = {
     type?: string | null,
     domainId?: string,
   ): Promise<TagDetailDTO | null> => {
-    const qs = buildQueryString({name, type: type ?? undefined, domainId});
+    const qs = buildQueryString({ name, type: type ?? undefined, domainId });
     return apiFetch<TagDetailDTO | null>(`/tags/by-name${qs}`);
   },
 
@@ -47,7 +47,7 @@ export const tagApi = {
    */
   create: async (input: CreateTagInput): Promise<TagDetailDTO> => {
     return apiFetch<TagDetailDTO>(`/tags`, {
-      method: 'POST',
+      method: "POST",
       body: JSON.stringify(input),
     });
   },
@@ -60,7 +60,7 @@ export const tagApi = {
     input: UpdateTagInput,
   ): Promise<TagDetailDTO> => {
     return apiFetch<TagDetailDTO>(`/tags/${unitId}`, {
-      method: 'PUT',
+      method: "PUT",
       body: JSON.stringify(input),
     });
   },
@@ -68,8 +68,10 @@ export const tagApi = {
   /**
    * Delete a tag
    */
-  remove: async (unitId: string): Promise<{message: string}> => {
-    return apiFetch<{message: string}>(`/tags/${unitId}`, {method: 'DELETE'});
+  remove: async (unitId: string): Promise<{ message: string }> => {
+    return apiFetch<{ message: string }>(`/tags/${unitId}`, {
+      method: "DELETE",
+    });
   },
 
   /**
@@ -78,10 +80,10 @@ export const tagApi = {
   attach: async (
     unitId: string,
     targetUnitId: string,
-  ): Promise<{message: string}> => {
-    return apiFetch<{message: string}>(`/tags/${unitId}/attach`, {
-      method: 'POST',
-      body: JSON.stringify({targetUnitId}),
+  ): Promise<{ message: string }> => {
+    return apiFetch<{ message: string }>(`/tags/${unitId}/attach`, {
+      method: "POST",
+      body: JSON.stringify({ targetUnitId }),
     });
   },
 
@@ -91,10 +93,10 @@ export const tagApi = {
   detach: async (
     unitId: string,
     targetUnitId: string,
-  ): Promise<{message: string}> => {
-    return apiFetch<{message: string}>(`/tags/${unitId}/detach`, {
-      method: 'POST',
-      body: JSON.stringify({targetUnitId}),
+  ): Promise<{ message: string }> => {
+    return apiFetch<{ message: string }>(`/tags/${unitId}/detach`, {
+      method: "POST",
+      body: JSON.stringify({ targetUnitId }),
     });
   },
 };

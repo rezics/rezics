@@ -1,7 +1,7 @@
-import {queryOptions, infiniteQueryOptions} from '@tanstack/react-query';
-import {tagApi} from './tag.api';
-import {tagKeys} from './tag.keys';
-import type {TagFilters} from './tag.types';
+import { infiniteQueryOptions, queryOptions } from "@tanstack/react-query";
+import { tagApi } from "./tag.api";
+import { tagKeys } from "./tag.keys";
+import type { TagFilters } from "./tag.types";
 
 export const tagListQuery = (filters?: TagFilters) =>
   queryOptions({
@@ -32,18 +32,19 @@ export const tagByNameQuery = (
 export const tagByObjectQuery = (objectId: string) =>
   queryOptions({
     queryKey: tagKeys.byObject(objectId),
-    queryFn: () => tagApi.list({objectId}),
+    queryFn: () => tagApi.list({ objectId }),
     enabled: !!objectId,
     staleTime: 1000 * 60 * 5,
   });
 
-export const tagInfiniteListQuery = (filters?: Omit<TagFilters, 'page'>) =>
+export const tagInfiniteListQuery = (filters?: Omit<TagFilters, "page">) =>
   infiniteQueryOptions({
     queryKey: tagKeys.list(filters),
-    queryFn: ({pageParam = 1}) => tagApi.list({...filters, page: pageParam}),
+    queryFn: ({ pageParam = 1 }) =>
+      tagApi.list({ ...filters, page: pageParam }),
     initialPageParam: 1,
     getNextPageParam: (lastPage, allPages, lastPageParam) => {
-      const {tags, total} = lastPage;
+      const { tags, total } = lastPage;
       const limit = filters?.limit || 20;
       const hasMore =
         tags.length === limit && allPages.length * limit < (total || 0);

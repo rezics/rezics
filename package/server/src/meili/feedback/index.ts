@@ -1,3 +1,3 @@
-export * from './feedback.api';
-export * from './sync';
-export * from '@rezics/contract';
+export * from "@rezics/contract";
+export * from "./feedback.api";
+export * from "./sync";

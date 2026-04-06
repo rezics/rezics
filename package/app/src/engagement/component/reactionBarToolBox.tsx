@@ -1,7 +1,7 @@
-import {Button, Dialog, DialogActions, DialogContent} from '@mui/material';
-import React from 'react';
-import {useNavigate} from '@tanstack/react-router';
-import {Facebook, Twitter, Instagram, Telegram} from '@mui/icons-material';
+import { Facebook, Instagram, Telegram, Twitter } from "@mui/icons-material";
+import { Button, Dialog, DialogActions, DialogContent } from "@mui/material";
+import { useNavigate } from "@tanstack/react-router";
+import type React from "react";
 
 export type ReactionBarToolBoxProps = {
   open: boolean;
@@ -14,16 +14,16 @@ export const ReactionBarToolBox: React.FC<ReactionBarToolBoxProps> = ({
   open,
   onClose,
   itemUrl,
-  itemText = 'Source: REZICS',
+  itemText = "Source: REZICS",
 }) => {
   const navigate = useNavigate();
   const origin = window?.location?.origin;
   const itemFullUrl = origin + itemUrl;
 
   function handleLinkClick() {
-    navigator.clipboard.writeText(itemUrl || '');
+    navigator.clipboard.writeText(itemUrl || "");
     if (itemUrl) {
-      navigate({to: itemUrl});
+      navigate({ to: itemUrl });
     }
   }
 
@@ -33,7 +33,7 @@ export const ReactionBarToolBox: React.FC<ReactionBarToolBoxProps> = ({
       onClose={onClose}
       slotProps={{
         paper: {
-          className: 'min-w-[20rem]',
+          className: "min-w-[20rem]",
         },
       }}
     >

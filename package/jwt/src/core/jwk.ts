@@ -1,16 +1,16 @@
-import {exportJWK, importJWK, importSPKI, type JWK} from 'jose';
-import {JwtAlgorithm} from './jwt-algorithm';
+import { exportJWK, importJWK, importSPKI, type JWK } from "jose";
+import { JwtAlgorithm } from "./jwt-algorithm";
 
 export type JwtPublicJwk = JWK & {
   kid: string;
-  use: 'sig';
+  use: "sig";
   alg: typeof JwtAlgorithm.ES256;
   [key: string]: unknown;
 };
 
 export type JwtPrivateJwk = JWK & {
   kid: string;
-  use: 'sig';
+  use: "sig";
   alg: typeof JwtAlgorithm.ES256;
   d: string;
   [key: string]: unknown;
@@ -19,12 +19,12 @@ export type JwtPrivateJwk = JWK & {
 function withJwtMetadata<TJwk extends JWK>(
   jwk: TJwk,
 ): TJwk & {
-  use: 'sig';
+  use: "sig";
   alg: typeof JwtAlgorithm.ES256;
 } {
   return {
     ...jwk,
-    use: 'sig',
+    use: "sig",
     alg: JwtAlgorithm.ES256,
   };
 }

@@ -1,4 +1,3 @@
-import {Elysia} from 'elysia';
 import {
   authContextTokenResponseSchema,
   authTokenResponseSchema,
@@ -6,13 +5,13 @@ import {
   getSessionStateResponseSchema,
   listSessionsResponseSchema,
   revokeSessionBodySchema,
-} from '@rezics/contract';
-import {coreInstance} from '../core';
-import {handleAuthRequest} from '../auth/routes';
-import {jsonRequestBody, jsonResponse} from './docs';
-import {listEnabledSocialProviderIds} from '../auth/providers';
-import {env} from '../env';
-import {verifyAuthIdentityToken} from '../session/jwt/verify';
+} from "@rezics/contract";
+import { listEnabledSocialProviderIds } from "../auth/providers";
+import { handleAuthRequest } from "../auth/routes";
+import { coreInstance } from "../core";
+import { env } from "../env";
+import { verifyAuthIdentityToken } from "../session/jwt/verify";
+import { jsonRequestBody, jsonResponse } from "./docs";
 
 async function forwardAuthRequest(
   request: Request,
@@ -57,7 +56,7 @@ async function getSessionStateResponse(request: Request): Promise<Response> {
     return Response.json(sessionData);
   }
 
-  const {prisma} = await import('../auth/prisma');
+  const { prisma } = await import("../auth/prisma");
   const accounts = await prisma.account.findMany({
     where: {
       userId: sessionData.user.id,
@@ -71,14 +70,14 @@ async function getSessionStateResponse(request: Request): Promise<Response> {
   const providerIds = Array.from(
     new Set(
       accounts
-        .map((account: {providerId: string}) => account.providerId)
+        .map((account: { providerId: string }) => account.providerId)
         .filter(
           (
             providerId: string,
           ): providerId is ReturnType<
             typeof listEnabledSocialProviderIds
           >[number] =>
-            providerId !== 'credential' &&
+            providerId !== "credential" &&
             listEnabledSocialProviderIds().includes(
               providerId as ReturnType<
                 typeof listEnabledSocialProviderIds
@@ -89,18 +88,18 @@ async function getSessionStateResponse(request: Request): Promise<Response> {
   );
 
   const hasPassword = accounts.some(
-    (account: {providerId: string; password: string | null}) =>
-      account.providerId === 'credential' && Boolean(account.password),
+    (account: { providerId: string; password: string | null }) =>
+      account.providerId === "credential" && Boolean(account.password),
   );
   const needsOnboarding =
     providerIds.length > 0 && !sessionData.user.emailVerified;
   const canAcquireMemberToken =
     sessionData.user.emailVerified && !needsOnboarding;
   const readinessStatus = needsOnboarding
-    ? 'needs-onboarding'
+    ? "needs-onboarding"
     : sessionData.user.emailVerified
-      ? 'ready'
-      : 'needs-verification';
+      ? "ready"
+      : "needs-verification";
 
   return Response.json({
     ...sessionData,
@@ -129,18 +128,18 @@ async function getSessionStateResponse(request: Request): Promise<Response> {
  * same JWKS signing key as `/auth/token`.
  */
 async function getContextTokenResponse(request: Request): Promise<Response> {
-  const authorization = request.headers.get('authorization');
+  const authorization = request.headers.get("authorization");
   if (!authorization) {
     return Response.json(
-      {message: 'Unauthorized: Missing Authorization header'},
-      {status: 401},
+      { message: "Unauthorized: Missing Authorization header" },
+      { status: 401 },
     );
   }
 
   let userId: string;
   try {
     const verified = await verifyAuthIdentityToken(authorization);
-    userId = verified.payload.sub ?? '';
+    userId = verified.payload.sub ?? "";
   } catch (error) {
     console.error(error);
     return Response.json(
@@ -148,22 +147,22 @@ async function getContextTokenResponse(request: Request): Promise<Response> {
         message:
           error instanceof Error
             ? error.message
-            : 'Unauthorized: Invalid identity token',
+            : "Unauthorized: Invalid identity token",
       },
-      {status: 401},
+      { status: 401 },
     );
   }
 
   if (!userId) {
     return Response.json(
-      {message: 'Unauthorized: Missing user identity'},
-      {status: 401},
+      { message: "Unauthorized: Missing user identity" },
+      { status: 401 },
     );
   }
 
-  const {prisma} = await import('../auth/prisma');
+  const { prisma } = await import("../auth/prisma");
   const user = await prisma.user.findUnique({
-    where: {id: userId},
+    where: { id: userId },
     select: {
       id: true,
       name: true,
@@ -180,98 +179,103 @@ async function getContextTokenResponse(request: Request): Promise<Response> {
 
   if (!user) {
     return Response.json(
-      {message: 'Unauthorized: User not found'},
-      {status: 401},
+      { message: "Unauthorized: User not found" },
+      { status: 401 },
     );
   }
 
-  const {signAuthContextToken} = await import('../session/jwt/context-token');
+  const { signAuthContextToken } = await import("../session/jwt/context-token");
   return Response.json(await signAuthContextToken(user));
 }
 
 export const sessionRouter = coreInstance()
   .get(
-    '/session/jwks',
+    "/session/jwks",
     async () => {
-      const {getAuthSessionJwksResponse} =
-        await import('../session/jwt/routes');
+      const { getAuthSessionJwksResponse } = await import(
+        "../session/jwt/routes"
+      );
       return getAuthSessionJwksResponse();
     },
     {
       detail: {
-        summary: 'Session JWKS public keys',
+        summary: "Session JWKS public keys",
         description:
-          'Canonical session-owned JSON Web Key Set (JWKS) endpoint for offline verification of auth-issued JWTs.',
-        tags: ['Session'],
+          "Canonical session-owned JSON Web Key Set (JWKS) endpoint for offline verification of auth-issued JWTs.",
+        tags: ["Session"],
       },
     },
   )
-  .get('/token', ({request}) => handleAuthRequest(request), {
+  .get("/token", ({ request }) => handleAuthRequest(request), {
     detail: {
-      summary: 'Get auth JWT',
-      description: 'Get a JWT for the current authenticated browser session.',
-      tags: ['Session'],
+      summary: "Get auth JWT",
+      description: "Get a JWT for the current authenticated browser session.",
+      tags: ["Session"],
       responses: {
-        200: jsonResponse('Session JWT.', authTokenResponseSchema),
+        200: jsonResponse("Session JWT.", authTokenResponseSchema),
       },
     },
   })
-  .get('/get-session', ({request}) => handleAuthRequest(request), {
+  .get("/get-session", ({ request }) => handleAuthRequest(request), {
     detail: {
-      summary: 'Get current session',
-      description: 'Retrieve the current authenticated session and user info.',
-      tags: ['Session'],
+      summary: "Get current session",
+      description: "Retrieve the current authenticated session and user info.",
+      tags: ["Session"],
       responses: {
-        200: jsonResponse('Current session details.', getSessionResponseSchema),
+        200: jsonResponse("Current session details.", getSessionResponseSchema),
       },
     },
   })
-  .get('/get-session-state', ({request}) => getSessionStateResponse(request), {
+  .get(
+    "/get-session-state",
+    ({ request }) => getSessionStateResponse(request),
+    {
+      detail: {
+        summary: "Get normalized session state",
+        description:
+          "Retrieve the current authenticated session together with readiness fields used by onboarding flows.",
+        tags: ["Session"],
+        responses: {
+          200: jsonResponse(
+            "Current session details with onboarding state.",
+            getSessionStateResponseSchema,
+          ),
+        },
+      },
+    },
+  )
+  .get("/context-token", ({ request }) => getContextTokenResponse(request), {
     detail: {
-      summary: 'Get normalized session state',
+      summary: "Get auth context JWT",
       description:
-        'Retrieve the current authenticated session together with readiness fields used by onboarding flows.',
-      tags: ['Session'],
+        "Get an auth-owned context token for onboarding and first-time user provisioning.",
+      tags: ["Session"],
       responses: {
         200: jsonResponse(
-          'Current session details with onboarding state.',
-          getSessionStateResponseSchema,
-        ),
-      },
-    },
-  })
-  .get('/context-token', ({request}) => getContextTokenResponse(request), {
-    detail: {
-      summary: 'Get auth context JWT',
-      description:
-        'Get an auth-owned context token for onboarding and first-time user provisioning.',
-      tags: ['Session'],
-      responses: {
-        200: jsonResponse(
-          'Auth context JWT and decoded claims.',
+          "Auth context JWT and decoded claims.",
           authContextTokenResponseSchema,
         ),
       },
     },
   })
-  .post('/list-sessions', ({request}) => handleAuthRequest(request), {
+  .post("/list-sessions", ({ request }) => handleAuthRequest(request), {
     detail: {
-      summary: 'List sessions',
-      description: 'List all active sessions for the current user.',
-      tags: ['Session'],
+      summary: "List sessions",
+      description: "List all active sessions for the current user.",
+      tags: ["Session"],
       responses: {
         200: jsonResponse(
-          'List of active sessions.',
+          "List of active sessions.",
           listSessionsResponseSchema,
         ),
       },
     },
   })
-  .post('/revoke-session', ({request}) => handleAuthRequest(request), {
+  .post("/revoke-session", ({ request }) => handleAuthRequest(request), {
     detail: {
-      summary: 'Revoke session',
-      description: 'Revoke a specific session by token.',
-      tags: ['Session'],
+      summary: "Revoke session",
+      description: "Revoke a specific session by token.",
+      tags: ["Session"],
       requestBody: jsonRequestBody(revokeSessionBodySchema),
     },
   });

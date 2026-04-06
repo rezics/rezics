@@ -1,4 +1,4 @@
-import {useEffect, useState} from 'react';
+import { useEffect, useState } from "react";
 
 type MasonryParams = {
   columns: number;
@@ -7,39 +7,39 @@ type MasonryParams = {
 
 function calcMasonryParams(width: number): MasonryParams {
   if (width >= 2100) {
-    return {columns: 6, spacing: 2.5};
+    return { columns: 6, spacing: 2.5 };
   }
   if (width >= 1536) {
-    return {columns: 5, spacing: 2.5};
+    return { columns: 5, spacing: 2.5 };
   }
   if (width >= 1280) {
-    return {columns: 4, spacing: 3};
+    return { columns: 4, spacing: 3 };
   }
   if (width >= 1024) {
-    return {columns: 3, spacing: 2.5};
+    return { columns: 3, spacing: 2.5 };
   }
   if (width >= 768) {
-    return {columns: 2, spacing: 2};
+    return { columns: 2, spacing: 2 };
   }
   if (width >= 640) {
-    return {columns: 2, spacing: 1.5};
+    return { columns: 2, spacing: 1.5 };
   }
 
   // < 640
-  return {columns: 1, spacing: 1};
+  return { columns: 1, spacing: 1 };
 }
 
 export function useMasonryParameters(): MasonryParams {
   const [params, setParams] = useState<MasonryParams>(() => {
     // SSR / 初始渲染兜底
-    if (typeof window === 'undefined') {
-      return {columns: 4, spacing: 2};
+    if (typeof window === "undefined") {
+      return { columns: 4, spacing: 2 };
     }
     return calcMasonryParams(window.innerWidth);
   });
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    if (typeof window === "undefined") return;
 
     const handleResize = () => {
       setParams(calcMasonryParams(window.innerWidth));
@@ -48,8 +48,8 @@ export function useMasonryParameters(): MasonryParams {
     // 初始化再算一次，防止初始宽度变化
     handleResize();
 
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   return params;
@@ -81,14 +81,14 @@ function throttle<T extends (...args: any[]) => void>(fn: T, wait: number) {
 
 export function useThrottleMasonryParameters(throttleMs = 1000): MasonryParams {
   const [params, setParams] = useState<MasonryParams>(() => {
-    if (typeof window === 'undefined') {
-      return {columns: 4, spacing: 2}; // SSR 兜底
+    if (typeof window === "undefined") {
+      return { columns: 4, spacing: 2 }; // SSR 兜底
     }
     return calcMasonryParams(window.innerWidth);
   });
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    if (typeof window === "undefined") return;
 
     // 包一层节流
     const throttledResize = throttle(() => {
@@ -98,8 +98,8 @@ export function useThrottleMasonryParameters(throttleMs = 1000): MasonryParams {
     // 立刻执行一次
     throttledResize();
 
-    window.addEventListener('resize', throttledResize);
-    return () => window.removeEventListener('resize', throttledResize);
+    window.addEventListener("resize", throttledResize);
+    return () => window.removeEventListener("resize", throttledResize);
   }, [throttleMs]);
 
   return params;

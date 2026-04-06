@@ -1,18 +1,18 @@
-import {useMutation, useQueryClient} from '@tanstack/react-query';
-import {authApi} from './auth.api';
-import {authKeys} from './auth.keys';
-import {clearAuthPresence} from '../react-query/authPresence';
-import {setToken, queryAccessToken} from '../react-query/jwt';
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { clearAuthPresence } from "../react-query/authPresence";
+import { queryAccessToken, setToken } from "../react-query/jwt";
+import { authApi } from "./auth.api";
+import { authKeys } from "./auth.keys";
 
 export function useSignInMutation() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (input: {email: string; password: string}) =>
+    mutationFn: (input: { email: string; password: string }) =>
       authApi.signIn(input),
     onSuccess: async () => {
-      qc.invalidateQueries({queryKey: authKeys.session()});
-      qc.invalidateQueries({queryKey: authKeys.sessionState()});
-      await queryAccessToken({requirePresence: false});
+      qc.invalidateQueries({ queryKey: authKeys.session() });
+      qc.invalidateQueries({ queryKey: authKeys.sessionState() });
+      await queryAccessToken({ requirePresence: false });
     },
   });
 }
@@ -24,9 +24,9 @@ export function useSignOutMutation() {
     onSuccess: () => {
       clearAuthPresence();
       setToken(null);
-      qc.invalidateQueries({queryKey: authKeys.session()});
-      qc.invalidateQueries({queryKey: authKeys.sessionState()});
-      qc.invalidateQueries({queryKey: authKeys.sessions()});
+      qc.invalidateQueries({ queryKey: authKeys.session() });
+      qc.invalidateQueries({ queryKey: authKeys.sessionState() });
+      qc.invalidateQueries({ queryKey: authKeys.sessions() });
     },
   });
 }
@@ -34,11 +34,12 @@ export function useSignOutMutation() {
 export function useSignUpMutation() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (input: {email: string; password: string}) => authApi.signUp(input),
+    mutationFn: (input: { email: string; password: string }) =>
+      authApi.signUp(input),
     onSuccess: async () => {
-      qc.invalidateQueries({queryKey: authKeys.session()});
-      qc.invalidateQueries({queryKey: authKeys.sessionState()});
-      await queryAccessToken({requirePresence: false});
+      qc.invalidateQueries({ queryKey: authKeys.session() });
+      qc.invalidateQueries({ queryKey: authKeys.sessionState() });
+      await queryAccessToken({ requirePresence: false });
     },
   });
 }
@@ -46,10 +47,10 @@ export function useSignUpMutation() {
 export function useSendVerificationEmailMutation() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (input: {email: string; callbackURL?: string}) =>
+    mutationFn: (input: { email: string; callbackURL?: string }) =>
       authApi.sendVerificationEmail(input),
     onSuccess: () => {
-      qc.invalidateQueries({queryKey: authKeys.sessionState()});
+      qc.invalidateQueries({ queryKey: authKeys.sessionState() });
     },
   });
 }
@@ -57,11 +58,11 @@ export function useSendVerificationEmailMutation() {
 export function useChangeEmailMutation() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (input: {newEmail: string; callbackURL?: string}) =>
+    mutationFn: (input: { newEmail: string; callbackURL?: string }) =>
       authApi.changeEmail(input),
     onSuccess: () => {
-      qc.invalidateQueries({queryKey: authKeys.session()});
-      qc.invalidateQueries({queryKey: authKeys.sessionState()});
+      qc.invalidateQueries({ queryKey: authKeys.session() });
+      qc.invalidateQueries({ queryKey: authKeys.sessionState() });
     },
   });
 }
@@ -69,9 +70,9 @@ export function useChangeEmailMutation() {
 export function useSetPasswordMutation() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (input: {newPassword: string}) => authApi.setPassword(input),
+    mutationFn: (input: { newPassword: string }) => authApi.setPassword(input),
     onSuccess: () => {
-      qc.invalidateQueries({queryKey: authKeys.sessionState()});
+      qc.invalidateQueries({ queryKey: authKeys.sessionState() });
     },
   });
 }
@@ -79,10 +80,10 @@ export function useSetPasswordMutation() {
 export function useAdminBanUserMutation() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (input: {userId: string; reason?: string}) =>
+    mutationFn: (input: { userId: string; reason?: string }) =>
       authApi.adminBanUser(input),
     onSuccess: () => {
-      qc.invalidateQueries({queryKey: authKeys.adminUsers()});
+      qc.invalidateQueries({ queryKey: authKeys.adminUsers() });
     },
   });
 }
@@ -90,9 +91,9 @@ export function useAdminBanUserMutation() {
 export function useAdminUnbanUserMutation() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (input: {userId: string}) => authApi.adminUnbanUser(input),
+    mutationFn: (input: { userId: string }) => authApi.adminUnbanUser(input),
     onSuccess: () => {
-      qc.invalidateQueries({queryKey: authKeys.adminUsers()});
+      qc.invalidateQueries({ queryKey: authKeys.adminUsers() });
     },
   });
 }
@@ -100,10 +101,10 @@ export function useAdminUnbanUserMutation() {
 export function useAdminSetRoleMutation() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (input: {userId: string; role: string}) =>
+    mutationFn: (input: { userId: string; role: string }) =>
       authApi.adminSetRole(input),
     onSuccess: () => {
-      qc.invalidateQueries({queryKey: authKeys.adminUsers()});
+      qc.invalidateQueries({ queryKey: authKeys.adminUsers() });
     },
   });
 }
@@ -111,9 +112,9 @@ export function useAdminSetRoleMutation() {
 export function useAdminRemoveUserMutation() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (input: {userId: string}) => authApi.adminRemoveUser(input),
+    mutationFn: (input: { userId: string }) => authApi.adminRemoveUser(input),
     onSuccess: () => {
-      qc.invalidateQueries({queryKey: authKeys.adminUsers()});
+      qc.invalidateQueries({ queryKey: authKeys.adminUsers() });
     },
   });
 }
@@ -121,9 +122,9 @@ export function useAdminRemoveUserMutation() {
 export function useRevokeSessionMutation() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (input: {token: string}) => authApi.revokeSession(input),
+    mutationFn: (input: { token: string }) => authApi.revokeSession(input),
     onSuccess: () => {
-      qc.invalidateQueries({queryKey: authKeys.sessions()});
+      qc.invalidateQueries({ queryKey: authKeys.sessions() });
     },
   });
 }

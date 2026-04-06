@@ -1,4 +1,4 @@
-import {t} from 'elysia';
+import { t } from "elysia";
 
 /**
  * Chapter contracts (server <-> client)
@@ -19,7 +19,7 @@ export const chapterListItemSchema = t.Object({
   updatedAt: t.Optional(t.Union([t.String(), t.Date()])),
 });
 
-export type ChapterListItemDTO = (typeof chapterListItemSchema)['static'];
+export type ChapterListItemDTO = (typeof chapterListItemSchema)["static"];
 
 export const chapterDetailSchema = t.Object({
   unitId: t.String(),
@@ -30,7 +30,7 @@ export const chapterDetailSchema = t.Object({
   updatedAt: t.Optional(t.Union([t.String(), t.Date()])),
 });
 
-export type ChapterDetailDTO = (typeof chapterDetailSchema)['static'];
+export type ChapterDetailDTO = (typeof chapterDetailSchema)["static"];
 
 // Backward-compat DTO for list shape used by some clients
 export const chapterListDTOSchema = t.Object({
@@ -39,14 +39,14 @@ export const chapterListDTOSchema = t.Object({
   ),
   chapters: t.Array(chapterListItemSchema),
 });
-export type ChapterListDTO = (typeof chapterListDTOSchema)['static'];
+export type ChapterListDTO = (typeof chapterListDTOSchema)["static"];
 
 // ========== Query/Params/Responses ==========
 
 export const chapterParamsSchema = t.Object({
   unitId: t.String(),
 });
-export type ChapterParams = (typeof chapterParamsSchema)['static'];
+export type ChapterParams = (typeof chapterParamsSchema)["static"];
 
 export const chapterListQuerySchema = t.Object({
   q: t.Optional(t.String()), // search title/content
@@ -73,16 +73,16 @@ export const chapterListQuerySchema = t.Object({
   ),
   limit: t.Optional(t.Number()),
 });
-export type ChapterListQuery = (typeof chapterListQuerySchema)['static'];
+export type ChapterListQuery = (typeof chapterListQuerySchema)["static"];
 
 export const chapterListResponseSchema = t.Object({
   items: t.Array(chapterListItemSchema),
   total: t.Optional(t.Number()),
 });
-export type ChapterListResponse = (typeof chapterListResponseSchema)['static'];
+export type ChapterListResponse = (typeof chapterListResponseSchema)["static"];
 
 export const chapterResponseSchema = chapterDetailSchema;
-export type ChapterResponse = (typeof chapterResponseSchema)['static'];
+export type ChapterResponse = (typeof chapterResponseSchema)["static"];
 
 // ========== Create/Update ==========
 
@@ -96,7 +96,7 @@ export const createChapterSchema = t.Object({
   metadata: t.Optional(t.Nullable(t.Record(t.String(), t.Any()))),
   status: t.Optional(t.String()), // UnitStatus, validated server-side
 });
-export type CreateChapterInput = (typeof createChapterSchema)['static'];
+export type CreateChapterInput = (typeof createChapterSchema)["static"];
 
 export const updateChapterSchema = t.Object({
   title: t.Optional(t.String()),
@@ -105,4 +105,4 @@ export const updateChapterSchema = t.Object({
   metadata: t.Optional(t.Nullable(t.Record(t.String(), t.Any()))),
   status: t.Optional(t.String()),
 });
-export type UpdateChapterInput = (typeof updateChapterSchema)['static'];
+export type UpdateChapterInput = (typeof updateChapterSchema)["static"];

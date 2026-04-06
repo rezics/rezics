@@ -1,15 +1,14 @@
-import {useEffect, useMemo, useState} from 'react';
-import Dialog from '@mui/material/Dialog';
-import DialogTitle from '@mui/material/DialogTitle';
-import DialogContent from '@mui/material/DialogContent';
-import TextField from '@mui/material/TextField';
-
-import {RezicsMarkdownEditor} from '@rezics/ui/editor';
-import {useCreateUnitMutation} from '@rezics/api/unit/unit.mutations';
-import {useUserProfileStore} from '@/user/state';
-import {useAlertStore} from '@app/state/windowAlertStore';
-import {UnitType} from '@rezics/contract';
-import {type Chapter} from './ChapterArborist';
+import { useAlertStore } from "@app/state/windowAlertStore";
+import Dialog from "@mui/material/Dialog";
+import DialogContent from "@mui/material/DialogContent";
+import DialogTitle from "@mui/material/DialogTitle";
+import TextField from "@mui/material/TextField";
+import { useCreateUnitMutation } from "@rezics/api/unit/unit.mutations";
+import { UnitType } from "@rezics/contract";
+import { RezicsMarkdownEditor } from "@rezics/ui/editor";
+import { useEffect, useMemo, useState } from "react";
+import { useUserProfileStore } from "@/user/state";
+import type { Chapter } from "./ChapterArborist";
 
 interface CreateChapterDialogProps {
   open: boolean;
@@ -32,22 +31,22 @@ export function CreateChapterDialog({
   bookUnitId,
   currentEditParentId,
 }: CreateChapterDialogProps) {
-  const {user} = useUserProfileStore();
-  const {show} = useAlertStore();
+  const { user } = useUserProfileStore();
+  const { show } = useAlertStore();
 
-  const [title, setTitle] = useState('');
-  const [content, setContent] = useState('');
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
 
   // Reset form when dialog is opened
   useEffect(() => {
     if (open) {
-      setTitle('');
-      setContent('');
+      setTitle("");
+      setContent("");
     }
   }, [open]);
 
   const createMutation = useCreateUnitMutation({
-    onError: error => {
+    onError: (error) => {
       show(
         `创建章节失败: ${
           error instanceof Error ? error.message : String(error)
@@ -64,13 +63,13 @@ export function CreateChapterDialog({
   async function handleSubmit() {
     if (!open) return;
     if (isInvalid) {
-      show('标题和内容不能为空');
+      show("标题和内容不能为空");
       return;
     }
 
     const userId = (user as any)?.unitId as string | undefined;
     if (!userId) {
-      show('请先登录');
+      show("请先登录");
       return;
     }
 
@@ -90,14 +89,14 @@ export function CreateChapterDialog({
       };
 
       handleCreate({
-        parentId: (currentEditParentId ?? '') as string | number,
+        parentId: (currentEditParentId ?? "") as string | number,
         newNode,
       });
 
       onClose();
     } catch (e) {
       // Error already surfaced via onError
-      console.error('Create chapter failed', e);
+      console.error("Create chapter failed", e);
     }
   }
 
@@ -111,9 +110,9 @@ export function CreateChapterDialog({
             fullWidth
             variant="filled"
             value={title}
-            onChange={e => setTitle(e.target.value)}
+            onChange={(e) => setTitle(e.target.value)}
             error={!title.trim()}
-            helperText={!title.trim() ? '必填' : ' '}
+            helperText={!title.trim() ? "必填" : " "}
           />
           <div className="min-h-[300px]">
             <RezicsMarkdownEditor
@@ -121,7 +120,7 @@ export function CreateChapterDialog({
               onChange={setContent}
               onSubmit={handleSubmit}
               onCancel={onClose}
-              submitLabel={createMutation.isPending ? '创建中...' : '创建'}
+              submitLabel={createMutation.isPending ? "创建中..." : "创建"}
             />
             {!content.trim() && (
               <div className="text-sm text-red-600 mt-2">内容为必填</div>

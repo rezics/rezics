@@ -1,5 +1,5 @@
-import {prisma} from '#/prisma/client';
-import type {JwtPrivateJwk, JwtPublicJwk} from '@rezics/jwt';
+import type { JwtPrivateJwk, JwtPublicJwk } from "@rezics/jwt";
+import { prisma } from "#/prisma/client";
 
 export type CachedJwksEntry = {
   kid: string;
@@ -26,13 +26,13 @@ export async function fetchJwtService(
   serviceKey: string,
 ): Promise<CachedJwtService> {
   const record = await prisma.jwtService.findUnique({
-    where: {serviceKey},
+    where: { serviceKey },
     include: {
       jwks: {
         where: {
-          OR: [{expiresAt: null}, {expiresAt: {gt: new Date()}}],
+          OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
         },
-        orderBy: {createdAt: 'desc'},
+        orderBy: { createdAt: "desc" },
       },
     },
   });
@@ -50,7 +50,7 @@ export async function fetchJwtService(
     jwksPath: record.jwksPath,
     isLocalIssuer: record.isLocalIssuer,
     isActive: record.isActive,
-    jwks: record.jwks.map(row => ({
+    jwks: record.jwks.map((row) => ({
       kid: row.id,
       publicJwk: row.publicJwk as unknown as JwtPublicJwk,
       privateJwk: row.privateJwk as unknown as JwtPrivateJwk,

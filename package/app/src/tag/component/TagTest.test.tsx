@@ -1,19 +1,19 @@
-import React, {useEffect, useMemo, useState} from 'react';
-import {useFixtureInput} from 'react-cosmos/client';
-import {faker} from '@faker-js/faker';
-import {QueryClient, QueryClientProvider} from '@tanstack/react-query';
-import type {TagDetailDTO} from '@rezics/api/tag/tag';
-import TagCard, {TagDetailCard} from './TagCards';
-import TagList from './TagList';
-import TagWrapper from './TagWrapper';
-
+import { faker } from "@faker-js/faker";
+import type { TagDetailDTO } from "@rezics/api/tag/tag";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 // MSW v2
-import {http, HttpResponse} from 'msw';
-import {setupWorker} from 'msw/browser';
+import { HttpResponse, http } from "msw";
+import { setupWorker } from "msw/browser";
+import type React from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useFixtureInput } from "react-cosmos/client";
+import TagCard, { TagDetailCard } from "./TagCards";
+import TagList from "./TagList";
+import TagWrapper from "./TagWrapper";
 
 // Infer the base URL used by apiFetch (see src/api/react-query/http.ts)
 const API_BASE =
-  (import.meta as any)?.env?.VITE_API_URL || 'http://localhost:4000';
+  (import.meta as any)?.env?.VITE_API_URL || "http://localhost:4000";
 
 // Keep a module-scoped ref-like store for handlers to read latest data
 const store = {
@@ -25,39 +25,40 @@ const ensureWorker = async () => {
   if (workerStarted) return;
   const worker = setupWorker(
     // GET /tags (list)
-    http.get(`${API_BASE}/tags`, ({request}) => {
+    http.get(`${API_BASE}/tags`, ({ request }) => {
       const url = new URL(request.url);
-      const domainId = url.searchParams.get('domainId') || undefined;
+      const domainId = url.searchParams.get("domainId") || undefined;
       // Basic filter logic for demo
       let tags = store.tags;
       if (domainId) {
-        tags = tags.filter(t => (t.domains || []).includes(domainId));
+        tags = tags.filter((t) => (t.domains || []).includes(domainId));
       }
-      return HttpResponse.json({tags, total: tags.length});
+      return HttpResponse.json({ tags, total: tags.length });
     }),
 
     // GET /tags/:unitId (detail)
-    http.get(`${API_BASE}/tags/:unitId`, ({params}) => {
-      const tag = store.tags.find(t => t.id === String(params.unitId));
-      if (!tag) return HttpResponse.json({message: 'Not Found'}, {status: 404});
+    http.get(`${API_BASE}/tags/:unitId`, ({ params }) => {
+      const tag = store.tags.find((t) => t.id === String(params.unitId));
+      if (!tag)
+        return HttpResponse.json({ message: "Not Found" }, { status: 404 });
       return HttpResponse.json(tag);
     }),
 
     // GET /units/:unitId (used for domain title in grouped mode)
-    http.get(`${API_BASE}/units/:unitId`, ({params}) => {
+    http.get(`${API_BASE}/units/:unitId`, ({ params }) => {
       const id = String(params.unitId);
       // Find a tag that references this domain id and derive a friendly title
       const title = `Domain ${id.slice(0, 6).toUpperCase()}`;
       return HttpResponse.json({
         id,
-        userId: 'demo-user',
-        type: 'DOMAIN',
+        userId: "demo-user",
+        type: "DOMAIN",
         title,
         content: `This is a mock Unit for domain ${id}.`,
       });
     }),
   );
-  await worker.start({onUnhandledRequest: 'bypass'});
+  await worker.start({ onUnhandledRequest: "bypass" });
   workerStarted = true;
 };
 
@@ -69,19 +70,19 @@ function makeTag(overrides?: Partial<TagDetailDTO>): TagDetailDTO {
     name: overrides?.name ?? faker.hacker.noun(),
     type:
       overrides?.type ??
-      faker.helpers.arrayElement(['GENRE', 'TOPIC', 'THEME', null]),
-    content: overrides?.content ?? faker.lorem.paragraphs({min: 1, max: 2}),
+      faker.helpers.arrayElement(["GENRE", "TOPIC", "THEME", null]),
+    content: overrides?.content ?? faker.lorem.paragraphs({ min: 1, max: 2 }),
     domains:
       overrides?.domains ??
       faker.helpers.arrayElements(
         [faker.string.uuid(), faker.string.uuid(), faker.string.uuid()],
-        {min: 0, max: 2},
+        { min: 0, max: 2 },
       ),
     i18n: overrides?.i18n ?? null,
   };
 }
 
-const Section: React.FC<{title: string; children: React.ReactNode}> = ({
+const Section: React.FC<{ title: string; children: React.ReactNode }> = ({
   title,
   children,
 }) => (
@@ -91,7 +92,9 @@ const Section: React.FC<{title: string; children: React.ReactNode}> = ({
   </section>
 );
 
-const QueryProvider: React.FC<{children: React.ReactNode}> = ({children}) => {
+const QueryProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const [client] = useState(() => new QueryClient());
   return <QueryClientProvider client={client}>{children}</QueryClientProvider>;
 };
@@ -107,12 +110,12 @@ const Fixture: React.FC = () => {
     const domainB = faker.string.uuid();
     const mk = (p?: Partial<TagDetailDTO>) => makeTag(p);
     return [
-      mk({name: 'Fantasy', type: 'GENRE', domains: [domainA]}),
-      mk({name: 'Science', type: 'TOPIC', domains: [domainB]}),
-      mk({name: 'Philosophy', type: 'THEME', domains: [domainA, domainB]}),
-      mk({name: 'NoDomainTag', type: null, domains: []}),
-      mk({name: 'Mystery', type: 'GENRE', domains: [domainA]}),
-      mk({name: 'Space', type: 'TOPIC', domains: [domainB]}),
+      mk({ name: "Fantasy", type: "GENRE", domains: [domainA] }),
+      mk({ name: "Science", type: "TOPIC", domains: [domainB] }),
+      mk({ name: "Philosophy", type: "THEME", domains: [domainA, domainB] }),
+      mk({ name: "NoDomainTag", type: null, domains: [] }),
+      mk({ name: "Mystery", type: "GENRE", domains: [domainA] }),
+      mk({ name: "Space", type: "TOPIC", domains: [domainB] }),
     ];
   }, []);
 
@@ -120,14 +123,14 @@ const Fixture: React.FC = () => {
   const [dataCtl] = useFixtureInput<{
     includeNoDomain: boolean;
     limit: number;
-  }>('Data Controls', {
+  }>("Data Controls", {
     includeNoDomain: true,
     limit: 20,
   });
 
   const demoTags = useMemo(() => {
     const list = baseTags.filter(
-      t => dataCtl.includeNoDomain || (t.domains && t.domains.length > 0),
+      (t) => dataCtl.includeNoDomain || (t.domains && t.domains.length > 0),
     );
     return list.slice(0, dataCtl.limit);
   }, [baseTags, dataCtl.includeNoDomain, dataCtl.limit]);
@@ -143,8 +146,8 @@ const Fixture: React.FC = () => {
   }, []);
 
   // Controls for sub-components
-  const [cardCtl] = useFixtureInput<{idx: number; selected: boolean}>(
-    'TagCard Props',
+  const [cardCtl] = useFixtureInput<{ idx: number; selected: boolean }>(
+    "TagCard Props",
     {
       idx: 0,
       selected: false,
@@ -155,7 +158,7 @@ const Fixture: React.FC = () => {
     demoTags[Math.min(cardCtl.idx, Math.max(0, demoTags.length - 1))] ??
     makeTag();
 
-  const [detailCtl] = useFixtureInput<{idx: number}>('TagDetailCard Props', {
+  const [detailCtl] = useFixtureInput<{ idx: number }>("TagDetailCard Props", {
     idx: 1,
   });
 
@@ -163,8 +166,8 @@ const Fixture: React.FC = () => {
     demoTags[Math.min(detailCtl.idx, Math.max(0, demoTags.length - 1))] ??
     makeTag();
 
-  const [listCtl] = useFixtureInput<{autoSelectFirst: boolean}>(
-    'TagList Props',
+  const [listCtl] = useFixtureInput<{ autoSelectFirst: boolean }>(
+    "TagList Props",
     {
       autoSelectFirst: false,
     },
@@ -180,20 +183,22 @@ const Fixture: React.FC = () => {
           limit?: number | null;
         }
       | undefined;
-  }>('TagWrapper Flat Controls', {
-    filters: {q: '', type: null, domainId: null, limit: 20},
+  }>("TagWrapper Flat Controls", {
+    filters: { q: "", type: null, domainId: null, limit: 20 },
   });
 
   const [wrapperGroupedCtl] = useFixtureInput<{
     domainIds: string[] | undefined;
-  }>('TagWrapper Grouped Controls', {
+  }>("TagWrapper Grouped Controls", {
     domainIds: undefined,
   });
 
   // Provide a suggestion of domains visible in dataset
   const knownDomains = useMemo(() => {
     const set = new Set<string>();
-    demoTags.forEach(t => (t.domains || []).forEach((d: string) => set.add(d)));
+    demoTags.forEach((t) =>
+      (t.domains || []).forEach((d: string) => set.add(d)),
+    );
     return Array.from(set);
   }, [demoTags]);
 
@@ -237,8 +242,8 @@ const Fixture: React.FC = () => {
 
       <Section title="TagWrapper – Grouped 模式（按 domain 分组）">
         <div className="mb-2 text-xs text-gray-600">
-          可用 domainIds:{' '}
-          {knownDomains.map(d => d.slice(0, 6)).join(', ') || '（无）'}
+          可用 domainIds:{" "}
+          {knownDomains.map((d) => d.slice(0, 6)).join(", ") || "（无）"}
         </div>
         <QueryProvider>
           <TagWrapper mode="grouped" domainIds={wrapperGroupedCtl.domainIds} />
@@ -248,6 +253,6 @@ const Fixture: React.FC = () => {
   );
 };
 
-Fixture.displayName = 'TagFixture';
+Fixture.displayName = "TagFixture";
 
 export default Fixture;

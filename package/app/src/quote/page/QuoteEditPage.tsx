@@ -1,35 +1,36 @@
-import {TextField} from '@mui/material';
-import {RezicsMarkdownEditor} from '@rezics/ui/editor';
-import type {UnitFormData} from '@rezics/api/unit/unit.types';
-import {useEffect, useMemo, useState} from 'react';
-import {useQuery} from '@tanstack/react-query';
-import {unitQueries} from '@rezics/api/unit/unit.queries';
-import {useUpdateUnitMutation} from '@rezics/api/unit/unit.mutations';
-import {useAlertStore} from '@app/state/windowAlertStore';
-import {useTranslation} from 'react-i18next';
-import {quoteEditRoute} from '@/router';
+import { useAlertStore } from "@app/state/windowAlertStore";
+import { TextField } from "@mui/material";
+import { useUpdateUnitMutation } from "@rezics/api/unit/unit.mutations";
+import { unitQueries } from "@rezics/api/unit/unit.queries";
+import type { UnitFormData } from "@rezics/api/unit/unit.types";
+import { RezicsMarkdownEditor } from "@rezics/ui/editor";
+import { useQuery } from "@tanstack/react-query";
+import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { quoteEditRoute } from "@/router";
+
 interface QuoteEditPageProps {
   unitId: string;
   data: UnitFormData;
   setData: (data: UnitFormData) => void;
 }
 
-export function QuoteEditPage({unitId, data, setData}: QuoteEditPageProps) {
-  const {t} = useTranslation();
-  const {show} = useAlertStore();
+export function QuoteEditPage({ unitId, data, setData }: QuoteEditPageProps) {
+  const { t } = useTranslation();
+  const { show } = useAlertStore();
   const source = useMemo(
-    () => (data.metadata as any)?.source || '',
+    () => (data.metadata as any)?.source || "",
     [data.metadata],
   );
 
-  const {mutate, isPending} = useUpdateUnitMutation({
-    onSuccess: data => {
-      show(t('quote.updated_success'));
-      console.log('update quote success', data);
+  const { mutate, isPending } = useUpdateUnitMutation({
+    onSuccess: (data) => {
+      show(t("quote.updated_success"));
+      console.log("update quote success", data);
     },
-    onError: error => {
-      show(t('quote.messages.update_failed', {error: String(error)}));
-      console.error('update quote failed', error);
+    onError: (error) => {
+      show(t("quote.messages.update_failed", { error: String(error) }));
+      console.error("update quote failed", error);
     },
   });
 
@@ -49,23 +50,23 @@ export function QuoteEditPage({unitId, data, setData}: QuoteEditPageProps) {
       <div className="flex flex-col gap-2">
         <TextField
           id="quote-title"
-          label={t('quote.form.title')}
+          label={t("quote.form.title")}
           variant="standard"
-          value={data.title || ''}
-          onChange={e => setData({...data, title: e.target.value})}
+          value={data.title || ""}
+          onChange={(e) => setData({ ...data, title: e.target.value })}
         />
       </div>
 
       <div className="flex flex-col gap-2">
         <TextField
           id="quote-source"
-          label={t('quote.form.source')}
+          label={t("quote.form.source")}
           variant="standard"
           value={source}
-          onChange={e =>
+          onChange={(e) =>
             setData({
               ...data,
-              metadata: {...(data.metadata || {}), source: e.target.value},
+              metadata: { ...(data.metadata || {}), source: e.target.value },
             })
           }
         />
@@ -73,10 +74,10 @@ export function QuoteEditPage({unitId, data, setData}: QuoteEditPageProps) {
 
       <div className="flex-1 min-h-[300px]">
         <RezicsMarkdownEditor
-          value={data.content || ''}
-          onChange={value => setData({...data, content: value})}
+          value={data.content || ""}
+          onChange={(value) => setData({ ...data, content: value })}
           onSubmit={handleSave}
-          submitLabel={t('common.save')}
+          submitLabel={t("common.save")}
         />
       </div>
     </div>
@@ -84,7 +85,7 @@ export function QuoteEditPage({unitId, data, setData}: QuoteEditPageProps) {
 }
 
 export function QuoteEditPageContainer() {
-  const {unitId} = quoteEditRoute.useParams();
+  const { unitId } = quoteEditRoute.useParams();
   const {
     data: unitData,
     isLoading,
@@ -95,12 +96,12 @@ export function QuoteEditPageContainer() {
   useEffect(() => {
     if (unitData) {
       setQuoteData({
-        title: unitData.title || '',
-        content: unitData.content || '',
+        title: unitData.title || "",
+        content: unitData.content || "",
         metadata: unitData.metadata || {},
-        targetUnitId: unitData.targetUnitId || '',
-        type: unitData.type || '',
-        status: unitData.status || '',
+        targetUnitId: unitData.targetUnitId || "",
+        type: unitData.type || "",
+        status: unitData.status || "",
       });
     }
   }, [unitData]);

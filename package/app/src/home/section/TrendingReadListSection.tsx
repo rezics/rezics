@@ -1,11 +1,12 @@
-import React, {useMemo} from 'react';
-import {Alert, Button, CircularProgress, Typography} from '@mui/material';
-import {useTranslation} from 'react-i18next';
-import {useNavigate} from '@tanstack/react-router';
-import {useQuery} from '@tanstack/react-query';
-import {buildMeiliReadlistQuery} from '@rezics/api/meili/meili.queries';
-import type {ReadlistDTO} from '@rezics/contract';
-import {HorizontalReadListCarousel} from '@/readlist/component/list/HorizontalReadListCarousel';
+import { Alert, Button, CircularProgress, Typography } from "@mui/material";
+import { buildMeiliReadlistQuery } from "@rezics/api/meili/meili.queries";
+import type { ReadlistDTO } from "@rezics/contract";
+import { useQuery } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
+import type React from "react";
+import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
+import { HorizontalReadListCarousel } from "@/readlist/component/list/HorizontalReadListCarousel";
 
 export type TrendingReadListSectionProps = {
   title?: string;
@@ -14,12 +15,12 @@ export type TrendingReadListSectionProps = {
 
 export const TrendingReadListSection: React.FC<
   TrendingReadListSectionProps
-> = ({title, limit = 8}) => {
-  const {t} = useTranslation();
-  const resolvedTitle = title ?? t('page.home.sections.trending_readlists');
+> = ({ title, limit = 8 }) => {
+  const { t } = useTranslation();
+  const resolvedTitle = title ?? t("page.home.sections.trending_readlists");
   const navigate = useNavigate();
-  const {data, isLoading, error} = useQuery(
-    buildMeiliReadlistQuery(0, limit, '', []),
+  const { data, isLoading, error } = useQuery(
+    buildMeiliReadlistQuery(0, limit, "", []),
   );
 
   const items = useMemo<ReadlistDTO[]>(() => data?.readlists ?? [], [data]);
@@ -42,7 +43,7 @@ export const TrendingReadListSection: React.FC<
         <Button
           variant="text"
           color="primary"
-          onClick={() => navigate({to: '/readlist'})}
+          onClick={() => navigate({ to: "/readlist" })}
         >
           更多 →
         </Button>

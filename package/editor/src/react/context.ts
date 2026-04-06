@@ -1,5 +1,5 @@
-import { createContext, useContext } from 'react';
-import type { EditorView } from '@codemirror/view';
+import type { EditorView } from "@codemirror/view";
+import { createContext, useContext } from "react";
 
 export const EditorContext = createContext<EditorView | null>(null);
 

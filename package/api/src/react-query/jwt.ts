@@ -1,23 +1,24 @@
-import {getApiConfig} from '../config';
-import {clearAuthPresence, hasAuthPresence} from './authPresence';
 import {
-  NormalizedTokenName,
   type AuthContextTokenClaims,
   type AuthIdentityTokenClaims,
-  type RezicsSessionTokenClaims,
   type AuthTokenResponse,
+  NormalizedTokenName,
   type NormalizedTokenName as NormalizedTokenNameType,
   normalizedTokenTransportMap,
-} from '@rezics/contract';
+  type RezicsSessionTokenClaims,
+} from "@rezics/contract";
+import { getApiConfig } from "../config";
+import { clearAuthPresence, hasAuthPresence } from "./authPresence";
 
 const DEFAULT_TOKEN_STORAGE_KEYS: Record<string, string> = {
   [NormalizedTokenName.AUTH_IDENTITY]: NormalizedTokenName.AUTH_IDENTITY,
   [NormalizedTokenName.REZICS_SESSION]: NormalizedTokenName.REZICS_SESSION,
-  [NormalizedTokenName.NOTIFICATION_SESSION]: NormalizedTokenName.NOTIFICATION_SESSION,
+  [NormalizedTokenName.NOTIFICATION_SESSION]:
+    NormalizedTokenName.NOTIFICATION_SESSION,
   [NormalizedTokenName.SEARCH_SESSION]: NormalizedTokenName.SEARCH_SESSION,
 };
 
-export const AUTH_TOKEN_STORAGE_EVENT = 'package-auth-token-storage';
+export const AUTH_TOKEN_STORAGE_EVENT = "package-auth-token-storage";
 type PersistedAuthSnapshot = {
   state?: {
     accessToken?: string | null;
@@ -38,7 +39,7 @@ export type JwtTokenStrategy = {
 };
 
 let tokenStrategy: JwtTokenStrategy = {
-  authBaseUrl: '',
+  authBaseUrl: "",
   storeKeyByToken: {
     ...DEFAULT_TOKEN_STORAGE_KEYS,
   },
@@ -65,7 +66,7 @@ export function configureJwtTokenStrategy(
 export function getJwtTokenStrategy(): JwtTokenStrategy {
   return {
     authBaseUrl: getAuthBaseUrl(),
-    storeKeyByToken: {...tokenStrategy.storeKeyByToken},
+    storeKeyByToken: { ...tokenStrategy.storeKeyByToken },
   };
 }
 
@@ -83,7 +84,7 @@ function getStoreKey(tokenName: NormalizedTokenNameType): string | undefined {
 }
 
 function readAuthSnapshot(storeKey: string): PersistedAuthSnapshot | null {
-  if (typeof window === 'undefined') return null;
+  if (typeof window === "undefined") return null;
   const raw = localStorage.getItem(storeKey);
   if (!raw) return null;
 
@@ -98,7 +99,7 @@ function writeAuthSnapshot(
   tokenName: NormalizedTokenNameType,
   token: string | null,
 ): void {
-  if (typeof window === 'undefined') return;
+  if (typeof window === "undefined") return;
 
   const storeKey = getStoreKey(tokenName);
   if (!storeKey) return;
@@ -119,7 +120,7 @@ function writeAuthSnapshot(
   );
   window.dispatchEvent(
     new CustomEvent(AUTH_TOKEN_STORAGE_EVENT, {
-      detail: {tokenName, token},
+      detail: { tokenName, token },
     }),
   );
 }
@@ -153,13 +154,13 @@ export const setToken = (
 export const removeToken = (
   tokenName: NormalizedTokenNameType = NormalizedTokenName.AUTH_IDENTITY,
 ): void => {
-  if (typeof window === 'undefined') return;
+  if (typeof window === "undefined") return;
   const storeKey = getStoreKey(tokenName);
   if (!storeKey) return;
   localStorage.removeItem(storeKey);
   window.dispatchEvent(
     new CustomEvent(AUTH_TOKEN_STORAGE_EVENT, {
-      detail: {tokenName, token: null},
+      detail: { tokenName, token: null },
     }),
   );
 };
@@ -171,7 +172,9 @@ export const isAuthenticated = (): boolean => {
   return !!getToken(NormalizedTokenName.AUTH_IDENTITY);
 };
 
-export async function queryAccessToken(options?: {requirePresence?: boolean}) {
+export async function queryAccessToken(options?: {
+  requirePresence?: boolean;
+}) {
   if (options?.requirePresence !== false && !hasAuthPresence()) {
     return null;
   }
@@ -179,10 +182,10 @@ export async function queryAccessToken(options?: {requirePresence?: boolean}) {
   const refreshTokenResponse = await fetch(
     `${getAuthBaseUrl()}/api/auth/token`,
     {
-      method: 'GET',
-      credentials: 'include',
+      method: "GET",
+      credentials: "include",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
     },
   );
@@ -191,7 +194,7 @@ export async function queryAccessToken(options?: {requirePresence?: boolean}) {
   const token = json.token ?? null;
   if (!token) {
     clearAuthPresence();
-    throw new Error('Unauthorized - Please login again');
+    throw new Error("Unauthorized - Please login again");
   }
   setToken(token, NormalizedTokenName.AUTH_IDENTITY);
   return token;
@@ -219,8 +222,9 @@ export async function ensureAuthIdentityToken(options?: {
 export function buildTokenHeaders(options?: {
   include?: NormalizedTokenNameType[];
 }): Record<string, string> {
-  const requestedTokenNames =
-    options?.include ?? [NormalizedTokenName.AUTH_IDENTITY];
+  const requestedTokenNames = options?.include ?? [
+    NormalizedTokenName.AUTH_IDENTITY,
+  ];
   const headers: Record<string, string> = {};
 
   for (const tokenName of requestedTokenNames) {
@@ -253,14 +257,14 @@ export function getTokenRecord(
 export function getAllTokenRecords(): JwtTokenRecord[] {
   return (
     Object.keys(normalizedTokenTransportMap) as NormalizedTokenNameType[]
-  ).map(tokenName => getTokenRecord(tokenName));
+  ).map((tokenName) => getTokenRecord(tokenName));
 }
 
 export function clearAllTokens(): void {
   const managedTokens = Object.keys(
     tokenStrategy.storeKeyByToken,
   ) as NormalizedTokenNameType[];
-  managedTokens.forEach(tokenName => {
+  managedTokens.forEach((tokenName) => {
     removeToken(tokenName);
   });
 }
@@ -283,15 +287,15 @@ export interface JwtPayload {
 }
 
 function decodeBase64Url(input: string): string {
-  const normalized = input.replace(/-/g, '+').replace(/_/g, '/');
-  const padded = normalized + '='.repeat((4 - (normalized.length % 4)) % 4);
-  if (typeof globalThis.atob === 'function') {
+  const normalized = input.replace(/-/g, "+").replace(/_/g, "/");
+  const padded = normalized + "=".repeat((4 - (normalized.length % 4)) % 4);
+  if (typeof globalThis.atob === "function") {
     return globalThis.atob(padded);
   }
-  if (typeof Buffer !== 'undefined') {
-    return Buffer.from(padded, 'base64').toString('utf-8');
+  if (typeof Buffer !== "undefined") {
+    return Buffer.from(padded, "base64").toString("utf-8");
   }
-  throw new Error('No base64 decoder available');
+  throw new Error("No base64 decoder available");
 }
 
 /**
@@ -301,7 +305,7 @@ export function parseJwt<T extends JwtPayload = JwtPayload>(
   token?: string | null,
 ): T | null {
   if (!token) return null;
-  const parts = token.split('.');
+  const parts = token.split(".");
   if (parts.length < 2) return null;
   const payloadPart = parts[1];
   if (!payloadPart) return null;

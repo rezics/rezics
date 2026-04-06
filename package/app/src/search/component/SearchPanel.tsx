@@ -1,16 +1,16 @@
-import React from 'react';
-import {Stack} from '@mui/material';
+import { Stack } from "@mui/material";
+import type { SortControlsProps } from "@rezics/ui/composite/pagination/Pagination.tsx";
+import type React from "react";
+import { BookSearchFilter } from "./SearchFilter";
 import {
   SearchInput,
-  SearchInputView,
   type SearchInputProps,
+  SearchInputView,
   type SearchInputViewProps,
-} from './SearchInput';
-import {BookSearchFilter} from './SearchFilter';
-import type {SortControlsProps} from '@rezics/ui/composite/pagination/Pagination.tsx';
+} from "./SearchInput";
 
 export type SearchPanelViewProps = {
-  inputProps: Omit<SearchInputViewProps, 'onAddTag'> & {
+  inputProps: Omit<SearchInputViewProps, "onAddTag"> & {
     onAddTag?: (tag: string) => void;
   };
   filterProps?: SortControlsProps;
@@ -30,7 +30,7 @@ export const SearchPanelView: React.FC<SearchPanelViewProps> = ({
   );
 };
 
-export type SearchPanelProps = Omit<SearchInputProps, 'placeholder'> & {
+export type SearchPanelProps = Omit<SearchInputProps, "placeholder"> & {
   placeholder?: string;
   filterProps?: SortControlsProps;
 };

@@ -1,1 +1,1 @@
-export * from './CookieConsentBanner';
+export * from "./CookieConsentBanner";

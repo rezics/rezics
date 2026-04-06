@@ -1,19 +1,19 @@
-import type {ReactNode} from 'react';
-import {ThemeProvider} from '@mui/material';
-import CssBaseline from '@mui/material/CssBaseline';
-import {StyledEngineProvider} from '@mui/material/styles';
-import {getTheme} from '@rezics/app-shell';
+import { ThemeProvider } from "@mui/material";
+import CssBaseline from "@mui/material/CssBaseline";
+import { StyledEngineProvider } from "@mui/material/styles";
+import { getTheme } from "@rezics/app-shell";
 import {
-  RouterProvider,
-  createRouter,
   createRootRoute,
   createRoute,
+  createRouter,
   Outlet,
-} from '@tanstack/react-router';
+  RouterProvider,
+} from "@tanstack/react-router";
+import type { ReactNode } from "react";
 
-import 'virtual:uno.css';
+import "virtual:uno.css";
 
-function MockRouterWrapper({children}: {children: ReactNode}) {
+function MockRouterWrapper({ children }: { children: ReactNode }) {
   const rootRoute = createRootRoute({
     component: () => (
       <>
@@ -25,18 +25,18 @@ function MockRouterWrapper({children}: {children: ReactNode}) {
 
   const indexRoute = createRoute({
     getParentRoute: () => rootRoute,
-    path: '/',
+    path: "/",
     component: () => null,
   });
 
   const routeTree = rootRoute.addChildren([indexRoute]);
-  const router = createRouter({routeTree});
+  const router = createRouter({ routeTree });
 
   return <RouterProvider router={router} />;
 }
 
-export default function CosmosDecorator({children}: {children: ReactNode}) {
-  const theme = getTheme('light');
+export default function CosmosDecorator({ children }: { children: ReactNode }) {
+  const theme = getTheme("light");
 
   return (
     <StyledEngineProvider injectFirst>

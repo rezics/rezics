@@ -1,4 +1,4 @@
-import {Typography} from '@mui/material';
+import { Typography } from "@mui/material";
 
 export function CustomSidebar({
   section,
@@ -19,17 +19,17 @@ export function CustomSidebar({
 
         <nav className="space-y-3">
           {[
-            {id: 'Profile', label: 'Profile Settings', icon: '👤'},
-            {id: 'Security', label: 'Security & Privacy', icon: '🔒'},
-          ].map(item => (
+            { id: "Profile", label: "Profile Settings", icon: "👤" },
+            { id: "Security", label: "Security & Privacy", icon: "🔒" },
+          ].map((item) => (
             <button
               key={item.id}
               onClick={() => setSection(item.id as any)}
               className={`w-full text-left px-6 py-4 rounded-xl transition-all duration-300 group
                                 ${
                                   section === item.id
-                                    ? 'bg-gradient-to-r from-rose-500 to-pink-500 text-white shadow-lg shadow-rose-500/25 transform scale-[1.02]'
-                                    : 'hover:bg-rose-50 text-gray-700 hover:shadow-md hover:scale-[1.01]'
+                                    ? "bg-gradient-to-r from-rose-500 to-pink-500 text-white shadow-lg shadow-rose-500/25 transform scale-[1.02]"
+                                    : "hover:bg-rose-50 text-gray-700 hover:shadow-md hover:scale-[1.01]"
                                 }`}
             >
               <div className="flex items-center space-x-3">
@@ -37,19 +37,19 @@ export function CustomSidebar({
                 <div>
                   <div
                     className={`font-semibold ${
-                      section === item.id ? 'text-white' : 'text-gray-900'
+                      section === item.id ? "text-white" : "text-gray-900"
                     }`}
                   >
                     {item.label}
                   </div>
                   <div
                     className={`text-sm ${
-                      section === item.id ? 'text-rose-100' : 'text-gray-500'
+                      section === item.id ? "text-rose-100" : "text-gray-500"
                     }`}
                   >
-                    {item.id === 'Profile'
-                      ? 'Manage your personal information'
-                      : 'Passwords and security keys'}
+                    {item.id === "Profile"
+                      ? "Manage your personal information"
+                      : "Passwords and security keys"}
                   </div>
                 </div>
               </div>

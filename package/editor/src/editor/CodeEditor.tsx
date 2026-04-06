@@ -1,5 +1,5 @@
-import { Editor } from '../react/Editor';
-import type { CodeEditorProps } from './types';
+import { Editor } from "../react/Editor";
+import type { CodeEditorProps } from "./types";
 
 export type { CodeEditorProps };
 

@@ -1,22 +1,25 @@
-import React, {useEffect, useMemo, useRef, useState} from 'react';
-import {Alert} from '@mui/material';
-import {UniversalPaginator, type UniversalPaginatorHandle} from '@rezics/ui';
-import {TextSearchInputWithIcon, type SearchInfo} from '@/search';
-import {useQuery, useQueryClient} from '@tanstack/react-query';
-import {buildMeiliReadlistQuery} from '@rezics/api/meili/meili.queries';
-import type {ReadlistDTO} from '@rezics/contract';
-import {reactionApi} from '@rezics/api/reaction/reaction.api';
-import {useTranslation} from 'react-i18next';
+import { Alert } from "@mui/material";
+import { buildMeiliReadlistQuery } from "@rezics/api/meili/meili.queries";
+import { reactionApi } from "@rezics/api/reaction/reaction.api";
+import type { ReadlistDTO } from "@rezics/contract";
+import { UniversalPaginator, type UniversalPaginatorHandle } from "@rezics/ui";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import type React from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { type SearchInfo, TextSearchInputWithIcon } from "@/search";
 
 type Readlist = ReadlistDTO;
 
-import {SingleReadlist} from '@/readlist/component/SingleReadlist.tsx';
+import { SingleReadlist } from "@/readlist/component/SingleReadlist.tsx";
 
 // Simple list view for Readlists
-const ReadlistListView: React.FC<{readlists: Readlist[]}> = ({readlists}) => {
+const ReadlistListView: React.FC<{ readlists: Readlist[] }> = ({
+  readlists,
+}) => {
   return (
     <div>
-      {readlists.map(item => (
+      {readlists.map((item) => (
         <div key={item.id}>
           <SingleReadlist
             data={item}
@@ -29,14 +32,14 @@ const ReadlistListView: React.FC<{readlists: Readlist[]}> = ({readlists}) => {
   );
 };
 
-function ErrorView({error}: {error: Error}) {
-  const {t} = useTranslation();
+function ErrorView({ error }: { error: Error }) {
+  const { t } = useTranslation();
   return (
     <div className="mx-auto max-w-7xl p-4">
       <TextSearchInputWithIcon
         onSearch={() => {}}
-        defaultValue={{keyword: ''}}
-        placeholder={t('page.readlist.list.search_placeholder')}
+        defaultValue={{ keyword: "" }}
+        placeholder={t("page.readlist.list.search_placeholder")}
       />
       <Alert severity="error" className="my-4">
         {String(error)}
@@ -45,30 +48,30 @@ function ErrorView({error}: {error: Error}) {
   );
 }
 
-type SortKey = 'time' | 'name' | 'popular' | 'agree';
+type SortKey = "time" | "name" | "popular" | "agree";
 
 /**
  * 后续API调整，Service调整的问题，是否要切换到 unit 查询，还是继续用独立服务。
  * @returns ReadListsPage
  */
-export function ReadListsPage({bookUnitId}: {bookUnitId?: string}) {
-  const {t} = useTranslation();
+export function ReadListsPage({ bookUnitId }: { bookUnitId?: string }) {
+  const { t } = useTranslation();
   const universalPaginatorRef = useRef<UniversalPaginatorHandle>(null);
   const EXTERNAL_PAGE_SIZE = 100;
   const [currentQuery, setCurrentQuery] = useState<SearchInfo>({
-    keyword: '',
+    keyword: "",
     tags: [],
   });
   const [start, setStart] = useState<number>(0);
   const [currentPage, setCurrentPage] = useState(1);
 
-  const {data, isLoading, error} = useQuery(
+  const { data, isLoading, error } = useQuery(
     buildMeiliReadlistQuery(
       start,
       EXTERNAL_PAGE_SIZE,
-      currentQuery.keyword ?? '',
+      currentQuery.keyword ?? "",
       currentQuery.tags ?? [],
-      {bookId: bookUnitId ?? undefined},
+      { bookId: bookUnitId ?? undefined },
     ),
   );
 
@@ -79,25 +82,25 @@ export function ReadListsPage({bookUnitId}: {bookUnitId?: string}) {
   const queryClient = useQueryClient();
   async function handlePreRequestData(page: number) {
     const startOffset = (page - 1) * EXTERNAL_PAGE_SIZE;
-    const {queryKey, queryFn} = buildMeiliReadlistQuery(
+    const { queryKey, queryFn } = buildMeiliReadlistQuery(
       startOffset,
       EXTERNAL_PAGE_SIZE,
-      currentQuery.keyword ?? '',
+      currentQuery.keyword ?? "",
       currentQuery.tags ?? [],
-      {bookId: bookUnitId ?? undefined},
+      { bookId: bookUnitId ?? undefined },
     );
-    const data = await queryClient.fetchQuery({queryKey, queryFn});
-    console.log('handlePreRequestData', data, page);
+    const data = await queryClient.fetchQuery({ queryKey, queryFn });
+    console.log("handlePreRequestData", data, page);
     return data?.readlists?.length ?? 0;
   }
 
   useEffect(() => {
-    console.log('data', data);
+    console.log("data", data);
   }, [data]);
 
   useEffect(() => {
     universalPaginatorRef.current?.resetPaginationPageNumber();
-    console.log('currentQuery', currentQuery);
+    console.log("currentQuery", currentQuery);
   }, [currentQuery]);
 
   const baseReadlists: Readlist[] = useMemo(
@@ -106,12 +109,12 @@ export function ReadListsPage({bookUnitId}: {bookUnitId?: string}) {
   );
 
   const currentTargetIds = useMemo(
-    () => baseReadlists.map(r => r.id).filter(Boolean),
+    () => baseReadlists.map((r) => r.id).filter(Boolean),
     [baseReadlists],
   );
 
-  const {data: reactionSummaryBatch} = useQuery({
-    queryKey: ['reaction-summary-batch', 'readlists', currentTargetIds],
+  const { data: reactionSummaryBatch } = useQuery({
+    queryKey: ["reaction-summary-batch", "readlists", currentTargetIds],
     queryFn: () => reactionApi.summaryBatch(currentTargetIds as string[]),
     enabled: currentTargetIds.length > 0,
     staleTime: 1000 * 60 * 2,
@@ -130,7 +133,7 @@ export function ReadListsPage({bookUnitId}: {bookUnitId?: string}) {
       return;
     }
 
-    const merged = baseReadlists.map(item => {
+    const merged = baseReadlists.map((item) => {
       const summaryMap = reactionSummaryBatch.summaries[item.id];
       if (!summaryMap) return item;
 
@@ -154,18 +157,18 @@ export function ReadListsPage({bookUnitId}: {bookUnitId?: string}) {
 
   const [sortConfig, setSortConfig] = useState<{
     type: SortKey;
-    order: 'asc' | 'desc';
+    order: "asc" | "desc";
   }>({
-    type: 'time',
-    order: 'desc',
+    type: "time",
+    order: "desc",
   });
 
   const handleSortChange = (newSort: {
     type?: string;
-    order?: 'asc' | 'desc';
+    order?: "asc" | "desc";
   }) => {
-    console.log('handleSortChange, newSort', newSort);
-    setSortConfig(prev => ({
+    console.log("handleSortChange, newSort", newSort);
+    setSortConfig((prev) => ({
       type: (newSort.type as SortKey) ?? prev.type,
       order: newSort.order ?? prev.order,
     }));
@@ -191,15 +194,15 @@ export function ReadListsPage({bookUnitId}: {bookUnitId?: string}) {
         isLoading={isLoading && readlists.length === 0}
         sortControl={
           <TextSearchInputWithIcon
-            onSearch={info => {
+            onSearch={(info) => {
               setCurrentQuery({
-                keyword: info ?? '',
+                keyword: info ?? "",
                 tags: [],
               });
-              console.log('onSearch', info);
+              console.log("onSearch", info);
             }}
-            defaultValue={{keyword: currentQuery.keyword ?? ''}}
-            placeholder={t('page.readlist.list.search_placeholder')}
+            defaultValue={{ keyword: currentQuery.keyword ?? "" }}
+            placeholder={t("page.readlist.list.search_placeholder")}
           />
         }
         currentPage={currentPage}

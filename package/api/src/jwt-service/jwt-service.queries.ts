@@ -1,6 +1,6 @@
-import {queryOptions} from '@tanstack/react-query';
-import {jwtServiceApi} from './jwt-service.api';
-import {jwtServiceKeys} from './jwt-service.keys';
+import { queryOptions } from "@tanstack/react-query";
+import { jwtServiceApi } from "./jwt-service.api";
+import { jwtServiceKeys } from "./jwt-service.keys";
 
 export const jwtServiceListQuery = () =>
   queryOptions({

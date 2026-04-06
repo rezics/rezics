@@ -1,38 +1,38 @@
+import { useAlertStore } from "@app/state/windowAlertStore";
 import {
   ChatBubbleOutline,
-  StarBorder,
-  OpenInNew,
   DeleteOutlined,
   EditOutlined,
-  SentimentSatisfiedAlt,
   EmojiEvents,
-} from '@mui/icons-material';
-import ThumbDownAltOutlinedIcon from '@mui/icons-material/ThumbDownAltOutlined';
-import ThumbUpAltOutlinedIcon from '@mui/icons-material/ThumbUpAltOutlined';
-import {IconButton, Popper, Tooltip} from '@mui/material';
-import React, {useEffect, useState} from 'react';
-import {ReactionBarToolBox} from './reactionBarToolBox';
-import {useAlertStore} from '@app/state/windowAlertStore';
-import {BookmarkTagManager} from './BookmarkTagManager';
-
+  OpenInNew,
+  SentimentSatisfiedAlt,
+  StarBorder,
+} from "@mui/icons-material";
+import ThumbDownAltOutlinedIcon from "@mui/icons-material/ThumbDownAltOutlined";
+import ThumbUpAltOutlinedIcon from "@mui/icons-material/ThumbUpAltOutlined";
+import { IconButton, Popper, Tooltip } from "@mui/material";
 import {
   useCreateReactionMutation,
   useDeleteReactionMutation,
-} from '@rezics/api/reaction/reaction.mutations';
+} from "@rezics/api/reaction/reaction.mutations";
+import type React from "react";
+import { useEffect, useState } from "react";
+import { BookmarkTagManager } from "./BookmarkTagManager";
+import { ReactionBarToolBox } from "./reactionBarToolBox";
 
 async function copyCurrentUrl(url?: string) {
   const theUrl = url || window.location.href;
   try {
     await navigator.clipboard.writeText(theUrl);
-    console.log('URL 已复制到剪贴板');
+    console.log("URL 已复制到剪贴板");
   } catch (err) {
-    console.error('复制失败：', err);
+    console.error("复制失败：", err);
   }
 }
 
 export type ReactionAdminBarProps = {
   className?: string;
-  size?: 'small' | 'medium' | 'large';
+  size?: "small" | "medium" | "large";
   fontSize?: string;
   onEdit: () => void;
   onDelete: () => void;
@@ -40,20 +40,25 @@ export type ReactionAdminBarProps = {
 
 export function ReactionAdminBar({
   className,
-  size = 'large',
-  fontSize = '1.5rem',
+  size = "large",
+  fontSize = "1.5rem",
   onEdit,
   onDelete,
 }: ReactionAdminBarProps) {
   return (
     <div className={`flex items-center ${className}`}>
-      <IconButton size={size} sx={{fontSize}} onClick={onEdit} className="ml-2">
+      <IconButton
+        size={size}
+        sx={{ fontSize }}
+        onClick={onEdit}
+        className="ml-2"
+      >
         <EditOutlined fontSize="inherit" />
       </IconButton>
 
       <IconButton
         size={size}
-        sx={{fontSize}}
+        sx={{ fontSize }}
         onClick={onDelete}
         className="ml-2"
       >
@@ -67,7 +72,7 @@ export type ReactionBarProps = {
   onReply?: () => void;
   unitId?: string;
   className?: string;
-  size?: 'small' | 'medium' | 'large';
+  size?: "small" | "medium" | "large";
   fontSize?: string;
   itemUrl?: string;
   hideLike?: boolean;
@@ -83,8 +88,8 @@ export const ReactionBar: React.FC<ReactionBarProps> = ({
   onReply,
   unitId,
   className,
-  size = 'large',
-  fontSize = '1.5rem',
+  size = "large",
+  fontSize = "1.5rem",
   itemUrl,
   hideLike = false,
   hideDislike = false,
@@ -98,7 +103,7 @@ export const ReactionBar: React.FC<ReactionBarProps> = ({
   };
 
   const [isToolBoxOpen, setIsToolBoxOpen] = useState(false);
-  const {show: showAlert} = useAlertStore();
+  const { show: showAlert } = useAlertStore();
 
   const [anchorBookmarkEl, setBookmarkAnchorEl] = useState<null | HTMLElement>(
     null,
@@ -120,31 +125,31 @@ export const ReactionBar: React.FC<ReactionBarProps> = ({
 
   const createReactionMutation = useCreateReactionMutation({
     onSuccess: () => {
-      showAlert('Reaction updated successfully');
+      showAlert("Reaction updated successfully");
     },
   });
 
   const deleteReactionMutation = useDeleteReactionMutation({
     onSuccess: () => {
-      showAlert('Reaction updated successfully');
+      showAlert("Reaction updated successfully");
     },
   });
 
-  const hasLike = userReactions.includes('like');
-  const hasDislike = userReactions.includes('dislike');
-  const hasBookmark = userReactions.includes('bookmark');
+  const hasLike = userReactions.includes("like");
+  const hasDislike = userReactions.includes("dislike");
+  const hasBookmark = userReactions.includes("bookmark");
 
-  const handleToggleReaction = (reaction: 'like' | 'dislike') => {
+  const handleToggleReaction = (reaction: "like" | "dislike") => {
     if (!unitId) return;
 
     const hasReaction = userReactions.includes(reaction);
 
     if (hasReaction) {
-      deleteReactionMutation.mutate({targetId: unitId, reaction});
-      setUserReactions(prev => prev.filter(r => r !== reaction));
+      deleteReactionMutation.mutate({ targetId: unitId, reaction });
+      setUserReactions((prev) => prev.filter((r) => r !== reaction));
     } else {
-      createReactionMutation.mutate({targetId: unitId, reaction});
-      setUserReactions(prev => [...prev, reaction]);
+      createReactionMutation.mutate({ targetId: unitId, reaction });
+      setUserReactions((prev) => [...prev, reaction]);
     }
   };
 
@@ -155,12 +160,12 @@ export const ReactionBar: React.FC<ReactionBarProps> = ({
           <div>
             <IconButton
               size={size}
-              sx={{fontSize}}
-              onClick={() => handleToggleReaction('like')}
+              sx={{ fontSize }}
+              onClick={() => handleToggleReaction("like")}
             >
               <ThumbUpAltOutlinedIcon
                 fontSize="inherit"
-                color={hasLike ? 'primary' : 'inherit'}
+                color={hasLike ? "primary" : "inherit"}
               />
             </IconButton>
           </div>
@@ -169,12 +174,12 @@ export const ReactionBar: React.FC<ReactionBarProps> = ({
           <div>
             <IconButton
               size={size}
-              sx={{fontSize}}
-              onClick={() => handleToggleReaction('dislike')}
+              sx={{ fontSize }}
+              onClick={() => handleToggleReaction("dislike")}
             >
               <ThumbDownAltOutlinedIcon
                 fontSize="inherit"
-                color={hasDislike ? 'error' : 'inherit'}
+                color={hasDislike ? "error" : "inherit"}
               />
             </IconButton>
           </div>
@@ -182,7 +187,7 @@ export const ReactionBar: React.FC<ReactionBarProps> = ({
 
         {!hideReply && (
           <div>
-            <IconButton size={size} sx={{fontSize}} onClick={handleReply}>
+            <IconButton size={size} sx={{ fontSize }} onClick={handleReply}>
               <ChatBubbleOutline fontSize="inherit" />
             </IconButton>
           </div>
@@ -192,14 +197,14 @@ export const ReactionBar: React.FC<ReactionBarProps> = ({
           <div>
             <IconButton
               size={size}
-              sx={{fontSize}}
-              onClick={event => {
+              sx={{ fontSize }}
+              onClick={(event) => {
                 handleBookmarkMenuToggle(event);
               }}
             >
               <StarBorder
                 fontSize="inherit"
-                color={hasBookmark ? 'primary' : 'inherit'}
+                color={hasBookmark ? "primary" : "inherit"}
               />
             </IconButton>
           </div>
@@ -210,9 +215,9 @@ export const ReactionBar: React.FC<ReactionBarProps> = ({
           anchorEl={anchorBookmarkEl}
           placement="right-start"
           modifiers={[
-            {name: 'flip', enabled: true},
+            { name: "flip", enabled: true },
             {
-              name: 'preventOverflow',
+              name: "preventOverflow",
               options: {
                 altAxis: true, // 允许上下、左右溢出检测
                 padding: 8,
@@ -220,7 +225,7 @@ export const ReactionBar: React.FC<ReactionBarProps> = ({
             },
           ]}
           sx={{
-            zIndex: theme => theme.zIndex.modal + 1,
+            zIndex: (theme) => theme.zIndex.modal + 1,
           }}
         >
           {unitId && (
@@ -238,9 +243,9 @@ export const ReactionBar: React.FC<ReactionBarProps> = ({
           <div>
             <IconButton
               size={size}
-              sx={{fontSize}}
+              sx={{ fontSize }}
               onClick={() => {
-                showAlert('链接已经复制到剪贴板');
+                showAlert("链接已经复制到剪贴板");
                 const origin = window?.location?.origin;
                 const theUrl = origin + itemUrl;
                 copyCurrentUrl(theUrl);
@@ -268,12 +273,12 @@ export function AwardReactionBar() {
     <div>
       <Tooltip title="Funny">
         <IconButton size="medium">
-          <SentimentSatisfiedAlt style={{fontSize: '1rem'}} />
+          <SentimentSatisfiedAlt style={{ fontSize: "1rem" }} />
         </IconButton>
       </Tooltip>
       <Tooltip title="Award">
         <IconButton size="medium">
-          <EmojiEvents style={{fontSize: '1rem'}} />
+          <EmojiEvents style={{ fontSize: "1rem" }} />
         </IconButton>
       </Tooltip>
     </div>

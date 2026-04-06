@@ -1,16 +1,20 @@
-import React, {useState, useCallback, useRef, useMemo} from 'react';
-import {MarkdownEditor} from '@rezics/editor/editor';
-import type {MarkdownEditorProps} from '@rezics/editor/editor';
-import type {ResizeConfig, ToolbarOverride} from '@rezics/editor/editor';
-import {insertImageUrl} from '@rezics/editor/markdown';
-import {EditorPanel} from './panel/EditorPanel';
-import {ImageModal} from './image/ImageModal';
-import {EmojiPickerOverlay} from './plugin/EmojiMart';
-import {useMentionPanel, MentionPanel} from './plugin/EditorMention';
-import Button from '@mui/material/Button';
-import {Paperclip, Smile} from 'lucide-react';
-import type {ImageProvider} from './image/types';
-import './editor.css';
+import Button from "@mui/material/Button";
+import type {
+  MarkdownEditorProps,
+  ResizeConfig,
+  ToolbarOverride,
+} from "@rezics/editor/editor";
+import { MarkdownEditor } from "@rezics/editor/editor";
+import { insertImageUrl } from "@rezics/editor/markdown";
+import { Paperclip, Smile } from "lucide-react";
+import type React from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
+import { ImageModal } from "./image/ImageModal";
+import type { ImageProvider } from "./image/types";
+import { EditorPanel } from "./panel/EditorPanel";
+import { MentionPanel, useMentionPanel } from "./plugin/EditorMention";
+import { EmojiPickerOverlay } from "./plugin/EmojiMart";
+import "./editor.css";
 
 export const DEFAULT_RESIZE_CONFIG: ResizeConfig = {
   height: 300,
@@ -19,7 +23,7 @@ export const DEFAULT_RESIZE_CONFIG: ResizeConfig = {
 };
 
 export interface RezicsMarkdownEditorProps
-  extends Omit<MarkdownEditorProps, 'viewRef'> {
+  extends Omit<MarkdownEditorProps, "viewRef"> {
   onSubmit?: () => void;
   onCancel?: () => void;
   submitLabel?: string;
@@ -31,7 +35,7 @@ export interface RezicsMarkdownEditorProps
 export function RezicsMarkdownEditor({
   onSubmit,
   onCancel,
-  submitLabel = 'Submit',
+  submitLabel = "Submit",
   extraRight,
   imageProviders,
   disableResize,
@@ -66,10 +70,10 @@ export function RezicsMarkdownEditor({
   const handleEmojiPick = useCallback((emoji: string) => {
     const view = viewRef.current;
     if (!view) return;
-    const {from, to} = view.state.selection.main;
+    const { from, to } = view.state.selection.main;
     view.dispatch({
-      changes: {from, to, insert: emoji},
-      selection: {anchor: from + emoji.length},
+      changes: { from, to, insert: emoji },
+      selection: { anchor: from + emoji.length },
     });
     view.focus();
     setEmojiOpen(false);
@@ -99,14 +103,14 @@ export function RezicsMarkdownEditor({
     if (callerToolbar === false) return false;
     return {
       ...callerToolbar,
-      extend: items => {
+      extend: (items) => {
         let result = [
           ...items,
           {
-            name: 'emoji',
-            label: 'Emoji',
+            name: "emoji",
+            label: "Emoji",
             icon: <Smile size={16} />,
-            action: () => setEmojiOpen(prev => !prev),
+            action: () => setEmojiOpen((prev) => !prev),
           },
         ];
         if (callerToolbar?.extend) {
@@ -141,13 +145,13 @@ export function RezicsMarkdownEditor({
             onClick={() => setImageModalOpen(true)}
             title="Insert image"
             sx={{
-              textTransform: 'none',
-              fontSize: '0.9rem',
+              textTransform: "none",
+              fontSize: "0.9rem",
               lineHeight: 1,
               px: 1,
-              '& .MuiButton-startIcon': {
-                '& svg': {
-                  height: '0.9em',
+              "& .MuiButton-startIcon": {
+                "& svg": {
+                  height: "0.9em",
                 },
               },
             }}

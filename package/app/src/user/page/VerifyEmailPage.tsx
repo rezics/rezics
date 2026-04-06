@@ -1,20 +1,20 @@
-import Alert from '@mui/material/Alert';
-import Button from '@mui/material/Button';
-import {CircularProgress, Typography} from '@mui/material';
-import {useNavigate} from '@tanstack/react-router';
-import {type FC, useMemo, useState} from 'react';
-import {authApi} from '@rezics/api/auth/auth.api';
-import {Turnstile} from '@rezics/ui/composite/auth/Turnstile.tsx';
-import {useTranslation} from 'react-i18next';
-import {Layout} from '../layout/Layout';
-import {hydrateAuthSessionState} from '@/user/state';
-import {useAuth} from './useAuth';
-import {resolvePostAuthDestination} from '../model/authRedirect';
-import {establishBusinessSession} from '../model/handler';
-import {env} from '@/env';
+import { CircularProgress, Typography } from "@mui/material";
+import Alert from "@mui/material/Alert";
+import Button from "@mui/material/Button";
+import { authApi } from "@rezics/api/auth/auth.api";
+import { Turnstile } from "@rezics/ui/composite/auth/Turnstile.tsx";
+import { useNavigate } from "@tanstack/react-router";
+import { type FC, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { env } from "@/env";
+import { hydrateAuthSessionState } from "@/user/state";
+import { Layout } from "../layout/Layout";
+import { resolvePostAuthDestination } from "../model/authRedirect";
+import { establishBusinessSession } from "../model/handler";
+import { useAuth } from "./useAuth";
 
 export const VerifyEmailPage: FC = () => {
-  const {t} = useTranslation();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const auth = useAuth();
   const [loading, setLoading] = useState(false);
@@ -25,8 +25,11 @@ export const VerifyEmailPage: FC = () => {
   const [turnstileError, setTurnstileError] = useState<string>();
   const [turnstileRetryKey, setTurnstileRetryKey] = useState(0);
 
-  const email = auth.authSession?.email ?? '';
-  const canResend = useMemo(() => Boolean(auth.authenticated && email), [auth.authenticated, email]);
+  const email = auth.authSession?.email ?? "";
+  const canResend = useMemo(
+    () => Boolean(auth.authenticated && email),
+    [auth.authenticated, email],
+  );
 
   const handleRefresh = async () => {
     setLoading(true);
@@ -50,7 +53,7 @@ export const VerifyEmailPage: FC = () => {
         });
         return;
       }
-      setMessage(t('auth.flow.verify_refreshed'));
+      setMessage(t("auth.flow.verify_refreshed"));
     } catch (caughtError) {
       setError((caughtError as Error).message);
     } finally {
@@ -60,7 +63,7 @@ export const VerifyEmailPage: FC = () => {
 
   const handleResend = async () => {
     if (!email) {
-      setError(t('auth.flow.verify_missing_email'));
+      setError(t("auth.flow.verify_missing_email"));
       return;
     }
 
@@ -70,14 +73,14 @@ export const VerifyEmailPage: FC = () => {
 
     try {
       if (!turnstileToken) {
-        throw new Error(t('auth.flow.verify_complete_widget'));
+        throw new Error(t("auth.flow.verify_complete_widget"));
       }
 
-      await authApi.sendVerificationEmail({email});
-      setMessage(t('auth.flow.verify_sent'));
+      await authApi.sendVerificationEmail({ email });
+      setMessage(t("auth.flow.verify_sent"));
       setTurnstileToken(undefined);
       setTurnstileReady(false);
-      setTurnstileRetryKey(current => current + 1);
+      setTurnstileRetryKey((current) => current + 1);
     } catch (caughtError) {
       setError((caughtError as Error).message);
     } finally {
@@ -88,15 +91,16 @@ export const VerifyEmailPage: FC = () => {
   if (!auth.authenticated) {
     return (
       <Layout
-        title={t('auth.flow.verify_title')}
+        title={t("auth.flow.verify_title")}
         content={
-          <Alert severity="info">
-            {t('auth.flow.verify_sign_in_first')}
-          </Alert>
+          <Alert severity="info">{t("auth.flow.verify_sign_in_first")}</Alert>
         }
         actions={
-          <Button variant="contained" onClick={() => navigate({to: '/login'})}>
-            {t('auth.login')}
+          <Button
+            variant="contained"
+            onClick={() => navigate({ to: "/login" })}
+          >
+            {t("auth.login")}
           </Button>
         }
       />
@@ -106,9 +110,9 @@ export const VerifyEmailPage: FC = () => {
   if (!auth.needsVerification && !auth.needsOnboarding) {
     return (
       <Layout
-        title={t('auth.flow.verify_title')}
+        title={t("auth.flow.verify_title")}
         content={
-          <Alert severity="success">{t('auth.flow.verify_already_done')}</Alert>
+          <Alert severity="success">{t("auth.flow.verify_already_done")}</Alert>
         }
         actions={
           <Button
@@ -123,7 +127,7 @@ export const VerifyEmailPage: FC = () => {
               })
             }
           >
-            {t('common.continue')}
+            {t("common.continue")}
           </Button>
         }
       />
@@ -132,15 +136,15 @@ export const VerifyEmailPage: FC = () => {
 
   return (
     <Layout
-      title={t('auth.flow.verify_title')}
+      title={t("auth.flow.verify_title")}
       content={
         <>
           {error && <Alert severity="error">{error}</Alert>}
           {message && <Alert severity="success">{message}</Alert>}
           <Typography variant="body1">
-            {t('auth.flow.verify_intro_prefix')}{' '}
-            <strong>{email || t('auth.flow.verify_email_fallback')}</strong>{' '}
-            {t('auth.flow.verify_intro_suffix')}
+            {t("auth.flow.verify_intro_prefix")}{" "}
+            <strong>{email || t("auth.flow.verify_email_fallback")}</strong>{" "}
+            {t("auth.flow.verify_intro_suffix")}
           </Typography>
           <Turnstile
             key={turnstileRetryKey}
@@ -162,7 +166,7 @@ export const VerifyEmailPage: FC = () => {
               <div className="flex items-center gap-3">
                 <CircularProgress size={18} />
                 <Typography variant="body2">
-                  {t('auth.flow.verify_widget_loading')}
+                  {t("auth.flow.verify_widget_loading")}
                 </Typography>
               </div>
             }
@@ -176,10 +180,10 @@ export const VerifyEmailPage: FC = () => {
                   size="small"
                   onClick={() => {
                     setTurnstileError(undefined);
-                    setTurnstileRetryKey(current => current + 1);
+                    setTurnstileRetryKey((current) => current + 1);
                   }}
                 >
-                  {t('auth.flow.retry')}
+                  {t("auth.flow.retry")}
                 </Button>
               }
             >
@@ -188,33 +192,35 @@ export const VerifyEmailPage: FC = () => {
           ) : null}
           {!turnstileError && !turnstileReady ? (
             <Alert severity="info">
-              {t('auth.flow.verify_widget_required')}
+              {t("auth.flow.verify_widget_required")}
             </Alert>
           ) : null}
           {auth.loading || loading ? (
             <div className="flex items-center gap-3">
               <CircularProgress size={18} />
               <Typography variant="body2">
-                {t('auth.flow.verify_checking_state')}
+                {t("auth.flow.verify_checking_state")}
               </Typography>
             </div>
           ) : null}
           <Typography variant="body2" color="text.secondary">
-            {t('auth.flow.verify_guest_notice')}
+            {t("auth.flow.verify_guest_notice")}
           </Typography>
         </>
       }
       actions={
         <>
           <Button variant="text" disabled={loading} onClick={handleRefresh}>
-            {t('auth.flow.verify_refresh')}
+            {t("auth.flow.verify_refresh")}
           </Button>
           <Button
             variant="contained"
-            disabled={!canResend || loading || !turnstileReady || !turnstileToken}
+            disabled={
+              !canResend || loading || !turnstileReady || !turnstileToken
+            }
             onClick={handleResend}
           >
-            {t('auth.flow.verify_resend')}
+            {t("auth.flow.verify_resend")}
           </Button>
         </>
       }

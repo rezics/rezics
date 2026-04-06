@@ -1,14 +1,14 @@
-import type {NavigationItem} from './navigation';
+import { ExpandLess, ExpandMore } from "@mui/icons-material";
 import {
-  List,
+  Collapse,
   Divider,
+  List,
   ListItemButton,
   ListItemIcon,
   ListItemText,
-  Collapse,
-} from '@mui/material';
-import {ExpandLess, ExpandMore} from '@mui/icons-material';
-import {MUILink} from '@rezics/ui/primitive/link/MUILink.tsx';
+} from "@mui/material";
+import { MUILink } from "@rezics/ui/primitive/link/MUILink.tsx";
+import type { NavigationItem } from "./navigation";
 
 interface NavigationListProps {
   NAVIGATION: NavigationItem[];
@@ -32,11 +32,11 @@ export const NavigationList = ({
   return (
     <List>
       {NAVIGATION.map((item, index) => {
-        if (item.kind === 'item' && item.onlyMobile && !isMobile) {
+        if (item.kind === "item" && item.onlyMobile && !isMobile) {
           return null;
         }
 
-        if (item.kind === 'divider')
+        if (item.kind === "divider")
           return <Divider key={index} className="my-1 mx-2" />;
 
         const isActive = pathname === `/${item.segment}`;
@@ -47,8 +47,8 @@ export const NavigationList = ({
           <div key={item.segment || index.toString()}>
             <ListItemButton
               className="py-1"
-              component={hasChildren ? 'div' : MUILink}
-              {...(!hasChildren ? {to: `${item.segment}`} : {})}
+              component={hasChildren ? "div" : MUILink}
+              {...(!hasChildren ? { to: `${item.segment}` } : {})}
               selected={isActive && !hasChildren}
               onClick={(event: any) =>
                 handleItemClick(event, item.segment, hasChildren)
@@ -86,7 +86,7 @@ export const NavigationList = ({
                           handleItemClick(event, child.segment, false)
                         }
                         className="py-1"
-                        sx={{pl: 4}}
+                        sx={{ pl: 4 }}
                       >
                         {(() => {
                           const Icon = child.icon;

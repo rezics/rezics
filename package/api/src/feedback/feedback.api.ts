@@ -4,13 +4,13 @@
  */
 
 import type {
-  FeedbackDTO,
   CreateFeedbackInput,
+  FeedbackDTO,
   FeedbackListResponse,
-} from '@rezics/contract';
-import type {FeedbackFilters} from './feedback.types';
-import {buildQueryString} from '../utils/buildQuery';
-import {apiFetch} from '../react-query/http';
+} from "@rezics/contract";
+import { apiFetch } from "../react-query/http";
+import { buildQueryString } from "../utils/buildQuery";
+import type { FeedbackFilters } from "./feedback.types";
 
 /**
  * Feedback API methods
@@ -20,8 +20,8 @@ export const feedbackApi = {
    * Create feedback for current authenticated user
    */
   create: async (input: CreateFeedbackInput): Promise<FeedbackDTO> => {
-    return apiFetch<FeedbackDTO>('/feedbacks', {
-      method: 'POST',
+    return apiFetch<FeedbackDTO>("/feedbacks", {
+      method: "POST",
       body: JSON.stringify(input),
     });
   },
@@ -73,8 +73,8 @@ export const feedbackApi = {
    */
   setResolved: async (id: string, resolved: boolean): Promise<FeedbackDTO> => {
     return apiFetch<FeedbackDTO>(`/feedbacks/${id}/resolve`, {
-      method: 'PATCH',
-      body: JSON.stringify({resolved}),
+      method: "PATCH",
+      body: JSON.stringify({ resolved }),
     });
   },
 };

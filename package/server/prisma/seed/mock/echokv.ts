@@ -1,16 +1,15 @@
 // 添加 main tag group 以及 公告板
-import {prisma} from '#/prisma/client';
-import type {PrismaClient} from '#/prisma/generated/client.js';
-
-import {generateNoticeboardData} from './data/home/noticeboard';
-import {products} from './data/home/homeCarousel';
-import {generateQuickTags} from './data/home/quick-tags';
+import { prisma } from "#/prisma/client";
+import type { PrismaClient } from "#/prisma/generated/client.js";
+import { products } from "./data/home/homeCarousel";
+import { generateNoticeboardData } from "./data/home/noticeboard";
+import { generateQuickTags } from "./data/home/quick-tags";
 
 export const seedEchoKV = async (prisma: PrismaClient) => {
   await prisma.echoKV.upsert({
-    where: {key: 'home_notice'},
+    where: { key: "home_notice" },
     create: {
-      key: 'home_notice',
+      key: "home_notice",
       value: JSON.stringify(generateNoticeboardData(100)),
     },
     update: {
@@ -18,9 +17,9 @@ export const seedEchoKV = async (prisma: PrismaClient) => {
     },
   });
   await prisma.echoKV.upsert({
-    where: {key: 'book_search_tag_group_quick'},
+    where: { key: "book_search_tag_group_quick" },
     create: {
-      key: 'book_search_tag_group_quick',
+      key: "book_search_tag_group_quick",
       value: JSON.stringify({
         presetTags: generateQuickTags(20),
       }),
@@ -32,9 +31,9 @@ export const seedEchoKV = async (prisma: PrismaClient) => {
     },
   });
   await prisma.echoKV.upsert({
-    where: {key: 'home_carousel'},
+    where: { key: "home_carousel" },
     create: {
-      key: 'home_carousel',
+      key: "home_carousel",
       value: JSON.stringify(products),
     },
     update: {

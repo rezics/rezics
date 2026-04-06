@@ -1,9 +1,9 @@
-export {getTheme, getDynamicTheme} from './theme';
 export {
-  generateDynamicColors,
   applyDynamicThemeToDOM,
+  type DynamicColorScheme,
   dynamicColorsToPalette,
   extractColorFromImage,
+  generateDynamicColors,
   PRESET_COLORS,
-  type DynamicColorScheme,
-} from './dynamicTheme';
+} from "./dynamicTheme";
+export { getDynamicTheme, getTheme } from "./theme";

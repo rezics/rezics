@@ -1,9 +1,7 @@
-import {useDialogStore} from '../state/dialogStore';
-import {Drawer} from '@mui/material';
-import React from 'react';
-
-import {RezicsMarkdownEditor} from '@rezics/ui/editor';
-
+import { Drawer } from "@mui/material";
+import { RezicsMarkdownEditor } from "@rezics/ui/editor";
+import type React from "react";
+import { useDialogStore } from "../state/dialogStore";
 
 function extractMentions(text: string): string[] {
   const result: string[] = [];
@@ -28,9 +26,9 @@ export const ReplyDrawerContainer: React.FC<ReplyDrawerContainerProps> = ({
   dialogId,
   onSubmit,
 }) => {
-  const entry = useDialogStore(state => state.dialogs[dialogId]);
-  const setDialogVisible = useDialogStore(state => state.setDialogVisible);
-  const setDialogContent = useDialogStore(state => state.setDialogContent);
+  const entry = useDialogStore((state) => state.dialogs[dialogId]);
+  const setDialogVisible = useDialogStore((state) => state.setDialogVisible);
+  const setDialogContent = useDialogStore((state) => state.setDialogContent);
 
   const handleClose = () => {
     setDialogVisible(dialogId, false);
@@ -39,7 +37,7 @@ export const ReplyDrawerContainer: React.FC<ReplyDrawerContainerProps> = ({
   const handleSubmit = () => {
     if (onSubmit && entry?.contentMain !== undefined) {
       const mentions = extractMentions(entry.contentMain);
-      let content: string | {text: string; mentions: string[]};
+      let content: string | { text: string; mentions: string[] };
       if (mentions.length > 0) {
         content = {
           text: entry.contentMain,
@@ -63,12 +61,12 @@ export const ReplyDrawerContainer: React.FC<ReplyDrawerContainerProps> = ({
       open={entry?.visible ?? false}
       onClose={handleClose}
       anchor="bottom"
-      sx={{zIndex: 2000}}
+      sx={{ zIndex: 2000 }}
     >
       <div className="w-11/12 mx-auto my-4 flex flex-col min-h-[250px]">
         <div className="flex-1 flex flex-col">
           <RezicsMarkdownEditor
-            value={entry?.contentMain ?? ''}
+            value={entry?.contentMain ?? ""}
             onChange={handleChange}
             onSubmit={handleSubmit}
             submitLabel="提交"

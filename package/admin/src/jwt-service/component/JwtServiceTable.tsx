@@ -1,25 +1,25 @@
-import type {FC} from 'react';
+import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import {
+  Chip,
+  IconButton,
+  Paper,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Paper,
-  Chip,
-  IconButton,
   Tooltip,
-} from '@mui/material';
-import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
-import type {JwtServiceDTO} from '@rezics/contract';
+} from "@mui/material";
+import type { JwtServiceDTO } from "@rezics/contract";
+import type { FC } from "react";
 
 type Props = {
   services: JwtServiceDTO[];
   onEdit: (service: JwtServiceDTO) => void;
 };
 
-export const JwtServiceTable: FC<Props> = ({services, onEdit}) => {
+export const JwtServiceTable: FC<Props> = ({ services, onEdit }) => {
   return (
     <TableContainer component={Paper} variant="outlined">
       <Table size="small">
@@ -34,12 +34,18 @@ export const JwtServiceTable: FC<Props> = ({services, onEdit}) => {
           </TableRow>
         </TableHead>
         <TableBody>
-          {services.map(service => (
+          {services.map((service) => (
             <TableRow key={service.serviceKey} hover>
               <TableCell>
                 <strong>{service.serviceKey}</strong>
               </TableCell>
-              <TableCell sx={{maxWidth: 250, overflow: 'hidden', textOverflow: 'ellipsis'}}>
+              <TableCell
+                sx={{
+                  maxWidth: 250,
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                }}
+              >
                 {service.issuer}
               </TableCell>
               <TableCell>{service.audience}</TableCell>

@@ -2,18 +2,18 @@
  * React Query mutations for Comment operations
  */
 
-import {
-  useMutation,
-  useQueryClient,
-  type UseMutationOptions,
-} from '@tanstack/react-query';
-import {commentApi} from './comment.api';
-import {commentKeys} from './comment.keys';
 import type {
   CommentDTO,
   CreateCommentInput,
   UpdateCommentInput,
-} from '@rezics/contract';
+} from "@rezics/contract";
+import {
+  type UseMutationOptions,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
+import { commentApi } from "./comment.api";
+import { commentKeys } from "./comment.keys";
 
 /**
  * Mutation for creating a comment
@@ -21,7 +21,7 @@ import type {
 export function useCreateCommentMutation(
   options?: Omit<
     UseMutationOptions<CommentDTO, Error, CreateCommentInput>,
-    'mutationFn'
+    "mutationFn"
   >,
 ) {
   const queryClient = useQueryClient();
@@ -31,8 +31,8 @@ export function useCreateCommentMutation(
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
       // Invalidate lists under the root post/tree
-      queryClient.invalidateQueries({queryKey: commentKeys.lists()});
-      queryClient.invalidateQueries({queryKey: commentKeys.commentTrees()});
+      queryClient.invalidateQueries({ queryKey: commentKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: commentKeys.commentTrees() });
 
       // Optionally seed detail cache (assumes data.id is unitId)
       if (data.id) {
@@ -52,19 +52,19 @@ export function useUpdateCommentMutation(
     UseMutationOptions<
       CommentDTO,
       Error,
-      {unitId: string; input: UpdateCommentInput}
+      { unitId: string; input: UpdateCommentInput }
     >,
-    'mutationFn'
+    "mutationFn"
   >,
 ) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({unitId, input}) => commentApi.update(unitId, input),
+    mutationFn: ({ unitId, input }) => commentApi.update(unitId, input),
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
-      queryClient.invalidateQueries({queryKey: commentKeys.lists()});
-      queryClient.invalidateQueries({queryKey: commentKeys.commentTrees()});
+      queryClient.invalidateQueries({ queryKey: commentKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: commentKeys.commentTrees() });
 
       queryClient.setQueryData(commentKeys.detail(variables.unitId), data);
       options?.onSuccess?.(data, variables, onMutateResult, context);
@@ -77,8 +77,8 @@ export function useUpdateCommentMutation(
  */
 export function useDeleteCommentMutation(
   options?: Omit<
-    UseMutationOptions<{message: string}, Error, string>,
-    'mutationFn'
+    UseMutationOptions<{ message: string }, Error, string>,
+    "mutationFn"
   >,
 ) {
   const queryClient = useQueryClient();
@@ -88,10 +88,10 @@ export function useDeleteCommentMutation(
     ...options,
     onSuccess: (data, unitId, onMutateResult, context) => {
       // Remove detail cache
-      queryClient.removeQueries({queryKey: commentKeys.detail(unitId)});
+      queryClient.removeQueries({ queryKey: commentKeys.detail(unitId) });
       // Invalidate lists for freshness
-      queryClient.invalidateQueries({queryKey: commentKeys.lists()});
-      queryClient.invalidateQueries({queryKey: commentKeys.commentTrees()});
+      queryClient.invalidateQueries({ queryKey: commentKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: commentKeys.commentTrees() });
       options?.onSuccess?.(data, unitId, onMutateResult, context);
     },
   });

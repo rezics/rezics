@@ -1,32 +1,29 @@
-import {Elysia} from 'elysia';
 import {
-  unitListQuerySchema,
-  unitParamsSchema,
-  unitResponseSchema,
-  unitListResponseSchema,
+  BasicAdminPermission,
+  type CreateUnitInput,
   createUnitSchema,
-  updateUnitSchema,
+  hasPermissionToDeleteUnit,
+  hasPermissionToUpdateUnit,
   type UnitListQuery,
   type UnitListResponse,
   type UnitResponse,
-  type CreateUnitInput,
   type UpdateUnitInput,
-  hasPermissionToUpdateUnit,
-  hasPermissionToDeleteUnit,
-  BasicAdminPermission,
-} from '@rezics/contract';
-import {unitService} from './unit.service';
-import {mapUnitToDTO} from './mapper';
-import {
-  authMacro,
-  buildActorFromContext,
-} from '@/middleware';
+  unitListQuerySchema,
+  unitListResponseSchema,
+  unitParamsSchema,
+  unitResponseSchema,
+  updateUnitSchema,
+} from "@rezics/contract";
+import { Elysia } from "elysia";
+import { authMacro, buildActorFromContext } from "@/middleware";
+import { mapUnitToDTO } from "./mapper";
+import { unitService } from "./unit.service";
 
-export const unitApi = new Elysia({prefix: '/units'})
+export const unitApi = new Elysia({ prefix: "/units" })
   .use(authMacro)
   .get(
-    '/:unitId',
-    async ({params}): Promise<UnitResponse> => {
+    "/:unitId",
+    async ({ params }): Promise<UnitResponse> => {
       const unit = await unitService.getByUnitId(params.unitId);
       return mapUnitToDTO(unit);
     },
@@ -34,15 +31,15 @@ export const unitApi = new Elysia({prefix: '/units'})
       params: unitParamsSchema,
       response: unitResponseSchema,
       detail: {
-        summary: 'Get unit',
-        description: 'Get a single Unit (with relations) by its id',
-        tags: ['Units'],
+        summary: "Get unit",
+        description: "Get a single Unit (with relations) by its id",
+        tags: ["Units"],
       },
     },
   )
   .post(
-    '/',
-    async ({body, identity}): Promise<UnitResponse> => {
+    "/",
+    async ({ body, identity }): Promise<UnitResponse> => {
       const createReq: CreateUnitInput = {
         ...body,
         userId: identity.unitId,
@@ -55,38 +52,38 @@ export const unitApi = new Elysia({prefix: '/units'})
       body: createUnitSchema,
       response: unitResponseSchema,
       detail: {
-        summary: 'Create unit',
-        description: 'Create a new Unit. Type must be one of UnitType.',
-        tags: ['Units'],
+        summary: "Create unit",
+        description: "Create a new Unit. Type must be one of UnitType.",
+        tags: ["Units"],
       },
     },
   )
   .get(
-    '/',
-    async ({query, currentUser, set}): Promise<UnitListResponse> => {
+    "/",
+    async ({ query, currentUser, set }): Promise<UnitListResponse> => {
       if (!BasicAdminPermission(currentUser)) {
         set.status = 403;
         throw new Error(
-          'Forbidden: you do not have permission to get all books',
+          "Forbidden: you do not have permission to get all books",
         );
       }
-      const {units, total} = await unitService.list(query as UnitListQuery);
-      return {units: units.map(mapUnitToDTO), total};
+      const { units, total } = await unitService.list(query as UnitListQuery);
+      return { units: units.map(mapUnitToDTO), total };
     },
     {
       requireOwner: true,
       query: unitListQuerySchema,
       response: unitListResponseSchema,
       detail: {
-        summary: 'List units',
+        summary: "List units",
         description:
-          'List Units with search, filtering by type/status/tags/user/domains, and pagination with cursor or offset.',
-        tags: ['Units'],
+          "List Units with search, filtering by type/status/tags/user/domains, and pagination with cursor or offset.",
+        tags: ["Units"],
       },
     },
   )
   .put(
-    '/:unitId',
+    "/:unitId",
     async ({
       params,
       body,
@@ -97,12 +94,12 @@ export const unitApi = new Elysia({prefix: '/units'})
       const target = await unitService.getByUnitId(params.unitId);
       if (
         !hasPermissionToUpdateUnit(
-          buildActorFromContext({identity, currentUser}),
+          buildActorFromContext({ identity, currentUser }),
           target as any,
         )
       ) {
         set.status = 403;
-        throw new Error('Forbidden: you do not own this unit');
+        throw new Error("Forbidden: you do not own this unit");
       }
       const unit = await unitService.update(
         params.unitId,
@@ -116,40 +113,40 @@ export const unitApi = new Elysia({prefix: '/units'})
       body: updateUnitSchema,
       response: unitResponseSchema,
       detail: {
-        summary: 'Update unit',
-        description: 'Update mutable fields of a Unit by id',
-        tags: ['Units'],
+        summary: "Update unit",
+        description: "Update mutable fields of a Unit by id",
+        tags: ["Units"],
       },
     },
   )
   .delete(
-    '/:unitId',
+    "/:unitId",
     async ({
       params,
       identity,
       currentUser,
       set,
-    }): Promise<{message: string}> => {
+    }): Promise<{ message: string }> => {
       const target = await unitService.getByUnitId(params.unitId);
       if (
         !hasPermissionToDeleteUnit(
-          buildActorFromContext({identity, currentUser}),
+          buildActorFromContext({ identity, currentUser }),
           target as any,
         )
       ) {
         set.status = 403;
-        throw new Error('Forbidden: you do not own this unit');
+        throw new Error("Forbidden: you do not own this unit");
       }
       await unitService.delete(params.unitId);
-      return {message: 'Unit deleted successfully'};
+      return { message: "Unit deleted successfully" };
     },
     {
       requireOwner: true,
       params: unitParamsSchema,
       detail: {
-        summary: 'Delete unit',
-        description: 'Delete a Unit by id (cascades to related indexes)',
-        tags: ['Units'],
+        summary: "Delete unit",
+        description: "Delete a Unit by id (cascades to related indexes)",
+        tags: ["Units"],
       },
     },
   );

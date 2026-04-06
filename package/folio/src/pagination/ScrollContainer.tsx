@@ -1,5 +1,5 @@
-import { useCallback, useRef, type ReactNode } from 'react';
-import { useFolio } from '../context';
+import { type ReactNode, useCallback, useRef } from "react";
+import { useFolio } from "../context";
 
 interface ScrollContainerProps {
   children: ReactNode;
@@ -12,7 +12,7 @@ export function ScrollContainer({ children }: ScrollContainerProps) {
   const handleScroll = useCallback(() => {
     const el = scrollRef.current;
     if (!el) return;
-    dispatch({ type: 'SET_SCROLL_OFFSET', offset: el.scrollTop });
+    dispatch({ type: "SET_SCROLL_OFFSET", offset: el.scrollTop });
   }, [dispatch]);
 
   return (
@@ -21,9 +21,9 @@ export function ScrollContainer({ children }: ScrollContainerProps) {
       className="folio-scroll-container"
       onScroll={handleScroll}
       style={{
-        overflow: 'auto',
-        height: '100%',
-        WebkitOverflowScrolling: 'touch',
+        overflow: "auto",
+        height: "100%",
+        WebkitOverflowScrolling: "touch",
       }}
     >
       {children}

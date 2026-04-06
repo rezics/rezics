@@ -1,51 +1,47 @@
-import React from 'react';
-import {useParams} from '@tanstack/react-router';
-import {useAtomValue} from 'jotai';
-import {useQuery} from '@tanstack/react-query';
-
-import {bookQueries} from '@rezics/api/book/book';
-
-import {bookDetailAtomFamily} from '../state/bookDetailAtoms';
-import {BookDetailShell} from '../section/BookDetailSection';
-
-import {TagWrapper} from '@/tag/component/TagWrapper.tsx';
-import {AccentBarWithText} from '@rezics/ui/composite/typography/AccentBarWithText.tsx';
-import {ArrowForwardIcon} from '@rezics/ui/composite/navigation/ArrowForwardIcon.tsx';
-import {Box, Divider, Stack} from '@mui/material';
-import {useTranslation} from 'react-i18next';
-
-import {BookDescription} from '../component/BookDescription';
-import {AuthorInfo} from '../component/AuthorInfo';
-import {QuoteExcerptPreview} from '../component/QuoteExcerptPreview';
-import {RemarkPreview} from '../component/RemarkPreview';
+import { Box, Divider, Stack } from "@mui/material";
+import { bookQueries } from "@rezics/api/book/book";
+import { ArrowForwardIcon } from "@rezics/ui/composite/navigation/ArrowForwardIcon.tsx";
+import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
+import { useQuery } from "@tanstack/react-query";
+import { useParams } from "@tanstack/react-router";
+import { useAtomValue } from "jotai";
+import type React from "react";
+import { useTranslation } from "react-i18next";
+import { TagWrapper } from "@/tag/component/TagWrapper.tsx";
+import { AuthorInfo } from "../component/AuthorInfo";
+import { BookDescription } from "../component/BookDescription";
+import { QuoteExcerptPreview } from "../component/QuoteExcerptPreview";
+import { RemarkPreview } from "../component/RemarkPreview";
+import { BookDetailShell } from "../section/BookDetailSection";
+import { bookDetailAtomFamily } from "../state/bookDetailAtoms";
 
 export const BookBasicInfoPage: React.FC = () => {
-  const {bookId} = useParams({strict: false}) as {bookId: string};
-  const {data} = useQuery({
+  const { bookId } = useParams({ strict: false }) as { bookId: string };
+  const { data } = useQuery({
     ...bookQueries.detail(bookId),
     enabled: Boolean(bookId),
   });
   const bookInfo = useAtomValue(bookDetailAtomFamily(bookId)) ?? data;
 
-  const {t} = useTranslation();
+  const { t } = useTranslation();
 
   if (!bookInfo) return null;
   return (
     <BookDetailShell bookInfo={bookInfo}>
       <Stack spacing={4}>
         <BookDescription
-          description={bookInfo?.description || ''}
-          bookId={bookInfo?.unitId || ''}
+          description={bookInfo?.description || ""}
+          bookId={bookInfo?.unitId || ""}
         />
         <Divider />
 
         <div>
           <ArrowForwardIcon size={16} to={`/tag/book/${bookInfo?.unitId}/tag`}>
-            <AccentBarWithText text={t('book.tags')} />
+            <AccentBarWithText text={t("book.tags")} />
           </ArrowForwardIcon>
         </div>
         <TagWrapper
-          filters={{objectId: bookInfo?.unitId || ''}}
+          filters={{ objectId: bookInfo?.unitId || "" }}
           mode="grouped"
         />
         <Divider />
@@ -53,10 +49,10 @@ export const BookBasicInfoPage: React.FC = () => {
         <AuthorInfo
           author={
             bookInfo?.author?.[0] || {
-              unitId: '',
-              name: '',
-              bio: '',
-              description: '',
+              unitId: "",
+              name: "",
+              bio: "",
+              description: "",
             }
           }
         />
@@ -64,10 +60,10 @@ export const BookBasicInfoPage: React.FC = () => {
 
         <div>
           <ArrowForwardIcon size={16} to={`/quote/book/${bookInfo?.unitId}`}>
-            <AccentBarWithText text={t('book.quote_excerpts')} />
+            <AccentBarWithText text={t("book.quote_excerpts")} />
           </ArrowForwardIcon>
         </div>
-        <QuoteExcerptPreview id={bookInfo?.unitId || ''} />
+        <QuoteExcerptPreview id={bookInfo?.unitId || ""} />
         <Divider />
 
         <Box>
@@ -76,10 +72,10 @@ export const BookBasicInfoPage: React.FC = () => {
               size={16}
               to={`/review/book/${bookInfo?.unitId}?tab=remark`}
             >
-              <AccentBarWithText text={t('book.remark')} />
+              <AccentBarWithText text={t("book.remark")} />
             </ArrowForwardIcon>
           </div>
-          <RemarkPreview bookId={bookInfo?.unitId || ''} />
+          <RemarkPreview bookId={bookInfo?.unitId || ""} />
         </Box>
       </Stack>
     </BookDetailShell>

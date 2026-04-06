@@ -1,11 +1,11 @@
-import React from 'react';
-import {IconButton, Paper, Tooltip} from '@mui/material';
-import {ExpandMore, ExpandLess, ChatBubbleOutline} from '@mui/icons-material';
-import {BookListViewItem} from '@/book-library/component/BookList/BookListView';
-import {useNavigate} from '@tanstack/react-router';
-import {MarkdownContent} from '@rezics/ui/composite/content/MarkdownContent.tsx';
-import {ReviewHeader} from '@/review/component/SingleReview';
-import {useTranslation} from 'react-i18next';
+import { ChatBubbleOutline, ExpandLess, ExpandMore } from "@mui/icons-material";
+import { IconButton, Paper, Tooltip } from "@mui/material";
+import { MarkdownContent } from "@rezics/ui/composite/content/MarkdownContent.tsx";
+import { useNavigate } from "@tanstack/react-router";
+import React from "react";
+import { useTranslation } from "react-i18next";
+import { BookListViewItem } from "@/book-library/component/BookList/BookListView";
+import { ReviewHeader } from "@/review/component/SingleReview";
 
 export type ReviewData = {
   unitId: string;
@@ -33,12 +33,12 @@ export const CollapsibleReview: React.FC<CollapsibleReviewProps> = ({
   review,
   defaultExpanded = false,
   maxCollapsedLines = 4,
-  className = '',
-  contentClassName = 'text-[13px] sm:text-sm text-gray-700 leading-6',
+  className = "",
+  contentClassName = "text-[13px] sm:text-sm text-gray-700 leading-6",
   header,
   footer,
 }) => {
-  const {t} = useTranslation();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [expanded, setExpanded] = React.useState<boolean>(defaultExpanded);
   const contentId = React.useId();
@@ -58,18 +58,18 @@ export const CollapsibleReview: React.FC<CollapsibleReviewProps> = ({
       // Temporarily apply clamp to measure
       const prev = el.style.webkitLineClamp as unknown as string;
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
+      // @ts-expect-error
       el.style.webkitLineClamp = String(maxCollapsedLines);
       const overflowing = el.scrollHeight > el.clientHeight + 2; // allow tiny diff
       setIsOverflowing(overflowing);
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      el.style.webkitLineClamp = prev ?? '';
+      // @ts-expect-error
+      el.style.webkitLineClamp = prev ?? "";
     };
     measure();
     const onResize = () => measure();
-    window.addEventListener('resize', onResize);
-    return () => window.removeEventListener('resize', onResize);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
   }, [expanded, maxCollapsedLines]);
 
   if (!review?.title && !review?.content) return null;
@@ -79,16 +79,16 @@ export const CollapsibleReview: React.FC<CollapsibleReviewProps> = ({
       variant="outlined"
       className={`p-3 sm:p-4 rounded-lg backdrop-blur ${className}`}
       role="region"
-      aria-label={t('readlist.a11y.book_review')}
+      aria-label={t("readlist.a11y.book_review")}
     >
       {header}
       <div className="flex items-start gap-3">
         {/* md 以上才显示 */}
         <div className="hidden md:block">
-          <Tooltip title={t('review.open_review_page')}>
+          <Tooltip title={t("review.open_review_page")}>
             <IconButton
-              aria-label={t('review.a11y.open_review_page')}
-              onClick={() => navigate({to: `/review/${review?.unitId}`})}
+              aria-label={t("review.a11y.open_review_page")}
+              onClick={() => navigate({ to: `/review/${review?.unitId}` })}
             >
               <ChatBubbleOutline fontSize="small" />
             </IconButton>
@@ -111,10 +111,10 @@ export const CollapsibleReview: React.FC<CollapsibleReviewProps> = ({
                 className={`overflow-hidden ${contentClassName}`}
                 style={
                   expanded
-                    ? {display: 'block'}
+                    ? { display: "block" }
                     : {
-                        display: '-webkit-box',
-                        WebkitBoxOrient: 'vertical',
+                        display: "-webkit-box",
+                        WebkitBoxOrient: "vertical",
                         WebkitLineClamp: String(
                           maxCollapsedLines,
                         ) as unknown as number,
@@ -132,14 +132,14 @@ export const CollapsibleReview: React.FC<CollapsibleReviewProps> = ({
               {(isOverflowing || expanded) && (
                 <div className="flex items-center justify-end mt-1.5">
                   <Tooltip
-                    title={expanded ? t('common.collapse') : t('common.expand')}
+                    title={expanded ? t("common.collapse") : t("common.expand")}
                     placement="top"
                   >
                     <IconButton
                       size="small"
                       aria-expanded={expanded}
                       aria-controls={contentId}
-                      onClick={() => setExpanded(v => !v)}
+                      onClick={() => setExpanded((v) => !v)}
                     >
                       {expanded ? (
                         <ExpandLess fontSize="small" />
@@ -165,8 +165,8 @@ function CollapsibleReviewContainer({
   review,
   defaultExpanded = false,
   maxCollapsedLines = 4,
-  className = '',
-  contentClassName = 'text-[13px] sm:text-sm text-gray-700 leading-6',
+  className = "",
+  contentClassName = "text-[13px] sm:text-sm text-gray-700 leading-6",
 }: CollapsibleReviewProps) {
   return (
     <div className={`w-full ${className}`}>
@@ -185,7 +185,7 @@ export const BookReviewGroup: React.FC<{
   book: any;
   review: ReviewData | null | undefined;
   className?: string;
-}> = ({book, review, className = ''}) => {
+}> = ({ book, review, className = "" }) => {
   return (
     <div className={`w-full ${className}`}>
       <BookListViewItem book={book} />

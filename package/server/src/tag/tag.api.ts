@@ -1,61 +1,58 @@
-import {t, Elysia} from 'elysia';
+import type {
+  CreateTagInput,
+  TagDetailDTO,
+  TagDTO,
+  TagListQuery,
+  UpdateTagInput,
+} from "@rezics/contract";
 import {
+  attachTagSchema,
   createTagSchema,
+  hasPermissionToDeleteTag,
+  hasPermissionToDeleteUnit,
+  hasPermissionToUpdateTag,
+  hasPermissionToUpdateUnit,
   tagListQuerySchema,
   tagParamsSchema,
   updateTagSchema,
-  attachTagSchema,
-  hasPermissionToUpdateTag,
-  hasPermissionToDeleteTag,
-  hasPermissionToUpdateUnit,
-  hasPermissionToDeleteUnit,
-} from '@rezics/contract';
-import type {
-  CreateTagInput,
-  UpdateTagInput,
-  TagDTO,
-  TagDetailDTO,
-  TagListQuery,
-} from '@rezics/contract';
-import {
-  authMacro,
-  buildActorFromContext,
-} from '@/middleware';
-import {tagService} from './tag.service';
-import {mapTagDetailToDTO, mapTagToDTO} from './mapper';
-import {unitService} from '../unit/unit.service';
+} from "@rezics/contract";
+import { Elysia, t } from "elysia";
+import { authMacro, buildActorFromContext } from "@/middleware";
+import { unitService } from "../unit/unit.service";
+import { mapTagDetailToDTO, mapTagToDTO } from "./mapper";
+import { tagService } from "./tag.service";
 
-export const tagApi = new Elysia({prefix: '/tags'})
+export const tagApi = new Elysia({ prefix: "/tags" })
   .use(authMacro)
   .get(
-    '/',
-    async ({query}): Promise<{tags: TagDTO[]; total: number}> => {
-      const {tags, total} = await tagService.list(query as TagListQuery);
-      return {tags: tags.map(mapTagToDTO), total};
+    "/",
+    async ({ query }): Promise<{ tags: TagDTO[]; total: number }> => {
+      const { tags, total } = await tagService.list(query as TagListQuery);
+      return { tags: tags.map(mapTagToDTO), total };
     },
     {
       query: tagListQuerySchema,
       detail: {
-        summary: 'List tags',
-        description: 'List tags with filtering and pagination, domain-aware',
-        tags: ['Tags'],
+        summary: "List tags",
+        description: "List tags with filtering and pagination, domain-aware",
+        tags: ["Tags"],
       },
     },
   )
   .get(
-    '/:unitId',
-    async ({params}): Promise<TagDetailDTO> => {
+    "/:unitId",
+    async ({ params }): Promise<TagDetailDTO> => {
       const tag = await tagService.getByUnitId(params.unitId);
       return mapTagDetailToDTO(tag);
     },
     {
       params: tagParamsSchema,
-      detail: {summary: 'Get tag', tags: ['Tags']},
+      detail: { summary: "Get tag", tags: ["Tags"] },
     },
   )
   .get(
-    '/by-name',
-    async ({query}): Promise<TagDetailDTO | null> => {
+    "/by-name",
+    async ({ query }): Promise<TagDetailDTO | null> => {
       const schema = t.Object({
         name: t.String(),
         type: t.Optional(t.Union([t.String(), t.Null()])),
@@ -75,12 +72,12 @@ export const tagApi = new Elysia({prefix: '/tags'})
         type: t.Optional(t.Union([t.String(), t.Null()])),
         domainId: t.String(),
       }),
-      detail: {summary: 'Get tag by name in domain', tags: ['Tags']},
+      detail: { summary: "Get tag by name in domain", tags: ["Tags"] },
     },
   )
   .post(
-    '/',
-    async ({body, identity}): Promise<TagDetailDTO> => {
+    "/",
+    async ({ body, identity }): Promise<TagDetailDTO> => {
       const created = await tagService.create(
         identity.unitId,
         body as CreateTagInput,
@@ -90,11 +87,11 @@ export const tagApi = new Elysia({prefix: '/tags'})
     {
       requireLogin: true,
       body: createTagSchema,
-      detail: {summary: 'Create tag', tags: ['Tags']},
+      detail: { summary: "Create tag", tags: ["Tags"] },
     },
   )
   .put(
-    '/:unitId',
+    "/:unitId",
     async ({
       params,
       body,
@@ -106,12 +103,12 @@ export const tagApi = new Elysia({prefix: '/tags'})
 
       if (
         !hasPermissionToUpdateTag(
-          buildActorFromContext({identity, currentUser}),
+          buildActorFromContext({ identity, currentUser }),
           existing.unit as any,
         )
       ) {
         set.status = 403;
-        throw new Error('Forbidden: you do not own this tag');
+        throw new Error("Forbidden: you do not own this tag");
       }
       const updated = await tagService.update(
         params.unitId,
@@ -123,97 +120,97 @@ export const tagApi = new Elysia({prefix: '/tags'})
       requireOwner: true,
       params: tagParamsSchema,
       body: updateTagSchema,
-      detail: {summary: 'Update tag', tags: ['Tags']},
+      detail: { summary: "Update tag", tags: ["Tags"] },
     },
   )
   .delete(
-    '/:unitId',
+    "/:unitId",
     async ({
       params,
       identity,
       currentUser,
       set,
-    }): Promise<{message: string}> => {
+    }): Promise<{ message: string }> => {
       const existing = await tagService.getByUnitId(params.unitId);
       if (
         !hasPermissionToDeleteTag(
-          buildActorFromContext({identity, currentUser}),
+          buildActorFromContext({ identity, currentUser }),
           existing.unit as any,
         )
       ) {
         set.status = 403;
-        throw new Error('Forbidden: you do not own this tag');
+        throw new Error("Forbidden: you do not own this tag");
       }
       await tagService.delete(params.unitId);
-      return {message: 'Tag deleted successfully'};
+      return { message: "Tag deleted successfully" };
     },
     {
       requireOwner: true,
       params: tagParamsSchema,
-      detail: {summary: 'Delete tag', tags: ['Tags']},
+      detail: { summary: "Delete tag", tags: ["Tags"] },
     },
   )
   .post(
-    '/:unitId/attach',
+    "/:unitId/attach",
     async ({
       params,
       body,
       identity,
       currentUser,
       set,
-    }): Promise<{message: string}> => {
+    }): Promise<{ message: string }> => {
       const existing = await tagService.getByUnitId(params.unitId);
       const target = await unitService.getByUnitId(body.targetUnitId);
       if (
         !existing ||
         !target ||
         !hasPermissionToUpdateUnit(
-          buildActorFromContext({identity, currentUser}),
+          buildActorFromContext({ identity, currentUser }),
           target as any,
         )
       ) {
         set.status = 403;
-        throw new Error('Forbidden: you do not own this tag');
+        throw new Error("Forbidden: you do not own this tag");
       }
       await tagService.attachToUnit(params.unitId, body.targetUnitId);
-      return {message: 'Tag attached successfully'};
+      return { message: "Tag attached successfully" };
     },
     {
       requireOwner: true,
       params: tagParamsSchema,
       body: attachTagSchema,
-      detail: {summary: 'Attach tag to unit', tags: ['Tags']},
+      detail: { summary: "Attach tag to unit", tags: ["Tags"] },
     },
   )
   .post(
-    '/:unitId/detach',
+    "/:unitId/detach",
     async ({
       params,
       body,
       identity,
       currentUser,
       set,
-    }): Promise<{message: string}> => {
+    }): Promise<{ message: string }> => {
       const existing = await tagService.getByUnitId(params.unitId);
       if (
         !hasPermissionToDeleteUnit(
-          buildActorFromContext({identity, currentUser}),
+          buildActorFromContext({ identity, currentUser }),
           existing.unit as any,
         )
       ) {
         set.status = 403;
-        throw new Error('Forbidden: you do not own this tag');
+        throw new Error("Forbidden: you do not own this tag");
       }
       await tagService.detachFromUnit(
         params.unitId,
         (body as any).targetUnitId,
       );
-      return {message: 'Tag detached successfully'};
+      return { message: "Tag detached successfully" };
     },
     {
       requireOwner: true,
       params: tagParamsSchema,
       body: attachTagSchema,
-      detail: {summary: 'Detach tag from unit', tags: ['Tags']},
+      detail: { summary: "Detach tag from unit", tags: ["Tags"] },
     },
   );

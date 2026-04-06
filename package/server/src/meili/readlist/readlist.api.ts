@@ -1,8 +1,8 @@
-import type {ReadlistListQuery} from '@rezics/contract';
-import {searchClient} from '../search-client';
-import type {ReadlistSearchDocument, ReadlistSearchResult} from './index';
-import type {SearchResponse} from '@rezics/search';
-import {defaultSort} from '../util';
+import type { ReadlistListQuery } from "@rezics/contract";
+import type { SearchResponse } from "@rezics/search";
+import { searchClient } from "../search-client";
+import { defaultSort } from "../util";
+import type { ReadlistSearchDocument, ReadlistSearchResult } from "./index";
 /**
  * Low-level search API that accepts a fully-constructed Meilisearch query string.
  *
@@ -22,7 +22,7 @@ export async function searchReadlistsRaw(
   const limit = options?.limit ?? 20;
 
   // eslint-disable-next-line no-console
-  console.log('searchReadlistsRaw', q, options);
+  console.log("searchReadlistsRaw", q, options);
   return searchClient.readlistIndex.search<ReadlistSearchDocument>(q, {
     offset,
     limit,
@@ -32,14 +32,14 @@ export async function searchReadlistsRaw(
 }
 
 function parseCsv(value?: string | null): string[] {
-  return (value ?? '')
-    .split(',')
-    .map(s => s.trim())
+  return (value ?? "")
+    .split(",")
+    .map((s) => s.trim())
     .filter(Boolean);
 }
 
 function escapeValues(values: string[]): string {
-  return values.map(v => `"${v.replace(/"/g, '\\"')}"`).join(', ');
+  return values.map((v) => `"${v.replace(/"/g, '\\"')}"`).join(", ");
 }
 
 /**
@@ -54,7 +54,7 @@ function escapeValues(values: string[]): string {
 export async function searchReadlists(
   opts: ReadlistListQuery,
 ): Promise<ReadlistSearchResult> {
-  const q = opts.q ?? '';
+  const q = opts.q ?? "";
 
   const filter: string[] = [];
 
@@ -83,11 +83,11 @@ export async function searchReadlists(
 
   // Sort
   const sort: string[] = [];
-  const sortType = opts.sort?.type ?? 'createdAt';
-  const sortOrder = opts.sort?.order?.toLowerCase() === 'asc' ? 'asc' : 'desc';
+  const sortType = opts.sort?.type ?? "createdAt";
+  const sortOrder = opts.sort?.order?.toLowerCase() === "asc" ? "asc" : "desc";
 
   // Meilisearch 里目前只声明了 createdAt / updatedAt 为 sortable
-  if (sortType === 'createdAt' || sortType === 'updatedAt') {
+  if (sortType === "createdAt" || sortType === "updatedAt") {
     sort.push(`${sortType}:${sortOrder}`);
   } else {
     // 其它类型（likeCount / commentCount / viewCount）暂时退化为 createdAt
@@ -105,11 +105,11 @@ export async function searchReadlists(
   });
 
   // Optionally clip content to keep payload small
-  const hits: ReadlistSearchDocument[] = resp.hits.map(hit => {
-    const content = hit.content ?? '';
+  const hits: ReadlistSearchDocument[] = resp.hits.map((hit) => {
+    const content = hit.content ?? "";
     return {
       ...hit,
-      content: content.length > 500 ? content.slice(0, 500) + '...' : content,
+      content: content.length > 500 ? `${content.slice(0, 500)}...` : content,
     };
   });
 

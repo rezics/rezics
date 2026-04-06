@@ -1,9 +1,9 @@
-import type { ComponentType } from 'react';
-import { useFolio } from '../context';
-import type { PanelProps, FolioContent, FolioNode } from '../types';
+import type { ComponentType } from "react";
+import { useFolio } from "../context";
+import type { FolioNode, PanelProps } from "../types";
 
 interface PanelSlotProps {
-  slot: 'Toolbar' | 'Controls' | 'Settings';
+  slot: "Toolbar" | "Controls" | "Settings";
   onTreeChange?: (tree: FolioNode[]) => void;
 }
 

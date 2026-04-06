@@ -1,5 +1,5 @@
-import type {JwtJwks} from '../core/jwks';
-import type {JwtKeyRecord} from '../contracts/persistence';
+import type { JwtKeyRecord } from "../contracts/persistence";
+import type { JwtJwks } from "../core/jwks";
 
 export type JwtClock = {
   now(): Date;

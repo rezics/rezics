@@ -3,20 +3,25 @@
  */
 
 import type {
-  ReviewDTO,
   CreateReviewInput,
-  UpdateReviewInput,
+  ReviewDTO,
   ReviewListQuery,
-} from '@rezics/contract';
+  UpdateReviewInput,
+} from "@rezics/contract";
 
 // Re-export contract types
-export type {ReviewDTO, CreateReviewInput, UpdateReviewInput, ReviewListQuery};
+export type {
+  CreateReviewInput,
+  ReviewDTO,
+  ReviewListQuery,
+  UpdateReviewInput,
+};
 
 /**
  * Extended frontend types
  */
-export type ReviewFormData = Omit<CreateReviewInput, 'userId'>;
+export type ReviewFormData = Omit<CreateReviewInput, "userId">;
 
 export type ReviewFilters = Partial<ReviewListQuery>;
 
-export type ReviewSortOption = 'createdAt' | 'updatedAt' | 'rating';
+export type ReviewSortOption = "createdAt" | "updatedAt" | "rating";

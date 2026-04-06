@@ -1,6 +1,6 @@
-import {Edit} from '@mui/icons-material';
-import {Button} from '@mui/material';
-import React from 'react';
+import { Edit } from "@mui/icons-material";
+import { Button } from "@mui/material";
+import type React from "react";
 
 export type EditButtonFloatRightShowProps = {
   onClick?: () => void;
@@ -9,7 +9,7 @@ export type EditButtonFloatRightShowProps = {
 
 export const EditButtonFloatRightShow: React.FC<
   EditButtonFloatRightShowProps
-> = ({onClick, text = '编辑'}) => {
+> = ({ onClick, text = "编辑" }) => {
   return (
     <div className="flex-1 justify-end">
       <Button
@@ -27,6 +27,6 @@ export const EditButtonFloatRightShow: React.FC<
 export type EditButtonFloatRightContainerProps = EditButtonFloatRightShowProps;
 export const EditButtonFloatRightContainer: React.FC<
   EditButtonFloatRightContainerProps
-> = props => {
+> = (props) => {
   return <EditButtonFloatRightShow {...props} />;
 };

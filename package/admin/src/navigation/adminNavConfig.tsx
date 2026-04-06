@@ -1,20 +1,20 @@
-import DashboardIcon from '@mui/icons-material/Dashboard';
-import Inventory2Icon from '@mui/icons-material/Inventory2';
-import PeopleIcon from '@mui/icons-material/People';
-import SettingsIcon from '@mui/icons-material/Settings';
-import React from 'react';
-import StorageOutlinedIcon from '@mui/icons-material/StorageOutlined';
-import KeyOutlinedIcon from '@mui/icons-material/KeyOutlined';
-import VpnKeyOutlinedIcon from '@mui/icons-material/VpnKeyOutlined';
-import ManageSearchOutlinedIcon from '@mui/icons-material/ManageSearchOutlined';
-import AdminPanelSettingsOutlinedIcon from '@mui/icons-material/AdminPanelSettingsOutlined';
+import AdminPanelSettingsOutlinedIcon from "@mui/icons-material/AdminPanelSettingsOutlined";
+import DashboardIcon from "@mui/icons-material/Dashboard";
+import Inventory2Icon from "@mui/icons-material/Inventory2";
+import KeyOutlinedIcon from "@mui/icons-material/KeyOutlined";
+import ManageSearchOutlinedIcon from "@mui/icons-material/ManageSearchOutlined";
+import PeopleIcon from "@mui/icons-material/People";
+import SettingsIcon from "@mui/icons-material/Settings";
+import StorageOutlinedIcon from "@mui/icons-material/StorageOutlined";
+import VpnKeyOutlinedIcon from "@mui/icons-material/VpnKeyOutlined";
+import type React from "react";
 
 export type AdminNavItem = {
   id: string;
   label: string;
   icon: React.ReactNode;
   to: string;
-  requiredRole?: 'owner';
+  requiredRole?: "owner";
 };
 
 export type AdminNavGroup = {
@@ -30,162 +30,162 @@ export const adminNav = {
   drawerWidth: 260,
   items: [
     {
-      id: 'dashboard',
-      label: 'Dashboard',
+      id: "dashboard",
+      label: "Dashboard",
       icon: <DashboardIcon fontSize="small" />,
-      to: '/',
+      to: "/",
     },
     {
-      id: 'users',
-      label: 'Users',
+      id: "users",
+      label: "Users",
       icon: <PeopleIcon fontSize="small" />,
       children: [
         {
-          id: 'users.list',
-          label: 'List',
+          id: "users.list",
+          label: "List",
           icon: <PeopleIcon fontSize="small" />,
-          to: '/users',
+          to: "/users",
         },
         {
-          id: 'users.meili',
-          label: 'Meili Search',
+          id: "users.meili",
+          label: "Meili Search",
           icon: <PeopleIcon fontSize="small" />,
-          to: '/users/meili',
+          to: "/users/meili",
         },
         {
-          id: 'users.create',
-          label: 'Create',
+          id: "users.create",
+          label: "Create",
           icon: <PeopleIcon fontSize="small" />,
-          to: '/users/create',
+          to: "/users/create",
         },
       ],
     },
     {
-      id: 'units',
-      label: 'Units',
+      id: "units",
+      label: "Units",
       icon: <Inventory2Icon fontSize="small" />,
       children: [
         {
-          id: 'units.list',
-          label: 'List',
+          id: "units.list",
+          label: "List",
           icon: <Inventory2Icon fontSize="small" />,
-          to: '/units',
+          to: "/units",
         },
         {
-          id: 'units.meili',
-          label: 'Meili Search',
+          id: "units.meili",
+          label: "Meili Search",
           icon: <Inventory2Icon fontSize="small" />,
-          to: '/units/meili',
+          to: "/units/meili",
         },
         {
-          id: 'units.create',
-          label: 'Create',
+          id: "units.create",
+          label: "Create",
           icon: <Inventory2Icon fontSize="small" />,
-          to: '/units/create',
+          to: "/units/create",
         },
       ],
     },
     {
-      id: 'books',
-      label: 'Books',
+      id: "books",
+      label: "Books",
       icon: <Inventory2Icon fontSize="small" />,
       children: [
         {
-          id: 'books.list',
-          label: 'List',
+          id: "books.list",
+          label: "List",
           icon: <Inventory2Icon fontSize="small" />,
-          to: '/book',
+          to: "/book",
         },
         {
-          id: 'books.meili',
-          label: 'Meili Search',
+          id: "books.meili",
+          label: "Meili Search",
           icon: <Inventory2Icon fontSize="small" />,
-          to: '/book/meili',
+          to: "/book/meili",
         },
         {
-          id: 'books.create',
-          label: 'Create',
+          id: "books.create",
+          label: "Create",
           icon: <Inventory2Icon fontSize="small" />,
-          to: '/book/create',
+          to: "/book/create",
         },
       ],
     },
     {
-      id: 'misc',
-      label: 'Misc',
+      id: "misc",
+      label: "Misc",
       icon: <StorageOutlinedIcon fontSize="small" />,
       children: [
         {
-          id: 'misc.echokv',
-          label: 'EchoKV',
+          id: "misc.echokv",
+          label: "EchoKV",
           icon: <StorageOutlinedIcon fontSize="small" />,
-          to: '/misc/echokv',
+          to: "/misc/echokv",
         },
         {
-          id: 'misc.token',
-          label: 'Token',
+          id: "misc.token",
+          label: "Token",
           icon: <KeyOutlinedIcon fontSize="small" />,
-          to: '/token',
+          to: "/token",
         },
         {
-          id: 'misc.jwt-services',
-          label: 'JWT Services',
+          id: "misc.jwt-services",
+          label: "JWT Services",
           icon: <VpnKeyOutlinedIcon fontSize="small" />,
-          to: '/jwt-services',
-          requiredRole: 'owner',
+          to: "/jwt-services",
+          requiredRole: "owner",
         },
       ],
     },
     {
-      id: 'meili',
-      label: 'Meili',
+      id: "meili",
+      label: "Meili",
       icon: <ManageSearchOutlinedIcon fontSize="small" />,
       children: [
         {
-          id: 'meili.search',
-          label: 'Meili Search',
-          to: '/meili',
+          id: "meili.search",
+          label: "Meili Search",
+          to: "/meili",
           icon: <ManageSearchOutlinedIcon fontSize="small" />,
         },
       ],
     },
     {
-      id: 'auth',
-      label: 'Auth',
+      id: "auth",
+      label: "Auth",
       icon: <AdminPanelSettingsOutlinedIcon fontSize="small" />,
       children: [
         {
-          id: 'auth.users',
-          label: 'Users',
+          id: "auth.users",
+          label: "Users",
           icon: <AdminPanelSettingsOutlinedIcon fontSize="small" />,
-          to: '/auth/users',
+          to: "/auth/users",
         },
         {
-          id: 'auth.sessions',
-          label: 'Sessions',
+          id: "auth.sessions",
+          label: "Sessions",
           icon: <AdminPanelSettingsOutlinedIcon fontSize="small" />,
-          to: '/auth/sessions',
+          to: "/auth/sessions",
         },
         {
-          id: 'auth.status',
-          label: 'Auth Status',
+          id: "auth.status",
+          label: "Auth Status",
           icon: <VpnKeyOutlinedIcon fontSize="small" />,
-          to: '/auth/status',
+          to: "/auth/status",
         },
         {
-          id: 'auth.jwt-services',
-          label: 'Auth JWT Services',
+          id: "auth.jwt-services",
+          label: "Auth JWT Services",
           icon: <VpnKeyOutlinedIcon fontSize="small" />,
-          to: '/auth/jwt-services',
-          requiredRole: 'owner',
+          to: "/auth/jwt-services",
+          requiredRole: "owner",
         },
       ],
     },
     {
-      id: 'settings',
-      label: 'Settings',
+      id: "settings",
+      label: "Settings",
       icon: <SettingsIcon fontSize="small" />,
-      to: '/settings',
+      to: "/settings",
     },
   ] satisfies AdminNavEntry[],
 };

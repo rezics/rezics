@@ -1,11 +1,11 @@
-import type { FolioNode, RendererPlugin } from '../../types';
-import { extractZip, readText, type FileMap } from './zip';
-import { parseContainer } from './container';
-import { parseOpf, resolveHref } from './opf';
-import { parseNcx, parseNavDoc, tocToFolioNodes } from './toc';
-import { resolveAssets, createAssetTracker, type AssetTracker } from './assets';
-import { createEpubControls } from './EpubControls';
-import { flattenTree } from '../../tree';
+import { flattenTree } from "../../tree";
+import type { FolioNode, RendererPlugin } from "../../types";
+import { createAssetTracker, resolveAssets } from "./assets";
+import { parseContainer } from "./container";
+import { createEpubControls } from "./EpubControls";
+import { parseOpf, resolveHref } from "./opf";
+import { parseNavDoc, parseNcx, tocToFolioNodes } from "./toc";
+import { extractZip, readText } from "./zip";
 
 export interface EpubPluginResult {
   plugin: RendererPlugin;
@@ -14,9 +14,7 @@ export interface EpubPluginResult {
   warnings: string[];
 }
 
-export async function createEpubPlugin(
-  file: File,
-): Promise<EpubPluginResult> {
+export async function createEpubPlugin(file: File): Promise<EpubPluginResult> {
   const fileMap = await extractZip(file);
   const warnings: string[] = [];
 
@@ -54,15 +52,15 @@ export async function createEpubPlugin(
   let tocNodes: FolioNode[];
 
   // Try EPUB 3 nav doc first, then NCX
-  const navItem = Array.from(opf.manifest.values()).find(
-    (item) => item.properties?.includes('nav'),
+  const navItem = Array.from(opf.manifest.values()).find((item) =>
+    item.properties?.includes("nav"),
   );
 
   const chapterFetch = (href: string) => {
     return () => {
       const html = chapterCache.get(href);
       if (html) {
-        return Promise.resolve({ contentType: 'html' as const, raw: html });
+        return Promise.resolve({ contentType: "html" as const, raw: html });
       }
       return Promise.reject(new Error(`Chapter not found: ${href}`));
     };
@@ -112,9 +110,9 @@ export async function createEpubPlugin(
       <div
         className="folio-epub-content"
         style={{
-          padding: '16px 24px',
-          maxWidth: '720px',
-          margin: '0 auto',
+          padding: "16px 24px",
+          maxWidth: "720px",
+          margin: "0 auto",
         }}
         dangerouslySetInnerHTML={{ __html: raw }}
       />
@@ -122,9 +120,9 @@ export async function createEpubPlugin(
   }
 
   const plugin: RendererPlugin = {
-    kind: 'renderer',
-    id: 'epub',
-    contentTypes: ['html'],
+    kind: "renderer",
+    id: "epub",
+    contentTypes: ["html"],
     Renderer: EpubRenderer,
     Controls,
   };

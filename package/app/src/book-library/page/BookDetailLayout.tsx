@@ -1,16 +1,16 @@
-import React, {useEffect, useMemo} from 'react';
-import {useParams} from '@tanstack/react-router';
-import {useQuery} from '@tanstack/react-query';
-import {useTranslation} from 'react-i18next';
-import {useAtomValue, useSetAtom} from 'jotai';
+import { bookQueries } from "@rezics/api/book/book";
+import { useQuery } from "@tanstack/react-query";
+import { useParams } from "@tanstack/react-router";
+import { useAtomValue, useSetAtom } from "jotai";
+import type React from "react";
+import { useEffect, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 
-import {bookQueries} from '@rezics/api/book/book';
-
-import {BookHeroSection} from '../section/BookHeroSection';
+import { BookHeroSection } from "../section/BookHeroSection";
 import {
   bookDetailAtomFamily,
   setBookDetailAtomFamily,
-} from '../state/bookDetailAtoms';
+} from "../state/bookDetailAtoms";
 
 /**
  * Book Detail Layout
@@ -18,20 +18,20 @@ import {
  * Shared layout for all book detail sub-routes.
  * Fetches book data, renders the hero section, and renders children (routed tab content).
  */
-export const BookDetailLayout: React.FC<{children: React.ReactNode}> = ({
+export const BookDetailLayout: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const params = useParams({strict: false}) as {bookId?: string};
-  const bookId = params.bookId ?? '';
+  const params = useParams({ strict: false }) as { bookId?: string };
+  const bookId = params.bookId ?? "";
   const queriesEnabled = Boolean(bookId);
 
-  const {t} = useTranslation();
+  const { t } = useTranslation();
 
-  const {data, isLoading, error} = useQuery({
+  const { data, isLoading, error } = useQuery({
     ...bookQueries.detail(bookId),
     enabled: queriesEnabled,
   });
-  const {data: rating} = useQuery({
+  const { data: rating } = useQuery({
     ...bookQueries.rating(bookId),
     enabled: queriesEnabled,
   });
@@ -49,17 +49,17 @@ export const BookDetailLayout: React.FC<{children: React.ReactNode}> = ({
   const bookInfo = useAtomValue(bookDetailAtomFamily(bookId)) ?? data;
 
   if (!queriesEnabled) {
-    return <div>{t('common.error_generic')} Missing bookId</div>;
+    return <div>{t("common.error_generic")} Missing bookId</div>;
   }
 
   if (isLoading || !bookInfo) {
-    return <div>{t('common.loading')}</div>;
+    return <div>{t("common.loading")}</div>;
   }
 
   if (error) {
     return (
       <div>
-        {t('common.error_generic')} {String(error)}
+        {t("common.error_generic")} {String(error)}
       </div>
     );
   }

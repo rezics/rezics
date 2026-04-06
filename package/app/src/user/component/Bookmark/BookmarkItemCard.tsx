@@ -1,21 +1,24 @@
-import React, {useEffect, useState} from 'react';
-import {useAlertStore} from '@app/state/windowAlertStore';
-import {useDeleteReactionMutation} from '@rezics/api/reaction/reaction.mutations';
-import {useSetBookmarkTagsMutation} from '@rezics/api/reaction/reaction.mutations';
+import { useAlertStore } from "@app/state/windowAlertStore";
+import { Delete } from "@mui/icons-material";
 import {
-  Typography,
-  TextField,
-  Chip,
-  Button,
-  IconButton,
   Autocomplete,
+  Button,
+  Chip,
+  IconButton,
   Paper,
+  TextField,
   Tooltip,
-} from '@mui/material';
-import {Delete} from '@mui/icons-material';
-import {type BookmarkEntry} from '../../page/BookmarkPage';
-import {buildUnitUrl} from '@/shared/util/build-url';
-import {Link} from '@rezics/ui/primitive/link/Link.tsx';
+  Typography,
+} from "@mui/material";
+import {
+  useDeleteReactionMutation,
+  useSetBookmarkTagsMutation,
+} from "@rezics/api/reaction/reaction.mutations";
+import { Link } from "@rezics/ui/primitive/link/Link.tsx";
+import type React from "react";
+import { useEffect, useState } from "react";
+import { buildUnitUrl } from "@/shared/util/build-url";
+import type { BookmarkEntry } from "../../page/BookmarkPage";
 
 type BookmarkItemCardProps = {
   entry: BookmarkEntry;
@@ -30,10 +33,10 @@ export const BookmarkItemCard: React.FC<BookmarkItemCardProps> = ({
   onRemoved,
   onTagsUpdated,
 }) => {
-  const {unit, createdAt, tags: initialTags} = entry;
+  const { unit, createdAt, tags: initialTags } = entry;
   const [localTags, setLocalTags] = useState<string[]>(initialTags ?? []);
-  const [newTag, setNewTag] = useState('');
-  const {show: showAlert} = useAlertStore();
+  const [newTag, setNewTag] = useState("");
+  const { show: showAlert } = useAlertStore();
 
   const unitUrl = buildUnitUrl(unit);
 
@@ -56,12 +59,12 @@ export const BookmarkItemCard: React.FC<BookmarkItemCardProps> = ({
   const handleRemoveBookmark = () => {
     deleteReactionMutation.mutate({
       targetId: unit.id,
-      reaction: 'bookmark',
+      reaction: "bookmark",
     });
   };
 
   const handleRemoveTag = (tag: string) => {
-    const next = localTags.filter(t => t !== tag);
+    const next = localTags.filter((t) => t !== tag);
     setLocalTags(next);
     setBookmarkTagsMutation.mutate({
       targetId: unit.id,
@@ -74,12 +77,12 @@ export const BookmarkItemCard: React.FC<BookmarkItemCardProps> = ({
     const trimmed = newTag.trim();
     if (!trimmed) return;
     if (localTags.includes(trimmed)) {
-      showAlert('该标签已存在');
+      showAlert("该标签已存在");
       return;
     }
     const next = [...localTags, trimmed];
     setLocalTags(next);
-    setNewTag('');
+    setNewTag("");
     setBookmarkTagsMutation.mutate({
       targetId: unit.id,
       tags: next,
@@ -89,7 +92,7 @@ export const BookmarkItemCard: React.FC<BookmarkItemCardProps> = ({
 
   const createdLabel = createdAt
     ? new Date(createdAt).toLocaleDateString()
-    : '';
+    : "";
 
   return (
     <Paper
@@ -101,7 +104,7 @@ export const BookmarkItemCard: React.FC<BookmarkItemCardProps> = ({
           <Tooltip title="打开内容页面" placement="top">
             <Link to={unitUrl}>
               <Chip
-                label={unit.type || 'UNKNOWN'}
+                label={unit.type || "UNKNOWN"}
                 size="small"
                 variant="outlined"
                 onClick={() => {}}
@@ -116,7 +119,7 @@ export const BookmarkItemCard: React.FC<BookmarkItemCardProps> = ({
           )}
         </div>
         <Typography variant="subtitle1" className="font-semibold truncate mb-1">
-          {unit.title || '(未命名内容)'}
+          {unit.title || "(未命名内容)"}
         </Typography>
         {unit.content && (
           <Typography
@@ -137,7 +140,7 @@ export const BookmarkItemCard: React.FC<BookmarkItemCardProps> = ({
               暂无标签
             </Typography>
           ) : (
-            localTags.map(tag => (
+            localTags.map((tag) => (
               <Chip
                 key={tag}
                 label={tag}
@@ -153,20 +156,20 @@ export const BookmarkItemCard: React.FC<BookmarkItemCardProps> = ({
             size="small"
             options={allBookmarkTags} // 你的完整标签列表
             value={newTag}
-            onChange={(_event, value) => setNewTag(value ?? '')} // 只能选列表中的项目
-            renderInput={params => (
+            onChange={(_event, value) => setNewTag(value ?? "")} // 只能选列表中的项目
+            renderInput={(params) => (
               <TextField
                 {...params}
                 placeholder="选择标签"
-                onKeyDown={e => {
-                  if (e.key === 'Enter') {
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
                     e.preventDefault();
                     handleAddTag(); // 保持你之前的行为
                   }
                 }}
               />
             )}
-            sx={{minWidth: 160}}
+            sx={{ minWidth: 160 }}
           />
 
           <Button

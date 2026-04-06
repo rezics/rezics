@@ -1,18 +1,18 @@
-import {useAppStore} from '@/app/state/appStore';
-import {useMemo} from 'react';
-import {MenuItem, ListItemIcon, ListItemText} from '@mui/material';
-import Brightness4Icon from '@mui/icons-material/Brightness4';
-import Brightness7Icon from '@mui/icons-material/Brightness7';
+import Brightness4Icon from "@mui/icons-material/Brightness4";
+import Brightness7Icon from "@mui/icons-material/Brightness7";
+import { ListItemIcon, ListItemText, MenuItem } from "@mui/material";
+import { useMemo } from "react";
+import { useAppStore } from "@/app/state/appStore";
 
 export function ThemeToggler() {
-  const themeMode = useAppStore(state => state.theme);
-  const setTheme = useAppStore(state => state.setTheme);
+  const themeMode = useAppStore((state) => state.theme);
+  const setTheme = useAppStore((state) => state.setTheme);
 
   const toggleTheme = () => {
-    setTheme(themeMode === 'light' ? 'dark' : 'light');
+    setTheme(themeMode === "light" ? "dark" : "light");
   };
 
-  const isDark = useMemo(() => themeMode === 'dark', [themeMode]);
+  const isDark = useMemo(() => themeMode === "dark", [themeMode]);
 
   return (
     <MenuItem onClick={toggleTheme}>

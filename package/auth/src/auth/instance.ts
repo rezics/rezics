@@ -1,24 +1,25 @@
-import {betterAuth} from 'better-auth';
-import {prismaAdapter} from '@better-auth/prisma-adapter';
-import {admin, genericOAuth, jwt, organization} from 'better-auth/plugins';
-import {oauthProvider} from '@better-auth/oauth-provider';
-import {prisma} from './prisma';
-import {env} from '../env';
-import {ac, authRoles, organizationRoles} from './permissions';
-import {trustedOrigins} from './trusted-origins';
-import {
-  buildSocialProviderOptions,
-  getTelegramGenericOAuthConfig,
-} from './providers';
-import {createAuthNotificationService} from '../notification';
+import { oauthProvider } from "@better-auth/oauth-provider";
+import { prismaAdapter } from "@better-auth/prisma-adapter";
+import { betterAuth } from "better-auth";
+import { admin, genericOAuth, jwt, organization } from "better-auth/plugins";
+import { env } from "../env";
+import { createAuthNotificationService } from "../notification";
 import {
   createBetterAuthJwtAdapter,
+  getAuthJwksGracePeriodSeconds,
+  getAuthJwksRotationIntervalSeconds,
   getAuthJwtAudience,
   getAuthJwtIssuer,
   getAuthJwtTtlSeconds,
-  getAuthJwksGracePeriodSeconds,
-  getAuthJwksRotationIntervalSeconds,
-} from '../session/jwt/export';
+} from "../session/jwt/export";
+import { ac, authRoles, organizationRoles } from "./permissions";
+import { prisma } from "./prisma";
+import {
+  buildSocialProviderOptions,
+  getTelegramGenericOAuthConfig,
+} from "./providers";
+import { trustedOrigins } from "./trusted-origins";
+
 const telegramOAuthConfig = getTelegramGenericOAuthConfig();
 const notificationService = createAuthNotificationService(env, {
   telegram: {
@@ -27,12 +28,12 @@ const notificationService = createAuthNotificationService(env, {
 });
 
 export const auth = betterAuth({
-  appName: 'Rezics Auth',
+  appName: "Rezics Auth",
   baseURL: env.BETTER_AUTH_URL,
-  basePath: '/api/auth',
+  basePath: "/api/auth",
   secret: env.BETTER_AUTH_SECRET,
   database: prismaAdapter(prisma, {
-    provider: 'postgresql',
+    provider: "postgresql",
   }),
   advanced: {
     database: {
@@ -42,7 +43,7 @@ export const auth = betterAuth({
   trustedOrigins,
   emailAndPassword: {
     enabled: true,
-    sendResetPassword: async ({user, url, token}) =>
+    sendResetPassword: async ({ user, url, token }) =>
       notificationService.sendPasswordResetEmail({
         user: {
           email: user.email,
@@ -54,7 +55,7 @@ export const auth = betterAuth({
     revokeSessionsOnPasswordReset: true,
   },
   emailVerification: {
-    sendVerificationEmail: async ({user, url, token}) =>
+    sendVerificationEmail: async ({ user, url, token }) =>
       notificationService.sendVerificationEmail({
         user: {
           email: user.email,
@@ -69,7 +70,7 @@ export const auth = betterAuth({
   account: {
     accountLinking: {
       enabled: true,
-      trustedProviders: ['google', 'microsoft', 'github', 'twitter'],
+      trustedProviders: ["google", "microsoft", "github", "twitter"],
       allowDifferentEmails: false,
     },
   },
@@ -80,7 +81,7 @@ export const auth = betterAuth({
     changeEmail: {
       enabled: true,
       updateEmailWithoutVerification: true,
-      sendChangeEmailConfirmation: async ({user, newEmail, url, token}) =>
+      sendChangeEmailConfirmation: async ({ user, newEmail, url, token }) =>
         notificationService.sendChangeEmailConfirmation({
           user: {
             email: user.email,
@@ -96,7 +97,7 @@ export const auth = betterAuth({
     jwt({
       jwks: {
         keyPairConfig: {
-          alg: 'ES256',
+          alg: "ES256",
         },
         rotationInterval: getAuthJwksRotationIntervalSeconds(),
         gracePeriod: getAuthJwksGracePeriodSeconds(),
@@ -120,9 +121,9 @@ export const auth = betterAuth({
           id: user.id,
           slug: user.slug,
           role: user.role,
-          scope: 'user',
+          scope: "user",
         }),
-        getSubject: ({user}: {user: {id: string}}) => user.id,
+        getSubject: ({ user }: { user: { id: string } }) => user.id,
       },
     }),
     ...(telegramOAuthConfig
@@ -133,10 +134,10 @@ export const auth = betterAuth({
         ]
       : []),
     oauthProvider({
-      scopes: ['openid', 'profile', 'email', 'offline_access', 'user'],
-      loginPage: '/login',
-      consentPage: '/consent',
-      grantTypes: ['authorization_code', 'refresh_token', 'client_credentials'],
+      scopes: ["openid", "profile", "email", "offline_access", "user"],
+      loginPage: "/login",
+      consentPage: "/consent",
+      grantTypes: ["authorization_code", "refresh_token", "client_credentials"],
       allowDynamicClientRegistration: true,
       allowUnauthenticatedClientRegistration: false,
       accessTokenExpiresIn: getAuthJwtTtlSeconds(),
@@ -148,37 +149,42 @@ export const auth = betterAuth({
       userInfo: ({
         user,
       }: {
-        user: {id: string; email: string; emailVerified: boolean; name: string};
+        user: {
+          id: string;
+          email: string;
+          emailVerified: boolean;
+          name: string;
+        };
       }) => ({
         sub: user.id,
         email: user.email,
         email_verified: user.emailVerified,
         name: user.name,
       }),
-      clientPrivileges: ({action, headers}) => {
-        if (action !== 'create' && action !== 'update') {
+      clientPrivileges: ({ action, headers }) => {
+        if (action !== "create" && action !== "update") {
           return true;
         }
 
-        const klass = headers.get('x-rezics-client-class') ?? 'public';
-        if (klass === 'trusted') {
-          return headers.get('x-rezics-internal') === '1';
+        const klass = headers.get("x-rezics-client-class") ?? "public";
+        if (klass === "trusted") {
+          return headers.get("x-rezics-internal") === "1";
         }
 
-        if (klass === 'confidential') {
+        if (klass === "confidential") {
           return true;
         }
 
-        return klass === 'public';
+        return klass === "public";
       },
       shouldSkipConsent: ({
         client,
       }: {
-        client: {type?: string; public?: boolean; skipConsent?: boolean};
+        client: { type?: string; public?: boolean; skipConsent?: boolean };
       }) => {
         const clientType =
-          client.type ?? (client.public ? 'public' : 'confidential');
-        return clientType === 'trusted' || Boolean(client.skipConsent);
+          client.type ?? (client.public ? "public" : "confidential");
+        return clientType === "trusted" || Boolean(client.skipConsent);
       },
       endSessionEndpoint: {
         enabled: true,
@@ -187,7 +193,7 @@ export const auth = betterAuth({
     admin({
       ac,
       roles: authRoles,
-      defaultRole: 'user',
+      defaultRole: "user",
     }),
     organization({
       ac,

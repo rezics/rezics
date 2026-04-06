@@ -1,14 +1,14 @@
-export type { PreviewConfig } from './preview';
-export {
-  preserveFormattingPlugin,
-  emptyLinesPlugin,
-  preserveSpacesPlugin,
-  novelModePlugin,
-  createNovelRenderer,
-} from './preserveFormatting';
+export { addCopyButtons } from "./copyButton";
+export { highlightCode } from "./highlight";
 export type {
-  PreserveFormatOptions,
   NovelRendererOptions,
-} from './preserveFormatting';
-export { highlightCode } from './highlight';
-export { addCopyButtons } from './copyButton';
+  PreserveFormatOptions,
+} from "./preserveFormatting";
+export {
+  createNovelRenderer,
+  emptyLinesPlugin,
+  novelModePlugin,
+  preserveFormattingPlugin,
+  preserveSpacesPlugin,
+} from "./preserveFormatting";
+export type { PreviewConfig } from "./preview";

@@ -1,4 +1,3 @@
-import type {ReadlistResponse} from '@rezics/contract';
 import {
   Avatar,
   Box,
@@ -7,11 +6,12 @@ import {
   Grid,
   Stack,
   Typography,
-} from '@mui/material';
-import {useNavigate} from '@tanstack/react-router';
-import React from 'react';
-import {MiniActionBar} from '@/engagement/component/MiniActionBar.tsx';
-import {LazyLoadImage} from '@rezics/ui/primitive/image/LazyLoadImage.tsx';
+} from "@mui/material";
+import type { ReadlistResponse } from "@rezics/contract";
+import { LazyLoadImage } from "@rezics/ui/primitive/image/LazyLoadImage.tsx";
+import { useNavigate } from "@tanstack/react-router";
+import type React from "react";
+import { MiniActionBar } from "@/engagement/component/MiniActionBar.tsx";
 
 interface SingleReadlistProps {
   data: ReadlistResponse;
@@ -33,15 +33,15 @@ export function SingleReadlist({
   return (
     <Card
       sx={{
-        cursor: 'pointer',
-        transition: 'box-shadow 0.2s',
-        '&:hover': {
+        cursor: "pointer",
+        transition: "box-shadow 0.2s",
+        "&:hover": {
           boxShadow: 4,
         },
       }}
-      onClick={e => navigate({to: `/readlist/${data.id}`})}
+      onClick={(_e) => navigate({ to: `/readlist/${data.id}` })}
     >
-      <CardContent sx={{flex: 1, display: 'flex', flexDirection: 'column'}}>
+      <CardContent sx={{ flex: 1, display: "flex", flexDirection: "column" }}>
         <Typography variant="h6" fontWeight="bold" gutterBottom>
           {data.title}
         </Typography>
@@ -51,16 +51,16 @@ export function SingleReadlist({
           color="text.secondary"
           sx={{
             mb: 2,
-            display: '-webkit-box',
+            display: "-webkit-box",
             WebkitLineClamp: 2,
-            WebkitBoxOrient: 'vertical',
-            overflow: 'hidden',
+            WebkitBoxOrient: "vertical",
+            overflow: "hidden",
           }}
         >
           {data.content}
         </Typography>
 
-        <Grid container spacing={1} sx={{mb: 2}}>
+        <Grid container spacing={1} sx={{ mb: 2 }}>
           {/* <div>
             {data.books.slice(0, 4).map((book, index) => (
               <Grid size={{xs: 3}} key={book.unitId}>
@@ -72,10 +72,10 @@ export function SingleReadlist({
           </div> */}
           <div
             className="relative w-full overflow-hidden rounded-md"
-            style={{aspectRatio: '16 / 9'}}
+            style={{ aspectRatio: "16 / 9" }}
           >
             <LazyLoadImage
-              src={data.coverUrl ?? ''}
+              src={data.coverUrl ?? ""}
               alt={data.title}
               className="w-full h-full object-cover"
             />
@@ -84,19 +84,19 @@ export function SingleReadlist({
 
         <Box
           sx={{
-            mt: 'auto',
+            mt: "auto",
             pt: 2,
             borderTop: 1,
-            borderColor: 'divider',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
+            borderColor: "divider",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
           }}
         >
           <Stack direction="row" spacing={1} alignItems="center">
             <Avatar
               src={data.creator?.avatar ?? undefined}
-              sx={{width: 24, height: 24}}
+              sx={{ width: 24, height: 24 }}
             />
             <Typography variant="body2" color="text.secondary">
               {data.creator?.name}
@@ -106,14 +106,14 @@ export function SingleReadlist({
           <Stack spacing={1} alignItems="center">
             {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
             <div
-              onClick={e => {
+              onClick={(e) => {
                 e.stopPropagation();
                 handleLike(data.id);
               }}
               className="flex items-center"
             >
               <Typography color="text.secondary">
-                {data.reactionSummaries.find((r: any) => r.reaction === 'like')
+                {data.reactionSummaries.find((r: any) => r.reaction === "like")
                   ?.count ?? 0}
               </Typography>
               <MiniActionBar

@@ -1,9 +1,9 @@
-import {Typography, Chip, useTheme, Box} from '@mui/material';
-import CampaignRoundedIcon from '@mui/icons-material/CampaignRounded';
-import PushPinRoundedIcon from '@mui/icons-material/PushPinRounded';
-import {MUILink} from '@rezics/ui/primitive/link/MUILink.tsx';
-import {useEffect, useState, useRef} from 'react';
-import clsx from 'clsx';
+import CampaignRoundedIcon from "@mui/icons-material/CampaignRounded";
+import PushPinRoundedIcon from "@mui/icons-material/PushPinRounded";
+import { Box, Chip, Typography, useTheme } from "@mui/material";
+import { MUILink } from "@rezics/ui/primitive/link/MUILink.tsx";
+import clsx from "clsx";
+import { useEffect, useRef, useState } from "react";
 
 export interface Announcement {
   id: string;
@@ -36,7 +36,7 @@ export function AnnouncementBar({
     if (items.length <= 1) return;
 
     timerRef.current = setInterval(() => {
-      setIndex(prev => (prev + 1) % items.length);
+      setIndex((prev) => (prev + 1) % items.length);
     }, interval);
 
     return () => {
@@ -52,8 +52,8 @@ export function AnnouncementBar({
       sx={{
         px: 2,
         py: 1,
-        display: 'flex',
-        alignItems: 'center',
+        display: "flex",
+        alignItems: "center",
         borderRadius: 2,
       }}
     >
@@ -70,15 +70,15 @@ export function AnnouncementBar({
       <div className="relative flex-1 overflow-hidden h-[28px] flex items-center">
         {items.map((item, i) => {
           const isActive = i === index;
-          const Wrapper = item.link ? MUILink : 'div';
+          const Wrapper = item.link ? MUILink : "div";
 
           return (
             <Wrapper
               key={item.id}
               to={item.link as any}
               className={clsx(
-                'absolute left-0 top-0 w-full h-full flex items-center gap-2 transition-all duration-500',
-                item.link && 'cursor-pointer',
+                "absolute left-0 top-0 w-full h-full flex items-center gap-2 transition-all duration-500",
+                item.link && "cursor-pointer",
               )}
               style={{
                 transform: `translateY(${(i - index) * 100}%)`,
@@ -87,7 +87,7 @@ export function AnnouncementBar({
             >
               {item.pin && (
                 <PushPinRoundedIcon
-                  sx={{fontSize: 14, color: theme.palette.warning.main}}
+                  sx={{ fontSize: 14, color: theme.palette.warning.main }}
                 />
               )}
 
@@ -105,9 +105,9 @@ export function AnnouncementBar({
               <Typography
                 variant="body2"
                 sx={{
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
                 }}
               >
                 {item.content}

@@ -1,5 +1,5 @@
-import type {BookDTO} from '@rezics/contract';
-import {getBookShareStyles} from '@/utils/shareStyles';
+import type { BookDTO } from "@rezics/contract";
+import { getBookShareStyles } from "@/utils/shareStyles";
 
 export interface BookShareDocumentProps {
   book: BookDTO;
@@ -26,7 +26,7 @@ function toAbsoluteUrl(
 }
 
 function clampDescription(desc: string, maxLen = 140): string {
-  const s = desc.replace(/\s+/g, ' ').trim();
+  const s = desc.replace(/\s+/g, " ").trim();
   if (s.length <= maxLen) return s;
   return `${s.slice(0, maxLen - 1)}…`;
 }
@@ -36,9 +36,9 @@ export function BookShareDocument({
   canonicalUrl,
   origin,
 }: BookShareDocumentProps) {
-  const title = book.title || 'Book';
+  const title = book.title || "Book";
   const description = clampDescription(
-    book.description || 'Open to view details.',
+    book.description || "Open to view details.",
     160,
   );
   const imageUrl = toAbsoluteUrl(book.coverUrl, origin);
@@ -64,7 +64,7 @@ export function BookShareDocument({
 
         <meta
           name="twitter:card"
-          content={imageUrl ? 'summary_large_image' : 'summary'}
+          content={imageUrl ? "summary_large_image" : "summary"}
         />
         <meta name="twitter:title" content={title} />
         <meta name="twitter:description" content={description} />

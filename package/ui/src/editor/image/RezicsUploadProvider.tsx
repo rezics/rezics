@@ -1,22 +1,21 @@
-import {useState, useRef, useCallback} from 'react';
-import Button from '@mui/material/Button';
-import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography';
-import CircularProgress from '@mui/material/CircularProgress';
-import Alert from '@mui/material/Alert';
-import CameraAltIcon from '@mui/icons-material/CameraAlt';
-import CloudUploadIcon from '@mui/icons-material/CloudUpload';
-import {useImageUpload} from '@rezics/api/upload/upload.mutations';
-import type {ImageProvider} from './types';
+import CameraAltIcon from "@mui/icons-material/CameraAlt";
+import CloudUploadIcon from "@mui/icons-material/CloudUpload";
+import Alert from "@mui/material/Alert";
+import Box from "@mui/material/Box";
+import CircularProgress from "@mui/material/CircularProgress";
+import Typography from "@mui/material/Typography";
+import { useImageUpload } from "@rezics/api/upload/upload.mutations";
+import { useCallback, useRef, useState } from "react";
+import type { ImageProvider } from "./types";
 
-const ACCEPTED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
-const ACCEPTED_EXTENSIONS = '.jpg,.jpeg,.png,.webp,.gif';
+const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+const ACCEPTED_EXTENSIONS = ".jpg,.jpeg,.png,.webp,.gif";
 
 interface UploadContentProps {
   onInsert: (url: string, alt?: string) => void;
 }
 
-function UploadContent({onInsert}: UploadContentProps) {
+function UploadContent({ onInsert }: UploadContentProps) {
   const [dragActive, setDragActive] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -25,14 +24,14 @@ function UploadContent({onInsert}: UploadContentProps) {
   const processFile = useCallback(
     async (file: File) => {
       if (!ACCEPTED_TYPES.includes(file.type)) {
-        setError('Unsupported file type. Use JPEG, PNG, WebP, or GIF.');
+        setError("Unsupported file type. Use JPEG, PNG, WebP, or GIF.");
         return;
       }
 
       setError(null);
 
       try {
-        const imageCompression = await import('browser-image-compression');
+        const imageCompression = await import("browser-image-compression");
         const compressed = await imageCompression.default(file, {
           maxSizeMB: 4.5,
           maxWidthOrHeight: 4096,
@@ -42,7 +41,7 @@ function UploadContent({onInsert}: UploadContentProps) {
         const result = await mutation.mutateAsync(compressed);
         onInsert(result.url);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Upload failed');
+        setError(err instanceof Error ? err.message : "Upload failed");
       }
     },
     [mutation, onInsert],
@@ -62,7 +61,7 @@ function UploadContent({onInsert}: UploadContentProps) {
     (e: React.ClipboardEvent) => {
       const items = e.clipboardData.items;
       for (const item of items) {
-        if (item.type.startsWith('image/')) {
+        if (item.type.startsWith("image/")) {
           const file = item.getAsFile();
           if (file) {
             processFile(file);
@@ -83,23 +82,26 @@ function UploadContent({onInsert}: UploadContentProps) {
   );
 
   return (
-    <Box sx={{display: 'flex', flexDirection: 'column', gap: 1.5, p: 1}} onPaste={handlePaste}>
+    <Box
+      sx={{ display: "flex", flexDirection: "column", gap: 1.5, p: 1 }}
+      onPaste={handlePaste}
+    >
       <Box
         sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
           borderRadius: 2,
           border: 2,
-          borderStyle: 'dashed',
-          borderColor: dragActive ? 'primary.main' : 'divider',
-          bgcolor: dragActive ? 'action.hover' : 'transparent',
+          borderStyle: "dashed",
+          borderColor: dragActive ? "primary.main" : "divider",
+          bgcolor: dragActive ? "action.hover" : "transparent",
           p: 4,
-          cursor: 'pointer',
-          transition: 'border-color 0.2s, background-color 0.2s',
-          '&:hover': {
-            borderColor: 'text.secondary',
+          cursor: "pointer",
+          transition: "border-color 0.2s, background-color 0.2s",
+          "&:hover": {
+            borderColor: "text.secondary",
           },
         }}
         onDragOver={(e: React.DragEvent) => {
@@ -111,15 +113,29 @@ function UploadContent({onInsert}: UploadContentProps) {
         onClick={() => inputRef.current?.click()}
       >
         {mutation.isPending ? (
-          <Box sx={{display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1}}>
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: 1,
+            }}
+          >
             <CircularProgress size={32} />
             <Typography variant="body2" color="text.secondary">
               Uploading...
             </Typography>
           </Box>
         ) : (
-          <Box sx={{display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1}}>
-            <CameraAltIcon sx={{fontSize: 32}} color="action" />
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: 1,
+            }}
+          >
+            <CameraAltIcon sx={{ fontSize: 32 }} color="action" />
             <Typography variant="body2" color="text.secondary">
               Drop image here, paste, or click to browse
             </Typography>
@@ -134,7 +150,7 @@ function UploadContent({onInsert}: UploadContentProps) {
         ref={inputRef}
         type="file"
         accept={ACCEPTED_EXTENSIONS}
-        style={{display: 'none'}}
+        style={{ display: "none" }}
         onChange={handleFileChange}
       />
 
@@ -148,8 +164,8 @@ function UploadContent({onInsert}: UploadContentProps) {
 }
 
 export const rezicsUploadProvider: ImageProvider = {
-  name: 'rezics-upload',
-  label: 'Upload',
+  name: "rezics-upload",
+  label: "Upload",
   icon: <CloudUploadIcon fontSize="small" />,
-  render: ({onInsert}) => <UploadContent onInsert={onInsert} />,
+  render: ({ onInsert }) => <UploadContent onInsert={onInsert} />,
 };

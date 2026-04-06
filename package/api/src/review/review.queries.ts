@@ -2,10 +2,10 @@
  * React Query configurations for Review queries
  */
 
-import {queryOptions, infiniteQueryOptions} from '@tanstack/react-query';
-import {reviewApi} from './review.api';
-import {reviewKeys} from './review.keys';
-import type {ReviewFilters} from './review.types';
+import { infiniteQueryOptions, queryOptions } from "@tanstack/react-query";
+import { reviewApi } from "./review.api";
+import { reviewKeys } from "./review.keys";
+import type { ReviewFilters } from "./review.types";
 
 /**
  * Query options for listing reviews
@@ -64,15 +64,15 @@ export const reviewsByBookQuery = (bookId: string, filters?: ReviewFilters) =>
  * Infinite query options for paginated review list
  */
 export const reviewInfiniteListQuery = (
-  filters?: Omit<ReviewFilters, 'page'>,
+  filters?: Omit<ReviewFilters, "page">,
 ) =>
   infiniteQueryOptions({
     queryKey: reviewKeys.list(filters),
-    queryFn: ({pageParam = 1}) =>
-      reviewApi.list({...filters, start: pageParam}),
+    queryFn: ({ pageParam = 1 }) =>
+      reviewApi.list({ ...filters, start: pageParam }),
     initialPageParam: 1,
     getNextPageParam: (lastPage, allPages, lastPageParam) => {
-      const {reviews, total} = lastPage;
+      const { reviews, total } = lastPage;
       const limit = filters?.limit || 20;
       const hasMore =
         reviews.length === limit && allPages.length * limit < (total || 0);
@@ -99,7 +99,7 @@ export const reviewQueries = {
 
 export const remarkListQuery = (filters?: ReviewFilters) =>
   queryOptions({
-    queryKey: reviewKeys.list({...filters, kind: 'remark'} as any),
+    queryKey: reviewKeys.list({ ...filters, kind: "remark" } as any),
     queryFn: () => reviewApi.remark.list(filters),
     staleTime: 1000 * 60 * 5,
   });

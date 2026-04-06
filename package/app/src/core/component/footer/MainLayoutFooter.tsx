@@ -1,22 +1,22 @@
-import React from 'react';
+import GitHubIcon from "@mui/icons-material/GitHub";
+import TelegramIcon from "@mui/icons-material/Telegram";
 import {
   Box,
+  Button,
   Container,
   Divider,
-  Typography,
-  Link as MUILink,
   IconButton,
-  TextField,
-  Button,
+  Link as MUILink,
   Stack,
+  TextField,
   Tooltip,
-} from '@mui/material';
-import GitHubIcon from '@mui/icons-material/GitHub';
-import TelegramIcon from '@mui/icons-material/Telegram';
-import {useTranslation} from 'react-i18next';
-import {LazyLoadImage} from '@rezics/ui/primitive/image/LazyLoadImage.tsx';
+  Typography,
+} from "@mui/material";
+import { LazyLoadImage } from "@rezics/ui/primitive/image/LazyLoadImage.tsx";
+import type React from "react";
+import { useTranslation } from "react-i18next";
 
-function SectionTitle({children}: {children: React.ReactNode}) {
+function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
     <Typography
       variant="subtitle1"
@@ -41,24 +41,24 @@ function FooterLink({
       href={href}
       underline="hover"
       color="text.secondary"
-      sx={{lineHeight: 1.9, display: 'inline-block'}}
+      sx={{ lineHeight: 1.9, display: "inline-block" }}
     >
       {children}
     </MUILink>
   );
 }
 
-export function MainLayoutFooter({className}: {className?: string}) {
-  const {t} = useTranslation();
+export function MainLayoutFooter({ className }: { className?: string }) {
+  const { t } = useTranslation();
   const year = new Date().getFullYear();
 
   return (
     <Box
       className={className}
       component="footer"
-      sx={{bgcolor: 'background.paper', color: 'text.primary'}}
+      sx={{ bgcolor: "background.paper", color: "text.primary" }}
     >
-      <Divider sx={{borderColor: 'divider'}} />
+      <Divider sx={{ borderColor: "divider" }} />
 
       <Container maxWidth="xl" className="mx-auto px-4">
         {/* Top content */}
@@ -75,26 +75,30 @@ export function MainLayoutFooter({className}: {className?: string}) {
                 <Typography
                   variant="h6"
                   fontWeight={800}
-                  sx={{letterSpacing: 0.2}}
+                  sx={{ letterSpacing: 0.2 }}
                 >
                   Library.Book
                 </Typography>
               </div>
-              <Typography variant="body2" color="text.secondary" sx={{mt: 1.5}}>
-                {t('layout.footer.brand.description')}
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{ mt: 1.5 }}
+              >
+                {t("layout.footer.brand.description")}
                 <br />
-                {t('layout.footer.brand.slogan')}
+                {t("layout.footer.brand.slogan")}
               </Typography>
 
               <Stack
                 direction="row"
                 spacing={1}
-                sx={{mt: 2}}
-                aria-label={t('layout.footer.social.aria')}
+                sx={{ mt: 2 }}
+                aria-label={t("layout.footer.social.aria")}
               >
-                <Tooltip title={t('layout.footer.social.github')}>
+                <Tooltip title={t("layout.footer.social.github")}>
                   <IconButton
-                    aria-label={t('layout.footer.social.github')}
+                    aria-label={t("layout.footer.social.github")}
                     color="primary"
                     size="small"
                     href="https://github.com/REZICS"
@@ -104,9 +108,9 @@ export function MainLayoutFooter({className}: {className?: string}) {
                     <GitHubIcon fontSize="small" />
                   </IconButton>
                 </Tooltip>
-                <Tooltip title={t('layout.footer.social.telegram')}>
+                <Tooltip title={t("layout.footer.social.telegram")}>
                   <IconButton
-                    aria-label={t('layout.footer.social.telegram')}
+                    aria-label={t("layout.footer.social.telegram")}
                     color="primary"
                     size="small"
                     href="https://t.me/REZICSofficial"
@@ -146,65 +150,69 @@ export function MainLayoutFooter({className}: {className?: string}) {
 
             {/* Navigation */}
             <nav
-              aria-label={t('layout.footer.product.aria')}
+              aria-label={t("layout.footer.product.aria")}
               className="md:col-span-1"
             >
-              <SectionTitle>{t('layout.footer.product.title')}</SectionTitle>
+              <SectionTitle>{t("layout.footer.product.title")}</SectionTitle>
               <Stack spacing={0.5}>
                 <FooterLink href="/book">
-                  {t('layout.footer.product.discover')}
+                  {t("layout.footer.product.discover")}
                 </FooterLink>
                 <FooterLink href="/readlist">
-                  {t('layout.footer.product.readlist')}
+                  {t("layout.footer.product.readlist")}
                 </FooterLink>
                 <FooterLink href="/review">
-                  {t('layout.footer.product.reviews')}
+                  {t("layout.footer.product.reviews")}
                 </FooterLink>
                 <FooterLink href="/unit">
-                  {t('layout.footer.product.search')}
+                  {t("layout.footer.product.search")}
                 </FooterLink>
               </Stack>
             </nav>
 
             <nav
-              aria-label={t('layout.footer.resources.aria')}
+              aria-label={t("layout.footer.resources.aria")}
               className="md:col-span-1"
             >
-              <SectionTitle>{t('layout.footer.resources.title')}</SectionTitle>
+              <SectionTitle>{t("layout.footer.resources.title")}</SectionTitle>
               <Stack spacing={0.5}>
                 <FooterLink href="/docs">
-                  {t('layout.footer.resources.docs')}
+                  {t("layout.footer.resources.docs")}
                 </FooterLink>
                 <FooterLink href="/api">
-                  {t('layout.footer.resources.api')}
+                  {t("layout.footer.resources.api")}
                 </FooterLink>
                 <FooterLink href="/changelog">
-                  {t('layout.footer.resources.changelog')}
+                  {t("layout.footer.resources.changelog")}
                 </FooterLink>
                 <FooterLink href="/status">
-                  {t('layout.footer.resources.status')}
+                  {t("layout.footer.resources.status")}
                 </FooterLink>
               </Stack>
             </nav>
 
             {/* Newsletter */}
             <div className="md:col-span-1">
-              <SectionTitle>{t('layout.footer.newsletter.title')}</SectionTitle>
-              <Typography variant="body2" color="text.secondary" sx={{mb: 1.5}}>
-                {t('layout.footer.newsletter.description')}
+              <SectionTitle>{t("layout.footer.newsletter.title")}</SectionTitle>
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{ mb: 1.5 }}
+              >
+                {t("layout.footer.newsletter.description")}
               </Typography>
               <Stack
-                direction={{xs: 'column', sm: 'row'}}
+                direction={{ xs: "column", sm: "row" }}
                 spacing={1}
                 component="form"
-                onSubmit={e => e.preventDefault()}
+                onSubmit={(e) => e.preventDefault()}
               >
                 <TextField
                   size="small"
                   type="email"
-                  placeholder={t('layout.footer.newsletter.email_placeholder')}
+                  placeholder={t("layout.footer.newsletter.email_placeholder")}
                   fullWidth
-                  aria-label={t('layout.footer.newsletter.email_aria')}
+                  aria-label={t("layout.footer.newsletter.email_aria")}
                 />
                 <Button
                   type="submit"
@@ -213,28 +221,28 @@ export function MainLayoutFooter({className}: {className?: string}) {
                   disableElevation
                   disabled
                 >
-                  {t('layout.footer.newsletter.submit')}
+                  {t("layout.footer.newsletter.submit")}
                 </Button>
               </Stack>
             </div>
           </div>
         </Box>
 
-        <Divider sx={{borderColor: 'divider'}} />
+        <Divider sx={{ borderColor: "divider" }} />
 
         {/* Bottom bar */}
         <Box
           className="py-6"
           sx={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            flexWrap: 'wrap',
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            flexWrap: "wrap",
             rowGap: 1.5,
           }}
         >
           <Typography variant="caption" color="text.secondary">
-            {t('layout.footer.copyright', {year})}
+            {t("layout.footer.copyright", { year })}
           </Typography>
 
           <Stack direction="row" spacing={2} alignItems="center">
@@ -244,7 +252,7 @@ export function MainLayoutFooter({className}: {className?: string}) {
               underline="hover"
               variant="caption"
             >
-              {t('layout.footer.legal.privacy')}
+              {t("layout.footer.legal.privacy")}
             </MUILink>
             <MUILink
               href="/terms"
@@ -252,7 +260,7 @@ export function MainLayoutFooter({className}: {className?: string}) {
               underline="hover"
               variant="caption"
             >
-              {t('layout.footer.legal.terms')}
+              {t("layout.footer.legal.terms")}
             </MUILink>
             <MUILink
               href="/contact"
@@ -260,7 +268,7 @@ export function MainLayoutFooter({className}: {className?: string}) {
               underline="hover"
               variant="caption"
             >
-              {t('layout.footer.legal.contact')}
+              {t("layout.footer.legal.contact")}
             </MUILink>
           </Stack>
         </Box>

@@ -1,5 +1,5 @@
-import {JwtAlgorithm} from '../core/jwt-algorithm';
-import type {JwtAudience} from '../core/jwt-claims';
+import type { JwtAlgorithm } from "../core/jwt-algorithm";
+import type { JwtAudience } from "../core/jwt-claims";
 
 export type JwtIssuerDescriptor = {
   issuer: string;

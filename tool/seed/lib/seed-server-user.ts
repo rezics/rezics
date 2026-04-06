@@ -1,4 +1,4 @@
-import type {ServerPrismaClient} from './create-prisma';
+import type { ServerPrismaClient } from "./create-prisma";
 
 export interface SeedServerUserInput {
   unitId: string;
@@ -14,7 +14,7 @@ export async function seedServerUser(
   input: SeedServerUserInput,
 ): Promise<void> {
   await prisma.user.upsert({
-    where: {unitId: input.unitId},
+    where: { unitId: input.unitId },
     update: {},
     create: {
       unitId: input.unitId,
@@ -23,7 +23,7 @@ export async function seedServerUser(
       avatar: input.avatar,
       bio: input.bio,
       permission: input.permission,
-      type: 'USER',
+      type: "USER",
       joinDate: new Date(),
     },
   });

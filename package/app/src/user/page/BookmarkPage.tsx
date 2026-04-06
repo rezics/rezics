@@ -1,20 +1,18 @@
-import React, {useEffect, useMemo, useState} from 'react';
-import {useQuery, useQueryClient} from '@tanstack/react-query';
-import {Select, MenuItem, Chip, Typography, Box, Button} from '@mui/material';
-import type {UnitDTO} from '@rezics/contract';
-
-import {reactionApi, reactionQueries} from '@rezics/api/reaction/reaction';
-import {unitApi} from '@rezics/api/unit/unit';
-import {useUserProfileStore} from '@/user/state';
-import {useAlertStore} from '@app/state/windowAlertStore';
+import { useAlertStore } from "@app/state/windowAlertStore";
+import { Box, Button, Chip, MenuItem, Select, Typography } from "@mui/material";
+import { reactionApi, reactionQueries } from "@rezics/api/reaction/reaction";
+import { unitApi } from "@rezics/api/unit/unit";
+import type { UnitDTO } from "@rezics/contract";
 import {
   UniversalPaginator,
   type UniversalPaginatorHandle,
-} from '@rezics/ui/composite/pagination/Pagination.tsx';
-
-import {UserBookmarkTagsCard} from './UserBookmarkTagsCard';
-import {BookmarkItemCard} from '@/user/component/Bookmark/BookmarkItemCard.tsx';
-import {useNavigate} from '@tanstack/react-router';
+} from "@rezics/ui/composite/pagination/Pagination.tsx";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
+import React, { useEffect, useMemo, useState } from "react";
+import { BookmarkItemCard } from "@/user/component/Bookmark/BookmarkItemCard.tsx";
+import { useUserProfileStore } from "@/user/state";
+import { UserBookmarkTagsCard } from "./UserBookmarkTagsCard";
 
 export type BookmarkEntry = {
   unit: UnitDTO;
@@ -28,18 +26,18 @@ type BookmarkPageQueryResult = {
 };
 
 const UNIT_TYPE_OPTIONS = [
-  '',
-  'BOOK',
-  'REVIEW',
-  'READLIST',
-  'COMMENT',
-  'NOTE',
-  'QUOTE',
-  'TAG',
-  'DOMAIN',
-  'IMAGE',
-  'VIDEO',
-  'CHAPTER',
+  "",
+  "BOOK",
+  "REVIEW",
+  "READLIST",
+  "COMMENT",
+  "NOTE",
+  "QUOTE",
+  "TAG",
+  "DOMAIN",
+  "IMAGE",
+  "VIDEO",
+  "CHAPTER",
 ] as const;
 
 /**
@@ -48,11 +46,11 @@ const UNIT_TYPE_OPTIONS = [
  */
 export const BookmarkPage: React.FC = () => {
   const navigate = useNavigate();
-  const user = useUserProfileStore(state => state.user);
+  const user = useUserProfileStore((state) => state.user);
   const userId = user?.unitId;
-  const {show: showAlert} = useAlertStore();
+  const { show: showAlert } = useAlertStore();
 
-  const [typeFilter, setTypeFilter] = useState<string>('');
+  const [typeFilter, setTypeFilter] = useState<string>("");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [entries, setEntries] = useState<BookmarkEntry[]>([]);
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -64,9 +62,9 @@ export const BookmarkPage: React.FC = () => {
   const [start, setStart] = useState<number>(0);
   const [totalItems, setTotalItems] = useState<number>(0);
 
-  const {data, isLoading, isError} = useQuery<BookmarkPageQueryResult>({
+  const { data, isLoading, isError } = useQuery<BookmarkPageQueryResult>({
     queryKey: [
-      'user-bookmarks',
+      "user-bookmarks",
       userId,
       {
         start,
@@ -76,12 +74,12 @@ export const BookmarkPage: React.FC = () => {
     enabled: !!userId,
     queryFn: async () => {
       if (!userId) {
-        return {entries: [], total: 0};
+        return { entries: [], total: 0 };
       }
 
       const reactionList = await reactionApi.list({
         userId,
-        reaction: 'bookmark',
+        reaction: "bookmark",
         start,
         limit: EXTERNAL_ITEMS_PER_PAGE,
       });
@@ -90,55 +88,55 @@ export const BookmarkPage: React.FC = () => {
       const total = reactionList.total ?? 0;
 
       if (reactions.length === 0) {
-        return {entries: [], total};
+        return { entries: [], total };
       }
 
       const targetIds = Array.from(
-        new Set(reactions.map(r => r.targetId).filter(Boolean)),
+        new Set(reactions.map((r) => r.targetId).filter(Boolean)),
       );
 
       const units = await Promise.all(
-        targetIds.map(async targetId => {
+        targetIds.map(async (targetId) => {
           try {
             const unit = await unitApi.get(targetId);
             return unit;
           } catch (e) {
-            console.error('Failed to load unit for bookmark', targetId, e);
+            console.error("Failed to load unit for bookmark", targetId, e);
             return null;
           }
         }),
       );
 
       const unitMap = new Map<string, UnitDTO>();
-      units.forEach(unit => {
+      units.forEach((unit) => {
         if (unit) {
           unitMap.set(unit.id, unit);
         }
       });
 
       const tagResults = await Promise.all(
-        targetIds.map(async targetId => {
+        targetIds.map(async (targetId) => {
           try {
             const res = await reactionApi.getBookmarkTags(targetId);
-            return {targetId, tags: res.tags ?? []};
+            return { targetId, tags: res.tags ?? [] };
           } catch (e) {
             console.error(
-              'Failed to load bookmark tags for target',
+              "Failed to load bookmark tags for target",
               targetId,
               e,
             );
-            return {targetId, tags: [] as string[]};
+            return { targetId, tags: [] as string[] };
           }
         }),
       );
 
       const tagMap = new Map<string, string[]>();
-      tagResults.forEach(result => {
+      tagResults.forEach((result) => {
         tagMap.set(result.targetId, result.tags);
       });
 
       const nextEntries = reactions
-        .map(reaction => {
+        .map((reaction) => {
           const unit = unitMap.get(reaction.targetId);
           if (!unit) return null;
           const tags = tagMap.get(reaction.targetId) ?? [];
@@ -149,7 +147,7 @@ export const BookmarkPage: React.FC = () => {
             tags,
           };
         })
-        .filter(entry => entry !== null) as BookmarkEntry[];
+        .filter((entry) => entry !== null) as BookmarkEntry[];
 
       return {
         entries: nextEntries,
@@ -170,25 +168,27 @@ export const BookmarkPage: React.FC = () => {
   }, [data]);
 
   // 用户级别的标签库（targetId === userId，对前端来说用 "tag" 作为占位 key）
-  const {data: userTagLibrary} = useQuery(reactionQueries.bookmarkTags('tag'));
+  const { data: userTagLibrary } = useQuery(
+    reactionQueries.bookmarkTags("tag"),
+  );
 
   const allBookmarkTags = useMemo(() => {
     const set = new Set<string>();
     if (userTagLibrary?.tags) {
-      userTagLibrary.tags.forEach(tag => set.add(tag));
+      userTagLibrary.tags.forEach((tag) => set.add(tag));
     }
-    entries.forEach(entry => {
-      entry.tags.forEach(tag => set.add(tag));
+    entries.forEach((entry) => {
+      entry.tags.forEach((tag) => set.add(tag));
     });
     return Array.from(set);
   }, [userTagLibrary, entries]);
 
   const filteredEntries = useMemo(() => {
-    return entries.filter(entry => {
+    return entries.filter((entry) => {
       const matchesType = typeFilter ? entry.unit.type === typeFilter : true;
       const matchesTags =
         selectedTags.length > 0
-          ? selectedTags.every(tag => entry.tags.includes(tag))
+          ? selectedTags.every((tag) => entry.tags.includes(tag))
           : true;
       return matchesType && matchesTags;
     });
@@ -204,7 +204,7 @@ export const BookmarkPage: React.FC = () => {
     const nextStart = (externalPage - 1) * EXTERNAL_ITEMS_PER_PAGE;
     const result = await queryClient.fetchQuery<BookmarkPageQueryResult>({
       queryKey: [
-        'user-bookmarks',
+        "user-bookmarks",
         userId,
         {
           start: nextStart,
@@ -214,7 +214,7 @@ export const BookmarkPage: React.FC = () => {
       queryFn: async () => {
         const reactionList = await reactionApi.list({
           userId,
-          reaction: 'bookmark',
+          reaction: "bookmark",
           start: nextStart,
           limit: EXTERNAL_ITEMS_PER_PAGE,
         });
@@ -223,54 +223,54 @@ export const BookmarkPage: React.FC = () => {
         const total = reactionList.total ?? 0;
 
         if (reactions.length === 0) {
-          return {entries: [], total};
+          return { entries: [], total };
         }
 
         const targetIds = Array.from(
-          new Set(reactions.map(r => r.targetId).filter(Boolean)),
+          new Set(reactions.map((r) => r.targetId).filter(Boolean)),
         );
 
         const units = await Promise.all(
-          targetIds.map(async targetId => {
+          targetIds.map(async (targetId) => {
             try {
               const unit = await unitApi.get(targetId);
               return unit;
             } catch (e) {
-              console.error('Failed to load unit for bookmark', targetId, e);
+              console.error("Failed to load unit for bookmark", targetId, e);
               return null;
             }
           }),
         );
         const unitMap = new Map<string, UnitDTO>();
-        units.forEach(unit => {
+        units.forEach((unit) => {
           if (unit) {
             unitMap.set(unit.id, unit);
           }
         });
 
         const tagResults = await Promise.all(
-          targetIds.map(async targetId => {
+          targetIds.map(async (targetId) => {
             try {
               const res = await reactionApi.getBookmarkTags(targetId);
-              return {targetId, tags: res.tags ?? []};
+              return { targetId, tags: res.tags ?? [] };
             } catch (e) {
               console.error(
-                'Failed to load bookmark tags for target',
+                "Failed to load bookmark tags for target",
                 targetId,
                 e,
               );
-              return {targetId, tags: [] as string[]};
+              return { targetId, tags: [] as string[] };
             }
           }),
         );
 
         const tagMap = new Map<string, string[]>();
-        tagResults.forEach(result => {
+        tagResults.forEach((result) => {
           tagMap.set(result.targetId, result.tags);
         });
 
         const nextEntries = reactions
-          .map(reaction => {
+          .map((reaction) => {
             const unit = unitMap.get(reaction.targetId);
             if (!unit) return null;
             const tags = tagMap.get(reaction.targetId) ?? [];
@@ -281,7 +281,7 @@ export const BookmarkPage: React.FC = () => {
               tags,
             };
           })
-          .filter(entry => entry !== null) as BookmarkEntry[];
+          .filter((entry) => entry !== null) as BookmarkEntry[];
 
         return {
           entries: nextEntries,
@@ -295,14 +295,14 @@ export const BookmarkPage: React.FC = () => {
   }
 
   const handleEntryRemoved = (targetId: string) => {
-    setEntries(prev => prev.filter(entry => entry.unit.id !== targetId));
-    setTotalItems(prev => Math.max(0, prev - 1));
+    setEntries((prev) => prev.filter((entry) => entry.unit.id !== targetId));
+    setTotalItems((prev) => Math.max(0, prev - 1));
   };
 
   const handleEntryTagsUpdated = (targetId: string, tags: string[]) => {
-    setEntries(prev =>
-      prev.map(entry =>
-        entry.unit.id === targetId ? {...entry, tags} : entry,
+    setEntries((prev) =>
+      prev.map((entry) =>
+        entry.unit.id === targetId ? { ...entry, tags } : entry,
       ),
     );
   };
@@ -310,7 +310,7 @@ export const BookmarkPage: React.FC = () => {
   useEffect(() => {
     setCurrentPage(1);
     paginatorRef.current?.resetPaginationPageNumber();
-  }, [typeFilter, selectedTags, filteredEntries]);
+  }, []);
 
   if (!userId) {
     return (
@@ -357,11 +357,11 @@ export const BookmarkPage: React.FC = () => {
           <Select
             size="small"
             value={typeFilter}
-            onChange={e => setTypeFilter(e.target.value)}
+            onChange={(e) => setTypeFilter(e.target.value)}
             displayEmpty
           >
             <MenuItem value="">全部类型</MenuItem>
-            {UNIT_TYPE_OPTIONS.filter(v => v).map(type => (
+            {UNIT_TYPE_OPTIONS.filter((v) => v).map((type) => (
               <MenuItem key={type} value={type}>
                 {type}
               </MenuItem>
@@ -370,7 +370,7 @@ export const BookmarkPage: React.FC = () => {
           <Button
             variant="text"
             color="primary"
-            onClick={() => navigate({to: '/user/me'})}
+            onClick={() => navigate({ to: "/user/me" })}
           >
             返回
           </Button>
@@ -380,16 +380,16 @@ export const BookmarkPage: React.FC = () => {
       {allBookmarkTags.length > 0 && (
         <div className="mb-4 flex flex-wrap gap-1 text-sm">
           <span className="text-gray-500 mr-1">标签：</span>
-          {allBookmarkTags.map(tag => (
+          {allBookmarkTags.map((tag) => (
             <Chip
               key={tag}
               label={tag}
               size="small"
-              color={selectedTags.includes(tag) ? 'primary' : 'default'}
+              color={selectedTags.includes(tag) ? "primary" : "default"}
               onClick={() =>
-                setSelectedTags(prev =>
+                setSelectedTags((prev) =>
                   prev.includes(tag)
-                    ? prev.filter(t => t !== tag)
+                    ? prev.filter((t) => t !== tag)
                     : [...prev, tag],
                 )
               }
@@ -430,18 +430,18 @@ export const BookmarkPage: React.FC = () => {
           >
             {(pageItems: BookmarkEntry[]) => (
               <div className="space-y-3">
-                {pageItems.map(entry => (
+                {pageItems.map((entry) => (
                   <BookmarkItemCard
                     key={entry.unit.id}
                     entry={entry}
                     allBookmarkTags={allBookmarkTags}
-                    onRemoved={targetId => {
+                    onRemoved={(targetId) => {
                       handleEntryRemoved(targetId);
-                      showAlert('已取消收藏');
+                      showAlert("已取消收藏");
                     }}
                     onTagsUpdated={(targetId, tags) => {
                       handleEntryTagsUpdated(targetId, tags);
-                      showAlert('书签标签已更新');
+                      showAlert("书签标签已更新");
                     }}
                   />
                 ))}

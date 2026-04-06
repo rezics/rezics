@@ -1,21 +1,20 @@
 export type {
+  CreateJwtServiceInput,
   JwtServiceDTO,
   JwtServiceListResponse,
-  CreateJwtServiceInput,
   UpdateJwtServiceInput,
-} from '@rezics/contract';
-
-export {authJwtServiceKeys} from './auth-jwt-service.keys';
-export {authJwtServiceApi} from './auth-jwt-service.api';
-export {
-  authJwtServiceQueries,
-  authJwtServiceListQuery,
-  authJwtServiceDetailQuery,
-} from './auth-jwt-service.queries';
+} from "@rezics/contract";
+export { authJwtServiceApi } from "./auth-jwt-service.api";
+export { authJwtServiceKeys } from "./auth-jwt-service.keys";
 export {
   authJwtServiceMutations,
-  useCreateAuthJwtServiceMutation,
-  useUpdateAuthJwtServiceMutation,
   useActivateAuthJwtServiceMutation,
+  useCreateAuthJwtServiceMutation,
   useDeactivateAuthJwtServiceMutation,
-} from './auth-jwt-service.mutations';
+  useUpdateAuthJwtServiceMutation,
+} from "./auth-jwt-service.mutations";
+export {
+  authJwtServiceDetailQuery,
+  authJwtServiceListQuery,
+  authJwtServiceQueries,
+} from "./auth-jwt-service.queries";

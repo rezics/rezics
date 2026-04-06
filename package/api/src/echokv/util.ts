@@ -1,6 +1,6 @@
 export function parseEchoKVResponse<T>(data: any): T {
   let result: T;
-  if (typeof data?.value === 'string') {
+  if (typeof data?.value === "string") {
     try {
       result = JSON.parse(String(data?.value)) as T;
     } catch (error) {

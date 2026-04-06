@@ -1,7 +1,7 @@
-import React from 'react';
-import {Card, CardContent, Typography, Chip} from '@mui/material';
-import type {TagDetailDTO} from '@rezics/api/tag/tag';
-import {MUILink} from '@rezics/ui/primitive/link/MUILink.tsx';
+import { Card, CardContent, Chip, Typography } from "@mui/material";
+import type { TagDetailDTO } from "@rezics/api/tag/tag";
+import { MUILink } from "@rezics/ui/primitive/link/MUILink.tsx";
+import type React from "react";
 
 /**
  * Generic card showing a tag's primary information
@@ -11,18 +11,18 @@ export const TagCard: React.FC<{
   tag: TagDetailDTO;
   onClick?: (tag: TagDetailDTO) => void;
   selected?: boolean;
-}> = ({tag, onClick, selected}) => {
+}> = ({ tag, onClick, selected }) => {
   return (
     <div
       className={
-        'cursor-pointer transition border rounded-md p-3 flex flex-col gap-1 hover:shadow-sm ' +
-        (selected ? 'border-blue-500 shadow' : 'border-gray-200')
+        "cursor-pointer transition border rounded-md p-3 flex flex-col gap-1 hover:shadow-sm " +
+        (selected ? "border-blue-500 shadow" : "border-gray-200")
       }
       role="button"
       tabIndex={0}
       onClick={() => onClick?.(tag)}
-      onKeyDown={e => {
-        if (e.key === 'Enter' || e.key === ' ') {
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
           onClick?.(tag);
         }
@@ -33,7 +33,7 @@ export const TagCard: React.FC<{
         <Chip
           size="small"
           label={tag.name}
-          color={selected ? 'primary' : 'default'}
+          color={selected ? "primary" : "default"}
         />
         {tag.type && (
           <span className="text-xs text-gray-500 font-mono">{tag.type}</span>
@@ -61,12 +61,12 @@ export const TagCard: React.FC<{
 export const TagDetailCard: React.FC<{
   tag: TagDetailDTO;
   onNavigate?: (tag: TagDetailDTO) => void;
-}> = ({tag}) => {
+}> = ({ tag }) => {
   return (
     <Card elevation={0} className="border border-gray-200 rounded-md">
       <CardContent className="space-y-2">
         <Typography variant="h6" component="div">
-          {tag.name}{' '}
+          {tag.name}{" "}
           {tag.type && (
             <span className="ml-2 text-xs font-normal text-gray-500 align-middle">
               {tag.type}
@@ -87,15 +87,15 @@ export const TagDetailCard: React.FC<{
         )}
         <div>
           <MUILink
-            to={'/tag/$unitId'}
-            params={{unitId: tag.id}}
+            to={"/tag/$unitId"}
+            params={{ unitId: tag.id }}
             className="text-sm text-blue-600 hover:underline"
           >
             查看详情 →
           </MUILink>
           <MUILink
-            to={'/book'}
-            search={{tags: tag.name}}
+            to={"/book"}
+            search={{ tags: tag.name }}
             className="text-sm text-blue-600 hover:underline !ml-8"
           >
             搜索标签 →

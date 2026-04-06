@@ -1,15 +1,14 @@
-import * as React from 'react';
-import {useMemo} from 'react';
+import type { ReviewDTO } from "@rezics/contract";
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
-} from '@rezics/ui/shadcn/carousel.tsx';
-
-import {VerticalTwoReviewCard} from '@/review/component/item/VerticalTwoReviewCard';
-import type {ReviewDTO} from '@rezics/contract';
+} from "@rezics/ui/shadcn/carousel.tsx";
+import type * as React from "react";
+import { useMemo } from "react";
+import { VerticalTwoReviewCard } from "@/review/component/item/VerticalTwoReviewCard";
 
 export interface HorizontalReviewCarouselProps {
   reviewList: ReviewDTO[];
@@ -18,14 +17,14 @@ export interface HorizontalReviewCarouselProps {
 
 export const HorizontalReviewCarousel: React.FC<
   HorizontalReviewCarouselProps
-> = ({reviewList, className}) => {
+> = ({ reviewList, className }) => {
   /**
    * 把 review 切成两两一组
    * [1,2,3,4,5] -> [[1,2], [3,4]]
    * 单数会自动丢弃最后一个
    */
   const reviewPairs = useMemo(() => {
-    const pairs: {review1: ReviewDTO; review2: ReviewDTO}[] = [];
+    const pairs: { review1: ReviewDTO; review2: ReviewDTO }[] = [];
 
     for (let i = 0; i < reviewList.length - 1; i += 2) {
       pairs.push({
@@ -43,9 +42,9 @@ export const HorizontalReviewCarousel: React.FC<
 
   return (
     <Carousel
-      className={['w-full', className ?? ''].join(' ')}
+      className={["w-full", className ?? ""].join(" ")}
       opts={{
-        align: 'start',
+        align: "start",
         dragFree: true,
       }}
     >

@@ -1,4 +1,4 @@
-import {t} from 'elysia';
+import { t } from "elysia";
 
 /**
  * <issuer>-<token-type>
@@ -14,11 +14,11 @@ import {t} from 'elysia';
  */
 
 export const NormalizedTokenName = {
-  AUTH_IDENTITY: 'auth-identity-token',
-  AUTH_CONTEXT: 'auth-context-token',
-  REZICS_SESSION: 'rezics-session-token',
-  NOTIFICATION_SESSION: 'notification-session-token',
-  SEARCH_SESSION: 'search-session-token',
+  AUTH_IDENTITY: "auth-identity-token",
+  AUTH_CONTEXT: "auth-context-token",
+  REZICS_SESSION: "rezics-session-token",
+  NOTIFICATION_SESSION: "notification-session-token",
+  SEARCH_SESSION: "search-session-token",
 } as const;
 export type NormalizedTokenName =
   (typeof NormalizedTokenName)[keyof typeof NormalizedTokenName];
@@ -32,11 +32,11 @@ export const normalizedTokenNameSchema = t.Union([
 ]);
 
 export const TokenTransportHeader = {
-  AUTHORIZATION: 'Authorization',
-  AUTH_CONTEXT: 'x-auth-context-token',
-  REZICS_SESSION: 'x-rezics-session-token',
-  NOTIFICATION_SESSION: 'x-notification-session-token',
-  SEARCH_SESSION: 'x-search-session-token',
+  AUTHORIZATION: "Authorization",
+  AUTH_CONTEXT: "x-auth-context-token",
+  REZICS_SESSION: "x-rezics-session-token",
+  NOTIFICATION_SESSION: "x-notification-session-token",
+  SEARCH_SESSION: "x-search-session-token",
 } as const;
 export type TokenTransportHeader =
   (typeof TokenTransportHeader)[keyof typeof TokenTransportHeader];
@@ -47,21 +47,21 @@ export const normalizedTokenTransportSchema = t.Object({
   usesBearer: t.Boolean(),
 });
 export type NormalizedTokenTransport =
-  (typeof normalizedTokenTransportSchema)['static'];
+  (typeof normalizedTokenTransportSchema)["static"];
 
 export const tokenPermissionRoleSchema = t.Union([
-  t.Literal('ROOT'),
-  t.Literal('ADMIN'),
-  t.Literal('USER'),
-  t.Literal('BLOCKED'),
+  t.Literal("ROOT"),
+  t.Literal("ADMIN"),
+  t.Literal("USER"),
+  t.Literal("BLOCKED"),
 ]);
-export type TokenPermissionRole = (typeof tokenPermissionRoleSchema)['static'];
+export type TokenPermissionRole = (typeof tokenPermissionRoleSchema)["static"];
 
 export const sessionPermissionSnapshotSchema = t.Object({
   role: tokenPermissionRoleSchema,
 });
 export type SessionPermissionSnapshot =
-  (typeof sessionPermissionSnapshotSchema)['static'];
+  (typeof sessionPermissionSnapshotSchema)["static"];
 
 export const rezicsSessionTokenClaimsSchema = t.Object({
   unitId: t.String(),
@@ -72,7 +72,7 @@ export const rezicsSessionTokenClaimsSchema = t.Object({
   aud: t.Optional(t.Union([t.String(), t.Array(t.String())])),
 });
 export type RezicsSessionTokenClaims =
-  (typeof rezicsSessionTokenClaimsSchema)['static'];
+  (typeof rezicsSessionTokenClaimsSchema)["static"];
 
 export const authIdentityTokenClaimsSchema = t.Object({
   unitId: t.Optional(t.String()),
@@ -87,7 +87,7 @@ export const authIdentityTokenClaimsSchema = t.Object({
   aud: t.Optional(t.Union([t.String(), t.Array(t.String())])),
 });
 export type AuthIdentityTokenClaims =
-  (typeof authIdentityTokenClaimsSchema)['static'];
+  (typeof authIdentityTokenClaimsSchema)["static"];
 
 export const authContextTokenClaimsSchema = t.Object({
   id: t.String(),
@@ -97,7 +97,7 @@ export const authContextTokenClaimsSchema = t.Object({
   name: t.String(),
   avatar: t.Optional(t.Nullable(t.String())),
   emailVerified: t.Boolean(),
-  verificationStatus: t.Union([t.Literal('verified'), t.Literal('pending')]),
+  verificationStatus: t.Union([t.Literal("verified"), t.Literal("pending")]),
   scope: t.Optional(t.Union([t.String(), t.Array(t.String())])),
   exp: t.Optional(t.Number()),
   iat: t.Optional(t.Number()),
@@ -105,7 +105,7 @@ export const authContextTokenClaimsSchema = t.Object({
   aud: t.Optional(t.Union([t.String(), t.Array(t.String())])),
 });
 export type AuthContextTokenClaims =
-  (typeof authContextTokenClaimsSchema)['static'];
+  (typeof authContextTokenClaimsSchema)["static"];
 
 export const normalizedTokenHeaderMap = {
   [NormalizedTokenName.AUTH_IDENTITY]: TokenTransportHeader.AUTHORIZATION,
@@ -117,11 +117,11 @@ export const normalizedTokenHeaderMap = {
 } satisfies Record<NormalizedTokenName, TokenTransportHeader>;
 
 export const TokenContextKey = {
-  AUTH_IDENTITY: 'authIdentityToken',
-  AUTH_CONTEXT: 'authContextToken',
-  REZICS_SESSION: 'rezicsSessionToken',
-  NOTIFICATION_SESSION: 'notificationSessionToken',
-  SEARCH_SESSION: 'searchSessionToken',
+  AUTH_IDENTITY: "authIdentityToken",
+  AUTH_CONTEXT: "authContextToken",
+  REZICS_SESSION: "rezicsSessionToken",
+  NOTIFICATION_SESSION: "notificationSessionToken",
+  SEARCH_SESSION: "searchSessionToken",
 } as const;
 export type TokenContextKey =
   (typeof TokenContextKey)[keyof typeof TokenContextKey];
@@ -166,7 +166,7 @@ export const normalizedTokenTransportMap = {
  * }
  */
 export const apiTokenScopesSchema = t.Record(t.String(), t.Array(t.String()));
-export type ApiTokenScopes = (typeof apiTokenScopesSchema)['static'];
+export type ApiTokenScopes = (typeof apiTokenScopesSchema)["static"];
 
 /**
  * DTO exposed to clients when listing or inspecting API tokens.
@@ -185,7 +185,7 @@ export const apiTokenDTOSchema = t.Object({
   revoked: t.Optional(t.Boolean()),
   revokedAt: t.Optional(t.Union([t.String(), t.Date(), t.Null()])),
 });
-export type ApiTokenDTO = (typeof apiTokenDTOSchema)['static'];
+export type ApiTokenDTO = (typeof apiTokenDTOSchema)["static"];
 
 /**
  * Request body for creating a new API token.
@@ -200,7 +200,7 @@ export const createApiTokenSchema = t.Object({
    */
   expiresAt: t.Optional(t.String()),
 });
-export type CreateApiTokenInput = (typeof createApiTokenSchema)['static'];
+export type CreateApiTokenInput = (typeof createApiTokenSchema)["static"];
 
 /**
  * Request body for updating an existing API token's metadata.
@@ -211,7 +211,7 @@ export const updateApiTokenSchema = t.Object({
   scopes: t.Optional(apiTokenScopesSchema),
   expiresAt: t.Optional(t.Union([t.String(), t.Null()])),
 });
-export type UpdateApiTokenInput = (typeof updateApiTokenSchema)['static'];
+export type UpdateApiTokenInput = (typeof updateApiTokenSchema)["static"];
 
 /**
  * Response shape for listing tokens of the current user.
@@ -220,7 +220,7 @@ export const apiTokenListResponseSchema = t.Object({
   tokens: t.Array(apiTokenDTOSchema),
 });
 export type ApiTokenListResponse =
-  (typeof apiTokenListResponseSchema)['static'];
+  (typeof apiTokenListResponseSchema)["static"];
 
 /**
  * Response shape for creating a token.
@@ -231,4 +231,4 @@ export const createApiTokenResponseSchema = t.Object({
   tokenInfo: apiTokenDTOSchema,
 });
 export type CreateApiTokenResponse =
-  (typeof createApiTokenResponseSchema)['static'];
+  (typeof createApiTokenResponseSchema)["static"];

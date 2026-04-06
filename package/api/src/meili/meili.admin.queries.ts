@@ -10,11 +10,11 @@
 
 import {
   queryOptions,
+  type UseMutationOptions,
   useMutation,
   useQueryClient,
-  type UseMutationOptions,
-} from '@tanstack/react-query';
-import {apiFetch} from '../react-query/http';
+} from "@tanstack/react-query";
+import { apiFetch } from "../react-query/http";
 
 export type MeiliHealthResponse = {
   status: string;
@@ -58,86 +58,86 @@ export type MeiliSearchKeyResponse = {
 export const meiliAdminApi = {
   // 健康检查（不需要权限）
   health: async (): Promise<MeiliHealthResponse> => {
-    return apiFetch<MeiliHealthResponse>('/meili/health');
+    return apiFetch<MeiliHealthResponse>("/meili/health");
   },
 
   // 索引初始化
   initUsersIndex: async (): Promise<MeiliApiMessageResponse> => {
-    return apiFetch<MeiliApiMessageResponse>('/meili/users/init', {
-      method: 'POST',
+    return apiFetch<MeiliApiMessageResponse>("/meili/users/init", {
+      method: "POST",
     });
   },
   initBooksIndex: async (): Promise<MeiliApiMessageResponse> => {
-    return apiFetch<MeiliApiMessageResponse>('/meili/books/init', {
-      method: 'POST',
+    return apiFetch<MeiliApiMessageResponse>("/meili/books/init", {
+      method: "POST",
     });
   },
   initReadlistsIndex: async (): Promise<MeiliApiMessageResponse> => {
-    return apiFetch<MeiliApiMessageResponse>('/meili/readlists/init', {
-      method: 'POST',
+    return apiFetch<MeiliApiMessageResponse>("/meili/readlists/init", {
+      method: "POST",
     });
   },
   initUnitsIndex: async (): Promise<MeiliApiMessageResponse> => {
-    return apiFetch<MeiliApiMessageResponse>('/meili/units/init', {
-      method: 'POST',
+    return apiFetch<MeiliApiMessageResponse>("/meili/units/init", {
+      method: "POST",
     });
   },
   initFeedbacksIndex: async (): Promise<MeiliApiMessageResponse> => {
-    return apiFetch<MeiliApiMessageResponse>('/meili/feedbacks/init', {
-      method: 'POST',
+    return apiFetch<MeiliApiMessageResponse>("/meili/feedbacks/init", {
+      method: "POST",
     });
   },
 
   // 全量同步
   syncAllBooks: async (): Promise<MeiliTaskResponse> => {
-    return apiFetch<MeiliTaskResponse>('/meili/books/sync', {
-      method: 'POST',
+    return apiFetch<MeiliTaskResponse>("/meili/books/sync", {
+      method: "POST",
     });
   },
   syncAllReadlists: async (): Promise<MeiliTaskResponse> => {
-    return apiFetch<MeiliTaskResponse>('/meili/readlists/sync', {
-      method: 'POST',
+    return apiFetch<MeiliTaskResponse>("/meili/readlists/sync", {
+      method: "POST",
     });
   },
   syncAllUnits: async (): Promise<MeiliTaskResponse> => {
-    return apiFetch<MeiliTaskResponse>('/meili/units/sync', {
-      method: 'POST',
+    return apiFetch<MeiliTaskResponse>("/meili/units/sync", {
+      method: "POST",
     });
   },
   syncAllFeedbacks: async (): Promise<MeiliTaskResponse> => {
-    return apiFetch<MeiliTaskResponse>('/meili/feedbacks/sync', {
-      method: 'POST',
+    return apiFetch<MeiliTaskResponse>("/meili/feedbacks/sync", {
+      method: "POST",
     });
   },
   syncAllUsers: async (): Promise<MeiliTaskResponse> => {
-    return apiFetch<MeiliTaskResponse>('/meili/users/sync', {
-      method: 'POST',
+    return apiFetch<MeiliTaskResponse>("/meili/users/sync", {
+      method: "POST",
     });
   },
 
   // 危险操作：删除全部 units
   deleteAllUnits: async (): Promise<MeiliApiMessageResponse> => {
     // 后端是 GET /meili/units/deleteAllUnits
-    return apiFetch<MeiliApiMessageResponse>('/meili/units/deleteAllUnits');
+    return apiFetch<MeiliApiMessageResponse>("/meili/units/deleteAllUnits");
   },
 
   // Key 管理
   createSearchKey: async (): Promise<MeiliSearchKeyResponse> => {
-    return apiFetch<MeiliSearchKeyResponse>('/meili/keys/search', {
-      method: 'POST',
+    return apiFetch<MeiliSearchKeyResponse>("/meili/keys/search", {
+      method: "POST",
     });
   },
   createAdminKey: async (): Promise<MeiliKey> => {
-    return apiFetch<MeiliKey>('/meili/keys/admin', {
-      method: 'POST',
+    return apiFetch<MeiliKey>("/meili/keys/admin", {
+      method: "POST",
     });
   },
   listKeys: async (): Promise<MeiliKeyListResponse> => {
-    return apiFetch<MeiliKeyListResponse>('/meili/keys');
+    return apiFetch<MeiliKeyListResponse>("/meili/keys");
   },
   deleteKey: async (uid: string): Promise<MeiliApiMessageResponse> => {
     return apiFetch<MeiliApiMessageResponse>(`/meili/keys/${uid}`, {
-      method: 'DELETE',
+      method: "DELETE",
     });
   },
 };
@@ -148,13 +148,13 @@ export const meiliAdminApi = {
 export const meiliAdminQueries = {
   health: () =>
     queryOptions({
-      queryKey: ['meili', 'admin', 'health'],
+      queryKey: ["meili", "admin", "health"],
       queryFn: () => meiliAdminApi.health(),
       staleTime: 1000 * 5,
     }),
   keys: () =>
     queryOptions({
-      queryKey: ['meili', 'admin', 'keys'],
+      queryKey: ["meili", "admin", "keys"],
       queryFn: () => meiliAdminApi.listKeys(),
       staleTime: 1000 * 30,
     }),
@@ -167,7 +167,7 @@ export const meiliAdminQueries = {
 export function useMeiliInitBooksIndexMutation(
   options?: Omit<
     UseMutationOptions<MeiliApiMessageResponse, Error, void>,
-    'mutationFn'
+    "mutationFn"
   >,
 ) {
   return useMutation({
@@ -179,7 +179,7 @@ export function useMeiliInitBooksIndexMutation(
 export function useMeiliInitReadlistsIndexMutation(
   options?: Omit<
     UseMutationOptions<MeiliApiMessageResponse, Error, void>,
-    'mutationFn'
+    "mutationFn"
   >,
 ) {
   return useMutation({
@@ -191,7 +191,7 @@ export function useMeiliInitReadlistsIndexMutation(
 export function useMeiliInitUnitsIndexMutation(
   options?: Omit<
     UseMutationOptions<MeiliApiMessageResponse, Error, void>,
-    'mutationFn'
+    "mutationFn"
   >,
 ) {
   return useMutation({
@@ -203,7 +203,7 @@ export function useMeiliInitUnitsIndexMutation(
 export function useMeiliInitFeedbacksIndexMutation(
   options?: Omit<
     UseMutationOptions<MeiliApiMessageResponse, Error, void>,
-    'mutationFn'
+    "mutationFn"
   >,
 ) {
   return useMutation({
@@ -215,7 +215,7 @@ export function useMeiliInitFeedbacksIndexMutation(
 export function useMeiliInitUsersIndexMutation(
   options?: Omit<
     UseMutationOptions<MeiliApiMessageResponse, Error, void>,
-    'mutationFn'
+    "mutationFn"
   >,
 ) {
   return useMutation({
@@ -227,7 +227,7 @@ export function useMeiliInitUsersIndexMutation(
 export function useMeiliSyncBooksMutation(
   options?: Omit<
     UseMutationOptions<MeiliTaskResponse, Error, void>,
-    'mutationFn'
+    "mutationFn"
   >,
 ) {
   return useMutation({
@@ -239,7 +239,7 @@ export function useMeiliSyncBooksMutation(
 export function useMeiliSyncReadlistsMutation(
   options?: Omit<
     UseMutationOptions<MeiliTaskResponse, Error, void>,
-    'mutationFn'
+    "mutationFn"
   >,
 ) {
   return useMutation({
@@ -251,7 +251,7 @@ export function useMeiliSyncReadlistsMutation(
 export function useMeiliSyncUnitsMutation(
   options?: Omit<
     UseMutationOptions<MeiliTaskResponse, Error, void>,
-    'mutationFn'
+    "mutationFn"
   >,
 ) {
   return useMutation({
@@ -263,7 +263,7 @@ export function useMeiliSyncUnitsMutation(
 export function useMeiliSyncFeedbacksMutation(
   options?: Omit<
     UseMutationOptions<MeiliTaskResponse, Error, void>,
-    'mutationFn'
+    "mutationFn"
   >,
 ) {
   return useMutation({
@@ -275,7 +275,7 @@ export function useMeiliSyncFeedbacksMutation(
 export function useMeiliSyncUsersMutation(
   options?: Omit<
     UseMutationOptions<MeiliTaskResponse, Error, void>,
-    'mutationFn'
+    "mutationFn"
   >,
 ) {
   return useMutation({
@@ -286,7 +286,7 @@ export function useMeiliSyncUsersMutation(
 export function useMeiliDeleteAllUnitsMutation(
   options?: Omit<
     UseMutationOptions<MeiliApiMessageResponse, Error, void>,
-    'mutationFn'
+    "mutationFn"
   >,
 ) {
   return useMutation({
@@ -298,7 +298,7 @@ export function useMeiliDeleteAllUnitsMutation(
 export function useMeiliCreateSearchKeyMutation(
   options?: Omit<
     UseMutationOptions<MeiliSearchKeyResponse, Error, void>,
-    'mutationFn'
+    "mutationFn"
   >,
 ) {
   return useMutation({
@@ -308,7 +308,7 @@ export function useMeiliCreateSearchKeyMutation(
 }
 
 export function useMeiliCreateAdminKeyMutation(
-  options?: Omit<UseMutationOptions<MeiliKey, Error, void>, 'mutationFn'>,
+  options?: Omit<UseMutationOptions<MeiliKey, Error, void>, "mutationFn">,
 ) {
   return useMutation({
     mutationFn: () => meiliAdminApi.createAdminKey(),
@@ -319,7 +319,7 @@ export function useMeiliCreateAdminKeyMutation(
 export function useMeiliDeleteKeyMutation(
   options?: Omit<
     UseMutationOptions<MeiliApiMessageResponse, Error, string>,
-    'mutationFn'
+    "mutationFn"
   >,
 ) {
   const queryClient = useQueryClient();
@@ -329,7 +329,7 @@ export function useMeiliDeleteKeyMutation(
     ...options,
     onSuccess: (data, uid, onMutateResult, context) => {
       // 删除成功后刷新 key 列表
-      queryClient.invalidateQueries({queryKey: ['meili', 'admin', 'keys']});
+      queryClient.invalidateQueries({ queryKey: ["meili", "admin", "keys"] });
       options?.onSuccess?.(data, uid, onMutateResult, context);
     },
   });

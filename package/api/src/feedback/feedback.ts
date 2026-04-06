@@ -11,33 +11,31 @@
  * - feedback.ts: Main entry (this file) - unified exports
  */
 
-// Types
-export type {
-  FeedbackDTO,
-  CreateFeedbackInput,
-  FeedbackListQuery,
-  FeedbackFormData,
-  FeedbackFilters,
-} from './feedback.types';
+// API Client
+export { feedbackApi } from "./feedback.api";
 
 // Query Keys
-export {feedbackKeys} from './feedback.keys';
-
-// API Client
-export {feedbackApi} from './feedback.api';
-
-// Query Configurations
-export {
-  feedbackQueries,
-  feedbackListQuery,
-  myFeedbackListQuery,
-  feedbacksByUserQuery,
-  feedbackDetailQuery,
-} from './feedback.queries';
-
+export { feedbackKeys } from "./feedback.keys";
 // Mutation Hooks
 export {
   feedbackMutations,
   useCreateFeedbackMutation,
   useSetFeedbackResolvedMutation,
-} from './feedback.mutations';
+} from "./feedback.mutations";
+
+// Query Configurations
+export {
+  feedbackDetailQuery,
+  feedbackListQuery,
+  feedbackQueries,
+  feedbacksByUserQuery,
+  myFeedbackListQuery,
+} from "./feedback.queries";
+// Types
+export type {
+  CreateFeedbackInput,
+  FeedbackDTO,
+  FeedbackFilters,
+  FeedbackFormData,
+  FeedbackListQuery,
+} from "./feedback.types";

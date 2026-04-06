@@ -1,7 +1,7 @@
-import type { Extension } from '@codemirror/state';
-import type { KeyBinding } from '@codemirror/view';
-import type { EditorPlugin } from './types';
-import type { ToolbarItem } from '../toolbar/types';
+import type { Extension } from "@codemirror/state";
+import type { KeyBinding } from "@codemirror/view";
+import type { ToolbarItem } from "../toolbar/types";
+import type { EditorPlugin } from "./types";
 
 export interface ResolvedPlugins {
   extensions: Extension[];

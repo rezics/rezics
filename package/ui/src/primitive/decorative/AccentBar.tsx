@@ -1,5 +1,5 @@
-import {Box, useTheme} from '@mui/material';
-import React from 'react';
+import { Box, useTheme } from "@mui/material";
+import type React from "react";
 
 export interface AccentBarProps {
   height?: number;
@@ -22,12 +22,12 @@ export const AccentBar: React.FC<AccentBarProps> = ({
     <Box
       className={className}
       sx={{
-        display: 'inline-block',
+        display: "inline-block",
         width: `${width}px`,
         height: `${height}px`,
         borderRadius: `${radius}px`,
         backgroundColor: color ?? theme.palette.primary.main,
-        verticalAlign: 'middle',
+        verticalAlign: "middle",
         flexShrink: 0,
       }}
     />

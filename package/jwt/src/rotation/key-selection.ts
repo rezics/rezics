@@ -1,4 +1,4 @@
-import type {JwtKeyRecord} from '../contracts/persistence';
+import type { JwtKeyRecord } from "../contracts/persistence";
 
 export function isKeyExpired(key: JwtKeyRecord, now: Date): boolean {
   return key.expiresAt !== null && key.expiresAt.getTime() <= now.getTime();
@@ -16,10 +16,14 @@ export function selectActiveKey(
   keys: JwtKeyRecord[],
   now: Date,
 ): JwtKeyRecord | null {
-  return [...keys]
-    .filter(key => isKeyActive(key, now))
-    .sort((left, right) => right.activatesAt.getTime() - left.activatesAt.getTime())[0] ??
-    null;
+  return (
+    [...keys]
+      .filter((key) => isKeyActive(key, now))
+      .sort(
+        (left, right) =>
+          right.activatesAt.getTime() - left.activatesAt.getTime(),
+      )[0] ?? null
+  );
 }
 
 export function selectPublishedKeys(
@@ -27,6 +31,8 @@ export function selectPublishedKeys(
   now: Date,
 ): JwtKeyRecord[] {
   return [...keys]
-    .filter(key => !isKeyExpired(key, now))
-    .sort((left, right) => right.activatesAt.getTime() - left.activatesAt.getTime());
+    .filter((key) => !isKeyExpired(key, now))
+    .sort(
+      (left, right) => right.activatesAt.getTime() - left.activatesAt.getTime(),
+    );
 }

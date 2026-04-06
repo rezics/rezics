@@ -1,33 +1,28 @@
-import React from 'react';
 import {
   Box,
-  Paper,
-  Stack,
-  Typography,
-  TextField,
   Button,
   MenuItem,
-} from '@mui/material';
-import FeedbackList from '../component/FeedbackList';
-import FeedbackDrawer from '../component/FeedbackDrawer';
-import {useQuery} from '@tanstack/react-query';
-import {feedbackListQuery} from '@rezics/api/feedback/feedback.queries';
+  Stack,
+  TextField,
+  Typography,
+} from "@mui/material";
+import { feedbackListQuery } from "@rezics/api/feedback/feedback.queries";
+import { useQuery } from "@tanstack/react-query";
+import React from "react";
+import FeedbackDrawer from "../component/FeedbackDrawer";
+import FeedbackList from "../component/FeedbackList";
 
 export const FeedbackAdminPage: React.FC = () => {
   const [open, setOpen] = React.useState(false);
-  const [type, setType] = React.useState<'all' | 'mine' | 'user'>('all');
-  const [userId, setUserId] = React.useState<string>('');
-  const [search, setSearch] = React.useState<string>('');
+  const [type, setType] = React.useState<"all" | "mine" | "user">("all");
+  const [userId, setUserId] = React.useState<string>("");
+  const [search, setSearch] = React.useState<string>("");
   const [resolvedFilter, setResolvedFilter] = React.useState<
-    'all' | 'resolved' | 'unresolved'
-  >('all');
+    "all" | "resolved" | "unresolved"
+  >("all");
 
   const resolvedValue =
-    resolvedFilter === 'all'
-      ? undefined
-      : resolvedFilter === 'resolved'
-        ? true
-        : false;
+    resolvedFilter === "all" ? undefined : resolvedFilter === "resolved";
 
   // Prefetch general list for smoother UX
   useQuery(feedbackListQuery());
@@ -35,7 +30,7 @@ export const FeedbackAdminPage: React.FC = () => {
   return (
     <Box className="max-w-6xl mx-auto p-4">
       <Stack
-        direction={{xs: 'column', sm: 'row'}}
+        direction={{ xs: "column", sm: "row" }}
         className="items-center justify-between mb-6 gap-4"
       >
         <Typography variant="h5" className="font-bold">
@@ -47,11 +42,11 @@ export const FeedbackAdminPage: React.FC = () => {
       </Stack>
 
       <div className="pb-4">
-        <Stack direction={{xs: 'column', md: 'row'}} spacing={2}>
+        <Stack direction={{ xs: "column", md: "row" }} spacing={2}>
           <TextField
             label="搜索内容"
             value={search}
-            onChange={e => setSearch(e.target.value)}
+            onChange={(e) => setSearch(e.target.value)}
             className="flex-1"
             size="small"
             placeholder="搜索反馈内容..."
@@ -61,9 +56,9 @@ export const FeedbackAdminPage: React.FC = () => {
             label="状态"
             select
             value={resolvedFilter}
-            onChange={e =>
+            onChange={(e) =>
               setResolvedFilter(
-                e.target.value as 'all' | 'resolved' | 'unresolved',
+                e.target.value as "all" | "resolved" | "unresolved",
               )
             }
             className="w-32"
@@ -79,7 +74,9 @@ export const FeedbackAdminPage: React.FC = () => {
               label="视图"
               select
               value={type}
-              onChange={e => setType(e.target.value as 'all' | 'mine' | 'user')}
+              onChange={(e) =>
+                setType(e.target.value as "all" | "mine" | "user")
+              }
               className="w-32"
               size="small"
             >
@@ -88,11 +85,11 @@ export const FeedbackAdminPage: React.FC = () => {
               <MenuItem value="user">按用户</MenuItem>
             </TextField>
 
-            {type === 'user' && (
+            {type === "user" && (
               <TextField
                 label="用户ID"
                 value={userId}
-                onChange={e => setUserId(e.target.value)}
+                onChange={(e) => setUserId(e.target.value)}
                 placeholder="输入用户ID"
                 className="flex-1"
                 size="small"

@@ -1,18 +1,19 @@
-import React, {useMemo} from 'react';
-import {useQuery} from '@tanstack/react-query';
 import {
   Alert,
+  Avatar,
   CircularProgress,
-  Typography,
   List,
   ListItem,
-  ListItemText,
   ListItemAvatar,
-  Avatar,
-} from '@mui/material';
-import {bookQueries} from '@rezics/api/book/book';
-import type {BookDTO} from '@rezics/contract';
-import {useTranslation} from 'react-i18next';
+  ListItemText,
+  Typography,
+} from "@mui/material";
+import { bookQueries } from "@rezics/api/book/book";
+import type { BookDTO } from "@rezics/contract";
+import { useQuery } from "@tanstack/react-query";
+import type React from "react";
+import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 
 type Book = BookDTO;
 
@@ -29,14 +30,14 @@ export const HomeRankingSection: React.FC<HomeRankingSectionProps> = ({
   title,
   limit = 10,
 }) => {
-  const {t} = useTranslation();
-  const resolvedTitle = title ?? t('page.home.sections.ranking');
+  const { t } = useTranslation();
+  const resolvedTitle = title ?? t("page.home.sections.ranking");
 
-  const {data, isLoading, error} = useQuery(
+  const { data, isLoading, error } = useQuery(
     bookQueries.list({
       start: 0,
       limit,
-      sort: {type: 'updatedAt', order: 'desc'},
+      sort: { type: "updatedAt", order: "desc" },
     }),
   );
 
@@ -84,7 +85,7 @@ export const HomeRankingSection: React.FC<HomeRankingSectionProps> = ({
                   </span>
                 </div>
               }
-              secondary={book.author?.[0]?.name || ''}
+              secondary={book.author?.[0]?.name || ""}
             />
           </ListItem>
         ))}
@@ -94,4 +95,3 @@ export const HomeRankingSection: React.FC<HomeRankingSectionProps> = ({
 };
 
 export default HomeRankingSection;
-

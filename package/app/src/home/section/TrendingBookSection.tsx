@@ -1,8 +1,8 @@
-import React from 'react';
-import {ResponsiveBookGridLimited} from '@/book-library/component/list/ResponsiveBookGridLimited';
-import {useHomeBooks} from './hooks/hooks';
-import {Button} from '@mui/material';
-import {useNavigate} from '@tanstack/react-router';
+import { Button } from "@mui/material";
+import { useNavigate } from "@tanstack/react-router";
+import React from "react";
+import { ResponsiveBookGridLimited } from "@/book-library/component/list/ResponsiveBookGridLimited";
+import { useHomeBooks } from "./hooks/hooks";
 
 export interface TrendingBookSectionProps {
   limit?: number;
@@ -14,15 +14,15 @@ export const TrendingBookSection: React.FC<TrendingBookSectionProps> = ({
   className,
 }) => {
   const navigate = useNavigate();
-  const {items = [], isLoading} = useHomeBooks(limit);
+  const { items = [], isLoading } = useHomeBooks(limit);
 
   const bookList = React.useMemo(() => {
-    return items.map(book => ({
+    return items.map((book) => ({
       id: book.unitId,
       title: book.title,
-      author: book.author?.[0]?.name ?? '',
+      author: book.author?.[0]?.name ?? "",
       description: book.description,
-      coverUrl: book.coverUrl ?? 'https://placehold.co/400x600?text=No+Cover',
+      coverUrl: book.coverUrl ?? "https://placehold.co/400x600?text=No+Cover",
       href: `/book/${book.unitId}`,
     }));
   }, [items]);
@@ -34,7 +34,7 @@ export const TrendingBookSection: React.FC<TrendingBookSectionProps> = ({
         <Button
           variant="text"
           color="primary"
-          onClick={() => navigate({to: '/book'})}
+          onClick={() => navigate({ to: "/book" })}
         >
           更多 →
         </Button>

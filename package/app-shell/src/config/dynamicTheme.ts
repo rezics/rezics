@@ -3,8 +3,8 @@ import {
   hexFromArgb,
   type Scheme,
   themeFromSourceColor,
-} from '@material/material-color-utilities';
-import {type PaletteOptions} from '@mui/material/styles';
+} from "@material/material-color-utilities";
+import type { PaletteOptions } from "@mui/material/styles";
 
 export interface DynamicColorScheme {
   primary: string;
@@ -81,7 +81,7 @@ export function generateDynamicColors(
 
 export function dynamicColorsToPalette(
   colors: DynamicColorScheme,
-  mode: 'light' | 'dark',
+  mode: "light" | "dark",
 ): PaletteOptions {
   return {
     mode,
@@ -131,7 +131,7 @@ export function dynamicColorsToPalette(
       disabled: colors.outline,
     },
     divider: colors.outlineVariant,
-    ...(mode === 'light'
+    ...(mode === "light"
       ? {
           surface: {
             main: colors.surface,
@@ -152,43 +152,43 @@ export function dynamicColorsToPalette(
 }
 
 export const PRESET_COLORS = {
-  red: '#f44336',
-  pink: '#e91e63',
-  purple: '#9c27b0',
-  deepPurple: '#673ab7',
-  indigo: '#3f51b5',
-  blue: '#2196f3',
-  lightBlue: '#03a9f4',
-  cyan: '#00bcd4',
-  teal: '#009688',
-  green: '#4caf50',
-  lightGreen: '#8bc34a',
-  lime: '#cddc39',
-  yellow: '#ffeb3b',
-  amber: '#ffc107',
-  orange: '#ff9800',
-  deepOrange: '#ff5722',
-  brown: '#795548',
-  grey: '#9e9e9e',
-  blueGrey: '#607d8b',
-  coral: '#f4606c',
-  mint: '#00d4aa',
-  lavender: '#b19cd9',
-  peach: '#ffab91',
-  sage: '#a5d6a7',
+  red: "#f44336",
+  pink: "#e91e63",
+  purple: "#9c27b0",
+  deepPurple: "#673ab7",
+  indigo: "#3f51b5",
+  blue: "#2196f3",
+  lightBlue: "#03a9f4",
+  cyan: "#00bcd4",
+  teal: "#009688",
+  green: "#4caf50",
+  lightGreen: "#8bc34a",
+  lime: "#cddc39",
+  yellow: "#ffeb3b",
+  amber: "#ffc107",
+  orange: "#ff9800",
+  deepOrange: "#ff5722",
+  brown: "#795548",
+  grey: "#9e9e9e",
+  blueGrey: "#607d8b",
+  coral: "#f4606c",
+  mint: "#00d4aa",
+  lavender: "#b19cd9",
+  peach: "#ffab91",
+  sage: "#a5d6a7",
 } as const;
 
 export async function extractColorFromImage(imageUrl: string): Promise<string> {
   return new Promise((resolve, reject) => {
     const img = new Image();
-    img.crossOrigin = 'anonymous';
+    img.crossOrigin = "anonymous";
 
     img.onload = () => {
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
 
       if (!ctx) {
-        reject(new Error('无法获取 Canvas 上下文'));
+        reject(new Error("无法获取 Canvas 上下文"));
         return;
       }
 
@@ -199,7 +199,7 @@ export async function extractColorFromImage(imageUrl: string): Promise<string> {
       const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
       const data = imageData.data;
 
-      const colorCounts: {[key: string]: number} = {};
+      const colorCounts: { [key: string]: number } = {};
 
       for (let i = 0; i < data.length; i += 4) {
         const r = data[i];
@@ -226,7 +226,7 @@ export async function extractColorFromImage(imageUrl: string): Promise<string> {
       }
 
       let maxCount = 0;
-      let dominantColor = '128,128,128';
+      let dominantColor = "128,128,128";
 
       for (const [color, count] of Object.entries(colorCounts)) {
         if (count > maxCount) {
@@ -235,19 +235,19 @@ export async function extractColorFromImage(imageUrl: string): Promise<string> {
         }
       }
 
-      const [r, g, b] = dominantColor.split(',').map(Number);
+      const [r, g, b] = dominantColor.split(",").map(Number);
       if (r !== undefined && g !== undefined && b !== undefined) {
-        const hexColor = `#${r.toString(16).padStart(2, '0')}${g
+        const hexColor = `#${r.toString(16).padStart(2, "0")}${g
           .toString(16)
-          .padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
+          .padStart(2, "0")}${b.toString(16).padStart(2, "0")}`;
         resolve(hexColor);
       } else {
-        resolve('#808080');
+        resolve("#808080");
       }
     };
 
     img.onerror = () => {
-      reject(new Error('无法加载图片'));
+      reject(new Error("无法加载图片"));
     };
 
     img.src = imageUrl;
@@ -260,47 +260,47 @@ export function applyDynamicThemeToDOM(
 ) {
   const root = document.documentElement;
 
-  root.style.setProperty('--md-sys-color-primary', colors.primary);
-  root.style.setProperty('--md-sys-color-on-primary', colors.onPrimary);
+  root.style.setProperty("--md-sys-color-primary", colors.primary);
+  root.style.setProperty("--md-sys-color-on-primary", colors.onPrimary);
   root.style.setProperty(
-    '--md-sys-color-primary-container',
+    "--md-sys-color-primary-container",
     colors.primaryContainer,
   );
   root.style.setProperty(
-    '--md-sys-color-on-primary-container',
+    "--md-sys-color-on-primary-container",
     colors.onPrimaryContainer,
   );
 
-  root.style.setProperty('--md-sys-color-secondary', colors.secondary);
-  root.style.setProperty('--md-sys-color-on-secondary', colors.onSecondary);
+  root.style.setProperty("--md-sys-color-secondary", colors.secondary);
+  root.style.setProperty("--md-sys-color-on-secondary", colors.onSecondary);
   root.style.setProperty(
-    '--md-sys-color-secondary-container',
+    "--md-sys-color-secondary-container",
     colors.secondaryContainer,
   );
   root.style.setProperty(
-    '--md-sys-color-on-secondary-container',
+    "--md-sys-color-on-secondary-container",
     colors.onSecondaryContainer,
   );
 
-  root.style.setProperty('--md-sys-color-surface', colors.surface);
-  root.style.setProperty('--md-sys-color-on-surface', colors.onSurface);
+  root.style.setProperty("--md-sys-color-surface", colors.surface);
+  root.style.setProperty("--md-sys-color-on-surface", colors.onSurface);
   root.style.setProperty(
-    '--md-sys-color-surface-variant',
+    "--md-sys-color-surface-variant",
     colors.surfaceVariant,
   );
   root.style.setProperty(
-    '--md-sys-color-on-surface-variant',
+    "--md-sys-color-on-surface-variant",
     colors.onSurfaceVariant,
   );
 
-  root.style.setProperty('--md-sys-color-background', colors.background);
-  root.style.setProperty('--md-sys-color-on-background', colors.onBackground);
+  root.style.setProperty("--md-sys-color-background", colors.background);
+  root.style.setProperty("--md-sys-color-on-background", colors.onBackground);
 
-  root.style.setProperty('--md-sys-color-outline', colors.outline);
+  root.style.setProperty("--md-sys-color-outline", colors.outline);
   root.style.setProperty(
-    '--md-sys-color-outline-variant',
+    "--md-sys-color-outline-variant",
     colors.outlineVariant,
   );
-  root.style.setProperty('--md-sys-color-shadow', colors.shadow);
-  root.style.setProperty('--md-sys-color-scrim', colors.scrim);
+  root.style.setProperty("--md-sys-color-shadow", colors.shadow);
+  root.style.setProperty("--md-sys-color-scrim", colors.scrim);
 }

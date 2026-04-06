@@ -1,8 +1,8 @@
-import {type ReviewDTO} from '@rezics/contract';
-import {SingleReviewShow} from './SingleReview';
-
-import {Box} from '@mui/material';
-import React, {useEffect, useReducer} from 'react';
+import { Box } from "@mui/material";
+import type { ReviewDTO } from "@rezics/contract";
+import type React from "react";
+import { useEffect, useReducer } from "react";
+import { SingleReviewShow } from "./SingleReview";
 
 export type ReviewListProps = {
   reviews: ReviewDTO[];
@@ -15,23 +15,23 @@ type State = {
 };
 
 type Action =
-  | {type: 'setReviews'; reviews: ReviewDTO[]}
-  | {type: 'openReply'; id: string}
-  | {type: 'closeReply'};
+  | { type: "setReviews"; reviews: ReviewDTO[] }
+  | { type: "openReply"; id: string }
+  | { type: "closeReply" };
 
 const reducer = (state: State, action: Action): State => {
   switch (action.type) {
-    case 'setReviews':
-      return {...state, reviews: action.reviews};
+    case "setReviews":
+      return { ...state, reviews: action.reviews };
 
-    case 'openReply':
+    case "openReply":
       return {
         ...state,
         isReplyModalOpen: true,
         currentReplyId: action.id,
       };
 
-    case 'closeReply':
+    case "closeReply":
       return {
         ...state,
         isReplyModalOpen: false,
@@ -43,7 +43,7 @@ const reducer = (state: State, action: Action): State => {
   }
 };
 
-export const ReviewList: React.FC<ReviewListProps> = ({reviews}) => {
+export const ReviewList: React.FC<ReviewListProps> = ({ reviews }) => {
   const [state, dispatch] = useReducer(reducer, {
     reviews: [],
     isReplyModalOpen: false,
@@ -51,20 +51,20 @@ export const ReviewList: React.FC<ReviewListProps> = ({reviews}) => {
   });
 
   useEffect(() => {
-    dispatch({type: 'setReviews', reviews: reviews || []});
+    dispatch({ type: "setReviews", reviews: reviews || [] });
   }, [reviews]);
 
   const handleReply = (reviewId: string) => {
-    dispatch({type: 'openReply', id: reviewId});
+    dispatch({ type: "openReply", id: reviewId });
   };
 
-  const handleCloseReplyModal = () => {
-    dispatch({type: 'closeReply'});
+  const _handleCloseReplyModal = () => {
+    dispatch({ type: "closeReply" });
   };
 
   return (
     <Box>
-      {state.reviews.map(review => (
+      {state.reviews.map((review) => (
         <SingleReviewShow
           key={review.unitId}
           review={review}

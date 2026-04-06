@@ -1,13 +1,12 @@
 import type {
   ReadlistDTO,
-  ReadlistMetadata,
   ReadlistListResponse,
-  UnitListResponse,
-  ReviewDTO,
+  ReadlistMetadata,
+  ReadlistSearchResult,
   ReviewListResponse,
   ReviewMeiliDTO,
-} from '@rezics/contract';
-import type {ReadlistSearchResult} from '@rezics/contract';
+  UnitListResponse,
+} from "@rezics/contract";
 
 /**
  * Map a single Unit (from Meili unit index) into a ReviewDTO.
@@ -25,7 +24,7 @@ export function mapUnitToReviewDTO(unit: any): ReviewMeiliDTO {
     unitId: unit.unitId ?? unit.id,
     bookId: unit.targetUnitId,
     title: unit.title,
-    content: unit.content ?? '',
+    content: unit.content ?? "",
     rating: unit.metadata?.rating,
     created_at: unit.createdAt,
     user: unit.user,
@@ -62,7 +61,7 @@ export function mapUnitListToReviewListResponse(
  */
 export function mapUnitToReadlistDTO(unit: any): ReadlistDTO {
   const metadata = (unit.metadata ?? {}) as ReadlistMetadata | any;
-  const items: {bookUnitId?: string; reviewUnitId?: string}[] = Array.isArray(
+  const items: { bookUnitId?: string; reviewUnitId?: string }[] = Array.isArray(
     metadata.items,
   )
     ? metadata.items
@@ -70,18 +69,18 @@ export function mapUnitToReadlistDTO(unit: any): ReadlistDTO {
 
   const books =
     items
-      .filter(item => !!item.bookUnitId)
-      .map(item => ({
+      .filter((item) => !!item.bookUnitId)
+      .map((item) => ({
         unitId: item.bookUnitId as string,
-        title: '',
+        title: "",
         coverUrl: undefined,
         author: undefined,
       })) ?? [];
 
   const reviews =
     items
-      .filter(item => !!item.reviewUnitId)
-      .map(item => ({
+      .filter((item) => !!item.reviewUnitId)
+      .map((item) => ({
         unitId: item.reviewUnitId as string,
         title: undefined,
         content: undefined,
@@ -91,13 +90,13 @@ export function mapUnitToReadlistDTO(unit: any): ReadlistDTO {
   const order: string[] | undefined =
     (metadata as any).order ??
     items
-      .map(item => item.bookUnitId || item.reviewUnitId)
+      .map((item) => item.bookUnitId || item.reviewUnitId)
       .filter((id): id is string => !!id);
 
   return {
     id: unit.id,
-    title: unit.title ?? '',
-    content: unit.content ?? '',
+    title: unit.title ?? "",
+    content: unit.content ?? "",
     coverUrl: metadata.coverUrl,
     creator: unit.user,
     reactionSummaries: unit.reactionSummaries,

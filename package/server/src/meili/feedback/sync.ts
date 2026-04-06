@@ -1,13 +1,13 @@
-import {prisma} from '#/prisma/client';
-import {searchClient} from '../search-client';
-import type {FeedbackSearchDocument} from '@rezics/contract';
+import type { FeedbackSearchDocument } from "@rezics/contract";
+import { prisma } from "#/prisma/client";
+import { searchClient } from "../search-client";
 
 /**
  * Sync a single feedback (by its id) into the Meilisearch `feedbacks` index.
  */
 export async function syncFeedbackToMeili(id: string): Promise<void> {
   const feedback = await prisma.feedback.findUnique({
-    where: {id},
+    where: { id },
   });
 
   if (!feedback) return;

@@ -1,17 +1,17 @@
-import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
-import ThumbDownIcon from '@mui/icons-material/ThumbDown';
-import ThumbUpIcon from '@mui/icons-material/ThumbUp';
-import {Box, Tooltip, Typography} from '@mui/material';
-import type {ReviewDTO} from '@rezics/contract';
-import React, {useState, useEffect} from 'react';
-import {CollapsibleByLineTextContainer} from '@rezics/ui/primitive/typography/collapsible-text/CollapsibleByLineText.tsx';
+import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
+import ThumbDownIcon from "@mui/icons-material/ThumbDown";
+import ThumbUpIcon from "@mui/icons-material/ThumbUp";
+import { Box, Tooltip, Typography } from "@mui/material";
+import type { ReviewDTO } from "@rezics/contract";
+import { LazyLoadImage } from "@rezics/ui/primitive/image/LazyLoadImage.tsx";
+import { MUILink } from "@rezics/ui/primitive/link/MUILink.tsx";
+import { CollapsibleByLineTextContainer } from "@rezics/ui/primitive/typography/collapsible-text/CollapsibleByLineText.tsx";
+import type React from "react";
+import { useEffect, useState } from "react";
 import {
   parseReactionSummaries,
   type ReactionSummaryDTO,
-} from '@/shared/util/reaction-summaries-parser';
-
-import {LazyLoadImage} from '@rezics/ui/primitive/image/LazyLoadImage.tsx';
-import {MUILink} from '@rezics/ui/primitive/link/MUILink.tsx';
+} from "@/shared/util/reaction-summaries-parser";
 
 export function MetaInfoBadge({
   review,
@@ -27,13 +27,13 @@ export function MetaInfoBadge({
         to={`/remark/${review.unitId}`}
         className="flex items-center gap-1"
         sx={{
-          textDecoration: 'none',
-          color: 'inherit',
+          textDecoration: "none",
+          color: "inherit",
           p: 0.5,
           borderRadius: 1,
-          transition: 'background-color 0.2s ease',
-          '&:hover': {
-            backgroundColor: 'action.hover',
+          transition: "background-color 0.2s ease",
+          "&:hover": {
+            backgroundColor: "action.hover",
           },
         }}
       >
@@ -44,7 +44,7 @@ export function MetaInfoBadge({
         )}
 
         <Typography variant="caption">
-          {review.rating?.toFixed(1) ?? '0.0'}/10 · {review.created_at}
+          {review.rating?.toFixed(1) ?? "0.0"}/10 · {review.created_at}
         </Typography>
       </Box>
     </Tooltip>
@@ -62,15 +62,15 @@ export const SingleRemarkShow: React.FC<SingleRemarkShowProps> = ({
   onLike,
   onDislike,
 }) => {
-  const handleLike = () => {
+  const _handleLike = () => {
     onLike?.(review.unitId);
   };
 
-  const handleDislike = () => {
+  const _handleDislike = () => {
     onDislike?.(review.unitId);
   };
 
-  const isRecommended = review.rating && review.rating >= 3 ? true : false;
+  const isRecommended = !!(review.rating && review.rating >= 3);
 
   const [reactionSummaries, setReactionSummaries] =
     useState<ReactionSummaryDTO>({});
@@ -85,8 +85,8 @@ export const SingleRemarkShow: React.FC<SingleRemarkShowProps> = ({
     <div className="py-4 border-b border-gray-200">
       <div className="flex gap-3">
         <LazyLoadImage
-          src={review.user?.avatar || ''}
-          alt={review.user?.name || ''}
+          src={review.user?.avatar || ""}
+          alt={review.user?.name || ""}
           className="w-10 h-10 rounded-md object-cover mt-2"
         />
 
@@ -94,7 +94,7 @@ export const SingleRemarkShow: React.FC<SingleRemarkShowProps> = ({
           {/* Row 1: User Info and Rating */}
           <div className="flex items-center gap-2">
             <span className="font-semibold text-sm">
-              {review.user?.name || ''}
+              {review.user?.name || ""}
             </span>
             <MetaInfoBadge review={review} isRecommended={isRecommended} />
           </div>
@@ -139,9 +139,9 @@ export const SingleRemarkShow: React.FC<SingleRemarkShowProps> = ({
             </div>
             <Tooltip title="回复数">
               <div className="flex items-center gap-1 cursor-pointer hover:text-blue-500">
-                <ChatBubbleOutlineIcon style={{fontSize: '1rem'}} />
+                <ChatBubbleOutlineIcon style={{ fontSize: "1rem" }} />
                 <span className="text-xs">
-                  {reactionSummaries?.comment ?? 0}{' '}
+                  {reactionSummaries?.comment ?? 0}{" "}
                 </span>
               </div>
             </Tooltip>

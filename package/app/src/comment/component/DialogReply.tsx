@@ -1,12 +1,12 @@
-import React from 'react';
 import {
   Button,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
-} from '@mui/material';
-import {useDialogStore} from '../state/dialogStore';
+} from "@mui/material";
+import type React from "react";
+import { useDialogStore } from "../state/dialogStore";
 
 export type DialogReplyProps = {
   onSubmit?: () => void;
@@ -20,13 +20,13 @@ const DialogReply: React.FC<DialogReplyProps> = ({
   onSubmit,
   title,
   children,
-  cancelText = '取消',
-  confirmText = '确认',
+  cancelText = "取消",
+  confirmText = "确认",
 }) => {
   const dialog = useDialogStore();
 
   const handleClose = () => {
-    dialog.setDialogVisible('dialogId', false);
+    dialog.setDialogVisible("dialogId", false);
   };
 
   const handleSubmit = () => {
@@ -36,7 +36,7 @@ const DialogReply: React.FC<DialogReplyProps> = ({
 
   return (
     <Dialog
-      open={dialog.dialogs['dialogId']?.visible ?? false}
+      open={dialog.dialogs.dialogId?.visible ?? false}
       onClose={handleClose}
     >
       {title && <DialogTitle>{title}</DialogTitle>}

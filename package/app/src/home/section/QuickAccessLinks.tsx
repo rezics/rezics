@@ -1,17 +1,17 @@
-import React, {useMemo} from 'react';
+import { Chip, type ChipProps } from "@mui/material";
+import { echoKvGetQuery } from "@rezics/api/echokv/echokv";
+import { parseEchoKVResponse } from "@rezics/api/echokv/util";
+import { Link } from "@rezics/ui/primitive/link/Link.tsx";
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
-} from '@rezics/ui/shadcn/carousel.tsx';
+} from "@rezics/ui/shadcn/carousel.tsx";
+import { useQuery } from "@tanstack/react-query";
+import type React from "react";
+import { useMemo } from "react";
 
-import {Chip, type ChipProps} from '@mui/material';
-import {echoKvGetQuery} from '@rezics/api/echokv/echokv';
-import {useQuery} from '@tanstack/react-query';
-import {parseEchoKVResponse} from '@rezics/api/echokv/util';
-import {Link} from '@rezics/ui/primitive/link/Link.tsx';
-
-import {DynamicIcon, type IconKey} from './DynamicIcon';
+import { DynamicIcon, type IconKey } from "./DynamicIcon";
 
 export type QuickAccessLinksProps = {
   key?: string;
@@ -24,9 +24,9 @@ type QuickTag = {
 };
 
 export const QuickAccessLinks: React.FC<QuickAccessLinksProps> = ({
-  key = 'book_search_tag_group_quick',
+  key = "book_search_tag_group_quick",
 }) => {
-  const {data} = useQuery(echoKvGetQuery(key));
+  const { data } = useQuery(echoKvGetQuery(key));
 
   const items = useMemo(
     () => parseEchoKVResponse<QuickTag[]>(data) ?? [],
@@ -39,20 +39,20 @@ export const QuickAccessLinks: React.FC<QuickAccessLinksProps> = ({
     <Carousel
       className="w-full"
       opts={{
-        align: 'start',
+        align: "start",
         dragFree: true,
       }}
     >
       <CarouselContent className="-ml-2">
-        {items.map(({name, icon, color}) => (
+        {items.map(({ name, icon, color }) => (
           <CarouselItem key={name} className="pl-2 basis-auto">
-            <Link to="/book" search={{tags: name}}>
+            <Link to="/book" search={{ tags: name }}>
               <Chip
                 icon={<DynamicIcon name={icon as IconKey} className="ml-1" />}
                 label={name}
                 clickable
                 size="small"
-                color={color as ChipProps['color']}
+                color={color as ChipProps["color"]}
               />
             </Link>
           </CarouselItem>

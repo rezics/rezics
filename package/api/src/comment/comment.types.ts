@@ -5,10 +5,10 @@
 
 import type {
   CommentDTO,
+  CommentTreeQuery,
   CreateCommentInput,
   UpdateCommentInput,
-  CommentTreeQuery,
-} from '@rezics/contract';
+} from "@rezics/contract";
 
 /**
  * Filters used for listing comments.
@@ -26,7 +26,7 @@ export type CommentListFilters = {
   /** Page size (limit of items to return) */
   limit?: number;
   /** Sort order, defaults to ascending if omitted */
-  order?: 'asc' | 'desc';
+  order?: "asc" | "desc";
 };
 
 /** Example form shape for creating a comment (UI layer) */
@@ -36,7 +36,7 @@ export type CommentFormData = {
 
 export type {
   CommentDTO,
+  CommentTreeQuery,
   CreateCommentInput,
   UpdateCommentInput,
-  CommentTreeQuery,
 };

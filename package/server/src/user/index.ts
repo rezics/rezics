@@ -6,19 +6,17 @@
  */
 
 // API endpoints
-export {userApi} from './api/user.api';
-
-// Service layer for internal use
-export {userService, UserService} from './service/user.service';
+export { userApi } from "./api/user.api";
+// Utilities
+export { mapUserToDTO, mapUserToPublicProfile } from "./model/mapper";
 
 // Types for internal use
 export type {
-  UserWithRelations,
-  UserFilterOptions,
   JWTPayload,
-} from './model/types';
+  UserFilterOptions,
+  UserWithRelations,
+} from "./model/types";
+// Service layer for internal use
+export { UserService, userService } from "./service/user.service";
 
-// Utilities
-export {mapUserToDTO, mapUserToPublicProfile} from './model/mapper';
-
-export * from './util';
+export * from "./util";

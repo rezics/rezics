@@ -1,56 +1,56 @@
-import {coreInstance} from './core';
-import {authOpenApiRouter} from './openapi';
-import {wellKnownApi} from './well-known/well-known.api';
-import {env} from './env';
-import {openapi} from '@elysiajs/openapi';
-import {cors} from '@elysiajs/cors';
-import {TokenTransportHeader} from '@rezics/contract';
+import { cors } from "@elysiajs/cors";
+import { openapi } from "@elysiajs/openapi";
+import { TokenTransportHeader } from "@rezics/contract";
+import { coreInstance } from "./core";
+import { env } from "./env";
+import { authOpenApiRouter } from "./openapi";
+import { wellKnownApi } from "./well-known/well-known.api";
 
-const isDev = env.NODE_ENV === 'development';
+const isDev = env.NODE_ENV === "development";
 
 const app = coreInstance();
 
 if (isDev) {
-  await import('./utils/logger-hook');
+  await import("./utils/logger-hook");
   app
-    .use(openapi({exclude: {staticFile: false}}))
-    .trace(async ({onHandle, context}) => {
+    .use(openapi({ exclude: { staticFile: false } }))
+    .trace(async ({ onHandle, context }) => {
       // 监听 handle 阶段
-      onHandle(({begin, onStop}) => {
-        const {route, params, request} = context;
+      onHandle(({ begin, onStop }) => {
+        const { route, params, request } = context;
 
-        onStop(({end}) => {
+        onStop(({ end }) => {
           console.log(
             `[${request.method}] ${route} took ${end - begin}ms`,
-            'params:',
+            "params:",
             params,
           );
         });
       });
     })
-    .onError(({code, error, set}) => {
-      console.log('[Error] ', code, error, set);
+    .onError(({ code, error, set }) => {
+      console.log("[Error] ", code, error, set);
     });
 }
 
 const devOrigins = [
-  'http://localhost:35001',
-  'http://localhost:35002',
-  'http://localhost:8000',
+  "http://localhost:35001",
+  "http://localhost:35002",
+  "http://localhost:8000",
 ];
 
-const prodOrigins = ['https://book.rezics.com', 'https://rezics.com'];
+const prodOrigins = ["https://book.rezics.com", "https://rezics.com"];
 
 app
   .use(
     cors({
       origin: isDev ? devOrigins : prodOrigins,
       credentials: true,
-      methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+      methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
       allowedHeaders: [
-        'content-type',
-        'authorization',
-        'x-internal-auth-token',
+        "content-type",
+        "authorization",
+        "x-internal-auth-token",
         TokenTransportHeader.AUTH_CONTEXT,
         TokenTransportHeader.REZICS_SESSION,
         TokenTransportHeader.NOTIFICATION_SESSION,
@@ -59,20 +59,20 @@ app
       maxAge: 600,
     }),
   )
-  .onError(({error, set}) => {
+  .onError(({ error, set }) => {
     if (!set.status) {
       set.status = 500;
     }
 
     return {
-      error: error instanceof Error ? error.message : 'Internal Server Error',
+      error: error instanceof Error ? error.message : "Internal Server Error",
     };
   })
   .use(wellKnownApi)
   .use(authOpenApiRouter)
-  .get('/health', () => ({status: 'ok'}));
+  .get("/health", () => ({ status: "ok" }));
 
-console.log('env.PORT', env.PORT);
+console.log("env.PORT", env.PORT);
 const port = Number(env.PORT);
 app.listen(port);
 

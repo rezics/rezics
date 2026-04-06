@@ -1,14 +1,14 @@
-import {faker} from '@faker-js/faker';
-import type {PrismaClient} from '#/prisma/generated/client.js';
-import {UnitType, UnitStatus} from '#/prisma/generated/client.js';
-import type {CreatedUser} from './types.js';
-import {pickN, randomInt} from './utils.js';
+import { faker } from "@faker-js/faker";
+import type { PrismaClient } from "#/prisma/generated/client.js";
+import { UnitStatus, UnitType } from "#/prisma/generated/client.js";
+import type { CreatedUser } from "./types.js";
+import { pickN, randomInt } from "./utils.js";
 
 /**
  * Tag types available in the system
  */
 // const TAG_TYPES = ['general', 'genre', 'author', 'system'] as const;
-const TAG_TYPES = ['book'] as const;
+const TAG_TYPES = ["book"] as const;
 
 export async function seedTagDomains(
   prisma: PrismaClient,
@@ -29,7 +29,7 @@ export async function seedTagDomains(
         title: `Tag Domain: ${name}`,
         content: `This is a tag domain`,
         metadata: {},
-        publishedAt: faker.date.past({years: 1}),
+        publishedAt: faker.date.past({ years: 1 }),
       },
     });
     tagDomainIds.push(unit.id);
@@ -69,9 +69,9 @@ export async function seedTags(
         title: `Tag: ${name}`,
         content: `This is a ${type} tag`,
         metadata: {},
-        publishedAt: faker.date.past({years: 1}),
+        publishedAt: faker.date.past({ years: 1 }),
         domains: {
-          connect: pickN(tagDomainIds, randomInt(1, 4)).map(unitId => ({
+          connect: pickN(tagDomainIds, randomInt(1, 4)).map((unitId) => ({
             id: unitId,
           })),
         },

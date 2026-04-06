@@ -1,8 +1,8 @@
-import { markdown, markdownLanguage } from '@codemirror/lang-markdown';
-import { GFM } from '@lezer/markdown';
-import type { Extension } from '@codemirror/state';
-import type { LanguageDescription } from '@codemirror/language';
-import { markdownHighlighting } from './highlight';
+import { markdown, markdownLanguage } from "@codemirror/lang-markdown";
+import type { LanguageDescription } from "@codemirror/language";
+import type { Extension } from "@codemirror/state";
+import { GFM } from "@lezer/markdown";
+import { markdownHighlighting } from "./highlight";
 
 export interface MarkdownLanguageConfig {
   codeLanguages?:

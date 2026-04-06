@@ -1,29 +1,29 @@
-import postgres from 'postgres';
+import postgres from "postgres";
 
 const sql = postgres({
-  host: 'localhost',
+  host: "localhost",
   port: 5432,
-  username: 'postgres',
-  password: '123456',
-  database: 'library',
-  replication: 'database', // 必须！
+  username: "postgres",
+  password: "123456",
+  database: "library",
+  replication: "database", // 必须！
 });
 
 async function main() {
-  console.log('Starting CDC...');
+  console.log("Starting CDC...");
 
   // 订阅 slot
   const replication = sql.subscribe(
-    'library_cdc_slot',
+    "library_cdc_slot",
     {
-      decoder: 'pgoutput',
+      decoder: "pgoutput",
       temporary: false,
     },
-    (lsn, log) => {
+    (_lsn, log) => {
       // 解析 pgoutput 的 JSON
       const msg = log.json();
 
-      console.log('----- CDC EVENT -----');
+      console.log("----- CDC EVENT -----");
       console.log(JSON.stringify(msg, null, 2));
 
       // 你可以在这里：
@@ -35,7 +35,7 @@ async function main() {
   );
 
   // 保持心跳
-  replication.on('error', console.error);
+  replication.on("error", console.error);
 }
 
 main();

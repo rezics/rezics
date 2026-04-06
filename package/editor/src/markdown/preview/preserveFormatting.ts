@@ -1,5 +1,5 @@
-import MarkdownIt from 'markdown-it';
-import {sourceLinePlugin} from './sourceLine';
+import MarkdownIt from "markdown-it";
+import { sourceLinePlugin } from "./sourceLine";
 
 export interface PreserveFormatOptions {
   preserveSpaces?: boolean;
@@ -24,7 +24,11 @@ function emptyLinesCore(state: {
     map?: [number, number] | null;
     meta?: unknown;
   }>;
-  Token: new (type: string, tag: string, nesting: number) => {
+  Token: new (
+    type: string,
+    tag: string,
+    nesting: number,
+  ) => {
     type: string;
     map?: [number, number] | null;
     meta?: unknown;
@@ -38,7 +42,7 @@ function emptyLinesCore(state: {
       if (prevEnd >= 0) {
         const gap = token.map[0] - prevEnd;
         if (gap >= 2) {
-          const spacer = new state.Token('empty_lines', '', 0);
+          const spacer = new state.Token("empty_lines", "", 0);
           spacer.meta = { count: gap };
           out.push(spacer);
         }
@@ -60,18 +64,22 @@ function preserveSpacesCore(state: {
     type: string;
     children?: Array<{ type: string; content: string }>;
   }>;
-  Token: new (type: string, tag: string, nesting: number) => {
+  Token: new (
+    type: string,
+    tag: string,
+    nesting: number,
+  ) => {
     type: string;
     content: string;
   };
 }): void {
   for (const blockToken of state.tokens) {
-    if (blockToken.type !== 'inline' || !blockToken.children) continue;
+    if (blockToken.type !== "inline" || !blockToken.children) continue;
 
     const newChildren: Array<{ type: string; content: string }> = [];
 
     for (const token of blockToken.children) {
-      if (token.type !== 'text' || !token.content.includes('  ')) {
+      if (token.type !== "text" || !token.content.includes("  ")) {
         newChildren.push(token);
         continue;
       }
@@ -81,11 +89,11 @@ function preserveSpacesCore(state: {
         if (part.length === 0) continue;
 
         if (/ {2,}/.test(part)) {
-          const t = new state.Token('html_inline', '', 0);
-          t.content = '&nbsp;'.repeat(part.length);
+          const t = new state.Token("html_inline", "", 0);
+          t.content = "&nbsp;".repeat(part.length);
           newChildren.push(t);
         } else {
-          const t = new state.Token('text', '', 0);
+          const t = new state.Token("text", "", 0);
           t.content = part;
           newChildren.push(t);
         }
@@ -99,7 +107,7 @@ function preserveSpacesCore(state: {
 /** markdown-it plugin: preserves extra blank lines as a height-compensated spacer. */
 export function emptyLinesPlugin(md: MarkdownIt): void {
   md.core.ruler.push(
-    'empty_lines',
+    "empty_lines",
     emptyLinesCore as Parameters<typeof md.core.ruler.push>[1],
   );
   md.renderer.rules.empty_lines = (tokens, idx) => {
@@ -115,7 +123,7 @@ export function emptyLinesPlugin(md: MarkdownIt): void {
 /** markdown-it plugin: preserves runs of 2+ inline spaces as `&nbsp;` entities. */
 export function preserveSpacesPlugin(md: MarkdownIt): void {
   md.core.ruler.push(
-    'preserve_spaces',
+    "preserve_spaces",
     preserveSpacesCore as Parameters<typeof md.core.ruler.push>[1],
   );
 }
@@ -137,7 +145,9 @@ export function preserveFormattingPlugin(
 }
 
 /** Returns a fully configured `MarkdownIt` instance for novel/prose content. */
-export function createNovelRenderer(options?: NovelRendererOptions): MarkdownIt {
+export function createNovelRenderer(
+  options?: NovelRendererOptions,
+): MarkdownIt {
   return new MarkdownIt({
     html: options?.html ?? false,
     linkify: options?.linkify ?? true,

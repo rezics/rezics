@@ -1,12 +1,11 @@
-import React from 'react';
-
-import {TextField} from '@mui/material';
+import { TextField } from "@mui/material";
+import type React from "react";
 
 interface BookTitleEditorProps {
   title: string;
 }
 
-export const BookTitleEditor: React.FC<BookTitleEditorProps> = ({title}) => {
+export const BookTitleEditor: React.FC<BookTitleEditorProps> = ({ title }) => {
   return (
     <div>
       <TextField

@@ -1,7 +1,8 @@
-import React, {useState, useCallback} from 'react';
-import {Chip, Typography} from '@mui/material';
-import type {TagDetailDTO} from '@rezics/api/tag/tag';
-import {TagDetailCard} from './TagCards';
+import { Chip, Typography } from "@mui/material";
+import type { TagDetailDTO } from "@rezics/api/tag/tag";
+import type React from "react";
+import { useCallback, useState } from "react";
+import { TagDetailCard } from "./TagCards";
 
 interface SingleTagChipProps {
   tag: TagDetailDTO;
@@ -22,7 +23,7 @@ export function SingleTagChip({
   const handleClick = useCallback(
     (e: React.MouseEvent, tag: TagDetailDTO) => {
       if (e.ctrlKey) {
-        window.open(`/tags/${tag.id}`, '_blank');
+        window.open(`/tags/${tag.id}`, "_blank");
         return;
       }
       setActiveId(tag.id === activeId ? null : tag.id);
@@ -36,8 +37,8 @@ export function SingleTagChip({
         label={tag.name}
         size="small"
         clickable
-        color={tag.id === activeId ? 'primary' : 'default'}
-        onClick={e => handleClick(e, tag)}
+        color={tag.id === activeId ? "primary" : "default"}
+        onClick={(e) => handleClick(e, tag)}
       />
       {activeId && (
         <div className="mt-4">
@@ -56,16 +57,16 @@ export const TagList: React.FC<{
   tags: TagDetailDTO[];
   className?: string;
   autoSelectFirst?: boolean;
-}> = ({tags, className, autoSelectFirst}) => {
+}> = ({ tags, className, autoSelectFirst }) => {
   const [activeId, setActiveId] = useState<string | null>(
     autoSelectFirst && tags.length > 0 ? tags[0].id : null,
   );
-  const activeTag = tags.find(t => t.id === activeId) || null;
+  const activeTag = tags.find((t) => t.id === activeId) || null;
 
   const handleClick = useCallback(
     (e: React.MouseEvent, tag: TagDetailDTO) => {
       if (e.ctrlKey) {
-        window.open(`/tags/${tag.id}`, '_blank');
+        window.open(`/tags/${tag.id}`, "_blank");
         return;
       }
       setActiveId(tag.id === activeId ? null : tag.id);
@@ -86,14 +87,14 @@ export const TagList: React.FC<{
   return (
     <div className={className}>
       <div className="flex flex-wrap gap-2">
-        {tags.map(tag => (
+        {tags.map((tag) => (
           <div key={tag.id} className="flex items-center">
             <Chip
               label={tag.name}
               size="small"
               clickable
-              color={tag.id === activeId ? 'primary' : 'default'}
-              onClick={e => handleClick(e, tag)}
+              color={tag.id === activeId ? "primary" : "default"}
+              onClick={(e) => handleClick(e, tag)}
             />
           </div>
         ))}

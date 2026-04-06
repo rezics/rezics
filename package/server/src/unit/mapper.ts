@@ -1,6 +1,6 @@
-import type {User} from '#/prisma/client';
-import type {PublicUser, UnitDTO} from '@rezics/contract';
-import type {UnitWithRelations} from './types';
+import type { PublicUser, UnitDTO } from "@rezics/contract";
+import type { User } from "#/prisma/client";
+import type { UnitWithRelations } from "./types";
 
 /**
  * Sanitize user data for public response
@@ -37,7 +37,7 @@ export function mapUnitToDTO(unit: UnitWithRelations): UnitDTO {
     targetUnitId: unit.targetUnitId ?? undefined,
     createdAt: unit.createdAt,
     updatedAt: unit.updatedAt,
-    tags: unit.tags?.map(t => t.name) ?? [],
+    tags: unit.tags?.map((t) => t.name) ?? [],
     reactionSummaries: unit.reactionSummaries,
   } as UnitDTO;
 }

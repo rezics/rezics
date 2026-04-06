@@ -1,11 +1,11 @@
-import {SignJWT} from 'jose';
-import type {AuthContextTokenClaims} from '@rezics/contract';
-import {getAuthPrivateSigningKey} from './service';
+import type { AuthContextTokenClaims } from "@rezics/contract";
+import { SignJWT } from "jose";
 import {
   getAuthJwtAudience,
   getAuthJwtIssuer,
   getAuthJwtTtlSeconds,
-} from './options';
+} from "./options";
+import { getAuthPrivateSigningKey } from "./service";
 
 type AuthUserContext = {
   id: string;
@@ -31,14 +31,14 @@ export function buildAuthContextClaims(
     name: user.name,
     avatar,
     emailVerified: user.emailVerified,
-    verificationStatus: user.emailVerified ? 'verified' : 'pending',
-    scope: 'user',
+    verificationStatus: user.emailVerified ? "verified" : "pending",
+    scope: "user",
   };
 }
 
 export async function signAuthContextToken(
   user: AuthUserContext,
-): Promise<{token: string; claims: AuthContextTokenClaims}> {
+): Promise<{ token: string; claims: AuthContextTokenClaims }> {
   const claims = buildAuthContextClaims(user);
   const signingKey = await getAuthPrivateSigningKey();
 

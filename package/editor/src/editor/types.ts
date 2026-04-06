@@ -1,11 +1,11 @@
-import type { Extension } from '@codemirror/state';
-import type { EditorView, KeyBinding } from '@codemirror/view';
-import type { ReactNode, RefCallback } from 'react';
-import type { EditorPlugin } from '../core/types';
-import type { ToolbarItem } from '../toolbar/types';
-import type { MentionConfig } from '../markdown/mention/index';
-import type { EmojiConfig } from '../markdown/emoji/index';
-import type { PreviewConfig } from '../markdown/preview/index';
+import type { Extension } from "@codemirror/state";
+import type { EditorView, KeyBinding } from "@codemirror/view";
+import type { ReactNode, RefCallback } from "react";
+import type { EditorPlugin } from "../core/types";
+import type { EmojiConfig } from "../markdown/emoji/index";
+import type { MentionConfig } from "../markdown/mention/index";
+import type { PreviewConfig } from "../markdown/preview/index";
+import type { ToolbarItem } from "../toolbar/types";
 
 export interface ToolbarOverride {
   /** Replace default icons by toolbar item name */

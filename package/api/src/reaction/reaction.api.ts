@@ -3,29 +3,29 @@
  * Direct API communication layer for reaction endpoints
  */
 
-import type {ReactionListQuery} from '@rezics/contract';
-import {buildQueryString} from '../utils/buildQuery';
-import {apiFetch} from '../react-query/http';
+import type { ReactionListQuery } from "@rezics/contract";
+import { apiFetch } from "../react-query/http";
+import { buildQueryString } from "../utils/buildQuery";
 import type {
+  BookmarkTagsResponse,
+  BookmarkTagsUpdateInput,
+  ReactionCreateInput,
+  ReactionDeleteQuery,
   ReactionDTO,
   ReactionListResponse,
   ReactionMultiSummaryResponse,
-  ReactionCreateInput,
-  ReactionUpdateInput,
-  ReactionDeleteQuery,
-  ReactionSummaryResponse,
   ReactionMyResponse,
-  BookmarkTagsResponse,
-  BookmarkTagsUpdateInput,
   ReactionSummary,
-} from './reaction.types.ts';
+  ReactionSummaryResponse,
+  ReactionUpdateInput,
+} from "./reaction.types.ts";
 
 function transformReactionSummaryResponse(response: {
   targetIds: string[];
   summaries: ReactionSummary[];
 }): ReactionMultiSummaryResponse {
   const summaries: Record<string, Record<string, number>> = {};
-  response.summaries.forEach(summary => {
+  response.summaries.forEach((summary) => {
     if (!summaries[summary.targetId]) {
       summaries[summary.targetId] = {};
     }
@@ -61,7 +61,7 @@ export const reactionApi = {
    */
   summary: async (targetId: string): Promise<ReactionSummaryResponse> => {
     return apiFetch<ReactionSummaryResponse>(
-      `/reactions/summary${buildQueryString({targetId})}`,
+      `/reactions/summary${buildQueryString({ targetId })}`,
     );
   },
 
@@ -75,12 +75,12 @@ export const reactionApi = {
     targetIds: string[],
   ): Promise<ReactionMultiSummaryResponse> => {
     const qs = new URLSearchParams();
-    targetIds.forEach(id => qs.append('targetIds', id));
+    targetIds.forEach((id) => qs.append("targetIds", id));
     const queryString = qs.toString();
     const response = await apiFetch<{
       targetIds: string[];
       summaries: ReactionSummary[];
-    }>(`/reactions/summary${queryString ? `?${queryString}` : ''}`);
+    }>(`/reactions/summary${queryString ? `?${queryString}` : ""}`);
     return transformReactionSummaryResponse(response);
   },
 
@@ -112,8 +112,8 @@ export const reactionApi = {
    * @returns {Promise<ReactionDTO>} The created (or existing) reaction row
    */
   create: async (input: ReactionCreateInput): Promise<ReactionDTO> => {
-    return apiFetch<ReactionDTO>('/reactions', {
-      method: 'POST',
+    return apiFetch<ReactionDTO>("/reactions", {
+      method: "POST",
       body: JSON.stringify(input),
     });
   },
@@ -127,7 +127,7 @@ export const reactionApi = {
    */
   update: async (input: ReactionUpdateInput): Promise<ReactionDTO> => {
     return apiFetch<ReactionDTO>(`/reactions`, {
-      method: 'PUT',
+      method: "PUT",
       body: JSON.stringify(input),
     });
   },
@@ -138,10 +138,10 @@ export const reactionApi = {
    * @param {ReactionDeleteQuery} query - Target and reaction to remove
    * @returns {Promise<{deleted: boolean}>} Whether a row was actually deleted
    */
-  remove: async (query: ReactionDeleteQuery): Promise<{deleted: boolean}> => {
-    return apiFetch<{deleted: boolean}>(
+  remove: async (query: ReactionDeleteQuery): Promise<{ deleted: boolean }> => {
+    return apiFetch<{ deleted: boolean }>(
       `/reactions${buildQueryString(query)}`,
-      {method: 'DELETE'},
+      { method: "DELETE" },
     );
   },
 
@@ -163,10 +163,10 @@ export const reactionApi = {
   setBookmarkTags: async (
     input: BookmarkTagsUpdateInput,
   ): Promise<BookmarkTagsResponse> => {
-    const {targetId, tags} = input;
+    const { targetId, tags } = input;
     return apiFetch<BookmarkTagsResponse>(`/reactions/bookmarks/${targetId}`, {
-      method: 'PUT',
-      body: JSON.stringify({tags}),
+      method: "PUT",
+      body: JSON.stringify({ tags }),
     });
   },
 };

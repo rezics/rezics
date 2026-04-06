@@ -41,7 +41,7 @@ export type ChangeEmailConfirmationPayload = {
   token: string;
 };
 
-export type NotificationChannel = 'email' | 'telegram';
+export type NotificationChannel = "email" | "telegram";
 
 export type AuthNotificationServiceOptions = {
   telegram?: {

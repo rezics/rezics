@@ -1,9 +1,10 @@
-import React, {useState} from 'react';
-import {IconButton, Menu} from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+import AddIcon from "@mui/icons-material/Add";
+import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
+import { IconButton, Menu } from "@mui/material";
+import type React from "react";
+import { useState } from "react";
 
-import {CreateMenuItem} from './CreateMenuItem';
+import { CreateMenuItem } from "./CreateMenuItem";
 
 export const CreateMenu: React.FC = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -24,7 +25,7 @@ export const CreateMenu: React.FC = () => {
         onClick={handleOpen}
         sx={{
           borderRadius: 1,
-          border: theme => `1px solid ${theme.palette.divider}`,
+          border: (theme) => `1px solid ${theme.palette.divider}`,
           px: 1,
           gap: 0.5,
         }}
@@ -38,12 +39,12 @@ export const CreateMenu: React.FC = () => {
         open={open}
         onClose={handleClose}
         anchorOrigin={{
-          vertical: 'bottom',
-          horizontal: 'right',
+          vertical: "bottom",
+          horizontal: "right",
         }}
         transformOrigin={{
-          vertical: 'top',
-          horizontal: 'right',
+          vertical: "top",
+          horizontal: "right",
         }}
       >
         <CreateMenuItem onClose={handleClose} />

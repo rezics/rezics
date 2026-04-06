@@ -1,5 +1,5 @@
 /**
  * Reaction Service - Exports
  */
-export {reactionApi} from './reaction.api';
-export {reactionService, ReactionService} from './reaction.service';
+export { reactionApi } from "./reaction.api";
+export { ReactionService, reactionService } from "./reaction.service";

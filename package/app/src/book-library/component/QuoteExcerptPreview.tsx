@@ -1,11 +1,10 @@
-import {isEmptyValue} from '@/shared/util/data-check.ts';
-import React from 'react';
-import {QuoteExcerptListContainer} from '@/review/component/QuoteExcerptList.tsx';
-
-import {useQuery} from '@tanstack/react-query';
-import {buildMeiliUnitQuery} from '@rezics/api/meili/meili.queries';
-import {UnitType} from '@rezics/contract';
-import {useTranslation} from 'react-i18next';
+import { buildMeiliUnitQuery } from "@rezics/api/meili/meili.queries";
+import { UnitType } from "@rezics/contract";
+import { useQuery } from "@tanstack/react-query";
+import type React from "react";
+import { useTranslation } from "react-i18next";
+import { QuoteExcerptListContainer } from "@/review/component/QuoteExcerptList.tsx";
+import { isEmptyValue } from "@/shared/util/data-check.ts";
 
 /** Props for QuoteExcerptPreview component. */
 export type QuoteExcerptPreviewProps = {
@@ -22,24 +21,24 @@ export const QuoteExcerptPreview: React.FC<QuoteExcerptPreviewProps> = ({
   id,
   quoteNumber = 3,
 }) => {
-  const {t} = useTranslation();
-  const {data, isLoading, error} = useQuery(
+  const { t } = useTranslation();
+  const { data, isLoading, error } = useQuery(
     buildMeiliUnitQuery({
       kind: UnitType.QUOTE,
       start: 0,
       targetUnitId: id,
-      keyword: '',
+      keyword: "",
       limit: quoteNumber,
-      mapFn: unitResp => unitResp,
-      options: {enabled: !!id},
+      mapFn: (unitResp) => unitResp,
+      options: { enabled: !!id },
     }),
   );
 
-  if (isLoading) return <div>{t('common.loading')}</div>;
+  if (isLoading) return <div>{t("common.loading")}</div>;
   if (error && !isEmptyValue(error))
     return (
       <div>
-        {t('common.error_generic')} {JSON.stringify(error)}
+        {t("common.error_generic")} {JSON.stringify(error)}
       </div>
     );
 
@@ -56,4 +55,4 @@ export const QuoteExcerptPreview: React.FC<QuoteExcerptPreviewProps> = ({
 };
 
 // Legacy export for backward compatibility
-export {QuoteExcerptPreview as QuoteExcerptPreviewContainer};
+export { QuoteExcerptPreview as QuoteExcerptPreviewContainer };

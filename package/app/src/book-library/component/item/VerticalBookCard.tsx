@@ -1,6 +1,6 @@
-import React from 'react';
-import {Link} from '@rezics/ui/primitive/link/Link.tsx';
-import {cn} from '@/shared/util/css-util.ts';
+import { Link } from "@rezics/ui/primitive/link/Link.tsx";
+import type React from "react";
+import { cn } from "@/shared/util/css-util.ts";
 
 export type BookProps = {
   title: string;
@@ -21,12 +21,12 @@ export function BookCard({
   onClick,
   className,
 }: BookProps) {
-  const Root: React.ElementType = href ? Link : 'button';
-  const rootProps = href ? {to: href} : {type: 'button' as const, onClick};
+  const Root: React.ElementType = href ? Link : "button";
+  const rootProps = href ? { to: href } : { type: "button" as const, onClick };
 
   return (
     <Root {...rootProps} className="text-left" aria-label={title}>
-      <div className={cn('relative w-full overflow-hidden', className ?? '')}>
+      <div className={cn("relative w-full overflow-hidden", className ?? "")}>
         <img
           src={coverUrl}
           alt={title}

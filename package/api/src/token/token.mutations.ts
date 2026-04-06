@@ -2,19 +2,19 @@
  * React Query mutations for Token operations
  */
 
-import {
-  useMutation,
-  useQueryClient,
-  type UseMutationOptions,
-} from '@tanstack/react-query';
-import {tokenApi} from './token.api';
-import {tokenKeys} from './token.keys';
 import type {
   ApiTokenDTO,
   CreateApiTokenInput,
   CreateApiTokenResponse,
   UpdateApiTokenInput,
-} from '@rezics/contract';
+} from "@rezics/contract";
+import {
+  type UseMutationOptions,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
+import { tokenApi } from "./token.api";
+import { tokenKeys } from "./token.keys";
 
 /**
  * Mutation for creating a token
@@ -22,7 +22,7 @@ import type {
 export function useCreateTokenMutation(
   options?: Omit<
     UseMutationOptions<CreateApiTokenResponse, Error, CreateApiTokenInput>,
-    'mutationFn'
+    "mutationFn"
   >,
 ) {
   const queryClient = useQueryClient();
@@ -32,7 +32,7 @@ export function useCreateTokenMutation(
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
       // Invalidate token list to include the new token
-      queryClient.invalidateQueries({queryKey: tokenKeys.lists()});
+      queryClient.invalidateQueries({ queryKey: tokenKeys.lists() });
 
       // Optionally pre-populate detail cache for the created token
       if (data.tokenInfo?.id) {
@@ -55,22 +55,22 @@ export function useUpdateTokenMutation(
     UseMutationOptions<
       ApiTokenDTO,
       Error,
-      {id: string; input: UpdateApiTokenInput}
+      { id: string; input: UpdateApiTokenInput }
     >,
-    'mutationFn'
+    "mutationFn"
   >,
 ) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({id, input}) => tokenApi.update(id, input),
+    mutationFn: ({ id, input }) => tokenApi.update(id, input),
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
       // Update detail cache for this token
       queryClient.setQueryData(tokenKeys.detail(variables.id), data);
 
       // Invalidate token list to refresh
-      queryClient.invalidateQueries({queryKey: tokenKeys.lists()});
+      queryClient.invalidateQueries({ queryKey: tokenKeys.lists() });
 
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
@@ -82,8 +82,8 @@ export function useUpdateTokenMutation(
  */
 export function useRevokeTokenMutation(
   options?: Omit<
-    UseMutationOptions<{message: string}, Error, string>,
-    'mutationFn'
+    UseMutationOptions<{ message: string }, Error, string>,
+    "mutationFn"
   >,
 ) {
   const queryClient = useQueryClient();
@@ -93,10 +93,10 @@ export function useRevokeTokenMutation(
     ...options,
     onSuccess: (data, id, onMutateResult, context) => {
       // Remove detail cache for revoked token
-      queryClient.removeQueries({queryKey: tokenKeys.detail(id)});
+      queryClient.removeQueries({ queryKey: tokenKeys.detail(id) });
 
       // Invalidate token list to remove revoked token
-      queryClient.invalidateQueries({queryKey: tokenKeys.lists()});
+      queryClient.invalidateQueries({ queryKey: tokenKeys.lists() });
 
       options?.onSuccess?.(data, id, onMutateResult, context);
     },

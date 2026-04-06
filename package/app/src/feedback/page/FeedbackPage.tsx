@@ -1,28 +1,24 @@
-import React from 'react';
 import {
   Box,
   Button,
-  Typography,
+  MenuItem,
   Stack,
   TextField,
-  MenuItem,
-} from '@mui/material';
-import FeedbackDrawer from '../component/FeedbackDrawer';
-import FeedbackList from '../component/FeedbackList';
+  Typography,
+} from "@mui/material";
+import React from "react";
+import FeedbackDrawer from "../component/FeedbackDrawer";
+import FeedbackList from "../component/FeedbackList";
 
 export const FeedbackPage: React.FC = () => {
   const [open, setOpen] = React.useState(false);
-  const [search, setSearch] = React.useState('');
+  const [search, setSearch] = React.useState("");
   const [resolvedFilter, setResolvedFilter] = React.useState<
-    'all' | 'resolved' | 'unresolved'
-  >('all');
+    "all" | "resolved" | "unresolved"
+  >("all");
 
   const resolvedValue =
-    resolvedFilter === 'all'
-      ? undefined
-      : resolvedFilter === 'resolved'
-        ? true
-        : false;
+    resolvedFilter === "all" ? undefined : resolvedFilter === "resolved";
 
   return (
     <Box className="max-w-5xl mx-auto p-4">
@@ -33,11 +29,15 @@ export const FeedbackPage: React.FC = () => {
         </Button>
       </Stack>
 
-      <Stack direction={{xs: 'column', sm: 'row'}} spacing={2} className="mb-4">
+      <Stack
+        direction={{ xs: "column", sm: "row" }}
+        spacing={2}
+        className="mb-4"
+      >
         <TextField
           label="搜索内容"
           value={search}
-          onChange={e => setSearch(e.target.value)}
+          onChange={(e) => setSearch(e.target.value)}
           className="flex-1"
           size="small"
           placeholder="搜索反馈内容..."
@@ -47,9 +47,9 @@ export const FeedbackPage: React.FC = () => {
           label="状态"
           select
           value={resolvedFilter}
-          onChange={e =>
+          onChange={(e) =>
             setResolvedFilter(
-              e.target.value as 'all' | 'resolved' | 'unresolved',
+              e.target.value as "all" | "resolved" | "unresolved",
             )
           }
           className="w-40"

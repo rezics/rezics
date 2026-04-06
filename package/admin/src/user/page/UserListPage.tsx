@@ -1,5 +1,5 @@
-import AddIcon from '@mui/icons-material/Add';
-import SearchIcon from '@mui/icons-material/Search';
+import AddIcon from "@mui/icons-material/Add";
+import SearchIcon from "@mui/icons-material/Search";
 import {
   Box,
   Button,
@@ -12,56 +12,55 @@ import {
   Stack,
   TextField,
   Typography,
-} from '@mui/material';
-import React from 'react';
-import {useQuery} from '@tanstack/react-query';
-import {useMatchRoute} from '@tanstack/react-router';
+} from "@mui/material";
+import { meiliUserApi } from "@rezics/api/meili/meili.api";
+import { userQueries } from "@rezics/api/user/user.queries";
+import type { UserDTO } from "@rezics/contract";
 
-import {Link} from '@rezics/ui/primitive/link/Link.tsx';
-import type {UserDTO} from '@rezics/contract';
-import {userQueries} from '@rezics/api/user/user.queries';
-import {meiliUserApi} from '@rezics/api/meili/meili.api';
-
-import {Page} from '@/core/layout/Page';
+import { Link } from "@rezics/ui/primitive/link/Link.tsx";
+import { useQuery } from "@tanstack/react-query";
+import { useMatchRoute } from "@tanstack/react-router";
+import React from "react";
 import {
-  PaginatedTable,
   type PaginatedColumn,
-} from '@/component/table/PaginatedTable';
+  PaginatedTable,
+} from "@/component/table/PaginatedTable";
+import { Page } from "@/core/layout/Page";
 
 function fmtDate(v?: string | Date) {
-  if (!v) return '';
-  const d = typeof v === 'string' ? new Date(v) : v;
+  if (!v) return "";
+  const d = typeof v === "string" ? new Date(v) : v;
   if (Number.isNaN(d.getTime())) return String(v);
   return d.toLocaleString();
 }
 
 export default function UserListPage() {
   const matchRoute = useMatchRoute();
-  const isMeiliMode = Boolean(matchRoute({to: '/users/meili'}));
+  const isMeiliMode = Boolean(matchRoute({ to: "/users/meili" }));
 
-  const [q, setQ] = React.useState('');
-  const [query, setQuery] = React.useState('');
+  const [q, setQ] = React.useState("");
+  const [query, setQuery] = React.useState("");
   const [page, setPage] = React.useState(0);
   const [limit, setLimit] = React.useState(20);
 
   React.useEffect(() => {
-    setQ('');
-    setQuery('');
+    setQ("");
+    setQuery("");
     setPage(0);
     setLimit(20);
-  }, [isMeiliMode]);
+  }, []);
 
   const listQuery = useQuery({
     ...userQueries.adminList({
       page: page + 1,
       limit,
-      ...(query ? {q: query} : {}),
+      ...(query ? { q: query } : {}),
     }),
     enabled: !isMeiliMode,
   });
 
   const meiliQuery = useQuery({
-    queryKey: ['meili-users', page, limit, query],
+    queryKey: ["meili-users", page, limit, query],
     queryFn: () =>
       meiliUserApi.userSearch({
         q: query || undefined,
@@ -79,72 +78,72 @@ export default function UserListPage() {
   const columns = React.useMemo(() => {
     const cols: PaginatedColumn<UserDTO>[] = [
       {
-        id: 'unitId',
-        header: 'Unit ID',
+        id: "unitId",
+        header: "Unit ID",
         minWidth: 220,
-        cell: u => (
-          <Typography variant="body2" sx={{fontFamily: 'monospace'}}>
+        cell: (u) => (
+          <Typography variant="body2" sx={{ fontFamily: "monospace" }}>
             {u.unitId}
           </Typography>
         ),
       },
       {
-        id: 'email',
-        header: 'Email',
+        id: "email",
+        header: "Email",
         minWidth: 240,
-        cell: u => (
+        cell: (u) => (
           <Typography variant="body2" noWrap>
-            {u.email ?? '-'}
+            {u.email ?? "-"}
           </Typography>
         ),
       },
       {
-        id: 'name',
-        header: 'Name',
+        id: "name",
+        header: "Name",
         minWidth: 160,
-        cell: u => (
+        cell: (u) => (
           <Typography variant="body2" fontWeight={700} noWrap>
             {u.name}
           </Typography>
         ),
       },
       {
-        id: 'slug',
-        header: 'Slug',
+        id: "slug",
+        header: "Slug",
         minWidth: 160,
-        cell: u => (
+        cell: (u) => (
           <Typography variant="body2" noWrap>
-            {u.slug ? `@${u.slug}` : '-'}
+            {u.slug ? `@${u.slug}` : "-"}
           </Typography>
         ),
       },
       {
-        id: 'type',
-        header: 'Type',
+        id: "type",
+        header: "Type",
         minWidth: 120,
-        cell: u => (u.type ? <Chip size="small" label={u.type} /> : '-'),
+        cell: (u) => (u.type ? <Chip size="small" label={u.type} /> : "-"),
       },
       {
-        id: 'roles',
-        header: 'Roles',
+        id: "roles",
+        header: "Roles",
         minWidth: 220,
-        cell: u => (
+        cell: (u) => (
           <Typography variant="body2" noWrap>
-            {u.permission?.role?.length ? u.permission.role.join(', ') : '-'}
+            {u.permission?.role?.length ? u.permission.role.join(", ") : "-"}
           </Typography>
         ),
       },
       {
-        id: 'joinDate',
-        header: 'Join Date',
+        id: "joinDate",
+        header: "Join Date",
         minWidth: 170,
-        cell: u => fmtDate(u.joinDate),
+        cell: (u) => fmtDate(u.joinDate),
       },
       {
-        id: 'actions',
-        header: 'Actions',
+        id: "actions",
+        header: "Actions",
         minWidth: 120,
-        cell: u => (
+        cell: (u) => (
           <Button
             size="small"
             component={Link}
@@ -161,17 +160,17 @@ export default function UserListPage() {
 
   return (
     <Page
-      title={isMeiliMode ? 'Users (Meili)' : 'Users'}
+      title={isMeiliMode ? "Users (Meili)" : "Users"}
       description={
         isMeiliMode
-          ? '管理 User（Meili 搜索）'
-          : '管理 User（普通列表 / 翻页 / 创建 / 编辑）'
+          ? "管理 User（Meili 搜索）"
+          : "管理 User（普通列表 / 翻页 / 创建 / 编辑）"
       }
     >
       <Card>
         <CardContent>
           <Stack
-            direction={{xs: 'column', sm: 'row'}}
+            direction={{ xs: "column", sm: "row" }}
             spacing={1.5}
             alignItems="stretch"
           >
@@ -180,9 +179,9 @@ export default function UserListPage() {
               label="Search"
               placeholder="q/email/slug/type..."
               value={q}
-              onChange={e => setQ(e.target.value)}
-              onKeyDown={e => {
-                if (e.key === 'Enter') {
+              onChange={(e) => setQ(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
                   setPage(0);
                   setQuery(q.trim());
                 }
@@ -195,7 +194,7 @@ export default function UserListPage() {
                 setPage(0);
                 setQuery(q.trim());
               }}
-              sx={{alignSelf: {xs: 'flex-end', sm: 'center'}}}
+              sx={{ alignSelf: { xs: "flex-end", sm: "center" } }}
             >
               <SearchIcon />
             </IconButton>
@@ -204,16 +203,16 @@ export default function UserListPage() {
               startIcon={<AddIcon />}
               component={Link}
               to="/users/create"
-              sx={{whiteSpace: 'nowrap'}}
+              sx={{ whiteSpace: "nowrap" }}
             >
               Create
             </Button>
           </Stack>
 
-          <Divider sx={{my: 2}} />
+          <Divider sx={{ my: 2 }} />
 
           {(isMeiliMode ? meiliQuery.isLoading : listQuery.isLoading) ? (
-            <Box sx={{display: 'flex', justifyContent: 'center', py: 6}}>
+            <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
               <CircularProgress size={24} />
             </Box>
           ) : (isMeiliMode ? meiliQuery.isError : listQuery.isError) ? (
@@ -224,12 +223,12 @@ export default function UserListPage() {
             <PaginatedTable<UserDTO>
               columns={columns}
               rows={users}
-              getRowId={u => u.unitId}
+              getRowId={(u) => u.unitId}
               count={total}
               page={page}
               rowsPerPage={limit}
-              onPageChange={nextPage => setPage(nextPage)}
-              onRowsPerPageChange={next => {
+              onPageChange={(nextPage) => setPage(nextPage)}
+              onRowsPerPageChange={(next) => {
                 setLimit(next);
                 setPage(0);
               }}

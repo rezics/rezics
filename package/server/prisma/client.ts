@@ -1,12 +1,12 @@
-import {PrismaClient} from './generated/client';
-import {PrismaPg} from '@prisma/adapter-pg';
-import {env} from '../src/env';
+import { PrismaPg } from "@prisma/adapter-pg";
+import { env } from "../src/env";
+import { PrismaClient } from "./generated/client";
 
 // Get database URL from environment variable
 const databaseUrl = env.DATABASE_URL;
 
 if (!databaseUrl) {
-  throw new Error('DATABASE_URL environment variable is not set');
+  throw new Error("DATABASE_URL environment variable is not set");
 }
 
 // Prisma ORM v7 requires a driver adapter.
@@ -20,34 +20,34 @@ const adapter = new PrismaPg({
 
 // Enable query logging in development
 const enableQueryEventLogging =
-  (process.env.NODE_ENV ?? 'development') !== 'production' &&
-  (process.env.PRISMA_LOG_QUERIES ?? '1') !== '0' &&
-  (process.env.PRISMA_LOG_QUERIES ?? '1') !== 'false';
+  (process.env.NODE_ENV ?? "development") !== "production" &&
+  (process.env.PRISMA_LOG_QUERIES ?? "1") !== "0" &&
+  (process.env.PRISMA_LOG_QUERIES ?? "1") !== "false";
 
 // Initialize Prisma Client with PostgreSQL adapter
 export const prisma = new PrismaClient({
   adapter,
   log: enableQueryEventLogging
-    ? [{emit: 'event', level: 'query'} as const]
+    ? [{ emit: "event", level: "query" } as const]
     : [],
 });
 
 // Log queries in development
 if (enableQueryEventLogging) {
-  prisma.$on('query', e => {
+  prisma.$on("query", (e) => {
     console.log(`\n[Prisma Query] ${e.duration}ms: ${e.query}`);
   });
 }
 
 // Handle graceful shutdown for Elysia
-process.on('SIGTERM', async () => {
+process.on("SIGTERM", async () => {
   await prisma.$disconnect();
   process.exit(0);
 });
 
-process.on('SIGINT', async () => {
+process.on("SIGINT", async () => {
   await prisma.$disconnect();
   process.exit(0);
 });
 
-export * from './generated/client';
+export * from "./generated/client";

@@ -1,5 +1,5 @@
-import {searchClient} from '../../src/meili/search-client';
-import type {PrismaClient} from '#/prisma/generated/client.js';
+import type { PrismaClient } from "#/prisma/generated/client.js";
+import { searchClient } from "../../src/meili/search-client";
 
 /**
  * Reset database by deleting all data in correct order
@@ -7,7 +7,7 @@ import type {PrismaClient} from '#/prisma/generated/client.js';
  * @param prisma - Prisma client instance
  */
 export async function resetDatabase(prisma: PrismaClient): Promise<void> {
-  console.log('Resetting database...');
+  console.log("Resetting database...");
   // Order matters due to FKs
   await prisma.apiToken.deleteMany();
   await prisma.bookmark.deleteMany();
@@ -29,7 +29,7 @@ export async function resetDatabase(prisma: PrismaClient): Promise<void> {
 }
 
 export async function resetMeiliSearchDatabase(): Promise<void> {
-  console.log('Resetting MeiliSearch database...');
+  console.log("Resetting MeiliSearch database...");
   await searchClient.deleteAllBooks();
   await searchClient.deleteAllUnits();
   await searchClient.deleteAllReadlists();

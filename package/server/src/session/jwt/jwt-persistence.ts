@@ -1,13 +1,13 @@
-import type {JwtKeyPersistence, JwtKeyRecord} from '@rezics/jwt';
+import type { JwtKeyPersistence, JwtKeyRecord } from "@rezics/jwt";
 import {
-  JwtAlgorithm,
   asJwtPrivateJwk,
   asJwtPublicJwk,
+  JwtAlgorithm,
   type JwtPrivateJwk,
   type JwtPublicJwk,
-} from '@rezics/jwt';
-import {prisma, Prisma} from '#/prisma/client';
-import {getJwtService} from '@/jwt';
+} from "@rezics/jwt";
+import { type Prisma, prisma } from "#/prisma/client";
+import { getJwtService } from "@/jwt";
 
 function mapRowToRecord(row: {
   id: string;
@@ -34,8 +34,8 @@ function mapRowToRecord(row: {
 }
 
 export const serverJwtPersistence: JwtKeyPersistence = {
-  async listKeys({issuer}) {
-    const service = await getJwtService('server-local');
+  async listKeys({ issuer }) {
+    const service = await getJwtService("server-local");
     if (issuer !== service.issuer) {
       return [];
     }
@@ -51,19 +51,19 @@ export const serverJwtPersistence: JwtKeyPersistence = {
           },
         },
       },
-      orderBy: [{createdAt: 'desc'}],
+      orderBy: [{ createdAt: "desc" }],
     });
 
     return rows.map(mapRowToRecord);
   },
-  async saveKey({issuer, key}) {
-    const service = await getJwtService('server-local');
+  async saveKey({ issuer, key }) {
+    const service = await getJwtService("server-local");
     if (issuer !== service.issuer) {
       throw new Error(`Unsupported issuer ${issuer}`);
     }
 
     await prisma.jwks.upsert({
-      where: {id: key.kid},
+      where: { id: key.kid },
       update: {
         jwtServiceId: service.id,
         publicJwk: key.publicJwk as Prisma.InputJsonValue,
@@ -83,25 +83,25 @@ export const serverJwtPersistence: JwtKeyPersistence = {
       },
     });
   },
-  async markKeyRetiring({issuer, kid, expiresAt}) {
-    const service = await getJwtService('server-local');
+  async markKeyRetiring({ issuer, kid, expiresAt }) {
+    const service = await getJwtService("server-local");
     if (issuer !== service.issuer) {
       throw new Error(`Unsupported issuer ${issuer}`);
     }
 
     await prisma.jwks.update({
-      where: {id: kid},
-      data: {expiresAt},
+      where: { id: kid },
+      data: { expiresAt },
     });
   },
-  async getKeyByKid({issuer, kid}) {
-    const service = await getJwtService('server-local');
+  async getKeyByKid({ issuer, kid }) {
+    const service = await getJwtService("server-local");
     if (issuer !== service.issuer) {
       return null;
     }
 
     const row = await prisma.jwks.findUnique({
-      where: {id: kid},
+      where: { id: kid },
       include: {
         jwtService: {
           select: {

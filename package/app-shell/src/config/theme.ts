@@ -1,57 +1,61 @@
-import {createTheme, type Theme, type ThemeOptions} from '@mui/material/styles';
-import {dynamicColorsToPalette, generateDynamicColors} from './dynamicTheme';
+import {
+  createTheme,
+  type Theme,
+  type ThemeOptions,
+} from "@mui/material/styles";
+import { dynamicColorsToPalette, generateDynamicColors } from "./dynamicTheme";
 
 const getDesignTokens = (
-  mode: 'light' | 'dark',
+  mode: "light" | "dark",
   customColor?: string,
 ): ThemeOptions => ({
   palette: {
     mode,
-    ...(mode === 'light'
+    ...(mode === "light"
       ? {
           primary: {
-            main: customColor || '#f4606c',
-            light: 'rgba(244, 96, 108, 0.8)',
-            dark: 'rgba(244, 96, 108, 1)',
-            contrastText: '#ffffff',
+            main: customColor || "#f4606c",
+            light: "rgba(244, 96, 108, 0.8)",
+            dark: "rgba(244, 96, 108, 1)",
+            contrastText: "#ffffff",
           },
           secondary: {
-            main: '#1976d2',
-            light: 'rgba(25, 118, 210, 0.8)',
-            dark: 'rgba(25, 118, 210, 1)',
-            contrastText: '#ffffff',
+            main: "#1976d2",
+            light: "rgba(25, 118, 210, 0.8)",
+            dark: "rgba(25, 118, 210, 1)",
+            contrastText: "#ffffff",
           },
           background: {
-            default: '#f5f5f5',
-            paper: '#ffffff',
+            default: "#f5f5f5",
+            paper: "#ffffff",
           },
           text: {
-            primary: 'rgba(0, 0, 0, 0.87)',
-            secondary: 'rgba(0, 0, 0, 0.6)',
-            disabled: 'rgba(0, 0, 0, 0.38)',
+            primary: "rgba(0, 0, 0, 0.87)",
+            secondary: "rgba(0, 0, 0, 0.6)",
+            disabled: "rgba(0, 0, 0, 0.38)",
           },
         }
       : {
           primary: {
-            main: customColor || '#f4606c',
-            light: 'rgba(244, 96, 108, 0.8)',
-            dark: 'rgba(244, 96, 108, 1)',
-            contrastText: '#ffffff',
+            main: customColor || "#f4606c",
+            light: "rgba(244, 96, 108, 0.8)",
+            dark: "rgba(244, 96, 108, 1)",
+            contrastText: "#ffffff",
           },
           secondary: {
-            main: '#1976d2',
-            light: 'rgba(25, 118, 210, 0.8)',
-            dark: 'rgba(25, 118, 210, 1)',
-            contrastText: '#ffffff',
+            main: "#1976d2",
+            light: "rgba(25, 118, 210, 0.8)",
+            dark: "rgba(25, 118, 210, 1)",
+            contrastText: "#ffffff",
           },
           background: {
-            default: '#121212',
-            paper: '#1e1e1e',
+            default: "#121212",
+            paper: "#1e1e1e",
           },
           text: {
-            primary: '#ffffff',
-            secondary: 'rgba(255, 255, 255, 0.7)',
-            disabled: 'rgba(255, 255, 255, 0.5)',
+            primary: "#ffffff",
+            secondary: "rgba(255, 255, 255, 0.7)",
+            disabled: "rgba(255, 255, 255, 0.5)",
           },
         }),
   },
@@ -59,7 +63,7 @@ const getDesignTokens = (
   components: {
     MuiLink: {
       defaultProps: {
-        underline: 'none',
+        underline: "none",
       },
     },
     MuiCssBaseline: {
@@ -70,7 +74,7 @@ const getDesignTokens = (
     MuiButton: {
       defaultProps: {
         disableElevation: true,
-        variant: 'contained',
+        variant: "contained",
       },
     },
     MuiPaper: {
@@ -105,7 +109,7 @@ const getDesignTokens = (
     toolbar: {
       minHeight: 60,
 
-      '@media (min-width:768px)': {
+      "@media (min-width:768px)": {
         minHeight: 60,
       },
     },
@@ -113,14 +117,14 @@ const getDesignTokens = (
 });
 
 export const getDynamicTheme = (
-  mode: 'light' | 'dark',
+  mode: "light" | "dark",
   sourceColor?: string,
 ): Theme => {
   if (!sourceColor) {
-    return createTheme({...getDesignTokens(mode), cssVariables: true});
+    return createTheme({ ...getDesignTokens(mode), cssVariables: true });
   }
 
-  const dynamicColors = generateDynamicColors(sourceColor, mode === 'dark');
+  const dynamicColors = generateDynamicColors(sourceColor, mode === "dark");
   const dynamicPalette = dynamicColorsToPalette(dynamicColors, mode);
 
   const baseTokens = getDesignTokens(mode);
@@ -143,11 +147,11 @@ export const getDynamicTheme = (
     },
   };
 
-  return createTheme({...enhancedTokens, cssVariables: true});
+  return createTheme({ ...enhancedTokens, cssVariables: true });
 };
 
 export const getTheme = (
-  mode: 'light' | 'dark',
+  mode: "light" | "dark",
   customColor?: string,
 ): Theme => {
   return createTheme({

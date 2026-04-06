@@ -1,11 +1,12 @@
-import React, {useMemo} from 'react';
-import {Alert, Button, CircularProgress, Typography} from '@mui/material';
-import {useTranslation} from 'react-i18next';
-import {useNavigate} from '@tanstack/react-router';
-import {useQuery} from '@tanstack/react-query';
-import {buildMeiliReviewQuery} from '@rezics/api/meili/meili.queries';
-import type {ReviewDTO} from '@rezics/contract';
-import {HorizontalReviewCarousel} from '@/review/component/list/HorizontalReviewCarousel';
+import { Alert, Button, CircularProgress, Typography } from "@mui/material";
+import { buildMeiliReviewQuery } from "@rezics/api/meili/meili.queries";
+import type { ReviewDTO } from "@rezics/contract";
+import { useQuery } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
+import type React from "react";
+import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
+import { HorizontalReviewCarousel } from "@/review/component/list/HorizontalReviewCarousel";
 
 export type TrendingReviewsProps = {
   title?: string;
@@ -20,10 +21,10 @@ export const TrendingReviews: React.FC<TrendingReviewsProps> = ({
   title,
   limit = 8,
 }) => {
-  const {t} = useTranslation();
-  const resolvedTitle = title ?? t('page.home.sections.trending_reviews');
+  const { t } = useTranslation();
+  const resolvedTitle = title ?? t("page.home.sections.trending_reviews");
   const navigate = useNavigate();
-  const {data, isLoading, error} = useQuery(
+  const { data, isLoading, error } = useQuery(
     buildMeiliReviewQuery(0, limit, {}),
   );
 
@@ -48,7 +49,7 @@ export const TrendingReviews: React.FC<TrendingReviewsProps> = ({
         <Button
           variant="text"
           color="primary"
-          onClick={() => navigate({to: '/book'})}
+          onClick={() => navigate({ to: "/book" })}
         >
           更多 →
         </Button>

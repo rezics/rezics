@@ -1,4 +1,4 @@
-import {faker} from '@faker-js/faker';
+import { faker } from "@faker-js/faker";
 
 /**
  * Generate random integer within range (inclusive)
@@ -7,7 +7,7 @@ import {faker} from '@faker-js/faker';
  * @returns Random integer
  */
 export function randomInt(minInclusive: number, maxInclusive: number): number {
-  return faker.number.int({min: minInclusive, max: maxInclusive});
+  return faker.number.int({ min: minInclusive, max: maxInclusive });
 }
 
 /**
@@ -17,7 +17,7 @@ export function randomInt(minInclusive: number, maxInclusive: number): number {
  * @returns Random float
  */
 export function randomFloat(min: number, max: number): number {
-  return faker.number.float({min, max});
+  return faker.number.float({ min, max });
 }
 
 /**
@@ -36,7 +36,7 @@ export function randomBoolean(trueProbability = 0.5): boolean {
  * @returns Array of picked items
  */
 export function pickN<T>(items: readonly T[], n: number): T[] {
-  return faker.helpers.arrayElements(items, {min: n, max: n});
+  return faker.helpers.arrayElements(items, { min: n, max: n });
 }
 
 /**
@@ -69,9 +69,9 @@ export function generateTitle(minWords = 3, maxWords = 7): string {
   const wordCount = randomInt(minWords, maxWords);
   return faker.lorem
     .words(wordCount)
-    .split(' ')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ');
+    .split(" ")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
 }
 
 /**

@@ -1,11 +1,14 @@
-import type { EditorPlugin } from '../../core/types';
-import { markdownLanguageSupport, type MarkdownLanguageConfig } from './language';
-import { markdownKeybindings } from './keybindings';
-import { markdownToolbarItems } from '../toolbar/index';
+import type { EditorPlugin } from "../../core/types";
+import { markdownToolbarItems } from "../toolbar/index";
+import { markdownKeybindings } from "./keybindings";
+import {
+  type MarkdownLanguageConfig,
+  markdownLanguageSupport,
+} from "./language";
 
 export function markdown(config?: MarkdownLanguageConfig): EditorPlugin {
   return {
-    name: 'markdown',
+    name: "markdown",
     extensions: markdownLanguageSupport(config),
     keybindings: markdownKeybindings,
     toolbar: markdownToolbarItems,
@@ -13,16 +16,16 @@ export function markdown(config?: MarkdownLanguageConfig): EditorPlugin {
 }
 
 export {
-  toggleBold,
-  toggleItalic,
-  toggleStrikethrough,
-  toggleHeading,
+  insertImage,
+  insertLink,
+  insertTable,
   toggleBlockquote,
-  toggleUnorderedList,
-  toggleOrderedList,
+  toggleBold,
   toggleCode,
   toggleCodeBlock,
-  insertLink,
-  insertImage,
-  insertTable,
-} from './commands';
+  toggleHeading,
+  toggleItalic,
+  toggleOrderedList,
+  toggleStrikethrough,
+  toggleUnorderedList,
+} from "./commands";

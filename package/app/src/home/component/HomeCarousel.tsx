@@ -1,23 +1,22 @@
-import {Typography} from '@mui/material';
-import {useIsMobile} from '@/shared/util/use-media-query';
-import React, {useEffect, useState} from 'react';
-import {useQuery} from '@tanstack/react-query';
-import {echoKvGetQuery} from '@rezics/api/echokv/echokv';
-import {parseEchoKVResponse} from '@rezics/api/echokv/util';
-import {useAlertStore} from '@app/state/windowAlertStore';
-import {LazyLoadImage} from '@rezics/ui/primitive/image/LazyLoadImage.tsx';
-import {useTranslation} from 'react-i18next';
-import {Link} from '@rezics/ui/primitive/link/Link.tsx';
-import {cn} from '@/shared/util/css-util';
-import {CarouselIndicator} from '@rezics/ui/primitive/carousel/CarouselIndicator.tsx';
-
+import { useAlertStore } from "@app/state/windowAlertStore";
+import { Typography } from "@mui/material";
+import { echoKvGetQuery } from "@rezics/api/echokv/echokv";
+import { parseEchoKVResponse } from "@rezics/api/echokv/util";
+import { CarouselIndicator } from "@rezics/ui/primitive/carousel/CarouselIndicator.tsx";
+import { useEmblaAutoplay } from "@rezics/ui/primitive/carousel/use-embla-autoplay.ts";
+import { LazyLoadImage } from "@rezics/ui/primitive/image/LazyLoadImage.tsx";
+import { Link } from "@rezics/ui/primitive/link/Link.tsx";
 import {
   Carousel,
+  type CarouselApi,
   CarouselContent,
   CarouselItem,
-  type CarouselApi,
-} from '@rezics/ui/shadcn';
-import {useEmblaAutoplay} from '@rezics/ui/primitive/carousel/use-embla-autoplay.ts';
+} from "@rezics/ui/shadcn";
+import { useQuery } from "@tanstack/react-query";
+import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { cn } from "@/shared/util/css-util";
+import { useIsMobile } from "@/shared/util/use-media-query";
 
 type ProductType = {
   cover?: string;
@@ -36,14 +35,14 @@ const CarouselContentInner = ({
   maxHeightClass,
 }: CarouselContentInnerProps) => {
   return (
-    <Link to={product?.link ?? '#'}>
+    <Link to={product?.link ?? "#"}>
       <div className="flex items-center gap-4 px-4">
         <div className="hidden sm:block flex-shrink-0 h-full overflow-hidden">
           <LazyLoadImage
-            src={product.cover ?? ''}
-            alt={product.title ?? ''}
+            src={product.cover ?? ""}
+            alt={product.title ?? ""}
             className={cn(
-              'w-full h-full object-cover rounded-lg',
+              "w-full h-full object-cover rounded-lg",
               maxHeightClass,
             )}
           />
@@ -67,13 +66,13 @@ const CarouselContentInnerCompact = ({
   product,
 }: CarouselContentInnerCompactProps) => {
   return (
-    <Link to={product?.link ?? '#'}>
+    <Link to={product?.link ?? "#"}>
       <div className="flex items-center gap-3 px-3 py-2">
         <div className="w-1/3 h-38 md:h-52 flex-shrink-0 overflow-hidden">
           <LazyLoadImage
-            src={product.cover ?? ''}
-            alt={product.title ?? ''}
-            className={cn('h-full object-cover rounded-md')}
+            src={product.cover ?? ""}
+            alt={product.title ?? ""}
+            className={cn("h-full object-cover rounded-md")}
           />
         </div>
         <div className="flex-1 min-w-0">
@@ -96,9 +95,9 @@ interface BookCarouselProps {
 export const BookCarousel: React.FC<BookCarouselProps> = ({
   autoplayIntervalNum = 3000,
 }) => {
-  const maxHeightClass = 'max-h-[250px]';
+  const maxHeightClass = "max-h-[250px]";
 
-  const {data} = useQuery(echoKvGetQuery('home_carousel'));
+  const { data } = useQuery(echoKvGetQuery("home_carousel"));
   type CarouselProduct = {
     cover?: string;
     title?: string;
@@ -107,8 +106,8 @@ export const BookCarousel: React.FC<BookCarouselProps> = ({
   };
 
   const [products, setProducts] = useState<CarouselProduct[]>([]);
-  const {show: showAlert} = useAlertStore();
-  const {t} = useTranslation();
+  const { show: showAlert } = useAlertStore();
+  const { t } = useTranslation();
   const [carouselApi, setCarouselApi] = React.useState<CarouselApi | null>(
     null,
   );
@@ -118,7 +117,7 @@ export const BookCarousel: React.FC<BookCarouselProps> = ({
       setProducts(parseEchoKVResponse<CarouselProduct[]>(data) ?? []);
     } catch (error) {
       showAlert(
-        t('page.home.noticeboard.alert.parse_failed', {
+        t("page.home.noticeboard.alert.parse_failed", {
           error: String(error),
         }),
       );
@@ -136,16 +135,16 @@ export const BookCarousel: React.FC<BookCarouselProps> = ({
 
   return (
     <Carousel
-      opts={{loop: true}}
-      className={cn('min-h-0', maxHeightClass)}
-      setApi={api => setCarouselApi(api)}
+      opts={{ loop: true }}
+      className={cn("min-h-0", maxHeightClass)}
+      setApi={(api) => setCarouselApi(api)}
     >
       <CarouselContent>
         {products?.map((product, index) => (
           <CarouselItem
             key={index}
             className={cn(
-              isMobile ? 'basis-[min(600px,100%)]' : 'basis-[min(800px,100%)]',
+              isMobile ? "basis-[min(600px,100%)]" : "basis-[min(800px,100%)]",
             )}
           >
             {isMobile ? (

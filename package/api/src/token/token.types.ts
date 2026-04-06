@@ -10,7 +10,7 @@ import type {
   CreateApiTokenInput,
   CreateApiTokenResponse,
   UpdateApiTokenInput,
-} from '@rezics/contract';
+} from "@rezics/contract";
 
 // Re-export contract types for convenience
 export type {

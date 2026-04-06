@@ -1,17 +1,17 @@
-import {useState, useEffect} from 'react';
-import type {FC} from 'react';
 import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  Button,
-  Box,
   Alert,
-} from '@mui/material';
-import type {ApiTokenDTO, UpdateApiTokenInput} from '@rezics/contract';
-import {ScopesEditor} from './ScopesEditor';
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  TextField,
+} from "@mui/material";
+import type { ApiTokenDTO, UpdateApiTokenInput } from "@rezics/contract";
+import type { FC } from "react";
+import { useEffect, useState } from "react";
+import { ScopesEditor } from "./ScopesEditor";
 
 interface EditTokenDialogProps {
   open: boolean;
@@ -33,8 +33,8 @@ export const EditTokenDialog: FC<EditTokenDialogProps> = ({
   updating,
   error,
 }) => {
-  const [name, setName] = useState('');
-  const [expiresAt, setExpiresAt] = useState<string>('');
+  const [name, setName] = useState("");
+  const [expiresAt, setExpiresAt] = useState<string>("");
   const [scopes, setScopes] = useState<Record<string, string[]>>({});
 
   useEffect(() => {
@@ -47,7 +47,7 @@ export const EditTokenDialog: FC<EditTokenDialogProps> = ({
         const formatted = date.toISOString().slice(0, 16);
         setExpiresAt(formatted);
       } else {
-        setExpiresAt('');
+        setExpiresAt("");
       }
       setScopes(token.scopes ?? {});
     }
@@ -65,8 +65,8 @@ export const EditTokenDialog: FC<EditTokenDialogProps> = ({
   };
 
   const handleClose = () => {
-    setName('');
-    setExpiresAt('');
+    setName("");
+    setExpiresAt("");
     setScopes({});
     onClose();
   };
@@ -80,16 +80,16 @@ export const EditTokenDialog: FC<EditTokenDialogProps> = ({
             fullWidth
             label="Token name"
             value={name}
-            onChange={e => setName(e.target.value)}
+            onChange={(e) => setName(e.target.value)}
           />
           <div className="my-6" />
           <TextField
             fullWidth
             type="datetime-local"
             label="Expires At (optional)"
-            InputLabelProps={{shrink: true}}
+            InputLabelProps={{ shrink: true }}
             value={expiresAt}
-            onChange={e => setExpiresAt(e.target.value)}
+            onChange={(e) => setExpiresAt(e.target.value)}
           />
           <div className="my-6" />
           <ScopesEditor scopes={scopes} onChange={setScopes} />
@@ -104,7 +104,7 @@ export const EditTokenDialog: FC<EditTokenDialogProps> = ({
           color="primary"
           disabled={updating}
         >
-          {updating ? 'Updating…' : 'Update'}
+          {updating ? "Updating…" : "Update"}
         </Button>
       </DialogActions>
     </Dialog>

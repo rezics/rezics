@@ -1,15 +1,15 @@
-import {JsonEditor} from '../JsonEditor';
+import { JsonEditor } from "../JsonEditor";
 
 const validJson = JSON.stringify(
   {
-    name: '@rezics/editor',
-    version: '1.0.50',
-    type: 'module',
+    name: "@rezics/editor",
+    version: "1.0.50",
+    type: "module",
     published: true,
-    tags: ['markdown', 'json', 'plugins', 'toolbar'],
+    tags: ["markdown", "json", "plugins", "toolbar"],
     dependencies: {
-      '@codemirror/state': '^6.6.0',
-      '@codemirror/view': '^6.40.0',
+      "@codemirror/state": "^6.6.0",
+      "@codemirror/view": "^6.40.0",
     },
     config: {
       nested: {
@@ -34,13 +34,13 @@ const invalidJson = `{
 
 const largeJson = JSON.stringify(
   {
-    items: Array.from({length: 100}, (_, i) => ({
+    items: Array.from({ length: 100 }, (_, i) => ({
       id: i + 1,
       title: `Item ${i + 1}`,
       description: `Description for item ${i + 1} with some details.`,
       metadata: {
-        created: '2025-01-15T10:00:00Z',
-        tags: ['tag-a', 'tag-b'],
+        created: "2025-01-15T10:00:00Z",
+        tags: ["tag-a", "tag-b"],
         active: i % 3 !== 0,
       },
     })),

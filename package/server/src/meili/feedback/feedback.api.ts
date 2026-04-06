@@ -1,11 +1,11 @@
-import type {FeedbackListQuery} from '@rezics/contract';
-import {searchClient} from '../search-client';
 import type {
+  FeedbackListQuery,
   FeedbackSearchDocument,
   FeedbackSearchResult,
-} from '@rezics/contract';
-import type {SearchResponse} from '@rezics/search';
-import {defaultSort} from '../util';
+} from "@rezics/contract";
+import type { SearchResponse } from "@rezics/search";
+import { searchClient } from "../search-client";
+import { defaultSort } from "../util";
 /**
  * Low-level search API that accepts a fully-constructed Meilisearch query string.
  *
@@ -25,7 +25,7 @@ export async function searchFeedbacksRaw(
   const limit = options?.limit ?? 20;
 
   // eslint-disable-next-line no-console
-  console.log('searchFeedbacksRaw', q, options);
+  console.log("searchFeedbacksRaw", q, options);
   return searchClient.feedbackIndex.search<FeedbackSearchDocument>(q, {
     offset,
     limit,
@@ -51,7 +51,7 @@ export async function searchFeedbacks(
   opts: FeedbackListQuery,
 ): Promise<FeedbackSearchResult> {
   // Use the provided query string or default to empty
-  const q = opts.q || '';
+  const q = opts.q || "";
 
   const filter: string[] = [];
 
@@ -67,8 +67,8 @@ export async function searchFeedbacks(
     filter.push(`type = "${escape(opts.type)}"`);
   }
 
-  if (typeof opts.resolved === 'boolean') {
-    filter.push(`resolved = ${opts.resolved ? 'true' : 'false'}`);
+  if (typeof opts.resolved === "boolean") {
+    filter.push(`resolved = ${opts.resolved ? "true" : "false"}`);
   }
 
   if (opts.createdAtFrom) {
@@ -80,7 +80,7 @@ export async function searchFeedbacks(
   }
 
   // Feedback 默认按创建时间倒序
-  const sort: string[] = ['createdAt:desc'];
+  const sort: string[] = ["createdAt:desc"];
 
   const limit = opts.limit ?? 20;
   const offset = opts.offset ?? 0;

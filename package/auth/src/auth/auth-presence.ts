@@ -1,14 +1,14 @@
-import {env} from '../env';
 import {
   AUTH_PRESENCE_COOKIE_MAX_AGE_SECONDS,
   AUTH_PRESENCE_COOKIE_NAME,
   AUTH_PRESENCE_COOKIE_VALUE,
-} from '@rezics/contract';
+} from "@rezics/contract";
+import { env } from "../env";
 
-const LOCALHOST_HOSTS = new Set(['localhost', '127.0.0.1', '::1']);
+const LOCALHOST_HOSTS = new Set(["localhost", "127.0.0.1", "::1"]);
 
 function isIpAddress(hostname: string): boolean {
-  return /^\d{1,3}(\.\d{1,3}){3}$/.test(hostname) || hostname.includes(':');
+  return /^\d{1,3}(\.\d{1,3}){3}$/.test(hostname) || hostname.includes(":");
 }
 
 function deriveCookieDomain(hostname: string): string | null {
@@ -16,7 +16,7 @@ function deriveCookieDomain(hostname: string): string | null {
     return null;
   }
 
-  const parts = hostname.split('.').filter(Boolean);
+  const parts = hostname.split(".").filter(Boolean);
   if (parts.length <= 1) {
     return null;
   }
@@ -31,18 +31,18 @@ function deriveCookieDomain(hostname: string): string | null {
     topLevel.length === 2 &&
     secondLevel.length <= 3
   ) {
-    return `.${parts.slice(-3).join('.')}`;
+    return `.${parts.slice(-3).join(".")}`;
   }
 
-  return `.${parts.slice(-2).join('.')}`;
+  return `.${parts.slice(-2).join(".")}`;
 }
 
 function buildCookieAttributes(url: URL, maxAge: number): string[] {
   const attributes = [
-    `${AUTH_PRESENCE_COOKIE_NAME}=${maxAge > 0 ? AUTH_PRESENCE_COOKIE_VALUE : ''}`,
-    'Path=/',
+    `${AUTH_PRESENCE_COOKIE_NAME}=${maxAge > 0 ? AUTH_PRESENCE_COOKIE_VALUE : ""}`,
+    "Path=/",
     `Max-Age=${maxAge}`,
-    'SameSite=Lax',
+    "SameSite=Lax",
   ];
 
   const authBaseUrl = env.BETTER_AUTH_URL ?? url.origin;
@@ -51,8 +51,8 @@ function buildCookieAttributes(url: URL, maxAge: number): string[] {
     attributes.push(`Domain=${domain}`);
   }
 
-  if (url.protocol === 'https:') {
-    attributes.push('Secure');
+  if (url.protocol === "https:") {
+    attributes.push("Secure");
   }
 
   return attributes;
@@ -60,10 +60,10 @@ function buildCookieAttributes(url: URL, maxAge: number): string[] {
 
 export function buildAuthPresenceSetCookie(url: URL): string {
   return buildCookieAttributes(url, AUTH_PRESENCE_COOKIE_MAX_AGE_SECONDS).join(
-    '; ',
+    "; ",
   );
 }
 
 export function buildAuthPresenceClearCookie(url: URL): string {
-  return buildCookieAttributes(url, 0).join('; ');
+  return buildCookieAttributes(url, 0).join("; ");
 }

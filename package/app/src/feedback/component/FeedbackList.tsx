@@ -1,44 +1,45 @@
-import React, {useEffect, useRef, useState} from 'react';
+import { useAlertStore } from "@app/state/windowAlertStore";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
+import DoneIcon from "@mui/icons-material/Done";
+import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
 import {
   Box,
+  Button,
+  Chip,
+  Divider,
+  IconButton,
   List,
   ListItem,
-  Chip,
-  Stack,
-  IconButton,
-  Tooltip,
   Paper,
+  Stack,
+  Tooltip,
   Typography,
-  Divider,
-  Button,
-} from '@mui/material';
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
-import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
-import DoneIcon from '@mui/icons-material/Done';
-import {useQuery, useQueryClient} from '@tanstack/react-query';
-import {buildMeiliFeedbackQuery} from '@rezics/api/meili/meili.queries';
-import {useSetFeedbackResolvedMutation} from '@rezics/api/feedback/feedback.mutations';
+} from "@mui/material";
+import { useSetFeedbackResolvedMutation } from "@rezics/api/feedback/feedback.mutations";
 import type {
   FeedbackDTO,
   FeedbackType,
-} from '@rezics/api/feedback/feedback.types';
+} from "@rezics/api/feedback/feedback.types";
+import { buildMeiliFeedbackQuery } from "@rezics/api/meili/meili.queries";
 import {
   UniversalPaginator,
   type UniversalPaginatorHandle,
-} from '@rezics/ui/composite/pagination/Pagination.tsx';
+} from "@rezics/ui/composite/pagination/Pagination.tsx";
+import { Link } from "@rezics/ui/primitive/link/Link.tsx";
 
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from '@rezics/ui/shadcn/popover.tsx';
-import {useAlertStore} from '@app/state/windowAlertStore';
-import {Link} from '@rezics/ui/primitive/link/Link.tsx';
+} from "@rezics/ui/shadcn/popover.tsx";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import type React from "react";
+import { useEffect, useRef, useState } from "react";
 
 export type FeedbackResolvedFilter = boolean | undefined;
 
 export type FeedbackListProps = {
-  queryType: 'mine' | 'all' | 'user';
+  queryType: "mine" | "all" | "user";
   userId?: string;
   /** Full-text search keyword. */
   search?: string;
@@ -49,19 +50,19 @@ export type FeedbackListProps = {
 };
 
 const typeColor: Record<
-  FeedbackDTO['type'],
-  | 'default'
-  | 'primary'
-  | 'secondary'
-  | 'success'
-  | 'warning'
-  | 'error'
+  FeedbackDTO["type"],
+  | "default"
+  | "primary"
+  | "secondary"
+  | "success"
+  | "warning"
+  | "error"
   | undefined
 > = {
-  BUG: 'error',
-  FEATURE: 'primary',
-  REPORT: 'secondary',
-  OTHER: 'default',
+  BUG: "error",
+  FEATURE: "primary",
+  REPORT: "secondary",
+  OTHER: "default",
 };
 
 const EXTERNAL_PAGE_SIZE = 50;
@@ -77,26 +78,26 @@ const FeedbackList: React.FC<FeedbackListProps> = ({
   const [startAll, setStartAll] = useState<number>(0);
   const [startMine, setStartMine] = useState<number>(0);
   const [startUser, setStartUser] = useState<number>(0);
-  const {show: showAlert} = useAlertStore();
+  const { show: showAlert } = useAlertStore();
   const queryClient = useQueryClient();
   const paginatorRef = useRef<UniversalPaginatorHandle | null>(null);
 
   const listResult = useQuery(
-    buildMeiliFeedbackQuery(startAll, EXTERNAL_PAGE_SIZE, search ?? '', {
+    buildMeiliFeedbackQuery(startAll, EXTERNAL_PAGE_SIZE, search ?? "", {
       type: typeFilter,
       resolved,
     }),
   );
 
   const myResult = useQuery(
-    buildMeiliFeedbackQuery(startMine, EXTERNAL_PAGE_SIZE, search ?? '', {
+    buildMeiliFeedbackQuery(startMine, EXTERNAL_PAGE_SIZE, search ?? "", {
       type: typeFilter,
       resolved,
     }),
   );
 
   const byUserResult = useQuery(
-    buildMeiliFeedbackQuery(startUser, EXTERNAL_PAGE_SIZE, search ?? '', {
+    buildMeiliFeedbackQuery(startUser, EXTERNAL_PAGE_SIZE, search ?? "", {
       userId: userId ?? undefined,
       type: typeFilter,
       resolved,
@@ -106,14 +107,14 @@ const FeedbackList: React.FC<FeedbackListProps> = ({
   const resolveMutation = useSetFeedbackResolvedMutation();
 
   const handleResolve = (id: string) => {
-    resolveMutation.mutate({id, resolved: true});
-    showAlert('反馈已解决');
+    resolveMutation.mutate({ id, resolved: true });
+    showAlert("反馈已解决");
   };
 
   const activeResult =
-    queryType === 'mine'
+    queryType === "mine"
       ? myResult
-      : queryType === 'user'
+      : queryType === "user"
         ? byUserResult
         : listResult;
 
@@ -123,22 +124,22 @@ const FeedbackList: React.FC<FeedbackListProps> = ({
 
   useEffect(() => {
     setCurrentPage(1);
-    if (queryType === 'all') {
+    if (queryType === "all") {
       setStartAll(0);
-    } else if (queryType === 'mine') {
+    } else if (queryType === "mine") {
       setStartMine(0);
-    } else if (queryType === 'user') {
+    } else if (queryType === "user") {
       setStartUser(0);
     }
 
     paginatorRef.current?.resetPaginationPageNumber?.();
-  }, [queryType, userId, search, typeFilter, resolved]);
+  }, [queryType]);
 
   const handleNeedMoreData = (externalPage: number) => {
     const offset = (externalPage - 1) * EXTERNAL_PAGE_SIZE;
-    if (queryType === 'mine') {
+    if (queryType === "mine") {
       setStartMine(offset);
-    } else if (queryType === 'user') {
+    } else if (queryType === "user") {
       setStartUser(offset);
     } else {
       setStartAll(offset);
@@ -149,46 +150,46 @@ const FeedbackList: React.FC<FeedbackListProps> = ({
     const offset = (externalPage - 1) * EXTERNAL_PAGE_SIZE;
     const limit = EXTERNAL_PAGE_SIZE;
 
-    if (queryType === 'mine') {
-      const {queryKey, queryFn} = buildMeiliFeedbackQuery(
+    if (queryType === "mine") {
+      const { queryKey, queryFn } = buildMeiliFeedbackQuery(
         offset,
         limit,
-        search ?? '',
+        search ?? "",
         {
           type: typeFilter,
           resolved,
         },
       );
-      const next = await queryClient.fetchQuery({queryKey, queryFn});
+      const next = await queryClient.fetchQuery({ queryKey, queryFn });
       return next?.items?.length ?? 0;
     }
 
-    if (queryType === 'user') {
+    if (queryType === "user") {
       if (!userId) return 0;
-      const {queryKey, queryFn} = buildMeiliFeedbackQuery(
+      const { queryKey, queryFn } = buildMeiliFeedbackQuery(
         offset,
         limit,
-        search ?? '',
+        search ?? "",
         {
           userId,
           type: typeFilter,
           resolved,
         },
       );
-      const next = await queryClient.fetchQuery({queryKey, queryFn});
+      const next = await queryClient.fetchQuery({ queryKey, queryFn });
       return next?.items?.length ?? 0;
     }
 
-    const {queryKey, queryFn} = buildMeiliFeedbackQuery(
+    const { queryKey, queryFn } = buildMeiliFeedbackQuery(
       offset,
       limit,
-      search ?? '',
+      search ?? "",
       {
         type: typeFilter,
         resolved,
       },
     );
-    const next = await queryClient.fetchQuery({queryKey, queryFn});
+    const next = await queryClient.fetchQuery({ queryKey, queryFn });
     return next?.items?.length ?? 0;
   };
 
@@ -319,9 +320,9 @@ const FeedbackList: React.FC<FeedbackListProps> = ({
 
                   <div>
                     {(() => {
-                      const url = item.url ?? '';
+                      const url = item.url ?? "";
                       if (!url) return null;
-                      const isInternal = url.startsWith('/');
+                      const isInternal = url.startsWith("/");
                       return isInternal ? (
                         <Link to={url}>{url}</Link>
                       ) : (

@@ -1,6 +1,5 @@
-import {useTheme} from '@mui/material';
-import {Box, IconButton} from '@mui/material';
-import {ChevronLeft, ChevronRight} from '@mui/icons-material';
+import { ChevronLeft, ChevronRight } from "@mui/icons-material";
+import { Box, IconButton, useTheme } from "@mui/material";
 
 export function MainSidebarDrawerHeader({
   handleDrawerToggle,
@@ -12,15 +11,15 @@ export function MainSidebarDrawerHeader({
   return (
     <Box
       sx={{
-        display: 'flex',
-        alignItems: 'center',
+        display: "flex",
+        alignItems: "center",
         px: 1,
         ...theme.mixins.toolbar, // ensures space below AppBar
-        justifyContent: 'flex-end',
+        justifyContent: "flex-end",
       }}
     >
       <IconButton onClick={handleDrawerToggle}>
-        {theme.direction === 'ltr' ? <ChevronLeft /> : <ChevronRight />}
+        {theme.direction === "ltr" ? <ChevronLeft /> : <ChevronRight />}
       </IconButton>
     </Box>
   );

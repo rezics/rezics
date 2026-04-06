@@ -1,18 +1,18 @@
-import React from 'react';
-import type {ReadlistResponse} from '@rezics/contract';
+import BookmarkAddOutlinedIcon from "@mui/icons-material/BookmarkAddOutlined";
+import ThumbUpAltOutlinedIcon from "@mui/icons-material/ThumbUpAltOutlined";
 import {
+  Box,
   Card,
   CardMedia,
-  Box,
-  Typography,
   IconButton,
   Tooltip,
-} from '@mui/material';
-import ThumbUpAltOutlinedIcon from '@mui/icons-material/ThumbUpAltOutlined';
-import BookmarkAddOutlinedIcon from '@mui/icons-material/BookmarkAddOutlined';
-import {LazyLoadImage} from '@rezics/ui/primitive/image/LazyLoadImage.tsx';
-import {useTranslation} from 'react-i18next';
-import {MUILink} from '@rezics/ui/primitive/link/MUILink.tsx';
+  Typography,
+} from "@mui/material";
+import type { ReadlistResponse } from "@rezics/contract";
+import { LazyLoadImage } from "@rezics/ui/primitive/image/LazyLoadImage.tsx";
+import { MUILink } from "@rezics/ui/primitive/link/MUILink.tsx";
+import type React from "react";
+import { useTranslation } from "react-i18next";
 
 interface SingleReadlistProps {
   data: ReadlistResponse;
@@ -32,13 +32,13 @@ export function SingleReadlist({
   handleBookListClick,
   handleLike,
   handleFavorite,
-  className = '',
+  className = "",
 }: SingleReadlistProps) {
-  const {t} = useTranslation();
+  const { t } = useTranslation();
   const id = data.id;
   const likeCount =
-    data.reactionSummaries?.find((r: any) => r.reaction === 'like')?.count ?? 0;
-  const authorName = data.creator?.name ?? data.creator?.slug ?? '—';
+    data.reactionSummaries?.find((r: any) => r.reaction === "like")?.count ?? 0;
+  const authorName = data.creator?.name ?? data.creator?.slug ?? "—";
   const cover = data.coverUrl;
 
   return (
@@ -50,9 +50,9 @@ export function SingleReadlist({
       className={`mt-4 h-[200px] flex flex-row items-stretch gap-4 w-full ${className}`}
     >
       {/* Cover */}
-      <CardMedia style={{width: '36%', objectFit: 'cover'}}>
+      <CardMedia style={{ width: "36%", objectFit: "cover" }}>
         <LazyLoadImage
-          src={cover ?? ''}
+          src={cover ?? ""}
           alt={data.title}
           className="w-full h-full object-cover"
         />
@@ -84,23 +84,25 @@ export function SingleReadlist({
           <Box className="flex flex-row items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
             {data.books?.length ? (
               <span>
-                {t('page.readlist.books_count', {count: data.books.length})}
+                {t("page.readlist.books_count", { count: data.books.length })}
               </span>
             ) : null}
             {data.reviews?.length ? (
               <span>
-                {t('page.readlist.reviews_count', {count: data.reviews.length})}
+                {t("page.readlist.reviews_count", {
+                  count: data.reviews.length,
+                })}
               </span>
             ) : null}
           </Box>
           <Box className="flex flex-row items-center gap-1">
             <Tooltip
-              title={`${t('page.readlist.like_tooltip')} (${likeCount})`}
+              title={`${t("page.readlist.like_tooltip")} (${likeCount})`}
             >
               <IconButton
                 size="small"
                 aria-label="like"
-                onClick={e => {
+                onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
                   handleLike(id);
@@ -113,11 +115,11 @@ export function SingleReadlist({
               </IconButton>
             </Tooltip>
             {handleFavorite && (
-              <Tooltip title={t('page.readlist.favorite_tooltip')}>
+              <Tooltip title={t("page.readlist.favorite_tooltip")}>
                 <IconButton
                   size="small"
                   aria-label="favorite"
-                  onClick={e => {
+                  onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
                     handleFavorite(id);

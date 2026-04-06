@@ -1,3 +1,5 @@
+import CancelIcon from "@mui/icons-material/Cancel";
+import SaveIcon from "@mui/icons-material/Save";
 import {
   Alert,
   Avatar,
@@ -9,21 +11,19 @@ import {
   CircularProgress,
   TextField,
   Typography,
-} from '@mui/material';
-import SaveIcon from '@mui/icons-material/Save';
-import CancelIcon from '@mui/icons-material/Cancel';
-import {useEffect, useState} from 'react';
-import type {FC} from 'react';
-import type React from 'react';
-import {useTranslation} from 'react-i18next';
-import type {UserDTO, UpdateUser} from '@rezics/contract';
-import {useQuery} from '@tanstack/react-query';
-import {userQueries} from '@rezics/api/user/user.queries';
-import {UserLoading} from './UserState';
-import {userApi} from '@rezics/api/user/user.api';
-import {PasswordField} from '@rezics/ui/composite/form/field/PasswordField.tsx';
-import {useMatch} from '@tanstack/react-router';
-import {Route as UserEditRoute} from '@/routes/_mainLayout/user/$unitId/edit';
+} from "@mui/material";
+import { userApi } from "@rezics/api/user/user.api";
+import { userQueries } from "@rezics/api/user/user.queries";
+import type { UpdateUser, UserDTO } from "@rezics/contract";
+import { PasswordField } from "@rezics/ui/composite/form/field/PasswordField.tsx";
+import { useQuery } from "@tanstack/react-query";
+import { useMatch } from "@tanstack/react-router";
+import type React from "react";
+import type { FC } from "react";
+import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { Route as UserEditRoute } from "@/routes/_mainLayout/user/$unitId/edit";
+import { UserLoading } from "./UserState";
 
 export interface UserEditPageProps {
   onCancel?: () => void;
@@ -40,24 +40,24 @@ export const UserEditPage: FC<UserEditPageProps> = ({
   onSuccess,
   unitId,
 }) => {
-  const routeMatch = useMatch({from: UserEditRoute.id, shouldThrow: false});
+  const routeMatch = useMatch({ from: UserEditRoute.id, shouldThrow: false });
   const resolvedUnitId = unitId ?? routeMatch?.params.unitId;
-  const {t} = useTranslation();
+  const { t } = useTranslation();
   const [user, setUser] = useState<UserDTO | null>(null);
   const {
     data,
     isLoading,
     error: queryError,
-  } = useQuery(userQueries.detail(resolvedUnitId ?? ''));
+  } = useQuery(userQueries.detail(resolvedUnitId ?? ""));
   const [error, setError] = useState<string | any | null>(null);
   const [saving, setSaving] = useState(false);
 
   const [formData, setFormData] = useState<UpdateUser>({
-    name: '',
-    avatar: '',
-    bio: '',
-    password: '',
-    description: '',
+    name: "",
+    avatar: "",
+    bio: "",
+    password: "",
+    description: "",
   });
 
   useEffect(() => {
@@ -65,10 +65,10 @@ export const UserEditPage: FC<UserEditPageProps> = ({
       setUser(data);
       setFormData({
         name: data.name,
-        avatar: data.avatar || '',
-        bio: data.bio || '',
-        password: '',
-        description: data.description || '',
+        avatar: data.avatar || "",
+        bio: data.bio || "",
+        password: "",
+        description: data.description || "",
       });
     }
     if (queryError) {
@@ -88,7 +88,7 @@ export const UserEditPage: FC<UserEditPageProps> = ({
       };
 
       // Only include password if it's not empty
-      if (formData.password && formData.password.trim() !== '') {
+      if (formData.password && formData.password.trim() !== "") {
         updateData.password = formData.password;
       }
       let updatedUser: UserDTO;
@@ -104,7 +104,7 @@ export const UserEditPage: FC<UserEditPageProps> = ({
       }
 
       // Clear password field after successful update
-      setFormData(prev => ({...prev, password: ''}));
+      setFormData((prev) => ({ ...prev, password: "" }));
     } catch (err) {
       setError(err);
     } finally {
@@ -113,7 +113,7 @@ export const UserEditPage: FC<UserEditPageProps> = ({
   };
 
   const handleChange = (field: keyof UpdateUser, value: string) => {
-    setFormData(prev => ({...prev, [field]: value}));
+    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   if (isLoading) {
@@ -133,13 +133,13 @@ export const UserEditPage: FC<UserEditPageProps> = ({
       <Card className="shadow-lg rounded-2xl">
         <CardHeader
           avatar={
-            <Avatar src={formData.avatar} sx={{width: 80, height: 80}}>
+            <Avatar src={formData.avatar} sx={{ width: 80, height: 80 }}>
               {formData.name?.charAt(0).toUpperCase()}
             </Avatar>
           }
           title={
             <Typography variant="h4" className="font-semibold">
-              {t('common.edit')} Profile
+              {t("common.edit")} Profile
             </Typography>
           }
         />
@@ -153,9 +153,9 @@ export const UserEditPage: FC<UserEditPageProps> = ({
             <Box className="space-y-4">
               <TextField
                 fullWidth
-                label={t('common.nickname')}
+                label={t("common.nickname")}
                 value={formData.name}
-                onChange={e => handleChange('name', e.target.value)}
+                onChange={(e) => handleChange("name", e.target.value)}
                 required
                 variant="outlined"
               />
@@ -164,7 +164,7 @@ export const UserEditPage: FC<UserEditPageProps> = ({
                 fullWidth
                 label="Avatar URL"
                 value={formData.avatar}
-                onChange={e => handleChange('avatar', e.target.value)}
+                onChange={(e) => handleChange("avatar", e.target.value)}
                 variant="outlined"
                 helperText="Enter a URL for your profile picture"
               />
@@ -173,7 +173,7 @@ export const UserEditPage: FC<UserEditPageProps> = ({
                 fullWidth
                 label="Bio"
                 value={formData.bio}
-                onChange={e => handleChange('bio', e.target.value)}
+                onChange={(e) => handleChange("bio", e.target.value)}
                 variant="outlined"
                 multiline
                 rows={4}
@@ -184,7 +184,7 @@ export const UserEditPage: FC<UserEditPageProps> = ({
                 fullWidth
                 label="Description"
                 value={formData.description}
-                onChange={e => handleChange('description', e.target.value)}
+                onChange={(e) => handleChange("description", e.target.value)}
                 variant="outlined"
                 multiline
                 rows={4}
@@ -194,8 +194,8 @@ export const UserEditPage: FC<UserEditPageProps> = ({
               <PasswordField
                 className="w-full"
                 label="New Password (optional)"
-                value={formData.password || ''}
-                setValue={value => handleChange('password', value)}
+                value={formData.password || ""}
+                setValue={(value) => handleChange("password", value)}
                 variant="outlined"
                 helperText="Leave empty to keep current password"
                 required={false}
@@ -209,7 +209,7 @@ export const UserEditPage: FC<UserEditPageProps> = ({
                     onClick={onCancel}
                     disabled={saving}
                   >
-                    {t('common.cancel')}
+                    {t("common.cancel")}
                   </Button>
                 )}
                 <Button
@@ -218,7 +218,7 @@ export const UserEditPage: FC<UserEditPageProps> = ({
                   startIcon={<SaveIcon />}
                   disabled={saving}
                 >
-                  {saving ? <CircularProgress size={24} /> : t('common.save')}
+                  {saving ? <CircularProgress size={24} /> : t("common.save")}
                 </Button>
               </Box>
             </Box>

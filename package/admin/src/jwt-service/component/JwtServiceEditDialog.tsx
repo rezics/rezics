@@ -1,20 +1,20 @@
-import {useState, useEffect} from 'react';
-import type {FC} from 'react';
 import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  TextField,
-  FormControlLabel,
-  Switch,
-  Stack,
   Alert,
-  Divider,
+  Button,
   Chip,
-} from '@mui/material';
-import type {JwtServiceDTO, UpdateJwtServiceInput} from '@rezics/contract';
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  FormControlLabel,
+  Stack,
+  Switch,
+  TextField,
+} from "@mui/material";
+import type { JwtServiceDTO, UpdateJwtServiceInput } from "@rezics/contract";
+import type { FC } from "react";
+import { useEffect, useState } from "react";
 
 type Props = {
   open: boolean;
@@ -37,10 +37,10 @@ export const JwtServiceEditDialog: FC<Props> = ({
   updating,
   error,
 }) => {
-  const [issuer, setIssuer] = useState('');
-  const [audience, setAudience] = useState('');
-  const [jwksUrl, setJwksUrl] = useState('');
-  const [jwksPath, setJwksPath] = useState('');
+  const [issuer, setIssuer] = useState("");
+  const [audience, setAudience] = useState("");
+  const [jwksUrl, setJwksUrl] = useState("");
+  const [jwksPath, setJwksPath] = useState("");
   const [isLocalIssuer, setIsLocalIssuer] = useState(false);
 
   useEffect(() => {
@@ -81,23 +81,23 @@ export const JwtServiceEditDialog: FC<Props> = ({
         Edit JWT Service: <strong>{service.serviceKey}</strong>
       </DialogTitle>
       <DialogContent>
-        <Stack spacing={2} sx={{mt: 1}}>
+        <Stack spacing={2} sx={{ mt: 1 }}>
           {error && <Alert severity="error">{error}</Alert>}
 
           <Stack direction="row" alignItems="center" spacing={1}>
             <Chip
-              label={service.isActive ? 'Active' : 'Inactive'}
-              color={service.isActive ? 'success' : 'default'}
+              label={service.isActive ? "Active" : "Inactive"}
+              color={service.isActive ? "success" : "default"}
               size="small"
             />
             <Button
               size="small"
               variant="outlined"
-              color={service.isActive ? 'warning' : 'success'}
+              color={service.isActive ? "warning" : "success"}
               onClick={handleToggleActive}
               disabled={updating}
             >
-              {service.isActive ? 'Deactivate' : 'Activate'}
+              {service.isActive ? "Deactivate" : "Activate"}
             </Button>
           </Stack>
 
@@ -106,28 +106,28 @@ export const JwtServiceEditDialog: FC<Props> = ({
           <TextField
             label="Issuer"
             value={issuer}
-            onChange={e => setIssuer(e.target.value)}
+            onChange={(e) => setIssuer(e.target.value)}
             fullWidth
             size="small"
           />
           <TextField
             label="Audience"
             value={audience}
-            onChange={e => setAudience(e.target.value)}
+            onChange={(e) => setAudience(e.target.value)}
             fullWidth
             size="small"
           />
           <TextField
             label="JWKS URL"
             value={jwksUrl}
-            onChange={e => setJwksUrl(e.target.value)}
+            onChange={(e) => setJwksUrl(e.target.value)}
             fullWidth
             size="small"
           />
           <TextField
             label="JWKS Path"
             value={jwksPath}
-            onChange={e => setJwksPath(e.target.value)}
+            onChange={(e) => setJwksPath(e.target.value)}
             fullWidth
             size="small"
           />
@@ -135,7 +135,7 @@ export const JwtServiceEditDialog: FC<Props> = ({
             control={
               <Switch
                 checked={isLocalIssuer}
-                onChange={e => setIsLocalIssuer(e.target.checked)}
+                onChange={(e) => setIsLocalIssuer(e.target.checked)}
               />
             }
             label="Local Issuer"
@@ -146,12 +146,8 @@ export const JwtServiceEditDialog: FC<Props> = ({
         <Button onClick={onClose} disabled={updating}>
           Cancel
         </Button>
-        <Button
-          onClick={handleSave}
-          variant="contained"
-          disabled={updating}
-        >
-          {updating ? 'Saving...' : 'Save'}
+        <Button onClick={handleSave} variant="contained" disabled={updating}>
+          {updating ? "Saving..." : "Save"}
         </Button>
       </DialogActions>
     </Dialog>

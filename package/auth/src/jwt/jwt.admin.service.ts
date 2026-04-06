@@ -1,9 +1,9 @@
-import {prisma} from '../auth/prisma';
 import type {
   CreateJwtServiceInput,
   JwtServiceDTO,
   UpdateJwtServiceInput,
-} from '@rezics/contract';
+} from "@rezics/contract";
+import { prisma } from "../auth/prisma";
 
 function mapToDTO(record: {
   id: string;
@@ -34,14 +34,14 @@ function mapToDTO(record: {
 export const authJwtServiceAdminService = {
   async list(): Promise<JwtServiceDTO[]> {
     const records = await prisma.jwtService.findMany({
-      orderBy: {createdAt: 'asc'},
+      orderBy: { createdAt: "asc" },
     });
     return records.map(mapToDTO);
   },
 
   async fetch(serviceKey: string): Promise<JwtServiceDTO | null> {
     const record = await prisma.jwtService.findUnique({
-      where: {serviceKey},
+      where: { serviceKey },
     });
     return record ? mapToDTO(record) : null;
   },
@@ -66,14 +66,14 @@ export const authJwtServiceAdminService = {
     input: UpdateJwtServiceInput,
   ): Promise<JwtServiceDTO> {
     const record = await prisma.jwtService.update({
-      where: {serviceKey},
+      where: { serviceKey },
       data: {
-        ...(input.issuer !== undefined ? {issuer: input.issuer} : {}),
-        ...(input.audience !== undefined ? {audience: input.audience} : {}),
-        ...(input.jwksUrl !== undefined ? {jwksUrl: input.jwksUrl} : {}),
-        ...(input.jwksPath !== undefined ? {jwksPath: input.jwksPath} : {}),
+        ...(input.issuer !== undefined ? { issuer: input.issuer } : {}),
+        ...(input.audience !== undefined ? { audience: input.audience } : {}),
+        ...(input.jwksUrl !== undefined ? { jwksUrl: input.jwksUrl } : {}),
+        ...(input.jwksPath !== undefined ? { jwksPath: input.jwksPath } : {}),
         ...(input.isLocalIssuer !== undefined
-          ? {isLocalIssuer: input.isLocalIssuer}
+          ? { isLocalIssuer: input.isLocalIssuer }
           : {}),
       },
     });
@@ -82,16 +82,16 @@ export const authJwtServiceAdminService = {
 
   async activate(serviceKey: string): Promise<JwtServiceDTO> {
     const record = await prisma.jwtService.update({
-      where: {serviceKey},
-      data: {isActive: true},
+      where: { serviceKey },
+      data: { isActive: true },
     });
     return mapToDTO(record);
   },
 
   async deactivate(serviceKey: string): Promise<JwtServiceDTO> {
     const record = await prisma.jwtService.update({
-      where: {serviceKey},
-      data: {isActive: false},
+      where: { serviceKey },
+      data: { isActive: false },
     });
     return mapToDTO(record);
   },

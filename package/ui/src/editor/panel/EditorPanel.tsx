@@ -1,6 +1,6 @@
-import type {ReactNode} from 'react';
-import Toolbar from '@mui/material/Toolbar';
-import Box from '@mui/material/Box';
+import Box from "@mui/material/Box";
+import Toolbar from "@mui/material/Toolbar";
+import type { ReactNode } from "react";
 
 export interface EditorPanelProps {
   left?: ReactNode;
@@ -8,7 +8,7 @@ export interface EditorPanelProps {
   className?: string;
 }
 
-export function EditorPanel({left, right, className}: EditorPanelProps) {
+export function EditorPanel({ left, right, className }: EditorPanelProps) {
   return (
     <Toolbar
       variant="dense"
@@ -22,14 +22,19 @@ export function EditorPanel({left, right, className}: EditorPanelProps) {
     >
       {left && (
         <Box
-          sx={{display: 'flex', alignItems: 'center', gap: 0.5, flexShrink: 0}}
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 0.5,
+            flexShrink: 0,
+          }}
         >
           {left}
         </Box>
       )}
-      <Box sx={{flex: 1}} />
+      <Box sx={{ flex: 1 }} />
       {right && (
-        <Box sx={{display: 'flex', alignItems: 'center', gap: 0.5}}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
           {right}
         </Box>
       )}

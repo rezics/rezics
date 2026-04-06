@@ -1,23 +1,24 @@
-import {Link} from '@rezics/ui/primitive/link/Link.tsx';
 import {
+  Box,
   Card,
   CardActionArea,
   CardContent,
   Typography,
-  Box,
-} from '@mui/material';
-import type {BookDTO} from '@rezics/contract';
-import {LazyLoadImage} from '@rezics/ui/primitive/image/LazyLoadImage.tsx';
-import {useTranslation} from 'react-i18next';
+} from "@mui/material";
+import type { BookDTO } from "@rezics/contract";
+import { LazyLoadImage } from "@rezics/ui/primitive/image/LazyLoadImage.tsx";
+import { Link } from "@rezics/ui/primitive/link/Link.tsx";
+import { useTranslation } from "react-i18next";
+
 // 辅助组件或直接在父组件中使用
 const BookCard = ({
   book,
-  className = '',
+  className = "",
 }: {
   book: BookDTO;
   className?: string;
 }) => {
-  const {t} = useTranslation();
+  const { t } = useTranslation();
   return (
     <Card
       key={book.unitId}
@@ -47,7 +48,7 @@ const BookCard = ({
         ) : (
           // 无图片时的占位符
           <Box className="w-full aspect-[3/4] h-42 bg-gray-200 flex items-center justify-center text-gray-400">
-            {t('book.no_cover')}
+            {t("book.no_cover")}
           </Box>
         )}
 
@@ -67,7 +68,7 @@ const BookCard = ({
             component="p"
             className="text-gray-500 truncate mt-auto pt-1"
           >
-            {book.author?.[0]?.name || t('book.unknown_author')}
+            {book.author?.[0]?.name || t("book.unknown_author")}
           </Typography>
         </CardContent>
       </CardActionArea>

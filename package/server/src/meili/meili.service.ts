@@ -1,30 +1,28 @@
 import type {
   BookQueryOptions,
-  UnitListQuery,
-  ReadlistListQuery,
+  BookSearchResult,
   FeedbackListQuery,
-  UserListQuery,
-} from '@rezics/contract';
-import type {BookSearchResult} from '@rezics/contract';
-import type {
-  UnitSearchResult,
-  ReadlistSearchResult,
   FeedbackSearchResult,
+  ReadlistListQuery,
+  ReadlistSearchResult,
+  UnitListQuery,
+  UnitSearchResult,
+  UserListQuery,
   UserSearchResult,
-} from '@rezics/contract';
-import {searchBooks} from './book/book.api';
-import {searchUnits} from './unit/unit.api';
-import {searchReadlists} from './readlist/readlist.api';
-import {searchFeedbacks} from './feedback/feedback.api';
-import {searchUsers} from './user/user.api';
+} from "@rezics/contract";
 import {
   syncAllBooks,
-  syncAllUnits,
-  syncAllReadlists,
   syncAllFeedbacks,
+  syncAllReadlists,
+  syncAllUnits,
   syncAllUsers,
-} from '@rezics/search';
-import {searchClient} from './search-client';
+} from "@rezics/search";
+import { searchBooks } from "./book/book.api";
+import { searchFeedbacks } from "./feedback/feedback.api";
+import { searchReadlists } from "./readlist/readlist.api";
+import { searchClient } from "./search-client";
+import { searchUnits } from "./unit/unit.api";
+import { searchUsers } from "./user/user.api";
 
 export class MeiliService {
   async searchBooks(options: BookQueryOptions): Promise<BookSearchResult> {

@@ -1,17 +1,17 @@
 import {
-  NormalizedTokenName,
   type AuthContextTokenClaims,
+  NormalizedTokenName,
   type NormalizedTokenName as NormalizedTokenNameType,
-} from '@rezics/contract';
+} from "@rezics/contract";
 import {
   JwtAlgorithm,
-  verifyTokenFromHeader,
-  type JwtVerifyInput as VerifyOptions,
   type VerifiedJwt as VerifiedToken,
-} from '@rezics/jwt';
-import type {JWTPayload} from 'jose';
-import {env} from '../../env';
-import {getJwtService} from '@/jwt';
+  type JwtVerifyInput as VerifyOptions,
+  verifyTokenFromHeader,
+} from "@rezics/jwt";
+import type { JWTPayload } from "jose";
+import { getJwtService } from "@/jwt";
+import { env } from "../../env";
 
 export function buildTrustedAuthVerifyOptions(
   trustedAuth: {
@@ -26,15 +26,15 @@ export function buildTrustedAuthVerifyOptions(
     issuer: overrides?.issuer ?? trustedAuth.issuer,
     audience: overrides?.audience ?? trustedAuth.audience,
     jwksUrl:
-      typeof overrides?.jwksUrl === 'string'
+      typeof overrides?.jwksUrl === "string"
         ? overrides.jwksUrl
         : trustedAuth.jwksUrl,
     algorithm: overrides?.algorithm ?? JwtAlgorithm.ES256,
     tokenName,
     clockToleranceSeconds:
       overrides?.clockToleranceSeconds ??
-      Number(env.AUTH_JWT_CLOCK_TOLERANCE_SECONDS ?? '5'),
-    requiredScope: overrides?.requiredScope ?? 'user',
+      Number(env.AUTH_JWT_CLOCK_TOLERANCE_SECONDS ?? "5"),
+    requiredScope: overrides?.requiredScope ?? "user",
     enforceTransport: overrides?.enforceTransport ?? true,
   };
 }
@@ -43,7 +43,7 @@ async function buildAuthVerifyOptions(
   overrides?: Partial<VerifyOptions>,
   tokenName: NormalizedTokenNameType = NormalizedTokenName.AUTH_IDENTITY,
 ): Promise<VerifyOptions> {
-  const trustedAuth = await getJwtService('auth-upstream');
+  const trustedAuth = await getJwtService("auth-upstream");
   return buildTrustedAuthVerifyOptions(trustedAuth, overrides, tokenName);
 }
 

@@ -13,27 +13,25 @@ import {
   MenuItem,
   Select,
   Typography,
-} from '@mui/material';
-import React from 'react';
-import {useQuery} from '@tanstack/react-query';
-
-import {authQueries} from '@rezics/api/auth/auth.queries';
+} from "@mui/material";
 import {
   useAdminBanUserMutation,
-  useAdminUnbanUserMutation,
-  useAdminSetRoleMutation,
   useAdminRemoveUserMutation,
-} from '@rezics/api/auth/auth.mutations';
-
-import {Page} from '@/core/layout/Page';
+  useAdminSetRoleMutation,
+  useAdminUnbanUserMutation,
+} from "@rezics/api/auth/auth.mutations";
+import { authQueries } from "@rezics/api/auth/auth.queries";
+import { useQuery } from "@tanstack/react-query";
+import React from "react";
 import {
-  PaginatedTable,
   type PaginatedColumn,
-} from '@/component/table/PaginatedTable';
+  PaginatedTable,
+} from "@/component/table/PaginatedTable";
+import { Page } from "@/core/layout/Page";
 
 function fmtDate(v?: string | Date) {
-  if (!v) return '';
-  const d = typeof v === 'string' ? new Date(v) : v;
+  if (!v) return "";
+  const d = typeof v === "string" ? new Date(v) : v;
   if (Number.isNaN(d.getTime())) return String(v);
   return d.toLocaleString();
 }
@@ -55,7 +53,7 @@ export default function AuthUsersPage() {
     title: string;
     message: string;
     onConfirm: () => void;
-  }>({open: false, title: '', message: '', onConfirm: () => {}});
+  }>({ open: false, title: "", message: "", onConfirm: () => {} });
 
   const usersQuery = useQuery(authQueries.adminUsers());
   const banMutation = useAdminBanUserMutation();
@@ -70,45 +68,45 @@ export default function AuthUsersPage() {
   const columns = React.useMemo(() => {
     const cols: PaginatedColumn<AuthUser>[] = [
       {
-        id: 'id',
-        header: 'ID',
+        id: "id",
+        header: "ID",
         minWidth: 220,
-        cell: u => (
-          <Typography variant="body2" sx={{fontFamily: 'monospace'}}>
+        cell: (u) => (
+          <Typography variant="body2" sx={{ fontFamily: "monospace" }}>
             {u.id}
           </Typography>
         ),
       },
       {
-        id: 'name',
-        header: 'Name',
+        id: "name",
+        header: "Name",
         minWidth: 160,
-        cell: u => (
+        cell: (u) => (
           <Typography variant="body2" fontWeight={700} noWrap>
             {u.name}
           </Typography>
         ),
       },
       {
-        id: 'email',
-        header: 'Email',
+        id: "email",
+        header: "Email",
         minWidth: 240,
-        cell: u => (
+        cell: (u) => (
           <Typography variant="body2" noWrap>
             {u.email}
           </Typography>
         ),
       },
       {
-        id: 'role',
-        header: 'Role',
+        id: "role",
+        header: "Role",
         minWidth: 140,
-        cell: u => (
+        cell: (u) => (
           <Select
             size="small"
-            value={u.role ?? 'user'}
-            onChange={e =>
-              setRoleMutation.mutate({userId: u.id, role: e.target.value})
+            value={u.role ?? "user"}
+            onChange={(e) =>
+              setRoleMutation.mutate({ userId: u.id, role: e.target.value })
             }
           >
             <MenuItem value="user">user</MenuItem>
@@ -118,10 +116,10 @@ export default function AuthUsersPage() {
         ),
       },
       {
-        id: 'banned',
-        header: 'Banned',
+        id: "banned",
+        header: "Banned",
         minWidth: 100,
-        cell: u =>
+        cell: (u) =>
           u.banned ? (
             <Chip size="small" label="Banned" color="error" />
           ) : (
@@ -129,22 +127,22 @@ export default function AuthUsersPage() {
           ),
       },
       {
-        id: 'createdAt',
-        header: 'Created',
+        id: "createdAt",
+        header: "Created",
         minWidth: 170,
-        cell: u => fmtDate(u.createdAt),
+        cell: (u) => fmtDate(u.createdAt),
       },
       {
-        id: 'actions',
-        header: 'Actions',
+        id: "actions",
+        header: "Actions",
         minWidth: 200,
-        cell: u => (
-          <Box sx={{display: 'flex', gap: 0.5}}>
+        cell: (u) => (
+          <Box sx={{ display: "flex", gap: 0.5 }}>
             {u.banned ? (
               <Button
                 size="small"
                 variant="outlined"
-                onClick={() => unbanMutation.mutate({userId: u.id})}
+                onClick={() => unbanMutation.mutate({ userId: u.id })}
               >
                 Unban
               </Button>
@@ -153,7 +151,7 @@ export default function AuthUsersPage() {
                 size="small"
                 variant="outlined"
                 color="warning"
-                onClick={() => banMutation.mutate({userId: u.id})}
+                onClick={() => banMutation.mutate({ userId: u.id })}
               >
                 Ban
               </Button>
@@ -165,11 +163,11 @@ export default function AuthUsersPage() {
               onClick={() =>
                 setConfirmDialog({
                   open: true,
-                  title: 'Remove User',
+                  title: "Remove User",
                   message: `Are you sure you want to remove "${u.name}" (${u.email})? This action cannot be undone.`,
                   onConfirm: () => {
-                    removeMutation.mutate({userId: u.id});
-                    setConfirmDialog(prev => ({...prev, open: false}));
+                    removeMutation.mutate({ userId: u.id });
+                    setConfirmDialog((prev) => ({ ...prev, open: false }));
                   },
                 })
               }
@@ -188,7 +186,7 @@ export default function AuthUsersPage() {
       <Card>
         <CardContent>
           {usersQuery.isLoading ? (
-            <Box sx={{display: 'flex', justifyContent: 'center', py: 6}}>
+            <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
               <CircularProgress size={24} />
             </Box>
           ) : usersQuery.isError ? (
@@ -199,12 +197,12 @@ export default function AuthUsersPage() {
             <PaginatedTable<AuthUser>
               columns={columns}
               rows={paginatedUsers}
-              getRowId={u => u.id}
+              getRowId={(u) => u.id}
               count={total}
               page={page}
               rowsPerPage={limit}
-              onPageChange={nextPage => setPage(nextPage)}
-              onRowsPerPageChange={next => {
+              onPageChange={(nextPage) => setPage(nextPage)}
+              onRowsPerPageChange={(next) => {
                 setLimit(next);
                 setPage(0);
               }}
@@ -215,7 +213,7 @@ export default function AuthUsersPage() {
 
       <Dialog
         open={confirmDialog.open}
-        onClose={() => setConfirmDialog(prev => ({...prev, open: false}))}
+        onClose={() => setConfirmDialog((prev) => ({ ...prev, open: false }))}
       >
         <DialogTitle>{confirmDialog.title}</DialogTitle>
         <DialogContent>
@@ -223,7 +221,9 @@ export default function AuthUsersPage() {
         </DialogContent>
         <DialogActions>
           <Button
-            onClick={() => setConfirmDialog(prev => ({...prev, open: false}))}
+            onClick={() =>
+              setConfirmDialog((prev) => ({ ...prev, open: false }))
+            }
           >
             Cancel
           </Button>

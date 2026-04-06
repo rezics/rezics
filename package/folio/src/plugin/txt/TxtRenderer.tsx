@@ -1,5 +1,5 @@
-import { useMemo } from 'react';
-import { createNovelRenderer } from '@rezics/editor/markdown';
+import { createNovelRenderer } from "@rezics/editor/markdown";
+import { useMemo } from "react";
 
 const md = createNovelRenderer({ html: false });
 
@@ -15,11 +15,11 @@ export function TxtRenderer({ raw }: TxtRendererProps) {
     <div
       className="folio-txt-content"
       style={{
-        padding: '16px 24px',
-        maxWidth: '720px',
-        margin: '0 auto',
-        wordBreak: 'break-word',
-        overflowWrap: 'break-word',
+        padding: "16px 24px",
+        maxWidth: "720px",
+        margin: "0 auto",
+        wordBreak: "break-word",
+        overflowWrap: "break-word",
       }}
       dangerouslySetInnerHTML={{ __html: html }}
     />

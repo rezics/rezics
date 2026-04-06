@@ -1,9 +1,10 @@
-import {InputAdornment, TextField} from '@mui/material';
-import React, {useState} from 'react';
+import { InputAdornment, TextField } from "@mui/material";
+import type React from "react";
+import { useState } from "react";
 
 export type TextSearchInputBaseProps = {
   value: string;
-  size?: 'small' | 'medium';
+  size?: "small" | "medium";
   height?: number;
   onValueChange: (value: string) => void;
   onSubmit: (value: string) => void;
@@ -15,7 +16,7 @@ export type TextSearchInputBaseProps = {
 
 export const TextSearchInputBase: React.FC<TextSearchInputBaseProps> = ({
   value,
-  size = 'small',
+  size = "small",
   height,
   onValueChange,
   onSubmit,
@@ -31,15 +32,15 @@ export const TextSearchInputBase: React.FC<TextSearchInputBaseProps> = ({
         fullWidth
         size={size}
         sx={{
-          '& .MuiInputBase-root': {
+          "& .MuiInputBase-root": {
             height: height,
           },
         }}
-        label={label ?? ''}
+        label={label ?? ""}
         autoComplete="off"
-        placeholder={placeholder ?? 'Find anything'}
+        placeholder={placeholder ?? "Find anything"}
         value={value}
-        onChange={event => onValueChange(event.target.value)}
+        onChange={(event) => onValueChange(event.target.value)}
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}
         slotProps={{
@@ -51,7 +52,7 @@ export const TextSearchInputBase: React.FC<TextSearchInputBaseProps> = ({
             ),
           },
         }}
-        onKeyDown={event => {
+        onKeyDown={(event) => {
           /**
            * 防止中文 / 日文 IME 输入时误触 Enter
            */
@@ -60,7 +61,7 @@ export const TextSearchInputBase: React.FC<TextSearchInputBaseProps> = ({
           /**
            * 仅在 focus 时触发 search
            */
-          if (focused && event.key === 'Enter') {
+          if (focused && event.key === "Enter") {
             event.preventDefault();
             onSubmit(value);
           }

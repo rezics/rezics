@@ -1,26 +1,26 @@
-import {Elysia} from 'elysia';
-import {swagger} from '@elysiajs/swagger';
-import {bookApi} from './book/book.api';
-import {env} from './env';
-import {getProdState} from './utils/getProdState';
+import { swagger } from "@elysiajs/swagger";
+import { Elysia } from "elysia";
+import { bookApi } from "./book/book.api";
+import { env } from "./env";
+import { getProdState } from "./utils/getProdState";
 
-const {isProd, isDev} = getProdState();
+const { isProd, isDev } = getProdState();
 
 if (isDev) {
-  await import('./utils/logger-hook');
+  await import("./utils/logger-hook");
 }
 
 const app = new Elysia()
   // .decorate('prisma', prisma)
-  .trace(async ({onHandle, context}) => {
+  .trace(async ({ onHandle, context }) => {
     // 监听 handle 阶段
-    onHandle(({begin, onStop}) => {
-      const {route, params, request} = context;
+    onHandle(({ begin, onStop }) => {
+      const { route, params, request } = context;
 
-      onStop(({end}) => {
+      onStop(({ end }) => {
         console.log(
           `[${request.method}] ${route} took ${end - begin}ms`,
-          'params:',
+          "params:",
           params,
         );
       });

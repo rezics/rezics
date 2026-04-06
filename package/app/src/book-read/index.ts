@@ -12,4 +12,4 @@
 // ============================================================================
 
 /** Chapter reading page. */
-export {BookReadChapterPage} from './page/ChapterPage';
+export { BookReadChapterPage } from "./page/ChapterPage";

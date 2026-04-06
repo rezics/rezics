@@ -3,20 +3,20 @@
  */
 
 import type {
-  TagDTO,
-  TagDetailDTO,
   CreateTagInput,
-  UpdateTagInput,
+  TagDetailDTO,
+  TagDTO,
   TagListQuery,
-} from '@rezics/contract';
+  UpdateTagInput,
+} from "@rezics/contract";
 
 // Re-export contract types
 export type {
-  TagDTO,
-  TagDetailDTO,
   CreateTagInput,
-  UpdateTagInput,
+  TagDetailDTO,
+  TagDTO,
   TagListQuery,
+  UpdateTagInput,
 };
 
 /**
@@ -26,4 +26,4 @@ export type TagFormData = Omit<CreateTagInput, never>;
 
 export type TagFilters = Partial<TagListQuery>;
 
-export type TagView = 'list' | 'cloud';
+export type TagView = "list" | "cloud";

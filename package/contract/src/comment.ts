@@ -1,5 +1,5 @@
-import {t} from 'elysia';
-import {publicUserSchema} from './unit';
+import { t } from "elysia";
+import { publicUserSchema } from "./unit";
 
 // Comment contracts
 export type CommentDTO = {
@@ -9,7 +9,7 @@ export type CommentDTO = {
   depth: number;
   content?: string | null;
   created_at?: string;
-  user?: {id: string; name: string; avatar?: string};
+  user?: { id: string; name: string; avatar?: string };
 };
 
 export type CreateCommentInput = {
@@ -33,7 +33,7 @@ export const commentTreeNodeSchema = t.Object({
   user: t.Optional(publicUserSchema),
 });
 
-export type CommentTreeNode = (typeof commentTreeNodeSchema)['static'];
+export type CommentTreeNode = (typeof commentTreeNodeSchema)["static"];
 
 export const commentTreeQuerySchema = t.Object({
   parentId: t.Optional(t.String()),
@@ -43,14 +43,14 @@ export const commentTreeQuerySchema = t.Object({
   order: t.Optional(t.String()), // asc | desc
 });
 
-export type CommentTreeQuery = (typeof commentTreeQuerySchema)['static'];
+export type CommentTreeQuery = (typeof commentTreeQuerySchema)["static"];
 
 export const commentTreeResponseSchema = t.Object({
   rootUnitId: t.String(),
   items: t.Array(commentTreeNodeSchema),
 });
 
-export type CommentTreeResponse = (typeof commentTreeResponseSchema)['static'];
+export type CommentTreeResponse = (typeof commentTreeResponseSchema)["static"];
 
 // Query schema for listing comments under a root
 export const commentListQuerySchema = t.Object({

@@ -1,90 +1,87 @@
-import {t, Elysia} from 'elysia';
+import type { CreateCommentInput } from "@rezics/contract";
 import {
-  authMacro,
-  buildActorFromContext,
-} from '@/middleware';
-import {commentService} from './comment.service';
-import {mapCommentToDTO} from './mapper';
-import type {CreateCommentInput} from '@rezics/contract';
-import {
+  type CommentTreeResponse,
   commentListQuerySchema,
+  commentTreeQuerySchema,
+  commentTreeResponseSchema,
   createCommentSchema,
+  hasPermissionToDeleteComment,
+  hasPermissionToUpdateComment,
   unitParamsSchema,
   updateCommentSchema,
-  commentTreeResponseSchema,
-  commentTreeQuerySchema,
-  type CommentTreeResponse,
-  hasPermissionToUpdateComment,
-  hasPermissionToDeleteComment,
-} from '@rezics/contract';
+} from "@rezics/contract";
+import { Elysia, t } from "elysia";
+import { authMacro, buildActorFromContext } from "@/middleware";
+import { commentService } from "./comment.service";
+import { mapCommentToDTO } from "./mapper";
 
-export const commentApi = new Elysia({prefix: '/comments'})
+export const commentApi = new Elysia({ prefix: "/comments" })
   .use(authMacro)
   .get(
-    '/comment-tree/:unitId',
-    async ({params, query}): Promise<CommentTreeResponse> => {
+    "/comment-tree/:unitId",
+    async ({ params, query }): Promise<CommentTreeResponse> => {
       const items = await commentService.getCommentTreeFlat(params.unitId, {
         parentId: (query as any).parentId,
         maxDepth: (query as any).maxDepth,
         start: (query as any).start,
         limit: (query as any).limit,
-        order: ((query as any).order as 'asc' | 'desc') ?? 'asc',
+        order: ((query as any).order as "asc" | "desc") ?? "asc",
       });
-      return {rootUnitId: params.unitId, items};
+      return { rootUnitId: params.unitId, items };
     },
     {
       params: unitParamsSchema,
       query: commentTreeQuerySchema,
       response: commentTreeResponseSchema,
       detail: {
-        summary: 'Get comment tree slice',
+        summary: "Get comment tree slice",
         description:
-          'Returns a flat slice of comments under the root unit using CommentIndex to optimize tree retrieval.',
-        tags: ['Units', 'Comments'],
+          "Returns a flat slice of comments under the root unit using CommentIndex to optimize tree retrieval.",
+        tags: ["Units", "Comments"],
       },
     },
   )
   .get(
-    '/',
-    async ({query}) => {
-      const {rootUnitId, parentId, maxDepth, start, limit, order} = query;
+    "/",
+    async ({ query }) => {
+      const { rootUnitId, parentId, maxDepth, start, limit, order } = query;
       const items = await commentService.list(rootUnitId, {
         parentId,
         maxDepth,
         start,
         limit,
-        order: order === 'desc' ? 'desc' : 'asc',
+        order: order === "desc" ? "desc" : "asc",
       });
-      return {rootUnitId, items};
+      return { rootUnitId, items };
     },
     {
       query: commentListQuerySchema,
       detail: {
-        summary: 'List comments',
+        summary: "List comments",
         description:
-          'List a flat slice of comments under a root unit or parent',
-        tags: ['Comments'],
+          "List a flat slice of comments under a root unit or parent",
+        tags: ["Comments"],
       },
     },
   )
   .get(
-    '/:unitId',
-    async ({params}) => {
+    "/:unitId",
+    async ({ params }) => {
       const comment = await commentService.getByUnitId(params.unitId);
       return mapCommentToDTO(comment);
     },
     {
-      params: t.Object({unitId: t.String()}),
+      params: t.Object({ unitId: t.String() }),
       detail: {
-        summary: 'Get comment',
-        description: 'Get a single comment by unit ID',
-        tags: ['Comments'],
+        summary: "Get comment",
+        description: "Get a single comment by unit ID",
+        tags: ["Comments"],
       },
     },
   )
   .post(
-    '/',
-    async ({body, identity}) => {
+    "/",
+    async ({ body, identity }) => {
       const req: CreateCommentInput = {
         rootPostId: body.rootPostId,
         parentCommentId: body.parentCommentId ?? null,
@@ -100,62 +97,62 @@ export const commentApi = new Elysia({prefix: '/comments'})
       requireLogin: true,
       body: createCommentSchema,
       detail: {
-        summary: 'Create comment',
-        description: 'Create a new comment under a root unit',
-        tags: ['Comments'],
+        summary: "Create comment",
+        description: "Create a new comment under a root unit",
+        tags: ["Comments"],
       },
     },
   )
   .put(
-    '/:unitId',
-    async ({params, body, identity, currentUser, set}) => {
+    "/:unitId",
+    async ({ params, body, identity, currentUser, set }) => {
       const target = await commentService.getByUnitId(params.unitId);
       if (
         !hasPermissionToUpdateComment(
-          buildActorFromContext({identity, currentUser}),
+          buildActorFromContext({ identity, currentUser }),
           target.unit as any,
         )
       ) {
         set.status = 403;
-        throw new Error('Forbidden: you do not own this comment');
+        throw new Error("Forbidden: you do not own this comment");
       }
       const updated = await commentService.update(params.unitId, body);
       return mapCommentToDTO(updated);
     },
     {
       requireOwner: true,
-      params: t.Object({unitId: t.String()}),
+      params: t.Object({ unitId: t.String() }),
       body: updateCommentSchema,
       detail: {
-        summary: 'Update comment',
-        description: 'Update an existing comment content',
-        tags: ['Comments'],
+        summary: "Update comment",
+        description: "Update an existing comment content",
+        tags: ["Comments"],
       },
     },
   )
   .delete(
-    '/:unitId',
-    async ({params, identity, currentUser, set}) => {
+    "/:unitId",
+    async ({ params, identity, currentUser, set }) => {
       const target = await commentService.getByUnitId(params.unitId);
       if (
         !hasPermissionToDeleteComment(
-          buildActorFromContext({identity, currentUser}),
+          buildActorFromContext({ identity, currentUser }),
           target.unit as any,
         )
       ) {
         set.status = 403;
-        throw new Error('Forbidden: you do not own this comment');
+        throw new Error("Forbidden: you do not own this comment");
       }
       await commentService.delete(params.unitId);
-      return {message: 'Comment deleted successfully'};
+      return { message: "Comment deleted successfully" };
     },
     {
       requireOwner: true,
-      params: t.Object({unitId: t.String()}),
+      params: t.Object({ unitId: t.String() }),
       detail: {
-        summary: 'Delete comment',
-        description: 'Delete a comment by unit ID',
-        tags: ['Comments'],
+        summary: "Delete comment",
+        description: "Delete a comment by unit ID",
+        tags: ["Comments"],
       },
     },
   );

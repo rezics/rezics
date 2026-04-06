@@ -1,6 +1,6 @@
-import {useState} from 'react';
-import {useFixtureSelect} from 'react-cosmos/client';
-import {MarkdownEditor} from '../MarkdownEditor';
+import { useState } from "react";
+import { useFixtureSelect } from "react-cosmos/client";
+import { MarkdownEditor } from "../MarkdownEditor";
 
 const previewMarkdown = `# Preview Demo
 
@@ -64,9 +64,9 @@ Another paragraph with  double  spaces  in  the  middle  of  sentences.
 `;
 
 function ViewModesFixture() {
-  const [viewMode] = useFixtureSelect('View Mode', {
-    options: ['write', 'preview', 'dual'] as const,
-    defaultValue: 'write',
+  const [viewMode] = useFixtureSelect("View Mode", {
+    options: ["write", "preview", "dual"] as const,
+    defaultValue: "write",
   });
 
   // MarkdownEditor manages viewMode internally, so we wrap it to start in the selected mode
@@ -86,7 +86,11 @@ function FullscreenFixture() {
   return (
     <div>
       {!active && (
-        <button type="button" onClick={() => setActive(true)} style={{margin: 8}}>
+        <button
+          type="button"
+          onClick={() => setActive(true)}
+          style={{ margin: 8 }}
+        >
           Re-mount editor
         </button>
       )}
@@ -109,17 +113,13 @@ export default {
   NoHighlight: () => (
     <MarkdownEditor
       value={previewMarkdown}
-      preview={{highlight: false}}
+      preview={{ highlight: false }}
       className="h-screen"
     />
   ),
 
   NovelFormatting: () => (
-    <MarkdownEditor
-      value={novelContent}
-      preview={true}
-      className="h-screen"
-    />
+    <MarkdownEditor value={novelContent} preview={true} className="h-screen" />
   ),
 
   CodeBlocks: () => (

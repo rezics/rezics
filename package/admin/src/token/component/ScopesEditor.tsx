@@ -1,21 +1,21 @@
-import {useState} from 'react';
-import type {FC} from 'react';
+import AddIcon from "@mui/icons-material/Add";
+import DeleteIcon from "@mui/icons-material/Delete";
 import {
   Box,
-  Typography,
-  TextField,
   Button,
   Chip,
-  Stack,
   FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
   IconButton,
+  InputLabel,
+  MenuItem,
   Paper,
-} from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import DeleteIcon from '@mui/icons-material/Delete';
+  Select,
+  Stack,
+  TextField,
+  Typography,
+} from "@mui/material";
+import type { FC } from "react";
+import { useState } from "react";
 
 interface ScopesEditorProps {
   scopes: Record<string, string[]>;
@@ -26,30 +26,30 @@ interface ScopesEditorProps {
  * 预定义的 scope 域和权限选项
  */
 const PREDEFINED_DOMAINS = [
-  'main',
-  'book',
-  'chapter',
-  'user',
-  'comment',
-  'tag',
-  'review',
-  'readlist',
+  "main",
+  "book",
+  "chapter",
+  "user",
+  "comment",
+  "tag",
+  "review",
+  "readlist",
 ];
-const PREDEFINED_PERMISSIONS = ['read', 'write', 'delete', 'admin'];
+const PREDEFINED_PERMISSIONS = ["read", "write", "delete", "admin"];
 
 /**
  * ScopesEditor - 编辑 API token 权限 (scopes) 的组件
  */
-export const ScopesEditor: FC<ScopesEditorProps> = ({scopes, onChange}) => {
-  const [newDomain, setNewDomain] = useState('');
-  const [newPermission, setNewPermission] = useState('');
-  const [customDomain, setCustomDomain] = useState('');
+export const ScopesEditor: FC<ScopesEditorProps> = ({ scopes, onChange }) => {
+  const [newDomain, setNewDomain] = useState("");
+  const [newPermission, setNewPermission] = useState("");
+  const [customDomain, setCustomDomain] = useState("");
 
   const addScope = () => {
-    const domain = newDomain === 'custom' ? customDomain : newDomain;
+    const domain = newDomain === "custom" ? customDomain : newDomain;
     if (!domain || !newPermission) return;
 
-    const updated = {...scopes};
+    const updated = { ...scopes };
     if (!updated[domain]) {
       updated[domain] = [];
     }
@@ -57,13 +57,13 @@ export const ScopesEditor: FC<ScopesEditorProps> = ({scopes, onChange}) => {
       updated[domain] = [...updated[domain], newPermission];
     }
     onChange(updated);
-    setNewPermission('');
+    setNewPermission("");
   };
 
   const removeScope = (domain: string, permission: string) => {
-    const updated = {...scopes};
+    const updated = { ...scopes };
     if (updated[domain]) {
-      updated[domain] = updated[domain].filter(p => p !== permission);
+      updated[domain] = updated[domain].filter((p) => p !== permission);
       if (updated[domain].length === 0) {
         delete updated[domain];
       }
@@ -72,7 +72,7 @@ export const ScopesEditor: FC<ScopesEditorProps> = ({scopes, onChange}) => {
   };
 
   const removeDomain = (domain: string) => {
-    const updated = {...scopes};
+    const updated = { ...scopes };
     delete updated[domain];
     onChange(updated);
   };
@@ -93,7 +93,7 @@ export const ScopesEditor: FC<ScopesEditorProps> = ({scopes, onChange}) => {
                   {domain}:
                 </Typography>
                 <Stack direction="row" spacing={0.5} flexWrap="wrap" useFlexGap>
-                  {permissions.map(perm => (
+                  {permissions.map((perm) => (
                     <Chip
                       key={`${domain}:${perm}`}
                       label={perm}
@@ -118,14 +118,14 @@ export const ScopesEditor: FC<ScopesEditorProps> = ({scopes, onChange}) => {
 
       {/* 添加新 scope */}
       <Stack direction="row" spacing={2} alignItems="flex-end">
-        <FormControl size="small" sx={{minWidth: 120}}>
+        <FormControl size="small" sx={{ minWidth: 120 }}>
           <InputLabel>Domain</InputLabel>
           <Select
             value={newDomain}
             label="Domain"
-            onChange={e => setNewDomain(e.target.value)}
+            onChange={(e) => setNewDomain(e.target.value)}
           >
-            {PREDEFINED_DOMAINS.map(d => (
+            {PREDEFINED_DOMAINS.map((d) => (
               <MenuItem key={d} value={d}>
                 {d}
               </MenuItem>
@@ -134,23 +134,23 @@ export const ScopesEditor: FC<ScopesEditorProps> = ({scopes, onChange}) => {
           </Select>
         </FormControl>
 
-        {newDomain === 'custom' && (
+        {newDomain === "custom" && (
           <TextField
             size="small"
             label="Custom domain"
             value={customDomain}
-            onChange={e => setCustomDomain(e.target.value)}
+            onChange={(e) => setCustomDomain(e.target.value)}
           />
         )}
 
-        <FormControl size="small" sx={{minWidth: 120}}>
+        <FormControl size="small" sx={{ minWidth: 120 }}>
           <InputLabel>Permission</InputLabel>
           <Select
             value={newPermission}
             label="Permission"
-            onChange={e => setNewPermission(e.target.value)}
+            onChange={(e) => setNewPermission(e.target.value)}
           >
-            {PREDEFINED_PERMISSIONS.map(p => (
+            {PREDEFINED_PERMISSIONS.map((p) => (
               <MenuItem key={p} value={p}>
                 {p}
               </MenuItem>
@@ -166,7 +166,7 @@ export const ScopesEditor: FC<ScopesEditorProps> = ({scopes, onChange}) => {
           disabled={
             !newDomain ||
             !newPermission ||
-            (newDomain === 'custom' && !customDomain)
+            (newDomain === "custom" && !customDomain)
           }
         >
           Add

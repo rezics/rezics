@@ -1,30 +1,27 @@
-import {Elysia} from 'elysia';
 import {
-  authMacro,
-  buildActorFromContext,
-} from '@/middleware';
-import {UnitType} from '#/prisma/client';
-import {
-  createReviewSchema,
-  updateReviewSchema,
-  reviewListQuerySchema,
-  reviewParamsSchema,
-  type ReviewListResponse,
-  type ReviewResponse,
+  BasicAdminPermission,
   type CreateReviewInput,
-  reviewQuerySchema,
+  createReviewSchema,
   hasPermissionToDeleteReview,
   hasPermissionToUpdateReview,
-  BasicAdminPermission,
-} from '@rezics/contract';
-import {reviewService} from './review.service';
-import {mapReviewToDTO} from './mapper';
+  type ReviewListResponse,
+  type ReviewResponse,
+  reviewListQuerySchema,
+  reviewParamsSchema,
+  reviewQuerySchema,
+  updateReviewSchema,
+} from "@rezics/contract";
+import { Elysia } from "elysia";
+import { UnitType } from "#/prisma/client";
+import { authMacro, buildActorFromContext } from "@/middleware";
+import { mapReviewToDTO } from "./mapper";
+import { reviewService } from "./review.service";
 
-export const reviewApi = new Elysia({prefix: '/reviews'})
+export const reviewApi = new Elysia({ prefix: "/reviews" })
   .use(authMacro)
   .get(
-    '/:id',
-    async ({params, query}): Promise<ReviewResponse> => {
+    "/:id",
+    async ({ params, query }): Promise<ReviewResponse> => {
       const review = await reviewService.getById(params.id, {
         unitType: query.unitType as UnitType,
       });
@@ -34,32 +31,32 @@ export const reviewApi = new Elysia({prefix: '/reviews'})
       params: reviewParamsSchema,
       query: reviewQuerySchema,
       detail: {
-        summary: 'Get review',
-        description: 'Get a single review by id',
-        tags: ['Reviews'],
+        summary: "Get review",
+        description: "Get a single review by id",
+        tags: ["Reviews"],
       },
     },
   )
   .get(
-    '/short',
-    async ({query}): Promise<ReviewListResponse> => {
-      const {reviews, total} = await reviewService.list(query, {
+    "/short",
+    async ({ query }): Promise<ReviewListResponse> => {
+      const { reviews, total } = await reviewService.list(query, {
         unitType: UnitType.REMARK,
       });
-      return {reviews: reviews.map(mapReviewToDTO), total};
+      return { reviews: reviews.map(mapReviewToDTO), total };
     },
     {
       query: reviewListQuerySchema,
       detail: {
-        summary: 'Get all short reviews',
-        description: 'List short-form reviews (UnitType.REMARK)',
-        tags: ['Short Reviews'],
+        summary: "Get all short reviews",
+        description: "List short-form reviews (UnitType.REMARK)",
+        tags: ["Short Reviews"],
       },
     },
   )
   .get(
-    '/remark/:id',
-    async ({params}): Promise<ReviewResponse> => {
+    "/remark/:id",
+    async ({ params }): Promise<ReviewResponse> => {
       const review = await reviewService.getById(params.id, {
         unitType: UnitType.REMARK,
       });
@@ -68,15 +65,15 @@ export const reviewApi = new Elysia({prefix: '/reviews'})
     {
       params: reviewParamsSchema,
       detail: {
-        summary: 'Get short review',
-        description: 'Get a single short review by id',
-        tags: ['Short Reviews'],
+        summary: "Get short review",
+        description: "Get a single short review by id",
+        tags: ["Short Reviews"],
       },
     },
   )
   .post(
-    '/',
-    async ({body, identity, query}): Promise<ReviewResponse> => {
+    "/",
+    async ({ body, identity, query }): Promise<ReviewResponse> => {
       const unitType = query.unitType ?? UnitType.REVIEW;
       const req: CreateReviewInput = {
         ...body,
@@ -91,36 +88,36 @@ export const reviewApi = new Elysia({prefix: '/reviews'})
       requireLogin: true,
       body: createReviewSchema,
       detail: {
-        summary: 'Create review',
-        description: 'Create a new review for a book',
-        tags: ['Reviews'],
+        summary: "Create review",
+        description: "Create a new review for a book",
+        tags: ["Reviews"],
       },
     },
   )
   .get(
-    '/',
-    async ({query, currentUser, set}): Promise<ReviewListResponse> => {
+    "/",
+    async ({ query, currentUser, set }): Promise<ReviewListResponse> => {
       if (!BasicAdminPermission(currentUser)) {
         set.status = 403;
         throw new Error(
-          'Forbidden: you do not have permission to get all reviews',
+          "Forbidden: you do not have permission to get all reviews",
         );
       }
-      const {reviews, total} = await reviewService.list(query);
-      return {reviews: reviews.map(mapReviewToDTO), total};
+      const { reviews, total } = await reviewService.list(query);
+      return { reviews: reviews.map(mapReviewToDTO), total };
     },
     {
       requireOwner: true,
       query: reviewListQuerySchema,
       detail: {
-        summary: 'Get all reviews',
-        description: 'Get all reviews with filters and pagination',
-        tags: ['Reviews'],
+        summary: "Get all reviews",
+        description: "Get all reviews with filters and pagination",
+        tags: ["Reviews"],
       },
     },
   )
   .put(
-    '/:id',
+    "/:id",
     async ({
       params,
       body,
@@ -131,13 +128,13 @@ export const reviewApi = new Elysia({prefix: '/reviews'})
       const target = await reviewService.getById(params.id);
       if (
         !hasPermissionToUpdateReview(
-          buildActorFromContext({identity, currentUser}),
+          buildActorFromContext({ identity, currentUser }),
           target as any,
         )
       ) {
         set.status = 403;
         throw new Error(
-          'Forbidden: you do not have permission to update this review',
+          "Forbidden: you do not have permission to update this review",
         );
       }
       const review = await reviewService.update(params.id, body);
@@ -148,42 +145,42 @@ export const reviewApi = new Elysia({prefix: '/reviews'})
       params: reviewParamsSchema,
       body: updateReviewSchema,
       detail: {
-        summary: 'Update review',
-        description: 'Update an existing review by id',
-        tags: ['Reviews'],
+        summary: "Update review",
+        description: "Update an existing review by id",
+        tags: ["Reviews"],
       },
     },
   )
   .delete(
-    '/:id',
+    "/:id",
     async ({
       params,
       identity,
       currentUser,
       set,
-    }): Promise<{message: string}> => {
+    }): Promise<{ message: string }> => {
       const target = await reviewService.getById(params.id);
       if (
         !hasPermissionToDeleteReview(
-          buildActorFromContext({identity, currentUser}),
+          buildActorFromContext({ identity, currentUser }),
           target as any,
         )
       ) {
         set.status = 403;
         throw new Error(
-          'Forbidden: you do not have permission to delete this review',
+          "Forbidden: you do not have permission to delete this review",
         );
       }
       await reviewService.delete(params.id);
-      return {message: 'Review deleted successfully'};
+      return { message: "Review deleted successfully" };
     },
     {
       requireOwner: true,
       params: reviewParamsSchema,
       detail: {
-        summary: 'Delete review',
-        description: 'Delete a review by id',
-        tags: ['Reviews'],
+        summary: "Delete review",
+        description: "Delete a review by id",
+        tags: ["Reviews"],
       },
     },
   );

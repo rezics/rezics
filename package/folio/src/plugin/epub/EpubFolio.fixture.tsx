@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
-import { Folio, type RendererPlugin, type FolioNode } from '@rezics/folio';
-import { createEpubPlugin } from '@rezics/folio/plugin/epub';
-import { WRAPPER_STYLE } from '../../_stubs';
-import { useFileUpload } from '../../_fixture-helpers';
+import { Folio, type FolioNode, type RendererPlugin } from "@rezics/folio";
+import { createEpubPlugin } from "@rezics/folio/plugin/epub";
+import { useEffect, useState } from "react";
+import { useFileUpload } from "../../_fixture-helpers";
+import { WRAPPER_STYLE } from "../../_stubs";
 
 type EpubResult = {
   plugin: RendererPlugin;
@@ -11,7 +11,7 @@ type EpubResult = {
 };
 
 function Default() {
-  const { file, FileInput } = useFileUpload('.epub');
+  const { file, FileInput } = useFileUpload(".epub");
   const [result, setResult] = useState<EpubResult | null>(null);
   const [error, setError] = useState<Error | null>(null);
 
@@ -49,7 +49,7 @@ function Default() {
 
   if (error) {
     return (
-      <div style={{ padding: 32, color: '#e53e3e' }}>
+      <div style={{ padding: 32, color: "#e53e3e" }}>
         Failed to load EPUB: {error.message}
       </div>
     );

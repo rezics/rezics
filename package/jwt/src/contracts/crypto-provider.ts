@@ -1,7 +1,12 @@
-import {generateKeyPairSync} from 'node:crypto';
-import {exportJWK} from 'jose';
-import {JwtAlgorithm} from '../core/jwt-algorithm';
-import {asJwtPrivateJwk, asJwtPublicJwk, type JwtPrivateJwk, type JwtPublicJwk} from '../core/jwk';
+import { generateKeyPairSync } from "node:crypto";
+import { exportJWK } from "jose";
+import {
+  asJwtPrivateJwk,
+  asJwtPublicJwk,
+  type JwtPrivateJwk,
+  type JwtPublicJwk,
+} from "../core/jwk";
+import { JwtAlgorithm } from "../core/jwt-algorithm";
 
 export type JwtKeyMaterial = {
   privateJwk: JwtPrivateJwk;
@@ -14,8 +19,8 @@ export type JwtCryptoProvider = {
 
 export const defaultJwtCryptoProvider: JwtCryptoProvider = {
   async generateKey() {
-    const {privateKey, publicKey} = generateKeyPairSync('ec', {
-      namedCurve: 'P-256',
+    const { privateKey, publicKey } = generateKeyPairSync("ec", {
+      namedCurve: "P-256",
     });
 
     return {

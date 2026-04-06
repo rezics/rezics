@@ -1,15 +1,13 @@
-import {type NavigationItem} from '../navigation/navigation';
-import {useLayoutStore} from '../../state/layoutStore';
-import {useRouterState} from '@tanstack/react-router';
-import React, {type ReactNode} from 'react';
-
-import useMeasure from 'react-use-measure';
-
-import {Sidebar as UiSidebar} from './sidebar';
-import {cn} from '@/shared/util/css-util';
-import {useIsMobile} from '@/shared/util/use-media-query';
-
-import {MainSidebarMenuSection} from './MainSidebarMenuSection';
+import { useRouterState } from "@tanstack/react-router";
+import type React from "react";
+import type { ReactNode } from "react";
+import useMeasure from "react-use-measure";
+import { cn } from "@/shared/util/css-util";
+import { useIsMobile } from "@/shared/util/use-media-query";
+import { useLayoutStore } from "../../state/layoutStore";
+import type { NavigationItem } from "../navigation/navigation";
+import { MainSidebarMenuSection } from "./MainSidebarMenuSection";
+import { Sidebar as UiSidebar } from "./sidebar";
 
 interface SidebarProps {
   sidebarClassName?: string;
@@ -17,7 +15,7 @@ interface SidebarProps {
   NAVIGATION: NavigationItem[];
   children?: ReactNode;
   isDragging?: boolean;
-  layoutType?: 'type-a' | 'type-b';
+  layoutType?: "type-a" | "type-b";
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -26,16 +24,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
   NAVIGATION,
   children = null,
   isDragging = false,
-  layoutType = 'type-b',
+  layoutType = "type-b",
 }) => {
   const isMobile = useIsMobile();
-  const sidebarOpen = useLayoutStore(s => s.sidebarOpen);
-  const sidebarWidth = useLayoutStore(s => s.drawerWidth);
-  const handleDrawerToggle = useLayoutStore(s => s.toggleSidebar);
-  const closeSidebar = useLayoutStore(s => s.closeSidebar);
-  const {toggleItem, openItems} = useLayoutStore();
-  const [refAbove, {height}] = useMeasure();
-  const pathname = useRouterState({select: s => s.location.pathname});
+  const sidebarOpen = useLayoutStore((s) => s.sidebarOpen);
+  const sidebarWidth = useLayoutStore((s) => s.drawerWidth);
+  const handleDrawerToggle = useLayoutStore((s) => s.toggleSidebar);
+  const closeSidebar = useLayoutStore((s) => s.closeSidebar);
+  const { toggleItem, openItems } = useLayoutStore();
+  const [refAbove, { height }] = useMeasure();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
   const handleSidebarClose = () => {
     if (isMobile) {
       closeSidebar();
@@ -47,7 +45,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   const handleItemClick = (
     // @ts-expect-error - event is not used
-    event: any,
+    _event: any,
     segment: string | undefined,
     hasChildren: boolean,
   ) => {
@@ -76,7 +74,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           openItems={openItems}
         />
       </div>
-      <div style={{height: heightBelow}}>{children}</div>
+      <div style={{ height: heightBelow }}>{children}</div>
     </>
   );
 
@@ -85,9 +83,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
     <UiSidebar
       isOpen={sidebarOpen}
       onClose={handleSidebarClose}
-      mode={isMobile ? 'fixed' : 'inline'}
+      mode={isMobile ? "fixed" : "inline"}
       width={`${sidebarWidth}px`}
-      className={cn(sidebarClassName, 'rounded-lg overflow-auto')}
+      className={cn(sidebarClassName, "rounded-lg overflow-auto")}
       isDragging={isDragging}
     >
       {sidebarInner}

@@ -1,12 +1,12 @@
-import {Dialog, DialogContent} from '@mui/material';
-import {type FC, useState} from 'react';
-import {LoginPage} from '../page/LoginPage.tsx';
-import {RegisterPage} from '../page/RegisterPage.tsx';
+import { Dialog, DialogContent } from "@mui/material";
+import { type FC, useState } from "react";
+import { LoginPage } from "../page/LoginPage.tsx";
+import { RegisterPage } from "../page/RegisterPage.tsx";
 
 export interface AuthModalProps {
   open: boolean;
   onClose: () => void;
-  initialMode?: 'login' | 'register';
+  initialMode?: "login" | "register";
 }
 
 /**
@@ -16,17 +16,17 @@ export interface AuthModalProps {
 export const AuthModal: FC<AuthModalProps> = ({
   open,
   onClose,
-  initialMode = 'login',
+  initialMode = "login",
 }) => {
-  const [mode, setMode] = useState<'login' | 'register'>(initialMode);
+  const [mode, setMode] = useState<"login" | "register">(initialMode);
 
-  const switchToRegister = () => setMode('register');
-  const switchToLogin = () => setMode('login');
+  const switchToRegister = () => setMode("register");
+  const switchToLogin = () => setMode("login");
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <DialogContent className="p-0">
-        {mode === 'login' ? (
+        {mode === "login" ? (
           <LoginPage
             isModal={true}
             onClose={onClose}

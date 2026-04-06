@@ -1,15 +1,15 @@
-import React from 'react';
+import CloseIcon from "@mui/icons-material/Close";
 import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  IconButton,
-  Divider,
   Box,
-} from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
-import FeedbackForm from './FeedbackForm';
-import type {CreateFeedbackInput} from '@rezics/api/feedback/feedback.types';
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  IconButton,
+} from "@mui/material";
+import type { CreateFeedbackInput } from "@rezics/api/feedback/feedback.types";
+import type React from "react";
+import FeedbackForm from "./FeedbackForm";
 
 type FeedbackDialogProps = {
   open: boolean;
@@ -17,7 +17,7 @@ type FeedbackDialogProps = {
   defaultValues?: {
     title?: string;
     content?: string;
-    type?: CreateFeedbackInput['type'];
+    type?: CreateFeedbackInput["type"];
   };
 };
 

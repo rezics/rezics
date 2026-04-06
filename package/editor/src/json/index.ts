@@ -1,6 +1,6 @@
-import type { EditorPlugin } from '../core/types';
-import { json } from './core/index';
-import { jsonLint } from './lint/index';
+import type { EditorPlugin } from "../core/types";
+import { json } from "./core/index";
+import { jsonLint } from "./lint/index";
 
 export interface JsonFullConfig {
   lint?: boolean;
@@ -16,7 +16,7 @@ export function jsonFull(config?: JsonFullConfig): EditorPlugin[] {
   return plugins;
 }
 
+export { formatJson } from "./core/commands";
 // Re-export granular factories
-export { json } from './core/index';
-export { formatJson } from './core/commands';
-export { jsonLint } from './lint/index';
+export { json } from "./core/index";
+export { jsonLint } from "./lint/index";

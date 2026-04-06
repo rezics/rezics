@@ -1,6 +1,6 @@
-import React from 'react';
-import {Paper, List, ListItemButton, ListItemText} from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
+import SearchIcon from "@mui/icons-material/Search";
+import { List, ListItemButton, ListItemText, Paper } from "@mui/material";
+import type React from "react";
 
 interface SearchSuggestionsProps {
   keyword: string;
@@ -26,8 +26,8 @@ export const SearchSuggestions: React.FC<SearchSuggestionsProps> = ({
       elevation={3}
       tabIndex={-1}
       sx={{
-        position: 'absolute',
-        top: '100%',
+        position: "absolute",
+        top: "100%",
         left: 0,
         right: 0,
         mt: 0.5,
@@ -35,9 +35,9 @@ export const SearchSuggestions: React.FC<SearchSuggestionsProps> = ({
       }}
     >
       <List dense>
-        {suggestions.map(item => (
+        {suggestions.map((item) => (
           <ListItemButton key={item} onClick={() => onSelect(item)}>
-            <SearchIcon sx={{mr: 1}} />
+            <SearchIcon sx={{ mr: 1 }} />
             <ListItemText primary={item} />
           </ListItemButton>
         ))}

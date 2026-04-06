@@ -1,9 +1,10 @@
-import {mkdtemp, readFile, rm, writeFile} from 'node:fs/promises';
-import os from 'node:os';
-import path from 'node:path';
+import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import os from "node:os";
+import path from "node:path";
 
 const IMPORT_LINE_PATTERN = /^(\s*)import\s+(["'])(.+?)\2\s*$/;
-const PATH_ATTRIBUTE_PATTERN = /\b(cwd|path|file|layout|command|edit)\s*=\s*(["'])(.+?)\2/g;
+const PATH_ATTRIBUTE_PATTERN =
+  /\b(cwd|path|file|layout|command|edit)\s*=\s*(["'])(.+?)\2/g;
 const FILE_LOCATION_PATTERN = /\blocation\s*=\s*(["'])file:(.+?)\1/g;
 
 type SourceLocation = {
@@ -16,8 +17,10 @@ export class LayoutCompileError extends Error {
   readonly location: SourceLocation;
 
   constructor(message: string, location: SourceLocation) {
-    super(`${message}\n  at ${location.filePath}:${location.line}:${location.column}`);
-    this.name = 'LayoutCompileError';
+    super(
+      `${message}\n  at ${location.filePath}:${location.line}:${location.column}`,
+    );
+    this.name = "LayoutCompileError";
     this.location = location;
   }
 }
@@ -27,7 +30,7 @@ type CompileContext = {
 };
 
 function isExplicitRelativePath(value: string): boolean {
-  return value.startsWith('./') || value.startsWith('../');
+  return value.startsWith("./") || value.startsWith("../");
 }
 
 function normalizePathForLayout(value: string): string {
@@ -35,30 +38,43 @@ function normalizePathForLayout(value: string): string {
 }
 
 function resolvePathAttributes(line: string, baseDir: string): string {
-  const withResolvedAttributes = line.replace(PATH_ATTRIBUTE_PATTERN, (match, key, quote, rawValue) => {
-    if (!isExplicitRelativePath(rawValue)) {
-      return match;
-    }
+  const withResolvedAttributes = line.replace(
+    PATH_ATTRIBUTE_PATTERN,
+    (match, key, quote, rawValue) => {
+      if (!isExplicitRelativePath(rawValue)) {
+        return match;
+      }
 
-    const resolvedValue = normalizePathForLayout(path.resolve(baseDir, rawValue));
-    return `${key}=${quote}${resolvedValue}${quote}`;
-  });
+      const resolvedValue = normalizePathForLayout(
+        path.resolve(baseDir, rawValue),
+      );
+      return `${key}=${quote}${resolvedValue}${quote}`;
+    },
+  );
 
-  return withResolvedAttributes.replace(FILE_LOCATION_PATTERN, (match, quote, rawValue) => {
-    if (!isExplicitRelativePath(rawValue)) {
-      return match;
-    }
+  return withResolvedAttributes.replace(
+    FILE_LOCATION_PATTERN,
+    (match, quote, rawValue) => {
+      if (!isExplicitRelativePath(rawValue)) {
+        return match;
+      }
 
-    const resolvedValue = normalizePathForLayout(path.resolve(baseDir, rawValue));
-    return `location=${quote}file:${resolvedValue}${quote}`;
-  });
+      const resolvedValue = normalizePathForLayout(
+        path.resolve(baseDir, rawValue),
+      );
+      return `location=${quote}file:${resolvedValue}${quote}`;
+    },
+  );
 }
 
-async function compileFile(filePath: string, context: CompileContext): Promise<string[]> {
+async function compileFile(
+  filePath: string,
+  context: CompileContext,
+): Promise<string[]> {
   const absolutePath = path.resolve(filePath);
 
   if (context.visited.has(absolutePath)) {
-    throw new LayoutCompileError('Circular layout import detected', {
+    throw new LayoutCompileError("Circular layout import detected", {
       filePath: absolutePath,
       line: 1,
       column: 1,
@@ -68,7 +84,7 @@ async function compileFile(filePath: string, context: CompileContext): Promise<s
   context.visited.add(absolutePath);
 
   try {
-    const content = await readFile(absolutePath, 'utf8');
+    const content = await readFile(absolutePath, "utf8");
     const lines = content.split(/\r?\n/);
     const compiledLines: string[] = [];
     const baseDir = path.dirname(absolutePath);
@@ -87,8 +103,10 @@ async function compileFile(filePath: string, context: CompileContext): Promise<s
       try {
         const importedLines = await compileFile(importedPath, context);
         compiledLines.push(
-          ...importedLines.map(importedLine =>
-            importedLine.length > 0 ? `${indentation}${importedLine}` : importedLine,
+          ...importedLines.map((importedLine) =>
+            importedLine.length > 0
+              ? `${indentation}${importedLine}`
+              : importedLine,
           ),
         );
       } catch (error) {
@@ -120,16 +138,16 @@ export async function compileLayout(layoutPath: string): Promise<{
   compiledLayoutPath: string;
   cleanup: () => Promise<void>;
 }> {
-  const compiledLines = await compileFile(layoutPath, {visited: new Set()});
-  const tempDir = await mkdtemp(path.join(os.tmpdir(), 'rezics-layout-'));
+  const compiledLines = await compileFile(layoutPath, { visited: new Set() });
+  const tempDir = await mkdtemp(path.join(os.tmpdir(), "rezics-layout-"));
   const compiledLayoutPath = path.join(tempDir, path.basename(layoutPath));
 
-  await writeFile(compiledLayoutPath, compiledLines.join('\n'));
+  await writeFile(compiledLayoutPath, compiledLines.join("\n"));
 
   return {
     compiledLayoutPath,
     cleanup: async () => {
-      await rm(tempDir, {recursive: true, force: true});
+      await rm(tempDir, { recursive: true, force: true });
     },
   };
 }

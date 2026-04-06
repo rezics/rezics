@@ -1,3 +1,3 @@
-export * from './readlist.api';
-export * from './readlist.service';
-export * from './types';
+export * from "./readlist.api";
+export * from "./readlist.service";
+export * from "./types";

@@ -1,6 +1,6 @@
-import {prisma} from '#/prisma/client';
-import {searchClient} from '@/meili/search-client';
-import type {AdminStatsResponse} from '@rezics/contract';
+import type { AdminStatsResponse } from "@rezics/contract";
+import { prisma } from "#/prisma/client";
+import { searchClient } from "@/meili/search-client";
 
 export class StatsService {
   async getStats(): Promise<AdminStatsResponse> {
@@ -19,16 +19,16 @@ export class StatsService {
       prisma.user.count(),
       prisma.book.count(),
       prisma.commentIndex.count(),
-      prisma.feedback.count({where: {resolved: false}}),
+      prisma.feedback.count({ where: { resolved: false } }),
       this.checkMeiliHealth(),
-      prisma.$queryRaw<{date: Date; count: bigint}[]>`
+      prisma.$queryRaw<{ date: Date; count: bigint }[]>`
         SELECT date_trunc('day', "createdAt")::date AS date, COUNT(*)::bigint AS count
         FROM "Book"
         WHERE "createdAt" >= ${thirtyDaysAgo}
         GROUP BY date
         ORDER BY date ASC
       `,
-      prisma.$queryRaw<{date: Date; count: bigint}[]>`
+      prisma.$queryRaw<{ date: Date; count: bigint }[]>`
         SELECT date_trunc('day', u."createdAt")::date AS date, COUNT(*)::bigint AS count
         FROM "CommentIndex" ci
         JOIN "Unit" u ON u.id = ci."unitId"
@@ -45,10 +45,10 @@ export class StatsService {
     );
 
     return {
-      counts: {users, books, comments, unresolvedFeedback},
+      counts: { users, books, comments, unresolvedFeedback },
       health: {
-        server: 'ok',
-        meili: meiliHealthy ? 'ok' : 'unreachable',
+        server: "ok",
+        meili: meiliHealthy ? "ok" : "unreachable",
       },
       contentTrend,
     };
@@ -68,11 +68,14 @@ export class StatsService {
 
   private buildContentTrend(
     startDate: Date,
-    bookTrend: {date: Date; count: bigint}[],
-    commentTrend: {date: Date; count: bigint}[],
-  ): AdminStatsResponse['contentTrend'] {
+    bookTrend: { date: Date; count: bigint }[],
+    commentTrend: { date: Date; count: bigint }[],
+  ): AdminStatsResponse["contentTrend"] {
     const bookMap = new Map(
-      bookTrend.map((r) => [r.date.toISOString().slice(0, 10), Number(r.count)]),
+      bookTrend.map((r) => [
+        r.date.toISOString().slice(0, 10),
+        Number(r.count),
+      ]),
     );
     const commentMap = new Map(
       commentTrend.map((r) => [
@@ -81,7 +84,7 @@ export class StatsService {
       ]),
     );
 
-    const result: AdminStatsResponse['contentTrend'] = [];
+    const result: AdminStatsResponse["contentTrend"] = [];
     const current = new Date(startDate);
     const today = new Date();
 

@@ -1,9 +1,9 @@
-import {useState} from 'react';
-import type React from 'react';
-import {useLayoutStore} from '../state/layoutStore.ts';
-import {useAppStore} from '@/app/state/appStore.ts';
-import {useUserProfileStore} from '@/user/state';
-import {useIsMobile} from '@/shared/util/use-media-query';
+import type React from "react";
+import { useState } from "react";
+import { useAppStore } from "@/app/state/appStore.ts";
+import { useIsMobile } from "@/shared/util/use-media-query";
+import { useUserProfileStore } from "@/user/state";
+import { useLayoutStore } from "../state/layoutStore.ts";
 
 // TODO Introduce Layout Store instead of useState for drawer width and sidebar open state
 
@@ -18,33 +18,33 @@ export interface ResponsiveSidebarState {
   setIsDragging: React.Dispatch<React.SetStateAction<boolean>>;
   isSidebarTransitioning: boolean;
   setIsSidebarTransitioning: React.Dispatch<React.SetStateAction<boolean>>;
-  themeMode: 'light' | 'dark';
+  themeMode: "light" | "dark";
   toggleTheme: () => void;
   isAdmin: boolean;
 }
 
 export const useResponsiveSidebar = (): ResponsiveSidebarState => {
   const isMobile = useIsMobile();
-  const sidebarOpen = useLayoutStore(s => s.sidebarOpen);
-  const drawerWidth = useLayoutStore(s => s.drawerWidth);
-  const toggleSidebar = useLayoutStore(s => s.toggleSidebar);
-  const closeSidebar = useLayoutStore(s => s.closeSidebar);
+  const sidebarOpen = useLayoutStore((s) => s.sidebarOpen);
+  const drawerWidth = useLayoutStore((s) => s.drawerWidth);
+  const toggleSidebar = useLayoutStore((s) => s.toggleSidebar);
+  const closeSidebar = useLayoutStore((s) => s.closeSidebar);
 
   const [isDragging, setIsDragging] = useState(false);
   const [isSidebarTransitioning, setIsSidebarTransitioning] = useState(false);
 
-  const themeMode = useAppStore(state => state.theme);
-  const setTheme = useAppStore(state => state.setTheme);
+  const themeMode = useAppStore((state) => state.theme);
+  const setTheme = useAppStore((state) => state.setTheme);
   function toggleTheme() {
-    setTheme(themeMode === 'light' ? 'dark' : 'light');
+    setTheme(themeMode === "light" ? "dark" : "light");
   }
 
-  const isAdmin = useUserProfileStore(state =>
-    state.user?.permission?.role?.includes('ADMIN'),
+  const isAdmin = useUserProfileStore((state) =>
+    state.user?.permission?.role?.includes("ADMIN"),
   );
 
   function setDrawerWidth(width: number) {
-    useLayoutStore.setState({drawerWidth: width});
+    useLayoutStore.setState({ drawerWidth: width });
   }
   const handleDrawerToggle = () => {
     setIsSidebarTransitioning(true);

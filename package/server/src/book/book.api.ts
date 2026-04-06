@@ -1,74 +1,69 @@
-import {Elysia, t} from 'elysia';
-import {
-  bookListQuerySchema,
-  bookParamsSchema,
-  createBookSchema,
-  updateBookSchema,
-} from '@rezics/contract';
 import type {
   BookListResponse,
   BookResponse,
   CreateBookInput,
-} from '@rezics/contract';
+} from "@rezics/contract";
 import {
   BasicAdminPermission,
+  bookListQuerySchema,
+  bookParamsSchema,
+  createBookSchema,
   hasPermissionToUpdateBook,
-} from '@rezics/contract';
-import type {Rating} from '#/prisma/client';
-import {bookService} from './book.service';
-import {mapBookToDTO} from './mapper';
-import {unitService} from '@/unit/unit.service';
-import {
-  authMacro,
-  buildActorFromContext,
-} from '@/middleware';
+  updateBookSchema,
+} from "@rezics/contract";
+import { Elysia, t } from "elysia";
+import type { Rating } from "#/prisma/client";
+import { authMacro, buildActorFromContext } from "@/middleware";
+import { unitService } from "@/unit/unit.service";
+import { bookService } from "./book.service";
+import { mapBookToDTO } from "./mapper";
 
-export const bookApi = new Elysia({prefix: '/books'})
+export const bookApi = new Elysia({ prefix: "/books" })
   .use(authMacro)
   .get(
-    '/:unitId',
-    async ({params}): Promise<BookResponse> => {
+    "/:unitId",
+    async ({ params }): Promise<BookResponse> => {
       const book = await bookService.getByUnitId(params.unitId);
       return mapBookToDTO(book);
     },
     {
       params: bookParamsSchema,
       detail: {
-        summary: 'Get book',
-        description: 'Get a single book by unit ID',
-        tags: ['Books'],
+        summary: "Get book",
+        description: "Get a single book by unit ID",
+        tags: ["Books"],
       },
     },
   )
   .get(
-    '/:unitId/rating',
-    async ({params}): Promise<Rating> => {
+    "/:unitId/rating",
+    async ({ params }): Promise<Rating> => {
       return bookService.getRatingByBookUnitId(params.unitId);
     },
     {
       params: bookParamsSchema,
       detail: {
-        summary: 'Get rating',
+        summary: "Get rating",
       },
     },
   )
   .get(
-    '/:unitId/chapterIndex',
-    async ({params}): Promise<any> => {
+    "/:unitId/chapterIndex",
+    async ({ params }): Promise<any> => {
       return bookService.getChapterIndexByBookUnitId(params.unitId);
     },
     {
       params: bookParamsSchema,
       detail: {
-        summary: 'Get chapterIndex',
-        description: 'Get chapterIndex by bookUnitId',
-        tags: ['Books'],
+        summary: "Get chapterIndex",
+        description: "Get chapterIndex by bookUnitId",
+        tags: ["Books"],
       },
     },
   )
   .post(
-    '/',
-    async ({body, identity}): Promise<BookResponse> => {
+    "/",
+    async ({ body, identity }): Promise<BookResponse> => {
       const bookReq: CreateBookInput = {
         userId: identity.unitId,
         ...body,
@@ -81,30 +76,30 @@ export const bookApi = new Elysia({prefix: '/books'})
       requireLogin: true,
       body: createBookSchema,
       detail: {
-        summary: 'Create book',
-        description: 'Create a new book',
-        tags: ['Books'],
+        summary: "Create book",
+        description: "Create a new book",
+        tags: ["Books"],
       },
     },
   )
   .get(
-    '/',
-    async ({query}): Promise<BookListResponse> => {
-      const {books, total} = await bookService.list(query);
-      return {books: books as any, total};
+    "/",
+    async ({ query }): Promise<BookListResponse> => {
+      const { books, total } = await bookService.list(query);
+      return { books: books as any, total };
     },
     {
       requireAdmin: true,
       query: bookListQuerySchema,
       detail: {
-        summary: 'Get all books',
-        description: 'Get all books with filters and pagination',
-        tags: ['Books'],
+        summary: "Get all books",
+        description: "Get all books with filters and pagination",
+        tags: ["Books"],
       },
     },
   )
   .put(
-    '/:unitId',
+    "/:unitId",
     async ({
       params,
       body,
@@ -120,14 +115,14 @@ export const bookApi = new Elysia({prefix: '/books'})
 
       if (
         !hasPermissionToUpdateBook(
-          buildActorFromContext({identity, currentUser}),
+          buildActorFromContext({ identity, currentUser }),
           undefined,
           targetBookUnit as any,
         )
       ) {
         set.status = 403;
         throw new Error(
-          'Forbidden: you do not have permission to update this book',
+          "Forbidden: you do not have permission to update this book",
         );
       }
 
@@ -139,15 +134,15 @@ export const bookApi = new Elysia({prefix: '/books'})
       params: bookParamsSchema,
       body: updateBookSchema,
       detail: {
-        summary: 'Update book',
-        description: 'Update an existing book by unit ID',
-        tags: ['Books'],
+        summary: "Update book",
+        description: "Update an existing book by unit ID",
+        tags: ["Books"],
       },
     },
   )
   .put(
-    '/:unitId/chapterIndex',
-    async ({params, body, identity, currentUser, set}): Promise<any> => {
+    "/:unitId/chapterIndex",
+    async ({ params, body, identity, currentUser, set }): Promise<any> => {
       const targetBookUnit = await unitService.getByUnitId(params.unitId);
       if (!targetBookUnit) {
         set.status = 404;
@@ -156,14 +151,14 @@ export const bookApi = new Elysia({prefix: '/books'})
 
       if (
         !hasPermissionToUpdateBook(
-          buildActorFromContext({identity, currentUser}),
+          buildActorFromContext({ identity, currentUser }),
           undefined,
           targetBookUnit as any,
         )
       ) {
         set.status = 403;
         throw new Error(
-          'Forbidden: you do not have permission to update this book',
+          "Forbidden: you do not have permission to update this book",
         );
       }
 
@@ -174,24 +169,24 @@ export const bookApi = new Elysia({prefix: '/books'})
       params: bookParamsSchema,
       body: t.Any(),
       detail: {
-        summary: 'Update book chapter index',
-        description: 'Update the chapter index of a book by unit ID',
-        tags: ['Books'],
+        summary: "Update book chapter index",
+        description: "Update the chapter index of a book by unit ID",
+        tags: ["Books"],
       },
     },
   )
   .delete(
-    '/:unitId',
+    "/:unitId",
     async ({
       params,
       identity,
       currentUser,
       set,
-    }): Promise<{message: string}> => {
+    }): Promise<{ message: string }> => {
       if (!BasicAdminPermission(currentUser)) {
         set.status = 403;
         throw new Error(
-          'Forbidden: you do not have permission to delete this book',
+          "Forbidden: you do not have permission to delete this book",
         );
       }
 
@@ -204,20 +199,20 @@ export const bookApi = new Elysia({prefix: '/books'})
       if (targetBookUnit.userId !== identity.unitId) {
         set.status = 403;
         throw new Error(
-          'Forbidden: you do not have permission to delete this book',
+          "Forbidden: you do not have permission to delete this book",
         );
       }
 
       await bookService.delete(params.unitId);
-      return {message: 'Book and related post deleted successfully'};
+      return { message: "Book and related post deleted successfully" };
     },
     {
       requireOwner: true,
       params: bookParamsSchema,
       detail: {
-        summary: 'Delete book',
-        description: 'Delete a book and its related unit by unit ID',
-        tags: ['Books'],
+        summary: "Delete book",
+        description: "Delete a book and its related unit by unit ID",
+        tags: ["Books"],
       },
     },
   );

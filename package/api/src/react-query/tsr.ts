@@ -1,4 +1,4 @@
-import {QueryClient} from '@tanstack/react-query';
+import { QueryClient } from "@tanstack/react-query";
 
 // === 基础 QueryClient（必选） ===
 export function createQueryClient() {
@@ -18,7 +18,7 @@ export function createQueryClient() {
             const status = errorJson?.status ?? 0;
             if (status >= 400 && status < 500 && status !== 408) return false;
           } catch (e) {
-            console.log('retry error parse error', e);
+            console.log("retry error parse error", e);
           }
           return failureCount < 2;
         },

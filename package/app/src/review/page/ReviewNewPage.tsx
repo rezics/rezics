@@ -1,14 +1,12 @@
-import {type ReviewResponse} from '@rezics/contract';
-import {ReviewEditPage} from './ReviewEditPage';
-import {useState} from 'react';
-import {TextField} from '@mui/material';
-
-import {useCreateReviewMutation} from '@rezics/api/review/review.mutations';
-import {useAlertStore} from '@app/state/windowAlertStore';
-import {useUserProfileStore} from '@/user/state';
-import {useRouterState} from '@tanstack/react-router';
-import {UnitType} from '@rezics/contract';
-import {reviewNewRoute} from '@/router';
+import { useAlertStore } from "@app/state/windowAlertStore";
+import { TextField } from "@mui/material";
+import { useCreateReviewMutation } from "@rezics/api/review/review.mutations";
+import { type ReviewResponse, UnitType } from "@rezics/contract";
+import { useRouterState } from "@tanstack/react-router";
+import { useState } from "react";
+import { reviewNewRoute } from "@/router";
+import { useUserProfileStore } from "@/user/state";
+import { ReviewEditPage } from "./ReviewEditPage";
 
 export function ReviewNewPage({
   bookUnitId: bookUnitIdProps,
@@ -21,24 +19,24 @@ export function ReviewNewPage({
   } else {
     bookUnitId = reviewNewRoute.useParams();
   }
-  const search = useRouterState({select: s => s.location.search ?? ''});
+  const search = useRouterState({ select: (s) => s.location.search ?? "" });
   const searchParams = new URLSearchParams(search);
   const [reviewData, setReviewData] = useState<ReviewResponse>(
     {} as ReviewResponse,
   );
-  const {show} = useAlertStore();
-  const {user} = useUserProfileStore();
+  const { show } = useAlertStore();
+  const { user } = useUserProfileStore();
   const unitType =
-    searchParams.get('tab') === 'remark' ? UnitType.REMARK : UnitType.REVIEW;
-  const {mutate, isPending} = useCreateReviewMutation(
+    searchParams.get("tab") === "remark" ? UnitType.REMARK : UnitType.REVIEW;
+  const { mutate, isPending } = useCreateReviewMutation(
     {
-      onSuccess: data => {
-        show('Review created successfully');
-        console.log('create review success', data);
+      onSuccess: (data) => {
+        show("Review created successfully");
+        console.log("create review success", data);
       },
-      onError: error => {
+      onError: (error) => {
         show(`Create review failed: ${error}`);
-        console.error('create review failed', error);
+        console.error("create review failed", error);
       },
     },
     unitType,
@@ -48,13 +46,13 @@ export function ReviewNewPage({
     console.log(reviewData);
     const userId = user?.unitId as string;
     if (!userId) {
-      show('Please login first');
+      show("Please login first");
       return;
     }
     mutate({
       bookId: bookUnitId,
-      title: reviewData.title || '',
-      content: reviewData.content || '',
+      title: reviewData.title || "",
+      content: reviewData.content || "",
       rating: reviewData.rating || 0,
       userId: userId,
     });
@@ -74,7 +72,7 @@ export function ReviewNewPage({
           data={reviewData}
           setData={setReviewData}
           onSubmit={handleSave}
-          submitLabel={isPending ? 'Submitting...' : 'Submit'}
+          submitLabel={isPending ? "Submitting..." : "Submit"}
         />
       </div>
     </div>

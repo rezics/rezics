@@ -1,9 +1,16 @@
-import React, {useMemo} from 'react';
-import {useQuery} from '@tanstack/react-query';
-import {Alert, CircularProgress, Typography, Card, CardContent} from '@mui/material';
-import {bookQueries} from '@rezics/api/book/book';
-import type {BookDTO} from '@rezics/contract';
-import {useTranslation} from 'react-i18next';
+import {
+  Alert,
+  Card,
+  CardContent,
+  CircularProgress,
+  Typography,
+} from "@mui/material";
+import { bookQueries } from "@rezics/api/book/book";
+import type { BookDTO } from "@rezics/contract";
+import { useQuery } from "@tanstack/react-query";
+import type React from "react";
+import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 
 type Book = BookDTO;
 
@@ -20,11 +27,11 @@ export const HomeTrendingWiki: React.FC<HomeTrendingWikiProps> = ({
   title,
   limit = 6,
 }) => {
-  const {t} = useTranslation();
-  const resolvedTitle = title ?? t('page.home.sections.trending_wiki');
+  const { t } = useTranslation();
+  const resolvedTitle = title ?? t("page.home.sections.trending_wiki");
 
-  const {data, isLoading, error} = useQuery(
-    bookQueries.list({start: 0, limit}),
+  const { data, isLoading, error } = useQuery(
+    bookQueries.list({ start: 0, limit }),
   );
   const books: Book[] = useMemo(() => data?.books ?? [], [data]);
 
@@ -46,7 +53,7 @@ export const HomeTrendingWiki: React.FC<HomeTrendingWikiProps> = ({
         {isLoading && <CircularProgress size={20} />}
       </div>
       <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
-        {books.map(book => (
+        {books.map((book) => (
           <Card key={book.unitId} className="overflow-hidden">
             <CardContent>
               <Typography variant="subtitle2" className="mb-1">
@@ -57,7 +64,7 @@ export const HomeTrendingWiki: React.FC<HomeTrendingWikiProps> = ({
                 color="text.secondary"
                 className="line-clamp-3"
               >
-                {t('page.home.sections.wiki_teaser_placeholder')}
+                {t("page.home.sections.wiki_teaser_placeholder")}
               </Typography>
             </CardContent>
           </Card>
@@ -68,4 +75,3 @@ export const HomeTrendingWiki: React.FC<HomeTrendingWikiProps> = ({
 };
 
 export default HomeTrendingWiki;
-

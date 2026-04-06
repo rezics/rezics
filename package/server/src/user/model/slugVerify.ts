@@ -1,55 +1,55 @@
 export type SlugValidationResult =
-  | {ok: true; normalized: string}
-  | {ok: false; reason: string};
+  | { ok: true; normalized: string }
+  | { ok: false; reason: string };
 
 const DEFAULT_RESERVED = [
   // roles / identities
-  'admin',
-  'administrator',
-  'moderator',
-  'staff',
-  'support',
-  'official',
-  'system',
-  'root',
-  'owner',
-  'security',
+  "admin",
+  "administrator",
+  "moderator",
+  "staff",
+  "support",
+  "official",
+  "system",
+  "root",
+  "owner",
+  "security",
   // auth / account
-  'login',
-  'logout',
-  'signin',
-  'signup',
-  'register',
-  'account',
-  'settings',
-  'password',
-  'oauth',
-  'auth',
+  "login",
+  "logout",
+  "signin",
+  "signup",
+  "register",
+  "account",
+  "settings",
+  "password",
+  "oauth",
+  "auth",
   // product / navigation
-  'help',
-  'docs',
-  'blog',
-  'news',
-  'status',
-  'about',
-  'terms',
-  'privacy',
-  'contact',
-  'pricing',
-  'billing',
+  "help",
+  "docs",
+  "blog",
+  "news",
+  "status",
+  "about",
+  "terms",
+  "privacy",
+  "contact",
+  "pricing",
+  "billing",
   // technical / routing
-  'api',
-  'graphql',
-  'assets',
-  'static',
-  'cdn',
-  'webhook',
-  'callback',
+  "api",
+  "graphql",
+  "assets",
+  "static",
+  "cdn",
+  "webhook",
+  "callback",
   // special aliases
-  'me',
-  'you',
-  'null',
-  'undefined',
+  "me",
+  "you",
+  "null",
+  "undefined",
 ] as const;
 
 // Build Set once in module initialization for O(1) lookup
@@ -71,29 +71,29 @@ export function validateSlug(
   const reserved = opts.reserved ?? DEFAULT_RESERVED_SET;
 
   // Normalization: trim + lower (only once)
-  let s = opts.trim === false ? input : input.trim();
-  if (s.length === 0) return {ok: false, reason: 'empty'};
+  const s = opts.trim === false ? input : input.trim();
+  if (s.length === 0) return { ok: false, reason: "empty" };
   // s = s.toLowerCase(); // Allow uppercase letters
 
   const len = s.length;
   if (len < minLen)
     return {
       ok: false,
-      reason: 'too_short, at least ' + minLen + ' characters long',
+      reason: `too_short, at least ${minLen} characters long`,
     };
   if (len > maxLen)
     return {
       ok: false,
-      reason: 'too_long, at most ' + maxLen + ' characters long',
+      reason: `too_long, at most ${maxLen} characters long`,
     };
 
   // First and last character '-' check (O(1))
-  if (s.charCodeAt(0) === 45) return {ok: false, reason: 'leading_hyphen'};
+  if (s.charCodeAt(0) === 45) return { ok: false, reason: "leading_hyphen" };
   if (s.charCodeAt(len - 1) === 45)
-    return {ok: false, reason: 'trailing_hyphen'};
+    return { ok: false, reason: "trailing_hyphen" };
 
   // Reserved word check (can be done before/after character validation; placing it here can reject hotspots faster)
-  if (reserved.has(s)) return {ok: false, reason: 'reserved'};
+  if (reserved.has(s)) return { ok: false, reason: "reserved" };
 
   // Single scan character validity + consecutive '--' check
   // Allowed: a-z (97-122), A-Z (65-90), 0-9 (48-57), '-' (45)
@@ -103,7 +103,7 @@ export function validateSlug(
 
     if (c === 45) {
       // '-'
-      if (prevHyphen) return {ok: false, reason: 'double_hyphen'};
+      if (prevHyphen) return { ok: false, reason: "double_hyphen" };
       prevHyphen = true;
       continue;
     }
@@ -116,8 +116,8 @@ export function validateSlug(
     // A-Z
     if (c >= 65 && c <= 90) continue;
 
-    return {ok: false, reason: 'invalid_char'};
+    return { ok: false, reason: "invalid_char" };
   }
 
-  return {ok: true, normalized: s};
+  return { ok: true, normalized: s };
 }

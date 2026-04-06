@@ -1,24 +1,24 @@
 import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  Typography,
   Button,
-} from '@mui/material';
-import React from 'react';
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  Typography,
+} from "@mui/material";
+import type React from "react";
 
 export const ConfirmDeleteDialog: React.FC<{
   open: boolean;
   onClose: () => void;
   onSubmit: () => void;
-}> = ({open, onClose, onSubmit}) => {
+}> = ({ open, onClose, onSubmit }) => {
   return (
     <Dialog
       open={open}
       onClose={onClose}
       slotProps={{
         paper: {
-          className: 'min-w-[20rem]',
+          className: "min-w-[20rem]",
         },
       }}
     >

@@ -10,22 +10,20 @@ import {
   DialogContentText,
   DialogTitle,
   Typography,
-} from '@mui/material';
-import React from 'react';
-import {useQuery} from '@tanstack/react-query';
-
-import {authQueries} from '@rezics/api/auth/auth.queries';
-import {useRevokeSessionMutation} from '@rezics/api/auth/auth.mutations';
-
-import {Page} from '@/core/layout/Page';
+} from "@mui/material";
+import { useRevokeSessionMutation } from "@rezics/api/auth/auth.mutations";
+import { authQueries } from "@rezics/api/auth/auth.queries";
+import { useQuery } from "@tanstack/react-query";
+import React from "react";
 import {
-  PaginatedTable,
   type PaginatedColumn,
-} from '@/component/table/PaginatedTable';
+  PaginatedTable,
+} from "@/component/table/PaginatedTable";
+import { Page } from "@/core/layout/Page";
 
 function fmtDate(v?: string | Date) {
-  if (!v) return '';
-  const d = typeof v === 'string' ? new Date(v) : v;
+  if (!v) return "";
+  const d = typeof v === "string" ? new Date(v) : v;
   if (Number.isNaN(d.getTime())) return String(v);
   return d.toLocaleString();
 }
@@ -43,7 +41,7 @@ export default function AuthSessionsPage() {
   const [confirmDialog, setConfirmDialog] = React.useState<{
     open: boolean;
     token: string;
-  }>({open: false, token: ''});
+  }>({ open: false, token: "" });
 
   const sessionsQuery = useQuery(authQueries.sessions());
   const revokeMutation = useRevokeSessionMutation();
@@ -55,47 +53,47 @@ export default function AuthSessionsPage() {
   const columns = React.useMemo(() => {
     const cols: PaginatedColumn<AuthSession>[] = [
       {
-        id: 'token',
-        header: 'Token',
+        id: "token",
+        header: "Token",
         minWidth: 220,
-        cell: s => (
-          <Typography variant="body2" sx={{fontFamily: 'monospace'}}>
+        cell: (s) => (
+          <Typography variant="body2" sx={{ fontFamily: "monospace" }}>
             {s.token.slice(0, 16)}…
           </Typography>
         ),
       },
       {
-        id: 'createdAt',
-        header: 'Created',
+        id: "createdAt",
+        header: "Created",
         minWidth: 170,
-        cell: s => fmtDate(s.createdAt),
+        cell: (s) => fmtDate(s.createdAt),
       },
       {
-        id: 'expiresAt',
-        header: 'Expires',
+        id: "expiresAt",
+        header: "Expires",
         minWidth: 170,
-        cell: s => fmtDate(s.expiresAt),
+        cell: (s) => fmtDate(s.expiresAt),
       },
       {
-        id: 'userAgent',
-        header: 'User Agent',
+        id: "userAgent",
+        header: "User Agent",
         minWidth: 300,
-        cell: s => (
+        cell: (s) => (
           <Typography variant="body2" noWrap>
-            {s.userAgent ?? '-'}
+            {s.userAgent ?? "-"}
           </Typography>
         ),
       },
       {
-        id: 'actions',
-        header: 'Actions',
+        id: "actions",
+        header: "Actions",
         minWidth: 120,
-        cell: s => (
+        cell: (s) => (
           <Button
             size="small"
             variant="outlined"
             color="error"
-            onClick={() => setConfirmDialog({open: true, token: s.token})}
+            onClick={() => setConfirmDialog({ open: true, token: s.token })}
           >
             Revoke
           </Button>
@@ -110,7 +108,7 @@ export default function AuthSessionsPage() {
       <Card>
         <CardContent>
           {sessionsQuery.isLoading ? (
-            <Box sx={{display: 'flex', justifyContent: 'center', py: 6}}>
+            <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
               <CircularProgress size={24} />
             </Box>
           ) : sessionsQuery.isError ? (
@@ -121,12 +119,12 @@ export default function AuthSessionsPage() {
             <PaginatedTable<AuthSession>
               columns={columns}
               rows={paginatedSessions}
-              getRowId={s => s.token}
+              getRowId={(s) => s.token}
               count={total}
               page={page}
               rowsPerPage={limit}
-              onPageChange={nextPage => setPage(nextPage)}
-              onRowsPerPageChange={next => {
+              onPageChange={(nextPage) => setPage(nextPage)}
+              onRowsPerPageChange={(next) => {
                 setLimit(next);
                 setPage(0);
               }}
@@ -137,7 +135,7 @@ export default function AuthSessionsPage() {
 
       <Dialog
         open={confirmDialog.open}
-        onClose={() => setConfirmDialog({open: false, token: ''})}
+        onClose={() => setConfirmDialog({ open: false, token: "" })}
       >
         <DialogTitle>Revoke Session</DialogTitle>
         <DialogContent>
@@ -147,13 +145,13 @@ export default function AuthSessionsPage() {
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setConfirmDialog({open: false, token: ''})}>
+          <Button onClick={() => setConfirmDialog({ open: false, token: "" })}>
             Cancel
           </Button>
           <Button
             onClick={() => {
-              revokeMutation.mutate({token: confirmDialog.token});
-              setConfirmDialog({open: false, token: ''});
+              revokeMutation.mutate({ token: confirmDialog.token });
+              setConfirmDialog({ open: false, token: "" });
             }}
             color="error"
             variant="contained"

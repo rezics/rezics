@@ -3,20 +3,20 @@
  */
 
 import {
+  type UseMutationOptions,
   useMutation,
   useQueryClient,
-  type UseMutationOptions,
-} from '@tanstack/react-query';
-import {reactionApi} from './reaction.api';
-import {reactionKeys} from './reaction.keys';
+} from "@tanstack/react-query";
+import { reactionApi } from "./reaction.api";
+import { reactionKeys } from "./reaction.keys";
 import type {
-  ReactionDTO,
-  ReactionCreateInput,
-  ReactionUpdateInput,
-  ReactionDeleteQuery,
-  BookmarkTagsUpdateInput,
   BookmarkTagsResponse,
-} from './reaction.types.ts';
+  BookmarkTagsUpdateInput,
+  ReactionCreateInput,
+  ReactionDeleteQuery,
+  ReactionDTO,
+  ReactionUpdateInput,
+} from "./reaction.types.ts";
 
 /**
  * Mutation for creating a reaction
@@ -24,7 +24,7 @@ import type {
 export function useCreateReactionMutation(
   options?: Omit<
     UseMutationOptions<ReactionDTO, Error, ReactionCreateInput>,
-    'mutationFn'
+    "mutationFn"
   >,
 ): ReturnType<typeof useMutation<ReactionDTO, Error, ReactionCreateInput>> {
   const queryClient = useQueryClient();
@@ -41,7 +41,7 @@ export function useCreateReactionMutation(
         queryKey: reactionKeys.my(variables.targetId),
       });
       // Also refresh lists if used
-      queryClient.invalidateQueries({queryKey: reactionKeys.lists()});
+      queryClient.invalidateQueries({ queryKey: reactionKeys.lists() });
 
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
@@ -54,7 +54,7 @@ export function useCreateReactionMutation(
 export function useUpdateReactionMutation(
   options?: Omit<
     UseMutationOptions<ReactionDTO, Error, ReactionUpdateInput>,
-    'mutationFn'
+    "mutationFn"
   >,
 ): ReturnType<typeof useMutation<ReactionDTO, Error, ReactionUpdateInput>> {
   const queryClient = useQueryClient();
@@ -70,7 +70,7 @@ export function useUpdateReactionMutation(
       queryClient.invalidateQueries({
         queryKey: reactionKeys.my(variables.targetId),
       });
-      queryClient.invalidateQueries({queryKey: reactionKeys.lists()});
+      queryClient.invalidateQueries({ queryKey: reactionKeys.lists() });
 
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
@@ -82,11 +82,11 @@ export function useUpdateReactionMutation(
  */
 export function useDeleteReactionMutation(
   options?: Omit<
-    UseMutationOptions<{deleted: boolean}, Error, ReactionDeleteQuery>,
-    'mutationFn'
+    UseMutationOptions<{ deleted: boolean }, Error, ReactionDeleteQuery>,
+    "mutationFn"
   >,
 ): ReturnType<
-  typeof useMutation<{deleted: boolean}, Error, ReactionDeleteQuery>
+  typeof useMutation<{ deleted: boolean }, Error, ReactionDeleteQuery>
 > {
   const queryClient = useQueryClient();
 
@@ -101,7 +101,7 @@ export function useDeleteReactionMutation(
       queryClient.invalidateQueries({
         queryKey: reactionKeys.my(variables.targetId),
       });
-      queryClient.invalidateQueries({queryKey: reactionKeys.lists()});
+      queryClient.invalidateQueries({ queryKey: reactionKeys.lists() });
 
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
@@ -114,7 +114,7 @@ export function useDeleteReactionMutation(
 export function useSetBookmarkTagsMutation(
   options?: Omit<
     UseMutationOptions<BookmarkTagsResponse, Error, BookmarkTagsUpdateInput>,
-    'mutationFn'
+    "mutationFn"
   >,
 ): ReturnType<
   typeof useMutation<BookmarkTagsResponse, Error, BookmarkTagsUpdateInput>

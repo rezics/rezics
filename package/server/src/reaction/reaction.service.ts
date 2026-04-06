@@ -1,6 +1,6 @@
-import {prisma} from '#/prisma/client';
-import type {Prisma, Reaction, ReactionSummary} from '#/prisma/client';
-import type {ReactionListQuery} from '@rezics/contract';
+import type { ReactionListQuery } from "@rezics/contract";
+import type { Prisma, Reaction, ReactionSummary } from "#/prisma/client";
+import { prisma } from "#/prisma/client";
 
 /**
  * Reaction Service - CRUD + summary counters
@@ -9,10 +9,10 @@ import type {ReactionListQuery} from '@rezics/contract';
 export class ReactionService {
   private whereFromQuery(query: ReactionListQuery): Prisma.ReactionWhereInput {
     const and: Prisma.ReactionWhereInput[] = [];
-    if (query.targetId) and.push({targetId: query.targetId});
-    if (query.reaction) and.push({reaction: query.reaction});
-    if (query.userId) and.push({userId: query.userId});
-    return and.length ? {AND: and} : {};
+    if (query.targetId) and.push({ targetId: query.targetId });
+    if (query.reaction) and.push({ reaction: query.reaction });
+    if (query.userId) and.push({ userId: query.userId });
+    return and.length ? { AND: and } : {};
   }
 
   async list(query: ReactionListQuery = {}): Promise<{
@@ -25,13 +25,13 @@ export class ReactionService {
     const [rows, total] = await Promise.all([
       prisma.reaction.findMany({
         where,
-        orderBy: {createdAt: 'desc'},
+        orderBy: { createdAt: "desc" },
         skip: start,
         take: limit,
       }),
-      prisma.reaction.count({where}),
+      prisma.reaction.count({ where }),
     ]);
-    return {reactions: rows, total};
+    return { reactions: rows, total };
   }
   /**
    * Get aggregated reaction counts.
@@ -51,7 +51,7 @@ export class ReactionService {
       if (!target.length) return {};
 
       const rows = await prisma.reactionSummary.findMany({
-        where: {targetId: {in: target}},
+        where: { targetId: { in: target } },
       });
 
       const byTarget: Record<string, Record<string, number>> = {};
@@ -64,7 +64,7 @@ export class ReactionService {
 
     // Single-target mode (backward compatible)
     const rows = await prisma.reactionSummary.findMany({
-      where: {targetId: target},
+      where: { targetId: target },
     });
     const result: Record<string, number> = {};
     for (const r of rows) result[r.reaction] = r.count;
@@ -93,7 +93,7 @@ export class ReactionService {
       const rows = await prisma.reaction.findMany({
         where: {
           userId,
-          targetId: {in: target},
+          targetId: { in: target },
         },
         select: {
           targetId: true,
@@ -114,18 +114,18 @@ export class ReactionService {
 
     // Single-target mode (backward compatible)
     const rows = await prisma.reaction.findMany({
-      where: {userId, targetId: target},
-      select: {reaction: true},
+      where: { userId, targetId: target },
+      select: { reaction: true },
     });
-    return rows.map(r => r.reaction);
+    return rows.map((r) => r.reaction);
   }
 
   /** Create a reaction (idempotent). Increments summary only if newly created. */
   async create(
-    params: Pick<Reaction, 'userId' | 'targetId' | 'reaction'>,
+    params: Pick<Reaction, "userId" | "targetId" | "reaction">,
   ): Promise<Reaction> {
-    const {userId, targetId, reaction} = params;
-    return await prisma.$transaction(async tx => {
+    const { userId, targetId, reaction } = params;
+    return await prisma.$transaction(async (tx) => {
       const existing = await tx.reaction.findUnique({
         where: {
           userId_targetId_reaction: {
@@ -138,17 +138,17 @@ export class ReactionService {
       if (existing) return existing;
 
       const created = await tx.reaction.create({
-        data: {userId, targetId, reaction},
+        data: { userId, targetId, reaction },
       });
 
       await tx.reactionSummary.upsert({
-        where: {targetId_reaction: {targetId, reaction}},
-        create: {targetId, reaction, count: 1},
-        update: {count: {increment: 1}},
+        where: { targetId_reaction: { targetId, reaction } },
+        create: { targetId, reaction, count: 1 },
+        update: { count: { increment: 1 } },
       });
 
       // If this is a bookmark reaction, ensure a Bookmark row exists (without tags for now).
-      if (reaction === 'bookmark') {
+      if (reaction === "bookmark") {
         await tx.bookmark.upsert({
           where: {
             userId_targetId: {
@@ -170,10 +170,10 @@ export class ReactionService {
 
   /** Delete a reaction for a user (idempotent). Decrements summary if deleted. */
   async remove(
-    params: Pick<Reaction, 'userId' | 'targetId' | 'reaction'>,
-  ): Promise<{deleted: boolean}> {
-    const {userId, targetId, reaction} = params;
-    return await prisma.$transaction(async tx => {
+    params: Pick<Reaction, "userId" | "targetId" | "reaction">,
+  ): Promise<{ deleted: boolean }> {
+    const { userId, targetId, reaction } = params;
+    return await prisma.$transaction(async (tx) => {
       const existing = await tx.reaction.findUnique({
         where: {
           userId_targetId_reaction: {
@@ -182,9 +182,9 @@ export class ReactionService {
             reaction,
           },
         },
-        select: {id: true},
+        select: { id: true },
       });
-      if (!existing) return {deleted: false};
+      if (!existing) return { deleted: false };
 
       await tx.reaction.delete({
         where: {
@@ -200,14 +200,14 @@ export class ReactionService {
       await tx.reactionSummary
         .update({
           where: {
-            targetId_reaction: {targetId, reaction},
+            targetId_reaction: { targetId, reaction },
           },
-          data: {count: {decrement: 1}},
+          data: { count: { decrement: 1 } },
         })
         .catch(() => Promise.resolve());
 
       // If we removed a bookmark reaction, also remove the Bookmark row (tags no longer apply).
-      if (reaction === 'bookmark') {
+      if (reaction === "bookmark") {
         await tx.bookmark.deleteMany({
           where: {
             userId,
@@ -216,7 +216,7 @@ export class ReactionService {
         });
       }
 
-      return {deleted: true};
+      return { deleted: true };
     });
   }
 
@@ -226,7 +226,7 @@ export class ReactionService {
     targetId: string,
     oldReaction: string,
     newReaction: string,
-  ): Promise<{reaction: Reaction | null; changed: boolean}> {
+  ): Promise<{ reaction: Reaction | null; changed: boolean }> {
     if (oldReaction === newReaction) {
       const existing = await prisma.reaction.findUnique({
         where: {
@@ -237,10 +237,10 @@ export class ReactionService {
           },
         },
       });
-      return {reaction: existing ?? null, changed: false};
+      return { reaction: existing ?? null, changed: false };
     }
 
-    return await prisma.$transaction(async tx => {
+    return await prisma.$transaction(async (tx) => {
       // Remove old if exists
       const old = await tx.reaction.findUnique({
         where: {
@@ -250,7 +250,7 @@ export class ReactionService {
             reaction: oldReaction,
           },
         },
-        select: {id: true},
+        select: { id: true },
       });
       if (old) {
         await tx.reaction.delete({
@@ -270,11 +270,11 @@ export class ReactionService {
                 reaction: oldReaction,
               },
             },
-            data: {count: {decrement: 1}},
+            data: { count: { decrement: 1 } },
           })
           .catch(() => Promise.resolve());
         // If old reaction was bookmark, drop bookmark row.
-        if (oldReaction === 'bookmark') {
+        if (oldReaction === "bookmark") {
           await tx.bookmark.deleteMany({
             where: {
               userId,
@@ -300,7 +300,7 @@ export class ReactionService {
         result = newExists;
       } else {
         result = await tx.reaction.create({
-          data: {userId, targetId, reaction: newReaction},
+          data: { userId, targetId, reaction: newReaction },
         });
         await tx.reactionSummary.upsert({
           where: {
@@ -309,11 +309,11 @@ export class ReactionService {
               reaction: newReaction,
             },
           },
-          create: {targetId, reaction: newReaction, count: 1},
-          update: {count: {increment: 1}},
+          create: { targetId, reaction: newReaction, count: 1 },
+          update: { count: { increment: 1 } },
         });
         // If new reaction is bookmark, ensure a Bookmark row exists.
-        if (newReaction === 'bookmark') {
+        if (newReaction === "bookmark") {
           await tx.bookmark.upsert({
             where: {
               userId_targetId: {
@@ -330,7 +330,7 @@ export class ReactionService {
         }
       }
 
-      return {reaction: result, changed: true};
+      return { reaction: result, changed: true };
     });
   }
 }

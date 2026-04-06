@@ -1,12 +1,12 @@
-import {faker} from '@faker-js/faker';
-import type {PrismaClient} from '#/prisma/generated/client.js';
-import type {CreatedUser} from './types.js';
-import {createUsernameGenerator, generateParagraph} from './utils.js';
-import {getRandomPressUserName, getRandomProducerUserName} from './data.js';
-import {randomUUID} from 'crypto';
+import { randomUUID } from "node:crypto";
+import { faker } from "@faker-js/faker";
+import type { PrismaClient } from "#/prisma/generated/client.js";
+import { getRandomPressUserName, getRandomProducerUserName } from "./data.js";
+import type { CreatedUser } from "./types.js";
+import { createUsernameGenerator, generateParagraph } from "./utils.js";
 
 function generateSlug(name: string) {
-  let slug = name.replace(/\s+/g, '_');
+  let slug = name.replace(/\s+/g, "_");
   const uuid = randomUUID();
   slug += `_${uuid}`;
   return slug;
@@ -28,17 +28,17 @@ export async function seedUsers(
 
   await prisma.user.create({
     data: {
-      slug: 'admin',
-      name: 'Admin',
+      slug: "admin",
+      name: "Admin",
       avatar: faker.image.avatar(),
       bio: generateParagraph(1, 2),
       description: generateParagraph(5, 10),
-      joinDate: faker.date.past({years: 4}),
+      joinDate: faker.date.past({ years: 4 }),
       permission: {
-        role: ['ADMIN'],
+        role: ["ADMIN"],
       },
     },
-    select: {unitId: true, name: true},
+    select: { unitId: true, name: true },
   });
 
   for (let i = 0; i < total; i++) {
@@ -51,9 +51,9 @@ export async function seedUsers(
         avatar: faker.image.avatar(),
         bio: generateParagraph(1, 2),
         description: generateParagraph(5, 10),
-        joinDate: faker.date.past({years: 4}),
+        joinDate: faker.date.past({ years: 4 }),
       },
-      select: {unitId: true, name: true},
+      select: { unitId: true, name: true },
     });
     users.push(created);
   }
@@ -77,9 +77,9 @@ export async function seedPressUsers(
         name: username,
         avatar: faker.image.avatar(),
         bio: generateParagraph(1, 2),
-        joinDate: faker.date.past({years: 4}),
+        joinDate: faker.date.past({ years: 4 }),
       },
-      select: {unitId: true, name: true},
+      select: { unitId: true, name: true },
     });
     users.push(created);
   }
@@ -103,9 +103,9 @@ export async function seedProducerUsers(
         name: username,
         avatar: faker.image.avatar(),
         bio: generateParagraph(1, 2),
-        joinDate: faker.date.past({years: 4}),
+        joinDate: faker.date.past({ years: 4 }),
       },
-      select: {unitId: true, name: true},
+      select: { unitId: true, name: true },
     });
     users.push(created);
   }

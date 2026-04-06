@@ -1,9 +1,9 @@
-import { useCallback, useEffect, useState } from 'react';
-import { EditorView } from '@codemirror/view';
-import { StateEffect } from '@codemirror/state';
-import type { ToolbarItem, ToolbarEntry } from '../types';
-import { useEditorContext } from '../../react/context';
-import './toolbar.css';
+import { StateEffect } from "@codemirror/state";
+import { EditorView } from "@codemirror/view";
+import { useCallback, useEffect, useState } from "react";
+import { useEditorContext } from "../../react/context";
+import type { ToolbarEntry, ToolbarItem } from "../types";
+import "./toolbar.css";
 
 export interface ReactToolbarProps {
   items: ToolbarEntry[];
@@ -68,7 +68,11 @@ function ToolbarButton({
       onClick={handleClick}
     >
       {item.icon ?? item.label}
-      <span role="tooltip" className="editor-toolbar-tooltip" data-visible={showTooltip}>
+      <span
+        role="tooltip"
+        className="editor-toolbar-tooltip"
+        data-visible={showTooltip}
+      >
         {item.label}
       </span>
     </button>
@@ -88,10 +92,10 @@ export function ReactToolbar({ items, className }: ReactToolbarProps) {
   return (
     <div
       role="toolbar"
-      className={`editor-toolbar${className ? ` ${className}` : ''}`}
+      className={`editor-toolbar${className ? ` ${className}` : ""}`}
     >
       {items.map((entry, i) => {
-        if (entry === '|') {
+        if (entry === "|") {
           return <ToolbarSeparatorEl key={`sep-${i}`} />;
         }
         const active = entry.isActive?.(view.state) ?? false;

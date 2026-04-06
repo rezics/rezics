@@ -5,7 +5,7 @@ export const toInt = (v: unknown, fallback: number): number => {
   return Number.isFinite(n) && n > 0 ? n : fallback;
 };
 
-export const safeString = (v: unknown, fallback = ''): string =>
+export const safeString = (v: unknown, fallback = ""): string =>
   v === undefined || v === null ? fallback : String(v);
 
 // Allow 0, clamp to >= 0
@@ -23,7 +23,7 @@ export function paginateOffset<T>(list: T[], offset: number, limit: number) {
   const safeOffset = Math.max(0, Number.isFinite(offset) ? offset : 0);
   const safeLimit = Math.max(0, Number.isFinite(limit) ? limit : 0);
   const items = list.slice(safeOffset, safeOffset + safeLimit);
-  return {items, offset: safeOffset, totalItems};
+  return { items, offset: safeOffset, totalItems };
 }
 
 export function pickRandom<T>(source: readonly T[], limit: number): T[] {

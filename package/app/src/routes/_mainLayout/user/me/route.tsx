@@ -2,12 +2,12 @@ import {
   createFileRoute,
   lazyRouteComponent,
   Outlet,
-} from '@tanstack/react-router';
+} from "@tanstack/react-router";
 
-export const Route = createFileRoute('/_mainLayout/user/me')({
+export const Route = createFileRoute("/_mainLayout/user/me")({
   component: Outlet,
   notFoundComponent: lazyRouteComponent(
-    () => import('@/core/page/NotFound'),
-    'NotFoundContainer',
+    () => import("@/core/page/NotFound"),
+    "NotFoundContainer",
   ),
 });

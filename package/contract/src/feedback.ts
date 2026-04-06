@@ -1,17 +1,17 @@
-import {t} from 'elysia';
-import type {OffsetPaginated, OffsetPaginationParams} from './pagination';
+import { t } from "elysia";
+import type { OffsetPaginated, OffsetPaginationParams } from "./pagination";
 
 /**
  * Feedback type enum (mirrors Prisma FeedbackType)
  */
 export const feedbackTypeSchema = t.Union([
-  t.Literal('REPORT'),
-  t.Literal('BUG'),
-  t.Literal('FEATURE'),
-  t.Literal('OTHER'),
+  t.Literal("REPORT"),
+  t.Literal("BUG"),
+  t.Literal("FEATURE"),
+  t.Literal("OTHER"),
 ]);
 
-export type FeedbackType = (typeof feedbackTypeSchema)['static'];
+export type FeedbackType = (typeof feedbackTypeSchema)["static"];
 
 /**
  * Feedback DTO exposed to clients

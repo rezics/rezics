@@ -1,9 +1,10 @@
-import React, {useState} from 'react';
-import {ReadListEditor} from './ReadListEditPage';
-import {Button} from '@mui/material';
-import {useNavigate} from '@tanstack/react-router';
-import {useCreateReadlistMutation} from '@rezics/api/readlist/readlist.mutations';
-import {useTranslation} from 'react-i18next';
+import { Button } from "@mui/material";
+import { useCreateReadlistMutation } from "@rezics/api/readlist/readlist.mutations";
+import { useNavigate } from "@tanstack/react-router";
+import type React from "react";
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
+import { ReadListEditor } from "./ReadListEditPage";
 
 export const NewReadListPage: React.FC = () => {
   const navigate = useNavigate();
@@ -12,15 +13,15 @@ export const NewReadListPage: React.FC = () => {
     reviews: [],
   });
   const createReadlistMutation = useCreateReadlistMutation({
-    onSuccess: data => {
-      navigate({to: `/readlist/${data.id}`});
+    onSuccess: (data) => {
+      navigate({ to: `/readlist/${data.id}` });
     },
-    onError: error => {
-      console.error('create readlist failed', error);
+    onError: (error) => {
+      console.error("create readlist failed", error);
     },
   });
 
-  const {t} = useTranslation();
+  const { t } = useTranslation();
 
   function handleSubmit() {
     const bookConnect = readlistData.books.map((book: any) => book.unitId);
@@ -34,7 +35,7 @@ export const NewReadListPage: React.FC = () => {
       order: order,
       title: readlistData.title,
       content: readlistData.content,
-      coverUrl: readlistData.coverUrl ?? '',
+      coverUrl: readlistData.coverUrl ?? "",
     });
   }
 
@@ -42,11 +43,11 @@ export const NewReadListPage: React.FC = () => {
     <div className="mb-4">
       <div className="flex items-center">
         <div className="text-2xl font-bold">
-          {t('page.readlist.new_readlist')}
+          {t("page.readlist.new_readlist")}
         </div>
         <div className="ml-auto">
           <Button variant="contained" color="primary" onClick={handleSubmit}>
-            {t('page.readlist.new_readlist')}
+            {t("page.readlist.new_readlist")}
           </Button>
         </div>
       </div>

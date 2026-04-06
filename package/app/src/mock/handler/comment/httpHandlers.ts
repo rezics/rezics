@@ -1,6 +1,6 @@
-import {http, HttpResponse} from 'msw';
-import {mockUsers} from '../../data/reviews.ts';
-import {toInt, toNonNegativeInt} from '../lib';
+import { HttpResponse, http } from "msw";
+import { mockUsers } from "../../data/reviews.ts";
+import { toInt, toNonNegativeInt } from "../lib";
 
 type CommentDTO = {
   id: string;
@@ -9,7 +9,7 @@ type CommentDTO = {
   depth: number;
   content?: string | null;
   created_at?: string;
-  user?: {id: string; name: string; avatar?: string};
+  user?: { id: string; name: string; avatar?: string };
 };
 
 function genId() {
@@ -21,9 +21,9 @@ const commentStore = new Map<string, CommentDTO[]>(); // rootPostId -> comments 
 function pickRandomUser() {
   return (
     mockUsers[Math.floor(Math.random() * mockUsers.length)] ?? {
-      id: '1',
-      name: 'John Doe',
-      avatar: '',
+      id: "1",
+      name: "John Doe",
+      avatar: "",
     }
   );
 }
@@ -87,41 +87,42 @@ function getAllComments(): CommentDTO[] {
 
 export const commentHttpHandlers = [
   // GET /api/comments?rootPostId=xxx -> CommentDTO[]
-  http.get('/api/comments', ({request}) => {
+  http.get("/api/comments", ({ request }) => {
     const url = new URL(request.url);
-    const rootPostId = url.searchParams.get('rootPostId');
-    if (!rootPostId) return HttpResponse.json([], {status: 200});
+    const rootPostId = url.searchParams.get("rootPostId");
+    if (!rootPostId) return HttpResponse.json([], { status: 200 });
     ensureSeedForRoot(rootPostId);
     const items = commentStore.get(rootPostId) ?? [];
-    return HttpResponse.json(items, {status: 200});
+    return HttpResponse.json(items, { status: 200 });
   }),
 
   // GET /api/comments/by-depth?rootPostId&depth&offset&limit -> OffsetPaginated<CommentDTO>
-  http.get('/api/comments/by-depth', ({request}) => {
+  http.get("/api/comments/by-depth", ({ request }) => {
     const url = new URL(request.url);
-    const rootPostId = url.searchParams.get('rootPostId');
-    const depth = Number(url.searchParams.get('depth') ?? 1);
-    const limit = toInt(url.searchParams.get('limit'), 10);
-    const offset = toNonNegativeInt(url.searchParams.get('offset'), 0);
+    const rootPostId = url.searchParams.get("rootPostId");
+    const depth = Number(url.searchParams.get("depth") ?? 1);
+    const limit = toInt(url.searchParams.get("limit"), 10);
+    const offset = toNonNegativeInt(url.searchParams.get("offset"), 0);
     if (!rootPostId)
       return HttpResponse.json(
-        {items: [], offset: 0, totalItems: 0},
-        {status: 200},
+        { items: [], offset: 0, totalItems: 0 },
+        { status: 200 },
       );
     ensureSeedForRoot(rootPostId);
     const list = (commentStore.get(rootPostId) ?? []).filter(
-      c => Number(c.depth) === Number(depth),
+      (c) => Number(c.depth) === Number(depth),
     );
     const totalItems = list.length;
     const items = list.slice(offset, offset + Math.max(1, limit));
-    return HttpResponse.json({items, offset, totalItems}, {status: 200});
+    return HttpResponse.json({ items, offset, totalItems }, { status: 200 });
   }),
 
   // GET /api/comments/:id -> CommentDTO
-  http.get('/api/comments/:id', ({params}) => {
+  http.get("/api/comments/:id", ({ params }) => {
     const id = String((params as any).id);
-    const found = getAllComments().find(c => String(c.id) === id);
-    if (!found) return HttpResponse.json({message: 'Not Found'}, {status: 404});
-    return HttpResponse.json(found, {status: 200});
+    const found = getAllComments().find((c) => String(c.id) === id);
+    if (!found)
+      return HttpResponse.json({ message: "Not Found" }, { status: 404 });
+    return HttpResponse.json(found, { status: 200 });
   }),
 ];

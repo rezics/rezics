@@ -1,6 +1,6 @@
-import type {User} from '#/prisma/client';
-import type {PublicUser, BookDTO} from '@rezics/contract';
-import type {BookWithRelations} from './types';
+import type { BookDTO, PublicUser } from "@rezics/contract";
+import type { User } from "#/prisma/client";
+import type { BookWithRelations } from "./types";
 
 /**
  * Sanitize user data for public response
@@ -34,12 +34,12 @@ export function mapBaseBookToDTO(book: BookWithRelations): BookDTO {
     producer: book.producer.map(sanitizeUser),
     coverUrl: book.coverUrl || undefined,
     isbn: book.isbn || undefined,
-    textLength: book.textLength.toString() || '0',
+    textLength: book.textLength.toString() || "0",
     nsfw: book.unit.nsfw || undefined,
     isLicensed: book.isLicensed || undefined,
     userId: book.unit.userId,
     user: sanitizeUser(book.unit.user),
-    tags: book.unit.tags?.map(tag => tag.name) || [],
+    tags: book.unit.tags?.map((tag) => tag.name) || [],
     reactionSummaries: book.unit.reactionSummaries,
     createdAt: book.createdAt,
     updatedAt: book.updatedAt,

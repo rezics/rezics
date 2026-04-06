@@ -1,13 +1,13 @@
-import {prisma} from '#/prisma/client';
-import {searchClient} from '../search-client';
-import type {ReadlistSearchDocument} from './index';
+import { prisma } from "#/prisma/client";
+import { searchClient } from "../search-client";
+import type { ReadlistSearchDocument } from "./index";
 
 /**
  * Sync a single readlist (by its unitId) into the Meilisearch `readlists` index.
  */
 export async function syncReadlistToMeili(unitId: string): Promise<void> {
   const readlist = await prisma.readList.findUnique({
-    where: {unitId},
+    where: { unitId },
     include: {
       unit: {
         include: {
@@ -15,7 +15,7 @@ export async function syncReadlistToMeili(unitId: string): Promise<void> {
           tags: true,
           reactionSummaries: true,
           domains: {
-            select: {id: true},
+            select: { id: true },
           },
         },
       },
@@ -24,7 +24,7 @@ export async function syncReadlistToMeili(unitId: string): Promise<void> {
     },
   });
 
-  if (!readlist || !readlist.unit) return;
+  if (!readlist?.unit) return;
 
   const unit = readlist.unit;
   const metadata = (unit.metadata ?? {}) as any;
@@ -42,13 +42,13 @@ export async function syncReadlistToMeili(unitId: string): Promise<void> {
   const doc: ReadlistSearchDocument = {
     id: readlist.unitId,
     // search fields
-    title: unit.title ?? '',
-    content: unit.content ?? '',
+    title: unit.title ?? "",
+    content: unit.content ?? "",
     tags,
     nsfw: unit.nsfw ?? false,
-    userId: unit.userId ?? '',
-    type: unit.type ?? 'READLIST',
-    status: unit.status ?? '',
+    userId: unit.userId ?? "",
+    type: unit.type ?? "READLIST",
+    status: unit.status ?? "",
     domainIds: unit.domains ? unit.domains.map((d: any) => d.id) : [],
     targetUnitId: unit.targetUnitId ?? null,
     // filters

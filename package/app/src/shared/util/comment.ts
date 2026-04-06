@@ -1,5 +1,5 @@
-import {commentApi} from '@rezics/api/comment/comment.api.ts';
-import type {CommentDTO, CreateCommentInput} from '@rezics/contract';
+import { commentApi } from "@rezics/api/comment/comment.api.ts";
+import type { CommentDTO, CreateCommentInput } from "@rezics/contract";
 
 /**
  * Submit a comment or reply.
@@ -11,21 +11,21 @@ export const handleSubmit = async (
   content: string,
 ): Promise<CommentDTO> => {
   if (!currentReplyId) {
-    throw new Error('currentReplyId is required');
+    throw new Error("currentReplyId is required");
   }
   if (!content || content.trim().length === 0) {
-    throw new Error('content is required');
+    throw new Error("content is required");
   }
 
   // Determine whether currentReplyId is a comment id or a root unit id.
   // If it's a comment, fetch to derive its rootUnitId for creation.
   let rootPostId = currentReplyId;
-  let parentCommentId: string | undefined = undefined;
+  let parentCommentId: string | undefined;
   try {
     const maybeComment = await commentApi.get(currentReplyId);
-    const rootId = (maybeComment as unknown as {rootUnitId?: string})
+    const rootId = (maybeComment as unknown as { rootUnitId?: string })
       .rootUnitId;
-    if (typeof rootId === 'string' && rootId.length > 0) {
+    if (typeof rootId === "string" && rootId.length > 0) {
       rootPostId = rootId;
       parentCommentId = currentReplyId;
     }
@@ -49,12 +49,12 @@ export const handleEdit = async (
   content: string,
 ): Promise<CommentDTO> => {
   if (!unitId) {
-    throw new Error('unitId is required');
+    throw new Error("unitId is required");
   }
   if (!content || content.trim().length === 0) {
-    throw new Error('content is required');
+    throw new Error("content is required");
   }
-  return commentApi.update(unitId, {content});
+  return commentApi.update(unitId, { content });
 };
 
 /**
@@ -62,9 +62,9 @@ export const handleEdit = async (
  */
 export const handleDelete = async (
   unitId: string,
-): Promise<{message: string}> => {
+): Promise<{ message: string }> => {
   if (!unitId) {
-    throw new Error('unitId is required');
+    throw new Error("unitId is required");
   }
   return commentApi.remove(unitId);
 };

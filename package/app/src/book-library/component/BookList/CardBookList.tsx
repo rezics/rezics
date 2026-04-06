@@ -1,22 +1,21 @@
-import {LazyLoadImage} from '@rezics/ui/primitive/image/LazyLoadImage.tsx';
-import {Card, CardContent, CardMedia, Typography} from '@mui/material';
-
-import type {BookDTO} from '@rezics/contract';
+import { Card, CardContent, CardMedia, Typography } from "@mui/material";
+import type { BookDTO } from "@rezics/contract";
+import { LazyLoadImage } from "@rezics/ui/primitive/image/LazyLoadImage.tsx";
 
 interface CardBookListProps {
   books: BookDTO[];
 }
 
-export const CardBookList = ({books}: CardBookListProps) => {
+export const CardBookList = ({ books }: CardBookListProps) => {
   return (
     <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-      {books.map(book => (
+      {books.map((book) => (
         <Card
           key={book.unitId}
           className="h-full flex flex-row items-stretch gap-4 w-full"
         >
           {book.coverUrl && (
-            <CardMedia style={{width: '36%', objectFit: 'cover'}}>
+            <CardMedia style={{ width: "36%", objectFit: "cover" }}>
               <LazyLoadImage
                 src={book.coverUrl}
                 alt={book.title}
@@ -34,7 +33,7 @@ export const CardBookList = ({books}: CardBookListProps) => {
                 color="text.secondary"
                 className="mb-2"
               >
-                {book.author?.[0]?.name || ''}
+                {book.author?.[0]?.name || ""}
               </Typography>
               <Typography variant="body2" className="line-clamp-3">
                 {book.description}

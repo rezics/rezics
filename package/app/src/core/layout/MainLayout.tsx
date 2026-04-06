@@ -1,30 +1,31 @@
-import Alert from '@mui/material/Alert';
-import Button from '@mui/material/Button';
-import {Header} from '../component/header/MainLayoutHeader';
-import {Sidebar} from '../component/sidebar/MainLayoutSidebar';
-import type {ReactNode} from 'react';
-import {Helmet} from 'react-helmet-async';
-import {NAVIGATION} from '../component/navigation/MainNavigation';
-import {MainLayoutFooter} from '../component/footer/MainLayoutFooter';
-import React from 'react';
-import {useAuthSessionStore, useUserProfileStore} from '@/user/state';
-import {HelpFab} from '../component/HelpWidget';
-import {useNavigate} from '@tanstack/react-router';
-import {useTranslation} from 'react-i18next';
-import {shouldShowVerificationBanner} from './verificationBanner';
+import Alert from "@mui/material/Alert";
+import Button from "@mui/material/Button";
+import { useNavigate } from "@tanstack/react-router";
+import type React from "react";
+import type { ReactNode } from "react";
+import { Helmet } from "react-helmet-async";
+import { useTranslation } from "react-i18next";
+import { useAuthSessionStore, useUserProfileStore } from "@/user/state";
+import { MainLayoutFooter } from "../component/footer/MainLayoutFooter";
+import { HelpFab } from "../component/HelpWidget";
+import { Header } from "../component/header/MainLayoutHeader";
+import { NAVIGATION } from "../component/navigation/MainNavigation";
+import { Sidebar } from "../component/sidebar/MainLayoutSidebar";
+import { shouldShowVerificationBanner } from "./verificationBanner";
 
 export interface MainLayoutProps {
   children: ReactNode;
 }
 
-export const MainLayout: React.FC<MainLayoutProps> = ({children}) => {
-  const {t} = useTranslation();
+export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const isAdmin =
-    useUserProfileStore(state => state.user?.permission?.role?.includes('ADMIN')) ??
-    false;
-  const showVerificationBanner = useAuthSessionStore(
-    state => shouldShowVerificationBanner(state.hasAuthSession, state.needsVerification),
+    useUserProfileStore((state) =>
+      state.user?.permission?.role?.includes("ADMIN"),
+    ) ?? false;
+  const showVerificationBanner = useAuthSessionStore((state) =>
+    shouldShowVerificationBanner(state.hasAuthSession, state.needsVerification),
   );
 
   return (
@@ -50,13 +51,13 @@ export const MainLayout: React.FC<MainLayoutProps> = ({children}) => {
                   <Button
                     color="inherit"
                     size="small"
-                    onClick={() => navigate({to: '/verify-email'})}
+                    onClick={() => navigate({ to: "/verify-email" })}
                   >
-                    {t('auth.flow.verify_banner_action')}
+                    {t("auth.flow.verify_banner_action")}
                   </Button>
                 }
               >
-                {t('auth.flow.verify_banner_message')}
+                {t("auth.flow.verify_banner_message")}
               </Alert>
             </div>
           ) : null}

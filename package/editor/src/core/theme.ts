@@ -1,7 +1,7 @@
-import { EditorView } from '@codemirror/view';
-import type { Extension } from '@codemirror/state';
-import type { TagStyle } from '@codemirror/language';
-import { HighlightStyle, syntaxHighlighting } from '@codemirror/language';
+import type { TagStyle } from "@codemirror/language";
+import { HighlightStyle, syntaxHighlighting } from "@codemirror/language";
+import type { Extension } from "@codemirror/state";
+import { EditorView } from "@codemirror/view";
 
 export interface ThemeSettings {
   background?: string;
@@ -14,7 +14,7 @@ export interface ThemeSettings {
 }
 
 export interface ThemeConfig {
-  variant: 'light' | 'dark';
+  variant: "light" | "dark";
   settings?: ThemeSettings;
   styles?: TagStyle[];
 }
@@ -24,26 +24,28 @@ export function createTheme(config: ThemeConfig): Extension {
 
   const theme = EditorView.theme(
     {
-      '&': {
-        backgroundColor: settings.background ?? 'transparent',
-        color: settings.foreground ?? 'inherit',
+      "&": {
+        backgroundColor: settings.background ?? "transparent",
+        color: settings.foreground ?? "inherit",
       },
-      '.cm-content': {
-        caretColor: settings.caret ?? settings.foreground ?? 'inherit',
+      ".cm-content": {
+        caretColor: settings.caret ?? settings.foreground ?? "inherit",
       },
-      '&.cm-focused .cm-selectionBackground, .cm-selectionBackground, ::selection':
+      "&.cm-focused .cm-selectionBackground, .cm-selectionBackground, ::selection":
         {
-          backgroundColor: settings.selection ?? (variant === 'dark' ? '#264f78' : '#add6ff'),
+          backgroundColor:
+            settings.selection ?? (variant === "dark" ? "#264f78" : "#add6ff"),
         },
-      '.cm-activeLine': {
-        backgroundColor: settings.lineHighlight ?? 'transparent',
+      ".cm-activeLine": {
+        backgroundColor: settings.lineHighlight ?? "transparent",
       },
-      '.cm-gutters': {
-        backgroundColor: settings.gutterBackground ?? settings.background ?? 'transparent',
-        color: settings.gutterForeground ?? settings.foreground ?? 'inherit',
+      ".cm-gutters": {
+        backgroundColor:
+          settings.gutterBackground ?? settings.background ?? "transparent",
+        color: settings.gutterForeground ?? settings.foreground ?? "inherit",
       },
     },
-    { dark: variant === 'dark' },
+    { dark: variant === "dark" },
   );
 
   const extensions: Extension[] = [theme];

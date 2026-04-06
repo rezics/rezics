@@ -1,6 +1,6 @@
-import { useState, useCallback, useMemo } from 'react';
-import type { PanelProps, FolioNode } from '../../types';
-import { splitTxt, type TxtSplitResult } from './split';
+import { useCallback, useMemo, useState } from "react";
+import type { PanelProps } from "../../types";
+import type { TxtSplitResult } from "./split";
 
 interface TxtSettingsInternalProps extends PanelProps {
   rawText: string;
@@ -38,11 +38,9 @@ function TxtSettingsInner({
   requestTreeChange,
 }: TxtSettingsInternalProps) {
   const [rules, setRules] = useState<string[]>(() =>
-    currentResult.ruleUsed
-      ? [currentResult.ruleUsed.source]
-      : [],
+    currentResult.ruleUsed ? [currentResult.ruleUsed.source] : [],
   );
-  const [testInput, setTestInput] = useState('');
+  const [testInput, setTestInput] = useState("");
   const [testError, setTestError] = useState<string | null>(null);
   const [splitInfo, setSplitInfo] = useState({
     count: currentResult.tree.length,
@@ -53,7 +51,7 @@ function TxtSettingsInner({
   const testPreview = useMemo(() => {
     if (!testInput.trim()) return null;
     try {
-      const regex = new RegExp(testInput, 'gm');
+      const regex = new RegExp(testInput, "gm");
       const matches: string[] = [];
       let m: RegExpExecArray | null;
       while ((m = regex.exec(rawText)) !== null) {
@@ -63,11 +61,11 @@ function TxtSettingsInner({
       }
       setTestError(null);
       return {
-        count: rawText.match(new RegExp(testInput, 'gm'))?.length ?? 0,
+        count: rawText.match(new RegExp(testInput, "gm"))?.length ?? 0,
         samples: matches,
       };
     } catch (e) {
-      setTestError(e instanceof Error ? e.message : 'Invalid regex');
+      setTestError(e instanceof Error ? e.message : "Invalid regex");
       return null;
     }
   }, [testInput, rawText]);
@@ -75,7 +73,7 @@ function TxtSettingsInner({
   const addRule = useCallback(() => {
     if (!testInput.trim() || testError) return;
     setRules((prev) => [...prev, testInput]);
-    setTestInput('');
+    setTestInput("");
   }, [testInput, testError]);
 
   const removeRule = useCallback((index: number) => {
@@ -84,7 +82,7 @@ function TxtSettingsInner({
 
   const handleResplit = useCallback(() => {
     try {
-      const regexRules = rules.map((r) => new RegExp(r, 'gm'));
+      const regexRules = rules.map((r) => new RegExp(r, "gm"));
       const result = onResplit(regexRules);
       setSplitInfo({
         count: result.tree.length,
@@ -93,7 +91,7 @@ function TxtSettingsInner({
       if (requestTreeChange) {
         requestTreeChange(result.tree);
       }
-    } catch (e) {
+    } catch (_e) {
       // Invalid regex in rules
     }
   }, [rules, onResplit, requestTreeChange]);
@@ -101,17 +99,17 @@ function TxtSettingsInner({
   return (
     <div
       className="folio-txt-settings"
-      style={{ padding: '12px', fontSize: '13px' }}
+      style={{ padding: "12px", fontSize: "13px" }}
     >
-      <h4 style={{ margin: '0 0 8px', fontSize: '14px' }}>
+      <h4 style={{ margin: "0 0 8px", fontSize: "14px" }}>
         Text Split Settings
       </h4>
 
       {/* Current rules */}
-      <div style={{ marginBottom: '12px' }}>
-        <div style={{ fontWeight: 600, marginBottom: '4px' }}>Split Rules</div>
+      <div style={{ marginBottom: "12px" }}>
+        <div style={{ fontWeight: 600, marginBottom: "4px" }}>Split Rules</div>
         {rules.length === 0 && (
-          <div style={{ color: '#888', fontSize: '12px' }}>
+          <div style={{ color: "#888", fontSize: "12px" }}>
             No custom rules. Using defaults.
           </div>
         )}
@@ -119,26 +117,33 @@ function TxtSettingsInner({
           <div
             key={i}
             style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              padding: '4px 8px',
-              background: 'rgba(128, 128, 128, 0.1)',
-              borderRadius: '4px',
-              marginBottom: '4px',
-              fontFamily: 'monospace',
-              fontSize: '12px',
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              padding: "4px 8px",
+              background: "rgba(128, 128, 128, 0.1)",
+              borderRadius: "4px",
+              marginBottom: "4px",
+              fontFamily: "monospace",
+              fontSize: "12px",
             }}
           >
-            <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            <span
+              style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis" }}
+            >
               /{rule}/
               {splitInfo.ruleUsed === rule && (
-                <span style={{ color: '#22c55e', marginLeft: '4px' }}>★</span>
+                <span style={{ color: "#22c55e", marginLeft: "4px" }}>★</span>
               )}
             </span>
             <button
               onClick={() => removeRule(i)}
-              style={{ cursor: 'pointer', fontSize: '12px', border: 'none', background: 'none' }}
+              style={{
+                cursor: "pointer",
+                fontSize: "12px",
+                border: "none",
+                background: "none",
+              }}
             >
               ✕
             </button>
@@ -147,9 +152,9 @@ function TxtSettingsInner({
       </div>
 
       {/* Test input */}
-      <div style={{ marginBottom: '12px' }}>
-        <div style={{ fontWeight: 600, marginBottom: '4px' }}>Test Regex</div>
-        <div style={{ display: 'flex', gap: '4px' }}>
+      <div style={{ marginBottom: "12px" }}>
+        <div style={{ fontWeight: 600, marginBottom: "4px" }}>Test Regex</div>
+        <div style={{ display: "flex", gap: "4px" }}>
           <input
             type="text"
             value={testInput}
@@ -157,42 +162,42 @@ function TxtSettingsInner({
             placeholder="^Chapter\s+\d+"
             style={{
               flex: 1,
-              padding: '6px 8px',
-              fontFamily: 'monospace',
-              fontSize: '12px',
-              border: '1px solid rgba(128, 128, 128, 0.3)',
-              borderRadius: '4px',
-              background: 'transparent',
-              color: 'inherit',
+              padding: "6px 8px",
+              fontFamily: "monospace",
+              fontSize: "12px",
+              border: "1px solid rgba(128, 128, 128, 0.3)",
+              borderRadius: "4px",
+              background: "transparent",
+              color: "inherit",
             }}
           />
           <button
             onClick={addRule}
             disabled={!testInput.trim() || !!testError}
-            style={{ cursor: 'pointer', fontSize: '12px', padding: '6px 12px' }}
+            style={{ cursor: "pointer", fontSize: "12px", padding: "6px 12px" }}
           >
             Add
           </button>
         </div>
         {testError && (
-          <div style={{ color: '#ef4444', fontSize: '11px', marginTop: '4px' }}>
+          <div style={{ color: "#ef4444", fontSize: "11px", marginTop: "4px" }}>
             {testError}
           </div>
         )}
         {testPreview && (
-          <div style={{ fontSize: '12px', marginTop: '4px' }}>
-            <span style={{ color: '#22c55e' }}>
+          <div style={{ fontSize: "12px", marginTop: "4px" }}>
+            <span style={{ color: "#22c55e" }}>
               {testPreview.count} matches found
             </span>
             {testPreview.samples.length > 0 && (
               <div
                 style={{
-                  marginTop: '4px',
-                  padding: '4px 8px',
-                  background: 'rgba(128, 128, 128, 0.1)',
-                  borderRadius: '4px',
-                  fontFamily: 'monospace',
-                  fontSize: '11px',
+                  marginTop: "4px",
+                  padding: "4px 8px",
+                  background: "rgba(128, 128, 128, 0.1)",
+                  borderRadius: "4px",
+                  fontFamily: "monospace",
+                  fontSize: "11px",
                 }}
               >
                 {testPreview.samples.map((s, i) => (
@@ -208,16 +213,16 @@ function TxtSettingsInner({
       {/* Result info */}
       <div
         style={{
-          padding: '8px',
-          background: 'rgba(128, 128, 128, 0.05)',
-          borderRadius: '4px',
-          fontSize: '12px',
-          marginBottom: '8px',
+          padding: "8px",
+          background: "rgba(128, 128, 128, 0.05)",
+          borderRadius: "4px",
+          fontSize: "12px",
+          marginBottom: "8px",
         }}
       >
         <div>Chapters: {splitInfo.count}</div>
         {splitInfo.ruleUsed && (
-          <div style={{ fontFamily: 'monospace' }}>
+          <div style={{ fontFamily: "monospace" }}>
             Rule: /{splitInfo.ruleUsed}/
           </div>
         )}
@@ -228,11 +233,11 @@ function TxtSettingsInner({
       <button
         onClick={handleResplit}
         style={{
-          width: '100%',
-          padding: '8px',
-          cursor: 'pointer',
-          fontSize: '13px',
-          borderRadius: '4px',
+          width: "100%",
+          padding: "8px",
+          cursor: "pointer",
+          fontSize: "13px",
+          borderRadius: "4px",
         }}
       >
         ↻ Re-split with current rules

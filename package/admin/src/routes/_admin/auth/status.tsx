@@ -1,8 +1,8 @@
-import {createFileRoute, lazyRouteComponent} from '@tanstack/react-router';
+import { createFileRoute, lazyRouteComponent } from "@tanstack/react-router";
 
-export const Route = createFileRoute('/_admin/auth/status')({
+export const Route = createFileRoute("/_admin/auth/status")({
   component: lazyRouteComponent(
-    () => import('@/auth/page/AuthStatusPage'),
-    'default',
+    () => import("@/auth/page/AuthStatusPage"),
+    "default",
   ),
 });

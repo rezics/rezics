@@ -1,10 +1,10 @@
-import React from 'react';
-import {Tabs, Tab, Button} from '@mui/material';
-import {HorizontalBookCarousel} from '@/book-library/component/list/HorizontalBookCarousel';
-import {useHomeBooks} from './hooks/hooks';
-import {useNavigate} from '@tanstack/react-router';
+import { Button, Tab, Tabs } from "@mui/material";
+import { useNavigate } from "@tanstack/react-router";
+import React from "react";
+import { HorizontalBookCarousel } from "@/book-library/component/list/HorizontalBookCarousel";
+import { useHomeBooks } from "./hooks/hooks";
 
-type TabKey = 'latest' | 'new' | 'completed';
+type TabKey = "latest" | "new" | "completed";
 
 export interface NewBookSectionProps {
   limit?: number;
@@ -15,19 +15,19 @@ export const NewBookSection: React.FC<NewBookSectionProps> = ({
   limit = 12,
   className,
 }) => {
-  const [tab, setTab] = React.useState<TabKey>('latest');
+  const [tab, setTab] = React.useState<TabKey>("latest");
   const navigate = useNavigate();
 
   // 你可以根据 tab 传不同参数，例如 status / orderBy
-  const {items = [], isLoading} = useHomeBooks(limit);
+  const { items = [], isLoading } = useHomeBooks(limit);
 
   const bookList = React.useMemo(() => {
-    return items.map(book => ({
+    return items.map((book) => ({
       id: book.unitId,
       title: book.title,
-      author: book.author?.[0]?.name ?? '',
+      author: book.author?.[0]?.name ?? "",
       description: book.description,
-      coverUrl: book.coverUrl ?? 'https://placehold.co/400x600?text=No+Cover',
+      coverUrl: book.coverUrl ?? "https://placehold.co/400x600?text=No+Cover",
       href: `/book/${book.unitId}`,
     }));
   }, [items]);
@@ -40,7 +40,7 @@ export const NewBookSection: React.FC<NewBookSectionProps> = ({
         <Button
           variant="text"
           color="primary"
-          onClick={() => navigate({to: '/book'})}
+          onClick={() => navigate({ to: "/book" })}
         >
           更多 →
         </Button>

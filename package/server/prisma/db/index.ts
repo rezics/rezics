@@ -1,14 +1,14 @@
-import {Client} from 'pg';
-import {readFile} from 'node:fs/promises';
-import {join} from 'node:path';
-import {sequence, keyOrder} from './sequence.js';
-import {env} from '@/env';
-import {fileURLToPath} from 'node:url';
+import { readFile } from "node:fs/promises";
+import { join } from "node:path";
+import { fileURLToPath } from "node:url";
+import { Client } from "pg";
+import { env } from "@/env";
+import { keyOrder, sequence } from "./sequence.js";
 
-const SQL_BASE_DIR = fileURLToPath(new URL('./sql', import.meta.url));
+const SQL_BASE_DIR = fileURLToPath(new URL("./sql", import.meta.url));
 
 type PgClientConfig =
-  | {connectionString: string}
+  | { connectionString: string }
   | {
       host?: string;
       port?: number;
@@ -18,9 +18,9 @@ type PgClientConfig =
     };
 
 function createPgClient(): Client {
-  const config = {connectionString: env.DATABASE_URL};
+  const config = { connectionString: env.DATABASE_URL };
 
-  console.log('🔌 Creating PostgreSQL client...', config);
+  console.log("🔌 Creating PostgreSQL client...", config);
 
   return new Client(config);
 }
@@ -31,7 +31,7 @@ async function runSqlFile(
   name: string,
 ): Promise<void> {
   const filePath = join(SQL_BASE_DIR, group, `${name}.sql`);
-  const sql = await readFile(filePath, 'utf8');
+  const sql = await readFile(filePath, "utf8");
 
   console.log(`\n▶️  Running SQL: [${group}] ${name}`);
   await client.query(sql);
@@ -46,13 +46,13 @@ async function runSqlFile(
  * - PGHOST, PGPORT, PGUSER, PGPASSWORD, PGDATABASE
  */
 export async function runDbSequence(): Promise<void> {
-  console.log('🔌 Running db migrate sequence...');
+  console.log("🔌 Running db migrate sequence...");
 
   const client = createPgClient();
 
   try {
     await client.connect();
-    console.log('✅ Connected to PostgreSQL');
+    console.log("✅ Connected to PostgreSQL");
 
     for (const group of keyOrder) {
       const items = sequence[group as keyof typeof sequence] ?? [];
@@ -62,17 +62,17 @@ export async function runDbSequence(): Promise<void> {
       }
     }
 
-    console.log('\n🎉 All SQL files executed successfully.');
+    console.log("\n🎉 All SQL files executed successfully.");
   } catch (err) {
-    console.error('❌ Error while running DB sequence:', err);
+    console.error("❌ Error while running DB sequence:", err);
     throw err;
   } finally {
     await client.end();
-    console.log('🔌 PostgreSQL connection closed');
+    console.log("🔌 PostgreSQL connection closed");
   }
 }
 
-runDbSequence().catch(err => {
-  console.error('❌ Error while running DB sequence:', err);
+runDbSequence().catch((err) => {
+  console.error("❌ Error while running DB sequence:", err);
   process.exitCode = 1;
 });

@@ -1,5 +1,5 @@
-import React from 'react';
-import {Button, Typography} from '@mui/material';
+import { Button, Typography } from "@mui/material";
+import type React from "react";
 
 export const HomeMobileDownloadCTA: React.FC = () => {
   return (
@@ -25,4 +25,3 @@ export const HomeMobileDownloadCTA: React.FC = () => {
 };
 
 export default HomeMobileDownloadCTA;
-

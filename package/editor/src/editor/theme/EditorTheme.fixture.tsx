@@ -1,9 +1,9 @@
-import {useMemo} from 'react';
-import {useFixtureSelect} from 'react-cosmos/client';
-import {tags} from '@lezer/highlight';
-import {MarkdownEditor} from '../MarkdownEditor';
-import {JsonEditor} from '../JsonEditor';
-import {createTheme} from '../../core/theme';
+import { tags } from "@lezer/highlight";
+import { useMemo } from "react";
+import { useFixtureSelect } from "react-cosmos/client";
+import { createTheme } from "../../core/theme";
+import { JsonEditor } from "../JsonEditor";
+import { MarkdownEditor } from "../MarkdownEditor";
 
 const markdownContent = `# Theme Preview
 
@@ -31,21 +31,18 @@ const invalidJson = `{
 }`;
 
 function ThemeVariantsFixture() {
-  const [variant] = useFixtureSelect('Variant', {
-    options: ['light', 'dark'] as const,
-    defaultValue: 'light',
+  const [variant] = useFixtureSelect("Variant", {
+    options: ["light", "dark"] as const,
+    defaultValue: "light",
   });
 
-  const theme = useMemo(
-    () => createTheme({variant}),
-    [variant],
-  );
+  const theme = useMemo(() => createTheme({ variant }), [variant]);
 
   return (
     <div
       style={{
-        height: '100vh',
-        background: variant === 'dark' ? '#1e1e1e' : '#ffffff',
+        height: "100vh",
+        background: variant === "dark" ? "#1e1e1e" : "#ffffff",
       }}
     >
       <MarkdownEditor
@@ -64,20 +61,20 @@ export default {
 
   CustomColors: () => {
     const theme = createTheme({
-      variant: 'dark',
+      variant: "dark",
       settings: {
-        background: '#1a1b26',
-        foreground: '#a9b1d6',
-        caret: '#c0caf5',
-        selection: '#33467c',
-        lineHighlight: '#292e42',
-        gutterBackground: '#1a1b26',
-        gutterForeground: '#3b4261',
+        background: "#1a1b26",
+        foreground: "#a9b1d6",
+        caret: "#c0caf5",
+        selection: "#33467c",
+        lineHighlight: "#292e42",
+        gutterBackground: "#1a1b26",
+        gutterForeground: "#3b4261",
       },
     });
 
     return (
-      <div style={{height: '100vh', background: '#1a1b26'}}>
+      <div style={{ height: "100vh", background: "#1a1b26" }}>
         <MarkdownEditor
           value={markdownContent}
           preview={false}
@@ -90,23 +87,23 @@ export default {
 
   CustomSyntaxStyles: () => {
     const theme = createTheme({
-      variant: 'light',
+      variant: "light",
       settings: {
-        background: '#fafafa',
-        foreground: '#383a42',
+        background: "#fafafa",
+        foreground: "#383a42",
       },
       styles: [
-        {tag: tags.keyword, color: '#a626a4'},
-        {tag: tags.string, color: '#50a14f'},
-        {tag: tags.comment, color: '#a0a1a7', fontStyle: 'italic'},
-        {tag: tags.number, color: '#986801'},
-        {tag: tags.function(tags.variableName), color: '#4078f2'},
-        {tag: tags.typeName, color: '#c18401'},
+        { tag: tags.keyword, color: "#a626a4" },
+        { tag: tags.string, color: "#50a14f" },
+        { tag: tags.comment, color: "#a0a1a7", fontStyle: "italic" },
+        { tag: tags.number, color: "#986801" },
+        { tag: tags.function(tags.variableName), color: "#4078f2" },
+        { tag: tags.typeName, color: "#c18401" },
       ],
     });
 
     return (
-      <div style={{height: '100vh', background: '#fafafa'}}>
+      <div style={{ height: "100vh", background: "#fafafa" }}>
         <MarkdownEditor
           value={markdownContent}
           preview={false}
@@ -119,18 +116,18 @@ export default {
 
   DarkMarkdownWithPreview: () => {
     const theme = createTheme({
-      variant: 'dark',
+      variant: "dark",
       settings: {
-        background: '#0d1117',
-        foreground: '#c9d1d9',
-        selection: '#264f78',
-        gutterBackground: '#0d1117',
-        gutterForeground: '#484f58',
+        background: "#0d1117",
+        foreground: "#c9d1d9",
+        selection: "#264f78",
+        gutterBackground: "#0d1117",
+        gutterForeground: "#484f58",
       },
     });
 
     return (
-      <div style={{height: '100vh', background: '#0d1117'}}>
+      <div style={{ height: "100vh", background: "#0d1117" }}>
         <MarkdownEditor
           value={markdownContent}
           preview={true}
@@ -143,21 +140,17 @@ export default {
 
   LightJsonWithLint: () => {
     const theme = createTheme({
-      variant: 'light',
+      variant: "light",
       settings: {
-        background: '#ffffff',
-        foreground: '#24292f',
-        lineHighlight: '#f6f8fa',
+        background: "#ffffff",
+        foreground: "#24292f",
+        lineHighlight: "#f6f8fa",
       },
     });
 
     return (
-      <div style={{height: '100vh', background: '#ffffff'}}>
-        <JsonEditor
-          value={invalidJson}
-          theme={theme}
-          className="h-full"
-        />
+      <div style={{ height: "100vh", background: "#ffffff" }}>
+        <JsonEditor value={invalidJson} theme={theme} className="h-full" />
       </div>
     );
   },

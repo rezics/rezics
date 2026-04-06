@@ -1,5 +1,5 @@
-import type { FolioNode } from '../../types';
-import { DEFAULT_SPLIT_RULES } from './rules';
+import type { FolioNode } from "../../types";
+import { DEFAULT_SPLIT_RULES } from "./rules";
 
 export interface TxtSplitOptions {
   splitRules?: RegExp[];
@@ -17,17 +17,23 @@ interface Chunk {
 
 function splitByRule(raw: string, rule: RegExp): Chunk[] {
   // Ensure the regex has the multiline flag and is global for splitting
-  const globalRule = new RegExp(rule.source, rule.flags.includes('g') ? rule.flags : rule.flags + 'g');
+  const globalRule = new RegExp(
+    rule.source,
+    rule.flags.includes("g") ? rule.flags : `${rule.flags}g`,
+  );
   // Also ensure multiline
-  const mlRule = new RegExp(globalRule.source, globalRule.flags.includes('m') ? globalRule.flags : globalRule.flags + 'm');
+  const mlRule = new RegExp(
+    globalRule.source,
+    globalRule.flags.includes("m") ? globalRule.flags : `${globalRule.flags}m`,
+  );
 
   const matches: { index: number; match: string }[] = [];
   let m: RegExpExecArray | null;
 
   while ((m = mlRule.exec(raw)) !== null) {
     // Extract the full line containing the match for a better title
-    const lineStart = raw.lastIndexOf('\n', m.index - 1) + 1;
-    const lineEnd = raw.indexOf('\n', m.index);
+    const lineStart = raw.lastIndexOf("\n", m.index - 1) + 1;
+    const lineEnd = raw.indexOf("\n", m.index);
     const fullLine = raw.slice(lineStart, lineEnd === -1 ? undefined : lineEnd);
     matches.push({ index: m.index, match: fullLine });
     // Prevent infinite loops on zero-width matches
@@ -42,7 +48,7 @@ function splitByRule(raw: string, rule: RegExp): Chunk[] {
   if (matches[0].index > 0) {
     const before = raw.slice(0, matches[0].index).trim();
     if (before) {
-      chunks.push({ title: 'Preface', content: before });
+      chunks.push({ title: "Preface", content: before });
     }
   }
 
@@ -72,7 +78,7 @@ export function splitTxt(
           title: chunk.title,
           fetch: () =>
             Promise.resolve({
-              contentType: 'txt',
+              contentType: "txt",
               raw: chunk.content,
             }),
         })),
@@ -85,11 +91,11 @@ export function splitTxt(
   return {
     tree: [
       {
-        id: 'txt-0',
-        title: 'Full Text',
+        id: "txt-0",
+        title: "Full Text",
         fetch: () =>
           Promise.resolve({
-            contentType: 'txt',
+            contentType: "txt",
             raw,
           }),
       },

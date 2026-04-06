@@ -2,9 +2,9 @@
  * React Query configurations for Token queries
  */
 
-import {queryOptions} from '@tanstack/react-query';
-import {tokenApi} from './token.api';
-import {tokenKeys} from './token.keys';
+import { queryOptions } from "@tanstack/react-query";
+import { tokenApi } from "./token.api";
+import { tokenKeys } from "./token.keys";
 
 /**
  * Query options for listing tokens of the current user

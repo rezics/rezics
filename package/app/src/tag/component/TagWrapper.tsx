@@ -1,15 +1,15 @@
-import React, {useMemo} from 'react';
-import {useQuery} from '@tanstack/react-query';
-import {tagQueries} from '@rezics/api/tag/tag';
-import type {TagFilters, TagDTO, TagDetailDTO} from '@rezics/api/tag/tag';
-import TagList from './TagList';
+import type { TagDetailDTO, TagDTO, TagFilters } from "@rezics/api/tag/tag";
+import { tagQueries } from "@rezics/api/tag/tag";
+import { MUILink } from "@rezics/ui/primitive/link/MUILink.tsx";
+import { useQuery } from "@tanstack/react-query";
+import type React from "react";
+import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 
-import {MUILink} from '@rezics/ui/primitive/link/MUILink.tsx';
+import { useIsMobile } from "@/shared/util/use-media-query";
+import TagList from "./TagList";
 
-import {useIsMobile} from '@/shared/util/use-media-query';
-import {useTranslation} from 'react-i18next';
-
-type Mode = 'flat' | 'grouped';
+type Mode = "flat" | "grouped";
 
 export type TagWrapperProps = {
   filters?: TagFilters;
@@ -26,7 +26,7 @@ interface buildGroupsAndDomainTitlesProps {
 }
 
 interface buildGroupsAndDomainTitlesResult {
-  groups: Map<string | 'NO_DOMAIN', TagDTO[]>;
+  groups: Map<string | "NO_DOMAIN", TagDTO[]>;
   domainTitleMap: Map<string, string>;
 }
 
@@ -42,7 +42,7 @@ function buildGroupsAndDomainTitles({
   domainIds,
   isMobile = false,
 }: buildGroupsAndDomainTitlesProps): buildGroupsAndDomainTitlesResult {
-  const groups = new Map<string | 'NO_DOMAIN', TagDTO[]>();
+  const groups = new Map<string | "NO_DOMAIN", TagDTO[]>();
   const domainTitleMap = new Map<string, string>();
   const allowed = domainIds?.length ? new Set(domainIds) : undefined;
 
@@ -53,7 +53,7 @@ function buildGroupsAndDomainTitles({
 
     // No domain: directly add to NO_DOMAIN
     if (domainObjs.length === 0) {
-      groups.set('NO_DOMAIN', [...(groups.get('NO_DOMAIN') ?? []), tag]);
+      groups.set("NO_DOMAIN", [...(groups.get("NO_DOMAIN") ?? []), tag]);
       continue;
     }
 
@@ -62,7 +62,7 @@ function buildGroupsAndDomainTitles({
       const id = d && (d.id ?? d.unitId) ? String(d.id ?? d.unitId) : null;
       if (!id) continue;
       if (allowed && !allowed.has(id)) continue;
-      const title = d && d.title ? String(d.title) : id;
+      const title = d?.title ? String(d.title) : id;
       groups.set(id, [...(groups.get(id) ?? []), tag]);
       if (!domainTitleMap.has(id)) domainTitleMap.set(id, title);
     }
@@ -74,10 +74,13 @@ function buildGroupsAndDomainTitles({
     const sortedGroups = Array.from(groups.entries()).sort(
       (a, b) => b[1].length - a[1].length,
     );
-    return {groups: new Map(sortedGroups.slice(0, maxGroups)), domainTitleMap};
+    return {
+      groups: new Map(sortedGroups.slice(0, maxGroups)),
+      domainTitleMap,
+    };
   }
 
-  return {groups, domainTitleMap};
+  return { groups, domainTitleMap };
 }
 
 /**
@@ -87,21 +90,21 @@ function buildGroupsAndDomainTitles({
  */
 export const TagWrapper: React.FC<TagWrapperProps> = ({
   filters,
-  mode = 'flat',
+  mode = "flat",
   renderAll = false,
   domainIds,
   className,
 }) => {
-  const {t} = useTranslation();
-  const {data, isLoading, error} = useQuery(tagQueries.list(filters));
+  const { t } = useTranslation();
+  const { data, isLoading, error } = useQuery(tagQueries.list(filters));
   const tags: TagDTO[] = useMemo(() => data?.tags ?? [], [data]);
   const isMobile = useIsMobile();
 
   const memo = useMemo(() => {
     const cutGroupFlag = !renderAll && isMobile;
-    if (mode !== 'grouped') {
+    if (mode !== "grouped") {
       return {
-        groups: null as unknown as Map<string | 'NO_DOMAIN', TagDTO[]>,
+        groups: null as unknown as Map<string | "NO_DOMAIN", TagDTO[]>,
         domainTitleMap: new Map<string, string>(),
       };
     }
@@ -117,7 +120,7 @@ export const TagWrapper: React.FC<TagWrapperProps> = ({
   if (isLoading) {
     return (
       <div className={className}>
-        <div className="text-sm text-gray-500">{t('tag.loading')}</div>
+        <div className="text-sm text-gray-500">{t("tag.loading")}</div>
       </div>
     );
   }
@@ -126,7 +129,7 @@ export const TagWrapper: React.FC<TagWrapperProps> = ({
     return (
       <div className={className}>
         <div className="text-sm text-red-600">
-          {t('tag.load_failed', {
+          {t("tag.load_failed", {
             error: String((error as any)?.message ?? error),
           })}
         </div>
@@ -134,7 +137,7 @@ export const TagWrapper: React.FC<TagWrapperProps> = ({
     );
   }
 
-  if (mode === 'flat') {
+  if (mode === "flat") {
     return (
       <div className={className}>
         <TagList tags={tags as unknown as TagDetailDTO[]} />
@@ -149,9 +152,9 @@ export const TagWrapper: React.FC<TagWrapperProps> = ({
         {[...(groups ?? new Map()).entries()].map(([domId, items]) => (
           <div key={domId + Math.random()} className="space-y-2">
             <div className="flex items-center gap-2">
-              {domId === 'NO_DOMAIN' ? (
+              {domId === "NO_DOMAIN" ? (
                 <span className="text-sm font-semibold text-gray-700">
-                  {t('tag.ungrouped')}
+                  {t("tag.ungrouped")}
                 </span>
               ) : (
                 <MUILink
@@ -172,12 +175,12 @@ export const TagWrapper: React.FC<TagWrapperProps> = ({
       </div>
       {!renderAll && isMobile && (
         <div className="mt-4 text-sm text-gray-500">
-          {t('tag.showing_top_tags')} ·
+          {t("tag.showing_top_tags")} ·
           <MUILink
             to="/tag/book/$bookId/tag"
-            params={{bookId: filters?.objectId as string}}
+            params={{ bookId: filters?.objectId as string }}
           >
-            {t('common.view_all')} →
+            {t("common.view_all")} →
           </MUILink>
         </div>
       )}

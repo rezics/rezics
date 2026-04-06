@@ -5,21 +5,22 @@ type AuthRedirectState = {
   redirectTo?: string;
 };
 
-export function resolvePostAuthDestination(
-  state: AuthRedirectState,
-): string {
+export function resolvePostAuthDestination(state: AuthRedirectState): string {
   if (state.needsOnboarding) {
-    return '/onboarding';
+    return "/onboarding";
   }
 
   if (state.needsVerification) {
-    return '/verify-email';
+    return "/verify-email";
   }
 
-  return state.redirectTo ?? '/';
+  return state.redirectTo ?? "/";
 }
 
-export function buildOAuthCallbackTargets(origin: string, mode: 'login' | 'register') {
+export function buildOAuthCallbackTargets(
+  origin: string,
+  mode: "login" | "register",
+) {
   return {
     callbackURL: `${origin}${resolvePostAuthDestination({
       needsOnboarding: false,

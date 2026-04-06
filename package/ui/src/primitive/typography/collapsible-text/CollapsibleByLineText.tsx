@@ -1,7 +1,8 @@
-import {useTheme} from '@mui/material/styles';
-import React, {useEffect, useRef, useState} from 'react';
-import {useTranslation} from 'react-i18next';
-import {MarkdownContent} from '@/composite/content/MarkdownContent.tsx';
+import { useTheme } from "@mui/material/styles";
+import type React from "react";
+import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { MarkdownContent } from "@/composite/content/MarkdownContent.tsx";
 
 export type CollapsibleByLineTextShowProps = {
   content?: string;
@@ -13,8 +14,8 @@ export type CollapsibleByLineTextShowProps = {
 
 export const CollapsibleByLineTextShow: React.FC<
   CollapsibleByLineTextShowProps
-> = ({content, children, maxLines = 4, isExpanded, onToggle}) => {
-  const {t} = useTranslation();
+> = ({ content, children, maxLines = 4, isExpanded, onToggle }) => {
+  const { t } = useTranslation();
   const theme = useTheme();
   const containerRef = useRef<HTMLDivElement>(null);
   const [isOverflow, setIsOverflow] = useState(false);
@@ -25,7 +26,7 @@ export const CollapsibleByLineTextShow: React.FC<
     requestAnimationFrame(() => {
       setIsOverflow(el.scrollHeight > el.clientHeight);
     });
-  }, [content, maxLines]);
+  }, []);
 
   return (
     <div className="relative text-base leading-snug">
@@ -33,9 +34,9 @@ export const CollapsibleByLineTextShow: React.FC<
         ref={containerRef}
         style={{
           WebkitLineClamp: isExpanded ? undefined : maxLines, // 动态控制行数
-          display: '-webkit-box', // 需要这两个来启用多行文本裁剪
-          WebkitBoxOrient: 'vertical',
-          overflow: 'hidden',
+          display: "-webkit-box", // 需要这两个来启用多行文本裁剪
+          WebkitBoxOrient: "vertical",
+          overflow: "hidden",
         }}
       >
         {content ? <MarkdownContent content={content} /> : children}
@@ -56,8 +57,8 @@ export const CollapsibleByLineTextShow: React.FC<
           <div
             className="relative flex justify-end z-10 px-2 pt-1"
             style={{
-              width: '8rem',
-              height: '100%',
+              width: "8rem",
+              height: "100%",
               background: `linear-gradient(to left, ${theme.palette.background.default} 40%, transparent 100%)`,
             }}
           >
@@ -66,7 +67,7 @@ export const CollapsibleByLineTextShow: React.FC<
               className="text-sm font-medium text-blue-600 hover:underline"
             >
               {/* 展开 */}
-              {t('common.expand')}
+              {t("common.expand")}
             </button>
           </div>
         </div>
@@ -83,9 +84,9 @@ export type CollapsibleByLineTextContainerProps = {
 
 export const CollapsibleByLineTextContainer: React.FC<
   CollapsibleByLineTextContainerProps
-> = ({content, children, maxLines = 4}) => {
+> = ({ content, children, maxLines = 4 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
-  const toggle = () => setIsExpanded(v => !v);
+  const toggle = () => setIsExpanded((v) => !v);
 
   return (
     <CollapsibleByLineTextShow

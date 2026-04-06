@@ -1,30 +1,29 @@
-import {t} from 'elysia';
+import { t } from "elysia";
 
 export const authProviderIdSchema = t.Union([
-  t.Literal('google'),
-  t.Literal('microsoft'),
-  t.Literal('github'),
-  t.Literal('twitter'),
-  t.Literal('telegram'),
+  t.Literal("google"),
+  t.Literal("microsoft"),
+  t.Literal("github"),
+  t.Literal("twitter"),
+  t.Literal("telegram"),
 ]);
-export type AuthProviderId = (typeof authProviderIdSchema)['static'];
+export type AuthProviderId = (typeof authProviderIdSchema)["static"];
 
 export const authProviderSchema = t.Object({
   id: authProviderIdSchema,
   enabled: t.Boolean(),
 });
-export type AuthProvider = (typeof authProviderSchema)['static'];
+export type AuthProvider = (typeof authProviderSchema)["static"];
 
 export const authReadinessStatusSchema = t.Union([
-  t.Literal('needs-onboarding'),
-  t.Literal('needs-verification'),
-  t.Literal('ready'),
+  t.Literal("needs-onboarding"),
+  t.Literal("needs-verification"),
+  t.Literal("ready"),
 ]);
-export type AuthReadinessStatus =
-  (typeof authReadinessStatusSchema)['static'];
+export type AuthReadinessStatus = (typeof authReadinessStatusSchema)["static"];
 
 export const authSessionStateSchema = t.Object({
-  email: t.String({format: 'email'}),
+  email: t.String({ format: "email" }),
   emailVerified: t.Boolean(),
   needsEmailVerification: t.Boolean(),
   needsOnboarding: t.Boolean(),
@@ -36,7 +35,7 @@ export const authSessionStateSchema = t.Object({
   primaryProviderId: t.Optional(authProviderIdSchema),
   trustedProviderId: t.Optional(authProviderIdSchema),
 });
-export type AuthSessionState = (typeof authSessionStateSchema)['static'];
+export type AuthSessionState = (typeof authSessionStateSchema)["static"];
 
 export const getSessionStateResponseSchema = t.Object({
   session: t.Object({
@@ -58,13 +57,13 @@ export const getSessionStateResponseSchema = t.Object({
   authSession: authSessionStateSchema,
 });
 export type GetSessionStateResponse =
-  (typeof getSessionStateResponseSchema)['static'];
+  (typeof getSessionStateResponseSchema)["static"];
 
 export const listAuthProvidersResponseSchema = t.Object({
   providers: t.Array(authProviderSchema),
 });
 export type ListAuthProvidersResponse =
-  (typeof listAuthProvidersResponseSchema)['static'];
+  (typeof listAuthProvidersResponseSchema)["static"];
 
 export const signInSocialBodySchema = t.Object({
   provider: authProviderIdSchema,
@@ -73,32 +72,33 @@ export const signInSocialBodySchema = t.Object({
   errorCallbackURL: t.Optional(t.String()),
   disableRedirect: t.Optional(t.Boolean()),
 });
-export type SignInSocialBody = (typeof signInSocialBodySchema)['static'];
+export type SignInSocialBody = (typeof signInSocialBodySchema)["static"];
 
 export const signInSocialResponseSchema = t.Object({
   url: t.String(),
   redirect: t.Boolean(),
 });
-export type SignInSocialResponse = (typeof signInSocialResponseSchema)['static'];
+export type SignInSocialResponse =
+  (typeof signInSocialResponseSchema)["static"];
 
 export const sendVerificationEmailBodySchema = t.Object({
-  email: t.String({format: 'email'}),
+  email: t.String({ format: "email" }),
   callbackURL: t.Optional(t.String()),
 });
 export type SendVerificationEmailBody =
-  (typeof sendVerificationEmailBodySchema)['static'];
+  (typeof sendVerificationEmailBodySchema)["static"];
 
 export const sendVerificationEmailResponseSchema = t.Object({
   status: t.Boolean(),
 });
 export type SendVerificationEmailResponse =
-  (typeof sendVerificationEmailResponseSchema)['static'];
+  (typeof sendVerificationEmailResponseSchema)["static"];
 
 export const verifyEmailQuerySchema = t.Object({
   token: t.String(),
   callbackURL: t.Optional(t.String()),
 });
-export type VerifyEmailQuery = (typeof verifyEmailQuerySchema)['static'];
+export type VerifyEmailQuery = (typeof verifyEmailQuerySchema)["static"];
 
 export const verifyEmailResponseSchema = t.Object({
   status: t.Boolean(),
@@ -117,26 +117,26 @@ export const verifyEmailResponseSchema = t.Object({
     ),
   ),
 });
-export type VerifyEmailResponse = (typeof verifyEmailResponseSchema)['static'];
+export type VerifyEmailResponse = (typeof verifyEmailResponseSchema)["static"];
 
 export const changeEmailBodySchema = t.Object({
-  newEmail: t.String({format: 'email'}),
+  newEmail: t.String({ format: "email" }),
   callbackURL: t.Optional(t.String()),
 });
-export type ChangeEmailBody = (typeof changeEmailBodySchema)['static'];
+export type ChangeEmailBody = (typeof changeEmailBodySchema)["static"];
 
 export const changeEmailResponseSchema = t.Object({
   status: t.Boolean(),
   message: t.Optional(t.Nullable(t.String())),
 });
-export type ChangeEmailResponse = (typeof changeEmailResponseSchema)['static'];
+export type ChangeEmailResponse = (typeof changeEmailResponseSchema)["static"];
 
 export const setPasswordBodySchema = t.Object({
   newPassword: t.String(),
 });
-export type SetPasswordBody = (typeof setPasswordBodySchema)['static'];
+export type SetPasswordBody = (typeof setPasswordBodySchema)["static"];
 
 export const setPasswordResponseSchema = t.Object({
   status: t.Boolean(),
 });
-export type SetPasswordResponse = (typeof setPasswordResponseSchema)['static'];
+export type SetPasswordResponse = (typeof setPasswordResponseSchema)["static"];

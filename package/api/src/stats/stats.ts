@@ -1,3 +1,3 @@
-export {adminStatsKeys} from './stats.keys';
-export {adminStatsApi} from './stats.api';
-export {adminStatsQueryOptions} from './stats.queries';
+export { adminStatsApi } from "./stats.api";
+export { adminStatsKeys } from "./stats.keys";
+export { adminStatsQueryOptions } from "./stats.queries";

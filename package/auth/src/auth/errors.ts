@@ -4,7 +4,7 @@ export class AuthPolicyError extends Error {
 
   constructor(status: number, code: string, message: string) {
     super(message);
-    this.name = 'AuthPolicyError';
+    this.name = "AuthPolicyError";
     this.status = status;
     this.code = code;
   }

@@ -1,15 +1,15 @@
-import {tanstackRouter} from '@tanstack/router-plugin/vite';
-import UnoCSS from 'unocss/vite';
-import process from 'node:process';
-import {defineConfig, loadEnv} from 'vite';
-import react from '@vitejs/plugin-react';
-import errorOverlay from '@visulima/vite-overlay';
-import svgr from 'vite-plugin-svgr';
+import process from "node:process";
+import { tanstackRouter } from "@tanstack/router-plugin/vite";
+import errorOverlay from "@visulima/vite-overlay";
+import react from "@vitejs/plugin-react";
+import UnoCSS from "unocss/vite";
+import { defineConfig, loadEnv } from "vite";
+import svgr from "vite-plugin-svgr";
 // import {visualizer} from 'rollup-plugin-visualizer';
 
 // https://vitejs.dev/config/
-export default defineConfig(({mode}) => {
-  const env = loadEnv(mode, process.cwd(), 'ICS');
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), "ICS");
 
   return {
     resolve: {
@@ -17,10 +17,10 @@ export default defineConfig(({mode}) => {
     },
     plugins: [
       tanstackRouter({
-        target: 'react',
+        target: "react",
         autoCodeSplitting: true,
-        routesDirectory: 'src/routes',
-        generatedRouteTree: 'src/routeTree.gen.ts',
+        routesDirectory: "src/routes",
+        generatedRouteTree: "src/routeTree.gen.ts",
       }),
       react(),
       // TODO Wait for plugin-react-oxc to support react compiler
@@ -31,9 +31,9 @@ export default defineConfig(({mode}) => {
       // }),
       UnoCSS(),
       errorOverlay({
-        reactPluginName: '@vitejs/plugin-react',
+        reactPluginName: "@vitejs/plugin-react",
         forwardConsole: true,
-        forwardedConsoleMethods: ['error', 'warn', 'log'],
+        forwardedConsoleMethods: ["error", "warn", "log"],
         showBallonButton: true,
       }),
       svgr(),
@@ -51,7 +51,7 @@ export default defineConfig(({mode}) => {
       rollupOptions: {
         output: {},
         treeshake: {
-          preset: 'smallest',
+          preset: "smallest",
           moduleSideEffects: false,
           propertyReadSideEffects: false,
           tryCatchDeoptimization: false,
@@ -64,7 +64,7 @@ export default defineConfig(({mode}) => {
       // sourcemapIgnoreList: false, // Disable sourcemap ignore list, will include all files like node_modules, etc.
     },
     define: {
-      'process.env': env,
+      "process.env": env,
     },
   };
 });

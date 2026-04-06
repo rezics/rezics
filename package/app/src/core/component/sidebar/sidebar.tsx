@@ -1,10 +1,11 @@
-import React, {useEffect, useState} from 'react';
-import {X, Menu} from 'lucide-react';
-import {cn} from '@/shared/util/css-util';
-import {Box} from '@mui/material';
+import { Box } from "@mui/material";
+import { X } from "lucide-react";
+import type React from "react";
+import { useEffect } from "react";
+import { cn } from "@/shared/util/css-util";
 
 // --- 类型定义 ---
-export type SidebarMode = 'fixed' | 'inline';
+export type SidebarMode = "fixed" | "inline";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -19,8 +20,8 @@ interface SidebarProps {
 export const Sidebar: React.FC<SidebarProps> = ({
   isOpen,
   onClose,
-  mode = 'inline',
-  width = '320px',
+  mode = "inline",
+  width = "320px",
   className,
   children,
   isDragging = false,
@@ -28,23 +29,23 @@ export const Sidebar: React.FC<SidebarProps> = ({
   // handle escape key
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
-      if (mode === 'fixed' && isOpen && e.key === 'Escape') {
+      if (mode === "fixed" && isOpen && e.key === "Escape") {
         onClose();
       }
     };
-    window.addEventListener('keydown', handleEsc);
-    return () => window.removeEventListener('keydown', handleEsc);
+    window.addEventListener("keydown", handleEsc);
+    return () => window.removeEventListener("keydown", handleEsc);
   }, [mode, isOpen, onClose]);
 
   // --- Fixed 模式渲染逻辑 ---
-  if (mode === 'fixed') {
+  if (mode === "fixed") {
     return (
-      <Box sx={{backgroundColor: 'background.paper'}}>
+      <Box sx={{ backgroundColor: "background.paper" }}>
         {/* 背景遮罩 (Backdrop) - 处理淡入淡出 */}
         <div
           className={cn(
-            'fixed inset-0 z-40 transition-opacity duration-300 ease-in-out',
-            isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none',
+            "fixed inset-0 z-40 transition-opacity duration-300 ease-in-out",
+            isOpen ? "opacity-100" : "opacity-0 pointer-events-none",
           )}
           onClick={onClose}
           aria-hidden="true"
@@ -53,18 +54,18 @@ export const Sidebar: React.FC<SidebarProps> = ({
         {/* 侧边栏面板 - 处理滑入滑出 */}
         <aside
           className={cn(
-            'fixed top-0 left-0 z-50 h-full shadow-xl transition-transform duration-300 ease-in-out',
-            isOpen ? 'translate-x-0' : '-translate-x-full',
+            "fixed top-0 left-0 z-50 h-full shadow-xl transition-transform duration-300 ease-in-out",
+            isOpen ? "translate-x-0" : "-translate-x-full",
           )}
-          style={{width: width}}
+          style={{ width: width }}
         >
           {/* 这里放置一个相对容器，方便放置关闭按钮 */}
           <Box
             className={cn(
-              'relative h-full flex flex-col overflow-hidden',
+              "relative h-full flex flex-col overflow-hidden",
               className,
             )}
-            sx={{backgroundColor: 'background.paper'}}
+            sx={{ backgroundColor: "background.paper" }}
           >
             {/* 仅在 Fixed 模式下，通常需要一个显式的关闭按钮 */}
             <button
@@ -89,24 +90,24 @@ export const Sidebar: React.FC<SidebarProps> = ({
   return (
     <Box
       className="inline-sidebar-container"
-      sx={{backgroundColor: 'background.paper'}}
+      sx={{ backgroundColor: "background.paper" }}
     >
       <div
         className={cn(`shrink-0`)}
         style={{
-          width: isOpen ? width : '0px',
-          transition: !isDragging ? 'width 0.3s ease-in-out' : 'none',
+          width: isOpen ? width : "0px",
+          transition: !isDragging ? "width 0.3s ease-in-out" : "none",
         }}
       />
       <div
         className={cn(`fixed inset-y-0 left-0 overflow-hidden`)}
         style={{
           width,
-          transform: isOpen ? 'translateX(0)' : `translateX(-${width})`,
-          transition: 'transform 0.3s ease-in-out',
+          transform: isOpen ? "translateX(0)" : `translateX(-${width})`,
+          transition: "transform 0.3s ease-in-out",
         }}
       >
-        <div className={cn('h-full', className)}>
+        <div className={cn("h-full", className)}>
           {/* 内容区域 */}
           <div className="h-full w-full">{children}</div>
         </div>

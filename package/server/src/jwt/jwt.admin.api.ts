@@ -1,33 +1,33 @@
-import {Elysia, t} from 'elysia';
-import {authMacro} from '@/middleware';
 import {
+  createJwtServiceInputSchema,
   jwtServiceDTOSchema,
   jwtServiceListResponseSchema,
-  createJwtServiceInputSchema,
   updateJwtServiceInputSchema,
-} from '@rezics/contract';
-import {jwtServiceAdminService} from './jwt.admin.service';
+} from "@rezics/contract";
+import { Elysia, t } from "elysia";
+import { authMacro } from "@/middleware";
+import { jwtServiceAdminService } from "./jwt.admin.service";
 
-export const jwtServiceAdminApi = new Elysia({prefix: '/admin/jwt-services'})
+export const jwtServiceAdminApi = new Elysia({ prefix: "/admin/jwt-services" })
   .use(authMacro)
   .get(
-    '/',
+    "/",
     async () => {
       const services = await jwtServiceAdminService.list();
-      return {services};
+      return { services };
     },
     {
       requireRoot: true,
       response: jwtServiceListResponseSchema,
       detail: {
-        summary: 'List all JWT services',
-        tags: ['Admin', 'JWT Service'],
+        summary: "List all JWT services",
+        tags: ["Admin", "JWT Service"],
       },
     },
   )
   .get(
-    '/:serviceKey',
-    async ({params, set}) => {
+    "/:serviceKey",
+    async ({ params, set }) => {
       const service = await jwtServiceAdminService.fetch(params.serviceKey);
       if (!service) {
         set.status = 404;
@@ -37,17 +37,17 @@ export const jwtServiceAdminApi = new Elysia({prefix: '/admin/jwt-services'})
     },
     {
       requireRoot: true,
-      params: t.Object({serviceKey: t.String()}),
+      params: t.Object({ serviceKey: t.String() }),
       response: jwtServiceDTOSchema,
       detail: {
-        summary: 'Fetch a JWT service by serviceKey',
-        tags: ['Admin', 'JWT Service'],
+        summary: "Fetch a JWT service by serviceKey",
+        tags: ["Admin", "JWT Service"],
       },
     },
   )
   .post(
-    '/',
-    async ({body, set}) => {
+    "/",
+    async ({ body, set }) => {
       try {
         const service = await jwtServiceAdminService.create(body);
         set.status = 201;
@@ -55,9 +55,9 @@ export const jwtServiceAdminApi = new Elysia({prefix: '/admin/jwt-services'})
       } catch (error) {
         if (
           error &&
-          typeof error === 'object' &&
-          'code' in error &&
-          (error as {code: string}).code === 'P2002'
+          typeof error === "object" &&
+          "code" in error &&
+          (error as { code: string }).code === "P2002"
         ) {
           set.status = 409;
           throw new Error(
@@ -72,14 +72,14 @@ export const jwtServiceAdminApi = new Elysia({prefix: '/admin/jwt-services'})
       body: createJwtServiceInputSchema,
       response: jwtServiceDTOSchema,
       detail: {
-        summary: 'Create a JWT service',
-        tags: ['Admin', 'JWT Service'],
+        summary: "Create a JWT service",
+        tags: ["Admin", "JWT Service"],
       },
     },
   )
   .patch(
-    '/:serviceKey',
-    async ({params, body, set}) => {
+    "/:serviceKey",
+    async ({ params, body, set }) => {
       if (body.jwksUrl !== undefined) {
         try {
           new URL(body.jwksUrl);
@@ -93,9 +93,9 @@ export const jwtServiceAdminApi = new Elysia({prefix: '/admin/jwt-services'})
       } catch (error) {
         if (
           error &&
-          typeof error === 'object' &&
-          'code' in error &&
-          (error as {code: string}).code === 'P2025'
+          typeof error === "object" &&
+          "code" in error &&
+          (error as { code: string }).code === "P2025"
         ) {
           set.status = 404;
           throw new Error(`JwtService not found: ${params.serviceKey}`);
@@ -105,26 +105,26 @@ export const jwtServiceAdminApi = new Elysia({prefix: '/admin/jwt-services'})
     },
     {
       requireRoot: true,
-      params: t.Object({serviceKey: t.String()}),
+      params: t.Object({ serviceKey: t.String() }),
       body: updateJwtServiceInputSchema,
       response: jwtServiceDTOSchema,
       detail: {
-        summary: 'Update a JWT service',
-        tags: ['Admin', 'JWT Service'],
+        summary: "Update a JWT service",
+        tags: ["Admin", "JWT Service"],
       },
     },
   )
   .post(
-    '/:serviceKey/activate',
-    async ({params, set}) => {
+    "/:serviceKey/activate",
+    async ({ params, set }) => {
       try {
         return await jwtServiceAdminService.activate(params.serviceKey);
       } catch (error) {
         if (
           error &&
-          typeof error === 'object' &&
-          'code' in error &&
-          (error as {code: string}).code === 'P2025'
+          typeof error === "object" &&
+          "code" in error &&
+          (error as { code: string }).code === "P2025"
         ) {
           set.status = 404;
           throw new Error(`JwtService not found: ${params.serviceKey}`);
@@ -134,25 +134,25 @@ export const jwtServiceAdminApi = new Elysia({prefix: '/admin/jwt-services'})
     },
     {
       requireRoot: true,
-      params: t.Object({serviceKey: t.String()}),
+      params: t.Object({ serviceKey: t.String() }),
       response: jwtServiceDTOSchema,
       detail: {
-        summary: 'Activate a JWT service',
-        tags: ['Admin', 'JWT Service'],
+        summary: "Activate a JWT service",
+        tags: ["Admin", "JWT Service"],
       },
     },
   )
   .post(
-    '/:serviceKey/deactivate',
-    async ({params, set}) => {
+    "/:serviceKey/deactivate",
+    async ({ params, set }) => {
       try {
         return await jwtServiceAdminService.deactivate(params.serviceKey);
       } catch (error) {
         if (
           error &&
-          typeof error === 'object' &&
-          'code' in error &&
-          (error as {code: string}).code === 'P2025'
+          typeof error === "object" &&
+          "code" in error &&
+          (error as { code: string }).code === "P2025"
         ) {
           set.status = 404;
           throw new Error(`JwtService not found: ${params.serviceKey}`);
@@ -162,11 +162,11 @@ export const jwtServiceAdminApi = new Elysia({prefix: '/admin/jwt-services'})
     },
     {
       requireRoot: true,
-      params: t.Object({serviceKey: t.String()}),
+      params: t.Object({ serviceKey: t.String() }),
       response: jwtServiceDTOSchema,
       detail: {
-        summary: 'Deactivate a JWT service',
-        tags: ['Admin', 'JWT Service'],
+        summary: "Deactivate a JWT service",
+        tags: ["Admin", "JWT Service"],
       },
     },
   );

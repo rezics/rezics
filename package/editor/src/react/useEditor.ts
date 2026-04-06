@@ -1,9 +1,9 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { EditorState, type Extension } from '@codemirror/state';
-import { EditorView, type KeyBinding } from '@codemirror/view';
-import { resolvePlugins } from '../core/plugin';
-import { mergeKeybindings } from '../core/keybindings';
-import type { EditorPlugin } from '../core/types';
+import { EditorState, type Extension } from "@codemirror/state";
+import { EditorView, type KeyBinding } from "@codemirror/view";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { mergeKeybindings } from "../core/keybindings";
+import { resolvePlugins } from "../core/plugin";
+import type { EditorPlugin } from "../core/types";
 
 const EMPTY_PLUGINS: EditorPlugin[] = [];
 const EMPTY_KEYBINDINGS: KeyBinding[] = [];
@@ -19,7 +19,7 @@ export interface UseEditorOptions {
 
 export function useEditor(options: UseEditorOptions) {
   const {
-    doc = '',
+    doc = "",
     plugins = EMPTY_PLUGINS,
     keybindings = EMPTY_KEYBINDINGS,
     theme,
@@ -72,7 +72,7 @@ export function useEditor(options: UseEditorOptions) {
     },
     // Recreate on plugin/keybinding/theme/extension identity change
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [plugins, keybindings, theme, extraExtensions],
+    [plugins, keybindings, theme, extraExtensions, doc],
   );
 
   // Sync external doc changes without recreating the view

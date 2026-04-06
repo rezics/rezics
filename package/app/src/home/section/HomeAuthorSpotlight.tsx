@@ -1,9 +1,10 @@
-import React, {useMemo} from 'react';
-import {useQuery} from '@tanstack/react-query';
-import {Alert, CircularProgress, Typography, Avatar} from '@mui/material';
-import {bookQueries} from '@rezics/api/book/book';
-import type {BookDTO, PublicUser} from '@rezics/contract';
-import {useTranslation} from 'react-i18next';
+import { Alert, Avatar, CircularProgress, Typography } from "@mui/material";
+import { bookQueries } from "@rezics/api/book/book";
+import type { BookDTO, PublicUser } from "@rezics/contract";
+import { useQuery } from "@tanstack/react-query";
+import type React from "react";
+import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 
 type Book = BookDTO;
 
@@ -22,11 +23,11 @@ export const HomeAuthorSpotlight: React.FC<HomeAuthorSpotlightProps> = ({
   limit = 24,
   maxAuthors = 12,
 }) => {
-  const {t} = useTranslation();
-  const resolvedTitle = title ?? t('page.home.sections.author_spotlight');
+  const { t } = useTranslation();
+  const resolvedTitle = title ?? t("page.home.sections.author_spotlight");
 
-  const {data, isLoading, error} = useQuery(
-    bookQueries.list({start: 0, limit}),
+  const { data, isLoading, error } = useQuery(
+    bookQueries.list({ start: 0, limit }),
   );
 
   const authors = useMemo(() => {
@@ -59,7 +60,7 @@ export const HomeAuthorSpotlight: React.FC<HomeAuthorSpotlightProps> = ({
         {isLoading && <CircularProgress size={20} />}
       </div>
       <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
-        {authors.map(a => (
+        {authors.map((a) => (
           <div
             key={a.unitId}
             className="flex items-center gap-3 p-3 rounded border bg-white"

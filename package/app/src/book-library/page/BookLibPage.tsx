@@ -1,14 +1,13 @@
-import React, {useEffect, useMemo, useRef, useState} from 'react';
+import { meiliQueries } from "@rezics/api/meili/meili.queries";
+import type { BookDTO } from "@rezics/contract";
+import type { UniversalPaginatorHandle } from "@rezics/ui/composite/pagination/Pagination.tsx";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import type React from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import type { SearchInfo } from "@/search";
+import type { BookLibSortKey } from "@/search/component/SearchFilter";
 
-import type {SearchInfo} from '@/search';
-import type {BookLibSortKey} from '@/search/component/SearchFilter';
-import {type UniversalPaginatorHandle} from '@rezics/ui/composite/pagination/Pagination.tsx';
-
-import {meiliQueries} from '@rezics/api/meili/meili.queries';
-import {useQuery, useQueryClient} from '@tanstack/react-query';
-import type {BookDTO} from '@rezics/contract';
-
-import {BookLibSectionRef} from '../section/BookLibSection';
+import { BookLibSectionRef } from "../section/BookLibSection";
 
 /**
  * Book Library Page - Route-level entry point for book list.
@@ -25,23 +24,25 @@ export const BookLibPage: React.FC = () => {
   const ref = useRef<UniversalPaginatorHandle>(null);
   const EXTERNAL_PAGE_SIZE = 100;
   const [currentQuery, setCurrentQuery] = useState<SearchInfo>({
-    keyword: '',
+    keyword: "",
     tags: [],
     nsfw: false,
     isLicensed: undefined,
-    textLength: '',
+    textLength: "",
   });
   const [start, setStart] = useState<number>(0);
 
-  const {data, isLoading, error} = useQuery(
+  const { data, isLoading, error } = useQuery(
     meiliQueries.booksSearch({
       start,
       limit: EXTERNAL_PAGE_SIZE,
-      keyword: currentQuery.keyword ?? '',
+      keyword: currentQuery.keyword ?? "",
       tags: currentQuery.tags ?? [],
-      ...(currentQuery.nsfw ? {nsfw: true} : {}),
-      ...(currentQuery.isLicensed ? {isLicensed: true} : {}),
-      ...(currentQuery.textLength ? {textLength: currentQuery.textLength} : {}),
+      ...(currentQuery.nsfw ? { nsfw: true } : {}),
+      ...(currentQuery.isLicensed ? { isLicensed: true } : {}),
+      ...(currentQuery.textLength
+        ? { textLength: currentQuery.textLength }
+        : {}),
     }),
   );
 
@@ -55,11 +56,11 @@ export const BookLibPage: React.FC = () => {
       meiliQueries.booksSearch({
         start: (page - 1) * EXTERNAL_PAGE_SIZE,
         limit: EXTERNAL_PAGE_SIZE,
-        keyword: currentQuery.keyword ?? '',
+        keyword: currentQuery.keyword ?? "",
         tags: currentQuery.tags ?? [],
-        ...(currentQuery.nsfw ? {nsfw: true} : {}),
+        ...(currentQuery.nsfw ? { nsfw: true } : {}),
         ...(currentQuery.textLength
-          ? {textLength: currentQuery.textLength}
+          ? { textLength: currentQuery.textLength }
           : {}),
       }),
     );
@@ -68,21 +69,24 @@ export const BookLibPage: React.FC = () => {
 
   useEffect(() => {
     ref.current?.resetPaginationPageNumber();
-  }, [currentQuery]);
+  }, []);
 
   const books: BookDTO[] = useMemo(() => data?.books ?? [], [data]);
   const totalItems: number = data?.total ?? 0;
 
   const [sortConfig, setSortConfig] = useState<{
     type: BookLibSortKey;
-    order: 'asc' | 'desc';
+    order: "asc" | "desc";
   }>({
-    type: 'time',
-    order: 'desc',
+    type: "time",
+    order: "desc",
   });
 
-  const handleSortChange = (newSort: {type?: string; order?: 'asc' | 'desc'}) =>
-    setSortConfig(prev => ({
+  const handleSortChange = (newSort: {
+    type?: string;
+    order?: "asc" | "desc";
+  }) =>
+    setSortConfig((prev) => ({
       type: newSort.type as BookLibSortKey,
       order: newSort.order ?? prev.order,
     }));

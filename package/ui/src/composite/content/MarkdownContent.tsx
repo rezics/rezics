@@ -1,8 +1,8 @@
-import {createNovelRenderer} from '@rezics/editor/markdown';
+import { createNovelRenderer } from "@rezics/editor/markdown";
 
-export function MarkdownContent({content}: {content: string}) {
+export function MarkdownContent({ content }: { content: string }) {
   const md = createNovelRenderer();
-  const chapterHtml = md.render(content || '');
+  const chapterHtml = md.render(content || "");
 
-  return <div dangerouslySetInnerHTML={{__html: chapterHtml}} />;
+  return <div dangerouslySetInnerHTML={{ __html: chapterHtml }} />;
 }

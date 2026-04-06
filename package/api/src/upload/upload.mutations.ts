@@ -1,11 +1,11 @@
-import {useMutation, type UseMutationOptions} from '@tanstack/react-query';
-import {uploadApi} from './upload.api';
-import type {ImageUploadResponse} from '@rezics/contract';
+import type { ImageUploadResponse } from "@rezics/contract";
+import { type UseMutationOptions, useMutation } from "@tanstack/react-query";
+import { uploadApi } from "./upload.api";
 
 export function useImageUpload(
   options?: Omit<
     UseMutationOptions<ImageUploadResponse, Error, File>,
-    'mutationFn'
+    "mutationFn"
   >,
 ) {
   return useMutation({

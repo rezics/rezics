@@ -1,4 +1,4 @@
-import {t} from 'elysia';
+import { t } from "elysia";
 
 export const adminStatsResponseSchema = t.Object({
   counts: t.Object({
@@ -8,8 +8,8 @@ export const adminStatsResponseSchema = t.Object({
     unresolvedFeedback: t.Number(),
   }),
   health: t.Object({
-    server: t.Union([t.Literal('ok'), t.Literal('degraded')]),
-    meili: t.Union([t.Literal('ok'), t.Literal('unreachable')]),
+    server: t.Union([t.Literal("ok"), t.Literal("degraded")]),
+    meili: t.Union([t.Literal("ok"), t.Literal("unreachable")]),
   }),
   contentTrend: t.Array(
     t.Object({
@@ -20,5 +20,4 @@ export const adminStatsResponseSchema = t.Object({
   ),
 });
 
-export type AdminStatsResponse =
-  (typeof adminStatsResponseSchema)['static'];
+export type AdminStatsResponse = (typeof adminStatsResponseSchema)["static"];

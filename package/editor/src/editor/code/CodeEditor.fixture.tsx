@@ -1,4 +1,4 @@
-import {CodeEditor} from '../CodeEditor';
+import { CodeEditor } from "../CodeEditor";
 
 const sampleText = `The editor with no language plugins acts as a plain text / code input.
 
@@ -18,12 +18,12 @@ export default {
       value={sampleText}
       plugins={[
         {
-          name: 'custom-noop',
+          name: "custom-noop",
           toolbar: [
             {
-              name: 'custom-btn',
-              label: 'Custom Button',
-              icon: '★',
+              name: "custom-btn",
+              label: "Custom Button",
+              icon: "★",
               action: () => {},
             },
           ],

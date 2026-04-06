@@ -1,10 +1,10 @@
-import {createFileRoute, lazyRouteComponent} from '@tanstack/react-router';
+import { createFileRoute, lazyRouteComponent } from "@tanstack/react-router";
 
 const ReadListEditPage = lazyRouteComponent(
-  () => import('@/readlist/page/ReadListEditPage'),
-  'ReadListEditPage',
+  () => import("@/readlist/page/ReadListEditPage"),
+  "ReadListEditPage",
 );
 
-export const Route = createFileRoute('/_mainLayout/readlist/$readlistId/edit')({
+export const Route = createFileRoute("/_mainLayout/readlist/$readlistId/edit")({
   component: ReadListEditPage,
 });

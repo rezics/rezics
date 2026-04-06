@@ -1,78 +1,79 @@
-import {prisma} from '#/prisma/client';
-import {UnitStatus, UnitType} from '#/prisma/client';
-import type {Prisma} from '#/prisma/client';
-import {readlistSelect, readlistListSelect} from './types';
 import type {
-  ReadlistListQuery,
   CreateReadlistInput,
+  ReadlistDTO,
+  ReadlistListQuery,
   UpdateReadlistInput,
-} from '@rezics/contract';
-import type {ReadlistDTO} from '@rezics/contract';
-import {mapReadlistListRowToDTO, mapReadlistRowToDTO} from './mapper';
-import {syncUnitToMeili, deleteUnitFromMeili} from '@/meili/unit/sync';
+} from "@rezics/contract";
+import type { Prisma } from "#/prisma/client";
+import { prisma, UnitStatus, UnitType } from "#/prisma/client";
+import { deleteUnitFromMeili, syncUnitToMeili } from "@/meili/unit/sync";
 import {
   deleteReadlistFromMeili,
   syncReadlistToMeili,
-} from '../meili/readlist/sync';
+} from "../meili/readlist/sync";
+import { mapReadlistListRowToDTO, mapReadlistRowToDTO } from "./mapper";
+import { readlistListSelect, readlistSelect } from "./types";
 
 export class ReadlistService {
   private buildWhere(options: ReadlistListQuery): Prisma.ReadListWhereInput {
     const and: Prisma.ReadListWhereInput[] = [
-      {unit: {status: UnitStatus.ACTIVE, type: UnitType.READLIST}},
+      { unit: { status: UnitStatus.ACTIVE, type: UnitType.READLIST } },
     ];
 
-    if (options.q && options.q.trim()) {
-      and.push({unit: {title: {contains: options.q, mode: 'insensitive'}}});
+    if (options.q?.trim()) {
+      and.push({
+        unit: { title: { contains: options.q, mode: "insensitive" } },
+      });
     }
 
-    if (options.userId && options.userId.trim()) {
-      and.push({unit: {userId: options.userId}});
+    if (options.userId?.trim()) {
+      and.push({ unit: { userId: options.userId } });
     }
 
-    const tagList = (options.tags ?? options.tag ?? '')
-      .split(',')
-      .map(s => s.trim())
+    const tagList = (options.tags ?? options.tag ?? "")
+      .split(",")
+      .map((s) => s.trim())
       .filter(Boolean);
     if (tagList.length > 0) {
-      and.push({unit: {tags: {some: {name: {in: tagList}}}}});
+      and.push({ unit: { tags: { some: { name: { in: tagList } } } } });
     }
 
     if (options.hasBookUnitId) {
-      and.push({book: {some: {unitId: options.hasBookUnitId}}});
+      and.push({ book: { some: { unitId: options.hasBookUnitId } } });
     }
     if (options.hasReviewUnitId) {
-      and.push({review: {some: {id: options.hasReviewUnitId}}});
+      and.push({ review: { some: { id: options.hasReviewUnitId } } });
     }
 
-    return and.length ? {AND: and} : {};
+    return and.length ? { AND: and } : {};
   }
 
   private buildOrderBy(
     options: ReadlistListQuery,
   ): Prisma.Enumerable<Prisma.ReadListOrderByWithRelationInput> {
-    const order = (options.sort?.order ?? 'desc') as 'asc' | 'desc';
-    const type = options.sort?.type ?? 'createdAt';
-    if (type === 'likeCount')
-      return [{unit: {createdAt: 'desc'}}, {unitId: 'desc'}];
-    if (type === 'commentCount')
-      return [{unit: {createdAt: 'desc'}}, {unitId: 'desc'}];
-    if (type === 'viewCount')
-      return [{unit: {createdAt: 'desc'}}, {unitId: 'desc'}];
-    if (type === 'updatedAt')
-      return [{unit: {updatedAt: order}}, {unitId: 'desc'}];
-    if (type === 'publishedAt')
-      return [{unit: {publishedAt: order}}, {unitId: 'desc'}];
-    return [{unit: {createdAt: order}}, {unitId: 'desc'}];
+    const order = (options.sort?.order ?? "desc") as "asc" | "desc";
+    const type = options.sort?.type ?? "createdAt";
+    if (type === "likeCount")
+      return [{ unit: { createdAt: "desc" } }, { unitId: "desc" }];
+    if (type === "commentCount")
+      return [{ unit: { createdAt: "desc" } }, { unitId: "desc" }];
+    if (type === "viewCount")
+      return [{ unit: { createdAt: "desc" } }, { unitId: "desc" }];
+    if (type === "updatedAt")
+      return [{ unit: { updatedAt: order } }, { unitId: "desc" }];
+    if (type === "publishedAt")
+      return [{ unit: { publishedAt: order } }, { unitId: "desc" }];
+    return [{ unit: { createdAt: order } }, { unitId: "desc" }];
   }
 
   // Mapping moved to mapper.ts
 
   async list(
     options: ReadlistListQuery = {},
-  ): Promise<{readlists: ReadlistDTO[]; total: number}> {
+  ): Promise<{ readlists: ReadlistDTO[]; total: number }> {
     const limitNum = Math.max(1, Math.min(Number(options.limit ?? 20), 100));
     const hasCursor = Boolean(options.cursor?.id);
-    const skipNum = hasCursor ? 1 : options.start ?? 0;
+    const skipNum = hasCursor ? 1 : (options.start ?? 0);
     const where = this.buildWhere(options);
     const orderBy = this.buildOrderBy(options);
 
@@ -81,26 +82,26 @@ export class ReadlistService {
         where,
         orderBy,
         skip: skipNum,
-        cursor: hasCursor ? {unitId: options.cursor!.id!} : undefined,
+        cursor: hasCursor ? { unitId: options.cursor!.id! } : undefined,
         take: limitNum,
         select: readlistListSelect,
       }),
-      prisma.readList.count({where}),
+      prisma.readList.count({ where }),
     ]);
 
-    return {readlists: rows.map(r => mapReadlistListRowToDTO(r)), total};
+    return { readlists: rows.map((r) => mapReadlistListRowToDTO(r)), total };
   }
 
   async getByUnitId(unitId: string): Promise<ReadlistDTO> {
     const row = await prisma.readList.findFirstOrThrow({
-      where: {unitId},
+      where: { unitId },
       select: readlistSelect,
     });
     return mapReadlistRowToDTO(row);
   }
 
   async create(req: CreateReadlistInput, userId: string): Promise<ReadlistDTO> {
-    const {book, review, order, title, content, coverUrl} = req;
+    const { book, review, order, title, content, coverUrl } = req;
 
     // Create Unit first (1:1 with ReadList)
     const unit = await prisma.unit.create({
@@ -109,14 +110,14 @@ export class ReadlistService {
         type: UnitType.READLIST,
         status: UnitStatus.ACTIVE,
         title,
-        metadata: {coverUrl: coverUrl || undefined} as Prisma.InputJsonValue,
+        metadata: { coverUrl: coverUrl || undefined } as Prisma.InputJsonValue,
       },
     });
     const row = await prisma.readList.create({
       data: {
         unitId: unit.id,
-        book: {connect: book!.map(unitId => ({unitId}))},
-        review: {connect: review!.map(id => ({id}))},
+        book: { connect: book!.map((unitId) => ({ unitId })) },
+        review: { connect: review!.map((id) => ({ id })) },
         order,
       },
       select: readlistSelect,
@@ -129,9 +130,9 @@ export class ReadlistService {
   }
 
   async update(unitId: string, req: UpdateReadlistInput): Promise<ReadlistDTO> {
-    const {book, review, order, title, content, coverUrl} = req;
+    const { book, review, order, title, content, coverUrl } = req;
     const row = await prisma.readList.update({
-      where: {unitId},
+      where: { unitId },
       data: {
         unit: {
           update: {
@@ -142,8 +143,8 @@ export class ReadlistService {
             } as Prisma.InputJsonValue,
           },
         },
-        book: {connect: book!.map(unitId => ({unitId}))},
-        review: {connect: review!.map(id => ({id}))},
+        book: { connect: book!.map((unitId) => ({ unitId })) },
+        review: { connect: review!.map((id) => ({ id })) },
         order,
       },
       select: readlistSelect,
@@ -154,7 +155,7 @@ export class ReadlistService {
   }
 
   async delete(unitId: string): Promise<void> {
-    await prisma.unit.delete({where: {id: unitId}});
+    await prisma.unit.delete({ where: { id: unitId } });
     await deleteUnitFromMeili(unitId);
     await deleteReadlistFromMeili(unitId);
   }

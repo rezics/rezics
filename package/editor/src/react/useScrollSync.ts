@@ -1,9 +1,9 @@
-import {useEffect, useRef} from 'react';
-import type {RefObject} from 'react';
-import {EditorView} from '@codemirror/view';
+import { EditorView } from "@codemirror/view";
+import type { RefObject } from "react";
+import { useEffect, useRef } from "react";
 
-type ViewMode = 'write' | 'preview' | 'dual';
-type SyncSource = 'editor' | 'preview' | null;
+type ViewMode = "write" | "preview" | "dual";
+type SyncSource = "editor" | "preview" | null;
 
 const GUARD_TIMEOUT_MS = 50;
 
@@ -15,7 +15,8 @@ function findSourceLineElement(
   container: HTMLElement,
   line: number,
 ): HTMLElement | null {
-  const elements = container.querySelectorAll<HTMLElement>('[data-source-line]');
+  const elements =
+    container.querySelectorAll<HTMLElement>("[data-source-line]");
   let best: HTMLElement | null = null;
   for (const el of elements) {
     const elLine = parseInt(el.dataset.sourceLine!, 10);
@@ -30,7 +31,8 @@ function findSourceLineElement(
  */
 function findTopVisibleSourceLine(container: HTMLElement): number | null {
   const containerRect = container.getBoundingClientRect();
-  const elements = container.querySelectorAll<HTMLElement>('[data-source-line]');
+  const elements =
+    container.querySelectorAll<HTMLElement>("[data-source-line]");
   for (const el of elements) {
     const rect = el.getBoundingClientRect();
     // Element is at or below the container's top edge
@@ -61,7 +63,7 @@ export function useScrollSync(
   const guardTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    if (viewMode !== 'dual' || !view || !previewRef.current) return;
+    if (viewMode !== "dual" || !view || !previewRef.current) return;
 
     const preview = previewRef.current;
     const scrollDOM = view.scrollDOM;
@@ -84,8 +86,8 @@ export function useScrollSync(
 
     // Editor → preview sync
     function handleEditorScroll() {
-      if (syncSourceRef.current === 'preview') return;
-      setGuard('editor');
+      if (syncSourceRef.current === "preview") return;
+      setGuard("editor");
 
       const topLine = view!.lineBlockAtHeight(scrollDOM.scrollTop);
       const lineNumber = view!.state.doc.lineAt(topLine.from).number - 1; // 0-based
@@ -101,8 +103,8 @@ export function useScrollSync(
 
     // Preview → editor sync
     function handlePreviewScroll() {
-      if (syncSourceRef.current === 'editor') return;
-      setGuard('preview');
+      if (syncSourceRef.current === "editor") return;
+      setGuard("preview");
 
       const lineNumber = findTopVisibleSourceLine(preview);
       if (lineNumber === null) return;
@@ -111,7 +113,7 @@ export function useScrollSync(
       const docLine = Math.min(lineNumber + 1, view!.state.doc.lines);
       const lineInfo = view!.state.doc.line(docLine);
       view!.dispatch({
-        effects: EditorView.scrollIntoView(lineInfo.from, {y: 'start'}),
+        effects: EditorView.scrollIntoView(lineInfo.from, { y: "start" }),
       });
     }
 
@@ -127,21 +129,21 @@ export function useScrollSync(
           const targetRect = target.getBoundingClientRect();
           const offset = targetRect.top - previewRect.top + preview.scrollTop;
           // Set guard to prevent the resulting scroll event from triggering reverse sync
-          setGuard('editor');
+          setGuard("editor");
           preview.scrollTop = offset;
         }
       });
     });
 
-    observer.observe(preview, {childList: true, subtree: false});
-    scrollDOM.addEventListener('scroll', handleEditorScroll, {passive: true});
-    preview.addEventListener('scroll', handlePreviewScroll, {passive: true});
+    observer.observe(preview, { childList: true, subtree: false });
+    scrollDOM.addEventListener("scroll", handleEditorScroll, { passive: true });
+    preview.addEventListener("scroll", handlePreviewScroll, { passive: true });
 
     return () => {
       clearGuard();
       observer.disconnect();
-      scrollDOM.removeEventListener('scroll', handleEditorScroll);
-      preview.removeEventListener('scroll', handlePreviewScroll);
+      scrollDOM.removeEventListener("scroll", handleEditorScroll);
+      preview.removeEventListener("scroll", handlePreviewScroll);
     };
   }, [view, previewRef, viewMode]);
 }

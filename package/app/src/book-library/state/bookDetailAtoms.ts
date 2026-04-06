@@ -1,7 +1,6 @@
-import {atom} from 'jotai';
-import {atomFamily} from 'jotai-family';
-
-import type {BookDTO} from '@rezics/contract';
+import type { BookDTO } from "@rezics/contract";
+import { atom } from "jotai";
+import { atomFamily } from "jotai-family";
 
 // ============================================================================
 // Types
@@ -11,7 +10,7 @@ import type {BookDTO} from '@rezics/contract';
 export type Book = BookDTO;
 
 /** Async data loading state for book detail. */
-export type BookDetailLoadingState = 'idle' | 'loading' | 'ready' | 'error';
+export type BookDetailLoadingState = "idle" | "loading" | "ready" | "error";
 
 // ============================================================================
 // Atoms - Book Detail Data
@@ -24,7 +23,7 @@ export type BookDetailLoadingState = 'idle' | 'loading' | 'ready' | 'error';
  * @example
  * const bookDetail = useAtomValue(bookDetailAtomFamily(bookId));
  */
-export const bookDetailAtomFamily = atomFamily((bookId: string) => {
+export const bookDetailAtomFamily = atomFamily((_bookId: string) => {
   return atom<Book | null>(null);
 });
 
@@ -54,7 +53,7 @@ export const patchBookDetailAtomFamily = atomFamily((bookId: string) => {
   return atom(null, (get, set, patch: Partial<Book>) => {
     const prev = get(bookDetailAtomFamily(bookId));
     if (!prev) return;
-    set(bookDetailAtomFamily(bookId), {...prev, ...patch});
+    set(bookDetailAtomFamily(bookId), { ...prev, ...patch });
   });
 });
 
@@ -62,4 +61,4 @@ export const patchBookDetailAtomFamily = atomFamily((bookId: string) => {
 // Hooks - Convenience wrappers for external consumers
 // ============================================================================
 
-export {useAtomValue, useSetAtom} from 'jotai';
+export { useAtomValue, useSetAtom } from "jotai";

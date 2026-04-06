@@ -1,65 +1,65 @@
-import {beforeEach, describe, expect, mock, test} from 'bun:test';
-import {NormalizedTokenName} from '@rezics/contract';
-import {configureApi} from '@rezics/api/config';
+import { beforeEach, describe, expect, mock, test } from "bun:test";
+import { configureApi } from "@rezics/api/config";
+import { NormalizedTokenName } from "@rezics/contract";
 
 // Required for @rezics/app env.ts validation
-process.env.VITE_API_URL ??= 'http://api.example';
-process.env.VITE_AUTH_API_URL ??= 'http://auth.example';
-process.env.VITE_TURNSTILE_SITE_KEY ??= 'turnstile-test-key';
+process.env.VITE_API_URL ??= "http://api.example";
+process.env.VITE_AUTH_API_URL ??= "http://auth.example";
+process.env.VITE_TURNSTILE_SITE_KEY ??= "turnstile-test-key";
 
 configureApi({
-  apiBaseUrl: 'http://api.example',
-  authBaseUrl: 'http://auth.example',
+  apiBaseUrl: "http://api.example",
+  authBaseUrl: "http://auth.example",
 });
 
 const fetchMock = mock();
 const signInMock = mock(async () => ({
   user: {
-    id: 'user-1',
-    email: 'reader@example.com',
+    id: "user-1",
+    email: "reader@example.com",
   },
   session: {
-    id: 'session-1',
-    token: 'better-auth-session-token',
+    id: "session-1",
+    token: "better-auth-session-token",
   },
 }));
 const signUpMock = mock(async () => ({
   user: {
-    id: 'user-1',
-    email: 'reader@example.com',
+    id: "user-1",
+    email: "reader@example.com",
   },
   session: {
-    id: 'session-1',
-    token: 'better-auth-session-token',
+    id: "session-1",
+    token: "better-auth-session-token",
   },
 }));
-const signOutMock = mock(async () => ({success: true}));
+const signOutMock = mock(async () => ({ success: true }));
 const getContextTokenMock = mock(async () => ({
-  token: 'context-token',
+  token: "context-token",
   claims: {
-    id: 'user-1',
-    unitId: 'user-1',
-    sub: 'user-1',
-    slug: 'reader',
-    name: 'Reader',
+    id: "user-1",
+    unitId: "user-1",
+    sub: "user-1",
+    slug: "reader",
+    name: "Reader",
     avatar: null,
     emailVerified: true,
-    verificationStatus: 'verified',
+    verificationStatus: "verified",
   },
 }));
 const ensureMock = mock(async () => ({
-  user: {unitId: 'user-1', name: 'Reader'},
+  user: { unitId: "user-1", name: "Reader" },
   alreadyCreated: false,
 }));
-const issueSessionTokenMock = mock(async () => ({token: 'member-token'}));
+const issueSessionTokenMock = mock(async () => ({ token: "member-token" }));
 const removeQueriesMock = mock(() => undefined);
 const clearProfileMock = mock(() => undefined);
 const clearAuthSessionStateMock = mock(() => undefined);
 const syncBusinessTokenMock = mock(() => undefined);
 const setUserMock = mock(() => undefined);
 const hydrateAuthSessionStateMock = mock(async () => ({
-  session: {id: 'session-1'},
-  user: {id: 'user-1'},
+  session: { id: "session-1" },
+  user: { id: "user-1" },
   authSession: {
     canAcquireMemberToken: true,
     needsOnboarding: false,
@@ -67,7 +67,7 @@ const hydrateAuthSessionStateMock = mock(async () => ({
   },
 }));
 
-mock.module('@rezics/api/auth/auth.api', () => ({
+mock.module("@rezics/api/auth/auth.api", () => ({
   authApi: {
     signIn: signInMock,
     signUp: signUpMock,
@@ -76,19 +76,19 @@ mock.module('@rezics/api/auth/auth.api', () => ({
   },
 }));
 
-mock.module('@rezics/api/auth/auth.keys', () => ({
+mock.module("@rezics/api/auth/auth.keys", () => ({
   authKeys: {
-    all: () => ['auth'],
+    all: () => ["auth"],
   },
 }));
 
-mock.module('@rezics/api/user/user.keys', () => ({
+mock.module("@rezics/api/user/user.keys", () => ({
   userKeys: {
-    all: () => ['user'],
+    all: () => ["user"],
   },
 }));
 
-mock.module('@rezics/api/user/user.api', () => ({
+mock.module("@rezics/api/user/user.api", () => ({
   userApi: {
     me: mock(),
     ensure: ensureMock,
@@ -96,13 +96,13 @@ mock.module('@rezics/api/user/user.api', () => ({
   },
 }));
 
-mock.module('@/app/provider/reactQueryUtil', () => ({
+mock.module("@/app/provider/reactQueryUtil", () => ({
   qc: {
     removeQueries: removeQueriesMock,
   },
 }));
 
-mock.module('@/user/state', () => ({
+mock.module("@/user/state", () => ({
   clearAuthSessionState: clearAuthSessionStateMock,
   hydrateAuthSessionState: hydrateAuthSessionStateMock,
   useAuthSessionStore: {
@@ -119,7 +119,7 @@ mock.module('@/user/state', () => ({
   },
 }));
 
-describe('auth handlers', () => {
+describe("auth handlers", () => {
   beforeEach(() => {
     globalThis.fetch = fetchMock as unknown as typeof fetch;
     globalThis.window = {
@@ -144,7 +144,7 @@ describe('auth handlers', () => {
       };
     })() as Storage;
     globalThis.document = {
-      cookie: '',
+      cookie: "",
     } as Document;
     fetchMock.mockClear();
     signInMock.mockClear();
@@ -161,74 +161,78 @@ describe('auth handlers', () => {
     setUserMock.mockClear();
   });
 
-  test('login acquires auth identity from the token endpoint instead of session.token', async () => {
+  test("login acquires auth identity from the token endpoint instead of session.token", async () => {
     fetchMock.mockResolvedValueOnce(
       new Response(
         JSON.stringify({
           token:
-            'eyJhbGciOiJub25lIn0.eyJzdWIiOiJ1c2VyLTEiLCJleHAiOjQ3NjYwMDAwMDB9.c2ln',
+            "eyJhbGciOiJub25lIn0.eyJzdWIiOiJ1c2VyLTEiLCJleHAiOjQ3NjYwMDAwMDB9.c2ln",
         }),
         {
           status: 200,
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
         },
       ),
     );
 
-    const {login} = await import('./handler');
-    const {getToken} = await import('@rezics/api/react-query/jwt');
+    const { login } = await import("./handler");
+    const { getToken } = await import("@rezics/api/react-query/jwt");
 
-    const result = await login('reader@example.com', 'secret');
+    const result = await login("reader@example.com", "secret");
 
     expect(signInMock).toHaveBeenCalledTimes(1);
-    expect(fetchMock.mock.calls[0]?.[0]).toBe('http://auth.example/api/auth/token');
+    expect(fetchMock.mock.calls[0]?.[0]).toBe(
+      "http://auth.example/api/auth/token",
+    );
     expect(result.token).toBe(
-      'eyJhbGciOiJub25lIn0.eyJzdWIiOiJ1c2VyLTEiLCJleHAiOjQ3NjYwMDAwMDB9.c2ln',
+      "eyJhbGciOiJub25lIn0.eyJzdWIiOiJ1c2VyLTEiLCJleHAiOjQ3NjYwMDAwMDB9.c2ln",
     );
     expect(getToken(NormalizedTokenName.AUTH_IDENTITY)).toBe(
-      'eyJhbGciOiJub25lIn0.eyJzdWIiOiJ1c2VyLTEiLCJleHAiOjQ3NjYwMDAwMDB9.c2ln',
+      "eyJhbGciOiJub25lIn0.eyJzdWIiOiJ1c2VyLTEiLCJleHAiOjQ3NjYwMDAwMDB9.c2ln",
     );
   });
 
-  test('registration acquires auth identity from the token endpoint instead of session.token', async () => {
+  test("registration acquires auth identity from the token endpoint instead of session.token", async () => {
     fetchMock.mockResolvedValueOnce(
       new Response(
         JSON.stringify({
           token:
-            'eyJhbGciOiJub25lIn0.eyJzdWIiOiJ1c2VyLTIiLCJleHAiOjQ3NjYwMDAwMDB9.c2ln',
+            "eyJhbGciOiJub25lIn0.eyJzdWIiOiJ1c2VyLTIiLCJleHAiOjQ3NjYwMDAwMDB9.c2ln",
         }),
         {
           status: 200,
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
         },
       ),
     );
 
-    const {register} = await import('./handler');
-    const {getToken} = await import('@rezics/api/react-query/jwt');
+    const { register } = await import("./handler");
+    const { getToken } = await import("@rezics/api/react-query/jwt");
 
-    const result = await register('reader@example.com', 'secret');
+    const result = await register("reader@example.com", "secret");
 
     expect(signUpMock).toHaveBeenCalledTimes(1);
-    expect(fetchMock.mock.calls[0]?.[0]).toBe('http://auth.example/api/auth/token');
+    expect(fetchMock.mock.calls[0]?.[0]).toBe(
+      "http://auth.example/api/auth/token",
+    );
     expect(result.token).toBe(
-      'eyJhbGciOiJub25lIn0.eyJzdWIiOiJ1c2VyLTIiLCJleHAiOjQ3NjYwMDAwMDB9.c2ln',
+      "eyJhbGciOiJub25lIn0.eyJzdWIiOiJ1c2VyLTIiLCJleHAiOjQ3NjYwMDAwMDB9.c2ln",
     );
     expect(getToken(NormalizedTokenName.AUTH_IDENTITY)).toBe(
-      'eyJhbGciOiJub25lIn0.eyJzdWIiOiJ1c2VyLTIiLCJleHAiOjQ3NjYwMDAwMDB9.c2ln',
+      "eyJhbGciOiJub25lIn0.eyJzdWIiOiJ1c2VyLTIiLCJleHAiOjQ3NjYwMDAwMDB9.c2ln",
     );
   });
 
-  test('establishBusinessSession fetches context, ensures user, and issues session token', async () => {
-    const {establishBusinessSession} = await import('./handler');
-    const {getToken, setToken} = await import('@rezics/api/react-query/jwt');
+  test("establishBusinessSession fetches context, ensures user, and issues session token", async () => {
+    const { establishBusinessSession } = await import("./handler");
+    const { getToken, setToken } = await import("@rezics/api/react-query/jwt");
 
     setToken(
-      'eyJhbGciOiJub25lIn0.eyJzdWIiOiJ1c2VyLTEiLCJleHAiOjQ3NjYwMDAwMDB9.c2ln',
+      "eyJhbGciOiJub25lIn0.eyJzdWIiOiJ1c2VyLTEiLCJleHAiOjQ3NjYwMDAwMDB9.c2ln",
       NormalizedTokenName.AUTH_IDENTITY,
     );
 
@@ -236,22 +240,22 @@ describe('auth handlers', () => {
 
     expect(getContextTokenMock).toHaveBeenCalledTimes(1);
     expect(ensureMock).toHaveBeenCalledTimes(1);
-    expect(ensureMock).toHaveBeenCalledWith('context-token');
+    expect(ensureMock).toHaveBeenCalledWith("context-token");
     expect(issueSessionTokenMock).toHaveBeenCalledTimes(1);
-    expect(getToken(NormalizedTokenName.REZICS_SESSION)).toBe('member-token');
-    expect(syncBusinessTokenMock).toHaveBeenCalledWith('member-token');
+    expect(getToken(NormalizedTokenName.REZICS_SESSION)).toBe("member-token");
+    expect(syncBusinessTokenMock).toHaveBeenCalledWith("member-token");
     expect(setUserMock).toHaveBeenCalledWith({
-      unitId: 'user-1',
-      name: 'Reader',
+      unitId: "user-1",
+      name: "Reader",
     });
   });
 
-  test('AUTH_CONTEXT is not persisted after establishBusinessSession', async () => {
-    const {establishBusinessSession} = await import('./handler');
-    const {getToken, setToken} = await import('@rezics/api/react-query/jwt');
+  test("AUTH_CONTEXT is not persisted after establishBusinessSession", async () => {
+    const { establishBusinessSession } = await import("./handler");
+    const { getToken, setToken } = await import("@rezics/api/react-query/jwt");
 
     setToken(
-      'eyJhbGciOiJub25lIn0.eyJzdWIiOiJ1c2VyLTEiLCJleHAiOjQ3NjYwMDAwMDB9.c2ln',
+      "eyJhbGciOiJub25lIn0.eyJzdWIiOiJ1c2VyLTEiLCJleHAiOjQ3NjYwMDAwMDB9.c2ln",
       NormalizedTokenName.AUTH_IDENTITY,
     );
 
@@ -261,12 +265,12 @@ describe('auth handlers', () => {
     expect(getToken(NormalizedTokenName.AUTH_CONTEXT)).toBeNull();
   });
 
-  test('clears auth-session, profile, and cached auth queries on logout', async () => {
-    const {logout} = await import('./handler');
-    const {getToken, setToken} = await import('@rezics/api/react-query/jwt');
+  test("clears auth-session, profile, and cached auth queries on logout", async () => {
+    const { logout } = await import("./handler");
+    const { getToken, setToken } = await import("@rezics/api/react-query/jwt");
 
-    setToken('identity-token', NormalizedTokenName.AUTH_IDENTITY);
-    setToken('member-token', NormalizedTokenName.REZICS_SESSION);
+    setToken("identity-token", NormalizedTokenName.AUTH_IDENTITY);
+    setToken("member-token", NormalizedTokenName.REZICS_SESSION);
 
     await logout(true);
 
@@ -278,9 +282,9 @@ describe('auth handlers', () => {
     expect(clearProfileMock).toHaveBeenCalledTimes(1);
     expect(removeQueriesMock).toHaveBeenCalledTimes(2);
     const calls = removeQueriesMock.mock.calls as unknown as Array<
-      [{queryKey: string[]}]
+      [{ queryKey: string[] }]
     >;
-    expect(calls[0]?.[0]).toEqual({queryKey: ['auth']});
-    expect(calls[1]?.[0]).toEqual({queryKey: ['user']});
+    expect(calls[0]?.[0]).toEqual({ queryKey: ["auth"] });
+    expect(calls[1]?.[0]).toEqual({ queryKey: ["user"] });
   });
 });

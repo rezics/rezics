@@ -2,14 +2,14 @@ import {
   createFileRoute,
   lazyRouteComponent,
   Outlet,
-} from '@tanstack/react-router';
+} from "@tanstack/react-router";
 
 const BookReadLayout = lazyRouteComponent(
-  () => import('@/book-read/layout/BookReadLayout'),
-  'BookReadLayout',
+  () => import("@/book-read/layout/BookReadLayout"),
+  "BookReadLayout",
 );
 
-export const Route = createFileRoute('/book_/$bookId/read/$chapterId')({
+export const Route = createFileRoute("/book_/$bookId/read/$chapterId")({
   component: () => (
     <BookReadLayout>
       <Outlet />

@@ -1,4 +1,4 @@
-import {prisma} from '#/prisma/client';
+import { prisma } from "#/prisma/client";
 
 /**
  * Get approximate count of Unit using pg_class reltuples heuristic
@@ -6,13 +6,13 @@ import {prisma} from '#/prisma/client';
  */
 export async function getUnitApproxCount() {
   const query: any = async () => {
-    return await prisma.$queryRaw<[{int8: bigint}]>`
+    return await prisma.$queryRaw<[{ int8: bigint }]>`
     SELECT (reltuples / relpages * (pg_relation_size(oid) / 8192))::bigint
     FROM pg_class
     WHERE oid = '"Unit"'::regclass;
   `;
   };
-  let result: [{int8: bigint}] | undefined;
+  let result: [{ int8: bigint }] | undefined;
   try {
     result = await query();
   } catch (_err) {

@@ -1,28 +1,26 @@
-import React, {useState, useEffect, useRef} from 'react';
-
-import {LinearChapterListEdit} from '@/book-edit/component/LinearChapterListEdit';
-import {ChapterArboristHeightSlider} from '@/book-library/component/Chapter/ChapterArboristHeightSlider';
-import {AccentBarWithText} from '@rezics/ui/composite/typography/AccentBarWithText.tsx';
-import {Alert, Button} from '@mui/material';
-import {useQueryClient} from '@tanstack/react-query';
-import {bookChapterIndexQuery} from '@rezics/api/book/book';
-
-import {Tab, Tabs} from '@mui/material';
-import {TabContext, TabPanel} from '@mui/lab';
-import {ChapterTreeJsonEditor} from '@/book-library/component/Chapter/ChapterTreeJsonEditor';
-import {bookEditLayoutRoute} from '@/router';
+import { TabContext, TabPanel } from "@mui/lab";
+import { Alert, Button, Tab, Tabs } from "@mui/material";
+import { bookChapterIndexQuery } from "@rezics/api/book/book";
+import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
+import { useQueryClient } from "@tanstack/react-query";
+import type React from "react";
+import { useEffect, useRef, useState } from "react";
+import { LinearChapterListEdit } from "@/book-edit/component/LinearChapterListEdit";
+import { ChapterArboristHeightSlider } from "@/book-library/component/Chapter/ChapterArboristHeightSlider";
+import { ChapterTreeJsonEditor } from "@/book-library/component/Chapter/ChapterTreeJsonEditor";
+import { bookEditLayoutRoute } from "@/router";
 
 /**
  * TODO 增加 JSON 编辑
  */
 export const BookEditChapterListPage: React.FC = () => {
-  const {bookId} = bookEditLayoutRoute.useParams();
+  const { bookId } = bookEditLayoutRoute.useParams();
   const queryClient = useQueryClient();
   const containerRef = useRef<HTMLDivElement>(null);
   const [parentWidth, setParentWidth] = useState<number>(0);
   const [chapterArboristHeight, setChapterArboristHeight] =
     useState<number>(800);
-  const [tab, setTab] = useState<string>('normal');
+  const [tab, setTab] = useState<string>("normal");
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
@@ -44,10 +42,10 @@ export const BookEditChapterListPage: React.FC = () => {
     );
     const json = chapterIndex;
     const jsonString = JSON.stringify(json);
-    const blob = new Blob([jsonString], {type: 'application/json'});
+    const blob = new Blob([jsonString], { type: "application/json" });
     const url = URL.createObjectURL(blob);
-    const date = new Date().toISOString().split('T')[0];
-    const a = document.createElement('a');
+    const date = new Date().toISOString().split("T")[0];
+    const a = document.createElement("a");
     a.href = url;
     a.download = `chapterIndex-${bookId}-${date}.json`;
     a.click();
@@ -76,7 +74,7 @@ export const BookEditChapterListPage: React.FC = () => {
       />
       <div className="mt-4" />
       <TabContext value={tab}>
-        <Tabs value={tab} onChange={(event, newValue) => setTab(newValue)}>
+        <Tabs value={tab} onChange={(_event, newValue) => setTab(newValue)}>
           <Tab label="普通编辑器" value="normal" />
           <Tab label="JSON编辑器" value="json" />
         </Tabs>

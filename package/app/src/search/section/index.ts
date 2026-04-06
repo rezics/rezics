@@ -1,1 +1,1 @@
-export {HomeSearch} from './HomeSearch';
+export { HomeSearch } from "./HomeSearch";

@@ -1,10 +1,10 @@
-import {createAuthMailer, isMailerConfigured} from './mailer';
+import { createAuthMailer, isMailerConfigured } from "./mailer";
 import {
   buildChangeEmailConfirmationEmail,
   buildInvitationEmail,
   buildPasswordResetEmail,
   buildVerificationEmail,
-} from './templates';
+} from "./templates";
 import type {
   AuthNotificationService,
   AuthNotificationServiceOptions,
@@ -12,10 +12,10 @@ import type {
   InvitationEmailPayload,
   PasswordResetEmailPayload,
   VerificationEmailPayload,
-} from './types';
+} from "./types";
 
 type AuthEnv = {
-  NODE_ENV?: 'development' | 'test' | 'production';
+  NODE_ENV?: "development" | "test" | "production";
   BETTER_AUTH_URL: string;
   SMTP_HOST?: string;
   SMTP_PORT?: string;
@@ -38,14 +38,16 @@ function formatFromAddress(name: string | undefined, email: string): string {
 
 function getSender(
   config: AuthEnv,
-  type: 'invitation' | 'password-reset' | 'verification',
+  type: "invitation" | "password-reset" | "verification",
 ): string | null {
   const sender =
-    type === 'invitation'
+    type === "invitation"
       ? config.AUTH_INVITATION_FROM_EMAIL
-      : type === 'password-reset'
-        ? config.AUTH_PASSWORD_RESET_FROM_EMAIL ?? config.AUTH_INVITATION_FROM_EMAIL
-        : config.AUTH_VERIFICATION_FROM_EMAIL ?? config.AUTH_INVITATION_FROM_EMAIL;
+      : type === "password-reset"
+        ? (config.AUTH_PASSWORD_RESET_FROM_EMAIL ??
+          config.AUTH_INVITATION_FROM_EMAIL)
+        : (config.AUTH_VERIFICATION_FROM_EMAIL ??
+          config.AUTH_INVITATION_FROM_EMAIL);
 
   if (!sender) {
     return null;
@@ -54,10 +56,7 @@ function getSender(
   return formatFromAddress(config.SMTP_USER_NAME, sender);
 }
 
-async function logNotification(
-  label: string,
-  payload: unknown,
-): Promise<void> {
+async function logNotification(label: string, payload: unknown): Promise<void> {
   console.info(label, payload);
 }
 
@@ -65,16 +64,18 @@ export function createAuthNotificationService(
   config: AuthEnv,
   _options?: AuthNotificationServiceOptions,
 ): AuthNotificationService {
-  const transport = isMailerConfigured(config) ? createAuthMailer(config) : null;
+  const transport = isMailerConfigured(config)
+    ? createAuthMailer(config)
+    : null;
 
   async function sendEmail(
-    type: 'invitation' | 'password-reset' | 'verification',
+    type: "invitation" | "password-reset" | "verification",
     to: string,
-    template: {subject: string; text: string; html?: string},
+    template: { subject: string; text: string; html?: string },
     payload: unknown,
     warningMessage: string,
   ): Promise<void> {
-    if (config.NODE_ENV !== 'production') {
+    if (config.NODE_ENV !== "production") {
       await logNotification(`[auth] ${type} notification (dev mode)`, payload);
       return;
     }
@@ -97,12 +98,12 @@ export function createAuthNotificationService(
 
   return {
     async sendInvitationEmail(data: InvitationEmailPayload): Promise<void> {
-      const inviteBaseUrl = config.BETTER_AUTH_URL.replace(/\/$/, '');
+      const inviteBaseUrl = config.BETTER_AUTH_URL.replace(/\/$/, "");
       const inviteLink = `${inviteBaseUrl}/accept-invitation/${data.id}`;
       const template = buildInvitationEmail(data, inviteLink);
 
       await sendEmail(
-        'invitation',
+        "invitation",
         data.email,
         template,
         {
@@ -112,7 +113,7 @@ export function createAuthNotificationService(
           inviterName: data.inviter.user.name,
           inviteLink,
         },
-        '[auth] Invitation email skipped: SMTP or sender email not configured.',
+        "[auth] Invitation email skipped: SMTP or sender email not configured.",
       );
     },
 
@@ -120,7 +121,7 @@ export function createAuthNotificationService(
       data: PasswordResetEmailPayload,
     ): Promise<void> {
       await sendEmail(
-        'password-reset',
+        "password-reset",
         data.user.email,
         buildPasswordResetEmail(data),
         {
@@ -128,15 +129,13 @@ export function createAuthNotificationService(
           resetUrl: data.url,
           token: data.token,
         },
-        '[auth] Password reset email skipped: SMTP or sender email not configured.',
+        "[auth] Password reset email skipped: SMTP or sender email not configured.",
       );
     },
 
-    async sendVerificationEmail(
-      data: VerificationEmailPayload,
-    ): Promise<void> {
+    async sendVerificationEmail(data: VerificationEmailPayload): Promise<void> {
       await sendEmail(
-        'verification',
+        "verification",
         data.user.email,
         buildVerificationEmail(data),
         {
@@ -144,7 +143,7 @@ export function createAuthNotificationService(
           verificationUrl: data.url,
           token: data.token,
         },
-        '[auth] Verification email skipped: SMTP or sender email not configured.',
+        "[auth] Verification email skipped: SMTP or sender email not configured.",
       );
     },
 
@@ -152,7 +151,7 @@ export function createAuthNotificationService(
       data: ChangeEmailConfirmationPayload,
     ): Promise<void> {
       await sendEmail(
-        'verification',
+        "verification",
         data.user.email,
         buildChangeEmailConfirmationEmail(data),
         {
@@ -161,7 +160,7 @@ export function createAuthNotificationService(
           confirmationUrl: data.url,
           token: data.token,
         },
-        '[auth] Email change confirmation skipped: SMTP or sender email not configured.',
+        "[auth] Email change confirmation skipped: SMTP or sender email not configured.",
       );
     },
   };

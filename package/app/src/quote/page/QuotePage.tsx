@@ -1,34 +1,34 @@
-import {AccentBar} from '@rezics/ui/primitive/decorative/AccentBar.tsx';
-import {TreeReplyComponents} from '@/comment/component/TreeReplyComponents';
-import {ChatBubbleOutline} from '@mui/icons-material';
-import {IconButton, Typography} from '@mui/material';
-import React, {useRef} from 'react';
-import {useTranslation} from 'react-i18next';
-
-import {useQuery} from '@tanstack/react-query';
-import {unitQueries} from '@rezics/api/unit/unit.queries';
-import FormatQuoteIcon from '@mui/icons-material/FormatQuote';
-import {SingleCommentElementWrapper} from '@/comment/component/SingleCommentElementWrapper';
-import {MarkdownContent} from '@rezics/ui/composite/content/MarkdownContent.tsx';
+import { ChatBubbleOutline } from "@mui/icons-material";
+import FormatQuoteIcon from "@mui/icons-material/FormatQuote";
+import { IconButton, Typography } from "@mui/material";
+import { unitQueries } from "@rezics/api/unit/unit.queries";
+import { MarkdownContent } from "@rezics/ui/composite/content/MarkdownContent.tsx";
+import { AccentBar } from "@rezics/ui/primitive/decorative/AccentBar.tsx";
+import { LazyLoadImage } from "@rezics/ui/primitive/image/LazyLoadImage.tsx";
+import { useQuery } from "@tanstack/react-query";
+import type React from "react";
+import { useRef } from "react";
+import { useTranslation } from "react-i18next";
+import { SingleCommentElementWrapper } from "@/comment/component/SingleCommentElementWrapper";
+import { TreeReplyComponents } from "@/comment/component/TreeReplyComponents";
 import {
   MiniActionBar,
   MiniAdminActionBar,
-} from '@/engagement/component/MiniActionBar';
-import {parseReactionSummaries} from '@/shared/util/reaction-summaries-parser';
-import {ReactionStatistics} from '@/engagement/component/ReactionStatistics';
-import {LazyLoadImage} from '@rezics/ui/primitive/image/LazyLoadImage.tsx';
-import {quoteRoute} from '@/router';
+} from "@/engagement/component/MiniActionBar";
+import { ReactionStatistics } from "@/engagement/component/ReactionStatistics";
+import { quoteRoute } from "@/router";
+import { parseReactionSummaries } from "@/shared/util/reaction-summaries-parser";
 
 export const QuotePage: React.FC = () => {
-  const {unitId} = quoteRoute.useParams();
-  const {t} = useTranslation();
+  const { unitId } = quoteRoute.useParams();
+  const { t } = useTranslation();
   const commentRef = useRef<HTMLDivElement>(null);
   const handleGoToComments = () => {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore: scrollIntoView is not defined in the type declaration
+    // @ts-expect-error: scrollIntoView is not defined in the type declaration
     commentRef.current?.scrollIntoView({
-      behavior: 'smooth',
-      block: 'start',
+      behavior: "smooth",
+      block: "start",
     });
   };
 
@@ -43,16 +43,16 @@ export const QuotePage: React.FC = () => {
     data: Quote,
     isLoading,
     error: _error,
-  } = useQuery(unitQueries.detail(unitId || ''));
+  } = useQuery(unitQueries.detail(unitId || ""));
 
   if (isLoading) {
-    return <div className="text-center py-10">{t('common.loading')}</div>;
+    return <div className="text-center py-10">{t("common.loading")}</div>;
   }
 
   if (!Quote?.id) {
     return (
       <div className="text-center py-10 text-red-500">
-        {t('quote.not_found')}
+        {t("quote.not_found")}
       </div>
     );
   }
@@ -83,7 +83,7 @@ export const QuotePage: React.FC = () => {
           {Quote.user && (
             <div className="flex items-center gap-3">
               <LazyLoadImage
-                src={Quote.user.avatar || ''}
+                src={Quote.user.avatar || ""}
                 alt="creator avatar"
                 className="w-10 h-10 rounded-full shadow"
               />
@@ -93,7 +93,7 @@ export const QuotePage: React.FC = () => {
           <div className="flex items-center gap-2">
             <MiniActionBar
               handleOnCommentClick={handleGoToComments}
-              unitId={unitId || ''}
+              unitId={unitId || ""}
             />
           </div>
         </div>
@@ -103,7 +103,7 @@ export const QuotePage: React.FC = () => {
         <FormatQuoteIcon
           sx={{
             fontSize: 30,
-            color: 'text.secondary',
+            color: "text.secondary",
             mr: 1,
             mt: 0.5,
           }}
@@ -138,17 +138,17 @@ export const QuotePage: React.FC = () => {
         <div className="flex items-center justify-between w-full">
           <div className="flex items-center gap-2">
             <AccentBar />
-            <p className="text-2xl font-bold">{t('review.comments')}</p>
+            <p className="text-2xl font-bold">{t("review.comments")}</p>
           </div>
 
-          <SingleCommentElementWrapper replyUnitId={unitId || ''}>
-            <IconButton size="large" sx={{fontSize: '1.5rem'}}>
+          <SingleCommentElementWrapper replyUnitId={unitId || ""}>
+            <IconButton size="large" sx={{ fontSize: "1.5rem" }}>
               <ChatBubbleOutline fontSize="inherit" />
             </IconButton>
           </SingleCommentElementWrapper>
         </div>
 
-        <TreeReplyComponents unitId={unitId || ''} />
+        <TreeReplyComponents unitId={unitId || ""} />
         {/* 供评论区占位符 */}
         <div className="mb-[200px]" />
       </div>

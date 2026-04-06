@@ -1,4 +1,4 @@
-import {MarkdownEditor} from '../MarkdownEditor';
+import { MarkdownEditor } from "../MarkdownEditor";
 
 const sampleMarkdown = `# Hello World
 
@@ -28,10 +28,10 @@ console.log(x);
 `;
 
 const longMarkdown = Array.from(
-  {length: 30},
+  { length: 30 },
   (_, i) =>
     `## Section ${i + 1}\n\nParagraph for section ${i + 1}. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.\n\n- Item A\n- Item B\n- Item C\n`,
-).join('\n');
+).join("\n");
 
 export default {
   Default: () => <MarkdownEditor value={sampleMarkdown} className="h-screen" />,
@@ -55,7 +55,7 @@ export default {
   Resizable: () => (
     <MarkdownEditor
       value={sampleMarkdown}
-      resize={{height: 400, minHeight: 200, maxHeight: 800}}
+      resize={{ height: 400, minHeight: 200, maxHeight: 800 }}
     />
   ),
 };

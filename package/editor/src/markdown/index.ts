@@ -1,9 +1,9 @@
-import type { EditorPlugin } from '../core/types';
-import type { MarkdownLanguageConfig } from './core/language';
-import { markdown } from './core/index';
-import { mention, type MentionConfig } from './mention/index';
-import { emoji, type EmojiConfig } from './emoji/index';
-import { languages } from '@codemirror/language-data';
+import { languages } from "@codemirror/language-data";
+import type { EditorPlugin } from "../core/types";
+import { markdown } from "./core/index";
+import type { MarkdownLanguageConfig } from "./core/language";
+import { type EmojiConfig, emoji } from "./emoji/index";
+import { type MentionConfig, mention } from "./mention/index";
 
 export interface MarkdownFullConfig extends MarkdownLanguageConfig {
   mention?: MentionConfig;
@@ -26,15 +26,15 @@ export function markdownFull(config?: MarkdownFullConfig): EditorPlugin[] {
   return plugins;
 }
 
+export { insertImageUrl } from "./core/commands";
 // Re-export granular factories
-export { markdown } from './core/index';
-export { mention } from './mention/index';
-export type { MentionItem, MentionConfig } from './mention/index';
-export { emoji } from './emoji/index';
-export type { EmojiConfig } from './emoji/index';
-export { insertImageUrl } from './core/commands';
+export { markdown } from "./core/index";
+export type { EmojiConfig } from "./emoji/index";
+export { emoji } from "./emoji/index";
+export type { MentionConfig, MentionItem } from "./mention/index";
+export { mention } from "./mention/index";
 export {
-  preserveFormattingPlugin,
-  novelModePlugin,
   createNovelRenderer,
-} from './preview/index';
+  novelModePlugin,
+  preserveFormattingPlugin,
+} from "./preview/index";

@@ -1,19 +1,19 @@
-import Alert from '@mui/material/Alert';
-import Button from '@mui/material/Button';
-import TextField from '@mui/material/TextField';
-import {Dialog, DialogContent} from '@mui/material';
-import {type FC, useState} from 'react';
-import {useTranslation} from 'react-i18next';
-import {register} from '../model/handler.ts';
-import {Layout} from '../layout/Layout.tsx';
-import {ModalLayout} from '../layout/ModalLayout.tsx';
-import {validateEmail, validatePassword} from '../model/validate.ts';
-import {useNavigate, useRouterState} from '@tanstack/react-router';
-import {PasswordField} from '@rezics/ui/composite/form/field/PasswordField.tsx';
-import {TextButton} from '@rezics/ui/primitive/button/TextButton.tsx';
-import {useAuthSessionStore} from '@/user/state';
-import {SocialAuthButtons} from '../component/SocialAuthButtons';
-import {resolvePostAuthDestination} from '../model/authRedirect';
+import { Dialog, DialogContent } from "@mui/material";
+import Alert from "@mui/material/Alert";
+import Button from "@mui/material/Button";
+import TextField from "@mui/material/TextField";
+import { PasswordField } from "@rezics/ui/composite/form/field/PasswordField.tsx";
+import { TextButton } from "@rezics/ui/primitive/button/TextButton.tsx";
+import { useNavigate, useRouterState } from "@tanstack/react-router";
+import { type FC, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { useAuthSessionStore } from "@/user/state";
+import { SocialAuthButtons } from "../component/SocialAuthButtons";
+import { Layout } from "../layout/Layout.tsx";
+import { ModalLayout } from "../layout/ModalLayout.tsx";
+import { resolvePostAuthDestination } from "../model/authRedirect";
+import { register } from "../model/handler.ts";
+import { validateEmail, validatePassword } from "../model/validate.ts";
 
 interface RegisterData {
   email: string;
@@ -37,39 +37,39 @@ export const RegisterPage: FC<RegisterPageProps> = ({
   onClose,
   onLoginClick,
 }) => {
-  const {t} = useTranslation();
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>();
   const [data, setData] = useState<RegisterData>({
-    email: '',
-    password: '',
-    confirm: '',
+    email: "",
+    password: "",
+    confirm: "",
   });
   const navigate = useNavigate();
-  const pathname = useRouterState({select: s => s.location.pathname});
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   const handleSubmit = async () => {
     let hasError = false;
     setLoading(true);
     setError(undefined);
     try {
-      let validateData: {valid: boolean; error: string | null} = {
+      let validateData: { valid: boolean; error: string | null } = {
         valid: false,
         error: null,
       };
       const email = data?.email;
       validateData = validateEmail(email);
-      if (!validateData.valid) throw new Error(validateData.error ?? '');
+      if (!validateData.valid) throw new Error(validateData.error ?? "");
 
       const password = data?.password;
       validateData = validatePassword(password);
-      if (!validateData.valid) throw new Error(validateData.error ?? '');
+      if (!validateData.valid) throw new Error(validateData.error ?? "");
 
       const confirm = data?.confirm;
       validateData = validatePassword(confirm);
-      if (!validateData.valid) throw new Error(validateData.error ?? '');
+      if (!validateData.valid) throw new Error(validateData.error ?? "");
       if (password !== confirm) {
-        throw new Error(t('auth.error.passwords_mismatch'));
+        throw new Error(t("auth.error.passwords_mismatch"));
       }
 
       await register(email, password);
@@ -81,13 +81,13 @@ export const RegisterPage: FC<RegisterPageProps> = ({
     }
     if (!hasError) {
       onClose?.();
-      if (pathname === '/register') {
+      if (pathname === "/register") {
         const authSessionState = useAuthSessionStore.getState();
         navigate({
           to: resolvePostAuthDestination({
             needsOnboarding: authSessionState.needsOnboarding,
             needsVerification: authSessionState.needsVerification,
-            readyForApp: authSessionState.capabilityLevel === 'member',
+            readyForApp: authSessionState.capabilityLevel === "member",
           }),
         });
       }
@@ -98,7 +98,7 @@ export const RegisterPage: FC<RegisterPageProps> = ({
     if (onLoginClick) {
       onLoginClick();
     } else {
-      navigate({to: '/login'});
+      navigate({ to: "/login" });
       onClose?.();
     }
   };
@@ -111,30 +111,30 @@ export const RegisterPage: FC<RegisterPageProps> = ({
       <TextField
         name="email"
         type="email"
-        label={t('common.email')}
+        label={t("common.email")}
         variant="standard"
         required
         value={data?.email}
         onChange={(event: any) => {
-          setData({...data, email: event.target.value});
+          setData({ ...data, email: event.target.value });
         }}
       />
       <PasswordField
         value={data?.password}
         setValue={(value: string) => {
-          setData({...data, password: value});
+          setData({ ...data, password: value });
         }}
       />
       <PasswordField
         value={data?.confirm}
         setValue={(value: string) => {
-          setData({...data, confirm: value});
+          setData({ ...data, confirm: value });
         }}
       />
       <div>
-        {t('auth.flow.already_have_account')}&nbsp;
+        {t("auth.flow.already_have_account")}&nbsp;
         <TextButton onClick={handleLoginClickInternal}>
-          {t('auth.flow.sign_in_instead')}
+          {t("auth.flow.sign_in_instead")}
         </TextButton>
       </div>
       <SocialAuthButtons mode="register" />
@@ -152,14 +152,14 @@ export const RegisterPage: FC<RegisterPageProps> = ({
         disabled={loading}
         onClick={handleSubmit}
       >
-        {loading ? t('common.loading') : t('auth.register')}
+        {loading ? t("common.loading") : t("auth.register")}
       </Button>
     </>
   );
 
   return (
     <LayoutComponent
-      title={t('auth.register')}
+      title={t("auth.register")}
       content={content}
       actions={actions}
     />

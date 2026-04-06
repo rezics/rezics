@@ -1,13 +1,13 @@
-import {prisma} from '#/prisma/client';
-import type {Prisma} from '#/prisma/client';
-import {
-  type ApiTokenDTO,
-  type ApiTokenScopes,
-  type CreateApiTokenInput,
-  type UpdateApiTokenInput,
-} from '@rezics/contract';
-import {generateSecureToken, hashToken, verifyTokenHash} from './utils';
-import {mapApiTokenToDTO, type ApiTokenWithScopes} from './types';
+import type {
+  ApiTokenDTO,
+  ApiTokenScopes,
+  CreateApiTokenInput,
+  UpdateApiTokenInput,
+} from "@rezics/contract";
+import type { Prisma } from "#/prisma/client";
+import { prisma } from "#/prisma/client";
+import { type ApiTokenWithScopes, mapApiTokenToDTO } from "./types";
+import { generateSecureToken, hashToken, verifyTokenHash } from "./utils";
 
 /**
  * API Token Service
@@ -25,8 +25,8 @@ export class TokenService {
   async createToken(
     userId: string,
     input: CreateApiTokenInput,
-    opts?: {ip?: string | null; userAgent?: string | null},
-  ): Promise<{token: string; tokenInfo: ApiTokenDTO}> {
+    opts?: { ip?: string | null; userAgent?: string | null },
+  ): Promise<{ token: string; tokenInfo: ApiTokenDTO }> {
     const rawToken = generateSecureToken();
     const tokenHash = hashToken(rawToken);
 
@@ -40,7 +40,7 @@ export class TokenService {
             ? (input.scopes as Prisma.InputJsonValue)
             : undefined,
         expiresAt:
-          input.expiresAt && input.expiresAt !== ''
+          input.expiresAt && input.expiresAt !== ""
             ? new Date(input.expiresAt)
             : undefined,
         lastIP: opts?.ip ?? undefined,
@@ -52,7 +52,7 @@ export class TokenService {
       created as ApiTokenWithScopes,
     ) as ApiTokenDTO;
 
-    return {token: rawToken, tokenInfo};
+    return { token: rawToken, tokenInfo };
   }
 
   /**
@@ -64,9 +64,9 @@ export class TokenService {
         userId,
         revoked: false,
       },
-      orderBy: {createdAt: 'desc'},
+      orderBy: { createdAt: "desc" },
     });
-    return tokens.map(t => mapApiTokenToDTO(t as ApiTokenWithScopes));
+    return tokens.map((t) => mapApiTokenToDTO(t as ApiTokenWithScopes));
   }
 
   /**
@@ -79,27 +79,27 @@ export class TokenService {
     input: UpdateApiTokenInput,
   ): Promise<ApiTokenDTO> {
     const existing = await prisma.apiToken.findUnique({
-      where: {id},
+      where: { id },
     });
     if (!existing || existing.userId !== userId) {
-      throw new Error('Token not found or you do not own this token');
+      throw new Error("Token not found or you do not own this token");
     }
 
     const updated = await prisma.apiToken.update({
-      where: {id},
+      where: { id },
       data: {
         name: input.name ?? existing.name,
         scopes:
           input.scopes != null
             ? (input.scopes as Prisma.InputJsonValue)
-            : (existing.scopes as Prisma.InputJsonValue | undefined) ??
-              undefined,
+            : ((existing.scopes as Prisma.InputJsonValue | undefined) ??
+              undefined),
         expiresAt:
           input.expiresAt === null
             ? undefined
             : input.expiresAt
-            ? new Date(input.expiresAt)
-            : existing.expiresAt ?? undefined,
+              ? new Date(input.expiresAt)
+              : (existing.expiresAt ?? undefined),
       },
     });
 
@@ -111,17 +111,17 @@ export class TokenService {
    */
   async revokeToken(userId: string, id: string): Promise<void> {
     const existing = await prisma.apiToken.findUnique({
-      where: {id},
+      where: { id },
     });
     if (!existing || existing.userId !== userId) {
-      throw new Error('Token not found or you do not own this token');
+      throw new Error("Token not found or you do not own this token");
     }
 
     if (existing.revoked) return;
 
     await prisma.apiToken.update({
-      where: {id},
-      data: {revoked: true, revokedAt: new Date()},
+      where: { id },
+      data: { revoked: true, revokedAt: new Date() },
     });
   }
 
@@ -132,10 +132,10 @@ export class TokenService {
    * - "api_xxx"
    */
   extractRawToken(authorization: string | undefined): string | null {
-    if (!authorization || typeof authorization !== 'string') return null;
+    if (!authorization || typeof authorization !== "string") return null;
 
-    if (authorization.startsWith('Bearer ')) {
-      return authorization.slice('Bearer '.length);
+    if (authorization.startsWith("Bearer ")) {
+      return authorization.slice("Bearer ".length);
     }
 
     return authorization;
@@ -147,40 +147,40 @@ export class TokenService {
    */
   async authenticateFromHeader(
     authorization: string | undefined,
-    set: {status?: number},
-    opts?: {ip?: string | null; userAgent?: string | null},
-  ): Promise<{userId: string; token: ApiTokenDTO; scopes: ApiTokenScopes}> {
+    set: { status?: number },
+    _opts?: { ip?: string | null; userAgent?: string | null },
+  ): Promise<{ userId: string; token: ApiTokenDTO; scopes: ApiTokenScopes }> {
     const rawToken = this.extractRawToken(authorization);
     if (!rawToken) {
       set.status = 401;
-      throw new Error('Unauthorized: Missing API token');
+      throw new Error("Unauthorized: Missing API token");
     }
 
     // We hash the raw token value and look it up by hash.
     const hashed = hashToken(rawToken);
     const record = await prisma.apiToken.findUnique({
-      where: {tokenHash: hashed},
+      where: { tokenHash: hashed },
     });
 
     if (!record) {
       set.status = 401;
-      throw new Error('Unauthorized: Invalid API token');
+      throw new Error("Unauthorized: Invalid API token");
     }
 
     // Double-check hash using timingSafeEqual to avoid subtle timing attacks.
     if (!verifyTokenHash(rawToken, record.tokenHash)) {
       set.status = 401;
-      throw new Error('Unauthorized: Invalid API token');
+      throw new Error("Unauthorized: Invalid API token");
     }
 
     // Check revoked / expiry
     if (record.revoked) {
       set.status = 401;
-      throw new Error('Unauthorized: API token has been revoked');
+      throw new Error("Unauthorized: API token has been revoked");
     }
     if (record.expiresAt && record.expiresAt.getTime() < Date.now()) {
       set.status = 401;
-      throw new Error('Unauthorized: API token has expired');
+      throw new Error("Unauthorized: API token has expired");
     }
 
     // Update usage metadata in the background (non-blocking best-effort).
@@ -221,11 +221,11 @@ export class TokenService {
     if (!scopes) return false;
     const domainPerms = scopes[domain];
     if (!Array.isArray(domainPerms)) return false;
-    return domainPerms.includes(permission) || domainPerms.includes('*');
+    return domainPerms.includes(permission) || domainPerms.includes("*");
   }
 
   hasAdminScope(scopes: ApiTokenScopes | null | undefined): boolean {
-    return scopes?.main?.includes('admin') ?? false;
+    return scopes?.main?.includes("admin") ?? false;
   }
 }
 

@@ -1,9 +1,8 @@
-import {useUserProfileStore} from '@/user/state';
 import {
   Logout as LogoutIcon,
   Person as PersonIcon,
   Settings as SettingsIcon,
-} from '@mui/icons-material';
+} from "@mui/icons-material";
 import {
   Avatar,
   Divider,
@@ -12,27 +11,28 @@ import {
   ListItemText,
   Menu,
   MenuItem,
-} from '@mui/material';
-import {useNavigate} from '@tanstack/react-router';
-import React, {useState} from 'react';
-import {Link} from '@rezics/ui/primitive/link/Link.tsx';
-
-import {logout} from '@/user/model/handler';
-import {userQueries} from '@rezics/api/user/user.queries';
-import {useQuery} from '@tanstack/react-query';
-import {useTranslation} from 'react-i18next';
-import {MiscMenuItems} from '../../component/header/MiscMenuItems';
+} from "@mui/material";
+import { userQueries } from "@rezics/api/user/user.queries";
+import { Link } from "@rezics/ui/primitive/link/Link.tsx";
+import { useQuery } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
+import type React from "react";
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
+import { logout } from "@/user/model/handler";
+import { useUserProfileStore } from "@/user/state";
+import { MiscMenuItems } from "../../component/header/MiscMenuItems";
 export type AccountMenuProps = {
   onLogout?: () => void;
 };
 
-export const AccountMenu: React.FC<AccountMenuProps> = ({onLogout}) => {
+export const AccountMenu: React.FC<AccountMenuProps> = ({ onLogout }) => {
   const navigate = useNavigate();
-  const {clearProfile} = useUserProfileStore();
+  const { clearProfile } = useUserProfileStore();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
-  const {data: user} = useQuery(userQueries.me());
-  const {t} = useTranslation();
+  const { data: user } = useQuery(userQueries.me());
+  const { t } = useTranslation();
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -46,16 +46,16 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({onLogout}) => {
     handleMenuClose();
     onLogout?.();
     clearProfile();
-    navigate({to: '/login'});
+    navigate({ to: "/login" });
     void logout();
   };
 
   const handleProfile = () => {
-    console.log('Profile clicked');
+    console.log("Profile clicked");
   };
 
   const handleSettings = () => {
-    console.log('Settings clicked');
+    console.log("Settings clicked");
   };
 
   return (
@@ -67,7 +67,7 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({onLogout}) => {
         aria-haspopup="true"
       >
         <Avatar
-          sx={{width: 36, height: 36}}
+          sx={{ width: 36, height: 36 }}
           variant="rounded"
           src={user?.avatar}
         >
@@ -78,13 +78,13 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({onLogout}) => {
         id="menu-appbar"
         anchorEl={anchorEl}
         anchorOrigin={{
-          vertical: 'bottom',
-          horizontal: 'right',
+          vertical: "bottom",
+          horizontal: "right",
         }}
         keepMounted
         transformOrigin={{
-          vertical: 'top',
-          horizontal: 'right',
+          vertical: "top",
+          horizontal: "right",
         }}
         open={Boolean(anchorEl)}
         onClose={handleMenuClose}
@@ -100,7 +100,7 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({onLogout}) => {
           <ListItemIcon>
             <PersonIcon fontSize="small" />
           </ListItemIcon>
-          <ListItemText>{t('navigation.profile')}</ListItemText>
+          <ListItemText>{t("navigation.profile")}</ListItemText>
         </MenuItem>
         <MenuItem
           component={Link}
@@ -113,7 +113,7 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({onLogout}) => {
           <ListItemIcon>
             <SettingsIcon fontSize="small" />
           </ListItemIcon>
-          <ListItemText>{t('navigation.settings')}</ListItemText>
+          <ListItemText>{t("navigation.settings")}</ListItemText>
         </MenuItem>
         <MiscMenuItems />
         <Divider />
@@ -121,7 +121,7 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({onLogout}) => {
           <ListItemIcon>
             <LogoutIcon fontSize="small" />
           </ListItemIcon>
-          <ListItemText>{t('auth.logout')}</ListItemText>
+          <ListItemText>{t("auth.logout")}</ListItemText>
         </MenuItem>
       </Menu>
     </>

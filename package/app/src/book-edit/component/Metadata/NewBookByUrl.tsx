@@ -1,17 +1,19 @@
-import {Alert, Button, TextField} from '@mui/material';
-import {useEffect, useState} from 'react';
-import {echoKvGetQuery} from '@rezics/api/echokv/echokv';
-import {useQuery} from '@tanstack/react-query';
+import { Alert, Button, TextField } from "@mui/material";
+import { echoKvGetQuery } from "@rezics/api/echokv/echokv";
+import { useQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 
 export function NewBookByUrl() {
-  const [url, setUrl] = useState('');
+  const [url, setUrl] = useState("");
   function handleCreateBook() {
     // TODO 对接爬虫
-    console.log('create book', url);
+    console.log("create book", url);
   }
-  const supportedSitesQuery = useQuery(echoKvGetQuery('crawler.supportedSites'));
+  const supportedSitesQuery = useQuery(
+    echoKvGetQuery("crawler.supportedSites"),
+  );
   const [supportedSitesList, setSupportedSitesList] = useState<
-    {name: string; url: string}[]
+    { name: string; url: string }[]
   >([]);
   useEffect(() => {
     if (
@@ -30,7 +32,7 @@ export function NewBookByUrl() {
       <div className="mt-4">
         <div>支持的网站：</div>
         <ul>
-          {supportedSitesList.map(site => (
+          {supportedSitesList.map((site) => (
             <li key={site.name}>
               <a href={site.url} target="_blank" rel="noreferrer">
                 {site.name}: {site.url}
@@ -45,7 +47,7 @@ export function NewBookByUrl() {
             fullWidth
             label="书籍URL"
             value={url}
-            onChange={newValue => setUrl(newValue.target.value)}
+            onChange={(newValue) => setUrl(newValue.target.value)}
             className="flex-1"
           />
           <Button
@@ -61,4 +63,3 @@ export function NewBookByUrl() {
     </div>
   );
 }
-

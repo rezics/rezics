@@ -1,18 +1,17 @@
-import {t} from 'elysia';
+import { t } from "elysia";
+import { authContextTokenClaimsSchema } from "../token";
+import { authSessionStateSchema } from "./self-service";
+import { authSessionSchema, authUserSchema } from "./sign-in";
 
-import {authSessionSchema, authUserSchema} from './sign-in';
-import {authSessionStateSchema} from './self-service';
-import {authContextTokenClaimsSchema} from '../token';
-
-export const AUTH_PRESENCE_COOKIE_NAME = 'rezics_logged_in';
-export const AUTH_PRESENCE_COOKIE_VALUE = '1';
+export const AUTH_PRESENCE_COOKIE_NAME = "rezics_logged_in";
+export const AUTH_PRESENCE_COOKIE_VALUE = "1";
 export const AUTH_PRESENCE_COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24 * 30;
 
 export const getSessionResponseSchema = t.Object({
   session: authSessionSchema,
   user: authUserSchema,
 });
-export type GetSessionResponse = (typeof getSessionResponseSchema)['static'];
+export type GetSessionResponse = (typeof getSessionResponseSchema)["static"];
 
 export const getSessionStateResponseSchema = t.Object({
   session: authSessionSchema,
@@ -20,25 +19,25 @@ export const getSessionStateResponseSchema = t.Object({
   authSession: authSessionStateSchema,
 });
 export type GetSessionStateResponse =
-  (typeof getSessionStateResponseSchema)['static'];
+  (typeof getSessionStateResponseSchema)["static"];
 
 export const authTokenResponseSchema = t.Object({
   token: t.String(),
 });
-export type AuthTokenResponse = (typeof authTokenResponseSchema)['static'];
+export type AuthTokenResponse = (typeof authTokenResponseSchema)["static"];
 
 export const authContextTokenResponseSchema = t.Object({
   token: t.String(),
   claims: authContextTokenClaimsSchema,
 });
 export type AuthContextTokenResponse =
-  (typeof authContextTokenResponseSchema)['static'];
+  (typeof authContextTokenResponseSchema)["static"];
 
 export const listSessionsResponseSchema = t.Array(authSessionSchema);
 export type ListSessionsResponse =
-  (typeof listSessionsResponseSchema)['static'];
+  (typeof listSessionsResponseSchema)["static"];
 
 export const revokeSessionBodySchema = t.Object({
   token: t.String(),
 });
-export type RevokeSessionBody = (typeof revokeSessionBodySchema)['static'];
+export type RevokeSessionBody = (typeof revokeSessionBodySchema)["static"];

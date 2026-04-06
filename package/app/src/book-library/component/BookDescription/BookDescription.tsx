@@ -1,10 +1,10 @@
-import {AccentBarWithText} from '@rezics/ui/composite/typography/AccentBarWithText.tsx';
-import {EditButtonFloatRightShow} from '@rezics/ui/composite/button/EditButtonFloatRight.tsx';
-import {Box, Typography} from '@mui/material';
-import React from 'react';
-import {useTranslation} from 'react-i18next';
-import {useNavigate} from '@tanstack/react-router';
-import type {BookDescriptionProps} from './types';
+import { Box, Typography } from "@mui/material";
+import { EditButtonFloatRightShow } from "@rezics/ui/composite/button/EditButtonFloatRight.tsx";
+import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
+import { useNavigate } from "@tanstack/react-router";
+import type React from "react";
+import { useTranslation } from "react-i18next";
+import type { BookDescriptionProps } from "./types";
 
 /**
  * Direct component for rendering a book description.
@@ -17,7 +17,7 @@ export const BookDescription: React.FC<BookDescriptionProps> = ({
   bookId,
   showEditButton,
 }) => {
-  const {t} = useTranslation();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const canEdit = Boolean(onEdit || bookId);
   const shouldShowEdit = showEditButton ?? canEdit;
@@ -28,7 +28,7 @@ export const BookDescription: React.FC<BookDescriptionProps> = ({
       return;
     }
     if (bookId) {
-      navigate({to: `/book/${bookId}/edit`});
+      navigate({ to: `/book/${bookId}/edit` });
     }
   };
 
@@ -36,18 +36,18 @@ export const BookDescription: React.FC<BookDescriptionProps> = ({
     <div>
       <Box>
         <div className="flex mb-4">
-          <AccentBarWithText text={t('book.description')} />
+          <AccentBarWithText text={t("book.description")} />
           {shouldShowEdit && (
             <EditButtonFloatRightShow
               onClick={handleEdit}
-              text={t('common.edit')}
+              text={t("common.edit")}
             />
           )}
-        </div>{' '}
+        </div>{" "}
         <Typography variant="body1" className="whitespace-pre-line">
           {description}
         </Typography>
-      </Box>{' '}
+      </Box>{" "}
     </div>
   );
 };

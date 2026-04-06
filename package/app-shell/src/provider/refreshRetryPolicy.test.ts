@@ -1,8 +1,8 @@
-import {describe, expect, test} from 'bun:test';
-import {createRefreshRetryPolicy} from './refreshRetryPolicy';
+import { describe, expect, test } from "bun:test";
+import { createRefreshRetryPolicy } from "./refreshRetryPolicy";
 
-describe('createRefreshRetryPolicy', () => {
-  test('uses exponential backoff before entering cooldown', () => {
+describe("createRefreshRetryPolicy", () => {
+  test("uses exponential backoff before entering cooldown", () => {
     const policy = createRefreshRetryPolicy({
       maxImmediateRetries: 3,
       initialDelayMs: 500,
@@ -17,7 +17,7 @@ describe('createRefreshRetryPolicy', () => {
     expect(policy.registerFailure()).toBe(30_000);
   });
 
-  test('resets the failure window after a successful refresh', () => {
+  test("resets the failure window after a successful refresh", () => {
     const policy = createRefreshRetryPolicy({
       initialDelayMs: 750,
       cooldownDelayMs: 20_000,

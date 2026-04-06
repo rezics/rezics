@@ -1,1 +1,1 @@
-export {BookEditMainPage} from '../section/BookEditInfoSection';
+export { BookEditMainPage } from "../section/BookEditInfoSection";

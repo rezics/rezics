@@ -1,12 +1,12 @@
-import {useFixtureInput} from 'react-cosmos/client';
-import {ArrowForwardIconContainer} from './ArrowForwardIcon';
+import { useFixtureInput } from "react-cosmos/client";
+import { ArrowForwardIconContainer } from "./ArrowForwardIcon";
 
 export default function ArrowForwardIconTest() {
   const [props] = useFixtureInput<
     Parameters<typeof ArrowForwardIconContainer>[0]
-  >('Props', {
+  >("Props", {
     size: 24,
-    children: '点击查看更多',
+    children: "点击查看更多",
   });
   function Default() {
     return (

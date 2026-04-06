@@ -1,5 +1,5 @@
-import type {UserDTO, UnitDTO} from '../index';
-import {BasicAdminPermission, isBlocked} from './core';
+import type { UnitDTO, UserDTO } from "../index";
+import { BasicAdminPermission, isBlocked } from "./core";
 
 /**
  * Readlist permissions.

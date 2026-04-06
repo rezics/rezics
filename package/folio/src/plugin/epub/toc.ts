@@ -1,7 +1,7 @@
-import { XMLParser } from 'fast-xml-parser';
-import type { FolioNode } from '../../types';
-import type { FileMap } from './zip';
-import { readText } from './zip';
+import { XMLParser } from "fast-xml-parser";
+import type { FolioNode } from "../../types";
+import type { FileMap } from "./zip";
+import { readText } from "./zip";
 
 interface TocNavPoint {
   id: string;
@@ -15,10 +15,7 @@ function ensureArray<T>(val: T | T[] | undefined): T[] {
   return Array.isArray(val) ? val : [val];
 }
 
-export function parseNcx(
-  fileMap: FileMap,
-  ncxPath: string,
-): TocNavPoint[] {
+export function parseNcx(fileMap: FileMap, ncxPath: string): TocNavPoint[] {
   const xml = readText(fileMap, ncxPath);
   if (!xml) return [];
 
@@ -30,13 +27,13 @@ export function parseNcx(
 
   function parseNavPoint(np: unknown): TocNavPoint {
     const obj = np as Record<string, unknown>;
-    const id = (obj['@_id'] as string) ?? '';
+    const id = (obj["@_id"] as string) ?? "";
     const label =
-      typeof obj.navLabel === 'object' && obj.navLabel
-        ? ((obj.navLabel as Record<string, unknown>).text as string) ?? ''
-        : '';
+      typeof obj.navLabel === "object" && obj.navLabel
+        ? (((obj.navLabel as Record<string, unknown>).text as string) ?? "")
+        : "";
     const content = obj.content as Record<string, string> | undefined;
-    const src = content?.['@_src'] ?? '';
+    const src = content?.["@_src"] ?? "";
     const children = ensureArray(obj.navPoint).map(parseNavPoint);
 
     return { id, label, src, children };
@@ -46,10 +43,7 @@ export function parseNcx(
   return navPoints.map(parseNavPoint);
 }
 
-export function parseNavDoc(
-  fileMap: FileMap,
-  navPath: string,
-): TocNavPoint[] {
+export function parseNavDoc(fileMap: FileMap, navPath: string): TocNavPoint[] {
   const xml = readText(fileMap, navPath);
   if (!xml) return [];
 
@@ -63,10 +57,10 @@ export function parseNavDoc(
 
   // Find the nav element with toc
   const navs = ensureArray(body.nav);
-  const tocNav = navs.find(
-    (n: Record<string, unknown>) =>
-      (n['@_epub:type'] as string)?.includes('toc'),
-  ) ?? navs[0];
+  const tocNav =
+    navs.find((n: Record<string, unknown>) =>
+      (n["@_epub:type"] as string)?.includes("toc"),
+    ) ?? navs[0];
 
   if (!tocNav) return [];
 
@@ -75,12 +69,12 @@ export function parseNavDoc(
     return items.map((item) => {
       const li = item as Record<string, unknown>;
       const a = li.a as Record<string, unknown> | undefined;
-      const label = (a?.['#text'] as string) ?? '';
-      const src = (a?.['@_href'] as string) ?? '';
+      const label = (a?.["#text"] as string) ?? "";
+      const src = (a?.["@_href"] as string) ?? "";
       const childOl = li.ol as Record<string, unknown> | undefined;
 
       return {
-        id: '',
+        id: "",
         label,
         src,
         children: childOl ? parseOl(childOl) : [],
@@ -94,11 +88,13 @@ export function parseNavDoc(
 export function tocToFolioNodes(
   navPoints: TocNavPoint[],
   spineHrefs: string[],
-  chapterFetch: (href: string) => () => Promise<{ contentType: string; raw: string }>,
+  chapterFetch: (
+    href: string,
+  ) => () => Promise<{ contentType: string; raw: string }>,
 ): FolioNode[] {
   function convert(np: TocNavPoint): FolioNode {
     // Strip fragment from src for matching
-    const baseSrc = np.src.split('#')[0];
+    const baseSrc = np.src.split("#")[0];
 
     if (np.children.length > 0) {
       // Has children — may itself be a leaf too if src points to content
@@ -116,7 +112,7 @@ export function tocToFolioNodes(
 
       return {
         id: `epub-branch-${np.id || np.label}`,
-        title: np.label || 'Untitled',
+        title: np.label || "Untitled",
         children,
       };
     }
@@ -124,7 +120,7 @@ export function tocToFolioNodes(
     // Leaf node
     return {
       id: `epub-${baseSrc || np.id}`,
-      title: np.label || baseSrc || 'Untitled',
+      title: np.label || baseSrc || "Untitled",
       fetch: baseSrc ? chapterFetch(baseSrc) : undefined,
     };
   }

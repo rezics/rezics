@@ -1,17 +1,17 @@
-import type {FC} from 'react';
+import EditIcon from "@mui/icons-material/Edit";
 import {
+  Button,
+  Chip,
+  Stack,
   Table,
+  TableBody,
+  TableCell,
   TableHead,
   TableRow,
-  TableCell,
-  TableBody,
-  Button,
   Tooltip,
-  Stack,
-  Chip,
-} from '@mui/material';
-import EditIcon from '@mui/icons-material/Edit';
-import type {ApiTokenDTO} from '@rezics/contract';
+} from "@mui/material";
+import type { ApiTokenDTO } from "@rezics/contract";
+import type { FC } from "react";
 
 interface TokenTableProps {
   tokens: ApiTokenDTO[];
@@ -36,7 +36,7 @@ export const TokenTable: FC<TokenTableProps> = ({
     return (
       <Stack direction="row" spacing={0.5} flexWrap="wrap" useFlexGap>
         {Object.entries(scopes).map(([domain, perms]) =>
-          perms.map(perm => (
+          perms.map((perm) => (
             <Chip
               key={`${domain}:${perm}`}
               label={`${domain}:${perm}`}
@@ -63,17 +63,17 @@ export const TokenTable: FC<TokenTableProps> = ({
         </TableRow>
       </TableHead>
       <TableBody>
-        {tokens.map(t => (
+        {tokens.map((t) => (
           <TableRow key={t.id} hover>
             <TableCell>{t.name}</TableCell>
             <TableCell>{renderScopes(t.scopes)}</TableCell>
             <TableCell>
-              {t.createdAt ? new Date(t.createdAt).toLocaleString() : '-'}
+              {t.createdAt ? new Date(t.createdAt).toLocaleString() : "-"}
             </TableCell>
             <TableCell>
-              {t.expiresAt ? new Date(t.expiresAt).toLocaleString() : 'Never'}
+              {t.expiresAt ? new Date(t.expiresAt).toLocaleString() : "Never"}
             </TableCell>
-            <TableCell>{t.revoked ? 'Yes' : 'No'}</TableCell>
+            <TableCell>{t.revoked ? "Yes" : "No"}</TableCell>
             <TableCell align="right">
               <Stack direction="row" spacing={1} justifyContent="flex-end">
                 <Tooltip title="Edit">

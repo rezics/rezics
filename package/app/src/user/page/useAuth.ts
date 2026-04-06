@@ -1,30 +1,35 @@
-import {useEffect} from 'react';
-import type {UserDTO} from '@rezics/contract';
-import {useQuery} from '@tanstack/react-query';
-import {userQueries} from '@rezics/api/user/user.queries';
-import {useAuthSessionStore, useUserProfileStore} from '@/user/state';
+import { userQueries } from "@rezics/api/user/user.queries";
+import type { UserDTO } from "@rezics/contract";
+import { useQuery } from "@tanstack/react-query";
+import { useEffect } from "react";
+import { useAuthSessionStore, useUserProfileStore } from "@/user/state";
 
 /**
  * useAuth - Authentication hook
  * Derives all state from authSessionStore + userProfileStore.
  */
 export const useAuth = () => {
-  const authSession = useAuthSessionStore(state => state.authSession);
-  const capabilityLevel = useAuthSessionStore(state => state.capabilityLevel);
-  const hasAuthSession = useAuthSessionStore(state => state.hasAuthSession);
-  const hasBusinessToken = useAuthSessionStore(state => state.hasBusinessToken);
-  const needsOnboarding = useAuthSessionStore(state => state.needsOnboarding);
-  const needsVerification = useAuthSessionStore(state => state.needsVerification);
-  const status = useAuthSessionStore(state => state.status);
-  const user = useUserProfileStore(state => state.user as UserDTO | null);
-  const setUser = useUserProfileStore(state => state.setUser);
+  const authSession = useAuthSessionStore((state) => state.authSession);
+  const capabilityLevel = useAuthSessionStore((state) => state.capabilityLevel);
+  const hasAuthSession = useAuthSessionStore((state) => state.hasAuthSession);
+  const hasBusinessToken = useAuthSessionStore(
+    (state) => state.hasBusinessToken,
+  );
+  const needsOnboarding = useAuthSessionStore((state) => state.needsOnboarding);
+  const needsVerification = useAuthSessionStore(
+    (state) => state.needsVerification,
+  );
+  const status = useAuthSessionStore((state) => state.status);
+  const user = useUserProfileStore((state) => state.user as UserDTO | null);
+  const setUser = useUserProfileStore((state) => state.setUser);
 
-  const {data, isLoading, error} = useQuery({
+  const { data, isLoading, error } = useQuery({
     ...userQueries.me(),
-    enabled: capabilityLevel === 'member' && !user,
+    enabled: capabilityLevel === "member" && !user,
   });
 
-  const resolvedUser = capabilityLevel === 'member' ? (user ?? data ?? null) : null;
+  const resolvedUser =
+    capabilityLevel === "member" ? (user ?? data ?? null) : null;
 
   useEffect(() => {
     if (data) {
@@ -36,8 +41,8 @@ export const useAuth = () => {
     user: resolvedUser,
     authSession,
     loading:
-      status === 'loading' ||
-      (capabilityLevel === 'member' && !resolvedUser ? isLoading : false),
+      status === "loading" ||
+      (capabilityLevel === "member" && !resolvedUser ? isLoading : false),
     error: error ? (error as Error).message : undefined,
     authenticated: hasAuthSession,
     isAuthenticated: hasAuthSession,
@@ -58,7 +63,7 @@ export const useAuth = () => {
  * useRequireAuth - Redirect to login if not authenticated
  * Returns auth state or redirects to login
  */
-export const useRequireAuth = (redirectTo = '/login') => {
+export const useRequireAuth = (redirectTo = "/login") => {
   const auth = useAuth();
 
   useEffect(() => {

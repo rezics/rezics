@@ -1,12 +1,12 @@
-import {useFixtureInput} from 'react-cosmos/client';
-import {ArrowButton} from './ArrowButton';
-import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
-import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
+import KeyboardArrowLeftIcon from "@mui/icons-material/KeyboardArrowLeft";
+import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
+import { useFixtureInput } from "react-cosmos/client";
+import { ArrowButton } from "./ArrowButton";
 
 export default function ArrowButtonTest() {
-  const [props] = useFixtureInput<Parameters<typeof ArrowButton>[0]>('Props', {
+  const [props] = useFixtureInput<Parameters<typeof ArrowButton>[0]>("Props", {
     icon: KeyboardArrowLeftIcon,
-    className: '',
+    className: "",
   });
 
   function Default() {

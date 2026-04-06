@@ -1,5 +1,5 @@
-import {queryOptions} from '@tanstack/react-query';
-import {apiFetch} from '../react-query/http';
+import { queryOptions } from "@tanstack/react-query";
+import { apiFetch } from "../react-query/http";
 
 export type EchoKvResponse<T = unknown> = {
   value: T;
@@ -26,8 +26,8 @@ export const echoKvApi = {
     value: T,
   ): Promise<EchoKvResponse<T>> => {
     return apiFetch<EchoKvResponse<T>>(`/echokv/${encodeURIComponent(key)}`, {
-      method: 'PUT',
-      body: JSON.stringify({value}),
+      method: "PUT",
+      body: JSON.stringify({ value }),
     });
   },
 
@@ -37,14 +37,14 @@ export const echoKvApi = {
   listKeys: async (search?: string): Promise<EchoKvKeyListResponse> => {
     const query = search?.trim()
       ? `?search=${encodeURIComponent(search.trim())}`
-      : '';
+      : "";
     return apiFetch<EchoKvKeyListResponse>(`/echokv${query}`);
   },
 };
 
 export function echoKvGetQuery(key: string) {
   return queryOptions({
-    queryKey: ['echokv', key],
+    queryKey: ["echokv", key],
     queryFn: () => echoKvApi.get(key),
     staleTime: 1000 * 60 * 60 * 2, // 2 hours
   });
@@ -52,7 +52,7 @@ export function echoKvGetQuery(key: string) {
 
 export function echoKvKeyListQuery(search: string) {
   return queryOptions({
-    queryKey: ['echokv-keys', search],
+    queryKey: ["echokv-keys", search],
     queryFn: () => echoKvApi.listKeys(search),
     staleTime: 1000 * 60, // 1 hour is overkill; 1 min is enough
   });

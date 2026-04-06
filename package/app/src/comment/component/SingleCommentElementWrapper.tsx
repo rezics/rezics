@@ -1,8 +1,9 @@
-import React, {useState} from 'react';
-import {ReplyDrawerContainer} from './ReplyDrawer';
-import {useCreateCommentMutation} from '@rezics/api/comment/comment.mutations';
-import {useAlertStore} from '@app/state/windowAlertStore';
-import {useDialogStore} from '../state/dialogStore';
+import { useAlertStore } from "@app/state/windowAlertStore";
+import { useCreateCommentMutation } from "@rezics/api/comment/comment.mutations";
+import type React from "react";
+import { useState } from "react";
+import { useDialogStore } from "../state/dialogStore";
+import { ReplyDrawerContainer } from "./ReplyDrawer";
 
 export function SingleCommentElementWrapper({
   replyUnitId,
@@ -13,15 +14,15 @@ export function SingleCommentElementWrapper({
   children: React.ReactNode;
   className?: string;
 }) {
-  const setDialogVisible = useDialogStore(state => state.setDialogVisible);
+  const setDialogVisible = useDialogStore((state) => state.setDialogVisible);
   const [isReplyModalOpen, setIsReplyModalOpen] = useState(false);
-  const showAlert = useAlertStore(state => state.show);
+  const showAlert = useAlertStore((state) => state.show);
   const createCommentMutation = useCreateCommentMutation({
     onSuccess: () => {
-      showAlert('Comment created successfully');
+      showAlert("Comment created successfully");
     },
     onError: () => {
-      showAlert('Failed to create comment');
+      showAlert("Failed to create comment");
     },
   });
 
@@ -32,7 +33,7 @@ export function SingleCommentElementWrapper({
 
   const handleSubmit = (content: string) => {
     createCommentMutation.mutate({
-      rootPostId: replyUnitId || '',
+      rootPostId: replyUnitId || "",
       content,
     });
   };

@@ -1,13 +1,13 @@
 /**
  * Never send unHashed passwords to server
  */
-import {prisma} from '#/prisma/client';
-import {UserType} from '#/prisma/client';
-import type {Prisma} from '#/prisma/client';
-import type {UserFilterOptions, UserWithRelations} from '../model/types';
-import {userInclude} from '../model/types';
-import type {UpdateUser} from '@rezics/contract';
-import {syncUserToMeili, deleteUserFromMeili} from '@/meili/user/sync';
+
+import type { UpdateUser } from "@rezics/contract";
+import type { Prisma } from "#/prisma/client";
+import { prisma, UserType } from "#/prisma/client";
+import { deleteUserFromMeili, syncUserToMeili } from "@/meili/user/sync";
+import type { UserFilterOptions, UserWithRelations } from "../model/types";
+import { userInclude } from "../model/types";
 
 export type CreateUserProfileInput = {
   unitId?: string;
@@ -40,26 +40,26 @@ export class UserService {
     const andWhere: Prisma.UserWhereInput[] = [];
 
     // Search in name or slug
-    if (options.q && options.q.trim()) {
+    if (options.q?.trim()) {
       andWhere.push({
         OR: [
-          {name: {contains: options.q, mode: 'insensitive'}},
-          {slug: {contains: options.q, mode: 'insensitive'}},
+          { name: { contains: options.q, mode: "insensitive" } },
+          { slug: { contains: options.q, mode: "insensitive" } },
         ],
       });
     }
 
     // Filter by slug
-    if (options.slug && options.slug.trim()) {
-      andWhere.push({slug: {equals: options.slug, mode: 'insensitive'}});
+    if (options.slug?.trim()) {
+      andWhere.push({ slug: { equals: options.slug, mode: "insensitive" } });
     }
 
     // Filter by type
     if (options.type) {
-      andWhere.push({type: options.type as UserType});
+      andWhere.push({ type: options.type as UserType });
     }
 
-    return andWhere.length > 0 ? {AND: andWhere} : {};
+    return andWhere.length > 0 ? { AND: andWhere } : {};
   }
 
   /**
@@ -78,15 +78,15 @@ export class UserService {
     const [users, total] = await Promise.all([
       prisma.user.findMany({
         where,
-        orderBy: {createdAt: 'desc'},
+        orderBy: { createdAt: "desc" },
         skip,
         take: limitNum,
         include: userInclude,
       }),
-      prisma.user.count({where}),
+      prisma.user.count({ where }),
     ]);
 
-    return {users: users as UserWithRelations[], total};
+    return { users: users as UserWithRelations[], total };
   }
 
   /**
@@ -94,7 +94,7 @@ export class UserService {
    */
   async getByUnitId(unitId: string): Promise<UserWithRelations> {
     const user = await prisma.user.findUniqueOrThrow({
-      where: {unitId},
+      where: { unitId },
       include: userInclude,
     });
 
@@ -106,7 +106,7 @@ export class UserService {
    */
   async getBySlug(slug: string): Promise<UserWithRelations | null> {
     const user = await prisma.user.findUnique({
-      where: {slug},
+      where: { slug },
       include: userInclude,
     });
 
@@ -117,7 +117,7 @@ export class UserService {
    * Create new user
    */
   async create(req: CreateUserProfileInput): Promise<UserWithRelations> {
-    const {unitId, slug, avatar, bio, type} = req;
+    const { unitId, slug, avatar, bio, type } = req;
 
     const user = await prisma.user.create({
       data: {
@@ -143,7 +143,7 @@ export class UserService {
     const slug = payload.slug?.trim() || payload.unitId;
 
     const user = await prisma.user.upsert({
-      where: {unitId: payload.unitId},
+      where: { unitId: payload.unitId },
       update: {},
       create: {
         unitId: payload.unitId,
@@ -164,7 +164,7 @@ export class UserService {
     payload: ProvisionFromAuthContextInput,
   ): Promise<UserWithRelations> {
     const user = await prisma.user.upsert({
-      where: {unitId: payload.unitId},
+      where: { unitId: payload.unitId },
       update: {},
       create: {
         unitId: payload.unitId,
@@ -186,7 +186,7 @@ export class UserService {
    * Update user
    */
   async update(unitId: string, req: UpdateUser): Promise<UserWithRelations> {
-    const {name, avatar, bio, description} = req;
+    const { name, avatar, bio, description } = req;
 
     const updateData: Prisma.UserUpdateInput = {
       name: name || undefined,
@@ -196,7 +196,7 @@ export class UserService {
     };
 
     const user = await prisma.user.update({
-      where: {unitId},
+      where: { unitId },
       data: updateData,
       include: userInclude,
     });
@@ -210,7 +210,7 @@ export class UserService {
    * Delete user by unitId
    */
   async delete(unitId: string): Promise<void> {
-    await prisma.user.delete({where: {unitId}});
+    await prisma.user.delete({ where: { unitId } });
     await deleteUserFromMeili(unitId);
   }
 
@@ -218,7 +218,7 @@ export class UserService {
    * Check if user exists by unitId
    */
   async exists(unitId: string): Promise<boolean> {
-    const count = await prisma.user.count({where: {unitId}});
+    const count = await prisma.user.count({ where: { unitId } });
     return count > 0;
   }
 
@@ -227,10 +227,10 @@ export class UserService {
    */
   async follow(followerId: string, followingId: string): Promise<void> {
     if (followerId === followingId) {
-      throw new Error('Cannot follow yourself');
+      throw new Error("Cannot follow yourself");
     }
 
-    await prisma.$transaction(async tx => {
+    await prisma.$transaction(async (tx) => {
       const existing = await tx.follow.findUnique({
         where: {
           followerId_followingId: {
@@ -250,13 +250,13 @@ export class UserService {
       });
 
       await tx.user.update({
-        where: {unitId: followerId},
-        data: {followingsCount: {increment: 1}},
+        where: { unitId: followerId },
+        data: { followingsCount: { increment: 1 } },
       });
 
       await tx.user.update({
-        where: {unitId: followingId},
-        data: {followersCount: {increment: 1}},
+        where: { unitId: followingId },
+        data: { followersCount: { increment: 1 } },
       });
     });
   }
@@ -265,7 +265,7 @@ export class UserService {
    * Unfollow a user
    */
   async unfollow(followerId: string, followingId: string): Promise<void> {
-    await prisma.$transaction(async tx => {
+    await prisma.$transaction(async (tx) => {
       const existing = await tx.follow.findUnique({
         where: {
           followerId_followingId: {
@@ -287,13 +287,13 @@ export class UserService {
       });
 
       await tx.user.update({
-        where: {unitId: followerId},
-        data: {followingsCount: {decrement: 1}},
+        where: { unitId: followerId },
+        data: { followingsCount: { decrement: 1 } },
       });
 
       await tx.user.update({
-        where: {unitId: followingId},
-        data: {followersCount: {decrement: 1}},
+        where: { unitId: followingId },
+        data: { followersCount: { decrement: 1 } },
       });
     });
   }
@@ -310,7 +310,7 @@ export class UserService {
     const follows = await prisma.follow.findMany({
       where: {
         followerId,
-        followingId: {in: targetIds},
+        followingId: { in: targetIds },
       },
       select: {
         followingId: true,
@@ -318,10 +318,10 @@ export class UserService {
     });
 
     const result: Record<string, boolean> = {};
-    targetIds.forEach(id => {
+    targetIds.forEach((id) => {
       result[id] = false;
     });
-    follows.forEach(f => {
+    follows.forEach((f) => {
       result[f.followingId] = true;
     });
 
@@ -339,7 +339,7 @@ export class UserService {
 
     const users = await prisma.user.findMany({
       where: {
-        unitId: {in: targetIds},
+        unitId: { in: targetIds },
       },
       select: {
         unitId: true,
@@ -349,10 +349,10 @@ export class UserService {
 
     const result: Record<string, number> = {};
     // Initialize all requested ids to 0 for deterministic keys
-    targetIds.forEach(id => {
+    targetIds.forEach((id) => {
       result[id] = 0;
     });
-    users.forEach(user => {
+    users.forEach((user) => {
       result[user.unitId] = user.followersCount ?? 0;
     });
 
@@ -364,25 +364,25 @@ export class UserService {
    */
   async getFollowers(
     userId: string,
-    options: {page?: number; limit?: number} = {},
-  ): Promise<{users: UserWithRelations[]; total: number}> {
+    options: { page?: number; limit?: number } = {},
+  ): Promise<{ users: UserWithRelations[]; total: number }> {
     const pageNum = Math.max(Number(options.page ?? 1), 1);
     const limitNum = Math.max(1, Math.min(Number(options.limit ?? 20), 100));
     const skip = (pageNum - 1) * limitNum;
 
     const [follows, total] = await Promise.all([
       prisma.follow.findMany({
-        where: {followingId: userId},
-        include: {follower: {include: userInclude}},
-        orderBy: {createdAt: 'desc'},
+        where: { followingId: userId },
+        include: { follower: { include: userInclude } },
+        orderBy: { createdAt: "desc" },
         skip,
         take: limitNum,
       }),
-      prisma.follow.count({where: {followingId: userId}}),
+      prisma.follow.count({ where: { followingId: userId } }),
     ]);
 
     return {
-      users: follows.map(f => f.follower as UserWithRelations),
+      users: follows.map((f) => f.follower as UserWithRelations),
       total,
     };
   }
@@ -392,25 +392,25 @@ export class UserService {
    */
   async getFollowings(
     userId: string,
-    options: {page?: number; limit?: number} = {},
-  ): Promise<{users: UserWithRelations[]; total: number}> {
+    options: { page?: number; limit?: number } = {},
+  ): Promise<{ users: UserWithRelations[]; total: number }> {
     const pageNum = Math.max(Number(options.page ?? 1), 1);
     const limitNum = Math.max(1, Math.min(Number(options.limit ?? 20), 100));
     const skip = (pageNum - 1) * limitNum;
 
     const [follows, total] = await Promise.all([
       prisma.follow.findMany({
-        where: {followerId: userId},
-        include: {following: {include: userInclude}},
-        orderBy: {createdAt: 'desc'},
+        where: { followerId: userId },
+        include: { following: { include: userInclude } },
+        orderBy: { createdAt: "desc" },
         skip,
         take: limitNum,
       }),
-      prisma.follow.count({where: {followerId: userId}}),
+      prisma.follow.count({ where: { followerId: userId } }),
     ]);
 
     return {
-      users: follows.map(f => f.following as UserWithRelations),
+      users: follows.map((f) => f.following as UserWithRelations),
       total,
     };
   }

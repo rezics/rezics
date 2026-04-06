@@ -2,27 +2,27 @@
  * React Query configurations for Meilisearch book queries
  */
 
-import {queryOptions} from '@tanstack/react-query';
+import type {
+  FeedbackListResponse,
+  FeedbackType,
+  UnitListResponse,
+} from "@rezics/contract";
+import { UnitType } from "@rezics/contract";
+import { queryOptions } from "@tanstack/react-query";
+import type { BookFilters } from "../book/book.types";
+import { hashFn } from "../utils/hash";
+import { mapUnitListToReviewListResponse } from "./mapper";
 import {
   mapReadlistSearchResultToReadlistListResponse,
   meiliBookApi,
+  meiliFeedbackApi,
   meiliReadlistApi,
   meiliUnitApi,
-  meiliFeedbackApi,
-} from './meili.api';
-import {type BookFilters} from '../book/book.types';
-import type {
-  UnitListResponse,
-  FeedbackListResponse,
-  FeedbackType,
-} from '@rezics/contract';
-import {UnitType} from '@rezics/contract';
-import {hashFn} from '../utils/hash';
-import {mapUnitListToReviewListResponse} from './mapper';
+} from "./meili.api";
 
 export const meiliBookSearchQuery = (filters?: BookFilters) =>
   queryOptions({
-    queryKey: ['meili', 'books', filters],
+    queryKey: ["meili", "books", filters],
     queryFn: () => meiliBookApi.bookSearch(filters),
     // Let caller control when to trigger by constructing options appropriately
     staleTime: 1000 * 60 * 2,
@@ -64,13 +64,13 @@ export const buildMeiliUnitQuery = ({
     start,
     limit,
     q: keyword || undefined,
-    ...(targetUnitId ? {targetUnitId} : {}),
-    ...(options?.userId ? {userId: options.userId} : {}),
+    ...(targetUnitId ? { targetUnitId } : {}),
+    ...(options?.userId ? { userId: options.userId } : {}),
   };
 
   return {
     queryKey: [
-      'meili-units',
+      "meili-units",
       kind,
       targetUnitId ?? null,
       start,
@@ -107,22 +107,22 @@ export const buildMeiliFeedbackQuery = (
     offset,
     limit,
     q: keyword || undefined,
-    ...(options?.userId ? {userId: options.userId} : {}),
-    ...(options?.type ? {type: options.type} : {}),
-    ...(typeof options?.resolved === 'boolean'
-      ? {resolved: options.resolved}
+    ...(options?.userId ? { userId: options.userId } : {}),
+    ...(options?.type ? { type: options.type } : {}),
+    ...(typeof options?.resolved === "boolean"
+      ? { resolved: options.resolved }
       : {}),
   } as const;
 
   return {
     queryKey: [
-      'meili-feedbacks',
+      "meili-feedbacks",
       offset,
       limit,
       keyword,
       options?.userId ?? null,
       options?.type ?? null,
-      typeof options?.resolved === 'boolean' ? options.resolved : null,
+      typeof options?.resolved === "boolean" ? options.resolved : null,
     ],
     queryFn: async (): Promise<FeedbackListResponse> => {
       const searchResult = await meiliFeedbackApi.feedbackSearch(filters);
@@ -162,19 +162,19 @@ export const buildMeiliReadlistQuery = (
     start: startOffset,
     limit: EXTERNAL_PAGE_SIZE,
     q: keyword || undefined,
-    tags: tags?.join(',') || undefined,
-    ...(options?.userId ? {userId: options.userId} : {}),
-    ...(options?.bookId ? {hasBookUnitId: options.bookId} : {}),
-    ...(options?.reviewId ? {hasReviewUnitId: options.reviewId} : {}),
+    tags: tags?.join(",") || undefined,
+    ...(options?.userId ? { userId: options.userId } : {}),
+    ...(options?.bookId ? { hasBookUnitId: options.bookId } : {}),
+    ...(options?.reviewId ? { hasReviewUnitId: options.reviewId } : {}),
   } as const;
 
   return {
     queryKey: [
-      'meili-readlists',
+      "meili-readlists",
       startOffset,
       EXTERNAL_PAGE_SIZE,
       keyword,
-      tags?.join(','),
+      tags?.join(","),
       options?.userId ?? null,
       options?.bookId ?? null,
       options?.reviewId ?? null,
@@ -213,7 +213,7 @@ export const buildMeiliReviewQuery = (
     kind: UnitType.REVIEW,
     start: startOffset,
     targetUnitId: undefined,
-    keyword: options?.keyword || '',
+    keyword: options?.keyword || "",
     limit,
     mapFn: mapUnitListToReviewListResponse,
     options,

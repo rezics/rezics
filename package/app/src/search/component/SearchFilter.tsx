@@ -1,24 +1,24 @@
-import {type SortControlsProps} from '@rezics/ui/composite/pagination/Pagination.tsx';
-import {ArrowDownward, ArrowUpward} from '@mui/icons-material';
-import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
-import {Button, Menu, MenuItem, Stack, Typography} from '@mui/material';
-import {useTheme} from '@mui/material/styles';
-import React from 'react';
+import { ArrowDownward, ArrowUpward } from "@mui/icons-material";
+import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
+import { Button, Menu, MenuItem, Stack, Typography } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
+import type { SortControlsProps } from "@rezics/ui/composite/pagination/Pagination.tsx";
+import React from "react";
 
 export type BookLibSortKey =
-  | 'relevance'
-  | 'time'
-  | 'favorites'
-  | 'wordCount'
-  | 'monthVotes'
-  | 'recommend';
+  | "relevance"
+  | "time"
+  | "favorites"
+  | "wordCount"
+  | "monthVotes"
+  | "recommend";
 
 const LABELS: Partial<Record<BookLibSortKey, string>> = {
-  relevance: '搜索相关性',
-  time: '最新',
-  favorites: '总收藏',
-  wordCount: '总字数',
-  monthVotes: '月票',
+  relevance: "搜索相关性",
+  time: "最新",
+  favorites: "总收藏",
+  wordCount: "总字数",
+  monthVotes: "月票",
 };
 
 export type BookSearchFilterProps = SortControlsProps;
@@ -32,7 +32,7 @@ export const BookSearchFilter: React.FC<BookSearchFilterProps> = ({
   const theme = useTheme();
 
   const handleClick = (key: string) => (e: React.MouseEvent) => {
-    if (key === 'recommend') {
+    if (key === "recommend") {
       // 推荐票用下拉菜单
       const el = e.currentTarget as HTMLElement;
       setAnchorEl(el);
@@ -53,14 +53,14 @@ export const BookSearchFilter: React.FC<BookSearchFilterProps> = ({
         alignItems="center"
         className="book-search-filter mb-6"
       >
-        {(Object.keys(LABELS) as BookLibSortKey[]).map(key => {
+        {(Object.keys(LABELS) as BookLibSortKey[]).map((key) => {
           const active = key === sortType;
           return (
             <Button
               key={key}
-              onClick={() => onSortChange({type: key})}
+              onClick={() => onSortChange({ type: key })}
               sx={{
-                backgroundColor: active ? theme.palette.secondary.main : '',
+                backgroundColor: active ? theme.palette.secondary.main : "",
               }}
               // variant={active ? "outlined" : "contained" }
             >
@@ -69,7 +69,7 @@ export const BookSearchFilter: React.FC<BookSearchFilterProps> = ({
           );
         })}
         <Button
-          onClick={handleClick('recommend')}
+          onClick={handleClick("recommend")}
           endIcon={<ArrowDropDownIcon fontSize="small" />}
         >
           <Typography variant="body2">推荐</Typography>
@@ -81,13 +81,13 @@ export const BookSearchFilter: React.FC<BookSearchFilterProps> = ({
           open={Boolean(anchorEl)}
           onClose={() => setAnchorEl(null)}
         >
-          <MenuItem onClick={handleSecondaryMenuSelect('weekVotes')}>
+          <MenuItem onClick={handleSecondaryMenuSelect("weekVotes")}>
             周推荐票
           </MenuItem>
-          <MenuItem onClick={handleSecondaryMenuSelect('monthVotes')}>
+          <MenuItem onClick={handleSecondaryMenuSelect("monthVotes")}>
             月推荐票
           </MenuItem>
-          <MenuItem onClick={handleSecondaryMenuSelect('totalVotes')}>
+          <MenuItem onClick={handleSecondaryMenuSelect("totalVotes")}>
             总推荐票
           </MenuItem>
         </Menu>
@@ -95,12 +95,12 @@ export const BookSearchFilter: React.FC<BookSearchFilterProps> = ({
       <div>
         <Button
           value="desc"
-          onClick={() => onSortChange({order: 'desc'})}
+          onClick={() => onSortChange({ order: "desc" })}
           size="small"
           sx={{
             backgroundColor:
-              sortOrder === 'desc' ? theme.palette.secondary.main : '',
-            textTransform: 'none',
+              sortOrder === "desc" ? theme.palette.secondary.main : "",
+            textTransform: "none",
           }}
         >
           <ArrowDownward />
@@ -108,13 +108,13 @@ export const BookSearchFilter: React.FC<BookSearchFilterProps> = ({
         </Button>
         <Button
           value="asc"
-          onClick={() => onSortChange({order: 'asc'})}
+          onClick={() => onSortChange({ order: "asc" })}
           className="!ml-2"
           size="small"
           sx={{
             backgroundColor:
-              sortOrder === 'asc' ? theme.palette.secondary.main : '',
-            textTransform: 'none',
+              sortOrder === "asc" ? theme.palette.secondary.main : "",
+            textTransform: "none",
           }}
         >
           <ArrowUpward />

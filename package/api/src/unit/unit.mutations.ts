@@ -2,18 +2,18 @@
  * React Query mutations for Unit operations
  */
 
-import {
-  useMutation,
-  useQueryClient,
-  type UseMutationOptions,
-} from '@tanstack/react-query';
-import {unitApi} from './unit.api';
-import {unitKeys} from './unit.keys';
 import type {
   CreateUnitInput,
-  UpdateUnitInput,
   UnitResponse,
-} from '@rezics/contract';
+  UpdateUnitInput,
+} from "@rezics/contract";
+import {
+  type UseMutationOptions,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
+import { unitApi } from "./unit.api";
+import { unitKeys } from "./unit.keys";
 
 /**
  * Mutation for creating a unit
@@ -21,7 +21,7 @@ import type {
 export function useCreateUnitMutation(
   options?: Omit<
     UseMutationOptions<UnitResponse, Error, CreateUnitInput>,
-    'mutationFn'
+    "mutationFn"
   >,
 ) {
   const queryClient = useQueryClient();
@@ -31,7 +31,7 @@ export function useCreateUnitMutation(
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
       // Invalidate and refetch unit lists
-      queryClient.invalidateQueries({queryKey: unitKeys.lists()});
+      queryClient.invalidateQueries({ queryKey: unitKeys.lists() });
 
       // Pre-populate the cache with the new unit
       if ((data as any)?.id) {
@@ -51,22 +51,22 @@ export function useUpdateUnitMutation(
     UseMutationOptions<
       UnitResponse,
       Error,
-      {unitId: string; input: UpdateUnitInput}
+      { unitId: string; input: UpdateUnitInput }
     >,
-    'mutationFn'
+    "mutationFn"
   >,
 ) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({unitId, input}) => unitApi.update(unitId, input),
+    mutationFn: ({ unitId, input }) => unitApi.update(unitId, input),
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
       // Update the cache for this specific unit
       queryClient.setQueryData(unitKeys.detail(variables.unitId), data);
 
       // Invalidate lists to ensure they're refreshed
-      queryClient.invalidateQueries({queryKey: unitKeys.lists()});
+      queryClient.invalidateQueries({ queryKey: unitKeys.lists() });
 
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
@@ -78,8 +78,8 @@ export function useUpdateUnitMutation(
  */
 export function useDeleteUnitMutation(
   options?: Omit<
-    UseMutationOptions<{message: string}, Error, string>,
-    'mutationFn'
+    UseMutationOptions<{ message: string }, Error, string>,
+    "mutationFn"
   >,
 ) {
   const queryClient = useQueryClient();
@@ -89,10 +89,10 @@ export function useDeleteUnitMutation(
     ...options,
     onSuccess: (data, unitId, onMutateResult, context) => {
       // Remove from cache
-      queryClient.removeQueries({queryKey: unitKeys.detail(unitId)});
+      queryClient.removeQueries({ queryKey: unitKeys.detail(unitId) });
 
       // Invalidate all lists
-      queryClient.invalidateQueries({queryKey: unitKeys.lists()});
+      queryClient.invalidateQueries({ queryKey: unitKeys.lists() });
 
       options?.onSuccess?.(data, unitId, onMutateResult, context);
     },

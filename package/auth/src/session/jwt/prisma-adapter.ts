@@ -1,22 +1,22 @@
-import {createHash} from 'node:crypto';
-import {symmetricDecrypt, symmetricEncrypt} from 'better-auth/crypto';
-import type {JwtKeyPersistence, JwtKeyRecord} from '@rezics/jwt';
+import { createHash } from "node:crypto";
+import type { JwtKeyPersistence, JwtKeyRecord } from "@rezics/jwt";
 import {
-  JwtAlgorithm,
   asJwtPrivateJwk,
   asJwtPublicJwk,
+  JwtAlgorithm,
   type JwtPrivateJwk,
   type JwtPublicJwk,
-} from '@rezics/jwt';
-import {prisma} from '../../auth/prisma';
+} from "@rezics/jwt";
+import { symmetricDecrypt, symmetricEncrypt } from "better-auth/crypto";
+import { prisma } from "../../auth/prisma";
 import {
   authJwtLocalServiceKey,
+  getAuthJwksGracePeriodSeconds,
   getAuthJwtAudience,
   getAuthJwtIssuer,
-  getAuthJwksGracePeriodSeconds,
   getAuthSessionJwksPath,
   getAuthSessionJwksUrl,
-} from './options';
+} from "./options";
 
 type JwtServiceRecord = {
   id: string;
@@ -31,7 +31,9 @@ type JwtServiceRecord = {
 
 type BetterAuthJwtAdapterContext = {
   context?: {
-    secretConfig?: string | {currentVersion: number; keys: Map<number, string>};
+    secretConfig?:
+      | string
+      | { currentVersion: number; keys: Map<number, string> };
   };
 };
 
@@ -62,7 +64,7 @@ type BetterAuthDirectJwkPayload = {
 };
 
 function deriveDeterministicKid(publicJwk: JwtPublicJwk): string {
-  return createHash('sha256')
+  return createHash("sha256")
     .update(
       JSON.stringify({
         kty: publicJwk.kty,
@@ -71,35 +73,35 @@ function deriveDeterministicKid(publicJwk: JwtPublicJwk): string {
         y: publicJwk.y,
       }),
     )
-    .digest('hex')
+    .digest("hex")
     .slice(0, 32);
 }
 
 function isSerializedJwkPayload(
   data: BetterAuthSerializedJwkPayload | BetterAuthDirectJwkPayload,
 ): data is BetterAuthSerializedJwkPayload {
-  return 'publicKey' in data && 'privateKey' in data;
+  return "publicKey" in data && "privateKey" in data;
 }
 
 function parseJsonValue(raw: string, fieldName: string): unknown {
   try {
     return JSON.parse(raw);
   } catch (error) {
-    throw new Error(`Invalid ${fieldName} JSON`, {cause: error});
+    throw new Error(`Invalid ${fieldName} JSON`, { cause: error });
   }
 }
 
 function asCompletePrivateJwk(jwk: unknown): JwtPrivateJwk {
   if (
     !jwk ||
-    typeof jwk !== 'object' ||
-    !('d' in jwk) ||
-    !('x' in jwk) ||
-    !('y' in jwk) ||
-    !('kty' in jwk) ||
-    jwk.kty !== 'EC'
+    typeof jwk !== "object" ||
+    !("d" in jwk) ||
+    !("x" in jwk) ||
+    !("y" in jwk) ||
+    !("kty" in jwk) ||
+    jwk.kty !== "EC"
   ) {
-    throw new Error('Expected a complete ES256 private JWK');
+    throw new Error("Expected a complete ES256 private JWK");
   }
 
   return asJwtPrivateJwk(jwk as JwtPrivateJwk);
@@ -109,15 +111,15 @@ async function parseSerializedPrivateJwk(
   privateKey: string,
   ctx: BetterAuthJwtAdapterContext,
 ): Promise<JwtPrivateJwk> {
-  const parsed = parseJsonValue(privateKey, 'privateKey');
-  if (typeof parsed !== 'string') {
+  const parsed = parseJsonValue(privateKey, "privateKey");
+  if (typeof parsed !== "string") {
     return asCompletePrivateJwk(parsed);
   }
 
   const secretConfig = ctx.context?.secretConfig;
   if (!secretConfig) {
     throw new Error(
-      'Missing Better Auth secret config for encrypted privateKey',
+      "Missing Better Auth secret config for encrypted privateKey",
     );
   }
 
@@ -126,7 +128,7 @@ async function parseSerializedPrivateJwk(
     data: parsed,
   });
   return asCompletePrivateJwk(
-    parseJsonValue(decrypted, 'decrypted privateKey'),
+    parseJsonValue(decrypted, "decrypted privateKey"),
   );
 }
 
@@ -136,7 +138,7 @@ async function toJwtKeyRecord(
 ): Promise<JwtKeyRecord> {
   if (isSerializedJwkPayload(data)) {
     const publicJwk = asJwtPublicJwk(
-      parseJsonValue(data.publicKey, 'publicKey') as JwtPublicJwk,
+      parseJsonValue(data.publicKey, "publicKey") as JwtPublicJwk,
     );
     const privateJwk = await parseSerializedPrivateJwk(data.privateKey, ctx);
     const kid = data.kid ?? publicJwk.kid ?? privateJwk.kid;
@@ -166,8 +168,8 @@ async function toJwtKeyRecord(
     };
   }
 
-  if (!data.d || !data.x || !data.y || data.kty !== 'EC') {
-    throw new Error('Expected a complete ES256 private JWK');
+  if (!data.d || !data.x || !data.y || data.kty !== "EC") {
+    throw new Error("Expected a complete ES256 private JWK");
   }
 
   const publicJwk = asJwtPublicJwk({
@@ -212,7 +214,7 @@ async function toBetterAuthJwkRecord(
             ctx.context?.secretConfig ??
             (() => {
               throw new Error(
-                'Missing Better Auth secret config for privateKey encryption',
+                "Missing Better Auth secret config for privateKey encryption",
               );
             })(),
           data: privateWebKey,
@@ -284,7 +286,7 @@ export async function getLocalAuthJwtServiceRecord(): Promise<JwtServiceRecord> 
 }
 
 export const authJwtPersistence: JwtKeyPersistence = {
-  async listKeys({issuer}) {
+  async listKeys({ issuer }) {
     if (issuer !== getAuthJwtIssuer()) {
       return [];
     }
@@ -301,18 +303,18 @@ export const authJwtPersistence: JwtKeyPersistence = {
           },
         },
       },
-      orderBy: [{createdAt: 'desc'}],
+      orderBy: [{ createdAt: "desc" }],
     });
     return rows.map(mapRowToRecord);
   },
-  async saveKey({issuer, key}) {
+  async saveKey({ issuer, key }) {
     if (issuer !== getAuthJwtIssuer()) {
       throw new Error(`Unsupported issuer ${issuer}`);
     }
 
     const localService = await ensureLocalAuthJwtServiceRecord();
     await prisma.jwks.upsert({
-      where: {id: key.kid},
+      where: { id: key.kid },
       update: {
         jwtServiceId: localService.id,
         publicJwk: key.publicJwk as any,
@@ -332,23 +334,23 @@ export const authJwtPersistence: JwtKeyPersistence = {
       },
     });
   },
-  async markKeyRetiring({issuer, kid, expiresAt}) {
+  async markKeyRetiring({ issuer, kid, expiresAt }) {
     if (issuer !== getAuthJwtIssuer()) {
       throw new Error(`Unsupported issuer ${issuer}`);
     }
 
     await prisma.jwks.update({
-      where: {id: kid},
-      data: {expiresAt},
+      where: { id: kid },
+      data: { expiresAt },
     });
   },
-  async getKeyByKid({issuer, kid}) {
+  async getKeyByKid({ issuer, kid }) {
     if (issuer !== getAuthJwtIssuer()) {
       return null;
     }
 
     const row = await prisma.jwks.findUnique({
-      where: {id: kid},
+      where: { id: kid },
       include: {
         jwtService: {
           select: {
@@ -370,7 +372,7 @@ export function createBetterAuthJwtAdapter(
         issuer: getAuthJwtIssuer(),
       });
       return Promise.all(
-        keys.map(key => toBetterAuthJwkRecord(key, _ctx, options)),
+        keys.map((key) => toBetterAuthJwkRecord(key, _ctx, options)),
       );
     },
     createJwk: async (

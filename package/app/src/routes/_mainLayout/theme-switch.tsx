@@ -1,10 +1,10 @@
-import {createFileRoute, lazyRouteComponent} from '@tanstack/react-router';
+import { createFileRoute, lazyRouteComponent } from "@tanstack/react-router";
 
 const ThemeSwitch = lazyRouteComponent(
-  () => import('@rezics/ui/shadcn/theme-switch.tsx'),
-  'ThemeSwitch',
+  () => import("@rezics/ui/shadcn/theme-switch.tsx"),
+  "ThemeSwitch",
 );
 
-export const Route = createFileRoute('/_mainLayout/theme-switch')({
+export const Route = createFileRoute("/_mainLayout/theme-switch")({
   component: ThemeSwitch,
 });

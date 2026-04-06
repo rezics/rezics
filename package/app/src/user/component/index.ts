@@ -1,1 +1,1 @@
-export {Small} from './Small';
+export { Small } from "./Small";

@@ -1,6 +1,6 @@
-import {create} from 'zustand';
-import {devtools, subscribeWithSelector} from 'zustand/middleware';
-import {immer} from 'zustand/middleware/immer';
+import { create } from "zustand";
+import { devtools, subscribeWithSelector } from "zustand/middleware";
+import { immer } from "zustand/middleware/immer";
 
 interface DialogEntry {
   visible: boolean;
@@ -17,7 +17,7 @@ interface DialogState {
 // Helper：保证每次访问一个 key 都有结构
 const ensureEntry = (state: DialogState, key: string): DialogEntry => {
   if (!state.dialogs[key]) {
-    state.dialogs[key] = {visible: false, contentMain: ''};
+    state.dialogs[key] = { visible: false, contentMain: "" };
   }
   return state.dialogs[key];
 };
@@ -30,7 +30,7 @@ export const useDialogStore = create<DialogState>()(
 
         setDialogVisible: (key, visible) =>
           set(
-            state => {
+            (state) => {
               const entry = ensureEntry(state, key);
               entry.visible = visible;
             },
@@ -40,7 +40,7 @@ export const useDialogStore = create<DialogState>()(
 
         setDialogContent: (key, content) =>
           set(
-            state => {
+            (state) => {
               const entry = ensureEntry(state, key);
               entry.contentMain = content;
             },
@@ -48,9 +48,9 @@ export const useDialogStore = create<DialogState>()(
             `dialog/setContent/${key}`,
           ),
 
-        getDialogEntry: key => get().dialogs[key],
+        getDialogEntry: (key) => get().dialogs[key],
       })),
     ),
-    {name: 'dialogStore', store: 'dialogStore'},
+    { name: "dialogStore", store: "dialogStore" },
   ),
 );

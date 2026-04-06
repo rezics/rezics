@@ -1,8 +1,8 @@
-import {createFileRoute, lazyRouteComponent} from '@tanstack/react-router';
+import { createFileRoute, lazyRouteComponent } from "@tanstack/react-router";
 
-export const Route = createFileRoute('/_admin/users/$unitId')({
+export const Route = createFileRoute("/_admin/users/$unitId")({
   component: lazyRouteComponent(
-    () => import('@/user/page/UserEditPage'),
-    'default',
+    () => import("@/user/page/UserEditPage"),
+    "default",
   ),
 });

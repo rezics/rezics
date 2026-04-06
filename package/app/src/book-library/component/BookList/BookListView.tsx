@@ -1,11 +1,9 @@
-import {Card, CardContent, CardMedia, Typography} from '@mui/material';
+import { Card, CardContent, CardMedia, Typography } from "@mui/material";
+import type { BookDTO } from "@rezics/contract";
+import { LazyLoadImage } from "@rezics/ui/primitive/image/LazyLoadImage.tsx";
+import { Link } from "@rezics/ui/primitive/link/Link.tsx";
 
-import {Link} from '@rezics/ui/primitive/link/Link.tsx';
-
-import type {BookDTO} from '@rezics/contract';
-import {LazyLoadImage} from '@rezics/ui/primitive/image/LazyLoadImage.tsx';
-
-import React from 'react';
+import type React from "react";
 
 /** Props for BookListViewItem component. */
 export type BookListViewItemProps = {
@@ -18,10 +16,10 @@ export type BookListViewItemProps = {
  *
  * Displays book cover, title, author, and description preview.
  */
-export const BookListViewItem: React.FC<BookListViewItemProps> = ({book}) => {
+export const BookListViewItem: React.FC<BookListViewItemProps> = ({ book }) => {
   return (
     <div>
-      <Link to="/book/$bookId" params={{bookId: book.unitId}}>
+      <Link to="/book/$bookId" params={{ bookId: book.unitId }}>
         <Card className="mt-4 h-[200px] flex flex-row items-stretch gap-4 w-full">
           {book.coverUrl && (
             <CardMedia className="aspect-[2/3]">
@@ -42,7 +40,7 @@ export const BookListViewItem: React.FC<BookListViewItemProps> = ({book}) => {
                 color="text.secondary"
                 className="mb-2"
               >
-                {book.author?.[0]?.name || ''}
+                {book.author?.[0]?.name || ""}
               </Typography>
               <Typography variant="body2" className="line-clamp-3">
                 {book.description}
@@ -66,10 +64,10 @@ export type BookListViewProps = {
  *
  * Renders a list of BookListViewItem components.
  */
-export const BookListView: React.FC<BookListViewProps> = ({books}) => {
+export const BookListView: React.FC<BookListViewProps> = ({ books }) => {
   return (
     <div className="mt-4 grid grid-cols-1">
-      {books.map(book => (
+      {books.map((book) => (
         <div key={book.unitId}>
           <BookListViewItem book={book} />
         </div>

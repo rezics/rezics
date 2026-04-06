@@ -1,14 +1,14 @@
-import {AccentBarWithText} from '@rezics/ui/composite/typography/AccentBarWithText.tsx';
-import {ArrowForwardIcon} from '@rezics/ui/composite/navigation/ArrowForwardIcon.tsx';
-import {EditButtonFloatRightShow} from '@rezics/ui/composite/button/EditButtonFloatRight.tsx';
-import {Typography} from '@mui/material';
-import React from 'react';
-import {useTranslation} from 'react-i18next';
-import type {PublicUser} from '@rezics/contract';
-import {FollowButton} from '@/engagement/component/FollowButton.tsx';
-import {LazyLoadImage} from '@rezics/ui/primitive/image/LazyLoadImage.tsx';
-import {useIsMobile} from '@/shared/util/use-media-query.ts';
-import {useNavigate} from '@tanstack/react-router';
+import { Typography } from "@mui/material";
+import type { PublicUser } from "@rezics/contract";
+import { EditButtonFloatRightShow } from "@rezics/ui/composite/button/EditButtonFloatRight.tsx";
+import { ArrowForwardIcon } from "@rezics/ui/composite/navigation/ArrowForwardIcon.tsx";
+import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
+import { LazyLoadImage } from "@rezics/ui/primitive/image/LazyLoadImage.tsx";
+import { useNavigate } from "@tanstack/react-router";
+import type React from "react";
+import { useTranslation } from "react-i18next";
+import { FollowButton } from "@/engagement/component/FollowButton.tsx";
+import { useIsMobile } from "@/shared/util/use-media-query.ts";
 
 // --------- Types ---------
 export type Author = PublicUser;
@@ -33,22 +33,22 @@ const AuthorInfoMobile: React.FC<AuthorInfoLayoutProps> = ({
   showEditButton,
   onEdit,
 }) => {
-  const {t} = useTranslation();
+  const { t } = useTranslation();
   return (
     <div>
       <ArrowForwardIcon size={16} to={`/user/${author?.unitId}`}>
         <AccentBarWithText
-          text={t('book.author_info.author_line', {name: author?.name})}
+          text={t("book.author_info.author_line", { name: author?.name })}
         />
       </ArrowForwardIcon>
       {showEditButton && (
-        <EditButtonFloatRightShow onClick={onEdit} text={t('common.edit')} />
+        <EditButtonFloatRightShow onClick={onEdit} text={t("common.edit")} />
       )}
       <div className="flex items-start gap-4 px-4 pt-6">
         {/* Left: Avatar + Follow */}
         <div className="flex flex-col items-center w-24 flex-shrink-0">
           <LazyLoadImage
-            src={author.avatar || ''}
+            src={author.avatar || ""}
             alt="avatar"
             className="w-24 h-24 rounded object-cover shadow-lg"
           />
@@ -86,20 +86,20 @@ const AuthorInfoDesktop: React.FC<AuthorInfoLayoutProps> = ({
   showEditButton,
   onEdit,
 }) => {
-  const {t} = useTranslation();
+  const { t } = useTranslation();
   return (
     <div>
       <div>
         <div className="flex mb-4">
           <ArrowForwardIcon size={16} to={`/user/${author?.unitId}`}>
             <AccentBarWithText
-              text={t('book.author_info.author_line', {name: author?.name})}
+              text={t("book.author_info.author_line", { name: author?.name })}
             />
           </ArrowForwardIcon>
           {showEditButton && (
             <EditButtonFloatRightShow
               onClick={onEdit}
-              text={t('common.edit')}
+              text={t("common.edit")}
             />
           )}
         </div>
@@ -110,7 +110,7 @@ const AuthorInfoDesktop: React.FC<AuthorInfoLayoutProps> = ({
               {/* Left image area */}
               <div className="w-1/5 flex-row justify-center">
                 <LazyLoadImage
-                  src={author.avatar || ''}
+                  src={author.avatar || ""}
                   className="max-w-full max-h-full object-contain rounded"
                   alt="avatar"
                 />
@@ -130,11 +130,11 @@ const AuthorInfoDesktop: React.FC<AuthorInfoLayoutProps> = ({
               {/* Right text */}
               <div className="flex-1 !text-md">
                 <Typography className="">
-                  {t('book.author_info.bio_label')}:{author.bio}
+                  {t("book.author_info.bio_label")}:{author.bio}
                 </Typography>
                 <br />
                 <Typography className="">
-                  {t('book.author_info.description_label')}:{author.description}
+                  {t("book.author_info.description_label")}:{author.description}
                 </Typography>
               </div>
             </div>
@@ -162,7 +162,7 @@ export const AuthorInfo: React.FC<AuthorInfoProps> = ({
       return;
     }
     if (author?.unitId) {
-      navigate({to: `/user/${author.unitId}/edit`});
+      navigate({ to: `/user/${author.unitId}/edit` });
     }
   };
 

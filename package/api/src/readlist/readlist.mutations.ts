@@ -2,18 +2,18 @@
  * React Query mutations for Readlist operations
  */
 
-import {
-  useMutation,
-  useQueryClient,
-  type UseMutationOptions,
-} from '@tanstack/react-query';
-import {readlistApi} from './readlist.api';
-import {readlistKeys} from './readlist.keys';
 import type {
   CreateReadlistInput,
-  UpdateReadlistInput,
   ReadlistResponse,
-} from '@rezics/contract';
+  UpdateReadlistInput,
+} from "@rezics/contract";
+import {
+  type UseMutationOptions,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
+import { readlistApi } from "./readlist.api";
+import { readlistKeys } from "./readlist.keys";
 
 /**
  * Mutation for creating a readlist
@@ -21,7 +21,7 @@ import type {
 export function useCreateReadlistMutation(
   options?: Omit<
     UseMutationOptions<ReadlistResponse, Error, CreateReadlistInput>,
-    'mutationFn'
+    "mutationFn"
   >,
 ) {
   const queryClient = useQueryClient();
@@ -31,7 +31,7 @@ export function useCreateReadlistMutation(
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
       // Invalidate and refetch readlist lists
-      queryClient.invalidateQueries({queryKey: readlistKeys.lists()});
+      queryClient.invalidateQueries({ queryKey: readlistKeys.lists() });
 
       // Pre-populate the cache with the new readlist by its unitId (id)
       queryClient.setQueryData(readlistKeys.detail(data.id), data);
@@ -49,22 +49,22 @@ export function useUpdateReadlistMutation(
     UseMutationOptions<
       ReadlistResponse,
       Error,
-      {unitId: string; input: UpdateReadlistInput}
+      { unitId: string; input: UpdateReadlistInput }
     >,
-    'mutationFn'
+    "mutationFn"
   >,
 ) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({unitId, input}) => readlistApi.update(unitId, input),
+    mutationFn: ({ unitId, input }) => readlistApi.update(unitId, input),
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
       // Update the cache for this specific readlist
       queryClient.setQueryData(readlistKeys.detail(variables.unitId), data);
 
       // Invalidate lists to ensure they're refreshed
-      queryClient.invalidateQueries({queryKey: readlistKeys.lists()});
+      queryClient.invalidateQueries({ queryKey: readlistKeys.lists() });
 
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
@@ -76,8 +76,8 @@ export function useUpdateReadlistMutation(
  */
 export function useDeleteReadlistMutation(
   options?: Omit<
-    UseMutationOptions<{message: string}, Error, string>,
-    'mutationFn'
+    UseMutationOptions<{ message: string }, Error, string>,
+    "mutationFn"
   >,
 ) {
   const queryClient = useQueryClient();
@@ -87,10 +87,10 @@ export function useDeleteReadlistMutation(
     ...options,
     onSuccess: (data, unitId, onMutateResult, context) => {
       // Remove from cache
-      queryClient.removeQueries({queryKey: readlistKeys.detail(unitId)});
+      queryClient.removeQueries({ queryKey: readlistKeys.detail(unitId) });
 
       // Invalidate all lists
-      queryClient.invalidateQueries({queryKey: readlistKeys.lists()});
+      queryClient.invalidateQueries({ queryKey: readlistKeys.lists() });
 
       options?.onSuccess?.(data, unitId, onMutateResult, context);
     },

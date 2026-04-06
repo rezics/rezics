@@ -1,13 +1,13 @@
-import React from 'react';
-import {LazyLoadImage} from '@rezics/ui/primitive/image/LazyLoadImage.tsx';
-import {useTranslation} from 'react-i18next';
+import { LazyLoadImage } from "@rezics/ui/primitive/image/LazyLoadImage.tsx";
+import type React from "react";
+import { useTranslation } from "react-i18next";
 
 const defaultBrands = [
-  'https://dummyimage.com/100x40/cccccc/000&text=Brand+A',
-  'https://dummyimage.com/100x40/cccccc/000&text=Brand+B',
-  'https://dummyimage.com/100x40/cccccc/000&text=Brand+C',
-  'https://dummyimage.com/100x40/cccccc/000&text=Brand+D',
-  'https://dummyimage.com/100x40/cccccc/000&text=Brand+E',
+  "https://dummyimage.com/100x40/cccccc/000&text=Brand+A",
+  "https://dummyimage.com/100x40/cccccc/000&text=Brand+B",
+  "https://dummyimage.com/100x40/cccccc/000&text=Brand+C",
+  "https://dummyimage.com/100x40/cccccc/000&text=Brand+D",
+  "https://dummyimage.com/100x40/cccccc/000&text=Brand+E",
 ];
 
 export type HomePartnerBrandsProps = {
@@ -19,8 +19,8 @@ export const HomePartnerBrands: React.FC<HomePartnerBrandsProps> = ({
   logos = defaultBrands,
   title,
 }) => {
-  const {t} = useTranslation();
-  const resolvedTitle = title ?? t('page.home.sections.partner_brands');
+  const { t } = useTranslation();
+  const resolvedTitle = title ?? t("page.home.sections.partner_brands");
   return (
     <div className="w-full">
       <div className="flex items-center justify-between mb-3">

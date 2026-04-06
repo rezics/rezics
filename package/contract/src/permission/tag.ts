@@ -1,5 +1,5 @@
-import type {UserDTO, UnitDTO} from '../index';
-import {BasicAdminPermission, isBlocked} from './core';
+import type { UnitDTO, UserDTO } from "../index";
+import { BasicAdminPermission, isBlocked } from "./core";
 
 export function hasPermissionToUpdateTag(
   user: UserDTO,
@@ -11,7 +11,7 @@ export function hasPermissionToUpdateTag(
   if (BasicAdminPermission(user)) {
     return true;
   }
-  if (user.unitId == unit?.user?.unitId) {
+  if (user.unitId === unit?.user?.unitId) {
     return true;
   }
   return true;

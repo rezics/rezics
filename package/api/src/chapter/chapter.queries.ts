@@ -2,10 +2,10 @@
  * React Query configurations for Chapter queries
  */
 
-import {queryOptions, infiniteQueryOptions} from '@tanstack/react-query';
-import {chapterApi} from './chapter.api';
-import {chapterKeys} from './chapter.keys';
-import type {ChapterFilters} from './chapter.types';
+import { infiniteQueryOptions, queryOptions } from "@tanstack/react-query";
+import { chapterApi } from "./chapter.api";
+import { chapterKeys } from "./chapter.keys";
+import type { ChapterFilters } from "./chapter.types";
 
 /**
  * Query options for listing chapters
@@ -68,15 +68,15 @@ export const chaptersByTargetUnitQuery = (
  * Uses offset-like start pagination
  */
 export const chapterInfiniteListQuery = (
-  filters?: Omit<ChapterFilters, 'page'>,
+  filters?: Omit<ChapterFilters, "page">,
 ) =>
   infiniteQueryOptions({
     queryKey: chapterKeys.list(filters),
-    queryFn: ({pageParam = 1}) =>
-      chapterApi.list({...filters, start: pageParam}),
+    queryFn: ({ pageParam = 1 }) =>
+      chapterApi.list({ ...filters, start: pageParam }),
     initialPageParam: 1,
     getNextPageParam: (lastPage, allPages, lastPageParam) => {
-      const {items, total} = lastPage;
+      const { items, total } = lastPage;
       const limit = filters?.limit || 20;
       const hasMore =
         items.length === limit && allPages.length * limit < (total || 0);

@@ -2,18 +2,18 @@
  * React Query mutations for Chapter operations
  */
 
-import {
-  useMutation,
-  useQueryClient,
-  type UseMutationOptions,
-} from '@tanstack/react-query';
-import {chapterApi} from './chapter.api';
-import {chapterKeys} from './chapter.keys';
 import type {
+  ChapterResponse,
   CreateChapterInput,
   UpdateChapterInput,
-  ChapterResponse,
-} from '@rezics/contract';
+} from "@rezics/contract";
+import {
+  type UseMutationOptions,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
+import { chapterApi } from "./chapter.api";
+import { chapterKeys } from "./chapter.keys";
 
 /**
  * Mutation for creating a chapter
@@ -21,7 +21,7 @@ import type {
 export function useCreateChapterMutation(
   options?: Omit<
     UseMutationOptions<ChapterResponse, Error, CreateChapterInput>,
-    'mutationFn'
+    "mutationFn"
   >,
 ) {
   const queryClient = useQueryClient();
@@ -31,7 +31,7 @@ export function useCreateChapterMutation(
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
       // Invalidate and refetch chapter lists
-      queryClient.invalidateQueries({queryKey: chapterKeys.lists()});
+      queryClient.invalidateQueries({ queryKey: chapterKeys.lists() });
 
       // Pre-populate the cache with the new chapter by its unitId
       queryClient.setQueryData(chapterKeys.detail(data.unitId), data);
@@ -49,22 +49,22 @@ export function useUpdateChapterMutation(
     UseMutationOptions<
       ChapterResponse,
       Error,
-      {unitId: string; input: UpdateChapterInput}
+      { unitId: string; input: UpdateChapterInput }
     >,
-    'mutationFn'
+    "mutationFn"
   >,
 ) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({unitId, input}) => chapterApi.update(unitId, input),
+    mutationFn: ({ unitId, input }) => chapterApi.update(unitId, input),
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
       // Update the cache for this specific chapter
       queryClient.setQueryData(chapterKeys.detail(variables.unitId), data);
 
       // Invalidate lists to ensure they're refreshed
-      queryClient.invalidateQueries({queryKey: chapterKeys.lists()});
+      queryClient.invalidateQueries({ queryKey: chapterKeys.lists() });
 
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
@@ -76,8 +76,8 @@ export function useUpdateChapterMutation(
  */
 export function useDeleteChapterMutation(
   options?: Omit<
-    UseMutationOptions<{message: string}, Error, string>,
-    'mutationFn'
+    UseMutationOptions<{ message: string }, Error, string>,
+    "mutationFn"
   >,
 ) {
   const queryClient = useQueryClient();
@@ -87,10 +87,10 @@ export function useDeleteChapterMutation(
     ...options,
     onSuccess: (data, unitId, onMutateResult, context) => {
       // Remove from cache
-      queryClient.removeQueries({queryKey: chapterKeys.detail(unitId)});
+      queryClient.removeQueries({ queryKey: chapterKeys.detail(unitId) });
 
       // Invalidate all lists
-      queryClient.invalidateQueries({queryKey: chapterKeys.lists()});
+      queryClient.invalidateQueries({ queryKey: chapterKeys.lists() });
 
       options?.onSuccess?.(data, unitId, onMutateResult, context);
     },

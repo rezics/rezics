@@ -1,8 +1,13 @@
-import { describe, expect, test } from 'bun:test';
-import { EditorState } from '@codemirror/state';
-import { insertEmoji } from './emoji';
+import { describe, expect, test } from "bun:test";
+import { EditorState } from "@codemirror/state";
+import { insertEmoji } from "./emoji";
 
-function runInsert(doc: string, from: number, to: number | undefined, emoji: string) {
+function runInsert(
+  doc: string,
+  from: number,
+  to: number | undefined,
+  emoji: string,
+) {
   const state = EditorState.create({
     doc,
     selection: { anchor: from, head: to ?? from },
@@ -25,19 +30,19 @@ function runInsert(doc: string, from: number, to: number | undefined, emoji: str
   };
 }
 
-describe('emoji insertion', () => {
-  test('inserts emoji at cursor', () => {
-    const { text } = runInsert('hello world', 5, undefined, '😀');
-    expect(text).toBe('hello😀 world');
+describe("emoji insertion", () => {
+  test("inserts emoji at cursor", () => {
+    const { text } = runInsert("hello world", 5, undefined, "😀");
+    expect(text).toBe("hello😀 world");
   });
 
-  test('replaces selection with emoji', () => {
-    const { text } = runInsert('hello world', 0, 5, '🎉');
-    expect(text).toBe('🎉 world');
+  test("replaces selection with emoji", () => {
+    const { text } = runInsert("hello world", 0, 5, "🎉");
+    expect(text).toBe("🎉 world");
   });
 
-  test('cursor advances past inserted emoji', () => {
-    const { head } = runInsert('test', 2, undefined, '✨');
-    expect(head).toBe(2 + '✨'.length);
+  test("cursor advances past inserted emoji", () => {
+    const { head } = runInsert("test", 2, undefined, "✨");
+    expect(head).toBe(2 + "✨".length);
   });
 });

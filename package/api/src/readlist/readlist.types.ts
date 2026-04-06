@@ -3,33 +3,33 @@
  */
 
 import type {
-  ReadlistDTO,
   CreateReadlistInput,
-  UpdateReadlistInput,
+  ReadlistDTO,
   ReadlistListQuery,
-} from '@rezics/contract';
+  UpdateReadlistInput,
+} from "@rezics/contract";
 
 // Re-export contract types
 export type {
-  ReadlistDTO,
   CreateReadlistInput,
-  UpdateReadlistInput,
+  ReadlistDTO,
   ReadlistListQuery,
+  UpdateReadlistInput,
 };
 
 /**
  * Extended frontend types
  */
-export type ReadlistFormData = Omit<CreateReadlistInput, 'userId'>;
+export type ReadlistFormData = Omit<CreateReadlistInput, "userId">;
 
 export type ReadlistFilters = Partial<ReadlistListQuery>;
 
 export type ReadlistSortOption =
-  | 'createdAt'
-  | 'updatedAt'
-  | 'publishedAt'
-  | 'likeCount'
-  | 'commentCount'
-  | 'viewCount';
+  | "createdAt"
+  | "updatedAt"
+  | "publishedAt"
+  | "likeCount"
+  | "commentCount"
+  | "viewCount";
 
-export type ReadlistView = 'grid' | 'list' | 'table';
+export type ReadlistView = "grid" | "list" | "table";

@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 /**
  * TODO 之后维护自己的 icon Lib
@@ -11,7 +11,7 @@ let iconsPromise: Promise<any> | null = null;
 
 async function loadIcons() {
   if (!iconsPromise) {
-    iconsPromise = import('@react-symbols/icons');
+    iconsPromise = import("@react-symbols/icons");
   }
   return iconsPromise;
 }

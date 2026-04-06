@@ -2,6 +2,6 @@
  * Tags Service - Main exports
  */
 
-export {tagApi} from './tag.api';
-export {tagService, TagService} from './tag.service';
-export {mapTagToDTO, mapTagDetailToDTO} from './mapper';
+export { mapTagDetailToDTO, mapTagToDTO } from "./mapper";
+export { tagApi } from "./tag.api";
+export { TagService, tagService } from "./tag.service";

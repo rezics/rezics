@@ -1,6 +1,6 @@
 // Type only used in server, otherwise use contract
 
-import type {Prisma, Unit, User, Tag, ReactionSummary} from '#/prisma/client';
+import type { Prisma, ReactionSummary, Tag, Unit, User } from "#/prisma/client";
 
 /**
  * Internal review type with relations (stored in Unit)
@@ -8,7 +8,7 @@ import type {Prisma, Unit, User, Tag, ReactionSummary} from '#/prisma/client';
 export type ReviewWithRelations = Unit & {
   user: User;
   tags: Tag[];
-  targetUnit?: Unit & {book?: unknown};
+  targetUnit?: Unit & { book?: unknown };
   reactionSummaries: ReactionSummary[];
 };
 
@@ -19,5 +19,5 @@ export const reviewInclude = {
   user: true,
   tags: true,
   reactionSummaries: true,
-  targetUnit: {include: {book: true, reactionSummaries: true}},
+  targetUnit: { include: { book: true, reactionSummaries: true } },
 } satisfies Prisma.UnitInclude;

@@ -1,4 +1,4 @@
-import {create} from 'zustand';
+import { create } from "zustand";
 
 interface AlertState {
   open: boolean;
@@ -9,9 +9,9 @@ interface AlertState {
 
 export const useAlertStore = create<AlertState>((set, _get) => ({
   open: false,
-  message: '',
+  message: "",
 
-  show: message => set({open: true, message}),
+  show: (message) => set({ open: true, message }),
 
-  close: () => set({open: false, message: ''}),
+  close: () => set({ open: false, message: "" }),
 }));

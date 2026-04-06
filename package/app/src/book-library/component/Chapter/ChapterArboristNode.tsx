@@ -1,11 +1,11 @@
-import React from 'react';
-import type {NodeRendererProps, TreeApi} from 'react-arborist';
-import {useTheme, alpha} from '@mui/material/styles';
-import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
-import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
-import {Link} from '@rezics/ui/primitive/link/Link.tsx';
-import type {Chapter, ChapterContextMenuState} from './ChapterArborist';
+import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
+import { alpha, useTheme } from "@mui/material/styles";
+import { Link } from "@rezics/ui/primitive/link/Link.tsx";
+import type React from "react";
+import type { NodeRendererProps, TreeApi } from "react-arborist";
+import type { Chapter, ChapterContextMenuState } from "./ChapterArborist";
 
 /**
  * Factory that returns a Node renderer function bound to the sidebar's state setters.
@@ -35,7 +35,7 @@ export const createChapterArboristNode = (
       <div
         style={{
           ...style,
-          backgroundColor: isSelected ? selectedBg : 'transparent',
+          backgroundColor: isSelected ? selectedBg : "transparent",
           color: isSelected ? selectedColor : undefined,
         }}
         ref={!node.isEditing && isTreeDraggable ? dragHandle : undefined}
@@ -45,12 +45,12 @@ export const createChapterArboristNode = (
             node.edit();
           }
         }}
-        onContextMenu={e => {
+        onContextMenu={(e) => {
           e.preventDefault();
           e.stopPropagation();
           const currentNodeId = String(node.id);
           treeRef.current?.select(currentNodeId);
-          setContextMenu({x: e.clientX, y: e.clientY, node});
+          setContextMenu({ x: e.clientX, y: e.clientY, node });
         }}
       >
         {/* Arrow toggle */}
@@ -59,7 +59,7 @@ export const createChapterArboristNode = (
             type="button"
             onClick={() => node.toggle()}
             className="w-5 h-5 flex justify-center items-center text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
-            aria-label={node.isOpen ? 'Collapse' : 'Expand'}
+            aria-label={node.isOpen ? "Collapse" : "Expand"}
           >
             {node.isOpen ? (
               <KeyboardArrowDownIcon fontSize="small" />
@@ -89,11 +89,11 @@ export const createChapterArboristNode = (
             <input
               type="text"
               defaultValue={node.data.title}
-              onFocus={e => e.currentTarget.select()}
+              onFocus={(e) => e.currentTarget.select()}
               onBlur={() => node.reset()}
-              onKeyDown={e => {
-                if (e.key === 'Escape') node.reset();
-                if (e.key === 'Enter') {
+              onKeyDown={(e) => {
+                if (e.key === "Escape") node.reset();
+                if (e.key === "Enter") {
                   node.submit((e.target as HTMLInputElement).value);
                 }
               }}
@@ -112,7 +112,7 @@ export const createChapterArboristNode = (
           ) : (
             <Link
               to="/book/$bookId/read/$chapterId"
-              params={{bookId: bookId, chapterId: node.id}}
+              params={{ bookId: bookId, chapterId: node.id }}
             >
               <span className="block truncate">{node.data.title}</span>
             </Link>

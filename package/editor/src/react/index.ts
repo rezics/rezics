@@ -1,5 +1,5 @@
-export { Editor } from './Editor';
-export type { EditorProps } from './Editor';
-export { useEditor } from './useEditor';
-export type { UseEditorOptions } from './useEditor';
-export { EditorContext, useEditorContext } from './context';
+export { EditorContext, useEditorContext } from "./context";
+export type { EditorProps } from "./Editor";
+export { Editor } from "./Editor";
+export type { UseEditorOptions } from "./useEditor";
+export { useEditor } from "./useEditor";

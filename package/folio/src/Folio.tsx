@@ -1,20 +1,20 @@
-import { useState, useRef, useCallback } from 'react';
-import { FolioProvider, useFolio } from './context';
-import { ContentRenderer } from './render/ContentRenderer';
-import { ScrollContainer } from './pagination/ScrollContainer';
-import { PageContainer } from './pagination/PageContainer';
-import { TocPanel } from './toc/TocPanel';
-import { PanelSlot } from './panel/PanelSlot';
-import { useFolioGesture } from './gesture/useFolioGesture';
-import { useKeyboardNav } from './gesture/useKeyboardNav';
-import { getThemeVars } from './styles/theme';
-import type { FolioProps } from './types';
+import { useCallback, useRef, useState } from "react";
+import { FolioProvider, useFolio } from "./context";
+import { useFolioGesture } from "./gesture/useFolioGesture";
+import { useKeyboardNav } from "./gesture/useKeyboardNav";
+import { PageContainer } from "./pagination/PageContainer";
+import { ScrollContainer } from "./pagination/ScrollContainer";
+import { PanelSlot } from "./panel/PanelSlot";
+import { ContentRenderer } from "./render/ContentRenderer";
+import { getThemeVars } from "./styles/theme";
+import { TocPanel } from "./toc/TocPanel";
+import type { FolioProps } from "./types";
 
 function FolioInner({
   onTreeChange,
   renderLoading,
   renderError,
-}: Pick<FolioProps, 'onTreeChange' | 'renderLoading' | 'renderError'>) {
+}: Pick<FolioProps, "onTreeChange" | "renderLoading" | "renderError">) {
   const { state } = useFolio();
   const [showUI, setShowUI] = useState(true);
   const [showToc, setShowToc] = useState(false);
@@ -31,27 +31,27 @@ function FolioInner({
   });
 
   useKeyboardNav({
-    enabled: state.readMode === 'page',
-    onNext: () => navigate('next'),
-    onPrev: () => navigate('prev'),
+    enabled: state.readMode === "page",
+    onNext: () => navigate("next"),
+    onPrev: () => navigate("prev"),
   });
 
   const themeVars = getThemeVars(state.theme);
 
   // Loading state
-  if (state.status.state === 'loading') {
+  if (state.status.state === "loading") {
     return (
-      <div className="folio-loading" style={{ ...themeVars, height: '100%' }}>
+      <div className="folio-loading" style={{ ...themeVars, height: "100%" }}>
         {renderLoading ? renderLoading() : <DefaultLoading />}
       </div>
     );
   }
 
   // Error state
-  if (state.status.state === 'error') {
+  if (state.status.state === "error") {
     const { error, retry } = state.status;
     return (
-      <div className="folio-error" style={{ ...themeVars, height: '100%' }}>
+      <div className="folio-error" style={{ ...themeVars, height: "100%" }}>
         {renderError ? (
           renderError(error, retry)
         ) : (
@@ -61,19 +61,19 @@ function FolioInner({
     );
   }
 
-  const Container =
-    state.readMode === 'page' ? PageContainer : ScrollContainer;
+  const Container = state.readMode === "page" ? PageContainer : ScrollContainer;
 
   return (
     <div
       className="folio-root"
       style={{
         ...themeVars,
-        height: '100%',
-        display: 'flex',
-        position: 'relative',
-        overflow: 'hidden',
-        padding: 'env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)',
+        height: "100%",
+        display: "flex",
+        position: "relative",
+        overflow: "hidden",
+        padding:
+          "env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)",
       }}
     >
       {/* TOC Sidebar */}
@@ -81,9 +81,9 @@ function FolioInner({
         <div
           className="folio-toc-sidebar"
           style={{
-            width: '280px',
+            width: "280px",
             flexShrink: 0,
-            borderRight: '1px solid rgba(128, 128, 128, 0.2)',
+            borderRight: "1px solid rgba(128, 128, 128, 0.2)",
             ...themeVars,
           }}
         >
@@ -93,25 +93,30 @@ function FolioInner({
 
       {/* Main Content Area */}
       <div
-        style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}
+        style={{
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+          minWidth: 0,
+        }}
       >
         {/* Toolbar */}
         {showUI && (
           <div
             className="folio-toolbar"
             style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              padding: '8px 12px',
-              borderBottom: '1px solid rgba(128, 128, 128, 0.2)',
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              padding: "8px 12px",
+              borderBottom: "1px solid rgba(128, 128, 128, 0.2)",
             }}
           >
             <button
               onClick={() => setShowToc((v) => !v)}
-              style={{ cursor: 'pointer', fontSize: '14px' }}
+              style={{ cursor: "pointer", fontSize: "14px" }}
             >
-              {showToc ? '✕' : '☰'}
+              {showToc ? "✕" : "☰"}
             </button>
             <PanelSlot slot="Toolbar" onTreeChange={onTreeChange} />
           </div>
@@ -119,9 +124,13 @@ function FolioInner({
 
         {/* Content */}
         <div
-          {...(state.readMode === 'page' ? bind() : {})}
+          {...(state.readMode === "page" ? bind() : {})}
           ref={containerRef}
-          style={{ flex: 1, overflow: 'hidden', touchAction: state.readMode === 'page' ? 'none' : 'auto' }}
+          style={{
+            flex: 1,
+            overflow: "hidden",
+            touchAction: state.readMode === "page" ? "none" : "auto",
+          }}
         >
           <Container>
             <div ref={innerRef}>
@@ -135,16 +144,16 @@ function FolioInner({
           <div
             className="folio-controls"
             style={{
-              padding: '8px 12px',
-              borderTop: '1px solid rgba(128, 128, 128, 0.2)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '16px',
-              fontSize: '13px',
+              padding: "8px 12px",
+              borderTop: "1px solid rgba(128, 128, 128, 0.2)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "16px",
+              fontSize: "13px",
             }}
           >
-            {state.readMode === 'page' && state.pageCount > 0 && (
+            {state.readMode === "page" && state.pageCount > 0 && (
               <span>
                 {state.pageIndex + 1} / {state.pageCount}
               </span>
@@ -164,10 +173,10 @@ function DefaultLoading() {
   return (
     <div
       style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        height: '100%',
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        height: "100%",
       }}
     >
       Loading...
@@ -179,16 +188,16 @@ function DefaultError({ error, retry }: { error: Error; retry: () => void }) {
   return (
     <div
       style={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        height: '100%',
-        gap: '12px',
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        height: "100%",
+        gap: "12px",
       }}
     >
       <p>Failed to load chapter: {error.message}</p>
-      <button onClick={retry} style={{ cursor: 'pointer' }}>
+      <button onClick={retry} style={{ cursor: "pointer" }}>
         Retry
       </button>
     </div>

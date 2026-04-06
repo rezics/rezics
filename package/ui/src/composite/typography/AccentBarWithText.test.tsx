@@ -1,20 +1,20 @@
-import {useFixtureInput} from 'react-cosmos/client';
-import {AccentBarWithText} from './AccentBarWithText';
+import { useFixtureInput } from "react-cosmos/client";
+import { AccentBarWithText } from "./AccentBarWithText";
 
 export default function AccentBarTest() {
-  const [barProps] = useFixtureInput<Parameters<typeof AccentBarWithText>[0]>(
-    'Accent Bar Props',
+  const [_barProps] = useFixtureInput<Parameters<typeof AccentBarWithText>[0]>(
+    "Accent Bar Props",
     {
       height: 24,
-      text: '推荐阅读',
+      text: "推荐阅读",
     },
   );
 
   const [barWithTextProps] = useFixtureInput<
     Parameters<typeof AccentBarWithText>[0]
-  >('Accent Bar With Text Props', {
+  >("Accent Bar With Text Props", {
     height: 24,
-    text: '推荐阅读',
+    text: "推荐阅读",
   });
 
   return (

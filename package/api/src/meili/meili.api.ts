@@ -6,21 +6,20 @@
 
 import type {
   BookListResponse,
-  ReadlistListQuery,
-  UnitListResponse,
   FeedbackListQuery,
-} from '@rezics/contract';
-import type {
-  ReadlistSearchResult,
   FeedbackSearchResult,
-} from '@rezics/contract';
-import type {UserDTO, UserListQuery} from '@rezics/contract';
-import {buildQueryString} from '../utils/buildQuery';
-import {apiFetch} from '../react-query/http';
-import type {BookFilters} from '../book/book.types';
-import type {UnitFilters} from '../unit/unit.types';
+  ReadlistListQuery,
+  ReadlistSearchResult,
+  UnitListResponse,
+  UserDTO,
+  UserListQuery,
+} from "@rezics/contract";
+import type { BookFilters } from "../book/book.types";
+import { apiFetch } from "../react-query/http";
+import type { UnitFilters } from "../unit/unit.types";
+import { buildQueryString } from "../utils/buildQuery";
 
-export * from './mapper';
+export * from "./mapper";
 
 export const meiliBookApi = {
   /**
@@ -30,7 +29,7 @@ export const meiliBookApi = {
    */
   bookSearch: async (filters?: BookFilters): Promise<BookListResponse> => {
     return apiFetch<BookListResponse>(`/meili/books/search`, {
-      method: 'POST',
+      method: "POST",
       body: JSON.stringify(filters),
     });
   },
@@ -46,7 +45,7 @@ export const meiliReadlistApi = {
     filters?: ReadlistListQuery,
   ): Promise<ReadlistSearchResult> => {
     return apiFetch<ReadlistSearchResult>(`/meili/readlists/search`, {
-      method: 'POST',
+      method: "POST",
       body: JSON.stringify(filters),
     });
   },
@@ -70,14 +69,14 @@ export const meiliFeedbackApi = {
     filters?: FeedbackListQuery,
   ): Promise<FeedbackSearchResult> => {
     return apiFetch<FeedbackSearchResult>(`/meili/feedbacks/search`, {
-      method: 'POST',
+      method: "POST",
       body: JSON.stringify(filters),
     });
   },
 };
 
 export type UserSearchResponse = {
-  users: Omit<UserDTO, 'email'>[];
+  users: Omit<UserDTO, "email">[];
   total: number;
 };
 

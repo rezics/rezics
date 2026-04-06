@@ -1,31 +1,21 @@
-import {ArrowDownward, ArrowUpward} from '@mui/icons-material';
+import { ArrowDownward, ArrowUpward } from "@mui/icons-material";
 import {
   Box,
-  Button,
   FormControl,
   Grid,
   InputLabel,
   LinearProgress,
   MenuItem,
   Pagination,
-  PaginationItem,
   Paper,
   Select,
   ToggleButton,
   ToggleButtonGroup,
   Typography,
-} from '@mui/material';
-import {
-  useImperativeHandle,
-  forwardRef,
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react';
-
-import React from 'react';
-import {useTranslation} from 'react-i18next';
+} from "@mui/material";
+import type React from "react";
+import { useEffect, useImperativeHandle, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 /**
  * example:
@@ -41,8 +31,8 @@ import {useTranslation} from 'react-i18next';
  */
 export interface SortControlsProps {
   sortType: string;
-  sortOrder: 'asc' | 'desc';
-  onSortChange: (newSort: {type?: string; order?: 'asc' | 'desc'}) => void;
+  sortOrder: "asc" | "desc";
+  onSortChange: (newSort: { type?: string; order?: "asc" | "desc" }) => void;
 }
 /**
  * SortControls
@@ -54,27 +44,27 @@ const SortControls: React.FC<SortControlsProps> = ({
   onSortChange,
 }) => {
   const sortOptions = [
-    {value: 'time', label: '按时间'},
-    {value: 'name', label: '按名称'},
-    {value: 'popular', label: '按热度'},
-    {value: 'agree', label: '按赞同数'},
+    { value: "time", label: "按时间" },
+    { value: "name", label: "按名称" },
+    { value: "popular", label: "按热度" },
+    { value: "agree", label: "按赞同数" },
   ];
   return (
-    <Paper elevation={1} sx={{p: 2, mb: 2, borderRadius: 2}}>
+    <Paper elevation={1} sx={{ p: 2, mb: 2, borderRadius: 2 }}>
       <Grid container spacing={2} alignItems="center">
-        <Grid sx={{xs: 12, sm: 'auto'}}>
-          <FormControl sx={{minWidth: 150}}>
+        <Grid sx={{ xs: 12, sm: "auto" }}>
+          <FormControl sx={{ minWidth: 150 }}>
             <InputLabel>排序方式</InputLabel>
             <Select
               value={sortType}
               label="排序方式"
-              onChange={e =>
+              onChange={(e) =>
                 onSortChange({
                   type: e.target.value as string,
                 })
               }
             >
-              {sortOptions.map(opt => (
+              {sortOptions.map((opt) => (
                 <MenuItem key={opt.value} value={opt.value}>
                   {opt.label}
                 </MenuItem>
@@ -82,12 +72,12 @@ const SortControls: React.FC<SortControlsProps> = ({
             </Select>
           </FormControl>
         </Grid>
-        <Grid sx={{xs: 12, sm: 'auto'}}>
+        <Grid sx={{ xs: 12, sm: "auto" }}>
           <ToggleButtonGroup
             value={sortOrder}
             exclusive
-            onChange={(_, v: 'asc' | 'desc' | null) =>
-              v && onSortChange({order: v})
+            onChange={(_, v: "asc" | "desc" | null) =>
+              v && onSortChange({ order: v })
             }
           >
             <ToggleButton value="desc">
@@ -117,10 +107,10 @@ const PaginationBar: React.FC<PaginationBarProps> = ({
   totalPages,
   onPageChange,
 }) => {
-  const {t} = useTranslation();
+  const { t } = useTranslation();
   useEffect(() => {
     console.log(
-      'PaginationBar',
+      "PaginationBar",
       JSON.stringify({
         page: page,
         dataLength: dataLength,
@@ -131,7 +121,7 @@ const PaginationBar: React.FC<PaginationBarProps> = ({
   if (totalPages <= 1) return null;
   return (
     <div>
-      <Box sx={{display: 'flex', justifyContent: 'center', p: 2, mt: 2}}>
+      <Box sx={{ display: "flex", justifyContent: "center", p: 2, mt: 2 }}>
         <Pagination
           // count={totalPages}
           count={dataLength}
@@ -150,7 +140,7 @@ const PaginationBar: React.FC<PaginationBarProps> = ({
         </Button> */}
       </Box>
       <div className="text-sm text-gray-500 text-center">
-        {t('search.pagination.tips')}
+        {t("search.pagination.tips")}
       </div>
     </div>
   );
@@ -209,7 +199,7 @@ export const UniversalPaginator = <T,>({
     externalItemsPerPage / itemsPerPage,
   );
   useEffect(() => {
-    console.log('paginationPageNumber', paginationPageNumber);
+    console.log("paginationPageNumber", paginationPageNumber);
   }, [paginationPageNumber]);
   const internalPagesPerExternalPage = useMemo(
     () => Math.ceil(externalItemsPerPage / itemsPerPage),
@@ -238,7 +228,7 @@ export const UniversalPaginator = <T,>({
 
   useImperativeHandle(ref, () => ({
     async resetPaginationPageNumber() {
-      console.log('resetPaginationPageNumber');
+      console.log("resetPaginationPageNumber");
       const result = await preRequestData?.(1);
       if (result) {
         const nextPaginationPageNumber =
@@ -248,7 +238,7 @@ export const UniversalPaginator = <T,>({
           Math.min(dataMaxPageNumber, nextPaginationPageNumber),
         );
         console.log(
-          'resetPaginationPageNumber',
+          "resetPaginationPageNumber",
           JSON.stringify({
             result: result,
             externalPage: externalPage,
@@ -271,30 +261,37 @@ export const UniversalPaginator = <T,>({
   const currentPageItems = useMemo(() => {
     const startIndex = (currentPage - rangeStartPage) * itemsPerPage;
     console.log(
-      'currentPageItems',
-      'currentPage',
+      "currentPageItems",
+      "currentPage",
       currentPage,
-      'globalStartIndex',
+      "globalStartIndex",
       globalStartIndex,
-      'externalPage',
+      "externalPage",
       externalPage,
-      'data.length',
+      "data.length",
       data.length,
     );
     console.log(
-      'rangeStartPage',
+      "rangeStartPage",
       rangeStartPage,
-      'startIndex',
+      "startIndex",
       startIndex,
-      'endIndex',
+      "endIndex",
       startIndex + itemsPerPage - 1,
     );
     return data.slice(startIndex, startIndex + itemsPerPage); // no minus 1, because slice is not inclusive
-  }, [data, currentPage, itemsPerPage, externalItemsPerPage]);
+  }, [
+    data,
+    currentPage,
+    itemsPerPage,
+    rangeStartPage,
+    globalStartIndex,
+    externalPage,
+  ]);
 
   const handlePageChange = (_: React.ChangeEvent<unknown>, newPage: number) => {
     console.log(
-      'pageChange',
+      "pageChange",
       JSON.stringify({
         newPage: newPage,
         paginationPageNumber: paginationPageNumber,
@@ -311,9 +308,9 @@ export const UniversalPaginator = <T,>({
     };
     if (isTheLastPage()) {
       const externalPage = Math.ceil(newPage / internalPagesPerExternalPage);
-      console.log('handlePageChange');
-      preRequestData?.(externalPage + 1).then(result => {
-        console.log('preRequestData', result);
+      console.log("handlePageChange");
+      preRequestData?.(externalPage + 1).then((result) => {
+        console.log("preRequestData", result);
         if (result) {
           const nextPaginationPageNumber =
             externalPage * Math.ceil(externalItemsPerPage / itemsPerPage) +
@@ -337,20 +334,20 @@ export const UniversalPaginator = <T,>({
           />
         ))}
 
-      <Box sx={{minHeight: 300, position: 'relative'}}>
+      <Box sx={{ minHeight: 300, position: "relative" }}>
         {isLoading && (
           <LinearProgress
             sx={{
-              position: 'absolute',
+              position: "absolute",
               top: 0,
               left: 0,
-              width: '100%',
+              width: "100%",
             }}
           />
         )}
         {children(currentPageItems)}
         {!isLoading && currentPageItems.length === 0 && (
-          <Typography sx={{textAlign: 'center', p: 5}}>没有内容。</Typography>
+          <Typography sx={{ textAlign: "center", p: 5 }}>没有内容。</Typography>
         )}
       </Box>
       <PaginationBar

@@ -1,14 +1,14 @@
+import type { CreateTagInput, UpdateTagInput } from "@rezics/contract";
 import {
+  type UseMutationOptions,
   useMutation,
   useQueryClient,
-  type UseMutationOptions,
-} from '@tanstack/react-query';
-import {tagApi} from './tag.api';
-import {tagKeys} from './tag.keys';
-import type {CreateTagInput, UpdateTagInput} from '@rezics/contract';
+} from "@tanstack/react-query";
+import { tagApi } from "./tag.api";
+import { tagKeys } from "./tag.keys";
 
 export function useCreateTagMutation(
-  options?: Omit<UseMutationOptions<any, Error, CreateTagInput>, 'mutationFn'>,
+  options?: Omit<UseMutationOptions<any, Error, CreateTagInput>, "mutationFn">,
 ) {
   const queryClient = useQueryClient();
 
@@ -16,7 +16,7 @@ export function useCreateTagMutation(
     mutationFn: (input: CreateTagInput) => tagApi.create(input),
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
-      queryClient.invalidateQueries({queryKey: tagKeys.lists()});
+      queryClient.invalidateQueries({ queryKey: tagKeys.lists() });
       // contract TagDetailDTO uses `id` field
       // pre-populate detail cache if available (TagDetailDTO uses `id`)
       queryClient.setQueryData(tagKeys.detail((data as any).id), data);
@@ -27,19 +27,24 @@ export function useCreateTagMutation(
 
 export function useUpdateTagMutation(
   options?: Omit<
-    UseMutationOptions<any, Error, {unitId: string; input: UpdateTagInput}>,
-    'mutationFn'
+    UseMutationOptions<any, Error, { unitId: string; input: UpdateTagInput }>,
+    "mutationFn"
   >,
 ) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({unitId, input}: {unitId: string; input: UpdateTagInput}) =>
-      tagApi.update(unitId, input),
+    mutationFn: ({
+      unitId,
+      input,
+    }: {
+      unitId: string;
+      input: UpdateTagInput;
+    }) => tagApi.update(unitId, input),
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
       queryClient.setQueryData(tagKeys.detail(variables.unitId), data);
-      queryClient.invalidateQueries({queryKey: tagKeys.lists()});
+      queryClient.invalidateQueries({ queryKey: tagKeys.lists() });
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
   });
@@ -47,8 +52,8 @@ export function useUpdateTagMutation(
 
 export function useDeleteTagMutation(
   options?: Omit<
-    UseMutationOptions<{message: string}, Error, string>,
-    'mutationFn'
+    UseMutationOptions<{ message: string }, Error, string>,
+    "mutationFn"
   >,
 ) {
   const queryClient = useQueryClient();
@@ -57,8 +62,8 @@ export function useDeleteTagMutation(
     mutationFn: (unitId: string) => tagApi.remove(unitId),
     ...options,
     onSuccess: (data, unitId, onMutateResult, context) => {
-      queryClient.removeQueries({queryKey: tagKeys.detail(unitId)});
-      queryClient.invalidateQueries({queryKey: tagKeys.lists()});
+      queryClient.removeQueries({ queryKey: tagKeys.detail(unitId) });
+      queryClient.invalidateQueries({ queryKey: tagKeys.lists() });
       options?.onSuccess?.(data, unitId, onMutateResult, context);
     },
   });
@@ -67,20 +72,21 @@ export function useDeleteTagMutation(
 export function useAttachTagMutation(
   options?: Omit<
     UseMutationOptions<
-      {message: string},
+      { message: string },
       Error,
-      {unitId: string; targetUnitId: string}
+      { unitId: string; targetUnitId: string }
     >,
-    'mutationFn'
+    "mutationFn"
   >,
 ) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({unitId, targetUnitId}) => tagApi.attach(unitId, targetUnitId),
+    mutationFn: ({ unitId, targetUnitId }) =>
+      tagApi.attach(unitId, targetUnitId),
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
-      queryClient.invalidateQueries({queryKey: tagKeys.lists()});
+      queryClient.invalidateQueries({ queryKey: tagKeys.lists() });
       queryClient.invalidateQueries({
         queryKey: tagKeys.detail(variables.unitId),
       });
@@ -92,20 +98,21 @@ export function useAttachTagMutation(
 export function useDetachTagMutation(
   options?: Omit<
     UseMutationOptions<
-      {message: string},
+      { message: string },
       Error,
-      {unitId: string; targetUnitId: string}
+      { unitId: string; targetUnitId: string }
     >,
-    'mutationFn'
+    "mutationFn"
   >,
 ) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({unitId, targetUnitId}) => tagApi.detach(unitId, targetUnitId),
+    mutationFn: ({ unitId, targetUnitId }) =>
+      tagApi.detach(unitId, targetUnitId),
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
-      queryClient.invalidateQueries({queryKey: tagKeys.lists()});
+      queryClient.invalidateQueries({ queryKey: tagKeys.lists() });
       queryClient.invalidateQueries({
         queryKey: tagKeys.detail(variables.unitId),
       });

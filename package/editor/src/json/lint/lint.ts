@@ -1,5 +1,5 @@
-import { linter, type Diagnostic } from '@codemirror/lint';
-import type { Extension } from '@codemirror/state';
+import { type Diagnostic, linter } from "@codemirror/lint";
+import type { Extension } from "@codemirror/state";
 
 function jsonLinter() {
   return linter((view) => {
@@ -10,7 +10,7 @@ function jsonLinter() {
       JSON.parse(text);
       return [];
     } catch (e) {
-      const message = e instanceof SyntaxError ? e.message : 'Invalid JSON';
+      const message = e instanceof SyntaxError ? e.message : "Invalid JSON";
       // Try to extract position from error message
       const posMatch = message.match(/position\s+(\d+)/i);
       const pos = posMatch ? parseInt(posMatch[1], 10) : 0;
@@ -21,7 +21,7 @@ function jsonLinter() {
         {
           from,
           to,
-          severity: 'error',
+          severity: "error",
           message,
         },
       ];

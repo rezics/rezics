@@ -1,4 +1,4 @@
-import nodemailer, {type Transporter} from 'nodemailer';
+import nodemailer, { type Transporter } from "nodemailer";
 
 type MailerConfig = {
   SMTP_HOST?: string;
@@ -13,7 +13,7 @@ function parseSecure(value: string | undefined): boolean {
     return true;
   }
 
-  return value.toLowerCase() !== 'false';
+  return value.toLowerCase() !== "false";
 }
 
 export function isMailerConfigured(config: MailerConfig): boolean {
@@ -21,7 +21,7 @@ export function isMailerConfigured(config: MailerConfig): boolean {
 }
 
 export function createAuthMailer(config: MailerConfig): Transporter {
-  const port = Number(config.SMTP_PORT ?? '465');
+  const port = Number(config.SMTP_PORT ?? "465");
   const secure = parseSecure(config.SMTP_SECURE);
 
   return nodemailer.createTransport({

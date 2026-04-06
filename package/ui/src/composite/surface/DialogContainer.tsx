@@ -1,11 +1,11 @@
-import CloseIcon from '@mui/icons-material/Close';
-import AppBar from '@mui/material/AppBar';
-import Dialog from '@mui/material/Dialog';
-import DialogContent from '@mui/material/DialogContent';
-import IconButton from '@mui/material/IconButton';
-import Toolbar from '@mui/material/Toolbar';
-import Typography from '@mui/material/Typography';
-import React from 'react';
+import CloseIcon from "@mui/icons-material/Close";
+import AppBar from "@mui/material/AppBar";
+import Dialog from "@mui/material/Dialog";
+import DialogContent from "@mui/material/DialogContent";
+import IconButton from "@mui/material/IconButton";
+import Toolbar from "@mui/material/Toolbar";
+import Typography from "@mui/material/Typography";
+import type React from "react";
 
 export interface DialogContainerProps {
   /** 控制对话框显示 */
@@ -17,7 +17,7 @@ export interface DialogContainerProps {
   /** 内容区域 */
   children?: React.ReactNode;
   /** 对话框宽度，可选 xs, sm, md, lg, xl */
-  maxWidth?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+  maxWidth?: "xs" | "sm" | "md" | "lg" | "xl";
   /** 是否全屏 */
   fullScreen?: boolean;
 }
@@ -31,7 +31,7 @@ const DialogContainer: React.FC<DialogContainerProps> = ({
   onClose,
   title,
   children,
-  maxWidth = 'md',
+  maxWidth = "md",
   fullScreen = false,
 }) => {
   return (
@@ -47,11 +47,11 @@ const DialogContainer: React.FC<DialogContainerProps> = ({
       <AppBar
         position="relative"
         elevation={1}
-        sx={{position: fullScreen ? 'fixed' : 'static'}}
+        sx={{ position: fullScreen ? "fixed" : "static" }}
       >
         <Toolbar variant="dense">
           {title && (
-            <Typography variant="h6" component="div" sx={{flexGrow: 1}}>
+            <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
               {title}
             </Typography>
           )}
@@ -67,7 +67,7 @@ const DialogContainer: React.FC<DialogContainerProps> = ({
         </Toolbar>
       </AppBar>
 
-      <DialogContent dividers sx={{p: 2}}>
+      <DialogContent dividers sx={{ p: 2 }}>
         {children}
       </DialogContent>
     </Dialog>

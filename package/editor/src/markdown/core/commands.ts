@@ -1,4 +1,4 @@
-import type { EditorView } from '@codemirror/view';
+import type { EditorView } from "@codemirror/view";
 
 function wrapToggle(view: EditorView, marker: string): boolean {
   const { state } = view;
@@ -26,18 +26,15 @@ function wrapToggle(view: EditorView, marker: string): boolean {
   }
 
   // Check if surrounding text has the markers
-  const before = state.sliceDoc(
-    Math.max(0, from - marker.length),
-    from,
-  );
+  const before = state.sliceDoc(Math.max(0, from - marker.length), from);
   const after = state.sliceDoc(to, to + marker.length);
 
   if (before === marker && after === marker) {
     // Unwrap surrounding markers
     view.dispatch({
       changes: [
-        { from: from - marker.length, to: from, insert: '' },
-        { from: to, to: to + marker.length, insert: '' },
+        { from: from - marker.length, to: from, insert: "" },
+        { from: to, to: to + marker.length, insert: "" },
       ],
       selection: {
         anchor: from - marker.length,
@@ -96,7 +93,7 @@ function lineToggle(
       changes.push({
         from: line.from,
         to: line.from + expectedPrefix.length,
-        insert: '',
+        insert: "",
       });
     }
   } else {
@@ -117,19 +114,19 @@ function lineToggle(
 }
 
 export function toggleBold(view: EditorView): boolean {
-  return wrapToggle(view, '**');
+  return wrapToggle(view, "**");
 }
 
 export function toggleItalic(view: EditorView): boolean {
-  return wrapToggle(view, '*');
+  return wrapToggle(view, "*");
 }
 
 export function toggleStrikethrough(view: EditorView): boolean {
-  return wrapToggle(view, '~~');
+  return wrapToggle(view, "~~");
 }
 
 export function toggleCode(view: EditorView): boolean {
-  return wrapToggle(view, '`');
+  return wrapToggle(view, "`");
 }
 
 export function toggleHeading(view: EditorView): boolean {
@@ -142,33 +139,33 @@ export function toggleHeading(view: EditorView): boolean {
     if (level >= 6) {
       // Remove heading
       view.dispatch({
-        changes: { from: line.from, to: line.from + level + 1, insert: '' },
+        changes: { from: line.from, to: line.from + level + 1, insert: "" },
       });
     } else {
       // Increase level
       view.dispatch({
-        changes: { from: line.from, to: line.from, insert: '#' },
+        changes: { from: line.from, to: line.from, insert: "#" },
       });
     }
   } else {
     // Add h1
     view.dispatch({
-      changes: { from: line.from, to: line.from, insert: '# ' },
+      changes: { from: line.from, to: line.from, insert: "# " },
     });
   }
   return true;
 }
 
 export function toggleBlockquote(view: EditorView): boolean {
-  return lineToggle(view, '> ');
+  return lineToggle(view, "> ");
 }
 
 export function toggleUnorderedList(view: EditorView): boolean {
-  return lineToggle(view, '- ');
+  return lineToggle(view, "- ");
 }
 
 export function toggleOrderedList(view: EditorView): boolean {
-  return lineToggle(view, '1. ', true);
+  return lineToggle(view, "1. ", true);
 }
 
 export function toggleCodeBlock(view: EditorView): boolean {
@@ -181,22 +178,20 @@ export function toggleCodeBlock(view: EditorView): boolean {
 
   // Check if already in a code block
   const prevLine =
-    lineFrom.number > 1
-      ? state.doc.line(lineFrom.number - 1).text
-      : '';
+    lineFrom.number > 1 ? state.doc.line(lineFrom.number - 1).text : "";
   const nextLine =
     lineTo.number < state.doc.lines
       ? state.doc.line(lineTo.number + 1).text
-      : '';
+      : "";
 
-  if (prevLine.startsWith('```') && nextLine.startsWith('```')) {
+  if (prevLine.startsWith("```") && nextLine.startsWith("```")) {
     // Unwrap code block
     const prevLineObj = state.doc.line(lineFrom.number - 1);
     const nextLineObj = state.doc.line(lineTo.number + 1);
     view.dispatch({
       changes: [
-        { from: prevLineObj.from, to: prevLineObj.to + 1, insert: '' },
-        { from: nextLineObj.from - 1, to: nextLineObj.to, insert: '' },
+        { from: prevLineObj.from, to: prevLineObj.to + 1, insert: "" },
+        { from: nextLineObj.from - 1, to: nextLineObj.to, insert: "" },
       ],
     });
   } else {
@@ -205,7 +200,7 @@ export function toggleCodeBlock(view: EditorView): boolean {
       changes: {
         from,
         to,
-        insert: '```\n' + selected + '\n```',
+        insert: `\`\`\`\n${selected}\n\`\`\``,
       },
     });
   }
@@ -215,7 +210,7 @@ export function toggleCodeBlock(view: EditorView): boolean {
 export function insertLink(view: EditorView): boolean {
   const { from, to } = view.state.selection.main;
   const selected = view.state.sliceDoc(from, to);
-  const text = selected || 'text';
+  const text = selected || "text";
   view.dispatch({
     changes: { from, to, insert: `[${text}](url)` },
     selection: { anchor: from + text.length + 3, head: from + text.length + 6 },
@@ -226,7 +221,7 @@ export function insertLink(view: EditorView): boolean {
 export function insertImage(view: EditorView): boolean {
   const { from, to } = view.state.selection.main;
   const selected = view.state.sliceDoc(from, to);
-  const alt = selected || 'alt';
+  const alt = selected || "alt";
   view.dispatch({
     changes: { from, to, insert: `![${alt}](url)` },
     selection: { anchor: from + alt.length + 4, head: from + alt.length + 7 },
@@ -237,7 +232,7 @@ export function insertImage(view: EditorView): boolean {
 export function insertImageUrl(
   view: EditorView,
   url: string,
-  alt = 'image',
+  alt = "image",
 ): void {
   const { from, to } = view.state.selection.main;
   const insert = `![${alt}](${url})`;
@@ -249,8 +244,7 @@ export function insertImageUrl(
 
 export function insertTable(view: EditorView): boolean {
   const { from, to } = view.state.selection.main;
-  const table =
-    '| Header | Header |\n| ------ | ------ |\n| Cell   | Cell   |';
+  const table = "| Header | Header |\n| ------ | ------ |\n| Cell   | Cell   |";
   view.dispatch({
     changes: { from, to, insert: table },
   });

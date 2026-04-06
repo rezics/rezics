@@ -1,4 +1,4 @@
-import {useEffect, useRef, useState} from 'react';
+import { useEffect, useRef, useState } from "react";
 
 export function useFakeProgress(active: boolean) {
   const [progress, setProgress] = useState(0);
@@ -9,7 +9,7 @@ export function useFakeProgress(active: boolean) {
       setProgress(0.05);
 
       const tick = () => {
-        setProgress(prev => {
+        setProgress((prev) => {
           if (prev < 0.8) return prev + Math.random() * 0.1; // 前段快
           if (prev < 0.95) return prev + Math.random() * 0.02; // 后段慢
           return prev;

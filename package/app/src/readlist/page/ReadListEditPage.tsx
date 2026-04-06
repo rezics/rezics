@@ -1,7 +1,5 @@
-import React, {useEffect} from 'react';
-import {useState} from 'react';
-import {buildMeiliUnitQuery} from '@rezics/api/meili/meili.queries';
-import {UnitType} from '@rezics/contract';
+import { useAlertStore } from "@app/state/windowAlertStore";
+import { ArrowDownward, ArrowUpward, Delete } from "@mui/icons-material";
 import {
   Button,
   IconButton,
@@ -9,24 +7,25 @@ import {
   Stack,
   TextField,
   Tooltip,
-} from '@mui/material';
-import {ArrowDownward, ArrowUpward, Delete} from '@mui/icons-material';
-import {useQuery, useQueryClient} from '@tanstack/react-query';
-
+} from "@mui/material";
+import { bookQueries } from "@rezics/api/book/book";
+import { mapUnitListToReviewListResponse } from "@rezics/api/meili/meili.api";
+import { buildMeiliUnitQuery } from "@rezics/api/meili/meili.queries";
 import {
   readlistQueries,
   useDeleteReadlistMutation,
   useUpdateReadlistMutation,
-} from '@rezics/api/readlist/readlist';
-import {reviewQueries} from '@rezics/api/review/review';
-import {BookReviewGroup} from '@/readlist/component/Review';
-import {bookQueries} from '@rezics/api/book/book';
-import {useNavigate} from '@tanstack/react-router';
-import {ConfirmDeleteDialog} from '@rezics/ui/composite/form/ConfirmDeleteDialog.tsx';
-import {useAlertStore} from '@app/state/windowAlertStore';
-import {mapUnitListToReviewListResponse} from '@rezics/api/meili/meili.api';
-import {useTranslation} from 'react-i18next';
-import {readlistEditRoute} from '@/router';
+} from "@rezics/api/readlist/readlist";
+import { reviewQueries } from "@rezics/api/review/review";
+import { UnitType } from "@rezics/contract";
+import { ConfirmDeleteDialog } from "@rezics/ui/composite/form/ConfirmDeleteDialog.tsx";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
+import type React from "react";
+import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { BookReviewGroup } from "@/readlist/component/Review";
+import { readlistEditRoute } from "@/router";
 
 function extractReviewId(input: string): string | null {
   if (!input) return null;
@@ -41,15 +40,15 @@ function extractReviewId(input: string): string | null {
 
 const PasteReviewUrlInput: React.FC<{
   onAdd: (id: string) => void;
-}> = ({onAdd}) => {
-  const {t} = useTranslation();
-  const [input, setInput] = useState('');
+}> = ({ onAdd }) => {
+  const { t } = useTranslation();
+  const [input, setInput] = useState("");
 
   const handleAdd = () => {
     const id = extractReviewId(input);
     if (id) {
       onAdd(id);
-      setInput('');
+      setInput("");
     }
   };
 
@@ -57,13 +56,13 @@ const PasteReviewUrlInput: React.FC<{
     <div className="flex items-end gap-3">
       <TextField
         fullWidth
-        label={t('page.readlist.paste_review_input_label')}
+        label={t("page.readlist.paste_review_input_label")}
         variant="standard"
         value={input}
-        onChange={e => setInput(e.target.value)}
+        onChange={(e) => setInput(e.target.value)}
       />
       <Button variant="contained" onClick={handleAdd}>
-        {t('page.readlist.add_button')}
+        {t("page.readlist.add_button")}
       </Button>
     </div>
   );
@@ -71,15 +70,15 @@ const PasteReviewUrlInput: React.FC<{
 
 const ReviewSearchBox: React.FC<{
   onAdd: (id: string) => void;
-}> = ({onAdd}) => {
-  const {t} = useTranslation();
-  const [keyword, setKeyword] = useState('');
-  const [q, setQ] = useState('');
-  const {data, isLoading} = useQuery(
+}> = ({ onAdd }) => {
+  const { t } = useTranslation();
+  const [keyword, setKeyword] = useState("");
+  const [q, setQ] = useState("");
+  const { data, isLoading } = useQuery(
     buildMeiliUnitQuery({
       kind: UnitType.REVIEW,
       start: 0,
-      targetUnitId: '',
+      targetUnitId: "",
       keyword: q,
       limit: 5,
       mapFn: mapUnitListToReviewListResponse,
@@ -92,12 +91,12 @@ const ReviewSearchBox: React.FC<{
       <div className="flex items-end gap-3">
         <TextField
           fullWidth
-          label={t('page.readlist.search_review_label')}
+          label={t("page.readlist.search_review_label")}
           variant="standard"
           value={keyword}
-          onChange={e => setKeyword(e.target.value)}
-          onKeyDown={e => {
-            if (e.key === 'Enter') {
+          onChange={(e) => setKeyword(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
               const k = keyword.trim();
               if (k) setQ(k);
             }
@@ -109,14 +108,14 @@ const ReviewSearchBox: React.FC<{
           onClick={() => setQ(keyword.trim())}
           disabled={!keyword.trim()}
         >
-          {t('page.readlist.search_button')}
+          {t("page.readlist.search_button")}
         </Button>
       </div>
 
       <Stack spacing={1}>
         {isLoading && (
           <div className="text-sm text-gray-500">
-            {t('page.readlist.searching')}
+            {t("page.readlist.searching")}
           </div>
         )}
         {!isLoading &&
@@ -128,7 +127,7 @@ const ReviewSearchBox: React.FC<{
             >
               <div className="min-w-0">
                 <div className="text-sm font-medium truncate">
-                  {rv.title || t('page.readlist.untitled')}{' '}
+                  {rv.title || t("page.readlist.untitled")}{" "}
                   <span className="text-gray-500">#{rv.unitId}</span>
                 </div>
                 <div className="text-xs text-gray-600 line-clamp-1">
@@ -136,7 +135,7 @@ const ReviewSearchBox: React.FC<{
                 </div>
               </div>
               <Button size="small" onClick={() => onAdd(rv.unitId)}>
-                {t('page.readlist.add_button')}
+                {t("page.readlist.add_button")}
               </Button>
             </Paper>
           ))}
@@ -152,26 +151,26 @@ const ReviewItemRow: React.FC<{
   onRemove: (id: string) => void;
   onMoveUp: (id: string) => void;
   onMoveDown: (id: string) => void;
-}> = ({reviewId, bookData, reviewData, onRemove, onMoveUp, onMoveDown}) => {
-  const {t} = useTranslation();
+}> = ({ reviewId, bookData, reviewData, onRemove, onMoveUp, onMoveDown }) => {
+  const { t } = useTranslation();
   return (
     <div className="flex items-start gap-3">
       <div className="flex flex-col gap-1">
-        <Tooltip title={t('page.readlist.move_up')}>
+        <Tooltip title={t("page.readlist.move_up")}>
           <span>
             <IconButton size="small" onClick={() => onMoveUp(reviewId)}>
               <ArrowUpward fontSize="small" />
             </IconButton>
           </span>
         </Tooltip>
-        <Tooltip title={t('page.readlist.move_down')}>
+        <Tooltip title={t("page.readlist.move_down")}>
           <span>
             <IconButton size="small" onClick={() => onMoveDown(reviewId)}>
               <ArrowDownward fontSize="small" />
             </IconButton>
           </span>
         </Tooltip>
-        <Tooltip title={t('common.delete')}>
+        <Tooltip title={t("common.delete")}>
           <span>
             <IconButton
               size="small"
@@ -194,14 +193,14 @@ export const ReadListEditor: React.FC<{
   header?: React.ReactNode;
   readlistData: any;
   setReadlistData: (data: any) => void;
-}> = ({header, readlistData, setReadlistData}) => {
-  const {t} = useTranslation();
+}> = ({ header, readlistData, setReadlistData }) => {
+  const { t } = useTranslation();
   useEffect(() => {
-    console.log('readlistData update', readlistData);
+    console.log("readlistData update", readlistData);
   }, [readlistData]);
 
   function updateReviewIds(ids: string[]) {
-    setReadlistData((prev: any) => ({...prev, order: ids}));
+    setReadlistData((prev: any) => ({ ...prev, order: ids }));
   }
 
   const queryClient = useQueryClient();
@@ -251,24 +250,27 @@ export const ReadListEditor: React.FC<{
       <div className="space-y-6">
         <Paper variant="outlined" className="p-4 space-y-4">
           <div className="text-lg font-semibold">
-            {t('page.readlist.meta_info')}
+            {t("page.readlist.meta_info")}
           </div>
           <TextField
-            label={t('page.readlist.title_label')}
+            label={t("page.readlist.title_label")}
             className="w-full"
             variant="standard"
-            value={readlistData?.title ?? ''}
-            onChange={e =>
-              setReadlistData((prev: any) => ({...prev, title: e.target.value}))
+            value={readlistData?.title ?? ""}
+            onChange={(e) =>
+              setReadlistData((prev: any) => ({
+                ...prev,
+                title: e.target.value,
+              }))
             }
           />
           <div className="mt-2" />
           <TextField
-            label={t('page.readlist.summary_label')}
+            label={t("page.readlist.summary_label")}
             variant="standard"
             className="w-full"
-            value={readlistData?.content ?? ''}
-            onChange={e =>
+            value={readlistData?.content ?? ""}
+            onChange={(e) =>
               setReadlistData((prev: any) => ({
                 ...prev,
                 content: e.target.value,
@@ -276,11 +278,11 @@ export const ReadListEditor: React.FC<{
             }
           />
           <TextField
-            label={t('page.readlist.cover_label')}
+            label={t("page.readlist.cover_label")}
             variant="standard"
             className="w-full"
-            value={readlistData?.coverUrl ?? ''}
-            onChange={e =>
+            value={readlistData?.coverUrl ?? ""}
+            onChange={(e) =>
               setReadlistData((prev: any) => ({
                 ...prev,
                 coverUrl: e.target.value,
@@ -290,7 +292,7 @@ export const ReadListEditor: React.FC<{
         </Paper>
         <Paper variant="outlined" className="p-4 space-y-4">
           <div className="text-lg font-semibold">
-            {t('page.readlist.add_review')}
+            {t("page.readlist.add_review")}
           </div>
           <PasteReviewUrlInput onAdd={addReviewId} />
           <ReviewSearchBox onAdd={addReviewId} />
@@ -298,12 +300,12 @@ export const ReadListEditor: React.FC<{
 
         <Paper variant="outlined" className="p-4 space-y-4">
           <div className="text-lg font-semibold">
-            {t('page.readlist.current_reviews_title')}
+            {t("page.readlist.current_reviews_title")}
           </div>
           <Stack spacing={3}>
             {readlistData?.order?.length === 0 && (
               <div className="text-sm text-gray-500">
-                {t('page.readlist.no_reviews_small')}
+                {t("page.readlist.no_reviews_small")}
               </div>
             )}
             {readlistData?.order?.map((unitId: any) => {
@@ -334,11 +336,13 @@ export const ReadListEditor: React.FC<{
 };
 
 export function ReadListEditPage() {
-  const {readlistId} = readlistEditRoute.useParams();
+  const { readlistId } = readlistEditRoute.useParams();
   const navigate = useNavigate();
-  const {data, isLoading} = useQuery(readlistQueries.detail(readlistId || ''));
+  const { data, isLoading } = useQuery(
+    readlistQueries.detail(readlistId || ""),
+  );
   type ReadlistData = typeof data;
-  const {t} = useTranslation();
+  const { t } = useTranslation();
 
   const updateReadlistMutation = useUpdateReadlistMutation();
 
@@ -351,15 +355,17 @@ export function ReadListEditPage() {
 
   function handleSubmit(data: ReadlistData) {
     // 将 books 转换成 Prisma connect 格式
-    const bookConnect = (data?.books ?? []).filter(Boolean).map(b => b.unitId);
+    const bookConnect = (data?.books ?? [])
+      .filter(Boolean)
+      .map((b) => b.unitId);
 
     // 将 reviews 转换成 Prisma connect 格式
     const reviewConnect = (data?.reviews ?? [])
       .filter(Boolean)
-      .map(r => r.unitId);
+      .map((r) => r.unitId);
 
-    console.log('bookConnect', bookConnect);
-    console.log('reviewConnect', reviewConnect);
+    console.log("bookConnect", bookConnect);
+    console.log("reviewConnect", reviewConnect);
 
     // 排序字段：直接传字符串数组
     const order = data?.order ?? [];
@@ -380,9 +386,9 @@ export function ReadListEditPage() {
       },
       {
         onSuccess: () => {
-          useAlertStore.getState().show(t('page.readlist.update_success'));
+          useAlertStore.getState().show(t("page.readlist.update_success"));
         },
-        onError: error => {
+        onError: (error) => {
           useAlertStore.getState().show(String(error));
         },
       },
@@ -394,11 +400,11 @@ export function ReadListEditPage() {
   const handleDelete = () => {
     deleteReadlistMutation.mutate(readlistId, {
       onSuccess: () => {
-        console.log(t('page.readlist.delete_success'));
-        navigate({to: `/readlist`});
+        console.log(t("page.readlist.delete_success"));
+        navigate({ to: `/readlist` });
       },
-      onError: error => {
-        console.error(t('page.readlist.delete_failed'), error);
+      onError: (error) => {
+        console.error(t("page.readlist.delete_failed"), error);
       },
     });
     setDeleteDialogOpen(false);
@@ -408,28 +414,28 @@ export function ReadListEditPage() {
     <div className="mb-4">
       <div className="flex items-center">
         <div className="text-2xl font-bold">
-          {t('page.readlist.edit_readlist')}
+          {t("page.readlist.edit_readlist")}
         </div>
         <div className="ml-auto">
           <Button
             variant="outlined"
             color="primary"
             className="!mr-2"
-            onClick={() => navigate({to: `/readlist/${readlistId}`})}
+            onClick={() => navigate({ to: `/readlist/${readlistId}` })}
           >
-            {t('common.back')}
+            {t("common.back")}
           </Button>
           <Button
             variant="contained"
             color="primary"
             onClick={() => handleSubmit(readlistData)}
           >
-            {t('common.submit')}
+            {t("common.submit")}
           </Button>
         </div>
       </div>
       {isLoading && (
-        <div className="text-sm text-gray-500 mt-1">{t('common.loading')}</div>
+        <div className="text-sm text-gray-500 mt-1">{t("common.loading")}</div>
       )}
     </div>
   );
@@ -448,7 +454,7 @@ export function ReadListEditPage() {
           color="primary"
           onClick={() => setDeleteDialogOpen(true)}
         >
-          {t('common.delete')}
+          {t("common.delete")}
         </Button>
         <ConfirmDeleteDialog
           open={deleteDialogOpen}

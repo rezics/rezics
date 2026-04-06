@@ -1,5 +1,5 @@
-import ExpandLessIcon from '@mui/icons-material/ExpandLess';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ExpandLessIcon from "@mui/icons-material/ExpandLess";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import {
   Box,
   Collapse,
@@ -9,32 +9,31 @@ import {
   ListItemIcon,
   ListItemText,
   Typography,
-} from '@mui/material';
-import React from 'react';
-import {useRouterState} from '@tanstack/react-router';
-
-import {adminConfig} from '@/app/config/adminConfig';
-import {Link} from '@rezics/ui/primitive/link/Link.tsx';
-import {getToken, parseJwt} from '@rezics/api/react-query/jwt';
-import {NormalizedTokenName} from '@rezics/contract';
+} from "@mui/material";
+import { getToken, parseJwt } from "@rezics/api/react-query/jwt";
+import { NormalizedTokenName } from "@rezics/contract";
+import { Link } from "@rezics/ui/primitive/link/Link.tsx";
+import { useRouterState } from "@tanstack/react-router";
+import React from "react";
+import { adminConfig } from "@/app/config/adminConfig";
 
 import type {
   AdminNavEntry,
   AdminNavGroup,
   AdminNavItem,
-} from './adminNavConfig';
+} from "./adminNavConfig";
 
 function isGroup(entry: AdminNavEntry): entry is AdminNavGroup {
-  return 'children' in entry;
+  return "children" in entry;
 }
 
 function isItem(entry: AdminNavEntry): entry is AdminNavItem {
-  return 'to' in entry;
+  return "to" in entry;
 }
 
 function isActivePath(pathname: string, to: string) {
-  if (to === '/_admin/' || to === '/_admin') {
-    return pathname === '/_admin' || pathname === '/_admin/';
+  if (to === "/_admin/" || to === "/_admin") {
+    return pathname === "/_admin" || pathname === "/_admin/";
   }
   return pathname === to || pathname.startsWith(`${to}/`);
 }
@@ -57,13 +56,13 @@ export function AdminNav({
   items: AdminNavEntry[];
   onNavigate?: () => void;
 }) {
-  const pathname = useRouterState({select: s => s.location.pathname});
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   const initialOpenGroups = React.useMemo(() => {
     const open: Record<string, boolean> = {};
     for (const entry of items) {
       if (isGroup(entry)) {
-        open[entry.id] = entry.children.some(child =>
+        open[entry.id] = entry.children.some((child) =>
           isActivePath(pathname, child.to),
         );
       }
@@ -75,12 +74,12 @@ export function AdminNav({
     React.useState<Record<string, boolean>>(initialOpenGroups);
 
   React.useEffect(() => {
-    setOpenGroups(prev => {
+    setOpenGroups((prev) => {
       let changed = false;
-      const next = {...prev};
+      const next = { ...prev };
       for (const entry of items) {
         if (isGroup(entry)) {
-          const shouldOpen = entry.children.some(child =>
+          const shouldOpen = entry.children.some((child) =>
             isActivePath(pathname, child.to),
           );
           if (next[entry.id] !== shouldOpen) {
@@ -104,7 +103,7 @@ export function AdminNav({
     // Example: `/users` matches `/users/create` by prefix, but only `Create` should be selected.
     if (selected && siblings?.length) {
       const hasMoreSpecificActiveSibling = siblings.some(
-        s =>
+        (s) =>
           s.id !== item.id &&
           s.to.startsWith(`${item.to}/`) &&
           isActivePath(pathname, s.to),
@@ -126,7 +125,7 @@ export function AdminNav({
           mx: 1,
         }}
       >
-        <ListItemIcon sx={{minWidth: 36}}>{item.icon}</ListItemIcon>
+        <ListItemIcon sx={{ minWidth: 36 }}>{item.icon}</ListItemIcon>
         <ListItemText primary={item.label} />
       </ListItemButton>
     );
@@ -136,12 +135,12 @@ export function AdminNav({
     <Box
       sx={{
         marginTop: 8,
-        height: '100%',
-        display: 'flex',
-        flexDirection: 'column',
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
       }}
     >
-      <Box sx={{px: 2, py: 2}}>
+      <Box sx={{ px: 2, py: 2 }}>
         <Typography variant="subtitle1" fontWeight={700}>
           {adminConfig.appName}
         </Typography>
@@ -153,9 +152,9 @@ export function AdminNav({
 
       <List
         dense
-        sx={{py: 1, display: 'flex', flexDirection: 'column', gap: 0.5}}
+        sx={{ py: 1, display: "flex", flexDirection: "column", gap: 0.5 }}
       >
-        {items.map(entry => {
+        {items.map((entry) => {
           if (isItem(entry)) {
             if (!isItemVisible(entry)) return null;
             return renderItem(entry, 0);
@@ -166,7 +165,7 @@ export function AdminNav({
           if (visibleChildren.length === 0) return null;
 
           const open = !!openGroups[entry.id];
-          const anySelected = visibleChildren.some(child =>
+          const anySelected = visibleChildren.some((child) =>
             isActivePath(pathname, child.to),
           );
 
@@ -174,7 +173,7 @@ export function AdminNav({
             <Box key={entry.id}>
               <ListItemButton
                 onClick={() =>
-                  setOpenGroups(prev => ({
+                  setOpenGroups((prev) => ({
                     ...prev,
                     [entry.id]: !prev[entry.id],
                   }))
@@ -187,13 +186,13 @@ export function AdminNav({
                   mx: 1,
                 }}
               >
-                <ListItemIcon sx={{minWidth: 36}}>{entry.icon}</ListItemIcon>
+                <ListItemIcon sx={{ minWidth: 36 }}>{entry.icon}</ListItemIcon>
                 <ListItemText primary={entry.label} />
                 {open ? <ExpandLessIcon /> : <ExpandMoreIcon />}
               </ListItemButton>
               <Collapse in={open} timeout="auto" unmountOnExit>
-                <List dense sx={{py: 0.5}}>
-                  {visibleChildren.map(child =>
+                <List dense sx={{ py: 0.5 }}>
+                  {visibleChildren.map((child) =>
                     renderItem(child, 1, visibleChildren),
                   )}
                 </List>
@@ -203,9 +202,9 @@ export function AdminNav({
         })}
       </List>
 
-      <Box sx={{flex: 1}} />
+      <Box sx={{ flex: 1 }} />
       <Divider />
-      <Box sx={{px: 2, py: 1.5}}>
+      <Box sx={{ px: 2, py: 1.5 }}>
         <Typography variant="caption" color="text.secondary">
           REZICS Book Library
         </Typography>

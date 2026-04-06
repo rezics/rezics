@@ -1,8 +1,7 @@
 // Type only used in server, otherwise use contract
 
-import type {User, Unit, Prisma} from '#/prisma/client';
-
-import {t} from 'elysia';
+import { t } from "elysia";
+import type { Prisma, Unit, User } from "#/prisma/client";
 
 /**
  * Internal user type with relations
@@ -28,7 +27,7 @@ export type UserFilterOptions = {
 export const userInclude = {
   Units: {
     take: 10,
-    orderBy: {createdAt: 'desc'},
+    orderBy: { createdAt: "desc" },
   },
 } satisfies Prisma.UserInclude;
 
@@ -47,9 +46,9 @@ export const jwtPayloadSchema = t.Object({
       {
         role: t.Array(t.String()),
       },
-      {additionalProperties: true},
+      { additionalProperties: true },
     ),
   ),
 });
 
-export type JWTPayload = (typeof jwtPayloadSchema)['static'];
+export type JWTPayload = (typeof jwtPayloadSchema)["static"];

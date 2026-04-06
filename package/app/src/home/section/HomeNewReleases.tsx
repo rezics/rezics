@@ -1,16 +1,17 @@
-import React, {useMemo} from 'react';
-import {useQuery} from '@tanstack/react-query';
 import {
   Alert,
-  CircularProgress,
-  Typography,
   Card,
   CardContent,
-} from '@mui/material';
-import {bookQueries} from '@rezics/api/book/book';
-import type {BookDTO} from '@rezics/contract';
-import {LazyLoadImage} from '@rezics/ui/primitive/image/LazyLoadImage.tsx';
-import {useTranslation} from 'react-i18next';
+  CircularProgress,
+  Typography,
+} from "@mui/material";
+import { bookQueries } from "@rezics/api/book/book";
+import type { BookDTO } from "@rezics/contract";
+import { LazyLoadImage } from "@rezics/ui/primitive/image/LazyLoadImage.tsx";
+import { useQuery } from "@tanstack/react-query";
+import type React from "react";
+import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 
 type Book = BookDTO;
 
@@ -28,15 +29,15 @@ export const HomeNewReleases: React.FC<HomeNewReleasesProps> = ({
   title,
   limit = 12,
 }) => {
-  const {t} = useTranslation();
+  const { t } = useTranslation();
   const resolvedTitle =
-    title ?? t('page.home.sections.new_book_recommendations');
+    title ?? t("page.home.sections.new_book_recommendations");
 
-  const {data, isLoading, error} = useQuery(
+  const { data, isLoading, error } = useQuery(
     bookQueries.list({
       start: 0,
       limit,
-      sort: {type: 'createdAt', order: 'desc'},
+      sort: { type: "createdAt", order: "desc" },
     }),
   );
 
@@ -60,7 +61,7 @@ export const HomeNewReleases: React.FC<HomeNewReleasesProps> = ({
         {isLoading && <CircularProgress size={20} />}
       </div>
       <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
-        {books.map(book => (
+        {books.map((book) => (
           <Card key={book.unitId} className="overflow-hidden">
             {book.coverUrl && (
               <LazyLoadImage
@@ -82,7 +83,7 @@ export const HomeNewReleases: React.FC<HomeNewReleasesProps> = ({
                 color="text.secondary"
                 className="truncate"
               >
-                {book.author?.[0]?.name || ''}
+                {book.author?.[0]?.name || ""}
               </Typography>
             </CardContent>
           </Card>

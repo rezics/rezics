@@ -1,13 +1,13 @@
-import {faker} from '@faker-js/faker';
-import type {UnitType, Prisma} from '#/prisma/generated/client.js';
-import {UnitType as UnitTypeEnum} from '#/prisma/generated/client.js';
+import { faker } from "@faker-js/faker";
+import type { Prisma, UnitType } from "#/prisma/generated/client.js";
+import { UnitType as UnitTypeEnum } from "#/prisma/generated/client.js";
 import {
-  randomInt,
-  randomFloat,
-  randomBoolean,
-  pickN,
   generateTitle,
-} from './utils.js';
+  pickN,
+  randomBoolean,
+  randomFloat,
+  randomInt,
+} from "./utils.js";
 
 /**
  * Generate book extra metadata
@@ -16,9 +16,9 @@ import {
 export function generateBookExtra(): Prisma.InputJsonValue {
   return {
     publisher: faker.company.name(),
-    year: faker.date.past({years: 45}).getFullYear(),
-    language: faker.helpers.arrayElement(['en', 'zh', 'es', 'fr', 'de', 'jp']),
-    format: faker.helpers.arrayElement(['paperback', 'hardcover', 'ebook']),
+    year: faker.date.past({ years: 45 }).getFullYear(),
+    language: faker.helpers.arrayElement(["en", "zh", "es", "fr", "de", "jp"]),
+    format: faker.helpers.arrayElement(["paperback", "hardcover", "ebook"]),
   };
 }
 
@@ -75,7 +75,7 @@ export function buildUnitTitleByType(type: UnitType): string | null {
  */
 export function buildMetadataByType(
   type: UnitType,
-  context: {bookIds: string[]},
+  context: { bookIds: string[] },
 ): Prisma.InputJsonValue {
   switch (type) {
     case UnitTypeEnum.REVIEW:
@@ -96,18 +96,18 @@ export function buildMetadataByType(
       const count = randomInt(3, Math.min(10, context.bookIds.length));
       const selected = pickN(context.bookIds, count);
       return {
-        coverUrl: faker.image.url({width: 400, height: 600}),
+        coverUrl: faker.image.url({ width: 400, height: 600 }),
         books: selected,
       };
     }
     case UnitTypeEnum.IMAGE:
       return {
-        url: faker.image.url({width: 800, height: 600}),
+        url: faker.image.url({ width: 800, height: 600 }),
       };
     case UnitTypeEnum.VIDEO:
-      return {url: faker.internet.url()};
+      return { url: faker.internet.url() };
     case UnitTypeEnum.NOTE:
-      return {pinned: randomBoolean(0.1)};
+      return { pinned: randomBoolean(0.1) };
     default:
       return {} as Prisma.InputJsonValue;
   }

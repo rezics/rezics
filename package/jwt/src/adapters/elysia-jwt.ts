@@ -1,4 +1,4 @@
-import type {JwtKeyRecord} from '../contracts/persistence';
+import type { JwtKeyRecord } from "../contracts/persistence";
 
 export function createElysiaJwtConfig(input: {
   name?: string;
@@ -8,7 +8,7 @@ export function createElysiaJwtConfig(input: {
   key: JwtKeyRecord;
 }) {
   return {
-    name: input.name ?? 'jwt',
+    name: input.name ?? "jwt",
     secret: input.key.privateJwk,
     alg: input.key.algorithm,
     iss: input.issuer,

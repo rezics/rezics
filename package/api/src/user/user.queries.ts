@@ -1,6 +1,6 @@
-import {queryOptions} from '@tanstack/react-query';
-import {userApi} from './user.api';
-import {userKeys} from './user.keys';
+import { queryOptions } from "@tanstack/react-query";
+import { userApi } from "./user.api";
+import { userKeys } from "./user.keys";
 
 export const userMeQuery = () =>
   queryOptions({
@@ -41,7 +41,7 @@ export const userAdminDetailQuery = (unitId: string) =>
 
 export const userFollowersQuery = (
   unitId: string,
-  query?: {page?: number; limit?: number},
+  query?: { page?: number; limit?: number },
 ) =>
   queryOptions({
     queryKey: userKeys.followers(unitId, query),
@@ -51,7 +51,7 @@ export const userFollowersQuery = (
 
 export const userFollowingsQuery = (
   unitId: string,
-  query?: {page?: number; limit?: number},
+  query?: { page?: number; limit?: number },
 ) =>
   queryOptions({
     queryKey: userKeys.followings(unitId, query),

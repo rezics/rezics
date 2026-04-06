@@ -1,3 +1,5 @@
+// import { TransitionProps } from "@mui/material/transitions";
+import CloseIcon from "@mui/icons-material/Close";
 import {
   AppBar,
   Box,
@@ -6,10 +8,9 @@ import {
   Slide,
   Toolbar,
   Typography,
-} from '@mui/material';
-import React from 'react';
-// import { TransitionProps } from "@mui/material/transitions";
-import CloseIcon from '@mui/icons-material/Close';
+} from "@mui/material";
+import React from "react";
+
 //  ;
 
 // 过渡动画 (从下方滑入)
@@ -43,22 +44,22 @@ const FullScreenModal: React.FC<FullScreenModalProps> = ({
       <Transition in={open}>
         <Box
           sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            height: '100vh',
-            width: '100vw',
-            bgcolor: 'background.paper',
+            display: "flex",
+            flexDirection: "column",
+            height: "100vh",
+            width: "100vw",
+            bgcolor: "background.paper",
           }}
         >
           {/* 顶栏: 承载 title 插槽 */}
-          <AppBar position="static" sx={{flexShrink: 0}}>
+          <AppBar position="static" sx={{ flexShrink: 0 }}>
             <Toolbar>
-              <Box sx={{flexGrow: 1}}>
+              <Box sx={{ flexGrow: 1 }}>
                 {/* 这里是 title 插槽的关键逻辑：
                   - 如果 title 是字符串, 用 Typography 组件包裹来应用默认样式
                   - 如果 title 是一个 React 元素 (JSX), 则直接渲染
                 */}
-                {typeof title === 'string' ? (
+                {typeof title === "string" ? (
                   <Typography variant="h6" component="div">
                     {title}
                   </Typography>
@@ -84,7 +85,7 @@ const FullScreenModal: React.FC<FullScreenModalProps> = ({
             sx={{
               flexGrow: 1,
               p: 3,
-              overflowY: 'auto',
+              overflowY: "auto",
             }}
           >
             {children}

@@ -1,5 +1,5 @@
-import type {TagWithRelations} from './types';
-import type {TagDTO, TagDetailDTO} from '@rezics/contract';
+import type { TagDetailDTO, TagDTO } from "@rezics/contract";
+import type { TagWithRelations } from "./types";
 
 export function mapTagToDTO(tag: TagWithRelations): TagDTO {
   return {
@@ -14,7 +14,7 @@ export function mapTagDetailToDTO(tag: TagWithRelations): TagDetailDTO {
   return {
     ...mapTagToDTO(tag),
     i18n: tag.i18n ?? null,
-    domains: tag.unit.domains?.map(d => d.id) ?? [],
+    domains: tag.unit.domains?.map((d) => d.id) ?? [],
     content: tag.unit.content ?? null,
   };
 }

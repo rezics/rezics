@@ -5,8 +5,8 @@ export interface ApiConfig {
 }
 
 let config: ApiConfig = {
-  apiBaseUrl: '',
-  authBaseUrl: '',
+  apiBaseUrl: "",
+  authBaseUrl: "",
   appVersion: undefined,
 };
 
@@ -15,7 +15,7 @@ let config: ApiConfig = {
  * Must be called once before any API function is used.
  */
 export function configureApi(overrides: ApiConfig) {
-  config = {...overrides};
+  config = { ...overrides };
 }
 
 export function getApiConfig(): Readonly<ApiConfig> {

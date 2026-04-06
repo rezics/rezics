@@ -6,14 +6,19 @@
  */
 
 import type {
-  FeedbackDTO,
   CreateFeedbackInput,
+  FeedbackDTO,
   FeedbackListQuery,
   FeedbackType,
-} from '@rezics/contract';
+} from "@rezics/contract";
 
 // Re-export contract types
-export type {FeedbackDTO, CreateFeedbackInput, FeedbackListQuery, FeedbackType};
+export type {
+  CreateFeedbackInput,
+  FeedbackDTO,
+  FeedbackListQuery,
+  FeedbackType,
+};
 
 /**
  * Extended frontend types

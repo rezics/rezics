@@ -1,11 +1,7 @@
-import {
-  EditorView,
-  ViewPlugin,
-  type ViewUpdate,
-} from '@codemirror/view';
-import { StateEffect, StateField } from '@codemirror/state';
-import type { Extension } from '@codemirror/state';
-import type { ReactNode } from 'react';
+import type { Extension } from "@codemirror/state";
+import { StateEffect, StateField } from "@codemirror/state";
+import { type EditorView, ViewPlugin, type ViewUpdate } from "@codemirror/view";
+import type { ReactNode } from "react";
 
 export interface EmojiConfig {
   renderPicker: (

@@ -1,4 +1,4 @@
-import type {UnitType} from '#/prisma/generated/client.js';
+import type { UnitType } from "#/prisma/generated/client.js";
 
 /**
  * User data returned after creation

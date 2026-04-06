@@ -1,21 +1,21 @@
+import SearchIcon from "@mui/icons-material/Search";
 import {
   Avatar,
   Box,
   Card,
   CardContent,
+  Chip,
+  InputAdornment,
   Pagination,
   TextField,
   Typography,
-  InputAdornment,
-  Chip,
-} from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
-import {useEffect, useMemo, useState} from 'react';
-import type {FC} from 'react';
-import type {UserDTO} from '@rezics/contract';
-import {useQuery} from '@tanstack/react-query';
-import {userQueries} from '@rezics/api/user/user.queries';
-import {UserError, UserLoading} from './UserState';
+} from "@mui/material";
+import { userQueries } from "@rezics/api/user/user.queries";
+import type { UserDTO } from "@rezics/contract";
+import { useQuery } from "@tanstack/react-query";
+import type { FC } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { UserError, UserLoading } from "./UserState";
 
 export interface UserListPageProps {
   onUserClick?: (unitId: string) => void;
@@ -25,12 +25,12 @@ export interface UserListPageProps {
  * UserListPage - 用户列表页面
  * 显示所有用户，支持搜索和分页
  */
-export const UserListPage: FC<UserListPageProps> = ({onUserClick}) => {
-  const [users, setUsers] = useState<Omit<UserDTO, 'email'>[]>([]);
+export const UserListPage: FC<UserListPageProps> = ({ onUserClick }) => {
+  const [users, setUsers] = useState<Omit<UserDTO, "email">[]>([]);
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [debouncedQuery, setDebouncedQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedQuery, setDebouncedQuery] = useState("");
 
   const itemsPerPage = 20;
 
@@ -53,7 +53,7 @@ export const UserListPage: FC<UserListPageProps> = ({onUserClick}) => {
     return query;
   }, [page, debouncedQuery]);
 
-  const {data, isLoading, error} = useQuery(userQueries.list(queryParams));
+  const { data, isLoading, error } = useQuery(userQueries.list(queryParams));
 
   useEffect(() => {
     if (data) {
@@ -64,7 +64,7 @@ export const UserListPage: FC<UserListPageProps> = ({onUserClick}) => {
 
   const handlePageChange = (_event: unknown, value: number) => {
     setPage(value);
-    window.scrollTo({top: 0, behavior: 'smooth'});
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleUserClick = (unitId: string) => {
@@ -88,7 +88,7 @@ export const UserListPage: FC<UserListPageProps> = ({onUserClick}) => {
           fullWidth
           placeholder="Search users by name or email..."
           value={searchQuery}
-          onChange={e => setSearchQuery(e.target.value)}
+          onChange={(e) => setSearchQuery(e.target.value)}
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
@@ -115,7 +115,7 @@ export const UserListPage: FC<UserListPageProps> = ({onUserClick}) => {
       {!isLoading && !error && users.length > 0 && (
         <>
           <Box className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {users.map(user => (
+            {users.map((user) => (
               <Card
                 key={user.id}
                 className="shadow-md rounded-lg cursor-pointer hover:shadow-xl transition-shadow"
@@ -124,7 +124,7 @@ export const UserListPage: FC<UserListPageProps> = ({onUserClick}) => {
                 <CardContent className="text-center">
                   <Avatar
                     src={user.avatar}
-                    sx={{width: 64, height: 64, margin: '0 auto'}}
+                    sx={{ width: 64, height: 64, margin: "0 auto" }}
                     className="mb-3"
                   >
                     {user.name?.charAt(0).toUpperCase()}
@@ -177,7 +177,7 @@ export const UserListPage: FC<UserListPageProps> = ({onUserClick}) => {
 
           <Box className="mt-4 text-center">
             <Typography variant="body2" color="textSecondary">
-              Showing {(page - 1) * itemsPerPage + 1} -{' '}
+              Showing {(page - 1) * itemsPerPage + 1} -{" "}
               {Math.min(page * itemsPerPage, total)} of {total} users
             </Typography>
           </Box>

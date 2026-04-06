@@ -1,13 +1,12 @@
-import {useUserProfileStore} from '@/user/state';
-import {Button, Typography} from '@mui/material';
-import {LinearChapterList} from '@/book-library/component/Chapter/LinearChapterList';
+import { LinearChapterList } from "@/book-library/component/Chapter/LinearChapterList";
+import { useUserProfileStore } from "@/user/state";
 
 export function TestPage02() {
-  const user = useUserProfileStore(state => state.user);
-  const product = {
-    title: 'Product 1',
-    lorem: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-    cover: 'https://m.media-amazon.com/images/I/81wGzzxqHSL._SY466_.jpg',
+  const _user = useUserProfileStore((state) => state.user);
+  const _product = {
+    title: "Product 1",
+    lorem: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+    cover: "https://m.media-amazon.com/images/I/81wGzzxqHSL._SY466_.jpg",
   };
   return (
     <div className="w-[300px]">

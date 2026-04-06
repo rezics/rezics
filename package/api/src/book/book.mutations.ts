@@ -2,18 +2,18 @@
  * React Query mutations for Book operations
  */
 
-import {
-  useMutation,
-  useQueryClient,
-  type UseMutationOptions,
-} from '@tanstack/react-query';
-import {bookApi} from './book.api';
-import {bookKeys} from './book.keys';
 import type {
+  BookResponse,
   CreateBookInput,
   UpdateBookInput,
-  BookResponse,
-} from '@rezics/contract';
+} from "@rezics/contract";
+import {
+  type UseMutationOptions,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
+import { bookApi } from "./book.api";
+import { bookKeys } from "./book.keys";
 
 /**
  * Mutation for creating a book
@@ -21,7 +21,7 @@ import type {
 export function useCreateBookMutation(
   options?: Omit<
     UseMutationOptions<BookResponse, Error, CreateBookInput>,
-    'mutationFn'
+    "mutationFn"
   >,
 ) {
   const queryClient = useQueryClient();
@@ -31,7 +31,7 @@ export function useCreateBookMutation(
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
       // Invalidate and refetch book lists
-      queryClient.invalidateQueries({queryKey: bookKeys.lists()});
+      queryClient.invalidateQueries({ queryKey: bookKeys.lists() });
 
       // Optionally pre-populate the cache with the new book
       queryClient.setQueryData(bookKeys.detail(data.unitId), data);
@@ -49,22 +49,22 @@ export function useUpdateBookMutation(
     UseMutationOptions<
       BookResponse,
       Error,
-      {postId: string; input: UpdateBookInput}
+      { postId: string; input: UpdateBookInput }
     >,
-    'mutationFn'
+    "mutationFn"
   >,
 ) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({postId, input}) => bookApi.update(postId, input),
+    mutationFn: ({ postId, input }) => bookApi.update(postId, input),
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
       // Update the cache for this specific book
       queryClient.setQueryData(bookKeys.detail(variables.postId), data);
 
       // Invalidate lists to ensure they're refreshed
-      queryClient.invalidateQueries({queryKey: bookKeys.lists()});
+      queryClient.invalidateQueries({ queryKey: bookKeys.lists() });
 
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
@@ -76,8 +76,8 @@ export function useUpdateBookMutation(
  */
 export function useDeleteBookMutation(
   options?: Omit<
-    UseMutationOptions<{message: string}, Error, string>,
-    'mutationFn'
+    UseMutationOptions<{ message: string }, Error, string>,
+    "mutationFn"
   >,
 ) {
   const queryClient = useQueryClient();
@@ -87,10 +87,10 @@ export function useDeleteBookMutation(
     ...options,
     onSuccess: (data, postId, onMutateResult, context) => {
       // Remove from cache
-      queryClient.removeQueries({queryKey: bookKeys.detail(postId)});
+      queryClient.removeQueries({ queryKey: bookKeys.detail(postId) });
 
       // Invalidate all lists
-      queryClient.invalidateQueries({queryKey: bookKeys.lists()});
+      queryClient.invalidateQueries({ queryKey: bookKeys.lists() });
 
       options?.onSuccess?.(data, postId, onMutateResult, context);
     },
@@ -110,13 +110,13 @@ export function useUpdateChapterIndexMutation(
         chaptersIndex: any;
       }
     >,
-    'mutationFn'
+    "mutationFn"
   >,
 ) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({bookUnitId, chaptersIndex}) =>
+    mutationFn: ({ bookUnitId, chaptersIndex }) =>
       bookApi.updateChapterIndex(bookUnitId, chaptersIndex),
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {

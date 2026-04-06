@@ -1,3 +1,9 @@
+import { Button, Tooltip } from "@mui/material";
+import { bookQueries } from "@rezics/api/book/book.queries";
+import type { ChapterTreeItem } from "@rezics/contract";
+import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
+import { Link } from "@rezics/ui/primitive/link/Link.tsx";
+import { useQuery } from "@tanstack/react-query";
 import React, {
   forwardRef,
   useCallback,
@@ -5,17 +11,9 @@ import React, {
   useImperativeHandle,
   useMemo,
   useState,
-} from 'react';
-import {Button, Tooltip} from '@mui/material';
-import {useTranslation} from 'react-i18next';
-import {useQuery} from '@tanstack/react-query';
-
-import {bookQueries} from '@rezics/api/book/book.queries';
-import {AccentBarWithText} from '@rezics/ui/composite/typography/AccentBarWithText.tsx';
-import {useChapterListStore} from '@/book-library/state/chapterListStore';
-import {Link} from '@rezics/ui/primitive/link/Link.tsx';
-
-import type {ChapterTreeItem} from '@rezics/contract';
+} from "react";
+import { useTranslation } from "react-i18next";
+import { useChapterListStore } from "@/book-library/state/chapterListStore";
 
 export type ChapterTreeHandle = {
   expandAll: () => void;
@@ -45,7 +43,7 @@ export const ChapterLeaf = React.memo(function ChapterLeaf({
   const content = (
     <Link
       to="/book/$bookId/read/$chapterId"
-      params={{bookId, chapterId: node.id}}
+      params={{ bookId, chapterId: node.id }}
       className="block hover:text-[var(--mui-palette-primary-main)]"
     >
       <p className="truncate p-2 rounded-md transition-colors duration-200">
@@ -86,7 +84,7 @@ export type ChapterTreeProps = {
 };
 
 const CHAPTER_GRID_CLASS =
-  'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-1';
+  "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-1";
 
 /**
  * Render chapter tree items WITHOUT a wrapping layout container.
@@ -104,7 +102,7 @@ const ChapterTreeItems = React.memo(function ChapterTreeItems({
 
   return (
     <>
-      {nodes.map(node => {
+      {nodes.map((node) => {
         const children = node.children ?? [];
         const hasChildren = children.length > 0;
 
@@ -131,7 +129,7 @@ const ChapterTreeItems = React.memo(function ChapterTreeItems({
                   size="small"
                   onClick={() => onToggle(String(node.id))}
                 >
-                  {isOpen ? 'Collapse' : 'Expand'}
+                  {isOpen ? "Collapse" : "Expand"}
                 </Button>
               )}
             </div>
@@ -190,10 +188,10 @@ export const ChapterTreeView = forwardRef<
   ChapterTreeHandle,
   ChapterTreeViewProps
 >(function ChapterTreeView(
-  {bookId, nodes, storageKey, defaultExpandAll = true},
+  { bookId, nodes, storageKey, defaultExpandAll = true },
   ref,
 ) {
-  const persisted = useChapterListStore(s =>
+  const persisted = useChapterListStore((s) =>
     storageKey ? s.chapterList[storageKey]?.expandedNodes : undefined,
   );
 
@@ -217,14 +215,14 @@ export const ChapterTreeView = forwardRef<
   // but ensure ids still valid; optionally expand all if empty & defaultExpandAll.
   useEffect(() => {
     const expandable = getAllExpandableIds(nodes);
-    setExpanded(prev => {
+    setExpanded((prev) => {
       const next = new Set<string>();
       for (const id of prev) if (expandable.has(id)) next.add(id);
       if (next.size === 0 && defaultExpandAll) return expandable;
       return next;
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [nodes]);
+  }, [nodes, defaultExpandAll]);
 
   const persistExpanded = useCallback(
     (set: Set<string>) => {
@@ -247,7 +245,7 @@ export const ChapterTreeView = forwardRef<
 
   const toggle = useCallback(
     (id: string) => {
-      setExpanded(prev => {
+      setExpanded((prev) => {
         const next = new Set(prev);
         if (next.has(id)) {
           next.delete(id);
@@ -319,9 +317,9 @@ export interface ChapterListProps {
  *
  * Fetches chapter data and renders using ChapterTreeView.
  */
-export const ChapterList: React.FC<ChapterListProps> = ({id}) => {
-  const {t} = useTranslation();
-  const {data, isLoading, error} = useQuery(bookQueries.chapterIndex(id));
+export const ChapterList: React.FC<ChapterListProps> = ({ id }) => {
+  const { t } = useTranslation();
+  const { data, isLoading, error } = useQuery(bookQueries.chapterIndex(id));
 
   const chapterTree: ChapterTreeItem[] = useMemo(
     () => data?.index ?? [],
@@ -330,31 +328,31 @@ export const ChapterList: React.FC<ChapterListProps> = ({id}) => {
 
   const treeRef = React.useRef<ChapterTreeHandle>(null);
 
-  if (isLoading) return <div>{t('common.loading')}</div>;
+  if (isLoading) return <div>{t("common.loading")}</div>;
   if (error)
     return (
       <div>
-        {t('common.error_generic')} {String(error)}
+        {t("common.error_generic")} {String(error)}
       </div>
     );
 
   return (
     <div>
       <div className="flex justify-between items-center mb-4">
-        <AccentBarWithText text={t('book.toc')} />
+        <AccentBarWithText text={t("book.toc")} />
 
         <div className="flex justify-end gap-2">
           <Button
             variant="contained"
             onClick={() => treeRef.current?.expandAll()}
           >
-            {t('common.expand_all')}
+            {t("common.expand_all")}
           </Button>
           <Button
             variant="outlined"
             onClick={() => treeRef.current?.collapseAll()}
           >
-            {t('common.collapse_all')}
+            {t("common.collapse_all")}
           </Button>
         </div>
       </div>
@@ -371,4 +369,4 @@ export const ChapterList: React.FC<ChapterListProps> = ({id}) => {
 };
 
 // Legacy export for backward compatibility
-export {ChapterList as ChapterListContainer};
+export { ChapterList as ChapterListContainer };

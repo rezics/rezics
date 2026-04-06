@@ -1,11 +1,10 @@
-import {BookCarousel} from '../component/HomeCarousel';
-import {NoticeBoard} from './NoticeBoard';
-
-import {useEffect, useRef, useState} from 'react';
-import {useTranslation} from 'react-i18next';
+import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { BookCarousel } from "../component/HomeCarousel";
+import { NoticeBoard } from "./NoticeBoard";
 
 export function ResponsiveCarouselNotice() {
-  const {t} = useTranslation();
+  const { t } = useTranslation();
   const containerRef = useRef<HTMLDivElement>(null);
   const carouselRef = useRef<HTMLDivElement>(null);
   const noticeRef = useRef<HTMLDivElement>(null);
@@ -20,17 +19,17 @@ export function ResponsiveCarouselNotice() {
       // 同步高度
       if (carouselRef.current && noticeRef.current) {
         const h = carouselRef.current.getBoundingClientRect().height;
-        noticeRef.current.style.height = isWide ? `${h}px` : 'auto';
+        noticeRef.current.style.height = isWide ? `${h}px` : "auto";
       }
     };
 
     const ro = new ResizeObserver(updateLayout);
     if (carouselRef.current) ro.observe(carouselRef.current);
-    window.addEventListener('resize', updateLayout);
+    window.addEventListener("resize", updateLayout);
     updateLayout();
 
     return () => {
-      window.removeEventListener('resize', updateLayout);
+      window.removeEventListener("resize", updateLayout);
       ro.disconnect();
     };
   }, [isWide]);
@@ -39,23 +38,23 @@ export function ResponsiveCarouselNotice() {
     <div
       ref={containerRef}
       className={`q-pa-md flex gap-4 transition-all duration-300 ${
-        isWide ? 'flex-row items-start' : 'flex-col'
+        isWide ? "flex-row items-start" : "flex-col"
       }`}
     >
       {/* 左侧：BookCarousel */}
-      <div ref={carouselRef} className={`${isWide ? 'w-2/3' : 'w-full'}`}>
+      <div ref={carouselRef} className={`${isWide ? "w-2/3" : "w-full"}`}>
         <div className="space-y-2 mb-4">
           <p className="text-[10px] uppercase tracking-[0.35em] text-primary/80">
-            {t('page.home.hero.kicker')}
+            {t("page.home.hero.kicker")}
           </p>
           <h1 className="text-2xl font-semibold leading-snug">
             <span className="text-primary">
-              {' '}
-              {t('page.home.hero.title_highlight')}
+              {" "}
+              {t("page.home.hero.title_highlight")}
             </span>
           </h1>
           <p className="text-xs text-muted-foreground">
-            {t('page.home.hero.subtitle')}
+            {t("page.home.hero.subtitle")}
           </p>
         </div>
         <BookCarousel autoplayIntervalNum={3000} />
@@ -64,11 +63,10 @@ export function ResponsiveCarouselNotice() {
       {/* 右侧：NoticeBoard */}
       <div
         ref={noticeRef}
-        className={`${isWide ? 'w-1/3' : 'w-full'} overflow-auto max-h-[32rem]`}
+        className={`${isWide ? "w-1/3" : "w-full"} overflow-auto max-h-[32rem]`}
       >
         <NoticeBoard />
       </div>
     </div>
   );
 }
-

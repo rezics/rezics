@@ -1,1 +1,1 @@
-export {t} from 'elysia';
+export { t } from "elysia";

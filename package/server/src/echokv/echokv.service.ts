@@ -1,10 +1,10 @@
-import {prisma, Prisma} from '#/prisma/client';
+import { type Prisma, prisma } from "#/prisma/client";
 
 type JsonValue = Prisma.JsonValue;
 export class EchoKvService {
   async get(key: string): Promise<JsonValue> {
     const value = await prisma.echoKV.findUnique({
-      where: {key},
+      where: { key },
     });
     return value?.value as JsonValue;
   }
@@ -22,9 +22,9 @@ export class EchoKvService {
    */
   async set(key: string, value: JsonValue): Promise<JsonValue> {
     const record = await prisma.echoKV.upsert({
-      where: {key},
-      update: {value: value as Prisma.InputJsonValue},
-      create: {key, value: value as Prisma.InputJsonValue},
+      where: { key },
+      update: { value: value as Prisma.InputJsonValue },
+      create: { key, value: value as Prisma.InputJsonValue },
     });
     return record.value as JsonValue;
   }
@@ -40,7 +40,7 @@ export class EchoKvService {
             where: {
               key: {
                 contains: search,
-                mode: 'insensitive',
+                mode: "insensitive",
               },
             },
           }
@@ -49,11 +49,11 @@ export class EchoKvService {
         key: true,
       },
       orderBy: {
-        updatedAt: 'desc',
+        updatedAt: "desc",
       },
     });
 
-    return records.map(r => r.key);
+    return records.map((r) => r.key);
   }
 }
 

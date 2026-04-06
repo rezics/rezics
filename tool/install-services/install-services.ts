@@ -6,8 +6,8 @@
  * 可在 Node / Bun 环境运行
  */
 
-import {execSync} from 'node:child_process';
-import {existsSync, chmodSync} from 'node:fs';
+import { execSync } from "node:child_process";
+import { chmodSync, existsSync } from "node:fs";
 
 // ======== 配置区：你可以随便改 ========
 
@@ -27,20 +27,20 @@ interface ServiceConfig {
 
 const SERVICES: ServiceConfig[] = [
   {
-    name: 'rezbooklib.service',
-    src: './rezbooklib.service',
+    name: "rezbooklib.service",
+    src: "./rezbooklib.service",
     enable: true,
     start: true,
   },
   {
-    name: 'rezbookauth.service',
-    src: './rezbookauth.service',
+    name: "rezbookauth.service",
+    src: "./rezbookauth.service",
     enable: true,
     start: true,
   },
 ];
 
-const SYSTEMD_DIR = '/etc/systemd/system';
+const SYSTEMD_DIR = "/etc/systemd/system";
 
 // 是否遇到错误时报错退出
 const EXIT_ON_ERROR = false;
@@ -49,7 +49,7 @@ const EXIT_ON_ERROR = false;
 
 function sh(cmd: string) {
   console.log(`\n> ${cmd}`);
-  execSync(cmd, {stdio: 'inherit'});
+  execSync(cmd, { stdio: "inherit" });
 }
 
 // ======== 单服务处理函数 ========
@@ -72,23 +72,23 @@ function installOneService(config: ServiceConfig) {
     console.log(`复制 ${config.src} -> ${dest}`);
     sh(`sudo cp "${config.src}" "${dest}"`);
 
-    console.log('设置权限 644');
+    console.log("设置权限 644");
     chmodSync(dest, 0o644);
 
-    console.log('执行 daemon-reload');
-    sh('sudo systemctl daemon-reload');
+    console.log("执行 daemon-reload");
+    sh("sudo systemctl daemon-reload");
 
     if (config.enable) {
-      console.log('启用开机自启');
+      console.log("启用开机自启");
       sh(`sudo systemctl enable ${config.name}`);
     }
 
     if (config.start) {
-      console.log('启动服务');
+      console.log("启动服务");
       sh(`sudo systemctl start ${config.name}`);
     }
 
-    console.log('查看服务状态');
+    console.log("查看服务状态");
     sh(`sudo systemctl status ${config.name} --no-pager`);
   } catch (err) {
     console.error(`🚨 安装 ${config.name} 失败:`);
@@ -101,13 +101,13 @@ function installOneService(config: ServiceConfig) {
 // ======== 主逻辑：依次执行 ========
 
 function main() {
-  console.log('==== 批量安装 systemd 服务 ====\n');
+  console.log("==== 批量安装 systemd 服务 ====\n");
 
-  SERVICES.forEach(service => {
+  SERVICES.forEach((service) => {
     installOneService(service);
   });
 
-  console.log('\n🚀 完成：所有服务已处理完毕');
+  console.log("\n🚀 完成：所有服务已处理完毕");
 }
 
 main();

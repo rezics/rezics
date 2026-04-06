@@ -1,11 +1,11 @@
-import React from 'react';
-import {AccentBarWithText} from '@rezics/ui/composite/typography/AccentBarWithText.tsx';
-import TagListEdit from '@/tag/component/Edit/TagListEdit';
-import {Alert} from '@mui/material';
-import {bookEditLayoutRoute} from '@/router';
+import { Alert } from "@mui/material";
+import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
+import type React from "react";
+import { bookEditLayoutRoute } from "@/router";
+import TagListEdit from "@/tag/component/Edit/TagListEdit";
 
 export const BookEditTagPage: React.FC = () => {
-  const {bookId} = bookEditLayoutRoute.useParams();
+  const { bookId } = bookEditLayoutRoute.useParams();
   return (
     <div className="mt-10 mx-auto w-11/12">
       <div className="pl-4">

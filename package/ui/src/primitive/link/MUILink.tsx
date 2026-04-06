@@ -1,4 +1,4 @@
-import {createLink} from '@tanstack/react-router';
-import {Link} from '@mui/material';
+import { Link } from "@mui/material";
+import { createLink } from "@tanstack/react-router";
 
 export const MUILink = createLink(Link);

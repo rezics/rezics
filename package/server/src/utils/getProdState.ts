@@ -1,4 +1,4 @@
-import 'dotenv/config';
+import "dotenv/config";
 
 export function getProdState() {
   // Bun 有两个 env：
@@ -9,13 +9,13 @@ export function getProdState() {
   const nodeEnv = process?.env?.NODE_ENV;
 
   // 统一获取环境变量（避免 bundler 静态折叠）
-  const env = bunEnv ?? nodeEnv ?? 'development';
+  const env = bunEnv ?? nodeEnv ?? "development";
 
   // 返回布尔值和实际字符串
   return {
     NODE_ENV: env,
-    isProd: env === 'production',
-    isDev: env === 'development',
-    isTest: env === 'test',
+    isProd: env === "production",
+    isDev: env === "development",
+    isTest: env === "test",
   };
 }

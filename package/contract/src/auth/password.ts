@@ -1,4 +1,4 @@
-import {t} from 'elysia';
+import { t } from "elysia";
 import {
   changeEmailBodySchema,
   changeEmailResponseSchema,
@@ -8,51 +8,51 @@ import {
   setPasswordResponseSchema,
   verifyEmailQuerySchema,
   verifyEmailResponseSchema,
-} from './self-service';
+} from "./self-service";
 
 export const requestPasswordResetBodySchema = t.Object({
-  email: t.String({format: 'email'}),
+  email: t.String({ format: "email" }),
   redirectTo: t.Optional(t.String()),
 });
 export type RequestPasswordResetBody =
-  (typeof requestPasswordResetBodySchema)['static'];
+  (typeof requestPasswordResetBodySchema)["static"];
 
 export const requestPasswordResetResponseSchema = t.Object({
   status: t.Boolean(),
   message: t.String(),
 });
 export type RequestPasswordResetResponse =
-  (typeof requestPasswordResetResponseSchema)['static'];
+  (typeof requestPasswordResetResponseSchema)["static"];
 
 export const resetPasswordCallbackParamsSchema = t.Object({
   token: t.String(),
 });
 export type ResetPasswordCallbackParams =
-  (typeof resetPasswordCallbackParamsSchema)['static'];
+  (typeof resetPasswordCallbackParamsSchema)["static"];
 
 export const resetPasswordCallbackQuerySchema = t.Object({
   callbackURL: t.String(),
 });
 export type ResetPasswordCallbackQuery =
-  (typeof resetPasswordCallbackQuerySchema)['static'];
+  (typeof resetPasswordCallbackQuerySchema)["static"];
 
 export const resetPasswordCallbackResponseSchema = t.Object({
   token: t.String(),
 });
 export type ResetPasswordCallbackResponse =
-  (typeof resetPasswordCallbackResponseSchema)['static'];
+  (typeof resetPasswordCallbackResponseSchema)["static"];
 
 export const resetPasswordBodySchema = t.Object({
   newPassword: t.String(),
   token: t.Optional(t.String()),
 });
-export type ResetPasswordBody = (typeof resetPasswordBodySchema)['static'];
+export type ResetPasswordBody = (typeof resetPasswordBodySchema)["static"];
 
 export const resetPasswordResponseSchema = t.Object({
   status: t.Boolean(),
 });
 export type ResetPasswordResponse =
-  (typeof resetPasswordResponseSchema)['static'];
+  (typeof resetPasswordResponseSchema)["static"];
 
 export {
   changeEmailBodySchema,
@@ -64,13 +64,13 @@ export {
   verifyEmailQuerySchema,
   verifyEmailResponseSchema,
 };
-export type ChangeEmailBody = (typeof changeEmailBodySchema)['static'];
-export type ChangeEmailResponse = (typeof changeEmailResponseSchema)['static'];
+export type ChangeEmailBody = (typeof changeEmailBodySchema)["static"];
+export type ChangeEmailResponse = (typeof changeEmailResponseSchema)["static"];
 export type SendVerificationEmailBody =
-  (typeof sendVerificationEmailBodySchema)['static'];
+  (typeof sendVerificationEmailBodySchema)["static"];
 export type SendVerificationEmailResponse =
-  (typeof sendVerificationEmailResponseSchema)['static'];
-export type SetPasswordBody = (typeof setPasswordBodySchema)['static'];
-export type SetPasswordResponse = (typeof setPasswordResponseSchema)['static'];
-export type VerifyEmailQuery = (typeof verifyEmailQuerySchema)['static'];
-export type VerifyEmailResponse = (typeof verifyEmailResponseSchema)['static'];
+  (typeof sendVerificationEmailResponseSchema)["static"];
+export type SetPasswordBody = (typeof setPasswordBodySchema)["static"];
+export type SetPasswordResponse = (typeof setPasswordResponseSchema)["static"];
+export type VerifyEmailQuery = (typeof verifyEmailQuerySchema)["static"];
+export type VerifyEmailResponse = (typeof verifyEmailResponseSchema)["static"];

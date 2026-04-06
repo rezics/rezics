@@ -1,6 +1,6 @@
-import type {User} from '#/prisma/client';
-import type {UserDTO} from '@rezics/contract';
-import type {UserWithRelations} from './types';
+import type { UserDTO } from "@rezics/contract";
+import type { User } from "#/prisma/client";
+import type { UserWithRelations } from "./types";
 
 /**
  * Map internal User model to UserDTO (public data)
@@ -16,7 +16,7 @@ export function mapUserToDTO(user: User | UserWithRelations): UserDTO {
     description: user.description || undefined,
     followersCount: user.followersCount,
     followingsCount: user.followingsCount,
-    permission: user.permission as {role: string[]} | undefined,
+    permission: user.permission as { role: string[] } | undefined,
     joinDate: user.joinDate?.toISOString(),
   };
 }

@@ -1,13 +1,13 @@
-import {prisma} from '#/prisma/client';
-import {searchClient} from '../search-client';
-import type {UserSearchDocument} from './index';
+import { prisma } from "#/prisma/client";
+import { searchClient } from "../search-client";
+import type { UserSearchDocument } from "./index";
 
 /**
  * Sync a single user (by its unitId) into the Meilisearch `users` index.
  */
 export async function syncUserToMeili(unitId: string): Promise<void> {
   const user = await prisma.user.findUnique({
-    where: {unitId},
+    where: { unitId },
   });
 
   if (!user) return;

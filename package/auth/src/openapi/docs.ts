@@ -2,19 +2,16 @@ type OpenApiSchema = any;
 
 export const jsonRequestBody = (schema: OpenApiSchema) => ({
   content: {
-    'application/json': {
+    "application/json": {
       schema,
     },
   },
 });
 
-export const jsonResponse = (
-  description: string,
-  schema: OpenApiSchema,
-) => ({
+export const jsonResponse = (description: string, schema: OpenApiSchema) => ({
   description,
   content: {
-    'application/json': {
+    "application/json": {
       schema,
     },
   },
@@ -27,7 +24,7 @@ export const parameter = ({
   schema,
 }: {
   name: string;
-  in: 'path' | 'query';
+  in: "path" | "query";
   required: boolean;
   schema: OpenApiSchema;
 }) => ({

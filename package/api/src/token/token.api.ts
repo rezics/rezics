@@ -9,8 +9,8 @@ import type {
   CreateApiTokenInput,
   CreateApiTokenResponse,
   UpdateApiTokenInput,
-} from '@rezics/contract';
-import {apiFetch} from '../react-query/http';
+} from "@rezics/contract";
+import { apiFetch } from "../react-query/http";
 
 /**
  * Token API methods
@@ -20,7 +20,7 @@ export const tokenApi = {
    * List all non-revoked tokens for the current user.
    */
   list: async (): Promise<ApiTokenListResponse> => {
-    return apiFetch<ApiTokenListResponse>('/token/tokens');
+    return apiFetch<ApiTokenListResponse>("/token/tokens");
   },
 
   /**
@@ -30,8 +30,8 @@ export const tokenApi = {
   create: async (
     input: CreateApiTokenInput,
   ): Promise<CreateApiTokenResponse> => {
-    return apiFetch<CreateApiTokenResponse>('/token/tokens', {
-      method: 'POST',
+    return apiFetch<CreateApiTokenResponse>("/token/tokens", {
+      method: "POST",
       body: JSON.stringify(input),
     });
   },
@@ -44,7 +44,7 @@ export const tokenApi = {
     input: UpdateApiTokenInput,
   ): Promise<ApiTokenDTO> => {
     return apiFetch<ApiTokenDTO>(`/token/tokens/${id}`, {
-      method: 'PUT',
+      method: "PUT",
       body: JSON.stringify(input),
     });
   },
@@ -52,9 +52,9 @@ export const tokenApi = {
   /**
    * Revoke an API token so it can no longer be used.
    */
-  revoke: async (id: string): Promise<{message: string}> => {
-    return apiFetch<{message: string}>(`/token/tokens/${id}`, {
-      method: 'DELETE',
+  revoke: async (id: string): Promise<{ message: string }> => {
+    return apiFetch<{ message: string }>(`/token/tokens/${id}`, {
+      method: "DELETE",
     });
   },
 };

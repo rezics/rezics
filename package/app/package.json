@@ -7,12 +7,9 @@
     "build": "vite build",
     "preview": "vite preview",
     "cosmos": "cosmos",
-    "cosmos-export": "cosmos-export",
-    "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "cosmos-export": "cosmos-export"
   },
   "exports": {
-    "./eslint.config": "./eslint.config.js",
     "./*": {
       "types": "./src/*.ts",
       "default": "./src/*.ts"
@@ -61,7 +58,6 @@
     "emoji-picker-react": "^4.16.1",
     "gel": "^2.1.1",
     "github-markdown-css": "5.8.1",
-    "globals": "^16.3.0",
     "graphql-tag": "2.12.6",
     "humanize-plus": "1.8.2",
     "i18n": "0.15.1",
@@ -92,7 +88,6 @@
     "zustand": "5.0.7"
   },
   "devDependencies": {
-    "@eslint/js": "^9.35.0",
     "@tanstack/router-plugin": "^1.157.16",
     "@types/humanize-plus": "1.8.2",
     "@types/lodash": "4.17.20",
@@ -101,15 +96,8 @@
     "@types/react-dom": "19.1.7",
     "@types/react-window": "1.8.8",
     "@types/uuid": "10.0.0",
-    "@typescript-eslint/eslint-plugin": "^8.44.0",
-    "@typescript-eslint/parser": "^8.44.0",
     "@unocss/preset-wind4": "^66.5.10",
     "@unocss/transformer-directives": "^66.5.10",
-    "eslint": "^9.35.0",
-    "eslint-plugin-jsx-a11y": "^6.10.2",
-    "eslint-plugin-react": "7.37.5",
-    "eslint-plugin-react-hooks": "^7.0.1",
-    "eslint-plugin-react-refresh": "^0.4.20",
     "jsdom": "26.1.0",
     "msw": "2.10.5",
     "react-cosmos": "7.0.0",

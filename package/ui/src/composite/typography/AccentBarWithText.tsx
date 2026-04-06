@@ -1,17 +1,20 @@
-import {Typography} from '@mui/material';
-import React from 'react';
-import {AccentBar, AccentBarProps} from '@/primitive/decorative/AccentBar';
+import { Typography } from "@mui/material";
+import type React from "react";
+import {
+  AccentBar,
+  type AccentBarProps,
+} from "@/primitive/decorative/AccentBar";
 
 export interface AccentBarWithTextProps extends AccentBarProps {
   text: React.ReactNode;
-  typographyVariant?: React.ComponentProps<typeof Typography>['variant'];
-  typographyProps?: Omit<React.ComponentProps<typeof Typography>, 'variant'>;
+  typographyVariant?: React.ComponentProps<typeof Typography>["variant"];
+  typographyProps?: Omit<React.ComponentProps<typeof Typography>, "variant">;
   gap?: number;
 }
 
 export const AccentBarWithText: React.FC<AccentBarWithTextProps> = ({
   text,
-  typographyVariant = 'h5',
+  typographyVariant = "h5",
   typographyProps,
   gap = 8,
   ...barProps
@@ -20,7 +23,7 @@ export const AccentBarWithText: React.FC<AccentBarWithTextProps> = ({
     <Typography
       variant={typographyVariant}
       className="font-bold flex items-center"
-      sx={{display: 'flex', alignItems: 'center', gap: `${gap}px`}}
+      sx={{ display: "flex", alignItems: "center", gap: `${gap}px` }}
       {...typographyProps}
     >
       <AccentBar {...barProps} />

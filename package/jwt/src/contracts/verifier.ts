@@ -1,11 +1,21 @@
-import type {KeyObject} from 'node:crypto';
-import type {JWK, JWTPayload} from 'jose';
-import type {JwtJwks} from '../core/jwks';
-import type {JwtVerifierOptions, VerifiedJwt} from '../core/verification';
+import type { KeyObject } from "node:crypto";
+import type { JWK, JWTPayload } from "jose";
+import type { JwtJwks } from "../core/jwks";
+import type { JwtVerifierOptions, VerifiedJwt } from "../core/verification";
 
 export type JwtKeySource =
-  | {jwksUrl: string; jwks?: never; verificationKey?: never; verificationKeyPem?: never}
-  | {jwks: JwtJwks | {keys: JWK[]}; jwksUrl?: never; verificationKey?: never; verificationKeyPem?: never}
+  | {
+      jwksUrl: string;
+      jwks?: never;
+      verificationKey?: never;
+      verificationKeyPem?: never;
+    }
+  | {
+      jwks: JwtJwks | { keys: JWK[] };
+      jwksUrl?: never;
+      verificationKey?: never;
+      verificationKeyPem?: never;
+    }
   | {
       verificationKey: CryptoKey | KeyObject | Uint8Array;
       jwksUrl?: never;

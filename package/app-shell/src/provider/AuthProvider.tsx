@@ -1,33 +1,33 @@
-import {useEffect, useRef} from 'react';
-import {
-  AUTH_TOKEN_STORAGE_EVENT,
-  clearAllTokens,
-  getToken,
-  getJwtTokenStrategy,
-  setToken,
-  parseJwt,
-  queryAccessToken,
-} from '@rezics/api/react-query/jwt';
-import {
-  NormalizedTokenName,
-  type NormalizedTokenName as NormalizedTokenNameType,
-} from '@rezics/contract';
-import type {TokenRefreshRegistry} from '@rezics/api/react-query/tokenRefreshRegistry';
 import {
   clearAuthPresence,
   hasAuthPresence,
-} from '@rezics/api/react-query/authPresence';
+} from "@rezics/api/react-query/authPresence";
+import {
+  AUTH_TOKEN_STORAGE_EVENT,
+  clearAllTokens,
+  getJwtTokenStrategy,
+  getToken,
+  parseJwt,
+  queryAccessToken,
+  setToken,
+} from "@rezics/api/react-query/jwt";
+import type { TokenRefreshRegistry } from "@rezics/api/react-query/tokenRefreshRegistry";
+import {
+  NormalizedTokenName,
+  type NormalizedTokenName as NormalizedTokenNameType,
+} from "@rezics/contract";
+import { useEffect, useRef } from "react";
 import {
   clearAuthSessionState,
   hydrateAuthSessionState,
   useAuthSessionStore,
-} from '../state/authSessionStore';
-import {createRefreshRetryPolicy} from './refreshRetryPolicy';
+} from "../state/authSessionStore";
+import { createRefreshRetryPolicy } from "./refreshRetryPolicy";
 
 const REFRESH_BUFFER_MS = 60 * 1000;
 const DEFAULT_TOKENS = [NormalizedTokenName.AUTH_IDENTITY];
 
-type TokenState = 'idle' | 'managing' | 'dormant' | 'backoff';
+type TokenState = "idle" | "managing" | "dormant" | "backoff";
 
 type TokenSlot = {
   tokenName: NormalizedTokenNameType;
@@ -49,23 +49,25 @@ function isTokenExpiredOrMissing(tokenName: NormalizedTokenNameType): boolean {
   return expMs - REFRESH_BUFFER_MS <= Date.now();
 }
 
-function classifyError(error: unknown): 'retryable' | 'non-retryable' {
-  const message = error instanceof Error ? error.message : '';
+function classifyError(error: unknown): "retryable" | "non-retryable" {
+  const message = error instanceof Error ? error.message : "";
   const isNonRetryable =
-    message.includes('not found') ||
-    message.includes('Unauthorized') ||
-    message.includes('Forbidden') ||
-    message.includes('403') ||
-    message.includes('404');
-  return isNonRetryable ? 'non-retryable' : 'retryable';
+    message.includes("not found") ||
+    message.includes("Unauthorized") ||
+    message.includes("Forbidden") ||
+    message.includes("403") ||
+    message.includes("404");
+  return isNonRetryable ? "non-retryable" : "retryable";
 }
 
-async function refreshGateway(): Promise<'success' | 'retryable' | 'non-retryable'> {
+async function refreshGateway(): Promise<
+  "success" | "retryable" | "non-retryable"
+> {
   try {
-    const token = await queryAccessToken({requirePresence: true});
-    return token ? 'success' : 'non-retryable';
+    const token = await queryAccessToken({ requirePresence: true });
+    return token ? "success" : "non-retryable";
   } catch {
-    return 'non-retryable';
+    return "non-retryable";
   }
 }
 
@@ -75,27 +77,27 @@ async function refreshServiceToken(
 ): Promise<void> {
   const refreshFn = registry[slot.tokenName];
   if (!refreshFn) {
-    slot.state = 'dormant';
+    slot.state = "dormant";
     return;
   }
 
   try {
-    const {token} = await refreshFn();
+    const { token } = await refreshFn();
     if (token) {
       setToken(token, slot.tokenName);
-      slot.state = 'managing';
+      slot.state = "managing";
       slot.retryPolicy.reset();
       slot.nextRetryAt = null;
     } else {
-      slot.state = 'dormant';
+      slot.state = "dormant";
     }
   } catch (error) {
     const classification = classifyError(error);
-    if (classification === 'non-retryable') {
-      slot.state = 'dormant';
+    if (classification === "non-retryable") {
+      slot.state = "dormant";
       slot.nextRetryAt = null;
     } else {
-      slot.state = 'backoff';
+      slot.state = "backoff";
       const delayMs = slot.retryPolicy.registerFailure();
       slot.nextRetryAt = Date.now() + delayMs;
     }
@@ -122,19 +124,19 @@ export function AuthProvider({
     let isHandlingExpiry = false;
 
     const serviceTokenNames = tokens.filter(
-      t => t !== NormalizedTokenName.AUTH_IDENTITY,
+      (t) => t !== NormalizedTokenName.AUTH_IDENTITY,
     );
 
     const gatewaySlot: TokenSlot = {
       tokenName: NormalizedTokenName.AUTH_IDENTITY,
-      state: 'idle',
+      state: "idle",
       retryPolicy: createRefreshRetryPolicy(),
       nextRetryAt: null,
     };
 
-    const serviceSlots: TokenSlot[] = serviceTokenNames.map(tokenName => ({
+    const serviceSlots: TokenSlot[] = serviceTokenNames.map((tokenName) => ({
       tokenName,
-      state: 'idle' as TokenState,
+      state: "idle" as TokenState,
       retryPolicy: createRefreshRetryPolicy(),
       nextRetryAt: null,
     }));
@@ -148,8 +150,10 @@ export function AuthProvider({
       }
     }
 
-    function getSlot(tokenName: NormalizedTokenNameType): TokenSlot | undefined {
-      return allSlots.find(s => s.tokenName === tokenName);
+    function getSlot(
+      tokenName: NormalizedTokenNameType,
+    ): TokenSlot | undefined {
+      return allSlots.find((s) => s.tokenName === tokenName);
     }
 
     function handleAuthSessionExpired() {
@@ -174,7 +178,9 @@ export function AuthProvider({
         ? getTokenExpMs(NormalizedTokenName.AUTH_IDENTITY)
         : null;
       const gatewayNeedsRefresh =
-        !gatewayToken || !gatewayExpMs || gatewayExpMs - REFRESH_BUFFER_MS <= Date.now();
+        !gatewayToken ||
+        !gatewayExpMs ||
+        gatewayExpMs - REFRESH_BUFFER_MS <= Date.now();
 
       if (gatewayNeedsRefresh) {
         if (!gatewayToken && !hasAuthPresence()) {
@@ -183,25 +189,25 @@ export function AuthProvider({
         }
 
         const result = await refreshGateway();
-        if (result === 'non-retryable') {
+        if (result === "non-retryable") {
           handleAuthSessionExpired();
           return;
         }
-        if (result === 'retryable') {
+        if (result === "retryable") {
           const delayMs = gatewaySlot.retryPolicy.registerFailure();
           scheduleRefresh(delayMs);
           return;
         }
-        gatewaySlot.state = 'managing';
+        gatewaySlot.state = "managing";
         gatewaySlot.retryPolicy.reset();
       } else {
-        gatewaySlot.state = 'managing';
+        gatewaySlot.state = "managing";
       }
 
       if (!mounted) return;
 
       // Hydrate auth session state on first successful gateway confirmation
-      if (useAuthSessionStore.getState().status === 'idle') {
+      if (useAuthSessionStore.getState().status === "idle") {
         await hydrateAuthSessionState();
       }
 
@@ -209,17 +215,23 @@ export function AuthProvider({
 
       // Phase 2: Service tokens (parallel, independent)
       const now = Date.now();
-      const slotsToRefresh = serviceSlots.filter(slot => {
-        if (slot.state === 'dormant') return false;
-        if (slot.state === 'backoff' && slot.nextRetryAt && slot.nextRetryAt > now) {
+      const slotsToRefresh = serviceSlots.filter((slot) => {
+        if (slot.state === "dormant") return false;
+        if (
+          slot.state === "backoff" &&
+          slot.nextRetryAt &&
+          slot.nextRetryAt > now
+        ) {
           return false;
         }
-        return isTokenExpiredOrMissing(slot.tokenName) || slot.state === 'backoff';
+        return (
+          isTokenExpiredOrMissing(slot.tokenName) || slot.state === "backoff"
+        );
       });
 
       if (slotsToRefresh.length > 0) {
         await Promise.allSettled(
-          slotsToRefresh.map(slot =>
+          slotsToRefresh.map((slot) =>
             refreshServiceToken(slot, registryRef.current),
           ),
         );
@@ -227,11 +239,8 @@ export function AuthProvider({
 
       // Mark healthy service tokens as managing
       for (const slot of serviceSlots) {
-        if (
-          slot.state === 'idle' &&
-          !isTokenExpiredOrMissing(slot.tokenName)
-        ) {
-          slot.state = 'managing';
+        if (slot.state === "idle" && !isTokenExpiredOrMissing(slot.tokenName)) {
+          slot.state = "managing";
         }
       }
 
@@ -250,7 +259,7 @@ export function AuthProvider({
 
       for (const slot of allSlots) {
         // Check expiry-based refresh for managing tokens
-        if (slot.state === 'managing') {
+        if (slot.state === "managing") {
           const expMs = getTokenExpMs(slot.tokenName);
           if (expMs) {
             const delay = expMs - REFRESH_BUFFER_MS - now;
@@ -261,7 +270,7 @@ export function AuthProvider({
         }
 
         // Check retry delay for backoff tokens
-        if (slot.state === 'backoff' && slot.nextRetryAt) {
+        if (slot.state === "backoff" && slot.nextRetryAt) {
           const delay = slot.nextRetryAt - now;
           if (delay > 0 && (earliest === null || delay < earliest)) {
             earliest = delay;
@@ -308,8 +317,8 @@ export function AuthProvider({
       }
 
       // Token was written — reactivate if dormant or in backoff
-      if (slot.state === 'dormant' || slot.state === 'backoff') {
-        slot.state = 'idle';
+      if (slot.state === "dormant" || slot.state === "backoff") {
+        slot.state = "idle";
         slot.retryPolicy.reset();
         slot.nextRetryAt = null;
         scheduleRefresh();
@@ -321,15 +330,17 @@ export function AuthProvider({
       if (!mounted) return;
 
       const strategy = getJwtTokenStrategy();
-      const managedKeys = Object.values(strategy.storeKeyByToken).filter(Boolean);
-      if (!managedKeys.includes(event.key ?? '')) return;
+      const managedKeys = Object.values(strategy.storeKeyByToken).filter(
+        Boolean,
+      );
+      if (!managedKeys.includes(event.key ?? "")) return;
 
       if (event.newValue !== null) {
         for (const slot of allSlots) {
-          if (slot.state === 'dormant' || slot.state === 'backoff') {
+          if (slot.state === "dormant" || slot.state === "backoff") {
             const token = getToken(slot.tokenName);
             if (token) {
-              slot.state = 'idle';
+              slot.state = "idle";
               slot.retryPolicy.reset();
               slot.nextRetryAt = null;
             }
@@ -348,12 +359,12 @@ export function AuthProvider({
 
     // Visibility change handler
     function handleVisibilityChange() {
-      if (document.visibilityState !== 'visible') return;
+      if (document.visibilityState !== "visible") return;
       if (!mounted) return;
 
       const needsRefresh = allSlots.some(
-        slot =>
-          slot.state === 'managing' && isTokenExpiredOrMissing(slot.tokenName),
+        (slot) =>
+          slot.state === "managing" && isTokenExpiredOrMissing(slot.tokenName),
       );
 
       if (needsRefresh) {
@@ -365,17 +376,20 @@ export function AuthProvider({
     scheduleRefresh();
 
     window.addEventListener(AUTH_TOKEN_STORAGE_EVENT, handleTokenStorageEvent);
-    window.addEventListener('storage', handleStorageEvent);
-    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener("storage", handleStorageEvent);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
 
     return () => {
       mounted = false;
       clearTimer();
-      window.removeEventListener(AUTH_TOKEN_STORAGE_EVENT, handleTokenStorageEvent);
-      window.removeEventListener('storage', handleStorageEvent);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener(
+        AUTH_TOKEN_STORAGE_EVENT,
+        handleTokenStorageEvent,
+      );
+      window.removeEventListener("storage", handleStorageEvent);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
-  }, [tokens, registry]);
+  }, [tokens]);
 
   return null;
 }

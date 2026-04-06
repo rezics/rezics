@@ -1,16 +1,15 @@
-import React from 'react';
-import type {ReadlistDTO} from '@rezics/contract';
-import ReadListCard from './ReadListCard';
+import type { ReadlistDTO } from "@rezics/contract";
+import type React from "react";
+import ReadListCard from "./ReadListCard";
 
 interface VerticalTwoReadListCardProps {
   readlist1: ReadlistDTO;
   readlist2: ReadlistDTO;
 }
 
-export const VerticalTwoReadListCard: React.FC<VerticalTwoReadListCardProps> = ({
-  readlist1,
-  readlist2,
-}) => {
+export const VerticalTwoReadListCard: React.FC<
+  VerticalTwoReadListCardProps
+> = ({ readlist1, readlist2 }) => {
   return (
     <div className="flex flex-col gap-4 mb-2">
       <ReadListCard readlist={readlist1} />

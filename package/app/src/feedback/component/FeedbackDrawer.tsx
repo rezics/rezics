@@ -1,8 +1,8 @@
-import React from 'react';
-import {Drawer, Box, Typography, IconButton, Divider} from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
-import FeedbackForm from './FeedbackForm';
-import type {CreateFeedbackInput} from '@rezics/api/feedback/feedback.types';
+import CloseIcon from "@mui/icons-material/Close";
+import { Box, Divider, Drawer, IconButton, Typography } from "@mui/material";
+import type { CreateFeedbackInput } from "@rezics/api/feedback/feedback.types";
+import type React from "react";
+import FeedbackForm from "./FeedbackForm";
 
 type FeedbackDrawerProps = {
   open: boolean;
@@ -10,7 +10,7 @@ type FeedbackDrawerProps = {
   defaultValues?: {
     title?: string;
     content?: string;
-    type?: CreateFeedbackInput['type'];
+    type?: CreateFeedbackInput["type"];
   };
 };
 

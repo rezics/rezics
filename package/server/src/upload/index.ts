@@ -1,1 +1,1 @@
-export {uploadApi} from './upload.api';
+export { uploadApi } from "./upload.api";

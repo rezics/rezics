@@ -1,21 +1,21 @@
-import { useMemo } from 'react';
-import type { Extension } from '@codemirror/state';
-import type { KeyBinding } from '@codemirror/view';
-import type { EditorPlugin } from '../core/types';
-import type { ResizeConfig } from '../editor/types';
-import { fixedHeightEditor } from '../core/fixedHeight';
-import { EditorContext } from './context';
-import { useEditor } from './useEditor';
-import { resolvePlugins } from '../core/plugin';
-import { ReactToolbar } from '../toolbar/react/index';
-import { ResizableWrapper } from './ResizableWrapper';
+import type { Extension } from "@codemirror/state";
+import type { KeyBinding } from "@codemirror/view";
+import { useMemo } from "react";
+import { fixedHeightEditor } from "../core/fixedHeight";
+import { resolvePlugins } from "../core/plugin";
+import type { EditorPlugin } from "../core/types";
+import type { ResizeConfig } from "../editor/types";
+import { ReactToolbar } from "../toolbar/react/index";
+import { EditorContext } from "./context";
+import { ResizableWrapper } from "./ResizableWrapper";
+import { useEditor } from "./useEditor";
 
 export interface EditorProps {
   value?: string;
   onChange?: (value: string) => void;
   plugins?: EditorPlugin[];
   keybindings?: KeyBinding[];
-  toolbar?: 'panel' | 'react' | false;
+  toolbar?: "panel" | "react" | false;
   theme?: Extension;
   className?: string;
   resize?: ResizeConfig;
@@ -46,15 +46,19 @@ export function Editor({
   });
 
   const toolbarItems = resolvePlugins(plugins ?? []).toolbar;
-  const showReactToolbar = toolbar === 'react' && toolbarItems.length > 0;
+  const showReactToolbar = toolbar === "react" && toolbarItems.length > 0;
 
   const inner = (
     <div
       className={resize ? undefined : className}
-      style={resize ? {height: '100%', display: 'flex', flexDirection: 'column'} : undefined}
+      style={
+        resize
+          ? { height: "100%", display: "flex", flexDirection: "column" }
+          : undefined
+      }
     >
       {showReactToolbar && <ReactToolbar items={toolbarItems} />}
-      <div ref={containerRef} style={resize ? {flex: 1} : undefined} />
+      <div ref={containerRef} style={resize ? { flex: 1 } : undefined} />
     </div>
   );
 

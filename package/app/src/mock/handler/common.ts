@@ -1,4 +1,4 @@
-import {v4 as uuidv4} from 'uuid';
+import { v4 as uuidv4 } from "uuid";
 
 export function generateRandomItemsFrom<T>(source: T[], count: number): T[] {
   const result: T[] = [];
@@ -18,9 +18,9 @@ export const EXTERNAL_PAGE_SIZE = 100;
 
 export function secureRandomString(length: number): string {
   const chars =
-    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
   const array = new Uint32Array(length);
   crypto.getRandomValues(array);
 
-  return Array.from(array, x => chars[x % chars.length]).join('');
+  return Array.from(array, (x) => chars[x % chars.length]).join("");
 }

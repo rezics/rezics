@@ -1,8 +1,8 @@
-import {prisma, UnitStatus, UnitType} from '#/prisma/client';
-import type {Prisma} from '#/prisma/client';
-import type {TagWithRelations} from './types';
-import {tagInclude} from './types';
-import type {CreateTagInput, UpdateTagInput} from '@rezics/contract';
+import type { CreateTagInput, UpdateTagInput } from "@rezics/contract";
+import type { Prisma } from "#/prisma/client";
+import { prisma, UnitStatus, UnitType } from "#/prisma/client";
+import type { TagWithRelations } from "./types";
+import { tagInclude } from "./types";
 
 export type TagFilterOptions = {
   q?: string;
@@ -18,7 +18,7 @@ export class TagService {
     const and: Prisma.TagWhereInput[] = [];
 
     if (options.objectId) {
-      and.push({units: {some: {id: options.objectId}}});
+      and.push({ units: { some: { id: options.objectId } } });
     }
 
     // if (options.q && options.q.trim()) {
@@ -26,14 +26,14 @@ export class TagService {
     // }
 
     if (options.type) {
-      and.push({type: options.type});
+      and.push({ type: options.type });
     }
 
     if (options.domainId) {
-      and.push({unit: {domains: {some: {id: options.domainId}}}});
+      and.push({ unit: { domains: { some: { id: options.domainId } } } });
     }
 
-    return and.length ? {AND: and} : {};
+    return and.length ? { AND: and } : {};
   }
 
   async list(options: TagFilterOptions = {}): Promise<{
@@ -49,20 +49,20 @@ export class TagService {
     const [tags, total] = await Promise.all([
       prisma.tag.findMany({
         where,
-        orderBy: {createdAt: 'desc'},
+        orderBy: { createdAt: "desc" },
         skip,
         take: limit,
         include: tagInclude,
       }),
-      prisma.tag.count({where}),
+      prisma.tag.count({ where }),
     ]);
 
-    return {tags: tags as TagWithRelations[], total};
+    return { tags: tags as TagWithRelations[], total };
   }
 
   async getByUnitId(unitId: string): Promise<TagWithRelations> {
     const tag = await prisma.tag.findUniqueOrThrow({
-      where: {unitId},
+      where: { unitId },
       include: tagInclude,
     });
     return tag as TagWithRelations;
@@ -77,7 +77,7 @@ export class TagService {
       where: {
         name,
         type: type ?? undefined,
-        unit: {domains: {some: {id: domainId}}},
+        unit: { domains: { some: { id: domainId } } },
       },
       include: tagInclude,
     });
@@ -85,7 +85,7 @@ export class TagService {
   }
 
   async create(userId: string, req: CreateTagInput): Promise<TagWithRelations> {
-    const {name, type, i18n, domains} = req;
+    const { name, type, i18n, domains } = req;
 
     const tag = await prisma.tag.create({
       data: {
@@ -97,7 +97,7 @@ export class TagService {
             title: name,
             // domains: connect
             ...(Array.isArray(domains) && domains.length
-              ? {domains: {connect: domains.map(id => ({id}))}}
+              ? { domains: { connect: domains.map((id) => ({ id })) } }
               : {}),
           },
         },
@@ -111,10 +111,10 @@ export class TagService {
   }
 
   async update(unitId: string, req: UpdateTagInput): Promise<TagWithRelations> {
-    const {name, type, i18n, domains} = req;
+    const { name, type, i18n, domains } = req;
 
     const tag = await prisma.tag.update({
-      where: {unitId},
+      where: { unitId },
       data: {
         name: name ?? undefined,
         type: type ?? undefined,
@@ -123,7 +123,7 @@ export class TagService {
           update: {
             title: name ?? undefined,
             ...(Array.isArray(domains)
-              ? {domains: {set: domains.map(id => ({id}))}}
+              ? { domains: { set: domains.map((id) => ({ id })) } }
               : {}),
           },
         },
@@ -134,20 +134,20 @@ export class TagService {
   }
 
   async delete(unitId: string): Promise<void> {
-    await prisma.unit.delete({where: {id: unitId}});
+    await prisma.unit.delete({ where: { id: unitId } });
   }
 
   async attachToUnit(tagUnitId: string, targetUnitId: string): Promise<void> {
     await prisma.unit.update({
-      where: {id: targetUnitId},
-      data: {tags: {connect: {unitId: tagUnitId}}},
+      where: { id: targetUnitId },
+      data: { tags: { connect: { unitId: tagUnitId } } },
     });
   }
 
   async detachFromUnit(tagUnitId: string, targetUnitId: string): Promise<void> {
     await prisma.unit.update({
-      where: {id: targetUnitId},
-      data: {tags: {disconnect: {unitId: tagUnitId}}},
+      where: { id: targetUnitId },
+      data: { tags: { disconnect: { unitId: tagUnitId } } },
     });
   }
 }

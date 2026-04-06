@@ -1,8 +1,8 @@
-import Button from '@mui/material/Button';
-import CircularProgress from '@mui/material/CircularProgress';
-import {Box} from '@mui/material';
-import type {FC, ReactNode} from 'react';
-import {useTheme} from '@mui/material/styles';
+import { Box } from "@mui/material";
+import Button from "@mui/material/Button";
+import CircularProgress from "@mui/material/CircularProgress";
+import { useTheme } from "@mui/material/styles";
+import type { FC, ReactNode } from "react";
 
 interface AuthProviderButtonProps {
   label: string;
@@ -30,18 +30,18 @@ export const AuthProviderButton: FC<AuthProviderButtonProps> = ({
       onClick={onClick}
       aria-label={label}
       sx={{
-        position: 'relative',
+        position: "relative",
 
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
 
-        textTransform: 'none',
+        textTransform: "none",
         fontWeight: 400,
 
         px: compact ? 1.5 : 2,
         py: compact ? 0.75 : 1,
-        fontSize: compact ? '0.8125rem' : '0.875rem',
+        fontSize: compact ? "0.8125rem" : "0.875rem",
 
         color: theme.palette.text.primary,
 
@@ -54,16 +54,16 @@ export const AuthProviderButton: FC<AuthProviderButtonProps> = ({
 
         backgroundColor: theme.palette.background.paper,
 
-        '&:hover': {
+        "&:hover": {
           borderColor: theme.palette.primary.main,
           backgroundColor: theme.palette.action.hover,
         },
 
-        '&:active': {
+        "&:active": {
           borderColor: theme.palette.primary.main,
         },
 
-        '&.Mui-disabled': {
+        "&.Mui-disabled": {
           opacity: 0.6,
         },
       }}
@@ -72,10 +72,10 @@ export const AuthProviderButton: FC<AuthProviderButtonProps> = ({
       {!loading && icon && (
         <Box
           sx={{
-            position: 'absolute',
+            position: "absolute",
             left: compact ? 6 : 10,
-            display: 'flex',
-            alignItems: 'center',
+            display: "flex",
+            alignItems: "center",
           }}
         >
           {icon}

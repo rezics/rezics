@@ -1,6 +1,6 @@
-import type {NormalizedTokenName} from '@rezics/contract';
-import type {JwtAlgorithm} from './jwt-algorithm';
-import type {JwtAudience, JwtClaims} from './jwt-claims';
+import type { NormalizedTokenName } from "@rezics/contract";
+import type { JwtAlgorithm } from "./jwt-algorithm";
+import type { JwtAudience, JwtClaims } from "./jwt-claims";
 
 export type JwtVerifierDescriptor = {
   issuer: string;

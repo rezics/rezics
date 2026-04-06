@@ -1,5 +1,5 @@
-import {createEnv} from '@t3-oss/env-core';
-import * as v from 'valibot';
+import { createEnv } from "@t3-oss/env-core";
+import * as v from "valibot";
 
 export const env = createEnv({
   server: {
@@ -12,16 +12,16 @@ export const env = createEnv({
      */
     NODE_ENV: v.optional(
       v.union([
-        v.literal('development'),
-        v.literal('test'),
-        v.literal('production'),
+        v.literal("development"),
+        v.literal("test"),
+        v.literal("production"),
       ]),
     ),
 
     /**
      * HTTP listen port. Defaults to '3001'.
      */
-    PORT: v.fallback(v.string(), '3001'),
+    PORT: v.fallback(v.string(), "3001"),
 
     /**
      * PostgreSQL connection string for Prisma data persistence. Required at startup.
@@ -54,7 +54,7 @@ export const env = createEnv({
     /**
      * API route prefix for auth endpoints. Defaults to '/api/auth'.
      */
-    AUTH_OPENAPI_ROUTER_PREFIX: v.fallback(v.string(), '/api/auth'),
+    AUTH_OPENAPI_ROUTER_PREFIX: v.fallback(v.string(), "/api/auth"),
 
     /**
      * Shared secret for service-to-service calls across internal boundaries.

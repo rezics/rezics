@@ -1,43 +1,44 @@
-import React, {useMemo, useRef, useState} from 'react';
 import {
+  Button,
   Card,
   CardContent,
   List,
   ListItem,
   ListItemText,
-  Tabs,
   Tab,
+  Tabs,
   Typography,
-  Button,
-} from '@mui/material';
-import {useQuery, useQueryClient} from '@tanstack/react-query';
-import {useUserProfileStore} from '@/user/state';
-import {reactionQueries} from '@rezics/api/reaction/reaction.queries';
-import type {ReactionDTO} from '@rezics/api/reaction/reaction.types';
+} from "@mui/material";
+import { reactionQueries } from "@rezics/api/reaction/reaction.queries";
+import type { ReactionDTO } from "@rezics/api/reaction/reaction.types";
 import {
   UniversalPaginator,
   type UniversalPaginatorHandle,
-} from '@rezics/ui/composite/pagination/Pagination.tsx';
-import {useNavigate} from '@tanstack/react-router';
+} from "@rezics/ui/composite/pagination/Pagination.tsx";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
+import type React from "react";
+import { useMemo, useRef, useState } from "react";
+import { useUserProfileStore } from "@/user/state";
 
 type ReactionInfoPageProps = {
   unitId?: string;
   isCurrentUser?: boolean;
 };
 
-type TabKey = 'mine' | 'bookmark';
+type TabKey = "mine" | "bookmark";
 
 const ITEMS_PER_PAGE = 20;
 const EXTERNAL_ITEMS_PER_PAGE = 100;
 
-function ReactionList({reactions}: {reactions: ReactionDTO[]}) {
+function ReactionList({ reactions }: { reactions: ReactionDTO[] }) {
   if (reactions.length === 0) {
     return <div className="py-10 text-center text-gray-500">暂无记录。</div>;
   }
 
   return (
     <List>
-      {reactions.map(item => (
+      {reactions.map((item) => (
         <ListItem key={item.id} divider>
           <ListItemText
             primary={
@@ -56,11 +57,11 @@ function ReactionList({reactions}: {reactions: ReactionDTO[]}) {
                   <span className="font-medium mr-1">时间:</span>
                   <span>
                     {new Date(item.createdAt).toLocaleString(undefined, {
-                      year: 'numeric',
-                      month: '2-digit',
-                      day: '2-digit',
-                      hour: '2-digit',
-                      minute: '2-digit',
+                      year: "numeric",
+                      month: "2-digit",
+                      day: "2-digit",
+                      hour: "2-digit",
+                      minute: "2-digit",
                     })}
                   </span>
                 </div>
@@ -78,13 +79,13 @@ export const ReactionInfoPage: React.FC<ReactionInfoPageProps> = ({
   isCurrentUser = false,
 }) => {
   const navigate = useNavigate();
-  const currentUser = useUserProfileStore(state => state.user);
+  const currentUser = useUserProfileStore((state) => state.user);
   const resolvedUnitId = useMemo(
     () => unitId || (isCurrentUser ? currentUser?.unitId : unitId),
     [unitId, isCurrentUser, currentUser?.unitId],
   );
 
-  const [tab, setTab] = useState<TabKey>('mine');
+  const [tab, setTab] = useState<TabKey>("mine");
   const [currentPage, setCurrentPage] = useState(1);
   const [externalPage, setExternalPage] = useState(1);
   const paginatorRef = useRef<UniversalPaginatorHandle>(null);
@@ -92,7 +93,7 @@ export const ReactionInfoPage: React.FC<ReactionInfoPageProps> = ({
 
   const mineQuery = useQuery({
     ...reactionQueries.list({
-      userId: resolvedUnitId || '',
+      userId: resolvedUnitId || "",
       start: (externalPage - 1) * EXTERNAL_ITEMS_PER_PAGE,
       limit: EXTERNAL_ITEMS_PER_PAGE,
     }),
@@ -101,8 +102,8 @@ export const ReactionInfoPage: React.FC<ReactionInfoPageProps> = ({
 
   const bookmarkQuery = useQuery({
     ...reactionQueries.list({
-      userId: resolvedUnitId || '',
-      reaction: 'bookmark',
+      userId: resolvedUnitId || "",
+      reaction: "bookmark",
       start: (externalPage - 1) * EXTERNAL_ITEMS_PER_PAGE,
       limit: EXTERNAL_ITEMS_PER_PAGE,
     }),
@@ -118,8 +119,8 @@ export const ReactionInfoPage: React.FC<ReactionInfoPageProps> = ({
   const bookmarkReactions = bookmarkQuery.data?.reactions ?? [];
   const bookmarkTotal = bookmarkQuery.data?.total ?? 0;
 
-  const activeReactions = tab === 'mine' ? mineReactions : bookmarkReactions;
-  const activeTotal = tab === 'mine' ? mineTotal : bookmarkTotal;
+  const activeReactions = tab === "mine" ? mineReactions : bookmarkReactions;
+  const activeTotal = tab === "mine" ? mineTotal : bookmarkTotal;
 
   const handleNeedMoreData = (page: number) => {
     setExternalPage(page);
@@ -134,7 +135,7 @@ export const ReactionInfoPage: React.FC<ReactionInfoPageProps> = ({
       limit: EXTERNAL_ITEMS_PER_PAGE,
     } as const;
 
-    if (tab === 'mine') {
+    if (tab === "mine") {
       const data = await queryClient.fetchQuery(
         reactionQueries.list({
           ...common,
@@ -146,7 +147,7 @@ export const ReactionInfoPage: React.FC<ReactionInfoPageProps> = ({
     const data = await queryClient.fetchQuery(
       reactionQueries.list({
         ...common,
-        reaction: 'bookmark',
+        reaction: "bookmark",
       }),
     );
     return data.reactions?.length ?? 0;
@@ -188,7 +189,7 @@ export const ReactionInfoPage: React.FC<ReactionInfoPageProps> = ({
         <Button
           variant="text"
           color="primary"
-          onClick={() => navigate({to: '/user/me'})}
+          onClick={() => navigate({ to: "/user/me" })}
         >
           返回
         </Button>

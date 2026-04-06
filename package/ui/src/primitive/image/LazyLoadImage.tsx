@@ -1,6 +1,6 @@
-import {LazyLoadImage as ReactLazyLoadImage} from 'react-lazy-load-image-component';
-import React from 'react';
-import 'react-lazy-load-image-component/src/effects/opacity.css';
+import type React from "react";
+import { LazyLoadImage as ReactLazyLoadImage } from "react-lazy-load-image-component";
+import "react-lazy-load-image-component/src/effects/opacity.css";
 
 type LazyLoadImageProps = {
   alt: string;

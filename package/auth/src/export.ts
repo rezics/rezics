@@ -1,4 +1,5 @@
-export {auth} from './auth/instance';
+export { auth } from "./auth/instance";
+export { createAuthGuard } from "./hooks/guard";
 export {
   getAuthContextVerifyOptions,
   getAuthIdentityVerifyOptions,
@@ -8,5 +9,4 @@ export {
   verifyBearerToken,
   verifySessionToken,
   verifyToken,
-} from './jwt';
-export {createAuthGuard} from './hooks/guard';
+} from "./jwt";

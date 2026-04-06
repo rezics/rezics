@@ -1,28 +1,29 @@
-import React, {useMemo, useRef, useState} from 'react';
 import {
   Avatar,
+  Button,
   Card,
   CardContent,
   List,
   ListItem,
   ListItemAvatar,
   ListItemText,
-  Tabs,
   Tab,
+  Tabs,
   Typography,
-  Button,
-} from '@mui/material';
-import {useQuery, useQueryClient} from '@tanstack/react-query';
-import type {UserDTO} from '@rezics/contract';
-import {userQueries} from '@rezics/api/user/user.queries';
-import {useUserProfileStore} from '@/user/state';
+} from "@mui/material";
+import { userQueries } from "@rezics/api/user/user.queries";
+import type { UserDTO } from "@rezics/contract";
 import {
   UniversalPaginator,
   type UniversalPaginatorHandle,
-} from '@rezics/ui/composite/pagination/Pagination.tsx';
-import {useNavigate} from '@tanstack/react-router';
+} from "@rezics/ui/composite/pagination/Pagination.tsx";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
+import type React from "react";
+import { useMemo, useRef, useState } from "react";
+import { useUserProfileStore } from "@/user/state";
 
-type SimpleUser = Omit<UserDTO, 'email'>;
+type SimpleUser = Omit<UserDTO, "email">;
 
 type FollowInfoPageProps = {
   unitId?: string;
@@ -32,14 +33,14 @@ type FollowInfoPageProps = {
 const ITEMS_PER_PAGE = 20;
 const EXTERNAL_ITEMS_PER_PAGE = 20;
 
-function FollowUserList({users}: {users: SimpleUser[]}) {
+function FollowUserList({ users }: { users: SimpleUser[] }) {
   if (users.length === 0) {
     return <div className="py-10 text-center text-gray-500">暂无用户。</div>;
   }
 
   return (
     <List>
-      {users.map(user => (
+      {users.map((user) => (
         <ListItem key={user.unitId} divider>
           <ListItemAvatar>
             <Avatar src={user.avatar ?? undefined}>
@@ -65,20 +66,20 @@ export const FollowInfoPage: React.FC<FollowInfoPageProps> = ({
   isCurrentUser = false,
 }) => {
   const navigate = useNavigate();
-  const currentUser = useUserProfileStore(state => state.user);
+  const currentUser = useUserProfileStore((state) => state.user);
   const resolvedUnitId = useMemo(
     () => unitId || (isCurrentUser ? currentUser?.unitId : unitId),
     [unitId, isCurrentUser, currentUser?.unitId],
   );
 
-  const [tab, setTab] = useState<'following' | 'followers'>('following');
+  const [tab, setTab] = useState<"following" | "followers">("following");
   const [currentPage, setCurrentPage] = useState(1);
   const [externalPage, setExternalPage] = useState(1);
   const paginatorRef = useRef<UniversalPaginatorHandle>(null);
   const queryClient = useQueryClient();
 
   const followersQuery = useQuery({
-    ...userQueries.followers(resolvedUnitId || '', {
+    ...userQueries.followers(resolvedUnitId || "", {
       page: externalPage,
       limit: EXTERNAL_ITEMS_PER_PAGE,
     }),
@@ -86,7 +87,7 @@ export const FollowInfoPage: React.FC<FollowInfoPageProps> = ({
   });
 
   const followingsQuery = useQuery({
-    ...userQueries.followings(resolvedUnitId || '', {
+    ...userQueries.followings(resolvedUnitId || "", {
       page: externalPage,
       limit: EXTERNAL_ITEMS_PER_PAGE,
     }),
@@ -102,8 +103,8 @@ export const FollowInfoPage: React.FC<FollowInfoPageProps> = ({
   const followings = followingsQuery.data?.users ?? [];
   const followingsTotal = followingsQuery.data?.total ?? 0;
 
-  const activeUsers = tab === 'following' ? followings : followers;
-  const activeTotal = tab === 'following' ? followingsTotal : followersTotal;
+  const activeUsers = tab === "following" ? followings : followers;
+  const activeTotal = tab === "following" ? followingsTotal : followersTotal;
 
   const handleNeedMoreData = (page: number) => {
     setExternalPage(page);
@@ -112,7 +113,7 @@ export const FollowInfoPage: React.FC<FollowInfoPageProps> = ({
   const handlePreRequestData = async (page: number): Promise<number> => {
     if (!resolvedUnitId) return 0;
 
-    if (tab === 'following') {
+    if (tab === "following") {
       const data = await queryClient.fetchQuery(
         userQueries.followings(resolvedUnitId, {
           page,
@@ -167,7 +168,7 @@ export const FollowInfoPage: React.FC<FollowInfoPageProps> = ({
         <Button
           variant="text"
           color="primary"
-          onClick={() => navigate({to: '/user/me'})}
+          onClick={() => navigate({ to: "/user/me" })}
         >
           返回
         </Button>

@@ -1,23 +1,23 @@
-import {prisma, UnitStatus, UnitType} from '#/prisma/client';
-import type {Prisma} from '#/prisma/client';
-import {unitService} from '@/unit/unit.service';
 import type {
   CreateReviewInput,
-  UpdateReviewInput,
   ReviewListQuery,
-} from '@rezics/contract';
-import type {ReviewWithRelations} from './types';
-import {reviewInclude} from './types';
+  UpdateReviewInput,
+} from "@rezics/contract";
+import type { Prisma } from "#/prisma/client";
+import { prisma, UnitStatus, UnitType } from "#/prisma/client";
+import { deleteUnitFromMeili, syncUnitToMeili } from "@/meili/unit/sync";
+import { unitService } from "@/unit/unit.service";
 import {
+  buildMetadataWithRating,
   buildRatingWhereClause,
   extractRatingFromMetadata,
   mapReviewQueryToUnitQuery,
   normalizeRatingValue,
-  buildMetadataWithRating,
-} from './mapper';
-import {syncUnitToMeili, deleteUnitFromMeili} from '@/meili/unit/sync';
+} from "./mapper";
+import type { ReviewWithRelations } from "./types";
+import { reviewInclude } from "./types";
 
-type UnitTypeOption = {unitType?: UnitType};
+type UnitTypeOption = { unitType?: UnitType };
 
 export class ReviewService {
   /**
@@ -37,12 +37,12 @@ export class ReviewService {
     const unitQuery = mapReviewQueryToUnitQuery(options, unitType);
     const ratingWhere = buildRatingWhereClause(options);
 
-    const {units, total} = await unitService.list(unitQuery, {
+    const { units, total } = await unitService.list(unitQuery, {
       include: reviewInclude,
       where: ratingWhere,
     });
 
-    return {reviews: units as ReviewWithRelations[], total};
+    return { reviews: units as ReviewWithRelations[], total };
   }
 
   /**
@@ -54,8 +54,8 @@ export class ReviewService {
     id: string,
     cfg?: UnitTypeOption,
   ): Promise<ReviewWithRelations> {
-    const unitType = this.resolveUnitType(cfg?.unitType);
-    const unit = await unitService.getByUnitId(id, {include: reviewInclude});
+    const _unitType = this.resolveUnitType(cfg?.unitType);
+    const unit = await unitService.getByUnitId(id, { include: reviewInclude });
     return unit as ReviewWithRelations;
   }
 
@@ -72,7 +72,7 @@ export class ReviewService {
     const unitType = this.resolveUnitType(cfg?.unitType);
     const normalizedRating = normalizeRatingValue(req.rating);
 
-    const review = await prisma.$transaction(async tx => {
+    const review = await prisma.$transaction(async (tx) => {
       const unit = await tx.unit.create({
         data: {
           userId: req.userId,
@@ -106,18 +106,18 @@ export class ReviewService {
   async update(
     id: string,
     req: UpdateReviewInput,
-    cfg?: UnitTypeOption,
+    _cfg?: UnitTypeOption,
   ): Promise<ReviewWithRelations> {
-    const ratingProvided = Object.prototype.hasOwnProperty.call(req, 'rating');
+    const ratingProvided = Object.hasOwn(req, "rating");
     const normalizedRating =
-      ratingProvided && typeof req.rating === 'number'
+      ratingProvided && typeof req.rating === "number"
         ? normalizeRatingValue(req.rating)
         : undefined;
 
-    const review = await prisma.$transaction(async tx => {
+    const review = await prisma.$transaction(async (tx) => {
       const existing = await tx.unit.findUniqueOrThrow({
-        where: {id},
-        select: {metadata: true, targetUnitId: true, type: true},
+        where: { id },
+        select: { metadata: true, targetUnitId: true, type: true },
       });
 
       const currentRating = extractRatingFromMetadata(existing.metadata);
@@ -130,7 +130,7 @@ export class ReviewService {
           : undefined;
 
       const updated = await tx.unit.update({
-        where: {id},
+        where: { id },
         data: {
           content: req.content ?? undefined,
           title: req.title ?? undefined,
@@ -165,11 +165,11 @@ export class ReviewService {
   }
 
   async delete(id: string, cfg?: UnitTypeOption): Promise<void> {
-    const unitType = this.resolveUnitType(cfg?.unitType);
-    await prisma.$transaction(async tx => {
+    const _unitType = this.resolveUnitType(cfg?.unitType);
+    await prisma.$transaction(async (tx) => {
       const existing = await tx.unit.findUniqueOrThrow({
-        where: {id},
-        select: {metadata: true, targetUnitId: true, type: true},
+        where: { id },
+        select: { metadata: true, targetUnitId: true, type: true },
       });
 
       const currentRating = extractRatingFromMetadata(existing.metadata);
@@ -198,9 +198,9 @@ export class ReviewService {
     deltaCount: number,
   ): Promise<void> {
     if (!bookUnitId || (deltaScore === 0 && deltaCount === 0)) return;
-    const key = {unitId: bookUnitId, domain: bookUnitId};
+    const key = { unitId: bookUnitId, domain: bookUnitId };
     const existing = await tx.rating.findUnique({
-      where: {unitId_domain: key},
+      where: { unitId_domain: key },
     });
 
     if (!existing) {
@@ -220,12 +220,12 @@ export class ReviewService {
     const nextCount = existing.totalCount + deltaCount;
 
     if (nextCount <= 0) {
-      await tx.rating.delete({where: {unitId_domain: key}});
+      await tx.rating.delete({ where: { unitId_domain: key } });
       return;
     }
 
     await tx.rating.update({
-      where: {unitId_domain: key},
+      where: { unitId_domain: key },
       data: {
         totalScore: nextScore,
         totalCount: nextCount,

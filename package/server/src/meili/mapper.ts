@@ -1,5 +1,4 @@
-import type {UserDTO} from '@rezics/contract';
-import type {UserSearchDocument} from '@rezics/contract';
+import type { UserDTO, UserSearchDocument } from "@rezics/contract";
 
 /**
  * Map a Meili user document into full `UserDTO`.
@@ -18,7 +17,7 @@ export function mapUserSearchDocToDTO(doc: UserSearchDocument): UserDTO {
     followingsCount: doc.followingsCount ?? undefined,
     permission: doc.permission,
     joinDate: doc.joinDate
-      ? typeof doc.joinDate === 'string'
+      ? typeof doc.joinDate === "string"
         ? doc.joinDate
         : doc.joinDate.toISOString()
       : undefined,
@@ -42,7 +41,7 @@ export function mapUserSearchDocToPublicProfile(
     followersCount: doc.followersCount ?? undefined,
     followingsCount: doc.followingsCount ?? undefined,
     joinDate: doc.joinDate
-      ? typeof doc.joinDate === 'string'
+      ? typeof doc.joinDate === "string"
         ? doc.joinDate
         : doc.joinDate.toISOString()
       : undefined,

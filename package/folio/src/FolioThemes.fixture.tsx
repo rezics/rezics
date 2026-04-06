@@ -1,10 +1,10 @@
-import { useState } from 'react';
-import { createTxtPlugin } from '@rezics/folio/plugin/txt';
-import { useFolio, FolioProvider } from '@rezics/folio';
-import type { FolioAction } from '@rezics/folio';
-import { PageContainer } from './pagination/PageContainer';
-import { FALLBACK_TEXT } from './_stubs';
-import { StateOverride, THEMES } from './_fixture-helpers';
+import type { FolioAction } from "@rezics/folio";
+import { FolioProvider, useFolio } from "@rezics/folio";
+import { createTxtPlugin } from "@rezics/folio/plugin/txt";
+import { useState } from "react";
+import { StateOverride, THEMES } from "./_fixture-helpers";
+import { FALLBACK_TEXT } from "./_stubs";
+import { PageContainer } from "./pagination/PageContainer";
 
 function setup() {
   const { plugin, tree } = createTxtPlugin(FALLBACK_TEXT.repeat(100));
@@ -16,37 +16,37 @@ function setup() {
 // ---------------------------------------------------------------------------
 
 const PHONE_PRESETS = [
-  { label: 'iPhone SE', w: 375, h: 667 },
-  { label: 'iPhone 14', w: 390, h: 844 },
-  { label: 'Pixel 7', w: 412, h: 915 },
-  { label: 'iPad Mini', w: 744, h: 1133 },
+  { label: "iPhone SE", w: 375, h: 667 },
+  { label: "iPhone 14", w: 390, h: 844 },
+  { label: "Pixel 7", w: 412, h: 915 },
+  { label: "iPad Mini", w: 744, h: 1133 },
 ] as const;
 
 function PageButtons() {
   const { state, dispatch } = useFolio();
-  if (state.readMode !== 'page') return null;
+  if (state.readMode !== "page") return null;
 
   const hasPrev = state.pageIndex > 0;
   const hasNext = state.pageCount > 0 && state.pageIndex < state.pageCount - 1;
 
   const btnStyle: React.CSSProperties = {
-    padding: '6px 16px',
+    padding: "6px 16px",
     fontSize: 13,
-    cursor: 'pointer',
+    cursor: "pointer",
     borderRadius: 6,
-    border: '1px solid rgba(128,128,128,0.3)',
-    background: 'rgba(128,128,128,0.08)',
-    color: 'inherit',
+    border: "1px solid rgba(128,128,128,0.3)",
+    background: "rgba(128,128,128,0.08)",
+    color: "inherit",
   };
 
   return (
     <div
       style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: '6px 12px',
-        borderTop: '1px solid rgba(128,128,128,0.2)',
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        padding: "6px 12px",
+        borderTop: "1px solid rgba(128,128,128,0.2)",
         fontSize: 13,
       }}
     >
@@ -54,7 +54,7 @@ function PageButtons() {
         style={{ ...btnStyle, opacity: hasPrev ? 1 : 0.3 }}
         disabled={!hasPrev}
         onClick={() =>
-          dispatch({ type: 'SET_PAGE', index: state.pageIndex - 1 })
+          dispatch({ type: "SET_PAGE", index: state.pageIndex - 1 })
         }
       >
         Prev
@@ -62,13 +62,13 @@ function PageButtons() {
       <span>
         {state.pageCount > 0
           ? `${state.pageIndex + 1} / ${state.pageCount}`
-          : '...'}
+          : "..."}
       </span>
       <button
         style={{ ...btnStyle, opacity: hasNext ? 1 : 0.3 }}
         disabled={!hasNext}
         onClick={() =>
-          dispatch({ type: 'SET_PAGE', index: state.pageIndex + 1 })
+          dispatch({ type: "SET_PAGE", index: state.pageIndex + 1 })
         }
       >
         Next
@@ -84,9 +84,9 @@ function ThemedFrame({ children }: { children: React.ReactNode }) {
     <div
       style={{
         ...themeStyle,
-        display: 'flex',
-        flexDirection: 'column',
-        height: '100%',
+        display: "flex",
+        flexDirection: "column",
+        height: "100%",
       }}
     >
       <div style={{ flex: 1, minHeight: 0 }}>{children}</div>
@@ -117,24 +117,24 @@ function PhoneFrame({
   return (
     <div
       style={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
         gap: 12,
         padding: 24,
-        height: '100vh',
-        boxSizing: 'border-box',
-        background: '#f0f0f0',
-        overflow: 'auto',
+        height: "100vh",
+        boxSizing: "border-box",
+        background: "#f0f0f0",
+        overflow: "auto",
       }}
     >
       {/* Controls */}
       <div
         style={{
-          display: 'flex',
-          alignItems: 'center',
+          display: "flex",
+          alignItems: "center",
           gap: 16,
-          flexWrap: 'wrap',
+          flexWrap: "wrap",
           fontSize: 13,
         }}
       >
@@ -143,19 +143,19 @@ function PhoneFrame({
             key={p.label}
             onClick={() => applyPreset(i)}
             style={{
-              padding: '4px 10px',
+              padding: "4px 10px",
               borderRadius: 4,
-              border: '1px solid #ccc',
-              background: preset === i ? '#333' : '#fff',
-              color: preset === i ? '#fff' : '#333',
-              cursor: 'pointer',
+              border: "1px solid #ccc",
+              background: preset === i ? "#333" : "#fff",
+              color: preset === i ? "#fff" : "#333",
+              cursor: "pointer",
               fontSize: 12,
             }}
           >
             {p.label}
           </button>
         ))}
-        <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+        <label style={{ display: "flex", alignItems: "center", gap: 6 }}>
           W
           <input
             type="range"
@@ -167,9 +167,9 @@ function PhoneFrame({
               setPreset(-1);
             }}
           />
-          <span style={{ minWidth: 36, textAlign: 'right' }}>{width}</span>
+          <span style={{ minWidth: 36, textAlign: "right" }}>{width}</span>
         </label>
-        <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+        <label style={{ display: "flex", alignItems: "center", gap: 6 }}>
           H
           <input
             type="range"
@@ -181,7 +181,7 @@ function PhoneFrame({
               setPreset(-1);
             }}
           />
-          <span style={{ minWidth: 36, textAlign: 'right' }}>{height}</span>
+          <span style={{ minWidth: 36, textAlign: "right" }}>{height}</span>
         </label>
       </div>
 
@@ -191,12 +191,12 @@ function PhoneFrame({
           width,
           height,
           borderRadius: 24,
-          border: '3px solid #222',
-          overflow: 'hidden',
-          boxShadow: '0 8px 32px rgba(0,0,0,0.18)',
+          border: "3px solid #222",
+          overflow: "hidden",
+          boxShadow: "0 8px 32px rgba(0,0,0,0.18)",
           flexShrink: 0,
-          display: 'flex',
-          flexDirection: 'column',
+          display: "flex",
+          flexDirection: "column",
         }}
       >
         <FolioProvider tree={tree} plugins={plugins}>
@@ -221,8 +221,8 @@ function FolioContent() {
   return (
     <div
       style={{
-        height: '100%',
-        padding: '24px 32px',
+        height: "100%",
+        padding: "24px 32px",
         fontSize: `${state.fontSize}px`,
         lineHeight: state.lineHeight,
       }}
@@ -234,7 +234,7 @@ function FolioContent() {
 
 function InnerReader() {
   const { state } = useFolio();
-  if (state.readMode === 'page') {
+  if (state.readMode === "page") {
     return (
       <PageContainer>
         <FolioContent />
@@ -242,7 +242,7 @@ function InnerReader() {
     );
   }
   return (
-    <div style={{ height: '100%', overflow: 'auto' }}>
+    <div style={{ height: "100%", overflow: "auto" }}>
       <FolioContent />
     </div>
   );
@@ -250,7 +250,7 @@ function InnerReader() {
 
 function ScrollMode() {
   return (
-    <PhoneFrame actions={[{ type: 'SET_READ_MODE', mode: 'scroll' }]}>
+    <PhoneFrame actions={[{ type: "SET_READ_MODE", mode: "scroll" }]}>
       <InnerReader />
     </PhoneFrame>
   );
@@ -266,7 +266,7 @@ function PageMode() {
 
 function DarkTheme() {
   return (
-    <PhoneFrame actions={[{ type: 'SET_THEME', theme: 'dark' }]}>
+    <PhoneFrame actions={[{ type: "SET_THEME", theme: "dark" }]}>
       <InnerReader />
     </PhoneFrame>
   );
@@ -274,7 +274,7 @@ function DarkTheme() {
 
 function SepiaTheme() {
   return (
-    <PhoneFrame actions={[{ type: 'SET_THEME', theme: 'sepia' }]}>
+    <PhoneFrame actions={[{ type: "SET_THEME", theme: "sepia" }]}>
       <InnerReader />
     </PhoneFrame>
   );

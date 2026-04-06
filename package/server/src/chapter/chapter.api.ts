@@ -1,43 +1,43 @@
-import {Elysia} from 'elysia';
 import {
-  chapterListQuerySchema,
-  chapterParamsSchema,
-  createChapterSchema,
-  updateChapterSchema,
   type ChapterListResponse,
   type ChapterResponse,
   type CreateChapterInput,
+  chapterListQuerySchema,
+  chapterParamsSchema,
+  createChapterSchema,
   hasPermissionToDeleteChapter,
   hasPermissionToUpdateChapter,
-} from '@rezics/contract';
-import {chapterService} from './chapter.service';
-import {mapUnitToChapterDetailDTO, mapUnitToChapterListItemDTO} from './mapper';
-import {unitService} from '@/unit/unit.service';
+  updateChapterSchema,
+} from "@rezics/contract";
+import { Elysia } from "elysia";
+import { authMacro, buildActorFromContext } from "@/middleware";
+import { unitService } from "@/unit/unit.service";
+import { chapterService } from "./chapter.service";
 import {
-  authMacro,
-  buildActorFromContext,
-} from '@/middleware';
+  mapUnitToChapterDetailDTO,
+  mapUnitToChapterListItemDTO,
+} from "./mapper";
 
-export const chapterApi = new Elysia({prefix: '/chapters'})
+export const chapterApi = new Elysia({ prefix: "/chapters" })
   .use(authMacro)
   .get(
-    '/:unitId',
-    async ({params}): Promise<ChapterResponse> => {
+    "/:unitId",
+    async ({ params }): Promise<ChapterResponse> => {
       const unit = await chapterService.getByUnitId(params.unitId);
       return mapUnitToChapterDetailDTO(unit);
     },
     {
       params: chapterParamsSchema,
       detail: {
-        summary: 'Get chapter',
-        description: 'Get a single chapter unit by unit ID',
-        tags: ['Chapters'],
+        summary: "Get chapter",
+        description: "Get a single chapter unit by unit ID",
+        tags: ["Chapters"],
       },
     },
   )
   .post(
-    '/',
-    async ({body, identity}): Promise<ChapterResponse> => {
+    "/",
+    async ({ body, identity }): Promise<ChapterResponse> => {
       const req: CreateChapterInput = {
         userId: identity.unitId,
         title: body.title,
@@ -53,16 +53,16 @@ export const chapterApi = new Elysia({prefix: '/chapters'})
       requireLogin: true,
       body: createChapterSchema,
       detail: {
-        summary: 'Create chapter',
-        description: 'Create a new chapter unit (CHAPTER)',
-        tags: ['Chapters'],
+        summary: "Create chapter",
+        description: "Create a new chapter unit (CHAPTER)",
+        tags: ["Chapters"],
       },
     },
   )
   .get(
-    '/',
-    async ({query}): Promise<ChapterListResponse> => {
-      const {items, total} = await chapterService.list(query);
+    "/",
+    async ({ query }): Promise<ChapterListResponse> => {
+      const { items, total } = await chapterService.list(query);
       return {
         items: items.map(mapUnitToChapterListItemDTO),
         total,
@@ -72,15 +72,15 @@ export const chapterApi = new Elysia({prefix: '/chapters'})
       requireAdmin: true,
       query: chapterListQuerySchema,
       detail: {
-        summary: 'List chapters',
+        summary: "List chapters",
         description:
-          'List chapter units with advanced filters (search, tags, status, targetUnitId, user, time range) and pagination',
-        tags: ['Chapters'],
+          "List chapter units with advanced filters (search, tags, status, targetUnitId, user, time range) and pagination",
+        tags: ["Chapters"],
       },
     },
   )
   .put(
-    '/:unitId',
+    "/:unitId",
     async ({
       params,
       body,
@@ -95,12 +95,12 @@ export const chapterApi = new Elysia({prefix: '/chapters'})
       }
       if (
         !hasPermissionToUpdateChapter(
-          buildActorFromContext({identity, currentUser}),
+          buildActorFromContext({ identity, currentUser }),
           target as any,
         )
       ) {
         set.status = 403;
-        throw new Error('Forbidden: you do not have permission to update');
+        throw new Error("Forbidden: you do not have permission to update");
       }
       const unit = await chapterService.update(params.unitId, body);
       return mapUnitToChapterDetailDTO(unit);
@@ -110,20 +110,20 @@ export const chapterApi = new Elysia({prefix: '/chapters'})
       params: chapterParamsSchema,
       body: updateChapterSchema,
       detail: {
-        summary: 'Update chapter',
-        description: 'Update an existing chapter (by unit ID)',
-        tags: ['Chapters'],
+        summary: "Update chapter",
+        description: "Update an existing chapter (by unit ID)",
+        tags: ["Chapters"],
       },
     },
   )
   .delete(
-    '/:unitId',
+    "/:unitId",
     async ({
       params,
       identity,
       currentUser,
       set,
-    }): Promise<{message: string}> => {
+    }): Promise<{ message: string }> => {
       const target = await unitService.getByUnitId(params.unitId);
       if (!target) {
         set.status = 404;
@@ -131,23 +131,23 @@ export const chapterApi = new Elysia({prefix: '/chapters'})
       }
       if (
         !hasPermissionToDeleteChapter(
-          buildActorFromContext({identity, currentUser}),
+          buildActorFromContext({ identity, currentUser }),
           target as any,
         )
       ) {
         set.status = 403;
-        throw new Error('Forbidden: you do not have permission to delete');
+        throw new Error("Forbidden: you do not have permission to delete");
       }
       await chapterService.delete(params.unitId);
-      return {message: 'Chapter deleted successfully'};
+      return { message: "Chapter deleted successfully" };
     },
     {
       requireOwner: true,
       params: chapterParamsSchema,
       detail: {
-        summary: 'Delete chapter',
-        description: 'Delete a chapter unit by unit ID',
-        tags: ['Chapters'],
+        summary: "Delete chapter",
+        description: "Delete a chapter unit by unit ID",
+        tags: ["Chapters"],
       },
     },
   );

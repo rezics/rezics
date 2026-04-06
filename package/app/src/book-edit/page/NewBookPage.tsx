@@ -1,8 +1,10 @@
-import {BookEditMainPage} from './InfoPage';
-import {useUserProfileStore, type PartialUserDTO} from '@/user/state';
+import { type PartialUserDTO, useUserProfileStore } from "@/user/state";
+import { BookEditMainPage } from "./InfoPage";
 
 export function NewBookPage() {
-  const user: PartialUserDTO | null = useUserProfileStore(state => state.user);
+  const _user: PartialUserDTO | null = useUserProfileStore(
+    (state) => state.user,
+  );
 
   return (
     <div>

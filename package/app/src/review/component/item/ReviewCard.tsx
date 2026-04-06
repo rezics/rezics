@@ -1,32 +1,33 @@
-import React from 'react';
 import {
-  Card,
-  CardContent,
-  CardActionArea,
-  Typography,
   Box,
+  Card,
+  CardActionArea,
+  CardContent,
+  Typography,
   useTheme,
-} from '@mui/material';
-import type {ReviewMeiliDTO} from '@rezics/contract';
-import {cn} from '@/shared/util/css-util';
-import {useNavigate} from '@tanstack/react-router';
+} from "@mui/material";
+import type { ReviewMeiliDTO } from "@rezics/contract";
+import { useNavigate } from "@tanstack/react-router";
+import type React from "react";
+import { cn } from "@/shared/util/css-util";
+
 interface ReviewCardProps {
   review: ReviewMeiliDTO;
   className?: string;
 }
 
-const ReviewCard: React.FC<ReviewCardProps> = ({review, className}) => {
+const ReviewCard: React.FC<ReviewCardProps> = ({ review, className }) => {
   const theme = useTheme();
   const bookMetadata = review.metadata?.book;
   const navigate = useNavigate();
 
   const handleOpenReview = () => {
     if (!review.unitId) return;
-    navigate({to: '/review/$reviewId', params: {reviewId: review.unitId}});
+    navigate({ to: "/review/$reviewId", params: { reviewId: review.unitId } });
   };
 
   return (
-    <Card className={cn('w-full transition-all hover:shadow-md', className)}>
+    <Card className={cn("w-full transition-all hover:shadow-md", className)}>
       <CardActionArea onClick={handleOpenReview} disabled={!review.unitId}>
         <CardContent>
           {/* 中间主体：书籍信息与评论内容 */}
@@ -35,7 +36,7 @@ const ReviewCard: React.FC<ReviewCardProps> = ({review, className}) => {
             {bookMetadata?.coverUrl && (
               <Box
                 className="flex-shrink-0 w-20 h-28 overflow-hidden rounded shadow-sm"
-                sx={{border: `1px solid ${theme.palette.divider}`}}
+                sx={{ border: `1px solid ${theme.palette.divider}` }}
               >
                 <img
                   src={bookMetadata.coverUrl}
@@ -51,7 +52,7 @@ const ReviewCard: React.FC<ReviewCardProps> = ({review, className}) => {
                 <Typography
                   variant="caption"
                   className="block truncate"
-                  sx={{letterSpacing: 1}}
+                  sx={{ letterSpacing: 1 }}
                 >
                   《{bookMetadata.title}》
                 </Typography>
@@ -61,7 +62,7 @@ const ReviewCard: React.FC<ReviewCardProps> = ({review, className}) => {
                 <Typography
                   variant="h6"
                   className="truncate"
-                  sx={{fontSize: '1.1rem', color: 'text.primary'}}
+                  sx={{ fontSize: "1.1rem", color: "text.primary" }}
                 >
                   {review.title}
                 </Typography>
@@ -71,7 +72,7 @@ const ReviewCard: React.FC<ReviewCardProps> = ({review, className}) => {
                 variant="body2"
                 color="text.secondary"
                 className="line-clamp-3 text-justify"
-                sx={{lineHeight: 1.6}}
+                sx={{ lineHeight: 1.6 }}
               >
                 {review.content}
               </Typography>
@@ -80,7 +81,7 @@ const ReviewCard: React.FC<ReviewCardProps> = ({review, className}) => {
                 <Typography
                   variant="h6"
                   className="invisible"
-                  sx={{fontSize: '1.1rem', color: 'text.primary'}}
+                  sx={{ fontSize: "1.1rem", color: "text.primary" }}
                 >
                   Blank Title
                 </Typography>
@@ -100,9 +101,9 @@ const ReviewCard: React.FC<ReviewCardProps> = ({review, className}) => {
                 variant="caption"
                 color="primary"
                 noWrap
-                sx={{lineHeight: 1}}
+                sx={{ lineHeight: 1 }}
               >
-                {review.user?.name || '匿名'}
+                {review.user?.name || "匿名"}
               </Typography>
 
               {review.rating !== undefined && (
@@ -110,7 +111,7 @@ const ReviewCard: React.FC<ReviewCardProps> = ({review, className}) => {
                   variant="caption"
                   color="secondary"
                   noWrap
-                  sx={{lineHeight: 1}}
+                  sx={{ lineHeight: 1 }}
                 >
                   {review.rating}
                 </Typography>
