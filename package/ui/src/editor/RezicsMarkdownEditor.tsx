@@ -1,12 +1,14 @@
-import {useState, useCallback, useRef} from 'react';
+import {useState, useCallback, useRef, useMemo} from 'react';
 import {MarkdownEditor} from '@rezics/editor/editor';
 import type {MarkdownEditorProps} from '@rezics/editor/editor';
-import type {ResizeConfig} from '@rezics/editor/editor';
+import type {ResizeConfig, ToolbarOverride} from '@rezics/editor/editor';
 import {insertImageUrl} from '@rezics/editor/markdown';
 import {EditorPanel} from './panel/EditorPanel';
 import {ImageModal} from './image/ImageModal';
+import {EmojiPickerOverlay} from './plugin/EmojiMart';
+import {useMentionPanel, MentionPanel} from './plugin/EditorMention';
 import Button from '@mui/material/Button';
-import {Paperclip} from 'lucide-react';
+import {Paperclip, Smile} from 'lucide-react';
 import type {ImageProvider} from './image/types';
 import './editor.css';
 
@@ -16,10 +18,8 @@ export const DEFAULT_RESIZE_CONFIG: ResizeConfig = {
   maxHeight: 800,
 };
 
-export interface RezicsMarkdownEditorProps extends Omit<
-  MarkdownEditorProps,
-  'viewRef'
-> {
+export interface RezicsMarkdownEditorProps
+  extends Omit<MarkdownEditorProps, 'viewRef'> {
   onSubmit?: () => void;
   onCancel?: () => void;
   submitLabel?: string;
@@ -33,14 +33,25 @@ export function RezicsMarkdownEditor({
   submitLabel = 'Submit',
   imageProviders,
   disableResize,
+  onChange,
+  toolbar: callerToolbar,
+  // Handled by this wrapper — don't forward to MarkdownEditor
+  emoji: _emoji,
+  mention: _mention,
   ...editorProps
 }: RezicsMarkdownEditorProps) {
   const [imageModalOpen, setImageModalOpen] = useState(false);
+  const [emojiOpen, setEmojiOpen] = useState(false);
+  const [editorView, setEditorView] = useState<any>(null);
   const viewRef = useRef<any>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
 
   const handleViewRef = useCallback((view: any) => {
     viewRef.current = view;
+    setEditorView(view);
   }, []);
+
+  // ---- Image ----
 
   const handleInsertImage = useCallback((url: string, alt?: string) => {
     if (viewRef.current) {
@@ -48,17 +59,77 @@ export function RezicsMarkdownEditor({
     }
   }, []);
 
+  // ---- Emoji ----
+
+  const handleEmojiPick = useCallback((emoji: string) => {
+    const view = viewRef.current;
+    if (!view) return;
+    const {from, to} = view.state.selection.main;
+    view.dispatch({
+      changes: {from, to, insert: emoji},
+      selection: {anchor: from + emoji.length},
+    });
+    view.focus();
+    setEmojiOpen(false);
+  }, []);
+
+  const emojiAnchorEl = emojiOpen
+    ? (wrapperRef.current?.querySelector(
+        '[aria-label="Emoji"]',
+      ) as HTMLElement | null)
+    : null;
+
+  // ---- Mention ----
+
+  const mention = useMentionPanel(editorView);
+
+  const handleEditorChange = useCallback(
+    (value: string) => {
+      onChange?.(value);
+      mention.checkTrigger();
+    },
+    [onChange, mention.checkTrigger],
+  );
+
+  // ---- Toolbar (add emoji button, merge caller overrides) ----
+
+  const toolbar = useMemo((): ToolbarOverride | false | undefined => {
+    if (callerToolbar === false) return false;
+    return {
+      ...callerToolbar,
+      extend: items => {
+        let result = [
+          ...items,
+          {
+            name: 'emoji',
+            label: 'Emoji',
+            icon: <Smile size={16} />,
+            action: () => setEmojiOpen(prev => !prev),
+          },
+        ];
+        if (callerToolbar?.extend) {
+          result = callerToolbar.extend(result);
+        }
+        return result;
+      },
+    };
+  }, [callerToolbar]);
+
+  // ---- Layout ----
+
   const resolvedResize = disableResize
     ? undefined
     : (editorProps.resize ?? DEFAULT_RESIZE_CONFIG);
 
   return (
-    <div>
+    <div ref={wrapperRef}>
       <MarkdownEditor
         {...editorProps}
         className="rezics-editor-wrapper"
         resize={resolvedResize}
         viewRef={handleViewRef}
+        onChange={handleEditorChange}
+        toolbar={toolbar}
       />
       <EditorPanel
         left={
@@ -102,6 +173,21 @@ export function RezicsMarkdownEditor({
         onClose={() => setImageModalOpen(false)}
         onInsert={handleInsertImage}
         providers={imageProviders}
+      />
+      <EmojiPickerOverlay
+        open={emojiOpen}
+        anchorEl={emojiAnchorEl}
+        onPick={handleEmojiPick}
+        onClose={() => setEmojiOpen(false)}
+      />
+      <MentionPanel
+        trigger={mention.trigger}
+        options={mention.options}
+        loading={mention.loading}
+        activeIndex={mention.activeIndex}
+        setActiveIndex={mention.setActiveIndex}
+        onPick={mention.pickMention}
+        onClose={mention.closeMention}
       />
     </div>
   );
