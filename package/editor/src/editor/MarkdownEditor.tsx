@@ -6,6 +6,7 @@ import {markdown} from '../markdown/core/index';
 import {mention} from '../markdown/mention/index';
 import {emoji} from '../markdown/emoji/index';
 import {resolvePlugins} from '../core/plugin';
+import {fixedHeightEditor} from '../core/fixedHeight';
 import {ReactToolbar} from '../toolbar/react/index';
 import {markdownIconMap} from './toolbar-defaults';
 import {applyIconDefaults, applyToolbarOverrides} from './toolbar-utils';
@@ -152,11 +153,17 @@ export function MarkdownEditor({
     return entries;
   }, [allPlugins, toolbar, preview, viewMode]);
 
+  const editorExtensions = useMemo(
+    () => (resize ? [fixedHeightEditor] : undefined),
+    [resize],
+  );
+
   const {containerRef, view} = useEditor({
     doc: value,
     plugins: allPlugins,
     keybindings,
     theme,
+    extraExtensions: editorExtensions,
     onChange: handleChange,
   });
 
@@ -274,19 +281,19 @@ export function MarkdownEditor({
       <div
         style={{
           flex: 1,
-          overflow: 'auto',
-          display: viewMode === 'dual' ? 'flex' : 'block',
+          overflow: useResize ? 'hidden' : 'auto',
+          display: 'flex',
+          minHeight: 0,
         }}
       >
         {/* Editor — always mounted, hidden in preview-only mode */}
         <div
           ref={containerRef}
           style={{
-            display: viewMode === 'preview' ? 'none' : 'block',
-            flex: viewMode === 'dual' ? 1 : undefined,
-            overflow: viewMode === 'dual' ? 'auto' : undefined,
-            borderRight:
-              viewMode === 'dual' ? '1px solid #d0d7de' : undefined,
+            display: viewMode === 'preview' ? 'none' : 'flex',
+            flex: 1,
+            minHeight: 0,
+            borderRight: viewMode === 'dual' ? '1px solid #d0d7de' : undefined,
           }}
         />
 

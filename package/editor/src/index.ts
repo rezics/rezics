@@ -2,6 +2,7 @@
 export { createEditor } from './core/create';
 export { createTheme } from './core/theme';
 export type { ThemeConfig, ThemeSettings } from './core/theme';
+export { fixedHeightEditor } from './core/fixedHeight';
 export type { EditorPlugin, EditorPluginFactory, EditorConfig } from './core/types';
 
 // React

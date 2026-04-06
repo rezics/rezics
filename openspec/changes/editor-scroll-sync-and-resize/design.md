@@ -73,7 +73,22 @@ This prevents infinite loops without requiring complex debounce logic.
 
 **Why:** Keeps the annotation logic decoupled from the scroll sync logic. The plugin is composable with the existing `novelModePlugin` pipeline and produces self-describing HTML that could be useful for other features (e.g., click-to-edit).
 
-### 8. ResizableWrapper minHeight adjustment
+### 8. Fixed-height CodeMirror extension
+
+**Choice:** Create a small `EditorView.theme()` extension that sets `height: 100%` on `&` (`.cm-editor`) and `overflow: auto` on `.cm-scroller`. This extension is applied conditionally — only when the editor is in fixed-height/resizable mode.
+
+**Why:** By default, CodeMirror sizes `.cm-editor` to its content height. In fixed-height mode, the container has an explicit height from `ResizableWrapper`, but the CM editor inside it doesn't stretch to fill it. This leaves dead space below the last line of content that is not part of the editor — clicking it does nothing, and the editor area appears smaller than the configured minimum.
+
+Setting `height: 100%` on `.cm-editor` makes it fill the flex container. Moving `overflow: auto` to `.cm-scroller` (instead of the parent div) ensures CodeMirror handles its own scrolling, which means clicking anywhere in the editor area — including below the last line — focuses the editor and places the cursor correctly.
+
+**Alternatives considered:**
+- *CSS from parent targeting `.cm-editor`*: Works but mixes concerns; the editor should own its sizing.
+- *Adding height styles to `createTheme()`*: Would always apply; we only want this in resize mode.
+- *Passing a `fixedHeight` flag to `createTheme()`*: Viable but couples theming to layout concerns.
+
+**Implementation:** A new export `fixedHeightEditor` in `package/editor/src/core/` that returns an `Extension`. The `useEditor` hook or the `MarkdownEditor`/`Editor` components conditionally include it in their extension array when `resize` is provided.
+
+### 9. ResizableWrapper minHeight adjustment
 
 **Choice:** Measure the header height via a ref on the header element and pass it to `ResizableWrapper` so the effective `minHeight` becomes `configuredMinHeight + headerHeight`. This ensures the content area below the header never drops below the configured minimum.
 

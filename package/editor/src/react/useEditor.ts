@@ -13,6 +13,7 @@ export interface UseEditorOptions {
   plugins?: EditorPlugin[];
   keybindings?: KeyBinding[];
   theme?: Extension;
+  extraExtensions?: Extension[];
   onChange?: (value: string) => void;
 }
 
@@ -22,6 +23,7 @@ export function useEditor(options: UseEditorOptions) {
     plugins = EMPTY_PLUGINS,
     keybindings = EMPTY_KEYBINDINGS,
     theme,
+    extraExtensions,
     onChange,
   } = options;
   const viewRef = useRef<EditorView | null>(null);
@@ -57,6 +59,10 @@ export function useEditor(options: UseEditorOptions) {
         extensions.push(theme);
       }
 
+      if (extraExtensions) {
+        extensions.push(...extraExtensions);
+      }
+
       const created = new EditorView({
         state: EditorState.create({ doc, extensions }),
         parent: node,
@@ -64,9 +70,9 @@ export function useEditor(options: UseEditorOptions) {
       viewRef.current = created;
       setView(created);
     },
-    // Recreate on plugin/keybinding/theme identity change
+    // Recreate on plugin/keybinding/theme/extension identity change
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [plugins, keybindings, theme],
+    [plugins, keybindings, theme, extraExtensions],
   );
 
   // Sync external doc changes without recreating the view

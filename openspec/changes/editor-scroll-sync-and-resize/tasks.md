@@ -23,9 +23,18 @@
 - [x] 4.2 Pass the adjusted `minHeight` (configured min + header height) to `ResizableWrapper` via the `config` prop
 - [x] 4.3 Add a `ResizeObserver` on the header element to recalculate effective minHeight when the header resizes (e.g., toolbar wrapping)
 
-## 5. Validation
+## 5. Fixed-height CodeMirror extension
+
+- [x] 5.1 Create `fixedHeightEditor` extension in `package/editor/src/core/fixedHeight.ts` that returns an `EditorView.theme()` setting `& { height: 100% }` and `.cm-scroller { overflow: auto }`
+- [x] 5.2 Conditionally include `fixedHeightEditor` in `useEditor` or the editor components when `resize` is provided — ensure it is NOT applied in free-flowing mode
+- [x] 5.3 Remove `overflow: auto` from the content area container div in `MarkdownEditor.tsx` and `Editor.tsx` when in resize mode (CM's `.cm-scroller` handles scrolling now)
+- [x] 5.4 Verify dual-column mode: both editor pane and preview pane fill available height and scroll independently
+
+## 6. Validation
 
 - [x] 5.1 Build the `package/editor` package (`bun run build` in `package/editor`) and confirm no type errors
-- [ ] 5.2 Manual test: open dual-column mode, scroll the editor, confirm preview follows; scroll the preview, confirm editor follows
-- [ ] 5.3 Manual test: type in the editor in dual mode, confirm preview scroll position is preserved after re-render
-- [ ] 5.4 Manual test: resize the editor to its minimum height, confirm the content area remains usable (>= configured minHeight)
+- [ ] 6.2 Manual test: open dual-column mode, scroll the editor, confirm preview follows; scroll the preview, confirm editor follows
+- [ ] 6.3 Manual test: type in the editor in dual mode, confirm preview scroll position is preserved after re-render
+- [ ] 6.4 Manual test: resize the editor to its minimum height, confirm the content area remains usable (>= configured minHeight)
+- [ ] 6.5 Manual test: with minimal content, confirm the entire editor height is clickable and places the cursor at the end of the document
+- [ ] 6.6 Manual test: without `resize` prop, confirm the editor sizes to content (no fixed height)

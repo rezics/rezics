@@ -1,6 +1,6 @@
 ## Why
 
-The markdown editor's dual-column mode has two usability problems: the editor and preview panes scroll independently with no synchronization, making it difficult to correlate source text with rendered output; and in resizable mode, the container's minimum height does not account for the header, allowing the content area to shrink below a usable size.
+The markdown editor's dual-column mode has three usability problems: the editor and preview panes scroll independently with no synchronization, making it difficult to correlate source text with rendered output; in resizable mode, the container's minimum height does not account for the header, allowing the content area to shrink below a usable size; and CodeMirror does not stretch to fill its container in fixed-height/resizable mode, leaving dead space below the content that is not clickable or editable.
 
 ## What Changes
 
@@ -9,6 +9,7 @@ The markdown editor's dual-column mode has two usability problems: the editor an
 - Listen to scroll events on both the CodeMirror `scrollDOM` and the preview container, mapping visible lines between the two panes.
 - Include scroll-loop prevention (a `syncSource` guard) and post-re-render scroll restoration to handle `innerHTML` replacement on content changes.
 - Adjust `ResizableWrapper` so the container's effective `minHeight` accounts for the header height, ensuring the content area is always >= the configured editor minimum height.
+- Add a conditional CodeMirror extension that makes `.cm-editor` and `.cm-scroller` stretch to fill the container in fixed-height/resizable mode, so the entire editor area is clickable and editable.
 
 ## Capabilities
 
@@ -19,7 +20,7 @@ The markdown editor's dual-column mode has two usability problems: the editor an
 ### Modified Capabilities
 
 - `editor-markdown-preview`: The preview renderer gains a `data-source-line` injection plugin for scroll sync support.
-- `editor-core`: `ResizableWrapper` minHeight calculation updated to account for header height.
+- `editor-core`: `ResizableWrapper` minHeight calculation updated to account for header height. CodeMirror gains a conditional fixed-height extension that stretches the editor to fill its container.
 
 ## Impact
 

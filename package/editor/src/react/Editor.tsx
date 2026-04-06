@@ -1,7 +1,9 @@
+import { useMemo } from 'react';
 import type { Extension } from '@codemirror/state';
 import type { KeyBinding } from '@codemirror/view';
 import type { EditorPlugin } from '../core/types';
 import type { ResizeConfig } from '../editor/types';
+import { fixedHeightEditor } from '../core/fixedHeight';
 import { EditorContext } from './context';
 import { useEditor } from './useEditor';
 import { resolvePlugins } from '../core/plugin';
@@ -29,11 +31,17 @@ export function Editor({
   className,
   resize,
 }: EditorProps) {
+  const editorExtensions = useMemo(
+    () => (resize ? [fixedHeightEditor] : undefined),
+    [resize],
+  );
+
   const { containerRef, view } = useEditor({
     doc: value,
     plugins,
     keybindings,
     theme,
+    extraExtensions: editorExtensions,
     onChange,
   });
 
@@ -46,7 +54,7 @@ export function Editor({
       style={resize ? {height: '100%', display: 'flex', flexDirection: 'column'} : undefined}
     >
       {showReactToolbar && <ReactToolbar items={toolbarItems} />}
-      <div ref={containerRef} style={resize ? {flex: 1, overflow: 'auto'} : undefined} />
+      <div ref={containerRef} style={resize ? {flex: 1} : undefined} />
     </div>
   );
 
