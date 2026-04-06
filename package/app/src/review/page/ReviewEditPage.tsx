@@ -1,7 +1,6 @@
-import {useState, useEffect} from 'react';
+import React, {useState, useEffect} from 'react';
 import {useQuery} from '@tanstack/react-query';
 import {RezicsMarkdownEditor} from '@rezics/ui/editor';
-import {Button} from '@mui/material';
 import {reviewQueries} from '@rezics/api/review/review.queries';
 import {
   useUpdateReviewMutation,
@@ -19,9 +18,13 @@ import {reviewEditRoute} from '@/router';
 interface ReviewEditPageProps {
   data: ReviewResponse;
   setData: (data: ReviewResponse) => void;
+  onSubmit?: () => void;
+  onCancel?: () => void;
+  submitLabel?: string;
+  extraActions?: React.ReactNode;
 }
 
-export function ReviewEditPage({data, setData}: ReviewEditPageProps) {
+export function ReviewEditPage({data, setData, onSubmit, onCancel, submitLabel, extraActions}: ReviewEditPageProps) {
   const {t} = useTranslation();
   return (
     <div className="flex flex-col gap-4 mt-2">
@@ -50,6 +53,10 @@ export function ReviewEditPage({data, setData}: ReviewEditPageProps) {
         <RezicsMarkdownEditor
           value={data.content || ''}
           onChange={value => setData({...data, content: value})}
+          onSubmit={onSubmit}
+          onCancel={onCancel}
+          submitLabel={submitLabel}
+          extraRight={extraActions}
         />
       </div>
     </div>
@@ -131,19 +138,13 @@ export function ReviewEditPageContainer() {
     <div>
       <div className="max-w-4xl mx-auto mt-4">
         <h1 className="text-xl font-semibold">Edit Review</h1>
-        <ReviewEditPage data={reviewData} setData={setReviewData} />
-
-        <div className="flex justify-end gap-2">
-          <DeleteButton onDelete={handleDelete} />
-          <Button
-            type="button"
-            className="btn btn-primary"
-            onClick={handleSave}
-            disabled={isPending}
-          >
-            {isPending ? t('common.submitting') : t('common.submit')}
-          </Button>
-        </div>
+        <ReviewEditPage
+          data={reviewData}
+          setData={setReviewData}
+          onSubmit={handleSave}
+          submitLabel={isPending ? t('common.submitting') : t('common.submit')}
+          extraActions={<DeleteButton onDelete={handleDelete} />}
+        />
       </div>
     </div>
   );

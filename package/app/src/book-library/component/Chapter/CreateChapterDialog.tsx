@@ -2,10 +2,7 @@ import {useEffect, useMemo, useState} from 'react';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
-import DialogActions from '@mui/material/DialogActions';
 import TextField from '@mui/material/TextField';
-import Button from '@mui/material/Button';
-import CircularProgress from '@mui/material/CircularProgress';
 
 import {RezicsMarkdownEditor} from '@rezics/ui/editor';
 import {useCreateUnitMutation} from '@rezics/api/unit/unit.mutations';
@@ -119,32 +116,19 @@ export function CreateChapterDialog({
             helperText={!title.trim() ? '必填' : ' '}
           />
           <div className="min-h-[300px]">
-            <RezicsMarkdownEditor value={content} onChange={setContent} />
+            <RezicsMarkdownEditor
+              value={content}
+              onChange={setContent}
+              onSubmit={handleSubmit}
+              onCancel={onClose}
+              submitLabel={createMutation.isPending ? '创建中...' : '创建'}
+            />
             {!content.trim() && (
               <div className="text-sm text-red-600 mt-2">内容为必填</div>
             )}
           </div>
         </div>
       </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose} disabled={createMutation.isPending}>
-          取消
-        </Button>
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={handleSubmit}
-          disabled={isInvalid || createMutation.isPending}
-        >
-          {createMutation.isPending ? (
-            <span className="flex items-center gap-2">
-              <CircularProgress size={16} /> 创建中...
-            </span>
-          ) : (
-            '创建'
-          )}
-        </Button>
-      </DialogActions>
     </Dialog>
   );
 }

@@ -2,7 +2,6 @@ import {type ReviewResponse} from '@rezics/contract';
 import {ReviewEditPage} from './ReviewEditPage';
 import {useState} from 'react';
 import {TextField} from '@mui/material';
-import {CooldownButton} from '@rezics/ui/composite/button/CooldownButton.tsx';
 
 import {useCreateReviewMutation} from '@rezics/api/review/review.mutations';
 import {useAlertStore} from '@app/state/windowAlertStore';
@@ -71,18 +70,12 @@ export function ReviewNewPage({
           value={bookUnitId}
           disabled
         />
-        <ReviewEditPage data={reviewData} setData={setReviewData} />
-        <div className="flex justify-end gap-2">
-          <CooldownButton
-            cooldownMs={10000}
-            type="button"
-            className="btn btn-primary"
-            onClick={handleSave}
-            disabled={isPending}
-          >
-            {isPending ? 'Submitting...' : 'Submit'}
-          </CooldownButton>
-        </div>
+        <ReviewEditPage
+          data={reviewData}
+          setData={setReviewData}
+          onSubmit={handleSave}
+          submitLabel={isPending ? 'Submitting...' : 'Submit'}
+        />
       </div>
     </div>
   );

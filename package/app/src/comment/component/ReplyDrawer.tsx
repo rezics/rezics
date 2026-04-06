@@ -4,42 +4,6 @@ import React from 'react';
 
 import {RezicsMarkdownEditor} from '@rezics/ui/editor';
 
-export type ReplyDrawerShowProps = {
-  open: boolean;
-  onClose: () => void;
-  onSubmit: () => void;
-  content: string;
-  onContentChange: (content: string) => void;
-};
-
-export const ReplyDrawerShow: React.FC<ReplyDrawerShowProps> = ({
-  open,
-  onClose,
-  onSubmit,
-  content,
-  onContentChange,
-}) => {
-  return (
-    <Drawer open={open} onClose={onClose} anchor="bottom" sx={{zIndex: 2000}}>
-      <div
-        className="w-11/12 mx-auto my-4 min-h-[250px] h-[480px]
-                  grid gap-4
-                  grid-cols-1"
-      >
-        {/* 内容区域 */}
-        <div className="flex flex-col">
-          <RezicsMarkdownEditor
-            value={content}
-            onChange={onContentChange}
-            onSubmit={onSubmit}
-            submitLabel="提交"
-          />
-        </div>
-
-      </div>
-    </Drawer>
-  );
-};
 
 function extractMentions(text: string): string[] {
   const result: string[] = [];
@@ -95,12 +59,22 @@ export const ReplyDrawerContainer: React.FC<ReplyDrawerContainerProps> = ({
   };
 
   return (
-    <ReplyDrawerShow
+    <Drawer
       open={entry?.visible ?? false}
       onClose={handleClose}
-      onSubmit={handleSubmit}
-      content={entry?.contentMain ?? ''}
-      onContentChange={handleChange}
-    />
+      anchor="bottom"
+      sx={{zIndex: 2000}}
+    >
+      <div className="w-11/12 mx-auto my-4 flex flex-col min-h-[250px]">
+        <div className="flex-1 flex flex-col">
+          <RezicsMarkdownEditor
+            value={entry?.contentMain ?? ''}
+            onChange={handleChange}
+            onSubmit={handleSubmit}
+            submitLabel="提交"
+          />
+        </div>
+      </div>
+    </Drawer>
   );
 };

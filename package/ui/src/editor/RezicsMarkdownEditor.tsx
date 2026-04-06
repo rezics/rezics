@@ -1,4 +1,4 @@
-import {useState, useCallback, useRef, useMemo} from 'react';
+import React, {useState, useCallback, useRef, useMemo} from 'react';
 import {MarkdownEditor} from '@rezics/editor/editor';
 import type {MarkdownEditorProps} from '@rezics/editor/editor';
 import type {ResizeConfig, ToolbarOverride} from '@rezics/editor/editor';
@@ -23,6 +23,7 @@ export interface RezicsMarkdownEditorProps
   onSubmit?: () => void;
   onCancel?: () => void;
   submitLabel?: string;
+  extraRight?: React.ReactNode;
   imageProviders?: ImageProvider[];
   disableResize?: boolean;
 }
@@ -31,6 +32,7 @@ export function RezicsMarkdownEditor({
   onSubmit,
   onCancel,
   submitLabel = 'Submit',
+  extraRight,
   imageProviders,
   disableResize,
   onChange,
@@ -155,6 +157,7 @@ export function RezicsMarkdownEditor({
         }
         right={
           <>
+            {extraRight}
             {onCancel && (
               <Button size="small" onClick={onCancel}>
                 Cancel
