@@ -52,17 +52,14 @@ export function MarkdownEditor({
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [liveContent, setLiveContent] = useState(value ?? '');
   const previewRef = useRef<HTMLDivElement>(null);
-  const containerElRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLDivElement>(null);
   const [headerHeight, setHeaderHeight] = useState(0);
 
   const previewConfig = useMemo(
-    () =>
-      typeof preview === 'object' ? preview : preview ? undefined : undefined,
+    () => (typeof preview === 'object' ? preview : undefined),
     [preview],
   );
 
-  // Sync liveContent when the value prop changes externally
   useEffect(() => {
     setLiveContent(value ?? '');
   }, [value]);
@@ -89,7 +86,6 @@ export function MarkdownEditor({
     if (emojiConfig) {
       plugins.push(emoji(emojiConfig));
     }
-
     if (extraPlugins) {
       plugins.push(...extraPlugins);
     }
@@ -97,40 +93,38 @@ export function MarkdownEditor({
     return plugins;
   }, [mentionConfig, emojiConfig, extraPlugins]);
 
-  // Build toolbar entries with separators between groups + preview extensions
   const toolbarEntries = useMemo((): ToolbarEntry[] => {
     if (toolbar === false) return [];
+
     const resolved = resolvePlugins(allPlugins).toolbar;
     const withIcons = applyIconDefaults(resolved, markdownIconMap);
     const items = applyToolbarOverrides(withIcons, toolbar);
 
-    // Group items by inserting separators between logical groups
     const textGroup = ['bold', 'italic', 'heading'];
     const blockGroup = ['blockquote', 'unordered-list', 'ordered-list'];
     const insertGroup = ['link', 'image', 'table', 'code-block'];
-
     const groups = [textGroup, blockGroup, insertGroup];
+
     const entries: ToolbarEntry[] = [];
 
     for (const group of groups) {
       const groupItems = group
         .map(name => items.find(item => item.name === name))
         .filter(Boolean) as typeof items;
-      if (groupItems.length > 0) {
-        if (entries.length > 0) entries.push('|');
-        entries.push(...groupItems);
-      }
+
+      if (groupItems.length === 0) continue;
+      if (entries.length > 0) entries.push('|');
+      entries.push(...groupItems);
     }
 
-    // Append any remaining items not in predefined groups
     const knownNames = new Set(groups.flat());
     const remaining = items.filter(item => !knownNames.has(item.name));
+
     if (remaining.length > 0) {
       if (entries.length > 0) entries.push('|');
       entries.push(...remaining);
     }
 
-    // Append preview extension icons (dual-column, fullscreen)
     if (preview) {
       if (entries.length > 0) entries.push('|');
       entries.push(
@@ -138,14 +132,15 @@ export function MarkdownEditor({
           name: 'dual-column',
           label: 'Dual column',
           icon: markdownIconMap['dual-column'],
-          action: () => setViewMode(m => (m === 'dual' ? 'write' : 'dual')),
+          action: () =>
+            setViewMode(mode => (mode === 'dual' ? 'write' : 'dual')),
           isActive: () => viewMode === 'dual',
         },
         {
           name: 'fullscreen',
           label: 'Fullscreen',
           icon: markdownIconMap.fullscreen,
-          action: () => setIsFullscreen(v => !v),
+          action: () => setIsFullscreen(value => !value),
         },
       );
     }
@@ -171,34 +166,34 @@ export function MarkdownEditor({
     viewRef?.(view);
   }, [view, viewRef]);
 
-  // Bidirectional scroll sync between editor and preview in dual-column mode
   useScrollSync(view, previewRef, viewMode);
 
-  // Measure header height for ResizableWrapper minHeight adjustment
   useEffect(() => {
     const header = headerRef.current;
     if (!header) return;
+
     const observer = new ResizeObserver(([entry]) => {
       setHeaderHeight(entry.contentRect.height);
     });
+
     observer.observe(header);
     return () => observer.disconnect();
   }, []);
 
-  // Update preview HTML when in preview or dual-column mode
   useEffect(() => {
-    if (viewMode !== 'write' && previewRef.current) {
-      previewRef.current.innerHTML = md.render(liveContent);
-      addCopyButtons(previewRef.current);
-    }
+    if (viewMode === 'write' || !previewRef.current) return;
+
+    previewRef.current.innerHTML = md.render(liveContent);
+    addCopyButtons(previewRef.current);
   }, [viewMode, liveContent, md]);
 
-  // Fullscreen toggle with Escape key
   useEffect(() => {
     if (!isFullscreen) return;
+
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') setIsFullscreen(false);
     };
+
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [isFullscreen]);
@@ -207,41 +202,60 @@ export function MarkdownEditor({
   const showDefaultToolbar =
     toolbar !== false && !hasCustomRender && toolbarEntries.length > 0;
 
-  const fullscreenStyle: React.CSSProperties = isFullscreen
-    ? {
-        position: 'fixed',
-        inset: 0,
-        zIndex: 9999,
-        background: '#fff',
-        display: 'flex',
-        flexDirection: 'column',
-      }
-    : {display: 'flex', flexDirection: 'column'};
+  const useResize = Boolean(resize) && !isFullscreen;
+  const isDual = viewMode === 'dual';
+  const showEditorPane = viewMode !== 'preview';
+  const showPreviewPane = Boolean(preview) && viewMode !== 'write';
 
-  const useResize = resize && !isFullscreen;
-
-  // Adjust minHeight to account for header so content area stays >= configured min
   const adjustedResize = useMemo(() => {
     if (!resize || !headerHeight) return resize;
+
     return {
       ...resize,
       minHeight: (resize.minHeight ?? 100) + headerHeight,
     };
   }, [resize, headerHeight]);
 
+  const containerStyle: React.CSSProperties = useResize
+    ? {display: 'flex', flexDirection: 'column', height: '100%'}
+    : isFullscreen
+      ? {
+          position: 'fixed',
+          inset: 0,
+          zIndex: 9999,
+          background: '#fff',
+          display: 'flex',
+          flexDirection: 'column',
+        }
+      : {display: 'flex', flexDirection: 'column'};
+
+  const contentStyle: React.CSSProperties = {
+    flex: 1,
+    display: 'flex',
+    minHeight: 0,
+    minWidth: 0,
+    overflow: 'hidden',
+  };
+
+  const editorPaneStyle: React.CSSProperties = {
+    display: showEditorPane ? 'block' : 'none',
+    flex: 1,
+    minHeight: 0,
+    minWidth: 0,
+    borderRight: isDual ? '1px solid #d0d7de' : undefined,
+  };
+
+  const previewPaneStyle: React.CSSProperties = {
+    display: showPreviewPane ? 'block' : 'none',
+    flex: 1,
+    minHeight: 0,
+    minWidth: 0,
+    overflow: 'auto',
+  };
+
   const editorContent = (
-    <div
-      ref={containerElRef}
-      className={useResize ? undefined : className}
-      style={
-        useResize
-          ? {display: 'flex', flexDirection: 'column' as const, height: '100%'}
-          : fullscreenStyle
-      }
-    >
-      {/* Tab bar + toolbar row */}
+    <div className={useResize ? undefined : className} style={containerStyle}>
       <div ref={headerRef} className="md-editor-header">
-        {/* Left: Write / Preview tabs */}
         {preview && (
           <div className="md-editor-tabs">
             <button
@@ -263,12 +277,11 @@ export function MarkdownEditor({
           </div>
         )}
 
-        {/* Right: toolbar (formatting groups + dual-column / fullscreen) */}
         <div className="md-editor-toolbar-right">
           {hasCustomRender &&
             view &&
             toolbar!.render!(
-              toolbarEntries.filter(e => e !== '|') as any,
+              toolbarEntries.filter(entry => entry !== '|') as any,
               view,
             )}
           {showDefaultToolbar && viewMode !== 'preview' && (
@@ -277,35 +290,17 @@ export function MarkdownEditor({
         </div>
       </div>
 
-      {/* Content area */}
-      <div
-        style={{
-          flex: 1,
-          overflow: useResize ? 'hidden' : 'auto',
-          display: 'flex',
-          minHeight: 0,
-        }}
-      >
-        {/* Editor — always mounted, hidden in preview-only mode */}
-        <div
-          ref={containerRef}
-          style={{
-            display: viewMode === 'preview' ? 'none' : 'flex',
-            flex: 1,
-            minHeight: 0,
-            borderRight: viewMode === 'dual' ? '1px solid #d0d7de' : undefined,
-          }}
-        />
+      <div style={contentStyle}>
+        {/* Keep the mount node as a block flex item.
+            Making this node itself a flex container can cause .cm-editor
+            to size to its intrinsic width instead of filling the pane. */}
+        <div ref={containerRef} style={editorPaneStyle} />
 
-        {/* Preview — shown in preview and dual modes */}
-        {preview && viewMode !== 'write' && (
+        {preview && (
           <div
             ref={previewRef}
             className="markdown-body md-editor-preview"
-            style={{
-              flex: viewMode === 'dual' ? 1 : undefined,
-              overflow: viewMode === 'dual' ? 'auto' : undefined,
-            }}
+            style={previewPaneStyle}
           />
         )}
       </div>
