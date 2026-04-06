@@ -212,13 +212,17 @@
 .md-editor-tab {
   position: relative;
   padding: 8px 12px;
-  border: none;
+  border: 1px solid transparent;
+  border-bottom: none;
+  border-radius: 6px 6px 0 0;
   background: none;
   cursor: pointer;
   font-size: 13px;
   font-weight: 500;
   color: var(--editor-tab-color, #57606a);
-  transition: color 0.15s, background-color 0.15s;
+  transition:
+    color 0.15s,
+    background-color 0.15s;
 }
 
 .md-editor-tab:hover {
@@ -228,19 +232,24 @@
 .md-editor-tab[data-active='true'] {
   font-weight: 600;
   color: var(--editor-tab-active-color, #24292f);
+  border-color: var(--editor-border-color, #d0d7de);
   margin-bottom: -1px;
   padding-bottom: 9px;
-  border-bottom: 1px solid transparent;
+  z-index: 1;
 }
 
 .md-editor-tab[data-tab='write'][data-active='true'] {
   background: var(--editor-write-bg, #fff);
-  border-bottom-color: var(--editor-write-bg, #fff);
+  border-bottom: 1px solid var(--editor-write-bg, #fff);
+  border-left-color: transparent;
+  border-top-color: transparent;
+  border-top-left-radius: 0;
 }
 
 .md-editor-tab[data-tab='preview'][data-active='true'] {
   background: var(--editor-preview-bg, #fafbfc);
-  border-bottom-color: var(--editor-preview-bg, #fafbfc);
+  border-bottom: 1px solid var(--editor-preview-bg, #fafbfc);
+  border-top-color: transparent;
 }
 
 .md-editor-toolbar-right {
