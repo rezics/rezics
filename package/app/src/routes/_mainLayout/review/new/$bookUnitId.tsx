@@ -5,6 +5,11 @@ const ReviewNewPage = lazyRouteComponent(
   "ReviewNewPage",
 );
 
+function ReviewNewPageContainer() {
+  const { bookUnitId } = Route.useParams();
+  return <ReviewNewPage bookUnitId={bookUnitId} />;
+}
+
 export const Route = createFileRoute("/_mainLayout/review/new/$bookUnitId")({
-  component: ReviewNewPage,
+  component: ReviewNewPageContainer,
 });

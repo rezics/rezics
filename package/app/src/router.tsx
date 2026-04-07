@@ -48,7 +48,6 @@ export { Route as remarkRoute } from "@/routes/_mainLayout/remark/$reviewId";
 export { Route as reviewRoute } from "@/routes/_mainLayout/review/$reviewId";
 export { Route as reviewEditRoute } from "@/routes/_mainLayout/review/$reviewId/edit";
 export { Route as reviewByBookRoute } from "@/routes/_mainLayout/review/book/$bookId";
-export { Route as reviewNewRoute } from "@/routes/_mainLayout/review/new/$bookUnitId";
 export { Route as tagUnitRoute } from "@/routes/_mainLayout/tag/$unitId";
 export { Route as tagBookRoute } from "@/routes/_mainLayout/tag/book/$bookId/route";
 export { Route as tagBookFullDomainRoute } from "@/routes/_mainLayout/tag/book/$bookId/tag/$domainId";

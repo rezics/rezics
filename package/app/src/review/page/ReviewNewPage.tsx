@@ -4,17 +4,14 @@ import { useCreateReviewMutation } from "@rezics/api/review/review.mutations";
 import { type ReviewResponse, UnitType } from "@rezics/contract";
 import { useRouterState } from "@tanstack/react-router";
 import { useState } from "react";
-import { reviewNewRoute } from "@/router";
 import { useUserProfileStore } from "@/user/state";
 import { ReviewEditPage } from "./ReviewEditPage";
 
 export function ReviewNewPage({
-  bookUnitId: bookUnitIdProps,
+  bookUnitId,
 }: {
-  bookUnitId?: string;
+  bookUnitId: string;
 }) {
-  const routeParams = reviewNewRoute.useParams();
-  const bookUnitId: string = bookUnitIdProps ?? routeParams.bookUnitId;
   const search = useRouterState({ select: (s) => s.location.search ?? "" });
   const searchParams = new URLSearchParams(search);
   const [reviewData, setReviewData] = useState<ReviewResponse>(
