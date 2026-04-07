@@ -61,6 +61,41 @@ export function useScrollSync(
 ) {
   const syncSourceRef = useRef<SyncSource>(null);
   const guardTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Track the editor's top visible line so we can restore it when the editor
+  // becomes hidden (display:none resets scrollTop to 0).
+  const lastEditorLineRef = useRef<number>(0);
+
+  // Always track the editor's scroll position, regardless of viewMode.
+  useEffect(() => {
+    if (!view) return;
+    const scrollDOM = view.scrollDOM;
+    const track = () => {
+      const topLine = view.lineBlockAtHeight(scrollDOM.scrollTop);
+      lastEditorLineRef.current =
+        view.state.doc.lineAt(topLine.from).number - 1;
+    };
+    scrollDOM.addEventListener("scroll", track, { passive: true });
+    return () => scrollDOM.removeEventListener("scroll", track);
+  }, [view]);
+
+  // When switching to a mode that shows the preview, sync preview position
+  // from the last known editor line.
+  useEffect(() => {
+    if (viewMode === "write" || !view || !previewRef.current) return;
+    const preview = previewRef.current;
+
+    // Wait one frame so the preview innerHTML has been rendered.
+    const raf = requestAnimationFrame(() => {
+      const target = findSourceLineElement(preview, lastEditorLineRef.current);
+      if (target) {
+        const previewRect = preview.getBoundingClientRect();
+        const targetRect = target.getBoundingClientRect();
+        preview.scrollTop =
+          targetRect.top - previewRect.top + preview.scrollTop;
+      }
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [view, previewRef, viewMode]);
 
   useEffect(() => {
     if (viewMode !== "dual" || !view || !previewRef.current) return;
