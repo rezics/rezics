@@ -168,28 +168,6 @@ export function MarkdownEditor({
 
   useScrollSync(view, previewRef, viewMode);
 
-  // ── DEBUG: scroll containment diagnostic (remove after debugging) ──
-  useEffect(() => {
-    if (viewMode !== "dual" || !previewRef.current) return;
-    const el = previewRef.current;
-
-    // Log on EVERY wheel event with current dimensions
-    const onWheel = (e: WheelEvent) => {
-      const { scrollTop, scrollHeight, clientHeight } = el;
-      console.log("🔍 Preview wheel:", {
-        scrollable: scrollHeight > clientHeight,
-        scrollTop,
-        scrollHeight,
-        clientHeight,
-        deltaY: e.deltaY,
-        height: getComputedStyle(el).height,
-      });
-    };
-    el.addEventListener("wheel", onWheel, { passive: true });
-    return () => el.removeEventListener("wheel", onWheel);
-  }, [viewMode]);
-  // ── END DEBUG ──
-
   useEffect(() => {
     const header = headerRef.current;
     if (!header) return;

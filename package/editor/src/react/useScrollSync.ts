@@ -112,9 +112,10 @@ export function useScrollSync(
       // Convert 0-based source line to 1-based doc line
       const docLine = Math.min(lineNumber + 1, view!.state.doc.lines);
       const lineInfo = view!.state.doc.line(docLine);
-      view!.dispatch({
-        effects: EditorView.scrollIntoView(lineInfo.from, { y: "start" }),
-      });
+      // Set scrollTop directly instead of using EditorView.scrollIntoView,
+      // which can scroll ancestor containers and cause the parent page to move.
+      const block = view!.lineBlockAt(lineInfo.from);
+      scrollDOM.scrollTop = block.top;
     }
 
     // Post-re-render scroll restoration via MutationObserver
