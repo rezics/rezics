@@ -94,6 +94,30 @@ Setting `height: 100%` on `.cm-editor` makes it fill the flex container. Moving 
 
 **Why:** Simple, no API changes needed. The header ref is already adjacent to the content area in `MarkdownEditor.tsx`. The measured value is passed as a prop adjustment, not a new config field.
 
+### 10. Direct scrollTop assignment for preview → editor sync
+
+**Choice:** Use `scrollDOM.scrollTop = block.top` instead of `view.dispatch({ effects: EditorView.scrollIntoView(...) })` for preview → editor sync.
+
+**Why:** `EditorView.scrollIntoView` dispatches a transaction that can propagate scroll effects to ancestor containers, causing the entire page to jump. Direct `scrollTop` assignment on the editor's own scroll DOM keeps the scroll contained within the editor pane.
+
+### 11. Scroll position restoration on mode switch
+
+**Choice:** Track the editor's last top visible line in a `lastEditorLineRef` and restore preview scroll via `requestAnimationFrame` when switching back to dual mode.
+
+**Why:** When the editor pane is `display: none` (preview-only mode), CodeMirror loses its scroll state. When switching back to dual mode, the preview would show position 0. By tracking the last known line and restoring after the DOM settles via RAF, the user sees a seamless transition.
+
+### 12. Overscroll containment CSS
+
+**Choice:** Apply `overscroll-behavior: contain` on both `.cm-scroller` and `.md-editor-preview` via CSS.
+
+**Why:** Without containment, when a user scrolls to the end of either pane, the browser chains the scroll event to the parent page. This is jarring in an embedded editor context. CSS containment is the simplest and most reliable prevention.
+
+### 13. Focus management for enter key
+
+**Choice:** Add CSS containment rules and explicit focus management in `MarkdownEditor.tsx` to prevent the enter key from causing editor blur.
+
+**Why:** In certain layout configurations, pressing enter would cause the CodeMirror editor to lose focus as the DOM restructured. Containment rules ensure layout changes from new lines stay isolated within the editor boundary.
+
 ## Risks / Trade-offs
 
 **Block-level granularity** → For very long paragraphs without internal block boundaries, sync snaps to the paragraph start. Mitigation: acceptable for structured book content; sub-block sync would require a custom markdown-it token splitter which adds complexity without proportional UX gain.
