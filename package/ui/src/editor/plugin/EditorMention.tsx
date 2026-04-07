@@ -359,12 +359,7 @@ export function MentionPanel({
         toJSON: () => ({}),
       }),
     };
-  }, [
-    trigger?.anchorPos.top,
-    trigger?.anchorPos.left,
-    trigger.anchorPos,
-    trigger,
-  ]);
+  }, [trigger]);
 
   const isOpen = !!trigger && !!virtualAnchorEl;
   const showEmpty = !loading && options.length === 0 && !!trigger?.query;

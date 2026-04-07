@@ -12,6 +12,11 @@
   height: 100%;
 }
 
+/* Prevent scroll chaining from editor/preview to parent page */
+.md-editor-root .cm-scroller {
+  overscroll-behavior: contain;
+}
+
 .markdown-body blockquote {
   border-left: 4px solid #d0d7de;
   margin: 0 0 16px;
@@ -191,6 +196,7 @@
   font-size: 14px;
   line-height: var(--md-line-height, 1.3);
   background: var(--editor-preview-bg, #fafbfc);
+  overscroll-behavior: contain;
 }
 
 .md-editor-header {

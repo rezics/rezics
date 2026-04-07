@@ -128,7 +128,17 @@ export function RezicsMarkdownEditor({
     : (editorProps.resize ?? DEFAULT_RESIZE_CONFIG);
 
   return (
-    <div ref={wrapperRef}>
+    <div
+      ref={wrapperRef}
+      onKeyDown={(e) => {
+        // Prevent Enter from propagating to parent forms/dialogs
+        // (e.g. MUI Dialog, form submission). Modifier+Enter is allowed
+        // through so consumers can bind Ctrl+Enter for submit.
+        if (e.key === "Enter" && !e.ctrlKey && !e.metaKey) {
+          e.stopPropagation();
+        }
+      }}
+    >
       <MarkdownEditor
         {...editorProps}
         className="rezics-editor-wrapper"

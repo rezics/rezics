@@ -29,6 +29,8 @@ export function useEditor(options: UseEditorOptions) {
   const viewRef = useRef<EditorView | null>(null);
   const onChangeRef = useRef(onChange);
   onChangeRef.current = onChange;
+  const docRef = useRef(doc);
+  docRef.current = doc;
 
   const [view, setView] = useState<EditorView | null>(null);
 
@@ -64,15 +66,16 @@ export function useEditor(options: UseEditorOptions) {
       }
 
       const created = new EditorView({
-        state: EditorState.create({ doc, extensions }),
+        state: EditorState.create({ doc: docRef.current, extensions }),
         parent: node,
       });
       viewRef.current = created;
       setView(created);
     },
-    // Recreate on plugin/keybinding/theme/extension identity change
+    // Recreate only on plugin/keybinding/theme/extension identity change.
+    // Doc changes are synced via the useEffect below without recreating the view.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [plugins, keybindings, theme, extraExtensions, doc],
+    [plugins, keybindings, theme, extraExtensions],
   );
 
   // Sync external doc changes without recreating the view

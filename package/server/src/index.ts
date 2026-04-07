@@ -7,8 +7,7 @@ import type {
 import {
   NormalizedTokenName,
   TokenContextKey,
-  // TokenTransportHeader,
-  // TokenTransportHeader,
+  TokenTransportHeader,
 } from "@rezics/contract";
 import {
   createJwtVerifier,
