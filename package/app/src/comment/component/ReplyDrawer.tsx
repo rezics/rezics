@@ -1,6 +1,6 @@
-import { Drawer } from "@mui/material";
 import { RezicsMarkdownEditor } from "@rezics/ui/editor";
 import type React from "react";
+import { useEffect, useRef } from "react";
 import { useDialogStore } from "../state/dialogStore";
 
 function extractMentions(text: string): string[] {
@@ -30,6 +30,18 @@ export const ReplyDrawerContainer: React.FC<ReplyDrawerContainerProps> = ({
   const entry = useDialogStore((state) => state.dialogs[dialogId]);
   const setDialogVisible = useDialogStore((state) => state.setDialogVisible);
   const setDialogContent = useDialogStore((state) => state.setDialogContent);
+  const panelRef = useRef<HTMLDivElement>(null);
+
+  const isOpen = entry?.visible ?? false;
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setDialogVisible(dialogId, false);
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, dialogId, setDialogVisible]);
 
   const handleClose = () => {
     setDialogVisible(dialogId, false);
@@ -57,15 +69,33 @@ export const ReplyDrawerContainer: React.FC<ReplyDrawerContainerProps> = ({
     setDialogContent(dialogId, value);
   };
 
+  const handleOverlayClick = (e: React.MouseEvent) => {
+    if (panelRef.current && !panelRef.current.contains(e.target as Node)) {
+      handleClose();
+    }
+  };
+
   return (
-    <Drawer
-      open={entry?.visible ?? false}
-      onClose={handleClose}
-      anchor="bottom"
-      sx={{ zIndex: 2000 }}
+    <div
+      className={`fixed inset-0 z-50 transition-opacity duration-200 ${
+        isOpen
+          ? "pointer-events-auto opacity-100"
+          : "pointer-events-none opacity-0"
+      }`}
+      onClick={handleOverlayClick}
     >
-      <div className="w-11/12 mx-auto my-4 flex flex-col min-h-[250px]">
-        <div className="flex-1 flex flex-col">
+      {/* Overlay */}
+      <div className="absolute inset-0 bg-black/30" />
+
+      {/* Panel */}
+      <div
+        ref={panelRef}
+        className={`absolute bottom-0 left-1/2 w-full max-w-4xl -translate-x-1/2 transition-transform duration-200 ease-out ${
+          isOpen ? "translate-y-0" : "translate-y-full"
+        }`}
+      >
+        {/* TODO need fix background color and rounded corner for top(it could be larger because person can't see the top of the drawer) */}
+        <div className="bg-white">
           <RezicsMarkdownEditor
             value={entry?.contentMain ?? ""}
             onChange={handleChange}
@@ -74,6 +104,6 @@ export const ReplyDrawerContainer: React.FC<ReplyDrawerContainerProps> = ({
           />
         </div>
       </div>
-    </Drawer>
+    </div>
   );
 };
