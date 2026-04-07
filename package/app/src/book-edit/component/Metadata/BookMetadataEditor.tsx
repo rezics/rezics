@@ -1,17 +1,21 @@
 import { InfoOutlined } from "@mui/icons-material";
-
 import {
   Autocomplete,
   Avatar,
-  Checkbox,
   Chip,
   CircularProgress,
-  FormControlLabel,
-  TextField,
-  Tooltip,
+  TextField as MuiTextField,
 } from "@mui/material";
 import { meiliUserApi } from "@rezics/api/meili/meili.api";
 import type { BookDTO, UserDTO } from "@rezics/contract";
+import { Checkbox } from "@rezics/ui/shadcn/checkbox.tsx";
+import { Label } from "@rezics/ui/shadcn/label.tsx";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@rezics/ui/shadcn/tooltip.tsx";
 import React from "react";
 import { useTranslation } from "react-i18next";
 
@@ -70,7 +74,8 @@ const UsersMultiSelect: React.FC<{
 }> = ({ label, value, onChange, placeholder, disabled }) => {
   const { input, setInput, options, loading } = useUserSearch();
   return (
-    <div>
+    <div className="space-y-2">
+      <Label className="text-sm font-medium">{label}</Label>
       <Autocomplete
         multiple
         disableCloseOnSelect
@@ -83,12 +88,14 @@ const UsersMultiSelect: React.FC<{
         isOptionEqualToValue={(o, v) => o.unitId === v.unitId}
         filterOptions={(x) => x}
         loading={loading}
+        size="small"
         renderInput={(params) => (
-          <TextField
+          <MuiTextField
             {...params}
-            label={label}
             placeholder={placeholder}
             disabled={disabled}
+            size="small"
+            variant="outlined"
             InputProps={{
               ...params.InputProps,
               endAdornment: (
@@ -119,6 +126,7 @@ const UsersMultiSelect: React.FC<{
               key={option.unitId}
               avatar={<Avatar src={option.avatar}>{option.name?.[0]}</Avatar>}
               label={option.name}
+              size="small"
             />
           ))
         }
@@ -128,55 +136,41 @@ const UsersMultiSelect: React.FC<{
   );
 };
 
-export function NSFWInfo({ tooltipTitle }: { tooltipTitle?: string }) {
-  const { t } = useTranslation();
+function FlagWithTooltip({
+  label,
+  tooltip,
+  checked,
+  onCheckedChange,
+  disabled,
+}: {
+  label: string;
+  tooltip: string;
+  checked: boolean;
+  onCheckedChange: (checked: boolean) => void;
+  disabled?: boolean;
+}) {
   return (
-    <div className="flex items-center gap-1">
-      <span>{t("book.flags.nsfw")}</span>
-
-      <Tooltip
-        title={tooltipTitle ?? t("book.tooltips.nsfw")}
-        placement="right"
-        slotProps={{
-          tooltip: {
-            sx: {
-              fontSize: "0.85rem",
-              padding: "6px 10px",
-              maxWidth: 300,
-              lineHeight: 1.4,
-            },
-          },
-        }}
-      >
-        <InfoOutlined fontSize="small" color="action" />
-      </Tooltip>
-    </div>
-  );
-}
-
-export function IsLicensedInfo({ tooltipTitle }: { tooltipTitle?: string }) {
-  const { t } = useTranslation();
-  return (
-    <div className="flex items-center gap-1 whitespace-nowrap">
-      <span>{t("book.flags.licensed")}</span>
-
-      <Tooltip
-        title={tooltipTitle ?? t("book.tooltips.licensed")}
-        placement="right"
-        slotProps={{
-          tooltip: {
-            sx: {
-              fontSize: "0.85rem",
-              padding: "6px 10px",
-              maxWidth: 300,
-              lineHeight: 1.4,
-            },
-          },
-        }}
-      >
-        <InfoOutlined fontSize="small" color="action" />
-      </Tooltip>
-    </div>
+    <TooltipProvider delayDuration={300}>
+      <div className="flex items-center gap-2">
+        <Checkbox
+          checked={checked}
+          onCheckedChange={onCheckedChange}
+          disabled={disabled}
+        />
+        <Label className="text-sm cursor-pointer">{label}</Label>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <InfoOutlined
+              sx={{ fontSize: 16 }}
+              className="text-muted-foreground cursor-help"
+            />
+          </TooltipTrigger>
+          <TooltipContent>
+            <p className="max-w-[280px]">{tooltip}</p>
+          </TooltipContent>
+        </Tooltip>
+      </div>
+    </TooltipProvider>
   );
 }
 
@@ -187,107 +181,149 @@ export const BookMetadataEditor: React.FC<BookMetadataEditorProps> = ({
 }) => {
   const { t } = useTranslation();
   return (
-    <div className="flex flex-col gap-6">
-      <div>
-        <TextField
-          fullWidth
-          label={t("book.fields.title")}
+    <div className="flex flex-col gap-5">
+      {/* Title */}
+      <div className="space-y-1">
+        <Label htmlFor="book-title">{t("book.fields.title")}</Label>
+        <input
+          id="book-title"
           value={value?.title ?? ""}
           onChange={(e) => onChange?.({ title: e.target.value })}
           disabled={disabled}
-          variant="outlined"
-          size="small"
+          className="w-full border-b border-input bg-transparent py-2 text-sm outline-none placeholder:text-muted-foreground focus:border-foreground transition-colors disabled:opacity-50"
         />
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
-          <TextField
-            fullWidth
-            label={t("book.fields.isbn")}
+
+      {/* ISBN + Cover URL */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="space-y-1">
+          <Label htmlFor="book-isbn">{t("book.fields.isbn")}</Label>
+          <input
+            id="book-isbn"
             value={value?.isbn ?? ""}
             onChange={(e) => onChange?.({ isbn: e.target.value })}
             disabled={disabled}
-            variant="outlined"
-            size="small"
+            className="w-full border-b border-input bg-transparent py-2 text-sm outline-none placeholder:text-muted-foreground focus:border-foreground transition-colors disabled:opacity-50"
           />
         </div>
-        <div>
-          <TextField
-            fullWidth
-            label={t("book.fields.cover_url")}
+        <div className="space-y-1">
+          <Label htmlFor="book-cover">{t("book.fields.cover_url")}</Label>
+          <input
+            id="book-cover"
             value={value?.coverUrl ?? ""}
             onChange={(e) => onChange?.({ coverUrl: e.target.value })}
             disabled={disabled}
-            variant="outlined"
-            size="small"
+            className="w-full border-b border-input bg-transparent py-2 text-sm outline-none placeholder:text-muted-foreground focus:border-foreground transition-colors disabled:opacity-50"
           />
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
-          <UsersMultiSelect
-            label={t("book.fields.author")}
-            value={(value?.author as any) ?? []}
-            onChange={(v) => onChange?.({ author: v as any })}
-            placeholder={t("book.placeholders.search_author")}
-            disabled={disabled}
-          />
-        </div>
-        <div>
-          <UsersMultiSelect
-            label={t("book.fields.press")}
-            value={(value?.press as any) ?? []}
-            onChange={(v) => onChange?.({ press: v as any })}
-            placeholder={t("book.placeholders.search_press")}
-            disabled={disabled}
-          />
-        </div>
-        <div>
-          <UsersMultiSelect
-            label={t("book.fields.producer")}
-            value={(value?.producer as any) ?? []}
-            onChange={(v) => onChange?.({ producer: v as any })}
-            placeholder={t("book.placeholders.search_producer")}
-            disabled={disabled}
-          />
-        </div>
-        <div className="flex items-center gap-2">
-          <TextField
-            fullWidth
-            label={t("book.fields.text_length")}
+      {/* Contributors */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <UsersMultiSelect
+          label={t("book.fields.author")}
+          value={(value?.author as any) ?? []}
+          onChange={(v) => onChange?.({ author: v as any })}
+          placeholder={t("book.placeholders.search_author")}
+          disabled={disabled}
+        />
+        <UsersMultiSelect
+          label={t("book.fields.press")}
+          value={(value?.press as any) ?? []}
+          onChange={(v) => onChange?.({ press: v as any })}
+          placeholder={t("book.placeholders.search_press")}
+          disabled={disabled}
+        />
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <UsersMultiSelect
+          label={t("book.fields.producer")}
+          value={(value?.producer as any) ?? []}
+          onChange={(v) => onChange?.({ producer: v as any })}
+          placeholder={t("book.placeholders.search_producer")}
+          disabled={disabled}
+        />
+        <div className="space-y-1">
+          <Label htmlFor="book-textlength">{t("book.fields.text_length")}</Label>
+          <input
+            id="book-textlength"
+            type="number"
             value={value?.textLength ?? ""}
-            onChange={(v) => onChange?.({ textLength: v.target.value })}
+            onChange={(e) => onChange?.({ textLength: e.target.value })}
             disabled={disabled}
-            variant="outlined"
-            size="small"
-          />
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={value?.isLicensed ?? false}
-                onChange={(e) => onChange?.({ isLicensed: e.target.checked })}
-                disabled={disabled}
-              />
-            }
-            label={<IsLicensedInfo />}
-            disabled={disabled}
-          />
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={value?.nsfw ?? false}
-                onChange={(e) => onChange?.({ nsfw: e.target.checked })}
-                disabled={disabled}
-              />
-            }
-            label={<NSFWInfo />}
-            disabled={disabled}
+            className="w-full border-b border-input bg-transparent py-2 text-sm outline-none placeholder:text-muted-foreground focus:border-foreground transition-colors disabled:opacity-50"
           />
         </div>
+      </div>
+
+      {/* Flags */}
+      <div className="flex flex-wrap gap-6">
+        <FlagWithTooltip
+          label={t("book.flags.licensed")}
+          tooltip={t("book.tooltips.licensed")}
+          checked={value?.isLicensed ?? false}
+          onCheckedChange={(checked) => onChange?.({ isLicensed: !!checked })}
+          disabled={disabled}
+        />
+        <FlagWithTooltip
+          label={t("book.flags.nsfw")}
+          tooltip={t("book.tooltips.nsfw")}
+          checked={value?.nsfw ?? false}
+          onCheckedChange={(checked) => onChange?.({ nsfw: !!checked })}
+          disabled={disabled}
+        />
       </div>
     </div>
   );
 };
+
+/**
+ * Standalone flag info components — used by search and other features.
+ * Kept as named exports for backward compatibility.
+ */
+export function NSFWInfo({ tooltipTitle }: { tooltipTitle?: string }) {
+  const { t } = useTranslation();
+  return (
+    <div className="flex items-center gap-1">
+      <span>{t("book.flags.nsfw")}</span>
+      <TooltipProvider delayDuration={300}>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <InfoOutlined
+              sx={{ fontSize: 16 }}
+              className="text-muted-foreground cursor-help"
+            />
+          </TooltipTrigger>
+          <TooltipContent>
+            <p className="max-w-[280px]">{tooltipTitle ?? t("book.tooltips.nsfw")}</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    </div>
+  );
+}
+
+export function IsLicensedInfo({ tooltipTitle }: { tooltipTitle?: string }) {
+  const { t } = useTranslation();
+  return (
+    <div className="flex items-center gap-1 whitespace-nowrap">
+      <span>{t("book.flags.licensed")}</span>
+      <TooltipProvider delayDuration={300}>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <InfoOutlined
+              sx={{ fontSize: 16 }}
+              className="text-muted-foreground cursor-help"
+            />
+          </TooltipTrigger>
+          <TooltipContent>
+            <p className="max-w-[280px]">{tooltipTitle ?? t("book.tooltips.licensed")}</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    </div>
+  );
+}
 
 export default BookMetadataEditor;

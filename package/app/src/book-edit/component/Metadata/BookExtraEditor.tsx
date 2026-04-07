@@ -1,15 +1,8 @@
-import AddIcon from "@mui/icons-material/Add";
-import DeleteIcon from "@mui/icons-material/Delete";
-import {
-  Button,
-  Divider,
-  IconButton,
-  Link,
-  Paper,
-  TextField,
-  Typography,
-} from "@mui/material";
+import { Button } from "@rezics/ui/shadcn/button.tsx";
+import { Input } from "@rezics/ui/shadcn/input.tsx";
+import { Separator } from "@rezics/ui/shadcn/separator.tsx";
 import { RezicsJsonEditor } from "@rezics/ui/editor";
+import { ExternalLink, Plus, Trash2 } from "lucide-react";
 import type React from "react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -48,86 +41,72 @@ function PublishURL({ value, onChange }: BookExtraEditorProps) {
     }
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      handleAdd();
-    }
-  };
-
   return (
-    <Paper sx={{ p: 2, borderRadius: 2 }}>
-      <Typography variant="h6" sx={{ mb: 2 }}>
+    <div className="space-y-3">
+      <h4 className="text-sm font-medium">
         {t("book.extra.publish_urls.title")}
-      </Typography>
+      </h4>
 
-      <div className="space-y-2">
-        {urls.map((url, index) => (
-          <Paper
-            // biome-ignore lint/suspicious/noArrayIndexKey: static list
-            key={index}
-            variant="outlined"
-            sx={{
-              p: 1.5,
-              display: "flex",
-              alignItems: "center",
-              gap: 1,
-            }}
-          >
-            <Link
-              href={url}
-              target="_blank"
-              rel="noopener noreferrer"
-              sx={{
-                flex: 1,
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap",
-              }}
+      {urls.length > 0 && (
+        <div className="space-y-2">
+          {urls.map((url, index) => (
+            <div
+              // biome-ignore lint/suspicious/noArrayIndexKey: static list
+              key={index}
+              className="flex items-center gap-2 rounded-md border bg-muted/30 px-3 py-2"
             >
-              {url}
-            </Link>
-            <IconButton
-              size="small"
-              color="error"
-              onClick={() => handleRemove(index)}
-              aria-label={t("common.delete")}
-            >
-              <DeleteIcon fontSize="small" />
-            </IconButton>
-          </Paper>
-        ))}
-      </div>
+              <ExternalLink className="size-3.5 flex-shrink-0 text-muted-foreground" />
+              <a
+                href={url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1 truncate text-sm text-primary hover:underline"
+              >
+                {url}
+              </a>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7 text-destructive hover:text-destructive"
+                onClick={() => handleRemove(index)}
+              >
+                <Trash2 className="size-3.5" />
+              </Button>
+            </div>
+          ))}
+        </div>
+      )}
 
-      <div className="flex gap-2 mt-3">
-        <TextField
-          fullWidth
-          size="small"
+      <div className="flex gap-2">
+        <Input
           type="url"
           value={newUrl}
           onChange={(e) => setNewUrl(e.target.value)}
-          onKeyPress={handleKeyPress}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              handleAdd();
+            }
+          }}
           placeholder={t("placeholders.enter_url")}
-          variant="outlined"
+          className="flex-1"
         />
         <Button
-          variant="contained"
+          variant="outline"
+          size="sm"
           onClick={handleAdd}
           disabled={!newUrl.trim()}
-          startIcon={<AddIcon />}
-          sx={{ minWidth: 100 }}
         >
+          <Plus className="size-4" />
           {t("common.add")}
         </Button>
       </div>
-    </Paper>
+    </div>
   );
 }
 
 /**
  * Book Extra Editor - Editor for book extra metadata.
- *
- * Provides UI for editing publish URLs and other extra JSON data.
  */
 export const BookExtraEditor: React.FC<BookExtraEditorProps> = ({
   value,
@@ -144,17 +123,10 @@ export const BookExtraEditor: React.FC<BookExtraEditorProps> = ({
     onChange?.(newExtraData);
   };
 
-  const _handlePublishURLChange = (publishURL: string[]) => {
-    handleExtraChange({
-      ...extraData,
-      publishURL,
-    });
-  };
-
   return (
-    <div>
+    <div className="space-y-4">
       <PublishURL value={extraData || undefined} onChange={handleExtraChange} />
-      <Divider sx={{ my: 3 }} />
+      <Separator />
       <RezicsJsonEditor
         value={JSON.stringify(extraData, null, 2)}
         onChange={(text) => {

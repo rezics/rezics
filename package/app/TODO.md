@@ -2,6 +2,7 @@
 - [ ] 登錄可能還是有問題，有可能會無緣無故退出，查看localstorage 重置邏輯以及 cookie 的更新邏輯
 - [ ] user/me page似乎可能卡住
 - [ ] 最新作品 home section 要優化，firefox 上會卡噸，性能不好
+- [ ] 很多API需要改成聚合查詢，減少請求次數，比如帖子的統計信息
 - [ ] Switching between tabs for an extended period may also cause the homepage carousel to go blank(till next carousel), only firefox or ?
 - [x] MUI 的还没自己写的好用 https://mui.com/x/react-tree-view/ 用这个替换当前的 Tree 章节 View
 - [ ] 树章节检查为啥 shift 键还是会跳转，感觉就不应该渲染为 link，修改一下
@@ -22,8 +23,3 @@
 - 好用的 JSON 编辑器
 - [ ] i18n 切换到 Paraglide + (Sherlock 扩展)，或者等到切换的时候看看 i18n Ally 的支持性
 - [ ] 模块化 字体切换 https://chatgpt.com/share/69991605-878c-8005-adaf-3b93dbcb43e7 
-
-## Complete
-
-- [x] 分页组件似乎有的时候可能突然将 page 重置为 1
-- [x] 完善 Sidebar 的功能，修改为连接

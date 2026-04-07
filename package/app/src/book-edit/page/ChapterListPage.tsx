@@ -1,47 +1,68 @@
-import { TabContext, TabPanel } from "@mui/lab";
-import { Alert, Button, Tab, Tabs } from "@mui/material";
 import { bookChapterIndexQuery } from "@rezics/api/book/book";
-import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
-import { useQueryClient } from "@tanstack/react-query";
+import type { ChapterTreeItem } from "@rezics/contract";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@rezics/ui/shadcn/tabs.tsx";
+import { useQueryClient, useQuery } from "@tanstack/react-query";
 import type React from "react";
-import { useEffect, useRef, useState } from "react";
-import { LinearChapterListEdit } from "@/book-edit/component/LinearChapterListEdit";
-import { ChapterArboristHeightSlider } from "@/book-library/component/Chapter/ChapterArboristHeightSlider";
+import { useCallback, useMemo, useRef, useState } from "react";
+import { bookQueries } from "@rezics/api/book/book.queries";
 import { ChapterTreeJsonEditor } from "@/book-library/component/Chapter/ChapterTreeJsonEditor";
 import { bookEditLayoutRoute } from "@/router";
+import {
+  ChapterTreeEditor,
+  type ChapterTreeEditorHandle,
+} from "../component/ChapterTreeEditor";
 
-/**
- * TODO 增加 JSON 编辑
- */
 export const BookEditChapterListPage: React.FC = () => {
   const { bookId } = bookEditLayoutRoute.useParams();
   const queryClient = useQueryClient();
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [parentWidth, setParentWidth] = useState<number>(0);
-  const [chapterArboristHeight, setChapterArboristHeight] =
-    useState<number>(800);
-  const [tab, setTab] = useState<string>("normal");
-  useEffect(() => {
-    const el = containerRef.current;
+  const editorRef = useRef<ChapterTreeEditorHandle | null>(null);
+  const [containerHeight, setContainerHeight] = useState(600);
+  const [containerWidth, setContainerWidth] = useState(0);
+
+  const { data, isLoading, error } = useQuery(bookQueries.chapterIndex(bookId));
+
+  const chapterTree: ChapterTreeItem[] = useMemo(
+    () => data?.index ?? [],
+    [data],
+  );
+
+  // Use callback ref so measurement happens when the DOM node actually mounts
+  const observerRef = useRef<ResizeObserver | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+
+  const containerCallbackRef = useCallback((el: HTMLDivElement | null) => {
+    // Cleanup previous observer
+    if (observerRef.current) {
+      observerRef.current.disconnect();
+      observerRef.current = null;
+    }
+
+    containerRef.current = el;
     if (!el) return;
 
     const update = () => {
-      setParentWidth(el.clientWidth);
+      setContainerWidth(el.clientWidth);
+      const rect = el.getBoundingClientRect();
+      const available = window.innerHeight - rect.top - 80;
+      setContainerHeight(Math.max(500, available));
     };
     update();
 
-    const observer = new ResizeObserver(() => update());
-    observer.observe(el);
-
-    return () => observer.disconnect();
+    observerRef.current = new ResizeObserver(() => update());
+    observerRef.current.observe(el);
+    window.addEventListener("resize", update);
   }, []);
 
   async function downloadJSON() {
     const chapterIndex = await queryClient.ensureQueryData(
       bookChapterIndexQuery(bookId),
     );
-    const json = chapterIndex;
-    const jsonString = JSON.stringify(json);
+    const jsonString = JSON.stringify(chapterIndex, null, 2);
     const blob = new Blob([jsonString], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const date = new Date().toISOString().split("T")[0];
@@ -52,44 +73,47 @@ export const BookEditChapterListPage: React.FC = () => {
     URL.revokeObjectURL(url);
   }
 
+  if (isLoading) {
+    return (
+      <div className="mt-10 mx-auto max-w-2xl px-4">
+        <div className="text-muted-foreground">Loading...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="mt-10 mx-auto max-w-2xl px-4">
+        <div className="text-destructive">Error: {String(error)}</div>
+      </div>
+    );
+  }
+
   return (
-    <div className="mt-10 mx-auto w-11/12" ref={containerRef}>
-      <div className="flex mb-4">
-        <AccentBarWithText text="章節编辑" />
-      </div>
-      <Alert severity="info" className="my-4">
-        右擊支持新增，頂部按鈕開啓后支持拖拽，重命名請开启Double-click Rename
-      </Alert>
-      <div className="flex justify-between items-center">
-        <div>
-          下载JSON文件:&nbsp;我们强烈建议定期下载JSON文件以备份，防止章节列表更新损坏导致书籍章节信息丢失以及重建困难
-        </div>
-        <Button variant="contained" onClick={downloadJSON}>
-          下载
-        </Button>
-      </div>
-      <ChapterArboristHeightSlider
-        height={chapterArboristHeight}
-        setHeight={setChapterArboristHeight}
-      />
-      <div className="mt-4" />
-      <TabContext value={tab}>
-        <Tabs value={tab} onChange={(_event, newValue) => setTab(newValue)}>
-          <Tab label="普通编辑器" value="normal" />
-          <Tab label="JSON编辑器" value="json" />
-        </Tabs>
-        <TabPanel value="normal">
-          <LinearChapterListEdit
-            bookId={bookId}
-            isEdit={true}
-            width={parentWidth - 20}
-            height={chapterArboristHeight}
+    <div className="mt-10 mx-auto max-w-2xl px-4" ref={containerCallbackRef}>
+      <h2 className="text-lg font-semibold mb-4">Chapter Management</h2>
+
+      <Tabs defaultValue="editor">
+        <TabsList>
+          <TabsTrigger value="editor">Editor</TabsTrigger>
+          <TabsTrigger value="json">JSON</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="editor">
+          <ChapterTreeEditor
+            ref={editorRef}
+            chapterTree={chapterTree}
+            bookUnitId={bookId}
+            height={containerHeight}
+            width={containerWidth > 0 ? containerWidth - 4 : undefined}
+            onDownloadJSON={downloadJSON}
           />
-        </TabPanel>
-        <TabPanel value="json">
+        </TabsContent>
+
+        <TabsContent value="json">
           <ChapterTreeJsonEditor bookId={bookId} />
-        </TabPanel>
-      </TabContext>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

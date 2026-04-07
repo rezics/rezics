@@ -36,7 +36,6 @@ export const BookReadLayout: React.FC<BookReadLayoutProps> = ({ children }) => {
             </div>
             <Divider className="mb-4" />
             <LinearChapterList
-              readingMode={true}
               bookId={bookId || ""}
               chapterId={chapterId || ""}
               height={sidebarHeightBelow}

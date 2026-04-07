@@ -1,29 +1,17 @@
-import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
 import { alpha, useTheme } from "@mui/material/styles";
 import { Link } from "@rezics/ui/primitive/link/Link.tsx";
-import type React from "react";
-import type { NodeRendererProps, TreeApi } from "react-arborist";
-import type { Chapter, ChapterContextMenuState } from "./ChapterArborist";
+import type { NodeRendererProps } from "react-arborist";
+import type { Chapter } from "./ChapterArborist";
 
 /**
- * Factory that returns a Node renderer function bound to the sidebar's state setters.
- * We use a factory instead of props because `react-arborist` expects the renderer
- * signature `({ node, style, dragHandle, tree }) => JSX.Element` only.
+ * Factory that returns a reader-only Node renderer for the chapter tree.
  */
-export const createChapterArboristNode = (
-  setContextMenu: React.Dispatch<React.SetStateAction<ChapterContextMenuState>>,
-  treeRef: React.RefObject<TreeApi<Chapter> | null>,
-  enableDoubleClickRename: boolean,
-  isTreeDraggable: boolean,
-  bookId: string,
-  isEditable: boolean = false,
-) => {
+export const createChapterArboristNode = (bookId: string) => {
   return function ChapterArboristNode({
     node,
     style,
-    dragHandle,
   }: NodeRendererProps<Chapter>) {
     const theme = useTheme();
     const hasChildren = !!(node.children && node.children.length > 0);
@@ -40,20 +28,7 @@ export const createChapterArboristNode = (
           backgroundColor: isSelected ? selectedBg : "transparent",
           color: isSelected ? selectedColor : undefined,
         }}
-        ref={!node.isEditing && isTreeDraggable ? dragHandle : undefined}
-        className={`flex items-center gap-2 px-2 py-1 cursor-pointer select-none rounded-sm transition-colors hover:bg-slate-100 dark:hover:bg-slate-800`}
-        onDoubleClick={() => {
-          if (enableDoubleClickRename) {
-            node.edit();
-          }
-        }}
-        onContextMenu={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          const currentNodeId = String(node.id);
-          treeRef.current?.select(currentNodeId);
-          setContextMenu({ x: e.clientX, y: e.clientY, node });
-        }}
+        className="flex items-center gap-2 px-2 py-1 cursor-pointer select-none rounded-sm transition-colors hover:bg-slate-100 dark:hover:bg-slate-800"
       >
         {/* Arrow toggle */}
         {hasChildren ? (
@@ -69,64 +44,21 @@ export const createChapterArboristNode = (
               <KeyboardArrowRightIcon fontSize="small" />
             )}
           </button>
-        ) : // <span className="w-5 h-5" />
-        null}
+        ) : null}
 
-        {/* Node icon */}
-        {/* <span className="w-5 h-5 flex justify-center items-center text-slate-500 dark:text-slate-400">
-          {hasChildren ? (
-            node.isOpen ? (
-              <FolderOpenOutlinedIcon fontSize="small" />
-            ) : (
-              <FolderOutlinedIcon fontSize="small" />
-            )
-          ) : (
-            <DescriptionOutlinedIcon fontSize="small" />
-          )}
-        </span> */}
-
-        {/* Title or editing input */}
+        {/* Title with navigation link for leaf nodes */}
         <div className="min-w-0 flex-1">
-          {node.isEditing ? (
-            <input
-              type="text"
-              defaultValue={node.data.title}
-              onFocus={(e) => e.currentTarget.select()}
-              onBlur={() => node.reset()}
-              onKeyDown={(e) => {
-                if (e.key === "Escape") node.reset();
-                if (e.key === "Enter") {
-                  node.submit((e.target as HTMLInputElement).value);
-                }
-              }}
-              className="w-full px-2 py-1 text-sm rounded border bg-transparent focus:outline-none"
-              style={{
-                boxShadow: `0 0 0 2px ${alpha(
-                  theme.palette.primary.main,
-                  0.25,
-                )}`,
-              }}
-            />
-          ) : hasChildren ? (
+          {hasChildren ? (
             <span className="truncate">{node.data.title}</span>
-          ) : isEditable ? (
-            <span className="block truncate">{node.data.title}</span>
           ) : (
             <Link
               to="/book/$bookId/read/$chapterId"
-              params={{ bookId: bookId, chapterId: node.id }}
+              params={{ bookId, chapterId: String(node.id) }}
             >
               <span className="block truncate">{node.data.title}</span>
             </Link>
           )}
         </div>
-
-        {/* Visual drag indicator when draggable (drag handle remains row-wide for usability) */}
-        {!node.isEditing && isTreeDraggable && (
-          <span className="ml-1 w-5 h-5 flex items-center justify-center text-slate-400 hover:text-slate-600">
-            <DragIndicatorIcon fontSize="small" />
-          </span>
-        )}
       </div>
     );
   };

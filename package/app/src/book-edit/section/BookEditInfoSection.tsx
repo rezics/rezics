@@ -1,5 +1,3 @@
-// 重构组件，去除 effect 影响，修正 publishURL 添加逻辑，支持添加多个 url
-
 import {
   Alert,
   Button,
@@ -19,9 +17,15 @@ import type {
   CreateBookInput,
   UpdateBookInput,
 } from "@rezics/contract";
-import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@rezics/ui/shadcn/collapsible.tsx";
+import { Separator } from "@rezics/ui/shadcn/separator.tsx";
 import { RezicsMarkdownEditor } from "@rezics/ui/editor";
 import { MUILink } from "@rezics/ui/primitive/link/MUILink.tsx";
+import { ChevronDown } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useMatchRoute, useNavigate } from "@tanstack/react-router";
 import type { TFunction } from "i18next";
@@ -36,7 +40,6 @@ function validatePublishURL(publishURL: string[]) {
 
 type BookMetadataValue = Partial<BookDTO>;
 
-/** Dialog state for showing update/create results. */
 type UpdateBookDialogState = {
   title: string;
   message: string;
@@ -45,9 +48,6 @@ type UpdateBookDialogState = {
   bookId?: string;
 } | null;
 
-/**
- * Renders a dialog showing the result of book update/create operation.
- */
 const UpdateBookDialog: React.FC<{
   t: TFunction;
   open: boolean;
@@ -70,23 +70,19 @@ const UpdateBookDialog: React.FC<{
         </Alert>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>{t("common.close")}</Button>
+        <Button onClick={onClose}>
+          {t("common.close")}
+        </Button>
       </DialogActions>
     </Dialog>
   );
 };
 
-/** Props for BookEditMainPage component. */
 export interface BookEditMainPageProps {
-  /** Whether this is creating a new book. */
   newBook?: boolean;
-  /** Custom page title. */
   pageTitle?: string;
 }
 
-/**
- * Book Edit Main Page - Form for editing or creating a book.
- */
 export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
   newBook = false,
   pageTitle,
@@ -105,6 +101,7 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
   const [updateBookErrorOpen, setUpdateBookErrorOpen] = React.useState(false);
   const [dialogState, setDialogState] =
     React.useState<UpdateBookDialogState>(null);
+  const [extraOpen, setExtraOpen] = React.useState(false);
 
   const metadata = metadataState ?? data ?? {};
 
@@ -189,83 +186,96 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
     }
   }
 
-  if (isLoading) return <div>{t("common.loading")}</div>;
+  if (isLoading) return <div className="mt-10 mx-auto max-w-3xl px-4 text-muted-foreground">{t("common.loading")}</div>;
   if (error)
     return (
-      <div>
+      <div className="mt-10 mx-auto max-w-3xl px-4 text-destructive">
         {t("common.error")}: {String(error)}
       </div>
     );
-  if (!data && !newBook) return <div>{t("common.no_data")}</div>;
+  if (!data && !newBook) return <div className="mt-10 mx-auto max-w-3xl px-4 text-muted-foreground">{t("common.no_data")}</div>;
 
   const resolvedPageTitle = pageTitle ?? t("page.book_edit.info.title");
 
   return (
-    <div className="mt-10 mx-auto w-11/12">
-      <div className="flex justify-between items-center">
-        <div className="text-2xl font-bold mb-4">{resolvedPageTitle}</div>
+    <div className="mt-10 mx-auto max-w-3xl px-4 pb-10">
+      {/* Header */}
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-2xl font-bold">{resolvedPageTitle}</h1>
         <div className="flex items-center gap-2">
-          {bookId ? (
+          {bookId && (
             <Button
               variant="outlined"
-              color="primary"
-              onClick={() => {
-                navigate({ to: `/book/${bookId}/` });
-              }}
+              onClick={() => navigate({ to: `/book/${bookId}/` })}
             >
               {t("common.back")}
             </Button>
-          ) : null}
+          )}
           <Button
             variant="contained"
-            color="primary"
-            onClick={() => {
-              handleSubmit();
-            }}
+            onClick={() => handleSubmit()}
           >
             {t("common.submit")}
           </Button>
         </div>
       </div>
 
-      <div>
-        <div className="flex mb-4">
-          <AccentBarWithText text={t("book.edit_sections.metadata")} />
-        </div>
-        <div className="mb-8">
+      <div className="space-y-10">
+        {/* Metadata */}
+        <section>
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
+            {t("book.edit_sections.metadata")}
+          </h3>
+          <Separator className="mb-5" />
           <BookMetadataEditor
             value={metadata}
             onChange={(value) => {
               setMetadataState((prev) => ({ ...prev, ...value }));
             }}
           />
-        </div>
-      </div>
+        </section>
 
-      <div>
-        <div className="flex mb-4">
-          <AccentBarWithText text={t("book.description")} />
-        </div>
-        <RezicsMarkdownEditor
-          value={metadata?.description ?? ""}
-          onChange={(value) => {
-            setMetadataState((prev) => ({ ...prev, description: value }));
-          }}
-        />
-      </div>
-
-      <div>
-        <div className="flex mb-4">
-          <AccentBarWithText text={t("book.edit_sections.extra")} />
-        </div>
-        <div className="mb-8">
-          <BookExtraEditor
-            value={metadata.extra}
+        {/* Description */}
+        <section>
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
+            {t("book.description")}
+          </h3>
+          <Separator className="mb-5" />
+          <RezicsMarkdownEditor
+            value={metadata?.description ?? ""}
             onChange={(value) => {
-              setMetadataState((prev) => ({ ...prev, extra: value }));
+              setMetadataState((prev) => ({ ...prev, description: value }));
             }}
           />
-        </div>
+        </section>
+
+        {/* Extra — Collapsible */}
+        <Collapsible open={extraOpen} onOpenChange={setExtraOpen}>
+          <section>
+            <CollapsibleTrigger asChild>
+              <button
+                type="button"
+                className="flex items-center justify-between w-full group"
+              >
+                <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  {t("book.edit_sections.extra")}
+                </h3>
+                <ChevronDown
+                  className={`size-4 text-muted-foreground transition-transform ${extraOpen ? "rotate-180" : ""}`}
+                />
+              </button>
+            </CollapsibleTrigger>
+            <Separator className="mt-3 mb-5" />
+            <CollapsibleContent>
+              <BookExtraEditor
+                value={metadata.extra}
+                onChange={(value) => {
+                  setMetadataState((prev) => ({ ...prev, extra: value }));
+                }}
+              />
+            </CollapsibleContent>
+          </section>
+        </Collapsible>
       </div>
 
       <UpdateBookDialog

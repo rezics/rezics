@@ -17,28 +17,21 @@ interface LinearChapterListProps {
   bookId: string;
   /** Currently selected chapter ID. */
   chapterId?: string;
-  /** Whether in reading mode. */
-  readingMode?: boolean;
 }
 
 /**
- * Linear Chapter List - Displays chapter tree using arborist.
+ * Linear Chapter List - Displays chapter tree using arborist (reader-only).
  */
 export const LinearChapterList: React.FC<LinearChapterListProps> = ({
   bookId,
   chapterId,
   width = 300,
   height = 300,
-  readingMode = false,
 }) => {
   const { data, isLoading, error } = useQuery(bookQueries.chapterIndex(bookId));
 
   const selectedId = chapterId || "";
-  const baseLink = readingMode
-    ? `/book/${bookId}/read`
-    : bookId
-      ? `/book/${bookId}/edit`
-      : "";
+  const baseLink = bookId;
 
   const chapterTree: ChapterTreeItem[] = useMemo(
     () => data?.index ?? [],
@@ -100,7 +93,6 @@ export const LinearChapterList: React.FC<LinearChapterListProps> = ({
           selectedId={String(selectedId)}
           width={width}
           baseLink={baseLink}
-          readingMode={readingMode}
         />
       </div>
     </div>
