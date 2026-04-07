@@ -21,7 +21,7 @@ mock.module("@rezics/api/react-query/jwt", () => ({
     if (name) delete tokenState[name];
   },
   clearAllTokens: () => {
-    Object.keys(tokenState).forEach((k) => delete tokenState[k]);
+    for (const k of Object.keys(tokenState)) delete tokenState[k];
   },
   parseJwt: (token?: string | null) => {
     if (!token) return null;
@@ -55,7 +55,7 @@ mock.module("../state/authSessionStore", () => ({
 
 describe("AuthProvider gateway + fan-out model", () => {
   beforeEach(() => {
-    Object.keys(tokenState).forEach((k) => delete tokenState[k]);
+    for (const k of Object.keys(tokenState)) delete tokenState[k];
     presence = false;
     queryAccessTokenMock.mockClear();
     clearAuthSessionStateMock.mockClear();

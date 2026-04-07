@@ -9,9 +9,10 @@ function extractMentions(text: string): string[] {
   // 全局版本，和你原规则语义一致
   const mentionRegex = /(^|[\s([{<])@([^\s@]{1,32})/g;
 
-  let match: RegExpExecArray | null;
-  while ((match = mentionRegex.exec(text)) !== null) {
+  let match: RegExpExecArray | null = mentionRegex.exec(text);
+  while (match !== null) {
     result.push(match[2]); // 只要用户名，不要 @ 和前导字符
+    match = mentionRegex.exec(text);
   }
 
   return result;

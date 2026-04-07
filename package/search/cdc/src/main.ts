@@ -1,6 +1,7 @@
+// @ts-expect-error -- postgres is an optional runtime dependency without type declarations in this package
 import postgres from "postgres";
 
-const sql = postgres({
+const sql: any = postgres({
   host: "localhost",
   port: 5432,
   username: "postgres",
@@ -13,13 +14,13 @@ async function main() {
   console.log("Starting CDC...");
 
   // 订阅 slot
-  const replication = sql.subscribe(
+  const replication: any = sql.subscribe(
     "library_cdc_slot",
     {
       decoder: "pgoutput",
       temporary: false,
     },
-    (_lsn, log) => {
+    (_lsn: unknown, log: { json: () => unknown }) => {
       // 解析 pgoutput 的 JSON
       const msg = log.json();
 

@@ -37,6 +37,7 @@ export const NavigationList = ({
         }
 
         if (item.kind === "divider")
+          // biome-ignore lint/suspicious/noArrayIndexKey: static list
           return <Divider key={index} className="my-1 mx-2" />;
 
         const isActive = pathname === `/${item.segment}`;

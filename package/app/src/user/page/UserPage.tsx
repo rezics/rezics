@@ -1,5 +1,6 @@
 import type { UserDTO } from "@rezics/contract";
 import type { FC } from "react";
+import { useMatch } from "@tanstack/react-router";
 import { useState } from "react";
 import { userRoute } from "@/router";
 import { useUserProfileStore } from "@/user/state";
@@ -15,11 +16,11 @@ export interface UserPageProps {
  * 根据状态显示用户资料或编辑表单
  */
 export const UserPage: FC<UserPageProps> = ({ isCurrentUser = false }) => {
-  let routeMatch;
-  if (!isCurrentUser) {
-    routeMatch = userRoute.useMatch({ shouldThrow: true });
-  }
-  const unitId = routeMatch?.params.unitId;
+  const routeMatch = useMatch({
+    from: userRoute.id,
+    shouldThrow: false,
+  });
+  const unitId = isCurrentUser ? undefined : routeMatch?.params.unitId;
   const [isEditing, setIsEditing] = useState(false);
   const currentUser = useUserProfileStore((state) => state.user);
   console.log(isCurrentUser, "isCurrentUser");

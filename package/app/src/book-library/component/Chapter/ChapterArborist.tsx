@@ -13,7 +13,12 @@ import {
   useRef,
   useState,
 } from "react";
-import type { DeleteHandler, MoveHandler, RenameHandler } from "react-arborist";
+import type {
+  DeleteHandler,
+  MoveHandler,
+  NodeApi,
+  RenameHandler,
+} from "react-arborist";
 import { Tree, type TreeApi } from "react-arborist";
 import {
   findAndAddChild,
@@ -44,7 +49,7 @@ export interface ChapterArboristRefHandle {
 export type ChapterContextMenuState = {
   x: number;
   y: number;
-  node: Chapter & { isOpen: boolean };
+  node: NodeApi<Chapter>;
 } | null;
 
 /** Props for ChapterArborist component. */
@@ -177,7 +182,7 @@ export const ChapterArborist = forwardRef<
       newNode: Chapter;
     }) {
       const currentTree = treeData;
-      let tmpTreeData;
+      let tmpTreeData: Chapter[];
       if (parentId) {
         tmpTreeData = findAndAddChild(
           currentTree,
@@ -234,6 +239,7 @@ export const ChapterArborist = forwardRef<
             创建新章节
           </Button>
         )}
+        {/* biome-ignore lint/a11y/noStaticElementInteractions: tree container */}
         <div
           className="p-2"
           role="presentation"

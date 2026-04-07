@@ -34,7 +34,7 @@ export async function searchFeedbacksRaw(
   });
 }
 
-function escape(value: string): string {
+function escapeValue(value: string): string {
   return value.trim().replace(/"/g, '\\"');
 }
 
@@ -56,15 +56,15 @@ export async function searchFeedbacks(
   const filter: string[] = [];
 
   if (opts.userId) {
-    filter.push(`userId = "${escape(opts.userId)}"`);
+    filter.push(`userId = "${escapeValue(opts.userId)}"`);
   }
 
   if (opts.unitId) {
-    filter.push(`unitId = "${escape(opts.unitId)}"`);
+    filter.push(`unitId = "${escapeValue(opts.unitId)}"`);
   }
 
   if (opts.type) {
-    filter.push(`type = "${escape(opts.type)}"`);
+    filter.push(`type = "${escapeValue(opts.type)}"`);
   }
 
   if (typeof opts.resolved === "boolean") {

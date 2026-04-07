@@ -29,8 +29,9 @@ function splitByRule(raw: string, rule: RegExp): Chunk[] {
 
   const matches: { index: number; match: string }[] = [];
   let m: RegExpExecArray | null;
+  m = mlRule.exec(raw);
 
-  while ((m = mlRule.exec(raw)) !== null) {
+  while (m !== null) {
     // Extract the full line containing the match for a better title
     const lineStart = raw.lastIndexOf("\n", m.index - 1) + 1;
     const lineEnd = raw.indexOf("\n", m.index);
@@ -38,6 +39,7 @@ function splitByRule(raw: string, rule: RegExp): Chunk[] {
     matches.push({ index: m.index, match: fullLine });
     // Prevent infinite loops on zero-width matches
     if (m.index === mlRule.lastIndex) mlRule.lastIndex++;
+    m = mlRule.exec(raw);
   }
 
   if (matches.length < 2) return [];

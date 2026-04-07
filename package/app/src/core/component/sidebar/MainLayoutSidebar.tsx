@@ -44,7 +44,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const heightBelow = `calc(100vh - ${height}px)`;
 
   const handleItemClick = (
-    // @ts-expect-error - event is not used
     _event: any,
     segment: string | undefined,
     hasChildren: boolean,

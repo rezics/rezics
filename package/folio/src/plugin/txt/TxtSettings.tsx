@@ -54,10 +54,12 @@ function TxtSettingsInner({
       const regex = new RegExp(testInput, "gm");
       const matches: string[] = [];
       let m: RegExpExecArray | null;
-      while ((m = regex.exec(rawText)) !== null) {
+      m = regex.exec(rawText);
+      while (m !== null) {
         matches.push(m[0].trim());
         if (m.index === regex.lastIndex) regex.lastIndex++;
         if (matches.length >= 5) break;
+        m = regex.exec(rawText);
       }
       setTestError(null);
       return {
@@ -115,6 +117,7 @@ function TxtSettingsInner({
         )}
         {rules.map((rule, i) => (
           <div
+            // biome-ignore lint/suspicious/noArrayIndexKey: static list
             key={i}
             style={{
               display: "flex",
@@ -137,6 +140,7 @@ function TxtSettingsInner({
               )}
             </span>
             <button
+              type="button"
               onClick={() => removeRule(i)}
               style={{
                 cursor: "pointer",
@@ -172,6 +176,7 @@ function TxtSettingsInner({
             }}
           />
           <button
+            type="button"
             onClick={addRule}
             disabled={!testInput.trim() || !!testError}
             style={{ cursor: "pointer", fontSize: "12px", padding: "6px 12px" }}
@@ -201,6 +206,7 @@ function TxtSettingsInner({
                 }}
               >
                 {testPreview.samples.map((s, i) => (
+                  // biome-ignore lint/suspicious/noArrayIndexKey: static list
                   <div key={i}>{s}</div>
                 ))}
                 {testPreview.count > 5 && <div>...</div>}
@@ -231,6 +237,7 @@ function TxtSettingsInner({
 
       {/* Re-split button */}
       <button
+        type="button"
         onClick={handleResplit}
         style={{
           width: "100%",

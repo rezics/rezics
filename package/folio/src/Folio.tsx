@@ -113,6 +113,7 @@ function FolioInner({
             }}
           >
             <button
+              type="button"
               onClick={() => setShowToc((v) => !v)}
               style={{ cursor: "pointer", fontSize: "14px" }}
             >
@@ -197,7 +198,7 @@ function DefaultError({ error, retry }: { error: Error; retry: () => void }) {
       }}
     >
       <p>Failed to load chapter: {error.message}</p>
-      <button onClick={retry} style={{ cursor: "pointer" }}>
+      <button type="button" onClick={retry} style={{ cursor: "pointer" }}>
         Retry
       </button>
     </div>

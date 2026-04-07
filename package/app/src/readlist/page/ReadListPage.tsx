@@ -23,8 +23,6 @@ export const ReadListPage: React.FC = () => {
   const commentRef = useRef<HTMLDivElement>(null);
   const { t } = useTranslation();
   const handleGoToComments = () => {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-expect-error: scrollIntoView is not defined in the type declaration
     commentRef.current?.scrollIntoView({
       behavior: "smooth",
       block: "start",

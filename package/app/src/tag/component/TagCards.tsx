@@ -13,6 +13,7 @@ export const TagCard: React.FC<{
   selected?: boolean;
 }> = ({ tag, onClick, selected }) => {
   return (
+    // biome-ignore lint/a11y/useSemanticElements: interactive card wrapper
     <div
       className={
         "cursor-pointer transition border rounded-md p-3 flex flex-col gap-1 hover:shadow-sm " +

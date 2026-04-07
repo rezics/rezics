@@ -1,4 +1,4 @@
-import { EditorView } from "@codemirror/view";
+import type { EditorView } from "@codemirror/view";
 import type { RefObject } from "react";
 import { useEffect, useRef } from "react";
 

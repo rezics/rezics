@@ -83,6 +83,7 @@
     "@types/react-lazy-load-image-component": "^1.6.5",
     "bun-types": "latest",
     "react-cosmos": "^7.1.1",
-    "react-cosmos-plugin-vite": "^7.1.1"
+    "react-cosmos-plugin-vite": "^7.1.1",
+    "react-i18next": "^17.0.2"
   }
 }

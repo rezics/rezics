@@ -20,7 +20,7 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { t } from "@rezics/contract";
-import type { Static } from "@sinclair/typebox";
+type Static<T extends { static: unknown }> = T["static"];
 import {
   type ColumnDef,
   type ColumnFiltersState,
@@ -146,7 +146,7 @@ const columns: ColumnDef<Static<typeof schema>>[] = [
             table.getIsAllPageRowsSelected() ||
             (table.getIsSomePageRowsSelected() && "indeterminate")
           }
-          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+          onCheckedChange={(value: boolean | "indeterminate") => table.toggleAllPageRowsSelected(!!value)}
           aria-label="Select all"
         />
       </div>
@@ -155,7 +155,7 @@ const columns: ColumnDef<Static<typeof schema>>[] = [
       <div className="flex items-center justify-center">
         <Checkbox
           checked={row.getIsSelected()}
-          onCheckedChange={(value) => row.toggleSelected(!!value)}
+          onCheckedChange={(value: boolean | "indeterminate") => row.toggleSelected(!!value)}
           aria-label="Select row"
         />
       </div>
@@ -467,7 +467,7 @@ export function DataTable({
                       key={column.id}
                       className="capitalize"
                       checked={column.getIsVisible()}
-                      onCheckedChange={(value) =>
+                      onCheckedChange={(value: boolean | "indeterminate") =>
                         column.toggleVisibility(!!value)
                       }
                     >
@@ -550,7 +550,7 @@ export function DataTable({
               </Label>
               <Select
                 value={`${table.getState().pagination.pageSize}`}
-                onValueChange={(value) => {
+                onValueChange={(value: string) => {
                   table.setPageSize(Number(value));
                 }}
               >
@@ -690,7 +690,7 @@ function TableCellViewer({ item }: { item: Static<typeof schema> }) {
                     tickLine={false}
                     axisLine={false}
                     tickMargin={8}
-                    tickFormatter={(value) => value.slice(0, 3)}
+                    tickFormatter={(value: string) => value.slice(0, 3)}
                     hide
                   />
                   <ChartTooltip

@@ -63,6 +63,7 @@ const BreadcrumbPage = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <span
     ref={ref}
+    tabIndex={0}
     role="link"
     aria-disabled="true"
     aria-current="page"

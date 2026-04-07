@@ -51,6 +51,7 @@ function PageButtons() {
       }}
     >
       <button
+        type="button"
         style={{ ...btnStyle, opacity: hasPrev ? 1 : 0.3 }}
         disabled={!hasPrev}
         onClick={() =>
@@ -65,6 +66,7 @@ function PageButtons() {
           : "..."}
       </span>
       <button
+        type="button"
         style={{ ...btnStyle, opacity: hasNext ? 1 : 0.3 }}
         disabled={!hasNext}
         onClick={() =>
@@ -140,6 +142,7 @@ function PhoneFrame({
       >
         {PHONE_PRESETS.map((p, i) => (
           <button
+            type="button"
             key={p.label}
             onClick={() => applyPreset(i)}
             style={{

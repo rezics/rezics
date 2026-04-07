@@ -93,9 +93,11 @@ export function ResizableWrapper({
       style={{ ...style, height: currentHeight }}
     >
       {children}
+      {/* biome-ignore lint/a11y/useSemanticElements: resize handle */}
       <div
         className="rezics-resize-handle"
         role="separator"
+        tabIndex={0}
         aria-orientation="horizontal"
         aria-label="Resize editor height"
         aria-valuenow={currentHeight}

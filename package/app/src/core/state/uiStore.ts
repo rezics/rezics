@@ -1,4 +1,4 @@
-import * as Array from "effect/Array";
+import * as EffectArray from "effect/Array";
 import { pipe } from "effect/Function";
 import { create } from "zustand";
 
@@ -26,7 +26,7 @@ const stateUtils = {
   addNotification:
     (message: string) =>
     (notifications: ReadonlyArray<string>): ReadonlyArray<string> =>
-      pipe(notifications, Array.append(message)),
+      pipe(notifications, EffectArray.append(message)),
 
   /**
    * 安全地移除指定索引的通知

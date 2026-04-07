@@ -196,9 +196,11 @@ const Fixture: React.FC = () => {
   // Provide a suggestion of domains visible in dataset
   const knownDomains = useMemo(() => {
     const set = new Set<string>();
-    demoTags.forEach((t) =>
-      (t.domains || []).forEach((d: string) => set.add(d)),
-    );
+    demoTags.forEach((t) => {
+      (t.domains || []).forEach((d: string) => {
+        set.add(d);
+      });
+    });
     return Array.from(set);
   }, [demoTags]);
 

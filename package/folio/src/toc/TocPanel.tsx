@@ -93,12 +93,14 @@ export function TocPanel() {
         }}
       >
         <button
+          type="button"
           onClick={expandAll}
           style={{ fontSize: "12px", cursor: "pointer" }}
         >
           Expand All
         </button>
         <button
+          type="button"
           onClick={collapseAll}
           style={{ fontSize: "12px", cursor: "pointer" }}
         >
@@ -111,7 +113,8 @@ export function TocPanel() {
           if (entry.kind === "branch") {
             const isCollapsed = collapsed.has(entry.node.id);
             return (
-              <div
+              <button
+                type="button"
                 key={`branch-${entry.node.id}`}
                 className="folio-toc-branch"
                 onClick={() => toggleBranch(entry.node.id)}
@@ -125,19 +128,25 @@ export function TocPanel() {
                   display: "flex",
                   alignItems: "center",
                   gap: "6px",
+                  border: "none",
+                  width: "100%",
+                  textAlign: "left",
+                  color: "inherit",
+                  font: "inherit",
                 }}
               >
                 <span style={{ fontSize: "10px" }}>
                   {isCollapsed ? "▶" : "▼"}
                 </span>
                 {entry.node.title}
-              </div>
+              </button>
             );
           }
 
           const isActive = entry.chapter.index === state.chapterIndex;
           return (
-            <div
+            <button
+              type="button"
               key={`leaf-${entry.node.id}`}
               className="folio-toc-leaf"
               onClick={() =>
@@ -155,10 +164,15 @@ export function TocPanel() {
                   ? "3px solid rgb(59, 130, 246)"
                   : "3px solid transparent",
                 userSelect: "none",
+                border: "none",
+                width: "100%",
+                textAlign: "left",
+                color: "inherit",
+                font: "inherit",
               }}
             >
               {entry.node.title}
-            </div>
+            </button>
           );
         })}
       </div>

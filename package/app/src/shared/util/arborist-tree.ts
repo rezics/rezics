@@ -1,4 +1,4 @@
-import * as Array from "effect/Array";
+import * as EffectArray from "effect/Array";
 import { pipe } from "effect/Function";
 import * as Option from "effect/Option";
 
@@ -27,13 +27,15 @@ const findNodeIndex = (
   nodes: TreeNode[],
   targetId: string | number,
 ): Option.Option<number> =>
-  Array.findFirstIndex(nodes, (node: TreeNode) => idsEqual(node.id, targetId));
+  EffectArray.findFirstIndex(nodes, (node: TreeNode) =>
+    idsEqual(node.id, targetId),
+  );
 
 // 辅助函数：安全地在指定位置插入元素
 const insertAt =
   <T>(index: number, items: T[]) =>
   (array: T[]): T[] => {
-    const [before, after] = Array.splitAt(array, index);
+    const [before, after] = EffectArray.splitAt(array, index);
     return [...before, ...items, ...after];
   };
 
@@ -158,15 +160,19 @@ export const findAndDelete = (
     if (node.children) {
       const filteredChildren = pipe(
         node.children,
-        Array.filter(shouldKeep),
-        Array.map(processNode),
+        EffectArray.filter(shouldKeep),
+        EffectArray.map(processNode),
       );
       return { ...node, children: filteredChildren };
     }
     return node;
   };
 
-  return pipe(tree, Array.filter(shouldKeep), Array.map(processNode));
+  return pipe(
+    tree,
+    EffectArray.filter(shouldKeep),
+    EffectArray.map(processNode),
+  );
 };
 
 /**

@@ -1,7 +1,7 @@
 import {
   Add,
   CheckCircle,
-  Error,
+  Error as ErrorIcon,
   Favorite,
   Info,
   Share,
@@ -40,7 +40,7 @@ export const ThemeDemo: React.FC = () => {
     { icon: <CheckCircle />, text: "任务已完成", color: "success" },
     { icon: <Warning />, text: "需要注意", color: "warning" },
     { icon: <Info />, text: "信息提示", color: "info" },
-    { icon: <Error />, text: "错误警告", color: "error" },
+    { icon: <ErrorIcon />, text: "错误警告", color: "error" },
   ];
 
   return (
@@ -173,6 +173,7 @@ export const ThemeDemo: React.FC = () => {
                 </Typography>
                 <List dense>
                   {demoItems.map((item, index) => (
+                    // biome-ignore lint/suspicious/noArrayIndexKey: static list
                     <ListItem key={index}>
                       <ListItemIcon
                         sx={{

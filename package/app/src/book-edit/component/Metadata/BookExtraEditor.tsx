@@ -64,6 +64,7 @@ function PublishURL({ value, onChange }: BookExtraEditorProps) {
       <div className="space-y-2">
         {urls.map((url, index) => (
           <Paper
+            // biome-ignore lint/suspicious/noArrayIndexKey: static list
             key={index}
             variant="outlined"
             sx={{

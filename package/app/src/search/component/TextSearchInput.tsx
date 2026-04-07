@@ -49,7 +49,9 @@ export const TextSearchInput = ({
   };
 
   return (
+    // biome-ignore lint/a11y/useSemanticElements: wrapper div
     <div
+      role="search"
       className={cn("relative", className)}
       ref={rootRef}
       onBlur={(event) => {

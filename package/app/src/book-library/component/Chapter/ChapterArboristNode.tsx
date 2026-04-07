@@ -33,6 +33,8 @@ export const createChapterArboristNode = (
 
     return (
       <div
+        role="treeitem"
+        tabIndex={0}
         style={{
           ...style,
           backgroundColor: isSelected ? selectedBg : "transparent",

@@ -51,6 +51,7 @@ export const HorizontalReviewCarousel: React.FC<
       <CarouselContent className="-ml-4">
         {reviewPairs.map((pair, index) => (
           <CarouselItem
+            // biome-ignore lint/suspicious/noArrayIndexKey: static list
             key={index}
             className="pl-4 basis-[100%] lg:basis-[50%] xl:basis-[40%]"
           >

@@ -42,6 +42,7 @@ export const CollapsibleByLineTextShow: React.FC<
         {content ? <MarkdownContent content={content} /> : children}
         {isExpanded && (
           <button
+            type="button"
             onClick={onToggle}
             className="ml-1 text-sm font-medium text-blue-600 hover:underline"
           >
@@ -63,6 +64,7 @@ export const CollapsibleByLineTextShow: React.FC<
             }}
           >
             <button
+              type="button"
               onClick={onToggle}
               className="text-sm font-medium text-blue-600 hover:underline"
             >

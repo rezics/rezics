@@ -21,6 +21,7 @@ export function TxtRenderer({ raw }: TxtRendererProps) {
         wordBreak: "break-word",
         overflowWrap: "break-word",
       }}
+      // biome-ignore lint/security/noDangerouslySetInnerHtml: intentional HTML rendering
       dangerouslySetInnerHTML={{ __html: html }}
     />
   );

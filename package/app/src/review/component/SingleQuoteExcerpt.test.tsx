@@ -7,6 +7,7 @@ import {
 export default function SingleQuoteExcerptTest() {
   const [props] = useFixtureInput<SingleQuoteExcerptShowProps>("Props", {
     author: {
+      unitId: "user-1",
       name: "张三",
       avatar: "https://i.pravatar.cc/300?img=1",
     },
@@ -32,6 +33,7 @@ export default function SingleQuoteExcerptTest() {
           <div className="space-y-4">
             <SingleQuoteExcerptShow
               author={{
+                unitId: "user-2",
                 name: "李四",
                 avatar: "https://i.pravatar.cc/300?img=2",
               }}
@@ -47,6 +49,7 @@ export default function SingleQuoteExcerptTest() {
 
             <SingleQuoteExcerptShow
               author={{
+                unitId: "user-3",
                 name: "王五",
                 avatar: "https://i.pravatar.cc/300?img=3",
               }}

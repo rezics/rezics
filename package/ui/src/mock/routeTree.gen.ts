@@ -10,7 +10,9 @@
 
 import { Route as rootRouteImport } from "./routes/__root";
 
+// biome-ignore lint/complexity/noBannedTypes: generated file
 export type FileRoutesByFullPath = {};
+// biome-ignore lint/complexity/noBannedTypes: generated file
 export type FileRoutesByTo = {};
 export interface FileRoutesById {
   __root__: typeof rootRouteImport;
@@ -23,6 +25,7 @@ export interface FileRouteTypes {
   id: "__root__";
   fileRoutesById: FileRoutesById;
 }
+// biome-ignore lint/complexity/noBannedTypes: generated file
 export type RootRouteChildren = {};
 
 declare module "@tanstack/react-router" {

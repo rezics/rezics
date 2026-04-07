@@ -42,7 +42,7 @@ export const EchokvEditPage: React.FC = () => {
       const res = await echoKvApi.get(currentKey.trim());
       const raw = res?.value;
 
-      let parsed;
+      let parsed: { value: unknown };
       if (typeof raw === "string") {
         try {
           parsed = { value: JSON.parse(raw) };

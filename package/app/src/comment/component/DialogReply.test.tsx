@@ -12,6 +12,7 @@ const DialogReplyTest = () => {
       <div className="border border-gray-200 rounded-lg p-4">
         <p className="mb-2">点击下方按钮会打开对话框：</p>
         <button
+          type="button"
           className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
           onClick={() => alert("在实际应用中，这里会打开 DialogReply 组件")}
         >

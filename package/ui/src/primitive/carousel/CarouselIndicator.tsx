@@ -74,6 +74,7 @@ export const CarouselIndicator: React.FC<CarouselIndicatorProps> = ({
             const active = i === current;
             return (
               <button
+                // biome-ignore lint/suspicious/noArrayIndexKey: static list
                 key={i}
                 type="button"
                 onClick={() => handleSelect(i)}

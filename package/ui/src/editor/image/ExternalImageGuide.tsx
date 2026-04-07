@@ -54,6 +54,7 @@ export function ExternalImageGuide({
             component="li"
             variant="body2"
             color="text.secondary"
+            // biome-ignore lint/suspicious/noArrayIndexKey: static list
             key={i}
           >
             {step}

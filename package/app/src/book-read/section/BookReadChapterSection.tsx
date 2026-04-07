@@ -26,6 +26,7 @@ export const BookReadChapterPage: React.FC = () => {
     <div className="w-11/12 mx-auto p-4">
       <h1 className="text-2xl font-bold">{data?.title}</h1>
       <div id="markdown-chapter-content" className="markdown-body">
+        {/* biome-ignore lint/security/noDangerouslySetInnerHtml: intentional HTML rendering */}
         <div dangerouslySetInnerHTML={{ __html: chapterHtml }} />
       </div>
     </div>

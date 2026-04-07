@@ -23,6 +23,7 @@ export function CustomSidebar({
             { id: "Security", label: "Security & Privacy", icon: "🔒" },
           ].map((item) => (
             <button
+              type="button"
               key={item.id}
               onClick={() => setSection(item.id as any)}
               className={`w-full text-left px-6 py-4 rounded-xl transition-all duration-300 group

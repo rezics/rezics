@@ -1,4 +1,4 @@
-import { commentApi } from "@rezics/api/comment/comment.api.ts";
+import { commentApi } from "@rezics/api/comment/comment.api";
 import type { CommentDTO, CreateCommentInput } from "@rezics/contract";
 
 /**

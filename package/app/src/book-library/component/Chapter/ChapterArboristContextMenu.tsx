@@ -38,6 +38,12 @@ export const ChapterArboristContextMenu = ({
           minWidth: 120,
         }}
         onClick={() => setContextMenu(null)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            setContextMenu(null);
+          }
+        }}
         onContextMenu={(e) => e.preventDefault()}
       >
         {/* <li
@@ -63,6 +69,12 @@ export const ChapterArboristContextMenu = ({
           onClick={() => {
             setContextMenu(null);
           }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              setContextMenu(null);
+            }
+          }}
         >
           {contextMenu.node?.isOpen ? "Collapse" : "Expand"}
         </li>
@@ -73,6 +85,14 @@ export const ChapterArboristContextMenu = ({
             const parentId = contextMenu.node.id;
             handleCreate(parentId);
             setContextMenu(null);
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              const parentId = contextMenu.node.id;
+              handleCreate(parentId);
+              setContextMenu(null);
+            }
           }}
         >
           新建子节点
@@ -95,6 +115,24 @@ export const ChapterArboristContextMenu = ({
             );
             setContextMenu(null);
           }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              const newNode: Chapter = {
+                id: uuidv4(),
+                title: "New Chapter",
+              };
+              setTreeData(
+                (current) =>
+                  insertSiblingAfter(
+                    current,
+                    contextMenu.node.id,
+                    newNode,
+                  ) as Chapter[],
+              );
+              setContextMenu(null);
+            }
+          }}
         >
           新建无内容节点
         </li>
@@ -107,6 +145,16 @@ export const ChapterArboristContextMenu = ({
             );
             setContextMenu(null);
           }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              setTreeData(
+                (current) =>
+                  moveSiblingFirst(current, contextMenu.node.id) as Chapter[],
+              );
+              setContextMenu(null);
+            }
+          }}
         >
           移到同级最前
         </li>
@@ -118,6 +166,16 @@ export const ChapterArboristContextMenu = ({
                 moveSiblingLast(current, contextMenu.node.id) as Chapter[],
             );
             setContextMenu(null);
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              setTreeData(
+                (current) =>
+                  moveSiblingLast(current, contextMenu.node.id) as Chapter[],
+              );
+              setContextMenu(null);
+            }
           }}
         >
           移到同级最后

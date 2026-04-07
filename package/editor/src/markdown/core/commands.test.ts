@@ -12,7 +12,7 @@ function runCommand(
   doc: string,
   from: number,
   to: number | undefined,
-  command: (view: any) => boolean | undefined,
+  command: (view: any) => boolean | void,
 ) {
   const state = EditorState.create({
     doc,

@@ -39,8 +39,18 @@ export function SingleCommentElementWrapper({
   };
   return (
     <div className={className}>
-      {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events */}
-      <div role="button" tabIndex={0} onClick={handleReply}>
+      {/* biome-ignore lint/a11y/useSemanticElements: interactive wrapper for reply action */}
+      <div
+        role="button"
+        tabIndex={0}
+        onClick={handleReply}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            handleReply();
+          }
+        }}
+      >
         {children}
       </div>
       {isReplyModalOpen && (

@@ -23,9 +23,10 @@ import {
   Typography,
   useTheme,
 } from "@mui/material";
+import { extractColorFromImage, PRESET_COLORS } from "@rezics/app-shell";
 import type React from "react";
 import { useState } from "react";
-import { extractColorFromImage, PRESET_COLORS } from "@/config/dynamicTheme";
+import { useAppStore } from "@/app/state/appStore";
 
 interface ThemeCustomizerProps {
   open: boolean;
@@ -37,10 +38,12 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({
   onClose,
 }) => {
   const theme = useTheme();
-  const customColor = appStore((state: any) => state.customColor);
-  const useDynamicTheme = appStore((state: any) => state.useDynamicTheme);
-  const setCustomColor = appStore((state: any) => state.setCustomColor);
-  const setUseDynamicTheme = appStore((state: any) => state.setUseDynamicTheme);
+  const customColor = useAppStore((state: any) => state.customColor);
+  const useDynamicTheme = useAppStore((state: any) => state.useDynamicTheme);
+  const setCustomColor = useAppStore((state: any) => state.setCustomColor);
+  const setUseDynamicTheme = useAppStore(
+    (state: any) => state.setUseDynamicTheme,
+  );
 
   const [selectedColor, setSelectedColor] = useState(customColor || "#f4606c");
   const [customHex, setCustomHex] = useState("");
@@ -286,7 +289,7 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({
 // 快速主题切换按钮组件
 export const ThemeQuickToggle: React.FC = () => {
   const [open, setOpen] = useState(false);
-  const _useDynamicTheme = appStore((state) => state.useDynamicTheme);
+  const _useDynamicTheme = useAppStore((state) => state.useDynamicTheme);
 
   return (
     <>

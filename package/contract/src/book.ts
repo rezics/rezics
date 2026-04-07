@@ -167,4 +167,4 @@ export interface ChapterIndexResponse {
 
 // ANCHOR Extra Types
 
-export type Publisher = {};
+export type Publisher = Record<string, unknown>;

@@ -80,7 +80,16 @@ function ToolbarButton({
 }
 
 function ToolbarSeparatorEl() {
-  return <div role="separator" className="editor-toolbar-separator" />;
+  return (
+    // biome-ignore lint/a11y/useSemanticElements: toolbar separator
+    <div
+      role="separator"
+      aria-label="Toolbar separator"
+      aria-valuenow={50}
+      tabIndex={0}
+      className="editor-toolbar-separator"
+    />
+  );
 }
 
 export function ReactToolbar({ items, className }: ReactToolbarProps) {
@@ -96,6 +105,7 @@ export function ReactToolbar({ items, className }: ReactToolbarProps) {
     >
       {items.map((entry, i) => {
         if (entry === "|") {
+          // biome-ignore lint/suspicious/noArrayIndexKey: static toolbar items
           return <ToolbarSeparatorEl key={`sep-${i}`} />;
         }
         const active = entry.isActive?.(view.state) ?? false;

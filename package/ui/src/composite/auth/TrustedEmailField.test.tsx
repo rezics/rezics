@@ -12,7 +12,7 @@ describe("TrustedEmailField", () => {
       editableHelperText: "Editable email",
     });
 
-    const children = element.props.children as Array<any>;
+    const children = (element as any).props.children as Array<any>;
     const textField = children[0];
     const buttonWrapper = children[1];
 
@@ -31,7 +31,7 @@ describe("TrustedEmailField", () => {
       editableHelperText: "Editable email",
     });
 
-    const children = element.props.children as Array<any>;
+    const children = (element as any).props.children as Array<any>;
     const textField = children[0];
     const buttonWrapper = children[1];
 

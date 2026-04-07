@@ -98,7 +98,7 @@ const UsersMultiSelect: React.FC<{
             placeholder={placeholder}
             disabled={disabled}
             InputProps={{
-              ...params.InputProps,
+              ...(params.InputProps as any),
               endAdornment: (
                 <>
                   {loading ? (

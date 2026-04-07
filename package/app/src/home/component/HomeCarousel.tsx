@@ -142,6 +142,7 @@ export const BookCarousel: React.FC<BookCarouselProps> = ({
       <CarouselContent>
         {products?.map((product, index) => (
           <CarouselItem
+            // biome-ignore lint/suspicious/noArrayIndexKey: static list
             key={index}
             className={cn(
               isMobile ? "basis-[min(600px,100%)]" : "basis-[min(800px,100%)]",

@@ -1,12 +1,12 @@
 import { Box, CircularProgress, Tab, Tabs, Typography } from "@mui/material";
-import { useEffect, useState } from "react";
 import {
   GreenButton,
   OrangeButton,
   RoseButton,
-} from "@/component/Common/UI/Button/CustomButton";
-import { ShadowRoundedCard } from "@/component/Common/UI/Card/CustomCard";
-import { RoseTextField } from "@/component/Common/UI/Text/CustomTextField";
+} from "@rezics/ui/primitive/button/colorful/index.ts";
+import { ShadowRoundedCard } from "@rezics/ui/primitive/card/Card.tsx";
+import { RoseTextField } from "@rezics/ui/primitive/control/text-input/TextField.tsx";
+import { useEffect, useState } from "react";
 import { useUserProfileStore } from "@/user/state";
 
 interface UserConfig {

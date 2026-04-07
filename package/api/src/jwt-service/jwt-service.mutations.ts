@@ -22,10 +22,10 @@ export function useCreateJwtServiceMutation(
   return useMutation({
     mutationFn: (input: CreateJwtServiceInput) => jwtServiceApi.create(input),
     ...options,
-    onSuccess: (data, variables, context) => {
+    onSuccess: (data, variables, onMutateResult, context) => {
       queryClient.invalidateQueries({ queryKey: jwtServiceKeys.lists() });
       queryClient.setQueryData(jwtServiceKeys.detail(data.serviceKey), data);
-      options?.onSuccess?.(data, variables, context);
+      options?.onSuccess?.(data, variables, onMutateResult, context);
     },
   });
 }
@@ -46,13 +46,13 @@ export function useUpdateJwtServiceMutation(
     mutationFn: ({ serviceKey, input }) =>
       jwtServiceApi.update(serviceKey, input),
     ...options,
-    onSuccess: (data, variables, context) => {
+    onSuccess: (data, variables, onMutateResult, context) => {
       queryClient.setQueryData(
         jwtServiceKeys.detail(variables.serviceKey),
         data,
       );
       queryClient.invalidateQueries({ queryKey: jwtServiceKeys.lists() });
-      options?.onSuccess?.(data, variables, context);
+      options?.onSuccess?.(data, variables, onMutateResult, context);
     },
   });
 }
@@ -68,10 +68,10 @@ export function useActivateJwtServiceMutation(
   return useMutation({
     mutationFn: (serviceKey: string) => jwtServiceApi.activate(serviceKey),
     ...options,
-    onSuccess: (data, serviceKey, context) => {
+    onSuccess: (data, serviceKey, onMutateResult, context) => {
       queryClient.setQueryData(jwtServiceKeys.detail(serviceKey), data);
       queryClient.invalidateQueries({ queryKey: jwtServiceKeys.lists() });
-      options?.onSuccess?.(data, serviceKey, context);
+      options?.onSuccess?.(data, serviceKey, onMutateResult, context);
     },
   });
 }
@@ -87,10 +87,10 @@ export function useDeactivateJwtServiceMutation(
   return useMutation({
     mutationFn: (serviceKey: string) => jwtServiceApi.deactivate(serviceKey),
     ...options,
-    onSuccess: (data, serviceKey, context) => {
+    onSuccess: (data, serviceKey, onMutateResult, context) => {
       queryClient.setQueryData(jwtServiceKeys.detail(serviceKey), data);
       queryClient.invalidateQueries({ queryKey: jwtServiceKeys.lists() });
-      options?.onSuccess?.(data, serviceKey, context);
+      options?.onSuccess?.(data, serviceKey, onMutateResult, context);
     },
   });
 }

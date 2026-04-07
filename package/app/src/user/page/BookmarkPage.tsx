@@ -175,10 +175,14 @@ export const BookmarkPage: React.FC = () => {
   const allBookmarkTags = useMemo(() => {
     const set = new Set<string>();
     if (userTagLibrary?.tags) {
-      userTagLibrary.tags.forEach((tag) => set.add(tag));
+      userTagLibrary.tags.forEach((tag) => {
+        set.add(tag);
+      });
     }
     entries.forEach((entry) => {
-      entry.tags.forEach((tag) => set.add(tag));
+      entry.tags.forEach((tag) => {
+        set.add(tag);
+      });
     });
     return Array.from(set);
   }, [userTagLibrary, entries]);

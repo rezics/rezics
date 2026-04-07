@@ -1,6 +1,13 @@
 import { HttpResponse, http } from "msw";
 import { chapterContent01 } from "../data/chapterContent01.ts";
-import chapterList01 from "../data/chapterlist01.json" with { type: "json" };
+
+const chapterList01 = {
+  chapters: {
+    143: { id: 143, title: "Chapter 1", noContent: true },
+    144: { id: 144, title: "Chapter 2", noContent: false },
+  },
+  order: { 143: [144] },
+};
 
 // Chapter ops – keep here for backward compatibility with previous file structure
 export function chapterListHandler(_body: any) {

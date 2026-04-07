@@ -17,7 +17,7 @@ export const ScoreFormEdit: React.FC<ScoreFormEditProps> = ({
   max,
   precision,
 }) => {
-  let initScore;
+  let initScore: number | undefined;
   useEffect(() => {
     initScore = defaultValue != null ? Number(defaultValue) : 0;
   }, [defaultValue]);

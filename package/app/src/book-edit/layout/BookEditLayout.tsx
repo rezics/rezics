@@ -4,6 +4,7 @@ import { LinearChapterList } from "@/book-library/component/Chapter/LinearChapte
 import { Header } from "@/core/component/header/MainLayoutHeader.tsx";
 import { Sidebar } from "@/core/component/sidebar/MainLayoutSidebar.tsx";
 import { useLayoutStore } from "@/core/state/layoutStore.ts";
+import { useMatch } from "@tanstack/react-router";
 import { bookEditChapterRoute, bookEditLayoutRoute } from "@/router";
 import { NAVIGATION } from "./BookEditorNavigation";
 
@@ -13,12 +14,11 @@ export interface BookEditLayoutProps {
 
 export const BookEditLayout: React.FC<BookEditLayoutProps> = ({ children }) => {
   const bookId: string | undefined = bookEditLayoutRoute.useParams().bookId;
-  let chapterId: string | undefined;
-  try {
-    chapterId = bookEditChapterRoute.useParams().chapterId;
-  } catch (_error) {
-    chapterId = undefined;
-  }
+  const chapterMatch = useMatch({
+    from: bookEditChapterRoute.id,
+    shouldThrow: false,
+  });
+  const chapterId: string | undefined = chapterMatch?.params.chapterId;
 
   // UI state
   const { sidebarHeightBelow } = useLayoutStore();

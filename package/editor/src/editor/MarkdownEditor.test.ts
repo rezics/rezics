@@ -6,7 +6,7 @@ import { applyIconDefaults, applyToolbarOverrides } from "./toolbar-utils";
 
 describe("MarkdownEditor composition", () => {
   it("markdownFull produces plugins with toolbar items", () => {
-    const plugins = markdownFull({ preview: true });
+    const plugins = markdownFull();
     const resolved = resolvePlugins(plugins);
 
     expect(resolved.toolbar.length).toBeGreaterThan(0);

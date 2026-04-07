@@ -104,11 +104,20 @@ export function SingleReadlist({
           </Stack>
 
           <Stack spacing={1} alignItems="center">
-            {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
+            {/* biome-ignore lint/a11y/useSemanticElements: card interaction */}
             <div
+              role="button"
+              tabIndex={0}
               onClick={(e) => {
                 e.stopPropagation();
                 handleLike(data.id);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleLike(data.id);
+                }
               }}
               className="flex items-center"
             >

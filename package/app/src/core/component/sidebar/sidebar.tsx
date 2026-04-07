@@ -69,6 +69,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           >
             {/* 仅在 Fixed 模式下，通常需要一个显式的关闭按钮 */}
             <button
+              type="button"
               onClick={onClose}
               className="absolute top-4 right-4 p-1 rounded-md transition-colors"
               aria-label="Close sidebar"

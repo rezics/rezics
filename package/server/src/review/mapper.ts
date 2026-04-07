@@ -106,7 +106,9 @@ export function mapReviewQueryToUnitQuery(
       .split(",")
       .map((s) => s.trim())
       .filter(Boolean)
-      .forEach((id) => targetIds.add(id));
+      .forEach((id) => {
+        targetIds.add(id);
+      });
   }
 
   if (targetIds.size === 1) {

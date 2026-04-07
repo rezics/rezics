@@ -126,7 +126,7 @@ async function verifyTokenInput<TPayload extends JWTPayload = JWTPayload>(
 
   assertJwtFormat(token);
 
-  let header;
+  let header: ReturnType<typeof decodeProtectedHeader>;
   try {
     header = decodeProtectedHeader(token);
   } catch (error) {
@@ -148,7 +148,7 @@ async function verifyTokenInput<TPayload extends JWTPayload = JWTPayload>(
 
   const key = await resolveKeySource(options);
 
-  let result;
+  let result: Awaited<ReturnType<typeof jwtVerify>>;
   try {
     result = await jwtVerify(
       token,

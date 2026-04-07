@@ -13,12 +13,8 @@ export function ReviewNewPage({
 }: {
   bookUnitId?: string;
 }) {
-  let bookUnitId: string;
-  if (bookUnitIdProps) {
-    bookUnitId = bookUnitIdProps;
-  } else {
-    bookUnitId = reviewNewRoute.useParams();
-  }
+  const routeParams = reviewNewRoute.useParams();
+  const bookUnitId: string = bookUnitIdProps ?? routeParams.bookUnitId;
   const search = useRouterState({ select: (s) => s.location.search ?? "" });
   const searchParams = new URLSearchParams(search);
   const [reviewData, setReviewData] = useState<ReviewResponse>(

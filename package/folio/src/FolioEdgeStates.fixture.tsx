@@ -43,7 +43,11 @@ function ErrorState() {
         renderError={(error, retry) => (
           <div style={{ padding: 32, textAlign: "center" }}>
             <p style={{ color: "#e53e3e" }}>{error.message}</p>
-            <button onClick={retry} style={{ marginTop: 8, cursor: "pointer" }}>
+            <button
+              type="button"
+              onClick={retry}
+              style={{ marginTop: 8, cursor: "pointer" }}
+            >
               Retry
             </button>
           </div>

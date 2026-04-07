@@ -75,7 +75,7 @@ export const reactionApi = {
     targetIds: string[],
   ): Promise<ReactionMultiSummaryResponse> => {
     const qs = new URLSearchParams();
-    targetIds.forEach((id) => qs.append("targetIds", id));
+    for (const id of targetIds) qs.append("targetIds", id);
     const queryString = qs.toString();
     const response = await apiFetch<{
       targetIds: string[];

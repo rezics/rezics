@@ -114,6 +114,7 @@ export async function createEpubPlugin(file: File): Promise<EpubPluginResult> {
           maxWidth: "720px",
           margin: "0 auto",
         }}
+        // biome-ignore lint/security/noDangerouslySetInnerHtml: intentional HTML rendering
         dangerouslySetInnerHTML={{ __html: raw }}
       />
     );

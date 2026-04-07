@@ -36,7 +36,7 @@ export const sessionApi = new Elysia({ prefix: "/session" })
         throw new Error("Unauthorized: Missing authorization header");
       }
 
-      let sessionState;
+      let sessionState: Awaited<ReturnType<typeof getAuthSessionState>>;
       try {
         sessionState = await getAuthSessionState(authorization, headers.cookie);
       } catch {

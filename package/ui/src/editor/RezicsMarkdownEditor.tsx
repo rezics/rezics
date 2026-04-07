@@ -128,6 +128,7 @@ export function RezicsMarkdownEditor({
     : (editorProps.resize ?? DEFAULT_RESIZE_CONFIG);
 
   return (
+    // biome-ignore lint/a11y/noStaticElementInteractions: editor wrapper needs keyboard handling
     <div
       ref={wrapperRef}
       onKeyDown={(e) => {

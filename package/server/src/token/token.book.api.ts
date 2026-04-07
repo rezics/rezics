@@ -5,7 +5,6 @@ import {
 } from "@rezics/contract";
 import { Elysia, t } from "elysia";
 import { bookService } from "../book/book.service";
-import { unitService } from "../unit/unit.service";
 import {
   hasPermissionToCreateBook,
   hasPermissionToReadBook,
@@ -157,39 +156,11 @@ export const bookRoute = new Elysia()
    */
   .delete(
     "/books/:unitId",
-    async ({ headers, set, params, request }) => {
+    async ({ set }) => {
       set.status = 403;
       return {
         message: "Forbidden: now don't allow use token to delete book",
       };
-      const ip =
-        request.headers.get("x-forwarded-for") ??
-        request.headers.get("x-real-ip") ??
-        null;
-      const userAgent = request.headers.get("user-agent") ?? null;
-
-      const { userId, scopes } = await tokenService.authenticateFromHeader(
-        headers.authorization,
-        { status: set.status as number | undefined },
-        { ip, userAgent },
-      );
-
-      if (
-        !tokenService.hasAdminScope(scopes) &&
-        !tokenService.hasScope(scopes, "book", "delete")
-      ) {
-        set.status = 403;
-        throw new Error("Forbidden: token does not have book:delete scope");
-      }
-
-      const unit = await unitService.getByUnitId(params.unitId);
-      if (!unit || unit.userId !== userId) {
-        set.status = 403;
-        throw new Error("Forbidden: token does not own this book");
-      }
-
-      await bookService.delete(params.unitId);
-      return { message: "Book and related post deleted successfully" };
     },
     {
       params: bookParamsSchema,

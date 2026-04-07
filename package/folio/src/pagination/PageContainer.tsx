@@ -59,7 +59,9 @@ export function PageContainer({ children }: PageContainerProps) {
       }
     }
 
-    return () => handlers.forEach((cleanup) => cleanup());
+    return () => {
+      for (const cleanup of handlers) cleanup();
+    };
   }, [recalculate]);
 
   const containerWidth = containerRef.current?.clientWidth ?? 0;

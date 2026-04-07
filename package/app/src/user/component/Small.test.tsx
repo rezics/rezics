@@ -11,7 +11,7 @@ export default () => {
 
   return (
     <div className="outline outline-black">
-      <Small {...props}></Small>
+      <Small.Container {...props}></Small.Container>
     </div>
   );
 };

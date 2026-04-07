@@ -29,6 +29,7 @@ export const HomePartnerBrands: React.FC<HomePartnerBrandsProps> = ({
       <div className="flex flex-wrap gap-6 items-center">
         {logos.map((src, i) => (
           <LazyLoadImage
+            // biome-ignore lint/suspicious/noArrayIndexKey: static list
             key={i}
             src={src}
             alt={`brand-${i}`}

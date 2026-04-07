@@ -1,5 +1,5 @@
 import { useFixtureInput } from "react-cosmos/client";
-import { ArrowForwardIconContainer } from "./ArrowForwardIcon";
+import { ArrowForwardIcon as ArrowForwardIconContainer } from "./ArrowForwardIcon";
 
 export default function ArrowForwardIconTest() {
   const [props] = useFixtureInput<

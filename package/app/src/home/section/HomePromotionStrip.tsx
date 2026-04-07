@@ -24,6 +24,7 @@ export const HomePromotionStrip: React.FC<HomePromotionStripProps> = ({
       <div className="flex gap-6 whitespace-nowrap text-sm">
         {resolvedItems.map((item, i) => (
           <a
+            // biome-ignore lint/suspicious/noArrayIndexKey: static list
             key={i}
             href={item.href || "#"}
             className="text-purple-700 hover:underline"

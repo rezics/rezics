@@ -57,13 +57,9 @@ export const CollapsibleReview: React.FC<CollapsibleReviewProps> = ({
       }
       // Temporarily apply clamp to measure
       const prev = el.style.webkitLineClamp as unknown as string;
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-expect-error
       el.style.webkitLineClamp = String(maxCollapsedLines);
       const overflowing = el.scrollHeight > el.clientHeight + 2; // allow tiny diff
       setIsOverflowing(overflowing);
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-expect-error
       el.style.webkitLineClamp = prev ?? "";
     };
     measure();

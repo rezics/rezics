@@ -74,7 +74,7 @@ export function BookShareDocument({
         {imageUrl ? <meta itemProp="image" content={imageUrl} /> : null}
 
         <style
-          // eslint-disable-next-line react/no-danger
+          // biome-ignore lint/security/noDangerouslySetInnerHtml: style injection
           dangerouslySetInnerHTML={{
             __html: styles,
           }}

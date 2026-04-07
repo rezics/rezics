@@ -47,11 +47,13 @@ export const HorizontalReadListCarousel: React.FC<
       <CarouselContent className="-ml-4">
         {variant === "single-line"
           ? readlistList.map((item, index) => (
+              // biome-ignore lint/suspicious/noArrayIndexKey: static list
               <CarouselItem key={index} className={CarouselItemClassName}>
                 <ReadListCard readlist={item} />
               </CarouselItem>
             ))
           : readlistPairs?.map((pair, index) => (
+              // biome-ignore lint/suspicious/noArrayIndexKey: static list
               <CarouselItem key={index} className={CarouselItemClassName}>
                 <VerticalTwoReadListCard
                   readlist1={pair.readlist1}

@@ -24,6 +24,7 @@ export function PanelSlot({ slot, onTreeChange }: PanelSlotProps) {
   return (
     <>
       {components.map((Component, i) => (
+        // biome-ignore lint/suspicious/noArrayIndexKey: static list
         <Component key={i} {...panelProps} />
       ))}
     </>

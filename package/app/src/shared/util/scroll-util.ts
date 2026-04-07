@@ -29,7 +29,7 @@ export function startThrottledScroll(
   };
 }
 
-export const scroll = async (distance: number, count = 0) => {
+export const scroll = async (distance: number, count = 0): Promise<void> => {
   // After adjusting the page structure, the function worked much better.
   if (count > 1000) {
     return;

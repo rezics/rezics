@@ -1,6 +1,11 @@
 import { HttpResponse, http } from "msw";
 
-// import { Post } from "@/contract/post.ts";
+const Post = {
+  list: { path: "/api/posts" },
+  get: { path: "/api/posts/:id" },
+  create: { path: "/api/posts" },
+  update: { path: "/api/posts/:id" },
+};
 
 const categories = [
   { id: "1", title: "General" },
