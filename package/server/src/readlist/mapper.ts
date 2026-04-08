@@ -1,20 +1,7 @@
-import type { PublicUser, ReadlistDTO } from "@rezics/contract";
+import type { ReadlistDTO } from "@rezics/contract";
+import { sanitizeUser } from "@/utils/sanitizeUser";
 import { mapReviewToDTO } from "../review/mapper";
 import type { ReadlistListSelected, ReadlistSelected } from "./types";
-
-export function sanitizeUser(u: {
-  unitId: string;
-  slug?: string;
-  name: string;
-  avatar?: string | null;
-}): PublicUser {
-  return {
-    unitId: u.unitId,
-    slug: u.slug,
-    name: u.name,
-    avatar: u.avatar ?? (null as any),
-  };
-}
 
 // Simple mappers for readlist service shapes
 export function mapReadlistListRowToDTO(

@@ -11,6 +11,6 @@ export { bookApi } from "./book.api";
 // Service layer for internal use
 export { BookService, bookService } from "./book.service";
 // Utilities
-export { mapBookToDTO, sanitizeUser } from "./mapper";
+export { mapBookToDTO } from "./mapper";
 // Types for internal use
 export type { BookWithRelations } from "./types";

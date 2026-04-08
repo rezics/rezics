@@ -38,6 +38,7 @@ import { tokenApi } from "./token";
 import { unitApi } from "./unit";
 import { uploadApi } from "./upload";
 import { userApi } from "./user";
+import { AppError } from "./utils/errors";
 import { getProdState } from "./utils/getProdState";
 import { wellKnownApi } from "./well-known/well-known.api";
 
@@ -142,6 +143,9 @@ app
     }),
   )
   .onError(({ code, error, set }) => {
+    if (error instanceof AppError) {
+      set.status = error.statusCode;
+    }
     set.status ||= 500;
     const message =
       error instanceof Error ? error.message : "Internal Server Error";

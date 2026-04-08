@@ -1,29 +1,7 @@
-import type {
-  PublicUser,
-  ReviewDTO,
-  ReviewListQuery,
-  UnitListQuery,
-} from "@rezics/contract";
-import type { Prisma, UnitType, User } from "#/prisma/client";
+import type { ReviewDTO, ReviewListQuery, UnitListQuery } from "@rezics/contract";
+import type { Prisma, UnitType } from "#/prisma/client";
+import { sanitizeUserWithBio } from "@/utils/sanitizeUser";
 import type { ReviewWithRelations } from "./types";
-
-/**
- * Sanitize user data for public response.
- *
- * 保留对外暴露所需的最小字段，避免泄露敏感信息。
- */
-export function sanitizeUser(u: User): PublicUser {
-  return {
-    unitId: u.unitId,
-    slug: u.slug,
-    name: u.name,
-    avatar: u.avatar ?? (null as any),
-    bio: u.bio ?? undefined,
-    description: u.description ?? undefined,
-    followersCount: u.followersCount,
-    followingsCount: u.followingsCount,
-  };
-}
 
 /**
  * 从 unit.metadata 中解析出评分字段。
@@ -169,6 +147,6 @@ export function mapReviewToDTO(unit: ReviewWithRelations): ReviewDTO {
     rating,
     reactionSummaries: unit.reactionSummaries,
     created_at: unit.createdAt?.toISOString?.() ?? (unit.createdAt as any),
-    user: unit.user ? sanitizeUser(unit.user) : undefined,
+    user: unit.user ? sanitizeUserWithBio(unit.user) : undefined,
   };
 }

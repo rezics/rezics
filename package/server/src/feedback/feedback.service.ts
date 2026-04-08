@@ -1,17 +1,12 @@
-import type {
-  CreateFeedbackInput,
-  FeedbackListQuery,
-  FeedbackListResponse,
-} from "@rezics/contract";
-import type { Prisma } from "#/prisma/client";
+import type { CreateFeedbackInput, FeedbackListQuery } from "@rezics/contract";
+import type { Feedback, Prisma } from "#/prisma/client";
 import { prisma } from "#/prisma/client";
 import { syncFeedbackToMeili } from "@/meili/feedback/sync";
-import { mapFeedbackToDTO } from "./mapper";
 
 export class FeedbackService {
   async create(
     input: CreateFeedbackInput & { userId: string },
-  ): Promise<ReturnType<typeof mapFeedbackToDTO>> {
+  ): Promise<Feedback> {
     const { userId, unitId, url, content, type } = input;
     const created = await prisma.feedback.create({
       data: {
@@ -23,20 +18,21 @@ export class FeedbackService {
       },
     });
     await syncFeedbackToMeili(created.id);
-    return mapFeedbackToDTO(created);
+    return created;
   }
 
-  async getById(id: string) {
-    const feedback = await prisma.feedback.findUniqueOrThrow({
+  async getById(id: string): Promise<Feedback> {
+    return prisma.feedback.findUniqueOrThrow({
       where: { id },
     });
-    return mapFeedbackToDTO(feedback);
   }
 
   /**
    * Generic list with rich filters for admin / per-user queries
    */
-  async list(query: FeedbackListQuery): Promise<FeedbackListResponse> {
+  async list(
+    query: FeedbackListQuery,
+  ): Promise<{ items: Feedback[]; offset: number; totalItems: number }> {
     const offset = Number.isFinite(query.offset as number)
       ? Number(query.offset)
       : 0;
@@ -84,7 +80,7 @@ export class FeedbackService {
     ]);
 
     return {
-      items: rows.map(mapFeedbackToDTO),
+      items: rows,
       offset,
       totalItems: total,
     };
@@ -95,7 +91,7 @@ export class FeedbackService {
    * - When setting resolved=true, resolvedAt is set to now.
    * - When setting resolved=false, resolvedAt is cleared.
    */
-  async setResolved(id: string, resolved: boolean) {
+  async setResolved(id: string, resolved: boolean): Promise<Feedback> {
     const data: Prisma.FeedbackUpdateInput = {
       resolved,
       resolvedAt: resolved ? new Date() : null,
@@ -105,7 +101,7 @@ export class FeedbackService {
       data,
     });
     await syncFeedbackToMeili(id);
-    return mapFeedbackToDTO(updated);
+    return updated;
   }
 }
 

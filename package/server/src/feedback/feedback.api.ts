@@ -8,16 +8,18 @@ import {
 import { Elysia, t } from "elysia";
 import { authMacro } from "@/middleware";
 import { feedbackService } from "./feedback.service";
+import { mapFeedbackToDTO } from "./mapper";
 
 export const feedbackApi = new Elysia({ prefix: "/feedbacks" })
   .use(authMacro)
   .post(
     "/",
     async ({ body, identity }): Promise<FeedbackDTO> => {
-      return feedbackService.create({
+      const created = await feedbackService.create({
         ...body,
         userId: identity.unitId,
       });
+      return mapFeedbackToDTO(created);
     },
     {
       requireLogin: true,
@@ -34,10 +36,11 @@ export const feedbackApi = new Elysia({ prefix: "/feedbacks" })
     "/my",
     async ({ query, identity }): Promise<FeedbackListResponse> => {
       const { userId: _ignoredUserId, ...rest } = query as any;
-      return feedbackService.list({
+      const result = await feedbackService.list({
         ...(rest as any),
         userId: identity.unitId,
       });
+      return { ...result, items: result.items.map(mapFeedbackToDTO) };
     },
     {
       requireLogin: true,
@@ -68,10 +71,11 @@ export const feedbackApi = new Elysia({ prefix: "/feedbacks" })
       }
 
       const { userId: _ignoredUserId, ...rest } = query as any;
-      return feedbackService.list({
+      const result = await feedbackService.list({
         ...(rest as any),
         userId: params.userId,
       });
+      return { ...result, items: result.items.map(mapFeedbackToDTO) };
     },
     {
       requireOwner: true,
@@ -94,7 +98,8 @@ export const feedbackApi = new Elysia({ prefix: "/feedbacks" })
           "Forbidden: you do not have permission to list all feedbacks",
         );
       }
-      return feedbackService.list(query as any);
+      const result = await feedbackService.list(query as any);
+      return { ...result, items: result.items.map(mapFeedbackToDTO) };
     },
     {
       requireOwner: true,
@@ -116,7 +121,8 @@ export const feedbackApi = new Elysia({ prefix: "/feedbacks" })
           "Forbidden: you do not have permission to get feedback details",
         );
       }
-      return feedbackService.getById(params.id);
+      const feedback = await feedbackService.getById(params.id);
+      return mapFeedbackToDTO(feedback);
     },
     {
       requireOwner: true,
@@ -138,7 +144,8 @@ export const feedbackApi = new Elysia({ prefix: "/feedbacks" })
         );
       }
       const resolved = (body as { resolved: boolean }).resolved;
-      return feedbackService.setResolved(params.id, resolved);
+      const feedback = await feedbackService.setResolved(params.id, resolved);
+      return mapFeedbackToDTO(feedback);
     },
     {
       requireOwner: true,
