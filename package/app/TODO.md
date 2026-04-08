@@ -2,6 +2,7 @@
 - [ ] 登錄可能還是有問題，有可能會無緣無故退出，查看localstorage 重置邏輯以及 cookie 的更新邏輯
 - [ ] user/me page似乎可能卡住
 - [ ] 最新作品 home section 要優化，firefox 上會卡噸，性能不好
+- [ ] chapter list 任意節點作爲任意節點 的 孩子，三個點擴展的功能
 - [ ] 很多API需要改成聚合查詢，減少請求次數，比如帖子的統計信息
 - [ ] Switching between tabs for an extended period may also cause the homepage carousel to go blank(till next carousel), only firefox or ?
 - [x] MUI 的还没自己写的好用 https://mui.com/x/react-tree-view/ 用这个替换当前的 Tree 章节 View
