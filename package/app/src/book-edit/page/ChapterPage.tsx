@@ -9,12 +9,12 @@ import {
   TextField,
 } from "@mui/material";
 import { bookChapterIndexQuery, bookMutations } from "@rezics/api/book/book";
+import { bookQueries } from "@rezics/api/book/book.queries";
 import {
   chapterDetailQuery,
   useUpdateChapterMutation,
 } from "@rezics/api/chapter/chapter";
 import { RezicsMarkdownEditor, type ViewMode } from "@rezics/ui/editor";
-import { bookQueries } from "@rezics/api/book/book.queries";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type React from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -44,9 +44,7 @@ export const BookEditChapterPage: React.FC = () => {
   const [viewMode, setViewMode] = useState<ViewMode>("write");
 
   // Load chapter tree for the move dialog
-  const { data: chapterIndexData } = useQuery(
-    bookQueries.chapterIndex(bookId),
-  );
+  const { data: chapterIndexData } = useQuery(bookQueries.chapterIndex(bookId));
   const chapterTree = useMemo(
     () => chapterIndexData?.index ?? [],
     [chapterIndexData],
@@ -56,7 +54,6 @@ export const BookEditChapterPage: React.FC = () => {
   const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [moveDialogOpen, setMoveDialogOpen] = useState(false);
-
 
   // Initialize form state from fetched data
   useEffect(() => {
@@ -158,7 +155,7 @@ export const BookEditChapterPage: React.FC = () => {
     <div
       className={`mx-auto px-6 pt-4 pb-6 flex flex-col h-[calc(100vh-5rem)] transition-all duration-300 ${isDual ? "max-w-7xl" : "max-w-4xl"}`}
     >
-      <div className="flex items-center gap-2 mb-2">
+      <div className="flex items-center gap-2 mb-4">
         <TextField
           id="chapter-title"
           placeholder={t("placeholders.chapter_title", "章节标题")}
@@ -206,9 +203,7 @@ export const BookEditChapterPage: React.FC = () => {
             <ListItemIcon>
               <Settings fontSize="small" />
             </ListItemIcon>
-            <ListItemText>
-              {t("chapter.metadata", "章节设置")}
-            </ListItemText>
+            <ListItemText>{t("chapter.metadata", "章节设置")}</ListItemText>
           </MenuItem>
         </Menu>
       </div>
