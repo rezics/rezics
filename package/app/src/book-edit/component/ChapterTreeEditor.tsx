@@ -64,8 +64,6 @@ export interface ChapterTreeEditorHandle {
 interface ChapterTreeEditorProps {
   chapterTree: Chapter[];
   bookUnitId: string;
-  height: number;
-  width?: number;
   onDownloadJSON?: () => void;
 }
 
@@ -114,15 +112,37 @@ function formatTotal(n: number): string {
   return n.toLocaleString();
 }
 
-const TOOLBAR_HEIGHT = 48;
-const FOOTER_HEIGHT = 48;
+const MIN_TREE_HEIGHT = 300;
 
 export const ChapterTreeEditor = forwardRef<
   ChapterTreeEditorHandle,
   ChapterTreeEditorProps
->(({ chapterTree, bookUnitId, height, width, onDownloadJSON }, ref) => {
+>(({ chapterTree, bookUnitId, onDownloadJSON }, ref) => {
   const treeRef = useRef<TreeApi<Chapter> | null>(null);
   const [treeData, setTreeData] = useState<Chapter[]>([]);
+  const [treeSize, setTreeSize] = useState({ width: 0, height: MIN_TREE_HEIGHT });
+  const treeAreaRef = useRef<HTMLDivElement | null>(null);
+  const resizeObserverRef = useRef<ResizeObserver | null>(null);
+
+  const treeAreaCallbackRef = useCallback((el: HTMLDivElement | null) => {
+    if (resizeObserverRef.current) {
+      resizeObserverRef.current.disconnect();
+      resizeObserverRef.current = null;
+    }
+    treeAreaRef.current = el;
+    if (!el) return;
+
+    const measure = () => {
+      setTreeSize({
+        width: el.clientWidth,
+        height: Math.max(MIN_TREE_HEIGHT, el.clientHeight),
+      });
+    };
+    measure();
+
+    resizeObserverRef.current = new ResizeObserver(measure);
+    resizeObserverRef.current.observe(el);
+  }, []);
   const [contextMenu, setContextMenu] = useState<ChapterContextMenuState>(null);
   const [createChapterDialog, setCreateChapterDialog] = useState(false);
   const [currentEditParentId, setCurrentEditParentId] = useState<
@@ -300,10 +320,8 @@ export const ChapterTreeEditor = forwardRef<
   const chapterCount = useMemo(() => countChapters(treeData), [treeData]);
   const wordCount = useMemo(() => totalWordCount(treeData), [treeData]);
 
-  const treeHeight = Math.max(200, height - TOOLBAR_HEIGHT - FOOTER_HEIGHT);
-
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full min-h-0">
       <ChapterTreeEditorToolbar
         searchTerm={searchTerm}
         onSearchChange={setSearchTerm}
@@ -314,11 +332,13 @@ export const ChapterTreeEditor = forwardRef<
         onToggleSortingMode={() => setIsSortingMode((v) => !v)}
       />
 
-      {/* Tree area */}
+      {/* Tree area — flex-1 fills remaining space; min-h provides scroll fallback */}
       {/* biome-ignore lint/a11y/noStaticElementInteractions: tree container */}
       <div
+        ref={treeAreaCallbackRef}
         role="presentation"
         className="flex-1 min-h-0 overflow-hidden"
+        style={{ minHeight: MIN_TREE_HEIGHT }}
         onClick={() => setContextMenu(null)}
         onKeyDown={(e: React.KeyboardEvent) => {
           if (e.key === "Escape") setContextMenu(null);
@@ -343,9 +363,9 @@ export const ChapterTreeEditor = forwardRef<
             onMove={onMove}
             onRename={onRename}
             onDelete={onDelete}
-            width={width}
-            height={treeHeight}
-            indent={20}
+            width={treeSize.width}
+            height={treeSize.height}
+            indent={0}
             rowHeight={LEAF_ROW_HEIGHT}
             disableDrag={!isSortingMode}
             disableDrop={!isSortingMode}
@@ -374,7 +394,7 @@ export const ChapterTreeEditor = forwardRef<
       </div>
 
       {/* Footer */}
-      <div className="flex items-center justify-between pt-3 text-sm text-muted-foreground">
+      <div className="flex items-center justify-between py-3 pb-6 text-sm text-muted-foreground">
         <span>
           {chapterCount} chapters · {formatTotal(wordCount)} words
         </span>
