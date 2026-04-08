@@ -1,3 +1,4 @@
+export type { ViewMode } from "@rezics/editor/editor";
 export { ImageModal, type ImageModalProps } from "./image/ImageModal";
 export type { ImageProvider } from "./image/types";
 export { EditorPanel, type EditorPanelProps } from "./panel/EditorPanel";

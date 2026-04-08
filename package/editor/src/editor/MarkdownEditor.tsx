@@ -23,7 +23,7 @@ import "./MarkdownEditor.css";
 
 export type { MarkdownEditorProps };
 
-type ViewMode = "write" | "preview" | "dual";
+import type { ViewMode } from "./types";
 
 function createMarkdownRenderer(config?: PreviewConfig) {
   const highlighter =
@@ -47,6 +47,7 @@ export function MarkdownEditor({
   toolbar,
   resize,
   viewRef,
+  onViewModeChange,
 }: MarkdownEditorProps) {
   const [viewMode, setViewMode] = useState<ViewMode>("write");
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -59,6 +60,10 @@ export function MarkdownEditor({
     () => (typeof preview === "object" ? preview : undefined),
     [preview],
   );
+
+  useEffect(() => {
+    onViewModeChange?.(viewMode);
+  }, [viewMode, onViewModeChange]);
 
   useEffect(() => {
     setLiveContent(value ?? "");

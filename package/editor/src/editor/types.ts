@@ -44,11 +44,15 @@ export interface BaseEditorProps {
   viewRef?: RefCallback<EditorView>;
 }
 
+export type ViewMode = "write" | "preview" | "dual";
+
 export interface MarkdownEditorProps extends BaseEditorProps {
   preview?: boolean | PreviewConfig;
   mention?: MentionConfig;
   emoji?: EmojiConfig;
   toolbar?: false | ToolbarOverride;
+  /** Called when the editor view mode changes (write / preview / dual). */
+  onViewModeChange?: (mode: ViewMode) => void;
 }
 
 export interface JsonEditorProps extends BaseEditorProps {

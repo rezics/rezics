@@ -3,6 +3,7 @@ import type {
   MarkdownEditorProps,
   ResizeConfig,
   ToolbarOverride,
+  ViewMode,
 } from "@rezics/editor/editor";
 import { MarkdownEditor } from "@rezics/editor/editor";
 import { insertImageUrl } from "@rezics/editor/markdown";
@@ -30,6 +31,9 @@ export interface RezicsMarkdownEditorProps
   extraRight?: React.ReactNode;
   imageProviders?: ImageProvider[];
   disableResize?: boolean;
+  /** Fill the parent container height via CSS flex instead of resize drag. */
+  fillHeight?: boolean;
+  onViewModeChange?: (mode: ViewMode) => void;
 }
 
 export function RezicsMarkdownEditor({
@@ -39,6 +43,8 @@ export function RezicsMarkdownEditor({
   extraRight,
   imageProviders,
   disableResize,
+  fillHeight,
+  onViewModeChange,
   onChange,
   toolbar: callerToolbar,
   // Handled by this wrapper — don't forward to MarkdownEditor
@@ -123,14 +129,16 @@ export function RezicsMarkdownEditor({
 
   // ---- Layout ----
 
-  const resolvedResize = disableResize
-    ? undefined
-    : (editorProps.resize ?? DEFAULT_RESIZE_CONFIG);
+  const resolvedResize =
+    fillHeight || disableResize
+      ? undefined
+      : (editorProps.resize ?? DEFAULT_RESIZE_CONFIG);
 
   return (
     // biome-ignore lint/a11y/noStaticElementInteractions: editor wrapper needs keyboard handling
     <div
       ref={wrapperRef}
+      className={fillHeight ? "rezics-editor-fill" : undefined}
       onKeyDown={(e) => {
         // Prevent Enter from propagating to parent forms/dialogs
         // (e.g. MUI Dialog, form submission). Modifier+Enter is allowed
@@ -147,6 +155,7 @@ export function RezicsMarkdownEditor({
         viewRef={handleViewRef}
         onChange={handleEditorChange}
         toolbar={toolbar}
+        onViewModeChange={onViewModeChange}
       />
       <EditorPanel
         left={

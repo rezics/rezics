@@ -14,6 +14,29 @@
   border-radius: 0;
 }
 
+/* Fill-height mode: editor + panel share parent height via flex.
+   Activated by the fillHeight prop on RezicsMarkdownEditor. */
+.rezics-editor-fill {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.rezics-editor-fill > .rezics-editor-wrapper {
+  flex: 1;
+  min-height: 0;
+  /* The md-editor-root IS this element; make it fill the flex slot */
+  height: 100%;
+}
+
+.rezics-editor-fill > .rezics-editor-wrapper .cm-editor {
+  height: 100%;
+}
+
+.rezics-editor-fill > .rezics-editor-wrapper .cm-scroller {
+  overflow: auto;
+}
+
 /* ── Dark mode ── */
 .dark .rezics-editor-wrapper {
   /* Surfaces */

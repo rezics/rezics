@@ -1,22 +1,30 @@
-import { Button, CircularProgress, TextField } from "@mui/material";
+import { AccountTree, MoreHoriz, Settings } from "@mui/icons-material";
+import {
+  CircularProgress,
+  IconButton,
+  ListItemIcon,
+  ListItemText,
+  Menu,
+  MenuItem,
+  TextField,
+} from "@mui/material";
 import { bookChapterIndexQuery, bookMutations } from "@rezics/api/book/book";
 import {
   chapterDetailQuery,
   useUpdateChapterMutation,
 } from "@rezics/api/chapter/chapter";
-
-import { RezicsMarkdownEditor } from "@rezics/ui/editor";
+import { RezicsMarkdownEditor, type ViewMode } from "@rezics/ui/editor";
+import { bookQueries } from "@rezics/api/book/book.queries";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type React from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { EditChapterDialog } from "@/book-edit/component/EditChapterDialog";
+import { MoveToParentDialog } from "@/book-edit/component/MoveToParentDialog";
 import { bookEditChapterRoute, bookEditLayoutRoute } from "@/router";
 
 /**
- * TODO 正常来说，所有的章节分卷管理都需要在这里解决，新增章节的时候选择分卷，或者删除章节。
  * TODO Chapter List 换成 Tree 模式之后，编辑还没有校验
- * @param param0
- * @returns
  */
 export const BookEditChapterPage: React.FC = () => {
   const { bookId } = bookEditLayoutRoute.useParams();
@@ -33,6 +41,22 @@ export const BookEditChapterPage: React.FC = () => {
 
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
+  const [viewMode, setViewMode] = useState<ViewMode>("write");
+
+  // Load chapter tree for the move dialog
+  const { data: chapterIndexData } = useQuery(
+    bookQueries.chapterIndex(bookId),
+  );
+  const chapterTree = useMemo(
+    () => chapterIndexData?.index ?? [],
+    [chapterIndexData],
+  );
+
+  // ---- Chapter actions menu ----
+  const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [moveDialogOpen, setMoveDialogOpen] = useState(false);
+
 
   // Initialize form state from fetched data
   useEffect(() => {
@@ -128,55 +152,97 @@ export const BookEditChapterPage: React.FC = () => {
     );
   }
 
+  const isDual = viewMode === "dual";
+
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">
-          {t("chapter.edit_title", "编辑章节")}
-        </h1>
-        <Button
-          variant="contained"
-          onClick={handleSubmit}
-          disabled={isInvalid || !isDirty || updateMutation.isPending}
+    <div
+      className={`mx-auto px-6 pt-4 pb-6 flex flex-col h-[calc(100vh-5rem)] transition-all duration-300 ${isDual ? "max-w-7xl" : "max-w-4xl"}`}
+    >
+      <div className="flex items-center gap-2 mb-2">
+        <TextField
+          id="chapter-title"
+          placeholder={t("placeholders.chapter_title", "章节标题")}
+          variant="standard"
+          className="flex-1"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          error={!title.trim()}
+          slotProps={{
+            input: {
+              sx: { fontSize: "1.25rem", fontWeight: 600 },
+            },
+          }}
+        />
+        <IconButton
+          size="small"
+          onClick={(e) => setMenuAnchor(e.currentTarget)}
         >
-          {updateMutation.isPending ? (
-            <span className="flex items-center gap-2">
-              <CircularProgress size={16} /> {t("common.saving", "保存中...")}
-            </span>
-          ) : (
-            t("common.submit")
-          )}
-        </Button>
+          <MoreHoriz />
+        </IconButton>
+        <Menu
+          anchorEl={menuAnchor}
+          open={Boolean(menuAnchor)}
+          onClose={() => setMenuAnchor(null)}
+        >
+          <MenuItem
+            onClick={() => {
+              setMenuAnchor(null);
+              setMoveDialogOpen(true);
+            }}
+          >
+            <ListItemIcon>
+              <AccountTree fontSize="small" />
+            </ListItemIcon>
+            <ListItemText>
+              {t("chapter.move_volume", "移动至分卷")}
+            </ListItemText>
+          </MenuItem>
+          <MenuItem
+            onClick={() => {
+              setMenuAnchor(null);
+              setEditDialogOpen(true);
+            }}
+          >
+            <ListItemIcon>
+              <Settings fontSize="small" />
+            </ListItemIcon>
+            <ListItemText>
+              {t("chapter.metadata", "章节设置")}
+            </ListItemText>
+          </MenuItem>
+        </Menu>
       </div>
 
-      <div className="rounded-lg border border-border shadow-sm p-4 bg-background">
-        <div className="mb-4">
-          <TextField
-            id="chapter-title"
-            label={t("chapter.title", "章节标题")}
-            placeholder={t("placeholders.chapter_title")}
-            multiline
-            variant="filled"
-            className="w-full"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            error={!title.trim()}
-            helperText={!title.trim() ? t("validation.required", "必填") : " "}
-          />
-        </div>
-        <div className="min-h-[400px]">
-          <RezicsMarkdownEditor
-            value={content}
-            onChange={setContent}
-            onSubmit={handleSubmit}
-          />
-          {!content.trim() && (
-            <div className="text-sm text-destructive mt-2">
-              {t("validation.required", "必填")}
-            </div>
-          )}
-        </div>
+      <div className="flex-1 min-h-0">
+        <RezicsMarkdownEditor
+          value={content}
+          onChange={setContent}
+          onSubmit={handleSubmit}
+          onViewModeChange={setViewMode}
+          fillHeight
+        />
       </div>
+
+      <EditChapterDialog
+        open={editDialogOpen}
+        onClose={() => setEditDialogOpen(false)}
+        chapter={data ? { id: chapterId, title, children: [] } : null}
+        onSave={({ title: newTitle, status }) => {
+          setTitle(newTitle);
+          // TODO: persist status change via API
+          console.log("Chapter status update:", status);
+        }}
+      />
+      <MoveToParentDialog
+        open={moveDialogOpen}
+        onClose={() => setMoveDialogOpen(false)}
+        treeData={chapterTree}
+        movingNode={data ? { id: chapterId, title, children: [] } : null}
+        onConfirm={(targetParentId) => {
+          // TODO: move chapter to new parent via API
+          console.log("Move chapter to:", targetParentId);
+        }}
+      />
     </div>
   );
 };

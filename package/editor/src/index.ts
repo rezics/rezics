@@ -9,7 +9,7 @@ export type {
   EditorPluginFactory,
 } from "./core/types";
 // Resize
-export type { ResizeConfig } from "./editor/types";
+export type { ResizeConfig, ViewMode } from "./editor/types";
 export { json } from "./json/core/index";
 // JSON (granular + preset)
 export { jsonFull } from "./json/index";
