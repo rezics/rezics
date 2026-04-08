@@ -114,6 +114,10 @@
   },
   "editor.defaultFormatter": "biomejs.biome",
   "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.organizeImports.biome": "explicit",
+    "source.fixAll.biome": "explicit"
+  },
   "typescript.experimental.useTsgo": true,
   "[prisma]": {
     "editor.defaultFormatter": "Prisma.prisma-insider"
