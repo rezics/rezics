@@ -1,3 +1,4 @@
+import { useTheme } from "@mui/material/styles";
 import { RezicsMarkdownEditor } from "@rezics/ui/editor";
 import type React from "react";
 import { useEffect, useRef } from "react";
@@ -30,6 +31,7 @@ export const ReplyDrawerContainer: React.FC<ReplyDrawerContainerProps> = ({
   const entry = useDialogStore((state) => state.dialogs[dialogId]);
   const setDialogVisible = useDialogStore((state) => state.setDialogVisible);
   const setDialogContent = useDialogStore((state) => state.setDialogContent);
+  const theme = useTheme();
   const panelRef = useRef<HTMLDivElement>(null);
 
   const isOpen = entry?.visible ?? false;
@@ -77,12 +79,16 @@ export const ReplyDrawerContainer: React.FC<ReplyDrawerContainerProps> = ({
 
   return (
     <div
+      role="dialog"
       className={`fixed inset-0 z-50 transition-opacity duration-200 ${
         isOpen
           ? "pointer-events-auto opacity-100"
           : "pointer-events-none opacity-0"
       }`}
       onClick={handleOverlayClick}
+      onKeyDown={(e) => {
+        if (e.key === "Escape") handleClose();
+      }}
     >
       {/* Overlay */}
       <div className="absolute inset-0 bg-black/30" />
@@ -94,8 +100,10 @@ export const ReplyDrawerContainer: React.FC<ReplyDrawerContainerProps> = ({
           isOpen ? "translate-y-0" : "translate-y-full"
         }`}
       >
-        {/* TODO need fix background color and rounded corner for top(it could be larger because person can't see the top of the drawer) */}
-        <div className="bg-white">
+        <div
+          className="rounded-t-2xl"
+          style={{ backgroundColor: theme.palette.background.paper }}
+        >
           <RezicsMarkdownEditor
             value={entry?.contentMain ?? ""}
             onChange={handleChange}
