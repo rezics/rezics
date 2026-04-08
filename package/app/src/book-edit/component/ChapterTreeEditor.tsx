@@ -1,7 +1,11 @@
-import { Download as DownloadIcon, Save as SaveIcon } from "@mui/icons-material";
-import { Button } from "@mui/material";
 import { useAlertStore } from "@app/state/windowAlertStore.ts";
+import {
+  Download as DownloadIcon,
+  Save as SaveIcon,
+} from "@mui/icons-material";
+import { Button } from "@mui/material";
 import { bookMutations } from "@rezics/api/book/book.mutations";
+import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
 import {
   forwardRef,
@@ -19,7 +23,6 @@ import type {
   RenameHandler,
 } from "react-arborist";
 import { Tree, type TreeApi } from "react-arborist";
-import { v4 as uuidv4 } from "uuid";
 import {
   findAndAddChild,
   findAndDelete,
@@ -29,8 +32,8 @@ import {
 } from "@/shared/util/arborist-tree";
 import { ChapterTreeContextMenu } from "./ChapterTreeContextMenu";
 import {
-  LEAF_ROW_HEIGHT,
   createChapterTreeEditorNode,
+  LEAF_ROW_HEIGHT,
   mockWordCount,
 } from "./ChapterTreeEditorNode";
 import { ChapterTreeEditorToolbar } from "./ChapterTreeEditorToolbar";
@@ -111,6 +114,9 @@ function formatTotal(n: number): string {
   return n.toLocaleString();
 }
 
+const TOOLBAR_HEIGHT = 48;
+const FOOTER_HEIGHT = 48;
+
 export const ChapterTreeEditor = forwardRef<
   ChapterTreeEditorHandle,
   ChapterTreeEditorProps
@@ -123,6 +129,7 @@ export const ChapterTreeEditor = forwardRef<
     string | number | null
   >(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [isSortingMode, setIsSortingMode] = useState(false);
 
   // Edit chapter dialog state
   const [editDialogChapter, setEditDialogChapter] = useState<Chapter | null>(
@@ -136,6 +143,7 @@ export const ChapterTreeEditor = forwardRef<
 
   const updateChapterIndexMutation = bookMutations.useUpdateChapterIndex();
   const { show: showAlert } = useAlertStore();
+  const navigate = useNavigate();
 
   useImperativeHandle(ref, () => ({
     expandAll: () => treeRef.current?.openAll(),
@@ -224,11 +232,27 @@ export const ChapterTreeEditor = forwardRef<
     setEditDialogChapter(chapter);
   }, []);
 
+  /** Navigate to the chapter content editor page. */
+  const handleNavigateToChapter = useCallback(
+    (chapter: Chapter) => {
+      navigate({
+        to: "/book/$bookId/edit/$chapterId",
+        params: { bookId: bookUnitId, chapterId: String(chapter.id) },
+      });
+    },
+    [navigate, bookUnitId],
+  );
+
   /** Save edits from the edit dialog (title rename + mock status). */
   const handleEditSave = useCallback(
     (update: { title: string; status: string }) => {
-      setTreeData((current) =>
-        findAndEdit(current, String(editDialogChapter!.id), update.title) as Chapter[],
+      setTreeData(
+        (current) =>
+          findAndEdit(
+            current,
+            String(editDialogChapter!.id),
+            update.title,
+          ) as Chapter[],
       );
     },
     [editDialogChapter],
@@ -262,27 +286,39 @@ export const ChapterTreeEditor = forwardRef<
   );
 
   const Node = useMemo(
-    () => createChapterTreeEditorNode(setContextMenu, treeRef, handleEditChapter),
-    [handleEditChapter],
+    () =>
+      createChapterTreeEditorNode(
+        setContextMenu,
+        treeRef,
+        handleEditChapter,
+        handleNavigateToChapter,
+        isSortingMode,
+      ),
+    [handleEditChapter, handleNavigateToChapter, isSortingMode],
   );
 
   const chapterCount = useMemo(() => countChapters(treeData), [treeData]);
   const wordCount = useMemo(() => totalWordCount(treeData), [treeData]);
 
+  const treeHeight = Math.max(200, height - TOOLBAR_HEIGHT - FOOTER_HEIGHT);
+
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col h-full">
       <ChapterTreeEditorToolbar
         searchTerm={searchTerm}
         onSearchChange={setSearchTerm}
         onExpandAll={() => treeRef.current?.openAll()}
         onCollapseAll={() => treeRef.current?.closeAll()}
         onNewChapter={handleQuickCreate}
+        isSortingMode={isSortingMode}
+        onToggleSortingMode={() => setIsSortingMode((v) => !v)}
       />
 
       {/* Tree area */}
       {/* biome-ignore lint/a11y/noStaticElementInteractions: tree container */}
       <div
         role="presentation"
+        className="flex-1 min-h-0 overflow-hidden"
         onClick={() => setContextMenu(null)}
         onKeyDown={(e: React.KeyboardEvent) => {
           if (e.key === "Escape") setContextMenu(null);
@@ -308,11 +344,11 @@ export const ChapterTreeEditor = forwardRef<
             onRename={onRename}
             onDelete={onDelete}
             width={width}
-            height={height}
+            height={treeHeight}
             indent={20}
             rowHeight={LEAF_ROW_HEIGHT}
-            disableDrag={false}
-            disableDrop={false}
+            disableDrag={!isSortingMode}
+            disableDrop={!isSortingMode}
             idAccessor="id"
             searchTerm={searchTerm}
             searchMatch={(node, t) =>

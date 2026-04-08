@@ -1,4 +1,10 @@
-import { Add, Search, UnfoldLess, UnfoldMore } from "@mui/icons-material";
+import {
+  Add,
+  Search,
+  SwapVert,
+  UnfoldLess,
+  UnfoldMore,
+} from "@mui/icons-material";
 import { Button, IconButton, Tooltip } from "@mui/material";
 import type React from "react";
 
@@ -8,6 +14,8 @@ interface ChapterTreeEditorToolbarProps {
   onExpandAll: () => void;
   onCollapseAll: () => void;
   onNewChapter: () => void;
+  isSortingMode: boolean;
+  onToggleSortingMode: () => void;
 }
 
 export const ChapterTreeEditorToolbar: React.FC<
@@ -18,11 +26,16 @@ export const ChapterTreeEditorToolbar: React.FC<
   onExpandAll,
   onCollapseAll,
   onNewChapter,
+  isSortingMode,
+  onToggleSortingMode,
 }) => {
   return (
     <div className="flex items-center gap-2 pb-3">
       <div className="relative flex-1">
-        <Search sx={{ fontSize: 16 }} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+        <Search
+          sx={{ fontSize: 16 }}
+          className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground"
+        />
         <input
           value={searchTerm}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
@@ -42,6 +55,19 @@ export const ChapterTreeEditorToolbar: React.FC<
       <Tooltip title="Collapse All">
         <IconButton size="small" onClick={onCollapseAll}>
           <UnfoldLess fontSize="small" />
+        </IconButton>
+      </Tooltip>
+
+      <Tooltip title={isSortingMode ? "Exit Sorting Mode" : "Sorting Mode"}>
+        <IconButton
+          size="small"
+          onClick={onToggleSortingMode}
+          sx={{
+            bgcolor: isSortingMode ? "action.selected" : "transparent",
+            color: isSortingMode ? "primary.main" : undefined,
+          }}
+        >
+          <SwapVert fontSize="small" />
         </IconButton>
       </Tooltip>
 

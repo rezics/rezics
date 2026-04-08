@@ -1,13 +1,19 @@
-import { DragIndicator, ExpandMore, MoreVert } from "@mui/icons-material";
-import { IconButton } from "@mui/material";
+import {
+  DragIndicator,
+  ExpandMore,
+  MoreVert,
+  Visibility,
+} from "@mui/icons-material";
+import { Card, CardContent, Chip, IconButton } from "@mui/material";
 import type React from "react";
 import type { NodeRendererProps, TreeApi } from "react-arborist";
+import { useLongPress } from "../hook/useLongPress";
 import type { Chapter, ChapterContextMenuState } from "./ChapterTreeEditor";
 
 /** Uniform row height — react-arborist (react-window) requires a single number. */
-export const LEAF_ROW_HEIGHT = 80;
+export const LEAF_ROW_HEIGHT = 100;
 
-/** Stable hash for seeded random mock word count. */
+/** Stable hash for seeded random mock values. */
 function hashCode(str: string): number {
   let hash = 0;
   for (let i = 0; i < str.length; i++) {
@@ -17,7 +23,7 @@ function hashCode(str: string): number {
   return Math.abs(hash);
 }
 
-/** Mock word count — to be replaced with real data later. */
+// MOCK: word count derived from node id hash — replace with real data when backend is ready
 export function mockWordCount(node: Chapter): number {
   if (node.children?.length) {
     return node.children.reduce((sum, c) => sum + mockWordCount(c), 0);
@@ -36,7 +42,7 @@ function formatCount(n: number): string {
   return n.toLocaleString();
 }
 
-/** Mock date from node id. */
+// MOCK: date from node id hash — replace with real createdAt/updatedAt
 function mockDate(id: string | number): string {
   const h = hashCode(String(id));
   const year = 2026;
@@ -47,15 +53,25 @@ function mockDate(id: string | number): string {
   return `${year}.${String(month).padStart(2, "0")}.${String(day).padStart(2, "0")} ${String(hour).padStart(2, "0")}:${String(min).padStart(2, "0")}`;
 }
 
+// MOCK: publish status derived from node id hash
+function mockPublishStatus(id: string | number): "DRAFT" | "PUBLISHED" {
+  return hashCode(String(id)) % 3 === 0 ? "DRAFT" : "PUBLISHED";
+}
+
+// MOCK: view count derived from node id hash
+function mockViewCount(id: string | number): number {
+  return (hashCode(String(id)) % 5000) + 10;
+}
+
 /**
  * Factory that returns a Node renderer bound to editor state setters.
  */
 export const createChapterTreeEditorNode = (
-  setContextMenu: React.Dispatch<
-    React.SetStateAction<ChapterContextMenuState>
-  >,
+  setContextMenu: React.Dispatch<React.SetStateAction<ChapterContextMenuState>>,
   treeRef: React.RefObject<TreeApi<Chapter> | null>,
   onEditChapter: (node: Chapter) => void,
+  onNavigateToChapter: (node: Chapter) => void,
+  isSortingMode: boolean,
 ) => {
   return function ChapterTreeEditorNode({
     node,
@@ -73,6 +89,21 @@ export const createChapterTreeEditorNode = (
       setContextMenu({ x: e.clientX, y: e.clientY, node });
     };
 
+    const openContextMenuFromTouch = (e: React.TouchEvent) => {
+      e.preventDefault();
+      const touch = e.touches[0] ?? e.changedTouches[0];
+      if (touch) {
+        treeRef.current?.select(String(node.id));
+        setContextMenu({
+          x: touch.clientX,
+          y: touch.clientY,
+          node,
+        });
+      }
+    };
+
+    const longPress = useLongPress(openContextMenuFromTouch);
+
     // ─── Parent / section node ───
     if (hasChildren) {
       return (
@@ -80,18 +111,22 @@ export const createChapterTreeEditorNode = (
           role="treeitem"
           tabIndex={0}
           style={style}
-          ref={dragHandle}
+          ref={isSortingMode ? dragHandle : undefined}
           className={`group flex items-center gap-2 px-2 h-full cursor-pointer select-none transition-colors duration-150 ${
-            isSelected
-              ? "bg-primary/8"
-              : "hover:bg-muted/40"
+            isSelected ? "bg-primary/8" : "hover:bg-muted/40"
           }`}
           onClick={() => node.toggle()}
+          onKeyDown={(e: React.KeyboardEvent) => {
+            if (e.key === "Enter") node.toggle();
+          }}
           onContextMenu={handleContextMenu}
+          {...longPress}
         >
-          <span className="flex-shrink-0 text-muted-foreground/40 group-hover:text-muted-foreground cursor-grab active:cursor-grabbing transition-colors">
-            <DragIndicator sx={{ fontSize: 16 }} />
-          </span>
+          {isSortingMode && (
+            <span className="flex-shrink-0 text-muted-foreground/40 group-hover:text-muted-foreground cursor-grab active:cursor-grabbing transition-colors">
+              <DragIndicator sx={{ fontSize: 16 }} />
+            </span>
+          )}
 
           <span className="flex-shrink-0 w-5 h-5 flex justify-center items-center text-muted-foreground">
             <ExpandMore
@@ -123,7 +158,6 @@ export const createChapterTreeEditorNode = (
               e.stopPropagation();
               handleContextMenu(e);
             }}
-            className="opacity-0 group-hover:opacity-100 transition-opacity"
             sx={{ width: 28, height: 28 }}
           >
             <MoreVert sx={{ fontSize: 18 }} />
@@ -133,62 +167,105 @@ export const createChapterTreeEditorNode = (
     }
 
     // ─── Leaf / chapter node ───
+    // MOCK: publish status and view count
+    const status = mockPublishStatus(node.id);
+    const views = mockViewCount(node.id);
+
+    const handleLeafClick = () => {
+      if (!isSortingMode) {
+        onNavigateToChapter(node.data);
+      }
+    };
+
     return (
       <div
         role="treeitem"
         tabIndex={0}
         style={style}
-        ref={dragHandle}
-        className={`group cursor-default select-none transition-colors duration-150 ${
-          isSelected ? "bg-primary/6" : ""
+        ref={isSortingMode ? dragHandle : undefined}
+        className={`group select-none ${
+          isSortingMode ? "cursor-default" : "cursor-pointer"
         }`}
-        onDoubleClick={() => onEditChapter(node.data)}
+        onClick={handleLeafClick}
+        onKeyDown={(e: React.KeyboardEvent) => {
+          if (e.key === "Enter") handleLeafClick();
+        }}
+        onDoubleClick={
+          isSortingMode ? () => onEditChapter(node.data) : undefined
+        }
         onContextMenu={handleContextMenu}
+        {...longPress}
       >
-        <div
-          className={`mx-1 rounded-lg px-3 py-2 transition-all duration-200 ${
-            isSelected
-              ? "bg-surface-variant/40 shadow-sm"
-              : "hover:bg-muted/30"
-          }`}
+        <Card
+          sx={{
+            mx: 1,
+            mr: 2,
+            height: "calc(100% - 2px)",
+            mt: "1px",
+            "&:hover": { boxShadow: 3 },
+          }}
         >
-          <div className="flex items-start justify-between gap-2">
-            <div className="min-w-0 flex-1">
-              {/* Title row with drag handle */}
-              <div className="flex items-center gap-1.5">
-                <span className="flex-shrink-0 text-muted-foreground/30 group-hover:text-muted-foreground cursor-grab active:cursor-grabbing transition-colors">
-                  <DragIndicator sx={{ fontSize: 14 }} />
-                </span>
-                <span className="font-medium text-sm truncate">
-                  {node.data.title}
-                </span>
+          <CardContent sx={{ py: 1.5, px: 2, "&:last-child": { pb: 1.5 } }}>
+            <div className="flex items-start justify-between gap-2">
+              <div className="min-w-0 flex-1">
+                {/* Title row */}
+                <div className="flex items-center gap-1.5">
+                  {isSortingMode && (
+                    <span className="flex-shrink-0 text-muted-foreground/30 group-hover:text-muted-foreground cursor-grab active:cursor-grabbing transition-colors">
+                      <DragIndicator sx={{ fontSize: 14 }} />
+                    </span>
+                  )}
+                  <span className="font-medium text-sm truncate">
+                    {node.data.title}
+                  </span>
+                </div>
+
+                {/* Status & date line */}
+                <div
+                  className={`flex items-center gap-3 mt-2 ${isSortingMode ? "pl-5" : "pl-0"}`}
+                >
+                  {/* MOCK: publish status chip */}
+                  <Chip
+                    label={status}
+                    size="small"
+                    color={status === "PUBLISHED" ? "success" : "default"}
+                    variant="outlined"
+                    sx={{ height: 20, fontSize: "0.675rem" }}
+                  />
+                  <span className="text-xs text-muted-foreground">
+                    Updated {mockDate(node.id)}
+                  </span>
+                </div>
+
+                {/* Stats line */}
+                <div
+                  className={`flex items-center gap-3 mt-1 ${isSortingMode ? "pl-5" : "pl-0"}`}
+                >
+                  <span className="text-xs text-muted-foreground tabular-nums">
+                    {formatCount(wordCount)} words
+                  </span>
+                  {/* MOCK: view count */}
+                  <span className="text-xs text-muted-foreground tabular-nums flex items-center gap-0.5">
+                    <Visibility sx={{ fontSize: 12 }} />
+                    {formatCount(views)}
+                  </span>
+                </div>
               </div>
 
-              {/* Meta line */}
-              <div className="flex items-center gap-3 mt-1.5 pl-5">
-                <span className="text-xs text-muted-foreground">
-                  {mockDate(node.id)}
-                </span>
-                <span className="text-xs text-muted-foreground tabular-nums">
-                  {formatCount(wordCount)} words
-                </span>
-              </div>
+              {/* Kebab menu — always visible */}
+              <IconButton
+                size="small"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleContextMenu(e);
+                }}
+                sx={{ width: 28, height: 28 }}
+              >
+                <MoreVert sx={{ fontSize: 18 }} />
+              </IconButton>
             </div>
-
-            {/* Kebab menu */}
-            <IconButton
-              size="small"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleContextMenu(e);
-              }}
-              className="opacity-0 group-hover:opacity-100 transition-opacity"
-              sx={{ width: 28, height: 28 }}
-            >
-              <MoreVert sx={{ fontSize: 18 }} />
-            </IconButton>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       </div>
     );
   };

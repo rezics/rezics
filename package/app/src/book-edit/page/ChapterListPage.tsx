@@ -1,10 +1,10 @@
 import { Tab, Tabs } from "@mui/material";
 import { bookChapterIndexQuery } from "@rezics/api/book/book";
+import { bookQueries } from "@rezics/api/book/book.queries";
 import type { ChapterTreeItem } from "@rezics/contract";
-import { useQueryClient, useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type React from "react";
 import { useCallback, useMemo, useRef, useState } from "react";
-import { bookQueries } from "@rezics/api/book/book.queries";
 import { ChapterTreeJsonEditor } from "@/book-library/component/Chapter/ChapterTreeJsonEditor";
 import { bookEditLayoutRoute } from "@/router";
 import {
@@ -44,8 +44,9 @@ export const BookEditChapterListPage: React.FC = () => {
     const update = () => {
       setContainerWidth(el.clientWidth);
       const rect = el.getBoundingClientRect();
-      const available = window.innerHeight - rect.top - 80;
-      setContainerHeight(Math.max(500, available));
+      // Leave only a small bottom margin — ChapterTreeEditor handles internal spacing
+      const available = window.innerHeight - rect.top - 16;
+      setContainerHeight(Math.max(400, available));
     };
     update();
 
@@ -71,7 +72,7 @@ export const BookEditChapterListPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="mt-10 mx-auto max-w-2xl px-4">
+      <div className="mt-4 mx-auto max-w-2xl px-4">
         <div className="text-muted-foreground">Loading...</div>
       </div>
     );
@@ -79,17 +80,20 @@ export const BookEditChapterListPage: React.FC = () => {
 
   if (error) {
     return (
-      <div className="mt-10 mx-auto max-w-2xl px-4">
+      <div className="mt-4 mx-auto max-w-2xl px-4">
         <div className="text-destructive">Error: {String(error)}</div>
       </div>
     );
   }
 
   return (
-    <div className="mt-10 mx-auto max-w-2xl px-4" ref={containerCallbackRef}>
-      <h2 className="text-lg font-semibold mb-4">Chapter Management</h2>
+    <div
+      className="mt-4 mx-auto max-w-2xl px-4 flex flex-col"
+      ref={containerCallbackRef}
+    >
+      <h2 className="text-lg font-semibold mb-2">Chapter Management</h2>
 
-      <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ mb: 2 }}>
+      <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ mb: 1 }}>
         <Tab label="Editor" />
         <Tab label="JSON" />
       </Tabs>

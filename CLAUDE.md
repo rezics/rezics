@@ -106,6 +106,19 @@ Keep implementation scoped to affected packages. Respect monorepo boundaries and
 
 - Main branch: `dev`
 
+## Frontend-First Development
+
+The frontend is implemented proactively — if a backend API or data source is not yet available, mock it and move forward. Backend development follows.
+
+**Mock convention:** All mock data, functions, and constants must be annotated with a `// MOCK:` comment so they can be found via `grep -r "// MOCK:"` and replaced when the backend is ready. Keep mock implementations simple (e.g., deterministic hash-based values). Example:
+
+```ts
+// MOCK: view count derived from node id hash
+function mockViewCount(id: string | number): number {
+  return (hashCode(String(id)) % 5000) + 10;
+}
+```
+
 ## Global Instructions
 
 - Prefer reading local files and fetching docs over answering from memory

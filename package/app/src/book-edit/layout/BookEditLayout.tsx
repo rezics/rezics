@@ -19,7 +19,10 @@ export const BookEditLayout: React.FC<BookEditLayoutProps> = ({ children }) => {
         <Sidebar NAVIGATION={NAVIGATION(bookId || "")} />
       </div>
 
-      <main className="flex-grow pt-16 transition-all duration-300">
+      <main
+        className="flex-grow pt-16 transition-all duration-300"
+        style={{ backgroundColor: "var(--mui-palette-background-default)" }}
+      >
         {children}
       </main>
     </div>

@@ -14,7 +14,7 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { Chapter } from "./ChapterTreeEditor";
 
-/** Mock publish statuses — replace with contract enum when backend is ready. */
+// MOCK: publish statuses — replace with contract enum when backend is ready
 const PUBLISH_STATUSES = ["DRAFT", "PUBLISHED", "ARCHIVED"] as const;
 type PublishStatus = (typeof PUBLISH_STATUSES)[number];
 
@@ -51,8 +51,17 @@ export function EditChapterDialog({
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="xs">
-      <DialogTitle>{t("book.chapter.edit_dialog.title", "Edit Chapter")}</DialogTitle>
-      <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2.5, pt: "16px !important" }}>
+      <DialogTitle>
+        {t("book.chapter.edit_dialog.title", "Edit Chapter")}
+      </DialogTitle>
+      <DialogContent
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          gap: 2.5,
+          pt: "16px !important",
+        }}
+      >
         <TextField
           label={t("book.fields.title", "Title")}
           fullWidth
@@ -63,7 +72,9 @@ export function EditChapterDialog({
           autoFocus
         />
         <FormControl fullWidth variant="filled">
-          <InputLabel>{t("book.chapter.edit_dialog.status", "Publish Status")}</InputLabel>
+          <InputLabel>
+            {t("book.chapter.edit_dialog.status", "Publish Status")}
+          </InputLabel>
           <Select
             value={status}
             onChange={(e) => setStatus(e.target.value as PublishStatus)}
