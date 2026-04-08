@@ -121,7 +121,7 @@ export function CreateChapterDialog({
               submitLabel={createMutation.isPending ? "创建中..." : "创建"}
             />
             {!content.trim() && (
-              <div className="text-sm text-red-600 mt-2">内容为必填</div>
+              <div className="text-sm text-destructive mt-2">内容为必填</div>
             )}
           </div>
         </div>

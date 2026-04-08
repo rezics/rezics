@@ -1,11 +1,6 @@
+import { Tab, Tabs } from "@mui/material";
 import { bookChapterIndexQuery } from "@rezics/api/book/book";
 import type { ChapterTreeItem } from "@rezics/contract";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@rezics/ui/shadcn/tabs.tsx";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useCallback, useMemo, useRef, useState } from "react";
@@ -21,6 +16,7 @@ export const BookEditChapterListPage: React.FC = () => {
   const { bookId } = bookEditLayoutRoute.useParams();
   const queryClient = useQueryClient();
   const editorRef = useRef<ChapterTreeEditorHandle | null>(null);
+  const [tab, setTab] = useState(0);
   const [containerHeight, setContainerHeight] = useState(600);
   const [containerWidth, setContainerWidth] = useState(0);
 
@@ -93,27 +89,23 @@ export const BookEditChapterListPage: React.FC = () => {
     <div className="mt-10 mx-auto max-w-2xl px-4" ref={containerCallbackRef}>
       <h2 className="text-lg font-semibold mb-4">Chapter Management</h2>
 
-      <Tabs defaultValue="editor">
-        <TabsList>
-          <TabsTrigger value="editor">Editor</TabsTrigger>
-          <TabsTrigger value="json">JSON</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="editor">
-          <ChapterTreeEditor
-            ref={editorRef}
-            chapterTree={chapterTree}
-            bookUnitId={bookId}
-            height={containerHeight}
-            width={containerWidth > 0 ? containerWidth - 4 : undefined}
-            onDownloadJSON={downloadJSON}
-          />
-        </TabsContent>
-
-        <TabsContent value="json">
-          <ChapterTreeJsonEditor bookId={bookId} />
-        </TabsContent>
+      <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ mb: 2 }}>
+        <Tab label="Editor" />
+        <Tab label="JSON" />
       </Tabs>
+
+      {tab === 0 && (
+        <ChapterTreeEditor
+          ref={editorRef}
+          chapterTree={chapterTree}
+          bookUnitId={bookId}
+          height={containerHeight}
+          width={containerWidth > 0 ? containerWidth - 4 : undefined}
+          onDownloadJSON={downloadJSON}
+        />
+      )}
+
+      {tab === 1 && <ChapterTreeJsonEditor bookId={bookId} />}
     </div>
   );
 };

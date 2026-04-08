@@ -12,7 +12,7 @@ export const BookEditTagPage: React.FC = () => {
         <div className="flex mb-4">
           <AccentBarWithText text="Tag编辑" />
         </div>
-        <div className="text-sm text-gray-500 mb-4">
+        <div className="text-sm text-muted-foreground mb-4">
           为当前书籍管理标签：可新建标签，并按列表/域分组方式查看与解绑。
         </div>
         <Alert severity="info" className="mb-4">

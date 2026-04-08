@@ -1,10 +1,22 @@
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuShortcut,
-} from "@rezics/ui/shadcn/dropdown-menu.tsx";
+  AccountTree,
+  ContentCopy,
+  Delete,
+  Edit,
+  KeyboardArrowDown,
+  KeyboardArrowUp,
+  PostAdd,
+  UnfoldLess,
+  UnfoldMore,
+} from "@mui/icons-material";
+import {
+  Divider,
+  ListItemIcon,
+  ListItemText,
+  Menu,
+  MenuItem,
+  Typography,
+} from "@mui/material";
 import { v4 as uuidv4 } from "uuid";
 import {
   insertSiblingAfter,
@@ -18,6 +30,8 @@ interface ChapterTreeContextMenuProps {
   setContextMenu: (state: ChapterContextMenuState) => void;
   setTreeData: React.Dispatch<React.SetStateAction<Chapter[]>>;
   handleCreate: (parentId: string | number) => void;
+  onEditChapter: (chapter: Chapter) => void;
+  onMoveToParent: (chapter: Chapter) => void;
 }
 
 export const ChapterTreeContextMenu = ({
@@ -25,110 +39,145 @@ export const ChapterTreeContextMenu = ({
   setContextMenu,
   setTreeData,
   handleCreate,
+  onEditChapter,
+  onMoveToParent,
 }: ChapterTreeContextMenuProps) => {
   const { node } = contextMenu;
 
   const close = () => setContextMenu(null);
 
   return (
-    <DropdownMenu
-      open={true}
-      onOpenChange={(open) => {
-        if (!open) close();
+    <Menu
+      open
+      onClose={close}
+      anchorReference="anchorPosition"
+      anchorPosition={{ top: contextMenu.y, left: contextMenu.x }}
+      slotProps={{
+        paper: {
+          sx: { minWidth: 200 },
+        },
       }}
     >
-      <DropdownMenuContent
-        className="min-w-[180px]"
-        style={{
-          position: "fixed",
-          top: contextMenu.y,
-          left: contextMenu.x,
+      <MenuItem
+        onClick={() => {
+          onEditChapter(node.data);
+          close();
         }}
       >
-        <DropdownMenuItem
-          onSelect={() => {
-            node.edit();
-            close();
-          }}
-        >
-          Rename
-          <DropdownMenuShortcut>F2</DropdownMenuShortcut>
-        </DropdownMenuItem>
+        <ListItemIcon>
+          <Edit fontSize="small" />
+        </ListItemIcon>
+        <ListItemText>Edit</ListItemText>
+      </MenuItem>
 
-        <DropdownMenuSeparator />
+      <MenuItem
+        onClick={() => {
+          onMoveToParent(node.data);
+          close();
+        }}
+      >
+        <ListItemIcon>
+          <AccountTree fontSize="small" />
+        </ListItemIcon>
+        <ListItemText>Move to...</ListItemText>
+      </MenuItem>
 
-        <DropdownMenuItem
-          onSelect={() => {
-            handleCreate(node.id);
-            close();
-          }}
-        >
-          New Child Chapter
-        </DropdownMenuItem>
+      <Divider />
 
-        <DropdownMenuItem
-          onSelect={() => {
-            const newNode: Chapter = {
-              id: uuidv4(),
-              title: "New Chapter",
-            };
-            setTreeData(
-              (current) =>
-                insertSiblingAfter(current, node.id, newNode) as Chapter[],
-            );
-            close();
-          }}
-        >
-          New Sibling After
-        </DropdownMenuItem>
+      <MenuItem
+        onClick={() => {
+          handleCreate(node.id);
+          close();
+        }}
+      >
+        <ListItemIcon>
+          <PostAdd fontSize="small" />
+        </ListItemIcon>
+        <ListItemText>New Child Chapter</ListItemText>
+      </MenuItem>
 
-        <DropdownMenuSeparator />
+      <MenuItem
+        onClick={() => {
+          const newNode: Chapter = {
+            id: uuidv4(),
+            title: "New Chapter",
+          };
+          setTreeData(
+            (current) =>
+              insertSiblingAfter(current, node.id, newNode) as Chapter[],
+          );
+          close();
+        }}
+      >
+        <ListItemIcon>
+          <ContentCopy fontSize="small" />
+        </ListItemIcon>
+        <ListItemText>New Sibling After</ListItemText>
+      </MenuItem>
 
-        <DropdownMenuItem
-          onSelect={() => {
-            if (node.children && node.children.length > 0) {
-              node.toggle();
-            }
-            close();
-          }}
-        >
-          {node.isOpen ? "Collapse" : "Expand"}
-        </DropdownMenuItem>
+      <Divider />
 
-        <DropdownMenuItem
-          onSelect={() => {
-            setTreeData(
-              (current) => moveSiblingFirst(current, node.id) as Chapter[],
-            );
-            close();
-          }}
-        >
-          Move to First
-        </DropdownMenuItem>
+      <MenuItem
+        onClick={() => {
+          if (node.children && node.children.length > 0) {
+            node.toggle();
+          }
+          close();
+        }}
+      >
+        <ListItemIcon>
+          {node.isOpen ? (
+            <UnfoldLess fontSize="small" />
+          ) : (
+            <UnfoldMore fontSize="small" />
+          )}
+        </ListItemIcon>
+        <ListItemText>{node.isOpen ? "Collapse" : "Expand"}</ListItemText>
+      </MenuItem>
 
-        <DropdownMenuItem
-          onSelect={() => {
-            setTreeData(
-              (current) => moveSiblingLast(current, node.id) as Chapter[],
-            );
-            close();
-          }}
-        >
-          Move to Last
-        </DropdownMenuItem>
+      <MenuItem
+        onClick={() => {
+          setTreeData(
+            (current) => moveSiblingFirst(current, node.id) as Chapter[],
+          );
+          close();
+        }}
+      >
+        <ListItemIcon>
+          <KeyboardArrowUp fontSize="small" />
+        </ListItemIcon>
+        <ListItemText>Move to First</ListItemText>
+      </MenuItem>
 
-        <DropdownMenuSeparator />
+      <MenuItem
+        onClick={() => {
+          setTreeData(
+            (current) => moveSiblingLast(current, node.id) as Chapter[],
+          );
+          close();
+        }}
+      >
+        <ListItemIcon>
+          <KeyboardArrowDown fontSize="small" />
+        </ListItemIcon>
+        <ListItemText>Move to Last</ListItemText>
+      </MenuItem>
 
-        <DropdownMenuItem
-          className="text-destructive focus:text-destructive"
-          onSelect={() => {
-            node.tree.delete(node.id);
-            close();
-          }}
-        >
-          Delete
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+      <Divider />
+
+      <MenuItem
+        onClick={() => {
+          node.tree.delete(node.id);
+          close();
+        }}
+      >
+        <ListItemIcon>
+          <Delete fontSize="small" color="error" />
+        </ListItemIcon>
+        <ListItemText>
+          <Typography color="error">Delete</Typography>
+        </ListItemText>
+      </MenuItem>
+    </Menu>
   );
 };

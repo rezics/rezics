@@ -2,20 +2,16 @@ import { InfoOutlined } from "@mui/icons-material";
 import {
   Autocomplete,
   Avatar,
+  Checkbox,
   Chip,
   CircularProgress,
+  FormControlLabel,
   TextField as MuiTextField,
+  Tooltip,
+  Typography,
 } from "@mui/material";
 import { meiliUserApi } from "@rezics/api/meili/meili.api";
 import type { BookDTO, UserDTO } from "@rezics/contract";
-import { Checkbox } from "@rezics/ui/shadcn/checkbox.tsx";
-import { Label } from "@rezics/ui/shadcn/label.tsx";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@rezics/ui/shadcn/tooltip.tsx";
 import React from "react";
 import { useTranslation } from "react-i18next";
 
@@ -75,7 +71,7 @@ const UsersMultiSelect: React.FC<{
   const { input, setInput, options, loading } = useUserSearch();
   return (
     <div className="space-y-2">
-      <Label className="text-sm font-medium">{label}</Label>
+      <Typography variant="body2" className="font-medium">{label}</Typography>
       <Autocomplete
         multiple
         disableCloseOnSelect
@@ -150,27 +146,26 @@ function FlagWithTooltip({
   disabled?: boolean;
 }) {
   return (
-    <TooltipProvider delayDuration={300}>
-      <div className="flex items-center gap-2">
-        <Checkbox
-          checked={checked}
-          onCheckedChange={onCheckedChange}
-          disabled={disabled}
+    <div className="flex items-center gap-1">
+      <FormControlLabel
+        control={
+          <Checkbox
+            checked={checked}
+            onChange={(_, c) => onCheckedChange(c)}
+            disabled={disabled}
+            size="small"
+          />
+        }
+        label={label}
+        slotProps={{ typography: { variant: "body2" } }}
+      />
+      <Tooltip title={tooltip}>
+        <InfoOutlined
+          sx={{ fontSize: 16 }}
+          className="text-muted-foreground cursor-help"
         />
-        <Label className="text-sm cursor-pointer">{label}</Label>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <InfoOutlined
-              sx={{ fontSize: 16 }}
-              className="text-muted-foreground cursor-help"
-            />
-          </TooltipTrigger>
-          <TooltipContent>
-            <p className="max-w-[280px]">{tooltip}</p>
-          </TooltipContent>
-        </Tooltip>
-      </div>
-    </TooltipProvider>
+      </Tooltip>
+    </div>
   );
 }
 
@@ -184,7 +179,7 @@ export const BookMetadataEditor: React.FC<BookMetadataEditorProps> = ({
     <div className="flex flex-col gap-5">
       {/* Title */}
       <div className="space-y-1">
-        <Label htmlFor="book-title">{t("book.fields.title")}</Label>
+        <Typography variant="body2" component="label" htmlFor="book-title">{t("book.fields.title")}</Typography>
         <input
           id="book-title"
           value={value?.title ?? ""}
@@ -197,7 +192,7 @@ export const BookMetadataEditor: React.FC<BookMetadataEditorProps> = ({
       {/* ISBN + Cover URL */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-1">
-          <Label htmlFor="book-isbn">{t("book.fields.isbn")}</Label>
+          <Typography variant="body2" component="label" htmlFor="book-isbn">{t("book.fields.isbn")}</Typography>
           <input
             id="book-isbn"
             value={value?.isbn ?? ""}
@@ -207,7 +202,7 @@ export const BookMetadataEditor: React.FC<BookMetadataEditorProps> = ({
           />
         </div>
         <div className="space-y-1">
-          <Label htmlFor="book-cover">{t("book.fields.cover_url")}</Label>
+          <Typography variant="body2" component="label" htmlFor="book-cover">{t("book.fields.cover_url")}</Typography>
           <input
             id="book-cover"
             value={value?.coverUrl ?? ""}
@@ -245,7 +240,7 @@ export const BookMetadataEditor: React.FC<BookMetadataEditorProps> = ({
           disabled={disabled}
         />
         <div className="space-y-1">
-          <Label htmlFor="book-textlength">{t("book.fields.text_length")}</Label>
+          <Typography variant="body2" component="label" htmlFor="book-textlength">{t("book.fields.text_length")}</Typography>
           <input
             id="book-textlength"
             type="number"
@@ -287,19 +282,12 @@ export function NSFWInfo({ tooltipTitle }: { tooltipTitle?: string }) {
   return (
     <div className="flex items-center gap-1">
       <span>{t("book.flags.nsfw")}</span>
-      <TooltipProvider delayDuration={300}>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <InfoOutlined
-              sx={{ fontSize: 16 }}
-              className="text-muted-foreground cursor-help"
-            />
-          </TooltipTrigger>
-          <TooltipContent>
-            <p className="max-w-[280px]">{tooltipTitle ?? t("book.tooltips.nsfw")}</p>
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
+      <Tooltip title={tooltipTitle ?? t("book.tooltips.nsfw")}>
+        <InfoOutlined
+          sx={{ fontSize: 16 }}
+          className="text-muted-foreground cursor-help"
+        />
+      </Tooltip>
     </div>
   );
 }
@@ -309,19 +297,12 @@ export function IsLicensedInfo({ tooltipTitle }: { tooltipTitle?: string }) {
   return (
     <div className="flex items-center gap-1 whitespace-nowrap">
       <span>{t("book.flags.licensed")}</span>
-      <TooltipProvider delayDuration={300}>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <InfoOutlined
-              sx={{ fontSize: 16 }}
-              className="text-muted-foreground cursor-help"
-            />
-          </TooltipTrigger>
-          <TooltipContent>
-            <p className="max-w-[280px]">{tooltipTitle ?? t("book.tooltips.licensed")}</p>
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
+      <Tooltip title={tooltipTitle ?? t("book.tooltips.licensed")}>
+        <InfoOutlined
+          sx={{ fontSize: 16 }}
+          className="text-muted-foreground cursor-help"
+        />
+      </Tooltip>
     </div>
   );
 }

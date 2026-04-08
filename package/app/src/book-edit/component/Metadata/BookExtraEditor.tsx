@@ -1,8 +1,6 @@
-import { Button } from "@rezics/ui/shadcn/button.tsx";
-import { Input } from "@rezics/ui/shadcn/input.tsx";
-import { Separator } from "@rezics/ui/shadcn/separator.tsx";
+import { Add, Delete, OpenInNew } from "@mui/icons-material";
+import { Button, Divider, IconButton } from "@mui/material";
 import { RezicsJsonEditor } from "@rezics/ui/editor";
-import { ExternalLink, Plus, Trash2 } from "lucide-react";
 import type React from "react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -55,7 +53,7 @@ function PublishURL({ value, onChange }: BookExtraEditorProps) {
               key={index}
               className="flex items-center gap-2 rounded-md border bg-muted/30 px-3 py-2"
             >
-              <ExternalLink className="size-3.5 flex-shrink-0 text-muted-foreground" />
+              <OpenInNew sx={{ fontSize: 14 }} className="flex-shrink-0 text-muted-foreground" />
               <a
                 href={url}
                 target="_blank"
@@ -64,21 +62,20 @@ function PublishURL({ value, onChange }: BookExtraEditorProps) {
               >
                 {url}
               </a>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-7 w-7 text-destructive hover:text-destructive"
+              <IconButton
+                size="small"
+                color="error"
                 onClick={() => handleRemove(index)}
               >
-                <Trash2 className="size-3.5" />
-              </Button>
+                <Delete sx={{ fontSize: 14 }} />
+              </IconButton>
             </div>
           ))}
         </div>
       )}
 
       <div className="flex gap-2">
-        <Input
+        <input
           type="url"
           value={newUrl}
           onChange={(e) => setNewUrl(e.target.value)}
@@ -89,15 +86,15 @@ function PublishURL({ value, onChange }: BookExtraEditorProps) {
             }
           }}
           placeholder={t("placeholders.enter_url")}
-          className="flex-1"
+          className="flex-1 border-b border-input bg-transparent py-2 text-sm outline-none placeholder:text-muted-foreground focus:border-foreground transition-colors"
         />
         <Button
-          variant="outline"
-          size="sm"
+          variant="outlined"
+          size="small"
           onClick={handleAdd}
           disabled={!newUrl.trim()}
+          startIcon={<Add />}
         >
-          <Plus className="size-4" />
           {t("common.add")}
         </Button>
       </div>
@@ -126,7 +123,7 @@ export const BookExtraEditor: React.FC<BookExtraEditorProps> = ({
   return (
     <div className="space-y-4">
       <PublishURL value={extraData || undefined} onChange={handleExtraChange} />
-      <Separator />
+      <Divider />
       <RezicsJsonEditor
         value={JSON.stringify(extraData, null, 2)}
         onChange={(text) => {

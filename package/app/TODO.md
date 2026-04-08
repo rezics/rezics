@@ -5,7 +5,6 @@
 - [ ] chapter list 任意節點作爲任意節點 的 孩子，三個點擴展的功能
 - [ ] 很多API需要改成聚合查詢，減少請求次數，比如帖子的統計信息
 - [ ] Switching between tabs for an extended period may also cause the homepage carousel to go blank(till next carousel), only firefox or ?
-- [x] MUI 的还没自己写的好用 https://mui.com/x/react-tree-view/ 用这个替换当前的 Tree 章节 View
 - [ ] 树章节检查为啥 shift 键还是会跳转，感觉就不应该渲染为 link，修改一下
 - 完善所有请求暂停逻辑，否则会导致重新渲染！
 - 切换明暗模式之后，SideBar 滚动条隐藏样式失效

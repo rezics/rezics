@@ -122,7 +122,7 @@ export const BookEditChapterPage: React.FC = () => {
 
   if (isError) {
     return (
-      <div className="max-w-xl mx-auto p-6 text-red-600">
+      <div className="max-w-xl mx-auto p-6 text-destructive">
         {(error as Error)?.message || "Failed to load chapter"}
       </div>
     );
@@ -149,7 +149,7 @@ export const BookEditChapterPage: React.FC = () => {
         </Button>
       </div>
 
-      <div className="rounded-lg border border-gray-200 shadow-sm p-4 bg-white">
+      <div className="rounded-lg border border-border shadow-sm p-4 bg-background">
         <div className="mb-4">
           <TextField
             id="chapter-title"
@@ -171,7 +171,7 @@ export const BookEditChapterPage: React.FC = () => {
             onSubmit={handleSubmit}
           />
           {!content.trim() && (
-            <div className="text-sm text-red-600 mt-2">
+            <div className="text-sm text-destructive mt-2">
               {t("validation.required", "必填")}
             </div>
           )}

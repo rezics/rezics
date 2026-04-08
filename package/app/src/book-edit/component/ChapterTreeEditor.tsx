@@ -1,7 +1,7 @@
+import { Download as DownloadIcon, Save as SaveIcon } from "@mui/icons-material";
+import { Button } from "@mui/material";
 import { useAlertStore } from "@app/state/windowAlertStore.ts";
 import { bookMutations } from "@rezics/api/book/book.mutations";
-import { Button } from "@rezics/ui/shadcn/button.tsx";
-import { Download, Save } from "lucide-react";
 import type React from "react";
 import {
   forwardRef,
@@ -35,6 +35,8 @@ import {
 } from "./ChapterTreeEditorNode";
 import { ChapterTreeEditorToolbar } from "./ChapterTreeEditorToolbar";
 import { CreateChapterDialog } from "./CreateChapterDialog";
+import { EditChapterDialog } from "./EditChapterDialog";
+import { MoveToParentDialog } from "./MoveToParentDialog";
 
 /** Chapter tree node structure. */
 export type Chapter = {
@@ -72,7 +74,6 @@ function findLastNonLeafId(tree: Chapter[]): string | number | null {
       lastId = node.id;
     }
   }
-  // Also check deeper levels if top-level has no non-leaf
   if (lastId === null) {
     for (const node of tree) {
       if (node.children) {
@@ -122,6 +123,16 @@ export const ChapterTreeEditor = forwardRef<
     string | number | null
   >(null);
   const [searchTerm, setSearchTerm] = useState("");
+
+  // Edit chapter dialog state
+  const [editDialogChapter, setEditDialogChapter] = useState<Chapter | null>(
+    null,
+  );
+
+  // Move-to-parent dialog state
+  const [moveDialogChapter, setMoveDialogChapter] = useState<Chapter | null>(
+    null,
+  );
 
   const updateChapterIndexMutation = bookMutations.useUpdateChapterIndex();
   const { show: showAlert } = useAlertStore();
@@ -204,14 +215,55 @@ export const ChapterTreeEditor = forwardRef<
     if (parentId !== null) {
       handlePreCreate(parentId);
     } else {
-      // No non-leaf exists, create at root
       handlePreCreate(null);
     }
   }
 
+  /** Open the edit dialog for a chapter. */
+  const handleEditChapter = useCallback((chapter: Chapter) => {
+    setEditDialogChapter(chapter);
+  }, []);
+
+  /** Save edits from the edit dialog (title rename + mock status). */
+  const handleEditSave = useCallback(
+    (update: { title: string; status: string }) => {
+      setTreeData((current) =>
+        findAndEdit(current, String(editDialogChapter!.id), update.title) as Chapter[],
+      );
+    },
+    [editDialogChapter],
+  );
+
+  /** Open the move-to-parent dialog. */
+  const handleMoveToParent = useCallback((chapter: Chapter) => {
+    setMoveDialogChapter(chapter);
+  }, []);
+
+  /** Confirm moving a node to a new parent. */
+  const handleMoveConfirm = useCallback(
+    (targetParentId: string | number | null) => {
+      if (!moveDialogChapter || targetParentId === null) return;
+      setTreeData((current) => {
+        const removed: Chapter[] = [];
+        const withoutNode = findAndRemove(
+          current,
+          [String(moveDialogChapter.id)],
+          removed,
+        ) as Chapter[];
+        if (removed.length === 0) return current;
+        return findAndAddChild(
+          withoutNode,
+          targetParentId,
+          removed[0],
+        ) as Chapter[];
+      });
+    },
+    [moveDialogChapter],
+  );
+
   const Node = useMemo(
-    () => createChapterTreeEditorNode(setContextMenu, treeRef),
-    [],
+    () => createChapterTreeEditorNode(setContextMenu, treeRef, handleEditChapter),
+    [handleEditChapter],
   );
 
   const chapterCount = useMemo(() => countChapters(treeData), [treeData]);
@@ -240,8 +292,8 @@ export const ChapterTreeEditor = forwardRef<
           <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
             <p className="text-sm">No chapters yet</p>
             <Button
-              variant="outline"
-              size="sm"
+              variant="outlined"
+              size="small"
               className="mt-3"
               onClick={() => handlePreCreate(null)}
             >
@@ -279,6 +331,8 @@ export const ChapterTreeEditor = forwardRef<
             setContextMenu={setContextMenu}
             setTreeData={setTreeData}
             handleCreate={handlePreCreate}
+            onEditChapter={handleEditChapter}
+            onMoveToParent={handleMoveToParent}
           />
         )}
       </div>
@@ -290,17 +344,22 @@ export const ChapterTreeEditor = forwardRef<
         </span>
         <div className="flex items-center gap-2">
           {onDownloadJSON && (
-            <Button variant="outline" size="sm" onClick={onDownloadJSON}>
-              <Download className="size-4" />
+            <Button
+              variant="outlined"
+              size="small"
+              startIcon={<DownloadIcon fontSize="small" />}
+              onClick={onDownloadJSON}
+            >
               <span className="hidden sm:inline">JSON</span>
             </Button>
           )}
           <Button
-            size="sm"
+            variant="contained"
+            size="small"
+            startIcon={<SaveIcon fontSize="small" />}
             onClick={() => saveTree(treeData)}
             disabled={updateChapterIndexMutation.isPending}
           >
-            <Save className="size-4" />
             <span className="hidden sm:inline">
               {updateChapterIndexMutation.isPending ? "Saving..." : "Save"}
             </span>
@@ -314,6 +373,21 @@ export const ChapterTreeEditor = forwardRef<
         handleCreate={handleCreate}
         bookUnitId={bookUnitId}
         currentEditParentId={currentEditParentId}
+      />
+
+      <EditChapterDialog
+        open={editDialogChapter !== null}
+        onClose={() => setEditDialogChapter(null)}
+        chapter={editDialogChapter}
+        onSave={handleEditSave}
+      />
+
+      <MoveToParentDialog
+        open={moveDialogChapter !== null}
+        onClose={() => setMoveDialogChapter(null)}
+        treeData={treeData}
+        movingNode={moveDialogChapter}
+        onConfirm={handleMoveConfirm}
       />
     </div>
   );

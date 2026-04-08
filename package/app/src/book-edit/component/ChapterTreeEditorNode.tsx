@@ -1,10 +1,11 @@
-import { GripVertical, MoreVertical } from "lucide-react";
+import { DragIndicator, ExpandMore, MoreVert } from "@mui/icons-material";
+import { IconButton } from "@mui/material";
 import type React from "react";
 import type { NodeRendererProps, TreeApi } from "react-arborist";
 import type { Chapter, ChapterContextMenuState } from "./ChapterTreeEditor";
 
 /** Uniform row height — react-arborist (react-window) requires a single number. */
-export const LEAF_ROW_HEIGHT = 84;
+export const LEAF_ROW_HEIGHT = 80;
 
 /** Stable hash for seeded random mock word count. */
 function hashCode(str: string): number {
@@ -54,6 +55,7 @@ export const createChapterTreeEditorNode = (
     React.SetStateAction<ChapterContextMenuState>
   >,
   treeRef: React.RefObject<TreeApi<Chapter> | null>,
+  onEditChapter: (node: Chapter) => void,
 ) => {
   return function ChapterTreeEditorNode({
     node,
@@ -71,7 +73,7 @@ export const createChapterTreeEditorNode = (
       setContextMenu({ x: e.clientX, y: e.clientY, node });
     };
 
-    // ─── Parent / section node (compact row) ───
+    // ─── Parent / section node ───
     if (hasChildren) {
       return (
         <div
@@ -79,137 +81,113 @@ export const createChapterTreeEditorNode = (
           tabIndex={0}
           style={style}
           ref={dragHandle}
-          className={`group flex items-center gap-1.5 px-2 h-full cursor-default select-none rounded-sm transition-colors ${
+          className={`group flex items-center gap-2 px-2 h-full cursor-pointer select-none transition-colors duration-150 ${
             isSelected
-              ? "bg-accent text-accent-foreground"
-              : "hover:bg-muted/50"
+              ? "bg-primary/8"
+              : "hover:bg-muted/40"
           }`}
-          onDoubleClick={() => node.edit()}
+          onClick={() => node.toggle()}
           onContextMenu={handleContextMenu}
         >
-          <span className="flex-shrink-0 w-4 h-4 flex items-center justify-center text-muted-foreground/40 group-hover:text-muted-foreground cursor-grab active:cursor-grabbing">
-            <GripVertical className="size-3.5" />
+          <span className="flex-shrink-0 text-muted-foreground/40 group-hover:text-muted-foreground cursor-grab active:cursor-grabbing transition-colors">
+            <DragIndicator sx={{ fontSize: 16 }} />
           </span>
 
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              node.toggle();
-            }}
-            className="flex-shrink-0 w-4 h-4 flex justify-center items-center text-muted-foreground hover:text-foreground"
-          >
-            <svg
-              className={`size-3 transition-transform ${node.isOpen ? "rotate-90" : ""}`}
-              viewBox="0 0 6 10"
-              fill="currentColor"
-            >
-              <path d="M1.4 0L0 1.4 3.6 5 0 8.6 1.4 10l5-5z" />
-            </svg>
-          </button>
+          <span className="flex-shrink-0 w-5 h-5 flex justify-center items-center text-muted-foreground">
+            <ExpandMore
+              sx={{
+                fontSize: 20,
+                transition: "transform 200ms ease",
+                transform: node.isOpen ? "rotate(0deg)" : "rotate(-90deg)",
+              }}
+            />
+          </span>
 
           <div className="min-w-0 flex-1">
-            {node.isEditing ? (
-              <input
-                type="text"
-                defaultValue={node.data.title}
-                autoFocus
-                onFocus={(e) => e.currentTarget.select()}
-                onBlur={() => node.reset()}
-                onKeyDown={(e) => {
-                  if (e.key === "Escape") node.reset();
-                  if (e.key === "Enter") {
-                    node.submit((e.target as HTMLInputElement).value);
-                  }
-                }}
-                className="w-full px-1.5 py-0.5 text-sm rounded border border-ring bg-background focus:outline-none focus:ring-1 focus:ring-ring"
-              />
-            ) : (
-              <span className="block truncate text-sm font-medium">
-                {node.data.title}
+            <span className="block text-sm font-semibold truncate">
+              {node.data.title}
+            </span>
+            <div className="flex items-center gap-3 mt-0.5">
+              <span className="text-xs text-muted-foreground">
+                {node.children?.length ?? 0} items
               </span>
-            )}
+              <span className="text-xs tabular-nums text-muted-foreground">
+                {formatCount(wordCount)} words
+              </span>
+            </div>
           </div>
 
-          <span className="flex-shrink-0 text-xs tabular-nums text-muted-foreground">
-            {formatCount(wordCount)}
-          </span>
+          <IconButton
+            size="small"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleContextMenu(e);
+            }}
+            className="opacity-0 group-hover:opacity-100 transition-opacity"
+            sx={{ width: 28, height: 28 }}
+          >
+            <MoreVert sx={{ fontSize: 18 }} />
+          </IconButton>
         </div>
       );
     }
 
-    // ─── Leaf / chapter node (card) ───
+    // ─── Leaf / chapter node ───
     return (
       <div
         role="treeitem"
         tabIndex={0}
         style={style}
         ref={dragHandle}
-        className={`group cursor-default select-none transition-colors ${
-          isSelected ? "bg-accent/30" : ""
+        className={`group cursor-default select-none transition-colors duration-150 ${
+          isSelected ? "bg-primary/6" : ""
         }`}
-        onDoubleClick={() => node.edit()}
+        onDoubleClick={() => onEditChapter(node.data)}
         onContextMenu={handleContextMenu}
       >
         <div
-          className={`mx-1 rounded-lg border bg-background px-3 py-2.5 transition-shadow hover:shadow-sm ${
-            isSelected ? "border-primary/30 shadow-sm" : "border-border"
+          className={`mx-1 rounded-lg px-3 py-2 transition-all duration-200 ${
+            isSelected
+              ? "bg-surface-variant/40 shadow-sm"
+              : "hover:bg-muted/30"
           }`}
         >
-          {node.isEditing ? (
-            <input
-              type="text"
-              defaultValue={node.data.title}
-              autoFocus
-              onFocus={(e) => e.currentTarget.select()}
-              onBlur={() => node.reset()}
-              onKeyDown={(e) => {
-                if (e.key === "Escape") node.reset();
-                if (e.key === "Enter") {
-                  node.submit((e.target as HTMLInputElement).value);
-                }
-              }}
-              className="w-full px-1 py-0.5 text-sm rounded border border-ring bg-background focus:outline-none focus:ring-1 focus:ring-ring"
-            />
-          ) : (
-            <div className="flex items-start justify-between gap-2">
-              <div className="min-w-0 flex-1">
-                {/* Title row with drag handle */}
-                <div className="flex items-center gap-1.5">
-                  <span className="flex-shrink-0 w-4 h-4 flex items-center justify-center text-muted-foreground/30 group-hover:text-muted-foreground cursor-grab active:cursor-grabbing">
-                    <GripVertical className="size-3.5" />
-                  </span>
-                  <span className="font-medium text-sm truncate">
-                    {node.data.title}
-                  </span>
-                </div>
-
-                {/* Meta line */}
-                <div className="flex items-center gap-3 mt-1.5 pl-5.5">
-                  <span className="text-xs text-rose-400">
-                    {mockDate(node.id)}
-                  </span>
-                </div>
-                <div className="flex items-center gap-3 mt-0.5 pl-5.5">
-                  <span className="text-xs text-muted-foreground tabular-nums">
-                    {formatCount(wordCount)} words
-                  </span>
-                </div>
+          <div className="flex items-start justify-between gap-2">
+            <div className="min-w-0 flex-1">
+              {/* Title row with drag handle */}
+              <div className="flex items-center gap-1.5">
+                <span className="flex-shrink-0 text-muted-foreground/30 group-hover:text-muted-foreground cursor-grab active:cursor-grabbing transition-colors">
+                  <DragIndicator sx={{ fontSize: 14 }} />
+                </span>
+                <span className="font-medium text-sm truncate">
+                  {node.data.title}
+                </span>
               </div>
 
-              {/* Kebab menu */}
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleContextMenu(e);
-                }}
-                className="flex-shrink-0 w-6 h-6 flex items-center justify-center rounded text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-              >
-                <MoreVertical className="size-4" />
-              </button>
+              {/* Meta line */}
+              <div className="flex items-center gap-3 mt-1.5 pl-5">
+                <span className="text-xs text-muted-foreground">
+                  {mockDate(node.id)}
+                </span>
+                <span className="text-xs text-muted-foreground tabular-nums">
+                  {formatCount(wordCount)} words
+                </span>
+              </div>
             </div>
-          )}
+
+            {/* Kebab menu */}
+            <IconButton
+              size="small"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleContextMenu(e);
+              }}
+              className="opacity-0 group-hover:opacity-100 transition-opacity"
+              sx={{ width: 28, height: 28 }}
+            >
+              <MoreVert sx={{ fontSize: 18 }} />
+            </IconButton>
+          </div>
         </div>
       </div>
     );

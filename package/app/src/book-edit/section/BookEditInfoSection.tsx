@@ -1,10 +1,13 @@
+import { ExpandMore } from "@mui/icons-material";
 import {
   Alert,
   Button,
+  Collapse,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
+  Divider,
   Typography,
 } from "@mui/material";
 import {
@@ -17,15 +20,8 @@ import type {
   CreateBookInput,
   UpdateBookInput,
 } from "@rezics/contract";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@rezics/ui/shadcn/collapsible.tsx";
-import { Separator } from "@rezics/ui/shadcn/separator.tsx";
 import { RezicsMarkdownEditor } from "@rezics/ui/editor";
 import { MUILink } from "@rezics/ui/primitive/link/MUILink.tsx";
-import { ChevronDown } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useMatchRoute, useNavigate } from "@tanstack/react-router";
 import type { TFunction } from "i18next";
@@ -101,7 +97,7 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
   const [updateBookErrorOpen, setUpdateBookErrorOpen] = React.useState(false);
   const [dialogState, setDialogState] =
     React.useState<UpdateBookDialogState>(null);
-  const [extraOpen, setExtraOpen] = React.useState(false);
+  const [extraOpen, setExtraOpen] = React.useState(true);
 
   const metadata = metadataState ?? data ?? {};
 
@@ -226,11 +222,11 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
           <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
             {t("book.edit_sections.metadata")}
           </h3>
-          <Separator className="mb-5" />
+          <Divider className="mb-5" />
           <BookMetadataEditor
             value={metadata}
             onChange={(value) => {
-              setMetadataState((prev) => ({ ...prev, ...value }));
+              setMetadataState((prev) => ({ ...(prev ?? data ?? {}), ...value }));
             }}
           />
         </section>
@@ -240,7 +236,7 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
           <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
             {t("book.description")}
           </h3>
-          <Separator className="mb-5" />
+          <Divider className="mb-5" />
           <RezicsMarkdownEditor
             value={metadata?.description ?? ""}
             onChange={(value) => {
@@ -250,32 +246,34 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
         </section>
 
         {/* Extra — Collapsible */}
-        <Collapsible open={extraOpen} onOpenChange={setExtraOpen}>
-          <section>
-            <CollapsibleTrigger asChild>
-              <button
-                type="button"
-                className="flex items-center justify-between w-full group"
-              >
-                <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  {t("book.edit_sections.extra")}
-                </h3>
-                <ChevronDown
-                  className={`size-4 text-muted-foreground transition-transform ${extraOpen ? "rotate-180" : ""}`}
-                />
-              </button>
-            </CollapsibleTrigger>
-            <Separator className="mt-3 mb-5" />
-            <CollapsibleContent>
-              <BookExtraEditor
-                value={metadata.extra}
-                onChange={(value) => {
-                  setMetadataState((prev) => ({ ...prev, extra: value }));
-                }}
-              />
-            </CollapsibleContent>
-          </section>
-        </Collapsible>
+        <section>
+          <button
+            type="button"
+            className="flex items-center justify-between w-full group"
+            onClick={() => setExtraOpen((o) => !o)}
+          >
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              {t("book.edit_sections.extra")}
+            </h3>
+            <ExpandMore
+              sx={{
+                fontSize: 20,
+                color: "text.secondary",
+                transition: "transform 200ms ease",
+                transform: extraOpen ? "rotate(180deg)" : "rotate(0deg)",
+              }}
+            />
+          </button>
+          <Divider className="mt-3 mb-5" />
+          <Collapse in={extraOpen} timeout="auto" unmountOnExit>
+            <BookExtraEditor
+              value={metadata.extra}
+              onChange={(value) => {
+                setMetadataState((prev) => ({ ...prev, extra: value }));
+              }}
+            />
+          </Collapse>
+        </section>
       </div>
 
       <UpdateBookDialog
