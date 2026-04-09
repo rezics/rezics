@@ -1,7 +1,32 @@
-# Preview
+# @rezics/preview
 
-Nginx 对于所有非人类用户应当分流到此
+Read-only preview rendering service for the Rezics platform. Generates HTML and SVG previews for bots, crawlers, and social media link unfurlers.
 
-Preview 应当查询数据库并生成预览渲染，然而 Preview 应当仅可以做数据库查询，不能进行任何写入。
+## Overview
 
-用于渲染提供给 bot 亦或者后续支持 SVG 一类 API
+A lightweight Elysia-based service that handles non-human user requests routed by Nginx. It queries the database in read-only mode to render book previews for SEO and social sharing without exposing write operations.
+
+## Purpose
+
+- **SEO** — Server-rendered HTML for search engine crawlers
+- **Social Sharing** — Open Graph and meta tag generation for link previews
+- **Bot Routing** — Nginx forwards non-human user agents to this service
+
+## Design Constraints
+
+- **Read-only** — Only performs database queries, never writes
+- **Public-facing** — No authentication required for preview endpoints
+- **Lightweight** — Minimal dependencies, fast response times
+
+## Scripts
+
+```bash
+bun run dev    # Start with --watch (development)
+```
+
+## Tech Stack
+
+- [Elysia](https://elysiajs.com) HTTP framework
+- [React 19](https://react.dev) for server-side rendering
+- Database access via `@rezics/server` (read-only)
+- Types from `@rezics/contract`

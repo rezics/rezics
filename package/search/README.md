@@ -1,13 +1,49 @@
-# Search Service
+# @rezics/search
 
-- [ ] 引入 meilisearch， meilibridge
+Full-text search infrastructure for the Rezics platform using [Meilisearch](https://www.meilisearch.com). Provides a search client and data synchronization utilities.
 
-cd /mnt/d/ICS/Library.Book/Library.Book/package/search/
+## Overview
 
-bun run meilisearch:wsl
+This package wraps the Meilisearch client with platform-specific configuration and provides sync functions to keep search indices up to date with the primary database.
 
-powershell -NoExit -Command {cd 'D:\ICS\Library.Book\Library.Book' pg_ctl start }
+## Exports
 
-tabby --new-tab "cd D:\ICS\Library.Book\Library.Book; pg_ctl start"
---new-tab "cd D:\ICS\Library.Book\Library.Book\package\search; bun run meilisearch:wsl" `
---new-tab "cd D:\ICS\Library.Book\Library.Book\package\app; bun dev"
+```typescript
+import { SearchClient, type MeiliConfig } from '@rezics/search';
+import { syncAllBooks, syncAllUsers } from '@rezics/search';
+```
+
+### Client
+
+- **`SearchClient`** — Configured Meilisearch client with `MeiliConfig`
+
+### Sync Functions
+
+| Function             | Description                        |
+| -------------------- | ---------------------------------- |
+| `syncAllBooks`       | Sync book data to search index     |
+| `syncAllFeedbacks`   | Sync feedback to search index      |
+| `syncAllReadlists`   | Sync readlists to search index     |
+| `syncAllUnits`       | Sync units to search index         |
+| `syncAllUsers`       | Sync user data to search index     |
+
+### Types
+
+- `SearchResponse` — Re-exported from the Meilisearch client
+
+## Configuration
+
+Meilisearch server settings are in `./bin/config.toml`.
+
+## Scripts
+
+```bash
+bun run meilisearch       # Start Meilisearch server
+bun run meilisearch:wsl   # Start Meilisearch (WSL, binds to 0.0.0.0:7700)
+```
+
+## Tech Stack
+
+- [Meilisearch](https://www.meilisearch.com) for full-text search
+- Data from `@rezics/server` (Prisma)
+- Types from `@rezics/contract`

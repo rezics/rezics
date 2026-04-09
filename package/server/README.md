@@ -1,92 +1,61 @@
-# server-elysia
+# @rezics/server
 
-To install dependencies:
+Core backend API server for the Rezics platform. Serves books, chapters, reviews, readlists, user interactions, file uploads, and content management.
+
+## Overview
+
+An Elysia-based API server that provides the main business logic for the platform. Uses Prisma with PostgreSQL for data persistence and integrates with `@rezics/auth` for identity, `@rezics/jwt` for token verification, and `@rezics/search` for full-text search.
+
+## API Domains
+
+| Domain      | Description                               |
+| ----------- | ----------------------------------------- |
+| `book`      | Book CRUD, metadata, and discovery        |
+| `chapter`   | Chapter content management                |
+| `comment`   | User comments on content                  |
+| `reaction`  | Content reactions                         |
+| `feedback`  | User feedback submissions                 |
+| `readlist`  | Reading list collections                  |
+| `review`    | Book reviews and ratings                  |
+| `user`      | User profiles                             |
+| `token`     | Token issuance and management             |
+| `tag`       | Content tagging                           |
+| `unit`      | Content units                             |
+| `upload`    | File uploads (S3)                         |
+| `meili`     | Meilisearch synchronization               |
+| `stats`     | Admin analytics                           |
+| `session`   | JWT session management and JWKS           |
+
+Each domain follows the pattern: `{domain}.api.ts` (routes), `{domain}.service.ts` (logic), `{domain}.mapper.ts` (transforms), `{domain}.types.ts` (types).
+
+## JWT and Session
+
+The server stores JWT service metadata in its own database for both the local issuer and trusted upstream issuers.
+
+| Endpoint              | Description                    |
+| --------------------- | ------------------------------ |
+| `/api/session/jwks`   | Canonical server JWKS          |
+| `/api/session/token`  | Session token issuance         |
+
+Environment variables (`AUTH_JWKS_URL`, `AUTH_JWT_ISSUER`, `MAIN_SESSION_JWT_*`) are bootstrap inputs; the local JWT service registry is the steady-state source of truth.
+
+## Scripts
 
 ```bash
-bun install
+bun run dev              # Start with --watch (development)
+bun run build            # Compile to standalone binary
+bun run prisma:generate  # Generate Prisma client
+bun run prisma:migrate   # Run migrations + generate
+bun run prisma:deploy    # Deploy migrations (production)
+bun run prisma:studio    # Open Prisma Studio
+bun run seed:mock        # Seed mock data
+bun run db:migrate       # Run custom migrations
 ```
 
-To run:
+## Tech Stack
 
-```bash
-bun run index.ts
-```
-
-This project was created using `bun init` in bun v1.3.0. [Bun](https://bun.com) is a fast all-in-one JavaScript runtime.
-
-# Library.Book.Backend
-
-Library.Book.Backend
-
-```
-git reset --soft HEAD~1
-```
-
-## Prisma
-
-```sh
-bunx prisma migrate dev --name init
-bunx prisma generate
-bun run prisma:seed
-bun run db:migrate
-bunx prisma migrate deploy
-bun run ./prisma/seed/utils/passwordReset.ts
-# 大型迁移
-bunx prisma migrate reset
-bun run prisma:seed:echokv
-
-# Apply existing migrations
-bunx prisma migrate deploy
-
-# Linux
-npx prisma generate
-```
-
-```sh
-# Ubuntu 示例
-sudo apt update
-sudo apt install postgresql postgresql-contrib
-sudo service postgresql start
-
-```
-
-```sh
-sudo systemctl restart rezbooklib.service
-journalctl -u rezbooklib.service -n 50 --no-pager
-```
-
-## Encore
-
-```sh
-# FTL connection failure
-encore daemon restart
-```
-
-## Bun 缓存清理
-
-```powershell
-Remove-Item "$env:USERPROFILE\.bun\install\cache" -Recurse -Force
-```
-
-## PostgreSQL
-
-```powershell
-pg_ctl start
-# 启动
-psql -U postgres
-
-```
-
-## JWT Metadata And Session Routes
-
-The main server now stores JWT service metadata in its own database for both the local issuer and trusted upstream issuers such as auth.
-
-- Canonical server JWKS: `/api/session/jwks`
-- Session token issuance: `/api/session/token`
-- Trusted auth issuer, audience, and JWKS location are persisted in the local JWT service registry
-- `AUTH_JWKS_URL`, `AUTH_JWT_ISSUER`, `AUTH_JWT_AUDIENCE`, and `MAIN_SESSION_JWT_*` are bootstrap inputs, not the steady-state source of truth
-
-Route policy is explicit:
-
-- Public verification surfaces such as JWKS are exposed with non-credentialed CORS
-- Session-protected surfaces stay on the credentialed policy
+- [Elysia](https://elysiajs.com) HTTP framework with OpenAPI support
+- [Prisma 7](https://www.prisma.io) with PostgreSQL
+- [AWS S3](https://aws.amazon.com/s3/) for file storage
+- [Jose](https://github.com/panva/jose) for JWT operations
+- Compiles to a standalone Bun binary for deployment

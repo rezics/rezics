@@ -1,5 +1,52 @@
-# Library.Book.Client
+# @rezics/app
+
+Main user-facing application for the Rezics book library platform. Provides book browsing, reading, editing, reviews, readlists, and community engagement features.
+
+## Overview
+
+A React SPA built with Vite that serves as the primary interface for readers and authors. Uses a feature-folder architecture with clear layering between model, hooks, state, components, and pages.
+
+## Features
+
+- **Book Library** — Browse, search, and discover books with Meilisearch-powered full-text search
+- **Book Reading** — Read books with the `@rezics/folio` reader
+- **Book Editing** — Author and edit book content with the `@rezics/editor`
+- **Reviews & Ratings** — Write and browse book reviews
+- **Readlists** — Curate and share reading lists
+- **Comments & Reactions** — Community engagement on content
+- **User Preferences** — Theme customization, reading settings, and profile management
+
+## Feature Architecture
+
+Features follow a layered structure (see `docs/feature standard.md`):
 
 ```
-pnpm dlx madge --image graph.png src/
+feature/
+  model/      # Pure business types and selectors (no React)
+  hooks/      # React logic and side effects
+  state/      # Jotai atoms or Zustand stores
+  component/  # Pure UI components
+  section/    # Business sections (wire state into components)
+  page/       # Thin route-level entry points
+  index.ts    # Public API for the feature
 ```
+
+**Key rule:** `model` must never import from `hooks` or `state`. External consumers must go through `index.ts`.
+
+## Scripts
+
+```bash
+bun run dev           # Start Vite dev server (port 35001)
+bun run build         # Production build
+bun run preview       # Preview production build
+bun run cosmos        # Launch React Cosmos for component development
+```
+
+## Tech Stack
+
+- [React 19](https://react.dev) + [Vite](https://vite.dev)
+- [TanStack Router](https://tanstack.com/router) for file-based routing
+- [TanStack Query](https://tanstack.com/query) for data fetching via `@rezics/api`
+- [Material-UI 7](https://mui.com) + [UnoCSS](https://unocss.dev) for styling
+- [Jotai](https://jotai.org) + [Zustand](https://zustand.docs.pmnd.rs) for state management
+- [Meilisearch](https://www.meilisearch.com) (via react-instantsearch) for search
