@@ -1,6 +1,7 @@
-import type { ReactionListQuery } from "@rezics/contract";
+import { NotificationType, type ReactionListQuery } from "@rezics/contract";
 import type { Prisma, Reaction, ReactionSummary } from "#/prisma/client";
 import { prisma } from "#/prisma/client";
+import { emitNotificationEvent } from "../notify/notify-client";
 
 /**
  * Reaction Service - CRUD + summary counters
@@ -125,7 +126,7 @@ export class ReactionService {
     params: Pick<Reaction, "userId" | "targetId" | "reaction">,
   ): Promise<Reaction> {
     const { userId, targetId, reaction } = params;
-    return await prisma.$transaction(async (tx) => {
+    const result = await prisma.$transaction(async (tx) => {
       const existing = await tx.reaction.findUnique({
         where: {
           userId_targetId_reaction: {
@@ -166,6 +167,29 @@ export class ReactionService {
 
       return created;
     });
+
+    // Emit notification (fire-and-forget)
+    const notifType =
+      reaction === "bookmark"
+        ? NotificationType.FAVORITE
+        : NotificationType.LIKE;
+    prisma.unit
+      .findUnique({ where: { id: targetId }, select: { userId: true, title: true } })
+      .then((unit) => {
+        if (unit && unit.userId !== userId) {
+          emitNotificationEvent({
+            recipientId: unit.userId,
+            type: notifType,
+            actorId: userId,
+            entityType: "unit",
+            entityId: targetId,
+            meta: { entityTitle: unit.title ?? undefined },
+          }).catch(() => {});
+        }
+      })
+      .catch(() => {});
+
+    return result;
   }
 
   /** Delete a reaction for a user (idempotent). Decrements summary if deleted. */

@@ -8,6 +8,7 @@ export * from "./comment";
 export * from "./feedback";
 export * from "./jwt-service";
 export * from "./meili";
+export * from "./notify";
 export * from "./pagination";
 export * from "./permission";
 export * from "./reaction";

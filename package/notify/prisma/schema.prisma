@@ -1,0 +1,62 @@
+generator client {
+  provider      = "prisma-client"
+  output        = "./generated"
+  moduleFormat  = "esm"
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgres"
+}
+
+enum NotificationType {
+  LIKE
+  FAVORITE
+  FOLLOW
+  COMMENT
+  MENTION
+  SYSTEM
+  INVITATION
+}
+
+model Notification {
+  id          String           @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  recipientId String           @db.Uuid
+  actorId     String?          @db.Uuid
+  type        NotificationType
+  entityType  String
+  entityId    String
+  meta        Json?
+  read        Boolean          @default(false)
+  readAt      DateTime?
+  createdAt   DateTime         @default(now())
+
+  @@index([recipientId, read])
+  @@index([recipientId, type, entityType, entityId])
+  @@index([recipientId, createdAt(sort: Desc)])
+}
+
+model Conversation {
+  id           String    @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  participantA String    @db.Uuid
+  participantB String    @db.Uuid
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  messages     Message[]
+
+  @@unique([participantA, participantB])
+  @@index([participantA])
+  @@index([participantB])
+}
+
+model Message {
+  id             String       @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  conversationId String       @db.Uuid
+  senderId       String       @db.Uuid
+  content        String
+  readAt         DateTime?
+  createdAt      DateTime     @default(now())
+  conversation   Conversation @relation(fields: [conversationId], references: [id])
+
+  @@index([conversationId, createdAt(sort: Desc)])
+}

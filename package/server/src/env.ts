@@ -123,6 +123,12 @@ export const env = createEnv({
     R2_BUCKET: v.optional(v.string()),
     /** Public base URL for serving uploaded images from R2. */
     R2_PUBLIC_URL: v.optional(v.string()),
+
+    /** Base URL of the Notify service for internal calls. */
+    NOTIFY_BASE_URL: v.fallback(v.string(), "http://localhost:3002"),
+
+    /** Shared secret for authenticating internal calls to the Notify service. */
+    NOTIFY_INTERNAL_SECRET: v.optional(v.string()),
   },
   runtimeEnv: process.env,
   emptyStringAsUndefined: true,

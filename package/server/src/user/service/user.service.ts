@@ -2,9 +2,10 @@
  * Never send unHashed passwords to server
  */
 
-import type { UpdateUser } from "@rezics/contract";
+import { NotificationType, type UpdateUser } from "@rezics/contract";
 import type { Prisma } from "#/prisma/client";
 import { prisma, UserType } from "#/prisma/client";
+import { emitNotificationEvent } from "../../notify/notify-client";
 import { deleteUserFromMeili, syncUserToMeili } from "@/meili/user/sync";
 import type { UserFilterOptions, UserWithRelations } from "../model/types";
 import { userInclude } from "../model/types";
@@ -259,6 +260,15 @@ export class UserService {
         data: { followersCount: { increment: 1 } },
       });
     });
+
+    // Emit notification (fire-and-forget)
+    emitNotificationEvent({
+      recipientId: followingId,
+      type: NotificationType.FOLLOW,
+      actorId: followerId,
+      entityType: "user",
+      entityId: followingId,
+    }).catch(() => {});
   }
 
   /**

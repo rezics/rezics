@@ -1,10 +1,12 @@
-import type {
-  CommentTreeNode,
-  CreateCommentInput,
-  UpdateCommentInput,
+import {
+  NotificationType,
+  type CommentTreeNode,
+  type CreateCommentInput,
+  type UpdateCommentInput,
 } from "@rezics/contract";
 import type { Prisma } from "#/prisma/client";
 import { prisma, UnitStatus, UnitType } from "#/prisma/client";
+import { emitNotificationEvent } from "../notify/notify-client";
 import { syncUnitToMeili } from "@/meili/unit/sync";
 import { getCommentApproxCount } from "./sql";
 import type { CommentWithRelations } from "./types";
@@ -167,6 +169,26 @@ export class CommentService {
         count: 1,
       },
     });
+    // Emit notification (fire-and-forget)
+    prisma.unit
+      .findUnique({
+        where: { id: rootPostId },
+        select: { userId: true, title: true },
+      })
+      .then((rootUnit) => {
+        if (rootUnit && rootUnit.userId !== userId) {
+          emitNotificationEvent({
+            recipientId: rootUnit.userId,
+            type: NotificationType.COMMENT,
+            actorId: userId,
+            entityType: "unit",
+            entityId: rootPostId,
+            meta: { entityTitle: rootUnit.title ?? undefined },
+          }).catch(() => {});
+        }
+      })
+      .catch(() => {});
+
     return created as CommentWithRelations;
   }
 

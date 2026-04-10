@@ -38,6 +38,8 @@ import { tokenApi } from "./token";
 import { unitApi } from "./unit";
 import { uploadApi } from "./upload";
 import { userApi } from "./user";
+import { dmServerApi } from "./notify/dm.api";
+import { userBatchApi } from "./notify/user-batch.api";
 import { AppError } from "./utils/errors";
 import { getProdState } from "./utils/getProdState";
 import { wellKnownApi } from "./well-known/well-known.api";
@@ -194,6 +196,8 @@ app
   .use(jwtServiceAdminApi)
   .use(statsAdminApi)
   .use(uploadApi)
+  .use(dmServerApi)
+  .use(userBatchApi)
   .get("/", () => "Hello Elysia")
   .get("/health", () => ({ status: "ok" }));
 

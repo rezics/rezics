@@ -1,0 +1,43 @@
+{
+  "name": "@rezics/notify",
+  "module": "src/index.ts",
+  "type": "module",
+  "private": true,
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./*": {
+      "types": "./src/*.ts",
+      "default": "./src/*.ts"
+    }
+  },
+  "scripts": {
+    "dev": "NODE_ENV=development bun run --watch --no-cache src/index.ts",
+    "build": "bun build src/index.ts --compile --minify-whitespace --minify-syntax --target bun --outfile notify",
+    "build:linux": "bun build src/index.ts --compile --minify-whitespace --minify-syntax --target bun-linux-x64 --outfile notify",
+    "prisma:generate": "bunx prisma generate",
+    "prisma:migrate": "bunx prisma migrate dev && bun run prisma:generate",
+    "prisma:deploy": "bunx prisma migrate deploy && bun run prisma:generate",
+    "prisma:studio": "bunx prisma studio"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.3.0",
+    "@types/pg": "^8.15.5",
+    "prisma": "^7.6.0"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "@elysiajs/cors": "^1.4.0",
+    "@rezics/contract": "workspace:*",
+    "@rezics/jwt": "workspace:*",
+    "@prisma/adapter-pg": "^7.6.0",
+    "@prisma/client": "^7.6.0",
+    "dotenv": "^17.2.3",
+    "elysia": "^1.4.22",
+    "pg": "^8.16.3"
+  }
+}
