@@ -100,13 +100,13 @@ If no translation exists for the requested language, fall back to `unit.defaultL
 
 **Rationale**:
 
-| Criterion | Adjacency only | Materialized path | Closure table |
-|-----------|---------------|-------------------|---------------|
-| Write cost | O(1) | O(1) | O(depth) |
-| Full subtree | recursive CTE | prefix scan | join |
-| Thread ordering | complex | natural (sort by path) | needs extra sort |
-| Pagination | hard | trivial (range query) | moderate |
-| Schema complexity | low | low | high (N^2 rows) |
+| Criterion         | Adjacency only | Materialized path      | Closure table    |
+| ----------------- | -------------- | ---------------------- | ---------------- |
+| Write cost        | O(1)           | O(1)                   | O(depth)         |
+| Full subtree      | recursive CTE  | prefix scan            | join             |
+| Thread ordering   | complex        | natural (sort by path) | needs extra sort |
+| Pagination        | hard           | trivial (range query)  | moderate         |
+| Schema complexity | low            | low                    | high (N^2 rows)  |
 
 The materialized path gives thread-ordered pagination (`ORDER BY sortPath`) in a single index scan — the most common read pattern for threaded discussions. Combined with adjacency fields (`parentPostUnitId`, `rootPostUnitId`) for direct parent lookups, this covers both flat and threaded modes without a separate index table.
 
@@ -1060,10 +1060,16 @@ Each phase is independently reversible:
 
 1. **Chapter model**: Currently chapters are `Unit(type=CHAPTER)` with `BookIndex.index` (JSON table of contents). Should chapters become a tree of Unit nodes with their own tree structure, or continue as a JSON index? This design preserves `BookIndex` as-is but the chapter model may need its own redesign.
 
+Answer: Chapters should retain the current BookIndex JSON structure, as it is the most flexible and lowest-cost solution.
+
 2. **Search index rebuild**: Meilisearch sync needs complete rewrite. Should work/release grouping use `COALESCE(workUnitId, id)` as group key? Should realm-scoped search be a separate index or filtered within one index?
 
 3. **EchoKV**: Temporary storage model — keep as-is or migrate to a different pattern?
 
+Answer: EchoKV: Keep the temporary storage model as it is for now.
+
 4. **Realm hierarchy**: Should realms support parent/child relationships (sub-realms), or remain strictly flat? Design assumes flat.
+
+Answer: Realm hierarchy: Keep it strictly flat.
 
 5. **Bookmark.tags**: Currently `String[]`. Should bookmarks use the new UnitTag system, or remain a simple personal tagging mechanism?
