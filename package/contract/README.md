@@ -8,27 +8,27 @@ This package is the single source of truth for all API data structures. Schemas 
 
 ## Domains
 
-| Schema           | Description                          |
-| ---------------- | ------------------------------------ |
-| `auth`           | Authentication and session types     |
-| `book`           | Book metadata and listing types      |
-| `chapter`        | Chapter content and structure        |
-| `comment`        | User comments                        |
-| `feedback`       | User feedback submissions            |
-| `jwt-service`    | JWT service metadata                 |
-| `meili`          | Meilisearch index and query types    |
-| `pagination`     | Offset and cursor pagination         |
-| `permission`     | Access control and role types        |
-| `reaction`       | Content reactions                    |
-| `readlist`       | Reading list collections             |
-| `review`         | Book reviews                         |
-| `search`         | Search query and result types        |
-| `tag`            | Content tagging                      |
-| `token`          | Token issuance and claims            |
-| `unit`           | Content units                        |
-| `upload`         | File upload types                    |
-| `user`           | User profiles                        |
-| `admin-stats`    | Admin dashboard statistics           |
+| Schema        | Description                       |
+| ------------- | --------------------------------- |
+| `auth`        | Authentication and session types  |
+| `book`        | Book metadata and listing types   |
+| `chapter`     | Chapter content and structure     |
+| `comment`     | User comments                     |
+| `feedback`    | User feedback submissions         |
+| `jwt-service` | JWT service metadata              |
+| `meili`       | Meilisearch index and query types |
+| `pagination`  | Offset and cursor pagination      |
+| `permission`  | Access control and role types     |
+| `reaction`    | Content reactions                 |
+| `readlist`    | Reading list collections          |
+| `review`      | Book reviews                      |
+| `search`      | Search query and result types     |
+| `tag`         | Content tagging                   |
+| `token`       | Token issuance and claims         |
+| `unit`        | Content units                     |
+| `upload`      | File upload types                 |
+| `user`        | User profiles                     |
+| `admin-stats` | Admin dashboard statistics        |
 
 ## Usage
 
@@ -37,6 +37,10 @@ import { type BookDTO, bookDTOSchema } from '@rezics/contract';
 ```
 
 All schemas are re-exported from the package root.
+
+## Decision
+
+- Don't use prisma box
 
 ## Tech Stack
 
