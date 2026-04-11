@@ -10,7 +10,7 @@ import {
   UnitType,
   type UnitVisibility,
 } from "#/prisma/client";
-import { deleteBookFromMeili, syncBookToMeili } from "@/meili/book/sync";
+import { syncContentToMeili, deleteContentFromMeili } from "@/meili/content/sync";
 import { getBookApproxCount } from "./sql";
 import type { BookWithRelations } from "./types";
 import { bookInclude } from "./types";
@@ -280,7 +280,7 @@ export class BookService {
       include: bookInclude,
     });
 
-    await syncBookToMeili(book.unitId);
+    await syncContentToMeili(book.unitId);
 
     return book as BookWithRelations;
   }
@@ -318,7 +318,7 @@ export class BookService {
       include: bookInclude,
     });
 
-    await syncBookToMeili(unitId);
+    await syncContentToMeili(unitId);
 
     return book as BookWithRelations;
   }
@@ -342,7 +342,7 @@ export class BookService {
    */
   async delete(unitId: string): Promise<void> {
     await prisma.unit.delete({ where: { id: unitId } });
-    await deleteBookFromMeili(unitId);
+    await deleteContentFromMeili(unitId);
   }
 
   /**

@@ -9,6 +9,7 @@ import type {
 } from "@rezics/contract";
 import type { Prisma } from "#/prisma/client";
 import { prisma, UnitStatus, UnitType } from "#/prisma/client";
+import { syncContentToMeili } from "@/meili/content/sync";
 import {
   mapRealmListRowToDTO,
   mapRealmMemberToDTO,
@@ -235,6 +236,7 @@ export class RealmService {
     const row = await prisma.realmUnit.create({
       data: { realmUnitId, unitId },
     });
+    await syncContentToMeili(unitId);
     return mapRealmUnitToDTO(row);
   }
 
@@ -247,6 +249,7 @@ export class RealmService {
         realmUnitId_unitId: { realmUnitId, unitId },
       },
     });
+    await syncContentToMeili(unitId);
   }
 
   // --- Realm tag units ---
@@ -269,6 +272,7 @@ export class RealmService {
       create: { unitId, tagUnitId, score: 1 },
     });
 
+    await syncContentToMeili(unitId);
     return mapRealmTagUnitToDTO(row);
   }
 
@@ -282,7 +286,7 @@ export class RealmService {
         realmUnitId_tagUnitId_unitId: { realmUnitId, tagUnitId, unitId },
       },
     });
-    // No cascade on removal per spec
+    await syncContentToMeili(unitId);
   }
 }
 

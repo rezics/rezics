@@ -6,11 +6,7 @@ import type {
 } from "@rezics/contract";
 import type { Prisma } from "#/prisma/client";
 import { prisma, UnitStatus, UnitType } from "#/prisma/client";
-import { deleteUnitFromMeili, syncUnitToMeili } from "@/meili/unit/sync";
-import {
-  deleteReadlistFromMeili,
-  syncReadlistToMeili,
-} from "../meili/readlist/sync";
+import { syncContentToMeili, deleteContentFromMeili } from "@/meili/content/sync";
 import { mapReadlistListRowToDTO, mapReadlistRowToDTO } from "./mapper";
 import { readlistListSelect, readlistSelect } from "./types";
 
@@ -123,8 +119,8 @@ export class ReadlistService {
       select: readlistSelect,
     });
 
-    await syncUnitToMeili(unit.id);
-    await syncReadlistToMeili(unit.id);
+    await syncContentToMeili(unit.id);
+    await syncContentToMeili(unit.id);
 
     return mapReadlistRowToDTO(row);
   }
@@ -149,15 +145,15 @@ export class ReadlistService {
       },
       select: readlistSelect,
     });
-    await syncUnitToMeili(unitId);
-    await syncReadlistToMeili(unitId);
+    await syncContentToMeili(unitId);
+    await syncContentToMeili(unitId);
     return mapReadlistRowToDTO(row);
   }
 
   async delete(unitId: string): Promise<void> {
     await prisma.unit.delete({ where: { id: unitId } });
-    await deleteUnitFromMeili(unitId);
-    await deleteReadlistFromMeili(unitId);
+    await deleteContentFromMeili(unitId);
+    await deleteContentFromMeili(unitId);
   }
 }
 

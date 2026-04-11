@@ -18,6 +18,8 @@ import { Route as AdminMeiliRouteImport } from './routes/_admin/meili'
 import { Route as AdminJwtServicesRouteImport } from './routes/_admin/jwt-services'
 import { Route as AdminUsersIndexRouteImport } from './routes/_admin/users/index'
 import { Route as AdminUnitsIndexRouteImport } from './routes/_admin/units/index'
+import { Route as AdminShelvesIndexRouteImport } from './routes/_admin/shelves/index'
+import { Route as AdminRealmsIndexRouteImport } from './routes/_admin/realms/index'
 import { Route as AdminBookIndexRouteImport } from './routes/_admin/book/index'
 import { Route as AdminUsersMeiliRouteImport } from './routes/_admin/users/meili'
 import { Route as AdminUsersCreateRouteImport } from './routes/_admin/users/create'
@@ -30,8 +32,6 @@ import { Route as AdminBookMeiliRouteImport } from './routes/_admin/book/meili'
 import { Route as AdminAuthUsersRouteImport } from './routes/_admin/auth/users'
 import { Route as AdminAuthStatusRouteImport } from './routes/_admin/auth/status'
 import { Route as AdminAuthSessionsRouteImport } from './routes/_admin/auth/sessions'
-import { Route as AdminRealmsIndexRouteImport } from './routes/_admin/realms/index'
-import { Route as AdminShelvesIndexRouteImport } from './routes/_admin/shelves/index'
 import { Route as AdminAuthJwtServicesRouteImport } from './routes/_admin/auth/jwt-services'
 
 const LoginRoute = LoginRouteImport.update({
@@ -78,9 +78,9 @@ const AdminUnitsIndexRoute = AdminUnitsIndexRouteImport.update({
   path: '/units/',
   getParentRoute: () => AdminRoute,
 } as any)
-const AdminBookIndexRoute = AdminBookIndexRouteImport.update({
-  id: '/book/',
-  path: '/book/',
+const AdminShelvesIndexRoute = AdminShelvesIndexRouteImport.update({
+  id: '/shelves/',
+  path: '/shelves/',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminRealmsIndexRoute = AdminRealmsIndexRouteImport.update({
@@ -88,9 +88,9 @@ const AdminRealmsIndexRoute = AdminRealmsIndexRouteImport.update({
   path: '/realms/',
   getParentRoute: () => AdminRoute,
 } as any)
-const AdminShelvesIndexRoute = AdminShelvesIndexRouteImport.update({
-  id: '/shelves/',
-  path: '/shelves/',
+const AdminBookIndexRoute = AdminBookIndexRouteImport.update({
+  id: '/book/',
+  path: '/book/',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminUsersMeiliRoute = AdminUsersMeiliRouteImport.update({
@@ -271,8 +271,6 @@ export interface FileRouteTypes {
     | '/auth/users'
     | '/book/meili'
     | '/misc/echokv'
-    | '/realms'
-    | '/shelves'
     | '/units/$unitId'
     | '/units/create'
     | '/units/meili'
@@ -280,6 +278,8 @@ export interface FileRouteTypes {
     | '/users/create'
     | '/users/meili'
     | '/book'
+    | '/realms'
+    | '/shelves'
     | '/units'
     | '/users'
   id:
@@ -380,11 +380,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminUnitsIndexRouteImport
       parentRoute: typeof AdminRoute
     }
-    '/_admin/book/': {
-      id: '/_admin/book/'
-      path: '/book'
-      fullPath: '/book/'
-      preLoaderRoute: typeof AdminBookIndexRouteImport
+    '/_admin/shelves/': {
+      id: '/_admin/shelves/'
+      path: '/shelves'
+      fullPath: '/shelves/'
+      preLoaderRoute: typeof AdminShelvesIndexRouteImport
       parentRoute: typeof AdminRoute
     }
     '/_admin/realms/': {
@@ -394,11 +394,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminRealmsIndexRouteImport
       parentRoute: typeof AdminRoute
     }
-    '/_admin/shelves/': {
-      id: '/_admin/shelves/'
-      path: '/shelves'
-      fullPath: '/shelves/'
-      preLoaderRoute: typeof AdminShelvesIndexRouteImport
+    '/_admin/book/': {
+      id: '/_admin/book/'
+      path: '/book'
+      fullPath: '/book/'
+      preLoaderRoute: typeof AdminBookIndexRouteImport
       parentRoute: typeof AdminRoute
     }
     '/_admin/users/meili': {

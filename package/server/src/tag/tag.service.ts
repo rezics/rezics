@@ -6,6 +6,7 @@ import type {
   UpdateTagInput,
 } from "@rezics/contract";
 import { prisma, UnitStatus, UnitType } from "#/prisma/client";
+import { syncContentToMeili } from "@/meili/content/sync";
 import type { TagWithTranslations, UnitTagWithRelations } from "./types";
 import { tagUnitInclude, unitTagInclude } from "./types";
 
@@ -131,6 +132,7 @@ export class TagService {
         voteCount: 0,
       },
     });
+    await syncContentToMeili(unitId);
   }
 
   /**
@@ -142,6 +144,7 @@ export class TagService {
         unitId_tagUnitId: { unitId, tagUnitId },
       },
     });
+    await syncContentToMeili(unitId);
   }
 
   /**

@@ -13,7 +13,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { meiliUnitApi } from "@rezics/api/meili/meili.api";
+import { meiliContentApi } from "@rezics/api/meili/meili.api";
 import { type UnitDTO, unitQueries } from "@rezics/api/unit/unit";
 import { Link } from "@rezics/ui/primitive/link/Link.tsx";
 import { useQuery } from "@tanstack/react-query";
@@ -69,13 +69,13 @@ export default function UnitsPage() {
   const meiliQuery = useQuery({
     queryKey: ["meili-units", page, limit, query],
     queryFn: () =>
-      meiliUnitApi.unitSearch({ start, limit, q: query || undefined }),
+      meiliContentApi.contentSearch({ keyword: query || undefined, offset: start, limit }),
     enabled: isMeiliMode,
   });
 
   const normalQuery = trimmedQuery.length > 0 ? searchQuery : listQuery;
   const data = isMeiliMode ? meiliQuery.data : normalQuery.data;
-  const units = data?.units ?? [];
+  const units = (isMeiliMode ? (data as any)?.items : data?.units) ?? [];
   const total = data?.total;
 
   const columns = React.useMemo(() => {

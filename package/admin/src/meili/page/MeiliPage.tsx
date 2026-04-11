@@ -21,12 +21,8 @@ type MessageState = {
   text: string;
 } | null;
 
-/**
- * Meili 管理页面
- */
 export function MeiliPage() {
   const [message, setMessage] = useState<MessageState>(null);
-  const [lastSearchKey, setLastSearchKey] = useState<string | null>(null);
   const [lastAdminKey, setLastAdminKey] = useState<string | null>(null);
 
   const { data: health, isLoading: isHealthLoading } = useQuery(
@@ -39,33 +35,22 @@ export function MeiliPage() {
     refetch: refetchKeys,
   } = useQuery(meiliAdminQueries.keys());
 
-  const initBooksMutation = meiliAdminMutations.useInitBooksIndex({
+  // Index initialization
+  const initContentMutation = meiliAdminMutations.useInitContentIndex({
     onSuccess: (res) => {
       setMessage({
         type: "success",
-        text: res.message || "Books 索引初始化完成",
-      });
-    },
-    onError: (err) => {
-      setMessage({ type: "error", text: err.message });
-    },
-  });
-
-  const initReadlistsMutation = meiliAdminMutations.useInitReadlistsIndex({
-    onSuccess: (res) => {
-      setMessage({
-        type: "success",
-        text: res.message || "Readlists 索引初始化完成",
+        text: res.message || "Content index initialized",
       });
     },
     onError: (err) => setMessage({ type: "error", text: err.message }),
   });
 
-  const initUnitsMutation = meiliAdminMutations.useInitUnitsIndex({
+  const initFeedbacksMutation = meiliAdminMutations.useInitFeedbacksIndex({
     onSuccess: (res) => {
       setMessage({
         type: "success",
-        text: res.message || "Units 索引初始化完成",
+        text: res.message || "Feedbacks index initialized",
       });
     },
     onError: (err) => setMessage({ type: "error", text: err.message }),
@@ -75,77 +60,46 @@ export function MeiliPage() {
     onSuccess: (res) => {
       setMessage({
         type: "success",
-        text: res.message || "Users 索引初始化完成",
+        text: res.message || "Users index initialized",
       });
     },
     onError: (err) => setMessage({ type: "error", text: err.message }),
   });
 
-  const syncBooksMutation = meiliAdminMutations.useSyncBooks({
+  // Full sync
+  const syncContentMutation = meiliAdminMutations.useSyncContent({
     onSuccess: () => {
-      setMessage({ type: "success", text: "开始同步全部 Books 到 Meili" });
-    },
-    onError: (err) => setMessage({ type: "error", text: err.message }),
-  });
-
-  const syncReadlistsMutation = meiliAdminMutations.useSyncReadlists({
-    onSuccess: () => {
-      setMessage({ type: "success", text: "开始同步全部 Readlists 到 Meili" });
-    },
-    onError: (err) => setMessage({ type: "error", text: err.message }),
-  });
-
-  const syncUnitsMutation = meiliAdminMutations.useSyncUnits({
-    onSuccess: () => {
-      setMessage({ type: "success", text: "开始同步全部 Units 到 Meili" });
-    },
-    onError: (err) => setMessage({ type: "error", text: err.message }),
-  });
-
-  const initFeedbacksMutation = meiliAdminMutations.useInitFeedbacksIndex({
-    onSuccess: (res) => {
-      setMessage({
-        type: "success",
-        text: res.message || "Feedbacks 索引初始化完成",
-      });
+      setMessage({ type: "success", text: "Content sync started" });
     },
     onError: (err) => setMessage({ type: "error", text: err.message }),
   });
 
   const syncFeedbacksMutation = meiliAdminMutations.useSyncFeedbacks({
     onSuccess: () => {
-      setMessage({
-        type: "success",
-        text: "开始同步全部 Feedbacks 到 Meili",
-      });
+      setMessage({ type: "success", text: "Feedbacks sync started" });
     },
     onError: (err) => setMessage({ type: "error", text: err.message }),
   });
+
   const syncUsersMutation = meiliAdminMutations.useSyncUsers({
     onSuccess: () => {
-      setMessage({ type: "success", text: "开始同步全部 Users 到 Meili" });
+      setMessage({ type: "success", text: "Users sync started" });
     },
     onError: (err) => setMessage({ type: "error", text: err.message }),
   });
 
-  const deleteAllUnitsMutation = meiliAdminMutations.useDeleteAllUnits({
+  // Dangerous operations
+  const deleteAllContentMutation = meiliAdminMutations.useDeleteAllContent({
     onSuccess: (res) => {
       setMessage({
         type: "success",
-        text: res.message || "已删除 Meili 中全部 Units",
+        text: res.message || "All content deleted from Meili",
       });
     },
     onError: (err) => setMessage({ type: "error", text: err.message }),
   });
 
-  const createSearchKeyMutation = meiliAdminMutations.useCreateSearchKey({
-    onSuccess: (res) => {
-      setLastSearchKey(res.key);
-      setMessage({ type: "success", text: "Search Key 已创建" });
-    },
-    onError: (err) => setMessage({ type: "error", text: err.message }),
-  });
-
+  // Key management
   const createAdminKeyMutation = meiliAdminMutations.useCreateAdminKey({
     onSuccess: (res) => {
       const keyString =
@@ -154,12 +108,10 @@ export function MeiliPage() {
       setMessage({
         type: "success",
         text: keyString
-          ? "Admin Key 已创建"
-          : "Admin Key 已创建（查看控制台返回值）",
+          ? "Admin Key created"
+          : "Admin Key created (see console for details)",
       });
-      if (!keyString) {
-        console.log("Meili admin key response", res);
-      }
+      if (!keyString) console.log("Meili admin key response", res);
     },
     onError: (err) => setMessage({ type: "error", text: err.message }),
   });
@@ -168,7 +120,7 @@ export function MeiliPage() {
     onSuccess: async (res) => {
       setMessage({
         type: "success",
-        text: res.message || "Key 已删除",
+        text: res.message || "Key deleted",
       });
       await refetchKeys();
     },
@@ -178,9 +130,7 @@ export function MeiliPage() {
   const handleDeleteKey = (key: MeiliKey) => {
     if (!key.uid) return;
     const ok = window.confirm(
-      `确定要删除 Key: ${key.uid}${
-        key.name ? ` (${key.name})` : ""
-      } ？此操作不可恢复。`,
+      `Delete Key: ${key.uid}${key.name ? ` (${key.name})` : ""}? This cannot be undone.`,
     );
     if (!ok) return;
     deleteKeyMutation.mutate(key.uid);
@@ -191,23 +141,23 @@ export function MeiliPage() {
       <div className="max-w-6xl mx-auto px-4 py-6 space-y-6">
         <div className="space-y-2">
           <Typography variant="h4" component="h1">
-            Meili 管理面板
+            Meili Admin
           </Typography>
           <Typography
             variant="body2"
             className="text-slate-600 dark:text-slate-300"
           >
-            仅限 Root 用户使用，用于初始化索引、全量同步数据以及管理 Meilisearch
-            API Key。
+            Root-only panel for index initialization, full sync, and Meilisearch
+            API key management.
           </Typography>
           {isHealthLoading ? (
             <div className="flex items-center gap-2 text-sm text-slate-600">
               <CircularProgress size={18} />
-              <span>正在检查 Meili 服务状态...</span>
+              <span>Checking Meili status...</span>
             </div>
           ) : (
             <div className="flex items-center gap-2 text-sm">
-              <span>Meili 状态：</span>
+              <span>Meili status:</span>
               <Chip
                 label={health?.status ?? "unknown"}
                 color={health?.status === "available" ? "success" : "warning"}
@@ -228,43 +178,23 @@ export function MeiliPage() {
         )}
 
         <div className="flex flex-col gap-4">
-          {/* 索引初始化 */}
+          {/* Index initialization */}
           <Card>
             <CardHeader
-              title="索引初始化"
-              subheader="仅在创建索引或调整索引设置后需要执行，一般是一次性操作。"
+              title="Index Initialization"
+              subheader="Run once when creating indexes or updating index settings."
             />
             <CardContent className="space-y-3">
               <div className="flex flex-wrap gap-2">
                 <Button
                   variant="contained"
                   size="small"
-                  onClick={() => initBooksMutation.mutate()}
-                  disabled={initBooksMutation.isPending}
+                  onClick={() => initContentMutation.mutate()}
+                  disabled={initContentMutation.isPending}
                 >
-                  {initBooksMutation.isPending
-                    ? "初始化中…"
-                    : "初始化 Books 索引"}
-                </Button>
-                <Button
-                  variant="contained"
-                  size="small"
-                  onClick={() => initReadlistsMutation.mutate()}
-                  disabled={initReadlistsMutation.isPending}
-                >
-                  {initReadlistsMutation.isPending
-                    ? "初始化中…"
-                    : "初始化 Readlists 索引"}
-                </Button>
-                <Button
-                  variant="contained"
-                  size="small"
-                  onClick={() => initUnitsMutation.mutate()}
-                  disabled={initUnitsMutation.isPending}
-                >
-                  {initUnitsMutation.isPending
-                    ? "初始化中…"
-                    : "初始化 Units 索引"}
+                  {initContentMutation.isPending
+                    ? "Initializing..."
+                    : "Init Content Index"}
                 </Button>
                 <Button
                   variant="contained"
@@ -273,8 +203,8 @@ export function MeiliPage() {
                   disabled={initFeedbacksMutation.isPending}
                 >
                   {initFeedbacksMutation.isPending
-                    ? "初始化中…"
-                    : "初始化 Feedbacks 索引"}
+                    ? "Initializing..."
+                    : "Init Feedbacks Index"}
                 </Button>
                 <Button
                   variant="contained"
@@ -283,50 +213,30 @@ export function MeiliPage() {
                   disabled={initUsersMutation.isPending}
                 >
                   {initUsersMutation.isPending
-                    ? "初始化中…"
-                    : "初始化 Users 索引"}
+                    ? "Initializing..."
+                    : "Init Users Index"}
                 </Button>
               </div>
-              <Typography variant="caption" color="text.secondary">
-                这些操作需要 Root 权限，且会访问后端 JWT
-                鉴权，如果权限不足会返回 403。
-              </Typography>
             </CardContent>
           </Card>
 
-          {/* 全量同步 */}
+          {/* Full sync */}
           <Card>
             <CardHeader
-              title="全量同步"
-              subheader="将数据库中全部数据重新同步到 Meilisearch，一般在批量修改或者导入后使用。"
+              title="Full Sync"
+              subheader="Re-sync all data from database to Meilisearch. Use after bulk imports or schema changes."
             />
             <CardContent className="space-y-3">
               <div className="flex flex-wrap gap-2">
                 <Button
                   variant="outlined"
                   size="small"
-                  onClick={() => syncBooksMutation.mutate()}
-                  disabled={syncBooksMutation.isPending}
+                  onClick={() => syncContentMutation.mutate()}
+                  disabled={syncContentMutation.isPending}
                 >
-                  {syncBooksMutation.isPending ? "同步中…" : "同步全部 Books"}
-                </Button>
-                <Button
-                  variant="outlined"
-                  size="small"
-                  onClick={() => syncReadlistsMutation.mutate()}
-                  disabled={syncReadlistsMutation.isPending}
-                >
-                  {syncReadlistsMutation.isPending
-                    ? "同步中…"
-                    : "同步全部 Readlists"}
-                </Button>
-                <Button
-                  variant="outlined"
-                  size="small"
-                  onClick={() => syncUnitsMutation.mutate()}
-                  disabled={syncUnitsMutation.isPending}
-                >
-                  {syncUnitsMutation.isPending ? "同步中…" : "同步全部 Units"}
+                  {syncContentMutation.isPending
+                    ? "Syncing..."
+                    : "Sync All Content"}
                 </Button>
                 <Button
                   variant="outlined"
@@ -335,8 +245,8 @@ export function MeiliPage() {
                   disabled={syncFeedbacksMutation.isPending}
                 >
                   {syncFeedbacksMutation.isPending
-                    ? "同步中…"
-                    : "同步全部 Feedbacks"}
+                    ? "Syncing..."
+                    : "Sync All Feedbacks"}
                 </Button>
                 <Button
                   variant="outlined"
@@ -344,21 +254,23 @@ export function MeiliPage() {
                   onClick={() => syncUsersMutation.mutate()}
                   disabled={syncUsersMutation.isPending}
                 >
-                  {syncUsersMutation.isPending ? "同步中…" : "同步全部 Users"}
+                  {syncUsersMutation.isPending
+                    ? "Syncing..."
+                    : "Sync All Users"}
                 </Button>
               </div>
               <Typography variant="caption" color="text.secondary">
-                同步操作一般是异步任务，这里只展示任务已触发，具体进度在后端或
-                Meili 仪表盘中查看。
+                Sync operations are async tasks. Check the backend or Meili
+                dashboard for progress.
               </Typography>
             </CardContent>
           </Card>
 
-          {/* 危险操作 */}
+          {/* Dangerous operations */}
           <Card>
             <CardHeader
-              title="危险操作"
-              subheader="这些操作会直接影响搜索索引数据，请谨慎使用。"
+              title="Dangerous Operations"
+              subheader="These operations directly affect search index data. Use with caution."
             />
             <CardContent className="space-y-3">
               <div className="flex flex-wrap gap-2">
@@ -368,43 +280,30 @@ export function MeiliPage() {
                   size="small"
                   onClick={() => {
                     const ok = window.confirm(
-                      "确定要删除 Meili 中的全部 Units 吗？这会清空相关搜索结果，且无法恢复！",
+                      "Delete all content from Meili? This will clear search results and cannot be undone!",
                     );
                     if (!ok) return;
-                    deleteAllUnitsMutation.mutate();
+                    deleteAllContentMutation.mutate();
                   }}
-                  disabled={deleteAllUnitsMutation.isPending}
+                  disabled={deleteAllContentMutation.isPending}
                 >
-                  {deleteAllUnitsMutation.isPending
-                    ? "正在删除…"
-                    : "删除全部 Units 索引数据"}
+                  {deleteAllContentMutation.isPending
+                    ? "Deleting..."
+                    : "Delete All Content"}
                 </Button>
               </div>
-              <Typography variant="caption" color="text.secondary">
-                建议仅在开发 / 测试环境使用，生产环境前请确认已经做好数据备份。
-              </Typography>
             </CardContent>
           </Card>
         </div>
 
-        {/* Key 管理 */}
+        {/* Key management */}
         <Card>
           <CardHeader
-            title="Meili API Key 管理"
-            subheader="创建前端 Search Key、临时 Admin Key，并查看 / 删除已有 Key。"
+            title="Meili API Key Management"
+            subheader="Create admin keys and manage existing keys."
           />
           <CardContent className="space-y-4">
             <div className="flex flex-wrap gap-2">
-              <Button
-                variant="contained"
-                size="small"
-                onClick={() => createSearchKeyMutation.mutate()}
-                disabled={createSearchKeyMutation.isPending}
-              >
-                {createSearchKeyMutation.isPending
-                  ? "正在创建…"
-                  : "创建 Search Key"}
-              </Button>
               <Button
                 variant="outlined"
                 size="small"
@@ -413,8 +312,8 @@ export function MeiliPage() {
                 disabled={createAdminKeyMutation.isPending}
               >
                 {createAdminKeyMutation.isPending
-                  ? "正在创建…"
-                  : "创建 Admin Key"}
+                  ? "Creating..."
+                  : "Create Admin Key"}
               </Button>
               <Button
                 variant="text"
@@ -422,23 +321,14 @@ export function MeiliPage() {
                 onClick={() => refetchKeys()}
                 disabled={isKeysLoading}
               >
-                刷新 Key 列表
+                Refresh Key List
               </Button>
             </div>
-
-            {lastSearchKey && (
-              <div className="text-xs break-all space-y-1">
-                <div className="font-semibold">最新 Search Key：</div>
-                <code className="px-2 py-1 rounded bg-slate-100 dark:bg-slate-800">
-                  {lastSearchKey}
-                </code>
-              </div>
-            )}
 
             {lastAdminKey && (
               <div className="text-xs break-all space-y-1">
                 <div className="font-semibold text-amber-700">
-                  最新 Admin Key（请妥善保存，只在安全环境使用）：
+                  Latest Admin Key (store securely):
                 </div>
                 <code className="px-2 py-1 rounded bg-slate-100 dark:bg-slate-800">
                   {lastAdminKey}
@@ -448,16 +338,16 @@ export function MeiliPage() {
 
             <div className="border-t border-slate-200 dark:border-slate-700 pt-3">
               <Typography variant="subtitle2" className="mb-2">
-                已有 Key 列表
+                Existing Keys
               </Typography>
               {isKeysLoading ? (
                 <div className="flex items-center gap-2 text-sm text-slate-600">
                   <CircularProgress size={18} />
-                  <span>正在加载 Key 列表...</span>
+                  <span>Loading keys...</span>
                 </div>
               ) : !keyList || keyList.results.length === 0 ? (
                 <Typography variant="body2" color="text.secondary">
-                  当前没有任何 Meili API Key。
+                  No Meili API keys found.
                 </Typography>
               ) : (
                 <div className="overflow-x-auto">
@@ -465,11 +355,11 @@ export function MeiliPage() {
                     <thead className="border-b border-slate-200 dark:border-slate-700 text-slate-500">
                       <tr>
                         <th className="py-1 pr-3">UID</th>
-                        <th className="py-1 pr-3">名称</th>
+                        <th className="py-1 pr-3">Name</th>
                         <th className="py-1 pr-3">Actions</th>
                         <th className="py-1 pr-3">Indexes</th>
-                        <th className="py-1 pr-3">过期时间</th>
-                        <th className="py-1 pr-3">操作</th>
+                        <th className="py-1 pr-3">Expires</th>
+                        <th className="py-1 pr-3">Action</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -491,7 +381,7 @@ export function MeiliPage() {
                             {(key.indexes || []).join(", ") || "-"}
                           </td>
                           <td className="py-1 pr-3 align-top text-[11px]">
-                            {key.expiresAt || "不过期"}
+                            {key.expiresAt || "Never"}
                           </td>
                           <td className="py-1 pr-3 align-top">
                             <Button
@@ -501,7 +391,7 @@ export function MeiliPage() {
                               onClick={() => handleDeleteKey(key)}
                               disabled={deleteKeyMutation.isPending}
                             >
-                              删除
+                              Delete
                             </Button>
                           </td>
                         </tr>

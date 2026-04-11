@@ -1,25 +1,12 @@
-import type {
-  ReadlistDTO,
-  ReadlistListResponse,
-  ReadlistMetadata,
-  ReadlistSearchResult,
-  ReviewListResponse,
-  ReviewMeiliDTO,
-  UnitListResponse,
-} from "@rezics/contract";
+// MOCK: Legacy mappers retained as stubs for consumers not yet migrated
+// to server-side DB queries. These were used by review, readlist, and
+// user-units pages that queried the old `units` Meili index.
 
 /**
- * Map a single Unit (from Meili unit index) into a ReviewDTO.
- *
- * - unit.id / unit.unitId -> ReviewDTO.unitId
- * - unit.targetUnitId     -> ReviewDTO.bookId
- * - unit.title/content    -> ReviewDTO.title/content
- * - unit.metadata.rating  -> ReviewDTO.rating
- * - unit.createdAt        -> ReviewDTO.created_at
- * - unit.user             -> ReviewDTO.user
- * - unit.reactionSummaries-> ReviewDTO.reactionSummaries
+ * @deprecated Units index removed. Migrate to server-side review API.
  */
-export function mapUnitToReviewDTO(unit: any): ReviewMeiliDTO {
+// MOCK: review mapping stub
+export function mapUnitToReviewDTO(unit: any): any {
   return {
     unitId: unit.unitId ?? unit.id,
     bookId: unit.targetUnitId,
@@ -34,65 +21,22 @@ export function mapUnitToReviewDTO(unit: any): ReviewMeiliDTO {
 }
 
 /**
- * Convert a Meili /meili/units/search response into a ReviewListResponse
- * compatible with the existing review API.
+ * @deprecated Units index removed. Migrate to server-side review API.
  */
-export function mapUnitListToReviewListResponse(
-  unitResp: UnitListResponse,
-): ReviewListResponse {
-  const reviews: ReviewMeiliDTO[] =
+// MOCK: review list mapping stub
+export function mapUnitListToReviewListResponse(unitResp: any): any {
+  const reviews =
     (unitResp.units as any[] | undefined)?.map(mapUnitToReviewDTO) ?? [];
-
-  return {
-    reviews,
-    total: unitResp.total,
-  };
+  return { reviews, total: unitResp.total };
 }
 
 /**
- * Map a single READLIST Unit (from Meili unit index) into a ReadlistDTO.
- *
- * - unit.id              -> ReadlistDTO.id
- * - unit.title/content   -> ReadlistDTO.title/content
- * - metadata.coverUrl    -> ReadlistDTO.coverUrl
- * - unit.user            -> ReadlistDTO.creator
- * - unit.reactionSummaries -> ReadlistDTO.reactionSummaries
- * - metadata.items       -> ReadlistDTO.books / ReadlistDTO.reviews (counts & unit links)
+ * @deprecated Readlists replaced by shelves. Migrate to server-side shelf API.
  */
-export function mapUnitToReadlistDTO(unit: any): ReadlistDTO {
-  const metadata = (unit.metadata ?? {}) as ReadlistMetadata | any;
-  const items: { bookUnitId?: string; reviewUnitId?: string }[] = Array.isArray(
-    metadata.items,
-  )
-    ? metadata.items
-    : [];
-
-  const books =
-    items
-      .filter((item) => !!item.bookUnitId)
-      .map((item) => ({
-        unitId: item.bookUnitId as string,
-        title: "",
-        coverUrl: undefined,
-        author: undefined,
-      })) ?? [];
-
-  const reviews =
-    items
-      .filter((item) => !!item.reviewUnitId)
-      .map((item) => ({
-        unitId: item.reviewUnitId as string,
-        title: undefined,
-        content: undefined,
-        targetUnitId: undefined,
-      })) ?? [];
-
-  const order: string[] | undefined =
-    (metadata as any).order ??
-    items
-      .map((item) => item.bookUnitId || item.reviewUnitId)
-      .filter((id): id is string => !!id);
-
+// MOCK: readlist mapping stub
+export function mapUnitToReadlistDTO(unit: any): any {
+  const metadata = unit.metadata ?? {};
+  const items: any[] = Array.isArray(metadata.items) ? metadata.items : [];
   return {
     id: unit.id,
     title: unit.title ?? "",
@@ -100,41 +44,26 @@ export function mapUnitToReadlistDTO(unit: any): ReadlistDTO {
     coverUrl: metadata.coverUrl,
     creator: unit.user,
     reactionSummaries: unit.reactionSummaries,
-    books,
-    reviews,
-    order,
+    books: items.filter((i: any) => i.bookUnitId).map((i: any) => ({ unitId: i.bookUnitId })),
+    reviews: items.filter((i: any) => i.reviewUnitId).map((i: any) => ({ unitId: i.reviewUnitId })),
+    order: items.map((i: any) => i.bookUnitId || i.reviewUnitId).filter(Boolean),
   };
 }
 
 /**
- * Convert a Meili `/meili/readlists/search` response into a
- * `ReadlistListResponse` compatible with the existing `/readlists` API.
+ * @deprecated Readlists replaced by shelves. Migrate to server-side shelf API.
  */
-export function mapReadlistSearchResultToReadlistListResponse(
-  searchResult: ReadlistSearchResult,
-): ReadlistListResponse {
-  const readlists: ReadlistDTO[] =
-    (searchResult.readlists as any[] | undefined)?.map(mapUnitToReadlistDTO) ??
-    [];
-
-  return {
-    readlists,
-    total: searchResult.total,
-  };
+// MOCK: readlist search result mapping stub
+export function mapReadlistSearchResultToReadlistListResponse(searchResult: any): any {
+  const readlists = (searchResult.readlists as any[] | undefined)?.map(mapUnitToReadlistDTO) ?? [];
+  return { readlists, total: searchResult.total };
 }
 
 /**
- * Convert a Meili /meili/units/search response into a ReadlistListResponse
- * compatible with the existing /readlists API.
+ * @deprecated Units index removed. Migrate to server-side API.
  */
-export function mapUnitListToReadlistListResponse(
-  unitResp: UnitListResponse,
-): ReadlistListResponse {
-  const readlists: ReadlistDTO[] =
-    (unitResp.units as any[] | undefined)?.map(mapUnitToReadlistDTO) ?? [];
-
-  return {
-    readlists,
-    total: unitResp.total,
-  };
+// MOCK: unit list to readlist mapping stub
+export function mapUnitListToReadlistListResponse(unitResp: any): any {
+  const readlists = (unitResp.units as any[] | undefined)?.map(mapUnitToReadlistDTO) ?? [];
+  return { readlists, total: unitResp.total };
 }

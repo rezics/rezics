@@ -15,7 +15,7 @@ export * from "./post";
 export * from "./reaction";
 export * from "./realm";
 export * from "./schema";
-export * from "./search";
+
 export * from "./shelf";
 export * from "./tag";
 export * from "./token";

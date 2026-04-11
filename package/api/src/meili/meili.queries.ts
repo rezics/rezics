@@ -1,99 +1,34 @@
 /**
- * React Query configurations for Meilisearch book queries
+ * React Query configurations for Meilisearch content queries
  */
 
 import type {
+  ContentSearchOptions,
+  ContentSearchResult,
   FeedbackListResponse,
   FeedbackType,
-  UnitListResponse,
 } from "@rezics/contract";
-import { UnitType } from "@rezics/contract";
-import { queryOptions } from "@tanstack/react-query";
-import type { BookFilters } from "../book/book.types";
-import { hashFn } from "../utils/hash";
-import { mapUnitListToReviewListResponse } from "./mapper";
-import {
-  mapReadlistSearchResultToReadlistListResponse,
-  meiliBookApi,
-  meiliFeedbackApi,
-  meiliReadlistApi,
-  meiliUnitApi,
-} from "./meili.api";
+import { queryOptions, useQuery } from "@tanstack/react-query";
+import { meiliContentApi, meiliFeedbackApi } from "./meili.api";
 
-export const meiliBookSearchQuery = (filters?: BookFilters) =>
+// ANCHOR: Content search
+
+export const contentSearchQueryOptions = (opts: ContentSearchOptions) =>
   queryOptions({
-    queryKey: ["meili", "books", filters],
-    queryFn: () => meiliBookApi.bookSearch(filters),
-    // Let caller control when to trigger by constructing options appropriately
+    queryKey: ["meili", "content", opts],
+    queryFn: () => meiliContentApi.contentSearch(opts),
     staleTime: 1000 * 60 * 2,
   });
 
-export const meiliQueries = {
-  booksSearch: meiliBookSearchQuery,
-};
+export function useContentSearch(opts: ContentSearchOptions) {
+  return useQuery(contentSearchQueryOptions(opts));
+}
 
-type buildMeiliUnitQueryProps = {
-  kind: undefined | keyof typeof UnitType;
-  start: number;
-  targetUnitId: string | undefined;
-  keyword: string;
-  limit: number;
-  mapFn: (unitResp: UnitListResponse) => any;
-  options?: {
-    enabled?: boolean;
-    /**
-     * Optional user filter – when provided, only units created by this user
-     * will be returned. This maps to Meilisearch `userId` filter.
-     */
-    userId?: string;
-  };
-};
-
-export const buildMeiliUnitQuery = ({
-  kind,
-  start,
-  targetUnitId,
-  keyword,
-  limit,
-  mapFn,
-  options,
-}: buildMeiliUnitQueryProps) => {
-  const type = kind;
-  const filters = {
-    type,
-    start,
-    limit,
-    q: keyword || undefined,
-    ...(targetUnitId ? { targetUnitId } : {}),
-    ...(options?.userId ? { userId: options.userId } : {}),
-  };
-
-  return {
-    queryKey: [
-      "meili-units",
-      kind,
-      targetUnitId ?? null,
-      start,
-      limit,
-      keyword,
-      options?.userId ?? null,
-      hashFn(mapFn),
-    ],
-    queryFn: async () => {
-      const unitResp = await meiliUnitApi.unitSearch(filters);
-      return mapFn(unitResp);
-    },
-    enabled: options?.enabled ?? true,
-    staleTime: 1000 * 60 * 5,
-  } as const;
-};
+// ANCHOR: Feedback search
 
 type FeedbackExtraFilterOptions = {
-  /** Filter feedbacks created by a specific user. */
   userId?: string;
-  /** Filter by feedback type (BUG / FEATURE / REPORT / OTHER). */
   type?: FeedbackType;
-  /** Filter by resolved status. */
   resolved?: boolean;
 };
 
@@ -136,86 +71,68 @@ export const buildMeiliFeedbackQuery = (
   } as const;
 };
 
-type ReadlistExtraFilterOptions = {
-  /** Filter readlists created by a specific user. */
-  userId?: string;
-  /**
-   * Filter readlists that contain the given book unit.
-   * Maps to backend `hasBookUnitId`.
-   */
-  bookId?: string;
-  /**
-   * Filter readlists that contain the given review unit.
-   * Maps to backend `hasReviewUnitId`.
-   */
-  reviewId?: string;
-};
+// ANCHOR: Legacy stubs
+// MOCK: These query builders are retained as stubs for consumers
+// not yet migrated to the new content search or server-side APIs.
+// The old `units` and `books` Meili indexes have been dropped.
 
-export const buildMeiliReadlistQuery = (
-  startOffset: number,
-  EXTERNAL_PAGE_SIZE: number,
-  keyword: string,
-  tags: string[],
-  options?: ReadlistExtraFilterOptions,
-) => {
-  const filters = {
-    start: startOffset,
-    limit: EXTERNAL_PAGE_SIZE,
-    q: keyword || undefined,
-    tags: tags?.join(",") || undefined,
-    ...(options?.userId ? { userId: options.userId } : {}),
-    ...(options?.bookId ? { hasBookUnitId: options.bookId } : {}),
-    ...(options?.reviewId ? { hasReviewUnitId: options.reviewId } : {}),
-  } as const;
-
-  return {
-    queryKey: [
-      "meili-readlists",
-      startOffset,
-      EXTERNAL_PAGE_SIZE,
-      keyword,
-      tags?.join(","),
-      options?.userId ?? null,
-      options?.bookId ?? null,
-      options?.reviewId ?? null,
-    ],
-    queryFn: async () => {
-      const searchResult = await meiliReadlistApi.readlistSearch(filters);
-      return mapReadlistSearchResultToReadlistListResponse(searchResult);
-    },
-    staleTime: 1000 * 60 * 5,
-  } as const;
-};
-
-type ReviewExtraFilterOptions = {
-  /** Filter reviews created by a specific user. */
-  userId?: string;
-  /** Filter by book ID. */
-  bookId?: string;
-  /** Filter by keyword. */
-  keyword?: string;
-  /** Filter by tags. */
-  tags?: string[];
-  /** Filter by rating. */
-  ratingMin?: number;
-  /** Filter by rating. */
-  ratingMax?: number;
-  /** Filter by sort. */
-  sort?: string;
-};
-
-export const buildMeiliReviewQuery = (
-  startOffset: number,
-  limit: number,
-  options?: ReviewExtraFilterOptions,
-) => {
-  return buildMeiliUnitQuery({
-    kind: UnitType.REVIEW,
-    start: startOffset,
-    targetUnitId: undefined,
-    keyword: options?.keyword || "",
-    limit,
-    mapFn: mapUnitListToReviewListResponse,
-    options,
+/** @deprecated Use useContentSearch instead */
+// MOCK: book search query stub — returns empty results
+export const meiliBookSearchQuery = (_filters?: any) =>
+  queryOptions({
+    queryKey: ["meili", "books", _filters],
+    queryFn: async () => ({ books: [], total: 0, processingTimeMs: 0, query: "" }),
+    staleTime: 1000 * 60 * 2,
   });
+
+/** @deprecated Use useContentSearch instead */
+export const meiliQueries = {
+  booksSearch: meiliBookSearchQuery,
 };
+
+/** @deprecated Units index removed. Migrate to server-side API. */
+// MOCK: unit query builder stub — returns empty results
+export const buildMeiliUnitQuery = ({
+  kind,
+  start,
+  targetUnitId,
+  keyword,
+  limit,
+  mapFn,
+  options,
+}: any) => ({
+  queryKey: ["meili-units", kind, targetUnitId ?? null, start, limit, keyword, options?.userId ?? null],
+  queryFn: async () => mapFn({ units: [], total: 0 }),
+  enabled: options?.enabled ?? true,
+  staleTime: 1000 * 60 * 5,
+});
+
+/** @deprecated Readlists replaced by shelves. */
+// MOCK: readlist query builder stub — returns empty results
+export const buildMeiliReadlistQuery = (
+  _start: number,
+  _limit: number,
+  _keyword: string,
+  _tags: string[],
+  _options?: any,
+) => ({
+  queryKey: ["meili-readlists", _start, _limit, _keyword, _tags?.join(",")],
+  queryFn: async () => ({ readlists: [], total: 0 }),
+  staleTime: 1000 * 60 * 5,
+});
+
+/** @deprecated Use useContentSearch instead */
+// MOCK: review query builder stub — returns empty results
+export const buildMeiliReviewQuery = (
+  _start: number,
+  _limit: number,
+  _options?: any,
+) => buildMeiliUnitQuery({
+  kind: "REVIEW",
+  start: _start,
+  targetUnitId: undefined,
+  keyword: _options?.keyword || "",
+  limit: _limit,
+  mapFn: (resp: any) => ({ reviews: [], total: resp.total }),
+  options: _options,
+});

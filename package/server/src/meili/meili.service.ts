@@ -1,42 +1,27 @@
 import type {
-  BookQueryOptions,
-  BookSearchResult,
+  ContentSearchOptions,
+  ContentSearchResult,
   FeedbackListQuery,
   FeedbackSearchResult,
-  ReadlistListQuery,
-  ReadlistSearchResult,
-  UnitListQuery,
-  UnitSearchResult,
   UserListQuery,
   UserSearchResult,
 } from "@rezics/contract";
 import {
-  syncAllBooks,
+  syncAllContent,
   syncAllFeedbacks,
-  syncAllReadlists,
-  syncAllUnits,
   syncAllUsers,
+  syncSingleContent,
 } from "@rezics/search";
-import { searchBooks } from "./book/book.api";
+import { searchContent } from "./content/content.service";
 import { searchFeedbacks } from "./feedback/feedback.api";
-import { searchReadlists } from "./readlist/readlist.api";
 import { searchClient } from "./search-client";
-import { searchUnits } from "./unit/unit.api";
 import { searchUsers } from "./user/user.api";
 
 export class MeiliService {
-  async searchBooks(options: BookQueryOptions): Promise<BookSearchResult> {
-    return searchBooks(options);
-  }
-
-  async searchUnits(options: UnitListQuery): Promise<UnitSearchResult> {
-    return searchUnits(options);
-  }
-
-  async searchReadlists(
-    options: ReadlistListQuery,
-  ): Promise<ReadlistSearchResult> {
-    return searchReadlists(options);
+  async searchContent(
+    options: ContentSearchOptions,
+  ): Promise<ContentSearchResult> {
+    return searchContent(options);
   }
 
   async searchFeedbacks(
@@ -49,16 +34,8 @@ export class MeiliService {
     return searchUsers(options);
   }
 
-  async initBooksIndex(): Promise<void> {
-    await searchClient.initBookIndex();
-  }
-
-  async initUnitsIndex(): Promise<void> {
-    await searchClient.initUnitIndex();
-  }
-
-  async initReadlistsIndex(): Promise<void> {
-    await searchClient.initReadlistIndex();
+  async initContentIndex(): Promise<void> {
+    await searchClient.initContentIndex();
   }
 
   async initFeedbacksIndex(): Promise<void> {
@@ -69,16 +46,12 @@ export class MeiliService {
     await searchClient.initUserIndex();
   }
 
-  async syncAllBooks(): Promise<unknown> {
-    return syncAllBooks(searchClient);
+  async syncAllContent(): Promise<unknown> {
+    return syncAllContent(searchClient);
   }
 
-  async syncAllUnits(): Promise<unknown> {
-    return syncAllUnits(searchClient);
-  }
-
-  async syncAllReadlists(): Promise<unknown> {
-    return syncAllReadlists(searchClient);
+  async syncSingleContent(unitId: string): Promise<void> {
+    return syncSingleContent(searchClient, unitId);
   }
 
   async syncAllFeedbacks(): Promise<unknown> {
@@ -87,10 +60,6 @@ export class MeiliService {
 
   async syncAllUsers(): Promise<unknown> {
     return syncAllUsers(searchClient);
-  }
-
-  async createSearchKey(): Promise<string> {
-    return searchClient.getSearchKey();
   }
 
   async createAdminKey() {

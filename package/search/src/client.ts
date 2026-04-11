@@ -7,18 +7,13 @@ export interface MeiliConfig {
 
 export class SearchClient {
   readonly meili: MeiliSearch;
-  readonly bookIndex: Index;
-  readonly unitIndex: Index;
-  /** @deprecated TODO(search-redesign): readlist index replaced by shelf units in unitIndex */
-  readonly readlistIndex: Index;
+  readonly contentIndex: Index;
   readonly feedbackIndex: Index;
   readonly userIndex: Index;
 
   constructor(config: MeiliConfig) {
     this.meili = new MeiliSearch({ host: config.host, apiKey: config.apiKey });
-    this.bookIndex = this.meili.index("books");
-    this.unitIndex = this.meili.index("units");
-    this.readlistIndex = this.meili.index("readlists"); // TODO(search-redesign): remove
+    this.contentIndex = this.meili.index("content");
     this.feedbackIndex = this.meili.index("feedbacks");
     this.userIndex = this.meili.index("users");
   }
@@ -34,54 +29,29 @@ export class SearchClient {
 
   // ANCHOR: Index initialization
 
-  async initBookIndex(): Promise<void> {
-    await this.bookIndex.updateSettings({
+  async initContentIndex(): Promise<void> {
+    await this.contentIndex.updateSettings({
       searchableAttributes: [
-        "id",
-        "title",
-        "description",
-        "tagSearch",
-        "authors",
-        "presses",
-        "isbn",
-        "producers",
-        "extra",
+        "titles",
+        "subtitles",
+        "descriptions",
+        "summaries",
+        "creditNames",
+        "tagLabels",
       ],
       filterableAttributes: [
-        "isLicensed",
-        "nsfw",
-        "tagSearch",
-        "authorIds",
-        "pressIds",
-        "producerIds",
-        "textLength",
-      ],
-      sortableAttributes: ["createdAt", "updatedAt"],
-    });
-    this.bookIndex.addDocuments([], { primaryKey: "id" });
-  }
-
-  async initUnitIndex(): Promise<void> {
-    await this.unitIndex.updateSettings({
-      searchableAttributes: ["id", "title", "content", "tags"],
-      filterableAttributes: [
-        "targetUnitId",
         "type",
-        "status",
-        "userId",
+        "tagIds",
+        "realmIds",
+        "realmTagKeys",
+        "languages",
         "nsfw",
-        "tags",
+        "visibility",
+        "isLicensed",
       ],
-      sortableAttributes: ["createdAt", "updatedAt"],
+      sortableAttributes: ["createdAt", "updatedAt", "publishedAt"],
     });
-    this.unitIndex.addDocuments([], { primaryKey: "id" });
-  }
-
-  /** @deprecated TODO(search-redesign): readlist index replaced by shelf units */
-  async initReadlistIndex(): Promise<void> {
-    console.warn(
-      "[DEPRECATED] initReadlistIndex is a no-op. Readlists are now shelves.",
-    );
+    this.contentIndex.addDocuments([], { primaryKey: "id" });
   }
 
   async initFeedbackIndex(): Promise<void> {
@@ -103,49 +73,25 @@ export class SearchClient {
   async initUserIndex(): Promise<void> {
     await this.userIndex.updateSettings({
       searchableAttributes: ["name", "slug", "email", "bio", "description"],
-      filterableAttributes: ["slug", "email", "type", "joinDate"],
+      filterableAttributes: ["slug", "email", "joinDate"],
       sortableAttributes: ["joinDate", "followersCount", "followingsCount"],
     });
     this.userIndex.addDocuments([], { primaryKey: "id" });
   }
 
-  // ANCHOR: Document operations
+  // ANCHOR: Content document operations
 
-  addOrUpdateBooks(books: any[]) {
-    return this.bookIndex.addDocuments(books);
+  addOrUpdateContent(docs: any[]) {
+    return this.contentIndex.addDocuments(docs);
   }
-  deleteBooks(ids: string[]) {
-    return this.bookIndex.deleteDocuments(ids);
+  deleteContent(ids: string[]) {
+    return this.contentIndex.deleteDocuments(ids);
   }
-  deleteAllBooks() {
-    return this.bookIndex.deleteAllDocuments();
-  }
-
-  addOrUpdateUnits(units: any[]) {
-    return this.unitIndex.addDocuments(units);
-  }
-  deleteUnits(ids: string[]) {
-    return this.unitIndex.deleteDocuments(ids);
-  }
-  deleteAllUnits() {
-    return this.unitIndex.deleteAllDocuments();
+  deleteAllContent() {
+    return this.contentIndex.deleteAllDocuments();
   }
 
-  /** @deprecated TODO(search-redesign): readlist operations are no-ops */
-  addOrUpdateReadlists(readlists: any[]) {
-    console.warn("[DEPRECATED] addOrUpdateReadlists is a no-op.");
-    return Promise.resolve({ taskUid: -1, status: "deprecated" }) as any;
-  }
-  /** @deprecated */
-  deleteReadlists(ids: string[]) {
-    console.warn("[DEPRECATED] deleteReadlists is a no-op.");
-    return Promise.resolve({ taskUid: -1, status: "deprecated" }) as any;
-  }
-  /** @deprecated */
-  deleteAllReadlists() {
-    console.warn("[DEPRECATED] deleteAllReadlists is a no-op.");
-    return Promise.resolve({ taskUid: -1, status: "deprecated" }) as any;
-  }
+  // ANCHOR: Feedback document operations
 
   addOrUpdateFeedbacks(feedbacks: any[]) {
     return this.feedbackIndex.addDocuments(feedbacks);
@@ -156,6 +102,8 @@ export class SearchClient {
   deleteAllFeedbacks() {
     return this.feedbackIndex.deleteAllDocuments();
   }
+
+  // ANCHOR: User document operations
 
   addOrUpdateUsers(users: any[]) {
     return this.userIndex.addDocuments(users);
@@ -168,15 +116,6 @@ export class SearchClient {
   }
 
   // ANCHOR: Key management
-
-  async getSearchKey(): Promise<string> {
-    const resp = await this.meili.createKey({
-      actions: ["search"],
-      indexes: ["books", "units"],
-      expiresAt: null,
-    });
-    return resp.key;
-  }
 
   async getAdminKey() {
     return this.meili.createKey({

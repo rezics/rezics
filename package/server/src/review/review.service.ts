@@ -5,7 +5,7 @@ import type {
 } from "@rezics/contract";
 import type { Prisma } from "#/prisma/client";
 import { prisma, UnitStatus, UnitType } from "#/prisma/client";
-import { deleteUnitFromMeili, syncUnitToMeili } from "@/meili/unit/sync";
+import { syncContentToMeili, deleteContentFromMeili } from "@/meili/content/sync";
 import { unitService } from "@/unit/unit.service";
 import {
   buildMetadataWithRating,
@@ -98,7 +98,7 @@ export class ReviewService {
       return unit as ReviewWithRelations;
     });
 
-    await syncUnitToMeili(review.id);
+    await syncContentToMeili(review.id);
 
     return review;
   }
@@ -159,7 +159,7 @@ export class ReviewService {
       return updated as ReviewWithRelations;
     });
 
-    await syncUnitToMeili(id);
+    await syncContentToMeili(id);
 
     return review;
   }
@@ -184,7 +184,7 @@ export class ReviewService {
         );
       }
     });
-    await deleteUnitFromMeili(id);
+    await deleteContentFromMeili(id);
   }
 
   private resolveUnitType(unitType?: UnitType): UnitType {

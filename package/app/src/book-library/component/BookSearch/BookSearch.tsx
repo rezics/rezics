@@ -1,8 +1,8 @@
-import type { BookQueryOptions } from "@rezics/contract";
+import type { ContentSearchOptions } from "@rezics/contract";
 import type React from "react";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { type SearchInfo, SearchInput } from "@/search";
+import { type SearchInfo, SearchInput, toContentSearchOptions } from "@/search";
 
 /** Available sort types for book search. */
 export type BookSortType =
@@ -18,7 +18,7 @@ export type BookSortType =
 /** Props for BookSearchInput component. */
 export type BookSearchInputProps = {
   /** Callback when search is triggered. */
-  onSearch: (options: BookQueryOptions) => void;
+  onSearch: (options: ContentSearchOptions) => void;
   /** Default search values. */
   defaultValue?: SearchInfo;
   /** Whether to hide the word count filter. */
@@ -41,49 +41,22 @@ export const BookSearchInput: React.FC<BookSearchInputProps> = ({
     order?: "asc" | "desc";
   }>({ order: "desc" });
 
-  // TODO 实际上应该由 echokv 提供data
-  // const tagGroups = useMemo(
-  //   () => ({
-  //     presetTags: [
-  //       'fiction',
-  //       'nonfiction',
-  //       'mystery',
-  //       'romance',
-  //       'history',
-  //       'science',
-  //       'fantasy',
-  //       'philosophy',
-  //     ],
-  //     statusTags: [
-  //       '10万字',
-  //       '20万字',
-  //       '50万字',
-  //       '100万字',
-  //       '200万字',
-  //       '连载中',
-  //       '已完结',
-  //     ],
-  //   }),
-  //   [],
-  // );
-
   const tagGroups = useMemo(() => ({}), []);
 
   const handleSearch = (info: SearchInfo) => {
-    const options: BookQueryOptions = {
-      keyword: info.keyword ?? undefined,
-      tags: info.tags?.length ? info.tags : undefined,
-      user: info.user ?? undefined,
-      textLength: info.textLength ?? undefined,
-      nsfw: info.nsfw ?? false,
-      isLicensed: info.isLicensed ?? undefined,
-      sort:
-        sort.type || sort.order
-          ? { type: sort.type as any, order: sort.order }
-          : undefined,
-    } as BookQueryOptions;
+    const options = toContentSearchOptions(info);
 
-    // const q = toBookQueryString(options);
+    if (sort.type && sort.type !== "relevance") {
+      const sortField =
+        sort.type === "createdAt" || sort.type === "updatedAt"
+          ? sort.type
+          : "createdAt";
+      options.sort = {
+        field: sortField,
+        order: sort.order,
+      };
+    }
+
     onSearch(options);
   };
 

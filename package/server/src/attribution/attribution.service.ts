@@ -14,6 +14,7 @@ import type {
 } from "@rezics/contract";
 import type { Prisma } from "#/prisma/client";
 import { prisma } from "#/prisma/client";
+import { syncContentToMeili } from "@/meili/content/sync";
 import {
   mapOrgCreditToDTO,
   mapOrganizationToDTO,
@@ -160,6 +161,7 @@ export class AttributionService {
       },
       include: personCreditInclude,
     });
+    await syncContentToMeili(req.unitId);
     return mapPersonCreditToDTO(row);
   }
 
@@ -173,6 +175,7 @@ export class AttributionService {
         unitId_personId_roleKey: { unitId, personId, roleKey },
       },
     });
+    await syncContentToMeili(unitId);
   }
 
   // --- Org credit links ---
@@ -187,6 +190,7 @@ export class AttributionService {
       },
       include: orgCreditInclude,
     });
+    await syncContentToMeili(req.unitId);
     return mapOrgCreditToDTO(row);
   }
 
@@ -200,6 +204,7 @@ export class AttributionService {
         unitId_organizationId_roleKey: { unitId, organizationId, roleKey },
       },
     });
+    await syncContentToMeili(unitId);
   }
 }
 

@@ -1,11 +1,11 @@
 /**
- * Meilisearch 管理端 API 封装 & React Query 配置
+ * Meilisearch admin API wrapper and React Query hooks.
  *
- * 对应后端 `package/server/src/meili/meili.api.ts` 中的管理路由：
+ * Backend routes:
  * - /meili/health
- * - /meili/books|readlists|units/(init|sync)
- * - /meili/units/deleteAllUnits
- * - /meili/keys/search|admin|(list|delete)
+ * - /meili/content|feedbacks|users/(init|sync)
+ * - /meili/content/deleteAll
+ * - /meili/keys/admin|(list|delete)
  */
 
 import {
@@ -28,7 +28,6 @@ export type MeiliTaskResponse = {
   task: unknown;
 };
 
-// 参照 Meilisearch 官方 Key 结构，做一个前端用的轻量类型
 export type MeiliKey = {
   uid: string;
   name?: string | null;
@@ -48,37 +47,17 @@ export type MeiliKeyListResponse = {
   total: number;
 };
 
-export type MeiliSearchKeyResponse = {
-  key: string;
-};
-
 /**
- * 纯 HTTP 封装，不依赖 React Query，方便在任意地方直接调用。
+ * Pure HTTP wrappers (no React Query dependency).
  */
 export const meiliAdminApi = {
-  // 健康检查（不需要权限）
   health: async (): Promise<MeiliHealthResponse> => {
     return apiFetch<MeiliHealthResponse>("/meili/health");
   },
 
-  // 索引初始化
-  initUsersIndex: async (): Promise<MeiliApiMessageResponse> => {
-    return apiFetch<MeiliApiMessageResponse>("/meili/users/init", {
-      method: "POST",
-    });
-  },
-  initBooksIndex: async (): Promise<MeiliApiMessageResponse> => {
-    return apiFetch<MeiliApiMessageResponse>("/meili/books/init", {
-      method: "POST",
-    });
-  },
-  initReadlistsIndex: async (): Promise<MeiliApiMessageResponse> => {
-    return apiFetch<MeiliApiMessageResponse>("/meili/readlists/init", {
-      method: "POST",
-    });
-  },
-  initUnitsIndex: async (): Promise<MeiliApiMessageResponse> => {
-    return apiFetch<MeiliApiMessageResponse>("/meili/units/init", {
+  // Index initialization
+  initContentIndex: async (): Promise<MeiliApiMessageResponse> => {
+    return apiFetch<MeiliApiMessageResponse>("/meili/content/init", {
       method: "POST",
     });
   },
@@ -87,20 +66,15 @@ export const meiliAdminApi = {
       method: "POST",
     });
   },
+  initUsersIndex: async (): Promise<MeiliApiMessageResponse> => {
+    return apiFetch<MeiliApiMessageResponse>("/meili/users/init", {
+      method: "POST",
+    });
+  },
 
-  // 全量同步
-  syncAllBooks: async (): Promise<MeiliTaskResponse> => {
-    return apiFetch<MeiliTaskResponse>("/meili/books/sync", {
-      method: "POST",
-    });
-  },
-  syncAllReadlists: async (): Promise<MeiliTaskResponse> => {
-    return apiFetch<MeiliTaskResponse>("/meili/readlists/sync", {
-      method: "POST",
-    });
-  },
-  syncAllUnits: async (): Promise<MeiliTaskResponse> => {
-    return apiFetch<MeiliTaskResponse>("/meili/units/sync", {
+  // Full sync
+  syncAllContent: async (): Promise<MeiliTaskResponse> => {
+    return apiFetch<MeiliTaskResponse>("/meili/content/sync", {
       method: "POST",
     });
   },
@@ -115,18 +89,12 @@ export const meiliAdminApi = {
     });
   },
 
-  // 危险操作：删除全部 units
-  deleteAllUnits: async (): Promise<MeiliApiMessageResponse> => {
-    // 后端是 GET /meili/units/deleteAllUnits
-    return apiFetch<MeiliApiMessageResponse>("/meili/units/deleteAllUnits");
+  // Dangerous operations
+  deleteAllContent: async (): Promise<MeiliApiMessageResponse> => {
+    return apiFetch<MeiliApiMessageResponse>("/meili/content/deleteAll");
   },
 
-  // Key 管理
-  createSearchKey: async (): Promise<MeiliSearchKeyResponse> => {
-    return apiFetch<MeiliSearchKeyResponse>("/meili/keys/search", {
-      method: "POST",
-    });
-  },
+  // Key management
   createAdminKey: async (): Promise<MeiliKey> => {
     return apiFetch<MeiliKey>("/meili/keys/admin", {
       method: "POST",
@@ -143,7 +111,7 @@ export const meiliAdminApi = {
 };
 
 /**
- * React Query QueryOptions - 方便在页面里直接 useQuery 使用。
+ * React Query options.
  */
 export const meiliAdminQueries = {
   health: () =>
@@ -161,41 +129,17 @@ export const meiliAdminQueries = {
 };
 
 /**
- * 一些常用的 Mutation Hook，供管理页面直接使用。
+ * Mutation hooks for admin operations.
  */
 
-export function useMeiliInitBooksIndexMutation(
+export function useMeiliInitContentIndexMutation(
   options?: Omit<
     UseMutationOptions<MeiliApiMessageResponse, Error, void>,
     "mutationFn"
   >,
 ) {
   return useMutation({
-    mutationFn: () => meiliAdminApi.initBooksIndex(),
-    ...options,
-  });
-}
-
-export function useMeiliInitReadlistsIndexMutation(
-  options?: Omit<
-    UseMutationOptions<MeiliApiMessageResponse, Error, void>,
-    "mutationFn"
-  >,
-) {
-  return useMutation({
-    mutationFn: () => meiliAdminApi.initReadlistsIndex(),
-    ...options,
-  });
-}
-
-export function useMeiliInitUnitsIndexMutation(
-  options?: Omit<
-    UseMutationOptions<MeiliApiMessageResponse, Error, void>,
-    "mutationFn"
-  >,
-) {
-  return useMutation({
-    mutationFn: () => meiliAdminApi.initUnitsIndex(),
+    mutationFn: () => meiliAdminApi.initContentIndex(),
     ...options,
   });
 }
@@ -224,38 +168,14 @@ export function useMeiliInitUsersIndexMutation(
   });
 }
 
-export function useMeiliSyncBooksMutation(
+export function useMeiliSyncContentMutation(
   options?: Omit<
     UseMutationOptions<MeiliTaskResponse, Error, void>,
     "mutationFn"
   >,
 ) {
   return useMutation({
-    mutationFn: () => meiliAdminApi.syncAllBooks(),
-    ...options,
-  });
-}
-
-export function useMeiliSyncReadlistsMutation(
-  options?: Omit<
-    UseMutationOptions<MeiliTaskResponse, Error, void>,
-    "mutationFn"
-  >,
-) {
-  return useMutation({
-    mutationFn: () => meiliAdminApi.syncAllReadlists(),
-    ...options,
-  });
-}
-
-export function useMeiliSyncUnitsMutation(
-  options?: Omit<
-    UseMutationOptions<MeiliTaskResponse, Error, void>,
-    "mutationFn"
-  >,
-) {
-  return useMutation({
-    mutationFn: () => meiliAdminApi.syncAllUnits(),
+    mutationFn: () => meiliAdminApi.syncAllContent(),
     ...options,
   });
 }
@@ -283,26 +203,15 @@ export function useMeiliSyncUsersMutation(
     ...options,
   });
 }
-export function useMeiliDeleteAllUnitsMutation(
+
+export function useMeiliDeleteAllContentMutation(
   options?: Omit<
     UseMutationOptions<MeiliApiMessageResponse, Error, void>,
     "mutationFn"
   >,
 ) {
   return useMutation({
-    mutationFn: () => meiliAdminApi.deleteAllUnits(),
-    ...options,
-  });
-}
-
-export function useMeiliCreateSearchKeyMutation(
-  options?: Omit<
-    UseMutationOptions<MeiliSearchKeyResponse, Error, void>,
-    "mutationFn"
-  >,
-) {
-  return useMutation({
-    mutationFn: () => meiliAdminApi.createSearchKey(),
+    mutationFn: () => meiliAdminApi.deleteAllContent(),
     ...options,
   });
 }
@@ -328,7 +237,6 @@ export function useMeiliDeleteKeyMutation(
     mutationFn: (uid: string) => meiliAdminApi.deleteKey(uid),
     ...options,
     onSuccess: (data, uid, onMutateResult, context) => {
-      // 删除成功后刷新 key 列表
       queryClient.invalidateQueries({ queryKey: ["meili", "admin", "keys"] });
       options?.onSuccess?.(data, uid, onMutateResult, context);
     },
@@ -336,18 +244,13 @@ export function useMeiliDeleteKeyMutation(
 }
 
 export const meiliAdminMutations = {
-  useInitBooksIndex: useMeiliInitBooksIndexMutation,
-  useInitReadlistsIndex: useMeiliInitReadlistsIndexMutation,
-  useInitUnitsIndex: useMeiliInitUnitsIndexMutation,
+  useInitContentIndex: useMeiliInitContentIndexMutation,
   useInitFeedbacksIndex: useMeiliInitFeedbacksIndexMutation,
   useInitUsersIndex: useMeiliInitUsersIndexMutation,
-  useSyncBooks: useMeiliSyncBooksMutation,
-  useSyncReadlists: useMeiliSyncReadlistsMutation,
-  useSyncUnits: useMeiliSyncUnitsMutation,
+  useSyncContent: useMeiliSyncContentMutation,
   useSyncFeedbacks: useMeiliSyncFeedbacksMutation,
   useSyncUsers: useMeiliSyncUsersMutation,
-  useDeleteAllUnits: useMeiliDeleteAllUnitsMutation,
-  useCreateSearchKey: useMeiliCreateSearchKeyMutation,
+  useDeleteAllContent: useMeiliDeleteAllContentMutation,
   useCreateAdminKey: useMeiliCreateAdminKeyMutation,
   useDeleteKey: useMeiliDeleteKeyMutation,
 };

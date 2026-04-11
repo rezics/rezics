@@ -1,9 +1,9 @@
 export type { SearchResponse } from "meilisearch";
 export { type MeiliConfig, SearchClient } from "./client";
 export {
-  syncAllBooks,
+  buildContentDocument,
+  syncAllContent,
   syncAllFeedbacks,
-  syncAllReadlists,
-  syncAllUnits,
   syncAllUsers,
+  syncSingleContent,
 } from "./sync";

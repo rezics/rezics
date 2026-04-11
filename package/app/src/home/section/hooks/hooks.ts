@@ -1,15 +1,10 @@
-import {
-  mapUnitListToReadlistListResponse,
-  meiliBookApi,
-} from "@rezics/api/meili/meili.api";
-import { buildMeiliUnitQuery } from "@rezics/api/meili/meili.queries";
+import { meiliContentApi } from "@rezics/api/meili/meili.api";
 import type {
   BookDTO,
+  ContentSearchDocument,
   QuoteDTO,
   ShelfDTO,
-  UnitListResponse,
 } from "@rezics/contract";
-import { UnitType } from "@rezics/contract";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 
@@ -22,48 +17,55 @@ export type SimpleQueryState<T> = {
 
 export function useHomeBooks(limit = 12): SimpleQueryState<BookDTO> {
   const { data, isLoading, error } = useQuery({
-    queryKey: [
-      "home",
-      "meili",
-      "books",
-      {
-        limit,
-      },
-    ],
+    queryKey: ["home", "content", "books", { limit }],
     queryFn: () =>
-      meiliBookApi.bookSearch({
+      meiliContentApi.contentSearch({
+        type: "BOOK",
         limit,
-        sort: { type: "createdAt", order: "desc" },
-      } as any),
+        sort: { field: "createdAt", order: "desc" },
+      }),
     staleTime: 1000 * 60,
   });
 
   const items = useMemo<BookDTO[]>(() => {
-    // Meili book search returns a list compatible with BookListResponse
-    // so we safely access `books`.
-    return ((data as any)?.books ?? []) as BookDTO[];
+    return ((data?.items ?? []) as ContentSearchDocument[]).map((doc) => ({
+      unitId: doc.id,
+      title: doc.titles[0] ?? "",
+      description: doc.descriptions[0] ?? "",
+      coverAssetUnitId: doc.coverAssetUnitId,
+      nsfw: doc.nsfw,
+      isLicensed: doc.isLicensed,
+      createdAt: doc.createdAt,
+      updatedAt: doc.updatedAt,
+    })) as BookDTO[];
   }, [data]);
 
-  const total: number | undefined = (data as any)?.total;
+  const total: number | undefined = data?.total;
 
   return { items, total, isLoading, error };
 }
 
+// MOCK: readlists/shelves from content search - returns shelf-type content docs
 export function useHomeReadlists(limit = 6): SimpleQueryState<ShelfDTO> {
-  const { data, isLoading, error } = useQuery(
-    buildMeiliUnitQuery({
-      // MOCK: old UnitType.READLIST removed; using SHELF type for meili
-      kind: UnitType.SHELF,
-      start: 0,
-      targetUnitId: undefined,
-      keyword: "",
-      limit,
-      mapFn: (unitResp: UnitListResponse) =>
-        mapUnitListToReadlistListResponse(unitResp),
-    }),
-  );
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["home", "content", "shelves", { limit }],
+    queryFn: () =>
+      meiliContentApi.contentSearch({
+        type: "SHELF",
+        limit,
+        sort: { field: "createdAt", order: "desc" },
+      }),
+    staleTime: 1000 * 60,
+  });
 
-  const items = useMemo<ShelfDTO[]>(() => data?.readlists ?? [], [data]);
+  const items = useMemo<ShelfDTO[]>(() => {
+    return ((data?.items ?? []) as ContentSearchDocument[]).map((doc) => ({
+      id: doc.id,
+      title: doc.titles[0] ?? "",
+      content: doc.descriptions[0] ?? "",
+    })) as ShelfDTO[];
+  }, [data]);
+
   const total: number | undefined = data?.total;
 
   return { items, total, isLoading, error };
@@ -74,33 +76,9 @@ type QuoteListResponse = {
   total?: number;
 };
 
+// MOCK: quotes are not in the content index (type QUOTE not indexed)
+// This returns empty results until a quote search mechanism is implemented
 export function useHomeQuotes(limit = 6): SimpleQueryState<QuoteDTO> {
-  const { data, isLoading, error } = useQuery(
-    buildMeiliUnitQuery({
-      kind: UnitType.QUOTE,
-      start: 0,
-      targetUnitId: undefined,
-      keyword: "",
-      limit,
-      mapFn: (unitResp: UnitListResponse) =>
-        ({
-          quotes: (unitResp.units ?? []).map((unit) => ({
-            id: unit.id,
-            text: (unit.content as string) ?? "",
-            from: unit.title ?? undefined,
-            bookId: unit.targetUnitId ?? undefined,
-            created_at:
-              typeof unit.createdAt === "string"
-                ? unit.createdAt
-                : unit.createdAt?.toString(),
-          })),
-          total: unitResp.total,
-        }) as QuoteListResponse,
-    }),
-  );
-
-  const items = useMemo<QuoteDTO[]>(() => (data as any)?.quotes ?? [], [data]);
-  const total: number | undefined = (data as any)?.total;
-
-  return { items, total, isLoading, error };
+  const items = useMemo<QuoteDTO[]>(() => [], []);
+  return { items, total: 0, isLoading: false, error: null };
 }

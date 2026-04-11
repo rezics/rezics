@@ -13,7 +13,7 @@ import {
   Typography,
 } from "@mui/material";
 import { type BookDTO, bookQueries } from "@rezics/api/book/book";
-import { meiliBookApi } from "@rezics/api/meili/meili.api";
+import { meiliContentApi } from "@rezics/api/meili/meili.api";
 import { Link } from "@rezics/ui/primitive/link/Link.tsx";
 import { useQuery } from "@tanstack/react-query";
 import { useMatchRoute } from "@tanstack/react-router";
@@ -83,13 +83,13 @@ export default function BooksPage() {
   const meiliQuery = useQuery({
     queryKey: ["meili-books", page, limit, query],
     queryFn: () =>
-      meiliBookApi.bookSearch({ start, limit, q: query || undefined }),
+      meiliContentApi.contentSearch({ keyword: query || undefined, type: "BOOK", offset: start, limit }),
     enabled: isMeiliMode,
   });
 
   const normalQuery = trimmedQuery.length > 0 ? searchQuery : listQuery;
   const data = isMeiliMode ? meiliQuery.data : normalQuery.data;
-  const books = data?.books ?? [];
+  const books = (isMeiliMode ? (data as any)?.items : data?.books) ?? [];
   const total = data?.total;
 
   const columns = React.useMemo(() => {

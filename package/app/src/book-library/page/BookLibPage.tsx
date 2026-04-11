@@ -1,5 +1,5 @@
-import { meiliQueries } from "@rezics/api/meili/meili.queries";
-import type { BookDTO } from "@rezics/contract";
+import { contentSearchQueryOptions } from "@rezics/api/meili/meili.queries";
+import type { ContentSearchDocument } from "@rezics/contract";
 import type { UniversalPaginatorHandle } from "@rezics/ui/composite/pagination/Pagination.tsx";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type React from "react";
@@ -12,13 +12,7 @@ import { BookLibSectionRef } from "../section/BookLibSection";
 /**
  * Book Library Page - Route-level entry point for book list.
  *
- * Responsibilities:
- * - Manage search query state
- * - Fetch paginated book data from Meili
- * - Handle pagination and sorting
- * - Compose BookLibSection with data
- *
- * This is a thin assembly layer that delegates UI to BookLibSection.
+ * Uses the unified content search index filtered to BOOK type.
  */
 export const BookLibPage: React.FC = () => {
   const ref = useRef<UniversalPaginatorHandle>(null);
@@ -28,21 +22,17 @@ export const BookLibPage: React.FC = () => {
     tags: [],
     nsfw: false,
     isLicensed: undefined,
-    textLength: "",
   });
   const [start, setStart] = useState<number>(0);
 
   const { data, isLoading, error } = useQuery(
-    meiliQueries.booksSearch({
-      start,
+    contentSearchQueryOptions({
+      keyword: currentQuery.keyword || undefined,
+      type: "BOOK",
+      nsfw: currentQuery.nsfw ?? false,
+      isLicensed: currentQuery.isLicensed,
+      offset: start,
       limit: EXTERNAL_PAGE_SIZE,
-      keyword: currentQuery.keyword ?? "",
-      tags: currentQuery.tags ?? [],
-      ...(currentQuery.nsfw ? { nsfw: true } : {}),
-      ...(currentQuery.isLicensed ? { isLicensed: true } : {}),
-      ...(currentQuery.textLength
-        ? { textLength: currentQuery.textLength }
-        : {}),
     }),
   );
 
@@ -53,25 +43,39 @@ export const BookLibPage: React.FC = () => {
   const queryClient = useQueryClient();
   async function handlePreRequestData(page: number) {
     const fetchedData = await queryClient.fetchQuery(
-      meiliQueries.booksSearch({
-        start: (page - 1) * EXTERNAL_PAGE_SIZE,
+      contentSearchQueryOptions({
+        keyword: currentQuery.keyword || undefined,
+        type: "BOOK",
+        nsfw: currentQuery.nsfw ?? false,
+        isLicensed: currentQuery.isLicensed,
+        offset: (page - 1) * EXTERNAL_PAGE_SIZE,
         limit: EXTERNAL_PAGE_SIZE,
-        keyword: currentQuery.keyword ?? "",
-        tags: currentQuery.tags ?? [],
-        ...(currentQuery.nsfw ? { nsfw: true } : {}),
-        ...(currentQuery.textLength
-          ? { textLength: currentQuery.textLength }
-          : {}),
       }),
     );
-    return fetchedData?.books?.length;
+    return fetchedData?.items?.length;
   }
 
   useEffect(() => {
     ref.current?.resetPaginationPageNumber();
   }, []);
 
-  const books: BookDTO[] = useMemo(() => data?.books ?? [], [data]);
+  // Map ContentSearchDocument to BookDTO-compatible shape for existing UI
+  const books = useMemo(
+    () =>
+      (data?.items ?? []).map((item: ContentSearchDocument) => ({
+        unitId: item.id,
+        title: item.titles[0] ?? "",
+        description: item.descriptions[0] ?? "",
+        coverAssetUnitId: item.coverAssetUnitId,
+        creditNames: item.creditNames,
+        type: item.type,
+        nsfw: item.nsfw,
+        isLicensed: item.isLicensed,
+        createdAt: item.createdAt,
+        updatedAt: item.updatedAt,
+      })),
+    [data],
+  );
   const totalItems: number = data?.total ?? 0;
 
   const [sortConfig, setSortConfig] = useState<{
@@ -94,7 +98,7 @@ export const BookLibPage: React.FC = () => {
   return (
     <BookLibSectionRef
       ref={ref}
-      books={books}
+      books={books as any}
       totalItems={totalItems}
       isLoading={isLoading}
       error={error}

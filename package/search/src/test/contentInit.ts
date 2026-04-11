@@ -1,5 +1,5 @@
-// bookInit.ts
-// 初始化 Meilisearch 的 books 索引，并做一次简单查询测试
+// contentInit.ts
+// Initialize the Meilisearch content index and run a sample search
 
 import { SearchClient } from "../client";
 
@@ -13,25 +13,25 @@ async function main() {
   const healthy = await client.checkHealth();
   if (!healthy) {
     console.error(
-      "Meilisearch is not available. 请确认 Meilisearch 已经启动并且环境变量配置正确。",
+      "Meilisearch is not available. Ensure it is running and environment variables are correct.",
     );
     process.exit(1);
   }
   console.log("Meilisearch is healthy.");
 
-  console.log('Initializing "books" index settings...');
-  await client.initBookIndex();
+  console.log('Initializing "content" index settings...');
+  await client.initContentIndex();
   console.log("Index settings initialized.");
 
-  console.log("Syncing all books from database to Meilisearch...");
-  const { syncAllBooks } = await import("../sync");
-  const task = await syncAllBooks(client);
-  console.log("Sync task enqueued:", task);
+  console.log("Syncing all content from database to Meilisearch...");
+  const { syncAllContent } = await import("../sync");
+  const task = await syncAllContent(client);
+  console.log("Sync result:", task);
 
   await new Promise((resolve) => setTimeout(resolve, 2000));
 
-  console.log('Running a sample search on "books" index...');
-  const result = await client.bookIndex.search("", {
+  console.log('Running a sample search on "content" index...');
+  const result = await client.contentIndex.search("", {
     offset: 0,
     limit: 5,
   });
@@ -39,10 +39,10 @@ async function main() {
   console.log("Search result (first 5 hits):");
   console.dir(result, { depth: null });
 
-  console.log("bookInit finished.");
+  console.log("contentInit finished.");
 }
 
 main().catch((err) => {
-  console.error("bookInit failed with error:", err);
+  console.error("contentInit failed with error:", err);
   process.exit(1);
 });

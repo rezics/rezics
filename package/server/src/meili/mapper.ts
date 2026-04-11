@@ -8,7 +8,6 @@ export function mapUserSearchDocToDTO(doc: UserSearchDocument): UserDTO {
   return {
     unitId: doc.unitId,
     slug: doc.slug ?? undefined,
-    type: doc.type ?? undefined,
     name: doc.name,
     avatar: doc.avatar ?? undefined,
     bio: doc.bio ?? undefined,

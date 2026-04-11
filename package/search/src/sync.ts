@@ -1,278 +1,210 @@
 import type {
-  BookSearchDocument,
+  ContentSearchDocument,
   FeedbackSearchDocument,
-  UnitSearchDocument,
   UserSearchDocument,
 } from "@rezics/contract";
 import { prisma, UnitType } from "@rezics/server";
 import type { SearchClient } from "./client";
 
-// TODO(search-redesign): replaced by unified content index
+const BATCH_SIZE = 5000;
 
-// ANCHOR: Books sync with batching (cursor-based)
-// Updated for new schema: UnitTranslation for title, PersonCredit/OrgCredit for names, UnitTag for tags
-export async function syncAllBooks(client: SearchClient) {
-  const BATCH_SIZE = 5000;
+const INDEXABLE_TYPES = [
+  UnitType.BOOK,
+  UnitType.GAME,
+  UnitType.MEDIA,
+  UnitType.SHELF,
+];
 
-  const deleteResult = await client.deleteAllBooks();
-  console.log("sync all books, deleteResult", deleteResult);
+const contentInclude = {
+  translations: true,
+  unitTags: {
+    include: {
+      tag: { include: { translations: true } },
+    },
+    orderBy: { score: "desc" as const },
+  },
+  inRealms: true,
+  realmTagAsUnit: true,
+  personCredits: {
+    include: { person: true },
+    orderBy: { sortOrder: "asc" as const },
+  },
+  organizationCredits: {
+    include: { organization: true },
+    orderBy: { sortOrder: "asc" as const },
+  },
+  book: true,
+  game: { include: { platforms: true } },
+  media: true,
+  shelf: true,
+} as const;
 
-  let cursor: string | undefined;
-  let total = 0;
+/**
+ * Build a ContentSearchDocument from a Prisma unit with all relations included.
+ */
+export function buildContentDocument(unit: any): ContentSearchDocument {
+  const translations: any[] = unit.translations ?? [];
+  const unitTags: any[] = unit.unitTags ?? [];
+  const inRealms: any[] = unit.inRealms ?? [];
+  const realmTagAsUnit: any[] = unit.realmTagAsUnit ?? [];
+  const personCredits: any[] = unit.personCredits ?? [];
+  const organizationCredits: any[] = unit.organizationCredits ?? [];
 
-  while (true) {
-    console.log("sync all books, cursor", cursor, "total", total);
+  // Flatten translations
+  const titles = translations.map((t: any) => t.title).filter(Boolean);
+  const subtitles = translations.map((t: any) => t.subtitle).filter(Boolean);
+  const summaries = translations.map((t: any) => t.summary).filter(Boolean);
+  const descriptions = translations
+    .map((t: any) => t.description)
+    .filter(Boolean);
+  const languages = translations.map((t: any) => t.language);
 
-    const books: any[] = await prisma.book.findMany({
-      take: BATCH_SIZE,
-      skip: cursor ? 1 : 0,
-      cursor: cursor ? { unitId: cursor } : undefined,
-      orderBy: { unitId: "asc" },
-      include: {
-        unit: {
-          include: {
-            translations: true,
-            personCredits: {
-              include: { person: true },
-              orderBy: { sortOrder: "asc" },
-            },
-            organizationCredits: {
-              include: { organization: true },
-              orderBy: { sortOrder: "asc" },
-            },
-            unitTags: {
-              include: {
-                tag: { include: { translations: true } },
-              },
-              orderBy: { score: "desc" },
-            },
-          },
-        },
-      },
-    });
-
-    if (books.length === 0) break;
-
-    const formatted: BookSearchDocument[] = books.map((b) => {
-      const unit = b.unit;
-      // Resolve title from UnitTranslation (first available)
-      const titleTranslation = unit?.translations?.find(
-        (t: any) => t.title,
-      );
-      const descTranslation = unit?.translations?.find(
-        (t: any) => t.description,
-      );
-
-      // Resolve tag labels from UnitTag -> tag.translations
-      const tagSearch: string[] = (unit?.unitTags ?? []).map(
-        (ut: any) =>
-          ut.tag?.translations?.find((t: any) => t.title)?.title ?? "",
-      ).filter(Boolean);
-
-      // Resolve author/press/producer from PersonCredit/OrgCredit
-      const authorCredits = (unit?.personCredits ?? []).filter(
-        (c: any) => c.roleKey === "author",
-      );
-      const pressCredits = (unit?.organizationCredits ?? []).filter(
-        (c: any) => c.roleKey === "press" || c.roleKey === "publisher",
-      );
-      const producerCredits = (unit?.personCredits ?? []).filter(
-        (c: any) => c.roleKey === "producer",
-      );
-
-      const base: BookSearchDocument = {
-        id: b.unitId,
-        title: titleTranslation?.title ?? "",
-        description: descTranslation?.description ?? null,
-        coverUrl: null, // TODO(search-redesign): coverAssetUnitId lookup
-        isbn: b.isbn13 ?? null,
-        tagSearch,
-        authors: authorCredits.map((c: any) => c.person?.name ?? ""),
-        presses: pressCredits.map((c: any) => c.organization?.name ?? ""),
-        producers: producerCredits.map((c: any) => c.person?.name ?? ""),
-        nsfw: unit?.nsfw ?? false,
-        isLicensed: b.isLicensed ?? false,
-        authorIds: authorCredits.map((c: any) => c.personId),
-        pressIds: pressCredits.map((c: any) => c.organizationId),
-        producerIds: producerCredits.map((c: any) => c.personId),
-        textLength: Number(b.textLength) ?? 0,
-        createdAt: b.createdAt,
-        updatedAt: b.updatedAt,
-        extra: b.extra ?? null,
-        metadata: unit?.extra ?? null,
-        unitId: b.unitId,
-        author: authorCredits.map((c: any) => c.person),
-        press: pressCredits.map((c: any) => c.organization),
-        producer: producerCredits.map((c: any) => c.person),
-        tags: (unit?.unitTags ?? []).map((ut: any) => ({
-          unitId: ut.tagUnitId,
-          label:
-            ut.tag?.translations?.find((t: any) => t.title)?.title ?? "",
-          score: ut.score,
-        })),
-      };
-
-      return base;
-    });
-
-    const addResult = await client.addOrUpdateBooks(formatted);
-    console.log("sync all books, addResult", addResult);
-
-    total += formatted.length;
-    cursor = books[books.length - 1]!.unitId;
+  // Tags
+  const tagIds = unitTags.map((ut: any) => ut.tagUnitId);
+  const tagScores: Record<string, number> = {};
+  const tagLabels: string[] = [];
+  for (const ut of unitTags) {
+    tagScores[ut.tagUnitId] = ut.score;
+    const labels: string[] = (ut.tag?.translations ?? [])
+      .map((t: any) => t.title)
+      .filter(Boolean);
+    tagLabels.push(...labels);
   }
 
+  // Realms
+  const realmIds = inRealms.map((r: any) => r.realmUnitId);
+
+  // Realm-tag compound keys
+  const realmTagKeys = realmTagAsUnit.map(
+    (rt: any) => `${rt.realmUnitId}:${rt.tagUnitId}`,
+  );
+
+  // Attribution
+  const creditNames = [
+    ...personCredits.map((c: any) => c.person?.name).filter(Boolean),
+    ...organizationCredits
+      .map((c: any) => c.organization?.name)
+      .filter(Boolean),
+  ];
+
+  // Type extension fields
+  const ext = unit.book ?? unit.game ?? unit.media ?? null;
+  const isLicensed = ext?.isLicensed ?? false;
+  const coverAssetUnitId = ext?.coverAssetUnitId ?? null;
+
   return {
-    message: "sync all books success",
-    totalSynced: total,
+    id: unit.id,
+    type: unit.type,
+    titles,
+    subtitles,
+    summaries,
+    descriptions,
+    creditNames,
+    tagLabels,
+    tagIds,
+    tagScores,
+    realmIds,
+    realmTagKeys,
+    languages,
+    nsfw: unit.nsfw ?? false,
+    visibility: unit.visibility ?? "PUBLIC",
+    isLicensed,
+    createdAt:
+      unit.createdAt instanceof Date
+        ? unit.createdAt.toISOString()
+        : unit.createdAt,
+    updatedAt:
+      unit.updatedAt instanceof Date
+        ? unit.updatedAt.toISOString()
+        : unit.updatedAt,
+    publishedAt: unit.publishedAt
+      ? unit.publishedAt instanceof Date
+        ? unit.publishedAt.toISOString()
+        : unit.publishedAt
+      : null,
+    defaultLanguage: unit.defaultLanguage ?? null,
+    coverAssetUnitId,
+    userId: unit.userId ?? null,
   };
 }
 
-// ANCHOR: Units sync with batching
-// Updated for new schema: UnitTranslation for title/content, UnitTag for tags, removed domainIds
-export async function syncAllUnits(client: SearchClient) {
-  const BATCH_SIZE = 5000;
+// ANCHOR: Full content reindex
 
-  const deleteResult = await client.deleteAllUnits();
-  console.log("sync all units, deleteResult", deleteResult);
+export async function syncAllContent(client: SearchClient) {
+  const deleteResult = await client.deleteAllContent();
+  console.log("syncAllContent: deleted all documents", deleteResult);
 
   let cursor: string | undefined;
   let total = 0;
 
-  // Types to sync (exclude removed types)
-  const syncTypes = [
-    UnitType.BOOK,
-    UnitType.GAME,
-    UnitType.MEDIA,
-    UnitType.POST,
-    UnitType.SHELF,
-    UnitType.REALM,
-  ];
-
   while (true) {
-    console.log("sync all units, cursor", cursor, "total", total);
+    console.log("syncAllContent: cursor", cursor, "total", total);
+
     const units: any[] = await prisma.unit.findMany({
+      where: {
+        workUnitId: null,
+        type: { in: INDEXABLE_TYPES },
+        status: "PUBLISHED",
+        visibility: "PUBLIC",
+      },
+      include: contentInclude,
+      orderBy: { id: "asc" },
       take: BATCH_SIZE,
       skip: cursor ? 1 : 0,
       cursor: cursor ? { id: cursor } : undefined,
-      orderBy: { id: "asc" },
-      where: { type: { in: syncTypes } },
-      include: {
-        user: true,
-        translations: true,
-        reactionSummaries: true,
-        unitTags: {
-          include: {
-            tag: { include: { translations: true } },
-          },
-          orderBy: { score: "desc" },
-        },
-      },
     });
 
     if (units.length === 0) break;
 
-    // Resolve title/content from UnitTranslation
-    let formatted: UnitSearchDocument[] = units.map((u: any) => {
-      const titleTranslation = u.translations?.find(
-        (t: any) => t.title,
-      );
-      const contentTranslation = u.translations?.find(
-        (t: any) => t.description,
-      );
+    const docs = units.map(buildContentDocument);
+    const addResult = await client.addOrUpdateContent(docs);
+    console.log("syncAllContent: added batch", addResult);
 
-      // Resolve tags from UnitTag -> tag.translations
-      const tags: string[] = (u.unitTags ?? []).map(
-        (ut: any) =>
-          ut.tag?.translations?.find((t: any) => t.title)?.title ?? "",
-      ).filter(Boolean);
-
-      return {
-        id: u.id,
-        title: titleTranslation?.title ?? "",
-        content: contentTranslation?.description ?? "",
-        tags,
-        type: u.type ?? "",
-        status: u.status ?? "",
-        userId: u.userId ?? "",
-        domainIds: [], // TODO(search-redesign): domains removed, use realm membership
-        targetUnitId: u.workUnitId,
-        hasTarget: u.workUnitId !== null,
-        nsfw: u.nsfw,
-        createdAt: u.createdAt,
-        updatedAt: u.updatedAt,
-        unitId: u.id,
-        user: u.user,
-        metadata: u.extra,
-        tagObjects: (u.unitTags ?? []).map((ut: any) => ({
-          unitId: ut.tagUnitId,
-          label:
-            ut.tag?.translations?.find((t: any) => t.title)?.title ?? "",
-          score: ut.score,
-        })),
-        reactionSummaries: u.reactionSummaries,
-      };
-    });
-
-    formatted = await Promise.all(
-      formatted.map(async (u: any) => {
-        if (u.type === UnitType.POST) {
-          const bookId = u.targetUnitId;
-          if (bookId) {
-            const bookUnit = await prisma.unit.findUnique({
-              where: { id: bookId },
-              include: { translations: true },
-            });
-            if (bookUnit) {
-              const bookTitle =
-                bookUnit.translations?.find((t: any) => t.title)?.title ??
-                "";
-              u.metadata = u.metadata ?? {};
-              u.metadata.book = { title: bookTitle, coverUrl: null };
-            }
-          }
-        }
-        return u;
-      }),
-    );
-
-    const addResult = await client.addOrUpdateUnits(formatted);
-    console.log("sync all units, addResult", addResult);
-
-    total += formatted.length;
-    cursor = units[units.length - 1].id;
+    total += docs.length;
+    cursor = units[units.length - 1]!.id;
   }
 
-  return {
-    message: "sync all units success",
-    totalSynced: total,
-  };
+  return { message: "syncAllContent success", totalSynced: total };
 }
 
-// TODO(search-redesign): replaced by unified content index
-// Readlist sync is now a no-op. Readlists are indexed as shelf units.
-export async function syncAllReadlists(client: SearchClient) {
-  console.warn(
-    "[DEPRECATED] syncAllReadlists is a no-op. Readlists are now shelves indexed via syncAllUnits.",
-  );
-  return {
-    message: "syncAllReadlists deprecated (no-op)",
-    totalSynced: 0,
-  };
+// ANCHOR: Incremental single-unit sync
+
+export async function syncSingleContent(
+  client: SearchClient,
+  unitId: string,
+) {
+  const unit = await prisma.unit.findUnique({
+    where: { id: unitId },
+    include: contentInclude,
+  });
+
+  // If unit doesn't exist or doesn't qualify, remove from index
+  if (
+    !unit ||
+    unit.workUnitId != null ||
+    !INDEXABLE_TYPES.includes(unit.type as any) ||
+    unit.status !== "PUBLISHED" ||
+    unit.visibility !== "PUBLIC"
+  ) {
+    await client.deleteContent([unitId]);
+    return;
+  }
+
+  const doc = buildContentDocument(unit);
+  await client.addOrUpdateContent([doc]);
 }
 
-// ANCHOR: Feedbacks sync with batching (cursor-based)
+// ANCHOR: Feedbacks sync
+
 export async function syncAllFeedbacks(client: SearchClient) {
-  const BATCH_SIZE = 5000;
-
   const deleteResult = await client.deleteAllFeedbacks();
-  console.log("sync all feedbacks, deleteResult", deleteResult);
+  console.log("syncAllFeedbacks: deleted all documents", deleteResult);
 
   let cursor: string | undefined;
   let total = 0;
 
   while (true) {
-    console.log("sync all feedbacks, cursor", cursor, "total", total);
+    console.log("syncAllFeedbacks: cursor", cursor, "total", total);
 
     const feedbacks: any[] = await prisma.feedback.findMany({
       take: BATCH_SIZE,
@@ -283,48 +215,40 @@ export async function syncAllFeedbacks(client: SearchClient) {
 
     if (feedbacks.length === 0) break;
 
-    const formatted: FeedbackSearchDocument[] = feedbacks.map((f) => {
-      const doc: FeedbackSearchDocument = {
-        id: f.id,
-        userId: f.userId,
-        unitId: f.unitId,
-        url: f.url,
-        content: f.content,
-        type: f.type,
-        resolved: f.resolved,
-        resolvedAt: f.resolvedAt,
-        createdAt: f.createdAt,
-        updatedAt: f.updatedAt,
-      };
-
-      return doc;
-    });
+    const formatted: FeedbackSearchDocument[] = feedbacks.map((f) => ({
+      id: f.id,
+      userId: f.userId,
+      unitId: f.unitId,
+      url: f.url,
+      content: f.content,
+      type: f.type,
+      resolved: f.resolved,
+      resolvedAt: f.resolvedAt,
+      createdAt: f.createdAt,
+      updatedAt: f.updatedAt,
+    }));
 
     const addResult = await client.addOrUpdateFeedbacks(formatted);
-    console.log("sync all feedbacks, addResult", addResult);
+    console.log("syncAllFeedbacks: added batch", addResult);
 
     total += formatted.length;
     cursor = feedbacks[feedbacks.length - 1]!.id;
   }
 
-  return {
-    message: "sync all feedbacks success",
-    totalSynced: total,
-  };
+  return { message: "syncAllFeedbacks success", totalSynced: total };
 }
 
-// ANCHOR: Users sync with batching (cursor-based)
-export async function syncAllUsers(client: SearchClient) {
-  const BATCH_SIZE = 5000;
+// ANCHOR: Users sync
 
+export async function syncAllUsers(client: SearchClient) {
   const deleteResult = await client.deleteAllUsers();
-  console.log("sync all users, deleteResult", deleteResult);
+  console.log("syncAllUsers: deleted all documents", deleteResult);
 
   let cursor: string | undefined;
   let total = 0;
 
   while (true) {
-    console.log("sync all users, cursor", cursor, "total", total);
+    console.log("syncAllUsers: cursor", cursor, "total", total);
 
     const users: any[] = await prisma.user.findMany({
       take: BATCH_SIZE,
@@ -341,7 +265,6 @@ export async function syncAllUsers(client: SearchClient) {
       name: u.name,
       email: u.email,
       slug: u.slug,
-      type: u.type,
       avatar: u.avatar,
       bio: u.bio,
       description: u.description,
@@ -352,14 +275,11 @@ export async function syncAllUsers(client: SearchClient) {
     }));
 
     const addResult = await client.addOrUpdateUsers(formatted);
-    console.log("sync all users, addResult", addResult);
+    console.log("syncAllUsers: added batch", addResult);
 
     total += formatted.length;
     cursor = users[users.length - 1]!.unitId;
   }
 
-  return {
-    message: "sync all users success",
-    totalSynced: total,
-  };
+  return { message: "syncAllUsers success", totalSynced: total };
 }

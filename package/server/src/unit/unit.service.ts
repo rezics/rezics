@@ -10,7 +10,7 @@ import {
   type UnitType,
   type UnitVisibility,
 } from "#/prisma/client";
-import { deleteUnitFromMeili, syncUnitToMeili } from "@/meili/unit/sync";
+import { syncContentToMeili, deleteContentFromMeili } from "@/meili/content/sync";
 import type { UnitWithRelations } from "./types";
 import { unitInclude } from "./types";
 
@@ -226,7 +226,7 @@ export class UnitService {
       },
       include: unitInclude,
     });
-    await syncUnitToMeili(unit.id);
+    await syncContentToMeili(unit.id);
     return unit as UnitWithRelations;
   }
 
@@ -256,7 +256,7 @@ export class UnitService {
       },
       include: unitInclude,
     });
-    await syncUnitToMeili(unitId);
+    await syncContentToMeili(unitId);
     return unit as UnitWithRelations;
   }
 
@@ -266,7 +266,7 @@ export class UnitService {
     db: Prisma.TransactionClient | typeof prisma = prisma,
   ): Promise<void> {
     await db.unit.delete({ where: { id: unitId } });
-    await deleteUnitFromMeili(unitId);
+    await deleteContentFromMeili(unitId);
   }
 }
 

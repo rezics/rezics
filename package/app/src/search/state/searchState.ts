@@ -30,7 +30,7 @@ type SearchState = {
 const initialQuery: SearchInfo = {
   keyword: "",
   tags: [],
-  textLength: "",
+  tagIds: [],
   nsfw: false,
   isLicensed: false,
 };

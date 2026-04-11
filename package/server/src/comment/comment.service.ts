@@ -7,7 +7,7 @@ import {
 import type { Prisma } from "#/prisma/client";
 import { prisma, UnitStatus, UnitType } from "#/prisma/client";
 import { emitNotificationEvent } from "../notify/notify-client";
-import { syncUnitToMeili } from "@/meili/unit/sync";
+import { syncContentToMeili } from "@/meili/content/sync";
 import { getCommentApproxCount } from "./sql";
 import type { CommentWithRelations } from "./types";
 import { commentInclude } from "./types";
@@ -153,7 +153,7 @@ export class CommentService {
       include: commentInclude,
     });
 
-    await syncUnitToMeili(created.unitId);
+    await syncContentToMeili(created.unitId);
 
     await prisma.reactionSummary.upsert({
       where: {
@@ -204,7 +204,7 @@ export class CommentService {
       },
       include: commentInclude,
     });
-    await syncUnitToMeili(unitId);
+    await syncContentToMeili(unitId);
     return updated as CommentWithRelations;
   }
 
@@ -218,7 +218,7 @@ export class CommentService {
       },
       include: commentInclude,
     });
-    await syncUnitToMeili(unitId);
+    await syncContentToMeili(unitId);
   }
 
   async exists(unitId: string): Promise<boolean> {
