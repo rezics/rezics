@@ -1,4 +1,4 @@
-import type { ReviewDTO } from "@rezics/contract";
+import type { PostDTO } from "@rezics/contract";
 import {
   Carousel,
   CarouselContent,
@@ -11,7 +11,7 @@ import { useMemo } from "react";
 import { VerticalTwoReviewCard } from "@/review/component/item/VerticalTwoReviewCard";
 
 export interface HorizontalReviewCarouselProps {
-  reviewList: ReviewDTO[];
+  reviewList: PostDTO[];
   className?: string;
 }
 
@@ -24,7 +24,7 @@ export const HorizontalReviewCarousel: React.FC<
    * 单数会自动丢弃最后一个
    */
   const reviewPairs = useMemo(() => {
-    const pairs: { review1: ReviewDTO; review2: ReviewDTO }[] = [];
+    const pairs: { review1: PostDTO; review2: PostDTO }[] = [];
 
     for (let i = 0; i < reviewList.length - 1; i += 2) {
       pairs.push({

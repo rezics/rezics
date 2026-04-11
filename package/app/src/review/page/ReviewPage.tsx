@@ -3,12 +3,11 @@ import {
   Avatar,
   Box,
   IconButton,
-  Rating,
   Tooltip,
   Typography,
 } from "@mui/material";
 import { bookQueries } from "@rezics/api/book/book";
-import { reviewQueries } from "@rezics/api/review/review";
+import { postQueries } from "@rezics/api/post/post";
 import { MarkdownContent } from "@rezics/ui/composite/content/MarkdownContent.tsx";
 import { AccentBar } from "@rezics/ui/primitive/decorative/AccentBar.tsx";
 import { MUILink } from "@rezics/ui/primitive/link/MUILink.tsx";
@@ -26,6 +25,10 @@ import {
 import { ReactionStatistics } from "@/engagement/component/ReactionStatistics.tsx";
 import { parseReactionSummaries } from "@/shared/util/reaction-summaries-parser";
 
+/**
+ * ReviewPage - now uses PostDTO instead of ReviewDTO.
+ * Uses postQueries.detail() instead of reviewQueries.detail().
+ */
 export function ReviewPage() {
   const matchRoute = useMatchRoute();
   const reviewParams = matchRoute({ to: "/review/$reviewId", fuzzy: false });
@@ -39,13 +42,22 @@ export function ReviewPage() {
     data: review,
     isLoading,
     error,
-  } = useQuery(reviewQueries.detail(reviewId || ""));
+  } = useQuery(postQueries.detail(reviewId || ""));
 
+  // MOCK: targetUnitId on the post references the book
+  const bookUnitId = review?.targetUnitId ?? '';
   const {
     data: book,
     isLoading: bookLoading,
     error: bookError,
-  } = useQuery(bookQueries.detail(review?.bookId || ""));
+  } = useQuery({
+    ...bookQueries.detail(bookUnitId),
+    enabled: !!bookUnitId,
+  });
+
+  // MOCK: rating and title from post.extra
+  const rating = (review?.extra as any)?.rating as number | undefined;
+  const reviewTitle = (review?.extra as any)?.title as string | undefined;
 
   const commentRef = useRef<HTMLDivElement>(null);
   const handleGoToComments = () => {
@@ -67,9 +79,13 @@ export function ReviewPage() {
     return <div className="mt-6">{t("common.no_data")}</div>;
   }
 
+  const dateStr = review.createdAt
+    ? new Date(String(review.createdAt)).toLocaleDateString()
+    : '';
+
   return (
     <div className="w-11/12 mx-auto mt-10 max-w-4xl">
-      {/* ANCHOR Book Info  */}
+      {/* Book Info */}
       {bookLoading ? (
         <div className="mt-6">{t("common.loading")}</div>
       ) : bookError instanceof Error ? (
@@ -84,38 +100,30 @@ export function ReviewPage() {
 
       <div className="flex items-center justify-between mt-6">
         <div className="text-2xl font-bold">
-          {review?.title || t("pages.review_page")}
+          {reviewTitle || t("pages.review_page")}
         </div>
         <div>
           <div className="text-right">
-            {!!review.rating && (
-              <Rating
-                value={review.rating / 2}
-                precision={0.5}
-                max={5}
-                readOnly
-              />
+            {!!rating && (
+              <Typography variant="body2" color="text.secondary">
+                {rating.toFixed(1)} / 10
+              </Typography>
             )}
             <div className="text-xs text-gray-500">
               <MUILink
                 to="/book/$bookId"
-                params={{ bookId: review.bookId }}
-              >{`/book/${review.bookId}`}</MUILink>
+                params={{ bookId: bookUnitId }}
+              >{`/book/${bookUnitId}`}</MUILink>
             </div>
           </div>
-          {/* <Button variant="contained" color="primary">
-            <Link to={`/review/${reviewId}/edit`}>{t('common.edit')}</Link>
-          </Button> */}
         </div>
       </div>
 
-      {/* ANCHOR Author Info */}
-
+      {/* Author Info */}
       <div className="mt-6">
-        {/* Header */}
         <div className="flex items-start gap-4">
           <Avatar
-            src={review.user?.avatar ?? ""}
+            src={review.author?.avatar ?? ""}
             sx={{ width: 56, height: 56, borderRadius: 1 }}
           />
           <div className="flex-1">
@@ -125,16 +133,16 @@ export function ReviewPage() {
             >
               <MUILink
                 to="/user/$unitId"
-                params={{ unitId: review.user?.unitId ?? "" }}
+                params={{ unitId: review.author?.unitId ?? "" }}
                 className="flex items-center"
               >
                 <div className="flex items-center justify-between">
                   <div>
                     <Typography variant="h6" className="font-bold text-primary">
-                      {review.user?.name}
+                      {review.author?.name}
                     </Typography>
                     <div className="text-sm text-gray-500 mt-1">
-                      <span>{review.created_at}</span>
+                      <span>{dateStr}</span>
                     </div>
                   </div>
                 </div>
@@ -145,7 +153,7 @@ export function ReviewPage() {
             <div className="flex justify-end">
               <MiniAdminActionBar
                 editionURL={`/review/${review.unitId}/edit`}
-                userUnitId={review.user?.unitId}
+                userUnitId={review.author?.unitId}
               />
               <MiniActionBar
                 handleOnCommentClick={handleGoToComments}
@@ -157,7 +165,7 @@ export function ReviewPage() {
 
         {/* Content */}
         <Box sx={{ mt: 3 }}>
-          <MarkdownContent content={review.content || ""} />
+          <MarkdownContent content={review.body || ""} />
         </Box>
 
         <div className="mt-2">
@@ -166,7 +174,7 @@ export function ReviewPage() {
           />
         </div>
 
-        {/* ANCHOR Comments */}
+        {/* Comments */}
         <div ref={commentRef} className="mt-5">
           <div className="flex items-center justify-between w-full">
             <div className="flex items-center gap-2">
@@ -182,10 +190,8 @@ export function ReviewPage() {
           </div>
 
           <TreeReplyComponents unitId={review.unitId || ""} />
-          {/* 供评论区占位符 */}
           <div className="mb-[200px]" />
         </div>
-        {/* Footer meta */}
       </div>
     </div>
   );

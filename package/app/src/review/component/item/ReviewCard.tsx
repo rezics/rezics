@@ -6,20 +6,32 @@ import {
   Typography,
   useTheme,
 } from "@mui/material";
-import type { ReviewMeiliDTO } from "@rezics/contract";
+import type { PostDTO } from "@rezics/contract";
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
 import { cn } from "@/shared/util/css-util";
 
+/**
+ * ReviewCard - now uses PostDTO instead of ReviewMeiliDTO.
+ * Post body replaces review.content; title and book metadata come from post.extra.
+ */
 interface ReviewCardProps {
-  review: ReviewMeiliDTO;
+  review: PostDTO;
   className?: string;
 }
 
 const ReviewCard: React.FC<ReviewCardProps> = ({ review, className }) => {
   const theme = useTheme();
-  const bookMetadata = review.metadata?.book;
   const navigate = useNavigate();
+
+  // MOCK: book metadata from post.extra if available
+  const bookMetadata = (review.extra as any)?.book as
+    | { coverUrl?: string; title?: string }
+    | undefined;
+  // MOCK: title from post.extra.title
+  const reviewTitle = (review.extra as any)?.title as string | undefined;
+  // MOCK: rating from post.extra.rating
+  const rating = (review.extra as any)?.rating as number | undefined;
 
   const handleOpenReview = () => {
     if (!review.unitId) return;
@@ -30,9 +42,7 @@ const ReviewCard: React.FC<ReviewCardProps> = ({ review, className }) => {
     <Card className={cn("w-full transition-all hover:shadow-md", className)}>
       <CardActionArea onClick={handleOpenReview} disabled={!review.unitId}>
         <CardContent>
-          {/* 中间主体：书籍信息与评论内容 */}
           <Box className="flex gap-4">
-            {/* 左侧：书籍封面 */}
             {bookMetadata?.coverUrl && (
               <Box
                 className="flex-shrink-0 w-20 h-28 overflow-hidden rounded shadow-sm"
@@ -46,7 +56,6 @@ const ReviewCard: React.FC<ReviewCardProps> = ({ review, className }) => {
               </Box>
             )}
 
-            {/* 右侧：文字详情 */}
             <Box className="flex-grow min-w-0">
               {bookMetadata?.title && (
                 <Typography
@@ -58,13 +67,13 @@ const ReviewCard: React.FC<ReviewCardProps> = ({ review, className }) => {
                 </Typography>
               )}
 
-              {review.title && (
+              {reviewTitle && (
                 <Typography
                   variant="h6"
                   className="truncate"
                   sx={{ fontSize: "1.1rem", color: "text.primary" }}
                 >
-                  {review.title}
+                  {reviewTitle}
                 </Typography>
               )}
 
@@ -74,10 +83,10 @@ const ReviewCard: React.FC<ReviewCardProps> = ({ review, className }) => {
                 className="line-clamp-3 text-justify"
                 sx={{ lineHeight: 1.6 }}
               >
-                {review.content}
+                {review.body}
               </Typography>
 
-              {!review.title && (
+              {!reviewTitle && (
                 <Typography
                   variant="h6"
                   className="invisible"
@@ -90,12 +99,10 @@ const ReviewCard: React.FC<ReviewCardProps> = ({ review, className }) => {
           </Box>
 
           <Box className="flex items-center justify-between text-xs text-muted-foreground mt-2">
-            {/* Left: 统计信息占位 */}
             <Box className="flex items-center gap-2">
-              {/* TODO 根据 reactionSummaries 结构循环渲染点赞等图标 */}0 观看
+              0 观看
             </Box>
 
-            {/* Right: 用户名 + 评分 */}
             <Box className="flex items-center gap-2">
               <Typography
                 variant="caption"
@@ -103,26 +110,21 @@ const ReviewCard: React.FC<ReviewCardProps> = ({ review, className }) => {
                 noWrap
                 sx={{ lineHeight: 1 }}
               >
-                {review.user?.name || "匿名"}
+                {review.author?.name || "匿名"}
               </Typography>
 
-              {review.rating !== undefined && (
+              {rating !== undefined && (
                 <Typography
                   variant="caption"
                   color="secondary"
                   noWrap
                   sx={{ lineHeight: 1 }}
                 >
-                  {review.rating}
+                  {rating}
                 </Typography>
               )}
             </Box>
           </Box>
-
-          {/* {review.reactionSummaries && (
-          <Box className="mt-3 flex gap-2">
-          </Box>
-        )} */}
         </CardContent>
       </CardActionArea>
     </Card>

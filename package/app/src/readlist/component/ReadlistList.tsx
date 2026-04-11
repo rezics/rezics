@@ -1,20 +1,20 @@
 import { Grid } from "@mui/material";
-import type { ReadlistResponse } from "@rezics/contract";
+import type { ShelfDTO } from "@rezics/contract";
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
 import { SingleReadlist } from "./SingleReadlistCard";
 
-// * Complete list of book-related reading lists.
-export function ReadlistList({ booklists }: { booklists: ReadlistResponse[] }) {
+/**
+ * ReadlistList - now uses ShelfDTO instead of ReadlistResponse.
+ */
+export function ReadlistList({ booklists }: { booklists: ShelfDTO[] }) {
   const navigate = useNavigate();
 
   const handleLike = (id: string) => {
-    console.log("Liked book ID:", id);
+    console.log("Liked shelf ID:", id);
   };
 
   const handleBookListClick = (id: string, event: React.MouseEvent) => {
-    console.log("Clicked book ID:", id);
-    console.log("Original event object:", event);
     event.preventDefault();
     event.stopPropagation();
     navigate({ to: `/readlist/${id}` });
@@ -22,8 +22,8 @@ export function ReadlistList({ booklists }: { booklists: ReadlistResponse[] }) {
 
   return (
     <Grid container spacing={2}>
-      {booklists.map((list: any) => (
-        <Grid size={{ xs: 12, lg: 6, xl: 4 }} key={list.id}>
+      {booklists.map((list) => (
+        <Grid size={{ xs: 12, lg: 6, xl: 4 }} key={list.unitId}>
           <SingleReadlist
             data={list}
             handleBookListClick={handleBookListClick}

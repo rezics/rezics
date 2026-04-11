@@ -1,11 +1,11 @@
 import { Divider } from "@mui/material";
-import type { ReviewMeiliDTO } from "@rezics/contract";
+import type { PostDTO } from "@rezics/contract";
 import type React from "react";
 import ReviewCard from "./ReviewCard";
 
 interface VerticalTwoReviewCardProps {
-  review1: ReviewMeiliDTO;
-  review2: ReviewMeiliDTO;
+  review1: PostDTO;
+  review2: PostDTO;
 }
 
 export const VerticalTwoReviewCard: React.FC<VerticalTwoReviewCardProps> = ({

@@ -2,6 +2,12 @@ import { Button } from "@mui/material";
 import { useNavigate } from "@tanstack/react-router";
 import React from "react";
 import { ResponsiveBookGridLimited } from "@/book-library/component/list/ResponsiveBookGridLimited";
+import {
+  getBookAuthorName,
+  getBookCoverUrl,
+  getBookDescription,
+  getBookTitle,
+} from "@/shared/util/translation-helpers";
 import { useHomeBooks } from "./hooks/hooks";
 
 export interface TrendingBookSectionProps {
@@ -19,10 +25,10 @@ export const TrendingBookSection: React.FC<TrendingBookSectionProps> = ({
   const bookList = React.useMemo(() => {
     return items.map((book) => ({
       id: book.unitId,
-      title: book.title,
-      author: book.author?.[0]?.name ?? "",
-      description: book.description,
-      coverUrl: book.coverUrl ?? "https://placehold.co/400x600?text=No+Cover",
+      title: getBookTitle(book),
+      author: getBookAuthorName(book),
+      description: getBookDescription(book),
+      coverUrl: getBookCoverUrl(book),
       href: `/book/${book.unitId}`,
     }));
   }, [items]);

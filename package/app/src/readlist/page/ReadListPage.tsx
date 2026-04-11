@@ -1,6 +1,6 @@
 import { ChatBubbleOutline } from "@mui/icons-material";
 import { Avatar, IconButton, Tooltip } from "@mui/material";
-import { readlistQueries } from "@rezics/api/readlist/readlist";
+import { shelfQueries } from "@rezics/api/shelf/shelf";
 import { AccentBar } from "@rezics/ui/primitive/decorative/AccentBar.tsx";
 import { Link } from "@rezics/ui/primitive/link/Link.tsx";
 import { useQuery } from "@tanstack/react-query";
@@ -16,8 +16,12 @@ import {
 import { ReactionStatistics } from "@/engagement/component/ReactionStatistics.tsx";
 import { Route } from "@/routes/_mainLayout/readlist/$readlistId";
 import { parseReactionSummaries } from "@/shared/util/reaction-summaries-parser";
-import { BookReviewGroup } from "../component/Review";
+import { getTranslation } from "@/shared/util/translation-helpers";
 
+/**
+ * ReadListPage - now backed by Shelf API instead of Readlist API.
+ * ShelfDTO has translations[] instead of top-level title/content.
+ */
 export const ReadListPage: React.FC = () => {
   const { readlistId } = Route.useParams();
   const commentRef = useRef<HTMLDivElement>(null);
@@ -30,22 +34,30 @@ export const ReadListPage: React.FC = () => {
   };
 
   const {
-    data: bookList,
+    data: shelf,
     isLoading,
     error: _error,
-  } = useQuery(readlistQueries.detail(readlistId || ""));
+  } = useQuery({
+    ...shelfQueries.detail(readlistId || ""),
+    enabled: !!readlistId,
+  });
 
   if (isLoading) {
     return <div className="text-center py-10">{t("common.loading")}</div>;
   }
 
-  if (!bookList?.id) {
+  if (!shelf?.unitId) {
     return (
       <div className="text-center py-10 text-red-500">
         {t("page.readlist.not_found")}
       </div>
     );
   }
+
+  const translation = getTranslation(shelf.translations);
+  const shelfTitle = translation?.title ?? '';
+  const shelfDescription = translation?.description ?? '';
+  const itemCount = shelf.items?.length ?? 0;
 
   return (
     <div
@@ -56,40 +68,37 @@ export const ReadListPage: React.FC = () => {
       <div className="space-y-4">
         <div>
           <div className="flex items-center">
-            <h2 className="text-2xl font-bold">{bookList.title}</h2>
+            <h2 className="text-2xl font-bold">{shelfTitle}</h2>
 
             <div className="ml-auto">
               <MiniAdminActionBar
                 editionURL={`/readlist/${readlistId}/edit`}
-                userUnitId={bookList.creator?.unitId}
+                userUnitId={shelf.user?.unitId}
               />
             </div>
           </div>
-
-          {/* 新 API 暂无 description 字段 */}
-          {/* <p className="text-gray-600">{(bookList as any).description}</p> */}
         </div>
 
         <div className="flex justify-between items-center">
-          {bookList.creator && (
+          {shelf.user && (
             <Tooltip
               title={t("page.readlist.open_user_ui")}
               placement="top-start"
             >
               <Link
                 to="/user/$unitId"
-                params={{ unitId: bookList.creator?.unitId }}
+                params={{ unitId: shelf.user?.unitId }}
                 className="flex items-center"
               >
                 <div className="flex items-center gap-3">
                   <Avatar
-                    src={bookList.creator.avatar || ""}
-                    alt={bookList.creator.name || "Avatar"}
+                    src={shelf.user.avatar || ""}
+                    alt={shelf.user.name || "Avatar"}
                     variant="rounded"
                     className="shadow"
                   />
                   <p className="text-sm text-gray-700">
-                    {bookList.creator.name}
+                    {shelf.user.name}
                   </p>
                 </div>
               </Link>
@@ -105,37 +114,26 @@ export const ReadListPage: React.FC = () => {
       </div>
 
       <div>
-        {bookList.content && <div className="mt-4">{bookList.content}</div>}
+        {shelfDescription && <div className="mt-4">{shelfDescription}</div>}
       </div>
 
-      {/* Book List */}
-      {/* 新 API 暂不直接返回 books 列表，这里占位或从 metadata.items 进一步查询渲染 */}
-      {/* <div className="grid grid-cols-1 gap-4 mt-6"> ... </div> */}
+      {/* Shelf items */}
+      {itemCount > 0 && (
+        <div className="mt-4 text-sm text-gray-600">
+          {t("page.readlist.books_count", { count: itemCount })}
+        </div>
+      )}
 
       {/* Likes & Comments */}
       <div className="text-sm mt-5 text-gray-700">
         <ReactionStatistics
-          reactionSummaries={parseReactionSummaries(bookList.reactionSummaries)}
+          reactionSummaries={parseReactionSummaries(shelf.reactionSummaries)}
         />
       </div>
 
-      {bookList?.order?.length === 0 && (
-        <div className="text-sm text-gray-500">
-          {t("page.readlist.no_reviews_small")}
-        </div>
-      )}
-      {bookList?.order?.map((unitId) => {
-        const reviewData = bookList?.reviews.find((r) => r.unitId === unitId);
-        const bookData = bookList?.books.find(
-          (b) => b.unitId === reviewData?.targetUnitId,
-        );
-        if (!bookData || !reviewData) return null;
-        return (
-          <BookReviewGroup key={unitId} review={reviewData} book={bookData} />
-        );
-      })}
+      {/* MOCK: shelf items display - items reference other units, need further queries */}
 
-      {/* 评论区 */}
+      {/* Comments section */}
       <div ref={commentRef} className="mt-5">
         <div className="flex items-center justify-between w-full">
           <div className="flex items-center gap-2">
@@ -151,7 +149,6 @@ export const ReadListPage: React.FC = () => {
         </div>
 
         <TreeReplyComponents unitId={readlistId || ""} />
-        {/* 供评论区占位符 */}
         <div className="mb-[200px]" />
       </div>
     </div>

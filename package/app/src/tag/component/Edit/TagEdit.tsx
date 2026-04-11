@@ -1,113 +1,58 @@
 import {
-  Autocomplete,
   Button,
   CircularProgress,
   TextField,
 } from "@mui/material";
 import type {
   CreateTagInput,
-  TagDetailDTO,
+  UnitTagDTO,
   UpdateTagInput,
 } from "@rezics/api/tag/tag";
 import {
   useCreateTagMutation,
   useUpdateTagMutation,
 } from "@rezics/api/tag/tag";
-import type { UnitDTO } from "@rezics/api/unit/unit";
-import { unitApi } from "@rezics/api/unit/unit";
 import type React from "react";
-import { useEffect, useMemo, useState } from "react";
+import { useState } from "react";
 
+/**
+ * TagEdit - now creates/updates tags using the new translation-based model.
+ * Tags are Units with type=TAG. CreateTagInput requires translations[].
+ */
 export type TagEditProps = {
-  tag?: TagDetailDTO | null; // 若存在则为更新模式
-  onSaved?: (tag: TagDetailDTO) => void;
+  tag?: UnitTagDTO | null;
+  onSaved?: (tag: UnitTagDTO) => void;
   className?: string;
 };
 
-/**
- * TagEdit – 编辑 Tag 及其绑定的 domains
- * - 搜索 domain 使用 unitApi.search，过滤 type = 'DOMAIN'
- */
 export const TagEdit: React.FC<TagEditProps> = ({
   tag,
   onSaved,
   className,
 }) => {
   const isUpdate = !!tag;
-  const [name, setName] = useState(tag?.name ?? "");
-  const [type, setType] = useState<string | null>(tag?.type ?? null);
-  const [domains, setDomains] = useState<UnitDTO[]>();
-  const [domainIds, setDomainIds] = useState<string[]>(() => {
-    if (!tag?.domains) return [];
-    // 兼容后端返回的两种形态：
-    // - string[]: 直接是域的 unitId
-    // - object[]: 域对象，包含 { id | unitId, ... }
-    return (tag.domains as any[])
-      .map((d) =>
-        typeof d === "string"
-          ? d
-          : String((d as any).id ?? (d as any).unitId ?? ""),
-      )
-      .filter(Boolean);
-  });
-
-  // domain 搜索
-  const [q, setQ] = useState("");
-  const [searching, setSearching] = useState(false);
-  const [options, setOptions] = useState<UnitDTO[]>([]);
-
-  useEffect(() => {
-    let mounted = true;
-    const h = setTimeout(async () => {
-      if (!q) {
-        setOptions([]);
-        return;
-      }
-      setSearching(true);
-      try {
-        const res = await unitApi.search(q, { type: "DOMAIN", limit: 10 });
-        if (mounted) setOptions(res.units || []);
-      } finally {
-        if (mounted) setSearching(false);
-      }
-    }, 300);
-    return () => {
-      mounted = false;
-      clearTimeout(h);
-    };
-  }, [q]);
+  const [name, setName] = useState(tag?.tagLabel ?? "");
 
   const createMutation = useCreateTagMutation({
-    onSuccess: (data) => onSaved?.(data as TagDetailDTO),
+    onSuccess: (data) => onSaved?.(data as UnitTagDTO),
   });
   const updateMutation = useUpdateTagMutation({
-    onSuccess: (data) => onSaved?.(data as TagDetailDTO),
+    onSuccess: (data) => onSaved?.(data as UnitTagDTO),
   });
 
   const busy = createMutation.isPending || updateMutation.isPending;
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const payload: CreateTagInput | UpdateTagInput = {
-      name: name.trim(),
-      type: type ?? null,
-      domains: domainIds,
-    };
+    const translations = [{ language: 'zh-CN', title: name.trim() }];
     if (isUpdate && tag) {
-      await updateMutation.mutateAsync({ unitId: tag.id, input: payload });
+      const payload: UpdateTagInput = { translations };
+      await updateMutation.mutateAsync({ unitId: tag.tagUnitId, input: payload });
     } else {
-      await createMutation.mutateAsync(payload as CreateTagInput);
+      const payload: CreateTagInput = { translations };
+      await createMutation.mutateAsync(payload);
     }
   };
-
-  const selectedDomainOptions = useMemo(() => {
-    return (
-      domains?.map((d) => ({
-        id: d.id,
-        title: d.title,
-      })) ?? []
-    );
-  }, [domains]);
 
   return (
     <form onSubmit={onSubmit} className={className}>
@@ -123,73 +68,6 @@ export const TagEdit: React.FC<TagEditProps> = ({
             onChange={(e) => setName(e.target.value)}
             required
           />
-        </div>
-
-        <div className="flex flex-col gap-2">
-          <label htmlFor="tag-type" className="text-sm text-gray-600">
-            类型
-          </label>
-          <TextField
-            id="tag-type"
-            size="small"
-            // value={type ?? ''}
-            value={"book"}
-            disabled
-            onChange={(e) => setType(e.target.value || null)}
-            placeholder="可选，如：TOPIC / GENRE"
-          />
-        </div>
-
-        <div className="flex flex-col gap-2">
-          <label htmlFor="tag-domains" className="text-sm text-gray-600">
-            Domains
-          </label>
-          <Autocomplete
-            multiple
-            options={options}
-            loading={searching}
-            getOptionLabel={(o) => {
-              const anyO = o as any;
-              const label = anyO.title ?? anyO.name ?? anyO.id;
-              return typeof label === "string" ? label : String(label ?? "");
-            }}
-            filterOptions={(x) => x} // 保留远程结果
-            value={selectedDomainOptions as any}
-            onChange={(_, values) => {
-              setDomainIds(values.map((v) => (v as any).id));
-              setDomains(
-                values.map((v) => {
-                  return { id: v.id, title: v.title } as any;
-                }),
-              );
-            }}
-            renderInput={(params) => {
-              const { InputProps, ...rest } = params;
-              return (
-                <TextField
-                  {...rest}
-                  id="tag-domains"
-                  size="small"
-                  placeholder="搜索域（DOMAIN）"
-                  onChange={(e) => setQ(e.target.value)}
-                  InputProps={{
-                    ...InputProps,
-                    endAdornment: (
-                      <>
-                        {searching ? (
-                          <CircularProgress color="inherit" size={16} />
-                        ) : null}
-                        {InputProps.endAdornment}
-                      </>
-                    ),
-                  }}
-                />
-              );
-            }}
-          />
-          <div className="text-xs text-gray-500">
-            按名称搜索 Unit（类型为 DOMAIN）进行绑定
-          </div>
         </div>
 
         <div className="flex items-center gap-3">

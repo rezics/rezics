@@ -1,4 +1,4 @@
-import type { ReadlistDTO } from "@rezics/contract";
+import type { ShelfDTO } from "@rezics/contract";
 import {
   Carousel,
   CarouselContent,
@@ -12,7 +12,7 @@ import ReadListCard from "../item/ReadListCard";
 import { VerticalTwoReadListCard } from "../item/VerticalTwoReadListCard";
 
 export interface HorizontalReadListCarouselProps {
-  readlistList: ReadlistDTO[];
+  readlistList: ShelfDTO[];
   className?: string;
   variant?: "single-line" | "double-line";
 }
@@ -26,7 +26,7 @@ export const HorizontalReadListCarousel: React.FC<
 > = ({ readlistList, className, variant = "single-line" }) => {
   const readlistPairs = useMemo(() => {
     if (variant === "single-line") return;
-    const pairs: { readlist1: ReadlistDTO; readlist2: ReadlistDTO }[] = [];
+    const pairs: { readlist1: ShelfDTO; readlist2: ShelfDTO }[] = [];
     for (let i = 0; i < readlistList.length - 1; i += 2) {
       pairs.push({
         readlist1: readlistList[i],

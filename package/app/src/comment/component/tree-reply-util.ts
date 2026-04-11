@@ -1,28 +1,34 @@
-import type { CommentTreeNode } from "@rezics/contract";
+import type { PostDTO } from "@rezics/contract";
 import type { UiComment } from "./TreeReplyComponents";
 
-export function buildTree(items: CommentTreeNode[] | undefined): UiComment[] {
+/**
+ * Build a tree from flat PostDTO[] (comments with parentPostUnitId).
+ * Replaces the old CommentTreeNode-based buildTree.
+ */
+export function buildTree(items: PostDTO[] | undefined): UiComment[] {
   if (!items || items.length === 0) return [];
 
-  // Map of id -> UiComment
+  // Map of unitId -> UiComment
   const map = new Map<string, UiComment>();
-  // Group by parentId
+  // Group by parentPostUnitId
   const childrenMap = new Map<string | null | undefined, UiComment[]>();
 
   for (const n of items) {
     const ui: UiComment = {
-      id: n.id,
-      content: n.content ?? null,
+      id: n.unitId,
+      content: n.body ?? null,
       created_at: n.createdAt
         ? typeof n.createdAt === "string"
           ? n.createdAt
           : new Date(n.createdAt as any).toISOString()
         : undefined,
-      user: n.user ? n.user : undefined,
+      user: n.author
+        ? { unitId: n.author.unitId, name: n.author.name, avatar: n.author.avatar }
+        : undefined,
       replies: [],
     };
-    map.set(n.id, ui);
-    const key = (n as any).parentCommentId ?? null;
+    map.set(n.unitId, ui);
+    const key = n.parentPostUnitId ?? null;
     const list = childrenMap.get(key) ?? [];
     list.push(ui);
     childrenMap.set(key, list);
@@ -30,11 +36,10 @@ export function buildTree(items: CommentTreeNode[] | undefined): UiComment[] {
 
   // Link children to parents
   for (const n of items) {
-    const parentId = (n as any).parentCommentId ?? null;
+    const parentId = n.parentPostUnitId ?? null;
     if (parentId && map.has(parentId)) {
       const parent = map.get(parentId)!;
       const childList = childrenMap.get(parentId) ?? [];
-      // Ensure parent's replies uses grouped list
       parent.replies = childList;
     }
   }
@@ -49,11 +54,10 @@ export function buildTree(items: CommentTreeNode[] | undefined): UiComment[] {
 
   // Some nodes may reference a parent not included in the slice; treat them as roots
   if (roots.length === 0) {
-    // Fallback: choose items with missing parent
     for (const n of items) {
-      const parentId = (n as any).parentCommentId ?? null;
+      const parentId = n.parentPostUnitId ?? null;
       if (!parentId || !map.has(parentId)) {
-        const ui = map.get(n.id)!;
+        const ui = map.get(n.unitId)!;
         if (!roots.includes(ui)) roots.push(ui);
       }
     }

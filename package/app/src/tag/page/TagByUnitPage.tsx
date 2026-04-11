@@ -1,5 +1,5 @@
 import { tagApi, tagQueries } from "@rezics/api/tag/tag";
-import type { TagDetailDTO } from "@rezics/contract";
+import type { UnitTagDTO } from "@rezics/contract";
 import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
 import { MUILink } from "@rezics/ui/primitive/link/MUILink.tsx";
 import { useQueries, useQuery } from "@tanstack/react-query";
@@ -7,18 +7,21 @@ import { useMatchRoute } from "@tanstack/react-router";
 import { tagBookRoute } from "@/router";
 import { TagWrapper } from "../component/TagWrapper";
 
+/**
+ * Tag pages - now use UnitTagDTO (scored tags) instead of old TagDetailDTO.
+ * Tags are scored junctions with tagUnitId, tagLabel, score, voteCount.
+ */
+
 export function TagByBookPage() {
   const { bookId } = tagBookRoute.useParams();
-  // List tags attached to this book (object)
   const pageSize = 30;
   const {
     data: listData,
     isLoading,
     error,
-  } = useQuery(tagQueries.list({ objectId: bookId, page: 1, limit: pageSize }));
+  } = useQuery(tagQueries.forUnit(bookId, { limit: pageSize }));
 
-  // Fetch details to get domains for grouping
-  const tagIds = listData?.tags?.map((t) => t.id) ?? [];
+  const tagIds = listData?.tags?.map((t) => t.tagUnitId) ?? [];
   const detailsResults = useQueries({
     queries: tagIds.map((id) => ({
       queryKey: ["tag", "detail", id],
@@ -27,9 +30,9 @@ export function TagByBookPage() {
     })),
   });
 
-  const _details: TagDetailDTO[] = detailsResults
+  const _details: UnitTagDTO[] = detailsResults
     .map((r) => r.data)
-    .filter(Boolean) as TagDetailDTO[];
+    .filter(Boolean) as UnitTagDTO[];
 
   const total = listData?.total ?? 0;
   const showSeeAll = total > pageSize;
@@ -44,7 +47,7 @@ export function TagByBookPage() {
       {!isLoading && !error && (
         <div className="mt-4">
           <TagWrapper
-            filters={{ objectId: bookId }}
+            filters={{ unitId: bookId }}
             mode="grouped"
             renderAll={true}
           />
@@ -74,20 +77,15 @@ export function TagByBookFullPage() {
 
   const bookId =
     (withDomain ? withDomain.bookId : "") || (base ? base.bookId : "") || "";
-  const domainId = withDomain ? withDomain.domainId : undefined;
 
-  // List tags attached to this book (object)
   const pageSize = 100;
   const {
     data: listData,
     isLoading,
     error,
-  } = useQuery(
-    tagQueries.list({ objectId: bookId, domainId, page: 1, limit: pageSize }),
-  );
+  } = useQuery(tagQueries.forUnit(bookId, { limit: pageSize }));
 
-  // Fetch details to get domains for grouping
-  const tagIds = listData?.tags?.map((t) => t.id) ?? [];
+  const tagIds = listData?.tags?.map((t) => t.tagUnitId) ?? [];
   const detailsResults = useQueries({
     queries: tagIds.map((id) => ({
       queryKey: ["tag", "detail", id],
@@ -96,9 +94,9 @@ export function TagByBookFullPage() {
     })),
   });
 
-  const details: TagDetailDTO[] = detailsResults
+  const details: UnitTagDTO[] = detailsResults
     .map((r) => r.data)
-    .filter(Boolean) as TagDetailDTO[];
+    .filter(Boolean) as UnitTagDTO[];
 
   const total = listData?.total ?? 0;
 
@@ -112,7 +110,7 @@ export function TagByBookFullPage() {
       {!isLoading && !error && (
         <div className="mt-4">
           <TagWrapper
-            filters={{ objectId: bookId, domainId }}
+            filters={{ unitId: bookId }}
             mode="grouped"
             renderAll={true}
           />

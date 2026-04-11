@@ -1,6 +1,5 @@
-import { mapUnitListToReviewListResponse } from "@rezics/api/meili/meili.api";
-import { buildMeiliUnitQuery } from "@rezics/api/meili/meili.queries";
-import { UnitType } from "@rezics/contract";
+import { postQueries } from "@rezics/api/post/post";
+import type { PostDTO } from "@rezics/contract";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useTranslation } from "react-i18next";
@@ -10,28 +9,24 @@ interface ShortBookReviewsProps {
   bookId: string;
 }
 
-// 短评就是Post评论
-
+/**
+ * Remark Preview - short reviews / remarks for a book.
+ * Now uses Post API with kindKey='remark' instead of the old Remark UnitType.
+ */
 export const RemarkPreview: React.FC<ShortBookReviewsProps> = ({ bookId }) => {
   const { t } = useTranslation();
-  const { data, isLoading, error } = useQuery(
-    buildMeiliUnitQuery({
-      kind: UnitType.REMARK,
-      start: 0,
-      targetUnitId: bookId,
-      keyword: "",
-      limit: 4,
-      mapFn: mapUnitListToReviewListResponse,
-      options: { enabled: !!bookId },
-    }),
-  );
+  // MOCK: fetch posts with kindKey='remark' for this book
+  const { data, isLoading, error } = useQuery({
+    ...postQueries.byTarget(bookId, { kindKey: 'remark', limit: 4 }),
+    enabled: !!bookId,
+  });
 
-  const handleLike = (reviewId: string) => {
-    console.log("Like review:", reviewId);
+  const handleLike = (postId: string) => {
+    console.log("Like post:", postId);
   };
 
-  const handleDislike = (reviewId: string) => {
-    console.log("Dislike review:", reviewId);
+  const handleDislike = (postId: string) => {
+    console.log("Dislike post:", postId);
   };
 
   if (isLoading) {
@@ -45,9 +40,11 @@ export const RemarkPreview: React.FC<ShortBookReviewsProps> = ({ bookId }) => {
     );
   }
 
+  const posts: PostDTO[] = data?.posts?.slice(0, 4) ?? [];
+
   return (
     <ShortReviewListShow
-      data={{ reviews: data?.reviews?.slice(0, 4) || [], total: data?.total }}
+      data={{ posts, total: data?.total }}
       onLike={handleLike}
       onDislike={handleDislike}
     />

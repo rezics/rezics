@@ -1,11 +1,11 @@
 import { useAlertStore } from "@app/state/windowAlertStore";
 import { TextField } from "@mui/material";
 import {
-  useDeleteReviewMutation,
-  useUpdateReviewMutation,
-} from "@rezics/api/review/review.mutations";
-import { reviewQueries } from "@rezics/api/review/review.queries";
-import type { ReviewResponse, UpdateReviewInput } from "@rezics/contract";
+  postQueries,
+  useDeletePostMutation,
+  useUpdatePostMutation,
+} from "@rezics/api/post/post";
+import type { PostDTO, UpdatePostInput } from "@rezics/contract";
 import { DeleteButton } from "@rezics/ui/composite/form/DeleteWrapper.tsx";
 import { RezicsMarkdownEditor } from "@rezics/ui/editor";
 import { RatingWithInput } from "@rezics/ui/primitive/control/rating/Rating.tsx";
@@ -16,9 +16,24 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { reviewEditRoute } from "@/router";
 
+/**
+ * ReviewEditPage - now uses PostDTO instead of ReviewResponse.
+ * Post body replaces review.content; title and rating stored in post.extra.
+ */
+
+// MOCK: local editing state with extra fields
+type ReviewEditState = {
+  unitId: string;
+  body: string;
+  _editTitle: string;
+  _editRating: number;
+  extra: Record<string, any>;
+  targetUnitId?: string | null;
+};
+
 interface ReviewEditPageProps {
-  data: ReviewResponse;
-  setData: (data: ReviewResponse) => void;
+  data: ReviewEditState;
+  setData: (data: ReviewEditState) => void;
   onSubmit?: () => void;
   onCancel?: () => void;
   submitLabel?: string;
@@ -41,16 +56,16 @@ export function ReviewEditPage({
           id="standard-basic"
           label={t("review.form.title")}
           variant="standard"
-          value={data.title || ""}
-          onChange={(e) => setData({ ...data, title: e.target.value })}
+          value={data._editTitle || ""}
+          onChange={(e) => setData({ ...data, _editTitle: e.target.value })}
         />
       </div>
 
       <div className="flex items-center gap-3">
         <span className="text-sm font-medium">{t("review.form.rating")}</span>
         <RatingWithInput
-          value={data.rating || 0}
-          onChange={(value) => setData({ ...data, rating: value ?? 0 })}
+          value={data._editRating || 0}
+          onChange={(value) => setData({ ...data, _editRating: value ?? 0 })}
           max={10}
           precision={0.5}
           size="large"
@@ -59,8 +74,8 @@ export function ReviewEditPage({
       </div>
       <div className="flex-1 min-h-[300px]">
         <RezicsMarkdownEditor
-          value={data.content || ""}
-          onChange={(value) => setData({ ...data, content: value })}
+          value={data.body || ""}
+          onChange={(value) => setData({ ...data, body: value })}
           onSubmit={onSubmit}
           onCancel={onCancel}
           submitLabel={submitLabel}
@@ -74,20 +89,32 @@ export function ReviewEditPage({
 export function ReviewEditPageContainer() {
   const { reviewId } = reviewEditRoute.useParams();
   const { t } = useTranslation();
-  const { data, isLoading, isError } = useQuery(reviewQueries.detail(reviewId));
+  const { data, isLoading, isError } = useQuery(postQueries.detail(reviewId));
   const navigate = useNavigate();
-  const [reviewData, setReviewData] = useState<ReviewResponse>(
-    {} as ReviewResponse,
-  );
+  const [reviewData, setReviewData] = useState<ReviewEditState>({
+    unitId: '',
+    body: '',
+    _editTitle: '',
+    _editRating: 0,
+    extra: {},
+  });
+
   useEffect(() => {
     if (data) {
-      setReviewData(data);
+      setReviewData({
+        unitId: data.unitId,
+        body: data.body ?? '',
+        _editTitle: (data.extra as any)?.title ?? '',
+        _editRating: (data.extra as any)?.rating ?? 0,
+        extra: (data.extra as Record<string, any>) ?? {},
+        targetUnitId: data.targetUnitId,
+      });
     }
   }, [data]);
 
   const { show } = useAlertStore();
 
-  const { mutate, isPending } = useUpdateReviewMutation({
+  const { mutate, isPending } = useUpdatePostMutation({
     onSuccess: () => {
       show(t("review.messages.update_success"));
     },
@@ -96,8 +123,8 @@ export function ReviewEditPageContainer() {
     },
   });
 
-  const { mutate: deleteReviewMutation, isPending: _isDeleting } =
-    useDeleteReviewMutation({
+  const { mutate: deletePostMutation, isPending: _isDeleting } =
+    useDeletePostMutation({
       onSuccess: () => {
         show(t("review.messages.delete_success"));
       },
@@ -105,28 +132,33 @@ export function ReviewEditPageContainer() {
         show(String(error));
       },
     });
+
   function handleSave() {
-    if (reviewData.rating) {
-      if (reviewData.rating > 10 || reviewData.rating < 0) {
+    if (reviewData._editRating) {
+      if (reviewData._editRating > 10 || reviewData._editRating < 0) {
         show(t("review.messages.rating_range_error"));
         return;
       }
     }
 
-    const input: UpdateReviewInput = {
-      title: reviewData.title || undefined,
-      content: reviewData.content || "",
-      rating: reviewData.rating || 0,
+    // MOCK: store title and rating in post.extra
+    const input: UpdatePostInput = {
+      body: reviewData.body || "",
+      extra: {
+        ...reviewData.extra,
+        title: reviewData._editTitle || undefined,
+        rating: reviewData._editRating || 0,
+      },
     };
 
-    mutate({ id: reviewId, input });
+    mutate({ unitId: reviewId, input });
   }
 
   function handleDelete() {
-    deleteReviewMutation(reviewId, {
+    deletePostMutation(reviewId, {
       onSuccess: () => {
         show(t("review.messages.delete_success"));
-        navigate({ to: `/review/book/${reviewData.bookId}` });
+        navigate({ to: `/review/book/${reviewData.targetUnitId ?? ''}` });
       },
       onError: (error) => {
         show(`Review delete failed: ${error}`);

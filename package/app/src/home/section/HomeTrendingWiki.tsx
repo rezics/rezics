@@ -11,6 +11,7 @@ import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
+import { getBookTitle } from "@/shared/util/translation-helpers";
 
 type Book = BookDTO;
 
@@ -57,7 +58,7 @@ export const HomeTrendingWiki: React.FC<HomeTrendingWikiProps> = ({
           <Card key={book.unitId} className="overflow-hidden">
             <CardContent>
               <Typography variant="subtitle2" className="mb-1">
-                {book.title}
+                {getBookTitle(book)}
               </Typography>
               <Typography
                 variant="body2"

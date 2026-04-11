@@ -8,6 +8,14 @@ import {
   MiniActionBar,
   MiniAdminActionBar,
 } from "@/engagement/component/MiniActionBar.tsx";
+import {
+  getBookAuthorName,
+  getBookCoverUrl,
+  getBookPublisherName,
+  getBookTagLabels,
+  getBookTitle,
+  getPersonCredits,
+} from "@/shared/util/translation-helpers";
 
 type Book = BookDTO;
 
@@ -38,12 +46,18 @@ export const BookHeroSection: React.FC<{
   rating: number;
 }> = ({ bookInfo, rating }) => {
   const { t } = useTranslation();
-  const tags = bookInfo?.tags ?? [];
+  const title = getBookTitle(bookInfo);
+  const coverUrl = getBookCoverUrl(bookInfo);
+  const authorName = getBookAuthorName(bookInfo);
+  const publisherName = getBookPublisherName(bookInfo);
+  const producerCredits = getPersonCredits(bookInfo?.personCredits, 'producer');
+  const producerName = producerCredits[0]?.name ?? '';
+  const tags = getBookTagLabels(bookInfo);
   return (
     <div
       className="bg-cover bg-center relative"
       style={{
-        backgroundImage: `url(${bookInfo?.coverUrl || ""})`,
+        backgroundImage: `url(${coverUrl})`,
       }}
     >
       <div className="bg-black/60 backdrop-blur-md shadow-lg w-full">
@@ -51,8 +65,8 @@ export const BookHeroSection: React.FC<{
           {/* Cover Image */}
           <div className="col-span-4 md:col-span-3 lg:col-span-2 flex justify-center">
             <LazyLoadImage
-              src={bookInfo?.coverUrl || ""}
-              alt={bookInfo?.title}
+              src={coverUrl}
+              alt={title}
               className="max-h-[300px] rounded-lg"
             />
           </div>
@@ -60,36 +74,38 @@ export const BookHeroSection: React.FC<{
           {/* Book Info */}
           <div className="col-span-8 md:col-span-6 text-white flex flex-col gap-3">
             <h1 className="text-2xl font-bold break-words">
-              {bookInfo?.title}
+              {title}
             </h1>
 
             <div className="space-y-1">
               <p>
                 {t("book.fields.author")}：
                 <span className="font-medium">
-                  {bookInfo?.author?.[0]?.name}
+                  {authorName}
                 </span>
               </p>
               <p>
-                {t("book.fields.press")}：{bookInfo?.press?.[0]?.name}
+                {t("book.fields.press")}：{publisherName}
               </p>
-              <p>
-                {t("book.fields.producer")}：{bookInfo?.producer?.[0]?.name}
-              </p>
+              {producerName && (
+                <p>
+                  {t("book.fields.producer")}：{producerName}
+                </p>
+              )}
               <p>
                 {t("book.fields.text_length")}：{bookInfo?.textLength ?? 0}
               </p>
               <p>
-                {t("book.fields.isbn")}：{bookInfo?.isbn}
+                {t("book.fields.isbn")}：{bookInfo?.isbn13 ?? ''}
               </p>
             </div>
 
-            {/* Tags */}
+            {/* Tags (scored) */}
             <div className="flex flex-wrap gap-2 mt-1">
-              {tags?.map((tag) => (
-                <Link key={tag} to="/book" search={{ tags: tag }}>
+              {tags.map((tag) => (
+                <Link key={tag.tagUnitId} to="/book" search={{ tags: tag.label }}>
                   <span className="px-2 py-1 rounded bg-white/10 text-white hover:bg-white/20 transition">
-                    {tag}
+                    {tag.label}
                   </span>
                 </Link>
               ))}

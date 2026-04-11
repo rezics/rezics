@@ -1,10 +1,14 @@
 import { useAlertStore } from "@app/state/windowAlertStore";
-import { useCreateCommentMutation } from "@rezics/api/comment/comment.mutations";
+import { useCreatePostMutation } from "@rezics/api/post/post";
 import type React from "react";
 import { useState } from "react";
 import { useDialogStore } from "../state/dialogStore";
 import { ReplyDrawerContainer } from "./ReplyDrawer";
 
+/**
+ * SingleCommentElementWrapper - now uses Post API instead of Comment API.
+ * Creates a post reply when submitting a comment.
+ */
 export function SingleCommentElementWrapper({
   replyUnitId,
   children,
@@ -17,7 +21,7 @@ export function SingleCommentElementWrapper({
   const setDialogVisible = useDialogStore((state) => state.setDialogVisible);
   const [isReplyModalOpen, setIsReplyModalOpen] = useState(false);
   const showAlert = useAlertStore((state) => state.show);
-  const createCommentMutation = useCreateCommentMutation({
+  const createPostMutation = useCreatePostMutation({
     onSuccess: () => {
       showAlert("Comment created successfully");
     },
@@ -32,9 +36,10 @@ export function SingleCommentElementWrapper({
   };
 
   const handleSubmit = (content: string) => {
-    createCommentMutation.mutate({
-      rootPostId: replyUnitId || "",
-      content,
+    createPostMutation.mutate({
+      targetUnitId: replyUnitId,
+      kindKey: 'comment',
+      body: content,
     });
   };
   return (

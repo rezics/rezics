@@ -1,11 +1,22 @@
 import { Box, Divider, Paper, Stack, Typography } from "@mui/material";
 import type { BookDTO } from "@rezics/contract";
 import { useTranslation } from "react-i18next";
+import {
+  getBookAuthorName,
+  getBookPublisherName,
+  getBookTitle,
+  getPersonCredits,
+} from "@/shared/util/translation-helpers";
 
 type Book = BookDTO;
 
 export function BookDetailSidebar({ bookInfo }: { bookInfo: Book }) {
   const { t } = useTranslation();
+  const title = getBookTitle(bookInfo);
+  const authorName = getBookAuthorName(bookInfo);
+  const publisherName = getBookPublisherName(bookInfo);
+  const producerCredits = getPersonCredits(bookInfo?.personCredits, 'producer');
+  const producerName = producerCredits[0]?.name ?? '';
 
   return (
     <Paper className="p-3 mt-4">
@@ -17,23 +28,35 @@ export function BookDetailSidebar({ bookInfo }: { bookInfo: Book }) {
         </Typography>
         <Stack spacing={1}>
           <Typography variant="body2">
-            {t("book.fields.title")}：{bookInfo?.title}
+            {t("book.fields.title")}：{title}
           </Typography>
           <Typography variant="body2">
-            {t("book.fields.author")}：{bookInfo?.author?.[0]?.name ?? ""}
+            {t("book.fields.author")}：{authorName}
           </Typography>
           <Typography variant="body2">
-            {t("book.fields.press")}：{bookInfo?.press?.[0]?.name ?? ""}
+            {t("book.fields.press")}：{publisherName}
           </Typography>
-          <Typography variant="body2">
-            {t("book.fields.producer")}：{bookInfo?.producer?.[0]?.name ?? ""}
-          </Typography>
+          {producerName && (
+            <Typography variant="body2">
+              {t("book.fields.producer")}：{producerName}
+            </Typography>
+          )}
           <Typography variant="body2">
             {t("book.fields.text_length")}：{bookInfo?.textLength ?? 0}
           </Typography>
           <Typography variant="body2">
-            {t("book.fields.isbn")}：{bookInfo?.isbn ?? " "}
+            {t("book.fields.isbn")}：{bookInfo?.isbn13 ?? ' '}
           </Typography>
+          {bookInfo?.pageCount && (
+            <Typography variant="body2">
+              {t("book.fields.page_count")}：{bookInfo.pageCount}
+            </Typography>
+          )}
+          {bookInfo?.formatKey && (
+            <Typography variant="body2">
+              {t("book.fields.format")}：{bookInfo.formatKey}
+            </Typography>
+          )}
         </Stack>
       </Box>
     </Paper>

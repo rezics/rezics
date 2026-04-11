@@ -1,41 +1,43 @@
 import { Button } from "@mui/material";
-import { useCreateReadlistMutation } from "@rezics/api/readlist/readlist.mutations";
+import { useCreateShelfMutation } from "@rezics/api/shelf/shelf";
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ReadListEditor } from "./ReadListEditPage";
 
+/**
+ * NewReadListPage - now uses Shelf API instead of Readlist API.
+ * Creates a Shelf with translations instead of top-level title/content.
+ */
 export const NewReadListPage: React.FC = () => {
   const navigate = useNavigate();
   const [readlistData, setReadlistData] = useState<any>({
     books: [],
     reviews: [],
   });
-  const createReadlistMutation = useCreateReadlistMutation({
+  const createShelfMutation = useCreateShelfMutation({
     onSuccess: (data) => {
-      navigate({ to: `/readlist/${data.id}` });
+      navigate({ to: `/readlist/${data.unitId}` });
     },
     onError: (error) => {
-      console.error("create readlist failed", error);
+      console.error("create shelf failed", error);
     },
   });
 
   const { t } = useTranslation();
 
   function handleSubmit() {
-    const bookConnect = readlistData.books.map((book: any) => book.unitId);
-    const reviewConnect = readlistData.reviews.map(
-      (review: any) => review.unitId,
-    );
-    const order = readlistData.order;
-    createReadlistMutation.mutate({
-      book: bookConnect,
-      review: reviewConnect,
-      order: order,
-      title: readlistData.title,
-      content: readlistData.content,
-      coverUrl: readlistData.coverUrl ?? "",
+    // MOCK: map old readlist fields to new shelf create input
+    createShelfMutation.mutate({
+      kindKey: 'collection',
+      translations: [
+        {
+          language: 'zh-CN',
+          title: readlistData.title ?? '',
+          description: readlistData.content ?? '',
+        },
+      ],
     });
   }
 

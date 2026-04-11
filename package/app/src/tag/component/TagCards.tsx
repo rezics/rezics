@@ -1,17 +1,18 @@
 import { Card, CardContent, Chip, Typography } from "@mui/material";
-import type { TagDetailDTO } from "@rezics/api/tag/tag";
+import type { UnitTagDTO } from "@rezics/contract";
 import { MUILink } from "@rezics/ui/primitive/link/MUILink.tsx";
 import type React from "react";
 
 /**
- * Generic card showing a tag's primary information
- * Layout uses div + Tailwind for spacing instead of MUI Box.
+ * TagCard and TagDetailCard - now use UnitTagDTO (scored tags).
+ * Tags have tagUnitId, tagLabel, score, voteCount.
  */
 export const TagCard: React.FC<{
-  tag: TagDetailDTO;
-  onClick?: (tag: TagDetailDTO) => void;
+  tag: UnitTagDTO;
+  onClick?: (tag: UnitTagDTO) => void;
   selected?: boolean;
 }> = ({ tag, onClick, selected }) => {
+  const label = tag.tagLabel ?? tag.tagUnitId;
   return (
     // biome-ignore lint/a11y/useSemanticElements: interactive card wrapper
     <div
@@ -28,28 +29,21 @@ export const TagCard: React.FC<{
           onClick?.(tag);
         }
       }}
-      data-tag-id={tag.id}
+      data-tag-id={tag.tagUnitId}
     >
       <div className="flex items-center gap-2">
         <Chip
           size="small"
-          label={tag.name}
+          label={label}
           color={selected ? "primary" : "default"}
         />
-        {tag.type && (
-          <span className="text-xs text-gray-500 font-mono">{tag.type}</span>
-        )}
+        <span className="text-xs text-gray-500 font-mono">
+          score: {tag.score}
+        </span>
       </div>
-      {tag.domains && tag.domains.length > 0 && (
-        <div className="flex flex-wrap gap-1 mt-1">
-          {tag.domains.map((d: string) => (
-            <span
-              key={d}
-              className="text-[10px] px-1 py-0.5 rounded bg-gray-100 text-gray-600"
-            >
-              {d.slice(0, 6)}
-            </span>
-          ))}
+      {tag.voteCount > 0 && (
+        <div className="text-[10px] text-gray-500 mt-1">
+          {tag.voteCount} votes
         </div>
       )}
     </div>
@@ -57,46 +51,33 @@ export const TagCard: React.FC<{
 };
 
 /**
- * Detailed card – wiki-style description from tag.content (unit content) and link to detail page.
+ * Detailed card for a scored tag junction.
  */
 export const TagDetailCard: React.FC<{
-  tag: TagDetailDTO;
-  onNavigate?: (tag: TagDetailDTO) => void;
+  tag: UnitTagDTO;
+  onNavigate?: (tag: UnitTagDTO) => void;
 }> = ({ tag }) => {
+  const label = tag.tagLabel ?? tag.tagUnitId;
   return (
     <Card elevation={0} className="border border-gray-200 rounded-md">
       <CardContent className="space-y-2">
         <Typography variant="h6" component="div">
-          {tag.name}{" "}
-          {tag.type && (
-            <span className="ml-2 text-xs font-normal text-gray-500 align-middle">
-              {tag.type}
-            </span>
-          )}
+          {label}
+          <span className="ml-2 text-xs font-normal text-gray-500 align-middle">
+            score: {tag.score} | {tag.voteCount} votes
+          </span>
         </Typography>
-        {tag.content ? (
-          <Typography
-            component="div"
-            className="prose prose-sm max-w-none text-gray-700 whitespace-pre-wrap"
-          >
-            {tag.content}
-          </Typography>
-        ) : (
-          <Typography variant="body2" color="text.secondary">
-            无描述内容
-          </Typography>
-        )}
         <div>
           <MUILink
             to={"/tag/$unitId"}
-            params={{ unitId: tag.id }}
+            params={{ unitId: tag.tagUnitId }}
             className="text-sm text-blue-600 hover:underline"
           >
             查看详情 →
           </MUILink>
           <MUILink
             to={"/book"}
-            search={{ tags: tag.name }}
+            search={{ tags: label }}
             className="text-sm text-blue-600 hover:underline !ml-8"
           >
             搜索标签 →
@@ -107,7 +88,4 @@ export const TagDetailCard: React.FC<{
   );
 };
 
-/**
- * Collection exports – extendable for more specialized tag cards later.
- */
 export default TagCard;

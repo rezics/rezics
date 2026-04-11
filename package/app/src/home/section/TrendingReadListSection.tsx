@@ -1,6 +1,6 @@
 import { Alert, Button, CircularProgress, Typography } from "@mui/material";
 import { buildMeiliReadlistQuery } from "@rezics/api/meili/meili.queries";
-import type { ReadlistDTO } from "@rezics/contract";
+import type { ShelfDTO } from "@rezics/contract";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
@@ -23,7 +23,8 @@ export const TrendingReadListSection: React.FC<
     buildMeiliReadlistQuery(0, limit, "", []),
   );
 
-  const items = useMemo<ReadlistDTO[]>(() => data?.readlists ?? [], [data]);
+  // MOCK: data shape may change when meili queries are updated for shelf
+  const items = useMemo<ShelfDTO[]>(() => (data as any)?.readlists ?? (data as any)?.shelves ?? [], [data]);
 
   if (error) {
     return (

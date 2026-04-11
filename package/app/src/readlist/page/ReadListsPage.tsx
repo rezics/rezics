@@ -1,7 +1,7 @@
 import { Alert } from "@mui/material";
 import { buildMeiliReadlistQuery } from "@rezics/api/meili/meili.queries";
 import { reactionApi } from "@rezics/api/reaction/reaction.api";
-import type { ReadlistDTO } from "@rezics/contract";
+import type { ShelfDTO } from "@rezics/contract";
 import { UniversalPaginator, type UniversalPaginatorHandle } from "@rezics/ui";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type React from "react";
@@ -9,7 +9,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { type SearchInfo, TextSearchInputWithIcon } from "@/search";
 
-type Readlist = ReadlistDTO;
+// MOCK: ReadlistDTO replaced by ShelfDTO in the new architecture
+type Readlist = ShelfDTO;
 
 import { SingleReadlist } from "@/readlist/component/SingleReadlist.tsx";
 
@@ -20,7 +21,7 @@ const ReadlistListView: React.FC<{ readlists: Readlist[] }> = ({
   return (
     <div>
       {readlists.map((item) => (
-        <div key={item.id}>
+        <div key={item.unitId}>
           <SingleReadlist
             data={item}
             handleBookListClick={() => {}}
@@ -109,7 +110,7 @@ export function ReadListsPage({ bookUnitId }: { bookUnitId?: string }) {
   );
 
   const currentTargetIds = useMemo(
-    () => baseReadlists.map((r) => r.id).filter(Boolean),
+    () => baseReadlists.map((r) => r.unitId).filter(Boolean),
     [baseReadlists],
   );
 
@@ -134,7 +135,7 @@ export function ReadListsPage({ bookUnitId }: { bookUnitId?: string }) {
     }
 
     const merged = baseReadlists.map((item) => {
-      const summaryMap = reactionSummaryBatch.summaries[item.id];
+      const summaryMap = reactionSummaryBatch.summaries[item.unitId];
       if (!summaryMap) return item;
 
       const reactionSummaries = Object.entries(summaryMap).map(

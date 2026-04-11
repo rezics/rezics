@@ -1,4 +1,4 @@
-import { buildMeiliReadlistQuery } from "@rezics/api/meili/meili.queries";
+import { shelfQueries } from "@rezics/api/shelf/shelf";
 import { ArrowForwardIcon } from "@rezics/ui/composite/navigation/ArrowForwardIcon.tsx";
 import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
 
@@ -6,6 +6,10 @@ import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { HorizontalReadListCarousel } from "@/readlist/component/list/HorizontalReadListCarousel.tsx";
 
+/**
+ * ReadlistByBookPreview - Now backed by Shelf API.
+ * Shows shelves that contain this book as an item.
+ */
 export function ReadlistByBookPreview({
   title,
   bookId,
@@ -16,9 +20,14 @@ export function ReadlistByBookPreview({
   readlistNumber?: number;
 }) {
   const { t } = useTranslation();
-  const { data, isLoading, error } = useQuery(
-    buildMeiliReadlistQuery(0, readlistNumber, "", [], { bookId }),
-  );
+  // MOCK: query shelves that contain this book unit
+  const { data, isLoading, error } = useQuery({
+    ...shelfQueries.list({
+      containsItemUnitId: bookId,
+      limit: readlistNumber,
+    }),
+    enabled: !!bookId,
+  });
 
   if (isLoading) {
     return <div>{t("common.loading")}</div>;
@@ -39,7 +48,7 @@ export function ReadlistByBookPreview({
       </ArrowForwardIcon>
       <div className="mb-4" />
       <HorizontalReadListCarousel
-        readlistList={data?.readlists?.slice(0, readlistNumber) || []}
+        readlistList={data?.shelves?.slice(0, readlistNumber) || []}
       />
     </div>
   );

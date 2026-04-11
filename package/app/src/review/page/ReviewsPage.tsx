@@ -2,7 +2,7 @@ import { Box, Tab, Tabs } from "@mui/material";
 import { mapUnitListToReviewListResponse } from "@rezics/api/meili/meili.api";
 import { buildMeiliUnitQuery } from "@rezics/api/meili/meili.queries";
 import { reactionApi } from "@rezics/api/reaction/reaction.api";
-import type { ReviewDTO } from "@rezics/contract";
+import type { PostDTO } from "@rezics/contract";
 import { UnitType } from "@rezics/contract";
 import { UniversalPaginator, type UniversalPaginatorHandle } from "@rezics/ui";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -12,7 +12,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { ReviewList } from "@/review/component/ReviewList.tsx";
 import { TextSearchInput } from "@/search/component/TextSearchInput";
 
-type Review = ReviewDTO;
+// MOCK: ReviewDTO replaced by PostDTO in the new architecture
+type Review = PostDTO;
 export interface ReviewsPageProps {
   bookUnitId?: string;
 }
@@ -41,7 +42,7 @@ export const ReviewsPage: React.FC<ReviewsPageProps> = ({ bookUnitId }) => {
 
   const reviewListQueryOpts = useQuery(
     buildMeiliUnitQuery({
-      kind: UnitType.REVIEW,
+      kind: UnitType.POST,
       start: startReview,
       targetUnitId: targetUnitId,
       keyword: keyword,
@@ -52,7 +53,7 @@ export const ReviewsPage: React.FC<ReviewsPageProps> = ({ bookUnitId }) => {
 
   const remarkListQueryOpts = useQuery(
     buildMeiliUnitQuery({
-      kind: UnitType.REMARK,
+      kind: UnitType.POST,
       start: startRemark,
       targetUnitId: targetUnitId,
       keyword: keyword,
@@ -77,7 +78,7 @@ export const ReviewsPage: React.FC<ReviewsPageProps> = ({ bookUnitId }) => {
     const isReview = tab === "review";
     const start = (page - 1) * EXTERNAL_PAGE_SIZE;
     const { queryKey, queryFn } = buildMeiliUnitQuery({
-      kind: isReview ? UnitType.REVIEW : UnitType.REMARK,
+      kind: isReview ? UnitType.POST : UnitType.POST,
       start: start,
       targetUnitId: targetUnitId,
       keyword: keyword,

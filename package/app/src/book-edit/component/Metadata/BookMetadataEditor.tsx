@@ -1,136 +1,38 @@
 import { InfoOutlined } from "@mui/icons-material";
 import {
-  Autocomplete,
-  Avatar,
   Checkbox,
-  Chip,
-  CircularProgress,
   FormControlLabel,
   TextField as MuiTextField,
   Tooltip,
   Typography,
 } from "@mui/material";
-import { meiliUserApi } from "@rezics/api/meili/meili.api";
-import type { BookDTO, UserDTO } from "@rezics/contract";
+import type { BookDTO } from "@rezics/contract";
 import React from "react";
 import { useTranslation } from "react-i18next";
+import {
+  getBookTitle,
+  getBookDescription,
+  getBookAuthorName,
+  getBookPublisherName,
+  getBookCoverUrl,
+} from "@/shared/util/translation-helpers";
 
-type PublicUserLike = Partial<UserDTO>;
-
-export type BookMetadataValue = Partial<BookDTO>;
+/**
+ * BookMetadataValue - editing state uses a flat overlay on top of BookDTO.
+ * New fields: isbn13, coverAssetUnitId, pageCount, formatKey, publicationDate.
+ * Title/description come from translations but we expose them as flat fields for editing.
+ */
+export type BookMetadataValue = Partial<BookDTO> & {
+  // MOCK: flat editing fields that map to translations
+  _editTitle?: string;
+  _editDescription?: string;
+};
 
 interface BookMetadataEditorProps {
   value?: BookMetadataValue;
   onChange?: (value: BookMetadataValue) => void;
   disabled?: boolean;
 }
-
-type UserOption = PublicUserLike;
-
-const useUserSearch = () => {
-  const [input, setInput] = React.useState("");
-  const [options, setOptions] = React.useState<UserOption[]>([]);
-  const [loading, setLoading] = React.useState(false);
-
-  React.useEffect(() => {
-    let active = true;
-    if (input.trim() === "") {
-      setOptions([]);
-      return;
-    }
-    setLoading(true);
-    const handle = setTimeout(async () => {
-      try {
-        const { users } = await meiliUserApi.userSearch({
-          q: input,
-          limit: 10,
-        });
-        if (active) setOptions(users as UserOption[]);
-      } catch {
-        if (active) setOptions([]);
-      } finally {
-        if (active) setLoading(false);
-      }
-    }, 250);
-    return () => {
-      active = false;
-      clearTimeout(handle);
-    };
-  }, [input]);
-
-  return { input, setInput, options, loading };
-};
-
-const UsersMultiSelect: React.FC<{
-  label: string;
-  value: UserOption[];
-  onChange: (v: UserOption[]) => void;
-  placeholder?: string;
-  disabled?: boolean;
-}> = ({ label, value, onChange, placeholder, disabled }) => {
-  const { input, setInput, options, loading } = useUserSearch();
-  return (
-    <div className="space-y-2">
-      <Typography variant="body2" className="font-medium">{label}</Typography>
-      <Autocomplete
-        multiple
-        disableCloseOnSelect
-        options={options}
-        value={value}
-        onChange={(_, newValue) => onChange(newValue)}
-        inputValue={input}
-        onInputChange={(_, v) => setInput(v)}
-        getOptionLabel={(o) => o.name ?? ""}
-        isOptionEqualToValue={(o, v) => o.unitId === v.unitId}
-        filterOptions={(x) => x}
-        loading={loading}
-        size="small"
-        renderInput={(params) => (
-          <MuiTextField
-            {...params}
-            placeholder={placeholder}
-            disabled={disabled}
-            size="small"
-            variant="outlined"
-            InputProps={{
-              ...params.InputProps,
-              endAdornment: (
-                <>
-                  {loading ? (
-                    <CircularProgress color="inherit" size={16} />
-                  ) : null}
-                  {params.InputProps.endAdornment}
-                </>
-              ),
-            }}
-          />
-        )}
-        renderOption={(props, option) => (
-          <li {...props} key={option.unitId}>
-            <div className="flex items-center gap-2">
-              <Avatar src={option.avatar} sx={{ width: 24, height: 24 }}>
-                {option.name?.[0] ?? "?"}
-              </Avatar>
-              <span>{option.name}</span>
-            </div>
-          </li>
-        )}
-        renderTags={(value, getTagProps) =>
-          value.map((option, index) => (
-            <Chip
-              {...getTagProps({ index })}
-              key={option.unitId}
-              avatar={<Avatar src={option.avatar}>{option.name?.[0]}</Avatar>}
-              label={option.name}
-              size="small"
-            />
-          ))
-        }
-        disabled={disabled}
-      />
-    </div>
-  );
-};
 
 function FlagWithTooltip({
   label,
@@ -175,28 +77,36 @@ export const BookMetadataEditor: React.FC<BookMetadataEditorProps> = ({
   disabled,
 }) => {
   const { t } = useTranslation();
+
+  // Resolve current display values from translations or override fields
+  const currentTitle = value?._editTitle ?? getBookTitle(value as BookDTO);
+  const currentIsbn = value?.isbn13 ?? '';
+  const currentCoverAssetId = value?.coverAssetUnitId ?? '';
+  const currentPageCount = value?.pageCount ?? '';
+  const currentTextLength = value?.textLength ?? '';
+
   return (
     <div className="flex flex-col gap-5">
-      {/* Title */}
+      {/* Title (from translations) */}
       <div className="space-y-1">
         <Typography variant="body2" component="label" htmlFor="book-title">{t("book.fields.title")}</Typography>
         <input
           id="book-title"
-          value={value?.title ?? ""}
-          onChange={(e) => onChange?.({ title: e.target.value })}
+          value={currentTitle}
+          onChange={(e) => onChange?.({ _editTitle: e.target.value })}
           disabled={disabled}
           className="w-full border-b border-input bg-transparent py-2 text-sm outline-none placeholder:text-muted-foreground focus:border-foreground transition-colors disabled:opacity-50"
         />
       </div>
 
-      {/* ISBN + Cover URL */}
+      {/* ISBN-13 + Cover Asset Unit ID */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-1">
           <Typography variant="body2" component="label" htmlFor="book-isbn">{t("book.fields.isbn")}</Typography>
           <input
             id="book-isbn"
-            value={value?.isbn ?? ""}
-            onChange={(e) => onChange?.({ isbn: e.target.value })}
+            value={currentIsbn}
+            onChange={(e) => onChange?.({ isbn13: e.target.value })}
             disabled={disabled}
             className="w-full border-b border-input bg-transparent py-2 text-sm outline-none placeholder:text-muted-foreground focus:border-foreground transition-colors disabled:opacity-50"
           />
@@ -205,51 +115,45 @@ export const BookMetadataEditor: React.FC<BookMetadataEditorProps> = ({
           <Typography variant="body2" component="label" htmlFor="book-cover">{t("book.fields.cover_url")}</Typography>
           <input
             id="book-cover"
-            value={value?.coverUrl ?? ""}
-            onChange={(e) => onChange?.({ coverUrl: e.target.value })}
+            value={currentCoverAssetId}
+            onChange={(e) => onChange?.({ coverAssetUnitId: e.target.value })}
             disabled={disabled}
+            placeholder="Cover asset unit ID"
             className="w-full border-b border-input bg-transparent py-2 text-sm outline-none placeholder:text-muted-foreground focus:border-foreground transition-colors disabled:opacity-50"
           />
         </div>
       </div>
 
-      {/* Contributors */}
+      {/* Page Count + Text Length */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <UsersMultiSelect
-          label={t("book.fields.author")}
-          value={(value?.author as any) ?? []}
-          onChange={(v) => onChange?.({ author: v as any })}
-          placeholder={t("book.placeholders.search_author")}
-          disabled={disabled}
-        />
-        <UsersMultiSelect
-          label={t("book.fields.press")}
-          value={(value?.press as any) ?? []}
-          onChange={(v) => onChange?.({ press: v as any })}
-          placeholder={t("book.placeholders.search_press")}
-          disabled={disabled}
-        />
-      </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <UsersMultiSelect
-          label={t("book.fields.producer")}
-          value={(value?.producer as any) ?? []}
-          onChange={(v) => onChange?.({ producer: v as any })}
-          placeholder={t("book.placeholders.search_producer")}
-          disabled={disabled}
-        />
+        <div className="space-y-1">
+          <Typography variant="body2" component="label" htmlFor="book-pagecount">{t("book.fields.page_count")}</Typography>
+          <input
+            id="book-pagecount"
+            type="number"
+            value={currentPageCount}
+            onChange={(e) => onChange?.({ pageCount: e.target.value ? Number(e.target.value) : undefined })}
+            disabled={disabled}
+            className="w-full border-b border-input bg-transparent py-2 text-sm outline-none placeholder:text-muted-foreground focus:border-foreground transition-colors disabled:opacity-50"
+          />
+        </div>
         <div className="space-y-1">
           <Typography variant="body2" component="label" htmlFor="book-textlength">{t("book.fields.text_length")}</Typography>
           <input
             id="book-textlength"
             type="number"
-            value={value?.textLength ?? ""}
-            onChange={(e) => onChange?.({ textLength: e.target.value })}
+            value={currentTextLength}
+            onChange={(e) => onChange?.({ textLength: e.target.value ? Number(e.target.value) : undefined })}
             disabled={disabled}
             className="w-full border-b border-input bg-transparent py-2 text-sm outline-none placeholder:text-muted-foreground focus:border-foreground transition-colors disabled:opacity-50"
           />
         </div>
+      </div>
+
+      {/* MOCK: personCredits/orgCredits editing would need a separate credit editor component */}
+      <div className="text-sm text-gray-500">
+        {/* MOCK: credits editing UI placeholder - use the admin panel for now */}
+        Credits (author, publisher, producer) are managed via the admin panel.
       </div>
 
       {/* Flags */}
@@ -274,8 +178,7 @@ export const BookMetadataEditor: React.FC<BookMetadataEditorProps> = ({
 };
 
 /**
- * Standalone flag info components — used by search and other features.
- * Kept as named exports for backward compatibility.
+ * Standalone flag info components for search and other features.
  */
 export function NSFWInfo({ tooltipTitle }: { tooltipTitle?: string }) {
   const { t } = useTranslation();

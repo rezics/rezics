@@ -1,137 +1,133 @@
-import BookmarkAddOutlinedIcon from "@mui/icons-material/BookmarkAddOutlined";
-import ThumbUpAltOutlinedIcon from "@mui/icons-material/ThumbUpAltOutlined";
 import {
+  Avatar,
   Box,
   Card,
-  CardMedia,
-  IconButton,
-  Tooltip,
+  CardContent,
+  Grid,
+  Stack,
   Typography,
 } from "@mui/material";
-import type { ReadlistResponse } from "@rezics/contract";
-import { LazyLoadImage } from "@rezics/ui/primitive/image/LazyLoadImage.tsx";
-import { MUILink } from "@rezics/ui/primitive/link/MUILink.tsx";
+import type { ShelfDTO } from "@rezics/contract";
+import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
-import { useTranslation } from "react-i18next";
-
-interface SingleReadlistProps {
-  data: ReadlistResponse;
-  handleBookListClick: (id: string, e: React.MouseEvent) => void;
-  handleLike: (id: string) => void;
-  handleFavorite?: (id: string) => void; // optional收藏
-  className?: string; // allow external styling overrides
-}
+import { MiniActionBar } from "@/engagement/component/MiniActionBar.tsx";
+import { getTranslation } from "@/shared/util/translation-helpers";
 
 /**
- * Horizontal strip readlist card.
- * - Entire card navigates via link & handleBookListClick
- * - Like / Favorite buttons stop propagation to avoid navigation
+ * SingleReadlist grid card - now uses ShelfDTO.
+ * Title/content come from shelf.translations[].
  */
+interface SingleReadlistProps {
+  data: ShelfDTO;
+  handleBookListClick: (id: string, e: React.MouseEvent) => void;
+  handleLike: (id: string) => void;
+}
+
 export function SingleReadlist({
   data,
   handleBookListClick,
   handleLike,
-  handleFavorite,
-  className = "",
 }: SingleReadlistProps) {
-  const { t } = useTranslation();
-  const id = data.id;
-  const likeCount =
-    data.reactionSummaries?.find((r: any) => r.reaction === "like")?.count ?? 0;
-  const authorName = data.creator?.name ?? data.creator?.slug ?? "—";
-  const cover = data.coverUrl;
+  const navigate = useNavigate();
+  const translation = getTranslation(data.translations);
+  const title = translation?.title ?? '';
+  const description = translation?.description ?? '';
 
   return (
     <Card
-      component={MUILink as any}
-      to={`/readlist/${id}`}
-      onClick={(e: React.MouseEvent) => handleBookListClick(id, e)}
-      elevation={0}
-      className={`mt-4 h-[200px] flex flex-row items-stretch gap-4 w-full ${className}`}
+      sx={{
+        cursor: "pointer",
+        transition: "box-shadow 0.2s",
+        "&:hover": {
+          boxShadow: 4,
+        },
+      }}
+      onClick={(_e) => navigate({ to: `/readlist/${data.unitId}` })}
     >
-      {/* Cover */}
-      <CardMedia style={{ width: "36%", objectFit: "cover" }}>
-        <LazyLoadImage
-          src={cover ?? ""}
-          alt={data.title}
-          className="w-full h-full object-cover"
-        />
-      </CardMedia>
-      {/* Right content */}
-      <Box className="flex flex-1 flex-col justify-between min-w-0">
-        <Box className="flex flex-col gap-1 min-w-0">
-          <Typography
-            variant="subtitle1"
-            className="font-semibold truncate"
-            title={data.title}
+      <CardContent sx={{ flex: 1, display: "flex", flexDirection: "column" }}>
+        <Typography variant="h6" fontWeight="bold" gutterBottom>
+          {title}
+        </Typography>
+
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          sx={{
+            mb: 2,
+            display: "-webkit-box",
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: "vertical",
+            overflow: "hidden",
+          }}
+        >
+          {description}
+        </Typography>
+
+        <Grid container spacing={1} sx={{ mb: 2 }}>
+          {/* MOCK: shelf items don't have inline cover URLs yet */}
+          <div
+            className="relative w-full overflow-hidden rounded-md"
+            style={{ aspectRatio: "16 / 9" }}
           >
-            {data.title}
-          </Typography>
-          {data.content && (
-            <Typography
-              variant="body2"
-              color="text.secondary"
-              className="line-clamp-2 whitespace-pre-wrap"
+            <Box
+              className="w-full h-full flex items-center justify-center"
+              sx={{ background: 'linear-gradient(135deg, #f5f5f5, #e0e0e0)' }}
             >
-              {data.content}
+              <Typography variant="caption" color="text.secondary">
+                {data.items?.length ?? 0} items
+              </Typography>
+            </Box>
+          </div>
+        </Grid>
+
+        <Box
+          sx={{
+            mt: "auto",
+            pt: 2,
+            borderTop: 1,
+            borderColor: "divider",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <Stack direction="row" spacing={1} alignItems="center">
+            <Avatar
+              src={data.user?.avatar ?? undefined}
+              sx={{ width: 24, height: 24 }}
+            />
+            <Typography variant="body2" color="text.secondary">
+              {data.user?.name}
             </Typography>
-          )}
-          <Typography variant="caption" color="text.secondary">
-            {authorName}
-          </Typography>
-        </Box>
-        <Box className="flex flex-row items-center justify-between mt-2">
-          <Box className="flex flex-row items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-            {data.books?.length ? (
-              <span>
-                {t("page.readlist.books_count", { count: data.books.length })}
-              </span>
-            ) : null}
-            {data.reviews?.length ? (
-              <span>
-                {t("page.readlist.reviews_count", {
-                  count: data.reviews.length,
-                })}
-              </span>
-            ) : null}
-          </Box>
-          <Box className="flex flex-row items-center gap-1">
-            <Tooltip
-              title={`${t("page.readlist.like_tooltip")} (${likeCount})`}
-            >
-              <IconButton
-                size="small"
-                aria-label="like"
-                onClick={(e) => {
+          </Stack>
+
+          <Stack spacing={1} alignItems="center">
+            {/* biome-ignore lint/a11y/useSemanticElements: card interaction */}
+            <div
+              role="button"
+              tabIndex={0}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleLike(data.unitId);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
                   e.preventDefault();
                   e.stopPropagation();
-                  handleLike(id);
-                }}
-              >
-                <ThumbUpAltOutlinedIcon fontSize="small" />
-                <Typography variant="caption" className="ml-1">
-                  {likeCount}
-                </Typography>
-              </IconButton>
-            </Tooltip>
-            {handleFavorite && (
-              <Tooltip title={t("page.readlist.favorite_tooltip")}>
-                <IconButton
-                  size="small"
-                  aria-label="favorite"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    handleFavorite(id);
-                  }}
-                >
-                  <BookmarkAddOutlinedIcon fontSize="small" />
-                </IconButton>
-              </Tooltip>
-            )}
-          </Box>
+                  handleLike(data.unitId);
+                }
+              }}
+              className="flex items-center"
+            >
+              <MiniActionBar
+                unitId={data.unitId}
+                hideReply={true}
+                reactionSummaries={data.reactionSummaries}
+              />
+            </div>
+          </Stack>
         </Box>
-      </Box>
+      </CardContent>
     </Card>
   );
 }

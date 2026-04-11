@@ -1,21 +1,25 @@
 import { Box } from "@mui/material";
-import type { ReviewDTO } from "@rezics/contract";
+import type { PostDTO } from "@rezics/contract";
 import type React from "react";
 import { useEffect, useReducer } from "react";
 import { SingleReviewShow } from "./SingleReview";
 
+/**
+ * ReviewList - now uses PostDTO instead of ReviewDTO.
+ * Posts with kindKey='review' are rendered as reviews.
+ */
 export type ReviewListProps = {
-  reviews: ReviewDTO[];
+  reviews: PostDTO[];
 };
 
 type State = {
-  reviews: ReviewDTO[];
+  reviews: PostDTO[];
   isReplyModalOpen: boolean;
   currentReplyId: string | null;
 };
 
 type Action =
-  | { type: "setReviews"; reviews: ReviewDTO[] }
+  | { type: "setReviews"; reviews: PostDTO[] }
   | { type: "openReply"; id: string }
   | { type: "closeReply" };
 
@@ -71,14 +75,6 @@ export const ReviewList: React.FC<ReviewListProps> = ({ reviews }) => {
           onReply={handleReply}
         />
       ))}
-
-      {/* 
-      <ReplyModal
-        open={state.isReplyModalOpen}
-        reviewId={state.currentReplyId}
-        onClose={handleCloseReplyModal}
-      />
-      */}
     </Box>
   );
 };

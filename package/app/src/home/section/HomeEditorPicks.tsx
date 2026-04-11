@@ -12,6 +12,11 @@ import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
+import {
+  getBookAuthorName,
+  getBookCoverUrl,
+  getBookTitle,
+} from "@/shared/util/translation-helpers";
 
 type Book = BookDTO;
 
@@ -54,33 +59,38 @@ export const HomeEditorPicks: React.FC<HomeEditorPicksProps> = ({
         {isLoading && <CircularProgress size={20} />}
       </div>
       <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 md:grid-cols-4">
-        {books.map((book) => (
-          <Card key={book.unitId} className="overflow-hidden">
-            {book.coverUrl && (
-              <LazyLoadImage
-                src={book.coverUrl}
-                alt={book.title}
-                className="w-full h-40 object-cover"
-              />
-            )}
-            <CardContent className="!pt-3">
-              <Typography
-                variant="subtitle2"
-                className="truncate"
-                title={book.title}
-              >
-                {book.title}
-              </Typography>
-              <Typography
-                variant="caption"
-                color="text.secondary"
-                className="truncate"
-              >
-                {book.author?.[0]?.name || ""}
-              </Typography>
-            </CardContent>
-          </Card>
-        ))}
+        {books.map((book) => {
+          const title = getBookTitle(book);
+          const coverUrl = getBookCoverUrl(book);
+          const authorName = getBookAuthorName(book);
+          return (
+            <Card key={book.unitId} className="overflow-hidden">
+              {coverUrl && (
+                <LazyLoadImage
+                  src={coverUrl}
+                  alt={title}
+                  className="w-full h-40 object-cover"
+                />
+              )}
+              <CardContent className="!pt-3">
+                <Typography
+                  variant="subtitle2"
+                  className="truncate"
+                  title={title}
+                >
+                  {title}
+                </Typography>
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                  className="truncate"
+                >
+                  {authorName}
+                </Typography>
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
     </div>
   );

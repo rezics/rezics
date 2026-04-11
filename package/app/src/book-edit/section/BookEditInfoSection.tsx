@@ -27,14 +27,13 @@ import { useMatchRoute, useNavigate } from "@tanstack/react-router";
 import type { TFunction } from "i18next";
 import React from "react";
 import { useTranslation } from "react-i18next";
+import { getBookDescription, getBookTitle } from "@/shared/util/translation-helpers";
 import { BookExtraEditor } from "../component/Metadata/BookExtraEditor";
-import { BookMetadataEditor } from "../component/Metadata/BookMetadataEditor";
+import { BookMetadataEditor, type BookMetadataValue } from "../component/Metadata/BookMetadataEditor";
 
 function validatePublishURL(publishURL: string[]) {
   return publishURL.every((url) => url.startsWith("https://"));
 }
-
-type BookMetadataValue = Partial<BookDTO>;
 
 type UpdateBookDialogState = {
   title: string;
@@ -79,6 +78,11 @@ export interface BookEditMainPageProps {
   pageTitle?: string;
 }
 
+/**
+ * BookEditMainPage - updated for new BookDTO with translations layer.
+ * Title/description are now in translations[], not top-level fields.
+ * isbn -> isbn13, coverUrl -> coverAssetUnitId, author/press/producer -> personCredits/orgCredits.
+ */
 export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
   newBook = false,
   pageTitle,
@@ -94,12 +98,15 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
   });
   const [metadataState, setMetadataState] =
     React.useState<BookMetadataValue | null>(null);
+  const [descriptionOverride, setDescriptionOverride] =
+    React.useState<string | null>(null);
   const [updateBookErrorOpen, setUpdateBookErrorOpen] = React.useState(false);
   const [dialogState, setDialogState] =
     React.useState<UpdateBookDialogState>(null);
   const [extraOpen, setExtraOpen] = React.useState(true);
 
-  const metadata = metadataState ?? data ?? {};
+  const metadata: BookMetadataValue = metadataState ?? data ?? {};
+  const currentDescription = descriptionOverride ?? getBookDescription(data);
 
   const createBookMutation = useCreateBookMutation({
     onSuccess: (responseData) => {
@@ -140,26 +147,35 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
   });
 
   async function handleSubmit() {
+    const editTitle = metadataState?._editTitle ?? getBookTitle(data);
+    const editDescription = descriptionOverride ?? getBookDescription(data);
+
     const updateBookData: UpdateBookInput = {
-      title: metadataState?.title,
-      description: metadataState?.description,
-      authorIds: metadataState?.author?.map((author) => author.unitId),
-      pressIds: metadataState?.press?.map((press) => press.unitId),
-      producerIds: metadataState?.producer?.map((producer) => producer.unitId),
+      isbn13: metadataState?.isbn13,
+      coverAssetUnitId: metadataState?.coverAssetUnitId,
+      pageCount: metadataState?.pageCount,
       textLength: metadataState?.textLength,
-      isbn: metadataState?.isbn,
-      coverUrl: metadataState?.coverUrl,
+      formatKey: metadataState?.formatKey,
       nsfw: metadataState?.nsfw,
       isLicensed: metadataState?.isLicensed,
       extra: metadataState?.extra,
     };
+
     const createBookData: CreateBookInput = {
       ...updateBookData,
-      title: metadataState?.title ?? "",
+      defaultLanguage: 'zh-CN',
+      translations: [
+        {
+          language: 'zh-CN',
+          title: editTitle,
+          description: editDescription,
+        },
+      ],
     };
+
     if (bookId) {
       updateBookMutation.mutateAsync({
-        postId: bookId,
+        unitId: bookId,
         input: updateBookData,
       });
     } else {
@@ -168,9 +184,7 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
         updateBookData.isLicensed ||
         (publishURL && validatePublishURL(publishURL))
       ) {
-        createBookMutation.mutateAsync({
-          ...createBookData,
-        });
+        createBookMutation.mutateAsync(createBookData);
       } else {
         setDialogState({
           title: t("page.book_edit.info.toast.create_failed_title"),
@@ -238,14 +252,14 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
           </h3>
           <Divider className="mb-5" />
           <RezicsMarkdownEditor
-            value={metadata?.description ?? ""}
+            value={currentDescription}
             onChange={(value) => {
-              setMetadataState((prev) => ({ ...prev, description: value }));
+              setDescriptionOverride(value);
             }}
           />
         </section>
 
-        {/* Extra — Collapsible */}
+        {/* Extra -- Collapsible */}
         <section>
           <button
             type="button"

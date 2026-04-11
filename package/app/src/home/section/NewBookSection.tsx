@@ -2,6 +2,12 @@ import { Button, Tab, Tabs } from "@mui/material";
 import { useNavigate } from "@tanstack/react-router";
 import React from "react";
 import { HorizontalBookCarousel } from "@/book-library/component/list/HorizontalBookCarousel";
+import {
+  getBookAuthorName,
+  getBookCoverUrl,
+  getBookDescription,
+  getBookTitle,
+} from "@/shared/util/translation-helpers";
 import { useHomeBooks } from "./hooks/hooks";
 
 type TabKey = "latest" | "new" | "completed";
@@ -18,16 +24,15 @@ export const NewBookSection: React.FC<NewBookSectionProps> = ({
   const [tab, setTab] = React.useState<TabKey>("latest");
   const navigate = useNavigate();
 
-  // 你可以根据 tab 传不同参数，例如 status / orderBy
   const { items = [], isLoading } = useHomeBooks(limit);
 
   const bookList = React.useMemo(() => {
     return items.map((book) => ({
       id: book.unitId,
-      title: book.title,
-      author: book.author?.[0]?.name ?? "",
-      description: book.description,
-      coverUrl: book.coverUrl ?? "https://placehold.co/400x600?text=No+Cover",
+      title: getBookTitle(book),
+      author: getBookAuthorName(book),
+      description: getBookDescription(book),
+      coverUrl: getBookCoverUrl(book),
       href: `/book/${book.unitId}`,
     }));
   }, [items]);

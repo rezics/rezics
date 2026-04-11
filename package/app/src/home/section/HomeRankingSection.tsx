@@ -14,6 +14,11 @@ import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
+import {
+  getBookAuthorName,
+  getBookCoverUrl,
+  getBookTitle,
+} from "@/shared/util/translation-helpers";
 
 type Book = BookDTO;
 
@@ -61,34 +66,39 @@ export const HomeRankingSection: React.FC<HomeRankingSectionProps> = ({
         {isLoading && <CircularProgress size={20} />}
       </div>
       <List dense>
-        {books.map((book, idx) => (
-          <ListItem key={book.unitId} className="!py-2">
-            <ListItemAvatar>
-              {book.coverUrl ? (
-                <Avatar
-                  variant="rounded"
-                  src={book.coverUrl}
-                  alt={book.title}
-                />
-              ) : (
-                <Avatar variant="rounded">{idx + 1}</Avatar>
-              )}
-            </ListItemAvatar>
-            <ListItemText
-              primary={
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-gray-500 w-6 text-right">
-                    {idx + 1}
-                  </span>
-                  <span className="truncate" title={book.title}>
-                    {book.title}
-                  </span>
-                </div>
-              }
-              secondary={book.author?.[0]?.name || ""}
-            />
-          </ListItem>
-        ))}
+        {books.map((book, idx) => {
+          const title = getBookTitle(book);
+          const coverUrl = getBookCoverUrl(book);
+          const authorName = getBookAuthorName(book);
+          return (
+            <ListItem key={book.unitId} className="!py-2">
+              <ListItemAvatar>
+                {coverUrl ? (
+                  <Avatar
+                    variant="rounded"
+                    src={coverUrl}
+                    alt={title}
+                  />
+                ) : (
+                  <Avatar variant="rounded">{idx + 1}</Avatar>
+                )}
+              </ListItemAvatar>
+              <ListItemText
+                primary={
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-gray-500 w-6 text-right">
+                      {idx + 1}
+                    </span>
+                    <span className="truncate" title={title}>
+                      {title}
+                    </span>
+                  </div>
+                }
+                secondary={authorName}
+              />
+            </ListItem>
+          );
+        })}
       </List>
     </div>
   );

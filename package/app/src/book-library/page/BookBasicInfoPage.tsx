@@ -7,6 +7,10 @@ import { useParams } from "@tanstack/react-router";
 import { useAtomValue } from "jotai";
 import type React from "react";
 import { useTranslation } from "react-i18next";
+import {
+  getBookAuthorName,
+  getBookDescription,
+} from "@/shared/util/translation-helpers";
 import { TagWrapper } from "@/tag/component/TagWrapper.tsx";
 import { AuthorInfo } from "../component/AuthorInfo";
 import { BookDescription } from "../component/BookDescription";
@@ -26,11 +30,21 @@ export const BookBasicInfoPage: React.FC = () => {
   const { t } = useTranslation();
 
   if (!bookInfo) return null;
+
+  const description = getBookDescription(bookInfo);
+  // MOCK: use first personCredit as author fallback for AuthorInfo
+  const authorUser = bookInfo?.user ?? {
+    unitId: bookInfo?.personCredits?.[0]?.personId ?? '',
+    name: getBookAuthorName(bookInfo),
+    bio: '',
+    description: '',
+  };
+
   return (
     <BookDetailShell bookInfo={bookInfo}>
       <Stack spacing={4}>
         <BookDescription
-          description={bookInfo?.description || ""}
+          description={description}
           bookId={bookInfo?.unitId || ""}
         />
         <Divider />
@@ -41,21 +55,12 @@ export const BookBasicInfoPage: React.FC = () => {
           </ArrowForwardIcon>
         </div>
         <TagWrapper
-          filters={{ objectId: bookInfo?.unitId || "" }}
+          filters={{ unitId: bookInfo?.unitId || "" }}
           mode="grouped"
         />
         <Divider />
 
-        <AuthorInfo
-          author={
-            bookInfo?.author?.[0] || {
-              unitId: "",
-              name: "",
-              bio: "",
-              description: "",
-            }
-          }
-        />
+        <AuthorInfo author={authorUser} />
         <Divider />
 
         <div>

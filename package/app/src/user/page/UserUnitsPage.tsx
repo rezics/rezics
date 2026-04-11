@@ -8,8 +8,8 @@ import {
 import { reactionApi } from "@rezics/api/reaction/reaction.api";
 import type {
   BookDTO,
-  ReadlistDTO,
-  ReviewDTO,
+  PostDTO,
+  ShelfDTO,
   UnitDTO,
 } from "@rezics/contract";
 import { UnitType } from "@rezics/contract";
@@ -25,8 +25,9 @@ import { QuoteExcerptListContainer } from "@/review/component/QuoteExcerptList.t
 import { ReviewList } from "@/review/component/ReviewList.tsx";
 import { TextSearchInputWithIcon } from "@/search/component/TextSearchInputWithIcon.tsx";
 
-type Readlist = ReadlistDTO;
-type Review = ReviewDTO;
+// MOCK: old types replaced by new architecture types
+type Readlist = ShelfDTO;
+type Review = PostDTO;
 type UnitItem = UnitDTO;
 
 export interface UserUnitsPageProps {
@@ -207,7 +208,7 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
 
   const reviewListQueryOpts = useQuery(
     buildMeiliUnitQuery({
-      kind: UnitType.REVIEW,
+      kind: UnitType.POST,
       start: startReview,
       targetUnitId: undefined,
       keyword: keyword,
@@ -219,7 +220,7 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
 
   const remarkListQueryOpts = useQuery(
     buildMeiliUnitQuery({
-      kind: UnitType.REMARK,
+      kind: UnitType.POST,
       start: startRemark,
       targetUnitId: undefined,
       keyword: keyword,
@@ -407,7 +408,7 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
     if (tab === "review" || tab === "remark") {
       const isReview = tab === "review";
       const { queryKey, queryFn } = buildMeiliUnitQuery({
-        kind: isReview ? UnitType.REVIEW : UnitType.REMARK,
+        kind: isReview ? UnitType.POST : UnitType.POST,
         start: start,
         targetUnitId: undefined,
         keyword: keyword,

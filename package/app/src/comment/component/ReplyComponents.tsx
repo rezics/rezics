@@ -1,13 +1,14 @@
-// 暂时就先这样不处理，后面树化，或者使用VirtualList
-
 import { Avatar } from "@mui/material";
-import { commentQueries } from "@rezics/api/comment/comment.queries";
+import { postQueries } from "@rezics/api/post/post";
+import type { PostDTO } from "@rezics/contract";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useCallback, useRef } from "react";
 
-// import { scrollToElementWithOffsetUniversal } from "@/shared/util/domUtils";
-
+/**
+ * ReplyComponents - Flat comment list.
+ * Now uses Post API instead of old Comment API.
+ */
 interface ReplyComponentsProps {
   bookListId: string;
 }
@@ -15,77 +16,72 @@ interface ReplyComponentsProps {
 export const ReplyComponents: React.FC<ReplyComponentsProps> = ({
   bookListId,
 }) => {
-  const commentId = bookListId; // TODO 暫時先用這個替代
-  const { data, isLoading, error } = useQuery(
-    commentQueries.unitCommentTree(commentId, {
-      // Fetch up to depth 3 for an initial view; adjust as needed
-      maxDepth: 100,
-      order: "asc",
-      start: 0,
+  // Fetch flat posts for this target
+  const { data } = useQuery({
+    ...postQueries.byTarget(bookListId, {
+      kindKey: 'comment',
+      mode: 'flat',
       limit: 200,
     }),
-  );
-  const commentRefs = useRef<Record<string, HTMLDivElement | null>>({});
-  const allComments = data?.items || [];
+    enabled: !!bookListId,
+  });
 
-  // 滚动到指定评论
+  const commentRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const allComments: PostDTO[] = data?.posts || [];
+
   const scrollToComment = useCallback((commentId: string) => {
     window.location.hash = `comment-${commentId}`;
-    // setTimeout(() => {
-    //     // scrollToElementWithOffset(`#comment-${commentId}`, 100, "auto");
-    //     // scrollToElementWithOffsetUniversal(`#comment-${commentId}`, 100, "auto");
-    // }, 1000);
   }, []);
 
-  // 获取父评论内容预览
   const getParentPreview = (parentId: string) => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const parent = allComments.find((c: any) => c.id === parentId);
+    const parent = allComments.find((c) => c.unitId === parentId);
     if (parent) {
-      return `${parent.content?.slice(0, 10)}...`;
+      return `${parent.body?.slice(0, 10)}...`;
     }
     return "";
   };
 
   return (
     <div className="p-4 space-y-4">
-      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-      {allComments.map((comment: any) => (
+      {allComments.map((comment) => (
         <div
-          key={comment.id}
-          id={`comment-${comment.id}`}
+          key={comment.unitId}
+          id={`comment-${comment.unitId}`}
           className="flex gap-3 items-start"
           ref={(el) => {
-            commentRefs.current[comment.id] = el;
+            commentRefs.current[comment.unitId] = el;
           }}
         >
-          <Avatar src={comment.avatar} className="w-8 h-8" />
+          <Avatar src={comment.author?.avatar ?? undefined} className="w-8 h-8" />
           <div className="flex-1">
             <div className="flex items-center gap-2">
               <span className="font-semibold text-red-800">
-                {comment.author}
+                {comment.author?.name ?? 'Unknown'}
               </span>
-              <span className="text-xs text-gray-500">#{comment.id}</span>
+              <span className="text-xs text-gray-500">#{comment.unitId.slice(-6)}</span>
               <span className="text-xs text-gray-500">
-                {comment.created_at}
+                {comment.createdAt
+                  ? new Date(String(comment.createdAt)).toLocaleString()
+                  : ''}
               </span>
             </div>
-            {comment.parent_id && (
+            {comment.parentPostUnitId && (
               <div className="text-xs text-blue-500 mt-1">
                 回复{" "}
                 <a
-                  href={`#comment-${comment.parent_id}`}
+                  href={`#comment-${comment.parentPostUnitId}`}
                   className="hover:underline"
                   onClick={(e) => {
                     e.preventDefault();
-                    scrollToComment(comment.parent_id);
+                    scrollToComment(comment.parentPostUnitId!);
                   }}
                 >
-                  #{comment.parent_id} {getParentPreview(comment.parent_id)}
+                  #{comment.parentPostUnitId.slice(-6)}{" "}
+                  {getParentPreview(comment.parentPostUnitId)}
                 </a>
               </div>
             )}
-            <p className="mt-1">{comment.content}</p>
+            <p className="mt-1">{comment.body}</p>
           </div>
         </div>
       ))}

@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
 import { useAtomValue } from "jotai";
 import type React from "react";
+import { getBookTitle } from "@/shared/util/translation-helpers";
 import { BookReviews } from "../component/BookReviewsPreview";
 import { ReadlistByBookPreview } from "../component/ReadlistByBookPreview";
 import { BookDetailShell } from "../section/BookDetailSection";
@@ -19,17 +20,19 @@ export const BookReviewPage: React.FC = () => {
 
   if (!bookInfo) return null;
 
+  const title = getBookTitle(bookInfo);
+
   return (
     <BookDetailShell bookInfo={bookInfo}>
       <Stack spacing={4}>
         <BookReviews
           bookId={bookInfo?.unitId || ""}
-          title={bookInfo?.title || ""}
+          title={title}
         />
 
         <ReadlistByBookPreview
           bookId={bookInfo?.unitId || ""}
-          title={bookInfo?.title || ""}
+          title={title}
         />
       </Stack>
     </BookDetailShell>

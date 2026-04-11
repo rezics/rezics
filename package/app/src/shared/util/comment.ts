@@ -1,15 +1,14 @@
-import { commentApi } from "@rezics/api/comment/comment.api";
-import type { CommentDTO, CreateCommentInput } from "@rezics/contract";
+import { postApi } from "@rezics/api/post/post";
+import type { PostDTO, CreatePostInput, UpdatePostInput } from "@rezics/contract";
 
 /**
- * Submit a comment or reply.
- * - If currentReplyId is a root unit id, creates a top-level comment.
- * - If currentReplyId is a comment id, creates a reply under that comment (same root).
+ * Submit a comment or reply using the Post API.
+ * Comments are Posts with kindKey='comment'.
  */
 export const handleSubmit = async (
   currentReplyId: string,
   content: string,
-): Promise<CommentDTO> => {
+): Promise<PostDTO> => {
   if (!currentReplyId) {
     throw new Error("currentReplyId is required");
   }
@@ -17,48 +16,47 @@ export const handleSubmit = async (
     throw new Error("content is required");
   }
 
-  // Determine whether currentReplyId is a comment id or a root unit id.
-  // If it's a comment, fetch to derive its rootUnitId for creation.
-  let rootPostId = currentReplyId;
-  let parentCommentId: string | undefined;
+  // Determine whether currentReplyId is a post id or a target unit id.
+  let targetUnitId = currentReplyId;
+  let parentPostUnitId: string | undefined;
   try {
-    const maybeComment = await commentApi.get(currentReplyId);
-    const rootId = (maybeComment as unknown as { rootUnitId?: string })
-      .rootUnitId;
-    if (typeof rootId === "string" && rootId.length > 0) {
-      rootPostId = rootId;
-      parentCommentId = currentReplyId;
+    const maybePost = await postApi.get(currentReplyId);
+    if (maybePost.targetUnitId) {
+      // This is a reply to another post
+      targetUnitId = maybePost.targetUnitId;
+      parentPostUnitId = currentReplyId;
     }
   } catch {
-    // If fetch fails, we treat currentReplyId as a root unit id (top-level comment)
+    // If fetch fails, treat currentReplyId as a target unit id (top-level comment)
   }
 
-  const input: CreateCommentInput = {
-    rootPostId,
-    parentCommentId,
-    content,
+  const input: CreatePostInput = {
+    targetUnitId,
+    parentPostUnitId,
+    kindKey: 'comment',
+    body: content,
   };
-  return commentApi.create(input);
+  return postApi.create(input);
 };
 
 /**
- * Edit a comment's content by its unit id.
+ * Edit a post's body by its unit id.
  */
 export const handleEdit = async (
   unitId: string,
   content: string,
-): Promise<CommentDTO> => {
+): Promise<PostDTO> => {
   if (!unitId) {
     throw new Error("unitId is required");
   }
   if (!content || content.trim().length === 0) {
     throw new Error("content is required");
   }
-  return commentApi.update(unitId, { content });
+  return postApi.update(unitId, { body: content });
 };
 
 /**
- * Delete a comment by its unit id.
+ * Delete a post by its unit id.
  */
 export const handleDelete = async (
   unitId: string,
@@ -66,5 +64,5 @@ export const handleDelete = async (
   if (!unitId) {
     throw new Error("unitId is required");
   }
-  return commentApi.remove(unitId);
+  return postApi.remove(unitId);
 };

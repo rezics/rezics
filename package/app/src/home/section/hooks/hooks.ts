@@ -6,7 +6,7 @@ import { buildMeiliUnitQuery } from "@rezics/api/meili/meili.queries";
 import type {
   BookDTO,
   QuoteDTO,
-  ReadlistDTO,
+  ShelfDTO,
   UnitListResponse,
 } from "@rezics/contract";
 import { UnitType } from "@rezics/contract";
@@ -49,10 +49,11 @@ export function useHomeBooks(limit = 12): SimpleQueryState<BookDTO> {
   return { items, total, isLoading, error };
 }
 
-export function useHomeReadlists(limit = 6): SimpleQueryState<ReadlistDTO> {
+export function useHomeReadlists(limit = 6): SimpleQueryState<ShelfDTO> {
   const { data, isLoading, error } = useQuery(
     buildMeiliUnitQuery({
-      kind: UnitType.READLIST,
+      // MOCK: old UnitType.READLIST removed; using SHELF type for meili
+      kind: UnitType.SHELF,
       start: 0,
       targetUnitId: undefined,
       keyword: "",
@@ -62,7 +63,7 @@ export function useHomeReadlists(limit = 6): SimpleQueryState<ReadlistDTO> {
     }),
   );
 
-  const items = useMemo<ReadlistDTO[]>(() => data?.readlists ?? [], [data]);
+  const items = useMemo<ShelfDTO[]>(() => data?.readlists ?? [], [data]);
   const total: number | undefined = data?.total;
 
   return { items, total, isLoading, error };

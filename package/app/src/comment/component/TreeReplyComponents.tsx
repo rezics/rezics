@@ -1,22 +1,18 @@
-// 暂时就先这样不处理，后面树化，或者使用VirtualList
-
 import { Add, Remove } from "@mui/icons-material";
 import { Avatar, Box, Collapse, IconButton, Typography } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useEffect, useMemo, useState } from "react";
 
-//  ;
-
 import { useAlertStore } from "@app/state/windowAlertStore";
 import {
-  useCreateCommentMutation,
-  useDeleteCommentMutation,
-  useUpdateCommentMutation,
-} from "@rezics/api/comment/comment.mutations";
-import { commentQueries } from "@rezics/api/comment/comment.queries";
+  postQueries,
+  useCreatePostMutation,
+  useDeletePostMutation,
+  useUpdatePostMutation,
+} from "@rezics/api/post/post";
+import type { PostDTO } from "@rezics/contract";
 import { reactionApi } from "@rezics/api/reaction/reaction";
-import type { CommentTreeNode } from "@rezics/contract";
 import { useTranslation } from "react-i18next";
 import {
   ReactionAdminBar,
@@ -27,22 +23,25 @@ import { useDialogStore } from "../state/dialogStore";
 import { ReplyDrawerContainer } from "./ReplyDrawer.tsx";
 import { buildTree } from "./tree-reply-util";
 
-// This is a temporary type definition based on the GraphQL schema.
-// Local UI type adapted from CommentTreeNode
-type UiUser = {
-  unitId: string;
-  name: string;
-  avatar?: string | null;
-  [key: string]: any;
-};
+/**
+ * TreeReplyComponents - now uses Post API instead of Comment API.
+ * Comments are Posts with kindKey='comment' and threaded via parentPostUnitId.
+ */
 
+// Local UI type adapted from PostDTO for tree rendering
 export type UiComment = {
   id: string;
   content?: string | null;
   created_at?: string;
-  user?: UiUser;
+  user?: {
+    unitId: string;
+    name: string;
+    avatar?: string | null;
+    [key: string]: any;
+  };
   replies?: UiComment[];
 };
+
 interface CommentNodeProps {
   comment: UiComment;
   level?: number;
@@ -63,26 +62,21 @@ const CommentNode: React.FC<CommentNodeProps> = ({
   openDrawer,
   userReactionsByTarget,
 }) => {
-  // Expand first two levels by default
   const [isExpanded, setIsExpanded] = useState(level < 2);
   const user = useUserProfileStore((state) => state.user);
   const handleToggleExpand = () => {
     if (comment.replies && comment.replies.length > 0) {
       setIsExpanded(!isExpanded);
     }
-    // TODO: Implement asynchronous loading of comments if they are not already fetched.
-    // This would require a new GraphQL query like getReplies(commentId: ID!).
   };
 
   const showAlert = useAlertStore((state) => state.show);
 
   const handleReply = () => {
-    console.log("Replying to comment:", comment.id);
     openDrawer(comment.id);
-    // This is where you would trigger a reply dialog or an inline reply form.
   };
 
-  const deleteCommentMutation = useDeleteCommentMutation({
+  const deletePostMutation = useDeletePostMutation({
     onSuccess: () => {
       showAlert("Comment deleted successfully");
     },
@@ -92,13 +86,12 @@ const CommentNode: React.FC<CommentNodeProps> = ({
   });
 
   const handleDelete = () => {
-    deleteCommentMutation.mutate(comment.id);
+    deletePostMutation.mutate(comment.id);
   };
 
   const setDialogContent = useDialogStore((state) => state.setDialogContent);
 
   const handleUpdate = () => {
-    console.log("handleUpdate", comment.id);
     const key = `update_${comment.id}`;
     setDialogContent(key, comment.content ?? "");
     openDrawer(key);
@@ -199,34 +192,32 @@ interface ReplyComponentsProps {
 }
 
 export function TreeReplyComponents({ unitId }: ReplyComponentsProps) {
-  // Fetch a flat slice of the comment tree for the unit
   const showAlert = useAlertStore((state) => state.show);
   const user = useUserProfileStore((state) => state.user);
   const { t } = useTranslation();
 
   function Core({ unitId }: { unitId: string }) {
-    const { data, isLoading, error } = useQuery(
-      commentQueries.unitCommentTree(unitId, {
-        // Fetch up to depth 3 for an initial view; adjust as needed
-        maxDepth: 100,
-        order: "asc",
-        start: 0,
+    // Fetch comment-kind posts for this unit (threaded mode)
+    const { data, isLoading, error } = useQuery({
+      ...postQueries.byTarget(unitId, {
+        kindKey: 'comment',
+        mode: 'threaded',
         limit: 200,
       }),
-    );
+      enabled: !!unitId,
+    });
 
-    // currentReplyId
     const setDialogVisible = useDialogStore((state) => state.setDialogVisible);
     const [currentReplyId, setCurrentReplyId] = useState<string | null>(null);
     const [topLevelComments, setTopLevelComments] = useState<UiComment[]>([]);
 
-    const commentItems = useMemo(
-      () => (data?.items as CommentTreeNode[] | undefined) ?? [],
+    const commentItems: PostDTO[] = useMemo(
+      () => data?.posts ?? [],
       [data],
     );
 
     const targetIds = useMemo(
-      () => commentItems.map((item) => item.id).filter(Boolean),
+      () => commentItems.map((item) => item.unitId).filter(Boolean),
       [commentItems],
     );
 
@@ -234,14 +225,14 @@ export function TreeReplyComponents({ unitId }: ReplyComponentsProps) {
       queryKey: ["reactions", "my", { targetIds }],
       queryFn: () => reactionApi.my({ targetIds }),
       enabled: !!user && targetIds.length > 0,
-      staleTime: 1000 * 60, // 1 minute
+      staleTime: 1000 * 60,
     });
 
     const userReactionsByTarget = myReactions?.reactionsByTarget ?? {};
 
     useEffect(() => {
       try {
-        const tree = buildTree(commentItems as any);
+        const tree = buildTree(commentItems);
         setTopLevelComments(tree);
       } catch (_error) {
         console.error("Error building comment tree");
@@ -253,7 +244,7 @@ export function TreeReplyComponents({ unitId }: ReplyComponentsProps) {
       setDialogVisible(id, true);
     };
 
-    const createCommentMutation = useCreateCommentMutation({
+    const createPostMutation = useCreatePostMutation({
       onSuccess: () => {
         showAlert("Comment created successfully");
       },
@@ -262,7 +253,7 @@ export function TreeReplyComponents({ unitId }: ReplyComponentsProps) {
       },
     });
 
-    const updateCommentMutation = useUpdateCommentMutation({
+    const updatePostMutation = useUpdatePostMutation({
       onSuccess: () => {
         showAlert("Comment updated successfully");
       },
@@ -273,17 +264,18 @@ export function TreeReplyComponents({ unitId }: ReplyComponentsProps) {
 
     const handleSubmit = (content: string) => {
       if (currentReplyId?.startsWith("update_")) {
-        updateCommentMutation.mutate({
+        updatePostMutation.mutate({
           unitId: currentReplyId.replace("update_", ""),
           input: {
-            content,
+            body: content,
           },
         });
       } else {
-        createCommentMutation.mutate({
-          rootPostId: unitId,
-          parentCommentId: currentReplyId || "",
-          content,
+        createPostMutation.mutate({
+          targetUnitId: unitId,
+          parentPostUnitId: currentReplyId || undefined,
+          kindKey: 'comment',
+          body: content,
         });
       }
     };
@@ -306,7 +298,6 @@ export function TreeReplyComponents({ unitId }: ReplyComponentsProps) {
             <p>No comments</p>
           )}
         </Box>
-        {/* 渲染 */}
         {currentReplyId && (
           <ReplyDrawerContainer
             dialogId={currentReplyId}

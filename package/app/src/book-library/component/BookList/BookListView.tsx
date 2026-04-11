@@ -4,6 +4,12 @@ import { LazyLoadImage } from "@rezics/ui/primitive/image/LazyLoadImage.tsx";
 import { Link } from "@rezics/ui/primitive/link/Link.tsx";
 
 import type React from "react";
+import {
+  getBookAuthorName,
+  getBookCoverUrl,
+  getBookDescription,
+  getBookTitle,
+} from "@/shared/util/translation-helpers";
 
 /** Props for BookListViewItem component. */
 export type BookListViewItemProps = {
@@ -17,15 +23,20 @@ export type BookListViewItemProps = {
  * Displays book cover, title, author, and description preview.
  */
 export const BookListViewItem: React.FC<BookListViewItemProps> = ({ book }) => {
+  const title = getBookTitle(book);
+  const coverUrl = getBookCoverUrl(book);
+  const authorName = getBookAuthorName(book);
+  const description = getBookDescription(book);
+
   return (
     <div>
       <Link to="/book/$bookId" params={{ bookId: book.unitId }}>
         <Card className="mt-4 h-[200px] flex flex-row items-stretch gap-4 w-full">
-          {book.coverUrl && (
+          {coverUrl && (
             <CardMedia className="aspect-[2/3]">
               <LazyLoadImage
-                src={book.coverUrl}
-                alt={book.title}
+                src={coverUrl}
+                alt={title}
                 className="!h-full object-cover w-full"
               />
             </CardMedia>
@@ -33,17 +44,17 @@ export const BookListViewItem: React.FC<BookListViewItemProps> = ({ book }) => {
           <CardContent className="flex-1 flex flex-col justify-between min-w-0">
             <div>
               <Typography variant="h6" className="mb-1">
-                {book.title}
+                {title}
               </Typography>
               <Typography
                 variant="subtitle2"
                 color="text.secondary"
                 className="mb-2"
               >
-                {book.author?.[0]?.name || ""}
+                {authorName}
               </Typography>
               <Typography variant="body2" className="line-clamp-3">
-                {book.description}
+                {description}
               </Typography>
             </div>
           </CardContent>

@@ -1,16 +1,39 @@
+// MOCK: book list data using new BookDTO shape with translations
 export const bookList01 = [
   {
-    id: "1",
-    title: "Mock Book 1",
-    author: "Author A",
-    description: "Mock Description 1",
-    cover: "https://m.media-amazon.com/images/I/81wGzzxqHSL._SY466_.jpg",
+    unitId: "1",
+    translations: [
+      {
+        unitId: "1",
+        language: "zh-CN",
+        title: "Mock Book 1",
+        description: "Mock Description 1",
+      },
+    ],
+    personCredits: [
+      { personId: "a1", name: "Author A", roleKey: "author" },
+    ],
+    orgCredits: [],
+    tags: [],
+    coverAssetUnitId: null,
+    isbn13: null,
   },
   {
-    id: "2",
-    title: "Mock Book 2",
-    author: "Author B",
-    description: "Mock Description 2",
-    cover: "https://m.media-amazon.com/images/I/81wGzzxqHSL._SY466_.jpg",
+    unitId: "2",
+    translations: [
+      {
+        unitId: "2",
+        language: "zh-CN",
+        title: "Mock Book 2",
+        description: "Mock Description 2",
+      },
+    ],
+    personCredits: [
+      { personId: "a2", name: "Author B", roleKey: "author" },
+    ],
+    orgCredits: [],
+    tags: [],
+    coverAssetUnitId: null,
+    isbn13: null,
   },
 ];

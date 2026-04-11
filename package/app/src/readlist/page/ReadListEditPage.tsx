@@ -11,12 +11,13 @@ import {
 import { bookQueries } from "@rezics/api/book/book";
 import { mapUnitListToReviewListResponse } from "@rezics/api/meili/meili.api";
 import { buildMeiliUnitQuery } from "@rezics/api/meili/meili.queries";
+// MOCK: readlist/review queries replaced by shelf/post queries
 import {
-  readlistQueries,
-  useDeleteReadlistMutation,
-  useUpdateReadlistMutation,
-} from "@rezics/api/readlist/readlist";
-import { reviewQueries } from "@rezics/api/review/review";
+  shelfQueries,
+  useDeleteShelfMutation,
+  useUpdateShelfMutation,
+} from "@rezics/api/shelf/shelf";
+import { postQueries } from "@rezics/api/post/post";
 import { UnitType } from "@rezics/contract";
 import { ConfirmDeleteDialog } from "@rezics/ui/composite/form/ConfirmDeleteDialog.tsx";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -76,7 +77,7 @@ const ReviewSearchBox: React.FC<{
   const [q, setQ] = useState("");
   const { data, isLoading } = useQuery(
     buildMeiliUnitQuery({
-      kind: UnitType.REVIEW,
+      kind: UnitType.POST,
       start: 0,
       targetUnitId: "",
       keyword: q,
@@ -207,15 +208,15 @@ export const ReadListEditor: React.FC<{
 
   const addReviewId = async (id: string) => {
     // 触发 review 查询
-    const review = await queryClient.fetchQuery(reviewQueries.detail(id));
+    // MOCK: fetch post (review) and its target book
+    const review = await queryClient.fetchQuery(postQueries.detail(id));
     const reviewWithTargetUnitId = {
       ...review,
-      targetUnitId: review.bookId,
+      targetUnitId: review.targetUnitId,
     };
 
-    // 触发 book 查询
     const book = await queryClient.fetchQuery(
-      bookQueries.detail(review?.bookId),
+      bookQueries.detail(review?.targetUnitId ?? ''),
     );
 
     setReadlistData((prev: any) => ({
@@ -338,13 +339,15 @@ export const ReadListEditor: React.FC<{
 export function ReadListEditPage() {
   const { readlistId } = readlistEditRoute.useParams();
   const navigate = useNavigate();
-  const { data, isLoading } = useQuery(
-    readlistQueries.detail(readlistId || ""),
-  );
+  // MOCK: using shelf API for readlist data
+  const { data, isLoading } = useQuery({
+    ...shelfQueries.detail(readlistId || ""),
+    enabled: !!readlistId,
+  });
   type ReadlistData = typeof data;
   const { t } = useTranslation();
 
-  const updateReadlistMutation = useUpdateReadlistMutation();
+  const updateReadlistMutation = useUpdateShelfMutation();
 
   const [readlistData, setReadlistData] = useState<any>(data);
   useEffect(() => {
@@ -396,7 +399,7 @@ export function ReadListEditPage() {
   }
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const deleteReadlistMutation = useDeleteReadlistMutation();
+  const deleteReadlistMutation = useDeleteShelfMutation();
   const handleDelete = () => {
     deleteReadlistMutation.mutate(readlistId, {
       onSuccess: () => {

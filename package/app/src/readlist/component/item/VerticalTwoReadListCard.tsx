@@ -1,10 +1,11 @@
-import type { ReadlistDTO } from "@rezics/contract";
+import type { ShelfDTO } from "@rezics/contract";
+// ReadlistDTO replaced by ShelfDTO in the new architecture
 import type React from "react";
 import ReadListCard from "./ReadListCard";
 
 interface VerticalTwoReadListCardProps {
-  readlist1: ReadlistDTO;
-  readlist2: ReadlistDTO;
+  readlist1: ShelfDTO;
+  readlist2: ShelfDTO;
 }
 
 export const VerticalTwoReadListCard: React.FC<

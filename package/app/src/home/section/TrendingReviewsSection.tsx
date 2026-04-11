@@ -1,6 +1,7 @@
 import { Alert, Button, CircularProgress, Typography } from "@mui/material";
+// MOCK: meili review queries may need updating when backend is ready
 import { buildMeiliReviewQuery } from "@rezics/api/meili/meili.queries";
-import type { ReviewDTO } from "@rezics/contract";
+import type { PostDTO } from "@rezics/contract";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
@@ -28,7 +29,8 @@ export const TrendingReviews: React.FC<TrendingReviewsProps> = ({
     buildMeiliReviewQuery(0, limit, {}),
   );
 
-  const items = useMemo<ReviewDTO[]>(() => data?.reviews ?? [], [data]);
+  // MOCK: data shape may change when meili queries are updated
+  const items = useMemo<PostDTO[]>(() => (data as any)?.reviews ?? (data as any)?.posts ?? [], [data]);
   const _total: number | undefined = data?.total;
 
   if (error) {

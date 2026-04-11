@@ -1,15 +1,20 @@
 import { Chip, Typography } from "@mui/material";
-import type { TagDetailDTO } from "@rezics/api/tag/tag";
+import type { UnitTagDTO } from "@rezics/contract";
 import type React from "react";
 import { useCallback, useState } from "react";
 import { TagDetailCard } from "./TagCards";
 
+/**
+ * TagList and SingleTagChip - now use UnitTagDTO (scored tags).
+ * Tags have tagUnitId, tagLabel, score, voteCount.
+ */
+
 interface SingleTagChipProps {
-  tag: TagDetailDTO;
+  tag: UnitTagDTO;
   className?: string;
   autoSelectFirst?: boolean;
   activeId?: string | null;
-  handleClick?: (e: React.MouseEvent, tag: TagDetailDTO) => void;
+  handleClick?: (e: React.MouseEvent, tag: UnitTagDTO) => void;
 }
 
 export function SingleTagChip({
@@ -18,26 +23,28 @@ export function SingleTagChip({
   autoSelectFirst,
 }: SingleTagChipProps) {
   const [activeId, setActiveId] = useState<string | null>(
-    autoSelectFirst ? tag.id : null,
+    autoSelectFirst ? tag.tagUnitId : null,
   );
   const handleClick = useCallback(
-    (e: React.MouseEvent, tag: TagDetailDTO) => {
+    (e: React.MouseEvent, tag: UnitTagDTO) => {
       if (e.ctrlKey) {
-        window.open(`/tags/${tag.id}`, "_blank");
+        window.open(`/tag/${tag.tagUnitId}`, "_blank");
         return;
       }
-      setActiveId(tag.id === activeId ? null : tag.id);
+      setActiveId(tag.tagUnitId === activeId ? null : tag.tagUnitId);
     },
     [activeId],
   );
 
+  const label = tag.tagLabel ?? tag.tagUnitId;
+
   return (
     <div className={className}>
       <Chip
-        label={tag.name}
+        label={`${label} (${tag.score})`}
         size="small"
         clickable
-        color={tag.id === activeId ? "primary" : "default"}
+        color={tag.tagUnitId === activeId ? "primary" : "default"}
         onClick={(e) => handleClick(e, tag)}
       />
       {activeId && (
@@ -49,27 +56,23 @@ export function SingleTagChip({
   );
 }
 
-/**
- * TagList – 展示标签列表（纯展示，不负责数据拉取）
- * 点击某个标签在下方展示 TagDetailCard，按住 Ctrl 点击直接跳转新窗口。
- */
 export const TagList: React.FC<{
-  tags: TagDetailDTO[];
+  tags: UnitTagDTO[];
   className?: string;
   autoSelectFirst?: boolean;
 }> = ({ tags, className, autoSelectFirst }) => {
   const [activeId, setActiveId] = useState<string | null>(
-    autoSelectFirst && tags.length > 0 ? tags[0].id : null,
+    autoSelectFirst && tags.length > 0 ? tags[0].tagUnitId : null,
   );
-  const activeTag = tags.find((t) => t.id === activeId) || null;
+  const activeTag = tags.find((t) => t.tagUnitId === activeId) || null;
 
   const handleClick = useCallback(
-    (e: React.MouseEvent, tag: TagDetailDTO) => {
+    (e: React.MouseEvent, tag: UnitTagDTO) => {
       if (e.ctrlKey) {
-        window.open(`/tags/${tag.id}`, "_blank");
+        window.open(`/tag/${tag.tagUnitId}`, "_blank");
         return;
       }
-      setActiveId(tag.id === activeId ? null : tag.id);
+      setActiveId(tag.tagUnitId === activeId ? null : tag.tagUnitId);
     },
     [activeId],
   );
@@ -87,17 +90,20 @@ export const TagList: React.FC<{
   return (
     <div className={className}>
       <div className="flex flex-wrap gap-2">
-        {tags.map((tag) => (
-          <div key={tag.id} className="flex items-center">
-            <Chip
-              label={tag.name}
-              size="small"
-              clickable
-              color={tag.id === activeId ? "primary" : "default"}
-              onClick={(e) => handleClick(e, tag)}
-            />
-          </div>
-        ))}
+        {tags.map((tag) => {
+          const label = tag.tagLabel ?? tag.tagUnitId;
+          return (
+            <div key={tag.tagUnitId} className="flex items-center">
+              <Chip
+                label={`${label} (${tag.score})`}
+                size="small"
+                clickable
+                color={tag.tagUnitId === activeId ? "primary" : "default"}
+                onClick={(e) => handleClick(e, tag)}
+              />
+            </div>
+          );
+        })}
       </div>
       {activeTag && (
         <div className="mt-4">
