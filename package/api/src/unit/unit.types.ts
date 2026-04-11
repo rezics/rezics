@@ -3,27 +3,23 @@
  */
 
 import type {
-  CommentTreeNode,
-  CommentTreeQuery,
-  CommentTreeResponse,
   CreateUnitInput,
   UnitDTO,
   UnitListQuery,
   UnitListResponse,
   UnitResponse,
+  UnitTranslationDTO,
   UpdateUnitInput,
 } from "@rezics/contract";
 
 // Re-export contract types
 export type {
-  CommentTreeNode,
-  CommentTreeQuery,
-  CommentTreeResponse,
   CreateUnitInput,
   UnitDTO,
   UnitListQuery,
   UnitListResponse,
   UnitResponse,
+  UnitTranslationDTO,
   UpdateUnitInput,
 };
 

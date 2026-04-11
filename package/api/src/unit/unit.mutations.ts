@@ -34,8 +34,8 @@ export function useCreateUnitMutation(
       queryClient.invalidateQueries({ queryKey: unitKeys.lists() });
 
       // Pre-populate the cache with the new unit
-      if ((data as any)?.id) {
-        queryClient.setQueryData(unitKeys.detail((data as any).id), data);
+      if (data?.id) {
+        queryClient.setQueryData(unitKeys.detail(data.id), data);
       }
 
       options?.onSuccess?.(data, variables, onMutateResult, context);

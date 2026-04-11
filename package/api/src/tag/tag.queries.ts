@@ -1,8 +1,15 @@
+/**
+ * React Query configurations for Tag queries
+ */
+
 import { infiniteQueryOptions, queryOptions } from "@tanstack/react-query";
 import { tagApi } from "./tag.api";
 import { tagKeys } from "./tag.keys";
 import type { TagFilters } from "./tag.types";
 
+/**
+ * Query options for listing/searching tags
+ */
 export const tagListQuery = (filters?: TagFilters) =>
   queryOptions({
     queryKey: tagKeys.list(filters),
@@ -10,6 +17,9 @@ export const tagListQuery = (filters?: TagFilters) =>
     staleTime: 1000 * 60 * 5,
   });
 
+/**
+ * Query options for getting a single tag by unitId
+ */
 export const tagDetailQuery = (unitId: string) =>
   queryOptions({
     queryKey: tagKeys.detail(unitId),
@@ -17,26 +27,23 @@ export const tagDetailQuery = (unitId: string) =>
     staleTime: 1000 * 60 * 10,
   });
 
-export const tagByNameQuery = (
-  name: string,
-  type?: string | null,
-  domainId?: string,
+/**
+ * Query options for getting scored tags for a specific unit
+ */
+export const tagsForUnitQuery = (
+  unitId: string,
+  filters?: Pick<TagFilters, "minScore" | "limit">,
 ) =>
   queryOptions({
-    queryKey: tagKeys.byName(name, type, domainId),
-    queryFn: () => tagApi.getByName(name, type, domainId),
-    enabled: !!name,
+    queryKey: tagKeys.forUnit(unitId),
+    queryFn: () => tagApi.getForUnit(unitId, filters),
+    enabled: !!unitId,
     staleTime: 1000 * 60 * 5,
   });
 
-export const tagByObjectQuery = (objectId: string) =>
-  queryOptions({
-    queryKey: tagKeys.byObject(objectId),
-    queryFn: () => tagApi.list({ objectId }),
-    enabled: !!objectId,
-    staleTime: 1000 * 60 * 5,
-  });
-
+/**
+ * Infinite query options for paginated tag list
+ */
 export const tagInfiniteListQuery = (filters?: Omit<TagFilters, "page">) =>
   infiniteQueryOptions({
     queryKey: tagKeys.list(filters),
@@ -53,10 +60,12 @@ export const tagInfiniteListQuery = (filters?: Omit<TagFilters, "page">) =>
     staleTime: 1000 * 60 * 5,
   });
 
+/**
+ * Combined query options export
+ */
 export const tagQueries = {
   list: tagListQuery,
   detail: tagDetailQuery,
-  byName: tagByNameQuery,
-  byObject: tagByObjectQuery,
+  forUnit: tagsForUnitQuery,
   infiniteList: tagInfiniteListQuery,
 };

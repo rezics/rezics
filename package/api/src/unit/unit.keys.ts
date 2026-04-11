@@ -23,7 +23,7 @@ export const unitKeys = {
   detail: (unitId: string) => [...unitKeys.details(), unitId] as const,
 
   /**
-   * Keys for user-specific queries (convenience)
+   * Keys for user-specific queries
    */
   byUser: (userId: string) => [...unitKeys.all(), "user", userId] as const,
 

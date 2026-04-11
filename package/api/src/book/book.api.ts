@@ -28,6 +28,8 @@ type Rating = {
 export const bookApi = {
   /**
    * List books with optional filters
+   * Supports: q, nsfw, language, tagUnitIds, personId, organizationId,
+   * userId, isbn13, workUnitId, visibility, status, sort, start, cursor, limit
    */
   list: async (filters?: BookFilters): Promise<BookListResponse> => {
     return apiFetch<BookListResponse>(`/books${buildQueryString(filters)}`);
@@ -63,10 +65,13 @@ export const bookApi = {
     bookUnitId: string,
     chaptersIndex: any,
   ): Promise<ChapterIndexResponse> => {
-    return apiFetch<ChapterIndexResponse>(`/books/${bookUnitId}/chapterIndex`, {
-      method: "PUT",
-      body: JSON.stringify(chaptersIndex),
-    });
+    return apiFetch<ChapterIndexResponse>(
+      `/books/${bookUnitId}/chapterIndex`,
+      {
+        method: "PUT",
+        body: JSON.stringify(chaptersIndex),
+      },
+    );
   },
 
   /**
@@ -94,22 +99,48 @@ export const bookApi = {
   },
 
   /**
-   * Get books by author ID
+   * Get books by person ID (attribution credit)
    */
-  getByAuthorId: async (
-    authorId: string,
+  getByPersonId: async (
+    personId: string,
     filters?: BookFilters,
   ): Promise<BookListResponse> => {
     return apiFetch<BookListResponse>(
-      `/books${buildQueryString({ authorId, ...filters })}`,
+      `/books${buildQueryString({ personId, ...filters })}`,
     );
   },
 
   /**
-   * Get book by ISBN
+   * Get books by organization ID (attribution credit)
    */
-  getByIsbn: async (isbn: string): Promise<BookListResponse> => {
-    return apiFetch<BookListResponse>(`/books${buildQueryString({ isbn })}`);
+  getByOrganizationId: async (
+    organizationId: string,
+    filters?: BookFilters,
+  ): Promise<BookListResponse> => {
+    return apiFetch<BookListResponse>(
+      `/books${buildQueryString({ organizationId, ...filters })}`,
+    );
+  },
+
+  /**
+   * Get book by ISBN-13
+   */
+  getByIsbn: async (isbn13: string): Promise<BookListResponse> => {
+    return apiFetch<BookListResponse>(
+      `/books${buildQueryString({ isbn13 })}`,
+    );
+  },
+
+  /**
+   * Get books by tag unit IDs (comma-separated)
+   */
+  getByTagUnitIds: async (
+    tagUnitIds: string,
+    filters?: BookFilters,
+  ): Promise<BookListResponse> => {
+    return apiFetch<BookListResponse>(
+      `/books${buildQueryString({ tagUnitIds, ...filters })}`,
+    );
   },
 
   /**
@@ -126,10 +157,10 @@ export const bookApi = {
    * Update existing book
    */
   update: async (
-    postId: string,
+    unitId: string,
     input: UpdateBookInput,
   ): Promise<BookResponse> => {
-    return apiFetch<BookResponse>(`/books/${postId}`, {
+    return apiFetch<BookResponse>(`/books/${unitId}`, {
       method: "PUT",
       body: JSON.stringify(input),
     });
@@ -138,8 +169,8 @@ export const bookApi = {
   /**
    * Delete book
    */
-  remove: async (postId: string): Promise<{ message: string }> => {
-    return apiFetch<{ message: string }>(`/books/${postId}`, {
+  remove: async (unitId: string): Promise<{ message: string }> => {
+    return apiFetch<{ message: string }>(`/books/${unitId}`, {
       method: "DELETE",
     });
   },

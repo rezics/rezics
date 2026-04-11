@@ -19,6 +19,8 @@ import type { UnitFilters } from "./unit.types";
 export const unitApi = {
   /**
    * List units with optional filters
+   * Supports: q, type, types, excludeTypes, status, statuses, visibility,
+   * userId, userIds, workUnitId, language, nsfw, date ranges, sort, pagination
    */
   list: async (filters?: UnitFilters): Promise<UnitListResponse> => {
     return apiFetch<UnitListResponse>(`/units${buildQueryString(filters)}`);

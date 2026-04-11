@@ -1,16 +1,9 @@
 /**
  * Tag API - Main entry point
- * Mirrors the structure used by Book API module
+ * Tags are Units with type=TAG. Scored associations and voting are managed
+ * through attach/detach/vote endpoints.
  */
 
-// Types
-export type {
-  CreateTagInput,
-  TagDetailDTO,
-  TagDTO,
-  TagListQuery,
-  UpdateTagInput,
-} from "@rezics/contract";
 // API client
 export { tagApi } from "./tag.api";
 
@@ -20,6 +13,7 @@ export { tagKeys } from "./tag.keys";
 export {
   tagMutations,
   useAttachTagMutation,
+  useCastTagVoteMutation,
   useCreateTagMutation,
   useDeleteTagMutation,
   useDetachTagMutation,
@@ -28,11 +22,22 @@ export {
 
 // Queries
 export {
-  tagByNameQuery,
-  tagByObjectQuery,
   tagDetailQuery,
   tagInfiniteListQuery,
   tagListQuery,
   tagQueries,
+  tagsForUnitQuery,
 } from "./tag.queries";
-export type { TagFilters, TagFormData, TagView } from "./tag.types";
+// Types
+export type {
+  AttachTagInput,
+  CastTagVoteInput,
+  CreateTagInput,
+  DetachTagInput,
+  TagFilters,
+  TagFormData,
+  TagView,
+  TagVoteDTO,
+  UnitTagDTO,
+  UpdateTagInput,
+} from "./tag.types";

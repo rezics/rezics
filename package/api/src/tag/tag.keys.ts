@@ -1,3 +1,7 @@
+/**
+ * React Query keys for Tag queries
+ */
+
 import type { TagFilters } from "./tag.types";
 
 export const tagKeys = {
@@ -11,11 +15,10 @@ export const tagKeys = {
   details: () => [...tagKeys.all(), "detail"] as const,
   detail: (unitId: string) => [...tagKeys.details(), unitId] as const,
 
-  // by name within domain
-  byName: (name: string, type?: string | null, domainId?: string) =>
-    [...tagKeys.all(), "byName", { name, type, domainId }] as const,
+  // tags for a specific unit (scored associations)
+  forUnit: (unitId: string) =>
+    [...tagKeys.all(), "forUnit", unitId] as const,
 
-  // by object (e.g. tags for a book/unit)
-  byObject: (objectId: string) =>
-    [...tagKeys.all(), "object", objectId] as const,
+  // votes
+  votes: () => [...tagKeys.all(), "votes"] as const,
 } as const;

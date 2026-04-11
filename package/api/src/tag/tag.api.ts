@@ -1,7 +1,17 @@
+/**
+ * Tag API client functions
+ *
+ * Tags are Units (type=TAG) with UnitTranslation labels.
+ * Scored tag associations (UnitTag) link tags to content with scores/votes.
+ */
+
 import type {
+  AttachTagInput,
+  CastTagVoteInput,
   CreateTagInput,
-  TagDetailDTO,
-  TagDTO,
+  DetachTagInput,
+  TagVoteDTO,
+  UnitTagDTO,
   UpdateTagInput,
 } from "@rezics/contract";
 import { apiFetch } from "../react-query/http";
@@ -13,53 +23,43 @@ import type { TagFilters } from "./tag.types";
  */
 export const tagApi = {
   /**
-   * List tags with optional filters (supports domainId and objectId filters)
+   * List scored tags for a unit, or search tags globally
+   * Supports: q, language, unitId, minScore, page, limit
    */
   list: async (
     filters?: TagFilters,
-  ): Promise<{ tags: TagDTO[]; total: number }> => {
-    return apiFetch<{ tags: TagDTO[]; total: number }>(
+  ): Promise<{ tags: UnitTagDTO[]; total: number }> => {
+    return apiFetch<{ tags: UnitTagDTO[]; total: number }>(
       `/tags${buildQueryString(filters)}`,
     );
   },
 
   /**
-   * Get tag detail by unitId
+   * Get tag detail by unitId (tag is a Unit with type=TAG)
    */
-  get: async (unitId: string): Promise<TagDetailDTO> => {
-    return apiFetch<TagDetailDTO>(`/tags/${unitId}`);
-  },
-
-  /**
-   * Get tag by name within a domain (returns null if not found)
-   */
-  getByName: async (
-    name: string,
-    type?: string | null,
-    domainId?: string,
-  ): Promise<TagDetailDTO | null> => {
-    const qs = buildQueryString({ name, type: type ?? undefined, domainId });
-    return apiFetch<TagDetailDTO | null>(`/tags/by-name${qs}`);
+  get: async (unitId: string): Promise<UnitTagDTO> => {
+    return apiFetch<UnitTagDTO>(`/tags/${unitId}`);
   },
 
   /**
    * Create a tag (requires auth)
+   * Input: translations array with language + title
    */
-  create: async (input: CreateTagInput): Promise<TagDetailDTO> => {
-    return apiFetch<TagDetailDTO>(`/tags`, {
+  create: async (input: CreateTagInput): Promise<UnitTagDTO> => {
+    return apiFetch<UnitTagDTO>(`/tags`, {
       method: "POST",
       body: JSON.stringify(input),
     });
   },
 
   /**
-   * Update a tag
+   * Update a tag's translations
    */
   update: async (
     unitId: string,
     input: UpdateTagInput,
-  ): Promise<TagDetailDTO> => {
-    return apiFetch<TagDetailDTO>(`/tags/${unitId}`, {
+  ): Promise<UnitTagDTO> => {
+    return apiFetch<UnitTagDTO>(`/tags/${unitId}`, {
       method: "PUT",
       body: JSON.stringify(input),
     });
@@ -75,28 +75,44 @@ export const tagApi = {
   },
 
   /**
-   * Attach tag (unitId) to a target unit
+   * Attach a tag to a unit (creates scored junction)
    */
-  attach: async (
-    unitId: string,
-    targetUnitId: string,
-  ): Promise<{ message: string }> => {
-    return apiFetch<{ message: string }>(`/tags/${unitId}/attach`, {
+  attach: async (input: AttachTagInput): Promise<{ message: string }> => {
+    return apiFetch<{ message: string }>(`/tags/attach`, {
       method: "POST",
-      body: JSON.stringify({ targetUnitId }),
+      body: JSON.stringify(input),
     });
   },
 
   /**
-   * Detach tag (unitId) from a target unit
+   * Detach a tag from a unit
    */
-  detach: async (
-    unitId: string,
-    targetUnitId: string,
-  ): Promise<{ message: string }> => {
-    return apiFetch<{ message: string }>(`/tags/${unitId}/detach`, {
+  detach: async (input: DetachTagInput): Promise<{ message: string }> => {
+    return apiFetch<{ message: string }>(`/tags/detach`, {
       method: "POST",
-      body: JSON.stringify({ targetUnitId }),
+      body: JSON.stringify(input),
     });
+  },
+
+  /**
+   * Cast a vote on a tag-unit association (+1 or -1)
+   */
+  vote: async (input: CastTagVoteInput): Promise<TagVoteDTO> => {
+    return apiFetch<TagVoteDTO>(`/tags/vote`, {
+      method: "POST",
+      body: JSON.stringify(input),
+    });
+  },
+
+  /**
+   * Get scored tags for a specific unit
+   */
+  getForUnit: async (
+    unitId: string,
+    filters?: Pick<TagFilters, "minScore" | "limit">,
+  ): Promise<{ tags: UnitTagDTO[]; total: number }> => {
+    return apiFetch<{ tags: UnitTagDTO[]; total: number }>(
+      `/tags${buildQueryString({ unitId, ...filters })}`,
+    );
   },
 };

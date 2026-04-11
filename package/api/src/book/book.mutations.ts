@@ -33,7 +33,7 @@ export function useCreateBookMutation(
       // Invalidate and refetch book lists
       queryClient.invalidateQueries({ queryKey: bookKeys.lists() });
 
-      // Optionally pre-populate the cache with the new book
+      // Pre-populate the cache with the new book
       queryClient.setQueryData(bookKeys.detail(data.unitId), data);
 
       options?.onSuccess?.(data, variables, onMutateResult, context);
@@ -49,7 +49,7 @@ export function useUpdateBookMutation(
     UseMutationOptions<
       BookResponse,
       Error,
-      { postId: string; input: UpdateBookInput }
+      { unitId: string; input: UpdateBookInput }
     >,
     "mutationFn"
   >,
@@ -57,11 +57,11 @@ export function useUpdateBookMutation(
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ postId, input }) => bookApi.update(postId, input),
+    mutationFn: ({ unitId, input }) => bookApi.update(unitId, input),
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
       // Update the cache for this specific book
-      queryClient.setQueryData(bookKeys.detail(variables.postId), data);
+      queryClient.setQueryData(bookKeys.detail(variables.unitId), data);
 
       // Invalidate lists to ensure they're refreshed
       queryClient.invalidateQueries({ queryKey: bookKeys.lists() });
@@ -83,16 +83,16 @@ export function useDeleteBookMutation(
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (postId: string) => bookApi.remove(postId),
+    mutationFn: (unitId: string) => bookApi.remove(unitId),
     ...options,
-    onSuccess: (data, postId, onMutateResult, context) => {
+    onSuccess: (data, unitId, onMutateResult, context) => {
       // Remove from cache
-      queryClient.removeQueries({ queryKey: bookKeys.detail(postId) });
+      queryClient.removeQueries({ queryKey: bookKeys.detail(unitId) });
 
       // Invalidate all lists
       queryClient.invalidateQueries({ queryKey: bookKeys.lists() });
 
-      options?.onSuccess?.(data, postId, onMutateResult, context);
+      options?.onSuccess?.(data, unitId, onMutateResult, context);
     },
   });
 }

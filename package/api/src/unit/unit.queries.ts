@@ -51,20 +51,18 @@ export const unitDetailQuery = (unitId: string) =>
 
 /**
  * Infinite query options for paginated unit list
- * @todo Align with backend pagination (offset/cursor)
  */
-export const unitInfiniteListQuery = (filters?: Omit<UnitFilters, "page">) =>
+export const unitInfiniteListQuery = (filters?: Omit<UnitFilters, "start">) =>
   infiniteQueryOptions({
     queryKey: unitKeys.list(filters),
-    queryFn: ({ pageParam = 1 }) =>
+    queryFn: ({ pageParam = 0 }) =>
       unitApi.list({ ...filters, start: pageParam }),
-    initialPageParam: 1,
-    getNextPageParam: (lastPage, allPages, lastPageParam) => {
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, _allPages, lastPageParam) => {
       const { units, total } = lastPage;
       const limit = filters?.limit || 20;
-      const hasMore =
-        units.length === limit && allPages.length * limit < (total || 0);
-      return hasMore ? lastPageParam + 1 : undefined;
+      const hasMore = units.length === limit;
+      return hasMore ? lastPageParam + limit : undefined;
     },
     staleTime: 1000 * 60 * 5, // 5 minutes
   });

@@ -35,9 +35,6 @@ export {
 } from "./unit.queries";
 // Types
 export type {
-  CommentTreeNode,
-  CommentTreeQuery,
-  CommentTreeResponse,
   CreateUnitInput,
   UnitDTO,
   UnitFilters,
@@ -46,6 +43,7 @@ export type {
   UnitListResponse,
   UnitResponse,
   UnitSortOption,
+  UnitTranslationDTO,
   UnitView,
   UpdateUnitInput,
 } from "./unit.types";

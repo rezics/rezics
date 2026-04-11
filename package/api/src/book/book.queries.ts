@@ -20,10 +20,10 @@ export const bookListQuery = (filters?: BookFilters) =>
 /**
  * Query options for getting a single book
  */
-export const bookDetailQuery = (postId: string) =>
+export const bookDetailQuery = (unitId: string) =>
   queryOptions({
-    queryKey: bookKeys.detail(postId),
-    queryFn: () => bookApi.get(postId),
+    queryKey: bookKeys.detail(unitId),
+    queryFn: () => bookApi.get(unitId),
     staleTime: 1000 * 60 * 10, // 10 minutes
   });
 
@@ -50,43 +50,66 @@ export const booksByUserQuery = (userId: string, filters?: BookFilters) =>
   });
 
 /**
- * Query options for getting books by author
+ * Query options for getting books by person (attribution credit)
  */
-export const booksByAuthorQuery = (authorId: string, filters?: BookFilters) =>
+export const booksByPersonQuery = (personId: string, filters?: BookFilters) =>
   queryOptions({
-    queryKey: bookKeys.byAuthor(authorId),
-    queryFn: () => bookApi.getByAuthorId(authorId, filters),
-    enabled: !!authorId,
+    queryKey: bookKeys.byPerson(personId),
+    queryFn: () => bookApi.getByPersonId(personId, filters),
+    enabled: !!personId,
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
 /**
- * Query options for getting book by ISBN
+ * Query options for getting books by organization (attribution credit)
  */
-export const bookByIsbnQuery = (isbn: string) =>
+export const booksByOrganizationQuery = (
+  organizationId: string,
+  filters?: BookFilters,
+) =>
   queryOptions({
-    queryKey: bookKeys.byIsbn(isbn),
-    queryFn: () => bookApi.getByIsbn(isbn),
-    enabled: !!isbn,
+    queryKey: bookKeys.byOrganization(organizationId),
+    queryFn: () => bookApi.getByOrganizationId(organizationId, filters),
+    enabled: !!organizationId,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+
+/**
+ * Query options for getting book by ISBN-13
+ */
+export const bookByIsbnQuery = (isbn13: string) =>
+  queryOptions({
+    queryKey: bookKeys.byIsbn(isbn13),
+    queryFn: () => bookApi.getByIsbn(isbn13),
+    enabled: !!isbn13,
     staleTime: 1000 * 60 * 30, // 30 minutes - ISBN lookups are stable
   });
 
 /**
- * Infinite query options for paginated book list
- * @todo Migrating from page to offset
+ * Query options for getting books by tag unit IDs
  */
-export const bookInfiniteListQuery = (filters?: Omit<BookFilters, "page">) =>
+export const booksByTagsQuery = (tagUnitIds: string, filters?: BookFilters) =>
+  queryOptions({
+    queryKey: bookKeys.byTags(tagUnitIds),
+    queryFn: () => bookApi.getByTagUnitIds(tagUnitIds, filters),
+    enabled: !!tagUnitIds,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+
+/**
+ * Infinite query options for paginated book list
+ */
+export const bookInfiniteListQuery = (filters?: Omit<BookFilters, "start">) =>
   infiniteQueryOptions({
     queryKey: bookKeys.list(filters),
-    queryFn: ({ pageParam = 1 }) =>
+    queryFn: ({ pageParam = 0 }) =>
       bookApi.list({ ...filters, start: pageParam }),
-    initialPageParam: 1,
-    getNextPageParam: (lastPage, allPages, lastPageParam) => {
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, _allPages, lastPageParam) => {
       const { books, total } = lastPage;
       const limit = filters?.limit || 20;
-      const hasMore =
-        books.length === limit && allPages.length * limit < (total || 0);
-      return hasMore ? lastPageParam + 1 : undefined;
+      const hasMore = books.length === limit;
+      return hasMore ? lastPageParam + limit : undefined;
     },
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
@@ -120,8 +143,10 @@ export const bookQueries = {
   search: bookSearchQuery,
   rating: bookRatingQuery,
   byUser: booksByUserQuery,
-  byAuthor: booksByAuthorQuery,
+  byPerson: booksByPersonQuery,
+  byOrganization: booksByOrganizationQuery,
   byIsbn: bookByIsbnQuery,
+  byTags: booksByTagsQuery,
   infiniteList: bookInfiniteListQuery,
   chapterIndex: bookChapterIndexQuery,
 };

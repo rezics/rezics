@@ -21,7 +21,7 @@ export const bookKeys = {
    * Keys for detail queries
    */
   details: () => [...bookKeys.all(), "detail"] as const,
-  detail: (postId: string) => [...bookKeys.details(), postId] as const,
+  detail: (unitId: string) => [...bookKeys.details(), unitId] as const,
   rating: (bookUnitId: string) =>
     [...bookKeys.all(), "rating", bookUnitId] as const,
   chapterIndex: (bookUnitId: string) =>
@@ -40,13 +40,25 @@ export const bookKeys = {
   byUser: (userId: string) => [...bookKeys.all(), "user", userId] as const,
 
   /**
-   * Keys for author-specific queries
+   * Keys for person (attribution) queries
    */
-  byAuthor: (authorId: string) =>
-    [...bookKeys.all(), "author", authorId] as const,
+  byPerson: (personId: string) =>
+    [...bookKeys.all(), "person", personId] as const,
+
+  /**
+   * Keys for organization (attribution) queries
+   */
+  byOrganization: (organizationId: string) =>
+    [...bookKeys.all(), "organization", organizationId] as const,
 
   /**
    * Keys for ISBN lookup
    */
-  byIsbn: (isbn: string) => [...bookKeys.all(), "isbn", isbn] as const,
+  byIsbn: (isbn13: string) => [...bookKeys.all(), "isbn", isbn13] as const,
+
+  /**
+   * Keys for tag-filtered queries
+   */
+  byTags: (tagUnitIds: string) =>
+    [...bookKeys.all(), "tags", tagUnitIds] as const,
 } as const;
