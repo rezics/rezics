@@ -236,13 +236,15 @@
 - [ ] 26.3 Delete `package/server/src/readlist/` directory entirely
 - [ ] 26.4 Update `package/server/src/index.ts`: remove old `.use()` mounts for comment, review, readlist; add new mounts for post, shelf, realm, realm-tag, attribution
 
-## 27. Server — Search Index Rebuild
+## 27. Server — Search Compatibility Stub
 
-- [ ] 27.1 Rewrite `package/server/src/meili/unit/sync.ts`: UnitSearchDocument now joins UnitTranslation for text fields, includes UnitTag scores, supports work/release grouping via `COALESCE(workUnitId, id)` as searchGroupKey
-- [ ] 27.2 Rewrite `package/server/src/meili/unit/unit.api.ts`: update Meilisearch filter building for new fields (visibility, nsfw, realm, language)
-- [ ] 27.3 Update `package/server/src/meili/book/` sync: Book search documents use UnitTranslation for title/description, PersonCredit for author names
-- [ ] 27.4 Create search sync for Shelf, Realm if needed
-- [ ] 27.5 Run full reindex after migration
+> **NOTE**: Full search redesign (unified content index, realm-scoped filtering, server-mediated search, new contract types) is handled by the separate `search-redesign` change. This section only ensures the existing search code compiles against the new schema so `unit-architecture` can land independently.
+
+- [ ] 27.1 Update `package/search/src/sync.ts` `syncAllBooks`: replace `Book.title`/`Book.description` reads with `UnitTranslation` join, replace `Book.author`/`Book.press`/`Book.producer` (User M2M) reads with `PersonCredit`/`OrgCredit` joins, replace `Book.tags` (String[]) and `Tag.name` reads with `UnitTag` join. Keep the existing `BookSearchDocument` shape — map new sources to old fields for continuity.
+- [ ] 27.2 Update `package/search/src/sync.ts` `syncAllUnits`: replace `Unit.title`/`Unit.content` reads with `UnitTranslation` join. Replace `domainIds` with empty array (domains removed). Update type filters to exclude removed types (`COMMENT`, `NOTE`, `REMARK`, `REVIEW`, `DOMAIN`, `READLIST`).
+- [ ] 27.3 Remove `syncAllReadlists` from `package/search/src/sync.ts` and its export from `index.ts`. Remove `readlistIndex` from `SearchClient`. Remove `package/server/src/meili/readlist/` directory.
+- [ ] 27.4 Verify `bun run build` passes in `package/search` and `package/server` with updated sync code.
+- [ ] 27.5 Add `// TODO(search-redesign): replaced by unified content index` comments on adapted sync functions to mark them as temporary.
 
 ## 28. API Client — `@rezics/api`
 

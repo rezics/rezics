@@ -27,7 +27,7 @@ The system needs to expand beyond books to games, anime/media, and community-dri
 - Decouple attribution from platform User accounts
 
 **Non-Goals:**
-- Full-text search redesign (Meilisearch sync adapts to new schema but architecture stays)
+- Full-text search redesign — handled by the separate `search-redesign` change. This change only ensures existing sync code compiles against the new schema (task 27).
 - Auth service changes (separate DB, unaffected)
 - Real-time/WebSocket features
 - UI/UX design for realm or shelf interfaces
