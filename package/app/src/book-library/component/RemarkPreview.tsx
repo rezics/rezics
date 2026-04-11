@@ -11,13 +11,13 @@ interface ShortBookReviewsProps {
 
 /**
  * Remark Preview - short reviews / remarks for a book.
- * Now uses Post API with kindKey='remark' instead of the old Remark UnitType.
+ * Now uses Post API with kind='remark' instead of the old Remark UnitType.
  */
 export const RemarkPreview: React.FC<ShortBookReviewsProps> = ({ bookId }) => {
   const { t } = useTranslation();
-  // MOCK: fetch posts with kindKey='remark' for this book
+  // MOCK: fetch posts with kind='remark' for this book
   const { data, isLoading, error } = useQuery({
-    ...postQueries.byTarget(bookId, { kindKey: 'remark', limit: 4 }),
+    ...postQueries.byTarget(bookId, { kind: 'remark', limit: 4 }),
     enabled: !!bookId,
   });
 

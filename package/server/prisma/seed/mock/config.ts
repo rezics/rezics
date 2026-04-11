@@ -1,27 +1,26 @@
 import type { SeedCounts } from "./types.js";
 
-/**
- * Parse environment variable as integer with fallback
- * @param name - Environment variable name
- * @param fallback - Default value if not set or invalid
- * @returns Parsed integer or fallback value
- */
 export function envInt(name: string, fallback: number): number {
   const raw = process.env[name];
   const v = raw ? Number.parseInt(raw, 10) : Number.NaN;
   return Number.isFinite(v) ? v : fallback;
 }
 
-/**
- * Default seed counts from environment or fallback values
- */
 export const DEFAULT_COUNTS: SeedCounts = {
-  users: envInt("SEED_USERS", 2000),
-  pressUsers: envInt("SEED_PRESS_USERS", 200),
-  producerUsers: envInt("SEED_PRODUCER_USERS", 200),
-  tags: envInt("SEED_TAGS", 4000),
-  books: envInt("SEED_BOOKS", 500),
-  otherPosts: envInt("SEED_OTHER_POSTS", 1500),
-  comments: envInt("SEED_COMMENTS", 600),
-  readLists: envInt("SEED_READ_LISTS", 1000),
+  users: envInt("SEED_USERS", 200),
+  tags: envInt("SEED_TAGS", 400),
+  books: envInt("SEED_BOOKS", 100),
+  games: envInt("SEED_GAMES", 50),
+  media: envInt("SEED_MEDIA", 50),
+  reviewsPerWork: envInt("SEED_REVIEWS_PER_WORK", 10),
+  commentsPerWork: envInt("SEED_COMMENTS_PER_WORK", 15),
+  quotesPerWork: envInt("SEED_QUOTES_PER_WORK", 5),
+  remarksPerWork: envInt("SEED_REMARKS_PER_WORK", 3),
+  shelves: envInt("SEED_SHELVES", 100),
+  realms: envInt("SEED_REALMS", 20),
+  chaptersPerBook: envInt("SEED_CHAPTERS_PER_BOOK", 30),
+  people: envInt("SEED_PEOPLE", 300),
+  organizations: envInt("SEED_ORGANIZATIONS", 50),
+  followsPerUser: envInt("SEED_FOLLOWS_PER_USER", 5),
+  bookmarksPerUser: envInt("SEED_BOOKMARKS_PER_USER", 8),
 };

@@ -40,6 +40,14 @@ enum UnitVisibility {
   PRIVATE
 }
 
+enum PostKind {
+  REVIEW
+  COMMENT
+  QUOTE
+  REMARK
+  POST
+}
+
 // ============================================================
 // CORE: UNIT IDENTITY
 // ============================================================
@@ -270,7 +278,7 @@ model Post {
   rootPostUnitId     String?   @db.Uuid
   parentPostUnitId   String?   @db.Uuid
 
-  kindKey            String?   @db.VarChar(64)
+  kind               PostKind?
 
   depth              Int       @default(0)
   sortPath           String?   @db.VarChar(512)
@@ -296,7 +304,7 @@ model Post {
   @@index([targetUnitId, sortPath])
   @@index([rootPostUnitId, sortPath])
   @@index([parentPostUnitId, createdAt])
-  @@index([kindKey, createdAt])
+  @@index([kind, createdAt])
 }
 
 // ============================================================

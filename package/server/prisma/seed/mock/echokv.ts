@@ -1,4 +1,3 @@
-// 添加 main tag group 以及 公告板
 import { prisma } from "#/prisma/client";
 import type { PrismaClient } from "#/prisma/generated/client.js";
 import { products } from "./data/home/homeCarousel";

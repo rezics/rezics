@@ -1,94 +1,49 @@
+import { randomUUID } from "node:crypto";
 import { faker } from "@faker-js/faker";
 import type { PrismaClient } from "#/prisma/generated/client.js";
 import { UnitStatus, UnitType } from "#/prisma/generated/client.js";
-import type { CreatedUser } from "./types.js";
-import { pickN, randomInt } from "./utils.js";
+import { generateTranslation } from "./generators.js";
+import type { CreatedUnit, CreatedUser } from "./types.js";
 
 /**
- * Tag types available in the system
- */
-// const TAG_TYPES = ['general', 'genre', 'author', 'system'] as const;
-const TAG_TYPES = ["book"] as const;
-
-export async function seedTagDomains(
-  prisma: PrismaClient,
-  total: number,
-  users: CreatedUser[],
-): Promise<string[]> {
-  console.log(`🏷️ Seeding ${total} tag domains...`);
-  const tagDomainIds: string[] = [];
-
-  for (let i = 0; i < total; i++) {
-    const user = faker.helpers.arrayElement(users);
-    const name = `${faker.word.adjective()} ${faker.word.noun()}`;
-    const unit = await prisma.unit.create({
-      data: {
-        userId: user.unitId,
-        type: UnitType.DOMAIN,
-        status: UnitStatus.ACTIVE,
-        title: `Tag Domain: ${name}`,
-        content: `This is a tag domain`,
-        metadata: {},
-        publishedAt: faker.date.past({ years: 1 }),
-      },
-    });
-    tagDomainIds.push(unit.id);
-  }
-
-  return tagDomainIds;
-}
-
-/**
- * Seed tags into database
- * @param prisma - Prisma client instance
- * @param total - Number of tags to create
- * @param users - Array of created users
- * @returns Array of tag unit IDs
+ * Seed tags as Unit(type=TAG) + UnitTranslation.
+ * Uses two-phase createMany for maximum throughput.
  */
 export async function seedTags(
   prisma: PrismaClient,
   total: number,
   users: CreatedUser[],
-): Promise<string[]> {
-  const tagDomainIds = await seedTagDomains(prisma, 20, users);
+): Promise<CreatedUnit[]> {
+  console.log(`[Seed] Seeding ${total} tags...`);
 
-  console.log(`🏷️ Seeding ${total} tags...`);
-  const tagUnitIds: string[] = [];
-
-  for (let i = 0; i < total; i++) {
+  const tags = Array.from({ length: total }, () => {
+    const id = randomUUID();
     const user = faker.helpers.arrayElement(users);
-    const name = `${faker.word.adjective()} ${faker.word.noun()}`;
-    const type = faker.helpers.arrayElement(TAG_TYPES);
+    const translation = generateTranslation(UnitType.TAG);
+    return { id, userId: user.unitId, title: translation.title };
+  });
 
-    // Create a unit for the tag
-    const unit = await prisma.unit.create({
-      data: {
-        userId: user.unitId,
-        type: UnitType.TAG,
-        status: UnitStatus.ACTIVE,
-        title: `Tag: ${name}`,
-        content: `This is a ${type} tag`,
-        metadata: {},
-        publishedAt: faker.date.past({ years: 1 }),
-        domains: {
-          connect: pickN(tagDomainIds, randomInt(1, 4)).map((unitId) => ({
-            id: unitId,
-          })),
-        },
-      },
-    });
+  // Phase 1: Create Unit rows
+  await prisma.unit.createMany({
+    data: tags.map((t) => ({
+      id: t.id,
+      type: UnitType.TAG,
+      userId: t.userId,
+      status: UnitStatus.PUBLISHED,
+      isLanguageNeutral: false,
+      defaultLanguage: "en",
+      publishedAt: faker.date.past({ years: 1 }),
+    })),
+  });
 
-    // Create the tag
-    await prisma.tag.create({
-      data: {
-        unitId: unit.id,
-        name,
-        type,
-      },
-    });
+  // Phase 2: Create UnitTranslation rows
+  await prisma.unitTranslation.createMany({
+    data: tags.map((t) => ({
+      unitId: t.id,
+      language: "en",
+      title: t.title,
+    })),
+  });
 
-    tagUnitIds.push(unit.id);
-  }
-
-  return tagUnitIds;
+  return tags.map((t) => ({ id: t.id, type: UnitType.TAG }));
 }

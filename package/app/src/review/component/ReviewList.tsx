@@ -6,7 +6,7 @@ import { SingleReviewShow } from "./SingleReview";
 
 /**
  * ReviewList - now uses PostDTO instead of ReviewDTO.
- * Posts with kindKey='review' are rendered as reviews.
+ * Posts with kind='review' are rendered as reviews.
  */
 export type ReviewListProps = {
   reviews: PostDTO[];

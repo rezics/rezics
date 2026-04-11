@@ -25,7 +25,7 @@ import { buildTree } from "./tree-reply-util";
 
 /**
  * TreeReplyComponents - now uses Post API instead of Comment API.
- * Comments are Posts with kindKey='comment' and threaded via parentPostUnitId.
+ * Comments are Posts with kind='comment' and threaded via parentPostUnitId.
  */
 
 // Local UI type adapted from PostDTO for tree rendering
@@ -200,7 +200,7 @@ export function TreeReplyComponents({ unitId }: ReplyComponentsProps) {
     // Fetch comment-kind posts for this unit (threaded mode)
     const { data, isLoading, error } = useQuery({
       ...postQueries.byTarget(unitId, {
-        kindKey: 'comment',
+        kind: 'comment',
         mode: 'threaded',
         limit: 200,
       }),
@@ -274,7 +274,7 @@ export function TreeReplyComponents({ unitId }: ReplyComponentsProps) {
         createPostMutation.mutate({
           targetUnitId: unitId,
           parentPostUnitId: currentReplyId || undefined,
-          kindKey: 'comment',
+          kind: 'comment',
           body: content,
         });
       }

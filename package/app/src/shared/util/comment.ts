@@ -3,7 +3,7 @@ import type { PostDTO, CreatePostInput, UpdatePostInput } from "@rezics/contract
 
 /**
  * Submit a comment or reply using the Post API.
- * Comments are Posts with kindKey='comment'.
+ * Comments are Posts with kind='comment'.
  */
 export const handleSubmit = async (
   currentReplyId: string,
@@ -33,7 +33,7 @@ export const handleSubmit = async (
   const input: CreatePostInput = {
     targetUnitId,
     parentPostUnitId,
-    kindKey: 'comment',
+    kind: 'comment',
     body: content,
   };
   return postApi.create(input);

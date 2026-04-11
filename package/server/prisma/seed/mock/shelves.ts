@@ -1,0 +1,88 @@
+import { faker } from "@faker-js/faker";
+import type { PrismaClient } from "#/prisma/generated/client.js";
+import { UnitStatus, UnitType } from "#/prisma/generated/client.js";
+import { SHELF_KIND_KEYS } from "./data.js";
+import { generateTranslation } from "./generators.js";
+import type { CreatedPost, CreatedUnit, CreatedUser } from "./types.js";
+import { chunkedParallel, pickN, randomBoolean, randomInt } from "./utils.js";
+
+const CHUNK_SIZE = 10;
+
+/**
+ * Seed shelves (replaces ReadList).
+ * Each shelf = Unit(type=SHELF) + Shelf extension + UnitTranslation + ShelfItems.
+ */
+export async function seedShelves(
+  prisma: PrismaClient,
+  total: number,
+  users: CreatedUser[],
+  workIds: string[],
+  reviewPosts: CreatedPost[],
+): Promise<CreatedUnit[]> {
+  if (workIds.length < 3) {
+    console.warn("[Seed] Not enough works to seed shelves (need >= 3). Skipping.");
+    return [];
+  }
+
+  console.log(`[Seed] Seeding ${total} shelves...`);
+
+  return chunkedParallel(
+    Array.from({ length: total }),
+    CHUNK_SIZE,
+    async () => {
+      const author = faker.helpers.arrayElement(users);
+      const translation = generateTranslation(UnitType.SHELF);
+      const kindKey = faker.helpers.arrayElement([...SHELF_KIND_KEYS]);
+
+      const unit = await prisma.unit.create({
+        data: {
+          type: UnitType.SHELF,
+          userId: author.unitId,
+          status: randomBoolean(0.9) ? UnitStatus.PUBLISHED : UnitStatus.DRAFT,
+          defaultLanguage: "en",
+          publishedAt: randomBoolean(0.85) ? faker.date.past({ years: 2 }) : null,
+          shelf: {
+            create: { kindKey },
+          },
+          translations: {
+            create: {
+              language: "en",
+              title: translation.title,
+              description: translation.description,
+            },
+          },
+          supportLanguages: {
+            create: { language: "en", isPrimary: true },
+          },
+        },
+        select: { id: true, type: true },
+      });
+
+      // Add items to shelf
+      const itemCount = randomInt(3, Math.min(10, workIds.length));
+      const selectedWorks = pickN(workIds, itemCount);
+
+      const shelfItems = selectedWorks.map((workId, i) => {
+        // Optionally link a review post
+        const matchingReview =
+          randomBoolean(0.3) && reviewPosts.length > 0
+            ? reviewPosts.find((p) => p.targetUnitId === workId)
+            : undefined;
+
+        return {
+          shelfUnitId: unit.id,
+          itemUnitId: workId,
+          sortOrder: i,
+          reviewPostUnitId: matchingReview?.id ?? null,
+          label: randomBoolean(0.2) ? faker.lorem.words({ min: 1, max: 3 }) : null,
+        };
+      });
+
+      if (shelfItems.length > 0) {
+        await prisma.shelfItem.createMany({ data: shelfItems });
+      }
+
+      return unit;
+    },
+  );
+}

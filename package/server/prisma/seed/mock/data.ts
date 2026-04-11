@@ -1,6 +1,7 @@
-import { faker } from "@faker-js/faker/locale/zu_ZA";
+import { faker } from "@faker-js/faker";
 
-// https://www.amazon.com/amz-books/store
+// ── Book covers ─────────────────────────────────────
+
 const book_cover_urls = [
   "https://m.media-amazon.com/images/I/91RwHjXkO6L._SY466_.jpg",
   "https://m.media-amazon.com/images/I/91pqP1xMb2L._SY466_.jpg",
@@ -20,34 +21,62 @@ const book_cover_urls = [
   "https://m.media-amazon.com/images/I/91Y94CZ-X3L._SY425_.jpg",
 ];
 
-const press_user_names = [
-  "起点中文网",
-  "晋江文学城",
-  "纵横中文网",
-  "菠萝包",
-  "红袖添香",
-  "潇湘书院",
-  "微信读书",
-];
-
-const producer_user_names = [
-  "阅文集团",
-  "腾讯文学",
-  "百度文学",
-  "阿里文学",
-  "网易文学",
-  "搜狐文学",
-  "凤凰文学",
-];
-
 export function getRandomBookCover() {
   return faker.helpers.arrayElement(book_cover_urls);
 }
 
-export function getRandomPressUserName() {
-  return faker.helpers.arrayElement(press_user_names);
-}
+// ── Constants ───────────────────────────────────────
 
-export function getRandomProducerUserName() {
-  return faker.helpers.arrayElement(producer_user_names);
-}
+export const PLATFORM_KEYS = [
+  "PC",
+  "PS5",
+  "PS4",
+  "XBOX_SERIES",
+  "XBOX_ONE",
+  "SWITCH",
+  "MOBILE",
+  "WEB",
+] as const;
+
+export const MEDIA_KIND_KEYS = [
+  "MOVIE",
+  "TV_SERIES",
+  "ANIME",
+  "DOCUMENTARY",
+  "SHORT_FILM",
+] as const;
+
+export const SHELF_KIND_KEYS = [
+  "READING_LIST",
+  "FAVORITES",
+  "WATCHLIST",
+  "PLAYLIST",
+  "CUSTOM",
+] as const;
+
+export const REALM_ROLE_KEYS = [
+  "OWNER",
+  "ADMIN",
+  "MODERATOR",
+  "MEMBER",
+] as const;
+
+export const PERSON_ROLE_KEYS = [
+  "AUTHOR",
+  "ILLUSTRATOR",
+  "TRANSLATOR",
+  "EDITOR",
+  "NARRATOR",
+  "COMPOSER",
+  "DIRECTOR",
+  "ACTOR",
+] as const;
+
+export const ORG_ROLE_KEYS = [
+  "PUBLISHER",
+  "STUDIO",
+  "DISTRIBUTOR",
+  "LABEL",
+] as const;
+
+export const REACTION_TYPES = ["like", "dislike", "love"] as const;

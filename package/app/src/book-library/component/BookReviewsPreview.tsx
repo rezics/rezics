@@ -20,7 +20,7 @@ interface BookReviewsProps {
 
 /**
  * Book Reviews Preview - Displays a preview of reviews for a book.
- * Now uses Post API with kindKey='review' instead of the old Review model.
+ * Now uses Post API with kind='review' instead of the old Review model.
  */
 export const BookReviews: React.FC<BookReviewsProps> = ({
   bookId,
@@ -29,9 +29,9 @@ export const BookReviews: React.FC<BookReviewsProps> = ({
 }) => {
   const { t } = useTranslation();
 
-  // MOCK: fetch posts with kindKey='review' for this book
+  // MOCK: fetch posts with kind='review' for this book
   const { data } = useQuery({
-    ...postQueries.byTarget(bookId, { kindKey: 'review', limit: reviewNumber }),
+    ...postQueries.byTarget(bookId, { kind: 'review', limit: reviewNumber }),
     enabled: !!bookId,
   });
 

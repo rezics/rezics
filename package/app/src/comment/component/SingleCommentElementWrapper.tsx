@@ -38,7 +38,7 @@ export function SingleCommentElementWrapper({
   const handleSubmit = (content: string) => {
     createPostMutation.mutate({
       targetUnitId: replyUnitId,
-      kindKey: 'comment',
+      kind: 'comment',
       body: content,
     });
   };

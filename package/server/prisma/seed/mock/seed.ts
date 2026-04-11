@@ -3,138 +3,165 @@ import type { Prisma } from "#/prisma/client";
 import { prisma } from "#/prisma/client";
 import { resetDatabase } from "#/prisma/seed/database";
 import {
+  seedPeople,
+  seedOrganizations,
+} from "#/prisma/seed/mock/attribution";
+import {
   seedBooks,
   seedChaptersForBook,
   updateChapterIndex,
 } from "#/prisma/seed/mock/books";
-import {
-  seedComments,
-  updateStatsWithCommentCounts,
-} from "#/prisma/seed/mock/comments";
 import { DEFAULT_COUNTS } from "#/prisma/seed/mock/config";
 import { seedEchoKV } from "#/prisma/seed/mock/echokv";
-import { seedReadLists } from "#/prisma/seed/mock/readlist";
+import { seedEngagement } from "#/prisma/seed/mock/engagement";
+import { seedGames } from "#/prisma/seed/mock/games";
+import { seedMedia } from "#/prisma/seed/mock/media";
+import { seedPostsForWorks } from "#/prisma/seed/mock/posts";
+import { seedRealms } from "#/prisma/seed/mock/realms";
+import { seedShelves } from "#/prisma/seed/mock/shelves";
 import { seedTags } from "#/prisma/seed/mock/tags";
-import { seedOtherUnits } from "#/prisma/seed/mock/units";
-import {
-  seedPressUsers,
-  seedProducerUsers,
-  seedUsers,
-} from "#/prisma/seed/mock/users";
+import { seedUsers } from "#/prisma/seed/mock/users";
+import { chunkedParallel } from "#/prisma/seed/mock/utils";
 
-// ------------------------------
-// Main Function
-// ------------------------------
+function stepTimer(label: string) {
+  const start = performance.now();
+  return () => {
+    const ms = (performance.now() - start).toFixed(0);
+    console.log(`[Seed] ${label} done (${ms}ms)`);
+  };
+}
 
-/**
- * Main seeding function
- * Orchestrates the entire database seeding process
- */
 async function main() {
-  console.time("seed");
-  console.log("[Seed] Starting database seeding with Faker.js...");
+  console.time("seed:total");
+  console.log("[Seed] Starting database seeding...");
   console.log("[Seed] Counts:", DEFAULT_COUNTS);
 
-  try {
-    // Reset database
-    await resetDatabase(prisma);
+  // ── STEP 1: Reset ─────────────────────────────────
+  let done = stepTimer("Step 1: Reset");
+  await resetDatabase(prisma);
+  done();
 
-    // Seed users
-    const users = await seedUsers(prisma, DEFAULT_COUNTS.users);
-    console.log(`[Seed] Created ${users.length} users`);
+  // ── STEP 2: Foundation (parallel) ─────────────────
+  done = stepTimer("Step 2: Users + People + Organizations");
+  const [users, people, organizations] = await Promise.all([
+    seedUsers(prisma, DEFAULT_COUNTS.users),
+    seedPeople(prisma, DEFAULT_COUNTS.people),
+    seedOrganizations(prisma, DEFAULT_COUNTS.organizations),
+  ]);
+  console.log(
+    `[Seed]   ${users.length} users, ${people.length} people, ${organizations.length} organizations`,
+  );
+  done();
 
-    const pressUsers = await seedPressUsers(prisma, DEFAULT_COUNTS.pressUsers);
-    console.log(`[Seed] Created ${pressUsers.length} press users`);
+  // ── STEP 3: Tags ──────────────────────────────────
+  done = stepTimer("Step 3: Tags");
+  const tags = await seedTags(prisma, DEFAULT_COUNTS.tags, users);
+  console.log(`[Seed]   ${tags.length} tags`);
+  done();
 
-    const producerUsers = await seedProducerUsers(
-      prisma,
-      DEFAULT_COUNTS.producerUsers,
-    );
-    console.log(`[Seed] Created ${producerUsers.length} producer users`);
+  // ── STEP 4: Works (parallel) ──────────────────────
+  done = stepTimer("Step 4: Books + Games + Media");
+  const [books, games, mediaItems] = await Promise.all([
+    seedBooks(prisma, DEFAULT_COUNTS.books, users, people, organizations, tags),
+    seedGames(prisma, DEFAULT_COUNTS.games, users, people, organizations, tags),
+    seedMedia(prisma, DEFAULT_COUNTS.media, users, people, organizations, tags),
+  ]);
+  const allWorkIds = [
+    ...books.map((b) => b.id),
+    ...games.map((g) => g.id),
+    ...mediaItems.map((m) => m.id),
+  ];
+  console.log(
+    `[Seed]   ${books.length} books, ${games.length} games, ${mediaItems.length} media`,
+  );
+  done();
 
-    // Seed tags
-    const tagUnitIds = await seedTags(prisma, DEFAULT_COUNTS.tags, users);
-    console.log(`[Seed] Created ${tagUnitIds.length} tags`);
+  // ── STEP 5: Content (parallel) ────────────────────
+  done = stepTimer("Step 5: Posts + Shelves + Realms");
+  const allWorks = [...books, ...games, ...mediaItems];
+  const [posts, shelves, realms] = await Promise.all([
+    seedPostsForWorks(prisma, allWorks, users, {
+      reviews: DEFAULT_COUNTS.reviewsPerWork,
+      comments: DEFAULT_COUNTS.commentsPerWork,
+      quotes: DEFAULT_COUNTS.quotesPerWork,
+      remarks: DEFAULT_COUNTS.remarksPerWork,
+    }),
+    seedShelves(prisma, DEFAULT_COUNTS.shelves, users, allWorkIds, []),
+    seedRealms(prisma, DEFAULT_COUNTS.realms, users, allWorkIds),
+  ]);
+  console.log(
+    `[Seed]   ${posts.length} posts, ${shelves.length} shelves, ${realms.length} realms`,
+  );
+  done();
 
-    // Seed books
-    const books = await seedBooks(
-      prisma,
-      DEFAULT_COUNTS.books,
-      users,
-      pressUsers,
-      producerUsers,
-      tagUnitIds,
-    );
-    const bookIds = books.map((b) => b.id);
-    console.log(`[Seed] Created ${books.length} books`);
+  // ── STEP 5b: Chapters (needs books from step 4) ──
+  done = stepTimer("Step 5b: Chapters + BookIndex");
+  const bookUnitMap = new Map<string, string>();
+  for (const book of books) {
+    // We need the userId for each book to assign chapters
+    const unit = await prisma.unit.findUnique({
+      where: { id: book.id },
+      select: { userId: true },
+    });
+    if (unit?.userId) bookUnitMap.set(book.id, unit.userId);
+  }
 
-    // Seed other units
-    const others = await seedOtherUnits(
-      prisma,
-      DEFAULT_COUNTS.otherPosts,
-      users,
-      bookIds,
-      tagUnitIds,
-    );
-    const reviewUnitIds = others.map((o) => o.id);
-    console.log(`[Seed] Created ${others.length} other units`);
+  await chunkedParallel(
+    books,
+    5,
+    async (book) => {
+      const userId = bookUnitMap.get(book.id);
+      if (!userId) return;
 
-    // Seed read lists
-    const readLists = await seedReadLists(
-      prisma,
-      DEFAULT_COUNTS.readLists,
-      users,
-      bookIds,
-      reviewUnitIds,
-    );
-    console.log(`[Seed] Created ${readLists.length} read lists`);
-
-    // Generate chapters per book and update chapter index JSON
-    for (const bookId of bookIds) {
-      const chapterTree = await seedChaptersForBook(prisma, bookId);
+      const chapterTree = await seedChaptersForBook(prisma, book.id, userId, {
+        topLevelCount: 2,
+        minChildren: 3,
+        maxChildren: DEFAULT_COUNTS.chaptersPerBook,
+      });
       await updateChapterIndex(
         prisma,
-        bookId,
+        book.id,
         chapterTree as unknown as Prisma.InputJsonValue,
       );
-    }
+    },
+  );
+  done();
 
-    // Seed comments
-    const allRootUnitIds: string[] = [...bookIds, ...others.map((o) => o.id)];
-    const { perRootCount } = await seedComments(
-      prisma,
-      DEFAULT_COUNTS.comments,
-      users,
-      allRootUnitIds,
-    );
-    const totalComments = Array.from(perRootCount.values()).reduce(
-      (a, b) => a + b,
-      0,
-    );
-    console.log(`[Seed] Created ${totalComments} comments`);
+  // ── STEP 6: Engagement ────────────────────────────
+  done = stepTimer("Step 6: Engagement");
+  const allUnitIds = [
+    ...allWorkIds,
+    ...posts.map((p) => p.id),
+    ...shelves.map((s) => s.id),
+    ...realms.map((r) => r.id),
+    ...tags.map((t) => t.id),
+  ];
+  await seedEngagement(prisma, users, allUnitIds, {
+    followsPerUser: DEFAULT_COUNTS.followsPerUser,
+    bookmarksPerUser: DEFAULT_COUNTS.bookmarksPerUser,
+  });
+  done();
 
-    // Update stats with comment counts
-    await updateStatsWithCommentCounts(prisma, perRootCount);
+  // ── STEP 7: Platform ──────────────────────────────
+  done = stepTimer("Step 7: EchoKV");
+  await seedEchoKV(prisma);
+  done();
 
-    // Seed echo KV
-    await seedEchoKV(prisma);
-
-    // Print summary
-    const summary = {
-      users: users.length,
-      tags: tagUnitIds.length,
-      books: books.length,
-      otherUnits: others.length,
-      readLists: readLists.length,
-      comments: totalComments,
-    };
-
-    console.log("[Seed] Seed complete!", summary);
-    console.timeEnd("seed");
-  } catch (error) {
-    console.error("[Error] Seed failed:", error);
-    throw error;
-  }
+  // ── Summary ───────────────────────────────────────
+  console.log("[Seed] Complete!", {
+    users: users.length,
+    people: people.length,
+    organizations: organizations.length,
+    tags: tags.length,
+    books: books.length,
+    games: games.length,
+    media: mediaItems.length,
+    posts: posts.length,
+    shelves: shelves.length,
+    realms: realms.length,
+    totalUnits: allUnitIds.length,
+  });
+  console.timeEnd("seed:total");
 }
 
 main()

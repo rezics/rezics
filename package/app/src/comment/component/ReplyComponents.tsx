@@ -19,7 +19,7 @@ export const ReplyComponents: React.FC<ReplyComponentsProps> = ({
   // Fetch flat posts for this target
   const { data } = useQuery({
     ...postQueries.byTarget(bookListId, {
-      kindKey: 'comment',
+      kind: 'comment',
       mode: 'flat',
       limit: 200,
     }),

@@ -22,7 +22,7 @@ export const postApi = {
   /**
    * List posts with optional filters
    * Supports: targetUnitId, realmUnitId, rootPostUnitId, parentPostUnitId,
-   * authorUserId, kindKey, mode, maxDepth, sort, start, cursor, limit
+   * authorUserId, kind, mode, maxDepth, sort, start, cursor, limit
    */
   list: async (filters?: PostFilters): Promise<PostListResponse> => {
     return apiFetch<PostListResponse>(`/posts${buildQueryString(filters)}`);

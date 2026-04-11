@@ -2,7 +2,7 @@
  * Post-related TypeScript types and interfaces for the frontend
  *
  * Post replaces Comment, Review, Note, Remark as a unified discussion entity.
- * Posts support threading via rootPostUnitId/parentPostUnitId, and kinds via kindKey.
+ * Posts support threading via rootPostUnitId/parentPostUnitId, and kinds via kind.
  */
 
 import type {

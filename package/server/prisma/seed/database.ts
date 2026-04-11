@@ -1,38 +1,77 @@
 import type { PrismaClient } from "#/prisma/generated/client.js";
-import { searchClient } from "../../src/meili/search-client";
 
 /**
- * Reset database by deleting all data in correct order
- * Order matters due to foreign key constraints
- * @param prisma - Prisma client instance
+ * Reset database by deleting all data in FK-safe order.
+ * Groups at the same FK level are deleted in parallel.
  */
 export async function resetDatabase(prisma: PrismaClient): Promise<void> {
-  console.log("Resetting database...");
-  // Order matters due to FKs
-  await prisma.apiToken.deleteMany();
-  await prisma.bookmark.deleteMany();
-  await prisma.follow.deleteMany();
-  await prisma.commentIndex.deleteMany();
-  await prisma.reaction.deleteMany();
-  await prisma.reactionSummary.deleteMany();
-  await prisma.rating.deleteMany();
-  await prisma.book.deleteMany();
-  await prisma.seriesBook.deleteMany();
-  await prisma.unitLocalizations.deleteMany();
-  await prisma.bookIndex.deleteMany();
-  await prisma.readList.deleteMany();
-  await prisma.tag.deleteMany();
-  await prisma.unit.deleteMany();
-  await prisma.user.deleteMany();
-  await prisma.echoKV.deleteMany();
-  await prisma.feedback.deleteMany();
-}
+  console.log("[Reset] Resetting database...");
 
-export async function resetMeiliSearchDatabase(): Promise<void> {
-  console.log("Resetting MeiliSearch database...");
-  await searchClient.deleteAllBooks();
-  await searchClient.deleteAllUnits();
-  await searchClient.deleteAllReadlists();
-  await searchClient.deleteAllFeedbacks();
-  await searchClient.deleteAllUsers();
+  // Group 1: Leaf tables with no dependents
+  await Promise.all([
+    prisma.apiToken.deleteMany(),
+    prisma.feedback.deleteMany(),
+    prisma.tagVote.deleteMany(),
+    prisma.bookmark.deleteMany(),
+    prisma.reaction.deleteMany(),
+    prisma.follow.deleteMany(),
+    prisma.personCredit.deleteMany(),
+    prisma.orgCredit.deleteMany(),
+  ]);
+
+  // Group 2: Aggregate / junction leaves
+  await Promise.all([
+    prisma.reactionSummary.deleteMany(),
+    prisma.rating.deleteMany(),
+    prisma.realmTagUnit.deleteMany(),
+  ]);
+
+  // Group 3: Realm + shelf + tag junction
+  await Promise.all([
+    prisma.realmUnit.deleteMany(),
+    prisma.realmMember.deleteMany(),
+    prisma.shelfItem.deleteMany(),
+    prisma.unitTag.deleteMany(),
+  ]);
+
+  // Group 4: Extension children
+  await Promise.all([
+    prisma.bookIndex.deleteMany(),
+    prisma.gamePlatform.deleteMany(),
+  ]);
+
+  // Group 5: Type extensions (1:1 with Unit)
+  await Promise.all([
+    prisma.post.deleteMany(),
+    prisma.shelf.deleteMany(),
+    prisma.realm.deleteMany(),
+    prisma.book.deleteMany(),
+    prisma.game.deleteMany(),
+    prisma.media.deleteMany(),
+  ]);
+
+  // Group 6: Translation layer
+  await Promise.all([
+    prisma.unitTranslation.deleteMany(),
+    prisma.unitSupportLanguage.deleteMany(),
+  ]);
+
+  // Group 7: Core
+  await prisma.unit.deleteMany();
+
+  // Group 8: Identity + attribution
+  await Promise.all([
+    prisma.user.deleteMany(),
+    prisma.person.deleteMany(),
+    prisma.organization.deleteMany(),
+  ]);
+
+  // Group 9: Platform misc
+  await Promise.all([
+    prisma.echoKV.deleteMany(),
+    prisma.jwks.deleteMany(),
+  ]);
+  await prisma.jwtService.deleteMany();
+
+  console.log("[Reset] Database reset complete.");
 }

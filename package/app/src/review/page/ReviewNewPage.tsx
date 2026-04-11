@@ -8,7 +8,7 @@ import { ReviewEditPage } from "./ReviewEditPage";
 
 /**
  * ReviewNewPage - now uses Post API instead of Review API.
- * Creates a Post with kindKey='review' or kindKey='remark'.
+ * Creates a Post with kind='review' or kind='remark'.
  */
 
 // MOCK: local editing state matching ReviewEditPage's expected shape
@@ -37,7 +37,7 @@ export function ReviewNewPage({
   });
   const { show } = useAlertStore();
   const { user } = useUserProfileStore();
-  const kindKey = searchParams.get("tab") === "remark" ? "remark" : "review";
+  const kind = searchParams.get("tab") === "remark" ? "remark" : "review";
 
   const { mutate, isPending } = useCreatePostMutation({
     onSuccess: (data) => {
@@ -58,7 +58,7 @@ export function ReviewNewPage({
     }
     mutate({
       targetUnitId: bookUnitId,
-      kindKey,
+      kind,
       body: reviewData.body || "",
       extra: {
         title: reviewData._editTitle || undefined,
@@ -70,7 +70,7 @@ export function ReviewNewPage({
   return (
     <div>
       <div className="max-w-4xl mx-auto mt-4">
-        <h1 className="text-xl font-semibold">New {kindKey}</h1>
+        <h1 className="text-xl font-semibold">New {kind}</h1>
         <TextField
           label="Book Unit ID"
           variant="filled"

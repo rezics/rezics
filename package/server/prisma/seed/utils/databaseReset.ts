@@ -1,9 +1,8 @@
 import { prisma } from "../../client";
-import { resetDatabase, resetMeiliSearchDatabase } from "../database";
+import { resetDatabase } from "../database";
 
 async function main() {
   await resetDatabase(prisma);
-  await resetMeiliSearchDatabase();
 }
 
 main()

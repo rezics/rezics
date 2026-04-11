@@ -4,7 +4,7 @@ import type {
   UpdatePostInput,
 } from "@rezics/contract";
 import type { Prisma } from "#/prisma/client";
-import { prisma, UnitStatus, UnitType } from "#/prisma/client";
+import { type PostKind, prisma, UnitStatus, UnitType } from "#/prisma/client";
 import type { PostWithRelations } from "./types";
 import { postInclude } from "./types";
 
@@ -22,7 +22,7 @@ export class PostService {
     const skipNum = query.start ?? 0;
 
     const where: Prisma.PostWhereInput = {
-      unit: { status: UnitStatus.ACTIVE },
+      unit: { status: UnitStatus.PUBLISHED },
     };
 
     if (query.targetUnitId) where.targetUnitId = query.targetUnitId;
@@ -30,7 +30,7 @@ export class PostService {
     if (query.rootPostUnitId) where.rootPostUnitId = query.rootPostUnitId;
     if (query.parentPostUnitId) where.parentPostUnitId = query.parentPostUnitId;
     if (query.authorUserId) where.authorUserId = query.authorUserId;
-    if (query.kindKey) where.kindKey = query.kindKey;
+    if (query.kind) where.kind = query.kind as PostKind;
 
     if (typeof query.maxDepth === "number") {
       where.depth = { lte: query.maxDepth };
@@ -83,7 +83,7 @@ export class PostService {
     input: CreatePostInput,
     authorUserId: string,
   ): Promise<PostWithRelations> {
-    const { targetUnitId, realmUnitId, parentPostUnitId, kindKey, body, extra } =
+    const { targetUnitId, realmUnitId, parentPostUnitId, kind, body, extra } =
       input;
 
     let depth = 0;
@@ -112,30 +112,30 @@ export class PostService {
     }
 
     const post = await prisma.$transaction(async (tx) => {
-      const created = await tx.post.create({
+      const unit = await tx.unit.create({
         data: {
-          unit: {
-            create: {
-              userId: authorUserId,
-              type: UnitType.POST,
-              status: UnitStatus.ACTIVE,
-            },
-          },
-          authorUserId,
-          targetUnitId: targetUnitId ?? undefined,
-          realmUnitId: realmUnitId ?? undefined,
-          body,
-          kindKey: kindKey ?? undefined,
-          depth,
-          sortPath: sortPath ?? undefined,
-          extra: extra as Prisma.InputJsonValue | undefined,
-          ...(rootPostUnitId
-            ? { rootPostUnitId }
-            : {}),
-          ...(parentPostUnitId
-            ? { parentPostUnitId }
-            : {}),
+          userId: authorUserId,
+          type: UnitType.POST,
+          status: UnitStatus.PUBLISHED,
         },
+      });
+
+      const createData: Prisma.PostUncheckedCreateInput = {
+        unitId: unit.id,
+        authorUserId,
+        targetUnitId: targetUnitId ?? undefined,
+        realmUnitId: realmUnitId ?? undefined,
+        body,
+        kind: (kind as PostKind) ?? undefined,
+        depth,
+        sortPath: sortPath ?? undefined,
+        extra: extra as Prisma.InputJsonValue | undefined,
+        rootPostUnitId: rootPostUnitId ?? undefined,
+        parentPostUnitId: parentPostUnitId ?? undefined,
+      };
+
+      const created = await tx.post.create({
+        data: createData,
         include: postInclude,
       });
 
@@ -277,7 +277,7 @@ export class PostService {
     if (lastSibling?.sortPath) {
       // Extract the last segment from the sibling's sortPath
       const segments = lastSibling.sortPath.split(".");
-      const lastSegment = segments[segments.length - 1];
+      const lastSegment = segments[segments.length - 1] ?? "0";
       const parsed = parseInt(lastSegment, 10);
       if (!isNaN(parsed)) {
         nextSegment = parsed + 1;

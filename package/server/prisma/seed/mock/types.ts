@@ -1,31 +1,46 @@
-import type { UnitType } from "#/prisma/generated/client.js";
+import type { PostKind, UnitType } from "#/prisma/generated/client.js";
 
-/**
- * User data returned after creation
- */
 export interface CreatedUser {
   unitId: string;
   name: string;
+  slug: string;
 }
 
-/**
- * Unit data returned after creation
- */
 export interface CreatedUnit {
   id: string;
   type: UnitType;
 }
 
-/**
- * Configuration for seeding counts
- */
+export interface CreatedPerson {
+  id: string;
+  name: string;
+}
+
+export interface CreatedOrganization {
+  id: string;
+  name: string;
+}
+
+export interface CreatedPost extends CreatedUnit {
+  kind: PostKind;
+  targetUnitId?: string;
+}
+
 export interface SeedCounts {
   users: number;
-  pressUsers: number;
-  producerUsers: number;
   tags: number;
   books: number;
-  otherPosts: number;
-  comments: number;
-  readLists: number;
+  games: number;
+  media: number;
+  reviewsPerWork: number;
+  commentsPerWork: number;
+  quotesPerWork: number;
+  remarksPerWork: number;
+  shelves: number;
+  realms: number;
+  chaptersPerBook: number;
+  people: number;
+  organizations: number;
+  followsPerUser: number;
+  bookmarksPerUser: number;
 }

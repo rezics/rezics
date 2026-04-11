@@ -14,7 +14,7 @@ export const postDTOSchema = t.Object({
   body: t.Optional(t.Nullable(t.String())),
   rootPostUnitId: t.Optional(t.Nullable(t.String())),
   parentPostUnitId: t.Optional(t.Nullable(t.String())),
-  kindKey: t.Optional(t.Nullable(t.String())),
+  kind: t.Optional(t.Nullable(t.String())),
   depth: t.Optional(t.Number()),
   sortPath: t.Optional(t.Nullable(t.String())),
   replyCount: t.Optional(t.Number()),
@@ -39,7 +39,7 @@ export const postListQuerySchema = t.Object({
   rootPostUnitId: t.Optional(t.String()),
   parentPostUnitId: t.Optional(t.String()),
   authorUserId: t.Optional(t.String()),
-  kindKey: t.Optional(t.String()),
+  kind: t.Optional(t.String()),
   mode: t.Optional(t.String()),
   maxDepth: t.Optional(t.Number()),
   sort: t.Optional(
@@ -89,7 +89,7 @@ export const createPostSchema = t.Object({
   targetUnitId: t.Optional(t.String()),
   realmUnitId: t.Optional(t.String()),
   parentPostUnitId: t.Optional(t.String()),
-  kindKey: t.Optional(t.String()),
+  kind: t.Optional(t.String()),
   body: t.String(),
   extra: t.Optional(t.Nullable(t.Record(t.String(), t.Any()))),
 });
