@@ -30,10 +30,10 @@ const PREDEFINED_DOMAINS = [
   "book",
   "chapter",
   "user",
-  "comment",
+  "post",
   "tag",
-  "review",
-  "readlist",
+  "realm",
+  "shelf",
 ];
 const PREDEFINED_PERMISSIONS = ["read", "write", "delete", "admin"];
 

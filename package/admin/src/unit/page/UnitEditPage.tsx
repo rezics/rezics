@@ -51,32 +51,28 @@ export default function UnitEditPage() {
   });
 
   const [status, setStatus] = React.useState("");
-  const [title, setTitle] = React.useState("");
-  const [content, setContent] = React.useState("");
-  const [targetUnitId, setTargetUnitId] = React.useState("");
-  const [metadataText, setMetadataText] = React.useState("");
+  const [visibility, setVisibility] = React.useState("");
+  const [extraText, setExtraText] = React.useState("");
 
   React.useEffect(() => {
     const u: UnitDTO | undefined = detailQuery.data;
     if (!u) return;
     setStatus(u.status ?? "");
-    setTitle(u.title ?? "");
-    setContent(u.content ?? "");
-    setTargetUnitId(u.targetUnitId ?? "");
-    setMetadataText(toJsonText(u.metadata));
+    setVisibility(u.visibility ?? "");
+    setExtraText(toJsonText(u.extra));
   }, [detailQuery.data]);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
 
-    let metadata: any;
-    const trimmedMetadata = metadataText.trim();
-    if (trimmedMetadata.length > 0) {
+    let extra: any;
+    const trimmedExtra = extraText.trim();
+    if (trimmedExtra.length > 0) {
       try {
-        metadata = JSON.parse(trimmedMetadata);
+        extra = JSON.parse(trimmedExtra);
       } catch {
-        setError("Metadata must be valid JSON.");
+        setError("Extra must be valid JSON.");
         return;
       }
     }
@@ -85,10 +81,8 @@ export default function UnitEditPage() {
       unitId,
       input: {
         status: status.trim() || undefined,
-        title: title.trim() || undefined,
-        content: content.trim() || undefined,
-        targetUnitId: targetUnitId.trim() || undefined,
-        metadata,
+        visibility: visibility.trim() || undefined,
+        extra,
       } as any,
     });
 
@@ -145,6 +139,12 @@ export default function UnitEditPage() {
                   Type: <strong>{detailQuery.data?.type ?? "-"}</strong>
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
+                  Default Language:{" "}
+                  <strong>
+                    {detailQuery.data?.defaultLanguage ?? "-"}
+                  </strong>
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
                   Created:{" "}
                   <strong>{fmtDate(detailQuery.data?.createdAt)}</strong>
                 </Typography>
@@ -154,35 +154,75 @@ export default function UnitEditPage() {
                 </Typography>
               </Stack>
 
+              {/* Translations (read-only display) */}
+              {detailQuery.data?.translations?.length ? (
+                <Stack spacing={1} sx={{ mb: 3 }}>
+                  <Typography variant="subtitle2" color="text.secondary">
+                    Translations
+                  </Typography>
+                  {detailQuery.data.translations.map((tr) => (
+                    <Box
+                      key={`${tr.unitId}-${tr.language}`}
+                      sx={{
+                        pl: 2,
+                        borderLeft: 2,
+                        borderColor: "divider",
+                      }}
+                    >
+                      <Typography variant="body2" fontWeight={600}>
+                        [{tr.language}] {tr.title || "(no title)"}
+                      </Typography>
+                      {tr.subtitle ? (
+                        <Typography variant="caption" color="text.secondary">
+                          Subtitle: {tr.subtitle}
+                        </Typography>
+                      ) : null}
+                      {tr.summary ? (
+                        <Typography
+                          variant="body2"
+                          color="text.secondary"
+                          sx={{ mt: 0.5 }}
+                        >
+                          {tr.summary}
+                        </Typography>
+                      ) : null}
+                    </Box>
+                  ))}
+                  <Typography variant="caption" color="text.secondary">
+                    Translations are managed via the translation API
+                    endpoints.
+                  </Typography>
+                </Stack>
+              ) : (
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{ mb: 2 }}
+                >
+                  No translations available.
+                </Typography>
+              )}
+
+              <Divider sx={{ mb: 2 }} />
+
               <Box component="form" onSubmit={onSubmit}>
                 <Stack spacing={2}>
                   <TextField
                     label="Status"
                     value={status}
                     onChange={(e) => setStatus(e.target.value)}
-                    placeholder="ACTIVE / DRAFT / ..."
+                    placeholder="DRAFT / PUBLISHED / ARCHIVED / ..."
                   />
                   <TextField
-                    label="Title"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
+                    label="Visibility"
+                    value={visibility}
+                    onChange={(e) => setVisibility(e.target.value)}
+                    placeholder="PUBLIC / UNLISTED / PRIVATE"
                   />
                   <TextField
-                    label="Content"
-                    value={content}
-                    onChange={(e) => setContent(e.target.value)}
-                    multiline
-                    minRows={8}
-                  />
-                  <TextField
-                    label="Target Unit ID"
-                    value={targetUnitId}
-                    onChange={(e) => setTargetUnitId(e.target.value)}
-                  />
-                  <TextField
-                    label="Metadata (JSON)"
-                    value={metadataText}
-                    onChange={(e) => setMetadataText(e.target.value)}
+                    label="Extra (JSON)"
+                    value={extraText}
+                    onChange={(e) => setExtraText(e.target.value)}
                     multiline
                     minRows={6}
                     placeholder='{"key":"value"}'

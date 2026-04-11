@@ -9,6 +9,7 @@ import {
   IconButton,
   Stack,
   TextField,
+  Tooltip,
   Typography,
 } from "@mui/material";
 import { type BookDTO, bookQueries } from "@rezics/api/book/book";
@@ -25,11 +26,29 @@ import {
 import { Page } from "@/core/layout/Page";
 import { fmtDate } from "@/util/format";
 
-function joinNames(users?: Array<{ name?: string | null }>): string {
-  const names = users
-    ?.map((u) => u.name)
-    .filter((v): v is string => typeof v === "string" && v.length > 0);
-  return names?.length ? names.join(", ") : "-";
+/** Extract the best title from the translations array. */
+function extractTitle(book: BookDTO): string {
+  const translations = book.translations;
+  if (!translations?.length) return "(no title)";
+  // Prefer default language match, fall back to first translation
+  const primary =
+    translations.find((t) => t.language === (book as any).defaultLanguage) ??
+    translations[0];
+  return primary?.title || "(no title)";
+}
+
+/** Format person/org credits into a readable string. */
+function formatCredits(book: BookDTO): string {
+  const parts: string[] = [];
+  if (book.personCredits?.length) {
+    parts.push(
+      ...book.personCredits.map((c) => `${c.name} (${c.roleKey})`),
+    );
+  }
+  if (book.orgCredits?.length) {
+    parts.push(...book.orgCredits.map((c) => `${c.name} (${c.roleKey})`));
+  }
+  return parts.length ? parts.join(", ") : "-";
 }
 
 export default function BooksPage() {
@@ -64,7 +83,7 @@ export default function BooksPage() {
   const meiliQuery = useQuery({
     queryKey: ["meili-books", page, limit, query],
     queryFn: () =>
-      meiliBookApi.bookSearch({ start, limit, keyword: query || undefined }),
+      meiliBookApi.bookSearch({ start, limit, q: query || undefined }),
     enabled: isMeiliMode,
   });
 
@@ -91,21 +110,27 @@ export default function BooksPage() {
         minWidth: 260,
         cell: (b) => (
           <Typography variant="body2" fontWeight={700} noWrap>
-            {b.title || "(no title)"}
+            {extractTitle(b)}
           </Typography>
         ),
       },
       {
-        id: "isbn",
-        header: "ISBN",
+        id: "isbn13",
+        header: "ISBN-13",
         minWidth: 160,
-        cell: (b) => b.isbn || "-",
+        cell: (b) => b.isbn13 || "-",
       },
       {
-        id: "author",
-        header: "Author",
-        minWidth: 220,
-        cell: (b) => joinNames(b.author as any),
+        id: "credits",
+        header: "Credits",
+        minWidth: 260,
+        cell: (b) => (
+          <Tooltip title={formatCredits(b)} arrow>
+            <Typography variant="body2" noWrap sx={{ maxWidth: 240 }}>
+              {formatCredits(b)}
+            </Typography>
+          </Tooltip>
+        ),
       },
       {
         id: "user",

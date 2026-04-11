@@ -27,6 +27,16 @@ import {
 import { Page } from "@/core/layout/Page";
 import { fmtDate } from "@/util/format";
 
+/** Extract the best title from the translations array on a UnitDTO. */
+function extractUnitTitle(unit: UnitDTO): string {
+  const translations = unit.translations;
+  if (!translations?.length) return "(no title)";
+  const primary =
+    translations.find((t) => t.language === unit.defaultLanguage) ??
+    translations[0];
+  return primary?.title || "(no title)";
+}
+
 export default function UnitsPage() {
   const matchRoute = useMatchRoute();
   const isMeiliMode = Boolean(matchRoute({ to: "/units/meili" }));
@@ -86,7 +96,7 @@ export default function UnitsPage() {
         minWidth: 220,
         cell: (u) => (
           <Typography variant="body2" fontWeight={600} noWrap>
-            {u.title || "(no title)"}
+            {extractUnitTitle(u)}
           </Typography>
         ),
       },
@@ -159,7 +169,7 @@ export default function UnitsPage() {
     >
       {isMeiliMode ? (
         <SearchablePaginatedTableCard<UnitDTO>
-          searchPlaceholder="title/content/userId/type..."
+          searchPlaceholder="title/userId/type..."
           q={q}
           onQChange={setQ}
           onSearch={() => {
@@ -203,7 +213,7 @@ export default function UnitsPage() {
               <TextField
                 size="small"
                 label="Search"
-                placeholder="q/title/userId/type..."
+                placeholder="q/userId/type..."
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
                 onKeyDown={(e) => {

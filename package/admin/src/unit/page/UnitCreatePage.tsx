@@ -30,9 +30,9 @@ export default function UnitCreatePage() {
   const [userId, setUserId] = React.useState("");
   const [type, setType] = React.useState("");
   const [status, setStatus] = React.useState("");
-  const [title, setTitle] = React.useState("");
-  const [content, setContent] = React.useState("");
-  const [targetUnitId, setTargetUnitId] = React.useState("");
+  const [defaultLanguage, setDefaultLanguage] = React.useState("en");
+  const [translationTitle, setTranslationTitle] = React.useState("");
+  const [translationSummary, setTranslationSummary] = React.useState("");
 
   React.useEffect(() => {
     if (userId) return;
@@ -47,13 +47,22 @@ export default function UnitCreatePage() {
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+    const translations =
+      translationTitle.trim() || translationSummary.trim()
+        ? [
+            {
+              language: defaultLanguage.trim() || "en",
+              title: translationTitle.trim() || undefined,
+              summary: translationSummary.trim() || undefined,
+            },
+          ]
+        : undefined;
     const unit = await createMutation.mutateAsync({
       userId: userId.trim(),
       type: type.trim(),
       status: status.trim() || undefined,
-      title: title.trim() || undefined,
-      content: content.trim() || undefined,
-      targetUnitId: targetUnitId.trim() || undefined,
+      defaultLanguage: defaultLanguage.trim() || undefined,
+      translations,
     } as any);
     await navigate({ to: `/units/${(unit as any).id}`, replace: true });
   }
@@ -96,30 +105,38 @@ export default function UnitCreatePage() {
                 value={type}
                 onChange={(e) => setType(e.target.value)}
                 required
-                placeholder="BOOK / COMMENT / NOTE / ..."
+                placeholder="BOOK / POST / TAG / REALM / SHELF / ..."
               />
               <TextField
                 label="Status"
                 value={status}
                 onChange={(e) => setStatus(e.target.value)}
-                placeholder="ACTIVE / DRAFT / ..."
+                placeholder="DRAFT / PUBLISHED / ARCHIVED / ..."
               />
+              <TextField
+                label="Default Language"
+                value={defaultLanguage}
+                onChange={(e) => setDefaultLanguage(e.target.value)}
+                placeholder="en"
+                helperText="ISO language code for the primary translation"
+              />
+
+              <Divider />
+              <Typography variant="subtitle2" color="text.secondary">
+                Initial Translation
+              </Typography>
               <TextField
                 label="Title"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
+                value={translationTitle}
+                onChange={(e) => setTranslationTitle(e.target.value)}
+                helperText="Title for the initial translation (uses default language)"
               />
               <TextField
-                label="Content"
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
+                label="Summary"
+                value={translationSummary}
+                onChange={(e) => setTranslationSummary(e.target.value)}
                 multiline
-                minRows={6}
-              />
-              <TextField
-                label="Target Unit ID"
-                value={targetUnitId}
-                onChange={(e) => setTargetUnitId(e.target.value)}
+                minRows={3}
               />
 
               <Box>

@@ -30,6 +30,8 @@ import { Route as AdminBookMeiliRouteImport } from './routes/_admin/book/meili'
 import { Route as AdminAuthUsersRouteImport } from './routes/_admin/auth/users'
 import { Route as AdminAuthStatusRouteImport } from './routes/_admin/auth/status'
 import { Route as AdminAuthSessionsRouteImport } from './routes/_admin/auth/sessions'
+import { Route as AdminRealmsIndexRouteImport } from './routes/_admin/realms/index'
+import { Route as AdminShelvesIndexRouteImport } from './routes/_admin/shelves/index'
 import { Route as AdminAuthJwtServicesRouteImport } from './routes/_admin/auth/jwt-services'
 
 const LoginRoute = LoginRouteImport.update({
@@ -79,6 +81,16 @@ const AdminUnitsIndexRoute = AdminUnitsIndexRouteImport.update({
 const AdminBookIndexRoute = AdminBookIndexRouteImport.update({
   id: '/book/',
   path: '/book/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminRealmsIndexRoute = AdminRealmsIndexRouteImport.update({
+  id: '/realms/',
+  path: '/realms/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminShelvesIndexRoute = AdminShelvesIndexRouteImport.update({
+  id: '/shelves/',
+  path: '/shelves/',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminUsersMeiliRoute = AdminUsersMeiliRouteImport.update({
@@ -162,6 +174,8 @@ export interface FileRoutesByFullPath {
   '/users/create': typeof AdminUsersCreateRoute
   '/users/meili': typeof AdminUsersMeiliRoute
   '/book/': typeof AdminBookIndexRoute
+  '/realms/': typeof AdminRealmsIndexRoute
+  '/shelves/': typeof AdminShelvesIndexRoute
   '/units/': typeof AdminUnitsIndexRoute
   '/users/': typeof AdminUsersIndexRoute
 }
@@ -185,6 +199,8 @@ export interface FileRoutesByTo {
   '/users/create': typeof AdminUsersCreateRoute
   '/users/meili': typeof AdminUsersMeiliRoute
   '/book': typeof AdminBookIndexRoute
+  '/realms': typeof AdminRealmsIndexRoute
+  '/shelves': typeof AdminShelvesIndexRoute
   '/units': typeof AdminUnitsIndexRoute
   '/users': typeof AdminUsersIndexRoute
 }
@@ -210,6 +226,8 @@ export interface FileRoutesById {
   '/_admin/users/create': typeof AdminUsersCreateRoute
   '/_admin/users/meili': typeof AdminUsersMeiliRoute
   '/_admin/book/': typeof AdminBookIndexRoute
+  '/_admin/realms/': typeof AdminRealmsIndexRoute
+  '/_admin/shelves/': typeof AdminShelvesIndexRoute
   '/_admin/units/': typeof AdminUnitsIndexRoute
   '/_admin/users/': typeof AdminUsersIndexRoute
 }
@@ -235,6 +253,8 @@ export interface FileRouteTypes {
     | '/users/create'
     | '/users/meili'
     | '/book/'
+    | '/realms/'
+    | '/shelves/'
     | '/units/'
     | '/users/'
   fileRoutesByTo: FileRoutesByTo
@@ -251,6 +271,8 @@ export interface FileRouteTypes {
     | '/auth/users'
     | '/book/meili'
     | '/misc/echokv'
+    | '/realms'
+    | '/shelves'
     | '/units/$unitId'
     | '/units/create'
     | '/units/meili'
@@ -282,6 +304,8 @@ export interface FileRouteTypes {
     | '/_admin/users/create'
     | '/_admin/users/meili'
     | '/_admin/book/'
+    | '/_admin/realms/'
+    | '/_admin/shelves/'
     | '/_admin/units/'
     | '/_admin/users/'
   fileRoutesById: FileRoutesById
@@ -361,6 +385,20 @@ declare module '@tanstack/react-router' {
       path: '/book'
       fullPath: '/book/'
       preLoaderRoute: typeof AdminBookIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/realms/': {
+      id: '/_admin/realms/'
+      path: '/realms'
+      fullPath: '/realms/'
+      preLoaderRoute: typeof AdminRealmsIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/shelves/': {
+      id: '/_admin/shelves/'
+      path: '/shelves'
+      fullPath: '/shelves/'
+      preLoaderRoute: typeof AdminShelvesIndexRouteImport
       parentRoute: typeof AdminRoute
     }
     '/_admin/users/meili': {
@@ -469,6 +507,8 @@ interface AdminRouteChildren {
   AdminUsersCreateRoute: typeof AdminUsersCreateRoute
   AdminUsersMeiliRoute: typeof AdminUsersMeiliRoute
   AdminBookIndexRoute: typeof AdminBookIndexRoute
+  AdminRealmsIndexRoute: typeof AdminRealmsIndexRoute
+  AdminShelvesIndexRoute: typeof AdminShelvesIndexRoute
   AdminUnitsIndexRoute: typeof AdminUnitsIndexRoute
   AdminUsersIndexRoute: typeof AdminUsersIndexRoute
 }
@@ -492,6 +532,8 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminUsersCreateRoute: AdminUsersCreateRoute,
   AdminUsersMeiliRoute: AdminUsersMeiliRoute,
   AdminBookIndexRoute: AdminBookIndexRoute,
+  AdminRealmsIndexRoute: AdminRealmsIndexRoute,
+  AdminShelvesIndexRoute: AdminShelvesIndexRoute,
   AdminUnitsIndexRoute: AdminUnitsIndexRoute,
   AdminUsersIndexRoute: AdminUsersIndexRoute,
 }

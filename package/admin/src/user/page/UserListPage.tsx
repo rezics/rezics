@@ -5,7 +5,6 @@ import {
   Button,
   Card,
   CardContent,
-  Chip,
   CircularProgress,
   Divider,
   IconButton,
@@ -118,12 +117,6 @@ export default function UserListPage() {
         ),
       },
       {
-        id: "type",
-        header: "Type",
-        minWidth: 120,
-        cell: (u) => (u.type ? <Chip size="small" label={u.type} /> : "-"),
-      },
-      {
         id: "roles",
         header: "Roles",
         minWidth: 220,
@@ -177,7 +170,7 @@ export default function UserListPage() {
             <TextField
               size="small"
               label="Search"
-              placeholder="q/email/slug/type..."
+              placeholder="q/email/slug..."
               value={q}
               onChange={(e) => setQ(e.target.value)}
               onKeyDown={(e) => {

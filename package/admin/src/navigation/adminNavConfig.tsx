@@ -1,5 +1,7 @@
 import AdminPanelSettingsOutlinedIcon from "@mui/icons-material/AdminPanelSettingsOutlined";
+import CollectionsBookmarkIcon from "@mui/icons-material/CollectionsBookmark";
 import DashboardIcon from "@mui/icons-material/Dashboard";
+import ForumIcon from "@mui/icons-material/Forum";
 import Inventory2Icon from "@mui/icons-material/Inventory2";
 import KeyOutlinedIcon from "@mui/icons-material/KeyOutlined";
 import ManageSearchOutlinedIcon from "@mui/icons-material/ManageSearchOutlined";
@@ -107,6 +109,34 @@ export const adminNav = {
           label: "Create",
           icon: <Inventory2Icon fontSize="small" />,
           to: "/book/create",
+        },
+      ],
+    },
+    // MOCK: realm management pages not yet implemented
+    {
+      id: "realms",
+      label: "Realms",
+      icon: <ForumIcon fontSize="small" />,
+      children: [
+        {
+          id: "realms.list",
+          label: "List",
+          icon: <ForumIcon fontSize="small" />,
+          to: "/realms",
+        },
+      ],
+    },
+    // MOCK: shelf management pages not yet implemented
+    {
+      id: "shelves",
+      label: "Shelves",
+      icon: <CollectionsBookmarkIcon fontSize="small" />,
+      children: [
+        {
+          id: "shelves.list",
+          label: "List",
+          icon: <CollectionsBookmarkIcon fontSize="small" />,
+          to: "/shelves",
         },
       ],
     },
