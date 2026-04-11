@@ -1064,6 +1064,8 @@ Answer: Chapters should retain the current BookIndex JSON structure, as it is th
 
 2. **Search index rebuild**: Meilisearch sync needs complete rewrite. Should work/release grouping use `COALESCE(workUnitId, id)` as group key? Should realm-scoped search be a separate index or filtered within one index?
 
+Answer: Neither. MeiliSearch update will implement in `search-redesign` change
+
 3. **EchoKV**: Temporary storage model — keep as-is or migrate to a different pattern?
 
 Answer: EchoKV: Keep the temporary storage model as it is for now.
@@ -1073,3 +1075,5 @@ Answer: EchoKV: Keep the temporary storage model as it is for now.
 Answer: Realm hierarchy: Keep it strictly flat.
 
 5. **Bookmark.tags**: Currently `String[]`. Should bookmarks use the new UnitTag system, or remain a simple personal tagging mechanism?
+
+Answer: Neither. The `shelf-redesign` change removes Bookmark entirely — Shelf replaces it as the universal collection mechanism. Personal tagging becomes `ShelfItem.keywords: String[]` (lightweight personal annotation, completely separate from the community UnitTag system). UnitTag is for community classification ("this book IS fantasy"); keywords are for personal organization ("to-read", "gift-idea"). User-level keyword vocabulary (`User.keywords: String[]`) provides autocomplete. See `openspec/changes/shelf-redesign/` for full design.
