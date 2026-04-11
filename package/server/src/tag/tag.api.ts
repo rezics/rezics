@@ -1,88 +1,72 @@
 import type {
+  AttachTagInput,
+  CastTagVoteInput,
   CreateTagInput,
-  TagDetailDTO,
-  TagDTO,
   TagListQuery,
+  UnitTagDTO,
   UpdateTagInput,
 } from "@rezics/contract";
 import {
   attachTagSchema,
+  castTagVoteSchema,
   createTagSchema,
-  hasPermissionToDeleteTag,
-  hasPermissionToDeleteUnit,
-  hasPermissionToUpdateTag,
-  hasPermissionToUpdateUnit,
+  detachTagSchema,
   tagListQuerySchema,
   tagParamsSchema,
   updateTagSchema,
 } from "@rezics/contract";
-import { Elysia, t } from "elysia";
-import { authMacro, buildActorFromContext } from "@/middleware";
-import { unitService } from "../unit/unit.service";
-import { mapTagDetailToDTO, mapTagToDTO } from "./mapper";
+import { Elysia } from "elysia";
+import { authMacro } from "@/middleware";
+import { mapTagUnitToDTO, mapUnitTagToDTO } from "./tag.mapper";
 import { tagService } from "./tag.service";
 
 export const tagApi = new Elysia({ prefix: "/tags" })
   .use(authMacro)
+
+  // GET / - list tags (search by name in language)
   .get(
     "/",
-    async ({ query }): Promise<{ tags: TagDTO[]; total: number }> => {
-      const { tags, total } = await tagService.list(query as TagListQuery);
-      return { tags: tags.map(mapTagToDTO), total };
+    async ({ query }) => {
+      const q = query as TagListQuery;
+      const { tags, total } = await tagService.list(q);
+      return {
+        tags: tags.map((t) => mapTagUnitToDTO(t, q.language)),
+        total,
+      };
     },
     {
       query: tagListQuerySchema,
       detail: {
         summary: "List tags",
-        description: "List tags with filtering and pagination, domain-aware",
+        description:
+          "List tag Units with optional name search and language filter",
         tags: ["Tags"],
       },
     },
   )
+
+  // GET /:unitId - get tag by unitId
   .get(
     "/:unitId",
-    async ({ params }): Promise<TagDetailDTO> => {
+    async ({ params }) => {
       const tag = await tagService.getByUnitId(params.unitId);
-      return mapTagDetailToDTO(tag);
+      return mapTagUnitToDTO(tag);
     },
     {
       params: tagParamsSchema,
-      detail: { summary: "Get tag", tags: ["Tags"] },
+      detail: { summary: "Get tag by unitId", tags: ["Tags"] },
     },
   )
-  .get(
-    "/by-name",
-    async ({ query }): Promise<TagDetailDTO | null> => {
-      const schema = t.Object({
-        name: t.String(),
-        type: t.Optional(t.Union([t.String(), t.Null()])),
-        domainId: t.String(),
-      });
-      const q = query as any as typeof schema.static;
-      const tag = await tagService.getByNameInDomain(
-        q.name,
-        q.type ?? null,
-        q.domainId,
-      );
-      return tag ? mapTagDetailToDTO(tag) : null;
-    },
-    {
-      query: t.Object({
-        name: t.String(),
-        type: t.Optional(t.Union([t.String(), t.Null()])),
-        domainId: t.String(),
-      }),
-      detail: { summary: "Get tag by name in domain", tags: ["Tags"] },
-    },
-  )
+
+  // POST / - create tag (requires login)
   .post(
     "/",
-    async ({ body, identity }): Promise<TagDetailDTO> => {
+    async ({ body, identity }) => {
       const created = await tagService.create(
         identity.unitId,
         body as CreateTagInput,
       );
-      return mapTagDetailToDTO(created);
+      return mapTagUnitToDTO(created);
     },
     {
       requireLogin: true,
@@ -90,127 +74,106 @@ export const tagApi = new Elysia({ prefix: "/tags" })
       detail: { summary: "Create tag", tags: ["Tags"] },
     },
   )
+
+  // PUT /:unitId - update tag (admin)
   .put(
     "/:unitId",
-    async ({
-      params,
-      body,
-      identity,
-      currentUser,
-      set,
-    }): Promise<TagDetailDTO> => {
-      const existing = await tagService.getByUnitId(params.unitId);
-
-      if (
-        !hasPermissionToUpdateTag(
-          buildActorFromContext({ identity, currentUser }),
-          existing.unit as any,
-        )
-      ) {
-        set.status = 403;
-        throw new Error("Forbidden: you do not own this tag");
-      }
+    async ({ params, body }) => {
       const updated = await tagService.update(
         params.unitId,
         body as UpdateTagInput,
       );
-      return mapTagDetailToDTO(updated);
+      return mapTagUnitToDTO(updated);
     },
     {
-      requireOwner: true,
+      requireAdmin: true,
       params: tagParamsSchema,
       body: updateTagSchema,
-      detail: { summary: "Update tag", tags: ["Tags"] },
+      detail: { summary: "Update tag (admin)", tags: ["Tags"] },
     },
   )
+
+  // DELETE /:unitId - delete tag (admin)
   .delete(
     "/:unitId",
-    async ({
-      params,
-      identity,
-      currentUser,
-      set,
-    }): Promise<{ message: string }> => {
-      const existing = await tagService.getByUnitId(params.unitId);
-      if (
-        !hasPermissionToDeleteTag(
-          buildActorFromContext({ identity, currentUser }),
-          existing.unit as any,
-        )
-      ) {
-        set.status = 403;
-        throw new Error("Forbidden: you do not own this tag");
-      }
+    async ({ params }) => {
       await tagService.delete(params.unitId);
       return { message: "Tag deleted successfully" };
     },
     {
-      requireOwner: true,
+      requireAdmin: true,
       params: tagParamsSchema,
-      detail: { summary: "Delete tag", tags: ["Tags"] },
+      detail: { summary: "Delete tag (admin)", tags: ["Tags"] },
     },
   )
+
+  // POST /attach - attach tag to unit (admin)
   .post(
-    "/:unitId/attach",
-    async ({
-      params,
-      body,
-      identity,
-      currentUser,
-      set,
-    }): Promise<{ message: string }> => {
-      const existing = await tagService.getByUnitId(params.unitId);
-      const target = await unitService.getByUnitId(body.targetUnitId);
-      if (
-        !existing ||
-        !target ||
-        !hasPermissionToUpdateUnit(
-          buildActorFromContext({ identity, currentUser }),
-          target as any,
-        )
-      ) {
-        set.status = 403;
-        throw new Error("Forbidden: you do not own this tag");
-      }
-      await tagService.attachToUnit(params.unitId, body.targetUnitId);
+    "/attach",
+    async ({ body }) => {
+      const { tagUnitId, unitId } = body as AttachTagInput;
+      await tagService.attachToUnit(tagUnitId, unitId);
       return { message: "Tag attached successfully" };
     },
     {
-      requireOwner: true,
-      params: tagParamsSchema,
+      requireAdmin: true,
       body: attachTagSchema,
-      detail: { summary: "Attach tag to unit", tags: ["Tags"] },
+      detail: { summary: "Attach tag to unit (admin)", tags: ["Tags"] },
     },
   )
+
+  // POST /detach - detach tag from unit (admin)
   .post(
-    "/:unitId/detach",
-    async ({
-      params,
-      body,
-      identity,
-      currentUser,
-      set,
-    }): Promise<{ message: string }> => {
-      const existing = await tagService.getByUnitId(params.unitId);
-      if (
-        !hasPermissionToDeleteUnit(
-          buildActorFromContext({ identity, currentUser }),
-          existing.unit as any,
-        )
-      ) {
-        set.status = 403;
-        throw new Error("Forbidden: you do not own this tag");
-      }
-      await tagService.detachFromUnit(
-        params.unitId,
-        (body as any).targetUnitId,
-      );
+    "/detach",
+    async ({ body }) => {
+      const { tagUnitId, unitId } = body as AttachTagInput;
+      await tagService.detachFromUnit(tagUnitId, unitId);
       return { message: "Tag detached successfully" };
     },
     {
-      requireOwner: true,
+      requireAdmin: true,
+      body: detachTagSchema,
+      detail: { summary: "Detach tag from unit (admin)", tags: ["Tags"] },
+    },
+  )
+
+  // POST /vote - cast tag vote (requires login)
+  .post(
+    "/vote",
+    async ({ body, identity }) => {
+      const { tagUnitId, unitId, value } = body as CastTagVoteInput;
+      await tagService.castVote(identity.unitId, unitId, tagUnitId, value);
+      return { message: "Vote cast successfully" };
+    },
+    {
+      requireLogin: true,
+      body: castTagVoteSchema,
+      detail: { summary: "Cast tag vote", tags: ["Tags"] },
+    },
+  )
+
+  // GET /for-unit/:unitId - get tags for a specific unit
+  .get(
+    "/for-unit/:unitId",
+    async ({ params, query }): Promise<{ tags: UnitTagDTO[] }> => {
+      const language =
+        typeof query === "object" && query !== null
+          ? (query as any).language
+          : undefined;
+      const unitTags = await tagService.getTagsForUnit(
+        params.unitId,
+        language,
+      );
+      return {
+        tags: unitTags.map((ut) => mapUnitTagToDTO(ut, language)),
+      };
+    },
+    {
       params: tagParamsSchema,
-      body: attachTagSchema,
-      detail: { summary: "Detach tag from unit", tags: ["Tags"] },
+      detail: {
+        summary: "Get tags for a unit",
+        description: "Get all scored tags attached to a specific unit",
+        tags: ["Tags"],
+      },
     },
   );

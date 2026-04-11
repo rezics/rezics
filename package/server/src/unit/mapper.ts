@@ -1,4 +1,4 @@
-import type { UnitDTO } from "@rezics/contract";
+import type { UnitDTO, UnitTranslationDTO } from "@rezics/contract";
 import { sanitizeUser } from "@/utils/sanitizeUser";
 import type { UnitWithRelations } from "./types";
 
@@ -8,17 +8,47 @@ import type { UnitWithRelations } from "./types";
 export function mapUnitToDTO(unit: UnitWithRelations): UnitDTO {
   return {
     id: unit.id,
-    userId: unit.userId,
-    user: sanitizeUser(unit.user),
     type: unit.type,
+    userId: unit.userId,
+    user: unit.user ? sanitizeUser(unit.user) : undefined,
+    workUnitId: unit.workUnitId ?? undefined,
+    defaultLanguage: unit.defaultLanguage ?? undefined,
+    isLanguageNeutral: unit.isLanguageNeutral,
     status: unit.status,
-    title: unit.title ?? undefined,
-    content: unit.content ?? undefined,
-    metadata: (unit.metadata as any) ?? undefined,
-    targetUnitId: unit.targetUnitId ?? undefined,
+    visibility: unit.visibility,
+    nsfw: unit.nsfw,
+    extra: (unit.extra as Record<string, unknown>) ?? undefined,
     createdAt: unit.createdAt,
     updatedAt: unit.updatedAt,
-    tags: unit.tags?.map((t) => t.name) ?? [],
+    publishedAt: unit.publishedAt ?? undefined,
+    translations: unit.translations?.map(mapTranslationToDTO) ?? [],
+    supportLanguages:
+      unit.supportLanguages?.map((sl) => ({
+        unitId: sl.unitId,
+        language: sl.language,
+        isPrimary: sl.isPrimary,
+        sortOrder: sl.sortOrder,
+      })) ?? [],
     reactionSummaries: unit.reactionSummaries,
   } as UnitDTO;
+}
+
+/**
+ * Map UnitTranslation row to DTO
+ */
+export function mapTranslationToDTO(
+  translation: UnitWithRelations["translations"][number],
+): UnitTranslationDTO {
+  return {
+    unitId: translation.unitId,
+    language: translation.language,
+    title: translation.title ?? undefined,
+    subtitle: translation.subtitle ?? undefined,
+    summary: translation.summary ?? undefined,
+    description: translation.description ?? undefined,
+    extra: (translation.extra as Record<string, unknown>) ?? undefined,
+    sourceReleaseUnitId: translation.sourceReleaseUnitId ?? undefined,
+    createdAt: translation.createdAt,
+    updatedAt: translation.updatedAt,
+  };
 }

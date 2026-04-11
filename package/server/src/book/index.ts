@@ -5,12 +5,15 @@
  * search, filtering, and relationship management.
  */
 
-// API endpoints (automatically registered by Encore)
+// API endpoints
 export { bookApi } from "./book.api";
 
 // Service layer for internal use
 export { BookService, bookService } from "./book.service";
+
 // Utilities
-export { mapBookToDTO } from "./mapper";
+export { mapBaseBookToDTO, mapBookToDTO } from "./mapper";
+
 // Types for internal use
 export type { BookWithRelations } from "./types";
+export { bookInclude } from "./types";

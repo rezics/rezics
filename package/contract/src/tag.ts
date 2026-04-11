@@ -1,61 +1,110 @@
-// Tag contracts
-export type TagDTO = {
-  id: string; // equals Tag.unitId
-  name: string;
-  type?: string | null;
-  domains: any;
-  content?: string | null;
-};
-
-export type TagDetailDTO = TagDTO & {
-  i18n?: unknown | null;
-  domains?: string[]; // domain user unitIds
-};
-
-export type CreateTagInput = {
-  name: string;
-  type?: string | null;
-  i18n?: unknown | null;
-  domains?: string[]; // domain user unitIds
-};
-
-export type UpdateTagInput = Partial<CreateTagInput>;
-
 import { t } from "elysia";
+
+// ============================================================
+// UNIT TAG DTO (scored junction)
+// ============================================================
+
+export const unitTagDTOSchema = t.Object({
+  unitId: t.String(),
+  tagUnitId: t.String(),
+  tagLabel: t.Optional(t.String()),
+  score: t.Number(),
+  voteCount: t.Number(),
+  createdAt: t.Optional(t.Union([t.String(), t.Date()])),
+  updatedAt: t.Optional(t.Union([t.String(), t.Date()])),
+});
+
+export type UnitTagDTO = (typeof unitTagDTOSchema)["static"];
+
+// ============================================================
+// TAG VOTE DTO
+// ============================================================
+
+export const tagVoteDTOSchema = t.Object({
+  userId: t.String(),
+  unitId: t.String(),
+  tagUnitId: t.String(),
+  value: t.Number(),
+  createdAt: t.Optional(t.Union([t.String(), t.Date()])),
+});
+
+export type TagVoteDTO = (typeof tagVoteDTOSchema)["static"];
+
+// ============================================================
+// TAG LIST/QUERY (tags are Units with UnitTranslation labels)
+// ============================================================
 
 export const tagListQuerySchema = t.Object({
   q: t.Optional(t.String()),
-  type: t.Optional(t.String()),
-  domainId: t.Optional(t.String()),
-  // target object unitId within which to search tags (e.g., a book's unitId)
-  objectId: t.Optional(t.String()),
+  language: t.Optional(t.String()),
+  unitId: t.Optional(t.String()),
+  minScore: t.Optional(t.Number()),
   page: t.Optional(t.Numeric()),
   limit: t.Optional(t.Numeric()),
 });
+
 export type TagListQuery = (typeof tagListQuerySchema)["static"];
 
 export const tagParamsSchema = t.Object({
   unitId: t.String(),
 });
+
 export type TagParams = (typeof tagParamsSchema)["static"];
 
+// ============================================================
+// TAG CRUD (tags are Units with type=TAG)
+// ============================================================
+
 export const createTagSchema = t.Object({
-  name: t.String({ minLength: 1 }),
-  type: t.Optional(t.Union([t.String(), t.Null()])),
-  i18n: t.Optional(t.Any()),
-  domains: t.Optional(t.Array(t.String())),
+  translations: t.Array(
+    t.Object({
+      language: t.String(),
+      title: t.String(),
+    }),
+  ),
 });
-export type CreateTag = (typeof createTagSchema)["static"];
+
+export type CreateTagInput = (typeof createTagSchema)["static"];
 
 export const updateTagSchema = t.Object({
-  name: t.Optional(t.String({ minLength: 1 })),
-  type: t.Optional(t.Union([t.String(), t.Null()])),
-  i18n: t.Optional(t.Any()),
-  domains: t.Optional(t.Array(t.String())),
+  translations: t.Optional(
+    t.Array(
+      t.Object({
+        language: t.String(),
+        title: t.String(),
+      }),
+    ),
+  ),
 });
-export type UpdateTag = (typeof updateTagSchema)["static"];
+
+export type UpdateTagInput = (typeof updateTagSchema)["static"];
+
+// ============================================================
+// TAG VOTING
+// ============================================================
+
+export const castTagVoteSchema = t.Object({
+  tagUnitId: t.String(),
+  unitId: t.String(),
+  value: t.Number(), // +1 or -1
+});
+
+export type CastTagVoteInput = (typeof castTagVoteSchema)["static"];
+
+// ============================================================
+// ATTACH/DETACH TAG TO UNIT
+// ============================================================
 
 export const attachTagSchema = t.Object({
-  targetUnitId: t.String(),
+  tagUnitId: t.String(),
+  unitId: t.String(),
 });
-export type AttachTag = (typeof attachTagSchema)["static"];
+
+export type AttachTagInput = (typeof attachTagSchema)["static"];
+
+export const detachTagSchema = t.Object({
+  tagUnitId: t.String(),
+  unitId: t.String(),
+});
+
+export type DetachTagInput = (typeof detachTagSchema)["static"];

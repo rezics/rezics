@@ -4,7 +4,12 @@ import type {
   UpdateUnitInput,
 } from "@rezics/contract";
 import type { Prisma } from "#/prisma/client";
-import { prisma, UnitStatus, type UnitType } from "#/prisma/client";
+import {
+  prisma,
+  UnitStatus,
+  type UnitType,
+  type UnitVisibility,
+} from "#/prisma/client";
 import { deleteUnitFromMeili, syncUnitToMeili } from "@/meili/unit/sync";
 import type { UnitWithRelations } from "./types";
 import { unitInclude } from "./types";
@@ -18,19 +23,26 @@ type UnitResult<TInclude extends MaybeInclude> = Prisma.UnitGetPayload<{
 
 /**
  * Compose a Prisma where clause for Unit list queries.
+ *
+ * Searches UnitTranslation for text queries (title/description).
+ * Filters by visibility, workUnitId, language, nsfw, type, status, userId.
  */
 export function buildUnitWhereClause(
   options: UnitListQuery,
 ): Prisma.UnitWhereInput {
   const andWhere: Prisma.UnitWhereInput[] = [];
 
-  // Text search: title/content
+  // Text search: search in UnitTranslation title/description
   if (options.q?.trim()) {
     andWhere.push({
-      OR: [
-        { title: { contains: options.q, mode: "insensitive" } },
-        { content: { contains: options.q, mode: "insensitive" } },
-      ],
+      translations: {
+        some: {
+          OR: [
+            { title: { contains: options.q, mode: "insensitive" } },
+            { description: { contains: options.q, mode: "insensitive" } },
+          ],
+        },
+      },
     });
   }
 
@@ -58,6 +70,13 @@ export function buildUnitWhereClause(
   if (statusList.length > 0)
     andWhere.push({ status: { in: statusList as UnitStatus[] } });
 
+  // Filter by visibility
+  if (options.visibility?.trim()) {
+    andWhere.push({
+      visibility: options.visibility as UnitVisibility,
+    });
+  }
+
   // Filter by userId(s)
   const userList = (options.userIds ?? options.userId ?? "")
     .split(",")
@@ -65,43 +84,25 @@ export function buildUnitWhereClause(
     .filter(Boolean);
   if (userList.length > 0) andWhere.push({ userId: { in: userList } });
 
-  // Filter by domain owner(s)
-  const domainList = (options.domainIds ?? "")
-    .split(",")
-    .map((s) => s.trim())
-    .filter(Boolean);
-  if (domainList.length > 0) {
+  // Filter by workUnitId
+  if (options.workUnitId?.trim()) {
+    andWhere.push({ workUnitId: options.workUnitId });
+  }
+
+  // Filter by language (translations must have this language)
+  if (options.language?.trim()) {
     andWhere.push({
-      domains: { some: { id: { in: domainList } } },
+      translations: {
+        some: { language: options.language },
+      },
     });
   }
 
-  // Target filters
-  const targetList = (options.targetUnitIds ?? "")
-    .split(",")
-    .map((s) => s.trim())
-    .filter(Boolean);
-  const singleTarget = options.targetUnitId?.trim();
-  const combinedTargets = [...targetList, singleTarget].filter(
-    Boolean,
-  ) as string[];
-  if (combinedTargets.length === 1)
-    andWhere.push({ targetUnitId: combinedTargets[0] });
-  if (combinedTargets.length > 1)
-    andWhere.push({
-      targetUnitId: { in: Array.from(new Set(combinedTargets)) },
-    });
-  if (options.hasTarget === "true")
-    andWhere.push({ NOT: { targetUnitId: null } });
-  if (options.hasTarget === "false") andWhere.push({ targetUnitId: null });
-
-  // Tags
-  const tagList = (options.tags ?? options.tag ?? "")
-    .split(",")
-    .map((s) => s.trim())
-    .filter(Boolean);
-  if (tagList.length > 0) {
-    andWhere.push({ tags: { some: { name: { in: tagList } } } });
+  // NSFW filter
+  if (options.nsfw === true) {
+    andWhere.push({ nsfw: true });
+  } else if (options.nsfw === false) {
+    andWhere.push({ nsfw: false });
   }
 
   // Date ranges
@@ -134,7 +135,7 @@ export function mergeUnitWhereInputs(
 }
 
 /**
- * Unit Service - Business logic for generic Unit entities and comment trees
+ * Unit Service - Business logic for generic Unit entities
  */
 export class UnitService {
   /**
@@ -192,20 +193,36 @@ export class UnitService {
     return unit as UnitResult<TInclude>;
   }
 
-  /** Create a Unit */
+  /** Create a Unit with optional translations */
   async create(input: CreateUnitInput): Promise<UnitWithRelations> {
     const unit = await prisma.unit.create({
       data: {
         userId: input.userId,
         type: input.type as UnitType,
-        status: (input.status as UnitStatus) ?? UnitStatus.ACTIVE,
-        title: input.title ?? undefined,
-        content: input.content ?? undefined,
-        metadata: (input.metadata ?? {}) as Prisma.InputJsonValue,
-        targetUnitId: input.targetUnitId ?? undefined,
+        status: (input.status as UnitStatus) ?? UnitStatus.DRAFT,
+        visibility: (input.visibility as UnitVisibility) ?? undefined,
+        workUnitId: input.workUnitId ?? undefined,
+        defaultLanguage: input.defaultLanguage ?? undefined,
+        isLanguageNeutral: input.isLanguageNeutral ?? false,
+        nsfw: input.nsfw ?? false,
+        extra: (input.extra ?? null) as Prisma.InputJsonValue,
         publishedAt: input.publishedAt
           ? new Date(input.publishedAt as any)
           : undefined,
+        translations:
+          input.translations && input.translations.length > 0
+            ? {
+                create: input.translations.map((tr) => ({
+                  language: tr.language,
+                  title: tr.title ?? undefined,
+                  subtitle: tr.subtitle ?? undefined,
+                  summary: tr.summary ?? undefined,
+                  description: tr.description ?? undefined,
+                  extra: (tr.extra ?? null) as Prisma.InputJsonValue,
+                  sourceReleaseUnitId: tr.sourceReleaseUnitId ?? undefined,
+                })),
+              }
+            : undefined,
       },
       include: unitInclude,
     });
@@ -213,7 +230,7 @@ export class UnitService {
     return unit as UnitWithRelations;
   }
 
-  /** Update a Unit */
+  /** Update a Unit (does not touch translations -- use TranslationService) */
   async update(
     unitId: string,
     input: UpdateUnitInput,
@@ -222,15 +239,20 @@ export class UnitService {
       where: { id: unitId },
       data: {
         status: (input.status as UnitStatus | undefined) ?? undefined,
-        title: input.title ?? undefined,
-        content: input.content ?? undefined,
-        metadata: (input.metadata ?? undefined) as
+        visibility: (input.visibility as UnitVisibility | undefined) ??
+          undefined,
+        nsfw: input.nsfw ?? undefined,
+        defaultLanguage: input.defaultLanguage ?? undefined,
+        isLanguageNeutral: input.isLanguageNeutral ?? undefined,
+        workUnitId: input.workUnitId,
+        extra: (input.extra ?? undefined) as
           | Prisma.InputJsonValue
           | undefined,
-        targetUnitId: input.targetUnitId ?? undefined,
         publishedAt: input.publishedAt
           ? new Date(input.publishedAt as any)
-          : undefined,
+          : input.publishedAt === null
+            ? null
+            : undefined,
       },
       include: unitInclude,
     });

@@ -1,31 +1,20 @@
+// Review permissions — DEPRECATED: use post permissions instead.
+// Kept as aliases for backward compatibility during migration.
 import type { UnitDTO, UserDTO } from "../index";
 import { BasicAdminPermission, isBlocked } from "./core";
 
-/**
- * Review permissions.
- *
- * Reviews are also backed by a `Unit` (Unit.type = REVIEW or REMARK).
- * Server-side code currently enforces:
- * - ADMIN can always modify/delete any review.
- * - Otherwise, only the owner of the underlying Unit can modify/delete.
- */
-
+/** @deprecated Use hasPermissionToUpdatePost */
 export function hasPermissionToUpdateReview(
   user: UserDTO,
   unit?: UnitDTO,
 ): boolean {
-  if (isBlocked(user)) {
-    return false;
-  }
-  if (BasicAdminPermission(user)) {
-    return true;
-  }
-  if (!unit?.user?.unitId) {
-    return false;
-  }
+  if (isBlocked(user)) return false;
+  if (BasicAdminPermission(user)) return true;
+  if (!unit?.user?.unitId) return false;
   return user.unitId === unit.user.unitId;
 }
 
+/** @deprecated Use hasPermissionToDeletePost */
 export function hasPermissionToDeleteReview(
   user: UserDTO,
   unit?: UnitDTO,

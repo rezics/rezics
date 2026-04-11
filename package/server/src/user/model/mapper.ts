@@ -9,7 +9,6 @@ export function mapUserToDTO(user: User | UserWithRelations): UserDTO {
   return {
     unitId: user.unitId,
     slug: user.slug,
-    type: user.type,
     name: user.name,
     avatar: user.avatar || undefined,
     bio: user.bio || undefined,

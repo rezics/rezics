@@ -1,3 +1,1 @@
-export * from "./readlist.api";
-export * from "./readlist.service";
-export * from "./types";
+// Readlist module — DEPRECATED: replaced by Shelf module (see ../shelf/)

@@ -9,307 +9,534 @@ datasource db {
   provider = "postgres"
 }
 
-/**
- * =========================
- * Enums
- * =========================
- */
+// ============================================================
+// ENUMS
+// ============================================================
 
 enum UnitType {
   BOOK
-  COMMENT
-  NOTE
-  REMARK // 区分用户书评和鉴赏家书评（REVIEW）
-  REVIEW
-  DOMAIN
+  GAME
+  MEDIA
+  POST
   TAG
-  QUOTE
-  READLIST
+  REALM
+  SHELF
+  CHAPTER
   IMAGE
   VIDEO
-  CHAPTER
+  QUOTE
 }
 
 enum UnitStatus {
   DRAFT
-  ACTIVE
+  PUBLISHED
+  ARCHIVED
   DELETED
-  FROZEN
 }
 
-enum UserType {
-  USER
-  AUTHOR
-  PRESS
-  PRODUCER
+enum UnitVisibility {
+  PUBLIC
+  UNLISTED
+  PRIVATE
 }
 
-/**
- * ANCHOR User
- * TODO 增加子组织
- * also use unitId
- */
-model User {
-  unitId String @id @default(dbgenerated("uuidv7()")) @db.Uuid
-  slug   String @unique
+// ============================================================
+// CORE: UNIT IDENTITY
+// ============================================================
 
-  type UserType @default(USER)
-
-  name        String
-  avatar      String?
-  bio         String?
-  description String? // Descriptive wiki for authors/publishers
-  joinDate    DateTime?
-
-  /**
-   * schema: {role: ['ROOT', 'ADMIN', 'USER', 'BLOCKED'], resource: {book: ['create', 'update', 'delete'], comment: ['create', 'update', 'delete'] ...}}
-   * resource 的部分还有待商榷，我的目的是为全局管理员提供一个快速筛选的方法，比如有权限管理所有书本的管理员，而不是具体管理某一个组织的那种
-   * TODO add independent userId-unitId permission database table
-   */
-  permission Json?
-
-  followersCount  Int @default(0) // 粉丝数
-  followingsCount Int @default(0) // 关注数
-
-  followers  Follow[] @relation("UserFollowers")
-  followings Follow[] @relation("UserFollowings")
-
-  // Relations
-  Units        Unit[]     @relation("UnitForUser")
-  authorBook   Book[]     @relation("BookAuthor")
-  pressBook    Book[]     @relation("BookPress")
-  producerBook Book[]     @relation("BookProducer")
-  reactions    Reaction[] @relation("UserReactions")
-  apiTokens    ApiToken[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([name])
-}
-
-model ApiToken {
-  id String @id @default(dbgenerated("uuidv7()")) @db.Uuid
-
-  userId String @db.Uuid
-  user   User   @relation(fields: [userId], references: [unitId])
-
-  name      String
-  tokenHash String @unique
-  scopes    Json   @default("{}") // example: {main:['admin'], post:['create', 'update', 'delete']}
-
-  createdAt  DateTime  @default(now())
-  expiresAt  DateTime? // Optional, default no expiration
-  lastUsedAt DateTime?
-  lastIP     String?
-  userAgent  String?
-
-  revoked   Boolean   @default(false)
-  revokedAt DateTime?
-
-  @@index([userId])
-  @@index([tokenHash])
-  @@index([expiresAt])
-}
-
-model Follow {
-  id         String @id @default(dbgenerated("uuidv7()")) @db.Uuid
-  follower   User   @relation("UserFollowings", fields: [followerId], references: [unitId])
-  followerId String @db.Uuid
-
-  following   User   @relation("UserFollowers", fields: [followingId], references: [unitId])
-  followingId String @db.Uuid
-
-  createdAt DateTime @default(now())
-
-  @@unique([followerId, followingId])
-}
-
-/**
- * ANCHOR Unit (统一内容入口)
- * - 仅固定最小公约字段；弹性入 metadata(JSON)
- * - 其它类型（REVIEW/QUOTE/READLIST…）都在这里
- */
 model Unit {
-  // basic info
-  id             String @id @default(dbgenerated("uuidv7()")) @db.Uuid
-  userId         String @db.Uuid
-  user           User   @relation("UnitForUser", fields: [userId], references: [unitId], onDelete: Cascade)
-  domains        Unit[] @relation("UnitDomains")
-  domainIncludes Unit[] @relation("UnitDomains")
+  id                String         @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  type              UnitType
+  workUnitId        String?        @db.Uuid
+  userId            String?        @db.Uuid
 
-  type   UnitType
-  status UnitStatus @default(ACTIVE)
+  defaultLanguage   String?        @db.VarChar(16)
+  isLanguageNeutral Boolean        @default(false)
 
-  title    String?
-  content  String?
-  metadata Json    @default("{}")
-  nsfw     Boolean @default(false)
+  status            UnitStatus     @default(DRAFT)
+  visibility        UnitVisibility @default(PUBLIC)
+  nsfw              Boolean        @default(false)
 
-  // 可选：指向任意 Unit 的“弱引用”
-  // 可被用于 Chapter，Review，Quote，Note，ReadList，Image，Video
-  // TODO Comment Index may need to sync with targetUnitId
-  targetUnitId String? @db.Uuid
-  targetUnit   Unit?   @relation("UnitTargets", fields: [targetUnitId], references: [id])
-  targetedBy   Unit[]  @relation("UnitTargets")
+  extra             Json?
 
-  publishedAt DateTime?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  publishedAt       DateTime?
 
-  // Book relation
-  book Book? @relation("BookIndexForUnit")
+  // Self-relation: work/release
+  work              Unit?          @relation("WorkRelease", fields: [workUnitId], references: [id], onDelete: SetNull)
+  releases          Unit[]         @relation("WorkRelease")
 
-  // ReadList relation
-  readList          ReadList?  @relation("ReadListIndexForUnit")
-  reviewForReadList ReadList[] @relation("ReviewForReadList")
+  // Owner/creator
+  user              User?          @relation("UnitForUser", fields: [userId], references: [unitId])
 
-  // Tag relation
-  tag  Tag?  @relation("TagIndexForUnit")
-  tags Tag[] @relation("UnitTags")
+  // Translation layer
+  translations      UnitTranslation[]
+  supportLanguages  UnitSupportLanguage[]
 
-  // === CommentIndex 的 3 条反向关系 ===
-  // 1) 这条评论本体对应的 Unit（1:1）
-  commentIndex CommentIndex? @relation("CommentIndexForUnit")
+  // Type extensions (1:1, optional)
+  book              Book?
+  game              Game?
+  media             Media?
+  post              Post?
+  shelf             Shelf?
+  realm             Realm?
 
-  // 2) 作为“根对象”的 Unit（1:N）
-  commentRoots CommentIndex[] @relation("RootUnit")
+  // Tag system
+  unitTags          UnitTag[]      @relation("TaggedUnit")
+  tagUsages         UnitTag[]      @relation("TagUnit")
+  tagVotesOnUnit    TagVote[]      @relation("TagVoteUnit")
+  tagVotesAsTag     TagVote[]      @relation("TagVoteTag")
 
-  // 3) 作为“父评论”的 Unit（1:N）
-  childCommentIndexes CommentIndex[] @relation("ParentComment")
+  // Realm organization
+  realmContent      RealmUnit[]    @relation("RealmContent")
+  inRealms          RealmUnit[]    @relation("UnitInRealm")
+  realmTagAsRealm   RealmTagUnit[] @relation("RealmTagRealm")
+  realmTagAsTag     RealmTagUnit[] @relation("RealmTagTag")
+  realmTagAsUnit    RealmTagUnit[] @relation("RealmTagUnit")
 
-  reactions         Reaction[]        @relation("UnitReactions")
-  reactionSummaries ReactionSummary[] @relation("UnitReactionSummaries")
+  // Attribution
+  personCredits       PersonCredit[]
+  organizationCredits OrgCredit[]
+
+  // Engagement
+  reactions           Reaction[]        @relation("UnitReactions")
+  reactionSummaries   ReactionSummary[] @relation("UnitReactionSummaries")
+  bookmarks           Bookmark[]
+
+  // Post relations (other posts referencing this unit)
+  targetedByPosts   Post[]         @relation("PostTarget")
+  realmPosts        Post[]         @relation("PostRealm")
+  rootPosts         Post[]         @relation("PostRoot")
+  parentPosts       Post[]         @relation("PostParent")
+
+  // Shelf item relations
+  shelfItemsContaining ShelfItem[] @relation("ShelfItemUnit")
+  shelfItemReviews     ShelfItem[] @relation("ShelfItemReview")
 
   @@index([type, status, createdAt])
+  @@index([workUnitId])
   @@index([userId, createdAt])
-  @@index([targetUnitId])
+  @@index([status, visibility])
+  @@index([defaultLanguage])
 }
 
-/**
- * ANCHOR Book（1:1 绑定 Unit）
- * 仅 Book 拥有专表；章节树、额外域等放 JSON
- * authors 就是纯字符串，关联用户的话单独做
- */
+// ============================================================
+// TRANSLATION LAYER
+// ============================================================
+
+model UnitTranslation {
+  unitId              String   @db.Uuid
+  language            String   @db.VarChar(16)
+
+  title               String?
+  subtitle            String?
+  summary             String?
+  description         String?
+  extra               Json?
+
+  // For works: which release provides content in this language
+  sourceReleaseUnitId String?  @db.Uuid
+
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  unit                Unit     @relation(fields: [unitId], references: [id], onDelete: Cascade)
+
+  @@id([unitId, language])
+  @@index([language, title])
+}
+
+model UnitSupportLanguage {
+  unitId    String   @db.Uuid
+  language  String   @db.VarChar(16)
+  isPrimary Boolean  @default(false)
+  sortOrder Int      @default(0)
+
+  unit      Unit     @relation(fields: [unitId], references: [id], onDelete: Cascade)
+
+  @@id([unitId, language])
+  @@index([language, unitId])
+}
+
+// ============================================================
+// BOOK EXTENSION
+// ============================================================
+
 model Book {
-  // main 版本 与 Unit 1:1 绑定；采用 Unit.id 作为主键
-  unitId String @id @default(dbgenerated("uuidv7()")) @db.Uuid
-  unit   Unit   @relation("BookIndexForUnit", fields: [unitId], references: [id], onDelete: Cascade)
+  unitId            String    @id @db.Uuid
+  unit              Unit      @relation(fields: [unitId], references: [id], onDelete: Cascade)
 
-  title      String
-  author     User[]   @relation("BookAuthor") // User[]，作者列表，所有作者都会被注册为用户
-  press      User[]   @relation("BookPress")
-  producer   User[]   @relation("BookProducer")
-  textLength Int      @default(0)
-  tags       String[] @default([])
+  isbn13            String?   @db.VarChar(32)
+  publicationDate   DateTime?
+  pageCount         Int?
+  textLength        Int       @default(0)
+  formatKey         String?   @db.VarChar(32)
+  isLicensed        Boolean   @default(false)
+  coverAssetUnitId  String?   @db.Uuid
 
-  series SeriesBook[] @relation("BookBelongsToSeries")
-  books  SeriesBook[] @relation("SeriesContainsBooks")
+  extra             Json?
 
-  anchorId String? @db.Uuid // 锚点ID，用于关联翻译，多版本
-  language String? @default("zh-CN")
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
 
-  description  String?
-  coverUrl     String?
-  isbn         String?
-  isLicensed   Boolean    @default(false)
-  // chaptersIndex String? // 章节树状信息, 章节信息类似Review,统一使用
-  chapterIndex BookIndex?
-  extra        Json? // 领域扩展（出版社、出版年、装帧…）
+  chapterIndex      BookIndex?
 
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-  readList  ReadList[] @relation("ReadListForBook")
-
-  @@index([title])
-  @@index([isbn])
-}
-
-model SeriesBook {
-  seriesId String @db.Uuid
-  bookId   String @db.Uuid
-
-  sortOrder   Int     @default(0)
-  volumeLabel String? // 额外元数据，例如在该系列中的特定称呼（如“外传”、“前传”），然而最好不要用
-
-  series Book @relation("BookBelongsToSeries", fields: [seriesId], references: [unitId], onDelete: Cascade)
-  book   Book @relation("SeriesContainsBooks", fields: [bookId], references: [unitId], onDelete: Cascade)
-
-  @@id([seriesId, bookId])
-  @@index([seriesId, sortOrder])
-}
-
-model UnitLocalizations {
-  unitId        String   @id @db.Uuid
-  languageIndex Json     @default("{}")
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  @@index([isbn13])
+  @@index([publicationDate])
 }
 
 model BookIndex {
   bookUnitId String   @id @db.Uuid
-  book       Book     @relation(fields: [bookUnitId], references: [unitId], onDelete: Cascade)
-  index      Json // 目录 JSON
+  index      Json
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+
+  book       Book     @relation(fields: [bookUnitId], references: [unitId], onDelete: Cascade)
 }
 
-/**
- * ANCHOR ReadList: 阅读列表
- */
-model ReadList {
-  unitId    String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
-  unit      Unit     @relation("ReadListIndexForUnit", fields: [unitId], references: [id], onDelete: Cascade)
-  review    Unit[]   @relation("ReviewForReadList")
-  book      Book[]   @relation("ReadListForBook")
-  order     String[] @default([]) // review unitId list
+// ============================================================
+// GAME EXTENSION
+// ============================================================
+
+model Game {
+  unitId            String    @id @db.Uuid
+  unit              Unit      @relation(fields: [unitId], references: [id], onDelete: Cascade)
+
+  releaseDate       DateTime?
+  versionLabel      String?
+  ageRatingKey      String?   @db.VarChar(32)
+  isLicensed        Boolean   @default(false)
+  coverAssetUnitId  String?   @db.Uuid
+
+  extra             Json?
+
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  platforms         GamePlatform[]
+}
+
+model GamePlatform {
+  gameUnitId  String @db.Uuid
+  platformKey String @db.VarChar(64)
+  sortOrder   Int    @default(0)
+
+  game        Game   @relation(fields: [gameUnitId], references: [unitId], onDelete: Cascade)
+
+  @@id([gameUnitId, platformKey])
+  @@index([platformKey, gameUnitId])
+}
+
+// ============================================================
+// MEDIA EXTENSION
+// ============================================================
+
+model Media {
+  unitId            String    @id @db.Uuid
+  unit              Unit      @relation(fields: [unitId], references: [id], onDelete: Cascade)
+
+  kindKey           String    @db.VarChar(32)
+  releaseDate       DateTime?
+  runtimeMinutes    Int?
+  episodeCount      Int?
+  seasonCount       Int?
+  isLicensed        Boolean   @default(false)
+  coverAssetUnitId  String?   @db.Uuid
+
+  extra             Json?
+
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@index([kindKey, releaseDate])
+}
+
+// ============================================================
+// POST EXTENSION (replaces Comment, Review, Note, Remark)
+// ============================================================
+
+model Post {
+  unitId             String    @id @db.Uuid
+  unit               Unit      @relation(fields: [unitId], references: [id], onDelete: Cascade)
+
+  authorUserId       String    @db.Uuid
+
+  targetUnitId       String?   @db.Uuid
+  realmUnitId        String?   @db.Uuid
+
+  body               String?
+
+  rootPostUnitId     String?   @db.Uuid
+  parentPostUnitId   String?   @db.Uuid
+
+  kindKey            String?   @db.VarChar(64)
+
+  depth              Int       @default(0)
+  sortPath           String?   @db.VarChar(512)
+
+  replyCount         Int       @default(0)
+  directReplyCount   Int       @default(0)
+  lastReplyAt        DateTime?
+  isLocked           Boolean   @default(false)
+
+  extra              Json?
+
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  targetUnit         Unit?     @relation("PostTarget", fields: [targetUnitId], references: [id], onDelete: SetNull)
+  realmUnit          Unit?     @relation("PostRealm", fields: [realmUnitId], references: [id], onDelete: SetNull)
+  rootPost           Unit?     @relation("PostRoot", fields: [rootPostUnitId], references: [id], onDelete: SetNull)
+  parentPost         Unit?     @relation("PostParent", fields: [parentPostUnitId], references: [id], onDelete: SetNull)
+
+  @@index([authorUserId, createdAt])
+  @@index([targetUnitId, createdAt])
+  @@index([targetUnitId, realmUnitId, createdAt])
+  @@index([targetUnitId, sortPath])
+  @@index([rootPostUnitId, sortPath])
+  @@index([parentPostUnitId, createdAt])
+  @@index([kindKey, createdAt])
+}
+
+// ============================================================
+// SHELF EXTENSION (replaces ReadList + Series)
+// ============================================================
+
+model Shelf {
+  unitId    String      @id @db.Uuid
+  unit      Unit        @relation(fields: [unitId], references: [id], onDelete: Cascade)
+
+  kindKey   String?     @db.VarChar(64)
+  extra     Json?
+
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  items     ShelfItem[]
+}
+
+model ShelfItem {
+  shelfUnitId      String   @db.Uuid
+  itemUnitId       String   @db.Uuid
+  sortOrder        Int      @default(0)
+
+  reviewPostUnitId String?  @db.Uuid
+
+  label            String?
+
+  extra            Json?
+
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  shelf            Shelf    @relation(fields: [shelfUnitId], references: [unitId], onDelete: Cascade)
+  item             Unit     @relation("ShelfItemUnit", fields: [itemUnitId], references: [id], onDelete: Cascade)
+  reviewPost       Unit?    @relation("ShelfItemReview", fields: [reviewPostUnitId], references: [id], onDelete: SetNull)
+
+  @@id([shelfUnitId, itemUnitId])
+  @@index([itemUnitId])
+  @@index([shelfUnitId, sortOrder])
+}
+
+// ============================================================
+// REALM EXTENSION
+// ============================================================
+
+model Realm {
+  unitId      String   @id @db.Uuid
+  unit        Unit     @relation(fields: [unitId], references: [id], onDelete: Cascade)
+
+  isPublic    Boolean  @default(true)
+  isOfficial  Boolean  @default(false)
+  memberCount Int      @default(0)
+
+  extra       Json?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  members     RealmMember[]
+}
+
+model RealmMember {
+  realmUnitId String   @db.Uuid
+  userId      String   @db.Uuid
+  roleKey     String   @db.VarChar(32)
+
+  joinedAt    DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  realm       Realm    @relation(fields: [realmUnitId], references: [unitId], onDelete: Cascade)
+
+  @@id([realmUnitId, userId])
+  @@index([userId])
+  @@index([realmUnitId, roleKey])
+}
+
+// ============================================================
+// REALM ORGANIZATION
+// ============================================================
+
+model RealmUnit {
+  realmUnitId String   @db.Uuid
+  unitId      String   @db.Uuid
+  createdAt   DateTime @default(now())
+
+  realm       Unit     @relation("RealmContent", fields: [realmUnitId], references: [id], onDelete: Cascade)
+  unit        Unit     @relation("UnitInRealm", fields: [unitId], references: [id], onDelete: Cascade)
+
+  @@id([realmUnitId, unitId])
+  @@index([unitId])
+  @@index([realmUnitId, createdAt])
+}
+
+model RealmTagUnit {
+  realmUnitId String   @db.Uuid
+  tagUnitId   String   @db.Uuid
+  unitId      String   @db.Uuid
+  createdAt   DateTime @default(now())
+
+  realm       Unit     @relation("RealmTagRealm", fields: [realmUnitId], references: [id], onDelete: Cascade)
+  tag         Unit     @relation("RealmTagTag", fields: [tagUnitId], references: [id], onDelete: Cascade)
+  unit        Unit     @relation("RealmTagUnit", fields: [unitId], references: [id], onDelete: Cascade)
+
+  @@id([realmUnitId, tagUnitId, unitId])
+  @@index([realmUnitId, unitId])
+  @@index([unitId, realmUnitId])
+  @@index([tagUnitId, realmUnitId])
+}
+
+// ============================================================
+// TAG SCORING SYSTEM
+// ============================================================
+
+model UnitTag {
+  unitId    String   @db.Uuid
+  tagUnitId String   @db.Uuid
+
+  score     Int      @default(0)
+  voteCount Int      @default(0)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  unit      Unit     @relation("TaggedUnit", fields: [unitId], references: [id], onDelete: Cascade)
+  tag       Unit     @relation("TagUnit", fields: [tagUnitId], references: [id], onDelete: Cascade)
+
+  @@id([unitId, tagUnitId])
+  @@index([unitId, score])
+  @@index([tagUnitId, score])
 }
 
-// TODO 检查下列 unitId 是否需要, 只有真正绑定 Unit 的才需要 unitId
-
-/**
- * ANCHOR CommentIndex: 评论树“关系索引表”
- * - 每条评论本体是 Unit(type='COMMENT')
- * - 该表存 root/parent/depth，加速树查询
- */
-model CommentIndex {
-  // 这条“评论 Unit”的 id（与 Unit 1:1）
-  unitId String @id @default(dbgenerated("uuidv7()")) @db.Uuid
-  unit   Unit   @relation("CommentIndexForUnit", fields: [unitId], references: [id], onDelete: Cascade)
-
-  // 根对象
-  rootUnitId String @db.Uuid
-  rootUnit   Unit   @relation("RootUnit", fields: [rootUnitId], references: [id], onDelete: Cascade)
-
-  // 父级评论（同为 Unit）
-  parentCommentId String? @db.Uuid
-  parentComment   Unit?   @relation("ParentComment", fields: [parentCommentId], references: [id], onDelete: SetNull)
-
-  depth Int
-  // 删掉多余/重复的 @@index([rootUnitId])，避免重复索引
-
-  @@index([rootUnitId, depth])
-  @@index([parentCommentId])
-}
-
-/**
- * ANCHOR UnitStats: 统计与互动
- * - 评论数等冗余计数（列表/详情快取）
- * - 赞/踩/爱心计数聚合
- */
-model Reaction {
-  id     String @id @default(dbgenerated("uuidv7()")) @db.Uuid
-  user   User   @relation("UserReactions", fields: [userId], references: [unitId], onDelete: Cascade)
-  userId String @db.Uuid
-
-  targetId   String @db.Uuid // bookId / chapterId / commentId
-  targetUnit Unit   @relation("UnitReactions", fields: [targetId], references: [id], onDelete: Cascade)
-
-  reaction String // like, bookmark, laugh, etc.
+model TagVote {
+  userId    String   @db.Uuid
+  unitId    String   @db.Uuid
+  tagUnitId String   @db.Uuid
+  value     Int
 
   createdAt DateTime @default(now())
+
+  unit      Unit     @relation("TagVoteUnit", fields: [unitId], references: [id], onDelete: Cascade)
+  tag       Unit     @relation("TagVoteTag", fields: [tagUnitId], references: [id], onDelete: Cascade)
+
+  @@id([userId, unitId, tagUnitId])
+  @@index([unitId, tagUnitId])
+}
+
+// ============================================================
+// ATTRIBUTION
+// ============================================================
+
+model Person {
+  id        String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  name      String
+  extra     Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  credits   PersonCredit[]
+}
+
+model Organization {
+  id        String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  name      String
+  extra     Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  credits   OrgCredit[]
+}
+
+model PersonCredit {
+  unitId    String @db.Uuid
+  personId  String @db.Uuid
+  roleKey   String @db.VarChar(64)
+  sortOrder Int    @default(0)
+
+  unit      Unit   @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  person    Person @relation(fields: [personId], references: [id], onDelete: Cascade)
+
+  @@id([unitId, personId, roleKey])
+  @@index([personId, roleKey])
+  @@index([unitId, roleKey, sortOrder])
+}
+
+model OrgCredit {
+  unitId         String       @db.Uuid
+  organizationId String       @db.Uuid
+  roleKey        String       @db.VarChar(64)
+  sortOrder      Int          @default(0)
+
+  unit           Unit         @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@id([unitId, organizationId, roleKey])
+  @@index([organizationId, roleKey])
+  @@index([unitId, roleKey, sortOrder])
+}
+
+// ============================================================
+// USER (simplified - UserType removed)
+// ============================================================
+
+model User {
+  unitId          String    @id @db.Uuid
+  slug            String    @unique
+  name            String
+  avatar          String?
+  bio             String?
+  description     String?
+  joinDate        DateTime?
+  permission      Json?
+  followersCount  Int       @default(0)
+  followingsCount Int       @default(0)
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  followers       Follow[]  @relation("UserFollowers")
+  followings      Follow[]  @relation("UserFollowings")
+  units           Unit[]    @relation("UnitForUser")
+  reactions       Reaction[] @relation("UserReactions")
+  apiTokens       ApiToken[]
+}
+
+// ============================================================
+// ENGAGEMENT (preserved)
+// ============================================================
+
+model Reaction {
+  id        String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  userId    String   @db.Uuid
+  targetId  String   @db.Uuid
+  reaction  String
+  createdAt DateTime @default(now())
+
+  user       User @relation("UserReactions", fields: [userId], references: [unitId], onDelete: Cascade)
+  targetUnit Unit @relation("UnitReactions", fields: [targetId], references: [id], onDelete: Cascade)
 
   @@unique([userId, targetId, reaction])
   @@index([targetId])
@@ -317,110 +544,78 @@ model Reaction {
   @@index([userId, reaction])
 }
 
-model Bookmark {
-  userId    String   @db.Uuid
-  targetId  String   @db.Uuid // use userId targetId userId to query all user tags
-  tags      String[] @default([])
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@unique([userId, targetId])
-  @@index([userId])
-  @@index([targetId])
-}
-
 model ReactionSummary {
-  targetId   String @db.Uuid
-  targetUnit Unit   @relation("UnitReactionSummaries", fields: [targetId], references: [id], onDelete: Cascade)
-  reaction   String
-  count      Int    @default(0)
+  targetId String @db.Uuid
+  reaction String
+  count    Int    @default(0)
+
+  targetUnit Unit @relation("UnitReactionSummaries", fields: [targetId], references: [id], onDelete: Cascade)
 
   @@id([targetId, reaction])
   @@index([targetId])
 }
 
+model Bookmark {
+  userId    String   @db.Uuid
+  targetId  String   @db.Uuid
+  tags      String[] @default([])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  targetUnit Unit @relation(fields: [targetId], references: [id], onDelete: Cascade)
+
+  @@id([userId, targetId])
+  @@index([userId])
+  @@index([targetId])
+}
+
 model Rating {
   unitId     String   @db.Uuid
-  domain     String   @db.Uuid // UnitId
+  domain     String   @db.Uuid
   totalScore Int      @default(0)
   totalCount Int      @default(0)
   updatedAt  DateTime @updatedAt
 
-  @@id([unitId, domain]) // 联合主键
+  @@id([unitId, domain])
 }
 
-/**
- * ANCHOR Tag: 作用于任意 Unit（含 Book）
- * TODO 迁移到unitId
- */
-model Tag {
-  unitId String  @id @default(dbgenerated("uuidv7()")) @db.Uuid
-  unit   Unit    @relation("TagIndexForUnit", fields: [unitId], references: [id], onDelete: Cascade)
-  name   String
-  i18n   Json?
-  type   String? // e.g. general / book / author / system
+model Follow {
+  id          String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  followerId  String   @db.Uuid
+  followingId String   @db.Uuid
+  createdAt   DateTime @default(now())
 
-  units Unit[] @relation("UnitTags")
+  follower  User @relation("UserFollowings", fields: [followerId], references: [unitId], onDelete: Cascade)
+  following User @relation("UserFollowers", fields: [followingId], references: [unitId], onDelete: Cascade)
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@unique([unitId, name, type])
-  @@index([type])
+  @@unique([followerId, followingId])
 }
 
-/**
- * ANCHOR EchoKV: 临时存储
- */
-model EchoKV {
-  key       String   @id
-  value     Json
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+model ApiToken {
+  id         String    @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  userId     String    @db.Uuid
+  name       String
+  tokenHash  String    @unique
+  scopes     Json      @default("{}")
+  createdAt  DateTime  @default(now())
+  expiresAt  DateTime?
+  lastUsedAt DateTime?
+  lastIP     String?
+  userAgent  String?
+  revoked    Boolean   @default(false)
+  revokedAt  DateTime?
+
+  user User @relation(fields: [userId], references: [unitId], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([tokenHash])
+  @@index([expiresAt])
 }
 
-model JwtService {
-  id            String @id @default(dbgenerated("uuidv7()")) @db.Uuid
-  serviceKey    String @unique
-  issuer        String
-  audience      String
-  jwksUrl       String
-  jwksPath      String
-  isLocalIssuer Boolean @default(false)
-  isActive      Boolean @default(true)
-
-  jwks Jwks[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@unique([issuer, audience])
-  @@index([isLocalIssuer, isActive])
-}
-
-model Jwks {
-  id           String     @id
-  jwtServiceId String     @db.Uuid
-  jwtService   JwtService @relation(fields: [jwtServiceId], references: [id], onDelete: Cascade)
-  publicJwk    Json
-  privateJwk   Json
-  alg          String?
-  createdAt    DateTime   @default(now())
-  expiresAt    DateTime?
-
-  @@index([jwtServiceId])
-}
-
-/**
- * Feedback
- */
-
-enum FeedbackType {
-  REPORT
-  BUG
-  FEATURE
-  OTHER
-}
+// ============================================================
+// PLATFORM MISC (preserved)
+// ============================================================
 
 model Feedback {
   id         String       @id @default(dbgenerated("uuidv7()")) @db.Uuid
@@ -440,14 +635,48 @@ model Feedback {
   @@index([resolved])
 }
 
-/**
- * 说明与迁移提示（非运行字段）
- * - JSONB/GiN 索引：Prisma schema 不直接声明 GiN，
- * 请在迁移中加 raw SQL，如：
- * CREATE INDEX idx_Units_metadata_gin ON "Unit" USING GIN(("metadata"));
- * - 若要 ltree/物化路径，可在迁移里启用扩展并增列，或保留目前索引表实现。
- * - 典型 metadata 结构（示例）：
- * REVIEW:   { "rating": 4.5, "title": "短评标题" }
- * QUOTE:    { "text": "...", "fromChapter": 12 }
- * READLIST: { "coverUrl": "...", "books": ["<bookunitId1>", "<bookunitId2>"] }
- */
+enum FeedbackType {
+  REPORT
+  BUG
+  FEATURE
+  OTHER
+}
+
+model JwtService {
+  id            String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  serviceKey    String   @unique
+  issuer        String
+  audience      String
+  jwksUrl       String
+  jwksPath      String
+  isLocalIssuer Boolean  @default(false)
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  jwks Jwks[]
+
+  @@unique([issuer, audience])
+  @@index([isLocalIssuer, isActive])
+}
+
+model Jwks {
+  id           String    @id
+  jwtServiceId String    @db.Uuid
+  publicJwk    Json
+  privateJwk   Json
+  alg          String?
+  createdAt    DateTime  @default(now())
+  expiresAt    DateTime?
+
+  jwtService JwtService @relation(fields: [jwtServiceId], references: [id], onDelete: Cascade)
+
+  @@index([jwtServiceId])
+}
+
+model EchoKV {
+  key       String   @id
+  value     Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

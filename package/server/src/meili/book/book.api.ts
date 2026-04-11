@@ -1,5 +1,4 @@
-import type { BookQueryOptions } from "@rezics/contract";
-import { toBookQueryString } from "@rezics/contract";
+import type { SearchQueryOptions } from "@rezics/contract";
 import type { SearchResponse } from "@rezics/search";
 import { searchClient } from "../search-client";
 import { defaultSort } from "../util";
@@ -8,7 +7,7 @@ import type { BookSearchDocument, BookSearchResult } from "./index";
  * Low-level search API that accepts a fully-constructed Meilisearch query string.
  *
  * Prefer using {@link searchBooks} in new code, which accepts a typed
- * {@link BookQueryOptions} object and builds the query for you.
+ * {@link SearchQueryOptions} object and builds the query for you.
  */
 export async function searchBooksRaw(
   q: string,
@@ -46,7 +45,7 @@ function buildTextLengthFilter(input: number | { min?: number; max?: number }) {
 /**
  * Higher-level search API for books.
  *
- * - Input is {@link BookQueryOptions} from `@rezics/contract`.
+ * - Input is {@link SearchQueryOptions} from `@rezics/contract`.
  * - It uses {@link toBookQueryString} to build the text query.
  * - It maps contract fields like `nsfw`, `tags`, `authorIds` etc. into
  *   Meilisearch filter expressions and sort options.
@@ -54,7 +53,7 @@ function buildTextLengthFilter(input: number | { min?: number; max?: number }) {
  * This is the main function you should consume from other packages.
  */
 export async function searchBooks(
-  opts: BookQueryOptions,
+  opts: SearchQueryOptions,
 ): Promise<BookSearchResult> {
   // const q = toBookQueryString(opts);
   const q = opts.keyword ?? "";
@@ -74,9 +73,9 @@ export async function searchBooks(
     filter.push("isLicensed = false");
   }
 
-  if (opts.tags?.length) {
+  if (opts.tagUnitIds?.length) {
     filter.push(
-      `tagSearch IN [${opts.tags
+      `tagLabels IN [${opts.tagUnitIds
         .map((t) => `"${t.replace(/"/g, '\\"')}"`)
         .join(", ")}]`,
     );
@@ -96,29 +95,7 @@ export async function searchBooks(
     }
   }
 
-  if (opts.authorIds?.length) {
-    filter.push(
-      `authorIds IN [${opts.authorIds
-        .map((id) => `"${id.replace(/"/g, '\\"')}"`)
-        .join(", ")}]`,
-    );
-  }
-
-  if (opts.pressIds?.length) {
-    filter.push(
-      `pressIds IN [${opts.pressIds
-        .map((id) => `"${id.replace(/"/g, '\\"')}"`)
-        .join(", ")}]`,
-    );
-  }
-
-  if (opts.producerIds?.length) {
-    filter.push(
-      `producerIds IN [${opts.producerIds
-        .map((id) => `"${id.replace(/"/g, '\\"')}"`)
-        .join(", ")}]`,
-    );
-  }
+  // TODO(search-redesign): personIds/orgIds filters for new attribution model
 
   const sort: string[] = [];
   if (opts.sort?.type && opts.sort.type !== "relevance") {

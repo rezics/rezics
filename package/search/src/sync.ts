@@ -7,7 +7,10 @@ import type {
 import { prisma, UnitType } from "@rezics/server";
 import type { SearchClient } from "./client";
 
+// TODO(search-redesign): replaced by unified content index
+
 // ANCHOR: Books sync with batching (cursor-based)
+// Updated for new schema: UnitTranslation for title, PersonCredit/OrgCredit for names, UnitTag for tags
 export async function syncAllBooks(client: SearchClient) {
   const BATCH_SIZE = 5000;
 
@@ -26,12 +29,23 @@ export async function syncAllBooks(client: SearchClient) {
       cursor: cursor ? { unitId: cursor } : undefined,
       orderBy: { unitId: "asc" },
       include: {
-        author: true,
-        press: true,
-        producer: true,
         unit: {
           include: {
-            tags: true,
+            translations: true,
+            personCredits: {
+              include: { person: true },
+              orderBy: { sortOrder: "asc" },
+            },
+            organizationCredits: {
+              include: { organization: true },
+              orderBy: { sortOrder: "asc" },
+            },
+            unitTags: {
+              include: {
+                tag: { include: { translations: true } },
+              },
+              orderBy: { score: "desc" },
+            },
           },
         },
       },
@@ -40,36 +54,62 @@ export async function syncAllBooks(client: SearchClient) {
     if (books.length === 0) break;
 
     const formatted: BookSearchDocument[] = books.map((b) => {
-      const tagSearch: string[] = [
-        ...(Array.isArray(b.tags) ? b.tags : []),
-        ...(b.unit?.tags?.map((t: any) => t.name) ?? []),
-      ];
+      const unit = b.unit;
+      // Resolve title from UnitTranslation (first available)
+      const titleTranslation = unit?.translations?.find(
+        (t: any) => t.title,
+      );
+      const descTranslation = unit?.translations?.find(
+        (t: any) => t.description,
+      );
+
+      // Resolve tag labels from UnitTag -> tag.translations
+      const tagSearch: string[] = (unit?.unitTags ?? []).map(
+        (ut: any) =>
+          ut.tag?.translations?.find((t: any) => t.title)?.title ?? "",
+      ).filter(Boolean);
+
+      // Resolve author/press/producer from PersonCredit/OrgCredit
+      const authorCredits = (unit?.personCredits ?? []).filter(
+        (c: any) => c.roleKey === "author",
+      );
+      const pressCredits = (unit?.organizationCredits ?? []).filter(
+        (c: any) => c.roleKey === "press" || c.roleKey === "publisher",
+      );
+      const producerCredits = (unit?.personCredits ?? []).filter(
+        (c: any) => c.roleKey === "producer",
+      );
 
       const base: BookSearchDocument = {
         id: b.unitId,
-        title: b.title,
-        description: b.description ?? null,
-        coverUrl: b.coverUrl ?? null,
-        isbn: b.isbn ?? null,
+        title: titleTranslation?.title ?? "",
+        description: descTranslation?.description ?? null,
+        coverUrl: null, // TODO(search-redesign): coverAssetUnitId lookup
+        isbn: b.isbn13 ?? null,
         tagSearch,
-        authors: b.author?.map((a: any) => a.name) ?? [],
-        presses: b.press?.map((p: any) => p.name) ?? [],
-        producers: b.producer?.map((p: any) => p.name) ?? [],
-        nsfw: b.unit?.nsfw ?? false,
+        authors: authorCredits.map((c: any) => c.person?.name ?? ""),
+        presses: pressCredits.map((c: any) => c.organization?.name ?? ""),
+        producers: producerCredits.map((c: any) => c.person?.name ?? ""),
+        nsfw: unit?.nsfw ?? false,
         isLicensed: b.isLicensed ?? false,
-        authorIds: b.author?.map((a: any) => a.unitId) ?? [],
-        pressIds: b.press?.map((p: any) => p.unitId) ?? [],
-        producerIds: b.producer?.map((p: any) => p.unitId) ?? [],
+        authorIds: authorCredits.map((c: any) => c.personId),
+        pressIds: pressCredits.map((c: any) => c.organizationId),
+        producerIds: producerCredits.map((c: any) => c.personId),
         textLength: Number(b.textLength) ?? 0,
         createdAt: b.createdAt,
         updatedAt: b.updatedAt,
         extra: b.extra ?? null,
-        metadata: b.unit?.metadata ?? null,
+        metadata: unit?.extra ?? null,
         unitId: b.unitId,
-        author: b.author,
-        press: b.press,
-        producer: b.producer,
-        tags: b.unit?.tags ?? [],
+        author: authorCredits.map((c: any) => c.person),
+        press: pressCredits.map((c: any) => c.organization),
+        producer: producerCredits.map((c: any) => c.person),
+        tags: (unit?.unitTags ?? []).map((ut: any) => ({
+          unitId: ut.tagUnitId,
+          label:
+            ut.tag?.translations?.find((t: any) => t.title)?.title ?? "",
+          score: ut.score,
+        })),
       };
 
       return base;
@@ -89,6 +129,7 @@ export async function syncAllBooks(client: SearchClient) {
 }
 
 // ANCHOR: Units sync with batching
+// Updated for new schema: UnitTranslation for title/content, UnitTag for tags, removed domainIds
 export async function syncAllUnits(client: SearchClient) {
   const BATCH_SIZE = 5000;
 
@@ -98,56 +139,96 @@ export async function syncAllUnits(client: SearchClient) {
   let cursor: string | undefined;
   let total = 0;
 
+  // Types to sync (exclude removed types)
+  const syncTypes = [
+    UnitType.BOOK,
+    UnitType.GAME,
+    UnitType.MEDIA,
+    UnitType.POST,
+    UnitType.SHELF,
+    UnitType.REALM,
+  ];
+
   while (true) {
     console.log("sync all units, cursor", cursor, "total", total);
-    const units: any = await prisma.unit.findMany({
+    const units: any[] = await prisma.unit.findMany({
       take: BATCH_SIZE,
       skip: cursor ? 1 : 0,
       cursor: cursor ? { id: cursor } : undefined,
       orderBy: { id: "asc" },
+      where: { type: { in: syncTypes } },
       include: {
         user: true,
-        tags: true,
+        translations: true,
         reactionSummaries: true,
-        domains: {
-          select: { id: true },
+        unitTags: {
+          include: {
+            tag: { include: { translations: true } },
+          },
+          orderBy: { score: "desc" },
         },
       },
     });
 
     if (units.length === 0) break;
 
-    let formatted: UnitSearchDocument[] = units.map((u: any) => ({
-      id: u.id,
-      title: u.title ?? "",
-      content: u.content ?? "",
-      tags: u.tags ? u.tags.map((t: any) => t.name) : [],
-      type: u.type ?? "",
-      status: u.status ?? "",
-      userId: u.userId ?? "",
-      domainIds: u.domains ? u.domains.map((d: any) => d.id) : [],
-      targetUnitId: u.targetUnitId,
-      hasTarget: u.targetUnitId !== null,
-      nsfw: u.nsfw,
-      createdAt: u.createdAt,
-      updatedAt: u.updatedAt,
-      unitId: u.id,
-      user: u.user,
-      metadata: u.metadata,
-      tagObjects: u.tags,
-      reactionSummaries: u.reactionSummaries,
-    }));
+    // Resolve title/content from UnitTranslation
+    let formatted: UnitSearchDocument[] = units.map((u: any) => {
+      const titleTranslation = u.translations?.find(
+        (t: any) => t.title,
+      );
+      const contentTranslation = u.translations?.find(
+        (t: any) => t.description,
+      );
+
+      // Resolve tags from UnitTag -> tag.translations
+      const tags: string[] = (u.unitTags ?? []).map(
+        (ut: any) =>
+          ut.tag?.translations?.find((t: any) => t.title)?.title ?? "",
+      ).filter(Boolean);
+
+      return {
+        id: u.id,
+        title: titleTranslation?.title ?? "",
+        content: contentTranslation?.description ?? "",
+        tags,
+        type: u.type ?? "",
+        status: u.status ?? "",
+        userId: u.userId ?? "",
+        domainIds: [], // TODO(search-redesign): domains removed, use realm membership
+        targetUnitId: u.workUnitId,
+        hasTarget: u.workUnitId !== null,
+        nsfw: u.nsfw,
+        createdAt: u.createdAt,
+        updatedAt: u.updatedAt,
+        unitId: u.id,
+        user: u.user,
+        metadata: u.extra,
+        tagObjects: (u.unitTags ?? []).map((ut: any) => ({
+          unitId: ut.tagUnitId,
+          label:
+            ut.tag?.translations?.find((t: any) => t.title)?.title ?? "",
+          score: ut.score,
+        })),
+        reactionSummaries: u.reactionSummaries,
+      };
+    });
 
     formatted = await Promise.all(
       formatted.map(async (u: any) => {
-        if (u.type === UnitType.REVIEW || u.type === UnitType.REMARK) {
+        if (u.type === UnitType.POST) {
           const bookId = u.targetUnitId;
           if (bookId) {
-            const book = await prisma.book.findUnique({
-              where: { unitId: bookId },
+            const bookUnit = await prisma.unit.findUnique({
+              where: { id: bookId },
+              include: { translations: true },
             });
-            if (book) {
-              u.metadata.book = { title: book.title, coverUrl: book.coverUrl };
+            if (bookUnit) {
+              const bookTitle =
+                bookUnit.translations?.find((t: any) => t.title)?.title ??
+                "";
+              u.metadata = u.metadata ?? {};
+              u.metadata.book = { title: bookTitle, coverUrl: null };
             }
           }
         }
@@ -168,93 +249,15 @@ export async function syncAllUnits(client: SearchClient) {
   };
 }
 
-// ANCHOR: Readlists sync with batching (cursor-based)
+// TODO(search-redesign): replaced by unified content index
+// Readlist sync is now a no-op. Readlists are indexed as shelf units.
 export async function syncAllReadlists(client: SearchClient) {
-  const BATCH_SIZE = 5000;
-
-  const deleteResult = await client.deleteAllReadlists();
-  console.log("sync all readlists, deleteResult", deleteResult);
-
-  let cursor: string | undefined;
-  let total = 0;
-
-  while (true) {
-    console.log("sync all readlists, cursor", cursor, "total", total);
-
-    const readlists: any[] = await prisma.readList.findMany({
-      take: BATCH_SIZE,
-      skip: cursor ? 1 : 0,
-      cursor: cursor ? { unitId: cursor } : undefined,
-      orderBy: { unitId: "asc" },
-      include: {
-        unit: {
-          include: {
-            user: true,
-            tags: true,
-            reactionSummaries: true,
-            domains: {
-              select: { id: true },
-            },
-          },
-        },
-        book: true,
-        review: true,
-      },
-    });
-
-    if (readlists.length === 0) break;
-
-    const formatted = readlists.map((rl) => {
-      const unit = rl.unit;
-      const metadata = unit?.metadata ?? {};
-
-      const bookIds: string[] = Array.isArray(rl.book)
-        ? rl.book.map((b: any) => b.unitId)
-        : [];
-      const reviewIds: string[] = Array.isArray(rl.review)
-        ? rl.review.map((r: any) => r.id)
-        : [];
-
-      const tags: string[] = unit?.tags
-        ? unit.tags.map((t: any) => t.name)
-        : [];
-
-      const doc: any = {
-        id: rl.unitId,
-        title: unit?.title ?? "",
-        content: unit?.content ?? "",
-        tags,
-        nsfw: unit?.nsfw ?? false,
-        userId: unit?.userId ?? "",
-        type: unit?.type ?? "READLIST",
-        status: unit?.status ?? "",
-        domainIds: unit?.domains ? unit.domains.map((d: any) => d.id) : [],
-        targetUnitId: unit?.targetUnitId ?? null,
-        bookIds,
-        reviewIds,
-        coverUrl: (metadata as any)?.coverUrl ?? null,
-        createdAt: unit?.createdAt ?? rl.createdAt,
-        updatedAt: unit?.updatedAt ?? rl.updatedAt,
-        unitId: rl.unitId,
-        user: unit?.user ?? null,
-        metadata,
-        tagObjects: unit?.tags ?? [],
-        reactionSummaries: unit?.reactionSummaries ?? [],
-      };
-
-      return doc;
-    });
-
-    const addResult = await client.addOrUpdateReadlists(formatted);
-    console.log("sync all readlists, addResult", addResult);
-
-    total += formatted.length;
-    cursor = readlists[readlists.length - 1]!.unitId;
-  }
-
+  console.warn(
+    "[DEPRECATED] syncAllReadlists is a no-op. Readlists are now shelves indexed via syncAllUnits.",
+  );
   return {
-    message: "sync all readlists success",
-    totalSynced: total,
+    message: "syncAllReadlists deprecated (no-op)",
+    totalSynced: 0,
   };
 }
 

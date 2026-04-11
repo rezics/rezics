@@ -7,7 +7,7 @@ import type { Prisma, Unit, User } from "#/prisma/client";
  * Internal user type with relations
  */
 export type UserWithRelations = User & {
-  Units?: Unit[];
+  units?: Unit[];
 };
 
 /**
@@ -16,7 +16,6 @@ export type UserWithRelations = User & {
 export type UserFilterOptions = {
   q?: string; // search in name or slug
   slug?: string;
-  type?: string;
   page?: number;
   limit?: number;
 };
@@ -25,7 +24,7 @@ export type UserFilterOptions = {
  * Prisma include for user relations
  */
 export const userInclude = {
-  Units: {
+  units: {
     take: 10,
     orderBy: { createdAt: "desc" },
   },

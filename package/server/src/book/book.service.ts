@@ -4,7 +4,12 @@ import type {
   UpdateBookInput,
 } from "@rezics/contract";
 import type { Prisma, Rating } from "#/prisma/client";
-import { prisma, UnitStatus, UnitType } from "#/prisma/client";
+import {
+  prisma,
+  UnitStatus,
+  UnitType,
+  type UnitVisibility,
+} from "#/prisma/client";
 import { deleteBookFromMeili, syncBookToMeili } from "@/meili/book/sync";
 import { getBookApproxCount } from "./sql";
 import type { BookWithRelations } from "./types";
@@ -21,91 +26,126 @@ export class BookService {
     const andWhere: Prisma.BookWhereInput[] = [];
 
     // NSFW filter - by default, only return non-NSFW content
-    // If options.nsfw === true, only return NSFW content
     if (options.nsfw === true) {
       andWhere.push({ unit: { nsfw: true } });
     } else {
       andWhere.push({ unit: { nsfw: false } });
     }
 
-    // Search in title, isbn, or post title
+    // Text search: search in UnitTranslation title/description + isbn13
     if (options.q?.trim()) {
       andWhere.push({
         OR: [
-          { title: { contains: options.q, mode: "insensitive" } },
-          { isbn: { contains: options.q, mode: "insensitive" } },
-          // {unit: {title: {contains: options.q, mode: 'insensitive'}}},
           {
-            author: {
-              some: { name: { contains: options.q, mode: "insensitive" } },
+            unit: {
+              translations: {
+                some: {
+                  title: { contains: options.q, mode: "insensitive" },
+                },
+              },
             },
           },
           {
-            press: {
-              some: { name: { contains: options.q, mode: "insensitive" } },
+            unit: {
+              translations: {
+                some: {
+                  description: { contains: options.q, mode: "insensitive" },
+                },
+              },
             },
           },
+          { isbn13: { contains: options.q, mode: "insensitive" } },
           {
-            producer: {
-              some: { name: { contains: options.q, mode: "insensitive" } },
+            unit: {
+              personCredits: {
+                some: {
+                  person: {
+                    name: { contains: options.q, mode: "insensitive" },
+                  },
+                },
+              },
             },
           },
         ],
       });
     }
 
-    // Filter by ISBN
-    if (options.isbn?.trim()) {
-      andWhere.push({ isbn: { contains: options.isbn, mode: "insensitive" } });
+    // Filter by ISBN13
+    if (options.isbn13?.trim()) {
+      andWhere.push({
+        isbn13: { contains: options.isbn13, mode: "insensitive" },
+      });
     }
 
-    // Filter by user ID
+    // Filter by user ID (unit owner)
     if (options.userId?.trim()) {
       andWhere.push({ unit: { userId: options.userId } });
     }
 
-    // Filter by author IDs
-    const authorList = (options.authorIds ?? options.authorId ?? "")
-      .split(",")
-      .map((s) => s.trim())
-      .filter(Boolean);
-    if (authorList.length > 0) {
+    // Filter by person ID (via PersonCredit)
+    if (options.personId?.trim()) {
       andWhere.push({
-        author: {
-          some: { unitId: { in: authorList } },
+        unit: {
+          personCredits: {
+            some: { personId: options.personId },
+          },
         },
       });
     }
 
-    // Filter by press IDs
-    const pressList = (options.pressIds ?? options.pressId ?? "")
-      .split(",")
-      .map((s) => s.trim())
-      .filter(Boolean);
-    if (pressList.length > 0) {
-      andWhere.push({ press: { some: { unitId: { in: pressList } } } });
+    // Filter by organization ID (via OrgCredit)
+    if (options.organizationId?.trim()) {
+      andWhere.push({
+        unit: {
+          organizationCredits: {
+            some: { organizationId: options.organizationId },
+          },
+        },
+      });
     }
 
-    // Filter by producer IDs
-    const producerList = (options.producerIds ?? options.producerId ?? "")
-      .split(",")
-      .map((s) => s.trim())
-      .filter(Boolean);
-    if (producerList.length > 0) {
-      andWhere.push({ producer: { some: { unitId: { in: producerList } } } });
-    }
-    // Filter by tags
-    const tagList = (options.tags ?? options.tag ?? "")
+    // Filter by tag unit IDs (scored tags)
+    const tagList = (options.tagUnitIds ?? "")
       .split(",")
       .map((s) => s.trim())
       .filter(Boolean);
     if (tagList.length > 0) {
       andWhere.push({
         unit: {
-          tags: {
-            some: { name: { in: tagList } },
+          unitTags: {
+            some: { tagUnitId: { in: tagList } },
           },
         },
+      });
+    }
+
+    // Filter by language (translations must have this language)
+    if (options.language?.trim()) {
+      andWhere.push({
+        unit: {
+          translations: {
+            some: { language: options.language },
+          },
+        },
+      });
+    }
+
+    // Filter by workUnitId
+    if (options.workUnitId?.trim()) {
+      andWhere.push({ unit: { workUnitId: options.workUnitId } });
+    }
+
+    // Filter by visibility
+    if (options.visibility?.trim()) {
+      andWhere.push({
+        unit: { visibility: options.visibility as UnitVisibility },
+      });
+    }
+
+    // Filter by status
+    if (options.status?.trim()) {
+      andWhere.push({
+        unit: { status: options.status as UnitStatus },
       });
     }
 
@@ -122,20 +162,18 @@ export class BookService {
     const cursor = options.cursor;
     const hasCursor = cursor?.unitId && cursor?.createdAt;
     const limitNum = Math.max(1, Math.min(Number(options.limit ?? 20), 100));
-    const calculateSkip = () => {
-      if (hasCursor) {
-        return 1;
-      }
-      return options.start ?? 0;
-    };
-    const skipNum = calculateSkip();
+    const skipNum = hasCursor ? 1 : (options.start ?? 0);
     const where = this.buildWhereClause(options);
-    console.log("cursor", cursor);
-    // TODO use Postgres Approximate counting
+
+    const sortField = options.sort?.type ?? "createdAt";
+    const sortOrder = (
+      options.sort?.order?.toLowerCase() === "asc" ? "asc" : "desc"
+    ) as Prisma.SortOrder;
+
     const [books, total] = await Promise.all([
       prisma.book.findMany({
         where,
-        orderBy: { createdAt: "desc" },
+        orderBy: { [sortField]: sortOrder },
         skip: skipNum,
         cursor: hasCursor
           ? { unitId: cursor.unitId, createdAt: cursor.createdAt }
@@ -143,23 +181,18 @@ export class BookService {
         take: limitNum,
         include: bookInclude,
       }),
-      // prisma.book.count({where}),
       getBookApproxCount(),
     ]);
-    books.forEach((book) => {
-      book.textLength = String(book.textLength) as any;
-    });
 
-    return { books: books as BookWithRelations[], total: total };
+    return { books: books as BookWithRelations[], total };
   }
 
   /**
    * Get book by unitId
    */
   async getByUnitId(unitId: string): Promise<BookWithRelations> {
-    // const unit = await prisma.unit.findUniqueOrThrow({where: {id: unitId}});
     const book = await prisma.book.findUniqueOrThrow({
-      where: { unitId: unitId },
+      where: { unitId },
       include: bookInclude,
     });
 
@@ -171,7 +204,7 @@ export class BookService {
    */
   async getRatingByBookUnitId(unitId: string): Promise<Rating> {
     const rating = await prisma.rating.findUniqueOrThrow({
-      where: { unitId_domain: { unitId: unitId, domain: unitId } },
+      where: { unitId_domain: { unitId, domain: unitId } },
     });
     return rating;
   }
@@ -187,11 +220,11 @@ export class BookService {
   }
 
   /**
-   * Get book by ISBN
+   * Get book by ISBN13
    */
-  async getByIsbn(isbn: string): Promise<BookWithRelations | null> {
+  async getByIsbn13(isbn13: string): Promise<BookWithRelations | null> {
     const book = await prisma.book.findFirst({
-      where: { isbn },
+      where: { isbn13 },
       include: bookInclude,
     });
 
@@ -199,47 +232,50 @@ export class BookService {
   }
 
   /**
-   * Create new book
+   * Create new book (Unit + Book extension + translations in one transaction)
    */
   async create(req: CreateBookInput): Promise<BookWithRelations> {
-    const {
-      userId,
-      title,
-      authorIds,
-      coverUrl,
-      isbn,
-      textLength,
-      chaptersIndex,
-      extra,
-      nsfw,
-      description,
-    } = req;
-
     const book = await prisma.book.create({
       data: {
         unit: {
           create: {
-            userId: userId || "",
+            userId: req.userId || "",
             type: UnitType.BOOK,
-            status: UnitStatus.ACTIVE,
-            title,
-            nsfw: nsfw || false,
-            metadata: (extra ?? {}) as Prisma.InputJsonValue,
+            status: UnitStatus.PUBLISHED,
+            visibility: (req.visibility as UnitVisibility) ?? undefined,
+            workUnitId: req.workUnitId ?? undefined,
+            defaultLanguage: req.defaultLanguage ?? undefined,
+            nsfw: req.nsfw ?? false,
+            extra: undefined,
+            translations:
+              req.translations && req.translations.length > 0
+                ? {
+                    create: req.translations.map((tr) => ({
+                      language: tr.language,
+                      title: tr.title ?? undefined,
+                      subtitle: tr.subtitle ?? undefined,
+                      summary: tr.summary ?? undefined,
+                      description: tr.description ?? undefined,
+                      extra: (tr.extra ?? null) as Prisma.InputJsonValue,
+                      sourceReleaseUnitId: tr.sourceReleaseUnitId ?? undefined,
+                    })),
+                  }
+                : undefined,
           },
         },
-        title,
-        description: description || undefined,
-        author:
-          authorIds && authorIds.length > 0
-            ? { connect: authorIds.map((unitId: string) => ({ unitId })) }
-            : undefined,
-        coverUrl: coverUrl || undefined,
-        textLength: parseInt(textLength || "0", 10) || 0,
-        isbn: isbn || undefined,
+        isbn13: req.isbn13 ?? undefined,
+        publicationDate: req.publicationDate
+          ? new Date(req.publicationDate as any)
+          : undefined,
+        pageCount: req.pageCount ?? undefined,
+        textLength: req.textLength ?? 0,
+        formatKey: req.formatKey ?? undefined,
+        isLicensed: req.isLicensed ?? false,
+        coverAssetUnitId: req.coverAssetUnitId ?? undefined,
+        extra: (req.extra ?? null) as Prisma.InputJsonValue,
         chapterIndex: {
-          create: { index: chaptersIndex || ({} as Prisma.InputJsonValue) },
+          create: { index: {} as Prisma.InputJsonValue },
         },
-        extra: (extra ?? null) as Prisma.InputJsonValue,
       },
       include: bookInclude,
     });
@@ -256,48 +292,26 @@ export class BookService {
     unitId: string,
     req: UpdateBookInput,
   ): Promise<BookWithRelations> {
-    const {
-      title,
-      authorIds,
-      pressIds,
-      producerIds,
-      coverUrl,
-      isbn,
-      textLength,
-      chaptersIndex,
-      extra,
-      description,
-      nsfw,
-      isLicensed,
-    } = req;
-
     const book = await prisma.book.update({
       where: { unitId },
       data: {
-        title: title || undefined,
-        author: Array.isArray(authorIds)
-          ? { set: authorIds.map((unitId) => ({ unitId })) }
-          : undefined,
-        press: Array.isArray(pressIds)
-          ? { set: pressIds.map((unitId) => ({ unitId })) }
-          : undefined,
-        producer: Array.isArray(producerIds)
-          ? { set: producerIds.map((unitId) => ({ unitId })) }
-          : undefined,
-        coverUrl: coverUrl || undefined,
-        isbn: isbn || undefined,
-        isLicensed: isLicensed || false,
-        textLength: Number(textLength || "0") || 0,
-        chapterIndex: {
-          update: { index: chaptersIndex || undefined },
-        },
-        description: description || undefined,
-        extra: (extra ?? undefined) as Prisma.InputJsonValue | undefined,
+        isbn13: req.isbn13,
+        publicationDate: req.publicationDate
+          ? new Date(req.publicationDate as any)
+          : req.publicationDate === null
+            ? null
+            : undefined,
+        pageCount: req.pageCount,
+        textLength: req.textLength ?? undefined,
+        formatKey: req.formatKey,
+        isLicensed: req.isLicensed ?? undefined,
+        coverAssetUnitId: req.coverAssetUnitId,
+        extra: (req.extra ?? undefined) as Prisma.InputJsonValue | undefined,
         unit: {
           update: {
-            title: title || undefined,
-            metadata: (extra ?? undefined) as Prisma.InputJsonValue | undefined,
-            nsfw: nsfw || false,
+            nsfw: req.nsfw ?? undefined,
+            visibility: (req.visibility as UnitVisibility | undefined) ??
+              undefined,
           },
         },
       },
@@ -309,6 +323,9 @@ export class BookService {
     return book as BookWithRelations;
   }
 
+  /**
+   * Update chapter index
+   */
   async updateChapterIndex(
     unitId: string,
     chaptersIndex: Prisma.InputJsonValue,
@@ -321,7 +338,7 @@ export class BookService {
   }
 
   /**
-   * Delete book by unitId
+   * Delete book by unitId (cascades via Unit delete)
    */
   async delete(unitId: string): Promise<void> {
     await prisma.unit.delete({ where: { id: unitId } });
@@ -334,36 +351,6 @@ export class BookService {
   async exists(unitId: string): Promise<boolean> {
     const count = await prisma.book.count({ where: { unitId } });
     return count > 0;
-  }
-
-  /**
-   * Get books by user ID
-   */
-  async getByUserId(userId: string): Promise<BookWithRelations[]> {
-    const books = await prisma.book.findMany({
-      where: { author: { some: { unitId: userId } } },
-      orderBy: { createdAt: "desc" },
-      include: bookInclude,
-    });
-
-    return books as BookWithRelations[];
-  }
-
-  /**
-   * Get books by author ID
-   */
-  async getByAuthorId(authorId: string): Promise<BookWithRelations[]> {
-    const books = await prisma.book.findMany({
-      where: {
-        author: {
-          some: { unitId: authorId },
-        },
-      },
-      orderBy: { createdAt: "desc" },
-      include: bookInclude,
-    });
-
-    return books as BookWithRelations[];
   }
 }
 

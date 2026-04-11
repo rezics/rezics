@@ -44,6 +44,8 @@ export const bookApi = new Elysia({ prefix: "/books" })
       params: bookParamsSchema,
       detail: {
         summary: "Get rating",
+        description: "Get rating for a book by unit ID",
+        tags: ["Books"],
       },
     },
   )
@@ -77,7 +79,8 @@ export const bookApi = new Elysia({ prefix: "/books" })
       body: createBookSchema,
       detail: {
         summary: "Create book",
-        description: "Create a new book",
+        description:
+          "Create a new book with Unit, Book extension, and optional translations",
         tags: ["Books"],
       },
     },
@@ -86,14 +89,15 @@ export const bookApi = new Elysia({ prefix: "/books" })
     "/",
     async ({ query }): Promise<BookListResponse> => {
       const { books, total } = await bookService.list(query);
-      return { books: books as any, total };
+      return { books: books.map(mapBookToDTO), total };
     },
     {
       requireAdmin: true,
       query: bookListQuerySchema,
       detail: {
         summary: "Get all books",
-        description: "Get all books with filters and pagination",
+        description:
+          "Get all books with filters (isbn13, personId, organizationId, tags, language) and pagination",
         tags: ["Books"],
       },
     },
@@ -204,7 +208,7 @@ export const bookApi = new Elysia({ prefix: "/books" })
       }
 
       await bookService.delete(params.unitId);
-      return { message: "Book and related post deleted successfully" };
+      return { message: "Book deleted successfully" };
     },
     {
       requireOwner: true,

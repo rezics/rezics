@@ -1,26 +1,67 @@
 import { t } from "elysia";
 
-// ANCHOR Shared schemas based on Prisma `Unit` and public user view
+// ============================================================
+// ENUMS
+// ============================================================
 
 export const UnitType = {
   BOOK: "BOOK",
-  COMMENT: "COMMENT",
-  NOTE: "NOTE",
-  REMARK: "REMARK",
-  REVIEW: "REVIEW",
-  DOMAIN: "DOMAIN",
+  GAME: "GAME",
+  MEDIA: "MEDIA",
+  POST: "POST",
   TAG: "TAG",
-  QUOTE: "QUOTE",
-  READLIST: "READLIST",
+  REALM: "REALM",
+  SHELF: "SHELF",
+  CHAPTER: "CHAPTER",
   IMAGE: "IMAGE",
   VIDEO: "VIDEO",
-  CHAPTER: "CHAPTER",
+  QUOTE: "QUOTE",
 } as const;
 
-/**
- * 用户的公开信息 Schema
- * (原 PublicUser type)
- */
+export const UnitStatus = {
+  DRAFT: "DRAFT",
+  PUBLISHED: "PUBLISHED",
+  ARCHIVED: "ARCHIVED",
+  DELETED: "DELETED",
+} as const;
+
+export const UnitVisibility = {
+  PUBLIC: "PUBLIC",
+  UNLISTED: "UNLISTED",
+  PRIVATE: "PRIVATE",
+} as const;
+
+export const unitTypeSchema = t.Union([
+  t.Literal("BOOK"),
+  t.Literal("GAME"),
+  t.Literal("MEDIA"),
+  t.Literal("POST"),
+  t.Literal("TAG"),
+  t.Literal("REALM"),
+  t.Literal("SHELF"),
+  t.Literal("CHAPTER"),
+  t.Literal("IMAGE"),
+  t.Literal("VIDEO"),
+  t.Literal("QUOTE"),
+]);
+
+export const unitStatusSchema = t.Union([
+  t.Literal("DRAFT"),
+  t.Literal("PUBLISHED"),
+  t.Literal("ARCHIVED"),
+  t.Literal("DELETED"),
+]);
+
+export const unitVisibilitySchema = t.Union([
+  t.Literal("PUBLIC"),
+  t.Literal("UNLISTED"),
+  t.Literal("PRIVATE"),
+]);
+
+// ============================================================
+// PUBLIC USER (shared across contracts)
+// ============================================================
+
 export const publicUserSchema = t.Object({
   unitId: t.String(),
   slug: t.Optional(t.String()),
@@ -28,67 +69,98 @@ export const publicUserSchema = t.Object({
   avatar: t.Optional(t.Nullable(t.String())),
   bio: t.Optional(t.String()),
   description: t.Optional(t.String()),
-  // Follow statistics (public, non-sensitive)
   followersCount: t.Optional(t.Number()),
   followingsCount: t.Optional(t.Number()),
 });
 
 export type PublicUser = (typeof publicUserSchema)["static"];
 
-/**
- * Minimal, reusable Unit shape (not exported to APIs directly)
- * - Mirrors columns in Prisma `Unit` model that are commonly surfaced
- */
-export const baseUnitSchema = t.Object({
-  id: t.String(),
-  userId: t.String(),
-  user: t.Optional(publicUserSchema),
-  type: t.Optional(t.String()), // REVIEW | READLIST | QUOTE | BOOK | ...
-  status: t.Optional(t.String()), // ACTIVE | DRAFT | ...
-  title: t.Optional(t.String()),
-  content: t.Optional(t.String()),
-  // Free-form metadata bag; concrete modules can narrow this
-  metadata: t.Optional(t.Record(t.String(), t.Any())),
-  targetUnitId: t.Optional(t.String()),
+// ============================================================
+// UNIT TRANSLATION DTO
+// ============================================================
+
+export const unitTranslationDTOSchema = t.Object({
+  unitId: t.String(),
+  language: t.String(),
+  title: t.Optional(t.Nullable(t.String())),
+  subtitle: t.Optional(t.Nullable(t.String())),
+  summary: t.Optional(t.Nullable(t.String())),
+  description: t.Optional(t.Nullable(t.String())),
+  extra: t.Optional(t.Nullable(t.Record(t.String(), t.Any()))),
+  sourceReleaseUnitId: t.Optional(t.Nullable(t.String())),
   createdAt: t.Optional(t.Union([t.String(), t.Date()])),
   updatedAt: t.Optional(t.Union([t.String(), t.Date()])),
 });
 
+export type UnitTranslationDTO = (typeof unitTranslationDTOSchema)["static"];
+
+export const unitSupportLanguageDTOSchema = t.Object({
+  unitId: t.String(),
+  language: t.String(),
+  isPrimary: t.Boolean(),
+  sortOrder: t.Number(),
+});
+
+export type UnitSupportLanguageDTO =
+  (typeof unitSupportLanguageDTOSchema)["static"];
+
+// ============================================================
+// UNIT DTO
+// ============================================================
+
+export const baseUnitSchema = t.Object({
+  id: t.String(),
+  type: t.String(),
+  userId: t.Optional(t.Nullable(t.String())),
+  user: t.Optional(publicUserSchema),
+  workUnitId: t.Optional(t.Nullable(t.String())),
+  defaultLanguage: t.Optional(t.Nullable(t.String())),
+  isLanguageNeutral: t.Optional(t.Boolean()),
+  status: t.Optional(t.String()),
+  visibility: t.Optional(t.String()),
+  nsfw: t.Optional(t.Boolean()),
+  extra: t.Optional(t.Nullable(t.Record(t.String(), t.Any()))),
+  createdAt: t.Optional(t.Union([t.String(), t.Date()])),
+  updatedAt: t.Optional(t.Union([t.String(), t.Date()])),
+  publishedAt: t.Optional(t.Nullable(t.Union([t.String(), t.Date()]))),
+});
+
 export type BaseUnit = (typeof baseUnitSchema)["static"];
 
-// ANCHOR Unit DTO for API responses
 export const unitDTOSchema = t.Object({
   ...baseUnitSchema.properties,
-  tags: t.Optional(t.Array(t.String())),
+  translations: t.Optional(t.Array(unitTranslationDTOSchema)),
+  supportLanguages: t.Optional(t.Array(unitSupportLanguageDTOSchema)),
   reactionSummaries: t.Optional(t.Any()),
 });
 
 export type UnitDTO = (typeof unitDTOSchema)["static"];
 
-// ANCHOR List/query schemas for Unit
+// ============================================================
+// UNIT LIST/QUERY
+// ============================================================
+
 export const unitListQuerySchema = t.Object({
-  q: t.Optional(t.String()), // search in title/content
-  type: t.Optional(t.String()), // single type
-  types: t.Optional(t.String()), // comma-separated types
-  excludeTypes: t.Optional(t.String()), // comma-separated types to exclude
-  status: t.Optional(t.String()), // single status
-  statuses: t.Optional(t.String()), // comma-separated statuses
-  tag: t.Optional(t.String()),
-  tags: t.Optional(t.String()),
+  q: t.Optional(t.String()),
+  type: t.Optional(t.String()),
+  types: t.Optional(t.String()),
+  excludeTypes: t.Optional(t.String()),
+  status: t.Optional(t.String()),
+  statuses: t.Optional(t.String()),
+  visibility: t.Optional(t.String()),
   userId: t.Optional(t.String()),
   userIds: t.Optional(t.String()),
-  domainIds: t.Optional(t.String()), // filter by domain owners
-  targetUnitId: t.Optional(t.String()),
-  targetUnitIds: t.Optional(t.String()),
-  hasTarget: t.Optional(t.String()), // 'true' | 'false'
+  workUnitId: t.Optional(t.String()),
+  language: t.Optional(t.String()),
+  nsfw: t.Optional(t.Boolean()),
   createdAtFrom: t.Optional(t.String()),
   createdAtTo: t.Optional(t.String()),
   publishedAtFrom: t.Optional(t.String()),
   publishedAtTo: t.Optional(t.String()),
   sort: t.Optional(
     t.Object({
-      field: t.Optional(t.String()), // createdAt | updatedAt | publishedAt
-      order: t.Optional(t.String()), // asc | desc
+      field: t.Optional(t.String()),
+      order: t.Optional(t.String()),
     }),
   ),
   start: t.Optional(t.Number()),
@@ -119,27 +191,83 @@ export type UnitParams = (typeof unitParamsSchema)["static"];
 export const unitResponseSchema = unitDTOSchema;
 export type UnitResponse = (typeof unitResponseSchema)["static"];
 
-// ANCHOR Create/Update Unit
+// ============================================================
+// CREATE/UPDATE UNIT
+// ============================================================
+
 export const createUnitSchema = t.Object({
-  userId: t.String(),
+  userId: t.Optional(t.String()),
   type: t.String(),
+  workUnitId: t.Optional(t.String()),
+  defaultLanguage: t.Optional(t.String()),
+  isLanguageNeutral: t.Optional(t.Boolean()),
   status: t.Optional(t.String()),
-  title: t.Optional(t.String()),
-  content: t.Optional(t.String()),
-  metadata: t.Optional(t.Record(t.String(), t.Any())),
-  targetUnitId: t.Optional(t.String()),
+  visibility: t.Optional(t.String()),
+  nsfw: t.Optional(t.Boolean()),
+  extra: t.Optional(t.Nullable(t.Record(t.String(), t.Any()))),
   publishedAt: t.Optional(t.Union([t.String(), t.Date()])),
+  translations: t.Optional(
+    t.Array(
+      t.Object({
+        language: t.String(),
+        title: t.Optional(t.String()),
+        subtitle: t.Optional(t.String()),
+        summary: t.Optional(t.String()),
+        description: t.Optional(t.String()),
+        extra: t.Optional(t.Nullable(t.Record(t.String(), t.Any()))),
+        sourceReleaseUnitId: t.Optional(t.String()),
+      }),
+    ),
+  ),
 });
 
 export type CreateUnitInput = (typeof createUnitSchema)["static"];
 
 export const updateUnitSchema = t.Object({
   status: t.Optional(t.String()),
-  title: t.Optional(t.String()),
-  content: t.Optional(t.String()),
-  metadata: t.Optional(t.Record(t.String(), t.Any())),
-  targetUnitId: t.Optional(t.String()),
-  publishedAt: t.Optional(t.Union([t.String(), t.Date()])),
+  visibility: t.Optional(t.String()),
+  nsfw: t.Optional(t.Boolean()),
+  defaultLanguage: t.Optional(t.String()),
+  isLanguageNeutral: t.Optional(t.Boolean()),
+  workUnitId: t.Optional(t.Nullable(t.String())),
+  extra: t.Optional(t.Nullable(t.Record(t.String(), t.Any()))),
+  publishedAt: t.Optional(t.Nullable(t.Union([t.String(), t.Date()]))),
 });
 
 export type UpdateUnitInput = (typeof updateUnitSchema)["static"];
+
+// ============================================================
+// TRANSLATION CRUD
+// ============================================================
+
+export const createTranslationSchema = t.Object({
+  language: t.String(),
+  title: t.Optional(t.String()),
+  subtitle: t.Optional(t.String()),
+  summary: t.Optional(t.String()),
+  description: t.Optional(t.String()),
+  extra: t.Optional(t.Nullable(t.Record(t.String(), t.Any()))),
+  sourceReleaseUnitId: t.Optional(t.String()),
+});
+
+export type CreateTranslationInput =
+  (typeof createTranslationSchema)["static"];
+
+export const updateTranslationSchema = t.Object({
+  title: t.Optional(t.Nullable(t.String())),
+  subtitle: t.Optional(t.Nullable(t.String())),
+  summary: t.Optional(t.Nullable(t.String())),
+  description: t.Optional(t.Nullable(t.String())),
+  extra: t.Optional(t.Nullable(t.Record(t.String(), t.Any()))),
+  sourceReleaseUnitId: t.Optional(t.Nullable(t.String())),
+});
+
+export type UpdateTranslationInput =
+  (typeof updateTranslationSchema)["static"];
+
+export const translationParamsSchema = t.Object({
+  unitId: t.String(),
+  language: t.String(),
+});
+
+export type TranslationParams = (typeof translationParamsSchema)["static"];

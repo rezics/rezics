@@ -1,34 +1,32 @@
+// TODO(search-redesign): replaced by unified content index
+
 /**
  * Shape of a book document stored in the Meilisearch `books` index.
- *
- * This is intentionally compact and denormalized to keep search fast.
+ * Updated for new schema: translations, personCredits, orgCredits, scored tags.
  */
 export interface BookSearchDocument {
   id: string;
-  // search fields
+  // search fields (flattened from UnitTranslation)
   title: string;
   description: string | null;
-  coverUrl: string | null;
-  isbn: string | null;
-  tagSearch: string[];
-  authors: string[];
-  presses: string[];
-  producers: string[];
+  isbn13: string | null;
+  tagLabels: string[];
+  personNames: string[];
+  orgNames: string[];
   textLength: number;
   nsfw: boolean;
   isLicensed: boolean;
-  authorIds: string[];
-  pressIds: string[];
-  producerIds: string[];
+  personIds: string[];
+  orgIds: string[];
   createdAt: string | Date;
   updatedAt: string | Date;
   extra: any;
-  metadata: any;
   // result fields
   unitId: string;
-  author: any;
-  press: any;
-  producer: any;
+  coverAssetUnitId: string | null;
+  defaultLanguage: string | null;
+  personCredits: any[];
+  orgCredits: any[];
   tags: any[];
 }
 
@@ -36,14 +34,9 @@ export interface BookSearchDocument {
  * Normalized search result for book queries.
  */
 export interface BookSearchResult {
-  /** Hits for the current page. */
   books: BookSearchDocument[];
-  /** Others. */
   others?: any;
-  /** Total number of matched hits. */
   total: number;
-  /** Meilisearch processing time in milliseconds. */
   processingTimeMs: number;
-  /** Final query string actually sent to Meilisearch. */
   query: string;
 }

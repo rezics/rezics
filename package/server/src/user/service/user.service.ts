@@ -4,7 +4,7 @@
 
 import { NotificationType, type UpdateUser } from "@rezics/contract";
 import type { Prisma } from "#/prisma/client";
-import { prisma, UserType } from "#/prisma/client";
+import { prisma } from "#/prisma/client";
 import { emitNotificationEvent } from "../../notify/notify-client";
 import { deleteUserFromMeili, syncUserToMeili } from "@/meili/user/sync";
 import type { UserFilterOptions, UserWithRelations } from "../model/types";
@@ -15,7 +15,6 @@ export type CreateUserProfileInput = {
   slug: string;
   avatar?: string;
   bio?: string;
-  type?: UserType;
 };
 
 export type ProvisionFromJwtInput = {
@@ -55,10 +54,7 @@ export class UserService {
       andWhere.push({ slug: { equals: options.slug, mode: "insensitive" } });
     }
 
-    // Filter by type
-    if (options.type) {
-      andWhere.push({ type: options.type as UserType });
-    }
+    // UserType removed — no type filter
 
     return andWhere.length > 0 ? { AND: andWhere } : {};
   }
@@ -118,7 +114,7 @@ export class UserService {
    * Create new user
    */
   async create(req: CreateUserProfileInput): Promise<UserWithRelations> {
-    const { unitId, slug, avatar, bio, type } = req;
+    const { unitId, slug, avatar, bio } = req;
 
     const user = await prisma.user.create({
       data: {
@@ -127,7 +123,6 @@ export class UserService {
         name: slug,
         avatar: avatar || undefined,
         bio: bio || undefined,
-        type: type ?? UserType.USER,
         joinDate: new Date(),
       },
       include: userInclude,
@@ -150,7 +145,6 @@ export class UserService {
         unitId: payload.unitId,
         slug,
         name: slug,
-        type: UserType.USER,
         joinDate: new Date(),
       },
       include: userInclude,
@@ -172,7 +166,6 @@ export class UserService {
         slug: payload.slug,
         name: payload.name,
         avatar: payload.avatar ?? undefined,
-        type: UserType.USER,
         joinDate: new Date(),
       },
       include: userInclude,

@@ -1,33 +1,28 @@
+// TODO(search-redesign): replaced by unified content index
+
 /**
  * Shape of a unit document stored in the Meilisearch `units` index.
- *
- * This is intentionally compact and denormalized to keep search fast.
- * It contains both fields used for search/filtering and richer
- * result fields for rendering in the UI.
+ * Updated for new schema: no title/content on Unit, translations-based search.
  */
 export interface UnitSearchDocument {
   id: string;
-
-  // search fields
+  // search fields (flattened from UnitTranslation)
   title?: string | null;
-  content?: string | null;
+  description?: string | null;
   tags?: string[];
   type?: string;
   status?: string;
+  visibility?: string;
   userId?: string;
-  domainIds?: string[];
-  targetUnitId?: string | null;
-  hasTarget?: boolean;
+  workUnitId?: string | null;
   nsfw?: boolean;
   createdAt?: string | Date;
   updatedAt?: string | Date;
   publishedAt?: string | null;
-
-  // result fields (denormalized from Unit relations/metadata)
+  // result fields
   unitId?: string;
   user?: any;
-  metadata?: any;
-  tagObjects?: any[];
+  translations?: any[];
   reactionSummaries?: any[];
 }
 
@@ -35,12 +30,8 @@ export interface UnitSearchDocument {
  * Normalized search result for unit queries.
  */
 export interface UnitSearchResult {
-  /** Hits for the current page. */
   units: UnitSearchDocument[];
-  /** Total number of matched hits. */
   total: number;
-  /** Meilisearch processing time in milliseconds. */
   processingTimeMs: number;
-  /** Final query string actually sent to Meilisearch. */
   query: string;
 }

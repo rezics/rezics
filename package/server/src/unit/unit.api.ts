@@ -1,9 +1,11 @@
 import {
   BasicAdminPermission,
   type CreateUnitInput,
+  createTranslationSchema,
   createUnitSchema,
   hasPermissionToDeleteUnit,
   hasPermissionToUpdateUnit,
+  translationParamsSchema,
   type UnitListQuery,
   type UnitListResponse,
   type UnitResponse,
@@ -12,11 +14,13 @@ import {
   unitListResponseSchema,
   unitParamsSchema,
   unitResponseSchema,
+  updateTranslationSchema,
   updateUnitSchema,
 } from "@rezics/contract";
 import { Elysia } from "elysia";
 import { authMacro, buildActorFromContext } from "@/middleware";
-import { mapUnitToDTO } from "./mapper";
+import { mapUnitToDTO, mapTranslationToDTO } from "./mapper";
+import { translationService } from "./translation.service";
 import { unitService } from "./unit.service";
 
 export const unitApi = new Elysia({ prefix: "/units" })
@@ -53,7 +57,8 @@ export const unitApi = new Elysia({ prefix: "/units" })
       response: unitResponseSchema,
       detail: {
         summary: "Create unit",
-        description: "Create a new Unit. Type must be one of UnitType.",
+        description:
+          "Create a new Unit with optional inline translations. Type must be one of UnitType.",
         tags: ["Units"],
       },
     },
@@ -64,7 +69,7 @@ export const unitApi = new Elysia({ prefix: "/units" })
       if (!BasicAdminPermission(currentUser)) {
         set.status = 403;
         throw new Error(
-          "Forbidden: you do not have permission to get all books",
+          "Forbidden: you do not have permission to list all units",
         );
       }
       const { units, total } = await unitService.list(query as UnitListQuery);
@@ -77,7 +82,7 @@ export const unitApi = new Elysia({ prefix: "/units" })
       detail: {
         summary: "List units",
         description:
-          "List Units with search, filtering by type/status/tags/user/domains, and pagination with cursor or offset.",
+          "List Units with search, filtering by type/status/visibility/language/user, and pagination with cursor or offset.",
         tags: ["Units"],
       },
     },
@@ -147,6 +152,91 @@ export const unitApi = new Elysia({ prefix: "/units" })
         summary: "Delete unit",
         description: "Delete a Unit by id (cascades to related indexes)",
         tags: ["Units"],
+      },
+    },
+  )
+  // ─── Translation CRUD ────────────────────────────────────────
+  .get(
+    "/:unitId/translations/:language",
+    async ({ params }) => {
+      const translation = await translationService.getTranslation(
+        params.unitId,
+        params.language,
+      );
+      return mapTranslationToDTO(translation as any);
+    },
+    {
+      params: translationParamsSchema,
+      detail: {
+        summary: "Get translation",
+        description: "Get a single translation by unit ID and language",
+        tags: ["Units", "Translations"],
+      },
+    },
+  )
+  .put(
+    "/:unitId/translations/:language",
+    async ({ params, body, identity, currentUser, set }) => {
+      const target = await unitService.getByUnitId(params.unitId);
+      if (
+        !hasPermissionToUpdateUnit(
+          buildActorFromContext({ identity, currentUser }),
+          target as any,
+        )
+      ) {
+        set.status = 403;
+        throw new Error("Forbidden: you do not own this unit");
+      }
+      const translation = await translationService.upsertTranslation(
+        params.unitId,
+        params.language,
+        body,
+      );
+      return mapTranslationToDTO(translation as any);
+    },
+    {
+      requireOwner: true,
+      params: translationParamsSchema,
+      body: updateTranslationSchema,
+      detail: {
+        summary: "Upsert translation",
+        description:
+          "Create or update a translation for a Unit by language code",
+        tags: ["Units", "Translations"],
+      },
+    },
+  )
+  .delete(
+    "/:unitId/translations/:language",
+    async ({
+      params,
+      identity,
+      currentUser,
+      set,
+    }): Promise<{ message: string }> => {
+      const target = await unitService.getByUnitId(params.unitId);
+      if (
+        !hasPermissionToUpdateUnit(
+          buildActorFromContext({ identity, currentUser }),
+          target as any,
+        )
+      ) {
+        set.status = 403;
+        throw new Error("Forbidden: you do not own this unit");
+      }
+      await translationService.deleteTranslation(
+        params.unitId,
+        params.language,
+      );
+      return { message: "Translation deleted successfully" };
+    },
+    {
+      requireOwner: true,
+      params: translationParamsSchema,
+      detail: {
+        summary: "Delete translation",
+        description: "Delete a translation for a Unit by language code",
+        tags: ["Units", "Translations"],
       },
     },
   );

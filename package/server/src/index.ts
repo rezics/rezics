@@ -15,9 +15,9 @@ import {
   JwtAlgorithm,
 } from "@rezics/jwt";
 import { Elysia } from "elysia";
+import { attributionApi } from "./attribution";
 import { bookApi } from "./book";
 import { chapterApi } from "./chapter";
-import { commentApi } from "./comment";
 import { echoKvApi } from "./echokv";
 import { env } from "./env";
 import { feedbackApi } from "./feedback";
@@ -27,9 +27,10 @@ import {
   jwtServiceAdminApi,
 } from "./jwt";
 import { meiliApi } from "./meili";
+import { postApi } from "./post";
 import { reactionApi } from "./reaction";
-import { readlistApi } from "./readlist";
-import { reviewApi } from "./review";
+import { realmApi } from "./realm";
+import { shelfApi } from "./shelf";
 import { sessionApi } from "./session";
 import { serverSessionJwksPath } from "./session/jwt/jwt-metadata";
 import { statsAdminApi } from "./stats";
@@ -181,13 +182,14 @@ app
   .use(wellKnownApi)
   .use(bookApi)
   .use(chapterApi)
-  .use(readlistApi)
-  .use(reviewApi)
+  .use(postApi)
+  .use(shelfApi)
+  .use(realmApi)
+  .use(attributionApi)
   .use(userApi)
   .use(meiliApi)
   .use(unitApi)
   .use(tagApi)
-  .use(commentApi)
   .use(reactionApi)
   .use(tokenApi)
   .use(echoKvApi)
