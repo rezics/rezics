@@ -11,6 +11,7 @@ import {
   type UnitVisibility,
 } from "#/prisma/client";
 import { syncContentToMeili, deleteContentFromMeili } from "@/meili/content/sync";
+import { cleanupReactions } from "@/reaction/reaction-client";
 import type { UnitWithRelations } from "./types";
 import { unitInclude } from "./types";
 
@@ -267,6 +268,8 @@ export class UnitService {
   ): Promise<void> {
     await db.unit.delete({ where: { id: unitId } });
     await deleteContentFromMeili(unitId);
+    // Fire-and-forget cleanup of reactions in the reaction service
+    cleanupReactions(unitId).catch(() => {});
   }
 }
 

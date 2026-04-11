@@ -12,6 +12,7 @@ import { initI18n } from "./provider/i18n";
 configureApi({
   apiBaseUrl: env.VITE_API_URL,
   authBaseUrl: env.VITE_AUTH_API_URL,
+  reactionServiceUrl: env.VITE_REACTION_SERVICE_URL,
 });
 initI18n();
 

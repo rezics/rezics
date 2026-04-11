@@ -29,7 +29,6 @@ export function mapUnitToDTO(unit: UnitWithRelations): UnitDTO {
         isPrimary: sl.isPrimary,
         sortOrder: sl.sortOrder,
       })) ?? [],
-    reactionSummaries: unit.reactionSummaries,
   } as UnitDTO;
 }
 

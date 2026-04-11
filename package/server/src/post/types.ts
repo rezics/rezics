@@ -1,7 +1,6 @@
 import type {
   Post,
   Prisma,
-  ReactionSummary,
   Unit,
   User,
 } from "#/prisma/client";
@@ -15,7 +14,6 @@ import type {
 export type PostWithRelations = Post & {
   unit: Unit & {
     user: User | null;
-    reactionSummaries: ReactionSummary[];
   };
 };
 
@@ -26,7 +24,6 @@ export const postInclude = {
   unit: {
     include: {
       user: true,
-      reactionSummaries: true,
     },
   },
 } satisfies Prisma.PostInclude;

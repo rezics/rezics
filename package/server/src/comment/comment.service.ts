@@ -155,20 +155,6 @@ export class CommentService {
 
     await syncContentToMeili(created.unitId);
 
-    await prisma.reactionSummary.upsert({
-      where: {
-        targetId_reaction: {
-          targetId: rootPostId,
-          reaction: "comment",
-        },
-      },
-      update: { count: { increment: 1 } },
-      create: {
-        targetId: rootPostId,
-        reaction: "comment",
-        count: 1,
-      },
-    });
     // Emit notification (fire-and-forget)
     prisma.unit
       .findUnique({

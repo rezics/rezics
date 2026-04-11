@@ -1,5 +1,4 @@
 /**
- * Reaction Service - Exports
+ * Reaction Client - HTTP client for the standalone reaction service
  */
-export { reactionApi } from "./reaction.api";
-export { ReactionService, reactionService } from "./reaction.service";
+export { cleanupReactions } from "./reaction-client";

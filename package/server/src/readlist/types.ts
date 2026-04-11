@@ -11,7 +11,6 @@ export const readlistListSelect = {
       createdAt: true,
       updatedAt: true,
       publishedAt: true,
-      reactionSummaries: true,
       user: { select: { unitId: true, slug: true, name: true, avatar: true } },
     },
   },
@@ -39,7 +38,6 @@ export const readlistSelect = {
       createdAt: true,
       updatedAt: true,
       publishedAt: true,
-      reactionSummaries: true,
       user: { select: { unitId: true, slug: true, name: true, avatar: true } },
     },
   },
@@ -63,7 +61,6 @@ export const readlistSelect = {
       createdAt: true,
       metadata: true,
       user: { select: { unitId: true, slug: true, name: true, avatar: true } },
-      reactionSummaries: true,
     },
   },
 } satisfies Prisma.ReadListSelect;

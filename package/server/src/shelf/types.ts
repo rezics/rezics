@@ -6,7 +6,6 @@ export const shelfInclude = {
     include: {
       user: true,
       translations: true,
-      reactionSummaries: true,
       unitTags: { orderBy: { score: "desc" as const } },
     },
   },
@@ -43,7 +42,6 @@ export const shelfListSelect = {
       updatedAt: true,
       user: { select: { unitId: true, slug: true, name: true, avatar: true } },
       translations: true,
-      reactionSummaries: true,
       unitTags: { orderBy: { score: "desc" as const } },
     },
   },

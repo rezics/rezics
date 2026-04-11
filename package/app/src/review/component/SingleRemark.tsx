@@ -125,7 +125,6 @@ export const SingleRemarkShow: React.FC<SingleRemarkShowProps> = ({
               </div>
               <div className="text-xs flex items-center gap-2">
                 <span>{reactionSummaries?.likes ?? 0} 人支持</span>
-                <span>{reactionSummaries?.bookmark ?? 0} 人收藏</span>
               </div>
             </div>
             <Tooltip title="回复数">

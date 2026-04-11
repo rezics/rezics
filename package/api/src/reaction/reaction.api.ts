@@ -1,146 +1,103 @@
 /**
  * Reaction API client functions
- * Direct API communication layer for reaction endpoints
+ * Calls the standalone reaction service directly
  */
 
-import type { ReactionListQuery } from "@rezics/contract";
-import { apiFetch } from "../react-query/http";
-import { buildQueryString } from "../utils/buildQuery";
+import {
+  NormalizedTokenName,
+} from "@rezics/contract";
+import { getApiConfig } from "../config";
+import { buildTokenHeaders } from "../react-query/jwt";
 import type {
   ReactionCreateInput,
   ReactionDeleteQuery,
   ReactionDTO,
-  ReactionListResponse,
-  ReactionMultiSummaryResponse,
   ReactionMyResponse,
-  ReactionSummary,
   ReactionSummaryResponse,
-  ReactionUpdateInput,
-} from "./reaction.types.ts";
+} from "./reaction.types";
 
-function transformReactionSummaryResponse(response: {
-  targetIds: string[];
-  summaries: ReactionSummary[];
-}): ReactionMultiSummaryResponse {
-  const summaries: Record<string, Record<string, number>> = {};
-  response.summaries.forEach((summary) => {
-    if (!summaries[summary.targetId]) {
-      summaries[summary.targetId] = {};
-    }
-    summaries[summary.targetId][summary.reaction] = summary.count;
-  });
-  return {
-    targetIds: response.targetIds,
-    summaries,
-  };
+function getReactionBaseUrl(): string {
+  return getApiConfig().reactionServiceUrl ?? getApiConfig().apiBaseUrl;
 }
 
-/**
- * Reaction API methods
- */
+async function reactionFetch<T>(
+  endpoint: string,
+  options?: RequestInit,
+): Promise<T> {
+  const url = `${getReactionBaseUrl()}${endpoint}`;
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+    ...Object.fromEntries(new Headers(options?.headers).entries()),
+    ...buildTokenHeaders({
+      include: [NormalizedTokenName.AUTH_IDENTITY],
+    }),
+  };
+
+  const response = await fetch(url, {
+    ...options,
+    credentials: "include",
+    headers,
+  });
+
+  if (!response.ok) {
+    const body = await response.json().catch(() => null);
+    throw new Error(
+      JSON.stringify({
+        status: response.status,
+        message: body?.message ?? response.statusText,
+      }),
+    );
+  }
+
+  return response.json() as Promise<T>;
+}
+
 export const reactionApi = {
   /**
-   * List reactions with optional filters and pagination
-   *
-   * @param {ReactionListQuery} [filters] - Optional filter and pagination params
-   * @returns {Promise<ReactionListResponse>} Paginated reactions and total count
+   * Get summary counts for one or many targets (unauthenticated)
    */
-  list: async (filters?: ReactionListQuery): Promise<ReactionListResponse> => {
-    return apiFetch<ReactionListResponse>(
-      `/reactions${buildQueryString(filters)}`,
-    );
-  },
-
-  /**
-   * Get summary counts by reaction for a target
-   *
-   * @param {string} targetId - Target entity id (UUID)
-   * @returns {Promise<ReactionSummaryResponse>} Aggregated counts per reaction
-   */
-  summary: async (targetId: string): Promise<ReactionSummaryResponse> => {
-    return apiFetch<ReactionSummaryResponse>(
-      `/reactions/summary${buildQueryString({ targetId })}`,
-    );
-  },
-
-  /**
-   * Get summary counts by reaction for many targets
-   *
-   * @param {string[]} targetIds - Array of target entity ids (UUID)
-   * @returns {Promise<ReactionMultiSummaryResponse>} Aggregated counts per reaction, keyed by targetId
-   */
-  summaryBatch: async (
-    targetIds: string[],
-  ): Promise<ReactionMultiSummaryResponse> => {
+  summary: async (targetIds: string[]): Promise<ReactionSummaryResponse> => {
     const qs = new URLSearchParams();
     for (const id of targetIds) qs.append("targetIds", id);
     const queryString = qs.toString();
-    const response = await apiFetch<{
-      targetIds: string[];
-      summaries: ReactionSummary[];
-    }>(`/reactions/summary${queryString ? `?${queryString}` : ""}`);
-    return transformReactionSummaryResponse(response);
+    return reactionFetch<ReactionSummaryResponse>(
+      `/reactions/summary${queryString ? `?${queryString}` : ""}`,
+    );
   },
 
   /**
    * Get current user's reactions for one or many targets
-   * Requires a valid Authorization header to be present via apiFetch setup
-   *
-   * - Single-target usage:
-   *    reactionApi.my({ targetId })
-   * - Multi-target usage:
-   *    reactionApi.my({ targetIds: [...] })
-   *
-   * @param params - Either { targetId } or { targetIds }
-   * @returns {Promise<ReactionMyResponse>} Aggregated reactions keyed by targetId
    */
-  my: async (params: {
-    targetId?: string;
-    targetIds?: string[];
-  }): Promise<ReactionMyResponse> => {
-    return apiFetch<ReactionMyResponse>(
-      `/reactions/my${buildQueryString(params)}`,
+  my: async (targetIds: string[]): Promise<ReactionMyResponse> => {
+    const qs = new URLSearchParams();
+    for (const id of targetIds) qs.append("targetIds", id);
+    const queryString = qs.toString();
+    return reactionFetch<ReactionMyResponse>(
+      `/reactions/my${queryString ? `?${queryString}` : ""}`,
     );
   },
 
   /**
    * Create a reaction for the current user (idempotent)
-   *
-   * @param {ReactionCreateInput} input - Reaction creation payload
-   * @returns {Promise<ReactionDTO>} The created (or existing) reaction row
    */
   create: async (input: ReactionCreateInput): Promise<ReactionDTO> => {
-    return apiFetch<ReactionDTO>("/reactions", {
+    return reactionFetch<ReactionDTO>("/reactions", {
       method: "POST",
       body: JSON.stringify(input),
     });
   },
 
   /**
-   * Update reaction type from one to another for current user
-   * When old and new are the same, backend responds with the current row
-   *
-   * @param {ReactionUpdateInput} input - Update payload
-   * @returns {Promise<ReactionDTO>} The resulting reaction row for the new type
-   */
-  update: async (input: ReactionUpdateInput): Promise<ReactionDTO> => {
-    return apiFetch<ReactionDTO>(`/reactions`, {
-      method: "PUT",
-      body: JSON.stringify(input),
-    });
-  },
-
-  /**
    * Delete a reaction for the current user (idempotent)
-   *
-   * @param {ReactionDeleteQuery} query - Target and reaction to remove
-   * @returns {Promise<{deleted: boolean}>} Whether a row was actually deleted
    */
   remove: async (query: ReactionDeleteQuery): Promise<{ deleted: boolean }> => {
-    return apiFetch<{ deleted: boolean }>(
-      `/reactions${buildQueryString(query)}`,
+    const qs = new URLSearchParams({
+      targetId: query.targetId,
+      reaction: query.reaction,
+    });
+    return reactionFetch<{ deleted: boolean }>(
+      `/reactions?${qs.toString()}`,
       { method: "DELETE" },
     );
   },
-
 };

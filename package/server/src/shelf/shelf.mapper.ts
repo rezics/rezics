@@ -56,7 +56,6 @@ export function mapShelfToDTO(row: ShelfWithRelations): ShelfDTO {
     extra: (row.extra as Record<string, unknown>) ?? undefined,
     translations: row.unit?.translations ?? [],
     items: (row.items ?? []).map((i) => mapShelfItemToDTO(i as any)),
-    reactionSummaries: row.unit?.reactionSummaries ?? [],
     createdAt: row.createdAt?.toISOString?.() ?? (row.createdAt as any),
     updatedAt: row.updatedAt?.toISOString?.() ?? (row.updatedAt as any),
   };
@@ -81,7 +80,6 @@ export function mapShelfListRowToDTO(row: ShelfListSelected): ShelfDTO {
     kindKey: row.kindKey ?? undefined,
     extra: (row.extra as Record<string, unknown>) ?? undefined,
     translations: row.unit?.translations ?? [],
-    reactionSummaries: row.unit?.reactionSummaries ?? [],
     createdAt: row.createdAt?.toISOString?.() ?? (row.createdAt as any),
     updatedAt: row.updatedAt?.toISOString?.() ?? (row.updatedAt as any),
   };

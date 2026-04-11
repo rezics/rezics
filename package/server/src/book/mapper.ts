@@ -81,9 +81,6 @@ export function mapBaseBookToDTO(book: BookWithRelations): BookDTO {
         };
       }) ?? [],
 
-    // Engagement
-    reactionSummaries: unit.reactionSummaries,
-
     createdAt: book.createdAt,
     updatedAt: book.updatedAt,
     publishedAt: unit.publishedAt ?? undefined,

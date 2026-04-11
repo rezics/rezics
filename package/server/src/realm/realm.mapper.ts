@@ -18,7 +18,6 @@ export function mapRealmToDTO(row: RealmWithRelations): RealmDTO {
     memberCount: row.memberCount,
     extra: (row.extra as Record<string, unknown>) ?? undefined,
     translations: row.unit?.translations ?? [],
-    reactionSummaries: row.unit?.reactionSummaries ?? [],
     createdAt: row.createdAt?.toISOString?.() ?? (row.createdAt as any),
     updatedAt: row.updatedAt?.toISOString?.() ?? (row.updatedAt as any),
   };
@@ -34,7 +33,6 @@ export function mapRealmListRowToDTO(row: RealmListSelected): RealmDTO {
     memberCount: row.memberCount,
     extra: (row.extra as Record<string, unknown>) ?? undefined,
     translations: row.unit?.translations ?? [],
-    reactionSummaries: row.unit?.reactionSummaries ?? [],
     createdAt: row.createdAt?.toISOString?.() ?? (row.createdAt as any),
     updatedAt: row.updatedAt?.toISOString?.() ?? (row.updatedAt as any),
   };

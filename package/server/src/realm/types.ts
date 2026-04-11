@@ -11,7 +11,6 @@ export const realmInclude = {
     include: {
       user: true,
       translations: true,
-      reactionSummaries: true,
     },
   },
   members: true,
@@ -34,7 +33,6 @@ export const realmListSelect = {
       updatedAt: true,
       user: { select: { unitId: true, slug: true, name: true, avatar: true } },
       translations: true,
-      reactionSummaries: true,
     },
   },
 } satisfies Prisma.RealmSelect;

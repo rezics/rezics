@@ -109,9 +109,7 @@ model Unit {
   personCredits       PersonCredit[]
   organizationCredits OrgCredit[]
 
-  // Engagement
-  reactions           Reaction[]        @relation("UnitReactions")
-  reactionSummaries   ReactionSummary[] @relation("UnitReactionSummaries")
+  // Engagement (reactions moved to @rezics/reaction service)
 
   // Post relations (other posts referencing this unit)
   targetedByPosts   Post[]         @relation("PostTarget")
@@ -560,40 +558,13 @@ model User {
   followers       Follow[]  @relation("UserFollowers")
   followings      Follow[]  @relation("UserFollowings")
   units           Unit[]    @relation("UnitForUser")
-  reactions       Reaction[] @relation("UserReactions")
   apiTokens       ApiToken[]
 }
 
 // ============================================================
-// ENGAGEMENT (preserved)
+// ENGAGEMENT
 // ============================================================
-
-model Reaction {
-  id        String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
-  userId    String   @db.Uuid
-  targetId  String   @db.Uuid
-  reaction  String
-  createdAt DateTime @default(now())
-
-  user       User @relation("UserReactions", fields: [userId], references: [unitId], onDelete: Cascade)
-  targetUnit Unit @relation("UnitReactions", fields: [targetId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, targetId, reaction])
-  @@index([targetId])
-  @@index([targetId, reaction])
-  @@index([userId, reaction])
-}
-
-model ReactionSummary {
-  targetId String @db.Uuid
-  reaction String
-  count    Int    @default(0)
-
-  targetUnit Unit @relation("UnitReactionSummaries", fields: [targetId], references: [id], onDelete: Cascade)
-
-  @@id([targetId, reaction])
-  @@index([targetId])
-}
+// Reaction and ReactionSummary models moved to @rezics/reaction service.
 
 model Rating {
   unitId     String   @db.Uuid

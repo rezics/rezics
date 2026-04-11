@@ -6,6 +6,7 @@
     "docs:dev": "cd docs && bun run dev",
     "app:dev": "cd package/app && bun run dev",
     "server:dev": "cd package/server && bun run dev",
+    "reaction:dev": "cd package/reaction && bun run dev",
     "deploy": "cd tool && bun run deploy",
     "check:runtime-env": "node tool/scripts/check-no-runtime-env.mjs",
     "seed:cross": "cd tool && bun run seed/cross-seed.ts",

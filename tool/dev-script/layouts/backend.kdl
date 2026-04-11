@@ -9,3 +9,9 @@ tab name="server" {
         args "dev"
     }
 }
+
+tab name="reaction" {
+    pane command="bun" cwd="../../../package/reaction" start_suspended=false {
+        args "dev"
+    }
+}

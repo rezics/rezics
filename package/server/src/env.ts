@@ -129,6 +129,15 @@ export const env = createEnv({
 
     /** Shared secret for authenticating internal calls to the Notify service. */
     NOTIFY_INTERNAL_SECRET: v.optional(v.string()),
+
+    /** Base URL of the Reaction service for internal calls. */
+    REACTION_BASE_URL: v.fallback(v.string(), "http://localhost:3003"),
+
+    /** Shared secret for authenticating internal calls to the Reaction service. */
+    REACTION_INTERNAL_SECRET: v.optional(v.string()),
+
+    /** Shared secret for authenticating incoming internal service-to-service calls. */
+    SERVER_INTERNAL_SECRET: v.optional(v.string()),
   },
   runtimeEnv: process.env,
   emptyStringAsUndefined: true,

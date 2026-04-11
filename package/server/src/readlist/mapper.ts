@@ -15,7 +15,6 @@ export function mapReadlistListRowToDTO(
     coverUrl,
     content: row.unit?.content ?? undefined,
     creator: row.unit?.user ? sanitizeUser(row.unit.user) : undefined,
-    reactionSummaries: row.unit?.reactionSummaries ?? [],
     books: [],
     reviews: [],
   };
@@ -28,7 +27,6 @@ export function mapReadlistRowToDTO(row: ReadlistSelected): ReadlistDTO {
     id: row.unitId,
     title: row.unit?.title ?? "",
     content: row.unit?.content ?? undefined,
-    reactionSummaries: row.unit?.reactionSummaries ?? [],
     coverUrl,
     creator: row.unit?.user ? sanitizeUser(row.unit.user) : undefined,
     books: (row.book ?? []).map((b) => ({

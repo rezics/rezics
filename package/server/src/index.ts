@@ -28,7 +28,7 @@ import {
 } from "./jwt";
 import { meiliApi } from "./meili";
 import { postApi } from "./post";
-import { reactionApi } from "./reaction";
+import { internalApi } from "./internal/internal.api";
 import { realmApi } from "./realm";
 import { collectionApi, shelfApi } from "./shelf";
 import { linkApi } from "./link";
@@ -193,7 +193,7 @@ app
   .use(meiliApi)
   .use(unitApi)
   .use(tagApi)
-  .use(reactionApi)
+  .use(internalApi)
   .use(tokenApi)
   .use(echoKvApi)
   .use(feedbackApi)

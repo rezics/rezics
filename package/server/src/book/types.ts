@@ -7,7 +7,6 @@ import type {
   Person,
   PersonCredit,
   Prisma,
-  ReactionSummary,
   Unit,
   UnitSupportLanguage,
   UnitTag,
@@ -23,7 +22,6 @@ export type BookWithRelations = Book & {
     user: User | null;
     translations: UnitTranslation[];
     supportLanguages: UnitSupportLanguage[];
-    reactionSummaries: ReactionSummary[];
     unitTags: (UnitTag & { tag: Unit & { translations: UnitTranslation[] } })[];
     personCredits: (PersonCredit & { person: Person })[];
     organizationCredits: (OrgCredit & { organization: Organization })[];
@@ -39,7 +37,6 @@ export const bookInclude = {
       user: true,
       translations: true,
       supportLanguages: true,
-      reactionSummaries: true,
       unitTags: {
         include: { tag: { include: { translations: true } } },
         orderBy: { score: "desc" as const },

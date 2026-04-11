@@ -1,0 +1,33 @@
+generator client {
+  provider      = "prisma-client"
+  output        = "./generated"
+  moduleFormat  = "esm"
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgres"
+}
+
+model Reaction {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String   @db.Uuid
+  targetId  String   @db.Uuid
+  reaction  String   @db.VarChar(32)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, targetId, reaction])
+  @@index([targetId])
+  @@index([targetId, reaction])
+  @@index([userId, reaction])
+  @@index([userId, createdAt])
+}
+
+model ReactionSummary {
+  targetId String @db.Uuid
+  reaction String @db.VarChar(32)
+  count    Int    @default(0)
+
+  @@id([targetId, reaction])
+  @@index([targetId])
+}

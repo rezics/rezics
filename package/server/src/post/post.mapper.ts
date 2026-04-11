@@ -23,7 +23,6 @@ export function mapPostToDTO(post: PostWithRelations): PostDTO {
     lastReplyAt: post.lastReplyAt?.toISOString() ?? null,
     isLocked: post.isLocked,
     extra: post.extra as Record<string, unknown> | null,
-    reactionSummaries: post.unit.reactionSummaries,
     createdAt: post.createdAt.toISOString(),
     updatedAt: post.updatedAt.toISOString(),
   };

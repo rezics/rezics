@@ -2,7 +2,6 @@
 
 import type {
   Prisma,
-  ReactionSummary,
   Unit,
   UnitSupportLanguage,
   UnitTranslation,
@@ -16,7 +15,6 @@ export type UnitWithRelations = Unit & {
   user: User | null;
   translations: UnitTranslation[];
   supportLanguages: UnitSupportLanguage[];
-  reactionSummaries: ReactionSummary[];
 };
 
 /**
@@ -26,5 +24,4 @@ export const unitInclude = {
   user: true,
   translations: true,
   supportLanguages: true,
-  reactionSummaries: true,
 } satisfies Prisma.UnitInclude;

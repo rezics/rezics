@@ -8,6 +8,7 @@ export const env = createEnv({
     VITE_API_URL: v.string(),
     VITE_AUTH_API_URL: v.string(),
     VITE_TURNSTILE_SITE_KEY: v.string(),
+    VITE_REACTION_SERVICE_URL: v.optional(v.string()),
   },
   runtimeEnv: import.meta.env,
   emptyStringAsUndefined: true,

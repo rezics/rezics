@@ -13,7 +13,7 @@ export * from "./notify";
 export * from "./pagination";
 export * from "./permission";
 export * from "./post";
-export * from "./reaction";
+export * from "./reaction/index";
 export * from "./realm";
 export * from "./schema";
 export * from "./seed-tags";
