@@ -1,46 +1,45 @@
-/**
- * React Query configurations for Shelf queries
- */
-
 import { infiniteQueryOptions, queryOptions } from "@tanstack/react-query";
-import { shelfApi } from "./shelf.api";
-import { shelfKeys } from "./shelf.keys";
-import type { ShelfFilters } from "./shelf.types";
+import { collectionApi, shelfApi, userKeywordsApi } from "./shelf.api";
+import { collectionKeys, shelfKeys, userKeywordKeys } from "./shelf.keys";
+import type { ShelfFilters, ShelfItemsQuery } from "./shelf.types";
 
-/**
- * Query options for listing shelves
- */
 export const shelfListQuery = (filters?: ShelfFilters) =>
   queryOptions({
     queryKey: shelfKeys.list(filters),
     queryFn: () => shelfApi.list(filters),
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: 1000 * 60 * 5,
   });
 
-/**
- * Query options for getting a single shelf
- */
 export const shelfDetailQuery = (unitId: string) =>
   queryOptions({
     queryKey: shelfKeys.detail(unitId),
     queryFn: () => shelfApi.get(unitId),
-    staleTime: 1000 * 60 * 10, // 10 minutes
+    staleTime: 1000 * 60 * 10,
   });
 
-/**
- * Query options for getting shelves by user
- */
 export const shelvesByUserQuery = (userId: string, filters?: ShelfFilters) =>
   queryOptions({
     queryKey: shelfKeys.byUser(userId),
     queryFn: () => shelfApi.getByUserId(userId, filters),
     enabled: !!userId,
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: 1000 * 60 * 5,
   });
 
-/**
- * Infinite query options for paginated shelf list
- */
+export const userShelvesQuery = () =>
+  queryOptions({
+    queryKey: shelfKeys.mine(),
+    queryFn: () => shelfApi.mine(),
+    staleTime: 1000 * 60 * 2,
+  });
+
+export const shelfItemsQuery = (unitId: string, query?: ShelfItemsQuery) =>
+  queryOptions({
+    queryKey: shelfKeys.itemsFiltered(unitId, query),
+    queryFn: () => shelfApi.listItems(unitId, query),
+    enabled: !!unitId,
+    staleTime: 1000 * 60 * 2,
+  });
+
 export const shelfInfiniteListQuery = (
   filters?: Omit<ShelfFilters, "start">,
 ) =>
@@ -55,15 +54,37 @@ export const shelfInfiniteListQuery = (
       const hasMore = shelves.length === limit;
       return hasMore ? lastPageParam + limit : undefined;
     },
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: 1000 * 60 * 5,
   });
 
-/**
- * Combined query options export
- */
+export const collectionStatusQuery = (targetId: string) =>
+  queryOptions({
+    queryKey: collectionKeys.status(targetId),
+    queryFn: () => collectionApi.status(targetId),
+    enabled: !!targetId,
+    staleTime: 1000 * 60 * 1,
+  });
+
+export const userKeywordsQuery = () =>
+  queryOptions({
+    queryKey: userKeywordKeys.mine(),
+    queryFn: () => userKeywordsApi.get(),
+    staleTime: 1000 * 60 * 5,
+  });
+
 export const shelfQueries = {
   list: shelfListQuery,
   detail: shelfDetailQuery,
   byUser: shelvesByUserQuery,
+  mine: userShelvesQuery,
+  items: shelfItemsQuery,
   infiniteList: shelfInfiniteListQuery,
+};
+
+export const collectionQueries = {
+  status: collectionStatusQuery,
+};
+
+export const userKeywordQueries = {
+  mine: userKeywordsQuery,
 };

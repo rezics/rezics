@@ -40,22 +40,10 @@ export const reactionMyQuery = (targetId: string) =>
   });
 
 /**
- * Query options for getting current user's bookmark tags on a target
- */
-export const reactionBookmarkTagsQuery = (targetId: string) =>
-  queryOptions({
-    queryKey: reactionKeys.bookmarkTags(targetId),
-    queryFn: () => reactionApi.getBookmarkTags(targetId),
-    enabled: !!targetId,
-    staleTime: 1000 * 60 * 2, // 2 minutes
-  });
-
-/**
  * Combined query options export
  */
 export const reactionQueries = {
   list: reactionListQuery,
   summary: reactionSummaryQuery,
   my: reactionMyQuery,
-  bookmarkTags: reactionBookmarkTagsQuery,
 };

@@ -1,7 +1,7 @@
 import { useAlertStore } from "@app/state/windowAlertStore";
 
-import { Add, Comment, Edit, FavoriteBorder } from "@mui/icons-material";
-import { IconButton, Popper, Tooltip } from "@mui/material";
+import { Comment, Edit, FavoriteBorder, LibraryAdd } from "@mui/icons-material";
+import { IconButton, Tooltip } from "@mui/material";
 import {
   useCreateReactionMutation,
   useDeleteReactionMutation,
@@ -12,8 +12,10 @@ import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { CollectionModal } from "@/collection/component/CollectionModal";
+import { FavoriteButton } from "@/collection/component/FavoriteButton";
+import { useCollectionModal } from "@/collection/hooks/useCollectionModal";
 import { useUserProfileStore } from "@/user/state";
-import { BookmarkTagManager } from "./BookmarkTagManager";
 
 interface MiniAdminActionBarProps {
   editionURL: string;
@@ -82,12 +84,8 @@ export function MiniActionBar({
   }, [data, unitId]);
 
   const hasLike = userReactions.includes("like");
-  const hasBookmark = userReactions.includes("bookmark");
 
-  const [anchorBookmarkEl, setBookmarkAnchorEl] = useState<null | HTMLElement>(
-    null,
-  );
-  const openBookmarkMenu = Boolean(anchorBookmarkEl);
+  const collection = useCollectionModal(unitId ?? "");
 
   const createReactionMutation = useCreateReactionMutation({
     onSuccess: () => {
@@ -115,11 +113,6 @@ export function MiniActionBar({
     }
   };
 
-  const handleBookmarkMenuToggle = (event: React.MouseEvent<HTMLElement>) => {
-    if (!unitId) return;
-    setBookmarkAnchorEl(anchorBookmarkEl ? null : event.currentTarget);
-  };
-  // const [_location, navigate] = useLocation();
   return (
     <span className={className}>
       <Tooltip title={t("accessibility.favorite")} placement="top">
@@ -146,47 +139,28 @@ export function MiniActionBar({
           </IconButton>
         </Tooltip>
       )}
-      <Popper
-        open={openBookmarkMenu}
-        anchorEl={anchorBookmarkEl}
-        placement="right-start"
-        modifiers={[
-          { name: "flip", enabled: true },
-          {
-            name: "preventOverflow",
-            options: {
-              altAxis: true, // 允许上下、左右溢出检测
-              padding: 8,
-            },
-          },
-        ]}
-        sx={{
-          zIndex: (theme) => theme.zIndex.modal + 1,
-        }}
-      >
-        {unitId && (
-          <BookmarkTagManager
-            unitId={unitId}
-            key={unitId}
-            open={openBookmarkMenu}
-            onClose={() => setBookmarkAnchorEl(null)}
-            hasBookmarked={hasBookmark}
-          />
-        )}
-      </Popper>
+      {unitId && <FavoriteButton unitId={unitId} size="small" color={textColor} />}
       <Tooltip title={t("accessibility.collection")} placement="top">
         <IconButton
           aria-label={t("accessibility.collection")}
           size="small"
-          onClick={handleBookmarkMenuToggle}
+          onClick={collection.handleOpen}
         >
-          <Add
-            fontSize="small"
-            color={hasBookmark ? "primary" : "inherit"}
-            className={textColor}
-          />
+          <LibraryAdd fontSize="small" className={textColor} />
         </IconButton>
       </Tooltip>
+      {unitId && (
+        <CollectionModal
+          open={collection.open}
+          onClose={collection.handleClose}
+          onCollect={collection.handleCollect}
+          shelves={collection.shelves}
+          status={collection.status}
+          userKeywords={collection.userKeywords}
+          isCollecting={collection.isCollecting}
+          isLoading={collection.isLoading}
+        />
+      )}
     </span>
   );
 }

@@ -62,24 +62,45 @@ export async function seedShelves(
       const itemCount = randomInt(3, Math.min(10, workIds.length));
       const selectedWorks = pickN(workIds, itemCount);
 
-      const shelfItems = selectedWorks.map((workId, i) => {
-        // Optionally link a review post
-        const matchingReview =
-          randomBoolean(0.3) && reviewPosts.length > 0
-            ? reviewPosts.find((p) => p.targetUnitId === workId)
-            : undefined;
-
-        return {
-          shelfUnitId: unit.id,
-          itemUnitId: workId,
-          sortOrder: i,
-          reviewPostUnitId: matchingReview?.id ?? null,
-          label: randomBoolean(0.2) ? faker.lorem.words({ min: 1, max: 3 }) : null,
-        };
-      });
+      const shelfItems = selectedWorks.map((workId, i) => ({
+        shelfUnitId: unit.id,
+        itemUnitId: workId,
+        sortOrder: i,
+        keywords: randomBoolean(0.3)
+          ? faker.helpers.arrayElements(
+              ["to-read", "favorite", "reference", "gift-idea", "summer", "classic"],
+              { min: 1, max: 3 },
+            )
+          : [],
+        label: randomBoolean(0.2) ? faker.lorem.words({ min: 1, max: 3 }) : null,
+      }));
 
       if (shelfItems.length > 0) {
         await prisma.shelfItem.createMany({ data: shelfItems });
+      }
+
+      // Optionally attach reviews via ShelfItemReview junction
+      if (reviewPosts.length > 0) {
+        const reviewAttachments = shelfItems
+          .filter(() => randomBoolean(0.3))
+          .map((item) => {
+            const review = reviewPosts.find((p) => p.targetUnitId === item.itemUnitId);
+            return review
+              ? {
+                  shelfUnitId: unit.id,
+                  itemUnitId: item.itemUnitId,
+                  reviewUnitId: review.id,
+                }
+              : null;
+          })
+          .filter((r): r is NonNullable<typeof r> => r !== null);
+
+        if (reviewAttachments.length > 0) {
+          await prisma.shelfItemReview.createMany({
+            data: reviewAttachments,
+            skipDuplicates: true,
+          });
+        }
       }
 
       return unit;

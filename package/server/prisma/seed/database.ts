@@ -12,7 +12,7 @@ export async function resetDatabase(prisma: PrismaClient): Promise<void> {
     prisma.apiToken.deleteMany(),
     prisma.feedback.deleteMany(),
     prisma.tagVote.deleteMany(),
-    prisma.bookmark.deleteMany(),
+    prisma.shelfItemReview.deleteMany(),
     prisma.reaction.deleteMany(),
     prisma.follow.deleteMany(),
     prisma.personCredit.deleteMany(),
@@ -48,6 +48,7 @@ export async function resetDatabase(prisma: PrismaClient): Promise<void> {
     prisma.book.deleteMany(),
     prisma.game.deleteMany(),
     prisma.media.deleteMany(),
+    prisma.link.deleteMany(),
   ]);
 
   // Group 6: Translation layer

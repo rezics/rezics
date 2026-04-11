@@ -7,6 +7,7 @@ export * from "./book";
 export * from "./chapter";
 export * from "./feedback";
 export * from "./jwt-service";
+export * from "./link";
 export * from "./meili";
 export * from "./notify";
 export * from "./pagination";
@@ -15,7 +16,7 @@ export * from "./post";
 export * from "./reaction";
 export * from "./realm";
 export * from "./schema";
-
+export * from "./seed-tags";
 export * from "./shelf";
 export * from "./tag";
 export * from "./token";

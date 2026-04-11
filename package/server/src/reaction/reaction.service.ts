@@ -148,31 +148,11 @@ export class ReactionService {
         update: { count: { increment: 1 } },
       });
 
-      // If this is a bookmark reaction, ensure a Bookmark row exists (without tags for now).
-      if (reaction === "bookmark") {
-        await tx.bookmark.upsert({
-          where: {
-            userId_targetId: {
-              userId,
-              targetId,
-            },
-          },
-          create: {
-            userId,
-            targetId,
-          },
-          update: {},
-        });
-      }
-
       return created;
     });
 
     // Emit notification (fire-and-forget)
-    const notifType =
-      reaction === "bookmark"
-        ? NotificationType.FAVORITE
-        : NotificationType.LIKE;
+    const notifType = NotificationType.LIKE;
     prisma.unit
       .findUnique({ where: { id: targetId }, select: { userId: true, title: true } })
       .then((unit) => {
@@ -229,16 +209,6 @@ export class ReactionService {
           data: { count: { decrement: 1 } },
         })
         .catch(() => Promise.resolve());
-
-      // If we removed a bookmark reaction, also remove the Bookmark row (tags no longer apply).
-      if (reaction === "bookmark") {
-        await tx.bookmark.deleteMany({
-          where: {
-            userId,
-            targetId,
-          },
-        });
-      }
 
       return { deleted: true };
     });
@@ -297,15 +267,6 @@ export class ReactionService {
             data: { count: { decrement: 1 } },
           })
           .catch(() => Promise.resolve());
-        // If old reaction was bookmark, drop bookmark row.
-        if (oldReaction === "bookmark") {
-          await tx.bookmark.deleteMany({
-            where: {
-              userId,
-              targetId,
-            },
-          });
-        }
       }
 
       // Ensure new exists; only increment summary if this is newly created
@@ -336,22 +297,6 @@ export class ReactionService {
           create: { targetId, reaction: newReaction, count: 1 },
           update: { count: { increment: 1 } },
         });
-        // If new reaction is bookmark, ensure a Bookmark row exists.
-        if (newReaction === "bookmark") {
-          await tx.bookmark.upsert({
-            where: {
-              userId_targetId: {
-                userId,
-                targetId,
-              },
-            },
-            create: {
-              userId,
-              targetId,
-            },
-            update: {},
-          });
-        }
       }
 
       return { reaction: result, changed: true };

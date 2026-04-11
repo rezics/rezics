@@ -1,12 +1,13 @@
 import { randomUUID } from "node:crypto";
 import { faker } from "@faker-js/faker";
 import type { PrismaClient } from "#/prisma/generated/client.js";
+import { UnitStatus, UnitType, UnitVisibility } from "#/prisma/generated/client.js";
 import { REACTION_TYPES } from "./data.js";
 import type { CreatedUser } from "./types.js";
 import { pickN, randomInt } from "./utils.js";
 
 /**
- * Seed all engagement data: reaction summaries, bookmarks, ratings, follows.
+ * Seed all engagement data: reaction summaries, favorites, follows.
  * Substeps run in parallel.
  */
 export async function seedEngagement(
@@ -21,7 +22,7 @@ export async function seedEngagement(
 
   await Promise.all([
     seedReactionSummaries(prisma, allUnitIds),
-    seedBookmarks(prisma, users, allUnitIds, counts.bookmarksPerUser),
+    seedFavorites(prisma, users, allUnitIds, counts.bookmarksPerUser),
     seedFollows(prisma, users, counts.followsPerUser),
   ]);
 }
@@ -53,36 +54,58 @@ async function seedReactionSummaries(
 }
 
 /**
- * Create Bookmark rows (random user→unit pairs).
+ * Create a Favorites shelf for each user and add random items.
  */
-async function seedBookmarks(
+async function seedFavorites(
   prisma: PrismaClient,
   users: CreatedUser[],
   unitIds: string[],
   perUser: number,
 ): Promise<void> {
-  console.log(`[Seed]   Seeding bookmarks...`);
-
-  const seen = new Set<string>();
-  const data: { userId: string; targetId: string }[] = [];
+  console.log(`[Seed]   Seeding favorites shelves...`);
 
   for (const user of users) {
-    const bookmarkCount = randomInt(0, perUser);
-    const targets = pickN(unitIds, Math.min(bookmarkCount, unitIds.length));
-    for (const targetId of targets) {
-      const key = `${user.unitId}:${targetId}`;
-      if (seen.has(key)) continue;
-      seen.add(key);
-      data.push({ userId: user.unitId, targetId });
-    }
-  }
+    const favCount = randomInt(0, perUser);
+    if (favCount === 0) continue;
 
-  const BATCH_SIZE = 5000;
-  for (let i = 0; i < data.length; i += BATCH_SIZE) {
-    await prisma.bookmark.createMany({
-      data: data.slice(i, i + BATCH_SIZE),
-      skipDuplicates: true,
+    const targets = pickN(unitIds, Math.min(favCount, unitIds.length));
+    const shelfId = randomUUID();
+
+    await prisma.unit.create({
+      data: {
+        id: shelfId,
+        type: UnitType.SHELF,
+        userId: user.unitId,
+        status: UnitStatus.PUBLISHED,
+        visibility: UnitVisibility.PRIVATE,
+        publishedAt: new Date(),
+        shelf: { create: { kindKey: "favorites" } },
+        translations: {
+          create: { language: "en", title: "Favorites" },
+        },
+      },
     });
+
+    const seen = new Set<string>();
+    const items = targets
+      .filter((targetId) => {
+        if (seen.has(targetId)) return false;
+        seen.add(targetId);
+        return true;
+      })
+      .map((targetId, i) => ({
+        shelfUnitId: shelfId,
+        itemUnitId: targetId,
+        sortOrder: i,
+        keywords: faker.helpers.arrayElements(
+          ["to-read", "favorite", "reference", "gift-idea"],
+          { min: 0, max: 2 },
+        ),
+      }));
+
+    if (items.length > 0) {
+      await prisma.shelfItem.createMany({ data: items, skipDuplicates: true });
+    }
   }
 }
 

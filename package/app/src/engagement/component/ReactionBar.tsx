@@ -4,29 +4,31 @@ import {
   DeleteOutlined,
   EditOutlined,
   EmojiEvents,
+  LibraryAdd,
   OpenInNew,
   SentimentSatisfiedAlt,
-  StarBorder,
 } from "@mui/icons-material";
 import ThumbDownAltOutlinedIcon from "@mui/icons-material/ThumbDownAltOutlined";
 import ThumbUpAltOutlinedIcon from "@mui/icons-material/ThumbUpAltOutlined";
-import { IconButton, Popper, Tooltip } from "@mui/material";
+import { IconButton, Tooltip } from "@mui/material";
 import {
   useCreateReactionMutation,
   useDeleteReactionMutation,
 } from "@rezics/api/reaction/reaction.mutations";
 import type React from "react";
 import { useEffect, useState } from "react";
-import { BookmarkTagManager } from "./BookmarkTagManager";
+import { CollectionModal } from "@/collection/component/CollectionModal";
+import { FavoriteButton } from "@/collection/component/FavoriteButton";
+import { useCollectionModal } from "@/collection/hooks/useCollectionModal";
 import { ReactionBarToolBox } from "./reactionBarToolBox";
 
 async function copyCurrentUrl(url?: string) {
   const theUrl = url || window.location.href;
   try {
     await navigator.clipboard.writeText(theUrl);
-    console.log("URL 已复制到剪贴板");
+    console.log("URL copied to clipboard");
   } catch (err) {
-    console.error("复制失败：", err);
+    console.error("Copy failed:", err);
   }
 }
 
@@ -80,7 +82,6 @@ export type ReactionBarProps = {
   hideReply?: boolean;
   hideBookmark?: boolean;
   hideShare?: boolean;
-  /** 当前用户在该 target 上的所有 reaction（例如 ['like'] 或 ['like','bookmark']） */
   currentUserReactions?: string[];
 };
 
@@ -105,15 +106,7 @@ export const ReactionBar: React.FC<ReactionBarProps> = ({
   const [isToolBoxOpen, setIsToolBoxOpen] = useState(false);
   const { show: showAlert } = useAlertStore();
 
-  const [anchorBookmarkEl, setBookmarkAnchorEl] = useState<null | HTMLElement>(
-    null,
-  );
-  const openBookmarkMenu = Boolean(anchorBookmarkEl);
-
-  const handleBookmarkMenuToggle = (event: React.MouseEvent<HTMLElement>) => {
-    if (!unitId) return;
-    setBookmarkAnchorEl(anchorBookmarkEl ? null : event.currentTarget);
-  };
+  const collection = useCollectionModal(unitId ?? "");
 
   const [userReactions, setUserReactions] = useState<string[]>(
     currentUserReactions ?? [],
@@ -137,7 +130,6 @@ export const ReactionBar: React.FC<ReactionBarProps> = ({
 
   const hasLike = userReactions.includes("like");
   const hasDislike = userReactions.includes("dislike");
-  const hasBookmark = userReactions.includes("bookmark");
 
   const handleToggleReaction = (reaction: "like" | "dislike") => {
     if (!unitId) return;
@@ -193,51 +185,32 @@ export const ReactionBar: React.FC<ReactionBarProps> = ({
           </div>
         )}
 
-        {!hideBookmark && (
-          <div>
-            <IconButton
-              size={size}
-              sx={{ fontSize }}
-              onClick={(event) => {
-                handleBookmarkMenuToggle(event);
-              }}
-            >
-              <StarBorder
-                fontSize="inherit"
-                color={hasBookmark ? "primary" : "inherit"}
-              />
-            </IconButton>
-          </div>
-        )}
-
-        <Popper
-          open={openBookmarkMenu}
-          anchorEl={anchorBookmarkEl}
-          placement="right-start"
-          modifiers={[
-            { name: "flip", enabled: true },
-            {
-              name: "preventOverflow",
-              options: {
-                altAxis: true, // 允许上下、左右溢出检测
-                padding: 8,
-              },
-            },
-          ]}
-          sx={{
-            zIndex: (theme) => theme.zIndex.modal + 1,
-          }}
-        >
-          {unitId && (
-            <BookmarkTagManager
-              unitId={unitId}
-              hasBookmarked={hasBookmark}
-              key={unitId}
-              open={openBookmarkMenu}
-              onClose={() => setBookmarkAnchorEl(null)}
+        {!hideBookmark && unitId && (
+          <>
+            <FavoriteButton unitId={unitId} size={size} />
+            <div>
+              <Tooltip title="Collect">
+                <IconButton
+                  size={size}
+                  sx={{ fontSize }}
+                  onClick={collection.handleOpen}
+                >
+                  <LibraryAdd fontSize="inherit" />
+                </IconButton>
+              </Tooltip>
+            </div>
+            <CollectionModal
+              open={collection.open}
+              onClose={collection.handleClose}
+              onCollect={collection.handleCollect}
+              shelves={collection.shelves}
+              status={collection.status}
+              userKeywords={collection.userKeywords}
+              isCollecting={collection.isCollecting}
+              isLoading={collection.isLoading}
             />
-          )}
-        </Popper>
+          </>
+        )}
 
         {!hideShare && (
           <div>
@@ -245,7 +218,7 @@ export const ReactionBar: React.FC<ReactionBarProps> = ({
               size={size}
               sx={{ fontSize }}
               onClick={() => {
-                showAlert("链接已经复制到剪贴板");
+                showAlert("Link copied to clipboard");
                 const origin = window?.location?.origin;
                 const theUrl = origin + itemUrl;
                 copyCurrentUrl(theUrl);

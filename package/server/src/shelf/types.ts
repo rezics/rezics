@@ -1,17 +1,13 @@
 import type { Prisma } from "#/prisma/client";
 
-// Internal shelf type with relations
-export type ShelfWithRelations = Prisma.ShelfGetPayload<{
-  include: typeof shelfInclude;
-}>;
-
-// Prisma include for shelf relations
+// Prisma include for shelf detail (with items + reviews)
 export const shelfInclude = {
   unit: {
     include: {
       user: true,
       translations: true,
       reactionSummaries: true,
+      unitTags: { orderBy: { score: "desc" as const } },
     },
   },
   items: {
@@ -23,10 +19,14 @@ export const shelfInclude = {
           translations: true,
         },
       },
-      reviewPost: true,
+      reviews: true,
     },
   },
 } satisfies Prisma.ShelfInclude;
+
+export type ShelfWithRelations = Prisma.ShelfGetPayload<{
+  include: typeof shelfInclude;
+}>;
 
 // Lighter select for list queries (no items)
 export const shelfListSelect = {
@@ -44,10 +44,27 @@ export const shelfListSelect = {
       user: { select: { unitId: true, slug: true, name: true, avatar: true } },
       translations: true,
       reactionSummaries: true,
+      unitTags: { orderBy: { score: "desc" as const } },
     },
   },
+  _count: { select: { items: true } },
 } satisfies Prisma.ShelfSelect;
 
 export type ShelfListSelected = Prisma.ShelfGetPayload<{
   select: typeof shelfListSelect;
+}>;
+
+// Include for shelf items listing with pagination
+export const shelfItemInclude = {
+  item: {
+    include: {
+      user: true,
+      translations: true,
+    },
+  },
+  reviews: true,
+} satisfies Prisma.ShelfItemInclude;
+
+export type ShelfItemWithRelations = Prisma.ShelfItemGetPayload<{
+  include: typeof shelfItemInclude;
 }>;

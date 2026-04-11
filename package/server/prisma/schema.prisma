@@ -25,6 +25,7 @@ enum UnitType {
   IMAGE
   VIDEO
   QUOTE
+  LINK
 }
 
 enum UnitStatus {
@@ -89,6 +90,7 @@ model Unit {
   post              Post?
   shelf             Shelf?
   realm             Realm?
+  link              Link?
 
   // Tag system
   unitTags          UnitTag[]      @relation("TaggedUnit")
@@ -110,7 +112,6 @@ model Unit {
   // Engagement
   reactions           Reaction[]        @relation("UnitReactions")
   reactionSummaries   ReactionSummary[] @relation("UnitReactionSummaries")
-  bookmarks           Bookmark[]
 
   // Post relations (other posts referencing this unit)
   targetedByPosts   Post[]         @relation("PostTarget")
@@ -119,8 +120,8 @@ model Unit {
   parentPosts       Post[]         @relation("PostParent")
 
   // Shelf item relations
-  shelfItemsContaining ShelfItem[] @relation("ShelfItemUnit")
-  shelfItemReviews     ShelfItem[] @relation("ShelfItemReview")
+  shelfItemsContaining ShelfItem[]       @relation("ShelfItemUnit")
+  shelfItemReviews     ShelfItemReview[] @relation("ShelfItemReviewUnit")
 
   @@index([type, status, createdAt])
   @@index([workUnitId])
@@ -261,6 +262,24 @@ model Media {
 }
 
 // ============================================================
+// LINK EXTENSION
+// ============================================================
+
+model Link {
+  unitId     String  @id @db.Uuid
+  unit       Unit    @relation(fields: [unitId], references: [id], onDelete: Cascade)
+
+  url        String
+  siteName   String? @db.VarChar(128)
+  faviconUrl String?
+
+  extra      Json?
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+// ============================================================
 // POST EXTENSION (replaces Comment, Review, Note, Remark)
 // ============================================================
 
@@ -325,26 +344,38 @@ model Shelf {
 }
 
 model ShelfItem {
-  shelfUnitId      String   @db.Uuid
-  itemUnitId       String   @db.Uuid
-  sortOrder        Int      @default(0)
+  shelfUnitId String   @db.Uuid
+  itemUnitId  String   @db.Uuid
+  sortOrder   Int      @default(0)
+  keywords    String[] @default([])
 
-  reviewPostUnitId String?  @db.Uuid
+  label       String?
 
-  label            String?
+  extra       Json?
 
-  extra            Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-
-  shelf            Shelf    @relation(fields: [shelfUnitId], references: [unitId], onDelete: Cascade)
-  item             Unit     @relation("ShelfItemUnit", fields: [itemUnitId], references: [id], onDelete: Cascade)
-  reviewPost       Unit?    @relation("ShelfItemReview", fields: [reviewPostUnitId], references: [id], onDelete: SetNull)
+  shelf       Shelf    @relation(fields: [shelfUnitId], references: [unitId], onDelete: Cascade)
+  item        Unit     @relation("ShelfItemUnit", fields: [itemUnitId], references: [id], onDelete: Cascade)
+  reviews     ShelfItemReview[]
 
   @@id([shelfUnitId, itemUnitId])
   @@index([itemUnitId])
   @@index([shelfUnitId, sortOrder])
+}
+
+model ShelfItemReview {
+  shelfUnitId  String   @db.Uuid
+  itemUnitId   String   @db.Uuid
+  reviewUnitId String   @db.Uuid
+  addedAt      DateTime @default(now())
+
+  shelfItem ShelfItem @relation(fields: [shelfUnitId, itemUnitId], references: [shelfUnitId, itemUnitId], onDelete: Cascade)
+  review    Unit      @relation("ShelfItemReviewUnit", fields: [reviewUnitId], references: [id], onDelete: Cascade)
+
+  @@id([shelfUnitId, itemUnitId, reviewUnitId])
+  @@index([reviewUnitId])
 }
 
 // ============================================================
@@ -519,6 +550,7 @@ model User {
   description     String?
   joinDate        DateTime?
   permission      Json?
+  keywords        String[]  @default([])
   followersCount  Int       @default(0)
   followingsCount Int       @default(0)
 
@@ -560,21 +592,6 @@ model ReactionSummary {
   targetUnit Unit @relation("UnitReactionSummaries", fields: [targetId], references: [id], onDelete: Cascade)
 
   @@id([targetId, reaction])
-  @@index([targetId])
-}
-
-model Bookmark {
-  userId    String   @db.Uuid
-  targetId  String   @db.Uuid
-  tags      String[] @default([])
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  targetUnit Unit @relation(fields: [targetId], references: [id], onDelete: Cascade)
-
-  @@id([userId, targetId])
-  @@index([userId])
   @@index([targetId])
 }
 

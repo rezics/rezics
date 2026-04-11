@@ -30,7 +30,8 @@ import { meiliApi } from "./meili";
 import { postApi } from "./post";
 import { reactionApi } from "./reaction";
 import { realmApi } from "./realm";
-import { shelfApi } from "./shelf";
+import { collectionApi, shelfApi } from "./shelf";
+import { linkApi } from "./link";
 import { sessionApi } from "./session";
 import { serverSessionJwksPath } from "./session/jwt/jwt-metadata";
 import { statsAdminApi } from "./stats";
@@ -184,6 +185,8 @@ app
   .use(chapterApi)
   .use(postApi)
   .use(shelfApi)
+  .use(collectionApi)
+  .use(linkApi)
   .use(realmApi)
   .use(attributionApi)
   .use(userApi)

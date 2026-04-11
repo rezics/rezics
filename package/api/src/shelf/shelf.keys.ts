@@ -1,29 +1,25 @@
-/**
- * React Query keys for Shelf queries
- */
-
-import type { ShelfFilters } from "./shelf.types";
+import type { ShelfFilters, ShelfItemsQuery } from "./shelf.types";
 
 export const shelfKeys = {
-  /**
-   * Base key for all shelf queries
-   */
   all: () => ["shelves"] as const,
-
-  /**
-   * Keys for list queries
-   */
   lists: () => [...shelfKeys.all(), "list"] as const,
   list: (filters?: ShelfFilters) => [...shelfKeys.lists(), filters] as const,
-
-  /**
-   * Keys for detail queries
-   */
   details: () => [...shelfKeys.all(), "detail"] as const,
   detail: (unitId: string) => [...shelfKeys.details(), unitId] as const,
-
-  /**
-   * Keys for user-specific queries
-   */
   byUser: (userId: string) => [...shelfKeys.all(), "user", userId] as const,
+  mine: () => [...shelfKeys.all(), "mine"] as const,
+  items: (unitId: string) => [...shelfKeys.all(), "items", unitId] as const,
+  itemsFiltered: (unitId: string, query?: ShelfItemsQuery) =>
+    [...shelfKeys.items(unitId), query] as const,
+} as const;
+
+export const collectionKeys = {
+  all: () => ["collection"] as const,
+  status: (targetId: string) =>
+    [...collectionKeys.all(), "status", targetId] as const,
+} as const;
+
+export const userKeywordKeys = {
+  all: () => ["userKeywords"] as const,
+  mine: () => [...userKeywordKeys.all(), "mine"] as const,
 } as const;

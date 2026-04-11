@@ -13,6 +13,7 @@ const INDEXABLE_TYPES = [
   UnitType.GAME,
   UnitType.MEDIA,
   UnitType.SHELF,
+  UnitType.LINK,
 ];
 
 const contentInclude = {
@@ -37,6 +38,7 @@ const contentInclude = {
   game: { include: { platforms: true } },
   media: true,
   shelf: true,
+  link: true,
 } as const;
 
 /**
@@ -92,6 +94,10 @@ export function buildContentDocument(unit: any): ContentSearchDocument {
   const isLicensed = ext?.isLicensed ?? false;
   const coverAssetUnitId = ext?.coverAssetUnitId ?? null;
 
+  // Link-specific fields
+  const linkUrl = unit.link?.url ?? null;
+  const linkSiteName = unit.link?.siteName ?? null;
+
   return {
     id: unit.id,
     type: unit.type,
@@ -125,6 +131,8 @@ export function buildContentDocument(unit: any): ContentSearchDocument {
     defaultLanguage: unit.defaultLanguage ?? null,
     coverAssetUnitId,
     userId: unit.userId ?? null,
+    linkUrl,
+    linkSiteName,
   };
 }
 

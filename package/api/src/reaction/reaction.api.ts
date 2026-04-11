@@ -7,8 +7,6 @@ import type { ReactionListQuery } from "@rezics/contract";
 import { apiFetch } from "../react-query/http";
 import { buildQueryString } from "../utils/buildQuery";
 import type {
-  BookmarkTagsResponse,
-  BookmarkTagsUpdateInput,
   ReactionCreateInput,
   ReactionDeleteQuery,
   ReactionDTO,
@@ -145,28 +143,4 @@ export const reactionApi = {
     );
   },
 
-  /**
-   * Get current user's bookmark tags for a given target.
-   *
-   * @param {string} targetId - Unit id of the bookmarked target
-   */
-  getBookmarkTags: async (targetId: string): Promise<BookmarkTagsResponse> => {
-    return apiFetch<BookmarkTagsResponse>(`/reactions/bookmarks/${targetId}`);
-  },
-
-  /**
-   * Set (replace) current user's bookmark tags for a given target.
-   * This will also ensure the 'bookmark' reaction exists.
-   *
-   * @param {BookmarkTagsUpdateInput} input - targetId + new tags
-   */
-  setBookmarkTags: async (
-    input: BookmarkTagsUpdateInput,
-  ): Promise<BookmarkTagsResponse> => {
-    const { targetId, tags } = input;
-    return apiFetch<BookmarkTagsResponse>(`/reactions/bookmarks/${targetId}`, {
-      method: "PUT",
-      body: JSON.stringify({ tags }),
-    });
-  },
 };

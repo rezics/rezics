@@ -16,6 +16,7 @@ export const UnitType = {
   IMAGE: "IMAGE",
   VIDEO: "VIDEO",
   QUOTE: "QUOTE",
+  LINK: "LINK",
 } as const;
 
 export const UnitStatus = {
@@ -43,6 +44,7 @@ export const unitTypeSchema = t.Union([
   t.Literal("IMAGE"),
   t.Literal("VIDEO"),
   t.Literal("QUOTE"),
+  t.Literal("LINK"),
 ]);
 
 export const unitStatusSchema = t.Union([
