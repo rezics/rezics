@@ -32,7 +32,7 @@ export const tagDetailQuery = (unitId: string) =>
  */
 export const tagsForUnitQuery = (
   unitId: string,
-  filters?: Pick<TagFilters, "minScore" | "limit">,
+  filters?: Pick<TagFilters, "minScore" | "limit"> & { language?: string },
 ) =>
   queryOptions({
     queryKey: tagKeys.forUnit(unitId),

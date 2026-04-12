@@ -30,19 +30,19 @@ export const realmKeys = {
     [...realmKeys.searches(), { q: query, ...filters }] as const,
 
   /**
-   * Keys for membership queries
+   * Keys for membership invalidation
    */
   members: (realmUnitId: string) =>
     [...realmKeys.all(), "members", realmUnitId] as const,
 
   /**
-   * Keys for realm content (units)
+   * Keys for realm content invalidation
    */
   units: (realmUnitId: string) =>
     [...realmKeys.all(), "units", realmUnitId] as const,
 
   /**
-   * Keys for realm tag-unit associations
+   * Keys for realm tag-unit invalidation
    */
   tagUnits: (realmUnitId: string) =>
     [...realmKeys.all(), "tagUnits", realmUnitId] as const,

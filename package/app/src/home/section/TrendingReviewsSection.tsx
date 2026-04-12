@@ -1,6 +1,5 @@
 import { Alert, Button, CircularProgress, Typography } from "@mui/material";
-// MOCK: meili review queries may need updating when backend is ready
-import { buildMeiliReviewQuery } from "@rezics/api/meili/meili.queries";
+import { contentSearchQueryOptions } from "@rezics/api/meili/meili.queries";
 import type { PostDTO } from "@rezics/contract";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
@@ -26,12 +25,14 @@ export const TrendingReviews: React.FC<TrendingReviewsProps> = ({
   const resolvedTitle = title ?? t("page.home.sections.trending_reviews");
   const navigate = useNavigate();
   const { data, isLoading, error } = useQuery(
-    buildMeiliReviewQuery(0, limit, {}),
+    contentSearchQueryOptions({ type: "POST", offset: 0, limit }),
   );
 
-  // MOCK: data shape may change when meili queries are updated
-  const items = useMemo<PostDTO[]>(() => (data as any)?.reviews ?? (data as any)?.posts ?? [], [data]);
-  const _total: number | undefined = data?.total;
+  // MOCK: map content search items to PostDTO shape until backend provides a dedicated reviews endpoint
+  const items = useMemo<PostDTO[]>(
+    () => (data?.items ?? []) as unknown as PostDTO[],
+    [data],
+  );
 
   if (error) {
     return (

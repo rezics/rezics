@@ -66,16 +66,6 @@ export const userApi = {
   },
 
   /**
-   * Admin: create user.
-   */
-  adminCreate: async (input: Record<string, unknown>): Promise<UserDTO> => {
-    return apiFetch(`/users/admin`, {
-      method: "POST",
-      body: JSON.stringify(input),
-    });
-  },
-
-  /**
    * Admin: update user.
    */
   adminUpdate: async (unitId: string, input: UpdateUser): Promise<UserDTO> => {
@@ -151,5 +141,11 @@ export const userApi = {
   ): Promise<{ users: UserDTO[]; total: number }> => {
     const qs = query ? `?${new URLSearchParams(query as any).toString()}` : "";
     return apiFetch(`/users/${unitId}/followings${qs}`);
+  },
+
+  batch: async (
+    ids: string[],
+  ): Promise<Record<string, { name: string; slug: string; avatar: string }>> => {
+    return apiFetch(`/users/batch?ids=${ids.join(",")}`);
   },
 };

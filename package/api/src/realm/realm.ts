@@ -37,11 +37,8 @@ export {
   realmDetailQuery,
   realmInfiniteListQuery,
   realmListQuery,
-  realmMembersQuery,
   realmQueries,
   realmSearchQuery,
-  realmTagUnitsQuery,
-  realmUnitsQuery,
 } from "./realm.queries";
 // Types
 export type {
@@ -59,7 +56,6 @@ export type {
   RealmTagUnitDTO,
   RealmUnitDTO,
   RealmView,
-  RemoveRealmTagUnitInput,
   UpdateMemberRoleInput,
   UpdateRealmInput,
 } from "./realm.types";

@@ -1,5 +1,5 @@
 import { Alert } from "@mui/material";
-import { buildMeiliReadlistQuery } from "@rezics/api/meili/meili.queries";
+import { contentSearchQueryOptions } from "@rezics/api/meili/meili.queries";
 import { reactionApi } from "@rezics/api/reaction/reaction.api";
 import type { ShelfDTO } from "@rezics/contract";
 import { UniversalPaginator, type UniversalPaginatorHandle } from "@rezics/ui";
@@ -66,14 +66,23 @@ export function ReadListsPage({ bookUnitId }: { bookUnitId?: string }) {
   const [start, setStart] = useState<number>(0);
   const [currentPage, setCurrentPage] = useState(1);
 
+  // MOCK: using content search with SHELF type until dedicated shelf list query is available
+  const searchOpts = useMemo(
+    () => ({
+      type: "SHELF" as const,
+      keyword: currentQuery.keyword || undefined,
+      tagIds:
+        currentQuery.tags && currentQuery.tags.length > 0
+          ? currentQuery.tags
+          : undefined,
+      offset: start,
+      limit: EXTERNAL_PAGE_SIZE,
+    }),
+    [currentQuery, start],
+  );
+
   const { data, isLoading, error } = useQuery(
-    buildMeiliReadlistQuery(
-      start,
-      EXTERNAL_PAGE_SIZE,
-      currentQuery.keyword ?? "",
-      currentQuery.tags ?? [],
-      { bookId: bookUnitId ?? undefined },
-    ),
+    contentSearchQueryOptions(searchOpts),
   );
 
   function handleNeedMoreData(page: number) {
@@ -83,29 +92,23 @@ export function ReadListsPage({ bookUnitId }: { bookUnitId?: string }) {
   const queryClient = useQueryClient();
   async function handlePreRequestData(page: number) {
     const startOffset = (page - 1) * EXTERNAL_PAGE_SIZE;
-    const { queryKey, queryFn } = buildMeiliReadlistQuery(
-      startOffset,
-      EXTERNAL_PAGE_SIZE,
-      currentQuery.keyword ?? "",
-      currentQuery.tags ?? [],
-      { bookId: bookUnitId ?? undefined },
+    const opts = {
+      ...searchOpts,
+      offset: startOffset,
+    };
+    const result = await queryClient.fetchQuery(
+      contentSearchQueryOptions(opts),
     );
-    const data = await queryClient.fetchQuery({ queryKey, queryFn });
-    console.log("handlePreRequestData", data, page);
-    return data?.readlists?.length ?? 0;
+    return result?.items?.length ?? 0;
   }
 
   useEffect(() => {
-    console.log("data", data);
-  }, [data]);
-
-  useEffect(() => {
     universalPaginatorRef.current?.resetPaginationPageNumber();
-    console.log("currentQuery", currentQuery);
   }, [currentQuery]);
 
+  // MOCK: cast content search items to ShelfDTO until backend provides a typed shelf response
   const baseReadlists: Readlist[] = useMemo(
-    () => data?.readlists ?? [],
+    () => (data?.items ?? []) as unknown as Readlist[],
     [data],
   );
 
@@ -168,7 +171,6 @@ export function ReadListsPage({ bookUnitId }: { bookUnitId?: string }) {
     type?: string;
     order?: "asc" | "desc";
   }) => {
-    console.log("handleSortChange, newSort", newSort);
     setSortConfig((prev) => ({
       type: (newSort.type as SortKey) ?? prev.type,
       order: newSort.order ?? prev.order,
@@ -200,7 +202,6 @@ export function ReadListsPage({ bookUnitId }: { bookUnitId?: string }) {
                 keyword: info ?? "",
                 tags: [],
               });
-              console.log("onSearch", info);
             }}
             defaultValue={{ keyword: currentQuery.keyword ?? "" }}
             placeholder={t("page.readlist.list.search_placeholder")}

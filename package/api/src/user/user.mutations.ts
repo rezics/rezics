@@ -22,23 +22,6 @@ export function useUpdateMeMutation(
   });
 }
 
-export function useAdminCreateUserMutation(
-  options?: Omit<
-    UseMutationOptions<UserDTO, Error, Record<string, unknown>>,
-    "mutationFn"
-  >,
-) {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: (input: Record<string, unknown>) => userApi.adminCreate(input),
-    ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      qc.invalidateQueries({ queryKey: userKeys.adminLists() });
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
-  });
-}
-
 export function useAdminUpdateUserMutation(
   options?: Omit<
     UseMutationOptions<UserDTO, Error, { unitId: string; input: UpdateUser }>,
@@ -144,7 +127,6 @@ export function useUnfollowMutation(
 
 export const userMutations = {
   useUpdateMe: useUpdateMeMutation,
-  useAdminCreate: useAdminCreateUserMutation,
   useAdminUpdate: useAdminUpdateUserMutation,
   useDeleteMe: useDeleteMeMutation,
   useFollow: useFollowMutation,

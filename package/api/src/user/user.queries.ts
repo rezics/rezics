@@ -66,6 +66,14 @@ export const userFollowStatusQuery = (targetIds: string[]) =>
     enabled: targetIds.length > 0,
   });
 
+export const userBatchQuery = (ids: string[]) =>
+  queryOptions({
+    queryKey: userKeys.batch(ids),
+    queryFn: () => userApi.batch(ids),
+    enabled: ids.length > 0,
+    staleTime: 1000 * 60 * 5,
+  });
+
 export const userQueries = {
   me: userMeQuery,
   list: userListQuery,
@@ -75,4 +83,5 @@ export const userQueries = {
   followers: userFollowersQuery,
   followings: userFollowingsQuery,
   followStatus: userFollowStatusQuery,
+  batch: userBatchQuery,
 };

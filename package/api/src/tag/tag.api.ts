@@ -109,10 +109,10 @@ export const tagApi = {
    */
   getForUnit: async (
     unitId: string,
-    filters?: Pick<TagFilters, "minScore" | "limit">,
-  ): Promise<{ tags: UnitTagDTO[]; total: number }> => {
-    return apiFetch<{ tags: UnitTagDTO[]; total: number }>(
-      `/tags${buildQueryString({ unitId, ...filters })}`,
+    filters?: Pick<TagFilters, "minScore" | "limit"> & { language?: string },
+  ): Promise<{ tags: UnitTagDTO[] }> => {
+    return apiFetch<{ tags: UnitTagDTO[] }>(
+      `/tags/for-unit/${unitId}${buildQueryString(filters)}`,
     );
   },
 };

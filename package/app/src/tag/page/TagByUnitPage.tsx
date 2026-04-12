@@ -34,7 +34,7 @@ export function TagByBookPage() {
     .map((r) => r.data)
     .filter(Boolean) as UnitTagDTO[];
 
-  const total = listData?.total ?? 0;
+  const total = listData?.tags?.length ?? 0;
   const showSeeAll = total > pageSize;
 
   return (
@@ -98,7 +98,7 @@ export function TagByBookFullPage() {
     .map((r) => r.data)
     .filter(Boolean) as UnitTagDTO[];
 
-  const total = listData?.total ?? 0;
+  const total = listData?.tags?.length ?? 0;
 
   return (
     <div className="w-11/12 mx-auto mt-10">

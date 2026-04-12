@@ -11,7 +11,6 @@ import type {
   RealmResponse,
   RealmTagUnitDTO,
   RealmUnitDTO,
-  RemoveRealmTagUnitInput,
   UpdateMemberRoleInput,
   UpdateRealmInput,
 } from "@rezics/contract";
@@ -308,7 +307,7 @@ export function useRemoveRealmTagUnitMutation(
     UseMutationOptions<
       { message: string },
       Error,
-      { realmUnitId: string; input: RemoveRealmTagUnitInput }
+      { realmUnitId: string; tagUnitId: string; contentUnitId: string }
     >,
     "mutationFn"
   >,
@@ -316,8 +315,8 @@ export function useRemoveRealmTagUnitMutation(
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ realmUnitId, input }) =>
-      realmApi.removeTagUnit(realmUnitId, input),
+    mutationFn: ({ realmUnitId, tagUnitId, contentUnitId }) =>
+      realmApi.removeTagUnit(realmUnitId, tagUnitId, contentUnitId),
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
       queryClient.invalidateQueries({

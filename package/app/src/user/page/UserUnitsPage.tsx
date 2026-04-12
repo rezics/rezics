@@ -1,10 +1,6 @@
 import { Alert, Box, Tab, Tabs } from "@mui/material";
-import { mapUnitListToReviewListResponse } from "@rezics/api/meili/meili.api";
-import {
-  buildMeiliReadlistQuery,
-  buildMeiliUnitQuery,
-  meiliBookSearchQuery,
-} from "@rezics/api/meili/meili.queries";
+import { contentSearchQueryOptions } from "@rezics/api/meili/meili.queries";
+import { meiliBookSearchQuery } from "@rezics/api/meili/meili.queries";
 import { reactionApi } from "@rezics/api/reaction/reaction.api";
 import type {
   BookDTO,
@@ -93,13 +89,7 @@ type TabKey =
 /**
  * UserUnitsPage
  *
- * 按 Tab 展示某个用户的：
- * - READLIST：基于 /meili/readlists/search（buildMeiliReadlistQuery）
- * - REVIEW / REMARK：基于 /meili/units/search（buildMeiliUnitQuery + UnitType）
- *
- * 并使用专门的组件渲染：
- * - READLIST：SingleReadlist
- * - REVIEW / REMARK：ReviewListContainer
+ * 按 Tab 展示某个用户的内容，使用 content search API。
  */
 export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
   const ref = useRef<UniversalPaginatorHandle>(null);
@@ -119,19 +109,23 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
   const [startNote, setStartNote] = useState<number>(0);
   const [startQuote, setStartQuote] = useState<number>(0);
 
-  // ======= Readlists (Meili readlists index with userId filter) =======
+  // ======= Readlists (content search with SHELF type) =======
+  // MOCK: using content search as shelf list query until dedicated endpoint exists
   const {
     data: readlistDataRaw,
     isLoading: isLoadingReadlist,
     error: errorReadlist,
   } = useQuery(
-    buildMeiliReadlistQuery(startReadlist, EXTERNAL_PAGE_SIZE, keyword, [], {
-      userId,
+    contentSearchQueryOptions({
+      type: "SHELF",
+      keyword: keyword || undefined,
+      offset: startReadlist,
+      limit: EXTERNAL_PAGE_SIZE,
     }),
   );
 
   const baseReadlists: Readlist[] = useMemo(
-    () => readlistDataRaw?.readlists ?? [],
+    () => (readlistDataRaw?.items ?? []) as unknown as Readlist[],
     [readlistDataRaw],
   );
 
@@ -204,50 +198,42 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
     error: errorBook,
   } = bookListQueryOpts;
 
-  // ======= Reviews / Remarks (Meili units index with userId filter) =======
-
-  const reviewListQueryOpts = useQuery(
-    buildMeiliUnitQuery({
-      kind: UnitType.POST,
-      start: startReview,
-      targetUnitId: undefined,
-      keyword: keyword,
-      limit: EXTERNAL_PAGE_SIZE,
-      mapFn: mapUnitListToReviewListResponse,
-      options: { userId },
-    }),
-  );
-
-  const remarkListQueryOpts = useQuery(
-    buildMeiliUnitQuery({
-      kind: UnitType.POST,
-      start: startRemark,
-      targetUnitId: undefined,
-      keyword: keyword,
-      limit: EXTERNAL_PAGE_SIZE,
-      mapFn: mapUnitListToReviewListResponse,
-      options: { userId },
-    }),
-  );
+  // ======= Reviews / Remarks (content search with POST type) =======
+  // MOCK: using content search for reviews/remarks until dedicated post query is available
 
   const {
     data: reviewData,
     isLoading: isLoadingReview,
     error: errorReview,
-  } = reviewListQueryOpts;
+  } = useQuery(
+    contentSearchQueryOptions({
+      type: UnitType.POST,
+      keyword: keyword || undefined,
+      offset: startReview,
+      limit: EXTERNAL_PAGE_SIZE,
+    }),
+  );
 
   const {
     data: remarkData,
     isLoading: isLoadingRemark,
     error: errorRemark,
-  } = remarkListQueryOpts;
+  } = useQuery(
+    contentSearchQueryOptions({
+      type: UnitType.POST,
+      keyword: keyword || undefined,
+      offset: startRemark,
+      limit: EXTERNAL_PAGE_SIZE,
+    }),
+  );
 
   const activeReviewLikeData = tab === "review" ? reviewData : remarkData;
   const isLoadingReviewLike =
     tab === "review" ? isLoadingReview : isLoadingRemark;
 
+  // MOCK: cast content search items to PostDTO shape
   const baseReviews: Review[] = useMemo(
-    () => activeReviewLikeData?.reviews ?? [],
+    () => (activeReviewLikeData?.items ?? []) as unknown as Review[],
     [activeReviewLikeData],
   );
 
@@ -305,21 +291,19 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
   const totalReviews: number =
     (tab === "review" ? reviewData?.total : remarkData?.total) ?? 0;
 
-  // ======= COMMENT / NOTE / QUOTE（同一 Meili units 查询，不同 type）=======
+  // ======= COMMENT / NOTE / QUOTE（content search with type filter）=======
+  // MOCK: using content search for comments/notes/quotes
 
   const {
     data: commentData,
     isLoading: isLoadingComment,
     error: errorComment,
   } = useQuery(
-    buildMeiliUnitQuery({
-      kind: UnitType.COMMENT,
-      start: startComment,
-      targetUnitId: undefined,
-      keyword: keyword,
+    contentSearchQueryOptions({
+      type: UnitType.COMMENT,
+      keyword: keyword || undefined,
+      offset: startComment,
       limit: EXTERNAL_PAGE_SIZE,
-      mapFn: (unitResp) => unitResp,
-      options: { userId },
     }),
   );
 
@@ -328,14 +312,11 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
     isLoading: isLoadingNote,
     error: errorNote,
   } = useQuery(
-    buildMeiliUnitQuery({
-      kind: UnitType.NOTE,
-      start: startNote,
-      targetUnitId: undefined,
-      keyword: keyword,
+    contentSearchQueryOptions({
+      type: UnitType.NOTE,
+      keyword: keyword || undefined,
+      offset: startNote,
       limit: EXTERNAL_PAGE_SIZE,
-      mapFn: (unitResp) => unitResp,
-      options: { userId },
     }),
   );
 
@@ -344,27 +325,25 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
     isLoading: isLoadingQuote,
     error: errorQuote,
   } = useQuery(
-    buildMeiliUnitQuery({
-      kind: UnitType.QUOTE,
-      start: startQuote,
-      targetUnitId: undefined,
-      keyword: keyword,
+    contentSearchQueryOptions({
+      type: UnitType.QUOTE,
+      keyword: keyword || undefined,
+      offset: startQuote,
       limit: EXTERNAL_PAGE_SIZE,
-      mapFn: (unitResp) => unitResp,
-      options: { userId },
     }),
   );
 
+  // MOCK: cast content search items to UnitDTO shape
   const commentUnits: UnitItem[] = useMemo(
-    () => (commentData?.units ?? []) as UnitItem[],
+    () => (commentData?.items ?? []) as unknown as UnitItem[],
     [commentData],
   );
   const noteUnits: UnitItem[] = useMemo(
-    () => (noteData?.units ?? []) as UnitItem[],
+    () => (noteData?.items ?? []) as unknown as UnitItem[],
     [noteData],
   );
   const quoteUnits: UnitItem[] = useMemo(
-    () => (quoteData?.units ?? []) as UnitItem[],
+    () => (quoteData?.items ?? []) as unknown as UnitItem[],
     [quoteData],
   );
 
@@ -393,34 +372,27 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
     const start = (page - 1) * EXTERNAL_PAGE_SIZE;
 
     if (tab === "readlist") {
-      const { queryKey, queryFn } = buildMeiliReadlistQuery(
-        start,
-        EXTERNAL_PAGE_SIZE,
-        keyword,
-        [],
-        { userId },
+      const result = await queryClient.fetchQuery(
+        contentSearchQueryOptions({
+          type: "SHELF",
+          keyword: keyword || undefined,
+          offset: start,
+          limit: EXTERNAL_PAGE_SIZE,
+        }),
       );
-      const nextData = await queryClient.fetchQuery({ queryKey, queryFn });
-      return nextData?.readlists?.length ?? 0;
+      return result?.items?.length ?? 0;
     }
 
-    // 其他 Tab 共用 Meili units 查询，只是 type / mapFn 不同
     if (tab === "review" || tab === "remark") {
-      const isReview = tab === "review";
-      const { queryKey, queryFn } = buildMeiliUnitQuery({
-        kind: isReview ? UnitType.POST : UnitType.POST,
-        start: start,
-        targetUnitId: undefined,
-        keyword: keyword,
-        limit: EXTERNAL_PAGE_SIZE,
-        mapFn: mapUnitListToReviewListResponse,
-        options: { userId },
-      });
-      const nextReviewData = await queryClient.fetchQuery({
-        queryKey,
-        queryFn,
-      });
-      return nextReviewData?.reviews?.length ?? 0;
+      const result = await queryClient.fetchQuery(
+        contentSearchQueryOptions({
+          type: UnitType.POST,
+          keyword: keyword || undefined,
+          offset: start,
+          limit: EXTERNAL_PAGE_SIZE,
+        }),
+      );
+      return result?.items?.length ?? 0;
     }
 
     const unitType =
@@ -430,20 +402,15 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
           ? UnitType.NOTE
           : UnitType.QUOTE;
 
-    const { queryKey, queryFn } = buildMeiliUnitQuery({
-      kind: unitType,
-      start: start,
-      targetUnitId: undefined,
-      keyword: keyword,
-      limit: EXTERNAL_PAGE_SIZE,
-      mapFn: (unitResp) => unitResp,
-      options: { userId },
-    });
-    const nextUnitData = await queryClient.fetchQuery({
-      queryKey,
-      queryFn,
-    });
-    return nextUnitData?.units?.length ?? 0;
+    const result = await queryClient.fetchQuery(
+      contentSearchQueryOptions({
+        type: unitType,
+        keyword: keyword || undefined,
+        offset: start,
+        limit: EXTERNAL_PAGE_SIZE,
+      }),
+    );
+    return result?.items?.length ?? 0;
   }
 
   useEffect(() => {

@@ -16,11 +16,11 @@ import type {
   RealmResponse,
   RealmTagUnitDTO,
   RealmUnitDTO,
-  RemoveRealmTagUnitInput,
   UpdateMemberRoleInput,
   UpdateRealmInput,
 } from "@rezics/contract";
 import { apiFetch } from "../react-query/http";
+import { getRezicsSessionClaims } from "../react-query/jwt";
 import { buildQueryString } from "../utils/buildQuery";
 import type { RealmFilters } from "./realm.types";
 
@@ -108,19 +108,15 @@ export const realmApi = {
    * Leave a realm
    */
   leave: async (realmUnitId: string): Promise<{ message: string }> => {
-    return apiFetch<{ message: string }>(`/realms/${realmUnitId}/members/me`, {
-      method: "DELETE",
-    });
-  },
-
-  /**
-   * Get realm members
-   */
-  getMembers: async (
-    realmUnitId: string,
-  ): Promise<{ members: RealmMemberDTO[] }> => {
-    return apiFetch<{ members: RealmMemberDTO[] }>(
-      `/realms/${realmUnitId}/members`,
+    const claims = getRezicsSessionClaims();
+    if (!claims?.unitId) {
+      throw new Error("Cannot leave realm: no active session");
+    }
+    return apiFetch<{ message: string }>(
+      `/realms/${realmUnitId}/members/${claims.unitId}`,
+      {
+        method: "DELETE",
+      },
     );
   },
 
@@ -165,7 +161,7 @@ export const realmApi = {
     realmUnitId: string,
     input: AddRealmUnitInput,
   ): Promise<RealmUnitDTO> => {
-    return apiFetch<RealmUnitDTO>(`/realms/${realmUnitId}/units`, {
+    return apiFetch<RealmUnitDTO>(`/realms/${realmUnitId}/content`, {
       method: "POST",
       body: JSON.stringify(input),
     });
@@ -179,21 +175,10 @@ export const realmApi = {
     unitId: string,
   ): Promise<{ message: string }> => {
     return apiFetch<{ message: string }>(
-      `/realms/${realmUnitId}/units/${unitId}`,
+      `/realms/${realmUnitId}/content/${unitId}`,
       {
         method: "DELETE",
       },
-    );
-  },
-
-  /**
-   * Get units in a realm
-   */
-  getUnits: async (
-    realmUnitId: string,
-  ): Promise<{ units: RealmUnitDTO[] }> => {
-    return apiFetch<{ units: RealmUnitDTO[] }>(
-      `/realms/${realmUnitId}/units`,
     );
   },
 
@@ -206,7 +191,7 @@ export const realmApi = {
     realmUnitId: string,
     input: AddRealmTagUnitInput,
   ): Promise<RealmTagUnitDTO> => {
-    return apiFetch<RealmTagUnitDTO>(`/realms/${realmUnitId}/tag-units`, {
+    return apiFetch<RealmTagUnitDTO>(`/realms/${realmUnitId}/tags`, {
       method: "POST",
       body: JSON.stringify(input),
     });
@@ -217,22 +202,14 @@ export const realmApi = {
    */
   removeTagUnit: async (
     realmUnitId: string,
-    input: RemoveRealmTagUnitInput,
+    tagUnitId: string,
+    contentUnitId: string,
   ): Promise<{ message: string }> => {
-    return apiFetch<{ message: string }>(`/realms/${realmUnitId}/tag-units`, {
-      method: "DELETE",
-      body: JSON.stringify(input),
-    });
-  },
-
-  /**
-   * Get tag-unit associations for a realm
-   */
-  getTagUnits: async (
-    realmUnitId: string,
-  ): Promise<{ tagUnits: RealmTagUnitDTO[] }> => {
-    return apiFetch<{ tagUnits: RealmTagUnitDTO[] }>(
-      `/realms/${realmUnitId}/tag-units`,
+    return apiFetch<{ message: string }>(
+      `/realms/${realmUnitId}/tags/${tagUnitId}/${contentUnitId}`,
+      {
+        method: "DELETE",
+      },
     );
   },
 };

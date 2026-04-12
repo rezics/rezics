@@ -39,39 +39,6 @@ export const realmSearchQuery = (query: string, filters?: RealmFilters) =>
   });
 
 /**
- * Query options for getting realm members
- */
-export const realmMembersQuery = (realmUnitId: string) =>
-  queryOptions({
-    queryKey: realmKeys.members(realmUnitId),
-    queryFn: () => realmApi.getMembers(realmUnitId),
-    enabled: !!realmUnitId,
-    staleTime: 1000 * 60 * 5, // 5 minutes
-  });
-
-/**
- * Query options for getting realm units (content)
- */
-export const realmUnitsQuery = (realmUnitId: string) =>
-  queryOptions({
-    queryKey: realmKeys.units(realmUnitId),
-    queryFn: () => realmApi.getUnits(realmUnitId),
-    enabled: !!realmUnitId,
-    staleTime: 1000 * 60 * 5, // 5 minutes
-  });
-
-/**
- * Query options for getting realm tag-unit associations
- */
-export const realmTagUnitsQuery = (realmUnitId: string) =>
-  queryOptions({
-    queryKey: realmKeys.tagUnits(realmUnitId),
-    queryFn: () => realmApi.getTagUnits(realmUnitId),
-    enabled: !!realmUnitId,
-    staleTime: 1000 * 60 * 5, // 5 minutes
-  });
-
-/**
  * Infinite query options for paginated realm list
  */
 export const realmInfiniteListQuery = (
@@ -98,8 +65,5 @@ export const realmQueries = {
   list: realmListQuery,
   detail: realmDetailQuery,
   search: realmSearchQuery,
-  members: realmMembersQuery,
-  units: realmUnitsQuery,
-  tagUnits: realmTagUnitsQuery,
   infiniteList: realmInfiniteListQuery,
 };

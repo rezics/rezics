@@ -1,0 +1,28 @@
+import type { CreateLinkInput, LinkDTO, UpdateLinkInput } from "@rezics/contract";
+import { apiFetch } from "../react-query/http";
+
+export const linkApi = {
+  create: async (input: CreateLinkInput): Promise<LinkDTO> => {
+    return apiFetch<LinkDTO>("/links", {
+      method: "POST",
+      body: JSON.stringify(input),
+    });
+  },
+
+  get: async (unitId: string): Promise<LinkDTO> => {
+    return apiFetch<LinkDTO>(`/links/${unitId}`);
+  },
+
+  update: async (unitId: string, input: UpdateLinkInput): Promise<LinkDTO> => {
+    return apiFetch<LinkDTO>(`/links/${unitId}`, {
+      method: "PUT",
+      body: JSON.stringify(input),
+    });
+  },
+
+  remove: async (unitId: string): Promise<{ message: string }> => {
+    return apiFetch<{ message: string }>(`/links/${unitId}`, {
+      method: "DELETE",
+    });
+  },
+};
