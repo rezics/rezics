@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "scripts": {
     "dev": "bun run dev-script/dev.ts",
+    "prisma:regenerate": "bun run dev-script/prisma-regenerate.ts",
     "install-services": "bun run install-services/install-services.ts",
     "deploy": "bun run deploy-script/deploy-script.ts",
     "generate-barrel": "bun run scripts/generate-barrel.ts",
@@ -14,7 +15,7 @@
     "@types/bun": "^1.3.11"
   },
   "dependencies": {
-    "@prisma/adapter-pg": "^7.6.0",
+    "@prisma/adapter-pg": "^7.7.0",
     "better-auth": "^1.5.3",
     "dotenv": "^17.2.3"
   }
