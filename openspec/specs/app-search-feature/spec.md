@@ -1,90 +1,56 @@
-## ADDED Requirements
-
-### Requirement: Search Feature Layering Boundaries
-The app SHALL implement `app/search` in `package/app` with explicit layer boundaries (`model/hooks/util/state/component/section/page/index.ts`) and SHALL place files according to responsibility.
-
-#### Scenario: Model responsibilities stay pure
-- **GIVEN** search query normalization, filter derivation, and search-result mapping rules exist
-- **WHEN** these rules are implemented or refactored
-- **THEN** they MUST live in `model` and MUST NOT import React hooks, feature `state`, or routing APIs
-
-### Requirement: Header Home Search Responsive Experience
-The app SHALL provide a homepage search entry in the main layout header with responsive behavior for desktop and mobile.
-
-#### Scenario: Desktop header search is always visible
-- **GIVEN** the app is rendered on desktop viewport
-- **WHEN** user visits home/main layout
-- **THEN** a header search bar MUST be visible directly in the main header area
-
-#### Scenario: Mobile header search expands on demand
-- **GIVEN** the app is rendered on mobile viewport
-- **WHEN** user taps the header search button
-- **THEN** a search bar MUST appear below the top bar
-- **AND** user can interact with the same search input behavior used by homepage search
-
-### Requirement: User-Visible Search Parity
-The refactor SHALL preserve existing user-visible search outcomes, including query handling, loading and empty states, and error-state rendering semantics.
-
-#### Scenario: Query behavior parity after refactor
-- **GIVEN** previously supported search queries and filter combinations
-- **WHEN** user executes these flows after refactor
-- **THEN** displayed results and state transitions MUST remain functionally equivalent
-
-### Requirement: Error Handling Continuity
-The search feature SHALL preserve and standardize error handling behavior so failures are surfaced consistently without uncaught UI-breaking exceptions.
-
-#### Scenario: Search request failure
-- **GIVEN** a search request fails due to network or server-side issues
-- **WHEN** failure is returned to search UI
-- **THEN** the feature MUST provide a recoverable error state and keep the page interactive
-
-### Requirement: Accessibility and Localization Preservation
-Search refactoring SHALL preserve accessibility and localization behavior for search inputs, status messages, and result state messaging.
-
-#### Scenario: Localized and accessible status messaging
-- **GIVEN** the search feature displays loading, empty, or error feedback
-- **WHEN** feedback is rendered in desktop or mobile search surfaces
-- **THEN** messages MUST remain localizable and exposed in a way compatible with existing accessibility semantics
-
-### Requirement: Independent Home Search Component Contract
-Homepage search input SHALL be defined as an independent component contract, with desktop and mobile wrappers composing it rather than duplicating business logic.
-
-#### Scenario: Shared base component used by wrappers
-- **GIVEN** desktop and mobile header experiences differ in presentation
-- **WHEN** search input behavior is implemented
-- **THEN** a shared base search component MUST encapsulate common input semantics
-- **AND** desktop/mobile wrappers MUST only provide layout and interaction-shell differences
-
 ## MODIFIED Requirements
 
+### Requirement: User-Visible Search Parity
+
+The search feature SHALL consume the new `ContentSearchResult` from the server-mediated search API. Search results SHALL display content from `ContentSearchDocument` fields (`titles`, `creditNames`, `type`, `coverAssetUnitId`). The frontend SHALL resolve display title from the `titles` array based on the user's preferred language, falling back to the first available title.
+
+#### Scenario: Query behavior with new result shape
+
+- **GIVEN** the search API returns `ContentSearchResult` with `items` containing `ContentSearchDocument` objects
+- **WHEN** results are rendered
+- **THEN** each result SHALL display the title resolved from `titles` array, attribution from `creditNames`, and content type from `type`
+
+#### Scenario: Multilingual title resolution
+
+- **GIVEN** a search result document with `titles: ["Harry Potter...", "哈利·波特..."]` and `languages: ["en", "zh"]`
+- **WHEN** the user's preferred language is "zh"
+- **THEN** the displayed title SHALL be "哈利·波特..."
+
 ### Requirement: Public Search Feature Entry
-The app SHALL expose search functionality through a stable public feature entry point (`index.ts`) with explicit named exports only, and consumers MUST integrate through this entry rather than deep-importing internal implementation files.
+
+The app SHALL expose search functionality through a stable public feature entry point (`index.ts`) with explicit named exports only. The search feature SHALL use `ContentSearchOptions` for query construction and `ContentSearchResult` for result handling, both imported from `@rezics/contract` via `@rezics/api` query hooks.
 
 #### Scenario: Consumer imports from explicit entry exports
+
 - **GIVEN** a route or component integrates search behavior
 - **WHEN** it imports search modules
 - **THEN** it MUST import from feature `index.ts` explicit named exports
-- **AND** it MUST receive equivalent behavior to prior implementation
+- **AND** search queries SHALL use `ContentSearchOptions` shape
 
-## REMOVED Requirements
+### Requirement: Search supports realm and tag filtering
 
-### Requirement: Aggregated Object-Style Search Export
-The app previously allowed object-style API usage through aggregated `Search` namespace exports (for example `Search.Show`, `Search.Container`, and nested `Search.panel.*`).
+The search feature SHALL support filtering by realm and by tags (both global and realm-scoped). Tag filtering SHALL use tag UUIDs, not tag name strings. The frontend SHALL pass tag UUIDs obtained from prior tag lookups or UI state.
 
-**Reason**
-- Aggregated object exports hide ownership boundaries, reduce tree-shaking clarity, and couple call sites to unstable internal aliases.
+#### Scenario: Search within a realm
 
-**Migration**
-- Replace all `Search.*` object-style access with explicit named imports from search feature `index.ts`.
-- Remove usage of alias exports such as `Show`, `Container`, `Filter`, `panelShow`, and `panelContainer`.
+- **GIVEN** the user is browsing a realm page
+- **WHEN** they perform a search
+- **THEN** the search request SHALL include `realmId` in the `ContentSearchOptions`
+- **AND** results SHALL be scoped to that realm
 
-#### Scenario: Legacy object export no longer available
-- **GIVEN** code previously consumed aggregated search namespace exports
-- **WHEN** the refactor is applied
-- **THEN** aggregated object exports MUST no longer be provided
-- **AND** call sites MUST be migrated to explicit named imports
+#### Scenario: Search with tag filter
 
-## RENAMED Requirements
+- **GIVEN** the user selects a tag filter in the search UI
+- **WHEN** the search request is sent
+- **THEN** it SHALL include the tag's UUID in `tagIds` (global) or `realmTagIds` (realm-scoped)
 
-### Requirement: Search Feature Layering
-**Renamed to:** Search Feature Layering Boundaries
+### Requirement: Search supports content type filtering
+
+The search feature SHALL allow filtering by content type (BOOK, GAME, MEDIA, SHELF) via the `type` field in `ContentSearchOptions`.
+
+#### Scenario: Filter search to books only
+
+- **GIVEN** the user selects "Books" type filter
+- **WHEN** the search is executed
+- **THEN** the request SHALL include `type: "BOOK"` in search options
+- **AND** only book results SHALL be displayed
