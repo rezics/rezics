@@ -1,3 +1,4 @@
+/** biome-ignore-all lint/correctness/noUnusedImports: <any> */
 import { faker } from "@faker-js/faker";
 import type { Prisma } from "#/prisma/generated/client.js";
 import { PostKind, UnitType } from "#/prisma/generated/client.js";
@@ -127,7 +128,9 @@ export function generatePostBody(kind: PostKind): string {
 
 // ── Post extra ──────────────────────────────────────
 
-export function generatePostExtra(kind: PostKind): Prisma.InputJsonValue | null {
+export function generatePostExtra(
+  kind: PostKind,
+): Prisma.InputJsonValue | null {
   switch (kind) {
     case PostKind.REVIEW:
       return { rating: Math.round(randomFloat(1, 5) * 10) / 10 };

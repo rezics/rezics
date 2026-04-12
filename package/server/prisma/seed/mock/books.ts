@@ -1,8 +1,8 @@
 import { randomUUID } from "node:crypto";
 import { faker } from "@faker-js/faker";
+import type { ChapterTreeItem } from "@rezics/contract";
 import type { Prisma, PrismaClient } from "#/prisma/generated/client.js";
 import { UnitStatus, UnitType } from "#/prisma/generated/client.js";
-import type { ChapterTreeItem } from "@rezics/contract";
 import { getRandomBookCover, ORG_ROLE_KEYS, PERSON_ROLE_KEYS } from "./data.js";
 import { generateBookExtra, generateTranslation } from "./generators.js";
 import type {
@@ -49,7 +49,9 @@ export async function seedBooks(
           userId: author.unitId,
           status: randomBoolean(0.85) ? UnitStatus.PUBLISHED : UnitStatus.DRAFT,
           defaultLanguage: "en",
-          publishedAt: randomBoolean(0.9) ? faker.date.past({ years: 3 }) : null,
+          publishedAt: randomBoolean(0.9)
+            ? faker.date.past({ years: 3 })
+            : null,
           book: {
             create: {
               isbn13: randomBoolean(0.8) ? faker.commerce.isbn() : null,
@@ -87,31 +89,25 @@ export async function seedBooks(
       });
 
       // Batch credits + tags for this unit
-      const personCredits = pickN(people, randomInt(1, 3)).map(
-        (p, i) => ({
-          unitId: unit.id,
-          personId: p.id,
-          roleKey: faker.helpers.arrayElement(
-            PERSON_ROLE_KEYS.filter((r) =>
-              ["AUTHOR", "ILLUSTRATOR", "TRANSLATOR", "EDITOR"].includes(r),
-            ),
+      const personCredits = pickN(people, randomInt(1, 3)).map((p, i) => ({
+        unitId: unit.id,
+        personId: p.id,
+        roleKey: faker.helpers.arrayElement(
+          PERSON_ROLE_KEYS.filter((r) =>
+            ["AUTHOR", "ILLUSTRATOR", "TRANSLATOR", "EDITOR"].includes(r),
           ),
-          sortOrder: i,
-        }),
-      );
+        ),
+        sortOrder: i,
+      }));
 
-      const orgCredits = pickN(organizations, randomInt(0, 2)).map(
-        (o, i) => ({
-          unitId: unit.id,
-          organizationId: o.id,
-          roleKey: faker.helpers.arrayElement(
-            ORG_ROLE_KEYS.filter((r) =>
-              ["PUBLISHER", "DISTRIBUTOR"].includes(r),
-            ),
-          ),
-          sortOrder: i,
-        }),
-      );
+      const orgCredits = pickN(organizations, randomInt(0, 2)).map((o, i) => ({
+        unitId: unit.id,
+        organizationId: o.id,
+        roleKey: faker.helpers.arrayElement(
+          ORG_ROLE_KEYS.filter((r) => ["PUBLISHER", "DISTRIBUTOR"].includes(r)),
+        ),
+        sortOrder: i,
+      }));
 
       const tagLinks = pickN(tags, randomInt(1, 5)).map((t) => ({
         unitId: unit.id,
@@ -143,6 +139,7 @@ export async function seedBooks(
  */
 export async function seedChaptersForBook(
   prisma: PrismaClient,
+  // biome-ignore lint/correctness/noUnusedFunctionParameters: <bookUnitId>
   bookUnitId: string,
   bookUserId: string,
   opts?: {
