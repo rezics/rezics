@@ -23,7 +23,6 @@ export async function seedServerUser(
       avatar: input.avatar,
       bio: input.bio,
       permission: input.permission,
-      type: "USER",
       joinDate: new Date(),
     },
   });
