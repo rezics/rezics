@@ -1,4 +1,5 @@
 import { cors } from "@elysiajs/cors";
+import { openapi } from "@elysiajs/openapi";
 import { Elysia } from "elysia";
 import { dmApi } from "./dm/dm.api";
 import { env } from "./env";
@@ -30,6 +31,37 @@ const app = new Elysia()
       maxAge: 600,
     }),
   )
+  .use(
+    openapi({
+      documentation: {
+        info: {
+          title: "Notify Service",
+          version: "1.0.0",
+        },
+        tags: [
+          { name: "Notifications", description: "Notification operations" },
+          { name: "Direct Messages", description: "Direct messaging" },
+          { name: "Realtime", description: "SSE and WebSocket endpoints" },
+          { name: "Internal", description: "Service-to-service endpoints" },
+          { name: "Health", description: "Health check endpoints" },
+        ],
+        components: {
+          securitySchemes: {
+            bearerAuth: {
+              type: "http",
+              scheme: "bearer",
+              bearerFormat: "JWT",
+            },
+            internalSecret: {
+              type: "apiKey",
+              in: "header",
+              name: "x-internal-secret",
+            },
+          },
+        },
+      },
+    }),
+  )
   .onError(({ error, set }) => {
     set.status ||= 500;
     const message =
@@ -40,11 +72,16 @@ const app = new Elysia()
   .use(streamApi)
   .use(dmApi)
   .use(internalApi)
-  .get("/", () => "Notify service")
-  .get("/health", () => ({ status: "ok" }));
+  .get("/", () => "Notify service", {
+    detail: { summary: "Service info", tags: ["Health"] },
+  })
+  .get("/health", () => ({ status: "ok" }), {
+    detail: { summary: "Health check", tags: ["Health"] },
+  });
 
 app.listen(port);
 
 console.log(
   `🔔 Notify service is running at http://${app.server?.hostname}:${app.server?.port}`,
+  `\n🔗 OpenAPI documentation: http://${app.server?.hostname}:${app.server?.port}/openapi`,
 );

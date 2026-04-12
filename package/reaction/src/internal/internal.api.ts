@@ -26,7 +26,16 @@ export const internalApi = new Elysia({ prefix: "/internal" })
 
       return { deleted: true, count };
     },
-    { body: cleanupBodySchema },
+    {
+      body: cleanupBodySchema,
+      detail: {
+        summary: "Cleanup reactions for target",
+        description:
+          "Deletes all reactions and summary entries for a given target ID.",
+        tags: ["Internal"],
+        security: [{ internalSecret: [] }],
+      },
+    },
   )
   .post(
     "/create",
@@ -58,7 +67,16 @@ export const internalApi = new Elysia({ prefix: "/internal" })
         throw e;
       }
     },
-    { body: internalCreateBodySchema },
+    {
+      body: internalCreateBodySchema,
+      detail: {
+        summary: "Create reaction (internal)",
+        description:
+          "Creates a reaction on behalf of a user. Idempotent — returns 201 if created, 200 if already existed.",
+        tags: ["Internal"],
+        security: [{ internalSecret: [] }],
+      },
+    },
   )
   .post(
     "/remove",
@@ -68,5 +86,12 @@ export const internalApi = new Elysia({ prefix: "/internal" })
     {
       body: internalRemoveBodySchema,
       response: internalRemoveResponseSchema,
+      detail: {
+        summary: "Remove reaction (internal)",
+        description:
+          "Removes a reaction on behalf of a user. Idempotent — returns deleted: false if it did not exist.",
+        tags: ["Internal"],
+        security: [{ internalSecret: [] }],
+      },
     },
   );

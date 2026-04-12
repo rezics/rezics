@@ -340,6 +340,7 @@
       "name": "@rezics/notify",
       "dependencies": {
         "@elysiajs/cors": "^1.4.0",
+        "@elysiajs/openapi": "^1.4.14",
         "@prisma/adapter-pg": "^7.6.0",
         "@prisma/client": "^7.6.0",
         "@rezics/contract": "workspace:*",
@@ -385,6 +386,7 @@
       "name": "@rezics/reaction",
       "dependencies": {
         "@elysiajs/cors": "^1.4.0",
+        "@elysiajs/openapi": "^1.4.14",
         "@prisma/adapter-pg": "^7.6.0",
         "@prisma/client": "^7.6.0",
         "@rezics/contract": "workspace:*",

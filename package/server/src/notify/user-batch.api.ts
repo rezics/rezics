@@ -35,5 +35,11 @@ export const userBatchApi = new Elysia({ prefix: "/users" }).get(
     query: t.Object({
       ids: t.String({ description: "Comma-separated user IDs (max 50)" }),
     }),
+    detail: {
+      summary: "Batch fetch users",
+      description:
+        "Returns user info (name, slug, avatar) for up to 50 user IDs passed as a comma-separated string.",
+      tags: ["Users"],
+    },
   },
 );

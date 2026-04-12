@@ -59,5 +59,16 @@ export const streamApi = new Elysia({ prefix: "/stream" })
         },
       );
     },
-    { requireUser: true },
+    {
+      requireUser: true,
+      detail: {
+        summary: "Notification stream (SSE)",
+        description:
+          "Opens a Server-Sent Events connection for real-time notification delivery. " +
+          "Events are sent as `data: <JSON>` frames. A heartbeat comment is sent every 30 seconds " +
+          "to keep the connection alive. The client should reconnect on disconnect.",
+        tags: ["Notifications", "Realtime"],
+        security: [{ bearerAuth: [] }],
+      },
+    },
   );

@@ -29,7 +29,16 @@ export const internalApi = new Elysia({ prefix: "/internal" })
 
       return { success: true, id: notification.id };
     },
-    { body: internalEventBodySchema },
+    {
+      body: internalEventBodySchema,
+      detail: {
+        summary: "Emit notification event",
+        description:
+          "Creates a notification and fans out to the recipient via SSE if connected.",
+        tags: ["Internal"],
+        security: [{ internalSecret: [] }],
+      },
+    },
   )
   .post(
     "/dm",
@@ -57,5 +66,14 @@ export const internalApi = new Elysia({ prefix: "/internal" })
 
       return { success: true, messageId: message.id, conversationId };
     },
-    { body: internalDmBodySchema },
+    {
+      body: internalDmBodySchema,
+      detail: {
+        summary: "Send DM (internal)",
+        description:
+          "Creates or upserts a conversation and inserts a message. Fans out to the recipient's WebSocket connections.",
+        tags: ["Internal"],
+        security: [{ internalSecret: [] }],
+      },
+    },
   );

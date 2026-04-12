@@ -43,5 +43,11 @@ export const dmServerApi = new Elysia({ prefix: "/dm" })
     {
       requireLogin: true,
       body: dmSendBodySchema,
+      detail: {
+        summary: "Send direct message",
+        description:
+          "Sends a direct message to another user. Requires the sender to follow the recipient.",
+        tags: ["Direct Messages"],
+      },
     },
   );

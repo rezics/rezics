@@ -18,7 +18,15 @@ export const dmApi = new Elysia({ prefix: "/dm" })
         })),
       };
     },
-    { requireUser: true },
+    {
+      requireUser: true,
+      detail: {
+        summary: "List conversations",
+        description: "Returns all DM conversations for the authenticated user.",
+        tags: ["Direct Messages"],
+        security: [{ bearerAuth: [] }],
+      },
+    },
   )
   .get(
     "/conversations/:id/messages",
@@ -54,9 +62,25 @@ export const dmApi = new Elysia({ prefix: "/dm" })
       requireUser: true,
       params: t.Object({ id: t.String() }),
       query: dmMessageListQuerySchema,
+      detail: {
+        summary: "Get conversation messages",
+        description:
+          "Returns paginated messages for a conversation. Automatically marks messages as read.",
+        tags: ["Direct Messages"],
+        security: [{ bearerAuth: [] }],
+      },
     },
   )
   .ws("/ws", {
+    detail: {
+      summary: "DM WebSocket",
+      description:
+        "WebSocket connection for real-time DM delivery. " +
+        "Authenticate by passing a JWT token as the `token` query parameter (e.g. /dm/ws?token=...). " +
+        "This is a receive-only connection — client messages are ignored. " +
+        "New messages are pushed as JSON frames.",
+      tags: ["Direct Messages", "Realtime"],
+    },
     async open(ws) {
       const url = new URL(ws.data.request.url);
       const token = url.searchParams.get("token");

@@ -18,6 +18,12 @@ export const notificationApi = new Elysia({ prefix: "/notifications" })
     {
       requireUser: true,
       query: notificationListQuerySchema,
+      detail: {
+        summary: "List notifications",
+        description: "Returns a paginated list of notifications for the authenticated user.",
+        tags: ["Notifications"],
+        security: [{ bearerAuth: [] }],
+      },
     },
   )
   .get(
@@ -26,7 +32,15 @@ export const notificationApi = new Elysia({ prefix: "/notifications" })
       const count = await notificationService.getUnreadCount(userId);
       return { count };
     },
-    { requireUser: true },
+    {
+      requireUser: true,
+      detail: {
+        summary: "Get unread count",
+        description: "Returns the number of unread notifications.",
+        tags: ["Notifications"],
+        security: [{ bearerAuth: [] }],
+      },
+    },
   )
   .post(
     "/read",
@@ -42,6 +56,12 @@ export const notificationApi = new Elysia({ prefix: "/notifications" })
     {
       requireUser: true,
       body: markReadBodySchema,
+      detail: {
+        summary: "Mark notification as read",
+        description: "Marks a specific notification as read by type, entity type, and entity ID.",
+        tags: ["Notifications"],
+        security: [{ bearerAuth: [] }],
+      },
     },
   )
   .post(
@@ -50,7 +70,15 @@ export const notificationApi = new Elysia({ prefix: "/notifications" })
       await notificationService.markAllAsRead(userId);
       return { success: true };
     },
-    { requireUser: true },
+    {
+      requireUser: true,
+      detail: {
+        summary: "Mark all as read",
+        description: "Marks all notifications as read for the authenticated user.",
+        tags: ["Notifications"],
+        security: [{ bearerAuth: [] }],
+      },
+    },
   )
   .delete(
     "/:id",
@@ -68,5 +96,11 @@ export const notificationApi = new Elysia({ prefix: "/notifications" })
     {
       requireUser: true,
       params: t.Object({ id: t.String() }),
+      detail: {
+        summary: "Delete notification",
+        description: "Deletes a notification by ID. Returns 404 if not found or not owned by the user.",
+        tags: ["Notifications"],
+        security: [{ bearerAuth: [] }],
+      },
     },
   );

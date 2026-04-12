@@ -48,12 +48,28 @@ export const reactionWriteApi = new Elysia({ prefix: "/reactions" })
         createdAt: result.createdAt,
       };
     },
-    { requireLogin: true, body: createSchema },
+    {
+      requireLogin: true,
+      body: createSchema,
+      detail: {
+        summary: "Create reaction",
+        description: "Adds a reaction to a unit. Triggers a notification to the unit owner.",
+        tags: ["Reactions"],
+      },
+    },
   )
   .delete(
     "/",
     async ({ query, identity }) => {
       return removeReaction(identity.unitId, query.targetId, query.reaction);
     },
-    { requireLogin: true, query: deleteQuerySchema },
+    {
+      requireLogin: true,
+      query: deleteQuerySchema,
+      detail: {
+        summary: "Remove reaction",
+        description: "Removes a reaction from a unit.",
+        tags: ["Reactions"],
+      },
+    },
   );

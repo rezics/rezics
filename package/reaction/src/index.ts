@@ -1,4 +1,5 @@
 import { cors } from "@elysiajs/cors";
+import { openapi } from "@elysiajs/openapi";
 import { Elysia } from "elysia";
 import { env } from "./env";
 import { internalApi } from "./internal/internal.api";
@@ -28,6 +29,35 @@ const app = new Elysia()
       maxAge: 600,
     }),
   )
+  .use(
+    openapi({
+      documentation: {
+        info: {
+          title: "Reaction Service",
+          version: "1.0.0",
+        },
+        tags: [
+          { name: "Reactions", description: "Reaction operations" },
+          { name: "Internal", description: "Service-to-service endpoints" },
+          { name: "Health", description: "Health check endpoints" },
+        ],
+        components: {
+          securitySchemes: {
+            bearerAuth: {
+              type: "http",
+              scheme: "bearer",
+              bearerFormat: "JWT",
+            },
+            internalSecret: {
+              type: "apiKey",
+              in: "header",
+              name: "x-internal-secret",
+            },
+          },
+        },
+      },
+    }),
+  )
   .onError(({ error, set }) => {
     set.status ||= 500;
     const message =
@@ -36,11 +66,16 @@ const app = new Elysia()
   })
   .use(reactionApi)
   .use(internalApi)
-  .get("/", () => "Reaction service")
-  .get("/health", () => ({ status: "ok" }));
+  .get("/", () => "Reaction service", {
+    detail: { summary: "Service info", tags: ["Health"] },
+  })
+  .get("/health", () => ({ status: "ok" }), {
+    detail: { summary: "Health check", tags: ["Health"] },
+  });
 
 app.listen(port);
 
 console.log(
   `⚡ Reaction service is running at http://${app.server?.hostname}:${app.server?.port}`,
+  `\n🔗 OpenAPI documentation: http://${app.server?.hostname}:${app.server?.port}/openapi`,
 );
