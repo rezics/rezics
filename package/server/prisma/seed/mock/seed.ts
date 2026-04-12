@@ -19,7 +19,7 @@ import { seedMedia } from "#/prisma/seed/mock/media";
 import { seedPostsForWorks } from "#/prisma/seed/mock/posts";
 import { seedRealms } from "#/prisma/seed/mock/realms";
 import { seedShelves } from "#/prisma/seed/mock/shelves";
-import { seedContentTypeTags } from "#/prisma/seed/mock/seed-tags";
+import { seedContentTypeTags } from "../../../../tool/seed/lib/seed-infra";
 import { seedTags } from "#/prisma/seed/mock/tags";
 import { seedUsers } from "#/prisma/seed/mock/users";
 import { chunkedParallel } from "#/prisma/seed/mock/utils";
@@ -56,10 +56,10 @@ async function main() {
 
   // ── STEP 3: Tags ──────────────────────────────────
   done = stepTimer("Step 3: Tags");
-  const contentTypeTags = await seedContentTypeTags(prisma);
+  const tagMap = await seedContentTypeTags(prisma);
   const tags = await seedTags(prisma, DEFAULT_COUNTS.tags, users);
-  const allTags = [...contentTypeTags, ...tags];
-  console.log(`[Seed]   ${contentTypeTags.length} content-type tags, ${tags.length} random tags`);
+  const contentTypeTagCount = Object.keys(tagMap).length;
+  console.log(`[Seed]   ${contentTypeTagCount} content-type tags, ${tags.length} random tags`);
   done();
 
   // ── STEP 4: Works (parallel) ──────────────────────

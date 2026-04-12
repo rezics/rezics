@@ -8,6 +8,11 @@ import {
   createServerPrisma,
   type ServerPrismaClient,
 } from "./lib/create-prisma";
+import {
+  seedContentTypeTags,
+  seedDefaultRealm,
+  seedInfraEchoKV,
+} from "./lib/seed-infra";
 import { seedServerUser } from "./lib/seed-server-user";
 
 export interface CrossSeedUserInput {
@@ -126,13 +131,34 @@ async function seedAll(
     await deleteExistingUsers(authPrisma, serverPrisma);
   }
 
+  let rootUserId: string | undefined;
   for (const input of SEED_USERS) {
     const result = await crossSeedUser(authPrisma, serverPrisma, input);
     printUserResult(result, getServerRole(input));
+    if (input.email === "root@rezics.com") {
+      rootUserId = result.userId;
+    }
   }
 
   console.log("");
   console.log("⚠️  Please store these passwords securely.");
+  console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+
+  // ── Infrastructure seeding ──────────────────────────
+  if (!rootUserId) {
+    throw new Error("Root user not found after seeding — cannot seed infrastructure.");
+  }
+
+  console.log("");
+  console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+  console.log(" Infrastructure Seeding");
+  console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+
+  const tagMap = await seedContentTypeTags(serverPrisma);
+  const realmId = await seedDefaultRealm(serverPrisma, rootUserId);
+  await seedInfraEchoKV(serverPrisma, tagMap, realmId);
+
+  console.log("");
   console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
   console.log("");
 }
