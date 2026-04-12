@@ -1,30 +1,30 @@
-## ADDED Requirements
+## MODIFIED Requirements
 
 ### Requirement: Create reaction
-The system SHALL allow an authenticated user to create a reaction on a target by providing a `targetId` and a `reaction` type. The operation SHALL be idempotent — creating an already-existing reaction SHALL return the existing record without error. The `reaction` value SHALL be validated against the configured allowlist (default: `like`, `dislike`). The system SHALL reject reactions with types not in the allowlist with a 400 status.
+The system SHALL allow an authenticated user to create a reaction on a target by providing a `targetId` and a `reaction` type. The write request goes to the **main server** (`POST /reactions`), which proxies it to the reaction service's internal API (`POST /internal/create`). The operation SHALL be idempotent — creating an already-existing reaction SHALL return the existing record without error. The `reaction` value SHALL be validated against the configured allowlist (default: `like`, `dislike`). The system SHALL reject reactions with types not in the allowlist with a 400 status.
 
 #### Scenario: Create a new reaction
-- **WHEN** an authenticated user sends `POST /reactions` with `{ targetId: "abc", reaction: "like" }`
-- **THEN** the system creates a Reaction row and returns `{ id, userId, targetId, reaction, createdAt }` with status 201
+- **WHEN** an authenticated user sends `POST /reactions` to the main server with `{ targetId: "abc", reaction: "like" }`
+- **THEN** the server calls `POST /internal/create` on the reaction service with `{ userId, targetId: "abc", reaction: "like" }`, which creates a Reaction row and returns `{ id, userId, targetId, reaction, createdAt, created: true }` with status 201
 
 #### Scenario: Idempotent create
 - **WHEN** an authenticated user sends `POST /reactions` with `{ targetId: "abc", reaction: "like" }` and a matching Reaction already exists
-- **THEN** the system returns the existing Reaction record with status 200, no duplicate row is created, and the summary counter is not incremented
+- **THEN** the reaction service returns the existing record with `{ created: false }` and status 200, no duplicate row is created, and the summary counter is not incremented
 
 #### Scenario: Invalid reaction type
 - **WHEN** an authenticated user sends `POST /reactions` with `{ targetId: "abc", reaction: "bookmark" }`
-- **THEN** the system returns status 400 with an error indicating the reaction type is not allowed
+- **THEN** the reaction service returns status 400 with an error indicating the reaction type is not allowed
 
 #### Scenario: Summary counter increment
 - **WHEN** a new reaction is successfully created (not idempotent hit)
 - **THEN** the corresponding ReactionSummary row is upserted with `count` incremented by 1, within the same database transaction
 
 ### Requirement: Delete reaction
-The system SHALL allow an authenticated user to delete their own reaction by providing `targetId` and `reaction` type. The operation SHALL be idempotent — deleting a non-existent reaction SHALL return `{ deleted: false }` without error.
+The system SHALL allow an authenticated user to delete their own reaction by providing `targetId` and `reaction` type. The write request goes to the **main server** (`DELETE /reactions`), which proxies it to the reaction service's internal API (`POST /internal/remove`). The operation SHALL be idempotent — deleting a non-existent reaction SHALL return `{ deleted: false }` without error.
 
 #### Scenario: Delete an existing reaction
-- **WHEN** an authenticated user sends `DELETE /reactions?targetId=abc&reaction=like` and the reaction exists
-- **THEN** the system deletes the Reaction row, decrements the ReactionSummary counter, and returns `{ deleted: true }`
+- **WHEN** an authenticated user sends `DELETE /reactions?targetId=abc&reaction=like` to the main server
+- **THEN** the server calls `POST /internal/remove` on the reaction service, which deletes the Reaction row, decrements the ReactionSummary counter, and returns `{ deleted: true }`
 
 #### Scenario: Idempotent delete
 - **WHEN** an authenticated user sends `DELETE /reactions?targetId=abc&reaction=like` and no matching reaction exists

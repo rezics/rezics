@@ -1,4 +1,38 @@
-## ADDED Requirements
+## MODIFIED Requirements
+
+### Requirement: Internal create endpoint
+The reaction service SHALL provide a `POST /internal/create` endpoint that creates a reaction for a given user. The endpoint SHALL be protected by the `x-internal-secret` header matching `REACTION_INTERNAL_SECRET`. This endpoint is called by the main server to proxy write requests.
+
+#### Scenario: Successful create
+- **WHEN** the server sends `POST /internal/create` with `{ userId: "u1", targetId: "abc", reaction: "like" }` and valid `x-internal-secret` header
+- **THEN** the system creates the Reaction row, upserts the ReactionSummary counter, and returns `{ id, userId, targetId, reaction, createdAt, created: true }` with status 201
+
+#### Scenario: Idempotent create
+- **WHEN** the server sends `POST /internal/create` with a reaction that already exists
+- **THEN** the system returns the existing record with `{ created: false }` and status 200
+
+#### Scenario: Invalid reaction type
+- **WHEN** the server sends `POST /internal/create` with an invalid reaction type
+- **THEN** the system returns status 400 with an error message
+
+#### Scenario: Invalid or missing secret
+- **WHEN** a client sends `POST /internal/create` without a valid `x-internal-secret` header
+- **THEN** the system returns status 401
+
+### Requirement: Internal remove endpoint
+The reaction service SHALL provide a `POST /internal/remove` endpoint that deletes a reaction for a given user. The endpoint SHALL be protected by the `x-internal-secret` header.
+
+#### Scenario: Successful remove
+- **WHEN** the server sends `POST /internal/remove` with `{ userId: "u1", targetId: "abc", reaction: "like" }` and valid secret
+- **THEN** the system deletes the Reaction row, decrements the ReactionSummary counter, and returns `{ deleted: true }`
+
+#### Scenario: Idempotent remove
+- **WHEN** the server sends `POST /internal/remove` for a reaction that doesn't exist
+- **THEN** the system returns `{ deleted: false }`
+
+#### Scenario: Invalid or missing secret
+- **WHEN** a client sends `POST /internal/remove` without a valid `x-internal-secret` header
+- **THEN** the system returns status 401
 
 ### Requirement: Cleanup reactions on unit deletion
 The system SHALL provide a `POST /internal/cleanup` endpoint that deletes all Reaction and ReactionSummary rows for a given `targetId`. The endpoint SHALL be protected by the `x-internal-secret` header matching `REACTION_INTERNAL_SECRET`.
@@ -25,18 +59,3 @@ The main server (`@rezics/server`) SHALL call the reaction service's `POST /inte
 #### Scenario: Cleanup call failure
 - **WHEN** the reaction service is unavailable during unit deletion
 - **THEN** the server logs the error and proceeds with the deletion. Orphan reactions are acceptable and cleaned up by periodic reconciliation.
-
-### Requirement: Server exposes owner resolution endpoint
-The main server SHALL expose a `GET /internal/units/owner` endpoint, protected by `x-internal-secret`, that resolves a Unit's owner by ID.
-
-#### Scenario: Resolve existing unit owner
-- **WHEN** the reaction service sends `GET /internal/units/owner?id=abc` with valid secret
-- **THEN** the server returns `{ ownerId: "user123" }`
-
-#### Scenario: Unit not found
-- **WHEN** the reaction service sends `GET /internal/units/owner?id=nonexistent` with valid secret
-- **THEN** the server returns status 404
-
-#### Scenario: Missing secret
-- **WHEN** a client sends `GET /internal/units/owner` without a valid `x-internal-secret` header
-- **THEN** the server returns status 401

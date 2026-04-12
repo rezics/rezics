@@ -1,12 +1,13 @@
 /**
  * Reaction API client functions
- * Calls the standalone reaction service directly
+ * Reads go directly to the reaction service; writes are routed through the main server.
  */
 
 import {
   NormalizedTokenName,
 } from "@rezics/contract";
 import { getApiConfig } from "../config";
+import { apiFetch } from "../react-query/http";
 import { buildTokenHeaders } from "../react-query/jwt";
 import type {
   ReactionCreateInput,
@@ -78,24 +79,26 @@ export const reactionApi = {
   },
 
   /**
-   * Create a reaction for the current user (idempotent)
+   * Create a reaction for the current user (idempotent).
+   * Writes are routed through the main server.
    */
   create: async (input: ReactionCreateInput): Promise<ReactionDTO> => {
-    return reactionFetch<ReactionDTO>("/reactions", {
+    return apiFetch<ReactionDTO>("/reactions", {
       method: "POST",
       body: JSON.stringify(input),
     });
   },
 
   /**
-   * Delete a reaction for the current user (idempotent)
+   * Delete a reaction for the current user (idempotent).
+   * Writes are routed through the main server.
    */
   remove: async (query: ReactionDeleteQuery): Promise<{ deleted: boolean }> => {
     const qs = new URLSearchParams({
       targetId: query.targetId,
       reaction: query.reaction,
     });
-    return reactionFetch<{ deleted: boolean }>(
+    return apiFetch<{ deleted: boolean }>(
       `/reactions?${qs.toString()}`,
       { method: "DELETE" },
     );

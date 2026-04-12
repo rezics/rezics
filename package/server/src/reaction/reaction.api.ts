@@ -1,0 +1,59 @@
+import {
+  createSchema,
+  deleteQuerySchema,
+} from "@rezics/contract/reaction";
+import { NotificationType } from "@rezics/contract";
+import { Elysia } from "elysia";
+import { authMacro } from "@/middleware";
+import { prisma } from "#/prisma/client";
+import { emitNotificationEvent } from "../notify/notify-client";
+import { createReaction, removeReaction } from "./reaction-client";
+
+export const reactionWriteApi = new Elysia({ prefix: "/reactions" })
+  .use(authMacro)
+  .post(
+    "/",
+    async ({ body, identity, set }) => {
+      const userId = identity.unitId;
+      const result = await createReaction(userId, body.targetId, body.reaction);
+
+      set.status = result.created ? 201 : 200;
+
+      if (result.created) {
+        prisma.unit
+          .findUnique({
+            where: { id: body.targetId },
+            select: { userId: true },
+          })
+          .then((unit) => {
+            if (unit?.userId && unit.userId !== userId) {
+              emitNotificationEvent({
+                recipientId: unit.userId,
+                type: NotificationType.LIKE,
+                actorId: userId,
+                entityType: "unit",
+                entityId: body.targetId,
+                meta: {},
+              }).catch(() => {});
+            }
+          })
+          .catch(() => {});
+      }
+
+      return {
+        id: result.id,
+        userId: result.userId,
+        targetId: result.targetId,
+        reaction: result.reaction,
+        createdAt: result.createdAt,
+      };
+    },
+    { requireLogin: true, body: createSchema },
+  )
+  .delete(
+    "/",
+    async ({ query, identity }) => {
+      return removeReaction(identity.unitId, query.targetId, query.reaction);
+    },
+    { requireLogin: true, query: deleteQuerySchema },
+  );

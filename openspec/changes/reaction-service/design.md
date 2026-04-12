@@ -105,37 +105,35 @@ model Bookmark {
 
 **Migration path**: If write volume grows to the point where transaction contention is measurable, the summary update can be moved to an async path (Redis INCR + periodic PostgreSQL sync) without changing the public API.
 
-### D5: Frontend Calls Reaction Service Directly
+### D5: Split Read/Write Traffic — Reads Direct, Writes via Server
 
-**Decision**: The frontend (`@rezics/app`) calls the reaction service directly at `VITE_REACTION_SERVICE_URL`. Reaction data is NOT proxied through the main server.
+**Decision**: The frontend calls the reaction service directly for **reads** (`GET /reactions/summary`, `GET /reactions/my`). **Writes** (`POST /reactions`, `DELETE /reactions`) are routed through the main server, which proxies them to the reaction service's internal API and handles side-effects (notification dispatch).
 
-**Rationale**: Proxying adds latency and couples the main server to the reaction service's availability. Direct calls let the frontend load content and reactions in parallel (two concurrent fetches), improving perceived performance. The frontend already handles multiple service URLs (server, auth via better-auth).
+**Rationale**: Reads are the hot path (every content page) and benefit from direct access for latency. Writes are lower frequency and require orchestration context (ownership resolution, notification dispatch, future economy system) that the main server already has. Routing writes through the server eliminates the reaction service's need to call back to the server for owner resolution and to the notify service for event dispatch — removing coupling and the need for retry queues for each new side-effect.
 
 **CORS**: The reaction service allows the same origins as server and notify (`localhost:35001/35002` in dev, `*.rezics.com` in prod).
 
-**Auth**: Public endpoints verify the same auth JWT that the server uses. The reaction service uses `@rezics/jwt`'s `createJwtVerifier()` + `createRemoteJWKSet()` to verify tokens against the auth service's JWKS endpoint. Same macro pattern as Notify's `requireUser`.
+**Auth**: Read endpoints verify the same auth JWT that the server uses. The reaction service uses `@rezics/jwt`'s `createJwtVerifier()` + `createRemoteJWKSet()` to verify tokens against the auth service's JWKS endpoint. Write endpoints on the reaction service are internal-only (secret-guarded), while the main server's write proxy endpoints use JWT auth.
 
-### D6: Notification via Notify Internal API
+### D6: Server-Side Notification Dispatch
 
-**Decision**: When a reaction is created, the reaction service calls Notify's `POST /internal/event` with a generic payload. The reaction service does NOT map reaction types to notification types — Notify does that.
+**Decision**: When a reaction write is proxied through the main server, the **server** dispatches the notification to Notify's `POST /internal/event`. The reaction service has no knowledge of notifications.
 
 ```typescript
-// Reaction service emits:
+// Server dispatches after successful reaction create:
 {
-  recipientId: string,    // resolved by reaction service (see below)
-  type: "LIKE",           // reaction service maps: like/dislike → LIKE
+  recipientId: string,    // resolved by server via prisma (direct DB access)
+  type: "LIKE",           // server maps: all reactions → LIKE
   actorId: string,        // userId who reacted
   entityType: "unit",
   entityId: string,       // targetId
-  meta: {}                // no entity snapshots — Notify resolves these
+  meta: {}
 }
 ```
 
-**Recipient resolution**: The reaction service does NOT know who owns a target. The main server provides a `GET /internal/units/owner` endpoint (shared-secret protected) that the reaction service calls to resolve `targetId → ownerId`. This is fire-and-forget — if the call fails, no notification is sent, but the reaction is still created.
+**Rationale**: The server already has direct database access to resolve ownership (`prisma.unit.findUnique`), already has the notify client (`emitNotificationEvent`), and is the natural orchestrator for write side-effects. This eliminates the reaction service's need to call back to the server for owner resolution and to notify for event dispatch — two outbound HTTP calls per reaction write that previously had no retry mechanism. Future side-effects (economy system) can be added to the server's write handler without touching the reaction service.
 
-**Alternative considered**: Reaction service emits a raw `reaction.created` event with no recipient, and Notify resolves the owner. Rejected because Notify shouldn't know about the server's data model either. The reaction service resolves the owner once and sends a complete notification payload.
-
-**Alternative considered**: Server-side notification emission (server watches reaction service events). Rejected because it re-couples the server to reaction writes.
+**Previous approach (superseded)**: The reaction service previously called `GET /internal/units/owner` on the server to resolve ownership, then called Notify directly. This created circular coupling (reaction → server → reaction for cleanup, reaction → notify) and would require adding a new client + retry path for each new side-effect.
 
 ### D7: Simplified API Surface
 
@@ -143,13 +141,14 @@ model Bookmark {
 
 | Endpoint | Method | Auth | Description |
 |----------|--------|------|-------------|
-| `/reactions/summary` | GET | None | Batch summary counts (`?targetIds=a,b,c`) |
-| `/reactions/my` | GET | JWT | User's reactions for targets (`?targetIds=a,b,c`) |
-| `/reactions` | POST | JWT | Create reaction `{ targetId, reaction }` |
-| `/reactions` | DELETE | JWT | Delete reaction `?targetId=x&reaction=y` |
-| `/internal/cleanup` | POST | Secret | Delete all reactions for a target `{ targetId }` |
-| `/internal/owner-resolve` | — | — | *Not on reaction service* — lives on server |
-| `/health` | GET | None | Health check |
+| `/reactions/summary` | GET | None | Batch summary counts (`?targetIds=a,b,c`) — reaction service |
+| `/reactions/my` | GET | JWT | User's reactions for targets (`?targetIds=a,b,c`) — reaction service |
+| `/reactions` | POST | JWT | Create reaction `{ targetId, reaction }` — **main server** (proxied) |
+| `/reactions` | DELETE | JWT | Delete reaction `?targetId=x&reaction=y` — **main server** (proxied) |
+| `/internal/create` | POST | Secret | Internal create `{ userId, targetId, reaction }` — reaction service |
+| `/internal/remove` | POST | Secret | Internal remove `{ userId, targetId, reaction }` — reaction service |
+| `/internal/cleanup` | POST | Secret | Delete all reactions for a target `{ targetId }` — reaction service |
+| `/health` | GET | None | Health check — reaction service |
 
 **Removed from current API:**
 - `GET /reactions/` (list with pagination) — not used by any frontend component; can be re-added if needed
@@ -224,15 +223,13 @@ package/reaction/
 │   ├── index.ts                  # Elysia server entry, CORS, error handler
 │   ├── env.ts                    # @t3-oss/env-core + Valibot validation
 │   ├── macro/
-│   │   ├── auth.ts               # requireUser macro (JWT → userId)
-│   │   └── internal.ts           # requireInternal macro (x-internal-secret)
+│   │   ├── auth.ts               # requireUser macro (JWT → userId) for read endpoints
+│   │   └── internal.ts           # requireInternal macro (x-internal-secret) for write + cleanup
 │   ├── reaction/
-│   │   ├── reaction.api.ts       # Public endpoints (summary, my, create, delete)
+│   │   ├── reaction.api.ts       # Public read endpoints (summary, my)
 │   │   └── reaction.service.ts   # Business logic + summary counter maintenance
-│   ├── internal/
-│   │   └── internal.api.ts       # POST /internal/cleanup
-│   └── notify/
-│       └── notify-client.ts      # Fire-and-forget call to Notify /internal/event
+│   └── internal/
+│       └── internal.api.ts       # POST /internal/create, /internal/remove, /internal/cleanup
 ├── prisma/
 │   ├── schema.prisma
 │   └── client.ts                 # Prisma client singleton
@@ -243,7 +240,7 @@ package/contract/src/reaction/
 ├── index.ts
 ├── reaction.schema.ts            # Typebox schemas (create, delete, summary, my)
 ├── reaction.types.ts             # Shared types (ReactionType, ReactionSummaryDto)
-└── internal.ts                   # Internal cleanup request schema
+└── internal.ts                   # Internal schemas (create, remove, cleanup)
 ```
 
 ## Data Flow
@@ -254,12 +251,21 @@ Content page load (parallel):
   Frontend → GET /reactions/summary?targetIds=id (reaction service) → { like: 42, dislike: 3 }
   Frontend → GET /reactions/my?targetIds=id (reaction service, auth) → ["like"]
 
-Reaction create:
-  Frontend → POST /reactions (reaction service, auth)
-    → Transaction: INSERT Reaction + UPSERT ReactionSummary
-    → Fire-and-forget: GET /internal/units/owner?id=targetId (server)
-      → If owner != actor: POST /internal/event (notify service)
+Reaction create (writes routed through server):
+  Frontend → POST /reactions (server, JWT auth)
+    → Server calls POST /internal/create { userId, targetId, reaction } (reaction service)
+      → Reaction service: Transaction: INSERT Reaction + UPSERT ReactionSummary
+      → Returns: { id, userId, targetId, reaction, createdAt, created }
+    → If created: Server resolves owner via prisma (direct DB access)
+      → If owner != actor: POST /internal/event (notify service, fire-and-forget)
     → Response: { id, userId, targetId, reaction, createdAt }
+
+Reaction delete (writes routed through server):
+  Frontend → DELETE /reactions?targetId=x&reaction=y (server, JWT auth)
+    → Server calls POST /internal/remove { userId, targetId, reaction } (reaction service)
+      → Reaction service: Transaction: DELETE Reaction + decrement ReactionSummary
+      → Returns: { deleted }
+    → Response: { deleted }
 
 Unit deletion cleanup:
   Server deletes Unit
@@ -278,12 +284,10 @@ Unit deletion cleanup:
 | `AUTH_JWKS_URL` | No | `http://localhost:3001/.well-known/jwks.json` | Auth JWKS endpoint |
 | `AUTH_ISSUER` | No | `http://localhost:3001` | JWT issuer |
 | `AUTH_JWT_AUDIENCE` | No | `rezics` | JWT audience |
-| `NOTIFY_BASE_URL` | No | `http://localhost:3002` | Notify service URL |
-| `NOTIFY_INTERNAL_SECRET` | No | — | Secret for calling Notify internal API |
-| `SERVER_BASE_URL` | No | `http://localhost:3000` | Server URL for owner resolution |
-| `SERVER_INTERNAL_SECRET` | No | — | Secret for calling server internal API |
 | `REACTION_TYPES` | No | `like,dislike` | Comma-separated allowed reaction types |
 | `PORT` | No | `3003` | HTTP listen port |
+
+Note: `NOTIFY_*` and `SERVER_*` env vars have been removed. The reaction service no longer makes outbound calls to other services. Notification dispatch is handled by the main server.
 
 ### Server additions (`package/server/.env`)
 | Variable | Required | Default | Description |
@@ -324,29 +328,17 @@ DELETE FROM "Reaction" WHERE "targetId" = $1;
 DELETE FROM "ReactionSummary" WHERE "targetId" = $1;
 ```
 
-## Server-Side Internal Endpoint for Owner Resolution
-
-The reaction service needs to know who owns a target unit to send notifications. The main server exposes:
-
-```
-GET /internal/units/owner?id=<targetId>
-Header: x-internal-secret: <SERVER_INTERNAL_SECRET>
-Response: { ownerId: string } | 404
-```
-
-This is a lightweight query (`SELECT "userId" FROM "Unit" WHERE id = $1`). The reaction service calls this fire-and-forget — if it fails, the reaction succeeds but no notification is sent.
-
 ## Risks / Trade-offs
 
-**[Network hop latency] → Mitigation:** The reaction service adds ~1-3ms per request on localhost. The frontend loads reactions in parallel with content, so this does not increase perceived page load time. Reaction data appears asynchronously — the UI renders content first, then reaction counts/state fill in.
+**[Network hop latency on reads] → Mitigation:** The reaction service adds ~1-3ms per request on localhost. The frontend loads reactions in parallel with content, so this does not increase perceived page load time.
 
-**[Orphan reactions on failed cleanup] → Mitigation:** If the server fails to call `/internal/cleanup` during unit deletion (crash, network error), orphan reactions remain. A periodic background job (hourly) can reconcile by querying the server for existence of targetIds with reactions. Not needed at launch — orphan reactions are harmless (never displayed, take negligible space).
+**[Extra hop for writes] → Mitigation:** Writes go client → server → reaction service (one extra hop vs. direct). Likes aren't latency-critical — the UI optimistically updates immediately. The ~5ms overhead is invisible to the user.
 
-**[Owner resolution adds latency to notification path] → Mitigation:** The `GET /internal/units/owner` call is fire-and-forget. It does not block the reaction response. If it adds latency, it only delays notification delivery, not the user's reaction experience.
+**[Orphan reactions on failed cleanup] → Mitigation:** If the server fails to call `/internal/cleanup` during unit deletion (crash, network error), orphan reactions remain. A periodic background job (hourly) can reconcile. Not needed at launch — orphan reactions are harmless (never displayed, take negligible space).
 
 **[Two databases to manage] → Mitigation:** The reaction schema is trivially small (2 tables, 6 indexes). Database provisioning, backups, and connection pooling are standard operations already handled for auth and notify databases. The operational cost is marginal.
 
-**[Eventual consistency during migration] → Mitigation:** During the migration window (old server reactions → new service), there's a brief period where new reactions go to the new service while old data is still in the server DB. The migration script handles this by copying all data first, then switching the frontend. Any reactions created between copy and switch are in the new service and don't need migration.
+**[Eventual consistency during migration] → Mitigation:** During the migration window (old server reactions → new service), there's a brief period where new reactions go to the new service while old data is still in the server DB. The migration script handles this by copying all data first, then switching the frontend.
 
 ## Migration Plan
 
@@ -362,5 +354,4 @@ This is a lightweight query (`SELECT "userId" FROM "Unit" WHERE id = $1`). The r
 ## Open Questions
 
 1. **Redis caching timeline**: Redis is designed-in but optional. Should it be included in the initial deployment, or added as a follow-up change when performance metrics justify it?
-2. **Owner resolution caching**: The `GET /internal/units/owner` call happens on every reaction create. Should the reaction service cache owner mappings (TTL ~5min) to reduce calls to the server? Ownership rarely changes.
-3. **Reaction history page**: The current `ReactionInfoPage` shows a user's reaction history. With the list endpoint removed from the reaction service, should the frontend query reactions by `userId` directly, or should the reaction service expose a dedicated `/reactions/history` endpoint?
+2. **Reaction history page**: The current `ReactionInfoPage` shows a user's reaction history. With the list endpoint removed from the reaction service, should the frontend query reactions by `userId` directly, or should the reaction service expose a dedicated `/reactions/history` endpoint?

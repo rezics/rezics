@@ -1,7 +1,6 @@
 import type { Reaction } from "#/prisma/client";
 import { prisma } from "#/prisma/client";
 import { allowedReactionTypes } from "../env";
-import { emitReactionNotification } from "../notify/notify-client";
 
 export class ReactionService {
   /** Get aggregated reaction counts for one or more targets. */
@@ -78,11 +77,6 @@ export class ReactionService {
 
       return { reaction: created, created: true };
     });
-
-    // Fire-and-forget notification for new reactions only
-    if (result.created) {
-      emitReactionNotification(userId, targetId).catch(() => {});
-    }
 
     return result;
   }

@@ -1,6 +1,4 @@
 import {
-  createSchema,
-  deleteQuerySchema,
   myQuerySchema,
   summaryQuerySchema,
 } from "@rezics/contract/reaction";
@@ -37,32 +35,4 @@ export const reactionApi = new Elysia({ prefix: "/reactions" })
       return { userId, reactionsByTarget };
     },
     { requireUser: true, query: myQuerySchema },
-  )
-  .post(
-    "/",
-    async ({ body, userId, set }) => {
-      try {
-        const result = await reactionService.create(
-          userId,
-          body.targetId,
-          body.reaction,
-        );
-        set.status = result.created ? 201 : 200;
-        return result.reaction;
-      } catch (e) {
-        if (e instanceof Error && e.message.startsWith("Invalid reaction type")) {
-          set.status = 400;
-          return { error: e.message };
-        }
-        throw e;
-      }
-    },
-    { requireUser: true, body: createSchema },
-  )
-  .delete(
-    "/",
-    async ({ query, userId }) => {
-      return reactionService.remove(userId, query.targetId, query.reaction);
-    },
-    { requireUser: true, query: deleteQuerySchema },
   );

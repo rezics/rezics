@@ -8,8 +8,8 @@ A secondary concern is the current coupling between reactions and bookmarks — 
 
 - **New `package/reaction` service** — standalone Elysia server with its own PostgreSQL database (Prisma 7). Owns `Reaction` and `ReactionSummary` tables with no foreign keys to the main database. Uses opaque UUIDs for `targetId` and `userId`.
 - **New `@rezics/contract` reaction schemas** — shared Typebox schemas for reaction endpoints under `package/contract/src/reaction/`, replacing the existing `package/contract/src/reaction.ts` file. Bookmark-related schemas removed.
-- **`@rezics/server` integration** — server drops its local reaction tables, service, and API routes. Gains an internal HTTP client (`reaction-client`) for calling the reaction service's cleanup endpoint on unit deletion. Notification emission moves out of the server's reaction code entirely.
-- **Reaction service notification integration** — on reaction create, the reaction service calls Notify's `POST /internal/event` with a `reaction.created` payload. Notify decides notification type mapping (like -> LIKE). **BREAKING**: The `FAVORITE` notification type is no longer emitted by the reaction service (bookmark reactions removed).
+- **`@rezics/server` integration** — server drops its local reaction tables, service, and API routes. Gains an internal HTTP client (`reaction-client`) for calling the reaction service's internal create/remove/cleanup endpoints. The server also exposes `POST /reactions` and `DELETE /reactions` endpoints that proxy writes to the reaction service and handle notification dispatch.
+- **Server-side notification dispatch** — when a reaction is created via the server, the server resolves the target owner (direct DB access) and dispatches a LIKE notification to Notify's `POST /internal/event`. The reaction service has no knowledge of notifications. **BREAKING**: The `FAVORITE` notification type is no longer emitted by reactions (bookmark reactions removed).
 - **`@rezics/api` client rewrite** — reaction API functions point to the reaction service URL. Bookmark-related functions (`getBookmarkTags`, `setBookmarkTags`) and mutation hooks removed.
 - **Frontend component updates** — `ReactionBar` and `MiniActionBar` drop the bookmark icon (shelf UI replaces it separately). Bookmark management components (`BookmarkTagManager`, `BookmarkItemCard`, `UserBookmarkTagsCard`) removed. `BookmarkPage` and bookmark tab in `ReactionInfoPage` removed.
 - **Redis caching layer** — designed into the service interface but optional at launch. Can be added without API changes when needed.
@@ -23,7 +23,7 @@ A secondary concern is the current coupling between reactions and bookmarks — 
 - `reaction-user-state`: Per-user reaction state for one or many targets. Powers "did I like this?" UI state. Single and multi-target modes.
 - `reaction-internal-api`: Shared-secret-protected endpoints for trusted backend services — cleanup on unit deletion, bulk operations.
 - `reaction-auth`: JWT verification of user identity via auth JWKS for public endpoints; shared secret verification for internal endpoints. Same trust model as `@rezics/notify`.
-- `reaction-notification`: Emit reaction events to Notify's internal event ingestion endpoint. Fire-and-forget with no coupling to notification types.
+- `reaction-notification`: Server-side notification dispatch on reaction create. The main server resolves ownership and emits events to Notify. The reaction service itself has no notification logic.
 
 ### Modified Capabilities
 

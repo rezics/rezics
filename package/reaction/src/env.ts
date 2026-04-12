@@ -29,18 +29,6 @@ export const env = createEnv({
     /** Auth JWT audience. */
     AUTH_JWT_AUDIENCE: v.fallback(v.string(), "rezics"),
 
-    /** Base URL of the Notify service for sending notifications. */
-    NOTIFY_BASE_URL: v.fallback(v.string(), "http://localhost:3002"),
-
-    /** Shared secret for authenticating internal calls to the Notify service. */
-    NOTIFY_INTERNAL_SECRET: v.optional(v.string()),
-
-    /** Base URL of the main server for owner resolution. */
-    SERVER_BASE_URL: v.fallback(v.string(), "http://localhost:3000"),
-
-    /** Shared secret for authenticating internal calls to the main server. */
-    SERVER_INTERNAL_SECRET: v.optional(v.string()),
-
     /** Comma-separated list of allowed reaction types. */
     REACTION_TYPES: v.fallback(v.string(), "like,dislike"),
 

@@ -15,7 +15,7 @@
 
 ## 3. Environment and Configuration
 
-- [x] 3.1 Create `package/reaction/src/env.ts` — `@t3-oss/env-core` + Valibot validation for all env vars per design (`REACTION_DATABASE_URL`, `REACTION_INTERNAL_SECRET`, `AUTH_JWKS_URL`, `AUTH_ISSUER`, `AUTH_JWT_AUDIENCE`, `NOTIFY_BASE_URL`, `NOTIFY_INTERNAL_SECRET`, `SERVER_BASE_URL`, `SERVER_INTERNAL_SECRET`, `REACTION_TYPES`, `PORT`)
+- [x] 3.1 Create `package/reaction/src/env.ts` — `@t3-oss/env-core` + Valibot validation for env vars (`REACTION_DATABASE_URL`, `REACTION_INTERNAL_SECRET`, `AUTH_JWKS_URL`, `AUTH_ISSUER`, `AUTH_JWT_AUDIENCE`, `REACTION_TYPES`, `PORT`). Note: `NOTIFY_*` and `SERVER_*` vars removed — reaction service no longer makes outbound calls.
 - [x] 3.2 Parse `REACTION_TYPES` into a `Set<string>` and export as `allowedReactionTypes` for validation
 
 ## 4. Auth Macros
@@ -27,7 +27,7 @@
 
 - [x] 5.1 Create `package/contract/src/reaction/reaction.schema.ts` — Typebox schemas: `createSchema` (`{ targetId: String, reaction: String }`), `deleteQuerySchema` (`{ targetId: String, reaction: String }`), `summaryQuerySchema` (`{ targetIds: String | String[] }`), `myQuerySchema` (`{ targetIds: String | String[] }`)
 - [x] 5.2 Create `package/contract/src/reaction/reaction.types.ts` — shared types: `ReactionDto`, `ReactionSummaryResponse`, `UserReactionsResponse`
-- [x] 5.3 Create `package/contract/src/reaction/internal.ts` — internal schemas: `cleanupBodySchema` (`{ targetId: String }`), `ownerResponseSchema` (`{ ownerId: String }`)
+- [x] 5.3 Create `package/contract/src/reaction/internal.ts` — internal schemas: `cleanupBodySchema`, `internalCreateBodySchema`, `internalCreateResponseSchema`, `internalRemoveBodySchema`, `internalRemoveResponseSchema`
 - [x] 5.4 Create `package/contract/src/reaction/index.ts` — re-export all schemas and types
 - [x] 5.5 Update `package/contract/src/index.ts` to export `./reaction/index.ts`. Remove or deprecate the old `reaction.ts` file (keep until server migration in task group 10).
 - [x] 5.6 Verify contract builds: `cd package/contract && bun run build` (or type-check)
@@ -35,18 +35,18 @@
 ## 6. Reaction Service Core
 
 - [x] 6.1 Create `package/reaction/src/reaction/reaction.service.ts` — `ReactionService` class with methods: `getSummary(targetIds: string[])`, `getUserReactions(userId: string, targetIds: string[])`, `create(userId, targetId, reaction)`, `remove(userId, targetId, reaction)`. Create and remove use `prisma.$transaction` to maintain Reaction + ReactionSummary atomically. Create validates reaction type against `allowedReactionTypes`. Create returns `{ reaction, created: boolean }` to distinguish new vs idempotent.
-- [x] 6.2 Create `package/reaction/src/reaction/reaction.api.ts` — Elysia router with prefix `/reactions`: `GET /summary` (unauthenticated, summaryQuerySchema), `GET /my` (requireUser, myQuerySchema), `POST /` (requireUser, createSchema), `DELETE /` (requireUser, deleteQuerySchema)
+- [x] 6.2 Create `package/reaction/src/reaction/reaction.api.ts` — Elysia router with prefix `/reactions`: `GET /summary` (unauthenticated, summaryQuerySchema), `GET /my` (requireUser, myQuerySchema). Write endpoints (`POST /`, `DELETE /`) removed — writes are now routed through the main server.
 - [ ] 6.3 Verify: write a test for `ReactionService.create` — creates reaction, increments summary, rejects invalid type, idempotent on duplicate
 
 ## 7. Internal API
 
-- [x] 7.1 Create `package/reaction/src/internal/internal.api.ts` — Elysia router with prefix `/internal`: `POST /cleanup` (requireInternal, cleanupBodySchema). Deletes all Reaction and ReactionSummary rows for the given targetId. Returns `{ deleted: true, count }`.
+- [x] 7.1 Create `package/reaction/src/internal/internal.api.ts` — Elysia router with prefix `/internal`: `POST /cleanup`, `POST /create`, `POST /remove` (all requireInternal). Create and remove proxy to `reactionService` methods. Cleanup deletes all Reaction and ReactionSummary rows for the given targetId.
 - [ ] 7.2 Verify: write a test for cleanup — creates reactions, calls cleanup, verifies all deleted
 
-## 8. Notification Integration
+## 8. Notification Integration (moved to server)
 
-- [x] 8.1 Create `package/reaction/src/notify/notify-client.ts` — HTTP client for Notify's `POST /internal/event` and server's `GET /internal/units/owner`. Both fire-and-forget with caught errors logged. Follow `package/server/src/notify/notify-client.ts` pattern.
-- [x] 8.2 Integrate notification into `ReactionService.create`: after successful create (not idempotent), resolve owner via server, if owner != actor send LIKE notification to Notify. All async, non-blocking.
+- [x] 8.1 ~~Create `package/reaction/src/notify/notify-client.ts`~~ — **Removed.** Notification logic moved to the main server. The reaction service no longer makes outbound calls.
+- [x] 8.2 Server-side notification dispatch: `package/server/src/reaction/reaction.api.ts` dispatches LIKE notification via `emitNotificationEvent()` after successful create (not idempotent), resolving owner via `prisma.unit.findUnique`. Fire-and-forget.
 
 ## 9. Server Entry Point
 
@@ -57,8 +57,8 @@
 
 ## 10. Server-Side Migration (remove reaction domain)
 
-- [x] 10.1 Create `package/server/src/reaction/reaction-client.ts` — HTTP client for reaction service's `POST /internal/cleanup` endpoint, using `REACTION_BASE_URL` and `REACTION_INTERNAL_SECRET`. Follow `notify-client.ts` pattern.
-- [x] 10.2 Create `package/server/src/internal/internal.api.ts` (or extend existing) — add `GET /internal/units/owner` endpoint protected by `x-internal-secret`. Returns `{ ownerId }` for the given unit ID.
+- [x] 10.1 Create `package/server/src/reaction/reaction-client.ts` — HTTP client for reaction service's internal endpoints (`/internal/create`, `/internal/remove`, `/internal/cleanup`), using `REACTION_BASE_URL` and `REACTION_INTERNAL_SECRET`.
+- [x] 10.2 Create `package/server/src/reaction/reaction.api.ts` — Elysia router with `POST /reactions` and `DELETE /reactions` endpoints that proxy writes to the reaction service and dispatch notifications.
 - [x] 10.3 Add `REACTION_BASE_URL` and `REACTION_INTERNAL_SECRET` to `package/server/src/env.ts`
 - [x] 10.4 Integrate cleanup call: wherever Units are deleted in the server, call `reactionClient.cleanup(targetId)` before or after deletion.
 - [x] 10.5 Remove `package/server/src/reaction/reaction.api.ts` and `reaction.service.ts`
@@ -72,7 +72,7 @@
 
 ## 11. API Client Rewrite
 
-- [x] 11.1 Update `package/api/src/reaction/reaction.api.ts` — point base URL to `VITE_REACTION_SERVICE_URL` env var instead of server URL. Remove bookmark-related functions (`getBookmarkTags`, `setBookmarkTags`). Remove `list` and `update` functions. Adjust `summary` and `my` to use new response shapes.
+- [x] 11.1 Update `package/api/src/reaction/reaction.api.ts` — reads (`summary`, `my`) go to `VITE_REACTION_SERVICE_URL` (reaction service direct). Writes (`create`, `remove`) use `apiFetch` to route through the main server (`apiBaseUrl`). Remove bookmark-related functions.
 - [x] 11.2 Update `package/api/src/reaction/reaction.types.ts` — align with new contract types, remove bookmark types
 - [x] 11.3 Update `package/api/src/reaction/reaction.keys.ts` — remove `bookmarkTags` key, remove `list` key
 - [x] 11.4 Update `package/api/src/reaction/reaction.queries.ts` — remove bookmark queries, update summary/my query options

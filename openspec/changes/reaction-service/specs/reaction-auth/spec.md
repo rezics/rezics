@@ -1,7 +1,7 @@
-## ADDED Requirements
+## MODIFIED Requirements
 
-### Requirement: JWT verification for public endpoints
-The reaction service SHALL verify auth-issued JWTs on endpoints that require authentication (`POST /reactions`, `DELETE /reactions`, `GET /reactions/my`). Verification SHALL use `createJwtVerifier()` and `createRemoteJWKSet()` from `@rezics/jwt` against the auth service's JWKS endpoint (`AUTH_JWKS_URL`).
+### Requirement: JWT verification for read endpoints
+The reaction service SHALL verify auth-issued JWTs on read endpoints that require authentication (`GET /reactions/my`). Verification SHALL use `createJwtVerifier()` and `createRemoteJWKSet()` from `@rezics/jwt` against the auth service's JWKS endpoint (`AUTH_JWKS_URL`).
 
 #### Scenario: Valid JWT
 - **WHEN** a client sends a request with a valid JWT in the `Authorization: Bearer <token>` header
@@ -20,7 +20,7 @@ The reaction service SHALL verify auth-issued JWTs on endpoints that require aut
 - **THEN** the system returns status 401
 
 ### Requirement: Shared secret for internal endpoints
-The reaction service SHALL verify the `x-internal-secret` header on internal endpoints (`/internal/*`). The secret SHALL match the `REACTION_INTERNAL_SECRET` environment variable.
+The reaction service SHALL verify the `x-internal-secret` header on internal endpoints (`/internal/*`), which include `/internal/create`, `/internal/remove`, and `/internal/cleanup`. The secret SHALL match the `REACTION_INTERNAL_SECRET` environment variable.
 
 #### Scenario: Valid internal secret
 - **WHEN** a service sends a request with matching `x-internal-secret` header
@@ -36,3 +36,14 @@ The `GET /reactions/summary` endpoint SHALL NOT require authentication. Reaction
 #### Scenario: Summary without auth
 - **WHEN** an unauthenticated client sends `GET /reactions/summary?targetIds=abc`
 - **THEN** the system returns the reaction summary with status 200
+
+### Requirement: Main server proxies writes with JWT auth
+The main server's `POST /reactions` and `DELETE /reactions` endpoints SHALL verify user identity via JWT (same `requireLogin` macro as other server endpoints). The server then calls the reaction service's internal endpoints with the shared secret.
+
+#### Scenario: Write via server with valid JWT
+- **WHEN** an authenticated user sends `POST /reactions` to the main server
+- **THEN** the server extracts the userId from the JWT and forwards the request to the reaction service's `POST /internal/create` with the shared secret
+
+#### Scenario: Write via server without JWT
+- **WHEN** an unauthenticated client sends `POST /reactions` to the main server
+- **THEN** the server returns status 401
