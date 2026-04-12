@@ -25,7 +25,7 @@
   "devDependencies": {
     "@types/bun": "^1.3.0",
     "@types/pg": "^8.15.5",
-    "prisma": "^7.6.0"
+    "prisma": "^7.7.0"
   },
   "peerDependencies": {
     "typescript": "^5"
@@ -33,8 +33,8 @@
   "dependencies": {
     "@elysiajs/cors": "^1.4.0",
     "@elysiajs/openapi": "^1.4.14",
-    "@prisma/adapter-pg": "^7.6.0",
-    "@prisma/client": "^7.6.0",
+    "@prisma/adapter-pg": "^7.7.0",
+    "@prisma/client": "^7.7.0",
     "@rezics/contract": "workspace:*",
     "@rezics/jwt": "workspace:*",
     "dotenv": "^17.2.3",
