@@ -2,7 +2,6 @@ import { randomUUID } from "node:crypto";
 import { faker } from "@faker-js/faker";
 import type { PrismaClient } from "#/prisma/generated/client.js";
 import { UnitStatus, UnitType, UnitVisibility } from "#/prisma/generated/client.js";
-import { REACTION_TYPES } from "./data.js";
 import type { CreatedUser } from "./types.js";
 import { pickN, randomInt } from "./utils.js";
 
@@ -21,36 +20,9 @@ export async function seedEngagement(
   );
 
   await Promise.all([
-    seedReactionSummaries(prisma, allUnitIds),
     seedFavorites(prisma, users, allUnitIds, counts.bookmarksPerUser),
     seedFollows(prisma, users, counts.followsPerUser),
   ]);
-}
-
-/**
- * Create ReactionSummary rows for all units (like/dislike/love).
- */
-async function seedReactionSummaries(
-  prisma: PrismaClient,
-  unitIds: string[],
-): Promise<void> {
-  console.log(`[Seed]   Seeding reaction summaries...`);
-
-  const data = unitIds.flatMap((targetId) =>
-    REACTION_TYPES.map((reaction) => ({
-      targetId,
-      reaction,
-      count: randomInt(0, 300),
-    })),
-  );
-
-  // createMany in batches to avoid parameter limit
-  const BATCH_SIZE = 5000;
-  for (let i = 0; i < data.length; i += BATCH_SIZE) {
-    await prisma.reactionSummary.createMany({
-      data: data.slice(i, i + BATCH_SIZE),
-    });
-  }
 }
 
 /**
