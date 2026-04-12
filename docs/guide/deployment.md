@@ -114,9 +114,8 @@ Backend secrets (DATABASE_URL, BETTER_AUTH_SECRET, etc.) are **not** GitHub secr
 | File | Tracked | Where | Purpose |
 |---|---|---|---|
 | `.env.example` | Yes (git) | All packages | Reference template |
-| `.env.development` | No | Developer machine | Dev defaults, loaded by `bun dev` / `vite dev` |
+| `.env` | No | Developer machine | Dev defaults, loaded by `bun dev` / `vite dev` / `prisma` |
 | `.env.production` | No | VPS (backend) or CI (frontend) | Production config |
-| `.env` | No | Developer machine | Local overrides |
 
 **Backend (server, auth):** `.env.production` is manually provisioned on the VPS. Bun loads it automatically when `NODE_ENV=production` (set by the systemd unit).
 
