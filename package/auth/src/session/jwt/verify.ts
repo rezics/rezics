@@ -1,13 +1,9 @@
-import type {
-  AuthContextTokenClaims,
-  AuthIdentityTokenClaims,
-} from "@rezics/contract";
+import type { AuthIdentityTokenClaims } from "@rezics/contract";
 import { NormalizedTokenName } from "@rezics/contract";
 import {
   type JwtVerifyInput,
   type VerifiedJwt,
   verifyBearerToken,
-  verifyTokenFromHeader,
 } from "@rezics/jwt";
 import type { JWTPayload } from "jose";
 import {
@@ -49,15 +45,6 @@ export function getAuthIdentityVerifyOptions(
   return buildLocalDefaults(overrides, NormalizedTokenName.AUTH_IDENTITY);
 }
 
-export function getAuthContextVerifyOptions(
-  overrides?: Partial<VerifyOptions>,
-): VerifyOptions {
-  return buildLocalDefaults(
-    { ...overrides, requiredScope: overrides?.requiredScope ?? undefined },
-    NormalizedTokenName.AUTH_CONTEXT,
-  );
-}
-
 export async function verifyAuthIdentityToken<
   TPayload extends JWTPayload = AuthIdentityTokenClaims & JWTPayload,
 >(
@@ -67,18 +54,6 @@ export async function verifyAuthIdentityToken<
   return verifyBearerToken<TPayload>(
     authorization,
     getAuthIdentityVerifyOptions(overrides),
-  );
-}
-
-export async function verifyAuthContextToken<
-  TPayload extends JWTPayload = AuthContextTokenClaims & JWTPayload,
->(
-  token: string | undefined,
-  overrides?: Partial<VerifyOptions>,
-): Promise<VerifiedToken<TPayload>> {
-  return verifyTokenFromHeader<TPayload>(
-    token,
-    getAuthContextVerifyOptions(overrides),
   );
 }
 

@@ -4,38 +4,17 @@ import {
   clearAllTokens,
   ensureAuthIdentityToken,
   parseJwt,
-  setToken,
 } from "@rezics/api/react-query/jwt";
-import { userApi } from "@rezics/api/user/user.api";
 import { userKeys } from "@rezics/api/user/user.keys";
 import {
   clearAuthSessionState,
   hydrateAuthSessionState,
   useAuthSessionStore,
 } from "@rezics/app-shell";
-import { NormalizedTokenName } from "@rezics/contract";
 import { qc } from "@/app/provider/reactQueryUtil";
 
 /**
- * Provision business session: AUTH_IDENTITY -> context token -> ensure user -> REZICS_SESSION.
- */
-export async function establishBusinessSession() {
-  await ensureAuthIdentityToken({ requirePresence: false });
-
-  const authContext = await authApi.getContextToken();
-  const contextToken = authContext.token;
-
-  await userApi.ensure(contextToken);
-  const sessionToken = (await userApi.issueSessionToken()).token;
-
-  setToken(sessionToken, NormalizedTokenName.REZICS_SESSION);
-  useAuthSessionStore.getState().syncBusinessToken(sessionToken);
-
-  await hydrateAuthSessionState();
-}
-
-/**
- * Admin login: sign in -> verify admin role -> hydrate session -> fire-and-forget business session.
+ * Admin login: sign in -> verify admin role -> hydrate session.
  */
 export async function adminLogin(email: string, password: string) {
   await authApi.signIn({ email, password });
@@ -48,8 +27,6 @@ export async function adminLogin(email: string, password: string) {
 
   await hydrateAuthSessionState();
 
-  await establishBusinessSession();
-
   return { token };
 }
 
@@ -59,7 +36,7 @@ export async function adminLogin(email: string, password: string) {
 export async function adminLogout() {
   await authApi.signOut();
   clearAllTokens();
-  useAuthSessionStore.getState().syncBusinessToken(null);
+  useAuthSessionStore.getState().reset();
   clearAuthSessionState();
   qc.removeQueries({ queryKey: authKeys.all() });
   qc.removeQueries({ queryKey: userKeys.all() });

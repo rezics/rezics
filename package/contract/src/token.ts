@@ -5,18 +5,13 @@ import { t } from "elysia";
  *
  * @example
  * auth-identity-token
- * auth-context-token
- * rezics-session-token
  * notification-session-token
  * search-session-token
  * Authorization: Bearer <auth-identity-token>
- * x-rezics-session-token: <rezics-session-token>
  */
 
 export const NormalizedTokenName = {
   AUTH_IDENTITY: "auth-identity-token",
-  AUTH_CONTEXT: "auth-context-token",
-  REZICS_SESSION: "rezics-session-token",
   NOTIFICATION_SESSION: "notification-session-token",
   SEARCH_SESSION: "search-session-token",
 } as const;
@@ -25,16 +20,12 @@ export type NormalizedTokenName =
 
 export const normalizedTokenNameSchema = t.Union([
   t.Literal(NormalizedTokenName.AUTH_IDENTITY),
-  t.Literal(NormalizedTokenName.AUTH_CONTEXT),
-  t.Literal(NormalizedTokenName.REZICS_SESSION),
   t.Literal(NormalizedTokenName.NOTIFICATION_SESSION),
   t.Literal(NormalizedTokenName.SEARCH_SESSION),
 ]);
 
 export const TokenTransportHeader = {
   AUTHORIZATION: "Authorization",
-  AUTH_CONTEXT: "x-auth-context-token",
-  REZICS_SESSION: "x-rezics-session-token",
   NOTIFICATION_SESSION: "x-notification-session-token",
   SEARCH_SESSION: "x-search-session-token",
 } as const;
@@ -57,23 +48,6 @@ export const tokenPermissionRoleSchema = t.Union([
 ]);
 export type TokenPermissionRole = (typeof tokenPermissionRoleSchema)["static"];
 
-export const sessionPermissionSnapshotSchema = t.Object({
-  role: tokenPermissionRoleSchema,
-});
-export type SessionPermissionSnapshot =
-  (typeof sessionPermissionSnapshotSchema)["static"];
-
-export const rezicsSessionTokenClaimsSchema = t.Object({
-  unitId: t.String(),
-  permission: sessionPermissionSnapshotSchema,
-  exp: t.Optional(t.Number()),
-  iat: t.Optional(t.Number()),
-  iss: t.Optional(t.String()),
-  aud: t.Optional(t.Union([t.String(), t.Array(t.String())])),
-});
-export type RezicsSessionTokenClaims =
-  (typeof rezicsSessionTokenClaimsSchema)["static"];
-
 export const authIdentityTokenClaimsSchema = t.Object({
   unitId: t.Optional(t.String()),
   sub: t.Optional(t.String()),
@@ -81,6 +55,7 @@ export const authIdentityTokenClaimsSchema = t.Object({
   name: t.Optional(t.String()),
   role: t.Optional(t.String()),
   scope: t.Optional(t.Union([t.String(), t.Array(t.String())])),
+  email_verified: t.Optional(t.Literal(false)),
   exp: t.Optional(t.Number()),
   iat: t.Optional(t.Number()),
   iss: t.Optional(t.String()),
@@ -89,28 +64,8 @@ export const authIdentityTokenClaimsSchema = t.Object({
 export type AuthIdentityTokenClaims =
   (typeof authIdentityTokenClaimsSchema)["static"];
 
-export const authContextTokenClaimsSchema = t.Object({
-  id: t.String(),
-  unitId: t.Optional(t.String()),
-  sub: t.Optional(t.String()),
-  slug: t.String(),
-  name: t.String(),
-  avatar: t.Optional(t.Nullable(t.String())),
-  emailVerified: t.Boolean(),
-  verificationStatus: t.Union([t.Literal("verified"), t.Literal("pending")]),
-  scope: t.Optional(t.Union([t.String(), t.Array(t.String())])),
-  exp: t.Optional(t.Number()),
-  iat: t.Optional(t.Number()),
-  iss: t.Optional(t.String()),
-  aud: t.Optional(t.Union([t.String(), t.Array(t.String())])),
-});
-export type AuthContextTokenClaims =
-  (typeof authContextTokenClaimsSchema)["static"];
-
 export const normalizedTokenHeaderMap = {
   [NormalizedTokenName.AUTH_IDENTITY]: TokenTransportHeader.AUTHORIZATION,
-  [NormalizedTokenName.AUTH_CONTEXT]: TokenTransportHeader.AUTH_CONTEXT,
-  [NormalizedTokenName.REZICS_SESSION]: TokenTransportHeader.REZICS_SESSION,
   [NormalizedTokenName.NOTIFICATION_SESSION]:
     TokenTransportHeader.NOTIFICATION_SESSION,
   [NormalizedTokenName.SEARCH_SESSION]: TokenTransportHeader.SEARCH_SESSION,
@@ -118,8 +73,6 @@ export const normalizedTokenHeaderMap = {
 
 export const TokenContextKey = {
   AUTH_IDENTITY: "authIdentityToken",
-  AUTH_CONTEXT: "authContextToken",
-  REZICS_SESSION: "rezicsSessionToken",
   NOTIFICATION_SESSION: "notificationSessionToken",
   SEARCH_SESSION: "searchSessionToken",
 } as const;
@@ -131,16 +84,6 @@ export const normalizedTokenTransportMap = {
     tokenName: NormalizedTokenName.AUTH_IDENTITY,
     headerName: TokenTransportHeader.AUTHORIZATION,
     usesBearer: true,
-  },
-  [NormalizedTokenName.AUTH_CONTEXT]: {
-    tokenName: NormalizedTokenName.AUTH_CONTEXT,
-    headerName: TokenTransportHeader.AUTH_CONTEXT,
-    usesBearer: false,
-  },
-  [NormalizedTokenName.REZICS_SESSION]: {
-    tokenName: NormalizedTokenName.REZICS_SESSION,
-    headerName: TokenTransportHeader.REZICS_SESSION,
-    usesBearer: false,
   },
   [NormalizedTokenName.NOTIFICATION_SESSION]: {
     tokenName: NormalizedTokenName.NOTIFICATION_SESSION,

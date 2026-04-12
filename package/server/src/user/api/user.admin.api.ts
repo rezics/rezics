@@ -6,6 +6,7 @@ import {
 } from "@rezics/contract";
 import { Elysia } from "elysia";
 import { authMacro } from "@/middleware";
+import { invalidate as invalidateUserCache } from "@/middleware/user-cache";
 import { mapUserToDTO } from "../model/mapper";
 import { userService } from "../service/user.service";
 
@@ -54,6 +55,7 @@ export const adminRoute = new Elysia()
       };
 
       const user = await userService.update(params.unitId, userReq);
+      invalidateUserCache(params.unitId);
       return mapUserToDTO(user);
     },
     {
@@ -71,6 +73,7 @@ export const adminRoute = new Elysia()
     "/admin/:unitId",
     async ({ params }): Promise<{ message: string }> => {
       await userService.delete(params.unitId);
+      invalidateUserCache(params.unitId);
       return { message: "User deleted successfully" };
     },
     {

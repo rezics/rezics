@@ -4,7 +4,6 @@
  */
 
 import type {
-  AuthContextTokenResponse,
   AuthProvider,
   AuthResponse,
   AuthSession,
@@ -27,7 +26,7 @@ import type {
 } from "@rezics/contract";
 import { NormalizedTokenName } from "@rezics/contract";
 import { getApiConfig } from "../config";
-import { buildTokenHeaders, ensureAuthIdentityToken } from "../react-query/jwt";
+import { buildTokenHeaders } from "../react-query/jwt";
 
 type AuthRequestInit = globalThis.RequestInit & {
   includeTokens?: NormalizedTokenName[];
@@ -110,17 +109,6 @@ export const authApi = {
 
   getToken: async (): Promise<AuthTokenResponse> => {
     return authFetch<AuthTokenResponse>("/api/auth/token");
-  },
-
-  /**
-   * Fetch an auth-owned context token using the locally managed identity JWT.
-   */
-  getContextToken: async (): Promise<AuthContextTokenResponse> => {
-    await ensureAuthIdentityToken({ requirePresence: true });
-
-    return authFetch<AuthContextTokenResponse>("/api/auth/context-token", {
-      includeTokens: [NormalizedTokenName.AUTH_IDENTITY],
-    });
   },
 
   listProviders: async (): Promise<{ providers: AuthProvider[] }> => {

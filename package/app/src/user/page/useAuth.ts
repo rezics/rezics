@@ -12,9 +12,6 @@ export const useAuth = () => {
   const authSession = useAuthSessionStore((state) => state.authSession);
   const capabilityLevel = useAuthSessionStore((state) => state.capabilityLevel);
   const hasAuthSession = useAuthSessionStore((state) => state.hasAuthSession);
-  const hasBusinessToken = useAuthSessionStore(
-    (state) => state.hasBusinessToken,
-  );
   const needsOnboarding = useAuthSessionStore((state) => state.needsOnboarding);
   const needsVerification = useAuthSessionStore(
     (state) => state.needsVerification,
@@ -47,15 +44,11 @@ export const useAuth = () => {
     authenticated: hasAuthSession,
     isAuthenticated: hasAuthSession,
     hasAuthSession,
-    hasBusinessToken,
     needsOnboarding,
     needsVerification,
     capabilityLevel,
     readyForApp:
-      hasAuthSession &&
-      !needsOnboarding &&
-      !needsVerification &&
-      hasBusinessToken,
+      hasAuthSession && !needsOnboarding && !needsVerification,
   };
 };
 

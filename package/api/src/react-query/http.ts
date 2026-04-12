@@ -27,10 +27,7 @@ function buildHeaders(options?: ApiRequestInit): Record<string, string> {
     "Content-Type": "application/json",
     ...Object.fromEntries(new Headers(options?.headers).entries()),
     ...buildTokenHeaders({
-      include: options?.includeTokens ?? [
-        NormalizedTokenName.AUTH_IDENTITY,
-        NormalizedTokenName.REZICS_SESSION,
-      ],
+      include: options?.includeTokens ?? [NormalizedTokenName.AUTH_IDENTITY],
     }),
   };
 

@@ -222,7 +222,7 @@ export async function verifySessionToken<
 >(tokenHeader: string | undefined, options: JwtVerifyInput) {
   return verifyTokenInput<TPayload>(tokenHeader, {
     ...options,
-    tokenName: options.tokenName ?? NormalizedTokenName.REZICS_SESSION,
+    tokenName: options.tokenName ?? NormalizedTokenName.AUTH_IDENTITY,
     requiredScope: undefined,
   });
 }

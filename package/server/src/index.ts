@@ -1,9 +1,6 @@
 import { cors } from "@elysiajs/cors";
 import { openapi } from "@elysiajs/openapi";
-import type {
-  AuthIdentityTokenClaims,
-  RezicsSessionTokenClaims,
-} from "@rezics/contract";
+import type { AuthIdentityTokenClaims } from "@rezics/contract";
 import {
   NormalizedTokenName,
   TokenContextKey,
@@ -34,7 +31,6 @@ import { realmApi } from "./realm";
 import { collectionApi, shelfApi } from "./shelf";
 import { linkApi } from "./link";
 import { sessionApi } from "./session";
-import { serverSessionJwksPath } from "./session/jwt/jwt-metadata";
 import { statsAdminApi } from "./stats";
 import { tagApi } from "./tag";
 import { tokenApi } from "./token";
@@ -74,30 +70,19 @@ if (isDev) {
 
 const port = env.PORT ? Number(env.PORT) : 3000;
 
-const serverBaseUrl = env.MAIN_SESSION_JWT_ISSUER ?? `http://localhost:${port}`;
 const authBaseUrl = env.AUTH_BASE_URL;
 const authAudience = env.AUTH_JWT_AUDIENCE ?? "rezics";
 const authJwksUrl = new URL("/.well-known/jwks.json", authBaseUrl).toString();
 
-await Promise.all([
-  bootstrapJwtServiceRecord("server-local", {
-    issuer: serverBaseUrl,
-    audience: env.MAIN_SESSION_JWT_AUDIENCE ?? "rezics",
-    jwksUrl: new URL(serverSessionJwksPath, serverBaseUrl).toString(),
-    jwksPath: serverSessionJwksPath,
-    isLocalIssuer: true,
-  }),
-  bootstrapJwtServiceRecord("auth-upstream", {
-    issuer: authBaseUrl,
-    audience: authAudience,
-    jwksUrl: authJwksUrl,
-    jwksPath: "/.well-known/jwks.json",
-    isLocalIssuer: false,
-  }),
-]);
+await bootstrapJwtServiceRecord("auth-upstream", {
+  issuer: authBaseUrl,
+  audience: authAudience,
+  jwksUrl: authJwksUrl,
+  jwksPath: "/.well-known/jwks.json",
+  isLocalIssuer: false,
+});
 
 const authUpstream = await getJwtService("auth-upstream");
-const serverLocal = await getJwtService("server-local");
 
 const authIdentityVerifier = createJwtVerifier<AuthIdentityTokenClaims>({
   issuer: authUpstream.issuer,
@@ -107,16 +92,6 @@ const authIdentityVerifier = createJwtVerifier<AuthIdentityTokenClaims>({
   tokenName: NormalizedTokenName.AUTH_IDENTITY,
   clockToleranceSeconds: Number(env.AUTH_JWT_CLOCK_TOLERANCE_SECONDS ?? "5"),
   requiredScope: "user",
-  enforceTransport: true,
-});
-
-const rezicsSessionVerifier = createJwtVerifier<RezicsSessionTokenClaims>({
-  issuer: serverLocal.issuer,
-  audience: serverLocal.audience,
-  jwksUrl: serverLocal.jwksUrl,
-  algorithm: JwtAlgorithm.ES256,
-  tokenName: NormalizedTokenName.REZICS_SESSION,
-  clockToleranceSeconds: 5,
   enforceTransport: true,
 });
 
@@ -138,12 +113,9 @@ app
         "content-type",
         "authorization",
         "accept",
-        TokenTransportHeader.AUTH_CONTEXT,
-        TokenTransportHeader.REZICS_SESSION,
         TokenTransportHeader.NOTIFICATION_SESSION,
         TokenTransportHeader.SEARCH_SESSION,
       ],
-      exposeHeaders: [TokenTransportHeader.REZICS_SESSION],
       maxAge: 600,
     }),
   )
@@ -169,16 +141,6 @@ app
       headerName: TokenTransportHeader.AUTHORIZATION,
       usesBearer: true,
       verifier: authIdentityVerifier,
-    }),
-  )
-  .use(
-    createTokenResolver<
-      typeof TokenContextKey.REZICS_SESSION,
-      RezicsSessionTokenClaims
-    >(TokenContextKey.REZICS_SESSION, {
-      headerName: TokenTransportHeader.REZICS_SESSION,
-      usesBearer: false,
-      verifier: rezicsSessionVerifier,
     }),
   )
   .use(wellKnownApi)

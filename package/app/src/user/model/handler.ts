@@ -3,11 +3,8 @@ import { authKeys } from "@rezics/api/auth/auth.keys";
 import {
   clearAllTokens,
   ensureAuthIdentityToken,
-  setToken,
 } from "@rezics/api/react-query/jwt";
-import { userApi } from "@rezics/api/user/user.api";
 import { userKeys } from "@rezics/api/user/user.keys";
-import { NormalizedTokenName } from "@rezics/contract";
 import { qc } from "@/app/provider/reactQueryUtil";
 import {
   clearAuthSessionState,
@@ -16,48 +13,17 @@ import {
   useUserProfileStore,
 } from "@/user/state";
 
-/**
- * One-shot provisioning sequence for establishing a business session.
- * 1. Ensure AUTH_IDENTITY exists
- * 2. Fetch AUTH_CONTEXT (ephemeral, in memory only)
- * 3. Provision user on business server via ensure()
- * 4. Issue REZICS_SESSION
- * 5. Hydrate authSessionStore
- */
-export async function establishBusinessSession() {
-  await ensureAuthIdentityToken({ requirePresence: false });
-
-  const authContext = await authApi.getContextToken();
-  const contextToken = authContext.token;
-
-  const ensured = await userApi.ensure(contextToken);
-  const sessionToken = (await userApi.issueSessionToken()).token;
-
-  setToken(sessionToken, NormalizedTokenName.REZICS_SESSION);
-  useAuthSessionStore.getState().syncBusinessToken(sessionToken);
-
-  await hydrateAuthSessionState();
-  useUserProfileStore.getState().setUser(ensured.user);
-
-  return { user: ensured.user };
-}
-
 export const login = async (email: string, password: string) => {
   await authApi.signIn({ email, password });
   const token = await ensureAuthIdentityToken({ requirePresence: false });
 
-  const sessionState = await hydrateAuthSessionState();
-  const hasAuthSession = Boolean(sessionState?.session?.id);
-
-  if (!token && !hasAuthSession) {
+  if (!token) {
     throw new Error("Login failed");
   }
 
-  const user = sessionState?.authSession.canAcquireMemberToken
-    ? (await establishBusinessSession()).user
-    : null;
+  await hydrateAuthSessionState();
 
-  return { user, token };
+  return { token };
 };
 
 export const register = async (
@@ -72,18 +38,13 @@ export const register = async (
     await authApi.signUp({ email, password });
     const token = await ensureAuthIdentityToken({ requirePresence: false });
 
-    const sessionState = await hydrateAuthSessionState();
-    const hasAuthSession = Boolean(sessionState?.session?.id);
-
-    if (!token && !hasAuthSession) {
+    if (!token) {
       throw new Error("Registration failed");
     }
 
-    const user = sessionState?.authSession.canAcquireMemberToken
-      ? (await establishBusinessSession()).user
-      : null;
+    await hydrateAuthSessionState();
 
-    return { user, token };
+    return { token };
   } catch (error) {
     console.error("Error during registration:", error);
     throw error;
@@ -93,8 +54,8 @@ export const register = async (
 export const logout = async (disableReload = false) => {
   await authApi.signOut();
   clearAllTokens();
-  useAuthSessionStore.getState().syncBusinessToken(null);
   clearAuthSessionState();
+  useAuthSessionStore.getState().reset();
   useUserProfileStore.getState().clearProfile();
   qc.removeQueries({ queryKey: authKeys.all() });
   qc.removeQueries({ queryKey: userKeys.all() });

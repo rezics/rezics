@@ -1,5 +1,4 @@
 import {
-  type AuthContextTokenClaims,
   NormalizedTokenName,
   type NormalizedTokenName as NormalizedTokenNameType,
 } from "@rezics/contract";
@@ -47,26 +46,14 @@ async function buildAuthVerifyOptions(
   return buildTrustedAuthVerifyOptions(trustedAuth, overrides, tokenName);
 }
 
-export async function getServerAuthContextVerifyOptions(
-  overrides?: Partial<VerifyOptions>,
-): Promise<VerifyOptions> {
-  return buildAuthVerifyOptions(
-    {
-      ...overrides,
-      requiredScope: overrides?.requiredScope ?? undefined,
-    },
-    NormalizedTokenName.AUTH_CONTEXT,
-  );
-}
-
-export async function verifyAuthContextToken<
-  TPayload extends JWTPayload = AuthContextTokenClaims & JWTPayload,
+export async function verifyAuthToken<
+  TPayload extends JWTPayload = JWTPayload,
 >(
   token: string | undefined,
   overrides?: Partial<VerifyOptions>,
 ): Promise<VerifiedToken<TPayload>> {
   return verifyTokenFromHeader<TPayload>(
     token,
-    await getServerAuthContextVerifyOptions(overrides),
+    await buildAuthVerifyOptions(overrides),
   );
 }

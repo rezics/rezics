@@ -1,18 +1,15 @@
 import {
-  type AuthContextTokenClaims,
   type AuthIdentityTokenClaims,
   type AuthTokenResponse,
   NormalizedTokenName,
   type NormalizedTokenName as NormalizedTokenNameType,
   normalizedTokenTransportMap,
-  type RezicsSessionTokenClaims,
 } from "@rezics/contract";
 import { getApiConfig } from "../config";
 import { clearAuthPresence, hasAuthPresence } from "./authPresence";
 
 const DEFAULT_TOKEN_STORAGE_KEYS: Record<string, string> = {
   [NormalizedTokenName.AUTH_IDENTITY]: NormalizedTokenName.AUTH_IDENTITY,
-  [NormalizedTokenName.REZICS_SESSION]: NormalizedTokenName.REZICS_SESSION,
   [NormalizedTokenName.NOTIFICATION_SESSION]:
     NormalizedTokenName.NOTIFICATION_SESSION,
   [NormalizedTokenName.SEARCH_SESSION]: NormalizedTokenName.SEARCH_SESSION,
@@ -329,14 +326,3 @@ export function getAuthIdentityClaims(): AuthIdentityTokenClaims | null {
   );
 }
 
-export function getAuthContextClaims(
-  token?: string | null,
-): AuthContextTokenClaims | null {
-  return parseJwt<AuthContextTokenClaims>(token ?? null);
-}
-
-export function getRezicsSessionClaims(): RezicsSessionTokenClaims | null {
-  return getParsedToken<RezicsSessionTokenClaims>(
-    NormalizedTokenName.REZICS_SESSION,
-  );
-}

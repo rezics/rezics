@@ -10,7 +10,6 @@ import { env } from "@/env";
 import { hydrateAuthSessionState } from "@/user/state";
 import { Layout } from "../layout/Layout";
 import { resolvePostAuthDestination } from "../model/authRedirect";
-import { establishBusinessSession } from "../model/handler";
 import { useAuth } from "./useAuth";
 
 export const VerifyEmailPage: FC = () => {
@@ -43,12 +42,10 @@ export const VerifyEmailPage: FC = () => {
         !sessionState.authSession.needsEmailVerification &&
         !sessionState.authSession.needsOnboarding
       ) {
-        await establishBusinessSession();
         navigate({
           to: resolvePostAuthDestination({
             needsOnboarding: sessionState.authSession.needsOnboarding,
             needsVerification: sessionState.authSession.needsEmailVerification,
-            readyForApp: sessionState.authSession.canAcquireMemberToken,
           }),
         });
         return;

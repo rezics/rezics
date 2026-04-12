@@ -1,5 +1,4 @@
 import { t } from "elysia";
-import { authContextTokenClaimsSchema } from "../token";
 import { authSessionStateSchema } from "./self-service";
 import { authSessionSchema, authUserSchema } from "./sign-in";
 
@@ -25,13 +24,6 @@ export const authTokenResponseSchema = t.Object({
   token: t.String(),
 });
 export type AuthTokenResponse = (typeof authTokenResponseSchema)["static"];
-
-export const authContextTokenResponseSchema = t.Object({
-  token: t.String(),
-  claims: authContextTokenClaimsSchema,
-});
-export type AuthContextTokenResponse =
-  (typeof authContextTokenResponseSchema)["static"];
 
 export const listSessionsResponseSchema = t.Array(authSessionSchema);
 export type ListSessionsResponse =

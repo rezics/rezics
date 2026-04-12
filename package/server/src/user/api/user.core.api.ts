@@ -1,16 +1,7 @@
-import type {
-  AuthContextTokenClaims,
-  EnsureUserResponse,
-  UpdateUser,
-  UserDTO,
-  UserListQuery,
-} from "@rezics/contract";
+import type { UpdateUser, UserDTO, UserListQuery } from "@rezics/contract";
 import {
   BasicAdminPermission,
-  ensureUserResponseSchema,
   hasPermissionToUpdateUser,
-  NormalizedTokenName,
-  normalizedTokenTransportMap,
   updateUserSchema,
   userListQuerySchema,
   userParamsSchema,
@@ -21,10 +12,6 @@ import { meiliService } from "@/meili/meili.service";
 import { authMacro } from "@/middleware";
 import { mapUserToDTO } from "../model/mapper";
 import { userService } from "../service/user.service";
-import { verifyAuthContextToken } from "../util";
-
-const AUTH_CONTEXT_HEADER =
-  normalizedTokenTransportMap[NormalizedTokenName.AUTH_CONTEXT].headerName;
 
 export const coreRoute = new Elysia()
   .use(authMacro)
@@ -42,66 +29,6 @@ export const coreRoute = new Elysia()
       detail: {
         summary: "Get all users",
         description: "Get all users with filters and pagination",
-        tags: ["Users"],
-      },
-    },
-  )
-  .get(
-    "/ensure",
-    async ({ headers, identity, set }): Promise<EnsureUserResponse> => {
-      const authorization = headers.authorization;
-      if (!authorization) {
-        set.status = 401;
-        throw new Error("Unauthorized: Missing Authorization header");
-      }
-
-      const existingUser = await userService
-        .getByUnitId(identity.unitId)
-        .catch(() => null);
-
-      if (existingUser) {
-        return {
-          user: mapUserToDTO(existingUser),
-          alreadyCreated: true,
-        };
-      }
-
-      const authContextHeader = headers[AUTH_CONTEXT_HEADER];
-      if (!authContextHeader) {
-        set.status = 401;
-        throw new Error(`Unauthorized: Missing ${AUTH_CONTEXT_HEADER} header`);
-      }
-
-      const authContext = (
-        await verifyAuthContextToken<AuthContextTokenClaims>(authContextHeader)
-      ).payload;
-      const authContextUnitId =
-        authContext.unitId ?? authContext.sub ?? authContext.id;
-
-      if (authContextUnitId !== identity.unitId) {
-        set.status = 401;
-        throw new Error("Unauthorized: Auth context token mismatch");
-      }
-
-      const user = await userService.provisionFromAuthContext({
-        unitId: identity.unitId,
-        slug: authContext.slug,
-        name: authContext.name,
-        avatar: authContext.avatar,
-      });
-
-      return {
-        user: mapUserToDTO(user),
-        alreadyCreated: false,
-      };
-    },
-    {
-      requireLogin: true,
-      response: ensureUserResponseSchema,
-      detail: {
-        summary: "Ensure current user",
-        description:
-          "Verify auth identity, ensure the local business user exists, and return whether the user already existed.",
         tags: ["Users"],
       },
     },
@@ -203,15 +130,12 @@ export const coreRoute = new Elysia()
   .delete(
     "/:unitId",
     async ({
-      session,
       currentUser,
       params,
       set,
     }): Promise<{ message: string }> => {
-      if (
-        session.permission.role !== "ROOT" &&
-        session.permission.role !== "ADMIN"
-      ) {
+      const roles = currentUser.permission?.role;
+      if (!roles?.includes("ROOT") && !roles?.includes("ADMIN")) {
         set.status = 403;
         throw new Error("Forbidden: Admin role required");
       }

@@ -1,24 +1,10 @@
-import {
-  type SessionTokenResponse,
-  sessionTokenResponseSchema,
-} from "@rezics/contract";
 import { Elysia } from "elysia";
-import {
-  assertMainServerEligibility,
-  authMacro,
-  getAuthSessionState,
-} from "@/middleware";
-import { userService } from "@/user/service/user.service";
-import {
-  buildRezicsSessionClaims,
-  getMainSessionPublicJwks,
-  mainSessionJwtPlugin,
-} from "./jwt/jwt.service.ts";
+import { getMainSessionPublicJwks } from "./jwt/jwt.service.ts";
 
-export const sessionApi = new Elysia({ prefix: "/session" })
-  .use(mainSessionJwtPlugin)
-  .use(authMacro)
-  .get("/jwks", async () => getMainSessionPublicJwks(), {
+export const sessionApi = new Elysia({ prefix: "/session" }).get(
+  "/jwks",
+  async () => getMainSessionPublicJwks(),
+  {
     detail: {
       summary: "Publish main-server JWKS (legacy)",
       description:
@@ -26,58 +12,5 @@ export const sessionApi = new Elysia({ prefix: "/session" })
       tags: ["Session"],
       deprecated: true,
     },
-  })
-  .post(
-    "/token",
-    async ({ identity, headers, jwt, set }): Promise<SessionTokenResponse> => {
-      const authorization = headers.authorization;
-      if (!authorization) {
-        set.status = 401;
-        throw new Error("Unauthorized: Missing authorization header");
-      }
-
-      let sessionState: Awaited<ReturnType<typeof getAuthSessionState>>;
-      try {
-        sessionState = await getAuthSessionState(authorization, headers.cookie);
-      } catch {
-        set.status = 503;
-        throw new Error(
-          "Service Unavailable: Unable to verify auth session eligibility",
-        );
-      }
-
-      try {
-        assertMainServerEligibility(sessionState);
-      } catch (error) {
-        const message =
-          error instanceof Error ? error.message : "Eligibility check failed";
-        if (message.includes("Unauthorized")) {
-          set.status = 401;
-        } else {
-          set.status = 403;
-        }
-        throw error;
-      }
-
-      const user = await userService.getByUnitId(identity.unitId);
-
-      return {
-        token: await jwt.sign(
-          buildRezicsSessionClaims({
-            unitId: user.unitId,
-            roles: (user.permission as { role?: string[] } | null)?.role,
-          }),
-        ),
-      };
-    },
-    {
-      requireLogin: true,
-      response: sessionTokenResponseSchema,
-      detail: {
-        summary: "Issue main-server session token",
-        description:
-          "Issue the main-server session token after auth identity verification and local user ensure.",
-        tags: ["Session"],
-      },
-    },
-  );
+  },
+);

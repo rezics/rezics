@@ -3,13 +3,7 @@
  * Direct API communication layer
  */
 
-import type {
-  EnsureUserResponse,
-  SessionTokenResponse,
-  UpdateUser,
-  UserDTO,
-} from "@rezics/contract";
-import { NormalizedTokenName } from "@rezics/contract";
+import type { UpdateUser, UserDTO } from "@rezics/contract";
 import { apiFetch } from "../react-query/http";
 
 type FollowSummaryResponse = {
@@ -18,24 +12,6 @@ type FollowSummaryResponse = {
 };
 
 export const userApi = {
-  ensure: async (contextToken: string): Promise<EnsureUserResponse> => {
-    return apiFetch(`/users/ensure`, {
-      includeTokens: [
-        NormalizedTokenName.AUTH_IDENTITY,
-        NormalizedTokenName.REZICS_SESSION,
-      ],
-      headers: {
-        "x-auth-context-token": contextToken,
-      },
-    });
-  },
-
-  issueSessionToken: async (): Promise<SessionTokenResponse> => {
-    return apiFetch(`/session/token`, {
-      method: "POST",
-    });
-  },
-
   me: async (): Promise<UserDTO> => {
     return apiFetch(`/users/me`);
   },

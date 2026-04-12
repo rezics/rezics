@@ -27,7 +27,7 @@ import { NormalizedTokenName } from "@rezics/contract";
 import { useState } from "react";
 
 import { Page } from "@/core/layout/Page";
-import { adminLogout, establishBusinessSession } from "@/user/model/handler";
+import { adminLogout } from "@/user/model/handler";
 
 function formatExpiry(exp?: number) {
   if (!exp) return "N/A";
@@ -159,7 +159,6 @@ function TokenCard({
 function SessionStoreCard() {
   const status = useAuthSessionStore((s) => s.status);
   const hasAuthSession = useAuthSessionStore((s) => s.hasAuthSession);
-  const hasBusinessToken = useAuthSessionStore((s) => s.hasBusinessToken);
   const capabilityLevel = useAuthSessionStore((s) => s.capabilityLevel);
   const needsVerification = useAuthSessionStore((s) => s.needsVerification);
   const needsOnboarding = useAuthSessionStore((s) => s.needsOnboarding);
@@ -170,7 +169,6 @@ function SessionStoreCard() {
   const rows: [string, React.ReactNode][] = [
     ["Hydration Status", status],
     ["Has Auth Session", hasAuthSession ? "Yes" : "No"],
-    ["Has Business Token", hasBusinessToken ? "Yes" : "No"],
     [
       "Capability Level",
       <Chip key="cap" label={capabilityLevel} size="small" />,
@@ -255,17 +253,6 @@ function ActionsCard() {
             ) : null}
             Re-hydrate Session
           </Button>
-          <Button
-            variant="outlined"
-            size="small"
-            disabled={loading !== null}
-            onClick={() => run("Business", establishBusinessSession)}
-          >
-            {loading === "Business" ? (
-              <CircularProgress size={16} sx={{ mr: 1 }} />
-            ) : null}
-            Establish Business Session
-          </Button>
           <Divider orientation="vertical" flexItem />
           <Button
             variant="outlined"
@@ -305,14 +292,6 @@ export default function AuthStatusPage() {
               await queryAccessToken({ requirePresence: false });
             }}
             refreshLabel="Refresh Token"
-          />
-        </Grid>
-        <Grid size={{ xs: 12, md: 6 }}>
-          <TokenCard
-            title="REZICS_SESSION"
-            tokenName={NormalizedTokenName.REZICS_SESSION}
-            onRefresh={establishBusinessSession}
-            refreshLabel="Establish Business Session"
           />
         </Grid>
         <Grid size={{ xs: 12, md: 6 }}>

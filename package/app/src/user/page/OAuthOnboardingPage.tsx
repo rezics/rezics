@@ -10,7 +10,6 @@ import { useTranslation } from "react-i18next";
 import { hydrateAuthSessionState } from "@/user/state";
 import { Layout } from "../layout/Layout";
 import { resolvePostAuthDestination } from "../model/authRedirect";
-import { establishBusinessSession } from "../model/handler";
 import { validateEmail, validatePassword } from "../model/validate";
 import { useAuth } from "./useAuth";
 
@@ -71,14 +70,10 @@ export const OAuthOnboardingPage: FC = () => {
 
       const sessionState = await hydrateAuthSessionState();
       if (sessionState) {
-        if (sessionState.authSession.canAcquireMemberToken) {
-          await establishBusinessSession();
-        }
         navigate({
           to: resolvePostAuthDestination({
             needsOnboarding: sessionState.authSession.needsOnboarding,
             needsVerification: sessionState.authSession.needsEmailVerification,
-            readyForApp: sessionState.authSession.canAcquireMemberToken,
           }),
         });
         return;

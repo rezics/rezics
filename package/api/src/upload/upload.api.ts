@@ -15,10 +15,7 @@ export const uploadApi = {
       credentials: "include",
       headers: {
         ...buildTokenHeaders({
-          include: [
-            NormalizedTokenName.AUTH_IDENTITY,
-            NormalizedTokenName.REZICS_SESSION,
-          ],
+          include: [NormalizedTokenName.AUTH_IDENTITY],
         }),
       },
     });

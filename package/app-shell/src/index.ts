@@ -10,7 +10,7 @@ export {
 } from "./config/dynamicTheme";
 export { getDynamicTheme, getTheme } from "./config/theme";
 export { useAppInit } from "./hook/useAppInit";
-export { AuthProvider, type AuthProviderProps } from "./provider/AuthProvider";
+export { AuthProvider } from "./provider/AuthProvider";
 export { PersistentSettingsLoader } from "./provider/PersistentSettingsLoader";
 export { ReactQueryProvider } from "./provider/ReactQueryProvider";
 export { qc } from "./provider/reactQueryUtil";

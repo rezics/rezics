@@ -1,4 +1,3 @@
-export * from "./context-token";
 export * from "./options";
 export * from "./prisma-adapter";
 export * from "./routes";

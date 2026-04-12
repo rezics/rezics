@@ -16,13 +16,6 @@ export const authSessionStateQuery = () =>
     staleTime: 1000 * 60 * 1,
   });
 
-export const authContextTokenQuery = () =>
-  queryOptions({
-    queryKey: authKeys.contextToken(),
-    queryFn: () => authApi.getContextToken(),
-    staleTime: 1000 * 60,
-  });
-
 export const authProvidersQuery = () =>
   queryOptions({
     queryKey: authKeys.providers(),
@@ -47,7 +40,6 @@ export const authAdminUsersQuery = () =>
 export const authQueries = {
   session: authSessionQuery,
   sessionState: authSessionStateQuery,
-  contextToken: authContextTokenQuery,
   sessions: authSessionsQuery,
   providers: authProvidersQuery,
   adminUsers: authAdminUsersQuery,

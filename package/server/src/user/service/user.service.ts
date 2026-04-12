@@ -20,6 +20,7 @@ export type CreateUserProfileInput = {
 export type ProvisionFromJwtInput = {
   unitId: string;
   slug?: string;
+  name?: string;
 };
 
 export type ProvisionFromAuthContextInput = {
@@ -137,6 +138,7 @@ export class UserService {
     payload: ProvisionFromJwtInput,
   ): Promise<UserWithRelations> {
     const slug = payload.slug?.trim() || payload.unitId;
+    const name = payload.name?.trim() || slug;
 
     const user = await prisma.user.upsert({
       where: { unitId: payload.unitId },
@@ -144,7 +146,7 @@ export class UserService {
       create: {
         unitId: payload.unitId,
         slug,
-        name: slug,
+        name,
         joinDate: new Date(),
       },
       include: userInclude,

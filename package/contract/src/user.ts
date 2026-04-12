@@ -27,20 +27,6 @@ export const userDTOSchema = t.Object({
 
 export type UserDTO = (typeof userDTOSchema)["static"];
 
-export const ensureUserResponseSchema = t.Object({
-  user: userDTOSchema,
-  alreadyCreated: t.Boolean(),
-});
-
-export type EnsureUserResponse = (typeof ensureUserResponseSchema)["static"];
-
-export const sessionTokenResponseSchema = t.Object({
-  token: t.String(),
-});
-
-export type SessionTokenResponse =
-  (typeof sessionTokenResponseSchema)["static"];
-
 export const userListQuerySchema = t.Object({
   q: t.Optional(t.String()),
   email: t.Optional(t.String()),

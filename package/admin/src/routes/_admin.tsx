@@ -6,7 +6,6 @@ import {
 import { NormalizedTokenName } from "@rezics/contract";
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import AdminLayout from "@/core/layout/AdminLayout";
-import { establishBusinessSession } from "@/user/model/handler";
 
 function resolveAttemptedPath(location: any): string {
   if (typeof location?.pathname === "string") {
@@ -29,10 +28,8 @@ export const Route = createFileRoute("/_admin")({
     const token = getToken(NormalizedTokenName.AUTH_IDENTITY);
     const store = useAuthSessionStore.getState();
 
-    // Fresh page load: hydrate session state from server
     if (store.status === "idle" && token) {
       await hydrateAuthSessionState();
-      await establishBusinessSession();
     }
 
     const { hasAuthSession } = useAuthSessionStore.getState();

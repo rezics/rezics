@@ -115,13 +115,17 @@ export const auth = betterAuth({
           user: Record<string, unknown> & {
             id: string;
             slug?: string;
+            name?: string;
             role?: string;
+            emailVerified?: boolean;
           };
         }) => ({
           id: user.id,
           slug: user.slug,
+          name: user.name,
           role: user.role,
           scope: "user",
+          ...(!user.emailVerified ? { email_verified: false } : {}),
         }),
         getSubject: ({ user }: { user: { id: string } }) => user.id,
       },

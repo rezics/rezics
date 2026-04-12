@@ -1,45 +1,13 @@
-import type {
-  AuthIdentityTokenClaims,
-  RezicsSessionTokenClaims,
-  TokenPermissionRole,
-  UserDTO,
-} from "@rezics/contract";
+import type { AuthIdentityTokenClaims, UserDTO } from "@rezics/contract";
 import { BasicAdminPermission, TokenTransportHeader } from "@rezics/contract";
 import { Elysia, status } from "elysia";
 import { mapUserToDTO } from "../user/model/mapper";
 import { userService } from "../user/service/user.service";
+import { cacheUser, getOrFetchUser } from "./user-cache";
 
 interface GlobalTokenContext {
   authIdentityToken: AuthIdentityTokenClaims | null;
-  rezicsSessionToken: RezicsSessionTokenClaims | null;
   headers: Record<string, string | undefined>;
-}
-
-function hasRole(
-  roles: string[] | undefined,
-  role: TokenPermissionRole,
-): boolean {
-  return Boolean(roles?.includes(role));
-}
-
-function matchesSnapshotRole(
-  snapshotRole: TokenPermissionRole,
-  persistedRoles: string[] | undefined,
-): boolean {
-  switch (snapshotRole) {
-    case "ROOT":
-      return hasRole(persistedRoles, "ROOT");
-    case "ADMIN":
-      return (
-        hasRole(persistedRoles, "ROOT") || hasRole(persistedRoles, "ADMIN")
-      );
-    case "USER":
-      return !hasRole(persistedRoles, "BLOCKED");
-    case "BLOCKED":
-      return hasRole(persistedRoles, "BLOCKED");
-    default:
-      return false;
-  }
 }
 
 export const authMacro = new Elysia({ name: "macro/auth" })
@@ -75,47 +43,37 @@ export const authMacro = new Elysia({ name: "macro/auth" })
   .macro("requireOwner", {
     requireLogin: true,
     async resolve(ctx) {
-      const { identity, rezicsSessionToken, headers } = ctx as unknown as {
+      const { identity } = ctx as unknown as {
         identity: { unitId: string } & AuthIdentityTokenClaims;
-        rezicsSessionToken: RezicsSessionTokenClaims | null;
-        headers: Record<string, string | undefined>;
       };
 
-      if (!rezicsSessionToken) {
-        const headerKey = TokenTransportHeader.REZICS_SESSION.toLowerCase();
-        const hadHeader = !!headers[headerKey];
-        return status(
-          401,
-          hadHeader
-            ? "Unauthorized: Session token is invalid or expired"
-            : "Unauthorized: No session token header provided",
-        );
+      let currentUser = getOrFetchUser(identity.unitId);
+
+      if (!currentUser) {
+        const persistedUser = await userService
+          .getByUnitId(identity.unitId)
+          .catch(() => null);
+
+        if (persistedUser) {
+          currentUser = mapUserToDTO(persistedUser);
+        } else {
+          const newUser = await userService.provisionFromJwt({
+            unitId: identity.unitId,
+            slug: identity.slug,
+            name: identity.name,
+          });
+          currentUser = mapUserToDTO(newUser);
+        }
+
+        cacheUser(identity.unitId, currentUser);
       }
 
-      if (rezicsSessionToken.unitId !== identity.unitId) {
-        return status(401, "Unauthorized: Identity and session token mismatch");
-      }
-
-      const persistedUser = await userService.getByUnitId(identity.unitId);
-      const currentUser = mapUserToDTO(persistedUser);
-      const persistedRoles = currentUser.permission?.role;
-
-      if (
-        !matchesSnapshotRole(rezicsSessionToken.permission.role, persistedRoles)
-      ) {
-        return status(
-          403,
-          "Forbidden: Persisted permissions no longer match session",
-        );
-      }
-
-      if (persistedRoles?.includes("BLOCKED")) {
+      if (currentUser.permission?.role?.includes("BLOCKED")) {
         return status(403, "Forbidden: User is blocked");
       }
 
       return {
         identity,
-        session: rezicsSessionToken,
         currentUser,
       };
     },
@@ -123,15 +81,12 @@ export const authMacro = new Elysia({ name: "macro/auth" })
   .macro("requireAdmin", {
     requireOwner: true,
     resolve(ctx) {
-      const { session, currentUser } = ctx as unknown as {
-        session: RezicsSessionTokenClaims;
+      const { currentUser } = ctx as unknown as {
         currentUser: UserDTO;
       };
 
-      if (
-        session.permission.role !== "ROOT" &&
-        session.permission.role !== "ADMIN"
-      ) {
+      const roles = currentUser.permission?.role;
+      if (!roles?.includes("ROOT") && !roles?.includes("ADMIN")) {
         return status(403, "Forbidden: Admin role required");
       }
 
@@ -143,11 +98,11 @@ export const authMacro = new Elysia({ name: "macro/auth" })
   .macro("requireRoot", {
     requireOwner: true,
     resolve(ctx) {
-      const { session } = ctx as unknown as {
-        session: RezicsSessionTokenClaims;
+      const { currentUser } = ctx as unknown as {
+        currentUser: UserDTO;
       };
 
-      if (session.permission.role !== "ROOT") {
+      if (!currentUser.permission?.role?.includes("ROOT")) {
         return status(403, "Forbidden: Root role required");
       }
     },

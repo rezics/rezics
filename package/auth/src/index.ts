@@ -51,8 +51,6 @@ app
         "content-type",
         "authorization",
         "x-internal-auth-token",
-        TokenTransportHeader.AUTH_CONTEXT,
-        TokenTransportHeader.REZICS_SESSION,
         TokenTransportHeader.NOTIFICATION_SESSION,
         TokenTransportHeader.SEARCH_SESSION,
       ],
