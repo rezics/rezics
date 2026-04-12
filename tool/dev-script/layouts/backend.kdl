@@ -15,3 +15,9 @@ tab name="reaction" {
         args "dev"
     }
 }
+
+tab name="notify" {
+    pane command="bun" cwd="../../../package/notify" start_suspended=false {
+        args "dev"
+    }
+}
