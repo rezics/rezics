@@ -48,8 +48,7 @@ export async function adminLogin(email: string, password: string) {
 
   await hydrateAuthSessionState();
 
-  // Fire-and-forget: don't block admin access on business session
-  establishBusinessSession().catch(() => {});
+  await establishBusinessSession();
 
   return { token };
 }

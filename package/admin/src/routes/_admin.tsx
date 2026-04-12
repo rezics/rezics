@@ -32,7 +32,7 @@ export const Route = createFileRoute("/_admin")({
     // Fresh page load: hydrate session state from server
     if (store.status === "idle" && token) {
       await hydrateAuthSessionState();
-      establishBusinessSession().catch(() => {});
+      await establishBusinessSession();
     }
 
     const { hasAuthSession } = useAuthSessionStore.getState();
