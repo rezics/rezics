@@ -81,7 +81,7 @@ export interface BookEditMainPageProps {
 /**
  * BookEditMainPage - updated for new BookDTO with translations layer.
  * Title/description are now in translations[], not top-level fields.
- * isbn -> isbn13, coverUrl -> coverAssetUnitId, author/press/producer -> personCredits/orgCredits.
+ * isbn -> isbn13, author/press/producer -> personCredits/orgCredits.
  */
 export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
   newBook = false,
@@ -152,7 +152,7 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
 
     const updateBookData: UpdateBookInput = {
       isbn13: metadataState?.isbn13,
-      coverAssetUnitId: metadataState?.coverAssetUnitId,
+      coverUrl: metadataState?.coverUrl,
       pageCount: metadataState?.pageCount,
       textLength: metadataState?.textLength,
       formatKey: metadataState?.formatKey,

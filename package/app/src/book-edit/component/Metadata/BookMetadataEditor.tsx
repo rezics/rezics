@@ -19,7 +19,7 @@ import {
 
 /**
  * BookMetadataValue - editing state uses a flat overlay on top of BookDTO.
- * New fields: isbn13, coverAssetUnitId, pageCount, formatKey, publicationDate.
+ * New fields: isbn13, coverUrl, pageCount, formatKey, publicationDate.
  * Title/description come from translations but we expose them as flat fields for editing.
  */
 export type BookMetadataValue = Partial<BookDTO> & {
@@ -81,7 +81,7 @@ export const BookMetadataEditor: React.FC<BookMetadataEditorProps> = ({
   // Resolve current display values from translations or override fields
   const currentTitle = value?._editTitle ?? getBookTitle(value as BookDTO);
   const currentIsbn = value?.isbn13 ?? '';
-  const currentCoverAssetId = value?.coverAssetUnitId ?? '';
+  const currentCoverUrl = value?.coverUrl ?? '';
   const currentPageCount = value?.pageCount ?? '';
   const currentTextLength = value?.textLength ?? '';
 
@@ -99,7 +99,7 @@ export const BookMetadataEditor: React.FC<BookMetadataEditorProps> = ({
         />
       </div>
 
-      {/* ISBN-13 + Cover Asset Unit ID */}
+      {/* ISBN-13 + Cover URL */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-1">
           <Typography variant="body2" component="label" htmlFor="book-isbn">{t("book.fields.isbn")}</Typography>
@@ -115,10 +115,10 @@ export const BookMetadataEditor: React.FC<BookMetadataEditorProps> = ({
           <Typography variant="body2" component="label" htmlFor="book-cover">{t("book.fields.cover_url")}</Typography>
           <input
             id="book-cover"
-            value={currentCoverAssetId}
-            onChange={(e) => onChange?.({ coverAssetUnitId: e.target.value })}
+            value={currentCoverUrl}
+            onChange={(e) => onChange?.({ coverUrl: e.target.value })}
             disabled={disabled}
-            placeholder="Cover asset unit ID"
+            placeholder="https://..."
             className="w-full border-b border-input bg-transparent py-2 text-sm outline-none placeholder:text-muted-foreground focus:border-foreground transition-colors disabled:opacity-50"
           />
         </div>

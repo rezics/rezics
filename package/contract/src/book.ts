@@ -52,7 +52,7 @@ export const bookDTOSchema = t.Object({
   textLength: t.Optional(t.Number()),
   formatKey: t.Optional(t.Nullable(t.String())),
   isLicensed: t.Optional(t.Boolean()),
-  coverAssetUnitId: t.Optional(t.Nullable(t.String())),
+  coverUrl: t.Optional(t.Nullable(t.String())),
   extra: t.Optional(t.Nullable(t.Record(t.String(), t.Any()))),
 
   // Translation layer
@@ -142,7 +142,7 @@ export const createBookSchema = t.Object({
   textLength: t.Optional(t.Number()),
   formatKey: t.Optional(t.String()),
   isLicensed: t.Optional(t.Boolean()),
-  coverAssetUnitId: t.Optional(t.String()),
+  coverUrl: t.Optional(t.String()),
   nsfw: t.Optional(t.Boolean()),
   visibility: t.Optional(t.String()),
   workUnitId: t.Optional(t.String()),
@@ -171,7 +171,7 @@ export const updateBookSchema = t.Object({
   textLength: t.Optional(t.Number()),
   formatKey: t.Optional(t.Nullable(t.String())),
   isLicensed: t.Optional(t.Boolean()),
-  coverAssetUnitId: t.Optional(t.Nullable(t.String())),
+  coverUrl: t.Optional(t.Nullable(t.String())),
   nsfw: t.Optional(t.Boolean()),
   visibility: t.Optional(t.String()),
   extra: t.Optional(t.Nullable(t.Record(t.String(), t.Any()))),

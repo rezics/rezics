@@ -271,7 +271,7 @@ export class BookService {
         textLength: req.textLength ?? 0,
         formatKey: req.formatKey ?? undefined,
         isLicensed: req.isLicensed ?? false,
-        coverAssetUnitId: req.coverAssetUnitId ?? undefined,
+        coverUrl: req.coverUrl ?? undefined,
         extra: (req.extra ?? null) as Prisma.InputJsonValue,
         chapterIndex: {
           create: { index: {} as Prisma.InputJsonValue },
@@ -305,7 +305,7 @@ export class BookService {
         textLength: req.textLength ?? undefined,
         formatKey: req.formatKey,
         isLicensed: req.isLicensed ?? undefined,
-        coverAssetUnitId: req.coverAssetUnitId,
+        coverUrl: req.coverUrl,
         extra: (req.extra ?? undefined) as Prisma.InputJsonValue | undefined,
         unit: {
           update: {

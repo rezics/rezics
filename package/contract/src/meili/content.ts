@@ -43,7 +43,7 @@ export const ContentSearchDocumentSchema = t.Object({
 
   // Result display fields
   defaultLanguage: t.Union([t.String(), t.Null()]),
-  coverAssetUnitId: t.Union([t.String(), t.Null()]),
+  coverUrl: t.Union([t.String(), t.Null()]),
   userId: t.Union([t.String(), t.Null()]),
 
   // Link-specific display fields

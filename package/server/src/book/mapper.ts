@@ -46,7 +46,7 @@ export function mapBaseBookToDTO(book: BookWithRelations): BookDTO {
     textLength: book.textLength,
     formatKey: book.formatKey ?? undefined,
     isLicensed: book.isLicensed,
-    coverAssetUnitId: book.coverAssetUnitId ?? undefined,
+    coverUrl: book.coverUrl ?? undefined,
     extra: (book.extra as Record<string, unknown>) ?? undefined,
 
     // Translation layer

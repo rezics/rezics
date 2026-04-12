@@ -89,23 +89,19 @@ export function getBookSubtitle(
   return tr?.subtitle ?? '';
 }
 
-// MOCK: cover URL from coverAssetUnitId (placeholder until asset service is live)
+// MOCK: fallback cover placeholder
 const MOCK_COVER_PLACEHOLDER =
   'https://m.media-amazon.com/images/I/81wGzzxqHSL._SY466_.jpg';
 
 /**
  * Resolve a cover URL from a BookDTO.
- * Uses coverAssetUnitId when available; falls back to a MOCK placeholder.
+ * Returns coverUrl directly when available; falls back to a MOCK placeholder.
  */
 export function getBookCoverUrl(
   book: BookDTO | null | undefined,
 ): string {
   if (!book) return MOCK_COVER_PLACEHOLDER;
-  // MOCK: when asset service is ready, resolve coverAssetUnitId to a real URL
-  if (book.coverAssetUnitId) {
-    return `/api/assets/${book.coverAssetUnitId}/file`;
-  }
-  return MOCK_COVER_PLACEHOLDER;
+  return book.coverUrl ?? MOCK_COVER_PLACEHOLDER;
 }
 
 /**

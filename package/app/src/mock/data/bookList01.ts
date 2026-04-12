@@ -15,7 +15,7 @@ export const bookList01 = [
     ],
     orgCredits: [],
     tags: [],
-    coverAssetUnitId: null,
+    coverUrl: null,
     isbn13: null,
   },
   {
@@ -33,7 +33,7 @@ export const bookList01 = [
     ],
     orgCredits: [],
     tags: [],
-    coverAssetUnitId: null,
+    coverUrl: null,
     isbn13: null,
   },
 ];

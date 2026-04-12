@@ -32,7 +32,7 @@ export function useHomeBooks(limit = 12): SimpleQueryState<BookDTO> {
       unitId: doc.id,
       title: doc.titles[0] ?? "",
       description: doc.descriptions[0] ?? "",
-      coverAssetUnitId: doc.coverAssetUnitId,
+      coverUrl: doc.coverUrl,
       nsfw: doc.nsfw,
       isLicensed: doc.isLicensed,
       createdAt: doc.createdAt,

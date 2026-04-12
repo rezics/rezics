@@ -63,7 +63,7 @@ export async function seedBooks(
                 "hardcover",
                 "ebook",
               ]),
-              coverAssetUnitId: null,
+              coverUrl: getRandomBookCover(),
               extra: generateBookExtra(),
               chapterIndex: {
                 create: { index: {} as Prisma.InputJsonValue },

@@ -66,7 +66,7 @@ export const BookLibPage: React.FC = () => {
         unitId: item.id,
         title: item.titles[0] ?? "",
         description: item.descriptions[0] ?? "",
-        coverAssetUnitId: item.coverAssetUnitId,
+        coverUrl: item.coverUrl,
         creditNames: item.creditNames,
         type: item.type,
         nsfw: item.nsfw,

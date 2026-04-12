@@ -180,7 +180,7 @@ model Book {
   textLength        Int       @default(0)
   formatKey         String?   @db.VarChar(32)
   isLicensed        Boolean   @default(false)
-  coverAssetUnitId  String?   @db.Uuid
+  coverUrl          String?
 
   extra             Json?
 
@@ -214,7 +214,7 @@ model Game {
   versionLabel      String?
   ageRatingKey      String?   @db.VarChar(32)
   isLicensed        Boolean   @default(false)
-  coverAssetUnitId  String?   @db.Uuid
+  coverUrl          String?
 
   extra             Json?
 
@@ -249,7 +249,7 @@ model Media {
   episodeCount      Int?
   seasonCount       Int?
   isLicensed        Boolean   @default(false)
-  coverAssetUnitId  String?   @db.Uuid
+  coverUrl          String?
 
   extra             Json?
 

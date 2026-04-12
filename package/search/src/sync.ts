@@ -92,7 +92,7 @@ export function buildContentDocument(unit: any): ContentSearchDocument {
   // Type extension fields
   const ext = unit.book ?? unit.game ?? unit.media ?? null;
   const isLicensed = ext?.isLicensed ?? false;
-  const coverAssetUnitId = ext?.coverAssetUnitId ?? null;
+  const coverUrl = ext?.coverUrl ?? null;
 
   // Link-specific fields
   const linkUrl = unit.link?.url ?? null;
@@ -129,7 +129,7 @@ export function buildContentDocument(unit: any): ContentSearchDocument {
         : unit.publishedAt
       : null,
     defaultLanguage: unit.defaultLanguage ?? null,
-    coverAssetUnitId,
+    coverUrl,
     userId: unit.userId ?? null,
     linkUrl,
     linkSiteName,
