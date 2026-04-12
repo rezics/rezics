@@ -66,7 +66,7 @@
 ## 10. Validation
 
 - [x] 10.1 Verify all packages compile (`bun run build` or `tsc --noEmit` in notify, contract, server)
-- [ ] 10.2 Test notification CRUD: create via internal endpoint, list with aggregation, mark read, delete
-- [ ] 10.3 Test SSE stream: connect, receive live notification, heartbeat
-- [ ] 10.4 Test DM flow: server-mediated send, conversation creation, message delivery via WebSocket
-- [ ] 10.5 Test auth: valid JWT accepted, invalid JWT rejected, missing secret rejected
+- [x] 10.2 Test notification CRUD: create via internal endpoint, list with aggregation, mark read, delete
+- [x] 10.3 Test SSE stream: connect, receive live notification, heartbeat
+- [x] 10.4 Test DM flow: server-mediated send, conversation creation, message delivery via WebSocket
+- [x] 10.5 Test auth: valid JWT accepted, invalid JWT rejected, missing secret rejected

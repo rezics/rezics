@@ -1,71 +1,81 @@
-# user-domain-decoupling Specification
+## REMOVED Requirements
 
-## Purpose
-TBD - created by archiving change decouple-user-domain-from-auth. Update Purpose after archive.
-## Requirements
-### Requirement: Server user module contains no identity lifecycle operations
+### Requirement: UserType enum values AUTHOR, PRESS, PRODUCER
 
-The `package/server` user module SHALL NOT contain any code that issues, refreshes, or validates authentication credentials. All identity lifecycle operations (registration, login, logout, password management, email verification, session management) SHALL be handled exclusively by `package/auth`.
+**Reason**: The `UserType` enum values `AUTHOR`, `PRESS`, and `PRODUCER` conflate platform identity with content attribution. An author does not need a REZICS account to be credited on a book. A publisher credited on a book is not a platform user. Attribution is now handled by the independent `Person`/`Organization` entities with `PersonCredit`/`OrgCredit` junction tables using flexible `roleKey` strings.
 
-#### Scenario: Auth routes removed from server
+**Migration**: The `UserType` enum is reduced to contain only `USER` (or removed entirely if the enum becomes single-valued). Existing users with `type = AUTHOR`, `PRESS`, or `PRODUCER` are migrated to `type = USER`. Their attribution data is migrated to `Person`/`Organization` records with corresponding `PersonCredit`/`OrgCredit` entries preserving the original role information.
 
-- GIVEN the server is running with the refactored user module
-- WHEN a client sends `POST /users/register`, `POST /users/login`, `POST /users/refresh-token`, `POST /users/change-password`, `POST /users/reset-password`, `POST /users/send-verification-code`, or `POST /users/verify-verification-code`
-- THEN the server SHALL respond with `404 Not Found` (route does not exist)
+### Requirement: User.authorBook, User.pressBook, User.producerBook relations
 
-#### Scenario: UserService has no auth methods
+**Reason**: The M2M relations `authorBook`, `pressBook`, and `producerBook` on the User model tied book attribution directly to platform accounts. This prevented crediting non-users (deceased authors, foreign publishers) and conflated the concepts of "platform account" and "credited contributor." Attribution is now decoupled via `Person` + `PersonCredit` and `Organization` + `OrgCredit` tables with flexible `roleKey` values (`author`, `translator`, `illustrator`, `publisher`, `developer`, etc.).
 
-- GIVEN the `UserService` class in `user.service.ts`
-- WHEN inspecting its public API
-- THEN it SHALL NOT expose `authenticate()`, `verifyPassword()`, `resetPassword()`, `sendVerificationCode()`, `verifyVerificationCode()`, or `resendVerificationCode()` methods
+**Migration**: For each existing `authorBook` relation, create a `Person` record (if the user does not already have a corresponding Person) and a `PersonCredit` with `roleKey = "author"`. For each `pressBook` relation, create an `Organization` record and an `OrgCredit` with `roleKey = "publisher"`. For each `producerBook` relation, create a `Person` or `Organization` record (based on context) and a credit with `roleKey = "producer"`. The M2M junction tables (`_BookAuthor`, `_BookPress`, `_BookProducer`) are dropped after migration.
 
-#### Scenario: No HMAC JWT plugins in server
+## ADDED Requirements
 
-- GIVEN the server's `coreInstance()` function in `core.ts`
-- WHEN inspecting its plugin chain
-- THEN it SHALL NOT include any `@elysiajs/jwt` plugin registrations
-- AND the Elysia context SHALL NOT include `jwt`, `refreshToken`, or `cookie.refresh_token` properties
+### Requirement: User type field simplified to platform identity only
 
-### Requirement: Server authenticates requests exclusively via JWKS verification
+The User model's `type` field SHALL either contain only the value `USER` or be removed entirely from the schema. The User model SHALL NOT carry any attribution-related type distinctions. A User represents a platform identity — someone who has a REZICS account, can log in, create content, and interact with the platform.
 
-All authenticated server endpoints SHALL validate incoming JWTs using the `verifyBearerToken()` function from `@rezics/auth/jwt`, which performs ES256 JWKS-based verification against the auth service's published key set.
+#### Scenario: Existing AUTHOR user migrated to USER
 
-#### Scenario: Valid auth-issued JWT accepted
+- **WHEN** inspecting a User record that previously had `type = AUTHOR`
+- **THEN** the User's `type` SHALL be `USER` (or the `type` field SHALL not exist)
+- AND the user's authorship credits SHALL be represented as `PersonCredit` records on the relevant units
 
-- GIVEN a JWT issued by `package/auth` with `alg: ES256`, valid `kid`, `iss`, `aud: rezics-api`, `scope: user`, and unexpired `exp`
-- WHEN the JWT is sent in the `Authorization: Bearer <token>` header to any protected endpoint
-- THEN the server SHALL accept the request and extract `unitId` and `slug` from the JWT payload
+#### Scenario: Existing PRESS user migrated to USER
 
-#### Scenario: Expired JWT rejected
+- **WHEN** inspecting a User record that previously had `type = PRESS`
+- **THEN** the User's `type` SHALL be `USER` (or the `type` field SHALL not exist)
+- AND the user's publisher credits SHALL be represented as `OrgCredit` records on the relevant units
 
-- GIVEN a JWT issued by `package/auth` that has expired
-- WHEN the JWT is sent to a protected endpoint
-- THEN the server SHALL respond with `401 Unauthorized`
+#### Scenario: Existing PRODUCER user migrated to USER
 
-#### Scenario: HMAC-signed JWT rejected
+- **WHEN** inspecting a User record that previously had `type = PRODUCER`
+- **THEN** the User's `type` SHALL be `USER` (or the `type` field SHALL not exist)
+- AND the user's production credits SHALL be represented as `PersonCredit` or `OrgCredit` records on the relevant units
 
-- GIVEN a JWT signed with HMAC (HS256) using the old server secret
-- WHEN the JWT is sent to a protected endpoint
-- THEN the server SHALL respond with `401 Unauthorized` because `alg !== ES256`
+#### Scenario: New user creation has no attribution type
 
-### Requirement: Server Prisma schema contains no auth-owned models
+- **WHEN** a new User record is created via lazy provisioning
+- **THEN** the User SHALL have `type = USER` (or no `type` field)
+- AND no attribution-related fields SHALL be set on the User record
 
-The `package/server` Prisma schema SHALL NOT contain models or fields that duplicate data owned by `package/auth`.
+### Requirement: User model has no book-specific relations
 
-#### Scenario: Auth models removed
+The User model SHALL NOT contain `authorBook`, `pressBook`, `producerBook`, or any other content-type-specific attribution relations. The User model's relations SHALL be limited to platform concerns: owned Units (via `Unit.userId`), follows, reactions, API tokens, and similar platform-level associations.
 
-- GIVEN the `package/server/prisma/schema.prisma` file
-- WHEN inspecting the schema
-- THEN it SHALL NOT contain `AuthSession` or `VerificationCode` models
-- AND the `User` model SHALL NOT contain a `passwordHash` field
+#### Scenario: User schema has no book attribution relations
 
-### Requirement: Server has no auth-related dependencies
+- **WHEN** inspecting the User model in the Prisma schema
+- **THEN** it SHALL NOT contain relations named `authorBook`, `pressBook`, or `producerBook`
+- AND no implicit M2M junction tables (`_BookAuthor`, `_BookPress`, `_BookProducer`) SHALL exist in the schema
 
-`package/server/package.json` SHALL NOT list `@elysiajs/jwt`, `@elysiajs/bearer`, `bcrypt`, `@types/bcrypt`, `nodemailer`, or `@types/nodemailer` as dependencies.
+#### Scenario: User still owns units via Unit.userId
 
-#### Scenario: Clean dependency list
+- **WHEN** a User creates a Unit (book, post, shelf, etc.)
+- **THEN** the Unit's `userId` field SHALL reference the creating User's `unitId`
+- AND the User's `Units` relation SHALL include all units where `Unit.userId` matches
 
-- GIVEN `package/server/package.json`
-- WHEN inspecting `dependencies` and `devDependencies`
-- THEN none of the auth-related packages SHALL be present
+#### Scenario: User profile does not expose attribution roles
 
+- **WHEN** a client fetches a User profile via the User API
+- **THEN** the response SHALL NOT include `authorBook`, `pressBook`, or `producerBook` arrays
+- AND attribution information for content the user is credited on SHALL be retrievable through the PersonCredit/OrgCredit query path, not through the User model
+
+### Requirement: User relationship with Unit preserved for ownership tracking
+
+The User model SHALL retain `unitId` as its primary key, maintaining the existing pattern where a User record is associated with a Unit record. The `Unit.userId` field on content units (books, posts, shelves, etc.) SHALL reference the creator's `User.unitId` for ownership and authorization checks. This relationship is unchanged by the unit architecture migration.
+
+#### Scenario: User unitId remains the primary key
+
+- **WHEN** inspecting the User model in the Prisma schema
+- **THEN** the `unitId` field SHALL be the `@id` field of type `String @db.Uuid`
+- AND it SHALL reference a Unit record
+
+#### Scenario: Content ownership queries use Unit.userId
+
+- **WHEN** the system checks whether a user owns a specific Unit
+- **THEN** it SHALL compare `Unit.userId` against the authenticated user's `unitId`
+- AND this check SHALL work identically for all unit types (BOOK, POST, SHELF, REALM, etc.)
