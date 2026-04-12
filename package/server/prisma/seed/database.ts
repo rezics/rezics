@@ -3,6 +3,9 @@ import type { PrismaClient } from "#/prisma/generated/client.js";
 /**
  * Reset database by deleting all data in FK-safe order.
  * Groups at the same FK level are deleted in parallel.
+ *
+ * This wipes everything — run `seed:cross` again afterward
+ * to re-establish infrastructure before mock seeding.
  */
 export async function resetDatabase(prisma: PrismaClient): Promise<void> {
   console.log("[Reset] Resetting database...");
@@ -13,7 +16,6 @@ export async function resetDatabase(prisma: PrismaClient): Promise<void> {
     prisma.feedback.deleteMany(),
     prisma.tagVote.deleteMany(),
     prisma.shelfItemReview.deleteMany(),
-    prisma.reaction.deleteMany(),
     prisma.follow.deleteMany(),
     prisma.personCredit.deleteMany(),
     prisma.orgCredit.deleteMany(),
@@ -21,7 +23,6 @@ export async function resetDatabase(prisma: PrismaClient): Promise<void> {
 
   // Group 2: Aggregate / junction leaves
   await Promise.all([
-    prisma.reactionSummary.deleteMany(),
     prisma.rating.deleteMany(),
     prisma.realmTagUnit.deleteMany(),
   ]);

@@ -2,10 +2,7 @@ import "dotenv/config";
 import type { Prisma } from "#/prisma/client";
 import { prisma } from "#/prisma/client";
 import { resetDatabase } from "#/prisma/seed/database";
-import {
-  seedPeople,
-  seedOrganizations,
-} from "#/prisma/seed/mock/attribution";
+import { seedOrganizations, seedPeople } from "#/prisma/seed/mock/attribution";
 import {
   seedBooks,
   seedChaptersForBook,
@@ -19,7 +16,6 @@ import { seedMedia } from "#/prisma/seed/mock/media";
 import { seedPostsForWorks } from "#/prisma/seed/mock/posts";
 import { seedRealms } from "#/prisma/seed/mock/realms";
 import { seedShelves } from "#/prisma/seed/mock/shelves";
-import { seedContentTypeTags } from "../../../../tool/seed/lib/seed-infra";
 import { seedTags } from "#/prisma/seed/mock/tags";
 import { seedUsers } from "#/prisma/seed/mock/users";
 import { chunkedParallel } from "#/prisma/seed/mock/utils";
@@ -56,10 +52,8 @@ async function main() {
 
   // ── STEP 3: Tags ──────────────────────────────────
   done = stepTimer("Step 3: Tags");
-  const tagMap = await seedContentTypeTags(prisma);
   const tags = await seedTags(prisma, DEFAULT_COUNTS.tags, users);
-  const contentTypeTagCount = Object.keys(tagMap).length;
-  console.log(`[Seed]   ${contentTypeTagCount} content-type tags, ${tags.length} random tags`);
+  console.log(`[Seed]   ${tags.length} random tags`);
   done();
 
   // ── STEP 4: Works (parallel) ──────────────────────
@@ -109,25 +103,21 @@ async function main() {
     if (unit?.userId) bookUnitMap.set(book.id, unit.userId);
   }
 
-  await chunkedParallel(
-    books,
-    5,
-    async (book) => {
-      const userId = bookUnitMap.get(book.id);
-      if (!userId) return;
+  await chunkedParallel(books, 5, async (book) => {
+    const userId = bookUnitMap.get(book.id);
+    if (!userId) return;
 
-      const chapterTree = await seedChaptersForBook(prisma, book.id, userId, {
-        topLevelCount: 2,
-        minChildren: 3,
-        maxChildren: DEFAULT_COUNTS.chaptersPerBook,
-      });
-      await updateChapterIndex(
-        prisma,
-        book.id,
-        chapterTree as unknown as Prisma.InputJsonValue,
-      );
-    },
-  );
+    const chapterTree = await seedChaptersForBook(prisma, book.id, userId, {
+      topLevelCount: 2,
+      minChildren: 3,
+      maxChildren: DEFAULT_COUNTS.chaptersPerBook,
+    });
+    await updateChapterIndex(
+      prisma,
+      book.id,
+      chapterTree as unknown as Prisma.InputJsonValue,
+    );
+  });
   done();
 
   // ── STEP 6: Engagement ────────────────────────────

@@ -38,7 +38,7 @@ export async function seedRealms(
           realm: {
             create: {
               isPublic,
-              isOfficial: randomBoolean(0.1),
+              isOfficial: false,
             },
           },
           translations: {
