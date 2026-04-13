@@ -9,8 +9,8 @@ import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useRef } from "react";
 import { useTranslation } from "react-i18next";
-import { SingleCommentElementWrapper } from "@/comment/component/SingleCommentElementWrapper";
-import { TreeReplyComponents } from "@/comment/component/TreeReplyComponents";
+import { InlinePostForm } from "@/discussion/component/InlinePostForm";
+import { ThreadView } from "@/discussion/component/ThreadView";
 import {
   MiniActionBar,
   MiniAdminActionBar,
@@ -139,14 +139,13 @@ export const QuotePage: React.FC = () => {
             <p className="text-2xl font-bold">{t("review.comments")}</p>
           </div>
 
-          <SingleCommentElementWrapper replyUnitId={unitId || ""}>
-            <IconButton size="large" sx={{ fontSize: "1.5rem" }}>
-              <ChatBubbleOutline fontSize="inherit" />
-            </IconButton>
-          </SingleCommentElementWrapper>
+          <IconButton size="large" sx={{ fontSize: "1.5rem" }}>
+            <ChatBubbleOutline fontSize="inherit" />
+          </IconButton>
         </div>
 
-        <TreeReplyComponents unitId={unitId || ""} />
+        <InlinePostForm targetUnitId={unitId || ""} placeholder="Write a reply..." />
+        <ThreadView rootPostUnitId={unitId || ""} />
         {/* 供评论区占位符 */}
         <div className="mb-[200px]" />
       </div>

@@ -59,7 +59,7 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
   const [startQuote, setStartQuote] = useState<number>(0);
 
   // ======= Shelves (content search with SHELF type) =======
-  // MOCK: using content search as shelf list query until dedicated endpoint exists
+  // Using content search as shelf list query
   const {
     data: shelfDataRaw,
     isLoading: isLoadingShelf,
@@ -148,7 +148,7 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
   } = bookListQueryOpts;
 
   // ======= Reviews / Remarks (content search with POST type) =======
-  // MOCK: using content search for reviews/remarks until dedicated post query is available
+  // Using content search for reviews/remarks
 
   const {
     data: reviewData,
@@ -180,7 +180,7 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
   const isLoadingReviewLike =
     tab === "review" ? isLoadingReview : isLoadingRemark;
 
-  // MOCK: cast content search items to PostDTO shape
+  // Cast content search items to PostDTO shape
   const baseReviews: PostDTO[] = useMemo(
     () => (activeReviewLikeData?.items ?? []) as unknown as PostDTO[],
     [activeReviewLikeData],

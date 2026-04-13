@@ -3,11 +3,13 @@ import type { BookDTO } from "@rezics/contract";
 import { LazyLoadImage } from "@rezics/ui/primitive/image/LazyLoadImage.tsx";
 import { Link } from "@rezics/ui/primitive/link/Link.tsx";
 import type React from "react";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   MiniActionBar,
   MiniAdminActionBar,
 } from "@/engagement/component/MiniActionBar.tsx";
+import { TranslationTabs } from "@/i18n/component/TranslationTabs";
 import {
   getBookAuthorName,
   getBookCoverUrl,
@@ -15,6 +17,7 @@ import {
   getBookTagLabels,
   getBookTitle,
   getPersonCredits,
+  getTranslation,
 } from "@/shared/util/translation-helpers";
 
 type Book = BookDTO;
@@ -46,7 +49,20 @@ export const BookHeroSection: React.FC<{
   rating: number;
 }> = ({ bookInfo, rating }) => {
   const { t } = useTranslation();
-  const title = getBookTitle(bookInfo);
+  const availableLanguages = useMemo(
+    () => (bookInfo?.translations ?? []).map((tr) => tr.language),
+    [bookInfo?.translations],
+  );
+  const [selectedLang, setSelectedLang] = useState(
+    bookInfo?.defaultLanguage ?? availableLanguages[0] ?? "",
+  );
+  const selectedTranslation = getTranslation(
+    bookInfo?.translations,
+    selectedLang,
+    undefined,
+    selectedLang || undefined,
+  );
+  const title = selectedTranslation?.title ?? getBookTitle(bookInfo);
   const coverUrl = getBookCoverUrl(bookInfo);
   const authorName = getBookAuthorName(bookInfo);
   const publisherName = getBookPublisherName(bookInfo);
@@ -76,6 +92,12 @@ export const BookHeroSection: React.FC<{
             <h1 className="text-2xl font-bold break-words">
               {title}
             </h1>
+
+            <TranslationTabs
+              languages={availableLanguages}
+              selected={selectedLang}
+              onChange={setSelectedLang}
+            />
 
             <div className="space-y-1">
               <p>

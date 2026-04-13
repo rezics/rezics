@@ -28,7 +28,7 @@ export const TrendingReviews: React.FC<TrendingReviewsProps> = ({
     contentSearchQueryOptions({ type: "POST", offset: 0, limit }),
   );
 
-  // MOCK: map content search items to PostDTO shape until backend provides a dedicated reviews endpoint
+  // Content search items cast to PostDTO shape (Meilisearch content index)
   const items = useMemo<PostDTO[]>(
     () => (data?.items ?? []) as unknown as PostDTO[],
     [data],

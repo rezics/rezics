@@ -21,7 +21,7 @@ import { reviewEditRoute } from "@/router";
  * Post body replaces review.content; title and rating stored in post.extra.
  */
 
-// MOCK: local editing state with extra fields
+// Local editing state with extra fields
 type ReviewEditState = {
   unitId: string;
   body: string;
@@ -78,9 +78,25 @@ export function ReviewEditPage({
           onChange={(value) => setData({ ...data, body: value })}
           onSubmit={onSubmit}
           onCancel={onCancel}
-          submitLabel={submitLabel}
+          submitLabel={
+            (data.body?.length ?? 0) < 200
+              ? `${200 - (data.body?.length ?? 0)} chars remaining`
+              : submitLabel
+          }
           extraRight={extraActions}
         />
+        <div className="flex justify-between mt-1">
+          <span className="text-xs text-muted-foreground">
+            {data.body?.length ?? 0} / 200 min characters
+          </span>
+          {(data.body?.length ?? 0) < 200 && (
+            <span className="text-xs text-red-500">
+              {t("review.validation.min_chars", {
+                defaultValue: "Reviews must be at least 200 characters",
+              })}
+            </span>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -134,6 +150,13 @@ export function ReviewEditPageContainer() {
     });
 
   function handleSave() {
+    if ((reviewData.body?.length ?? 0) < 200) {
+      show(t("review.validation.min_chars", {
+        defaultValue: "Reviews must be at least 200 characters",
+      }));
+      return;
+    }
+
     if (reviewData._editRating) {
       if (reviewData._editRating > 10 || reviewData._editRating < 0) {
         show(t("review.messages.rating_range_error"));
@@ -141,7 +164,6 @@ export function ReviewEditPageContainer() {
       }
     }
 
-    // MOCK: store title and rating in post.extra
     const input: UpdatePostInput = {
       body: reviewData.body || "",
       extra: {

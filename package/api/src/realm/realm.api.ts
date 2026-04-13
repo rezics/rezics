@@ -20,7 +20,7 @@ import type {
   UpdateRealmInput,
 } from "@rezics/contract";
 import { apiFetch } from "../react-query/http";
-import { getRezicsSessionClaims } from "../react-query/jwt";
+import { getAuthIdentityClaims } from "../react-query/jwt";
 import { buildQueryString } from "../utils/buildQuery";
 import type { RealmFilters } from "./realm.types";
 
@@ -28,6 +28,10 @@ import type { RealmFilters } from "./realm.types";
  * Realm API methods
  */
 export const realmApi = {
+  mine: async (): Promise<RealmListResponse> => {
+    return apiFetch<RealmListResponse>("/realms/me");
+  },
+
   // ---- CRUD ----
 
   /**
@@ -108,7 +112,7 @@ export const realmApi = {
    * Leave a realm
    */
   leave: async (realmUnitId: string): Promise<{ message: string }> => {
-    const claims = getRezicsSessionClaims();
+    const claims = getAuthIdentityClaims();
     if (!claims?.unitId) {
       throw new Error("Cannot leave realm: no active session");
     }

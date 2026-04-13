@@ -1,4 +1,5 @@
 import { bookQueries } from "@rezics/api/book/book";
+import { scoreQueries } from "@rezics/api/score/score";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
 import { useAtomValue, useSetAtom } from "jotai";
@@ -31,15 +32,17 @@ export const BookDetailLayout: React.FC<{ children: React.ReactNode }> = ({
     ...bookQueries.detail(bookId),
     enabled: queriesEnabled,
   });
-  const { data: rating } = useQuery({
-    ...bookQueries.rating(bookId),
+  const { data: scoreAggregates } = useQuery({
+    ...scoreQueries.aggregates(bookId),
     enabled: queriesEnabled,
   });
 
   const ratingValue = useMemo(() => {
-    const average = (rating?.totalScore || 0) / (rating?.totalCount || 1) || 0;
+    const agg = scoreAggregates?.[0];
+    if (!agg || agg.totalCount === 0) return 0;
+    const average = agg.totalScore / agg.totalCount;
     return Number(average.toFixed(1));
-  }, [rating]);
+  }, [scoreAggregates]);
 
   const setBookDetail = useSetAtom(setBookDetailAtomFamily(bookId));
   useEffect(() => {

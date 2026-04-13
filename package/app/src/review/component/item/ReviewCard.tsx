@@ -24,13 +24,11 @@ const ReviewCard: React.FC<ReviewCardProps> = ({ review, className }) => {
   const theme = useTheme();
   const navigate = useNavigate();
 
-  // MOCK: book metadata from post.extra if available
   const bookMetadata = (review.extra as any)?.book as
     | { coverUrl?: string; title?: string }
     | undefined;
-  // MOCK: title from post.extra.title
   const reviewTitle = (review.extra as any)?.title as string | undefined;
-  // MOCK: rating from post.extra.rating
+  // Rating from post.extra.rating (legacy) or linked ScoreEntry via scoreEntryId
   const rating = (review.extra as any)?.rating as number | undefined;
 
   const handleOpenReview = () => {

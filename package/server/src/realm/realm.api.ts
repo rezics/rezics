@@ -28,6 +28,21 @@ const MODERATOR_ROLES = ["owner", "admin", "moderator"];
 export const realmApi = new Elysia({ prefix: "/realms" })
   .use(authMacro)
   .get(
+    "/me",
+    async ({ identity }): Promise<RealmListResponse> => {
+      const { realms, total } = await realmService.listByMember(identity.unitId);
+      return { realms, total };
+    },
+    {
+      requireLogin: true,
+      detail: {
+        summary: "My realms",
+        description: "Get realms where current user is a member",
+        tags: ["Realms"],
+      },
+    },
+  )
+  .get(
     "/:unitId",
     async ({ params }): Promise<RealmDTO> => {
       return realmService.getByUnitId(params.unitId);

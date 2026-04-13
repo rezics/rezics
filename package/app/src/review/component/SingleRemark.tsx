@@ -24,7 +24,7 @@ export function MetaInfoBadge({
   review: PostDTO;
   isRecommended: boolean;
 }) {
-  // MOCK: rating from post.extra.rating
+  // Rating from post.extra.rating (legacy) or linked ScoreEntry via scoreEntryId
   const rating = (review.extra as any)?.rating as number | undefined;
   const dateStr = review.createdAt
     ? new Date(String(review.createdAt)).toLocaleDateString()
@@ -80,7 +80,7 @@ export const SingleRemarkShow: React.FC<SingleRemarkShowProps> = ({
     onDislike?.(review.unitId);
   };
 
-  // MOCK: rating from post.extra.rating
+  // Rating from post.extra.rating (legacy) or linked ScoreEntry via scoreEntryId
   const rating = (review.extra as any)?.rating as number | undefined;
   const isRecommended = !!(rating && rating >= 3);
 

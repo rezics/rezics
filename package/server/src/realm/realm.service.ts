@@ -17,7 +17,7 @@ import {
   mapRealmToDTO,
   mapRealmUnitToDTO,
 } from "./realm.mapper";
-import { realmInclude, realmListSelect } from "./types";
+import { realmInclude, realmListSelect, type RealmWithRelations } from "./types";
 
 export class RealmService {
   private buildWhere(options: RealmListQuery): Prisma.RealmWhereInput {
@@ -287,6 +287,31 @@ export class RealmService {
       },
     });
     await syncContentToMeili(unitId);
+  }
+  async listByMember(
+    userId: string,
+  ): Promise<{ realms: RealmDTO[]; total: number }> {
+    const members = await prisma.realmMember.findMany({
+      where: { userId },
+      select: { realmUnitId: true },
+    });
+
+    const realmIds = members.map((m) => m.realmUnitId);
+    if (realmIds.length === 0) return { realms: [], total: 0 };
+
+    const [realms, total] = await Promise.all([
+      prisma.realm.findMany({
+        where: { unitId: { in: realmIds } },
+        include: realmInclude,
+        orderBy: { unit: { createdAt: "desc" } },
+      }),
+      prisma.realm.count({ where: { unitId: { in: realmIds } } }),
+    ]);
+
+    return {
+      realms: realms.map((r) => mapRealmToDTO(r as RealmWithRelations)),
+      total,
+    };
   }
 }
 

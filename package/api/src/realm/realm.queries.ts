@@ -61,9 +61,17 @@ export const realmInfiniteListQuery = (
 /**
  * Combined query options export
  */
+export const myRealmsQuery = () =>
+  queryOptions({
+    queryKey: realmKeys.mine(),
+    queryFn: () => realmApi.mine(),
+    staleTime: 1000 * 60 * 2,
+  });
+
 export const realmQueries = {
   list: realmListQuery,
   detail: realmDetailQuery,
   search: realmSearchQuery,
   infiniteList: realmInfiniteListQuery,
+  mine: myRealmsQuery,
 };

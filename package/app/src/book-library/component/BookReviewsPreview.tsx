@@ -29,7 +29,7 @@ export const BookReviews: React.FC<BookReviewsProps> = ({
 }) => {
   const { t } = useTranslation();
 
-  // MOCK: fetch posts with kind='review' for this book
+  // Fetch posts with kind='review' for this book
   const { data } = useQuery({
     ...postQueries.byTarget(bookId, { kind: 'review', limit: reviewNumber }),
     enabled: !!bookId,

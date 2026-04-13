@@ -42,6 +42,17 @@ export const tagsForUnitQuery = (
   });
 
 /**
+ * Query options for getting tag context (global tags + realm highlights) for a unit
+ */
+export const tagContextQuery = (unitId: string) =>
+  queryOptions({
+    queryKey: tagKeys.context(unitId),
+    queryFn: () => tagApi.getTagContext(unitId),
+    enabled: !!unitId,
+    staleTime: 1000 * 60 * 5,
+  });
+
+/**
  * Infinite query options for paginated tag list
  */
 export const tagInfiniteListQuery = (filters?: Omit<TagFilters, "page">) =>
@@ -67,5 +78,6 @@ export const tagQueries = {
   list: tagListQuery,
   detail: tagDetailQuery,
   forUnit: tagsForUnitQuery,
+  context: tagContextQuery,
   infiniteList: tagInfiniteListQuery,
 };

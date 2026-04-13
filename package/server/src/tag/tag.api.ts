@@ -18,6 +18,7 @@ import {
 import { Elysia } from "elysia";
 import { authMacro } from "@/middleware";
 import { mapTagUnitToDTO, mapUnitTagToDTO } from "./tag.mapper";
+import { getTagContext } from "./tag-context.service";
 import { tagService } from "./tag.service";
 
 export const tagApi = new Elysia({ prefix: "/tags" })
@@ -149,6 +150,23 @@ export const tagApi = new Elysia({ prefix: "/tags" })
       requireLogin: true,
       body: castTagVoteSchema,
       detail: { summary: "Cast tag vote", tags: ["Tags"] },
+    },
+  )
+
+  // GET /for-unit/:unitId/context - get tag context for a unit
+  .get(
+    "/for-unit/:unitId/context",
+    async ({ params, identity }) => {
+      return getTagContext(params.unitId, identity?.unitId);
+    },
+    {
+      params: tagParamsSchema,
+      detail: {
+        summary: "Get tag context for a unit",
+        description:
+          "Get global tags and realm-specific tag highlights for a unit",
+        tags: ["Tags"],
+      },
     },
   )
 

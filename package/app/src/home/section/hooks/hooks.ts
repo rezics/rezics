@@ -45,7 +45,7 @@ export function useHomeBooks(limit = 12): SimpleQueryState<BookDTO> {
   return { items, total, isLoading, error };
 }
 
-// MOCK: shelves from content search - returns shelf-type content docs
+// Shelves from content search - returns shelf-type content docs
 export function useHomeShelves(limit = 6): SimpleQueryState<ShelfDTO> {
   const { data, isLoading, error } = useQuery({
     queryKey: ["home", "content", "shelves", { limit }],
@@ -76,7 +76,7 @@ type QuoteListResponse = {
   total?: number;
 };
 
-// MOCK: quotes are not in the content index (type QUOTE not indexed)
+// Quotes are not in the content index (type QUOTE not indexed)
 // This returns empty results until a quote search mechanism is implemented
 export function useHomeQuotes(limit = 6): SimpleQueryState<QuoteDTO> {
   const items = useMemo<QuoteDTO[]>(() => [], []);

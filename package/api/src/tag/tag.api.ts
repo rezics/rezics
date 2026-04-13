@@ -105,6 +105,22 @@ export const tagApi = {
   },
 
   /**
+   * Get tag context (global tags + realm highlights) for a unit
+   */
+  getTagContext: async (
+    unitId: string,
+  ): Promise<{
+    tags: { tagUnitId: string; score: number; label: string }[];
+    realmHighlights: {
+      realmUnitId: string;
+      realmName: string;
+      tags: string[];
+    }[];
+  }> => {
+    return apiFetch(`/tags/for-unit/${unitId}/context`);
+  },
+
+  /**
    * Get scored tags for a specific unit
    */
   getForUnit: async (

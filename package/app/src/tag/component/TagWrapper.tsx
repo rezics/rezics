@@ -1,5 +1,5 @@
 import type { UnitTagDTO } from "@rezics/contract";
-import { tagQueries } from "@rezics/api/tag/tag";
+import { tagContextQuery, tagQueries } from "@rezics/api/tag/tag";
 import type { TagFilters } from "@rezics/api/tag/tag";
 import { MUILink } from "@rezics/ui/primitive/link/MUILink.tsx";
 import { useQuery } from "@tanstack/react-query";
@@ -8,6 +8,7 @@ import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useIsMobile } from "@/shared/util/use-media-query";
+import { RealmTagHighlights } from "./RealmTagHighlights";
 import TagList from "./TagList";
 
 type Mode = "flat" | "grouped";
@@ -36,6 +37,16 @@ export const TagWrapper: React.FC<TagWrapperProps> = ({
   const tags: UnitTagDTO[] = useMemo(() => data?.tags ?? [], [data]);
   const isMobile = useIsMobile();
 
+  const unitId = filters?.unitId;
+  const { data: contextData } = useQuery({
+    ...tagContextQuery(unitId ?? ""),
+    enabled: !!unitId,
+  });
+  const realmHighlights = useMemo(
+    () => contextData?.realmHighlights ?? [],
+    [contextData],
+  );
+
   if (isLoading) {
     return (
       <div className={className}>
@@ -61,6 +72,7 @@ export const TagWrapper: React.FC<TagWrapperProps> = ({
   return (
     <div className={className}>
       <TagList tags={tags} />
+      <RealmTagHighlights realmHighlights={realmHighlights} />
     </div>
   );
 };

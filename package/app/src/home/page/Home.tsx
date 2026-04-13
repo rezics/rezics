@@ -5,7 +5,9 @@ import { HomeSearch } from "@/search";
 import { cn } from "@/shared/util/css-util";
 import { useIsMobile } from "@/shared/util/use-media-query";
 import { BookCarousel } from "../component/HomeCarousel";
+import { ActiveRealmsSection } from "../section/ActiveRealmsSection";
 import { AnnouncementBarSection } from "../section/AnnouncementBarSection";
+import { LibraryCardsSection } from "../section/LibraryCardsSection";
 import { NewBookSection } from "../section/NewBookSection";
 import { QuickAccessLinks } from "../section/QuickAccessLinks";
 import { TrendingBookSection } from "../section/TrendingBookSection";
@@ -52,6 +54,14 @@ export const Home: React.FC<HomeProps> = () => {
           </div>
         </Paper>
       </section>
+
+      <Paper sx={{ mt: 2, p: 2 }}>
+        <LibraryCardsSection />
+      </Paper>
+
+      <Paper sx={{ mt: 2, p: 2 }}>
+        <ActiveRealmsSection />
+      </Paper>
 
       <Paper sx={{ mt: 2 }}>
         <AnnouncementBarSection />

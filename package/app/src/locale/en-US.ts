@@ -415,6 +415,22 @@ export default {
     },
   },
 
+  // Realm
+  realm: {
+    title: "Realms",
+    search: "Search Realms",
+    new_realm: "New Realm",
+    manage: "Manage Realm",
+    join: "Join",
+    leave: "Leave",
+    members: "Members",
+    feed: "Feed",
+    tags: "Tags",
+    public: "Public",
+    official: "Official",
+    no_realms: "No realms found",
+  },
+
   // Review
   review: {
     hot: "Hot reviews",

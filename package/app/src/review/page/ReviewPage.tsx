@@ -13,11 +13,11 @@ import { AccentBar } from "@rezics/ui/primitive/decorative/AccentBar.tsx";
 import { MUILink } from "@rezics/ui/primitive/link/MUILink.tsx";
 import { useQuery } from "@tanstack/react-query";
 import { useMatchRoute } from "@tanstack/react-router";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { BookListViewItem } from "@/book-library/component/BookList/BookListView";
-import { SingleCommentElementWrapper } from "@/comment/component/SingleCommentElementWrapper.tsx";
-import TreeReplyComponents from "@/comment/component/TreeReplyComponents";
+import { InlinePostForm } from "@/discussion/component/InlinePostForm";
+import { ThreadView } from "@/discussion/component/ThreadView";
 import {
   MiniActionBar,
   MiniAdminActionBar,
@@ -25,10 +25,6 @@ import {
 import { ReactionStatistics } from "@/engagement/component/ReactionStatistics.tsx";
 import { parseReactionSummaries } from "@/shared/util/reaction-summaries-parser";
 
-/**
- * ReviewPage - now uses PostDTO instead of ReviewDTO.
- * Uses postQueries.detail() instead of reviewQueries.detail().
- */
 export function ReviewPage() {
   const matchRoute = useMatchRoute();
   const reviewParams = matchRoute({ to: "/review/$reviewId", fuzzy: false });
@@ -44,8 +40,7 @@ export function ReviewPage() {
     error,
   } = useQuery(postQueries.detail(reviewId || ""));
 
-  // MOCK: targetUnitId on the post references the book
-  const bookUnitId = review?.targetUnitId ?? '';
+  const bookUnitId = review?.targetUnitId ?? "";
   const {
     data: book,
     isLoading: bookLoading,
@@ -55,11 +50,12 @@ export function ReviewPage() {
     enabled: !!bookUnitId,
   });
 
-  // MOCK: rating and title from post.extra
+  // Rating from post.extra.rating (legacy) or linked ScoreEntry via scoreEntryId
   const rating = (review?.extra as any)?.rating as number | undefined;
   const reviewTitle = (review?.extra as any)?.title as string | undefined;
 
   const commentRef = useRef<HTMLDivElement>(null);
+  const [showReplyForm, setShowReplyForm] = useState(false);
   const handleGoToComments = () => {
     commentRef.current?.scrollIntoView({
       behavior: "smooth",
@@ -81,7 +77,7 @@ export function ReviewPage() {
 
   const dateStr = review.createdAt
     ? new Date(String(review.createdAt)).toLocaleDateString()
-    : '';
+    : "";
 
   return (
     <div className="w-11/12 mx-auto mt-10 max-w-4xl">
@@ -174,7 +170,7 @@ export function ReviewPage() {
           />
         </div>
 
-        {/* Comments */}
+        {/* Comments / Replies */}
         <div ref={commentRef} className="mt-5">
           <div className="flex items-center justify-between w-full">
             <div className="flex items-center gap-2">
@@ -182,14 +178,26 @@ export function ReviewPage() {
               <p className="text-2xl font-bold">{t("review.comments")}</p>
             </div>
 
-            <SingleCommentElementWrapper replyUnitId={review.unitId || ""}>
-              <IconButton size="large" sx={{ fontSize: "1.5rem" }}>
-                <ChatBubbleOutline fontSize="inherit" />
-              </IconButton>
-            </SingleCommentElementWrapper>
+            <IconButton
+              size="large"
+              sx={{ fontSize: "1.5rem" }}
+              onClick={() => setShowReplyForm(!showReplyForm)}
+            >
+              <ChatBubbleOutline fontSize="inherit" />
+            </IconButton>
           </div>
 
-          <TreeReplyComponents unitId={review.unitId || ""} />
+          {showReplyForm && (
+            <Box mb={2}>
+              <InlinePostForm
+                targetUnitId={review.unitId}
+                placeholder="Write a reply..."
+                onSuccess={() => setShowReplyForm(false)}
+              />
+            </Box>
+          )}
+
+          <ThreadView rootPostUnitId={review.unitId} />
           <div className="mb-[200px]" />
         </div>
       </div>

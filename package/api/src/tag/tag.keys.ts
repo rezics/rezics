@@ -19,6 +19,10 @@ export const tagKeys = {
   forUnit: (unitId: string) =>
     [...tagKeys.all(), "forUnit", unitId] as const,
 
+  // tag context (global tags + realm highlights)
+  context: (unitId: string) =>
+    [...tagKeys.all(), "context", unitId] as const,
+
   // votes
   votes: () => [...tagKeys.all(), "votes"] as const,
 } as const;

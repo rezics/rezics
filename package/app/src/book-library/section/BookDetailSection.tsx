@@ -8,7 +8,7 @@ import { useTranslation } from "react-i18next";
 
 import { BookDetailSidebar } from "../component/BookDetail/BookDetailSidebar";
 
-const TAB_ROUTES = ["info", "review", "content"] as const;
+const TAB_ROUTES = ["info", "content", "review", "discussion"] as const;
 
 function useActiveTabIndex(): number {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
@@ -46,8 +46,9 @@ export const BookDetailShell: React.FC<BookDetailShellProps> = ({
           <Grid size={{ xs: 12, lg: 9 }}>
             <Tabs value={activeTab} onChange={handleTabChange}>
               <Tab label={t("page.book.tabs.info")} />
-              <Tab label={t("page.book.tabs.reviews")} />
               <Tab label={t("page.book.tabs.toc")} />
+              <Tab label={t("page.book.tabs.reviews")} />
+              <Tab label="Discussion" />
             </Tabs>
 
             <Box sx={{ p: 3 }}>{children}</Box>

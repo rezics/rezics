@@ -11,19 +11,37 @@ import type {
   UnitTranslationDTO,
 } from '@rezics/contract';
 
-// MOCK: default language fallback chain
 const DEFAULT_LANGUAGE_CHAIN = ['zh-CN', 'zh', 'en', 'ja'] as const;
+
+/**
+ * Get the user's preferred languages from settings.
+ * Returns empty array as placeholder — will be wired to User.settings.preferredLanguages.
+ */
+export function getUserPreferredLanguages(): string[] {
+  return [];
+}
 
 /**
  * Resolve the best translation from a translations array.
  * Falls back through the language chain, then to the first available entry.
+ *
+ * @param translations - Array of available translations
+ * @param language - Preferred language code (highest priority)
+ * @param fallbackChain - Ordered list of fallback language codes
+ * @param explicitLanguage - If provided, only return an exact match for this language (no fallback)
  */
 export function getTranslation(
   translations: UnitTranslationDTO[] | undefined | null,
   language?: string,
   fallbackChain: readonly string[] = DEFAULT_LANGUAGE_CHAIN,
+  explicitLanguage?: string,
 ): UnitTranslationDTO | undefined {
   if (!translations || translations.length === 0) return undefined;
+
+  // Explicit language: return exact match only, no fallback
+  if (explicitLanguage) {
+    return translations.find((t) => t.language === explicitLanguage);
+  }
 
   // Exact match
   if (language) {
@@ -89,7 +107,7 @@ export function getBookSubtitle(
   return tr?.subtitle ?? '';
 }
 
-// MOCK: fallback cover placeholder
+// Fallback cover placeholder image
 const MOCK_COVER_PLACEHOLDER =
   'https://m.media-amazon.com/images/I/81wGzzxqHSL._SY466_.jpg';
 

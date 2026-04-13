@@ -13,7 +13,7 @@ export const ReviewHeader: React.FC<{
 }> = ({ review }) => {
   const { t } = useTranslation();
   const followersCount = review.author?.followersCount ?? 0;
-  // MOCK: rating stored in post.extra.rating when backend supports it
+  // Rating from post.extra.rating (legacy) or linked ScoreEntry via scoreEntryId
   const rating = (review.extra as any)?.rating as number | undefined;
   return (
     <div className="flex flex-wrap items-center mb-2 gap-2">

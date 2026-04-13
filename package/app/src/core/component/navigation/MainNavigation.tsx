@@ -2,6 +2,7 @@
 
 import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
 import ArticleOutlinedIcon from "@mui/icons-material/ArticleOutlined";
+import GroupsOutlinedIcon from "@mui/icons-material/GroupsOutlined";
 import DashboardOutlinedIcon from "@mui/icons-material/DashboardOutlined";
 import ErrorOutlineOutlinedIcon from "@mui/icons-material/ErrorOutlineOutlined";
 import FeedbackOutlinedIcon from "@mui/icons-material/FeedbackOutlined";
@@ -56,6 +57,12 @@ export const NAVIGATION = (isAdmin = false): NavigationItem[] => {
       segment: "/review",
       title: "Reviews",
       icon: RateReviewOutlinedIcon,
+    },
+    {
+      kind: "item",
+      segment: "/realm",
+      title: "Realms",
+      icon: GroupsOutlinedIcon,
     },
     {
       kind: "item",

@@ -11,6 +11,7 @@ import {
   getBookAuthorName,
   getBookDescription,
 } from "@/shared/util/translation-helpers";
+import { WorkReleaseNav } from "@/i18n/component/WorkReleaseNav";
 import { TagWrapper } from "@/tag/component/TagWrapper.tsx";
 import { AuthorInfo } from "../component/AuthorInfo";
 import { BookDescription } from "../component/BookDescription";
@@ -62,6 +63,16 @@ export const BookBasicInfoPage: React.FC = () => {
 
         <AuthorInfo author={authorUser} />
         <Divider />
+
+        {bookInfo?.workUnitId && (
+          <>
+            <WorkReleaseNav
+              workUnitId={bookInfo.workUnitId}
+              currentBookId={bookInfo.unitId}
+            />
+            <Divider />
+          </>
+        )}
 
         <div>
           <ArrowForwardIcon size={16} to={`/quote/book/${bookInfo?.unitId}`}>

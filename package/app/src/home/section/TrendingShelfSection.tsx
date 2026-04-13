@@ -24,7 +24,7 @@ export const TrendingShelfSection: React.FC<TrendingShelfSectionProps> = ({
     contentSearchQueryOptions({ type: "SHELF", offset: 0, limit }),
   );
 
-  // MOCK: map content search items to ShelfDTO shape until backend provides a dedicated shelves endpoint
+  // Content search items cast to ShelfDTO shape (Meilisearch content index)
   const items = useMemo<ShelfDTO[]>(
     () => (data?.items ?? []) as unknown as ShelfDTO[],
     [data],

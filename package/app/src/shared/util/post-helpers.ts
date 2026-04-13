@@ -1,9 +1,9 @@
 import { postApi } from "@rezics/api/post/post";
-import type { PostDTO, CreatePostInput, UpdatePostInput } from "@rezics/contract";
+import type { PostDTO, CreatePostInput } from "@rezics/contract";
+import { PostKind } from "@rezics/contract";
 
 /**
- * Submit a comment or reply using the Post API.
- * Comments are Posts with kind='comment'.
+ * Submit a post or reply using the Post API.
  */
 export const handleSubmit = async (
   currentReplyId: string,
@@ -16,24 +16,22 @@ export const handleSubmit = async (
     throw new Error("content is required");
   }
 
-  // Determine whether currentReplyId is a post id or a target unit id.
   let targetUnitId = currentReplyId;
   let parentPostUnitId: string | undefined;
   try {
     const maybePost = await postApi.get(currentReplyId);
     if (maybePost.targetUnitId) {
-      // This is a reply to another post
       targetUnitId = maybePost.targetUnitId;
       parentPostUnitId = currentReplyId;
     }
   } catch {
-    // If fetch fails, treat currentReplyId as a target unit id (top-level comment)
+    // If fetch fails, treat currentReplyId as a target unit id (top-level post)
   }
 
   const input: CreatePostInput = {
     targetUnitId,
     parentPostUnitId,
-    kind: 'comment',
+    kind: PostKind.POST,
     body: content,
   };
   return postApi.create(input);
