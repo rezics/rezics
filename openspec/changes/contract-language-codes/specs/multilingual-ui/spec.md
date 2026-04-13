@@ -1,0 +1,108 @@
+## MODIFIED Requirements
+
+### Requirement: Homepage sections use i18n for all UI strings
+
+All homepage section components SHALL use `react-i18next` `useTranslation()` for UI strings. No section component SHALL contain hardcoded Chinese or English display text. Section titles, action labels ("More"), loading states, empty states, and tab labels SHALL be resolved from locale translation keys.
+
+#### Scenario: NewBookSection renders in user's UI language
+
+- **WHEN** the homepage loads with UI language set to "en"
+- **THEN** NewBookSection SHALL display "Latest Works" (not "最新作品"), tab labels "Latest Serial" / "New on Shelf" / "Recently Completed", and "More" (not "更多 →")
+
+#### Scenario: TrendingBookSection renders in user's UI language
+
+- **WHEN** the homepage loads with UI language set to "en"
+- **THEN** TrendingBookSection SHALL display "Trending Books" (not "趋势好书") and "More" (not "更多 →")
+
+#### Scenario: ActiveRealmsSection renders in user's UI language
+
+- **WHEN** the homepage loads with UI language set to "zh-hant"
+- **THEN** ActiveRealmsSection SHALL display the Chinese translation for "Active Realms" and "More"
+
+#### Scenario: LibraryCardsSection renders in user's UI language
+
+- **WHEN** the homepage loads with UI language set to "ja"
+- **THEN** LibraryCardsSection SHALL display Japanese translations for "Book Library", "Game Library", "Media Library", and "Coming Soon"
+
+### Requirement: Search components use i18n for all UI strings
+
+SearchFilter and SearchInput components SHALL use `react-i18next` for all sort labels, filter labels, placeholder text, and preset tag labels. No search component SHALL contain hardcoded Chinese or English display text.
+
+#### Scenario: SearchFilter renders sort options in user's UI language
+
+- **WHEN** the search page loads with UI language set to "en"
+- **THEN** sort options SHALL display "Relevance", "Latest", "Total Favorites", "Word Count", "Monthly Votes" (not Chinese equivalents)
+- **AND** order buttons SHALL display "Descending" / "Ascending" (not "降序" / "升序")
+
+#### Scenario: SearchInput renders placeholder in user's UI language
+
+- **WHEN** the search page loads with UI language set to "zh-hant"
+- **THEN** the search placeholder SHALL display the Chinese translation for "Title, ISBN, Author, Publisher, Producer"
+- **AND** filter labels ("Tags", "Word Count") SHALL display in Chinese
+
+### Requirement: All five locale files contain keys for homepage and search strings
+
+Translation keys for homepage sections and search components SHALL exist in all five locale files: `en.ts`, `zh-hant.ts`, `zh-hans.ts`, `de.ts`, and `ja.ts`. Missing native translations SHALL use English as a placeholder.
+
+#### Scenario: en locale has complete homepage section keys
+
+- **WHEN** the `en.ts` locale file is loaded
+- **THEN** it SHALL contain keys under `page.home.section` for all section titles, action labels, tab labels, loading states, and empty states
+
+#### Scenario: zh-hant locale has complete homepage section keys
+
+- **WHEN** the `zh-hant.ts` locale file is loaded
+- **THEN** it SHALL contain keys under `page.home.section` matching the same key structure as `en.ts` with Traditional Chinese translations
+
+### Requirement: Homepage book content renders in user's preferred content language
+
+Book titles and descriptions displayed in homepage sections (NewBookSection, TrendingBookSection) SHALL be resolved using the `getBookTitle()` and `getBookDescription()` translation helpers, which apply the user's preferred language fallback chain. Content SHALL NOT display as empty strings.
+
+#### Scenario: Book title renders from search result translations
+
+- **WHEN** a homepage book card receives a DTO with `translations: [{ language: "zh-hant", title: "書名" }, { language: "en", title: "Title" }]`
+- **AND** the user's fallback chain resolves to "en"
+- **THEN** the book card SHALL display "Title"
+
+#### Scenario: Book title falls back when preferred language unavailable
+
+- **WHEN** a homepage book card receives a DTO with `translations: [{ language: "zh-hant", title: "書名" }]`
+- **AND** the user's preferred language is "de"
+- **THEN** the book card SHALL fall back to `en` (not found), then to first available, and display "書名" rather than an empty string
+
+## ADDED Requirements
+
+### Requirement: i18n resource keys use canonical language codes
+
+The react-i18next resource configuration SHALL use canonical language codes (`zh-hant`, `zh-hans`, `en`, `ja`, `de`) as resource keys. Locale files SHALL be named using canonical codes (e.g., `zh-hant.ts`, `en.ts`).
+
+#### Scenario: i18n resources registered with canonical keys
+
+- **WHEN** the i18n provider initializes
+- **THEN** resource keys SHALL be `'zh-hant'`, `'zh-hans'`, `'en'`, `'ja'`, `'de'`
+- **AND** no resource key SHALL use legacy codes (`zh-SC`, `zh-TC`, `en-US`, `ja-JP`, `de-DE`)
+
+#### Scenario: Default language is zh-hant
+
+- **WHEN** the i18n provider initializes without a persisted language preference
+- **THEN** the active language SHALL be `'zh-hant'`
+
+#### Scenario: Fallback language is en
+
+- **WHEN** a translation key is missing in the active locale
+- **THEN** the system SHALL fall back to the `'en'` locale
+
+### Requirement: Language toggle uses canonical codes
+
+The LangToggle component SHALL use canonical language codes when calling `i18n.changeLanguage()`. Display labels SHALL use native language names from `LANGUAGE_META`.
+
+#### Scenario: User switches to Traditional Chinese
+
+- **WHEN** the user selects Traditional Chinese from the language toggle
+- **THEN** `i18n.changeLanguage('zh-hant')` SHALL be called
+- **AND** the menu item SHALL display "繁體中文"
+
+#### Scenario: User switches to English
+
+- **WHEN** the user selects English from the language toggle
+- **THEN** `i18n.changeLanguage('en')` SHALL be called
