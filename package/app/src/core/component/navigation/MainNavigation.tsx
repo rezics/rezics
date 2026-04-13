@@ -47,8 +47,8 @@ export const NAVIGATION = (isAdmin = false): NavigationItem[] => {
     },
     {
       kind: "item",
-      segment: "/readlist",
-      title: "Read Lists",
+      segment: "/shelf",
+      title: "Shelves",
       icon: ListAltOutlinedIcon,
     },
     {
@@ -80,8 +80,8 @@ export const NAVIGATION = (isAdmin = false): NavigationItem[] => {
     },
     {
       kind: "item",
-      title: "New Read List",
-      segment: "/readlist/new",
+      title: "New Shelf",
+      segment: "/shelf/new",
       icon: PlaylistAddOutlinedIcon,
     },
   ];

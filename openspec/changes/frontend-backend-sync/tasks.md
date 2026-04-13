@@ -1,60 +1,60 @@
 ## 1. Contract Foundation (PostKind + UnitType Cleanup)
 
-- [ ] 1.1 Add `PostKind` typed const enum to `package/contract/src/post.ts` with values `REVIEW`, `REMARK`, `QUOTE`, `POST`. Export the type and the const object.
-- [ ] 1.2 Update `postDTOSchema.kind` from `t.Optional(t.String())` to `t.Optional(t.Nullable(t.Union([t.Literal("REVIEW"), t.Literal("REMARK"), t.Literal("QUOTE"), t.Literal("POST")])))` in `package/contract/src/post.ts`.
-- [ ] 1.3 Update `createPostSchema.kind` from `t.Optional(t.String())` to `t.Optional(t.Union([...PostKind literals]))` in `package/contract/src/post.ts`.
-- [ ] 1.3a Add `scoreEntryId: t.Optional(t.Nullable(t.String()))` to `postDTOSchema` in `package/contract/src/post.ts`.
-- [ ] 1.3b Add `scoreEntryId: t.Optional(t.String())` to `createPostSchema` in `package/contract/src/post.ts`.
-- [ ] 1.3c Update `mapPostToDTO()` in `package/server/src/post/post.mapper.ts` to include `scoreEntryId: post.scoreEntryId ?? null`.
-- [ ] 1.3d Update `postService.create()` in `package/server/src/post/post.service.ts` to accept and pass `scoreEntryId` in the `createData` object.
-- [ ] 1.3e Fix `bookApi.getRating()` in `package/api/src/book/book.api.ts` — replace stale local `Rating` type (lines 17-23) with `ScoreAggregateDTO[]` from `@rezics/contract`. Update `bookRatingQuery` return type in `book.queries.ts`.
-- [ ] 1.4 Remove `COMMENT` from the `PostKind` Prisma enum in `package/server/prisma/schema.prisma`. Create migration with `bun run prisma:migrate` in `package/server`.
-- [ ] 1.5 Delete empty contract stubs: `package/contract/src/comment.ts`, `package/contract/src/review.ts`, `package/contract/src/readlist.ts`.
-- [ ] 1.6 Remove re-exports of deleted stubs from `package/contract/src/index.ts` (remove `export * from "./comment"`, `export * from "./review"` — note: `readlist.ts` was not exported).
-- [ ] 1.7 Delete dead server domain `package/server/src/comment/` (all files: `comment.api.ts`, `comment.service.ts`, `mapper.ts`, `types.ts`, `sql.ts`, `index.ts`).
-- [ ] 1.8 Remove comment domain mount from `package/server/src/index.ts` (remove `.use()` for comment routes if present).
-- [ ] 1.9 Update `package/app/src/shared/util/build-url.ts`: remove `REVIEW` and `READLIST` cases, add `SHELF` → `/shelf/${unit.id}`, update `POST` routing to use kind-based logic.
-- [ ] 1.10 Fix `package/app/src/user/page/UserUnitsPage.tsx`: remove references to `UnitType.COMMENT`, `UnitType.NOTE`. Replace with PostKind-based filtering or remove dead branches.
-- [ ] 1.11 Fix `package/app/src/unit/page/UnitsPage.tsx`: remove references to non-existent UnitType values.
-- [ ] 1.12 Fix `package/app/src/review/page/ReviewsPage.tsx`: replace `UnitType.POST` kind references with `PostKind.REVIEW` / `PostKind.REMARK`.
-- [ ] 1.13 Grep entire `package/app/src/` for remaining references to `UnitType.COMMENT`, `UnitType.NOTE`, `"REVIEW"` (as UnitType), `"READLIST"` (as UnitType) and fix all occurrences.
-- [ ] 1.14 Run `bun run build` in `package/contract` and `package/server` to verify compilation. Run `bun run app:dev` to verify frontend compilation with no import errors.
+- [x] 1.1 Add `PostKind` typed const enum to `package/contract/src/post.ts` with values `REVIEW`, `REMARK`, `QUOTE`, `POST`. Export the type and the const object.
+- [x] 1.2 Update `postDTOSchema.kind` from `t.Optional(t.String())` to `t.Optional(t.Nullable(t.Union([t.Literal("REVIEW"), t.Literal("REMARK"), t.Literal("QUOTE"), t.Literal("POST")])))` in `package/contract/src/post.ts`.
+- [x] 1.3 Update `createPostSchema.kind` from `t.Optional(t.String())` to `t.Optional(t.Union([...PostKind literals]))` in `package/contract/src/post.ts`.
+- [x] 1.3a Add `scoreEntryId: t.Optional(t.Nullable(t.String()))` to `postDTOSchema` in `package/contract/src/post.ts`.
+- [x] 1.3b Add `scoreEntryId: t.Optional(t.String())` to `createPostSchema` in `package/contract/src/post.ts`.
+- [x] 1.3c Update `mapPostToDTO()` in `package/server/src/post/post.mapper.ts` to include `scoreEntryId: post.scoreEntryId ?? null`.
+- [x] 1.3d Update `postService.create()` in `package/server/src/post/post.service.ts` to accept and pass `scoreEntryId` in the `createData` object.
+- [x] 1.3e Fix `bookApi.getRating()` in `package/api/src/book/book.api.ts` — replace stale local `Rating` type (lines 17-23) with `ScoreAggregateDTO[]` from `@rezics/contract`. Update `bookRatingQuery` return type in `book.queries.ts`.
+- [x] 1.4 Remove `COMMENT` from the `PostKind` Prisma enum in `package/server/prisma/schema.prisma`. Create migration with `bun run prisma:migrate` in `package/server`.
+- [x] 1.5 Delete empty contract stubs: `package/contract/src/comment.ts`, `package/contract/src/review.ts`, `package/contract/src/readlist.ts`.
+- [x] 1.6 Remove re-exports of deleted stubs from `package/contract/src/index.ts` (remove `export * from "./comment"`, `export * from "./review"` — note: `readlist.ts` was not exported).
+- [x] 1.7 Delete dead server domain `package/server/src/comment/` (all files: `comment.api.ts`, `comment.service.ts`, `mapper.ts`, `types.ts`, `sql.ts`, `index.ts`).
+- [x] 1.8 Remove comment domain mount from `package/server/src/index.ts` (remove `.use()` for comment routes if present).
+- [x] 1.9 Update `package/app/src/shared/util/build-url.ts`: remove `REVIEW` and `READLIST` cases, add `SHELF` → `/shelf/${unit.id}`, update `POST` routing to use kind-based logic.
+- [x] 1.10 Fix `package/app/src/user/page/UserUnitsPage.tsx`: remove references to `UnitType.COMMENT`, `UnitType.NOTE`. Replace with PostKind-based filtering or remove dead branches.
+- [x] 1.11 Fix `package/app/src/unit/page/UnitsPage.tsx`: remove references to non-existent UnitType values.
+- [x] 1.12 Fix `package/app/src/review/page/ReviewsPage.tsx`: replace `UnitType.POST` kind references with `PostKind.REVIEW` / `PostKind.REMARK`.
+- [x] 1.13 Grep entire `package/app/src/` for remaining references to `UnitType.COMMENT`, `UnitType.NOTE`, `"REVIEW"` (as UnitType), `"READLIST"` (as UnitType) and fix all occurrences.
+- [x] 1.14 Run `bun run build` in `package/contract` and `package/server` to verify compilation. Run `bun run app:dev` to verify frontend compilation with no import errors.
 
 ## 2. User Settings Infrastructure
 
-- [ ] 2.1 Add `settings Json?` column to the `User` model in `package/server/prisma/schema.prisma`. Run `bun run prisma:migrate` in `package/server`.
-- [ ] 2.2 Add `UserSettings` type to `package/contract/src/user.ts` defining the settings shape: `realmTagPreferences` (per unit type: `{ realmIds: string[], maxDisplay: number }`), `preferredLanguages` (string array).
-- [ ] 2.3 Create `package/server/src/user/settings.service.ts` with `getSettings(userId)` and `updateSettings(userId, partial)` (deep-merge update). Validate `realmIds` arrays max length 50.
-- [ ] 2.4 Add `GET /users/me/settings` and `PUT /users/me/settings` endpoints in `package/server/src/user/` (new file or extend existing user API).
-- [ ] 2.5 Add `userSettingsQuery()` and `useUpdateSettingsMutation()` hooks in `package/api/src/user/`.
-- [ ] 2.6 Verify endpoints with manual test: `GET /users/me/settings` returns `{}` for existing users, `PUT` with partial body deep-merges correctly.
+- [x] 2.1 Add `settings Json?` column to the `User` model in `package/server/prisma/schema.prisma`. Run `bun run prisma:migrate` in `package/server`.
+- [x] 2.2 Add `UserSettings` type to `package/contract/src/user.ts` defining the settings shape: `realmTagPreferences` (per unit type: `{ realmIds: string[], maxDisplay: number }`), `preferredLanguages` (string array).
+- [x] 2.3 Create `package/server/src/user/settings.service.ts` with `getSettings(userId)` and `updateSettings(userId, partial)` (deep-merge update). Validate `realmIds` arrays max length 50.
+- [x] 2.4 Add `GET /users/me/settings` and `PUT /users/me/settings` endpoints in `package/server/src/user/` (new file or extend existing user API).
+- [x] 2.5 Add `userSettingsQuery()` and `useUpdateSettingsMutation()` hooks in `package/api/src/user/`.
+- [x] 2.6 Verify endpoints with manual test: `GET /users/me/settings` returns `{}` for existing users, `PUT` with partial body deep-merges correctly.
 
 ## 3. Shelf Migration (readlist → shelf)
 
-- [ ] 3.1 Delete `package/app/src/readlist/` directory entirely (all pages, components, index.ts).
-- [ ] 3.2 Delete readlist route files: `package/app/src/routes/_mainLayout/readlist/` (all 5 route files).
-- [ ] 3.3 Remove readlist route exports from `package/app/src/router.tsx` (`readlistEditRoute`, `readlistByBookRoute`).
-- [ ] 3.4 Create `package/app/src/shelf/page/ShelfListPage.tsx` — shelf landing page at `/shelf` using `shelfApi.list()` with curated/trending sections.
-- [ ] 3.5 Create `package/app/src/shelf/page/ShelfSearchPage.tsx` — shelf search page at `/shelf/search` using `contentSearchQueryOptions({ type: 'SHELF' })` with tag filtering, keyword search, pagination.
-- [ ] 3.6 Enhance existing `package/app/src/shelf/page/ShelfPage.tsx` — shelf detail with translations[], items, view mode switching (grid/list/review), keywords, ShelfItemReview display.
-- [ ] 3.7 Create `package/app/src/shelf/page/ShelfEditPage.tsx` — edit shelf metadata (translations), manage items (add/remove/reorder), edit keywords. Uses `shelfApi.update()`, `shelfApi.addItem()`, `shelfApi.removeItem()`, `shelfApi.reorderItems()`.
-- [ ] 3.8 Create `package/app/src/shelf/page/ShelfByBookPage.tsx` — shelves containing a specific book. Uses `shelfApi.list({ containsItemUnitId: bookId })`.
-- [ ] 3.9 Create `package/app/src/shelf/page/NewShelfPage.tsx` — create shelf form with title/description (translations), tags. Uses `useCreateShelfMutation()`.
-- [ ] 3.10 Create `package/app/src/shelf/component/ShelfCard.tsx` — card with title from `getTranslation()`, item count, tags.
-- [ ] 3.11 Create `package/app/src/shelf/component/ShelfList.tsx` — list/grid display of shelf cards.
-- [ ] 3.12 Create `package/app/src/shelf/component/SingleShelf.tsx` — full shelf detail view component.
-- [ ] 3.13 Create `package/app/src/shelf/component/HorizontalShelfCarousel.tsx` — horizontal carousel for homepage/landing use.
-- [ ] 3.14 Create `package/app/src/shelf/index.ts` — public exports.
-- [ ] 3.15 Create route files: `package/app/src/routes/_mainLayout/shelf/index.tsx` (landing), `shelf/search.tsx`, `shelf/$shelfId/index.tsx` (detail), `shelf/$shelfId/edit.tsx`, `shelf/new.tsx`, `shelf/book/$bookId.tsx`.
-- [ ] 3.16 Update `package/app/src/core/component/navigation/MainNavigation.tsx`: rename "Read Lists" → "Shelves", update link to `/shelf`. Add "My Shelves" item.
-- [ ] 3.17 Update `package/app/src/core/component/create-menu/` entries: "New Read List" → "New Shelf", link to `/shelf/new`.
-- [ ] 3.18 Update `package/app/src/core/component/footer/MainLayoutFooter.tsx`: rename "Readlists" → "Shelves", update link.
-- [ ] 3.19 Update locale files `package/app/src/locale/en-US.ts` and `package/app/src/locale/zh-SC.ts`: rename all readlist keys to shelf equivalents.
-- [ ] 3.20 Update `package/app/src/home/section/TrendingReadListSection.tsx` → rename to `TrendingShelfSection.tsx`, update component name and imports.
-- [ ] 3.21 Update `package/app/src/home/section/hooks/hooks.ts`: rename `useHomeReadlists` to `useHomeShelves`, update content search type.
-- [ ] 3.22 Update `package/app/src/book-library/component/ReadlistByBookPreview.tsx` → rename to `ShelfByBookPreview.tsx`, update imports and content.
-- [ ] 3.23 Grep `package/app/src/` for any remaining `readlist`/`Readlist`/`ReadList` references and fix all.
-- [ ] 3.24 Run `bun run app:dev` and verify shelf routes render. Test: landing, search, detail, edit, create, shelves-by-book.
+- [x] 3.1 Delete `package/app/src/readlist/` directory entirely (all pages, components, index.ts).
+- [x] 3.2 Delete readlist route files: `package/app/src/routes/_mainLayout/readlist/` (all 5 route files).
+- [x] 3.3 Remove readlist route exports from `package/app/src/router.tsx` (`readlistEditRoute`, `readlistByBookRoute`).
+- [x] 3.4 Create `package/app/src/shelf/page/ShelfListPage.tsx` — shelf landing page at `/shelf` using `shelfApi.list()` with curated/trending sections.
+- [x] 3.5 Create `package/app/src/shelf/page/ShelfSearchPage.tsx` — shelf search page at `/shelf/search` using `contentSearchQueryOptions({ type: 'SHELF' })` with tag filtering, keyword search, pagination.
+- [x] 3.6 Enhance existing `package/app/src/shelf/page/ShelfPage.tsx` — shelf detail with translations[], items, view mode switching (grid/list/review), keywords, ShelfItemReview display.
+- [x] 3.7 Create `package/app/src/shelf/page/ShelfEditPage.tsx` — edit shelf metadata (translations), manage items (add/remove/reorder), edit keywords. Uses `shelfApi.update()`, `shelfApi.addItem()`, `shelfApi.removeItem()`, `shelfApi.reorderItems()`.
+- [x] 3.8 Create `package/app/src/shelf/page/ShelfByBookPage.tsx` — shelves containing a specific book. Uses `shelfApi.list({ containsItemUnitId: bookId })`.
+- [x] 3.9 Create `package/app/src/shelf/page/NewShelfPage.tsx` — create shelf form with title/description (translations), tags. Uses `useCreateShelfMutation()`.
+- [x] 3.10 Create `package/app/src/shelf/component/ShelfCard.tsx` — card with title from `getTranslation()`, item count, tags.
+- [x] 3.11 Create `package/app/src/shelf/component/ShelfList.tsx` — list/grid display of shelf cards.
+- [x] 3.12 Create `package/app/src/shelf/component/SingleShelf.tsx` — full shelf detail view component.
+- [x] 3.13 Create `package/app/src/shelf/component/HorizontalShelfCarousel.tsx` — horizontal carousel for homepage/landing use.
+- [x] 3.14 Create `package/app/src/shelf/index.ts` — public exports.
+- [x] 3.15 Create route files: `package/app/src/routes/_mainLayout/shelf/index.tsx` (landing), `shelf/search.tsx`, `shelf/$shelfId/index.tsx` (detail), `shelf/$shelfId/edit.tsx`, `shelf/new.tsx`, `shelf/book/$bookId.tsx`.
+- [x] 3.16 Update `package/app/src/core/component/navigation/MainNavigation.tsx`: rename "Read Lists" → "Shelves", update link to `/shelf`. Add "My Shelves" item.
+- [x] 3.17 Update `package/app/src/core/component/create-menu/` entries: "New Read List" → "New Shelf", link to `/shelf/new`.
+- [x] 3.18 Update `package/app/src/core/component/footer/MainLayoutFooter.tsx`: rename "Readlists" → "Shelves", update link.
+- [x] 3.19 Update locale files `package/app/src/locale/en-US.ts` and `package/app/src/locale/zh-SC.ts`: rename all readlist keys to shelf equivalents.
+- [x] 3.20 Update `package/app/src/home/section/TrendingReadListSection.tsx` → rename to `TrendingShelfSection.tsx`, update component name and imports.
+- [x] 3.21 Update `package/app/src/home/section/hooks/hooks.ts`: rename `useHomeReadlists` to `useHomeShelves`, update content search type.
+- [x] 3.22 Update `package/app/src/book-library/component/ReadlistByBookPreview.tsx` → rename to `ShelfByBookPreview.tsx`, update imports and content.
+- [x] 3.23 Grep `package/app/src/` for any remaining `readlist`/`Readlist`/`ReadList` references and fix all.
+- [x] 3.24 Run `bun run app:dev` and verify shelf routes render. Test: landing, search, detail, edit, create, shelves-by-book.
 
 ## 4. Review & Remark UX
 

@@ -12,8 +12,8 @@ const CreateMenuNavigation: NavigationItem[] = [
   },
   {
     kind: "item",
-    title: "New Read List",
-    segment: "/readlist/new",
+    title: "New Shelf",
+    segment: "/shelf/new",
     icon: PlaylistAddOutlinedIcon,
   },
 ];

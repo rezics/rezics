@@ -74,6 +74,13 @@ export const userBatchQuery = (ids: string[]) =>
     staleTime: 1000 * 60 * 5,
   });
 
+export const userSettingsQuery = () =>
+  queryOptions({
+    queryKey: userKeys.settings(),
+    queryFn: () => userApi.getSettings(),
+    staleTime: 1000 * 60 * 10,
+  });
+
 export const userQueries = {
   me: userMeQuery,
   list: userListQuery,
@@ -84,4 +91,5 @@ export const userQueries = {
   followings: userFollowingsQuery,
   followStatus: userFollowStatusQuery,
   batch: userBatchQuery,
+  settings: userSettingsQuery,
 };

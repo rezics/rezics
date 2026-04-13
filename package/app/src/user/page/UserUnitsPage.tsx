@@ -16,80 +16,31 @@ import {
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import React, { type FC, useEffect, useMemo, useRef, useState } from "react";
 import { BookListView } from "@/book-library/component/BookList/BookListView";
-import { SingleReadlist } from "@/readlist/component/SingleReadlist.tsx";
 import { QuoteExcerptListContainer } from "@/review/component/QuoteExcerptList.tsx";
+import { ShelfCard } from "@/shelf/component/ShelfCard";
 import { ReviewList } from "@/review/component/ReviewList.tsx";
 import { TextSearchInputWithIcon } from "@/search/component/TextSearchInputWithIcon.tsx";
-
-// MOCK: old types replaced by new architecture types
-type Readlist = ShelfDTO;
-type Review = PostDTO;
-type UnitItem = UnitDTO;
 
 export interface UserUnitsPageProps {
   userId: string;
 }
 
-// Readlist 列表视图（复用 ReadListsPage 的写法）
-const ReadlistListView: React.FC<{ readlists: Readlist[] }> = ({
-  readlists,
-}) => {
+const ShelfListView: React.FC<{ shelves: ShelfDTO[] }> = ({ shelves }) => {
   return (
-    <div>
-      {readlists.map((item) => (
-        <div key={item.id}>
-          <SingleReadlist
-            data={item}
-            // 用户内容页主要是浏览，不在这里处理交互
-            handleBookListClick={() => {}}
-            handleLike={() => {}}
-          />
-        </div>
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+      {shelves.map((item) => (
+        <ShelfCard key={item.unitId} shelf={item} />
       ))}
     </div>
   );
 };
 
-// COMMENT / NOTE 的简单通用列表视图
-const UnitSimpleListView: React.FC<{ units: UnitItem[] }> = ({ units }) => {
-  // TODO 需要为评论做单独的适配，传入targetUnitId
-  return (
-    <div className="space-y-3">
-      {units.map((unit) => (
-        <div
-          key={unit.id}
-          className="rounded-md border border-gray-200 px-3 py-2 dark:border-gray-700"
-        >
-          <div className="text-xs text-gray-500 mb-1">
-            {unit.type || "UNIT"}
-          </div>
-          <div className="font-semibold truncate mb-1">
-            {unit.title || "(未命名内容)"}
-          </div>
-          {unit.content && (
-            <div className="text-sm text-gray-700 line-clamp-3 dark:text-gray-300 whitespace-pre-wrap">
-              {unit.content}
-            </div>
-          )}
-        </div>
-      ))}
-    </div>
-  );
-};
-
-type TabKey =
-  | "readlist"
-  | "review"
-  | "remark"
-  | "comment"
-  | "note"
-  | "quote"
-  | "book";
+type TabKey = "shelf" | "review" | "remark" | "quote" | "book";
 
 /**
  * UserUnitsPage
  *
- * 按 Tab 展示某个用户的内容，使用 content search API。
+ * Displays a user's content by tab, using content search API.
  */
 export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
   const ref = useRef<UniversalPaginatorHandle>(null);
@@ -97,72 +48,70 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
 
   const EXTERNAL_PAGE_SIZE = 50;
 
-  const [tab, setTab] = useState<TabKey>("readlist");
+  const [tab, setTab] = useState<TabKey>("shelf");
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [keyword, setKeyword] = useState<string>("");
 
-  const [startReadlist, setStartReadlist] = useState<number>(0);
+  const [startShelf, setStartShelf] = useState<number>(0);
   const [startReview, setStartReview] = useState<number>(0);
   const [startBook, setStartBook] = useState<number>(0);
   const [startRemark, setStartRemark] = useState<number>(0);
-  const [startComment, setStartComment] = useState<number>(0);
-  const [startNote, setStartNote] = useState<number>(0);
   const [startQuote, setStartQuote] = useState<number>(0);
 
-  // ======= Readlists (content search with SHELF type) =======
+  // ======= Shelves (content search with SHELF type) =======
   // MOCK: using content search as shelf list query until dedicated endpoint exists
   const {
-    data: readlistDataRaw,
-    isLoading: isLoadingReadlist,
-    error: errorReadlist,
+    data: shelfDataRaw,
+    isLoading: isLoadingShelf,
+    error: errorShelf,
   } = useQuery(
     contentSearchQueryOptions({
       type: "SHELF",
       keyword: keyword || undefined,
-      offset: startReadlist,
+      offset: startShelf,
       limit: EXTERNAL_PAGE_SIZE,
     }),
   );
 
-  const baseReadlists: Readlist[] = useMemo(
-    () => (readlistDataRaw?.items ?? []) as unknown as Readlist[],
-    [readlistDataRaw],
+  const baseShelves: ShelfDTO[] = useMemo(
+    () => (shelfDataRaw?.items ?? []) as unknown as ShelfDTO[],
+    [shelfDataRaw],
   );
 
-  const currentReadlistTargetIds = useMemo(
-    () => baseReadlists.map((r) => r.id).filter(Boolean),
-    [baseReadlists],
+  const currentShelfTargetIds = useMemo(
+    () => baseShelves.map((r) => r.id).filter(Boolean),
+    [baseShelves],
   );
 
-  const { data: readlistReactionSummaryBatch } = useQuery({
+  const { data: shelfReactionSummaryBatch } = useQuery({
     queryKey: [
       "reaction-summary-batch",
       "user",
       userId,
-      "readlists",
-      currentReadlistTargetIds,
+      "shelves",
+      currentShelfTargetIds,
     ],
     queryFn: () =>
-      reactionApi.summaryBatch(currentReadlistTargetIds as string[]),
-    enabled: currentReadlistTargetIds.length > 0,
+      reactionApi.summaryBatch(currentShelfTargetIds as string[]),
+    enabled: currentShelfTargetIds.length > 0,
     staleTime: 1000 * 60 * 2,
   });
 
-  const [readlists, setReadlists] = useState<Readlist[]>([]);
+  const [shelves, setShelves] = useState<ShelfDTO[]>([]);
 
   useEffect(() => {
-    if (!baseReadlists || baseReadlists.length === 0) {
-      setReadlists([]);
+    if (!baseShelves || baseShelves.length === 0) {
+      setShelves([]);
       return;
     }
 
-    if (!readlistReactionSummaryBatch) {
-      setReadlists(baseReadlists);
+    if (!shelfReactionSummaryBatch) {
+      setShelves(baseShelves);
       return;
     }
 
-    const merged = baseReadlists.map((item) => {
-      const summaryMap = readlistReactionSummaryBatch.summaries[item.id];
+    const merged = baseShelves.map((item) => {
+      const summaryMap = shelfReactionSummaryBatch.summaries[item.id];
       if (!summaryMap) return item;
 
       const reactionSummaries = Object.entries(summaryMap).map(
@@ -178,10 +127,10 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
       };
     });
 
-    setReadlists(merged);
-  }, [baseReadlists, readlistReactionSummaryBatch]);
+    setShelves(merged);
+  }, [baseShelves, shelfReactionSummaryBatch]);
 
-  const totalReadlists: number = readlistDataRaw?.total ?? 0;
+  const totalShelves: number = shelfDataRaw?.total ?? 0;
 
   // ======= Books (Meili books index with userId filter) =======
   const bookListQueryOpts = useQuery(
@@ -232,8 +181,8 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
     tab === "review" ? isLoadingReview : isLoadingRemark;
 
   // MOCK: cast content search items to PostDTO shape
-  const baseReviews: Review[] = useMemo(
-    () => (activeReviewLikeData?.items ?? []) as unknown as Review[],
+  const baseReviews: PostDTO[] = useMemo(
+    () => (activeReviewLikeData?.items ?? []) as unknown as PostDTO[],
     [activeReviewLikeData],
   );
 
@@ -255,7 +204,7 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
     staleTime: 1000 * 60 * 2,
   });
 
-  const [reviews, setReviews] = useState<Review[]>([]);
+  const [reviews, setReviews] = useState<PostDTO[]>([]);
 
   useEffect(() => {
     if (!baseReviews || baseReviews.length === 0) {
@@ -291,34 +240,7 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
   const totalReviews: number =
     (tab === "review" ? reviewData?.total : remarkData?.total) ?? 0;
 
-  // ======= COMMENT / NOTE / QUOTE（content search with type filter）=======
-  // MOCK: using content search for comments/notes/quotes
-
-  const {
-    data: commentData,
-    isLoading: isLoadingComment,
-    error: errorComment,
-  } = useQuery(
-    contentSearchQueryOptions({
-      type: UnitType.COMMENT,
-      keyword: keyword || undefined,
-      offset: startComment,
-      limit: EXTERNAL_PAGE_SIZE,
-    }),
-  );
-
-  const {
-    data: noteData,
-    isLoading: isLoadingNote,
-    error: errorNote,
-  } = useQuery(
-    contentSearchQueryOptions({
-      type: UnitType.NOTE,
-      keyword: keyword || undefined,
-      offset: startNote,
-      limit: EXTERNAL_PAGE_SIZE,
-    }),
-  );
+  // ======= Quotes (content search with QUOTE type) =======
 
   const {
     data: quoteData,
@@ -333,36 +255,23 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
     }),
   );
 
-  // MOCK: cast content search items to UnitDTO shape
-  const commentUnits: UnitItem[] = useMemo(
-    () => (commentData?.items ?? []) as unknown as UnitItem[],
-    [commentData],
-  );
-  const noteUnits: UnitItem[] = useMemo(
-    () => (noteData?.items ?? []) as unknown as UnitItem[],
-    [noteData],
-  );
-  const quoteUnits: UnitItem[] = useMemo(
-    () => (quoteData?.items ?? []) as unknown as UnitItem[],
+  const quoteUnits: UnitDTO[] = useMemo(
+    () => (quoteData?.items ?? []) as unknown as UnitDTO[],
     [quoteData],
   );
 
-  // ======= 通用分页控制 =======
+  // ======= Pagination control =======
 
   function handleNeedMoreData(page: number) {
     const start = (page - 1) * EXTERNAL_PAGE_SIZE;
-    if (tab === "readlist") {
-      setStartReadlist(start);
+    if (tab === "shelf") {
+      setStartShelf(start);
     } else if (tab === "review") {
       setStartReview(start);
     } else if (tab === "remark") {
       setStartRemark(start);
     } else if (tab === "book") {
       setStartBook(start);
-    } else if (tab === "comment") {
-      setStartComment(start);
-    } else if (tab === "note") {
-      setStartNote(start);
     } else if (tab === "quote") {
       setStartQuote(start);
     }
@@ -371,7 +280,7 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
   async function handlePreRequestData(page: number) {
     const start = (page - 1) * EXTERNAL_PAGE_SIZE;
 
-    if (tab === "readlist") {
+    if (tab === "shelf") {
       const result = await queryClient.fetchQuery(
         contentSearchQueryOptions({
           type: "SHELF",
@@ -395,16 +304,9 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
       return result?.items?.length ?? 0;
     }
 
-    const unitType =
-      tab === "comment"
-        ? UnitType.COMMENT
-        : tab === "note"
-          ? UnitType.NOTE
-          : UnitType.QUOTE;
-
     const result = await queryClient.fetchQuery(
       contentSearchQueryOptions({
-        type: unitType,
+        type: UnitType.QUOTE,
         keyword: keyword || undefined,
         offset: start,
         limit: EXTERNAL_PAGE_SIZE,
@@ -418,17 +320,17 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
     setCurrentPage(1);
   }, []);
 
-  // 根据当前 Tab 选择数据源
+  // Select data source by current tab
   let isLoading: boolean;
-  let items: (Readlist | Review | UnitItem | BookDTO)[];
+  let items: (ShelfDTO | PostDTO | UnitDTO | BookDTO)[];
   let totalItems: number;
   let activeError: Error | null = null;
 
-  if (tab === "readlist") {
-    isLoading = isLoadingReadlist;
-    items = readlists ?? [];
-    totalItems = totalReadlists;
-    activeError = errorReadlist as Error | null;
+  if (tab === "shelf") {
+    isLoading = isLoadingShelf;
+    items = shelves ?? [];
+    totalItems = totalShelves;
+    activeError = errorShelf as Error | null;
   } else if (tab === "review" || tab === "remark") {
     isLoading = isLoadingReviewLike;
     items = reviews ?? [];
@@ -439,16 +341,6 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
     items = bookData?.books ?? [];
     totalItems = bookData?.total ?? 0;
     activeError = errorBook as Error | null;
-  } else if (tab === "comment") {
-    isLoading = isLoadingComment;
-    items = commentUnits ?? [];
-    totalItems = commentData?.total ?? 0;
-    activeError = errorComment as Error | null;
-  } else if (tab === "note") {
-    isLoading = isLoadingNote;
-    items = noteUnits ?? [];
-    totalItems = noteData?.total ?? 0;
-    activeError = errorNote as Error | null;
   } else {
     // quote
     isLoading = isLoadingQuote;
@@ -459,7 +351,7 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
 
   return (
     <div className="mx-auto p-2 mt-4">
-      {/* 顶部搜索 + Tab */}
+      {/* Search + Tabs */}
       <div className="mb-4">
         <TextSearchInputWithIcon
           onSearch={(info) => {
@@ -474,13 +366,11 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
             onChange={(_, v) => setTab(v)}
             aria-label="user unit tabs"
           >
-            <Tab label="READLIST" value="readlist" />
+            <Tab label="SHELF" value="shelf" />
             <Tab label="REVIEW" value="review" />
             <Tab label="BOOK" value="book" />
             <Tab label="REMARK" value="remark" />
-            <Tab label="COMMENT" value="comment" />
             <Tab label="QUOTE" value="quote" />
-            {/* <Tab label="NOTE" value="note" /> */}
           </Tabs>
         </Box>
       </div>
@@ -491,7 +381,7 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
         </Alert>
       )}
 
-      <UniversalPaginator<Readlist | Review | UnitItem | BookDTO>
+      <UniversalPaginator<ShelfDTO | PostDTO | UnitDTO | BookDTO>
         ref={ref}
         data={items}
         totalExternalItems={totalItems}
@@ -507,14 +397,14 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
         setCurrentPage={setCurrentPage}
         disableSortControl={true}
       >
-        {(currentPageItems: (Readlist | Review | UnitItem | BookDTO)[]) => {
-          if (tab === "readlist") {
+        {(currentPageItems: (ShelfDTO | PostDTO | UnitDTO | BookDTO)[]) => {
+          if (tab === "shelf") {
             return (
-              <ReadlistListView readlists={currentPageItems as Readlist[]} />
+              <ShelfListView shelves={currentPageItems as ShelfDTO[]} />
             );
           }
           if (tab === "review" || tab === "remark") {
-            return <ReviewList reviews={currentPageItems as Review[]} />;
+            return <ReviewList reviews={currentPageItems as PostDTO[]} />;
           }
           if (tab === "book") {
             return <BookListView books={currentPageItems as BookDTO[]} />;
@@ -523,14 +413,13 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
             return (
               <QuoteExcerptListContainer
                 data={{
-                  units: currentPageItems as UnitItem[],
+                  units: currentPageItems as UnitDTO[],
                   total: totalItems,
                 }}
               />
             );
           }
-          // COMMENT / NOTE
-          return <UnitSimpleListView units={currentPageItems as UnitItem[]} />;
+          return null;
         }}
       </UniversalPaginator>
     </div>

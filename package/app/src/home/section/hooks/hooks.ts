@@ -45,8 +45,8 @@ export function useHomeBooks(limit = 12): SimpleQueryState<BookDTO> {
   return { items, total, isLoading, error };
 }
 
-// MOCK: readlists/shelves from content search - returns shelf-type content docs
-export function useHomeReadlists(limit = 6): SimpleQueryState<ShelfDTO> {
+// MOCK: shelves from content search - returns shelf-type content docs
+export function useHomeShelves(limit = 6): SimpleQueryState<ShelfDTO> {
   const { data, isLoading, error } = useQuery({
     queryKey: ["home", "content", "shelves", { limit }],
     queryFn: () =>

@@ -10,7 +10,7 @@ import { NewBookSection } from "../section/NewBookSection";
 import { QuickAccessLinks } from "../section/QuickAccessLinks";
 import { TrendingBookSection } from "../section/TrendingBookSection";
 import { TrendingQuoteSection } from "../section/TrendingQuoteSection";
-import { TrendingReadListSection } from "../section/TrendingReadListSection";
+import { TrendingShelfSection } from "../section/TrendingShelfSection";
 import { TrendingReviews } from "../section/TrendingReviewsSection";
 
 export type HomeProps = object;
@@ -58,7 +58,7 @@ export const Home: React.FC<HomeProps> = () => {
       </Paper>
 
       <Paper sx={{ mt: 2, p: 2 }}>
-        <TrendingReadListSection />
+        <TrendingShelfSection />
       </Paper>
 
       <Paper sx={{ mt: 2, p: 2 }}>

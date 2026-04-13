@@ -2,6 +2,26 @@ import { t } from "elysia";
 import { publicUserSchema } from "./unit";
 
 // ============================================================
+// POST KIND
+// ============================================================
+
+export const PostKind = {
+  REVIEW: "REVIEW",
+  REMARK: "REMARK",
+  QUOTE: "QUOTE",
+  POST: "POST",
+} as const;
+
+export type PostKind = (typeof PostKind)[keyof typeof PostKind];
+
+const postKindLiterals = t.Union([
+  t.Literal("REVIEW"),
+  t.Literal("REMARK"),
+  t.Literal("QUOTE"),
+  t.Literal("POST"),
+]);
+
+// ============================================================
 // POST DTO (replaces Comment, Review, Note, Remark)
 // ============================================================
 
@@ -14,13 +34,14 @@ export const postDTOSchema = t.Object({
   body: t.Optional(t.Nullable(t.String())),
   rootPostUnitId: t.Optional(t.Nullable(t.String())),
   parentPostUnitId: t.Optional(t.Nullable(t.String())),
-  kind: t.Optional(t.Nullable(t.String())),
+  kind: t.Optional(t.Nullable(postKindLiterals)),
   depth: t.Optional(t.Number()),
   sortPath: t.Optional(t.Nullable(t.String())),
   replyCount: t.Optional(t.Number()),
   directReplyCount: t.Optional(t.Number()),
   lastReplyAt: t.Optional(t.Nullable(t.Union([t.String(), t.Date()]))),
   isLocked: t.Optional(t.Boolean()),
+  scoreEntryId: t.Optional(t.Nullable(t.String())),
   extra: t.Optional(t.Nullable(t.Record(t.String(), t.Any()))),
   reactionSummaries: t.Optional(t.Any()),
   createdAt: t.Optional(t.Union([t.String(), t.Date()])),
@@ -89,8 +110,9 @@ export const createPostSchema = t.Object({
   targetUnitId: t.Optional(t.String()),
   realmUnitId: t.Optional(t.String()),
   parentPostUnitId: t.Optional(t.String()),
-  kind: t.Optional(t.String()),
+  kind: t.Optional(postKindLiterals),
   body: t.String(),
+  scoreEntryId: t.Optional(t.String()),
   extra: t.Optional(t.Nullable(t.Record(t.String(), t.Any()))),
 });
 

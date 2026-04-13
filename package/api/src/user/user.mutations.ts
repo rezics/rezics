@@ -1,4 +1,4 @@
-import type { UpdateUser, UserDTO } from "@rezics/contract";
+import type { UpdateUser, UpdateUserSettings, UserDTO, UserSettings } from "@rezics/contract";
 import {
   type UseMutationOptions,
   useMutation,
@@ -125,10 +125,28 @@ export function useUnfollowMutation(
   });
 }
 
+export function useUpdateSettingsMutation(
+  options?: Omit<
+    UseMutationOptions<UserSettings, Error, UpdateUserSettings>,
+    "mutationFn"
+  >,
+) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (input: UpdateUserSettings) => userApi.updateSettings(input),
+    ...options,
+    onSuccess: (data, variables, onMutateResult, context) => {
+      qc.setQueryData(userKeys.settings(), data);
+      options?.onSuccess?.(data, variables, onMutateResult, context);
+    },
+  });
+}
+
 export const userMutations = {
   useUpdateMe: useUpdateMeMutation,
   useAdminUpdate: useAdminUpdateUserMutation,
   useDeleteMe: useDeleteMeMutation,
   useFollow: useFollowMutation,
   useUnfollow: useUnfollowMutation,
+  useUpdateSettings: useUpdateSettingsMutation,
 };

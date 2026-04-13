@@ -6,7 +6,7 @@ import { useAtomValue } from "jotai";
 import type React from "react";
 import { getBookTitle } from "@/shared/util/translation-helpers";
 import { BookReviews } from "../component/BookReviewsPreview";
-import { ReadlistByBookPreview } from "../component/ReadlistByBookPreview";
+import { ShelfByBookPreview } from "../component/ShelfByBookPreview";
 import { BookDetailShell } from "../section/BookDetailSection";
 import { bookDetailAtomFamily } from "../state/bookDetailAtoms";
 
@@ -30,7 +30,7 @@ export const BookReviewPage: React.FC = () => {
           title={title}
         />
 
-        <ReadlistByBookPreview
+        <ShelfByBookPreview
           bookId={bookInfo?.unitId || ""}
           title={title}
         />

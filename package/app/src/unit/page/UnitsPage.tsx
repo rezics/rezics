@@ -101,7 +101,7 @@ export interface UnitsPageProps {
 export const UnitsPage: React.FC<UnitsPageProps> = ({
   mode = "tab",
   type,
-  types = ["UNIT", "REVIEW", "REMARK", "QUOTE", "BOOK"],
+  types = ["UNIT", "POST", "QUOTE", "BOOK"],
   userId,
   targetUnitId,
   children = defaultChildren,

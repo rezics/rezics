@@ -41,8 +41,6 @@ declare module "@tanstack/react-router" {
 export { Route as quoteRoute } from "@/routes/_mainLayout/quote/$unitId";
 export { Route as quoteEditRoute } from "@/routes/_mainLayout/quote/$unitId/edit";
 export { Route as quoteByBookRoute } from "@/routes/_mainLayout/quote/book/$bookId";
-export { Route as readlistEditRoute } from "@/routes/_mainLayout/readlist/$readlistId/edit";
-export { Route as readlistByBookRoute } from "@/routes/_mainLayout/readlist/book/$bookId";
 
 export { Route as remarkRoute } from "@/routes/_mainLayout/remark/$reviewId";
 export { Route as reviewRoute } from "@/routes/_mainLayout/review/$reviewId";

@@ -26,4 +26,5 @@ export const userKeys = {
   followStatus: (targetIds: string[]) =>
     [...userKeys.detail("me"), "follow-status", targetIds] as const,
   batch: (ids: string[]) => [...userKeys.all(), "batch", ids] as const,
+  settings: () => [...userKeys.all(), "me", "settings"] as const,
 } as const;

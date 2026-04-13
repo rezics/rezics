@@ -12,7 +12,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { ReviewList } from "@/review/component/ReviewList.tsx";
 import { TextSearchInput } from "@/search/component/TextSearchInput";
 
-// MOCK: ReviewDTO replaced by PostDTO in the new architecture
 type Review = PostDTO;
 export interface ReviewsPageProps {
   bookUnitId?: string;
@@ -178,7 +177,7 @@ export const ReviewsPage: React.FC<ReviewsPageProps> = ({ bookUnitId }) => {
                 console.log("onSearch", info);
               }}
               defaultValue={{ keyword: keyword ?? "" }}
-              placeholder="Search readlists"
+              placeholder="Search reviews"
             />
             <Box sx={{ borderBottom: 1, borderColor: "divider", mt: 2, mb: 2 }}>
               <Tabs

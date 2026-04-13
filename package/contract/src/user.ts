@@ -79,3 +79,25 @@ export const loginSchema = t.Object({
 });
 
 export type LoginUser = (typeof loginSchema)["static"];
+
+// ============================================================
+// USER SETTINGS
+// ============================================================
+
+export const realmTagPreferenceSchema = t.Object({
+  realmIds: t.Array(t.String(), { maxItems: 50 }),
+  maxDisplay: t.Number(),
+});
+
+export const userSettingsSchema = t.Object({
+  realmTagPreferences: t.Optional(
+    t.Record(t.String(), realmTagPreferenceSchema),
+  ),
+  preferredLanguages: t.Optional(t.Array(t.String())),
+});
+
+export type UserSettings = (typeof userSettingsSchema)["static"];
+
+export const updateUserSettingsSchema = t.Partial(userSettingsSchema);
+
+export type UpdateUserSettings = (typeof updateUserSettingsSchema)["static"];

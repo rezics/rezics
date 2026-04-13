@@ -43,7 +43,6 @@ enum UnitVisibility {
 
 enum PostKind {
   REVIEW
-  COMMENT
   QUOTE
   REMARK
   POST
@@ -554,6 +553,7 @@ model User {
   keywords        String[]  @default([])
   followersCount  Int       @default(0)
   followingsCount Int       @default(0)
+  settings        Json?
 
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt

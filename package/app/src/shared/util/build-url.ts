@@ -4,12 +4,12 @@ export function buildUnitUrl(unit: UnitDTO): string {
   switch (unit.type) {
     case "BOOK":
       return `/book/${unit.id}`;
-    case "REVIEW":
+    case "POST":
       return `/review/${unit.id}`;
     case "QUOTE":
       return `/quote/${unit.id}`;
-    case "READLIST":
-      return `/readlist/${unit.id}`;
+    case "SHELF":
+      return `/shelf/${unit.id}`;
     default:
       return `/unit/${unit.id}`;
   }

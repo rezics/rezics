@@ -8,19 +8,12 @@ import type {
   BookResponse,
   ChapterIndexResponse,
   CreateBookInput,
+  ScoreAggregateDTO,
   UpdateBookInput,
 } from "@rezics/contract";
 import { apiFetch } from "../react-query/http";
 import { buildQueryString } from "../utils/buildQuery";
 import type { BookFilters } from "./book.types";
-
-type Rating = {
-  unitId: string;
-  updatedAt: Date;
-  domain: string;
-  totalScore: number;
-  totalCount: number;
-};
 
 /**
  * Book API methods
@@ -45,8 +38,8 @@ export const bookApi = {
   /**
    * Get rating by book unitId
    */
-  getRating: async (bookUnitId: string): Promise<Rating> => {
-    return apiFetch<Rating>(`/books/${bookUnitId}/rating`);
+  getRating: async (bookUnitId: string): Promise<ScoreAggregateDTO[]> => {
+    return apiFetch<ScoreAggregateDTO[]>(`/books/${bookUnitId}/rating`);
   },
 
   /**

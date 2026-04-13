@@ -158,8 +158,8 @@ export function MainLayoutFooter({ className }: { className?: string }) {
                 <FooterLink href="/book">
                   {t("layout.footer.product.discover")}
                 </FooterLink>
-                <FooterLink href="/readlist">
-                  {t("layout.footer.product.readlist")}
+                <FooterLink href="/shelf">
+                  {t("layout.footer.product.shelves")}
                 </FooterLink>
                 <FooterLink href="/review">
                   {t("layout.footer.product.reviews")}

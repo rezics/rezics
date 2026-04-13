@@ -16,6 +16,7 @@ export function mapPostToDTO(post: PostWithRelations): PostDTO {
     rootPostUnitId: post.rootPostUnitId ?? null,
     parentPostUnitId: post.parentPostUnitId ?? null,
     kind: post.kind ?? null,
+    scoreEntryId: post.scoreEntryId ?? null,
     depth: post.depth,
     sortPath: post.sortPath ?? null,
     replyCount: post.replyCount,

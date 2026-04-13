@@ -83,8 +83,15 @@ export class PostService {
     input: CreatePostInput,
     authorUserId: string,
   ): Promise<PostWithRelations> {
-    const { targetUnitId, realmUnitId, parentPostUnitId, kind, body, extra } =
-      input;
+    const {
+      targetUnitId,
+      realmUnitId,
+      parentPostUnitId,
+      kind,
+      body,
+      scoreEntryId,
+      extra,
+    } = input;
 
     let depth = 0;
     let rootPostUnitId: string | undefined;
@@ -127,6 +134,7 @@ export class PostService {
         realmUnitId: realmUnitId ?? undefined,
         body,
         kind: (kind as PostKind) ?? undefined,
+        scoreEntryId: scoreEntryId ?? undefined,
         depth,
         sortPath: sortPath ?? undefined,
         extra: extra as Prisma.InputJsonValue | undefined,
