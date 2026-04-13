@@ -1,3 +1,5 @@
+// TODO performance issue, cache size may be too large
+
 import type { UserDTO } from "@rezics/contract";
 
 interface CacheEntry {

@@ -52,9 +52,9 @@ export const TrendingReviews: React.FC<TrendingReviewsProps> = ({
         <Button
           variant="text"
           color="primary"
-          onClick={() => navigate({ to: "/book" })}
+          onClick={() => navigate({ to: "/review" })}
         >
-          更多 →
+          {t("page.home.sections.trending_reviews")} →
         </Button>
       </div>
       {isLoading && <CircularProgress size={20} />}

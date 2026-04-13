@@ -9,9 +9,6 @@ import { ActiveRealmsSection } from "../section/ActiveRealmsSection";
 import { AnnouncementBarSection } from "../section/AnnouncementBarSection";
 import { LibraryCardsSection } from "../section/LibraryCardsSection";
 import { NewBookSection } from "../section/NewBookSection";
-import { QuickAccessLinks } from "../section/QuickAccessLinks";
-import { TrendingBookSection } from "../section/TrendingBookSection";
-import { TrendingQuoteSection } from "../section/TrendingQuoteSection";
 import { TrendingShelfSection } from "../section/TrendingShelfSection";
 import { TrendingReviews } from "../section/TrendingReviewsSection";
 
@@ -47,11 +44,6 @@ export const Home: React.FC<HomeProps> = () => {
             </div>
             <BookCarousel autoplayIntervalNum={3000} />
           </div>
-
-          {/* Search and quick links */}
-          <div className="mt-6">
-            <QuickAccessLinks />
-          </div>
         </Paper>
       </section>
 
@@ -76,19 +68,8 @@ export const Home: React.FC<HomeProps> = () => {
       </Paper>
 
       <Paper sx={{ mt: 2, p: 2 }}>
-        <NewBookSection />
+        <NewBookSection limit={5} />
       </Paper>
-
-      {/* 添加引用区块 */}
-      <Paper sx={{ mt: 2, p: 2 }}>
-        <TrendingQuoteSection />
-      </Paper>
-
-      <Paper sx={{ mt: 2, p: 2 }}>
-        <TrendingBookSection />
-      </Paper>
-
-      {/* 添加评论区块 */}
     </div>
   );
 };

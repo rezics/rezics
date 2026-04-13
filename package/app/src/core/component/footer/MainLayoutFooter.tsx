@@ -77,7 +77,7 @@ export function MainLayoutFooter({ className }: { className?: string }) {
                   fontWeight={800}
                   sx={{ letterSpacing: 0.2 }}
                 >
-                  Library.Book
+                  REZICS
                 </Typography>
               </div>
               <Typography

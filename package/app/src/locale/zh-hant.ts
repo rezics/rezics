@@ -6,7 +6,7 @@ export default {
     footer: {
       brand: {
         description:
-          "一个全面的，包含数字时代作品的书库，期待着让人们找到他们所寻的书，让故事遇见正确的人。",
+          "一个涵盖图书、游戏和媒体的多元库平台——帮助人们发现所爱的作品。",
         slogan: "inherited·create·spread",
       },
       social: {
@@ -56,7 +56,7 @@ export default {
     home: {
       name: "Home",
       hero: {
-        kicker: "Library Book",
+        kicker: "REZICS",
         title_highlight: "与所爱的故事相遇",
         subtitle: "搜索想看的书，发现高质量书单、短评和金句。",
       },
@@ -148,6 +148,14 @@ export default {
           media_library: "媒体库",
           coming_soon: "即将推出",
         },
+      },
+    },
+    book_home: {
+      hero: {
+        kicker: "图书馆",
+        title: "发现你的下一本好书",
+        subtitle: "浏览新书、趋势好书、精选摘录等。",
+        search_placeholder: "搜索书名、作者、ISBN...",
       },
     },
     book: {

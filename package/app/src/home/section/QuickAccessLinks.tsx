@@ -46,7 +46,7 @@ export const QuickAccessLinks: React.FC<QuickAccessLinksProps> = ({
       <CarouselContent className="-ml-2">
         {items.map(({ name, icon, color }) => (
           <CarouselItem key={name} className="pl-2 basis-auto">
-            <Link to="/book" search={{ tags: name }}>
+            <Link to="/book/search" search={{ tags: name }}>
               <Chip
                 icon={<DynamicIcon name={icon as IconKey} className="ml-1" />}
                 label={name}

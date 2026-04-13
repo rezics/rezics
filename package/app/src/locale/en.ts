@@ -10,7 +10,7 @@ export default {
     footer: {
       brand: {
         description:
-          "A comprehensive library of works for the digital era—helping people find the books they seek, and letting stories meet the right readers.",
+          "A multi-library platform for books, games, and media — helping people discover the works they love.",
         slogan: "inherited·create·spread",
       },
       social: {
@@ -61,7 +61,7 @@ export default {
     home: {
       name: "Home",
       hero: {
-        kicker: "Library Book",
+        kicker: "REZICS",
         title_highlight: "Meet the stories you love",
         subtitle:
           "Search for books you want, and discover high-quality reading lists, short reviews, and quotes.",
@@ -159,6 +159,15 @@ export default {
           media_library: "Media Library",
           coming_soon: "Coming Soon",
         },
+      },
+    },
+    book_home: {
+      hero: {
+        kicker: "Book Library",
+        title: "Discover your next great read",
+        subtitle:
+          "Browse new releases, trending books, curated quotes, and more.",
+        search_placeholder: "Search title, author, ISBN...",
       },
     },
     book: {

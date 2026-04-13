@@ -22,6 +22,8 @@ export {
   BookLibPage,
   BookLibPage as BookLibContainer,
 } from "./page/BookLibPage";
+/** Book library curated homepage. */
+export { BookHomePage } from "./page/BookHomePage";
 export { BookReviewPage } from "./page/BookReviewPage";
 
 // ============================================================================
