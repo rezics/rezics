@@ -1,194 +1,71 @@
 ## ADDED Requirements
 
-### Requirement: TranslationTabs displays available languages on unit detail views
+### Requirement: Homepage sections use i18n for all UI strings
 
-Unit detail views (book, shelf, realm, tag) SHALL render a TranslationTabs component that shows one tab per language present in the unit's `translations[]` array. The currently active language tab SHALL be visually distinguished.
+All homepage section components SHALL use `react-i18next` `useTranslation()` for UI strings. No section component SHALL contain hardcoded Chinese or English display text. Section titles, action labels ("More"), loading states, empty states, and tab labels SHALL be resolved from locale translation keys.
 
-#### Scenario: Unit has multiple translations
+#### Scenario: NewBookSection renders in user's UI language
 
-- WHEN a unit detail view loads with `translations[]` containing entries for `zh-CN`, `en`, and `ja`
-- THEN TranslationTabs SHALL render three language tabs corresponding to those languages
-- AND one tab SHALL be marked as active based on the user's preferred language
+- **WHEN** the homepage loads with UI language set to "en-US"
+- **THEN** NewBookSection SHALL display "Latest Works" (not "最新作品"), tab labels "Latest Serial" / "New on Shelf" / "Recently Completed", and "More" (not "更多 →")
 
-#### Scenario: Unit has a single translation
+#### Scenario: TrendingBookSection renders in user's UI language
 
-- WHEN a unit detail view loads with `translations[]` containing a single entry
-- THEN TranslationTabs SHALL render one language tab
-- AND that tab SHALL be active by default
+- **WHEN** the homepage loads with UI language set to "en-US"
+- **THEN** TrendingBookSection SHALL display "Trending Books" (not "趋势好书") and "More" (not "更多 →")
 
-### Requirement: Switching language tab re-renders content in the selected translation
+#### Scenario: ActiveRealmsSection renders in user's UI language
 
-WHEN the user selects a different language tab in TranslationTabs, the unit detail view SHALL re-render all translatable content fields (title, description, summary, subtitle) using the translation entry matching the selected language.
+- **WHEN** the homepage loads with UI language set to "zh-SC"
+- **THEN** ActiveRealmsSection SHALL display the Chinese translation for "Active Realms" and "More"
 
-#### Scenario: User switches from Chinese to English
+#### Scenario: LibraryCardsSection renders in user's UI language
 
-- WHEN the user activates the English language tab on a unit that has both `zh-CN` and `en` translations
-- THEN the view SHALL display the title, description, summary, and subtitle from the `en` translation entry
-- AND the English tab SHALL become the active tab
+- **WHEN** the homepage loads with UI language set to "ja-JP"
+- **THEN** LibraryCardsSection SHALL display Japanese translations for "Book Library", "Game Library", "Media Library", and "Coming Soon"
 
-#### Scenario: User switches to a language and switches back
+### Requirement: Search components use i18n for all UI strings
 
-- WHEN the user switches to a different language tab and then switches back to the original tab
-- THEN the view SHALL display the content from the original language's translation entry
+SearchFilter and SearchInput components SHALL use `react-i18next` for all sort labels, filter labels, placeholder text, and preset tag labels. No search component SHALL contain hardcoded Chinese or English display text.
 
-### Requirement: TranslationEditor provides per-language translation management in edit forms
+#### Scenario: SearchFilter renders sort options in user's UI language
 
-Edit forms for translatable units (book, shelf, tag) SHALL include a TranslationEditor component that allows users to manage translations per language. The editor SHALL support adding a new language, editing an existing translation, and designating the primary language.
+- **WHEN** the search page loads with UI language set to "en-US"
+- **THEN** sort options SHALL display "Relevance", "Latest", "Total Favorites", "Word Count", "Monthly Votes" (not Chinese equivalents)
+- **AND** order buttons SHALL display "Descending" / "Ascending" (not "降序" / "升序")
 
-#### Scenario: Adding a new language translation
+#### Scenario: SearchInput renders placeholder in user's UI language
 
-- WHEN the user activates the "add language" action in TranslationEditor
-- THEN the editor SHALL present a language selector for choosing the new language
-- AND upon selection, the editor SHALL display empty fields for the new language's translatable content
+- **WHEN** the search page loads with UI language set to "zh-SC"
+- **THEN** the search placeholder SHALL display the Chinese translation for "Title, ISBN, Author, Publisher, Producer"
+- **AND** filter labels ("Tags", "Word Count") SHALL display in Chinese
 
-#### Scenario: Editing an existing translation
+### Requirement: All five locale files contain keys for homepage and search strings
 
-- WHEN the user selects a language tab in TranslationEditor that has an existing translation
-- THEN the editor SHALL populate the form fields with that translation's current values
-- AND the user SHALL be able to modify and save changes to those fields
+Translation keys for homepage sections and search components SHALL exist in all five locale files: en-US, zh-SC, zh-TC, de-DE, and ja-JP. Missing native translations SHALL use English as a placeholder.
 
-#### Scenario: Setting the primary language
+#### Scenario: en-US locale has complete homepage section keys
 
-- WHEN the user designates a language as the primary language in TranslationEditor
-- THEN that language SHALL be marked as the unit's primary/default language
-- AND the primary designation SHALL be visually indicated in the editor
+- **WHEN** the en-US locale file is loaded
+- **THEN** it SHALL contain keys under `page.home.section` for all section titles, action labels, tab labels, loading states, and empty states
 
-### Requirement: WorkReleaseNav displays other releases of the same work on book detail
+#### Scenario: zh-SC locale has complete homepage section keys
 
-Book detail pages SHALL render a WorkReleaseNav component that shows other releases (language editions) of the same work, queried by `workUnitId`. The current release SHALL be visually distinguished from the others.
+- **WHEN** the zh-SC locale file is loaded
+- **THEN** it SHALL contain keys under `page.home.section` matching the same key structure as en-US with Chinese translations
 
-#### Scenario: Book has multiple releases under the same work
+### Requirement: Homepage book content renders in user's preferred content language
 
-- WHEN a book detail page loads for a book whose `workUnitId` references a work with three releases
-- THEN WorkReleaseNav SHALL display navigation entries for all three releases
-- AND the currently viewed release SHALL be visually marked as active
+Book titles and descriptions displayed in homepage sections (NewBookSection, TrendingBookSection) SHALL be resolved using the `getBookTitle()` and `getBookDescription()` translation helpers, which apply the user's preferred language fallback chain. Content SHALL NOT display as empty strings.
 
-#### Scenario: Book is a standalone work with no other releases
+#### Scenario: Book title renders from search result translations
 
-- WHEN a book detail page loads for a book that is the only release under its `workUnitId`
-- THEN WorkReleaseNav SHALL NOT be rendered
+- **WHEN** a homepage book card receives a DTO with `translations: [{ language: "zh-CN", title: "书名" }, { language: "en", title: "Title" }]`
+- **AND** the user's fallback chain resolves to "en"
+- **THEN** the book card SHALL display "Title"
 
-### Requirement: Each release in WorkReleaseNav links to its detail page
+#### Scenario: Book title falls back when preferred language unavailable
 
-Every release entry displayed in WorkReleaseNav SHALL be a navigable link to that release's book detail page.
-
-#### Scenario: User navigates to a different release
-
-- WHEN the user activates a release entry in WorkReleaseNav
-- THEN the application SHALL navigate to the selected release's book detail page
-
-### Requirement: Tag labels are resolved using the user's preferred language
-
-Tag labels displayed throughout the application SHALL be resolved from the tag unit's `translations[]` using the user's preferred language. Tags are units with their own translations, and the label SHALL reflect the user's language preference.
-
-#### Scenario: Tag has translation matching user's preferred language
-
-- WHEN a tag is displayed and the user's preferred language is `en`
-- AND the tag's `translations[]` contains an `en` entry
-- THEN the tag label SHALL be the title from the `en` translation entry
-
-#### Scenario: Tag has no translation for user's preferred language
-
-- WHEN a tag is displayed and the user's preferred language is `fr`
-- AND the tag's `translations[]` does not contain an `fr` entry
-- THEN the tag label SHALL be resolved using the translation fallback chain
-
-### Requirement: Translation helper uses a user-preference-aware fallback chain
-
-The `getTranslation()` helper SHALL resolve translations using a fallback chain that prioritizes the user's preferred languages from `User.settings.preferredLanguages` before falling back to the system default chain. The hardcoded fallback chain SHALL serve only as a last resort after user preferences are exhausted.
-
-#### Scenario: User has preferred languages configured
-
-- WHEN `getTranslation()` is called with no explicit language parameter
-- AND the user has `preferredLanguages` set to `['ja', 'en']`
-- THEN the helper SHALL attempt `ja` first, then `en`, then the system default chain
-- AND SHALL return the first matching translation found
-
-#### Scenario: User has no preferred languages configured
-
-- WHEN `getTranslation()` is called with no explicit language parameter
-- AND the user has no `preferredLanguages` setting
-- THEN the helper SHALL fall back to the system default chain (`zh-CN`, `zh`, `en`, `ja`)
-
-#### Scenario: Explicit language parameter takes highest priority
-
-- WHEN `getTranslation()` is called with an explicit language parameter
-- THEN that language SHALL be attempted first, before user preferences and system defaults
-
-### Requirement: User can configure language preferences in profile settings
-
-The user profile or preferences page SHALL provide a setting for configuring preferred languages. The user SHALL be able to select, order, and remove languages from their preference list.
-
-#### Scenario: User adds a preferred language
-
-- WHEN the user adds a language to their preferred languages list
-- THEN that language SHALL appear in the user's language preference list
-- AND the preference SHALL take effect for translation resolution across the application
-
-#### Scenario: User reorders preferred languages
-
-- WHEN the user reorders their preferred languages list
-- THEN the new order SHALL be reflected in translation resolution priority
-
-#### Scenario: User removes a preferred language
-
-- WHEN the user removes a language from their preferred languages list
-- THEN that language SHALL no longer be included in the user's preference-based fallback chain
-
-### Requirement: Language preferences are persisted in User.settings.preferredLanguages
-
-Changes to the user's language preferences SHALL be persisted to `User.settings.preferredLanguages` via the user settings API. The persisted value SHALL be an ordered array of language codes.
-
-#### Scenario: Preference saved to settings
-
-- WHEN the user saves language preferences of `['en', 'zh-CN', 'ja']`
-- THEN `User.settings.preferredLanguages` SHALL contain `['en', 'zh-CN', 'ja']` in that order
-
-#### Scenario: Preference survives session restart
-
-- WHEN the user configures preferred languages and later starts a new session
-- THEN the application SHALL load `User.settings.preferredLanguages` and apply it to translation resolution
-
-### Requirement: Default language detection from browser locale when no preference is set
-
-WHEN the user has no `preferredLanguages` setting configured and is not authenticated or has not set a preference, the application SHALL detect the user's preferred language from the browser locale and use it as the primary language in the fallback chain.
-
-#### Scenario: Browser locale is used as default
-
-- WHEN the user has no `preferredLanguages` configured
-- AND the browser locale is `ja-JP`
-- THEN the translation fallback chain SHALL begin with `ja-JP` (and its base language `ja`) before the system default chain
-
-#### Scenario: Authenticated user with preferences overrides browser locale
-
-- WHEN the user has `preferredLanguages` set to `['en']`
-- AND the browser locale is `zh-CN`
-- THEN the translation fallback chain SHALL begin with `en` per the user's explicit preference, not the browser locale
-
-### Requirement: All unit detail views display content in user's preferred language
-
-All unit detail views -- book, shelf, realm, and tag -- SHALL display translatable content fields using the user's preferred language as resolved by the translation helper. This SHALL apply to titles, descriptions, summaries, and any other fields sourced from `translations[]`.
-
-#### Scenario: Book detail loads in preferred language
-
-- WHEN a user with preferred language `en` opens a book detail page
-- AND the book has an `en` translation
-- THEN the book title, description, summary, and subtitle SHALL be displayed from the `en` translation
-
-#### Scenario: Shelf detail loads in preferred language
-
-- WHEN a user with preferred language `ja` opens a shelf detail page
-- AND the shelf has a `ja` translation
-- THEN the shelf title and description SHALL be displayed from the `ja` translation
-
-#### Scenario: Tag detail loads in preferred language
-
-- WHEN a user with preferred language `zh-CN` opens a tag detail page
-- AND the tag has a `zh-CN` translation
-- THEN the tag name and description SHALL be displayed from the `zh-CN` translation
-
-#### Scenario: Fallback when preferred language is unavailable
-
-- WHEN a user opens any unit detail view
-- AND the unit does not have a translation in the user's preferred language
-- THEN the view SHALL display content from the next available language in the fallback chain
+- **WHEN** a homepage book card receives a DTO with `translations: [{ language: "zh-CN", title: "书名" }]`
+- **AND** the user's preferred language is "de"
+- **THEN** the book card SHALL fall back through the chain and display "书名" rather than an empty string
