@@ -3,7 +3,7 @@ import { DEFAULT_LANGUAGE } from "@rezics/contract";
 import type { PrismaClient } from "#/prisma/generated/client.js";
 import { UnitStatus, UnitType } from "#/prisma/generated/client.js";
 import { SHELF_KIND_KEYS } from "./data.js";
-import { generateTranslation } from "./generators.js";
+import { generateTranslations } from "./generators.js";
 import type { CreatedPost, CreatedUnit, CreatedUser } from "./types.js";
 import { chunkedParallel, pickN, randomBoolean, randomInt } from "./utils.js";
 
@@ -32,7 +32,7 @@ export async function seedShelves(
     CHUNK_SIZE,
     async () => {
       const author = faker.helpers.arrayElement(users);
-      const translation = generateTranslation(UnitType.SHELF);
+      const translations = generateTranslations(UnitType.SHELF);
       const kindKey = faker.helpers.arrayElement([...SHELF_KIND_KEYS]);
 
       const unit = await prisma.unit.create({
@@ -46,14 +46,18 @@ export async function seedShelves(
             create: { kindKey },
           },
           translations: {
-            create: {
-              language: DEFAULT_LANGUAGE,
-              title: translation.title,
-              description: translation.description,
-            },
+            create: translations.map((t) => ({
+              language: t.language,
+              title: t.title,
+              description: t.description,
+            })),
           },
           supportLanguages: {
-            create: { language: DEFAULT_LANGUAGE, isPrimary: true },
+            create: translations.map((t, i) => ({
+              language: t.language,
+              isPrimary: i === 0,
+              sortOrder: i,
+            })),
           },
         },
         select: { id: true, type: true },

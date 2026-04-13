@@ -4,7 +4,7 @@ import { DEFAULT_LANGUAGE, type ChapterTreeItem } from "@rezics/contract";
 import type { Prisma, PrismaClient } from "#/prisma/generated/client.js";
 import { UnitStatus, UnitType } from "#/prisma/generated/client.js";
 import { getRandomBookCover, ORG_ROLE_KEYS, PERSON_ROLE_KEYS } from "./data.js";
-import { generateBookExtra, generateTranslation } from "./generators.js";
+import { generateBookExtra, generateTranslations } from "./generators.js";
 import type {
   CreatedOrganization,
   CreatedPerson,
@@ -41,7 +41,7 @@ export async function seedBooks(
     CHUNK_SIZE,
     async () => {
       const author = faker.helpers.arrayElement(users);
-      const translation = generateTranslation(UnitType.BOOK);
+      const translations = generateTranslations(UnitType.BOOK);
 
       const unit = await prisma.unit.create({
         data: {
@@ -73,16 +73,20 @@ export async function seedBooks(
             },
           },
           translations: {
-            create: {
-              language: DEFAULT_LANGUAGE,
-              title: translation.title,
-              subtitle: translation.subtitle,
-              summary: translation.summary,
-              description: translation.description,
-            },
+            create: translations.map((t) => ({
+              language: t.language,
+              title: t.title,
+              subtitle: t.subtitle,
+              summary: t.summary,
+              description: t.description,
+            })),
           },
           supportLanguages: {
-            create: { language: DEFAULT_LANGUAGE, isPrimary: true },
+            create: translations.map((t, i) => ({
+              language: t.language,
+              isPrimary: i === 0,
+              sortOrder: i,
+            })),
           },
         },
         select: { id: true, type: true },

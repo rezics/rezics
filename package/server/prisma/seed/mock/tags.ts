@@ -3,11 +3,11 @@ import { faker } from "@faker-js/faker";
 import { DEFAULT_LANGUAGE } from "@rezics/contract";
 import type { PrismaClient } from "#/prisma/generated/client.js";
 import { UnitStatus, UnitType } from "#/prisma/generated/client.js";
-import { generateTranslation } from "./generators.js";
+import { generateTranslations } from "./generators.js";
 import type { CreatedUnit, CreatedUser } from "./types.js";
 
 /**
- * Seed tags as Unit(type=TAG) + UnitTranslation.
+ * Seed tags as Unit(type=TAG) + UnitTranslation + UnitSupportLanguage.
  * Uses two-phase createMany for maximum throughput.
  */
 export async function seedTags(
@@ -20,8 +20,8 @@ export async function seedTags(
   const tags = Array.from({ length: total }, () => {
     const id = randomUUID();
     const user = faker.helpers.arrayElement(users);
-    const translation = generateTranslation(UnitType.TAG);
-    return { id, userId: user.unitId, title: translation.title };
+    const translations = generateTranslations(UnitType.TAG);
+    return { id, userId: user.unitId, translations };
   });
 
   // Phase 1: Create Unit rows
@@ -37,13 +37,27 @@ export async function seedTags(
     })),
   });
 
-  // Phase 2: Create UnitTranslation rows
+  // Phase 2: Create UnitTranslation rows (all languages)
   await prisma.unitTranslation.createMany({
-    data: tags.map((t) => ({
-      unitId: t.id,
-      language: DEFAULT_LANGUAGE,
-      title: t.title,
-    })),
+    data: tags.flatMap((t) =>
+      t.translations.map((tr) => ({
+        unitId: t.id,
+        language: tr.language,
+        title: tr.title,
+      })),
+    ),
+  });
+
+  // Phase 3: Create UnitSupportLanguage rows
+  await prisma.unitSupportLanguage.createMany({
+    data: tags.flatMap((t) =>
+      t.translations.map((tr, i) => ({
+        unitId: t.id,
+        language: tr.language,
+        isPrimary: i === 0,
+        sortOrder: i,
+      })),
+    ),
   });
 
   return tags.map((t) => ({ id: t.id, type: UnitType.TAG }));

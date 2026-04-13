@@ -24,7 +24,8 @@
     "prisma:studio": "bunx prisma studio",
     "seed:mock": "bun run prisma/seed/mock/seed.ts",
     "seed:mock:echokv": "bun run prisma/seed/mock/echokv.ts",
-    "seed:databaseReset": "bun run prisma/seed/utils/databaseReset.ts",
+    "seed:database-reset": "bun run prisma/seed/utils/database-reset.ts",
+    "seed:database-reset:all": "bun run prisma/seed/utils/database-reset.ts --all",
     "seed:init-meili-search": "bun run prisma/seed/utils/init-meili-search.ts"
   },
   "devDependencies": {

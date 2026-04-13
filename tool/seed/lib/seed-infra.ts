@@ -1,4 +1,7 @@
-import { DEFAULT_LANGUAGE } from "../../../package/contract/src/language";
+import {
+  DEFAULT_LANGUAGE,
+  FALLBACK_LANGUAGE,
+} from "../../../package/contract/src/language";
 import {
   SEED_TAG_NAMES,
   SEED_TAG_SCORE,
@@ -46,11 +49,18 @@ export async function seedContentTypeTags(
           visibility: "PUBLIC",
           isLanguageNeutral: true,
           publishedAt: new Date(),
+          defaultLanguage: DEFAULT_LANGUAGE,
           translations: {
-            create: {
-              language: DEFAULT_LANGUAGE,
-              title,
-            },
+            create: [
+              { language: DEFAULT_LANGUAGE, title },
+              { language: FALLBACK_LANGUAGE, title },
+            ],
+          },
+          supportLanguages: {
+            create: [
+              { language: DEFAULT_LANGUAGE, isPrimary: true, sortOrder: 0 },
+              { language: FALLBACK_LANGUAGE, isPrimary: false, sortOrder: 1 },
+            ],
           },
         },
         select: { id: true },
@@ -107,11 +117,18 @@ export async function seedDefaultRealm(
       status: "PUBLISHED",
       visibility: "PUBLIC",
       publishedAt: new Date(),
+      defaultLanguage: DEFAULT_LANGUAGE,
       translations: {
-        create: {
-          language: DEFAULT_LANGUAGE,
-          title: "rezics",
-        },
+        create: [
+          { language: DEFAULT_LANGUAGE, title: "rezics" },
+          { language: FALLBACK_LANGUAGE, title: "rezics" },
+        ],
+      },
+      supportLanguages: {
+        create: [
+          { language: DEFAULT_LANGUAGE, isPrimary: true, sortOrder: 0 },
+          { language: FALLBACK_LANGUAGE, isPrimary: false, sortOrder: 1 },
+        ],
       },
       realm: {
         create: {

@@ -7,7 +7,7 @@ import {
   PERSON_ROLE_KEYS,
   PLATFORM_KEYS,
 } from "./data.js";
-import { generateGameExtra, generateTranslation } from "./generators.js";
+import { generateGameExtra, generateTranslations } from "./generators.js";
 import type {
   CreatedOrganization,
   CreatedPerson,
@@ -36,7 +36,7 @@ export async function seedGames(
     CHUNK_SIZE,
     async () => {
       const author = faker.helpers.arrayElement(users);
-      const translation = generateTranslation(UnitType.GAME);
+      const translations = generateTranslations(UnitType.GAME);
       const platforms = pickN(
         [...PLATFORM_KEYS],
         randomInt(1, 4),
@@ -74,15 +74,19 @@ export async function seedGames(
             },
           },
           translations: {
-            create: {
-              language: DEFAULT_LANGUAGE,
-              title: translation.title,
-              summary: translation.summary,
-              description: translation.description,
-            },
+            create: translations.map((t) => ({
+              language: t.language,
+              title: t.title,
+              summary: t.summary,
+              description: t.description,
+            })),
           },
           supportLanguages: {
-            create: { language: DEFAULT_LANGUAGE, isPrimary: true },
+            create: translations.map((t, i) => ({
+              language: t.language,
+              isPrimary: i === 0,
+              sortOrder: i,
+            })),
           },
         },
         select: { id: true, type: true },

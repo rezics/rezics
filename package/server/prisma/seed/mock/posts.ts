@@ -6,7 +6,7 @@ import { PostKind, UnitStatus, UnitType } from "#/prisma/generated/client.js";
 import {
   generatePostBody,
   generatePostExtra,
-  generateTranslation,
+  generateTranslations,
 } from "./generators.js";
 import type { CreatedPost, CreatedUnit, CreatedUser } from "./types.js";
 import { chunkedParallel, randomBoolean, randomInt } from "./utils.js";
@@ -104,6 +104,7 @@ async function seedPostKindForTarget(
     const body = generatePostBody(kind);
     const extra = generatePostExtra(kind);
     const needsTitle = kind === PostKind.REVIEW;
+    const translations = needsTitle ? generateTranslations(UnitType.POST) : [];
 
     // Find a matching scoreEntryId for this author+target
     let scoreEntryId: string | undefined;
@@ -137,14 +138,20 @@ async function seedPostKindForTarget(
         },
         translations: needsTitle
           ? {
-              create: {
-                language: DEFAULT_LANGUAGE,
-                title: generateTranslation(UnitType.POST).title,
-              },
+              create: translations.map((t) => ({
+                language: t.language,
+                title: t.title,
+              })),
             }
           : undefined,
         supportLanguages: {
-          create: { language: DEFAULT_LANGUAGE, isPrimary: true },
+          create: needsTitle
+            ? translations.map((t, i) => ({
+                language: t.language,
+                isPrimary: i === 0,
+                sortOrder: i,
+              }))
+            : { language: DEFAULT_LANGUAGE, isPrimary: true },
         },
       },
       select: { id: true, type: true },

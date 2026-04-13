@@ -3,7 +3,7 @@ import { DEFAULT_LANGUAGE } from "@rezics/contract";
 import type { PrismaClient } from "#/prisma/generated/client.js";
 import { UnitStatus, UnitType } from "#/prisma/generated/client.js";
 import { REALM_ROLE_KEYS } from "./data.js";
-import { generateTranslation } from "./generators.js";
+import { generateTranslations } from "./generators.js";
 import type { CreatedUnit, CreatedUser } from "./types.js";
 import { chunkedParallel, pickN, randomBoolean, randomInt } from "./utils.js";
 
@@ -26,7 +26,7 @@ export async function seedRealms(
     CHUNK_SIZE,
     async () => {
       const owner = faker.helpers.arrayElement(users);
-      const translation = generateTranslation(UnitType.REALM);
+      const translations = generateTranslations(UnitType.REALM);
       const isPublic = randomBoolean(0.8);
 
       const unit = await prisma.unit.create({
@@ -43,14 +43,18 @@ export async function seedRealms(
             },
           },
           translations: {
-            create: {
-              language: DEFAULT_LANGUAGE,
-              title: translation.title,
-              description: translation.description,
-            },
+            create: translations.map((t) => ({
+              language: t.language,
+              title: t.title,
+              description: t.description,
+            })),
           },
           supportLanguages: {
-            create: { language: DEFAULT_LANGUAGE, isPrimary: true },
+            create: translations.map((t, i) => ({
+              language: t.language,
+              isPrimary: i === 0,
+              sortOrder: i,
+            })),
           },
         },
         select: { id: true, type: true },

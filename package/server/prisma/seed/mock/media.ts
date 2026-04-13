@@ -7,7 +7,7 @@ import {
   ORG_ROLE_KEYS,
   PERSON_ROLE_KEYS,
 } from "./data.js";
-import { generateMediaExtra, generateTranslation } from "./generators.js";
+import { generateMediaExtra, generateTranslations } from "./generators.js";
 import type {
   CreatedOrganization,
   CreatedPerson,
@@ -36,7 +36,7 @@ export async function seedMedia(
     CHUNK_SIZE,
     async () => {
       const author = faker.helpers.arrayElement(users);
-      const translation = generateTranslation(UnitType.MEDIA);
+      const translations = generateTranslations(UnitType.MEDIA);
       const kindKey = faker.helpers.arrayElement([...MEDIA_KIND_KEYS]);
       const isTV = kindKey === "TV_SERIES" || kindKey === "ANIME";
 
@@ -60,15 +60,19 @@ export async function seedMedia(
             },
           },
           translations: {
-            create: {
-              language: DEFAULT_LANGUAGE,
-              title: translation.title,
-              summary: translation.summary,
-              description: translation.description,
-            },
+            create: translations.map((t) => ({
+              language: t.language,
+              title: t.title,
+              summary: t.summary,
+              description: t.description,
+            })),
           },
           supportLanguages: {
-            create: { language: DEFAULT_LANGUAGE, isPrimary: true },
+            create: translations.map((t, i) => ({
+              language: t.language,
+              isPrimary: i === 0,
+              sortOrder: i,
+            })),
           },
         },
         select: { id: true, type: true },
