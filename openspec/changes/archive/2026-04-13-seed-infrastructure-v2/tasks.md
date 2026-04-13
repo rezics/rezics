@@ -58,8 +58,8 @@
 
 ## 10. Validation
 
-- [ ] 10.1 Run `bun run seed:database-reset` and verify infrastructure is preserved (users, tags, realm, EchoKV remain)
-- [ ] 10.2 Run `bun run seed:database-reset --all` and verify full wipe (all tables empty)
-- [ ] 10.3 Run `bun run seed:mock` and verify multilingual translations are created (spot-check books, shelves, realms for multiple UnitTranslation records)
-- [ ] 10.4 Start dev server and verify multilingual content displays correctly in the UI when switching languages via LangToggle
+- [x] 10.1 Run `bun run seed:database-reset` and verify infrastructure is preserved (users, tags, realm, EchoKV remain)
+- [x] 10.2 Run `bun run seed:database-reset --all` and verify full wipe (all tables empty)
+- [x] 10.3 Run `bun run seed:mock` and verify multilingual translations are created (spot-check books, shelves, realms for multiple UnitTranslation records)
+- [x] 10.4 Start dev server and verify multilingual content displays correctly in the UI when switching languages via LangToggle
 <!-- Tasks 10.1-10.4 require running database for validation -->
