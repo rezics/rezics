@@ -133,6 +133,13 @@ export function buildContentDocument(unit: any): ContentSearchDocument {
     userId: unit.userId ?? null,
     linkUrl,
     linkSiteName,
+    translations: translations.map((tr: any) => ({
+      language: tr.language,
+      title: tr.title ?? null,
+      subtitle: tr.subtitle ?? null,
+      summary: tr.summary ?? null,
+      description: tr.description ?? null,
+    })),
   };
 }
 

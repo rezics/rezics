@@ -1,6 +1,7 @@
 import { Button, Tab, Tabs } from "@mui/material";
 import { useNavigate } from "@tanstack/react-router";
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { HorizontalBookCarousel } from "@/book-library/component/list/HorizontalBookCarousel";
 import {
   getBookAuthorName,
@@ -21,6 +22,7 @@ export const NewBookSection: React.FC<NewBookSectionProps> = ({
   limit = 12,
   className,
 }) => {
+  const { t } = useTranslation();
   const [tab, setTab] = React.useState<TabKey>("latest");
   const navigate = useNavigate();
 
@@ -41,29 +43,29 @@ export const NewBookSection: React.FC<NewBookSectionProps> = ({
     <section className={className}>
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h2 className="font-semibold">最新作品</h2>
+        <h2 className="font-semibold">{t("page.home.sections.new_book.title")}</h2>
         <Button
           variant="text"
           color="primary"
           onClick={() => navigate({ to: "/book" })}
         >
-          更多 →
+          {t("page.home.sections.new_book.more")}
         </Button>
       </div>
 
       {/* Tabs */}
       <div className="mb-4">
         <Tabs value={tab} onChange={(_, value) => setTab(value)}>
-          <Tab value="latest" label="最新连载" />
-          <Tab value="new" label="最新上架" />
-          <Tab value="completed" label="近期完结" />
+          <Tab value="latest" label={t("page.home.sections.new_book.tab_latest_serial")} />
+          <Tab value="new" label={t("page.home.sections.new_book.tab_new_on_shelf")} />
+          <Tab value="completed" label={t("page.home.sections.new_book.tab_recently_completed")} />
         </Tabs>
       </div>
 
       {/* Content */}
       <div>
         {isLoading ? (
-          <div className="text-slate-400 text-sm">Loading...</div>
+          <div className="text-slate-400 text-sm">{t("page.home.sections.trending_book.loading")}</div>
         ) : (
           <HorizontalBookCarousel bookList={bookList} />
         )}

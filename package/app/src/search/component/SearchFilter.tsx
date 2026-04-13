@@ -4,6 +4,7 @@ import { Button, Menu, MenuItem, Stack, Typography } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import type { SortControlsProps } from "@rezics/ui/composite/pagination/Pagination.tsx";
 import React from "react";
+import { useTranslation } from "react-i18next";
 
 export type BookLibSortKey =
   | "relevance"
@@ -13,12 +14,12 @@ export type BookLibSortKey =
   | "monthVotes"
   | "recommend";
 
-const LABELS: Partial<Record<BookLibSortKey, string>> = {
-  relevance: "搜索相关性",
-  time: "最新",
-  favorites: "总收藏",
-  wordCount: "总字数",
-  monthVotes: "月票",
+const LABEL_KEYS: Partial<Record<BookLibSortKey, string>> = {
+  relevance: "search.filter.relevance",
+  time: "search.filter.time",
+  favorites: "search.filter.favorites",
+  wordCount: "search.filter.word_count",
+  monthVotes: "search.filter.month_votes",
 };
 
 export type BookSearchFilterProps = SortControlsProps;
@@ -28,12 +29,12 @@ export const BookSearchFilter: React.FC<BookSearchFilterProps> = ({
   sortOrder,
   onSortChange,
 }) => {
+  const { t } = useTranslation();
   const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
   const theme = useTheme();
 
   const handleClick = (key: string) => (e: React.MouseEvent) => {
     if (key === "recommend") {
-      // 推荐票用下拉菜单
       const el = e.currentTarget as HTMLElement;
       setAnchorEl(el);
       return;
@@ -53,7 +54,7 @@ export const BookSearchFilter: React.FC<BookSearchFilterProps> = ({
         alignItems="center"
         className="book-search-filter mb-6"
       >
-        {(Object.keys(LABELS) as BookLibSortKey[]).map((key) => {
+        {(Object.keys(LABEL_KEYS) as BookLibSortKey[]).map((key) => {
           const active = key === sortType;
           return (
             <Button
@@ -62,9 +63,8 @@ export const BookSearchFilter: React.FC<BookSearchFilterProps> = ({
               sx={{
                 backgroundColor: active ? theme.palette.secondary.main : "",
               }}
-              // variant={active ? "outlined" : "contained" }
             >
-              <Typography variant="body2">{LABELS[key]}</Typography>
+              <Typography variant="body2">{t(LABEL_KEYS[key]!)}</Typography>
             </Button>
           );
         })}
@@ -72,23 +72,22 @@ export const BookSearchFilter: React.FC<BookSearchFilterProps> = ({
           onClick={handleClick("recommend")}
           endIcon={<ArrowDropDownIcon fontSize="small" />}
         >
-          <Typography variant="body2">推荐</Typography>
+          <Typography variant="body2">{t("search.filter.recommendation")}</Typography>
         </Button>
 
-        {/* “推荐票” 下拉菜单 */}
         <Menu
           anchorEl={anchorEl}
           open={Boolean(anchorEl)}
           onClose={() => setAnchorEl(null)}
         >
           <MenuItem onClick={handleSecondaryMenuSelect("weekVotes")}>
-            周推荐票
+            {t("search.filter.week_votes")}
           </MenuItem>
           <MenuItem onClick={handleSecondaryMenuSelect("monthVotes")}>
-            月推荐票
+            {t("search.filter.month_votes")}
           </MenuItem>
           <MenuItem onClick={handleSecondaryMenuSelect("totalVotes")}>
-            总推荐票
+            {t("search.filter.total_votes")}
           </MenuItem>
         </Menu>
       </Stack>
@@ -104,7 +103,7 @@ export const BookSearchFilter: React.FC<BookSearchFilterProps> = ({
           }}
         >
           <ArrowDownward />
-          &nbsp; 降序
+          &nbsp; {t("search.filter.desc")}
         </Button>
         <Button
           value="asc"
@@ -118,7 +117,7 @@ export const BookSearchFilter: React.FC<BookSearchFilterProps> = ({
           }}
         >
           <ArrowUpward />
-          &nbsp; 升序
+          &nbsp; {t("search.filter.asc")}
         </Button>
       </div>
     </div>

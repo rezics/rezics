@@ -69,7 +69,7 @@ export const SearchInputView: React.FC<SearchInputViewProps> = ({
           fullWidth
           size="small"
           label={placeholder ?? t("placeholders.search_books")}
-          placeholder="Title, ISBN, Author, Publisher, Producer"
+          placeholder={t("search.input.placeholder")}
           value={value.keyword ?? ""}
           onChange={(e) => onValueChange({ ...value, keyword: e.target.value })}
           onKeyDown={handleKeyDown}
@@ -88,8 +88,8 @@ export const SearchInputView: React.FC<SearchInputViewProps> = ({
           <TextField
             fullWidth
             size="small"
-            label="Tags"
-            placeholder="Click tags below or enter tags separated by commas"
+            label={t("search.input.tags_label")}
+            placeholder={t("search.input.tags_hint")}
             value={
               value.tags
                 ? value.tags.filter((tag) => tag.trim() !== "").join(", ")
@@ -107,8 +107,8 @@ export const SearchInputView: React.FC<SearchInputViewProps> = ({
           {!hiddenWordCountFilter && (
             <TextField
               size="small"
-              label="Word Count"
-              placeholder="10000-20000"
+              label={t("search.input.word_count_label")}
+              placeholder={t("search.input.word_count_placeholder")}
               className="w-40"
               value={value.textLength ?? ""}
               onChange={(e) =>

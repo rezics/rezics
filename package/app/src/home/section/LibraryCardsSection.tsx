@@ -4,20 +4,22 @@ import SportsEsportsOutlinedIcon from "@mui/icons-material/SportsEsportsOutlined
 import MovieOutlinedIcon from "@mui/icons-material/MovieOutlined";
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
+import { useTranslation } from "react-i18next";
 
 const libraries = [
-  { title: "Book Library", icon: MenuBookOutlinedIcon, to: "/book", active: true },
-  { title: "Game Library", icon: SportsEsportsOutlinedIcon, to: "#", active: false },
-  { title: "Media Library", icon: MovieOutlinedIcon, to: "#", active: false },
-];
+  { key: "book_library", icon: MenuBookOutlinedIcon, to: "/book", active: true },
+  { key: "game_library", icon: SportsEsportsOutlinedIcon, to: "#", active: false },
+  { key: "media_library", icon: MovieOutlinedIcon, to: "#", active: false },
+] as const;
 
 export const LibraryCardsSection: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
       {libraries.map((lib) => (
-        <Card key={lib.title} elevation={0}>
+        <Card key={lib.key} elevation={0}>
           <CardActionArea
             onClick={() => lib.active && navigate({ to: lib.to })}
             disabled={!lib.active}
@@ -27,10 +29,10 @@ export const LibraryCardsSection: React.FC = () => {
                 <lib.icon sx={{ fontSize: 32 }} color={lib.active ? "primary" : "disabled"} />
                 <Box>
                   <Typography variant="h6" fontWeight={600}>
-                    {lib.title}
+                    {t(`page.home.sections.library_cards.${lib.key}`)}
                   </Typography>
                   {!lib.active && (
-                    <Chip label="Coming Soon" size="small" variant="outlined" />
+                    <Chip label={t("page.home.sections.library_cards.coming_soon")} size="small" variant="outlined" />
                   )}
                 </Box>
               </Stack>

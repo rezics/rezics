@@ -1,6 +1,7 @@
 import { Button } from "@mui/material";
 import { useNavigate } from "@tanstack/react-router";
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { ResponsiveBookGridLimited } from "@/book-library/component/list/ResponsiveBookGridLimited";
 import {
   getBookAuthorName,
@@ -19,6 +20,7 @@ export const TrendingBookSection: React.FC<TrendingBookSectionProps> = ({
   limit = 12,
   className,
 }) => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { items = [], isLoading } = useHomeBooks(limit);
 
@@ -36,17 +38,17 @@ export const TrendingBookSection: React.FC<TrendingBookSectionProps> = ({
   return (
     <section className={className}>
       <div className="flex items-center justify-between mb-4">
-        <h2 className="font-semibold">趋势好书</h2>
+        <h2 className="font-semibold">{t("page.home.sections.trending_book.title")}</h2>
         <Button
           variant="text"
           color="primary"
           onClick={() => navigate({ to: "/book" })}
         >
-          更多 →
+          {t("page.home.sections.trending_book.more")}
         </Button>
       </div>
       {isLoading ? (
-        <div className="text-slate-400 text-sm">Loading...</div>
+        <div className="text-slate-400 text-sm">{t("page.home.sections.trending_book.loading")}</div>
       ) : (
         <ResponsiveBookGridLimited bookList={bookList} />
       )}

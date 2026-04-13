@@ -49,6 +49,19 @@ export const ContentSearchDocumentSchema = t.Object({
   // Link-specific display fields
   linkUrl: t.Optional(t.Union([t.String(), t.Null()])),
   linkSiteName: t.Optional(t.Union([t.String(), t.Null()])),
+
+  // Structured translations for language-aware rendering
+  translations: t.Optional(
+    t.Array(
+      t.Object({
+        language: t.String(),
+        title: t.Union([t.String(), t.Null()]),
+        subtitle: t.Union([t.String(), t.Null()]),
+        summary: t.Union([t.String(), t.Null()]),
+        description: t.Union([t.String(), t.Null()]),
+      }),
+    ),
+  ),
 });
 
 export type ContentSearchDocument = Static<

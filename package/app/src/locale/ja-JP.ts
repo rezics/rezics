@@ -99,6 +99,72 @@ export default {
     },
   },
 
+  page: {
+    home: {
+      sections: {
+        new_book: {
+          title: "Latest Works", // TODO: translate
+          tab_latest_serial: "Latest Serial", // TODO: translate
+          tab_new_on_shelf: "New on Shelf", // TODO: translate
+          tab_recently_completed: "Recently Completed", // TODO: translate
+          more: "More \u2192", // TODO: translate
+        },
+        trending_book: {
+          title: "Trending Books", // TODO: translate
+          more: "More \u2192", // TODO: translate
+          loading: "Loading...", // TODO: translate
+        },
+        trending_quote: {
+          title: "Trending Quotes", // TODO: translate
+          more: "More \u2192", // TODO: translate
+          empty: "No quotes yet", // TODO: translate
+        },
+        active_realms: {
+          title: "Active Realms", // TODO: translate
+          more: "More", // TODO: translate
+        },
+        library_cards: {
+          book_library: "Book Library", // TODO: translate
+          game_library: "Game Library", // TODO: translate
+          media_library: "Media Library", // TODO: translate
+          coming_soon: "Coming Soon", // TODO: translate
+        },
+      },
+    },
+  },
+
+  search: {
+    filter: {
+      relevance: "Relevance", // TODO: translate
+      time: "Latest", // TODO: translate
+      favorites: "Total Favorites", // TODO: translate
+      word_count: "Word Count", // TODO: translate
+      month_votes: "Monthly Votes", // TODO: translate
+      recommendation: "Recommendation", // TODO: translate
+      week_votes: "Weekly Votes", // TODO: translate
+      total_votes: "Total Votes", // TODO: translate
+      desc: "Descending", // TODO: translate
+      asc: "Ascending", // TODO: translate
+    },
+    input: {
+      placeholder: "Title, ISBN, Author, Publisher, Producer", // TODO: translate
+      tags_label: "Tags", // TODO: translate
+      tags_hint: "Click tags below or enter tags separated by commas", // TODO: translate
+      word_count_label: "Word Count", // TODO: translate
+      word_count_placeholder: "10000-20000",
+      preset_tags: {
+        fiction: "Fiction", // TODO: translate
+        nonfiction: "Nonfiction", // TODO: translate
+        mystery: "Mystery", // TODO: translate
+        romance: "Romance", // TODO: translate
+        history: "History", // TODO: translate
+        science: "Science", // TODO: translate
+        fantasy: "Fantasy", // TODO: translate
+        philosophy: "Philosophy", // TODO: translate
+      },
+    },
+  },
+
   // Common UI Elements
   common: {
     email: "メール",

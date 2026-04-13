@@ -1,6 +1,7 @@
 import { Alert, Button, CircularProgress, Typography } from "@mui/material";
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
+import { useTranslation } from "react-i18next";
 import { HorizontalQuoteCarousel } from "@/quote/component/list/HorizontalQuoteCarousel";
 import { useHomeQuotes } from "./hooks/hooks";
 
@@ -13,8 +14,9 @@ export const TrendingQuoteSection: React.FC<TrendingQuoteSectionProps> = ({
   title,
   limit = 8,
 }) => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
-  const resolvedTitle = title ?? "热门摘录";
+  const resolvedTitle = title ?? t("page.home.sections.trending_quote.title");
   const { items, isLoading, error } = useHomeQuotes(limit);
 
   const handleMoreClick = () => {
@@ -46,7 +48,7 @@ export const TrendingQuoteSection: React.FC<TrendingQuoteSectionProps> = ({
       <div className="flex items-center justify-between mb-4">
         <h2 className="font-semibold">{resolvedTitle}</h2>
         <Button variant="text" color="primary" onClick={handleMoreClick}>
-          更多 →
+          {t("page.home.sections.trending_quote.more")}
         </Button>
       </div>
 
@@ -54,7 +56,7 @@ export const TrendingQuoteSection: React.FC<TrendingQuoteSectionProps> = ({
 
       {!isLoading && !items.length && (
         <Typography variant="body2" color="text.secondary">
-          暂无摘录
+          {t("page.home.sections.trending_quote.empty")}
         </Typography>
       )}
 

@@ -30,8 +30,10 @@ export function useHomeBooks(limit = 12): SimpleQueryState<BookDTO> {
   const items = useMemo<BookDTO[]>(() => {
     return ((data?.items ?? []) as ContentSearchDocument[]).map((doc) => ({
       unitId: doc.id,
-      title: doc.titles[0] ?? "",
-      description: doc.descriptions[0] ?? "",
+      defaultLanguage: doc.defaultLanguage,
+      translations: doc.translations ?? (doc.titles[0]
+        ? [{ unitId: doc.id, language: doc.defaultLanguage ?? 'zh-CN', title: doc.titles[0], subtitle: null, summary: doc.summaries[0] ?? null, description: doc.descriptions[0] ?? null }]
+        : []),
       coverUrl: doc.coverUrl,
       nsfw: doc.nsfw,
       isLicensed: doc.isLicensed,
@@ -63,6 +65,9 @@ export function useHomeShelves(limit = 6): SimpleQueryState<ShelfDTO> {
       id: doc.id,
       title: doc.titles[0] ?? "",
       content: doc.descriptions[0] ?? "",
+      translations: doc.translations ?? (doc.titles[0]
+        ? [{ unitId: doc.id, language: doc.defaultLanguage ?? 'zh-CN', title: doc.titles[0], subtitle: null, summary: doc.summaries[0] ?? null, description: doc.descriptions[0] ?? null }]
+        : []),
     })) as ShelfDTO[];
   }, [data]);
 

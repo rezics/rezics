@@ -91,6 +91,72 @@ export default {
     },
   },
 
+  page: {
+    home: {
+      sections: {
+        new_book: {
+          title: "最新作品",
+          tab_latest_serial: "最新連載",
+          tab_new_on_shelf: "最新上架",
+          tab_recently_completed: "近期完結",
+          more: "更多 \u2192",
+        },
+        trending_book: {
+          title: "趨勢好書",
+          more: "更多 \u2192",
+          loading: "載入中...",
+        },
+        trending_quote: {
+          title: "熱門摘錄",
+          more: "更多 \u2192",
+          empty: "暫無摘錄",
+        },
+        active_realms: {
+          title: "活躍領域",
+          more: "更多",
+        },
+        library_cards: {
+          book_library: "圖書館",
+          game_library: "遊戲庫",
+          media_library: "媒體庫",
+          coming_soon: "即將推出",
+        },
+      },
+    },
+  },
+
+  search: {
+    filter: {
+      relevance: "搜尋相關性",
+      time: "最新",
+      favorites: "總收藏",
+      word_count: "總字數",
+      month_votes: "月票",
+      recommendation: "推薦",
+      week_votes: "週推薦票",
+      total_votes: "總推薦票",
+      desc: "降序",
+      asc: "升序",
+    },
+    input: {
+      placeholder: "書名、ISBN、作者、出版社、出品方",
+      tags_label: "標籤",
+      tags_hint: "點擊下方標籤或輸入標籤，用逗號分隔",
+      word_count_label: "字數",
+      word_count_placeholder: "10000-20000",
+      preset_tags: {
+        fiction: "小說",
+        nonfiction: "非虛構",
+        mystery: "懸疑",
+        romance: "言情",
+        history: "歷史",
+        science: "科學",
+        fantasy: "奇幻",
+        philosophy: "哲學",
+      },
+    },
+  },
+
   // Common UI Elements
   common: {
     email: "郵箱",

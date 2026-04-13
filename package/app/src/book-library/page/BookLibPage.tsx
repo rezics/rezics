@@ -64,8 +64,10 @@ export const BookLibPage: React.FC = () => {
     () =>
       (data?.items ?? []).map((item: ContentSearchDocument) => ({
         unitId: item.id,
-        title: item.titles[0] ?? "",
-        description: item.descriptions[0] ?? "",
+        defaultLanguage: item.defaultLanguage,
+        translations: item.translations ?? (item.titles[0]
+          ? [{ unitId: item.id, language: item.defaultLanguage ?? 'zh-CN', title: item.titles[0], subtitle: null, summary: item.summaries[0] ?? null, description: item.descriptions[0] ?? null }]
+          : []),
         coverUrl: item.coverUrl,
         creditNames: item.creditNames,
         type: item.type,
@@ -98,7 +100,7 @@ export const BookLibPage: React.FC = () => {
   return (
     <BookLibSectionRef
       ref={ref}
-      books={books as any}
+      books={books}
       totalItems={totalItems}
       isLoading={isLoading}
       error={error}
