@@ -15,6 +15,7 @@ export * from "./permission";
 export * from "./post";
 export * from "./reaction/index";
 export * from "./realm";
+export * from "./score";
 export * from "./schema";
 export * from "./seed-tags";
 export * from "./shelf";

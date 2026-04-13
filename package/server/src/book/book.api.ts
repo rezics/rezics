@@ -2,6 +2,7 @@ import type {
   BookListResponse,
   BookResponse,
   CreateBookInput,
+  ScoreAggregateDTO,
 } from "@rezics/contract";
 import {
   BasicAdminPermission,
@@ -12,8 +13,9 @@ import {
   updateBookSchema,
 } from "@rezics/contract";
 import { Elysia, t } from "elysia";
-import type { Rating } from "#/prisma/client";
 import { authMacro, buildActorFromContext } from "@/middleware";
+import { mapScoreAggregateToDTO } from "@/score/score.mapper";
+import { scoreService } from "@/score/score.service";
 import { unitService } from "@/unit/unit.service";
 import { bookService } from "./book.service";
 import { mapBookToDTO } from "./mapper";
@@ -37,14 +39,15 @@ export const bookApi = new Elysia({ prefix: "/books" })
   )
   .get(
     "/:unitId/rating",
-    async ({ params }): Promise<Rating> => {
-      return bookService.getRatingByBookUnitId(params.unitId);
+    async ({ params }): Promise<ScoreAggregateDTO[]> => {
+      const aggregates = await scoreService.getAggregatesByUnit(params.unitId);
+      return aggregates.map(mapScoreAggregateToDTO);
     },
     {
       params: bookParamsSchema,
       detail: {
-        summary: "Get rating",
-        description: "Get rating for a book by unit ID",
+        summary: "Get score aggregates",
+        description: "Get all realm score aggregates for a book by unit ID",
         tags: ["Books"],
       },
     },

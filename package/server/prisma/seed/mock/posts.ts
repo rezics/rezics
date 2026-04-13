@@ -22,12 +22,14 @@ interface PostCounts {
 /**
  * Seed posts for all work units (books, games, media).
  * Creates reviews, quotes, remarks, and threaded comments.
+ * scoreEntries maps `${userId}:${unitId}:${realm}` -> scoreEntryId for linking reviews/remarks.
  */
 export async function seedPostsForWorks(
   prisma: PrismaClient,
   works: CreatedUnit[],
   users: CreatedUser[],
   counts: PostCounts,
+  scoreEntries?: Map<string, string>,
 ): Promise<CreatedPost[]> {
   console.log(
     `[Seed] Seeding posts for ${works.length} works (${counts.reviews} reviews, ${counts.quotes} quotes, ${counts.remarks} remarks, ${counts.comments} comments per work)...`,
@@ -43,6 +45,7 @@ export async function seedPostsForWorks(
       work.id,
       users,
       counts.reviews,
+      scoreEntries,
     );
     allPosts.push(...reviews);
 
@@ -63,6 +66,7 @@ export async function seedPostsForWorks(
       work.id,
       users,
       counts.remarks,
+      scoreEntries,
     );
     allPosts.push(...remarks);
 
@@ -81,6 +85,7 @@ export async function seedPostsForWorks(
 
 /**
  * Create N posts of a given kind targeting a unit.
+ * For REVIEW and REMARK kinds, links to a ScoreEntry if available in scoreEntries map.
  */
 async function seedPostKindForTarget(
   prisma: PrismaClient,
@@ -88,14 +93,28 @@ async function seedPostKindForTarget(
   targetUnitId: string,
   users: CreatedUser[],
   count: number,
+  scoreEntries?: Map<string, string>,
 ): Promise<CreatedPost[]> {
   const posts: CreatedPost[] = [];
+  const needsScore = kind === PostKind.REVIEW || kind === PostKind.REMARK;
 
   await chunkedParallel(Array.from({ length: count }), CHUNK_SIZE, async () => {
     const author = faker.helpers.arrayElement(users);
     const body = generatePostBody(kind);
     const extra = generatePostExtra(kind);
     const needsTitle = kind === PostKind.REVIEW;
+
+    // Find a matching scoreEntryId for this author+target
+    let scoreEntryId: string | undefined;
+    if (needsScore && scoreEntries) {
+      // Try all realms — keys are `${userId}:${unitId}:${realm}`
+      for (const [key, entryId] of scoreEntries) {
+        if (key.startsWith(`${author.unitId}:${targetUnitId}:`)) {
+          scoreEntryId = entryId;
+          break;
+        }
+      }
+    }
 
     const unit = await prisma.unit.create({
       data: {
@@ -112,6 +131,7 @@ async function seedPostKindForTarget(
             body,
             extra: extra ?? undefined,
             depth: 0,
+            scoreEntryId: scoreEntryId ?? undefined,
           },
         },
         translations: needsTitle

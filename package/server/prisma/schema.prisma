@@ -289,6 +289,7 @@ model Post {
 
   targetUnitId       String?   @db.Uuid
   realmUnitId        String?   @db.Uuid
+  scoreEntryId       String?   @db.Uuid
 
   body               String?
 
@@ -314,6 +315,7 @@ model Post {
   realmUnit          Unit?     @relation("PostRealm", fields: [realmUnitId], references: [id], onDelete: SetNull)
   rootPost           Unit?     @relation("PostRoot", fields: [rootPostUnitId], references: [id], onDelete: SetNull)
   parentPost         Unit?     @relation("PostParent", fields: [parentPostUnitId], references: [id], onDelete: SetNull)
+  scoreEntry         ScoreEntry? @relation("PostScoreEntry", fields: [scoreEntryId], references: [id], onDelete: Restrict)
 
   @@index([authorUserId, createdAt])
   @@index([targetUnitId, createdAt])
@@ -322,6 +324,7 @@ model Post {
   @@index([rootPostUnitId, sortPath])
   @@index([parentPostUnitId, createdAt])
   @@index([kind, createdAt])
+  @@index([scoreEntryId])
 }
 
 // ============================================================
@@ -566,14 +569,52 @@ model User {
 // ============================================================
 // Reaction and ReactionSummary models moved to @rezics/reaction service.
 
-model Rating {
-  unitId     String   @db.Uuid
-  domain     String   @db.Uuid
-  totalScore Int      @default(0)
-  totalCount Int      @default(0)
-  updatedAt  DateTime @updatedAt
+// ============================================================
+// SCORE SYSTEM
+// ============================================================
 
-  @@id([unitId, domain])
+model ScoreEntry {
+  id        String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  userId    String   @db.Uuid
+  unitId    String   @db.Uuid
+  realm     String   @db.Uuid
+  value     Int
+  fields    Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  linkedPosts Post[] @relation("PostScoreEntry")
+
+  @@unique([userId, unitId, realm])
+  @@index([unitId, realm])
+  @@index([userId, unitId])
+}
+
+model ScoreAggregate {
+  unitId       String   @db.Uuid
+  realm        String   @db.Uuid
+  totalScore   Int      @default(0)
+  totalCount   Int      @default(0)
+  distribution Json
+  fields       Json?
+
+  updatedAt    DateTime @updatedAt
+
+  @@id([unitId, realm])
+}
+
+model ScoreRealmField {
+  realm     String   @db.Uuid
+  key       String   @db.VarChar(64)
+  label     String?
+  sortOrder Int      @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@id([realm, key])
+  @@index([realm, sortOrder])
 }
 
 model Follow {

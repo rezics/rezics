@@ -15,6 +15,7 @@ import { seedGames } from "#/prisma/seed/mock/games";
 import { seedMedia } from "#/prisma/seed/mock/media";
 import { seedPostsForWorks } from "#/prisma/seed/mock/posts";
 import { seedRealms } from "#/prisma/seed/mock/realms";
+import { seedScores } from "#/prisma/seed/mock/scores";
 import { seedShelves } from "#/prisma/seed/mock/shelves";
 import { seedTags } from "#/prisma/seed/mock/tags";
 import { seedUsers } from "#/prisma/seed/mock/users";
@@ -73,26 +74,41 @@ async function main() {
   );
   done();
 
-  // ── STEP 5: Content (parallel) ────────────────────
-  done = stepTimer("Step 5: Posts + Shelves + Realms");
+  // ── STEP 5: Shelves + Realms (parallel) ───────────
+  done = stepTimer("Step 5: Shelves + Realms");
   const allWorks = [...books, ...games, ...mediaItems];
-  const [posts, shelves, realms] = await Promise.all([
-    seedPostsForWorks(prisma, allWorks, users, {
-      reviews: DEFAULT_COUNTS.reviewsPerWork,
-      comments: DEFAULT_COUNTS.commentsPerWork,
-      quotes: DEFAULT_COUNTS.quotesPerWork,
-      remarks: DEFAULT_COUNTS.remarksPerWork,
-    }),
+  const [shelves, realms] = await Promise.all([
     seedShelves(prisma, DEFAULT_COUNTS.shelves, users, allWorkIds, []),
     seedRealms(prisma, DEFAULT_COUNTS.realms, users, allWorkIds),
   ]);
-  console.log(
-    `[Seed]   ${posts.length} posts, ${shelves.length} shelves, ${realms.length} realms`,
-  );
+  console.log(`[Seed]   ${shelves.length} shelves, ${realms.length} realms`);
   done();
 
-  // ── STEP 5b: Chapters (needs books from step 4) ──
-  done = stepTimer("Step 5b: Chapters + BookIndex");
+  // ── STEP 5a: Scores (needs realms + works) ──────
+  done = stepTimer("Step 5a: Scores");
+  const { scoreEntries } = await seedScores(
+    prisma,
+    allWorks,
+    users,
+    realms,
+    DEFAULT_COUNTS.reviewsPerWork,
+  );
+  console.log(`[Seed]   ${scoreEntries.size} score entries`);
+  done();
+
+  // ── STEP 5b: Posts (needs scores for review/remark linking)
+  done = stepTimer("Step 5b: Posts");
+  const posts = await seedPostsForWorks(prisma, allWorks, users, {
+    reviews: DEFAULT_COUNTS.reviewsPerWork,
+    comments: DEFAULT_COUNTS.commentsPerWork,
+    quotes: DEFAULT_COUNTS.quotesPerWork,
+    remarks: DEFAULT_COUNTS.remarksPerWork,
+  }, scoreEntries);
+  console.log(`[Seed]   ${posts.length} posts`);
+  done();
+
+  // ── STEP 5c: Chapters (needs books from step 4) ──
+  done = stepTimer("Step 5c: Chapters + BookIndex");
   const bookUnitMap = new Map<string, string>();
   for (const book of books) {
     // We need the userId for each book to assign chapters

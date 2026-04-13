@@ -19,11 +19,12 @@ export async function resetDatabase(prisma: PrismaClient): Promise<void> {
     prisma.follow.deleteMany(),
     prisma.personCredit.deleteMany(),
     prisma.orgCredit.deleteMany(),
+    prisma.scoreRealmField.deleteMany(),
+    prisma.scoreAggregate.deleteMany(),
   ]);
 
   // Group 2: Aggregate / junction leaves
   await Promise.all([
-    prisma.rating.deleteMany(),
     prisma.realmTagUnit.deleteMany(),
   ]);
 
@@ -42,8 +43,10 @@ export async function resetDatabase(prisma: PrismaClient): Promise<void> {
   ]);
 
   // Group 5: Type extensions (1:1 with Unit)
+  // Post must be deleted before ScoreEntry (FK constraint)
+  await prisma.post.deleteMany();
+  await prisma.scoreEntry.deleteMany();
   await Promise.all([
-    prisma.post.deleteMany(),
     prisma.shelf.deleteMany(),
     prisma.realm.deleteMany(),
     prisma.book.deleteMany(),

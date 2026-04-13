@@ -3,7 +3,7 @@ import type {
   CreateBookInput,
   UpdateBookInput,
 } from "@rezics/contract";
-import type { Prisma, Rating } from "#/prisma/client";
+import type { Prisma } from "#/prisma/client";
 import {
   prisma,
   UnitStatus,
@@ -197,16 +197,6 @@ export class BookService {
     });
 
     return book as BookWithRelations;
-  }
-
-  /**
-   * Get rating by book unitId
-   */
-  async getRatingByBookUnitId(unitId: string): Promise<Rating> {
-    const rating = await prisma.rating.findUniqueOrThrow({
-      where: { unitId_domain: { unitId, domain: unitId } },
-    });
-    return rating;
   }
 
   /**

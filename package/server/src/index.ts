@@ -28,6 +28,7 @@ import { postApi } from "./post";
 import { internalApi } from "./internal/internal.api";
 import { reactionWriteApi } from "./reaction";
 import { realmApi } from "./realm";
+import { scoreApi } from "./score/score.api";
 import { collectionApi, shelfApi } from "./shelf";
 import { linkApi } from "./link";
 import { sessionApi } from "./session";
@@ -156,6 +157,7 @@ app
   .use(meiliApi)
   .use(unitApi)
   .use(tagApi)
+  .use(scoreApi)
   .use(internalApi)
   .use(reactionWriteApi)
   .use(tokenApi)
