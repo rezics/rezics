@@ -46,7 +46,6 @@ Additionally, the `UnitType` enum in the contract has 12 values (`BOOK`, `GAME`,
 
 **Non-Goals:**
 
-- Rating system refactor (mocked with TODO annotations; separate change)
 - Game library or media library frontend (placeholder cards only)
 - Admin panel changes beyond navigation label updates (admin already uses "shelves")
 - Notification/inbox feature rework (existing implementation retained)
@@ -127,16 +126,16 @@ Additionally, the `UnitType` enum in the contract has 12 values (`BOOK`, `GAME`,
 **Decision**: Book detail layout has 4 tabs: Info, Content, Reviews & Ratings, Discussion.
 
 The Reviews & Ratings tab integrates:
-1. **Rating overview** at top (mocked — distribution chart, average score, total count from reviews + remarks)
-2. **Inline remark form** below (star rating selector + text input + submit button)
+1. **Score overview** at top (real data from `scoreQueries.aggregates(unitId)` — distribution histogram, average score, total count)
+2. **Inline remark form** below (score selector 1-10 + text input + submit button)
 3. **Sub-tab toggle**: Remarks | Reviews
-4. **Remark list**: Compact cards with author, rating stars, text, reactions, timestamp
-5. **Review list**: Article preview cards with title, rating, word count, excerpt, reactions
+4. **Remark list**: Compact cards with author, score, text, reactions, timestamp
+5. **Review list**: Article preview cards with title, score, word count, excerpt, reactions
 6. **"Write a Full Review" link** navigating to `/review/new/:bookUnitId`
 
-**Rationale**: Douban's 短评/长评 model works because remarks are low-friction (inline, no page navigation) while reviews are a commitment (dedicated editor). Combining both on one tab with the rating summary gives a complete picture of community sentiment.
+**Rationale**: Douban's 短评/长评 model works because remarks are low-friction (inline, no page navigation) while reviews are a commitment (dedicated editor). Combining both on one tab with the score summary gives a complete picture of community sentiment.
 
-**Rating components**: `RatingInput` (star selector), `RatingOverview` (summary + distribution) — both mocked with `// TODO: rating system being refactored` annotations. They read from `Rating.totalScore` and `Rating.totalCount` via `bookQueries.rating()` which already exists.
+**Score components**: `ScoreInput` (1-10 score selector, calls `useUpsertScoreMutation()`), `ScoreOverview` (average, count, real distribution histogram from `scoreQueries.aggregates(unitId)`). Data comes from `ScoreAggregateDTO` — no mocking needed.
 
 ### D4: Remark inline UX
 
@@ -144,14 +143,16 @@ The Reviews & Ratings tab integrates:
 
 **Form structure**:
 ```
-[Star Rating: ☆☆☆☆☆]     // TODO: mock RatingInput
-[Text input (expandable)]   // No character limit
-[Submit Remark]              // Creates PostKind.REMARK with targetUnitId
+[Score: 1 2 3 4 5 6 7 8 9 10]  // ScoreInput (1-10 selector)
+[Text input (expandable)]       // No character limit
+[Submit Remark]                  // Upserts ScoreEntry + creates PostKind.REMARK
 ```
 
-**API call**: `postApi.create({ targetUnitId: bookUnitId, kind: 'REMARK', body: text, extra: { rating: selectedRating } })`
+**API call** (two-step):
+1. If score provided: `scoreApi.upsertScore({ unitId: bookUnitId, realm: defaultRealmId, value: selectedScore })` → returns `ScoreEntryDTO`
+2. `postApi.create({ targetUnitId: bookUnitId, kind: 'REMARK', body: text, scoreEntryId: scoreEntry?.id })`
 
-**Rationale**: Inline creation removes friction. Users see existing remarks, form a quick opinion, write it immediately. No context switching. The star rating is optional but encouraged (both reviews and remarks trigger rating aggregation when present).
+**Rationale**: Inline creation removes friction. Users see existing remarks, form a quick opinion, write it immediately. No context switching. The score is optional. When provided, a ScoreEntry is created/updated first, then linked to the post via `scoreEntryId`.
 
 ### D5: Review — 200 character minimum
 
@@ -159,7 +160,7 @@ The Reviews & Ratings tab integrates:
 
 **Enforcement**: Character counter below the editor body. Submit button disabled until 200 chars reached. Validation message: "Reviews must be at least 200 characters" (i18n key).
 
-**Review editor fields**: Title (in `post.extra.title`), Body (markdown, main content), Rating (in `post.extra.rating`), Target book (from route param).
+**Review editor fields**: Title (in `post.extra.title`), Body (markdown, main content), Score (1-10, linked via `scoreEntryId` to ScoreEntry), Target book (from route param).
 
 ### D6: Discussion feature — Post threading on works
 
@@ -347,8 +348,8 @@ Footer product links updated: Discover→/book, Shelves→/shelf, Reviews→/rev
 **[Large scope] → Phased implementation with clear boundaries**
 This change touches ~100 files across 4 packages. Mitigated by splitting into 7 independent phases. Phases 2-4 (shelf, review/remark, realm) can proceed in parallel. Each phase produces a self-contained, testable increment.
 
-**[Rating system mocked] → TODO annotations for future change**
-The rating system is under separate refactoring. All rating UI components (`RatingInput`, `RatingOverview`, rating distribution) are mocked with `// TODO: rating system being refactored` annotations. They read from the existing `bookQueries.rating()` endpoint for basic average/count display but distribution data is fabricated.
+**[Score system integration] → Contract extension required**
+The score system is complete (`ScoreEntry`, `ScoreAggregate`, full API client). Integration requires adding `scoreEntryId` to `PostDTO` and `CreatePostInput` in the contract, updating the post mapper and service to propagate it, and replacing `bookQueries.rating()` with `scoreQueries.aggregates()`. This is plumbing work in Phase 1, not a UI risk.
 
 **[COMMENT removal in Prisma] → Existing data unaffected**
 Removing `COMMENT` from the `PostKind` enum doesn't require a data migration. Existing rows with `kind = 'COMMENT'` remain in the database. The application code simply stops creating new posts with this kind. If needed, a future migration can batch-update `COMMENT` posts to `POST`.

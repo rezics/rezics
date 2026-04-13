@@ -19,7 +19,7 @@ The backend has undergone three fundamental architectural shifts — Post unific
 - **Shelf feature** (`package/app/src/shelf/`): Full CRUD pages, browse/search at `/shelf/search`, detail view with grid/list/review modes, item management, keyword filtering.
 - **Realm feature** (`package/app/src/realm/`): Full CRUD, membership management (join/leave/roles), content feed, realm-scoped tag curation for moderators. Routes at `/realm/*`.
 - **Discussion feature** (`package/app/src/discussion/`): Threaded discussion on any work's detail page. Uses Post model with `kind: POST` and `targetUnitId`. New discussion tab on book detail.
-- **Remark inline UX**: Inline remark creation form on the book review tab (star rating + text, Douban-style 短评). Remarks use `PostKind.REMARK`, trigger rating aggregation, no character limit.
+- **Remark inline UX**: Inline remark creation form on the book review tab (score selector 1-10 + text, Douban-style 短评). Remarks use `PostKind.REMARK` with `scoreEntryId` linking to the score system, no character limit.
 - **Review enforcement**: Long-form reviews (`PostKind.REVIEW`) enforce 200-character minimum on frontend. Dedicated editor page with markdown support.
 - **Realm-tag context display**: Tag display on units shows all global tags sorted by score, plus realm-aggregated highlights from the user's preferred realms. New backend endpoint `GET /tags/for-unit/:unitId/context`.
 - **User realm-tag preferences**: Per-unit-type configuration of which realms influence tag display and their rank order. Stored in a new `settings` JSON column on the `User` table (not EchoKV). Max 50 realms per unit type.
@@ -34,7 +34,7 @@ The backend has undergone three fundamental architectural shifts — Post unific
 - **Book detail tabs**: Rework from 3 tabs (Info, Review, Content) to 4 tabs (Info, Content, Reviews & Ratings, Discussion).
 - **Navigation sidebar**: Update entries — rename Readlists→Shelves, add Realms, add My Shelves/My Realms, update Create menu.
 - **Translation helpers** (`package/app/src/shared/util/translation-helpers.ts`): Replace hardcoded `['zh-CN', 'zh', 'en', 'ja']` fallback with user-preference-aware chain.
-- **Rating UI**: Mock rating input and distribution components with `// TODO:` annotations (rating system under separate refactor).
+- **Score UI**: Wire `ScoreInput` (1-10 selector) and `ScoreOverview` (distribution histogram) to the real score system (`scoreQueries.aggregates()`, `scoreMutations.useUpsertScore()`). Add `scoreEntryId` to PostDTO and CreatePostInput contracts.
 - **Resolve ~50 MOCK annotations**: Replace content-search-as-list-query hacks with proper API calls (`shelfApi.list()`, `postApi.list({ kind })`, etc.) now that backend endpoints exist.
 
 ## Capabilities
@@ -42,7 +42,7 @@ The backend has undergone three fundamental architectural shifts — Post unific
 ### New Capabilities
 
 - `shelf-migration`: Complete readlist-to-shelf frontend migration — delete readlist/ feature, build shelf/ with full CRUD pages, routes at `/shelf/*` and `/shelf/search`, update navigation/footer/locale/URL builder, wire to shelf API and replace content-search hacks.
-- `review-remark-ux`: Distinct Review (long-form, 200 char min, dedicated editor, PostKind.REVIEW) and Remark (inline creation on book page, no char limit, PostKind.REMARK) UX. Rating input/overview components (mocked). Book detail review tab redesign with rating summary, inline remark form, and sub-tab toggle between remarks and reviews.
+- `review-remark-ux`: Distinct Review (long-form, 200 char min, dedicated editor, PostKind.REVIEW) and Remark (inline creation on book page, no char limit, PostKind.REMARK) UX. ScoreInput (1-10) and ScoreOverview components wired to real score system. Book detail review tab redesign with score summary, inline remark form, and sub-tab toggle between remarks and reviews.
 - `work-discussion`: Threaded discussion feature on work detail pages using Post model (kind: POST, targetUnitId). Delete comment/ feature, build discussion/ module with ThreadList, ThreadView, ReplyDrawer, InlinePostForm. Add Discussion tab to book detail layout.
 - `realm-frontend`: Full realm feature — RealmListPage (browse/search at /realm and /realm/search), RealmPage (detail with content feed, tag curation, member list), RealmManagePage (settings for owner/admin), NewRealmPage, JoinButton, RealmTagManager. Navigation integration.
 - `realm-tag-context`: Realm-based tag aggregation — new backend endpoint `GET /tags/for-unit/:unitId/context` returning global tags plus realm highlights for authenticated users. User realm-tag preferences stored in User.settings JSON column (max 50 realms per unit type). Frontend RealmTagHighlights component and RealmTagPreferences settings page. Backend `GET /realms/me` endpoint for joined realms.
@@ -65,7 +65,7 @@ The backend has undergone three fundamental architectural shifts — Post unific
 | `package/api` | Minor: realm-tag context query hooks, user settings hooks, possible new query wrappers |
 | `package/server` | Moderate: new endpoints (tag context, realms/me, user settings), comment/ domain deleted, PostKind enum update |
 | `package/admin` | Minor: navigation label updates (already uses "shelves") |
-| `package/ui` | Minor: possible new shared components (RatingInput, TranslationTabs) |
+| `package/ui` | Minor: possible new shared components (ScoreInput, TranslationTabs) |
 | `package/search` | None: Meilisearch integration unchanged |
 
 ### Database Changes

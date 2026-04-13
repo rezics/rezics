@@ -3,6 +3,11 @@
 - [ ] 1.1 Add `PostKind` typed const enum to `package/contract/src/post.ts` with values `REVIEW`, `REMARK`, `QUOTE`, `POST`. Export the type and the const object.
 - [ ] 1.2 Update `postDTOSchema.kind` from `t.Optional(t.String())` to `t.Optional(t.Nullable(t.Union([t.Literal("REVIEW"), t.Literal("REMARK"), t.Literal("QUOTE"), t.Literal("POST")])))` in `package/contract/src/post.ts`.
 - [ ] 1.3 Update `createPostSchema.kind` from `t.Optional(t.String())` to `t.Optional(t.Union([...PostKind literals]))` in `package/contract/src/post.ts`.
+- [ ] 1.3a Add `scoreEntryId: t.Optional(t.Nullable(t.String()))` to `postDTOSchema` in `package/contract/src/post.ts`.
+- [ ] 1.3b Add `scoreEntryId: t.Optional(t.String())` to `createPostSchema` in `package/contract/src/post.ts`.
+- [ ] 1.3c Update `mapPostToDTO()` in `package/server/src/post/post.mapper.ts` to include `scoreEntryId: post.scoreEntryId ?? null`.
+- [ ] 1.3d Update `postService.create()` in `package/server/src/post/post.service.ts` to accept and pass `scoreEntryId` in the `createData` object.
+- [ ] 1.3e Fix `bookApi.getRating()` in `package/api/src/book/book.api.ts` — replace stale local `Rating` type (lines 17-23) with `ScoreAggregateDTO[]` from `@rezics/contract`. Update `bookRatingQuery` return type in `book.queries.ts`.
 - [ ] 1.4 Remove `COMMENT` from the `PostKind` Prisma enum in `package/server/prisma/schema.prisma`. Create migration with `bun run prisma:migrate` in `package/server`.
 - [ ] 1.5 Delete empty contract stubs: `package/contract/src/comment.ts`, `package/contract/src/review.ts`, `package/contract/src/readlist.ts`.
 - [ ] 1.6 Remove re-exports of deleted stubs from `package/contract/src/index.ts` (remove `export * from "./comment"`, `export * from "./review"` — note: `readlist.ts` was not exported).
@@ -53,21 +58,22 @@
 
 ## 4. Review & Remark UX
 
-- [ ] 4.1 Create `package/app/src/remark/component/RemarkInlineForm.tsx` — inline form with star rating selector + text input + submit button. Creates `PostKind.REMARK` with `targetUnitId`, `body`, `extra: { rating }`.
-- [ ] 4.2 Create `package/app/src/remark/component/RemarkCard.tsx` — compact card: author, rating stars, text, reactions, timestamp.
+- [ ] 4.1 Create `package/app/src/remark/component/RemarkInlineForm.tsx` — inline form with ScoreInput (1-10) + text input + submit button. On submit: if score provided, calls `useUpsertScoreMutation({ unitId: bookUnitId, realm: defaultRealmId, value })` to get `scoreEntryId`; then calls `postApi.create({ targetUnitId, kind: 'REMARK', body, scoreEntryId })`. No `extra: { rating }` pattern.
+- [ ] 4.2 Create `package/app/src/remark/component/RemarkCard.tsx` — compact card: author, score (if ScoreEntry linked), text, reactions, timestamp.
 - [ ] 4.3 Create `package/app/src/remark/component/RemarkList.tsx` — paginated list of RemarkCards. Uses `postApi.list({ targetUnitId, kind: 'REMARK' })`.
-- [ ] 4.4 Create `package/app/src/engagement/component/RatingInput.tsx` — star rating selector (1-5 or 1-10). Add `// TODO: rating system being refactored — mock component` annotation.
-- [ ] 4.5 Create `package/app/src/engagement/component/RatingOverview.tsx` — rating summary: average score, total count, distribution chart. Uses `bookQueries.rating()`. Add `// TODO: rating distribution data mocked — rating system being refactored` annotation.
-- [ ] 4.6 Rework `package/app/src/book-library/page/BookReviewPage.tsx` — new layout: RatingOverview at top, RemarkInlineForm below, sub-tab toggle (Remarks | Reviews), RemarkList and ReviewList sections, "Write a Full Review" link.
-- [ ] 4.7 Update `package/app/src/review/page/ReviewEditPage.tsx` — add 200-character minimum validation: character counter below body editor, submit button disabled until 200 chars, validation message (i18n key `review.validation.min_chars`).
-- [ ] 4.8 Update `package/app/src/review/page/ReviewNewPage.tsx` — same 200-char validation. Ensure `kind: PostKind.REVIEW` used in creation.
+- [ ] 4.4 Create `package/app/src/engagement/component/ScoreInput.tsx` — 1-10 score selector (segmented control with numbered buttons). No mock annotation. Emits selected integer value (or null) to parent form.
+- [ ] 4.5 Create `package/app/src/engagement/component/ScoreOverview.tsx` — displays average score (`totalScore / totalCount`), total count, and distribution histogram bar chart. Uses `scoreQueries.aggregates(unitId)`, selects the default realm aggregate. Renders real data from `ScoreAggregateDTO.distribution`. No mock data, no TODO annotations.
+- [ ] 4.6 Rework `package/app/src/book-library/page/BookReviewPage.tsx` — new layout: ScoreOverview at top (fed by `scoreQueries.aggregates(unitId)`), RemarkInlineForm below, sub-tab toggle (Remarks | Reviews), RemarkList and ReviewList sections, "Write a Full Review" link.
+- [ ] 4.7 Update `package/app/src/review/page/ReviewEditPage.tsx` — add 200-character minimum validation: character counter below body editor, submit button disabled until 200 chars, validation message (i18n key `review.validation.min_chars`). Replace `extra.rating` read/write: load existing score via `scoreQueries.userScores(userId, bookUnitId)`, on save call `useUpsertScoreMutation()` if score changed. Remove MOCK annotation.
+- [ ] 4.8 Update `package/app/src/review/page/ReviewNewPage.tsx` — same 200-char validation. Ensure `kind: PostKind.REVIEW` used in creation. Two-step flow: upsert score via `useUpsertScoreMutation()` first (if score provided), then create post with `scoreEntryId`. No `extra: { rating }` pattern.
 - [ ] 4.9 Update `package/app/src/review/page/ReviewsPage.tsx` — use `postApi.list({ kind: PostKind.REVIEW })` instead of content-search stub. Remove MOCK annotations.
 - [ ] 4.10 Create review search page at `package/app/src/review/page/ReviewSearchPage.tsx` — full Meilisearch search at `/review/search`.
 - [ ] 4.11 Create route files: `package/app/src/routes/_mainLayout/review/search.tsx`, `package/app/src/routes/_mainLayout/remark/$remarkId.tsx` (permalink), `package/app/src/routes/_mainLayout/remark/book/$bookId.tsx`.
-- [ ] 4.12 Update `package/app/src/review/component/SingleReview.tsx` — remove MOCK annotations for `post.extra.rating` and `post.extra.title` extraction (these are the real field locations per design).
-- [ ] 4.13 Update `package/app/src/review/component/SingleRemark.tsx` — remove MOCK annotations for `post.extra.rating`.
-- [ ] 4.14 Update `package/app/src/review/component/item/ReviewCard.tsx` — remove MOCK annotations for book metadata and rating extraction.
-- [ ] 4.15 Verify: `bun run app:dev`, navigate to `/book/:id/review`, confirm rating overview, inline remark form, sub-tab toggle, review list all render.
+- [ ] 4.12 Update `package/app/src/review/component/SingleReview.tsx` — replace `(review.extra as any)?.rating` with score display from linked ScoreEntry (via `scoreEntryId` on PostDTO). Remove MOCK comment. Keep `post.extra.title` extraction (title is still in extra).
+- [ ] 4.13 Update `package/app/src/review/component/SingleRemark.tsx` — replace `(review.extra as any)?.rating` reads with score from linked ScoreEntry. Remove both MOCK comments.
+- [ ] 4.14 Update `package/app/src/review/component/item/ReviewCard.tsx` — replace `(review.extra as any)?.rating` with score from linked ScoreEntry. Remove MOCK comments.
+- [ ] 4.15 Verify: `bun run app:dev`, navigate to `/book/:id/review`, confirm score overview, inline remark form, sub-tab toggle, review list all render.
+- [ ] 4.16 Update `BookDetailLayout.tsx` — replace `bookQueries.rating(bookId)` usage with `scoreQueries.aggregates(bookId)`. Compute average from default realm aggregate's `totalScore / totalCount`.
 
 ## 5. Discussion Feature (replaces comment/)
 
@@ -148,11 +154,11 @@
 
 ## 10. MOCK Cleanup & Final Verification
 
-- [ ] 10.1 Grep `package/app/src/` for `// MOCK:` annotations. For each: if the backend API now exists, replace the mock with the real API call. If the mock is correct behavior (e.g., `post.extra.rating` extraction), change the comment from `// MOCK:` to a descriptive comment or remove it.
+- [ ] 10.1 Grep `package/app/src/` for `// MOCK:` annotations. For each: if the backend API now exists, replace the mock with the real API call. If the mock is correct behavior, change the comment from `// MOCK:` to a descriptive comment or remove it. Score-related mocks should all be replaced by Phase 4 (score data comes from ScoreEntry via `scoreEntryId`, not `post.extra.rating`).
 - [ ] 10.2 Remove type aliases: `type Readlist = ShelfDTO` and `type Review = PostDTO` in `UserUnitsPage.tsx` — use the real types directly.
 - [ ] 10.3 Update `package/app/src/user/page/UserUnitsPage.tsx` — replace content-search-based tab queries with proper API calls: `shelfApi.list({ userId })`, `postApi.list({ authorUserId, kind })`.
 - [ ] 10.4 Update `package/app/src/home/section/hooks/hooks.ts` — replace all `meiliContentApi.contentSearch()` hacks for shelves/reviews/quotes with dedicated API calls.
-- [ ] 10.5 Verify zero remaining `// MOCK:` annotations referencing backend APIs that now exist (rating-system mocks with `// TODO:` are acceptable).
+- [ ] 10.5 Verify zero remaining `// MOCK:` or `// TODO:` annotations referencing backend APIs that now exist. No score/rating-related TODO annotations should remain.
 - [ ] 10.6 Run `bun run format:check` from repo root. Fix any formatting issues.
 - [ ] 10.7 Run `bun run knip` from repo root. Verify no new unused exports/dependencies introduced.
 - [ ] 10.8 Run full build: `bun run build` in `package/contract`, `package/api`, `package/server`. Run `bun run app:dev` and verify no compilation errors.
