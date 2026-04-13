@@ -51,6 +51,7 @@ export const shelfDTOSchema = t.Object({
   userId: t.Optional(t.Nullable(t.String())),
   user: t.Optional(publicUserSchema),
   kindKey: t.Optional(t.Nullable(t.String())),
+  coverUrl: t.Optional(t.Nullable(t.String())),
   extra: t.Optional(t.Nullable(t.Record(t.String(), t.Any()))),
   translations: t.Optional(t.Array(unitTranslationDTOSchema)),
   items: t.Optional(t.Array(shelfItemDTOSchema)),
@@ -69,6 +70,7 @@ export const shelfSummaryDTOSchema = t.Object({
   unitId: t.String(),
   userId: t.Optional(t.Nullable(t.String())),
   kindKey: t.Optional(t.Nullable(t.String())),
+  coverUrl: t.Optional(t.Nullable(t.String())),
   title: t.Optional(t.Nullable(t.String())),
   itemCount: t.Number(),
   tags: t.Optional(
@@ -158,6 +160,7 @@ export const createShelfSchema = t.Object({
   kindKey: t.Optional(t.String()),
   visibility: t.Optional(t.String()),
   tagIds: t.Optional(t.Array(t.String())),
+  coverUrl: t.Optional(t.String()),
   extra: t.Optional(t.Nullable(t.Record(t.String(), t.Any()))),
   translations: t.Optional(
     t.Array(
@@ -177,6 +180,7 @@ export type CreateShelfInput = (typeof createShelfSchema)["static"];
 export const updateShelfSchema = t.Object({
   title: t.Optional(t.String()),
   kindKey: t.Optional(t.Nullable(t.String())),
+  coverUrl: t.Optional(t.Nullable(t.String())),
   visibility: t.Optional(t.String()),
   extra: t.Optional(t.Nullable(t.Record(t.String(), t.Any()))),
 });

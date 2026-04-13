@@ -39,16 +39,24 @@ export const ShelfCard: React.FC<ShelfCardProps> = ({ shelf, className }) => {
           className="w-full aspect-[16/9] overflow-hidden relative"
           sx={{ borderBottom: `1px solid ${theme.palette.divider}` }}
         >
-          <Box
-            className="w-full h-full flex items-center justify-center"
-            sx={{
-              background: `linear-gradient(135deg, ${theme.palette.action.hover}, ${theme.palette.background.default})`,
-            }}
-          >
-            <Typography variant="caption" color="text.secondary">
-              {itemsCount} items
-            </Typography>
-          </Box>
+          {shelf.coverUrl ? (
+            <img
+              src={shelf.coverUrl}
+              alt={title || "Shelf cover"}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <Box
+              className="w-full h-full flex items-center justify-center"
+              sx={{
+                background: `linear-gradient(135deg, ${theme.palette.action.hover}, ${theme.palette.background.default})`,
+              }}
+            >
+              <Typography variant="caption" color="text.secondary">
+                {itemsCount} items
+              </Typography>
+            </Box>
+          )}
         </Box>
 
         <CardContent>

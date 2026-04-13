@@ -24,11 +24,13 @@ export function ShelfEditPage({ shelfId }: ShelfEditPageProps) {
   const translation = shelf ? getTranslation(shelf.translations) : null;
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [coverUrl, setCoverUrl] = useState("");
 
   useEffect(() => {
     if (translation) {
       setTitle(translation.title ?? "");
       setDescription(translation.description ?? "");
+      setCoverUrl(shelf?.coverUrl ?? "");
     }
   }, [translation]);
 
@@ -37,6 +39,7 @@ export function ShelfEditPage({ shelfId }: ShelfEditPageProps) {
       {
         unitId: shelfId,
         input: {
+          coverUrl: coverUrl || null,
           translations: [
             {
               language: translation?.language ?? DEFAULT_LANGUAGE,
@@ -81,6 +84,13 @@ export function ShelfEditPage({ shelfId }: ShelfEditPageProps) {
           fullWidth
           multiline
           rows={4}
+          variant="standard"
+        />
+        <TextField
+          label="Cover Image URL"
+          value={coverUrl}
+          onChange={(e) => setCoverUrl(e.target.value)}
+          fullWidth
           variant="standard"
         />
         <Stack direction="row" spacing={2} justifyContent="flex-end">

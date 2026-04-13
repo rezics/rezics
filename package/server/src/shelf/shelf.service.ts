@@ -100,7 +100,7 @@ export class ShelfService {
   }
 
   async create(req: CreateShelfInput, userId: string): Promise<ShelfDTO> {
-    const { title, kindKey, visibility, tagIds, extra, translations } = req;
+    const { title, kindKey, coverUrl, visibility, tagIds, extra, translations } = req;
 
     const translationData = translations?.length
       ? translations
@@ -145,6 +145,7 @@ export class ShelfService {
       data: {
         unitId: unit.id,
         kindKey: kindKey ?? undefined,
+        coverUrl: coverUrl ?? undefined,
         extra: (extra ?? undefined) as Prisma.InputJsonValue | undefined,
       },
       include: shelfInclude,
@@ -154,7 +155,7 @@ export class ShelfService {
   }
 
   async update(unitId: string, req: UpdateShelfInput): Promise<ShelfDTO> {
-    const { kindKey, visibility, extra, title } = req;
+    const { kindKey, coverUrl, visibility, extra, title } = req;
 
     if (visibility !== undefined) {
       await prisma.unit.update({
@@ -175,6 +176,7 @@ export class ShelfService {
       where: { unitId },
       data: {
         kindKey: kindKey !== undefined ? kindKey : undefined,
+        coverUrl: coverUrl !== undefined ? coverUrl : undefined,
         extra:
           extra !== undefined
             ? ((extra ?? undefined) as Prisma.InputJsonValue | undefined)

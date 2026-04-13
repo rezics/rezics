@@ -2,7 +2,7 @@ import { faker } from "@faker-js/faker";
 import { DEFAULT_LANGUAGE } from "@rezics/contract";
 import type { PrismaClient } from "#/prisma/generated/client.js";
 import { UnitStatus, UnitType } from "#/prisma/generated/client.js";
-import { SHELF_KIND_KEYS } from "./data.js";
+import { getRandomShelfCover, SHELF_KIND_KEYS } from "./data.js";
 import { generateTranslations } from "./generators.js";
 import type { CreatedPost, CreatedUnit, CreatedUser } from "./types.js";
 import { chunkedParallel, pickN, randomBoolean, randomInt } from "./utils.js";
@@ -43,7 +43,10 @@ export async function seedShelves(
           defaultLanguage: DEFAULT_LANGUAGE,
           publishedAt: randomBoolean(0.85) ? faker.date.past({ years: 2 }) : null,
           shelf: {
-            create: { kindKey },
+            create: {
+              kindKey,
+              coverUrl: randomBoolean(0.7) ? getRandomShelfCover() : null,
+            },
           },
           translations: {
             create: translations.map((t) => ({

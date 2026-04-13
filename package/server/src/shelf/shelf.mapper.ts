@@ -53,6 +53,7 @@ export function mapShelfToDTO(row: ShelfWithRelations): ShelfDTO {
     userId: row.unit?.userId ?? undefined,
     user: row.unit?.user ? sanitizeUser(row.unit.user) : undefined,
     kindKey: row.kindKey ?? undefined,
+    coverUrl: row.coverUrl ?? undefined,
     extra: (row.extra as Record<string, unknown>) ?? undefined,
     translations: row.unit?.translations ?? [],
     items: (row.items ?? []).map((i) => mapShelfItemToDTO(i as any)),
@@ -78,6 +79,7 @@ export function mapShelfListRowToDTO(row: ShelfListSelected): ShelfDTO {
     userId: row.unit?.userId ?? undefined,
     user: row.unit?.user ? sanitizeUser(row.unit.user) : undefined,
     kindKey: row.kindKey ?? undefined,
+    coverUrl: row.coverUrl ?? undefined,
     extra: (row.extra as Record<string, unknown>) ?? undefined,
     translations: row.unit?.translations ?? [],
     createdAt: row.createdAt?.toISOString?.() ?? (row.createdAt as any),
@@ -91,6 +93,7 @@ export function mapShelfSummaryToDTO(row: ShelfListSelected): ShelfSummaryDTO {
     unitId: row.unitId,
     userId: row.unit?.userId ?? undefined,
     kindKey: row.kindKey ?? undefined,
+    coverUrl: row.coverUrl ?? undefined,
     title,
     itemCount: row._count?.items ?? 0,
     tags: row.unit?.unitTags?.map((t) => ({

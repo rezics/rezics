@@ -13,10 +13,12 @@ export function NewShelfPage() {
   const createMutation = useCreateShelfMutation();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [coverUrl, setCoverUrl] = useState("");
 
   const handleCreate = () => {
     createMutation.mutate(
       {
+        coverUrl: coverUrl || undefined,
         translations: [
           {
             language: DEFAULT_LANGUAGE,
@@ -57,6 +59,13 @@ export function NewShelfPage() {
           fullWidth
           multiline
           rows={4}
+          variant="standard"
+        />
+        <TextField
+          label="Cover Image URL"
+          value={coverUrl}
+          onChange={(e) => setCoverUrl(e.target.value)}
+          fullWidth
           variant="standard"
         />
         <Stack direction="row" justifyContent="flex-end">

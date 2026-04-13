@@ -335,6 +335,7 @@ model Shelf {
   unit      Unit        @relation(fields: [unitId], references: [id], onDelete: Cascade)
 
   kindKey   String?     @db.VarChar(64)
+  coverUrl  String?
   extra     Json?
 
   createdAt DateTime    @default(now())

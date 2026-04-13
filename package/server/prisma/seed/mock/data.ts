@@ -25,6 +25,13 @@ export function getRandomBookCover() {
   return faker.helpers.arrayElement(book_cover_urls);
 }
 
+// ── Shelf covers (landscape 16:9) ──────────────────
+
+export function getRandomShelfCover() {
+  const id = faker.number.int({ min: 1, max: 1000 });
+  return `https://picsum.photos/seed/${id}/800/450`;
+}
+
 // ── Constants ───────────────────────────────────────
 
 export const PLATFORM_KEYS = [
