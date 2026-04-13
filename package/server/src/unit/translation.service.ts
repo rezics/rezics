@@ -2,6 +2,7 @@ import type {
   CreateTranslationInput,
   UpdateTranslationInput,
 } from "@rezics/contract";
+import { FALLBACK_LANGUAGE } from "@rezics/contract";
 import type { Prisma, UnitTranslation } from "#/prisma/client";
 import { prisma } from "#/prisma/client";
 
@@ -85,14 +86,14 @@ export class TranslationService {
   /**
    * Resolve the best translation for a unit given requested and default languages.
    *
-   * Precedence: requestedLang -> defaultLang -> first available
+   * Precedence: requestedLang -> defaultLang -> 'en' (platform fallback) -> first available
    */
   async resolveTranslation(
     unitId: string,
     requestedLang?: string,
     defaultLang?: string,
   ): Promise<UnitTranslation | null> {
-    // Try requested language first
+    // 1. Try requested language first
     if (requestedLang) {
       const match = await prisma.unitTranslation.findUnique({
         where: { unitId_language: { unitId, language: requestedLang } },
@@ -100,7 +101,7 @@ export class TranslationService {
       if (match) return match;
     }
 
-    // Fall back to default language
+    // 2. Fall back to unit's default language
     if (defaultLang && defaultLang !== requestedLang) {
       const match = await prisma.unitTranslation.findUnique({
         where: { unitId_language: { unitId, language: defaultLang } },
@@ -108,7 +109,15 @@ export class TranslationService {
       if (match) return match;
     }
 
-    // Fall back to first available translation
+    // 3. Fall back to platform fallback language ('en')
+    if (FALLBACK_LANGUAGE !== requestedLang && FALLBACK_LANGUAGE !== defaultLang) {
+      const match = await prisma.unitTranslation.findUnique({
+        where: { unitId_language: { unitId, language: FALLBACK_LANGUAGE } },
+      });
+      if (match) return match;
+    }
+
+    // 4. Fall back to first available translation
     return prisma.unitTranslation.findFirst({
       where: { unitId },
       orderBy: { language: "asc" },

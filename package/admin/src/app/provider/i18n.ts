@@ -1,22 +1,22 @@
 import i18n from "i18next";
 
-import deDE from "@/locale/de-DE.ts";
-import enUS from "@/locale/en-US.ts";
-import jaJP from "@/locale/ja-JP.ts";
-import zhSC from "@/locale/zh-SC.ts";
-import zhTW from "@/locale/zh-TC.ts";
+import de from "@/locale/de.ts";
+import en from "@/locale/en.ts";
+import ja from "@/locale/ja.ts";
+import zhHant from "@/locale/zh-hant.ts";
+import zhHans from "@/locale/zh-hans.ts";
 
 export function initI18n() {
   i18n.init({
     resources: {
-      "en-US": { translation: enUS },
-      "zh-SC": { translation: zhSC },
-      "de-DE": { translation: deDE },
-      "ja-JP": { translation: jaJP },
-      "zh-TC": { translation: zhTW },
+      "en": { translation: en },
+      "zh-hant": { translation: zhHant },
+      "zh-hans": { translation: zhHans },
+      "de": { translation: de },
+      "ja": { translation: ja },
     },
-    lng: "zh-SC",
-    fallbackLng: "en-US",
+    lng: "zh-hant",
+    fallbackLng: "en",
     interpolation: {
       escapeValue: false,
     },

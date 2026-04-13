@@ -47,7 +47,7 @@ export function BookShareDocument({
 
   // Minimal, bot-friendly HTML: meta in <head>, readable content in <body>.
   return (
-    <html lang="zh-CN">
+    <html lang="zh-hant">
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />

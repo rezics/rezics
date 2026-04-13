@@ -1,4 +1,5 @@
 import { faker } from "@faker-js/faker";
+import { DEFAULT_LANGUAGE } from "@rezics/contract";
 import type { PrismaClient } from "#/prisma/generated/client.js";
 import { UnitStatus, UnitType } from "#/prisma/generated/client.js";
 import { REALM_ROLE_KEYS } from "./data.js";
@@ -33,7 +34,7 @@ export async function seedRealms(
           type: UnitType.REALM,
           userId: owner.unitId,
           status: UnitStatus.PUBLISHED,
-          defaultLanguage: "en",
+          defaultLanguage: DEFAULT_LANGUAGE,
           publishedAt: faker.date.past({ years: 2 }),
           realm: {
             create: {
@@ -43,13 +44,13 @@ export async function seedRealms(
           },
           translations: {
             create: {
-              language: "en",
+              language: DEFAULT_LANGUAGE,
               title: translation.title,
               description: translation.description,
             },
           },
           supportLanguages: {
-            create: { language: "en", isPrimary: true },
+            create: { language: DEFAULT_LANGUAGE, isPrimary: true },
           },
         },
         select: { id: true, type: true },

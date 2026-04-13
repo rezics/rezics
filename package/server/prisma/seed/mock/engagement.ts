@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { faker } from "@faker-js/faker";
+import { DEFAULT_LANGUAGE } from "@rezics/contract";
 import type { PrismaClient } from "#/prisma/generated/client.js";
 import { UnitStatus, UnitType, UnitVisibility } from "#/prisma/generated/client.js";
 import type { CreatedUser } from "./types.js";
@@ -53,7 +54,7 @@ async function seedFavorites(
         publishedAt: new Date(),
         shelf: { create: { kindKey: "favorites" } },
         translations: {
-          create: { language: "en", title: "Favorites" },
+          create: { language: DEFAULT_LANGUAGE, title: "Favorites" },
         },
       },
     });

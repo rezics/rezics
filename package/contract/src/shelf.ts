@@ -1,4 +1,5 @@
 import { t } from "elysia";
+import { languageSchema } from "./language";
 import { publicUserSchema, unitTranslationDTOSchema } from "./unit";
 
 // ============================================================
@@ -109,7 +110,7 @@ export const shelfListQuerySchema = t.Object({
   userId: t.Optional(t.String()),
   kindKey: t.Optional(t.String()),
   containsItemUnitId: t.Optional(t.String()),
-  language: t.Optional(t.String()),
+  language: t.Optional(languageSchema),
   sort: t.Optional(
     t.Object({
       field: t.Optional(t.String()),
@@ -161,7 +162,7 @@ export const createShelfSchema = t.Object({
   translations: t.Optional(
     t.Array(
       t.Object({
-        language: t.String(),
+        language: languageSchema,
         title: t.Optional(t.String()),
         subtitle: t.Optional(t.String()),
         summary: t.Optional(t.String()),

@@ -1,4 +1,5 @@
 import { t } from "elysia";
+import { languageSchema } from "./language";
 import { publicUserSchema, unitTranslationDTOSchema } from "./unit";
 
 // ============================================================
@@ -42,7 +43,7 @@ export const bookDTOSchema = t.Object({
   status: t.Optional(t.String()),
   visibility: t.Optional(t.String()),
   nsfw: t.Optional(t.Boolean()),
-  defaultLanguage: t.Optional(t.Nullable(t.String())),
+  defaultLanguage: t.Optional(t.Nullable(languageSchema)),
   isLanguageNeutral: t.Optional(t.Boolean()),
 
   // Book extension fields
@@ -82,7 +83,7 @@ export type BookDTO = (typeof bookDTOSchema)["static"];
 export const bookListQuerySchema = t.Object({
   q: t.Optional(t.String()),
   nsfw: t.Optional(t.Boolean()),
-  language: t.Optional(t.String()),
+  language: t.Optional(languageSchema),
   tagUnitIds: t.Optional(t.String()),
   personId: t.Optional(t.String()),
   organizationId: t.Optional(t.String()),
@@ -135,7 +136,7 @@ export type BookResponse = (typeof bookResponseSchema)["static"];
 
 export const createBookSchema = t.Object({
   userId: t.Optional(t.String()),
-  defaultLanguage: t.Optional(t.String()),
+  defaultLanguage: t.Optional(languageSchema),
   isbn13: t.Optional(t.String()),
   publicationDate: t.Optional(t.Union([t.String(), t.Date()])),
   pageCount: t.Optional(t.Number()),
@@ -150,7 +151,7 @@ export const createBookSchema = t.Object({
   translations: t.Optional(
     t.Array(
       t.Object({
-        language: t.String(),
+        language: languageSchema,
         title: t.Optional(t.String()),
         subtitle: t.Optional(t.String()),
         summary: t.Optional(t.String()),

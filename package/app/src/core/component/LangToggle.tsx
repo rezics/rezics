@@ -1,4 +1,5 @@
 import { ListItemText, Menu, MenuItem } from "@mui/material";
+import { LANGUAGES, LANGUAGE_META } from "@rezics/contract";
 import React from "react";
 import { useTranslation } from "react-i18next";
 
@@ -56,20 +57,20 @@ export const LangToggle: React.FC<LangToggleProps> = ({ children }) => {
           },
         }}
       >
-        <MenuItem onClick={() => handleChangeLang("zh-SC")}>
-          <ListItemText>简体中文</ListItemText>
+        <MenuItem onClick={() => handleChangeLang(LANGUAGES.ZH_HANS)}>
+          <ListItemText>{LANGUAGE_META["zh-hans"].nativeName}</ListItemText>
         </MenuItem>
-        <MenuItem onClick={() => handleChangeLang("zh-TC")}>
-          <ListItemText>繁体中文</ListItemText>
+        <MenuItem onClick={() => handleChangeLang(LANGUAGES.ZH_HANT)}>
+          <ListItemText>{LANGUAGE_META["zh-hant"].nativeName}</ListItemText>
         </MenuItem>
-        <MenuItem onClick={() => handleChangeLang("en-US")}>
-          <ListItemText>English</ListItemText>
+        <MenuItem onClick={() => handleChangeLang(LANGUAGES.EN)}>
+          <ListItemText>{LANGUAGE_META.en.nativeName}</ListItemText>
         </MenuItem>
-        <MenuItem onClick={() => handleChangeLang("ja-JP")}>
-          <ListItemText>日本語</ListItemText>
+        <MenuItem onClick={() => handleChangeLang(LANGUAGES.JA)}>
+          <ListItemText>{LANGUAGE_META.ja.nativeName}</ListItemText>
         </MenuItem>
-        <MenuItem onClick={() => handleChangeLang("de-DE")}>
-          <ListItemText>Deutsch</ListItemText>
+        <MenuItem onClick={() => handleChangeLang(LANGUAGES.DE)}>
+          <ListItemText>{LANGUAGE_META.de.nativeName}</ListItemText>
         </MenuItem>
       </Menu>
     </>

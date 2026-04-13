@@ -4,6 +4,7 @@ import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import { useCreateShelfMutation } from "@rezics/api/shelf/shelf.mutations";
+import { DEFAULT_LANGUAGE } from "@rezics/contract";
 import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 
@@ -18,7 +19,7 @@ export function NewShelfPage() {
       {
         translations: [
           {
-            language: "zh-CN",
+            language: DEFAULT_LANGUAGE,
             title,
             description,
           },

@@ -1,4 +1,5 @@
 import { t } from "elysia";
+import { languageSchema } from "./language";
 
 // ============================================================
 // ENUMS
@@ -83,7 +84,7 @@ export type PublicUser = (typeof publicUserSchema)["static"];
 
 export const unitTranslationDTOSchema = t.Object({
   unitId: t.String(),
-  language: t.String(),
+  language: languageSchema,
   title: t.Optional(t.Nullable(t.String())),
   subtitle: t.Optional(t.Nullable(t.String())),
   summary: t.Optional(t.Nullable(t.String())),
@@ -98,7 +99,7 @@ export type UnitTranslationDTO = (typeof unitTranslationDTOSchema)["static"];
 
 export const unitSupportLanguageDTOSchema = t.Object({
   unitId: t.String(),
-  language: t.String(),
+  language: languageSchema,
   isPrimary: t.Boolean(),
   sortOrder: t.Number(),
 });
@@ -116,7 +117,7 @@ export const baseUnitSchema = t.Object({
   userId: t.Optional(t.Nullable(t.String())),
   user: t.Optional(publicUserSchema),
   workUnitId: t.Optional(t.Nullable(t.String())),
-  defaultLanguage: t.Optional(t.Nullable(t.String())),
+  defaultLanguage: t.Optional(t.Nullable(languageSchema)),
   isLanguageNeutral: t.Optional(t.Boolean()),
   status: t.Optional(t.String()),
   visibility: t.Optional(t.String()),
@@ -153,7 +154,7 @@ export const unitListQuerySchema = t.Object({
   userId: t.Optional(t.String()),
   userIds: t.Optional(t.String()),
   workUnitId: t.Optional(t.String()),
-  language: t.Optional(t.String()),
+  language: t.Optional(languageSchema),
   nsfw: t.Optional(t.Boolean()),
   createdAtFrom: t.Optional(t.String()),
   createdAtTo: t.Optional(t.String()),
@@ -201,7 +202,7 @@ export const createUnitSchema = t.Object({
   userId: t.Optional(t.String()),
   type: t.String(),
   workUnitId: t.Optional(t.String()),
-  defaultLanguage: t.Optional(t.String()),
+  defaultLanguage: t.Optional(languageSchema),
   isLanguageNeutral: t.Optional(t.Boolean()),
   status: t.Optional(t.String()),
   visibility: t.Optional(t.String()),
@@ -211,7 +212,7 @@ export const createUnitSchema = t.Object({
   translations: t.Optional(
     t.Array(
       t.Object({
-        language: t.String(),
+        language: languageSchema,
         title: t.Optional(t.String()),
         subtitle: t.Optional(t.String()),
         summary: t.Optional(t.String()),
@@ -229,7 +230,7 @@ export const updateUnitSchema = t.Object({
   status: t.Optional(t.String()),
   visibility: t.Optional(t.String()),
   nsfw: t.Optional(t.Boolean()),
-  defaultLanguage: t.Optional(t.String()),
+  defaultLanguage: t.Optional(languageSchema),
   isLanguageNeutral: t.Optional(t.Boolean()),
   workUnitId: t.Optional(t.Nullable(t.String())),
   extra: t.Optional(t.Nullable(t.Record(t.String(), t.Any()))),
@@ -243,7 +244,7 @@ export type UpdateUnitInput = (typeof updateUnitSchema)["static"];
 // ============================================================
 
 export const createTranslationSchema = t.Object({
-  language: t.String(),
+  language: languageSchema,
   title: t.Optional(t.String()),
   subtitle: t.Optional(t.String()),
   summary: t.Optional(t.String()),
@@ -269,7 +270,7 @@ export type UpdateTranslationInput =
 
 export const translationParamsSchema = t.Object({
   unitId: t.String(),
-  language: t.String(),
+  language: languageSchema,
 });
 
 export type TranslationParams = (typeof translationParamsSchema)["static"];

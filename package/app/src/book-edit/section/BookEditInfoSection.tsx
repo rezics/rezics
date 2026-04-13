@@ -20,6 +20,7 @@ import type {
   CreateBookInput,
   UpdateBookInput,
 } from "@rezics/contract";
+import { DEFAULT_LANGUAGE } from "@rezics/contract";
 import { RezicsMarkdownEditor } from "@rezics/ui/editor";
 import { MUILink } from "@rezics/ui/primitive/link/MUILink.tsx";
 import { useQuery } from "@tanstack/react-query";
@@ -163,10 +164,10 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
 
     const createBookData: CreateBookInput = {
       ...updateBookData,
-      defaultLanguage: 'zh-CN',
+      defaultLanguage: DEFAULT_LANGUAGE,
       translations: [
         {
-          language: 'zh-CN',
+          language: DEFAULT_LANGUAGE,
           title: editTitle,
           description: editDescription,
         },

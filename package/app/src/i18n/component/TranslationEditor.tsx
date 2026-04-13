@@ -1,4 +1,5 @@
 import { Box, Button, Stack, Tab, Tabs, TextField } from "@mui/material";
+import { DEFAULT_LANGUAGE } from "@rezics/contract";
 import type React from "react";
 import { useState } from "react";
 
@@ -20,7 +21,7 @@ export const TranslationEditor: React.FC<TranslationEditorProps> = ({
   onChange,
 }) => {
   const [activeTab, setActiveTab] = useState(
-    translations[0]?.language ?? "zh-CN",
+    translations[0]?.language ?? DEFAULT_LANGUAGE,
   );
 
   const activeTranslation = translations.find(

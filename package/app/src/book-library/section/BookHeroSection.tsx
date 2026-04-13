@@ -53,7 +53,7 @@ export const BookHeroSection: React.FC<{
     () => (bookInfo?.translations ?? []).map((tr) => tr.language),
     [bookInfo?.translations],
   );
-  const [selectedLang, setSelectedLang] = useState(
+  const [selectedLang, setSelectedLang] = useState<string>(
     bookInfo?.defaultLanguage ?? availableLanguages[0] ?? "",
   );
   const selectedTranslation = getTranslation(

@@ -4,6 +4,7 @@ import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import { useCreateRealmMutation } from "@rezics/api/realm/realm";
+import { DEFAULT_LANGUAGE } from "@rezics/contract";
 import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 
@@ -15,7 +16,7 @@ export function NewRealmPage() {
 
   const handleCreate = () => {
     createMutation.mutate(
-      { translations: [{ language: "zh-CN", title, description }] },
+      { translations: [{ language: DEFAULT_LANGUAGE, title, description }] },
       { onSuccess: (data) => navigate({ to: "/realm/$realmId", params: { realmId: data.unitId } }) },
     );
   };

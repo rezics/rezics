@@ -7,6 +7,7 @@ export * from "./book";
 export * from "./chapter";
 export * from "./feedback";
 export * from "./jwt-service";
+export * from "./language";
 export * from "./link";
 export * from "./meili";
 export * from "./notify";

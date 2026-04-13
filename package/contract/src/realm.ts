@@ -1,4 +1,5 @@
 import { t } from "elysia";
+import { languageSchema } from "./language";
 import { publicUserSchema, unitTranslationDTOSchema } from "./unit";
 
 // ============================================================
@@ -70,7 +71,7 @@ export const realmListQuerySchema = t.Object({
   isPublic: t.Optional(t.Boolean()),
   isOfficial: t.Optional(t.Boolean()),
   userId: t.Optional(t.String()),
-  language: t.Optional(t.String()),
+  language: t.Optional(languageSchema),
   sort: t.Optional(
     t.Object({
       field: t.Optional(t.String()),
@@ -113,7 +114,7 @@ export const createRealmSchema = t.Object({
   translations: t.Optional(
     t.Array(
       t.Object({
-        language: t.String(),
+        language: languageSchema,
         title: t.Optional(t.String()),
         subtitle: t.Optional(t.String()),
         summary: t.Optional(t.String()),

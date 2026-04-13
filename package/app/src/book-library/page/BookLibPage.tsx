@@ -1,5 +1,5 @@
 import { contentSearchQueryOptions } from "@rezics/api/meili/meili.queries";
-import type { ContentSearchDocument } from "@rezics/contract";
+import { DEFAULT_LANGUAGE, type ContentSearchDocument } from "@rezics/contract";
 import type { UniversalPaginatorHandle } from "@rezics/ui/composite/pagination/Pagination.tsx";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type React from "react";
@@ -66,7 +66,7 @@ export const BookLibPage: React.FC = () => {
         unitId: item.id,
         defaultLanguage: item.defaultLanguage,
         translations: item.translations ?? (item.titles[0]
-          ? [{ unitId: item.id, language: item.defaultLanguage ?? 'zh-CN', title: item.titles[0], subtitle: null, summary: item.summaries[0] ?? null, description: item.descriptions[0] ?? null }]
+          ? [{ unitId: item.id, language: item.defaultLanguage ?? DEFAULT_LANGUAGE, title: item.titles[0], subtitle: null, summary: item.summaries[0] ?? null, description: item.descriptions[0] ?? null }]
           : []),
         coverUrl: item.coverUrl,
         creditNames: item.creditNames,

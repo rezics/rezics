@@ -1,4 +1,5 @@
 import { faker } from "@faker-js/faker";
+import { DEFAULT_LANGUAGE } from "@rezics/contract";
 import type { PrismaClient } from "#/prisma/generated/client.js";
 import { UnitStatus, UnitType } from "#/prisma/generated/client.js";
 import {
@@ -44,7 +45,7 @@ export async function seedMedia(
           type: UnitType.MEDIA,
           userId: author.unitId,
           status: randomBoolean(0.85) ? UnitStatus.PUBLISHED : UnitStatus.DRAFT,
-          defaultLanguage: "en",
+          defaultLanguage: DEFAULT_LANGUAGE,
           publishedAt: randomBoolean(0.8) ? faker.date.past({ years: 5 }) : null,
           media: {
             create: {
@@ -60,14 +61,14 @@ export async function seedMedia(
           },
           translations: {
             create: {
-              language: "en",
+              language: DEFAULT_LANGUAGE,
               title: translation.title,
               summary: translation.summary,
               description: translation.description,
             },
           },
           supportLanguages: {
-            create: { language: "en", isPrimary: true },
+            create: { language: DEFAULT_LANGUAGE, isPrimary: true },
           },
         },
         select: { id: true, type: true },

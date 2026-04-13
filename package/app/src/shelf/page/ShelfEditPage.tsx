@@ -6,6 +6,7 @@ import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import { shelfDetailQuery } from "@rezics/api/shelf";
 import { useUpdateShelfMutation } from "@rezics/api/shelf/shelf.mutations";
+import { DEFAULT_LANGUAGE } from "@rezics/contract";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
@@ -38,7 +39,7 @@ export function ShelfEditPage({ shelfId }: ShelfEditPageProps) {
         input: {
           translations: [
             {
-              language: translation?.language ?? "zh-CN",
+              language: translation?.language ?? DEFAULT_LANGUAGE,
               title,
               description,
             },

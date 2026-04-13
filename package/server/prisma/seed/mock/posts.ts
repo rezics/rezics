@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { faker } from "@faker-js/faker";
+import { DEFAULT_LANGUAGE } from "@rezics/contract";
 import type { PrismaClient } from "#/prisma/generated/client.js";
 import { PostKind, UnitStatus, UnitType } from "#/prisma/generated/client.js";
 import {
@@ -121,7 +122,7 @@ async function seedPostKindForTarget(
         type: UnitType.POST,
         userId: author.unitId,
         status: randomBoolean(0.9) ? UnitStatus.PUBLISHED : UnitStatus.DRAFT,
-        defaultLanguage: "en",
+        defaultLanguage: DEFAULT_LANGUAGE,
         publishedAt: randomBoolean(0.85) ? faker.date.past({ years: 2 }) : null,
         post: {
           create: {
@@ -137,13 +138,13 @@ async function seedPostKindForTarget(
         translations: needsTitle
           ? {
               create: {
-                language: "en",
+                language: DEFAULT_LANGUAGE,
                 title: generateTranslation(UnitType.POST).title,
               },
             }
           : undefined,
         supportLanguages: {
-          create: { language: "en", isPrimary: true },
+          create: { language: DEFAULT_LANGUAGE, isPrimary: true },
         },
       },
       select: { id: true, type: true },
@@ -186,7 +187,7 @@ async function seedCommentsForTarget(
           type: UnitType.POST,
           userId: author.unitId,
           status: UnitStatus.PUBLISHED,
-          defaultLanguage: "en",
+          defaultLanguage: DEFAULT_LANGUAGE,
           publishedAt: faker.date.past({ years: 1 }),
           post: {
             create: {
@@ -200,7 +201,7 @@ async function seedCommentsForTarget(
             },
           },
           supportLanguages: {
-            create: { language: "en", isPrimary: true },
+            create: { language: DEFAULT_LANGUAGE, isPrimary: true },
           },
         },
         select: { id: true, type: true },
@@ -244,7 +245,7 @@ async function seedCommentsForTarget(
           type: UnitType.POST,
           userId: author.unitId,
           status: UnitStatus.PUBLISHED,
-          defaultLanguage: "en",
+          defaultLanguage: DEFAULT_LANGUAGE,
           publishedAt: faker.date.past({ years: 1 }),
           post: {
             create: {
@@ -259,7 +260,7 @@ async function seedCommentsForTarget(
             },
           },
           supportLanguages: {
-            create: { language: "en", isPrimary: true },
+            create: { language: DEFAULT_LANGUAGE, isPrimary: true },
           },
         },
         select: { id: true, type: true },

@@ -12,6 +12,7 @@ import {
   useCreateTagMutation,
   useUpdateTagMutation,
 } from "@rezics/api/tag/tag";
+import { DEFAULT_LANGUAGE } from "@rezics/contract";
 import type React from "react";
 import { useState } from "react";
 
@@ -44,7 +45,7 @@ export const TagEdit: React.FC<TagEditProps> = ({
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const translations = [{ language: 'zh-CN', title: name.trim() }];
+    const translations = [{ language: DEFAULT_LANGUAGE, title: name.trim() }];
     if (isUpdate && tag) {
       const payload: UpdateTagInput = { translations };
       await updateMutation.mutateAsync({ unitId: tag.tagUnitId, input: payload });

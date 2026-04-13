@@ -1,5 +1,6 @@
 import { t } from "elysia";
 import type { Static } from "elysia";
+import { languageSchema } from "../language";
 
 // ANCHOR: Content Search Document
 
@@ -42,7 +43,7 @@ export const ContentSearchDocumentSchema = t.Object({
   publishedAt: t.Union([t.String(), t.Null()]),
 
   // Result display fields
-  defaultLanguage: t.Union([t.String(), t.Null()]),
+  defaultLanguage: t.Union([languageSchema, t.Null()]),
   coverUrl: t.Union([t.String(), t.Null()]),
   userId: t.Union([t.String(), t.Null()]),
 
@@ -54,7 +55,7 @@ export const ContentSearchDocumentSchema = t.Object({
   translations: t.Optional(
     t.Array(
       t.Object({
-        language: t.String(),
+        language: languageSchema,
         title: t.Union([t.String(), t.Null()]),
         subtitle: t.Union([t.String(), t.Null()]),
         summary: t.Union([t.String(), t.Null()]),

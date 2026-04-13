@@ -5,6 +5,7 @@ import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import { realmDetailQuery, useUpdateRealmMutation } from "@rezics/api/realm/realm";
+import { DEFAULT_LANGUAGE } from "@rezics/contract";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
@@ -32,7 +33,7 @@ export function RealmManagePage({ realmId }: RealmManagePageProps) {
 
   const handleSave = () => {
     updateMutation.mutate(
-      { unitId: realmId, input: { translations: [{ language: translation?.language ?? "zh-CN", title, description }] } },
+      { unitId: realmId, input: { translations: [{ language: translation?.language ?? DEFAULT_LANGUAGE, title, description }] } },
       { onSuccess: () => navigate({ to: "/realm/$realmId", params: { realmId } }) },
     );
   };

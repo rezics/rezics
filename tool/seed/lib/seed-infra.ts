@@ -1,3 +1,4 @@
+import { DEFAULT_LANGUAGE } from "../../../package/contract/src/language";
 import {
   SEED_TAG_NAMES,
   SEED_TAG_SCORE,
@@ -26,7 +27,7 @@ export async function seedContentTypeTags(
       where: {
         type: "TAG",
         translations: {
-          some: { language: "en", title },
+          some: { language: DEFAULT_LANGUAGE, title },
         },
       },
       select: { id: true },
@@ -47,7 +48,7 @@ export async function seedContentTypeTags(
           publishedAt: new Date(),
           translations: {
             create: {
-              language: "en",
+              language: DEFAULT_LANGUAGE,
               title,
             },
           },
@@ -108,7 +109,7 @@ export async function seedDefaultRealm(
       publishedAt: new Date(),
       translations: {
         create: {
-          language: "en",
+          language: DEFAULT_LANGUAGE,
           title: "rezics",
         },
       },

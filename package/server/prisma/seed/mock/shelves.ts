@@ -1,4 +1,5 @@
 import { faker } from "@faker-js/faker";
+import { DEFAULT_LANGUAGE } from "@rezics/contract";
 import type { PrismaClient } from "#/prisma/generated/client.js";
 import { UnitStatus, UnitType } from "#/prisma/generated/client.js";
 import { SHELF_KIND_KEYS } from "./data.js";
@@ -39,20 +40,20 @@ export async function seedShelves(
           type: UnitType.SHELF,
           userId: author.unitId,
           status: randomBoolean(0.9) ? UnitStatus.PUBLISHED : UnitStatus.DRAFT,
-          defaultLanguage: "en",
+          defaultLanguage: DEFAULT_LANGUAGE,
           publishedAt: randomBoolean(0.85) ? faker.date.past({ years: 2 }) : null,
           shelf: {
             create: { kindKey },
           },
           translations: {
             create: {
-              language: "en",
+              language: DEFAULT_LANGUAGE,
               title: translation.title,
               description: translation.description,
             },
           },
           supportLanguages: {
-            create: { language: "en", isPrimary: true },
+            create: { language: DEFAULT_LANGUAGE, isPrimary: true },
           },
         },
         select: { id: true, type: true },

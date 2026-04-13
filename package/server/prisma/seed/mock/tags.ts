@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { faker } from "@faker-js/faker";
+import { DEFAULT_LANGUAGE } from "@rezics/contract";
 import type { PrismaClient } from "#/prisma/generated/client.js";
 import { UnitStatus, UnitType } from "#/prisma/generated/client.js";
 import { generateTranslation } from "./generators.js";
@@ -31,7 +32,7 @@ export async function seedTags(
       userId: t.userId,
       status: UnitStatus.PUBLISHED,
       isLanguageNeutral: false,
-      defaultLanguage: "en",
+      defaultLanguage: DEFAULT_LANGUAGE,
       publishedAt: faker.date.past({ years: 1 }),
     })),
   });
@@ -40,7 +41,7 @@ export async function seedTags(
   await prisma.unitTranslation.createMany({
     data: tags.map((t) => ({
       unitId: t.id,
-      language: "en",
+      language: DEFAULT_LANGUAGE,
       title: t.title,
     })),
   });

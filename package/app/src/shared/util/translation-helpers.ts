@@ -10,8 +10,7 @@ import type {
   BookDTO,
   UnitTranslationDTO,
 } from '@rezics/contract';
-
-const DEFAULT_LANGUAGE_CHAIN = ['zh-CN', 'zh', 'en', 'ja'] as const;
+import { DEFAULT_LANGUAGE, FALLBACK_LANGUAGE } from '@rezics/contract';
 
 /**
  * Get the user's preferred languages from settings.
@@ -23,17 +22,17 @@ export function getUserPreferredLanguages(): string[] {
 
 /**
  * Resolve the best translation from a translations array.
- * Falls back through the language chain, then to the first available entry.
+ * Resolution order: preferred → unit default → 'en' (platform fallback) → first available.
  *
  * @param translations - Array of available translations
  * @param language - Preferred language code (highest priority)
- * @param fallbackChain - Ordered list of fallback language codes
+ * @param unitDefaultLanguage - Unit's default language (second priority)
  * @param explicitLanguage - If provided, only return an exact match for this language (no fallback)
  */
 export function getTranslation(
   translations: UnitTranslationDTO[] | undefined | null,
   language?: string,
-  fallbackChain: readonly string[] = DEFAULT_LANGUAGE_CHAIN,
+  unitDefaultLanguage?: string,
   explicitLanguage?: string,
 ): UnitTranslationDTO | undefined {
   if (!translations || translations.length === 0) return undefined;
@@ -43,19 +42,23 @@ export function getTranslation(
     return translations.find((t) => t.language === explicitLanguage);
   }
 
-  // Exact match
+  // 1. Exact match on preferred language
   if (language) {
     const exact = translations.find((t) => t.language === language);
     if (exact) return exact;
   }
 
-  // Fallback chain
-  for (const lang of fallbackChain) {
-    const match = translations.find((t) => t.language === lang);
-    if (match) return match;
+  // 2. Fallback to unit's default language
+  if (unitDefaultLanguage) {
+    const unitDefault = translations.find((t) => t.language === unitDefaultLanguage);
+    if (unitDefault) return unitDefault;
   }
 
-  // Last resort: first entry
+  // 3. Fallback to platform fallback language ('en')
+  const fallback = translations.find((t) => t.language === FALLBACK_LANGUAGE);
+  if (fallback) return fallback;
+
+  // 4. Last resort: first available entry
   return translations[0];
 }
 

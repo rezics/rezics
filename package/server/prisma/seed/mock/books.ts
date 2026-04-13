@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { faker } from "@faker-js/faker";
-import type { ChapterTreeItem } from "@rezics/contract";
+import { DEFAULT_LANGUAGE, type ChapterTreeItem } from "@rezics/contract";
 import type { Prisma, PrismaClient } from "#/prisma/generated/client.js";
 import { UnitStatus, UnitType } from "#/prisma/generated/client.js";
 import { getRandomBookCover, ORG_ROLE_KEYS, PERSON_ROLE_KEYS } from "./data.js";
@@ -48,7 +48,7 @@ export async function seedBooks(
           type: UnitType.BOOK,
           userId: author.unitId,
           status: randomBoolean(0.85) ? UnitStatus.PUBLISHED : UnitStatus.DRAFT,
-          defaultLanguage: "en",
+          defaultLanguage: DEFAULT_LANGUAGE,
           publishedAt: randomBoolean(0.9)
             ? faker.date.past({ years: 3 })
             : null,
@@ -74,7 +74,7 @@ export async function seedBooks(
           },
           translations: {
             create: {
-              language: "en",
+              language: DEFAULT_LANGUAGE,
               title: translation.title,
               subtitle: translation.subtitle,
               summary: translation.summary,
@@ -82,7 +82,7 @@ export async function seedBooks(
             },
           },
           supportLanguages: {
-            create: { language: "en", isPrimary: true },
+            create: { language: DEFAULT_LANGUAGE, isPrimary: true },
           },
         },
         select: { id: true, type: true },
@@ -165,12 +165,12 @@ export async function seedChaptersForBook(
         userId: bookUserId,
         type: UnitType.CHAPTER,
         status: UnitStatus.PUBLISHED,
-        defaultLanguage: "en",
+        defaultLanguage: DEFAULT_LANGUAGE,
         translations: {
-          create: { language: "en", title: parentTitle },
+          create: { language: DEFAULT_LANGUAGE, title: parentTitle },
         },
         supportLanguages: {
-          create: { language: "en", isPrimary: true },
+          create: { language: DEFAULT_LANGUAGE, isPrimary: true },
         },
       },
     });
@@ -193,10 +193,10 @@ export async function seedChaptersForBook(
           userId: bookUserId,
           type: UnitType.CHAPTER,
           status: UnitStatus.PUBLISHED,
-          defaultLanguage: "en",
+          defaultLanguage: DEFAULT_LANGUAGE,
           translations: {
             create: {
-              language: "en",
+              language: DEFAULT_LANGUAGE,
               title: child.title,
               description: child.noContent
                 ? undefined
@@ -204,7 +204,7 @@ export async function seedChaptersForBook(
             },
           },
           supportLanguages: {
-            create: { language: "en", isPrimary: true },
+            create: { language: DEFAULT_LANGUAGE, isPrimary: true },
           },
         },
       });

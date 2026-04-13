@@ -1,3 +1,5 @@
+import { DEFAULT_LANGUAGE } from "@rezics/contract";
+
 // MOCK: book list data using new BookDTO shape with translations
 export const bookList01 = [
   {
@@ -5,7 +7,7 @@ export const bookList01 = [
     translations: [
       {
         unitId: "1",
-        language: "zh-CN",
+        language: DEFAULT_LANGUAGE,
         title: "Mock Book 1",
         description: "Mock Description 1",
       },
@@ -23,7 +25,7 @@ export const bookList01 = [
     translations: [
       {
         unitId: "2",
-        language: "zh-CN",
+        language: DEFAULT_LANGUAGE,
         title: "Mock Book 2",
         description: "Mock Description 2",
       },
