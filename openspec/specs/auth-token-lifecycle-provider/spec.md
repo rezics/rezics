@@ -2,12 +2,17 @@
 
 ### Requirement: AuthProvider accepts a configurable token array
 
-AuthProvider SHALL accept `tokens` parameter specifying which token names to manage. The default configuration SHALL include `AUTH_IDENTITY` and `REZICS_SESSION`. The ordering defines the dependency chain: `AUTH_IDENTITY` is refreshed first (via session cookie), then `REZICS_SESSION` (via exchange using the refreshed `AUTH_IDENTITY`).
+AuthProvider SHALL accept `tokens` parameter specifying which token names to manage. The default configuration SHALL include `AUTH_IDENTITY` and `REZICS_SESSION`. The ordering defines the dependency chain: `AUTH_IDENTITY` is refreshed first (via session cookie), then `REZICS_SESSION` (via exchange using the refreshed `AUTH_IDENTITY`). AuthProvider SHALL be exported from `@rezics/api` (not `@rezics/app-shell`).
 
-#### Scenario: AuthProvider manages two tokens with dependency ordering
+#### Scenario: AuthProvider managed two tokens with dependency ordering
 
 - **WHEN** AuthProvider initializes with default configuration
 - **THEN** it manages `AUTH_IDENTITY` and `REZICS_SESSION` tokens, refreshing them in dependency order
+
+#### Scenario: AuthProvider imported from @rezics/api
+
+- **WHEN** an app needs the auth provider
+- **THEN** it imports `AuthProvider` from `@rezics/api`
 
 ### Requirement: AuthProvider refreshes tokens proactively before expiry
 
@@ -58,3 +63,12 @@ AuthProvider SHALL NOT call `ensure()` or user provisioning endpoint. Provisioni
 
 - **WHEN** AuthProvider refreshes tokens for a newly registered user
 - **THEN** it does not call any provisioning endpoint (the user was provisioned during registration)
+
+### Requirement: authSessionStore hydrates permission from session token
+
+When `authSessionStore` hydrates from a refreshed `REZICS_SESSION` token, it SHALL parse the token's `permission` claim and expose it as the `permission` field. It SHALL NOT derive or expose `capabilityLevel`.
+
+#### Scenario: Store hydrates permission after token refresh
+
+- **WHEN** AuthProvider writes a new `REZICS_SESSION` token to localStorage
+- **THEN** `authSessionStore` reads the token's `permission` claim and updates its `permission` field accordingly
