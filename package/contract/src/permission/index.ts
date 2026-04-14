@@ -14,5 +14,3 @@ export * from "./user"; // /users
 
 // Deprecated aliases (kept for migration)
 export * from "./comment";
-export * from "./readlist";
-export * from "./review";

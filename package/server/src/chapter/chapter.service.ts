@@ -116,7 +116,7 @@ export class ChapterService {
       data: {
         userId,
         type: UnitType.CHAPTER,
-        status: (status as UnitStatus) || UnitStatus.ACTIVE,
+        status: (status as UnitStatus) || UnitStatus.PUBLISHED,
         title,
         content: content || undefined,
         targetUnitId: targetUnitId || undefined,

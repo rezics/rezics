@@ -22,7 +22,7 @@ import { realmInclude, realmListSelect, type RealmWithRelations } from "./types"
 export class RealmService {
   private buildWhere(options: RealmListQuery): Prisma.RealmWhereInput {
     const and: Prisma.RealmWhereInput[] = [
-      { unit: { status: UnitStatus.ACTIVE, type: UnitType.REALM } },
+      { unit: { status: UnitStatus.PUBLISHED, type: UnitType.REALM } },
     ];
 
     if (options.q?.trim()) {
@@ -103,7 +103,7 @@ export class RealmService {
       data: {
         userId,
         type: UnitType.REALM,
-        status: UnitStatus.ACTIVE,
+        status: UnitStatus.PUBLISHED,
         ...(translations?.length
           ? {
               translations: {
