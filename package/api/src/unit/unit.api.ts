@@ -7,6 +7,8 @@ import type {
   CreateUnitInput,
   UnitListResponse,
   UnitResponse,
+  UnitTranslationDTO,
+  UpdateTranslationInput,
   UpdateUnitInput,
 } from "@rezics/contract";
 import { apiFetch } from "../react-query/http";
@@ -87,5 +89,22 @@ export const unitApi = {
     return apiFetch<{ message: string }>(`/units/${unitId}`, {
       method: "DELETE",
     });
+  },
+
+  /**
+   * Upsert a translation for a unit by language
+   */
+  upsertTranslation: async (
+    unitId: string,
+    language: string,
+    input: UpdateTranslationInput,
+  ): Promise<UnitTranslationDTO> => {
+    return apiFetch<UnitTranslationDTO>(
+      `/units/${unitId}/translations/${language}`,
+      {
+        method: "PUT",
+        body: JSON.stringify(input),
+      },
+    );
   },
 };

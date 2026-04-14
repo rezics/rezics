@@ -96,6 +96,17 @@ export const realmApi = {
   // ---- Membership ----
 
   /**
+   * Get current user's membership in a realm
+   */
+  getMyMembership: async (
+    realmUnitId: string,
+  ): Promise<RealmMemberDTO | null> => {
+    return apiFetch<RealmMemberDTO | null>(
+      `/realms/${realmUnitId}/members/me`,
+    );
+  },
+
+  /**
    * Join a realm
    */
   join: async (

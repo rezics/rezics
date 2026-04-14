@@ -154,6 +154,22 @@ export const realmApi = new Elysia({ prefix: "/realms" })
     },
   )
   // --- Membership routes ---
+  .get(
+    "/:unitId/members/me",
+    async ({ params, identity }): Promise<RealmMemberDTO | null> => {
+      return realmService.getMember(params.unitId, identity.unitId);
+    },
+    {
+      requireLogin: true,
+      params: realmParamsSchema,
+      detail: {
+        summary: "Get my membership",
+        description:
+          "Get the current user's membership and role in a realm, or null if not a member",
+        tags: ["Realms"],
+      },
+    },
+  )
   .post(
     "/:unitId/members",
     async ({ params, body, identity }): Promise<RealmMemberDTO> => {

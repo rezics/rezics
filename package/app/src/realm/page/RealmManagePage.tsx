@@ -4,12 +4,15 @@ import CircularProgress from "@mui/material/CircularProgress";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
-import { realmDetailQuery, useUpdateRealmMutation } from "@rezics/api/realm/realm";
+import { myRealmMembershipQuery, realmDetailQuery, useUpdateRealmMutation } from "@rezics/api/realm/realm";
+import { unitApi } from "@rezics/api/unit/unit";
 import { DEFAULT_LANGUAGE } from "@rezics/contract";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { getTranslation } from "@/shared/util/translation-helpers";
+import { canManageRealm } from "../model/canManageRealm";
+import { useServerRole } from "../model/useServerRole";
 
 interface RealmManagePageProps {
   realmId: string;
@@ -17,12 +20,27 @@ interface RealmManagePageProps {
 
 export function RealmManagePage({ realmId }: RealmManagePageProps) {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { data: realm, isLoading } = useQuery(realmDetailQuery(realmId));
+  const { data: membership, isLoading: membershipLoading } = useQuery(myRealmMembershipQuery(realmId));
+  const serverRole = useServerRole();
   const updateMutation = useUpdateRealmMutation();
 
-  const translation = realm ? getTranslation(realm.unit?.translations) : null;
+  const translation = realm ? getTranslation(realm.translations) : null;
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  const allowed = canManageRealm({
+    globalRole: serverRole,
+    memberRoleKey: membership?.roleKey,
+  });
+
+  useEffect(() => {
+    if (!isLoading && !membershipLoading && !allowed) {
+      navigate({ to: "/realm/$realmId", params: { realmId } });
+    }
+  }, [isLoading, membershipLoading, allowed, navigate, realmId]);
 
   useEffect(() => {
     if (translation) {
@@ -31,15 +49,29 @@ export function RealmManagePage({ realmId }: RealmManagePageProps) {
     }
   }, [translation]);
 
-  const handleSave = () => {
-    updateMutation.mutate(
-      { unitId: realmId, input: { translations: [{ language: translation?.language ?? DEFAULT_LANGUAGE, title, description }] } },
-      { onSuccess: () => navigate({ to: "/realm/$realmId", params: { realmId } }) },
-    );
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      const language = translation?.language ?? DEFAULT_LANGUAGE;
+
+      // Upsert translation via unit translation endpoint
+      await unitApi.upsertTranslation(realmId, language, { title, description });
+
+      // Invalidate realm detail to pick up updated translations
+      await queryClient.invalidateQueries({ queryKey: ["realms", "detail", realmId] });
+
+      navigate({ to: "/realm/$realmId", params: { realmId } });
+    } finally {
+      setSaving(false);
+    }
   };
 
-  if (isLoading) {
+  if (isLoading || membershipLoading) {
     return (<Box display="flex" justifyContent="center" py={6}><CircularProgress /></Box>);
+  }
+
+  if (!allowed) {
+    return null;
   }
 
   return (
@@ -50,7 +82,7 @@ export function RealmManagePage({ realmId }: RealmManagePageProps) {
         <TextField label="Description" value={description} onChange={(e) => setDescription(e.target.value)} fullWidth multiline rows={4} variant="standard" />
         <Stack direction="row" spacing={2} justifyContent="flex-end">
           <Button variant="text" onClick={() => navigate({ to: "/realm/$realmId", params: { realmId } })}>Cancel</Button>
-          <Button variant="contained" disableElevation onClick={handleSave} disabled={updateMutation.isPending}>Save</Button>
+          <Button variant="contained" disableElevation onClick={handleSave} disabled={saving}>Save</Button>
         </Stack>
       </Stack>
     </Box>

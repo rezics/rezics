@@ -59,6 +59,16 @@ export const realmInfiniteListQuery = (
   });
 
 /**
+ * Query options for getting current user's membership in a realm
+ */
+export const myRealmMembershipQuery = (realmUnitId: string) =>
+  queryOptions({
+    queryKey: realmKeys.members(realmUnitId),
+    queryFn: () => realmApi.getMyMembership(realmUnitId),
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+
+/**
  * Combined query options export
  */
 export const myRealmsQuery = () =>
@@ -74,4 +84,5 @@ export const realmQueries = {
   search: realmSearchQuery,
   infiniteList: realmInfiniteListQuery,
   mine: myRealmsQuery,
+  myMembership: myRealmMembershipQuery,
 };

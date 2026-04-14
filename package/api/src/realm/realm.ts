@@ -34,6 +34,7 @@ export {
 
 // Query Configurations
 export {
+  myRealmMembershipQuery,
   myRealmsQuery,
   realmDetailQuery,
   realmInfiniteListQuery,

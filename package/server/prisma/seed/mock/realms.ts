@@ -71,13 +71,13 @@ export async function seedRealms(
         {
           realmUnitId: unit.id,
           userId: owner.unitId,
-          roleKey: "OWNER",
+          roleKey: "owner",
         },
         ...memberUsers.map((u) => ({
           realmUnitId: unit.id,
           userId: u.unitId,
           roleKey: faker.helpers.arrayElement(
-            REALM_ROLE_KEYS.filter((r) => r !== "OWNER"),
+            REALM_ROLE_KEYS.filter((r) => r !== "owner"),
           ),
         })),
       ];

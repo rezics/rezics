@@ -62,10 +62,10 @@ export const SHELF_KIND_KEYS = [
 ] as const;
 
 export const REALM_ROLE_KEYS = [
-  "OWNER",
-  "ADMIN",
-  "MODERATOR",
-  "MEMBER",
+  "owner",
+  "admin",
+  "moderator",
+  "member",
 ] as const;
 
 export const PERSON_ROLE_KEYS = [

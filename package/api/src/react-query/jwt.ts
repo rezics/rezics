@@ -3,6 +3,7 @@ import {
   type AuthTokenResponse,
   NormalizedTokenName,
   type NormalizedTokenName as NormalizedTokenNameType,
+  type RezicsSessionClaims,
   normalizedTokenTransportMap,
 } from "@rezics/contract";
 import { getApiConfig } from "../config";
@@ -337,6 +338,12 @@ export function getParsedToken<T extends JwtPayload = JwtPayload>(
 export function getAuthIdentityClaims(): AuthIdentityTokenClaims | null {
   return getParsedToken<AuthIdentityTokenClaims>(
     NormalizedTokenName.AUTH_IDENTITY,
+  );
+}
+
+export function getRezicsSessionClaims(): RezicsSessionClaims | null {
+  return getParsedToken<RezicsSessionClaims>(
+    NormalizedTokenName.REZICS_SESSION,
   );
 }
 

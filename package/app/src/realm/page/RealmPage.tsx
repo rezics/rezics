@@ -1,17 +1,22 @@
 import Box from "@mui/material/Box";
 import CircularProgress from "@mui/material/CircularProgress";
+import IconButton from "@mui/material/IconButton";
 import Stack from "@mui/material/Stack";
 import Tab from "@mui/material/Tab";
 import Tabs from "@mui/material/Tabs";
 import Typography from "@mui/material/Typography";
-import { realmDetailQuery } from "@rezics/api/realm/realm";
+import TuneRoundedIcon from "@mui/icons-material/TuneRounded";
+import { myRealmMembershipQuery, realmDetailQuery } from "@rezics/api/realm/realm";
 import { useQuery } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { getTranslation } from "@/shared/util/translation-helpers";
 import { JoinButton } from "../component/JoinButton";
 import { RealmContentFeed } from "../component/RealmContentFeed";
 import { RealmMemberList } from "../component/RealmMemberList";
 import { RealmTagManager } from "../component/RealmTagManager";
+import { canManageRealm } from "../model/canManageRealm";
+import { useServerRole } from "../model/useServerRole";
 
 interface RealmPageProps {
   realmId: string;
@@ -19,7 +24,14 @@ interface RealmPageProps {
 
 export function RealmPage({ realmId }: RealmPageProps) {
   const { data: realm, isLoading } = useQuery(realmDetailQuery(realmId));
+  const { data: membership } = useQuery(myRealmMembershipQuery(realmId));
+  const serverRole = useServerRole();
   const [tab, setTab] = useState<"feed" | "tags" | "members">("feed");
+
+  const showManage = canManageRealm({
+    globalRole: serverRole,
+    memberRoleKey: membership?.roleKey,
+  });
 
   if (isLoading) {
     return (<Box display="flex" justifyContent="center" py={6}><CircularProgress /></Box>);
@@ -29,7 +41,7 @@ export function RealmPage({ realmId }: RealmPageProps) {
     return <Typography color="text.secondary" py={4}>Realm not found</Typography>;
   }
 
-  const translation = getTranslation(realm.unit?.translations);
+  const translation = getTranslation(realm.translations);
   const title = translation?.title ?? "Untitled Realm";
   const description = translation?.description ?? "";
 
@@ -37,7 +49,16 @@ export function RealmPage({ realmId }: RealmPageProps) {
     <Box maxWidth="lg" mx="auto" px={2} py={3}>
       <Stack spacing={2} mb={3}>
         <Stack direction="row" justifyContent="space-between" alignItems="center">
-          <Typography variant="h5" fontWeight={600}>{title}</Typography>
+          <Stack direction="row" alignItems="center" spacing={1}>
+            <Typography variant="h5" fontWeight={600}>{title}</Typography>
+            {showManage && (
+              <Link to="/realm/$realmId/manage" params={{ realmId }}>
+                <IconButton size="small">
+                  <TuneRoundedIcon fontSize="small" />
+                </IconButton>
+              </Link>
+            )}
+          </Stack>
           <JoinButton realmId={realmId} />
         </Stack>
         {description && (
