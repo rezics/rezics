@@ -6,6 +6,7 @@ import {
   buildAuthPresenceClearCookie,
   buildAuthPresenceSetCookie,
 } from "./auth-presence";
+import { provisionUserOnServer } from "../provisioning/provision";
 import { AuthPolicyError } from "./errors";
 import { auth } from "./instance";
 import { enforceInternalTokenSurface } from "./token-boundary";
@@ -35,6 +36,10 @@ function isSessionEstablishingPath(pathname: string): boolean {
 
 function isSessionClearingPath(pathname: string): boolean {
   return pathname.endsWith("/sign-out") || pathname.endsWith("/revoke-session");
+}
+
+function isVerifyEmailPath(pathname: string): boolean {
+  return pathname.includes("/verify-email");
 }
 
 function isSessionCheckPath(pathname: string): boolean {
@@ -74,6 +79,24 @@ export async function handleAuthRequest(request: Request): Promise<Response> {
   const response = await auth.handler(request);
   const { pathname } = new URL(request.url);
   const requestUrl = new URL(request.url);
+
+  if (response.ok && isVerifyEmailPath(pathname)) {
+    try {
+      const cloned = response.clone();
+      const body = (await cloned.json()) as {
+        user?: { id?: string; name?: string; slug?: string };
+      };
+      if (body.user?.id) {
+        await provisionUserOnServer({
+          unitId: body.user.id,
+          slug: body.user.slug ?? body.user.name ?? body.user.id,
+          name: body.user.name ?? body.user.id,
+        });
+      }
+    } catch (error) {
+      console.error("[verify-email] Post-verification provisioning failed:", error);
+    }
+  }
 
   if (response.ok && isSessionEstablishingPath(pathname)) {
     return withCookie(response, buildAuthPresenceSetCookie(requestUrl));

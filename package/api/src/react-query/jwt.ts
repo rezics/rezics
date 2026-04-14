@@ -110,6 +110,9 @@ function writeAuthSnapshot(
         slug: payload?.slug ?? null,
         role: payload?.role ?? null,
         isAuthenticated: !!token,
+        ...(payload?.email_verified === false
+          ? { email_verified: false }
+          : {}),
       },
       version: 0,
     }),
@@ -218,6 +221,9 @@ export async function ensureAuthIdentityToken(options?: {
 export async function exchangeForSessionToken(): Promise<string | null> {
   const authToken = getToken(NormalizedTokenName.AUTH_IDENTITY);
   if (!authToken) return null;
+
+  const claims = parseJwt(authToken);
+  if (claims?.email_verified === false) return null;
 
   const { apiBaseUrl } = getApiConfig();
   const response = await fetch(`${apiBaseUrl}/session/exchange`, {

@@ -2,6 +2,10 @@ import { CircularProgress, Typography } from "@mui/material";
 import Alert from "@mui/material/Alert";
 import Button from "@mui/material/Button";
 import { authApi } from "@rezics/api/auth/auth.api";
+import {
+  exchangeForSessionToken,
+  queryAccessToken,
+} from "@rezics/api/react-query/jwt";
 import { Turnstile } from "@rezics/ui/composite/auth/Turnstile.tsx";
 import { useNavigate } from "@tanstack/react-router";
 import { type FC, useMemo, useState } from "react";
@@ -36,12 +40,14 @@ export const VerifyEmailPage: FC = () => {
     setMessage(undefined);
 
     try {
+      await queryAccessToken({ requirePresence: false });
       const sessionState = await hydrateAuthSessionState();
       if (
         sessionState &&
         !sessionState.authSession.needsEmailVerification &&
         !sessionState.authSession.needsOnboarding
       ) {
+        await exchangeForSessionToken();
         navigate({
           to: resolvePostAuthDestination({
             needsOnboarding: sessionState.authSession.needsOnboarding,

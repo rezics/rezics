@@ -4,6 +4,7 @@ import {
   clearAllTokens,
   ensureAuthIdentityToken,
   exchangeForSessionToken,
+  parseJwt,
 } from "@rezics/api/react-query/jwt";
 import { userKeys } from "@rezics/api/user/user.keys";
 import { qc } from "@/app/provider/reactQueryUtil";
@@ -20,6 +21,12 @@ export const login = async (email: string, password: string) => {
 
   if (!authToken) {
     throw new Error("Login failed");
+  }
+
+  const claims = parseJwt(authToken);
+  if (claims?.email_verified === false) {
+    await hydrateAuthSessionState();
+    return { token: null };
   }
 
   const sessionToken = await exchangeForSessionToken();
@@ -46,6 +53,12 @@ export const register = async (
 
     if (!authToken) {
       throw new Error("Registration failed");
+    }
+
+    const claims = parseJwt(authToken);
+    if (claims?.email_verified === false) {
+      await hydrateAuthSessionState();
+      return { token: null };
     }
 
     const sessionToken = await exchangeForSessionToken();
