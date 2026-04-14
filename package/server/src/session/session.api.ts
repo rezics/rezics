@@ -67,6 +67,13 @@ export const sessionApi = new Elysia({ prefix: "/session" })
     });
 
     return { token };
+  }, {
+    detail: {
+      summary: "Exchange auth token for session token",
+      description:
+        "Verify an upstream auth identity token and issue a rezics session token with the user's role",
+      tags: ["Session"],
+    },
   })
   .get("/jwks", async () => getMainSessionPublicJwks(), {
     detail: {

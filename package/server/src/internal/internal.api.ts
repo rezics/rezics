@@ -28,6 +28,11 @@ export const internalApi = new Elysia({ prefix: "/internal" })
     },
     {
       query: t.Object({ id: t.String() }),
+      detail: {
+        summary: "Get unit owner",
+        description: "Look up the owner of a unit by its ID",
+        tags: ["Internal"],
+      },
     },
   )
   .post(
@@ -58,5 +63,11 @@ export const internalApi = new Elysia({ prefix: "/internal" })
         slug: t.Optional(t.String()),
         name: t.Optional(t.String()),
       }),
+      detail: {
+        summary: "Provision user",
+        description:
+          "Create or update a user record from auth service provisioning",
+        tags: ["Internal"],
+      },
     },
   );
