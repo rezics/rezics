@@ -72,6 +72,17 @@ export const meiliAdminApi = {
     });
   },
 
+  initPostsIndex: async (): Promise<MeiliApiMessageResponse> => {
+    return apiFetch<MeiliApiMessageResponse>("/meili/posts/init", {
+      method: "POST",
+    });
+  },
+  initRealmsIndex: async (): Promise<MeiliApiMessageResponse> => {
+    return apiFetch<MeiliApiMessageResponse>("/meili/realms/init", {
+      method: "POST",
+    });
+  },
+
   // Full sync
   syncAllContent: async (): Promise<MeiliTaskResponse> => {
     return apiFetch<MeiliTaskResponse>("/meili/content/sync", {
@@ -89,6 +100,17 @@ export const meiliAdminApi = {
     });
   },
 
+  syncAllPosts: async (): Promise<MeiliTaskResponse> => {
+    return apiFetch<MeiliTaskResponse>("/meili/posts/sync", {
+      method: "POST",
+    });
+  },
+  syncAllRealms: async (): Promise<MeiliTaskResponse> => {
+    return apiFetch<MeiliTaskResponse>("/meili/realms/sync", {
+      method: "POST",
+    });
+  },
+
   // Dangerous operations
   deleteAllContent: async (): Promise<MeiliApiMessageResponse> => {
     return apiFetch<MeiliApiMessageResponse>("/meili/content/deleteAll");
@@ -100,6 +122,16 @@ export const meiliAdminApi = {
   },
   deleteAllUsers: async (): Promise<MeiliApiMessageResponse> => {
     return apiFetch<MeiliApiMessageResponse>("/meili/users/deleteAll", {
+      method: "DELETE",
+    });
+  },
+  deleteAllPosts: async (): Promise<MeiliApiMessageResponse> => {
+    return apiFetch<MeiliApiMessageResponse>("/meili/posts/deleteAll", {
+      method: "DELETE",
+    });
+  },
+  deleteAllRealms: async (): Promise<MeiliApiMessageResponse> => {
+    return apiFetch<MeiliApiMessageResponse>("/meili/realms/deleteAll", {
       method: "DELETE",
     });
   },
@@ -183,6 +215,30 @@ export function useMeiliInitUsersIndexMutation(
   });
 }
 
+export function useMeiliInitPostsIndexMutation(
+  options?: Omit<
+    UseMutationOptions<MeiliApiMessageResponse, Error, void>,
+    "mutationFn"
+  >,
+) {
+  return useMutation({
+    mutationFn: () => meiliAdminApi.initPostsIndex(),
+    ...options,
+  });
+}
+
+export function useMeiliInitRealmsIndexMutation(
+  options?: Omit<
+    UseMutationOptions<MeiliApiMessageResponse, Error, void>,
+    "mutationFn"
+  >,
+) {
+  return useMutation({
+    mutationFn: () => meiliAdminApi.initRealmsIndex(),
+    ...options,
+  });
+}
+
 export function useMeiliSyncContentMutation(
   options?: Omit<
     UseMutationOptions<MeiliTaskResponse, Error, void>,
@@ -219,6 +275,30 @@ export function useMeiliSyncUsersMutation(
   });
 }
 
+export function useMeiliSyncPostsMutation(
+  options?: Omit<
+    UseMutationOptions<MeiliTaskResponse, Error, void>,
+    "mutationFn"
+  >,
+) {
+  return useMutation({
+    mutationFn: () => meiliAdminApi.syncAllPosts(),
+    ...options,
+  });
+}
+
+export function useMeiliSyncRealmsMutation(
+  options?: Omit<
+    UseMutationOptions<MeiliTaskResponse, Error, void>,
+    "mutationFn"
+  >,
+) {
+  return useMutation({
+    mutationFn: () => meiliAdminApi.syncAllRealms(),
+    ...options,
+  });
+}
+
 export function useMeiliDeleteAllContentMutation(
   options?: Omit<
     UseMutationOptions<MeiliApiMessageResponse, Error, void>,
@@ -251,6 +331,30 @@ export function useMeiliDeleteAllUsersMutation(
 ) {
   return useMutation({
     mutationFn: () => meiliAdminApi.deleteAllUsers(),
+    ...options,
+  });
+}
+
+export function useMeiliDeleteAllPostsMutation(
+  options?: Omit<
+    UseMutationOptions<MeiliApiMessageResponse, Error, void>,
+    "mutationFn"
+  >,
+) {
+  return useMutation({
+    mutationFn: () => meiliAdminApi.deleteAllPosts(),
+    ...options,
+  });
+}
+
+export function useMeiliDeleteAllRealmsMutation(
+  options?: Omit<
+    UseMutationOptions<MeiliApiMessageResponse, Error, void>,
+    "mutationFn"
+  >,
+) {
+  return useMutation({
+    mutationFn: () => meiliAdminApi.deleteAllRealms(),
     ...options,
   });
 }
@@ -298,12 +402,18 @@ export const meiliAdminMutations = {
   useInitContentIndex: useMeiliInitContentIndexMutation,
   useInitFeedbacksIndex: useMeiliInitFeedbacksIndexMutation,
   useInitUsersIndex: useMeiliInitUsersIndexMutation,
+  useInitPostsIndex: useMeiliInitPostsIndexMutation,
+  useInitRealmsIndex: useMeiliInitRealmsIndexMutation,
   useSyncContent: useMeiliSyncContentMutation,
   useSyncFeedbacks: useMeiliSyncFeedbacksMutation,
   useSyncUsers: useMeiliSyncUsersMutation,
+  useSyncPosts: useMeiliSyncPostsMutation,
+  useSyncRealms: useMeiliSyncRealmsMutation,
   useDeleteAllContent: useMeiliDeleteAllContentMutation,
   useDeleteAllFeedbacks: useMeiliDeleteAllFeedbacksMutation,
   useDeleteAllUsers: useMeiliDeleteAllUsersMutation,
+  useDeleteAllPosts: useMeiliDeleteAllPostsMutation,
+  useDeleteAllRealms: useMeiliDeleteAllRealmsMutation,
   useResetAllIndexes: useMeiliResetAllIndexesMutation,
   useCreateAdminKey: useMeiliCreateAdminKeyMutation,
   useDeleteKey: useMeiliDeleteKeyMutation,

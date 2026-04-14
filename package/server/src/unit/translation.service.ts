@@ -4,7 +4,9 @@ import type {
 } from "@rezics/contract";
 import { FALLBACK_LANGUAGE } from "@rezics/contract";
 import type { Prisma, UnitTranslation } from "#/prisma/client";
-import { prisma } from "#/prisma/client";
+import { prisma, UnitType } from "#/prisma/client";
+import { syncRealmToMeili } from "@/meili/realm/sync";
+import { syncPostsByTargetToMeili } from "@/meili/post/sync";
 
 /**
  * Translation Service - CRUD for UnitTranslation rows
@@ -54,7 +56,7 @@ export class TranslationService {
           : undefined,
     };
 
-    return prisma.unitTranslation.upsert({
+    const result = await prisma.unitTranslation.upsert({
       where: { unitId_language: { unitId, language } },
       create: payload,
       update: {
@@ -69,6 +71,27 @@ export class TranslationService {
             : undefined,
       },
     });
+
+    // Fire-and-forget: sync dependent Meilisearch documents
+    this.syncMeiliOnTranslationChange(unitId).catch(() => {});
+
+    return result;
+  }
+
+  private async syncMeiliOnTranslationChange(unitId: string): Promise<void> {
+    const unit = await prisma.unit.findUnique({
+      where: { id: unitId },
+      select: { type: true },
+    });
+    if (!unit) return;
+
+    if (unit.type === UnitType.REALM) {
+      // Realm translation changed — re-sync the realm document
+      await syncRealmToMeili(unitId);
+    } else {
+      // Non-realm translation changed — re-sync posts targeting this unit
+      await syncPostsByTargetToMeili(unitId);
+    }
   }
 
   /**

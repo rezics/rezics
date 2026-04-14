@@ -1,6 +1,8 @@
 import type {
   ContentSearchDocument,
   FeedbackSearchDocument,
+  PostSearchDocument,
+  RealmSearchDocument,
   UserSearchDocument,
 } from "@rezics/contract";
 import { prisma, UnitType } from "@rezics/server";
@@ -251,6 +253,315 @@ export async function syncAllFeedbacks(client: SearchClient) {
   }
 
   return { message: "syncAllFeedbacks success", totalSynced: total };
+}
+
+// ANCHOR: Post document builder
+
+const postIncludeForSync = {
+  unit: {
+    include: {
+      user: true,
+    },
+  },
+  targetUnit: {
+    include: {
+      translations: true,
+      book: true,
+      game: true,
+      media: true,
+    },
+  },
+  scoreEntry: true,
+} as const;
+
+export function buildPostDocument(post: any): PostSearchDocument {
+  const user = post.unit?.user;
+  const targetUnit = post.targetUnit;
+  const scoreEntry = post.scoreEntry;
+
+  // Denormalized target unit info
+  let targetTitles: string[] | null = null;
+  let targetType: string | null = null;
+  let targetCoverUrl: string | null = null;
+
+  if (targetUnit) {
+    const translations: any[] = targetUnit.translations ?? [];
+    targetTitles = translations.map((t: any) => t.title).filter(Boolean);
+    targetType = targetUnit.type ?? null;
+    const ext = targetUnit.book ?? targetUnit.game ?? targetUnit.media ?? null;
+    targetCoverUrl = ext?.coverUrl ?? null;
+  }
+
+  return {
+    id: post.unitId,
+    body: post.body ?? null,
+    kind: post.kind ?? null,
+    depth: post.depth,
+    sortPath: post.sortPath ?? null,
+    isLocked: post.isLocked,
+    replyCount: post.replyCount,
+    directReplyCount: post.directReplyCount,
+    lastReplyAt: post.lastReplyAt
+      ? post.lastReplyAt instanceof Date
+        ? post.lastReplyAt.toISOString()
+        : post.lastReplyAt
+      : null,
+    createdAt:
+      post.createdAt instanceof Date
+        ? post.createdAt.toISOString()
+        : post.createdAt,
+    updatedAt:
+      post.updatedAt instanceof Date
+        ? post.updatedAt.toISOString()
+        : post.updatedAt,
+    targetUnitId: post.targetUnitId ?? null,
+    realmUnitId: post.realmUnitId ?? null,
+    rootPostUnitId: post.rootPostUnitId ?? null,
+    parentPostUnitId: post.parentPostUnitId ?? null,
+    authorUserId: post.authorUserId,
+    scoreEntryId: post.scoreEntryId ?? null,
+    authorName: user?.name ?? null,
+    authorSlug: user?.slug ?? null,
+    authorAvatar: user?.avatar ?? null,
+    targetTitles,
+    targetType,
+    targetCoverUrl,
+    scoreValue: scoreEntry?.value ?? null,
+    scoreFields: scoreEntry?.fields ?? null,
+    extra: post.extra ?? undefined,
+  };
+}
+
+// ANCHOR: Post sync functions
+
+export async function syncSinglePost(
+  client: SearchClient,
+  unitId: string,
+) {
+  const post = await prisma.post.findUnique({
+    where: { unitId },
+    include: {
+      ...postIncludeForSync,
+      unit: { include: { user: true } },
+    },
+  });
+
+  if (!post || post.unit.status !== "PUBLISHED") {
+    await client.deletePosts([unitId]);
+    return;
+  }
+
+  const doc = buildPostDocument(post);
+  await client.addOrUpdatePosts([doc]);
+}
+
+export async function syncAllPosts(client: SearchClient) {
+  const deleteResult = await client.deleteAllPosts();
+  console.log("syncAllPosts: deleted all documents", deleteResult);
+
+  let cursor: string | undefined;
+  let total = 0;
+
+  while (true) {
+    console.log("syncAllPosts: cursor", cursor, "total", total);
+
+    const posts: any[] = await prisma.post.findMany({
+      where: {
+        unit: { status: "PUBLISHED" },
+      },
+      include: {
+        ...postIncludeForSync,
+        unit: { include: { user: true } },
+      },
+      orderBy: { unitId: "asc" },
+      take: BATCH_SIZE,
+      skip: cursor ? 1 : 0,
+      cursor: cursor ? { unitId: cursor } : undefined,
+    });
+
+    if (posts.length === 0) break;
+
+    const docs = posts.map(buildPostDocument);
+    const addResult = await client.addOrUpdatePosts(docs);
+    console.log("syncAllPosts: added batch", addResult);
+
+    total += docs.length;
+    cursor = posts[posts.length - 1]!.unitId;
+  }
+
+  return { message: "syncAllPosts success", totalSynced: total };
+}
+
+export async function syncPostsByAuthor(
+  client: SearchClient,
+  userId: string,
+) {
+  let cursor: string | undefined;
+  let total = 0;
+
+  while (true) {
+    const posts: any[] = await prisma.post.findMany({
+      where: {
+        authorUserId: userId,
+        unit: { status: "PUBLISHED" },
+      },
+      include: {
+        ...postIncludeForSync,
+        unit: { include: { user: true } },
+      },
+      orderBy: { unitId: "asc" },
+      take: BATCH_SIZE,
+      skip: cursor ? 1 : 0,
+      cursor: cursor ? { unitId: cursor } : undefined,
+    });
+
+    if (posts.length === 0) break;
+
+    const docs = posts.map(buildPostDocument);
+    await client.addOrUpdatePosts(docs);
+
+    total += docs.length;
+    cursor = posts[posts.length - 1]!.unitId;
+  }
+
+  return { message: "syncPostsByAuthor success", totalSynced: total };
+}
+
+export async function syncPostsByTarget(
+  client: SearchClient,
+  targetUnitId: string,
+) {
+  let cursor: string | undefined;
+  let total = 0;
+
+  while (true) {
+    const posts: any[] = await prisma.post.findMany({
+      where: {
+        targetUnitId,
+        unit: { status: "PUBLISHED" },
+      },
+      include: {
+        ...postIncludeForSync,
+        unit: { include: { user: true } },
+      },
+      orderBy: { unitId: "asc" },
+      take: BATCH_SIZE,
+      skip: cursor ? 1 : 0,
+      cursor: cursor ? { unitId: cursor } : undefined,
+    });
+
+    if (posts.length === 0) break;
+
+    const docs = posts.map(buildPostDocument);
+    await client.addOrUpdatePosts(docs);
+
+    total += docs.length;
+    cursor = posts[posts.length - 1]!.unitId;
+  }
+
+  return { message: "syncPostsByTarget success", totalSynced: total };
+}
+
+// ANCHOR: Realm document builder
+
+export function buildRealmDocument(realm: any): RealmSearchDocument {
+  const unit = realm.unit;
+  const translations: any[] = unit?.translations ?? [];
+
+  const titles = translations.map((t: any) => t.title).filter(Boolean);
+  const descriptions = translations
+    .map((t: any) => t.description)
+    .filter(Boolean);
+
+  return {
+    id: realm.unitId,
+    isPublic: realm.isPublic,
+    isOfficial: realm.isOfficial,
+    memberCount: realm.memberCount,
+    createdAt:
+      realm.createdAt instanceof Date
+        ? realm.createdAt.toISOString()
+        : realm.createdAt,
+    updatedAt:
+      realm.updatedAt instanceof Date
+        ? realm.updatedAt.toISOString()
+        : realm.updatedAt,
+    userId: unit?.userId ?? null,
+    titles,
+    descriptions,
+    translations: translations.map((tr: any) => ({
+      language: tr.language,
+      title: tr.title ?? null,
+      description: tr.description ?? null,
+    })),
+    extra: realm.extra ?? undefined,
+  };
+}
+
+// ANCHOR: Realm sync functions
+
+export async function syncSingleRealm(
+  client: SearchClient,
+  unitId: string,
+) {
+  const realm = await prisma.realm.findUnique({
+    where: { unitId },
+    include: {
+      unit: {
+        include: {
+          translations: true,
+        },
+      },
+    },
+  });
+
+  if (!realm || realm.unit.status !== "PUBLISHED") {
+    await client.deleteRealms([unitId]);
+    return;
+  }
+
+  const doc = buildRealmDocument(realm);
+  await client.addOrUpdateRealms([doc]);
+}
+
+export async function syncAllRealms(client: SearchClient) {
+  const deleteResult = await client.deleteAllRealms();
+  console.log("syncAllRealms: deleted all documents", deleteResult);
+
+  let cursor: string | undefined;
+  let total = 0;
+
+  while (true) {
+    console.log("syncAllRealms: cursor", cursor, "total", total);
+
+    const realms: any[] = await prisma.realm.findMany({
+      where: {
+        unit: { status: "PUBLISHED" },
+      },
+      include: {
+        unit: {
+          include: {
+            translations: true,
+          },
+        },
+      },
+      orderBy: { unitId: "asc" },
+      take: BATCH_SIZE,
+      skip: cursor ? 1 : 0,
+      cursor: cursor ? { unitId: cursor } : undefined,
+    });
+
+    if (realms.length === 0) break;
+
+    const docs = realms.map(buildRealmDocument);
+    const addResult = await client.addOrUpdateRealms(docs);
+    console.log("syncAllRealms: added batch", addResult);
+
+    total += docs.length;
+    cursor = realms[realms.length - 1]!.unitId;
+  }
+
+  return { message: "syncAllRealms success", totalSynced: total };
 }
 
 // ANCHOR: Users sync

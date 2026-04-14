@@ -3,6 +3,8 @@ import {
   type FeedbackListQuery,
   feedbackListQuerySchema,
   isRoot,
+  PostSearchOptionsSchema,
+  RealmSearchOptionsSchema,
   type UserListQuery,
   userListQuerySchema,
 } from "@rezics/contract";
@@ -78,6 +80,36 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
       },
     },
   )
+  .post(
+    "/posts/search",
+    async ({ body }) => {
+      return meiliService.searchPosts(body);
+    },
+    {
+      body: PostSearchOptionsSchema,
+      detail: {
+        summary: "Search posts (Meilisearch)",
+        description:
+          "Full-text search over posts with filters for kind, target, realm, author, depth.",
+        tags: ["Meili", "Posts", "Search"],
+      },
+    },
+  )
+  .post(
+    "/realms/search",
+    async ({ body }) => {
+      return meiliService.searchRealms(body);
+    },
+    {
+      body: RealmSearchOptionsSchema,
+      detail: {
+        summary: "Search realms (Meilisearch)",
+        description:
+          "Full-text search over realms with filters for public/official status.",
+        tags: ["Meili", "Realms", "Search"],
+      },
+    },
+  )
   // ANCHOR: Admin — index init
   .post(
     "/content/init",
@@ -144,6 +176,52 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
       requireLogin: true,
       detail: {
         summary: "Init users index",
+        tags: ["Meili", "Admin"],
+      },
+    },
+  )
+  .post(
+    "/posts/init",
+    async ({ identity, set }) => {
+      if (!isRoot(identity)) {
+        set.status = 403;
+        throw new Error("Forbidden: not authorized to init posts index");
+      }
+      const isRootUser = await verifyRootFromDb(identity.unitId);
+      if (!isRootUser) {
+        set.status = 403;
+        throw new Error("Forbidden: not authorized to init posts index");
+      }
+      await meiliService.initPostsIndex();
+      return { message: "posts index initialized" };
+    },
+    {
+      requireLogin: true,
+      detail: {
+        summary: "Init posts index",
+        tags: ["Meili", "Admin"],
+      },
+    },
+  )
+  .post(
+    "/realms/init",
+    async ({ identity, set }) => {
+      if (!isRoot(identity)) {
+        set.status = 403;
+        throw new Error("Forbidden: not authorized to init realms index");
+      }
+      const isRootUser = await verifyRootFromDb(identity.unitId);
+      if (!isRootUser) {
+        set.status = 403;
+        throw new Error("Forbidden: not authorized to init realms index");
+      }
+      await meiliService.initRealmsIndex();
+      return { message: "realms index initialized" };
+    },
+    {
+      requireLogin: true,
+      detail: {
+        summary: "Init realms index",
         tags: ["Meili", "Admin"],
       },
     },
@@ -218,6 +296,52 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
       },
     },
   )
+  .post(
+    "/posts/sync",
+    async ({ identity, set }) => {
+      if (!isRoot(identity)) {
+        set.status = 403;
+        throw new Error("Forbidden: not authorized to sync posts");
+      }
+      const isRootUser = await verifyRootFromDb(identity.unitId);
+      if (!isRootUser) {
+        set.status = 403;
+        throw new Error("Forbidden: not authorized to sync posts");
+      }
+      const task = await meiliService.syncAllPosts();
+      return { task };
+    },
+    {
+      requireLogin: true,
+      detail: {
+        summary: "Sync all posts to Meilisearch",
+        tags: ["Meili", "Admin"],
+      },
+    },
+  )
+  .post(
+    "/realms/sync",
+    async ({ identity, set }) => {
+      if (!isRoot(identity)) {
+        set.status = 403;
+        throw new Error("Forbidden: not authorized to sync realms");
+      }
+      const isRootUser = await verifyRootFromDb(identity.unitId);
+      if (!isRootUser) {
+        set.status = 403;
+        throw new Error("Forbidden: not authorized to sync realms");
+      }
+      const task = await meiliService.syncAllRealms();
+      return { task };
+    },
+    {
+      requireLogin: true,
+      detail: {
+        summary: "Sync all realms to Meilisearch",
+        tags: ["Meili", "Admin"],
+      },
+    },
+  )
   // ANCHOR: Admin — dangerous operations
   .get(
     "/content/deleteAll",
@@ -284,6 +408,52 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
       requireLogin: true,
       detail: {
         summary: "Delete all users from Meilisearch",
+        tags: ["Meili", "Admin"],
+      },
+    },
+  )
+  .delete(
+    "/posts/deleteAll",
+    async ({ identity, set }) => {
+      if (!isRoot(identity)) {
+        set.status = 403;
+        throw new Error("Forbidden: not authorized to delete all posts");
+      }
+      const isRootUser = await verifyRootFromDb(identity.unitId);
+      if (!isRootUser) {
+        set.status = 403;
+        throw new Error("Forbidden: not authorized to delete all posts");
+      }
+      await meiliService.deleteAllPosts();
+      return { message: "all posts deleted" };
+    },
+    {
+      requireLogin: true,
+      detail: {
+        summary: "Delete all posts from Meilisearch",
+        tags: ["Meili", "Admin"],
+      },
+    },
+  )
+  .delete(
+    "/realms/deleteAll",
+    async ({ identity, set }) => {
+      if (!isRoot(identity)) {
+        set.status = 403;
+        throw new Error("Forbidden: not authorized to delete all realms");
+      }
+      const isRootUser = await verifyRootFromDb(identity.unitId);
+      if (!isRootUser) {
+        set.status = 403;
+        throw new Error("Forbidden: not authorized to delete all realms");
+      }
+      await meiliService.deleteAllRealms();
+      return { message: "all realms deleted" };
+    },
+    {
+      requireLogin: true,
+      detail: {
+        summary: "Delete all realms from Meilisearch",
         tags: ["Meili", "Admin"],
       },
     },

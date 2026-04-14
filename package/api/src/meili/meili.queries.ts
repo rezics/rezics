@@ -7,9 +7,20 @@ import type {
   ContentSearchResult,
   FeedbackListResponse,
   FeedbackType,
+  PostSearchOptions,
+  RealmSearchOptions,
 } from "@rezics/contract";
-import { queryOptions, useQuery } from "@tanstack/react-query";
-import { meiliContentApi, meiliFeedbackApi } from "./meili.api";
+import {
+  queryOptions,
+  useInfiniteQuery,
+  useQuery,
+} from "@tanstack/react-query";
+import {
+  meiliContentApi,
+  meiliFeedbackApi,
+  meiliPostApi,
+  meiliRealmApi,
+} from "./meili.api";
 
 // ANCHOR: Content search
 
@@ -70,6 +81,66 @@ export const buildMeiliFeedbackQuery = (
     staleTime: 1000 * 60 * 5,
   } as const;
 };
+
+// ANCHOR: Post search
+
+export const postSearchQueryOptions = (opts: PostSearchOptions) =>
+  queryOptions({
+    queryKey: ["meili", "posts", opts],
+    queryFn: () => meiliPostApi.postSearch(opts),
+    staleTime: 1000 * 60 * 2,
+  });
+
+export function usePostSearchQuery(opts: PostSearchOptions) {
+  return useQuery(postSearchQueryOptions(opts));
+}
+
+export function usePostSearchInfiniteQuery(
+  opts: Omit<PostSearchOptions, "offset">,
+) {
+  const limit = opts.limit ?? 20;
+  return useInfiniteQuery({
+    queryKey: ["meili", "posts", "infinite", opts],
+    queryFn: ({ pageParam = 0 }) =>
+      meiliPostApi.postSearch({ ...opts, offset: pageParam, limit }),
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, _allPages, lastPageParam) => {
+      if (lastPage.items.length < limit) return undefined;
+      return lastPageParam + limit;
+    },
+    staleTime: 1000 * 60 * 2,
+  });
+}
+
+// ANCHOR: Realm search
+
+export const realmSearchQueryOptions = (opts: RealmSearchOptions) =>
+  queryOptions({
+    queryKey: ["meili", "realms", opts],
+    queryFn: () => meiliRealmApi.realmSearch(opts),
+    staleTime: 1000 * 60 * 2,
+  });
+
+export function useRealmSearchQuery(opts: RealmSearchOptions) {
+  return useQuery(realmSearchQueryOptions(opts));
+}
+
+export function useRealmSearchInfiniteQuery(
+  opts: Omit<RealmSearchOptions, "offset">,
+) {
+  const limit = opts.limit ?? 20;
+  return useInfiniteQuery({
+    queryKey: ["meili", "realms", "infinite", opts],
+    queryFn: ({ pageParam = 0 }) =>
+      meiliRealmApi.realmSearch({ ...opts, offset: pageParam, limit }),
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, _allPages, lastPageParam) => {
+      if (lastPage.items.length < limit) return undefined;
+      return lastPageParam + limit;
+    },
+    staleTime: 1000 * 60 * 2,
+  });
+}
 
 // ANCHOR: Legacy stubs
 

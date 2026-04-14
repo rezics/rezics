@@ -1,109 +1,73 @@
 import { Box, Tab, Tabs } from "@mui/material";
-import { mapUnitListToReviewListResponse } from "@rezics/api/meili/meili.api";
-import { buildMeiliUnitQuery } from "@rezics/api/meili/meili.queries";
+import { usePostSearchQuery } from "@rezics/api/meili/meili.queries";
 import { reactionApi } from "@rezics/api/reaction/reaction.api";
-import type { PostDTO } from "@rezics/contract";
-import { UnitType } from "@rezics/contract";
+import type { PostDTO, PostSearchDocument } from "@rezics/contract";
 import { UniversalPaginator, type UniversalPaginatorHandle } from "@rezics/ui";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useRouterState } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ReviewList } from "@/review/component/ReviewList.tsx";
 import { TextSearchInput } from "@/search/component/TextSearchInput";
 
+function mapPostSearchDocToPostDTO(doc: PostSearchDocument): PostDTO {
+  return {
+    unitId: doc.id,
+    authorUserId: doc.authorUserId,
+    author: {
+      unitId: doc.authorUserId,
+      name: doc.authorName ?? "",
+      slug: doc.authorSlug ?? undefined,
+      avatar: doc.authorAvatar ?? undefined,
+    },
+    targetUnitId: doc.targetUnitId,
+    realmUnitId: doc.realmUnitId,
+    body: doc.body,
+    rootPostUnitId: doc.rootPostUnitId,
+    parentPostUnitId: doc.parentPostUnitId,
+    kind: doc.kind as any,
+    depth: doc.depth,
+    sortPath: doc.sortPath,
+    replyCount: doc.replyCount,
+    directReplyCount: doc.directReplyCount,
+    lastReplyAt: doc.lastReplyAt,
+    isLocked: doc.isLocked,
+    scoreEntryId: doc.scoreEntryId,
+    extra: doc.extra as any,
+    createdAt: doc.createdAt,
+    updatedAt: doc.updatedAt,
+  };
+}
+
 type Review = PostDTO;
+
 export interface ReviewsPageProps {
   bookUnitId?: string;
 }
+
 export const ReviewsPage: React.FC<ReviewsPageProps> = ({ bookUnitId }) => {
   const ref = useRef<UniversalPaginatorHandle>(null);
-  const queryClient = useQueryClient();
   const targetUnitId = bookUnitId ?? "";
-
   const EXTERNAL_PAGE_SIZE = 50;
-  const [startReview, setStartReview] = useState<number>(0);
-  const [startRemark, setStartRemark] = useState<number>(0);
+  const [start, setStart] = useState<number>(0);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [tab, setTab] = useState<"review" | "remark">("review");
   const [keyword, setKeyword] = useState<string>("");
-  const search = useRouterState({ select: (s) => s.location.search ?? "" });
-  const searchParams = useMemo(() => new URLSearchParams(search), [search]);
 
-  useEffect(() => {
-    const tabParam = searchParams.get("tab");
-    if (tabParam) {
-      if (tabParam === "review" || tabParam === "remark") {
-        setTab(tabParam as "review" | "remark");
-      }
-    }
-  }, [searchParams.get]);
+  const kind = tab === "review" ? "REVIEW" : "REMARK";
 
-  const reviewListQueryOpts = useQuery(
-    buildMeiliUnitQuery({
-      kind: UnitType.POST,
-      start: startReview,
-      targetUnitId: targetUnitId,
-      keyword: keyword,
-      limit: EXTERNAL_PAGE_SIZE,
-      mapFn: mapUnitListToReviewListResponse,
-    }),
-  );
+  const { data, isLoading } = usePostSearchQuery({
+    kind,
+    targetUnitId: targetUnitId || undefined,
+    keyword: keyword || undefined,
+    offset: start,
+    limit: EXTERNAL_PAGE_SIZE,
+  });
 
-  const remarkListQueryOpts = useQuery(
-    buildMeiliUnitQuery({
-      kind: UnitType.POST,
-      start: startRemark,
-      targetUnitId: targetUnitId,
-      keyword: keyword,
-      limit: EXTERNAL_PAGE_SIZE,
-      mapFn: mapUnitListToReviewListResponse,
-    }),
-  );
-
-  const { data: reviewData, isLoading: isLoadingReview } = reviewListQueryOpts;
-
-  const { data: remarkData, isLoading: isLoadingRemark } = remarkListQueryOpts;
-
-  function handleNeedMoreData(page: number) {
-    if (tab === "review") {
-      setStartReview((page - 1) * EXTERNAL_PAGE_SIZE);
-    } else {
-      setStartRemark((page - 1) * EXTERNAL_PAGE_SIZE);
-    }
-  }
-
-  async function handlePreRequestData(page: number) {
-    const isReview = tab === "review";
-    const start = (page - 1) * EXTERNAL_PAGE_SIZE;
-    const { queryKey, queryFn } = buildMeiliUnitQuery({
-      kind: isReview ? UnitType.POST : UnitType.POST,
-      start: start,
-      targetUnitId: targetUnitId,
-      keyword: keyword,
-      limit: EXTERNAL_PAGE_SIZE,
-      mapFn: mapUnitListToReviewListResponse,
-    });
-    const nextData = await queryClient.fetchQuery({
-      queryKey,
-      queryFn,
-    });
-    return nextData?.reviews?.length ?? 0;
-  }
-
-  useEffect(() => {
-    ref.current?.resetPaginationPageNumber?.();
-    setCurrentPage(1);
-  }, []);
-
-  const activeData = tab === "review" ? reviewData : remarkData;
-  const isLoading = tab === "review" ? isLoadingReview : isLoadingRemark;
   const baseReviews: Review[] = useMemo(
-    () => activeData?.reviews ?? [],
-    [activeData],
+    () => data?.items?.map(mapPostSearchDocToPostDTO) ?? [],
+    [data],
   );
 
-  // Collect current visible review unitIds for reaction summary batch query
   const currentTargetIds = useMemo(
     () => baseReviews.map((r) => r.unitId).filter(Boolean),
     [baseReviews],
@@ -111,14 +75,13 @@ export const ReviewsPage: React.FC<ReviewsPageProps> = ({ bookUnitId }) => {
 
   const { data: reactionSummaryBatch } = useQuery({
     queryKey: ["reaction-summary-batch", tab, bookUnitId, currentTargetIds],
-    queryFn: () => reactionApi.summaryBatch(currentTargetIds as string[]),
+    queryFn: () => reactionApi.summary(currentTargetIds as string[]),
     enabled: currentTargetIds.length > 0,
     staleTime: 1000 * 60 * 2,
   });
 
   const [reviews, setReviews] = useState<Review[]>([]);
 
-  // Merge Meili review list data with accurate reaction summaries
   useEffect(() => {
     if (!baseReviews || baseReviews.length === 0) {
       setReviews([]);
@@ -126,7 +89,6 @@ export const ReviewsPage: React.FC<ReviewsPageProps> = ({ bookUnitId }) => {
     }
 
     if (!reactionSummaryBatch) {
-      // Fallback: just use Meili data if batch summary not loaded yet
       setReviews(baseReviews);
       return;
     }
@@ -151,7 +113,16 @@ export const ReviewsPage: React.FC<ReviewsPageProps> = ({ bookUnitId }) => {
     setReviews(merged);
   }, [baseReviews, reactionSummaryBatch]);
 
-  const totalItems: number = activeData?.total ?? 10000;
+  const totalItems: number = data?.total ?? 0;
+
+  function handleNeedMoreData(page: number) {
+    setStart((page - 1) * EXTERNAL_PAGE_SIZE);
+  }
+
+  useEffect(() => {
+    ref.current?.resetPaginationPageNumber?.();
+    setCurrentPage(1);
+  }, [tab, keyword]);
 
   return (
     <div className="mx-auto max-w-7xl p-4 mt-4">
@@ -165,7 +136,6 @@ export const ReviewsPage: React.FC<ReviewsPageProps> = ({ bookUnitId }) => {
         sortOrder={undefined as any}
         onSortChange={() => {}}
         requestData={handleNeedMoreData}
-        preRequestData={handlePreRequestData}
         isLoading={isLoading && reviews.length === 0}
         currentPage={currentPage}
         setCurrentPage={setCurrentPage}
@@ -174,7 +144,6 @@ export const ReviewsPage: React.FC<ReviewsPageProps> = ({ bookUnitId }) => {
             <TextSearchInput
               onSearch={(info) => {
                 setKeyword(info ?? "");
-                console.log("onSearch", info);
               }}
               defaultValue={{ keyword: keyword ?? "" }}
               placeholder="Search reviews"

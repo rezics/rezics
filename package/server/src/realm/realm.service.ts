@@ -10,6 +10,7 @@ import type {
 import type { Prisma } from "#/prisma/client";
 import { prisma, UnitStatus, UnitType } from "#/prisma/client";
 import { syncContentToMeili } from "@/meili/content/sync";
+import { syncRealmToMeili } from "@/meili/realm/sync";
 import {
   mapRealmListRowToDTO,
   mapRealmMemberToDTO,
@@ -136,6 +137,9 @@ export class RealmService {
       include: realmInclude,
     });
 
+    // Fire-and-forget sync to Meilisearch
+    syncRealmToMeili(unit.id).catch(() => {});
+
     return mapRealmToDTO(row);
   }
 
@@ -153,6 +157,9 @@ export class RealmService {
       },
       include: realmInclude,
     });
+
+    // Fire-and-forget sync to Meilisearch
+    syncRealmToMeili(unitId).catch(() => {});
 
     return mapRealmToDTO(row);
   }
@@ -180,6 +187,9 @@ export class RealmService {
       where: { unitId: realmUnitId },
       data: { memberCount: { increment: 1 } },
     });
+
+    // Fire-and-forget sync to Meilisearch (memberCount changed)
+    syncRealmToMeili(realmUnitId).catch(() => {});
 
     return mapRealmMemberToDTO(member);
   }
@@ -213,6 +223,9 @@ export class RealmService {
       where: { unitId: realmUnitId },
       data: { memberCount: { decrement: 1 } },
     });
+
+    // Fire-and-forget sync to Meilisearch (memberCount changed)
+    syncRealmToMeili(realmUnitId).catch(() => {});
   }
 
   async getMember(

@@ -10,12 +10,16 @@ export class SearchClient {
   readonly contentIndex: Index;
   readonly feedbackIndex: Index;
   readonly userIndex: Index;
+  readonly postIndex: Index;
+  readonly realmIndex: Index;
 
   constructor(config: MeiliConfig) {
     this.meili = new MeiliSearch({ host: config.host, apiKey: config.apiKey });
     this.contentIndex = this.meili.index("content");
     this.feedbackIndex = this.meili.index("feedbacks");
     this.userIndex = this.meili.index("users");
+    this.postIndex = this.meili.index("posts");
+    this.realmIndex = this.meili.index("realms");
   }
 
   async checkHealth(): Promise<boolean> {
@@ -79,6 +83,33 @@ export class SearchClient {
     this.userIndex.addDocuments([], { primaryKey: "id" });
   }
 
+  async initPostIndex(): Promise<void> {
+    await this.postIndex.updateSettings({
+      searchableAttributes: ["body", "targetTitles", "authorName"],
+      filterableAttributes: [
+        "kind",
+        "targetUnitId",
+        "realmUnitId",
+        "authorUserId",
+        "depth",
+        "isLocked",
+        "rootPostUnitId",
+        "parentPostUnitId",
+      ],
+      sortableAttributes: ["createdAt", "updatedAt", "replyCount"],
+    });
+    this.postIndex.addDocuments([], { primaryKey: "id" });
+  }
+
+  async initRealmIndex(): Promise<void> {
+    await this.realmIndex.updateSettings({
+      searchableAttributes: ["titles", "descriptions"],
+      filterableAttributes: ["isPublic", "isOfficial"],
+      sortableAttributes: ["memberCount", "createdAt", "updatedAt"],
+    });
+    this.realmIndex.addDocuments([], { primaryKey: "id" });
+  }
+
   // ANCHOR: Content document operations
 
   addOrUpdateContent(docs: any[]) {
@@ -113,6 +144,30 @@ export class SearchClient {
   }
   deleteAllUsers() {
     return this.userIndex.deleteAllDocuments();
+  }
+
+  // ANCHOR: Post document operations
+
+  addOrUpdatePosts(docs: any[]) {
+    return this.postIndex.addDocuments(docs);
+  }
+  deletePosts(ids: string[]) {
+    return this.postIndex.deleteDocuments(ids);
+  }
+  deleteAllPosts() {
+    return this.postIndex.deleteAllDocuments();
+  }
+
+  // ANCHOR: Realm document operations
+
+  addOrUpdateRealms(docs: any[]) {
+    return this.realmIndex.addDocuments(docs);
+  }
+  deleteRealms(ids: string[]) {
+    return this.realmIndex.deleteDocuments(ids);
+  }
+  deleteAllRealms() {
+    return this.realmIndex.deleteAllDocuments();
   }
 
   // ANCHOR: Index deletion

@@ -3,17 +3,25 @@ import type {
   ContentSearchResult,
   FeedbackListQuery,
   FeedbackSearchResult,
+  PostSearchOptions,
+  PostSearchResult,
+  RealmSearchOptions,
+  RealmSearchResult,
   UserListQuery,
   UserSearchResult,
 } from "@rezics/contract";
 import {
   syncAllContent,
   syncAllFeedbacks,
+  syncAllPosts,
+  syncAllRealms,
   syncAllUsers,
   syncSingleContent,
 } from "@rezics/search";
 import { searchContent } from "./content/content.service";
 import { searchFeedbacks } from "./feedback/feedback.api";
+import { searchPosts } from "./post/post.service";
+import { searchRealms } from "./realm/realm.service";
 import { searchClient } from "./search-client";
 import { searchUsers } from "./user/user.api";
 
@@ -34,6 +42,16 @@ export class MeiliService {
     return searchUsers(options);
   }
 
+  async searchPosts(options: PostSearchOptions): Promise<PostSearchResult> {
+    return searchPosts(options);
+  }
+
+  async searchRealms(
+    options: RealmSearchOptions,
+  ): Promise<RealmSearchResult> {
+    return searchRealms(options);
+  }
+
   async initContentIndex(): Promise<void> {
     await searchClient.initContentIndex();
   }
@@ -44,6 +62,14 @@ export class MeiliService {
 
   async initUsersIndex(): Promise<void> {
     await searchClient.initUserIndex();
+  }
+
+  async initPostsIndex(): Promise<void> {
+    await searchClient.initPostIndex();
+  }
+
+  async initRealmsIndex(): Promise<void> {
+    await searchClient.initRealmIndex();
   }
 
   async syncAllContent(): Promise<unknown> {
@@ -62,12 +88,28 @@ export class MeiliService {
     return syncAllUsers(searchClient);
   }
 
+  async syncAllPosts(): Promise<unknown> {
+    return syncAllPosts(searchClient);
+  }
+
+  async syncAllRealms(): Promise<unknown> {
+    return syncAllRealms(searchClient);
+  }
+
   async deleteAllFeedbacks() {
     return searchClient.deleteAllFeedbacks();
   }
 
   async deleteAllUsers() {
     return searchClient.deleteAllUsers();
+  }
+
+  async deleteAllPosts() {
+    return searchClient.deleteAllPosts();
+  }
+
+  async deleteAllRealms() {
+    return searchClient.deleteAllRealms();
   }
 
   async deleteAllIndexes() {

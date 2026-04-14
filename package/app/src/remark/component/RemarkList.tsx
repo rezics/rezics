@@ -1,11 +1,39 @@
 import Box from "@mui/material/Box";
 import CircularProgress from "@mui/material/CircularProgress";
 import Typography from "@mui/material/Typography";
-import { postQueries } from "@rezics/api/post/post";
-import { PostKind } from "@rezics/contract";
-import { useQuery } from "@tanstack/react-query";
+import { usePostSearchQuery } from "@rezics/api/meili/meili.queries";
+import type { PostDTO, PostSearchDocument } from "@rezics/contract";
 import type React from "react";
 import { RemarkCard } from "./RemarkCard";
+
+function mapPostSearchDocToPostDTO(doc: PostSearchDocument): PostDTO {
+  return {
+    unitId: doc.id,
+    authorUserId: doc.authorUserId,
+    author: {
+      unitId: doc.authorUserId,
+      name: doc.authorName ?? "",
+      slug: doc.authorSlug ?? undefined,
+      avatar: doc.authorAvatar ?? undefined,
+    },
+    targetUnitId: doc.targetUnitId,
+    realmUnitId: doc.realmUnitId,
+    body: doc.body,
+    rootPostUnitId: doc.rootPostUnitId,
+    parentPostUnitId: doc.parentPostUnitId,
+    kind: doc.kind as any,
+    depth: doc.depth,
+    sortPath: doc.sortPath,
+    replyCount: doc.replyCount,
+    directReplyCount: doc.directReplyCount,
+    lastReplyAt: doc.lastReplyAt,
+    isLocked: doc.isLocked,
+    scoreEntryId: doc.scoreEntryId,
+    extra: doc.extra as any,
+    createdAt: doc.createdAt,
+    updatedAt: doc.updatedAt,
+  };
+}
 
 interface RemarkListProps {
   targetUnitId: string;
@@ -16,12 +44,13 @@ export const RemarkList: React.FC<RemarkListProps> = ({
   targetUnitId,
   limit = 20,
 }) => {
-  const { data, isLoading } = useQuery(
-    postQueries.byTarget(targetUnitId),
-  );
+  const { data, isLoading } = usePostSearchQuery({
+    kind: "REMARK",
+    targetUnitId,
+    limit,
+  });
 
-  const remarks =
-    data?.posts?.filter((p) => p.kind === PostKind.REMARK) ?? [];
+  const remarks = data?.items?.map(mapPostSearchDocToPostDTO) ?? [];
 
   if (isLoading) {
     return (
@@ -41,7 +70,7 @@ export const RemarkList: React.FC<RemarkListProps> = ({
 
   return (
     <Box>
-      {remarks.slice(0, limit).map((remark) => (
+      {remarks.map((remark) => (
         <RemarkCard key={remark.unitId} remark={remark} />
       ))}
     </Box>

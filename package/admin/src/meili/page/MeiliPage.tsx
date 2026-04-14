@@ -73,6 +73,26 @@ export function MeiliPage() {
     onError: (err) => setMessage({ type: "error", text: err.message }),
   });
 
+  const initPostsMutation = meiliAdminMutations.useInitPostsIndex({
+    onSuccess: (res) => {
+      setMessage({
+        type: "success",
+        text: res.message || "Posts index initialized",
+      });
+    },
+    onError: (err) => setMessage({ type: "error", text: err.message }),
+  });
+
+  const initRealmsMutation = meiliAdminMutations.useInitRealmsIndex({
+    onSuccess: (res) => {
+      setMessage({
+        type: "success",
+        text: res.message || "Realms index initialized",
+      });
+    },
+    onError: (err) => setMessage({ type: "error", text: err.message }),
+  });
+
   // Full sync
   const syncContentMutation = meiliAdminMutations.useSyncContent({
     onSuccess: () => {
@@ -91,6 +111,20 @@ export function MeiliPage() {
   const syncUsersMutation = meiliAdminMutations.useSyncUsers({
     onSuccess: () => {
       setMessage({ type: "success", text: "Users sync started" });
+    },
+    onError: (err) => setMessage({ type: "error", text: err.message }),
+  });
+
+  const syncPostsMutation = meiliAdminMutations.useSyncPosts({
+    onSuccess: () => {
+      setMessage({ type: "success", text: "Posts sync started" });
+    },
+    onError: (err) => setMessage({ type: "error", text: err.message }),
+  });
+
+  const syncRealmsMutation = meiliAdminMutations.useSyncRealms({
+    onSuccess: () => {
+      setMessage({ type: "success", text: "Realms sync started" });
     },
     onError: (err) => setMessage({ type: "error", text: err.message }),
   });
@@ -122,6 +156,26 @@ export function MeiliPage() {
       setMessage({
         type: "success",
         text: res.message || "All users deleted from Meili",
+      });
+    },
+    onError: (err) => setMessage({ type: "error", text: err.message }),
+  });
+
+  const deleteAllPostsMutation = meiliAdminMutations.useDeleteAllPosts({
+    onSuccess: (res) => {
+      setMessage({
+        type: "success",
+        text: res.message || "All posts deleted from Meili",
+      });
+    },
+    onError: (err) => setMessage({ type: "error", text: err.message }),
+  });
+
+  const deleteAllRealmsMutation = meiliAdminMutations.useDeleteAllRealms({
+    onSuccess: (res) => {
+      setMessage({
+        type: "success",
+        text: res.message || "All realms deleted from Meili",
       });
     },
     onError: (err) => setMessage({ type: "error", text: err.message }),
@@ -259,6 +313,26 @@ export function MeiliPage() {
                     ? "Initializing..."
                     : "Init Users Index"}
                 </Button>
+                <Button
+                  variant="contained"
+                  size="small"
+                  onClick={() => initPostsMutation.mutate()}
+                  disabled={initPostsMutation.isPending}
+                >
+                  {initPostsMutation.isPending
+                    ? "Initializing..."
+                    : "Init Posts Index"}
+                </Button>
+                <Button
+                  variant="contained"
+                  size="small"
+                  onClick={() => initRealmsMutation.mutate()}
+                  disabled={initRealmsMutation.isPending}
+                >
+                  {initRealmsMutation.isPending
+                    ? "Initializing..."
+                    : "Init Realms Index"}
+                </Button>
               </div>
             </CardContent>
           </Card>
@@ -300,6 +374,26 @@ export function MeiliPage() {
                   {syncUsersMutation.isPending
                     ? "Syncing..."
                     : "Sync All Users"}
+                </Button>
+                <Button
+                  variant="outlined"
+                  size="small"
+                  onClick={() => syncPostsMutation.mutate()}
+                  disabled={syncPostsMutation.isPending}
+                >
+                  {syncPostsMutation.isPending
+                    ? "Syncing..."
+                    : "Sync All Posts"}
+                </Button>
+                <Button
+                  variant="outlined"
+                  size="small"
+                  onClick={() => syncRealmsMutation.mutate()}
+                  disabled={syncRealmsMutation.isPending}
+                >
+                  {syncRealmsMutation.isPending
+                    ? "Syncing..."
+                    : "Sync All Realms"}
                 </Button>
               </div>
               <Typography variant="caption" color="text.secondary">
@@ -380,6 +474,40 @@ export function MeiliPage() {
                       ? "Deleting..."
                       : "Delete All Users"}
                   </Button>
+                  <Button
+                    variant="contained"
+                    color="error"
+                    size="small"
+                    onClick={() => {
+                      const ok = window.confirm(
+                        "Delete all posts from Meili? This cannot be undone!",
+                      );
+                      if (!ok) return;
+                      deleteAllPostsMutation.mutate();
+                    }}
+                    disabled={deleteAllPostsMutation.isPending}
+                  >
+                    {deleteAllPostsMutation.isPending
+                      ? "Deleting..."
+                      : "Delete All Posts"}
+                  </Button>
+                  <Button
+                    variant="contained"
+                    color="error"
+                    size="small"
+                    onClick={() => {
+                      const ok = window.confirm(
+                        "Delete all realms from Meili? This cannot be undone!",
+                      );
+                      if (!ok) return;
+                      deleteAllRealmsMutation.mutate();
+                    }}
+                    disabled={deleteAllRealmsMutation.isPending}
+                  >
+                    {deleteAllRealmsMutation.isPending
+                      ? "Deleting..."
+                      : "Delete All Realms"}
+                  </Button>
                 </div>
               </div>
 
@@ -394,9 +522,9 @@ export function MeiliPage() {
                   color="text.secondary"
                   className="block mb-2"
                 >
-                  Deletes all three indexes entirely (content, feedbacks,
-                  users). All settings and documents are lost. You must re-run
-                  Init to recreate indexes.
+                  Deletes all indexes entirely (content, feedbacks, users,
+                  posts, realms). All settings and documents are lost. You
+                  must re-run Init to recreate indexes.
                 </Typography>
                 <Button
                   variant="outlined"
@@ -424,9 +552,10 @@ export function MeiliPage() {
             <DialogTitle>Reset Everything?</DialogTitle>
             <DialogContent>
               <DialogContentText>
-                This will permanently delete all three Meilisearch indexes
-                (content, feedbacks, users) including their settings and
-                documents. You will need to re-run Init to recreate them.
+                This will permanently delete all Meilisearch indexes
+                (content, feedbacks, users, posts, realms) including their
+                settings and documents. You will need to re-run Init to
+                recreate them.
               </DialogContentText>
               <DialogContentText sx={{ mt: 2 }}>
                 Type <strong>RESET</strong> to confirm.

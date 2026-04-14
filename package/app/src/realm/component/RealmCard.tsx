@@ -10,7 +10,7 @@ interface RealmCardProps {
 
 export const RealmCard: React.FC<RealmCardProps> = ({ realm }) => {
   const navigate = useNavigate();
-  const translation = getTranslation(realm.unit?.translations);
+  const translation = getTranslation(realm.translations);
   const title = translation?.title ?? "Untitled Realm";
   const description = translation?.description ?? "";
 

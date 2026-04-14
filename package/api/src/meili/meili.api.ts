@@ -9,6 +9,10 @@ import type {
   ContentSearchResult,
   FeedbackListQuery,
   FeedbackSearchResult,
+  PostSearchOptions,
+  PostSearchResult,
+  RealmSearchOptions,
+  RealmSearchResult,
   UserDTO,
   UserListQuery,
 } from "@rezics/contract";
@@ -39,6 +43,32 @@ export const meiliFeedbackApi = {
     return apiFetch<FeedbackSearchResult>(`/meili/feedbacks/search`, {
       method: "POST",
       body: JSON.stringify(filters),
+    });
+  },
+};
+
+// ANCHOR: Post search
+
+export const meiliPostApi = {
+  postSearch: async (
+    opts: PostSearchOptions,
+  ): Promise<PostSearchResult> => {
+    return apiFetch<PostSearchResult>(`/meili/posts/search`, {
+      method: "POST",
+      body: JSON.stringify(opts),
+    });
+  },
+};
+
+// ANCHOR: Realm search
+
+export const meiliRealmApi = {
+  realmSearch: async (
+    opts: RealmSearchOptions,
+  ): Promise<RealmSearchResult> => {
+    return apiFetch<RealmSearchResult>(`/meili/realms/search`, {
+      method: "POST",
+      body: JSON.stringify(opts),
     });
   },
 };

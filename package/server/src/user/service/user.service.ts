@@ -7,6 +7,7 @@ import type { Prisma } from "#/prisma/client";
 import { prisma } from "#/prisma/client";
 import { emitNotificationEvent } from "../../notify/notify-client";
 import { deleteUserFromMeili, syncUserToMeili } from "@/meili/user/sync";
+import { syncPostsByAuthorToMeili } from "@/meili/post/sync";
 import { syncProfileToAuth } from "./profile-sync";
 import type { UserFilterOptions, UserWithRelations } from "../model/types";
 import { userInclude } from "../model/types";
@@ -207,6 +208,9 @@ export class UserService {
       slug: user.slug,
       avatar: user.avatar,
     }).catch(() => {});
+
+    // Fire-and-forget: re-sync all posts by this author (denormalized author info)
+    syncPostsByAuthorToMeili(unitId).catch(() => {});
 
     return user as UserWithRelations;
   }

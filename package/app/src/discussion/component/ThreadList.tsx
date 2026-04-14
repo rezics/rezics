@@ -1,11 +1,39 @@
 import Box from "@mui/material/Box";
 import CircularProgress from "@mui/material/CircularProgress";
 import Typography from "@mui/material/Typography";
-import { postQueries } from "@rezics/api/post/post";
-import { PostKind } from "@rezics/contract";
-import { useQuery } from "@tanstack/react-query";
+import { usePostSearchQuery } from "@rezics/api/meili/meili.queries";
+import type { PostDTO, PostSearchDocument } from "@rezics/contract";
 import type React from "react";
 import { PostCard } from "./PostCard";
+
+function mapPostSearchDocToPostDTO(doc: PostSearchDocument): PostDTO {
+  return {
+    unitId: doc.id,
+    authorUserId: doc.authorUserId,
+    author: {
+      unitId: doc.authorUserId,
+      name: doc.authorName ?? "",
+      slug: doc.authorSlug ?? undefined,
+      avatar: doc.authorAvatar ?? undefined,
+    },
+    targetUnitId: doc.targetUnitId,
+    realmUnitId: doc.realmUnitId,
+    body: doc.body,
+    rootPostUnitId: doc.rootPostUnitId,
+    parentPostUnitId: doc.parentPostUnitId,
+    kind: doc.kind as any,
+    depth: doc.depth,
+    sortPath: doc.sortPath,
+    replyCount: doc.replyCount,
+    directReplyCount: doc.directReplyCount,
+    lastReplyAt: doc.lastReplyAt,
+    isLocked: doc.isLocked,
+    scoreEntryId: doc.scoreEntryId,
+    extra: doc.extra as any,
+    createdAt: doc.createdAt,
+    updatedAt: doc.updatedAt,
+  };
+}
 
 interface ThreadListProps {
   targetUnitId: string;
@@ -16,12 +44,13 @@ export const ThreadList: React.FC<ThreadListProps> = ({
   targetUnitId,
   onReply,
 }) => {
-  const { data, isLoading } = useQuery(postQueries.byTarget(targetUnitId));
+  const { data, isLoading } = usePostSearchQuery({
+    kind: "POST",
+    targetUnitId,
+    depth: 0,
+  });
 
-  const threads =
-    data?.posts?.filter(
-      (p) => p.kind === PostKind.POST && !p.parentPostUnitId,
-    ) ?? [];
+  const threads = data?.items?.map(mapPostSearchDocToPostDTO) ?? [];
 
   if (isLoading) {
     return (

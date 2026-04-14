@@ -5,6 +5,7 @@ import type {
 } from "@rezics/contract";
 import type { Prisma } from "#/prisma/client";
 import { type PostKind, prisma, UnitStatus, UnitType } from "#/prisma/client";
+import { syncPostToMeili } from "@/meili/post/sync";
 import type { PostWithRelations } from "./types";
 import { postInclude } from "./types";
 
@@ -182,6 +183,9 @@ export class PostService {
       return created as PostWithRelations;
     });
 
+    // Fire-and-forget sync to Meilisearch
+    syncPostToMeili(post.unitId).catch(() => {});
+
     return post;
   }
 
@@ -202,6 +206,9 @@ export class PostService {
       data,
       include: postInclude,
     });
+
+    // Fire-and-forget sync to Meilisearch
+    syncPostToMeili(unitId).catch(() => {});
 
     return updated as PostWithRelations;
   }
@@ -254,6 +261,9 @@ export class PostService {
         });
       }
     });
+
+    // Fire-and-forget sync to Meilisearch (will remove the deleted post)
+    syncPostToMeili(unitId).catch(() => {});
   }
 
   /**

@@ -58,15 +58,23 @@ export const realmApi = new Elysia({ prefix: "/realms" })
   )
   .get(
     "/",
-    async ({ query }): Promise<RealmListResponse> => {
+    async ({ query, identity, set }): Promise<RealmListResponse> => {
+      if (!BasicAdminPermission(identity)) {
+        set.status = 403;
+        throw new Error(
+          "Forbidden: DB-backed realm listing requires admin permission. Use POST /meili/realms/search for public access.",
+        );
+      }
       const { realms, total } = await realmService.list(query as any);
       return { realms, total };
     },
     {
+      requireLogin: true,
       query: realmListQuerySchema,
       detail: {
-        summary: "List realms",
-        description: "List realms with filtering and pagination",
+        summary: "List realms (admin only)",
+        description:
+          "List realms with filtering and pagination. Requires admin permission. Use POST /meili/realms/search for public search.",
         tags: ["Realms"],
       },
     },

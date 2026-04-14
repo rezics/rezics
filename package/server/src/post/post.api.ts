@@ -35,13 +35,10 @@ export const postApi = new Elysia({ prefix: "/posts" })
   .get(
     "/",
     async ({ query, identity, set }): Promise<PostListResponse> => {
-      // Unscoped listing (no targetUnitId or realmUnitId) requires admin
-      const isScoped = !!(query.targetUnitId || query.realmUnitId);
-
-      if (!isScoped && !BasicAdminPermission(identity)) {
+      if (!BasicAdminPermission(identity)) {
         set.status = 403;
         throw new Error(
-          "Forbidden: unscoped post listing requires admin permission",
+          "Forbidden: DB-backed post listing requires admin permission. Use POST /meili/posts/search for public access.",
         );
       }
 
@@ -53,9 +50,9 @@ export const postApi = new Elysia({ prefix: "/posts" })
       query: postListQuerySchema,
       response: postListResponseSchema,
       detail: {
-        summary: "List posts",
+        summary: "List posts (admin only)",
         description:
-          "List posts with filters. Unscoped listing requires admin; scoped by targetUnitId or realmUnitId is open.",
+          "List posts with filters. Requires admin permission. Use POST /meili/posts/search for public search.",
         tags: ["Posts"],
       },
     },
