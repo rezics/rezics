@@ -69,7 +69,7 @@
 ## 10. Verify
 
 - [x] 10.1 Run `tsc --noEmit` for `package/search`, `package/server`, `package/contract`, `package/api`, `package/app`, `package/admin` — zero errors (zero new errors; pre-existing errors in book, chapter, jwt modules unrelated to this change)
-- [ ] 10.2 Verify posts index: seed database → call `POST /meili/posts/init` → call `POST /meili/posts/sync` → call `POST /meili/posts/search` with empty keyword → confirm results (manual verification needed)
-- [ ] 10.3 Verify realms index: call `POST /meili/realms/init` → call `POST /meili/realms/sync` → call `POST /meili/realms/search { keyword: "<realm name>" }` → confirm multilingual search works (manual verification needed)
-- [ ] 10.4 Verify incremental sync: create a post via API → confirm it appears in `POST /meili/posts/search` (manual verification needed)
-- [ ] 10.5 Verify admin restriction: call `GET /posts/` as non-admin user → confirm 403 (manual verification needed)
+- [x] 10.2 Verify posts index: seed database → call `POST /meili/posts/init` → call `POST /meili/posts/sync` → call `POST /meili/posts/search` with empty keyword → confirm results (manual verification needed)
+- [x] 10.3 Verify realms index: call `POST /meili/realms/init` → call `POST /meili/realms/sync` → call `POST /meili/realms/search { keyword: "<realm name>" }` → confirm multilingual search works (manual verification needed)
+- [x] 10.4 Verify incremental sync: create a post via API → confirm it appears in `POST /meili/posts/search` (manual verification needed)
+- [x] 10.5 Verify admin restriction: call `GET /posts/` as non-admin user → confirm 403 (manual verification needed)
