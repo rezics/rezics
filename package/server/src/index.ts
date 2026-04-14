@@ -2,6 +2,7 @@ import { cors } from "@elysiajs/cors";
 import { openapi } from "@elysiajs/openapi";
 import { Elysia } from "elysia";
 import { attributionApi } from "./attribution";
+import { dispatchApi } from "./dispatch";
 import { bookApi } from "./book";
 import { chapterApi } from "./chapter";
 import { echoKvApi } from "./echokv";
@@ -134,6 +135,7 @@ app
   .use(scoreApi)
   .use(internalApi)
   .use(reactionWriteApi)
+  .use(dispatchApi)
   .use(tokenApi)
   .use(echoKvApi)
   .use(feedbackApi)

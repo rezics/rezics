@@ -4,10 +4,13 @@ import {
   BasicAdminPermission,
   createApiTokenResponseSchema,
   createApiTokenSchema,
+  DispatchScope,
   updateApiTokenSchema,
 } from "@rezics/contract";
 import { Elysia, t } from "elysia";
+import { prisma } from "#/prisma/client";
 import { authMacro } from "@/middleware";
+import { signRezicsSessionToken } from "@/session/jwt/jwt.service";
 import { bookRoute } from "./token.book.api";
 import { tokenService } from "./token.service";
 import { userRoute } from "./token.user.api";
@@ -16,6 +19,56 @@ import { userRoute } from "./token.user.api";
 const tokenExternalRoutes = new Elysia({ prefix: "/token" })
   .use(bookRoute)
   .use(userRoute);
+
+// Token-auth session exchange route
+const tokenSessionRoute = new Elysia({ prefix: "/token" }).post(
+  "/session",
+  async ({ headers, set }) => {
+    const { userId, scopes } = await tokenService.authenticateFromHeader(
+      headers.authorization,
+      { status: set.status as number | undefined },
+    );
+
+    if (
+      !tokenService.hasScope(scopes, DispatchScope.DOMAIN, DispatchScope.SESSION)
+    ) {
+      set.status = 403;
+      throw new Error("Forbidden: token lacks dispatch:rezics-server-session scope");
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { unitId: userId },
+      select: { unitId: true, permission: true },
+    });
+
+    if (!user) {
+      set.status = 404;
+      throw new Error("User not found");
+    }
+
+    const dbPermission = user.permission as
+      | { role?: string[] }
+      | null
+      | undefined;
+    const role = dbPermission?.role?.[0] ?? "MEMBER";
+
+    const token = await signRezicsSessionToken({
+      unitId: user.unitId,
+      permission: { role },
+    });
+
+    return { token };
+  },
+  {
+    headers: t.Object({ authorization: t.String() }, { additionalProperties: true }),
+    detail: {
+      summary: "Exchange API token for session JWT",
+      description:
+        "Exchange a valid API token with dispatch:rezics-server-session scope for a short-lived rezics-session-token JWT",
+      tags: ["Token", "Dispatch"],
+    },
+  },
+);
 
 // Owner-authenticated token management routes
 const tokenManagementRoutes = new Elysia({ prefix: "/token" })
@@ -119,4 +172,5 @@ const tokenManagementRoutes = new Elysia({ prefix: "/token" })
 
 export const tokenApi = new Elysia()
   .use(tokenExternalRoutes)
+  .use(tokenSessionRoute)
   .use(tokenManagementRoutes);

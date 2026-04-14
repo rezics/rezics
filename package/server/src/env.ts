@@ -122,6 +122,15 @@ export const env = createEnv({
 
     /** Shared secret for authenticating incoming internal service-to-service calls. */
     SERVER_INTERNAL_SECRET: v.optional(v.string()),
+
+    /** Base URL of the dispatch hub for audit notifications. */
+    DISPATCH_HUB_URL: v.optional(v.string()),
+
+    /** HMAC shared secret for signing dispatch audit notifications. */
+    DISPATCH_RECEIPT_SECRET: v.optional(v.string()),
+
+    /** Project identifier for dispatch integration. */
+    DISPATCH_PROJECT_ID: v.optional(v.string()),
   },
   runtimeEnv: process.env,
   emptyStringAsUndefined: true,

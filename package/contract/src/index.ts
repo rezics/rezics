@@ -5,6 +5,7 @@ export * from "./attribution";
 export * from "./auth";
 export * from "./book";
 export * from "./chapter";
+export * from "./dispatch";
 export * from "./feedback";
 export * from "./jwt-service";
 export * from "./language";
