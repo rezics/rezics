@@ -242,6 +242,75 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
       },
     },
   )
+  .delete(
+    "/feedbacks/deleteAll",
+    async ({ identity, set }) => {
+      if (!isRoot(identity)) {
+        set.status = 403;
+        throw new Error("Forbidden: not authorized to delete all feedbacks");
+      }
+      const isRootUser = await verifyRootFromDb(identity.unitId);
+      if (!isRootUser) {
+        set.status = 403;
+        throw new Error("Forbidden: not authorized to delete all feedbacks");
+      }
+      await meiliService.deleteAllFeedbacks();
+      return { message: "all feedbacks deleted" };
+    },
+    {
+      requireLogin: true,
+      detail: {
+        summary: "Delete all feedbacks from Meilisearch",
+        tags: ["Meili", "Admin"],
+      },
+    },
+  )
+  .delete(
+    "/users/deleteAll",
+    async ({ identity, set }) => {
+      if (!isRoot(identity)) {
+        set.status = 403;
+        throw new Error("Forbidden: not authorized to delete all users");
+      }
+      const isRootUser = await verifyRootFromDb(identity.unitId);
+      if (!isRootUser) {
+        set.status = 403;
+        throw new Error("Forbidden: not authorized to delete all users");
+      }
+      await meiliService.deleteAllUsers();
+      return { message: "all users deleted" };
+    },
+    {
+      requireLogin: true,
+      detail: {
+        summary: "Delete all users from Meilisearch",
+        tags: ["Meili", "Admin"],
+      },
+    },
+  )
+  .delete(
+    "/indexes/resetAll",
+    async ({ identity, set }) => {
+      if (!isRoot(identity)) {
+        set.status = 403;
+        throw new Error("Forbidden: not authorized to reset all indexes");
+      }
+      const isRootUser = await verifyRootFromDb(identity.unitId);
+      if (!isRootUser) {
+        set.status = 403;
+        throw new Error("Forbidden: not authorized to reset all indexes");
+      }
+      await meiliService.deleteAllIndexes();
+      return { message: "all indexes deleted" };
+    },
+    {
+      requireLogin: true,
+      detail: {
+        summary: "Delete all Meilisearch indexes (nuclear reset)",
+        tags: ["Meili", "Admin"],
+      },
+    },
+  )
   // ANCHOR: Admin — key management
   .post(
     "/keys/admin",

@@ -6,6 +6,13 @@ import {
   CardHeader,
   Chip,
   CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  Divider,
+  TextField,
   Typography,
 } from "@mui/material";
 import {
@@ -98,6 +105,42 @@ export function MeiliPage() {
     },
     onError: (err) => setMessage({ type: "error", text: err.message }),
   });
+
+  const deleteAllFeedbacksMutation =
+    meiliAdminMutations.useDeleteAllFeedbacks({
+      onSuccess: (res) => {
+        setMessage({
+          type: "success",
+          text: res.message || "All feedbacks deleted from Meili",
+        });
+      },
+      onError: (err) => setMessage({ type: "error", text: err.message }),
+    });
+
+  const deleteAllUsersMutation = meiliAdminMutations.useDeleteAllUsers({
+    onSuccess: (res) => {
+      setMessage({
+        type: "success",
+        text: res.message || "All users deleted from Meili",
+      });
+    },
+    onError: (err) => setMessage({ type: "error", text: err.message }),
+  });
+
+  const resetAllIndexesMutation = meiliAdminMutations.useResetAllIndexes({
+    onSuccess: (res) => {
+      setMessage({
+        type: "success",
+        text:
+          res.message ||
+          "All indexes deleted. Run Init to recreate.",
+      });
+    },
+    onError: (err) => setMessage({ type: "error", text: err.message }),
+  });
+
+  const [resetDialogOpen, setResetDialogOpen] = useState(false);
+  const [resetConfirmText, setResetConfirmText] = useState("");
 
   // Key management
   const createAdminKeyMutation = meiliAdminMutations.useCreateAdminKey({
@@ -272,28 +315,154 @@ export function MeiliPage() {
               title="Dangerous Operations"
               subheader="These operations directly affect search index data. Use with caution."
             />
-            <CardContent className="space-y-3">
-              <div className="flex flex-wrap gap-2">
+            <CardContent className="space-y-4">
+              <div>
+                <Typography variant="subtitle2" className="mb-1">
+                  Delete All Documents
+                </Typography>
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                  className="block mb-2"
+                >
+                  Removes all documents from an index but keeps index settings
+                  intact. You can re-sync afterward.
+                </Typography>
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    variant="contained"
+                    color="error"
+                    size="small"
+                    onClick={() => {
+                      const ok = window.confirm(
+                        "Delete all content from Meili? This will clear search results and cannot be undone!",
+                      );
+                      if (!ok) return;
+                      deleteAllContentMutation.mutate();
+                    }}
+                    disabled={deleteAllContentMutation.isPending}
+                  >
+                    {deleteAllContentMutation.isPending
+                      ? "Deleting..."
+                      : "Delete All Content"}
+                  </Button>
+                  <Button
+                    variant="contained"
+                    color="error"
+                    size="small"
+                    onClick={() => {
+                      const ok = window.confirm(
+                        "Delete all feedbacks from Meili? This cannot be undone!",
+                      );
+                      if (!ok) return;
+                      deleteAllFeedbacksMutation.mutate();
+                    }}
+                    disabled={deleteAllFeedbacksMutation.isPending}
+                  >
+                    {deleteAllFeedbacksMutation.isPending
+                      ? "Deleting..."
+                      : "Delete All Feedbacks"}
+                  </Button>
+                  <Button
+                    variant="contained"
+                    color="error"
+                    size="small"
+                    onClick={() => {
+                      const ok = window.confirm(
+                        "Delete all users from Meili? This cannot be undone!",
+                      );
+                      if (!ok) return;
+                      deleteAllUsersMutation.mutate();
+                    }}
+                    disabled={deleteAllUsersMutation.isPending}
+                  >
+                    {deleteAllUsersMutation.isPending
+                      ? "Deleting..."
+                      : "Delete All Users"}
+                  </Button>
+                </div>
+              </div>
+
+              <Divider />
+
+              <div>
+                <Typography variant="subtitle2" color="error" className="mb-1">
+                  Reset Everything
+                </Typography>
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                  className="block mb-2"
+                >
+                  Deletes all three indexes entirely (content, feedbacks,
+                  users). All settings and documents are lost. You must re-run
+                  Init to recreate indexes.
+                </Typography>
                 <Button
-                  variant="contained"
+                  variant="outlined"
                   color="error"
                   size="small"
-                  onClick={() => {
-                    const ok = window.confirm(
-                      "Delete all content from Meili? This will clear search results and cannot be undone!",
-                    );
-                    if (!ok) return;
-                    deleteAllContentMutation.mutate();
-                  }}
-                  disabled={deleteAllContentMutation.isPending}
+                  onClick={() => setResetDialogOpen(true)}
+                  disabled={resetAllIndexesMutation.isPending}
                 >
-                  {deleteAllContentMutation.isPending
-                    ? "Deleting..."
-                    : "Delete All Content"}
+                  {resetAllIndexesMutation.isPending
+                    ? "Resetting..."
+                    : "Reset Everything"}
                 </Button>
               </div>
             </CardContent>
           </Card>
+
+          {/* Reset confirmation dialog */}
+          <Dialog
+            open={resetDialogOpen}
+            onClose={() => {
+              setResetDialogOpen(false);
+              setResetConfirmText("");
+            }}
+          >
+            <DialogTitle>Reset Everything?</DialogTitle>
+            <DialogContent>
+              <DialogContentText>
+                This will permanently delete all three Meilisearch indexes
+                (content, feedbacks, users) including their settings and
+                documents. You will need to re-run Init to recreate them.
+              </DialogContentText>
+              <DialogContentText sx={{ mt: 2 }}>
+                Type <strong>RESET</strong> to confirm.
+              </DialogContentText>
+              <TextField
+                autoFocus
+                fullWidth
+                margin="dense"
+                value={resetConfirmText}
+                onChange={(e) => setResetConfirmText(e.target.value)}
+                placeholder="RESET"
+              />
+            </DialogContent>
+            <DialogActions>
+              <Button
+                onClick={() => {
+                  setResetDialogOpen(false);
+                  setResetConfirmText("");
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                color="error"
+                variant="contained"
+                disabled={resetConfirmText !== "RESET"}
+                onClick={() => {
+                  resetAllIndexesMutation.mutate();
+                  setResetDialogOpen(false);
+                  setResetConfirmText("");
+                }}
+              >
+                Delete All Indexes
+              </Button>
+            </DialogActions>
+          </Dialog>
         </div>
 
         {/* Key management */}

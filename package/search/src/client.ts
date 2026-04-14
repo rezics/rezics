@@ -115,6 +115,15 @@ export class SearchClient {
     return this.userIndex.deleteAllDocuments();
   }
 
+  // ANCHOR: Index deletion
+
+  async deleteAllIndexes() {
+    const { results } = await this.meili.getIndexes();
+    await Promise.allSettled(
+      results.map((index) => this.meili.deleteIndex(index.uid)),
+    );
+  }
+
   // ANCHOR: Key management
 
   async getAdminKey() {

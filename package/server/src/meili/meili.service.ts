@@ -62,6 +62,18 @@ export class MeiliService {
     return syncAllUsers(searchClient);
   }
 
+  async deleteAllFeedbacks() {
+    return searchClient.deleteAllFeedbacks();
+  }
+
+  async deleteAllUsers() {
+    return searchClient.deleteAllUsers();
+  }
+
+  async deleteAllIndexes() {
+    return searchClient.deleteAllIndexes();
+  }
+
   async createAdminKey() {
     return searchClient.getAdminKey();
   }

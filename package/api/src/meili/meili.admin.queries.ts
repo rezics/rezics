@@ -93,6 +93,21 @@ export const meiliAdminApi = {
   deleteAllContent: async (): Promise<MeiliApiMessageResponse> => {
     return apiFetch<MeiliApiMessageResponse>("/meili/content/deleteAll");
   },
+  deleteAllFeedbacks: async (): Promise<MeiliApiMessageResponse> => {
+    return apiFetch<MeiliApiMessageResponse>("/meili/feedbacks/deleteAll", {
+      method: "DELETE",
+    });
+  },
+  deleteAllUsers: async (): Promise<MeiliApiMessageResponse> => {
+    return apiFetch<MeiliApiMessageResponse>("/meili/users/deleteAll", {
+      method: "DELETE",
+    });
+  },
+  resetAllIndexes: async (): Promise<MeiliApiMessageResponse> => {
+    return apiFetch<MeiliApiMessageResponse>("/meili/indexes/resetAll", {
+      method: "DELETE",
+    });
+  },
 
   // Key management
   createAdminKey: async (): Promise<MeiliKey> => {
@@ -216,6 +231,42 @@ export function useMeiliDeleteAllContentMutation(
   });
 }
 
+export function useMeiliDeleteAllFeedbacksMutation(
+  options?: Omit<
+    UseMutationOptions<MeiliApiMessageResponse, Error, void>,
+    "mutationFn"
+  >,
+) {
+  return useMutation({
+    mutationFn: () => meiliAdminApi.deleteAllFeedbacks(),
+    ...options,
+  });
+}
+
+export function useMeiliDeleteAllUsersMutation(
+  options?: Omit<
+    UseMutationOptions<MeiliApiMessageResponse, Error, void>,
+    "mutationFn"
+  >,
+) {
+  return useMutation({
+    mutationFn: () => meiliAdminApi.deleteAllUsers(),
+    ...options,
+  });
+}
+
+export function useMeiliResetAllIndexesMutation(
+  options?: Omit<
+    UseMutationOptions<MeiliApiMessageResponse, Error, void>,
+    "mutationFn"
+  >,
+) {
+  return useMutation({
+    mutationFn: () => meiliAdminApi.resetAllIndexes(),
+    ...options,
+  });
+}
+
 export function useMeiliCreateAdminKeyMutation(
   options?: Omit<UseMutationOptions<MeiliKey, Error, void>, "mutationFn">,
 ) {
@@ -251,6 +302,9 @@ export const meiliAdminMutations = {
   useSyncFeedbacks: useMeiliSyncFeedbacksMutation,
   useSyncUsers: useMeiliSyncUsersMutation,
   useDeleteAllContent: useMeiliDeleteAllContentMutation,
+  useDeleteAllFeedbacks: useMeiliDeleteAllFeedbacksMutation,
+  useDeleteAllUsers: useMeiliDeleteAllUsersMutation,
+  useResetAllIndexes: useMeiliResetAllIndexesMutation,
   useCreateAdminKey: useMeiliCreateAdminKeyMutation,
   useDeleteKey: useMeiliDeleteKeyMutation,
 };
