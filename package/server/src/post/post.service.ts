@@ -5,7 +5,7 @@ import type {
 } from "@rezics/contract";
 import type { Prisma } from "#/prisma/client";
 import { type PostKind, prisma, UnitStatus, UnitType } from "#/prisma/client";
-import { syncPostToMeili } from "@/meili/post/sync";
+import { syncPostToMeili, patchPostFieldsToMeili } from "@/meili/post/sync";
 import type { PostWithRelations } from "./types";
 import { postInclude } from "./types";
 
@@ -207,8 +207,12 @@ export class PostService {
       include: postInclude,
     });
 
-    // Fire-and-forget sync to Meilisearch
-    syncPostToMeili(unitId).catch(() => {});
+    // Fire-and-forget partial sync to Meilisearch
+    const patchFields: Record<string, any> = {};
+    if (input.body !== undefined) patchFields.body = input.body;
+    if (input.isLocked !== undefined) patchFields.isLocked = input.isLocked;
+    if (input.extra !== undefined) patchFields.extra = input.extra;
+    patchPostFieldsToMeili(unitId, patchFields).catch(() => {});
 
     return updated as PostWithRelations;
   }

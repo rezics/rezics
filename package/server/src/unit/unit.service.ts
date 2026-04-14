@@ -10,7 +10,11 @@ import {
   type UnitType,
   type UnitVisibility,
 } from "#/prisma/client";
-import { syncContentToMeili, deleteContentFromMeili } from "@/meili/content/sync";
+import {
+  syncContentToMeili,
+  deleteContentFromMeili,
+  patchContentMetadataToMeili,
+} from "@/meili/content/sync";
 import { cleanupReactions } from "@/reaction/reaction-client";
 import type { UnitWithRelations } from "./types";
 import { unitInclude } from "./types";
@@ -257,7 +261,18 @@ export class UnitService {
       },
       include: unitInclude,
     });
-    await syncContentToMeili(unitId);
+
+    const patchFields: Record<string, any> = {};
+    if (input.nsfw !== undefined) patchFields.nsfw = input.nsfw;
+    if (input.visibility !== undefined) patchFields.visibility = input.visibility;
+    if (input.defaultLanguage !== undefined) patchFields.defaultLanguage = input.defaultLanguage;
+    if (input.publishedAt !== undefined) {
+      patchFields.publishedAt = input.publishedAt
+        ? new Date(input.publishedAt as any).toISOString()
+        : null;
+    }
+    await patchContentMetadataToMeili(unitId, patchFields);
+
     return unit as UnitWithRelations;
   }
 

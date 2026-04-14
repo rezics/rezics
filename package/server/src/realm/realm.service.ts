@@ -9,8 +9,15 @@ import type {
 } from "@rezics/contract";
 import type { Prisma } from "#/prisma/client";
 import { prisma, UnitStatus, UnitType } from "#/prisma/client";
-import { syncContentToMeili } from "@/meili/content/sync";
-import { syncRealmToMeili } from "@/meili/realm/sync";
+import {
+  patchContentRealmIdsToMeili,
+  patchContentRealmTagKeysToMeili,
+} from "@/meili/content/sync";
+import {
+  syncRealmToMeili,
+  patchRealmMetadataToMeili,
+  patchRealmMemberCountToMeili,
+} from "@/meili/realm/sync";
 import {
   mapRealmListRowToDTO,
   mapRealmMemberToDTO,
@@ -158,8 +165,12 @@ export class RealmService {
       include: realmInclude,
     });
 
-    // Fire-and-forget sync to Meilisearch
-    syncRealmToMeili(unitId).catch(() => {});
+    // Fire-and-forget partial sync to Meilisearch
+    const patchFields: Record<string, any> = {};
+    if (isPublic !== undefined) patchFields.isPublic = isPublic;
+    if (isOfficial !== undefined) patchFields.isOfficial = isOfficial;
+    if (extra !== undefined) patchFields.extra = extra;
+    patchRealmMetadataToMeili(unitId, patchFields).catch(() => {});
 
     return mapRealmToDTO(row);
   }
@@ -183,13 +194,13 @@ export class RealmService {
       },
     });
 
-    await prisma.realm.update({
+    const updatedRealm = await prisma.realm.update({
       where: { unitId: realmUnitId },
       data: { memberCount: { increment: 1 } },
     });
 
-    // Fire-and-forget sync to Meilisearch (memberCount changed)
-    syncRealmToMeili(realmUnitId).catch(() => {});
+    // Fire-and-forget partial sync to Meilisearch (memberCount changed)
+    patchRealmMemberCountToMeili(realmUnitId, updatedRealm.memberCount).catch(() => {});
 
     return mapRealmMemberToDTO(member);
   }
@@ -219,13 +230,13 @@ export class RealmService {
       },
     });
 
-    await prisma.realm.update({
+    const updatedRealm = await prisma.realm.update({
       where: { unitId: realmUnitId },
       data: { memberCount: { decrement: 1 } },
     });
 
-    // Fire-and-forget sync to Meilisearch (memberCount changed)
-    syncRealmToMeili(realmUnitId).catch(() => {});
+    // Fire-and-forget partial sync to Meilisearch (memberCount changed)
+    patchRealmMemberCountToMeili(realmUnitId, updatedRealm.memberCount).catch(() => {});
   }
 
   async getMember(
@@ -249,7 +260,7 @@ export class RealmService {
     const row = await prisma.realmUnit.create({
       data: { realmUnitId, unitId },
     });
-    await syncContentToMeili(unitId);
+    await patchContentRealmIdsToMeili(unitId);
     return mapRealmUnitToDTO(row);
   }
 
@@ -262,7 +273,7 @@ export class RealmService {
         realmUnitId_unitId: { realmUnitId, unitId },
       },
     });
-    await syncContentToMeili(unitId);
+    await patchContentRealmIdsToMeili(unitId);
   }
 
   // --- Realm tag units ---
@@ -285,7 +296,7 @@ export class RealmService {
       create: { unitId, tagUnitId, score: 1 },
     });
 
-    await syncContentToMeili(unitId);
+    await patchContentRealmTagKeysToMeili(unitId);
     return mapRealmTagUnitToDTO(row);
   }
 
@@ -299,7 +310,7 @@ export class RealmService {
         realmUnitId_tagUnitId_unitId: { realmUnitId, tagUnitId, unitId },
       },
     });
-    await syncContentToMeili(unitId);
+    await patchContentRealmTagKeysToMeili(unitId);
   }
   async listByMember(
     userId: string,

@@ -3,6 +3,9 @@ import {
   syncAllPosts,
   syncPostsByAuthor,
   syncPostsByTarget,
+  patchPostsAuthor,
+  patchPostsTarget,
+  patchPostFields,
 } from "@rezics/search";
 import { searchClient } from "../search-client";
 
@@ -24,4 +27,22 @@ export async function syncPostsByAuthorToMeili(userId: string) {
 
 export async function syncPostsByTargetToMeili(targetUnitId: string) {
   return syncPostsByTarget(searchClient, targetUnitId);
+}
+
+export async function patchPostsAuthorToMeili(
+  userId: string,
+  fields: Record<string, any>,
+): Promise<void> {
+  await patchPostsAuthor(searchClient, userId, fields);
+}
+
+export async function patchPostsTargetToMeili(targetUnitId: string): Promise<void> {
+  await patchPostsTarget(searchClient, targetUnitId);
+}
+
+export async function patchPostFieldsToMeili(
+  unitId: string,
+  fields: Record<string, any>,
+): Promise<void> {
+  await patchPostFields(searchClient, unitId, fields);
 }

@@ -211,6 +211,288 @@ export async function syncSingleContent(
   await client.addOrUpdateContent([doc]);
 }
 
+// ANCHOR: Content partial sync functions
+
+export async function patchContentTags(
+  client: SearchClient,
+  unitId: string,
+) {
+  const unitTags = await prisma.unitTag.findMany({
+    where: { unitId },
+    include: { tag: { include: { translations: true } } },
+    orderBy: { score: "desc" },
+  });
+
+  const tagIds = unitTags.map((ut: any) => ut.tagUnitId);
+  const tagScores: Record<string, number> = {};
+  const tagLabels: string[] = [];
+  for (const ut of unitTags) {
+    tagScores[ut.tagUnitId] = ut.score;
+    const labels: string[] = ((ut as any).tag?.translations ?? [])
+      .map((t: any) => t.title)
+      .filter(Boolean);
+    tagLabels.push(...labels);
+  }
+
+  await client.patchContent([{ id: unitId, tagIds, tagScores, tagLabels }]);
+}
+
+export async function patchContentCredits(
+  client: SearchClient,
+  unitId: string,
+) {
+  const [personCredits, orgCredits] = await Promise.all([
+    prisma.personCredit.findMany({
+      where: { unitId },
+      include: { person: true },
+      orderBy: { sortOrder: "asc" },
+    }),
+    prisma.orgCredit.findMany({
+      where: { unitId },
+      include: { organization: true },
+      orderBy: { sortOrder: "asc" },
+    }),
+  ]);
+
+  const creditNames = [
+    ...personCredits.map((c: any) => c.person?.name).filter(Boolean),
+    ...orgCredits.map((c: any) => c.organization?.name).filter(Boolean),
+  ];
+
+  await client.patchContent([{ id: unitId, creditNames }]);
+}
+
+export async function patchContentTranslations(
+  client: SearchClient,
+  unitId: string,
+) {
+  const translations = await prisma.unitTranslation.findMany({
+    where: { unitId },
+  });
+
+  const titles = translations.map((t: any) => t.title).filter(Boolean);
+  const subtitles = translations.map((t: any) => t.subtitle).filter(Boolean);
+  const summaries = translations.map((t: any) => t.summary).filter(Boolean);
+  const descriptions = translations
+    .map((t: any) => t.description)
+    .filter(Boolean);
+  const languages = translations.map((t: any) => t.language);
+
+  await client.patchContent([
+    {
+      id: unitId,
+      titles,
+      subtitles,
+      summaries,
+      descriptions,
+      languages,
+      translations: translations.map((tr: any) => ({
+        language: tr.language,
+        title: tr.title ?? null,
+        subtitle: tr.subtitle ?? null,
+        summary: tr.summary ?? null,
+        description: tr.description ?? null,
+      })),
+    },
+  ]);
+}
+
+export async function patchContentRealmIds(
+  client: SearchClient,
+  unitId: string,
+) {
+  const inRealms = await prisma.realmUnit.findMany({
+    where: { unitId },
+  });
+
+  const realmIds = inRealms.map((r: any) => r.realmUnitId);
+  await client.patchContent([{ id: unitId, realmIds }]);
+}
+
+export async function patchContentRealmTagKeys(
+  client: SearchClient,
+  unitId: string,
+) {
+  const realmTagAsUnit = await prisma.realmTagUnit.findMany({
+    where: { unitId },
+  });
+
+  const realmTagKeys = realmTagAsUnit.map(
+    (rt: any) => `${rt.realmUnitId}:${rt.tagUnitId}`,
+  );
+  await client.patchContent([{ id: unitId, realmTagKeys }]);
+}
+
+export async function patchContentMetadata(
+  client: SearchClient,
+  unitId: string,
+  fields: Record<string, any>,
+) {
+  await client.patchContent([{ id: unitId, ...fields }]);
+}
+
+// ANCHOR: Post partial sync functions
+
+export async function patchPostsAuthor(
+  client: SearchClient,
+  userId: string,
+  fields: Record<string, any>,
+) {
+  let cursor: string | undefined;
+
+  while (true) {
+    const posts = await prisma.post.findMany({
+      where: {
+        authorUserId: userId,
+        unit: { status: "PUBLISHED" },
+      },
+      select: { unitId: true },
+      orderBy: { unitId: "asc" },
+      take: BATCH_SIZE,
+      skip: cursor ? 1 : 0,
+      cursor: cursor ? { unitId: cursor } : undefined,
+    });
+
+    if (posts.length === 0) break;
+
+    const docs = posts.map((p) => ({ id: p.unitId, ...fields }));
+    await client.patchPosts(docs);
+
+    cursor = posts[posts.length - 1]!.unitId;
+  }
+}
+
+export async function patchPostsTarget(
+  client: SearchClient,
+  targetUnitId: string,
+) {
+  // Fetch target unit data once
+  const targetUnit = await prisma.unit.findUnique({
+    where: { id: targetUnitId },
+    include: {
+      translations: true,
+      book: true,
+      game: true,
+      media: true,
+    },
+  });
+
+  let targetTitles: string[] | null = null;
+  let targetType: string | null = null;
+  let targetCoverUrl: string | null = null;
+
+  if (targetUnit) {
+    const translations: any[] = targetUnit.translations ?? [];
+    targetTitles = translations.map((t: any) => t.title).filter(Boolean);
+    targetType = targetUnit.type ?? null;
+    const ext =
+      (targetUnit as any).book ??
+      (targetUnit as any).game ??
+      (targetUnit as any).media ??
+      null;
+    targetCoverUrl = ext?.coverUrl ?? null;
+  }
+
+  let cursor: string | undefined;
+
+  while (true) {
+    const posts = await prisma.post.findMany({
+      where: {
+        targetUnitId,
+        unit: { status: "PUBLISHED" },
+      },
+      select: { unitId: true },
+      orderBy: { unitId: "asc" },
+      take: BATCH_SIZE,
+      skip: cursor ? 1 : 0,
+      cursor: cursor ? { unitId: cursor } : undefined,
+    });
+
+    if (posts.length === 0) break;
+
+    const docs = posts.map((p) => ({
+      id: p.unitId,
+      targetTitles,
+      targetType,
+      targetCoverUrl,
+    }));
+    await client.patchPosts(docs);
+
+    cursor = posts[posts.length - 1]!.unitId;
+  }
+}
+
+export async function patchPostFields(
+  client: SearchClient,
+  unitId: string,
+  fields: Record<string, any>,
+) {
+  await client.patchPosts([{ id: unitId, ...fields }]);
+}
+
+// ANCHOR: Realm partial sync functions
+
+export async function patchRealmMemberCount(
+  client: SearchClient,
+  unitId: string,
+  memberCount: number,
+) {
+  await client.patchRealms([{ id: unitId, memberCount }]);
+}
+
+export async function patchRealmMetadata(
+  client: SearchClient,
+  unitId: string,
+  fields: Record<string, any>,
+) {
+  await client.patchRealms([{ id: unitId, ...fields }]);
+}
+
+export async function patchRealmTranslations(
+  client: SearchClient,
+  unitId: string,
+) {
+  const translations = await prisma.unitTranslation.findMany({
+    where: { unitId },
+  });
+
+  const titles = translations.map((t: any) => t.title).filter(Boolean);
+  const descriptions = translations
+    .map((t: any) => t.description)
+    .filter(Boolean);
+
+  await client.patchRealms([
+    {
+      id: unitId,
+      titles,
+      descriptions,
+      translations: translations.map((tr: any) => ({
+        language: tr.language,
+        title: tr.title ?? null,
+        description: tr.description ?? null,
+      })),
+    },
+  ]);
+}
+
+// ANCHOR: User and feedback partial sync functions
+
+export async function patchUserFields(
+  client: SearchClient,
+  unitId: string,
+  fields: Record<string, any>,
+) {
+  await client.patchUsers([{ id: unitId, ...fields }]);
+}
+
+export async function patchFeedbackResolution(
+  client: SearchClient,
+  id: string,
+  fields: Record<string, any>,
+) {
+  await client.patchFeedbacks([{ id, ...fields }]);
+}
+
 // ANCHOR: Feedbacks sync
 
 export async function syncAllFeedbacks(client: SearchClient) {

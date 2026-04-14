@@ -1,4 +1,12 @@
-import { syncSingleContent } from "@rezics/search";
+import {
+  syncSingleContent,
+  patchContentTags,
+  patchContentCredits,
+  patchContentTranslations,
+  patchContentRealmIds,
+  patchContentRealmTagKeys,
+  patchContentMetadata,
+} from "@rezics/search";
 import { searchClient } from "../search-client";
 
 /**
@@ -14,4 +22,31 @@ export async function syncContentToMeili(unitId: string): Promise<void> {
  */
 export async function deleteContentFromMeili(unitId: string): Promise<void> {
   await searchClient.deleteContent([unitId]);
+}
+
+export async function patchContentTagsToMeili(unitId: string): Promise<void> {
+  await patchContentTags(searchClient, unitId);
+}
+
+export async function patchContentCreditsToMeili(unitId: string): Promise<void> {
+  await patchContentCredits(searchClient, unitId);
+}
+
+export async function patchContentTranslationsToMeili(unitId: string): Promise<void> {
+  await patchContentTranslations(searchClient, unitId);
+}
+
+export async function patchContentRealmIdsToMeili(unitId: string): Promise<void> {
+  await patchContentRealmIds(searchClient, unitId);
+}
+
+export async function patchContentRealmTagKeysToMeili(unitId: string): Promise<void> {
+  await patchContentRealmTagKeys(searchClient, unitId);
+}
+
+export async function patchContentMetadataToMeili(
+  unitId: string,
+  fields: Record<string, any>,
+): Promise<void> {
+  await patchContentMetadata(searchClient, unitId, fields);
 }

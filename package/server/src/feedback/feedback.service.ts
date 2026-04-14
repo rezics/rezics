@@ -1,7 +1,7 @@
 import type { CreateFeedbackInput, FeedbackListQuery } from "@rezics/contract";
 import type { Feedback, Prisma } from "#/prisma/client";
 import { prisma } from "#/prisma/client";
-import { syncFeedbackToMeili } from "@/meili/feedback/sync";
+import { syncFeedbackToMeili, patchFeedbackResolutionToMeili } from "@/meili/feedback/sync";
 
 export class FeedbackService {
   async create(
@@ -100,7 +100,10 @@ export class FeedbackService {
       where: { id },
       data,
     });
-    await syncFeedbackToMeili(id);
+    await patchFeedbackResolutionToMeili(id, {
+      resolved: updated.resolved,
+      resolvedAt: updated.resolvedAt?.toISOString() ?? null,
+    });
     return updated;
   }
 }

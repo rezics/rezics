@@ -10,7 +10,11 @@ import {
   UnitType,
   type UnitVisibility,
 } from "#/prisma/client";
-import { syncContentToMeili, deleteContentFromMeili } from "@/meili/content/sync";
+import {
+  syncContentToMeili,
+  deleteContentFromMeili,
+  patchContentMetadataToMeili,
+} from "@/meili/content/sync";
 import { getBookApproxCount } from "./sql";
 import type { BookWithRelations } from "./types";
 import { bookInclude } from "./types";
@@ -308,7 +312,12 @@ export class BookService {
       include: bookInclude,
     });
 
-    await syncContentToMeili(unitId);
+    const patchFields: Record<string, any> = {};
+    if (req.isLicensed !== undefined) patchFields.isLicensed = req.isLicensed;
+    if (req.coverUrl !== undefined) patchFields.coverUrl = req.coverUrl;
+    if (req.nsfw !== undefined) patchFields.nsfw = req.nsfw;
+    if (req.visibility !== undefined) patchFields.visibility = req.visibility;
+    await patchContentMetadataToMeili(unitId, patchFields);
 
     return book as BookWithRelations;
   }

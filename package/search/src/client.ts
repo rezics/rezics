@@ -115,6 +115,9 @@ export class SearchClient {
   addOrUpdateContent(docs: any[]) {
     return this.contentIndex.addDocuments(docs);
   }
+  patchContent(docs: any[]) {
+    return this.contentIndex.updateDocuments(docs);
+  }
   deleteContent(ids: string[]) {
     return this.contentIndex.deleteDocuments(ids);
   }
@@ -126,6 +129,9 @@ export class SearchClient {
 
   addOrUpdateFeedbacks(feedbacks: any[]) {
     return this.feedbackIndex.addDocuments(feedbacks);
+  }
+  patchFeedbacks(docs: any[]) {
+    return this.feedbackIndex.updateDocuments(docs);
   }
   deleteFeedbacks(ids: string[]) {
     return this.feedbackIndex.deleteDocuments(ids);
@@ -139,6 +145,9 @@ export class SearchClient {
   addOrUpdateUsers(users: any[]) {
     return this.userIndex.addDocuments(users);
   }
+  patchUsers(docs: any[]) {
+    return this.userIndex.updateDocuments(docs);
+  }
   deleteUsers(ids: string[]) {
     return this.userIndex.deleteDocuments(ids);
   }
@@ -151,6 +160,9 @@ export class SearchClient {
   addOrUpdatePosts(docs: any[]) {
     return this.postIndex.addDocuments(docs);
   }
+  patchPosts(docs: any[]) {
+    return this.postIndex.updateDocuments(docs);
+  }
   deletePosts(ids: string[]) {
     return this.postIndex.deleteDocuments(ids);
   }
@@ -162,6 +174,9 @@ export class SearchClient {
 
   addOrUpdateRealms(docs: any[]) {
     return this.realmIndex.addDocuments(docs);
+  }
+  patchRealms(docs: any[]) {
+    return this.realmIndex.updateDocuments(docs);
   }
   deleteRealms(ids: string[]) {
     return this.realmIndex.deleteDocuments(ids);

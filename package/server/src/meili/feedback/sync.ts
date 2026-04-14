@@ -1,4 +1,5 @@
 import type { FeedbackSearchDocument } from "@rezics/contract";
+import { patchFeedbackResolution } from "@rezics/search";
 import { prisma } from "#/prisma/client";
 import { searchClient } from "../search-client";
 
@@ -33,4 +34,11 @@ export async function syncFeedbackToMeili(id: string): Promise<void> {
  */
 export async function deleteFeedbackFromMeili(id: string): Promise<void> {
   await searchClient.feedbackIndex.deleteDocuments([id]);
+}
+
+export async function patchFeedbackResolutionToMeili(
+  id: string,
+  fields: Record<string, any>,
+): Promise<void> {
+  await patchFeedbackResolution(searchClient, id, fields);
 }

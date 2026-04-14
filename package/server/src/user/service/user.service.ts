@@ -6,8 +6,8 @@ import { NotificationType, type UpdateUser } from "@rezics/contract";
 import type { Prisma } from "#/prisma/client";
 import { prisma } from "#/prisma/client";
 import { emitNotificationEvent } from "../../notify/notify-client";
-import { deleteUserFromMeili, syncUserToMeili } from "@/meili/user/sync";
-import { syncPostsByAuthorToMeili } from "@/meili/post/sync";
+import { deleteUserFromMeili, syncUserToMeili, patchUserFieldsToMeili } from "@/meili/user/sync";
+import { syncPostsByAuthorToMeili, patchPostsAuthorToMeili } from "@/meili/post/sync";
 import { syncProfileToAuth } from "./profile-sync";
 import type { UserFilterOptions, UserWithRelations } from "../model/types";
 import { userInclude } from "../model/types";
@@ -199,7 +199,13 @@ export class UserService {
       include: userInclude,
     });
 
-    await syncUserToMeili(unitId);
+    // Partial sync user fields to Meilisearch
+    const userPatchFields: Record<string, any> = {};
+    if (name) userPatchFields.name = user.name;
+    if (avatar) userPatchFields.avatar = user.avatar;
+    if (bio) userPatchFields.bio = user.bio;
+    if (description) userPatchFields.description = user.description;
+    await patchUserFieldsToMeili(unitId, userPatchFields);
 
     // Fire-and-forget profile sync to auth
     syncProfileToAuth({
@@ -209,8 +215,11 @@ export class UserService {
       avatar: user.avatar,
     }).catch(() => {});
 
-    // Fire-and-forget: re-sync all posts by this author (denormalized author info)
-    syncPostsByAuthorToMeili(unitId).catch(() => {});
+    // Fire-and-forget: partial update denormalized author info on all posts
+    const authorPatchFields: Record<string, any> = {};
+    if (name) authorPatchFields.authorName = user.name;
+    if (avatar) authorPatchFields.authorAvatar = user.avatar;
+    patchPostsAuthorToMeili(unitId, authorPatchFields).catch(() => {});
 
     return user as UserWithRelations;
   }

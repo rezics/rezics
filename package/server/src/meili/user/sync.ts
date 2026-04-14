@@ -1,3 +1,4 @@
+import { patchUserFields } from "@rezics/search";
 import { prisma } from "#/prisma/client";
 import { searchClient } from "../search-client";
 import type { UserSearchDocument } from "./index";
@@ -34,4 +35,11 @@ export async function syncUserToMeili(unitId: string): Promise<void> {
  */
 export async function deleteUserFromMeili(unitId: string): Promise<void> {
   await searchClient.userIndex.deleteDocuments([unitId]);
+}
+
+export async function patchUserFieldsToMeili(
+  unitId: string,
+  fields: Record<string, any>,
+): Promise<void> {
+  await patchUserFields(searchClient, unitId, fields);
 }

@@ -5,8 +5,9 @@ import type {
 import { FALLBACK_LANGUAGE } from "@rezics/contract";
 import type { Prisma, UnitTranslation } from "#/prisma/client";
 import { prisma, UnitType } from "#/prisma/client";
-import { syncRealmToMeili } from "@/meili/realm/sync";
-import { syncPostsByTargetToMeili } from "@/meili/post/sync";
+import { patchContentTranslationsToMeili } from "@/meili/content/sync";
+import { patchRealmTranslationsToMeili } from "@/meili/realm/sync";
+import { patchPostsTargetToMeili } from "@/meili/post/sync";
 
 /**
  * Translation Service - CRUD for UnitTranslation rows
@@ -86,11 +87,10 @@ export class TranslationService {
     if (!unit) return;
 
     if (unit.type === UnitType.REALM) {
-      // Realm translation changed — re-sync the realm document
-      await syncRealmToMeili(unitId);
+      await patchRealmTranslationsToMeili(unitId);
     } else {
-      // Non-realm translation changed — re-sync posts targeting this unit
-      await syncPostsByTargetToMeili(unitId);
+      await patchContentTranslationsToMeili(unitId);
+      await patchPostsTargetToMeili(unitId);
     }
   }
 
