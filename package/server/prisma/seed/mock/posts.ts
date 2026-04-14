@@ -15,14 +15,14 @@ const CHUNK_SIZE = 10;
 
 interface PostCounts {
   reviews: number;
-  comments: number;
+  treePosts: number;
   quotes: number;
   remarks: number;
 }
 
 /**
  * Seed posts for all work units (books, games, media).
- * Creates reviews, quotes, remarks, and threaded comments.
+ * Creates reviews, quotes, remarks, and tree posts (threaded).
  * scoreEntries maps `${userId}:${unitId}:${realm}` -> scoreEntryId for linking reviews/remarks.
  */
 export async function seedPostsForWorks(
@@ -33,7 +33,7 @@ export async function seedPostsForWorks(
   scoreEntries?: Map<string, string>,
 ): Promise<CreatedPost[]> {
   console.log(
-    `[Seed] Seeding posts for ${works.length} works (${counts.reviews} reviews, ${counts.quotes} quotes, ${counts.remarks} remarks, ${counts.comments} comments per work)...`,
+    `[Seed] Seeding posts for ${works.length} works (${counts.reviews} reviews, ${counts.quotes} quotes, ${counts.remarks} remarks, ${counts.treePosts} tree posts per work)...`,
   );
   const allPosts: CreatedPost[] = [];
 
@@ -71,14 +71,14 @@ export async function seedPostsForWorks(
     );
     allPosts.push(...remarks);
 
-    // Threaded comments
-    const comments = await seedCommentsForTarget(
+    // Tree posts (threaded)
+    const treePosts = await seedTreePostsForTarget(
       prisma,
       work.id,
       users,
-      counts.comments,
+      counts.treePosts,
     );
-    allPosts.push(...comments);
+    allPosts.push(...treePosts);
   });
 
   return allPosts;
@@ -164,10 +164,10 @@ async function seedPostKindForTarget(
 }
 
 /**
- * Create threaded comments for a target unit.
- * Two-pass: root comments first, then replies.
+ * Create tree posts (threaded) for a target unit.
+ * Two-pass: root posts first, then replies.
  */
-async function seedCommentsForTarget(
+async function seedTreePostsForTarget(
   prisma: PrismaClient,
   targetUnitId: string,
   users: CreatedUser[],
@@ -177,7 +177,7 @@ async function seedCommentsForTarget(
   const replyCount = total - rootCount;
   const posts: CreatedPost[] = [];
 
-  // Pass 1: Root comments
+  // Pass 1: Root posts
   const rootIds: string[] = [];
 
   await chunkedParallel(
@@ -201,8 +201,8 @@ async function seedCommentsForTarget(
               authorUserId: author.unitId,
               targetUnitId,
               rootPostUnitId: id,
-              kind: PostKind.COMMENT,
-              body: generatePostBody(PostKind.COMMENT),
+              kind: PostKind.POST,
+              body: generatePostBody(PostKind.POST),
               depth: 0,
               sortPath,
             },
@@ -217,7 +217,7 @@ async function seedCommentsForTarget(
       rootIds.push(unit.id);
       posts.push({
         ...unit,
-        kind: PostKind.COMMENT,
+        kind: PostKind.POST,
         targetUnitId,
       });
     },
@@ -225,7 +225,7 @@ async function seedCommentsForTarget(
 
   if (rootIds.length === 0 || replyCount === 0) return posts;
 
-  // Pass 2: Reply comments
+  // Pass 2: Replies
   const replyParents: { id: string; sortPath: string; depth: number }[] =
     rootIds.map((id, i) => ({
       id,
@@ -260,8 +260,8 @@ async function seedCommentsForTarget(
               targetUnitId,
               rootPostUnitId: rootId,
               parentPostUnitId: parent.id,
-              kind: PostKind.COMMENT,
-              body: generatePostBody(PostKind.COMMENT),
+              kind: PostKind.POST,
+              body: generatePostBody(PostKind.POST),
               depth,
               sortPath,
             },
@@ -277,7 +277,7 @@ async function seedCommentsForTarget(
       replyParents.push({ id: replyId, sortPath, depth });
       posts.push({
         ...unit,
-        kind: PostKind.COMMENT,
+        kind: PostKind.POST,
         targetUnitId,
       });
     },

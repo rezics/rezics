@@ -33,7 +33,7 @@ export interface SeedCounts {
   games: number;
   media: number;
   reviewsPerWork: number;
-  commentsPerWork: number;
+  treePostsPerWork: number;
   quotesPerWork: number;
   remarksPerWork: number;
   shelves: number;

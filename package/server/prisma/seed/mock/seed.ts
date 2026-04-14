@@ -100,7 +100,7 @@ async function main() {
   done = stepTimer("Step 5b: Posts");
   const posts = await seedPostsForWorks(prisma, allWorks, users, {
     reviews: DEFAULT_COUNTS.reviewsPerWork,
-    comments: DEFAULT_COUNTS.commentsPerWork,
+    treePosts: DEFAULT_COUNTS.treePostsPerWork,
     quotes: DEFAULT_COUNTS.quotesPerWork,
     remarks: DEFAULT_COUNTS.remarksPerWork,
   }, scoreEntries);

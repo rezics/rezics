@@ -13,7 +13,7 @@ export const DEFAULT_COUNTS: SeedCounts = {
   games: envInt("SEED_GAMES", 50),
   media: envInt("SEED_MEDIA", 50),
   reviewsPerWork: envInt("SEED_REVIEWS_PER_WORK", 10),
-  commentsPerWork: envInt("SEED_COMMENTS_PER_WORK", 15),
+  treePostsPerWork: envInt("SEED_TREE_POSTS_PER_WORK", 15),
   quotesPerWork: envInt("SEED_QUOTES_PER_WORK", 5),
   remarksPerWork: envInt("SEED_REMARKS_PER_WORK", 3),
   shelves: envInt("SEED_SHELVES", 100),

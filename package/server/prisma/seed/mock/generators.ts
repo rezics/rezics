@@ -227,8 +227,6 @@ export function generatePostBody(kind: PostKind): string {
   switch (kind) {
     case PostKind.REVIEW:
       return generateParagraph(5, 15);
-    case PostKind.COMMENT:
-      return generateParagraph(1, 4);
     case PostKind.QUOTE:
       return faker.lorem.sentences({ min: 1, max: 3 });
     case PostKind.REMARK:
