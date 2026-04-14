@@ -10,8 +10,7 @@ import { useAuthSessionStore, useUserProfileStore } from "@/user/state";
  */
 export const useAuth = () => {
   const authSession = useAuthSessionStore((state) => state.authSession);
-  const capabilityLevel = useAuthSessionStore((state) => state.capabilityLevel);
-  const hasAuthSession = useAuthSessionStore((state) => state.hasAuthSession);
+  const permission = useAuthSessionStore((state) => state.permission);
   const needsOnboarding = useAuthSessionStore((state) => state.needsOnboarding);
   const needsVerification = useAuthSessionStore(
     (state) => state.needsVerification,
@@ -20,13 +19,14 @@ export const useAuth = () => {
   const user = useUserProfileStore((state) => state.user as UserDTO | null);
   const setUser = useUserProfileStore((state) => state.setUser);
 
+  const isAuthenticated = permission !== null;
+
   const { data, isLoading, error } = useQuery({
     ...userQueries.me(),
-    enabled: capabilityLevel === "member" && !user,
+    enabled: isAuthenticated && !user,
   });
 
-  const resolvedUser =
-    capabilityLevel === "member" ? (user ?? data ?? null) : null;
+  const resolvedUser = isAuthenticated ? (user ?? data ?? null) : null;
 
   useEffect(() => {
     if (data) {
@@ -39,16 +39,14 @@ export const useAuth = () => {
     authSession,
     loading:
       status === "loading" ||
-      (capabilityLevel === "member" && !resolvedUser ? isLoading : false),
+      (isAuthenticated && !resolvedUser ? isLoading : false),
     error: error ? (error as Error).message : undefined,
-    authenticated: hasAuthSession,
-    isAuthenticated: hasAuthSession,
-    hasAuthSession,
+    authenticated: isAuthenticated,
+    isAuthenticated,
+    permission,
     needsOnboarding,
     needsVerification,
-    capabilityLevel,
-    readyForApp:
-      hasAuthSession && !needsOnboarding && !needsVerification,
+    readyForApp: isAuthenticated && !needsOnboarding && !needsVerification,
   };
 };
 

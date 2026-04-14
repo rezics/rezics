@@ -1,13 +1,15 @@
-const MANAGE_ROLES = ['owner', 'admin', 'moderator'];
+import type { Permission } from "@rezics/contract";
+
+const MANAGE_ROLES = ["owner", "admin", "moderator"];
 
 export function canManageRealm({
-  globalRole,
+  permission,
   memberRoleKey,
 }: {
-  globalRole?: string | null;
+  permission?: Permission | null;
   memberRoleKey?: string | null;
 }): boolean {
-  if (globalRole === 'ADMIN' || globalRole === 'ROOT') return true;
+  if (permission?.role === "ADMIN" || permission?.role === "ROOT") return true;
   if (memberRoleKey && MANAGE_ROLES.includes(memberRoleKey)) return true;
   return false;
 }

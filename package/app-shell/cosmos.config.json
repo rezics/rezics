@@ -1,7 +1,0 @@
-{
-  "$schema": "http://json.schemastore.org/cosmos-config",
-  "plugins": ["react-cosmos-plugin-vite"],
-  "fixtureFileSuffix": "test",
-  "globalImports": ["./src/foundation/global.css"],
-  "port": 5173
-}

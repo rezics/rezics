@@ -43,7 +43,7 @@ export const scoreApi = new Elysia({ prefix: '/score' })
   .delete(
     '/:id',
     async ({ params, identity, set }) => {
-      const isAdmin = BasicAdminPermission(identity);
+      const isAdmin = BasicAdminPermission(identity.permission);
       try {
         await scoreService.deleteScore(params.id, isAdmin);
         return { message: 'Score deleted' };

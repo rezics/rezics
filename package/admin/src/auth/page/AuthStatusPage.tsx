@@ -22,7 +22,7 @@ import {
 import {
   hydrateAuthSessionState,
   useAuthSessionStore,
-} from "@rezics/app-shell";
+} from "@rezics/api/state";
 import { NormalizedTokenName } from "@rezics/contract";
 import { useState } from "react";
 
@@ -158,8 +158,7 @@ function TokenCard({
 
 function SessionStoreCard() {
   const status = useAuthSessionStore((s) => s.status);
-  const hasAuthSession = useAuthSessionStore((s) => s.hasAuthSession);
-  const capabilityLevel = useAuthSessionStore((s) => s.capabilityLevel);
+  const permission = useAuthSessionStore((s) => s.permission);
   const needsVerification = useAuthSessionStore((s) => s.needsVerification);
   const needsOnboarding = useAuthSessionStore((s) => s.needsOnboarding);
   const user = useAuthSessionStore((s) => s.user);
@@ -168,10 +167,10 @@ function SessionStoreCard() {
 
   const rows: [string, React.ReactNode][] = [
     ["Hydration Status", status],
-    ["Has Auth Session", hasAuthSession ? "Yes" : "No"],
+    ["Authenticated", permission ? "Yes" : "No"],
     [
-      "Capability Level",
-      <Chip key="cap" label={capabilityLevel} size="small" />,
+      "Server Permission",
+      <Chip key="perm" label={permission?.role ?? "none"} size="small" />,
     ],
     ["Needs Verification", needsVerification ? "Yes" : "No"],
     ["Needs Onboarding", needsOnboarding ? "Yes" : "No"],

@@ -1,1 +1,3 @@
-export { qc } from "@rezics/app-shell";
+import { createQueryClient } from "@rezics/api/react-query/tsr";
+
+export const qc = createQueryClient();

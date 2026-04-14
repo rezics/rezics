@@ -1,6 +1,8 @@
+import type { Permission } from "@rezics/contract";
+
 export function shouldShowVerificationBanner(
-  hasAuthSession: boolean,
+  permission: Permission | null,
   needsVerification: boolean,
 ) {
-  return hasAuthSession && needsVerification;
+  return permission !== null && needsVerification;
 }

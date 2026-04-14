@@ -1,7 +1,7 @@
 import { ThemeProvider } from "@mui/material";
 import CssBaseline from "@mui/material/CssBaseline";
 import { StyledEngineProvider } from "@mui/material/styles";
-import { getTheme } from "@rezics/app-shell";
+import { getTheme } from "./config/theme";
 import {
   createRootRoute,
   createRoute,

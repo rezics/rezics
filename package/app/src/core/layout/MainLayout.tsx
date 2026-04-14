@@ -25,7 +25,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       state.user?.permission?.role?.includes("ADMIN"),
     ) ?? false;
   const showVerificationBanner = useAuthSessionStore((state) =>
-    shouldShowVerificationBanner(state.hasAuthSession, state.needsVerification),
+    shouldShowVerificationBanner(state.permission, state.needsVerification),
   );
 
   return (

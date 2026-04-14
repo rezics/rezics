@@ -35,7 +35,7 @@ export const postApi = new Elysia({ prefix: "/posts" })
   .get(
     "/",
     async ({ query, identity, set }): Promise<PostListResponse> => {
-      if (!BasicAdminPermission(identity)) {
+      if (!BasicAdminPermission(identity.permission)) {
         set.status = 403;
         throw new Error(
           "Forbidden: DB-backed post listing requires admin permission. Use POST /meili/posts/search for public access.",

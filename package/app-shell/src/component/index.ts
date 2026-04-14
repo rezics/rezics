@@ -1,1 +1,0 @@
-export { WindowAlert } from "./WindowAlert";

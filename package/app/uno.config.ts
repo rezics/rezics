@@ -1,3 +1,3 @@
-import { createUnoConfig } from "@rezics/app-shell/config/uno-config";
+import { createUnoConfig } from "@rezics/ui/uno.config";
 
 export default createUnoConfig();

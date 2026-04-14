@@ -15,8 +15,8 @@ import { JoinButton } from "../component/JoinButton";
 import { RealmContentFeed } from "../component/RealmContentFeed";
 import { RealmMemberList } from "../component/RealmMemberList";
 import { RealmTagManager } from "../component/RealmTagManager";
+import { useServerPermission } from "@rezics/api/hooks";
 import { canManageRealm } from "../model/canManageRealm";
-import { useServerRole } from "../model/useServerRole";
 
 interface RealmPageProps {
   realmId: string;
@@ -25,11 +25,11 @@ interface RealmPageProps {
 export function RealmPage({ realmId }: RealmPageProps) {
   const { data: realm, isLoading } = useQuery(realmDetailQuery(realmId));
   const { data: membership } = useQuery(myRealmMembershipQuery(realmId));
-  const serverRole = useServerRole();
+  const permission = useServerPermission();
   const [tab, setTab] = useState<"feed" | "tags" | "members">("feed");
 
   const showManage = canManageRealm({
-    globalRole: serverRole,
+    permission,
     memberRoleKey: membership?.roleKey,
   });
 

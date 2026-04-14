@@ -7,12 +7,12 @@ import type {
   AuthSession,
   AuthUser,
   GetSessionStateResponse,
+  Permission,
 } from "@rezics/contract";
 import { NormalizedTokenName } from "@rezics/contract";
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 
-export type AuthCapabilityLevel = "anonymous" | "member";
 export type AuthSessionHydrationStatus = "idle" | "loading" | "ready" | "error";
 
 type AuthSessionSnapshot = Pick<
@@ -25,8 +25,15 @@ export type AuthSessionStoreState = {
   session: AuthSession | null;
   user: AuthUser | null;
   authSession: GetSessionStateResponse["authSession"] | null;
-  hasAuthSession: boolean;
-  capabilityLevel: AuthCapabilityLevel;
+  /**
+   * Main server permission, derived from the `rezics-session-token` claims.
+   *
+   * This represents the main server's permission model and is unrelated to
+   * `auth-identity-token` except during the session exchange flow.
+   *
+   * `null` when the user has no valid session token (unauthenticated).
+   */
+  permission: Permission | null;
   needsVerification: boolean;
   needsOnboarding: boolean;
   error: string | null;
@@ -43,9 +50,11 @@ function deriveNeedsVerification(): boolean {
   return payload?.email_verified === false;
 }
 
-function deriveCapabilityLevel(): AuthCapabilityLevel {
+function derivePermission(): Permission | null {
   const sessionToken = getToken(NormalizedTokenName.REZICS_SESSION);
-  return sessionToken ? "member" : "anonymous";
+  if (!sessionToken) return null;
+  const payload = parseJwt(sessionToken);
+  return payload?.permission ?? null;
 }
 
 function deriveState(
@@ -53,18 +62,16 @@ function deriveState(
   status: AuthSessionHydrationStatus = "ready",
   error: string | null = null,
 ) {
-  const hasAuthSession = Boolean(snapshot?.session?.id && snapshot?.user?.id);
   const needsVerification = deriveNeedsVerification();
   const needsOnboarding = Boolean(snapshot?.authSession?.needsOnboarding);
-  const capabilityLevel = deriveCapabilityLevel();
+  const permission = derivePermission();
 
   return {
     status,
     session: snapshot?.session ?? null,
     user: snapshot?.user ?? null,
     authSession: snapshot?.authSession ?? null,
-    hasAuthSession,
-    capabilityLevel,
+    permission,
     needsVerification,
     needsOnboarding,
     error,

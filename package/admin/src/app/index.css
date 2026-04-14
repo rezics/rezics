@@ -109,3 +109,12 @@
     @apply bg-background text-foreground;
   }
 }
+
+input.MuiInputBase-input.MuiOutlinedInput-input:-webkit-autofill,
+input.MuiInputBase-input.MuiOutlinedInput-input:-webkit-autofill:hover,
+input.MuiInputBase-input.MuiOutlinedInput-input:-webkit-autofill:focus,
+input.MuiInputBase-input.MuiOutlinedInput-input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 100px #ffc7cc inset;
+  -webkit-text-fill-color: inherit;
+  caret-color: inherit;
+}

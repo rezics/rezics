@@ -11,7 +11,7 @@ import {
   clearAuthSessionState,
   hydrateAuthSessionState,
   useAuthSessionStore,
-} from "@rezics/app-shell";
+} from "@rezics/api/state";
 import { qc } from "@/app/provider/reactQueryUtil";
 
 /**

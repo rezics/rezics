@@ -59,7 +59,7 @@ export const realmApi = new Elysia({ prefix: "/realms" })
   .get(
     "/",
     async ({ query, identity, set }): Promise<RealmListResponse> => {
-      if (!BasicAdminPermission(identity)) {
+      if (!BasicAdminPermission(identity.permission)) {
         set.status = 403;
         throw new Error(
           "Forbidden: DB-backed realm listing requires admin permission. Use POST /meili/realms/search for public access.",
@@ -206,7 +206,7 @@ export const realmApi = new Elysia({ prefix: "/realms" })
       if (
         !actorMember ||
         (!MODERATOR_ROLES.includes(actorMember.roleKey) &&
-          !BasicAdminPermission(identity))
+          !BasicAdminPermission(identity.permission))
       ) {
         set.status = 403;
         throw new Error(
@@ -247,7 +247,7 @@ export const realmApi = new Elysia({ prefix: "/realms" })
         if (
           !actorMember ||
           (!MODERATOR_ROLES.includes(actorMember.roleKey) &&
-            !BasicAdminPermission(identity))
+            !BasicAdminPermission(identity.permission))
         ) {
           set.status = 403;
           throw new Error(
@@ -351,7 +351,7 @@ export const realmApi = new Elysia({ prefix: "/realms" })
       if (
         !actorMember ||
         (!MODERATOR_ROLES.includes(actorMember.roleKey) &&
-          !BasicAdminPermission(identity))
+          !BasicAdminPermission(identity.permission))
       ) {
         set.status = 403;
         throw new Error(
@@ -390,7 +390,7 @@ export const realmApi = new Elysia({ prefix: "/realms" })
       if (
         !actorMember ||
         (!MODERATOR_ROLES.includes(actorMember.roleKey) &&
-          !BasicAdminPermission(identity))
+          !BasicAdminPermission(identity.permission))
       ) {
         set.status = 403;
         throw new Error(

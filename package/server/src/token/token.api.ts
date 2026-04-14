@@ -23,7 +23,7 @@ const tokenManagementRoutes = new Elysia({ prefix: "/token" })
   .get(
     "/tokens",
     async ({ identity, set }) => {
-      if (!BasicAdminPermission(identity)) {
+      if (!BasicAdminPermission(identity.permission)) {
         set.status = 403;
         throw new Error("Forbidden: Cannot list tokens");
       }
@@ -43,7 +43,7 @@ const tokenManagementRoutes = new Elysia({ prefix: "/token" })
   .post(
     "/tokens",
     async ({ identity, set, body, request }) => {
-      if (!BasicAdminPermission(identity)) {
+      if (!BasicAdminPermission(identity.permission)) {
         set.status = 403;
         throw new Error("Forbidden: Cannot create token");
       }
@@ -77,7 +77,7 @@ const tokenManagementRoutes = new Elysia({ prefix: "/token" })
   .put(
     "/tokens/:id",
     async ({ identity, set, params, body }) => {
-      if (!BasicAdminPermission(identity)) {
+      if (!BasicAdminPermission(identity.permission)) {
         set.status = 403;
         throw new Error("Forbidden: Cannot update token");
       }
@@ -99,7 +99,7 @@ const tokenManagementRoutes = new Elysia({ prefix: "/token" })
   .delete(
     "/tokens/:id",
     async ({ identity, set, params }) => {
-      if (!BasicAdminPermission(identity)) {
+      if (!BasicAdminPermission(identity.permission)) {
         set.status = 403;
         throw new Error("Forbidden: Cannot revoke token");
       }

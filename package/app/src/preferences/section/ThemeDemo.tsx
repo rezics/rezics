@@ -27,7 +27,7 @@ import {
   Typography,
   useTheme,
 } from "@mui/material";
-import { PRESET_COLORS } from "@rezics/app-shell";
+import { PRESET_COLORS } from "@rezics/ui";
 import type React from "react";
 import { useAppStore } from "@/app/state/appStore";
 

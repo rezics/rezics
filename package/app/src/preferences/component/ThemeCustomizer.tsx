@@ -23,7 +23,7 @@ import {
   Typography,
   useTheme,
 } from "@mui/material";
-import { extractColorFromImage, PRESET_COLORS } from "@rezics/app-shell";
+import { extractColorFromImage, PRESET_COLORS } from "@rezics/ui";
 import type React from "react";
 import { useState } from "react";
 import { useAppStore } from "@/app/state/appStore";

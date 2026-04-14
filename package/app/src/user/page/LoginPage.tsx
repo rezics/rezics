@@ -78,7 +78,7 @@ export const LoginPage: FC<LoginPageProps> = ({
           to: resolvePostAuthDestination({
             needsOnboarding: authSessionState.needsOnboarding,
             needsVerification: authSessionState.needsVerification,
-            readyForApp: authSessionState.capabilityLevel === "member",
+            readyForApp: authSessionState.permission !== null,
           }),
         });
       }

@@ -2,7 +2,7 @@ import { getToken, parseJwt } from "@rezics/api/react-query/jwt";
 import {
   hydrateAuthSessionState,
   useAuthSessionStore,
-} from "@rezics/app-shell";
+} from "@rezics/api/state";
 import { NormalizedTokenName } from "@rezics/contract";
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import AdminLayout from "@/core/layout/AdminLayout";
@@ -32,9 +32,9 @@ export const Route = createFileRoute("/_admin")({
       await hydrateAuthSessionState();
     }
 
-    const { hasAuthSession } = useAuthSessionStore.getState();
+    const { permission } = useAuthSessionStore.getState();
 
-    if (hasAuthSession && isAdminRole(token)) {
+    if (permission && isAdminRole(token)) {
       return;
     }
 

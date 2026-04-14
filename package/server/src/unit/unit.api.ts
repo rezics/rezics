@@ -66,7 +66,7 @@ export const unitApi = new Elysia({ prefix: "/units" })
   .get(
     "/",
     async ({ query, identity, set }): Promise<UnitListResponse> => {
-      if (!BasicAdminPermission(identity)) {
+      if (!BasicAdminPermission(identity.permission)) {
         set.status = 403;
         throw new Error(
           "Forbidden: you do not have permission to list all units",

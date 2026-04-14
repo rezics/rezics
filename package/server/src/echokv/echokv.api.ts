@@ -47,7 +47,7 @@ export const echoKvApi = new Elysia({ prefix: "/echokv" })
   .put(
     "/:key",
     async ({ params, body, identity, set }): Promise<EchoKVResponse> => {
-      if (!BasicAdminPermission(identity)) {
+      if (!BasicAdminPermission(identity.permission)) {
         set.status = 403;
         throw new Error("Forbidden: You are not authorized to update EchoKV");
       }

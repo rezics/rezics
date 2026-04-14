@@ -66,7 +66,7 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
     "/feedbacks/search",
     async ({ body, identity }) => {
       const options = { ...(body as FeedbackListQuery) };
-      if (!isRoot(identity)) {
+      if (!isRoot(identity.permission)) {
         options.userId = identity.unitId;
       }
       return meiliService.searchFeedbacks(options);
@@ -114,7 +114,7 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
   .post(
     "/content/init",
     async ({ identity, set }) => {
-      if (!isRoot(identity)) {
+      if (!isRoot(identity.permission)) {
         set.status = 403;
         throw new Error("Forbidden: not authorized to init content index");
       }
@@ -137,7 +137,7 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
   .post(
     "/feedbacks/init",
     async ({ identity, set }) => {
-      if (!isRoot(identity)) {
+      if (!isRoot(identity.permission)) {
         set.status = 403;
         throw new Error("Forbidden: not authorized to init feedbacks index");
       }
@@ -160,7 +160,7 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
   .post(
     "/users/init",
     async ({ identity, set }) => {
-      if (!isRoot(identity)) {
+      if (!isRoot(identity.permission)) {
         set.status = 403;
         throw new Error("Forbidden: not authorized to init users index");
       }
@@ -183,7 +183,7 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
   .post(
     "/posts/init",
     async ({ identity, set }) => {
-      if (!isRoot(identity)) {
+      if (!isRoot(identity.permission)) {
         set.status = 403;
         throw new Error("Forbidden: not authorized to init posts index");
       }
@@ -206,7 +206,7 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
   .post(
     "/realms/init",
     async ({ identity, set }) => {
-      if (!isRoot(identity)) {
+      if (!isRoot(identity.permission)) {
         set.status = 403;
         throw new Error("Forbidden: not authorized to init realms index");
       }
@@ -230,7 +230,7 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
   .post(
     "/content/sync",
     async ({ identity, set }) => {
-      if (!isRoot(identity)) {
+      if (!isRoot(identity.permission)) {
         set.status = 403;
         throw new Error("Forbidden: not authorized to sync content");
       }
@@ -253,7 +253,7 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
   .post(
     "/feedbacks/sync",
     async ({ identity, set }) => {
-      if (!isRoot(identity)) {
+      if (!isRoot(identity.permission)) {
         set.status = 403;
         throw new Error("Forbidden: not authorized to sync feedbacks");
       }
@@ -276,7 +276,7 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
   .post(
     "/users/sync",
     async ({ identity, set }) => {
-      if (!isRoot(identity)) {
+      if (!isRoot(identity.permission)) {
         set.status = 403;
         throw new Error("Forbidden: not authorized to sync users");
       }
@@ -299,7 +299,7 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
   .post(
     "/posts/sync",
     async ({ identity, set }) => {
-      if (!isRoot(identity)) {
+      if (!isRoot(identity.permission)) {
         set.status = 403;
         throw new Error("Forbidden: not authorized to sync posts");
       }
@@ -322,7 +322,7 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
   .post(
     "/realms/sync",
     async ({ identity, set }) => {
-      if (!isRoot(identity)) {
+      if (!isRoot(identity.permission)) {
         set.status = 403;
         throw new Error("Forbidden: not authorized to sync realms");
       }
@@ -346,7 +346,7 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
   .get(
     "/content/deleteAll",
     async ({ identity, set }) => {
-      if (!isRoot(identity)) {
+      if (!isRoot(identity.permission)) {
         set.status = 403;
         throw new Error("Forbidden: not authorized to delete all content");
       }
@@ -369,7 +369,7 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
   .delete(
     "/feedbacks/deleteAll",
     async ({ identity, set }) => {
-      if (!isRoot(identity)) {
+      if (!isRoot(identity.permission)) {
         set.status = 403;
         throw new Error("Forbidden: not authorized to delete all feedbacks");
       }
@@ -392,7 +392,7 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
   .delete(
     "/users/deleteAll",
     async ({ identity, set }) => {
-      if (!isRoot(identity)) {
+      if (!isRoot(identity.permission)) {
         set.status = 403;
         throw new Error("Forbidden: not authorized to delete all users");
       }
@@ -415,7 +415,7 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
   .delete(
     "/posts/deleteAll",
     async ({ identity, set }) => {
-      if (!isRoot(identity)) {
+      if (!isRoot(identity.permission)) {
         set.status = 403;
         throw new Error("Forbidden: not authorized to delete all posts");
       }
@@ -438,7 +438,7 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
   .delete(
     "/realms/deleteAll",
     async ({ identity, set }) => {
-      if (!isRoot(identity)) {
+      if (!isRoot(identity.permission)) {
         set.status = 403;
         throw new Error("Forbidden: not authorized to delete all realms");
       }
@@ -461,7 +461,7 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
   .delete(
     "/indexes/resetAll",
     async ({ identity, set }) => {
-      if (!isRoot(identity)) {
+      if (!isRoot(identity.permission)) {
         set.status = 403;
         throw new Error("Forbidden: not authorized to reset all indexes");
       }
@@ -485,7 +485,7 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
   .post(
     "/keys/admin",
     async ({ identity, set }) => {
-      if (!isRoot(identity)) {
+      if (!isRoot(identity.permission)) {
         set.status = 403;
         throw new Error("Forbidden: not authorized to create admin key");
       }
@@ -507,7 +507,7 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
   .get(
     "/keys",
     async ({ identity, set }) => {
-      if (!isRoot(identity)) {
+      if (!isRoot(identity.permission)) {
         set.status = 403;
         throw new Error("Forbidden: not authorized to list keys");
       }
@@ -529,7 +529,7 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
   .delete(
     "/keys/:uid",
     async ({ params, identity, set }) => {
-      if (!isRoot(identity)) {
+      if (!isRoot(identity.permission)) {
         set.status = 403;
         throw new Error("Forbidden: not authorized to delete key");
       }

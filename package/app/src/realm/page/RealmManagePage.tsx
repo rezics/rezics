@@ -11,8 +11,8 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { getTranslation } from "@/shared/util/translation-helpers";
+import { useServerPermission } from "@rezics/api/hooks";
 import { canManageRealm } from "../model/canManageRealm";
-import { useServerRole } from "../model/useServerRole";
 
 interface RealmManagePageProps {
   realmId: string;
@@ -23,7 +23,7 @@ export function RealmManagePage({ realmId }: RealmManagePageProps) {
   const queryClient = useQueryClient();
   const { data: realm, isLoading } = useQuery(realmDetailQuery(realmId));
   const { data: membership, isLoading: membershipLoading } = useQuery(myRealmMembershipQuery(realmId));
-  const serverRole = useServerRole();
+  const permission = useServerPermission();
   const updateMutation = useUpdateRealmMutation();
 
   const translation = realm ? getTranslation(realm.translations) : null;
@@ -32,7 +32,7 @@ export function RealmManagePage({ realmId }: RealmManagePageProps) {
   const [saving, setSaving] = useState(false);
 
   const allowed = canManageRealm({
-    globalRole: serverRole,
+    permission,
     memberRoleKey: membership?.roleKey,
   });
 
