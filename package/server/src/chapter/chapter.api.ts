@@ -9,8 +9,8 @@ import {
   hasPermissionToUpdateChapter,
   updateChapterSchema,
 } from "@rezics/contract";
-import { Elysia } from "elysia";
-import { authMacro, buildActorFromContext } from "@/middleware";
+import { Elysia, status } from "elysia";
+import { authMacro, verifyAdminFromDb } from "@/middleware";
 import { unitService } from "@/unit/unit.service";
 import { chapterService } from "./chapter.service";
 import {
@@ -61,7 +61,13 @@ export const chapterApi = new Elysia({ prefix: "/chapters" })
   )
   .get(
     "/",
-    async ({ query }): Promise<ChapterListResponse> => {
+    async ({ identity, query }): Promise<ChapterListResponse> => {
+      if (identity.role !== "ADMIN" && identity.role !== "ROOT") {
+        return status(403, "Forbidden: Admin role required");
+      }
+      const isAdmin = await verifyAdminFromDb(identity.unitId);
+      if (!isAdmin) return status(403, "Forbidden: Admin role required");
+
       const { items, total } = await chapterService.list(query);
       return {
         items: items.map(mapUnitToChapterListItemDTO),
@@ -69,7 +75,7 @@ export const chapterApi = new Elysia({ prefix: "/chapters" })
       };
     },
     {
-      requireAdmin: true,
+      requireLogin: true,
       query: chapterListQuerySchema,
       detail: {
         summary: "List chapters",
@@ -81,24 +87,13 @@ export const chapterApi = new Elysia({ prefix: "/chapters" })
   )
   .put(
     "/:unitId",
-    async ({
-      params,
-      body,
-      identity,
-      currentUser,
-      set,
-    }): Promise<ChapterResponse> => {
+    async ({ params, body, identity, set }): Promise<ChapterResponse> => {
       const target = await unitService.getByUnitId(params.unitId);
       if (!target) {
         set.status = 404;
         throw new Error(`Chapter not found: ${params.unitId}`);
       }
-      if (
-        !hasPermissionToUpdateChapter(
-          buildActorFromContext({ identity, currentUser }),
-          target as any,
-        )
-      ) {
+      if (!hasPermissionToUpdateChapter(identity, target as any)) {
         set.status = 403;
         throw new Error("Forbidden: you do not have permission to update");
       }
@@ -106,7 +101,7 @@ export const chapterApi = new Elysia({ prefix: "/chapters" })
       return mapUnitToChapterDetailDTO(unit);
     },
     {
-      requireOwner: true,
+      requireLogin: true,
       params: chapterParamsSchema,
       body: updateChapterSchema,
       detail: {
@@ -118,23 +113,13 @@ export const chapterApi = new Elysia({ prefix: "/chapters" })
   )
   .delete(
     "/:unitId",
-    async ({
-      params,
-      identity,
-      currentUser,
-      set,
-    }): Promise<{ message: string }> => {
+    async ({ params, identity, set }): Promise<{ message: string }> => {
       const target = await unitService.getByUnitId(params.unitId);
       if (!target) {
         set.status = 404;
         throw new Error(`Chapter not found: ${params.unitId}`);
       }
-      if (
-        !hasPermissionToDeleteChapter(
-          buildActorFromContext({ identity, currentUser }),
-          target as any,
-        )
-      ) {
+      if (!hasPermissionToDeleteChapter(identity, target as any)) {
         set.status = 403;
         throw new Error("Forbidden: you do not have permission to delete");
       }
@@ -142,7 +127,7 @@ export const chapterApi = new Elysia({ prefix: "/chapters" })
       return { message: "Chapter deleted successfully" };
     },
     {
-      requireOwner: true,
+      requireLogin: true,
       params: chapterParamsSchema,
       detail: {
         summary: "Delete chapter",

@@ -1,15 +1,16 @@
-import type { BookDTO, UnitDTO, UserDTO } from "../index";
+import type { BookDTO, UnitDTO } from "../index";
+import type { AuthIdentity } from "./core";
 import { BasicAdminPermission, isBlocked } from "./core";
 
 export function hasPermissionToUpdateBook(
-  user: UserDTO,
+  actor: AuthIdentity,
   _book?: BookDTO,
   unit?: UnitDTO,
 ): boolean {
-  if (isBlocked(user)) return false;
-  if (BasicAdminPermission(user)) return true;
+  if (isBlocked(actor)) return false;
+  if (BasicAdminPermission(actor)) return true;
   if (!unit?.user?.unitId) return false;
-  return user.unitId === unit.user.unitId;
+  return actor.unitId === unit.user.unitId;
 }
 
 /**
@@ -19,8 +20,8 @@ export function hasPermissionToUpdateBook(
  * - Otherwise: only the owner of the book's Unit can delete.
  */
 export function hasPermissionToDeleteBook(
-  user: UserDTO,
+  actor: AuthIdentity,
   unit?: UnitDTO,
 ): boolean {
-  return hasPermissionToUpdateBook(user, undefined, unit);
+  return hasPermissionToUpdateBook(actor, undefined, unit);
 }

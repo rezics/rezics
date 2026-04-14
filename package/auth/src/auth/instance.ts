@@ -41,6 +41,45 @@ export const auth = betterAuth({
     },
   },
   trustedOrigins,
+  databaseHooks: {
+    user: {
+      create: {
+        after: async (user) => {
+          const serverBaseUrl = env.SERVER_BASE_URL;
+          const secret = env.SERVER_INTERNAL_SECRET;
+          if (!secret) {
+            console.warn(
+              "[afterSignUp] SERVER_INTERNAL_SECRET not set, skipping provisioning",
+            );
+            return;
+          }
+
+          const response = await fetch(
+            `${serverBaseUrl}/internal/users/provision`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "x-internal-secret": secret,
+              },
+              body: JSON.stringify({
+                unitId: user.id,
+                slug: (user as Record<string, unknown>).slug ?? user.name,
+                name: user.name,
+              }),
+            },
+          );
+
+          if (!response.ok) {
+            console.error(
+              `[afterSignUp] Provisioning failed: ${response.status} ${response.statusText}`,
+            );
+            throw new Error("User provisioning on server failed");
+          }
+        },
+      },
+    },
+  },
   emailAndPassword: {
     enabled: true,
     sendResetPassword: async ({ user, url, token }) =>

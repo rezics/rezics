@@ -1,15 +1,14 @@
 import type { UpdateUser, UserDTO, UserListQuery } from "@rezics/contract";
 import {
-  BasicAdminPermission,
   hasPermissionToUpdateUser,
   updateUserSchema,
   userListQuerySchema,
   userParamsSchema,
 } from "@rezics/contract";
-import { Elysia } from "elysia";
+import { Elysia, status } from "elysia";
 import { mapUserSearchDocToPublicProfile } from "@/meili/mapper";
 import { meiliService } from "@/meili/meili.service";
-import { authMacro } from "@/middleware";
+import { authMacro, verifyAdminFromDb } from "@/middleware";
 import { mapUserToDTO } from "../model/mapper";
 import { userService } from "../service/user.service";
 
@@ -35,12 +34,12 @@ export const coreRoute = new Elysia()
   )
   .get(
     "/me",
-    async ({ currentUser }): Promise<UserDTO> => {
-      const user = await userService.getByUnitId(currentUser.unitId);
+    async ({ identity }): Promise<UserDTO> => {
+      const user = await userService.getByUnitId(identity.unitId);
       return mapUserToDTO(user);
     },
     {
-      requireOwner: true,
+      requireLogin: true,
       detail: {
         summary: "Get current user",
         description:
@@ -62,7 +61,7 @@ export const coreRoute = new Elysia()
       return mapUserToDTO(user);
     },
     {
-      requireOwner: true,
+      requireLogin: true,
       body: updateUserSchema,
       detail: {
         summary: "Update current user",
@@ -73,18 +72,9 @@ export const coreRoute = new Elysia()
   )
   .put(
     "/:unitId",
-    async ({ identity, currentUser, params, body, set }): Promise<UserDTO> => {
-      if (
-        !hasPermissionToUpdateUser(
-          {
-            ...currentUser,
-            unitId: identity.unitId,
-          } as never,
-          params.unitId,
-        )
-      ) {
-        set.status = 403;
-        throw new Error("Forbidden: Cannot update other users");
+    async ({ identity, params, body }): Promise<UserDTO> => {
+      if (!hasPermissionToUpdateUser(identity, params.unitId)) {
+        return status(403, "Forbidden: Cannot update other users");
       }
 
       const userReq: UpdateUser = {
@@ -98,7 +88,7 @@ export const coreRoute = new Elysia()
       return mapUserToDTO(user);
     },
     {
-      requireOwner: true,
+      requireLogin: true,
       params: userParamsSchema,
       body: updateUserSchema,
       detail: {
@@ -110,16 +100,18 @@ export const coreRoute = new Elysia()
   )
   .delete(
     "/me",
-    async ({ identity, currentUser, set }): Promise<{ message: string }> => {
-      if (!BasicAdminPermission(currentUser)) {
-        set.status = 403;
-        throw new Error("Forbidden: Cannot delete current user");
+    async ({ identity }): Promise<{ message: string }> => {
+      if (identity.role !== "ADMIN" && identity.role !== "ROOT") {
+        return status(403, "Forbidden: Admin role required");
       }
+      const isAdmin = await verifyAdminFromDb(identity.unitId);
+      if (!isAdmin) return status(403, "Forbidden: Admin role required");
+
       await userService.delete(identity.unitId);
       return { message: "User deleted successfully" };
     },
     {
-      requireOwner: true,
+      requireLogin: true,
       detail: {
         summary: "Delete current user",
         description: "Delete current authenticated user account",
@@ -129,26 +121,18 @@ export const coreRoute = new Elysia()
   )
   .delete(
     "/:unitId",
-    async ({
-      currentUser,
-      params,
-      set,
-    }): Promise<{ message: string }> => {
-      const roles = currentUser.permission?.role;
-      if (!roles?.includes("ROOT") && !roles?.includes("ADMIN")) {
-        set.status = 403;
-        throw new Error("Forbidden: Admin role required");
+    async ({ identity, params }): Promise<{ message: string }> => {
+      if (identity.role !== "ADMIN" && identity.role !== "ROOT") {
+        return status(403, "Forbidden: Admin role required");
       }
-      if (!BasicAdminPermission(currentUser)) {
-        set.status = 403;
-        throw new Error("Forbidden: Persisted admin permission required");
-      }
+      const isAdmin = await verifyAdminFromDb(identity.unitId);
+      if (!isAdmin) return status(403, "Forbidden: Admin role required");
 
       await userService.delete(params.unitId);
       return { message: "User deleted successfully" };
     },
     {
-      requireOwner: true,
+      requireLogin: true,
       params: userParamsSchema,
       detail: {
         summary: "Delete user",

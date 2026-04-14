@@ -7,6 +7,7 @@ import type { Prisma } from "#/prisma/client";
 import { prisma } from "#/prisma/client";
 import { emitNotificationEvent } from "../../notify/notify-client";
 import { deleteUserFromMeili, syncUserToMeili } from "@/meili/user/sync";
+import { syncProfileToAuth } from "./profile-sync";
 import type { UserFilterOptions, UserWithRelations } from "../model/types";
 import { userInclude } from "../model/types";
 
@@ -198,6 +199,14 @@ export class UserService {
     });
 
     await syncUserToMeili(unitId);
+
+    // Fire-and-forget profile sync to auth
+    syncProfileToAuth({
+      unitId,
+      name: user.name,
+      slug: user.slug,
+      avatar: user.avatar,
+    }).catch(() => {});
 
     return user as UserWithRelations;
   }

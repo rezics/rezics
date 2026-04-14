@@ -62,6 +62,17 @@ export const env = createEnv({
     AUTH_INTERNAL_TOKEN_GATEWAY_SECRET: v.string(),
 
     /**
+     * Base URL of the main server for internal calls (e.g., user provisioning).
+     * Defaults to 'http://localhost:3000'.
+     */
+    SERVER_BASE_URL: v.fallback(v.string(), "http://localhost:3000"),
+
+    /**
+     * Shared secret for authenticating calls to the main server's internal endpoints.
+     */
+    SERVER_INTERNAL_SECRET: v.optional(v.string()),
+
+    /**
      * Supplemental list of trusted origins for auth flows.
      */
     AUTH_TRUSTED_ORIGINS: v.optional(v.string()),

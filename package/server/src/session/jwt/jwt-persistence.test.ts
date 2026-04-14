@@ -29,8 +29,6 @@ mock.module("../../prisma/client", () => ({
 describe("server jwt persistence", () => {
   beforeEach(() => {
     process.env.PORT = "3000";
-    process.env.MAIN_SESSION_JWT_ISSUER = "http://localhost:3000";
-    process.env.MAIN_SESSION_JWT_AUDIENCE = "rezics";
     jwtServiceUpsert.mockReset();
     jwksFindMany.mockReset();
     jwksFindUnique.mockReset();

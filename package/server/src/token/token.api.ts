@@ -22,12 +22,8 @@ const tokenManagementRoutes = new Elysia({ prefix: "/token" })
   .use(authMacro)
   .get(
     "/tokens",
-    async ({ identity, currentUser, set }) => {
-      if (!identity || !currentUser) {
-        set.status = 401;
-        throw new Error("Unauthorized");
-      }
-      if (!BasicAdminPermission(currentUser)) {
+    async ({ identity, set }) => {
+      if (!BasicAdminPermission(identity)) {
         set.status = 403;
         throw new Error("Forbidden: Cannot list tokens");
       }
@@ -35,7 +31,7 @@ const tokenManagementRoutes = new Elysia({ prefix: "/token" })
       return { tokens };
     },
     {
-      requireOwner: true,
+      requireLogin: true,
       detail: {
         summary: "List API tokens",
         description: "List non-revoked API tokens for the current user",
@@ -46,12 +42,8 @@ const tokenManagementRoutes = new Elysia({ prefix: "/token" })
   )
   .post(
     "/tokens",
-    async ({ identity, currentUser, set, body, request }) => {
-      if (!identity || !currentUser) {
-        set.status = 401;
-        throw new Error("Unauthorized");
-      }
-      if (!BasicAdminPermission(currentUser)) {
+    async ({ identity, set, body, request }) => {
+      if (!BasicAdminPermission(identity)) {
         set.status = 403;
         throw new Error("Forbidden: Cannot create token");
       }
@@ -71,7 +63,7 @@ const tokenManagementRoutes = new Elysia({ prefix: "/token" })
       return { token, tokenInfo };
     },
     {
-      requireOwner: true,
+      requireLogin: true,
       body: createApiTokenSchema,
       response: createApiTokenResponseSchema,
       detail: {
@@ -84,19 +76,15 @@ const tokenManagementRoutes = new Elysia({ prefix: "/token" })
   )
   .put(
     "/tokens/:id",
-    async ({ identity, currentUser, set, params, body }) => {
-      if (!identity || !currentUser) {
-        set.status = 401;
-        throw new Error("Unauthorized");
-      }
-      if (!BasicAdminPermission(currentUser)) {
+    async ({ identity, set, params, body }) => {
+      if (!BasicAdminPermission(identity)) {
         set.status = 403;
         throw new Error("Forbidden: Cannot update token");
       }
       return tokenService.updateToken(identity.unitId, params.id, body);
     },
     {
-      requireOwner: true,
+      requireLogin: true,
       params: t.Object({ id: t.String() }),
       body: updateApiTokenSchema,
       response: apiTokenDTOSchema,
@@ -110,12 +98,8 @@ const tokenManagementRoutes = new Elysia({ prefix: "/token" })
   )
   .delete(
     "/tokens/:id",
-    async ({ identity, currentUser, set, params }) => {
-      if (!identity || !currentUser) {
-        set.status = 401;
-        throw new Error("Unauthorized");
-      }
-      if (!BasicAdminPermission(currentUser)) {
+    async ({ identity, set, params }) => {
+      if (!BasicAdminPermission(identity)) {
         set.status = 403;
         throw new Error("Forbidden: Cannot revoke token");
       }
@@ -123,7 +107,7 @@ const tokenManagementRoutes = new Elysia({ prefix: "/token" })
       return { message: "Token revoked successfully" };
     },
     {
-      requireOwner: true,
+      requireLogin: true,
       params: t.Object({ id: t.String() }),
       detail: {
         summary: "Revoke API token",

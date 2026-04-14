@@ -1,4 +1,4 @@
-// Core role helpers (isAdmin / isRoot / isBlocked / BasicAdminPermission)
+// AuthIdentity type + core role helpers (isAdmin / isRoot / isBlocked / BasicAdminPermission)
 export * from "./core";
 // Legacy exports (still usable for direct role checks)
 export * from "./main";

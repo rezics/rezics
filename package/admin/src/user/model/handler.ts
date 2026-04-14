@@ -3,6 +3,7 @@ import { authKeys } from "@rezics/api/auth/auth.keys";
 import {
   clearAllTokens,
   ensureAuthIdentityToken,
+  exchangeForSessionToken,
   parseJwt,
 } from "@rezics/api/react-query/jwt";
 import { userKeys } from "@rezics/api/user/user.keys";
@@ -14,20 +15,25 @@ import {
 import { qc } from "@/app/provider/reactQueryUtil";
 
 /**
- * Admin login: sign in -> verify admin role -> hydrate session.
+ * Admin login: sign in -> verify admin role -> exchange for session token -> hydrate.
  */
 export async function adminLogin(email: string, password: string) {
   await authApi.signIn({ email, password });
-  const token = await ensureAuthIdentityToken({ requirePresence: false });
+  const authToken = await ensureAuthIdentityToken({ requirePresence: false });
 
-  const claims = parseJwt(token);
+  const claims = parseJwt(authToken);
   if (!(claims?.role === "admin" || claims?.role === "owner")) {
     throw new Error("You are not authorized to access this page");
   }
 
+  const sessionToken = await exchangeForSessionToken();
+  if (!sessionToken) {
+    throw new Error("Login failed: token exchange failed");
+  }
+
   await hydrateAuthSessionState();
 
-  return { token };
+  return { token: sessionToken };
 }
 
 /**

@@ -73,7 +73,7 @@ export const followRoute = new Elysia()
       return { message: "Followed successfully" };
     },
     {
-      requireOwner: true,
+      requireLogin: true,
       params: t.Object({
         targetId: t.String(),
       }),
@@ -91,7 +91,7 @@ export const followRoute = new Elysia()
       return { message: "Unfollowed successfully" };
     },
     {
-      requireOwner: true,
+      requireLogin: true,
       params: t.Object({
         targetId: t.String(),
       }),
@@ -116,7 +116,7 @@ export const followRoute = new Elysia()
       return status;
     },
     {
-      requireOwner: true,
+      requireLogin: true,
       query: t.Object({
         targetIds: t.Optional(t.Union([t.String(), t.Array(t.String())])),
       }),

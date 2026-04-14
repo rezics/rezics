@@ -13,7 +13,7 @@ import {
 } from "@rezics/contract";
 import { Elysia } from "elysia";
 import { UnitType } from "#/prisma/client";
-import { authMacro, buildActorFromContext } from "@/middleware";
+import { authMacro } from "@/middleware";
 import { mapReviewToDTO } from "./mapper";
 import { reviewService } from "./review.service";
 
@@ -96,8 +96,8 @@ export const reviewApi = new Elysia({ prefix: "/reviews" })
   )
   .get(
     "/",
-    async ({ query, currentUser, set }): Promise<ReviewListResponse> => {
-      if (!BasicAdminPermission(currentUser)) {
+    async ({ query, identity, set }): Promise<ReviewListResponse> => {
+      if (!BasicAdminPermission(identity)) {
         set.status = 403;
         throw new Error(
           "Forbidden: you do not have permission to get all reviews",
@@ -107,7 +107,7 @@ export const reviewApi = new Elysia({ prefix: "/reviews" })
       return { reviews: reviews.map(mapReviewToDTO), total };
     },
     {
-      requireOwner: true,
+      requireLogin: true,
       query: reviewListQuerySchema,
       detail: {
         summary: "Get all reviews",
@@ -118,20 +118,9 @@ export const reviewApi = new Elysia({ prefix: "/reviews" })
   )
   .put(
     "/:id",
-    async ({
-      params,
-      body,
-      identity,
-      currentUser,
-      set,
-    }): Promise<ReviewResponse> => {
+    async ({ params, body, identity, set }): Promise<ReviewResponse> => {
       const target = await reviewService.getById(params.id);
-      if (
-        !hasPermissionToUpdateReview(
-          buildActorFromContext({ identity, currentUser }),
-          target as any,
-        )
-      ) {
+      if (!hasPermissionToUpdateReview(identity, target as any)) {
         set.status = 403;
         throw new Error(
           "Forbidden: you do not have permission to update this review",
@@ -141,7 +130,7 @@ export const reviewApi = new Elysia({ prefix: "/reviews" })
       return mapReviewToDTO(review);
     },
     {
-      requireOwner: true,
+      requireLogin: true,
       params: reviewParamsSchema,
       body: updateReviewSchema,
       detail: {
@@ -153,19 +142,9 @@ export const reviewApi = new Elysia({ prefix: "/reviews" })
   )
   .delete(
     "/:id",
-    async ({
-      params,
-      identity,
-      currentUser,
-      set,
-    }): Promise<{ message: string }> => {
+    async ({ params, identity, set }): Promise<{ message: string }> => {
       const target = await reviewService.getById(params.id);
-      if (
-        !hasPermissionToDeleteReview(
-          buildActorFromContext({ identity, currentUser }),
-          target as any,
-        )
-      ) {
+      if (!hasPermissionToDeleteReview(identity, target as any)) {
         set.status = 403;
         throw new Error(
           "Forbidden: you do not have permission to delete this review",
@@ -175,7 +154,7 @@ export const reviewApi = new Elysia({ prefix: "/reviews" })
       return { message: "Review deleted successfully" };
     },
     {
-      requireOwner: true,
+      requireLogin: true,
       params: reviewParamsSchema,
       detail: {
         summary: "Delete review",

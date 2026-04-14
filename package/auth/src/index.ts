@@ -1,8 +1,8 @@
 import { cors } from "@elysiajs/cors";
 import { openapi } from "@elysiajs/openapi";
-import { TokenTransportHeader } from "@rezics/contract";
 import { coreInstance } from "./core";
 import { env } from "./env";
+import { authInternalApi } from "./internal/internal.api";
 import { authOpenApiRouter } from "./openapi";
 import { wellKnownApi } from "./well-known/well-known.api";
 
@@ -51,8 +51,8 @@ app
         "content-type",
         "authorization",
         "x-internal-auth-token",
-        TokenTransportHeader.NOTIFICATION_SESSION,
-        TokenTransportHeader.SEARCH_SESSION,
+        "x-internal-secret",
+        "x-auth-identity-token",
       ],
       maxAge: 600,
     }),
@@ -67,6 +67,7 @@ app
     };
   })
   .use(wellKnownApi)
+  .use(authInternalApi)
   .use(authOpenApiRouter)
   .get("/health", () => ({ status: "ok" }));
 

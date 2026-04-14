@@ -5,6 +5,7 @@ import {
 import {
   AUTH_TOKEN_STORAGE_EVENT,
   clearAllTokens,
+  exchangeForSessionToken,
   getJwtTokenStrategy,
   getToken,
   parseJwt,
@@ -21,14 +22,14 @@ import { createRefreshRetryPolicy } from "./refreshRetryPolicy";
 
 const REFRESH_BUFFER_MS = 60 * 1000;
 
-function getTokenExpMs(): number | null {
-  const token = getToken(NormalizedTokenName.AUTH_IDENTITY);
+function getTokenExpMs(tokenName: string): number | null {
+  const token = getToken(tokenName as any);
   if (!token) return null;
   const payload = parseJwt(token);
   return payload?.exp ? payload.exp * 1000 : null;
 }
 
-async function refreshGateway(): Promise<
+async function refreshAuthIdentity(): Promise<
   "success" | "retryable" | "non-retryable"
 > {
   try {
@@ -36,6 +37,17 @@ async function refreshGateway(): Promise<
     return token ? "success" : "non-retryable";
   } catch {
     return "non-retryable";
+  }
+}
+
+async function refreshSessionToken(): Promise<
+  "success" | "retryable" | "non-retryable"
+> {
+  try {
+    const token = await exchangeForSessionToken();
+    return token ? "success" : "retryable";
+  } catch {
+    return "retryable";
   }
 }
 
@@ -70,20 +82,23 @@ export function AuthProvider() {
     async function runRefreshCycle() {
       if (!mounted) return;
 
-      const gatewayToken = getToken(NormalizedTokenName.AUTH_IDENTITY);
-      const gatewayExpMs = gatewayToken ? getTokenExpMs() : null;
-      const gatewayNeedsRefresh =
-        !gatewayToken ||
-        !gatewayExpMs ||
-        gatewayExpMs - REFRESH_BUFFER_MS <= Date.now();
+      // 1. Refresh auth-identity-token via session cookie
+      const authToken = getToken(NormalizedTokenName.AUTH_IDENTITY);
+      const authExpMs = authToken
+        ? getTokenExpMs(NormalizedTokenName.AUTH_IDENTITY)
+        : null;
+      const authNeedsRefresh =
+        !authToken ||
+        !authExpMs ||
+        authExpMs - REFRESH_BUFFER_MS <= Date.now();
 
-      if (gatewayNeedsRefresh) {
-        if (!gatewayToken && !hasAuthPresence()) {
+      if (authNeedsRefresh) {
+        if (!authToken && !hasAuthPresence()) {
           handleAuthSessionExpired();
           return;
         }
 
-        const result = await refreshGateway();
+        const result = await refreshAuthIdentity();
         if (result === "non-retryable") {
           handleAuthSessionExpired();
           return;
@@ -93,8 +108,30 @@ export function AuthProvider() {
           scheduleRefresh(delayMs);
           return;
         }
-        retryPolicy.reset();
       }
+
+      if (!mounted) return;
+
+      // 2. Refresh rezics-session-token via exchange
+      const sessionToken = getToken(NormalizedTokenName.REZICS_SESSION);
+      const sessionExpMs = sessionToken
+        ? getTokenExpMs(NormalizedTokenName.REZICS_SESSION)
+        : null;
+      const sessionNeedsRefresh =
+        !sessionToken ||
+        !sessionExpMs ||
+        sessionExpMs - REFRESH_BUFFER_MS <= Date.now();
+
+      if (sessionNeedsRefresh) {
+        const result = await refreshSessionToken();
+        if (result === "retryable") {
+          const delayMs = retryPolicy.registerFailure();
+          scheduleRefresh(delayMs);
+          return;
+        }
+      }
+
+      retryPolicy.reset();
 
       if (!mounted) return;
 
@@ -104,6 +141,7 @@ export function AuthProvider() {
 
       if (!mounted) return;
 
+      // Schedule next refresh based on the sooner expiry
       const nextDelayMs = computeNextRefreshDelay();
       if (nextDelayMs !== null) {
         scheduleRefresh(nextDelayMs);
@@ -111,9 +149,16 @@ export function AuthProvider() {
     }
 
     function computeNextRefreshDelay(): number | null {
-      const expMs = getTokenExpMs();
-      if (!expMs) return null;
-      const delay = expMs - REFRESH_BUFFER_MS - Date.now();
+      const authExpMs = getTokenExpMs(NormalizedTokenName.AUTH_IDENTITY);
+      const sessionExpMs = getTokenExpMs(NormalizedTokenName.REZICS_SESSION);
+
+      const expiryTimes = [authExpMs, sessionExpMs].filter(
+        (v): v is number => v !== null,
+      );
+      if (expiryTimes.length === 0) return null;
+
+      const earliestExpiry = Math.min(...expiryTimes);
+      const delay = earliestExpiry - REFRESH_BUFFER_MS - Date.now();
       return delay > 0 ? delay : 0;
     }
 
@@ -135,10 +180,12 @@ export function AuthProvider() {
       const detail = customEvent.detail;
 
       if (!detail?.tokenName) return;
-      if (detail.tokenName !== NormalizedTokenName.AUTH_IDENTITY) return;
 
       if (detail.token === null) {
-        if (!hasAuthPresence()) {
+        if (
+          detail.tokenName === NormalizedTokenName.AUTH_IDENTITY &&
+          !hasAuthPresence()
+        ) {
           handleAuthSessionExpired();
         }
         return;
@@ -172,8 +219,14 @@ export function AuthProvider() {
       if (document.visibilityState !== "visible") return;
       if (!mounted) return;
 
-      const expMs = getTokenExpMs();
-      if (!expMs || expMs - REFRESH_BUFFER_MS <= Date.now()) {
+      const sessionExpMs = getTokenExpMs(NormalizedTokenName.REZICS_SESSION);
+      const authExpMs = getTokenExpMs(NormalizedTokenName.AUTH_IDENTITY);
+      const now = Date.now();
+
+      if (
+        (!sessionExpMs || sessionExpMs - REFRESH_BUFFER_MS <= now) ||
+        (!authExpMs || authExpMs - REFRESH_BUFFER_MS <= now)
+      ) {
         scheduleRefresh();
       }
     }

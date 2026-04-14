@@ -1,23 +1,17 @@
-import type { UserDTO } from "../index";
+export type AuthIdentity = { unitId: string; role: string };
 
-export function isAdmin(user: UserDTO) {
-  if (user.permission?.role?.includes("ADMIN")) {
-    return true;
-  }
+export function isAdmin(actor: AuthIdentity) {
+  return actor.role === "ADMIN";
 }
 
-export function isRoot(user: UserDTO) {
-  if (user.permission?.role?.includes("ROOT")) {
-    return true;
-  }
+export function isRoot(actor: AuthIdentity) {
+  return actor.role === "ROOT";
 }
 
-export function BasicAdminPermission(user: UserDTO) {
-  return isAdmin(user) || isRoot(user);
+export function BasicAdminPermission(actor: AuthIdentity) {
+  return isAdmin(actor) || isRoot(actor);
 }
 
-export function isBlocked(user: UserDTO) {
-  if (user.permission?.role?.includes("BLOCKED")) {
-    return true;
-  }
+export function isBlocked(actor: AuthIdentity) {
+  return actor.role === "BLOCKED";
 }

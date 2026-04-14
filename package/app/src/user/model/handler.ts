@@ -3,6 +3,7 @@ import { authKeys } from "@rezics/api/auth/auth.keys";
 import {
   clearAllTokens,
   ensureAuthIdentityToken,
+  exchangeForSessionToken,
 } from "@rezics/api/react-query/jwt";
 import { userKeys } from "@rezics/api/user/user.keys";
 import { qc } from "@/app/provider/reactQueryUtil";
@@ -15,15 +16,20 @@ import {
 
 export const login = async (email: string, password: string) => {
   await authApi.signIn({ email, password });
-  const token = await ensureAuthIdentityToken({ requirePresence: false });
+  const authToken = await ensureAuthIdentityToken({ requirePresence: false });
 
-  if (!token) {
+  if (!authToken) {
     throw new Error("Login failed");
+  }
+
+  const sessionToken = await exchangeForSessionToken();
+  if (!sessionToken) {
+    throw new Error("Login failed: token exchange failed");
   }
 
   await hydrateAuthSessionState();
 
-  return { token };
+  return { token: sessionToken };
 };
 
 export const register = async (
@@ -36,15 +42,20 @@ export const register = async (
     void avatar;
     void bio;
     await authApi.signUp({ email, password });
-    const token = await ensureAuthIdentityToken({ requirePresence: false });
+    const authToken = await ensureAuthIdentityToken({ requirePresence: false });
 
-    if (!token) {
+    if (!authToken) {
       throw new Error("Registration failed");
+    }
+
+    const sessionToken = await exchangeForSessionToken();
+    if (!sessionToken) {
+      throw new Error("Registration failed: token exchange failed");
     }
 
     await hydrateAuthSessionState();
 
-    return { token };
+    return { token: sessionToken };
   } catch (error) {
     console.error("Error during registration:", error);
     throw error;

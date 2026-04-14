@@ -4,7 +4,7 @@ import type { JwtAudience, JwtClaims } from "./jwt-claims";
 
 export type JwtVerifierDescriptor = {
   issuer: string;
-  audience: JwtAudience;
+  audience?: JwtAudience;
   algorithm: JwtAlgorithm;
 };
 

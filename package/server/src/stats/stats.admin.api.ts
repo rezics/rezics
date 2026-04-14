@@ -1,17 +1,23 @@
 import { adminStatsResponseSchema } from "@rezics/contract";
-import { Elysia } from "elysia";
-import { authMacro } from "@/middleware/permission";
+import { Elysia, status } from "elysia";
+import { authMacro, verifyAdminFromDb } from "@/middleware/permission";
 import { statsService } from "./stats.service";
 
 export const statsAdminApi = new Elysia({ prefix: "/admin/stats" })
   .use(authMacro)
   .get(
     "/",
-    async () => {
+    async ({ identity }) => {
+      if (identity.role !== "ADMIN" && identity.role !== "ROOT") {
+        return status(403, "Forbidden: Admin role required");
+      }
+      const isAdmin = await verifyAdminFromDb(identity.unitId);
+      if (!isAdmin) return status(403, "Forbidden: Admin role required");
+
       return statsService.getStats();
     },
     {
-      requireAdmin: true,
+      requireLogin: true,
       response: adminStatsResponseSchema,
       detail: {
         summary: "Get admin dashboard stats",

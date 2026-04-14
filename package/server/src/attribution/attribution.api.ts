@@ -18,7 +18,7 @@ import {
   updatePersonSchema,
 } from "@rezics/contract";
 import { Elysia, t } from "elysia";
-import { authMacro, buildActorFromContext } from "@/middleware";
+import { authMacro } from "@/middleware";
 import { attributionService } from "./attribution.service";
 
 export const attributionApi = new Elysia({ prefix: "/attribution" })
@@ -56,15 +56,15 @@ export const attributionApi = new Elysia({ prefix: "/attribution" })
   )
   .post(
     "/persons",
-    async ({ body, currentUser, set }): Promise<PersonDTO> => {
-      if (!BasicAdminPermission(currentUser)) {
+    async ({ body, identity, set }): Promise<PersonDTO> => {
+      if (!BasicAdminPermission(identity)) {
         set.status = 403;
         throw new Error("Forbidden: admin permission required");
       }
       return attributionService.createPerson(body);
     },
     {
-      requireOwner: true,
+      requireLogin: true,
       body: createPersonSchema,
       detail: {
         summary: "Create person",
@@ -75,15 +75,15 @@ export const attributionApi = new Elysia({ prefix: "/attribution" })
   )
   .put(
     "/persons/:id",
-    async ({ params, body, currentUser, set }): Promise<PersonDTO> => {
-      if (!BasicAdminPermission(currentUser)) {
+    async ({ params, body, identity, set }): Promise<PersonDTO> => {
+      if (!BasicAdminPermission(identity)) {
         set.status = 403;
         throw new Error("Forbidden: admin permission required");
       }
       return attributionService.updatePerson(params.id, body);
     },
     {
-      requireOwner: true,
+      requireLogin: true,
       params: personParamsSchema,
       body: updatePersonSchema,
       detail: {
@@ -95,8 +95,8 @@ export const attributionApi = new Elysia({ prefix: "/attribution" })
   )
   .delete(
     "/persons/:id",
-    async ({ params, currentUser, set }): Promise<{ message: string }> => {
-      if (!BasicAdminPermission(currentUser)) {
+    async ({ params, identity, set }): Promise<{ message: string }> => {
+      if (!BasicAdminPermission(identity)) {
         set.status = 403;
         throw new Error("Forbidden: admin permission required");
       }
@@ -104,7 +104,7 @@ export const attributionApi = new Elysia({ prefix: "/attribution" })
       return { message: "Person deleted successfully" };
     },
     {
-      requireOwner: true,
+      requireLogin: true,
       params: personParamsSchema,
       detail: {
         summary: "Delete person",
@@ -146,15 +146,15 @@ export const attributionApi = new Elysia({ prefix: "/attribution" })
   )
   .post(
     "/organizations",
-    async ({ body, currentUser, set }): Promise<OrganizationDTO> => {
-      if (!BasicAdminPermission(currentUser)) {
+    async ({ body, identity, set }): Promise<OrganizationDTO> => {
+      if (!BasicAdminPermission(identity)) {
         set.status = 403;
         throw new Error("Forbidden: admin permission required");
       }
       return attributionService.createOrganization(body);
     },
     {
-      requireOwner: true,
+      requireLogin: true,
       body: createOrganizationSchema,
       detail: {
         summary: "Create organization",
@@ -168,17 +168,17 @@ export const attributionApi = new Elysia({ prefix: "/attribution" })
     async ({
       params,
       body,
-      currentUser,
+      identity,
       set,
     }): Promise<OrganizationDTO> => {
-      if (!BasicAdminPermission(currentUser)) {
+      if (!BasicAdminPermission(identity)) {
         set.status = 403;
         throw new Error("Forbidden: admin permission required");
       }
       return attributionService.updateOrganization(params.id, body);
     },
     {
-      requireOwner: true,
+      requireLogin: true,
       params: organizationParamsSchema,
       body: updateOrganizationSchema,
       detail: {
@@ -190,8 +190,8 @@ export const attributionApi = new Elysia({ prefix: "/attribution" })
   )
   .delete(
     "/organizations/:id",
-    async ({ params, currentUser, set }): Promise<{ message: string }> => {
-      if (!BasicAdminPermission(currentUser)) {
+    async ({ params, identity, set }): Promise<{ message: string }> => {
+      if (!BasicAdminPermission(identity)) {
         set.status = 403;
         throw new Error("Forbidden: admin permission required");
       }
@@ -199,7 +199,7 @@ export const attributionApi = new Elysia({ prefix: "/attribution" })
       return { message: "Organization deleted successfully" };
     },
     {
-      requireOwner: true,
+      requireLogin: true,
       params: organizationParamsSchema,
       detail: {
         summary: "Delete organization",
@@ -211,15 +211,15 @@ export const attributionApi = new Elysia({ prefix: "/attribution" })
   // --- Credit link routes ---
   .post(
     "/credits/person",
-    async ({ body, currentUser, set }): Promise<PersonCreditDTO> => {
-      if (!BasicAdminPermission(currentUser)) {
+    async ({ body, identity, set }): Promise<PersonCreditDTO> => {
+      if (!BasicAdminPermission(identity)) {
         set.status = 403;
         throw new Error("Forbidden: admin permission required");
       }
       return attributionService.linkPersonCredit(body);
     },
     {
-      requireOwner: true,
+      requireLogin: true,
       body: linkPersonCreditSchema,
       detail: {
         summary: "Link person credit to unit",
@@ -230,8 +230,8 @@ export const attributionApi = new Elysia({ prefix: "/attribution" })
   )
   .delete(
     "/credits/person/:unitId/:personId/:roleKey",
-    async ({ params, currentUser, set }): Promise<{ message: string }> => {
-      if (!BasicAdminPermission(currentUser)) {
+    async ({ params, identity, set }): Promise<{ message: string }> => {
+      if (!BasicAdminPermission(identity)) {
         set.status = 403;
         throw new Error("Forbidden: admin permission required");
       }
@@ -243,7 +243,7 @@ export const attributionApi = new Elysia({ prefix: "/attribution" })
       return { message: "Person credit unlinked" };
     },
     {
-      requireOwner: true,
+      requireLogin: true,
       params: t.Object({
         unitId: t.String(),
         personId: t.String(),
@@ -258,15 +258,15 @@ export const attributionApi = new Elysia({ prefix: "/attribution" })
   )
   .post(
     "/credits/organization",
-    async ({ body, currentUser, set }): Promise<OrgCreditDTO> => {
-      if (!BasicAdminPermission(currentUser)) {
+    async ({ body, identity, set }): Promise<OrgCreditDTO> => {
+      if (!BasicAdminPermission(identity)) {
         set.status = 403;
         throw new Error("Forbidden: admin permission required");
       }
       return attributionService.linkOrgCredit(body);
     },
     {
-      requireOwner: true,
+      requireLogin: true,
       body: linkOrgCreditSchema,
       detail: {
         summary: "Link organization credit to unit",
@@ -277,8 +277,8 @@ export const attributionApi = new Elysia({ prefix: "/attribution" })
   )
   .delete(
     "/credits/organization/:unitId/:organizationId/:roleKey",
-    async ({ params, currentUser, set }): Promise<{ message: string }> => {
-      if (!BasicAdminPermission(currentUser)) {
+    async ({ params, identity, set }): Promise<{ message: string }> => {
+      if (!BasicAdminPermission(identity)) {
         set.status = 403;
         throw new Error("Forbidden: admin permission required");
       }
@@ -290,7 +290,7 @@ export const attributionApi = new Elysia({ prefix: "/attribution" })
       return { message: "Organization credit unlinked" };
     },
     {
-      requireOwner: true,
+      requireLogin: true,
       params: t.Object({
         unitId: t.String(),
         organizationId: t.String(),

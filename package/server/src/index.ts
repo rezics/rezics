@@ -1,16 +1,5 @@
 import { cors } from "@elysiajs/cors";
 import { openapi } from "@elysiajs/openapi";
-import type { AuthIdentityTokenClaims } from "@rezics/contract";
-import {
-  NormalizedTokenName,
-  TokenContextKey,
-  TokenTransportHeader,
-} from "@rezics/contract";
-import {
-  createJwtVerifier,
-  createTokenResolver,
-  JwtAlgorithm,
-} from "@rezics/jwt";
 import { Elysia } from "elysia";
 import { attributionApi } from "./attribution";
 import { bookApi } from "./book";
@@ -18,11 +7,7 @@ import { chapterApi } from "./chapter";
 import { echoKvApi } from "./echokv";
 import { env } from "./env";
 import { feedbackApi } from "./feedback";
-import {
-  bootstrapJwtServiceRecord,
-  getJwtService,
-  jwtServiceAdminApi,
-} from "./jwt";
+import { bootstrapJwtServiceRecord, jwtServiceAdminApi } from "./jwt";
 import { meiliApi } from "./meili";
 import { postApi } from "./post";
 import { internalApi } from "./internal/internal.api";
@@ -75,25 +60,24 @@ const authBaseUrl = env.AUTH_BASE_URL;
 const authAudience = env.AUTH_JWT_AUDIENCE ?? "rezics";
 const authJwksUrl = new URL("/.well-known/jwks.json", authBaseUrl).toString();
 
+// Bootstrap server-local JWT service for signing rezics-session-tokens
+const serverJwksUrl = `http://localhost:${port}/.well-known/jwks.json`;
+
+await bootstrapJwtServiceRecord("server-local", {
+  issuer: "rezics-server",
+  audience: "rezics",
+  jwksUrl: serverJwksUrl,
+  jwksPath: "/.well-known/jwks.json",
+  isLocalIssuer: true,
+});
+
+// Bootstrap auth-upstream JWT service for token exchange verification
 await bootstrapJwtServiceRecord("auth-upstream", {
   issuer: authBaseUrl,
   audience: authAudience,
   jwksUrl: authJwksUrl,
   jwksPath: "/.well-known/jwks.json",
   isLocalIssuer: false,
-});
-
-const authUpstream = await getJwtService("auth-upstream");
-
-const authIdentityVerifier = createJwtVerifier<AuthIdentityTokenClaims>({
-  issuer: authUpstream.issuer,
-  audience: authUpstream.audience,
-  jwksUrl: authUpstream.jwksUrl,
-  algorithm: JwtAlgorithm.ES256,
-  tokenName: NormalizedTokenName.AUTH_IDENTITY,
-  clockToleranceSeconds: Number(env.AUTH_JWT_CLOCK_TOLERANCE_SECONDS ?? "5"),
-  requiredScope: "user",
-  enforceTransport: true,
 });
 
 const devOrigins = [
@@ -114,8 +98,8 @@ app
         "content-type",
         "authorization",
         "accept",
-        TokenTransportHeader.NOTIFICATION_SESSION,
-        TokenTransportHeader.SEARCH_SESSION,
+        "x-auth-identity-token",
+        "x-internal-secret",
       ],
       maxAge: 600,
     }),
@@ -134,16 +118,6 @@ app
       message,
     };
   })
-  .use(
-    createTokenResolver<
-      typeof TokenContextKey.AUTH_IDENTITY,
-      AuthIdentityTokenClaims
-    >(TokenContextKey.AUTH_IDENTITY, {
-      headerName: TokenTransportHeader.AUTHORIZATION,
-      usesBearer: true,
-      verifier: authIdentityVerifier,
-    }),
-  )
   .use(wellKnownApi)
   .use(bookApi)
   .use(chapterApi)

@@ -3,9 +3,6 @@
  * Reads go directly to the reaction service; writes are routed through the main server.
  */
 
-import {
-  NormalizedTokenName,
-} from "@rezics/contract";
 import { getApiConfig } from "../config";
 import { apiFetch } from "../react-query/http";
 import { buildTokenHeaders } from "../react-query/jwt";
@@ -29,9 +26,7 @@ async function reactionFetch<T>(
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
     ...Object.fromEntries(new Headers(options?.headers).entries()),
-    ...buildTokenHeaders({
-      include: [NormalizedTokenName.AUTH_IDENTITY],
-    }),
+    ...buildTokenHeaders(),
   };
 
   const response = await fetch(url, {

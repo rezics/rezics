@@ -1,23 +1,24 @@
 // Review permissions — DEPRECATED: use post permissions instead.
 // Kept as aliases for backward compatibility during migration.
-import type { UnitDTO, UserDTO } from "../index";
+import type { UnitDTO } from "../index";
+import type { AuthIdentity } from "./core";
 import { BasicAdminPermission, isBlocked } from "./core";
 
 /** @deprecated Use hasPermissionToUpdatePost */
 export function hasPermissionToUpdateReview(
-  user: UserDTO,
+  actor: AuthIdentity,
   unit?: UnitDTO,
 ): boolean {
-  if (isBlocked(user)) return false;
-  if (BasicAdminPermission(user)) return true;
+  if (isBlocked(actor)) return false;
+  if (BasicAdminPermission(actor)) return true;
   if (!unit?.user?.unitId) return false;
-  return user.unitId === unit.user.unitId;
+  return actor.unitId === unit.user.unitId;
 }
 
 /** @deprecated Use hasPermissionToDeletePost */
 export function hasPermissionToDeleteReview(
-  user: UserDTO,
+  actor: AuthIdentity,
   unit?: UnitDTO,
 ): boolean {
-  return hasPermissionToUpdateReview(user, unit);
+  return hasPermissionToUpdateReview(actor, unit);
 }

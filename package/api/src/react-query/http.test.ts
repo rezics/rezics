@@ -136,16 +136,13 @@ describe("refreshAuthToken", () => {
 
     await apiFetch("/books", {
       headers: {
-        Authorization: "Bearer wrong-token",
         "x-trace-id": "trace-1",
       },
     });
 
     expect(fetchMock.mock.calls[0]?.[1]).toMatchObject({
       headers: {
-        Authorization:
-          "Bearer eyJhbGciOiJub25lIn0.eyJzdWIiOiJ1c2VyLTEiLCJleHAiOjQ3NjYwMDAwMDB9.c2ln",
-        "x-rezics-session-token": "member-token",
+        Authorization: "Bearer member-token",
         "x-trace-id": "trace-1",
       },
     });

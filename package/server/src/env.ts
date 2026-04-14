@@ -41,30 +41,14 @@ export const env = createEnv({
     AUTH_JWT_CLOCK_TOLERANCE_SECONDS: v.optional(v.string()),
 
     /**
-     * Bootstrap-only PEM private key used to seed the local server signing key.
-     * Steady-state signing uses the persisted server JWKS key store.
-     */
-    MAIN_SESSION_JWT_PRIVATE_JWK: v.optional(v.string()),
-
-    /**
-     * Bootstrap-only public JWK paired with `MAIN_SESSION_JWT_PRIVATE_JWK`.
-     */
-    MAIN_SESSION_JWT_PUBLIC_JWK: v.optional(v.string()),
-
-    /**
-     * Bootstrap-only issuer used to seed the local server JWT service metadata.
-     */
-    MAIN_SESSION_JWT_ISSUER: v.optional(v.string()),
-
-    /**
-     * Bootstrap-only audience used to seed the local server JWT service metadata.
-     */
-    MAIN_SESSION_JWT_AUDIENCE: v.optional(v.string()),
-
-    /**
-     * Bootstrap-only main-server session JWT lifetime in seconds.
+     * Rezics session token lifetime in seconds. Defaults to 900 (15 minutes).
      */
     MAIN_SESSION_JWT_TTL_SECONDS: v.optional(v.string()),
+
+    /**
+     * JWKS signing key rotation interval in seconds. Defaults to 2592000 (30 days).
+     */
+    MAIN_SESSION_JWKS_ROTATION_SECONDS: v.optional(v.string()),
 
     /**
      * Optional SMTP host reserved for server-side mail features.

@@ -1,19 +1,20 @@
-import type { UnitDTO, UserDTO } from "../index";
+import type { UnitDTO } from "../index";
+import type { AuthIdentity } from "./core";
 import { BasicAdminPermission, isBlocked } from "./core";
 
 export function hasPermissionToUpdateShelf(
-  user: UserDTO,
+  actor: AuthIdentity,
   unit?: UnitDTO,
 ): boolean {
-  if (isBlocked(user)) return false;
-  if (BasicAdminPermission(user)) return true;
+  if (isBlocked(actor)) return false;
+  if (BasicAdminPermission(actor)) return true;
   if (!unit?.user?.unitId) return false;
-  return user.unitId === unit.user.unitId;
+  return actor.unitId === unit.user.unitId;
 }
 
 export function hasPermissionToDeleteShelf(
-  user: UserDTO,
+  actor: AuthIdentity,
   unit?: UnitDTO,
 ): boolean {
-  return hasPermissionToUpdateShelf(user, unit);
+  return hasPermissionToUpdateShelf(actor, unit);
 }

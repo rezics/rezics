@@ -7,16 +7,11 @@ process.env.DATABASE_URL ??=
 process.env.AUTH_BASE_URL ??= "http://localhost:3001";
 
 mock.module("@/middleware/permission", () => ({
-  authMacro: new Elysia({ name: "macro/auth" })
-    .macro("requireLogin", {
-      resolve: () => ({ identity: { unitId: "test" } }),
-    })
-    .macro("requireOwner", {
-      requireLogin: true,
-      resolve: () => ({ session: {}, currentUser: {} }),
-    })
-    .macro("requireAdmin", { requireOwner: true }),
-  buildActorFromContext: () => ({}),
+  authMacro: new Elysia({ name: "macro/auth" }).macro("requireLogin", {
+    resolve: () => ({ identity: { unitId: "test", role: "MEMBER" } }),
+  }),
+  verifyAdminFromDb: async () => true,
+  verifyRootFromDb: async () => true,
 }));
 
 mock.module("./echokv.service", () => ({

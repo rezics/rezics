@@ -24,13 +24,7 @@ import type {
   SignInSocialBody,
   SignInSocialResponse,
 } from "@rezics/contract";
-import { NormalizedTokenName } from "@rezics/contract";
 import { getApiConfig } from "../config";
-import { buildTokenHeaders } from "../react-query/jwt";
-
-type AuthRequestInit = globalThis.RequestInit & {
-  includeTokens?: NormalizedTokenName[];
-};
 
 function getAuthBaseUrl(): string {
   return getApiConfig().authBaseUrl;
@@ -38,18 +32,16 @@ function getAuthBaseUrl(): string {
 
 async function authFetch<T>(
   endpoint: string,
-  options?: AuthRequestInit,
+  options?: RequestInit,
 ): Promise<T> {
   const url = `${getAuthBaseUrl()}${endpoint}`;
   const existingHeaders = new Headers(options?.headers);
-  const authHeaders = buildTokenHeaders({ include: options?.includeTokens });
   const response = await fetch(url, {
     ...options,
     credentials: "include",
     headers: {
       "Content-Type": "application/json",
       ...Object.fromEntries(existingHeaders.entries()),
-      ...authHeaders,
     },
   });
 

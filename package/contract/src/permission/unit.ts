@@ -1,50 +1,24 @@
-import type { UnitDTO, UserDTO } from "../index";
+import type { UnitDTO } from "../index";
+import type { AuthIdentity } from "./core";
 import { BasicAdminPermission, isBlocked } from "./core";
 
-/**
- * Generic Unit ownership based permission helpers.
- *
- * Most resources in the system (books, chapters, readlists, reviews, etc.)
- * are ultimately backed by a `Unit`. These helpers encapsulate the common
- * "owner or admin" rule while also respecting BLOCKED users.
- */
-
-function isUnitOwner(user: UserDTO, unit?: UnitDTO): boolean {
-  if (!unit?.user?.unitId) {
-    return false;
-  }
-  return user.unitId === unit.user.unitId;
+function isUnitOwner(actor: AuthIdentity, unit?: UnitDTO): boolean {
+  if (!unit?.user?.unitId) return false;
+  return actor.unitId === unit.user.unitId;
 }
 
-/**
- * Permissions for updating a Unit-backed resource.
- *
- * - BLOCKED users: never allowed.
- * - ROOT / ADMIN: always allowed.
- * - Otherwise: only the owner of the Unit can update.
- */
 export function hasPermissionToUpdateUnit(
-  user: UserDTO,
+  actor: AuthIdentity,
   unit?: UnitDTO,
 ): boolean {
-  if (isBlocked(user)) {
-    return false;
-  }
-  if (BasicAdminPermission(user)) {
-    return true;
-  }
-  return isUnitOwner(user, unit);
+  if (isBlocked(actor)) return false;
+  if (BasicAdminPermission(actor)) return true;
+  return isUnitOwner(actor, unit);
 }
 
-/**
- * Permissions for deleting a Unit-backed resource.
- *
- * For now we mirror the update rule: owner or admin, and not BLOCKED.
- * Individual modules can wrap this if they need stricter semantics.
- */
 export function hasPermissionToDeleteUnit(
-  user: UserDTO,
+  actor: AuthIdentity,
   unit?: UnitDTO,
 ): boolean {
-  return hasPermissionToUpdateUnit(user, unit);
+  return hasPermissionToUpdateUnit(actor, unit);
 }

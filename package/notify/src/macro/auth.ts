@@ -1,5 +1,5 @@
 import {
-  type AuthIdentityTokenClaims,
+  type RezicsSessionClaims,
   NormalizedTokenName,
   TokenTransportHeader,
 } from "@rezics/contract";
@@ -7,14 +7,12 @@ import { createJwtVerifier, JwtAlgorithm } from "@rezics/jwt";
 import { Elysia } from "elysia";
 import { env } from "../env";
 
-const verifier = createJwtVerifier<AuthIdentityTokenClaims>({
-  issuer: env.AUTH_ISSUER,
-  audience: env.AUTH_JWT_AUDIENCE,
-  jwksUrl: env.AUTH_JWKS_URL,
+const verifier = createJwtVerifier<RezicsSessionClaims>({
+  issuer: env.SERVER_ISSUER,
+  jwksUrl: env.SERVER_JWKS_URL,
   algorithm: JwtAlgorithm.ES256,
-  tokenName: NormalizedTokenName.AUTH_IDENTITY,
+  tokenName: NormalizedTokenName.REZICS_SESSION,
   clockToleranceSeconds: 5,
-  requiredScope: "user",
   enforceTransport: true,
 });
 

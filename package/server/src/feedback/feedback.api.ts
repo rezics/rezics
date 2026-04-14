@@ -59,10 +59,9 @@ export const feedbackApi = new Elysia({ prefix: "/feedbacks" })
       params,
       query,
       identity,
-      currentUser,
       set,
     }): Promise<FeedbackListResponse> => {
-      const isAdmin = BasicAdminPermission(currentUser);
+      const isAdmin = BasicAdminPermission(identity);
       if (!isAdmin && identity.unitId !== params.userId) {
         set.status = 403;
         throw new Error(
@@ -78,7 +77,7 @@ export const feedbackApi = new Elysia({ prefix: "/feedbacks" })
       return { ...result, items: result.items.map(mapFeedbackToDTO) };
     },
     {
-      requireOwner: true,
+      requireLogin: true,
       params: t.Object({ userId: t.String() }),
       query: feedbackListQuerySchema,
       detail: {
@@ -91,8 +90,8 @@ export const feedbackApi = new Elysia({ prefix: "/feedbacks" })
   )
   .get(
     "/",
-    async ({ query, currentUser, set }): Promise<FeedbackListResponse> => {
-      if (!BasicAdminPermission(currentUser)) {
+    async ({ query, identity, set }): Promise<FeedbackListResponse> => {
+      if (!BasicAdminPermission(identity)) {
         set.status = 403;
         throw new Error(
           "Forbidden: you do not have permission to list all feedbacks",
@@ -102,7 +101,7 @@ export const feedbackApi = new Elysia({ prefix: "/feedbacks" })
       return { ...result, items: result.items.map(mapFeedbackToDTO) };
     },
     {
-      requireOwner: true,
+      requireLogin: true,
       query: feedbackListQuerySchema,
       detail: {
         summary: "List feedbacks (admin)",
@@ -114,8 +113,8 @@ export const feedbackApi = new Elysia({ prefix: "/feedbacks" })
   )
   .get(
     "/:id",
-    async ({ params, currentUser, set }): Promise<FeedbackDTO> => {
-      if (!BasicAdminPermission(currentUser)) {
+    async ({ params, identity, set }): Promise<FeedbackDTO> => {
+      if (!BasicAdminPermission(identity)) {
         set.status = 403;
         throw new Error(
           "Forbidden: you do not have permission to get feedback details",
@@ -125,7 +124,7 @@ export const feedbackApi = new Elysia({ prefix: "/feedbacks" })
       return mapFeedbackToDTO(feedback);
     },
     {
-      requireOwner: true,
+      requireLogin: true,
       params: t.Object({ id: t.String() }),
       detail: {
         summary: "Get feedback (admin)",
@@ -136,8 +135,8 @@ export const feedbackApi = new Elysia({ prefix: "/feedbacks" })
   )
   .patch(
     "/:id/resolve",
-    async ({ params, body, currentUser, set }): Promise<FeedbackDTO> => {
-      if (!BasicAdminPermission(currentUser)) {
+    async ({ params, body, identity, set }): Promise<FeedbackDTO> => {
+      if (!BasicAdminPermission(identity)) {
         set.status = 403;
         throw new Error(
           "Forbidden: you do not have permission to update feedback status",
@@ -148,7 +147,7 @@ export const feedbackApi = new Elysia({ prefix: "/feedbacks" })
       return mapFeedbackToDTO(feedback);
     },
     {
-      requireOwner: true,
+      requireLogin: true,
       params: t.Object({ id: t.String() }),
       body: t.Object({
         resolved: t.Boolean(),

@@ -10,9 +10,7 @@ import { clearAuthPresence, hasAuthPresence } from "./authPresence";
 
 const DEFAULT_TOKEN_STORAGE_KEYS: Record<string, string> = {
   [NormalizedTokenName.AUTH_IDENTITY]: NormalizedTokenName.AUTH_IDENTITY,
-  [NormalizedTokenName.NOTIFICATION_SESSION]:
-    NormalizedTokenName.NOTIFICATION_SESSION,
-  [NormalizedTokenName.SEARCH_SESSION]: NormalizedTokenName.SEARCH_SESSION,
+  [NormalizedTokenName.REZICS_SESSION]: NormalizedTokenName.REZICS_SESSION,
 };
 
 export const AUTH_TOKEN_STORAGE_EVENT = "package-auth-token-storage";
@@ -163,10 +161,10 @@ export const removeToken = (
 };
 
 /**
- * Check if user is authenticated
+ * Check if user is authenticated (has a valid session token)
  */
 export const isAuthenticated = (): boolean => {
-  return !!getToken(NormalizedTokenName.AUTH_IDENTITY);
+  return !!getToken(NormalizedTokenName.REZICS_SESSION);
 };
 
 export async function queryAccessToken(options?: {
@@ -213,28 +211,44 @@ export async function ensureAuthIdentityToken(options?: {
 }
 
 /**
- * Build transport-correct headers for the requested normalized token types.
- * Bearer and custom header transports are derived from the shared contract.
+ * Exchange an auth-identity-token for a rezics-session-token via
+ * the server's POST /session/exchange endpoint.
  */
-export function buildTokenHeaders(options?: {
-  include?: NormalizedTokenNameType[];
-}): Record<string, string> {
-  const requestedTokenNames = options?.include ?? [
-    NormalizedTokenName.AUTH_IDENTITY,
-  ];
+export async function exchangeForSessionToken(): Promise<string | null> {
+  const authToken = getToken(NormalizedTokenName.AUTH_IDENTITY);
+  if (!authToken) return null;
+
+  const { apiBaseUrl } = getApiConfig();
+  const response = await fetch(`${apiBaseUrl}/session/exchange`, {
+    method: "POST",
+    headers: {
+      "x-auth-identity-token": authToken,
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (!response.ok) {
+    return null;
+  }
+
+  const json = (await response.json()) as { token?: string };
+  const token = json.token ?? null;
+  if (token) {
+    setToken(token, NormalizedTokenName.REZICS_SESSION);
+  }
+  return token;
+}
+
+/**
+ * Build transport-correct headers for API calls.
+ * Authorization: Bearer always carries the REZICS_SESSION token.
+ */
+export function buildTokenHeaders(): Record<string, string> {
   const headers: Record<string, string> = {};
 
-  for (const tokenName of requestedTokenNames) {
-    const transport = normalizedTokenTransportMap[tokenName];
-    const token = readStoredToken(tokenName);
-
-    if (!token) {
-      continue;
-    }
-
-    headers[transport.headerName] = transport.usesBearer
-      ? `Bearer ${token}`
-      : token;
+  const sessionToken = readStoredToken(NormalizedTokenName.REZICS_SESSION);
+  if (sessionToken) {
+    headers["Authorization"] = `Bearer ${sessionToken}`;
   }
 
   return headers;

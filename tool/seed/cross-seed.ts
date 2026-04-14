@@ -59,7 +59,7 @@ const SEED_USERS: CrossSeedUserInput[] = [
   {
     email: "admin@rezics.com",
     name: "Admin User",
-    role: "user",
+    role: "admin",
     permission: { role: ["ADMIN"] },
   },
   {

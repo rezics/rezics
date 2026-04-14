@@ -18,7 +18,7 @@ import {
   updateUnitSchema,
 } from "@rezics/contract";
 import { Elysia } from "elysia";
-import { authMacro, buildActorFromContext } from "@/middleware";
+import { authMacro } from "@/middleware";
 import { mapUnitToDTO, mapTranslationToDTO } from "./mapper";
 import { translationService } from "./translation.service";
 import { unitService } from "./unit.service";
@@ -65,8 +65,8 @@ export const unitApi = new Elysia({ prefix: "/units" })
   )
   .get(
     "/",
-    async ({ query, currentUser, set }): Promise<UnitListResponse> => {
-      if (!BasicAdminPermission(currentUser)) {
+    async ({ query, identity, set }): Promise<UnitListResponse> => {
+      if (!BasicAdminPermission(identity)) {
         set.status = 403;
         throw new Error(
           "Forbidden: you do not have permission to list all units",
@@ -76,7 +76,7 @@ export const unitApi = new Elysia({ prefix: "/units" })
       return { units: units.map(mapUnitToDTO), total };
     },
     {
-      requireOwner: true,
+      requireLogin: true,
       query: unitListQuerySchema,
       response: unitListResponseSchema,
       detail: {
@@ -93,15 +93,11 @@ export const unitApi = new Elysia({ prefix: "/units" })
       params,
       body,
       identity,
-      currentUser,
       set,
     }): Promise<UnitResponse> => {
       const target = await unitService.getByUnitId(params.unitId);
       if (
-        !hasPermissionToUpdateUnit(
-          buildActorFromContext({ identity, currentUser }),
-          target as any,
-        )
+        !hasPermissionToUpdateUnit(identity, target as any)
       ) {
         set.status = 403;
         throw new Error("Forbidden: you do not own this unit");
@@ -113,7 +109,7 @@ export const unitApi = new Elysia({ prefix: "/units" })
       return mapUnitToDTO(unit);
     },
     {
-      requireOwner: true,
+      requireLogin: true,
       params: unitParamsSchema,
       body: updateUnitSchema,
       response: unitResponseSchema,
@@ -129,15 +125,11 @@ export const unitApi = new Elysia({ prefix: "/units" })
     async ({
       params,
       identity,
-      currentUser,
       set,
     }): Promise<{ message: string }> => {
       const target = await unitService.getByUnitId(params.unitId);
       if (
-        !hasPermissionToDeleteUnit(
-          buildActorFromContext({ identity, currentUser }),
-          target as any,
-        )
+        !hasPermissionToDeleteUnit(identity, target as any)
       ) {
         set.status = 403;
         throw new Error("Forbidden: you do not own this unit");
@@ -146,7 +138,7 @@ export const unitApi = new Elysia({ prefix: "/units" })
       return { message: "Unit deleted successfully" };
     },
     {
-      requireOwner: true,
+      requireLogin: true,
       params: unitParamsSchema,
       detail: {
         summary: "Delete unit",
@@ -176,13 +168,10 @@ export const unitApi = new Elysia({ prefix: "/units" })
   )
   .put(
     "/:unitId/translations/:language",
-    async ({ params, body, identity, currentUser, set }) => {
+    async ({ params, body, identity, set }) => {
       const target = await unitService.getByUnitId(params.unitId);
       if (
-        !hasPermissionToUpdateUnit(
-          buildActorFromContext({ identity, currentUser }),
-          target as any,
-        )
+        !hasPermissionToUpdateUnit(identity, target as any)
       ) {
         set.status = 403;
         throw new Error("Forbidden: you do not own this unit");
@@ -195,7 +184,7 @@ export const unitApi = new Elysia({ prefix: "/units" })
       return mapTranslationToDTO(translation as any);
     },
     {
-      requireOwner: true,
+      requireLogin: true,
       params: translationParamsSchema,
       body: updateTranslationSchema,
       detail: {
@@ -211,15 +200,11 @@ export const unitApi = new Elysia({ prefix: "/units" })
     async ({
       params,
       identity,
-      currentUser,
       set,
     }): Promise<{ message: string }> => {
       const target = await unitService.getByUnitId(params.unitId);
       if (
-        !hasPermissionToUpdateUnit(
-          buildActorFromContext({ identity, currentUser }),
-          target as any,
-        )
+        !hasPermissionToUpdateUnit(identity, target as any)
       ) {
         set.status = 403;
         throw new Error("Forbidden: you do not own this unit");
@@ -231,7 +216,7 @@ export const unitApi = new Elysia({ prefix: "/units" })
       return { message: "Translation deleted successfully" };
     },
     {
-      requireOwner: true,
+      requireLogin: true,
       params: translationParamsSchema,
       detail: {
         summary: "Delete translation",

@@ -11,7 +11,7 @@ import {
   updatePostSchema,
 } from "@rezics/contract";
 import { Elysia } from "elysia";
-import { authMacro, buildActorFromContext } from "@/middleware";
+import { authMacro } from "@/middleware";
 import { mapPostToDTO } from "./post.mapper";
 import { postService } from "./post.service";
 
@@ -34,11 +34,11 @@ export const postApi = new Elysia({ prefix: "/posts" })
   )
   .get(
     "/",
-    async ({ query, currentUser, set }): Promise<PostListResponse> => {
+    async ({ query, identity, set }): Promise<PostListResponse> => {
       // Unscoped listing (no targetUnitId or realmUnitId) requires admin
       const isScoped = !!(query.targetUnitId || query.realmUnitId);
 
-      if (!isScoped && !BasicAdminPermission(currentUser)) {
+      if (!isScoped && !BasicAdminPermission(identity)) {
         set.status = 403;
         throw new Error(
           "Forbidden: unscoped post listing requires admin permission",
@@ -49,7 +49,7 @@ export const postApi = new Elysia({ prefix: "/posts" })
       return { posts: posts.map(mapPostToDTO), total };
     },
     {
-      requireOwner: true,
+      requireLogin: true,
       query: postListQuerySchema,
       response: postListResponseSchema,
       detail: {
@@ -79,20 +79,9 @@ export const postApi = new Elysia({ prefix: "/posts" })
   )
   .put(
     "/:unitId",
-    async ({
-      params,
-      body,
-      identity,
-      currentUser,
-      set,
-    }): Promise<PostResponse> => {
+    async ({ params, body, identity, set }): Promise<PostResponse> => {
       const target = await postService.getByUnitId(params.unitId);
-      if (
-        !hasPermissionToUpdatePost(
-          buildActorFromContext({ identity, currentUser }),
-          target.unit as any,
-        )
-      ) {
+      if (!hasPermissionToUpdatePost(identity, target.unit as any)) {
         set.status = 403;
         throw new Error(
           "Forbidden: you do not have permission to update this post",
@@ -102,7 +91,7 @@ export const postApi = new Elysia({ prefix: "/posts" })
       return mapPostToDTO(updated);
     },
     {
-      requireOwner: true,
+      requireLogin: true,
       params: postParamsSchema,
       body: updatePostSchema,
       detail: {
@@ -114,19 +103,9 @@ export const postApi = new Elysia({ prefix: "/posts" })
   )
   .delete(
     "/:unitId",
-    async ({
-      params,
-      identity,
-      currentUser,
-      set,
-    }): Promise<{ message: string }> => {
+    async ({ params, identity, set }): Promise<{ message: string }> => {
       const target = await postService.getByUnitId(params.unitId);
-      if (
-        !hasPermissionToDeletePost(
-          buildActorFromContext({ identity, currentUser }),
-          target.unit as any,
-        )
-      ) {
+      if (!hasPermissionToDeletePost(identity, target.unit as any)) {
         set.status = 403;
         throw new Error(
           "Forbidden: you do not have permission to delete this post",
@@ -136,7 +115,7 @@ export const postApi = new Elysia({ prefix: "/posts" })
       return { message: "Post deleted successfully" };
     },
     {
-      requireOwner: true,
+      requireLogin: true,
       params: postParamsSchema,
       detail: {
         summary: "Delete post",

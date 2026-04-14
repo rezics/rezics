@@ -17,17 +17,14 @@ export const env = createEnv({
     /** Shared secret for authenticating internal service-to-service calls. */
     NOTIFY_INTERNAL_SECRET: v.string(),
 
-    /** Auth service JWKS URL for verifying user JWTs. */
-    AUTH_JWKS_URL: v.fallback(
+    /** Server JWKS URL for verifying rezics-session-token JWTs. */
+    SERVER_JWKS_URL: v.fallback(
       v.string(),
-      "http://localhost:3001/.well-known/jwks.json",
+      "http://localhost:3000/.well-known/jwks.json",
     ),
 
-    /** Auth JWT issuer (auth base URL). */
-    AUTH_ISSUER: v.fallback(v.string(), "http://localhost:3001"),
-
-    /** Auth JWT audience. */
-    AUTH_JWT_AUDIENCE: v.fallback(v.string(), "rezics"),
+    /** Expected JWT issuer for rezics-session-token. */
+    SERVER_ISSUER: v.fallback(v.string(), "rezics-server"),
 
     /** Server HTTP listen port. */
     PORT: v.optional(v.string()),

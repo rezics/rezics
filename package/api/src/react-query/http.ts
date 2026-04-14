@@ -1,10 +1,10 @@
-import {
-  NormalizedTokenName,
-  type NormalizedTokenName as NormalizedTokenNameType,
-} from "@rezics/contract";
 import { getApiConfig } from "../config";
 import { clearAuthPresence, hasAuthPresence } from "./authPresence";
-import { buildTokenHeaders, queryAccessToken } from "./jwt";
+import {
+  buildTokenHeaders,
+  exchangeForSessionToken,
+  queryAccessToken,
+} from "./jwt";
 
 /**
  * Base API URL - should be configured via environment
@@ -13,25 +13,18 @@ function getApiBaseUrl(): string {
   return getApiConfig().apiBaseUrl;
 }
 
-export type ApiRequestInit = globalThis.RequestInit & {
-  includeTokens?: NormalizedTokenNameType[];
-};
+export type ApiRequestInit = globalThis.RequestInit;
 
 /**
- * Build request headers for business API calls using the normalized token
- * transport contract. Caller-provided headers are preserved, but managed
- * auth transports always win when present.
+ * Build request headers for business API calls.
+ * Authorization: Bearer always carries the rezics-session-token.
  */
 function buildHeaders(options?: ApiRequestInit): Record<string, string> {
-  const headers = {
+  return {
     "Content-Type": "application/json",
     ...Object.fromEntries(new Headers(options?.headers).entries()),
-    ...buildTokenHeaders({
-      include: options?.includeTokens ?? [NormalizedTokenName.AUTH_IDENTITY],
-    }),
+    ...buildTokenHeaders(),
   };
-
-  return headers;
 }
 
 async function requestWithAuthRetry(
@@ -58,8 +51,10 @@ async function requestWithAuthRetry(
     return response;
   }
 
+  // Try refreshing: get a new auth-identity-token, then exchange for session token
   try {
     await queryAccessToken();
+    await exchangeForSessionToken();
   } catch {
     clearAuthPresence();
     return response;

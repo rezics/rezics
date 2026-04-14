@@ -1,11 +1,5 @@
-import {
-  asJwtPrivateJwk,
-  asJwtPublicJwk,
-  type JwtPrivateJwk,
-  type JwtPublicJwk,
-} from "@rezics/jwt";
+import { defaultJwtCryptoProvider } from "@rezics/jwt";
 import { type Prisma, prisma } from "#/prisma/client";
-import { env } from "@/env";
 
 type BootstrapDefaults = {
   issuer: string;
@@ -14,34 +8,6 @@ type BootstrapDefaults = {
   jwksPath: string;
   isLocalIssuer: boolean;
 };
-
-type SeededKeyPair = {
-  privateJwk: JwtPrivateJwk;
-  publicJwk: JwtPublicJwk;
-};
-
-function parseSeededJwk<TJwk extends JwtPublicJwk | JwtPrivateJwk>(
-  value: string | undefined,
-): TJwk | null {
-  if (!value) return null;
-  return JSON.parse(value) as TJwk;
-}
-
-function getSeededKeyPair(): SeededKeyPair | null {
-  const privateJwk = parseSeededJwk<JwtPrivateJwk>(
-    env.MAIN_SESSION_JWT_PRIVATE_JWK,
-  );
-  const publicJwk = parseSeededJwk<JwtPublicJwk>(
-    env.MAIN_SESSION_JWT_PUBLIC_JWK,
-  );
-
-  if (!privateJwk || !publicJwk) return null;
-
-  return {
-    privateJwk: asJwtPrivateJwk(privateJwk),
-    publicJwk: asJwtPublicJwk(publicJwk),
-  };
-}
 
 export async function bootstrapJwtServiceRecord(
   serviceKey: string,
@@ -61,31 +27,29 @@ export async function bootstrapJwtServiceRecord(
     },
   });
 
-  if (serviceKey === "server-local") {
-    const seeded = getSeededKeyPair();
-    if (seeded) {
-      const existingKeys = await prisma.jwks.count({
-        where: { jwtServiceId: service.id },
-      });
+  if (defaults.isLocalIssuer) {
+    const existingKeys = await prisma.jwks.count({
+      where: { jwtServiceId: service.id },
+    });
 
-      if (existingKeys === 0) {
-        const kid = `jwt-${new Date().toISOString()}`;
-        await prisma.jwks.create({
-          data: {
-            id: kid,
-            jwtServiceId: service.id,
-            publicJwk: {
-              ...seeded.publicJwk,
-              kid,
-            } as unknown as Prisma.InputJsonValue,
-            privateJwk: {
-              ...seeded.privateJwk,
-              kid,
-            } as unknown as Prisma.InputJsonValue,
-            alg: "ES256",
-          },
-        });
-      }
+    if (existingKeys === 0) {
+      const keyPair = await defaultJwtCryptoProvider.generateKey();
+      const kid = `jwt-${new Date().toISOString()}`;
+      await prisma.jwks.create({
+        data: {
+          id: kid,
+          jwtServiceId: service.id,
+          publicJwk: {
+            ...keyPair.publicJwk,
+            kid,
+          } as unknown as Prisma.InputJsonValue,
+          privateJwk: {
+            ...keyPair.privateJwk,
+            kid,
+          } as unknown as Prisma.InputJsonValue,
+          alg: "ES256",
+        },
+      });
     }
   }
 }

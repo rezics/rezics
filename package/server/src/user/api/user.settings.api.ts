@@ -11,11 +11,11 @@ export const settingsRoute = new Elysia()
   .use(authMacro)
   .get(
     "/me/settings",
-    async ({ currentUser }): Promise<UserSettings> => {
-      return getSettings(currentUser.unitId);
+    async ({ identity }): Promise<UserSettings> => {
+      return getSettings(identity.unitId);
     },
     {
-      requireOwner: true,
+      requireLogin: true,
       detail: {
         summary: "Get user settings",
         description: "Get current user's settings (realm-tag preferences, language preferences)",
@@ -25,11 +25,11 @@ export const settingsRoute = new Elysia()
   )
   .put(
     "/me/settings",
-    async ({ currentUser, body }): Promise<UserSettings> => {
-      return updateSettings(currentUser.unitId, body);
+    async ({ identity, body }): Promise<UserSettings> => {
+      return updateSettings(identity.unitId, body);
     },
     {
-      requireOwner: true,
+      requireLogin: true,
       body: updateUserSettingsSchema,
       detail: {
         summary: "Update user settings",

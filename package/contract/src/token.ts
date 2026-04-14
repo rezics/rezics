@@ -4,30 +4,25 @@ import { t } from "elysia";
  * <issuer>-<token-type>
  *
  * @example
- * auth-identity-token
- * notification-session-token
- * search-session-token
- * Authorization: Bearer <auth-identity-token>
+ * auth-identity-token — issued by auth, used as exchange/refresh token
+ * rezics-session-token — issued by server, used as Bearer access token
  */
 
 export const NormalizedTokenName = {
   AUTH_IDENTITY: "auth-identity-token",
-  NOTIFICATION_SESSION: "notification-session-token",
-  SEARCH_SESSION: "search-session-token",
+  REZICS_SESSION: "rezics-session-token",
 } as const;
 export type NormalizedTokenName =
   (typeof NormalizedTokenName)[keyof typeof NormalizedTokenName];
 
 export const normalizedTokenNameSchema = t.Union([
   t.Literal(NormalizedTokenName.AUTH_IDENTITY),
-  t.Literal(NormalizedTokenName.NOTIFICATION_SESSION),
-  t.Literal(NormalizedTokenName.SEARCH_SESSION),
+  t.Literal(NormalizedTokenName.REZICS_SESSION),
 ]);
 
 export const TokenTransportHeader = {
+  AUTH_IDENTITY_EXCHANGE: "x-auth-identity-token",
   AUTHORIZATION: "Authorization",
-  NOTIFICATION_SESSION: "x-notification-session-token",
-  SEARCH_SESSION: "x-search-session-token",
 } as const;
 export type TokenTransportHeader =
   (typeof TokenTransportHeader)[keyof typeof TokenTransportHeader];
@@ -64,17 +59,26 @@ export const authIdentityTokenClaimsSchema = t.Object({
 export type AuthIdentityTokenClaims =
   (typeof authIdentityTokenClaimsSchema)["static"];
 
+export const rezicsSessionClaimsSchema = t.Object({
+  sub: t.String(),
+  unitId: t.String(),
+  role: t.String(),
+  iss: t.Literal("rezics-server"),
+  exp: t.Number(),
+  iat: t.Number(),
+});
+export type RezicsSessionClaims =
+  (typeof rezicsSessionClaimsSchema)["static"];
+
 export const normalizedTokenHeaderMap = {
-  [NormalizedTokenName.AUTH_IDENTITY]: TokenTransportHeader.AUTHORIZATION,
-  [NormalizedTokenName.NOTIFICATION_SESSION]:
-    TokenTransportHeader.NOTIFICATION_SESSION,
-  [NormalizedTokenName.SEARCH_SESSION]: TokenTransportHeader.SEARCH_SESSION,
+  [NormalizedTokenName.AUTH_IDENTITY]:
+    TokenTransportHeader.AUTH_IDENTITY_EXCHANGE,
+  [NormalizedTokenName.REZICS_SESSION]: TokenTransportHeader.AUTHORIZATION,
 } satisfies Record<NormalizedTokenName, TokenTransportHeader>;
 
 export const TokenContextKey = {
   AUTH_IDENTITY: "authIdentityToken",
-  NOTIFICATION_SESSION: "notificationSessionToken",
-  SEARCH_SESSION: "searchSessionToken",
+  REZICS_SESSION: "rezicsSessionToken",
 } as const;
 export type TokenContextKey =
   (typeof TokenContextKey)[keyof typeof TokenContextKey];
@@ -82,18 +86,13 @@ export type TokenContextKey =
 export const normalizedTokenTransportMap = {
   [NormalizedTokenName.AUTH_IDENTITY]: {
     tokenName: NormalizedTokenName.AUTH_IDENTITY,
+    headerName: TokenTransportHeader.AUTH_IDENTITY_EXCHANGE,
+    usesBearer: false,
+  },
+  [NormalizedTokenName.REZICS_SESSION]: {
+    tokenName: NormalizedTokenName.REZICS_SESSION,
     headerName: TokenTransportHeader.AUTHORIZATION,
     usesBearer: true,
-  },
-  [NormalizedTokenName.NOTIFICATION_SESSION]: {
-    tokenName: NormalizedTokenName.NOTIFICATION_SESSION,
-    headerName: TokenTransportHeader.NOTIFICATION_SESSION,
-    usesBearer: false,
-  },
-  [NormalizedTokenName.SEARCH_SESSION]: {
-    tokenName: NormalizedTokenName.SEARCH_SESSION,
-    headerName: TokenTransportHeader.SEARCH_SESSION,
-    usesBearer: false,
   },
 } satisfies Record<NormalizedTokenName, NormalizedTokenTransport>;
 

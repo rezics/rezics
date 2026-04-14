@@ -4,9 +4,8 @@ import {
   userListQuerySchema,
   userParamsSchema,
 } from "@rezics/contract";
-import { Elysia } from "elysia";
-import { authMacro } from "@/middleware";
-import { invalidate as invalidateUserCache } from "@/middleware/user-cache";
+import { Elysia, status } from "elysia";
+import { authMacro, verifyAdminFromDb } from "@/middleware";
 import { mapUserToDTO } from "../model/mapper";
 import { userService } from "../service/user.service";
 
@@ -14,12 +13,18 @@ export const adminRoute = new Elysia()
   .use(authMacro)
   .get(
     "/admin",
-    async ({ query }): Promise<{ users: UserDTO[]; total: number }> => {
+    async ({ identity, query }): Promise<{ users: UserDTO[]; total: number }> => {
+      if (identity.role !== "ADMIN" && identity.role !== "ROOT") {
+        return status(403, "Forbidden: Admin role required");
+      }
+      const isAdmin = await verifyAdminFromDb(identity.unitId);
+      if (!isAdmin) return status(403, "Forbidden: Admin role required");
+
       const { users, total } = await userService.list(query as any);
       return { users: users.map(mapUserToDTO), total };
     },
     {
-      requireAdmin: true,
+      requireLogin: true,
       query: userListQuerySchema,
       detail: {
         summary: "Admin list users",
@@ -30,12 +35,18 @@ export const adminRoute = new Elysia()
   )
   .get(
     "/admin/:unitId",
-    async ({ params }): Promise<UserDTO> => {
+    async ({ identity, params }): Promise<UserDTO> => {
+      if (identity.role !== "ADMIN" && identity.role !== "ROOT") {
+        return status(403, "Forbidden: Admin role required");
+      }
+      const isAdmin = await verifyAdminFromDb(identity.unitId);
+      if (!isAdmin) return status(403, "Forbidden: Admin role required");
+
       const user = await userService.getByUnitId(params.unitId);
       return mapUserToDTO(user);
     },
     {
-      requireAdmin: true,
+      requireLogin: true,
       params: userParamsSchema,
       detail: {
         summary: "Admin get user",
@@ -46,7 +57,13 @@ export const adminRoute = new Elysia()
   )
   .put(
     "/admin/:unitId",
-    async ({ params, body }): Promise<UserDTO> => {
+    async ({ identity, params, body }): Promise<UserDTO> => {
+      if (identity.role !== "ADMIN" && identity.role !== "ROOT") {
+        return status(403, "Forbidden: Admin role required");
+      }
+      const isAdmin = await verifyAdminFromDb(identity.unitId);
+      if (!isAdmin) return status(403, "Forbidden: Admin role required");
+
       const userReq: UpdateUser = {
         name: body.name,
         avatar: body.avatar,
@@ -55,11 +72,11 @@ export const adminRoute = new Elysia()
       };
 
       const user = await userService.update(params.unitId, userReq);
-      invalidateUserCache(params.unitId);
+
       return mapUserToDTO(user);
     },
     {
-      requireAdmin: true,
+      requireLogin: true,
       params: userParamsSchema,
       body: updateUserSchema,
       detail: {
@@ -71,13 +88,19 @@ export const adminRoute = new Elysia()
   )
   .delete(
     "/admin/:unitId",
-    async ({ params }): Promise<{ message: string }> => {
+    async ({ identity, params }): Promise<{ message: string }> => {
+      if (identity.role !== "ADMIN" && identity.role !== "ROOT") {
+        return status(403, "Forbidden: Admin role required");
+      }
+      const isAdmin = await verifyAdminFromDb(identity.unitId);
+      if (!isAdmin) return status(403, "Forbidden: Admin role required");
+
       await userService.delete(params.unitId);
-      invalidateUserCache(params.unitId);
+
       return { message: "User deleted successfully" };
     },
     {
-      requireAdmin: true,
+      requireLogin: true,
       params: userParamsSchema,
       detail: {
         summary: "Admin delete user",

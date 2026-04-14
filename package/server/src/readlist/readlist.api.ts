@@ -13,7 +13,7 @@ import {
   updateReadlistSchema,
 } from "@rezics/contract";
 import { Elysia } from "elysia";
-import { authMacro, buildActorFromContext } from "@/middleware";
+import { authMacro } from "@/middleware";
 import { unitService } from "@/unit/unit.service";
 import { readlistService } from "./readlist.service";
 
@@ -57,8 +57,8 @@ export const readlistApi = new Elysia({ prefix: "/readlists" })
   )
   .get(
     "/",
-    async ({ query, currentUser, set }): Promise<ReadlistListResponse> => {
-      if (!BasicAdminPermission(currentUser)) {
+    async ({ query, identity, set }): Promise<ReadlistListResponse> => {
+      if (!BasicAdminPermission(identity)) {
         set.status = 403;
         throw new Error(
           "Forbidden: you do not have permission to get all books",
@@ -68,7 +68,7 @@ export const readlistApi = new Elysia({ prefix: "/readlists" })
       return { readlists, total };
     },
     {
-      requireOwner: true,
+      requireLogin: true,
       query: readlistListQuerySchema,
       detail: {
         summary: "Get all readlists",
@@ -79,24 +79,13 @@ export const readlistApi = new Elysia({ prefix: "/readlists" })
   )
   .put(
     "/:unitId",
-    async ({
-      params,
-      body,
-      identity,
-      currentUser,
-      set,
-    }): Promise<ReadlistResponse> => {
+    async ({ params, body, identity, set }): Promise<ReadlistResponse> => {
       const target = await unitService.getByUnitId(params.unitId);
       if (!target) {
         set.status = 404;
         throw new Error(`Readlist not found: ${params.unitId}`);
       }
-      if (
-        !hasPermissionToUpdateReadlist(
-          buildActorFromContext({ identity, currentUser }),
-          target as any,
-        )
-      ) {
+      if (!hasPermissionToUpdateReadlist(identity, target as any)) {
         set.status = 403;
         throw new Error(
           "Forbidden: you do not have permission to update this readlist",
@@ -105,7 +94,7 @@ export const readlistApi = new Elysia({ prefix: "/readlists" })
       return readlistService.update(params.unitId, body);
     },
     {
-      requireOwner: true,
+      requireLogin: true,
       params: readlistParamsSchema,
       body: updateReadlistSchema,
       detail: {
@@ -117,19 +106,9 @@ export const readlistApi = new Elysia({ prefix: "/readlists" })
   )
   .delete(
     "/:unitId",
-    async ({
-      params,
-      identity,
-      currentUser,
-      set,
-    }): Promise<{ message: string }> => {
+    async ({ params, identity, set }): Promise<{ message: string }> => {
       const target = await unitService.getByUnitId(params.unitId);
-      if (
-        !hasPermissionToDeleteReadlist(
-          buildActorFromContext({ identity, currentUser }),
-          target as any,
-        )
-      ) {
+      if (!hasPermissionToDeleteReadlist(identity, target as any)) {
         set.status = 403;
         throw new Error(
           "Forbidden: you do not have permission to delete this readlist",
@@ -139,7 +118,7 @@ export const readlistApi = new Elysia({ prefix: "/readlists" })
       return { message: "Readlist deleted successfully" };
     },
     {
-      requireOwner: true,
+      requireLogin: true,
       params: readlistParamsSchema,
       detail: {
         summary: "Delete readlist",

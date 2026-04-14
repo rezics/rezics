@@ -7,7 +7,7 @@ import {
   userListQuerySchema,
 } from "@rezics/contract";
 import { Elysia, t } from "elysia";
-import { authMacro } from "@/middleware";
+import { authMacro, verifyRootFromDb } from "@/middleware";
 import { mapUserSearchDocToPublicProfile } from "./mapper";
 import { meiliService } from "./meili.service";
 import { searchClient } from "./search-client";
@@ -62,15 +62,15 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
   )
   .post(
     "/feedbacks/search",
-    async ({ body, currentUser }) => {
+    async ({ body, identity }) => {
       const options = { ...(body as FeedbackListQuery) };
-      if (!isRoot(currentUser as any)) {
-        options.userId = currentUser.unitId;
+      if (!isRoot(identity)) {
+        options.userId = identity.unitId;
       }
       return meiliService.searchFeedbacks(options);
     },
     {
-      requireOwner: true,
+      requireLogin: true,
       body: feedbackListQuerySchema,
       detail: {
         summary: "Search feedbacks (Meilisearch)",
@@ -81,8 +81,13 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
   // ANCHOR: Admin — index init
   .post(
     "/content/init",
-    async ({ currentUser, set }) => {
-      if (!isRoot(currentUser as any)) {
+    async ({ identity, set }) => {
+      if (!isRoot(identity)) {
+        set.status = 403;
+        throw new Error("Forbidden: not authorized to init content index");
+      }
+      const isRootUser = await verifyRootFromDb(identity.unitId);
+      if (!isRootUser) {
         set.status = 403;
         throw new Error("Forbidden: not authorized to init content index");
       }
@@ -90,7 +95,7 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
       return { message: "content index initialized" };
     },
     {
-      requireOwner: true,
+      requireLogin: true,
       detail: {
         summary: "Init content index",
         tags: ["Meili", "Admin"],
@@ -99,8 +104,13 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
   )
   .post(
     "/feedbacks/init",
-    async ({ currentUser, set }) => {
-      if (!isRoot(currentUser as any)) {
+    async ({ identity, set }) => {
+      if (!isRoot(identity)) {
+        set.status = 403;
+        throw new Error("Forbidden: not authorized to init feedbacks index");
+      }
+      const isRootUser = await verifyRootFromDb(identity.unitId);
+      if (!isRootUser) {
         set.status = 403;
         throw new Error("Forbidden: not authorized to init feedbacks index");
       }
@@ -108,7 +118,7 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
       return { message: "feedbacks index initialized" };
     },
     {
-      requireOwner: true,
+      requireLogin: true,
       detail: {
         summary: "Init feedbacks index",
         tags: ["Meili", "Admin"],
@@ -117,8 +127,13 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
   )
   .post(
     "/users/init",
-    async ({ currentUser, set }) => {
-      if (!isRoot(currentUser as any)) {
+    async ({ identity, set }) => {
+      if (!isRoot(identity)) {
+        set.status = 403;
+        throw new Error("Forbidden: not authorized to init users index");
+      }
+      const isRootUser = await verifyRootFromDb(identity.unitId);
+      if (!isRootUser) {
         set.status = 403;
         throw new Error("Forbidden: not authorized to init users index");
       }
@@ -126,7 +141,7 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
       return { message: "users index initialized" };
     },
     {
-      requireOwner: true,
+      requireLogin: true,
       detail: {
         summary: "Init users index",
         tags: ["Meili", "Admin"],
@@ -136,8 +151,13 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
   // ANCHOR: Admin — full sync
   .post(
     "/content/sync",
-    async ({ currentUser, set }) => {
-      if (!isRoot(currentUser as any)) {
+    async ({ identity, set }) => {
+      if (!isRoot(identity)) {
+        set.status = 403;
+        throw new Error("Forbidden: not authorized to sync content");
+      }
+      const isRootUser = await verifyRootFromDb(identity.unitId);
+      if (!isRootUser) {
         set.status = 403;
         throw new Error("Forbidden: not authorized to sync content");
       }
@@ -145,7 +165,7 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
       return { task };
     },
     {
-      requireOwner: true,
+      requireLogin: true,
       detail: {
         summary: "Sync all content to Meilisearch",
         tags: ["Meili", "Admin"],
@@ -154,8 +174,13 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
   )
   .post(
     "/feedbacks/sync",
-    async ({ currentUser, set }) => {
-      if (!isRoot(currentUser as any)) {
+    async ({ identity, set }) => {
+      if (!isRoot(identity)) {
+        set.status = 403;
+        throw new Error("Forbidden: not authorized to sync feedbacks");
+      }
+      const isRootUser = await verifyRootFromDb(identity.unitId);
+      if (!isRootUser) {
         set.status = 403;
         throw new Error("Forbidden: not authorized to sync feedbacks");
       }
@@ -163,7 +188,7 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
       return { task };
     },
     {
-      requireOwner: true,
+      requireLogin: true,
       detail: {
         summary: "Sync all feedbacks to Meilisearch",
         tags: ["Meili", "Admin"],
@@ -172,8 +197,13 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
   )
   .post(
     "/users/sync",
-    async ({ currentUser, set }) => {
-      if (!isRoot(currentUser as any)) {
+    async ({ identity, set }) => {
+      if (!isRoot(identity)) {
+        set.status = 403;
+        throw new Error("Forbidden: not authorized to sync users");
+      }
+      const isRootUser = await verifyRootFromDb(identity.unitId);
+      if (!isRootUser) {
         set.status = 403;
         throw new Error("Forbidden: not authorized to sync users");
       }
@@ -181,7 +211,7 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
       return { task };
     },
     {
-      requireOwner: true,
+      requireLogin: true,
       detail: {
         summary: "Sync all users to Meilisearch",
         tags: ["Meili", "Admin"],
@@ -191,8 +221,13 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
   // ANCHOR: Admin — dangerous operations
   .get(
     "/content/deleteAll",
-    async ({ currentUser, set }) => {
-      if (!isRoot(currentUser as any)) {
+    async ({ identity, set }) => {
+      if (!isRoot(identity)) {
+        set.status = 403;
+        throw new Error("Forbidden: not authorized to delete all content");
+      }
+      const isRootUser = await verifyRootFromDb(identity.unitId);
+      if (!isRootUser) {
         set.status = 403;
         throw new Error("Forbidden: not authorized to delete all content");
       }
@@ -200,7 +235,7 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
       return { message: "all content deleted" };
     },
     {
-      requireOwner: true,
+      requireLogin: true,
       detail: {
         summary: "Delete all content from Meilisearch",
         tags: ["Meili", "Admin"],
@@ -210,15 +245,20 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
   // ANCHOR: Admin — key management
   .post(
     "/keys/admin",
-    async ({ currentUser, set }) => {
-      if (!isRoot(currentUser as any)) {
+    async ({ identity, set }) => {
+      if (!isRoot(identity)) {
+        set.status = 403;
+        throw new Error("Forbidden: not authorized to create admin key");
+      }
+      const isRootUser = await verifyRootFromDb(identity.unitId);
+      if (!isRootUser) {
         set.status = 403;
         throw new Error("Forbidden: not authorized to create admin key");
       }
       return meiliService.createAdminKey();
     },
     {
-      requireOwner: true,
+      requireLogin: true,
       detail: {
         summary: "Create admin API key",
         tags: ["Meili", "Keys", "Admin"],
@@ -227,15 +267,20 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
   )
   .get(
     "/keys",
-    async ({ currentUser, set }) => {
-      if (!isRoot(currentUser as any)) {
+    async ({ identity, set }) => {
+      if (!isRoot(identity)) {
+        set.status = 403;
+        throw new Error("Forbidden: not authorized to list keys");
+      }
+      const isRootUser = await verifyRootFromDb(identity.unitId);
+      if (!isRootUser) {
         set.status = 403;
         throw new Error("Forbidden: not authorized to list keys");
       }
       return meiliService.listKeys();
     },
     {
-      requireOwner: true,
+      requireLogin: true,
       detail: {
         summary: "List Meilisearch keys",
         tags: ["Meili", "Keys", "Admin"],
@@ -244,8 +289,13 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
   )
   .delete(
     "/keys/:uid",
-    async ({ params, currentUser, set }) => {
-      if (!isRoot(currentUser as any)) {
+    async ({ params, identity, set }) => {
+      if (!isRoot(identity)) {
+        set.status = 403;
+        throw new Error("Forbidden: not authorized to delete key");
+      }
+      const isRootUser = await verifyRootFromDb(identity.unitId);
+      if (!isRootUser) {
         set.status = 403;
         throw new Error("Forbidden: not authorized to delete key");
       }
@@ -253,7 +303,7 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
       return { message: "key deleted" };
     },
     {
-      requireOwner: true,
+      requireLogin: true,
       params: t.Object({
         uid: t.String(),
       }),

@@ -1,6 +1,7 @@
 import { Elysia, t } from "elysia";
 import { prisma } from "#/prisma/client";
 import { env } from "../env";
+import { syncUserToMeili } from "@/meili/user/sync";
 
 export const internalApi = new Elysia({ prefix: "/internal" })
   .onBeforeHandle(({ headers, set }) => {
@@ -27,5 +28,35 @@ export const internalApi = new Elysia({ prefix: "/internal" })
     },
     {
       query: t.Object({ id: t.String() }),
+    },
+  )
+  .post(
+    "/users/provision",
+    async ({ body }) => {
+      const { unitId, slug, name } = body;
+      const finalSlug = slug?.trim() || unitId;
+      const finalName = name?.trim() || finalSlug;
+
+      await prisma.user.upsert({
+        where: { unitId },
+        update: {},
+        create: {
+          unitId,
+          slug: finalSlug,
+          name: finalName,
+          joinDate: new Date(),
+        },
+      });
+
+      await syncUserToMeili(unitId).catch(() => {});
+
+      return { ok: true };
+    },
+    {
+      body: t.Object({
+        unitId: t.String(),
+        slug: t.Optional(t.String()),
+        name: t.Optional(t.String()),
+      }),
     },
   );

@@ -5,15 +5,14 @@ import type {
   ScoreAggregateDTO,
 } from "@rezics/contract";
 import {
-  BasicAdminPermission,
   bookListQuerySchema,
   bookParamsSchema,
   createBookSchema,
   hasPermissionToUpdateBook,
   updateBookSchema,
 } from "@rezics/contract";
-import { Elysia, t } from "elysia";
-import { authMacro, buildActorFromContext } from "@/middleware";
+import { Elysia, status, t } from "elysia";
+import { authMacro, verifyAdminFromDb } from "@/middleware";
 import { mapScoreAggregateToDTO } from "@/score/score.mapper";
 import { scoreService } from "@/score/score.service";
 import { unitService } from "@/unit/unit.service";
@@ -90,12 +89,18 @@ export const bookApi = new Elysia({ prefix: "/books" })
   )
   .get(
     "/",
-    async ({ query }): Promise<BookListResponse> => {
+    async ({ identity, query }): Promise<BookListResponse> => {
+      if (identity.role !== "ADMIN" && identity.role !== "ROOT") {
+        return status(403, "Forbidden: Admin role required");
+      }
+      const isAdmin = await verifyAdminFromDb(identity.unitId);
+      if (!isAdmin) return status(403, "Forbidden: Admin role required");
+
       const { books, total } = await bookService.list(query);
       return { books: books.map(mapBookToDTO), total };
     },
     {
-      requireAdmin: true,
+      requireLogin: true,
       query: bookListQuerySchema,
       detail: {
         summary: "Get all books",
@@ -107,13 +112,7 @@ export const bookApi = new Elysia({ prefix: "/books" })
   )
   .put(
     "/:unitId",
-    async ({
-      params,
-      body,
-      identity,
-      currentUser,
-      set,
-    }): Promise<BookResponse> => {
+    async ({ params, body, identity, set }): Promise<BookResponse> => {
       const targetBookUnit = await unitService.getByUnitId(params.unitId);
       if (!targetBookUnit) {
         set.status = 404;
@@ -121,11 +120,7 @@ export const bookApi = new Elysia({ prefix: "/books" })
       }
 
       if (
-        !hasPermissionToUpdateBook(
-          buildActorFromContext({ identity, currentUser }),
-          undefined,
-          targetBookUnit as any,
-        )
+        !hasPermissionToUpdateBook(identity, undefined, targetBookUnit as any)
       ) {
         set.status = 403;
         throw new Error(
@@ -137,7 +132,7 @@ export const bookApi = new Elysia({ prefix: "/books" })
       return mapBookToDTO(book);
     },
     {
-      requireOwner: true,
+      requireLogin: true,
       params: bookParamsSchema,
       body: updateBookSchema,
       detail: {
@@ -149,7 +144,7 @@ export const bookApi = new Elysia({ prefix: "/books" })
   )
   .put(
     "/:unitId/chapterIndex",
-    async ({ params, body, identity, currentUser, set }): Promise<any> => {
+    async ({ params, body, identity, set }): Promise<any> => {
       const targetBookUnit = await unitService.getByUnitId(params.unitId);
       if (!targetBookUnit) {
         set.status = 404;
@@ -157,11 +152,7 @@ export const bookApi = new Elysia({ prefix: "/books" })
       }
 
       if (
-        !hasPermissionToUpdateBook(
-          buildActorFromContext({ identity, currentUser }),
-          undefined,
-          targetBookUnit as any,
-        )
+        !hasPermissionToUpdateBook(identity, undefined, targetBookUnit as any)
       ) {
         set.status = 403;
         throw new Error(
@@ -172,7 +163,7 @@ export const bookApi = new Elysia({ prefix: "/books" })
       return bookService.updateChapterIndex(params.unitId, body);
     },
     {
-      requireOwner: true,
+      requireLogin: true,
       params: bookParamsSchema,
       body: t.Any(),
       detail: {
@@ -184,13 +175,8 @@ export const bookApi = new Elysia({ prefix: "/books" })
   )
   .delete(
     "/:unitId",
-    async ({
-      params,
-      identity,
-      currentUser,
-      set,
-    }): Promise<{ message: string }> => {
-      if (!BasicAdminPermission(currentUser)) {
+    async ({ params, identity, set }): Promise<{ message: string }> => {
+      if (identity.role !== "ADMIN" && identity.role !== "ROOT") {
         set.status = 403;
         throw new Error(
           "Forbidden: you do not have permission to delete this book",
@@ -214,7 +200,7 @@ export const bookApi = new Elysia({ prefix: "/books" })
       return { message: "Book deleted successfully" };
     },
     {
-      requireOwner: true,
+      requireLogin: true,
       params: bookParamsSchema,
       detail: {
         summary: "Delete book",

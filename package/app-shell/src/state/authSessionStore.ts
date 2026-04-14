@@ -1,4 +1,3 @@
-import { authApi } from "@rezics/api/auth/auth.api";
 import {
   clearAuthPresence,
   hasAuthPresence,
@@ -44,6 +43,11 @@ function deriveNeedsVerification(): boolean {
   return payload?.email_verified === false;
 }
 
+function deriveCapabilityLevel(): AuthCapabilityLevel {
+  const sessionToken = getToken(NormalizedTokenName.REZICS_SESSION);
+  return sessionToken ? "member" : "anonymous";
+}
+
 function deriveState(
   snapshot: AuthSessionSnapshot | null,
   status: AuthSessionHydrationStatus = "ready",
@@ -52,10 +56,7 @@ function deriveState(
   const hasAuthSession = Boolean(snapshot?.session?.id && snapshot?.user?.id);
   const needsVerification = deriveNeedsVerification();
   const needsOnboarding = Boolean(snapshot?.authSession?.needsOnboarding);
-
-  const capabilityLevel: AuthCapabilityLevel = hasAuthSession
-    ? "member"
-    : "anonymous";
+  const capabilityLevel = deriveCapabilityLevel();
 
   return {
     status,
@@ -105,7 +106,33 @@ export async function hydrateAuthSessionState(options?: {
   store.setPending();
 
   try {
-    const sessionState = await authApi.getSessionState();
+    // Derive state from local token claims — no server call needed
+    const authToken = getToken(NormalizedTokenName.AUTH_IDENTITY);
+    const payload = authToken ? parseJwt(authToken) : null;
+
+    const sessionState: AuthSessionSnapshot = {
+      session: payload
+        ? { id: payload.sub ?? "", token: authToken!, expiresAt: "" }
+        : null,
+      user: payload
+        ? {
+            id: payload.sub ?? payload.id ?? "",
+            name: payload.name ?? "",
+            role: payload.role ?? "user",
+            email: "",
+            emailVerified: payload.email_verified !== false,
+            createdAt: "",
+            updatedAt: "",
+          }
+        : null,
+      authSession: {
+        canAcquireMemberToken: !!payload,
+        readinessStatus: payload?.email_verified === false
+          ? "needs-verification"
+          : "ready",
+      } as GetSessionStateResponse["authSession"],
+    };
+
     useAuthSessionStore.getState().setSessionState(sessionState);
     return sessionState;
   } catch (error) {

@@ -1,5 +1,4 @@
 import type { ImageUploadResponse } from "@rezics/contract";
-import { NormalizedTokenName } from "@rezics/contract";
 import { getApiConfig } from "../config";
 import { buildTokenHeaders } from "../react-query/jwt";
 
@@ -14,9 +13,7 @@ export const uploadApi = {
       body: formData,
       credentials: "include",
       headers: {
-        ...buildTokenHeaders({
-          include: [NormalizedTokenName.AUTH_IDENTITY],
-        }),
+        ...buildTokenHeaders(),
       },
     });
 

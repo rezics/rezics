@@ -7,7 +7,7 @@ import {
   type JwtPublicJwk,
 } from "@rezics/jwt";
 import { type Prisma, prisma } from "#/prisma/client";
-import { getJwtService } from "@/jwt";
+import { getJwtService } from "@/jwt/jwtServiceCache";
 
 function mapRowToRecord(row: {
   id: string;

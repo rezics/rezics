@@ -1,22 +1,16 @@
-import type { UserDTO } from "../index";
+import type { AuthIdentity } from "./core";
 
-export function verifyRoot(user: UserDTO): boolean {
-  if (!user.permission?.role) {
-    return false;
-  }
-  return user.permission?.role?.includes("ROOT");
+export function verifyRoot(actor: AuthIdentity): boolean {
+  return actor.role === "ROOT";
 }
 
-export function verifyAdmin(user: UserDTO): boolean {
-  if (!user.permission?.role) {
-    return false;
-  }
-  return user.permission?.role?.includes("ADMIN");
+export function verifyAdmin(actor: AuthIdentity): boolean {
+  return actor.role === "ADMIN";
 }
 
-export function verifyBlocked(user: UserDTO): boolean {
-  if (!user.permission?.role) {
+export function verifyBlocked(actor: AuthIdentity): boolean {
+  if (!actor.role) {
     return true;
   }
-  return user.permission?.role?.includes("BLOCKED");
+  return actor.role === "BLOCKED";
 }

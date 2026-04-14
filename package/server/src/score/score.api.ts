@@ -1,13 +1,14 @@
 import { t } from 'elysia';
 import {
   addRealmFieldInputSchema,
+  BasicAdminPermission,
   scoreAggregateDTOSchema,
   scoreEntryDTOSchema,
   scoreRealmFieldDTOSchema,
   upsertScoreInputSchema,
 } from '@rezics/contract';
-import { Elysia } from 'elysia';
-import { authMacro } from '@/middleware';
+import { Elysia, status } from 'elysia';
+import { authMacro, verifyAdminFromDb } from '@/middleware';
 import {
   mapScoreAggregateToDTO,
   mapScoreEntryToDTO,
@@ -41,11 +42,10 @@ export const scoreApi = new Elysia({ prefix: '/score' })
   // DELETE /score/:id — delete score (auth required)
   .delete(
     '/:id',
-    async ({ params, identity, currentUser, set }) => {
-      const isAdmin = currentUser.permission?.role?.includes('ADMIN') ||
-        currentUser.permission?.role?.includes('ROOT');
+    async ({ params, identity, set }) => {
+      const isAdmin = BasicAdminPermission(identity);
       try {
-        await scoreService.deleteScore(params.id, !!isAdmin);
+        await scoreService.deleteScore(params.id, isAdmin);
         return { message: 'Score deleted' };
       } catch (err: any) {
         if (err.status === 409) {
@@ -56,7 +56,7 @@ export const scoreApi = new Elysia({ prefix: '/score' })
       }
     },
     {
-      requireOwner: true,
+      requireLogin: true,
       params: t.Object({ id: t.String() }),
       detail: { summary: 'Delete score', tags: ['Score'] },
     },
@@ -104,12 +104,18 @@ export const scoreApi = new Elysia({ prefix: '/score' })
   // POST /score/recalculate — admin recalculation endpoint
   .post(
     '/recalculate',
-    async ({ body }) => {
+    async ({ body, identity }) => {
+      if (identity.role !== "ADMIN" && identity.role !== "ROOT") {
+        return status(403, "Forbidden: Admin role required");
+      }
+      const isAdmin = await verifyAdminFromDb(identity.unitId);
+      if (!isAdmin) return status(403, "Forbidden: Admin role required");
+
       const aggregate = await scoreService.recalculateAggregate(body.unitId, body.realm);
       return aggregate ? mapScoreAggregateToDTO(aggregate) : { message: 'No entries, aggregate deleted' };
     },
     {
-      requireAdmin: true,
+      requireLogin: true,
       body: t.Object({ unitId: t.String(), realm: t.String() }),
       detail: { summary: 'Recalculate aggregate (admin)', tags: ['Score'] },
     },
@@ -131,7 +137,13 @@ export const scoreApi = new Elysia({ prefix: '/score' })
   // POST /score/realm/:realmId — add field (admin)
   .post(
     '/realm/:realmId',
-    async ({ params, body }) => {
+    async ({ params, body, identity }) => {
+      if (identity.role !== "ADMIN" && identity.role !== "ROOT") {
+        return status(403, "Forbidden: Admin role required");
+      }
+      const isAdmin = await verifyAdminFromDb(identity.unitId);
+      if (!isAdmin) return status(403, "Forbidden: Admin role required");
+
       const field = await scoreService.addRealmField(
         params.realmId,
         body.key,
@@ -141,7 +153,7 @@ export const scoreApi = new Elysia({ prefix: '/score' })
       return mapScoreRealmFieldToDTO(field);
     },
     {
-      requireAdmin: true,
+      requireLogin: true,
       params: t.Object({ realmId: t.String() }),
       body: addRealmFieldInputSchema,
       detail: { summary: 'Add realm field (admin)', tags: ['Score'] },
@@ -151,7 +163,13 @@ export const scoreApi = new Elysia({ prefix: '/score' })
   // DELETE /score/realm/:realmId/:key — remove field (admin)
   .delete(
     '/realm/:realmId/:key',
-    async ({ params, set }) => {
+    async ({ params, identity, set }) => {
+      if (identity.role !== "ADMIN" && identity.role !== "ROOT") {
+        return status(403, "Forbidden: Admin role required");
+      }
+      const isAdmin = await verifyAdminFromDb(identity.unitId);
+      if (!isAdmin) return status(403, "Forbidden: Admin role required");
+
       try {
         await scoreService.removeRealmField(params.realmId, params.key);
         return { message: 'Field removed' };
@@ -164,7 +182,7 @@ export const scoreApi = new Elysia({ prefix: '/score' })
       }
     },
     {
-      requireAdmin: true,
+      requireLogin: true,
       params: t.Object({ realmId: t.String(), key: t.String() }),
       detail: { summary: 'Remove realm field (admin)', tags: ['Score'] },
     },

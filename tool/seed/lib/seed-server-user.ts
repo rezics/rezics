@@ -15,7 +15,9 @@ export async function seedServerUser(
 ): Promise<void> {
   await prisma.user.upsert({
     where: { unitId: input.unitId },
-    update: {},
+    update: {
+      permission: input.permission,
+    },
     create: {
       unitId: input.unitId,
       slug: input.slug,

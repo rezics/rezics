@@ -1,1 +1,1 @@
-export { authMacro, buildActorFromContext } from "./permission";
+export { authMacro, verifyAdminFromDb, verifyRootFromDb } from "./permission";

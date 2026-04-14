@@ -18,7 +18,7 @@ import {
   updateRealmSchema,
 } from "@rezics/contract";
 import { Elysia, t } from "elysia";
-import { authMacro, buildActorFromContext } from "@/middleware";
+import { authMacro } from "@/middleware";
 import { unitService } from "@/unit/unit.service";
 import { realmService } from "./realm.service";
 
@@ -92,15 +92,11 @@ export const realmApi = new Elysia({ prefix: "/realms" })
       params,
       body,
       identity,
-      currentUser,
       set,
     }): Promise<RealmDTO> => {
       const target = await unitService.getByUnitId(params.unitId);
       if (
-        !hasPermissionToUpdateUnit(
-          buildActorFromContext({ identity, currentUser }),
-          target as any,
-        )
+        !hasPermissionToUpdateUnit(identity, target as any)
       ) {
         set.status = 403;
         throw new Error(
@@ -110,7 +106,7 @@ export const realmApi = new Elysia({ prefix: "/realms" })
       return realmService.update(params.unitId, body);
     },
     {
-      requireOwner: true,
+      requireLogin: true,
       params: realmParamsSchema,
       body: updateRealmSchema,
       detail: {
@@ -125,15 +121,11 @@ export const realmApi = new Elysia({ prefix: "/realms" })
     async ({
       params,
       identity,
-      currentUser,
       set,
     }): Promise<{ message: string }> => {
       const target = await unitService.getByUnitId(params.unitId);
       if (
-        !hasPermissionToUpdateUnit(
-          buildActorFromContext({ identity, currentUser }),
-          target as any,
-        )
+        !hasPermissionToUpdateUnit(identity, target as any)
       ) {
         set.status = 403;
         throw new Error(
@@ -144,7 +136,7 @@ export const realmApi = new Elysia({ prefix: "/realms" })
       return { message: "Realm deleted successfully" };
     },
     {
-      requireOwner: true,
+      requireLogin: true,
       params: realmParamsSchema,
       detail: {
         summary: "Delete realm",
@@ -180,7 +172,6 @@ export const realmApi = new Elysia({ prefix: "/realms" })
       params,
       body,
       identity,
-      currentUser,
       set,
     }): Promise<RealmMemberDTO> => {
       // Moderator+ can update member roles
@@ -191,9 +182,7 @@ export const realmApi = new Elysia({ prefix: "/realms" })
       if (
         !actorMember ||
         (!MODERATOR_ROLES.includes(actorMember.roleKey) &&
-          !BasicAdminPermission(
-            buildActorFromContext({ identity, currentUser }),
-          ))
+          !BasicAdminPermission(identity))
       ) {
         set.status = 403;
         throw new Error(
@@ -207,7 +196,7 @@ export const realmApi = new Elysia({ prefix: "/realms" })
       );
     },
     {
-      requireOwner: true,
+      requireLogin: true,
       params: t.Object({ unitId: t.String(), userId: t.String() }),
       body: updateMemberRoleSchema,
       detail: {
@@ -222,7 +211,6 @@ export const realmApi = new Elysia({ prefix: "/realms" })
     async ({
       params,
       identity,
-      currentUser,
       set,
     }): Promise<{ message: string }> => {
       const isSelf = params.userId === identity.unitId;
@@ -235,9 +223,7 @@ export const realmApi = new Elysia({ prefix: "/realms" })
         if (
           !actorMember ||
           (!MODERATOR_ROLES.includes(actorMember.roleKey) &&
-            !BasicAdminPermission(
-              buildActorFromContext({ identity, currentUser }),
-            ))
+            !BasicAdminPermission(identity))
         ) {
           set.status = 403;
           throw new Error(
@@ -249,7 +235,7 @@ export const realmApi = new Elysia({ prefix: "/realms" })
       return { message: "Member removed successfully" };
     },
     {
-      requireOwner: true,
+      requireLogin: true,
       params: t.Object({ unitId: t.String(), userId: t.String() }),
       detail: {
         summary: "Remove member / leave realm",
@@ -265,15 +251,11 @@ export const realmApi = new Elysia({ prefix: "/realms" })
       params,
       body,
       identity,
-      currentUser,
       set,
     }): Promise<RealmUnitDTO> => {
       const target = await unitService.getByUnitId(params.unitId);
       if (
-        !hasPermissionToUpdateUnit(
-          buildActorFromContext({ identity, currentUser }),
-          target as any,
-        )
+        !hasPermissionToUpdateUnit(identity, target as any)
       ) {
         set.status = 403;
         throw new Error(
@@ -283,7 +265,7 @@ export const realmApi = new Elysia({ prefix: "/realms" })
       return realmService.addRealmUnit(params.unitId, body.unitId);
     },
     {
-      requireOwner: true,
+      requireLogin: true,
       params: realmParamsSchema,
       body: addRealmUnitSchema,
       detail: {
@@ -298,15 +280,11 @@ export const realmApi = new Elysia({ prefix: "/realms" })
     async ({
       params,
       identity,
-      currentUser,
       set,
     }): Promise<{ message: string }> => {
       const target = await unitService.getByUnitId(params.unitId);
       if (
-        !hasPermissionToUpdateUnit(
-          buildActorFromContext({ identity, currentUser }),
-          target as any,
-        )
+        !hasPermissionToUpdateUnit(identity, target as any)
       ) {
         set.status = 403;
         throw new Error(
@@ -320,7 +298,7 @@ export const realmApi = new Elysia({ prefix: "/realms" })
       return { message: "Content removed from realm" };
     },
     {
-      requireOwner: true,
+      requireLogin: true,
       params: t.Object({
         unitId: t.String(),
         contentUnitId: t.String(),
@@ -339,7 +317,6 @@ export const realmApi = new Elysia({ prefix: "/realms" })
       params,
       body,
       identity,
-      currentUser,
       set,
     }): Promise<RealmTagUnitDTO> => {
       // Moderator+ can manage tags
@@ -350,9 +327,7 @@ export const realmApi = new Elysia({ prefix: "/realms" })
       if (
         !actorMember ||
         (!MODERATOR_ROLES.includes(actorMember.roleKey) &&
-          !BasicAdminPermission(
-            buildActorFromContext({ identity, currentUser }),
-          ))
+          !BasicAdminPermission(identity))
       ) {
         set.status = 403;
         throw new Error(
@@ -366,7 +341,7 @@ export const realmApi = new Elysia({ prefix: "/realms" })
       );
     },
     {
-      requireOwner: true,
+      requireLogin: true,
       params: realmParamsSchema,
       body: addRealmTagUnitSchema,
       detail: {
@@ -382,7 +357,6 @@ export const realmApi = new Elysia({ prefix: "/realms" })
     async ({
       params,
       identity,
-      currentUser,
       set,
     }): Promise<{ message: string }> => {
       const actorMember = await realmService.getMember(
@@ -392,9 +366,7 @@ export const realmApi = new Elysia({ prefix: "/realms" })
       if (
         !actorMember ||
         (!MODERATOR_ROLES.includes(actorMember.roleKey) &&
-          !BasicAdminPermission(
-            buildActorFromContext({ identity, currentUser }),
-          ))
+          !BasicAdminPermission(identity))
       ) {
         set.status = 403;
         throw new Error(
@@ -409,7 +381,7 @@ export const realmApi = new Elysia({ prefix: "/realms" })
       return { message: "Realm tag unit removed" };
     },
     {
-      requireOwner: true,
+      requireLogin: true,
       params: t.Object({
         unitId: t.String(),
         tagUnitId: t.String(),

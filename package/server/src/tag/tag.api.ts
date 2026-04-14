@@ -15,8 +15,8 @@ import {
   tagParamsSchema,
   updateTagSchema,
 } from "@rezics/contract";
-import { Elysia } from "elysia";
-import { authMacro } from "@/middleware";
+import { Elysia, status } from "elysia";
+import { authMacro, verifyAdminFromDb } from "@/middleware";
 import { mapTagUnitToDTO, mapUnitTagToDTO } from "./tag.mapper";
 import { getTagContext } from "./tag-context.service";
 import { tagService } from "./tag.service";
@@ -79,7 +79,13 @@ export const tagApi = new Elysia({ prefix: "/tags" })
   // PUT /:unitId - update tag (admin)
   .put(
     "/:unitId",
-    async ({ params, body }) => {
+    async ({ params, body, identity }) => {
+      if (identity.role !== "ADMIN" && identity.role !== "ROOT") {
+        return status(403, "Forbidden: Admin role required");
+      }
+      const isAdmin = await verifyAdminFromDb(identity.unitId);
+      if (!isAdmin) return status(403, "Forbidden: Admin role required");
+
       const updated = await tagService.update(
         params.unitId,
         body as UpdateTagInput,
@@ -87,7 +93,7 @@ export const tagApi = new Elysia({ prefix: "/tags" })
       return mapTagUnitToDTO(updated);
     },
     {
-      requireAdmin: true,
+      requireLogin: true,
       params: tagParamsSchema,
       body: updateTagSchema,
       detail: { summary: "Update tag (admin)", tags: ["Tags"] },
@@ -97,12 +103,18 @@ export const tagApi = new Elysia({ prefix: "/tags" })
   // DELETE /:unitId - delete tag (admin)
   .delete(
     "/:unitId",
-    async ({ params }) => {
+    async ({ params, identity }) => {
+      if (identity.role !== "ADMIN" && identity.role !== "ROOT") {
+        return status(403, "Forbidden: Admin role required");
+      }
+      const isAdmin = await verifyAdminFromDb(identity.unitId);
+      if (!isAdmin) return status(403, "Forbidden: Admin role required");
+
       await tagService.delete(params.unitId);
       return { message: "Tag deleted successfully" };
     },
     {
-      requireAdmin: true,
+      requireLogin: true,
       params: tagParamsSchema,
       detail: { summary: "Delete tag (admin)", tags: ["Tags"] },
     },
@@ -111,13 +123,19 @@ export const tagApi = new Elysia({ prefix: "/tags" })
   // POST /attach - attach tag to unit (admin)
   .post(
     "/attach",
-    async ({ body }) => {
+    async ({ body, identity }) => {
+      if (identity.role !== "ADMIN" && identity.role !== "ROOT") {
+        return status(403, "Forbidden: Admin role required");
+      }
+      const isAdmin = await verifyAdminFromDb(identity.unitId);
+      if (!isAdmin) return status(403, "Forbidden: Admin role required");
+
       const { tagUnitId, unitId } = body as AttachTagInput;
       await tagService.attachToUnit(tagUnitId, unitId);
       return { message: "Tag attached successfully" };
     },
     {
-      requireAdmin: true,
+      requireLogin: true,
       body: attachTagSchema,
       detail: { summary: "Attach tag to unit (admin)", tags: ["Tags"] },
     },
@@ -126,13 +144,19 @@ export const tagApi = new Elysia({ prefix: "/tags" })
   // POST /detach - detach tag from unit (admin)
   .post(
     "/detach",
-    async ({ body }) => {
+    async ({ body, identity }) => {
+      if (identity.role !== "ADMIN" && identity.role !== "ROOT") {
+        return status(403, "Forbidden: Admin role required");
+      }
+      const isAdmin = await verifyAdminFromDb(identity.unitId);
+      if (!isAdmin) return status(403, "Forbidden: Admin role required");
+
       const { tagUnitId, unitId } = body as AttachTagInput;
       await tagService.detachFromUnit(tagUnitId, unitId);
       return { message: "Tag detached successfully" };
     },
     {
-      requireAdmin: true,
+      requireLogin: true,
       body: detachTagSchema,
       detail: { summary: "Detach tag from unit (admin)", tags: ["Tags"] },
     },
