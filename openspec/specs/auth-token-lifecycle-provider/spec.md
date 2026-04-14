@@ -1,111 +1,60 @@
-## ADDED Requirements
+## MODIFIED Requirements
 
 ### Requirement: AuthProvider accepts a configurable token array
 
-AuthProvider SHALL accept a `tokens` parameter specifying which token names to manage (e.g., `[AUTH_IDENTITY, REZICS_SESSION]`). The ordering of the array SHALL define the dependency chain — tokens later in the array depend on tokens earlier in the array.
+AuthProvider SHALL accept `tokens` parameter specifying which token names to manage. The default configuration SHALL include `AUTH_IDENTITY` and `REZICS_SESSION`. The ordering defines the dependency chain: `AUTH_IDENTITY` is refreshed first (via session cookie), then `REZICS_SESSION` (via exchange using the refreshed `AUTH_IDENTITY`).
 
-#### Scenario: App frontend configures identity and session tokens
+#### Scenario: AuthProvider manages two tokens with dependency ordering
 
-- **WHEN** AuthProvider is mounted with `tokens={[AUTH_IDENTITY, REZICS_SESSION]}`
-- **THEN** it SHALL manage refresh lifecycle for both AUTH_IDENTITY and REZICS_SESSION
-- **AND** it SHALL refresh AUTH_IDENTITY before attempting REZICS_SESSION
-
-#### Scenario: Admin frontend configures identity token only
-
-- **WHEN** AuthProvider is mounted with `tokens={[AUTH_IDENTITY]}`
-- **THEN** it SHALL manage refresh lifecycle for AUTH_IDENTITY only
-- **AND** it SHALL NOT attempt to obtain or refresh REZICS_SESSION
-
-### Requirement: AuthProvider is stateless and side-effect free to consumers
-
-AuthProvider SHALL NOT maintain Zustand, Jotai, or React context state for token values or claims. It SHALL NOT expose any context provider that consumers read from. Its sole observable effect SHALL be writing tokens to localStorage and dispatching storage events.
-
-#### Scenario: No consumer-facing state
-
-- **WHEN** AuthProvider is mounted and actively managing tokens
-- **THEN** no React context, Zustand store, or global state SHALL be written by AuthProvider
-- **AND** tokens SHALL exist only in localStorage
-
-#### Scenario: Token write dispatches storage events
-
-- **WHEN** AuthProvider writes or removes a token in localStorage
-- **THEN** it SHALL dispatch the `AUTH_TOKEN_STORAGE_EVENT` custom event for same-tab listeners
-- **AND** the standard `StorageEvent` SHALL propagate to other tabs
+- **WHEN** AuthProvider initializes with default configuration
+- **THEN** it manages `AUTH_IDENTITY` and `REZICS_SESSION` tokens, refreshing them in dependency order
 
 ### Requirement: AuthProvider refreshes tokens proactively before expiry
 
-AuthProvider SHALL schedule token refresh before the token's JWT expiration. The refresh buffer SHALL be configurable with a sensible default (e.g., 60 seconds).
+AuthProvider SHALL schedule token refresh before JWT expiration with configurable refresh buffer (default 60 seconds). Each token has its own independent refresh schedule. When `REZICS_SESSION` needs refresh, AuthProvider SHALL first ensure `AUTH_IDENTITY` is valid, refreshing it if needed.
 
-#### Scenario: Token refreshed before expiry
+#### Scenario: REZICS_SESSION refresh triggers AUTH_IDENTITY check
 
-- **WHEN** AUTH_IDENTITY has 45 seconds remaining and the refresh buffer is 60 seconds
-- **THEN** AuthProvider SHALL initiate a refresh for AUTH_IDENTITY
-- **AND** upon success, it SHALL write the new token to localStorage and reschedule
+- **WHEN** `REZICS_SESSION` is approaching expiry and `AUTH_IDENTITY` is also expired
+- **THEN** AuthProvider refreshes `AUTH_IDENTITY` first (via session cookie), then exchanges it for a new `REZICS_SESSION`
 
-#### Scenario: Dependency chain respected during refresh
+#### Scenario: REZICS_SESSION refresh with valid AUTH_IDENTITY
 
-- **WHEN** both AUTH_IDENTITY and REZICS_SESSION need refresh
-- **THEN** AuthProvider SHALL refresh AUTH_IDENTITY first
-- **AND** only after AUTH_IDENTITY succeeds SHALL it refresh REZICS_SESSION
+- **WHEN** `REZICS_SESSION` is approaching expiry and `AUTH_IDENTITY` is still valid
+- **THEN** AuthProvider exchanges the existing `AUTH_IDENTITY` for a new `REZICS_SESSION` without refreshing `AUTH_IDENTITY`
+
+### Requirement: AuthProvider is stateless and side-effect free to consumers
+
+AuthProvider SHALL NOT maintain Zustand/Jotai/React context state. Sole observable effect SHALL be writing tokens to localStorage and dispatching storage events. Consumers read tokens from localStorage or from stores that observe localStorage events.
+
+#### Scenario: Token refresh updates localStorage
+
+- **WHEN** AuthProvider refreshes a token
+- **THEN** the new token is written to localStorage and a `package-auth-token-storage` custom event is dispatched
 
 ### Requirement: AuthProvider reacts to failure type
 
-AuthProvider SHALL distinguish between retryable and non-retryable failures when obtaining or refreshing a token.
+AuthProvider SHALL distinguish between retryable failures (network errors, 5xx) and non-retryable failures (401, 403, 404). On non-retryable failure for `AUTH_IDENTITY`, both tokens enter dormant state. On non-retryable failure for `REZICS_SESSION` only, `REZICS_SESSION` enters dormant while `AUTH_IDENTITY` continues refreshing.
 
-#### Scenario: Retryable error triggers backoff
+#### Scenario: AUTH_IDENTITY non-retryable failure makes both dormant
 
-- **WHEN** a token refresh fails due to a network error or 5xx response
-- **THEN** AuthProvider SHALL retry with exponential backoff
-- **AND** it SHALL NOT enter dormant state for that token
-
-#### Scenario: Non-retryable error triggers dormant state
-
-- **WHEN** a token refresh for REZICS_SESSION fails because the user does not exist on the business server (e.g., 404 or a specific error code indicating "user not found")
-- **THEN** AuthProvider SHALL stop retrying for REZICS_SESSION
-- **AND** it SHALL enter dormant state for that token
-
-#### Scenario: Auth session expired clears all managed tokens
-
-- **WHEN** AUTH_IDENTITY refresh fails because the auth session no longer exists (cookie invalid/expired)
-- **THEN** AuthProvider SHALL clear all managed tokens from localStorage
-- **AND** downstream tokens (REZICS_SESSION) SHALL NOT be attempted
-
-### Requirement: Dormant tokens reactivate on localStorage observation
-
-When a managed token is in dormant state, AuthProvider SHALL observe localStorage for external writes to that token's key. Upon detection, it SHALL exit dormant state and begin managing that token's refresh lifecycle.
-
-#### Scenario: Login flow writes token, AuthProvider resumes
-
-- **WHEN** REZICS_SESSION is dormant because the user was not provisioned
-- **AND** the login flow calls `issueSessionToken()` which writes REZICS_SESSION to localStorage
-- **THEN** AuthProvider SHALL detect the write via `AUTH_TOKEN_STORAGE_EVENT` or `StorageEvent`
-- **AND** it SHALL exit dormant state and schedule refresh based on the token's expiry
-
-#### Scenario: Cross-tab login activates dormant token
-
-- **WHEN** REZICS_SESSION is dormant in Tab A
-- **AND** Tab B completes login and writes REZICS_SESSION to localStorage
-- **THEN** Tab A's AuthProvider SHALL detect the `StorageEvent`
-- **AND** it SHALL exit dormant state and begin managing refresh
+- **WHEN** `AUTH_IDENTITY` refresh fails with 401 (session expired)
+- **THEN** both `AUTH_IDENTITY` and `REZICS_SESSION` enter dormant state (user must re-login)
 
 ### Requirement: AuthProvider recovers on visibility change
 
-When the document becomes visible after being hidden, AuthProvider SHALL check all managed tokens and refresh any that are expired or missing.
+When document becomes visible after hidden, AuthProvider SHALL check all managed tokens and refresh any expired/missing. This ensures tokens are fresh after the user returns from a background tab.
 
-#### Scenario: Tab returns from background with expired token
+#### Scenario: Returning from background refreshes expired tokens
 
-- **WHEN** the user returns to a tab that has been in the background
-- **AND** AUTH_IDENTITY has expired during the background period
-- **THEN** AuthProvider SHALL refresh AUTH_IDENTITY immediately
-- **AND** upon success, proceed to refresh REZICS_SESSION if needed
+- **WHEN** the browser tab becomes visible and the `REZICS_SESSION` has expired
+- **THEN** AuthProvider refreshes `AUTH_IDENTITY` if needed, then exchanges for a new `REZICS_SESSION`
 
 ### Requirement: AuthProvider does not perform user provisioning
 
-AuthProvider SHALL NOT call `ensure()`, `userApi.ensure()`, or any user provisioning endpoint. Provisioning is the responsibility of the login flow.
+AuthProvider SHALL NOT call `ensure()` or user provisioning endpoint. Provisioning is the responsibility of the auth `afterSignUp` hook.
 
-#### Scenario: First-time user with no business session
+#### Scenario: AuthProvider skips provisioning
 
-- **WHEN** AuthProvider attempts to obtain REZICS_SESSION for a user who has not been provisioned
-- **AND** the server returns a "user not found" error
-- **THEN** AuthProvider SHALL enter dormant state for REZICS_SESSION
-- **AND** it SHALL NOT attempt to provision the user
+- **WHEN** AuthProvider refreshes tokens for a newly registered user
+- **THEN** it does not call any provisioning endpoint (the user was provisioned during registration)

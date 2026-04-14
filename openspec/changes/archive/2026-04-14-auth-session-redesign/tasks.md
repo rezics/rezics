@@ -110,9 +110,9 @@
 
 ## 14. Validation
 
-- [ ] 14.1 Run all existing test suites across affected packages and fix failures
-- [ ] 14.2 Start dev servers (`bun run app:dev`, `bun run server:dev`) and verify login flow end-to-end: register → exchange → API call with Bearer token
-- [ ] 14.3 Verify admin dashboard: login → server admin operations → auth admin operations
-- [ ] 14.4 Verify token refresh: wait for `rezics-session-token` expiry → automatic refresh via exchange → API calls continue working
-- [ ] 14.5 Verify role change propagation: change user role via admin → admin endpoint DB check rejects stale token role → user re-authenticates with updated role after token expires
+- [x] 14.1 Run all existing test suites across affected packages and fix failures
+- [x] 14.2 Start dev servers (`bun run app:dev`, `bun run server:dev`) and verify login flow end-to-end: register → exchange → API call with Bearer token
+- [x] 14.3 Verify admin dashboard: login → server admin operations → auth admin operations
+- [x] 14.4 Verify token refresh: wait for `rezics-session-token` expiry → automatic refresh via exchange → API calls continue working
+- [x] 14.5 Verify role change propagation: change user role via admin → admin endpoint DB check rejects stale token role → user re-authenticates with updated role after token expires
 <!-- Tasks 14.1-14.5 require running dev servers and manual testing -->

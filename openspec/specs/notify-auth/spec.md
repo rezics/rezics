@@ -1,47 +1,51 @@
-## ADDED Requirements
+## MODIFIED Requirements
 
 ### Requirement: JWT verification for read endpoints
-All user-facing read endpoints SHALL verify the caller's identity by validating a JWT issued by the auth service. The `sub` claim SHALL be extracted as `userId` and used to scope all queries to that user's data.
 
-#### Scenario: Valid JWT grants access
-- **WHEN** a request to `GET /notifications` includes a valid auth-issued JWT
-- **THEN** the `sub` claim is extracted as `userId`
-- **AND** only notifications with `recipientId=userId` are returned
+All user-facing read endpoints SHALL verify caller's identity by validating `rezics-session-token` (issued by server) via the server's JWKS endpoint. Extract `sub` claim as `userId`, scope queries to that user's data. The token is received via `Authorization: Bearer`.
 
-#### Scenario: Invalid JWT rejected
-- **WHEN** a request to `GET /notifications` includes an expired or malformed JWT
-- **THEN** the request is rejected with 401
+#### Scenario: Valid rezics-session-token grants access
+
+- **WHEN** a user-facing read endpoint receives a request with `Authorization: Bearer <valid-rezics-session-token>`
+- **THEN** the JWT is verified against the server's JWKS, `sub` is extracted as `userId`, and the request proceeds
+
+#### Scenario: auth-identity-token is rejected
+
+- **WHEN** a request includes an `auth-identity-token` (issuer "rezics-auth") in `Authorization: Bearer`
+- **THEN** verification fails (issuer mismatch) and the endpoint returns 401
 
 ### Requirement: Reuse @rezics/jwt verification
-Notify SHALL use `createJwtVerifier()` and `createRemoteJWKSet()` from `@rezics/jwt` to verify auth-issued tokens. Notify SHALL NOT implement custom JWKS fetching or caching logic.
 
-#### Scenario: JWKS fetched from auth
-- **WHEN** Notify starts and receives its first authenticated request
-- **THEN** it fetches public keys from `AUTH_JWKS_URL` via `createRemoteJWKSet()`
-- **AND** subsequent requests use cached keys with automatic refresh
+Notify SHALL use `createJwtVerifier()` and `createRemoteJWKSet()` from `@rezics/jwt` to verify server-issued tokens. The JWKS URL SHALL point to the server's `/.well-known/jwks.json` endpoint instead of the auth service's JWKS endpoint.
+
+#### Scenario: JWKS URL points to server
+
+- **WHEN** the notify service initializes its JWT verifier
+- **THEN** the remote JWKS URL is configured to the main server's JWKS endpoint
 
 ### Requirement: Elysia requireUser macro
-Notify SHALL define a `requireUser` Elysia macro that performs JWT verification and populates `userId` in the request context. This macro SHALL be applied to all user-facing endpoints.
 
-#### Scenario: Macro populates userId
-- **WHEN** a request passes through the `requireUser` macro with a valid JWT
-- **THEN** `context.userId` is set to the JWT's `sub` claim
-- **AND** route handlers can access `userId` without repeated verification logic
+Notify SHALL define `requireUser` Elysia macro performing `rezics-session-token` verification, populating `userId` in request context, applied to all user-facing endpoints.
+
+#### Scenario: requireUser extracts userId from rezics-session-token
+
+- **WHEN** a user-facing endpoint processes a request with `requireUser: true`
+- **THEN** the `userId` in request context is the `sub`/`unitId` claim from the `rezics-session-token`
 
 ### Requirement: WebSocket authentication via query parameter
-The WebSocket endpoint `WS /dm` SHALL accept the JWT as a `token` query parameter since browsers cannot set custom headers during WebSocket handshake. The token SHALL be validated on connection open; invalid tokens SHALL cause immediate close with code 4001.
 
-#### Scenario: WebSocket authenticated successfully
-- **WHEN** a client connects to `WS /dm?token=<valid-jwt>`
-- **THEN** the connection is established and `userId` is extracted from the token
+WebSocket endpoint `WS /dm` SHALL accept `rezics-session-token` as `token` query parameter. Validate on connection open against server JWKS. Invalid tokens cause immediate close with code 4001.
 
-#### Scenario: WebSocket authentication failure
-- **WHEN** a client connects to `WS /dm?token=<invalid-jwt>`
-- **THEN** the connection is closed with code 4001 before any messages are processed
+#### Scenario: WebSocket accepts rezics-session-token
+
+- **WHEN** a WebSocket connection is opened with `?token=<valid-rezics-session-token>`
+- **THEN** the token is verified against server JWKS and the connection is established
 
 ### Requirement: Internal secret verification
-Internal write endpoints SHALL use `x-internal-secret` header verification against `NOTIFY_INTERNAL_SECRET` environment variable. This is separate from JWT verification — internal endpoints do not require JWTs.
 
-#### Scenario: Internal and user auth are independent paths
-- **WHEN** a request arrives at `POST /internal/event` with a valid `x-internal-secret`
-- **THEN** no JWT verification is performed — the shared secret is sufficient
+Internal write endpoints SHALL use `x-internal-secret` header verification against `NOTIFY_INTERNAL_SECRET` environment variable. This is separate from JWT verification and unchanged by this change.
+
+#### Scenario: Internal endpoints use shared secret
+
+- **WHEN** the server calls a notify internal endpoint
+- **THEN** it authenticates via `x-internal-secret` header, not via JWT

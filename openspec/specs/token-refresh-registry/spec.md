@@ -1,48 +1,31 @@
-## Requirements
+## MODIFIED Requirements
 
 ### Requirement: Registry is extensible via factory function
 
-The system MAY retain `createTokenRefreshRegistry()` as an extensible factory for future service tokens. The factory SHALL have no default entries. Consuming apps MAY add entries for future tokens (e.g., `NOTIFICATION_SESSION`).
+System MAY retain `createTokenRefreshRegistry()` as extensible factory. The registry SHALL manage two token entries: `AUTH_IDENTITY` (refreshed via session cookie using `GET /api/auth/token`) and `REZICS_SESSION` (refreshed via exchange using `POST /session/exchange` with `auth-identity-token`). `NOTIFICATION_SESSION` and `SEARCH_SESSION` entries SHALL be removed.
 
-#### Scenario: Empty default registry
+#### Scenario: Registry manages two tokens
 
-- **WHEN** the default registry is loaded
-- **THEN** it SHALL contain no entries
-- **AND** no service token refresh SHALL be attempted by default
+- **WHEN** `AuthProvider` initializes the token refresh registry
+- **THEN** two entries exist: `AUTH_IDENTITY` (refresh via session cookie) and `REZICS_SESSION` (refresh via exchange endpoint)
 
-#### Scenario: App adds a custom token refresh
+#### Scenario: REZICS_SESSION refresh uses auth-identity-token
 
-- **WHEN** an app calls `createTokenRefreshRegistry({[NOTIFICATION_SESSION]: refreshFn})`
-- **THEN** the returned registry SHALL contain only the `NOTIFICATION_SESSION` entry
-
-### Requirement: Missing registry entry is treated as non-retryable
-
-When AuthProvider attempts to refresh a service token that has no registry entry, the refresh SHALL fail with a non-retryable result, causing the token to enter dormant state.
-
-#### Scenario: Unknown token type has no registry entry
-
-- **WHEN** AuthProvider tries to refresh a token with no registry entry
-- **THEN** the refresh SHALL return a non-retryable result
-- **AND** the token SHALL enter dormant state
+- **WHEN** the `REZICS_SESSION` token needs refreshing
+- **THEN** the refresh function reads the current `AUTH_IDENTITY` token from storage, sends it via `x-auth-identity-token` to `POST /session/exchange`, and stores the returned `rezics-session-token`
 
 ### Requirement: Refresh function contract
 
-Each refresh function in the registry SHALL be an async function that returns `{token: string}` on success and throws on failure. AuthProvider classifies errors as retryable or non-retryable using the same heuristic as the current implementation.
+Each refresh function in registry SHALL be async function returning `{ token: string }` on success, throw on failure. AuthProvider classifies errors as retryable or non-retryable. The `REZICS_SESSION` refresh function SHALL treat `AUTH_IDENTITY` token absence as a dependency — if `AUTH_IDENTITY` is missing or expired, the `REZICS_SESSION` refresh SHALL be deferred until `AUTH_IDENTITY` is refreshed.
 
-#### Scenario: Refresh function succeeds
+#### Scenario: REZICS_SESSION refresh defers when AUTH_IDENTITY is missing
 
-- **WHEN** a registry refresh function resolves with `{token: "jwt..."}`
-- **THEN** AuthProvider SHALL write the token to localStorage via `setToken()`
-- **AND** it SHALL dispatch the `AUTH_TOKEN_STORAGE_EVENT`
+- **WHEN** the `REZICS_SESSION` token needs refreshing but no valid `AUTH_IDENTITY` token exists in storage
+- **THEN** the refresh is deferred; `AUTH_IDENTITY` is refreshed first, then `REZICS_SESSION` refresh proceeds
 
-#### Scenario: Refresh function throws a retryable error
+## REMOVED Requirements
 
-- **WHEN** a registry refresh function throws with a network error message
-- **THEN** AuthProvider SHALL classify it as retryable
-- **AND** it SHALL schedule a retry with exponential backoff for that token only
+### Requirement: Missing registry entry is treated as non-retryable
 
-#### Scenario: Refresh function throws a non-retryable error
-
-- **WHEN** a registry refresh function throws with a "not found" or "Forbidden" message
-- **THEN** AuthProvider SHALL classify it as non-retryable
-- **AND** the token SHALL enter dormant state
+**Reason**: With only two fixed entries in the registry, the concept of a missing entry is no longer meaningful. The registry is not dynamically populated.
+**Migration**: Remove the missing-entry error path. The two entries are always present.
