@@ -42,8 +42,19 @@ enum UnitVisibility {
 }
 
 enum PostKind {
+  /**
+   * Long-form review with rating.
+   * Structured, in-depth content (e.g. like review from professional connoisseurs).
+   */
   REVIEW
+  /**
+   * Quoting content, such as well-written sentences from books or touching lines from games.
+   */
   QUOTE
+  /**
+   * Casual and unrestricted user remark.
+   * No word limit
+   */
   REMARK
   POST
 }
@@ -53,56 +64,56 @@ enum PostKind {
 // ============================================================
 
 model Unit {
-  id                String         @id @default(dbgenerated("uuidv7()")) @db.Uuid
-  type              UnitType
-  workUnitId        String?        @db.Uuid
-  userId            String?        @db.Uuid
+  id         String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  type       UnitType
+  workUnitId String?  @db.Uuid
+  userId     String?  @db.Uuid
 
-  defaultLanguage   String?        @db.VarChar(16)
-  isLanguageNeutral Boolean        @default(false)
+  defaultLanguage   String? @db.VarChar(16)
+  isLanguageNeutral Boolean @default(false)
 
-  status            UnitStatus     @default(DRAFT)
-  visibility        UnitVisibility @default(PUBLIC)
-  nsfw              Boolean        @default(false)
+  status     UnitStatus     @default(DRAFT)
+  visibility UnitVisibility @default(PUBLIC)
+  nsfw       Boolean        @default(false)
 
-  extra             Json?
+  extra Json?
 
-  createdAt         DateTime       @default(now())
-  updatedAt         DateTime       @updatedAt
-  publishedAt       DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  publishedAt DateTime?
 
   // Self-relation: work/release
-  work              Unit?          @relation("WorkRelease", fields: [workUnitId], references: [id], onDelete: SetNull)
-  releases          Unit[]         @relation("WorkRelease")
+  work     Unit?  @relation("WorkRelease", fields: [workUnitId], references: [id], onDelete: SetNull)
+  releases Unit[] @relation("WorkRelease")
 
   // Owner/creator
-  user              User?          @relation("UnitForUser", fields: [userId], references: [unitId])
+  user User? @relation("UnitForUser", fields: [userId], references: [unitId])
 
   // Translation layer
-  translations      UnitTranslation[]
-  supportLanguages  UnitSupportLanguage[]
+  translations     UnitTranslation[]
+  supportLanguages UnitSupportLanguage[]
 
   // Type extensions (1:1, optional)
-  book              Book?
-  game              Game?
-  media             Media?
-  post              Post?
-  shelf             Shelf?
-  realm             Realm?
-  link              Link?
+  book  Book?
+  game  Game?
+  media Media?
+  post  Post?
+  shelf Shelf?
+  realm Realm?
+  link  Link?
 
   // Tag system
-  unitTags          UnitTag[]      @relation("TaggedUnit")
-  tagUsages         UnitTag[]      @relation("TagUnit")
-  tagVotesOnUnit    TagVote[]      @relation("TagVoteUnit")
-  tagVotesAsTag     TagVote[]      @relation("TagVoteTag")
+  unitTags       UnitTag[] @relation("TaggedUnit")
+  tagUsages      UnitTag[] @relation("TagUnit")
+  tagVotesOnUnit TagVote[] @relation("TagVoteUnit")
+  tagVotesAsTag  TagVote[] @relation("TagVoteTag")
 
   // Realm organization
-  realmContent      RealmUnit[]    @relation("RealmContent")
-  inRealms          RealmUnit[]    @relation("UnitInRealm")
-  realmTagAsRealm   RealmTagUnit[] @relation("RealmTagRealm")
-  realmTagAsTag     RealmTagUnit[] @relation("RealmTagTag")
-  realmTagAsUnit    RealmTagUnit[] @relation("RealmTagUnit")
+  realmContent    RealmUnit[]    @relation("RealmContent")
+  inRealms        RealmUnit[]    @relation("UnitInRealm")
+  realmTagAsRealm RealmTagUnit[] @relation("RealmTagRealm")
+  realmTagAsTag   RealmTagUnit[] @relation("RealmTagTag")
+  realmTagAsUnit  RealmTagUnit[] @relation("RealmTagUnit")
 
   // Attribution
   personCredits       PersonCredit[]
@@ -111,10 +122,10 @@ model Unit {
   // Engagement (reactions moved to @rezics/reaction service)
 
   // Post relations (other posts referencing this unit)
-  targetedByPosts   Post[]         @relation("PostTarget")
-  realmPosts        Post[]         @relation("PostRealm")
-  rootPosts         Post[]         @relation("PostRoot")
-  parentPosts       Post[]         @relation("PostParent")
+  targetedByPosts Post[] @relation("PostTarget")
+  realmPosts      Post[] @relation("PostRealm")
+  rootPosts       Post[] @relation("PostRoot")
+  parentPosts     Post[] @relation("PostParent")
 
   // Shelf item relations
   shelfItemsContaining ShelfItem[]       @relation("ShelfItemUnit")
@@ -132,34 +143,34 @@ model Unit {
 // ============================================================
 
 model UnitTranslation {
-  unitId              String   @db.Uuid
-  language            String   @db.VarChar(16)
+  unitId   String @db.Uuid
+  language String @db.VarChar(16)
 
-  title               String?
-  subtitle            String?
-  summary             String?
-  description         String?
-  extra               Json?
+  title       String?
+  subtitle    String?
+  summary     String?
+  description String?
+  extra       Json?
 
   // For works: which release provides content in this language
-  sourceReleaseUnitId String?  @db.Uuid
+  sourceReleaseUnitId String? @db.Uuid
 
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  unit                Unit     @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  unit Unit @relation(fields: [unitId], references: [id], onDelete: Cascade)
 
   @@id([unitId, language])
   @@index([language, title])
 }
 
 model UnitSupportLanguage {
-  unitId    String   @db.Uuid
-  language  String   @db.VarChar(16)
-  isPrimary Boolean  @default(false)
-  sortOrder Int      @default(0)
+  unitId    String  @db.Uuid
+  language  String  @db.VarChar(16)
+  isPrimary Boolean @default(false)
+  sortOrder Int     @default(0)
 
-  unit      Unit     @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  unit Unit @relation(fields: [unitId], references: [id], onDelete: Cascade)
 
   @@id([unitId, language])
   @@index([language, unitId])
@@ -170,23 +181,23 @@ model UnitSupportLanguage {
 // ============================================================
 
 model Book {
-  unitId            String    @id @db.Uuid
-  unit              Unit      @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  unitId String @id @db.Uuid
+  unit   Unit   @relation(fields: [unitId], references: [id], onDelete: Cascade)
 
-  isbn13            String?   @db.VarChar(32)
-  publicationDate   DateTime?
-  pageCount         Int?
-  textLength        Int       @default(0)
-  formatKey         String?   @db.VarChar(32)
-  isLicensed        Boolean   @default(false)
-  coverUrl          String?
+  isbn13          String?   @db.VarChar(32)
+  publicationDate DateTime?
+  pageCount       Int?
+  textLength      Int       @default(0)
+  formatKey       String?   @db.VarChar(32)
+  isLicensed      Boolean   @default(false)
+  coverUrl        String?
 
-  extra             Json?
+  extra Json?
 
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  chapterIndex      BookIndex?
+  chapterIndex BookIndex?
 
   @@index([isbn13])
   @@index([publicationDate])
@@ -198,7 +209,7 @@ model BookIndex {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
-  book       Book     @relation(fields: [bookUnitId], references: [unitId], onDelete: Cascade)
+  book Book @relation(fields: [bookUnitId], references: [unitId], onDelete: Cascade)
 }
 
 // ============================================================
@@ -206,21 +217,21 @@ model BookIndex {
 // ============================================================
 
 model Game {
-  unitId            String    @id @db.Uuid
-  unit              Unit      @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  unitId String @id @db.Uuid
+  unit   Unit   @relation(fields: [unitId], references: [id], onDelete: Cascade)
 
-  releaseDate       DateTime?
-  versionLabel      String?
-  ageRatingKey      String?   @db.VarChar(32)
-  isLicensed        Boolean   @default(false)
-  coverUrl          String?
+  releaseDate  DateTime?
+  versionLabel String?
+  ageRatingKey String?   @db.VarChar(32)
+  isLicensed   Boolean   @default(false)
+  coverUrl     String?
 
-  extra             Json?
+  extra Json?
 
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  platforms         GamePlatform[]
+  platforms GamePlatform[]
 }
 
 model GamePlatform {
@@ -228,7 +239,7 @@ model GamePlatform {
   platformKey String @db.VarChar(64)
   sortOrder   Int    @default(0)
 
-  game        Game   @relation(fields: [gameUnitId], references: [unitId], onDelete: Cascade)
+  game Game @relation(fields: [gameUnitId], references: [unitId], onDelete: Cascade)
 
   @@id([gameUnitId, platformKey])
   @@index([platformKey, gameUnitId])
@@ -239,21 +250,21 @@ model GamePlatform {
 // ============================================================
 
 model Media {
-  unitId            String    @id @db.Uuid
-  unit              Unit      @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  unitId String @id @db.Uuid
+  unit   Unit   @relation(fields: [unitId], references: [id], onDelete: Cascade)
 
-  kindKey           String    @db.VarChar(32)
-  releaseDate       DateTime?
-  runtimeMinutes    Int?
-  episodeCount      Int?
-  seasonCount       Int?
-  isLicensed        Boolean   @default(false)
-  coverUrl          String?
+  kindKey        String    @db.VarChar(32)
+  releaseDate    DateTime?
+  runtimeMinutes Int?
+  episodeCount   Int?
+  seasonCount    Int?
+  isLicensed     Boolean   @default(false)
+  coverUrl       String?
 
-  extra             Json?
+  extra Json?
 
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([kindKey, releaseDate])
 }
@@ -263,17 +274,17 @@ model Media {
 // ============================================================
 
 model Link {
-  unitId     String  @id @db.Uuid
-  unit       Unit    @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  unitId String @id @db.Uuid
+  unit   Unit   @relation(fields: [unitId], references: [id], onDelete: Cascade)
 
   url        String
   siteName   String? @db.VarChar(128)
   faviconUrl String?
 
-  extra      Json?
+  extra Json?
 
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 // ============================================================
@@ -281,40 +292,40 @@ model Link {
 // ============================================================
 
 model Post {
-  unitId             String    @id @db.Uuid
-  unit               Unit      @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  unitId String @id @db.Uuid
+  unit   Unit   @relation(fields: [unitId], references: [id], onDelete: Cascade)
 
-  authorUserId       String    @db.Uuid
+  authorUserId String @db.Uuid
 
-  targetUnitId       String?   @db.Uuid
-  realmUnitId        String?   @db.Uuid
-  scoreEntryId       String?   @db.Uuid
+  targetUnitId String? @db.Uuid
+  realmUnitId  String? @db.Uuid
+  scoreEntryId String? @db.Uuid
 
-  body               String?
+  body String?
 
-  rootPostUnitId     String?   @db.Uuid
-  parentPostUnitId   String?   @db.Uuid
+  rootPostUnitId   String? @db.Uuid
+  parentPostUnitId String? @db.Uuid
 
-  kind               PostKind?
+  kind PostKind?
 
-  depth              Int       @default(0)
-  sortPath           String?   @db.VarChar(512)
+  depth    Int     @default(0)
+  sortPath String? @db.VarChar(512)
 
-  replyCount         Int       @default(0)
-  directReplyCount   Int       @default(0)
-  lastReplyAt        DateTime?
-  isLocked           Boolean   @default(false)
+  replyCount       Int       @default(0)
+  directReplyCount Int       @default(0)
+  lastReplyAt      DateTime?
+  isLocked         Boolean   @default(false)
 
-  extra              Json?
+  extra Json?
 
-  createdAt          DateTime  @default(now())
-  updatedAt          DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  targetUnit         Unit?     @relation("PostTarget", fields: [targetUnitId], references: [id], onDelete: SetNull)
-  realmUnit          Unit?     @relation("PostRealm", fields: [realmUnitId], references: [id], onDelete: SetNull)
-  rootPost           Unit?     @relation("PostRoot", fields: [rootPostUnitId], references: [id], onDelete: SetNull)
-  parentPost         Unit?     @relation("PostParent", fields: [parentPostUnitId], references: [id], onDelete: SetNull)
-  scoreEntry         ScoreEntry? @relation("PostScoreEntry", fields: [scoreEntryId], references: [id], onDelete: Restrict)
+  targetUnit Unit?       @relation("PostTarget", fields: [targetUnitId], references: [id], onDelete: SetNull)
+  realmUnit  Unit?       @relation("PostRealm", fields: [realmUnitId], references: [id], onDelete: SetNull)
+  rootPost   Unit?       @relation("PostRoot", fields: [rootPostUnitId], references: [id], onDelete: SetNull)
+  parentPost Unit?       @relation("PostParent", fields: [parentPostUnitId], references: [id], onDelete: SetNull)
+  scoreEntry ScoreEntry? @relation("PostScoreEntry", fields: [scoreEntryId], references: [id], onDelete: Restrict)
 
   @@index([authorUserId, createdAt])
   @@index([targetUnitId, createdAt])
@@ -331,17 +342,17 @@ model Post {
 // ============================================================
 
 model Shelf {
-  unitId    String      @id @db.Uuid
-  unit      Unit        @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  unitId String @id @db.Uuid
+  unit   Unit   @relation(fields: [unitId], references: [id], onDelete: Cascade)
 
-  kindKey   String?     @db.VarChar(64)
-  coverUrl  String?
-  extra     Json?
+  kindKey  String? @db.VarChar(64)
+  coverUrl String?
+  extra    Json?
 
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  items     ShelfItem[]
+  items ShelfItem[]
 }
 
 model ShelfItem {
@@ -350,16 +361,16 @@ model ShelfItem {
   sortOrder   Int      @default(0)
   keywords    String[] @default([])
 
-  label       String?
+  label String?
 
-  extra       Json?
+  extra Json?
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  shelf       Shelf    @relation(fields: [shelfUnitId], references: [unitId], onDelete: Cascade)
-  item        Unit     @relation("ShelfItemUnit", fields: [itemUnitId], references: [id], onDelete: Cascade)
-  reviews     ShelfItemReview[]
+  shelf   Shelf             @relation(fields: [shelfUnitId], references: [unitId], onDelete: Cascade)
+  item    Unit              @relation("ShelfItemUnit", fields: [itemUnitId], references: [id], onDelete: Cascade)
+  reviews ShelfItemReview[]
 
   @@id([shelfUnitId, itemUnitId])
   @@index([itemUnitId])
@@ -384,30 +395,30 @@ model ShelfItemReview {
 // ============================================================
 
 model Realm {
-  unitId      String   @id @db.Uuid
-  unit        Unit     @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  unitId String @id @db.Uuid
+  unit   Unit   @relation(fields: [unitId], references: [id], onDelete: Cascade)
 
-  isPublic    Boolean  @default(true)
-  isOfficial  Boolean  @default(false)
-  memberCount Int      @default(0)
+  isPublic    Boolean @default(true)
+  isOfficial  Boolean @default(false)
+  memberCount Int     @default(0)
 
-  extra       Json?
+  extra Json?
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  members     RealmMember[]
+  members RealmMember[]
 }
 
 model RealmMember {
-  realmUnitId String   @db.Uuid
-  userId      String   @db.Uuid
-  roleKey     String   @db.VarChar(32)
+  realmUnitId String @db.Uuid
+  userId      String @db.Uuid
+  roleKey     String @db.VarChar(32)
 
-  joinedAt    DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  joinedAt  DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  realm       Realm    @relation(fields: [realmUnitId], references: [unitId], onDelete: Cascade)
+  realm Realm @relation(fields: [realmUnitId], references: [unitId], onDelete: Cascade)
 
   @@id([realmUnitId, userId])
   @@index([userId])
@@ -423,8 +434,8 @@ model RealmUnit {
   unitId      String   @db.Uuid
   createdAt   DateTime @default(now())
 
-  realm       Unit     @relation("RealmContent", fields: [realmUnitId], references: [id], onDelete: Cascade)
-  unit        Unit     @relation("UnitInRealm", fields: [unitId], references: [id], onDelete: Cascade)
+  realm Unit @relation("RealmContent", fields: [realmUnitId], references: [id], onDelete: Cascade)
+  unit  Unit @relation("UnitInRealm", fields: [unitId], references: [id], onDelete: Cascade)
 
   @@id([realmUnitId, unitId])
   @@index([unitId])
@@ -437,9 +448,9 @@ model RealmTagUnit {
   unitId      String   @db.Uuid
   createdAt   DateTime @default(now())
 
-  realm       Unit     @relation("RealmTagRealm", fields: [realmUnitId], references: [id], onDelete: Cascade)
-  tag         Unit     @relation("RealmTagTag", fields: [tagUnitId], references: [id], onDelete: Cascade)
-  unit        Unit     @relation("RealmTagUnit", fields: [unitId], references: [id], onDelete: Cascade)
+  realm Unit @relation("RealmTagRealm", fields: [realmUnitId], references: [id], onDelete: Cascade)
+  tag   Unit @relation("RealmTagTag", fields: [tagUnitId], references: [id], onDelete: Cascade)
+  unit  Unit @relation("RealmTagUnit", fields: [unitId], references: [id], onDelete: Cascade)
 
   @@id([realmUnitId, tagUnitId, unitId])
   @@index([realmUnitId, unitId])
@@ -452,17 +463,17 @@ model RealmTagUnit {
 // ============================================================
 
 model UnitTag {
-  unitId    String   @db.Uuid
-  tagUnitId String   @db.Uuid
+  unitId    String @db.Uuid
+  tagUnitId String @db.Uuid
 
-  score     Int      @default(0)
-  voteCount Int      @default(0)
+  score     Int @default(0)
+  voteCount Int @default(0)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  unit      Unit     @relation("TaggedUnit", fields: [unitId], references: [id], onDelete: Cascade)
-  tag       Unit     @relation("TagUnit", fields: [tagUnitId], references: [id], onDelete: Cascade)
+  unit Unit @relation("TaggedUnit", fields: [unitId], references: [id], onDelete: Cascade)
+  tag  Unit @relation("TagUnit", fields: [tagUnitId], references: [id], onDelete: Cascade)
 
   @@id([unitId, tagUnitId])
   @@index([unitId, score])
@@ -470,15 +481,15 @@ model UnitTag {
 }
 
 model TagVote {
-  userId    String   @db.Uuid
-  unitId    String   @db.Uuid
-  tagUnitId String   @db.Uuid
+  userId    String @db.Uuid
+  unitId    String @db.Uuid
+  tagUnitId String @db.Uuid
   value     Int
 
   createdAt DateTime @default(now())
 
-  unit      Unit     @relation("TagVoteUnit", fields: [unitId], references: [id], onDelete: Cascade)
-  tag       Unit     @relation("TagVoteTag", fields: [tagUnitId], references: [id], onDelete: Cascade)
+  unit Unit @relation("TagVoteUnit", fields: [unitId], references: [id], onDelete: Cascade)
+  tag  Unit @relation("TagVoteTag", fields: [tagUnitId], references: [id], onDelete: Cascade)
 
   @@id([userId, unitId, tagUnitId])
   @@index([unitId, tagUnitId])
@@ -489,25 +500,25 @@ model TagVote {
 // ============================================================
 
 model Person {
-  id        String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
-  name      String
-  extra     Json?
+  id    String @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  name  String
+  extra Json?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  credits   PersonCredit[]
+  credits PersonCredit[]
 }
 
 model Organization {
-  id        String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
-  name      String
-  extra     Json?
+  id    String @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  name  String
+  extra Json?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  credits   OrgCredit[]
+  credits OrgCredit[]
 }
 
 model PersonCredit {
@@ -516,8 +527,8 @@ model PersonCredit {
   roleKey   String @db.VarChar(64)
   sortOrder Int    @default(0)
 
-  unit      Unit   @relation(fields: [unitId], references: [id], onDelete: Cascade)
-  person    Person @relation(fields: [personId], references: [id], onDelete: Cascade)
+  unit   Unit   @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  person Person @relation(fields: [personId], references: [id], onDelete: Cascade)
 
   @@id([unitId, personId, roleKey])
   @@index([personId, roleKey])
@@ -525,13 +536,13 @@ model PersonCredit {
 }
 
 model OrgCredit {
-  unitId         String       @db.Uuid
-  organizationId String       @db.Uuid
-  roleKey        String       @db.VarChar(64)
-  sortOrder      Int          @default(0)
+  unitId         String @db.Uuid
+  organizationId String @db.Uuid
+  roleKey        String @db.VarChar(64)
+  sortOrder      Int    @default(0)
 
-  unit           Unit         @relation(fields: [unitId], references: [id], onDelete: Cascade)
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  unit         Unit         @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
   @@id([unitId, organizationId, roleKey])
   @@index([organizationId, roleKey])
@@ -556,13 +567,13 @@ model User {
   followingsCount Int       @default(0)
   settings        Json?
 
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  followers       Follow[]  @relation("UserFollowers")
-  followings      Follow[]  @relation("UserFollowings")
-  units           Unit[]    @relation("UnitForUser")
-  apiTokens       ApiToken[]
+  followers  Follow[]   @relation("UserFollowers")
+  followings Follow[]   @relation("UserFollowings")
+  units      Unit[]     @relation("UnitForUser")
+  apiTokens  ApiToken[]
 }
 
 // ============================================================
@@ -575,12 +586,12 @@ model User {
 // ============================================================
 
 model ScoreEntry {
-  id        String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
-  userId    String   @db.Uuid
-  unitId    String   @db.Uuid
-  realm     String   @db.Uuid
-  value     Int
-  fields    Json?
+  id     String @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  userId String @db.Uuid
+  unitId String @db.Uuid
+  realm  String @db.Uuid
+  value  Int
+  fields Json?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -593,23 +604,23 @@ model ScoreEntry {
 }
 
 model ScoreAggregate {
-  unitId       String   @db.Uuid
-  realm        String   @db.Uuid
-  totalScore   Int      @default(0)
-  totalCount   Int      @default(0)
+  unitId       String @db.Uuid
+  realm        String @db.Uuid
+  totalScore   Int    @default(0)
+  totalCount   Int    @default(0)
   distribution Json
   fields       Json?
 
-  updatedAt    DateTime @updatedAt
+  updatedAt DateTime @updatedAt
 
   @@id([unitId, realm])
 }
 
 model ScoreRealmField {
-  realm     String   @db.Uuid
-  key       String   @db.VarChar(64)
+  realm     String  @db.Uuid
+  key       String  @db.VarChar(64)
   label     String?
-  sortOrder Int      @default(0)
+  sortOrder Int     @default(0)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
