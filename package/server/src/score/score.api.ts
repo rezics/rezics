@@ -105,7 +105,7 @@ export const scoreApi = new Elysia({ prefix: '/score' })
   .post(
     '/recalculate',
     async ({ body, identity }) => {
-      if (identity.role !== "ADMIN" && identity.role !== "ROOT") {
+      if (identity.permission.role !== "ADMIN" && identity.permission.role !== "ROOT") {
         return status(403, "Forbidden: Admin role required");
       }
       const isAdmin = await verifyAdminFromDb(identity.unitId);
@@ -138,7 +138,7 @@ export const scoreApi = new Elysia({ prefix: '/score' })
   .post(
     '/realm/:realmId',
     async ({ params, body, identity }) => {
-      if (identity.role !== "ADMIN" && identity.role !== "ROOT") {
+      if (identity.permission.role !== "ADMIN" && identity.permission.role !== "ROOT") {
         return status(403, "Forbidden: Admin role required");
       }
       const isAdmin = await verifyAdminFromDb(identity.unitId);
@@ -164,7 +164,7 @@ export const scoreApi = new Elysia({ prefix: '/score' })
   .delete(
     '/realm/:realmId/:key',
     async ({ params, identity, set }) => {
-      if (identity.role !== "ADMIN" && identity.role !== "ROOT") {
+      if (identity.permission.role !== "ADMIN" && identity.permission.role !== "ROOT") {
         return status(403, "Forbidden: Admin role required");
       }
       const isAdmin = await verifyAdminFromDb(identity.unitId);

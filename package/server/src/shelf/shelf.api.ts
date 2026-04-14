@@ -92,7 +92,7 @@ export const shelfApi = new Elysia({ prefix: "/shelves" })
         set.status = 404;
         throw new Error(`Shelf not found: ${params.unitId}`);
       }
-      if (!hasPermissionToUpdateShelf(identity, target as any)) {
+      if (!hasPermissionToUpdateShelf(identity.permission, identity.unitId, target as any)) {
         set.status = 403;
         throw new Error(
           "Forbidden: you do not have permission to update this shelf",
@@ -115,7 +115,7 @@ export const shelfApi = new Elysia({ prefix: "/shelves" })
     "/:unitId",
     async ({ params, identity, set }): Promise<{ message: string }> => {
       const target = await unitService.getByUnitId(params.unitId);
-      if (!hasPermissionToDeleteShelf(identity, target as any)) {
+      if (!hasPermissionToDeleteShelf(identity.permission, identity.unitId, target as any)) {
         set.status = 403;
         throw new Error(
           "Forbidden: you do not have permission to delete this shelf",
@@ -160,7 +160,7 @@ export const shelfApi = new Elysia({ prefix: "/shelves" })
     "/:unitId/items",
     async ({ params, body, identity, set }): Promise<ShelfItemDTO> => {
       const target = await unitService.getByUnitId(params.unitId);
-      if (!hasPermissionToUpdateShelf(identity, target as any)) {
+      if (!hasPermissionToUpdateShelf(identity.permission, identity.unitId, target as any)) {
         set.status = 403;
         throw new Error(
           "Forbidden: you do not have permission to modify this shelf",
@@ -183,7 +183,7 @@ export const shelfApi = new Elysia({ prefix: "/shelves" })
     "/:unitId/items/:itemUnitId",
     async ({ params, body, identity, set }): Promise<ShelfItemDTO> => {
       const target = await unitService.getByUnitId(params.unitId);
-      if (!hasPermissionToUpdateShelf(identity, target as any)) {
+      if (!hasPermissionToUpdateShelf(identity.permission, identity.unitId, target as any)) {
         set.status = 403;
         throw new Error(
           "Forbidden: you do not have permission to modify this shelf",
@@ -210,7 +210,7 @@ export const shelfApi = new Elysia({ prefix: "/shelves" })
     "/:unitId/items/reorder",
     async ({ params, body, identity, set }): Promise<{ message: string }> => {
       const target = await unitService.getByUnitId(params.unitId);
-      if (!hasPermissionToUpdateShelf(identity, target as any)) {
+      if (!hasPermissionToUpdateShelf(identity.permission, identity.unitId, target as any)) {
         set.status = 403;
         throw new Error(
           "Forbidden: you do not have permission to modify this shelf",
@@ -234,7 +234,7 @@ export const shelfApi = new Elysia({ prefix: "/shelves" })
     "/:unitId/items/:itemUnitId",
     async ({ params, identity, set }): Promise<{ message: string }> => {
       const target = await unitService.getByUnitId(params.unitId);
-      if (!hasPermissionToUpdateShelf(identity, target as any)) {
+      if (!hasPermissionToUpdateShelf(identity.permission, identity.unitId, target as any)) {
         set.status = 403;
         throw new Error(
           "Forbidden: you do not have permission to modify this shelf",
@@ -257,7 +257,7 @@ export const shelfApi = new Elysia({ prefix: "/shelves" })
     "/:unitId/items/:itemUnitId/reviews/:reviewUnitId",
     async ({ params, identity, set }): Promise<{ message: string }> => {
       const target = await unitService.getByUnitId(params.unitId);
-      if (!hasPermissionToUpdateShelf(identity, target as any)) {
+      if (!hasPermissionToUpdateShelf(identity.permission, identity.unitId, target as any)) {
         set.status = 403;
         throw new Error(
           "Forbidden: you do not have permission to modify this shelf",

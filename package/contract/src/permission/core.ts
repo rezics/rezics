@@ -1,17 +1,28 @@
-export type AuthIdentity = { unitId: string; role: string };
+import { t } from "elysia";
+import { tokenPermissionRoleSchema, type TokenPermissionRole } from "../token";
 
-export function isAdmin(actor: AuthIdentity) {
-  return actor.role === "ADMIN";
+/**
+ * Canonical representation of the main server's permission model.
+ * Mirrors the `User.permission` JSON structure in the server database
+ * and is embedded in `rezics-session-token` claims.
+ */
+export const permissionSchema = t.Object({
+  role: tokenPermissionRoleSchema,
+});
+export type Permission = { role: TokenPermissionRole };
+
+export function isAdmin(permission: Permission) {
+  return permission.role === "ADMIN";
 }
 
-export function isRoot(actor: AuthIdentity) {
-  return actor.role === "ROOT";
+export function isRoot(permission: Permission) {
+  return permission.role === "ROOT";
 }
 
-export function BasicAdminPermission(actor: AuthIdentity) {
-  return isAdmin(actor) || isRoot(actor);
+export function BasicAdminPermission(permission: Permission) {
+  return isAdmin(permission) || isRoot(permission);
 }
 
-export function isBlocked(actor: AuthIdentity) {
-  return actor.role === "BLOCKED";
+export function isBlocked(permission: Permission) {
+  return permission.role === "BLOCKED";
 }

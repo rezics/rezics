@@ -90,7 +90,7 @@ export const bookApi = new Elysia({ prefix: "/books" })
   .get(
     "/",
     async ({ identity, query }): Promise<BookListResponse> => {
-      if (identity.role !== "ADMIN" && identity.role !== "ROOT") {
+      if (identity.permission.role !== "ADMIN" && identity.permission.role !== "ROOT") {
         return status(403, "Forbidden: Admin role required");
       }
       const isAdmin = await verifyAdminFromDb(identity.unitId);
@@ -120,7 +120,7 @@ export const bookApi = new Elysia({ prefix: "/books" })
       }
 
       if (
-        !hasPermissionToUpdateBook(identity, undefined, targetBookUnit as any)
+        !hasPermissionToUpdateBook(identity.permission, identity.unitId, undefined, targetBookUnit as any)
       ) {
         set.status = 403;
         throw new Error(
@@ -152,7 +152,7 @@ export const bookApi = new Elysia({ prefix: "/books" })
       }
 
       if (
-        !hasPermissionToUpdateBook(identity, undefined, targetBookUnit as any)
+        !hasPermissionToUpdateBook(identity.permission, identity.unitId, undefined, targetBookUnit as any)
       ) {
         set.status = 403;
         throw new Error(
@@ -176,7 +176,7 @@ export const bookApi = new Elysia({ prefix: "/books" })
   .delete(
     "/:unitId",
     async ({ params, identity, set }): Promise<{ message: string }> => {
-      if (identity.role !== "ADMIN" && identity.role !== "ROOT") {
+      if (identity.permission.role !== "ADMIN" && identity.permission.role !== "ROOT") {
         set.status = 403;
         throw new Error(
           "Forbidden: you do not have permission to delete this book",

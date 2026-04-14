@@ -24,7 +24,7 @@ export async function getMainSessionPublicJwks() {
 
 export async function signRezicsSessionToken(claims: {
   unitId: string;
-  role: string;
+  permission: { role: string };
 }): Promise<string> {
   const service = await getJwtService("server-local");
   const key = service.jwks[0];
@@ -42,7 +42,7 @@ export async function signRezicsSessionToken(claims: {
   return new SignJWT({
     sub: claims.unitId,
     unitId: claims.unitId,
-    role: claims.role,
+    permission: claims.permission,
   })
     .setProtectedHeader({ alg: "ES256", kid: key.kid })
     .setIssuer(ISSUER)
@@ -66,7 +66,7 @@ export async function verifyRezicsSessionToken(
       clockTolerance: 5,
     });
 
-    if (!payload.unitId || !payload.role) {
+    if (!payload.unitId || !payload.permission) {
       return null;
     }
 

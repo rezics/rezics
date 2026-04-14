@@ -97,7 +97,7 @@ export const unitApi = new Elysia({ prefix: "/units" })
     }): Promise<UnitResponse> => {
       const target = await unitService.getByUnitId(params.unitId);
       if (
-        !hasPermissionToUpdateUnit(identity, target as any)
+        !hasPermissionToUpdateUnit(identity.permission, identity.unitId, target as any)
       ) {
         set.status = 403;
         throw new Error("Forbidden: you do not own this unit");
@@ -129,7 +129,7 @@ export const unitApi = new Elysia({ prefix: "/units" })
     }): Promise<{ message: string }> => {
       const target = await unitService.getByUnitId(params.unitId);
       if (
-        !hasPermissionToDeleteUnit(identity, target as any)
+        !hasPermissionToDeleteUnit(identity.permission, identity.unitId, target as any)
       ) {
         set.status = 403;
         throw new Error("Forbidden: you do not own this unit");
@@ -171,7 +171,7 @@ export const unitApi = new Elysia({ prefix: "/units" })
     async ({ params, body, identity, set }) => {
       const target = await unitService.getByUnitId(params.unitId);
       if (
-        !hasPermissionToUpdateUnit(identity, target as any)
+        !hasPermissionToUpdateUnit(identity.permission, identity.unitId, target as any)
       ) {
         set.status = 403;
         throw new Error("Forbidden: you do not own this unit");
@@ -204,7 +204,7 @@ export const unitApi = new Elysia({ prefix: "/units" })
     }): Promise<{ message: string }> => {
       const target = await unitService.getByUnitId(params.unitId);
       if (
-        !hasPermissionToUpdateUnit(identity, target as any)
+        !hasPermissionToUpdateUnit(identity.permission, identity.unitId, target as any)
       ) {
         set.status = 403;
         throw new Error("Forbidden: you do not own this unit");

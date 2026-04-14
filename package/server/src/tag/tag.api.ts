@@ -80,7 +80,7 @@ export const tagApi = new Elysia({ prefix: "/tags" })
   .put(
     "/:unitId",
     async ({ params, body, identity }) => {
-      if (identity.role !== "ADMIN" && identity.role !== "ROOT") {
+      if (identity.permission.role !== "ADMIN" && identity.permission.role !== "ROOT") {
         return status(403, "Forbidden: Admin role required");
       }
       const isAdmin = await verifyAdminFromDb(identity.unitId);
@@ -104,7 +104,7 @@ export const tagApi = new Elysia({ prefix: "/tags" })
   .delete(
     "/:unitId",
     async ({ params, identity }) => {
-      if (identity.role !== "ADMIN" && identity.role !== "ROOT") {
+      if (identity.permission.role !== "ADMIN" && identity.permission.role !== "ROOT") {
         return status(403, "Forbidden: Admin role required");
       }
       const isAdmin = await verifyAdminFromDb(identity.unitId);
@@ -124,7 +124,7 @@ export const tagApi = new Elysia({ prefix: "/tags" })
   .post(
     "/attach",
     async ({ body, identity }) => {
-      if (identity.role !== "ADMIN" && identity.role !== "ROOT") {
+      if (identity.permission.role !== "ADMIN" && identity.permission.role !== "ROOT") {
         return status(403, "Forbidden: Admin role required");
       }
       const isAdmin = await verifyAdminFromDb(identity.unitId);
@@ -145,7 +145,7 @@ export const tagApi = new Elysia({ prefix: "/tags" })
   .post(
     "/detach",
     async ({ body, identity }) => {
-      if (identity.role !== "ADMIN" && identity.role !== "ROOT") {
+      if (identity.permission.role !== "ADMIN" && identity.permission.role !== "ROOT") {
         return status(403, "Forbidden: Admin role required");
       }
       const isAdmin = await verifyAdminFromDb(identity.unitId);

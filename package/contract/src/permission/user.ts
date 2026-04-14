@@ -1,19 +1,21 @@
-import type { AuthIdentity } from "./core";
+import type { Permission } from "./core";
 import { BasicAdminPermission, isBlocked } from "./core";
 
 export function hasPermissionToUpdateUser(
-  actor: AuthIdentity,
+  permission: Permission,
+  actorUnitId: string,
   targetUnitId: string,
 ): boolean {
-  if (isBlocked(actor)) return false;
-  if (BasicAdminPermission(actor)) return true;
-  return actor.unitId === targetUnitId;
+  if (isBlocked(permission)) return false;
+  if (BasicAdminPermission(permission)) return true;
+  return actorUnitId === targetUnitId;
 }
 
 export function hasPermissionToDeleteUser(
-  actor: AuthIdentity,
+  permission: Permission,
+  actorUnitId: string,
   targetUnitId: string,
 ): boolean {
-  if (isBlocked(actor)) return false;
-  return actor.unitId === targetUnitId;
+  if (isBlocked(permission)) return false;
+  return actorUnitId === targetUnitId;
 }

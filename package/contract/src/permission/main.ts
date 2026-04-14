@@ -1,16 +1,16 @@
-import type { AuthIdentity } from "./core";
+import type { Permission } from "./core";
 
-export function verifyRoot(actor: AuthIdentity): boolean {
-  return actor.role === "ROOT";
+export function verifyRoot(permission: Permission): boolean {
+  return permission.role === "ROOT";
 }
 
-export function verifyAdmin(actor: AuthIdentity): boolean {
-  return actor.role === "ADMIN";
+export function verifyAdmin(permission: Permission): boolean {
+  return permission.role === "ADMIN";
 }
 
-export function verifyBlocked(actor: AuthIdentity): boolean {
-  if (!actor.role) {
+export function verifyBlocked(permission: Permission): boolean {
+  if (!permission.role) {
     return true;
   }
-  return actor.role === "BLOCKED";
+  return permission.role === "BLOCKED";
 }

@@ -55,15 +55,15 @@ export const sessionApi = new Elysia({ prefix: "/session" })
       return status(404, "User not found");
     }
 
-    const permission = user.permission as
+    const dbPermission = user.permission as
       | { role?: string[] }
       | null
       | undefined;
-    const role = permission?.role?.[0] ?? "MEMBER";
+    const role = dbPermission?.role?.[0] ?? "MEMBER";
 
     const token = await signRezicsSessionToken({
       unitId: user.unitId,
-      role,
+      permission: { role },
     });
 
     return { token };

@@ -73,7 +73,7 @@ export const coreRoute = new Elysia()
   .put(
     "/:unitId",
     async ({ identity, params, body }): Promise<UserDTO> => {
-      if (!hasPermissionToUpdateUser(identity, params.unitId)) {
+      if (!hasPermissionToUpdateUser(identity.permission, identity.unitId, params.unitId)) {
         return status(403, "Forbidden: Cannot update other users");
       }
 
@@ -101,7 +101,7 @@ export const coreRoute = new Elysia()
   .delete(
     "/me",
     async ({ identity }): Promise<{ message: string }> => {
-      if (identity.role !== "ADMIN" && identity.role !== "ROOT") {
+      if (identity.permission.role !== "ADMIN" && identity.permission.role !== "ROOT") {
         return status(403, "Forbidden: Admin role required");
       }
       const isAdmin = await verifyAdminFromDb(identity.unitId);
@@ -122,7 +122,7 @@ export const coreRoute = new Elysia()
   .delete(
     "/:unitId",
     async ({ identity, params }): Promise<{ message: string }> => {
-      if (identity.role !== "ADMIN" && identity.role !== "ROOT") {
+      if (identity.permission.role !== "ADMIN" && identity.permission.role !== "ROOT") {
         return status(403, "Forbidden: Admin role required");
       }
       const isAdmin = await verifyAdminFromDb(identity.unitId);

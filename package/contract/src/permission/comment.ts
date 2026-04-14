@@ -1,23 +1,25 @@
 // Comment permissions — DEPRECATED: use post permissions instead.
 // Kept as aliases for backward compatibility during migration.
 import type { UnitDTO } from "../index";
-import type { AuthIdentity } from "./core";
+import type { Permission } from "./core";
 import { BasicAdminPermission, isBlocked } from "./core";
 
 /** @deprecated Use hasPermissionToUpdatePost */
 export function hasPermissionToUpdateComment(
-  actor: AuthIdentity,
+  permission: Permission,
+  actorUnitId: string,
   unit?: UnitDTO,
 ): boolean {
-  if (isBlocked(actor)) return false;
-  if (BasicAdminPermission(actor)) return true;
-  return actor.unitId === unit?.user?.unitId;
+  if (isBlocked(permission)) return false;
+  if (BasicAdminPermission(permission)) return true;
+  return actorUnitId === unit?.user?.unitId;
 }
 
 /** @deprecated Use hasPermissionToDeletePost */
 export function hasPermissionToDeleteComment(
-  actor: AuthIdentity,
+  permission: Permission,
+  actorUnitId: string,
   unit?: UnitDTO,
 ): boolean {
-  return hasPermissionToUpdateComment(actor, unit);
+  return hasPermissionToUpdateComment(permission, actorUnitId, unit);
 }

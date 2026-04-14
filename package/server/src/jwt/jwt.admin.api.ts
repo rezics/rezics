@@ -13,7 +13,7 @@ export const jwtServiceAdminApi = new Elysia({ prefix: "/admin/jwt-services" })
   .get(
     "/",
     async ({ identity }) => {
-      if (identity.role !== "ROOT") {
+      if (identity.permission.role !== "ROOT") {
         return status(403, "Forbidden: Root role required");
       }
       const isRoot = await verifyRootFromDb(identity.unitId);
@@ -34,7 +34,7 @@ export const jwtServiceAdminApi = new Elysia({ prefix: "/admin/jwt-services" })
   .get(
     "/:serviceKey",
     async ({ params, identity, set }) => {
-      if (identity.role !== "ROOT") {
+      if (identity.permission.role !== "ROOT") {
         return status(403, "Forbidden: Root role required");
       }
       const isRoot = await verifyRootFromDb(identity.unitId);
@@ -60,7 +60,7 @@ export const jwtServiceAdminApi = new Elysia({ prefix: "/admin/jwt-services" })
   .post(
     "/",
     async ({ body, identity, set }) => {
-      if (identity.role !== "ROOT") {
+      if (identity.permission.role !== "ROOT") {
         return status(403, "Forbidden: Root role required");
       }
       const isRoot = await verifyRootFromDb(identity.unitId);
@@ -98,7 +98,7 @@ export const jwtServiceAdminApi = new Elysia({ prefix: "/admin/jwt-services" })
   .patch(
     "/:serviceKey",
     async ({ params, body, identity, set }) => {
-      if (identity.role !== "ROOT") {
+      if (identity.permission.role !== "ROOT") {
         return status(403, "Forbidden: Root role required");
       }
       const isRoot = await verifyRootFromDb(identity.unitId);
@@ -141,7 +141,7 @@ export const jwtServiceAdminApi = new Elysia({ prefix: "/admin/jwt-services" })
   .post(
     "/:serviceKey/activate",
     async ({ params, identity, set }) => {
-      if (identity.role !== "ROOT") {
+      if (identity.permission.role !== "ROOT") {
         return status(403, "Forbidden: Root role required");
       }
       const isRoot = await verifyRootFromDb(identity.unitId);
@@ -175,7 +175,7 @@ export const jwtServiceAdminApi = new Elysia({ prefix: "/admin/jwt-services" })
   .post(
     "/:serviceKey/deactivate",
     async ({ params, identity, set }) => {
-      if (identity.role !== "ROOT") {
+      if (identity.permission.role !== "ROOT") {
         return status(403, "Forbidden: Root role required");
       }
       const isRoot = await verifyRootFromDb(identity.unitId);

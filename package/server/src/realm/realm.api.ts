@@ -104,7 +104,7 @@ export const realmApi = new Elysia({ prefix: "/realms" })
     }): Promise<RealmDTO> => {
       const target = await unitService.getByUnitId(params.unitId);
       if (
-        !hasPermissionToUpdateUnit(identity, target as any)
+        !hasPermissionToUpdateUnit(identity.permission, identity.unitId, target as any)
       ) {
         set.status = 403;
         throw new Error(
@@ -133,7 +133,7 @@ export const realmApi = new Elysia({ prefix: "/realms" })
     }): Promise<{ message: string }> => {
       const target = await unitService.getByUnitId(params.unitId);
       if (
-        !hasPermissionToUpdateUnit(identity, target as any)
+        !hasPermissionToUpdateUnit(identity.permission, identity.unitId, target as any)
       ) {
         set.status = 403;
         throw new Error(
@@ -279,7 +279,7 @@ export const realmApi = new Elysia({ prefix: "/realms" })
     }): Promise<RealmUnitDTO> => {
       const target = await unitService.getByUnitId(params.unitId);
       if (
-        !hasPermissionToUpdateUnit(identity, target as any)
+        !hasPermissionToUpdateUnit(identity.permission, identity.unitId, target as any)
       ) {
         set.status = 403;
         throw new Error(
@@ -308,7 +308,7 @@ export const realmApi = new Elysia({ prefix: "/realms" })
     }): Promise<{ message: string }> => {
       const target = await unitService.getByUnitId(params.unitId);
       if (
-        !hasPermissionToUpdateUnit(identity, target as any)
+        !hasPermissionToUpdateUnit(identity.permission, identity.unitId, target as any)
       ) {
         set.status = 403;
         throw new Error(

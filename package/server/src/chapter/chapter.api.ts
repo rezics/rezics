@@ -62,7 +62,7 @@ export const chapterApi = new Elysia({ prefix: "/chapters" })
   .get(
     "/",
     async ({ identity, query }): Promise<ChapterListResponse> => {
-      if (identity.role !== "ADMIN" && identity.role !== "ROOT") {
+      if (identity.permission.role !== "ADMIN" && identity.permission.role !== "ROOT") {
         return status(403, "Forbidden: Admin role required");
       }
       const isAdmin = await verifyAdminFromDb(identity.unitId);
@@ -93,7 +93,7 @@ export const chapterApi = new Elysia({ prefix: "/chapters" })
         set.status = 404;
         throw new Error(`Chapter not found: ${params.unitId}`);
       }
-      if (!hasPermissionToUpdateChapter(identity, target as any)) {
+      if (!hasPermissionToUpdateChapter(identity.permission, identity.unitId, target as any)) {
         set.status = 403;
         throw new Error("Forbidden: you do not have permission to update");
       }
@@ -119,7 +119,7 @@ export const chapterApi = new Elysia({ prefix: "/chapters" })
         set.status = 404;
         throw new Error(`Chapter not found: ${params.unitId}`);
       }
-      if (!hasPermissionToDeleteChapter(identity, target as any)) {
+      if (!hasPermissionToDeleteChapter(identity.permission, identity.unitId, target as any)) {
         set.status = 403;
         throw new Error("Forbidden: you do not have permission to delete");
       }

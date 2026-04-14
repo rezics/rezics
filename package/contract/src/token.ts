@@ -35,10 +35,14 @@ export const normalizedTokenTransportSchema = t.Object({
 export type NormalizedTokenTransport =
   (typeof normalizedTokenTransportSchema)["static"];
 
+/**
+ * Main Server Token Permission Role
+ */
 export const tokenPermissionRoleSchema = t.Union([
   t.Literal("ROOT"),
   t.Literal("ADMIN"),
   t.Literal("USER"),
+  t.Literal("MEMBER"),
   t.Literal("BLOCKED"),
 ]);
 export type TokenPermissionRole = (typeof tokenPermissionRoleSchema)["static"];
@@ -62,13 +66,14 @@ export type AuthIdentityTokenClaims =
 export const rezicsSessionClaimsSchema = t.Object({
   sub: t.String(),
   unitId: t.String(),
-  role: t.String(),
+  permission: t.Object({
+    role: tokenPermissionRoleSchema,
+  }),
   iss: t.Literal("rezics-server"),
   exp: t.Number(),
   iat: t.Number(),
 });
-export type RezicsSessionClaims =
-  (typeof rezicsSessionClaimsSchema)["static"];
+export type RezicsSessionClaims = (typeof rezicsSessionClaimsSchema)["static"];
 
 export const normalizedTokenHeaderMap = {
   [NormalizedTokenName.AUTH_IDENTITY]:

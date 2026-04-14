@@ -78,7 +78,7 @@ export const postApi = new Elysia({ prefix: "/posts" })
     "/:unitId",
     async ({ params, body, identity, set }): Promise<PostResponse> => {
       const target = await postService.getByUnitId(params.unitId);
-      if (!hasPermissionToUpdatePost(identity, target.unit as any)) {
+      if (!hasPermissionToUpdatePost(identity.permission, identity.unitId, target.unit as any)) {
         set.status = 403;
         throw new Error(
           "Forbidden: you do not have permission to update this post",
@@ -102,7 +102,7 @@ export const postApi = new Elysia({ prefix: "/posts" })
     "/:unitId",
     async ({ params, identity, set }): Promise<{ message: string }> => {
       const target = await postService.getByUnitId(params.unitId);
-      if (!hasPermissionToDeletePost(identity, target.unit as any)) {
+      if (!hasPermissionToDeletePost(identity.permission, identity.unitId, target.unit as any)) {
         set.status = 403;
         throw new Error(
           "Forbidden: you do not have permission to delete this post",
