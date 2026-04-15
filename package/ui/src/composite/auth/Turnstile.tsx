@@ -23,16 +23,20 @@ interface TurnstileProps {
   initTimeoutMs?: number;
   onError?: (error: Error) => void;
   onReady?: () => void;
+  onExpired?: () => void;
 }
+
+const EMPTY_OPTIONS: Record<string, any> = {};
 
 export function Turnstile({
   siteKeyProps,
   onVerify,
-  options = {},
+  options = EMPTY_OPTIONS,
   loadingComponent = defaultLoadingComponent(),
   initTimeoutMs = 5000,
   onError,
   onReady,
+  onExpired,
 }: TurnstileProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const widgetIdRef = useRef<string | null>(null);
@@ -41,9 +45,11 @@ export function Turnstile({
   const onVerifyRef = useRef(onVerify);
   const onReadyRef = useRef(onReady);
   const onErrorRef = useRef(onError);
+  const onExpiredRef = useRef(onExpired);
   onVerifyRef.current = onVerify;
   onReadyRef.current = onReady;
   onErrorRef.current = onError;
+  onExpiredRef.current = onExpired;
 
   useEffect(() => {
     const scriptId = "cf-turnstile-script";
@@ -68,6 +74,8 @@ export function Turnstile({
         widgetIdRef.current = window.turnstile.render(containerRef.current, {
           sitekey: siteKeyProps,
           callback: (token: string) => onVerifyRef.current(token),
+          "expired-callback": () => onExpiredRef.current?.(),
+          "refresh-expired": "never",
           ...options,
         });
         setIsVerifiedShow(true);

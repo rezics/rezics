@@ -305,6 +305,9 @@ function EmailVerificationStep({
           setTurnstileToken(undefined);
           setTurnstileError(caughtError.message);
         }}
+        onExpired={() => {
+          setTurnstileToken(undefined);
+        }}
         loadingComponent={
           <div className="flex items-center gap-3">
             <CircularProgress size={18} />
