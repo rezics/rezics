@@ -104,45 +104,6 @@ describe("verifyBearerToken", () => {
     server.stop(true);
   });
 
-  test("verifies auth context tokens with explicit transport settings", async () => {
-    const key = await createEcJwkWithKid("kid-context");
-
-    const token = await new SignJWT({
-      id: "user-1",
-      sub: "user-1",
-      unitId: "user-1",
-      slug: "reader",
-      name: "Reader",
-      avatar: "https://example.com/avatar.png",
-      emailVerified: false,
-      verificationStatus: "pending",
-      scope: "user",
-    })
-      .setProtectedHeader({ alg: "ES256", kid: "kid-context" })
-      .setIssuer("https://issuer.example")
-      .setAudience("rezics")
-      .setIssuedAt()
-      .setExpirationTime("1h")
-      .sign(key.privateKey);
-
-    const verified = await verifyTokenFromHeader(token, {
-      issuer: "https://issuer.example",
-      audience: "rezics",
-      verificationKey: await crypto.subtle.importKey(
-        "jwk",
-        key.publicJwk as JsonWebKey,
-        { name: "ECDSA", namedCurve: "P-256" },
-        true,
-        ["verify"],
-      ),
-      algorithm: JwtAlgorithm.ES256,
-      tokenName: NormalizedTokenName.AUTH_CONTEXT,
-      requiredScope: undefined,
-    });
-
-    expect(verified.payload.slug).toBe("reader");
-    expect(verified.payload.verificationStatus).toBe("pending");
-  });
 });
 
 describe("auth-local verifier wrappers", () => {

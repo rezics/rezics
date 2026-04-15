@@ -126,24 +126,29 @@ export const auth = betterAuth({
         issuer: getAuthJwtIssuer(),
         audience: getAuthJwtAudience(),
         expirationTime: `${getAuthJwtTtlSeconds()}s`,
-        definePayload: ({
+        definePayload: async ({
           user,
         }: {
           user: Record<string, unknown> & {
             id: string;
-            slug?: string;
             name?: string;
             role?: string;
             emailVerified?: boolean;
           };
-        }) => ({
-          id: user.id,
-          slug: user.slug,
-          name: user.name,
-          role: user.role,
-          scope: "user",
-          ...(!user.emailVerified ? { email_verified: false } : {}),
-        }),
+        }) => {
+          const profile = await prisma.userProfile.findUnique({
+            where: { userId: user.id },
+            select: { slug: true },
+          });
+          return {
+            id: user.id,
+            slug: profile?.slug,
+            name: user.name,
+            role: user.role,
+            scope: "user",
+            ...(!user.emailVerified ? { email_verified: false } : {}),
+          };
+        },
         getSubject: ({ user }: { user: { id: string } }) => user.id,
       },
     }),
