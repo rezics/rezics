@@ -7,6 +7,7 @@ import {
   buildAuthPresenceSetCookie,
 } from "./auth-presence";
 import { provisionUserOnServer } from "../provisioning/provision";
+import { verifyTurnstileToken } from "../utils/turnstileUtils";
 import { AuthPolicyError } from "./errors";
 import { auth } from "./instance";
 import { enforceInternalTokenSurface } from "./token-boundary";
@@ -40,6 +41,10 @@ function isSessionClearingPath(pathname: string): boolean {
 
 function isVerifyEmailPath(pathname: string): boolean {
   return pathname.includes("/verify-email");
+}
+
+function isSendVerificationOTPPath(pathname: string): boolean {
+  return pathname.includes("/email-otp/send-verification-otp");
 }
 
 function isSessionCheckPath(pathname: string): boolean {
@@ -76,11 +81,39 @@ export async function handleAuthRequest(request: Request): Promise<Response> {
     );
   }
 
-  const response = await auth.handler(request);
-  const { pathname } = new URL(request.url);
   const requestUrl = new URL(request.url);
+  const { pathname } = requestUrl;
 
-  if (response.ok && isVerifyEmailPath(pathname)) {
+  if (isSendVerificationOTPPath(pathname) && request.method === "POST") {
+    const cloned = request.clone();
+    let body: { turnstileToken?: string } | undefined;
+    try {
+      body = await cloned.json();
+    } catch {
+      return toJsonError(400, "INVALID_REQUEST", "Invalid request body");
+    }
+
+    if (!body?.turnstileToken) {
+      return toJsonError(
+        403,
+        "TURNSTILE_REQUIRED",
+        "Turnstile verification is required",
+      );
+    }
+
+    const turnstileResult = await verifyTurnstileToken(body.turnstileToken);
+    if (!turnstileResult.success) {
+      return toJsonError(
+        403,
+        "TURNSTILE_FAILED",
+        "Turnstile verification failed",
+      );
+    }
+  }
+
+  const response = await auth.handler(request);
+
+  if (response.ok && (isVerifyEmailPath(pathname) || pathname.includes("/email-otp/verify-email"))) {
     try {
       const cloned = response.clone();
       const body = (await cloned.json()) as {

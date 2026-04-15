@@ -152,6 +152,12 @@ export const env = createEnv({
     // Telegram
     TELEGRAM_CLIENT_ID: v.optional(v.string()),
     TELEGRAM_CLIENT_SECRET: v.optional(v.string()),
+
+    /*
+     * Turnstile (Cloudflare CAPTCHA)
+     */
+
+    TURNSTILE_SECRET: v.optional(v.string()),
   },
   runtimeEnv: process.env,
   emptyStringAsUndefined: true,

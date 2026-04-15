@@ -1,3 +1,10 @@
+import {
+  render,
+  VerificationCode,
+  PasswordReset,
+  Invitation,
+  EmailChangeConfirm,
+} from "@rezics/email";
 import { createAuthMailer, isMailerConfigured } from "./mailer";
 import {
   buildChangeEmailConfirmationEmail,
@@ -12,6 +19,7 @@ import type {
   InvitationEmailPayload,
   PasswordResetEmailPayload,
   VerificationEmailPayload,
+  VerificationOTPPayload,
 } from "./types";
 
 type AuthEnv = {
@@ -161,6 +169,27 @@ export function createAuthNotificationService(
           token: data.token,
         },
         "[auth] Email change confirmation skipped: SMTP or sender email not configured.",
+      );
+    },
+
+    async sendVerificationOTP(data: VerificationOTPPayload): Promise<void> {
+      const { html, text } = await render(VerificationCode, {
+        code: data.otp,
+      });
+
+      await sendEmail(
+        "verification",
+        data.email,
+        {
+          subject: "Your verification code",
+          html,
+          text,
+        },
+        {
+          email: data.email,
+          type: data.type,
+        },
+        "[auth] Verification OTP email skipped: SMTP or sender email not configured.",
       );
     },
   };

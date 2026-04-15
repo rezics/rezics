@@ -2,6 +2,7 @@ import { oauthProvider } from "@better-auth/oauth-provider";
 import { prismaAdapter } from "@better-auth/prisma-adapter";
 import { betterAuth } from "better-auth";
 import { admin, genericOAuth, jwt, organization } from "better-auth/plugins";
+import { emailOTP } from "better-auth/plugins/email-otp";
 import { env } from "../env";
 import { provisionUserOnServer } from "../provisioning/provision";
 import { createAuthNotificationService } from "../notification";
@@ -80,7 +81,7 @@ export const auth = betterAuth({
         url,
         token,
       }),
-    sendOnSignUp: true,
+    sendOnSignUp: false,
     autoSignInAfterVerification: true,
   },
   account: {
@@ -110,6 +111,18 @@ export const auth = betterAuth({
     },
   },
   plugins: [
+    emailOTP({
+      otpLength: 6,
+      expiresIn: 300,
+      allowedAttempts: 3,
+      storeOTP: "hashed",
+      sendVerificationOnSignUp: false,
+      resendStrategy: "rotate",
+      overrideDefaultEmailVerification: true,
+      sendVerificationOTP: async ({ email, otp, type }) => {
+        await notificationService.sendVerificationOTP({ email, otp, type });
+      },
+    }),
     jwt({
       jwks: {
         keyPairConfig: {

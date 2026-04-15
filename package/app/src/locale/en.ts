@@ -322,11 +322,17 @@ export default {
       verify_refresh: "Refresh Status",
       verify_resend: "Resend Email",
       verify_refreshed: "Verification status refreshed.",
-      verify_sent: "Verification email sent.",
+      verify_sent: "Verification code sent. Check your inbox.",
       verify_missing_email: "Missing account email for verification.",
       verify_complete_widget:
         "Complete the verification widget before requesting another email.",
       verify_checking_state: "Checking verification state…",
+      verify_send_code: "Send Code",
+      verify_submit_code: "Verify",
+      verify_code_sent_to: "A 6-digit code was sent to",
+      verify_code_expires: "The code expires in 5 minutes.",
+      verify_code_incomplete: "Please enter the full 6-digit code.",
+      verify_success: "Email verified successfully!",
       verify_banner_action: "Verify Email",
       verify_banner_message:
         "Your account can browse guest-accessible pages, but member features stay locked until your email is verified.",

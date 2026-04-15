@@ -9,4 +9,5 @@ export type {
   NotificationChannel,
   PasswordResetEmailPayload,
   VerificationEmailPayload,
+  VerificationOTPPayload,
 } from "./types";

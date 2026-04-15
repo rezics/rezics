@@ -3,10 +3,8 @@
   "compilerOptions": {
     "jsx": "react-jsx",
     "paths": {
-      "@/*": ["./src/*"],
-      "#prisma/*": ["./prisma/*"]
+      "@/*": ["./*"]
     },
-
     "noUncheckedIndexedAccess": true,
     "noImplicitOverride": true,
     "noUnusedLocals": false,

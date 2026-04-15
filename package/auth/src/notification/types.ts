@@ -41,6 +41,12 @@ export type ChangeEmailConfirmationPayload = {
   token: string;
 };
 
+export type VerificationOTPPayload = {
+  email: string;
+  otp: string;
+  type: "sign-in" | "email-verification" | "forget-password" | "change-email";
+};
+
 export type NotificationChannel = "email" | "telegram";
 
 export type AuthNotificationServiceOptions = {
@@ -53,6 +59,7 @@ export interface AuthNotificationService {
   sendInvitationEmail(data: InvitationEmailPayload): Promise<void>;
   sendPasswordResetEmail(data: PasswordResetEmailPayload): Promise<void>;
   sendVerificationEmail(data: VerificationEmailPayload): Promise<void>;
+  sendVerificationOTP(data: VerificationOTPPayload): Promise<void>;
   sendChangeEmailConfirmation(
     data: ChangeEmailConfirmationPayload,
   ): Promise<void>;

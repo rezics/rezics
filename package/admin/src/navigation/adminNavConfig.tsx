@@ -1,4 +1,5 @@
 import AdminPanelSettingsOutlinedIcon from "@mui/icons-material/AdminPanelSettingsOutlined";
+import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
 import CollectionsBookmarkIcon from "@mui/icons-material/CollectionsBookmark";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import ForumIcon from "@mui/icons-material/Forum";
@@ -201,6 +202,12 @@ export const adminNav = {
           label: "Auth Status",
           icon: <VpnKeyOutlinedIcon fontSize="small" />,
           to: "/auth/status",
+        },
+        {
+          id: "auth.email",
+          label: "Email Templates",
+          icon: <EmailOutlinedIcon fontSize="small" />,
+          to: "/auth/email",
         },
         {
           id: "auth.jwt-services",

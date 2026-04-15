@@ -2,6 +2,7 @@ import { cors } from "@elysiajs/cors";
 import { openapi } from "@elysiajs/openapi";
 import { coreInstance } from "./core";
 import { env } from "./env";
+import { adminEmailApi } from "./admin/email.api";
 import { authInternalApi } from "./internal/internal.api";
 import { authOpenApiRouter } from "./openapi";
 import { wellKnownApi } from "./well-known/well-known.api";
@@ -68,6 +69,7 @@ app
   })
   .use(wellKnownApi)
   .use(authInternalApi)
+  .use(adminEmailApi)
   .use(authOpenApiRouter)
   .get("/health", () => ({ status: "ok" }));
 

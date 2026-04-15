@@ -128,6 +128,34 @@ export const authApi = {
     );
   },
 
+  sendVerificationOTP: async (input: {
+    email: string;
+    type: "email-verification";
+    turnstileToken: string;
+  }): Promise<{ success: boolean }> => {
+    return authFetch<{ success: boolean }>(
+      "/api/auth/email-otp/send-verification-otp",
+      {
+        method: "POST",
+        body: JSON.stringify(input),
+      },
+    );
+  },
+
+  verifyEmailOTP: async (input: {
+    email: string;
+    otp: string;
+  }): Promise<{
+    status: boolean;
+    token: string | null;
+    user: { id: string; email: string; emailVerified: boolean; name: string };
+  }> => {
+    return authFetch("/api/auth/email-otp/verify-email", {
+      method: "POST",
+      body: JSON.stringify(input),
+    });
+  },
+
   changeEmail: async (input: ChangeEmailBody): Promise<ChangeEmailResponse> => {
     return authFetch<ChangeEmailResponse>("/api/auth/change-email", {
       method: "POST",
@@ -205,6 +233,44 @@ export const authApi = {
     return authFetch<{ success: boolean }>("/api/auth/admin/set-role", {
       method: "POST",
       body: JSON.stringify(input),
+    });
+  },
+
+  adminEmailTemplates: async () => {
+    return authFetch<
+      {
+        name: string;
+        description: string;
+        propSchema: Record<
+          string,
+          { type: string; required: boolean; description: string }
+        >;
+      }[]
+    >("/admin/email/templates");
+  },
+
+  adminEmailSendTest: async (input: {
+    template: string;
+    props: Record<string, unknown>;
+    to: string;
+  }) => {
+    return authFetch<{ success: boolean; to: string }>(
+      "/admin/email/send-test",
+      {
+        method: "POST",
+        body: JSON.stringify(input),
+      },
+    );
+  },
+
+  adminEmailSmtpTest: async () => {
+    return authFetch<{
+      connected: boolean;
+      host?: string;
+      port?: string;
+      error?: string;
+    }>("/admin/email/smtp-test", {
+      method: "POST",
     });
   },
 };
