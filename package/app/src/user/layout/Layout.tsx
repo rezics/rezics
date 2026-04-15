@@ -11,7 +11,7 @@ export const Layout: FC<{
   actions: React.ReactNode;
 }> = ({ title, content, actions }) => (
   <div className="w-full h-dvh flex flex-col items-center justify-center">
-    <Card className="min-w-full sm:min-w-[384px] lg:min-w-[480px]">
+    <Card className="w-full max-w-[480px] mx-4 sm:mx-0">
       <CardContent className="flex flex-col gap-4">
         <Typography variant="h4">{title}</Typography>
         {content}

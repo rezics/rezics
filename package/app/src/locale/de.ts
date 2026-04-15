@@ -77,7 +77,8 @@ export default {
       verify_guest_notice:
         "Sie können weiterhin gastzugängliche Seiten nutzen, aber Mitgliedsfunktionen bleiben bis zur Verifizierung gesperrt.",
       verify_refresh: "Status aktualisieren",
-      verify_resend: "E-Mail erneut senden",
+      verify_resend_code: "Code erneut senden",
+      verify_resend_cooldown: "Code erneut senden ({{seconds}}s)",
       verify_refreshed: "Verifizierungsstatus aktualisiert.",
       verify_sent: "Bestätigungs-E-Mail gesendet.",
       verify_missing_email:

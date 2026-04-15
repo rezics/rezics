@@ -1,36 +1,23 @@
 import nodemailer, { type Transporter } from "nodemailer";
+import { env } from "../env";
 
-type MailerConfig = {
-  SMTP_HOST?: string;
-  SMTP_PORT?: string;
-  SMTP_SECURE?: string;
-  SMTP_USER?: string;
-  SMTP_PASSWORD?: string;
-};
-
-function parseSecure(value: string | undefined): boolean {
-  if (value === undefined) {
-    return true;
-  }
-
-  return value.toLowerCase() !== "false";
+export function getDefaultSender(): string {
+  const email = env.AUTH_VERIFICATION_FROM_EMAIL;
+  const name = env.SMTP_USER_NAME;
+  return name?.trim() ? `${name.trim()} <${email}>` : email;
 }
 
-export function isMailerConfigured(config: MailerConfig): boolean {
-  return Boolean(config.SMTP_HOST && config.SMTP_USER && config.SMTP_PASSWORD);
-}
-
-export function createAuthMailer(config: MailerConfig): Transporter {
-  const port = Number(config.SMTP_PORT ?? "465");
-  const secure = parseSecure(config.SMTP_SECURE);
+export function createAuthMailer(): Transporter {
+  const port = Number(env.SMTP_PORT);
+  const secure = env.SMTP_SECURE.toLowerCase() !== "false";
 
   return nodemailer.createTransport({
-    host: config.SMTP_HOST as string,
+    host: env.SMTP_HOST,
     port,
     secure,
     auth: {
-      user: config.SMTP_USER as string,
-      pass: config.SMTP_PASSWORD as string,
+      user: env.SMTP_USER,
+      pass: env.SMTP_PASSWORD,
     },
     pool: true,
     maxConnections: 3,

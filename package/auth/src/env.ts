@@ -111,11 +111,11 @@ export const env = createEnv({
      * Configures the delivery mechanism for outbound emails.
      */
 
-    SMTP_HOST: v.optional(v.string()),
-    SMTP_PORT: v.optional(v.string()),
-    SMTP_SECURE: v.optional(v.string()),
-    SMTP_USER: v.optional(v.string()),
-    SMTP_PASSWORD: v.optional(v.string()),
+    SMTP_HOST: v.string(),
+    SMTP_PORT: v.fallback(v.string(), "465"),
+    SMTP_SECURE: v.fallback(v.string(), "true"),
+    SMTP_USER: v.string(),
+    SMTP_PASSWORD: v.string(),
     SMTP_USER_NAME: v.optional(v.string()),
 
     /*
@@ -123,9 +123,9 @@ export const env = createEnv({
      * Defines the 'From' address for different notification types.
      */
 
-    AUTH_INVITATION_FROM_EMAIL: v.optional(v.string()),
-    AUTH_PASSWORD_RESET_FROM_EMAIL: v.optional(v.string()),
-    AUTH_VERIFICATION_FROM_EMAIL: v.optional(v.string()),
+    AUTH_INVITATION_FROM_EMAIL: v.fallback(v.string(), "noreply@rezics.com"),
+    AUTH_PASSWORD_RESET_FROM_EMAIL: v.fallback(v.string(), "noreply@rezics.com"),
+    AUTH_VERIFICATION_FROM_EMAIL: v.fallback(v.string(), "noreply@rezics.com"),
 
     /*
      * OAuth Provider Credentials

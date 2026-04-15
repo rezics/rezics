@@ -302,7 +302,8 @@ export default {
       verify_guest_notice:
         "在完成邮箱验证前，你仍可浏览访客可见页面，但成员专属功能会继续保持锁定。",
       verify_refresh: "刷新状态",
-      verify_resend: "重新发送邮件",
+      verify_resend_code: "重新发送验证码",
+      verify_resend_cooldown: "重新发送验证码 ({{seconds}}s)",
       verify_refreshed: "验证状态已刷新。",
       verify_sent: "验证邮件已发送。",
       verify_missing_email: "当前账号缺少可用于验证的邮箱地址。",

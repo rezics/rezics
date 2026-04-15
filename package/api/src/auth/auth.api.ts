@@ -131,7 +131,7 @@ export const authApi = {
   sendVerificationOTP: async (input: {
     email: string;
     type: "email-verification";
-    turnstileToken: string;
+    turnstileToken?: string;
   }): Promise<{ success: boolean }> => {
     return authFetch<{ success: boolean }>(
       "/api/auth/email-otp/send-verification-otp",

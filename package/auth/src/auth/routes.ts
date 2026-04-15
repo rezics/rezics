@@ -93,21 +93,15 @@ export async function handleAuthRequest(request: Request): Promise<Response> {
       return toJsonError(400, "INVALID_REQUEST", "Invalid request body");
     }
 
-    if (!body?.turnstileToken) {
-      return toJsonError(
-        403,
-        "TURNSTILE_REQUIRED",
-        "Turnstile verification is required",
-      );
-    }
-
-    const turnstileResult = await verifyTurnstileToken(body.turnstileToken);
-    if (!turnstileResult.success) {
-      return toJsonError(
-        403,
-        "TURNSTILE_FAILED",
-        "Turnstile verification failed",
-      );
+    if (body?.turnstileToken) {
+      const turnstileResult = await verifyTurnstileToken(body.turnstileToken);
+      if (!turnstileResult.success) {
+        return toJsonError(
+          403,
+          "TURNSTILE_FAILED",
+          "Turnstile verification failed",
+        );
+      }
     }
   }
 

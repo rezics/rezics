@@ -8,7 +8,7 @@ import {
 } from "@rezics/api/react-query/jwt";
 import { Turnstile } from "@rezics/ui/composite/auth/Turnstile.tsx";
 import { useNavigate } from "@tanstack/react-router";
-import { type FC, useMemo, useState } from "react";
+import { type FC, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { env } from "@/env";
 import { logout } from "@/user/model/handler";
@@ -26,16 +26,55 @@ export const VerifyEmailPage: FC = () => {
   const [message, setMessage] = useState<string>();
   const [error, setError] = useState<string>();
   const [otpCode, setOtpCode] = useState("");
-  const [codeSent, setCodeSent] = useState(false);
+  const [codeSent, setCodeSent] = useState(() => {
+    const stored = localStorage.getItem("verify-cooldown-end");
+    return stored ? Number(stored) > Date.now() : false;
+  });
   const [turnstileToken, setTurnstileToken] = useState<string>();
   const [turnstileReady, setTurnstileReady] = useState(false);
   const [turnstileError, setTurnstileError] = useState<string>();
-  const [turnstileRetryKey, setTurnstileRetryKey] = useState(0);
+  const [cooldownEnd, setCooldownEnd] = useState<number | null>(() => {
+    const stored = localStorage.getItem("verify-cooldown-end");
+    if (!stored) return null;
+    const ts = Number(stored);
+    return ts > Date.now() ? ts : null;
+  });
+  const [cooldownRemaining, setCooldownRemaining] = useState(0);
+  const cooldownRef = useRef<ReturnType<typeof setInterval>>();
+
+  useEffect(() => {
+    if (!cooldownEnd) {
+      setCooldownRemaining(0);
+      return;
+    }
+
+    const tick = () => {
+      const remaining = Math.ceil((cooldownEnd - Date.now()) / 1000);
+      if (remaining <= 0) {
+        setCooldownRemaining(0);
+        setCooldownEnd(null);
+        localStorage.removeItem("verify-cooldown-end");
+        clearInterval(cooldownRef.current);
+      } else {
+        setCooldownRemaining(remaining);
+      }
+    };
+
+    tick();
+    cooldownRef.current = setInterval(tick, 1000);
+    return () => clearInterval(cooldownRef.current);
+  }, [cooldownEnd]);
 
   const email = auth.authSession?.email ?? "";
   const canSend = useMemo(
-    () => Boolean(email && turnstileReady && turnstileToken && !loading),
-    [email, turnstileReady, turnstileToken, loading],
+    () =>
+      Boolean(
+        email &&
+          !loading &&
+          !cooldownRemaining &&
+          (codeSent || (turnstileReady && turnstileToken)),
+      ),
+    [email, loading, cooldownRemaining, codeSent, turnstileReady, turnstileToken],
   );
 
   const handleSendCode = async () => {
@@ -49,20 +88,20 @@ export const VerifyEmailPage: FC = () => {
     setMessage(undefined);
 
     try {
-      if (!turnstileToken) {
+      if (!codeSent && !turnstileToken) {
         throw new Error(t("auth.flow.verify_complete_widget"));
       }
 
       await authApi.sendVerificationOTP({
         email,
         type: "email-verification",
-        turnstileToken,
+        ...(turnstileToken && { turnstileToken }),
       });
       setMessage(t("auth.flow.verify_sent"));
       setCodeSent(true);
-      setTurnstileToken(undefined);
-      setTurnstileReady(false);
-      setTurnstileRetryKey((current) => current + 1);
+      const end = Date.now() + 60_000;
+      setCooldownEnd(end);
+      localStorage.setItem("verify-cooldown-end", String(end));
     } catch (caughtError) {
       setError((caughtError as Error).message);
     } finally {
@@ -179,50 +218,37 @@ export const VerifyEmailPage: FC = () => {
             {t("auth.flow.verify_intro_suffix")}
           </Typography>
 
-          <Turnstile
-            key={turnstileRetryKey}
-            siteKeyProps={env.VITE_TURNSTILE_SITE_KEY}
-            onVerify={(token: string) => {
-              setTurnstileToken(token);
-              setTurnstileError(undefined);
-            }}
-            onReady={() => {
-              setTurnstileReady(true);
-              setTurnstileError(undefined);
-            }}
-            onError={(caughtError: Error) => {
-              setTurnstileReady(false);
-              setTurnstileToken(undefined);
-              setTurnstileError(caughtError.message);
-            }}
-            loadingComponent={
-              <div className="flex items-center gap-3">
-                <CircularProgress size={18} />
-                <Typography variant="body2">
-                  {t("auth.flow.verify_widget_loading")}
-                </Typography>
-              </div>
-            }
-          />
+          {!codeSent && (
+            <>
+              <Turnstile
+                siteKeyProps={env.VITE_TURNSTILE_SITE_KEY}
+                onVerify={(token: string) => {
+                  setTurnstileToken(token);
+                  setTurnstileError(undefined);
+                }}
+                onReady={() => {
+                  setTurnstileReady(true);
+                  setTurnstileError(undefined);
+                }}
+                onError={(caughtError: Error) => {
+                  setTurnstileReady(false);
+                  setTurnstileToken(undefined);
+                  setTurnstileError(caughtError.message);
+                }}
+                loadingComponent={
+                  <div className="flex items-center gap-3">
+                    <CircularProgress size={18} />
+                    <Typography variant="body2">
+                      {t("auth.flow.verify_widget_loading")}
+                    </Typography>
+                  </div>
+                }
+              />
 
-          {turnstileError && (
-            <Alert
-              severity="error"
-              action={
-                <Button
-                  color="inherit"
-                  size="small"
-                  onClick={() => {
-                    setTurnstileError(undefined);
-                    setTurnstileRetryKey((current) => current + 1);
-                  }}
-                >
-                  {t("auth.flow.retry")}
-                </Button>
-              }
-            >
-              {turnstileError}
-            </Alert>
+              {turnstileError && (
+                <Alert severity="error">{turnstileError}</Alert>
+              )}
+            </>
           )}
 
           <Button
@@ -231,7 +257,13 @@ export const VerifyEmailPage: FC = () => {
             onClick={handleSendCode}
             fullWidth
           >
-            {t("auth.flow.verify_send_code")}
+            {codeSent
+              ? cooldownRemaining > 0
+                ? t("auth.flow.verify_resend_cooldown", {
+                    seconds: cooldownRemaining,
+                  })
+                : t("auth.flow.verify_resend_code")
+              : t("auth.flow.verify_send_code")}
           </Button>
 
           <Divider />
@@ -271,30 +303,14 @@ export const VerifyEmailPage: FC = () => {
         </>
       }
       actions={
-        <>
-          <Button
-            variant="text"
-            disabled={loading}
-            onClick={handleLogout}
-            color="inherit"
-          >
-            {t("auth.logout")}
-          </Button>
-          <Button
-            variant="text"
-            disabled={!codeSent || loading}
-            onClick={() => {
-              setTurnstileRetryKey((current) => current + 1);
-              setTurnstileToken(undefined);
-              setTurnstileReady(false);
-              setOtpCode("");
-              setError(undefined);
-              setMessage(undefined);
-            }}
-          >
-            {t("auth.flow.verify_resend")}
-          </Button>
-        </>
+        <Button
+          variant="text"
+          disabled={loading}
+          onClick={handleLogout}
+          color="inherit"
+        >
+          {t("auth.logout")}
+        </Button>
       }
     />
   );

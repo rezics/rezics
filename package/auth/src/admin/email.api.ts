@@ -1,8 +1,7 @@
 import { Elysia, t } from "elysia";
 import { render, templateRegistry } from "@rezics/email";
 import { auth } from "../auth/instance";
-import { env } from "../env";
-import { createAuthMailer, isMailerConfigured } from "../notification/mailer";
+import { createAuthMailer, getDefaultSender } from "../notification/mailer";
 
 async function requireAdmin(request: Request): Promise<string | null> {
   const session = await auth.api.getSession({ headers: request.headers });
@@ -39,22 +38,10 @@ export const adminEmailApi = new Elysia({ prefix: "/admin/email" })
       }
 
       const { html, text } = await render(entry.component, body.props as any);
-
-      if (!isMailerConfigured(env)) {
-        set.status = 503;
-        return { error: "SMTP is not configured" };
-      }
-
-      const transport = createAuthMailer(env);
-      const from =
-        env.AUTH_VERIFICATION_FROM_EMAIL ??
-        env.AUTH_INVITATION_FROM_EMAIL ??
-        "noreply@rezics.com";
+      const transport = createAuthMailer();
 
       await transport.sendMail({
-        from: env.SMTP_USER_NAME
-          ? `${env.SMTP_USER_NAME} <${from}>`
-          : from,
+        from: getDefaultSender(),
         to: body.to,
         subject: `[Test] ${entry.description}`,
         html,
@@ -71,29 +58,15 @@ export const adminEmailApi = new Elysia({ prefix: "/admin/email" })
       }),
     },
   )
-  .post("/smtp-test", async ({ set }) => {
-    if (!isMailerConfigured(env)) {
-      set.status = 503;
-      return {
-        connected: false,
-        error: "SMTP is not configured (missing host, user, or password)",
-      };
-    }
-
-    const transport = createAuthMailer(env);
+  .post("/smtp-test", async () => {
+    const transport = createAuthMailer();
 
     try {
       const verified = await transport.verify();
-      return {
-        connected: verified,
-        host: env.SMTP_HOST,
-        port: env.SMTP_PORT ?? "465",
-      };
+      return { connected: verified };
     } catch (err) {
       return {
         connected: false,
-        host: env.SMTP_HOST,
-        port: env.SMTP_PORT ?? "465",
         error: err instanceof Error ? err.message : "Unknown error",
       };
     }

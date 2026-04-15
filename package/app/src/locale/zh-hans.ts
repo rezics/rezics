@@ -71,7 +71,8 @@ export default {
       verify_guest_notice:
         "在完成郵箱驗證前，你仍可瀏覽訪客可見頁面，但成員專屬功能會繼續保持鎖定。",
       verify_refresh: "重新整理狀態",
-      verify_resend: "重新發送郵件",
+      verify_resend_code: "重新發送驗證碼",
+      verify_resend_cooldown: "重新發送驗證碼 ({{seconds}}s)",
       verify_refreshed: "驗證狀態已重新整理。",
       verify_sent: "驗證郵件已發送。",
       verify_missing_email: "目前帳號缺少可用於驗證的郵箱地址。",

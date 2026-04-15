@@ -320,7 +320,8 @@ export default {
       verify_guest_notice:
         "You can keep browsing guest-accessible pages, but member-only actions stay locked until verification completes.",
       verify_refresh: "Refresh Status",
-      verify_resend: "Resend Email",
+      verify_resend_code: "Re-send Code",
+      verify_resend_cooldown: "Re-send Code ({{seconds}}s)",
       verify_refreshed: "Verification status refreshed.",
       verify_sent: "Verification code sent. Check your inbox.",
       verify_missing_email: "Missing account email for verification.",

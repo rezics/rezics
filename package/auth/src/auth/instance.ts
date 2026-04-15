@@ -23,7 +23,7 @@ import {
 import { trustedOrigins } from "./trusted-origins";
 
 const telegramOAuthConfig = getTelegramGenericOAuthConfig();
-const notificationService = createAuthNotificationService(env, {
+const notificationService = createAuthNotificationService({
   telegram: {
     enabled: false,
   },

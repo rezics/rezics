@@ -77,7 +77,8 @@ export default {
       verify_guest_notice:
         "確認が完了するまで、ゲスト向けページの閲覧は続けられますが、メンバー限定機能は利用できません。",
       verify_refresh: "状態を更新",
-      verify_resend: "確認メールを再送",
+      verify_resend_code: "コードを再送信",
+      verify_resend_cooldown: "コードを再送信 ({{seconds}}s)",
       verify_refreshed: "確認状態を更新しました。",
       verify_sent: "確認メールを送信しました。",
       verify_missing_email:

@@ -21,7 +21,7 @@ export const OtpInput: FC<OtpInputProps> = ({
   disabled = false,
 }) => {
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
-  const digits = value.padEnd(length, "").slice(0, length).split("");
+  const digits = Array.from({ length }, (_, i) => value[i] ?? "");
 
   const focusInput = useCallback(
     (index: number) => {
@@ -100,10 +100,6 @@ export const OtpInput: FC<OtpInputProps> = ({
           slotProps={{
             input: {
               style: {
-                textAlign: "center",
-                fontSize: "24px",
-                fontFamily: "monospace",
-                fontWeight: 700,
                 width: "48px",
                 height: "56px",
                 padding: 0,
@@ -114,6 +110,12 @@ export const OtpInput: FC<OtpInputProps> = ({
               inputMode: "numeric",
               pattern: "[0-9]",
               autoComplete: "one-time-code",
+              style: {
+                textAlign: "center",
+                fontSize: "24px",
+                fontFamily: "monospace",
+                fontWeight: 700,
+              },
             },
           }}
           variant="outlined"
