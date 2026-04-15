@@ -13,7 +13,7 @@ const JwtServicesPage = lazyRouteComponent(
 
 export const Route = createFileRoute("/_admin/jwt-services")({
   beforeLoad: () => {
-    const token = getToken(NormalizedTokenName.AUTH_IDENTITY);
+    const token = getToken(NormalizedTokenName.AUTH_SESSION);
     const role = token ? parseJwt(token)?.role : null;
     if (role !== "owner") {
       throw redirect({ to: "/", replace: true });

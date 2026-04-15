@@ -7,7 +7,7 @@ TBD - created by archiving change jwt-context-plugin-route-refactor. Update Purp
 The `@rezics/jwt` package SHALL export a `createTokenResolver` factory function from its adapters module. The factory SHALL accept a context key name (string literal), a header name, a bearer flag, and a `JwtVerifier<TPayload>` function. It SHALL return an Elysia plugin instance.
 
 #### Scenario: Create a token resolver for a bearer token
-- **WHEN** `createTokenResolver('authIdentityToken', { headerName: 'authorization', usesBearer: true, verifier })` is called
+- **WHEN** `createTokenResolver('authSessionToken', { headerName: 'authorization', usesBearer: true, verifier })` is called
 - **THEN** the returned value is a valid Elysia plugin that can be registered via `.use()`
 
 #### Scenario: Create a token resolver for a custom header token
@@ -22,7 +22,7 @@ The plugin SHALL use Elysia `resolve` with `as: 'global'` to inject the token pa
 - **THEN** the handler receives the verified payload (or `null`) under that key name
 
 #### Scenario: Multiple token resolvers compose independently
-- **WHEN** two token resolver plugins are registered (e.g., `authIdentityToken` and `rezicsSessionToken`)
+- **WHEN** two token resolver plugins are registered (e.g., `authSessionToken` and `rezicsSessionToken`)
 - **THEN** both keys are available in handler context simultaneously without conflict
 
 ### Requirement: Absent header produces null
@@ -30,7 +30,7 @@ The plugin SHALL NOT throw an error when the configured header is absent from th
 
 #### Scenario: Request without the configured header
 - **WHEN** a request arrives without the configured header (e.g., no `Authorization` header)
-- **THEN** the handler context contains `{ authIdentityToken: null }`
+- **THEN** the handler context contains `{ authSessionToken: null }`
 
 ### Requirement: Present valid token produces verified payload
 The plugin SHALL verify a present token using the configured `JwtVerifier<TPayload>` and inject the verified payload into context.
@@ -69,15 +69,15 @@ When `usesBearer` is `true`, the plugin SHALL strip the `Bearer ` prefix from th
 The plugin SHALL set an Elysia `name` and `seed` based on the configured key name to enable Elysia's built-in plugin deduplication. Registering the same token resolver twice SHALL NOT create duplicate resolvers.
 
 #### Scenario: Duplicate registration
-- **WHEN** the same `createTokenResolver('authIdentityToken', config)` is `.use()`d twice on the same Elysia instance
+- **WHEN** the same `createTokenResolver('authSessionToken', config)` is `.use()`d twice on the same Elysia instance
 - **THEN** the resolver runs only once per request
 
 ### Requirement: Typed context key
 The factory SHALL use TypeScript generics so that the returned plugin carries type information mapping the configured key name to `TPayload | null` in handler context.
 
 #### Scenario: Type inference in handler
-- **WHEN** a handler destructures `{ authIdentityToken }` after using a plugin created with `createTokenResolver<'authIdentityToken', AuthIdentityTokenClaims>(...)`
-- **THEN** TypeScript infers `authIdentityToken` as `AuthIdentityTokenClaims | null`
+- **WHEN** a handler destructures `{ authSessionToken }` after using a plugin created with `createTokenResolver<'authSessionToken', AuthSessionTokenClaims>(...)`
+- **THEN** TypeScript infers `authSessionToken` as `AuthSessionTokenClaims | null`
 
 ### Requirement: Package export
 The `createTokenResolver` factory SHALL be exported from `@rezics/jwt` root export and from the `@rezics/jwt/adapters` sub-export.

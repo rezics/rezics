@@ -1,9 +1,9 @@
 export { auth } from "./auth/instance";
 export { createAuthGuard } from "./hooks/guard";
 export {
-  getAuthIdentityVerifyOptions,
+  getAuthSessionVerifyOptions,
   verifyAuth,
-  verifyAuthIdentityToken,
+  verifyAuthSessionToken,
   verifyBearerToken,
   verifySessionToken,
   verifyToken,

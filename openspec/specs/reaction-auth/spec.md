@@ -9,9 +9,9 @@ Reaction service SHALL verify `rezics-session-token` (issued by server) on authe
 - **WHEN** `GET /reactions/my` receives a request with `Authorization: Bearer <valid-rezics-session-token>`
 - **THEN** the JWT is verified against the server's JWKS, `sub` is extracted as user identity, and the user's reactions are returned
 
-#### Scenario: auth-identity-token is rejected
+#### Scenario: auth-session-token is rejected
 
-- **WHEN** a request includes an `auth-identity-token` in `Authorization: Bearer`
+- **WHEN** a request includes an `auth-session-token` in `Authorization: Bearer`
 - **THEN** verification fails (issuer mismatch) and the endpoint returns 401
 
 ### Requirement: Shared secret for internal endpoints

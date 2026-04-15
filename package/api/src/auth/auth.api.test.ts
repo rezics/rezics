@@ -3,7 +3,7 @@ import { NormalizedTokenName } from "@rezics/contract";
 import { configureApi } from "../config";
 
 const fetchMock = mock();
-const identityToken =
+const authToken =
   "eyJhbGciOiJub25lIn0.eyJzdWIiOiJ1c2VyLTEiLCJleHAiOjQ3NjYwMDAwMDB9.c2ln";
 
 type MemoryStorage = {
@@ -71,7 +71,7 @@ describe("authApi", () => {
 
   test("reads auth context tokens from the auth service", async () => {
     const { setToken } = await import("../react-query/jwt");
-    setToken(identityToken, NormalizedTokenName.AUTH_IDENTITY);
+    setToken(authToken, NormalizedTokenName.AUTH_SESSION);
 
     fetchMock.mockResolvedValueOnce(
       new Response(
@@ -107,7 +107,7 @@ describe("authApi", () => {
     expect(url).toBe("http://auth.example/api/auth/context-token");
     expect(fetchMock.mock.calls[0]?.[1]).toMatchObject({
       headers: {
-        Authorization: `Bearer ${identityToken}`,
+        Authorization: `Bearer ${authToken}`,
       },
     });
   });

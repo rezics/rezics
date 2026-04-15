@@ -285,8 +285,8 @@ export default function AuthStatusPage() {
       <Grid container spacing={2}>
         <Grid size={{ xs: 12, md: 6 }}>
           <TokenCard
-            title="AUTH_IDENTITY"
-            tokenName={NormalizedTokenName.AUTH_IDENTITY}
+            title="AUTH_SESSION"
+            tokenName={NormalizedTokenName.AUTH_SESSION}
             onRefresh={async () => {
               await queryAccessToken({ requirePresence: false });
             }}

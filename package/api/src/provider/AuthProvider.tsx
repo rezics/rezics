@@ -29,7 +29,7 @@ function getTokenExpMs(tokenName: string): number | null {
   return payload?.exp ? payload.exp * 1000 : null;
 }
 
-async function refreshAuthIdentity(): Promise<
+async function refreshAuthSession(): Promise<
   "success" | "retryable" | "non-retryable"
 > {
   try {
@@ -82,10 +82,10 @@ export function AuthProvider() {
     async function runRefreshCycle() {
       if (!mounted) return;
 
-      // 1. Refresh auth-identity-token via session cookie
-      const authToken = getToken(NormalizedTokenName.AUTH_IDENTITY);
+      // 1. Refresh auth-session-token via session cookie
+      const authToken = getToken(NormalizedTokenName.AUTH_SESSION);
       const authExpMs = authToken
-        ? getTokenExpMs(NormalizedTokenName.AUTH_IDENTITY)
+        ? getTokenExpMs(NormalizedTokenName.AUTH_SESSION)
         : null;
       const authNeedsRefresh =
         !authToken ||
@@ -98,7 +98,7 @@ export function AuthProvider() {
           return;
         }
 
-        const result = await refreshAuthIdentity();
+        const result = await refreshAuthSession();
         if (result === "non-retryable") {
           handleAuthSessionExpired();
           return;
@@ -115,7 +115,7 @@ export function AuthProvider() {
       // 2. Refresh rezics-session-token via exchange
       // Skip for unverified users — exchange always returns null for them
       const currentAuthClaims = parseJwt(
-        getToken(NormalizedTokenName.AUTH_IDENTITY),
+        getToken(NormalizedTokenName.AUTH_SESSION),
       );
       const isUnverified = currentAuthClaims?.email_verified === false;
 
@@ -157,7 +157,7 @@ export function AuthProvider() {
     }
 
     function computeNextRefreshDelay(): number | null {
-      const authExpMs = getTokenExpMs(NormalizedTokenName.AUTH_IDENTITY);
+      const authExpMs = getTokenExpMs(NormalizedTokenName.AUTH_SESSION);
       const sessionExpMs = getTokenExpMs(NormalizedTokenName.REZICS_SESSION);
 
       const expiryTimes = [authExpMs, sessionExpMs].filter(
@@ -191,7 +191,7 @@ export function AuthProvider() {
 
       if (detail.token === null) {
         if (
-          detail.tokenName === NormalizedTokenName.AUTH_IDENTITY &&
+          detail.tokenName === NormalizedTokenName.AUTH_SESSION &&
           !hasAuthPresence()
         ) {
           handleAuthSessionExpired();
@@ -215,7 +215,7 @@ export function AuthProvider() {
         scheduleRefresh();
       } else {
         if (
-          !getToken(NormalizedTokenName.AUTH_IDENTITY) &&
+          !getToken(NormalizedTokenName.AUTH_SESSION) &&
           !hasAuthPresence()
         ) {
           handleAuthSessionExpired();
@@ -228,7 +228,7 @@ export function AuthProvider() {
       if (!mounted) return;
 
       const sessionExpMs = getTokenExpMs(NormalizedTokenName.REZICS_SESSION);
-      const authExpMs = getTokenExpMs(NormalizedTokenName.AUTH_IDENTITY);
+      const authExpMs = getTokenExpMs(NormalizedTokenName.AUTH_SESSION);
       const now = Date.now();
 
       if (

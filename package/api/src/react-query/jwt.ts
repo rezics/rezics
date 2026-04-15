@@ -1,5 +1,5 @@
 import {
-  type AuthIdentityTokenClaims,
+  type AuthSessionTokenClaims,
   type AuthTokenResponse,
   NormalizedTokenName,
   type NormalizedTokenName as NormalizedTokenNameType,
@@ -10,7 +10,7 @@ import { getApiConfig } from "../config";
 import { clearAuthPresence, hasAuthPresence } from "./authPresence";
 
 const DEFAULT_TOKEN_STORAGE_KEYS: Record<string, string> = {
-  [NormalizedTokenName.AUTH_IDENTITY]: NormalizedTokenName.AUTH_IDENTITY,
+  [NormalizedTokenName.AUTH_SESSION]: NormalizedTokenName.AUTH_SESSION,
   [NormalizedTokenName.REZICS_SESSION]: NormalizedTokenName.REZICS_SESSION,
 };
 
@@ -128,7 +128,7 @@ function writeAuthSnapshot(
  * Get JWT token from localStorage
  */
 export const getToken = (
-  tokenName: NormalizedTokenNameType = NormalizedTokenName.AUTH_IDENTITY,
+  tokenName: NormalizedTokenNameType = NormalizedTokenName.AUTH_SESSION,
 ): string | null => {
   return readStoredToken(tokenName);
 };
@@ -138,7 +138,7 @@ export const getToken = (
  */
 export const setToken = (
   token: string | null,
-  tokenName: NormalizedTokenNameType = NormalizedTokenName.AUTH_IDENTITY,
+  tokenName: NormalizedTokenNameType = NormalizedTokenName.AUTH_SESSION,
 ): void => {
   if (token) {
     writeAuthSnapshot(tokenName, token);
@@ -151,7 +151,7 @@ export const setToken = (
  * Remove JWT token from localStorage
  */
 export const removeToken = (
-  tokenName: NormalizedTokenNameType = NormalizedTokenName.AUTH_IDENTITY,
+  tokenName: NormalizedTokenNameType = NormalizedTokenName.AUTH_SESSION,
 ): void => {
   if (typeof window === "undefined") return;
   const storeKey = getStoreKey(tokenName);
@@ -195,18 +195,18 @@ export async function queryAccessToken(options?: {
     clearAuthPresence();
     throw new Error("Unauthorized - Please login again");
   }
-  setToken(token, NormalizedTokenName.AUTH_IDENTITY);
+  setToken(token, NormalizedTokenName.AUTH_SESSION);
   return token;
 }
 
 /**
- * Ensure an auth identity JWT exists in client storage, using the auth
+ * Ensure an auth session JWT exists in client storage, using the auth
  * session cookie to mint one when needed.
  */
-export async function ensureAuthIdentityToken(options?: {
+export async function ensureAuthSessionToken(options?: {
   requirePresence?: boolean;
 }) {
-  const existingToken = getToken(NormalizedTokenName.AUTH_IDENTITY);
+  const existingToken = getToken(NormalizedTokenName.AUTH_SESSION);
   if (existingToken) {
     return existingToken;
   }
@@ -215,11 +215,11 @@ export async function ensureAuthIdentityToken(options?: {
 }
 
 /**
- * Exchange an auth-identity-token for a rezics-session-token via
+ * Exchange an auth-session-token for a rezics-session-token via
  * the server's POST /session/exchange endpoint.
  */
 export async function exchangeForSessionToken(): Promise<string | null> {
-  const authToken = getToken(NormalizedTokenName.AUTH_IDENTITY);
+  const authToken = getToken(NormalizedTokenName.AUTH_SESSION);
   if (!authToken) return null;
 
   const claims = parseJwt(authToken);
@@ -229,7 +229,7 @@ export async function exchangeForSessionToken(): Promise<string | null> {
   const response = await fetch(`${apiBaseUrl}/session/exchange`, {
     method: "POST",
     headers: {
-      "x-auth-identity-token": authToken,
+      "x-auth-session-token": authToken,
       "Content-Type": "application/json",
     },
   });
@@ -341,9 +341,9 @@ export function getParsedToken<T extends JwtPayload = JwtPayload>(
   return parseJwt<T>(getToken(tokenName));
 }
 
-export function getAuthIdentityClaims(): AuthIdentityTokenClaims | null {
-  return getParsedToken<AuthIdentityTokenClaims>(
-    NormalizedTokenName.AUTH_IDENTITY,
+export function getAuthSessionClaims(): AuthSessionTokenClaims | null {
+  return getParsedToken<AuthSessionTokenClaims>(
+    NormalizedTokenName.AUTH_SESSION,
   );
 }
 

@@ -7,24 +7,24 @@
  *
  * Provide the following environment variables:
  *
- *   AUTH_IDENTITY_TOKEN   – A valid auth-identity JWT (Bearer value only)
+ *   AUTH_SESSION_TOKEN   – A valid auth-session JWT (Bearer value only)
  *   AUTH_CONTEXT_TOKEN    – (optional) A valid auth-context JWT for first-time provisioning
  *
  * Run:
- *   AUTH_IDENTITY_TOKEN="ey..." bun test src/user/api/user.ensure.integration.test.ts
+ *   AUTH_SESSION_TOKEN="ey..." bun test src/user/api/user.ensure.integration.test.ts
  */
 import { describe, expect, test } from "bun:test";
 
-const AUTH_IDENTITY_TOKEN = process.env.AUTH_IDENTITY_TOKEN;
+const AUTH_SESSION_TOKEN = process.env.AUTH_SESSION_TOKEN;
 const AUTH_CONTEXT_TOKEN = process.env.AUTH_CONTEXT_TOKEN;
 const SERVER_BASE_URL = process.env.SERVER_BASE_URL ?? "http://localhost:3000";
 
-const describeWithToken = AUTH_IDENTITY_TOKEN ? describe : describe.skip;
+const describeWithToken = AUTH_SESSION_TOKEN ? describe : describe.skip;
 
 describeWithToken("GET /users/ensure (integration)", () => {
-  test("returns 200 with a valid auth identity token", async () => {
+  test("returns 200 with a valid auth session token", async () => {
     const headers: Record<string, string> = {
-      Authorization: `Bearer ${AUTH_IDENTITY_TOKEN}`,
+      Authorization: `Bearer ${AUTH_SESSION_TOKEN}`,
     };
 
     if (AUTH_CONTEXT_TOKEN) {

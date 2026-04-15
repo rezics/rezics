@@ -20,7 +20,7 @@ describe("server auth verifier options", () => {
       jwksUrl: "http://localhost:35003/api/auth/session/jwks",
       algorithm: "ES256",
       requiredScope: "user",
-      tokenName: "auth-identity-token",
+      tokenName: "auth-session-token",
       enforceTransport: true,
     });
     expect(typeof options.clockToleranceSeconds).toBe("number");

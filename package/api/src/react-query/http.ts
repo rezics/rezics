@@ -51,7 +51,7 @@ async function requestWithAuthRetry(
     return response;
   }
 
-  // Try refreshing: get a new auth-identity-token, then exchange for session token
+  // Try refreshing: get a new auth-session-token, then exchange for session token
   try {
     await queryAccessToken();
     await exchangeForSessionToken();

@@ -9,9 +9,9 @@ All user-facing read endpoints SHALL verify caller's identity by validating `rez
 - **WHEN** a user-facing read endpoint receives a request with `Authorization: Bearer <valid-rezics-session-token>`
 - **THEN** the JWT is verified against the server's JWKS, `sub` is extracted as `userId`, and the request proceeds
 
-#### Scenario: auth-identity-token is rejected
+#### Scenario: auth-session-token is rejected
 
-- **WHEN** a request includes an `auth-identity-token` (issuer "rezics-auth") in `Authorization: Bearer`
+- **WHEN** a request includes an `auth-session-token` (issuer "rezics-auth") in `Authorization: Bearer`
 - **THEN** verification fails (issuer mismatch) and the endpoint returns 401
 
 ### Requirement: Reuse @rezics/jwt verification

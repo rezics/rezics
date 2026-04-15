@@ -97,7 +97,7 @@ describe("POST /session/exchange", () => {
     const response = await sessionApi.handle(
       new Request("http://localhost/session/exchange", {
         method: "POST",
-        headers: { "x-auth-identity-token": "valid-auth-token" },
+        headers: { "x-auth-session-token": "valid-auth-token" },
       }),
     );
 
@@ -128,7 +128,7 @@ describe("POST /session/exchange", () => {
     const response = await sessionApi.handle(
       new Request("http://localhost/session/exchange", {
         method: "POST",
-        headers: { "x-auth-identity-token": "expired-token" },
+        headers: { "x-auth-session-token": "expired-token" },
       }),
     );
 
@@ -148,7 +148,7 @@ describe("POST /session/exchange", () => {
     const response = await sessionApi.handle(
       new Request("http://localhost/session/exchange", {
         method: "POST",
-        headers: { "x-auth-identity-token": "valid-auth-token" },
+        headers: { "x-auth-session-token": "valid-auth-token" },
       }),
     );
 
@@ -172,7 +172,7 @@ describe("POST /session/exchange", () => {
     const response = await sessionApi.handle(
       new Request("http://localhost/session/exchange", {
         method: "POST",
-        headers: { "x-auth-identity-token": "valid-auth-token" },
+        headers: { "x-auth-session-token": "valid-auth-token" },
       }),
     );
 

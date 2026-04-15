@@ -2,7 +2,7 @@ import { authApi } from "@rezics/api/auth/auth.api";
 import { authKeys } from "@rezics/api/auth/auth.keys";
 import {
   clearAllTokens,
-  ensureAuthIdentityToken,
+  ensureAuthSessionToken,
   exchangeForSessionToken,
   parseJwt,
 } from "@rezics/api/react-query/jwt";
@@ -17,7 +17,7 @@ import {
 
 export const login = async (email: string, password: string) => {
   await authApi.signIn({ email, password });
-  const authToken = await ensureAuthIdentityToken({ requirePresence: false });
+  const authToken = await ensureAuthSessionToken({ requirePresence: false });
 
   if (!authToken) {
     throw new Error("Login failed");
@@ -49,7 +49,7 @@ export const register = async (
     void avatar;
     void bio;
     await authApi.signUp({ email, password });
-    const authToken = await ensureAuthIdentityToken({ requirePresence: false });
+    const authToken = await ensureAuthSessionToken({ requirePresence: false });
 
     if (!authToken) {
       throw new Error("Registration failed");

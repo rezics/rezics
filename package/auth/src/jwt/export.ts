@@ -5,7 +5,7 @@ export {
 } from "@rezics/jwt";
 export type { VerifiedToken, VerifyOptions } from "../session/jwt/verify";
 export {
-  getAuthIdentityVerifyOptions,
+  getAuthSessionVerifyOptions,
   verifyAuth,
-  verifyAuthIdentityToken,
+  verifyAuthSessionToken,
 } from "../session/jwt/verify";

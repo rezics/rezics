@@ -30,7 +30,7 @@ export type AuthSessionStoreState = {
    * Main server permission, derived from the `rezics-session-token` claims.
    *
    * This represents the main server's permission model and is unrelated to
-   * `auth-identity-token` except during the session exchange flow.
+   * `auth-session-token` except during the session exchange flow.
    *
    * `null` when the user has no valid session token (unauthenticated).
    */
@@ -45,7 +45,7 @@ export type AuthSessionStoreState = {
 };
 
 function deriveNeedsVerification(): boolean {
-  const token = getToken(NormalizedTokenName.AUTH_IDENTITY);
+  const token = getToken(NormalizedTokenName.AUTH_SESSION);
   if (!token) return false;
   const payload = parseJwt(token);
   return payload?.email_verified === false;
@@ -103,7 +103,7 @@ export async function hydrateAuthSessionState(options?: {
   requirePresence?: boolean;
 }) {
   const store = useAuthSessionStore.getState();
-  const token = getToken(NormalizedTokenName.AUTH_IDENTITY);
+  const token = getToken(NormalizedTokenName.AUTH_SESSION);
   const requiresPresence = options?.requirePresence ?? !token;
 
   if (requiresPresence && !hasAuthPresence()) {
@@ -115,7 +115,7 @@ export async function hydrateAuthSessionState(options?: {
 
   try {
     // Derive state from local token claims (server call for unverified users)
-    const authToken = getToken(NormalizedTokenName.AUTH_IDENTITY);
+    const authToken = getToken(NormalizedTokenName.AUTH_SESSION);
     const payload = authToken ? parseJwt(authToken) : null;
 
     // For unverified users, fetch full authSession from server to get email

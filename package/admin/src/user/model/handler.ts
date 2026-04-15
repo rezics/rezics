@@ -2,7 +2,7 @@ import { authApi } from "@rezics/api/auth/auth.api";
 import { authKeys } from "@rezics/api/auth/auth.keys";
 import {
   clearAllTokens,
-  ensureAuthIdentityToken,
+  ensureAuthSessionToken,
   exchangeForSessionToken,
   parseJwt,
 } from "@rezics/api/react-query/jwt";
@@ -19,7 +19,7 @@ import { qc } from "@/app/provider/reactQueryUtil";
  */
 export async function adminLogin(email: string, password: string) {
   await authApi.signIn({ email, password });
-  const authToken = await ensureAuthIdentityToken({ requirePresence: false });
+  const authToken = await ensureAuthSessionToken({ requirePresence: false });
 
   const claims = parseJwt(authToken);
   if (!(claims?.role === "admin" || claims?.role === "owner")) {

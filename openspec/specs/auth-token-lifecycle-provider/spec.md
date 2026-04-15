@@ -2,12 +2,12 @@
 
 ### Requirement: AuthProvider accepts a configurable token array
 
-AuthProvider SHALL accept `tokens` parameter specifying which token names to manage. The default configuration SHALL include `AUTH_IDENTITY` and `REZICS_SESSION`. The ordering defines the dependency chain: `AUTH_IDENTITY` is refreshed first (via session cookie), then `REZICS_SESSION` (via exchange using the refreshed `AUTH_IDENTITY`). AuthProvider SHALL be exported from `@rezics/api` (not `@rezics/app-shell`).
+AuthProvider SHALL accept `tokens` parameter specifying which token names to manage. The default configuration SHALL include `AUTH_SESSION` and `REZICS_SESSION`. The ordering defines the dependency chain: `AUTH_SESSION` is refreshed first (via session cookie), then `REZICS_SESSION` (via exchange using the refreshed `AUTH_SESSION`). AuthProvider SHALL be exported from `@rezics/api` (not `@rezics/app-shell`).
 
 #### Scenario: AuthProvider managed two tokens with dependency ordering
 
 - **WHEN** AuthProvider initializes with default configuration
-- **THEN** it manages `AUTH_IDENTITY` and `REZICS_SESSION` tokens, refreshing them in dependency order
+- **THEN** it manages `AUTH_SESSION` and `REZICS_SESSION` tokens, refreshing them in dependency order
 
 #### Scenario: AuthProvider imported from @rezics/api
 
@@ -16,17 +16,17 @@ AuthProvider SHALL accept `tokens` parameter specifying which token names to man
 
 ### Requirement: AuthProvider refreshes tokens proactively before expiry
 
-AuthProvider SHALL schedule token refresh before JWT expiration with configurable refresh buffer (default 60 seconds). Each token has its own independent refresh schedule. When `REZICS_SESSION` needs refresh, AuthProvider SHALL first ensure `AUTH_IDENTITY` is valid, refreshing it if needed.
+AuthProvider SHALL schedule token refresh before JWT expiration with configurable refresh buffer (default 60 seconds). Each token has its own independent refresh schedule. When `REZICS_SESSION` needs refresh, AuthProvider SHALL first ensure `AUTH_SESSION` is valid, refreshing it if needed.
 
-#### Scenario: REZICS_SESSION refresh triggers AUTH_IDENTITY check
+#### Scenario: REZICS_SESSION refresh triggers AUTH_SESSION check
 
-- **WHEN** `REZICS_SESSION` is approaching expiry and `AUTH_IDENTITY` is also expired
-- **THEN** AuthProvider refreshes `AUTH_IDENTITY` first (via session cookie), then exchanges it for a new `REZICS_SESSION`
+- **WHEN** `REZICS_SESSION` is approaching expiry and `AUTH_SESSION` is also expired
+- **THEN** AuthProvider refreshes `AUTH_SESSION` first (via session cookie), then exchanges it for a new `REZICS_SESSION`
 
-#### Scenario: REZICS_SESSION refresh with valid AUTH_IDENTITY
+#### Scenario: REZICS_SESSION refresh with valid AUTH_SESSION
 
-- **WHEN** `REZICS_SESSION` is approaching expiry and `AUTH_IDENTITY` is still valid
-- **THEN** AuthProvider exchanges the existing `AUTH_IDENTITY` for a new `REZICS_SESSION` without refreshing `AUTH_IDENTITY`
+- **WHEN** `REZICS_SESSION` is approaching expiry and `AUTH_SESSION` is still valid
+- **THEN** AuthProvider exchanges the existing `AUTH_SESSION` for a new `REZICS_SESSION` without refreshing `AUTH_SESSION`
 
 ### Requirement: AuthProvider is stateless and side-effect free to consumers
 
@@ -39,12 +39,12 @@ AuthProvider SHALL NOT maintain Zustand/Jotai/React context state. Sole observab
 
 ### Requirement: AuthProvider reacts to failure type
 
-AuthProvider SHALL distinguish between retryable failures (network errors, 5xx) and non-retryable failures (401, 403, 404). On non-retryable failure for `AUTH_IDENTITY`, both tokens enter dormant state. On non-retryable failure for `REZICS_SESSION` only, `REZICS_SESSION` enters dormant while `AUTH_IDENTITY` continues refreshing.
+AuthProvider SHALL distinguish between retryable failures (network errors, 5xx) and non-retryable failures (401, 403, 404). On non-retryable failure for `AUTH_SESSION`, both tokens enter dormant state. On non-retryable failure for `REZICS_SESSION` only, `REZICS_SESSION` enters dormant while `AUTH_SESSION` continues refreshing.
 
-#### Scenario: AUTH_IDENTITY non-retryable failure makes both dormant
+#### Scenario: AUTH_SESSION non-retryable failure makes both dormant
 
-- **WHEN** `AUTH_IDENTITY` refresh fails with 401 (session expired)
-- **THEN** both `AUTH_IDENTITY` and `REZICS_SESSION` enter dormant state (user must re-login)
+- **WHEN** `AUTH_SESSION` refresh fails with 401 (session expired)
+- **THEN** both `AUTH_SESSION` and `REZICS_SESSION` enter dormant state (user must re-login)
 
 ### Requirement: AuthProvider recovers on visibility change
 
@@ -53,7 +53,7 @@ When document becomes visible after hidden, AuthProvider SHALL check all managed
 #### Scenario: Returning from background refreshes expired tokens
 
 - **WHEN** the browser tab becomes visible and the `REZICS_SESSION` has expired
-- **THEN** AuthProvider refreshes `AUTH_IDENTITY` if needed, then exchanges for a new `REZICS_SESSION`
+- **THEN** AuthProvider refreshes `AUTH_SESSION` if needed, then exchanges for a new `REZICS_SESSION`
 
 ### Requirement: AuthProvider does not perform user provisioning
 
@@ -66,7 +66,7 @@ AuthProvider SHALL NOT call `ensure()` or user provisioning endpoint. Provisioni
 
 #### Scenario: AuthProvider auto-unblocks exchange after verification
 
-- **WHEN** AuthProvider refreshes `AUTH_IDENTITY` and the new token no longer has `email_verified: false`
+- **WHEN** AuthProvider refreshes `AUTH_SESSION` and the new token no longer has `email_verified: false`
 - **THEN** the next `REZICS_SESSION` refresh succeeds because `exchangeForSessionToken()` no longer short-circuits
 
 ### Requirement: authSessionStore hydrates permission from session token

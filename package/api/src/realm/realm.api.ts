@@ -20,7 +20,7 @@ import type {
   UpdateRealmInput,
 } from "@rezics/contract";
 import { apiFetch } from "../react-query/http";
-import { getAuthIdentityClaims } from "../react-query/jwt";
+import { getAuthSessionClaims } from "../react-query/jwt";
 import { buildQueryString } from "../utils/buildQuery";
 import type { RealmFilters } from "./realm.types";
 
@@ -123,7 +123,7 @@ export const realmApi = {
    * Leave a realm
    */
   leave: async (realmUnitId: string): Promise<{ message: string }> => {
-    const claims = getAuthIdentityClaims();
+    const claims = getAuthSessionClaims();
     if (!claims?.unitId) {
       throw new Error("Cannot leave realm: no active session");
     }

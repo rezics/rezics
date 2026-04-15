@@ -19,7 +19,7 @@ export function buildTrustedAuthVerifyOptions(
     jwksUrl: string;
   },
   overrides?: Partial<VerifyOptions>,
-  tokenName: NormalizedTokenNameType = NormalizedTokenName.AUTH_IDENTITY,
+  tokenName: NormalizedTokenNameType = NormalizedTokenName.AUTH_SESSION,
 ): VerifyOptions {
   return {
     issuer: overrides?.issuer ?? trustedAuth.issuer,
@@ -40,7 +40,7 @@ export function buildTrustedAuthVerifyOptions(
 
 async function buildAuthVerifyOptions(
   overrides?: Partial<VerifyOptions>,
-  tokenName: NormalizedTokenNameType = NormalizedTokenName.AUTH_IDENTITY,
+  tokenName: NormalizedTokenNameType = NormalizedTokenName.AUTH_SESSION,
 ): Promise<VerifyOptions> {
   const trustedAuth = await getJwtService("auth-upstream");
   return buildTrustedAuthVerifyOptions(trustedAuth, overrides, tokenName);

@@ -161,7 +161,7 @@ describe("auth handlers", () => {
     setUserMock.mockClear();
   });
 
-  test("login acquires auth identity from the token endpoint instead of session.token", async () => {
+  test("login acquires auth session token from the token endpoint instead of session.token", async () => {
     fetchMock.mockResolvedValueOnce(
       new Response(
         JSON.stringify({
@@ -189,12 +189,12 @@ describe("auth handlers", () => {
     expect(result.token).toBe(
       "eyJhbGciOiJub25lIn0.eyJzdWIiOiJ1c2VyLTEiLCJleHAiOjQ3NjYwMDAwMDB9.c2ln",
     );
-    expect(getToken(NormalizedTokenName.AUTH_IDENTITY)).toBe(
+    expect(getToken(NormalizedTokenName.AUTH_SESSION)).toBe(
       "eyJhbGciOiJub25lIn0.eyJzdWIiOiJ1c2VyLTEiLCJleHAiOjQ3NjYwMDAwMDB9.c2ln",
     );
   });
 
-  test("registration acquires auth identity from the token endpoint instead of session.token", async () => {
+  test("registration acquires auth session token from the token endpoint instead of session.token", async () => {
     fetchMock.mockResolvedValueOnce(
       new Response(
         JSON.stringify({
@@ -222,7 +222,7 @@ describe("auth handlers", () => {
     expect(result.token).toBe(
       "eyJhbGciOiJub25lIn0.eyJzdWIiOiJ1c2VyLTIiLCJleHAiOjQ3NjYwMDAwMDB9.c2ln",
     );
-    expect(getToken(NormalizedTokenName.AUTH_IDENTITY)).toBe(
+    expect(getToken(NormalizedTokenName.AUTH_SESSION)).toBe(
       "eyJhbGciOiJub25lIn0.eyJzdWIiOiJ1c2VyLTIiLCJleHAiOjQ3NjYwMDAwMDB9.c2ln",
     );
   });
@@ -233,7 +233,7 @@ describe("auth handlers", () => {
 
     setToken(
       "eyJhbGciOiJub25lIn0.eyJzdWIiOiJ1c2VyLTEiLCJleHAiOjQ3NjYwMDAwMDB9.c2ln",
-      NormalizedTokenName.AUTH_IDENTITY,
+      NormalizedTokenName.AUTH_SESSION,
     );
 
     await establishBusinessSession();
@@ -256,7 +256,7 @@ describe("auth handlers", () => {
 
     setToken(
       "eyJhbGciOiJub25lIn0.eyJzdWIiOiJ1c2VyLTEiLCJleHAiOjQ3NjYwMDAwMDB9.c2ln",
-      NormalizedTokenName.AUTH_IDENTITY,
+      NormalizedTokenName.AUTH_SESSION,
     );
 
     await establishBusinessSession();
@@ -269,13 +269,13 @@ describe("auth handlers", () => {
     const { logout } = await import("./handler");
     const { getToken, setToken } = await import("@rezics/api/react-query/jwt");
 
-    setToken("identity-token", NormalizedTokenName.AUTH_IDENTITY);
+    setToken("identity-token", NormalizedTokenName.AUTH_SESSION);
     setToken("member-token", NormalizedTokenName.REZICS_SESSION);
 
     await logout(true);
 
     expect(signOutMock).toHaveBeenCalledTimes(1);
-    expect(getToken(NormalizedTokenName.AUTH_IDENTITY)).toBeNull();
+    expect(getToken(NormalizedTokenName.AUTH_SESSION)).toBeNull();
     expect(getToken(NormalizedTokenName.REZICS_SESSION)).toBeNull();
     expect(syncBusinessTokenMock).toHaveBeenCalledWith(null);
     expect(clearAuthSessionStateMock).toHaveBeenCalledTimes(1);

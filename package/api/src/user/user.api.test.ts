@@ -71,7 +71,7 @@ describe("userApi", () => {
 
     setToken(
       "eyJhbGciOiJub25lIn0.eyJzdWIiOiJ1c2VyLTEiLCJleHAiOjQ3NjYwMDAwMDB9.c2ln",
-      NormalizedTokenName.AUTH_IDENTITY,
+      NormalizedTokenName.AUTH_SESSION,
     );
 
     await userApi.ensure("context-token");

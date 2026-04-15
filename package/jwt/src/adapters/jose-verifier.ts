@@ -117,7 +117,7 @@ async function verifyTokenInput<TPayload extends JWTPayload = JWTPayload>(
   tokenInput: string | undefined,
   options: JwtVerifyInput,
 ): Promise<VerifiedJwt<TPayload>> {
-  const tokenName = options.tokenName ?? NormalizedTokenName.AUTH_IDENTITY;
+  const tokenName = options.tokenName ?? NormalizedTokenName.AUTH_SESSION;
   const token = extractRawToken(
     tokenInput,
     tokenName,
@@ -207,7 +207,7 @@ export async function verifyBearerToken<
 >(authorization: string | undefined, options: JwtVerifyInput) {
   return verifyTokenInput<TPayload>(authorization, {
     ...options,
-    tokenName: options.tokenName ?? NormalizedTokenName.AUTH_IDENTITY,
+    tokenName: options.tokenName ?? NormalizedTokenName.AUTH_SESSION,
   });
 }
 
@@ -222,7 +222,7 @@ export async function verifySessionToken<
 >(tokenHeader: string | undefined, options: JwtVerifyInput) {
   return verifyTokenInput<TPayload>(tokenHeader, {
     ...options,
-    tokenName: options.tokenName ?? NormalizedTokenName.AUTH_IDENTITY,
+    tokenName: options.tokenName ?? NormalizedTokenName.AUTH_SESSION,
     requiredScope: undefined,
   });
 }

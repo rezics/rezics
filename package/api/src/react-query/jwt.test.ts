@@ -47,19 +47,19 @@ describe("jwt token storage", () => {
     } as unknown as Window & typeof globalThis;
   });
 
-  test("stores auth identity and member session tokens separately", async () => {
+  test("stores auth session and member session tokens separately", async () => {
     const jwt = await import("./jwt");
 
-    const identityToken = createToken({ sub: "user-1", slug: "reader" });
+    const authToken = createToken({ sub: "user-1", slug: "reader" });
     const sessionToken = createToken({
       unitId: "user-1",
       permission: { role: "USER" },
     });
 
-    jwt.setToken(identityToken, NormalizedTokenName.AUTH_IDENTITY);
+    jwt.setToken(authToken, NormalizedTokenName.AUTH_SESSION);
     jwt.setToken(sessionToken, NormalizedTokenName.REZICS_SESSION);
 
-    expect(jwt.getToken(NormalizedTokenName.AUTH_IDENTITY)).toBe(identityToken);
+    expect(jwt.getToken(NormalizedTokenName.AUTH_SESSION)).toBe(authToken);
     expect(jwt.getToken(NormalizedTokenName.REZICS_SESSION)).toBe(sessionToken);
     expect(jwt.getRezicsSessionClaims()).toMatchObject({
       unitId: "user-1",

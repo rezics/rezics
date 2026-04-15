@@ -25,7 +25,7 @@ function isAdminRole(token: string | null): boolean {
 
 export const Route = createFileRoute("/_admin")({
   beforeLoad: async ({ location }) => {
-    const token = getToken(NormalizedTokenName.AUTH_IDENTITY);
+    const token = getToken(NormalizedTokenName.AUTH_SESSION);
     const store = useAuthSessionStore.getState();
 
     if (store.status === "idle" && token) {

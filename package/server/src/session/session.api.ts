@@ -1,4 +1,4 @@
-import type { AuthIdentityTokenClaims } from "@rezics/contract";
+import type { AuthSessionTokenClaims } from "@rezics/contract";
 import { TokenTransportHeader } from "@rezics/contract";
 import { JwtAlgorithm, verifyBearerToken } from "@rezics/jwt";
 import { Elysia, status } from "elysia";
@@ -12,21 +12,21 @@ import {
 export const sessionApi = new Elysia({ prefix: "/session" })
   .post("/exchange", async ({ headers }) => {
     const authToken = (headers as Record<string, string | undefined>)[
-      TokenTransportHeader.AUTH_IDENTITY_EXCHANGE.toLowerCase()
+      TokenTransportHeader.AUTH_SESSION_EXCHANGE.toLowerCase()
     ];
 
     if (!authToken) {
       return status(
         401,
-        "Unauthorized: Missing x-auth-identity-token header",
+        "Unauthorized: Missing x-auth-session-token header",
       );
     }
 
     const authUpstream = await getJwtService("auth-upstream");
 
-    let claims: AuthIdentityTokenClaims;
+    let claims: AuthSessionTokenClaims;
     try {
-      const result = await verifyBearerToken<AuthIdentityTokenClaims>(
+      const result = await verifyBearerToken<AuthSessionTokenClaims>(
         authToken,
         {
           issuer: authUpstream.issuer,
@@ -71,7 +71,7 @@ export const sessionApi = new Elysia({ prefix: "/session" })
     detail: {
       summary: "Exchange auth token for session token",
       description:
-        "Verify an upstream auth identity token and issue a rezics session token with the user's role",
+        "Verify an upstream auth session token and issue a rezics session token with the user's role",
       tags: ["Session"],
     },
   })

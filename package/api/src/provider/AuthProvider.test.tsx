@@ -30,7 +30,7 @@ mock.module("@rezics/api/react-query/jwt", () => ({
   queryAccessToken: queryAccessTokenMock,
   getJwtTokenStrategy: () => ({
     storeKeyByToken: {
-      [NormalizedTokenName.AUTH_IDENTITY]: "auth-store",
+      [NormalizedTokenName.AUTH_SESSION]: "auth-store",
       [NormalizedTokenName.REZICS_SESSION]: "rezics-session-store",
     },
   }),
@@ -66,9 +66,9 @@ describe("AuthProvider gateway + fan-out model", () => {
     expect(typeof AuthProvider).toBe("function");
   });
 
-  test("AuthProvider defaults to AUTH_IDENTITY only when tokens omitted", async () => {
+  test("AuthProvider defaults to AUTH_SESSION only when tokens omitted", async () => {
     const { AuthProvider } = await import("./AuthProvider");
-    // No tokens prop — should default to [AUTH_IDENTITY]
+    // No tokens prop — should default to [AUTH_SESSION]
     expect(AuthProvider.length).toBe(1); // accepts props object
   });
 

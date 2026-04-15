@@ -43,14 +43,14 @@ The `AuthIdentity` type (`{ unitId: string; role: string }`) SHALL be deleted fr
 
 ### Requirement: Exchange flow derives permission exclusively from server database
 
-The `POST /session/exchange` endpoint SHALL extract `unitId` from the `auth-identity-token`, query `User.permission` from the server database, and write the result into the session token's `permission` field. The endpoint SHALL NOT read or use the `auth-identity-token`'s `role` field.
+The `POST /session/exchange` endpoint SHALL extract `unitId` from the `auth-session-token`, query `User.permission` from the server database, and write the result into the session token's `permission` field. The endpoint SHALL NOT read or use the `auth-session-token`'s `role` field.
 
 #### Scenario: Exchange reads permission from server DB
 
-- **WHEN** a client exchanges an `auth-identity-token` for a `rezics-session-token`
+- **WHEN** a client exchanges an `auth-session-token` for a `rezics-session-token`
 - **THEN** the server reads `User.permission` from the database using the token's `unitId`, constructs `{ role: permission.role[0] ?? "MEMBER" }`, and embeds it as the `permission` claim in the session token
 
 #### Scenario: Auth token role is ignored during exchange
 
-- **WHEN** an `auth-identity-token` has `role: "admin"` but the server database has `User.permission: null`
+- **WHEN** an `auth-session-token` has `role: "admin"` but the server database has `User.permission: null`
 - **THEN** the issued session token contains `permission: { role: "MEMBER" }` -- the auth token's role has no effect

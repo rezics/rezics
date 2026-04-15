@@ -24,13 +24,13 @@ describe("createTokenResolver", () => {
   test("absent header returns null", async () => {
     const app = new Elysia()
       .use(
-        createTokenResolver("authIdentityToken", {
+        createTokenResolver("authSessionToken", {
           headerName: "Authorization",
           usesBearer: true,
           verifier: mockVerifier({ sub: "user-1" }),
         }),
       )
-      .get("/", ({ authIdentityToken }) => ({ token: authIdentityToken }));
+      .get("/", ({ authSessionToken }) => ({ token: authSessionToken }));
 
     const res = await app.handle(new Request("http://localhost/"));
     const body = await res.json();
@@ -41,13 +41,13 @@ describe("createTokenResolver", () => {
     const payload = { sub: "user-1", unitId: "u1" };
     const app = new Elysia()
       .use(
-        createTokenResolver("authIdentityToken", {
+        createTokenResolver("authSessionToken", {
           headerName: "Authorization",
           usesBearer: true,
           verifier: mockVerifier(payload),
         }),
       )
-      .get("/", ({ authIdentityToken }) => ({ token: authIdentityToken }));
+      .get("/", ({ authSessionToken }) => ({ token: authSessionToken }));
 
     const res = await app.handle(
       new Request("http://localhost/", {
@@ -61,13 +61,13 @@ describe("createTokenResolver", () => {
   test("invalid token resolves to null", async () => {
     const app = new Elysia()
       .use(
-        createTokenResolver("authIdentityToken", {
+        createTokenResolver("authSessionToken", {
           headerName: "Authorization",
           usesBearer: true,
           verifier: failingVerifier() as any,
         }),
       )
-      .get("/", ({ authIdentityToken }) => ({ token: authIdentityToken }));
+      .get("/", ({ authSessionToken }) => ({ token: authSessionToken }));
 
     const res = await app.handle(
       new Request("http://localhost/", {
@@ -92,13 +92,13 @@ describe("createTokenResolver", () => {
 
     const app = new Elysia()
       .use(
-        createTokenResolver("authIdentityToken", {
+        createTokenResolver("authSessionToken", {
           headerName: "Authorization",
           usesBearer: true,
           verifier,
         }),
       )
-      .get("/", ({ authIdentityToken }) => ({ token: authIdentityToken }));
+      .get("/", ({ authSessionToken }) => ({ token: authSessionToken }));
 
     await app.handle(
       new Request("http://localhost/", {
@@ -140,7 +140,7 @@ describe("createTokenResolver", () => {
   test("multiple resolvers compose independently", async () => {
     const app = new Elysia()
       .use(
-        createTokenResolver("authIdentityToken", {
+        createTokenResolver("authSessionToken", {
           headerName: "Authorization",
           usesBearer: true,
           verifier: mockVerifier({ sub: "user-1" }),
@@ -156,8 +156,8 @@ describe("createTokenResolver", () => {
           }),
         }),
       )
-      .get("/", ({ authIdentityToken, rezicsSessionToken }) => ({
-        identity: authIdentityToken,
+      .get("/", ({ authSessionToken, rezicsSessionToken }) => ({
+        identity: authSessionToken,
         session: rezicsSessionToken,
       }));
 
@@ -188,7 +188,7 @@ describe("createTokenResolver", () => {
       } as VerifiedJwt<any>;
     };
 
-    const resolver = createTokenResolver("authIdentityToken", {
+    const resolver = createTokenResolver("authSessionToken", {
       headerName: "Authorization",
       usesBearer: true,
       verifier: countingVerifier,
@@ -197,7 +197,7 @@ describe("createTokenResolver", () => {
     const app = new Elysia()
       .use(resolver)
       .use(resolver)
-      .get("/", ({ authIdentityToken }) => ({ token: authIdentityToken }));
+      .get("/", ({ authSessionToken }) => ({ token: authSessionToken }));
 
     await app.handle(
       new Request("http://localhost/", {

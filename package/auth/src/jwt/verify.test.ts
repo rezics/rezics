@@ -146,7 +146,7 @@ describe("verifyBearerToken", () => {
 });
 
 describe("auth-local verifier wrappers", () => {
-  test("uses auth env defaults for auth identity verification", async () => {
+  test("uses auth env defaults for auth session token verification", async () => {
     const key = await createEcJwkWithKid("kid-auth-local");
 
     const server = Bun.serve({
@@ -165,7 +165,7 @@ describe("auth-local verifier wrappers", () => {
     // Some client-side tests set a global window in the same Bun process.
     // Ensure auth-local resolves env in server mode for this verifier test.
     (globalThis as { window?: Window }).window = undefined;
-    const { verifyAuthIdentityToken } = await import("../session/jwt/verify");
+    const { verifyAuthSessionToken } = await import("../session/jwt/verify");
 
     const token = await new SignJWT({
       unitId: "user-1",
@@ -180,7 +180,7 @@ describe("auth-local verifier wrappers", () => {
       .setExpirationTime("1h")
       .sign(key.privateKey);
 
-    const verified = await verifyAuthIdentityToken(`Bearer ${token}`);
+    const verified = await verifyAuthSessionToken(`Bearer ${token}`);
 
     expect(verified.payload.sub).toBe("user-1");
     server.stop(true);

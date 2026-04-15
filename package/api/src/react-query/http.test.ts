@@ -130,7 +130,7 @@ describe("refreshAuthToken", () => {
 
     setToken(
       "eyJhbGciOiJub25lIn0.eyJzdWIiOiJ1c2VyLTEiLCJleHAiOjQ3NjYwMDAwMDB9.c2ln",
-      NormalizedTokenName.AUTH_IDENTITY,
+      NormalizedTokenName.AUTH_SESSION,
     );
     setToken("member-token", NormalizedTokenName.REZICS_SESSION);
 

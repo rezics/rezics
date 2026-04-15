@@ -4,24 +4,31 @@ import { t } from "elysia";
  * <issuer>-<token-type>
  *
  * @example
- * auth-identity-token — issued by auth, used as exchange/refresh token
+ * auth-session-token — issued by auth, used as exchange/refresh token
  * rezics-session-token — issued by server, used as Bearer access token
  */
 
 export const NormalizedTokenName = {
-  AUTH_IDENTITY: "auth-identity-token",
+  /**
+   * auth-session-token — issued by auth, auth server session token
+   * for rezics server used as exchange/refresh token
+   */
+  AUTH_SESSION: "auth-session-token",
+  /**
+   * rezics-session-token — issued by server, used as Bearer access token for rezics server
+   */
   REZICS_SESSION: "rezics-session-token",
 } as const;
 export type NormalizedTokenName =
   (typeof NormalizedTokenName)[keyof typeof NormalizedTokenName];
 
 export const normalizedTokenNameSchema = t.Union([
-  t.Literal(NormalizedTokenName.AUTH_IDENTITY),
+  t.Literal(NormalizedTokenName.AUTH_SESSION),
   t.Literal(NormalizedTokenName.REZICS_SESSION),
 ]);
 
 export const TokenTransportHeader = {
-  AUTH_IDENTITY_EXCHANGE: "x-auth-identity-token",
+  AUTH_SESSION_EXCHANGE: "x-auth-session-token",
   AUTHORIZATION: "Authorization",
 } as const;
 export type TokenTransportHeader =
@@ -47,7 +54,7 @@ export const tokenPermissionRoleSchema = t.Union([
 ]);
 export type TokenPermissionRole = (typeof tokenPermissionRoleSchema)["static"];
 
-export const authIdentityTokenClaimsSchema = t.Object({
+export const authSessionTokenClaimsSchema = t.Object({
   unitId: t.Optional(t.String()),
   sub: t.Optional(t.String()),
   slug: t.Optional(t.String()),
@@ -60,8 +67,8 @@ export const authIdentityTokenClaimsSchema = t.Object({
   iss: t.Optional(t.String()),
   aud: t.Optional(t.Union([t.String(), t.Array(t.String())])),
 });
-export type AuthIdentityTokenClaims =
-  (typeof authIdentityTokenClaimsSchema)["static"];
+export type AuthSessionTokenClaims =
+  (typeof authSessionTokenClaimsSchema)["static"];
 
 export const rezicsSessionClaimsSchema = t.Object({
   sub: t.String(),
@@ -76,22 +83,22 @@ export const rezicsSessionClaimsSchema = t.Object({
 export type RezicsSessionClaims = (typeof rezicsSessionClaimsSchema)["static"];
 
 export const normalizedTokenHeaderMap = {
-  [NormalizedTokenName.AUTH_IDENTITY]:
-    TokenTransportHeader.AUTH_IDENTITY_EXCHANGE,
+  [NormalizedTokenName.AUTH_SESSION]:
+    TokenTransportHeader.AUTH_SESSION_EXCHANGE,
   [NormalizedTokenName.REZICS_SESSION]: TokenTransportHeader.AUTHORIZATION,
 } satisfies Record<NormalizedTokenName, TokenTransportHeader>;
 
 export const TokenContextKey = {
-  AUTH_IDENTITY: "authIdentityToken",
+  AUTH_SESSION: "authSessionToken",
   REZICS_SESSION: "rezicsSessionToken",
 } as const;
 export type TokenContextKey =
   (typeof TokenContextKey)[keyof typeof TokenContextKey];
 
 export const normalizedTokenTransportMap = {
-  [NormalizedTokenName.AUTH_IDENTITY]: {
-    tokenName: NormalizedTokenName.AUTH_IDENTITY,
-    headerName: TokenTransportHeader.AUTH_IDENTITY_EXCHANGE,
+  [NormalizedTokenName.AUTH_SESSION]: {
+    tokenName: NormalizedTokenName.AUTH_SESSION,
+    headerName: TokenTransportHeader.AUTH_SESSION_EXCHANGE,
     usesBearer: false,
   },
   [NormalizedTokenName.REZICS_SESSION]: {

@@ -19,7 +19,7 @@
 The `useServerPermission()` hook SHALL include JSDoc that states:
 1. The return value represents the main server's permission model
 2. It is derived from `rezics-session-token` claims
-3. It is unrelated to `auth-identity-token` except during the session exchange flow
+3. It is unrelated to `auth-session-token` except during the session exchange flow
 
 #### Scenario: Developer reads hook documentation
 

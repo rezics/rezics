@@ -39,7 +39,7 @@ function isActivePath(pathname: string, to: string) {
 }
 
 function getCurrentUserRole(): string | null {
-  const token = getToken(NormalizedTokenName.AUTH_IDENTITY);
+  const token = getToken(NormalizedTokenName.AUTH_SESSION);
   if (!token) return null;
   return parseJwt(token)?.role ?? null;
 }

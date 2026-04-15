@@ -6,7 +6,7 @@ import { useAuthSessionStore } from "../state/authSessionStore";
  * derived from the `rezics-session-token` claims.
  *
  * This represents the main server's permission model and is
- * unrelated to `auth-identity-token` except during the
+ * unrelated to `auth-session-token` except during the
  * session exchange flow.
  *
  * Returns `null` when the user has no valid session token

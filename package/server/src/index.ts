@@ -99,7 +99,7 @@ app
         "content-type",
         "authorization",
         "accept",
-        "x-auth-identity-token",
+        "x-auth-session-token",
         "x-internal-secret",
       ],
       maxAge: 600,
