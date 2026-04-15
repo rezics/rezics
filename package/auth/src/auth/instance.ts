@@ -46,11 +46,18 @@ export const auth = betterAuth({
   databaseHooks: {
     user: {
       create: {
+        /**
+         * OAuth-only provisioning hook.
+         *
+         * Fires on user.create — only relevant for OAuth flows where
+         * emailVerified is true at account creation time. Email-registered
+         * users have emailVerified=false at creation (set to true later
+         * via updateUser during OTP verify), so this hook does not serve them.
+         * Email users are provisioned via the route interceptor in routes.ts
+         * and the self-healing exchange fallback in the server.
+         */
         after: async (user) => {
           if (!user.emailVerified) return;
-          /**
-           * This does not apply to users who registered via email, but rather to those who registered via OAuth or other channels.
-           */
           await provisionUserOnServer({
             unitId: user.id,
             slug:

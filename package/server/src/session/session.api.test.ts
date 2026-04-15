@@ -46,7 +46,7 @@ const mockGetJwtService = mock(async () => ({
   jwksUrl: "http://localhost:3001/.well-known/jwks.json",
 }));
 
-mock.module("@/jwt", () => ({
+mock.module("@/jwt/jwtServiceCache", () => ({
   getJwtService: mockGetJwtService,
 }));
 
@@ -60,6 +60,17 @@ mock.module("#/prisma/client", () => ({
     user: {
       findUnique: mockFindUnique,
     },
+  },
+}));
+
+const mockProvisionFromJwt = mock(async () => ({
+  unitId: "new-user",
+  permission: null,
+}));
+
+mock.module("@/user/service/user.service", () => ({
+  userService: {
+    provisionFromJwt: mockProvisionFromJwt,
   },
 }));
 
@@ -135,9 +146,41 @@ describe("POST /session/exchange", () => {
     expect(response.status).toBe(401);
   });
 
-  test("unprovisioned user returns 404", async () => {
+  test("unprovisioned verified user is auto-provisioned and gets token", async () => {
     mockVerifyBearerToken.mockResolvedValueOnce({
-      payload: { unitId: "unknown-user", sub: "unknown-user", scope: "user" },
+      payload: { unitId: "new-user", sub: "new-user", scope: "user", name: "New User" },
+      token: "raw-token",
+      protectedHeader: { alg: "ES256" },
+    });
+    mockFindUnique.mockResolvedValueOnce(null);
+    mockProvisionFromJwt.mockResolvedValueOnce({
+      unitId: "new-user",
+      permission: null,
+    });
+    signRezicsSessionToken.mockResolvedValueOnce("new-user-session-token");
+
+    const { sessionApi } = await import("./session.api");
+
+    const response = await sessionApi.handle(
+      new Request("http://localhost/session/exchange", {
+        method: "POST",
+        headers: { "x-auth-session-token": "valid-auth-token" },
+      }),
+    );
+
+    expect(response.status).toBe(200);
+    const body = await response.json();
+    expect(body).toHaveProperty("token", "new-user-session-token");
+    expect(mockProvisionFromJwt).toHaveBeenCalledWith({
+      unitId: "new-user",
+      slug: undefined,
+      name: "New User",
+    });
+  });
+
+  test("unverified unprovisioned user returns 403", async () => {
+    mockVerifyBearerToken.mockResolvedValueOnce({
+      payload: { unitId: "unverified-user", sub: "unverified-user", scope: "user", email_verified: false },
       token: "raw-token",
       protectedHeader: { alg: "ES256" },
     });
@@ -152,7 +195,7 @@ describe("POST /session/exchange", () => {
       }),
     );
 
-    expect(response.status).toBe(404);
+    expect(response.status).toBe(403);
   });
 
   test("blocked user still receives token (role embedded as hint)", async () => {

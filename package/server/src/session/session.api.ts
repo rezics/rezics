@@ -4,6 +4,7 @@ import { JwtAlgorithm, verifyBearerToken } from "@rezics/jwt";
 import { Elysia, status } from "elysia";
 import { prisma } from "#/prisma/client";
 import { getJwtService } from "@/jwt/jwtServiceCache";
+import { userService } from "@/user/service/user.service";
 import {
   getMainSessionPublicJwks,
   signRezicsSessionToken,
@@ -41,18 +42,35 @@ export const sessionApi = new Elysia({ prefix: "/session" })
       return status(401, "Unauthorized: Invalid or expired auth token");
     }
 
+    /**
+     * `sub` from the auth JWT maps to `unitId` in the server's user model.
+     * The `unitId` claim is a legacy alias; `sub` is the canonical identifier.
+     */
     const unitId = claims.unitId || claims.sub;
     if (!unitId) {
       return status(401, "Unauthorized: Token missing unitId claim");
     }
 
-    const user = await prisma.user.findUnique({
+    let user = await prisma.user.findUnique({
       where: { unitId },
       select: { unitId: true, permission: true },
     });
 
     if (!user) {
-      return status(404, "User not found");
+      if (claims.email_verified === false) {
+        return status(403, "Email not verified");
+      }
+
+      const provisioned = await userService.provisionFromJwt({
+        unitId,
+        slug: claims.slug,
+        name: claims.name,
+      });
+
+      user = {
+        unitId: provisioned.unitId,
+        permission: provisioned.permission,
+      };
     }
 
     const dbPermission = user.permission as

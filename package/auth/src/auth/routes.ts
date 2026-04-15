@@ -6,7 +6,7 @@ import {
   buildAuthPresenceClearCookie,
   buildAuthPresenceSetCookie,
 } from "./auth-presence";
-import { provisionUserOnServer } from "../provisioning/provision";
+import { eagerProvisionViaExchange } from "../provisioning/eager-exchange";
 import { verifyTurnstileToken } from "../utils/turnstileUtils";
 import { AuthPolicyError } from "./errors";
 import { auth } from "./instance";
@@ -31,7 +31,8 @@ function isSessionEstablishingPath(pathname: string): boolean {
   return (
     pathname.includes("/sign-in") ||
     pathname.includes("/oauth/callback") ||
-    pathname.endsWith("/token")
+    pathname.endsWith("/token") ||
+    pathname.includes("/email-otp/verify-email")
   );
 }
 
@@ -111,17 +112,14 @@ export async function handleAuthRequest(request: Request): Promise<Response> {
     try {
       const cloned = response.clone();
       const body = (await cloned.json()) as {
-        user?: { id?: string; name?: string; slug?: string };
+        user?: { id?: string };
       };
       if (body.user?.id) {
-        await provisionUserOnServer({
-          unitId: body.user.id,
-          slug: body.user.slug ?? body.user.name ?? body.user.id,
-          name: body.user.name ?? body.user.id,
-        });
+        await eagerProvisionViaExchange(body.user.id);
       }
     } catch (error) {
-      console.error("[verify-email] Post-verification provisioning failed:", error);
+      // Best-effort: exchange fallback will handle if this fails
+      console.error("[verify-email] Eager provisioning failed:", error);
     }
   }
 
