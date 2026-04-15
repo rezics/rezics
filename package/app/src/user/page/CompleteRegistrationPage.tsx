@@ -290,39 +290,31 @@ function EmailVerificationStep({
         {t("auth.flow.verify_intro_suffix")}
       </Typography>
 
-      {turnstileToken ? (
-        <Alert severity="success">
-          {t("auth.flow.verify_turnstile_passed")}
-        </Alert>
-      ) : (
-        <>
-          <Turnstile
-            siteKeyProps={env.VITE_TURNSTILE_SITE_KEY}
-            onVerify={(token: string) => {
-              setTurnstileToken(token);
-              setTurnstileError(undefined);
-            }}
-            onReady={() => {
-              setTurnstileReady(true);
-              setTurnstileError(undefined);
-            }}
-            onError={(caughtError: Error) => {
-              setTurnstileReady(false);
-              setTurnstileToken(undefined);
-              setTurnstileError(caughtError.message);
-            }}
-            loadingComponent={
-              <div className="flex items-center gap-3">
-                <CircularProgress size={18} />
-                <Typography variant="body2">
-                  {t("auth.flow.verify_widget_loading")}
-                </Typography>
-              </div>
-            }
-          />
-          {turnstileError && <Alert severity="error">{turnstileError}</Alert>}
-        </>
-      )}
+      <Turnstile
+        siteKeyProps={env.VITE_TURNSTILE_SITE_KEY}
+        onVerify={(token: string) => {
+          setTurnstileToken(token);
+          setTurnstileError(undefined);
+        }}
+        onReady={() => {
+          setTurnstileReady(true);
+          setTurnstileError(undefined);
+        }}
+        onError={(caughtError: Error) => {
+          setTurnstileReady(false);
+          setTurnstileToken(undefined);
+          setTurnstileError(caughtError.message);
+        }}
+        loadingComponent={
+          <div className="flex items-center gap-3">
+            <CircularProgress size={18} />
+            <Typography variant="body2">
+              {t("auth.flow.verify_widget_loading")}
+            </Typography>
+          </div>
+        }
+      />
+      {turnstileError && <Alert severity="error">{turnstileError}</Alert>}
 
       <Button
         variant="contained"
