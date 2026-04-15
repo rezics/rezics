@@ -1,4 +1,4 @@
-import { CircularProgress, Typography } from "@mui/material";
+import { CircularProgress, Divider, Typography } from "@mui/material";
 import Alert from "@mui/material/Alert";
 import Button from "@mui/material/Button";
 import { authApi } from "@rezics/api/auth/auth.api";
@@ -18,17 +18,15 @@ import { Layout } from "../layout/Layout";
 import { resolvePostAuthDestination } from "../model/authRedirect";
 import { useAuth } from "./useAuth";
 
-type Step = "send" | "verify";
-
 export const VerifyEmailPage: FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const auth = useAuth();
-  const [step, setStep] = useState<Step>("send");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string>();
   const [error, setError] = useState<string>();
   const [otpCode, setOtpCode] = useState("");
+  const [codeSent, setCodeSent] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState<string>();
   const [turnstileReady, setTurnstileReady] = useState(false);
   const [turnstileError, setTurnstileError] = useState<string>();
@@ -36,8 +34,8 @@ export const VerifyEmailPage: FC = () => {
 
   const email = auth.authSession?.email ?? "";
   const canSend = useMemo(
-    () => Boolean(email && turnstileReady && turnstileToken),
-    [email, turnstileReady, turnstileToken],
+    () => Boolean(email && turnstileReady && turnstileToken && !loading),
+    [email, turnstileReady, turnstileToken, loading],
   );
 
   const handleSendCode = async () => {
@@ -61,7 +59,7 @@ export const VerifyEmailPage: FC = () => {
         turnstileToken,
       });
       setMessage(t("auth.flow.verify_sent"));
-      setStep("verify");
+      setCodeSent(true);
       setTurnstileToken(undefined);
       setTurnstileReady(false);
       setTurnstileRetryKey((current) => current + 1);
@@ -111,36 +109,6 @@ export const VerifyEmailPage: FC = () => {
       } catch {
         setError(msg);
       }
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleRefresh = async () => {
-    setLoading(true);
-    setError(undefined);
-    setMessage(undefined);
-
-    try {
-      await queryAccessToken({ requirePresence: false });
-      const sessionState = await hydrateAuthSessionState();
-      if (
-        sessionState &&
-        !sessionState.authSession.needsEmailVerification &&
-        !sessionState.authSession.needsOnboarding
-      ) {
-        await exchangeForSessionToken();
-        navigate({
-          to: resolvePostAuthDestination({
-            needsOnboarding: sessionState.authSession.needsOnboarding,
-            needsVerification: sessionState.authSession.needsEmailVerification,
-          }),
-        });
-        return;
-      }
-      setMessage(t("auth.flow.verify_refreshed"));
-    } catch (caughtError) {
-      setError((caughtError as Error).message);
     } finally {
       setLoading(false);
     }
@@ -205,74 +173,92 @@ export const VerifyEmailPage: FC = () => {
           {error && <Alert severity="error">{error}</Alert>}
           {message && <Alert severity="success">{message}</Alert>}
 
-          {step === "send" ? (
-            <>
-              <Typography variant="body1">
-                {t("auth.flow.verify_intro_prefix")}{" "}
-                <strong>{email || t("auth.flow.verify_email_fallback")}</strong>{" "}
-                {t("auth.flow.verify_intro_suffix")}
-              </Typography>
-              <Turnstile
-                key={turnstileRetryKey}
-                siteKeyProps={env.VITE_TURNSTILE_SITE_KEY}
-                onVerify={(token: string) => {
-                  setTurnstileToken(token);
-                  setTurnstileError(undefined);
-                }}
-                onReady={() => {
-                  setTurnstileReady(true);
-                  setTurnstileError(undefined);
-                }}
-                onError={(caughtError: Error) => {
-                  setTurnstileReady(false);
-                  setTurnstileToken(undefined);
-                  setTurnstileError(caughtError.message);
-                }}
-                loadingComponent={
-                  <div className="flex items-center gap-3">
-                    <CircularProgress size={18} />
-                    <Typography variant="body2">
-                      {t("auth.flow.verify_widget_loading")}
-                    </Typography>
-                  </div>
-                }
-              />
-              {turnstileError ? (
-                <Alert
-                  severity="error"
-                  action={
-                    <Button
-                      color="inherit"
-                      size="small"
-                      onClick={() => {
-                        setTurnstileError(undefined);
-                        setTurnstileRetryKey((current) => current + 1);
-                      }}
-                    >
-                      {t("auth.flow.retry")}
-                    </Button>
-                  }
+          <Typography variant="body1">
+            {t("auth.flow.verify_intro_prefix")}{" "}
+            <strong>{email || t("auth.flow.verify_email_fallback")}</strong>{" "}
+            {t("auth.flow.verify_intro_suffix")}
+          </Typography>
+
+          <Turnstile
+            key={turnstileRetryKey}
+            siteKeyProps={env.VITE_TURNSTILE_SITE_KEY}
+            onVerify={(token: string) => {
+              setTurnstileToken(token);
+              setTurnstileError(undefined);
+            }}
+            onReady={() => {
+              setTurnstileReady(true);
+              setTurnstileError(undefined);
+            }}
+            onError={(caughtError: Error) => {
+              setTurnstileReady(false);
+              setTurnstileToken(undefined);
+              setTurnstileError(caughtError.message);
+            }}
+            loadingComponent={
+              <div className="flex items-center gap-3">
+                <CircularProgress size={18} />
+                <Typography variant="body2">
+                  {t("auth.flow.verify_widget_loading")}
+                </Typography>
+              </div>
+            }
+          />
+
+          {turnstileError && (
+            <Alert
+              severity="error"
+              action={
+                <Button
+                  color="inherit"
+                  size="small"
+                  onClick={() => {
+                    setTurnstileError(undefined);
+                    setTurnstileRetryKey((current) => current + 1);
+                  }}
                 >
-                  {turnstileError}
-                </Alert>
-              ) : null}
-            </>
-          ) : (
-            <>
-              <Typography variant="body1">
-                {t("auth.flow.verify_code_sent_to")}{" "}
-                <strong>{email}</strong>
-              </Typography>
-              <OtpInput
-                value={otpCode}
-                onChange={setOtpCode}
-                disabled={loading}
-              />
-              <Typography variant="body2" color="text.secondary">
-                {t("auth.flow.verify_code_expires")}
-              </Typography>
-            </>
+                  {t("auth.flow.retry")}
+                </Button>
+              }
+            >
+              {turnstileError}
+            </Alert>
           )}
+
+          <Button
+            variant="contained"
+            disabled={!canSend}
+            onClick={handleSendCode}
+            fullWidth
+          >
+            {t("auth.flow.verify_send_code")}
+          </Button>
+
+          <Divider />
+
+          {codeSent && (
+            <Typography variant="body2" color="text.secondary">
+              {t("auth.flow.verify_code_sent_to")}{" "}
+              <strong>{email}</strong>
+              {" — "}
+              {t("auth.flow.verify_code_expires")}
+            </Typography>
+          )}
+
+          <OtpInput
+            value={otpCode}
+            onChange={setOtpCode}
+            disabled={loading}
+          />
+
+          <Button
+            variant="contained"
+            disabled={otpCode.replace(/\s/g, "").length !== 6 || loading}
+            onClick={handleVerifyCode}
+            fullWidth
+          >
+            {t("auth.flow.verify_submit_code")}
+          </Button>
 
           {auth.loading || loading ? (
             <div className="flex items-center gap-3">
@@ -294,42 +280,20 @@ export const VerifyEmailPage: FC = () => {
           >
             {t("auth.logout")}
           </Button>
-          {step === "send" ? (
-            <>
-              <Button variant="text" disabled={loading} onClick={handleRefresh}>
-                {t("auth.flow.verify_refresh")}
-              </Button>
-              <Button
-                variant="contained"
-                disabled={!canSend || loading}
-                onClick={handleSendCode}
-              >
-                {t("auth.flow.verify_send_code")}
-              </Button>
-            </>
-          ) : (
-            <>
-              <Button
-                variant="text"
-                disabled={loading}
-                onClick={() => {
-                  setStep("send");
-                  setOtpCode("");
-                  setError(undefined);
-                  setMessage(undefined);
-                }}
-              >
-                {t("auth.flow.verify_resend")}
-              </Button>
-              <Button
-                variant="contained"
-                disabled={otpCode.replace(/\s/g, "").length !== 6 || loading}
-                onClick={handleVerifyCode}
-              >
-                {t("auth.flow.verify_submit_code")}
-              </Button>
-            </>
-          )}
+          <Button
+            variant="text"
+            disabled={!codeSent || loading}
+            onClick={() => {
+              setTurnstileRetryKey((current) => current + 1);
+              setTurnstileToken(undefined);
+              setTurnstileReady(false);
+              setOtpCode("");
+              setError(undefined);
+              setMessage(undefined);
+            }}
+          >
+            {t("auth.flow.verify_resend")}
+          </Button>
         </>
       }
     />

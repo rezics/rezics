@@ -38,9 +38,12 @@ export function Turnstile({
   const widgetIdRef = useRef<string | null>(null);
   const [isVerifiedShow, setIsVerifiedShow] = useState(false);
 
-  function handleVerify(token: string) {
-    onVerify(token);
-  }
+  const onVerifyRef = useRef(onVerify);
+  const onReadyRef = useRef(onReady);
+  const onErrorRef = useRef(onError);
+  onVerifyRef.current = onVerify;
+  onReadyRef.current = onReady;
+  onErrorRef.current = onError;
 
   useEffect(() => {
     const scriptId = "cf-turnstile-script";
@@ -54,10 +57,8 @@ export function Turnstile({
       script.id = scriptId;
       script.crossOrigin = "anonymous";
       script.onerror = () => {
-        if (!mounted) {
-          return;
-        }
-        onError?.(new Error("Failed to load Turnstile widget."));
+        if (!mounted) return;
+        onErrorRef.current?.(new Error("Failed to load Turnstile widget."));
       };
       document.body.appendChild(script);
     }
@@ -66,17 +67,19 @@ export function Turnstile({
       if (window.turnstile && containerRef.current && !widgetIdRef.current) {
         widgetIdRef.current = window.turnstile.render(containerRef.current, {
           sitekey: siteKeyProps,
-          callback: handleVerify,
+          callback: (token: string) => onVerifyRef.current(token),
           ...options,
         });
         setIsVerifiedShow(true);
-        onReady?.();
+        onReadyRef.current?.();
       }
     }, 100);
 
     const timeout = window.setTimeout(() => {
       if (!widgetIdRef.current && mounted) {
-        onError?.(new Error("Turnstile widget did not initialize in time."));
+        onErrorRef.current?.(
+          new Error("Turnstile widget did not initialize in time."),
+        );
       }
     }, initTimeoutMs);
 
@@ -88,12 +91,12 @@ export function Turnstile({
         try {
           window.turnstile.remove(widgetIdRef.current);
         } catch {
-          onError?.(new Error("Error removing Turnstile widget"));
+          // Widget already removed
         }
       }
+      widgetIdRef.current = null;
     };
-    // biome-ignore lint/correctness/useExhaustiveDependencies: turnstile widget lifecycle
-  }, [options, initTimeoutMs, siteKeyProps, onReady, onError, handleVerify]);
+  }, [siteKeyProps, options, initTimeoutMs]);
 
   return (
     <div>

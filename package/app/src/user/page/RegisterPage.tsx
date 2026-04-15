@@ -4,7 +4,7 @@ import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import { PasswordField } from "@rezics/ui/composite/form/field/PasswordField.tsx";
 import { TextButton } from "@rezics/ui/primitive/button/TextButton.tsx";
-import { useNavigate, useRouterState } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
 import { type FC, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useAuthSessionStore } from "@/user/state";
@@ -46,7 +46,6 @@ export const RegisterPage: FC<RegisterPageProps> = ({
     confirm: "",
   });
   const navigate = useNavigate();
-  const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   const handleSubmit = async () => {
     let hasError = false;
@@ -80,17 +79,14 @@ export const RegisterPage: FC<RegisterPageProps> = ({
       setLoading(false);
     }
     if (!hasError) {
+      const authSessionState = useAuthSessionStore.getState();
+      const destination = resolvePostAuthDestination({
+        needsOnboarding: authSessionState.needsOnboarding,
+        needsVerification: authSessionState.needsVerification,
+        readyForApp: authSessionState.permission !== null,
+      });
       onClose?.();
-      if (pathname === "/register") {
-        const authSessionState = useAuthSessionStore.getState();
-        navigate({
-          to: resolvePostAuthDestination({
-            needsOnboarding: authSessionState.needsOnboarding,
-            needsVerification: authSessionState.needsVerification,
-            readyForApp: authSessionState.permission !== null,
-          }),
-        });
-      }
+      navigate({ to: destination });
     }
   };
 
