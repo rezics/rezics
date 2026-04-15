@@ -130,7 +130,11 @@ export const auth = betterAuth({
       resendStrategy: "rotate",
       overrideDefaultEmailVerification: true,
       sendVerificationOTP: async ({ email, otp, type }) => {
-        await notificationService.sendVerificationOTP({ email, otp, type });
+        notificationService
+          .sendVerificationOTP({ email, otp, type })
+          .catch((err) =>
+            console.error("[email-otp] Failed to send verification OTP:", err),
+          );
       },
     }),
     jwt({

@@ -67,6 +67,7 @@ export default {
       verify_intro_suffix: "後即可解鎖成員能力。",
       verify_email_fallback: "你的郵箱地址",
       verify_widget_loading: "正在載入驗證元件…",
+      verify_turnstile_passed: "驗證通過。",
       verify_widget_required: "驗證元件完成載入前，暫時無法重新發送驗證郵件。",
       verify_guest_notice:
         "在完成郵箱驗證前，你仍可瀏覽訪客可見頁面，但成員專屬功能會繼續保持鎖定。",

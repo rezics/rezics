@@ -315,6 +315,7 @@ export default {
       verify_intro_suffix: "to unlock member access.",
       verify_email_fallback: "your email address",
       verify_widget_loading: "Loading verification widget…",
+      verify_turnstile_passed: "Verification passed.",
       verify_widget_required:
         "Verification email resend stays disabled until the widget finishes loading.",
       verify_guest_notice:

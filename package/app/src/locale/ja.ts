@@ -72,6 +72,7 @@ export default {
       verify_intro_suffix: "を確認するとメンバー機能が利用可能になります。",
       verify_email_fallback: "あなたのメールアドレス",
       verify_widget_loading: "確認ウィジェットを読み込み中…",
+      verify_turnstile_passed: "認証に合格しました。",
       verify_widget_required:
         "確認ウィジェットの読み込みが完了するまで、確認メールの再送は無効です。",
       verify_guest_notice:

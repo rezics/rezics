@@ -72,6 +72,7 @@ export default {
       verify_intro_suffix: "um Mitgliederzugriff freizuschalten.",
       verify_email_fallback: "Ihre E-Mail-Adresse",
       verify_widget_loading: "Verifizierungs-Widget wird geladen…",
+      verify_turnstile_passed: "Verifizierung bestanden.",
       verify_widget_required:
         "Das erneute Senden der Bestätigungs-E-Mail bleibt deaktiviert, bis das Widget geladen wurde.",
       verify_guest_notice:

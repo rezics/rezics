@@ -298,6 +298,7 @@ export default {
       verify_intro_suffix: "后即可解锁成员能力。",
       verify_email_fallback: "你的邮箱地址",
       verify_widget_loading: "正在加载验证组件…",
+      verify_turnstile_passed: "验证通过。",
       verify_widget_required: "验证组件完成加载前，暂时无法重新发送验证邮件。",
       verify_guest_notice:
         "在完成邮箱验证前，你仍可浏览访客可见页面，但成员专属功能会继续保持锁定。",

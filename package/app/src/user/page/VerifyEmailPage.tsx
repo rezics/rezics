@@ -2,17 +2,13 @@ import { CircularProgress, Divider, Typography } from "@mui/material";
 import Alert from "@mui/material/Alert";
 import Button from "@mui/material/Button";
 import { authApi } from "@rezics/api/auth/auth.api";
-import {
-  exchangeForSessionToken,
-  queryAccessToken,
-} from "@rezics/api/react-query/jwt";
+import { clearAllTokens } from "@rezics/api/react-query/jwt";
 import { Turnstile } from "@rezics/ui/composite/auth/Turnstile.tsx";
 import { useNavigate } from "@tanstack/react-router";
 import { type FC, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { env } from "@/env";
 import { logout } from "@/user/model/handler";
-import { hydrateAuthSessionState } from "@/user/state";
 import { OtpInput } from "../component/OtpInput";
 import { Layout } from "../layout/Layout";
 import { resolvePostAuthDestination } from "../model/authRedirect";
@@ -40,7 +36,7 @@ export const VerifyEmailPage: FC = () => {
     return ts > Date.now() ? ts : null;
   });
   const [cooldownRemaining, setCooldownRemaining] = useState(0);
-  const cooldownRef = useRef<ReturnType<typeof setInterval>>();
+  const cooldownRef = useRef<ReturnType<typeof setInterval>>(undefined);
 
   useEffect(() => {
     if (!cooldownEnd) {
@@ -74,7 +70,14 @@ export const VerifyEmailPage: FC = () => {
           !cooldownRemaining &&
           (codeSent || (turnstileReady && turnstileToken)),
       ),
-    [email, loading, cooldownRemaining, codeSent, turnstileReady, turnstileToken],
+    [
+      email,
+      loading,
+      cooldownRemaining,
+      codeSent,
+      turnstileReady,
+      turnstileToken,
+    ],
   );
 
   const handleSendCode = async () => {
@@ -123,22 +126,14 @@ export const VerifyEmailPage: FC = () => {
       const result = await authApi.verifyEmailOTP({ email, otp: otpCode });
 
       if (result.status) {
-        await queryAccessToken({ requirePresence: false });
-        const sessionState = await hydrateAuthSessionState();
-        if (
-          sessionState &&
-          !sessionState.authSession.needsEmailVerification
-        ) {
-          await exchangeForSessionToken();
-          navigate({
-            to: resolvePostAuthDestination({
-              needsOnboarding: sessionState.authSession.needsOnboarding,
-              needsVerification: false,
-            }),
-          });
-          return;
-        }
-        setMessage(t("auth.flow.verify_success"));
+        // Clear stale tokens so AuthProvider fetches a fresh JWT
+        // on the next page load (the old one still has email_verified: false).
+        clearAllTokens();
+        window.location.href = resolvePostAuthDestination({
+          needsOnboarding: auth.needsOnboarding,
+          needsVerification: false,
+        });
+        return;
       }
     } catch (caughtError) {
       const msg = (caughtError as Error).message;
@@ -218,7 +213,11 @@ export const VerifyEmailPage: FC = () => {
             {t("auth.flow.verify_intro_suffix")}
           </Typography>
 
-          {!codeSent && (
+          {turnstileToken ? (
+            <Alert severity="success">
+              {t("auth.flow.verify_turnstile_passed")}
+            </Alert>
+          ) : (
             <>
               <Turnstile
                 siteKeyProps={env.VITE_TURNSTILE_SITE_KEY}
@@ -270,18 +269,13 @@ export const VerifyEmailPage: FC = () => {
 
           {codeSent && (
             <Typography variant="body2" color="text.secondary">
-              {t("auth.flow.verify_code_sent_to")}{" "}
-              <strong>{email}</strong>
+              {t("auth.flow.verify_code_sent_to")} <strong>{email}</strong>
               {" — "}
               {t("auth.flow.verify_code_expires")}
             </Typography>
           )}
 
-          <OtpInput
-            value={otpCode}
-            onChange={setOtpCode}
-            disabled={loading}
-          />
+          <OtpInput value={otpCode} onChange={setOtpCode} disabled={loading} />
 
           <Button
             variant="contained"
