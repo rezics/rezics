@@ -113,21 +113,29 @@ export function AuthProvider() {
       if (!mounted) return;
 
       // 2. Refresh rezics-session-token via exchange
-      const sessionToken = getToken(NormalizedTokenName.REZICS_SESSION);
-      const sessionExpMs = sessionToken
-        ? getTokenExpMs(NormalizedTokenName.REZICS_SESSION)
-        : null;
-      const sessionNeedsRefresh =
-        !sessionToken ||
-        !sessionExpMs ||
-        sessionExpMs - REFRESH_BUFFER_MS <= Date.now();
+      // Skip for unverified users — exchange always returns null for them
+      const currentAuthClaims = parseJwt(
+        getToken(NormalizedTokenName.AUTH_IDENTITY),
+      );
+      const isUnverified = currentAuthClaims?.email_verified === false;
 
-      if (sessionNeedsRefresh) {
-        const result = await refreshSessionToken();
-        if (result === "retryable") {
-          const delayMs = retryPolicy.registerFailure();
-          scheduleRefresh(delayMs);
-          return;
+      if (!isUnverified) {
+        const sessionToken = getToken(NormalizedTokenName.REZICS_SESSION);
+        const sessionExpMs = sessionToken
+          ? getTokenExpMs(NormalizedTokenName.REZICS_SESSION)
+          : null;
+        const sessionNeedsRefresh =
+          !sessionToken ||
+          !sessionExpMs ||
+          sessionExpMs - REFRESH_BUFFER_MS <= Date.now();
+
+        if (sessionNeedsRefresh) {
+          const result = await refreshSessionToken();
+          if (result === "retryable") {
+            const delayMs = retryPolicy.registerFailure();
+            scheduleRefresh(delayMs);
+            return;
+          }
         }
       }
 

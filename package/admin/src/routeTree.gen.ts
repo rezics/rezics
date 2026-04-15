@@ -32,8 +32,8 @@ import { Route as AdminBookMeiliRouteImport } from './routes/_admin/book/meili'
 import { Route as AdminAuthUsersRouteImport } from './routes/_admin/auth/users'
 import { Route as AdminAuthStatusRouteImport } from './routes/_admin/auth/status'
 import { Route as AdminAuthSessionsRouteImport } from './routes/_admin/auth/sessions'
-import { Route as AdminAuthEmailRouteImport } from './routes/_admin/auth/email'
 import { Route as AdminAuthJwtServicesRouteImport } from './routes/_admin/auth/jwt-services'
+import { Route as AdminAuthEmailRouteImport } from './routes/_admin/auth/email'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -134,11 +134,6 @@ const AdminBookMeiliRoute = AdminBookMeiliRouteImport.update({
   path: '/book/meili',
   getParentRoute: () => AdminRoute,
 } as any)
-const AdminAuthEmailRoute = AdminAuthEmailRouteImport.update({
-  id: '/auth/email',
-  path: '/auth/email',
-  getParentRoute: () => AdminRoute,
-} as any)
 const AdminAuthUsersRoute = AdminAuthUsersRouteImport.update({
   id: '/auth/users',
   path: '/auth/users',
@@ -157,6 +152,11 @@ const AdminAuthSessionsRoute = AdminAuthSessionsRouteImport.update({
 const AdminAuthJwtServicesRoute = AdminAuthJwtServicesRouteImport.update({
   id: '/auth/jwt-services',
   path: '/auth/jwt-services',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAuthEmailRoute = AdminAuthEmailRouteImport.update({
+  id: '/auth/email',
+  path: '/auth/email',
   getParentRoute: () => AdminRoute,
 } as any)
 
@@ -469,13 +469,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminBookMeiliRouteImport
       parentRoute: typeof AdminRoute
     }
-    '/_admin/auth/email': {
-      id: '/_admin/auth/email'
-      path: '/auth/email'
-      fullPath: '/auth/email'
-      preLoaderRoute: typeof AdminAuthEmailRouteImport
-      parentRoute: typeof AdminRoute
-    }
     '/_admin/auth/users': {
       id: '/_admin/auth/users'
       path: '/auth/users'
@@ -502,6 +495,13 @@ declare module '@tanstack/react-router' {
       path: '/auth/jwt-services'
       fullPath: '/auth/jwt-services'
       preLoaderRoute: typeof AdminAuthJwtServicesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/auth/email': {
+      id: '/_admin/auth/email'
+      path: '/auth/email'
+      fullPath: '/auth/email'
+      preLoaderRoute: typeof AdminAuthEmailRouteImport
       parentRoute: typeof AdminRoute
     }
   }

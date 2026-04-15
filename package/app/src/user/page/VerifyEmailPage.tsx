@@ -36,8 +36,8 @@ export const VerifyEmailPage: FC = () => {
 
   const email = auth.authSession?.email ?? "";
   const canSend = useMemo(
-    () => Boolean(auth.authenticated && email && turnstileReady && turnstileToken),
-    [auth.authenticated, email, turnstileReady, turnstileToken],
+    () => Boolean(email && turnstileReady && turnstileToken),
+    [email, turnstileReady, turnstileToken],
   );
 
   const handleSendCode = async () => {
@@ -151,7 +151,7 @@ export const VerifyEmailPage: FC = () => {
     navigate({ to: "/" });
   };
 
-  if (!auth.authenticated) {
+  if (!auth.authenticated && !auth.needsVerification) {
     return (
       <Layout
         title={t("auth.flow.verify_title")}

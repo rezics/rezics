@@ -1,3 +1,4 @@
+import { authApi } from "@rezics/api/auth/auth.api";
 import {
   clearAuthPresence,
   hasAuthPresence,
@@ -113,9 +114,29 @@ export async function hydrateAuthSessionState(options?: {
   store.setPending();
 
   try {
-    // Derive state from local token claims — no server call needed
+    // Derive state from local token claims (server call for unverified users)
     const authToken = getToken(NormalizedTokenName.AUTH_IDENTITY);
     const payload = authToken ? parseJwt(authToken) : null;
+
+    // For unverified users, fetch full authSession from server to get email
+    // and other fields. For verified users, derive from local token claims.
+    let authSession: GetSessionStateResponse["authSession"];
+    if (payload?.email_verified === false) {
+      try {
+        const serverState = await authApi.getSessionState();
+        authSession = serverState.authSession;
+      } catch {
+        authSession = {
+          canAcquireMemberToken: !!payload,
+          readinessStatus: "needs-verification",
+        } as GetSessionStateResponse["authSession"];
+      }
+    } else {
+      authSession = {
+        canAcquireMemberToken: !!payload,
+        readinessStatus: "ready",
+      } as GetSessionStateResponse["authSession"];
+    }
 
     const sessionState: AuthSessionSnapshot = {
       session: payload
@@ -132,12 +153,7 @@ export async function hydrateAuthSessionState(options?: {
             updatedAt: "",
           }
         : null,
-      authSession: {
-        canAcquireMemberToken: !!payload,
-        readinessStatus: payload?.email_verified === false
-          ? "needs-verification"
-          : "ready",
-      } as GetSessionStateResponse["authSession"],
+      authSession,
     };
 
     useAuthSessionStore.getState().setSessionState(sessionState);
