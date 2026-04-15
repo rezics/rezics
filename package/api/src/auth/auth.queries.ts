@@ -37,10 +37,19 @@ export const authAdminUsersQuery = () =>
     staleTime: 1000 * 60 * 1,
   });
 
+export const authSlugCheckQuery = (slug: string) =>
+  queryOptions({
+    queryKey: authKeys.slugCheck(slug),
+    queryFn: () => authApi.checkSlug(slug),
+    enabled: slug.length >= 6,
+    staleTime: 1000 * 30,
+  });
+
 export const authQueries = {
   session: authSessionQuery,
   sessionState: authSessionStateQuery,
   sessions: authSessionsQuery,
   providers: authProvidersQuery,
   adminUsers: authAdminUsersQuery,
+  slugCheck: authSlugCheckQuery,
 };

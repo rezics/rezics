@@ -16,9 +16,9 @@ export function PendingVerificationSection() {
         variant="outlined"
         size="small"
         component={Link}
-        to="/verify-email"
+        to="/complete-registration"
       >
-        {t("auth.flow.verify_banner_action")}
+        {t("auth.flow.complete_registration_action")}
       </Button>
       <Button
         variant="text"

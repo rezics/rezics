@@ -129,6 +129,17 @@ export function useRevokeSessionMutation() {
   });
 }
 
+export function useConfirmIdentityMutation() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (input: { username: string; slug: string }) =>
+      authApi.confirmIdentity(input),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: authKeys.sessionState() });
+    },
+  });
+}
+
 export const authMutations = {
   useSignIn: useSignInMutation,
   useSignUp: useSignUpMutation,
@@ -141,4 +152,5 @@ export const authMutations = {
   useAdminSetRole: useAdminSetRoleMutation,
   useAdminRemoveUser: useAdminRemoveUserMutation,
   useRevokeSession: useRevokeSessionMutation,
+  useConfirmIdentity: useConfirmIdentityMutation,
 };

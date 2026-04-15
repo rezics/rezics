@@ -134,10 +134,10 @@ describe("authApi", () => {
           authSession: {
             email: "reader@example.com",
             emailVerified: false,
-            needsEmailVerification: true,
-            needsOnboarding: true,
+            identitySet: false,
+            registrationComplete: false,
             canAcquireMemberToken: false,
-            readinessStatus: "needs-onboarding",
+            readinessStatus: "needs-registration",
             hasPassword: false,
             canSetPassword: true,
             providerIds: ["google"],
@@ -155,7 +155,7 @@ describe("authApi", () => {
     const { authApi } = await import("./auth.api");
     const response = await authApi.getSessionState();
 
-    expect(response.authSession.needsEmailVerification).toBe(true);
+    expect(response.authSession.emailVerified).toBe(false);
 
     const [url, options] = fetchMock.mock.calls[0]!;
     expect(url).toBe("http://auth.example/api/auth/get-session-state");

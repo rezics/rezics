@@ -335,9 +335,11 @@ export default {
       verify_code_expires: "The code expires in 5 minutes.",
       verify_code_incomplete: "Please enter the full 6-digit code.",
       verify_success: "Email verified successfully!",
-      verify_banner_action: "Verify Email",
+      verify_banner_action: "Complete Registration",
       verify_banner_message:
-        "Your account can browse guest-accessible pages, but member features stay locked until your email is verified.",
+        "Your account can browse guest-accessible pages, but member features stay locked until registration is complete.",
+      complete_registration_action: "Complete Registration",
+      complete_registration_prompt: "Complete registration to {{action}}",
       retry: "Retry",
       providers: {
         github: "GitHub",

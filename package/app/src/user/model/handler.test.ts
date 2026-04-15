@@ -62,8 +62,8 @@ const hydrateAuthSessionStateMock = mock(async () => ({
   user: { id: "user-1" },
   authSession: {
     canAcquireMemberToken: true,
-    needsOnboarding: false,
-    needsEmailVerification: false,
+    identitySet: true,
+    registrationComplete: true,
   },
 }));
 

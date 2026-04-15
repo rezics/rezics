@@ -43,8 +43,8 @@ const readySession: GetSessionStateResponse = {
   authSession: {
     email: "reader@example.com",
     emailVerified: true,
-    needsEmailVerification: false,
-    needsOnboarding: false,
+    identitySet: true,
+    registrationComplete: true,
     canAcquireMemberToken: true,
     readinessStatus: "ready" as const,
     hasPassword: true,
@@ -55,14 +55,15 @@ const readySession: GetSessionStateResponse = {
   },
 };
 
-const guestSession = {
+const incompleteSession = {
   ...readySession,
   authSession: {
     ...readySession.authSession,
     emailVerified: false,
-    needsEmailVerification: true,
+    identitySet: false,
+    registrationComplete: false,
     canAcquireMemberToken: false,
-    readinessStatus: "needs-verification" as const,
+    readinessStatus: "needs-registration" as const,
     trustedProviderId: undefined,
   },
 };
@@ -72,14 +73,11 @@ describe("authSessionStore", () => {
     tokenState[NormalizedTokenName.REZICS_SESSION] = null;
     presence = false;
     getSessionStateMock.mockReset();
-    const { clearAuthSessionState, useAuthSessionStore } = await import(
-      "./authSessionStore"
-    );
+    const { clearAuthSessionState } = await import("./authSessionStore");
     clearAuthSessionState();
-    useAuthSessionStore.getState().syncBusinessToken(null);
   });
 
-  test("hydrates member-ready state on reload when a business token already exists", async () => {
+  test("hydrates ready state on reload when session is complete", async () => {
     tokenState[NormalizedTokenName.REZICS_SESSION] = "member-token";
     presence = true;
     getSessionStateMock.mockResolvedValueOnce(readySession);
@@ -92,29 +90,25 @@ describe("authSessionStore", () => {
 
     expect(useAuthSessionStore.getState()).toMatchObject({
       status: "ready",
-      hasAuthSession: true,
-      hasBusinessToken: true,
-      capabilityLevel: "member",
-      needsVerification: false,
-      needsOnboarding: false,
+      registrationComplete: true,
+      identitySet: true,
     });
   });
 
-  test("derives needsVerification from authSession state", async () => {
+  test("derives registrationComplete from authSession state", async () => {
     const { useAuthSessionStore } = await import("./authSessionStore");
 
-    useAuthSessionStore.getState().setSessionState(guestSession);
+    useAuthSessionStore.getState().setSessionState(incompleteSession);
 
     expect(useAuthSessionStore.getState()).toMatchObject({
-      hasBusinessToken: false,
-      needsVerification: true,
-      capabilityLevel: "guest",
+      registrationComplete: false,
+      identitySet: false,
     });
   });
 
-  test("hydrates authenticated but unverified sessions as guest-capable", async () => {
+  test("hydrates authenticated but incomplete registration as not complete", async () => {
     presence = true;
-    getSessionStateMock.mockResolvedValueOnce(guestSession);
+    getSessionStateMock.mockResolvedValueOnce(incompleteSession);
 
     const { hydrateAuthSessionState, useAuthSessionStore } = await import(
       "./authSessionStore"
@@ -124,10 +118,7 @@ describe("authSessionStore", () => {
 
     expect(useAuthSessionStore.getState()).toMatchObject({
       status: "ready",
-      hasAuthSession: true,
-      hasBusinessToken: false,
-      capabilityLevel: "guest",
-      needsVerification: true,
+      registrationComplete: false,
     });
   });
 
@@ -142,8 +133,6 @@ describe("authSessionStore", () => {
     expect(getSessionStateMock).not.toHaveBeenCalled();
     expect(useAuthSessionStore.getState()).toMatchObject({
       status: "ready",
-      capabilityLevel: "anonymous",
-      hasAuthSession: false,
     });
   });
 
@@ -160,8 +149,6 @@ describe("authSessionStore", () => {
     expect(presence).toBe(false);
     expect(useAuthSessionStore.getState()).toMatchObject({
       status: "error",
-      hasAuthSession: false,
-      capabilityLevel: "anonymous",
     });
   });
 });

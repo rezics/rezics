@@ -11,10 +11,10 @@ import { useAuthSessionStore, useUserProfileStore } from "@/user/state";
 export const useAuth = () => {
   const authSession = useAuthSessionStore((state) => state.authSession);
   const permission = useAuthSessionStore((state) => state.permission);
-  const needsOnboarding = useAuthSessionStore((state) => state.needsOnboarding);
-  const needsVerification = useAuthSessionStore(
-    (state) => state.needsVerification,
+  const registrationComplete = useAuthSessionStore(
+    (state) => state.registrationComplete,
   );
+  const identitySet = useAuthSessionStore((state) => state.identitySet);
   const status = useAuthSessionStore((state) => state.status);
   const user = useUserProfileStore((state) => state.user as UserDTO | null);
   const setUser = useUserProfileStore((state) => state.setUser);
@@ -44,9 +44,9 @@ export const useAuth = () => {
     authenticated: isAuthenticated,
     isAuthenticated,
     permission,
-    needsOnboarding,
-    needsVerification,
-    readyForApp: isAuthenticated && !needsOnboarding && !needsVerification,
+    identitySet,
+    registrationComplete,
+    readyForApp: isAuthenticated && registrationComplete,
   };
 };
 

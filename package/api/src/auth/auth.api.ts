@@ -11,7 +11,10 @@ import type {
   AuthUser,
   ChangeEmailBody,
   ChangeEmailResponse,
+  CheckSlugResponse,
   GetSessionStateResponse,
+  IdentityConfirmBody,
+  IdentityConfirmResponse,
   RequestPasswordResetBody,
   RequestPasswordResetResponse,
   ResetPasswordBody,
@@ -272,5 +275,20 @@ export const authApi = {
     }>("/admin/email/smtp-test", {
       method: "POST",
     });
+  },
+
+  confirmIdentity: async (
+    input: IdentityConfirmBody,
+  ): Promise<IdentityConfirmResponse> => {
+    return authFetch<IdentityConfirmResponse>("/api/auth/identity/confirm", {
+      method: "POST",
+      body: JSON.stringify(input),
+    });
+  },
+
+  checkSlug: async (slug: string): Promise<CheckSlugResponse> => {
+    return authFetch<CheckSlugResponse>(
+      `/api/auth/identity/check-slug?slug=${encodeURIComponent(slug)}`,
+    );
   },
 };

@@ -5,31 +5,28 @@ import {
 } from "./authRedirect";
 
 describe("authRedirect", () => {
-  test("sends newly registered email users to verification before the app", () => {
+  test("sends incomplete registration users to complete-registration", () => {
     expect(
       resolvePostAuthDestination({
-        needsOnboarding: false,
-        needsVerification: true,
-        readyForApp: false,
+        registrationComplete: false,
       }),
-    ).toBe("/verify-email");
+    ).toBe("/complete-registration");
   });
 
-  test("sends oauth users needing setup to onboarding", () => {
+  test("sends fully registered users to home", () => {
     expect(
       resolvePostAuthDestination({
-        needsOnboarding: true,
-        needsVerification: false,
+        registrationComplete: true,
       }),
-    ).toBe("/onboarding");
+    ).toBe("/");
   });
 
-  test("builds oauth callback targets around onboarding and auth entry routes", () => {
+  test("builds oauth callback targets around complete-registration and auth entry routes", () => {
     expect(
       buildOAuthCallbackTargets("https://rezics.example", "register"),
     ).toEqual({
       callbackURL: "https://rezics.example/",
-      newUserCallbackURL: "https://rezics.example/onboarding",
+      newUserCallbackURL: "https://rezics.example/complete-registration",
       errorCallbackURL: "https://rezics.example/register",
     });
   });

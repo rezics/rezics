@@ -1,6 +1,7 @@
 import { Elysia } from "elysia";
 import { handleAuthRequest } from "../auth/routes";
 import { env } from "../env";
+import { identityApi } from "../identity/identity.api";
 import { jwtServiceAdminRouter } from "../jwt/jwt.admin.api";
 import { adminRouter } from "./admin";
 import { oauthRouter } from "./oauth";
@@ -20,6 +21,7 @@ export const authOpenApiRouter = new Elysia({
   .use(organizationRouter)
   .use(oauthRouter)
   .use(selfServiceRouter)
+  .use(identityApi)
   .use(jwtServiceAdminRouter)
   .use(
     new Elysia().all("/*", ({ request }) => handleAuthRequest(request), {

@@ -310,9 +310,11 @@ export default {
       verify_missing_email: "当前账号缺少可用于验证的邮箱地址。",
       verify_complete_widget: "请先完成验证组件，再请求重新发送邮件。",
       verify_checking_state: "正在检查验证状态…",
-      verify_banner_action: "去验证邮箱",
+      verify_banner_action: "完成註冊",
       verify_banner_message:
-        "当前账号仍可访问访客可见页面，但在邮箱验证完成前，成员功能会保持锁定。",
+        "當前帳號仍可訪問訪客可見頁面，但在註冊完成前，成員功能會保持鎖定。",
+      complete_registration_action: "完成註冊",
+      complete_registration_prompt: "完成註冊以{{action}}",
       retry: "重试",
       providers: {
         github: "GitHub",

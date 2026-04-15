@@ -6,10 +6,11 @@ import {
   buildAuthPresenceClearCookie,
   buildAuthPresenceSetCookie,
 } from "./auth-presence";
-import { eagerProvisionViaExchange } from "../provisioning/eager-exchange";
+import { provisionUserOnServer } from "../provisioning/provision";
 import { verifyTurnstileToken } from "../utils/turnstileUtils";
 import { AuthPolicyError } from "./errors";
 import { auth } from "./instance";
+import { prisma } from "./prisma";
 import { enforceInternalTokenSurface } from "./token-boundary";
 
 const openIdMetadataHandler = oauthProviderOpenIdConfigMetadata(auth);
@@ -112,14 +113,25 @@ export async function handleAuthRequest(request: Request): Promise<Response> {
     try {
       const cloned = response.clone();
       const body = (await cloned.json()) as {
-        user?: { id?: string };
+        user?: { id?: string; name?: string };
       };
       if (body.user?.id) {
-        await eagerProvisionViaExchange(body.user.id);
+        // Only provision if UserProfile exists (identity step complete)
+        const profile = await prisma.userProfile.findUnique({
+          where: { userId: body.user.id },
+          select: { slug: true },
+        });
+        if (profile) {
+          await provisionUserOnServer({
+            unitId: body.user.id,
+            slug: profile.slug,
+            name: body.user.name ?? "",
+          });
+        }
       }
     } catch (error) {
       // Best-effort: exchange fallback will handle if this fails
-      console.error("[verify-email] Eager provisioning failed:", error);
+      console.error("[verify-email] Provisioning after verification failed:", error);
     }
   }
 

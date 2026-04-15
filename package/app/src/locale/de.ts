@@ -87,9 +87,11 @@ export default {
       verify_complete_widget:
         "Schließen Sie das Verifizierungs-Widget ab, bevor Sie eine weitere E-Mail anfordern.",
       verify_checking_state: "Verifizierungsstatus wird geprüft…",
-      verify_banner_action: "E-Mail verifizieren",
+      verify_banner_action: "Registrierung abschließen",
       verify_banner_message:
-        "Ihr Konto kann gastzugängliche Seiten weiterhin nutzen, aber Mitgliedsfunktionen bleiben gesperrt, bis Ihre E-Mail verifiziert ist.",
+        "Ihr Konto kann gastzugängliche Seiten weiterhin nutzen, aber Mitgliedsfunktionen bleiben gesperrt, bis die Registrierung abgeschlossen ist.",
+      complete_registration_action: "Registrierung abschließen",
+      complete_registration_prompt: "Registrierung abschließen um {{action}}",
       retry: "Erneut versuchen",
       providers: {
         github: "GitHub",

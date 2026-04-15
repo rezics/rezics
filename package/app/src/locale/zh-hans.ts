@@ -79,9 +79,11 @@ export default {
       verify_missing_email: "目前帳號缺少可用於驗證的郵箱地址。",
       verify_complete_widget: "請先完成驗證元件，再要求重新發送郵件。",
       verify_checking_state: "正在檢查驗證狀態…",
-      verify_banner_action: "去驗證郵箱",
+      verify_banner_action: "完成注册",
       verify_banner_message:
-        "當前帳號仍可存取訪客可見頁面，但在郵箱驗證完成前，成員功能會保持鎖定。",
+        "当前账号仍可访问访客可见页面，但在注册完成前，成员功能会保持锁定。",
+      complete_registration_action: "完成注册",
+      complete_registration_prompt: "完成注册以{{action}}",
       retry: "重試",
       providers: {
         github: "GitHub",

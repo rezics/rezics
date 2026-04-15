@@ -35,21 +35,14 @@ export type AuthSessionStoreState = {
    * `null` when the user has no valid session token (unauthenticated).
    */
   permission: Permission | null;
-  needsVerification: boolean;
-  needsOnboarding: boolean;
+  identitySet: boolean;
+  registrationComplete: boolean;
   error: string | null;
   setPending: () => void;
   setSessionState: (state: AuthSessionSnapshot | null) => void;
   clearSessionState: () => void;
   reset: () => void;
 };
-
-function deriveNeedsVerification(): boolean {
-  const token = getToken(NormalizedTokenName.AUTH_SESSION);
-  if (!token) return false;
-  const payload = parseJwt(token);
-  return payload?.email_verified === false;
-}
 
 function derivePermission(): Permission | null {
   const sessionToken = getToken(NormalizedTokenName.REZICS_SESSION);
@@ -63,8 +56,9 @@ function deriveState(
   status: AuthSessionHydrationStatus = "ready",
   error: string | null = null,
 ) {
-  const needsVerification = deriveNeedsVerification();
-  const needsOnboarding = Boolean(snapshot?.authSession?.needsOnboarding);
+  const identitySet = Boolean(snapshot?.authSession?.identitySet);
+  const emailVerified = Boolean(snapshot?.authSession?.emailVerified);
+  const registrationComplete = identitySet && emailVerified;
   const permission = derivePermission();
 
   return {
@@ -73,8 +67,8 @@ function deriveState(
     user: snapshot?.user ?? null,
     authSession: snapshot?.authSession ?? null,
     permission,
-    needsVerification,
-    needsOnboarding,
+    identitySet,
+    registrationComplete,
     error,
   };
 }
@@ -114,27 +108,25 @@ export async function hydrateAuthSessionState(options?: {
   store.setPending();
 
   try {
-    // Derive state from local token claims (server call for unverified users)
+    // Always fetch full session state from server to get identity + email status
     const authToken = getToken(NormalizedTokenName.AUTH_SESSION);
     const payload = authToken ? parseJwt(authToken) : null;
 
-    // For unverified users, fetch full authSession from server to get email
-    // and other fields. For verified users, derive from local token claims.
     let authSession: GetSessionStateResponse["authSession"];
-    if (payload?.email_verified === false) {
-      try {
-        const serverState = await authApi.getSessionState();
-        authSession = serverState.authSession;
-      } catch {
-        authSession = {
-          canAcquireMemberToken: !!payload,
-          readinessStatus: "needs-verification",
-        } as GetSessionStateResponse["authSession"];
-      }
-    } else {
+    try {
+      const serverState = await authApi.getSessionState();
+      authSession = serverState.authSession;
+    } catch {
+      // Fallback: derive from local token claims
+      const emailVerified = payload?.email_verified !== false;
+      const identitySet = Boolean(payload?.slug);
       authSession = {
-        canAcquireMemberToken: !!payload,
-        readinessStatus: "ready",
+        canAcquireMemberToken: identitySet && emailVerified,
+        readinessStatus:
+          identitySet && emailVerified ? "ready" : "needs-registration",
+        emailVerified,
+        identitySet,
+        registrationComplete: identitySet && emailVerified,
       } as GetSessionStateResponse["authSession"];
     }
 

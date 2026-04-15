@@ -61,6 +61,10 @@ export const sessionApi = new Elysia({ prefix: "/session" })
         return status(403, "Email not verified");
       }
 
+      if (!claims.slug) {
+        return status(403, "Registration incomplete");
+      }
+
       const provisioned = await userService.provisionFromJwt({
         unitId,
         slug: claims.slug,

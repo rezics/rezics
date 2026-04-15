@@ -16,8 +16,7 @@ export const authProviderSchema = t.Object({
 export type AuthProvider = (typeof authProviderSchema)["static"];
 
 export const authReadinessStatusSchema = t.Union([
-  t.Literal("needs-onboarding"),
-  t.Literal("needs-verification"),
+  t.Literal("needs-registration"),
   t.Literal("ready"),
 ]);
 export type AuthReadinessStatus = (typeof authReadinessStatusSchema)["static"];
@@ -25,8 +24,8 @@ export type AuthReadinessStatus = (typeof authReadinessStatusSchema)["static"];
 export const authSessionStateSchema = t.Object({
   email: t.String({ format: "email" }),
   emailVerified: t.Boolean(),
-  needsEmailVerification: t.Boolean(),
-  needsOnboarding: t.Boolean(),
+  identitySet: t.Boolean(),
+  registrationComplete: t.Boolean(),
   canAcquireMemberToken: t.Boolean(),
   readinessStatus: authReadinessStatusSchema,
   hasPassword: t.Boolean(),
@@ -36,28 +35,6 @@ export const authSessionStateSchema = t.Object({
   trustedProviderId: t.Optional(authProviderIdSchema),
 });
 export type AuthSessionState = (typeof authSessionStateSchema)["static"];
-
-export const getSessionStateResponseSchema = t.Object({
-  session: t.Object({
-    id: t.String(),
-    token: t.String(),
-    expiresAt: t.String(),
-    userId: t.String(),
-  }),
-  user: t.Object({
-    id: t.String(),
-    name: t.String(),
-    role: t.String(),
-    email: t.String(),
-    emailVerified: t.Boolean(),
-    image: t.Optional(t.Nullable(t.String())),
-    createdAt: t.String(),
-    updatedAt: t.String(),
-  }),
-  authSession: authSessionStateSchema,
-});
-export type GetSessionStateResponse =
-  (typeof getSessionStateResponseSchema)["static"];
 
 export const listAuthProvidersResponseSchema = t.Object({
   providers: t.Array(authProviderSchema),
@@ -140,3 +117,30 @@ export const setPasswordResponseSchema = t.Object({
   status: t.Boolean(),
 });
 export type SetPasswordResponse = (typeof setPasswordResponseSchema)["static"];
+
+// Identity step contracts
+
+export const identityConfirmBodySchema = t.Object({
+  username: t.String({ minLength: 1 }),
+  slug: t.String({ minLength: 1 }),
+});
+export type IdentityConfirmBody =
+  (typeof identityConfirmBodySchema)["static"];
+
+export const identityConfirmResponseSchema = t.Object({
+  ok: t.Boolean(),
+  slug: t.String(),
+});
+export type IdentityConfirmResponse =
+  (typeof identityConfirmResponseSchema)["static"];
+
+export const checkSlugQuerySchema = t.Object({
+  slug: t.String({ minLength: 1 }),
+});
+export type CheckSlugQuery = (typeof checkSlugQuerySchema)["static"];
+
+export const checkSlugResponseSchema = t.Object({
+  available: t.Boolean(),
+  reason: t.Optional(t.String()),
+});
+export type CheckSlugResponse = (typeof checkSlugResponseSchema)["static"];

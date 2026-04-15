@@ -11,4 +11,5 @@ export const authKeys = {
   adminUsers: () => [...authKeys.all(), "admin", "users"] as const,
   adminUserList: (filters?: Record<string, unknown>) =>
     [...authKeys.adminUsers(), filters] as const,
+  slugCheck: (slug: string) => [...authKeys.all(), "slug-check", slug] as const,
 } as const;

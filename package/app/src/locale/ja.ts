@@ -87,9 +87,11 @@ export default {
       verify_complete_widget:
         "再送信を行う前に、確認ウィジェットを完了してください。",
       verify_checking_state: "確認状態を確認中…",
-      verify_banner_action: "メールを確認",
+      verify_banner_action: "登録を完了",
       verify_banner_message:
-        "このアカウントは引き続きゲスト向けページを閲覧できますが、メール確認が完了するまでメンバー機能はロックされたままです。",
+        "このアカウントは引き続きゲスト向けページを閲覧できますが、登録が完了するまでメンバー機能はロックされたままです。",
+      complete_registration_action: "登録を完了",
+      complete_registration_prompt: "{{action}}するには登録を完了してください",
       retry: "再試行",
       providers: {
         github: "GitHub",

@@ -159,8 +159,10 @@ function TokenCard({
 function SessionStoreCard() {
   const status = useAuthSessionStore((s) => s.status);
   const permission = useAuthSessionStore((s) => s.permission);
-  const needsVerification = useAuthSessionStore((s) => s.needsVerification);
-  const needsOnboarding = useAuthSessionStore((s) => s.needsOnboarding);
+  const identitySet = useAuthSessionStore((s) => s.identitySet);
+  const registrationComplete = useAuthSessionStore(
+    (s) => s.registrationComplete,
+  );
   const user = useAuthSessionStore((s) => s.user);
   const session = useAuthSessionStore((s) => s.session);
   const error = useAuthSessionStore((s) => s.error);
@@ -172,8 +174,8 @@ function SessionStoreCard() {
       "Server Permission",
       <Chip key="perm" label={permission?.role ?? "none"} size="small" />,
     ],
-    ["Needs Verification", needsVerification ? "Yes" : "No"],
-    ["Needs Onboarding", needsOnboarding ? "Yes" : "No"],
+    ["Identity Set", identitySet ? "Yes" : "No"],
+    ["Registration Complete", registrationComplete ? "Yes" : "No"],
     ["User ID", user?.id ?? "-"],
     ["User Name", user?.name ?? "-"],
     ["User Email", user?.email ?? "-"],

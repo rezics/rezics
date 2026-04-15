@@ -1,10 +1,8 @@
-import { createFileRoute, lazyRouteComponent } from "@tanstack/react-router";
-
-const OAuthOnboardingPage = lazyRouteComponent(
-  () => import("@/user/page/OAuthOnboardingPage"),
-  "OAuthOnboardingPage",
-);
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_mainLayout/onboarding")({
-  component: OAuthOnboardingPage,
+  beforeLoad: () => {
+    throw redirect({ to: "/complete-registration" });
+  },
+  component: () => null,
 });

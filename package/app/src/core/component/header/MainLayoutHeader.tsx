@@ -43,7 +43,8 @@ export const Header: React.FC<HeaderProps> = ({
 
   const authSection = (() => {
     if (auth.readyForApp && auth.user) return <AuthenticatedSection />;
-    if (auth.needsVerification) return <PendingVerificationSection />;
+    if (auth.authenticated && !auth.registrationComplete)
+      return <PendingVerificationSection />;
     return <UnauthenticatedSection />;
   })();
 

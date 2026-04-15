@@ -89,32 +89,34 @@ async function getSessionStateResponse(request: Request): Promise<Response> {
     (account: { providerId: string; password: string | null }) =>
       account.providerId === "credential" && Boolean(account.password),
   );
-  const needsOnboarding =
-    providerIds.length > 0 && !sessionData.user.emailVerified;
-  const canAcquireMemberToken =
-    sessionData.user.emailVerified && !needsOnboarding;
-  const readinessStatus = needsOnboarding
-    ? "needs-onboarding"
-    : sessionData.user.emailVerified
-      ? "ready"
-      : "needs-verification";
+
+  // Check if UserProfile exists (identity step complete)
+  const userProfile = await prisma.userProfile.findUnique({
+    where: { userId: sessionData.user.id },
+    select: { slug: true },
+  });
+  const identitySet = userProfile !== null;
+  const emailVerified = sessionData.user.emailVerified;
+  const registrationComplete = identitySet && emailVerified;
+  const canAcquireMemberToken = registrationComplete;
+  const readinessStatus = registrationComplete
+    ? "ready"
+    : "needs-registration";
 
   return Response.json({
     ...sessionData,
     authSession: {
       email: sessionData.user.email,
-      emailVerified: sessionData.user.emailVerified,
-      needsEmailVerification: !sessionData.user.emailVerified,
-      needsOnboarding,
+      emailVerified,
+      identitySet,
+      registrationComplete,
       canAcquireMemberToken,
       readinessStatus,
       hasPassword,
       canSetPassword: !hasPassword,
       providerIds,
       primaryProviderId: providerIds[0],
-      trustedProviderId: sessionData.user.emailVerified
-        ? providerIds[0]
-        : undefined,
+      trustedProviderId: emailVerified ? providerIds[0] : undefined,
     },
   });
 }

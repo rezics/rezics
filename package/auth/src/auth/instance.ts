@@ -5,7 +5,6 @@ import { admin, genericOAuth, jwt, organization } from "better-auth/plugins";
 import { emailOTP } from "better-auth/plugins/email-otp";
 import { env } from "../env";
 import { createAuthNotificationService } from "../notification";
-import { provisionUserOnServer } from "../provisioning/provision";
 import {
   createBetterAuthJwtAdapter,
   getAuthJwksGracePeriodSeconds,
@@ -47,23 +46,18 @@ export const auth = betterAuth({
     user: {
       create: {
         /**
-         * OAuth-only provisioning hook.
+         * User creation hook.
          *
-         * Fires on user.create — only relevant for OAuth flows where
-         * emailVerified is true at account creation time. Email-registered
-         * users have emailVerified=false at creation (set to true later
-         * via updateUser during OTP verify), so this hook does not serve them.
-         * Email users are provisioned via the route interceptor in routes.ts
-         * and the self-healing exchange fallback in the server.
+         * Provisioning is deferred until both registration steps complete:
+         * 1. Identity confirmation (UserProfile created with slug)
+         * 2. Email verification
+         *
+         * Provisioning is triggered by whichever step completes last
+         * (identity.api.ts or routes.ts verify-email interceptor).
+         * The exchange endpoint serves as a fallback.
          */
-        after: async (user) => {
-          if (!user.emailVerified) return;
-          await provisionUserOnServer({
-            unitId: user.id,
-            slug:
-              ((user as Record<string, unknown>).slug as string) ?? user.name,
-            name: user.name,
-          });
+        after: async (_user) => {
+          // No-op: provisioning deferred to registration completion
         },
       },
     },

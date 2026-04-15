@@ -21,6 +21,7 @@ import { Route as MainLayoutRegisterRouteImport } from './routes/_mainLayout/reg
 import { Route as MainLayoutOnboardingRouteImport } from './routes/_mainLayout/onboarding'
 import { Route as MainLayoutNoticeRouteImport } from './routes/_mainLayout/notice'
 import { Route as MainLayoutLoginRouteImport } from './routes/_mainLayout/login'
+import { Route as MainLayoutCompleteRegistrationRouteImport } from './routes/_mainLayout/complete-registration'
 import { Route as MainLayoutUnitIndexRouteImport } from './routes/_mainLayout/unit/index'
 import { Route as MainLayoutShelfIndexRouteImport } from './routes/_mainLayout/shelf/index'
 import { Route as MainLayoutReviewIndexRouteImport } from './routes/_mainLayout/review/index'
@@ -141,6 +142,12 @@ const MainLayoutLoginRoute = MainLayoutLoginRouteImport.update({
   path: '/login',
   getParentRoute: () => MainLayoutRoute,
 } as any)
+const MainLayoutCompleteRegistrationRoute =
+  MainLayoutCompleteRegistrationRouteImport.update({
+    id: '/complete-registration',
+    path: '/complete-registration',
+    getParentRoute: () => MainLayoutRoute,
+  } as any)
 const MainLayoutUnitIndexRoute = MainLayoutUnitIndexRouteImport.update({
   id: '/unit/',
   path: '/unit/',
@@ -478,6 +485,7 @@ const MainLayoutTagBookBookIdTagDomainIdRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof MainLayoutIndexRoute
+  '/complete-registration': typeof MainLayoutCompleteRegistrationRoute
   '/login': typeof MainLayoutLoginRoute
   '/notice': typeof MainLayoutNoticeRoute
   '/onboarding': typeof MainLayoutOnboardingRoute
@@ -550,6 +558,7 @@ export interface FileRoutesByFullPath {
   '/tag/book/$bookId/tag/': typeof MainLayoutTagBookBookIdTagIndexRoute
 }
 export interface FileRoutesByTo {
+  '/complete-registration': typeof MainLayoutCompleteRegistrationRoute
   '/login': typeof MainLayoutLoginRoute
   '/notice': typeof MainLayoutNoticeRoute
   '/onboarding': typeof MainLayoutOnboardingRoute
@@ -618,6 +627,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_mainLayout': typeof MainLayoutRouteWithChildren
+  '/_mainLayout/complete-registration': typeof MainLayoutCompleteRegistrationRoute
   '/_mainLayout/login': typeof MainLayoutLoginRoute
   '/_mainLayout/notice': typeof MainLayoutNoticeRoute
   '/_mainLayout/onboarding': typeof MainLayoutOnboardingRoute
@@ -694,6 +704,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/complete-registration'
     | '/login'
     | '/notice'
     | '/onboarding'
@@ -766,6 +777,7 @@ export interface FileRouteTypes {
     | '/tag/book/$bookId/tag/'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/complete-registration'
     | '/login'
     | '/notice'
     | '/onboarding'
@@ -833,6 +845,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/_mainLayout'
+    | '/_mainLayout/complete-registration'
     | '/_mainLayout/login'
     | '/_mainLayout/notice'
     | '/_mainLayout/onboarding'
@@ -996,6 +1009,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof MainLayoutLoginRouteImport
+      parentRoute: typeof MainLayoutRoute
+    }
+    '/_mainLayout/complete-registration': {
+      id: '/_mainLayout/complete-registration'
+      path: '/complete-registration'
+      fullPath: '/complete-registration'
+      preLoaderRoute: typeof MainLayoutCompleteRegistrationRouteImport
       parentRoute: typeof MainLayoutRoute
     }
     '/_mainLayout/unit/': {
@@ -1527,6 +1547,7 @@ const MainLayoutTagDomainUnitIdRouteRouteWithChildren =
   )
 
 interface MainLayoutRouteChildren {
+  MainLayoutCompleteRegistrationRoute: typeof MainLayoutCompleteRegistrationRoute
   MainLayoutLoginRoute: typeof MainLayoutLoginRoute
   MainLayoutNoticeRoute: typeof MainLayoutNoticeRoute
   MainLayoutOnboardingRoute: typeof MainLayoutOnboardingRoute
@@ -1577,6 +1598,7 @@ interface MainLayoutRouteChildren {
 }
 
 const MainLayoutRouteChildren: MainLayoutRouteChildren = {
+  MainLayoutCompleteRegistrationRoute: MainLayoutCompleteRegistrationRoute,
   MainLayoutLoginRoute: MainLayoutLoginRoute,
   MainLayoutNoticeRoute: MainLayoutNoticeRoute,
   MainLayoutOnboardingRoute: MainLayoutOnboardingRoute,

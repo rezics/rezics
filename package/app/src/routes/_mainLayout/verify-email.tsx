@@ -1,10 +1,8 @@
-import { createFileRoute, lazyRouteComponent } from "@tanstack/react-router";
-
-const VerifyEmailPage = lazyRouteComponent(
-  () => import("@/user/page/VerifyEmailPage"),
-  "VerifyEmailPage",
-);
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_mainLayout/verify-email")({
-  component: VerifyEmailPage,
+  beforeLoad: () => {
+    throw redirect({ to: "/complete-registration" });
+  },
+  component: () => null,
 });
