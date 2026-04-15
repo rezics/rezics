@@ -3,7 +3,7 @@ import type { PrismaClient } from "#/prisma/generated/client.js";
 // ── Infrastructure Snapshot ────────────────────────────
 
 /**
- * Permission role values assigned by cross-seed.
+ * Permission role values assigned by seed CLI.
  * Used to identify the 4 seed users in the server DB
  * (which lacks email — permission is the stable identifier).
  */
@@ -27,7 +27,7 @@ export interface InfraSnapshot {
 }
 
 /**
- * Snapshot cross-seeded infrastructure before a database reset.
+ * Snapshot seed CLIed infrastructure before a database reset.
  *
  * Captures:
  * - Seed users (identified by known permission role values)
@@ -42,7 +42,7 @@ export async function snapshotInfrastructure(
 ): Promise<InfraSnapshot> {
   console.log("[Snapshot] Capturing infrastructure...");
 
-  // Seed users — identified by their permission role values set by cross-seed.
+  // Seed users — identified by their permission role values set by seed CLI.
   // Server User table has no email field, so permission is the stable identifier.
   const users = await prisma.user.findMany({
     where: {
@@ -270,7 +270,7 @@ export async function restoreInfrastructure(
 }
 
 /**
- * Reset the database while preserving cross-seeded infrastructure.
+ * Reset the database while preserving seed CLIed infrastructure.
  * Snapshots infra → runs full reset → restores snapshotted data.
  *
  * Preserved infrastructure includes:

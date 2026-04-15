@@ -2,7 +2,7 @@
  * Database Reset Script
  *
  * Resets mock data from the server database. By default, preserves
- * cross-seeded infrastructure so `seed:cross` does not need to be rerun.
+ * cross-seeded infrastructure so `bun run seed` does not need to be rerun.
  *
  * **Infrastructure** (preserved by default):
  * - Seed users (root, admin, regular, blocked)
@@ -12,7 +12,7 @@
  *
  * **Flags:**
  * - `--all`  Full wipe — deletes everything including infrastructure.
- *            Requires `seed:cross` to be rerun before mock seeding.
+ *            Requires `bun run seed` to be rerun before mock seeding.
  *
  * **Usage:**
  * ```

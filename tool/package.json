@@ -7,14 +7,14 @@
     "install-services": "bun run install-services/install-services.ts",
     "deploy": "bun run deploy-script/deploy-script.ts",
     "generate-barrel": "bun run scripts/generate-barrel.ts",
-    "seed:cross": "bun run seed/cross-seed.ts",
-    "seed:cross:overwrite": "bun run seed/cross-seed.ts overwrite"
+    "seed": "bun run seed/seed.ts"
   },
   "type": "module",
   "devDependencies": {
     "@types/bun": "^1.3.11"
   },
   "dependencies": {
+    "@clack/prompts": "^0.11.0",
     "@prisma/adapter-pg": "^7.7.0",
     "better-auth": "^1.5.3",
     "dotenv": "^17.2.3"
