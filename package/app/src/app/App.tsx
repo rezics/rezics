@@ -24,12 +24,15 @@ import { useAppStore } from "./state/appStore";
 import "virtual:uno.css";
 import "@rezics/ui/shared/style/layers.css";
 
+function AppInit({ children }: { children: ReactNode }) {
+  useAppInit();
+  return children;
+}
+
 function AppProviders({ children }: { children: ReactNode }) {
   const themeMode = useAppStore((s) => s.theme);
   const customColor = useAppStore((s) => s.customColor);
   const useDynamicTheme = useAppStore((s) => s.useDynamicTheme);
-
-  useAppInit();
 
   const theme = useMemo(() => {
     if (useDynamicTheme && customColor) {
@@ -60,9 +63,11 @@ function AppProviders({ children }: { children: ReactNode }) {
               <CssBaseline />
               <PersistentSettingsLoader />
               <ReactQueryProvider>
-                <AuthProvider />
-                <WindowAlert />
-                {children}
+                <AppInit>
+                  <AuthProvider />
+                  <WindowAlert />
+                  {children}
+                </AppInit>
               </ReactQueryProvider>
             </ThemeProvider>
           </StyledEngineProvider>
