@@ -4,8 +4,8 @@ import { betterAuth } from "better-auth";
 import { admin, genericOAuth, jwt, organization } from "better-auth/plugins";
 import { emailOTP } from "better-auth/plugins/email-otp";
 import { env } from "../env";
-import { provisionUserOnServer } from "../provisioning/provision";
 import { createAuthNotificationService } from "../notification";
+import { provisionUserOnServer } from "../provisioning/provision";
 import {
   createBetterAuthJwtAdapter,
   getAuthJwksGracePeriodSeconds,
@@ -48,10 +48,13 @@ export const auth = betterAuth({
       create: {
         after: async (user) => {
           if (!user.emailVerified) return;
-
+          /**
+           * This does not apply to users who registered via email, but rather to those who registered via OAuth or other channels.
+           */
           await provisionUserOnServer({
             unitId: user.id,
-            slug: (user as Record<string, unknown>).slug as string ?? user.name,
+            slug:
+              ((user as Record<string, unknown>).slug as string) ?? user.name,
             name: user.name,
           });
         },
