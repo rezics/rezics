@@ -42,26 +42,6 @@ export const auth = betterAuth({
     },
   },
   trustedOrigins,
-  databaseHooks: {
-    user: {
-      create: {
-        /**
-         * User creation hook.
-         *
-         * Provisioning is deferred until both registration steps complete:
-         * 1. Identity confirmation (UserProfile created with slug)
-         * 2. Email verification
-         *
-         * Provisioning is triggered by whichever step completes last
-         * (identity.api.ts or routes.ts verify-email interceptor).
-         * The exchange endpoint serves as a fallback.
-         */
-        after: async (_user) => {
-          // No-op: provisioning deferred to registration completion
-        },
-      },
-    },
-  },
   emailAndPassword: {
     enabled: true,
     sendResetPassword: async ({ user, url, token }) =>
