@@ -13,11 +13,21 @@ import Alert from "@mui/material/Alert";
 import Button from "@mui/material/Button";
 import { authApi } from "@rezics/api/auth/auth.api";
 import { authQueries } from "@rezics/api/auth/auth.queries";
-import { clearAllTokens } from "@rezics/api/react-query/jwt";
+import {
+  exchangeForSessionToken,
+  queryAccessToken,
+} from "@rezics/api/react-query/jwt";
 import { Turnstile } from "@rezics/ui/composite/auth/Turnstile.tsx";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
-import { type FC, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  type FC,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useTranslation } from "react-i18next";
 import { env } from "@/env";
 import { hydrateAuthSessionState } from "@/user/state";
@@ -37,14 +47,12 @@ function deriveSlugFromName(name: string): string {
 
 // --- Step 1: Identity Form ---
 
-function IdentityStep({
-  onComplete,
-}: {
-  onComplete: () => void;
-}) {
+function IdentityStep({ onComplete }: { onComplete: () => void }) {
   const { t } = useTranslation();
   const auth = useAuth();
-  const [username, setUsername] = useState(auth.authSession?.email?.split("@")[0] ?? "");
+  const [username, setUsername] = useState(
+    auth.authSession?.email?.split("@")[0] ?? "",
+  );
   const [slug, setSlug] = useState("");
   const [slugTouched, setSlugTouched] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -55,7 +63,7 @@ function IdentityStep({
     if (auth.user?.name && !username) {
       setUsername(auth.user.name);
     }
-  }, [auth.user?.name]);
+  }, [auth.user?.name, username]);
 
   // Auto-derive slug from username if user hasn't manually edited slug
   useEffect(() => {
@@ -131,7 +139,7 @@ function IdentityStep({
         helperText={
           checkingSlug
             ? "Checking availability..."
-            : slugError ?? (slugCheck?.available ? "Available" : undefined)
+            : (slugError ?? (slugCheck?.available ? "Available" : undefined))
         }
         required
       />
@@ -209,7 +217,14 @@ function EmailVerificationStep({
           !cooldownRemaining &&
           (codeSent || (turnstileReady && turnstileToken)),
       ),
-    [email, loading, cooldownRemaining, codeSent, turnstileReady, turnstileToken],
+    [
+      email,
+      loading,
+      cooldownRemaining,
+      codeSent,
+      turnstileReady,
+      turnstileToken,
+    ],
   );
 
   const handleSendCode = async () => {
@@ -271,8 +286,7 @@ function EmailVerificationStep({
       {message && <Alert severity="success">{message}</Alert>}
 
       <Typography variant="body1">
-        {t("auth.flow.verify_intro_prefix")}{" "}
-        <strong>{email}</strong>{" "}
+        {t("auth.flow.verify_intro_prefix")} <strong>{email}</strong>{" "}
         {t("auth.flow.verify_intro_suffix")}
       </Typography>
 
@@ -359,8 +373,7 @@ export const CompleteRegistrationPage: FC = () => {
   const [justCompletedEmail, setJustCompletedEmail] = useState(false);
 
   const identitySet = auth.identitySet || justCompletedIdentity;
-  const emailVerified =
-    auth.authSession?.emailVerified || justCompletedEmail;
+  const emailVerified = auth.authSession?.emailVerified || justCompletedEmail;
   const email = auth.authSession?.email ?? "";
   const trustedProvider = auth.authSession?.trustedProviderId;
 
@@ -374,7 +387,10 @@ export const CompleteRegistrationPage: FC = () => {
 
   const handleEmailComplete = useCallback(async () => {
     setJustCompletedEmail(true);
-    clearAllTokens();
+    // Re-acquire fresh tokens (claims now include email_verified: true)
+    // instead of clearing — clearing creates a gap where the user appears logged out.
+    await queryAccessToken({ requirePresence: false });
+    await exchangeForSessionToken();
     await hydrateAuthSessionState();
   }, []);
 
@@ -427,9 +443,7 @@ export const CompleteRegistrationPage: FC = () => {
               <StepLabel
                 optional={
                   identitySet && auth.user?.slug ? (
-                    <Typography variant="caption">
-                      {auth.user.slug}
-                    </Typography>
+                    <Typography variant="caption">{auth.user.slug}</Typography>
                   ) : undefined
                 }
               >
@@ -464,21 +478,14 @@ export const CompleteRegistrationPage: FC = () => {
           </Stepper>
 
           {activeStep === 2 && (
-            <Alert
-              severity="success"
-              icon={<CheckCircleIcon />}
-            >
+            <Alert severity="success" icon={<CheckCircleIcon />}>
               Registration complete! Redirecting...
             </Alert>
           )}
         </div>
       }
       actions={
-        <Button
-          variant="text"
-          onClick={handleLogout}
-          color="inherit"
-        >
+        <Button variant="text" onClick={handleLogout} color="inherit">
           {t("auth.logout")}
         </Button>
       }
