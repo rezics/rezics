@@ -2,6 +2,7 @@ import {
   DEFAULT_LANGUAGE,
   FALLBACK_LANGUAGE,
 } from "../../../package/contract/src/language";
+import { DEFAULT_REALM } from "../../../package/contract/src/realm";
 import {
   SEED_TAG_NAMES,
   SEED_TAG_SCORE,
@@ -110,6 +111,10 @@ export async function seedDefaultRealm(
     return existing.unitId;
   }
 
+  const languages = Object.keys(DEFAULT_REALM.translations) as Array<
+    keyof typeof DEFAULT_REALM.translations
+  >;
+
   const unit = await prisma.unit.create({
     data: {
       type: "REALM",
@@ -119,21 +124,23 @@ export async function seedDefaultRealm(
       publishedAt: new Date(),
       defaultLanguage: DEFAULT_LANGUAGE,
       translations: {
-        create: [
-          { language: DEFAULT_LANGUAGE, title: "rezics" },
-          { language: FALLBACK_LANGUAGE, title: "rezics" },
-        ],
+        create: languages.map((lang) => ({
+          language: lang,
+          title: DEFAULT_REALM.translations[lang].title,
+          description: DEFAULT_REALM.translations[lang].description,
+        })),
       },
       supportLanguages: {
-        create: [
-          { language: DEFAULT_LANGUAGE, isPrimary: true, sortOrder: 0 },
-          { language: FALLBACK_LANGUAGE, isPrimary: false, sortOrder: 1 },
-        ],
+        create: languages.map((lang, i) => ({
+          language: lang,
+          isPrimary: lang === DEFAULT_LANGUAGE,
+          sortOrder: i,
+        })),
       },
       realm: {
         create: {
-          isPublic: true,
-          isOfficial: true,
+          isPublic: DEFAULT_REALM.isPublic,
+          isOfficial: DEFAULT_REALM.isOfficial,
           memberCount: 1,
         },
       },

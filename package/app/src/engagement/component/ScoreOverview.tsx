@@ -2,6 +2,7 @@ import Box from "@mui/material/Box";
 import LinearProgress from "@mui/material/LinearProgress";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
+import { getDefaultRealmId } from "@rezics/api/infra/default-realm";
 import { scoreQueries } from "@rezics/api/score/score";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
@@ -13,7 +14,7 @@ interface ScoreOverviewProps {
 
 export const ScoreOverview: React.FC<ScoreOverviewProps> = ({
   unitId,
-  realm = "default",
+  realm = getDefaultRealmId() ?? "default",
 }) => {
   const { data: aggregates } = useQuery(scoreQueries.aggregates(unitId));
 

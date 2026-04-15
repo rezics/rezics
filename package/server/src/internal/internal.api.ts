@@ -1,6 +1,7 @@
 import { Elysia, t } from "elysia";
 import { prisma } from "#/prisma/client";
 import { env } from "../env";
+import { getDefaultRealmId } from "../infra/default-realm";
 import { syncUserToMeili } from "@/meili/user/sync";
 
 export const internalApi = new Elysia({ prefix: "/internal" })
@@ -54,6 +55,26 @@ export const internalApi = new Elysia({ prefix: "/internal" })
       });
 
       await syncUserToMeili(unitId).catch(() => {});
+
+      // Fire-and-forget: join user to default realm
+      const defaultRealmId = getDefaultRealmId();
+      if (defaultRealmId) {
+        prisma.realmMember
+          .create({
+            data: {
+              realmUnitId: defaultRealmId,
+              userId: unitId,
+              roleKey: "member",
+            },
+          })
+          .catch((err: unknown) => {
+            // Silently ignore duplicate membership or other errors
+            console.log(
+              `[provision] auto-join default realm failed for ${unitId}:`,
+              err instanceof Error ? err.message : err,
+            );
+          });
+      }
 
       return { ok: true };
     },

@@ -30,6 +30,7 @@ import { AppError } from "./utils/errors";
 import { getProdState } from "./utils/getProdState";
 import { wellKnownApi } from "./well-known/well-known.api";
 
+import { initDefaultRealmCache } from "./infra/default-realm";
 import "dotenv/config";
 
 const { isProd, isDev } = getProdState();
@@ -147,6 +148,8 @@ app
   .use(userBatchApi)
   .get("/", () => "Hello Elysia")
   .get("/health", () => ({ status: "ok" }));
+
+await initDefaultRealmCache();
 
 app.listen(port);
 

@@ -3,6 +3,51 @@ import { languageSchema } from "./language";
 import { publicUserSchema, unitTranslationDTOSchema } from "./unit";
 
 // ============================================================
+// DEFAULT REALM
+// ============================================================
+
+/** Translation entry for a realm with title and description. */
+interface DefaultRealmTranslation {
+  /** Display name of the realm. */
+  title: string;
+  /** Short description of the realm's purpose. */
+  description: string;
+}
+
+/**
+ * The default realm definition — single source of truth for the official
+ * "rezics" realm's slug, flags, and localized content.
+ *
+ * Consumed by the seed script, server cache, and frontend infra bootstrap.
+ */
+export const DEFAULT_REALM = {
+  /** Stable slug identifier, consistent across environments. */
+  slug: "rezics",
+  /** Visible to all users. */
+  isPublic: true,
+  /** Marked as the platform's official realm. */
+  isOfficial: true,
+  /** Localized title and description keyed by language code. */
+  translations: {
+    en: {
+      title: "rezics",
+      description: "The global community for sharing and discovering books",
+    },
+    "zh-hant": {
+      title: "rezics",
+      description: "分享與探索書籍的全球社群",
+    },
+    ja: {
+      title: "rezics",
+      description: "本を共有し発見するためのグローバルコミュニティ",
+    },
+  } satisfies Record<string, DefaultRealmTranslation>,
+} as const;
+
+/** Type of the {@link DEFAULT_REALM} constant for typed parameter passing. */
+export type DefaultRealmDefinition = typeof DEFAULT_REALM;
+
+// ============================================================
 // REALM DTO
 // ============================================================
 

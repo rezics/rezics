@@ -2,6 +2,7 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
+import { getDefaultRealmId } from "@rezics/api/infra/default-realm";
 import { useCreatePostMutation } from "@rezics/api/post/post";
 import { useUpsertScoreMutation } from "@rezics/api/score/score";
 import { PostKind } from "@rezics/contract";
@@ -17,7 +18,7 @@ interface RemarkInlineFormProps {
 
 export const RemarkInlineForm: React.FC<RemarkInlineFormProps> = ({
   bookUnitId,
-  realmId = "default",
+  realmId = getDefaultRealmId() ?? "default",
   onSuccess,
 }) => {
   const [score, setScore] = useState<number | null>(null);

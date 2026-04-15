@@ -1,5 +1,6 @@
 import { useAlertStore } from "@app/state/windowAlertStore";
 import { TextField } from "@mui/material";
+import { getDefaultRealmId } from "@rezics/api/infra/default-realm";
 import { useCreatePostMutation } from "@rezics/api/post/post";
 import { useUpsertScoreMutation } from "@rezics/api/score/score";
 import { PostKind } from "@rezics/contract";
@@ -64,7 +65,7 @@ export function ReviewNewPage({
     if (reviewData._editRating > 0) {
       const scoreEntry = await scoreMutation.mutateAsync({
         unitId: bookUnitId,
-        realm: "default",
+        realm: getDefaultRealmId() ?? "default",
         value: reviewData._editRating,
       });
       scoreEntryId = scoreEntry.id;
