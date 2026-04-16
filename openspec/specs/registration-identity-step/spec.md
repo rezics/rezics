@@ -1,6 +1,6 @@
 ### Requirement: User explicitly sets username and slug during registration
 
-The auth service SHALL expose an endpoint for authenticated users to submit their chosen username and slug. The endpoint SHALL validate the slug for format (using the same rules as `slugVerify` in the server: 6-32 chars, alphanumeric + hyphens, no leading/trailing/consecutive hyphens, no reserved words) and uniqueness (against `UserProfile.slug` `@unique` constraint in auth DB). On success, the endpoint SHALL create a `UserProfile` row with the user's `userId` and chosen `slug`, and update `User.name` with the chosen username.
+The auth service SHALL expose an endpoint for authenticated users to submit their chosen username and slug. The endpoint SHALL validate the slug using `validateSlug` imported from `@rezics/contract` (format: lowercase `[a-z0-9-]`, length 6–36, no leading/trailing/consecutive hyphens, no reserved words from the platform-wide reserved list) and uniqueness (against `UserProfile.slug` `@unique` constraint in auth DB). On success, the endpoint SHALL create a `UserProfile` row with the user's `userId` and chosen `slug`, and update `User.name` with the chosen username.
 
 #### Scenario: Successful identity submission creates UserProfile
 
@@ -29,7 +29,7 @@ The auth service SHALL expose an endpoint for authenticated users to submit thei
 
 ### Requirement: Slug availability check endpoint
 
-The auth service SHALL expose an endpoint for authenticated users to check if a slug is available before submitting. The endpoint SHALL validate format and uniqueness, returning the result without creating any records.
+The auth service SHALL expose an endpoint for authenticated users to check if a slug is available before submitting. The endpoint SHALL validate format using `validateSlug` from `@rezics/contract` and check uniqueness, returning the result without creating any records.
 
 #### Scenario: Available slug
 
@@ -59,7 +59,7 @@ Once a `UserProfile` exists for a user, the slug field SHALL NOT be updatable by
 
 - **WHEN** an admin user updates another user's slug
 - **THEN** the slug SHALL be updated in the `UserProfile`
-- **AND** uniqueness validation SHALL still apply
+- **AND** uniqueness and format validation (via `@rezics/contract`) SHALL still apply
 
 ### Requirement: Provisioning triggers after identity step if email already verified
 

@@ -38,4 +38,4 @@
 ## 6. Verification
 
 - [x] 6.1 Run `bun test` in `package/server` and `package/auth` to verify no regressions
-- [ ] 6.2 Start dev servers (`bun run server:dev`, `bun run app:dev`) and manually test: create a tag with slug, verify lookup by slug, verify write-once rejection, verify reserved word rejection
+- [x] 6.2 Start dev servers (`bun run server:dev`, `bun run app:dev`) and manually test: create a tag with slug, verify lookup by slug, verify write-once rejection, verify reserved word rejection

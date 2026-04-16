@@ -114,4 +114,4 @@
 - [x] 12.4 Run `cd package/app && bunx tsc --noEmit 2>&1 | grep -v "^\.\.\/"` — zero errors (excluding cross-package UI path alias noise)
 - [x] 12.5 Run `bun test` in `package/server` — 43 pass, 8 fail (all pre-existing: JWT/auth/CORS config tests unrelated to this migration)
 - [x] 12.6 Run `bun test` in `package/app` — 3 pass, 7 fail (all pre-existing: UI module resolution + auth handler tests)
-- [ ] 12.7 Start dev server (`bun run app:dev`) and manually verify key pages load without runtime errors: home page, book library, user profile, shelf detail
+- [x] 12.7 Start dev server (`bun run app:dev`) and manually verify key pages load without runtime errors: home page, book library, user profile, shelf detail
