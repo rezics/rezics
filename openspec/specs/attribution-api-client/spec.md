@@ -1,113 +1,107 @@
 # attribution-api-client Specification
 
 ## Purpose
-TBD - created by archiving change api-realignment. Update Purpose after archive.
+Unified entity and attribution API client for @rezics/api, providing TanStack Query hooks and query options for entity management and attribution linking.
+
 ## Requirements
-### Requirement: Person API client methods
-The `@rezics/api` package SHALL provide an `attributionApi` object with person methods that map to the server's `/attribution/persons` endpoints. All types SHALL be imported from `@rezics/contract`.
+
+### Requirement: Entity API client methods
+
+The `attributionApi` object SHALL provide entity methods that map to the server's `/attribution/entities` endpoints. All types SHALL be imported from `@rezics/contract`.
 
 Methods:
-- `listPersons(query?: PersonListQuery): Promise<{ persons: PersonDTO[]; total: number }>` — `GET /attribution/persons`
-- `getPerson(id: string): Promise<PersonDTO>` — `GET /attribution/persons/:id`
-- `createPerson(input: CreatePersonInput): Promise<PersonDTO>` — `POST /attribution/persons`
-- `updatePerson(id: string, input: UpdatePersonInput): Promise<PersonDTO>` — `PUT /attribution/persons/:id`
-- `deletePerson(id: string): Promise<{ message: string }>` — `DELETE /attribution/persons/:id`
+- `listEntities(query?: EntityListQuery): Promise<{ entities: EntityDTO[]; total: number }>` — `GET /attribution/entities`
+- `getEntity(id: string): Promise<EntityDTO>` — `GET /attribution/entities/:id`
+- `createEntity(input: CreateEntityInput): Promise<EntityDTO>` — `POST /attribution/entities`
+- `updateEntity(id: string, input: UpdateEntityInput): Promise<EntityDTO>` — `PUT /attribution/entities/:id`
+- `deleteEntity(id: string): Promise<{ message: string }>` — `DELETE /attribution/entities/:id`
 
-#### Scenario: List persons with pagination
-- **WHEN** `attributionApi.listPersons({ page: 1, limit: 20 })` is called
-- **THEN** it SHALL send `GET /attribution/persons?page=1&limit=20` and return `{ persons: PersonDTO[], total: number }`
+#### Scenario: List entities filtered by kind
 
-#### Scenario: Get a single person
-- **WHEN** `attributionApi.getPerson("person-1")` is called
-- **THEN** it SHALL send `GET /attribution/persons/person-1` and return a `PersonDTO`
+- **WHEN** `attributionApi.listEntities({ kind: "person", page: 1, limit: 20 })` is called
+- **THEN** it SHALL send `GET /attribution/entities?kind=person&page=1&limit=20` and return `{ entities: EntityDTO[], total: number }`
 
-### Requirement: Organization API client methods
-The `attributionApi` object SHALL include organization methods that map to `/attribution/organizations`.
+#### Scenario: Get a single entity
 
-Methods:
-- `listOrganizations(query?: OrganizationListQuery): Promise<{ organizations: OrganizationDTO[]; total: number }>` — `GET /attribution/organizations`
-- `getOrganization(id: string): Promise<OrganizationDTO>` — `GET /attribution/organizations/:id`
-- `createOrganization(input: CreateOrganizationInput): Promise<OrganizationDTO>` — `POST /attribution/organizations`
-- `updateOrganization(id: string, input: UpdateOrganizationInput): Promise<OrganizationDTO>` — `PUT /attribution/organizations/:id`
-- `deleteOrganization(id: string): Promise<{ message: string }>` — `DELETE /attribution/organizations/:id`
+- **WHEN** `attributionApi.getEntity("entity-1")` is called
+- **THEN** it SHALL send `GET /attribution/entities/entity-1` and return an `EntityDTO` with translations
 
-#### Scenario: List organizations
-- **WHEN** `attributionApi.listOrganizations()` is called
-- **THEN** it SHALL send `GET /attribution/organizations` and return `{ organizations: OrganizationDTO[], total: number }`
+### Requirement: Unified attribution link API client methods
 
-### Requirement: Credit link API client methods
-The `attributionApi` object SHALL include credit management methods that map to `/attribution/credits`.
+The `attributionApi` object SHALL include unified credit management methods:
+- `linkAttribution(input: LinkAttributionInput): Promise<AttributionDTO>` — `POST /attribution/credits`
+- `unlinkAttribution(unitId, entityId, role): Promise<{ message: string }>` — `DELETE /attribution/credits/:unitId/:entityId/:role`
 
-Methods:
-- `linkPersonCredit(input: LinkPersonCreditInput): Promise<PersonCreditDTO>` — `POST /attribution/credits/person`
-- `unlinkPersonCredit(unitId, personId, roleKey): Promise<{ message: string }>` — `DELETE /attribution/credits/person/:unitId/:personId/:roleKey`
-- `linkOrgCredit(input: LinkOrgCreditInput): Promise<OrgCreditDTO>` — `POST /attribution/credits/organization`
-- `unlinkOrgCredit(unitId, organizationId, roleKey): Promise<{ message: string }>` — `DELETE /attribution/credits/organization/:unitId/:organizationId/:roleKey`
+#### Scenario: Link an attribution
 
-#### Scenario: Link a person credit
-- **WHEN** `attributionApi.linkPersonCredit({ unitId: "u1", personId: "p1", roleKey: "author" })` is called
-- **THEN** it SHALL send `POST /attribution/credits/person` with JSON body and return a `PersonCreditDTO`
+- **WHEN** `attributionApi.linkAttribution({ unitId: "u1", entityId: "e1", role: "author" })` is called
+- **THEN** it SHALL send `POST /attribution/credits` with JSON body and return an `AttributionDTO`
 
-#### Scenario: Unlink a person credit
-- **WHEN** `attributionApi.unlinkPersonCredit("u1", "p1", "author")` is called
-- **THEN** it SHALL send `DELETE /attribution/credits/person/u1/p1/author` and return `{ message: string }`
+#### Scenario: Unlink an attribution
 
-### Requirement: Attribution query key factory
+- **WHEN** `attributionApi.unlinkAttribution("u1", "e1", "author")` is called
+- **THEN** it SHALL send `DELETE /attribution/credits/u1/e1/author` and return `{ message: string }`
+
+### Requirement: Entity query key factory
+
 The module SHALL export an `attributionKeys` factory with keys for:
-- Person list/detail queries
-- Organization list/detail queries
-- Credits by unit queries
+- Entity list/detail queries (with kind filter support)
+- Attributions by unit queries
 
-#### Scenario: Person detail key
-- **WHEN** `attributionKeys.personDetail("person-1")` is called
-- **THEN** it SHALL return `["attribution", "persons", "detail", "person-1"]`
+#### Scenario: Entity list key with kind filter
 
-#### Scenario: Credits by unit key
-- **WHEN** `attributionKeys.creditsByUnit("unit-1")` is called
+- **WHEN** `attributionKeys.entityList({ kind: "person" })` is called
+- **THEN** it SHALL return `["attribution", "entities", "list", { kind: "person" }]`
+
+#### Scenario: Entity detail key
+
+- **WHEN** `attributionKeys.entityDetail("entity-1")` is called
+- **THEN** it SHALL return `["attribution", "entities", "detail", "entity-1"]`
+
+#### Scenario: Attributions by unit key
+
+- **WHEN** `attributionKeys.attributionsByUnit("unit-1")` is called
 - **THEN** it SHALL return `["attribution", "credits", "unit-1"]`
 
-### Requirement: Attribution query options
-The module SHALL export query options for:
-- `personListQuery(query?)` — 5 min stale
-- `personDetailQuery(id)` — 10 min stale
-- `organizationListQuery(query?)` — 5 min stale
-- `organizationDetailQuery(id)` — 10 min stale
+### Requirement: Entity query options
 
-#### Scenario: Person list query
-- **WHEN** `personListQuery({ q: "search" })` is called
-- **THEN** it SHALL return a `queryOptions` config using `attributionKeys.personList(query)` and `attributionApi.listPersons(query)`
+The module SHALL export query options:
+- `entityListQuery(query?)` — 5 min stale
+- `entityDetailQuery(id)` — 10 min stale
 
-### Requirement: Attribution mutation hooks
-The module SHALL export mutation hooks for all write operations. Each SHALL invalidate relevant caches on success.
+#### Scenario: Entity list query with kind
 
-Person mutations:
-- `useCreatePersonMutation` — invalidates person lists
-- `useUpdatePersonMutation` — updates person detail, invalidates lists
-- `useDeletePersonMutation` — removes person detail, invalidates lists
+- **WHEN** `entityListQuery({ kind: "person", q: "liu" })` is called
+- **THEN** it SHALL return a `queryOptions` config using `attributionKeys.entityList(query)` and `attributionApi.listEntities(query)`
 
-Organization mutations:
-- `useCreateOrganizationMutation` — invalidates organization lists
-- `useUpdateOrganizationMutation` — updates organization detail, invalidates lists
-- `useDeleteOrganizationMutation` — removes organization detail, invalidates lists
+### Requirement: Entity and attribution mutation hooks
 
-Credit mutations:
-- `useLinkPersonCreditMutation` — invalidates credits-by-unit
-- `useUnlinkPersonCreditMutation` — invalidates credits-by-unit
-- `useLinkOrgCreditMutation` — invalidates credits-by-unit
-- `useUnlinkOrgCreditMutation` — invalidates credits-by-unit
+The module SHALL export mutation hooks for all write operations with cache invalidation:
 
-#### Scenario: Create person invalidation
-- **WHEN** `useCreatePersonMutation` succeeds
-- **THEN** it SHALL invalidate `attributionKeys.personLists()` and set the detail cache for the new person
+Entity mutations:
+- `useCreateEntityMutation` — invalidates entity lists
+- `useUpdateEntityMutation` — updates entity detail, invalidates lists
+- `useDeleteEntityMutation` — removes entity detail, invalidates lists
 
-#### Scenario: Link credit invalidation
-- **WHEN** `useLinkPersonCreditMutation` succeeds with `{ unitId: "u1" }`
-- **THEN** it SHALL invalidate `attributionKeys.creditsByUnit("u1")`
+Attribution mutations:
+- `useLinkAttributionMutation` — invalidates attributions-by-unit
+- `useUnlinkAttributionMutation` — invalidates attributions-by-unit
+
+#### Scenario: Create entity invalidation
+
+- **WHEN** `useCreateEntityMutation` succeeds
+- **THEN** it SHALL invalidate `attributionKeys.entityLists()` and set the detail cache for the new entity
+
+#### Scenario: Link attribution invalidation
+
+- **WHEN** `useLinkAttributionMutation` succeeds with `{ unitId: "u1" }`
+- **THEN** it SHALL invalidate `attributionKeys.attributionsByUnit("u1")`
 
 ### Requirement: Attribution barrel export
+
 The module SHALL export all public API surface from an `attribution.ts` barrel file.
 
 #### Scenario: Single import point
-- **WHEN** a consumer imports from `@rezics/api/attribution/attribution`
-- **THEN** they SHALL have access to `attributionApi`, `attributionKeys`, `attributionMutations`, all query options, and all re-exported types
 
+- **WHEN** a consumer imports from `@rezics/api/attribution/attribution`
+- **THEN** they SHALL have access to `attributionApi`, `attributionKeys`, all query options, all mutation hooks, and all re-exported types
