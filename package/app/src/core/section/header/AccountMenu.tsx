@@ -90,7 +90,7 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({ onLogout }) => {
         </MenuItem>
         <MenuItem
           component={Link}
-          to={`/user/me/edit`}
+          to={`/user/me`}
           onClick={handleMenuClose}
         >
           <ListItemIcon>

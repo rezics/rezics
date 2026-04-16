@@ -46,6 +46,7 @@ import { Route as MainLayoutUserMeRouteRouteImport } from './routes/_mainLayout/
 import { Route as MainLayoutBookBookIdRouteRouteImport } from './routes/_mainLayout/book/$bookId/route'
 import { Route as BookBookIdEditIndexRouteImport } from './routes/book_/$bookId/edit/index'
 import { Route as MainLayoutUserMeIndexRouteImport } from './routes/_mainLayout/user/me/index'
+import { Route as MainLayoutUserUnitIdIndexRouteImport } from './routes/_mainLayout/user/$unitId/index'
 import { Route as MainLayoutShelfShelfIdIndexRouteImport } from './routes/_mainLayout/shelf/$shelfId/index'
 import { Route as MainLayoutReviewReviewIdIndexRouteImport } from './routes/_mainLayout/review/$reviewId/index'
 import { Route as MainLayoutRealmRealmIdIndexRouteImport } from './routes/_mainLayout/realm/$realmId/index'
@@ -58,7 +59,12 @@ import { Route as MainLayoutUserMeReactionRouteImport } from './routes/_mainLayo
 import { Route as MainLayoutUserMeFollowRouteImport } from './routes/_mainLayout/user/me/follow'
 import { Route as MainLayoutUserMeEditRouteImport } from './routes/_mainLayout/user/me/edit'
 import { Route as MainLayoutUserMeBookmarkRouteImport } from './routes/_mainLayout/user/me/bookmark'
+import { Route as MainLayoutUserUnitIdShelvesRouteImport } from './routes/_mainLayout/user/$unitId/shelves'
+import { Route as MainLayoutUserUnitIdRealmsRouteImport } from './routes/_mainLayout/user/$unitId/realms'
+import { Route as MainLayoutUserUnitIdReactionsRouteImport } from './routes/_mainLayout/user/$unitId/reactions'
+import { Route as MainLayoutUserUnitIdFollowersRouteImport } from './routes/_mainLayout/user/$unitId/followers'
 import { Route as MainLayoutUserUnitIdEditRouteImport } from './routes/_mainLayout/user/$unitId/edit'
+import { Route as MainLayoutUserUnitIdContentRouteImport } from './routes/_mainLayout/user/$unitId/content'
 import { Route as MainLayoutShelfBookBookIdRouteImport } from './routes/_mainLayout/shelf/book/$bookId'
 import { Route as MainLayoutShelfShelfIdEditRouteImport } from './routes/_mainLayout/shelf/$shelfId/edit'
 import { Route as MainLayoutReviewNewBookUnitIdRouteImport } from './routes/_mainLayout/review/new/$bookUnitId'
@@ -271,6 +277,12 @@ const MainLayoutUserMeIndexRoute = MainLayoutUserMeIndexRouteImport.update({
   path: '/',
   getParentRoute: () => MainLayoutUserMeRouteRoute,
 } as any)
+const MainLayoutUserUnitIdIndexRoute =
+  MainLayoutUserUnitIdIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => MainLayoutUserUnitIdRoute,
+  } as any)
 const MainLayoutShelfShelfIdIndexRoute =
   MainLayoutShelfShelfIdIndexRouteImport.update({
     id: '/shelf/$shelfId/',
@@ -338,10 +350,40 @@ const MainLayoutUserMeBookmarkRoute =
     path: '/bookmark',
     getParentRoute: () => MainLayoutUserMeRouteRoute,
   } as any)
+const MainLayoutUserUnitIdShelvesRoute =
+  MainLayoutUserUnitIdShelvesRouteImport.update({
+    id: '/shelves',
+    path: '/shelves',
+    getParentRoute: () => MainLayoutUserUnitIdRoute,
+  } as any)
+const MainLayoutUserUnitIdRealmsRoute =
+  MainLayoutUserUnitIdRealmsRouteImport.update({
+    id: '/realms',
+    path: '/realms',
+    getParentRoute: () => MainLayoutUserUnitIdRoute,
+  } as any)
+const MainLayoutUserUnitIdReactionsRoute =
+  MainLayoutUserUnitIdReactionsRouteImport.update({
+    id: '/reactions',
+    path: '/reactions',
+    getParentRoute: () => MainLayoutUserUnitIdRoute,
+  } as any)
+const MainLayoutUserUnitIdFollowersRoute =
+  MainLayoutUserUnitIdFollowersRouteImport.update({
+    id: '/followers',
+    path: '/followers',
+    getParentRoute: () => MainLayoutUserUnitIdRoute,
+  } as any)
 const MainLayoutUserUnitIdEditRoute =
   MainLayoutUserUnitIdEditRouteImport.update({
     id: '/edit',
     path: '/edit',
+    getParentRoute: () => MainLayoutUserUnitIdRoute,
+  } as any)
+const MainLayoutUserUnitIdContentRoute =
+  MainLayoutUserUnitIdContentRouteImport.update({
+    id: '/content',
+    path: '/content',
     getParentRoute: () => MainLayoutUserUnitIdRoute,
   } as any)
 const MainLayoutShelfBookBookIdRoute =
@@ -534,7 +576,12 @@ export interface FileRoutesByFullPath {
   '/review/new/$bookUnitId': typeof MainLayoutReviewNewBookUnitIdRoute
   '/shelf/$shelfId/edit': typeof MainLayoutShelfShelfIdEditRoute
   '/shelf/book/$bookId': typeof MainLayoutShelfBookBookIdRoute
+  '/user/$unitId/content': typeof MainLayoutUserUnitIdContentRoute
   '/user/$unitId/edit': typeof MainLayoutUserUnitIdEditRoute
+  '/user/$unitId/followers': typeof MainLayoutUserUnitIdFollowersRoute
+  '/user/$unitId/reactions': typeof MainLayoutUserUnitIdReactionsRoute
+  '/user/$unitId/realms': typeof MainLayoutUserUnitIdRealmsRoute
+  '/user/$unitId/shelves': typeof MainLayoutUserUnitIdShelvesRoute
   '/user/me/bookmark': typeof MainLayoutUserMeBookmarkRoute
   '/user/me/edit': typeof MainLayoutUserMeEditRoute
   '/user/me/follow': typeof MainLayoutUserMeFollowRoute
@@ -547,6 +594,7 @@ export interface FileRoutesByFullPath {
   '/realm/$realmId/': typeof MainLayoutRealmRealmIdIndexRoute
   '/review/$reviewId/': typeof MainLayoutReviewReviewIdIndexRoute
   '/shelf/$shelfId/': typeof MainLayoutShelfShelfIdIndexRoute
+  '/user/$unitId/': typeof MainLayoutUserUnitIdIndexRoute
   '/user/me/': typeof MainLayoutUserMeIndexRoute
   '/book/$bookId/edit/': typeof BookBookIdEditIndexRoute
   '/tag/book/$bookId/tag': typeof MainLayoutTagBookBookIdTagRouteRouteWithChildren
@@ -582,7 +630,6 @@ export interface FileRoutesByTo {
   '/shelf/search': typeof MainLayoutShelfSearchRoute
   '/tag/$unitId': typeof MainLayoutTagUnitIdRoute
   '/unit/$unitId': typeof MainLayoutUnitUnitIdRoute
-  '/user/$unitId': typeof MainLayoutUserUnitIdRouteWithChildren
   '/book': typeof MainLayoutBookIndexRoute
   '/feedback': typeof MainLayoutFeedbackIndexRoute
   '/realm': typeof MainLayoutRealmIndexRoute
@@ -602,7 +649,12 @@ export interface FileRoutesByTo {
   '/review/new/$bookUnitId': typeof MainLayoutReviewNewBookUnitIdRoute
   '/shelf/$shelfId/edit': typeof MainLayoutShelfShelfIdEditRoute
   '/shelf/book/$bookId': typeof MainLayoutShelfBookBookIdRoute
+  '/user/$unitId/content': typeof MainLayoutUserUnitIdContentRoute
   '/user/$unitId/edit': typeof MainLayoutUserUnitIdEditRoute
+  '/user/$unitId/followers': typeof MainLayoutUserUnitIdFollowersRoute
+  '/user/$unitId/reactions': typeof MainLayoutUserUnitIdReactionsRoute
+  '/user/$unitId/realms': typeof MainLayoutUserUnitIdRealmsRoute
+  '/user/$unitId/shelves': typeof MainLayoutUserUnitIdShelvesRoute
   '/user/me/bookmark': typeof MainLayoutUserMeBookmarkRoute
   '/user/me/edit': typeof MainLayoutUserMeEditRoute
   '/user/me/follow': typeof MainLayoutUserMeFollowRoute
@@ -615,6 +667,7 @@ export interface FileRoutesByTo {
   '/realm/$realmId': typeof MainLayoutRealmRealmIdIndexRoute
   '/review/$reviewId': typeof MainLayoutReviewReviewIdIndexRoute
   '/shelf/$shelfId': typeof MainLayoutShelfShelfIdIndexRoute
+  '/user/$unitId': typeof MainLayoutUserUnitIdIndexRoute
   '/user/me': typeof MainLayoutUserMeIndexRoute
   '/book/$bookId/edit': typeof BookBookIdEditIndexRoute
   '/tag/book/$bookId': typeof MainLayoutTagBookBookIdIndexRoute
@@ -677,7 +730,12 @@ export interface FileRoutesById {
   '/_mainLayout/review/new/$bookUnitId': typeof MainLayoutReviewNewBookUnitIdRoute
   '/_mainLayout/shelf/$shelfId/edit': typeof MainLayoutShelfShelfIdEditRoute
   '/_mainLayout/shelf/book/$bookId': typeof MainLayoutShelfBookBookIdRoute
+  '/_mainLayout/user/$unitId/content': typeof MainLayoutUserUnitIdContentRoute
   '/_mainLayout/user/$unitId/edit': typeof MainLayoutUserUnitIdEditRoute
+  '/_mainLayout/user/$unitId/followers': typeof MainLayoutUserUnitIdFollowersRoute
+  '/_mainLayout/user/$unitId/reactions': typeof MainLayoutUserUnitIdReactionsRoute
+  '/_mainLayout/user/$unitId/realms': typeof MainLayoutUserUnitIdRealmsRoute
+  '/_mainLayout/user/$unitId/shelves': typeof MainLayoutUserUnitIdShelvesRoute
   '/_mainLayout/user/me/bookmark': typeof MainLayoutUserMeBookmarkRoute
   '/_mainLayout/user/me/edit': typeof MainLayoutUserMeEditRoute
   '/_mainLayout/user/me/follow': typeof MainLayoutUserMeFollowRoute
@@ -690,6 +748,7 @@ export interface FileRoutesById {
   '/_mainLayout/realm/$realmId/': typeof MainLayoutRealmRealmIdIndexRoute
   '/_mainLayout/review/$reviewId/': typeof MainLayoutReviewReviewIdIndexRoute
   '/_mainLayout/shelf/$shelfId/': typeof MainLayoutShelfShelfIdIndexRoute
+  '/_mainLayout/user/$unitId/': typeof MainLayoutUserUnitIdIndexRoute
   '/_mainLayout/user/me/': typeof MainLayoutUserMeIndexRoute
   '/book_/$bookId/edit/': typeof BookBookIdEditIndexRoute
   '/_mainLayout/tag/book/$bookId/tag': typeof MainLayoutTagBookBookIdTagRouteRouteWithChildren
@@ -753,7 +812,12 @@ export interface FileRouteTypes {
     | '/review/new/$bookUnitId'
     | '/shelf/$shelfId/edit'
     | '/shelf/book/$bookId'
+    | '/user/$unitId/content'
     | '/user/$unitId/edit'
+    | '/user/$unitId/followers'
+    | '/user/$unitId/reactions'
+    | '/user/$unitId/realms'
+    | '/user/$unitId/shelves'
     | '/user/me/bookmark'
     | '/user/me/edit'
     | '/user/me/follow'
@@ -766,6 +830,7 @@ export interface FileRouteTypes {
     | '/realm/$realmId/'
     | '/review/$reviewId/'
     | '/shelf/$shelfId/'
+    | '/user/$unitId/'
     | '/user/me/'
     | '/book/$bookId/edit/'
     | '/tag/book/$bookId/tag'
@@ -801,7 +866,6 @@ export interface FileRouteTypes {
     | '/shelf/search'
     | '/tag/$unitId'
     | '/unit/$unitId'
-    | '/user/$unitId'
     | '/book'
     | '/feedback'
     | '/realm'
@@ -821,7 +885,12 @@ export interface FileRouteTypes {
     | '/review/new/$bookUnitId'
     | '/shelf/$shelfId/edit'
     | '/shelf/book/$bookId'
+    | '/user/$unitId/content'
     | '/user/$unitId/edit'
+    | '/user/$unitId/followers'
+    | '/user/$unitId/reactions'
+    | '/user/$unitId/realms'
+    | '/user/$unitId/shelves'
     | '/user/me/bookmark'
     | '/user/me/edit'
     | '/user/me/follow'
@@ -834,6 +903,7 @@ export interface FileRouteTypes {
     | '/realm/$realmId'
     | '/review/$reviewId'
     | '/shelf/$shelfId'
+    | '/user/$unitId'
     | '/user/me'
     | '/book/$bookId/edit'
     | '/tag/book/$bookId'
@@ -895,7 +965,12 @@ export interface FileRouteTypes {
     | '/_mainLayout/review/new/$bookUnitId'
     | '/_mainLayout/shelf/$shelfId/edit'
     | '/_mainLayout/shelf/book/$bookId'
+    | '/_mainLayout/user/$unitId/content'
     | '/_mainLayout/user/$unitId/edit'
+    | '/_mainLayout/user/$unitId/followers'
+    | '/_mainLayout/user/$unitId/reactions'
+    | '/_mainLayout/user/$unitId/realms'
+    | '/_mainLayout/user/$unitId/shelves'
     | '/_mainLayout/user/me/bookmark'
     | '/_mainLayout/user/me/edit'
     | '/_mainLayout/user/me/follow'
@@ -908,6 +983,7 @@ export interface FileRouteTypes {
     | '/_mainLayout/realm/$realmId/'
     | '/_mainLayout/review/$reviewId/'
     | '/_mainLayout/shelf/$shelfId/'
+    | '/_mainLayout/user/$unitId/'
     | '/_mainLayout/user/me/'
     | '/book_/$bookId/edit/'
     | '/_mainLayout/tag/book/$bookId/tag'
@@ -1186,6 +1262,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MainLayoutUserMeIndexRouteImport
       parentRoute: typeof MainLayoutUserMeRouteRoute
     }
+    '/_mainLayout/user/$unitId/': {
+      id: '/_mainLayout/user/$unitId/'
+      path: '/'
+      fullPath: '/user/$unitId/'
+      preLoaderRoute: typeof MainLayoutUserUnitIdIndexRouteImport
+      parentRoute: typeof MainLayoutUserUnitIdRoute
+    }
     '/_mainLayout/shelf/$shelfId/': {
       id: '/_mainLayout/shelf/$shelfId/'
       path: '/shelf/$shelfId'
@@ -1270,11 +1353,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MainLayoutUserMeBookmarkRouteImport
       parentRoute: typeof MainLayoutUserMeRouteRoute
     }
+    '/_mainLayout/user/$unitId/shelves': {
+      id: '/_mainLayout/user/$unitId/shelves'
+      path: '/shelves'
+      fullPath: '/user/$unitId/shelves'
+      preLoaderRoute: typeof MainLayoutUserUnitIdShelvesRouteImport
+      parentRoute: typeof MainLayoutUserUnitIdRoute
+    }
+    '/_mainLayout/user/$unitId/realms': {
+      id: '/_mainLayout/user/$unitId/realms'
+      path: '/realms'
+      fullPath: '/user/$unitId/realms'
+      preLoaderRoute: typeof MainLayoutUserUnitIdRealmsRouteImport
+      parentRoute: typeof MainLayoutUserUnitIdRoute
+    }
+    '/_mainLayout/user/$unitId/reactions': {
+      id: '/_mainLayout/user/$unitId/reactions'
+      path: '/reactions'
+      fullPath: '/user/$unitId/reactions'
+      preLoaderRoute: typeof MainLayoutUserUnitIdReactionsRouteImport
+      parentRoute: typeof MainLayoutUserUnitIdRoute
+    }
+    '/_mainLayout/user/$unitId/followers': {
+      id: '/_mainLayout/user/$unitId/followers'
+      path: '/followers'
+      fullPath: '/user/$unitId/followers'
+      preLoaderRoute: typeof MainLayoutUserUnitIdFollowersRouteImport
+      parentRoute: typeof MainLayoutUserUnitIdRoute
+    }
     '/_mainLayout/user/$unitId/edit': {
       id: '/_mainLayout/user/$unitId/edit'
       path: '/edit'
       fullPath: '/user/$unitId/edit'
       preLoaderRoute: typeof MainLayoutUserUnitIdEditRouteImport
+      parentRoute: typeof MainLayoutUserUnitIdRoute
+    }
+    '/_mainLayout/user/$unitId/content': {
+      id: '/_mainLayout/user/$unitId/content'
+      path: '/content'
+      fullPath: '/user/$unitId/content'
+      preLoaderRoute: typeof MainLayoutUserUnitIdContentRouteImport
       parentRoute: typeof MainLayoutUserUnitIdRoute
     }
     '/_mainLayout/shelf/book/$bookId': {
@@ -1485,11 +1603,23 @@ const MainLayoutUserMeRouteRouteWithChildren =
   )
 
 interface MainLayoutUserUnitIdRouteChildren {
+  MainLayoutUserUnitIdContentRoute: typeof MainLayoutUserUnitIdContentRoute
   MainLayoutUserUnitIdEditRoute: typeof MainLayoutUserUnitIdEditRoute
+  MainLayoutUserUnitIdFollowersRoute: typeof MainLayoutUserUnitIdFollowersRoute
+  MainLayoutUserUnitIdReactionsRoute: typeof MainLayoutUserUnitIdReactionsRoute
+  MainLayoutUserUnitIdRealmsRoute: typeof MainLayoutUserUnitIdRealmsRoute
+  MainLayoutUserUnitIdShelvesRoute: typeof MainLayoutUserUnitIdShelvesRoute
+  MainLayoutUserUnitIdIndexRoute: typeof MainLayoutUserUnitIdIndexRoute
 }
 
 const MainLayoutUserUnitIdRouteChildren: MainLayoutUserUnitIdRouteChildren = {
+  MainLayoutUserUnitIdContentRoute: MainLayoutUserUnitIdContentRoute,
   MainLayoutUserUnitIdEditRoute: MainLayoutUserUnitIdEditRoute,
+  MainLayoutUserUnitIdFollowersRoute: MainLayoutUserUnitIdFollowersRoute,
+  MainLayoutUserUnitIdReactionsRoute: MainLayoutUserUnitIdReactionsRoute,
+  MainLayoutUserUnitIdRealmsRoute: MainLayoutUserUnitIdRealmsRoute,
+  MainLayoutUserUnitIdShelvesRoute: MainLayoutUserUnitIdShelvesRoute,
+  MainLayoutUserUnitIdIndexRoute: MainLayoutUserUnitIdIndexRoute,
 }
 
 const MainLayoutUserUnitIdRouteWithChildren =

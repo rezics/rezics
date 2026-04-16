@@ -1,10 +1,10 @@
 import { createFileRoute, lazyRouteComponent } from "@tanstack/react-router";
 
-const UserPage = lazyRouteComponent(
-  () => import("@/user/page/UserPage"),
-  "UserPage",
+const ProfileShell = lazyRouteComponent(
+  () => import("@/user/component/ProfileShell"),
+  "ProfileShell",
 );
 
 export const Route = createFileRoute("/_mainLayout/user/$unitId")({
-  component: UserPage,
+  component: ProfileShell,
 });

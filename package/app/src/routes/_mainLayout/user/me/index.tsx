@@ -1,10 +1,12 @@
-import { createFileRoute, lazyRouteComponent } from "@tanstack/react-router";
-
-const UserPage = lazyRouteComponent(
-  () => import("@/user/page/UserPage"),
-  "UserPage",
-);
+import { createFileRoute, redirect } from "@tanstack/react-router";
+import { useUserProfileStore } from "@/user/state";
 
 export const Route = createFileRoute("/_mainLayout/user/me/")({
-  component: () => <UserPage isCurrentUser={true} />,
+  beforeLoad: () => {
+    const unitId = useUserProfileStore.getState().user?.unitId;
+    if (unitId) {
+      throw redirect({ to: "/user/$unitId", params: { unitId } });
+    }
+    throw redirect({ to: "/login" });
+  },
 });

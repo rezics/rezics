@@ -1,10 +1,8 @@
-import { createFileRoute, lazyRouteComponent } from "@tanstack/react-router";
-
-const UserEditPage = lazyRouteComponent(
-  () => import("@/user/page/UserEditPage"),
-  "UserEditPage",
-);
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_mainLayout/user/me/edit")({
-  component: UserEditPage,
+  beforeLoad: () => {
+    // TODO: redirect to /user/me/settings/profile once settings-page change lands
+    throw redirect({ to: "/user/me" });
+  },
 });
