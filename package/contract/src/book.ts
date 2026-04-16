@@ -33,6 +33,16 @@ export const scoredTagBriefSchema = t.Object({
 });
 
 // ============================================================
+// BOOK EXTRA SCHEMA
+// ============================================================
+
+export const bookExtraSchema = t.Object({
+  publishURL: t.Optional(t.Array(t.String())),
+});
+
+export type BookExtra = (typeof bookExtraSchema)["static"];
+
+// ============================================================
 // BOOK DTO
 // ============================================================
 
@@ -55,7 +65,7 @@ export const bookDTOSchema = t.Object({
   formatKey: t.Optional(t.Nullable(t.String())),
   isLicensed: t.Optional(t.Boolean()),
   coverUrl: t.Optional(t.Nullable(t.String())),
-  extra: t.Optional(t.Nullable(t.Record(t.String(), t.Any()))),
+  extra: t.Optional(t.Nullable(bookExtraSchema)),
 
   // Translation layer
   translations: t.Optional(t.Array(unitTranslationDTOSchema)),
@@ -184,12 +194,31 @@ export type UpdateBookInput = (typeof updateBookSchema)["static"];
 // CHAPTER TYPES (preserved from old schema)
 // ============================================================
 
+export const bookIndexNodeSchema: ReturnType<typeof t.Recursive> = t.Recursive(
+  (self) =>
+    t.Object({
+      id: t.String(),
+      title: t.String(),
+      noContent: t.Boolean(),
+      children: t.Optional(t.Array(self)),
+    }),
+);
+
 export interface ChapterTreeItem {
   id: string;
   title: string;
   noContent: boolean;
   children?: ChapterTreeItem[];
 }
+
+export const bookIndexDTOSchema = t.Object({
+  bookUnitId: t.String(),
+  index: t.Array(bookIndexNodeSchema),
+  createdAt: t.Union([t.String(), t.Date()]),
+  updatedAt: t.Union([t.String(), t.Date()]),
+});
+
+export type BookIndexDTO = (typeof bookIndexDTOSchema)["static"];
 
 export interface ChapterIndexResponse {
   bookUnitId: string;

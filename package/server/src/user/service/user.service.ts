@@ -5,15 +5,22 @@
 import { NotificationType, type UpdateUser } from "@rezics/contract";
 import type { Prisma } from "#/prisma/client";
 import { prisma } from "#/prisma/client";
+import {
+  patchPostsAuthorToMeili,
+  syncPostsByAuthorToMeili,
+} from "@/meili/post/sync";
+import {
+  deleteUserFromMeili,
+  patchUserFieldsToMeili,
+  syncUserToMeili,
+} from "@/meili/user/sync";
 import { emitNotificationEvent } from "../../notify/notify-client";
-import { deleteUserFromMeili, syncUserToMeili, patchUserFieldsToMeili } from "@/meili/user/sync";
-import { syncPostsByAuthorToMeili, patchPostsAuthorToMeili } from "@/meili/post/sync";
-import { syncProfileToAuth } from "./profile-sync";
 import type { UserFilterOptions, UserWithRelations } from "../model/types";
 import { userInclude } from "../model/types";
+import { syncProfileToAuth } from "./profile-sync";
 
 export type CreateUserProfileInput = {
-  unitId?: string;
+  unitId: string;
   slug: string;
   avatar?: string;
   bio?: string;
@@ -169,7 +176,7 @@ export class UserService {
         unitId: payload.unitId,
         slug: payload.slug,
         name: payload.name,
-        avatar: payload.avatar ?? undefined,
+        avatar: payload.avatar ?? null,
         joinDate: new Date(),
       },
       include: userInclude,

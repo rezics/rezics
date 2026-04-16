@@ -7,13 +7,13 @@ import {
   Typography,
   useTheme,
 } from "@mui/material";
-import type { QuoteDTO } from "@rezics/contract";
+import type { UnitDTO } from "@rezics/contract";
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
 import { cn } from "@/shared/util/css-util";
 
 export interface QuoteCardProps {
-  quote: QuoteDTO;
+  quote: UnitDTO;
   className?: string;
 }
 
@@ -42,7 +42,7 @@ const QuoteCard: React.FC<QuoteCardProps> = ({ quote, className }) => {
                 color="text.primary"
                 className="line-clamp-3 leading-7"
               >
-                {quote.text || "暂无摘录内容"}
+                {quote.translations?.[0]?.description || "暂无摘录内容"}
               </Typography>
 
               <Box className="mt-3 flex items-center justify-between gap-2">
@@ -50,7 +50,7 @@ const QuoteCard: React.FC<QuoteCardProps> = ({ quote, className }) => {
                   0 喜欢
                 </Typography>
                 <Typography variant="caption" color="text.secondary" noWrap>
-                  —— {quote.from || "未知出处"}
+                  —— {(quote.extra as Record<string, any>)?.source || "未知出处"}
                 </Typography>
               </Box>
             </Box>

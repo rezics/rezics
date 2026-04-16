@@ -4,8 +4,8 @@ import type {
   ShelfItemDTO,
   ShelfItemReviewDTO,
   ShelfSummaryDTO,
+  UnitTranslationDTO,
 } from "@rezics/contract";
-import { sanitizeUser } from "@/utils/sanitizeUser";
 import type {
   ShelfItemWithRelations,
   ShelfListSelected,
@@ -19,7 +19,7 @@ export function mapShelfItemReviewToDTO(
     shelfUnitId: review.shelfUnitId,
     itemUnitId: review.itemUnitId,
     reviewUnitId: review.reviewUnitId,
-    addedAt: review.addedAt?.toISOString?.() ?? (review.addedAt as any),
+    addedAt: review.addedAt,
   };
 }
 
@@ -33,14 +33,14 @@ export function mapShelfItemToDTO(
     keywords: item.keywords,
     label: item.label ?? undefined,
     extra: (item.extra as Record<string, unknown>) ?? undefined,
-    createdAt: item.createdAt?.toISOString?.() ?? (item.createdAt as any),
-    updatedAt: item.updatedAt?.toISOString?.() ?? (item.updatedAt as any),
+    createdAt: item.createdAt,
+    updatedAt: item.updatedAt,
     reviews: (item.reviews ?? []).map(mapShelfItemReviewToDTO),
     item: item.item
       ? {
           id: item.item.id,
           type: item.item.type,
-          translations: item.item.translations as any ?? [],
+          translations: (item.item.translations ?? []) as unknown as UnitTranslationDTO[],
           extra: (item.item.extra as Record<string, unknown>) ?? undefined,
         }
       : undefined,
@@ -51,14 +51,14 @@ export function mapShelfToDTO(row: ShelfWithRelations): ShelfDTO {
   return {
     unitId: row.unitId,
     userId: row.unit?.userId ?? undefined,
-    user: row.unit?.user ? sanitizeUser(row.unit.user) : undefined,
+    user: row.unit?.user ?? undefined,
     kindKey: row.kindKey ?? undefined,
     coverUrl: row.coverUrl ?? undefined,
     extra: (row.extra as Record<string, unknown>) ?? undefined,
-    translations: (row.unit?.translations ?? []) as ShelfDTO["translations"],
+    translations: (row.unit?.translations ?? []) as unknown as ShelfDTO["translations"],
     items: (row.items ?? []).map((i) => mapShelfItemToDTO(i as any)),
-    createdAt: row.createdAt?.toISOString?.() ?? (row.createdAt as any),
-    updatedAt: row.updatedAt?.toISOString?.() ?? (row.updatedAt as any),
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
   };
 }
 
@@ -77,13 +77,13 @@ export function mapShelfListRowToDTO(row: ShelfListSelected): ShelfDTO {
   return {
     unitId: row.unitId,
     userId: row.unit?.userId ?? undefined,
-    user: row.unit?.user ? sanitizeUser(row.unit.user) : undefined,
+    user: row.unit?.user ?? undefined,
     kindKey: row.kindKey ?? undefined,
     coverUrl: row.coverUrl ?? undefined,
     extra: (row.extra as Record<string, unknown>) ?? undefined,
-    translations: (row.unit?.translations ?? []) as ShelfDTO["translations"],
-    createdAt: row.createdAt?.toISOString?.() ?? (row.createdAt as any),
-    updatedAt: row.updatedAt?.toISOString?.() ?? (row.updatedAt as any),
+    translations: (row.unit?.translations ?? []) as unknown as ShelfDTO["translations"],
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
   };
 }
 

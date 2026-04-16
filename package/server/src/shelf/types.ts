@@ -1,10 +1,11 @@
 import type { Prisma } from "#/prisma/client";
+import { publicUserSelect } from "@/utils/sanitizeUser";
 
 // Prisma include for shelf detail (with items + reviews)
 export const shelfInclude = {
   unit: {
     include: {
-      user: true,
+      user: { select: publicUserSelect },
       translations: true,
       unitTags: { orderBy: { score: "desc" as const } },
     },
@@ -14,7 +15,7 @@ export const shelfInclude = {
     include: {
       item: {
         include: {
-          user: true,
+          user: { select: publicUserSelect },
           translations: true,
         },
       },
@@ -57,7 +58,7 @@ export type ShelfListSelected = Prisma.ShelfGetPayload<{
 export const shelfItemInclude = {
   item: {
     include: {
-      user: true,
+      user: { select: publicUserSelect },
       translations: true,
     },
   },

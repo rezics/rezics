@@ -142,12 +142,12 @@ export class ScoreService {
         realm,
         ...computed,
         distribution: computed.distribution as Prisma.InputJsonValue,
-        fields: computed.fields as Prisma.InputJsonValue ?? undefined,
+        fields: (computed.fields ?? undefined) as Prisma.InputJsonValue | undefined,
       },
       update: {
         ...computed,
         distribution: computed.distribution as Prisma.InputJsonValue,
-        fields: computed.fields as Prisma.InputJsonValue ?? undefined,
+        fields: (computed.fields ?? undefined) as Prisma.InputJsonValue | undefined,
       },
     });
   }

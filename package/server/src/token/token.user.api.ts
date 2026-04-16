@@ -108,7 +108,10 @@ export const userRoute = new Elysia()
         throw new Error("Forbidden: token does not have user:write scope");
       }
 
-      const created = await userService.create(body);
+      const created = await userService.create({
+        ...body,
+        unitId: body.unitId!,
+      });
       return mapUserToDTO(created);
     },
     {

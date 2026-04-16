@@ -127,7 +127,7 @@ export const BookMetadataEditor: React.FC<BookMetadataEditorProps> = ({
       {/* Page Count + Text Length */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-1">
-          <Typography variant="body2" component="label" htmlFor="book-pagecount">{t("book.fields.page_count")}</Typography>
+          <Typography variant="body2" component="label" htmlFor="book-pagecount">{t("book.fields.page_count" as any)}</Typography>
           <input
             id="book-pagecount"
             type="number"

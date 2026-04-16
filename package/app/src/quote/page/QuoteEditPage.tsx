@@ -19,9 +19,10 @@ interface QuoteEditPageProps {
 export function QuoteEditPage({ unitId, data, setData }: QuoteEditPageProps) {
   const { t } = useTranslation();
   const { show } = useAlertStore();
+  const translation = data.translations?.[0];
   const source = useMemo(
-    () => (data.metadata as any)?.source || "",
-    [data.metadata],
+    () => (data.extra as Record<string, any>)?.source || "",
+    [data.extra],
   );
 
   const { mutate, isPending } = useUpdateUnitMutation({
@@ -39,11 +40,11 @@ export function QuoteEditPage({ unitId, data, setData }: QuoteEditPageProps) {
     mutate({
       unitId: unitId,
       input: {
-        title: data.title,
-        content: data.content,
-        // status: data.status || '', // not support now
+        extra: data.extra ?? undefined,
+        status: data.status || undefined,
       },
     });
+    // TODO: update translation (title, description) via translation API
   }
 
   return (
@@ -53,8 +54,15 @@ export function QuoteEditPage({ unitId, data, setData }: QuoteEditPageProps) {
           id="quote-title"
           label={t("quote.form.title")}
           variant="standard"
-          value={data.title || ""}
-          onChange={(e) => setData({ ...data, title: e.target.value })}
+          value={translation?.title || ""}
+          onChange={(e) =>
+            setData({
+              ...data,
+              translations: [
+                { ...(translation || { language: "en" }), title: e.target.value },
+              ],
+            })
+          }
         />
       </div>
 
@@ -67,7 +75,7 @@ export function QuoteEditPage({ unitId, data, setData }: QuoteEditPageProps) {
           onChange={(e) =>
             setData({
               ...data,
-              metadata: { ...(data.metadata || {}), source: e.target.value },
+              extra: { ...((data.extra as Record<string, any>) || {}), source: e.target.value },
             })
           }
         />
@@ -75,8 +83,15 @@ export function QuoteEditPage({ unitId, data, setData }: QuoteEditPageProps) {
 
       <div className="flex-1 min-h-[300px]">
         <RezicsMarkdownEditor
-          value={data.content || ""}
-          onChange={(value) => setData({ ...data, content: value })}
+          value={translation?.description || ""}
+          onChange={(value) =>
+            setData({
+              ...data,
+              translations: [
+                { ...(translation || { language: "en" }), description: value },
+              ],
+            })
+          }
           onSubmit={handleSave}
           submitLabel={t("common.save")}
         />
@@ -97,12 +112,16 @@ export function QuoteEditPageContainer() {
   useEffect(() => {
     if (unitData) {
       setQuoteData({
-        title: unitData.title || "",
-        content: unitData.content || "",
-        metadata: unitData.metadata || {},
-        targetUnitId: unitData.targetUnitId || "",
         type: unitData.type || "",
         status: unitData.status || "",
+        extra: unitData.extra ?? undefined,
+        translations: unitData.translations?.map((tr) => ({
+          language: tr.language,
+          title: tr.title ?? undefined,
+          subtitle: tr.subtitle ?? undefined,
+          summary: tr.summary ?? undefined,
+          description: tr.description ?? undefined,
+        })),
       });
     }
   }, [unitData]);

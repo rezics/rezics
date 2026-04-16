@@ -35,15 +35,18 @@ export const HomeTagExplore: React.FC<HomeTagExploreProps> = ({
   const tags = useMemo(() => {
     const books: Book[] = data?.books ?? [];
     const freq = new Map<string, number>();
+    const labelMap = new Map<string, string>();
     for (const b of books) {
       for (const tag of b.tags ?? []) {
-        freq.set(tag, (freq.get(tag) ?? 0) + 1);
+        const key = tag.tagUnitId;
+        freq.set(key, (freq.get(key) ?? 0) + 1);
+        if (tag.label && !labelMap.has(key)) labelMap.set(key, tag.label);
       }
     }
     return Array.from(freq.entries())
       .sort((a, b) => b[1] - a[1])
       .slice(0, maxTags)
-      .map(([t]) => t);
+      .map(([id]) => labelMap.get(id) ?? id);
   }, [data, maxTags]);
 
   if (error) {

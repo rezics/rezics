@@ -4,6 +4,16 @@ import { paginationLimitSchema } from "./pagination";
 import { publicUserSchema, unitTranslationDTOSchema } from "./unit";
 
 // ============================================================
+// SHELF EXTRA SCHEMA
+// ============================================================
+
+export const shelfExtraSchema = t.Object({
+  viewMode: t.Optional(t.String()),
+});
+
+export type ShelfExtra = (typeof shelfExtraSchema)["static"];
+
+// ============================================================
 // SHELF ITEM REVIEW DTO
 // ============================================================
 
@@ -53,7 +63,7 @@ export const shelfDTOSchema = t.Object({
   user: t.Optional(publicUserSchema),
   kindKey: t.Optional(t.Nullable(t.String())),
   coverUrl: t.Optional(t.Nullable(t.String())),
-  extra: t.Optional(t.Nullable(t.Record(t.String(), t.Any()))),
+  extra: t.Optional(t.Nullable(shelfExtraSchema)),
   translations: t.Optional(t.Array(unitTranslationDTOSchema)),
   items: t.Optional(t.Array(shelfItemDTOSchema)),
   reactionSummaries: t.Optional(t.Any()),

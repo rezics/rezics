@@ -29,7 +29,7 @@ export const QuoteExcerptPreview: React.FC<QuoteExcerptPreviewProps> = ({
       targetUnitId: id,
       keyword: "",
       limit: quoteNumber,
-      mapFn: (unitResp) => unitResp,
+      mapFn: (unitResp: any) => unitResp,
       options: { enabled: !!id },
     }),
   );

@@ -1,20 +1,21 @@
 import type { Prisma } from "#/prisma/client";
-
-// Internal realm type with relations
-export type RealmWithRelations = Prisma.RealmGetPayload<{
-  include: typeof realmInclude;
-}>;
+import { publicUserSelect } from "@/utils/sanitizeUser";
 
 // Prisma include for realm relations
 export const realmInclude = {
   unit: {
     include: {
-      user: true,
+      user: { select: publicUserSelect },
       translations: true,
     },
   },
   members: true,
 } satisfies Prisma.RealmInclude;
+
+// Internal realm type with relations
+export type RealmWithRelations = Prisma.RealmGetPayload<{
+  include: typeof realmInclude;
+}>;
 
 // Lighter select for list queries (no members)
 export const realmListSelect = {

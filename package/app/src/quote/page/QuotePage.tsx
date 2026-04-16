@@ -64,7 +64,7 @@ export const QuotePage: React.FC = () => {
       <div className="space-y-4">
         <div>
           <div className="flex items-center">
-            <h2 className="text-2xl font-bold">{Quote.title}</h2>
+            <h2 className="text-2xl font-bold">{Quote.translations?.[0]?.title}</h2>
 
             <div className="ml-auto">
               <MiniAdminActionBar
@@ -107,7 +107,9 @@ export const QuotePage: React.FC = () => {
           }}
         />
         <div className="flex-1 mt-2">
-          {Quote.content && <MarkdownContent content={Quote.content} />}
+          {Quote.translations?.[0]?.description && (
+            <MarkdownContent content={Quote.translations[0].description} />
+          )}
         </div>
       </div>
 
@@ -127,7 +129,7 @@ export const QuotePage: React.FC = () => {
           </Typography>
         </div>
         <Typography variant="caption" color="text.disabled">
-          —— {Quote.metadata?.source}
+          —— {(Quote.extra as Record<string, any>)?.source}
         </Typography>
       </div>
 

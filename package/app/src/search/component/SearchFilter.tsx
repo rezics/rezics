@@ -64,7 +64,7 @@ export const BookSearchFilter: React.FC<BookSearchFilterProps> = ({
                 backgroundColor: active ? theme.palette.secondary.main : "",
               }}
             >
-              <Typography variant="body2">{t(LABEL_KEYS[key]!)}</Typography>
+              <Typography variant="body2">{t(LABEL_KEYS[key]! as any)}</Typography>
             </Button>
           );
         })}

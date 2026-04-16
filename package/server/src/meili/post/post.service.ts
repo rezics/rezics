@@ -55,7 +55,7 @@ export async function searchPosts(
 
   return {
     items: resp.hits as any[],
-    total: resp.totalHits ?? resp.estimatedTotalHits ?? resp.hits.length,
+    total: resp.estimatedTotalHits ?? resp.hits.length,
     processingTimeMs: resp.processingTimeMs,
     query: resp.query ?? q,
   };

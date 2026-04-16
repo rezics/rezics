@@ -1,5 +1,4 @@
-import type { BookDTO, UnitTranslationDTO } from "@rezics/contract";
-import { sanitizeUser } from "@/utils/sanitizeUser";
+import type { BookDTO, Language, UnitTranslationDTO } from "@rezics/contract";
 import type { BookWithRelations } from "./types";
 
 /**
@@ -10,7 +9,7 @@ function mapTranslation(
 ): UnitTranslationDTO {
   return {
     unitId: tr.unitId,
-    language: tr.language,
+    language: tr.language as Language,
     title: tr.title ?? undefined,
     subtitle: tr.subtitle ?? undefined,
     summary: tr.summary ?? undefined,
@@ -31,12 +30,12 @@ export function mapBaseBookToDTO(book: BookWithRelations): BookDTO {
   return {
     unitId: book.unitId,
     userId: unit.userId,
-    user: unit.user ? sanitizeUser(unit.user) : undefined,
+    user: unit.user ?? undefined,
     workUnitId: unit.workUnitId ?? undefined,
     status: unit.status,
     visibility: unit.visibility,
     nsfw: unit.nsfw,
-    defaultLanguage: unit.defaultLanguage ?? undefined,
+    defaultLanguage: (unit.defaultLanguage as Language) ?? undefined,
     isLanguageNeutral: unit.isLanguageNeutral,
 
     // Book extension fields

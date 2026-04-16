@@ -12,13 +12,17 @@ export class ChapterService {
   private buildWhereClause(options: ChapterListQuery): Prisma.UnitWhereInput {
     const andWhere: Prisma.UnitWhereInput[] = [];
 
-    // Search in title/content
+    // Search in title via translations
     if (options.q?.trim()) {
       andWhere.push({
-        OR: [
-          { title: { contains: options.q, mode: "insensitive" } },
-          { content: { contains: options.q } },
-        ],
+        translations: {
+          some: {
+            OR: [
+              { title: { contains: options.q, mode: "insensitive" } },
+              { description: { contains: options.q } },
+            ],
+          },
+        },
       });
     }
 
@@ -27,31 +31,22 @@ export class ChapterService {
       andWhere.push({ userId: options.userId });
     }
 
-    // Filter by tags (CSV or single)
-    const tagList = (options.tags ?? options.tag ?? "")
-      .split(",")
-      .map((s) => s.trim())
-      .filter(Boolean);
-    if (tagList.length > 0) {
-      andWhere.push({ tags: { some: { name: { in: tagList } } } });
-    }
-
     // Filter by status (CSV allowed)
     const statuses = (options.status ?? "")
       .split(",")
-      .map((s) => s.trim())
+      .map((s: string) => s.trim())
       .filter(Boolean) as (keyof typeof UnitStatus)[];
     if (statuses.length > 0) {
       andWhere.push({ status: { in: statuses as unknown as UnitStatus[] } });
     }
 
-    // Filter by target unit (book or chapter). Allow CSV
+    // Filter by target unit (book). Allow CSV
     const targetList = (options.targetUnitIds ?? options.targetUnitId ?? "")
       .split(",")
-      .map((s) => s.trim())
+      .map((s: string) => s.trim())
       .filter(Boolean);
     if (targetList.length > 0) {
-      andWhere.push({ targetUnitId: { in: targetList } });
+      andWhere.push({ workUnitId: { in: targetList } });
     }
 
     // Date range
@@ -99,51 +94,83 @@ export class ChapterService {
       prisma.unit.count({ where }),
     ]);
 
-    return { items: items as ChapterUnitWithRelations[], total };
+    return { items, total };
   }
 
   async getByUnitId(unitId: string): Promise<ChapterUnitWithRelations> {
-    const unit = await prisma.unit.findUniqueOrThrow({
+    return prisma.unit.findUniqueOrThrow({
       where: { id: unitId },
       include: chapterUnitInclude,
     });
-    return unit as ChapterUnitWithRelations;
   }
 
   async create(req: CreateChapterInput): Promise<ChapterUnitWithRelations> {
-    const { userId, title, content, targetUnitId, metadata, status } = req;
-    const unit = await prisma.unit.create({
+    const { userId, title, content, targetUnitId, status } = req;
+    return prisma.unit.create({
       data: {
         userId,
         type: UnitType.CHAPTER,
         status: (status as UnitStatus) || UnitStatus.PUBLISHED,
-        title,
-        content: content || undefined,
-        targetUnitId: targetUnitId || undefined,
-        metadata: (metadata ?? {}) as Prisma.InputJsonValue,
+        workUnitId: targetUnitId || undefined,
+        translations: {
+          create: {
+            language: "en",
+            title,
+            description: content || undefined,
+          },
+        },
       },
       include: chapterUnitInclude,
     });
-    return unit as ChapterUnitWithRelations;
   }
 
   async update(
     unitId: string,
     req: UpdateChapterInput,
   ): Promise<ChapterUnitWithRelations> {
-    const { title, content, targetUnitId, metadata, status } = req;
-    const unit = await prisma.unit.update({
+    const { title, content, targetUnitId, status } = req;
+
+    // Update the unit base fields
+    const unitData: Prisma.UnitUpdateInput = {};
+    if (targetUnitId !== undefined) {
+      unitData.work = targetUnitId === null
+        ? { disconnect: true }
+        : { connect: { id: targetUnitId } };
+    }
+    if (status) {
+      unitData.status = status as UnitStatus;
+    }
+
+    // Update the translation if title or content changed
+    if (title !== undefined || content !== undefined) {
+      const existing = await prisma.unitTranslation.findFirst({
+        where: { unitId },
+      });
+      if (existing) {
+        await prisma.unitTranslation.update({
+          where: { unitId_language: { unitId, language: existing.language } },
+          data: {
+            ...(title !== undefined ? { title } : {}),
+            ...(content !== undefined ? { description: content } : {}),
+          },
+        });
+      } else {
+        await prisma.unitTranslation.create({
+          data: {
+            unitId,
+            language: "en",
+            title: title ?? "",
+            description: content ?? undefined,
+          },
+        });
+      }
+    }
+
+    return prisma.unit.update({
       where: { id: unitId },
-      data: {
-        title: title || undefined,
-        content: content ?? undefined,
-        targetUnitId: targetUnitId === null ? null : targetUnitId || undefined,
-        metadata: (metadata ?? undefined) as Prisma.InputJsonValue | undefined,
-        status: (status as UnitStatus) || undefined,
-      },
+      data: unitData,
       include: chapterUnitInclude,
     });
-    return unit as ChapterUnitWithRelations;
   }
 
   async delete(unitId: string): Promise<void> {

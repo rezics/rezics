@@ -1,5 +1,13 @@
 import { faker } from "@faker-js/faker";
-import type { TagDetailDTO } from "@rezics/api/tag/tag";
+/** Local type for tag detail used in test fixtures */
+type TagDetailDTO = {
+  id: string;
+  name: string;
+  type: string | null;
+  domains: string[];
+  content?: string;
+  i18n?: any;
+};
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 // MSW v2
 import { HttpResponse, http } from "msw";
@@ -213,7 +221,7 @@ const Fixture: React.FC = () => {
       <Section title="TagCard">
         <div className="max-w-xl">
           <TagCard
-            tag={cardTag}
+            tag={cardTag as any}
             selected={cardCtl.selected}
             onClick={() => {}}
           />
@@ -225,12 +233,12 @@ const Fixture: React.FC = () => {
 
       <Section title="TagDetailCard">
         <div className="max-w-2xl">
-          <TagDetailCard tag={detailTag} />
+          <TagDetailCard tag={detailTag as any} />
         </div>
       </Section>
 
       <Section title="TagList">
-        <TagList tags={demoTags} autoSelectFirst={listCtl.autoSelectFirst} />
+        <TagList tags={demoTags as any} autoSelectFirst={listCtl.autoSelectFirst} />
         <div className="text-xs text-gray-500 mt-2">
           点击标签切换详情；按住 Ctrl 点击在新窗口打开。
         </div>

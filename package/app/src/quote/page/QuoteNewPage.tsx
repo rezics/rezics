@@ -29,16 +29,22 @@ export function QuoteNewPage({ bookUnitId }: { bookUnitId: string }) {
       show("Please login first");
       return;
     }
+    const translation = quoteData.translations?.[0];
     mutate({
       userId,
       type: "QUOTE",
-      title: quoteData.title || undefined,
-      content: quoteData.content || "",
-      metadata: {
-        ...(quoteData.metadata || {}),
-        source: (quoteData.metadata as any)?.source || "",
+      extra: {
+        ...((quoteData.extra as Record<string, any>) || {}),
+        source: (quoteData.extra as Record<string, any>)?.source || "",
       },
-      targetUnitId: bookUnitId,
+      workUnitId: bookUnitId,
+      translations: [
+        {
+          language: translation?.language || "en",
+          title: translation?.title || undefined,
+          description: translation?.description || "",
+        },
+      ],
     });
   }
 

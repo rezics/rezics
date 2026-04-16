@@ -3,9 +3,9 @@ import type {
   RealmMemberDTO,
   RealmTagUnitDTO,
   RealmUnitDTO,
+  UnitTranslationDTO,
 } from "@rezics/contract";
 import type { RealmMember, RealmTagUnit, RealmUnit } from "#/prisma/client";
-import { sanitizeUser } from "@/utils/sanitizeUser";
 import type { RealmListSelected, RealmWithRelations } from "./types";
 
 export function mapRealmToDTO(row: RealmWithRelations): RealmDTO {
@@ -13,14 +13,14 @@ export function mapRealmToDTO(row: RealmWithRelations): RealmDTO {
     unitId: row.unitId,
     slug: row.unit?.slug ?? undefined,
     userId: row.unit?.userId ?? undefined,
-    user: row.unit?.user ? sanitizeUser(row.unit.user) : undefined,
+    user: row.unit?.user ?? undefined,
     isPublic: row.isPublic,
     isOfficial: row.isOfficial,
     memberCount: row.memberCount,
     extra: (row.extra as Record<string, unknown>) ?? undefined,
-    translations: row.unit?.translations ?? [],
-    createdAt: row.createdAt?.toISOString?.() ?? (row.createdAt as any),
-    updatedAt: row.updatedAt?.toISOString?.() ?? (row.updatedAt as any),
+    translations: (row.unit?.translations ?? []) as unknown as UnitTranslationDTO[],
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
   };
 }
 
@@ -29,14 +29,14 @@ export function mapRealmListRowToDTO(row: RealmListSelected): RealmDTO {
     unitId: row.unitId,
     slug: row.unit?.slug ?? undefined,
     userId: row.unit?.userId ?? undefined,
-    user: row.unit?.user ? sanitizeUser(row.unit.user) : undefined,
+    user: row.unit?.user ?? undefined,
     isPublic: row.isPublic,
     isOfficial: row.isOfficial,
     memberCount: row.memberCount,
     extra: (row.extra as Record<string, unknown>) ?? undefined,
-    translations: row.unit?.translations ?? [],
-    createdAt: row.createdAt?.toISOString?.() ?? (row.createdAt as any),
-    updatedAt: row.updatedAt?.toISOString?.() ?? (row.updatedAt as any),
+    translations: (row.unit?.translations ?? []) as unknown as UnitTranslationDTO[],
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
   };
 }
 
@@ -45,8 +45,8 @@ export function mapRealmMemberToDTO(row: RealmMember): RealmMemberDTO {
     realmUnitId: row.realmUnitId,
     userId: row.userId,
     roleKey: row.roleKey,
-    joinedAt: row.joinedAt?.toISOString?.() ?? (row.joinedAt as any),
-    updatedAt: row.updatedAt?.toISOString?.() ?? (row.updatedAt as any),
+    joinedAt: row.joinedAt,
+    updatedAt: row.updatedAt,
   };
 }
 
@@ -54,7 +54,7 @@ export function mapRealmUnitToDTO(row: RealmUnit): RealmUnitDTO {
   return {
     realmUnitId: row.realmUnitId,
     unitId: row.unitId,
-    createdAt: row.createdAt?.toISOString?.() ?? (row.createdAt as any),
+    createdAt: row.createdAt,
   };
 }
 
@@ -63,6 +63,6 @@ export function mapRealmTagUnitToDTO(row: RealmTagUnit): RealmTagUnitDTO {
     realmUnitId: row.realmUnitId,
     tagUnitId: row.tagUnitId,
     unitId: row.unitId,
-    createdAt: row.createdAt?.toISOString?.() ?? (row.createdAt as any),
+    createdAt: row.createdAt,
   };
 }

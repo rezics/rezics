@@ -23,6 +23,23 @@ const postKindLiterals = t.Union([
 ]);
 
 // ============================================================
+// POST EXTRA SCHEMA
+// ============================================================
+
+export const postExtraSchema = t.Object({
+  rating: t.Optional(t.Number()),
+  title: t.Optional(t.String()),
+  book: t.Optional(
+    t.Object({
+      id: t.String(),
+      title: t.String(),
+    }),
+  ),
+});
+
+export type PostExtra = (typeof postExtraSchema)["static"];
+
+// ============================================================
 // POST DTO (replaces Comment, Review, Note, Remark)
 // ============================================================
 
@@ -43,7 +60,7 @@ export const postDTOSchema = t.Object({
   lastReplyAt: t.Optional(t.Nullable(t.Union([t.String(), t.Date()]))),
   isLocked: t.Optional(t.Boolean()),
   scoreEntryId: t.Optional(t.Nullable(t.String())),
-  extra: t.Optional(t.Nullable(t.Record(t.String(), t.Any()))),
+  extra: t.Optional(t.Nullable(postExtraSchema)),
   reactionSummaries: t.Optional(t.Any()),
   createdAt: t.Optional(t.Union([t.String(), t.Date()])),
   updatedAt: t.Optional(t.Union([t.String(), t.Date()])),

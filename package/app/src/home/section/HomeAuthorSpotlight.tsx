@@ -35,9 +35,8 @@ export const HomeAuthorSpotlight: React.FC<HomeAuthorSpotlightProps> = ({
     const books: Book[] = data?.books ?? [];
     const map = new Map<string, PublicUser>();
     for (const b of books) {
-      for (const a of b.author ?? []) {
-        if (!map.has(a.unitId)) map.set(a.unitId, a);
-      }
+      const u = b.user;
+      if (u && !map.has(u.unitId)) map.set(u.unitId, u);
       if (map.size >= maxAuthors) break;
     }
     return Array.from(map.values()).slice(0, maxAuthors);

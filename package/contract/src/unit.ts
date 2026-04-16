@@ -70,8 +70,8 @@ export const publicUserSchema = t.Object({
   slug: t.Optional(t.String()),
   name: t.String(),
   avatar: t.Optional(t.Nullable(t.String())),
-  bio: t.Optional(t.String()),
-  description: t.Optional(t.String()),
+  bio: t.Optional(t.Nullable(t.String())),
+  description: t.Optional(t.Nullable(t.String())),
   followersCount: t.Optional(t.Number()),
   followingsCount: t.Optional(t.Number()),
 });

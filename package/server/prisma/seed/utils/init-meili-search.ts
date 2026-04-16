@@ -8,10 +8,11 @@ export async function initMeiliSearch(): Promise<void> {
   }
 
   await Promise.all([
-    searchClient.initBookIndex(),
-    searchClient.initUnitIndex(),
+    searchClient.initContentIndex(),
     searchClient.initFeedbackIndex(),
     searchClient.initUserIndex(),
+    searchClient.initPostIndex(),
+    searchClient.initRealmIndex(),
   ]);
 
   console.log("MeiliSearch indexes initialized.");

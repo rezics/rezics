@@ -3,7 +3,6 @@ import {
   DEFAULT_LANGUAGE,
   type BookDTO,
   type ContentSearchDocument,
-  type QuoteDTO,
   type ShelfDTO,
 } from "@rezics/contract";
 import { useQuery } from "@tanstack/react-query";
@@ -69,7 +68,7 @@ export function useHomeShelves(limit = 6): SimpleQueryState<ShelfDTO> {
       translations: doc.translations ?? (doc.titles[0]
         ? [{ unitId: doc.id, language: doc.defaultLanguage ?? DEFAULT_LANGUAGE, title: doc.titles[0], subtitle: null, summary: doc.summaries[0] ?? null, description: doc.descriptions[0] ?? null }]
         : []),
-    })) as ShelfDTO[];
+    })) as unknown as ShelfDTO[];
   }, [data]);
 
   const total: number | undefined = data?.total;
@@ -77,14 +76,9 @@ export function useHomeShelves(limit = 6): SimpleQueryState<ShelfDTO> {
   return { items, total, isLoading, error };
 }
 
-type QuoteListResponse = {
-  quotes: QuoteDTO[];
-  total?: number;
-};
-
 // Quotes are not in the content index (type QUOTE not indexed)
-// This returns empty results until a quote search mechanism is implemented
-export function useHomeQuotes(limit = 6): SimpleQueryState<QuoteDTO> {
-  const items = useMemo<QuoteDTO[]>(() => [], []);
+// MOCK: returns empty results until a quote search mechanism is implemented
+export function useHomeQuotes(_limit = 6): SimpleQueryState<import("@rezics/contract").UnitDTO> {
+  const items = useMemo<import("@rezics/contract").UnitDTO[]>(() => [], []);
   return { items, total: 0, isLoading: false, error: null };
 }

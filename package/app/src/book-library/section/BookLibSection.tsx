@@ -102,10 +102,9 @@ export const BookLibSection = (
             onSearch={(info) => {
               setCurrentQuery({
                 keyword: info.keyword ?? "",
-                tags: info.tags ?? [],
+                tagIds: info.tagIds ?? [],
                 nsfw: info.nsfw ?? false,
                 isLicensed: info.isLicensed ?? undefined,
-                textLength: info.textLength ?? "",
               });
             }}
             defaultValue={currentQuery}

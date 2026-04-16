@@ -4,7 +4,7 @@ import {
   jwtServiceListResponseSchema,
   updateJwtServiceInputSchema,
 } from "@rezics/contract";
-import { Elysia, status, t } from "elysia";
+import { Elysia, t } from "elysia";
 import { authMacro, verifyRootFromDb } from "@/middleware";
 import { jwtServiceAdminService } from "./jwt.admin.service";
 
@@ -12,7 +12,7 @@ export const jwtServiceAdminApi = new Elysia({ prefix: "/admin/jwt-services" })
   .use(authMacro)
   .get(
     "/",
-    async ({ identity }) => {
+    async ({ identity, status }) => {
       if (identity.permission.role !== "ROOT") {
         return status(403, "Forbidden: Root role required");
       }
@@ -24,7 +24,10 @@ export const jwtServiceAdminApi = new Elysia({ prefix: "/admin/jwt-services" })
     },
     {
       requireLogin: true,
-      response: jwtServiceListResponseSchema,
+      response: {
+        200: jwtServiceListResponseSchema,
+        403: t.String(),
+      },
       detail: {
         summary: "List all JWT services",
         tags: ["Admin", "JWT Service"],
@@ -33,7 +36,7 @@ export const jwtServiceAdminApi = new Elysia({ prefix: "/admin/jwt-services" })
   )
   .get(
     "/:serviceKey",
-    async ({ params, identity, set }) => {
+    async ({ params, identity, set, status }) => {
       if (identity.permission.role !== "ROOT") {
         return status(403, "Forbidden: Root role required");
       }
@@ -50,7 +53,10 @@ export const jwtServiceAdminApi = new Elysia({ prefix: "/admin/jwt-services" })
     {
       requireLogin: true,
       params: t.Object({ serviceKey: t.String() }),
-      response: jwtServiceDTOSchema,
+      response: {
+        200: jwtServiceDTOSchema,
+        403: t.String(),
+      },
       detail: {
         summary: "Fetch a JWT service by serviceKey",
         tags: ["Admin", "JWT Service"],
@@ -59,7 +65,7 @@ export const jwtServiceAdminApi = new Elysia({ prefix: "/admin/jwt-services" })
   )
   .post(
     "/",
-    async ({ body, identity, set }) => {
+    async ({ body, identity, set, status }) => {
       if (identity.permission.role !== "ROOT") {
         return status(403, "Forbidden: Root role required");
       }
@@ -73,7 +79,10 @@ export const jwtServiceAdminApi = new Elysia({ prefix: "/admin/jwt-services" })
     {
       requireLogin: true,
       body: createJwtServiceInputSchema,
-      response: jwtServiceDTOSchema,
+      response: {
+        200: jwtServiceDTOSchema,
+        403: t.String(),
+      },
       detail: {
         summary: "Create a JWT service",
         tags: ["Admin", "JWT Service"],
@@ -82,7 +91,7 @@ export const jwtServiceAdminApi = new Elysia({ prefix: "/admin/jwt-services" })
   )
   .patch(
     "/:serviceKey",
-    async ({ params, body, identity, set }) => {
+    async ({ params, body, identity, set, status }) => {
       if (identity.permission.role !== "ROOT") {
         return status(403, "Forbidden: Root role required");
       }
@@ -103,7 +112,10 @@ export const jwtServiceAdminApi = new Elysia({ prefix: "/admin/jwt-services" })
       requireLogin: true,
       params: t.Object({ serviceKey: t.String() }),
       body: updateJwtServiceInputSchema,
-      response: jwtServiceDTOSchema,
+      response: {
+        200: jwtServiceDTOSchema,
+        403: t.String(),
+      },
       detail: {
         summary: "Update a JWT service",
         tags: ["Admin", "JWT Service"],
@@ -112,7 +124,7 @@ export const jwtServiceAdminApi = new Elysia({ prefix: "/admin/jwt-services" })
   )
   .post(
     "/:serviceKey/activate",
-    async ({ params, identity }) => {
+    async ({ params, identity, status }) => {
       if (identity.permission.role !== "ROOT") {
         return status(403, "Forbidden: Root role required");
       }
@@ -124,7 +136,10 @@ export const jwtServiceAdminApi = new Elysia({ prefix: "/admin/jwt-services" })
     {
       requireLogin: true,
       params: t.Object({ serviceKey: t.String() }),
-      response: jwtServiceDTOSchema,
+      response: {
+        200: jwtServiceDTOSchema,
+        403: t.String(),
+      },
       detail: {
         summary: "Activate a JWT service",
         tags: ["Admin", "JWT Service"],
@@ -133,7 +148,7 @@ export const jwtServiceAdminApi = new Elysia({ prefix: "/admin/jwt-services" })
   )
   .post(
     "/:serviceKey/deactivate",
-    async ({ params, identity }) => {
+    async ({ params, identity, status }) => {
       if (identity.permission.role !== "ROOT") {
         return status(403, "Forbidden: Root role required");
       }
@@ -145,7 +160,10 @@ export const jwtServiceAdminApi = new Elysia({ prefix: "/admin/jwt-services" })
     {
       requireLogin: true,
       params: t.Object({ serviceKey: t.String() }),
-      response: jwtServiceDTOSchema,
+      response: {
+        200: jwtServiceDTOSchema,
+        403: t.String(),
+      },
       detail: {
         summary: "Deactivate a JWT service",
         tags: ["Admin", "JWT Service"],

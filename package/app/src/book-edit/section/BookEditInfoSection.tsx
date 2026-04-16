@@ -164,7 +164,14 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
     };
 
     const createBookData: CreateBookInput = {
-      ...updateBookData,
+      isbn13: metadataState?.isbn13 ?? undefined,
+      coverUrl: metadataState?.coverUrl ?? undefined,
+      pageCount: metadataState?.pageCount ?? undefined,
+      textLength: metadataState?.textLength,
+      formatKey: metadataState?.formatKey ?? undefined,
+      nsfw: metadataState?.nsfw,
+      isLicensed: metadataState?.isLicensed,
+      extra: metadataState?.extra,
       defaultLanguage: DEFAULT_LANGUAGE,
       translations: [
         {

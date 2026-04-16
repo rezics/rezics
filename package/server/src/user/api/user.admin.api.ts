@@ -4,7 +4,7 @@ import {
   userListQuerySchema,
   userParamsSchema,
 } from "@rezics/contract";
-import { Elysia, status } from "elysia";
+import { Elysia, t } from "elysia";
 import { authMacro, verifyAdminFromDb } from "@/middleware";
 import { mapUserToDTO } from "../model/mapper";
 import { userService } from "../service/user.service";
@@ -13,7 +13,7 @@ export const adminRoute = new Elysia()
   .use(authMacro)
   .get(
     "/admin",
-    async ({ identity, query }) => {
+    async ({ identity, query, status }) => {
       if (identity.permission.role !== "ADMIN" && identity.permission.role !== "ROOT") {
         return status(403, "Forbidden: Admin role required");
       }
@@ -26,6 +26,10 @@ export const adminRoute = new Elysia()
     {
       requireLogin: true,
       query: userListQuerySchema,
+      response: {
+        200: t.Any(),
+        403: t.String(),
+      },
       detail: {
         summary: "Admin list users",
         description: "List users for admin",
@@ -35,7 +39,7 @@ export const adminRoute = new Elysia()
   )
   .get(
     "/admin/:unitId",
-    async ({ identity, params }) => {
+    async ({ identity, params, status }) => {
       if (identity.permission.role !== "ADMIN" && identity.permission.role !== "ROOT") {
         return status(403, "Forbidden: Admin role required");
       }
@@ -48,6 +52,10 @@ export const adminRoute = new Elysia()
     {
       requireLogin: true,
       params: userParamsSchema,
+      response: {
+        200: t.Any(),
+        403: t.String(),
+      },
       detail: {
         summary: "Admin get user",
         description: "Get user detail for admin",
@@ -57,7 +65,7 @@ export const adminRoute = new Elysia()
   )
   .put(
     "/admin/:unitId",
-    async ({ identity, params, body }) => {
+    async ({ identity, params, body, status }) => {
       if (identity.permission.role !== "ADMIN" && identity.permission.role !== "ROOT") {
         return status(403, "Forbidden: Admin role required");
       }
@@ -79,6 +87,10 @@ export const adminRoute = new Elysia()
       requireLogin: true,
       params: userParamsSchema,
       body: updateUserSchema,
+      response: {
+        200: t.Any(),
+        403: t.String(),
+      },
       detail: {
         summary: "Admin update user",
         description: "Update user as admin",
@@ -88,7 +100,7 @@ export const adminRoute = new Elysia()
   )
   .delete(
     "/admin/:unitId",
-    async ({ identity, params }) => {
+    async ({ identity, params, status }) => {
       if (identity.permission.role !== "ADMIN" && identity.permission.role !== "ROOT") {
         return status(403, "Forbidden: Admin role required");
       }
@@ -102,6 +114,10 @@ export const adminRoute = new Elysia()
     {
       requireLogin: true,
       params: userParamsSchema,
+      response: {
+        200: t.Object({ message: t.String() }),
+        403: t.String(),
+      },
       detail: {
         summary: "Admin delete user",
         description: "Delete user as admin",

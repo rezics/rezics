@@ -1,5 +1,4 @@
 import type { UnitDTO, UnitTranslationDTO } from "@rezics/contract";
-import { sanitizeUser } from "@/utils/sanitizeUser";
 import type { UnitWithRelations } from "./types";
 
 /**
@@ -11,7 +10,7 @@ export function mapUnitToDTO(unit: UnitWithRelations): UnitDTO {
     type: unit.type,
     slug: unit.slug ?? undefined,
     userId: unit.userId,
-    user: unit.user ? sanitizeUser(unit.user) : undefined,
+    user: unit.user ?? undefined,
     workUnitId: unit.workUnitId ?? undefined,
     defaultLanguage: unit.defaultLanguage ?? undefined,
     isLanguageNeutral: unit.isLanguageNeutral,

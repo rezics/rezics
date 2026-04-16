@@ -6,7 +6,7 @@ interface RealmTagManagerProps {
   realmId: string;
 }
 
-export const RealmTagManager: React.FC<RealmTagManagerProps> = ({ realmId }) => {
+export const RealmTagManager: React.FC<RealmTagManagerProps> = ({ realmId: _realmId }) => {
   // MOCK: tag management UI placeholder
   return (
     <Box py={2}>

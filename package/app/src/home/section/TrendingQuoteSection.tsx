@@ -22,8 +22,8 @@ export const TrendingQuoteSection: React.FC<TrendingQuoteSectionProps> = ({
 
   const handleMoreClick = () => {
     const first = items[0];
-    if (first?.bookId) {
-      navigate({ to: "/quote/book/$bookId", params: { bookId: first.bookId } });
+    if (first?.workUnitId) {
+      navigate({ to: "/quote/book/$bookId", params: { bookId: first.workUnitId } });
       return;
     }
     if (first?.id) {
@@ -39,7 +39,7 @@ export const TrendingQuoteSection: React.FC<TrendingQuoteSectionProps> = ({
         <Typography variant="h6" className="mb-3">
           {resolvedTitle}
         </Typography>
-        <QueryErrorDisplay error={error} />
+        <QueryErrorDisplay error={error instanceof Error ? error : null} />
       </div>
     );
   }

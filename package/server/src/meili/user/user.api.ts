@@ -54,10 +54,6 @@ export async function searchUsers(
     filter.push(`slug = "${escapeValue(opts.slug)}"`);
   }
 
-  if (opts.type) {
-    filter.push(`type = "${escapeValue(opts.type)}"`);
-  }
-
   const pageNum = Math.max(Number(opts.page ?? 1), 1);
   const rawLimit = Math.max(1, Math.min(Number(opts.limit ?? 20), 100));
   const offset = (pageNum - 1) * rawLimit;
@@ -73,7 +69,7 @@ export async function searchUsers(
 
   return {
     users: resp.hits as UserSearchDocument[],
-    total: resp.totalHits ?? resp.estimatedTotalHits ?? resp.hits.length,
+    total: resp.estimatedTotalHits ?? resp.hits.length,
     processingTimeMs: resp.processingTimeMs,
     query: resp.query ?? q,
   };

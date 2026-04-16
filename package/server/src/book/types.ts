@@ -1,32 +1,7 @@
 // Type only used in server, otherwise use contract
 
-import type {
-  Book,
-  OrgCredit,
-  Organization,
-  Person,
-  PersonCredit,
-  Prisma,
-  Unit,
-  UnitSupportLanguage,
-  UnitTag,
-  UnitTranslation,
-  User,
-} from "#/prisma/client";
-
-/**
- * Internal book type with relations
- */
-export type BookWithRelations = Book & {
-  unit: Unit & {
-    user: User | null;
-    translations: UnitTranslation[];
-    supportLanguages: UnitSupportLanguage[];
-    unitTags: (UnitTag & { tag: Unit & { translations: UnitTranslation[] } })[];
-    personCredits: (PersonCredit & { person: Person })[];
-    organizationCredits: (OrgCredit & { organization: Organization })[];
-  };
-};
+import type { Prisma } from "#/prisma/client";
+import { publicUserSelect } from "@/utils/sanitizeUser";
 
 /**
  * Prisma include for book relations
@@ -34,7 +9,7 @@ export type BookWithRelations = Book & {
 export const bookInclude = {
   unit: {
     include: {
-      user: true,
+      user: { select: publicUserSelect },
       translations: true,
       supportLanguages: true,
       unitTags: {
@@ -52,3 +27,10 @@ export const bookInclude = {
     },
   },
 } satisfies Prisma.BookInclude;
+
+/**
+ * Internal book type with relations
+ */
+export type BookWithRelations = Prisma.BookGetPayload<{
+  include: typeof bookInclude;
+}>;

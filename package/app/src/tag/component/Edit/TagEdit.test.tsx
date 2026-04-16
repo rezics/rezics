@@ -1,6 +1,13 @@
-import type { TagDetailDTO } from "@rezics/api/tag/tag";
 import { tagApi } from "@rezics/api/tag/tag";
 import { unitApi } from "@rezics/api/unit/unit";
+
+/** Local type for tag detail used in test fixtures */
+type TagDetailDTO = {
+  id: string;
+  name: string;
+  type: string | null;
+  domains: string[];
+};
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import React, { useEffect, useState } from "react";
 import { useFixtureInput } from "react-cosmos/client";
@@ -23,7 +30,7 @@ export default function TagEditFixture() {
   const [simulateError] = useFixtureInput<boolean>("simulateError", false);
 
   // 保存结果显示
-  const [saved, setSaved] = useState<TagDetailDTO | null>(null);
+  const [saved, setSaved] = useState<any>(null);
   // 最近一次错误（仅简单展示）
   const [lastError, setLastError] = useState<string | null>(null);
 
@@ -76,13 +83,14 @@ export default function TagEditFixture() {
   // -----------------------------------------------------------------------
 
   // 更新模式下提供一个初始 tag
-  const updateTag: TagDetailDTO | null =
+  const updateTag: any =
     mode === "update"
       ? {
-          id: "tag_existing_1",
-          name: "现有标签",
-          type: "GENRE",
-          domains: ["domain_old"],
+          unitId: "tag_existing_1",
+          tagUnitId: "tag_existing_1",
+          score: 0,
+          voteCount: 0,
+          tagLabel: "现有标签",
         }
       : null;
 

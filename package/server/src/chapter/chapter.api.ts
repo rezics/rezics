@@ -1,15 +1,14 @@
 import {
-  type ChapterListResponse,
-  type ChapterResponse,
-  type CreateChapterInput,
   chapterListQuerySchema,
+  chapterListResponseSchema,
   chapterParamsSchema,
+  chapterResponseSchema,
   createChapterSchema,
   hasPermissionToDeleteChapter,
   hasPermissionToUpdateChapter,
   updateChapterSchema,
 } from "@rezics/contract";
-import { Elysia, status } from "elysia";
+import { Elysia, t } from "elysia";
 import { authMacro, verifyAdminFromDb } from "@/middleware";
 import { unitService } from "@/unit/unit.service";
 import { chapterService } from "./chapter.service";
@@ -22,12 +21,13 @@ export const chapterApi = new Elysia({ prefix: "/chapters" })
   .use(authMacro)
   .get(
     "/:unitId",
-    async ({ params }): Promise<ChapterResponse> => {
+    async ({ params }) => {
       const unit = await chapterService.getByUnitId(params.unitId);
       return mapUnitToChapterDetailDTO(unit);
     },
     {
       params: chapterParamsSchema,
+      response: chapterResponseSchema,
       detail: {
         summary: "Get chapter",
         description: "Get a single chapter unit by unit ID",
@@ -37,21 +37,20 @@ export const chapterApi = new Elysia({ prefix: "/chapters" })
   )
   .post(
     "/",
-    async ({ body, identity }): Promise<ChapterResponse> => {
-      const req: CreateChapterInput = {
+    async ({ body, identity }) => {
+      const unit = await chapterService.create({
         userId: identity.unitId,
         title: body.title,
         content: body.content,
         targetUnitId: body.targetUnitId,
-        metadata: body.metadata,
         status: body.status,
-      };
-      const unit = await chapterService.create(req);
+      });
       return mapUnitToChapterDetailDTO(unit);
     },
     {
       requireLogin: true,
       body: createChapterSchema,
+      response: chapterResponseSchema,
       detail: {
         summary: "Create chapter",
         description: "Create a new chapter unit (CHAPTER)",
@@ -61,7 +60,7 @@ export const chapterApi = new Elysia({ prefix: "/chapters" })
   )
   .get(
     "/",
-    async ({ identity, query }): Promise<ChapterListResponse> => {
+    async ({ identity, query, status }) => {
       if (identity.permission.role !== "ADMIN" && identity.permission.role !== "ROOT") {
         return status(403, "Forbidden: Admin role required");
       }
@@ -77,6 +76,10 @@ export const chapterApi = new Elysia({ prefix: "/chapters" })
     {
       requireLogin: true,
       query: chapterListQuerySchema,
+      response: {
+        200: chapterListResponseSchema,
+        403: t.String(),
+      },
       detail: {
         summary: "List chapters",
         description:
@@ -87,7 +90,7 @@ export const chapterApi = new Elysia({ prefix: "/chapters" })
   )
   .put(
     "/:unitId",
-    async ({ params, body, identity, set }): Promise<ChapterResponse> => {
+    async ({ params, body, identity, set }) => {
       const target = await unitService.getByUnitId(params.unitId);
       if (!target) {
         set.status = 404;
@@ -104,6 +107,7 @@ export const chapterApi = new Elysia({ prefix: "/chapters" })
       requireLogin: true,
       params: chapterParamsSchema,
       body: updateChapterSchema,
+      response: chapterResponseSchema,
       detail: {
         summary: "Update chapter",
         description: "Update an existing chapter (by unit ID)",
@@ -113,7 +117,7 @@ export const chapterApi = new Elysia({ prefix: "/chapters" })
   )
   .delete(
     "/:unitId",
-    async ({ params, identity, set }): Promise<{ message: string }> => {
+    async ({ params, identity, set }) => {
       const target = await unitService.getByUnitId(params.unitId);
       if (!target) {
         set.status = 404;

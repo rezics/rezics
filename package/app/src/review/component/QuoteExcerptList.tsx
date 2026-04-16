@@ -24,13 +24,13 @@ export const QuoteExcerptListShow: React.FC<QuoteExcerptListShowProps> = ({
                   name: quote.user?.name || "",
                   avatar: quote.user?.avatar || "",
                 }}
-                content={quote.content || ""}
+                content={quote.translations?.[0]?.description || ""}
                 stats={{
                   replies: 0,
                   likes: 0,
                   date: quote.createdAt?.toString() || "",
                 }}
-                source={quote.metadata?.source || ""}
+                source={(quote.extra as Record<string, any>)?.source || ""}
                 originalLink={`/quote/${quote.id}`}
               />
             ),

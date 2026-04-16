@@ -152,7 +152,7 @@ describe("POST /session/exchange", () => {
       token: "raw-token",
       protectedHeader: { alg: "ES256" },
     });
-    mockFindUnique.mockResolvedValueOnce(null);
+    mockFindUnique.mockResolvedValueOnce(null as any);
     mockProvisionFromJwt.mockResolvedValueOnce({
       unitId: "new-user",
       permission: null,
@@ -184,7 +184,7 @@ describe("POST /session/exchange", () => {
       token: "raw-token",
       protectedHeader: { alg: "ES256" },
     });
-    mockFindUnique.mockResolvedValueOnce(null);
+    mockFindUnique.mockResolvedValueOnce(null as any);
 
     const { sessionApi } = await import("./session.api");
 

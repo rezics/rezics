@@ -49,12 +49,12 @@ export function BookDetailSidebar({ bookInfo }: { bookInfo: Book }) {
           </Typography>
           {bookInfo?.pageCount && (
             <Typography variant="body2">
-              {t("book.fields.page_count")}：{bookInfo.pageCount}
+              {t("book.fields.page_count" as any)}：{bookInfo.pageCount}
             </Typography>
           )}
           {bookInfo?.formatKey && (
             <Typography variant="body2">
-              {t("book.fields.format")}：{bookInfo.formatKey}
+              {t("book.fields.format" as any)}：{bookInfo.formatKey}
             </Typography>
           )}
         </Stack>

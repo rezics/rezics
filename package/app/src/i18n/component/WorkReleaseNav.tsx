@@ -41,7 +41,6 @@ export const WorkReleaseNav: React.FC<WorkReleaseNavProps> = ({
           >
             <Chip
               label={
-                book.title ??
                 getTranslation(book.translations)?.title ??
                 "Edition"
               }

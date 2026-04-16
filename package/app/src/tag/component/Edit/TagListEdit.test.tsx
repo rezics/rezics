@@ -1,6 +1,13 @@
-import type { TagDetailDTO } from "@rezics/api/tag/tag";
 import { tagApi } from "@rezics/api/tag/tag";
 import { unitApi } from "@rezics/api/unit/unit";
+
+/** Local type for tag detail used in test fixtures */
+type TagDetailDTO = {
+  id: string;
+  name: string;
+  type: string | null;
+  domains: string[];
+};
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { useFixtureInput } from "react-cosmos/client";
@@ -51,42 +58,44 @@ export default function TagListEditFixture() {
       const tags = (objId && db[objId]) || [];
       return { tags, total: tags.length } as any;
     };
-    tagApi.attach = async (unitId: string, targetUnitId: string) => {
+    tagApi.attach = async (input: { tagUnitId: string; unitId: string }) => {
       if (simulateError) {
         const err = new Error("模拟 attach 失败");
         setLastAction(err.message);
         throw err;
       }
+      const { tagUnitId, unitId } = input;
       setDb((prev) => {
-        const list = prev[targetUnitId] || [];
+        const list = prev[unitId] || [];
         // 若不存在则添加一个占位（通常来自 create 成功回调）
-        if (!list.some((t) => t.id === unitId)) {
+        if (!list.some((t) => t.id === tagUnitId)) {
           const newTag: TagDetailDTO = {
-            id: unitId,
-            name: `新建-${unitId.slice(-5)}`,
+            id: tagUnitId,
+            name: `新建-${tagUnitId.slice(-5)}`,
             type: null,
             domains: [],
           } as TagDetailDTO;
-          return { ...prev, [targetUnitId]: [...list, newTag] };
+          return { ...prev, [unitId]: [...list, newTag] };
         }
         return prev;
       });
-      setLastAction(`attach ${unitId} -> ${targetUnitId}`);
+      setLastAction(`attach ${tagUnitId} -> ${unitId}`);
       return { message: "ok" } as any;
     };
-    tagApi.detach = async (unitId: string, targetUnitId: string) => {
+    tagApi.detach = async (input: { tagUnitId: string; unitId: string }) => {
       if (simulateError) {
         const err = new Error("模拟 detach 失败");
         setLastAction(err.message);
         throw err;
       }
+      const { tagUnitId, unitId } = input;
       setDb((prev) => ({
         ...prev,
-        [targetUnitId]: (prev[targetUnitId] || []).filter(
-          (t) => t.id !== unitId,
+        [unitId]: (prev[unitId] || []).filter(
+          (t) => t.id !== tagUnitId,
         ),
       }));
-      setLastAction(`detach ${unitId} -/-> ${targetUnitId}`);
+      setLastAction(`detach ${tagUnitId} -/-> ${unitId}`);
       return { message: "ok" } as any;
     };
     tagApi.create = async (input: any) => {

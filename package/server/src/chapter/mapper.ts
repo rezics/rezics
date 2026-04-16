@@ -4,11 +4,12 @@ import type { ChapterUnitWithRelations } from "./types";
 export function mapUnitToChapterListItemDTO(
   u: ChapterUnitWithRelations,
 ): ChapterListItemDTO {
+  const translation = u.translations?.[0];
   return {
     unitId: u.id,
-    title: u.title ?? "",
-    noContent: !(u.content && u.content.length > 0),
-    userId: u.userId,
+    title: translation?.title ?? "",
+    noContent: !translation?.description,
+    userId: u.userId ?? undefined,
     createdAt: u.createdAt,
     updatedAt: u.updatedAt,
   };
@@ -17,11 +18,12 @@ export function mapUnitToChapterListItemDTO(
 export function mapUnitToChapterDetailDTO(
   u: ChapterUnitWithRelations,
 ): ChapterDetailDTO {
+  const translation = u.translations?.[0];
   return {
     unitId: u.id,
-    title: u.title ?? "",
-    content: u.content ?? undefined,
-    userId: u.userId,
+    title: translation?.title ?? "",
+    content: translation?.description ?? undefined,
+    userId: u.userId ?? undefined,
     createdAt: u.createdAt,
     updatedAt: u.updatedAt,
   };

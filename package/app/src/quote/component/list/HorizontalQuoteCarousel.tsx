@@ -1,4 +1,4 @@
-import type { QuoteDTO } from "@rezics/contract";
+import type { UnitDTO } from "@rezics/contract";
 import {
   Carousel,
   CarouselContent,
@@ -10,7 +10,7 @@ import type * as React from "react";
 import QuoteCard from "../item/QuoteCard";
 
 export interface HorizontalQuoteCarouselProps {
-  quoteList: QuoteDTO[];
+  quoteList: UnitDTO[];
   className?: string;
 }
 

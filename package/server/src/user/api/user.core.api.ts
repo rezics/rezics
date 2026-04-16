@@ -5,7 +5,7 @@ import {
   userListQuerySchema,
   userParamsSchema,
 } from "@rezics/contract";
-import { Elysia, status } from "elysia";
+import { Elysia, t } from "elysia";
 import { mapUserSearchDocToPublicProfile } from "@/meili/mapper";
 import { meiliService } from "@/meili/meili.service";
 import { authMacro, verifyAdminFromDb } from "@/middleware";
@@ -72,7 +72,7 @@ export const coreRoute = new Elysia()
   )
   .put(
     "/:unitId",
-    async ({ identity, params, body }) => {
+    async ({ identity, params, body, status }) => {
       if (!hasPermissionToUpdateUser(identity.permission, identity.unitId, params.unitId)) {
         return status(403, "Forbidden: Cannot update other users");
       }
@@ -91,6 +91,10 @@ export const coreRoute = new Elysia()
       requireLogin: true,
       params: userParamsSchema,
       body: updateUserSchema,
+      response: {
+        200: t.Any(),
+        403: t.String(),
+      },
       detail: {
         summary: "Update user",
         description: "Update a user by unit ID (own profile only)",
@@ -100,7 +104,7 @@ export const coreRoute = new Elysia()
   )
   .delete(
     "/me",
-    async ({ identity }) => {
+    async ({ identity, status }) => {
       if (identity.permission.role !== "ADMIN" && identity.permission.role !== "ROOT") {
         return status(403, "Forbidden: Admin role required");
       }
@@ -112,6 +116,10 @@ export const coreRoute = new Elysia()
     },
     {
       requireLogin: true,
+      response: {
+        200: t.Object({ message: t.String() }),
+        403: t.String(),
+      },
       detail: {
         summary: "Delete current user",
         description: "Delete current authenticated user account",
@@ -121,7 +129,7 @@ export const coreRoute = new Elysia()
   )
   .delete(
     "/:unitId",
-    async ({ identity, params }) => {
+    async ({ identity, params, status }) => {
       if (identity.permission.role !== "ADMIN" && identity.permission.role !== "ROOT") {
         return status(403, "Forbidden: Admin role required");
       }
@@ -134,6 +142,10 @@ export const coreRoute = new Elysia()
     {
       requireLogin: true,
       params: userParamsSchema,
+      response: {
+        200: t.Object({ message: t.String() }),
+        403: t.String(),
+      },
       detail: {
         summary: "Delete user",
         description: "Delete a user by unit ID (own profile only)",
