@@ -9,14 +9,14 @@
 
 - [x] 2.1 Update `tool/seed/lib/seed-infra.ts` `seedDefaultRealm` to import `DEFAULT_REALM` from `@rezics/contract` and iterate over `DEFAULT_REALM.translations` to create `UnitTranslation` and `UnitSupportLanguage` rows for all 3 languages
 - [x] 2.2 Remove hardcoded translation strings from `seedDefaultRealm`
-- [ ] 2.3 Verify seed is idempotent — run twice against a test database and confirm no duplicate translations or errors
+- [x] 2.3 Verify seed is idempotent — run twice against a test database and confirm no duplicate translations or errors
 
 ## 3. Server: Boot-time Default Realm Cache
 
 - [x] 3.1 Create `package/server/src/infra/default-realm.ts` exporting `initDefaultRealmCache(): Promise<void>` and `getDefaultRealmId(): string | null`
 - [x] 3.2 `initDefaultRealmCache` reads `infra:default_realm` from EchoKV via Prisma, caches the ID. Logs a warning if key is missing
 - [x] 3.3 Call `initDefaultRealmCache()` in server startup (`package/server/src/index.ts`) before the server starts listening
-- [ ] 3.4 Verify server starts cleanly with and without the EchoKV key present
+- [x] 3.4 Verify server starts cleanly with and without the EchoKV key present
 
 ## 4. Server: Auto-Join on Provisioning
 
@@ -35,4 +35,4 @@
 
 - [x] 6.1 Run `bun run build` across affected packages (`contract`, `server`, `app`) — no type errors
 - [x] 6.2 Run `bun test` in `package/server` — all tests pass including new provisioning tests
-- [ ] 6.3 Manual test: seed a fresh database, start server, register a new user, confirm they appear in `RealmMember` for the default realm
+- [x] 6.3 Manual test: seed a fresh database, start server, register a new user, confirm they appear in `RealmMember` for the default realm
