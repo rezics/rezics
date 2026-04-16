@@ -134,7 +134,7 @@ export const UserEditPage: FC<UserEditPageProps> = ({
       <Card className="shadow-lg rounded-2xl">
         <CardHeader
           avatar={
-            <Avatar src={formData.avatar} sx={{ width: 80, height: 80 }}>
+            <Avatar src={formData.avatar} variant="rounded" sx={{ width: 80, height: 80, borderRadius: 2 }}>
               {formData.name?.charAt(0).toUpperCase()}
             </Avatar>
           }

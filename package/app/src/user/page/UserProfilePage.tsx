@@ -74,7 +74,7 @@ export const UserProfilePage: FC<UserProfilePageProps> = ({
       <Card className="shadow-lg rounded-2xl">
         <CardHeader
           avatar={
-            <Avatar src={user.avatar} sx={{ width: 80, height: 80 }}>
+            <Avatar src={user.avatar} variant="rounded" sx={{ width: 80, height: 80, borderRadius: 2 }}>
               {user.name?.charAt(0).toUpperCase()}
             </Avatar>
           }

@@ -87,7 +87,8 @@ export const SettingsProfileSection: FC = () => {
         <div className="flex items-center gap-4 mb-6">
           <Avatar
             src={formData.avatar}
-            sx={{ width: 72, height: 72 }}
+            variant="rounded"
+            sx={{ width: 72, height: 72, borderRadius: 2 }}
           >
             {formData.name?.charAt(0).toUpperCase()}
           </Avatar>
