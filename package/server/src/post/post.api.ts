@@ -11,7 +11,7 @@ import {
   updatePostSchema,
 } from "@rezics/contract";
 import { Elysia } from "elysia";
-import { authMacro } from "@/middleware";
+import { authMacro, isAdminRole, tryResolveIdentity } from "@/middleware";
 import { mapPostToDTO } from "./post.mapper";
 import { postService } from "./post.service";
 
@@ -34,25 +34,20 @@ export const postApi = new Elysia({ prefix: "/posts" })
   )
   .get(
     "/",
-    async ({ query, identity, set }): Promise<PostListResponse> => {
-      if (!BasicAdminPermission(identity.permission)) {
-        set.status = 403;
-        throw new Error(
-          "Forbidden: DB-backed post listing requires admin permission. Use POST /meili/posts/search for public access.",
-        );
-      }
+    async ({ headers, query }): Promise<PostListResponse> => {
+      const identity = await tryResolveIdentity(headers["authorization"]);
+      const admin = isAdminRole(identity);
 
-      const { posts, total } = await postService.list(query);
+      const { posts, total } = await postService.list(query, { isAdmin: admin });
       return { posts: posts.map(mapPostToDTO), total };
     },
     {
-      requireLogin: true,
       query: postListQuerySchema,
       response: postListResponseSchema,
       detail: {
-        summary: "List posts (admin only)",
+        summary: "List posts",
         description:
-          "List posts with filters. Requires admin permission. Use POST /meili/posts/search for public search.",
+          "List posts with filters and pagination. Public callers see only published posts; admins have full access.",
         tags: ["Posts"],
       },
     },

@@ -1,5 +1,6 @@
 import { t } from "elysia";
 import { languageSchema } from "./language";
+import { paginationLimitSchema } from "./pagination";
 import { publicUserSchema, unitTranslationDTOSchema } from "./unit";
 
 // ============================================================
@@ -126,7 +127,7 @@ export const shelfListQuerySchema = t.Object({
       createdAt: t.Optional(t.String()),
     }),
   ),
-  limit: t.Optional(t.Number()),
+  limit: paginationLimitSchema,
 });
 
 export type ShelfListQuery = (typeof shelfListQuerySchema)["static"];
@@ -222,7 +223,7 @@ export const shelfItemsQuerySchema = t.Object({
   keyword: t.Optional(t.String()),
   sort: t.Optional(t.Union([t.Literal("newest"), t.Literal("oldest"), t.Literal("manual")])),
   cursor: t.Optional(t.String()),
-  limit: t.Optional(t.Number()),
+  limit: paginationLimitSchema,
 });
 
 export type ShelfItemsQuery = (typeof shelfItemsQuerySchema)["static"];

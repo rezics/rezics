@@ -18,7 +18,7 @@ import {
   updateRealmSchema,
 } from "@rezics/contract";
 import { Elysia, t } from "elysia";
-import { authMacro } from "@/middleware";
+import { authMacro, isAdminRole, tryResolveIdentity } from "@/middleware";
 import { unitService } from "@/unit/unit.service";
 import { realmService } from "./realm.service";
 
@@ -58,23 +58,23 @@ export const realmApi = new Elysia({ prefix: "/realms" })
   )
   .get(
     "/",
-    async ({ query, identity, set }): Promise<RealmListResponse> => {
-      if (!BasicAdminPermission(identity.permission)) {
-        set.status = 403;
-        throw new Error(
-          "Forbidden: DB-backed realm listing requires admin permission. Use POST /meili/realms/search for public access.",
-        );
-      }
-      const { realms, total } = await realmService.list(query as any);
+    async ({ headers, query }): Promise<RealmListResponse> => {
+      const identity = await tryResolveIdentity(headers["authorization"]);
+      const admin = isAdminRole(identity);
+
+      const effectiveQuery = admin
+        ? query
+        : { ...query, isPublic: true };
+
+      const { realms, total } = await realmService.list(effectiveQuery as any);
       return { realms, total };
     },
     {
-      requireLogin: true,
       query: realmListQuerySchema,
       detail: {
-        summary: "List realms (admin only)",
+        summary: "List realms",
         description:
-          "List realms with filtering and pagination. Requires admin permission. Use POST /meili/realms/search for public search.",
+          "List realms with filtering and pagination. Public callers see only public realms; admins have full access.",
         tags: ["Realms"],
       },
     },

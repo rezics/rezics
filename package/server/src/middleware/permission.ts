@@ -31,6 +31,20 @@ export const authMacro = new Elysia({ name: "macro/auth" }).macro(
   },
 );
 
+export async function tryResolveIdentity(
+  authorization: string | undefined,
+): Promise<RezicsSessionClaims | null> {
+  if (!authorization) return null;
+  return (await verifyRezicsSessionToken(authorization)) as RezicsSessionClaims | null;
+}
+
+function isAdminRole(identity: RezicsSessionClaims | null): boolean {
+  if (!identity) return false;
+  return identity.permission.role === "ADMIN" || identity.permission.role === "ROOT";
+}
+
+export { isAdminRole };
+
 export async function verifyAdminFromDb(unitId: string): Promise<boolean> {
   const user = await prisma.user.findUnique({
     where: { unitId },

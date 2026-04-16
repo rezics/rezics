@@ -1,4 +1,5 @@
 import { t } from "elysia";
+import { paginationLimitSchema } from "./pagination";
 import { publicUserSchema } from "./unit";
 
 // ============================================================
@@ -77,7 +78,7 @@ export const postListQuerySchema = t.Object({
       sortPath: t.Optional(t.String()),
     }),
   ),
-  limit: t.Optional(t.Number()),
+  limit: paginationLimitSchema,
 });
 
 export type PostListQuery = (typeof postListQuerySchema)["static"];

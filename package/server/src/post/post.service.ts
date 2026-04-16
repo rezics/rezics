@@ -18,13 +18,14 @@ export class PostService {
    */
   async list(
     query: PostListQuery = {},
+    options?: { isAdmin?: boolean },
   ): Promise<{ posts: PostWithRelations[]; total: number }> {
     const limitNum = Math.max(1, Math.min(Number(query.limit ?? 50), 200));
     const skipNum = query.start ?? 0;
 
-    const where: Prisma.PostWhereInput = {
-      unit: { status: UnitStatus.PUBLISHED },
-    };
+    const where: Prisma.PostWhereInput = options?.isAdmin
+      ? {}
+      : { unit: { status: UnitStatus.PUBLISHED } };
 
     if (query.targetUnitId) where.targetUnitId = query.targetUnitId;
     if (query.realmUnitId) where.realmUnitId = query.realmUnitId;

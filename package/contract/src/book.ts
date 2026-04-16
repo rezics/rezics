@@ -1,5 +1,6 @@
 import { t } from "elysia";
 import { languageSchema } from "./language";
+import { paginationLimitSchema } from "./pagination";
 import { publicUserSchema, unitTranslationDTOSchema } from "./unit";
 
 // ============================================================
@@ -81,7 +82,6 @@ export type BookDTO = (typeof bookDTOSchema)["static"];
 // ============================================================
 
 export const bookListQuerySchema = t.Object({
-  q: t.Optional(t.String()),
   nsfw: t.Optional(t.Boolean()),
   language: t.Optional(languageSchema),
   tagUnitIds: t.Optional(t.String()),
@@ -105,7 +105,7 @@ export const bookListQuerySchema = t.Object({
       createdAt: t.Optional(t.String()),
     }),
   ),
-  limit: t.Optional(t.Number()),
+  limit: paginationLimitSchema,
 });
 
 export type BookListQuery = (typeof bookListQuerySchema)["static"];

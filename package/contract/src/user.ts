@@ -1,4 +1,5 @@
 import { t } from "elysia";
+import { paginationLimitSchema } from "./pagination";
 
 // ============================================================
 // USER DTO (UserType removed — no AUTHOR/PRESS/PRODUCER)
@@ -32,7 +33,7 @@ export const userListQuerySchema = t.Object({
   email: t.Optional(t.String()),
   slug: t.Optional(t.String()),
   page: t.Optional(t.Numeric()),
-  limit: t.Optional(t.Numeric()),
+  limit: paginationLimitSchema,
 });
 
 export type UserListQuery = (typeof userListQuerySchema)["static"];

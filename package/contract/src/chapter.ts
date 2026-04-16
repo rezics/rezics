@@ -1,4 +1,5 @@
 import { t } from "elysia";
+import { paginationLimitSchema } from "./pagination";
 
 // ============================================================
 // CHAPTER CONTRACTS
@@ -63,7 +64,7 @@ export const chapterListQuerySchema = t.Object({
       createdAt: t.Optional(t.String()),
     }),
   ),
-  limit: t.Optional(t.Number()),
+  limit: paginationLimitSchema,
 });
 
 export type ChapterListQuery = (typeof chapterListQuerySchema)["static"];

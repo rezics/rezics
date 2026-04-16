@@ -1,1 +1,7 @@
-export { authMacro, verifyAdminFromDb, verifyRootFromDb } from "./permission";
+export {
+  authMacro,
+  isAdminRole,
+  tryResolveIdentity,
+  verifyAdminFromDb,
+  verifyRootFromDb,
+} from "./permission";

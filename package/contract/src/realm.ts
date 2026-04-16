@@ -1,5 +1,6 @@
 import { t } from "elysia";
 import { languageSchema } from "./language";
+import { paginationLimitSchema } from "./pagination";
 import { publicUserSchema, unitTranslationDTOSchema } from "./unit";
 
 // ============================================================
@@ -112,7 +113,6 @@ export type RealmTagUnitDTO = (typeof realmTagUnitDTOSchema)["static"];
 // ============================================================
 
 export const realmListQuerySchema = t.Object({
-  q: t.Optional(t.String()),
   isPublic: t.Optional(t.Boolean()),
   isOfficial: t.Optional(t.Boolean()),
   userId: t.Optional(t.String()),
@@ -124,7 +124,7 @@ export const realmListQuerySchema = t.Object({
     }),
   ),
   start: t.Optional(t.Number()),
-  limit: t.Optional(t.Number()),
+  limit: paginationLimitSchema,
 });
 
 export type RealmListQuery = (typeof realmListQuerySchema)["static"];

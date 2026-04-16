@@ -36,44 +36,6 @@ export class BookService {
       andWhere.push({ unit: { nsfw: false } });
     }
 
-    // Text search: search in UnitTranslation title/description + isbn13
-    if (options.q?.trim()) {
-      andWhere.push({
-        OR: [
-          {
-            unit: {
-              translations: {
-                some: {
-                  title: { contains: options.q, mode: "insensitive" },
-                },
-              },
-            },
-          },
-          {
-            unit: {
-              translations: {
-                some: {
-                  description: { contains: options.q, mode: "insensitive" },
-                },
-              },
-            },
-          },
-          { isbn13: { contains: options.q, mode: "insensitive" } },
-          {
-            unit: {
-              personCredits: {
-                some: {
-                  person: {
-                    name: { contains: options.q, mode: "insensitive" },
-                  },
-                },
-              },
-            },
-          },
-        ],
-      });
-    }
-
     // Filter by ISBN13
     if (options.isbn13?.trim()) {
       andWhere.push({

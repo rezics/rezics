@@ -1,5 +1,9 @@
 import { t } from "elysia";
-import type { OffsetPaginated, OffsetPaginationParams } from "./pagination";
+import {
+  paginationLimitSchema,
+  type OffsetPaginated,
+  type OffsetPaginationParams,
+} from "./pagination";
 
 /**
  * Feedback type enum (mirrors Prisma FeedbackType)
@@ -75,7 +79,7 @@ export type FeedbackListQuery = OffsetPaginationParams & {
 
 export const feedbackListQuerySchema = t.Object({
   offset: t.Optional(t.Number()),
-  limit: t.Optional(t.Number()),
+  limit: paginationLimitSchema,
   q: t.Optional(t.String()),
   userId: t.Optional(t.String()),
   unitId: t.Optional(t.String()),

@@ -1,4 +1,5 @@
 import { t } from "elysia";
+import { paginationLimitSchema } from "./pagination";
 
 // ============================================================
 // UNIT TAG DTO (scored junction)
@@ -40,7 +41,7 @@ export const tagListQuerySchema = t.Object({
   unitId: t.Optional(t.String()),
   minScore: t.Optional(t.Number()),
   page: t.Optional(t.Numeric()),
-  limit: t.Optional(t.Numeric()),
+  limit: paginationLimitSchema,
 });
 
 export type TagListQuery = (typeof tagListQuerySchema)["static"];

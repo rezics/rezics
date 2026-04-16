@@ -33,18 +33,6 @@ export class RealmService {
       { unit: { status: UnitStatus.PUBLISHED, type: UnitType.REALM } },
     ];
 
-    if (options.q?.trim()) {
-      and.push({
-        unit: {
-          translations: {
-            some: {
-              title: { contains: options.q, mode: "insensitive" },
-            },
-          },
-        },
-      });
-    }
-
     if (options.userId?.trim()) {
       and.push({ unit: { userId: options.userId } });
     }

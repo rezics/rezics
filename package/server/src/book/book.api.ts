@@ -12,7 +12,7 @@ import {
   updateBookSchema,
 } from "@rezics/contract";
 import { Elysia, status, t } from "elysia";
-import { authMacro, verifyAdminFromDb } from "@/middleware";
+import { authMacro, isAdminRole, tryResolveIdentity } from "@/middleware";
 import { mapScoreAggregateToDTO } from "@/score/score.mapper";
 import { scoreService } from "@/score/score.service";
 import { unitService } from "@/unit/unit.service";
@@ -89,23 +89,23 @@ export const bookApi = new Elysia({ prefix: "/books" })
   )
   .get(
     "/",
-    async ({ identity, query }): Promise<BookListResponse> => {
-      if (identity.permission.role !== "ADMIN" && identity.permission.role !== "ROOT") {
-        return status(403, "Forbidden: Admin role required");
-      }
-      const isAdmin = await verifyAdminFromDb(identity.unitId);
-      if (!isAdmin) return status(403, "Forbidden: Admin role required");
+    async ({ headers, query }): Promise<BookListResponse> => {
+      const identity = await tryResolveIdentity(headers["authorization"]);
+      const admin = isAdminRole(identity);
 
-      const { books, total } = await bookService.list(query);
+      const effectiveQuery = admin
+        ? query
+        : { ...query, status: "PUBLISHED", visibility: "PUBLIC" };
+
+      const { books, total } = await bookService.list(effectiveQuery);
       return { books: books.map(mapBookToDTO), total };
     },
     {
-      requireLogin: true,
       query: bookListQuerySchema,
       detail: {
-        summary: "Get all books",
+        summary: "List books",
         description:
-          "Get all books with filters (isbn13, personId, organizationId, tags, language) and pagination",
+          "List books with filters and pagination. Public callers see only published/public books; admins have full filter access.",
         tags: ["Books"],
       },
     },
