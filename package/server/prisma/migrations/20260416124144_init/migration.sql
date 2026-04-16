@@ -1,5 +1,5 @@
 -- CreateEnum
-CREATE TYPE "UnitType" AS ENUM ('BOOK', 'GAME', 'MEDIA', 'POST', 'TAG', 'REALM', 'SHELF', 'CHAPTER', 'IMAGE', 'VIDEO', 'QUOTE');
+CREATE TYPE "UnitType" AS ENUM ('BOOK', 'GAME', 'MEDIA', 'POST', 'TAG', 'REALM', 'SHELF', 'CHAPTER', 'IMAGE', 'VIDEO', 'QUOTE', 'LINK', 'ENTITY');
 
 -- CreateEnum
 CREATE TYPE "UnitStatus" AS ENUM ('DRAFT', 'PUBLISHED', 'ARCHIVED', 'DELETED');
@@ -8,7 +8,7 @@ CREATE TYPE "UnitStatus" AS ENUM ('DRAFT', 'PUBLISHED', 'ARCHIVED', 'DELETED');
 CREATE TYPE "UnitVisibility" AS ENUM ('PUBLIC', 'UNLISTED', 'PRIVATE');
 
 -- CreateEnum
-CREATE TYPE "PostKind" AS ENUM ('REVIEW', 'COMMENT', 'QUOTE', 'REMARK', 'POST');
+CREATE TYPE "PostKind" AS ENUM ('REVIEW', 'QUOTE', 'REMARK', 'POST');
 
 -- CreateEnum
 CREATE TYPE "FeedbackType" AS ENUM ('REPORT', 'BUG', 'FEATURE', 'OTHER');
@@ -17,6 +17,7 @@ CREATE TYPE "FeedbackType" AS ENUM ('REPORT', 'BUG', 'FEATURE', 'OTHER');
 CREATE TABLE "Unit" (
     "id" UUID NOT NULL DEFAULT uuidv7(),
     "type" "UnitType" NOT NULL,
+    "slug" TEXT,
     "workUnitId" UUID,
     "userId" UUID,
     "defaultLanguage" VARCHAR(16),
@@ -67,7 +68,7 @@ CREATE TABLE "Book" (
     "textLength" INTEGER NOT NULL DEFAULT 0,
     "formatKey" VARCHAR(32),
     "isLicensed" BOOLEAN NOT NULL DEFAULT false,
-    "coverAssetUnitId" UUID,
+    "coverUrl" TEXT,
     "extra" JSONB,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -92,7 +93,7 @@ CREATE TABLE "Game" (
     "versionLabel" TEXT,
     "ageRatingKey" VARCHAR(32),
     "isLicensed" BOOLEAN NOT NULL DEFAULT false,
-    "coverAssetUnitId" UUID,
+    "coverUrl" TEXT,
     "extra" JSONB,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -118,7 +119,7 @@ CREATE TABLE "Media" (
     "episodeCount" INTEGER,
     "seasonCount" INTEGER,
     "isLicensed" BOOLEAN NOT NULL DEFAULT false,
-    "coverAssetUnitId" UUID,
+    "coverUrl" TEXT,
     "extra" JSONB,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -127,11 +128,25 @@ CREATE TABLE "Media" (
 );
 
 -- CreateTable
+CREATE TABLE "Link" (
+    "unitId" UUID NOT NULL,
+    "url" TEXT NOT NULL,
+    "siteName" VARCHAR(128),
+    "faviconUrl" TEXT,
+    "extra" JSONB,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Link_pkey" PRIMARY KEY ("unitId")
+);
+
+-- CreateTable
 CREATE TABLE "Post" (
     "unitId" UUID NOT NULL,
     "authorUserId" UUID NOT NULL,
     "targetUnitId" UUID,
     "realmUnitId" UUID,
+    "scoreEntryId" UUID,
     "body" TEXT,
     "rootPostUnitId" UUID,
     "parentPostUnitId" UUID,
@@ -153,6 +168,7 @@ CREATE TABLE "Post" (
 CREATE TABLE "Shelf" (
     "unitId" UUID NOT NULL,
     "kindKey" VARCHAR(64),
+    "coverUrl" TEXT,
     "extra" JSONB,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -165,13 +181,23 @@ CREATE TABLE "ShelfItem" (
     "shelfUnitId" UUID NOT NULL,
     "itemUnitId" UUID NOT NULL,
     "sortOrder" INTEGER NOT NULL DEFAULT 0,
-    "reviewPostUnitId" UUID,
+    "keywords" TEXT[] DEFAULT ARRAY[]::TEXT[],
     "label" TEXT,
     "extra" JSONB,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "ShelfItem_pkey" PRIMARY KEY ("shelfUnitId","itemUnitId")
+);
+
+-- CreateTable
+CREATE TABLE "ShelfItemReview" (
+    "shelfUnitId" UUID NOT NULL,
+    "itemUnitId" UUID NOT NULL,
+    "reviewUnitId" UUID NOT NULL,
+    "addedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "ShelfItemReview_pkey" PRIMARY KEY ("shelfUnitId","itemUnitId","reviewUnitId")
 );
 
 -- CreateTable
@@ -241,45 +267,22 @@ CREATE TABLE "TagVote" (
 );
 
 -- CreateTable
-CREATE TABLE "Person" (
-    "id" UUID NOT NULL DEFAULT uuidv7(),
-    "name" TEXT NOT NULL,
-    "extra" JSONB,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "Person_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "Organization" (
-    "id" UUID NOT NULL DEFAULT uuidv7(),
-    "name" TEXT NOT NULL,
-    "extra" JSONB,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "Organization_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "PersonCredit" (
+CREATE TABLE "Entity" (
     "unitId" UUID NOT NULL,
-    "personId" UUID NOT NULL,
-    "roleKey" VARCHAR(64) NOT NULL,
+    "kind" VARCHAR(32),
+    "verified" BOOLEAN NOT NULL DEFAULT false,
+
+    CONSTRAINT "Entity_pkey" PRIMARY KEY ("unitId")
+);
+
+-- CreateTable
+CREATE TABLE "Attribution" (
+    "unitId" UUID NOT NULL,
+    "entityId" UUID NOT NULL,
+    "role" VARCHAR(64) NOT NULL,
     "sortOrder" INTEGER NOT NULL DEFAULT 0,
 
-    CONSTRAINT "PersonCredit_pkey" PRIMARY KEY ("unitId","personId","roleKey")
-);
-
--- CreateTable
-CREATE TABLE "OrgCredit" (
-    "unitId" UUID NOT NULL,
-    "organizationId" UUID NOT NULL,
-    "roleKey" VARCHAR(64) NOT NULL,
-    "sortOrder" INTEGER NOT NULL DEFAULT 0,
-
-    CONSTRAINT "OrgCredit_pkey" PRIMARY KEY ("unitId","organizationId","roleKey")
+    CONSTRAINT "Attribution_pkey" PRIMARY KEY ("unitId","entityId","role")
 );
 
 -- CreateTable
@@ -292,8 +295,10 @@ CREATE TABLE "User" (
     "description" TEXT,
     "joinDate" TIMESTAMP(3),
     "permission" JSONB,
+    "keywords" TEXT[] DEFAULT ARRAY[]::TEXT[],
     "followersCount" INTEGER NOT NULL DEFAULT 0,
     "followingsCount" INTEGER NOT NULL DEFAULT 0,
+    "settings" JSONB,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -301,45 +306,42 @@ CREATE TABLE "User" (
 );
 
 -- CreateTable
-CREATE TABLE "Reaction" (
+CREATE TABLE "ScoreEntry" (
     "id" UUID NOT NULL DEFAULT uuidv7(),
     "userId" UUID NOT NULL,
-    "targetId" UUID NOT NULL,
-    "reaction" TEXT NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT "Reaction_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "ReactionSummary" (
-    "targetId" UUID NOT NULL,
-    "reaction" TEXT NOT NULL,
-    "count" INTEGER NOT NULL DEFAULT 0,
-
-    CONSTRAINT "ReactionSummary_pkey" PRIMARY KEY ("targetId","reaction")
-);
-
--- CreateTable
-CREATE TABLE "Bookmark" (
-    "userId" UUID NOT NULL,
-    "targetId" UUID NOT NULL,
-    "tags" TEXT[] DEFAULT ARRAY[]::TEXT[],
+    "unitId" UUID NOT NULL,
+    "realm" UUID NOT NULL,
+    "value" INTEGER NOT NULL,
+    "fields" JSONB,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
-    CONSTRAINT "Bookmark_pkey" PRIMARY KEY ("userId","targetId")
+    CONSTRAINT "ScoreEntry_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "Rating" (
+CREATE TABLE "ScoreAggregate" (
     "unitId" UUID NOT NULL,
-    "domain" UUID NOT NULL,
+    "realm" UUID NOT NULL,
     "totalScore" INTEGER NOT NULL DEFAULT 0,
     "totalCount" INTEGER NOT NULL DEFAULT 0,
+    "distribution" JSONB NOT NULL,
+    "fields" JSONB,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
-    CONSTRAINT "Rating_pkey" PRIMARY KEY ("unitId","domain")
+    CONSTRAINT "ScoreAggregate_pkey" PRIMARY KEY ("unitId","realm")
+);
+
+-- CreateTable
+CREATE TABLE "ScoreRealmField" (
+    "realm" UUID NOT NULL,
+    "key" VARCHAR(64) NOT NULL,
+    "label" TEXT,
+    "sortOrder" INTEGER NOT NULL DEFAULT 0,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "ScoreRealmField_pkey" PRIMARY KEY ("realm","key")
 );
 
 -- CreateTable
@@ -426,6 +428,9 @@ CREATE TABLE "EchoKV" (
 );
 
 -- CreateIndex
+CREATE UNIQUE INDEX "Unit_slug_key" ON "Unit"("slug");
+
+-- CreateIndex
 CREATE INDEX "Unit_type_status_createdAt_idx" ON "Unit"("type", "status", "createdAt");
 
 -- CreateIndex
@@ -480,10 +485,16 @@ CREATE INDEX "Post_parentPostUnitId_createdAt_idx" ON "Post"("parentPostUnitId",
 CREATE INDEX "Post_kind_createdAt_idx" ON "Post"("kind", "createdAt");
 
 -- CreateIndex
+CREATE INDEX "Post_scoreEntryId_idx" ON "Post"("scoreEntryId");
+
+-- CreateIndex
 CREATE INDEX "ShelfItem_itemUnitId_idx" ON "ShelfItem"("itemUnitId");
 
 -- CreateIndex
 CREATE INDEX "ShelfItem_shelfUnitId_sortOrder_idx" ON "ShelfItem"("shelfUnitId", "sortOrder");
+
+-- CreateIndex
+CREATE INDEX "ShelfItemReview_reviewUnitId_idx" ON "ShelfItemReview"("reviewUnitId");
 
 -- CreateIndex
 CREATE INDEX "RealmMember_userId_idx" ON "RealmMember"("userId");
@@ -516,40 +527,25 @@ CREATE INDEX "UnitTag_tagUnitId_score_idx" ON "UnitTag"("tagUnitId", "score");
 CREATE INDEX "TagVote_unitId_tagUnitId_idx" ON "TagVote"("unitId", "tagUnitId");
 
 -- CreateIndex
-CREATE INDEX "PersonCredit_personId_roleKey_idx" ON "PersonCredit"("personId", "roleKey");
+CREATE INDEX "Attribution_entityId_role_idx" ON "Attribution"("entityId", "role");
 
 -- CreateIndex
-CREATE INDEX "PersonCredit_unitId_roleKey_sortOrder_idx" ON "PersonCredit"("unitId", "roleKey", "sortOrder");
-
--- CreateIndex
-CREATE INDEX "OrgCredit_organizationId_roleKey_idx" ON "OrgCredit"("organizationId", "roleKey");
-
--- CreateIndex
-CREATE INDEX "OrgCredit_unitId_roleKey_sortOrder_idx" ON "OrgCredit"("unitId", "roleKey", "sortOrder");
+CREATE INDEX "Attribution_unitId_role_sortOrder_idx" ON "Attribution"("unitId", "role", "sortOrder");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "User_slug_key" ON "User"("slug");
 
 -- CreateIndex
-CREATE INDEX "Reaction_targetId_idx" ON "Reaction"("targetId");
+CREATE INDEX "ScoreEntry_unitId_realm_idx" ON "ScoreEntry"("unitId", "realm");
 
 -- CreateIndex
-CREATE INDEX "Reaction_targetId_reaction_idx" ON "Reaction"("targetId", "reaction");
+CREATE INDEX "ScoreEntry_userId_unitId_idx" ON "ScoreEntry"("userId", "unitId");
 
 -- CreateIndex
-CREATE INDEX "Reaction_userId_reaction_idx" ON "Reaction"("userId", "reaction");
+CREATE UNIQUE INDEX "ScoreEntry_userId_unitId_realm_key" ON "ScoreEntry"("userId", "unitId", "realm");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Reaction_userId_targetId_reaction_key" ON "Reaction"("userId", "targetId", "reaction");
-
--- CreateIndex
-CREATE INDEX "ReactionSummary_targetId_idx" ON "ReactionSummary"("targetId");
-
--- CreateIndex
-CREATE INDEX "Bookmark_userId_idx" ON "Bookmark"("userId");
-
--- CreateIndex
-CREATE INDEX "Bookmark_targetId_idx" ON "Bookmark"("targetId");
+CREATE INDEX "ScoreRealmField_realm_sortOrder_idx" ON "ScoreRealmField"("realm", "sortOrder");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Follow_followerId_followingId_key" ON "Follow"("followerId", "followingId");
@@ -618,6 +614,9 @@ ALTER TABLE "GamePlatform" ADD CONSTRAINT "GamePlatform_gameUnitId_fkey" FOREIGN
 ALTER TABLE "Media" ADD CONSTRAINT "Media_unitId_fkey" FOREIGN KEY ("unitId") REFERENCES "Unit"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "Link" ADD CONSTRAINT "Link_unitId_fkey" FOREIGN KEY ("unitId") REFERENCES "Unit"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "Post" ADD CONSTRAINT "Post_unitId_fkey" FOREIGN KEY ("unitId") REFERENCES "Unit"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -633,6 +632,9 @@ ALTER TABLE "Post" ADD CONSTRAINT "Post_rootPostUnitId_fkey" FOREIGN KEY ("rootP
 ALTER TABLE "Post" ADD CONSTRAINT "Post_parentPostUnitId_fkey" FOREIGN KEY ("parentPostUnitId") REFERENCES "Unit"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "Post" ADD CONSTRAINT "Post_scoreEntryId_fkey" FOREIGN KEY ("scoreEntryId") REFERENCES "ScoreEntry"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "Shelf" ADD CONSTRAINT "Shelf_unitId_fkey" FOREIGN KEY ("unitId") REFERENCES "Unit"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -642,7 +644,10 @@ ALTER TABLE "ShelfItem" ADD CONSTRAINT "ShelfItem_shelfUnitId_fkey" FOREIGN KEY 
 ALTER TABLE "ShelfItem" ADD CONSTRAINT "ShelfItem_itemUnitId_fkey" FOREIGN KEY ("itemUnitId") REFERENCES "Unit"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "ShelfItem" ADD CONSTRAINT "ShelfItem_reviewPostUnitId_fkey" FOREIGN KEY ("reviewPostUnitId") REFERENCES "Unit"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "ShelfItemReview" ADD CONSTRAINT "ShelfItemReview_shelfUnitId_itemUnitId_fkey" FOREIGN KEY ("shelfUnitId", "itemUnitId") REFERENCES "ShelfItem"("shelfUnitId", "itemUnitId") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "ShelfItemReview" ADD CONSTRAINT "ShelfItemReview_reviewUnitId_fkey" FOREIGN KEY ("reviewUnitId") REFERENCES "Unit"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Realm" ADD CONSTRAINT "Realm_unitId_fkey" FOREIGN KEY ("unitId") REFERENCES "Unit"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -678,28 +683,13 @@ ALTER TABLE "TagVote" ADD CONSTRAINT "TagVote_unitId_fkey" FOREIGN KEY ("unitId"
 ALTER TABLE "TagVote" ADD CONSTRAINT "TagVote_tagUnitId_fkey" FOREIGN KEY ("tagUnitId") REFERENCES "Unit"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "PersonCredit" ADD CONSTRAINT "PersonCredit_unitId_fkey" FOREIGN KEY ("unitId") REFERENCES "Unit"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "Entity" ADD CONSTRAINT "Entity_unitId_fkey" FOREIGN KEY ("unitId") REFERENCES "Unit"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "PersonCredit" ADD CONSTRAINT "PersonCredit_personId_fkey" FOREIGN KEY ("personId") REFERENCES "Person"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "Attribution" ADD CONSTRAINT "Attribution_unitId_fkey" FOREIGN KEY ("unitId") REFERENCES "Unit"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "OrgCredit" ADD CONSTRAINT "OrgCredit_unitId_fkey" FOREIGN KEY ("unitId") REFERENCES "Unit"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "OrgCredit" ADD CONSTRAINT "OrgCredit_organizationId_fkey" FOREIGN KEY ("organizationId") REFERENCES "Organization"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "Reaction" ADD CONSTRAINT "Reaction_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("unitId") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "Reaction" ADD CONSTRAINT "Reaction_targetId_fkey" FOREIGN KEY ("targetId") REFERENCES "Unit"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "ReactionSummary" ADD CONSTRAINT "ReactionSummary_targetId_fkey" FOREIGN KEY ("targetId") REFERENCES "Unit"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "Bookmark" ADD CONSTRAINT "Bookmark_targetId_fkey" FOREIGN KEY ("targetId") REFERENCES "Unit"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "Attribution" ADD CONSTRAINT "Attribution_entityId_fkey" FOREIGN KEY ("entityId") REFERENCES "Unit"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Follow" ADD CONSTRAINT "Follow_followerId_fkey" FOREIGN KEY ("followerId") REFERENCES "User"("unitId") ON DELETE CASCADE ON UPDATE CASCADE;
