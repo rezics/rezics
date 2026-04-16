@@ -1,7 +1,9 @@
 export * from "./component";
 export * from "./hooks/useHomeSearchNavigate";
 export * from "./model/searchInfo";
-export * from "./model/searchParser";
+export { parseSearchString as parseSearchStringLegacy } from "./model/searchParser";
+export * from "./model/searchQuery";
+export * from "./model/searchQueryToOptions";
 export * from "./page";
 export * from "./section";
 export * from "./state";

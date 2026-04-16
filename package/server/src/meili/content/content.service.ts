@@ -3,6 +3,7 @@ import type {
   ContentSearchResult,
 } from "@rezics/contract";
 import { searchClient } from "../search-client";
+import { resolveSlugRefs } from "../../shared/slug-ref";
 
 /**
  * Search the unified content index with typed options.
@@ -25,8 +26,13 @@ export async function searchContent(
     }
   }
 
-  // Global tag filter
-  if (opts.tagIds?.length) {
+  // Global tag filter — tags (SlugRef[]) takes precedence over tagIds
+  if (opts.tags?.length) {
+    const resolvedTagIds = await resolveSlugRefs(opts.tags);
+    for (const tagId of resolvedTagIds) {
+      filter.push(`tagIds = "${tagId}"`);
+    }
+  } else if (opts.tagIds?.length) {
     for (const tagId of opts.tagIds) {
       filter.push(`tagIds = "${tagId}"`);
     }

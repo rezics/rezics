@@ -17,6 +17,7 @@ import { realmApi } from "./realm";
 import { scoreApi } from "./score/score.api";
 import { collectionApi, shelfApi } from "./shelf";
 import { linkApi } from "./link";
+import { zoneApi } from "./zone/zone.api";
 import { sessionApi } from "./session";
 import { statsAdminApi } from "./stats";
 import { tagApi } from "./tag";
@@ -164,6 +165,7 @@ app
   .use(shelfApi)
   .use(collectionApi)
   .use(linkApi)
+  .use(zoneApi)
   .use(realmApi)
   .use(attributionApi)
   .use(userApi)

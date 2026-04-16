@@ -1,3 +1,4 @@
+import type { SearchQuery } from "@rezics/contract";
 import { create } from "zustand";
 import type { SearchInfo } from "../model/searchInfo";
 import { normalizeSearchInfo } from "../model/searchInfo";
@@ -16,10 +17,14 @@ type SearchResultState<T = unknown> = {
 };
 
 type SearchState = {
+  /** Structured search query (new) */
+  searchQuery: SearchQuery;
+  /** Legacy SearchInfo — kept for backward compat with existing components */
   query: SearchInfo;
   filter: SearchFilterState;
   status: SearchRequestStatus;
   result: SearchResultState;
+  setSearchQuery: (value: SearchQuery) => void;
   setQuery: (value: SearchInfo) => void;
   setFilter: (value: Partial<SearchFilterState>) => void;
   setStatus: (value: SearchRequestStatus) => void;
@@ -35,11 +40,15 @@ const initialQuery: SearchInfo = {
   isLicensed: false,
 };
 
+const initialSearchQuery: SearchQuery = {};
+
 export const useSearchState = create<SearchState>()((set) => ({
+  searchQuery: initialSearchQuery,
   query: initialQuery,
   filter: { sortOrder: "desc" },
   status: "idle",
   result: { items: [], total: 0 },
+  setSearchQuery: (value) => set({ searchQuery: value }),
   setQuery: (value) => set({ query: normalizeSearchInfo(value) }),
   setFilter: (value) =>
     set((state) => ({
@@ -52,6 +61,7 @@ export const useSearchState = create<SearchState>()((set) => ({
   setResult: (value) => set({ result: value }),
   reset: () =>
     set({
+      searchQuery: initialSearchQuery,
       query: initialQuery,
       filter: { sortOrder: "desc" },
       status: "idle",

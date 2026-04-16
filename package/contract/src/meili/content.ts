@@ -1,6 +1,7 @@
 import { t } from "elysia";
 import type { Static } from "elysia";
 import { languageSchema } from "../language";
+import { SlugRefSchema } from "../common/slug-ref";
 
 // ANCHOR: Content Search Document
 
@@ -74,6 +75,7 @@ export type ContentSearchDocument = Static<
 export const ContentSearchOptionsSchema = t.Object({
   keyword: t.Optional(t.String()),
   type: t.Optional(t.Union([t.String(), t.Array(t.String())])),
+  tags: t.Optional(t.Array(SlugRefSchema)),
   tagIds: t.Optional(t.Array(t.String())),
   realmId: t.Optional(t.String()),
   realmTagIds: t.Optional(t.Array(t.String())),

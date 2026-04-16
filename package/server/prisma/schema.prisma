@@ -27,6 +27,7 @@ enum UnitType {
   QUOTE
   LINK
   ENTITY
+  ZONE
 }
 
 enum UnitStatus {
@@ -104,6 +105,7 @@ model Unit {
   realm  Realm?
   link   Link?
   entity Entity?
+  zone   Zone?
 
   // Tag system
   unitTags       UnitTag[] @relation("TaggedUnit")
@@ -508,6 +510,21 @@ model Entity {
   verified Boolean @default(false)
 
   unit Unit @relation(fields: [unitId], references: [id], onDelete: Cascade)
+}
+
+model Zone {
+  unitId   String    @id @db.Uuid
+  unit     Unit      @relation(fields: [unitId], references: [id], onDelete: Cascade)
+
+  filters  Json
+  template String    @db.VarChar(64)
+  styling  Json?
+
+  startsAt DateTime?
+  endsAt   DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Attribution {
