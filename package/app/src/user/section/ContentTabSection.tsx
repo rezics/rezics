@@ -7,7 +7,7 @@ import type { PostSearchDocument, PostSearchOptions } from "@rezics/contract";
 import { useQuery } from "@tanstack/react-query";
 import type { FC } from "react";
 import { useState } from "react";
-import { useProfileContext } from "@/user/component/ProfileShell";
+import { useProfileContext } from "@/user/component/ProfileLayout";
 import {
   InnerFilterPanel,
   type ChipDefinition,

@@ -9,7 +9,7 @@ import {
   type ChipDefinition,
   InnerFilterPanel,
 } from "@/user/component/InnerFilterPanel";
-import { useProfileContext } from "@/user/component/ProfileShell";
+import { useProfileContext } from "@/user/component/ProfileLayout";
 
 const FILTER_CHIPS: ChipDefinition[] = [
   { value: "joined", label: "Joined" },

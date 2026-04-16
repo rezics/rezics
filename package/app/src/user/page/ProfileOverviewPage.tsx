@@ -1,22 +1,182 @@
+import { Box, Typography } from "@mui/material";
+import { contentSearchQueryOptions } from "@rezics/api/meili/meili.queries";
+import type { ContentSearchDocument } from "@rezics/contract";
+import { Link } from "@rezics/ui/primitive/link/Link.tsx";
+import { useQuery } from "@tanstack/react-query";
 import type { FC } from "react";
-import { useProfileContext } from "@/user/component/ProfileShell";
-import { OverviewMain } from "@/user/component/OverviewMain";
-import { OverviewSidebar } from "@/user/component/OverviewSidebar";
-import { TwoColumnLayout } from "@/user/component/TwoColumnLayout";
+import { useProfileContext } from "@/user/component/ProfileLayout";
 
 export const ProfileOverviewPage: FC = () => {
-  const { user, unitId, isCurrentUser } = useProfileContext();
+  const { user, unitId } = useProfileContext();
+
+  // MOCK: pinned items — first 6 published units by this user
+  const pinnedQuery = useQuery(
+    contentSearchQueryOptions({
+      sort: { field: "publishedAt", order: "desc" },
+      limit: 6,
+    }),
+  );
+
+  // MOCK: recent activity — latest published units
+  const recentQuery = useQuery(
+    contentSearchQueryOptions({
+      sort: { field: "updatedAt", order: "desc" },
+      limit: 10,
+    }),
+  );
+
+  const shelvesCountQuery = useQuery({
+    ...contentSearchQueryOptions({
+      type: ["SHELF"],
+      sort: { field: "createdAt", order: "desc" },
+      limit: 0,
+    }),
+  });
+
+  const reviewsCountQuery = useQuery({
+    ...contentSearchQueryOptions({
+      type: ["POST"],
+      sort: { field: "createdAt", order: "desc" },
+      limit: 0,
+    }),
+  });
+
+  const pinned = pinnedQuery.data?.items ?? [];
+  const recent = recentQuery.data?.items ?? [];
 
   return (
-    <TwoColumnLayout
-      sidebar={
-        <OverviewSidebar
-          user={user}
-          unitId={unitId}
-          isCurrentUser={isCurrentUser}
+    <div className="flex flex-col gap-6 py-4">
+      {/* Mobile stats — hidden on desktop (shown in sidebar) */}
+      <div className="md:hidden flex flex-wrap gap-4 text-sm">
+        <StatItem
+          label="Shelves"
+          count={shelvesCountQuery.data?.total}
+          to={`/user/${unitId}/shelves`}
         />
-      }
-      main={<OverviewMain unitId={unitId} />}
-    />
+        <StatItem
+          label="Content"
+          count={reviewsCountQuery.data?.total}
+          to={`/user/${unitId}/content`}
+        />
+        <StatItem
+          label="Followers"
+          count={user.followersCount ?? 0}
+          to={`/user/${unitId}/followers`}
+        />
+        <StatItem
+          label="Following"
+          count={user.followingsCount ?? 0}
+          to={`/user/${unitId}/followers?filter=following`}
+        />
+      </div>
+
+      {/* Pinned Items */}
+      <div>
+        <Typography variant="subtitle2" className="font-semibold mb-3">
+          Pinned
+        </Typography>
+        {pinned.length > 0 ? (
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+            {pinned.map((item: ContentSearchDocument) => (
+              <PinnedCard key={item.id} item={item} />
+            ))}
+          </div>
+        ) : (
+          <Typography variant="body2" color="text.secondary">
+            No pinned items yet
+          </Typography>
+        )}
+      </div>
+
+      {/* Recent Activity */}
+      <div>
+        <Typography variant="subtitle2" className="font-semibold mb-3">
+          Recent Activity
+        </Typography>
+        {recent.length > 0 ? (
+          <div className="flex flex-col gap-2">
+            {recent.map((item: ContentSearchDocument) => (
+              <ActivityItem key={item.id} item={item} />
+            ))}
+          </div>
+        ) : (
+          <Typography variant="body2" color="text.secondary">
+            No recent activity
+          </Typography>
+        )}
+      </div>
+    </div>
+  );
+};
+
+const StatItem: FC<{
+  label: string;
+  count: number | undefined;
+  to: string;
+}> = ({ label, count, to }) => (
+  <Link to={to} className="no-underline">
+    <span className="text-gray-500 hover:text-gray-700">
+      <strong className="text-gray-900">{count ?? "—"}</strong> {label}
+    </span>
+  </Link>
+);
+
+// MOCK: pinned card component
+const PinnedCard: FC<{ item: ContentSearchDocument }> = ({ item }) => {
+  const title = item.translations?.[0]?.title ?? item.type ?? "Untitled";
+
+  return (
+    <Link
+      to="/unit/$unitId"
+      params={{ unitId: item.id }}
+      className="no-underline"
+    >
+      <Box className="border border-gray-200 rounded-lg p-3 hover:border-gray-400 transition-colors">
+        <Typography
+          variant="caption"
+          color="text.secondary"
+          className="uppercase"
+        >
+          {item.type}
+        </Typography>
+        <Typography
+          variant="body2"
+          className="font-medium mt-1 line-clamp-2"
+          color="text.primary"
+        >
+          {title}
+        </Typography>
+      </Box>
+    </Link>
+  );
+};
+
+// MOCK: activity item component
+const ActivityItem: FC<{ item: ContentSearchDocument }> = ({ item }) => {
+  const title = item.translations?.[0]?.title ?? item.type ?? "Untitled";
+  const date = item.updatedAt
+    ? new Date(item.updatedAt).toLocaleDateString()
+    : "";
+
+  return (
+    <Box className="flex items-center gap-3 py-1">
+      <Typography
+        variant="caption"
+        color="text.secondary"
+        className="uppercase min-w-[60px]"
+      >
+        {item.type}
+      </Typography>
+      <Typography
+        variant="body2"
+        className="flex-1 truncate"
+        color="text.primary"
+      >
+        {title}
+      </Typography>
+      <Typography variant="caption" color="text.secondary">
+        {date}
+      </Typography>
+    </Box>
   );
 };

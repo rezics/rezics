@@ -4,7 +4,7 @@ import type { ShelfDTO } from "@rezics/contract";
 import { Link } from "@rezics/ui/primitive/link/Link.tsx";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState, type FC } from "react";
-import { useProfileContext } from "@/user/component/ProfileShell";
+import { useProfileContext } from "@/user/component/ProfileLayout";
 import {
   InnerFilterPanel,
   type ChipDefinition,

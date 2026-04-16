@@ -5,7 +5,7 @@ import { Link } from "@rezics/ui/primitive/link/Link.tsx";
 import { useQuery } from "@tanstack/react-query";
 import { useState, type FC } from "react";
 import FollowButton from "@/engagement/component/FollowButton";
-import { useProfileContext } from "@/user/component/ProfileShell";
+import { useProfileContext } from "@/user/component/ProfileLayout";
 import {
   InnerFilterPanel,
   type ChipDefinition,

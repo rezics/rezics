@@ -78,11 +78,7 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({ onLogout }) => {
         open={Boolean(anchorEl)}
         onClose={handleMenuClose}
       >
-        <MenuItem
-          component={Link}
-          to={`/user/me`}
-          onClick={handleMenuClose}
-        >
+        <MenuItem component={Link} to={`/user/me`} onClick={handleMenuClose}>
           <ListItemIcon>
             <PersonIcon fontSize="small" />
           </ListItemIcon>
@@ -90,7 +86,7 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({ onLogout }) => {
         </MenuItem>
         <MenuItem
           component={Link}
-          to={`/user/me`}
+          to={`/user/me/settings/profile`}
           onClick={handleMenuClose}
         >
           <ListItemIcon>
