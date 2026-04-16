@@ -66,6 +66,7 @@ enum PostKind {
 model Unit {
   id         String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
   type       UnitType
+  slug       String?  @unique
   workUnitId String?  @db.Uuid
   userId     String?  @db.Uuid
 

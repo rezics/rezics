@@ -11,6 +11,7 @@ import type { RealmListSelected, RealmWithRelations } from "./types";
 export function mapRealmToDTO(row: RealmWithRelations): RealmDTO {
   return {
     unitId: row.unitId,
+    slug: row.unit?.slug ?? undefined,
     userId: row.unit?.userId ?? undefined,
     user: row.unit?.user ? sanitizeUser(row.unit.user) : undefined,
     isPublic: row.isPublic,
@@ -26,6 +27,7 @@ export function mapRealmToDTO(row: RealmWithRelations): RealmDTO {
 export function mapRealmListRowToDTO(row: RealmListSelected): RealmDTO {
   return {
     unitId: row.unitId,
+    slug: row.unit?.slug ?? undefined,
     userId: row.unit?.userId ?? undefined,
     user: row.unit?.user ? sanitizeUser(row.unit.user) : undefined,
     isPublic: row.isPublic,

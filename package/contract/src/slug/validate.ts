@@ -1,64 +1,13 @@
+import { RESERVED_SLUGS } from "./reserved";
+
 export type SlugValidationResult =
   | { ok: true; normalized: string }
   | { ok: false; reason: string };
 
-const DEFAULT_RESERVED = [
-  // roles / identities
-  "admin",
-  "administrator",
-  "moderator",
-  "staff",
-  "support",
-  "official",
-  "system",
-  "root",
-  "owner",
-  "security",
-  // auth / account
-  "login",
-  "logout",
-  "signin",
-  "signup",
-  "register",
-  "account",
-  "settings",
-  "password",
-  "oauth",
-  "auth",
-  // product / navigation
-  "help",
-  "docs",
-  "blog",
-  "news",
-  "status",
-  "about",
-  "terms",
-  "privacy",
-  "contact",
-  "pricing",
-  "billing",
-  // technical / routing
-  "api",
-  "graphql",
-  "assets",
-  "static",
-  "cdn",
-  "webhook",
-  "callback",
-  // special aliases
-  "me",
-  "you",
-  "null",
-  "undefined",
-] as const;
-
-const DEFAULT_RESERVED_SET: ReadonlySet<string> = new Set(DEFAULT_RESERVED);
-
 export interface ValidateSlugOptions {
   minLen?: number; // default 6
-  maxLen?: number; // default 32
-  reserved?: ReadonlySet<string>; // default DEFAULT_RESERVED_SET
-  trim?: boolean; // default true
+  maxLen?: number; // default 36
+  reserved?: ReadonlySet<string>; // default RESERVED_SLUGS
 }
 
 export function validateSlug(
@@ -66,10 +15,11 @@ export function validateSlug(
   opts: ValidateSlugOptions = {},
 ): SlugValidationResult {
   const minLen = opts.minLen ?? 6;
-  const maxLen = opts.maxLen ?? 32;
-  const reserved = opts.reserved ?? DEFAULT_RESERVED_SET;
+  const maxLen = opts.maxLen ?? 36;
+  const reserved = opts.reserved ?? RESERVED_SLUGS;
 
-  const s = opts.trim === false ? input : input.trim();
+  // trim + lowercase normalize
+  const s = input.trim().toLowerCase();
   if (s.length === 0) return { ok: false, reason: "empty" };
 
   const len = s.length;
@@ -105,8 +55,6 @@ export function validateSlug(
     if (c >= 48 && c <= 57) continue;
     // a-z
     if (c >= 97 && c <= 122) continue;
-    // A-Z
-    if (c >= 65 && c <= 90) continue;
 
     return { ok: false, reason: "invalid_char" };
   }

@@ -5,6 +5,7 @@ import type {
   TagListQuery,
   UpdateTagInput,
 } from "@rezics/contract";
+import { validateSlug } from "@rezics/contract";
 import { prisma, UnitStatus, UnitType } from "#/prisma/client";
 import { patchContentTagsToMeili } from "@/meili/content/sync";
 import type { TagWithTranslations, UnitTagWithRelations } from "./types";
@@ -69,13 +70,24 @@ export class TagService {
    * Create a new tag Unit with translations.
    * Tags are always isLanguageNeutral=true and type=TAG.
    */
-  async create(userId: string, input: CreateTagInput): Promise<TagWithTranslations> {
+  async create(
+    userId: string,
+    input: CreateTagInput & { slug?: string },
+  ): Promise<TagWithTranslations> {
+    let normalizedSlug: string | undefined;
+    if (input.slug) {
+      const validation = validateSlug(input.slug);
+      if (!validation.ok) throw new Error(`Invalid slug: ${validation.reason}`);
+      normalizedSlug = validation.normalized;
+    }
+
     const tag = await prisma.unit.create({
       data: {
         type: UnitType.TAG,
         status: UnitStatus.PUBLISHED,
         isLanguageNeutral: true,
         userId,
+        ...(normalizedSlug ? { slug: normalizedSlug } : {}),
         translations: {
           create: input.translations.map((t) => ({
             language: t.language,

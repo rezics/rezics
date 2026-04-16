@@ -7,6 +7,7 @@ import type {
   RealmUnitDTO,
   UpdateRealmInput,
 } from "@rezics/contract";
+import { validateSlug } from "@rezics/contract";
 import type { Prisma } from "#/prisma/client";
 import { prisma, UnitStatus, UnitType } from "#/prisma/client";
 import {
@@ -92,14 +93,25 @@ export class RealmService {
     return mapRealmToDTO(row);
   }
 
-  async create(req: CreateRealmInput, userId: string): Promise<RealmDTO> {
+  async create(
+    req: CreateRealmInput & { slug?: string },
+    userId: string,
+  ): Promise<RealmDTO> {
     const { isPublic, extra, translations } = req;
+
+    let normalizedSlug: string | undefined;
+    if (req.slug) {
+      const validation = validateSlug(req.slug);
+      if (!validation.ok) throw new Error(`Invalid slug: ${validation.reason}`);
+      normalizedSlug = validation.normalized;
+    }
 
     const unit = await prisma.unit.create({
       data: {
         userId,
         type: UnitType.REALM,
         status: UnitStatus.PUBLISHED,
+        ...(normalizedSlug ? { slug: normalizedSlug } : {}),
         ...(translations?.length
           ? {
               translations: {

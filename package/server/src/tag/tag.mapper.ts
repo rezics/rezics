@@ -45,11 +45,13 @@ export function mapTagUnitToDTO(
   language?: string,
 ): {
   unitId: string;
+  slug: string | undefined;
   label: string | undefined;
   translations: { language: string; title: string | null }[];
 } {
   return {
     unitId: tag.id,
+    slug: tag.slug ?? undefined,
     label: resolveLabel(tag.translations, language),
     translations: tag.translations.map((t) => ({
       language: t.language,

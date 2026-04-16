@@ -54,6 +54,7 @@ export type DefaultRealmDefinition = typeof DEFAULT_REALM;
 
 export const realmDTOSchema = t.Object({
   unitId: t.String(),
+  slug: t.Optional(t.Nullable(t.String())),
   userId: t.Optional(t.Nullable(t.String())),
   user: t.Optional(publicUserSchema),
   isPublic: t.Boolean(),

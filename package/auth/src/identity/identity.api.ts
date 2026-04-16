@@ -2,7 +2,7 @@ import { Elysia, t } from "elysia";
 import { auth } from "../auth/instance";
 import { prisma } from "../auth/prisma";
 import { provisionUserOnServer } from "../provisioning/provision";
-import { validateSlug } from "./slugValidation";
+import { validateSlug } from "@rezics/contract";
 
 async function getSessionUser(
   request: Request,

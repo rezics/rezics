@@ -9,6 +9,7 @@ export function mapUnitToDTO(unit: UnitWithRelations): UnitDTO {
   return {
     id: unit.id,
     type: unit.type,
+    slug: unit.slug ?? undefined,
     userId: unit.userId,
     user: unit.user ? sanitizeUser(unit.user) : undefined,
     workUnitId: unit.workUnitId ?? undefined,

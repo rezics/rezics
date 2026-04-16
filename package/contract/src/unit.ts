@@ -114,6 +114,7 @@ export type UnitSupportLanguageDTO =
 export const baseUnitSchema = t.Object({
   id: t.String(),
   type: t.String(),
+  slug: t.Optional(t.Nullable(t.String())),
   userId: t.Optional(t.Nullable(t.String())),
   user: t.Optional(publicUserSchema),
   workUnitId: t.Optional(t.Nullable(t.String())),

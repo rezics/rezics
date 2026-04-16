@@ -20,6 +20,7 @@ export * from "./realm";
 export * from "./schema";
 export * from "./score";
 export * from "./seed-tags";
+export * from "./slug";
 export * from "./shelf";
 export * from "./tag";
 export * from "./token";

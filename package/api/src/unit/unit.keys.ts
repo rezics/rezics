@@ -28,6 +28,11 @@ export const unitKeys = {
   byUser: (userId: string) => [...unitKeys.all(), "user", userId] as const,
 
   /**
+   * Keys for slug lookup queries
+   */
+  bySlug: (slug: string) => [...unitKeys.all(), "slug", slug] as const,
+
+  /**
    * Keys for search queries
    */
   searches: () => [...unitKeys.all(), "search"] as const,

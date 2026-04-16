@@ -26,6 +26,7 @@ export {
 
 // Query Configurations
 export {
+  unitBySlugQuery,
   unitDetailQuery,
   unitInfiniteListQuery,
   unitListQuery,

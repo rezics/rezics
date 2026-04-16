@@ -28,6 +28,7 @@ export const realmListSelect = {
   unit: {
     select: {
       id: true,
+      slug: true,
       userId: true,
       createdAt: true,
       updatedAt: true,

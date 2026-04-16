@@ -276,6 +276,25 @@ export class UnitService {
     return unit as UnitWithRelations;
   }
 
+  /** Get a unit by slug with relations */
+  async getBySlug(slug: string): Promise<UnitWithRelations | null> {
+    const unit = await prisma.unit.findUnique({
+      where: { slug },
+      include: unitInclude,
+    });
+    return unit as UnitWithRelations | null;
+  }
+
+  /** Set or update a unit's slug */
+  async setSlug(unitId: string, slug: string): Promise<UnitWithRelations> {
+    const unit = await prisma.unit.update({
+      where: { id: unitId },
+      data: { slug },
+      include: unitInclude,
+    });
+    return unit as UnitWithRelations;
+  }
+
   /** Delete a Unit by id (cascades) */
   async delete(
     unitId: string,

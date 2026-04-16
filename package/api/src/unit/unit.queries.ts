@@ -68,11 +68,23 @@ export const unitInfiniteListQuery = (filters?: Omit<UnitFilters, "start">) =>
   });
 
 /**
+ * Query options for looking up a unit by slug
+ */
+export const unitBySlugQuery = (slug: string) =>
+  queryOptions({
+    queryKey: unitKeys.bySlug(slug),
+    queryFn: () => unitApi.getBySlug(slug),
+    enabled: !!slug,
+    staleTime: 1000 * 60 * 10, // 10 minutes
+  });
+
+/**
  * Combined query options export
  */
 export const unitQueries = {
   list: unitListQuery,
   detail: unitDetailQuery,
+  bySlug: unitBySlugQuery,
   search: unitSearchQuery,
   byUser: unitsByUserQuery,
   infiniteList: unitInfiniteListQuery,

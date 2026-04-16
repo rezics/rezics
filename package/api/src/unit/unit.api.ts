@@ -60,6 +60,26 @@ export const unitApi = {
   },
 
   /**
+   * Get single unit by slug
+   */
+  getBySlug: async (slug: string): Promise<UnitResponse> => {
+    return apiFetch<UnitResponse>(`/units/by-slug/${slug}`);
+  },
+
+  /**
+   * Set slug on a unit (TAG or REALM only)
+   */
+  setSlug: async (
+    unitId: string,
+    slug: string,
+  ): Promise<UnitResponse> => {
+    return apiFetch<UnitResponse>(`/units/${unitId}/slug`, {
+      method: "PUT",
+      body: JSON.stringify({ slug }),
+    });
+  },
+
+  /**
    * Create new unit
    */
   create: async (input: CreateUnitInput): Promise<UnitResponse> => {
