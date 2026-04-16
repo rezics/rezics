@@ -1,6 +1,7 @@
 import type React from "react";
 import type { ReactNode } from "react";
 import { Helmet } from "react-helmet-async";
+import { useSyncUserProfile } from "@/user/hooks/useSyncUserProfile";
 import { useUserProfileStore } from "@/user/state";
 import { MainLayoutFooter } from "../component/footer/MainLayoutFooter";
 import { HelpFab } from "../component/HelpWidget";
@@ -13,6 +14,8 @@ export interface MainLayoutProps {
 }
 
 export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
+  useSyncUserProfile();
+
   const isAdmin =
     useUserProfileStore((state) =>
       state.user?.permission?.role?.includes("ADMIN"),
