@@ -1,22 +1,58 @@
 import { Box, Chip, Typography } from "@mui/material";
+import { useRealmSearchQuery } from "@rezics/api/meili/meili.queries";
 import { realmQueries } from "@rezics/api/realm/realm.queries";
-import {
-  realmSearchQueryOptions,
-  useRealmSearchQuery,
-} from "@rezics/api/meili/meili.queries";
+import type { RealmDTO, RealmSearchDocument } from "@rezics/contract";
 import { Link } from "@rezics/ui/primitive/link/Link.tsx";
 import { useQuery } from "@tanstack/react-query";
-import { useState, type FC } from "react";
-import { useProfileContext } from "@/user/component/ProfileShell";
+import { type FC, useState } from "react";
 import {
-  InnerFilterPanel,
   type ChipDefinition,
+  InnerFilterPanel,
 } from "@/user/component/InnerFilterPanel";
+import { useProfileContext } from "@/user/component/ProfileShell";
 
 const FILTER_CHIPS: ChipDefinition[] = [
   { value: "joined", label: "Joined" },
   { value: "created", label: "Created" },
 ];
+
+type RealmListItemModel = {
+  unitId: string;
+  title: string;
+  description: string;
+  memberCount: number;
+  isOfficial: boolean;
+  isPublic: boolean;
+};
+
+// TODO This mapping capability should be provided by the API; need to explore.
+function mapJoinedRealmToListItem(realm: RealmDTO): RealmListItemModel {
+  const primaryTranslation = realm.translations?.[0];
+
+  return {
+    unitId: realm.unitId,
+    title: primaryTranslation?.title ?? realm.unitId,
+    description: primaryTranslation?.description ?? "",
+    memberCount: realm.memberCount,
+    isOfficial: realm.isOfficial,
+    isPublic: realm.isPublic,
+  };
+}
+
+function mapSearchRealmToListItem(
+  realm: RealmSearchDocument,
+): RealmListItemModel {
+  const primaryTranslation = realm.translations[0];
+
+  return {
+    unitId: realm.id,
+    title: primaryTranslation?.title ?? realm.titles[0] ?? realm.id,
+    description: primaryTranslation?.description ?? realm.descriptions[0] ?? "",
+    memberCount: realm.memberCount,
+    isOfficial: realm.isOfficial,
+    isPublic: realm.isPublic,
+  };
+}
 
 export const RealmsTabSection: FC = () => {
   const { unitId, isCurrentUser } = useProfileContext();
@@ -34,15 +70,27 @@ export const RealmsTabSection: FC = () => {
     limit: 50,
   });
 
-  const isLoading =
-    filter === "joined" ? joinedQuery.isLoading : createdQuery.isLoading;
+  const activeQuery = filter === "joined" ? joinedQuery : createdQuery;
+  const isLoading = activeQuery.isLoading;
+  const errorMessage =
+    activeQuery.error instanceof Error
+      ? activeQuery.error.message
+      : activeQuery.error
+        ? "Failed to load realms"
+        : null;
 
-  const joinedRealms = (joinedQuery.data as any[]) ?? [];
-  const createdRealms = (createdQuery.data?.items ?? []).filter(
-    (r: any) => r.userId === unitId,
-  );
+  const joinedRealms =
+    joinedQuery.data?.realms.map(mapJoinedRealmToListItem) ?? [];
+  const createdRealms =
+    createdQuery.data?.items
+      .filter((realm) => realm.userId === unitId)
+      .map(mapSearchRealmToListItem) ?? [];
 
   const realms = filter === "joined" ? joinedRealms : createdRealms;
+  const emptyMessage =
+    filter === "joined"
+      ? "Not a member of any realms yet"
+      : "No realms created yet";
 
   return (
     <div className="flex flex-col gap-4 py-4">
@@ -53,19 +101,29 @@ export const RealmsTabSection: FC = () => {
       />
 
       {isLoading ? (
-        <Typography variant="body2" color="text.secondary" className="py-8 text-center">
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          className="py-8 text-center"
+        >
           Loading...
         </Typography>
+      ) : errorMessage ? (
+        <Typography variant="body2" color="error" className="py-8 text-center">
+          {errorMessage}
+        </Typography>
       ) : realms.length === 0 ? (
-        <Typography variant="body2" color="text.secondary" className="py-8 text-center">
-          {filter === "joined"
-            ? "Not a member of any realms yet"
-            : "No realms created yet"}
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          className="py-8 text-center"
+        >
+          {emptyMessage}
         </Typography>
       ) : (
         <div className="flex flex-col gap-2">
-          {realms.map((realm: any) => (
-            <RealmListItem key={realm.unitId ?? realm.id} realm={realm} />
+          {realms.map((realm) => (
+            <RealmListItem key={realm.unitId} realm={realm} />
           ))}
         </div>
       )}
@@ -73,42 +131,52 @@ export const RealmsTabSection: FC = () => {
   );
 };
 
-const RealmListItem: FC<{ realm: any }> = ({ realm }) => {
-  const realmId = realm.unitId ?? realm.id;
-  const title =
-    realm.translations?.[0]?.title ?? realm.titles?.[0] ?? realmId;
-  const description =
-    realm.translations?.[0]?.description ?? realm.descriptions?.[0] ?? "";
-  const memberCount = realm.memberCount ?? 0;
-
+const RealmListItem: FC<{ realm: RealmListItemModel }> = ({ realm }) => {
   return (
-    <Link to="/realm/$realmId" params={{ realmId }} className="no-underline">
+    <Link
+      to="/realm/$realmId"
+      params={{ realmId: realm.unitId }}
+      className="no-underline"
+    >
       <Box className="border border-gray-200 rounded-lg p-4 hover:border-gray-300 transition-colors">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
-              <Typography variant="body1" className="font-medium" color="text.primary">
-                {title}
+              <Typography
+                variant="body1"
+                className="font-medium"
+                color="text.primary"
+              >
+                {realm.title}
               </Typography>
               {realm.isOfficial && (
-                <Chip label="Official" size="small" color="primary" variant="outlined" />
+                <Chip
+                  label="Official"
+                  size="small"
+                  color="primary"
+                  variant="outlined"
+                />
               )}
-              {realm.isPublic === false && (
+              {!realm.isPublic && (
                 <Chip label="Private" size="small" variant="outlined" />
               )}
             </div>
-            {description && (
+            {realm.description && (
               <Typography
                 variant="body2"
                 color="text.secondary"
                 className="mt-1 line-clamp-2"
               >
-                {description}
+                {realm.description}
               </Typography>
             )}
           </div>
-          <Typography variant="body2" color="text.secondary" className="shrink-0">
-            {memberCount} members
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            className="shrink-0"
+          >
+            {realm.memberCount} members
           </Typography>
         </div>
       </Box>
