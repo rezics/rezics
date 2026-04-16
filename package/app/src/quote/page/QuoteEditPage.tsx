@@ -7,6 +7,7 @@ import { RezicsMarkdownEditor } from "@rezics/ui/editor";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { QueryErrorDisplay } from "@/core/component/QueryErrorDisplay";
 import { quoteEditRoute } from "@/router";
 
 interface QuoteEditPageProps {
@@ -110,7 +111,7 @@ export function QuoteEditPageContainer() {
     return <div>Loading...</div>;
   }
   if (error) {
-    return <div>Error: {error.message}</div>;
+    return <QueryErrorDisplay error={error} />;
   }
 
   return (

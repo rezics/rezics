@@ -3,8 +3,8 @@ import { UnitType } from "@rezics/contract";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useTranslation } from "react-i18next";
+import { QueryErrorDisplay } from "@/core/component/QueryErrorDisplay";
 import { QuoteExcerptListContainer } from "@/review/component/QuoteExcerptList.tsx";
-import { isEmptyValue } from "@/shared/util/data-check.ts";
 
 /** Props for QuoteExcerptPreview component. */
 export type QuoteExcerptPreviewProps = {
@@ -35,12 +35,7 @@ export const QuoteExcerptPreview: React.FC<QuoteExcerptPreviewProps> = ({
   );
 
   if (isLoading) return <div>{t("common.loading")}</div>;
-  if (error && !isEmptyValue(error))
-    return (
-      <div>
-        {t("common.error_generic")} {JSON.stringify(error)}
-      </div>
-    );
+  if (error) return <QueryErrorDisplay error={error} />;
 
   return (
     <div>

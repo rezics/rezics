@@ -16,6 +16,7 @@ import { useMatchRoute } from "@tanstack/react-router";
 import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { BookListViewItem } from "@/book-library/component/BookList/BookListView";
+import { QueryErrorDisplay } from "@/core/component/QueryErrorDisplay";
 import { InlinePostForm } from "@/discussion/component/InlinePostForm";
 import { ThreadView } from "@/discussion/component/ThreadView";
 import {
@@ -67,8 +68,8 @@ export function ReviewPage() {
     return <div className="mt-6">{t("common.loading")}</div>;
   }
 
-  if (error instanceof Error) {
-    return <div className="mt-6 text-red-500">Error: {error.message}</div>;
+  if (error) {
+    return <QueryErrorDisplay error={error} className="mt-6" />;
   }
 
   if (!review) {
@@ -84,8 +85,8 @@ export function ReviewPage() {
       {/* Book Info */}
       {bookLoading ? (
         <div className="mt-6">{t("common.loading")}</div>
-      ) : bookError instanceof Error ? (
-        <div className="mt-6 text-red-500">Error: {bookError.message}</div>
+      ) : bookError ? (
+        <QueryErrorDisplay error={bookError} className="mt-6" />
       ) : !book ? (
         <div className="mt-6">{t("common.no_data")}</div>
       ) : (

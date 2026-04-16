@@ -17,6 +17,7 @@ import { userQueries } from "@rezics/api/user/user.queries";
 import type { UpdateUser, UserDTO } from "@rezics/contract";
 import { PasswordField } from "@rezics/ui/composite/form/field/PasswordField.tsx";
 import { useQuery } from "@tanstack/react-query";
+import { QueryErrorDisplay } from "@/core/component/QueryErrorDisplay";
 import { useMatch } from "@tanstack/react-router";
 import type React from "react";
 import type { FC } from "react";
@@ -146,9 +147,10 @@ export const UserEditPage: FC<UserEditPageProps> = ({
         <CardContent>
           <form onSubmit={handleSubmit}>
             {error && (
-              <Alert severity="error" className="mb-4">
-                {JSON.stringify(error.message)}
-              </Alert>
+              <QueryErrorDisplay
+                error={error instanceof Error ? error : new Error(String(error))}
+                className="mb-4"
+              />
             )}
             <Box className="space-y-4">
               <TextField

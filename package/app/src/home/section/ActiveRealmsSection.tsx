@@ -1,9 +1,10 @@
-import { Alert, Button, CircularProgress, Typography } from "@mui/material";
+import { Button, CircularProgress, Typography } from "@mui/material";
 import { realmListQuery } from "@rezics/api/realm/realm";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
 import { useTranslation } from "react-i18next";
+import { QueryErrorDisplay } from "@/core/component/QueryErrorDisplay";
 import { RealmCard } from "@/realm/component/RealmCard";
 
 export const ActiveRealmsSection: React.FC = () => {
@@ -16,7 +17,7 @@ export const ActiveRealmsSection: React.FC = () => {
   const realms = data?.realms ?? [];
 
   if (error) {
-    return <Alert severity="error">{String(error)}</Alert>;
+    return <QueryErrorDisplay error={error} />;
   }
 
   return (

@@ -25,6 +25,7 @@ import { RezicsMarkdownEditor } from "@rezics/ui/editor";
 import { MUILink } from "@rezics/ui/primitive/link/MUILink.tsx";
 import { useQuery } from "@tanstack/react-query";
 import { useMatchRoute, useNavigate } from "@tanstack/react-router";
+import { QueryErrorDisplay } from "@/core/component/QueryErrorDisplay";
 import type { TFunction } from "i18next";
 import React from "react";
 import { useTranslation } from "react-i18next";
@@ -200,8 +201,8 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
   if (isLoading) return <div className="mt-10 mx-auto max-w-3xl px-4 text-muted-foreground">{t("common.loading")}</div>;
   if (error)
     return (
-      <div className="mt-10 mx-auto max-w-3xl px-4 text-destructive">
-        {t("common.error")}: {String(error)}
+      <div className="mt-10 mx-auto max-w-3xl px-4">
+        <QueryErrorDisplay error={error} />
       </div>
     );
   if (!data && !newBook) return <div className="mt-10 mx-auto max-w-3xl px-4 text-muted-foreground">{t("common.no_data")}</div>;

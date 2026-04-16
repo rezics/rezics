@@ -1,4 +1,5 @@
 import { QueryClient } from "@tanstack/react-query";
+import { ApiError } from "./errors";
 
 // === 基础 QueryClient（必选） ===
 export function createQueryClient() {
@@ -13,12 +14,9 @@ export function createQueryClient() {
         refetchOnMount: false, // 避免重复装载时无谓重取（配合 staleTime 使用）
         // 对 4xx（除 408）不重试，其他最多 2 次，指数退避上限 30s
         retry(failureCount, error) {
-          try {
-            const errorJson = JSON.parse(error.message);
-            const status = errorJson?.status ?? 0;
+          if (error instanceof ApiError) {
+            const { status } = error;
             if (status >= 400 && status < 500 && status !== 408) return false;
-          } catch (e) {
-            console.log("retry error parse error", e);
           }
           return failureCount < 2;
         },

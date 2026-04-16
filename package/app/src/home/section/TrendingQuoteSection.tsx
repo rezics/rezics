@@ -1,7 +1,8 @@
-import { Alert, Button, CircularProgress, Typography } from "@mui/material";
+import { Button, CircularProgress, Typography } from "@mui/material";
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
 import { useTranslation } from "react-i18next";
+import { QueryErrorDisplay } from "@/core/component/QueryErrorDisplay";
 import { HorizontalQuoteCarousel } from "@/quote/component/list/HorizontalQuoteCarousel";
 import { useHomeQuotes } from "./hooks/hooks";
 
@@ -38,7 +39,7 @@ export const TrendingQuoteSection: React.FC<TrendingQuoteSectionProps> = ({
         <Typography variant="h6" className="mb-3">
           {resolvedTitle}
         </Typography>
-        <Alert severity="error">{String(error)}</Alert>
+        <QueryErrorDisplay error={error} />
       </div>
     );
   }

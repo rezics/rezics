@@ -1,4 +1,4 @@
-import { Alert, Button, CircularProgress, Typography } from "@mui/material";
+import { Button, CircularProgress, Typography } from "@mui/material";
 import { contentSearchQueryOptions } from "@rezics/api/meili/meili.queries";
 import type { PostDTO } from "@rezics/contract";
 import { useQuery } from "@tanstack/react-query";
@@ -6,6 +6,7 @@ import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
+import { QueryErrorDisplay } from "@/core/component/QueryErrorDisplay";
 import { HorizontalReviewCarousel } from "@/review/component/list/HorizontalReviewCarousel";
 
 export type TrendingReviewsProps = {
@@ -40,7 +41,7 @@ export const TrendingReviews: React.FC<TrendingReviewsProps> = ({
         <Typography variant="h6" className="mb-3">
           {resolvedTitle}
         </Typography>
-        <Alert severity="error">{String(error)}</Alert>
+        <QueryErrorDisplay error={error} />
       </div>
     );
   }

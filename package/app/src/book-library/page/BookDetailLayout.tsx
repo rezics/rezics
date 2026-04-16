@@ -6,6 +6,7 @@ import { useAtomValue, useSetAtom } from "jotai";
 import type React from "react";
 import { useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
+import { QueryErrorDisplay } from "@/core/component/QueryErrorDisplay";
 
 import { BookHeroSection } from "../section/BookHeroSection";
 import {
@@ -60,11 +61,7 @@ export const BookDetailLayout: React.FC<{ children: React.ReactNode }> = ({
   }
 
   if (error) {
-    return (
-      <div>
-        {t("common.error_generic")} {String(error)}
-      </div>
-    );
+    return <QueryErrorDisplay error={error} />;
   }
 
   return (

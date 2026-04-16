@@ -4,6 +4,7 @@ import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWith
 
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
+import { QueryErrorDisplay } from "@/core/component/QueryErrorDisplay";
 import { HorizontalShelfCarousel } from "@/shelf/component/HorizontalShelfCarousel";
 
 export function ShelfByBookPreview({
@@ -27,12 +28,7 @@ export function ShelfByBookPreview({
   if (isLoading) {
     return <div>{t("common.loading")}</div>;
   }
-  if (error && error instanceof Error)
-    return (
-      <div>
-        {t("common.error")}: {error.message}
-      </div>
-    );
+  if (error) return <QueryErrorDisplay error={error} />;
 
   return (
     <div className="@container">

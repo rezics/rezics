@@ -1,5 +1,4 @@
 import {
-  Alert,
   Card,
   CardContent,
   CircularProgress,
@@ -12,6 +11,7 @@ import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
+import { QueryErrorDisplay } from "@/core/component/QueryErrorDisplay";
 import {
   getBookAuthorName,
   getBookCoverUrl,
@@ -54,7 +54,7 @@ export const HomeNewReleases: React.FC<HomeNewReleasesProps> = ({
         <div className="flex items-center justify-between mb-3">
           <Typography variant="h6">{resolvedTitle}</Typography>
         </div>
-        <Alert severity="error">{String(error)}</Alert>
+        <QueryErrorDisplay error={error} />
       </div>
     );
   }

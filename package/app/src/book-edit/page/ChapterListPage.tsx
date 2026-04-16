@@ -6,6 +6,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type React from "react";
 import { useMemo, useRef, useState } from "react";
 import { ChapterTreeJsonEditor } from "@/book-library/component/Chapter/ChapterTreeJsonEditor";
+import { QueryErrorDisplay } from "@/core/component/QueryErrorDisplay";
 import { bookEditLayoutRoute } from "@/router";
 import {
   ChapterTreeEditor,
@@ -51,7 +52,7 @@ export const BookEditChapterListPage: React.FC = () => {
   if (error) {
     return (
       <div className="mt-4 mx-auto max-w-2xl px-4">
-        <div className="text-destructive">Error: {String(error)}</div>
+        <QueryErrorDisplay error={error} />
       </div>
     );
   }

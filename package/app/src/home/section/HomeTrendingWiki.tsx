@@ -1,5 +1,4 @@
 import {
-  Alert,
   Card,
   CardContent,
   CircularProgress,
@@ -11,6 +10,7 @@ import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
+import { QueryErrorDisplay } from "@/core/component/QueryErrorDisplay";
 import { getBookTitle } from "@/shared/util/translation-helpers";
 
 type Book = BookDTO;
@@ -42,7 +42,7 @@ export const HomeTrendingWiki: React.FC<HomeTrendingWikiProps> = ({
         <Typography variant="h6" className="mb-3">
           {resolvedTitle}
         </Typography>
-        <Alert severity="error">{String(error)}</Alert>
+        <QueryErrorDisplay error={error} />
       </div>
     );
   }

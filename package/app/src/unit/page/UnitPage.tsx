@@ -5,6 +5,7 @@ import { AccentBar } from "@rezics/ui/primitive/decorative/AccentBar.tsx";
 import { MUILink } from "@rezics/ui/primitive/link/MUILink.tsx";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
+import { QueryErrorDisplay } from "@/core/component/QueryErrorDisplay";
 import { unitRoute } from "@/router";
 
 function formatMetadataValue(value: unknown): string {
@@ -38,12 +39,8 @@ export function UnitPage() {
     );
   }
 
-  if (error instanceof Error) {
-    return (
-      <div className="mt-6 text-center text-sm text-red-500">
-        Error: {error.message}
-      </div>
-    );
+  if (error) {
+    return <QueryErrorDisplay error={error} className="mt-6" />;
   }
 
   if (!unit) {

@@ -13,6 +13,7 @@ import {
 } from "@mui/material";
 import { userQueries } from "@rezics/api/user/user.queries";
 import type { UserDTO } from "@rezics/contract";
+import { QueryErrorDisplay } from "@/core/component/QueryErrorDisplay";
 import {
   UniversalPaginator,
   type UniversalPaginatorHandle,
@@ -145,11 +146,8 @@ export const FollowInfoPage: React.FC<FollowInfoPageProps> = ({
 
   if (error) {
     return (
-      <div className="w-full max-w-3xl mx-auto mt-16 text-center">
-        <Typography variant="h6">加载关注信息失败</Typography>
-        <Typography variant="body2" color="textSecondary">
-          {error.message}
-        </Typography>
+      <div className="w-full max-w-3xl mx-auto mt-16">
+        <QueryErrorDisplay error={error} />
       </div>
     );
   }

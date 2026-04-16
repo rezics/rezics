@@ -5,6 +5,7 @@ import { RezicsJsonEditor } from "@rezics/ui/editor";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useEffect, useState } from "react";
+import { QueryErrorDisplay } from "@/core/component/QueryErrorDisplay";
 
 /** Props for ChapterTreeJsonEditor component. */
 interface ChapterTreeJsonEditorProps {
@@ -40,7 +41,7 @@ export const ChapterTreeJsonEditor: React.FC<ChapterTreeJsonEditorProps> = ({
   }
 
   if (isLoading) return <div>Loading...</div>;
-  if (error) return <div>Oh no... {String(error)}</div>;
+  if (error) return <QueryErrorDisplay error={error} />;
 
   return (
     <div>

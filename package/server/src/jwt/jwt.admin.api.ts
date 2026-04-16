@@ -66,24 +66,9 @@ export const jwtServiceAdminApi = new Elysia({ prefix: "/admin/jwt-services" })
       const isRoot = await verifyRootFromDb(identity.unitId);
       if (!isRoot) return status(403, "Forbidden: Root role required");
 
-      try {
-        const service = await jwtServiceAdminService.create(body);
-        set.status = 201;
-        return service;
-      } catch (error) {
-        if (
-          error &&
-          typeof error === "object" &&
-          "code" in error &&
-          (error as { code: string }).code === "P2002"
-        ) {
-          set.status = 409;
-          throw new Error(
-            `JwtService with serviceKey '${body.serviceKey}' already exists`,
-          );
-        }
-        throw error;
-      }
+      const service = await jwtServiceAdminService.create(body);
+      set.status = 201;
+      return service;
     },
     {
       requireLogin: true,
@@ -112,20 +97,7 @@ export const jwtServiceAdminApi = new Elysia({ prefix: "/admin/jwt-services" })
           throw new Error(`Invalid URL for jwksUrl: ${body.jwksUrl}`);
         }
       }
-      try {
-        return await jwtServiceAdminService.update(params.serviceKey, body);
-      } catch (error) {
-        if (
-          error &&
-          typeof error === "object" &&
-          "code" in error &&
-          (error as { code: string }).code === "P2025"
-        ) {
-          set.status = 404;
-          throw new Error(`JwtService not found: ${params.serviceKey}`);
-        }
-        throw error;
-      }
+      return await jwtServiceAdminService.update(params.serviceKey, body);
     },
     {
       requireLogin: true,
@@ -140,27 +112,14 @@ export const jwtServiceAdminApi = new Elysia({ prefix: "/admin/jwt-services" })
   )
   .post(
     "/:serviceKey/activate",
-    async ({ params, identity, set }) => {
+    async ({ params, identity }) => {
       if (identity.permission.role !== "ROOT") {
         return status(403, "Forbidden: Root role required");
       }
       const isRoot = await verifyRootFromDb(identity.unitId);
       if (!isRoot) return status(403, "Forbidden: Root role required");
 
-      try {
-        return await jwtServiceAdminService.activate(params.serviceKey);
-      } catch (error) {
-        if (
-          error &&
-          typeof error === "object" &&
-          "code" in error &&
-          (error as { code: string }).code === "P2025"
-        ) {
-          set.status = 404;
-          throw new Error(`JwtService not found: ${params.serviceKey}`);
-        }
-        throw error;
-      }
+      return await jwtServiceAdminService.activate(params.serviceKey);
     },
     {
       requireLogin: true,
@@ -174,27 +133,14 @@ export const jwtServiceAdminApi = new Elysia({ prefix: "/admin/jwt-services" })
   )
   .post(
     "/:serviceKey/deactivate",
-    async ({ params, identity, set }) => {
+    async ({ params, identity }) => {
       if (identity.permission.role !== "ROOT") {
         return status(403, "Forbidden: Root role required");
       }
       const isRoot = await verifyRootFromDb(identity.unitId);
       if (!isRoot) return status(403, "Forbidden: Root role required");
 
-      try {
-        return await jwtServiceAdminService.deactivate(params.serviceKey);
-      } catch (error) {
-        if (
-          error &&
-          typeof error === "object" &&
-          "code" in error &&
-          (error as { code: string }).code === "P2025"
-        ) {
-          set.status = 404;
-          throw new Error(`JwtService not found: ${params.serviceKey}`);
-        }
-        throw error;
-      }
+      return await jwtServiceAdminService.deactivate(params.serviceKey);
     },
     {
       requireLogin: true,

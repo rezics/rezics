@@ -1,5 +1,6 @@
 import { getApiConfig } from "../config";
 import { clearAuthPresence, hasAuthPresence } from "./authPresence";
+import { ApiError } from "./errors";
 import {
   buildTokenHeaders,
   exchangeForSessionToken,
@@ -76,11 +77,11 @@ export async function apiFetchResponse<T>(
   const responseJson = await response.json().catch(() => null);
 
   if (!response.ok) {
-    throw new Error(
-      JSON.stringify({
-        status: response.status,
-        message: responseJson?.message ?? response.statusText,
-      }),
+    throw new ApiError(
+      response.status,
+      responseJson?.code ?? "UNKNOWN",
+      responseJson?.message ?? response.statusText,
+      responseJson?.detail,
     );
   }
 

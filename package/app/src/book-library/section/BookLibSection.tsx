@@ -1,4 +1,4 @@
-import { Alert } from "@mui/material";
+import { QueryErrorDisplay } from "@/core/component/QueryErrorDisplay";
 import type { BookDTO } from "@rezics/contract";
 import {
   UniversalPaginator,
@@ -20,7 +20,7 @@ export type BookLibSectionProps = {
   /** Loading state indicator. */
   isLoading: boolean;
   /** Error object if fetch failed. */
-  error: unknown;
+  error: Error | null;
   /** Current sort configuration. */
   sortConfig: {
     type: BookLibSortKey;
@@ -78,9 +78,7 @@ export const BookLibSection = (
     return (
       <div className="mx-auto max-w-7xl p-4">
         <BookSearchInput onSearch={() => {}} />
-        <Alert severity="error" className="my-4">
-          {String(error)}
-        </Alert>
+        <QueryErrorDisplay error={error} className="my-4" />
       </div>
     );
   }

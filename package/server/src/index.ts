@@ -26,6 +26,7 @@ import { uploadApi } from "./upload";
 import { userApi } from "./user";
 import { dmServerApi } from "./notify/dm.api";
 import { userBatchApi } from "./notify/user-batch.api";
+import { Prisma } from "#/prisma/client";
 import { AppError } from "./utils/errors";
 import { getProdState } from "./utils/getProdState";
 import { wellKnownApi } from "./well-known/well-known.api";
@@ -109,7 +110,43 @@ app
   .onError(({ code, error, set }) => {
     if (error instanceof AppError) {
       set.status = error.statusCode;
+    } else if (
+      error instanceof Prisma.PrismaClientKnownRequestError
+    ) {
+      const prismaStatusMap: Record<string, number> = {
+        P2025: 404,
+        P2002: 409,
+        P2003: 400,
+        P2014: 400,
+      };
+      set.status = prismaStatusMap[error.code] ?? 500;
+
+      const modelName =
+        (error.meta?.["modelName"] as string | undefined) ??
+        (error.meta?.["model"] as string | undefined);
+      const target = error.meta?.["target"] as string[] | undefined;
+
+      const humanMessages: Record<string, string> = {
+        P2025: `${modelName ?? "Record"} not found`,
+        P2002: `${modelName ?? "Record"} already exists`,
+        P2003: `Related ${modelName ?? "record"} not found`,
+        P2014: `Required relation on ${modelName ?? "record"} is missing`,
+      };
+
+      return {
+        status: set.status,
+        code,
+        message: humanMessages[error.code] ?? "Database error",
+        detail: {
+          prisma: {
+            code: error.code,
+            ...(modelName && { model: modelName }),
+            ...(target && { target }),
+          },
+        },
+      };
     }
+
     set.status ||= 500;
     const message =
       error instanceof Error ? error.message : "Internal Server Error";

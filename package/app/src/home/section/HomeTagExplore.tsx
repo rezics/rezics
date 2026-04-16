@@ -1,4 +1,4 @@
-import { Alert, Chip, CircularProgress, Typography } from "@mui/material";
+import { Chip, CircularProgress, Typography } from "@mui/material";
 import { bookQueries } from "@rezics/api/book/book";
 import type { BookDTO } from "@rezics/contract";
 import { Link } from "@rezics/ui/primitive/link/Link.tsx";
@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
+import { QueryErrorDisplay } from "@/core/component/QueryErrorDisplay";
 
 type Book = BookDTO;
 
@@ -51,7 +52,7 @@ export const HomeTagExplore: React.FC<HomeTagExploreProps> = ({
         <Typography variant="h6" className="mb-3">
           {resolvedTitle}
         </Typography>
-        <Alert severity="error">{String(error)}</Alert>
+        <QueryErrorDisplay error={error} />
       </div>
     );
   }

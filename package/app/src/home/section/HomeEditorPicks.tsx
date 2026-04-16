@@ -1,5 +1,4 @@
 import {
-  Alert,
   Card,
   CardContent,
   CircularProgress,
@@ -12,6 +11,7 @@ import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
+import { QueryErrorDisplay } from "@/core/component/QueryErrorDisplay";
 import {
   getBookAuthorName,
   getBookCoverUrl,
@@ -47,7 +47,7 @@ export const HomeEditorPicks: React.FC<HomeEditorPicksProps> = ({
         <Typography variant="h6" className="mb-3">
           {resolvedTitle}
         </Typography>
-        <Alert severity="error">{String(error)}</Alert>
+        <QueryErrorDisplay error={error} />
       </div>
     );
   }

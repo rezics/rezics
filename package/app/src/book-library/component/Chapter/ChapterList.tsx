@@ -4,6 +4,7 @@ import type { ChapterTreeItem } from "@rezics/contract";
 import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
 import { Link } from "@rezics/ui/primitive/link/Link.tsx";
 import { useQuery } from "@tanstack/react-query";
+import { QueryErrorDisplay } from "@/core/component/QueryErrorDisplay";
 import React, {
   forwardRef,
   useCallback,
@@ -329,12 +330,7 @@ export const ChapterList: React.FC<ChapterListProps> = ({ id }) => {
   const treeRef = React.useRef<ChapterTreeHandle>(null);
 
   if (isLoading) return <div>{t("common.loading")}</div>;
-  if (error)
-    return (
-      <div>
-        {t("common.error_generic")} {String(error)}
-      </div>
-    );
+  if (error) return <QueryErrorDisplay error={error} />;
 
   return (
     <div>

@@ -3,6 +3,7 @@ import type { PostDTO } from "@rezics/contract";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useTranslation } from "react-i18next";
+import { QueryErrorDisplay } from "@/core/component/QueryErrorDisplay";
 import { ShortReviewListShow } from "@/review/component/ShortReviewList.tsx";
 
 interface ShortBookReviewsProps {
@@ -32,12 +33,8 @@ export const RemarkPreview: React.FC<ShortBookReviewsProps> = ({ bookId }) => {
   if (isLoading) {
     return <div>{t("common.loading")}</div>;
   }
-  if (error && error instanceof Error) {
-    return (
-      <div>
-        {t("common.error")}: {error.message}
-      </div>
-    );
+  if (error) {
+    return <QueryErrorDisplay error={error} />;
   }
 
   const posts: PostDTO[] = data?.posts?.slice(0, 4) ?? [];

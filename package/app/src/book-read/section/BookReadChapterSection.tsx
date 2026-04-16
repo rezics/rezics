@@ -2,6 +2,7 @@ import { chapterDetailQuery } from "@rezics/api/chapter/chapter";
 import { createNovelRenderer } from "@rezics/editor/markdown";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
+import { QueryErrorDisplay } from "@/core/component/QueryErrorDisplay";
 import { bookReadLayoutRoute } from "@/router";
 
 export const BookReadChapterPage: React.FC = () => {
@@ -14,13 +15,7 @@ export const BookReadChapterPage: React.FC = () => {
   const chapterHtml = md.render(data?.content || "");
 
   if (isPending) return <div>Loading...</div>;
-  if (isError)
-    return (
-      <div>
-        Oh no...{" "}
-        {error instanceof Error ? error.message : "Failed to load chapter"}
-      </div>
-    );
+  if (isError) return <QueryErrorDisplay error={error} />;
 
   return (
     <div className="w-11/12 mx-auto p-4">

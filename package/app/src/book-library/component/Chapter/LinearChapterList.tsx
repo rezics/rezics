@@ -4,6 +4,7 @@ import type { ChapterTreeItem } from "@rezics/contract";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useMemo, useRef, useState } from "react";
+import { QueryErrorDisplay } from "@/core/component/QueryErrorDisplay";
 import type { ChapterArboristRefHandle } from "./ChapterArborist";
 import { ChapterArborist } from "./ChapterArborist";
 
@@ -43,7 +44,7 @@ export const LinearChapterList: React.FC<LinearChapterListProps> = ({
 
   if (!bookId) return null;
   if (isLoading) return <div>Loading...</div>;
-  if (error) return <div>Oh no... {String(error)}</div>;
+  if (error) return <QueryErrorDisplay error={error} />;
 
   return (
     <div className="w-full">
