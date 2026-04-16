@@ -1,21 +1,14 @@
 import type {
-  OrgCreditDTO,
-  OrganizationDTO,
-  PersonCreditDTO,
-  PersonDTO,
+  AttributionDTO,
+  EntityDTO,
 } from "@rezics/contract";
 import {
   BasicAdminPermission,
-  createOrganizationSchema,
-  createPersonSchema,
-  linkOrgCreditSchema,
-  linkPersonCreditSchema,
-  organizationListQuerySchema,
-  organizationParamsSchema,
-  personListQuerySchema,
-  personParamsSchema,
-  updateOrganizationSchema,
-  updatePersonSchema,
+  createEntitySchema,
+  entityListQuerySchema,
+  entityParamsSchema,
+  linkAttributionSchema,
+  updateEntitySchema,
 } from "@rezics/contract";
 import { Elysia, t } from "elysia";
 import { authMacro } from "@/middleware";
@@ -23,283 +16,141 @@ import { attributionService } from "./attribution.service";
 
 export const attributionApi = new Elysia({ prefix: "/attribution" })
   .use(authMacro)
-  // --- Person routes ---
+  // --- Entity routes ---
   .get(
-    "/persons",
+    "/entities",
     async ({
       query,
-    }): Promise<{ persons: PersonDTO[]; total: number }> => {
-      return attributionService.listPersons(query as any);
+    }): Promise<{ entities: EntityDTO[]; total: number }> => {
+      return attributionService.listEntities(query as any);
     },
     {
-      query: personListQuerySchema,
+      query: entityListQuerySchema,
       detail: {
-        summary: "List persons",
-        description: "List persons with filtering and pagination",
+        summary: "List entities",
+        description:
+          "List entities with filtering by kind and search query",
         tags: ["Attribution"],
       },
     },
   )
   .get(
-    "/persons/:id",
-    async ({ params }): Promise<PersonDTO> => {
-      return attributionService.getPersonById(params.id);
+    "/entities/:id",
+    async ({ params }): Promise<EntityDTO> => {
+      return attributionService.getEntityById(params.id);
     },
     {
-      params: personParamsSchema,
+      params: entityParamsSchema,
       detail: {
-        summary: "Get person",
-        description: "Get a single person by ID",
+        summary: "Get entity",
+        description: "Get a single entity by ID",
         tags: ["Attribution"],
       },
     },
   )
   .post(
-    "/persons",
-    async ({ body, identity, set }): Promise<PersonDTO> => {
+    "/entities",
+    async ({ body, identity, set }): Promise<EntityDTO> => {
       if (!BasicAdminPermission(identity.permission)) {
         set.status = 403;
         throw new Error("Forbidden: admin permission required");
       }
-      return attributionService.createPerson(body);
+      return attributionService.createEntity(body);
     },
     {
       requireLogin: true,
-      body: createPersonSchema,
+      body: createEntitySchema,
       detail: {
-        summary: "Create person",
-        description: "Create a new person (admin only)",
+        summary: "Create entity",
+        description: "Create a new entity (admin only)",
         tags: ["Attribution"],
       },
     },
   )
   .put(
-    "/persons/:id",
-    async ({ params, body, identity, set }): Promise<PersonDTO> => {
+    "/entities/:id",
+    async ({ params, body, identity, set }): Promise<EntityDTO> => {
       if (!BasicAdminPermission(identity.permission)) {
         set.status = 403;
         throw new Error("Forbidden: admin permission required");
       }
-      return attributionService.updatePerson(params.id, body);
+      return attributionService.updateEntity(params.id, body);
     },
     {
       requireLogin: true,
-      params: personParamsSchema,
-      body: updatePersonSchema,
+      params: entityParamsSchema,
+      body: updateEntitySchema,
       detail: {
-        summary: "Update person",
-        description: "Update a person (admin only)",
+        summary: "Update entity",
+        description: "Update an entity (admin only)",
         tags: ["Attribution"],
       },
     },
   )
   .delete(
-    "/persons/:id",
+    "/entities/:id",
     async ({ params, identity, set }): Promise<{ message: string }> => {
       if (!BasicAdminPermission(identity.permission)) {
         set.status = 403;
         throw new Error("Forbidden: admin permission required");
       }
-      await attributionService.deletePerson(params.id);
-      return { message: "Person deleted successfully" };
+      await attributionService.deleteEntity(params.id);
+      return { message: "Entity deleted successfully" };
     },
     {
       requireLogin: true,
-      params: personParamsSchema,
+      params: entityParamsSchema,
       detail: {
-        summary: "Delete person",
-        description: "Delete a person (admin only)",
-        tags: ["Attribution"],
-      },
-    },
-  )
-  // --- Organization routes ---
-  .get(
-    "/organizations",
-    async ({
-      query,
-    }): Promise<{ organizations: OrganizationDTO[]; total: number }> => {
-      return attributionService.listOrganizations(query as any);
-    },
-    {
-      query: organizationListQuerySchema,
-      detail: {
-        summary: "List organizations",
-        description: "List organizations with filtering and pagination",
-        tags: ["Attribution"],
-      },
-    },
-  )
-  .get(
-    "/organizations/:id",
-    async ({ params }): Promise<OrganizationDTO> => {
-      return attributionService.getOrganizationById(params.id);
-    },
-    {
-      params: organizationParamsSchema,
-      detail: {
-        summary: "Get organization",
-        description: "Get a single organization by ID",
-        tags: ["Attribution"],
-      },
-    },
-  )
-  .post(
-    "/organizations",
-    async ({ body, identity, set }): Promise<OrganizationDTO> => {
-      if (!BasicAdminPermission(identity.permission)) {
-        set.status = 403;
-        throw new Error("Forbidden: admin permission required");
-      }
-      return attributionService.createOrganization(body);
-    },
-    {
-      requireLogin: true,
-      body: createOrganizationSchema,
-      detail: {
-        summary: "Create organization",
-        description: "Create a new organization (admin only)",
-        tags: ["Attribution"],
-      },
-    },
-  )
-  .put(
-    "/organizations/:id",
-    async ({
-      params,
-      body,
-      identity,
-      set,
-    }): Promise<OrganizationDTO> => {
-      if (!BasicAdminPermission(identity.permission)) {
-        set.status = 403;
-        throw new Error("Forbidden: admin permission required");
-      }
-      return attributionService.updateOrganization(params.id, body);
-    },
-    {
-      requireLogin: true,
-      params: organizationParamsSchema,
-      body: updateOrganizationSchema,
-      detail: {
-        summary: "Update organization",
-        description: "Update an organization (admin only)",
-        tags: ["Attribution"],
-      },
-    },
-  )
-  .delete(
-    "/organizations/:id",
-    async ({ params, identity, set }): Promise<{ message: string }> => {
-      if (!BasicAdminPermission(identity.permission)) {
-        set.status = 403;
-        throw new Error("Forbidden: admin permission required");
-      }
-      await attributionService.deleteOrganization(params.id);
-      return { message: "Organization deleted successfully" };
-    },
-    {
-      requireLogin: true,
-      params: organizationParamsSchema,
-      detail: {
-        summary: "Delete organization",
-        description: "Delete an organization (admin only)",
+        summary: "Delete entity",
+        description: "Delete an entity (admin only)",
         tags: ["Attribution"],
       },
     },
   )
   // --- Credit link routes ---
   .post(
-    "/credits/person",
-    async ({ body, identity, set }): Promise<PersonCreditDTO> => {
+    "/credits",
+    async ({ body, identity, set }): Promise<AttributionDTO> => {
       if (!BasicAdminPermission(identity.permission)) {
         set.status = 403;
         throw new Error("Forbidden: admin permission required");
       }
-      return attributionService.linkPersonCredit(body);
+      return attributionService.linkAttribution(body);
     },
     {
       requireLogin: true,
-      body: linkPersonCreditSchema,
+      body: linkAttributionSchema,
       detail: {
-        summary: "Link person credit to unit",
-        description: "Link a person credit to a unit (admin only)",
+        summary: "Link attribution",
+        description: "Link an entity to a unit with a role (admin only)",
         tags: ["Attribution"],
       },
     },
   )
   .delete(
-    "/credits/person/:unitId/:personId/:roleKey",
+    "/credits/:unitId/:entityId/:role",
     async ({ params, identity, set }): Promise<{ message: string }> => {
       if (!BasicAdminPermission(identity.permission)) {
         set.status = 403;
         throw new Error("Forbidden: admin permission required");
       }
-      await attributionService.unlinkPersonCredit(
+      await attributionService.unlinkAttribution(
         params.unitId,
-        params.personId,
-        params.roleKey,
+        params.entityId,
+        params.role,
       );
-      return { message: "Person credit unlinked" };
+      return { message: "Attribution unlinked" };
     },
     {
       requireLogin: true,
       params: t.Object({
         unitId: t.String(),
-        personId: t.String(),
-        roleKey: t.String(),
+        entityId: t.String(),
+        role: t.String(),
       }),
       detail: {
-        summary: "Unlink person credit from unit",
-        description: "Unlink a person credit from a unit (admin only)",
-        tags: ["Attribution"],
-      },
-    },
-  )
-  .post(
-    "/credits/organization",
-    async ({ body, identity, set }): Promise<OrgCreditDTO> => {
-      if (!BasicAdminPermission(identity.permission)) {
-        set.status = 403;
-        throw new Error("Forbidden: admin permission required");
-      }
-      return attributionService.linkOrgCredit(body);
-    },
-    {
-      requireLogin: true,
-      body: linkOrgCreditSchema,
-      detail: {
-        summary: "Link organization credit to unit",
-        description: "Link an organization credit to a unit (admin only)",
-        tags: ["Attribution"],
-      },
-    },
-  )
-  .delete(
-    "/credits/organization/:unitId/:organizationId/:roleKey",
-    async ({ params, identity, set }): Promise<{ message: string }> => {
-      if (!BasicAdminPermission(identity.permission)) {
-        set.status = 403;
-        throw new Error("Forbidden: admin permission required");
-      }
-      await attributionService.unlinkOrgCredit(
-        params.unitId,
-        params.organizationId,
-        params.roleKey,
-      );
-      return { message: "Organization credit unlinked" };
-    },
-    {
-      requireLogin: true,
-      params: t.Object({
-        unitId: t.String(),
-        organizationId: t.String(),
-        roleKey: t.String(),
-      }),
-      detail: {
-        summary: "Unlink organization credit from unit",
-        description:
-          "Unlink an organization credit from a unit (admin only)",
+        summary: "Unlink attribution",
+        description: "Unlink an entity from a unit (admin only)",
         tags: ["Attribution"],
       },
     },

@@ -28,12 +28,12 @@ const contentInclude = {
   },
   inRealms: true,
   realmTagAsUnit: true,
-  personCredits: {
-    include: { person: true },
-    orderBy: { sortOrder: "asc" as const },
-  },
-  organizationCredits: {
-    include: { organization: true },
+  attributions: {
+    include: {
+      entity: {
+        include: { translations: true },
+      },
+    },
     orderBy: { sortOrder: "asc" as const },
   },
   book: true,
@@ -51,8 +51,7 @@ export function buildContentDocument(unit: any): ContentSearchDocument {
   const unitTags: any[] = unit.unitTags ?? [];
   const inRealms: any[] = unit.inRealms ?? [];
   const realmTagAsUnit: any[] = unit.realmTagAsUnit ?? [];
-  const personCredits: any[] = unit.personCredits ?? [];
-  const organizationCredits: any[] = unit.organizationCredits ?? [];
+  const attributions: any[] = unit.attributions ?? [];
 
   // Flatten translations
   const titles = translations.map((t: any) => t.title).filter(Boolean);
@@ -84,12 +83,12 @@ export function buildContentDocument(unit: any): ContentSearchDocument {
   );
 
   // Attribution
-  const creditNames = [
-    ...personCredits.map((c: any) => c.person?.name).filter(Boolean),
-    ...organizationCredits
-      .map((c: any) => c.organization?.name)
-      .filter(Boolean),
-  ];
+  const creditNames = attributions
+    .map((a: any) => {
+      const translations = a.entity?.translations ?? [];
+      return translations[0]?.title;
+    })
+    .filter(Boolean);
 
   // Type extension fields
   const ext = unit.book ?? unit.game ?? unit.media ?? null;
@@ -241,23 +240,22 @@ export async function patchContentCredits(
   client: SearchClient,
   unitId: string,
 ) {
-  const [personCredits, orgCredits] = await Promise.all([
-    prisma.personCredit.findMany({
-      where: { unitId },
-      include: { person: true },
-      orderBy: { sortOrder: "asc" },
-    }),
-    prisma.orgCredit.findMany({
-      where: { unitId },
-      include: { organization: true },
-      orderBy: { sortOrder: "asc" },
-    }),
-  ]);
+  const attributions = await prisma.attribution.findMany({
+    where: { unitId },
+    include: {
+      entity: {
+        include: { translations: true },
+      },
+    },
+    orderBy: { sortOrder: "asc" },
+  });
 
-  const creditNames = [
-    ...personCredits.map((c: any) => c.person?.name).filter(Boolean),
-    ...orgCredits.map((c: any) => c.organization?.name).filter(Boolean),
-  ];
+  const creditNames = attributions
+    .map((a: any) => {
+      const translations = a.entity?.translations ?? [];
+      return translations[0]?.title;
+    })
+    .filter(Boolean);
 
   await client.patchContent([{ id: unitId, creditNames }]);
 }

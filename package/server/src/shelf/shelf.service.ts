@@ -321,7 +321,7 @@ export class ShelfService {
       where.item = {
         OR: [
           { post: { authorUserId: userId } },
-          { personCredits: { some: {} } },
+          { attributions: { some: {} } },
           { userId },
         ],
       };

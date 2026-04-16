@@ -4,19 +4,19 @@ import type { PrismaClient } from "#/prisma/generated/client.js";
 import { UnitStatus, UnitType } from "#/prisma/generated/client.js";
 import {
   MEDIA_KIND_KEYS,
-  ORG_ROLE_KEYS,
-  PERSON_ROLE_KEYS,
 } from "./data.js";
 import { generateMediaExtra, generateTranslations } from "./generators.js";
 import type {
-  CreatedOrganization,
-  CreatedPerson,
+  CreatedEntity,
   CreatedUnit,
   CreatedUser,
 } from "./types.js";
 import { chunkedParallel, pickN, randomBoolean, randomInt } from "./utils.js";
 
 const CHUNK_SIZE = 10;
+
+const MEDIA_PERSON_ROLES = ["director", "actor", "composer", "narrator"];
+const MEDIA_ORG_ROLES = ["studio", "distributor"];
 
 /**
  * Seed media using chunked Promise.all.
@@ -25,8 +25,8 @@ export async function seedMedia(
   prisma: PrismaClient,
   total: number,
   users: CreatedUser[],
-  people: CreatedPerson[],
-  organizations: CreatedOrganization[],
+  people: CreatedEntity[],
+  organizations: CreatedEntity[],
   tags: CreatedUnit[],
 ): Promise<CreatedUnit[]> {
   console.log(`[Seed] Seeding ${total} media...`);
@@ -78,32 +78,26 @@ export async function seedMedia(
         select: { id: true, type: true },
       });
 
-      // Credits + tags
-      const personCredits = pickN(people, randomInt(1, 4)).map(
+      // Attributions + tags
+      const personAttributions = pickN(people, randomInt(1, 4)).map(
         (p, i) => ({
           unitId: unit.id,
-          personId: p.id,
-          roleKey: faker.helpers.arrayElement(
-            PERSON_ROLE_KEYS.filter((r) =>
-              ["DIRECTOR", "ACTOR", "COMPOSER", "NARRATOR"].includes(r),
-            ),
-          ),
+          entityId: p.unitId,
+          role: faker.helpers.arrayElement(MEDIA_PERSON_ROLES),
           sortOrder: i,
         }),
       );
 
-      const orgCredits = pickN(organizations, randomInt(1, 2)).map(
+      const orgAttributions = pickN(organizations, randomInt(1, 2)).map(
         (o, i) => ({
           unitId: unit.id,
-          organizationId: o.id,
-          roleKey: faker.helpers.arrayElement(
-            ORG_ROLE_KEYS.filter((r) =>
-              ["STUDIO", "DISTRIBUTOR"].includes(r),
-            ),
-          ),
+          entityId: o.unitId,
+          role: faker.helpers.arrayElement(MEDIA_ORG_ROLES),
           sortOrder: i,
         }),
       );
+
+      const attributions = [...personAttributions, ...orgAttributions];
 
       const tagLinks = pickN(tags, randomInt(1, 5)).map((t) => ({
         unitId: unit.id,
@@ -111,11 +105,8 @@ export async function seedMedia(
       }));
 
       await Promise.all([
-        personCredits.length > 0
-          ? prisma.personCredit.createMany({ data: personCredits })
-          : Promise.resolve(),
-        orgCredits.length > 0
-          ? prisma.orgCredit.createMany({ data: orgCredits })
+        attributions.length > 0
+          ? prisma.attribution.createMany({ data: attributions })
           : Promise.resolve(),
         tagLinks.length > 0
           ? prisma.unitTag.createMany({ data: tagLinks })

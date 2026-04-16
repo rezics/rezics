@@ -1,9 +1,10 @@
 import { randomUUID } from "node:crypto";
 import { faker } from "@faker-js/faker";
-import { LANGUAGES } from "@rezics/contract";
+import { DEFAULT_LANGUAGE, LANGUAGES } from "@rezics/contract";
+import { UnitStatus, UnitType } from "#/prisma/generated/client.js";
 import type { PrismaClient } from "#/prisma/generated/client.js";
 import { getFaker } from "./generators.js";
-import type { CreatedOrganization, CreatedPerson } from "./types.js";
+import type { CreatedEntity } from "./types.js";
 
 /** Locale distribution for attribution names — diverse locale mix. */
 const LOCALE_WEIGHTS = [
@@ -25,57 +26,91 @@ function pickRandomLocale(): (typeof LOCALE_WEIGHTS)[number]["lang"] {
 }
 
 /**
- * Seed Person records via createMany.
- * Uses locale-appropriate faker instances for diverse name generation.
+ * Seed Entity units (kind='person') via individual creates.
+ * Each entity = Unit (type=ENTITY) + Entity extension + UnitTranslation.
  */
 export async function seedPeople(
   prisma: PrismaClient,
   total: number,
-): Promise<CreatedPerson[]> {
-  console.log(`[Seed] Seeding ${total} people...`);
+): Promise<CreatedEntity[]> {
+  console.log(`[Seed] Seeding ${total} person entities...`);
 
-  const data = Array.from({ length: total }, () => {
+  const results: CreatedEntity[] = [];
+
+  for (let i = 0; i < total; i++) {
     const lang = pickRandomLocale();
     const f = getFaker(lang);
-    return {
-      id: randomUUID(),
-      name: f.person.fullName(),
-      extra: {
-        nationality: faker.location.country(),
-        birthYear: faker.date.past({ years: 80 }).getFullYear(),
+    const id = randomUUID();
+    const name = f.person.fullName();
+
+    await prisma.unit.create({
+      data: {
+        id,
+        type: UnitType.ENTITY,
+        status: UnitStatus.PUBLISHED,
+        defaultLanguage: lang,
+        entity: {
+          create: {
+            kind: "person",
+            verified: false,
+          },
+        },
+        translations: {
+          create: {
+            language: lang,
+            title: name,
+          },
+        },
       },
-    };
-  });
+    });
 
-  await prisma.person.createMany({ data });
+    results.push({ unitId: id, name, kind: "person" });
+  }
 
-  return data.map((p) => ({ id: p.id, name: p.name }));
+  return results;
 }
 
 /**
- * Seed Organization records via createMany.
- * Uses locale-appropriate faker instances for diverse company names.
+ * Seed Entity units (kind='organization') via individual creates.
+ * Each entity = Unit (type=ENTITY) + Entity extension + UnitTranslation.
  */
 export async function seedOrganizations(
   prisma: PrismaClient,
   total: number,
-): Promise<CreatedOrganization[]> {
-  console.log(`[Seed] Seeding ${total} organizations...`);
+): Promise<CreatedEntity[]> {
+  console.log(`[Seed] Seeding ${total} organization entities...`);
 
-  const data = Array.from({ length: total }, () => {
+  const results: CreatedEntity[] = [];
+
+  for (let i = 0; i < total; i++) {
     const lang = pickRandomLocale();
     const f = getFaker(lang);
-    return {
-      id: randomUUID(),
-      name: f.company.name(),
-      extra: {
-        country: faker.location.country(),
-        foundedYear: faker.date.past({ years: 50 }).getFullYear(),
+    const id = randomUUID();
+    const name = f.company.name();
+
+    await prisma.unit.create({
+      data: {
+        id,
+        type: UnitType.ENTITY,
+        status: UnitStatus.PUBLISHED,
+        defaultLanguage: lang,
+        entity: {
+          create: {
+            kind: "organization",
+            verified: false,
+          },
+        },
+        translations: {
+          create: {
+            language: lang,
+            title: name,
+          },
+        },
       },
-    };
-  });
+    });
 
-  await prisma.organization.createMany({ data });
+    results.push({ unitId: id, name, kind: "organization" });
+  }
 
-  return data.map((o) => ({ id: o.id, name: o.name }));
+  return results;
 }

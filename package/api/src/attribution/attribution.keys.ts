@@ -1,31 +1,18 @@
-import type {
-  OrganizationListQuery,
-  PersonListQuery,
-} from "@rezics/contract";
+import type { EntityListQuery } from "@rezics/contract";
 
 export const attributionKeys = {
   all: () => ["attribution"] as const,
 
-  // Persons
-  personLists: () => [...attributionKeys.all(), "persons", "list"] as const,
-  personList: (query?: PersonListQuery) =>
-    [...attributionKeys.personLists(), query] as const,
-  personDetails: () =>
-    [...attributionKeys.all(), "persons", "detail"] as const,
-  personDetail: (id: string) =>
-    [...attributionKeys.personDetails(), id] as const,
+  // Entities
+  entityLists: () => [...attributionKeys.all(), "entities", "list"] as const,
+  entityList: (query?: EntityListQuery) =>
+    [...attributionKeys.entityLists(), query] as const,
+  entityDetails: () =>
+    [...attributionKeys.all(), "entities", "detail"] as const,
+  entityDetail: (id: string) =>
+    [...attributionKeys.entityDetails(), id] as const,
 
-  // Organizations
-  organizationLists: () =>
-    [...attributionKeys.all(), "organizations", "list"] as const,
-  organizationList: (query?: OrganizationListQuery) =>
-    [...attributionKeys.organizationLists(), query] as const,
-  organizationDetails: () =>
-    [...attributionKeys.all(), "organizations", "detail"] as const,
-  organizationDetail: (id: string) =>
-    [...attributionKeys.organizationDetails(), id] as const,
-
-  // Credits
-  creditsByUnit: (unitId: string) =>
+  // Attributions by unit
+  attributionsByUnit: (unitId: string) =>
     [...attributionKeys.all(), "credits", unitId] as const,
 } as const;

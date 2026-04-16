@@ -35,8 +35,7 @@ export {
   bookQueries,
   bookRatingQuery,
   bookSearchQuery,
-  booksByOrganizationQuery,
-  booksByPersonQuery,
+  booksByEntityQuery,
   booksByTagsQuery,
   booksByUserQuery,
 } from "./book.queries";

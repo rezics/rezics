@@ -92,26 +92,14 @@ export const bookApi = {
   },
 
   /**
-   * Get books by person ID (attribution credit)
+   * Get books by entity ID (attribution credit)
    */
-  getByPersonId: async (
-    personId: string,
+  getByEntityId: async (
+    entityId: string,
     filters?: BookFilters,
   ): Promise<BookListResponse> => {
     return apiFetch<BookListResponse>(
-      `/books${buildQueryString({ personId, ...filters })}`,
-    );
-  },
-
-  /**
-   * Get books by organization ID (attribution credit)
-   */
-  getByOrganizationId: async (
-    organizationId: string,
-    filters?: BookFilters,
-  ): Promise<BookListResponse> => {
-    return apiFetch<BookListResponse>(
-      `/books${buildQueryString({ organizationId, ...filters })}`,
+      `/books${buildQueryString({ entityId, ...filters })}`,
     );
   },
 

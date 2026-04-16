@@ -40,16 +40,10 @@ export const bookKeys = {
   byUser: (userId: string) => [...bookKeys.all(), "user", userId] as const,
 
   /**
-   * Keys for person (attribution) queries
+   * Keys for entity (attribution) queries
    */
-  byPerson: (personId: string) =>
-    [...bookKeys.all(), "person", personId] as const,
-
-  /**
-   * Keys for organization (attribution) queries
-   */
-  byOrganization: (organizationId: string) =>
-    [...bookKeys.all(), "organization", organizationId] as const,
+  byEntity: (entityId: string) =>
+    [...bookKeys.all(), "entity", entityId] as const,
 
   /**
    * Keys for ISBN lookup

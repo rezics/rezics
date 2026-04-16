@@ -1,25 +1,8 @@
 import { t } from "elysia";
+import { attributionBriefSchema } from "./attribution";
 import { languageSchema } from "./language";
 import { paginationLimitSchema } from "./pagination";
 import { publicUserSchema, unitTranslationDTOSchema } from "./unit";
-
-// ============================================================
-// PERSON/ORG CREDIT BRIEFS (inline for BookDTO)
-// ============================================================
-
-export const personCreditBriefSchema = t.Object({
-  personId: t.String(),
-  name: t.String(),
-  roleKey: t.String(),
-  sortOrder: t.Optional(t.Number()),
-});
-
-export const orgCreditBriefSchema = t.Object({
-  organizationId: t.String(),
-  name: t.String(),
-  roleKey: t.String(),
-  sortOrder: t.Optional(t.Number()),
-});
 
 // ============================================================
 // SCORED TAG BRIEF (inline for BookDTO)
@@ -71,8 +54,7 @@ export const bookDTOSchema = t.Object({
   translations: t.Optional(t.Array(unitTranslationDTOSchema)),
 
   // Attribution
-  personCredits: t.Optional(t.Array(personCreditBriefSchema)),
-  orgCredits: t.Optional(t.Array(orgCreditBriefSchema)),
+  attributions: t.Optional(t.Array(attributionBriefSchema)),
 
   // Tags (scored)
   tags: t.Optional(t.Array(scoredTagBriefSchema)),
@@ -95,8 +77,7 @@ export const bookListQuerySchema = t.Object({
   nsfw: t.Optional(t.Boolean()),
   language: t.Optional(languageSchema),
   tagUnitIds: t.Optional(t.String()),
-  personId: t.Optional(t.String()),
-  organizationId: t.Optional(t.String()),
+  entityId: t.Optional(t.String()),
   userId: t.Optional(t.String()),
   isbn13: t.Optional(t.String()),
   workUnitId: t.Optional(t.String()),

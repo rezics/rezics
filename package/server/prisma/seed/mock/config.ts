@@ -19,8 +19,8 @@ export const DEFAULT_COUNTS: SeedCounts = {
   shelves: envInt("SEED_SHELVES", 100),
   realms: envInt("SEED_REALMS", 20),
   chaptersPerBook: envInt("SEED_CHAPTERS_PER_BOOK", 30),
-  people: envInt("SEED_PEOPLE", 300),
-  organizations: envInt("SEED_ORGANIZATIONS", 50),
+  personEntities: envInt("SEED_PERSON_ENTITIES", 300),
+  organizationEntities: envInt("SEED_ORGANIZATION_ENTITIES", 50),
   followsPerUser: envInt("SEED_FOLLOWS_PER_USER", 5),
   bookmarksPerUser: envInt("SEED_BOOKMARKS_PER_USER", 8),
 };

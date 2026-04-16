@@ -50,27 +50,13 @@ export const booksByUserQuery = (userId: string, filters?: BookFilters) =>
   });
 
 /**
- * Query options for getting books by person (attribution credit)
+ * Query options for getting books by entity (attribution credit)
  */
-export const booksByPersonQuery = (personId: string, filters?: BookFilters) =>
+export const booksByEntityQuery = (entityId: string, filters?: BookFilters) =>
   queryOptions({
-    queryKey: bookKeys.byPerson(personId),
-    queryFn: () => bookApi.getByPersonId(personId, filters),
-    enabled: !!personId,
-    staleTime: 1000 * 60 * 5, // 5 minutes
-  });
-
-/**
- * Query options for getting books by organization (attribution credit)
- */
-export const booksByOrganizationQuery = (
-  organizationId: string,
-  filters?: BookFilters,
-) =>
-  queryOptions({
-    queryKey: bookKeys.byOrganization(organizationId),
-    queryFn: () => bookApi.getByOrganizationId(organizationId, filters),
-    enabled: !!organizationId,
+    queryKey: bookKeys.byEntity(entityId),
+    queryFn: () => bookApi.getByEntityId(entityId, filters),
+    enabled: !!entityId,
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
@@ -143,8 +129,7 @@ export const bookQueries = {
   search: bookSearchQuery,
   rating: bookRatingQuery,
   byUser: booksByUserQuery,
-  byPerson: booksByPersonQuery,
-  byOrganization: booksByOrganizationQuery,
+  byEntity: booksByEntityQuery,
   byIsbn: bookByIsbnQuery,
   byTags: booksByTagsQuery,
   infiniteList: bookInfiniteListQuery,

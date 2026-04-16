@@ -141,8 +141,7 @@ export async function resetDatabase(prisma: PrismaClient): Promise<void> {
     prisma.tagVote.deleteMany(),
     prisma.shelfItemReview.deleteMany(),
     prisma.follow.deleteMany(),
-    prisma.personCredit.deleteMany(),
-    prisma.orgCredit.deleteMany(),
+    prisma.attribution.deleteMany(),
     prisma.scoreRealmField.deleteMany(),
     prisma.scoreAggregate.deleteMany(),
   ]);
@@ -188,11 +187,10 @@ export async function resetDatabase(prisma: PrismaClient): Promise<void> {
   // Group 7: Core
   await prisma.unit.deleteMany();
 
-  // Group 8: Identity + attribution
+  // Group 8: Identity + entity
   await Promise.all([
     prisma.user.deleteMany(),
-    prisma.person.deleteMany(),
-    prisma.organization.deleteMany(),
+    prisma.entity.deleteMany(),
   ]);
 
   // Group 9: Platform misc

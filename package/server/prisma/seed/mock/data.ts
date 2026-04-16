@@ -68,22 +68,5 @@ export const REALM_ROLE_KEYS = [
   "member",
 ] as const;
 
-export const PERSON_ROLE_KEYS = [
-  "AUTHOR",
-  "ILLUSTRATOR",
-  "TRANSLATOR",
-  "EDITOR",
-  "NARRATOR",
-  "COMPOSER",
-  "DIRECTOR",
-  "ACTOR",
-] as const;
-
-export const ORG_ROLE_KEYS = [
-  "PUBLISHER",
-  "STUDIO",
-  "DISTRIBUTOR",
-  "LABEL",
-] as const;
 
 export const REACTION_TYPES = ["like", "dislike", "love"] as const;

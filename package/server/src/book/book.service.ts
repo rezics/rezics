@@ -48,23 +48,12 @@ export class BookService {
       andWhere.push({ unit: { userId: options.userId } });
     }
 
-    // Filter by person ID (via PersonCredit)
-    if (options.personId?.trim()) {
+    // Filter by entity ID (via Attribution)
+    if (options.entityId?.trim()) {
       andWhere.push({
         unit: {
-          personCredits: {
-            some: { personId: options.personId },
-          },
-        },
-      });
-    }
-
-    // Filter by organization ID (via OrgCredit)
-    if (options.organizationId?.trim()) {
-      andWhere.push({
-        unit: {
-          organizationCredits: {
-            some: { organizationId: options.organizationId },
+          attributions: {
+            some: { entityId: options.entityId },
           },
         },
       });

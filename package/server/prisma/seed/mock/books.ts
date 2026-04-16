@@ -3,11 +3,10 @@ import { faker } from "@faker-js/faker";
 import { DEFAULT_LANGUAGE, type ChapterTreeItem } from "@rezics/contract";
 import type { Prisma, PrismaClient } from "#/prisma/generated/client.js";
 import { UnitStatus, UnitType } from "#/prisma/generated/client.js";
-import { getRandomBookCover, ORG_ROLE_KEYS, PERSON_ROLE_KEYS } from "./data.js";
+import { getRandomBookCover } from "./data.js";
 import { generateBookExtra, generateTranslations } from "./generators.js";
 import type {
-  CreatedOrganization,
-  CreatedPerson,
+  CreatedEntity,
   CreatedUnit,
   CreatedUser,
 } from "./types.js";
@@ -26,12 +25,15 @@ const CHUNK_SIZE = 10;
  * Seed books using chunked Promise.all.
  * Each book = Unit + Book extension + UnitTranslation + UnitSupportLanguage + credits + tags.
  */
+const BOOK_PERSON_ROLES = ["author", "illustrator", "translator", "editor"];
+const BOOK_ORG_ROLES = ["publisher", "distributor"];
+
 export async function seedBooks(
   prisma: PrismaClient,
   total: number,
   users: CreatedUser[],
-  people: CreatedPerson[],
-  organizations: CreatedOrganization[],
+  people: CreatedEntity[],
+  organizations: CreatedEntity[],
   tags: CreatedUnit[],
 ): Promise<CreatedUnit[]> {
   console.log(`[Seed] Seeding ${total} books...`);
@@ -92,26 +94,22 @@ export async function seedBooks(
         select: { id: true, type: true },
       });
 
-      // Batch credits + tags for this unit
-      const personCredits = pickN(people, randomInt(1, 3)).map((p, i) => ({
+      // Batch attributions + tags for this unit
+      const personAttributions = pickN(people, randomInt(1, 3)).map((p, i) => ({
         unitId: unit.id,
-        personId: p.id,
-        roleKey: faker.helpers.arrayElement(
-          PERSON_ROLE_KEYS.filter((r) =>
-            ["AUTHOR", "ILLUSTRATOR", "TRANSLATOR", "EDITOR"].includes(r),
-          ),
-        ),
+        entityId: p.unitId,
+        role: faker.helpers.arrayElement(BOOK_PERSON_ROLES),
         sortOrder: i,
       }));
 
-      const orgCredits = pickN(organizations, randomInt(0, 2)).map((o, i) => ({
+      const orgAttributions = pickN(organizations, randomInt(0, 2)).map((o, i) => ({
         unitId: unit.id,
-        organizationId: o.id,
-        roleKey: faker.helpers.arrayElement(
-          ORG_ROLE_KEYS.filter((r) => ["PUBLISHER", "DISTRIBUTOR"].includes(r)),
-        ),
+        entityId: o.unitId,
+        role: faker.helpers.arrayElement(BOOK_ORG_ROLES),
         sortOrder: i,
       }));
+
+      const attributions = [...personAttributions, ...orgAttributions];
 
       const tagLinks = pickN(tags, randomInt(1, 5)).map((t) => ({
         unitId: unit.id,
@@ -119,11 +117,8 @@ export async function seedBooks(
       }));
 
       await Promise.all([
-        personCredits.length > 0
-          ? prisma.personCredit.createMany({ data: personCredits })
-          : Promise.resolve(),
-        orgCredits.length > 0
-          ? prisma.orgCredit.createMany({ data: orgCredits })
+        attributions.length > 0
+          ? prisma.attribution.createMany({ data: attributions })
           : Promise.resolve(),
         tagLinks.length > 0
           ? prisma.unitTag.createMany({ data: tagLinks })

@@ -1,8 +1,6 @@
 export {
-  mapOrgCreditToDTO,
-  mapOrganizationToDTO,
-  mapPersonCreditToDTO,
-  mapPersonToDTO,
+  mapAttributionToDTO,
+  mapEntityToDTO,
 } from "./attribution.mapper";
 export { attributionApi } from "./attribution.api";
 export { AttributionService, attributionService } from "./attribution.service";

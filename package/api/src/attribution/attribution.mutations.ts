@@ -1,14 +1,9 @@
 import type {
-  CreateOrganizationInput,
-  CreatePersonInput,
-  LinkOrgCreditInput,
-  LinkPersonCreditInput,
-  OrgCreditDTO,
-  OrganizationDTO,
-  PersonCreditDTO,
-  PersonDTO,
-  UpdateOrganizationInput,
-  UpdatePersonInput,
+  AttributionDTO,
+  CreateEntityInput,
+  EntityDTO,
+  LinkAttributionInput,
+  UpdateEntityInput,
 } from "@rezics/contract";
 import {
   type UseMutationOptions,
@@ -18,57 +13,60 @@ import {
 import { attributionApi } from "./attribution.api";
 import { attributionKeys } from "./attribution.keys";
 
-// ---- Person mutations ----
+// ---- Entity mutations ----
 
-export function useCreatePersonMutation(
+export function useCreateEntityMutation(
   options?: Omit<
-    UseMutationOptions<PersonDTO, Error, CreatePersonInput>,
+    UseMutationOptions<EntityDTO, Error, CreateEntityInput>,
     "mutationFn"
   >,
 ) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (input: CreatePersonInput) =>
-      attributionApi.createPerson(input),
+    mutationFn: (input: CreateEntityInput) =>
+      attributionApi.createEntity(input),
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
       queryClient.invalidateQueries({
-        queryKey: attributionKeys.personLists(),
+        queryKey: attributionKeys.entityLists(),
       });
-      queryClient.setQueryData(attributionKeys.personDetail(data.id), data);
+      queryClient.setQueryData(
+        attributionKeys.entityDetail(data.unitId),
+        data,
+      );
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
   });
 }
 
-export function useUpdatePersonMutation(
+export function useUpdateEntityMutation(
   options?: Omit<
     UseMutationOptions<
-      PersonDTO,
+      EntityDTO,
       Error,
-      { id: string; input: UpdatePersonInput }
+      { id: string; input: UpdateEntityInput }
     >,
     "mutationFn"
   >,
 ) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, input }) => attributionApi.updatePerson(id, input),
+    mutationFn: ({ id, input }) => attributionApi.updateEntity(id, input),
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
       queryClient.setQueryData(
-        attributionKeys.personDetail(variables.id),
+        attributionKeys.entityDetail(variables.id),
         data,
       );
       queryClient.invalidateQueries({
-        queryKey: attributionKeys.personLists(),
+        queryKey: attributionKeys.entityLists(),
       });
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
   });
 }
 
-export function useDeletePersonMutation(
+export function useDeleteEntityMutation(
   options?: Omit<
     UseMutationOptions<{ message: string }, Error, string>,
     "mutationFn"
@@ -76,180 +74,60 @@ export function useDeletePersonMutation(
 ) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (id: string) => attributionApi.deletePerson(id),
+    mutationFn: (id: string) => attributionApi.deleteEntity(id),
     ...options,
     onSuccess: (data, id, onMutateResult, context) => {
       queryClient.removeQueries({
-        queryKey: attributionKeys.personDetail(id),
+        queryKey: attributionKeys.entityDetail(id),
       });
       queryClient.invalidateQueries({
-        queryKey: attributionKeys.personLists(),
+        queryKey: attributionKeys.entityLists(),
       });
       options?.onSuccess?.(data, id, onMutateResult, context);
     },
   });
 }
 
-// ---- Organization mutations ----
+// ---- Attribution mutations ----
 
-export function useCreateOrganizationMutation(
+export function useLinkAttributionMutation(
   options?: Omit<
-    UseMutationOptions<OrganizationDTO, Error, CreateOrganizationInput>,
+    UseMutationOptions<AttributionDTO, Error, LinkAttributionInput>,
     "mutationFn"
   >,
 ) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (input: CreateOrganizationInput) =>
-      attributionApi.createOrganization(input),
+    mutationFn: (input: LinkAttributionInput) =>
+      attributionApi.linkAttribution(input),
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
       queryClient.invalidateQueries({
-        queryKey: attributionKeys.organizationLists(),
-      });
-      queryClient.setQueryData(
-        attributionKeys.organizationDetail(data.id),
-        data,
-      );
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
-  });
-}
-
-export function useUpdateOrganizationMutation(
-  options?: Omit<
-    UseMutationOptions<
-      OrganizationDTO,
-      Error,
-      { id: string; input: UpdateOrganizationInput }
-    >,
-    "mutationFn"
-  >,
-) {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: ({ id, input }) =>
-      attributionApi.updateOrganization(id, input),
-    ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      queryClient.setQueryData(
-        attributionKeys.organizationDetail(variables.id),
-        data,
-      );
-      queryClient.invalidateQueries({
-        queryKey: attributionKeys.organizationLists(),
+        queryKey: attributionKeys.attributionsByUnit(variables.unitId),
       });
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
   });
 }
 
-export function useDeleteOrganizationMutation(
-  options?: Omit<
-    UseMutationOptions<{ message: string }, Error, string>,
-    "mutationFn"
-  >,
-) {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (id: string) => attributionApi.deleteOrganization(id),
-    ...options,
-    onSuccess: (data, id, onMutateResult, context) => {
-      queryClient.removeQueries({
-        queryKey: attributionKeys.organizationDetail(id),
-      });
-      queryClient.invalidateQueries({
-        queryKey: attributionKeys.organizationLists(),
-      });
-      options?.onSuccess?.(data, id, onMutateResult, context);
-    },
-  });
-}
-
-// ---- Credit mutations ----
-
-export function useLinkPersonCreditMutation(
-  options?: Omit<
-    UseMutationOptions<PersonCreditDTO, Error, LinkPersonCreditInput>,
-    "mutationFn"
-  >,
-) {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (input: LinkPersonCreditInput) =>
-      attributionApi.linkPersonCredit(input),
-    ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      queryClient.invalidateQueries({
-        queryKey: attributionKeys.creditsByUnit(variables.unitId),
-      });
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
-  });
-}
-
-export function useUnlinkPersonCreditMutation(
+export function useUnlinkAttributionMutation(
   options?: Omit<
     UseMutationOptions<
       { message: string },
       Error,
-      { unitId: string; personId: string; roleKey: string }
+      { unitId: string; entityId: string; role: string }
     >,
     "mutationFn"
   >,
 ) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ unitId, personId, roleKey }) =>
-      attributionApi.unlinkPersonCredit(unitId, personId, roleKey),
+    mutationFn: ({ unitId, entityId, role }) =>
+      attributionApi.unlinkAttribution(unitId, entityId, role),
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
       queryClient.invalidateQueries({
-        queryKey: attributionKeys.creditsByUnit(variables.unitId),
-      });
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
-  });
-}
-
-export function useLinkOrgCreditMutation(
-  options?: Omit<
-    UseMutationOptions<OrgCreditDTO, Error, LinkOrgCreditInput>,
-    "mutationFn"
-  >,
-) {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (input: LinkOrgCreditInput) =>
-      attributionApi.linkOrgCredit(input),
-    ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      queryClient.invalidateQueries({
-        queryKey: attributionKeys.creditsByUnit(variables.unitId),
-      });
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
-  });
-}
-
-export function useUnlinkOrgCreditMutation(
-  options?: Omit<
-    UseMutationOptions<
-      { message: string },
-      Error,
-      { unitId: string; organizationId: string; roleKey: string }
-    >,
-    "mutationFn"
-  >,
-) {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: ({ unitId, organizationId, roleKey }) =>
-      attributionApi.unlinkOrgCredit(unitId, organizationId, roleKey),
-    ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      queryClient.invalidateQueries({
-        queryKey: attributionKeys.creditsByUnit(variables.unitId),
+        queryKey: attributionKeys.attributionsByUnit(variables.unitId),
       });
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
@@ -257,14 +135,9 @@ export function useUnlinkOrgCreditMutation(
 }
 
 export const attributionMutations = {
-  useCreatePerson: useCreatePersonMutation,
-  useUpdatePerson: useUpdatePersonMutation,
-  useDeletePerson: useDeletePersonMutation,
-  useCreateOrganization: useCreateOrganizationMutation,
-  useUpdateOrganization: useUpdateOrganizationMutation,
-  useDeleteOrganization: useDeleteOrganizationMutation,
-  useLinkPersonCredit: useLinkPersonCreditMutation,
-  useUnlinkPersonCredit: useUnlinkPersonCreditMutation,
-  useLinkOrgCredit: useLinkOrgCreditMutation,
-  useUnlinkOrgCredit: useUnlinkOrgCreditMutation,
+  useCreateEntity: useCreateEntityMutation,
+  useUpdateEntity: useUpdateEntityMutation,
+  useDeleteEntity: useDeleteEntityMutation,
+  useLinkAttribution: useLinkAttributionMutation,
+  useUnlinkAttribution: useUnlinkAttributionMutation,
 };

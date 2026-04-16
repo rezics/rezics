@@ -16,12 +16,12 @@ export const bookInclude = {
         include: { tag: { include: { translations: true } } },
         orderBy: { score: "desc" as const },
       },
-      personCredits: {
-        include: { person: true },
-        orderBy: { sortOrder: "asc" as const },
-      },
-      organizationCredits: {
-        include: { organization: true },
+      attributions: {
+        include: {
+          entity: {
+            include: { entity: true, translations: true },
+          },
+        },
         orderBy: { sortOrder: "asc" as const },
       },
     },

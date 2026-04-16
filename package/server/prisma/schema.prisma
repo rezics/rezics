@@ -26,6 +26,7 @@ enum UnitType {
   VIDEO
   QUOTE
   LINK
+  ENTITY
 }
 
 enum UnitStatus {
@@ -95,13 +96,14 @@ model Unit {
   supportLanguages UnitSupportLanguage[]
 
   // Type extensions (1:1, optional)
-  book  Book?
-  game  Game?
-  media Media?
-  post  Post?
-  shelf Shelf?
-  realm Realm?
-  link  Link?
+  book   Book?
+  game   Game?
+  media  Media?
+  post   Post?
+  shelf  Shelf?
+  realm  Realm?
+  link   Link?
+  entity Entity?
 
   // Tag system
   unitTags       UnitTag[] @relation("TaggedUnit")
@@ -117,8 +119,8 @@ model Unit {
   realmTagAsUnit  RealmTagUnit[] @relation("RealmTagUnit")
 
   // Attribution
-  personCredits       PersonCredit[]
-  organizationCredits OrgCredit[]
+  attributions Attribution[] @relation("AttributedUnit")
+  attributedAs Attribution[] @relation("AttributionEntity")
 
   // Engagement (reactions moved to @rezics/reaction service)
 
@@ -500,54 +502,26 @@ model TagVote {
 // ATTRIBUTION
 // ============================================================
 
-model Person {
-  id    String @id @default(dbgenerated("uuidv7()")) @db.Uuid
-  name  String
-  extra Json?
+model Entity {
+  unitId   String  @id @db.Uuid
+  kind     String? @db.VarChar(32)
+  verified Boolean @default(false)
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  credits PersonCredit[]
+  unit Unit @relation(fields: [unitId], references: [id], onDelete: Cascade)
 }
 
-model Organization {
-  id    String @id @default(dbgenerated("uuidv7()")) @db.Uuid
-  name  String
-  extra Json?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  credits OrgCredit[]
-}
-
-model PersonCredit {
+model Attribution {
   unitId    String @db.Uuid
-  personId  String @db.Uuid
-  roleKey   String @db.VarChar(64)
+  entityId  String @db.Uuid
+  role      String @db.VarChar(64)
   sortOrder Int    @default(0)
 
-  unit   Unit   @relation(fields: [unitId], references: [id], onDelete: Cascade)
-  person Person @relation(fields: [personId], references: [id], onDelete: Cascade)
+  unit   Unit @relation("AttributedUnit", fields: [unitId], references: [id], onDelete: Cascade)
+  entity Unit @relation("AttributionEntity", fields: [entityId], references: [id], onDelete: Cascade)
 
-  @@id([unitId, personId, roleKey])
-  @@index([personId, roleKey])
-  @@index([unitId, roleKey, sortOrder])
-}
-
-model OrgCredit {
-  unitId         String @db.Uuid
-  organizationId String @db.Uuid
-  roleKey        String @db.VarChar(64)
-  sortOrder      Int    @default(0)
-
-  unit         Unit         @relation(fields: [unitId], references: [id], onDelete: Cascade)
-  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-
-  @@id([unitId, organizationId, roleKey])
-  @@index([organizationId, roleKey])
-  @@index([unitId, roleKey, sortOrder])
+  @@id([unitId, entityId, role])
+  @@index([entityId, role])
+  @@index([unitId, role, sortOrder])
 }
 
 // ============================================================

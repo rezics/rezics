@@ -41,13 +41,13 @@ async function main() {
 
   // ── STEP 2: Foundation (parallel) ─────────────────
   done = stepTimer("Step 2: Users + People + Organizations");
-  const [users, people, organizations] = await Promise.all([
-    seedUsers(prisma, DEFAULT_COUNTS.users),
-    seedPeople(prisma, DEFAULT_COUNTS.people),
-    seedOrganizations(prisma, DEFAULT_COUNTS.organizations),
+  const users = await seedUsers(prisma, DEFAULT_COUNTS.users);
+  const [people, organizations] = await Promise.all([
+    seedPeople(prisma, DEFAULT_COUNTS.personEntities),
+    seedOrganizations(prisma, DEFAULT_COUNTS.organizationEntities),
   ]);
   console.log(
-    `[Seed]   ${users.length} users, ${people.length} people, ${organizations.length} organizations`,
+    `[Seed]   ${users.length} users, ${people.length} person entities, ${organizations.length} organization entities`,
   );
   done();
 
@@ -159,8 +159,8 @@ async function main() {
   // ── Summary ───────────────────────────────────────
   console.log("[Seed] Complete!", {
     users: users.length,
-    people: people.length,
-    organizations: organizations.length,
+    personEntities: people.length,
+    organizationEntities: organizations.length,
     tags: tags.length,
     books: books.length,
     games: games.length,

@@ -126,47 +126,36 @@ export function getBookCoverUrl(
 }
 
 /**
- * Filter person credits by role key (e.g. 'author', 'translator', 'illustrator').
+ * Filter attributions by role (e.g. 'author', 'translator', 'publisher').
  */
-export function getPersonCredits(
-  credits: BookDTO['personCredits'],
-  roleKey: string,
-): Array<{ personId: string; name: string; roleKey: string; sortOrder?: number }> {
-  if (!credits) return [];
-  return credits.filter((c) => c.roleKey === roleKey);
-}
-
-/**
- * Filter org credits by role key (e.g. 'publisher', 'producer').
- */
-export function getOrgCredits(
-  credits: BookDTO['orgCredits'],
-  roleKey: string,
-): Array<{ organizationId: string; name: string; roleKey: string; sortOrder?: number }> {
-  if (!credits) return [];
-  return credits.filter((c) => c.roleKey === roleKey);
+export function getAttributionsByRole(
+  attributions: BookDTO['attributions'],
+  role: string,
+): Array<{ entityId: string; name: string; role: string; sortOrder?: number }> {
+  if (!attributions) return [];
+  return attributions.filter((a) => a.role === role);
 }
 
 /**
  * Get the primary author name from a BookDTO.
- * Returns the first personCredit with roleKey 'author', or the first personCredit.
+ * Returns the first attribution with role 'author', or the first attribution.
  */
 export function getBookAuthorName(book: BookDTO | null | undefined): string {
-  if (!book?.personCredits?.length) return '';
-  const authors = getPersonCredits(book.personCredits, 'author');
+  if (!book?.attributions?.length) return '';
+  const authors = getAttributionsByRole(book.attributions, 'author');
   if (authors.length > 0) return authors[0].name;
-  // Fallback to first credit
-  return book.personCredits[0].name;
+  // Fallback to first attribution
+  return book.attributions[0].name;
 }
 
 /**
  * Get the primary publisher name from a BookDTO.
  */
 export function getBookPublisherName(book: BookDTO | null | undefined): string {
-  if (!book?.orgCredits?.length) return '';
-  const publishers = getOrgCredits(book.orgCredits, 'publisher');
+  if (!book?.attributions?.length) return '';
+  const publishers = getAttributionsByRole(book.attributions, 'publisher');
   if (publishers.length > 0) return publishers[0].name;
-  return book.orgCredits[0].name;
+  return '';
 }
 
 /**

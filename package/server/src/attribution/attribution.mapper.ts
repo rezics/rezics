@@ -1,57 +1,68 @@
 import type {
-  OrgCreditDTO,
-  OrganizationDTO,
-  PersonCreditDTO,
-  PersonDTO,
+  AttributionDTO,
+  EntityDTO,
 } from "@rezics/contract";
-import type { Organization, Person } from "#/prisma/client";
+import type { Language } from "@rezics/contract";
 import type {
-  OrgCreditWithRelations,
-  PersonCreditWithRelations,
+  AttributionWithRelations,
+  EntityWithRelations,
 } from "./types";
 
-export function mapPersonToDTO(row: Person): PersonDTO {
-  return {
-    id: row.id,
-    name: row.name,
-    extra: (row.extra as Record<string, unknown>) ?? undefined,
-    createdAt: row.createdAt?.toISOString?.() ?? (row.createdAt as any),
-    updatedAt: row.updatedAt?.toISOString?.() ?? (row.updatedAt as any),
-  };
-}
-
-export function mapOrganizationToDTO(row: Organization): OrganizationDTO {
-  return {
-    id: row.id,
-    name: row.name,
-    extra: (row.extra as Record<string, unknown>) ?? undefined,
-    createdAt: row.createdAt?.toISOString?.() ?? (row.createdAt as any),
-    updatedAt: row.updatedAt?.toISOString?.() ?? (row.updatedAt as any),
-  };
-}
-
-export function mapPersonCreditToDTO(
-  row: PersonCreditWithRelations,
-): PersonCreditDTO {
+export function mapEntityToDTO(row: EntityWithRelations): EntityDTO {
   return {
     unitId: row.unitId,
-    personId: row.personId,
-    roleKey: row.roleKey,
-    sortOrder: row.sortOrder,
-    person: row.person ? mapPersonToDTO(row.person) : undefined,
+    kind: row.kind ?? undefined,
+    verified: row.verified,
+    slug: row.unit.slug ?? undefined,
+    translations: row.unit.translations?.map((tr) => ({
+      unitId: tr.unitId,
+      language: tr.language as Language,
+      title: tr.title ?? undefined,
+      subtitle: tr.subtitle ?? undefined,
+      summary: tr.summary ?? undefined,
+      description: tr.description ?? undefined,
+      extra: (tr.extra as Record<string, unknown>) ?? undefined,
+      sourceReleaseUnitId: tr.sourceReleaseUnitId ?? undefined,
+      createdAt: tr.createdAt,
+      updatedAt: tr.updatedAt,
+    })),
+    createdAt: row.unit.createdAt?.toISOString?.() ?? (row.unit.createdAt as any),
+    updatedAt: row.unit.updatedAt?.toISOString?.() ?? (row.unit.updatedAt as any),
   };
 }
 
-export function mapOrgCreditToDTO(
-  row: OrgCreditWithRelations,
-): OrgCreditDTO {
+export function mapAttributionToDTO(
+  row: AttributionWithRelations,
+): AttributionDTO {
+  const entityUnit = row.entity;
+  const entityExt = (entityUnit as any).entity;
+
   return {
     unitId: row.unitId,
-    organizationId: row.organizationId,
-    roleKey: row.roleKey,
+    entityId: row.entityId,
+    role: row.role,
     sortOrder: row.sortOrder,
-    organization: row.organization
-      ? mapOrganizationToDTO(row.organization)
+    entity: entityUnit
+      ? {
+          unitId: entityUnit.id,
+          kind: entityExt?.kind ?? undefined,
+          verified: entityExt?.verified ?? false,
+          slug: entityUnit.slug ?? undefined,
+          translations: (entityUnit as any).translations?.map((tr: any) => ({
+            unitId: tr.unitId,
+            language: tr.language as Language,
+            title: tr.title ?? undefined,
+            subtitle: tr.subtitle ?? undefined,
+            summary: tr.summary ?? undefined,
+            description: tr.description ?? undefined,
+            extra: (tr.extra as Record<string, unknown>) ?? undefined,
+            sourceReleaseUnitId: tr.sourceReleaseUnitId ?? undefined,
+            createdAt: tr.createdAt,
+            updatedAt: tr.updatedAt,
+          })),
+          createdAt: entityUnit.createdAt?.toISOString?.() ?? (entityUnit.createdAt as any),
+          updatedAt: entityUnit.updatedAt?.toISOString?.() ?? (entityUnit.updatedAt as any),
+        }
       : undefined,
   };
 }

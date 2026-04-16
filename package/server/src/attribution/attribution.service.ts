@@ -1,210 +1,193 @@
 import type {
-  CreateOrganizationInput,
-  CreatePersonInput,
-  LinkOrgCreditInput,
-  LinkPersonCreditInput,
-  OrgCreditDTO,
-  OrganizationDTO,
-  OrganizationListQuery,
-  PersonCreditDTO,
-  PersonDTO,
-  PersonListQuery,
-  UpdateOrganizationInput,
-  UpdatePersonInput,
+  AttributionDTO,
+  CreateEntityInput,
+  EntityDTO,
+  EntityListQuery,
+  LinkAttributionInput,
+  UpdateEntityInput,
 } from "@rezics/contract";
 import type { Prisma } from "#/prisma/client";
 import { prisma } from "#/prisma/client";
 import { patchContentCreditsToMeili } from "@/meili/content/sync";
 import {
-  mapOrgCreditToDTO,
-  mapOrganizationToDTO,
-  mapPersonCreditToDTO,
-  mapPersonToDTO,
+  mapAttributionToDTO,
+  mapEntityToDTO,
 } from "./attribution.mapper";
-import { orgCreditInclude, personCreditInclude } from "./types";
+import { attributionInclude, entityInclude } from "./types";
 
 export class AttributionService {
-  // --- Person CRUD ---
+  // --- Entity CRUD ---
 
-  async listPersons(
-    options: PersonListQuery = {},
-  ): Promise<{ persons: PersonDTO[]; total: number }> {
+  async listEntities(
+    options: EntityListQuery = {},
+  ): Promise<{ entities: EntityDTO[]; total: number }> {
     const page = Math.max(Number(options.page ?? 1), 1);
     const limit = Math.max(1, Math.min(Number(options.limit ?? 20), 100));
     const skip = (page - 1) * limit;
 
-    const where: Prisma.PersonWhereInput = options.q?.trim()
-      ? { name: { contains: options.q, mode: "insensitive" } }
-      : {};
+    const where: Prisma.EntityWhereInput = {};
+
+    if (options.kind?.trim()) {
+      where.kind = options.kind;
+    }
+
+    if (options.q?.trim()) {
+      where.unit = {
+        translations: {
+          some: {
+            title: { contains: options.q, mode: "insensitive" },
+          },
+        },
+      };
+    }
 
     const [rows, total] = await Promise.all([
-      prisma.person.findMany({
+      prisma.entity.findMany({
         where,
-        orderBy: { createdAt: "desc" },
+        include: entityInclude,
+        orderBy: { unit: { createdAt: "desc" } },
         skip,
         take: limit,
       }),
-      prisma.person.count({ where }),
+      prisma.entity.count({ where }),
     ]);
 
-    return { persons: rows.map(mapPersonToDTO), total };
+    return { entities: rows.map(mapEntityToDTO), total };
   }
 
-  async getPersonById(id: string): Promise<PersonDTO> {
-    const row = await prisma.person.findUniqueOrThrow({ where: { id } });
-    return mapPersonToDTO(row);
-  }
-
-  async createPerson(req: CreatePersonInput): Promise<PersonDTO> {
-    const row = await prisma.person.create({
-      data: {
-        name: req.name,
-        extra: (req.extra ?? undefined) as Prisma.InputJsonValue | undefined,
-      },
+  async getEntityById(id: string): Promise<EntityDTO> {
+    const row = await prisma.entity.findUniqueOrThrow({
+      where: { unitId: id },
+      include: entityInclude,
     });
-    return mapPersonToDTO(row);
+    return mapEntityToDTO(row);
   }
 
-  async updatePerson(id: string, req: UpdatePersonInput): Promise<PersonDTO> {
-    const row = await prisma.person.update({
-      where: { id },
-      data: {
-        name: req.name ?? undefined,
-        extra: req.extra !== undefined
-          ? ((req.extra ?? undefined) as Prisma.InputJsonValue | undefined)
-          : undefined,
-      },
+  async createEntity(req: CreateEntityInput): Promise<EntityDTO> {
+    const row = await prisma.$transaction(async (tx) => {
+      const unit = await tx.unit.create({
+        data: {
+          type: "ENTITY",
+          slug: req.slug ?? undefined,
+          status: "PUBLISHED",
+          visibility: "PUBLIC",
+          translations: {
+            create: req.translations.map((tr) => ({
+              language: tr.language,
+              title: tr.title,
+              subtitle: tr.subtitle ?? undefined,
+              summary: tr.summary ?? undefined,
+              description: tr.description ?? undefined,
+            })),
+          },
+          entity: {
+            create: {
+              kind: req.kind ?? undefined,
+              verified: false,
+            },
+          },
+        },
+      });
+
+      return tx.entity.findUniqueOrThrow({
+        where: { unitId: unit.id },
+        include: entityInclude,
+      });
     });
-    return mapPersonToDTO(row);
+
+    return mapEntityToDTO(row);
   }
 
-  async deletePerson(id: string): Promise<void> {
-    await prisma.person.delete({ where: { id } });
-  }
+  async updateEntity(id: string, req: UpdateEntityInput): Promise<EntityDTO> {
+    const row = await prisma.$transaction(async (tx) => {
+      // Update entity extension fields
+      if (req.kind !== undefined) {
+        await tx.entity.update({
+          where: { unitId: id },
+          data: { kind: req.kind ?? undefined },
+        });
+      }
 
-  // --- Organization CRUD ---
+      // Update slug if provided
+      if (req.slug !== undefined) {
+        await tx.unit.update({
+          where: { id },
+          data: { slug: req.slug ?? undefined },
+        });
+      }
 
-  async listOrganizations(
-    options: OrganizationListQuery = {},
-  ): Promise<{ organizations: OrganizationDTO[]; total: number }> {
-    const page = Math.max(Number(options.page ?? 1), 1);
-    const limit = Math.max(1, Math.min(Number(options.limit ?? 20), 100));
-    const skip = (page - 1) * limit;
+      // Update translations if provided
+      if (req.translations?.length) {
+        for (const tr of req.translations) {
+          await tx.unitTranslation.upsert({
+            where: { unitId_language: { unitId: id, language: tr.language } },
+            create: {
+              unitId: id,
+              language: tr.language,
+              title: tr.title,
+              subtitle: tr.subtitle ?? undefined,
+              summary: tr.summary ?? undefined,
+              description: tr.description ?? undefined,
+            },
+            update: {
+              title: tr.title,
+              subtitle: tr.subtitle ?? undefined,
+              summary: tr.summary ?? undefined,
+              description: tr.description ?? undefined,
+            },
+          });
+        }
+      }
 
-    const where: Prisma.OrganizationWhereInput = options.q?.trim()
-      ? { name: { contains: options.q, mode: "insensitive" } }
-      : {};
-
-    const [rows, total] = await Promise.all([
-      prisma.organization.findMany({
-        where,
-        orderBy: { createdAt: "desc" },
-        skip,
-        take: limit,
-      }),
-      prisma.organization.count({ where }),
-    ]);
-
-    return { organizations: rows.map(mapOrganizationToDTO), total };
-  }
-
-  async getOrganizationById(id: string): Promise<OrganizationDTO> {
-    const row = await prisma.organization.findUniqueOrThrow({
-      where: { id },
+      return tx.entity.findUniqueOrThrow({
+        where: { unitId: id },
+        include: entityInclude,
+      });
     });
-    return mapOrganizationToDTO(row);
+
+    return mapEntityToDTO(row);
   }
 
-  async createOrganization(
-    req: CreateOrganizationInput,
-  ): Promise<OrganizationDTO> {
-    const row = await prisma.organization.create({
-      data: {
-        name: req.name,
-        extra: (req.extra ?? undefined) as Prisma.InputJsonValue | undefined,
-      },
-    });
-    return mapOrganizationToDTO(row);
+  async deleteEntity(id: string): Promise<void> {
+    await prisma.unit.delete({ where: { id } });
   }
 
-  async updateOrganization(
-    id: string,
-    req: UpdateOrganizationInput,
-  ): Promise<OrganizationDTO> {
-    const row = await prisma.organization.update({
-      where: { id },
-      data: {
-        name: req.name ?? undefined,
-        extra: req.extra !== undefined
-          ? ((req.extra ?? undefined) as Prisma.InputJsonValue | undefined)
-          : undefined,
-      },
-    });
-    return mapOrganizationToDTO(row);
-  }
+  // --- Attribution link/unlink ---
 
-  async deleteOrganization(id: string): Promise<void> {
-    await prisma.organization.delete({ where: { id } });
-  }
-
-  // --- Person credit links ---
-
-  async linkPersonCredit(
-    req: LinkPersonCreditInput,
-  ): Promise<PersonCreditDTO> {
-    const row = await prisma.personCredit.create({
+  async linkAttribution(req: LinkAttributionInput): Promise<AttributionDTO> {
+    const row = await prisma.attribution.create({
       data: {
         unitId: req.unitId,
-        personId: req.personId,
-        roleKey: req.roleKey,
+        entityId: req.entityId,
+        role: req.role,
         sortOrder: req.sortOrder ?? 0,
       },
-      include: personCreditInclude,
+      include: attributionInclude,
     });
     await patchContentCreditsToMeili(req.unitId);
-    return mapPersonCreditToDTO(row);
+    return mapAttributionToDTO(row);
   }
 
-  async unlinkPersonCredit(
+  async unlinkAttribution(
     unitId: string,
-    personId: string,
-    roleKey: string,
+    entityId: string,
+    role: string,
   ): Promise<void> {
-    await prisma.personCredit.delete({
+    await prisma.attribution.delete({
       where: {
-        unitId_personId_roleKey: { unitId, personId, roleKey },
+        unitId_entityId_role: { unitId, entityId, role },
       },
     });
     await patchContentCreditsToMeili(unitId);
   }
 
-  // --- Org credit links ---
-
-  async linkOrgCredit(req: LinkOrgCreditInput): Promise<OrgCreditDTO> {
-    const row = await prisma.orgCredit.create({
-      data: {
-        unitId: req.unitId,
-        organizationId: req.organizationId,
-        roleKey: req.roleKey,
-        sortOrder: req.sortOrder ?? 0,
-      },
-      include: orgCreditInclude,
+  async getAttributionsByUnit(unitId: string): Promise<AttributionDTO[]> {
+    const rows = await prisma.attribution.findMany({
+      where: { unitId },
+      include: attributionInclude,
+      orderBy: [{ role: "asc" }, { sortOrder: "asc" }],
     });
-    await patchContentCreditsToMeili(req.unitId);
-    return mapOrgCreditToDTO(row);
-  }
-
-  async unlinkOrgCredit(
-    unitId: string,
-    organizationId: string,
-    roleKey: string,
-  ): Promise<void> {
-    await prisma.orgCredit.delete({
-      where: {
-        unitId_organizationId_roleKey: { unitId, organizationId, roleKey },
-      },
-    });
-    await patchContentCreditsToMeili(unitId);
+    return rows.map(mapAttributionToDTO);
   }
 }
 

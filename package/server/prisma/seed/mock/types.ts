@@ -11,14 +11,10 @@ export interface CreatedUnit {
   type: UnitType;
 }
 
-export interface CreatedPerson {
-  id: string;
+export interface CreatedEntity {
+  unitId: string;
   name: string;
-}
-
-export interface CreatedOrganization {
-  id: string;
-  name: string;
+  kind: string;
 }
 
 export interface CreatedPost extends CreatedUnit {
@@ -39,8 +35,8 @@ export interface SeedCounts {
   shelves: number;
   realms: number;
   chaptersPerBook: number;
-  people: number;
-  organizations: number;
+  personEntities: number;
+  organizationEntities: number;
   followsPerUser: number;
   bookmarksPerUser: number;
 }

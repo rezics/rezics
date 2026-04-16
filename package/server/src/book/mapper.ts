@@ -52,20 +52,17 @@ export function mapBaseBookToDTO(book: BookWithRelations): BookDTO {
     translations: unit.translations?.map(mapTranslation) ?? [],
 
     // Attribution
-    personCredits:
-      unit.personCredits?.map((pc) => ({
-        personId: pc.personId,
-        name: pc.person.name,
-        roleKey: pc.roleKey,
-        sortOrder: pc.sortOrder,
-      })) ?? [],
-    orgCredits:
-      unit.organizationCredits?.map((oc) => ({
-        organizationId: oc.organizationId,
-        name: oc.organization.name,
-        roleKey: oc.roleKey,
-        sortOrder: oc.sortOrder,
-      })) ?? [],
+    attributions:
+      unit.attributions?.map((a) => {
+        const entityTranslations = (a.entity as any).translations ?? [];
+        const name = entityTranslations[0]?.title ?? "";
+        return {
+          entityId: a.entityId,
+          name,
+          role: a.role,
+          sortOrder: a.sortOrder,
+        };
+      }) ?? [],
 
     // Tags (scored)
     tags:

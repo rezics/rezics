@@ -2,10 +2,10 @@ import { Box, Divider, Paper, Stack, Typography } from "@mui/material";
 import type { BookDTO } from "@rezics/contract";
 import { useTranslation } from "react-i18next";
 import {
+  getAttributionsByRole,
   getBookAuthorName,
   getBookPublisherName,
   getBookTitle,
-  getPersonCredits,
 } from "@/shared/util/translation-helpers";
 
 type Book = BookDTO;
@@ -15,7 +15,7 @@ export function BookDetailSidebar({ bookInfo }: { bookInfo: Book }) {
   const title = getBookTitle(bookInfo);
   const authorName = getBookAuthorName(bookInfo);
   const publisherName = getBookPublisherName(bookInfo);
-  const producerCredits = getPersonCredits(bookInfo?.personCredits, 'producer');
+  const producerCredits = getAttributionsByRole(bookInfo?.attributions, 'producer');
   const producerName = producerCredits[0]?.name ?? '';
 
   return (

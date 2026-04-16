@@ -11,12 +11,12 @@ import {
 } from "@/engagement/component/MiniActionBar.tsx";
 import { TranslationTabs } from "@/i18n/component/TranslationTabs";
 import {
+  getAttributionsByRole,
   getBookAuthorName,
   getBookCoverUrl,
   getBookPublisherName,
   getBookTagLabels,
   getBookTitle,
-  getPersonCredits,
   getTranslation,
 } from "@/shared/util/translation-helpers";
 
@@ -66,7 +66,7 @@ export const BookHeroSection: React.FC<{
   const coverUrl = getBookCoverUrl(bookInfo);
   const authorName = getBookAuthorName(bookInfo);
   const publisherName = getBookPublisherName(bookInfo);
-  const producerCredits = getPersonCredits(bookInfo?.personCredits, 'producer');
+  const producerCredits = getAttributionsByRole(bookInfo?.attributions, 'producer');
   const producerName = producerCredits[0]?.name ?? '';
   const tags = getBookTagLabels(bookInfo);
   return (

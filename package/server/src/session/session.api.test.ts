@@ -1,5 +1,4 @@
-import { describe, expect, mock, test } from "bun:test";
-import { Elysia } from "elysia";
+import { beforeEach, describe, expect, mock, test } from "bun:test";
 
 process.env.NODE_ENV = "test";
 process.env.DATABASE_URL ??=
@@ -73,6 +72,55 @@ mock.module("@/user/service/user.service", () => ({
     provisionFromJwt: mockProvisionFromJwt,
   },
 }));
+
+beforeEach(() => {
+  getMainSessionPublicJwks.mockReset();
+  getMainSessionPublicJwks.mockResolvedValue({
+    keys: [
+      {
+        kty: "EC",
+        use: "sig",
+        alg: "ES256",
+        kid: "server-kid",
+        crv: "P-256",
+        x: "x-coordinate",
+        y: "y-coordinate",
+      },
+    ],
+  });
+
+  signRezicsSessionToken.mockReset();
+  signRezicsSessionToken.mockResolvedValue("signed-session-token");
+
+  verifyRezicsSessionToken.mockReset();
+  verifyRezicsSessionToken.mockResolvedValue(null);
+
+  mockVerifyBearerToken.mockReset();
+  mockVerifyBearerToken.mockResolvedValue({
+    payload: { unitId: "user-1", sub: "user-1", scope: "user" },
+    token: "raw-token",
+    protectedHeader: { alg: "ES256" },
+  });
+
+  mockGetJwtService.mockReset();
+  mockGetJwtService.mockResolvedValue({
+    issuer: "http://localhost:3001",
+    audience: "rezics",
+    jwksUrl: "http://localhost:3001/.well-known/jwks.json",
+  });
+
+  mockFindUnique.mockReset();
+  mockFindUnique.mockResolvedValue({
+    unitId: "user-1",
+    permission: { role: ["MEMBER"] },
+  });
+
+  mockProvisionFromJwt.mockReset();
+  mockProvisionFromJwt.mockResolvedValue({
+    unitId: "new-user",
+    permission: null,
+  } as any);
+});
 
 describe("GET /session/jwks", () => {
   test("publishes the canonical public jwks document", async () => {
@@ -148,7 +196,13 @@ describe("POST /session/exchange", () => {
 
   test("unprovisioned verified user is auto-provisioned and gets token", async () => {
     mockVerifyBearerToken.mockResolvedValueOnce({
-      payload: { unitId: "new-user", sub: "new-user", scope: "user", name: "New User" },
+      payload: {
+        unitId: "new-user",
+        sub: "new-user",
+        slug: "new-user",
+        scope: "user",
+        name: "New User",
+      },
       token: "raw-token",
       protectedHeader: { alg: "ES256" },
     });
@@ -173,7 +227,7 @@ describe("POST /session/exchange", () => {
     expect(body).toHaveProperty("token", "new-user-session-token");
     expect(mockProvisionFromJwt).toHaveBeenCalledWith({
       unitId: "new-user",
-      slug: undefined,
+      slug: "new-user",
       name: "New User",
     });
   });

@@ -12,10 +12,9 @@ export const bookList01 = [
         description: "Mock Description 1",
       },
     ],
-    personCredits: [
-      { personId: "a1", name: "Author A", roleKey: "author" },
+    attributions: [
+      { entityId: "a1", name: "Author A", role: "author" },
     ],
-    orgCredits: [],
     tags: [],
     coverUrl: null,
     isbn13: null,
@@ -30,10 +29,9 @@ export const bookList01 = [
         description: "Mock Description 2",
       },
     ],
-    personCredits: [
-      { personId: "a2", name: "Author B", roleKey: "author" },
+    attributions: [
+      { entityId: "a2", name: "Author B", role: "author" },
     ],
-    orgCredits: [],
     tags: [],
     coverUrl: null,
     isbn13: null,
