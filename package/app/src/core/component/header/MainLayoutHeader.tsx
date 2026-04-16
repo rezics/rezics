@@ -1,14 +1,12 @@
 import { AppBar, Avatar, Toolbar, Typography } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { Link } from "@rezics/ui/primitive/link/Link.tsx";
-import { useMatch } from "@tanstack/react-router";
-import type React from "react";
-import { useMemo } from "react";
+import { useRouterState } from "@tanstack/react-router";
+import React, { useMemo } from "react";
 import { useAppStore } from "@/app/state/appStore.ts";
 import { AuthenticatedSection } from "@/core/section/header/AuthenticatedSection.tsx";
 import { PendingVerificationSection } from "@/core/section/header/PendingVerificationSection.tsx";
 import { UnauthenticatedSection } from "@/core/section/header/UnauthenticatedSection.tsx";
-import { Route as HomeRoute } from "@/routes/_mainLayout/index.tsx";
 import { HomeSearch } from "@/search";
 import { cn } from "@/shared/util/css-util";
 import { useIsMobile } from "@/shared/util/use-media-query";
@@ -22,18 +20,22 @@ interface HeaderProps {
   disableDrawerToggle?: boolean;
 }
 
-export const Header: React.FC<HeaderProps> = ({
+export const Header: React.FC<HeaderProps> = React.memo(({
   isDragging = false,
   layoutType = "type-b",
   disableDrawerToggle = false,
 }) => {
-  const { sidebarOpen, drawerWidth, toggleSidebar } = useLayoutStore();
+  const sidebarOpen = useLayoutStore((s) => s.sidebarOpen);
+  const drawerWidth = useLayoutStore((s) => s.drawerWidth);
+  const toggleSidebar = useLayoutStore((s) => s.toggleSidebar);
   const theme = useTheme();
   const isMobile = useIsMobile();
   const themeMode = useAppStore((state) => state.theme);
 
   const isDark = useMemo(() => themeMode === "dark", [themeMode]);
-  const matchHomeRoute = useMatch({ from: HomeRoute.id, shouldThrow: false });
+  const isHomePage = useRouterState({
+    select: (s) => s.location.pathname === "/",
+  });
 
   const handleDrawerToggle = () => {
     if (!disableDrawerToggle) toggleSidebar();
@@ -80,7 +82,7 @@ export const Header: React.FC<HeaderProps> = ({
         />
 
         <Link to="/" className="flex items-center gap-2 shrink-0">
-          {!matchHomeRoute && (
+          {!isHomePage && (
             <Avatar sx={{ bgcolor: "transparent" }} variant="rounded">
               <img src="/logo.svg" alt="logo" />
             </Avatar>
@@ -95,7 +97,7 @@ export const Header: React.FC<HeaderProps> = ({
         </Link>
 
         <div className="flex-1 min-w-0 flex justify-center">
-          {!isMobile && matchHomeRoute && (
+          {!isMobile && isHomePage && (
             <HomeSearch className="w-full max-w-md" />
           )}
         </div>
@@ -104,4 +106,4 @@ export const Header: React.FC<HeaderProps> = ({
       </Toolbar>
     </AppBar>
   );
-};
+});

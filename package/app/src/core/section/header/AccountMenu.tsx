@@ -12,9 +12,7 @@ import {
   Menu,
   MenuItem,
 } from "@mui/material";
-import { userQueries } from "@rezics/api/user/user.queries";
 import { Link } from "@rezics/ui/primitive/link/Link.tsx";
-import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
 import { useState } from "react";
@@ -28,10 +26,10 @@ export type AccountMenuProps = {
 
 export const AccountMenu: React.FC<AccountMenuProps> = ({ onLogout }) => {
   const navigate = useNavigate();
-  const { clearProfile } = useUserProfileStore();
+  const clearProfile = useUserProfileStore((state) => state.clearProfile);
+  const user = useUserProfileStore((state) => state.user);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
-  const { data: user } = useQuery(userQueries.me());
   const { t } = useTranslation();
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
@@ -48,14 +46,6 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({ onLogout }) => {
     clearProfile();
     navigate({ to: "/login" });
     void logout();
-  };
-
-  const handleProfile = () => {
-    console.log("Profile clicked");
-  };
-
-  const handleSettings = () => {
-    console.log("Settings clicked");
   };
 
   return (
@@ -81,7 +71,6 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({ onLogout }) => {
           vertical: "bottom",
           horizontal: "right",
         }}
-        keepMounted
         transformOrigin={{
           vertical: "top",
           horizontal: "right",
@@ -92,10 +81,7 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({ onLogout }) => {
         <MenuItem
           component={Link}
           to={`/user/me`}
-          onClick={() => {
-            handleMenuClose();
-            handleProfile();
-          }}
+          onClick={handleMenuClose}
         >
           <ListItemIcon>
             <PersonIcon fontSize="small" />
@@ -105,10 +91,7 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({ onLogout }) => {
         <MenuItem
           component={Link}
           to={`/user/me/edit`}
-          onClick={() => {
-            handleMenuClose();
-            handleSettings();
-          }}
+          onClick={handleMenuClose}
         >
           <ListItemIcon>
             <SettingsIcon fontSize="small" />

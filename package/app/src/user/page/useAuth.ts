@@ -1,7 +1,7 @@
 import { userQueries } from "@rezics/api/user/user.queries";
 import type { UserDTO } from "@rezics/contract";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useAuthSessionStore, useUserProfileStore } from "@/user/state";
 
 /**
@@ -17,7 +17,6 @@ export const useAuth = () => {
   const identitySet = useAuthSessionStore((state) => state.identitySet);
   const status = useAuthSessionStore((state) => state.status);
   const user = useUserProfileStore((state) => state.user as UserDTO | null);
-  const setUser = useUserProfileStore((state) => state.setUser);
 
   const isAuthenticated = permission !== null;
 
@@ -27,12 +26,6 @@ export const useAuth = () => {
   });
 
   const resolvedUser = isAuthenticated ? (user ?? data ?? null) : null;
-
-  useEffect(() => {
-    if (data) {
-      setUser(data);
-    }
-  }, [data, setUser]);
 
   return {
     user: resolvedUser,

@@ -14,7 +14,7 @@ import {
   type UniversalPaginatorHandle,
 } from "@rezics/ui/composite/pagination/Pagination.tsx";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import React, { type FC, useEffect, useMemo, useRef, useState } from "react";
+import React, { type FC, useCallback, useMemo, useRef, useState } from "react";
 import { BookListView } from "@/book-library/component/BookList/BookListView";
 import { QuoteExcerptListContainer } from "@/review/component/QuoteExcerptList.tsx";
 import { ShelfCard } from "@/shelf/component/ShelfCard";
@@ -37,16 +37,31 @@ const ShelfListView: React.FC<{ shelves: ShelfDTO[] }> = ({ shelves }) => {
 
 type TabKey = "shelf" | "review" | "remark" | "quote" | "book";
 
-/**
- * UserUnitsPage
- *
- * Displays a user's content by tab, using content search API.
- */
+const EXTERNAL_PAGE_SIZE = 50;
+
+function mergeReactionSummaries<T extends { id?: string; unitId?: string }>(
+  items: T[],
+  summaries: Record<string, Record<string, number>> | undefined,
+  idField: "id" | "unitId",
+): T[] {
+  if (!summaries) return items;
+  return items.map((item) => {
+    const key = item[idField];
+    if (!key) return item;
+    const summaryMap = summaries[key];
+    if (!summaryMap) return item;
+    return {
+      ...item,
+      reactionSummaries: Object.entries(summaryMap).map(
+        ([reaction, count]) => ({ reaction, count }),
+      ),
+    };
+  });
+}
+
 export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
   const ref = useRef<UniversalPaginatorHandle>(null);
   const queryClient = useQueryClient();
-
-  const EXTERNAL_PAGE_SIZE = 50;
 
   const [tab, setTab] = useState<TabKey>("shelf");
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -58,8 +73,8 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
   const [startRemark, setStartRemark] = useState<number>(0);
   const [startQuote, setStartQuote] = useState<number>(0);
 
-  // ======= Shelves (content search with SHELF type) =======
-  // Using content search as shelf list query
+  // ======= Shelves =======
+
   const {
     data: shelfDataRaw,
     isLoading: isLoadingShelf,
@@ -73,67 +88,40 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
     }),
   );
 
-  const baseShelves: ShelfDTO[] = useMemo(
-    () => (shelfDataRaw?.items ?? []) as unknown as ShelfDTO[],
+  const shelfTargetIds = useMemo(
+    () =>
+      (shelfDataRaw?.items ?? [])
+        .map((r) => r.id)
+        .filter(Boolean) as string[],
     [shelfDataRaw],
   );
 
-  const currentShelfTargetIds = useMemo(
-    () => baseShelves.map((r) => r.id).filter(Boolean),
-    [baseShelves],
-  );
-
-  const { data: shelfReactionSummaryBatch } = useQuery({
-    queryKey: [
-      "reaction-summary-batch",
-      "user",
-      userId,
-      "shelves",
-      currentShelfTargetIds,
-    ],
-    queryFn: () =>
-      reactionApi.summaryBatch(currentShelfTargetIds as string[]),
-    enabled: currentShelfTargetIds.length > 0,
+  const { data: shelfReactionBatch } = useQuery({
+    queryKey: ["reaction-summary-batch", "user", userId, "shelves", shelfTargetIds],
+    queryFn: () => reactionApi.summaryBatch(shelfTargetIds),
+    enabled: shelfTargetIds.length > 0,
     staleTime: 1000 * 60 * 2,
   });
 
-  const [shelves, setShelves] = useState<ShelfDTO[]>([]);
-
-  useEffect(() => {
-    if (!baseShelves || baseShelves.length === 0) {
-      setShelves([]);
-      return;
-    }
-
-    if (!shelfReactionSummaryBatch) {
-      setShelves(baseShelves);
-      return;
-    }
-
-    const merged = baseShelves.map((item) => {
-      const summaryMap = shelfReactionSummaryBatch.summaries[item.id];
-      if (!summaryMap) return item;
-
-      const reactionSummaries = Object.entries(summaryMap).map(
-        ([reaction, count]) => ({
-          reaction,
-          count,
-        }),
-      );
-
-      return {
-        ...item,
-        reactionSummaries,
-      };
-    });
-
-    setShelves(merged);
-  }, [baseShelves, shelfReactionSummaryBatch]);
+  const shelves = useMemo(
+    () =>
+      mergeReactionSummaries(
+        (shelfDataRaw?.items ?? []) as unknown as ShelfDTO[],
+        shelfReactionBatch?.summaries,
+        "id",
+      ),
+    [shelfDataRaw, shelfReactionBatch],
+  );
 
   const totalShelves: number = shelfDataRaw?.total ?? 0;
 
-  // ======= Books (Meili books index with userId filter) =======
-  const bookListQueryOpts = useQuery(
+  // ======= Books =======
+
+  const {
+    data: bookData,
+    isLoading: isLoadingBook,
+    error: errorBook,
+  } = useQuery(
     meiliBookSearchQuery({
       authorIds: [userId],
       start: startBook,
@@ -141,14 +129,7 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
     }),
   );
 
-  const {
-    data: bookData,
-    isLoading: isLoadingBook,
-    error: errorBook,
-  } = bookListQueryOpts;
-
-  // ======= Reviews / Remarks (content search with POST type) =======
-  // Using content search for reviews/remarks
+  // ======= Reviews / Remarks =======
 
   const {
     data: reviewData,
@@ -180,67 +161,35 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
   const isLoadingReviewLike =
     tab === "review" ? isLoadingReview : isLoadingRemark;
 
-  // Cast content search items to PostDTO shape
-  const baseReviews: PostDTO[] = useMemo(
-    () => (activeReviewLikeData?.items ?? []) as unknown as PostDTO[],
+  const reviewTargetIds = useMemo(
+    () =>
+      ((activeReviewLikeData?.items ?? []) as unknown as PostDTO[])
+        .map((r) => r.unitId)
+        .filter(Boolean) as string[],
     [activeReviewLikeData],
   );
 
-  const currentReviewTargetIds = useMemo(
-    () => baseReviews.map((r) => r.unitId).filter(Boolean),
-    [baseReviews],
-  );
-
-  const { data: reviewReactionSummaryBatch } = useQuery({
-    queryKey: [
-      "reaction-summary-batch",
-      "user",
-      userId,
-      tab,
-      currentReviewTargetIds,
-    ],
-    queryFn: () => reactionApi.summaryBatch(currentReviewTargetIds as string[]),
-    enabled: currentReviewTargetIds.length > 0,
+  const { data: reviewReactionBatch } = useQuery({
+    queryKey: ["reaction-summary-batch", "user", userId, tab, reviewTargetIds],
+    queryFn: () => reactionApi.summaryBatch(reviewTargetIds),
+    enabled: reviewTargetIds.length > 0,
     staleTime: 1000 * 60 * 2,
   });
 
-  const [reviews, setReviews] = useState<PostDTO[]>([]);
-
-  useEffect(() => {
-    if (!baseReviews || baseReviews.length === 0) {
-      setReviews([]);
-      return;
-    }
-
-    if (!reviewReactionSummaryBatch) {
-      setReviews(baseReviews);
-      return;
-    }
-
-    const merged = baseReviews.map((review) => {
-      const summaryMap = reviewReactionSummaryBatch.summaries[review.unitId];
-      if (!summaryMap) return review;
-
-      const reactionSummaries = Object.entries(summaryMap).map(
-        ([reaction, count]) => ({
-          reaction,
-          count,
-        }),
-      );
-
-      return {
-        ...review,
-        reactionSummaries,
-      };
-    });
-
-    setReviews(merged);
-  }, [baseReviews, reviewReactionSummaryBatch]);
+  const reviews = useMemo(
+    () =>
+      mergeReactionSummaries(
+        (activeReviewLikeData?.items ?? []) as unknown as PostDTO[],
+        reviewReactionBatch?.summaries,
+        "unitId",
+      ),
+    [activeReviewLikeData, reviewReactionBatch],
+  );
 
   const totalReviews: number =
     (tab === "review" ? reviewData?.total : remarkData?.total) ?? 0;
 
-  // ======= Quotes (content search with QUOTE type) =======
+  // ======= Quotes =======
 
   const {
     data: quoteData,
@@ -262,63 +211,75 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
 
   // ======= Pagination control =======
 
-  function handleNeedMoreData(page: number) {
-    const start = (page - 1) * EXTERNAL_PAGE_SIZE;
-    if (tab === "shelf") {
-      setStartShelf(start);
-    } else if (tab === "review") {
-      setStartReview(start);
-    } else if (tab === "remark") {
-      setStartRemark(start);
-    } else if (tab === "book") {
-      setStartBook(start);
-    } else if (tab === "quote") {
-      setStartQuote(start);
-    }
-  }
+  const handleNeedMoreData = useCallback(
+    (page: number) => {
+      const start = (page - 1) * EXTERNAL_PAGE_SIZE;
+      if (tab === "shelf") {
+        setStartShelf(start);
+      } else if (tab === "review") {
+        setStartReview(start);
+      } else if (tab === "remark") {
+        setStartRemark(start);
+      } else if (tab === "book") {
+        setStartBook(start);
+      } else if (tab === "quote") {
+        setStartQuote(start);
+      }
+    },
+    [tab],
+  );
 
-  async function handlePreRequestData(page: number) {
-    const start = (page - 1) * EXTERNAL_PAGE_SIZE;
+  const handlePreRequestData = useCallback(
+    async (page: number) => {
+      const start = (page - 1) * EXTERNAL_PAGE_SIZE;
 
-    if (tab === "shelf") {
+      if (tab === "shelf") {
+        const result = await queryClient.fetchQuery(
+          contentSearchQueryOptions({
+            type: "SHELF",
+            keyword: keyword || undefined,
+            offset: start,
+            limit: EXTERNAL_PAGE_SIZE,
+          }),
+        );
+        return result?.items?.length ?? 0;
+      }
+
+      if (tab === "review" || tab === "remark") {
+        const result = await queryClient.fetchQuery(
+          contentSearchQueryOptions({
+            type: UnitType.POST,
+            keyword: keyword || undefined,
+            offset: start,
+            limit: EXTERNAL_PAGE_SIZE,
+          }),
+        );
+        return result?.items?.length ?? 0;
+      }
+
+      if (tab === "book") {
+        const result = await queryClient.fetchQuery(
+          meiliBookSearchQuery({
+            authorIds: [userId],
+            start,
+            limit: EXTERNAL_PAGE_SIZE,
+          }),
+        );
+        return (result as any)?.books?.length ?? 0;
+      }
+
       const result = await queryClient.fetchQuery(
         contentSearchQueryOptions({
-          type: "SHELF",
+          type: UnitType.QUOTE,
           keyword: keyword || undefined,
           offset: start,
           limit: EXTERNAL_PAGE_SIZE,
         }),
       );
       return result?.items?.length ?? 0;
-    }
-
-    if (tab === "review" || tab === "remark") {
-      const result = await queryClient.fetchQuery(
-        contentSearchQueryOptions({
-          type: UnitType.POST,
-          keyword: keyword || undefined,
-          offset: start,
-          limit: EXTERNAL_PAGE_SIZE,
-        }),
-      );
-      return result?.items?.length ?? 0;
-    }
-
-    const result = await queryClient.fetchQuery(
-      contentSearchQueryOptions({
-        type: UnitType.QUOTE,
-        keyword: keyword || undefined,
-        offset: start,
-        limit: EXTERNAL_PAGE_SIZE,
-      }),
-    );
-    return result?.items?.length ?? 0;
-  }
-
-  useEffect(() => {
-    ref.current?.resetPaginationPageNumber?.();
-    setCurrentPage(1);
-  }, []);
+    },
+    [tab, keyword, userId, queryClient],
+  );
 
   // Select data source by current tab
   let isLoading: boolean;
@@ -328,12 +289,12 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
 
   if (tab === "shelf") {
     isLoading = isLoadingShelf;
-    items = shelves ?? [];
+    items = shelves;
     totalItems = totalShelves;
     activeError = errorShelf as Error | null;
   } else if (tab === "review" || tab === "remark") {
     isLoading = isLoadingReviewLike;
-    items = reviews ?? [];
+    items = reviews;
     totalItems = totalReviews;
     activeError = (errorReview ?? errorRemark) as Error | null;
   } else if (tab === "book") {
@@ -342,16 +303,14 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
     totalItems = bookData?.total ?? 0;
     activeError = errorBook as Error | null;
   } else {
-    // quote
     isLoading = isLoadingQuote;
-    items = quoteUnits ?? [];
+    items = quoteUnits;
     totalItems = quoteData?.total ?? 0;
     activeError = errorQuote as Error | null;
   }
 
   return (
     <div className="mx-auto p-2 mt-4">
-      {/* Search + Tabs */}
       <div className="mb-4">
         <TextSearchInputWithIcon
           onSearch={(info) => {

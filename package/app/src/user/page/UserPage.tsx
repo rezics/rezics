@@ -23,7 +23,6 @@ export const UserPage: FC<UserPageProps> = ({ isCurrentUser = false }) => {
   const unitId = isCurrentUser ? undefined : routeMatch?.params.unitId;
   const [isEditing, setIsEditing] = useState(false);
   const currentUser = useUserProfileStore((state) => state.user);
-  console.log(isCurrentUser, "isCurrentUser");
 
   const handleEditClick = () => {
     setIsEditing(true);

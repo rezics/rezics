@@ -13,7 +13,7 @@ import { userQueries } from "@rezics/api/user/user.queries";
 import type { UserDTO } from "@rezics/contract";
 import { Link } from "@rezics/ui/primitive/link/Link.tsx";
 import { useQuery } from "@tanstack/react-query";
-import { type FC, useEffect } from "react";
+import type { FC } from "react";
 import { useTranslation } from "react-i18next";
 import FollowButton from "@/engagement/component/FollowButton";
 import { useUserProfileStore } from "@/user/state";
@@ -36,10 +36,7 @@ export const UserProfilePage: FC<UserProfilePageProps> = ({
   onEditClick,
 }) => {
   const currentUser = useUserProfileStore((state) => state.user);
-  const { setUser } = useUserProfileStore();
   const { t } = useTranslation();
-
-  console.log("isCurrentUser", isCurrentUser);
 
   const meQuery = useQuery({
     ...userQueries.me(),
@@ -49,12 +46,6 @@ export const UserProfilePage: FC<UserProfilePageProps> = ({
     ...userQueries.detail(unitId),
     enabled: !isCurrentUser && unitId !== "",
   });
-
-  useEffect(() => {
-    if (meQuery.data) {
-      setUser(meQuery.data);
-    }
-  }, [meQuery.data, setUser]);
 
   const isLoading = meQuery.isLoading || detailQuery.isLoading;
   const queryError = (meQuery.error ?? detailQuery.error) as Error | null;
