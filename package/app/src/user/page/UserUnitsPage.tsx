@@ -98,7 +98,7 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
 
   const { data: shelfReactionBatch } = useQuery({
     queryKey: ["reaction-summary-batch", "user", userId, "shelves", shelfTargetIds],
-    queryFn: () => reactionApi.summaryBatch(shelfTargetIds),
+    queryFn: () => reactionApi.summary(shelfTargetIds),
     enabled: shelfTargetIds.length > 0,
     staleTime: 1000 * 60 * 2,
   });
@@ -171,7 +171,7 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
 
   const { data: reviewReactionBatch } = useQuery({
     queryKey: ["reaction-summary-batch", "user", userId, tab, reviewTargetIds],
-    queryFn: () => reactionApi.summaryBatch(reviewTargetIds),
+    queryFn: () => reactionApi.summary(reviewTargetIds),
     enabled: reviewTargetIds.length > 0,
     staleTime: 1000 * 60 * 2,
   });

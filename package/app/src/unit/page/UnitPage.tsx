@@ -51,7 +51,10 @@ export function UnitPage() {
     );
   }
 
-  const metadataEntries = Object.entries(unit.metadata ?? {});
+  const primaryTranslation = unit.translations?.[0];
+  const title = primaryTranslation?.title;
+  const content = primaryTranslation?.description;
+  const metadataEntries = Object.entries(unit.extra ?? {});
 
   return (
     <div className="w-11/12 max-w-4xl mx-auto mt-10 mb-10">
@@ -59,7 +62,7 @@ export function UnitPage() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="space-y-1">
           <Typography variant="h4" className="font-bold">
-            {unit.title || t("pages.unit_page", "Unit")}
+            {title || t("pages.unit_page", "Unit")}
           </Typography>
           <Typography
             variant="body2"
@@ -87,7 +90,7 @@ export function UnitPage() {
               color="default"
             />
           )}
-          {unit.tags?.map((tag) => (
+          {(unit.extra?.tags as string[] | undefined)?.map((tag: string) => (
             <Chip
               key={tag}
               label={tag}
@@ -143,8 +146,8 @@ export function UnitPage() {
       {/* ANCHOR Content */}
       <div className="mt-8">
         <Paper className="p-5">
-          {unit.content ? (
-            <MarkdownContent content={unit.content} />
+          {content ? (
+            <MarkdownContent content={content} />
           ) : (
             <Typography variant="body2" color="text.secondary">
               {t("unit.no_content")}

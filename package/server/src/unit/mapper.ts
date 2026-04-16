@@ -40,7 +40,7 @@ export function mapTranslationToDTO(
 ): UnitTranslationDTO {
   return {
     unitId: translation.unitId,
-    language: translation.language,
+    language: translation.language as UnitTranslationDTO["language"],
     title: translation.title ?? undefined,
     subtitle: translation.subtitle ?? undefined,
     summary: translation.summary ?? undefined,

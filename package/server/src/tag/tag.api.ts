@@ -180,8 +180,8 @@ export const tagApi = new Elysia({ prefix: "/tags" })
   // GET /for-unit/:unitId/context - get tag context for a unit
   .get(
     "/for-unit/:unitId/context",
-    async ({ params, identity }) => {
-      return getTagContext(params.unitId, identity?.unitId);
+    async ({ params }) => {
+      return getTagContext(params.unitId);
     },
     {
       params: tagParamsSchema,

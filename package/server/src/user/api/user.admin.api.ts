@@ -1,4 +1,4 @@
-import type { UpdateUser, UserDTO } from "@rezics/contract";
+import type { UpdateUser } from "@rezics/contract";
 import {
   updateUserSchema,
   userListQuerySchema,
@@ -13,7 +13,7 @@ export const adminRoute = new Elysia()
   .use(authMacro)
   .get(
     "/admin",
-    async ({ identity, query }): Promise<{ users: UserDTO[]; total: number }> => {
+    async ({ identity, query }) => {
       if (identity.permission.role !== "ADMIN" && identity.permission.role !== "ROOT") {
         return status(403, "Forbidden: Admin role required");
       }
@@ -35,7 +35,7 @@ export const adminRoute = new Elysia()
   )
   .get(
     "/admin/:unitId",
-    async ({ identity, params }): Promise<UserDTO> => {
+    async ({ identity, params }) => {
       if (identity.permission.role !== "ADMIN" && identity.permission.role !== "ROOT") {
         return status(403, "Forbidden: Admin role required");
       }
@@ -57,7 +57,7 @@ export const adminRoute = new Elysia()
   )
   .put(
     "/admin/:unitId",
-    async ({ identity, params, body }): Promise<UserDTO> => {
+    async ({ identity, params, body }) => {
       if (identity.permission.role !== "ADMIN" && identity.permission.role !== "ROOT") {
         return status(403, "Forbidden: Admin role required");
       }
@@ -88,7 +88,7 @@ export const adminRoute = new Elysia()
   )
   .delete(
     "/admin/:unitId",
-    async ({ identity, params }): Promise<{ message: string }> => {
+    async ({ identity, params }) => {
       if (identity.permission.role !== "ADMIN" && identity.permission.role !== "ROOT") {
         return status(403, "Forbidden: Admin role required");
       }

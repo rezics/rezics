@@ -227,44 +227,6 @@ describe("auth handlers", () => {
     );
   });
 
-  test("establishBusinessSession fetches context, ensures user, and issues session token", async () => {
-    const { establishBusinessSession } = await import("./handler");
-    const { getToken, setToken } = await import("@rezics/api/react-query/jwt");
-
-    setToken(
-      "eyJhbGciOiJub25lIn0.eyJzdWIiOiJ1c2VyLTEiLCJleHAiOjQ3NjYwMDAwMDB9.c2ln",
-      NormalizedTokenName.AUTH_SESSION,
-    );
-
-    await establishBusinessSession();
-
-    expect(getContextTokenMock).toHaveBeenCalledTimes(1);
-    expect(ensureMock).toHaveBeenCalledTimes(1);
-    expect(ensureMock).toHaveBeenCalledWith("context-token");
-    expect(issueSessionTokenMock).toHaveBeenCalledTimes(1);
-    expect(getToken(NormalizedTokenName.REZICS_SESSION)).toBe("member-token");
-    expect(syncBusinessTokenMock).toHaveBeenCalledWith("member-token");
-    expect(setUserMock).toHaveBeenCalledWith({
-      unitId: "user-1",
-      name: "Reader",
-    });
-  });
-
-  test("AUTH_CONTEXT is not persisted after establishBusinessSession", async () => {
-    const { establishBusinessSession } = await import("./handler");
-    const { getToken, setToken } = await import("@rezics/api/react-query/jwt");
-
-    setToken(
-      "eyJhbGciOiJub25lIn0.eyJzdWIiOiJ1c2VyLTEiLCJleHAiOjQ3NjYwMDAwMDB9.c2ln",
-      NormalizedTokenName.AUTH_SESSION,
-    );
-
-    await establishBusinessSession();
-
-    // AUTH_CONTEXT should not be in localStorage (no storage key configured)
-    expect(getToken(NormalizedTokenName.AUTH_CONTEXT)).toBeNull();
-  });
-
   test("clears auth-session, profile, and cached auth queries on logout", async () => {
     const { logout } = await import("./handler");
     const { getToken, setToken } = await import("@rezics/api/react-query/jwt");

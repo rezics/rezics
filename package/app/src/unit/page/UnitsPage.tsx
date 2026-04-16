@@ -52,16 +52,16 @@ function defaultChildren(units: Unit[]) {
                 variant="subtitle1"
                 className="font-semibold truncate mb-1"
               >
-                {item.title || "(未命名内容)"}
+                {item.translations?.[0]?.title || "(未命名内容)"}
               </Typography>
             </div>
-            {item.content && (
+            {item.translations?.[0]?.description && (
               <Typography
                 variant="body2"
                 color="textSecondary"
                 className="line-clamp-4"
               >
-                {item.content}
+                {item.translations[0].description}
               </Typography>
             )}
           </div>

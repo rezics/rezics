@@ -30,7 +30,7 @@ mock.module("./jwt/jwt.service", () => ({
 }));
 
 const mockVerifyBearerToken = mock(async () => ({
-  payload: { unitId: "user-1", sub: "user-1", scope: "user" },
+  payload: { unitId: "user-1", sub: "user-1", scope: "user" } as Record<string, unknown>,
   token: "raw-token",
   protectedHeader: { alg: "ES256" },
 }));
@@ -66,7 +66,7 @@ mock.module("#/prisma/client", () => ({
 const mockProvisionFromJwt = mock(async () => ({
   unitId: "new-user",
   permission: null,
-}));
+}) as any);
 
 mock.module("@/user/service/user.service", () => ({
   userService: {

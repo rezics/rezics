@@ -106,8 +106,8 @@ const ShelfCard: FC<{ shelf: ShelfDTO }> = ({ shelf }) => {
 
   return (
     <Link
-      to="/shelf/$unitId"
-      params={{ unitId: shelf.unitId }}
+      to="/shelf/$shelfId"
+      params={{ shelfId: shelf.unitId }}
       className="no-underline"
     >
       <Box className="border border-gray-200 rounded-lg p-4 hover:border-gray-400 transition-colors h-full flex flex-col">

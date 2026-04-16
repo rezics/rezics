@@ -1,4 +1,4 @@
-import type { UpdateUser, UserDTO, UserListQuery } from "@rezics/contract";
+import type { UpdateUser, UserListQuery } from "@rezics/contract";
 import {
   hasPermissionToUpdateUser,
   updateUserSchema,
@@ -16,7 +16,7 @@ export const coreRoute = new Elysia()
   .use(authMacro)
   .get(
     "/",
-    async ({ query }): Promise<{ users: UserDTO[]; total: number }> => {
+    async ({ query }) => {
       const result = await meiliService.searchUsers(query as UserListQuery);
       return {
         users: result.users.map(mapUserSearchDocToPublicProfile),
@@ -34,7 +34,7 @@ export const coreRoute = new Elysia()
   )
   .get(
     "/me",
-    async ({ identity }): Promise<UserDTO> => {
+    async ({ identity }) => {
       const user = await userService.getByUnitId(identity.unitId);
       return mapUserToDTO(user);
     },
@@ -50,7 +50,7 @@ export const coreRoute = new Elysia()
   )
   .put(
     "/me",
-    async ({ identity, body }): Promise<UserDTO> => {
+    async ({ identity, body }) => {
       const userReq: UpdateUser = {
         name: body.name,
         avatar: body.avatar,
@@ -72,7 +72,7 @@ export const coreRoute = new Elysia()
   )
   .put(
     "/:unitId",
-    async ({ identity, params, body }): Promise<UserDTO> => {
+    async ({ identity, params, body }) => {
       if (!hasPermissionToUpdateUser(identity.permission, identity.unitId, params.unitId)) {
         return status(403, "Forbidden: Cannot update other users");
       }
@@ -100,7 +100,7 @@ export const coreRoute = new Elysia()
   )
   .delete(
     "/me",
-    async ({ identity }): Promise<{ message: string }> => {
+    async ({ identity }) => {
       if (identity.permission.role !== "ADMIN" && identity.permission.role !== "ROOT") {
         return status(403, "Forbidden: Admin role required");
       }
@@ -121,7 +121,7 @@ export const coreRoute = new Elysia()
   )
   .delete(
     "/:unitId",
-    async ({ identity, params }): Promise<{ message: string }> => {
+    async ({ identity, params }) => {
       if (identity.permission.role !== "ADMIN" && identity.permission.role !== "ROOT") {
         return status(403, "Forbidden: Admin role required");
       }

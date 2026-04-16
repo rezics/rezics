@@ -1,6 +1,6 @@
-import type { UnitTagDTO } from "@rezics/contract";
-import { tagContextQuery, tagQueries } from "@rezics/api/tag/tag";
 import type { TagFilters } from "@rezics/api/tag/tag";
+import { tagContextQuery, tagQueries } from "@rezics/api/tag/tag";
+import type { UnitTagDTO } from "@rezics/contract";
 import { MUILink } from "@rezics/ui/primitive/link/MUILink.tsx";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
@@ -27,9 +27,9 @@ export type TagWrapperProps = {
  */
 export const TagWrapper: React.FC<TagWrapperProps> = ({
   filters,
-  mode = "flat",
-  renderAll = false,
-  domainIds,
+  mode: _mode = "flat",
+  renderAll: _renderAll = false,
+  domainIds: _domainIds,
   className,
 }) => {
   const { t } = useTranslation();

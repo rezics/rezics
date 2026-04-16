@@ -234,7 +234,7 @@ export class ScoreService {
           totalScore: existing.totalScore - (oldValue ?? 0),
           totalCount: nextCount,
           distribution: distribution as Prisma.InputJsonValue,
-          fields: fields as Prisma.InputJsonValue ?? undefined,
+          fields: (fields ?? undefined) as Prisma.InputJsonValue | undefined,
         },
       });
       return;
@@ -258,7 +258,7 @@ export class ScoreService {
           totalScore: newValue,
           totalCount: 1,
           distribution: distribution as Prisma.InputJsonValue,
-          fields: fields as Prisma.InputJsonValue ?? undefined,
+          fields: (fields ?? undefined) as Prisma.InputJsonValue | undefined,
         },
       });
       return;
@@ -286,7 +286,7 @@ export class ScoreService {
           totalScore: existing.totalScore + deltaScore,
           totalCount: existing.totalCount + deltaCount,
           distribution: distribution as Prisma.InputJsonValue,
-          fields: fields as Prisma.InputJsonValue ?? undefined,
+          fields: (fields ?? undefined) as Prisma.InputJsonValue | undefined,
         },
       });
     }

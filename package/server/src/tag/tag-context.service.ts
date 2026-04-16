@@ -6,14 +6,14 @@ export async function getTagContext(unitId: string, userId?: string) {
     where: { unitId },
     orderBy: { score: "desc" },
     include: {
-      tag: { include: { unit: { include: { translations: true } } } },
+      tag: { include: { translations: true } },
     },
   });
 
   const tags = unitTags.map((ut) => ({
     tagUnitId: ut.tagUnitId,
     score: ut.score,
-    label: ut.tag?.unit?.translations?.[0]?.title ?? ut.tagUnitId,
+    label: ut.tag?.translations?.[0]?.title ?? ut.tagUnitId,
   }));
 
   let realmHighlights: {
@@ -27,7 +27,7 @@ export async function getTagContext(unitId: string, userId?: string) {
     const memberships = await prisma.realmMember.findMany({
       where: { userId },
       take: 5,
-      orderBy: { createdAt: "desc" },
+      orderBy: { joinedAt: "desc" },
       select: { realmUnitId: true },
     });
 
@@ -37,7 +37,7 @@ export async function getTagContext(unitId: string, userId?: string) {
       const realmTagUnits = await prisma.realmTagUnit.findMany({
         where: { unitId, realmUnitId: { in: realmIds } },
         include: {
-          realm: { include: { unit: { include: { translations: true } } } },
+          realm: { include: { translations: true } },
         },
       });
 
@@ -50,7 +50,7 @@ export async function getTagContext(unitId: string, userId?: string) {
         if (!grouped.has(key)) {
           grouped.set(key, {
             realmName:
-              rtu.realm?.unit?.translations?.[0]?.title ?? key,
+              rtu.realm?.translations?.[0]?.title ?? key,
             tags: [],
           });
         }

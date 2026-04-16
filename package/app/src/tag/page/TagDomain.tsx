@@ -12,7 +12,7 @@ export function TagDomainPage() {
     withTitleMatch?.params.unitId ?? baseMatch?.params.unitId ?? "";
   const title = withTitleMatch?.params.title;
   const { data, isLoading, error } = useQuery(
-    tagQueries.list({ domainId: unitId }),
+    tagQueries.list({ unitId }),
   );
   if (isLoading) {
     return (
@@ -35,7 +35,7 @@ export function TagDomainPage() {
   return (
     <div className="w-11/12 mx-auto mt-10">
       <AccentBarWithText text={title ?? `域（${unitId}）`} />
-      <TagWrapper filters={{ domainId: unitId }} mode="flat" />
+      <TagWrapper filters={{ unitId }} mode="flat" />
     </div>
   );
 }

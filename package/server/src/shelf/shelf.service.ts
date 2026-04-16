@@ -105,7 +105,7 @@ export class ShelfService {
     const translationData = translations?.length
       ? translations
       : title
-        ? [{ language: "en", title }]
+        ? [{ language: "en" as const, title, subtitle: undefined, summary: undefined, description: undefined }]
         : [];
 
     const unit = await prisma.unit.create({
