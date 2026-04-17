@@ -25,6 +25,7 @@ export * from "./slug";
 export * from "./shelf";
 export * from "./tag";
 export * from "./token";
+export * from "./translation-group";
 export * from "./unit";
 export * from "./upload";
 export * from "./user";

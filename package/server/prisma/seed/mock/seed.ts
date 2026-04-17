@@ -14,7 +14,10 @@ import { seedEchoKV } from "#/prisma/seed/mock/echokv";
 import { seedEngagement } from "#/prisma/seed/mock/engagement";
 import { seedGames } from "#/prisma/seed/mock/games";
 import { seedMedia } from "#/prisma/seed/mock/media";
-import { seedPostsForWorks } from "#/prisma/seed/mock/posts";
+import {
+  seedPostsForWorks,
+  seedWikiTranslationGroups,
+} from "#/prisma/seed/mock/posts";
 import { seedRealms } from "#/prisma/seed/mock/realms";
 import { seedScores } from "#/prisma/seed/mock/scores";
 import { seedShelves } from "#/prisma/seed/mock/shelves";
@@ -93,6 +96,16 @@ async function main() {
   done = stepTimer("Step 7: Posts");
   const posts = await seedPostsForWorks(prisma, allWorks, users, scoreEntries);
   console.log(`[Seed]   ${posts.length} posts`);
+  done();
+
+  // ── STEP 7b: Wiki translation groups ──────────────
+  done = stepTimer("Step 7b: Wiki translation groups");
+  const wikiGroup = await seedWikiTranslationGroups(prisma, users);
+  if (wikiGroup) {
+    console.log(
+      `[Seed]   1 wiki translation group with ${wikiGroup.postIds.length} parallel posts`,
+    );
+  }
   done();
 
   // ── STEP 8: Shelves (needs review posts) ──────────

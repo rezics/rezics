@@ -22,6 +22,7 @@ import { sessionApi } from "./session";
 import { statsAdminApi } from "./stats";
 import { tagApi } from "./tag";
 import { tokenApi } from "./token";
+import { translationGroupApi } from "./translation-group";
 import { unitApi } from "./unit";
 import { uploadApi } from "./upload";
 import { userApi, userBriefApi } from "./user";
@@ -173,6 +174,7 @@ app
   .use(meiliApi)
   .use(unitApi)
   .use(tagApi)
+  .use(translationGroupApi)
   .use(scoreApi)
   .use(internalApi)
   .use(reactionWriteApi)

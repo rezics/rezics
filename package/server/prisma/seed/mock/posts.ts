@@ -453,3 +453,100 @@ async function seedTreePostsForTarget(
 
   return posts;
 }
+
+// Deterministic uuidv7-shaped ids (version nibble 7) so reseeds are stable.
+const WIKI_GROUP_ID = "01910000-0000-7000-8000-000000000001";
+const WIKI_POST_ZH_ID = "01910000-0000-7000-8000-000000001001";
+const WIKI_POST_EN_ID = "01910000-0000-7000-8000-000000001002";
+const WIKI_POST_JA_ID = "01910000-0000-7000-8000-000000001003";
+
+const WIKI_POSTS: { id: string; language: string; title: string; body: string }[] = [
+  {
+    id: WIKI_POST_ZH_ID,
+    language: "zh-hant",
+    title: "Rezics 是甚麼",
+    // MOCK: seeded wiki body for the Traditional Chinese variant.
+    body: "Rezics 是一個讓不同語言版本的維基條目並列共存的平台。",
+  },
+  {
+    id: WIKI_POST_EN_ID,
+    language: "en",
+    title: "What is Rezics",
+    // MOCK: seeded wiki body for the English variant.
+    body: "Rezics keeps each language's wiki page as its own first-class post and links them as parallel translations.",
+  },
+  {
+    id: WIKI_POST_JA_ID,
+    language: "ja",
+    title: "Rezics とは",
+    // MOCK: seeded wiki body for the Japanese variant.
+    body: "Rezics は、各言語のウィキ記事を独立した投稿として扱い、並列翻訳としてつなげるプラットフォームです。",
+  },
+];
+
+/**
+ * Seed at least one parallel-translation wiki POST group (zh-hant / en / ja).
+ * Idempotent: skipped if the well-known group id already exists.
+ */
+export async function seedWikiTranslationGroups(
+  prisma: PrismaClient,
+  users: CreatedUser[],
+): Promise<{ groupId: string; postIds: string[] } | null> {
+  if (users.length === 0) return null;
+
+  const existing = await prisma.translationGroup.findUnique({
+    where: { id: WIKI_GROUP_ID },
+    select: { id: true },
+  });
+  if (existing) {
+    return { groupId: WIKI_GROUP_ID, postIds: WIKI_POSTS.map((p) => p.id) };
+  }
+
+  const author = users[0]!;
+
+  await prisma.$transaction(async (tx) => {
+    await tx.translationGroup.create({
+      data: {
+        id: WIKI_GROUP_ID,
+        supportedLanguages: WIKI_POSTS.map((p) => p.language),
+      },
+    });
+
+    for (const p of WIKI_POSTS) {
+      await tx.unit.create({
+        data: {
+          id: p.id,
+          type: UnitType.POST,
+          userId: author.unitId,
+          status: UnitStatus.PUBLISHED,
+          defaultLanguage: p.language,
+          translationGroupId: WIKI_GROUP_ID,
+          publishedAt: new Date(),
+          post: {
+            create: {
+              authorUserId: author.unitId,
+              kind: PostKind.POST,
+              body: p.body,
+              depth: 0,
+            },
+          },
+          translations: {
+            create: {
+              language: p.language,
+              title: p.title,
+            },
+          },
+          supportLanguages: {
+            create: {
+              language: p.language,
+              isPrimary: true,
+              sortOrder: 0,
+            },
+          },
+        },
+      });
+    }
+  });
+
+  return { groupId: WIKI_GROUP_ID, postIds: WIKI_POSTS.map((p) => p.id) };
+}

@@ -120,6 +120,7 @@ export const baseUnitSchema = t.Object({
   workUnitId: t.Optional(t.Nullable(t.String())),
   defaultLanguage: t.Optional(t.Nullable(languageSchema)),
   isLanguageNeutral: t.Optional(t.Boolean()),
+  translationGroupId: t.Optional(t.Nullable(t.String())),
   status: t.Optional(t.String()),
   visibility: t.Optional(t.String()),
   nsfw: t.Optional(t.Boolean()),

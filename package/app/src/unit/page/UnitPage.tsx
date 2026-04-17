@@ -1,5 +1,9 @@
 import { Avatar, Chip, Paper, Tooltip, Typography } from "@mui/material";
 import { unitDetailQuery } from "@rezics/api/unit/unit";
+import {
+  useAttachTranslation,
+  useTranslationGroupSiblings,
+} from "@rezics/api/translation-group";
 import { MarkdownContent } from "@rezics/ui/composite/content/MarkdownContent.tsx";
 import { AccentBar } from "@rezics/ui/primitive/decorative/AccentBar.tsx";
 import { MUILink } from "@rezics/ui/primitive/link/MUILink.tsx";
@@ -7,6 +11,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { QueryErrorDisplay } from "@/core/component/QueryErrorDisplay";
 import { unitRoute } from "@/router";
+import { PostLanguageSwitcher } from "../component/PostLanguageSwitcher";
 
 function formatMetadataValue(value: unknown): string {
   if (value === null || value === undefined) return "-";
@@ -55,6 +60,28 @@ export function UnitPage() {
   const title = primaryTranslation?.title;
   const content = primaryTranslation?.description;
   const metadataEntries = Object.entries(unit.extra ?? {});
+
+  const isPost = unit.type === "POST";
+  const groupId = unit.translationGroupId ?? null;
+  const siblingsQuery = useTranslationGroupSiblings(
+    isPost && groupId ? unit.id : null,
+  );
+  const attach = useAttachTranslation();
+  // MOCK: client-side gate until permissions are finalized for translation attach.
+  const canAddTranslation = isPost;
+  const handleAddTranslation = () => {
+    const lang = window.prompt(
+      t(
+        "post.add_translation_prompt",
+        "New translation language code (e.g. ja, en, zh-hant)",
+      ) ?? "",
+    );
+    if (!lang) return;
+    attach.mutate({
+      unitId: unit.id,
+      input: { language: lang as never, body: "" },
+    });
+  };
 
   return (
     <div className="w-11/12 max-w-4xl mx-auto mt-10 mb-10">
@@ -140,6 +167,21 @@ export function UnitPage() {
               </div>
             )}
           </div>
+        </div>
+      )}
+
+      {/* ANCHOR Translation switcher (POST only when grouped) */}
+      {isPost && groupId && (
+        <div className="mt-6">
+          <PostLanguageSwitcher
+            currentUnitId={unit.id}
+            currentLanguage={unit.defaultLanguage ?? null}
+            supportedLanguages={siblingsQuery.data?.supportedLanguages ?? []}
+            siblings={siblingsQuery.data?.siblings ?? []}
+            isLoading={siblingsQuery.isLoading}
+            canAddTranslation={canAddTranslation}
+            onAddTranslation={handleAddTranslation}
+          />
         </div>
       )}
 

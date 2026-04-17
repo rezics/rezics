@@ -14,6 +14,7 @@ export function mapUnitToDTO(unit: UnitWithRelations): UnitDTO {
     workUnitId: unit.workUnitId ?? undefined,
     defaultLanguage: unit.defaultLanguage ?? undefined,
     isLanguageNeutral: unit.isLanguageNeutral,
+    translationGroupId: unit.translationGroupId ?? undefined,
     status: unit.status,
     visibility: unit.visibility,
     nsfw: unit.nsfw,

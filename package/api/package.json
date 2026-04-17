@@ -26,6 +26,10 @@
       "types": "./src/hooks/index.ts",
       "default": "./src/hooks/index.ts"
     },
+    "./translation-group": {
+      "types": "./src/translation-group/index.ts",
+      "default": "./src/translation-group/index.ts"
+    },
     "./*": {
       "types": "./src/*.ts",
       "default": "./src/*.ts"
