@@ -245,7 +245,18 @@ function scanRoutes(files: string[]): Violation[] {
       const start = m.index;
       const precedingBlock = content.slice(Math.max(0, start - 120), start);
       if (precedingBlock.includes("@convention:root-list-ok")) continue;
-      const handlerWindow = content.slice(start, start + 800);
+      // Scope the handler window to the end of THIS Elysia verb call so we do
+      // not bleed into the next handler. End at whichever comes first:
+      // (a) the next `.get|post|put|patch|delete|options|use|onError|derive(` call,
+      // (b) a semicolon that closes a statement chain,
+      // (c) 2000 characters as a hard fallback.
+      const rest = content.slice(start);
+      const NEXT_VERB_RE =
+        /\.(get|post|put|patch|delete|options|use|onError|derive|decorate|state|resolve|guard|group)\s*\(/g;
+      NEXT_VERB_RE.lastIndex = 1; // skip the current `.get|post` we just matched
+      const next = NEXT_VERB_RE.exec(rest);
+      const end = Math.min(rest.length, next ? next.index : 2000);
+      const handlerWindow = rest.slice(0, end);
       const returnsCollection =
         /items\s*:/.test(handlerWindow) ||
         /ListResponse/.test(handlerWindow) ||
@@ -274,7 +285,14 @@ function isLikelyPlural(name: string): boolean {
 
 function singularOfAllowlisted(name: string): string | null {
   for (const plural of PLURAL_CONTAINER_ALLOWLIST) {
-    if (plural === `${name}s` || plural === `${name}es`) return plural;
+    if (plural === `${name}s`) return plural;
+    // `+es` only applies when the singular ends in s, x, z, ch, or sh
+    // (e.g. "boxes" → "box", not "stats" → "stat" nor "states" → "stat")
+    if (
+      plural === `${name}es` &&
+      /(s|x|z|ch|sh)$/.test(name)
+    )
+      return plural;
     if (plural.endsWith("ies") && plural.slice(0, -3) + "y" === name) return plural;
   }
   return null;
