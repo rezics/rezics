@@ -34,7 +34,7 @@ export { emoji } from "./emoji/index";
 export type { MentionConfig, MentionItem } from "./mention/index";
 export { mention } from "./mention/index";
 export {
-  createNovelRenderer,
+  createRezicsRenderer,
   novelModePlugin,
   preserveFormattingPlugin,
 } from "./preview/index";

@@ -1,11 +1,11 @@
 export { addCopyButtons } from "./copyButton";
 export { highlightCode } from "./highlight";
 export type {
-  NovelRendererOptions,
   PreserveFormatOptions,
+  RezicsRendererOptions,
 } from "./preserveFormatting";
 export {
-  createNovelRenderer,
+  createRezicsRenderer,
   emptyLinesPlugin,
   novelModePlugin,
   preserveFormattingPlugin,

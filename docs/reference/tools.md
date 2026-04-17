@@ -2,6 +2,10 @@
 
 Introduce tools we used in this library
 
+## claude code
+
+claude --model claude-opus-4-6
+
 ## knip
 
 tool to analysis unused packages

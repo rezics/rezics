@@ -9,7 +9,7 @@ import { mention } from "../markdown/mention/index";
 import { addCopyButtons } from "../markdown/preview/copyButton";
 import { highlightCode } from "../markdown/preview/highlight";
 import type { PreviewConfig } from "../markdown/preview/index";
-import { createNovelRenderer } from "../markdown/preview/index";
+import { createRezicsRenderer } from "../markdown/preview/index";
 import { EditorContext } from "../react/context";
 import { ResizableWrapper } from "../react/ResizableWrapper";
 import { useEditor } from "../react/useEditor";
@@ -31,7 +31,7 @@ function createMarkdownRenderer(config?: PreviewConfig) {
       ? undefined
       : (config?.highlight ?? highlightCode);
 
-  return createNovelRenderer({ html: true, highlight: highlighter });
+  return createRezicsRenderer({ html: true, highlight: highlighter });
 }
 
 export function MarkdownEditor({

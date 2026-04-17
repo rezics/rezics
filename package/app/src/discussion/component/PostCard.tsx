@@ -1,5 +1,6 @@
 import { Avatar, Box, Typography } from "@mui/material";
 import type { PostDTO } from "@rezics/contract";
+import { MarkdownContent } from "@rezics/ui/composite/content/MarkdownContent.tsx";
 import { Link } from "@rezics/ui/primitive/link/Link.tsx";
 import type React from "react";
 
@@ -38,9 +39,10 @@ export const PostCard: React.FC<PostCardProps> = ({ post, depth = 0, onReply }) 
             </Typography>
           </Box>
 
-          <Typography variant="body2" className="whitespace-pre-wrap">
-            {post.body}
-          </Typography>
+          <MarkdownContent
+            content={post.body ?? ""}
+            className="markdown-body text-sm"
+          />
 
           <Box className="flex items-center gap-3 mt-1">
             <Typography variant="caption" color="text.secondary">

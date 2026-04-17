@@ -1,8 +1,8 @@
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import TextField from "@mui/material/TextField";
 import { useCreatePostMutation } from "@rezics/api/post/post";
 import { PostKind } from "@rezics/contract";
+import { RezicsMarkdownEditor } from "@rezics/ui/editor";
 import type React from "react";
 import { useState } from "react";
 
@@ -16,7 +16,6 @@ interface InlinePostFormProps {
 export const InlinePostForm: React.FC<InlinePostFormProps> = ({
   targetUnitId,
   parentPostUnitId,
-  placeholder = "Start a discussion...",
   onSuccess,
 }) => {
   const [text, setText] = useState("");
@@ -42,15 +41,11 @@ export const InlinePostForm: React.FC<InlinePostFormProps> = ({
 
   return (
     <Box>
-      <TextField
-        placeholder={placeholder}
+      <RezicsMarkdownEditor
         value={text}
-        onChange={(e) => setText(e.target.value)}
-        multiline
-        minRows={2}
-        maxRows={6}
-        variant="standard"
-        fullWidth
+        onChange={setText}
+        preview={false}
+        resize={{ height: 150, minHeight: 100, maxHeight: 400 }}
       />
       <Box display="flex" justifyContent="flex-end" mt={1}>
         <Button

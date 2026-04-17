@@ -102,3 +102,31 @@ export type UserSettings = (typeof userSettingsSchema)["static"];
 export const updateUserSettingsSchema = t.Partial(userSettingsSchema);
 
 export type UpdateUserSettings = (typeof updateUserSettingsSchema)["static"];
+
+// ============================================================
+// USER BRIEF (lightweight — card/mention contexts)
+// ============================================================
+
+export const userBriefSchema = t.Object({
+  unitId: t.String(),
+  name: t.String(),
+  slug: t.Optional(t.String()),
+  bio: t.Optional(t.String()),
+  avatar: t.Optional(t.String()),
+});
+
+export type UserBrief = (typeof userBriefSchema)["static"];
+
+export const userBriefBatchRequestSchema = t.Object({
+  unitIds: t.Array(t.String(), { maxItems: 200 }),
+});
+
+export type UserBriefBatchRequest =
+  (typeof userBriefBatchRequestSchema)["static"];
+
+export const userBriefBatchResponseSchema = t.Object({
+  users: t.Array(userBriefSchema),
+});
+
+export type UserBriefBatchResponse =
+  (typeof userBriefBatchResponseSchema)["static"];

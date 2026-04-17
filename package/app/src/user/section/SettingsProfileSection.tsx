@@ -10,6 +10,7 @@ import SaveIcon from '@mui/icons-material/Save';
 import { userQueries } from '@rezics/api/user/user.queries';
 import { useUpdateMeMutation } from '@rezics/api/user/user.mutations';
 import type { UpdateUser } from '@rezics/contract';
+import { RezicsMarkdownEditor } from '@rezics/ui/editor';
 import { useQuery } from '@tanstack/react-query';
 import { type FC, useEffect, useState } from 'react';
 import { SettingsSection } from '@/user/component/SettingsSection';
@@ -136,16 +137,19 @@ export const SettingsProfileSection: FC = () => {
             placeholder="A short bio about yourself"
           />
 
-          <TextField
-            fullWidth
-            label="Description"
-            value={formData.description}
-            onChange={(e) => handleChange('description', e.target.value)}
-            variant="standard"
-            multiline
-            rows={4}
-            placeholder="Tell others more about yourself"
-          />
+          <div>
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              className="mb-2 block"
+            >
+              Description
+            </Typography>
+            <RezicsMarkdownEditor
+              value={formData.description ?? ''}
+              onChange={(value) => handleChange('description', value)}
+            />
+          </div>
         </div>
       </SettingsSection>
 

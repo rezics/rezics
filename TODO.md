@@ -1,3 +1,11 @@
+## Section 1
+- [x] zone-and-unified-search
+- [ ] universal-markdown-and-user-brief
+- [ ] book-detail-restructure
+- [ ] tag-interaction-system
+- [ ] seed-restructure-and-scale
+
+## Section 2
 - [ ] 重新制作章节编辑器，功能完整，美观好用的组件
 - [ ] 我需要整理spc规范嘛？
 - [ ] 我需要做到auth-store规范，如果 access token 不存在，则不主动请求任何 内容，所有请求都依赖于auth-store

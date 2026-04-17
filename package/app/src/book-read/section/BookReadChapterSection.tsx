@@ -1,5 +1,5 @@
 import { chapterDetailQuery } from "@rezics/api/chapter/chapter";
-import { createNovelRenderer } from "@rezics/editor/markdown";
+import { createRezicsRenderer } from "@rezics/editor/markdown";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { QueryErrorDisplay } from "@/core/component/QueryErrorDisplay";
@@ -11,7 +11,7 @@ export const BookReadChapterPage: React.FC = () => {
     chapterDetailQuery(chapterId),
   );
 
-  const md = createNovelRenderer();
+  const md = createRezicsRenderer();
   const chapterHtml = md.render(data?.content || "");
 
   if (isPending) return <div>Loading...</div>;

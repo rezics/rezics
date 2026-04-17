@@ -1,7 +1,7 @@
-import { createNovelRenderer } from "@rezics/editor/markdown";
+import { createRezicsRenderer } from "@rezics/editor/markdown";
 import { useMemo } from "react";
 
-const md = createNovelRenderer({ html: false });
+const md = createRezicsRenderer({ html: false });
 
 interface TxtRendererProps {
   raw: string;

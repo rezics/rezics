@@ -4,6 +4,7 @@ import type { ContentSearchDocument } from "@rezics/contract";
 import { Link } from "@rezics/ui/primitive/link/Link.tsx";
 import { useQuery } from "@tanstack/react-query";
 import type { FC } from "react";
+import { DescriptionBox } from "@/user/component/DescriptionBox";
 import { useProfileContext } from "@/user/component/ProfileLayout";
 
 export const ProfileOverviewPage: FC = () => {
@@ -69,6 +70,11 @@ export const ProfileOverviewPage: FC = () => {
           to={`/user/${unitId}/followers?filter=following`}
         />
       </div>
+
+      {/* DESCRIPTION.md */}
+      {user.description && user.description.trim() !== "" && (
+        <DescriptionBox content={user.description} />
+      )}
 
       {/* Pinned Items */}
       <div>

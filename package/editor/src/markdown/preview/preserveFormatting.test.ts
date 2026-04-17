@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import MarkdownIt from "markdown-it";
 import {
-  createNovelRenderer,
+  createRezicsRenderer,
   emptyLinesPlugin,
   novelModePlugin,
   preserveFormattingPlugin,
@@ -113,23 +113,23 @@ describe("preserveFormattingPlugin", () => {
   });
 });
 
-// ── createNovelRenderer ─────────────────────────────────────────────
+// ── createRezicsRenderer ─────────────────────────────────────────────
 
-describe("createNovelRenderer", () => {
+describe("createRezicsRenderer", () => {
   test("returns a working MarkdownIt instance", () => {
-    const md = createNovelRenderer();
+    const md = createRezicsRenderer();
     const html = md.render("Hello\nWorld");
     expect(html).toContain("<br>");
   });
 
   test("respects html option", () => {
-    const md = createNovelRenderer({ html: true });
+    const md = createRezicsRenderer({ html: true });
     const html = md.render("<em>test</em>");
     expect(html).toContain("<em>test</em>");
   });
 
   test("html disabled by default", () => {
-    const md = createNovelRenderer();
+    const md = createRezicsRenderer();
     const html = md.render("<em>test</em>");
     expect(html).not.toContain("<em>test</em>");
   });

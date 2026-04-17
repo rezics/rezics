@@ -6,7 +6,7 @@ export interface PreserveFormatOptions {
   preserveEmptyLines?: boolean;
 }
 
-export interface NovelRendererOptions {
+export interface RezicsRendererOptions {
   html?: boolean;
   linkify?: boolean;
   typographer?: boolean;
@@ -145,8 +145,8 @@ export function preserveFormattingPlugin(
 }
 
 /** Returns a fully configured `MarkdownIt` instance for novel/prose content. */
-export function createNovelRenderer(
-  options?: NovelRendererOptions,
+export function createRezicsRenderer(
+  options?: RezicsRendererOptions,
 ): MarkdownIt {
   return new MarkdownIt({
     html: options?.html ?? false,

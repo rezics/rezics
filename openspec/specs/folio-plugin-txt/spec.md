@@ -43,7 +43,7 @@ Each `FolioNode` produced by `splitTxt()` SHALL have a `fetch()` that returns `P
 
 ### Requirement: Txt renderer plugin
 
-The txt plugin SHALL register a renderer for `contentTypes: ['txt']`. The renderer SHALL use `createNovelRenderer()` from `@rezics/editor/markdown` to render the text with novel mode (line break preservation, empty line preservation, space preservation). The output SHALL be themed according to the current `FolioState` (fontSize, lineHeight, theme).
+The txt plugin SHALL register a renderer for `contentTypes: ['txt']`. The renderer SHALL use `createRezicsRenderer()` from `@rezics/editor/markdown` to render the text with novel mode (line break preservation, empty line preservation, space preservation). The output SHALL be themed according to the current `FolioState` (fontSize, lineHeight, theme).
 
 #### Scenario: Plain text rendering
 - **WHEN** content with `contentType: 'txt'` is rendered

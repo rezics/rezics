@@ -24,7 +24,7 @@ import { tagApi } from "./tag";
 import { tokenApi } from "./token";
 import { unitApi } from "./unit";
 import { uploadApi } from "./upload";
-import { userApi } from "./user";
+import { userApi, userBriefApi } from "./user";
 import { dmServerApi } from "./notify/dm.api";
 import { userBatchApi } from "./notify/user-batch.api";
 import { Prisma } from "#/prisma/client";
@@ -169,6 +169,7 @@ app
   .use(realmApi)
   .use(attributionApi)
   .use(userApi)
+  .use(userBriefApi)
   .use(meiliApi)
   .use(unitApi)
   .use(tagApi)
