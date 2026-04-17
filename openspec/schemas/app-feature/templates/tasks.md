@@ -4,9 +4,9 @@
 
 ## 2. Implementation
 
-- [ ] 2.1 Update model layer
-- [ ] 2.2 Update hooks/state wiring
-- [ ] 2.3 Update component/section/page composition
+- [ ] 2.1 Update models layer
+- [ ] 2.2 Update hooks/states wiring
+- [ ] 2.3 Update components/sections/pages composition
 - [ ] 2.4 Export via index.ts only
 
 ## 3. Validation

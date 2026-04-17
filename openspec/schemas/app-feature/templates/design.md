@@ -4,19 +4,19 @@
 
 ## Layered Design
 
-### model
+### models
 
 ### hooks
 
-### util
+### utils
 
-### state
+### states
 
-### component
+### components
 
-### section
+### sections
 
-### page
+### pages
 
 ### index.ts
 

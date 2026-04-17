@@ -65,15 +65,15 @@ Types are defined once in `@rezics/contract` using Typebox and shared across fro
 ### Frontend Feature Structure
 
 Features in `package/app` follow a layered architecture (see `package/app/docs/feature standard.md`):
-- `model/` — Pure business types and selectors (no React dependencies)
+- `models/` — Pure business types and selectors (no React dependencies)
 - `hooks/` — React logic and side effects
-- `state/` — Jotai atoms or Zustand stores
-- `component/` — Pure UI components
-- `section/` — Business sections (wire state into components)
-- `page/` — Thin route-level entry points
+- `states/` — Jotai atoms or Zustand stores
+- `components/` — Pure UI components
+- `sections/` — Business sections (wire state into components)
+- `pages/` — Thin route-level entry points
 - `index.ts` — The only public export for the feature
 
-**Key rule:** `model` must never import from `hooks` or `state`. External consumers must go through `index.ts`.
+**Key rule:** `models` must never import from `hooks` or `states`. External consumers must go through `index.ts`.
 
 ### Two Separate Databases
 

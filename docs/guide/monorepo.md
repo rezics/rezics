@@ -6,10 +6,10 @@ This project uses [Bun workspaces](https://bun.sh/docs/install/workspaces) with 
 
 ```json
 {
-  "workspaces": ["packages/**", "!packages/**/test/**", "!packages/**/template/**"]
+  "workspaces": ["package/**", "!package/**/test/**", "!package/**/template/**"]
 }
 ```
 
-`packages/**` uses tree-matching (recursive glob), so nested packages are discovered automatically.
+`package/**` uses tree-matching (recursive glob), so nested packages are discovered automatically.
 
 See Bun's [glob pattern docs](https://bun.com/docs/runtime/glob#supported-glob-patterns) for details.

@@ -135,17 +135,17 @@ This pattern is deliberately generic — it can be reused for realm references, 
 
 ```
 zone/
-  model/        — ZoneDTO types, filter merge utilities
+  models/       — ZoneDTO types, filter merge utilities
   hooks/        — useZone, useZoneFilters
-  state/        — zone config state (fetched zone data)
-  component/    — zone-specific UI atoms (lifecycle badge, etc.)
-  section/      — zone-specific business blocks
-  template/     — homepage templates (book.tsx, game.tsx, default.tsx)
-  page/         — ZoneHomePage, ZoneSearchPage (thin route entry points)
+  states/       — zone config state (fetched zone data)
+  components/   — zone-specific UI atoms (lifecycle badge, etc.)
+  sections/     — zone-specific business blocks
+  templates/    — homepage templates (book.tsx, game.tsx, default.tsx)
+  pages/        — ZoneHomePage, ZoneSearchPage (thin route entry points)
   index.ts      — public exports
 ```
 
-The `template/` layer sits between `section/` and `page/` conceptually: it composes sections into a configurable layout, but is not a route entry point itself. Pages select and render templates.
+The `templates/` layer sits between `sections/` and `pages/` conceptually: it composes sections into a configurable layout, but is not a route entry point itself. Pages select and render templates.
 
 ## Risks / Trade-offs
 

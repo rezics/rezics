@@ -14,7 +14,7 @@ artifacts:
       - **Why**: problem/opportunity and user impact.
       - **What Changes**: high-level behavior and UX changes.
       - **Feature Scope**: target feature name and affected layer folders:
-        - `model`, `hooks`, `util`, `state`, `component`, `section`, `page`, `index.ts`
+        - `models`, `hooks`, `utils`, `states`, `components`, `sections`, `pages`, `index.ts`
       - **Package Scope**: explicitly list affected packages (e.g. `package/app`, `package/ui`, `package/api`).
       - **Impact**: compatibility, migration, and operational impact.
 
@@ -66,17 +66,17 @@ artifacts:
       - **Rollout / Migration** (if applicable)
 
       Layered Design MUST map changes to:
-      - `model`: pure business entities/rules/selectors, no React/hooks/state imports.
+      - `models`: pure business entities/rules/selectors, no React/hooks/state imports.
       - `hooks`: feature-local React side effects and event handling.
-      - `util`: feature-local technical helpers (formatting/parsing), not business rules.
-      - `state`: jotai/zustand state containers.
-      - `component`: presentational, side-effect free UI building blocks.
-      - `section`: business composition layer wiring state/hooks/components.
-      - `page`: thin route entry assembly.
+      - `utils`: feature-local technical helpers (formatting/parsing), not business rules.
+      - `states`: jotai/zustand state containers.
+      - `components`: presentational, side-effect free UI building blocks.
+      - `sections`: business composition layer wiring state/hooks/components.
+      - `pages`: thin route entry assembly.
       - `index.ts`: only public feature export.
 
       Dependency constraints:
-      - Do not let `model` depend on `hooks` or `state`.
+      - Do not let `models` depend on `hooks` or `states`.
       - Prefer internal relative imports within the same feature for cohesive modules.
       - Use root-level aliases only for app/platform-level shared modules.
       - External modules must import the feature via `index.ts` only.
@@ -102,7 +102,7 @@ artifacts:
       - Keep tasks small, verifiable, and ordered by dependency.
 
       Task coverage requirements:
-      - Include explicit tasks for each affected layer folder (`model/hooks/util/state/component/section/page/index.ts`).
+      - Include explicit tasks for each affected layer folder (`models/hooks/utils/states/components/sections/pages/index.ts`).
       - Include tasks to enforce import boundaries and layering constraints.
       - Include targeted validation steps in tasks (lint, typecheck, package-level tests/build).
       - If public exports change, include migration/update steps for call sites.

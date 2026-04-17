@@ -66,14 +66,14 @@
 
 ### CI (Pull Requests)
 
-Triggers on PRs to `master`. Runs:
+Triggers on PRs to `dev`. Runs:
 - `bun run knip` -- detect unused exports/dependencies
 - `bun run check:runtime-env` -- validate env isolation
 
 ### CD (Deploy on Push to `dev`)
 
 ```
-push to master
+push to dev
     │
     ├── build-frontend  ─┐
     ├── build-server    ─┤  (parallel)

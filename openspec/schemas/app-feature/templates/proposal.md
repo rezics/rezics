@@ -8,13 +8,13 @@
 
 - Feature name:
 - Affected layers:
-  - model
+  - models
   - hooks
-  - util
-  - state
-  - component
-  - section
-  - page
+  - utils
+  - states
+  - components
+  - sections
+  - pages
   - index.ts
 
 ## Package Scope

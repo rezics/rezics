@@ -85,13 +85,13 @@ The zone feature SHALL reside in `package/app/src/zone/` and follow the standard
 
 | Layer        | Purpose                                              |
 |--------------|------------------------------------------------------|
-| `model/`     | ZoneDTO types, filter merge utilities                |
-| `hooks/`     | useZone, useZoneFilters                              |
-| `state/`     | Zone config state                                    |
-| `component/` | Zone-specific UI atoms                               |
-| `section/`   | Zone-specific business blocks                        |
-| `template/`  | Homepage templates, named by slug                    |
-| `page/`      | ZoneHomePage, ZoneSearchPage (thin route entries)     |
+| `models/`      | ZoneDTO types, filter merge utilities                |
+| `hooks/`       | useZone, useZoneFilters                              |
+| `states/`      | Zone config state                                    |
+| `components/`  | Zone-specific UI atoms                               |
+| `sections/`    | Zone-specific business blocks                        |
+| `templates/`   | Homepage templates, named by slug                    |
+| `pages/`       | ZoneHomePage, ZoneSearchPage (thin route entries)     |
 | `index.ts`   | Public exports                                       |
 
 #### Scenario: External consumer imports from zone feature
