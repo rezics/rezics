@@ -28,13 +28,9 @@ export interface SeedCounts {
   books: number;
   games: number;
   media: number;
-  reviewsPerWork: number;
-  treePostsPerWork: number;
-  quotesPerWork: number;
-  remarksPerWork: number;
   shelves: number;
   realms: number;
-  chaptersPerBook: number;
+  zones: number;
   personEntities: number;
   organizationEntities: number;
   followsPerUser: number;

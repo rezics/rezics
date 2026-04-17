@@ -2,7 +2,7 @@
 - [x] zone-and-unified-search
 - [x] universal-markdown-and-user-brief
 - [x] book-detail-restructure
-- [ ] tag-interaction-system
+- [x] tag-interaction-system
 - [ ] seed-restructure-and-scale
 
 ## Section 2

@@ -44,6 +44,7 @@ export async function seedTags(
         unitId: t.id,
         language: tr.language,
         title: tr.title,
+        description: tr.description,
       })),
     ),
   });

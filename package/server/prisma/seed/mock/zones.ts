@@ -1,0 +1,160 @@
+import { randomUUID } from "node:crypto";
+import { faker } from "@faker-js/faker";
+import { DEFAULT_LANGUAGE } from "@rezics/contract";
+import type { Prisma, PrismaClient } from "#/prisma/generated/client.js";
+import { UnitStatus, UnitType } from "#/prisma/generated/client.js";
+import { generateTranslations } from "./generators.js";
+import type { CreatedUnit } from "./types.js";
+import { pickN, randomBoolean } from "./utils.js";
+
+const ZONE_TEMPLATES = [
+  "featured-carousel",
+  "trending-grid",
+  "seasonal-banner",
+  "topic-spotlight",
+  "new-releases",
+] as const;
+
+const ZONE_STYLING_PRESETS: Prisma.InputJsonValue[] = [
+  { layout: "hero", backgroundColor: "#0f172a", textColor: "#f8fafc" },
+  { layout: "grid", columns: 4 },
+  { layout: "carousel", autoplay: true, interval: 5000 },
+  { layout: "banner", backgroundImageUrl: "https://picsum.photos/seed/zone/1600/400" },
+  { theme: "seasonal", accentColor: "#f97316" },
+  { theme: "dark", accentColor: "#6366f1" },
+];
+
+const WORK_TYPE_FILTERS = [UnitType.BOOK, UnitType.GAME, UnitType.MEDIA];
+
+interface ZoneTemporalState {
+  startsAt: Date | null;
+  endsAt: Date | null;
+}
+
+function pickTemporalState(): ZoneTemporalState {
+  const r = Math.random();
+  if (r < 0.4) return { startsAt: null, endsAt: null };
+  if (r < 0.7) {
+    return {
+      startsAt: faker.date.past({ years: 1 }),
+      endsAt: faker.date.future({ years: 1 }),
+    };
+  }
+  if (r < 0.9) {
+    const startsAt = faker.date.future({ years: 1 });
+    const endsAt = faker.date.soon({ days: 180, refDate: startsAt });
+    return { startsAt, endsAt };
+  }
+  const endsAt = faker.date.past({ years: 1 });
+  const startsAt = faker.date.past({ years: 2, refDate: endsAt });
+  return { startsAt, endsAt };
+}
+
+function buildFilters(
+  template: (typeof ZONE_TEMPLATES)[number],
+  workIds: string[],
+  tagIds: string[],
+): Prisma.InputJsonValue {
+  const contentType = faker.helpers.arrayElement(WORK_TYPE_FILTERS);
+
+  switch (template) {
+    case "featured-carousel": {
+      const picks = workIds.length > 0 ? pickN(workIds, Math.min(8, workIds.length)) : [];
+      return { type: contentType, workIds: picks };
+    }
+    case "trending-grid":
+      return {
+        type: contentType,
+        sort: "trending",
+        since: faker.date.past({ years: 1 }).toISOString(),
+      };
+    case "seasonal-banner":
+      return {
+        season: faker.helpers.arrayElement(["spring", "summer", "autumn", "winter"]),
+        type: contentType,
+      };
+    case "topic-spotlight": {
+      const picks = tagIds.length > 0 ? pickN(tagIds, Math.min(3, tagIds.length)) : [];
+      return { type: contentType, tagIds: picks };
+    }
+    case "new-releases":
+      return {
+        type: contentType,
+        sort: "newest",
+        since: faker.date.recent({ days: 90 }).toISOString(),
+      };
+  }
+}
+
+/**
+ * Seed Zone units with varied templates, filters, styling, and temporal states.
+ */
+export async function seedZones(
+  prisma: PrismaClient,
+  total: number,
+  workIds: string[],
+  tagIds: string[],
+): Promise<CreatedUnit[]> {
+  console.log(`[Seed] Seeding ${total} zones...`);
+
+  const results: CreatedUnit[] = [];
+
+  // Ensure every template appears at least once
+  const templateSchedule: (typeof ZONE_TEMPLATES)[number][] = [];
+  for (let i = 0; i < total; i++) {
+    if (i < ZONE_TEMPLATES.length) {
+      templateSchedule.push(ZONE_TEMPLATES[i]!);
+    } else {
+      templateSchedule.push(faker.helpers.arrayElement(ZONE_TEMPLATES));
+    }
+  }
+
+  for (let i = 0; i < total; i++) {
+    const template = templateSchedule[i]!;
+    const translations = generateTranslations(UnitType.ZONE);
+    const { startsAt, endsAt } = pickTemporalState();
+    const styling = randomBoolean(0.6)
+      ? faker.helpers.arrayElement(ZONE_STYLING_PRESETS)
+      : null;
+    const filters = buildFilters(template, workIds, tagIds);
+
+    const id = randomUUID();
+    await prisma.unit.create({
+      data: {
+        id,
+        type: UnitType.ZONE,
+        status: UnitStatus.PUBLISHED,
+        defaultLanguage: DEFAULT_LANGUAGE,
+        publishedAt: faker.date.past({ years: 1 }),
+        zone: {
+          create: {
+            template,
+            filters,
+            styling: styling ?? undefined,
+            startsAt,
+            endsAt,
+          },
+        },
+        translations: {
+          create: translations.map((t) => ({
+            language: t.language,
+            title: t.title,
+            description: t.description,
+          })),
+        },
+        supportLanguages: {
+          create: translations.map((t, idx) => ({
+            language: t.language,
+            isPrimary: idx === 0,
+            sortOrder: idx,
+          })),
+        },
+      },
+      select: { id: true, type: true },
+    });
+
+    results.push({ id, type: UnitType.ZONE });
+  }
+
+  return results;
+}

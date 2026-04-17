@@ -1,7 +1,8 @@
 import { faker } from "@faker-js/faker";
 import { DEFAULT_LANGUAGE } from "@rezics/contract";
-import type { PrismaClient } from "#/prisma/generated/client.js";
+import type { Prisma, PrismaClient } from "#/prisma/generated/client.js";
 import { UnitStatus, UnitType } from "#/prisma/generated/client.js";
+import { flushAttributionsAndTags } from "./books.js";
 import {
   MEDIA_KIND_KEYS,
 } from "./data.js";
@@ -31,7 +32,10 @@ export async function seedMedia(
 ): Promise<CreatedUnit[]> {
   console.log(`[Seed] Seeding ${total} media...`);
 
-  return chunkedParallel(
+  const allAttributions: Prisma.AttributionCreateManyInput[] = [];
+  const allTagLinks: Prisma.UnitTagCreateManyInput[] = [];
+
+  const created = await chunkedParallel(
     Array.from({ length: total }),
     CHUNK_SIZE,
     async () => {
@@ -78,42 +82,30 @@ export async function seedMedia(
         select: { id: true, type: true },
       });
 
-      // Attributions + tags
-      const personAttributions = pickN(people, randomInt(1, 4)).map(
-        (p, i) => ({
+      for (const [i, p] of pickN(people, randomInt(1, 4)).entries()) {
+        allAttributions.push({
           unitId: unit.id,
           entityId: p.unitId,
           role: faker.helpers.arrayElement(MEDIA_PERSON_ROLES),
           sortOrder: i,
-        }),
-      );
-
-      const orgAttributions = pickN(organizations, randomInt(1, 2)).map(
-        (o, i) => ({
+        });
+      }
+      for (const [i, o] of pickN(organizations, randomInt(1, 2)).entries()) {
+        allAttributions.push({
           unitId: unit.id,
           entityId: o.unitId,
           role: faker.helpers.arrayElement(MEDIA_ORG_ROLES),
           sortOrder: i,
-        }),
-      );
-
-      const attributions = [...personAttributions, ...orgAttributions];
-
-      const tagLinks = pickN(tags, randomInt(1, 5)).map((t) => ({
-        unitId: unit.id,
-        tagUnitId: t.id,
-      }));
-
-      await Promise.all([
-        attributions.length > 0
-          ? prisma.attribution.createMany({ data: attributions })
-          : Promise.resolve(),
-        tagLinks.length > 0
-          ? prisma.unitTag.createMany({ data: tagLinks })
-          : Promise.resolve(),
-      ]);
+        });
+      }
+      for (const t of pickN(tags, randomInt(1, 5))) {
+        allTagLinks.push({ unitId: unit.id, tagUnitId: t.id });
+      }
 
       return unit;
     },
   );
+
+  await flushAttributionsAndTags(prisma, allAttributions, allTagLinks);
+  return created;
 }

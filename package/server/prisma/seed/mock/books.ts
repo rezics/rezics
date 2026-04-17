@@ -15,6 +15,7 @@ import {
   generateParagraph,
   generateTitle,
   pickN,
+  powerLaw,
   randomBoolean,
   randomInt,
 } from "./utils.js";
@@ -37,6 +38,9 @@ export async function seedBooks(
   tags: CreatedUnit[],
 ): Promise<CreatedUnit[]> {
   console.log(`[Seed] Seeding ${total} books...`);
+
+  const allAttributions: Prisma.AttributionCreateManyInput[] = [];
+  const allTagLinks: Prisma.UnitTagCreateManyInput[] = [];
 
   const created = await chunkedParallel(
     Array.from({ length: total }),
@@ -94,101 +98,163 @@ export async function seedBooks(
         select: { id: true, type: true },
       });
 
-      // Batch attributions + tags for this unit
-      const personAttributions = pickN(people, randomInt(1, 3)).map((p, i) => ({
-        unitId: unit.id,
-        entityId: p.unitId,
-        role: faker.helpers.arrayElement(BOOK_PERSON_ROLES),
-        sortOrder: i,
-      }));
-
-      const orgAttributions = pickN(organizations, randomInt(0, 2)).map((o, i) => ({
-        unitId: unit.id,
-        entityId: o.unitId,
-        role: faker.helpers.arrayElement(BOOK_ORG_ROLES),
-        sortOrder: i,
-      }));
-
-      const attributions = [...personAttributions, ...orgAttributions];
-
-      const tagLinks = pickN(tags, randomInt(1, 5)).map((t) => ({
-        unitId: unit.id,
-        tagUnitId: t.id,
-      }));
-
-      await Promise.all([
-        attributions.length > 0
-          ? prisma.attribution.createMany({ data: attributions })
-          : Promise.resolve(),
-        tagLinks.length > 0
-          ? prisma.unitTag.createMany({ data: tagLinks })
-          : Promise.resolve(),
-      ]);
+      for (const [i, p] of pickN(people, randomInt(1, 3)).entries()) {
+        allAttributions.push({
+          unitId: unit.id,
+          entityId: p.unitId,
+          role: faker.helpers.arrayElement(BOOK_PERSON_ROLES),
+          sortOrder: i,
+        });
+      }
+      for (const [i, o] of pickN(organizations, randomInt(0, 2)).entries()) {
+        allAttributions.push({
+          unitId: unit.id,
+          entityId: o.unitId,
+          role: faker.helpers.arrayElement(BOOK_ORG_ROLES),
+          sortOrder: i,
+        });
+      }
+      for (const t of pickN(tags, randomInt(1, 5))) {
+        allTagLinks.push({ unitId: unit.id, tagUnitId: t.id });
+      }
 
       return unit;
     },
   );
 
+  await flushAttributionsAndTags(prisma, allAttributions, allTagLinks);
+
   return created;
 }
+
+async function flushAttributionsAndTags(
+  prisma: PrismaClient,
+  attributions: Prisma.AttributionCreateManyInput[],
+  tagLinks: Prisma.UnitTagCreateManyInput[],
+): Promise<void> {
+  const BATCH = 500;
+  for (let i = 0; i < attributions.length; i += BATCH) {
+    await prisma.attribution.createMany({
+      data: attributions.slice(i, i + BATCH),
+      skipDuplicates: true,
+    });
+  }
+  for (let i = 0; i < tagLinks.length; i += BATCH) {
+    await prisma.unitTag.createMany({
+      data: tagLinks.slice(i, i + BATCH),
+      skipDuplicates: true,
+    });
+  }
+}
+
+export { flushAttributionsAndTags };
 
 /**
  * Create chapters for a book and return a nested tree structure.
  * Chapters are Unit(type=CHAPTER) + UnitTranslation. The tree is stored in BookIndex.
  */
+const CHAPTER_BATCH_THRESHOLD = 50;
+const CHAPTER_BATCH_SIZE = 500;
+
 export async function seedChaptersForBook(
   prisma: PrismaClient,
   // biome-ignore lint/correctness/noUnusedFunctionParameters: <bookUnitId>
   bookUnitId: string,
   bookUserId: string,
-  opts?: {
-    topLevelCount?: number;
-    minChildren?: number;
-    maxChildren?: number;
-  },
 ): Promise<ChapterTreeItem[]> {
-  const topLevelCount =
-    opts?.topLevelCount ?? faker.number.int({ min: 1, max: 4 });
-  const minChildren = opts?.minChildren ?? 5;
-  const maxChildren = opts?.maxChildren ?? 20;
+  // Power-law: most books small, rare mega-books with 500+ chapters
+  const totalChapters = powerLaw(5, 1200, 2.0);
+  const topLevelCount = Math.max(1, Math.min(6, Math.ceil(totalChapters / 40)));
+  const useBatch = totalChapters > CHAPTER_BATCH_THRESHOLD;
 
   const tree: ChapterTreeItem[] = [];
+
+  // Distribute children as evenly as possible across top-level parents
+  const childCounts: number[] = Array.from({ length: topLevelCount }, (_, i) =>
+    Math.floor(totalChapters / topLevelCount) +
+    (i < totalChapters % topLevelCount ? 1 : 0),
+  );
+
+  interface ChapterUnitRow {
+    id: string;
+    title: string;
+    description?: string;
+  }
+  const parentRows: ChapterUnitRow[] = [];
+  const childRows: ChapterUnitRow[] = [];
+  const childTreeByParent: ChapterTreeItem[][] = [];
 
   for (let t = 0; t < topLevelCount; t++) {
     const parentTitle = generateTitle(2, 4);
     const parentId = randomUUID();
+    parentRows.push({ id: parentId, title: parentTitle });
 
-    await prisma.unit.create({
-      data: {
-        id: parentId,
-        userId: bookUserId,
-        type: UnitType.CHAPTER,
-        status: UnitStatus.PUBLISHED,
-        defaultLanguage: DEFAULT_LANGUAGE,
-        translations: {
-          create: { language: DEFAULT_LANGUAGE, title: parentTitle },
-        },
-        supportLanguages: {
-          create: { language: DEFAULT_LANGUAGE, isPrimary: true },
-        },
-      },
-    });
-
-    const childCount = faker.number.int({ min: minChildren, max: maxChildren });
     const children: ChapterTreeItem[] = [];
+    childTreeByParent.push(children);
 
-    // Batch create child chapter Units + translations
-    const childData = Array.from({ length: childCount }, () => {
+    const childCount = childCounts[t]!;
+    for (let c = 0; c < childCount; c++) {
       const noContent = faker.datatype.boolean({ probability: 0.2 });
       const childTitle = faker.lorem.words({ min: 3, max: 6 });
-      return { id: randomUUID(), title: childTitle, noContent };
-    });
+      const id = randomUUID();
+      childRows.push({
+        id,
+        title: childTitle,
+        description: noContent ? undefined : generateParagraph(1, 3),
+      });
+      children.push({ id, title: childTitle, noContent });
+    }
 
-    // Create child units in chunks
-    await chunkedParallel(childData, CHUNK_SIZE, async (child) => {
+    tree.push({
+      id: parentId,
+      title: parentTitle,
+      noContent: true,
+      children,
+    });
+  }
+
+  const allRows = [...parentRows, ...childRows];
+
+  if (useBatch) {
+    for (let i = 0; i < allRows.length; i += CHAPTER_BATCH_SIZE) {
+      const chunk = allRows.slice(i, i + CHAPTER_BATCH_SIZE);
+      await prisma.unit.createMany({
+        data: chunk.map((r) => ({
+          id: r.id,
+          userId: bookUserId,
+          type: UnitType.CHAPTER,
+          status: UnitStatus.PUBLISHED,
+          defaultLanguage: DEFAULT_LANGUAGE,
+        })),
+      });
+    }
+    for (let i = 0; i < allRows.length; i += CHAPTER_BATCH_SIZE) {
+      const chunk = allRows.slice(i, i + CHAPTER_BATCH_SIZE);
+      await prisma.unitTranslation.createMany({
+        data: chunk.map((r) => ({
+          unitId: r.id,
+          language: DEFAULT_LANGUAGE,
+          title: r.title,
+          description: r.description,
+        })),
+      });
+    }
+    for (let i = 0; i < allRows.length; i += CHAPTER_BATCH_SIZE) {
+      const chunk = allRows.slice(i, i + CHAPTER_BATCH_SIZE);
+      await prisma.unitSupportLanguage.createMany({
+        data: chunk.map((r) => ({
+          unitId: r.id,
+          language: DEFAULT_LANGUAGE,
+          isPrimary: true,
+          sortOrder: 0,
+        })),
+      });
+    }
+  } else {
+    await chunkedParallel(allRows, CHUNK_SIZE, async (row) => {
       await prisma.unit.create({
         data: {
-          id: child.id,
+          id: row.id,
           userId: bookUserId,
           type: UnitType.CHAPTER,
           status: UnitStatus.PUBLISHED,
@@ -196,10 +262,8 @@ export async function seedChaptersForBook(
           translations: {
             create: {
               language: DEFAULT_LANGUAGE,
-              title: child.title,
-              description: child.noContent
-                ? undefined
-                : generateParagraph(1, 3),
+              title: row.title,
+              description: row.description,
             },
           },
           supportLanguages: {
@@ -207,19 +271,6 @@ export async function seedChaptersForBook(
           },
         },
       });
-
-      children.push({
-        id: child.id,
-        title: child.title,
-        noContent: child.noContent,
-      });
-    });
-
-    tree.push({
-      id: parentId,
-      title: parentTitle,
-      noContent: true,
-      children,
     });
   }
 

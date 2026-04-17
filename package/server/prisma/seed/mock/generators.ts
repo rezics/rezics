@@ -111,7 +111,20 @@ function pickFromCorpus(
         description: f.helpers.arrayElement([...descriptions]),
       };
     case UnitType.TAG:
-      return { title };
+      return {
+        title,
+        description: f.helpers.arrayElement([...summaries]),
+      };
+    case UnitType.ENTITY:
+      return {
+        title,
+        description: f.helpers.arrayElement([...summaries]),
+      };
+    case UnitType.ZONE:
+      return {
+        title,
+        description: f.helpers.arrayElement([...summaries]),
+      };
     case UnitType.SHELF:
       return {
         title,

@@ -5,7 +5,7 @@ import { UnitStatus, UnitType } from "#/prisma/generated/client.js";
 import { getRandomShelfCover, SHELF_KIND_KEYS } from "./data.js";
 import { generateTranslations } from "./generators.js";
 import type { CreatedPost, CreatedUnit, CreatedUser } from "./types.js";
-import { chunkedParallel, pickN, randomBoolean, randomInt } from "./utils.js";
+import { chunkedParallel, pickN, powerLaw, randomBoolean } from "./utils.js";
 
 const CHUNK_SIZE = 10;
 
@@ -35,6 +35,14 @@ export async function seedShelves(
       const translations = generateTranslations(UnitType.SHELF);
       const kindKey = faker.helpers.arrayElement([...SHELF_KIND_KEYS]);
 
+      const extra = randomBoolean(0.3)
+        ? {
+            sortBy: faker.helpers.arrayElement(["addedAt", "title", "rating"]),
+            displayMode: faker.helpers.arrayElement(["grid", "list", "compact"]),
+            theme: faker.helpers.arrayElement(["default", "dark", "accent"]),
+          }
+        : null;
+
       const unit = await prisma.unit.create({
         data: {
           type: UnitType.SHELF,
@@ -46,6 +54,7 @@ export async function seedShelves(
             create: {
               kindKey,
               coverUrl: randomBoolean(0.7) ? getRandomShelfCover() : null,
+              extra: extra ?? undefined,
             },
           },
           translations: {
@@ -66,8 +75,8 @@ export async function seedShelves(
         select: { id: true, type: true },
       });
 
-      // Add items to shelf
-      const itemCount = randomInt(3, Math.min(10, workIds.length));
+      // Add items to shelf — power-law: most shelves small, rare large collections
+      const itemCount = Math.min(powerLaw(3, 150, 1.5), workIds.length);
       const selectedWorks = pickN(workIds, itemCount);
 
       const shelfItems = selectedWorks.map((workId, i) => ({

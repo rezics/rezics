@@ -9,74 +9,68 @@ import {
   generateTranslations,
 } from "./generators.js";
 import type { CreatedPost, CreatedUnit, CreatedUser } from "./types.js";
-import { chunkedParallel, randomBoolean, randomInt } from "./utils.js";
+import { chunkedParallel, powerLaw, randomBoolean, randomInt } from "./utils.js";
 
 const CHUNK_SIZE = 10;
-
-interface PostCounts {
-  reviews: number;
-  treePosts: number;
-  quotes: number;
-  remarks: number;
-}
+const BATCH_THRESHOLD = 20;
+const BATCH_SIZE = 500;
 
 /**
  * Seed posts for all work units (books, games, media).
- * Creates reviews, quotes, remarks, and tree posts (threaded).
- * scoreEntries maps `${userId}:${unitId}:${realm}` -> scoreEntryId for linking reviews/remarks.
+ * Per-work counts drawn from a power-law distribution so most works get
+ * minimal engagement while a few get extreme engagement.
  */
 export async function seedPostsForWorks(
   prisma: PrismaClient,
   works: CreatedUnit[],
   users: CreatedUser[],
-  counts: PostCounts,
   scoreEntries?: Map<string, string>,
 ): Promise<CreatedPost[]> {
   console.log(
-    `[Seed] Seeding posts for ${works.length} works (${counts.reviews} reviews, ${counts.quotes} quotes, ${counts.remarks} remarks, ${counts.treePosts} tree posts per work)...`,
+    `[Seed] Seeding posts for ${works.length} works (power-law distribution)...`,
   );
   const allPosts: CreatedPost[] = [];
 
-  // Process works in chunks
   await chunkedParallel(works, CHUNK_SIZE, async (work) => {
-    // Reviews
+    const reviewCount = powerLaw(0, 50, 1.8);
+    const quoteCount = powerLaw(0, 15, 2.0);
+    const remarkCount = powerLaw(0, 10, 2.0);
+    const treeCount = powerLaw(0, 120, 1.8);
+
     const reviews = await seedPostKindForTarget(
       prisma,
       PostKind.REVIEW,
       work.id,
       users,
-      counts.reviews,
+      reviewCount,
       scoreEntries,
     );
     allPosts.push(...reviews);
 
-    // Quotes
     const quotes = await seedPostKindForTarget(
       prisma,
       PostKind.QUOTE,
       work.id,
       users,
-      counts.quotes,
+      quoteCount,
     );
     allPosts.push(...quotes);
 
-    // Remarks
     const remarks = await seedPostKindForTarget(
       prisma,
       PostKind.REMARK,
       work.id,
       users,
-      counts.remarks,
+      remarkCount,
       scoreEntries,
     );
     allPosts.push(...remarks);
 
-    // Tree posts (threaded)
     const treePosts = await seedTreePostsForTarget(
       prisma,
       work.id,
       users,
-      counts.treePosts,
+      treeCount,
     );
     allPosts.push(...treePosts);
   });
@@ -86,7 +80,7 @@ export async function seedPostsForWorks(
 
 /**
  * Create N posts of a given kind targeting a unit.
- * For REVIEW and REMARK kinds, links to a ScoreEntry if available in scoreEntries map.
+ * Uses batch createMany for high-engagement works (> BATCH_THRESHOLD).
  */
 async function seedPostKindForTarget(
   prisma: PrismaClient,
@@ -96,6 +90,18 @@ async function seedPostKindForTarget(
   count: number,
   scoreEntries?: Map<string, string>,
 ): Promise<CreatedPost[]> {
+  if (count === 0) return [];
+  if (count > BATCH_THRESHOLD) {
+    return seedPostKindBatch(
+      prisma,
+      kind,
+      targetUnitId,
+      users,
+      count,
+      scoreEntries,
+    );
+  }
+
   const posts: CreatedPost[] = [];
   const needsScore = kind === PostKind.REVIEW || kind === PostKind.REMARK;
 
@@ -106,10 +112,8 @@ async function seedPostKindForTarget(
     const needsTitle = kind === PostKind.REVIEW;
     const translations = needsTitle ? generateTranslations(UnitType.POST) : [];
 
-    // Find a matching scoreEntryId for this author+target
     let scoreEntryId: string | undefined;
     if (needsScore && scoreEntries) {
-      // Try all realms — keys are `${userId}:${unitId}:${realm}`
       for (const [key, entryId] of scoreEntries) {
         if (key.startsWith(`${author.unitId}:${targetUnitId}:`)) {
           scoreEntryId = entryId;
@@ -164,6 +168,141 @@ async function seedPostKindForTarget(
 }
 
 /**
+ * Batch variant for high-engagement works.
+ * Generates all rows in memory, then inserts via createMany across tables.
+ */
+async function seedPostKindBatch(
+  prisma: PrismaClient,
+  kind: PostKind,
+  targetUnitId: string,
+  users: CreatedUser[],
+  count: number,
+  scoreEntries?: Map<string, string>,
+): Promise<CreatedPost[]> {
+  const needsScore = kind === PostKind.REVIEW || kind === PostKind.REMARK;
+  const needsTitle = kind === PostKind.REVIEW;
+
+  interface Row {
+    id: string;
+    author: CreatedUser;
+    body: string;
+    extra: ReturnType<typeof generatePostExtra>;
+    published: boolean;
+    publishedAt: Date | null;
+    translations: { language: string; title: string }[];
+    scoreEntryId?: string;
+  }
+
+  const rows: Row[] = Array.from({ length: count }, () => {
+    const author = faker.helpers.arrayElement(users);
+    let scoreEntryId: string | undefined;
+    if (needsScore && scoreEntries) {
+      for (const [key, entryId] of scoreEntries) {
+        if (key.startsWith(`${author.unitId}:${targetUnitId}:`)) {
+          scoreEntryId = entryId;
+          break;
+        }
+      }
+    }
+    const published = randomBoolean(0.9);
+    return {
+      id: randomUUID(),
+      author,
+      body: generatePostBody(kind),
+      extra: generatePostExtra(kind),
+      published,
+      publishedAt: randomBoolean(0.85) ? faker.date.past({ years: 2 }) : null,
+      translations: needsTitle
+        ? generateTranslations(UnitType.POST).map((t) => ({
+            language: t.language,
+            title: t.title,
+          }))
+        : [],
+      scoreEntryId,
+    };
+  });
+
+  // Unit
+  for (let i = 0; i < rows.length; i += BATCH_SIZE) {
+    const chunk = rows.slice(i, i + BATCH_SIZE);
+    await prisma.unit.createMany({
+      data: chunk.map((r) => ({
+        id: r.id,
+        type: UnitType.POST,
+        userId: r.author.unitId,
+        status: r.published ? UnitStatus.PUBLISHED : UnitStatus.DRAFT,
+        defaultLanguage: DEFAULT_LANGUAGE,
+        publishedAt: r.publishedAt,
+      })),
+    });
+  }
+
+  // Post
+  for (let i = 0; i < rows.length; i += BATCH_SIZE) {
+    const chunk = rows.slice(i, i + BATCH_SIZE);
+    await prisma.post.createMany({
+      data: chunk.map((r) => ({
+        unitId: r.id,
+        authorUserId: r.author.unitId,
+        targetUnitId,
+        kind,
+        body: r.body,
+        extra: r.extra ?? undefined,
+        depth: 0,
+        scoreEntryId: r.scoreEntryId ?? null,
+      })),
+    });
+  }
+
+  // Translations (reviews only)
+  if (needsTitle) {
+    const allTranslations = rows.flatMap((r) =>
+      r.translations.map((t) => ({
+        unitId: r.id,
+        language: t.language,
+        title: t.title,
+      })),
+    );
+    for (let i = 0; i < allTranslations.length; i += BATCH_SIZE) {
+      await prisma.unitTranslation.createMany({
+        data: allTranslations.slice(i, i + BATCH_SIZE),
+      });
+    }
+  }
+
+  // Support languages
+  const allSupport = rows.flatMap((r) =>
+    needsTitle && r.translations.length > 0
+      ? r.translations.map((t, i) => ({
+          unitId: r.id,
+          language: t.language,
+          isPrimary: i === 0,
+          sortOrder: i,
+        }))
+      : [
+          {
+            unitId: r.id,
+            language: DEFAULT_LANGUAGE,
+            isPrimary: true,
+            sortOrder: 0,
+          },
+        ],
+  );
+  for (let i = 0; i < allSupport.length; i += BATCH_SIZE) {
+    await prisma.unitSupportLanguage.createMany({
+      data: allSupport.slice(i, i + BATCH_SIZE),
+    });
+  }
+
+  return rows.map((r) => ({
+    id: r.id,
+    type: UnitType.POST,
+    kind,
+    targetUnitId,
+  }));
+}
+
+/**
  * Create tree posts (threaded) for a target unit.
  * Two-pass: root posts first, then replies.
  */
@@ -173,6 +312,8 @@ async function seedTreePostsForTarget(
   users: CreatedUser[],
   total: number,
 ): Promise<CreatedPost[]> {
+  if (total === 0) return [];
+
   const rootCount = Math.max(1, Math.floor(total * 0.4));
   const replyCount = total - rootCount;
   const posts: CreatedPost[] = [];
@@ -273,7 +414,6 @@ async function seedTreePostsForTarget(
         select: { id: true, type: true },
       });
 
-      // Add this reply as a potential parent for future replies
       replyParents.push({ id: replyId, sortPath, depth });
       posts.push({
         ...unit,

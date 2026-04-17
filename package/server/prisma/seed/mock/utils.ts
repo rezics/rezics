@@ -11,6 +11,20 @@ export function randomInt(minInclusive: number, maxInclusive: number): number {
 }
 
 /**
+ * Pareto-like power-law integer in [min, max].
+ * Larger alpha → heavier skew toward min.
+ */
+export function powerLaw(min: number, max: number, alpha: number): number {
+  if (max <= min) return min;
+  const u = Math.random();
+  const raw = min + (max - min) * u ** alpha;
+  const rounded = Math.round(raw);
+  if (rounded < min) return min;
+  if (rounded > max) return max;
+  return rounded;
+}
+
+/**
  * Generate random float within range
  * @param min - Minimum value
  * @param max - Maximum value
