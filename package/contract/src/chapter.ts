@@ -1,4 +1,5 @@
 import { t } from "elysia";
+import { listGetQueryBase } from "./list-query-base";
 import { paginationLimitSchema } from "./pagination";
 
 // ============================================================
@@ -44,6 +45,7 @@ export const chapterParamsSchema = t.Object({
 export type ChapterParams = (typeof chapterParamsSchema)["static"];
 
 export const chapterListQuerySchema = t.Object({
+  ...listGetQueryBase.properties,
   q: t.Optional(t.String()),
   userId: t.Optional(t.String()),
   status: t.Optional(t.String()),

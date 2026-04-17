@@ -1,5 +1,6 @@
 import { t } from "elysia";
 import { languageSchema } from "./language";
+import { listGetQueryBase } from "./list-query-base";
 
 // ============================================================
 // ENUMS
@@ -146,6 +147,7 @@ export type UnitDTO = (typeof unitDTOSchema)["static"];
 // ============================================================
 
 export const unitListQuerySchema = t.Object({
+  ...listGetQueryBase.properties,
   q: t.Optional(t.String()),
   type: t.Optional(t.String()),
   types: t.Optional(t.String()),

@@ -91,9 +91,26 @@ The current `tool/scripts/check-convention.ts` loads `expected-violations.json`,
 
 **Alternative considered:** rip out baseline support entirely. Rejected: the snapshot mechanism is genuinely useful as a *ratchet* during future multi-step migrations. Keeping it dormant but functional is cheap.
 
-### D6: Contract mixin spread is mechanical — no design latitude
+### D6: Contract mixin split — CSV for GET, array for POST
 
-`listQueryBase` is already exported from `@rezics/contract` (Change 1, task 3.1). Spreading it into each `*ListQuerySchema`:
+Change 1 exported a single `listQueryBase` with `ids: t.Array(t.String())`, but that schema silently fails on `GET ?ids=a,b,c` because Elysia hands the querystring value through as the raw `string` `"a,b,c"` without splitting. Rather than paper over the transport difference with a `t.Union` or a hidden transform, the contract now exports two honest mixins:
+
+```ts
+// package/contract/src/list-query-base.ts
+export const listGetQueryBase = t.Object({
+  ids: t.Optional(t.String()),                       // CSV, split by the handler
+});
+
+export const listPostBodyBase = t.Object({
+  ids: t.Optional(t.Array(t.String(), { maxItems: 200 })),
+});
+
+export function parseIdsCsv(raw: string | undefined): string[] | undefined {
+  // trim + dedupe + throw over 200
+}
+```
+
+Spreading:
 
 ```ts
 // before
@@ -102,17 +119,40 @@ export const bookListQuerySchema = t.Object({
   limit: paginationLimitSchema,
 });
 
-// after
+// after (GET querystring schema)
 export const bookListQuerySchema = t.Object({
-  ...listQueryBase.properties,
+  ...listGetQueryBase.properties,
+  kind: t.Optional(t.String()),
+  limit: paginationLimitSchema,
+});
+
+// POST body schema — created only when a domain adds POST /list
+export const bookListBodySchema = t.Object({
+  ...listPostBodyBase.properties,
   kind: t.Optional(t.String()),
   limit: paginationLimitSchema,
 });
 ```
 
-Per-schema edit, no cross-cutting logic. Server handlers that read `query.ids` only if defined already compose correctly (the field is optional). Handlers that need to act on `ids` gain a small `if (query.ids?.length) where.unitId = { in: query.ids }` in their Prisma query builder.
+Handlers:
 
-**Why include the `ids` handler logic in this change:** otherwise the contract advertises an `ids` field that doesn't work. Spec's "Universal batch-hydration" requirement would be false on paper. Scope is small — 12 list endpoints, each gets ~3 lines in its service layer.
+```ts
+.get("/list", async ({ query }) => {
+  const idList = parseIdsCsv(query.ids);
+  return service.list({ ...query, ids: idList });
+})
+.post("/list", async ({ body }) => {
+  return service.list({ ...body });   // body.ids is already string[]
+})
+```
+
+**Why two bases instead of one union:** a `t.Union([t.String(), t.Array(t.String())])` works on paper but leaks transport concerns into every handler and makes typed use awkward (`typeof query.ids === "string" ? …`). Two mixins keep each handler's type narrow and make the CSV/array choice an explicit authoring decision.
+
+**Why remove `listQueryBase` instead of aliasing:** Change 1 task 3.3 explicitly said "do NOT modify any existing `*ListQuerySchema`". Nothing consumes the old export. Keeping it as a deprecated alias would just invite accidental misuse.
+
+**Scope of this change's spread:** all 12 existing `*ListQuerySchema` (GET querystring today) get `listGetQueryBase`. POST body schemas are created only per-domain when a POST `/list` endpoint is actually added — not speculatively. Server handlers that need to act on `ids` gain `const idList = parseIdsCsv(query.ids); if (idList?.length) where.unitId = { in: idList };` in their Prisma query builder. Scope remains small — 12 list endpoints, each gets ~3 lines in its service layer.
+
+**Why include the `ids` handler logic in this change:** otherwise the contract advertises an `ids` field that doesn't work. The spec's "Universal batch-hydration" requirement would be false on paper. Shipping the schema without the handler would be a lie.
 
 ### D7: Frontend caller sweep
 

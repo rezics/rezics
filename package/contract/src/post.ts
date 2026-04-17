@@ -1,4 +1,5 @@
 import { t } from "elysia";
+import { listGetQueryBase } from "./list-query-base";
 import { paginationLimitSchema } from "./pagination";
 import { publicUserSchema } from "./unit";
 
@@ -73,6 +74,7 @@ export type PostDTO = (typeof postDTOSchema)["static"];
 // ============================================================
 
 export const postListQuerySchema = t.Object({
+  ...listGetQueryBase.properties,
   targetUnitId: t.Optional(t.String()),
   realmUnitId: t.Optional(t.String()),
   rootPostUnitId: t.Optional(t.String()),

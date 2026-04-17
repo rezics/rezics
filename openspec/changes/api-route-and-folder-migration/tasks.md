@@ -1,9 +1,10 @@
 ## 1. Contract sweep
 
-- [ ] 1.1 Inventory every `*ListQuerySchema` in `package/contract/src/**` via grep (`rg 'ListQuerySchema\s*=\s*t\.Object'`); capture the list in a scratch note
-- [ ] 1.2 For each schema, spread `...listQueryBase.properties` as the first field of the `t.Object({ ... })` definition; import `listQueryBase` where missing
-- [ ] 1.3 Run `bun --filter @rezics/contract tsc --noEmit` (or `cd package/contract && bun run build`) — expect exit 0
-- [ ] 1.4 For each list endpoint in `@rezics/server`, add `ids` handling to its service layer: if `query.ids?.length` then filter `unitId: { in: query.ids }` in the Prisma `where` clause; compose with other filters via intersection (not replacement)
+- [x] 1.0 Refactor `package/contract/src/list-query-base.ts` to export `listGetQueryBase` (CSV `ids`), `listPostBodyBase` (array `ids`, `maxItems: 200`), and `parseIdsCsv` helper; remove old single `listQueryBase` export
+- [x] 1.1 Inventory every `*ListQuerySchema` in `package/contract/src/**` via grep (`rg 'ListQuerySchema\s*=\s*t\.Object'`); found 12: book, chapter, dmMessage (notify/dm), entity (attribution), feedback, notification (notify/notification), post, realm, shelf, tag, unit, user
+- [x] 1.2 For each schema, spread `...listGetQueryBase.properties` as the first field of the `t.Object({ ... })` definition; import `listGetQueryBase` where missing — 12 schemas updated: book, chapter, dmMessage, entity, feedback, notification, post, realm, shelf, tag, unit, user
+- [x] 1.3 Run `bun --filter @rezics/contract tsc --noEmit` (or `cd package/contract && bun run build`) — exit 0
+- [ ] 1.4 For each list endpoint in `@rezics/server`, add `ids` handling: call `parseIdsCsv(query.ids)` in the route (or service) to get `string[] | undefined`; if the result is non-empty, filter `unitId: { in: idList }` in the Prisma `where` clause via intersection (not replacement)
 - [ ] 1.5 Run `bun --filter @rezics/server tsc --noEmit` — expect exit 0
 - [ ] 1.6 Spot-test one endpoint per affected domain: `curl 'http://localhost:3000/book/list?ids=<id1>,<id2>'` returns only those two books (requires a seeded DB and running dev server; skip if sandbox-only)
 

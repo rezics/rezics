@@ -1,4 +1,5 @@
 import { t } from "elysia";
+import { listGetQueryBase } from "../list-query-base";
 
 export const NotificationType = {
   LIKE: "LIKE",
@@ -72,6 +73,7 @@ export const markReadBodySchema = t.Object({
 export type MarkReadBody = (typeof markReadBodySchema)["static"];
 
 export const notificationListQuerySchema = t.Object({
+  ...listGetQueryBase.properties,
   page: t.Optional(t.Numeric({ default: 1 })),
   limit: t.Optional(t.Numeric({ default: 20 })),
 });

@@ -1,5 +1,6 @@
 import { t } from "elysia";
 import { languageSchema } from "./language";
+import { listGetQueryBase } from "./list-query-base";
 import { paginationLimitSchema } from "./pagination";
 import { publicUserSchema, unitTranslationDTOSchema } from "./unit";
 
@@ -114,6 +115,7 @@ export type RealmTagUnitDTO = (typeof realmTagUnitDTOSchema)["static"];
 // ============================================================
 
 export const realmListQuerySchema = t.Object({
+  ...listGetQueryBase.properties,
   isPublic: t.Optional(t.Boolean()),
   isOfficial: t.Optional(t.Boolean()),
   userId: t.Optional(t.String()),

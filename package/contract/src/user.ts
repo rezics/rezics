@@ -1,4 +1,5 @@
 import { t } from "elysia";
+import { listGetQueryBase } from "./list-query-base";
 import { paginationLimitSchema } from "./pagination";
 
 // ============================================================
@@ -29,6 +30,7 @@ export const userDTOSchema = t.Object({
 export type UserDTO = (typeof userDTOSchema)["static"];
 
 export const userListQuerySchema = t.Object({
+  ...listGetQueryBase.properties,
   q: t.Optional(t.String()),
   email: t.Optional(t.String()),
   slug: t.Optional(t.String()),

@@ -1,4 +1,5 @@
 import { t } from "elysia";
+import { listGetQueryBase } from "./list-query-base";
 import { paginationLimitSchema } from "./pagination";
 
 // ============================================================
@@ -63,6 +64,7 @@ export type TagVoteDTO = (typeof tagVoteDTOSchema)["static"];
 // ============================================================
 
 export const tagListQuerySchema = t.Object({
+  ...listGetQueryBase.properties,
   q: t.Optional(t.String()),
   language: t.Optional(t.String()),
   unitId: t.Optional(t.String()),

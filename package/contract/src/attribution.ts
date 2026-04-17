@@ -1,4 +1,5 @@
 import { t } from "elysia";
+import { listGetQueryBase } from "./list-query-base";
 import { unitTranslationDTOSchema } from "./unit";
 
 // ============================================================
@@ -52,6 +53,7 @@ export const updateEntitySchema = t.Object({
 export type UpdateEntityInput = (typeof updateEntitySchema)["static"];
 
 export const entityListQuerySchema = t.Object({
+  ...listGetQueryBase.properties,
   kind: t.Optional(t.String()),
   q: t.Optional(t.String()),
   page: t.Optional(t.Numeric()),

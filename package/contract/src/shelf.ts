@@ -1,5 +1,6 @@
 import { t } from "elysia";
 import { languageSchema } from "./language";
+import { listGetQueryBase } from "./list-query-base";
 import { paginationLimitSchema } from "./pagination";
 import { publicUserSchema, unitTranslationDTOSchema } from "./unit";
 
@@ -120,6 +121,7 @@ export type ShelfDetailDTO = (typeof shelfDetailDTOSchema)["static"];
 // ============================================================
 
 export const shelfListQuerySchema = t.Object({
+  ...listGetQueryBase.properties,
   userId: t.Optional(t.String()),
   kindKey: t.Optional(t.String()),
   containsItemUnitId: t.Optional(t.String()),

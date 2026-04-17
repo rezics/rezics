@@ -1,4 +1,5 @@
 import { t } from "elysia";
+import { listGetQueryBase } from "../list-query-base";
 
 export const dmMessageSchema = t.Object({
   id: t.String(),
@@ -35,6 +36,7 @@ export type DmMessageListResponse =
   (typeof dmMessageListResponseSchema)["static"];
 
 export const dmMessageListQuerySchema = t.Object({
+  ...listGetQueryBase.properties,
   page: t.Optional(t.Numeric({ default: 1 })),
   limit: t.Optional(t.Numeric({ default: 50 })),
 });

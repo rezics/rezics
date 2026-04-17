@@ -1,6 +1,7 @@
 import { t } from "elysia";
 import { attributionBriefSchema } from "./attribution";
 import { languageSchema } from "./language";
+import { listGetQueryBase } from "./list-query-base";
 import { paginationLimitSchema } from "./pagination";
 import { publicUserSchema, unitTranslationDTOSchema } from "./unit";
 
@@ -60,6 +61,7 @@ export type BookDTO = (typeof bookDTOSchema)["static"];
 // ============================================================
 
 export const bookListQuerySchema = t.Object({
+  ...listGetQueryBase.properties,
   nsfw: t.Optional(t.Boolean()),
   language: t.Optional(languageSchema),
   tagUnitIds: t.Optional(t.String()),

@@ -1,4 +1,5 @@
 import { t } from "elysia";
+import { listGetQueryBase } from "./list-query-base";
 import {
   paginationLimitSchema,
   type OffsetPaginated,
@@ -78,6 +79,7 @@ export type FeedbackListQuery = OffsetPaginationParams & {
 };
 
 export const feedbackListQuerySchema = t.Object({
+  ...listGetQueryBase.properties,
   offset: t.Optional(t.Number()),
   limit: paginationLimitSchema,
   q: t.Optional(t.String()),

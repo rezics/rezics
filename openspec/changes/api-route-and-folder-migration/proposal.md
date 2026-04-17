@@ -11,8 +11,11 @@ One-shot migration is the right shape because HTTP route renames (15 prefixes) c
   - 12 root list handlers (`.get("/", …)` / `.post("/", …)` returning `items`) gain the `/list` suffix, or are annotated `// @convention:root-list-ok` for narrow pronoun-root exceptions (e.g., `/users/me` style).
   - `/unit` prefix collision: the `translation-group` domain currently mounts at `/unit` — it moves to `/translation-group` (the folder is already `translation-group/`, so only the Elysia prefix changes) so the migrated `/unit` prefix (from `/units`) can own the path cleanly.
 
-- **Contract schema normalization**:
-  - Every `*ListQuerySchema` in `@rezics/contract` spreads `...listQueryBase.properties` so it carries the shared `ids: t.Optional(t.Array(t.String(), { maxItems: 200 }))` field. Candidates include `bookListQuerySchema`, `postListQuerySchema`, `realmListQuerySchema`, `shelfListQuerySchema`, `chapterListQuerySchema`, `tagListQuerySchema`, `feedbackListQuerySchema`, `userFilterSchema`, `zoneListQuerySchema`, `notificationListQuerySchema`, `linkListQuerySchema`, `reactionListQuerySchema`, and any others discovered by grep.
+- **Contract schema normalization** (two-base mirror):
+  - `package/contract/src/list-query-base.ts` is refactored to export TWO mixins that mirror HTTP transport honestly: `listGetQueryBase` with `ids: t.Optional(t.String())` (CSV, split server-side) for GET querystring schemas, and `listPostBodyBase` with `ids: t.Optional(t.Array(t.String(), { maxItems: 200 }))` for POST body schemas. A shared `parseIdsCsv()` helper handles CSV split + dedupe + 200-cap enforcement.
+  - Every existing `*ListQuerySchema` (all GET querystring today) spreads `...listGetQueryBase.properties`. Discovered 12 schemas: `bookListQuerySchema`, `chapterListQuerySchema`, `dmMessageListQuerySchema`, `entityListQuerySchema`, `feedbackListQuerySchema`, `notificationListQuerySchema`, `postListQuerySchema`, `realmListQuerySchema`, `shelfListQuerySchema`, `tagListQuerySchema`, `unitListQuerySchema`, `userListQuerySchema`.
+  - POST body schemas are NOT created speculatively — each domain adds its `*ListBodySchema` spreading `listPostBodyBase` when it actually adds a `POST /list` endpoint.
+  - The (never-consumed) `listQueryBase` export from Change 1 is removed and replaced by the two new bases; no backward-compat alias is kept since no caller references it.
   - No behaviour change for callers that omit `ids`; no contract break for callers that already pass filters.
 
 - **Folder renames** (R3 + R4 violations):
@@ -51,6 +54,7 @@ _None._
 
 ### Modified Capabilities
 
+- `api-route-convention`: the single `listQueryBase` mixin from Change 1 splits into two transport-mirrored mixins (`listGetQueryBase` CSV + `listPostBodyBase` array) to honestly reflect HTTP querystring-vs-body differences. Two requirements get updated scenarios — "ids field on every list query" (now names the two bases and documents the CSV helper) and "When to choose GET vs POST for list" (JSDoc lives on both bases). No route-shape behaviour changes; this is a contract-layer correction.
 - `convention-enforcement`: one requirement's implementation expectations shift — the check script runs without a baseline snapshot post-migration, enforcing zero violations. The requirement text in the spec already implies this; a clarifying scenario is added that locks it in explicitly so future contributors don't re-introduce a tolerate-existing pattern.
 
 ## Impact
