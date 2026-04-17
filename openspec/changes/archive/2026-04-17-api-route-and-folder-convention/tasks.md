@@ -1,8 +1,8 @@
 ## 1. Specs land in repo
 
-- [ ] 1.1 Move `openspec/changes/api-route-and-folder-convention/specs/api-route-convention/spec.md` → `openspec/specs/api-route-convention/spec.md` at archive time (handled by `/opsx:archive`, listed here for visibility)
-- [ ] 1.2 Move `openspec/changes/api-route-and-folder-convention/specs/folder-naming-convention/spec.md` → `openspec/specs/folder-naming-convention/spec.md` at archive time
-- [ ] 1.3 Move `openspec/changes/api-route-and-folder-convention/specs/convention-enforcement/spec.md` → `openspec/specs/convention-enforcement/spec.md` at archive time
+- [x] 1.1 Move `openspec/changes/api-route-and-folder-convention/specs/api-route-convention/spec.md` → `openspec/specs/api-route-convention/spec.md` at archive time (handled by `/opsx:archive`, listed here for visibility)
+- [x] 1.2 Move `openspec/changes/api-route-and-folder-convention/specs/folder-naming-convention/spec.md` → `openspec/specs/folder-naming-convention/spec.md` at archive time
+- [x] 1.3 Move `openspec/changes/api-route-and-folder-convention/specs/convention-enforcement/spec.md` → `openspec/specs/convention-enforcement/spec.md` at archive time
 - [x] 1.4 Run `openspec validate api-route-and-folder-convention --strict` and resolve any warnings before apply
 
 ## 2. Documentation touchpoints
