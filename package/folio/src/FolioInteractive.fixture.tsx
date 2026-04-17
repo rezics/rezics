@@ -4,8 +4,8 @@ import {
   type RendererPlugin,
   useFolio,
 } from "@rezics/folio";
-import { createEpubPlugin } from "@rezics/folio/plugin/epub";
-import { createTxtPlugin } from "@rezics/folio/plugin/txt";
+import { createEpubPlugin } from "@rezics/folio/plugins/epub";
+import { createTxtPlugin } from "@rezics/folio/plugins/txt";
 import { useEffect, useState } from "react";
 import { useFixtureInput, useFixtureSelect } from "react-cosmos/client";
 import { FixtureReader, useFileUpload } from "./_fixture-helpers";

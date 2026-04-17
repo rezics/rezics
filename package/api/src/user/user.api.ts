@@ -13,7 +13,7 @@ type FollowSummaryResponse = {
 
 export const userApi = {
   me: async (): Promise<UserDTO> => {
-    return apiFetch(`/users/me`);
+    return apiFetch(`/user/me`);
   },
 
   list: async (
@@ -34,55 +34,55 @@ export const userApi = {
     const qs = query
       ? `?${new URLSearchParams(query as Record<string, string>).toString()}`
       : "";
-    return apiFetch(`/users/admin${qs}`);
+    return apiFetch(`/user/admin${qs}`);
   },
 
   adminGet: async (unitId: string): Promise<UserDTO> => {
-    return apiFetch(`/users/admin/${unitId}`);
+    return apiFetch(`/user/admin/${unitId}`);
   },
 
   /**
    * Admin: update user.
    */
   adminUpdate: async (unitId: string, input: UpdateUser): Promise<UserDTO> => {
-    return apiFetch(`/users/admin/${unitId}`, {
+    return apiFetch(`/user/admin/${unitId}`, {
       method: "PUT",
       body: JSON.stringify(input),
     });
   },
 
   get: async (unitId: string): Promise<UserDTO> => {
-    return apiFetch(`/users/${unitId}`);
+    return apiFetch(`/user/${unitId}`);
   },
 
   updateMe: async (input: UpdateUser): Promise<UserDTO> => {
-    return apiFetch(`/users/me`, {
+    return apiFetch(`/user/me`, {
       method: "PUT",
       body: JSON.stringify(input),
     });
   },
 
   update: async (unitId: string, input: UpdateUser): Promise<UserDTO> => {
-    return apiFetch(`/users/${unitId}`, {
+    return apiFetch(`/user/${unitId}`, {
       method: "PUT",
       body: JSON.stringify(input),
     });
   },
 
   deleteMe: async (): Promise<{ message: string }> => {
-    return apiFetch(`/users/me`, { method: "DELETE" });
+    return apiFetch(`/user/me`, { method: "DELETE" });
   },
 
   delete: async (unitId: string): Promise<{ message: string }> => {
-    return apiFetch(`/users/${unitId}`, { method: "DELETE" });
+    return apiFetch(`/user/${unitId}`, { method: "DELETE" });
   },
 
   follow: async (targetId: string): Promise<{ message: string }> => {
-    return apiFetch(`/users/follow/${targetId}`, { method: "POST" });
+    return apiFetch(`/user/follow/${targetId}`, { method: "POST" });
   },
 
   unfollow: async (targetId: string): Promise<{ message: string }> => {
-    return apiFetch(`/users/follow/${targetId}`, { method: "DELETE" });
+    return apiFetch(`/user/follow/${targetId}`, { method: "DELETE" });
   },
 
   getFollowStatus: async (
@@ -90,7 +90,7 @@ export const userApi = {
   ): Promise<Record<string, boolean>> => {
     const qs = new URLSearchParams();
     for (const id of targetIds) qs.append("targetIds", id);
-    return apiFetch(`/users/follow/status?${qs.toString()}`);
+    return apiFetch(`/user/follow/status?${qs.toString()}`);
   },
 
   getFollowSummary: async (
@@ -99,7 +99,7 @@ export const userApi = {
     const qs = new URLSearchParams();
     for (const id of targetIds) qs.append("targetIds", id);
     return apiFetch<FollowSummaryResponse>(
-      `/users/follow/summary?${qs.toString()}`,
+      `/user/follow/summary?${qs.toString()}`,
     );
   },
 
@@ -108,7 +108,7 @@ export const userApi = {
     query?: { page?: number; limit?: number },
   ): Promise<{ users: UserDTO[]; total: number }> => {
     const qs = query ? `?${new URLSearchParams(query as any).toString()}` : "";
-    return apiFetch(`/users/${unitId}/followers${qs}`);
+    return apiFetch(`/user/${unitId}/followers${qs}`);
   },
 
   getFollowings: async (
@@ -116,21 +116,21 @@ export const userApi = {
     query?: { page?: number; limit?: number },
   ): Promise<{ users: UserDTO[]; total: number }> => {
     const qs = query ? `?${new URLSearchParams(query as any).toString()}` : "";
-    return apiFetch(`/users/${unitId}/followings${qs}`);
+    return apiFetch(`/user/${unitId}/followings${qs}`);
   },
 
   batch: async (
     ids: string[],
   ): Promise<Record<string, { name: string; slug: string; avatar: string }>> => {
-    return apiFetch(`/users/batch?ids=${ids.join(",")}`);
+    return apiFetch(`/user/batch?ids=${ids.join(",")}`);
   },
 
   getSettings: async (): Promise<UserSettings> => {
-    return apiFetch(`/users/me/settings`);
+    return apiFetch(`/user/me/settings`);
   },
 
   updateSettings: async (input: UpdateUserSettings): Promise<UserSettings> => {
-    return apiFetch(`/users/me/settings`, {
+    return apiFetch(`/user/me/settings`, {
       method: "PUT",
       body: JSON.stringify(input),
     });

@@ -1,7 +1,7 @@
 import { createFileRoute, lazyRouteComponent } from "@tanstack/react-router";
 
 const ProfileLayout = lazyRouteComponent(
-  () => import("@/user/component/ProfileLayout"),
+  () => import("@/user/components/ProfileLayout"),
   "ProfileLayout",
 );
 

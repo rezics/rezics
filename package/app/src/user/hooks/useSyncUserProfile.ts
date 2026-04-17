@@ -1,7 +1,7 @@
 import { userQueries } from "@rezics/api/user/user.queries";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
-import { useUserProfileStore } from "@/user/state";
+import { useUserProfileStore } from "@/user/states";
 
 /**
  * Subscribes to the `me` query and syncs its data into the Zustand

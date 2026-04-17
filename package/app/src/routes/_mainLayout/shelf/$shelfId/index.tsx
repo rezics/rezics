@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { ShelfPage } from "@/shelf/page/ShelfPage";
+import { ShelfPage } from "@/shelf/pages/ShelfPage";
 
 export const Route = createFileRoute("/_mainLayout/shelf/$shelfId/")({
   component: () => {

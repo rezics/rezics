@@ -3,7 +3,7 @@ import "./index.css";
 import { ThemeProvider } from "@mui/material";
 import CssBaseline from "@mui/material/CssBaseline";
 import { StyledEngineProvider } from "@mui/material/styles";
-import { AuthProvider } from "@rezics/api/provider";
+import { AuthProvider } from "@rezics/api/providers";
 import {
   applyDynamicThemeToDOM,
   generateDynamicColors,
@@ -15,14 +15,14 @@ import { type ReactNode, StrictMode, useEffect, useMemo } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { HelmetProvider } from "react-helmet-async";
 import { router } from "@/router";
-import { WindowAlert } from "./component/WindowAlert";
-import { PersistentSettingsLoader } from "./provider/PersistentSettingsLoader";
-import { ReactQueryProvider } from "./provider/react-query";
-import { useAppInit } from "./provider/useAppInit";
-import { useAppStore } from "./state/appStore";
+import { WindowAlert } from "./components/WindowAlert";
+import { PersistentSettingsLoader } from "./providers/PersistentSettingsLoader";
+import { ReactQueryProvider } from "./providers/react-query";
+import { useAppInit } from "./providers/useAppInit";
+import { useAppStore } from "./states/appStore";
 
 import "virtual:uno.css";
-import "@rezics/ui/shared/style/layers.css";
+import "@rezics/ui/shared/styles/layers.css";
 
 function AppInit({ children }: { children: ReactNode }) {
   useAppInit();

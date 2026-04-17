@@ -2,10 +2,10 @@ import { getToken, parseJwt } from "@rezics/api/react-query/jwt";
 import {
   hydrateAuthSessionState,
   useAuthSessionStore,
-} from "@rezics/api/state";
+} from "@rezics/api/states";
 import { NormalizedTokenName } from "@rezics/contract";
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
-import AdminLayout from "@/core/layout/AdminLayout";
+import AdminLayout from "@/core/layouts/AdminLayout";
 
 function resolveAttemptedPath(location: any): string {
   if (typeof location?.pathname === "string") {

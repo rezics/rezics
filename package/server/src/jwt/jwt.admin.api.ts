@@ -11,7 +11,7 @@ import { jwtServiceAdminService } from "./jwt.admin.service";
 export const jwtServiceAdminApi = new Elysia({ prefix: "/admin/jwt-services" })
   .use(authMacro)
   .get(
-    "/",
+    "/list",
     async ({ identity, status }) => {
       if (identity.permission.role !== "ROOT") {
         return status(403, "Forbidden: Root role required");

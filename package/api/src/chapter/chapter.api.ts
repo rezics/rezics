@@ -22,7 +22,7 @@ export const chapterApi = {
    */
   list: async (filters?: ChapterFilters): Promise<ChapterListResponse> => {
     return apiFetch<ChapterListResponse>(
-      `/chapters${buildQueryString(filters)}`,
+      `/chapter/list${buildQueryString(filters)}`,
     );
   },
 
@@ -30,7 +30,7 @@ export const chapterApi = {
    * Get single chapter by unitId
    */
   get: async (unitId: string): Promise<ChapterResponse> => {
-    return apiFetch<ChapterResponse>(`/chapters/${unitId}`);
+    return apiFetch<ChapterResponse>(`/chapter/${unitId}`);
   },
 
   /**
@@ -41,7 +41,7 @@ export const chapterApi = {
     filters?: ChapterFilters,
   ): Promise<ChapterListResponse> => {
     return apiFetch<ChapterListResponse>(
-      `/chapters${buildQueryString({ q: query, ...filters })}`,
+      `/chapter/list${buildQueryString({ q: query, ...filters })}`,
     );
   },
 
@@ -53,7 +53,7 @@ export const chapterApi = {
     filters?: ChapterFilters,
   ): Promise<ChapterListResponse> => {
     return apiFetch<ChapterListResponse>(
-      `/chapters${buildQueryString({ userId, ...filters })}`,
+      `/chapter/list${buildQueryString({ userId, ...filters })}`,
     );
   },
 
@@ -65,7 +65,7 @@ export const chapterApi = {
     filters?: ChapterFilters,
   ): Promise<ChapterListResponse> => {
     return apiFetch<ChapterListResponse>(
-      `/chapters${buildQueryString({ targetUnitId, ...filters })}`,
+      `/chapter/list${buildQueryString({ targetUnitId, ...filters })}`,
     );
   },
 
@@ -73,7 +73,7 @@ export const chapterApi = {
    * Create new chapter
    */
   create: async (input: CreateChapterInput): Promise<ChapterResponse> => {
-    return apiFetch<ChapterResponse>("/chapters", {
+    return apiFetch<ChapterResponse>("/chapter", {
       method: "POST",
       body: JSON.stringify(input),
     });
@@ -86,7 +86,7 @@ export const chapterApi = {
     unitId: string,
     input: UpdateChapterInput,
   ): Promise<ChapterResponse> => {
-    return apiFetch<ChapterResponse>(`/chapters/${unitId}`, {
+    return apiFetch<ChapterResponse>(`/chapter/${unitId}`, {
       method: "PUT",
       body: JSON.stringify(input),
     });
@@ -96,7 +96,7 @@ export const chapterApi = {
    * Delete chapter
    */
   remove: async (unitId: string): Promise<{ message: string }> => {
-    return apiFetch<{ message: string }>(`/chapters/${unitId}`, {
+    return apiFetch<{ message: string }>(`/chapter/${unitId}`, {
       method: "DELETE",
     });
   },

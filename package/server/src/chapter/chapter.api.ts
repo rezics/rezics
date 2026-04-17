@@ -17,7 +17,7 @@ import {
   mapUnitToChapterListItemDTO,
 } from "./mapper";
 
-export const chapterApi = new Elysia({ prefix: "/chapters" })
+export const chapterApi = new Elysia({ prefix: "/chapter" })
   .use(authMacro)
   .get(
     "/:unitId",
@@ -59,7 +59,7 @@ export const chapterApi = new Elysia({ prefix: "/chapters" })
     },
   )
   .get(
-    "/",
+    "/list",
     async ({ identity, query, status }) => {
       if (identity.permission.role !== "ADMIN" && identity.permission.role !== "ROOT") {
         return status(403, "Forbidden: Admin role required");

@@ -69,6 +69,7 @@ export const createFeedbackSchema = t.Object({
  * List / filter feedbacks (admin or per-user)
  */
 export type FeedbackListQuery = OffsetPaginationParams & {
+  ids?: string;
   q?: string;
   userId?: string;
   unitId?: string;

@@ -1,5 +1,5 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
-import { useUserProfileStore } from "@/user/state";
+import { useUserProfileStore } from "@/user/states";
 
 export const Route = createFileRoute("/_mainLayout/user/me/follow")({
   beforeLoad: () => {

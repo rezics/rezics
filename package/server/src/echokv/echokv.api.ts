@@ -11,7 +11,7 @@ import type {
 export const echoKvApi = new Elysia({ prefix: "/echokv" })
   .use(authMacro)
   .get(
-    "/",
+    "/list",
     async ({ query }): Promise<EchoKVKeyListResponse> => {
       const keys = await echoKvService.listKeys(query.search);
       return { keys };

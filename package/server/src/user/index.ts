@@ -9,15 +9,15 @@
 export { userApi } from "./api/user.api";
 export { userBriefApi } from "./api/user-brief.api";
 // Utilities
-export { mapUserToDTO, mapUserToPublicProfile } from "./model/mapper";
+export { mapUserToDTO, mapUserToPublicProfile } from "./models/mapper";
 
 // Types for internal use
 export type {
   JWTPayload,
   UserFilterOptions,
   UserWithRelations,
-} from "./model/types";
+} from "./models/types";
 // Service layer for internal use
 export { UserService, userService } from "./service/user.service";
 
-export * from "./util";
+export * from "./utils";

@@ -29,7 +29,7 @@ import type { RealmFilters } from "./realm.types";
  */
 export const realmApi = {
   mine: async (): Promise<RealmListResponse> => {
-    return apiFetch<RealmListResponse>("/realms/me");
+    return apiFetch<RealmListResponse>("/realm/me");
   },
 
   // ---- CRUD ----
@@ -39,14 +39,14 @@ export const realmApi = {
    * Supports: q, isPublic, isOfficial, userId, language, sort, start, limit
    */
   list: async (filters?: RealmFilters): Promise<RealmListResponse> => {
-    return apiFetch<RealmListResponse>(`/realms${buildQueryString(filters)}`);
+    return apiFetch<RealmListResponse>(`/realm/list${buildQueryString(filters)}`);
   },
 
   /**
    * Get single realm by unitId
    */
   get: async (unitId: string): Promise<RealmResponse> => {
-    return apiFetch<RealmResponse>(`/realms/${unitId}`);
+    return apiFetch<RealmResponse>(`/realm/${unitId}`);
   },
 
   /**
@@ -57,7 +57,7 @@ export const realmApi = {
     filters?: RealmFilters,
   ): Promise<RealmListResponse> => {
     return apiFetch<RealmListResponse>(
-      `/realms${buildQueryString({ q: query, ...filters })}`,
+      `/realm/list${buildQueryString({ q: query, ...filters })}`,
     );
   },
 
@@ -65,7 +65,7 @@ export const realmApi = {
    * Create new realm
    */
   create: async (input: CreateRealmInput): Promise<RealmResponse> => {
-    return apiFetch<RealmResponse>("/realms", {
+    return apiFetch<RealmResponse>("/realm", {
       method: "POST",
       body: JSON.stringify(input),
     });
@@ -78,7 +78,7 @@ export const realmApi = {
     unitId: string,
     input: UpdateRealmInput,
   ): Promise<RealmResponse> => {
-    return apiFetch<RealmResponse>(`/realms/${unitId}`, {
+    return apiFetch<RealmResponse>(`/realm/${unitId}`, {
       method: "PUT",
       body: JSON.stringify(input),
     });
@@ -88,7 +88,7 @@ export const realmApi = {
    * Delete realm
    */
   remove: async (unitId: string): Promise<{ message: string }> => {
-    return apiFetch<{ message: string }>(`/realms/${unitId}`, {
+    return apiFetch<{ message: string }>(`/realm/${unitId}`, {
       method: "DELETE",
     });
   },
@@ -102,7 +102,7 @@ export const realmApi = {
     realmUnitId: string,
   ): Promise<RealmMemberDTO | null> => {
     return apiFetch<RealmMemberDTO | null>(
-      `/realms/${realmUnitId}/members/me`,
+      `/realm/${realmUnitId}/members/me`,
     );
   },
 
@@ -113,7 +113,7 @@ export const realmApi = {
     realmUnitId: string,
     input?: JoinRealmInput,
   ): Promise<RealmMemberDTO> => {
-    return apiFetch<RealmMemberDTO>(`/realms/${realmUnitId}/members`, {
+    return apiFetch<RealmMemberDTO>(`/realm/${realmUnitId}/members`, {
       method: "POST",
       body: JSON.stringify(input ?? {}),
     });
@@ -128,7 +128,7 @@ export const realmApi = {
       throw new Error("Cannot leave realm: no active session");
     }
     return apiFetch<{ message: string }>(
-      `/realms/${realmUnitId}/members/${claims.unitId}`,
+      `/realm/${realmUnitId}/members/${claims.unitId}`,
       {
         method: "DELETE",
       },
@@ -144,7 +144,7 @@ export const realmApi = {
     input: UpdateMemberRoleInput,
   ): Promise<RealmMemberDTO> => {
     return apiFetch<RealmMemberDTO>(
-      `/realms/${realmUnitId}/members/${userId}`,
+      `/realm/${realmUnitId}/members/${userId}`,
       {
         method: "PUT",
         body: JSON.stringify(input),
@@ -160,7 +160,7 @@ export const realmApi = {
     userId: string,
   ): Promise<{ message: string }> => {
     return apiFetch<{ message: string }>(
-      `/realms/${realmUnitId}/members/${userId}`,
+      `/realm/${realmUnitId}/members/${userId}`,
       {
         method: "DELETE",
       },
@@ -176,7 +176,7 @@ export const realmApi = {
     realmUnitId: string,
     input: AddRealmUnitInput,
   ): Promise<RealmUnitDTO> => {
-    return apiFetch<RealmUnitDTO>(`/realms/${realmUnitId}/content`, {
+    return apiFetch<RealmUnitDTO>(`/realm/${realmUnitId}/content`, {
       method: "POST",
       body: JSON.stringify(input),
     });
@@ -190,7 +190,7 @@ export const realmApi = {
     unitId: string,
   ): Promise<{ message: string }> => {
     return apiFetch<{ message: string }>(
-      `/realms/${realmUnitId}/content/${unitId}`,
+      `/realm/${realmUnitId}/content/${unitId}`,
       {
         method: "DELETE",
       },
@@ -206,7 +206,7 @@ export const realmApi = {
     realmUnitId: string,
     input: AddRealmTagUnitInput,
   ): Promise<RealmTagUnitDTO> => {
-    return apiFetch<RealmTagUnitDTO>(`/realms/${realmUnitId}/tags`, {
+    return apiFetch<RealmTagUnitDTO>(`/realm/${realmUnitId}/tags`, {
       method: "POST",
       body: JSON.stringify(input),
     });
@@ -221,7 +221,7 @@ export const realmApi = {
     contentUnitId: string,
   ): Promise<{ message: string }> => {
     return apiFetch<{ message: string }>(
-      `/realms/${realmUnitId}/tags/${tagUnitId}/${contentUnitId}`,
+      `/realm/${realmUnitId}/tags/${tagUnitId}/${contentUnitId}`,
       {
         method: "DELETE",
       },

@@ -23,12 +23,12 @@ import { mapTagUnitToDTO, mapUnitTagToDTO } from "./tag.mapper";
 import { getTagContext } from "./tag-context.service";
 import { tagService } from "./tag.service";
 
-export const tagApi = new Elysia({ prefix: "/tags" })
+export const tagApi = new Elysia({ prefix: "/tag" })
   .use(authMacro)
 
-  // GET / - list tags (search by name in language)
+  // GET /list - list tags (search by name in language)
   .get(
-    "/",
+    "/list",
     async ({ query }) => {
       const q = query as TagListQuery;
       const { tags, total } = await tagService.list(q);

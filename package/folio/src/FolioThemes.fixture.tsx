@@ -1,6 +1,6 @@
 import type { FolioAction } from "@rezics/folio";
 import { FolioProvider, useFolio } from "@rezics/folio";
-import { createTxtPlugin } from "@rezics/folio/plugin/txt";
+import { createTxtPlugin } from "@rezics/folio/plugins/txt";
 import { useState } from "react";
 import { StateOverride, THEMES } from "./_fixture-helpers";
 import { FALLBACK_TEXT } from "./_stubs";

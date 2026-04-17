@@ -7,7 +7,7 @@ import type {
   RealmUnitDTO,
   UpdateRealmInput,
 } from "@rezics/contract";
-import { validateSlug } from "@rezics/contract";
+import { parseIdsCsv, validateSlug } from "@rezics/contract";
 import type { Prisma } from "#/prisma/client";
 import { prisma, UnitStatus, UnitType } from "#/prisma/client";
 import {
@@ -44,6 +44,11 @@ export class RealmService {
 
     if (options.isOfficial !== undefined) {
       and.push({ isOfficial: options.isOfficial });
+    }
+
+    const idList = parseIdsCsv(options.ids);
+    if (idList && idList.length > 0) {
+      and.push({ unitId: { in: idList } });
     }
 
     return and.length ? { AND: and } : {};

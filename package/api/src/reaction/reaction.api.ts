@@ -57,7 +57,7 @@ export const reactionApi = {
     for (const id of targetIds) qs.append("targetIds", id);
     const queryString = qs.toString();
     return reactionFetch<ReactionSummaryResponse>(
-      `/reactions/summary${queryString ? `?${queryString}` : ""}`,
+      `/reaction/summary${queryString ? `?${queryString}` : ""}`,
     );
   },
 
@@ -69,7 +69,7 @@ export const reactionApi = {
     for (const id of targetIds) qs.append("targetIds", id);
     const queryString = qs.toString();
     return reactionFetch<ReactionMyResponse>(
-      `/reactions/my${queryString ? `?${queryString}` : ""}`,
+      `/reaction/my${queryString ? `?${queryString}` : ""}`,
     );
   },
 
@@ -78,7 +78,7 @@ export const reactionApi = {
    * Writes are routed through the main server.
    */
   create: async (input: ReactionCreateInput): Promise<ReactionDTO> => {
-    return apiFetch<ReactionDTO>("/reactions", {
+    return apiFetch<ReactionDTO>("/reaction", {
       method: "POST",
       body: JSON.stringify(input),
     });
@@ -94,7 +94,7 @@ export const reactionApi = {
       reaction: query.reaction,
     });
     return apiFetch<{ deleted: boolean }>(
-      `/reactions?${qs.toString()}`,
+      `/reaction?${qs.toString()}`,
       { method: "DELETE" },
     );
   },

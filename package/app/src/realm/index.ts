@@ -1,6 +1,6 @@
-export { RealmCard } from "./component/RealmCard";
-export { RealmList } from "./component/RealmList";
-export { RealmContentFeed } from "./component/RealmContentFeed";
-export { RealmMemberList } from "./component/RealmMemberList";
-export { RealmTagManager } from "./component/RealmTagManager";
-export { JoinButton } from "./component/JoinButton";
+export { RealmCard } from "./components/RealmCard";
+export { RealmList } from "./components/RealmList";
+export { RealmContentFeed } from "./components/RealmContentFeed";
+export { RealmMemberList } from "./components/RealmMemberList";
+export { RealmTagManager } from "./components/RealmTagManager";
+export { JoinButton } from "./components/JoinButton";

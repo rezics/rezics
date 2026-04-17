@@ -1,7 +1,7 @@
 import { createFileRoute, lazyRouteComponent } from "@tanstack/react-router";
 
 const ShelvesTabSection = lazyRouteComponent(
-  () => import("@/user/section/ShelvesTabSection"),
+  () => import("@/user/sections/ShelvesTabSection"),
   "ShelvesTabSection",
 );
 

@@ -10,7 +10,7 @@ import { authMacro } from "@/middleware";
 import { feedbackService } from "./feedback.service";
 import { mapFeedbackToDTO } from "./mapper";
 
-export const feedbackApi = new Elysia({ prefix: "/feedbacks" })
+export const feedbackApi = new Elysia({ prefix: "/feedback" })
   .use(authMacro)
   .post(
     "/",
@@ -89,7 +89,7 @@ export const feedbackApi = new Elysia({ prefix: "/feedbacks" })
     },
   )
   .get(
-    "/",
+    "/list",
     async ({ query, identity, set }): Promise<FeedbackListResponse> => {
       if (!BasicAdminPermission(identity.permission)) {
         set.status = 403;

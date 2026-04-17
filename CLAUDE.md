@@ -98,9 +98,10 @@ Canonical conventions for `@rezics/server` routes and repository folders. Full s
 
 **Routes** (`api-route-convention`):
 - Resource prefixes are **singular**: `/book`, `/user`, `/post` — not `/books`, `/users`, `/posts`.
-- Collection / batch access uses the `/list` suffix: `GET /{resource}/list?ids=a,b,c` (small, cacheable) and `POST /{resource}/list` (large ids or nested filters), both sharing the same schema.
-- Every `*ListQuerySchema` spreads `listQueryBase` from `@rezics/contract` to pick up the shared `ids: string[]` field (`maxItems: 200`).
+- Collection / batch access uses the `/list` suffix: `GET /{resource}/list?ids=a,b,c` (small, cacheable CSV) and `POST /{resource}/list` (large ids or nested filters).
+- Every `*ListQuerySchema` spreads `listGetQueryBase.properties` from `@rezics/contract` to pick up the shared `ids: string` (CSV) field; batch POST bodies use `listPostBodyBase` (array, `maxItems: 200`). Services call `parseIdsCsv(query.ids)` and intersect the resulting `id[]` with other where-clause filters.
 - `@rezics/auth` is out of scope (better-auth governed).
+- Baseline snapshot retired 2026-04-17 after the `api-route-and-folder-migration` change landed; `check:convention` now expects zero violations.
 
 **Folders** (`folder-naming-convention`) — β dual-track:
 - Domain / feature folders are **singular** (`book/`, `user/`, `translation-group/`).

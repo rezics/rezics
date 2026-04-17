@@ -1,7 +1,7 @@
 import { createFileRoute, lazyRouteComponent } from "@tanstack/react-router";
 
 const ContentTabSection = lazyRouteComponent(
-  () => import("@/user/section/ContentTabSection"),
+  () => import("@/user/sections/ContentTabSection"),
   "ContentTabSection",
 );
 

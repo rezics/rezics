@@ -13,8 +13,8 @@ import { useCallback, useMemo, useRef, useState } from "react";
 import { ImageModal } from "./image/ImageModal";
 import type { ImageProvider } from "./image/types";
 import { EditorPanel } from "./panel/EditorPanel";
-import { MentionPanel, useMentionPanel } from "./plugin/EditorMention";
-import { EmojiPickerOverlay } from "./plugin/EmojiMart";
+import { MentionPanel, useMentionPanel } from "./plugins/EditorMention";
+import { EmojiPickerOverlay } from "./plugins/EmojiMart";
 import "./editor.css";
 
 export const DEFAULT_RESIZE_CONFIG: ResizeConfig = {

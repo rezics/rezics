@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import type { JwtCryptoProvider } from "../contracts/crypto-provider";
-import type { JwtKeyPersistence, JwtKeyRecord } from "../contracts/persistence";
+import type { JwtCryptoProvider } from "../contract/crypto-provider";
+import type { JwtKeyPersistence, JwtKeyRecord } from "../contract/persistence";
 import type { JwtPrivateJwk, JwtPublicJwk } from "../core/jwk";
 import { JwtAlgorithm } from "../core/jwt-algorithm";
 import { createRotationEngine } from "./rotation-engine";

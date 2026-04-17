@@ -1,7 +1,7 @@
 import { createFileRoute, lazyRouteComponent } from "@tanstack/react-router";
 
 const RealmsTabSection = lazyRouteComponent(
-  () => import("@/user/section/RealmsTabSection"),
+  () => import("@/user/sections/RealmsTabSection"),
   "RealmsTabSection",
 );
 

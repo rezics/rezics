@@ -34,7 +34,7 @@ Use explicit named imports from `@/search`:
 - `SimpleSearchInput`
 - search model/types (`SearchInfo`, parser/normalize helpers)
 
-Avoid deep imports from `@/search/component/*` outside the feature.
+Avoid deep imports from `@/search/components/*` outside the feature.
 
 ## Header Home Search Behavior
 

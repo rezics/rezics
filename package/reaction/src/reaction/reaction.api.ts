@@ -13,7 +13,7 @@ function normalizeIds(
   return Array.isArray(raw) ? raw : [raw];
 }
 
-export const reactionApi = new Elysia({ prefix: "/reactions" })
+export const reactionApi = new Elysia({ prefix: "/reaction" })
   .use(authMacro)
   .get(
     "/summary",

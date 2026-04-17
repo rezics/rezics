@@ -89,7 +89,7 @@ describe("refreshAuthToken", () => {
     const { apiFetch } = await import("./http");
     const { getToken } = await import("./jwt");
 
-    const result = await apiFetch<{ ok: boolean }>("/books");
+    const result = await apiFetch<{ ok: boolean }>("/book");
 
     expect(fetchMock).toHaveBeenCalledTimes(3);
     expect(fetchMock.mock.calls[1]?.[0]).toBe(
@@ -111,7 +111,7 @@ describe("refreshAuthToken", () => {
 
     const { apiFetch } = await import("./http");
 
-    await expect(apiFetch("/books")).rejects.toThrow("Expired");
+    await expect(apiFetch("/book")).rejects.toThrow("Expired");
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
@@ -134,7 +134,7 @@ describe("refreshAuthToken", () => {
     );
     setToken("member-token", NormalizedTokenName.REZICS_SESSION);
 
-    await apiFetch("/books", {
+    await apiFetch("/book", {
       headers: {
         "x-trace-id": "trace-1",
       },

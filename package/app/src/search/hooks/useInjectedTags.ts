@@ -1,6 +1,6 @@
 import { useRouterState } from "@tanstack/react-router";
 import { useMemo } from "react";
-import type { InjectedTag } from "../model/injectedTags";
+import type { InjectedTag } from "../models/injectedTags";
 
 /**
  * Read `injectedTags` from TanStack Router's location state.

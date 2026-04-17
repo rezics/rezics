@@ -15,7 +15,7 @@ import { authMacro, isAdminRole, tryResolveIdentity } from "@/middleware";
 import { mapPostToDTO } from "./post.mapper";
 import { postService } from "./post.service";
 
-export const postApi = new Elysia({ prefix: "/posts" })
+export const postApi = new Elysia({ prefix: "/post" })
   .use(authMacro)
   .get(
     "/:unitId",
@@ -33,7 +33,7 @@ export const postApi = new Elysia({ prefix: "/posts" })
     },
   )
   .get(
-    "/",
+    "/list",
     async ({ headers, query }): Promise<PostListResponse> => {
       const identity = await tryResolveIdentity(headers["authorization"]);
       const admin = isAdminRole(identity);

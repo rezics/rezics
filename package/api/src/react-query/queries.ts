@@ -30,7 +30,7 @@ export const userQueries = {
   byId: (id: string) =>
     queryOptions<UserDTO, Error, UserView, ReturnType<typeof userKeys.byId>>({
       queryKey: userKeys.byId(id),
-      queryFn: () => apiFetch<UserDTO>(`/users/${id}`),
+      queryFn: () => apiFetch<UserDTO>(`/user/${id}`),
       // select 的返回值（UserView）就是 *最终* data 类型
       select: (u) => ({
         id: u.id,

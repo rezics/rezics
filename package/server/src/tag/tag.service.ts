@@ -5,7 +5,7 @@ import type {
   TagListQuery,
   UpdateTagInput,
 } from "@rezics/contract";
-import { FALLBACK_LANGUAGE, validateSlug } from "@rezics/contract";
+import { FALLBACK_LANGUAGE, parseIdsCsv, validateSlug } from "@rezics/contract";
 import { prisma, UnitStatus, UnitType } from "#/prisma/client";
 import { patchContentTagsToMeili } from "@/meili/content/sync";
 import type { TagWithTranslations, UnitTagWithRelations } from "./types";
@@ -39,6 +39,11 @@ export class TagService {
       where.translations = {
         some: { language: query.language },
       };
+    }
+
+    const idList = parseIdsCsv(query.ids);
+    if (idList && idList.length > 0) {
+      where.id = { in: idList };
     }
 
     const [tags, total] = await Promise.all([

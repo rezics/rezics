@@ -112,7 +112,7 @@ export {
   SectionCards,
   SiteHeader,
   schema,
-} from "./section";
+} from "./sections";
 export {
   Select,
   SelectContent,

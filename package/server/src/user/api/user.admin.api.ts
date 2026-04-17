@@ -6,7 +6,7 @@ import {
 } from "@rezics/contract";
 import { Elysia, t } from "elysia";
 import { authMacro, verifyAdminFromDb } from "@/middleware";
-import { mapUserToDTO } from "../model/mapper";
+import { mapUserToDTO } from "../models/mapper";
 import { userService } from "../service/user.service";
 
 export const adminRoute = new Elysia()

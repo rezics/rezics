@@ -6,8 +6,8 @@
   "module": "src/index.ts",
   "exports": {
     ".": "./src/index.ts",
-    "./plugin/txt": "./src/plugin/txt/index.ts",
-    "./plugin/epub": "./src/plugin/epub/index.tsx"
+    "./plugins/txt": "./src/plugins/txt/index.ts",
+    "./plugins/epub": "./src/plugins/epub/index.tsx"
   },
   "scripts": {
     "test": "bun test",

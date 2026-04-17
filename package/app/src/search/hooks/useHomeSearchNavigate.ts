@@ -1,5 +1,5 @@
 import { useNavigate } from "@tanstack/react-router";
-import { buildSearchPath } from "../util/searchQuery";
+import { buildSearchPath } from "../utils/searchQuery";
 
 export function useHomeSearchNavigate() {
   const navigate = useNavigate();

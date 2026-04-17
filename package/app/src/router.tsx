@@ -3,7 +3,7 @@ import {
   createRouter,
   type ParsedLocation,
 } from "@tanstack/react-router";
-import { qc } from "@/app/provider/reactQueryUtil";
+import { qc } from "@/app/providers/reactQueryUtil";
 import { routeTree } from "./routeTree.gen";
 
 export const router = createRouter({

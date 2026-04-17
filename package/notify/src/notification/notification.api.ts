@@ -6,10 +6,10 @@ import { Elysia, t } from "elysia";
 import { authMacro } from "../macro/auth";
 import * as notificationService from "./notification.service";
 
-export const notificationApi = new Elysia({ prefix: "/notifications" })
+export const notificationApi = new Elysia({ prefix: "/notification" })
   .use(authMacro)
   .get(
-    "/",
+    "/list",
     async ({ userId, query }) => {
       const page = Number(query.page ?? 1);
       const limit = Number(query.limit ?? 20);

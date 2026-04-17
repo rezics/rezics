@@ -1,7 +1,7 @@
 import { createFileRoute, lazyRouteComponent } from "@tanstack/react-router";
 
 const RealmListPage = lazyRouteComponent(
-  () => import("@/realm/page/RealmListPage"),
+  () => import("@/realm/pages/RealmListPage"),
   "RealmListPage",
 );
 

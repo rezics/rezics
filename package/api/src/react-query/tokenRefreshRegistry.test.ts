@@ -7,7 +7,7 @@ mock.module("../user/user.api", () => ({
   },
 }));
 
-mock.module("@rezics/api/state/authSessionStore", () => ({
+mock.module("@rezics/api/states/authSessionStore", () => ({
   useAuthSessionStore: {
     getState: () => ({
       syncBusinessToken: mock(() => undefined),

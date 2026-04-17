@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { RealmPage } from "@/realm/page/RealmPage";
+import { RealmPage } from "@/realm/pages/RealmPage";
 
 export const Route = createFileRoute("/_mainLayout/realm/$realmId/")({
   component: () => {

@@ -3,6 +3,7 @@ import type {
   CreateChapterInput,
   UpdateChapterInput,
 } from "@rezics/contract";
+import { parseIdsCsv } from "@rezics/contract";
 import type { Prisma } from "#/prisma/client";
 import { prisma, UnitStatus, UnitType } from "#/prisma/client";
 import type { ChapterUnitWithRelations } from "./types";
@@ -63,6 +64,12 @@ export class ChapterService {
 
     // Always restrict to CHAPTER
     andWhere.push({ type: UnitType.CHAPTER });
+
+    // Intersect with explicit unit id list (from listGetQueryBase)
+    const idList = parseIdsCsv(options.ids);
+    if (idList && idList.length > 0) {
+      andWhere.push({ id: { in: idList } });
+    }
 
     return andWhere.length > 0 ? { AND: andWhere } : { type: UnitType.CHAPTER };
   }

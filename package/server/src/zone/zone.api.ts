@@ -4,7 +4,7 @@ import { authMacro, isAdminRole } from "@/middleware";
 import { zoneService } from "./zone.service";
 import { mapZoneToDTO } from "./zone.mapper";
 
-export const zoneApi = new Elysia({ prefix: "/zones" })
+export const zoneApi = new Elysia({ prefix: "/zone" })
   .use(authMacro)
 
   // Public: Get zone by slug

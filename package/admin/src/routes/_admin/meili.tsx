@@ -1,7 +1,7 @@
 import { createFileRoute, lazyRouteComponent } from "@tanstack/react-router";
 
 const MeiliPage = lazyRouteComponent(
-  () => import("@/meili/page/MeiliPage"),
+  () => import("@/meili/pages/MeiliPage"),
   "MeiliPage",
 );
 

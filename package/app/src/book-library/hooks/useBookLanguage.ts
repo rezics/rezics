@@ -5,7 +5,7 @@ import { useAtom } from "jotai";
 import { useCallback, useMemo } from "react";
 import { FALLBACK_LANGUAGE } from "@rezics/contract";
 
-import { bookLanguageAtom } from "../state/bookDetailAtoms";
+import { bookLanguageAtom } from "../states/bookDetailAtoms";
 
 /**
  * Resolve the initial language for a book detail page from the user's

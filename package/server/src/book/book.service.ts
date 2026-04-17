@@ -3,6 +3,7 @@ import type {
   CreateBookInput,
   UpdateBookInput,
 } from "@rezics/contract";
+import { parseIdsCsv } from "@rezics/contract";
 import type { Prisma } from "#/prisma/client";
 import {
   prisma,
@@ -102,6 +103,12 @@ export class BookService {
       andWhere.push({
         unit: { status: options.status as UnitStatus },
       });
+    }
+
+    // Intersect with explicit unit id list (from listGetQueryBase)
+    const idList = parseIdsCsv(options.ids);
+    if (idList && idList.length > 0) {
+      andWhere.push({ unitId: { in: idList } });
     }
 
     return { AND: andWhere };

@@ -25,14 +25,14 @@ export const postApi = {
    * authorUserId, kind, mode, maxDepth, sort, start, cursor, limit
    */
   list: async (filters?: PostFilters): Promise<PostListResponse> => {
-    return apiFetch<PostListResponse>(`/posts${buildQueryString(filters)}`);
+    return apiFetch<PostListResponse>(`/post/list${buildQueryString(filters)}`);
   },
 
   /**
    * Get single post by unitId
    */
   get: async (unitId: string): Promise<PostResponse> => {
-    return apiFetch<PostResponse>(`/posts/${unitId}`);
+    return apiFetch<PostResponse>(`/post/${unitId}`);
   },
 
   /**
@@ -43,7 +43,7 @@ export const postApi = {
     filters?: PostFilters,
   ): Promise<PostListResponse> => {
     return apiFetch<PostListResponse>(
-      `/posts${buildQueryString({ targetUnitId, ...filters })}`,
+      `/post/list${buildQueryString({ targetUnitId, ...filters })}`,
     );
   },
 
@@ -55,7 +55,7 @@ export const postApi = {
     filters?: PostFilters,
   ): Promise<PostListResponse> => {
     return apiFetch<PostListResponse>(
-      `/posts${buildQueryString({ authorUserId, ...filters })}`,
+      `/post/list${buildQueryString({ authorUserId, ...filters })}`,
     );
   },
 
@@ -67,7 +67,7 @@ export const postApi = {
     filters?: PostFilters,
   ): Promise<PostListResponse> => {
     return apiFetch<PostListResponse>(
-      `/posts${buildQueryString({ rootPostUnitId, ...filters })}`,
+      `/post/list${buildQueryString({ rootPostUnitId, ...filters })}`,
     );
   },
 
@@ -79,7 +79,7 @@ export const postApi = {
     filters?: PostFilters,
   ): Promise<PostListResponse> => {
     return apiFetch<PostListResponse>(
-      `/posts${buildQueryString({ parentPostUnitId, ...filters })}`,
+      `/post/list${buildQueryString({ parentPostUnitId, ...filters })}`,
     );
   },
 
@@ -91,7 +91,7 @@ export const postApi = {
     filters?: PostFilters,
   ): Promise<PostListResponse> => {
     return apiFetch<PostListResponse>(
-      `/posts${buildQueryString({ realmUnitId, ...filters })}`,
+      `/post/list${buildQueryString({ realmUnitId, ...filters })}`,
     );
   },
 
@@ -99,7 +99,7 @@ export const postApi = {
    * Create new post
    */
   create: async (input: CreatePostInput): Promise<PostResponse> => {
-    return apiFetch<PostResponse>("/posts", {
+    return apiFetch<PostResponse>("/post", {
       method: "POST",
       body: JSON.stringify(input),
     });
@@ -112,7 +112,7 @@ export const postApi = {
     unitId: string,
     input: UpdatePostInput,
   ): Promise<PostResponse> => {
-    return apiFetch<PostResponse>(`/posts/${unitId}`, {
+    return apiFetch<PostResponse>(`/post/${unitId}`, {
       method: "PUT",
       body: JSON.stringify(input),
     });
@@ -122,7 +122,7 @@ export const postApi = {
    * Delete post
    */
   remove: async (unitId: string): Promise<{ message: string }> => {
-    return apiFetch<{ message: string }>(`/posts/${unitId}`, {
+    return apiFetch<{ message: string }>(`/post/${unitId}`, {
       method: "DELETE",
     });
   },

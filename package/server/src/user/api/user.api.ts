@@ -8,7 +8,7 @@ import { settingsRoute } from "./user.settings.api";
 /**
  * User Controller - Elysia.js routes with JWT authentication
  */
-export const userApi = new Elysia({ prefix: "/users" })
+export const userApi = new Elysia({ prefix: "/user" })
   .use(coreRoute)
   .use(adminRoute)
   .use(followRoute)

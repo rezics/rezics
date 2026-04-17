@@ -9,13 +9,13 @@ import { Elysia, t } from "elysia";
 import { mapUserSearchDocToPublicProfile } from "@/meili/mapper";
 import { meiliService } from "@/meili/meili.service";
 import { authMacro, verifyAdminFromDb } from "@/middleware";
-import { mapUserToDTO } from "../model/mapper";
+import { mapUserToDTO } from "../models/mapper";
 import { userService } from "../service/user.service";
 
 export const coreRoute = new Elysia()
   .use(authMacro)
   .get(
-    "/",
+    "/list",
     async ({ query }) => {
       const result = await meiliService.searchUsers(query as UserListQuery);
       return {

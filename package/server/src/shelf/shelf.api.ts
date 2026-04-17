@@ -22,7 +22,7 @@ import { authMacro } from "@/middleware";
 import { unitService } from "@/unit/unit.service";
 import { shelfService } from "./shelf.service";
 
-export const shelfApi = new Elysia({ prefix: "/shelves" })
+export const shelfApi = new Elysia({ prefix: "/shelf" })
   .use(authMacro)
   // --- Shelf CRUD ---
   .get(
@@ -55,7 +55,7 @@ export const shelfApi = new Elysia({ prefix: "/shelves" })
     },
   )
   .get(
-    "/",
+    "/list",
     async ({ query }): Promise<ShelfListResponse> => {
       const { shelves, total } = await shelfService.list(query as any);
       return { shelves, total };

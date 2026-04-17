@@ -1,7 +1,7 @@
 import { createFileRoute, lazyRouteComponent } from "@tanstack/react-router";
 
 const EchokvPage = lazyRouteComponent(
-  () => import("@/misc/page/EchokvEdit"),
+  () => import("@/misc/pages/EchokvEdit"),
   "EchokvEditPage",
 );
 

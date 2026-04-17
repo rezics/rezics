@@ -2,7 +2,7 @@ import type { UserDTO } from "@rezics/contract";
 import { userParamsSchema } from "@rezics/contract";
 import { Elysia, t } from "elysia";
 import { authMacro } from "@/middleware";
-import { mapUserToPublicProfile } from "../model/mapper";
+import { mapUserToPublicProfile } from "../models/mapper";
 import { userService } from "../service/user.service";
 
 export const followRoute = new Elysia()

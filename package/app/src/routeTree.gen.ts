@@ -84,19 +84,19 @@ import { Route as MainLayoutBookBookIdInfoRouteImport } from './routes/_mainLayo
 import { Route as MainLayoutBookBookIdDiscussionRouteImport } from './routes/_mainLayout/book/$bookId/discussion'
 import { Route as MainLayoutBookBookIdContentRouteImport } from './routes/_mainLayout/book/$bookId/content'
 import { Route as BookBookIdReadChapterIdRouteRouteImport } from './routes/book_/$bookId/read/$chapterId/route'
-import { Route as MainLayoutUserMeSettingsRouteRouteImport } from './routes/_mainLayout/user/me/settings/route'
+import { Route as MainLayoutUserMeSettingRouteRouteImport } from './routes/_mainLayout/user/me/setting/route'
 import { Route as MainLayoutTagDomainUnitIdRouteRouteImport } from './routes/_mainLayout/tag/domain/$unitId/route'
 import { Route as MainLayoutTagBookBookIdRouteRouteImport } from './routes/_mainLayout/tag/book/$bookId/route'
 import { Route as BookBookIdReadChapterIdIndexRouteImport } from './routes/book_/$bookId/read/$chapterId/index'
-import { Route as MainLayoutUserMeSettingsIndexRouteImport } from './routes/_mainLayout/user/me/settings/index'
+import { Route as MainLayoutUserMeSettingIndexRouteImport } from './routes/_mainLayout/user/me/setting/index'
 import { Route as MainLayoutTagDomainUnitIdIndexRouteImport } from './routes/_mainLayout/tag/domain/$unitId/index'
 import { Route as MainLayoutTagBookBookIdIndexRouteImport } from './routes/_mainLayout/tag/book/$bookId/index'
-import { Route as MainLayoutUserMeSettingsTokensRouteImport } from './routes/_mainLayout/user/me/settings/tokens'
-import { Route as MainLayoutUserMeSettingsSecurityRouteImport } from './routes/_mainLayout/user/me/settings/security'
-import { Route as MainLayoutUserMeSettingsProfileRouteImport } from './routes/_mainLayout/user/me/settings/profile'
-import { Route as MainLayoutUserMeSettingsPreferencesRouteImport } from './routes/_mainLayout/user/me/settings/preferences'
-import { Route as MainLayoutUserMeSettingsConnectionsRouteImport } from './routes/_mainLayout/user/me/settings/connections'
-import { Route as MainLayoutUserMeSettingsAccountRouteImport } from './routes/_mainLayout/user/me/settings/account'
+import { Route as MainLayoutUserMeSettingTokensRouteImport } from './routes/_mainLayout/user/me/setting/tokens'
+import { Route as MainLayoutUserMeSettingSecurityRouteImport } from './routes/_mainLayout/user/me/setting/security'
+import { Route as MainLayoutUserMeSettingProfileRouteImport } from './routes/_mainLayout/user/me/setting/profile'
+import { Route as MainLayoutUserMeSettingPreferencesRouteImport } from './routes/_mainLayout/user/me/setting/preferences'
+import { Route as MainLayoutUserMeSettingConnectionsRouteImport } from './routes/_mainLayout/user/me/setting/connections'
+import { Route as MainLayoutUserMeSettingAccountRouteImport } from './routes/_mainLayout/user/me/setting/account'
 import { Route as MainLayoutTagBookBookIdTagRouteRouteImport } from './routes/_mainLayout/tag/book/$bookId/tag/route'
 import { Route as MainLayoutTagBookBookIdTagIndexRouteImport } from './routes/_mainLayout/tag/book/$bookId/tag/index'
 import { Route as MainLayoutTagDomainUnitIdTitleTitleRouteImport } from './routes/_mainLayout/tag/domain/$unitId/title/$title'
@@ -509,10 +509,10 @@ const BookBookIdReadChapterIdRouteRoute =
     path: '/book/$bookId/read/$chapterId',
     getParentRoute: () => rootRouteImport,
   } as any)
-const MainLayoutUserMeSettingsRouteRoute =
-  MainLayoutUserMeSettingsRouteRouteImport.update({
-    id: '/settings',
-    path: '/settings',
+const MainLayoutUserMeSettingRouteRoute =
+  MainLayoutUserMeSettingRouteRouteImport.update({
+    id: '/setting',
+    path: '/setting',
     getParentRoute: () => MainLayoutUserMeRouteRoute,
   } as any)
 const MainLayoutTagDomainUnitIdRouteRoute =
@@ -533,11 +533,11 @@ const BookBookIdReadChapterIdIndexRoute =
     path: '/',
     getParentRoute: () => BookBookIdReadChapterIdRouteRoute,
   } as any)
-const MainLayoutUserMeSettingsIndexRoute =
-  MainLayoutUserMeSettingsIndexRouteImport.update({
+const MainLayoutUserMeSettingIndexRoute =
+  MainLayoutUserMeSettingIndexRouteImport.update({
     id: '/',
     path: '/',
-    getParentRoute: () => MainLayoutUserMeSettingsRouteRoute,
+    getParentRoute: () => MainLayoutUserMeSettingRouteRoute,
   } as any)
 const MainLayoutTagDomainUnitIdIndexRoute =
   MainLayoutTagDomainUnitIdIndexRouteImport.update({
@@ -551,41 +551,41 @@ const MainLayoutTagBookBookIdIndexRoute =
     path: '/',
     getParentRoute: () => MainLayoutTagBookBookIdRouteRoute,
   } as any)
-const MainLayoutUserMeSettingsTokensRoute =
-  MainLayoutUserMeSettingsTokensRouteImport.update({
+const MainLayoutUserMeSettingTokensRoute =
+  MainLayoutUserMeSettingTokensRouteImport.update({
     id: '/tokens',
     path: '/tokens',
-    getParentRoute: () => MainLayoutUserMeSettingsRouteRoute,
+    getParentRoute: () => MainLayoutUserMeSettingRouteRoute,
   } as any)
-const MainLayoutUserMeSettingsSecurityRoute =
-  MainLayoutUserMeSettingsSecurityRouteImport.update({
+const MainLayoutUserMeSettingSecurityRoute =
+  MainLayoutUserMeSettingSecurityRouteImport.update({
     id: '/security',
     path: '/security',
-    getParentRoute: () => MainLayoutUserMeSettingsRouteRoute,
+    getParentRoute: () => MainLayoutUserMeSettingRouteRoute,
   } as any)
-const MainLayoutUserMeSettingsProfileRoute =
-  MainLayoutUserMeSettingsProfileRouteImport.update({
+const MainLayoutUserMeSettingProfileRoute =
+  MainLayoutUserMeSettingProfileRouteImport.update({
     id: '/profile',
     path: '/profile',
-    getParentRoute: () => MainLayoutUserMeSettingsRouteRoute,
+    getParentRoute: () => MainLayoutUserMeSettingRouteRoute,
   } as any)
-const MainLayoutUserMeSettingsPreferencesRoute =
-  MainLayoutUserMeSettingsPreferencesRouteImport.update({
+const MainLayoutUserMeSettingPreferencesRoute =
+  MainLayoutUserMeSettingPreferencesRouteImport.update({
     id: '/preferences',
     path: '/preferences',
-    getParentRoute: () => MainLayoutUserMeSettingsRouteRoute,
+    getParentRoute: () => MainLayoutUserMeSettingRouteRoute,
   } as any)
-const MainLayoutUserMeSettingsConnectionsRoute =
-  MainLayoutUserMeSettingsConnectionsRouteImport.update({
+const MainLayoutUserMeSettingConnectionsRoute =
+  MainLayoutUserMeSettingConnectionsRouteImport.update({
     id: '/connections',
     path: '/connections',
-    getParentRoute: () => MainLayoutUserMeSettingsRouteRoute,
+    getParentRoute: () => MainLayoutUserMeSettingRouteRoute,
   } as any)
-const MainLayoutUserMeSettingsAccountRoute =
-  MainLayoutUserMeSettingsAccountRouteImport.update({
+const MainLayoutUserMeSettingAccountRoute =
+  MainLayoutUserMeSettingAccountRouteImport.update({
     id: '/account',
     path: '/account',
-    getParentRoute: () => MainLayoutUserMeSettingsRouteRoute,
+    getParentRoute: () => MainLayoutUserMeSettingRouteRoute,
   } as any)
 const MainLayoutTagBookBookIdTagRouteRoute =
   MainLayoutTagBookBookIdTagRouteRouteImport.update({
@@ -650,7 +650,7 @@ export interface FileRoutesByFullPath {
   '/unit/': typeof MainLayoutUnitIndexRoute
   '/tag/book/$bookId': typeof MainLayoutTagBookBookIdRouteRouteWithChildren
   '/tag/domain/$unitId': typeof MainLayoutTagDomainUnitIdRouteRouteWithChildren
-  '/user/me/settings': typeof MainLayoutUserMeSettingsRouteRouteWithChildren
+  '/user/me/setting': typeof MainLayoutUserMeSettingRouteRouteWithChildren
   '/book/$bookId/read/$chapterId': typeof BookBookIdReadChapterIdRouteRouteWithChildren
   '/book/$bookId/content': typeof MainLayoutBookBookIdContentRoute
   '/book/$bookId/discussion': typeof MainLayoutBookBookIdDiscussionRoute
@@ -691,15 +691,15 @@ export interface FileRoutesByFullPath {
   '/zone/$slug/': typeof MainLayoutZoneSlugIndexRoute
   '/book/$bookId/edit/': typeof BookBookIdEditIndexRoute
   '/tag/book/$bookId/tag': typeof MainLayoutTagBookBookIdTagRouteRouteWithChildren
-  '/user/me/settings/account': typeof MainLayoutUserMeSettingsAccountRoute
-  '/user/me/settings/connections': typeof MainLayoutUserMeSettingsConnectionsRoute
-  '/user/me/settings/preferences': typeof MainLayoutUserMeSettingsPreferencesRoute
-  '/user/me/settings/profile': typeof MainLayoutUserMeSettingsProfileRoute
-  '/user/me/settings/security': typeof MainLayoutUserMeSettingsSecurityRoute
-  '/user/me/settings/tokens': typeof MainLayoutUserMeSettingsTokensRoute
+  '/user/me/setting/account': typeof MainLayoutUserMeSettingAccountRoute
+  '/user/me/setting/connections': typeof MainLayoutUserMeSettingConnectionsRoute
+  '/user/me/setting/preferences': typeof MainLayoutUserMeSettingPreferencesRoute
+  '/user/me/setting/profile': typeof MainLayoutUserMeSettingProfileRoute
+  '/user/me/setting/security': typeof MainLayoutUserMeSettingSecurityRoute
+  '/user/me/setting/tokens': typeof MainLayoutUserMeSettingTokensRoute
   '/tag/book/$bookId/': typeof MainLayoutTagBookBookIdIndexRoute
   '/tag/domain/$unitId/': typeof MainLayoutTagDomainUnitIdIndexRoute
-  '/user/me/settings/': typeof MainLayoutUserMeSettingsIndexRoute
+  '/user/me/setting/': typeof MainLayoutUserMeSettingIndexRoute
   '/book/$bookId/read/$chapterId/': typeof BookBookIdReadChapterIdIndexRoute
   '/tag/book/$bookId/tag/$domainId': typeof MainLayoutTagBookBookIdTagDomainIdRoute
   '/tag/domain/$unitId/title/$title': typeof MainLayoutTagDomainUnitIdTitleTitleRoute
@@ -775,15 +775,15 @@ export interface FileRoutesByTo {
   '/z/$slug': typeof MainLayoutZSlugIndexRoute
   '/zone/$slug': typeof MainLayoutZoneSlugIndexRoute
   '/book/$bookId/edit': typeof BookBookIdEditIndexRoute
-  '/user/me/settings/account': typeof MainLayoutUserMeSettingsAccountRoute
-  '/user/me/settings/connections': typeof MainLayoutUserMeSettingsConnectionsRoute
-  '/user/me/settings/preferences': typeof MainLayoutUserMeSettingsPreferencesRoute
-  '/user/me/settings/profile': typeof MainLayoutUserMeSettingsProfileRoute
-  '/user/me/settings/security': typeof MainLayoutUserMeSettingsSecurityRoute
-  '/user/me/settings/tokens': typeof MainLayoutUserMeSettingsTokensRoute
+  '/user/me/setting/account': typeof MainLayoutUserMeSettingAccountRoute
+  '/user/me/setting/connections': typeof MainLayoutUserMeSettingConnectionsRoute
+  '/user/me/setting/preferences': typeof MainLayoutUserMeSettingPreferencesRoute
+  '/user/me/setting/profile': typeof MainLayoutUserMeSettingProfileRoute
+  '/user/me/setting/security': typeof MainLayoutUserMeSettingSecurityRoute
+  '/user/me/setting/tokens': typeof MainLayoutUserMeSettingTokensRoute
   '/tag/book/$bookId': typeof MainLayoutTagBookBookIdIndexRoute
   '/tag/domain/$unitId': typeof MainLayoutTagDomainUnitIdIndexRoute
-  '/user/me/settings': typeof MainLayoutUserMeSettingsIndexRoute
+  '/user/me/setting': typeof MainLayoutUserMeSettingIndexRoute
   '/book/$bookId/read/$chapterId': typeof BookBookIdReadChapterIdIndexRoute
   '/tag/book/$bookId/tag/$domainId': typeof MainLayoutTagBookBookIdTagDomainIdRoute
   '/tag/domain/$unitId/title/$title': typeof MainLayoutTagDomainUnitIdTitleTitleRoute
@@ -829,7 +829,7 @@ export interface FileRoutesById {
   '/_mainLayout/unit/': typeof MainLayoutUnitIndexRoute
   '/_mainLayout/tag/book/$bookId': typeof MainLayoutTagBookBookIdRouteRouteWithChildren
   '/_mainLayout/tag/domain/$unitId': typeof MainLayoutTagDomainUnitIdRouteRouteWithChildren
-  '/_mainLayout/user/me/settings': typeof MainLayoutUserMeSettingsRouteRouteWithChildren
+  '/_mainLayout/user/me/setting': typeof MainLayoutUserMeSettingRouteRouteWithChildren
   '/book_/$bookId/read/$chapterId': typeof BookBookIdReadChapterIdRouteRouteWithChildren
   '/_mainLayout/book/$bookId/content': typeof MainLayoutBookBookIdContentRoute
   '/_mainLayout/book/$bookId/discussion': typeof MainLayoutBookBookIdDiscussionRoute
@@ -870,15 +870,15 @@ export interface FileRoutesById {
   '/_mainLayout/zone/$slug/': typeof MainLayoutZoneSlugIndexRoute
   '/book_/$bookId/edit/': typeof BookBookIdEditIndexRoute
   '/_mainLayout/tag/book/$bookId/tag': typeof MainLayoutTagBookBookIdTagRouteRouteWithChildren
-  '/_mainLayout/user/me/settings/account': typeof MainLayoutUserMeSettingsAccountRoute
-  '/_mainLayout/user/me/settings/connections': typeof MainLayoutUserMeSettingsConnectionsRoute
-  '/_mainLayout/user/me/settings/preferences': typeof MainLayoutUserMeSettingsPreferencesRoute
-  '/_mainLayout/user/me/settings/profile': typeof MainLayoutUserMeSettingsProfileRoute
-  '/_mainLayout/user/me/settings/security': typeof MainLayoutUserMeSettingsSecurityRoute
-  '/_mainLayout/user/me/settings/tokens': typeof MainLayoutUserMeSettingsTokensRoute
+  '/_mainLayout/user/me/setting/account': typeof MainLayoutUserMeSettingAccountRoute
+  '/_mainLayout/user/me/setting/connections': typeof MainLayoutUserMeSettingConnectionsRoute
+  '/_mainLayout/user/me/setting/preferences': typeof MainLayoutUserMeSettingPreferencesRoute
+  '/_mainLayout/user/me/setting/profile': typeof MainLayoutUserMeSettingProfileRoute
+  '/_mainLayout/user/me/setting/security': typeof MainLayoutUserMeSettingSecurityRoute
+  '/_mainLayout/user/me/setting/tokens': typeof MainLayoutUserMeSettingTokensRoute
   '/_mainLayout/tag/book/$bookId/': typeof MainLayoutTagBookBookIdIndexRoute
   '/_mainLayout/tag/domain/$unitId/': typeof MainLayoutTagDomainUnitIdIndexRoute
-  '/_mainLayout/user/me/settings/': typeof MainLayoutUserMeSettingsIndexRoute
+  '/_mainLayout/user/me/setting/': typeof MainLayoutUserMeSettingIndexRoute
   '/book_/$bookId/read/$chapterId/': typeof BookBookIdReadChapterIdIndexRoute
   '/_mainLayout/tag/book/$bookId/tag/$domainId': typeof MainLayoutTagBookBookIdTagDomainIdRoute
   '/_mainLayout/tag/domain/$unitId/title/$title': typeof MainLayoutTagDomainUnitIdTitleTitleRoute
@@ -924,7 +924,7 @@ export interface FileRouteTypes {
     | '/unit/'
     | '/tag/book/$bookId'
     | '/tag/domain/$unitId'
-    | '/user/me/settings'
+    | '/user/me/setting'
     | '/book/$bookId/read/$chapterId'
     | '/book/$bookId/content'
     | '/book/$bookId/discussion'
@@ -965,15 +965,15 @@ export interface FileRouteTypes {
     | '/zone/$slug/'
     | '/book/$bookId/edit/'
     | '/tag/book/$bookId/tag'
-    | '/user/me/settings/account'
-    | '/user/me/settings/connections'
-    | '/user/me/settings/preferences'
-    | '/user/me/settings/profile'
-    | '/user/me/settings/security'
-    | '/user/me/settings/tokens'
+    | '/user/me/setting/account'
+    | '/user/me/setting/connections'
+    | '/user/me/setting/preferences'
+    | '/user/me/setting/profile'
+    | '/user/me/setting/security'
+    | '/user/me/setting/tokens'
     | '/tag/book/$bookId/'
     | '/tag/domain/$unitId/'
-    | '/user/me/settings/'
+    | '/user/me/setting/'
     | '/book/$bookId/read/$chapterId/'
     | '/tag/book/$bookId/tag/$domainId'
     | '/tag/domain/$unitId/title/$title'
@@ -1049,15 +1049,15 @@ export interface FileRouteTypes {
     | '/z/$slug'
     | '/zone/$slug'
     | '/book/$bookId/edit'
-    | '/user/me/settings/account'
-    | '/user/me/settings/connections'
-    | '/user/me/settings/preferences'
-    | '/user/me/settings/profile'
-    | '/user/me/settings/security'
-    | '/user/me/settings/tokens'
+    | '/user/me/setting/account'
+    | '/user/me/setting/connections'
+    | '/user/me/setting/preferences'
+    | '/user/me/setting/profile'
+    | '/user/me/setting/security'
+    | '/user/me/setting/tokens'
     | '/tag/book/$bookId'
     | '/tag/domain/$unitId'
-    | '/user/me/settings'
+    | '/user/me/setting'
     | '/book/$bookId/read/$chapterId'
     | '/tag/book/$bookId/tag/$domainId'
     | '/tag/domain/$unitId/title/$title'
@@ -1102,7 +1102,7 @@ export interface FileRouteTypes {
     | '/_mainLayout/unit/'
     | '/_mainLayout/tag/book/$bookId'
     | '/_mainLayout/tag/domain/$unitId'
-    | '/_mainLayout/user/me/settings'
+    | '/_mainLayout/user/me/setting'
     | '/book_/$bookId/read/$chapterId'
     | '/_mainLayout/book/$bookId/content'
     | '/_mainLayout/book/$bookId/discussion'
@@ -1143,15 +1143,15 @@ export interface FileRouteTypes {
     | '/_mainLayout/zone/$slug/'
     | '/book_/$bookId/edit/'
     | '/_mainLayout/tag/book/$bookId/tag'
-    | '/_mainLayout/user/me/settings/account'
-    | '/_mainLayout/user/me/settings/connections'
-    | '/_mainLayout/user/me/settings/preferences'
-    | '/_mainLayout/user/me/settings/profile'
-    | '/_mainLayout/user/me/settings/security'
-    | '/_mainLayout/user/me/settings/tokens'
+    | '/_mainLayout/user/me/setting/account'
+    | '/_mainLayout/user/me/setting/connections'
+    | '/_mainLayout/user/me/setting/preferences'
+    | '/_mainLayout/user/me/setting/profile'
+    | '/_mainLayout/user/me/setting/security'
+    | '/_mainLayout/user/me/setting/tokens'
     | '/_mainLayout/tag/book/$bookId/'
     | '/_mainLayout/tag/domain/$unitId/'
-    | '/_mainLayout/user/me/settings/'
+    | '/_mainLayout/user/me/setting/'
     | '/book_/$bookId/read/$chapterId/'
     | '/_mainLayout/tag/book/$bookId/tag/$domainId'
     | '/_mainLayout/tag/domain/$unitId/title/$title'
@@ -1691,11 +1691,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BookBookIdReadChapterIdRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_mainLayout/user/me/settings': {
-      id: '/_mainLayout/user/me/settings'
-      path: '/settings'
-      fullPath: '/user/me/settings'
-      preLoaderRoute: typeof MainLayoutUserMeSettingsRouteRouteImport
+    '/_mainLayout/user/me/setting': {
+      id: '/_mainLayout/user/me/setting'
+      path: '/setting'
+      fullPath: '/user/me/setting'
+      preLoaderRoute: typeof MainLayoutUserMeSettingRouteRouteImport
       parentRoute: typeof MainLayoutUserMeRouteRoute
     }
     '/_mainLayout/tag/domain/$unitId': {
@@ -1719,12 +1719,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BookBookIdReadChapterIdIndexRouteImport
       parentRoute: typeof BookBookIdReadChapterIdRouteRoute
     }
-    '/_mainLayout/user/me/settings/': {
-      id: '/_mainLayout/user/me/settings/'
+    '/_mainLayout/user/me/setting/': {
+      id: '/_mainLayout/user/me/setting/'
       path: '/'
-      fullPath: '/user/me/settings/'
-      preLoaderRoute: typeof MainLayoutUserMeSettingsIndexRouteImport
-      parentRoute: typeof MainLayoutUserMeSettingsRouteRoute
+      fullPath: '/user/me/setting/'
+      preLoaderRoute: typeof MainLayoutUserMeSettingIndexRouteImport
+      parentRoute: typeof MainLayoutUserMeSettingRouteRoute
     }
     '/_mainLayout/tag/domain/$unitId/': {
       id: '/_mainLayout/tag/domain/$unitId/'
@@ -1740,47 +1740,47 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MainLayoutTagBookBookIdIndexRouteImport
       parentRoute: typeof MainLayoutTagBookBookIdRouteRoute
     }
-    '/_mainLayout/user/me/settings/tokens': {
-      id: '/_mainLayout/user/me/settings/tokens'
+    '/_mainLayout/user/me/setting/tokens': {
+      id: '/_mainLayout/user/me/setting/tokens'
       path: '/tokens'
-      fullPath: '/user/me/settings/tokens'
-      preLoaderRoute: typeof MainLayoutUserMeSettingsTokensRouteImport
-      parentRoute: typeof MainLayoutUserMeSettingsRouteRoute
+      fullPath: '/user/me/setting/tokens'
+      preLoaderRoute: typeof MainLayoutUserMeSettingTokensRouteImport
+      parentRoute: typeof MainLayoutUserMeSettingRouteRoute
     }
-    '/_mainLayout/user/me/settings/security': {
-      id: '/_mainLayout/user/me/settings/security'
+    '/_mainLayout/user/me/setting/security': {
+      id: '/_mainLayout/user/me/setting/security'
       path: '/security'
-      fullPath: '/user/me/settings/security'
-      preLoaderRoute: typeof MainLayoutUserMeSettingsSecurityRouteImport
-      parentRoute: typeof MainLayoutUserMeSettingsRouteRoute
+      fullPath: '/user/me/setting/security'
+      preLoaderRoute: typeof MainLayoutUserMeSettingSecurityRouteImport
+      parentRoute: typeof MainLayoutUserMeSettingRouteRoute
     }
-    '/_mainLayout/user/me/settings/profile': {
-      id: '/_mainLayout/user/me/settings/profile'
+    '/_mainLayout/user/me/setting/profile': {
+      id: '/_mainLayout/user/me/setting/profile'
       path: '/profile'
-      fullPath: '/user/me/settings/profile'
-      preLoaderRoute: typeof MainLayoutUserMeSettingsProfileRouteImport
-      parentRoute: typeof MainLayoutUserMeSettingsRouteRoute
+      fullPath: '/user/me/setting/profile'
+      preLoaderRoute: typeof MainLayoutUserMeSettingProfileRouteImport
+      parentRoute: typeof MainLayoutUserMeSettingRouteRoute
     }
-    '/_mainLayout/user/me/settings/preferences': {
-      id: '/_mainLayout/user/me/settings/preferences'
+    '/_mainLayout/user/me/setting/preferences': {
+      id: '/_mainLayout/user/me/setting/preferences'
       path: '/preferences'
-      fullPath: '/user/me/settings/preferences'
-      preLoaderRoute: typeof MainLayoutUserMeSettingsPreferencesRouteImport
-      parentRoute: typeof MainLayoutUserMeSettingsRouteRoute
+      fullPath: '/user/me/setting/preferences'
+      preLoaderRoute: typeof MainLayoutUserMeSettingPreferencesRouteImport
+      parentRoute: typeof MainLayoutUserMeSettingRouteRoute
     }
-    '/_mainLayout/user/me/settings/connections': {
-      id: '/_mainLayout/user/me/settings/connections'
+    '/_mainLayout/user/me/setting/connections': {
+      id: '/_mainLayout/user/me/setting/connections'
       path: '/connections'
-      fullPath: '/user/me/settings/connections'
-      preLoaderRoute: typeof MainLayoutUserMeSettingsConnectionsRouteImport
-      parentRoute: typeof MainLayoutUserMeSettingsRouteRoute
+      fullPath: '/user/me/setting/connections'
+      preLoaderRoute: typeof MainLayoutUserMeSettingConnectionsRouteImport
+      parentRoute: typeof MainLayoutUserMeSettingRouteRoute
     }
-    '/_mainLayout/user/me/settings/account': {
-      id: '/_mainLayout/user/me/settings/account'
+    '/_mainLayout/user/me/setting/account': {
+      id: '/_mainLayout/user/me/setting/account'
       path: '/account'
-      fullPath: '/user/me/settings/account'
-      preLoaderRoute: typeof MainLayoutUserMeSettingsAccountRouteImport
-      parentRoute: typeof MainLayoutUserMeSettingsRouteRoute
+      fullPath: '/user/me/setting/account'
+      preLoaderRoute: typeof MainLayoutUserMeSettingAccountRouteImport
+      parentRoute: typeof MainLayoutUserMeSettingRouteRoute
     }
     '/_mainLayout/tag/book/$bookId/tag': {
       id: '/_mainLayout/tag/book/$bookId/tag'
@@ -1835,37 +1835,36 @@ const MainLayoutBookBookIdRouteRouteWithChildren =
     MainLayoutBookBookIdRouteRouteChildren,
   )
 
-interface MainLayoutUserMeSettingsRouteRouteChildren {
-  MainLayoutUserMeSettingsAccountRoute: typeof MainLayoutUserMeSettingsAccountRoute
-  MainLayoutUserMeSettingsConnectionsRoute: typeof MainLayoutUserMeSettingsConnectionsRoute
-  MainLayoutUserMeSettingsPreferencesRoute: typeof MainLayoutUserMeSettingsPreferencesRoute
-  MainLayoutUserMeSettingsProfileRoute: typeof MainLayoutUserMeSettingsProfileRoute
-  MainLayoutUserMeSettingsSecurityRoute: typeof MainLayoutUserMeSettingsSecurityRoute
-  MainLayoutUserMeSettingsTokensRoute: typeof MainLayoutUserMeSettingsTokensRoute
-  MainLayoutUserMeSettingsIndexRoute: typeof MainLayoutUserMeSettingsIndexRoute
+interface MainLayoutUserMeSettingRouteRouteChildren {
+  MainLayoutUserMeSettingAccountRoute: typeof MainLayoutUserMeSettingAccountRoute
+  MainLayoutUserMeSettingConnectionsRoute: typeof MainLayoutUserMeSettingConnectionsRoute
+  MainLayoutUserMeSettingPreferencesRoute: typeof MainLayoutUserMeSettingPreferencesRoute
+  MainLayoutUserMeSettingProfileRoute: typeof MainLayoutUserMeSettingProfileRoute
+  MainLayoutUserMeSettingSecurityRoute: typeof MainLayoutUserMeSettingSecurityRoute
+  MainLayoutUserMeSettingTokensRoute: typeof MainLayoutUserMeSettingTokensRoute
+  MainLayoutUserMeSettingIndexRoute: typeof MainLayoutUserMeSettingIndexRoute
 }
 
-const MainLayoutUserMeSettingsRouteRouteChildren: MainLayoutUserMeSettingsRouteRouteChildren =
+const MainLayoutUserMeSettingRouteRouteChildren: MainLayoutUserMeSettingRouteRouteChildren =
   {
-    MainLayoutUserMeSettingsAccountRoute: MainLayoutUserMeSettingsAccountRoute,
-    MainLayoutUserMeSettingsConnectionsRoute:
-      MainLayoutUserMeSettingsConnectionsRoute,
-    MainLayoutUserMeSettingsPreferencesRoute:
-      MainLayoutUserMeSettingsPreferencesRoute,
-    MainLayoutUserMeSettingsProfileRoute: MainLayoutUserMeSettingsProfileRoute,
-    MainLayoutUserMeSettingsSecurityRoute:
-      MainLayoutUserMeSettingsSecurityRoute,
-    MainLayoutUserMeSettingsTokensRoute: MainLayoutUserMeSettingsTokensRoute,
-    MainLayoutUserMeSettingsIndexRoute: MainLayoutUserMeSettingsIndexRoute,
+    MainLayoutUserMeSettingAccountRoute: MainLayoutUserMeSettingAccountRoute,
+    MainLayoutUserMeSettingConnectionsRoute:
+      MainLayoutUserMeSettingConnectionsRoute,
+    MainLayoutUserMeSettingPreferencesRoute:
+      MainLayoutUserMeSettingPreferencesRoute,
+    MainLayoutUserMeSettingProfileRoute: MainLayoutUserMeSettingProfileRoute,
+    MainLayoutUserMeSettingSecurityRoute: MainLayoutUserMeSettingSecurityRoute,
+    MainLayoutUserMeSettingTokensRoute: MainLayoutUserMeSettingTokensRoute,
+    MainLayoutUserMeSettingIndexRoute: MainLayoutUserMeSettingIndexRoute,
   }
 
-const MainLayoutUserMeSettingsRouteRouteWithChildren =
-  MainLayoutUserMeSettingsRouteRoute._addFileChildren(
-    MainLayoutUserMeSettingsRouteRouteChildren,
+const MainLayoutUserMeSettingRouteRouteWithChildren =
+  MainLayoutUserMeSettingRouteRoute._addFileChildren(
+    MainLayoutUserMeSettingRouteRouteChildren,
   )
 
 interface MainLayoutUserMeRouteRouteChildren {
-  MainLayoutUserMeSettingsRouteRoute: typeof MainLayoutUserMeSettingsRouteRouteWithChildren
+  MainLayoutUserMeSettingRouteRoute: typeof MainLayoutUserMeSettingRouteRouteWithChildren
   MainLayoutUserMeBookmarkRoute: typeof MainLayoutUserMeBookmarkRoute
   MainLayoutUserMeEditRoute: typeof MainLayoutUserMeEditRoute
   MainLayoutUserMeFollowRoute: typeof MainLayoutUserMeFollowRoute
@@ -1874,8 +1873,8 @@ interface MainLayoutUserMeRouteRouteChildren {
 }
 
 const MainLayoutUserMeRouteRouteChildren: MainLayoutUserMeRouteRouteChildren = {
-  MainLayoutUserMeSettingsRouteRoute:
-    MainLayoutUserMeSettingsRouteRouteWithChildren,
+  MainLayoutUserMeSettingRouteRoute:
+    MainLayoutUserMeSettingRouteRouteWithChildren,
   MainLayoutUserMeBookmarkRoute: MainLayoutUserMeBookmarkRoute,
   MainLayoutUserMeEditRoute: MainLayoutUserMeEditRoute,
   MainLayoutUserMeFollowRoute: MainLayoutUserMeFollowRoute,

@@ -7,7 +7,7 @@ import {
 } from "@tanstack/react-router";
 
 const AuthJwtServicesPage = lazyRouteComponent(
-  () => import("@/auth-jwt-service/page/AuthJwtServicesPage"),
+  () => import("@/auth-jwt-service/pages/AuthJwtServicesPage"),
   "AuthJwtServicesPage",
 );
 

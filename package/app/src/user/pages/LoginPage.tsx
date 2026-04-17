@@ -1,0 +1,166 @@
+import { Dialog, DialogContent } from "@mui/material";
+import Alert from "@mui/material/Alert";
+import Button from "@mui/material/Button";
+import TextField from "@mui/material/TextField";
+import { PasswordField } from "@rezics/ui/composite/form/field/PasswordField.tsx";
+import { TextButton } from "@rezics/ui/primitive/button/TextButton.tsx";
+import { MUILink } from "@rezics/ui/primitive/link/MUILink.tsx";
+import { useNavigate } from "@tanstack/react-router";
+import { type FC, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { useAuthSessionStore } from "@/user/states";
+import { SocialAuthButtons } from "../components/SocialAuthButtons";
+import { Layout } from "../layouts/Layout";
+import { ModalLayout } from "../layouts/ModalLayout";
+import { resolvePostAuthDestination } from "../models/authRedirect";
+import { login } from "../models/handler";
+import { validateEmail } from "../models/validate";
+
+interface LoginData {
+  email: string;
+  password: string;
+}
+
+export interface LoginPageProps {
+  isModal?: boolean;
+  onClose?: () => void;
+  /** 当在 AuthModal 中使用时，点击“注册”按钮切换到注册视图 */
+  onRegisterClick?: () => void;
+}
+
+/**
+ * LoginPage - 完整的登录页面容器
+ * 合并了原来的 Show/Page 结构
+ */
+export const LoginPage: FC<LoginPageProps> = ({
+  isModal = false,
+  onClose,
+  onRegisterClick,
+}) => {
+  const { t } = useTranslation();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string>();
+  const [data, setData] = useState<LoginData>({
+    email: "",
+    password: "",
+  });
+  const navigate = useNavigate();
+
+  const handleSubmit = async () => {
+    let hasError = false;
+    setLoading(true);
+    setError(undefined);
+
+    try {
+      console.log("try to login");
+      let validateData: { valid: boolean; error: string | null } = {
+        valid: false,
+        error: null,
+      };
+      const email = data?.email;
+      validateData = validateEmail(email);
+      if (!validateData.valid) throw new Error(validateData.error ?? "");
+
+      const password = data?.password;
+      await login(email, password);
+    } catch (e: any) {
+      hasError = true;
+      setError((e as Error).message);
+    } finally {
+      setLoading(false);
+    }
+    if (!hasError) {
+      const authSessionState = useAuthSessionStore.getState();
+      const destination = resolvePostAuthDestination({
+        registrationComplete: authSessionState.registrationComplete,
+      });
+      onClose?.();
+      navigate({ to: destination });
+    }
+  };
+
+  const handleRegisterClick = () => {
+    if (onRegisterClick) {
+      onRegisterClick();
+    } else {
+      navigate({ to: "/register" });
+      console.log("handleRegisterClick");
+      onClose?.();
+    }
+  };
+
+  const LayoutComponent = isModal ? ModalLayout : Layout;
+
+  const content = (
+    <>
+      {error && <Alert severity="error">{error}</Alert>}
+      <TextField
+        name="email"
+        type="email"
+        label={t("common.email")}
+        variant="standard"
+        required
+        value={data?.email}
+        onChange={(event: any) => {
+          setData({ ...data, email: event.target.value });
+        }}
+      />
+      <PasswordField
+        value={data?.password}
+        setValue={(value: string) => {
+          setData({ ...data, password: value });
+        }}
+      />
+      <div>
+        {t("auth.flow.new_to_app")}&nbsp;
+        <TextButton onClick={handleRegisterClick}>
+          {t("auth.flow.create_account")}
+        </TextButton>
+        <br />
+        <MUILink to="/reset-password">{t("auth.flow.forgot_password")}</MUILink>
+      </div>
+      <SocialAuthButtons mode="login" />
+    </>
+  );
+
+  const actions = (
+    <>
+      {/* <Button variant="text" type="button" onClick={handleRegisterClick}>
+        {t('auth.register')}
+      </Button> */}
+      <Button
+        className="justify-end"
+        type="button"
+        variant="contained"
+        disabled={loading}
+        onClick={handleSubmit}
+      >
+        {loading ? t("common.loading") : t("auth.login")}
+      </Button>
+    </>
+  );
+
+  return (
+    <LayoutComponent
+      title={t("auth.login")}
+      content={content}
+      actions={actions}
+    />
+  );
+};
+
+export function LoginModal({
+  open,
+  onClose,
+}: {
+  open: boolean;
+  onClose: () => void;
+}) {
+  return (
+    <Dialog open={open} onClose={onClose}>
+      <DialogContent className="!p-0">
+        <LoginPage isModal={true} onClose={onClose} />
+      </DialogContent>
+    </Dialog>
+  );
+}

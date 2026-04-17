@@ -1,7 +1,7 @@
 import { createFileRoute, lazyRouteComponent } from "@tanstack/react-router";
 
 const FeedbackAdminPage = lazyRouteComponent(
-  () => import("@/feedback/page/FeedbackAdminPage"),
+  () => import("@/feedback/pages/FeedbackAdminPage"),
   "FeedbackAdminPage",
 );
 

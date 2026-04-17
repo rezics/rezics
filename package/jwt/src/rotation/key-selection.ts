@@ -1,4 +1,4 @@
-import type { JwtKeyRecord } from "../contracts/persistence";
+import type { JwtKeyRecord } from "../contract/persistence";
 
 export function isKeyExpired(key: JwtKeyRecord, now: Date): boolean {
   return key.expiresAt !== null && key.expiresAt.getTime() <= now.getTime();

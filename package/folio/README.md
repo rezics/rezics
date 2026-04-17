@@ -18,7 +18,7 @@ A self-contained reader component designed for the Rezics platform. Supports bot
 
 ```typescript
 import { Folio, FolioProvider } from '@rezics/folio';
-import { epubPlugin } from '@rezics/folio/plugin/epub';
+import { epubPlugin } from '@rezics/folio/plugins/epub';
 
 function Reader({ file }: { file: File }) {
   return (

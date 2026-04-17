@@ -31,7 +31,7 @@ export const tagApi = {
     filters?: TagFilters,
   ): Promise<{ tags: UnitTagDTO[]; total: number }> => {
     return apiFetch<{ tags: UnitTagDTO[]; total: number }>(
-      `/tags${buildQueryString(filters)}`,
+      `/tag/list${buildQueryString(filters)}`,
     );
   },
 
@@ -39,7 +39,7 @@ export const tagApi = {
    * Get tag detail by unitId (tag is a Unit with type=TAG)
    */
   get: async (unitId: string): Promise<UnitTagDTO> => {
-    return apiFetch<UnitTagDTO>(`/tags/${unitId}`);
+    return apiFetch<UnitTagDTO>(`/tag/${unitId}`);
   },
 
   /**
@@ -47,7 +47,7 @@ export const tagApi = {
    * Input: translations array with language + title
    */
   create: async (input: CreateTagInput): Promise<UnitTagDTO> => {
-    return apiFetch<UnitTagDTO>(`/tags`, {
+    return apiFetch<UnitTagDTO>(`/tag`, {
       method: "POST",
       body: JSON.stringify(input),
     });
@@ -60,7 +60,7 @@ export const tagApi = {
     unitId: string,
     input: UpdateTagInput,
   ): Promise<UnitTagDTO> => {
-    return apiFetch<UnitTagDTO>(`/tags/${unitId}`, {
+    return apiFetch<UnitTagDTO>(`/tag/${unitId}`, {
       method: "PUT",
       body: JSON.stringify(input),
     });
@@ -70,7 +70,7 @@ export const tagApi = {
    * Delete a tag
    */
   remove: async (unitId: string): Promise<{ message: string }> => {
-    return apiFetch<{ message: string }>(`/tags/${unitId}`, {
+    return apiFetch<{ message: string }>(`/tag/${unitId}`, {
       method: "DELETE",
     });
   },
@@ -79,7 +79,7 @@ export const tagApi = {
    * Attach a tag to a unit (creates scored junction)
    */
   attach: async (input: AttachTagInput): Promise<{ message: string }> => {
-    return apiFetch<{ message: string }>(`/tags/attach`, {
+    return apiFetch<{ message: string }>(`/tag/attach`, {
       method: "POST",
       body: JSON.stringify(input),
     });
@@ -89,7 +89,7 @@ export const tagApi = {
    * Detach a tag from a unit
    */
   detach: async (input: DetachTagInput): Promise<{ message: string }> => {
-    return apiFetch<{ message: string }>(`/tags/detach`, {
+    return apiFetch<{ message: string }>(`/tag/detach`, {
       method: "POST",
       body: JSON.stringify(input),
     });
@@ -99,7 +99,7 @@ export const tagApi = {
    * Cast a vote on a tag-unit association (+1 or -1)
    */
   vote: async (input: CastTagVoteInput): Promise<TagVoteDTO> => {
-    return apiFetch<TagVoteDTO>(`/tags/vote`, {
+    return apiFetch<TagVoteDTO>(`/tag/vote`, {
       method: "POST",
       body: JSON.stringify(input),
     });
@@ -118,7 +118,7 @@ export const tagApi = {
       tags: string[];
     }[];
   }> => {
-    return apiFetch(`/tags/for-unit/${unitId}/context`);
+    return apiFetch(`/tag/for-unit/${unitId}/context`);
   },
 
   /**
@@ -129,7 +129,7 @@ export const tagApi = {
     filters?: Pick<TagFilters, "minScore" | "limit"> & { language?: string },
   ): Promise<{ tags: UnitTagDTO[] }> => {
     return apiFetch<{ tags: UnitTagDTO[] }>(
-      `/tags/for-unit/${unitId}${buildQueryString(filters)}`,
+      `/tag/for-unit/${unitId}${buildQueryString(filters)}`,
     );
   },
 
@@ -144,7 +144,7 @@ export const tagApi = {
     if (tagUnitIds.length === 0) return {};
     const params = buildQueryString({ unitIds: tagUnitIds.join(","), lang });
     return apiFetch<BatchTagTranslationResult>(
-      `/tags/batch-translations${params}`,
+      `/tag/batch-translations${params}`,
     );
   },
 };

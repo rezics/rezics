@@ -1,3 +1,3 @@
-export { CollectionModal } from "./component/CollectionModal";
-export { FavoriteButton } from "./component/FavoriteButton";
+export { CollectionModal } from "./components/CollectionModal";
+export { FavoriteButton } from "./components/FavoriteButton";
 export { useCollectionModal } from "./hooks/useCollectionModal";

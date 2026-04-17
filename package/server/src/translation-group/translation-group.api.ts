@@ -10,7 +10,7 @@ import { Elysia } from "elysia";
 import { authMacro } from "@/middleware";
 import { translationGroupService } from "./translation-group.service";
 
-export const translationGroupApi = new Elysia({ prefix: "/unit" })
+export const translationGroupApi = new Elysia({ prefix: "/translation-group" })
   .use(authMacro)
   .get(
     "/:unitId/translations",

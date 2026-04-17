@@ -25,7 +25,7 @@ export const unitApi = {
    * userId, userIds, workUnitId, language, nsfw, date ranges, sort, pagination
    */
   list: async (filters?: UnitFilters): Promise<UnitListResponse> => {
-    return apiFetch<UnitListResponse>(`/units${buildQueryString(filters)}`);
+    return apiFetch<UnitListResponse>(`/unit/list${buildQueryString(filters)}`);
   },
 
   /**
@@ -36,7 +36,7 @@ export const unitApi = {
     filters?: UnitFilters,
   ): Promise<UnitListResponse> => {
     return apiFetch<UnitListResponse>(
-      `/units${buildQueryString({ q: query, ...filters })}`,
+      `/unit/list${buildQueryString({ q: query, ...filters })}`,
     );
   },
 
@@ -48,7 +48,7 @@ export const unitApi = {
     filters?: UnitFilters,
   ): Promise<UnitListResponse> => {
     return apiFetch<UnitListResponse>(
-      `/units${buildQueryString({ userId, ...filters })}`,
+      `/unit/list${buildQueryString({ userId, ...filters })}`,
     );
   },
 
@@ -56,14 +56,14 @@ export const unitApi = {
    * Get single unit by id
    */
   get: async (unitId: string): Promise<UnitResponse> => {
-    return apiFetch<UnitResponse>(`/units/${unitId}`);
+    return apiFetch<UnitResponse>(`/unit/${unitId}`);
   },
 
   /**
    * Get single unit by slug
    */
   getBySlug: async (slug: string): Promise<UnitResponse> => {
-    return apiFetch<UnitResponse>(`/units/by-slug/${slug}`);
+    return apiFetch<UnitResponse>(`/unit/by-slug/${slug}`);
   },
 
   /**
@@ -73,7 +73,7 @@ export const unitApi = {
     unitId: string,
     slug: string,
   ): Promise<UnitResponse> => {
-    return apiFetch<UnitResponse>(`/units/${unitId}/slug`, {
+    return apiFetch<UnitResponse>(`/unit/${unitId}/slug`, {
       method: "PUT",
       body: JSON.stringify({ slug }),
     });
@@ -83,7 +83,7 @@ export const unitApi = {
    * Create new unit
    */
   create: async (input: CreateUnitInput): Promise<UnitResponse> => {
-    return apiFetch<UnitResponse>("/units", {
+    return apiFetch<UnitResponse>("/unit", {
       method: "POST",
       body: JSON.stringify(input),
     });
@@ -96,7 +96,7 @@ export const unitApi = {
     unitId: string,
     input: UpdateUnitInput,
   ): Promise<UnitResponse> => {
-    return apiFetch<UnitResponse>(`/units/${unitId}`, {
+    return apiFetch<UnitResponse>(`/unit/${unitId}`, {
       method: "PUT",
       body: JSON.stringify(input),
     });
@@ -106,7 +106,7 @@ export const unitApi = {
    * Delete unit
    */
   remove: async (unitId: string): Promise<{ message: string }> => {
-    return apiFetch<{ message: string }>(`/units/${unitId}`, {
+    return apiFetch<{ message: string }>(`/unit/${unitId}`, {
       method: "DELETE",
     });
   },
@@ -120,7 +120,7 @@ export const unitApi = {
     input: UpdateTranslationInput,
   ): Promise<UnitTranslationDTO> => {
     return apiFetch<UnitTranslationDTO>(
-      `/units/${unitId}/translations/${language}`,
+      `/unit/${unitId}/translations/${language}`,
       {
         method: "PUT",
         body: JSON.stringify(input),

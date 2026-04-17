@@ -15,8 +15,8 @@ import {
   syncUserToMeili,
 } from "@/meili/user/sync";
 import { emitNotificationEvent } from "../../notify/notify-client";
-import type { UserFilterOptions, UserWithRelations } from "../model/types";
-import { userInclude } from "../model/types";
+import type { UserFilterOptions, UserWithRelations } from "../models/types";
+import { userInclude } from "../models/types";
 import { syncProfileToAuth } from "./profile-sync";
 
 export type CreateUserProfileInput = {

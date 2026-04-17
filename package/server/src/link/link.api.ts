@@ -4,7 +4,7 @@ import { Elysia, t } from "elysia";
 import { authMacro } from "@/middleware";
 import { linkService } from "./link.service";
 
-export const linkApi = new Elysia({ prefix: "/links" })
+export const linkApi = new Elysia({ prefix: "/link" })
   .use(authMacro)
   .post(
     "/",

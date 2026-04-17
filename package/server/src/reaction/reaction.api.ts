@@ -9,7 +9,7 @@ import { prisma } from "#/prisma/client";
 import { emitNotificationEvent } from "../notify/notify-client";
 import { createReaction, removeReaction } from "./reaction-client";
 
-export const reactionWriteApi = new Elysia({ prefix: "/reactions" })
+export const reactionWriteApi = new Elysia({ prefix: "/reaction" })
   .use(authMacro)
   .post(
     "/",

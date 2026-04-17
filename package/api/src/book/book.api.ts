@@ -25,21 +25,21 @@ export const bookApi = {
    * userId, isbn13, workUnitId, visibility, status, sort, start, cursor, limit
    */
   list: async (filters?: BookFilters): Promise<BookListResponse> => {
-    return apiFetch<BookListResponse>(`/books${buildQueryString(filters)}`);
+    return apiFetch<BookListResponse>(`/book/list${buildQueryString(filters)}`);
   },
 
   /**
    * Get single book by unitId
    */
   get: async (unitId: string): Promise<BookResponse> => {
-    return apiFetch<BookResponse>(`/books/${unitId}`);
+    return apiFetch<BookResponse>(`/book/${unitId}`);
   },
 
   /**
    * Get rating by book unitId
    */
   getRating: async (bookUnitId: string): Promise<ScoreAggregateDTO[]> => {
-    return apiFetch<ScoreAggregateDTO[]>(`/books/${bookUnitId}/rating`);
+    return apiFetch<ScoreAggregateDTO[]>(`/book/${bookUnitId}/rating`);
   },
 
   /**
@@ -48,7 +48,7 @@ export const bookApi = {
   getChapterIndex: async (
     bookUnitId: string,
   ): Promise<ChapterIndexResponse> => {
-    return apiFetch<ChapterIndexResponse>(`/books/${bookUnitId}/chapterIndex`);
+    return apiFetch<ChapterIndexResponse>(`/book/${bookUnitId}/chapterIndex`);
   },
 
   /**
@@ -59,7 +59,7 @@ export const bookApi = {
     chaptersIndex: any,
   ): Promise<ChapterIndexResponse> => {
     return apiFetch<ChapterIndexResponse>(
-      `/books/${bookUnitId}/chapterIndex`,
+      `/book/${bookUnitId}/chapterIndex`,
       {
         method: "PUT",
         body: JSON.stringify(chaptersIndex),
@@ -75,7 +75,7 @@ export const bookApi = {
     filters?: BookFilters,
   ): Promise<BookListResponse> => {
     return apiFetch<BookListResponse>(
-      `/books${buildQueryString({ q: query, ...filters })}`,
+      `/book/list${buildQueryString({ q: query, ...filters })}`,
     );
   },
 
@@ -87,7 +87,7 @@ export const bookApi = {
     filters?: BookFilters,
   ): Promise<BookListResponse> => {
     return apiFetch<BookListResponse>(
-      `/books${buildQueryString({ userId, ...filters })}`,
+      `/book/list${buildQueryString({ userId, ...filters })}`,
     );
   },
 
@@ -99,7 +99,7 @@ export const bookApi = {
     filters?: BookFilters,
   ): Promise<BookListResponse> => {
     return apiFetch<BookListResponse>(
-      `/books${buildQueryString({ entityId, ...filters })}`,
+      `/book/list${buildQueryString({ entityId, ...filters })}`,
     );
   },
 
@@ -108,7 +108,7 @@ export const bookApi = {
    */
   getByIsbn: async (isbn13: string): Promise<BookListResponse> => {
     return apiFetch<BookListResponse>(
-      `/books${buildQueryString({ isbn13 })}`,
+      `/book/list${buildQueryString({ isbn13 })}`,
     );
   },
 
@@ -120,7 +120,7 @@ export const bookApi = {
     filters?: BookFilters,
   ): Promise<BookListResponse> => {
     return apiFetch<BookListResponse>(
-      `/books${buildQueryString({ tagUnitIds, ...filters })}`,
+      `/book/list${buildQueryString({ tagUnitIds, ...filters })}`,
     );
   },
 
@@ -128,7 +128,7 @@ export const bookApi = {
    * Create new book
    */
   create: async (input: CreateBookInput): Promise<BookResponse> => {
-    return apiFetch<BookResponse>("/books", {
+    return apiFetch<BookResponse>("/book", {
       method: "POST",
       body: JSON.stringify(input),
     });
@@ -141,7 +141,7 @@ export const bookApi = {
     unitId: string,
     input: UpdateBookInput,
   ): Promise<BookResponse> => {
-    return apiFetch<BookResponse>(`/books/${unitId}`, {
+    return apiFetch<BookResponse>(`/book/${unitId}`, {
       method: "PUT",
       body: JSON.stringify(input),
     });
@@ -151,7 +151,7 @@ export const bookApi = {
    * Delete book
    */
   remove: async (unitId: string): Promise<{ message: string }> => {
-    return apiFetch<{ message: string }>(`/books/${unitId}`, {
+    return apiFetch<{ message: string }>(`/book/${unitId}`, {
       method: "DELETE",
     });
   },

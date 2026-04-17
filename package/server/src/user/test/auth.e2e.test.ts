@@ -1,8 +1,8 @@
 import { describe, expect, test } from "bun:test";
 import { exportJWK, generateKeyPair, SignJWT } from "jose";
-import { verifyTokenFromHeader } from "../../../../jwt/src/adapters/jose-verifier";
+import { verifyTokenFromHeader } from "../../../../jwt/src/adapter/jose-verifier";
 import { JwtAlgorithm } from "../../../../jwt/src/core/jwt-algorithm";
-import type { JWTPayload } from "../model/types";
+import type { JWTPayload } from "../models/types";
 
 process.env.NODE_ENV = "test";
 process.env.DATABASE_URL ??=

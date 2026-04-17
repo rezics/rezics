@@ -16,17 +16,17 @@
       "types": "./src/core/export.ts",
       "default": "./src/core/export.ts"
     },
-    "./contracts": {
-      "types": "./src/contracts/export.ts",
-      "default": "./src/contracts/export.ts"
+    "./contract": {
+      "types": "./src/contract/export.ts",
+      "default": "./src/contract/export.ts"
     },
     "./rotation": {
       "types": "./src/rotation/export.ts",
       "default": "./src/rotation/export.ts"
     },
-    "./adapters": {
-      "types": "./src/adapters/export.ts",
-      "default": "./src/adapters/export.ts"
+    "./adapter": {
+      "types": "./src/adapter/export.ts",
+      "default": "./src/adapter/export.ts"
     }
   },
   "peerDependencies": {

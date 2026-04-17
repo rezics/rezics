@@ -4,8 +4,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { AdvancedSearch, SearchResultList } from "@/search";
 import { useInjectedTags } from "@/search/hooks/useInjectedTags";
-import { parseSearchString } from "@/search/model/searchQuery";
-import { searchQueryToOptions } from "@/search/model/searchQueryToOptions";
+import { parseSearchString } from "@/search/models/searchQuery";
+import { searchQueryToOptions } from "@/search/models/searchQueryToOptions";
 
 type SearchRouteParams = {
   q?: string;

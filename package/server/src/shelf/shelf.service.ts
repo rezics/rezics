@@ -11,6 +11,7 @@ import type {
   UpdateShelfInput,
   UpdateShelfItemInput,
 } from "@rezics/contract";
+import { parseIdsCsv } from "@rezics/contract";
 import type { Prisma } from "#/prisma/client";
 import { prisma, UnitStatus, UnitType, UnitVisibility } from "#/prisma/client";
 import {
@@ -40,6 +41,11 @@ export class ShelfService {
       and.push({
         items: { some: { itemUnitId: options.containsItemUnitId } },
       });
+    }
+
+    const idList = parseIdsCsv(options.ids);
+    if (idList && idList.length > 0) {
+      and.push({ unitId: { in: idList } });
     }
 
     return and.length ? { AND: and } : {};

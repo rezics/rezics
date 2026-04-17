@@ -25,7 +25,7 @@ import { mapUnitToDTO, mapTranslationToDTO } from "./mapper";
 import { translationService } from "./translation.service";
 import { unitService } from "./unit.service";
 
-export const unitApi = new Elysia({ prefix: "/units" })
+export const unitApi = new Elysia({ prefix: "/unit" })
   .use(authMacro)
   .get(
     "/:unitId",
@@ -66,7 +66,7 @@ export const unitApi = new Elysia({ prefix: "/units" })
     },
   )
   .get(
-    "/",
+    "/list",
     async ({ query, identity, set }): Promise<UnitListResponse> => {
       if (!BasicAdminPermission(identity.permission)) {
         set.status = 403;

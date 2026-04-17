@@ -16,7 +16,7 @@ export const Route = createFileRoute("/_mainLayout/book/$bookId")({
     </BookDetailLayout>
   ),
   notFoundComponent: lazyRouteComponent(
-    () => import("@/core/page/NotFound"),
+    () => import("@/core/pages/NotFound"),
     "NotFoundContainer",
   ),
 });

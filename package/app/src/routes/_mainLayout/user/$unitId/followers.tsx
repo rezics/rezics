@@ -1,7 +1,7 @@
 import { createFileRoute, lazyRouteComponent } from "@tanstack/react-router";
 
 const FollowersTabSection = lazyRouteComponent(
-  () => import("@/user/section/FollowersTabSection"),
+  () => import("@/user/sections/FollowersTabSection"),
   "FollowersTabSection",
 );
 

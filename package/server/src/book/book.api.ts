@@ -19,7 +19,7 @@ import { unitService } from "@/unit/unit.service";
 import { bookService } from "./book.service";
 import { mapBookToDTO } from "./mapper";
 
-export const bookApi = new Elysia({ prefix: "/books" })
+export const bookApi = new Elysia({ prefix: "/book" })
   .use(authMacro)
   .get(
     "/:unitId",
@@ -88,7 +88,7 @@ export const bookApi = new Elysia({ prefix: "/books" })
     },
   )
   .get(
-    "/",
+    "/list",
     async ({ headers, query }): Promise<BookListResponse> => {
       const identity = await tryResolveIdentity(headers["authorization"]);
       const admin = isAdminRole(identity);

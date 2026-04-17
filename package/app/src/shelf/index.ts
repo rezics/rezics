@@ -1,5 +1,5 @@
-export { ShelfCard } from "./component/ShelfCard";
-export { ShelfList } from "./component/ShelfList";
-export { SingleShelf } from "./component/SingleShelf";
-export { HorizontalShelfCarousel } from "./component/HorizontalShelfCarousel";
-export { ShelfItemCard } from "./component/ShelfItemCard";
+export { ShelfCard } from "./components/ShelfCard";
+export { ShelfList } from "./components/ShelfList";
+export { SingleShelf } from "./components/SingleShelf";
+export { HorizontalShelfCarousel } from "./components/HorizontalShelfCarousel";
+export { ShelfItemCard } from "./components/ShelfItemCard";

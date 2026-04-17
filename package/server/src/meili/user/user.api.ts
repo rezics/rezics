@@ -1,4 +1,5 @@
 import type { UserListQuery } from "@rezics/contract";
+import { parseIdsCsv } from "@rezics/contract";
 import type { SearchResponse } from "@rezics/search";
 import { searchClient } from "../search-client";
 import type { UserSearchDocument, UserSearchResult } from "./index";
@@ -52,6 +53,12 @@ export async function searchUsers(
 
   if (opts.slug) {
     filter.push(`slug = "${escapeValue(opts.slug)}"`);
+  }
+
+  const idList = parseIdsCsv(opts.ids);
+  if (idList && idList.length > 0) {
+    const quoted = idList.map((id) => `"${escapeValue(id)}"`).join(", ");
+    filter.push(`unitId IN [${quoted}]`);
   }
 
   const pageNum = Math.max(Number(opts.page ?? 1), 1);

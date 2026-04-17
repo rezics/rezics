@@ -116,7 +116,7 @@ appStore.getState().setCustomColor('#FF5722');
 ### 2. 在组件中使用
 
 ```typescript
-import {ThemeQuickToggle} from '@/component/Theme/ThemeCustomizer';
+import {ThemeQuickToggle} from '@/components/Theme/ThemeCustomizer';
 
 // 在布局中添加主题自定义按钮
 <ThemeQuickToggle />;
@@ -175,7 +175,7 @@ export const PRESET_COLORS = {
 使用 `ThemeDemo` 组件可以查看动态主题的效果：
 
 ```typescript
-import {ThemeDemo} from '@/component/Theme/ThemeDemo';
+import {ThemeDemo} from '@/components/Theme/ThemeDemo';
 
 <ThemeDemo />;
 ```
@@ -224,7 +224,7 @@ const theme = useMemo(() => {
 在布局组件中添加主题自定义按钮：
 
 ```typescript
-import {ThemeQuickToggle} from '@/component/Theme/ThemeCustomizer';
+import {ThemeQuickToggle} from '@/components/Theme/ThemeCustomizer';
 
 <ThemeQuickToggle />;
 ```

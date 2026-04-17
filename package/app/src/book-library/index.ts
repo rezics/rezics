@@ -15,26 +15,26 @@
 export {
   BookBasicInfoPage,
   BookBasicInfoPage as OverviewPage,
-} from "./page/BookBasicInfoPage";
-export { BookContentPage } from "./page/BookContentPage";
+} from "./pages/BookBasicInfoPage";
+export { BookContentPage } from "./pages/BookContentPage";
 export {
   BookDiscussionPage,
   BookCommunityPage,
-} from "./page/BookDiscussionPage";
+} from "./pages/BookDiscussionPage";
 /** Book detail layout (shared hero + data fetching). */
-export { BookDetailLayout } from "./page/BookDetailLayout";
+export { BookDetailLayout } from "./pages/BookDetailLayout";
 /** Book library list page. */
 // Backward compatible aliases
 export {
   BookLibPage,
   BookLibPage as BookLibContainer,
-} from "./page/BookLibPage";
+} from "./pages/BookLibPage";
 /** Book library curated homepage. */
-export { BookHomePage } from "./page/BookHomePage";
+export { BookHomePage } from "./pages/BookHomePage";
 export {
   BookReviewPage,
   BookReviewPage as ReviewShelfPage,
-} from "./page/BookReviewPage";
+} from "./pages/BookReviewPage";
 
 // ============================================================================
 // Section Components (Page-composable modules)
@@ -44,8 +44,8 @@ export {
   BookDetailShell,
   BookDetailShell as BookDetailView,
   type BookDetailShellProps,
-} from "./section/BookDetailSection";
-export { BookHeroSection } from "./section/BookHeroSection";
+} from "./sections/BookDetailSection";
+export { BookHeroSection } from "./sections/BookHeroSection";
 // Backward compatible aliases
 export {
   BookLibSection,
@@ -53,7 +53,7 @@ export {
   type BookLibSectionProps,
   BookLibSectionRef,
   BookLibSectionRef as BookLibShowRef,
-} from "./section/BookLibSection";
+} from "./sections/BookLibSection";
 
 // ============================================================================
 // UI Components (Reusable building blocks)
@@ -66,20 +66,20 @@ export {
   BookListViewItem,
   type BookListViewItemProps,
   type BookListViewProps,
-} from "./component/BookList/BookListView";
+} from "./components/BookList/BookListView";
 // Backward compatible aliases
 export {
   BookSearchInput,
   BookSearchInput as BookSearchContainer,
   type BookSearchInputProps,
-} from "./component/BookSearch/BookSearch";
+} from "./components/BookSearch/BookSearch";
 export {
   ChapterLeaf,
   ChapterList,
   ChapterList as ChapterListContainer,
   type ChapterTreeHandle,
   ChapterTreeView,
-} from "./component/Chapter/ChapterList";
+} from "./components/Chapter/ChapterList";
 
 // ============================================================================
 // State (Jotai atoms and hooks)
@@ -91,4 +91,4 @@ export {
   bookDetailAtomFamily,
   patchBookDetailAtomFamily,
   setBookDetailAtomFamily,
-} from "./state";
+} from "./states";

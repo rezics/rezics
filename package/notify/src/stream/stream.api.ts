@@ -6,6 +6,7 @@ const HEARTBEAT_INTERVAL = 30_000;
 
 export const streamApi = new Elysia({ prefix: "/stream" })
   .use(authMacro)
+  // @convention:root-list-ok — SSE stream, not a collection
   .get(
     "/",
     ({ userId, set }) => {

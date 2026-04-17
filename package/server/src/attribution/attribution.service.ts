@@ -6,6 +6,7 @@ import type {
   LinkAttributionInput,
   UpdateEntityInput,
 } from "@rezics/contract";
+import { parseIdsCsv } from "@rezics/contract";
 import type { Prisma } from "#/prisma/client";
 import { prisma } from "#/prisma/client";
 import { patchContentCreditsToMeili } from "@/meili/content/sync";
@@ -39,6 +40,11 @@ export class AttributionService {
           },
         },
       };
+    }
+
+    const idList = parseIdsCsv(options.ids);
+    if (idList && idList.length > 0) {
+      where.unitId = { in: idList };
     }
 
     const [rows, total] = await Promise.all([

@@ -1,7 +1,7 @@
 import { createFileRoute, lazyRouteComponent } from "@tanstack/react-router";
 
 const NotificationPage = lazyRouteComponent(
-  () => import("@/inbox/page/NotificationPage"),
+  () => import("@/inbox/pages/NotificationPage"),
   "NotificationPage",
 );
 

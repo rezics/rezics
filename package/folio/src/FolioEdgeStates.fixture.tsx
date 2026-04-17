@@ -1,5 +1,5 @@
 import { Folio, type FolioNode } from "@rezics/folio";
-import { createTxtPlugin } from "@rezics/folio/plugin/txt";
+import { createTxtPlugin } from "@rezics/folio/plugins/txt";
 import { buildTree, FALLBACK_TEXT, WRAPPER_STYLE } from "./_stubs";
 
 function LoadingState() {

@@ -3,6 +3,7 @@ import type {
   UnitListQuery,
   UpdateUnitInput,
 } from "@rezics/contract";
+import { parseIdsCsv } from "@rezics/contract";
 import type { Prisma } from "#/prisma/client";
 import {
   prisma,
@@ -122,6 +123,12 @@ export function buildUnitWhereClause(
   }
   if (options.publishedAtTo) {
     andWhere.push({ publishedAt: { lte: new Date(options.publishedAtTo) } });
+  }
+
+  // Intersect with explicit unit id list (from listGetQueryBase)
+  const idList = parseIdsCsv(options.ids);
+  if (idList && idList.length > 0) {
+    andWhere.push({ id: { in: idList } });
   }
 
   return andWhere.length > 0 ? { AND: andWhere } : {};

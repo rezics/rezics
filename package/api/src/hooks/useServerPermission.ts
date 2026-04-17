@@ -1,5 +1,5 @@
 import type { Permission } from "@rezics/contract";
-import { useAuthSessionStore } from "../state/authSessionStore";
+import { useAuthSessionStore } from "../states/authSessionStore";
 
 /**
  * Returns the current user's permission on the main server,

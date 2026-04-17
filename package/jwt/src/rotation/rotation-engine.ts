@@ -1,6 +1,6 @@
-import type { JwtCryptoProvider } from "../contracts/crypto-provider";
-import type { JwtIssuerDescriptor } from "../contracts/issuer";
-import type { JwtKeyPersistence, JwtKeyRecord } from "../contracts/persistence";
+import type { JwtCryptoProvider } from "../contract/crypto-provider";
+import type { JwtIssuerDescriptor } from "../contract/issuer";
+import type { JwtKeyPersistence, JwtKeyRecord } from "../contract/persistence";
 import { JwtAlgorithm } from "../core/jwt-algorithm";
 import { selectActiveKey, selectPublishedKeys } from "./key-selection";
 import {

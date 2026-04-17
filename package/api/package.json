@@ -14,13 +14,13 @@
       "types": "./src/echokv/echokv.ts",
       "default": "./src/echokv/echokv.ts"
     },
-    "./provider": {
-      "types": "./src/provider/index.ts",
-      "default": "./src/provider/index.ts"
+    "./providers": {
+      "types": "./src/providers/index.ts",
+      "default": "./src/providers/index.ts"
     },
-    "./state": {
-      "types": "./src/state/index.ts",
-      "default": "./src/state/index.ts"
+    "./states": {
+      "types": "./src/states/index.ts",
+      "default": "./src/states/index.ts"
     },
     "./hooks": {
       "types": "./src/hooks/index.ts",

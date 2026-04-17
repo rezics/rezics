@@ -20,11 +20,11 @@ import type { ShelfFilters, ShelfItemsQuery } from "./shelf.types";
 
 export const shelfApi = {
   list: async (filters?: ShelfFilters): Promise<ShelfListResponse> => {
-    return apiFetch<ShelfListResponse>(`/shelves${buildQueryString(filters)}`);
+    return apiFetch<ShelfListResponse>(`/shelf/list${buildQueryString(filters)}`);
   },
 
   get: async (unitId: string): Promise<ShelfDetailDTO> => {
-    return apiFetch<ShelfDetailDTO>(`/shelves/${unitId}`);
+    return apiFetch<ShelfDetailDTO>(`/shelf/${unitId}`);
   },
 
   getByUserId: async (
@@ -32,16 +32,16 @@ export const shelfApi = {
     filters?: ShelfFilters,
   ): Promise<ShelfListResponse> => {
     return apiFetch<ShelfListResponse>(
-      `/shelves${buildQueryString({ userId, ...filters })}`,
+      `/shelf/list${buildQueryString({ userId, ...filters })}`,
     );
   },
 
   mine: async (): Promise<ShelfSummaryDTO[]> => {
-    return apiFetch<ShelfSummaryDTO[]>("/shelves/me");
+    return apiFetch<ShelfSummaryDTO[]>("/shelf/me");
   },
 
   create: async (input: CreateShelfInput): Promise<ShelfResponse> => {
-    return apiFetch<ShelfResponse>("/shelves", {
+    return apiFetch<ShelfResponse>("/shelf", {
       method: "POST",
       body: JSON.stringify(input),
     });
@@ -51,14 +51,14 @@ export const shelfApi = {
     unitId: string,
     input: UpdateShelfInput,
   ): Promise<ShelfResponse> => {
-    return apiFetch<ShelfResponse>(`/shelves/${unitId}`, {
+    return apiFetch<ShelfResponse>(`/shelf/${unitId}`, {
       method: "PUT",
       body: JSON.stringify(input),
     });
   },
 
   remove: async (unitId: string): Promise<{ message: string }> => {
-    return apiFetch<{ message: string }>(`/shelves/${unitId}`, {
+    return apiFetch<{ message: string }>(`/shelf/${unitId}`, {
       method: "DELETE",
     });
   },
@@ -69,7 +69,7 @@ export const shelfApi = {
     query?: ShelfItemsQuery,
   ): Promise<{ items: ShelfItemDTO[]; hasMore: boolean }> => {
     return apiFetch(
-      `/shelves/${shelfUnitId}/items${buildQueryString(query)}`,
+      `/shelf/${shelfUnitId}/items${buildQueryString(query)}`,
     );
   },
 
@@ -77,7 +77,7 @@ export const shelfApi = {
     shelfUnitId: string,
     input: AddShelfItemInput,
   ): Promise<ShelfItemDTO> => {
-    return apiFetch<ShelfItemDTO>(`/shelves/${shelfUnitId}/items`, {
+    return apiFetch<ShelfItemDTO>(`/shelf/${shelfUnitId}/items`, {
       method: "POST",
       body: JSON.stringify(input),
     });
@@ -89,7 +89,7 @@ export const shelfApi = {
     input: UpdateShelfItemInput,
   ): Promise<ShelfItemDTO> => {
     return apiFetch<ShelfItemDTO>(
-      `/shelves/${shelfUnitId}/items/${itemUnitId}`,
+      `/shelf/${shelfUnitId}/items/${itemUnitId}`,
       {
         method: "PATCH",
         body: JSON.stringify(input),
@@ -101,7 +101,7 @@ export const shelfApi = {
     shelfUnitId: string,
     input: ReorderShelfItemsInput,
   ): Promise<{ message: string }> => {
-    return apiFetch(`/shelves/${shelfUnitId}/items/reorder`, {
+    return apiFetch(`/shelf/${shelfUnitId}/items/reorder`, {
       method: "PUT",
       body: JSON.stringify(input),
     });
@@ -112,7 +112,7 @@ export const shelfApi = {
     itemUnitId: string,
   ): Promise<{ message: string }> => {
     return apiFetch<{ message: string }>(
-      `/shelves/${shelfUnitId}/items/${itemUnitId}`,
+      `/shelf/${shelfUnitId}/items/${itemUnitId}`,
       { method: "DELETE" },
     );
   },
@@ -123,7 +123,7 @@ export const shelfApi = {
     reviewUnitId: string,
   ): Promise<{ message: string }> => {
     return apiFetch<{ message: string }>(
-      `/shelves/${shelfUnitId}/items/${itemUnitId}/reviews/${reviewUnitId}`,
+      `/shelf/${shelfUnitId}/items/${itemUnitId}/reviews/${reviewUnitId}`,
       { method: "DELETE" },
     );
   },
@@ -155,14 +155,14 @@ export const collectionApi = {
 
 export const userKeywordsApi = {
   get: async (): Promise<string[]> => {
-    return apiFetch<string[]>("/users/me/keywords");
+    return apiFetch<string[]>("/user/me/keywords");
   },
 
   update: async (input: {
     add?: string[];
     remove?: string[];
   }): Promise<string[]> => {
-    return apiFetch<string[]>("/users/me/keywords", {
+    return apiFetch<string[]>("/user/me/keywords", {
       method: "PATCH",
       body: JSON.stringify(input),
     });

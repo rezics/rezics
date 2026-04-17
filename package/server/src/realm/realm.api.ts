@@ -25,7 +25,7 @@ import { realmService } from "./realm.service";
 /** Realm roles that can moderate (update members, manage tags). */
 const MODERATOR_ROLES = ["owner", "admin", "moderator"];
 
-export const realmApi = new Elysia({ prefix: "/realms" })
+export const realmApi = new Elysia({ prefix: "/realm" })
   .use(authMacro)
   .get(
     "/me",
@@ -57,7 +57,7 @@ export const realmApi = new Elysia({ prefix: "/realms" })
     },
   )
   .get(
-    "/",
+    "/list",
     async ({ headers, query }): Promise<RealmListResponse> => {
       const identity = await tryResolveIdentity(headers["authorization"]);
       const admin = isAdminRole(identity);

@@ -1,8 +1,8 @@
 import type { SearchQuery } from "@rezics/contract";
 import { useNavigate } from "@tanstack/react-router";
 import { useCallback } from "react";
-import type { InjectedTag } from "../model/injectedTags";
-import { serializeSearchString } from "../model/searchQuery";
+import type { InjectedTag } from "../models/injectedTags";
+import { serializeSearchString } from "../models/searchQuery";
 
 /**
  * Navigate to the global search page with pre-resolved tag data.

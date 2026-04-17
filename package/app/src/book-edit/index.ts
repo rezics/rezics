@@ -12,16 +12,16 @@
 // ============================================================================
 
 /** Chapter list edit page. */
-export { BookEditChapterListPage } from "./page/ChapterListPage";
+export { BookEditChapterListPage } from "./pages/ChapterListPage";
 /** Single chapter edit page. */
-export { BookEditChapterPage } from "./page/ChapterPage";
+export { BookEditChapterPage } from "./pages/ChapterPage";
 /** Book info edit page. */
-export { BookEditMainPage } from "./page/InfoPage";
+export { BookEditMainPage } from "./pages/InfoPage";
 /** New book creation page. */
-export { NewBookPage } from "./page/NewBookPage";
+export { NewBookPage } from "./pages/NewBookPage";
 
 /** Book tag edit page. */
-export { BookEditTagPage } from "./page/TagPage";
+export { BookEditTagPage } from "./pages/TagPage";
 
 // ============================================================================
 // UI Components (Reusable building blocks)
@@ -30,11 +30,11 @@ export { BookEditTagPage } from "./page/TagPage";
 export {
   type BookExtraData,
   BookExtraEditor,
-} from "./component/Metadata/BookExtraEditor";
+} from "./components/Metadata/BookExtraEditor";
 
 export {
   BookMetadataEditor,
   type BookMetadataValue,
-} from "./component/Metadata/BookMetadataEditor";
+} from "./components/Metadata/BookMetadataEditor";
 
-export { NewBookByUrl } from "./component/Metadata/NewBookByUrl";
+export { NewBookByUrl } from "./components/Metadata/NewBookByUrl";

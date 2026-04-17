@@ -19,7 +19,7 @@ import { collectionApi, shelfApi } from "./shelf";
 import { linkApi } from "./link";
 import { zoneApi } from "./zone/zone.api";
 import { sessionApi } from "./session";
-import { statsAdminApi } from "./stats";
+import { statsAdminApi } from "./stat";
 import { tagApi } from "./tag";
 import { tokenApi } from "./token";
 import { translationGroupApi } from "./translation-group";

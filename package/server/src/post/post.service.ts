@@ -3,6 +3,7 @@ import type {
   PostListQuery,
   UpdatePostInput,
 } from "@rezics/contract";
+import { parseIdsCsv } from "@rezics/contract";
 import type { Prisma } from "#/prisma/client";
 import { type PostKind, prisma, UnitStatus, UnitType } from "#/prisma/client";
 import { syncPostToMeili, patchPostFieldsToMeili } from "@/meili/post/sync";
@@ -36,6 +37,11 @@ export class PostService {
 
     if (typeof query.maxDepth === "number") {
       where.depth = { lte: query.maxDepth };
+    }
+
+    const idList = parseIdsCsv(query.ids);
+    if (idList && idList.length > 0) {
+      where.unitId = { in: idList };
     }
 
     const isThreaded = query.mode === "threaded";

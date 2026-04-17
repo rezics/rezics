@@ -7,7 +7,7 @@ import {
 } from "@tanstack/react-router";
 
 const JwtServicesPage = lazyRouteComponent(
-  () => import("@/jwt-service/page/JwtServicesPage"),
+  () => import("@/jwt-service/pages/JwtServicesPage"),
   "JwtServicesPage",
 );
 

@@ -5,7 +5,7 @@ import { bookService } from "@rezics/server/book/book.service";
 import { mapBookToDTO } from "@rezics/server/book/mapper";
 import React from "react";
 import { renderToReadableStream } from "react-dom/server";
-import { BookShareDocument } from "../component/BookShareDocument";
+import { BookShareDocument } from "../components/BookShareDocument";
 import { coreInstance } from "../core";
 import { withDoctype } from "../utils/htmlStream";
 

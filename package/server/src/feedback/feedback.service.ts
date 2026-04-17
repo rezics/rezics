@@ -1,4 +1,5 @@
 import type { CreateFeedbackInput, FeedbackListQuery } from "@rezics/contract";
+import { parseIdsCsv } from "@rezics/contract";
 import type { Feedback, Prisma } from "#/prisma/client";
 import { prisma } from "#/prisma/client";
 import { syncFeedbackToMeili, patchFeedbackResolutionToMeili } from "@/meili/feedback/sync";
@@ -67,6 +68,11 @@ export class FeedbackService {
           query.createdAtTo,
         );
       }
+    }
+
+    const idList = parseIdsCsv(query.ids);
+    if (idList && idList.length > 0) {
+      where.id = { in: idList };
     }
 
     const [rows, total] = await Promise.all([

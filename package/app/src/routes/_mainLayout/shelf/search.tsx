@@ -1,7 +1,7 @@
 import { createFileRoute, lazyRouteComponent } from "@tanstack/react-router";
 
 const ShelfSearchPage = lazyRouteComponent(
-  () => import("@/shelf/page/ShelfSearchPage"),
+  () => import("@/shelf/pages/ShelfSearchPage"),
   "ShelfSearchPage",
 );
 

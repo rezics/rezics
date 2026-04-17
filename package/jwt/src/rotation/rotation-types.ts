@@ -1,4 +1,4 @@
-import type { JwtKeyRecord } from "../contracts/persistence";
+import type { JwtKeyRecord } from "../contract/persistence";
 import type { JwtJwks } from "../core/jwks";
 
 export type JwtClock = {

@@ -20,7 +20,7 @@ export const feedbackApi = {
    * Create feedback for current authenticated user
    */
   create: async (input: CreateFeedbackInput): Promise<FeedbackDTO> => {
-    return apiFetch<FeedbackDTO>("/feedbacks", {
+    return apiFetch<FeedbackDTO>("/feedback", {
       method: "POST",
       body: JSON.stringify(input),
     });
@@ -28,24 +28,24 @@ export const feedbackApi = {
 
   /**
    * Get current user's feedback list
-   * GET /feedbacks/my
+   * GET /feedback/my
    */
   listMy: async (filters?: FeedbackFilters): Promise<FeedbackListResponse> => {
     return apiFetch<FeedbackListResponse>(
-      `/feedbacks/my${buildQueryString(filters)}`,
+      `/feedback/my${buildQueryString(filters)}`,
     );
   },
 
   /**
    * List feedbacks for a specific userId (admin or self)
-   * GET /feedbacks/by-user/:userId
+   * GET /feedback/by-user/:userId
    */
   listByUser: async (
     userId: string,
     filters?: FeedbackFilters,
   ): Promise<FeedbackListResponse> => {
     return apiFetch<FeedbackListResponse>(
-      `/feedbacks/by-user/${userId}${buildQueryString(filters)}`,
+      `/feedback/by-user/${userId}${buildQueryString(filters)}`,
     );
   },
 
@@ -55,24 +55,24 @@ export const feedbackApi = {
    */
   list: async (filters?: FeedbackFilters): Promise<FeedbackListResponse> => {
     return apiFetch<FeedbackListResponse>(
-      `/feedbacks${buildQueryString(filters)}`,
+      `/feedback/list${buildQueryString(filters)}`,
     );
   },
 
   /**
    * Admin: get a single feedback by id
-   * GET /feedbacks/:id
+   * GET /feedback/:id
    */
   get: async (id: string): Promise<FeedbackDTO> => {
-    return apiFetch<FeedbackDTO>(`/feedbacks/${id}`);
+    return apiFetch<FeedbackDTO>(`/feedback/${id}`);
   },
 
   /**
    * Admin: mark feedback as resolved / unresolved
-   * PATCH /feedbacks/:id/resolve
+   * PATCH /feedback/:id/resolve
    */
   setResolved: async (id: string, resolved: boolean): Promise<FeedbackDTO> => {
-    return apiFetch<FeedbackDTO>(`/feedbacks/${id}/resolve`, {
+    return apiFetch<FeedbackDTO>(`/feedback/${id}/resolve`, {
       method: "PATCH",
       body: JSON.stringify({ resolved }),
     });
