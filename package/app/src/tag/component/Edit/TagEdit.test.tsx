@@ -90,7 +90,6 @@ export default function TagEditFixture() {
           tagUnitId: "tag_existing_1",
           score: 0,
           voteCount: 0,
-          tagLabel: "现有标签",
         }
       : null;
 

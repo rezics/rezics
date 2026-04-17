@@ -20,16 +20,12 @@ function resolveLabel(
 }
 
 /**
- * Map a UnitTag junction row (with relations) to the contract DTO.
+ * Map a UnitTag junction row to the contract DTO.
  */
-export function mapUnitTagToDTO(
-  unitTag: UnitTagWithRelations,
-  language?: string,
-): UnitTagDTO {
+export function mapUnitTagToDTO(unitTag: UnitTagWithRelations): UnitTagDTO {
   return {
     unitId: unitTag.unitId,
     tagUnitId: unitTag.tagUnitId,
-    tagLabel: resolveLabel(unitTag.tag.translations, language),
     score: unitTag.score,
     voteCount: unitTag.voteCount,
     createdAt: unitTag.createdAt.toISOString(),

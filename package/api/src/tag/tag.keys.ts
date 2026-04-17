@@ -23,6 +23,10 @@ export const tagKeys = {
   context: (unitId: string) =>
     [...tagKeys.all(), "context", unitId] as const,
 
+  // batch translations for a set of tag unit IDs in a language
+  translations: (tagUnitIds: string[], lang: string) =>
+    [...tagKeys.all(), "translations", [...tagUnitIds].sort().join(","), lang] as const,
+
   // votes
   votes: () => [...tagKeys.all(), "votes"] as const,
 } as const;

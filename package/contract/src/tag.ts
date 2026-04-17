@@ -8,7 +8,6 @@ import { paginationLimitSchema } from "./pagination";
 export const unitTagDTOSchema = t.Object({
   unitId: t.String(),
   tagUnitId: t.String(),
-  tagLabel: t.Optional(t.String()),
   score: t.Number(),
   voteCount: t.Number(),
   createdAt: t.Optional(t.Union([t.String(), t.Date()])),
@@ -16,6 +15,34 @@ export const unitTagDTOSchema = t.Object({
 });
 
 export type UnitTagDTO = (typeof unitTagDTOSchema)["static"];
+
+// ============================================================
+// BATCH TAG TRANSLATION
+// ============================================================
+
+export const batchTagTranslationQuerySchema = t.Object({
+  unitIds: t.String(), // comma-separated tag unit IDs
+  lang: t.String(),
+});
+
+export type BatchTagTranslationQuery = {
+  unitIds: string[];
+  language: string;
+};
+
+export const batchTagTranslationEntrySchema = t.Object({
+  name: t.String(),
+  slug: t.String(),
+  description: t.String(),
+});
+
+export const batchTagTranslationResultSchema = t.Record(
+  t.String(),
+  batchTagTranslationEntrySchema,
+);
+
+export type BatchTagTranslationEntry = (typeof batchTagTranslationEntrySchema)["static"];
+export type BatchTagTranslationResult = Record<string, BatchTagTranslationEntry>;
 
 // ============================================================
 // TAG VOTE DTO

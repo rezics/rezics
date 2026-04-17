@@ -1,5 +1,6 @@
 import { Box, Divider, Stack } from "@mui/material";
 import { bookQueries } from "@rezics/api/book/book";
+import { tagQueries } from "@rezics/api/tag/tag.queries";
 import { ArrowForwardIcon } from "@rezics/ui/composite/navigation/ArrowForwardIcon.tsx";
 import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
 import { useQuery } from "@tanstack/react-query";
@@ -10,6 +11,7 @@ import { useTranslation } from "react-i18next";
 import { getTranslation } from "@/shared/util/translation-helpers";
 import { WorkReleaseNav } from "@/i18n/component/WorkReleaseNav";
 import { RemarkInlineForm } from "@/remark/component/RemarkInlineForm";
+import { TagInteraction } from "@/tag/component/TagInteraction";
 import { BookDescription } from "../component/BookDescription";
 import { MetadataPanel } from "../component/BookDetail/MetadataPanel";
 import { QuoteExcerptPreview } from "../component/QuoteExcerptPreview";
@@ -28,6 +30,16 @@ export const BookBasicInfoPage: React.FC = () => {
 
   const { t } = useTranslation();
   const [selectedLang] = useBookLanguage(bookId, bookInfo);
+
+  const { data: tagsData } = useQuery({
+    ...tagQueries.forUnit(bookId),
+    enabled: Boolean(bookId),
+  });
+  const unitTags = tagsData?.tags ?? [];
+  const tagUnitIds = unitTags.map((tag) => tag.tagUnitId);
+  const { data: tagTranslations } = useQuery(
+    tagQueries.batchTranslations(tagUnitIds, selectedLang),
+  );
 
   if (!bookInfo) return null;
 
@@ -58,6 +70,22 @@ export const BookBasicInfoPage: React.FC = () => {
         <Box className="lg:hidden">
           <MetadataPanel bookInfo={bookInfo} variant="inline" />
         </Box>
+
+        {unitTags.length > 0 && (
+          <>
+            <Divider />
+            <div>
+              <AccentBarWithText text={t("book.fields.tags", "Tags")} />
+              <Box mt={1}>
+                <TagInteraction
+                  tags={unitTags}
+                  translations={tagTranslations ?? {}}
+                  bookUnitId={bookInfo.unitId ?? bookId}
+                />
+              </Box>
+            </div>
+          </>
+        )}
 
         <Divider />
 

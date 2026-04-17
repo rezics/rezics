@@ -5,7 +5,7 @@ import type {
   TagListQuery,
   UpdateTagInput,
 } from "@rezics/contract";
-import { validateSlug } from "@rezics/contract";
+import { FALLBACK_LANGUAGE, validateSlug } from "@rezics/contract";
 import { prisma, UnitStatus, UnitType } from "#/prisma/client";
 import { patchContentTagsToMeili } from "@/meili/content/sync";
 import type { TagWithTranslations, UnitTagWithRelations } from "./types";
@@ -199,19 +199,54 @@ export class TagService {
   }
 
   /**
-   * Get all UnitTag rows for a given unit, with tag labels resolved.
-   * Optionally filter labels by language.
+   * Get all UnitTag rows for a given unit.
+   * Display labels are resolved separately via the batch translation query.
    */
-  async getTagsForUnit(
-    unitId: string,
-    language?: string,
-  ): Promise<UnitTagWithRelations[]> {
+  async getTagsForUnit(unitId: string): Promise<UnitTagWithRelations[]> {
     const unitTags = await prisma.unitTag.findMany({
       where: { unitId },
       orderBy: { score: "desc" },
       include: unitTagInclude,
     });
     return unitTags as UnitTagWithRelations[];
+  }
+
+  /**
+   * Resolve display translations for a batch of tag unit IDs in the requested language.
+   * Uses the standard translation resolution chain (requested -> unit default -> platform fallback -> first).
+   */
+  async batchTranslations(
+    tagUnitIds: string[],
+    language: string,
+  ): Promise<Record<string, { name: string; slug: string; description: string }>> {
+    if (tagUnitIds.length === 0) return {};
+
+    const tagUnits = await prisma.unit.findMany({
+      where: { id: { in: tagUnitIds }, type: UnitType.TAG },
+      include: { translations: true },
+    });
+
+    const result: Record<string, { name: string; slug: string; description: string }> = {};
+
+    for (const tag of tagUnits) {
+      const translations = tag.translations ?? [];
+      const requested = translations.find((t) => t.language === language && t.title);
+      const defaultLang = tag.defaultLanguage;
+      const byDefault = defaultLang
+        ? translations.find((t) => t.language === defaultLang && t.title)
+        : undefined;
+      const byFallback = translations.find((t) => t.language === FALLBACK_LANGUAGE && t.title);
+      const first = translations.find((t) => t.title);
+      const pick = requested ?? byDefault ?? byFallback ?? first;
+
+      result[tag.id] = {
+        name: pick?.title ?? "",
+        slug: tag.slug ?? "",
+        description: pick?.description ?? "",
+      };
+    }
+
+    return result;
   }
 }
 

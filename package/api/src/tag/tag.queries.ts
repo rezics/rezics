@@ -53,6 +53,21 @@ export const tagContextQuery = (unitId: string) =>
   });
 
 /**
+ * Query options for resolving translations for a batch of tag unit IDs in a language.
+ * Shared across components that display the same tags in the same language (hero + overview).
+ */
+export const tagBatchTranslationsQuery = (
+  tagUnitIds: string[],
+  lang: string,
+) =>
+  queryOptions({
+    queryKey: tagKeys.translations(tagUnitIds, lang),
+    queryFn: () => tagApi.batchTranslations(tagUnitIds, lang),
+    enabled: tagUnitIds.length > 0 && !!lang,
+    staleTime: 1000 * 60 * 30,
+  });
+
+/**
  * Infinite query options for paginated tag list
  */
 export const tagInfiniteListQuery = (filters?: Omit<TagFilters, "page">) =>
@@ -79,5 +94,6 @@ export const tagQueries = {
   detail: tagDetailQuery,
   forUnit: tagsForUnitQuery,
   context: tagContextQuery,
+  batchTranslations: tagBatchTranslationsQuery,
   infiniteList: tagInfiniteListQuery,
 };

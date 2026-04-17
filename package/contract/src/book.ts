@@ -5,17 +5,6 @@ import { paginationLimitSchema } from "./pagination";
 import { publicUserSchema, unitTranslationDTOSchema } from "./unit";
 
 // ============================================================
-// SCORED TAG BRIEF (inline for BookDTO)
-// ============================================================
-
-export const scoredTagBriefSchema = t.Object({
-  tagUnitId: t.String(),
-  label: t.Optional(t.String()),
-  score: t.Number(),
-  voteCount: t.Optional(t.Number()),
-});
-
-// ============================================================
 // BOOK EXTRA SCHEMA
 // ============================================================
 
@@ -55,9 +44,6 @@ export const bookDTOSchema = t.Object({
 
   // Attribution
   attributions: t.Optional(t.Array(attributionBriefSchema)),
-
-  // Tags (scored)
-  tags: t.Optional(t.Array(scoredTagBriefSchema)),
 
   // Engagement
   reactionSummaries: t.Optional(t.Any()),

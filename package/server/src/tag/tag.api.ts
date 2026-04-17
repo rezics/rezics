@@ -1,5 +1,6 @@
 import type {
   AttachTagInput,
+  BatchTagTranslationResult,
   CastTagVoteInput,
   CreateTagInput,
   TagListQuery,
@@ -8,6 +9,7 @@ import type {
 } from "@rezics/contract";
 import {
   attachTagSchema,
+  batchTagTranslationQuerySchema,
   castTagVoteSchema,
   createTagSchema,
   detachTagSchema,
@@ -41,6 +43,27 @@ export const tagApi = new Elysia({ prefix: "/tags" })
         summary: "List tags",
         description:
           "List tag Units with optional name search and language filter",
+        tags: ["Tags"],
+      },
+    },
+  )
+
+  // GET /batch-translations - resolve translations for a batch of tag unit IDs
+  .get(
+    "/batch-translations",
+    async ({ query }): Promise<BatchTagTranslationResult> => {
+      const unitIds = (query.unitIds ?? "")
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean);
+      return tagService.batchTranslations(unitIds, query.lang);
+    },
+    {
+      query: batchTagTranslationQuerySchema,
+      detail: {
+        summary: "Batch tag translations",
+        description:
+          "Resolve translated name/slug/description for an array of tag unit IDs in the requested language.",
         tags: ["Tags"],
       },
     },
@@ -197,17 +220,10 @@ export const tagApi = new Elysia({ prefix: "/tags" })
   // GET /for-unit/:unitId - get tags for a specific unit
   .get(
     "/for-unit/:unitId",
-    async ({ params, query }): Promise<{ tags: UnitTagDTO[] }> => {
-      const language =
-        typeof query === "object" && query !== null
-          ? (query as any).language
-          : undefined;
-      const unitTags = await tagService.getTagsForUnit(
-        params.unitId,
-        language,
-      );
+    async ({ params }): Promise<{ tags: UnitTagDTO[] }> => {
+      const unitTags = await tagService.getTagsForUnit(params.unitId);
       return {
-        tags: unitTags.map((ut) => mapUnitTagToDTO(ut, language)),
+        tags: unitTags.map((ut) => mapUnitTagToDTO(ut)),
       };
     },
     {

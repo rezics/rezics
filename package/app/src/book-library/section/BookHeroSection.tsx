@@ -1,7 +1,8 @@
 import { Rating } from "@mui/material";
 import type { BookDTO } from "@rezics/contract";
+import { tagQueries } from "@rezics/api/tag/tag.queries";
 import { LazyLoadImage } from "@rezics/ui/primitive/image/LazyLoadImage.tsx";
-import { Link } from "@rezics/ui/primitive/link/Link.tsx";
+import { useQuery } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
 import type React from "react";
 import { useTranslation } from "react-i18next";
@@ -9,9 +10,9 @@ import {
   MiniActionBar,
   MiniAdminActionBar,
 } from "@/engagement/component/MiniActionBar.tsx";
+import { useNavigateToTagSearch } from "@/search/hooks/useNavigateToTagSearch";
 import {
   getBookCoverUrl,
-  getBookTagLabels,
   getEntityTranslation,
   getTranslation,
 } from "@/shared/util/translation-helpers";
@@ -60,7 +61,15 @@ export const BookHeroSection: React.FC<{
   const author = getEntityTranslation(bookInfo?.attributions, "author", selectedLang);
   const publisher = getEntityTranslation(bookInfo?.attributions, "publisher", selectedLang);
   const producer = getEntityTranslation(bookInfo?.attributions, "producer", selectedLang);
-  const tags = getBookTagLabels(bookInfo);
+
+  const bookUnitId = bookInfo?.unitId ?? "";
+  const { data: tagsData } = useQuery(tagQueries.forUnit(bookUnitId));
+  const unitTags = tagsData?.tags ?? [];
+  const tagUnitIds = unitTags.map((t) => t.tagUnitId);
+  const { data: translations } = useQuery(
+    tagQueries.batchTranslations(tagUnitIds, selectedLang),
+  );
+  const navigateToTagSearch = useNavigateToTagSearch();
 
   return (
     <div
@@ -113,13 +122,26 @@ export const BookHeroSection: React.FC<{
 
             {/* Tags (scored) */}
             <div className="flex flex-wrap gap-2 mt-1">
-              {tags.map((tag) => (
-                <Link key={tag.tagUnitId} to="/book" search={{ tags: tag.label }}>
-                  <span className="px-2 py-1 rounded bg-white/10 text-white hover:bg-white/20 transition">
-                    {tag.label}
-                  </span>
-                </Link>
-              ))}
+              {unitTags.map((tag) => {
+                const tr = translations?.[tag.tagUnitId];
+                const label = tr?.name || tag.tagUnitId;
+                const slug = tr?.slug ?? "";
+                return (
+                  <button
+                    key={tag.tagUnitId}
+                    type="button"
+                    onClick={() =>
+                      slug &&
+                      navigateToTagSearch([
+                        { slug, unitId: tag.tagUnitId, name: label },
+                      ])
+                    }
+                    className="px-2 py-1 rounded bg-white/10 text-white hover:bg-white/20 transition cursor-pointer"
+                  >
+                    {label}
+                  </button>
+                );
+              })}
             </div>
           </div>
 

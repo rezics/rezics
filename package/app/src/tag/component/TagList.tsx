@@ -4,11 +4,6 @@ import type React from "react";
 import { useCallback, useState } from "react";
 import { TagDetailCard } from "./TagCards";
 
-/**
- * TagList and SingleTagChip - now use UnitTagDTO (scored tags).
- * Tags have tagUnitId, tagLabel, score, voteCount.
- */
-
 interface SingleTagChipProps {
   tag: UnitTagDTO;
   className?: string;
@@ -36,7 +31,7 @@ export function SingleTagChip({
     [activeId],
   );
 
-  const label = tag.tagLabel ?? tag.tagUnitId;
+  const label = tag.tagUnitId;
 
   return (
     <div className={className}>
@@ -91,7 +86,7 @@ export const TagList: React.FC<{
     <div className={className}>
       <div className="flex flex-wrap gap-2">
         {tags.map((tag) => {
-          const label = tag.tagLabel ?? tag.tagUnitId;
+          const label = tag.tagUnitId;
           return (
             <div key={tag.tagUnitId} className="flex items-center">
               <Chip

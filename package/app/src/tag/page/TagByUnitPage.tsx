@@ -7,11 +7,6 @@ import { useMatchRoute } from "@tanstack/react-router";
 import { tagBookRoute } from "@/router";
 import { TagWrapper } from "../component/TagWrapper";
 
-/**
- * Tag pages - now use UnitTagDTO (scored tags) instead of old TagDetailDTO.
- * Tags are scored junctions with tagUnitId, tagLabel, score, voteCount.
- */
-
 export function TagByBookPage() {
   const { bookId } = tagBookRoute.useParams();
   const pageSize = 30;

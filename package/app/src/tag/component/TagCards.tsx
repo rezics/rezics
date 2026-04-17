@@ -3,16 +3,13 @@ import type { UnitTagDTO } from "@rezics/contract";
 import { MUILink } from "@rezics/ui/primitive/link/MUILink.tsx";
 import type React from "react";
 
-/**
- * TagCard and TagDetailCard - now use UnitTagDTO (scored tags).
- * Tags have tagUnitId, tagLabel, score, voteCount.
- */
 export const TagCard: React.FC<{
   tag: UnitTagDTO;
+  label?: string;
   onClick?: (tag: UnitTagDTO) => void;
   selected?: boolean;
-}> = ({ tag, onClick, selected }) => {
-  const label = tag.tagLabel ?? tag.tagUnitId;
+}> = ({ tag, label: labelProp, onClick, selected }) => {
+  const label = labelProp ?? tag.tagUnitId;
   return (
     // biome-ignore lint/a11y/useSemanticElements: interactive card wrapper
     <div
@@ -50,14 +47,12 @@ export const TagCard: React.FC<{
   );
 };
 
-/**
- * Detailed card for a scored tag junction.
- */
 export const TagDetailCard: React.FC<{
   tag: UnitTagDTO;
+  label?: string;
   onNavigate?: (tag: UnitTagDTO) => void;
-}> = ({ tag }) => {
-  const label = tag.tagLabel ?? tag.tagUnitId;
+}> = ({ tag, label: labelProp }) => {
+  const label = labelProp ?? tag.tagUnitId;
   return (
     <Card elevation={0} className="border border-gray-200 rounded-md">
       <CardContent className="space-y-2">

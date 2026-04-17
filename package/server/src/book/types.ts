@@ -12,10 +12,6 @@ export const bookInclude = {
       user: { select: publicUserSelect },
       translations: true,
       supportLanguages: true,
-      unitTags: {
-        include: { tag: { include: { translations: true } } },
-        orderBy: { score: "desc" as const },
-      },
       attributions: {
         include: {
           entity: {

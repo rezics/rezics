@@ -1,7 +1,7 @@
 ## Section 1
 - [x] zone-and-unified-search
 - [x] universal-markdown-and-user-brief
-- [ ] book-detail-restructure
+- [x] book-detail-restructure
 - [ ] tag-interaction-system
 - [ ] seed-restructure-and-scale
 
@@ -9,6 +9,7 @@
 - [ ] book content index 並不需要章節存在，所以如果沒有 unitId 前端應該給交互，可以創建 chapter
 - [ ] post 不需要 translation 直接使用 unit translation 只不過他專門索引 不同 trans 的 release id, 就是 翻譯是 不同 unit 維護
 - [ ] UnitTranslation  sourceReleaseUnitId  我覺得這個名詞不夠準確，因爲這描述了 work，但是他可以提供 wiki 的功能
+- [ ] 快照其實是正確的，用快照的話，bot更新可以不觸發新版本
 - [ ] 我需要整理spc规范嘛？
 - [ ] 有沒有一個將所有 test 收集起來並以文檔展示，也方便測試的工具？
 - [ ] R2 暫時對於所有非書籍封面，或者非管理員不開放（就是論壇圖片全部走圖床）

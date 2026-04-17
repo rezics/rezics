@@ -167,7 +167,7 @@ export const TagListEdit: React.FC<TagListEditProps> = ({
                 key={t.tagUnitId}
                 className="flex items-center justify-between gap-2"
               >
-                <Chip label={t.tagLabel ?? t.tagUnitId} size="small" />
+                <Chip label={t.tagUnitId} size="small" />
                 <Button
                   size="small"
                   variant="outlined"

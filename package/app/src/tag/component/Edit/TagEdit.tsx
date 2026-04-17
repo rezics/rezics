@@ -22,17 +22,19 @@ import { useState } from "react";
  */
 export type TagEditProps = {
   tag?: UnitTagDTO | null;
+  initialName?: string;
   onSaved?: (tag: UnitTagDTO) => void;
   className?: string;
 };
 
 export const TagEdit: React.FC<TagEditProps> = ({
   tag,
+  initialName,
   onSaved,
   className,
 }) => {
   const isUpdate = !!tag;
-  const [name, setName] = useState(tag?.tagLabel ?? "");
+  const [name, setName] = useState(initialName ?? "");
 
   const createMutation = useCreateTagMutation({
     onSuccess: (data) => onSaved?.(data as UnitTagDTO),

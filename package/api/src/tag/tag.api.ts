@@ -7,6 +7,7 @@
 
 import type {
   AttachTagInput,
+  BatchTagTranslationResult,
   CastTagVoteInput,
   CreateTagInput,
   DetachTagInput,
@@ -129,6 +130,21 @@ export const tagApi = {
   ): Promise<{ tags: UnitTagDTO[] }> => {
     return apiFetch<{ tags: UnitTagDTO[] }>(
       `/tags/for-unit/${unitId}${buildQueryString(filters)}`,
+    );
+  },
+
+  /**
+   * Resolve translations for a batch of tag unit IDs in the requested language.
+   * Returns `{ [tagUnitId]: { name, slug, description } }`.
+   */
+  batchTranslations: async (
+    tagUnitIds: string[],
+    lang: string,
+  ): Promise<BatchTagTranslationResult> => {
+    if (tagUnitIds.length === 0) return {};
+    const params = buildQueryString({ unitIds: tagUnitIds.join(","), lang });
+    return apiFetch<BatchTagTranslationResult>(
+      `/tags/batch-translations${params}`,
     );
   },
 };

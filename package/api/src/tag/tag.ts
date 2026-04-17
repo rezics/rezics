@@ -22,6 +22,7 @@ export {
 
 // Queries
 export {
+  tagBatchTranslationsQuery,
   tagContextQuery,
   tagDetailQuery,
   tagInfiniteListQuery,

@@ -10,7 +10,7 @@ import type {
   BookDTO,
   UnitTranslationDTO,
 } from '@rezics/contract';
-import { DEFAULT_LANGUAGE, FALLBACK_LANGUAGE } from '@rezics/contract';
+import { FALLBACK_LANGUAGE } from '@rezics/contract';
 
 /**
  * Get the user's preferred languages from settings.
@@ -194,16 +194,3 @@ export function getBookPublisherName(book: BookDTO | null | undefined): string {
   return '';
 }
 
-/**
- * Get tag labels from scored tag briefs on a BookDTO.
- */
-export function getBookTagLabels(
-  book: BookDTO | null | undefined,
-): Array<{ tagUnitId: string; label: string; score: number }> {
-  if (!book?.tags) return [];
-  return book.tags.map((t) => ({
-    tagUnitId: t.tagUnitId,
-    label: t.label ?? t.tagUnitId,
-    score: t.score,
-  }));
-}

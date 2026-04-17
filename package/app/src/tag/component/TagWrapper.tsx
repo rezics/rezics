@@ -21,10 +21,6 @@ export type TagWrapperProps = {
   renderAll?: boolean;
 };
 
-/**
- * TagWrapper - now uses UnitTagDTO (scored tags) instead of old TagDTO.
- * Tags have tagUnitId, tagLabel, score, voteCount.
- */
 export const TagWrapper: React.FC<TagWrapperProps> = ({
   filters,
   mode: _mode = "flat",

@@ -26,7 +26,7 @@ export function TagUnitPage() {
   }
   return (
     <div className="w-11/12 mx-auto mt-10">
-      <AccentBarWithText text={(data as UnitTagDTO)?.tagLabel ?? `标签（${unitId}）`} />
+      <AccentBarWithText text={`标签（${unitId}）`} />
       <div className="mt-4">
         <TagDetailCard tag={data as UnitTagDTO} />
       </div>

@@ -83,19 +83,6 @@ export function mapBaseBookToDTO(book: BookWithRelations): BookDTO {
         };
       }) ?? [],
 
-    // Tags (scored)
-    tags:
-      unit.unitTags?.map((ut) => {
-        // Resolve tag label from first available translation
-        const tagTranslation = ut.tag.translations?.[0];
-        return {
-          tagUnitId: ut.tagUnitId,
-          label: tagTranslation?.title ?? undefined,
-          score: ut.score,
-          voteCount: ut.voteCount,
-        };
-      }) ?? [],
-
     createdAt: book.createdAt,
     updatedAt: book.updatedAt,
     publishedAt: unit.publishedAt ?? undefined,
