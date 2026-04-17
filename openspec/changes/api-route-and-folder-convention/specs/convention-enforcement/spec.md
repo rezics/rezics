@@ -1,7 +1,7 @@
 ## ADDED Requirements
 
 ### Requirement: Convention check script exists and is runnable
-A TypeScript script at `package/scripts/check-convention.ts` SHALL implement the route and folder checks defined in `api-route-convention/spec.md` and `folder-naming-convention/spec.md`. The script SHALL be invokable via `bun run check:convention` at the repository root and SHALL exit with a non-zero status code when any violation is found.
+A TypeScript script at `tool/scripts/check-convention.ts` SHALL implement the route and folder checks defined in `api-route-convention/spec.md` and `folder-naming-convention/spec.md`. The script SHALL be invokable via `bun run check:convention` at the repository root and SHALL exit with a non-zero status code when any violation is found.
 
 #### Scenario: Clean repository passes
 - **WHEN** a developer runs `bun run check:convention` on a repository with no violations

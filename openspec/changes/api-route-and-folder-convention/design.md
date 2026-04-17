@@ -109,14 +109,14 @@ Anything not on the allowlist is singular. Adding to the allowlist requires amen
 
 ### D6: Enforcement — pre-commit script + CI step
 
-`package/scripts/check-convention.ts` performs three scans:
+`tool/scripts/check-convention.ts` performs three scans:
 
 1. **Route prefix scan:** parse `new Elysia({ prefix: "..." })` call sites across `package/*/src`. Reject `prefix` values ending in common plural markers (`s`, `es`) unless the bare stem is itself a valid singular English noun that happens to end in `s` (e.g., `stats` — handled via explicit allowlist). Flag prefixes that contain known plural resource names from a fixed denylist derived from this change's migration scope.
 2. **List-suffix scan:** parse `.get("/", …)` and `.post("/", …)` handlers whose return type contains `items` or resembles a list response, and require the route path to end in `/list`.
 3. **Folder-name scan:** walk `package/*/src/**` (excluding `prisma/generated/**`). Reject plural folder names not on the container allowlist. Reject singular folder names that equal any entry on the plural container allowlist.
 
 Integration:
-- Pre-commit: `lefthook.yml` adds a pre-commit step running `bun run scripts/check-convention.ts --staged`.
+- Pre-commit: `lefthook.yml` adds a pre-commit step running `bun run check:convention -- --staged`.
 - CI: the existing CI workflow gains a `bun run check:convention` step before tests.
 - Local: `bun run check:convention` available as a package.json script.
 

@@ -17,6 +17,9 @@ jobs:
 
       - run: bun install --frozen-lockfile
 
+      - name: Check convention (routes & folders)
+        run: bun run check:convention
+
       - name: Check unused exports & dependencies
         run: bun run knip
 

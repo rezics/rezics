@@ -20,7 +20,7 @@ This proposal establishes a single, enforceable naming convention for HTTP route
   - This supersedes the conflicting example in `package/app/docs/feature standard.md` (which currently shows `hooks/` plural alongside `util/` singular).
 
 - **Automated enforcement** (new):
-  - A Node script at `package/scripts/check-convention.ts` SHALL scan Elysia `prefix:` declarations and reject plural resource prefixes, flag list-returning routes missing the `/list` suffix, and reject folder names that violate the domain-singular / container-plural rules.
+  - A Node script at `tool/scripts/check-convention.ts` SHALL scan Elysia `prefix:` declarations and reject plural resource prefixes, flag list-returning routes missing the `/list` suffix, and reject folder names that violate the domain-singular / container-plural rules.
   - The check SHALL run as a pre-commit hook and as a CI step.
 
 - **CLAUDE.md update**: a new "API Route & Folder Convention" section is added summarizing the rules and linking to the spec.
@@ -49,7 +49,7 @@ _None._ `pagination-limit-contract` and `public-list-endpoints` remain untouched
   - `openspec/specs/convention-enforcement/spec.md` (new)
   - `CLAUDE.md` (new section)
   - `package/app/docs/feature standard.md` (correct the `hooks/` vs `util/` inconsistency, align with new convention)
-  - `package/scripts/check-convention.ts` (new)
+  - `tool/scripts/check-convention.ts` (new)
   - `.lefthook.yml` or equivalent pre-commit config (wire the script)
   - CI workflow file (wire the script)
 
@@ -61,4 +61,4 @@ _None._ `pagination-limit-contract` and `public-list-endpoints` remain untouched
 
 - **Backward compatibility**: this change is docs + tooling only, so nothing breaks at runtime. The follow-up migration will require a coordinated server+client deploy (no HTTP route aliasing is planned — the cost of dual-maintenance outweighs the short migration window).
 
-- **Affected packages**: `@rezics/server`, `@rezics/contract`, `@rezics/api`, `@rezics/app`, `@rezics/admin`, `@rezics/ui` (folder convention), plus the new `package/scripts/` for tooling. `@rezics/auth` is explicitly out of scope.
+- **Affected packages**: `@rezics/server`, `@rezics/contract`, `@rezics/api`, `@rezics/app`, `@rezics/admin`, `@rezics/ui` (folder convention), plus `tool/scripts/` for the convention-check script. `@rezics/auth` is explicitly out of scope.

@@ -1,0 +1,6 @@
+pre-commit:
+  parallel: true
+  jobs:
+    - name: check-convention
+      run: bun run check:convention -- --staged
+      stage_fixed: false
