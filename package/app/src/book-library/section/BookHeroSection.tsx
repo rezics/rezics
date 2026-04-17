@@ -2,23 +2,21 @@ import { Rating } from "@mui/material";
 import type { BookDTO } from "@rezics/contract";
 import { LazyLoadImage } from "@rezics/ui/primitive/image/LazyLoadImage.tsx";
 import { Link } from "@rezics/ui/primitive/link/Link.tsx";
+import { useParams } from "@tanstack/react-router";
 import type React from "react";
-import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   MiniActionBar,
   MiniAdminActionBar,
 } from "@/engagement/component/MiniActionBar.tsx";
-import { TranslationTabs } from "@/i18n/component/TranslationTabs";
 import {
-  getAttributionsByRole,
-  getBookAuthorName,
   getBookCoverUrl,
-  getBookPublisherName,
   getBookTagLabels,
-  getBookTitle,
+  getEntityTranslation,
   getTranslation,
 } from "@/shared/util/translation-helpers";
+
+import { useBookLanguage } from "../hooks/useBookLanguage";
 
 type Book = BookDTO;
 
@@ -49,26 +47,21 @@ export const BookHeroSection: React.FC<{
   rating: number;
 }> = ({ bookInfo, rating }) => {
   const { t } = useTranslation();
-  const availableLanguages = useMemo(
-    () => (bookInfo?.translations ?? []).map((tr) => tr.language),
-    [bookInfo?.translations],
-  );
-  const [selectedLang, setSelectedLang] = useState<string>(
-    bookInfo?.defaultLanguage ?? availableLanguages[0] ?? "",
-  );
+  const { bookId } = useParams({ strict: false }) as { bookId?: string };
+  const [selectedLang] = useBookLanguage(bookId ?? bookInfo?.unitId ?? "", bookInfo);
+
   const selectedTranslation = getTranslation(
     bookInfo?.translations,
     selectedLang,
-    undefined,
-    selectedLang || undefined,
+    bookInfo?.defaultLanguage ?? undefined,
   );
-  const title = selectedTranslation?.title ?? getBookTitle(bookInfo);
+  const title = selectedTranslation?.title ?? "";
   const coverUrl = getBookCoverUrl(bookInfo);
-  const authorName = getBookAuthorName(bookInfo);
-  const publisherName = getBookPublisherName(bookInfo);
-  const producerCredits = getAttributionsByRole(bookInfo?.attributions, 'producer');
-  const producerName = producerCredits[0]?.name ?? '';
+  const author = getEntityTranslation(bookInfo?.attributions, "author", selectedLang);
+  const publisher = getEntityTranslation(bookInfo?.attributions, "publisher", selectedLang);
+  const producer = getEntityTranslation(bookInfo?.attributions, "producer", selectedLang);
   const tags = getBookTagLabels(bookInfo);
+
   return (
     <div
       className="bg-cover bg-center relative"
@@ -93,25 +86,21 @@ export const BookHeroSection: React.FC<{
               {title}
             </h1>
 
-            <TranslationTabs
-              languages={availableLanguages}
-              selected={selectedLang}
-              onChange={setSelectedLang}
-            />
-
             <div className="space-y-1">
-              <p>
-                {t("book.fields.author")}：
-                <span className="font-medium">
-                  {authorName}
-                </span>
-              </p>
-              <p>
-                {t("book.fields.press")}：{publisherName}
-              </p>
-              {producerName && (
+              {author?.name && (
                 <p>
-                  {t("book.fields.producer")}：{producerName}
+                  {t("book.fields.author")}：
+                  <span className="font-medium">{author.name}</span>
+                </p>
+              )}
+              {publisher?.name && (
+                <p>
+                  {t("book.fields.press")}：{publisher.name}
+                </p>
+              )}
+              {producer?.name && (
+                <p>
+                  {t("book.fields.producer")}：{producer.name}
                 </p>
               )}
               <p>

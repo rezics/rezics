@@ -1,16 +1,39 @@
 import {
   Alert,
+  Box,
   Button,
   Chip,
   CircularProgress,
+  IconButton,
+  MenuItem,
+  Stack,
   TextField,
   Typography,
 } from '@mui/material';
+import {
+  closestCenter,
+  DndContext,
+  type DragEndEvent,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core';
+import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import { userQueries } from '@rezics/api/user/user.queries';
 import { useUpdateSettingsMutation } from '@rezics/api/user/user.mutations';
 import { userKeywordQueries } from '@rezics/api/shelf/shelf.queries';
 import { useUpdateKeywordsMutation } from '@rezics/api/shelf/shelf.mutations';
 import { useQuery } from '@tanstack/react-query';
+import { GripVerticalIcon, XIcon } from 'lucide-react';
 import { type FC, useState } from 'react';
 import { SettingsSection } from '@/user/component/SettingsSection';
 import { useRequireAuth } from '@/user/page/useAuth';
@@ -23,7 +46,75 @@ const SUPPORTED_LANGUAGES = [
   { code: 'de', label: 'German' },
 ] as const;
 
+const LANG_LABELS: Record<string, string> = Object.fromEntries(
+  SUPPORTED_LANGUAGES.map((l) => [l.code, l.label]),
+);
+
 const MAX_KEYWORDS = 500;
+
+type SortableLangItemProps = {
+  code: string;
+  onRemove: (code: string) => void;
+  disabled?: boolean;
+};
+
+const SortableLangItem: FC<SortableLangItemProps> = ({
+  code,
+  onRemove,
+  disabled,
+}) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: code });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <Box
+      ref={setNodeRef}
+      style={style}
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 1,
+        px: 1,
+        py: 0.5,
+        borderRadius: 1,
+        bgcolor: 'action.hover',
+      }}
+    >
+      <IconButton
+        size="small"
+        sx={{ cursor: 'grab', touchAction: 'none' }}
+        {...attributes}
+        {...listeners}
+        aria-label="drag handle"
+      >
+        <GripVerticalIcon size={14} />
+      </IconButton>
+      <Typography variant="body2" sx={{ flex: 1 }}>
+        {LANG_LABELS[code] ?? code}
+      </Typography>
+      <IconButton
+        size="small"
+        onClick={() => onRemove(code)}
+        disabled={disabled}
+        aria-label={`remove ${code}`}
+      >
+        <XIcon size={14} />
+      </IconButton>
+    </Box>
+  );
+};
 
 export const SettingsPreferencesSection: FC = () => {
   useRequireAuth();
@@ -41,14 +132,22 @@ export const SettingsPreferencesSection: FC = () => {
   const [langSuccess, setLangSuccess] = useState(false);
   const [newKeyword, setNewKeyword] = useState('');
 
-  const preferredLangs = new Set(settings?.preferredLanguages ?? []);
+  const preferredLangs: string[] = settings?.preferredLanguages ?? [];
+  const availableToAdd = SUPPORTED_LANGUAGES.filter(
+    (l) => !preferredLangs.includes(l.code),
+  );
+  const [addPick, setAddPick] = useState<string>('');
 
-  const handleToggleLang = (code: string) => {
-    const next = new Set(preferredLangs);
-    if (next.has(code)) next.delete(code);
-    else next.add(code);
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
+  );
+
+  const persistOrder = (next: string[]) => {
     updateSettings.mutate(
-      { preferredLanguages: [...next] },
+      { preferredLanguages: next },
       {
         onSuccess: () => {
           setLangSuccess(true);
@@ -56,6 +155,25 @@ export const SettingsPreferencesSection: FC = () => {
         },
       },
     );
+  };
+
+  const handleAddLang = (code: string) => {
+    if (!code || preferredLangs.includes(code)) return;
+    persistOrder([...preferredLangs, code]);
+    setAddPick('');
+  };
+
+  const handleRemoveLang = (code: string) => {
+    persistOrder(preferredLangs.filter((c) => c !== code));
+  };
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    const oldIndex = preferredLangs.indexOf(String(active.id));
+    const newIndex = preferredLangs.indexOf(String(over.id));
+    if (oldIndex < 0 || newIndex < 0) return;
+    persistOrder(arrayMove(preferredLangs, oldIndex, newIndex));
   };
 
   const handleAddKeyword = (e: React.FormEvent) => {
@@ -82,25 +200,70 @@ export const SettingsPreferencesSection: FC = () => {
     <div>
       <SettingsSection
         title="Language Preferences"
-        description="Select your preferred content languages."
+        description="Drag to reorder by priority. The first language is the most preferred."
       >
         {langSuccess && (
           <Alert severity="success" className="mb-3">
             Language preferences saved.
           </Alert>
         )}
-        <div className="flex flex-wrap gap-2">
-          {SUPPORTED_LANGUAGES.map(({ code, label }) => (
-            <Chip
-              key={code}
-              label={label}
-              variant={preferredLangs.has(code) ? 'filled' : 'outlined'}
-              color={preferredLangs.has(code) ? 'primary' : 'default'}
-              onClick={() => handleToggleLang(code)}
-              disabled={updateSettings.isPending}
-            />
-          ))}
-        </div>
+
+        {preferredLangs.length === 0 ? (
+          <Typography variant="body2" color="text.secondary" mb={2}>
+            No language preferences yet. Add one below.
+          </Typography>
+        ) : (
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            modifiers={[restrictToVerticalAxis]}
+            onDragEnd={handleDragEnd}
+          >
+            <SortableContext
+              items={preferredLangs}
+              strategy={verticalListSortingStrategy}
+            >
+              <Stack spacing={1} mb={2}>
+                {preferredLangs.map((code) => (
+                  <SortableLangItem
+                    key={code}
+                    code={code}
+                    onRemove={handleRemoveLang}
+                    disabled={updateSettings.isPending}
+                  />
+                ))}
+              </Stack>
+            </SortableContext>
+          </DndContext>
+        )}
+
+        {availableToAdd.length > 0 && (
+          <Stack direction="row" spacing={1} alignItems="center">
+            <TextField
+              select
+              size="small"
+              variant="outlined"
+              label="Add language"
+              value={addPick}
+              onChange={(e) => setAddPick(e.target.value)}
+              sx={{ minWidth: 220 }}
+            >
+              {availableToAdd.map(({ code, label }) => (
+                <MenuItem key={code} value={code}>
+                  {label}
+                </MenuItem>
+              ))}
+            </TextField>
+            <Button
+              variant="outlined"
+              size="small"
+              onClick={() => handleAddLang(addPick)}
+              disabled={!addPick || updateSettings.isPending}
+            >
+              Add
+            </Button>
+          </Stack>
+        )}
       </SettingsSection>
 
       <SettingsSection

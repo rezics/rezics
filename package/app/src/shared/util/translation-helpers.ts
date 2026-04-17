@@ -136,6 +136,42 @@ export function getAttributionsByRole(
   return attributions.filter((a) => a.role === role);
 }
 
+export type EntityTranslation = {
+  name: string;
+  bio?: string;
+};
+
+/**
+ * Resolve an entity's translated name/bio for a given language from a
+ * book's attributions. The attribution brief carries an optional `entity`
+ * with `translations[]` (UnitTranslationDTO). Falls back through the
+ * standard translation chain when the requested language is unavailable.
+ *
+ * Always returns at least an entry with the attribution's denormalized
+ * `name` so callers don't need to handle the missing-entity case.
+ */
+export function getEntityTranslation(
+  attributions: BookDTO['attributions'],
+  role: string,
+  language?: string,
+): EntityTranslation | undefined {
+  const matches = getAttributionsByRole(attributions, role);
+  if (matches.length === 0) return undefined;
+
+  const first = matches[0] as (typeof matches)[number] & {
+    entity?: {
+      translations?: UnitTranslationDTO[];
+    };
+  };
+  const translations = first.entity?.translations;
+  const tr = getTranslation(translations, language);
+
+  return {
+    name: tr?.title ?? first.name,
+    bio: tr?.description ?? undefined,
+  };
+}
+
 /**
  * Get the primary author name from a BookDTO.
  * Returns the first attribution with role 'author', or the first attribution.

@@ -7,16 +7,14 @@ import { useParams } from "@tanstack/react-router";
 import { useAtomValue } from "jotai";
 import type React from "react";
 import { useTranslation } from "react-i18next";
-import {
-  getBookAuthorName,
-  getBookDescription,
-} from "@/shared/util/translation-helpers";
+import { getTranslation } from "@/shared/util/translation-helpers";
 import { WorkReleaseNav } from "@/i18n/component/WorkReleaseNav";
-import { TagWrapper } from "@/tag/component/TagWrapper.tsx";
-import { AuthorInfo } from "../component/AuthorInfo";
+import { RemarkInlineForm } from "@/remark/component/RemarkInlineForm";
 import { BookDescription } from "../component/BookDescription";
+import { MetadataPanel } from "../component/BookDetail/MetadataPanel";
 import { QuoteExcerptPreview } from "../component/QuoteExcerptPreview";
 import { RemarkPreview } from "../component/RemarkPreview";
+import { useBookLanguage } from "../hooks/useBookLanguage";
 import { BookDetailShell } from "../section/BookDetailSection";
 import { bookDetailAtomFamily } from "../state/bookDetailAtoms";
 
@@ -29,70 +27,78 @@ export const BookBasicInfoPage: React.FC = () => {
   const bookInfo = useAtomValue(bookDetailAtomFamily(bookId)) ?? data;
 
   const { t } = useTranslation();
+  const [selectedLang] = useBookLanguage(bookId, bookInfo);
 
   if (!bookInfo) return null;
 
-  const description = getBookDescription(bookInfo);
-  // MOCK: use first personCredit as author fallback for AuthorInfo
-  const authorUser = bookInfo?.user ?? {
-    unitId: bookInfo?.personCredits?.[0]?.personId ?? '',
-    name: getBookAuthorName(bookInfo),
-    bio: '',
-    description: '',
-  };
+  const description =
+    getTranslation(bookInfo.translations, selectedLang, bookInfo.defaultLanguage ?? undefined)
+      ?.description ?? "";
+
+  const sidebar = (
+    <Stack spacing={3}>
+      <MetadataPanel bookInfo={bookInfo} />
+      {bookInfo.workUnitId && (
+        <WorkReleaseNav
+          workUnitId={bookInfo.workUnitId}
+          currentBookId={bookInfo.unitId}
+        />
+      )}
+    </Stack>
+  );
 
   return (
-    <BookDetailShell bookInfo={bookInfo}>
+    <BookDetailShell bookInfo={bookInfo} sidebar={sidebar}>
       <Stack spacing={4}>
         <BookDescription
           description={description}
-          bookId={bookInfo?.unitId || ""}
+          bookId={bookInfo.unitId || ""}
         />
+
+        <Box className="lg:hidden">
+          <MetadataPanel bookInfo={bookInfo} variant="inline" />
+        </Box>
+
         <Divider />
 
         <div>
-          <ArrowForwardIcon size={16} to={`/tag/book/${bookInfo?.unitId}/tag`}>
-            <AccentBarWithText text={t("book.tags")} />
-          </ArrowForwardIcon>
-        </div>
-        <TagWrapper
-          filters={{ unitId: bookInfo?.unitId || "" }}
-          mode="grouped"
-        />
-        <Divider />
-
-        <AuthorInfo author={authorUser} />
-        <Divider />
-
-        {bookInfo?.workUnitId && (
-          <>
-            <WorkReleaseNav
-              workUnitId={bookInfo.workUnitId}
-              currentBookId={bookInfo.unitId}
-            />
-            <Divider />
-          </>
-        )}
-
-        <div>
-          <ArrowForwardIcon size={16} to={`/quote/book/${bookInfo?.unitId}`}>
+          <ArrowForwardIcon size={16} to={`/quote/book/${bookInfo.unitId}`}>
             <AccentBarWithText text={t("book.quote_excerpts")} />
           </ArrowForwardIcon>
         </div>
-        <QuoteExcerptPreview id={bookInfo?.unitId || ""} />
+        <QuoteExcerptPreview id={bookInfo.unitId || ""} />
+
+        <Divider />
+
+        <div>
+          <AccentBarWithText text={t("book.fields.score" as any)} />
+          <Box mt={1}>
+            <RemarkInlineForm bookUnitId={bookInfo.unitId || ""} />
+          </Box>
+        </div>
+
         <Divider />
 
         <Box>
           <div>
             <ArrowForwardIcon
               size={16}
-              to={`/review/book/${bookInfo?.unitId}?tab=remark`}
+              to={`/review/book/${bookInfo.unitId}?tab=remark`}
             >
               <AccentBarWithText text={t("book.remark")} />
             </ArrowForwardIcon>
           </div>
-          <RemarkPreview bookId={bookInfo?.unitId || ""} />
+          <RemarkPreview bookId={bookInfo.unitId || ""} />
         </Box>
+
+        {bookInfo.workUnitId && (
+          <Box className="lg:hidden">
+            <WorkReleaseNav
+              workUnitId={bookInfo.workUnitId}
+              currentBookId={bookInfo.unitId}
+            />
+          </Box>
+        )}
       </Stack>
     </BookDetailShell>
   );

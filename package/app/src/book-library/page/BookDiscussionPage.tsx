@@ -1,4 +1,4 @@
-import { Divider, Stack, Typography } from "@mui/material";
+import { Box, Divider, Paper, Stack, Typography } from "@mui/material";
 import { bookQueries } from "@rezics/api/book/book";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
@@ -11,7 +11,22 @@ import { ThreadList } from "@/discussion/component/ThreadList";
 import { BookDetailShell } from "../section/BookDetailSection";
 import { bookDetailAtomFamily } from "../state/bookDetailAtoms";
 
-export const BookDiscussionPage: React.FC = () => {
+const CommunitySidebar: React.FC = () => (
+  <Paper variant="outlined" sx={{ p: 2 }}>
+    <Typography variant="subtitle1" fontWeight={600} mb={1}>
+      Community
+    </Typography>
+    <Typography variant="body2" color="text.secondary">
+      Hot threads and active contributors will appear here.
+    </Typography>
+  </Paper>
+);
+
+/**
+ * Community tab — discussion threads for the book.
+ * (Routed at `/book/$bookId/discussion`; the tab label is "Community".)
+ */
+export const BookCommunityPage: React.FC = () => {
   const { bookId } = useParams({ strict: false }) as { bookId: string };
   const { data } = useQuery({
     ...bookQueries.detail(bookId),
@@ -23,11 +38,11 @@ export const BookDiscussionPage: React.FC = () => {
   if (!bookInfo) return null;
 
   return (
-    <BookDetailShell bookInfo={bookInfo}>
+    <BookDetailShell bookInfo={bookInfo} sidebar={<CommunitySidebar />}>
       <Stack spacing={3}>
-        <Typography variant="h6" fontWeight={600}>
-          Discussion
-        </Typography>
+        <Box className="lg:hidden">
+          <CommunitySidebar />
+        </Box>
 
         <InlinePostForm targetUnitId={bookId} />
 
@@ -46,3 +61,6 @@ export const BookDiscussionPage: React.FC = () => {
     </BookDetailShell>
   );
 };
+
+// Backward-compatible alias used by existing route files.
+export const BookDiscussionPage = BookCommunityPage;

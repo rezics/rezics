@@ -1,20 +1,23 @@
-import { Box, Button, Divider, Stack, Tab, Tabs, Typography } from "@mui/material";
+import { Box, Button, Divider, Stack } from "@mui/material";
 import { bookQueries } from "@rezics/api/book/book";
+import { postQueries } from "@rezics/api/post/post";
+import { PostKind } from "@rezics/contract";
+import { ArrowForwardIcon } from "@rezics/ui/composite/navigation/ArrowForwardIcon.tsx";
+import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useParams } from "@tanstack/react-router";
 import { useAtomValue } from "jotai";
 import type React from "react";
-import { useState } from "react";
 import { ScoreOverview } from "@/engagement/component/ScoreOverview";
-import { RemarkInlineForm } from "@/remark/component/RemarkInlineForm";
-import { RemarkList } from "@/remark/component/RemarkList";
 import { ReviewList } from "@/review/component/ReviewList";
-import { getBookTitle } from "@/shared/util/translation-helpers";
+import { getTranslation } from "@/shared/util/translation-helpers";
 import { ShelfByBookPreview } from "../component/ShelfByBookPreview";
+import { useBookLanguage } from "../hooks/useBookLanguage";
 import { BookDetailShell } from "../section/BookDetailSection";
 import { bookDetailAtomFamily } from "../state/bookDetailAtoms";
-import { postQueries } from "@rezics/api/post/post";
-import { PostKind } from "@rezics/contract";
+
+const REVIEW_PREVIEW_LIMIT = 5;
+const SHELF_PREVIEW_LIMIT = 5;
 
 export const BookReviewPage: React.FC = () => {
   const { bookId } = useParams({ strict: false }) as { bookId: string };
@@ -24,47 +27,50 @@ export const BookReviewPage: React.FC = () => {
     enabled: Boolean(bookId),
   });
   const bookInfo = useAtomValue(bookDetailAtomFamily(bookId)) ?? data;
-  const [subTab, setSubTab] = useState<"remarks" | "reviews">("remarks");
+  const [selectedLang] = useBookLanguage(bookId, bookInfo);
 
   const { data: reviewsData } = useQuery({
-    ...postQueries.byTarget(bookId),
+    ...postQueries.byTarget(bookId, {
+      kind: "review",
+      limit: REVIEW_PREVIEW_LIMIT,
+    }),
     enabled: Boolean(bookId),
   });
 
-  const reviews =
-    reviewsData?.posts?.filter((p) => p.kind === PostKind.REVIEW) ?? [];
-
   if (!bookInfo) return null;
 
-  const title = getBookTitle(bookInfo);
+  const title =
+    getTranslation(bookInfo.translations, selectedLang, bookInfo.defaultLanguage ?? undefined)
+      ?.title ?? "";
+
+  const reviews =
+    reviewsData?.posts
+      ?.filter((p) => p.kind === PostKind.REVIEW)
+      .slice(0, REVIEW_PREVIEW_LIMIT) ?? [];
+
+  const sidebar = (
+    <Stack spacing={3}>
+      <ScoreOverview unitId={bookId} />
+    </Stack>
+  );
 
   return (
-    <BookDetailShell bookInfo={bookInfo}>
+    <BookDetailShell bookInfo={bookInfo} sidebar={sidebar}>
       <Stack spacing={4}>
-        {/* Score Overview */}
-        <ScoreOverview unitId={bookId} />
+        <Box className="lg:hidden">
+          <ScoreOverview unitId={bookId} />
+        </Box>
 
-        <Divider />
-
-        {/* Inline Remark Form */}
-        <RemarkInlineForm bookUnitId={bookId} />
-
-        <Divider />
-
-        {/* Sub-tab toggle: Remarks | Reviews */}
         <Box>
           <Stack
             direction="row"
             justifyContent="space-between"
             alignItems="center"
+            mb={1}
           >
-            <Tabs
-              value={subTab}
-              onChange={(_, v) => setSubTab(v)}
-            >
-              <Tab label="Remarks" value="remarks" />
-              <Tab label="Reviews" value="reviews" />
-            </Tabs>
+            <ArrowForwardIcon size={16} to={`/review/book/${bookId}`}>
+              <AccentBarWithText text={`Reviews of ${title}`} />
+            </ArrowForwardIcon>
             <Button
               variant="text"
               size="small"
@@ -75,25 +81,18 @@ export const BookReviewPage: React.FC = () => {
                 })
               }
             >
-              Write a Full Review
+              Write a Review
             </Button>
           </Stack>
-
-          <Box mt={2}>
-            {subTab === "remarks" ? (
-              <RemarkList targetUnitId={bookId} />
-            ) : (
-              <ReviewList reviews={reviews} />
-            )}
-          </Box>
+          <ReviewList reviews={reviews} />
         </Box>
 
         <Divider />
 
-        {/* Shelves containing this book */}
         <ShelfByBookPreview
-          bookId={bookInfo?.unitId || ""}
+          bookId={bookInfo.unitId || ""}
           title={title}
+          shelfNumber={SHELF_PREVIEW_LIMIT}
         />
       </Stack>
     </BookDetailShell>

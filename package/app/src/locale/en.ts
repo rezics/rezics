@@ -175,6 +175,10 @@ export default {
         info: "Info",
         reviews: "Reviews",
         toc: "Contents",
+        overview: "Overview",
+        review_shelf: "Review & Shelf",
+        content: "Content",
+        community: "Community",
       },
     },
     book_edit: {

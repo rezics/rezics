@@ -12,8 +12,15 @@
 // ============================================================================
 
 /** Book detail sub-pages (routed tabs). */
-export { BookBasicInfoPage } from "./page/BookBasicInfoPage";
+export {
+  BookBasicInfoPage,
+  BookBasicInfoPage as OverviewPage,
+} from "./page/BookBasicInfoPage";
 export { BookContentPage } from "./page/BookContentPage";
+export {
+  BookDiscussionPage,
+  BookCommunityPage,
+} from "./page/BookDiscussionPage";
 /** Book detail layout (shared hero + data fetching). */
 export { BookDetailLayout } from "./page/BookDetailLayout";
 /** Book library list page. */
@@ -24,7 +31,10 @@ export {
 } from "./page/BookLibPage";
 /** Book library curated homepage. */
 export { BookHomePage } from "./page/BookHomePage";
-export { BookReviewPage } from "./page/BookReviewPage";
+export {
+  BookReviewPage,
+  BookReviewPage as ReviewShelfPage,
+} from "./page/BookReviewPage";
 
 // ============================================================================
 // Section Components (Page-composable modules)

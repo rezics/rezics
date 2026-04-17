@@ -1,12 +1,34 @@
-import { Stack } from "@mui/material";
+import { Box, Paper, Stack, Typography } from "@mui/material";
 import { bookQueries } from "@rezics/api/book/book";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
 import { useAtomValue } from "jotai";
 import type React from "react";
 import { ChapterList } from "../component/Chapter/ChapterList";
+import { ReleaseSelector } from "../component/ReleaseSelector";
+import { useBookLanguage } from "../hooks/useBookLanguage";
+import { useReleaseSelection } from "../hooks/useReleaseSelection";
 import { BookDetailShell } from "../section/BookDetailSection";
 import { bookDetailAtomFamily } from "../state/bookDetailAtoms";
+
+const ContentSidebar: React.FC<{ textLength: number; pageCount?: number }> = ({
+  textLength,
+  pageCount,
+}) => (
+  <Paper variant="outlined" sx={{ p: 2 }}>
+    <Typography variant="subtitle1" fontWeight={600} mb={1}>
+      Reading
+    </Typography>
+    <Stack spacing={1}>
+      <Typography variant="body2">
+        Text length: {textLength.toLocaleString()}
+      </Typography>
+      {pageCount != null && (
+        <Typography variant="body2">Pages: {pageCount}</Typography>
+      )}
+    </Stack>
+  </Paper>
+);
 
 export const BookContentPage: React.FC = () => {
   const { bookId } = useParams({ strict: false }) as { bookId: string };
@@ -15,13 +37,39 @@ export const BookContentPage: React.FC = () => {
     enabled: Boolean(bookId),
   });
   const bookInfo = useAtomValue(bookDetailAtomFamily(bookId)) ?? data;
+  const [selectedLang] = useBookLanguage(bookId, bookInfo);
+  const [selectedReleaseUnitId, setSelectedRelease] = useReleaseSelection(
+    bookInfo,
+    selectedLang,
+  );
 
   if (!bookInfo) return null;
 
+  const sidebar = (
+    <ContentSidebar
+      textLength={bookInfo.textLength ?? 0}
+      pageCount={bookInfo.pageCount ?? undefined}
+    />
+  );
+
   return (
-    <BookDetailShell bookInfo={bookInfo}>
-      <Stack spacing={4}>
-        <ChapterList id={bookInfo?.unitId || "0"} />
+    <BookDetailShell bookInfo={bookInfo} sidebar={sidebar}>
+      <Stack spacing={3}>
+        <ReleaseSelector
+          bookInfo={bookInfo}
+          selectedLang={selectedLang}
+          selectedReleaseUnitId={selectedReleaseUnitId}
+          onSelect={setSelectedRelease}
+        />
+
+        <Box className="lg:hidden">
+          <ContentSidebar
+            textLength={bookInfo.textLength ?? 0}
+            pageCount={bookInfo.pageCount ?? undefined}
+          />
+        </Box>
+
+        <ChapterList id={selectedReleaseUnitId || bookInfo.unitId} />
       </Stack>
     </BookDetailShell>
   );

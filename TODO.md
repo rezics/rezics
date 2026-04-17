@@ -1,16 +1,15 @@
 ## Section 1
 - [x] zone-and-unified-search
-- [ ] universal-markdown-and-user-brief
+- [x] universal-markdown-and-user-brief
 - [ ] book-detail-restructure
 - [ ] tag-interaction-system
 - [ ] seed-restructure-and-scale
 
 ## Section 2
-- [ ] 重新制作章节编辑器，功能完整，美观好用的组件
+- [ ] book content index 並不需要章節存在，所以如果沒有 unitId 前端應該給交互，可以創建 chapter
+- [ ] post 不需要 translation 直接使用 unit translation 只不過他專門索引 不同 trans 的 release id, 就是 翻譯是 不同 unit 維護
+- [ ] UnitTranslation  sourceReleaseUnitId  我覺得這個名詞不夠準確，因爲這描述了 work，但是他可以提供 wiki 的功能
 - [ ] 我需要整理spc规范嘛？
-- [ ] 我需要做到auth-store规范，如果 access token 不存在，则不主动请求任何 内容，所有请求都依赖于auth-store
-- [ ] 实现session失效后的主动登录退出机制，但是我又担心网络波动引起恶意退出？better-auth session 到底是如何工作的
-- [ ] 引入prismabox優化contract package, 但是對於這種有唯一 contract來源的，到底要如何處理其實是個問題
 - [ ] 有沒有一個將所有 test 收集起來並以文檔展示，也方便測試的工具？
 - [ ] R2 暫時對於所有非書籍封面，或者非管理員不開放（就是論壇圖片全部走圖床）
 - [ ] 截至目前，i18n 並沒有一個很好的解決方案，所以暫時不做遷移，不是非常重要

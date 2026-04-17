@@ -92,11 +92,19 @@ export type LinkAttributionInput =
 // ATTRIBUTION BRIEF (inline for BookDTO etc.)
 // ============================================================
 
+export const attributionBriefEntitySchema = t.Object({
+  unitId: t.String(),
+  kind: t.Optional(t.Nullable(t.String())),
+  slug: t.Optional(t.Nullable(t.String())),
+  translations: t.Optional(t.Array(unitTranslationDTOSchema)),
+});
+
 export const attributionBriefSchema = t.Object({
   entityId: t.String(),
   name: t.String(),
   role: t.String(),
   sortOrder: t.Optional(t.Number()),
+  entity: t.Optional(attributionBriefEntitySchema),
 });
 
 export type AttributionBrief = (typeof attributionBriefSchema)["static"];
