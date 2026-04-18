@@ -254,6 +254,7 @@
         "@codemirror/view": "^6.40.0",
         "@lezer/highlight": "^1.2.3",
         "@lezer/markdown": "^1.6.3",
+        "@rezics/contract": "workspace:*",
         "highlight.js": "^11.11.1",
         "lucide-react": "^0.474.0",
         "markdown-it": "^14.1.1",

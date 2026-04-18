@@ -17,6 +17,7 @@
     "cosmos": "cosmos"
   },
   "dependencies": {
+    "@rezics/contract": "workspace:*",
     "lucide-react": "^0.474.0",
     "@codemirror/autocomplete": "^6.20.1",
     "@codemirror/commands": "^6.10.3",

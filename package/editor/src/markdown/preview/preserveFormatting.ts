@@ -1,4 +1,5 @@
 import MarkdownIt from "markdown-it";
+import { linkProtectionPlugin } from "./linkProtection";
 import { sourceLinePlugin } from "./sourceLine";
 
 export interface PreserveFormatOptions {
@@ -155,5 +156,6 @@ export function createRezicsRenderer(
     highlight: options?.highlight === false ? undefined : options?.highlight,
   })
     .use(novelModePlugin)
+    .use(linkProtectionPlugin)
     .use(sourceLinePlugin);
 }

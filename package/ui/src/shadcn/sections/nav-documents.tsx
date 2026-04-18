@@ -5,6 +5,7 @@ import {
   ShareIcon,
 } from "lucide-react";
 
+import { SafeLink } from "@/link/SafeLink";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -39,10 +40,10 @@ export function NavDocuments({
         {items.map((item) => (
           <SidebarMenuItem key={item.name}>
             <SidebarMenuButton asChild>
-              <a href={item.url}>
+              <SafeLink href={item.url}>
                 <item.icon />
                 <span>{item.name}</span>
-              </a>
+              </SafeLink>
             </SidebarMenuButton>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

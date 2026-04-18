@@ -1,0 +1,12 @@
+{
+  "_note": "TEMPORARY BASELINE. This snapshot exists only to block NEW violations from accumulating while a migration is in progress. Delete this file once the migration lands.",
+  "total": 1,
+  "byRule": {
+    "R1": 0,
+    "R2": 0,
+    "R3": 0,
+    "R4": 0,
+    "R5": 1
+  },
+  "keys": ["R5  package/preview/src/components/BookShareDocument.tsx:97"]
+}

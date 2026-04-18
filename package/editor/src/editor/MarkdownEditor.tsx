@@ -190,6 +190,17 @@ export function MarkdownEditor({
 
     previewRef.current.innerHTML = md.render(liveContent);
     addCopyButtons(previewRef.current);
+
+    const el = previewRef.current;
+    const handler = (e: MouseEvent) => {
+      const target = (e.target as HTMLElement).closest<HTMLAnchorElement>(
+        'a[data-link-kind="external"]',
+      );
+      if (!target) return;
+      e.preventDefault();
+    };
+    el.addEventListener("click", handler);
+    return () => el.removeEventListener("click", handler);
   }, [viewMode, liveContent, md]);
 
   useEffect(() => {

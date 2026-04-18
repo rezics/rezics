@@ -1,5 +1,4 @@
 export * from "./composite";
-
 // Theme system
 export {
   applyDynamicThemeToDOM,
@@ -10,3 +9,4 @@ export {
   PRESET_COLORS,
 } from "./config/dynamicTheme";
 export { getDynamicTheme, getTheme } from "./config/theme";
+export * from "./link";

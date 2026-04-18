@@ -97,6 +97,10 @@ Validated at runtime using `@t3-oss/env-core` + Valibot. Environment dependencie
 See `CONTRIBUTING.md` for a convention summary and `openspec/specs/` for authoritative specs.
 Enforced by `bun run check:convention` (pre-commit + PR merge gate).
 
+## Link Rendering Convention
+
+All JSX links must use `<SafeLink href={url}>` from `@rezics/ui` instead of raw `<a href>`. This classifies URLs and routes external links through a confirmation modal. See `openspec/specs/outbound-link-protection/spec.md` for the full spec. Enforced by R5 in `bun run check:convention`.
+
 ## Change Management
 
 This project uses **OpenSpec** for non-trivial changes:

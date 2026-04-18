@@ -1,5 +1,6 @@
 import { Alert, Button, TextField } from "@mui/material";
 import { echoKvGetQuery } from "@rezics/api/echokv/echokv";
+import { SafeLink } from "@rezics/ui/link/SafeLink.tsx";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 
@@ -34,9 +35,9 @@ export function NewBookByUrl() {
         <ul>
           {supportedSitesList.map((site) => (
             <li key={site.name}>
-              <a href={site.url} target="_blank" rel="noreferrer">
+              <SafeLink href={site.url}>
                 {site.name}: {site.url}
-              </a>
+              </SafeLink>
             </li>
           ))}
         </ul>

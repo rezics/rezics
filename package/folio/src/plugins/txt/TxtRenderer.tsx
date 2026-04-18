@@ -1,4 +1,5 @@
 import { createRezicsRenderer } from "@rezics/editor/markdown";
+import { handleExternalLinkClick } from "@rezics/ui/link/handleExternalLinkClick.ts";
 import { useMemo } from "react";
 
 const md = createRezicsRenderer({ html: false });
@@ -21,6 +22,7 @@ export function TxtRenderer({ raw }: TxtRendererProps) {
         wordBreak: "break-word",
         overflowWrap: "break-word",
       }}
+      onClick={handleExternalLinkClick}
       // biome-ignore lint/security/noDangerouslySetInnerHtml: intentional HTML rendering
       dangerouslySetInnerHTML={{ __html: html }}
     />

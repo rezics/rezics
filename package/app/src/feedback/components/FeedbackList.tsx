@@ -25,6 +25,7 @@ import {
   UniversalPaginator,
   type UniversalPaginatorHandle,
 } from "@rezics/ui/composite/pagination/Pagination.tsx";
+import { SafeLink } from "@rezics/ui/link/SafeLink.tsx";
 import { Link } from "@rezics/ui/primitive/link/Link.tsx";
 
 import {
@@ -326,9 +327,7 @@ const FeedbackList: React.FC<FeedbackListProps> = ({
                       return isInternal ? (
                         <Link to={url}>{url}</Link>
                       ) : (
-                        <a href={url} target="_blank" rel="noreferrer">
-                          {url}
-                        </a>
+                        <SafeLink href={url}>{url}</SafeLink>
                       );
                     })()}
                   </div>

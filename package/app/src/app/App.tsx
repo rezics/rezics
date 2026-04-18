@@ -6,6 +6,7 @@ import { StyledEngineProvider } from "@mui/material/styles";
 import { AuthProvider } from "@rezics/api/providers";
 import {
   applyDynamicThemeToDOM,
+  ExternalLinkModal,
   generateDynamicColors,
   getDynamicTheme,
   getTheme,
@@ -66,6 +67,7 @@ function AppProviders({ children }: { children: ReactNode }) {
                 <AppInit>
                   <AuthProvider />
                   <WindowAlert />
+                  <ExternalLinkModal />
                   {children}
                 </AppInit>
               </ReactQueryProvider>

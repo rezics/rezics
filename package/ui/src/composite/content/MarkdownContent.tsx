@@ -1,4 +1,5 @@
 import { createRezicsRenderer } from "@rezics/editor/markdown";
+import { handleExternalLinkClick } from "../../link/handleExternalLinkClick";
 
 export function MarkdownContent({
   content,
@@ -13,6 +14,7 @@ export function MarkdownContent({
   return (
     <div
       className={className}
+      onClick={handleExternalLinkClick}
       // biome-ignore lint/security/noDangerouslySetInnerHtml: intentional HTML rendering
       dangerouslySetInnerHTML={{ __html: chapterHtml }}
     />

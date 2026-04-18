@@ -1,5 +1,6 @@
 import { chapterDetailQuery } from "@rezics/api/chapter/chapter";
 import { createRezicsRenderer } from "@rezics/editor/markdown";
+import { handleExternalLinkClick } from "@rezics/ui/link/handleExternalLinkClick.ts";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
@@ -22,7 +23,10 @@ export const BookReadChapterPage: React.FC = () => {
       <h1 className="text-2xl font-bold">{data?.title}</h1>
       <div id="markdown-chapter-content" className="markdown-body">
         {/* biome-ignore lint/security/noDangerouslySetInnerHtml: intentional HTML rendering */}
-        <div dangerouslySetInnerHTML={{ __html: chapterHtml }} />
+        <div
+          onClick={handleExternalLinkClick}
+          dangerouslySetInnerHTML={{ __html: chapterHtml }}
+        />
       </div>
     </div>
   );

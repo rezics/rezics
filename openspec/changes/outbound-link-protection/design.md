@@ -127,3 +127,7 @@ Rollback: revert the R5 commit to disable enforcement; the `<Link>` primitive it
 - **Should rezics-domain links bypass the modal entirely?** Current design: yes, they classify as `rezics` (not `external`). This is the right default — the user is staying within the rezics ecosystem. Confirm during implementation review.
 - **Where does the markdown renderer currently live?** Implementation task includes a discovery step to locate every renderer entry point before pointing them at `<Link>`. May reveal that we have multiple parallel renderers worth consolidating; that consolidation, if substantial, is its own follow-up.
 - **Any per-host policy to ship in v1?** Default position: no. The hook exists; populating it can wait for a real need.
+
+## Downstream Consumption
+
+Excerpt-source renderer in `post-excerpt-and-unit-resolver` should use: `<SafeLink href={source.url}>{source.title}</SafeLink>`

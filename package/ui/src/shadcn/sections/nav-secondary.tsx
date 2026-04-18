@@ -1,6 +1,7 @@
 import type { LucideIcon } from "lucide-react";
 import type * as React from "react";
 
+import { SafeLink } from "@/link/SafeLink";
 import {
   SidebarGroup,
   SidebarGroupContent,
@@ -23,16 +24,18 @@ export function NavSecondary({
     <SidebarGroup {...props}>
       <SidebarGroupContent>
         <SidebarMenu>
-          {items.map((item: { title: string; url: string; icon: LucideIcon }) => (
-            <SidebarMenuItem key={item.title}>
-              <SidebarMenuButton asChild>
-                <a href={item.url}>
-                  <item.icon />
-                  <span>{item.title}</span>
-                </a>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          ))}
+          {items.map(
+            (item: { title: string; url: string; icon: LucideIcon }) => (
+              <SidebarMenuItem key={item.title}>
+                <SidebarMenuButton asChild>
+                  <SafeLink href={item.url}>
+                    <item.icon />
+                    <span>{item.title}</span>
+                  </SafeLink>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            ),
+          )}
         </SidebarMenu>
       </SidebarGroupContent>
     </SidebarGroup>

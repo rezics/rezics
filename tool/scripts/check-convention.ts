@@ -107,7 +107,7 @@ const EXEMPT_PACKAGES = new Set(["auth"]);
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
-type Rule = "R1" | "R2" | "R3" | "R4";
+type Rule = "R1" | "R2" | "R3" | "R4" | "R5";
 
 interface Violation {
   rule: Rule;
@@ -121,6 +121,7 @@ const SPEC_LINK: Record<Rule, string> = {
   R2: "openspec/specs/api-route-convention/spec.md",
   R3: "openspec/specs/folder-naming-convention/spec.md",
   R4: "openspec/specs/folder-naming-convention/spec.md",
+  R5: "openspec/specs/outbound-link-protection/spec.md",
 };
 
 // ─── Path utilities ─────────────────────────────────────────────────────────
@@ -346,6 +347,43 @@ function scanFolders(directoryPaths: string[]): Violation[] {
   return violations;
 }
 
+// ─── R5: raw <a href> scanning ──────────────────────────────────────────────
+
+const R5_FILE_ALLOWLIST = new Set(["package/ui/src/link/SafeLink.tsx"]);
+
+const RAW_ANCHOR_PATTERN = /<a\s[^>]*href=/g;
+
+function scanRawAnchors(tsxFiles: string[]): Violation[] {
+  const violations: Violation[] = [];
+
+  for (const filePath of tsxFiles) {
+    const relPath = relative(REPO_ROOT, filePath);
+    if (R5_FILE_ALLOWLIST.has(relPath)) continue;
+
+    let content: string;
+    try {
+      content = readFileSync(filePath, "utf8");
+    } catch {
+      continue;
+    }
+
+    const lines = content.split("\n");
+    for (let i = 0; i < lines.length; i++) {
+      if (RAW_ANCHOR_PATTERN.test(lines[i])) {
+        violations.push({
+          rule: "R5",
+          path: `${relPath}:${i + 1}`,
+          message: `Raw <a href> found — use <SafeLink> from @rezics/ui instead`,
+          spec: SPEC_LINK.R5,
+        });
+      }
+      RAW_ANCHOR_PATTERN.lastIndex = 0;
+    }
+  }
+
+  return violations;
+}
+
 // ─── Git staged-file helpers ────────────────────────────────────────────────
 
 function getStagedFilePaths(): string[] {
@@ -382,7 +420,7 @@ function loadSnapshot(): ViolationSnapshot | null {
 }
 
 function buildSnapshot(violations: Violation[]): ViolationSnapshot {
-  const byRule: Record<Rule, number> = { R1: 0, R2: 0, R3: 0, R4: 0 };
+  const byRule: Record<Rule, number> = { R1: 0, R2: 0, R3: 0, R4: 0, R5: 0 };
   const keys: string[] = [];
   for (const violation of violations) {
     byRule[violation.rule]++;
@@ -414,6 +452,7 @@ function main() {
 
   const routeFiles: string[] = [];
   const folderPaths: string[] = [];
+  const tsxFiles: string[] = [];
 
   if (isStagedMode) {
     const stagedPaths = getStagedFilePaths();
@@ -424,6 +463,9 @@ function main() {
         !isExemptPackage(filePath)
       ) {
         routeFiles.push(filePath);
+      }
+      if (/\.tsx$/.test(filePath) && !isExemptPath(filePath)) {
+        tsxFiles.push(filePath);
       }
     }
     const affectedDirs = new Set<string>();
@@ -441,16 +483,23 @@ function main() {
     for (const dirPath of walkDirectories(packagesRoot)) {
       folderPaths.push(dirPath);
     }
+    for (const filePath of walkFilesByExtension(packagesRoot, /\.tsx$/)) {
+      tsxFiles.push(filePath);
+    }
   }
 
-  const violations = [...scanRoutes(routeFiles), ...scanFolders(folderPaths)];
+  const violations = [
+    ...scanRoutes(routeFiles),
+    ...scanFolders(folderPaths),
+    ...scanRawAnchors(tsxFiles),
+  ];
   const currentSnapshot = buildSnapshot(violations);
 
   if (isSnapshotUpdate) {
     saveSnapshot(currentSnapshot);
-    const { R1, R2, R3, R4 } = currentSnapshot.byRule;
+    const { R1, R2, R3, R4, R5 } = currentSnapshot.byRule;
     console.log(
-      `Snapshot updated: ${currentSnapshot.total} violations (R1=${R1} R2=${R2} R3=${R3} R4=${R4})`,
+      `Snapshot updated: ${currentSnapshot.total} violations (R1=${R1} R2=${R2} R3=${R3} R4=${R4} R5=${R5})`,
     );
     process.exit(0);
   }
@@ -467,11 +516,11 @@ function main() {
   }
 
   const baselineTotal = baselineSnapshot?.total ?? 0;
-  const { R1, R2, R3, R4 } = currentSnapshot.byRule;
+  const { R1, R2, R3, R4, R5 } = currentSnapshot.byRule;
   console.log(
     `check:convention — ${violations.length} violation(s) (baseline ${baselineTotal}):`,
   );
-  console.log(`  R1=${R1}  R2=${R2}  R3=${R3}  R4=${R4}`);
+  console.log(`  R1=${R1}  R2=${R2}  R3=${R3}  R4=${R4}  R5=${R5}`);
 
   if (newViolations.length > 0) {
     console.log(
