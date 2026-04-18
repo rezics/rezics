@@ -8,529 +8,529 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { Route as rootRouteImport } from "./routes/__root";
-import { Route as AdminRouteImport } from "./routes/_admin";
-import { Route as AdminAuthEmailRouteImport } from "./routes/_admin/auth/email";
-import { Route as AdminAuthJwtServicesRouteImport } from "./routes/_admin/auth/jwt-services";
-import { Route as AdminAuthSessionsRouteImport } from "./routes/_admin/auth/sessions";
-import { Route as AdminAuthStatusRouteImport } from "./routes/_admin/auth/status";
-import { Route as AdminAuthUsersRouteImport } from "./routes/_admin/auth/users";
-import { Route as AdminBookIndexRouteImport } from "./routes/_admin/book/index";
-import { Route as AdminBookMeiliRouteImport } from "./routes/_admin/book/meili";
-import { Route as AdminIndexRouteImport } from "./routes/_admin/index";
-import { Route as AdminJwtServicesRouteImport } from "./routes/_admin/jwt-services";
-import { Route as AdminMeiliRouteImport } from "./routes/_admin/meili";
-import { Route as AdminMiscEchokvRouteImport } from "./routes/_admin/misc/echokv";
-import { Route as AdminRealmIndexRouteImport } from "./routes/_admin/realm/index";
-import { Route as AdminSettingsRouteImport } from "./routes/_admin/settings";
-import { Route as AdminShelfIndexRouteImport } from "./routes/_admin/shelf/index";
-import { Route as AdminTokenRouteImport } from "./routes/_admin/token";
-import { Route as AdminUnitUnitIdRouteImport } from "./routes/_admin/unit/$unitId";
-import { Route as AdminUnitCreateRouteImport } from "./routes/_admin/unit/create";
-import { Route as AdminUnitIndexRouteImport } from "./routes/_admin/unit/index";
-import { Route as AdminUnitMeiliRouteImport } from "./routes/_admin/unit/meili";
-import { Route as AdminUserUnitIdRouteImport } from "./routes/_admin/user/$unitId";
-import { Route as AdminUserCreateRouteImport } from "./routes/_admin/user/create";
-import { Route as AdminUserIndexRouteImport } from "./routes/_admin/user/index";
-import { Route as AdminUserMeiliRouteImport } from "./routes/_admin/user/meili";
-import { Route as LoginRouteImport } from "./routes/login";
+import { Route as rootRouteImport } from './routes/__root'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as AdminRouteImport } from './routes/_admin'
+import { Route as AdminIndexRouteImport } from './routes/_admin/index'
+import { Route as AdminTokenRouteImport } from './routes/_admin/token'
+import { Route as AdminSettingsRouteImport } from './routes/_admin/settings'
+import { Route as AdminMeiliRouteImport } from './routes/_admin/meili'
+import { Route as AdminJwtServicesRouteImport } from './routes/_admin/jwt-services'
+import { Route as AdminUserIndexRouteImport } from './routes/_admin/user/index'
+import { Route as AdminUnitIndexRouteImport } from './routes/_admin/unit/index'
+import { Route as AdminShelfIndexRouteImport } from './routes/_admin/shelf/index'
+import { Route as AdminRealmIndexRouteImport } from './routes/_admin/realm/index'
+import { Route as AdminBookIndexRouteImport } from './routes/_admin/book/index'
+import { Route as AdminUserMeiliRouteImport } from './routes/_admin/user/meili'
+import { Route as AdminUserCreateRouteImport } from './routes/_admin/user/create'
+import { Route as AdminUserUnitIdRouteImport } from './routes/_admin/user/$unitId'
+import { Route as AdminUnitMeiliRouteImport } from './routes/_admin/unit/meili'
+import { Route as AdminUnitCreateRouteImport } from './routes/_admin/unit/create'
+import { Route as AdminUnitUnitIdRouteImport } from './routes/_admin/unit/$unitId'
+import { Route as AdminMiscEchokvRouteImport } from './routes/_admin/misc/echokv'
+import { Route as AdminBookMeiliRouteImport } from './routes/_admin/book/meili'
+import { Route as AdminAuthUsersRouteImport } from './routes/_admin/auth/users'
+import { Route as AdminAuthStatusRouteImport } from './routes/_admin/auth/status'
+import { Route as AdminAuthSessionsRouteImport } from './routes/_admin/auth/sessions'
+import { Route as AdminAuthJwtServicesRouteImport } from './routes/_admin/auth/jwt-services'
+import { Route as AdminAuthEmailRouteImport } from './routes/_admin/auth/email'
 
 const LoginRoute = LoginRouteImport.update({
-  id: "/login",
-  path: "/login",
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const AdminRoute = AdminRouteImport.update({
-  id: "/_admin",
+  id: '/_admin',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
-  id: "/",
-  path: "/",
+  id: '/',
+  path: '/',
   getParentRoute: () => AdminRoute,
-} as any);
+} as any)
 const AdminTokenRoute = AdminTokenRouteImport.update({
-  id: "/token",
-  path: "/token",
+  id: '/token',
+  path: '/token',
   getParentRoute: () => AdminRoute,
-} as any);
+} as any)
 const AdminSettingsRoute = AdminSettingsRouteImport.update({
-  id: "/settings",
-  path: "/settings",
+  id: '/settings',
+  path: '/settings',
   getParentRoute: () => AdminRoute,
-} as any);
+} as any)
 const AdminMeiliRoute = AdminMeiliRouteImport.update({
-  id: "/meili",
-  path: "/meili",
+  id: '/meili',
+  path: '/meili',
   getParentRoute: () => AdminRoute,
-} as any);
+} as any)
 const AdminJwtServicesRoute = AdminJwtServicesRouteImport.update({
-  id: "/jwt-services",
-  path: "/jwt-services",
+  id: '/jwt-services',
+  path: '/jwt-services',
   getParentRoute: () => AdminRoute,
-} as any);
+} as any)
 const AdminUserIndexRoute = AdminUserIndexRouteImport.update({
-  id: "/user/",
-  path: "/user/",
+  id: '/user/',
+  path: '/user/',
   getParentRoute: () => AdminRoute,
-} as any);
+} as any)
 const AdminUnitIndexRoute = AdminUnitIndexRouteImport.update({
-  id: "/unit/",
-  path: "/unit/",
+  id: '/unit/',
+  path: '/unit/',
   getParentRoute: () => AdminRoute,
-} as any);
+} as any)
 const AdminShelfIndexRoute = AdminShelfIndexRouteImport.update({
-  id: "/shelf/",
-  path: "/shelf/",
+  id: '/shelf/',
+  path: '/shelf/',
   getParentRoute: () => AdminRoute,
-} as any);
+} as any)
 const AdminRealmIndexRoute = AdminRealmIndexRouteImport.update({
-  id: "/realm/",
-  path: "/realm/",
+  id: '/realm/',
+  path: '/realm/',
   getParentRoute: () => AdminRoute,
-} as any);
+} as any)
 const AdminBookIndexRoute = AdminBookIndexRouteImport.update({
-  id: "/book/",
-  path: "/book/",
+  id: '/book/',
+  path: '/book/',
   getParentRoute: () => AdminRoute,
-} as any);
+} as any)
 const AdminUserMeiliRoute = AdminUserMeiliRouteImport.update({
-  id: "/user/meili",
-  path: "/user/meili",
+  id: '/user/meili',
+  path: '/user/meili',
   getParentRoute: () => AdminRoute,
-} as any);
+} as any)
 const AdminUserCreateRoute = AdminUserCreateRouteImport.update({
-  id: "/user/create",
-  path: "/user/create",
+  id: '/user/create',
+  path: '/user/create',
   getParentRoute: () => AdminRoute,
-} as any);
+} as any)
 const AdminUserUnitIdRoute = AdminUserUnitIdRouteImport.update({
-  id: "/user/$unitId",
-  path: "/user/$unitId",
+  id: '/user/$unitId',
+  path: '/user/$unitId',
   getParentRoute: () => AdminRoute,
-} as any);
+} as any)
 const AdminUnitMeiliRoute = AdminUnitMeiliRouteImport.update({
-  id: "/unit/meili",
-  path: "/unit/meili",
+  id: '/unit/meili',
+  path: '/unit/meili',
   getParentRoute: () => AdminRoute,
-} as any);
+} as any)
 const AdminUnitCreateRoute = AdminUnitCreateRouteImport.update({
-  id: "/unit/create",
-  path: "/unit/create",
+  id: '/unit/create',
+  path: '/unit/create',
   getParentRoute: () => AdminRoute,
-} as any);
+} as any)
 const AdminUnitUnitIdRoute = AdminUnitUnitIdRouteImport.update({
-  id: "/unit/$unitId",
-  path: "/unit/$unitId",
+  id: '/unit/$unitId',
+  path: '/unit/$unitId',
   getParentRoute: () => AdminRoute,
-} as any);
+} as any)
 const AdminMiscEchokvRoute = AdminMiscEchokvRouteImport.update({
-  id: "/misc/echokv",
-  path: "/misc/echokv",
+  id: '/misc/echokv',
+  path: '/misc/echokv',
   getParentRoute: () => AdminRoute,
-} as any);
+} as any)
 const AdminBookMeiliRoute = AdminBookMeiliRouteImport.update({
-  id: "/book/meili",
-  path: "/book/meili",
+  id: '/book/meili',
+  path: '/book/meili',
   getParentRoute: () => AdminRoute,
-} as any);
+} as any)
 const AdminAuthUsersRoute = AdminAuthUsersRouteImport.update({
-  id: "/auth/users",
-  path: "/auth/users",
+  id: '/auth/users',
+  path: '/auth/users',
   getParentRoute: () => AdminRoute,
-} as any);
+} as any)
 const AdminAuthStatusRoute = AdminAuthStatusRouteImport.update({
-  id: "/auth/status",
-  path: "/auth/status",
+  id: '/auth/status',
+  path: '/auth/status',
   getParentRoute: () => AdminRoute,
-} as any);
+} as any)
 const AdminAuthSessionsRoute = AdminAuthSessionsRouteImport.update({
-  id: "/auth/sessions",
-  path: "/auth/sessions",
+  id: '/auth/sessions',
+  path: '/auth/sessions',
   getParentRoute: () => AdminRoute,
-} as any);
+} as any)
 const AdminAuthJwtServicesRoute = AdminAuthJwtServicesRouteImport.update({
-  id: "/auth/jwt-services",
-  path: "/auth/jwt-services",
+  id: '/auth/jwt-services',
+  path: '/auth/jwt-services',
   getParentRoute: () => AdminRoute,
-} as any);
+} as any)
 const AdminAuthEmailRoute = AdminAuthEmailRouteImport.update({
-  id: "/auth/email",
-  path: "/auth/email",
+  id: '/auth/email',
+  path: '/auth/email',
   getParentRoute: () => AdminRoute,
-} as any);
+} as any)
 
 export interface FileRoutesByFullPath {
-  "/": typeof AdminIndexRoute;
-  "/login": typeof LoginRoute;
-  "/jwt-services": typeof AdminJwtServicesRoute;
-  "/meili": typeof AdminMeiliRoute;
-  "/settings": typeof AdminSettingsRoute;
-  "/token": typeof AdminTokenRoute;
-  "/auth/email": typeof AdminAuthEmailRoute;
-  "/auth/jwt-services": typeof AdminAuthJwtServicesRoute;
-  "/auth/sessions": typeof AdminAuthSessionsRoute;
-  "/auth/status": typeof AdminAuthStatusRoute;
-  "/auth/users": typeof AdminAuthUsersRoute;
-  "/book/meili": typeof AdminBookMeiliRoute;
-  "/misc/echokv": typeof AdminMiscEchokvRoute;
-  "/unit/$unitId": typeof AdminUnitUnitIdRoute;
-  "/unit/create": typeof AdminUnitCreateRoute;
-  "/unit/meili": typeof AdminUnitMeiliRoute;
-  "/user/$unitId": typeof AdminUserUnitIdRoute;
-  "/user/create": typeof AdminUserCreateRoute;
-  "/user/meili": typeof AdminUserMeiliRoute;
-  "/book/": typeof AdminBookIndexRoute;
-  "/realm/": typeof AdminRealmIndexRoute;
-  "/shelf/": typeof AdminShelfIndexRoute;
-  "/unit/": typeof AdminUnitIndexRoute;
-  "/user/": typeof AdminUserIndexRoute;
+  '/': typeof AdminIndexRoute
+  '/login': typeof LoginRoute
+  '/jwt-services': typeof AdminJwtServicesRoute
+  '/meili': typeof AdminMeiliRoute
+  '/settings': typeof AdminSettingsRoute
+  '/token': typeof AdminTokenRoute
+  '/auth/email': typeof AdminAuthEmailRoute
+  '/auth/jwt-services': typeof AdminAuthJwtServicesRoute
+  '/auth/sessions': typeof AdminAuthSessionsRoute
+  '/auth/status': typeof AdminAuthStatusRoute
+  '/auth/users': typeof AdminAuthUsersRoute
+  '/book/meili': typeof AdminBookMeiliRoute
+  '/misc/echokv': typeof AdminMiscEchokvRoute
+  '/unit/$unitId': typeof AdminUnitUnitIdRoute
+  '/unit/create': typeof AdminUnitCreateRoute
+  '/unit/meili': typeof AdminUnitMeiliRoute
+  '/user/$unitId': typeof AdminUserUnitIdRoute
+  '/user/create': typeof AdminUserCreateRoute
+  '/user/meili': typeof AdminUserMeiliRoute
+  '/book/': typeof AdminBookIndexRoute
+  '/realm/': typeof AdminRealmIndexRoute
+  '/shelf/': typeof AdminShelfIndexRoute
+  '/unit/': typeof AdminUnitIndexRoute
+  '/user/': typeof AdminUserIndexRoute
 }
 export interface FileRoutesByTo {
-  "/login": typeof LoginRoute;
-  "/jwt-services": typeof AdminJwtServicesRoute;
-  "/meili": typeof AdminMeiliRoute;
-  "/settings": typeof AdminSettingsRoute;
-  "/token": typeof AdminTokenRoute;
-  "/": typeof AdminIndexRoute;
-  "/auth/email": typeof AdminAuthEmailRoute;
-  "/auth/jwt-services": typeof AdminAuthJwtServicesRoute;
-  "/auth/sessions": typeof AdminAuthSessionsRoute;
-  "/auth/status": typeof AdminAuthStatusRoute;
-  "/auth/users": typeof AdminAuthUsersRoute;
-  "/book/meili": typeof AdminBookMeiliRoute;
-  "/misc/echokv": typeof AdminMiscEchokvRoute;
-  "/unit/$unitId": typeof AdminUnitUnitIdRoute;
-  "/unit/create": typeof AdminUnitCreateRoute;
-  "/unit/meili": typeof AdminUnitMeiliRoute;
-  "/user/$unitId": typeof AdminUserUnitIdRoute;
-  "/user/create": typeof AdminUserCreateRoute;
-  "/user/meili": typeof AdminUserMeiliRoute;
-  "/book": typeof AdminBookIndexRoute;
-  "/realm": typeof AdminRealmIndexRoute;
-  "/shelf": typeof AdminShelfIndexRoute;
-  "/unit": typeof AdminUnitIndexRoute;
-  "/user": typeof AdminUserIndexRoute;
+  '/login': typeof LoginRoute
+  '/jwt-services': typeof AdminJwtServicesRoute
+  '/meili': typeof AdminMeiliRoute
+  '/settings': typeof AdminSettingsRoute
+  '/token': typeof AdminTokenRoute
+  '/': typeof AdminIndexRoute
+  '/auth/email': typeof AdminAuthEmailRoute
+  '/auth/jwt-services': typeof AdminAuthJwtServicesRoute
+  '/auth/sessions': typeof AdminAuthSessionsRoute
+  '/auth/status': typeof AdminAuthStatusRoute
+  '/auth/users': typeof AdminAuthUsersRoute
+  '/book/meili': typeof AdminBookMeiliRoute
+  '/misc/echokv': typeof AdminMiscEchokvRoute
+  '/unit/$unitId': typeof AdminUnitUnitIdRoute
+  '/unit/create': typeof AdminUnitCreateRoute
+  '/unit/meili': typeof AdminUnitMeiliRoute
+  '/user/$unitId': typeof AdminUserUnitIdRoute
+  '/user/create': typeof AdminUserCreateRoute
+  '/user/meili': typeof AdminUserMeiliRoute
+  '/book': typeof AdminBookIndexRoute
+  '/realm': typeof AdminRealmIndexRoute
+  '/shelf': typeof AdminShelfIndexRoute
+  '/unit': typeof AdminUnitIndexRoute
+  '/user': typeof AdminUserIndexRoute
 }
 export interface FileRoutesById {
-  __root__: typeof rootRouteImport;
-  "/_admin": typeof AdminRouteWithChildren;
-  "/login": typeof LoginRoute;
-  "/_admin/jwt-services": typeof AdminJwtServicesRoute;
-  "/_admin/meili": typeof AdminMeiliRoute;
-  "/_admin/settings": typeof AdminSettingsRoute;
-  "/_admin/token": typeof AdminTokenRoute;
-  "/_admin/": typeof AdminIndexRoute;
-  "/_admin/auth/email": typeof AdminAuthEmailRoute;
-  "/_admin/auth/jwt-services": typeof AdminAuthJwtServicesRoute;
-  "/_admin/auth/sessions": typeof AdminAuthSessionsRoute;
-  "/_admin/auth/status": typeof AdminAuthStatusRoute;
-  "/_admin/auth/users": typeof AdminAuthUsersRoute;
-  "/_admin/book/meili": typeof AdminBookMeiliRoute;
-  "/_admin/misc/echokv": typeof AdminMiscEchokvRoute;
-  "/_admin/unit/$unitId": typeof AdminUnitUnitIdRoute;
-  "/_admin/unit/create": typeof AdminUnitCreateRoute;
-  "/_admin/unit/meili": typeof AdminUnitMeiliRoute;
-  "/_admin/user/$unitId": typeof AdminUserUnitIdRoute;
-  "/_admin/user/create": typeof AdminUserCreateRoute;
-  "/_admin/user/meili": typeof AdminUserMeiliRoute;
-  "/_admin/book/": typeof AdminBookIndexRoute;
-  "/_admin/realm/": typeof AdminRealmIndexRoute;
-  "/_admin/shelf/": typeof AdminShelfIndexRoute;
-  "/_admin/unit/": typeof AdminUnitIndexRoute;
-  "/_admin/user/": typeof AdminUserIndexRoute;
+  __root__: typeof rootRouteImport
+  '/_admin': typeof AdminRouteWithChildren
+  '/login': typeof LoginRoute
+  '/_admin/jwt-services': typeof AdminJwtServicesRoute
+  '/_admin/meili': typeof AdminMeiliRoute
+  '/_admin/settings': typeof AdminSettingsRoute
+  '/_admin/token': typeof AdminTokenRoute
+  '/_admin/': typeof AdminIndexRoute
+  '/_admin/auth/email': typeof AdminAuthEmailRoute
+  '/_admin/auth/jwt-services': typeof AdminAuthJwtServicesRoute
+  '/_admin/auth/sessions': typeof AdminAuthSessionsRoute
+  '/_admin/auth/status': typeof AdminAuthStatusRoute
+  '/_admin/auth/users': typeof AdminAuthUsersRoute
+  '/_admin/book/meili': typeof AdminBookMeiliRoute
+  '/_admin/misc/echokv': typeof AdminMiscEchokvRoute
+  '/_admin/unit/$unitId': typeof AdminUnitUnitIdRoute
+  '/_admin/unit/create': typeof AdminUnitCreateRoute
+  '/_admin/unit/meili': typeof AdminUnitMeiliRoute
+  '/_admin/user/$unitId': typeof AdminUserUnitIdRoute
+  '/_admin/user/create': typeof AdminUserCreateRoute
+  '/_admin/user/meili': typeof AdminUserMeiliRoute
+  '/_admin/book/': typeof AdminBookIndexRoute
+  '/_admin/realm/': typeof AdminRealmIndexRoute
+  '/_admin/shelf/': typeof AdminShelfIndexRoute
+  '/_admin/unit/': typeof AdminUnitIndexRoute
+  '/_admin/user/': typeof AdminUserIndexRoute
 }
 export interface FileRouteTypes {
-  fileRoutesByFullPath: FileRoutesByFullPath;
+  fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    | "/"
-    | "/login"
-    | "/jwt-services"
-    | "/meili"
-    | "/settings"
-    | "/token"
-    | "/auth/email"
-    | "/auth/jwt-services"
-    | "/auth/sessions"
-    | "/auth/status"
-    | "/auth/users"
-    | "/book/meili"
-    | "/misc/echokv"
-    | "/unit/$unitId"
-    | "/unit/create"
-    | "/unit/meili"
-    | "/user/$unitId"
-    | "/user/create"
-    | "/user/meili"
-    | "/book/"
-    | "/realm/"
-    | "/shelf/"
-    | "/unit/"
-    | "/user/";
-  fileRoutesByTo: FileRoutesByTo;
+    | '/'
+    | '/login'
+    | '/jwt-services'
+    | '/meili'
+    | '/settings'
+    | '/token'
+    | '/auth/email'
+    | '/auth/jwt-services'
+    | '/auth/sessions'
+    | '/auth/status'
+    | '/auth/users'
+    | '/book/meili'
+    | '/misc/echokv'
+    | '/unit/$unitId'
+    | '/unit/create'
+    | '/unit/meili'
+    | '/user/$unitId'
+    | '/user/create'
+    | '/user/meili'
+    | '/book/'
+    | '/realm/'
+    | '/shelf/'
+    | '/unit/'
+    | '/user/'
+  fileRoutesByTo: FileRoutesByTo
   to:
-    | "/login"
-    | "/jwt-services"
-    | "/meili"
-    | "/settings"
-    | "/token"
-    | "/"
-    | "/auth/email"
-    | "/auth/jwt-services"
-    | "/auth/sessions"
-    | "/auth/status"
-    | "/auth/users"
-    | "/book/meili"
-    | "/misc/echokv"
-    | "/unit/$unitId"
-    | "/unit/create"
-    | "/unit/meili"
-    | "/user/$unitId"
-    | "/user/create"
-    | "/user/meili"
-    | "/book"
-    | "/realm"
-    | "/shelf"
-    | "/unit"
-    | "/user";
+    | '/login'
+    | '/jwt-services'
+    | '/meili'
+    | '/settings'
+    | '/token'
+    | '/'
+    | '/auth/email'
+    | '/auth/jwt-services'
+    | '/auth/sessions'
+    | '/auth/status'
+    | '/auth/users'
+    | '/book/meili'
+    | '/misc/echokv'
+    | '/unit/$unitId'
+    | '/unit/create'
+    | '/unit/meili'
+    | '/user/$unitId'
+    | '/user/create'
+    | '/user/meili'
+    | '/book'
+    | '/realm'
+    | '/shelf'
+    | '/unit'
+    | '/user'
   id:
-    | "__root__"
-    | "/_admin"
-    | "/login"
-    | "/_admin/jwt-services"
-    | "/_admin/meili"
-    | "/_admin/settings"
-    | "/_admin/token"
-    | "/_admin/"
-    | "/_admin/auth/email"
-    | "/_admin/auth/jwt-services"
-    | "/_admin/auth/sessions"
-    | "/_admin/auth/status"
-    | "/_admin/auth/users"
-    | "/_admin/book/meili"
-    | "/_admin/misc/echokv"
-    | "/_admin/unit/$unitId"
-    | "/_admin/unit/create"
-    | "/_admin/unit/meili"
-    | "/_admin/user/$unitId"
-    | "/_admin/user/create"
-    | "/_admin/user/meili"
-    | "/_admin/book/"
-    | "/_admin/realm/"
-    | "/_admin/shelf/"
-    | "/_admin/unit/"
-    | "/_admin/user/";
-  fileRoutesById: FileRoutesById;
+    | '__root__'
+    | '/_admin'
+    | '/login'
+    | '/_admin/jwt-services'
+    | '/_admin/meili'
+    | '/_admin/settings'
+    | '/_admin/token'
+    | '/_admin/'
+    | '/_admin/auth/email'
+    | '/_admin/auth/jwt-services'
+    | '/_admin/auth/sessions'
+    | '/_admin/auth/status'
+    | '/_admin/auth/users'
+    | '/_admin/book/meili'
+    | '/_admin/misc/echokv'
+    | '/_admin/unit/$unitId'
+    | '/_admin/unit/create'
+    | '/_admin/unit/meili'
+    | '/_admin/user/$unitId'
+    | '/_admin/user/create'
+    | '/_admin/user/meili'
+    | '/_admin/book/'
+    | '/_admin/realm/'
+    | '/_admin/shelf/'
+    | '/_admin/unit/'
+    | '/_admin/user/'
+  fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  AdminRoute: typeof AdminRouteWithChildren;
-  LoginRoute: typeof LoginRoute;
+  AdminRoute: typeof AdminRouteWithChildren
+  LoginRoute: typeof LoginRoute
 }
 
-declare module "@tanstack/react-router" {
+declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    "/login": {
-      id: "/login";
-      path: "/login";
-      fullPath: "/login";
-      preLoaderRoute: typeof LoginRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/_admin": {
-      id: "/_admin";
-      path: "";
-      fullPath: "/";
-      preLoaderRoute: typeof AdminRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/_admin/": {
-      id: "/_admin/";
-      path: "/";
-      fullPath: "/";
-      preLoaderRoute: typeof AdminIndexRouteImport;
-      parentRoute: typeof AdminRoute;
-    };
-    "/_admin/token": {
-      id: "/_admin/token";
-      path: "/token";
-      fullPath: "/token";
-      preLoaderRoute: typeof AdminTokenRouteImport;
-      parentRoute: typeof AdminRoute;
-    };
-    "/_admin/settings": {
-      id: "/_admin/settings";
-      path: "/settings";
-      fullPath: "/settings";
-      preLoaderRoute: typeof AdminSettingsRouteImport;
-      parentRoute: typeof AdminRoute;
-    };
-    "/_admin/meili": {
-      id: "/_admin/meili";
-      path: "/meili";
-      fullPath: "/meili";
-      preLoaderRoute: typeof AdminMeiliRouteImport;
-      parentRoute: typeof AdminRoute;
-    };
-    "/_admin/jwt-services": {
-      id: "/_admin/jwt-services";
-      path: "/jwt-services";
-      fullPath: "/jwt-services";
-      preLoaderRoute: typeof AdminJwtServicesRouteImport;
-      parentRoute: typeof AdminRoute;
-    };
-    "/_admin/user/": {
-      id: "/_admin/user/";
-      path: "/user";
-      fullPath: "/user/";
-      preLoaderRoute: typeof AdminUserIndexRouteImport;
-      parentRoute: typeof AdminRoute;
-    };
-    "/_admin/unit/": {
-      id: "/_admin/unit/";
-      path: "/unit";
-      fullPath: "/unit/";
-      preLoaderRoute: typeof AdminUnitIndexRouteImport;
-      parentRoute: typeof AdminRoute;
-    };
-    "/_admin/shelf/": {
-      id: "/_admin/shelf/";
-      path: "/shelf";
-      fullPath: "/shelf/";
-      preLoaderRoute: typeof AdminShelfIndexRouteImport;
-      parentRoute: typeof AdminRoute;
-    };
-    "/_admin/realm/": {
-      id: "/_admin/realm/";
-      path: "/realm";
-      fullPath: "/realm/";
-      preLoaderRoute: typeof AdminRealmIndexRouteImport;
-      parentRoute: typeof AdminRoute;
-    };
-    "/_admin/book/": {
-      id: "/_admin/book/";
-      path: "/book";
-      fullPath: "/book/";
-      preLoaderRoute: typeof AdminBookIndexRouteImport;
-      parentRoute: typeof AdminRoute;
-    };
-    "/_admin/user/meili": {
-      id: "/_admin/user/meili";
-      path: "/user/meili";
-      fullPath: "/user/meili";
-      preLoaderRoute: typeof AdminUserMeiliRouteImport;
-      parentRoute: typeof AdminRoute;
-    };
-    "/_admin/user/create": {
-      id: "/_admin/user/create";
-      path: "/user/create";
-      fullPath: "/user/create";
-      preLoaderRoute: typeof AdminUserCreateRouteImport;
-      parentRoute: typeof AdminRoute;
-    };
-    "/_admin/user/$unitId": {
-      id: "/_admin/user/$unitId";
-      path: "/user/$unitId";
-      fullPath: "/user/$unitId";
-      preLoaderRoute: typeof AdminUserUnitIdRouteImport;
-      parentRoute: typeof AdminRoute;
-    };
-    "/_admin/unit/meili": {
-      id: "/_admin/unit/meili";
-      path: "/unit/meili";
-      fullPath: "/unit/meili";
-      preLoaderRoute: typeof AdminUnitMeiliRouteImport;
-      parentRoute: typeof AdminRoute;
-    };
-    "/_admin/unit/create": {
-      id: "/_admin/unit/create";
-      path: "/unit/create";
-      fullPath: "/unit/create";
-      preLoaderRoute: typeof AdminUnitCreateRouteImport;
-      parentRoute: typeof AdminRoute;
-    };
-    "/_admin/unit/$unitId": {
-      id: "/_admin/unit/$unitId";
-      path: "/unit/$unitId";
-      fullPath: "/unit/$unitId";
-      preLoaderRoute: typeof AdminUnitUnitIdRouteImport;
-      parentRoute: typeof AdminRoute;
-    };
-    "/_admin/misc/echokv": {
-      id: "/_admin/misc/echokv";
-      path: "/misc/echokv";
-      fullPath: "/misc/echokv";
-      preLoaderRoute: typeof AdminMiscEchokvRouteImport;
-      parentRoute: typeof AdminRoute;
-    };
-    "/_admin/book/meili": {
-      id: "/_admin/book/meili";
-      path: "/book/meili";
-      fullPath: "/book/meili";
-      preLoaderRoute: typeof AdminBookMeiliRouteImport;
-      parentRoute: typeof AdminRoute;
-    };
-    "/_admin/auth/users": {
-      id: "/_admin/auth/users";
-      path: "/auth/users";
-      fullPath: "/auth/users";
-      preLoaderRoute: typeof AdminAuthUsersRouteImport;
-      parentRoute: typeof AdminRoute;
-    };
-    "/_admin/auth/status": {
-      id: "/_admin/auth/status";
-      path: "/auth/status";
-      fullPath: "/auth/status";
-      preLoaderRoute: typeof AdminAuthStatusRouteImport;
-      parentRoute: typeof AdminRoute;
-    };
-    "/_admin/auth/sessions": {
-      id: "/_admin/auth/sessions";
-      path: "/auth/sessions";
-      fullPath: "/auth/sessions";
-      preLoaderRoute: typeof AdminAuthSessionsRouteImport;
-      parentRoute: typeof AdminRoute;
-    };
-    "/_admin/auth/jwt-services": {
-      id: "/_admin/auth/jwt-services";
-      path: "/auth/jwt-services";
-      fullPath: "/auth/jwt-services";
-      preLoaderRoute: typeof AdminAuthJwtServicesRouteImport;
-      parentRoute: typeof AdminRoute;
-    };
-    "/_admin/auth/email": {
-      id: "/_admin/auth/email";
-      path: "/auth/email";
-      fullPath: "/auth/email";
-      preLoaderRoute: typeof AdminAuthEmailRouteImport;
-      parentRoute: typeof AdminRoute;
-    };
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_admin': {
+      id: '/_admin'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_admin/': {
+      id: '/_admin/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/token': {
+      id: '/_admin/token'
+      path: '/token'
+      fullPath: '/token'
+      preLoaderRoute: typeof AdminTokenRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/settings': {
+      id: '/_admin/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof AdminSettingsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/meili': {
+      id: '/_admin/meili'
+      path: '/meili'
+      fullPath: '/meili'
+      preLoaderRoute: typeof AdminMeiliRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/jwt-services': {
+      id: '/_admin/jwt-services'
+      path: '/jwt-services'
+      fullPath: '/jwt-services'
+      preLoaderRoute: typeof AdminJwtServicesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/user/': {
+      id: '/_admin/user/'
+      path: '/user'
+      fullPath: '/user/'
+      preLoaderRoute: typeof AdminUserIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/unit/': {
+      id: '/_admin/unit/'
+      path: '/unit'
+      fullPath: '/unit/'
+      preLoaderRoute: typeof AdminUnitIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/shelf/': {
+      id: '/_admin/shelf/'
+      path: '/shelf'
+      fullPath: '/shelf/'
+      preLoaderRoute: typeof AdminShelfIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/realm/': {
+      id: '/_admin/realm/'
+      path: '/realm'
+      fullPath: '/realm/'
+      preLoaderRoute: typeof AdminRealmIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/book/': {
+      id: '/_admin/book/'
+      path: '/book'
+      fullPath: '/book/'
+      preLoaderRoute: typeof AdminBookIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/user/meili': {
+      id: '/_admin/user/meili'
+      path: '/user/meili'
+      fullPath: '/user/meili'
+      preLoaderRoute: typeof AdminUserMeiliRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/user/create': {
+      id: '/_admin/user/create'
+      path: '/user/create'
+      fullPath: '/user/create'
+      preLoaderRoute: typeof AdminUserCreateRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/user/$unitId': {
+      id: '/_admin/user/$unitId'
+      path: '/user/$unitId'
+      fullPath: '/user/$unitId'
+      preLoaderRoute: typeof AdminUserUnitIdRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/unit/meili': {
+      id: '/_admin/unit/meili'
+      path: '/unit/meili'
+      fullPath: '/unit/meili'
+      preLoaderRoute: typeof AdminUnitMeiliRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/unit/create': {
+      id: '/_admin/unit/create'
+      path: '/unit/create'
+      fullPath: '/unit/create'
+      preLoaderRoute: typeof AdminUnitCreateRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/unit/$unitId': {
+      id: '/_admin/unit/$unitId'
+      path: '/unit/$unitId'
+      fullPath: '/unit/$unitId'
+      preLoaderRoute: typeof AdminUnitUnitIdRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/misc/echokv': {
+      id: '/_admin/misc/echokv'
+      path: '/misc/echokv'
+      fullPath: '/misc/echokv'
+      preLoaderRoute: typeof AdminMiscEchokvRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/book/meili': {
+      id: '/_admin/book/meili'
+      path: '/book/meili'
+      fullPath: '/book/meili'
+      preLoaderRoute: typeof AdminBookMeiliRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/auth/users': {
+      id: '/_admin/auth/users'
+      path: '/auth/users'
+      fullPath: '/auth/users'
+      preLoaderRoute: typeof AdminAuthUsersRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/auth/status': {
+      id: '/_admin/auth/status'
+      path: '/auth/status'
+      fullPath: '/auth/status'
+      preLoaderRoute: typeof AdminAuthStatusRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/auth/sessions': {
+      id: '/_admin/auth/sessions'
+      path: '/auth/sessions'
+      fullPath: '/auth/sessions'
+      preLoaderRoute: typeof AdminAuthSessionsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/auth/jwt-services': {
+      id: '/_admin/auth/jwt-services'
+      path: '/auth/jwt-services'
+      fullPath: '/auth/jwt-services'
+      preLoaderRoute: typeof AdminAuthJwtServicesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/auth/email': {
+      id: '/_admin/auth/email'
+      path: '/auth/email'
+      fullPath: '/auth/email'
+      preLoaderRoute: typeof AdminAuthEmailRouteImport
+      parentRoute: typeof AdminRoute
+    }
   }
 }
 
 interface AdminRouteChildren {
-  AdminJwtServicesRoute: typeof AdminJwtServicesRoute;
-  AdminMeiliRoute: typeof AdminMeiliRoute;
-  AdminSettingsRoute: typeof AdminSettingsRoute;
-  AdminTokenRoute: typeof AdminTokenRoute;
-  AdminIndexRoute: typeof AdminIndexRoute;
-  AdminAuthEmailRoute: typeof AdminAuthEmailRoute;
-  AdminAuthJwtServicesRoute: typeof AdminAuthJwtServicesRoute;
-  AdminAuthSessionsRoute: typeof AdminAuthSessionsRoute;
-  AdminAuthStatusRoute: typeof AdminAuthStatusRoute;
-  AdminAuthUsersRoute: typeof AdminAuthUsersRoute;
-  AdminBookMeiliRoute: typeof AdminBookMeiliRoute;
-  AdminMiscEchokvRoute: typeof AdminMiscEchokvRoute;
-  AdminUnitUnitIdRoute: typeof AdminUnitUnitIdRoute;
-  AdminUnitCreateRoute: typeof AdminUnitCreateRoute;
-  AdminUnitMeiliRoute: typeof AdminUnitMeiliRoute;
-  AdminUserUnitIdRoute: typeof AdminUserUnitIdRoute;
-  AdminUserCreateRoute: typeof AdminUserCreateRoute;
-  AdminUserMeiliRoute: typeof AdminUserMeiliRoute;
-  AdminBookIndexRoute: typeof AdminBookIndexRoute;
-  AdminRealmIndexRoute: typeof AdminRealmIndexRoute;
-  AdminShelfIndexRoute: typeof AdminShelfIndexRoute;
-  AdminUnitIndexRoute: typeof AdminUnitIndexRoute;
-  AdminUserIndexRoute: typeof AdminUserIndexRoute;
+  AdminJwtServicesRoute: typeof AdminJwtServicesRoute
+  AdminMeiliRoute: typeof AdminMeiliRoute
+  AdminSettingsRoute: typeof AdminSettingsRoute
+  AdminTokenRoute: typeof AdminTokenRoute
+  AdminIndexRoute: typeof AdminIndexRoute
+  AdminAuthEmailRoute: typeof AdminAuthEmailRoute
+  AdminAuthJwtServicesRoute: typeof AdminAuthJwtServicesRoute
+  AdminAuthSessionsRoute: typeof AdminAuthSessionsRoute
+  AdminAuthStatusRoute: typeof AdminAuthStatusRoute
+  AdminAuthUsersRoute: typeof AdminAuthUsersRoute
+  AdminBookMeiliRoute: typeof AdminBookMeiliRoute
+  AdminMiscEchokvRoute: typeof AdminMiscEchokvRoute
+  AdminUnitUnitIdRoute: typeof AdminUnitUnitIdRoute
+  AdminUnitCreateRoute: typeof AdminUnitCreateRoute
+  AdminUnitMeiliRoute: typeof AdminUnitMeiliRoute
+  AdminUserUnitIdRoute: typeof AdminUserUnitIdRoute
+  AdminUserCreateRoute: typeof AdminUserCreateRoute
+  AdminUserMeiliRoute: typeof AdminUserMeiliRoute
+  AdminBookIndexRoute: typeof AdminBookIndexRoute
+  AdminRealmIndexRoute: typeof AdminRealmIndexRoute
+  AdminShelfIndexRoute: typeof AdminShelfIndexRoute
+  AdminUnitIndexRoute: typeof AdminUnitIndexRoute
+  AdminUserIndexRoute: typeof AdminUserIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
@@ -557,14 +557,14 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminShelfIndexRoute: AdminShelfIndexRoute,
   AdminUnitIndexRoute: AdminUnitIndexRoute,
   AdminUserIndexRoute: AdminUserIndexRoute,
-};
+}
 
-const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren);
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRouteWithChildren,
   LoginRoute: LoginRoute,
-};
+}
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
-  ._addFileTypes<FileRouteTypes>();
+  ._addFileTypes<FileRouteTypes>()
