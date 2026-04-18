@@ -1,4 +1,3 @@
-import Autocomplete from "@mui/material/Autocomplete";
 import Button from "@mui/material/Button";
 import Checkbox from "@mui/material/Checkbox";
 import Chip from "@mui/material/Chip";
@@ -12,7 +11,6 @@ import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
 import Stack from "@mui/material/Stack";
-import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import { echoKvGetQuery } from "@rezics/api/echokv";
 import type {
@@ -30,14 +28,9 @@ import { useCallback, useMemo, useState } from "react";
 interface CollectionModalProps {
   open: boolean;
   onClose: () => void;
-  onCollect: (
-    shelfIds: string[],
-    keywords: string[],
-    independent?: boolean,
-  ) => void;
+  onCollect: (shelfIds: string[], independent?: boolean) => void;
   shelves: ShelfSummaryDTO[];
   status?: CollectionStatusResponse;
-  userKeywords: string[];
   isCollecting: boolean;
   isLoading: boolean;
   isReview?: boolean;
@@ -49,7 +42,6 @@ export function CollectionModal({
   onCollect,
   shelves,
   status,
-  userKeywords,
   isCollecting,
   isLoading,
   isReview = false,
@@ -57,7 +49,6 @@ export function CollectionModal({
   const [selectedShelves, setSelectedShelves] = useState<Set<string>>(
     new Set(),
   );
-  const [keywords, setKeywords] = useState<string[]>([]);
   const [filterTag, setFilterTag] = useState<SeedTagName | null>(null);
   const [independent, setIndependent] = useState(false);
 
@@ -90,8 +81,8 @@ export function CollectionModal({
   }, []);
 
   const handleSave = useCallback(() => {
-    onCollect([...selectedShelves], keywords, independent);
-  }, [selectedShelves, keywords, independent, onCollect]);
+    onCollect([...selectedShelves], independent);
+  }, [selectedShelves, independent, onCollect]);
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="xs">
@@ -149,33 +140,6 @@ export function CollectionModal({
                 ))
               )}
             </List>
-
-            {/* Keywords input */}
-            <Autocomplete
-              multiple
-              freeSolo
-              size="small"
-              options={userKeywords}
-              value={keywords}
-              onChange={(_, newValue) => setKeywords(newValue)}
-              renderTags={(value, getTagProps) =>
-                value.map((kw, index) => (
-                  <Chip
-                    {...getTagProps({ index })}
-                    key={kw}
-                    label={kw}
-                    size="small"
-                  />
-                ))
-              }
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  variant="standard"
-                  placeholder="Add keywords..."
-                />
-              )}
-            />
 
             {/* Dual collection mode for reviews */}
             {isReview && (

@@ -1,36 +1,36 @@
 import Box from "@mui/material/Box";
 import Chip from "@mui/material/Chip";
 import Stack from "@mui/material/Stack";
-import Tab from "@mui/material/Tab";
-import Tabs from "@mui/material/Tabs";
 import Typography from "@mui/material/Typography";
-import { useState } from "react";
 import type { ShelfItemDTO, ShelfView } from "@rezics/api/shelf";
 
 interface ShelfItemCardProps {
   item: ShelfItemDTO;
+  title?: string;
   viewMode: ShelfView;
 }
 
-export function ShelfItemCard({ item, viewMode }: ShelfItemCardProps) {
-  const [reviewTab, setReviewTab] = useState(0);
-  const title = item.item?.translations?.[0]?.title ?? "Untitled";
-  const type = item.item?.type ?? "UNKNOWN";
-  const reviews = item.reviews ?? [];
+export function ShelfItemCard({ item, title, viewMode }: ShelfItemCardProps) {
+  const displayTitle = title ?? item.itemRef;
+  const reviewCount = item.reviewIds.length;
+  const tagCount = item.tagIds.length;
 
   if (viewMode === "list") {
     return (
       <Stack direction="row" spacing={2} alignItems="center" py={1} px={1}>
-        <Chip label={type} size="small" variant="outlined" />
+        <Chip label={item.kind} size="small" variant="outlined" />
         <Typography variant="body1" flex={1} noWrap>
-          {title}
+          {displayTitle}
         </Typography>
-        {item.keywords.length > 0 && (
-          <Stack direction="row" spacing={0.5}>
-            {item.keywords.map((kw) => (
-              <Chip key={kw} label={kw} size="small" variant="outlined" />
-            ))}
-          </Stack>
+        {reviewCount > 0 && (
+          <Typography variant="caption" color="text.secondary">
+            {reviewCount} review{reviewCount === 1 ? "" : "s"}
+          </Typography>
+        )}
+        {tagCount > 0 && (
+          <Typography variant="caption" color="text.secondary">
+            {tagCount} tag{tagCount === 1 ? "" : "s"}
+          </Typography>
         )}
       </Stack>
     );
@@ -40,37 +40,20 @@ export function ShelfItemCard({ item, viewMode }: ShelfItemCardProps) {
     return (
       <Box py={1} px={1}>
         <Stack direction="row" spacing={2} alignItems="center">
-          <Chip label={type} size="small" variant="outlined" />
+          <Chip label={item.kind} size="small" variant="outlined" />
           <Typography variant="body1" flex={1}>
-            {title}
+            {displayTitle}
           </Typography>
+          {reviewCount > 0 && (
+            <Typography variant="caption" color="text.secondary">
+              {reviewCount} review{reviewCount === 1 ? "" : "s"}
+            </Typography>
+          )}
         </Stack>
-        {reviews.length > 0 && (
-          <Box mt={1}>
-            <Tabs
-              value={reviewTab}
-              onChange={(_, v) => setReviewTab(v)}
-              variant="scrollable"
-              scrollButtons="auto"
-            >
-              {reviews.map((review, i) => (
-                <Tab key={review.reviewUnitId} label={`Review ${i + 1}`} />
-              ))}
-            </Tabs>
-          </Box>
-        )}
-        {item.keywords.length > 0 && (
-          <Stack direction="row" spacing={0.5} mt={1}>
-            {item.keywords.map((kw) => (
-              <Chip key={kw} label={kw} size="small" variant="outlined" />
-            ))}
-          </Stack>
-        )}
       </Box>
     );
   }
 
-  // Grid mode (default)
   return (
     <Box
       py={1}
@@ -94,18 +77,16 @@ export function ShelfItemCard({ item, viewMode }: ShelfItemCardProps) {
         }}
       >
         <Typography variant="caption" color="text.secondary">
-          {type}
+          {item.kind}
         </Typography>
       </Box>
       <Typography variant="body2" noWrap>
-        {title}
+        {displayTitle}
       </Typography>
-      {item.keywords.length > 0 && (
-        <Stack direction="row" spacing={0.5} mt={0.5} flexWrap="wrap">
-          {item.keywords.slice(0, 3).map((kw) => (
-            <Chip key={kw} label={kw} size="small" variant="outlined" />
-          ))}
-        </Stack>
+      {reviewCount > 0 && (
+        <Typography variant="caption" color="text.secondary">
+          {reviewCount} review{reviewCount === 1 ? "" : "s"}
+        </Typography>
       )}
     </Box>
   );

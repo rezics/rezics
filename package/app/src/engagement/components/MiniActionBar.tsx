@@ -138,7 +138,9 @@ export function MiniActionBar({
           </IconButton>
         </Tooltip>
       )}
-      {unitId && <FavoriteButton unitId={unitId} size="small" color={textColor} />}
+      {unitId && (
+        <FavoriteButton unitId={unitId} size="small" color={textColor} />
+      )}
       <Tooltip title={t("accessibility.collection")} placement="top">
         <IconButton
           aria-label={t("accessibility.collection")}
@@ -155,7 +157,6 @@ export function MiniActionBar({
           onCollect={collection.handleCollect}
           shelves={collection.shelves}
           status={collection.status}
-          userKeywords={collection.userKeywords}
           isCollecting={collection.isCollecting}
           isLoading={collection.isLoading}
         />

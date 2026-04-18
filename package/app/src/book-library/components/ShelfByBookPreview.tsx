@@ -19,7 +19,7 @@ export function ShelfByBookPreview({
   const { t } = useTranslation();
   const { data, isLoading, error } = useQuery({
     ...shelfQueries.list({
-      containsItemUnitId: bookId,
+      containsItemRef: bookId,
       limit: shelfNumber,
     }),
     enabled: !!bookId,
@@ -33,9 +33,7 @@ export function ShelfByBookPreview({
   return (
     <div className="@container">
       <ArrowForwardIcon size={16} to={`/shelf/book/${bookId}`}>
-        <AccentBarWithText
-          text={t("shelf.includes_book_title", { title })}
-        />
+        <AccentBarWithText text={t("shelf.includes_book_title", { title })} />
       </ArrowForwardIcon>
       <div className="mb-4" />
       <HorizontalShelfCarousel

@@ -1,16 +1,4 @@
 import {
-  Alert,
-  Box,
-  Button,
-  Chip,
-  CircularProgress,
-  IconButton,
-  MenuItem,
-  Stack,
-  TextField,
-  Typography,
-} from '@mui/material';
-import {
   closestCenter,
   DndContext,
   type DragEndEvent,
@@ -18,39 +6,46 @@ import {
   PointerSensor,
   useSensor,
   useSensors,
-} from '@dnd-kit/core';
-import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
+} from "@dnd-kit/core";
+import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
 import {
   arrayMove,
   SortableContext,
   sortableKeyboardCoordinates,
   useSortable,
   verticalListSortingStrategy,
-} from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
-import { userQueries } from '@rezics/api/user/user.queries';
-import { useUpdateSettingsMutation } from '@rezics/api/user/user.mutations';
-import { userKeywordQueries } from '@rezics/api/shelf/shelf.queries';
-import { useUpdateKeywordsMutation } from '@rezics/api/shelf/shelf.mutations';
-import { useQuery } from '@tanstack/react-query';
-import { GripVerticalIcon, XIcon } from 'lucide-react';
-import { type FC, useState } from 'react';
-import { SettingsSection } from '@/user/components/SettingsSection';
-import { useRequireAuth } from '@/user/pages/useAuth';
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import {
+  Alert,
+  Box,
+  Button,
+  CircularProgress,
+  IconButton,
+  MenuItem,
+  Stack,
+  TextField,
+  Typography,
+} from "@mui/material";
+import { useUpdateSettingsMutation } from "@rezics/api/user/user.mutations";
+import { userQueries } from "@rezics/api/user/user.queries";
+import { useQuery } from "@tanstack/react-query";
+import { GripVerticalIcon, XIcon } from "lucide-react";
+import { type FC, useState } from "react";
+import { SettingsSection } from "@/user/components/SettingsSection";
+import { useRequireAuth } from "@/user/pages/useAuth";
 
 const SUPPORTED_LANGUAGES = [
-  { code: 'zh-hant', label: 'Traditional Chinese' },
-  { code: 'zh-hans', label: 'Simplified Chinese' },
-  { code: 'en', label: 'English' },
-  { code: 'ja', label: 'Japanese' },
-  { code: 'de', label: 'German' },
+  { code: "zh-hant", label: "Traditional Chinese" },
+  { code: "zh-hans", label: "Simplified Chinese" },
+  { code: "en", label: "English" },
+  { code: "ja", label: "Japanese" },
+  { code: "de", label: "German" },
 ] as const;
 
 const LANG_LABELS: Record<string, string> = Object.fromEntries(
   SUPPORTED_LANGUAGES.map((l) => [l.code, l.label]),
 );
-
-const MAX_KEYWORDS = 500;
 
 type SortableLangItemProps = {
   code: string;
@@ -83,18 +78,18 @@ const SortableLangItem: FC<SortableLangItemProps> = ({
       ref={setNodeRef}
       style={style}
       sx={{
-        display: 'flex',
-        alignItems: 'center',
+        display: "flex",
+        alignItems: "center",
         gap: 1,
         px: 1,
         py: 0.5,
         borderRadius: 1,
-        bgcolor: 'action.hover',
+        bgcolor: "action.hover",
       }}
     >
       <IconButton
         size="small"
-        sx={{ cursor: 'grab', touchAction: 'none' }}
+        sx={{ cursor: "grab", touchAction: "none" }}
         {...attributes}
         {...listeners}
         aria-label="drag handle"
@@ -122,21 +117,16 @@ export const SettingsPreferencesSection: FC = () => {
   const { data: settings, isLoading: settingsLoading } = useQuery(
     userQueries.settings(),
   );
-  const { data: keywords = [], isLoading: keywordsLoading } = useQuery(
-    userKeywordQueries.mine(),
-  );
 
   const updateSettings = useUpdateSettingsMutation();
-  const updateKeywords = useUpdateKeywordsMutation();
 
   const [langSuccess, setLangSuccess] = useState(false);
-  const [newKeyword, setNewKeyword] = useState('');
 
   const preferredLangs: string[] = settings?.preferredLanguages ?? [];
   const availableToAdd = SUPPORTED_LANGUAGES.filter(
     (l) => !preferredLangs.includes(l.code),
   );
-  const [addPick, setAddPick] = useState<string>('');
+  const [addPick, setAddPick] = useState<string>("");
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -160,7 +150,7 @@ export const SettingsPreferencesSection: FC = () => {
   const handleAddLang = (code: string) => {
     if (!code || preferredLangs.includes(code)) return;
     persistOrder([...preferredLangs, code]);
-    setAddPick('');
+    setAddPick("");
   };
 
   const handleRemoveLang = (code: string) => {
@@ -174,18 +164,6 @@ export const SettingsPreferencesSection: FC = () => {
     const newIndex = preferredLangs.indexOf(String(over.id));
     if (oldIndex < 0 || newIndex < 0) return;
     persistOrder(arrayMove(preferredLangs, oldIndex, newIndex));
-  };
-
-  const handleAddKeyword = (e: React.FormEvent) => {
-    e.preventDefault();
-    const trimmed = newKeyword.trim();
-    if (!trimmed || keywords.length >= MAX_KEYWORDS) return;
-    updateKeywords.mutate({ add: [trimmed] });
-    setNewKeyword('');
-  };
-
-  const handleRemoveKeyword = (keyword: string) => {
-    updateKeywords.mutate({ remove: [keyword] });
   };
 
   if (settingsLoading) {
@@ -269,6 +247,7 @@ export const SettingsPreferencesSection: FC = () => {
       <SettingsSection
         title="Realm Tag Preferences"
         description="Configure how tags are displayed per realm."
+        divider={false}
       >
         {settings?.realmTagPreferences &&
         Object.keys(settings.realmTagPreferences).length > 0 ? (
@@ -280,8 +259,8 @@ export const SettingsPreferencesSection: FC = () => {
                     {realm}
                   </Typography>
                   <Typography variant="caption" color="text.secondary">
-                    Max display: {pref.maxDisplay} | Realms:{' '}
-                    {pref.realmIds.join(', ')}
+                    Max display: {pref.maxDisplay} | Realms:{" "}
+                    {pref.realmIds.join(", ")}
                   </Typography>
                 </div>
               ),
@@ -290,59 +269,6 @@ export const SettingsPreferencesSection: FC = () => {
         ) : (
           <Typography variant="body2" color="text.secondary">
             No realm tag preferences configured.
-          </Typography>
-        )}
-      </SettingsSection>
-
-      <SettingsSection
-        title="Keyword Vocabulary"
-        description="Manage keywords used for content discovery."
-        divider={false}
-      >
-        <Typography variant="caption" color="text.secondary" className="mb-3 block">
-          {keywords.length} / {MAX_KEYWORDS} keywords
-        </Typography>
-
-        <form onSubmit={handleAddKeyword} className="flex items-end gap-2 mb-4">
-          <TextField
-            label="Add keyword"
-            value={newKeyword}
-            onChange={(e) => setNewKeyword(e.target.value)}
-            variant="standard"
-            size="small"
-            disabled={keywords.length >= MAX_KEYWORDS}
-            className="flex-1"
-          />
-          <Button
-            type="submit"
-            size="small"
-            variant="outlined"
-            disabled={
-              !newKeyword.trim() ||
-              keywords.length >= MAX_KEYWORDS ||
-              updateKeywords.isPending
-            }
-          >
-            Add
-          </Button>
-        </form>
-
-        {keywordsLoading ? (
-          <CircularProgress size={20} />
-        ) : keywords.length > 0 ? (
-          <div className="flex flex-wrap gap-1">
-            {keywords.map((kw) => (
-              <Chip
-                key={kw}
-                label={kw}
-                size="small"
-                onDelete={() => handleRemoveKeyword(kw)}
-              />
-            ))}
-          </div>
-        ) : (
-          <Typography variant="body2" color="text.secondary">
-            No keywords added yet.
           </Typography>
         )}
       </SettingsSection>

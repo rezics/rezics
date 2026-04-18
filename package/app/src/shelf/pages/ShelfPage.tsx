@@ -1,47 +1,103 @@
-import { useState } from "react";
+import GridViewIcon from "@mui/icons-material/GridView";
+import ListIcon from "@mui/icons-material/List";
+import RateReviewIcon from "@mui/icons-material/RateReview";
 import Box from "@mui/material/Box";
-import Chip from "@mui/material/Chip";
+import Button from "@mui/material/Button";
 import CircularProgress from "@mui/material/CircularProgress";
 import Stack from "@mui/material/Stack";
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import Typography from "@mui/material/Typography";
-import GridViewIcon from "@mui/icons-material/GridView";
-import ListIcon from "@mui/icons-material/List";
-import RateReviewIcon from "@mui/icons-material/RateReview";
-import { useQuery } from "@tanstack/react-query";
-import { shelfDetailQuery, shelfItemsQuery } from "@rezics/api/shelf";
-import type { ShelfItemsQuery, ShelfView } from "@rezics/api/shelf";
+import { bookKeys } from "@rezics/api/book/book.keys";
+import { postKeys } from "@rezics/api/post/post.keys";
+import type {
+  ShelfItemDTO,
+  ShelfSortMode,
+  ShelfView,
+} from "@rezics/api/shelf";
+import {
+  shelfDetailQuery,
+  shelfItemsQuery,
+  useCleanupOrphansMutation,
+  useShelfHydration,
+} from "@rezics/api/shelf";
+import { tagKeys } from "@rezics/api/tag/tag.keys";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMemo, useState } from "react";
+import { useUserProfileStore } from "@/user/states";
 import { ShelfItemCard } from "../components/ShelfItemCard";
 
 interface ShelfPageProps {
   unitId: string;
 }
 
+const titleCollator = new Intl.Collator(undefined, {
+  numeric: true,
+  sensitivity: "base",
+});
+
 export function ShelfPage({ unitId }: ShelfPageProps) {
   const [viewMode, setViewMode] = useState<ShelfView>("grid");
-  const [filter, setFilter] = useState<ShelfItemsQuery["filter"]>("all");
-  const [keywordFilter, setKeywordFilter] = useState<string | undefined>();
+  const [sortMode, setSortMode] = useState<ShelfSortMode>("manual");
 
   const detailQuery = useQuery(shelfDetailQuery(unitId));
-  const itemsQuery = useQuery(
-    shelfItemsQuery(unitId, {
-      filter,
-      keyword: keywordFilter,
-      sort: viewMode === "grid" ? "newest" : "manual",
-    }),
-  );
+  const itemsQuery = useQuery(shelfItemsQuery(unitId));
 
   const shelf = detailQuery.data;
   const items = itemsQuery.data?.items ?? [];
   const title = shelf?.translations?.[0]?.title ?? "Shelf";
 
-  // Derive viewMode from shelf.extra if set
-  const savedViewMode = (shelf?.extra as any)?.viewMode as ShelfView | undefined;
+  const savedViewMode = (shelf?.extra as any)?.viewMode as
+    | ShelfView
+    | undefined;
   const effectiveViewMode = savedViewMode ?? viewMode;
 
-  // Collect all unique keywords from items
-  const allKeywords = [...new Set(items.flatMap((item) => item.keywords))];
+  const hydration = useShelfHydration(items);
+  const queryClient = useQueryClient();
+  const currentUser = useUserProfileStore((s) => s.user);
+  const isOwner = !!currentUser && currentUser.unitId === shelf?.userId;
+  const cleanupMutation = useCleanupOrphansMutation();
+
+  const getHydratedTitle = (item: ShelfItemDTO): string | undefined => {
+    if (item.kind === "book") {
+      const book = queryClient.getQueryData<any>(bookKeys.detail(item.itemRef));
+      return book?.translations?.[0]?.title;
+    }
+    if (
+      item.kind === "review" ||
+      item.kind === "quote" ||
+      item.kind === "post"
+    ) {
+      const post = queryClient.getQueryData<any>(postKeys.detail(item.itemRef));
+      return post?.translations?.[0]?.title ?? post?.title;
+    }
+    if (item.kind === "tag") {
+      const tag = queryClient.getQueryData<any>(tagKeys.detail(item.itemRef));
+      return tag?.translations?.[0]?.title ?? tag?.label;
+    }
+    return undefined;
+  };
+
+  const sortedItems = useMemo(() => {
+    const arr = [...items];
+    if (sortMode === "manual") {
+      arr.sort((a, b) => (a.position < b.position ? -1 : 1));
+    } else if (sortMode === "time") {
+      arr.sort((a, b) => {
+        const aT = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const bT = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        return bT - aT;
+      });
+    } else if (sortMode === "title") {
+      arr.sort((a, b) =>
+        titleCollator.compare(
+          getHydratedTitle(a) ?? a.itemRef,
+          getHydratedTitle(b) ?? b.itemRef,
+        ),
+      );
+    }
+    return arr;
+  }, [items, sortMode, hydration.buckets]);
 
   if (detailQuery.isLoading) {
     return (
@@ -54,8 +110,11 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
   return (
     <Box maxWidth="lg" mx="auto" px={2} py={3}>
       <Stack spacing={3}>
-        {/* Header */}
-        <Stack direction="row" justifyContent="space-between" alignItems="center">
+        <Stack
+          direction="row"
+          justifyContent="space-between"
+          alignItems="center"
+        >
           <Typography variant="h5">{title}</Typography>
           <Stack direction="row" spacing={1} alignItems="center">
             <Typography variant="body2" color="text.secondary">
@@ -80,53 +139,67 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
           </Stack>
         </Stack>
 
-        {/* Filters */}
-        <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
-          {(["all", "created", "collected"] as const).map((f) => (
-            <Chip
-              key={f}
-              label={f.charAt(0).toUpperCase() + f.slice(1)}
-              size="small"
-              variant={filter === f ? "filled" : "outlined"}
-              onClick={() => setFilter(f)}
-            />
-          ))}
-          {allKeywords.length > 0 && (
+        <Stack direction="row" spacing={1} alignItems="center">
+          <Typography variant="body2" color="text.secondary">
+            Sort
+          </Typography>
+          <ToggleButtonGroup
+            value={sortMode}
+            exclusive
+            size="small"
+            onChange={(_, v) => v && setSortMode(v as ShelfSortMode)}
+          >
+            <ToggleButton value="manual">Manual</ToggleButton>
+            <ToggleButton value="time">Time</ToggleButton>
+            <ToggleButton value="title">Title</ToggleButton>
+          </ToggleButtonGroup>
+          {hydration.orphanItemRefs.length > 0 && (
             <>
-              <Box sx={{ width: "1px", bgcolor: "divider", mx: 0.5 }} />
-              {allKeywords.map((kw) => (
-                <Chip
-                  key={kw}
-                  label={kw}
+              <Typography variant="caption" color="warning.main">
+                {hydration.orphanItemRefs.length} orphan
+                {hydration.orphanItemRefs.length === 1 ? "" : "s"}
+              </Typography>
+              {isOwner && (
+                <Button
                   size="small"
-                  variant={keywordFilter === kw ? "filled" : "outlined"}
+                  variant="text"
+                  disabled={cleanupMutation.isPending}
                   onClick={() =>
-                    setKeywordFilter(keywordFilter === kw ? undefined : kw)
+                    cleanupMutation.mutate({
+                      shelfUnitId: unitId,
+                      input: { orphanItemRefs: hydration.orphanItemRefs },
+                    })
                   }
-                />
-              ))}
+                >
+                  Clean up
+                </Button>
+              )}
             </>
           )}
         </Stack>
 
-        {/* Item list */}
         {itemsQuery.isLoading ? (
           <Box display="flex" justifyContent="center" py={4}>
             <CircularProgress size={20} />
           </Box>
-        ) : items.length === 0 ? (
+        ) : sortedItems.length === 0 ? (
           <Typography color="text.secondary" textAlign="center" py={4}>
             No items in this shelf
           </Typography>
         ) : (
           <Stack spacing={1}>
-            {items.map((item) => (
-              <ShelfItemCard
-                key={item.itemUnitId}
-                item={item}
-                viewMode={effectiveViewMode}
-              />
-            ))}
+            {sortedItems
+              .filter(
+                (item) => !hydration.orphanItemRefs.includes(item.itemRef),
+              )
+              .map((item) => (
+                <ShelfItemCard
+                  key={item.itemRef}
+                  item={item}
+                  title={getHydratedTitle(item)}
+                  viewMode={effectiveViewMode}
+                />
+              ))}
           </Stack>
         )}
       </Stack>

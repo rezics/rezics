@@ -205,7 +205,6 @@ export const ReactionBar: React.FC<ReactionBarProps> = ({
               onCollect={collection.handleCollect}
               shelves={collection.shelves}
               status={collection.status}
-              userKeywords={collection.userKeywords}
               isCollecting={collection.isCollecting}
               isLoading={collection.isLoading}
             />

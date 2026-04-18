@@ -11,7 +11,7 @@ interface ShelfByBookPageProps {
 
 export function ShelfByBookPage({ bookId }: ShelfByBookPageProps) {
   const { data, isLoading } = useQuery(
-    shelfListQuery({ containsItemUnitId: bookId, limit: 50 }),
+    shelfListQuery({ containsItemRef: bookId, limit: 50 }),
   );
 
   const shelves = data?.shelves ?? [];
