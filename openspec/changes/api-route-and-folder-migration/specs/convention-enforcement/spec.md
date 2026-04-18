@@ -18,3 +18,6 @@ A TypeScript script at `tool/scripts/check-convention.ts` SHALL implement the ro
 #### Scenario: Missing baseline snapshot is tolerated with new violation
 - **WHEN** `tool/scripts/expected-violations.json` does not exist and a plural prefix is introduced
 - **THEN** the script prints the violation and exits with status 1 (no baseline means every violation is "new")
+
+### Requirement: Enforcement is pre-commit + PR merge gate (not CI)
+The convention check runs as a **pre-commit hook** (`--staged` mode) and as a **PR merge gate** (full scan on PRs targeting `dev`). It SHALL NOT run in CI on every push. This keeps the feedback loop local and lightweight while still blocking merges that bypass pre-commit.

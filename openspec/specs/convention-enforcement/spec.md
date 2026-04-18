@@ -22,16 +22,16 @@ The repository's pre-commit hook configuration (`lefthook.yml` or equivalent) SH
 - **WHEN** a developer commits `new Elysia({ prefix: "/widgets" })`
 - **THEN** the pre-commit hook rejects the commit with the same actionable message as the manual script
 
-### Requirement: CI runs the check before tests
-The CI workflow SHALL include a `Check convention` step that runs `bun run check:convention` before the test suite. A failing check SHALL fail the CI run independently of tests.
+### Requirement: PR merge gate runs the check
+A GitHub Actions workflow SHALL run `bun run check:convention` (full scan) on pull requests targeting `dev`. A failing check SHALL block merge. The check SHALL NOT run on every push — only on PR events.
 
 #### Scenario: PR with convention violation
 - **WHEN** a pull request is opened that introduces a plural domain folder
-- **THEN** CI fails at the `Check convention` step with the violation path in the failure message
+- **THEN** the PR check fails with the violation path in the failure message
 
 #### Scenario: PR with only test changes
 - **WHEN** a PR touches only test files and introduces no folder or route changes
-- **THEN** the `Check convention` step passes
+- **THEN** the convention check passes
 
 ### Requirement: No per-site suppression mechanism
 The check script SHALL NOT accept inline comments, ignore files, or configuration overrides that exempt specific paths from validation. Adjustments SHALL only be possible by editing the allowlists defined inside the script (which mirror the specs) — and those edits require a spec amendment per `folder-naming-convention/spec.md`.

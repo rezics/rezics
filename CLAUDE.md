@@ -95,7 +95,7 @@ Validated at runtime using `@t3-oss/env-core` + Valibot. Environment dependencie
 ## API Route & Folder Convention
 
 See `CONTRIBUTING.md` for a convention summary and `openspec/specs/` for authoritative specs.
-Enforced by `bun run check:convention` (pre-commit + CI).
+Enforced by `bun run check:convention` (pre-commit + PR merge gate).
 
 ## Change Management
 

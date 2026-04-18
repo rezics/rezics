@@ -186,7 +186,4 @@ Each handler normalizes body into the same service call as the GET handler. Patt
 
 ## 12. PR preparation
 
-- [ ] 12.1 Write PR description enumerating: (a) the 15 renamed HTTP prefixes, (b) the 12 `/list`-suffix additions, (c) the POST `/list` coverage (11 domains), (d) the `/unit` collision resolution, (e) the folder-rename batches by package, (f) the snapshot retirement, (g) CONTRIBUTING.md creation
-- [ ] 12.2 Deploy checklist in PR body: "server and client must deploy together; no alias window exists"
-- [ ] 12.3 Release notes line item: one sentence describing the breaking route change for internal visibility
-- [ ] 12.4 Link the PR to the archived `api-route-and-folder-convention` change as its origin
+N/A — PR description will be generated at commit/PR time, not pre-planned.

@@ -12,16 +12,17 @@
  *   bun run check:convention               # full scan
  *   bun run check:convention -- --staged   # only staged files
  *   bun run check:convention -- --snapshot # update expected-violations.json
- *
- * Exit code is 0 when no NEW violations beyond the baseline snapshot, 1 otherwise.
- * The baseline (expected-violations.json) is TEMPORARY — it exists only until the
- * api-route-and-folder-migration change eliminates all violations in one shot,
- * at which point this script and its baseline should be deleted.
  */
 
-import { readdirSync, readFileSync, statSync, writeFileSync, existsSync } from "node:fs";
-import { join, relative, basename } from "node:path";
 import { execSync } from "node:child_process";
+import {
+  existsSync,
+  readdirSync,
+  readFileSync,
+  statSync,
+  writeFileSync,
+} from "node:fs";
+import { basename, join, relative } from "node:path";
 
 const REPO_ROOT = new URL("../..", import.meta.url).pathname.replace(/\/$/, "");
 const SCRIPTS_DIR = new URL(".", import.meta.url).pathname.replace(/\/$/, "");
@@ -29,7 +30,6 @@ const SNAPSHOT_PATH = join(SCRIPTS_DIR, "expected-violations.json");
 
 // ─── Allowlists ──────────────────────────────────────────────────────────────
 
-/** Plural container folder names allowed under folder-naming-convention R4. */
 const PLURAL_CONTAINER_ALLOWLIST = new Set([
   "hooks",
   "utils",
@@ -54,11 +54,6 @@ const PLURAL_CONTAINER_ALLOWLIST = new Set([
   "templates",
 ]);
 
-/**
- * Route prefix last-segment allowlist — non-resource names that are permitted
- * to end in a plural-looking form. These are service names, namespaces, or
- * compound English words, not resource plurals.
- */
 const ROUTE_PREFIX_ALLOWLIST = new Set([
   "stats",
   "meili",
@@ -94,8 +89,7 @@ const ROUTE_PREFIX_ALLOWLIST = new Set([
   "admin",
 ]);
 
-/** Paths (glob-like prefixes) to skip during scanning. */
-const EXEMPT_DIRS = [
+const EXEMPT_DIR_PATTERNS = [
   "node_modules",
   ".git",
   "dist",
@@ -109,7 +103,6 @@ const EXEMPT_DIRS = [
   "openspec",
 ];
 
-/** Packages fully exempt from folder-naming checks. */
 const EXEMPT_PACKAGES = new Set(["auth"]);
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -130,109 +123,125 @@ const SPEC_LINK: Record<Rule, string> = {
   R4: "openspec/specs/folder-naming-convention/spec.md",
 };
 
-// ─── Folder walking ──────────────────────────────────────────────────────────
+// ─── Path utilities ─────────────────────────────────────────────────────────
 
 function isExemptPath(absPath: string): boolean {
-  const rel = relative(REPO_ROOT, absPath);
-  if (rel.startsWith("..")) return true;
-  for (const part of EXEMPT_DIRS) {
-    if (rel === part || rel.startsWith(`${part}/`) || rel.includes(`/${part}/`) || rel.endsWith(`/${part}`)) {
-      return true;
-    }
-  }
-  return false;
+  const relPath = relative(REPO_ROOT, absPath);
+  if (relPath.startsWith("..")) return true;
+  return EXEMPT_DIR_PATTERNS.some(
+    (pattern) =>
+      relPath === pattern ||
+      relPath.startsWith(`${pattern}/`) ||
+      relPath.includes(`/${pattern}/`) ||
+      relPath.endsWith(`/${pattern}`),
+  );
 }
 
 function isExemptPackage(absPath: string): boolean {
-  const rel = relative(REPO_ROOT, absPath);
-  const match = rel.match(/^package\/([^/]+)/);
-  if (!match) return false;
-  return EXEMPT_PACKAGES.has(match[1]);
+  const relPath = relative(REPO_ROOT, absPath);
+  const packageMatch = relPath.match(/^package\/([^/]+)/);
+  if (!packageMatch?.[1]) return false;
+  return EXEMPT_PACKAGES.has(packageMatch[1]);
 }
 
-function* walkDirs(root: string): Generator<string> {
+// ─── Filesystem walking ─────────────────────────────────────────────────────
+
+function* walkDirectories(root: string): Generator<string> {
   let entries: string[];
   try {
     entries = readdirSync(root);
   } catch {
     return;
   }
-  for (const name of entries) {
-    const abs = join(root, name);
-    let st;
+  for (const entryName of entries) {
+    const entryPath = join(root, entryName);
     try {
-      st = statSync(abs);
+      if (!statSync(entryPath).isDirectory()) continue;
     } catch {
       continue;
     }
-    if (!st.isDirectory()) continue;
-    if (isExemptPath(abs)) continue;
-    yield abs;
-    yield* walkDirs(abs);
+    if (isExemptPath(entryPath)) continue;
+    yield entryPath;
+    yield* walkDirectories(entryPath);
   }
 }
 
-function* walkFiles(root: string, ext: RegExp): Generator<string> {
+function* walkFilesByExtension(
+  root: string,
+  extensionPattern: RegExp,
+): Generator<string> {
   let entries: string[];
   try {
     entries = readdirSync(root);
   } catch {
     return;
   }
-  for (const name of entries) {
-    const abs = join(root, name);
-    let st;
+  for (const entryName of entries) {
+    const entryPath = join(root, entryName);
+    let entryStat: ReturnType<typeof statSync>;
     try {
-      st = statSync(abs);
+      entryStat = statSync(entryPath);
     } catch {
       continue;
     }
-    if (st.isDirectory()) {
-      if (isExemptPath(abs)) continue;
-      yield* walkFiles(abs, ext);
-    } else if (ext.test(name)) {
-      yield abs;
+    if (entryStat.isDirectory()) {
+      if (isExemptPath(entryPath)) continue;
+      yield* walkFilesByExtension(entryPath, extensionPattern);
+    } else if (extensionPattern.test(entryName)) {
+      yield entryPath;
     }
   }
 }
 
-// ─── R1 + R2: route scan ─────────────────────────────────────────────────────
+// ─── R1 + R2: route scanning ────────────────────────────────────────────────
 
-const PREFIX_RE = /new\s+Elysia\s*\(\s*\{[^}]*prefix\s*:\s*["']([^"']+)["']/g;
-const LIST_ROOT_RE =
-  /\.(get|post)\s*\(\s*["']\/["']\s*,/g;
+const ELYSIA_PREFIX_PATTERN =
+  /new\s+Elysia\s*\(\s*\{[^}]*prefix\s*:\s*["']([^"']+)["']/g;
+const ROOT_HANDLER_PATTERN = /\.(get|post)\s*\(\s*["']\/["']\s*,/g;
 
-function looksPluralResource(segment: string): boolean {
+const ELYSIA_VERB_PATTERN =
+  /\.(get|post|put|patch|delete|options|use|onError|derive|decorate|state|resolve|guard|group)\s*\(/g;
+
+function isPluralResource(segment: string): boolean {
   if (ROUTE_PREFIX_ALLOWLIST.has(segment)) return false;
   if (segment.endsWith("ies")) return true;
   if (segment.endsWith("ses")) return true;
   if (segment.endsWith("es") && segment.length > 3) return true;
-  if (segment.endsWith("s") && !segment.endsWith("ss") && segment.length > 2) return true;
+  if (segment.endsWith("s") && !segment.endsWith("ss") && segment.length > 2)
+    return true;
   return false;
 }
 
-function scanRoutes(files: string[]): Violation[] {
+function isCollectionHandler(handlerSource: string): boolean {
+  return (
+    /items\s*:/.test(handlerSource) ||
+    /ListResponse/.test(handlerSource) ||
+    /Array<|: [A-Z]\w*\[\]/.test(handlerSource)
+  );
+}
+
+function scanRoutes(apiFiles: string[]): Violation[] {
   const violations: Violation[] = [];
-  for (const file of files) {
-    if (!/\.api\.ts$/.test(file)) continue;
-    let content: string;
+
+  for (const filePath of apiFiles) {
+    if (!/\.api\.ts$/.test(filePath)) continue;
+    let fileContent: string;
     try {
-      content = readFileSync(file, "utf8");
+      fileContent = readFileSync(filePath, "utf8");
     } catch {
       continue;
     }
+    const relFilePath = relative(REPO_ROOT, filePath);
 
-    PREFIX_RE.lastIndex = 0;
-    let m: RegExpExecArray | null;
-    while ((m = PREFIX_RE.exec(content))) {
-      const prefix = m[1];
+    for (const prefixMatch of fileContent.matchAll(ELYSIA_PREFIX_PATTERN)) {
+      const prefix = prefixMatch[1]!;
       const segments = prefix.split("/").filter(Boolean);
-      for (const seg of segments) {
-        if (looksPluralResource(seg)) {
+      for (const segment of segments) {
+        if (isPluralResource(segment)) {
           violations.push({
             rule: "R1",
-            path: `${relative(REPO_ROOT, file)}  prefix="${prefix}"`,
-            message: `Elysia prefix contains plural segment "${seg}" — use singular form`,
+            path: `${relFilePath}  prefix="${prefix}"`,
+            message: `Elysia prefix contains plural segment "${segment}" — use singular form`,
             spec: SPEC_LINK.R1,
           });
           break;
@@ -240,223 +249,249 @@ function scanRoutes(files: string[]): Violation[] {
       }
     }
 
-    LIST_ROOT_RE.lastIndex = 0;
-    while ((m = LIST_ROOT_RE.exec(content))) {
-      const start = m.index;
-      const precedingBlock = content.slice(Math.max(0, start - 120), start);
-      if (precedingBlock.includes("@convention:root-list-ok")) continue;
-      // Scope the handler window to the end of THIS Elysia verb call so we do
-      // not bleed into the next handler. End at whichever comes first:
-      // (a) the next `.get|post|put|patch|delete|options|use|onError|derive(` call,
-      // (b) a semicolon that closes a statement chain,
-      // (c) 2000 characters as a hard fallback.
-      const rest = content.slice(start);
-      const NEXT_VERB_RE =
-        /\.(get|post|put|patch|delete|options|use|onError|derive|decorate|state|resolve|guard|group)\s*\(/g;
-      NEXT_VERB_RE.lastIndex = 1; // skip the current `.get|post` we just matched
-      const next = NEXT_VERB_RE.exec(rest);
-      const end = Math.min(rest.length, next ? next.index : 2000);
-      const handlerWindow = rest.slice(0, end);
-      const returnsCollection =
-        /items\s*:/.test(handlerWindow) ||
-        /ListResponse/.test(handlerWindow) ||
-        /Array<|: [A-Z]\w*\[\]/.test(handlerWindow);
-      if (!returnsCollection) continue;
+    for (const handlerMatch of fileContent.matchAll(ROOT_HANDLER_PATTERN)) {
+      const matchIndex = handlerMatch.index;
+      const precedingContext = fileContent.slice(
+        Math.max(0, matchIndex - 120),
+        matchIndex,
+      );
+      if (precedingContext.includes("@convention:root-list-ok")) continue;
+
+      const contentAfterMatch = fileContent.slice(matchIndex);
+      ELYSIA_VERB_PATTERN.lastIndex = 1;
+      const nextVerbMatch = ELYSIA_VERB_PATTERN.exec(contentAfterMatch);
+      const handlerEndIndex = Math.min(
+        contentAfterMatch.length,
+        nextVerbMatch ? nextVerbMatch.index : 2000,
+      );
+      const handlerSource = contentAfterMatch.slice(0, handlerEndIndex);
+
+      if (!isCollectionHandler(handlerSource)) continue;
+
+      const httpMethod = handlerMatch[1]!.toUpperCase();
       violations.push({
         rule: "R2",
-        path: `${relative(REPO_ROOT, file)}`,
-        message: `${m[1].toUpperCase()} "/" likely returns a collection — move to "/list" or annotate with // @convention:root-list-ok`,
+        path: relFilePath,
+        message: `${httpMethod} "/" likely returns a collection — move to "/list" or annotate with // @convention:root-list-ok`,
         spec: SPEC_LINK.R2,
       });
     }
   }
+
   return violations;
 }
 
-// ─── R3 + R4: folder scan ────────────────────────────────────────────────────
+// ─── R3 + R4: folder scanning ───────────────────────────────────────────────
 
 function isLikelyPlural(name: string): boolean {
   if (name.endsWith("ies")) return true;
   if (name.endsWith("ses")) return true;
   if (name.endsWith("es") && name.length > 3) return true;
-  if (name.endsWith("s") && !name.endsWith("ss") && name.length > 2) return true;
+  if (name.endsWith("s") && !name.endsWith("ss") && name.length > 2)
+    return true;
   return false;
 }
 
-function singularOfAllowlisted(name: string): string | null {
-  for (const plural of PLURAL_CONTAINER_ALLOWLIST) {
-    if (plural === `${name}s`) return plural;
-    // `+es` only applies when the singular ends in s, x, z, ch, or sh
-    // (e.g. "boxes" → "box", not "stats" → "stat" nor "states" → "stat")
+function findAllowlistedPluralForm(singularName: string): string | null {
+  for (const pluralEntry of PLURAL_CONTAINER_ALLOWLIST) {
+    if (pluralEntry === `${singularName}s`) return pluralEntry;
     if (
-      plural === `${name}es` &&
-      /(s|x|z|ch|sh)$/.test(name)
+      pluralEntry === `${singularName}es` &&
+      /(s|x|z|ch|sh)$/.test(singularName)
     )
-      return plural;
-    if (plural.endsWith("ies") && plural.slice(0, -3) + "y" === name) return plural;
+      return pluralEntry;
+    if (
+      pluralEntry.endsWith("ies") &&
+      `${pluralEntry.slice(0, -3)}y` === singularName
+    )
+      return pluralEntry;
   }
   return null;
 }
 
-function scanFolders(dirs: string[]): Violation[] {
+function scanFolders(directoryPaths: string[]): Violation[] {
   const violations: Violation[] = [];
-  for (const dir of dirs) {
-    if (isExemptPath(dir)) continue;
-    if (isExemptPackage(dir)) continue;
-    const rel = relative(REPO_ROOT, dir);
-    if (!/^package\/[^/]+\/(src|docs|prisma\/seed)/.test(rel)) continue;
-    const name = basename(dir);
-    if (/^package\/[^/]+\/(src|docs)$/.test(rel)) continue;
 
-    if (PLURAL_CONTAINER_ALLOWLIST.has(name)) continue;
+  for (const dirPath of directoryPaths) {
+    if (isExemptPath(dirPath)) continue;
+    if (isExemptPackage(dirPath)) continue;
+    const relPath = relative(REPO_ROOT, dirPath);
+    if (!/^package\/[^/]+\/(src|docs|prisma\/seed)/.test(relPath)) continue;
+    if (/^package\/[^/]+\/(src|docs)$/.test(relPath)) continue;
 
-    if (isLikelyPlural(name)) {
+    const folderName = basename(dirPath);
+    if (PLURAL_CONTAINER_ALLOWLIST.has(folderName)) continue;
+
+    if (isLikelyPlural(folderName)) {
       violations.push({
         rule: "R4",
-        path: rel,
-        message: `Plural folder "${name}" is not on the container allowlist — rename to singular or propose a spec amendment`,
+        path: relPath,
+        message: `Plural folder "${folderName}" is not on the container allowlist — rename to singular or propose a spec amendment`,
         spec: SPEC_LINK.R4,
       });
       continue;
     }
 
-    const allowlistedPlural = singularOfAllowlisted(name);
-    if (allowlistedPlural) {
+    const expectedPluralForm = findAllowlistedPluralForm(folderName);
+    if (expectedPluralForm) {
       violations.push({
         rule: "R3",
-        path: rel,
-        message: `Singular folder "${name}" matches container allowlist entry "${allowlistedPlural}" — rename to "${allowlistedPlural}"`,
+        path: relPath,
+        message: `Singular folder "${folderName}" matches container allowlist entry "${expectedPluralForm}" — rename to "${expectedPluralForm}"`,
         spec: SPEC_LINK.R3,
       });
     }
   }
+
   return violations;
 }
 
-// ─── Staged-mode helpers ─────────────────────────────────────────────────────
+// ─── Git staged-file helpers ────────────────────────────────────────────────
 
-function stagedFiles(): string[] {
+function getStagedFilePaths(): string[] {
   try {
-    const out = execSync("git diff --cached --name-only --diff-filter=ACMR", {
-      cwd: REPO_ROOT,
-      encoding: "utf8",
-    });
-    return out
+    const gitOutput = execSync(
+      "git diff --cached --name-only --diff-filter=ACMR",
+      { cwd: REPO_ROOT, encoding: "utf8" },
+    );
+    return gitOutput
       .split("\n")
-      .map((l) => l.trim())
+      .map((line) => line.trim())
       .filter(Boolean)
-      .map((p) => join(REPO_ROOT, p));
+      .map((relPath) => join(REPO_ROOT, relPath));
   } catch {
     return [];
   }
 }
 
-// ─── Snapshot baseline ───────────────────────────────────────────────────────
+// ─── Snapshot baseline ──────────────────────────────────────────────────────
 
-interface Snapshot {
+interface ViolationSnapshot {
   total: number;
   byRule: Record<Rule, number>;
   keys: string[];
 }
 
-function loadSnapshot(): Snapshot | null {
+function loadSnapshot(): ViolationSnapshot | null {
   if (!existsSync(SNAPSHOT_PATH)) return null;
   try {
-    return JSON.parse(readFileSync(SNAPSHOT_PATH, "utf8")) as Snapshot;
+    return JSON.parse(readFileSync(SNAPSHOT_PATH, "utf8")) as ViolationSnapshot;
   } catch {
     return null;
   }
 }
 
-function buildSnapshot(violations: Violation[]): Snapshot {
+function buildSnapshot(violations: Violation[]): ViolationSnapshot {
   const byRule: Record<Rule, number> = { R1: 0, R2: 0, R3: 0, R4: 0 };
   const keys: string[] = [];
-  for (const v of violations) {
-    byRule[v.rule]++;
-    keys.push(`${v.rule}  ${v.path}`);
+  for (const violation of violations) {
+    byRule[violation.rule]++;
+    keys.push(`${violation.rule}  ${violation.path}`);
   }
   keys.sort();
   return { total: violations.length, byRule, keys };
 }
 
-function saveSnapshot(snap: Snapshot) {
-  const marker = {
+function saveSnapshot(snapshot: ViolationSnapshot) {
+  const snapshotWithNote = {
     _note:
-      "TEMPORARY BASELINE. The api-route-and-folder-migration change is expected to eliminate every entry below in a single pass; after that, this file and tool/scripts/check-convention.ts SHOULD be deleted. This snapshot exists only to block NEW violations from accumulating in the interim.",
-    ...snap,
+      "TEMPORARY BASELINE. This snapshot exists only to block NEW violations from accumulating while a migration is in progress. Delete this file once the migration lands.",
+    ...snapshot,
   };
-  writeFileSync(SNAPSHOT_PATH, JSON.stringify(marker, null, 2) + "\n", "utf8");
+  writeFileSync(
+    SNAPSHOT_PATH,
+    `${JSON.stringify(snapshotWithNote, null, 2)}\n`,
+    "utf8",
+  );
 }
 
 // ─── Main ────────────────────────────────────────────────────────────────────
 
 function main() {
-  const args = new Set(process.argv.slice(2));
-  const staged = args.has("--staged");
-  const updateSnapshot = args.has("--snapshot");
+  const cliFlags = new Set(process.argv.slice(2));
+  const isStagedMode = cliFlags.has("--staged");
+  const isSnapshotUpdate = cliFlags.has("--snapshot");
 
-  const scanFilesForRoutes: string[] = [];
-  const scanDirs: string[] = [];
+  const routeFiles: string[] = [];
+  const folderPaths: string[] = [];
 
-  if (staged) {
-    const files = stagedFiles();
-    for (const f of files) {
-      if (/\.api\.ts$/.test(f) && !isExemptPath(f) && !isExemptPackage(f)) {
-        scanFilesForRoutes.push(f);
+  if (isStagedMode) {
+    const stagedPaths = getStagedFilePaths();
+    for (const filePath of stagedPaths) {
+      if (
+        /\.api\.ts$/.test(filePath) &&
+        !isExemptPath(filePath) &&
+        !isExemptPackage(filePath)
+      ) {
+        routeFiles.push(filePath);
       }
     }
-    const dirSet = new Set<string>();
-    for (const f of files) {
-      const d = f.substring(0, f.lastIndexOf("/"));
-      for (const dir of walkDirs(d)) dirSet.add(dir);
-      dirSet.add(d);
+    const affectedDirs = new Set<string>();
+    for (const filePath of stagedPaths) {
+      const parentDir = filePath.substring(0, filePath.lastIndexOf("/"));
+      affectedDirs.add(parentDir);
+      for (const subDir of walkDirectories(parentDir)) affectedDirs.add(subDir);
     }
-    scanDirs.push(...dirSet);
+    folderPaths.push(...affectedDirs);
   } else {
     const packagesRoot = join(REPO_ROOT, "package");
-    for (const f of walkFiles(packagesRoot, /\.api\.ts$/)) {
-      if (!isExemptPackage(f)) scanFilesForRoutes.push(f);
+    for (const filePath of walkFilesByExtension(packagesRoot, /\.api\.ts$/)) {
+      if (!isExemptPackage(filePath)) routeFiles.push(filePath);
     }
-    for (const d of walkDirs(packagesRoot)) {
-      scanDirs.push(d);
+    for (const dirPath of walkDirectories(packagesRoot)) {
+      folderPaths.push(dirPath);
     }
   }
 
-  const violations = [...scanRoutes(scanFilesForRoutes), ...scanFolders(scanDirs)];
-  const current = buildSnapshot(violations);
+  const violations = [...scanRoutes(routeFiles), ...scanFolders(folderPaths)];
+  const currentSnapshot = buildSnapshot(violations);
 
-  if (updateSnapshot) {
-    saveSnapshot(current);
-    console.log(`Snapshot updated: ${current.total} violations (R1=${current.byRule.R1} R2=${current.byRule.R2} R3=${current.byRule.R3} R4=${current.byRule.R4})`);
+  if (isSnapshotUpdate) {
+    saveSnapshot(currentSnapshot);
+    const { R1, R2, R3, R4 } = currentSnapshot.byRule;
+    console.log(
+      `Snapshot updated: ${currentSnapshot.total} violations (R1=${R1} R2=${R2} R3=${R3} R4=${R4})`,
+    );
     process.exit(0);
   }
 
-  const snap = loadSnapshot();
-  const baseline = snap?.total ?? 0;
-  const baselineKeys = new Set(snap?.keys ?? []);
-  const newViolations = violations.filter((v) => !baselineKeys.has(`${v.rule}  ${v.path}`));
+  const baselineSnapshot = loadSnapshot();
+  const baselineKeys = new Set(baselineSnapshot?.keys ?? []);
+  const newViolations = violations.filter(
+    (violation) => !baselineKeys.has(`${violation.rule}  ${violation.path}`),
+  );
 
   if (violations.length === 0) {
     console.log("check:convention — 0 violations.");
     process.exit(0);
   }
 
-  console.log(`check:convention — ${violations.length} violation(s) (baseline ${baseline}):`);
-  console.log(`  R1=${current.byRule.R1}  R2=${current.byRule.R2}  R3=${current.byRule.R3}  R4=${current.byRule.R4}`);
+  const baselineTotal = baselineSnapshot?.total ?? 0;
+  const { R1, R2, R3, R4 } = currentSnapshot.byRule;
+  console.log(
+    `check:convention — ${violations.length} violation(s) (baseline ${baselineTotal}):`,
+  );
+  console.log(`  R1=${R1}  R2=${R2}  R3=${R3}  R4=${R4}`);
 
   if (newViolations.length > 0) {
-    console.log(`\n${newViolations.length} NEW violation(s) beyond baseline:\n`);
-    for (const v of newViolations) {
-      console.log(`  [${v.rule}] ${v.path}`);
-      console.log(`        ${v.message}`);
-      console.log(`        see ${v.spec}`);
+    console.log(
+      `\n${newViolations.length} NEW violation(s) beyond baseline:\n`,
+    );
+    for (const violation of newViolations) {
+      console.log(`  [${violation.rule}] ${violation.path}`);
+      console.log(`        ${violation.message}`);
+      console.log(`        see ${violation.spec}`);
     }
-    console.log(`\nFix new violations or update the baseline with: bun run check:convention -- --snapshot`);
+    console.log(
+      "\nFix new violations or update the baseline with: bun run check:convention -- --snapshot",
+    );
     process.exit(1);
   }
 
-  if (!staged) {
-    console.log("\nAll violations are in the baseline snapshot. Migration change will drive this to zero.");
+  if (!isStagedMode) {
+    console.log(
+      "\nAll violations are in the baseline snapshot. Migration change will drive this to zero.",
+    );
   }
   process.exit(0);
 }

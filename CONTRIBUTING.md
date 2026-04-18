@@ -42,7 +42,8 @@ bun run check:convention   # Scans routes and folders; exits non-zero on violati
 ```
 
 - Pre-commit hook runs it in `--staged` mode
-- CI runs it before tests
+- PR merge gate runs a full scan (GitHub Actions on PRs to `dev`)
+- Not in CI on every push
 - No per-site suppression — only spec amendments
 
 ### Full Specs
