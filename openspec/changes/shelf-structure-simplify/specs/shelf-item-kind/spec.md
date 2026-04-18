@@ -1,85 +1,110 @@
 ## ADDED Requirements
 
-### Requirement: ShelfItemKind render discriminator
+### Requirement: ShelfItem kind render discriminator
 
-Each ShelfItem SHALL have a `kind` field (String, max 32 chars) that tells the frontend which component to use for rendering. The kind SHALL be determined at write time based on the source Unit's type and subtype.
+Each ShelfItem SHALL have a `kind` field (`String`, max 32 characters) that tells the frontend which component to render. The system SHALL determine `kind` at write time from the source Unit's type and — for POSTs — the Post subtype.
 
-#### Scenario: Book item has kind "book"
+#### Scenario: Book unit has kind "book"
 
-- **WHEN** a Unit of type BOOK is added to a shelf
+- **WHEN** a Unit of type `BOOK` is added to a shelf
 - **THEN** the ShelfItem SHALL have `kind = "book"`
 
 #### Scenario: Review post has kind "review"
 
-- **WHEN** a Unit of type POST with `Post.kind = REVIEW` is added to a shelf
+- **WHEN** a Unit of type `POST` with `Post.kind = REVIEW` is added to a shelf
 - **THEN** the ShelfItem SHALL have `kind = "review"`
 
 #### Scenario: Quote post has kind "quote"
 
-- **WHEN** a Unit of type POST with `Post.kind = QUOTE` is added to a shelf
+- **WHEN** a Unit of type `POST` with `Post.kind = QUOTE` is added to a shelf
 - **THEN** the ShelfItem SHALL have `kind = "quote"`
 
 #### Scenario: Generic post has kind "post"
 
-- **WHEN** a Unit of type POST with `Post.kind` other than REVIEW or QUOTE is added to a shelf
+- **WHEN** a Unit of type `POST` with `Post.kind` other than `REVIEW` or `QUOTE` is added to a shelf
 - **THEN** the ShelfItem SHALL have `kind = "post"`
 
-#### Scenario: Tag item has kind "tag"
+#### Scenario: Tag unit has kind "tag"
 
-- **WHEN** a Unit of type TAG is added to a shelf
+- **WHEN** a Unit of type `TAG` is added to a shelf
 - **THEN** the ShelfItem SHALL have `kind = "tag"`
 
-#### Scenario: Link item has kind "link"
+#### Scenario: Realm unit has kind "realm"
 
-- **WHEN** a Unit of type LINK is added to a shelf
+- **WHEN** a Unit of type `REALM` is added to a shelf
+- **THEN** the ShelfItem SHALL have `kind = "realm"`
+
+#### Scenario: Link unit has kind "link"
+
+- **WHEN** a Unit of type `LINK` is added to a shelf
 - **THEN** the ShelfItem SHALL have `kind = "link"`
 
-### Requirement: ShelfItemKind enum values
+#### Scenario: Unknown UnitType falls back to lowercased type
 
-The system SHALL support the following kind values: `book`, `review`, `quote`, `post`, `chapter`, `tag`, `realm`, `image`, `video`, `media`, `game`, `link`. The mapping from UnitType to kind SHALL be: UnitType value lowercased, except POST which uses Post.kind subtype mapping.
+- **WHEN** a Unit of any other `UnitType` (e.g. `GAME`, `MEDIA`, `IMAGE`, `VIDEO`, `CHAPTER`) is added to a shelf
+- **THEN** the ShelfItem SHALL have `kind` equal to the lowercased `UnitType` string
 
-#### Scenario: Kind values cover all UnitTypes
+### Requirement: ShelfItem kind value set
 
-- **WHEN** a Unit of any UnitType (BOOK, GAME, MEDIA, POST, TAG, REALM, SHELF, CHAPTER, IMAGE, VIDEO, QUOTE, LINK, ENTITY, ZONE) is added to a shelf
-- **THEN** the system SHALL assign a valid kind value
-- **AND** unknown UnitTypes SHALL default to the lowercased UnitType string
+The system SHALL support the following `kind` values: `book`, `review`, `quote`, `post`, `chapter`, `tag`, `realm`, `image`, `video`, `media`, `game`, `link`.
 
-### Requirement: ShelfItem.data for per-item structured extras
+#### Scenario: Contract enumerates all kinds
 
-Each ShelfItem SHALL have an optional `data` Json field (default null). When present, it MAY contain `review` (array of reviewUnitIds attached to this item) and `tag` (array of tagUnitIds applied to this item within this shelf context).
+- **WHEN** the shared contract package exports the `ShelfItemKind` type
+- **THEN** the type SHALL be a union of exactly the above string literals
 
-#### Scenario: Item with no extras
+### Requirement: ShelfItem.reviewIds array for attached reviews
 
-- **WHEN** a simple book is added to a shelf without review or tag attachments
-- **THEN** ShelfItem.data SHALL be null
+Each ShelfItem SHALL have a `reviewIds: String[] @db.Uuid @default([])` field that stores unit ids of reviews attached to this item. A GIN index SHALL exist on `reviewIds` to support reverse lookups.
 
-#### Scenario: Item with attached reviews
+#### Scenario: Item with no reviews
 
-- **WHEN** a book item has reviews "review-1" and "review-2" attached
-- **THEN** ShelfItem.data SHALL be `{ review: ["review-1", "review-2"] }`
+- **WHEN** a book is added to a shelf without any attached reviews
+- **THEN** `ShelfItem.reviewIds` SHALL equal `[]`
 
-#### Scenario: Item with per-item tags
+#### Scenario: Item with multiple attached reviews
 
-- **WHEN** a book item has tags "tag-3" and "tag-4" applied within this shelf
-- **THEN** ShelfItem.data SHALL include `{ tag: ["tag-3", "tag-4"] }`
+- **WHEN** a book has two reviews attached within a shelf
+- **THEN** `ShelfItem.reviewIds` SHALL contain both review unit ids
 
-#### Scenario: Item with both reviews and tags
+#### Scenario: Reverse lookup by review id
 
-- **WHEN** a book item has reviews and tags attached
-- **THEN** ShelfItem.data SHALL be `{ review: ["review-1"], tag: ["tag-3", "tag-4"] }`
+- **WHEN** the system queries "which ShelfItems reference review R"
+- **THEN** the query SHALL use `WHERE reviewIds @> ARRAY[R]::uuid[]` and hit the GIN index on `reviewIds`
 
-### Requirement: ShelfItem FK decoupling
+#### Scenario: Attach review updates array
 
-ShelfItem SHALL use `itemRef: String` instead of `itemUnitId` with a foreign key to Unit. The `itemRef` column SHALL NOT have a FK constraint. An index (`@@index([itemRef])`) SHALL exist for "which shelves contain this item" queries.
+- **WHEN** a review is attached to an existing ShelfItem
+- **THEN** the attach SHALL APPEND the review's unit id to `reviewIds` if not already present
+- **AND** SHALL NOT create any other row
 
-#### Scenario: Query shelves containing a specific item
+#### Scenario: Detach review updates array
 
-- **WHEN** querying for all shelves that contain item "book-1"
-- **THEN** the query SHALL use `WHERE itemRef = "book-1"` with the `@@index([itemRef])` index
-- **AND** the query SHALL NOT require a join to the Unit table
+- **WHEN** a review is detached from a ShelfItem
+- **THEN** the detach SHALL REMOVE the review's unit id from `reviewIds`
+- **AND** the ShelfItem SHALL remain
+- **AND** SHALL NOT delete any other row
 
-#### Scenario: External Unit deletion does not cascade
+### Requirement: ShelfItem.tagIds array for per-item tags
 
-- **WHEN** a Unit referenced by ShelfItem.itemRef is deleted
-- **THEN** the ShelfItem row SHALL remain (no cascade)
-- **AND** the ShelfItem SHALL become an orphan until frontend cleanup
+Each ShelfItem SHALL have a `tagIds: String[] @db.Uuid @default([])` field that stores unit ids of Tag units applied to this item within this shelf. A GIN index SHALL exist on `tagIds` to support reverse lookups. Values SHALL be unit ids — free-text strings are not accepted.
+
+#### Scenario: Item with no tags
+
+- **WHEN** a book is added to a shelf without any per-item tags
+- **THEN** `ShelfItem.tagIds` SHALL equal `[]`
+
+#### Scenario: Item with multiple per-item tags
+
+- **WHEN** a book has two tag unit ids applied within a shelf
+- **THEN** `ShelfItem.tagIds` SHALL contain both tag unit ids
+
+#### Scenario: Reverse lookup by tag id
+
+- **WHEN** the system queries "which ShelfItems carry tag T"
+- **THEN** the query SHALL use `WHERE tagIds @> ARRAY[T]::uuid[]` and hit the GIN index on `tagIds`
+
+#### Scenario: Same unit in two shelves has independent tags
+
+- **WHEN** a unit is in Shelf A with `tagIds = [X]` and Shelf B with `tagIds = [Y]`
+- **THEN** modifying one shelf's `tagIds` SHALL NOT affect the other

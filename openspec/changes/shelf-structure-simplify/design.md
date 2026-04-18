@@ -1,178 +1,211 @@
 ## Context
 
-The Shelf system currently uses three Prisma models (`Shelf`, `ShelfItem`, `ShelfItemReview`) with ShelfItem carrying mixed concerns: ordering (`sortOrder`), free-text tagging (`keywords[]`), presentation (`label`, `extra`), and a FK to Unit (`itemUnitId`). The `all/created/collected` filter joins across Post domain boundaries using the viewer's userId, producing nonsensical results on non-owned shelves.
+The current shelf system carries structural debt:
 
-This design simplifies the architecture to two models with clear separation: Shelf owns the structural layout (ordering + tag vocabulary) via a JSON column, while ShelfItem serves as the M:M index edge plus per-item structured data. The Unit FK is removed to give the frontend full rendering control via a `kind` discriminator.
+1. **`ShelfItem` mixes concerns.** `sortOrder`, `keywords[]`, `label`, `extra` conflate ordering, filtering, labeling, and metadata on one row. Drag/drop reorder requires N-row UPDATE transactions.
+2. **`ShelfItemReview` is a third junction table for what amounts to "review ids attached to this item".** A Postgres array column achieves the same semantics with one less table and one less JOIN.
+3. **`ShelfItem` has a 1:1 FK to `Unit`, but is conceptually a composition** — a primary unit plus attached reviews plus per-item tags. Forcing `itemUnitId FK → Unit` limits cascade behavior and blocks frontend-driven rendering.
+4. **`all/created/collected` filter is semantically broken** — it classifies items using the viewer's userId, which is meaningless on non-owner shelves.
+5. **Free-text `keywords: String[]`** on `ShelfItem` (and mirrored `User.keywords` vocabulary) cannot participate in tag search indexing and drifts from the unit-id-based tag system used elsewhere in the codebase.
+
+A prior iteration of this design proposed `Shelf.structure: Json` (author-curated tag list + ordered unit refs), `ShelfItem.data: Json` (per-item extras), and a generic `Unit.parentUnitId` rename. All three were rejected in discussion: abstract JSON containers lose type safety and native index support, and generic column names drift toward mixed semantics which hurt query planning. The final design is uniformly specialized — typed columns, typed arrays, no JSON-as-container, no speculative renames.
 
 ## Goals / Non-Goals
 
 **Goals:**
-- Reduce Shelf models from 3 to 2 (drop `ShelfItemReview`)
-- Move ordering from per-row `sortOrder` to a single JSON array on Shelf
-- Replace free-text `keywords[]` with unitId-based tag references
-- Decouple ShelfItem from Unit FK; add `kind` field for frontend rendering
-- Remove the broken `all/created/collected` filter
-- Establish batch hydration pattern: frontend groups items by kind, fetches via existing list APIs, seeds TanStack Query cache
+
+- Reduce shelf Prisma models from 3 to 2 (drop `ShelfItemReview`).
+- Replace integer `sortOrder` with fractional-index `position: String` so reorder becomes a single-row UPDATE.
+- Replace `ShelfItemReview` junction with `ShelfItem.reviewIds: String[] @db.Uuid` + GIN index.
+- Replace `ShelfItem.keywords: String[]` (free-text) with `ShelfItem.tagIds: String[] @db.Uuid` (unit-id refs) + GIN index. Drop `User.keywords` entirely.
+- Remove the `ShelfItem → Unit` FK; hydrate via frontend batch calls using the denormalized `kind` discriminator.
+- Remove the broken `all/created/collected` filter.
+- Establish the frontend pattern: group by `kind`, batch-fetch via existing list APIs, seed per-item detail cache, then render.
 
 **Non-Goals:**
-- Large shelf degradation strategy (threshold, feature reduction) — deferred
-- Adding list APIs for missing types (link, image, video, media, game) — added as needed
-- Changing how community tags (unitTags) work on Shelf's Unit — existing mechanism stays
-- Real-time collaboration on shelf editing
+
+- Renaming `Unit.workUnitId` / `@relation("WorkRelease")`. Specialized naming stays.
+- A generic `UnitEdge` or `ShelfStructure` JSON abstraction. Each domain keeps its own junction with its own columns.
+- Adding list APIs for missing kinds (link/image/video/media/game). Items of kinds without a list endpoint render a generic card; endpoints are added as individual kinds need them.
+- Large-shelf degradation strategy (threshold, feature reduction).
+- Real-time collaborative shelf editing.
+- DB-level FK on `ShelfItem.itemRef`. Referential integrity for shelf items is application-level (orphan detection + author-triggered cleanup).
 
 ## Decisions
 
-### 1. JSON `structure` field on Shelf
+### 1. Specialization over abstraction
 
-**Decision**: Add `structure Json @default("{}")` to the Shelf model.
+**Decision:** Every per-item extra becomes a typed column on `ShelfItem` — no generic `data: Json` container, no generic `parentUnitId` rename on `Unit`.
 
-**Shape**:
-```typescript
-interface ShelfStructure {
-  tag: string[];    // tagUnitId[] — author-curated subset, synced with unitTags
-  units: string[];  // itemRef[] — ordered list, defines manual sort
+**Rationale:**
+
+- Modern Postgres NULL cost: 1 bit per column in the per-row NULL bitmap. Nullable specialized columns are effectively free.
+- Specialized columns get specialized indexes. The planner sees the semantic and can plan precisely. Generic columns force composite indexes or JSON path operators, both of which hurt estimates and plans.
+- Specialized names are self-documenting. `reviewIds` and `tagIds` say what they are; `data.review[]` requires discovery.
+- Specialized naming is the existing codebase pattern (`Book`, `Game`, `Media`, `Shelf`, etc. are all type-specific extensions of `Unit` with dedicated columns).
+
+**Alternatives considered:**
+
+- `ShelfItem.data: Json` with `{ review?, tag? }` shape. Rejected — loses native array operators, forces GIN-on-whole-document indexing, and reverse lookups ("which items reference review X") become expensive JSON path queries.
+- Rename `workUnitId` → `parentUnitId` to pre-generalize the hierarchy. Rejected — would invite stuffing multiple semantics into one column later, which defeats the planner. Keep `workUnitId` specialized; if a second kind of unit hierarchy is ever needed, add a separate specialized column.
+
+### 2. Fractional indexing on `ShelfItem.position`
+
+**Decision:** `position String @db.VarChar(64)` — a lexicographically-sortable fractional index key (base-62 encoding recommended). All ordering operations are single-row UPDATEs or INSERTs.
+
+| Operation | Behavior |
+|-----------|----------|
+| Append | Generate a key after the last item's position. Single INSERT. |
+| Prepend | Generate a key before the first item's position. Single INSERT. |
+| Insert between | Generate a key between two adjacent items' positions. Single INSERT. |
+| Drag/drop reorder | UPDATE one row's `position` to between its new neighbors. Single UPDATE. |
+| Key-density exhaustion | When the generated key between two neighbors exceeds a threshold length (e.g. 16 chars), trigger an **n-reorder**: read N surrounding items (e.g. 50), redistribute positions evenly, UPDATE N rows in one transaction. Rare under normal usage. |
+
+**Index:** `@@index([shelfUnitId, position])` supports `ORDER BY position ASC` ranged reads for pagination.
+
+**Ties:** If two concurrent inserts produce identical positions (rare — shelves are single-author), the composite PK `@@id([shelfUnitId, itemRef])` prevents duplicate items; for the same item, the later write wins. For distinct items with colliding positions, ties break by `createdAt` at render time.
+
+**Alternatives considered:**
+
+- Keep `sortOrder: Int`. Rejected — any insert-between requires rewriting all subsequent rows.
+- Use a linked list (`prevItemRef`/`nextItemRef`). Rejected — reorder is cheap but reads require recursive CTE; pagination becomes complex.
+
+### 3. `ShelfItem.itemRef` — denormalized, no FK
+
+**Decision:** `itemRef: String @db.Uuid` replaces `itemUnitId` with **no** `@relation` to `Unit`. A `kind` discriminator (`String @db.VarChar(32)`) is written at the same time.
+
+**Rationale:**
+
+- A `ShelfItem` is conceptually a composition (primary unit + attached reviews + per-item tags). The FK to Unit was a convenience for JOINs, not a correctness requirement.
+- Frontend renders cards from `kind` alone without first fetching the Unit row. Hydration is a separate batched step.
+- External Unit deletion should not implicitly mutate shelves. Deletion is handled by author-triggered orphan cleanup, which is visible and reversible before save.
+
+**`kind` derivation at write time:**
+
+| Source | Kind |
+|--------|------|
+| `Unit.type = BOOK` | `book` |
+| `Unit.type = POST` AND `Post.kind = REVIEW` | `review` |
+| `Unit.type = POST` AND `Post.kind = QUOTE` | `quote` |
+| `Unit.type = POST` (other) | `post` |
+| `Unit.type = TAG` | `tag` |
+| `Unit.type = REALM` | `realm` |
+| `Unit.type = LINK` | `link` |
+| `Unit.type = IMAGE` / `VIDEO` / `MEDIA` / `GAME` / `CHAPTER` | lowercased type string |
+| Unknown | lowercased `Unit.type` as fallback |
+
+### 4. `reviewIds` and `tagIds` as Postgres uuid arrays
+
+**Decision:**
+
+```prisma
+reviewIds String[] @db.Uuid @default([])
+tagIds    String[] @db.Uuid @default([])
+```
+
+GIN indexes on both:
+
+```prisma
+@@index([reviewIds], type: Gin)
+@@index([tagIds], type: Gin)
+```
+
+**Semantics:**
+
+- `reviewIds` replaces the `ShelfItemReview` junction table. A ShelfItem for "War and Peace" in a shelf can have `reviewIds = [reviewA, reviewB]` meaning both reviews are attached to this slot.
+- `tagIds` replaces `ShelfItem.keywords`. Values are unit ids of Tag units, not free-text.
+- Reverse lookup ("which ShelfItems reference review X") uses `WHERE reviewIds @> ARRAY[X]::uuid[]` against the GIN index. Same for tags.
+- Cardinality per item is small (0–10 typical). Updates are full-array rewrites, which is fine at this cardinality.
+
+**Alternatives considered:**
+
+- Keep `ShelfItemReview` junction. Rejected — extra table, extra JOIN, no gain over an array at expected cardinality.
+- Store review ids in `data: Json`. Rejected — see Decision 1.
+
+### 5. Composite primary key and unique constraint
+
+**Decision:** `@@id([shelfUnitId, itemRef])`. The primary unit can appear in a shelf at most once. Multiple reviews of the same book in the same shelf collapse into one ShelfItem row with `reviewIds = [r1, r2, ...]`.
+
+This matches the user-facing model: one "slot" per primary unit per shelf.
+
+### 6. Removal of shelf-level JSON structure
+
+**Decision:** `Shelf.structure: Json` is **not** added. The Shelf model is unchanged except for the cascade implications of removing `ShelfItemReview`.
+
+```prisma
+model Shelf {
+  unitId    String   @id @db.Uuid
+  unit      Unit     @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  kindKey   String?  @db.VarChar(64)
+  coverUrl  String?
+  extra     Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  items     ShelfItem[]
 }
 ```
 
-**Why not a separate table for ordering**: A separate `ShelfOrder` table or `sortOrder` column requires N writes for drag/drop. JSON rewrite is atomic — one UPDATE replaces the entire order. For shelves under 1000 items (99%+ of cases), the JSON payload is well under 100KB.
+**Rationale:** With `ShelfItem.position` carrying ordering, and with no author-curated per-shelf tag vocabulary in the final design, there is nothing for `structure` to hold. Community/author tags on a shelf itself go through the existing `UnitTag` mechanism (tagging a Shelf's Unit).
 
-**Why not put per-item data in this JSON**: Per-item data (reviews, tags) changes independently from ordering. Embedding it in the shelf-level JSON creates write contention (editing one item's reviews requires locking the entire shelf structure). Keeping per-item data in ShelfItem rows isolates writes.
+### 7. Frontend batch hydration pattern
 
-### 2. ShelfItem FK removal
+**Decision:** After fetching a page of `ShelfItem[]`, the frontend:
 
-**Decision**: Rename `itemUnitId` to `itemRef: String`. Drop the FK constraint to Unit. Add `kind: String @db.VarChar(32)` as a denormalized render discriminator.
+1. Groups items by `kind`: `{ book: [ids...], review: [ids...], tag: [ids...], ... }`.
+2. Issues one parallel list call per kind: `POST /book/list { ids }`, `POST /post/list { ids }`, `POST /tag/list { ids }`, etc.
+3. For each returned entity, seeds the per-item detail cache: `queryClient.setQueryData(bookKeys.detail(id), data)` — reusable by detail pages, search, and other features.
+4. Renders in `position` order, matching hydrated data by id. Items whose hydration fails (404 from the list endpoint) are hidden.
 
-**Alternatives considered**:
-- Keep FK, add `kind` as denormalized column → still requires Unit join for hydration, limits flexibility
-- Keep FK, derive kind from Unit.type at query time → N+1 join, defeats simplification goal
+**Orphan cleanup:** Hidden orphan itemRefs are tracked in frontend state. On the author's next save of any kind (add, remove, reorder, retag), the orphan list is sent with the request and the backend deletes those ShelfItem rows.
 
-**Why remove FK**:
-- Frontend renders via `kind` without fetching Unit first
-- Batch hydration via list APIs is the designated data path
-- No cascade on Unit delete — frontend detects orphans and cleans up on commit
-- Opens future possibility for non-Unit items (though not in current scope)
+### 8. Frontend-driven sorting
 
-**ShelfItemKind values** (determined at write time):
-```
-book | review | quote | post | chapter | tag | realm | image | video | media | game | link
-```
+**Decision:** Three modes; all operate on loaded items:
 
-Mapping: `Unit.type` maps directly for most types. For `POST`, the `Post.kind` subtype determines: `REVIEW → review`, `QUOTE → quote`, otherwise `post`.
+| Mode | Source | Notes |
+|------|--------|-------|
+| `manual` (default) | `ShelfItem.position` (lex order) | As returned by API |
+| `time` | `ShelfItem.createdAt` (desc) | Pure client-side |
+| `title` | Hydrated item title via `Intl.Collator(userLocale)` | Covers currently-loaded items; expanding the set re-sorts |
 
-### 3. ShelfItem.data JSON for per-item extras
+Backend has **no** sort parameter.
 
-**Decision**: Add `data Json?` (default null) to ShelfItem.
+### 9. Pagination
 
-**Shape**:
-```typescript
-interface ShelfItemData {
-  review?: string[];  // reviewUnitId[] attached to this item
-  tag?: string[];     // tagUnitId[] applied to this item within this shelf
-}
-```
+**Decision:** Default page size 100. Cursor-based on `position` (or offset+limit; both work with the `(shelfUnitId, position)` index).
 
-**Why JSON instead of a separate table**: ShelfItemReview existed solely to link reviews to shelf items. With typically 0-3 reviews per item, a JSON array is simpler and avoids a third table. The same applies to per-item tags.
-
-### 4. structure.tag ↔ unitTags synchronization
-
-**Decision**: Application-level sync, no DB-level constraint.
-
-When the author adds a tag to `structure.tag`:
-1. Create a `unitTag` row (tag → shelf's Unit) for search indexing
-2. Append the tagUnitId to `structure.tag` for display order
-
-When the author removes a tag from `structure.tag`:
-1. Delete the corresponding `unitTag` row
-2. Remove from `structure.tag`
-
-Community/non-author tags go to `unitTags` only, never into `structure.tag`. The `structure.tag` array is purely the author's curated selection and ordering.
-
-No validation that `structure.tag ⊆ unitTags` — the author's additions directly CREATE unitTag entries. All tag IDs must reference existing Tag units in Rezics.
-
-### 5. Consistency model between structure.units and ShelfItem rows
-
-**Decision**: Dual source of truth — ShelfItem rows are the existence truth, `structure.units` is the ordering truth.
-
-| Operation | ShelfItem | structure.units |
-|-----------|-----------|-----------------|
-| Add item | INSERT row | push to array |
-| Remove item | DELETE row | remove from array |
-| Reorder | — | rewrite array |
-| Add review/tag | UPDATE data | — |
-
-All add/remove operations run in a single transaction.
-
-**Orphan handling**: When a Unit is deleted externally, the ShelfItem row stays (no FK cascade). The `structure.units` array references a now-missing item. On frontend render, items that fail hydration are hidden. When the author next commits changes (any edit to the shelf), the frontend sends a cleanup request to remove orphaned ShelfItem rows and their references from `structure.units`.
-
-### 6. Frontend batch hydration and cache seeding
-
-**Decision**: Frontend groups ShelfItem[] by `kind`, calls existing POST list APIs with `{ ids: [...] }`, and seeds per-item detail cache.
-
-```
-ShelfItem[] grouped by kind:
-  book:   [id1, id2, id5] → POST /book/list { ids: [...] }
-  review: [id3]           → POST /post/list { ids: [...], kind: 'REVIEW' }
-  tag:    [id4]           → POST /tag/list  { ids: [...] }
-
-Each result item → queryClient.setQueryData(['books','detail', id], bookData)
-```
-
-This reuses existing list endpoints (which already accept `ids` arrays, max 200) and populates the same cache keys used by detail pages, search results, and other features.
-
-### 7. Pagination
-
-**Decision**: Default page size of 100. Backend returns ShelfItems ordered by `structure.units` position.
-
-Backend implementation:
-1. Read `structure.units` array
-2. Slice to requested page (offset-based, e.g., items 0-99, 100-199)
-3. Query ShelfItem rows for those itemRefs
-4. Return in structure.units order
-
-Most shelves have <100 items → single request, no pagination needed.
-
-### 8. Sorting
-
-**Decision**: Three sort modes, all frontend-driven.
-
-| Mode | Source | Implementation |
-|------|--------|----------------|
-| manual | `structure.units` order | Default — items returned in this order from API |
-| time | `ShelfItem.createdAt` | Frontend sorts hydrated items |
-| title | Hydrated item title | Frontend sorts via `Intl.Collator(userLocale)` |
-
-Title sort only covers items loaded into TanStack Query cache (accumulated across pages). This is intentional — sorting items the user hasn't seen yet by a field that depends on locale makes no sense.
+Most shelves have well under 100 items and load in a single request. Large shelves paginate transparently.
 
 ## Risks / Trade-offs
 
-**[Orphan accumulation]** → Without FK cascade, deleted Units leave orphan ShelfItem rows. Mitigation: frontend cleanup on author edit. Additional safety net: periodic background job (future, not in scope) to scan for orphans.
-
-**[structure.units ↔ ShelfItem desync]** → Bug in transaction logic could leave structure.units referencing an itemRef with no ShelfItem row, or vice versa. Mitigation: inner-join on read (only render items present in BOTH); transaction discipline on write.
-
-**[JSON size for large shelves]** → A shelf with 5000 items produces a ~200KB structure.units array. Mitigation: acceptable for Postgres JSON columns; large shelf degradation deferred but the architecture doesn't prevent it.
-
-**[Batch hydration latency]** → First render of a shelf triggers 3-5 batch list API calls. Mitigation: TanStack Query parallel fetching; progressive rendering (show items as each kind's batch resolves); cache hits for previously-seen items.
-
-**[No FK integrity on itemRef]** → The `kind` field could drift if a Unit's type changes (unlikely but possible for Post subtype changes). Mitigation: kind is determined at write time and stable for the lifetime of the ShelfItem. If a Post's kind changes (extremely rare), the ShelfItem's kind becomes stale but still renders — just with the wrong card type until re-collected.
+- **[Fractional-index key growth]** → In pathological cases (many sequential insert-between at the same gap), keys lengthen before n-reorder triggers. Starting threshold: rebalance when a newly-generated key would exceed 16 chars, covering 50 surrounding items. Tunable once we have usage data.
+- **[Orphan-ref accumulation]** → `itemRef` has no FK cascade. If an author never revisits a shelf after the referenced Unit is deleted, orphan ShelfItem rows linger. Acceptable — they're filtered out on read and cleaned on next save. A background reconciliation job is out of scope.
+- **[`reviewIds` / `tagIds` orphan refs]** → Same shape of problem as itemRef, same application-level cleanup. GIN reverse lookup makes it cheap to find impacted items when a Unit is deleted (if we later want a reconciliation job).
+- **[`kind` drift]** → `kind` is denormalized at write time. If a Post subtype changes (e.g. REVIEW → QUOTE), the ShelfItem's kind becomes stale. Rare in practice; worst case is the wrong card type rendered until the item is re-added.
+- **[No backend sort/filter]** → Frontend sorting means title sort only covers loaded items. Acceptable — the product UX for "sort 5,000 items by title" is degenerate anyway; we'd paginate-into-view first.
+- **[Concurrent position conflicts]** → Two clients inserting at the same gap could pick colliding positions. Mitigated by composite PK on `itemRef` (different items can't clash on `itemRef`; same item can't duplicate) and by `createdAt` tiebreak at render.
+- **[Breaking schema change]** → No API backward compat. The migration is a single cutover; the frontend and backend ship together.
 
 ## Migration Plan
 
 ### Data Migration Steps
 
-1. **Add new columns**: `Shelf.structure` (Json, default `{}`), `ShelfItem.kind` (String), `ShelfItem.data` (Json, nullable), `ShelfItem.itemRef` (String)
-2. **Populate `itemRef`**: Copy `itemUnitId` → `itemRef` for all existing ShelfItem rows
-3. **Populate `kind`**: Join ShelfItem → Unit → (optionally Post) to determine kind per row. Default `post` for unknown types.
-4. **Build `structure.units`**: For each shelf, query its ShelfItems ordered by `sortOrder ASC, createdAt ASC`, produce the ordered array of itemRefs, write to `Shelf.structure.units`
-5. **Build `structure.tag`**: For each shelf, query its `unitTags` where the tag was added by the shelf owner, write those tagUnitIds to `Shelf.structure.tag`
-6. **Migrate ShelfItemReview → data.review**: For each ShelfItem with associated ShelfItemReview rows, set `data = { review: [reviewUnitId, ...] }`
-7. **Migrate keywords → data.tag**: For ShelfItems with non-empty `keywords[]`, map keyword strings to tag unitIds where possible. Unmappable keywords are dropped (they were free-text, not tag references).
-8. **Drop old columns/tables**: Remove `ShelfItem.sortOrder`, `ShelfItem.keywords`, `ShelfItem.label`, `ShelfItem.extra`, `ShelfItem.itemUnitId`. Drop `ShelfItemReview` table.
+1. **Schema: add columns.** `ShelfItem.itemRef String @db.Uuid`, `ShelfItem.kind String @db.VarChar(32)`, `ShelfItem.position String @db.VarChar(64)`, `ShelfItem.reviewIds String[] @db.Uuid @default([])`, `ShelfItem.tagIds String[] @db.Uuid @default([])`. All initially populated via the data-migration script; none nullable in the final state (except via `@default([])` for arrays).
+2. **Backfill `itemRef`.** `UPDATE ShelfItem SET itemRef = itemUnitId`.
+3. **Backfill `kind`.** JOIN to `Unit` (and `Post` where `Unit.type = POST`) to compute per row. Default to lowercased `Unit.type` for unmapped values.
+4. **Backfill `position`.** For each shelf, sort existing items by `(sortOrder ASC, createdAt ASC)` and assign evenly spaced fractional keys across the lex range.
+5. **Backfill `reviewIds`.** `UPDATE ShelfItem si SET reviewIds = ARRAY(SELECT reviewUnitId FROM ShelfItemReview WHERE shelfUnitId = si.shelfUnitId AND itemUnitId = si.itemUnitId)::uuid[]`.
+6. **Backfill `tagIds`.** For each non-empty `keywords` array, attempt to resolve each keyword string to a Tag unit id. Unresolved keywords are dropped — free-text keywords were never FK-backed. Record a count for reporting.
+7. **Drop columns/relations/tables.** `ShelfItem.sortOrder`, `ShelfItem.keywords`, `ShelfItem.label`, `ShelfItem.extra`, `ShelfItem.itemUnitId`, the FK relation from `ShelfItem` to `Unit`, the `shelfItemReviews` relation on `Unit`, the `ShelfItemReview` model, `User.keywords`.
+8. **Recreate constraints & indexes.** New PK `@@id([shelfUnitId, itemRef])`. New indexes: `@@index([itemRef])`, `@@index([shelfUnitId, position])`, GIN on `reviewIds`, GIN on `tagIds`.
+9. **Verify.** Row counts match. Sample render against old-vs-new. Orphan scan (items whose `itemRef` has no Unit) for reporting.
 
 ### Rollback Strategy
 
-Keep the old columns for one release cycle (mark as deprecated). If issues arise, revert the API/frontend code while old columns still contain valid data. Once stable, drop deprecated columns in a follow-up migration.
+This is a single-cutover migration. Rollback requires restoring `itemUnitId`, `sortOrder`, `keywords`, `label`, `extra`, and the `ShelfItemReview` table from backup. Because drops happen in step 7, a DB snapshot before step 7 is the rollback point. The API/frontend ship with the schema change — rolling back the DB also requires reverting the application deploy.
 
 ## Open Questions
 
-1. **keywords → tag migration fidelity**: Existing `keywords[]` are free-text strings, not tag unitIds. How many existing keywords map to real Tag units? If most don't, the migration effectively drops per-item tagging data. Needs a data audit before migration.
-2. **Review collection without FK**: When collecting a review, the backend currently follows `Post.targetUnitId` to auto-collect the target work. Without FK on ShelfItem, the backend still needs to query the Post to determine the target — this query path remains unchanged but is worth noting.
+1. **`keywords → tagIds` mapping fidelity.** How many existing `keywords` strings resolve to real Tag units? A pre-migration audit (count of distinct keyword strings vs. matchable Tag titles) determines whether users perceive data loss. If matches are low, a user-facing notice may be warranted.
+2. **Fractional-index library vs. in-house.** JavaScript/TypeScript options exist (e.g. `fractional-indexing`). Decision before implementation: take a dependency or implement the ~50 lines of base-62 midpoint logic in-house.
+3. **GIN index on `@db.Uuid[]`.** Confirm Prisma generates the correct DDL for `@@index([reviewIds], type: Gin)` on a uuid array; if not, the migration script supplements with raw SQL.

@@ -1,92 +1,94 @@
 ## ADDED Requirements
 
-### Requirement: Shelf structure JSON field
+### Requirement: ShelfItem fractional-index position
 
-The Shelf model SHALL have a `structure` Json column (default `{}`) containing two arrays: `tag` (an ordered list of tagUnitIds representing the author's curated tag vocabulary) and `units` (an ordered list of itemRefs defining manual sort order).
+Each ShelfItem SHALL have a `position` field of type `String` (max 64 characters) that encodes a fractional index. The system SHALL order items within a shelf by comparing `position` strings lexicographically. A compound index `@@index([shelfUnitId, position])` SHALL exist to support ordered reads.
 
-#### Scenario: New shelf has empty structure
+#### Scenario: Append item to shelf
 
-- **WHEN** a new shelf is created without specifying structure
-- **THEN** the shelf SHALL have `structure = {}` (empty object)
+- **WHEN** a new item is added to a shelf with existing items
+- **THEN** the system SHALL generate a new `position` string lexicographically greater than the current maximum position in that shelf
+- **AND** the insert SHALL be a single-row INSERT with no modifications to other rows
 
-#### Scenario: Structure with tags and units
+#### Scenario: Prepend item to shelf
 
-- **WHEN** a shelf has `structure = { tag: ["tag-1", "tag-2"], units: ["book-1", "post-2", "tag-1"] }`
-- **THEN** `structure.tag` SHALL define the author's curated tag vocabulary in display order
-- **AND** `structure.units` SHALL define the item rendering order
+- **WHEN** a new item is added and placed at the start of the shelf
+- **THEN** the system SHALL generate a `position` string lexicographically less than the current minimum position
+- **AND** the insert SHALL be a single-row INSERT
 
-### Requirement: structure.tag synchronization with unitTags
+#### Scenario: Insert item between two existing items
 
-When the shelf author adds a tag to `structure.tag`, the system SHALL also create a `unitTag` row linking the tag to the shelf's Unit for search indexing. When the author removes a tag from `structure.tag`, the corresponding `unitTag` row SHALL be deleted. Community/non-author tags SHALL exist in `unitTags` only and SHALL NOT be added to `structure.tag`.
+- **WHEN** an item is inserted between positions `P_a` and `P_b`
+- **THEN** the system SHALL generate a `position` string `P_new` such that `P_a < P_new < P_b` lexicographically
+- **AND** no existing row SHALL be modified
 
-#### Scenario: Author adds a tag to shelf
+#### Scenario: Drag-drop reorder
 
-- **WHEN** the shelf author adds tagUnitId "tag-1" to the shelf
-- **THEN** "tag-1" SHALL be appended to `structure.tag`
-- **AND** a `unitTag` row SHALL be created linking "tag-1" to the shelf's Unit
+- **WHEN** the author reorders an existing item to a new location between two other items
+- **THEN** the system SHALL UPDATE only the moved item's `position` to a value between the new neighbors' positions
+- **AND** no other rows SHALL be modified
 
-#### Scenario: Author removes a tag from shelf
+### Requirement: Position-key density rebalancing
 
-- **WHEN** the shelf author removes tagUnitId "tag-1" from the shelf
-- **THEN** "tag-1" SHALL be removed from `structure.tag`
-- **AND** the corresponding `unitTag` row SHALL be deleted
+When a newly-generated `position` would exceed a configured length threshold (default 16 characters), the system SHALL perform an n-reorder: read a window of surrounding items, redistribute their positions evenly across the lex range, and UPDATE them in a single transaction.
 
-#### Scenario: Community tag does not appear in structure.tag
+#### Scenario: Rebalance triggered by key growth
 
-- **WHEN** a non-author user tags the shelf with "tag-5"
-- **THEN** a `unitTag` row SHALL be created
-- **AND** `structure.tag` SHALL NOT be modified
+- **WHEN** the system attempts to generate a new position and the candidate key length would exceed the threshold
+- **THEN** the system SHALL select a window of surrounding items (default 50)
+- **AND** SHALL reassign evenly-spaced positions across that window
+- **AND** SHALL apply the updates in a single transaction
 
-### Requirement: structure.units defines manual sort order
+#### Scenario: Normal insert below threshold
 
-The `structure.units` array SHALL be the single source of truth for manual item ordering. Drag/drop reorder operations SHALL only modify `structure.units` without touching ShelfItem rows.
+- **WHEN** the candidate position key length is below the threshold
+- **THEN** no rebalance SHALL be performed
+- **AND** the insert SHALL complete as a single-row INSERT
 
-#### Scenario: Reorder items via drag/drop
+### Requirement: ShelfItem itemRef without foreign key
 
-- **WHEN** the author reorders items from `["a", "b", "c"]` to `["c", "a", "b"]`
-- **THEN** `structure.units` SHALL be updated to `["c", "a", "b"]`
-- **AND** no ShelfItem rows SHALL be modified
+ShelfItem SHALL use `itemRef: String @db.Uuid` as the reference to its primary unit. The column SHALL NOT declare a foreign key relation to `Unit`. An index `@@index([itemRef])` SHALL exist for "which shelves contain this item" queries.
 
-#### Scenario: Add item appends to structure.units
+#### Scenario: Add item references primary unit by id
 
-- **WHEN** a new item "book-3" is added to a shelf with `structure.units = ["book-1", "book-2"]`
-- **THEN** `structure.units` SHALL become `["book-1", "book-2", "book-3"]`
-- **AND** a ShelfItem row SHALL be created in the same transaction
+- **WHEN** a unit with id `U` is added to a shelf
+- **THEN** the ShelfItem row SHALL have `itemRef = U`
+- **AND** no FK constraint SHALL link `itemRef` to `Unit.id`
 
-#### Scenario: Remove item removes from structure.units
+#### Scenario: External Unit deletion does not cascade
 
-- **WHEN** item "book-2" is removed from a shelf with `structure.units = ["book-1", "book-2", "book-3"]`
-- **THEN** `structure.units` SHALL become `["book-1", "book-3"]`
-- **AND** the ShelfItem row SHALL be deleted in the same transaction
+- **WHEN** the Unit referenced by a ShelfItem's `itemRef` is deleted externally
+- **THEN** the ShelfItem row SHALL remain
+- **AND** the ShelfItem SHALL be treated as an orphan until cleanup
 
-### Requirement: Consistency between structure.units and ShelfItem rows
+#### Scenario: Reverse lookup uses itemRef index
 
-Add and remove operations SHALL modify both `structure.units` and ShelfItem rows within a single database transaction. On read, items present in `structure.units` but missing from ShelfItem rows (orphans from external Unit deletion) SHALL be filtered out during rendering.
+- **WHEN** the system queries "which ShelfItems reference unit U"
+- **THEN** the query SHALL use `WHERE itemRef = U` and hit `@@index([itemRef])`
+- **AND** SHALL NOT require a JOIN to the `Unit` table
 
-#### Scenario: Orphan in structure.units after external Unit deletion
+### Requirement: ShelfItem composite primary key on itemRef
 
-- **WHEN** a Unit referenced in `structure.units` is deleted externally
-- **THEN** the corresponding itemRef remains in `structure.units` (no cascade)
-- **AND** on render, the frontend SHALL hide items that fail hydration
-- **AND** on next author commit, the frontend SHALL send a cleanup request to remove orphaned entries
+The ShelfItem composite primary key SHALL be `@@id([shelfUnitId, itemRef])`. A given primary unit SHALL appear at most once per shelf.
 
-#### Scenario: Transaction failure rolls back both writes
+#### Scenario: Duplicate item rejected
 
-- **WHEN** adding an item fails during the ShelfItem INSERT
-- **THEN** the `structure.units` update SHALL also be rolled back
-- **AND** the shelf state SHALL remain unchanged
+- **GIVEN** a shelf already contains itemRef `U`
+- **WHEN** the system attempts to insert another ShelfItem with the same `(shelfUnitId, U)`
+- **THEN** the PK constraint SHALL reject the insert
+- **AND** no second row SHALL be created
 
-### Requirement: Pagination of shelf items
+### Requirement: Pagination by position
 
-The API SHALL return shelf items paginated with a default page size of 100. Items SHALL be returned in `structure.units` order. The API SHALL support offset-based pagination.
+The API SHALL return shelf items ordered by `position ASC` and SHALL support pagination with a default page size of 100.
 
 #### Scenario: Shelf with fewer than 100 items
 
-- **WHEN** a shelf has 50 items and the client requests items without pagination params
-- **THEN** all 50 items SHALL be returned in `structure.units` order
+- **WHEN** a client requests items from a shelf with 50 items and no pagination params
+- **THEN** all 50 items SHALL be returned ordered by `position` ASC
 
-#### Scenario: Shelf with more than 100 items
+#### Scenario: Shelf larger than the page size
 
-- **WHEN** a shelf has 200 items and the client requests the second page (offset=100, limit=100)
-- **THEN** items 101-200 from `structure.units` SHALL be returned
-- **AND** the response SHALL indicate whether more items exist
+- **WHEN** a client requests the next page of a 200-item shelf
+- **THEN** the API SHALL return the next 100 items in `position` ASC order
+- **AND** the response SHALL indicate whether more items remain

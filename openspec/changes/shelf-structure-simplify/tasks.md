@@ -1,93 +1,104 @@
 ## 1. Prisma Schema Migration
 
-- [ ] 1.1 Add `structure Json @default("{}")` column to the `Shelf` model in `package/server/prisma/schema.prisma`
-- [ ] 1.2 Add `itemRef String` column to `ShelfItem`, add `kind String @db.VarChar(32)` column, add `data Json?` column
-- [ ] 1.3 Add `@@index([itemRef])` to ShelfItem. Update composite PK from `@@id([shelfUnitId, itemUnitId])` to `@@id([shelfUnitId, itemRef])`
-- [ ] 1.4 Remove `sortOrder`, `keywords`, `label`, `extra` columns from ShelfItem. Remove `itemUnitId` column and its FK relation to Unit
-- [ ] 1.5 Remove the `ShelfItemReview` model entirely
-- [ ] 1.6 Remove the `ShelfItem` relation (`items`) from the `Shelf` model if needed and re-add with updated field names. Remove `ShelfItemReview` relation from Unit
-- [ ] 1.7 Run `bun run prisma:generate` in `package/server` to verify schema compiles
+- [ ] 1.1 In `package/server/prisma/schema.prisma`: add `ShelfItem.itemRef String @db.Uuid`, `ShelfItem.kind String @db.VarChar(32)`, `ShelfItem.position String @db.VarChar(64)`, `ShelfItem.reviewIds String[] @db.Uuid @default([])`, `ShelfItem.tagIds String[] @db.Uuid @default([])`
+- [ ] 1.2 Remove `ShelfItem.sortOrder`, `ShelfItem.keywords`, `ShelfItem.label`, `ShelfItem.extra`, `ShelfItem.itemUnitId`, and the `item Unit @relation("ShelfItemUnit", ...)` FK relation
+- [ ] 1.3 Replace composite PK: from `@@id([shelfUnitId, itemUnitId])` to `@@id([shelfUnitId, itemRef])`
+- [ ] 1.4 Replace index: from `@@index([shelfUnitId, sortOrder])` to `@@index([shelfUnitId, position])`. Replace `@@index([itemUnitId])` with `@@index([itemRef])`
+- [ ] 1.5 Add GIN indexes on `ShelfItem.reviewIds` and `ShelfItem.tagIds` (use `@@index([reviewIds], type: Gin)` / `@@index([tagIds], type: Gin)`; supplement with raw SQL in the migration if Prisma DDL needs it)
+- [ ] 1.6 Delete the `ShelfItemReview` model entirely. Remove the `reviews ShelfItemReview[]` relation from `ShelfItem`, and the `shelfItemReviews ShelfItemReview[] @relation("ShelfItemReviewUnit")` relation from `Unit`
+- [ ] 1.7 In the `User` model (auth/server wherever declared): remove `keywords: String[]` and any uses
+- [ ] 1.8 Verify `Unit.workUnitId` / `@relation("WorkRelease")` / `work` / `releases` are UNCHANGED (rename is intentionally NOT in scope)
+- [ ] 1.9 Run `bun run prisma:generate` in `package/server` and confirm schema compiles
 
 ## 2. Data Migration Script
 
-- [ ] 2.1 Create migration script: populate `itemRef` from existing `itemUnitId` for all ShelfItem rows
-- [ ] 2.2 Create migration script: populate `kind` by joining ShelfItem → Unit (and optionally Post for POST type) to determine ShelfItemKind
-- [ ] 2.3 Create migration script: build `structure.units` for each Shelf by querying ShelfItems ordered by `sortOrder ASC, createdAt ASC`
-- [ ] 2.4 Create migration script: build `structure.tag` for each Shelf by querying unitTags where the tag was added by the shelf owner
-- [ ] 2.5 Create migration script: migrate ShelfItemReview rows into `ShelfItem.data.review` arrays
-- [ ] 2.6 Create migration script: convert non-empty `keywords[]` to `data.tag` where keywords map to existing Tag units
-- [ ] 2.7 Run `bun run prisma:migrate` and verify migration completes without errors
+- [ ] 2.1 Create a migration script (SQL or Prisma-based) that populates `ShelfItem.itemRef` from `itemUnitId` for all existing rows
+- [ ] 2.2 Script: populate `ShelfItem.kind` via join to `Unit` (and `Post` for `POST` type) applying the mapping: `BOOK → book`, `POST+REVIEW → review`, `POST+QUOTE → quote`, other `POST → post`, `TAG → tag`, `REALM → realm`, `LINK → link`, fallback lowercased `UnitType` string
+- [ ] 2.3 Script: for each shelf, order existing items by `(sortOrder ASC, createdAt ASC)` and assign evenly-spaced fractional-index `position` values across the lex range (use a base-62 midpoint algorithm)
+- [ ] 2.4 Script: populate `ShelfItem.reviewIds` by aggregating `reviewUnitId` values from `ShelfItemReview` rows matching `(shelfUnitId, itemUnitId)`
+- [ ] 2.5 Script: populate `ShelfItem.tagIds` by resolving each legacy `keywords[]` string to a Tag unit via title match. Record count of unresolved strings for reporting; unresolved entries are dropped
+- [ ] 2.6 Script: drop `ShelfItemReview` table, drop `ShelfItem.sortOrder` / `keywords` / `label` / `extra` / `itemUnitId` columns, drop `User.keywords` column
+- [ ] 2.7 Run `bun run prisma:migrate` and verify the migration completes with no orphaned rows
 
 ## 3. Contract Updates (`@rezics/contract`)
 
-- [ ] 3.1 Add `ShelfItemKind` type (union of string literals: `book | review | quote | post | chapter | tag | realm | image | video | media | game | link`)
-- [ ] 3.2 Add `ShelfStructure` Typebox schema (`{ tag: string[], units: string[] }`)
-- [ ] 3.3 Update `shelfDTOSchema` to include `structure` field using `ShelfStructure` schema
-- [ ] 3.4 Update `shelfItemDTOSchema`: replace `itemUnitId` with `itemRef`, add `kind: ShelfItemKind`, add `data: Json?`. Remove `sortOrder`, `keywords`, `label`, `extra`, `reviews`, `item` (expanded relation)
-- [ ] 3.5 Remove `shelfItemReviewDTOSchema` and `ShelfItemReviewDTO` exports
-- [ ] 3.6 Remove `all | created | collected` from `shelfItemsQuerySchema.filter`. Remove `keyword` and `sort` fields from `shelfItemsQuerySchema`
-- [ ] 3.7 Update `addShelfItemSchema`: replace `itemUnitId` with `itemRef`, add `kind: ShelfItemKind`, remove `sortOrder`, `keywords`, `label`
-- [ ] 3.8 Update `updateShelfItemSchema`: remove `sortOrder`, `keywords`, `label`, `extra`. Add `data: Json?`
-- [ ] 3.9 Remove `reorderShelfItemsSchema` (reorder now updates `structure.units` only)
-- [ ] 3.10 Update `collectInputSchema`: remove `keywords` field
-- [ ] 3.11 Verify contract builds: run `tsc --noEmit` in `package/contract`
+- [ ] 3.1 Add `ShelfItemKind` type in `package/contract/src/shelf.ts` as a union: `'book' | 'review' | 'quote' | 'post' | 'chapter' | 'tag' | 'realm' | 'image' | 'video' | 'media' | 'game' | 'link'`
+- [ ] 3.2 Update `shelfItemDTOSchema`: fields `shelfUnitId`, `itemRef`, `kind` (ShelfItemKind), `position`, `reviewIds` (array of uuid), `tagIds` (array of uuid), `createdAt`, `updatedAt`. Remove any `itemUnitId`, `sortOrder`, `keywords`, `label`, `extra`, `reviews`, `item`, `data` fields
+- [ ] 3.3 Delete `shelfItemReviewDTOSchema` / `ShelfItemReviewDTO` / related exports
+- [ ] 3.4 Update `shelfItemsQuerySchema`: remove `filter` (`all|created|collected`), remove `keyword`, remove `sort`. Keep only pagination params (`limit`, `cursor`/`offset`)
+- [ ] 3.5 Update `addShelfItemSchema`: `itemRef`, `kind`, optional `tagIds`, optional `reviewIds`. Remove `sortOrder`, `keywords`, `label`
+- [ ] 3.6 Add `updateShelfItemSchema` (or split into focused mutations): allow PATCH of `reviewIds` (add/remove), `tagIds` (set). Remove any `keywords`, `label`, `extra`, `sortOrder`, `data` fields
+- [ ] 3.7 Add `reorderShelfItemSchema` (singular): `{ shelfUnitId, itemRef, beforeItemRef?, afterItemRef? }` — server computes new `position` between neighbors
+- [ ] 3.8 Update `collectInputSchema`: remove `keywords`
+- [ ] 3.9 Remove any `shelf-keywords` related exports (keyword CRUD endpoints, user keyword vocabulary types)
+- [ ] 3.10 Verify contract builds: run `tsc --noEmit` in `package/contract`
 
 ## 4. Server Service Rewrite (`@rezics/server`)
 
-- [ ] 4.1 Update `shelf.mapper.ts`: update mapping functions for new ShelfItem shape (itemRef, kind, data). Remove ShelfItemReview mapping
-- [ ] 4.2 Update `types.ts`: update `shelfInclude`, `shelfItemInclude`, `shelfListSelect` to reflect new schema (no ShelfItemReview include, no item relation expand)
-- [ ] 4.3 Rewrite `ShelfService.create()`: initialize `structure = { tag: [], units: [] }`. Accept optional tagIds and sync to both structure.tag and unitTags
-- [ ] 4.4 Rewrite `ShelfService.addItem()`: accept `itemRef` + `kind`, INSERT ShelfItem + append to `structure.units` in one transaction
-- [ ] 4.5 Rewrite `ShelfService.removeItem()`: DELETE ShelfItem + remove from `structure.units` in one transaction
-- [ ] 4.6 Rewrite `ShelfService.reorderItems()`: only update `Shelf.structure.units` JSON (single UPDATE, no ShelfItem row changes)
-- [ ] 4.7 Rewrite `ShelfService.getShelfItems()`: read `structure.units`, slice for pagination (offset/limit, default 100), query ShelfItem rows for those itemRefs, return in structure order. Remove filter/keyword/sort logic
-- [ ] 4.8 Add `ShelfService.updateItemData()`: UPDATE a single ShelfItem's `data` field (for adding/removing reviews and tags per item)
-- [ ] 4.9 Add `ShelfService.cleanupOrphans()`: accept a list of orphaned itemRefs, DELETE their ShelfItem rows, remove from structure.units
-- [ ] 4.10 Rewrite `ShelfService.attachReview()` / `detachReview()`: update `ShelfItem.data.review` array instead of creating/deleting ShelfItemReview rows
-- [ ] 4.11 Add shelf tag management methods: add/remove tag syncs both `structure.tag` and `unitTags` in one transaction
-- [ ] 4.12 Update `ShelfService.getByUnitId()`: include `structure` in response
-- [ ] 4.13 Verify server builds: run `tsc --noEmit` in `package/server`
+- [ ] 4.1 Create a fractional-indexing utility (`package/server/src/shelf/fractional-index.ts`) with functions `generateBetween(a?: string, b?: string): string` and `rebalance(positions: string[]): string[]`. Choose: either take `fractional-indexing` as a dependency or implement in-house (~50 lines of base-62 midpoint logic)
+- [ ] 4.2 Update `package/server/src/shelf/shelf.mapper.ts`: map new ShelfItem shape (no itemUnitId/sortOrder/keywords/label/extra/reviews/data). Remove ShelfItemReview mapping
+- [ ] 4.3 Update `package/server/src/shelf/types.ts`: update `shelfInclude`, `shelfItemInclude`, `shelfListSelect` to the new schema (no ShelfItemReview include, no Unit relation expand on ShelfItem)
+- [ ] 4.4 Rewrite `ShelfService.addItem()`: compute `kind` from source Unit/Post at write time, call `generateBetween(lastPosition, undefined)` to append, insert ShelfItem row in a single INSERT
+- [ ] 4.5 Rewrite `ShelfService.removeItem()`: DELETE the single ShelfItem row
+- [ ] 4.6 Rewrite `ShelfService.reorderItem()`: compute new position via `generateBetween(beforePos, afterPos)`, run a single UPDATE. On key-length threshold breach, trigger local window rebalance (UPDATE N rows in one transaction)
+- [ ] 4.7 Rewrite `ShelfService.getShelfItems()`: `ORDER BY position ASC`, default limit 100, offset or cursor pagination. Remove filter/keyword/sort logic entirely
+- [ ] 4.8 Add `ShelfService.attachReview(shelfUnitId, itemRef, reviewUnitId)`: append to `reviewIds` array (unique). If no ShelfItem exists yet for `itemRef`, create it then append
+- [ ] 4.9 Add `ShelfService.detachReview(shelfUnitId, itemRef, reviewUnitId)`: remove from `reviewIds` array
+- [ ] 4.10 Add `ShelfService.setItemTags(shelfUnitId, itemRef, tagIds)`: replace the item's `tagIds` array
+- [ ] 4.11 Add `ShelfService.cleanupOrphans(shelfUnitId, orphanItemRefs[])`: DELETE ShelfItem rows matching those itemRefs in one transaction; authorize against the shelf's owner
+- [ ] 4.12 Verify server builds: run `tsc --noEmit` in `package/server`
 
 ## 5. Collection Service Update (`@rezics/server`)
 
-- [ ] 5.1 Update `CollectionService.collect()`: use `itemRef` + `kind` instead of `itemUnitId`. Write to `structure.units` in same transaction. Remove keywords merging logic. Remove `User.keywords` merge
-- [ ] 5.2 Update `CollectionService.toggleFavorite()`: use `itemRef` + `kind`. Write to `structure.units`. Store review in `data.review` instead of creating ShelfItemReview
-- [ ] 5.3 Update `CollectionService.getCollectionStatus()`: query by `itemRef` instead of `itemUnitId`. Check `data.review` instead of ShelfItemReview table
-- [ ] 5.4 Verify collection service builds and all shelf-related code compiles
+- [ ] 5.1 In `package/server/src/shelf/collection.service.ts`, update `collect()`: use `itemRef` + `kind`, generate `position` for new rows, remove `keywords` merging and all `User.keywords` side effects
+- [ ] 5.2 Update `toggleFavorite()`: use `itemRef` + `kind`, generate `position`. For a review-target auto-collection, append the review's unit id to the ShelfItem's `reviewIds` (create row if needed)
+- [ ] 5.3 Update `getCollectionStatus()`: query by `WHERE itemRef = ?` (no Unit JOIN). For review status, use `WHERE reviewIds @> ARRAY[reviewId]::uuid[]` against the GIN index
+- [ ] 5.4 Delete the `resolveReviewTarget → tx.shelfItemReview.upsert` code path; replace with `reviewIds` array mutation on the target ShelfItem
+- [ ] 5.5 Verify collection service builds
 
 ## 6. API Route Updates (`@rezics/server`)
 
-- [ ] 6.1 Update `shelf.api.ts`: update route handlers to use new service signatures. Remove filter/sort/keyword query params from items endpoint
-- [ ] 6.2 Add route for `cleanupOrphans` endpoint (POST `/shelf/:unitId/cleanup`)
-- [ ] 6.3 Add route for `updateItemData` endpoint (PATCH `/shelf/:unitId/items/:itemRef/data`)
-- [ ] 6.4 Add routes for shelf tag management (POST/DELETE `/shelf/:unitId/tags`)
-- [ ] 6.5 Update `collection.api.ts`: remove `keywords` from collect input
+- [ ] 6.1 Update `package/server/src/shelf/shelf.api.ts`: route handlers use new service signatures; remove `filter`, `keyword`, `sort` query params from items endpoint
+- [ ] 6.2 Replace the existing bulk reorder route with a single-item reorder route: `PATCH /shelf/:shelfUnitId/items/:itemRef/position` taking `{ beforeItemRef?, afterItemRef? }`
+- [ ] 6.3 Add `POST /shelf/:shelfUnitId/items/:itemRef/reviews` (attach) and `DELETE /shelf/:shelfUnitId/items/:itemRef/reviews/:reviewUnitId` (detach)
+- [ ] 6.4 Add `PUT /shelf/:shelfUnitId/items/:itemRef/tags` (set `tagIds`)
+- [ ] 6.5 Add `POST /shelf/:shelfUnitId/cleanup` taking `{ orphanItemRefs: string[] }` — author-only
+- [ ] 6.6 Update `collection.api.ts`: remove `keywords` from collect input; verify the favorite toggle route handles `reviewIds` updates for review auto-collect
+- [ ] 6.7 Remove any keyword vocabulary routes (add keyword, remove keyword, list keywords)
 
 ## 7. API Client Updates (`@rezics/api`)
 
-- [ ] 7.1 Update `shelf.keys.ts`: update query key structure for new item query shape (remove filter/sort keys)
-- [ ] 7.2 Update `shelf.queries.ts`: update `shelfItemsQuery` to use new paginated endpoint (offset/limit, no filter/sort params). Update `shelfDetailQuery` to include structure
-- [ ] 7.3 Update `shelf.mutations.ts`: update `addItem`, `removeItem`, `reorderItems` mutations for new service signatures. Add `updateItemData`, `cleanupOrphans`, `addShelfTag`, `removeShelfTag` mutations
-- [ ] 7.4 Update `shelf.types.ts`: update `ShelfItemsQuery` (remove filter/sort/keyword), update `ShelfFilters`
-- [ ] 7.5 Add batch hydration utility: `useShelfHydration(items: ShelfItemDTO[])` hook that groups by kind, issues parallel batch queries, seeds detail cache via `setQueryData`
-- [ ] 7.6 Verify API client builds: run `tsc --noEmit` in `package/api`
+- [ ] 7.1 Update `package/api/src/shelf/shelf.keys.ts`: remove filter/sort/keyword variants from the query key factory
+- [ ] 7.2 Update `package/api/src/shelf/shelf.queries.ts`: `shelfItemsQuery` uses paginated endpoint with `limit` only (default 100); response is the thin ShelfItem shape
+- [ ] 7.3 Update `package/api/src/shelf/shelf.mutations.ts`: `addItem`, `removeItem`, `reorderItem` (single-row), `attachReview`, `detachReview`, `setItemTags`, `cleanupOrphans`. Delete `reorderItems` (bulk)
+- [ ] 7.4 Update `package/api/src/shelf/shelf.types.ts`: remove `ShelfItemsFilter` / `ShelfItemsSort` / `ShelfItemsKeyword` types
+- [ ] 7.5 Add `useShelfHydration(items: ShelfItemDTO[])` hook: groups by `kind`, issues parallel batch list queries, seeds per-item detail cache via `queryClient.setQueryData(...)`, reports per-item success/failure for orphan detection
+- [ ] 7.6 Remove user-keyword-vocabulary client code (hooks, query keys, mutations)
+- [ ] 7.7 Verify API client builds: run `tsc --noEmit` in `package/api`
 
 ## 8. Frontend Refactor (`@rezics/app`)
 
-- [ ] 8.1 Update `ShelfPage.tsx`: remove `all/created/collected` filter chips and `keywordFilter` state. Add sort mode toggle (manual/time/title)
-- [ ] 8.2 Implement kind-based item rendering: create a `ShelfItemRenderer` component that switches on `kind` to render different card types (book card, review card, tag chip, etc.)
-- [ ] 8.3 Integrate `useShelfHydration` hook in ShelfPage to hydrate items after fetching ShelfItem list
-- [ ] 8.4 Implement frontend sorting: manual (default from API order), time (sort by createdAt), title (sort by hydrated title using `Intl.Collator`)
-- [ ] 8.5 Implement orphan detection: hide items that fail hydration, collect orphan itemRefs, send cleanup on next author save
-- [ ] 8.6 Update `ShelfEditPage.tsx` if it exists: update tag management UI to use structure.tag + unitTags sync
-- [ ] 8.7 Update `ShelfItemCard.tsx`: accept new ShelfItem shape (itemRef, kind, data instead of itemUnitId, sortOrder, keywords)
-- [ ] 8.8 Update any components referencing `ShelfItemReview` types or `keywords` filtering
+- [ ] 8.1 Update `ShelfPage` in `package/app/src/shelf` (or equivalent): remove the `all/created/collected` filter chips and any `keywordFilter` state. Add a sort-mode toggle with three options: `manual | time | title`
+- [ ] 8.2 Implement `ShelfItemRenderer` that switches on `kind` to render the appropriate card (book card, review card, tag chip, generic fallback for unsupported kinds)
+- [ ] 8.3 Integrate `useShelfHydration` in ShelfPage: render items in `position` order (from API), replace with hydrated data as batches return; track orphans in state
+- [ ] 8.4 Implement frontend sort modes: manual (identity — API order), time (`createdAt` desc), title (`Intl.Collator(userLocale)` over hydrated titles; partial-data behavior preserved)
+- [ ] 8.5 On author save of any kind (add/remove/reorder/retag/attach-review/detach-review), include the accumulated `orphanItemRefs[]` in the request and call the cleanup endpoint if non-empty
+- [ ] 8.6 Update `ShelfItemCard` to accept the new shape (`itemRef`, `kind`, `reviewIds`, `tagIds`, `position`). Remove any reads of `itemUnitId`, `sortOrder`, `keywords`, `label`, `extra`, `reviews`, `data`
+- [ ] 8.7 Remove the user keyword vocabulary UI (autocomplete, manage-keywords page/modal). Replace per-item tag UI with a unit-id-based Tag picker writing to `tagIds`
+- [ ] 8.8 Review any shelf-related pages that previously expanded `item` (full Unit) on ShelfItem rows; route them through the hydration hook
+- [ ] 8.9 Verify app builds: run `tsc --noEmit` in `package/app`
 
-## 9. Cross-Package Verification
+## 9. Seeds & Fixtures
 
-- [ ] 9.1 Grep for all references to `ShelfItemReview`, `itemUnitId`, `sortOrder` (in ShelfItem context), `keywords` (in ShelfItem context) across the monorepo and update or remove
-- [ ] 9.2 Grep for references to removed contract exports (`shelfItemReviewDTOSchema`, `reorderShelfItemsSchema`, filter types) and update consumers
-- [ ] 9.3 Run `tsc --noEmit` in each affected package: contract, server, api, app
-- [ ] 9.4 Run `bun run knip` at root to detect newly unused exports
-- [ ] 9.5 Start dev server (`bun run server:dev`) and verify shelf CRUD endpoints work
-- [ ] 9.6 Start frontend (`bun run app:dev`) and verify shelf page renders, pagination works, sort modes work, and orphan handling works
+- [ ] 9.1 Update `package/server/prisma/seed/mocks/shelves.ts` and `seed/database.ts`: produce ShelfItem rows with `itemRef`, `kind`, `position` (spaced fractional keys), `reviewIds`, `tagIds`. Remove any `sortOrder`, `keywords`, `label`, `extra`, `ShelfItemReview` seed usage
+- [ ] 9.2 Update any seed files that set `User.keywords`
+
+## 10. Cross-Package Verification
+
+- [ ] 10.1 Grep monorepo for residual references: `ShelfItemReview`, `itemUnitId` (shelf scope), `sortOrder` (shelf scope), `keywords` (shelf scope), `User.keywords` — update or remove each
+- [ ] 10.2 Grep for removed contract exports (`shelfItemReviewDTOSchema`, `reorderShelfItemsSchema`, filter/sort/keyword types, keyword vocabulary types) — update consumers
+- [ ] 10.3 Confirm `Unit.workUnitId` / `WorkRelease` / `work` / `releases` are untouched across the monorepo (this rename is explicitly out of scope)
+- [ ] 10.4 Run `tsc --noEmit` in each affected package: `contract`, `server`, `api`, `app`
+- [ ] 10.5 Run `bun run knip` at the repo root; resolve any newly-unused exports introduced by the refactor
+- [ ] 10.6 Start `bun run server:dev` and smoke-test shelf CRUD: create shelf, add item, reorder, attach review, detach review, set tags, cleanup orphans
+- [ ] 10.7 Start `bun run app:dev` and smoke-test ShelfPage: rendering, sort-mode toggle, drag-drop reorder, review attach/detach UI, orphan auto-hiding, cleanup-on-save

@@ -145,7 +145,12 @@ export const bookApi = new Elysia({ prefix: "/book" })
       }
 
       if (
-        !hasPermissionToUpdateBook(identity.permission, identity.unitId, undefined, targetBookUnit as any)
+        !hasPermissionToUpdateBook(
+          identity.permission,
+          identity.unitId,
+          undefined,
+          targetBookUnit as any,
+        )
       ) {
         set.status = 403;
         throw new Error(
@@ -177,7 +182,12 @@ export const bookApi = new Elysia({ prefix: "/book" })
       }
 
       if (
-        !hasPermissionToUpdateBook(identity.permission, identity.unitId, undefined, targetBookUnit as any)
+        !hasPermissionToUpdateBook(
+          identity.permission,
+          identity.unitId,
+          undefined,
+          targetBookUnit as any,
+        )
       ) {
         set.status = 403;
         throw new Error(
@@ -201,7 +211,10 @@ export const bookApi = new Elysia({ prefix: "/book" })
   .delete(
     "/:unitId",
     async ({ params, identity, set }): Promise<{ message: string }> => {
-      if (identity.permission.role !== "ADMIN" && identity.permission.role !== "ROOT") {
+      if (
+        identity.permission.role !== "ADMIN" &&
+        identity.permission.role !== "ROOT"
+      ) {
         set.status = 403;
         throw new Error(
           "Forbidden: you do not have permission to delete this book",
