@@ -1,7 +1,7 @@
 ## MODIFIED Requirements
 
 ### Requirement: `ids` field on every list query
-Every list-query schema in `@rezics/contract` SHALL include an optional `ids` field sourced from one of two shared mixins that mirror the HTTP transport: GET querystring schemas spread `...listGetQueryBase.properties` (where `ids` is a CSV `string`, split server-side via the shared `parseIdsCsv` helper), and POST body schemas spread `...listPostBodyBase.properties` (where `ids` is a native `string[]` with `maxItems: 200`). The GET CSV and POST array SHALL represent the same logical value — both paths MAY be implemented for the same resource, and when both exist they SHALL accept the same id set. When `ids` is provided, it SHALL compose with other filters via intersection.
+Every list-query schema in `@rezics/contract` SHALL include an optional `ids` field sourced from one of two shared mixins that mirror the HTTP transport: GET querystring schemas spread `...listGetQueryBase.properties` (where `ids` is a CSV `string`, split server-side via the shared `parseIdsCsv` helper), and POST body schemas spread `...listPostBodyBase.properties` (where `ids` is a native `string[]` with `maxItems: 200`). The GET CSV and POST array SHALL represent the same logical value — every resource that exposes `GET /list` SHALL also expose `POST /list`, and both SHALL accept the same id set and return the same response shape. When `ids` is provided, it SHALL compose with other filters via intersection.
 
 #### Scenario: GET schema spreads listGetQueryBase
 - **WHEN** a developer defines `postListQuerySchema = t.Object({ ...listGetQueryBase.properties, kind: t.Optional(...) })`

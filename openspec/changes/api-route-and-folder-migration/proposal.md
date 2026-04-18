@@ -14,7 +14,7 @@ One-shot migration is the right shape because HTTP route renames (15 prefixes) c
 - **Contract schema normalization** (two-base mirror):
   - `package/contract/src/list-query-base.ts` is refactored to export TWO mixins that mirror HTTP transport honestly: `listGetQueryBase` with `ids: t.Optional(t.String())` (CSV, split server-side) for GET querystring schemas, and `listPostBodyBase` with `ids: t.Optional(t.Array(t.String(), { maxItems: 200 }))` for POST body schemas. A shared `parseIdsCsv()` helper handles CSV split + dedupe + 200-cap enforcement.
   - Every existing `*ListQuerySchema` (all GET querystring today) spreads `...listGetQueryBase.properties`. Discovered 12 schemas: `bookListQuerySchema`, `chapterListQuerySchema`, `dmMessageListQuerySchema`, `entityListQuerySchema`, `feedbackListQuerySchema`, `notificationListQuerySchema`, `postListQuerySchema`, `realmListQuerySchema`, `shelfListQuerySchema`, `tagListQuerySchema`, `unitListQuerySchema`, `userListQuerySchema`.
-  - POST body schemas are NOT created speculatively — each domain adds its `*ListBodySchema` spreading `listPostBodyBase` when it actually adds a `POST /list` endpoint.
+  - Every domain that has a `GET /list` endpoint also gets a matching `POST /list` endpoint with a `*ListBodySchema` spreading `...listPostBodyBase.properties`, mirroring the GET schema's domain-specific fields. The POST handler normalizes input into the same service call as the GET handler — no duplicate business logic.
   - The (never-consumed) `listQueryBase` export from Change 1 is removed and replaced by the two new bases; no backward-compat alias is kept since no caller references it.
   - No behaviour change for callers that omit `ids`; no contract break for callers that already pass filters.
 
@@ -32,8 +32,15 @@ One-shot migration is the right shape because HTTP route renames (15 prefixes) c
   - `tool/scripts/check-convention.ts` is simplified (baseline-loading code removed; script now exits non-zero on ANY violation — zero-tolerance). The script, the `bun run check:convention` package.json entry, the `lefthook.yml` pre-commit job, and the CI step all remain in place as ongoing guards.
   - The `convention-enforcement` spec is unchanged: its scenarios already describe zero-tolerance behaviour ("script prints summary ... exits with status 0" requires "no violations"); the baseline snapshot was scaffolding below the spec level.
 
-- **Documentation**:
-  - `CLAUDE.md` "API Route & Folder Convention" section is unchanged — it already describes the post-migration steady state. A single sentence is added noting that the baseline snapshot is gone.
+- **POST `/list` endpoint coverage** (spec compliance):
+  - Every domain with a `GET /list` gains a matching `.post("/list", ...)` handler. 11 domains: book, chapter, echokv, feedback, jwt (admin), notification, post, realm, shelf, tag, unit, user.
+  - Each domain gets a `*ListBodySchema` in `@rezics/contract` spreading `...listPostBodyBase.properties` plus the same domain-specific fields as its GET query schema.
+  - POST handlers normalize `body` into the same service input type as GET handlers (service receives `ids: string[] | undefined` regardless of transport). No business logic duplication.
+  - `@rezics/api` gains POST-based query functions for large-batch / cursor use cases, with the GET variants remaining the default for small queries.
+
+- **Documentation — single source of truth**:
+  - A new `CONTRIBUTING.md` at the repository root becomes the canonical contributor-facing reference for route and folder conventions. It summarizes the rules with links to the authoritative specs under `openspec/specs/`.
+  - `CLAUDE.md` "API Route & Folder Convention" section is reduced to a short pointer: "See `CONTRIBUTING.md` and `openspec/specs/` for route and folder conventions." All duplicated rule text is removed.
   - `package/app/docs/feature standard.md` already points at the spec; no further edits needed.
 
 - **BREAKING** (HTTP surface):
@@ -42,7 +49,7 @@ One-shot migration is the right shape because HTTP route renames (15 prefixes) c
 - **Non-goals**:
   - Does NOT modify `@rezics/auth` (better-auth governed).
   - Does NOT touch Prisma schemas or DB migrations.
-  - Does NOT introduce new capabilities. Does NOT amend `api-route-convention/spec.md` or `folder-naming-convention/spec.md` (their requirements are already correct).
+  - Does NOT amend `api-route-convention/spec.md` or `folder-naming-convention/spec.md` (their requirements are already correct; POST `/list` was always part of the spec — this change fulfills it).
   - Does NOT change pagination, sorting, or cursor semantics beyond the `ids` field already introduced in Change 1.
   - Does NOT dismantle the enforcement script itself — only the baseline snapshot. The pre-commit hook and CI step remain long-term guards.
 
@@ -78,4 +85,5 @@ _None._
   1. `bun run check:convention` exits 0 with no baseline file present.
   2. `openspec validate api-route-and-folder-migration --strict` passes.
   3. Spot-check: `grep -r "/books\|/users\|/posts" package/{api,app,admin}/src` returns no HTTP path matches (import paths and prose are fine).
-  4. Manual smoke test: hit the five highest-traffic renamed endpoints (`/book/list`, `/post/list`, `/user/brief/list`, `/tag/list`, `/realm/list`) against a running `@rezics/server` and confirm 200 responses.
+  4. Manual smoke test: hit the five highest-traffic renamed endpoints (`/book/list`, `/post/list`, `/user/brief/list`, `/tag/list`, `/realm/list`) via both GET and POST against a running `@rezics/server` and confirm 200 responses.
+  5. `CONTRIBUTING.md` exists at the repo root with convention summary and spec links. `CLAUDE.md` convention section is a pointer only — no duplicated rule text.

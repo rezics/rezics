@@ -182,6 +182,55 @@ Three categories of caller update:
 
 - **[CI fails mid-migration PR on some unrelated transient]** → Standard PR risk; not migration-specific. Normal retry flow applies.
 
+### D8: POST `/list` handler pattern — shared service input, transport-level normalize
+
+Every domain that exposes `GET /list` also exposes `POST /list`. Both handlers converge on the same service call:
+
+```ts
+// contract: book.ts
+export const bookListQuerySchema = t.Object({
+  ...listGetQueryBase.properties,
+  kind: t.Optional(t.String()),
+  limit: paginationLimitSchema,
+});
+
+export const bookListBodySchema = t.Object({
+  ...listPostBodyBase.properties,
+  kind: t.Optional(t.String()),
+  limit: paginationLimitSchema,
+});
+
+// server: book.api.ts
+.get("/list", async ({ headers, query }) => {
+  const idList = parseIdsCsv(query.ids);
+  return service.list({ ...query, ids: idList });
+}, { query: bookListQuerySchema })
+.post("/list", async ({ headers, body }) => {
+  return service.list(body);  // body.ids is already string[]
+}, { body: bookListBodySchema })
+```
+
+The service layer's `list(input)` method accepts a unified shape where `ids` is always `string[] | undefined`. GET handlers normalize CSV → array via `parseIdsCsv`; POST handlers pass `body` directly. No business logic duplication.
+
+**Why not a shared handler factory:** each domain's handler has slightly different concerns (auth checks, admin overrides, response mapping). A factory would need so many options that it would be harder to read than the ~5-line handler. Keep it explicit.
+
+**Scope:** all 11 domains with existing `GET /list` endpoints — book, chapter, echokv, feedback, jwt (admin), notification, post, realm, shelf, tag, unit, user.
+
+### D9: CONTRIBUTING.md as convention single source of truth
+
+The route and folder convention rules are currently restated in `CLAUDE.md` (§ "API Route & Folder Convention"), which duplicates `openspec/specs/*/spec.md`. This creates a drift risk — when a spec updates, `CLAUDE.md` may lag behind.
+
+**Decision:** create `CONTRIBUTING.md` at the repository root as the canonical contributor-facing guide. It contains:
+- Short convention summary (singular routes, `/list` suffix, GET+POST, folder dual-track)
+- Links to `openspec/specs/{api-route-convention,folder-naming-convention,convention-enforcement}/spec.md` for full details
+- Development workflow basics (branch from `dev`, run `check:convention`, etc.)
+
+`CLAUDE.md` § "API Route & Folder Convention" is replaced with a 2-line pointer to `CONTRIBUTING.md` and the specs directory. No rule text remains duplicated.
+
+**Why `CONTRIBUTING.md`:** GitHub surfaces it automatically when contributors open issues/PRs. It's the standard OSS file for coding conventions. The OpenSpec specs are too detailed for a quick-reference; `CONTRIBUTING.md` bridges the gap between "I just cloned this repo" and "I need the full spec".
+
+**Why not `docs/conventions.md`:** a nested `docs/` file is invisible unless you know to look for it. `CONTRIBUTING.md` at the root is discoverable by convention.
+
 ## Migration Plan
 
 1. **Branch:** `dev → migrate/convention` or equivalent.
@@ -191,9 +240,11 @@ Three categories of caller update:
 5. **Folder renames** (domain + container): batch by package (`package/app`, `package/admin`, `package/ui`, etc.). `git mv` + import rewrite per package. `tsc --noEmit` per package.
 6. **Allowlist extensions** (if D4 opts in): edit `folder-naming-convention/spec.md` and `tool/scripts/check-convention.ts` in a single commit inside the PR.
 7. **Snapshot deletion**: `rm tool/scripts/expected-violations.json`. Patch `check-convention.ts` to tolerate missing baseline.
-8. **Verification**: `bun run check:convention` exits 0 with no file present. `bun run build` in every frontend package. `bun test` where applicable.
-9. **PR description** includes: list of affected endpoints, deploy checklist (server and client staged together), post-deploy smoke-test targets.
-10. **Rollback**: `git revert` the PR. Route renames are path-only; reverting restores the old paths without data loss. Folder renames revert cleanly via `git mv` history. No DB state is touched.
+8. **POST `/list` coverage** (D8): for each of the 11 domains, create `*ListBodySchema` in contract, add `.post("/list", ...)` handler in server, verify `tsc --noEmit` per package.
+9. **CONTRIBUTING.md + CLAUDE.md slim-down** (D9): create `CONTRIBUTING.md` with convention summary + spec links. Replace `CLAUDE.md` convention section with a pointer.
+10. **Verification**: `bun run check:convention` exits 0 with no file present. `bun run build` in every frontend package. `bun test` where applicable. Smoke test POST `/list` endpoints.
+11. **PR description** includes: list of affected endpoints, deploy checklist (server and client staged together), post-deploy smoke-test targets.
+12. **Rollback**: `git revert` the PR. Route renames are path-only; reverting restores the old paths without data loss. Folder renames revert cleanly via `git mv` history. No DB state is touched.
 
 ## Open Questions
 
